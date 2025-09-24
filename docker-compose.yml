@@ -1,0 +1,214 @@
+version: '3.8'
+
+services:
+  ***REMOVED*** Service Bus (Core Message Bus)
+  service-bus:
+    build:
+      context: ./.platform/service-bus
+      dockerfile: Dockerfile
+    ports:
+      - "5672:5672"    ***REMOVED*** AMQP
+      - "15672:15672"   ***REMOVED*** Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin123
+    volumes:
+      - service-bus-data:/var/lib/rabbitmq
+    networks:
+      - valero-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  ***REMOVED*** Service Registry (Service Discovery)
+  service-registry:
+    build:
+      context: ./.platform/service-registry
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    environment:
+      - EUREKA_SERVER_PORT=8761
+      - EUREKA_INSTANCE_HOSTNAME=service-registry
+    networks:
+      - valero-network
+    depends_on:
+      - service-bus
+
+  ***REMOVED*** API Gateway (Unified API Interface)
+  api-gateway:
+    build:
+      context: ./.platform/api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - GATEWAY_PORT=8080
+      - SERVICE_REGISTRY_URL=http://service-registry:8761
+    networks:
+      - valero-network
+    depends_on:
+      - service-registry
+
+  ***REMOVED*** CRM Service
+  crm-service:
+    build:
+      context: ./domains/crm
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - SERVICE_PORT=8081
+      - SERVICE_NAME=crm-service
+      - SERVICE_REGISTRY_URL=http://service-registry:8761
+      - DATABASE_URL=postgresql://crm_user:crm_pass@crm-db:5432/crm_db
+    networks:
+      - valero-network
+    depends_on:
+      - crm-db
+      - service-registry
+
+  ***REMOVED*** ERP Service
+  erp-service:
+    build:
+      context: ./domains/erp
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      - SERVICE_PORT=8082
+      - SERVICE_NAME=erp-service
+      - SERVICE_REGISTRY_URL=http://service-registry:8761
+      - DATABASE_URL=postgresql://erp_user:erp_pass@erp-db:5432/erp_db
+    networks:
+      - valero-network
+    depends_on:
+      - erp-db
+      - service-registry
+
+  ***REMOVED*** Analytics Service
+  analytics-service:
+    build:
+      context: ./domains/analytics
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      - SERVICE_PORT=8083
+      - SERVICE_NAME=analytics-service
+      - SERVICE_REGISTRY_URL=http://service-registry:8761
+      - DATABASE_URL=postgresql://analytics_user:analytics_pass@analytics-db:5432/analytics_db
+    networks:
+      - valero-network
+    depends_on:
+      - analytics-db
+      - service-registry
+
+  ***REMOVED*** Integration Service
+  integration-service:
+    build:
+      context: ./domains/integration
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8084"
+    environment:
+      - SERVICE_PORT=8084
+      - SERVICE_NAME=integration-service
+      - SERVICE_REGISTRY_URL=http://service-registry:8761
+      - DATABASE_URL=postgresql://integration_user:integration_pass@integration-db:5432/integration_db
+    networks:
+      - valero-network
+    depends_on:
+      - integration-db
+      - service-registry
+
+  ***REMOVED*** Databases
+  crm-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=crm_db
+      - POSTGRES_USER=crm_user
+      - POSTGRES_PASSWORD=crm_pass
+    volumes:
+      - crm-db-data:/var/lib/postgresql/data
+    networks:
+      - valero-network
+
+  erp-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=erp_db
+      - POSTGRES_USER=erp_user
+      - POSTGRES_PASSWORD=erp_pass
+    volumes:
+      - erp-db-data:/var/lib/postgresql/data
+    networks:
+      - valero-network
+
+  analytics-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=analytics_db
+      - POSTGRES_USER=analytics_user
+      - POSTGRES_PASSWORD=analytics_pass
+    volumes:
+      - analytics-db-data:/var/lib/postgresql/data
+    networks:
+      - valero-network
+
+  integration-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=integration_db
+      - POSTGRES_USER=integration_user
+      - POSTGRES_PASSWORD=integration_pass
+    volumes:
+      - integration-db-data:/var/lib/postgresql/data
+    networks:
+      - valero-network
+
+  ***REMOVED*** Monitoring Stack
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - valero-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - valero-network
+
+  ***REMOVED*** Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - valero-network
+
+volumes:
+  service-bus-data:
+  crm-db-data:
+  erp-db-data:
+  analytics-db-data:
+  integration-db-data:
+  grafana-data:
+  redis-data:
+
+networks:
+  valero-network:
+    driver: bridge
