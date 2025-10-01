@@ -5,6 +5,7 @@ import {
   getDocumentById,
   getDocumentFileUrl,
 } from '../../domain/services/document-renderer';
+import { processBatch } from '../../domain/services/batch-processor';
 
 export async function registerDocumentRoutes(server: FastifyInstance): Promise<void> {
   // Create document
@@ -17,6 +18,26 @@ export async function registerDocumentRoutes(server: FastifyInstance): Promise<v
     const document = await createDocument(tenantId, input, userId);
 
     await reply.code(201).send(document);
+  });
+
+  // Batch create documents
+  server.post('/documents/batch', async (request, reply) => {
+    const tenantId = request.headers['x-tenant-id'] as string;
+    const authContext = (request as { authContext?: { userId?: string } }).authContext;
+    const userId = authContext?.userId ?? 'system';
+
+    const input = request.body as {
+      templateKey: string;
+      documents: Array<{
+        payload: Record<string, unknown>;
+        locale?: string;
+        seriesId?: string;
+      }>;
+    };
+
+    const result = await processBatch(tenantId, input, userId);
+
+    await reply.code(200).send(result);
   });
 
   // Get document

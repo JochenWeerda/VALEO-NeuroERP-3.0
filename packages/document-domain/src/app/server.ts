@@ -3,7 +3,9 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import dotenv from 'dotenv';
 import { registerDocumentRoutes } from './routes/documents';
+import { registerTemplateRoutes } from './routes/templates';
 import { initEventPublisher, closeEventPublisher } from '../infra/messaging/publisher';
+import { initEventConsumer, closeEventConsumer } from '../infra/messaging/event-consumer';
 import pino from 'pino';
 
 dotenv.config();
@@ -32,11 +34,13 @@ server.get('/ready', async () => ({ status: 'ready' }));
 server.get('/live', async () => ({ status: 'alive' }));
 
 void server.register(registerDocumentRoutes, { prefix: '/document/api/v1' });
+void server.register(registerTemplateRoutes, { prefix: '/document/api/v1' });
 server.get('/document/api/v1/openapi.json', async () => server.swagger());
 
 export async function start(): Promise<void> {
   try {
     await initEventPublisher();
+    await initEventConsumer(); // Start consuming events
     const port = parseInt(process.env.PORT ?? '3070', 10);
     await server.listen({ port, host: '0.0.0.0' });
     server.log.info(`🚀 Document Domain on port ${port}`);
@@ -47,6 +51,7 @@ export async function start(): Promise<void> {
 }
 
 export async function stop(): Promise<void> {
+  await closeEventConsumer();
   await closeEventPublisher();
   await server.close();
 }
