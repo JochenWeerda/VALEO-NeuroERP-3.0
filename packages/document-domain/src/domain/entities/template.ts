@@ -14,18 +14,26 @@ export const TemplateSchema = z.object({
   status: TemplateStatusEnum.default('Draft'),
   locale: z.array(z.string()).default(['de-DE']),
   paper: PaperFormatEnum.default('A4'),
-  margins: z.object({ top: z.number(), right: z.number(), bottom: z.number(), left: z.number() }).optional(),
+  margins: z
+    .object({ top: z.number(), right: z.number(), bottom: z.number(), left: z.number() })
+    .optional(),
   sourceHtml: z.string().min(1),
   css: z.string().optional(),
-  assets: z.object({
-    logoUri: z.string().optional(),
-    fontUris: z.array(z.string()).optional(),
-  }).optional(),
+  assets: z
+    .object({
+      logoUri: z.string().optional(),
+      fontUris: z.array(z.string()).optional(),
+    })
+    .optional(),
   createdAt: z.string().datetime().optional(),
   updatedAt: z.string().datetime().optional(),
 });
 
 export type Template = z.infer<typeof TemplateSchema>;
 
-export const CreateTemplateSchema = TemplateSchema.omit({ id: true, createdAt: true, updatedAt: true });
+export const CreateTemplateSchema = TemplateSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 export type CreateTemplate = z.infer<typeof CreateTemplateSchema>;

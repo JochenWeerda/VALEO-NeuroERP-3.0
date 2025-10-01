@@ -1,6 +1,6 @@
 import { db } from '../../infra/db/connection';
 import { numberSeries } from '../../infra/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import pino from 'pino';
 
 const logger = pino({ name: 'numbering' });

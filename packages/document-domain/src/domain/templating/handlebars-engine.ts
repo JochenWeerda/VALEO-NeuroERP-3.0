@@ -12,7 +12,10 @@ Handlebars.registerHelper('formatDate', (date: string, locale: string = 'de-DE')
   return new Intl.DateTimeFormat(locale).format(new Date(date));
 });
 
-export async function renderTemplate(source: string, data: Record<string, any>): Promise<string> {
+export async function renderTemplate(
+  source: string,
+  data: Record<string, unknown>
+): Promise<string> {
   try {
     const template = Handlebars.compile(source);
     return template(data);

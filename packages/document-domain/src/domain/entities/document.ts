@@ -1,7 +1,16 @@
 import { z } from 'zod';
 
 export const DocumentStatusEnum = z.enum(['Draft', 'Issued', 'Superseded', 'Cancelled']);
-export const DocumentTypeEnum = z.enum(['invoice', 'credit_note', 'delivery_note', 'weighing_ticket', 'offer', 'order_confirmation', 'certificate', 'label']);
+export const DocumentTypeEnum = z.enum([
+  'invoice',
+  'credit_note',
+  'delivery_note',
+  'weighing_ticket',
+  'offer',
+  'order_confirmation',
+  'certificate',
+  'label',
+]);
 export const FileRoleEnum = z.enum(['render', 'attachment', 'einvoice', 'label']);
 export const SignatureTypeEnum = z.enum(['hash', 'pades', 'timestamp']);
 
@@ -32,10 +41,12 @@ export const DocumentSchema = z.object({
   status: DocumentStatusEnum.default('Draft'),
   files: z.array(DocumentFileSchema).default([]),
   signatures: z.array(DocumentSignatureSchema).default([]),
-  metadata: z.object({
-    tags: z.array(z.string()).optional(),
-    relatedRefs: z.record(z.string(), z.string()).optional(),
-  }).optional(),
+  metadata: z
+    .object({
+      tags: z.array(z.string()).optional(),
+      relatedRefs: z.record(z.string(), z.string()).optional(),
+    })
+    .optional(),
   createdAt: z.string().datetime().optional(),
 });
 
@@ -48,11 +59,13 @@ export const CreateDocumentInputSchema = z.object({
   locale: z.string().default('de-DE'),
   seriesId: z.string().optional(),
   attachments: z.array(z.object({ name: z.string(), uri: z.string() })).optional(),
-  options: z.object({
-    sign: z.enum(['none', 'hash', 'timestamp', 'pades']).default('timestamp'),
-    qr: z.boolean().default(false),
-    watermark: z.string().optional(),
-  }).optional(),
+  options: z
+    .object({
+      sign: z.enum(['none', 'hash', 'timestamp', 'pades']).default('timestamp'),
+      qr: z.boolean().default(false),
+      watermark: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type CreateDocumentInput = z.infer<typeof CreateDocumentInputSchema>;

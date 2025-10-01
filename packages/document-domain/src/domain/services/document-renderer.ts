@@ -1,5 +1,5 @@
 import { db } from '../../infra/db/connection';
-import { templates, numberSeries, documents } from '../../infra/db/schema';
+import { templates, documents } from '../../infra/db/schema';
 import { CreateDocumentInput, Document } from '../entities/document';
 import { renderTemplate } from '../templating/handlebars-engine';
 import { uploadToS3, generateSignedUrl } from '../../infra/storage/s3-client';
@@ -7,7 +7,6 @@ import { generateDocumentNumber } from './numbering-service';
 import { publishEvent } from '../../infra/messaging/publisher';
 import { createHash } from 'crypto';
 import { eq, and } from 'drizzle-orm';
-import { randomUUID } from 'crypto';
 import pino from 'pino';
 
 const logger = pino({ name: 'document-renderer' });
@@ -15,13 +14,24 @@ const logger = pino({ name: 'document-renderer' });
 export async function createDocument(
   tenantId: string,
   input: CreateDocumentInput,
-  userId?: string
+  _userId?: string
 ): Promise<Document> {
-  logger.info({ tenantId, docType: input.docType, templateKey: input.templateKey }, 'Creating document');
+  logger.info(
+    { tenantId, docType: input.docType, templateKey: input.templateKey },
+    'Creating document'
+  );
 
   // 1. Get template
-  const [template] = await db.select().from(templates)
-    .where(and(eq(templates.tenantId, tenantId), eq(templates.key, input.templateKey), eq(templates.status, 'Active')))
+  const [template] = await db
+    .select()
+    .from(templates)
+    .where(
+      and(
+        eq(templates.tenantId, tenantId),
+        eq(templates.key, input.templateKey),
+        eq(templates.status, 'Active')
+      )
+    )
     .limit(1);
 
   if (!template) throw new Error('Template not found or not active');
@@ -33,7 +43,11 @@ export async function createDocument(
   }
 
   // 3. Render HTML
-  const html = await renderTemplate(template.sourceHtml, { ...input.payload, number: docNumber, locale: input.locale });
+  const html = await renderTemplate(template.sourceHtml, {
+    ...input.payload,
+    number: docNumber,
+    locale: input.locale,
+  });
 
   // 4. Convert to PDF (simplified - in production: Playwright)
   const pdfBuffer = Buffer.from(html); // Mock: In production -> Playwright HTML to PDF
@@ -47,18 +61,24 @@ export async function createDocument(
   const uri = await uploadToS3(fileName, pdfBuffer, 'application/pdf');
 
   // 7. Create document record
-  const insertedDocs = await db.insert(documents).values({
-    tenantId,
-    docType: input.docType,
-    number: docNumber || null,
-    templateKey: input.templateKey,
-    templateVersion: template.version,
-    payloadHash,
-    locale: input.locale,
-    status: 'Issued',
-    files: [{ role: 'render', uri, mime: 'application/pdf', bytes: pdfBuffer.length, sha256 }] as any,
-    signatures: input.options?.sign === 'timestamp' ? [{ type: 'hash', value: sha256, timestamp: new Date().toISOString() }] as any : [],
-  }).returning();
+  const insertedDocs = await db
+    .insert(documents)
+    .values({
+      tenantId,
+      docType: input.docType,
+      number: docNumber ?? null,
+      templateKey: input.templateKey,
+      templateVersion: template.version,
+      payloadHash,
+      locale: input.locale,
+      status: 'Issued',
+      files: [{ role: 'render', uri, mime: 'application/pdf', bytes: pdfBuffer.length, sha256 }],
+      signatures:
+        input.options?.sign === 'timestamp'
+          ? [{ type: 'hash', value: sha256, timestamp: new Date().toISOString() }]
+          : [],
+    })
+    .returning();
 
   const document = insertedDocs[0];
   if (!document) throw new Error('Failed to create document');
@@ -76,31 +96,40 @@ export async function createDocument(
   return {
     ...document,
     id: document.id,
-    number: document.number || undefined,
+    number: document.number ?? undefined,
     createdAt: document.createdAt.toISOString(),
   } as Document;
 }
 
-export async function getDocumentById(tenantId: string, documentId: string): Promise<Document | null> {
-  const [doc] = await db.select().from(documents)
+export async function getDocumentById(
+  tenantId: string,
+  documentId: string
+): Promise<Document | null> {
+  const [doc] = await db
+    .select()
+    .from(documents)
     .where(and(eq(documents.id, documentId), eq(documents.tenantId, tenantId)))
     .limit(1);
-  
+
   if (!doc) return null;
-  
+
   // Convert DB types to Entity types
   return {
     ...doc,
-    number: doc.number || undefined,
+    number: doc.number ?? undefined,
     createdAt: doc.createdAt.toISOString(),
   } as Document;
 }
 
-export async function getDocumentFileUrl(tenantId: string, documentId: string, role: string = 'render'): Promise<string> {
+export async function getDocumentFileUrl(
+  tenantId: string,
+  documentId: string,
+  role: string = 'render'
+): Promise<string> {
   const doc = await getDocumentById(tenantId, documentId);
   if (!doc) throw new Error('Document not found');
 
-  const file = (doc.files as any[]).find((f: any) => f.role === role);
+  const file = (doc.files as Array<{ role: string; uri: string }>).find(f => f.role === role);
   if (!file) throw new Error(`File with role ${role} not found`);
 
   return generateSignedUrl(file.uri, 3600); // 1h validity
