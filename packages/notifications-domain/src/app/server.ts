@@ -4,6 +4,7 @@ import swaggerUi from '@fastify/swagger-ui';
 import dotenv from 'dotenv';
 import { registerMessageRoutes } from './routes/messages';
 import { initEventPublisher, closeEventPublisher } from '../infra/messaging/publisher';
+import { initEventConsumer, closeEventConsumer } from '../infra/messaging/event-consumer';
 import pino from 'pino';
 
 dotenv.config();
@@ -18,7 +19,7 @@ void server.register(swagger, {
     openapi: '3.0.3',
     info: {
       title: 'Notifications Domain API',
-      description: 'Multi-Channel Notification Platform (Email, SMS, WhatsApp, Push)',
+      description: 'Multi-Channel Notification Platform (Email, SMS, WhatsApp, Push, Webhook)',
       version: '1.0.0',
     },
     servers: [{ url: process.env.API_BASE_URL ?? 'http://localhost:3080' }],
@@ -37,6 +38,7 @@ server.get('/notifications/api/v1/openapi.json', async () => server.swagger());
 export async function start(): Promise<void> {
   try {
     await initEventPublisher();
+    await initEventConsumer(); // Start consuming events
     const port = parseInt(process.env.PORT ?? '3080', 10);
     await server.listen({ port, host: '0.0.0.0' });
     server.log.info(`🚀 Notifications Domain on port ${port}`);
@@ -47,6 +49,7 @@ export async function start(): Promise<void> {
 }
 
 export async function stop(): Promise<void> {
+  await closeEventConsumer();
   await closeEventPublisher();
   await server.close();
 }

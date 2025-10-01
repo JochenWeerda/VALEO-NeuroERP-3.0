@@ -3,6 +3,10 @@ import { notificationTemplates, notificationMessages } from '../../infra/db/sche
 import { SendMessageInput, NotificationMessage } from '../entities/notification-message';
 import { renderTemplate } from './template-renderer';
 import { sendEmail } from '../adapters/email-adapter';
+import { sendSms } from '../adapters/sms-adapter';
+import { sendWhatsApp } from '../adapters/whatsapp-adapter';
+import { sendPush } from '../adapters/push-adapter';
+import { sendWebhook } from '../adapters/webhook-adapter';
 import { publishEvent } from '../../infra/messaging/publisher';
 import { eq, and } from 'drizzle-orm';
 import pino from 'pino';
@@ -66,6 +70,8 @@ export async function sendNotification(
 
   // 3. Dispatch to channel
   try {
+    let result: { success: boolean; error?: string } = { success: false };
+
     if (input.channel === 'Email') {
       const emailRecipients = input.recipients.filter(r => r.type === 'Email').map(r => r.value);
       const emailMessage: Parameters<typeof sendEmail>[0] = {
@@ -76,35 +82,60 @@ export async function sendNotification(
       if (bodyHtml) {
         emailMessage.html = bodyHtml;
       }
-      await sendEmail(emailMessage);
+      result = await sendEmail(emailMessage);
+    } else if (input.channel === 'SMS') {
+      const smsRecipients = input.recipients.filter(r => r.type === 'Phone').map(r => r.value);
+      result = await sendSms({ to: smsRecipients, text: bodyText ?? '' });
+    } else if (input.channel === 'WhatsApp') {
+      const whatsappRecipients = input.recipients.filter(r => r.type === 'Phone').map(r => r.value);
+      result = await sendWhatsApp({ to: whatsappRecipients, text: bodyText ?? '' });
+    } else if (input.channel === 'Push') {
+      const pushTokens = input.recipients.filter(r => r.type === 'UserId').map(r => r.value);
+      result = await sendPush({
+        to: pushTokens,
+        title: subject ?? 'Notification',
+        body: bodyText ?? '',
+      });
+    } else if (input.channel === 'Webhook') {
+      const webhookUrl = input.recipients.find(r => r.type === 'Webhook')?.value;
+      if (webhookUrl) {
+        result = await sendWebhook({ url: webhookUrl, payload: input.payload });
+      }
     }
-    // TODO: SMS, WhatsApp, Push, Webhook adapters
 
-    // Update status to Sent
-    await db
-      .update(notificationMessages)
-      .set({ status: 'Sent', sentAt: new Date() })
-      .where(eq(notificationMessages.id, message.id));
+    if (result.success) {
+      // Update status to Sent
+      await db
+        .update(notificationMessages)
+        .set({ status: 'Sent', sentAt: new Date() })
+        .where(eq(notificationMessages.id, message.id));
 
-    // Publish event
-    await publishEvent('message.sent', {
-      tenantId,
-      messageId: message.id,
-      channel: input.channel,
-      occurredAt: new Date().toISOString(),
-    });
+      // Publish event
+      await publishEvent('message.sent', {
+        tenantId,
+        messageId: message.id,
+        channel: input.channel,
+        occurredAt: new Date().toISOString(),
+      });
 
-    return {
-      ...message,
-      status: 'Sent',
-      sentAt: new Date().toISOString(),
-      createdAt: message.createdAt.toISOString(),
-    } as NotificationMessage;
+      return {
+        ...message,
+        status: 'Sent',
+        sentAt: new Date().toISOString(),
+        createdAt: message.createdAt.toISOString(),
+      } as NotificationMessage;
+    } else {
+      throw new Error(result.error ?? 'Send failed');
+    }
   } catch (error) {
     // Update status to Failed
     await db
       .update(notificationMessages)
-      .set({ status: 'Failed', lastError: String(error), attemptCount: message.attemptCount + 1 })
+      .set({
+        status: 'Failed',
+        lastError: String(error),
+        attemptCount: message.attemptCount + 1,
+      })
       .where(eq(notificationMessages.id, message.id));
 
     logger.error({ error, messageId: message.id }, 'Notification send failed');

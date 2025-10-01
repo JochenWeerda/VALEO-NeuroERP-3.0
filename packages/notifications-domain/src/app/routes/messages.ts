@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { SendMessageInputSchema } from '../../domain/entities/notification-message';
 import { sendNotification, getMessageById } from '../../domain/services/notification-service';
+import { retryFailedMessage } from '../../domain/services/retry-service';
 
 export async function registerMessageRoutes(server: FastifyInstance): Promise<void> {
   // Send message
@@ -27,5 +28,19 @@ export async function registerMessageRoutes(server: FastifyInstance): Promise<vo
     }
 
     await reply.send(message);
+  });
+
+  // Retry failed message
+  server.post('/messages/:id/retry', async (request, reply) => {
+    const tenantId = request.headers['x-tenant-id'] as string;
+    const { id } = request.params as { id: string };
+
+    const result = await retryFailedMessage(tenantId, id);
+
+    if (result.success) {
+      await reply.send({ success: true, message: 'Retry initiated' });
+    } else {
+      await reply.code(400).send({ success: false, error: result.error ?? 'Retry failed' });
+    }
   });
 }
