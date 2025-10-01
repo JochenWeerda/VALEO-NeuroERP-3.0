@@ -9,16 +9,17 @@ export async function generateDocumentNumber(tenantId: string, seriesId: string)
   logger.debug({ tenantId, seriesId }, 'Generating document number');
 
   // Race-safe: SELECT FOR UPDATE
-  const [series] = await db.execute(sql`
+  const result = await db.execute(sql`
     SELECT * FROM ${numberSeries} 
     WHERE id = ${seriesId} AND tenant_id = ${tenantId}
     FOR UPDATE
   `);
 
+  const series = result[0];
   if (!series) throw new Error('Number series not found');
 
-  const nextSeq = series.next_seq;
-  const pattern = series.pattern;
+  const nextSeq = series.next_seq as number;
+  const pattern = series.pattern as string;
 
   // Format number
   const number = formatNumber(pattern, nextSeq);

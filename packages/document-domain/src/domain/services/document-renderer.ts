@@ -47,12 +47,10 @@ export async function createDocument(
   const uri = await uploadToS3(fileName, pdfBuffer, 'application/pdf');
 
   // 7. Create document record
-  const docId = randomUUID();
-  const [document] = await db.insert(documents).values({
-    id: docId,
+  const insertedDocs = await db.insert(documents).values({
     tenantId,
     docType: input.docType,
-    number: docNumber,
+    number: docNumber || null,
     templateKey: input.templateKey,
     templateVersion: template.version,
     payloadHash,
@@ -62,23 +60,40 @@ export async function createDocument(
     signatures: input.options?.sign === 'timestamp' ? [{ type: 'hash', value: sha256, timestamp: new Date().toISOString() }] as any : [],
   }).returning();
 
+  const document = insertedDocs[0];
+  if (!document) throw new Error('Failed to create document');
+
   // 8. Publish event
   await publishEvent('document.created', {
     tenantId,
-    documentId: docId,
+    documentId: document.id,
     docType: input.docType,
     number: docNumber,
     occurredAt: new Date().toISOString(),
   });
 
-  return document as Document;
+  // Convert DB types to Entity types
+  return {
+    ...document,
+    id: document.id,
+    number: document.number || undefined,
+    createdAt: document.createdAt.toISOString(),
+  } as Document;
 }
 
 export async function getDocumentById(tenantId: string, documentId: string): Promise<Document | null> {
   const [doc] = await db.select().from(documents)
     .where(and(eq(documents.id, documentId), eq(documents.tenantId, tenantId)))
     .limit(1);
-  return doc as Document || null;
+  
+  if (!doc) return null;
+  
+  // Convert DB types to Entity types
+  return {
+    ...doc,
+    number: doc.number || undefined,
+    createdAt: doc.createdAt.toISOString(),
+  } as Document;
 }
 
 export async function getDocumentFileUrl(tenantId: string, documentId: string, role: string = 'render'): Promise<string> {
