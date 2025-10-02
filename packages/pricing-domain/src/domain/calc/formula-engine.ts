@@ -74,14 +74,19 @@ export async function evaluateFormula(
     }
   }
 
-  return {
+  const evaluationResult: any = {
     result,
     inputs: resolvedInputs,
     expression: formula.expression,
-    cappedValue,
     roundedValue,
     calculatedAt: new Date().toISOString(),
   };
+
+  if (cappedValue !== undefined) {
+    evaluationResult.cappedValue = cappedValue;
+  }
+
+  return evaluationResult;
 }
 
 /**

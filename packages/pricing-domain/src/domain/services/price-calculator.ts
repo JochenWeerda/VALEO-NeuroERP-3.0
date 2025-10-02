@@ -75,10 +75,11 @@ export async function calculateQuote(
     inputs: input as any,
     components: components as any,
     totalNet: quote.totalNet.toString(),
-    totalGross: quote.totalGross?.toString(),
+    totalGross: quote.totalGross?.toString() ?? null,
     currency: quote.currency,
     expiresAt,
-    createdBy: userId,
+    createdBy: userId ?? null,
+    signature: null,
   });
 
   // Publish event (ohne Preise!)
@@ -258,11 +259,11 @@ async function applyDynamicFormula(
     .where(
       and(
         eq(dynamicFormulas.tenantId, tenantId),
-        or(eq(dynamicFormulas.sku, input.sku), eq(dynamicFormulas.commodity, input.sku.split('-')[0]))!, // Simplified
+        or(eq(dynamicFormulas.sku, input.sku), eq(dynamicFormulas.commodity, input.sku.split('-')[0] || input.sku)),
         eq(dynamicFormulas.active, true),
         lte(dynamicFormulas.validFrom, now),
-        or(isNull(dynamicFormulas.validTo), gte(dynamicFormulas.validTo, now))!
-      )
+        or(isNull(dynamicFormulas.validTo), gte(dynamicFormulas.validTo, now))
+      )!
     )
     .limit(1);
 
@@ -400,5 +401,13 @@ export async function getQuoteById(tenantId: string, quoteId: string): Promise<P
     return null;
   }
 
-  return quote as PriceQuote;
+  return {
+    ...quote,
+    totalNet: Number(quote.totalNet),
+    totalGross: quote.totalGross ? Number(quote.totalGross) : undefined,
+    calculatedAt: quote.calculatedAt.toISOString(),
+    expiresAt: quote.expiresAt.toISOString(),
+    createdBy: quote.createdBy ?? undefined,
+    signature: quote.signature ?? undefined,
+  } as PriceQuote;
 }

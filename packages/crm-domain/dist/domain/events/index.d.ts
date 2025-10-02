@@ -1,0 +1,6 @@
+export * from './domain-events';
+export * from './event-factories';
+export { DomainEventType } from './domain-events';
+export type { DomainEvent, AnyDomainEvent, CustomerCreatedEvent, CustomerUpdatedEvent, CustomerStatusChangedEvent, CustomerDeletedEvent, ContactCreatedEvent, ContactUpdatedEvent, ContactDeletedEvent, OpportunityCreatedEvent, OpportunityUpdatedEvent, OpportunityStageChangedEvent, OpportunityWonEvent, OpportunityLostEvent, OpportunityDeletedEvent, InteractionCreatedEvent, InteractionUpdatedEvent, InteractionDeletedEvent } from './domain-events';
+export { createCustomerCreatedEvent, createCustomerUpdatedEvent, createCustomerStatusChangedEvent, createCustomerDeletedEvent, createContactCreatedEvent, createContactUpdatedEvent, createContactDeletedEvent, createOpportunityCreatedEvent, createOpportunityUpdatedEvent, createOpportunityStageChangedEvent, createOpportunityWonEvent, createOpportunityLostEvent, createOpportunityDeletedEvent, createInteractionCreatedEvent, createInteractionUpdatedEvent, createInteractionDeletedEvent } from './event-factories';
+//# sourceMappingURL=index.d.ts.map

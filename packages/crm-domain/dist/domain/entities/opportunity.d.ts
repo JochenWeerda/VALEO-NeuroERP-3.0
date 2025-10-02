@@ -1,0 +1,150 @@
+import { z } from 'zod';
+export declare const OpportunityStage: {
+    readonly LEAD: "Lead";
+    readonly QUALIFIED: "Qualified";
+    readonly PROPOSAL: "Proposal";
+    readonly WON: "Won";
+    readonly LOST: "Lost";
+};
+export type OpportunityStageType = typeof OpportunityStage[keyof typeof OpportunityStage];
+export declare const OpportunitySchema: z.ZodObject<{
+    id: z.ZodString;
+    tenantId: z.ZodString;
+    customerId: z.ZodString;
+    title: z.ZodString;
+    stage: z.ZodEnum<["Lead", "Qualified", "Proposal", "Won", "Lost"]>;
+    expectedCloseDate: z.ZodOptional<z.ZodDate>;
+    amountNet: z.ZodOptional<z.ZodNumber>;
+    currency: z.ZodOptional<z.ZodString>;
+    probability: z.ZodNumber;
+    ownerUserId: z.ZodOptional<z.ZodString>;
+    createdAt: z.ZodDate;
+    updatedAt: z.ZodDate;
+    version: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    tenantId: string;
+    customerId: string;
+    createdAt: Date;
+    updatedAt: Date;
+    version: number;
+    title: string;
+    stage: "Lead" | "Qualified" | "Proposal" | "Won" | "Lost";
+    probability: number;
+    expectedCloseDate?: Date | undefined;
+    amountNet?: number | undefined;
+    currency?: string | undefined;
+    ownerUserId?: string | undefined;
+}, {
+    id: string;
+    tenantId: string;
+    customerId: string;
+    createdAt: Date;
+    updatedAt: Date;
+    version: number;
+    title: string;
+    stage: "Lead" | "Qualified" | "Proposal" | "Won" | "Lost";
+    probability: number;
+    expectedCloseDate?: Date | undefined;
+    amountNet?: number | undefined;
+    currency?: string | undefined;
+    ownerUserId?: string | undefined;
+}>;
+export type Opportunity = z.infer<typeof OpportunitySchema>;
+export declare const CreateOpportunityInputSchema: z.ZodObject<Omit<{
+    id: z.ZodString;
+    tenantId: z.ZodString;
+    customerId: z.ZodString;
+    title: z.ZodString;
+    stage: z.ZodEnum<["Lead", "Qualified", "Proposal", "Won", "Lost"]>;
+    expectedCloseDate: z.ZodOptional<z.ZodDate>;
+    amountNet: z.ZodOptional<z.ZodNumber>;
+    currency: z.ZodOptional<z.ZodString>;
+    probability: z.ZodNumber;
+    ownerUserId: z.ZodOptional<z.ZodString>;
+    createdAt: z.ZodDate;
+    updatedAt: z.ZodDate;
+    version: z.ZodNumber;
+}, "id" | "createdAt" | "updatedAt" | "version">, "strip", z.ZodTypeAny, {
+    tenantId: string;
+    customerId: string;
+    title: string;
+    stage: "Lead" | "Qualified" | "Proposal" | "Won" | "Lost";
+    probability: number;
+    expectedCloseDate?: Date | undefined;
+    amountNet?: number | undefined;
+    currency?: string | undefined;
+    ownerUserId?: string | undefined;
+}, {
+    tenantId: string;
+    customerId: string;
+    title: string;
+    stage: "Lead" | "Qualified" | "Proposal" | "Won" | "Lost";
+    probability: number;
+    expectedCloseDate?: Date | undefined;
+    amountNet?: number | undefined;
+    currency?: string | undefined;
+    ownerUserId?: string | undefined;
+}>;
+export type CreateOpportunityInput = z.infer<typeof CreateOpportunityInputSchema>;
+export declare const UpdateOpportunityInputSchema: z.ZodObject<{
+    title: z.ZodOptional<z.ZodString>;
+    stage: z.ZodOptional<z.ZodEnum<["Lead", "Qualified", "Proposal", "Won", "Lost"]>>;
+    expectedCloseDate: z.ZodOptional<z.ZodNullable<z.ZodDate>>;
+    amountNet: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    currency: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    probability: z.ZodOptional<z.ZodNumber>;
+    ownerUserId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+}, "strip", z.ZodTypeAny, {
+    title?: string | undefined;
+    stage?: "Lead" | "Qualified" | "Proposal" | "Won" | "Lost" | undefined;
+    expectedCloseDate?: Date | null | undefined;
+    amountNet?: number | null | undefined;
+    currency?: string | null | undefined;
+    probability?: number | undefined;
+    ownerUserId?: string | null | undefined;
+}, {
+    title?: string | undefined;
+    stage?: "Lead" | "Qualified" | "Proposal" | "Won" | "Lost" | undefined;
+    expectedCloseDate?: Date | null | undefined;
+    amountNet?: number | null | undefined;
+    currency?: string | null | undefined;
+    probability?: number | undefined;
+    ownerUserId?: string | null | undefined;
+}>;
+export type UpdateOpportunityInput = z.infer<typeof UpdateOpportunityInputSchema>;
+export declare class OpportunityEntity {
+    private props;
+    private constructor();
+    static create(props: CreateOpportunityInput & {
+        tenantId: string;
+    }): OpportunityEntity;
+    static fromPersistence(props: Opportunity): OpportunityEntity;
+    update(props: UpdateOpportunityInput): void;
+    changeStage(newStage: OpportunityStageType): void;
+    markAsWon(): void;
+    markAsLost(): void;
+    updateProbability(probability: number): void;
+    updateAmount(amountNet: number, currency?: string): void;
+    updateExpectedCloseDate(date: Date): void;
+    isOpen(): boolean;
+    isWon(): boolean;
+    isLost(): boolean;
+    getWeightedValue(): number;
+    get id(): string;
+    get tenantId(): string;
+    get customerId(): string;
+    get title(): string;
+    get stage(): OpportunityStageType;
+    get expectedCloseDate(): Date | undefined;
+    get amountNet(): number | undefined;
+    get currency(): string | undefined;
+    get probability(): number;
+    get ownerUserId(): string | undefined;
+    get createdAt(): Date;
+    get updatedAt(): Date;
+    get version(): number;
+    toPersistence(): Opportunity;
+    toJSON(): Omit<Opportunity, 'tenantId'>;
+}
+//# sourceMappingURL=opportunity.d.ts.map
