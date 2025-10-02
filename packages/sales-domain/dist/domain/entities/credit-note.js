@@ -104,14 +104,28 @@ class CreditNoteEntity {
         return new CreditNoteEntity(creditNote);
     }
     static fromPersistence(props) {
-        return new CreditNoteEntity(props);
+        return new CreditNoteEntity({
+            ...props,
+            subtotalNet: Number(props.subtotalNet),
+            totalDiscount: Number(props.totalDiscount),
+            totalNet: Number(props.totalNet),
+            totalGross: Number(props.totalGross),
+            lines: props.lines.map((line) => ({
+                ...line,
+                unitPrice: Number(line.unitPrice),
+                discount: Number(line.discount),
+                totalNet: Number(line.totalNet),
+                totalGross: Number(line.totalGross),
+            })),
+            settledAt: props.settledAt ?? undefined,
+        });
     }
     update(props) {
         if (props.reason !== undefined) {
             this.props.reason = props.reason;
         }
         if (props.notes !== undefined) {
-            this.props.notes = props.notes;
+            this.props.notes = props.notes ?? undefined;
         }
         if (props.status !== undefined) {
             this.validateStatusTransition(this.props.status, props.status);

@@ -35,11 +35,11 @@ export declare const CreateOrderContractSchema: z.ZodObject<{
     status: z.ZodEnum<["Draft", "Confirmed", "Invoiced", "Cancelled"]>;
     tenantId: z.ZodString;
     customerId: z.ZodString;
+    orderNumber: z.ZodString;
     taxRate: z.ZodDefault<z.ZodNumber>;
     currency: z.ZodDefault<z.ZodString>;
-    notes: z.ZodOptional<z.ZodString>;
-    orderNumber: z.ZodString;
     expectedDeliveryDate: z.ZodOptional<z.ZodDate>;
+    notes: z.ZodOptional<z.ZodString>;
 } & {
     lines: z.ZodArray<z.ZodObject<Omit<{
         id: z.ZodString;
@@ -70,6 +70,7 @@ export declare const CreateOrderContractSchema: z.ZodObject<{
     status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
     tenantId: string;
     customerId: string;
+    orderNumber: string;
     lines: {
         sku: string;
         name: string;
@@ -80,13 +81,13 @@ export declare const CreateOrderContractSchema: z.ZodObject<{
     }[];
     taxRate: number;
     currency: string;
-    orderNumber: string;
-    notes?: string | undefined;
     expectedDeliveryDate?: Date | undefined;
+    notes?: string | undefined;
 }, {
     status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
     tenantId: string;
     customerId: string;
+    orderNumber: string;
     lines: {
         sku: string;
         name: string;
@@ -95,11 +96,10 @@ export declare const CreateOrderContractSchema: z.ZodObject<{
         description?: string | undefined;
         discount?: number | undefined;
     }[];
-    orderNumber: string;
     taxRate?: number | undefined;
     currency?: string | undefined;
-    notes?: string | undefined;
     expectedDeliveryDate?: Date | undefined;
+    notes?: string | undefined;
 }>;
 export declare const UpdateOrderContractSchema: z.ZodObject<{
     lines: z.ZodOptional<z.ZodArray<z.ZodObject<Omit<{
@@ -140,8 +140,8 @@ export declare const UpdateOrderContractSchema: z.ZodObject<{
         discount: number;
         description?: string | undefined;
     }[] | undefined;
-    notes?: string | null | undefined;
     expectedDeliveryDate?: Date | null | undefined;
+    notes?: string | null | undefined;
 }, {
     status?: "Draft" | "Confirmed" | "Invoiced" | "Cancelled" | undefined;
     lines?: {
@@ -152,8 +152,8 @@ export declare const UpdateOrderContractSchema: z.ZodObject<{
         description?: string | undefined;
         discount?: number | undefined;
     }[] | undefined;
-    notes?: string | null | undefined;
     expectedDeliveryDate?: Date | null | undefined;
+    notes?: string | null | undefined;
 }>;
 export declare const OrderResponseContractSchema: z.ZodObject<Omit<{
     id: z.ZodString;
@@ -209,6 +209,7 @@ export declare const OrderResponseContractSchema: z.ZodObject<Omit<{
     totalGross: number;
     status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
     customerId: string;
+    orderNumber: string;
     lines: {
         id: string;
         sku: string;
@@ -227,15 +228,15 @@ export declare const OrderResponseContractSchema: z.ZodObject<Omit<{
     createdAt: Date;
     updatedAt: Date;
     version: number;
-    orderNumber: string;
-    notes?: string | undefined;
     expectedDeliveryDate?: Date | undefined;
+    notes?: string | undefined;
 }, {
     id: string;
     totalNet: number;
     totalGross: number;
     status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
     customerId: string;
+    orderNumber: string;
     lines: {
         id: string;
         sku: string;
@@ -252,11 +253,10 @@ export declare const OrderResponseContractSchema: z.ZodObject<Omit<{
     createdAt: Date;
     updatedAt: Date;
     version: number;
-    orderNumber: string;
     taxRate?: number | undefined;
     currency?: string | undefined;
-    notes?: string | undefined;
     expectedDeliveryDate?: Date | undefined;
+    notes?: string | undefined;
 }>;
 export declare const OrderQueryContractSchema: z.ZodObject<{
     customerId: z.ZodOptional<z.ZodString>;
@@ -278,10 +278,10 @@ export declare const OrderQueryContractSchema: z.ZodObject<{
     status?: "Draft" | "Confirmed" | "Invoiced" | "Cancelled" | undefined;
     customerId?: string | undefined;
     search?: string | undefined;
-    page?: string | undefined;
-    pageSize?: string | undefined;
     expectedDeliveryDateFrom?: string | undefined;
     expectedDeliveryDateTo?: string | undefined;
+    page?: string | undefined;
+    pageSize?: string | undefined;
 }>;
 export declare const OrderListResponseContractSchema: z.ZodObject<{
     data: z.ZodArray<z.ZodObject<Omit<{
@@ -338,6 +338,7 @@ export declare const OrderListResponseContractSchema: z.ZodObject<{
         totalGross: number;
         status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
         customerId: string;
+        orderNumber: string;
         lines: {
             id: string;
             sku: string;
@@ -356,15 +357,15 @@ export declare const OrderListResponseContractSchema: z.ZodObject<{
         createdAt: Date;
         updatedAt: Date;
         version: number;
-        orderNumber: string;
-        notes?: string | undefined;
         expectedDeliveryDate?: Date | undefined;
+        notes?: string | undefined;
     }, {
         id: string;
         totalNet: number;
         totalGross: number;
         status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
         customerId: string;
+        orderNumber: string;
         lines: {
             id: string;
             sku: string;
@@ -381,11 +382,10 @@ export declare const OrderListResponseContractSchema: z.ZodObject<{
         createdAt: Date;
         updatedAt: Date;
         version: number;
-        orderNumber: string;
         taxRate?: number | undefined;
         currency?: string | undefined;
-        notes?: string | undefined;
         expectedDeliveryDate?: Date | undefined;
+        notes?: string | undefined;
     }>, "many">;
     pagination: z.ZodObject<{
         page: z.ZodNumber;
@@ -410,6 +410,7 @@ export declare const OrderListResponseContractSchema: z.ZodObject<{
         totalGross: number;
         status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
         customerId: string;
+        orderNumber: string;
         lines: {
             id: string;
             sku: string;
@@ -428,9 +429,8 @@ export declare const OrderListResponseContractSchema: z.ZodObject<{
         createdAt: Date;
         updatedAt: Date;
         version: number;
-        orderNumber: string;
-        notes?: string | undefined;
         expectedDeliveryDate?: Date | undefined;
+        notes?: string | undefined;
     }[];
     pagination: {
         page: number;
@@ -445,6 +445,7 @@ export declare const OrderListResponseContractSchema: z.ZodObject<{
         totalGross: number;
         status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
         customerId: string;
+        orderNumber: string;
         lines: {
             id: string;
             sku: string;
@@ -461,11 +462,10 @@ export declare const OrderListResponseContractSchema: z.ZodObject<{
         createdAt: Date;
         updatedAt: Date;
         version: number;
-        orderNumber: string;
         taxRate?: number | undefined;
         currency?: string | undefined;
-        notes?: string | undefined;
         expectedDeliveryDate?: Date | undefined;
+        notes?: string | undefined;
     }[];
     pagination: {
         page: number;

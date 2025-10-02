@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvoiceRepository = void 0;
 const drizzle_orm_1 = require("drizzle-orm");
-const uuid_1 = require("uuid");
 const connection_1 = require("../db/connection");
 const schema_1 = require("../db/schema");
 const entities_1 = require("../../domain/entities");
@@ -82,8 +81,8 @@ class InvoiceRepository {
             pagination: {
                 page: pagination.page,
                 pageSize: pagination.pageSize,
-                total,
-                totalPages: Math.ceil(total / pagination.pageSize)
+                total: Number(total),
+                totalPages: Math.ceil(Number(total) / pagination.pageSize)
             }
         };
     }
@@ -129,20 +128,14 @@ class InvoiceRepository {
             pagination: {
                 page: pagination.page,
                 pageSize: pagination.pageSize,
-                total,
-                totalPages: Math.ceil(total / pagination.pageSize)
+                total: Number(total),
+                totalPages: Math.ceil(Number(total) / pagination.pageSize)
             }
         };
     }
     async create(input) {
-        const invoiceData = {
-            ...input,
-            id: (0, uuid_1.v4)(),
-            status: entities_1.InvoiceStatus.ISSUED,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            version: 1
-        };
+        const invoice = entities_1.InvoiceEntity.create(input);
+        const invoiceData = invoice.toPersistence();
         const result = await connection_1.db
             .insert(schema_1.invoices)
             .values(invoiceData)
@@ -152,6 +145,8 @@ class InvoiceRepository {
     async update(id, tenantId, input) {
         const updateData = {
             ...input,
+            notes: input.notes ?? undefined,
+            dueDate: input.dueDate ?? undefined,
             updatedAt: new Date()
         };
         const result = await connection_1.db

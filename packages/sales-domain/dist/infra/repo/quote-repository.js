@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuoteRepository = void 0;
 const drizzle_orm_1 = require("drizzle-orm");
-const uuid_1 = require("uuid");
 const connection_1 = require("../db/connection");
 const schema_1 = require("../db/schema");
 const entities_1 = require("../../domain/entities");
@@ -73,8 +72,8 @@ class QuoteRepository {
             pagination: {
                 page: pagination.page,
                 pageSize: pagination.pageSize,
-                total,
-                totalPages: Math.ceil(total / pagination.pageSize)
+                total: Number(total),
+                totalPages: Math.ceil(Number(total) / pagination.pageSize)
             }
         };
     }
@@ -122,20 +121,14 @@ class QuoteRepository {
             pagination: {
                 page: pagination.page,
                 pageSize: pagination.pageSize,
-                total,
-                totalPages: Math.ceil(total / pagination.pageSize)
+                total: Number(total),
+                totalPages: Math.ceil(Number(total) / pagination.pageSize)
             }
         };
     }
     async create(input) {
-        const quoteData = {
-            ...input,
-            id: (0, uuid_1.v4)(),
-            status: input.status || entities_1.QuoteStatus.DRAFT,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            version: 1
-        };
+        const quote = entities_1.QuoteEntity.create(input);
+        const quoteData = quote.toPersistence();
         const result = await connection_1.db
             .insert(schema_1.quotes)
             .values(quoteData)
@@ -145,6 +138,8 @@ class QuoteRepository {
     async update(id, tenantId, input) {
         const updateData = {
             ...input,
+            notes: input.notes ?? undefined,
+            validUntil: input.validUntil ?? undefined,
             updatedAt: new Date()
         };
         const result = await connection_1.db

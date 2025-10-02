@@ -125,8 +125,24 @@ export class InvoiceEntity {
     return new InvoiceEntity(invoice);
   }
 
-  public static fromPersistence(props: Invoice): InvoiceEntity {
-    return new InvoiceEntity(props);
+  public static fromPersistence(props: any): InvoiceEntity {
+    return new InvoiceEntity({
+      ...props,
+      subtotalNet: Number(props.subtotalNet),
+      totalDiscount: Number(props.totalDiscount),
+      totalNet: Number(props.totalNet),
+      totalTax: Number(props.totalTax),
+      totalGross: Number(props.totalGross),
+      lines: props.lines.map((line: any) => ({
+        ...line,
+        unitPrice: Number(line.unitPrice),
+        discount: Number(line.discount),
+        totalNet: Number(line.totalNet),
+        totalGross: Number(line.totalGross),
+      })),
+      paidAt: props.paidAt ?? undefined,
+      notes: props.notes ?? undefined,
+    });
   }
 
   public update(props: UpdateInvoiceInput): void {
@@ -135,7 +151,7 @@ export class InvoiceEntity {
     }
 
     if (props.notes !== undefined) {
-      this.props.notes = props.notes;
+      this.props.notes = props.notes ?? undefined;
     }
 
     if (props.status !== undefined) {

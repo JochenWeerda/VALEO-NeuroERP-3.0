@@ -15,16 +15,19 @@ async function authMiddleware(request, reply) {
         // Verify JWT token
         const payload = await (0, jwt_1.verifyJWT)(token);
         // Attach user to request
+        const headerTenantId = request.headers['x-tenant-id'];
+        const payloadTenantId = typeof payload.tenantId === 'string' ? payload.tenantId : null;
+        const headerTenant = typeof headerTenantId === 'string' ? headerTenantId : null;
         request.user = {
-            userId: payload.sub,
-            tenantId: payload.tenantId || request.headers['x-tenant-id'],
-            roles: payload.roles || [],
-            permissions: payload.permissions || [],
+            userId: payload.sub || 'unknown',
+            tenantId: payloadTenantId || headerTenant || 'unknown',
+            roles: Array.isArray(payload.roles) ? payload.roles : [],
+            permissions: Array.isArray(payload.permissions) ? payload.permissions : [],
         };
         // Continue to next middleware
     }
     catch (error) {
-        request.log.error('Authentication error:', error);
+        request.log.error({ error }, 'Authentication error');
         return reply.code(401).send({
             error: 'Unauthorized',
             message: 'Invalid or expired token',

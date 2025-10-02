@@ -276,7 +276,7 @@ export declare class OrderEntity {
     static create(props: CreateOrderInput & {
         tenantId: string;
     }): OrderEntity;
-    static fromPersistence(props: Order): OrderEntity;
+    static fromPersistence(props: any): OrderEntity;
     update(props: UpdateOrderInput): void;
     confirm(): void;
     markAsInvoiced(): void;

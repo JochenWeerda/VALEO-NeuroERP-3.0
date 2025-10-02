@@ -241,7 +241,7 @@ export declare class InvoiceEntity {
     static create(props: CreateInvoiceInput & {
         tenantId: string;
     }): InvoiceEntity;
-    static fromPersistence(props: Invoice): InvoiceEntity;
+    static fromPersistence(props: any): InvoiceEntity;
     update(props: UpdateInvoiceInput): void;
     markAsPaid(): void;
     markAsOverdue(): void;

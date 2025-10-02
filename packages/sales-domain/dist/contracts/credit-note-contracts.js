@@ -30,6 +30,7 @@ exports.CreditNoteStatusContractSchema = zod_1.z.enum([
 exports.CreateCreditNoteContractSchema = entities_1.CreateCreditNoteInputSchema.openapi({
     description: 'Credit note creation data',
     example: {
+        tenantId: 'tenant-001',
         customerId: '550e8400-e29b-41d4-a716-446655440000',
         invoiceId: '550e8400-e29b-41d4-a716-446655440004',
         creditNumber: 'CN-2024-001',
@@ -87,9 +88,9 @@ exports.CreditNoteResponseContractSchema = entities_1.CreditNoteSchema.omit({ te
         reason: 'Service not delivered as agreed',
         notes: 'Customer dissatisfaction with delivery timeline',
         status: entities_1.CreditNoteStatus.SETTLED,
-        settledAt: '2024-02-12T10:00:00.000Z',
-        createdAt: '2024-02-10T00:00:00.000Z',
-        updatedAt: '2024-02-12T10:00:00.000Z',
+        settledAt: new Date('2024-02-12T10:00:00.000Z'),
+        createdAt: new Date('2024-02-10T00:00:00.000Z'),
+        updatedAt: new Date('2024-02-12T10:00:00.000Z'),
         version: 2
     }
 });

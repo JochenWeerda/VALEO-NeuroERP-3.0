@@ -38,6 +38,7 @@ export const InvoiceStatusContractSchema = z.enum([
 export const CreateInvoiceContractSchema = CreateInvoiceInputSchema.openapi({
   description: 'Invoice creation data',
   example: {
+    tenantId: 'tenant-001',
     customerId: '550e8400-e29b-41d4-a716-446655440000',
     orderId: '550e8400-e29b-41d4-a716-446655440003',
     invoiceNumber: 'INV-2024-001',
@@ -51,7 +52,7 @@ export const CreateInvoiceContractSchema = CreateInvoiceInputSchema.openapi({
         discount: 10
       }
     ],
-    dueDate: '2024-02-15T00:00:00.000Z',
+    dueDate: new Date('2024-02-15T00:00:00.000Z'),
     notes: 'Payment due within 14 days',
     taxRate: 19,
     currency: 'EUR'
@@ -94,12 +95,12 @@ export const InvoiceResponseContractSchema = InvoiceSchema.omit({ tenantId: true
     totalGross: 3213.00,
     taxRate: 19,
     currency: 'EUR',
-    dueDate: '2024-02-15T00:00:00.000Z',
-    paidAt: '2024-02-10T14:30:00.000Z',
+    dueDate: new Date('2024-02-15T00:00:00.000Z'),
+    paidAt: new Date('2024-02-10T14:30:00.000Z'),
     notes: 'Payment due within 14 days',
     status: InvoiceStatus.PAID,
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-02-10T14:30:00.000Z',
+    createdAt: new Date('2024-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2024-02-10T14:30:00.000Z'),
     version: 2
   }
 });

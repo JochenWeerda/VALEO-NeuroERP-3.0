@@ -70,7 +70,7 @@ app.get('/ready', async () => {
     await pool.query('SELECT 1');
     return { status: 'ready', database: 'connected' };
   } catch (error) {
-    app.log.error('Database health check failed:', error);
+    app.log.error({ error }, 'Database health check failed');
     return { status: 'not ready', database: 'disconnected' };
   }
 });
@@ -91,7 +91,7 @@ const closeGracefully = async (signal: string) => {
     await pool.end();
     process.exit(0);
   } catch (error) {
-    app.log.error('Error during shutdown:', error);
+    app.log.error({ error }, 'Error during shutdown');
     process.exit(1);
   }
 };
@@ -111,7 +111,7 @@ const start = async () => {
     app.log.info(`API Documentation available at http://${host}:${port}/documentation`);
 
   } catch (error) {
-    app.log.error('Failed to start server:', error);
+    app.log.error({ error }, 'Failed to start server');
     process.exit(1);
   }
 };

@@ -126,7 +126,7 @@ export declare const quotes: import("drizzle-orm/pg-core").PgTableWithColumns<{
             name: "currency";
             tableName: "quotes";
             dataType: "string";
-            columnType: "PgText";
+            columnType: "PgVarchar";
             data: string;
             driverParam: string;
             notNull: true;
@@ -337,7 +337,7 @@ export declare const orders: import("drizzle-orm/pg-core").PgTableWithColumns<{
             name: "currency";
             tableName: "orders";
             dataType: "string";
-            columnType: "PgText";
+            columnType: "PgVarchar";
             data: string;
             driverParam: string;
             notNull: true;
@@ -560,7 +560,7 @@ export declare const invoices: import("drizzle-orm/pg-core").PgTableWithColumns<
             name: "currency";
             tableName: "invoices";
             dataType: "string";
-            columnType: "PgText";
+            columnType: "PgVarchar";
             data: string;
             driverParam: string;
             notNull: true;
@@ -609,7 +609,7 @@ export declare const invoices: import("drizzle-orm/pg-core").PgTableWithColumns<
             tableName: "invoices";
             dataType: "string";
             columnType: "PgText";
-            data: "Issued" | "Paid" | "Cancelled" | "Overdue";
+            data: "Cancelled" | "Issued" | "Paid" | "Overdue";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -795,7 +795,7 @@ export declare const creditNotes: import("drizzle-orm/pg-core").PgTableWithColum
             name: "currency";
             tableName: "credit_notes";
             dataType: "string";
-            columnType: "PgText";
+            columnType: "PgVarchar";
             data: string;
             driverParam: string;
             notNull: true;
@@ -1063,7 +1063,7 @@ export declare const quotesRelations: {
                 name: "currency";
                 tableName: "orders";
                 dataType: "string";
-                columnType: "PgText";
+                columnType: "PgVarchar";
                 data: string;
                 driverParam: string;
                 notNull: true;
@@ -1276,7 +1276,7 @@ export declare const ordersRelations: {
                 name: "currency";
                 tableName: "quotes";
                 dataType: "string";
-                columnType: "PgText";
+                columnType: "PgVarchar";
                 data: string;
                 driverParam: string;
                 notNull: true;
@@ -1499,7 +1499,7 @@ export declare const ordersRelations: {
                 name: "currency";
                 tableName: "invoices";
                 dataType: "string";
-                columnType: "PgText";
+                columnType: "PgVarchar";
                 data: string;
                 driverParam: string;
                 notNull: true;
@@ -1548,7 +1548,7 @@ export declare const ordersRelations: {
                 tableName: "invoices";
                 dataType: "string";
                 columnType: "PgText";
-                data: "Issued" | "Paid" | "Cancelled" | "Overdue";
+                data: "Cancelled" | "Issued" | "Paid" | "Overdue";
                 driverParam: string;
                 notNull: true;
                 hasDefault: true;
@@ -1724,7 +1724,7 @@ export declare const invoicesRelations: {
                 name: "currency";
                 tableName: "orders";
                 dataType: "string";
-                columnType: "PgText";
+                columnType: "PgVarchar";
                 data: string;
                 driverParam: string;
                 notNull: true;
@@ -1947,7 +1947,7 @@ export declare const invoicesRelations: {
                 name: "currency";
                 tableName: "credit_notes";
                 dataType: "string";
-                columnType: "PgText";
+                columnType: "PgVarchar";
                 data: string;
                 driverParam: string;
                 notNull: true;
@@ -2184,7 +2184,7 @@ export declare const creditNotesRelations: {
                 name: "currency";
                 tableName: "invoices";
                 dataType: "string";
-                columnType: "PgText";
+                columnType: "PgVarchar";
                 data: string;
                 driverParam: string;
                 notNull: true;
@@ -2233,7 +2233,7 @@ export declare const creditNotesRelations: {
                 tableName: "invoices";
                 dataType: "string";
                 columnType: "PgText";
-                data: "Issued" | "Paid" | "Cancelled" | "Overdue";
+                data: "Cancelled" | "Issued" | "Paid" | "Overdue";
                 driverParam: string;
                 notNull: true;
                 hasDefault: true;

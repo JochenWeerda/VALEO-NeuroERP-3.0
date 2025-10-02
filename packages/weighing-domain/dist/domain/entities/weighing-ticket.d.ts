@@ -1,0 +1,296 @@
+import { z } from 'zod';
+export declare const WeighingType: {
+    readonly VEHICLE: "Vehicle";
+    readonly CONTAINER: "Container";
+    readonly SILO: "Silo";
+    readonly MANUAL: "Manual";
+};
+export declare const WeighingStatus: {
+    readonly DRAFT: "Draft";
+    readonly IN_PROGRESS: "InProgress";
+    readonly COMPLETED: "Completed";
+    readonly CANCELLED: "Cancelled";
+    readonly ERROR: "Error";
+};
+export declare const CommodityType: {
+    readonly WHEAT: "WHEAT";
+    readonly BARLEY: "BARLEY";
+    readonly RAPESEED: "RAPESEED";
+    readonly SOYMEAL: "SOYMEAL";
+    readonly COMPOUND_FEED: "COMPOUND_FEED";
+    readonly FERTILIZER: "FERTILIZER";
+    readonly OTHER: "OTHER";
+};
+export declare const WeighingMode: {
+    readonly GROSS: "Gross";
+    readonly TARE: "Tare";
+    readonly NET: "Net";
+};
+export type WeighingTypeValue = typeof WeighingType[keyof typeof WeighingType];
+export type WeighingStatusValue = typeof WeighingStatus[keyof typeof WeighingStatus];
+export type CommodityTypeValue = typeof CommodityType[keyof typeof CommodityType];
+export type WeighingModeValue = typeof WeighingMode[keyof typeof WeighingMode];
+export declare const WeighingDataSchema: z.ZodObject<{
+    weight: z.ZodNumber;
+    unit: z.ZodEnum<["kg", "t"]>;
+    timestamp: z.ZodString;
+    scaleId: z.ZodString;
+    operatorId: z.ZodOptional<z.ZodString>;
+    notes: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    scaleId: string;
+    timestamp: string;
+    weight: number;
+    unit: "kg" | "t";
+    notes?: string | undefined;
+    operatorId?: string | undefined;
+}, {
+    scaleId: string;
+    timestamp: string;
+    weight: number;
+    unit: "kg" | "t";
+    notes?: string | undefined;
+    operatorId?: string | undefined;
+}>;
+export declare const WeighingTicketSchema: z.ZodObject<{
+    id: z.ZodOptional<z.ZodString>;
+    tenantId: z.ZodString;
+    ticketNumber: z.ZodString;
+    type: z.ZodEnum<["Vehicle", "Container", "Silo", "Manual"]>;
+    status: z.ZodDefault<z.ZodEnum<["Draft", "InProgress", "Completed", "Cancelled", "Error"]>>;
+    licensePlate: z.ZodOptional<z.ZodString>;
+    containerNumber: z.ZodOptional<z.ZodString>;
+    siloId: z.ZodOptional<z.ZodString>;
+    commodity: z.ZodEnum<["WHEAT", "BARLEY", "RAPESEED", "SOYMEAL", "COMPOUND_FEED", "FERTILIZER", "OTHER"]>;
+    commodityDescription: z.ZodOptional<z.ZodString>;
+    grossWeight: z.ZodOptional<z.ZodObject<{
+        weight: z.ZodNumber;
+        unit: z.ZodEnum<["kg", "t"]>;
+        timestamp: z.ZodString;
+        scaleId: z.ZodString;
+        operatorId: z.ZodOptional<z.ZodString>;
+        notes: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+        scaleId: string;
+        timestamp: string;
+        weight: number;
+        unit: "kg" | "t";
+        notes?: string | undefined;
+        operatorId?: string | undefined;
+    }, {
+        scaleId: string;
+        timestamp: string;
+        weight: number;
+        unit: "kg" | "t";
+        notes?: string | undefined;
+        operatorId?: string | undefined;
+    }>>;
+    tareWeight: z.ZodOptional<z.ZodObject<{
+        weight: z.ZodNumber;
+        unit: z.ZodEnum<["kg", "t"]>;
+        timestamp: z.ZodString;
+        scaleId: z.ZodString;
+        operatorId: z.ZodOptional<z.ZodString>;
+        notes: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+        scaleId: string;
+        timestamp: string;
+        weight: number;
+        unit: "kg" | "t";
+        notes?: string | undefined;
+        operatorId?: string | undefined;
+    }, {
+        scaleId: string;
+        timestamp: string;
+        weight: number;
+        unit: "kg" | "t";
+        notes?: string | undefined;
+        operatorId?: string | undefined;
+    }>>;
+    netWeight: z.ZodOptional<z.ZodNumber>;
+    netWeightUnit: z.ZodOptional<z.ZodEnum<["kg", "t"]>>;
+    expectedWeight: z.ZodOptional<z.ZodNumber>;
+    tolerancePercent: z.ZodDefault<z.ZodNumber>;
+    isWithinTolerance: z.ZodOptional<z.ZodBoolean>;
+    contractId: z.ZodOptional<z.ZodString>;
+    orderId: z.ZodOptional<z.ZodString>;
+    deliveryNoteId: z.ZodOptional<z.ZodString>;
+    anprRecordId: z.ZodOptional<z.ZodString>;
+    autoAssigned: z.ZodDefault<z.ZodBoolean>;
+    gateId: z.ZodOptional<z.ZodString>;
+    slotId: z.ZodOptional<z.ZodString>;
+    createdAt: z.ZodOptional<z.ZodDate>;
+    updatedAt: z.ZodOptional<z.ZodDate>;
+    completedAt: z.ZodOptional<z.ZodDate>;
+    version: z.ZodDefault<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    tenantId: string;
+    ticketNumber: string;
+    type: "Vehicle" | "Container" | "Silo" | "Manual";
+    status: "Draft" | "InProgress" | "Completed" | "Cancelled" | "Error";
+    commodity: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER" | "OTHER";
+    tolerancePercent: number;
+    autoAssigned: boolean;
+    version: number;
+    id?: string | undefined;
+    licensePlate?: string | undefined;
+    containerNumber?: string | undefined;
+    siloId?: string | undefined;
+    commodityDescription?: string | undefined;
+    grossWeight?: {
+        scaleId: string;
+        timestamp: string;
+        weight: number;
+        unit: "kg" | "t";
+        notes?: string | undefined;
+        operatorId?: string | undefined;
+    } | undefined;
+    tareWeight?: {
+        scaleId: string;
+        timestamp: string;
+        weight: number;
+        unit: "kg" | "t";
+        notes?: string | undefined;
+        operatorId?: string | undefined;
+    } | undefined;
+    netWeight?: number | undefined;
+    netWeightUnit?: "kg" | "t" | undefined;
+    expectedWeight?: number | undefined;
+    isWithinTolerance?: boolean | undefined;
+    contractId?: string | undefined;
+    orderId?: string | undefined;
+    deliveryNoteId?: string | undefined;
+    anprRecordId?: string | undefined;
+    gateId?: string | undefined;
+    slotId?: string | undefined;
+    createdAt?: Date | undefined;
+    updatedAt?: Date | undefined;
+    completedAt?: Date | undefined;
+}, {
+    tenantId: string;
+    ticketNumber: string;
+    type: "Vehicle" | "Container" | "Silo" | "Manual";
+    commodity: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER" | "OTHER";
+    id?: string | undefined;
+    status?: "Draft" | "InProgress" | "Completed" | "Cancelled" | "Error" | undefined;
+    licensePlate?: string | undefined;
+    containerNumber?: string | undefined;
+    siloId?: string | undefined;
+    commodityDescription?: string | undefined;
+    grossWeight?: {
+        scaleId: string;
+        timestamp: string;
+        weight: number;
+        unit: "kg" | "t";
+        notes?: string | undefined;
+        operatorId?: string | undefined;
+    } | undefined;
+    tareWeight?: {
+        scaleId: string;
+        timestamp: string;
+        weight: number;
+        unit: "kg" | "t";
+        notes?: string | undefined;
+        operatorId?: string | undefined;
+    } | undefined;
+    netWeight?: number | undefined;
+    netWeightUnit?: "kg" | "t" | undefined;
+    expectedWeight?: number | undefined;
+    tolerancePercent?: number | undefined;
+    isWithinTolerance?: boolean | undefined;
+    contractId?: string | undefined;
+    orderId?: string | undefined;
+    deliveryNoteId?: string | undefined;
+    anprRecordId?: string | undefined;
+    autoAssigned?: boolean | undefined;
+    gateId?: string | undefined;
+    slotId?: string | undefined;
+    createdAt?: Date | undefined;
+    updatedAt?: Date | undefined;
+    completedAt?: Date | undefined;
+    version?: number | undefined;
+}>;
+export interface WeighingData {
+    weight: number;
+    unit: 'kg' | 't';
+    timestamp: Date;
+    scaleId: string;
+    operatorId?: string;
+    notes?: string;
+}
+export interface WeighingTicketEntity {
+    id: string;
+    tenantId: string;
+    ticketNumber: string;
+    type: WeighingTypeValue;
+    status: WeighingStatusValue;
+    licensePlate?: string;
+    containerNumber?: string;
+    siloId?: string;
+    commodity: CommodityTypeValue;
+    commodityDescription?: string;
+    grossWeight?: WeighingData;
+    tareWeight?: WeighingData;
+    netWeight?: number;
+    netWeightUnit?: 'kg' | 't';
+    expectedWeight?: number;
+    tolerancePercent: number;
+    isWithinTolerance?: boolean;
+    contractId?: string;
+    orderId?: string;
+    deliveryNoteId?: string;
+    anprRecordId?: string;
+    autoAssigned: boolean;
+    gateId?: string;
+    slotId?: string;
+    createdAt: Date;
+    updatedAt: Date;
+    completedAt?: Date;
+    version: number;
+}
+export declare class WeighingTicket implements WeighingTicketEntity {
+    id: string;
+    tenantId: string;
+    ticketNumber: string;
+    type: WeighingTypeValue;
+    status: WeighingStatusValue;
+    licensePlate?: string;
+    containerNumber?: string;
+    siloId?: string;
+    commodity: CommodityTypeValue;
+    commodityDescription?: string;
+    grossWeight?: WeighingData;
+    tareWeight?: WeighingData;
+    netWeight?: number;
+    netWeightUnit?: 'kg' | 't';
+    expectedWeight?: number;
+    tolerancePercent: number;
+    isWithinTolerance?: boolean;
+    contractId?: string;
+    orderId?: string;
+    deliveryNoteId?: string;
+    anprRecordId?: string;
+    autoAssigned: boolean;
+    gateId?: string;
+    slotId?: string;
+    createdAt: Date;
+    updatedAt: Date;
+    completedAt?: Date;
+    version: number;
+    constructor(props: WeighingTicketEntity);
+    addGrossWeight(weight: number, unit: 'kg' | 't', scaleId: string, operatorId?: string, notes?: string): void;
+    addTareWeight(weight: number, unit: 'kg' | 't', scaleId: string, operatorId?: string, notes?: string): void;
+    private calculateNetWeight;
+    complete(): void;
+    cancel(): void;
+    canBeModified(): boolean;
+    isValid(): boolean;
+    getWeightSummary(): {
+        gross?: number;
+        tare?: number;
+        net?: number;
+        unit: 'kg' | 't';
+        isWithinTolerance?: boolean;
+    };
+}
+//# sourceMappingURL=weighing-ticket.d.ts.map

@@ -18,14 +18,14 @@ const server = fastify({
   logger: {
     level: process.env.LOG_LEVEL || 'info',
     serializers: {
-      req: (req) => ({
+      req: (req: any) => ({
         method: req.method,
         url: req.url,
         hostname: req.hostname,
         remoteAddress: req.ip,
-        remotePort: req.socket?.remotePort,
+        remotePort: req.socket?.remotePort ?? undefined,
       }),
-      res: (res) => ({
+      res: (res: any) => ({
         statusCode: res.statusCode,
       }),
     },
@@ -116,7 +116,7 @@ const gracefulShutdown = async (signal: string) => {
     server.log.info('Server closed successfully');
     process.exit(0);
   } catch (error) {
-    server.log.error('Error during shutdown:', error);
+    server.log.error({ error }, 'Error during shutdown');
     process.exit(1);
   }
 };

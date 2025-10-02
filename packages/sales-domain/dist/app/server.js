@@ -28,7 +28,7 @@ const server = (0, fastify_1.default)({
                 url: req.url,
                 hostname: req.hostname,
                 remoteAddress: req.ip,
-                remotePort: req.socket?.remotePort,
+                remotePort: req.socket?.remotePort ?? undefined,
             }),
             res: (res) => ({
                 statusCode: res.statusCode,
@@ -113,7 +113,7 @@ const gracefulShutdown = async (signal) => {
         process.exit(0);
     }
     catch (error) {
-        server.log.error('Error during shutdown:', error);
+        server.log.error({ error }, 'Error during shutdown');
         process.exit(1);
     }
 };

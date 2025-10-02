@@ -112,8 +112,8 @@ export class OrderRepository {
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
@@ -172,33 +172,29 @@ export class OrderRepository {
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
 
   async create(input: CreateOrderInput & { tenantId: string }): Promise<OrderEntity> {
-    const orderData: Order = {
-      ...input,
-      id: uuidv4(),
-      status: input.status || OrderStatus.DRAFT,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      version: 1
-    };
+    const order = OrderEntity.create(input);
+    const orderData = order.toPersistence();
 
     const result = await db
       .insert(orders)
-      .values(orderData)
+      .values(orderData as any)
       .returning();
 
     return OrderEntity.fromPersistence(result[0]);
   }
 
   async update(id: string, tenantId: string, input: UpdateOrderInput): Promise<OrderEntity | null> {
-    const updateData: Partial<Order> = {
+    const updateData: any = {
       ...input,
+      notes: input.notes ?? undefined,
+      expectedDeliveryDate: input.expectedDeliveryDate ?? undefined,
       updatedAt: new Date()
     };
 

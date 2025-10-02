@@ -31,7 +31,7 @@ export async function registerTicketRoutes(
 
       try {
         const ticket = await weighingService.createTicket({
-          ...request.body,
+          ...(request.body as any),
           tenantId
         });
 
@@ -179,7 +179,7 @@ export async function registerTicketRoutes(
       }
 
       try {
-        const ticket = await weighingService.updateTicket(id, tenantId, request.body);
+        const ticket = await weighingService.updateTicket(id, tenantId, request.body as any);
 
         return reply.send(ticket);
       } catch (error) {
@@ -218,13 +218,13 @@ export async function registerTicketRoutes(
         const ticket = await weighingService.recordWeight({
           ticketId: id,
           tenantId,
-          ...request.body
+          ...(request.body as any)
         });
 
         return reply.send(ticket);
       } catch (error) {
-        request.log.error(error);
-        return reply.code(400).send({ error: error.message });
+        request.log.error({ error });
+        return reply.code(400).send({ error: error instanceof Error ? error.message : 'Unknown error' });
       }
     }
   });
@@ -259,7 +259,7 @@ export async function registerTicketRoutes(
         return reply.send(ticket);
       } catch (error) {
         request.log.error(error);
-        return reply.code(400).send({ error: error.message });
+        return reply.code(400).send({ error: error instanceof Error ? error.message : 'Unknown error' });
       }
     }
   });
@@ -301,7 +301,7 @@ export async function registerTicketRoutes(
         return reply.send(ticket);
       } catch (error) {
         request.log.error(error);
-        return reply.code(400).send({ error: error.message });
+        return reply.code(400).send({ error: error instanceof Error ? error.message : 'Unknown error' });
       }
     }
   });
@@ -340,7 +340,7 @@ export async function registerTicketRoutes(
         return reply.code(204).send();
       } catch (error) {
         request.log.error(error);
-        return reply.code(400).send({ error: error.message });
+        return reply.code(400).send({ error: error instanceof Error ? error.message : 'Unknown error' });
       }
     }
   });
