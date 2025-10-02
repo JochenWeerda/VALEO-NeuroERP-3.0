@@ -122,8 +122,24 @@ export class OrderEntity {
     return new OrderEntity(order);
   }
 
-  public static fromPersistence(props: Order): OrderEntity {
-    return new OrderEntity(props);
+  public static fromPersistence(props: any): OrderEntity {
+    return new OrderEntity({
+      ...props,
+      subtotalNet: Number(props.subtotalNet),
+      totalDiscount: Number(props.totalDiscount),
+      totalNet: Number(props.totalNet),
+      totalTax: Number(props.totalTax),
+      totalGross: Number(props.totalGross),
+      lines: props.lines.map((line: any) => ({
+        ...line,
+        unitPrice: Number(line.unitPrice),
+        discount: Number(line.discount),
+        totalNet: Number(line.totalNet),
+        totalGross: Number(line.totalGross),
+      })),
+      expectedDeliveryDate: props.expectedDeliveryDate ?? undefined,
+      notes: props.notes ?? undefined,
+    });
   }
 
   public update(props: UpdateOrderInput): void {
@@ -143,11 +159,11 @@ export class OrderEntity {
     }
 
     if (props.expectedDeliveryDate !== undefined) {
-      this.props.expectedDeliveryDate = props.expectedDeliveryDate;
+      this.props.expectedDeliveryDate = props.expectedDeliveryDate ?? undefined;
     }
 
     if (props.notes !== undefined) {
-      this.props.notes = props.notes;
+      this.props.notes = props.notes ?? undefined;
     }
 
     if (props.status !== undefined) {

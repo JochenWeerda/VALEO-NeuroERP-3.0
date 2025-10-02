@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderRepository = void 0;
 const drizzle_orm_1 = require("drizzle-orm");
-const uuid_1 = require("uuid");
 const connection_1 = require("../db/connection");
 const schema_1 = require("../db/schema");
 const entities_1 = require("../../domain/entities");
@@ -68,8 +67,8 @@ class OrderRepository {
             pagination: {
                 page: pagination.page,
                 pageSize: pagination.pageSize,
-                total,
-                totalPages: Math.ceil(total / pagination.pageSize)
+                total: Number(total),
+                totalPages: Math.ceil(Number(total) / pagination.pageSize)
             }
         };
     }
@@ -112,20 +111,14 @@ class OrderRepository {
             pagination: {
                 page: pagination.page,
                 pageSize: pagination.pageSize,
-                total,
-                totalPages: Math.ceil(total / pagination.pageSize)
+                total: Number(total),
+                totalPages: Math.ceil(Number(total) / pagination.pageSize)
             }
         };
     }
     async create(input) {
-        const orderData = {
-            ...input,
-            id: (0, uuid_1.v4)(),
-            status: input.status || entities_1.OrderStatus.DRAFT,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            version: 1
-        };
+        const order = entities_1.OrderEntity.create(input);
+        const orderData = order.toPersistence();
         const result = await connection_1.db
             .insert(schema_1.orders)
             .values(orderData)
@@ -135,6 +128,8 @@ class OrderRepository {
     async update(id, tenantId, input) {
         const updateData = {
             ...input,
+            notes: input.notes ?? undefined,
+            expectedDeliveryDate: input.expectedDeliveryDate ?? undefined,
             updatedAt: new Date()
         };
         const result = await connection_1.db

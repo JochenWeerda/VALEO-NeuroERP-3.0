@@ -131,8 +131,8 @@ export class InvoiceRepository {
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
@@ -195,33 +195,29 @@ export class InvoiceRepository {
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
 
   async create(input: CreateInvoiceInput & { tenantId: string }): Promise<InvoiceEntity> {
-    const invoiceData: Invoice = {
-      ...input,
-      id: uuidv4(),
-      status: InvoiceStatus.ISSUED,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      version: 1
-    };
+    const invoice = InvoiceEntity.create(input);
+    const invoiceData = invoice.toPersistence();
 
     const result = await db
       .insert(invoices)
-      .values(invoiceData)
+      .values(invoiceData as any)
       .returning();
 
     return InvoiceEntity.fromPersistence(result[0]);
   }
 
   async update(id: string, tenantId: string, input: UpdateInvoiceInput): Promise<InvoiceEntity | null> {
-    const updateData: Partial<Invoice> = {
+    const updateData: any = {
       ...input,
+      notes: input.notes ?? undefined,
+      dueDate: input.dueDate ?? undefined,
       updatedAt: new Date()
     };
 
@@ -258,7 +254,7 @@ export class InvoiceRepository {
   }
 
   async updateStatus(id: string, tenantId: string, status: InvoiceStatusType): Promise<InvoiceEntity | null> {
-    const updateData: Partial<Invoice> = {
+    const updateData: any = {
       status,
       updatedAt: new Date()
     };

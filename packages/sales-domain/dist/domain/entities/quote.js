@@ -110,7 +110,22 @@ class QuoteEntity {
         return new QuoteEntity(quote);
     }
     static fromPersistence(props) {
-        return new QuoteEntity(props);
+        return new QuoteEntity({
+            ...props,
+            subtotalNet: Number(props.subtotalNet),
+            totalDiscount: Number(props.totalDiscount),
+            totalNet: Number(props.totalNet),
+            totalTax: Number(props.totalTax),
+            totalGross: Number(props.totalGross),
+            lines: props.lines.map((line) => ({
+                ...line,
+                unitPrice: Number(line.unitPrice),
+                discount: Number(line.discount),
+                totalNet: Number(line.totalNet),
+                totalGross: Number(line.totalGross),
+            })),
+            notes: props.notes ?? undefined,
+        });
     }
     update(props) {
         if (props.lines) {
@@ -127,10 +142,10 @@ class QuoteEntity {
             this.props.totalGross = this.props.lines.reduce((sum, line) => sum + line.totalGross, 0);
         }
         if (props.validUntil !== undefined) {
-            this.props.validUntil = props.validUntil;
+            this.props.validUntil = props.validUntil ?? undefined;
         }
         if (props.notes !== undefined) {
-            this.props.notes = props.notes;
+            this.props.notes = props.notes ?? undefined;
         }
         if (props.status !== undefined) {
             this.validateStatusTransition(this.props.status, props.status);

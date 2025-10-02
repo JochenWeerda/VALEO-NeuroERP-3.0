@@ -107,7 +107,23 @@ class OrderEntity {
         return new OrderEntity(order);
     }
     static fromPersistence(props) {
-        return new OrderEntity(props);
+        return new OrderEntity({
+            ...props,
+            subtotalNet: Number(props.subtotalNet),
+            totalDiscount: Number(props.totalDiscount),
+            totalNet: Number(props.totalNet),
+            totalTax: Number(props.totalTax),
+            totalGross: Number(props.totalGross),
+            lines: props.lines.map((line) => ({
+                ...line,
+                unitPrice: Number(line.unitPrice),
+                discount: Number(line.discount),
+                totalNet: Number(line.totalNet),
+                totalGross: Number(line.totalGross),
+            })),
+            expectedDeliveryDate: props.expectedDeliveryDate ?? undefined,
+            notes: props.notes ?? undefined,
+        });
     }
     update(props) {
         if (props.lines) {
@@ -124,10 +140,10 @@ class OrderEntity {
             this.props.totalGross = this.props.lines.reduce((sum, line) => sum + line.totalGross, 0);
         }
         if (props.expectedDeliveryDate !== undefined) {
-            this.props.expectedDeliveryDate = props.expectedDeliveryDate;
+            this.props.expectedDeliveryDate = props.expectedDeliveryDate ?? undefined;
         }
         if (props.notes !== undefined) {
-            this.props.notes = props.notes;
+            this.props.notes = props.notes ?? undefined;
         }
         if (props.status !== undefined) {
             this.validateStatusTransition(this.props.status, props.status);

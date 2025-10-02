@@ -277,7 +277,7 @@ export declare class QuoteEntity {
     static create(props: CreateQuoteInput & {
         tenantId: string;
     }): QuoteEntity;
-    static fromPersistence(props: Quote): QuoteEntity;
+    static fromPersistence(props: any): QuoteEntity;
     update(props: UpdateQuoteInput): void;
     send(): void;
     accept(): void;

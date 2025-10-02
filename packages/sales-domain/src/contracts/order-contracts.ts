@@ -41,6 +41,8 @@ export const OrderStatusContractSchema = z.enum([
 export const CreateOrderContractSchema = CreateOrderInputSchema.openapi({
   description: 'Order creation data',
   example: {
+    tenantId: 'tenant-001',
+    status: OrderStatus.DRAFT,
     customerId: '550e8400-e29b-41d4-a716-446655440000',
     orderNumber: 'ORD-2024-001',
     lines: [
@@ -65,7 +67,7 @@ export const UpdateOrderContractSchema = UpdateOrderInputSchema.openapi({
   description: 'Order update data',
   example: {
     status: OrderStatus.CONFIRMED,
-    expectedDeliveryDate: '2024-07-15T00:00:00.000Z'
+    expectedDeliveryDate: new Date('2024-07-15T00:00:00.000Z')
   }
 });
 
@@ -95,11 +97,11 @@ export const OrderResponseContractSchema = OrderSchema.omit({ tenantId: true }).
     totalGross: 3213.00,
     taxRate: 19,
     currency: 'EUR',
-    expectedDeliveryDate: '2024-06-30T00:00:00.000Z',
+    expectedDeliveryDate: new Date('2024-06-30T00:00:00.000Z'),
     notes: 'Rush order - client needs delivery by end of month',
     status: OrderStatus.CONFIRMED,
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
+    createdAt: new Date('2024-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     version: 1
   }
 });

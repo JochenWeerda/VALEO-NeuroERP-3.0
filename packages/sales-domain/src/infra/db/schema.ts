@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, boolean, integer, numeric, jsonb, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, varchar, timestamp, boolean, integer, numeric, jsonb, index } from 'drizzle-orm/pg-core';
 
 // Quote Table
 export const quotes = pgTable('quotes', {
@@ -12,7 +12,7 @@ export const quotes = pgTable('quotes', {
   totalNet: numeric('total_net', { precision: 15, scale: 2 }).notNull(),
   totalGross: numeric('total_gross', { precision: 15, scale: 2 }).notNull(),
   taxRate: numeric('tax_rate', { precision: 5, scale: 2 }).notNull().default('19.00'),
-  currency: text('currency', { length: 3 }).notNull().default('EUR'),
+  currency: varchar('currency', { length: 3 }).notNull().default('EUR'),
   validUntil: timestamp('valid_until').notNull(),
   notes: text('notes'),
   status: text('status', { enum: ['Draft', 'Sent', 'Accepted', 'Rejected', 'Expired'] }).notNull().default('Draft'),
@@ -38,7 +38,7 @@ export const orders = pgTable('orders', {
   totalNet: numeric('total_net', { precision: 15, scale: 2 }).notNull(),
   totalGross: numeric('total_gross', { precision: 15, scale: 2 }).notNull(),
   taxRate: numeric('tax_rate', { precision: 5, scale: 2 }).notNull().default('19.00'),
-  currency: text('currency', { length: 3 }).notNull().default('EUR'),
+  currency: varchar('currency', { length: 3 }).notNull().default('EUR'),
   expectedDeliveryDate: timestamp('expected_delivery_date'),
   notes: text('notes'),
   status: text('status', { enum: ['Draft', 'Confirmed', 'Invoiced', 'Cancelled'] }).notNull().default('Draft'),
@@ -65,7 +65,7 @@ export const invoices = pgTable('invoices', {
   totalNet: numeric('total_net', { precision: 15, scale: 2 }).notNull(),
   totalGross: numeric('total_gross', { precision: 15, scale: 2 }).notNull(),
   taxRate: numeric('tax_rate', { precision: 5, scale: 2 }).notNull().default('19.00'),
-  currency: text('currency', { length: 3 }).notNull().default('EUR'),
+  currency: varchar('currency', { length: 3 }).notNull().default('EUR'),
   dueDate: timestamp('due_date').notNull(),
   paidAt: timestamp('paid_at'),
   notes: text('notes'),
@@ -94,7 +94,7 @@ export const creditNotes = pgTable('credit_notes', {
   totalNet: numeric('total_net', { precision: 15, scale: 2 }).notNull(),
   totalGross: numeric('total_gross', { precision: 15, scale: 2 }).notNull(),
   taxRate: numeric('tax_rate', { precision: 5, scale: 2 }).notNull().default('19.00'),
-  currency: text('currency', { length: 3 }).notNull().default('EUR'),
+  currency: varchar('currency', { length: 3 }).notNull().default('EUR'),
   reason: text('reason').notNull(),
   notes: text('notes'),
   status: text('status', { enum: ['Issued', 'Settled'] }).notNull().default('Issued'),
