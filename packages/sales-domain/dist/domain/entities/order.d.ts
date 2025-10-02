@@ -18,8 +18,8 @@ export declare const OrderLineSchema: z.ZodObject<{
     totalGross: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    name: string;
     sku: string;
+    name: string;
     quantity: number;
     unitPrice: number;
     discount: number;
@@ -28,8 +28,8 @@ export declare const OrderLineSchema: z.ZodObject<{
     description?: string | undefined;
 }, {
     id: string;
-    name: string;
     sku: string;
+    name: string;
     quantity: number;
     unitPrice: number;
     totalNet: number;
@@ -55,8 +55,8 @@ export declare const OrderSchema: z.ZodObject<{
         totalGross: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
@@ -65,8 +65,8 @@ export declare const OrderSchema: z.ZodObject<{
         description?: string | undefined;
     }, {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         totalNet: number;
@@ -87,12 +87,16 @@ export declare const OrderSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
     version: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    version: number;
+    id: string;
+    totalNet: number;
+    totalGross: number;
+    status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
+    tenantId: string;
     customerId: string;
     lines: {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
@@ -100,27 +104,27 @@ export declare const OrderSchema: z.ZodObject<{
         totalGross: number;
         description?: string | undefined;
     }[];
-    id: string;
-    status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
-    tenantId: string;
-    totalNet: number;
-    totalGross: number;
     subtotalNet: number;
     totalDiscount: number;
     taxRate: number;
     currency: string;
     createdAt: Date;
     updatedAt: Date;
+    version: number;
     orderNumber: string;
     notes?: string | undefined;
     expectedDeliveryDate?: Date | undefined;
 }, {
-    version: number;
+    id: string;
+    totalNet: number;
+    totalGross: number;
+    status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
+    tenantId: string;
     customerId: string;
     lines: {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         totalNet: number;
@@ -128,15 +132,11 @@ export declare const OrderSchema: z.ZodObject<{
         description?: string | undefined;
         discount?: number | undefined;
     }[];
-    id: string;
-    status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
-    tenantId: string;
-    totalNet: number;
-    totalGross: number;
     subtotalNet: number;
     totalDiscount: number;
     createdAt: Date;
     updatedAt: Date;
+    version: number;
     orderNumber: string;
     taxRate?: number | undefined;
     currency?: string | undefined;
@@ -145,9 +145,9 @@ export declare const OrderSchema: z.ZodObject<{
 }>;
 export type Order = z.infer<typeof OrderSchema>;
 export declare const CreateOrderInputSchema: z.ZodObject<{
-    customerId: z.ZodString;
     status: z.ZodEnum<["Draft", "Confirmed", "Invoiced", "Cancelled"]>;
     tenantId: z.ZodString;
+    customerId: z.ZodString;
     taxRate: z.ZodDefault<z.ZodNumber>;
     currency: z.ZodDefault<z.ZodString>;
     notes: z.ZodOptional<z.ZodString>;
@@ -165,49 +165,49 @@ export declare const CreateOrderInputSchema: z.ZodObject<{
         totalNet: z.ZodNumber;
         totalGross: z.ZodNumber;
     }, "id" | "totalNet" | "totalGross">, "strip", z.ZodTypeAny, {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }, {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
         discount?: number | undefined;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
+    status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
+    tenantId: string;
     customerId: string;
     lines: {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }[];
-    status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
-    tenantId: string;
     taxRate: number;
     currency: string;
     orderNumber: string;
     notes?: string | undefined;
     expectedDeliveryDate?: Date | undefined;
 }, {
+    status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
+    tenantId: string;
     customerId: string;
     lines: {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
         discount?: number | undefined;
     }[];
-    status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
-    tenantId: string;
     orderNumber: string;
     taxRate?: number | undefined;
     currency?: string | undefined;
@@ -227,15 +227,15 @@ export declare const UpdateOrderInputSchema: z.ZodObject<{
         totalNet: z.ZodNumber;
         totalGross: z.ZodNumber;
     }, "id" | "totalNet" | "totalGross">, "strip", z.ZodTypeAny, {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }, {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
@@ -245,27 +245,27 @@ export declare const UpdateOrderInputSchema: z.ZodObject<{
     notes: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     status: z.ZodOptional<z.ZodEnum<["Draft", "Confirmed", "Invoiced", "Cancelled"]>>;
 }, "strip", z.ZodTypeAny, {
+    status?: "Draft" | "Confirmed" | "Invoiced" | "Cancelled" | undefined;
     lines?: {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }[] | undefined;
-    status?: "Draft" | "Confirmed" | "Invoiced" | "Cancelled" | undefined;
     notes?: string | null | undefined;
     expectedDeliveryDate?: Date | null | undefined;
 }, {
+    status?: "Draft" | "Confirmed" | "Invoiced" | "Cancelled" | undefined;
     lines?: {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
         discount?: number | undefined;
     }[] | undefined;
-    status?: "Draft" | "Confirmed" | "Invoiced" | "Cancelled" | undefined;
     notes?: string | null | undefined;
     expectedDeliveryDate?: Date | null | undefined;
 }>;

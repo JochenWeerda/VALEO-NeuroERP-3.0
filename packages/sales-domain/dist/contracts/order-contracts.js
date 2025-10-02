@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderListResponseContractSchema = exports.OrderQueryContractSchema = exports.OrderResponseContractSchema = exports.UpdateOrderContractSchema = exports.CreateOrderContractSchema = exports.OrderStatusContractSchema = exports.OrderLineContractSchema = void 0;
 const zod_1 = require("zod");
+const zod_openapi_1 = require("zod-openapi");
+(0, zod_openapi_1.extendZodWithOpenApi)(zod_1.z);
 const entities_1 = require("../domain/entities");
 // OpenAPI schema for Order Line
 exports.OrderLineContractSchema = entities_1.OrderLineSchema.openapi({
@@ -44,7 +46,7 @@ exports.CreateOrderContractSchema = entities_1.CreateOrderInputSchema.openapi({
                 discount: 10
             }
         ],
-        expectedDeliveryDate: '2024-06-30T00:00:00.000Z',
+        expectedDeliveryDate: new Date('2024-06-30T00:00:00.000Z'),
         notes: 'Rush order - client needs delivery by end of month',
         taxRate: 19,
         currency: 'EUR'

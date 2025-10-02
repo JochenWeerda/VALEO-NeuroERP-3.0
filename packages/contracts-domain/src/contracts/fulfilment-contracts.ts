@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { extendZodWithOpenApi } from 'zod-openapi';
+
+extendZodWithOpenApi(z);
 
 export const FulfilmentResponseSchema = z.object({
   contractId: z.string().uuid(),
@@ -16,14 +19,14 @@ export const FulfilmentResponseSchema = z.object({
     notes: z.string().optional(),
   })),
   lastUpdated: z.string().datetime(),
-}).openapi('Fulfilment');
+});
 
 export const PricingFixingSchema = z.object({
   kind: z.enum(['BASIS', 'FUTURES', 'MIN_PRICE_DECISION']),
   value: z.number(),
   futuresMonth: z.string().optional(),
   notes: z.string().optional(),
-}).openapi('PricingFixing');
+});
 
 export type FulfilmentResponse = z.infer<typeof FulfilmentResponseSchema>;
 export type PricingFixing = z.infer<typeof PricingFixingSchema>;

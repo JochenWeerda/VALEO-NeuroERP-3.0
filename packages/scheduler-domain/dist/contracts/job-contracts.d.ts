@@ -158,10 +158,10 @@ declare const JobResponseSchema: z.ZodObject<{
     updatedAt: z.ZodString;
     version: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    tenantId: string;
-    version: number;
-    enabled: boolean;
     id: string;
+    tenantId: string;
+    enabled: boolean;
+    version: number;
     createdAt: string;
     updatedAt: string;
     key: string;
@@ -177,10 +177,10 @@ declare const JobResponseSchema: z.ZodObject<{
         maxSec?: number | undefined;
     };
 }, {
-    tenantId: string;
-    version: number;
-    enabled: boolean;
     id: string;
+    tenantId: string;
+    enabled: boolean;
+    version: number;
     createdAt: string;
     updatedAt: string;
     key: string;
@@ -225,10 +225,10 @@ declare const JobListResponseSchema: z.ZodObject<{
         updatedAt: z.ZodString;
         version: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        tenantId: string;
-        version: number;
-        enabled: boolean;
         id: string;
+        tenantId: string;
+        enabled: boolean;
+        version: number;
         createdAt: string;
         updatedAt: string;
         key: string;
@@ -244,10 +244,10 @@ declare const JobListResponseSchema: z.ZodObject<{
             maxSec?: number | undefined;
         };
     }, {
-        tenantId: string;
-        version: number;
-        enabled: boolean;
         id: string;
+        tenantId: string;
+        enabled: boolean;
+        version: number;
         createdAt: string;
         updatedAt: string;
         key: string;
@@ -281,10 +281,10 @@ declare const JobListResponseSchema: z.ZodObject<{
     }>;
 }, "strip", z.ZodTypeAny, {
     data: {
-        tenantId: string;
-        version: number;
-        enabled: boolean;
         id: string;
+        tenantId: string;
+        enabled: boolean;
+        version: number;
         createdAt: string;
         updatedAt: string;
         key: string;
@@ -308,10 +308,10 @@ declare const JobListResponseSchema: z.ZodObject<{
     };
 }, {
     data: {
-        tenantId: string;
-        version: number;
-        enabled: boolean;
         id: string;
+        tenantId: string;
+        enabled: boolean;
+        version: number;
         createdAt: string;
         updatedAt: string;
         key: string;

@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { extendZodWithOpenApi } from 'zod-openapi';
+
+extendZodWithOpenApi(z);
 
 // Enums for contracts
 export const ContractTypeEnum = z.enum(['Buy', 'Sell']);
@@ -23,7 +26,7 @@ export const PricingTermsSchema = z.object({
     method: z.enum(['SPOT', 'FIXING']),
   }).optional(),
   lastFixingAt: z.string().datetime().optional(),
-}).openapi('PricingTerms');
+});
 
 // Delivery Terms Schema
 export const DeliveryTermsSchema = z.object({
@@ -35,7 +38,7 @@ export const DeliveryTermsSchema = z.object({
     titleTransfer: TitleTransferTypeEnum.optional(),
   }).optional(),
   qualitySpecs: z.record(z.string(), z.any()).optional(),
-}).openapi('DeliveryTerms');
+});
 
 // Contract Create Schema
 export const CreateContractSchema = z.object({
@@ -54,7 +57,7 @@ export const CreateContractSchema = z.object({
   }),
   pricing: PricingTermsSchema,
   delivery: DeliveryTermsSchema,
-}).openapi('CreateContract');
+});
 
 // Contract Update Schema
 export const UpdateContractSchema = z.object({
@@ -69,7 +72,7 @@ export const UpdateContractSchema = z.object({
   }).optional(),
   pricing: PricingTermsSchema.optional(),
   delivery: DeliveryTermsSchema.optional(),
-}).openapi('UpdateContract');
+});
 
 // Contract Response Schema
 export const ContractResponseSchema = z.object({
@@ -95,7 +98,7 @@ export const ContractResponseSchema = z.object({
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   version: z.number(),
-}).openapi('Contract');
+});
 
 // Contract List Query Schema
 export const ContractListQuerySchema = z.object({
@@ -107,7 +110,7 @@ export const ContractListQuerySchema = z.object({
   deliveryTo: z.string().datetime().optional(),
   page: z.coerce.number().min(1).default(1),
   pageSize: z.coerce.number().min(1).max(100).default(20),
-}).openapi('ContractListQuery');
+});
 
 // Contract List Response Schema
 export const ContractListResponseSchema = z.object({
@@ -118,18 +121,18 @@ export const ContractListResponseSchema = z.object({
     total: z.number(),
     totalPages: z.number(),
   }),
-}).openapi('ContractListResponse');
+});
 
 // Contract Activate Schema
 export const ActivateContractSchema = z.object({
   notes: z.string().optional(),
-}).openapi('ActivateContract');
+});
 
 // Contract Cancel Schema
 export const CancelContractSchema = z.object({
   reason: z.string(),
   notes: z.string().optional(),
-}).openapi('CancelContract');
+});
 
 // Type exports
 export type CreateContract = z.infer<typeof CreateContractSchema>;

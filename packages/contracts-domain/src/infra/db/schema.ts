@@ -41,14 +41,14 @@ export const contracts = pgTable('contracts', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   version: integer('version').notNull().default(1),
-}, (table) => [
-  index('contracts_tenant_id_idx').on(table.tenantId),
-  index('contracts_counterparty_id_idx').on(table.counterpartyId),
-  index('contracts_status_idx').on(table.status),
-  index('contracts_commodity_idx').on(table.commodity),
-  index('contracts_type_idx').on(table.type),
-  index('contracts_delivery_window_idx').on(table.deliveryWindowFrom, table.deliveryWindowTo),
-]);
+}, (table) => ({
+  tenantIdIdx: index('contracts_tenant_id_idx').on(table.tenantId),
+  counterpartyIdIdx: index('contracts_counterparty_id_idx').on(table.counterpartyId),
+  statusIdx: index('contracts_status_idx').on(table.status),
+  commodityIdx: index('contracts_commodity_idx').on(table.commodity),
+  typeIdx: index('contracts_type_idx').on(table.type),
+  deliveryWindowIdx: index('contracts_delivery_window_idx').on(table.deliveryWindowFrom, table.deliveryWindowTo),
+}));
 
 // Call-offs table
 export const callOffs = pgTable('call_offs', {
@@ -66,12 +66,12 @@ export const callOffs = pgTable('call_offs', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   version: integer('version').notNull().default(1),
-}, (table) => [
-  index('call_offs_contract_id_idx').on(table.contractId),
-  index('call_offs_tenant_id_idx').on(table.tenantId),
-  index('call_offs_status_idx').on(table.status),
-  index('call_offs_window_idx').on(table.windowFrom, table.windowTo),
-]);
+}, (table) => ({
+  contractIdIdx: index('call_offs_contract_id_idx').on(table.contractId),
+  tenantIdIdx: index('call_offs_tenant_id_idx').on(table.tenantId),
+  statusIdx: index('call_offs_status_idx').on(table.status),
+  windowIdx: index('call_offs_window_idx').on(table.windowFrom, table.windowTo),
+}));
 
 // Fulfilment tracking table
 export const fulfilments = pgTable('fulfilments', {
@@ -84,9 +84,9 @@ export const fulfilments = pgTable('fulfilments', {
   avgPrice: decimal('avg_price', { precision: 10, scale: 2 }),
   timeline: jsonb('timeline').notNull().default([]),
   lastUpdated: timestamp('last_updated', { withTimezone: true }).notNull().defaultNow(),
-}, (table) => [
-  index('fulfilments_tenant_id_idx').on(table.tenantId),
-]);
+}, (table) => ({
+  tenantIdIdx: index('fulfilments_tenant_id_idx').on(table.tenantId),
+}));
 
 // Amendments table
 export const amendments = pgTable('amendments', {
@@ -104,11 +104,11 @@ export const amendments = pgTable('amendments', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   version: integer('version').notNull().default(1),
-}, (table) => [
-  index('amendments_contract_id_idx').on(table.contractId),
-  index('amendments_tenant_id_idx').on(table.tenantId),
-  index('amendments_status_idx').on(table.status),
-]);
+}, (table) => ({
+  contractIdIdx: index('amendments_contract_id_idx').on(table.contractId),
+  tenantIdIdx: index('amendments_tenant_id_idx').on(table.tenantId),
+  statusIdx: index('amendments_status_idx').on(table.status),
+}));
 
 // Hedge references table
 export const hedgeRefs = pgTable('hedge_refs', {
@@ -123,11 +123,11 @@ export const hedgeRefs = pgTable('hedge_refs', {
   side: text('side', { enum: ['BUY', 'SELL'] }).notNull(),
   linkId: text('link_id'), // External reference ID
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-}, (table) => [
-  index('hedge_refs_contract_id_idx').on(table.contractId),
-  index('hedge_refs_tenant_id_idx').on(table.tenantId),
-  index('hedge_refs_link_id_idx').on(table.linkId),
-]);
+}, (table) => ({
+  contractIdIdx: index('hedge_refs_contract_id_idx').on(table.contractId),
+  tenantIdIdx: index('hedge_refs_tenant_id_idx').on(table.tenantId),
+  linkIdIdx: index('hedge_refs_link_id_idx').on(table.linkId),
+}));
 
 // Type exports
 export type Contract = typeof contracts.$inferSelect;

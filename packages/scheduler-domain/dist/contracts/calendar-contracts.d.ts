@@ -184,10 +184,10 @@ declare const CalendarResponseSchema: z.ZodObject<{
     updatedAt: z.ZodString;
     version: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
+    id: string;
     name: string;
     tenantId: string | null;
     version: number;
-    id: string;
     createdAt: string;
     updatedAt: string;
     key: string;
@@ -202,10 +202,10 @@ declare const CalendarResponseSchema: z.ZodObject<{
         sun: boolean;
     };
 }, {
+    id: string;
     name: string;
     tenantId: string | null;
     version: number;
-    id: string;
     createdAt: string;
     updatedAt: string;
     key: string;
@@ -256,10 +256,10 @@ declare const CalendarListResponseSchema: z.ZodObject<{
         updatedAt: z.ZodString;
         version: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
+        id: string;
         name: string;
         tenantId: string | null;
         version: number;
-        id: string;
         createdAt: string;
         updatedAt: string;
         key: string;
@@ -274,10 +274,10 @@ declare const CalendarListResponseSchema: z.ZodObject<{
             sun: boolean;
         };
     }, {
+        id: string;
         name: string;
         tenantId: string | null;
         version: number;
-        id: string;
         createdAt: string;
         updatedAt: string;
         key: string;
@@ -310,10 +310,10 @@ declare const CalendarListResponseSchema: z.ZodObject<{
     }>;
 }, "strip", z.ZodTypeAny, {
     data: {
+        id: string;
         name: string;
         tenantId: string | null;
         version: number;
-        id: string;
         createdAt: string;
         updatedAt: string;
         key: string;
@@ -336,10 +336,10 @@ declare const CalendarListResponseSchema: z.ZodObject<{
     };
 }, {
     data: {
+        id: string;
         name: string;
         tenantId: string | null;
         version: number;
-        id: string;
         createdAt: string;
         updatedAt: string;
         key: string;
