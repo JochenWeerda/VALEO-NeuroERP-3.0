@@ -1,0 +1,52 @@
+{
+  "name": "@valero-neuroerp/hr-domain",
+  "version": "0.1.0",
+  "description": "VALEO NeuroERP 3.0 - HR Domain for Employee Management",
+  "type": "commonjs",
+  "main": "dist/index.cjs",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/app/simple-server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/app/simple-server.js",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "migrate:gen": "drizzle-kit generate:pg",
+    "migrate:up": "drizzle-kit up:pg",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
+  },
+  "dependencies": {
+    "fastify": "^4.28.1",
+    "@fastify/swagger": "^8.0.0",
+    "@fastify/swagger-ui": "^2.0.0",
+    "@fastify/cors": "^9.0.1",
+    "zod": "^3.23.8",
+    "zod-openapi": "^0.9.0",
+    "drizzle-orm": "^0.31.0",
+    "pg": "^8.11.0",
+    "nats": "^2.18.0",
+    "jose": "^5.2.0",
+    "pino": "^9.3.0",
+    "pino-pretty": "^10.3.1",
+    "@opentelemetry/api": "^1.8.0",
+    "@opentelemetry/sdk-node": "^0.50.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.50.0",
+    "uuid": "^10.0.0",
+    "date-fns": "^3.6.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.3",
+    "vitest": "^1.5.0",
+    "supertest": "^6.3.4",
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.11.6",
+    "@types/uuid": "^10.0.0",
+    "drizzle-kit": "^0.21.0",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0"
+  }
+}

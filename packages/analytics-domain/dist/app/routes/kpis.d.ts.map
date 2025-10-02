@@ -1,0 +1,1 @@
+{"version":3,"file":"kpis.d.ts","sourceRoot":"","sources":["../../../src/app/routes/kpis.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,SAAS,CAAC;AAE1C,OAAO,EAAE,OAAO,EAAE,MAAM,2BAA2B,CAAC;AAgBpD,wBAAsB,iBAAiB,CAAC,OAAO,EAAE,eAAe,EAAE,EAAE,EAAE,UAAU,CAAC,OAAO,OAAO,CAAC,iBA8X/F;AAGD,OAAO,QAAQ,SAAS,CAAC;IACvB,UAAU,cAAc;QACtB,QAAQ,EAAE,MAAM,CAAC;KAClB;CACF"}

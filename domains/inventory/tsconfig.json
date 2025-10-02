@@ -1,0 +1,67 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"],
+      "@/core/*": ["./core/*"],
+      "@/application/*": ["./application/*"],
+      "@/infrastructure/*": ["./infrastructure/*"],
+      "@/presentation/*": ["./presentation/*"],
+      "@valero-neuroerp/utilities": ["../../packages/utilities/src/index.ts"],
+      "@valero-neuroerp/utilities/*": ["../../packages/utilities/src/*"],
+      "@valero-neuroerp/data-models": ["../../packages/data-models/src/index.ts"],
+      "@valero-neuroerp/data-models/*": ["../../packages/data-models/src/*"],
+      "@valero-neuroerp/inventory-domain": ["./index.ts"],
+      "@valero-neuroerp/inventory-domain/*": ["./*"],
+      "@valero-neuroerp/procurement-domain": ["../../domains/procurement/src/index.ts"],
+      "@valero-neuroerp/procurement-domain/*": ["../../domains/procurement/src/*"],
+      "@valero-neuroerp/finance-domain": ["../../domains/finance/src/index.ts"],
+      "@valero-neuroerp/finance-domain/*": ["../../domains/finance/src/*"],
+      "@domains/*": ["../../domains/*/src"],
+      "@inventory/*": ["./*"],
+      "@procurement/*": ["../../domains/procurement/src/*"],
+      "@finance/*": ["../../domains/finance/src/*"]
+    },
+    "types": [
+      "node",
+      "express",
+      "jest"
+    ],
+    "lib": [
+      "es2021",
+      "dom"
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}

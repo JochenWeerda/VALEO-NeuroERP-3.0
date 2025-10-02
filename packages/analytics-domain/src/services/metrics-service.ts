@@ -1,0 +1,2 @@
+// Metrics Service - Placeholder
+export {};

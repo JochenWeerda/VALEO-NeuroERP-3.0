@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  inventory-domain:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - INVENTORY_PORT=3002
+      - DB_HOST=inventory-db
+      - DB_PORT=5432
+      - DB_NAME=neuroerp_inventory
+      - DB_USER=neuroerp
+      - DB_PASSWORD=password
+      - EVENT_BUS_TYPE=KAFKA
+      - KAFKA_BROKERS=kafka:9092
+      - REDIS_URL=redis://inventory-redis:6379
+      - ENABLE_GS1=true
+      - ENABLE_EPCIS=true
+    depends_on:
+      - inventory-db
+      - kafka
+      - inventory-redis
+    networks:
+      - inventory-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  inventory-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=neuroerp_inventory
+      - POSTGRES_USER=neuroerp
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5436:5432"
+    volumes:
+      - inventory_data:/var/lib/postgresql/data
+      - ../../migrations/sql/inventory:/docker-entrypoint-initdb.d
+    networks:
+      - inventory-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U neuroerp -d neuroerp_inventory"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  inventory-redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - inventory_redis_data:/data
+    networks:
+      - inventory-network
+    command: redis-server --appendonly yes
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+    depends_on:
+      - zookeeper
+    networks:
+      - inventory-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_TICK_TIME=2000
+    networks:
+      - inventory-network
+
+  grafana:
+    image: grafana/grafana:9.5.0
+    ports:
+      - "3003:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ../../monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ../../monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - inventory-network
+
+  prometheus:
+    image: prom/prometheus:v2.43.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - inventory-network
+
+volumes:
+  inventory_data:
+  inventory_redis_data:
+
+networks:
+  inventory-network:
+    driver: bridge

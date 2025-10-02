@@ -1,0 +1,66 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "target": "ES2021",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": false,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "noImplicitAny": true,
+    "strictNullChecks": false,
+    "strictFunctionTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": false,
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"],
+      "@/core/*": ["./core/*"],
+      "@/application/*": ["./application/*"],
+      "@/infrastructure/*": ["./infrastructure/*"],
+      "@/presentation/*": ["./presentation/*"],
+      "@valero-neuroerp/utilities": ["../../utilities/dist/index"],
+      "@valero-neuroerp/utilities/*": ["../../utilities/dist/*"],
+      "@valero-neuroerp/data-models": ["../../data-models/dist/index"],
+      "@valero-neuroerp/data-models/*": ["../../data-models/dist/*"],
+      "@valero-neuroerp/finance-domain": ["../../domains/finance/src/index.ts"],
+      "@valero-neuroerp/finance-domain/*": ["../../domains/finance/src/*"],
+      "@valero-neuroerp/erp-domain": ["./index.ts"],
+      "@valero-neuroerp/erp-domain/*": ["./*"],
+      "@domains/*": ["../../domains/*/src"],
+      "@finance/*": ["../../domains/finance/src/*"],
+      "@erp/*": ["./*"]
+    },
+    "types": [
+      "node",
+      "express",
+      "jest"
+    ],
+    "lib": [
+      "es2021",
+      "dom"
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}
