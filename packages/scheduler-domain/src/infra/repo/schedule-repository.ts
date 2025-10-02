@@ -185,6 +185,20 @@ export class ScheduleRepository {
     return result[0]?.count || 0;
   }
 
+  async findEnabledSchedulesBeforeDate(beforeDate: Date, limit: number = 100): Promise<Schedule[]> {
+    const result = await db
+      .select()
+      .from(schedules)
+      .where(and(
+        eq(schedules.enabled, true),
+        lte(schedules.nextFireAt, beforeDate)
+      ))
+      .orderBy(asc(schedules.nextFireAt))
+      .limit(limit);
+
+    return result as Schedule[];
+  }
+
   // Convert database record to domain entity
   toDomainEntity(schedule: Schedule): ScheduleEntity {
     return new ScheduleEntity({

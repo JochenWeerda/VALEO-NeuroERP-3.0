@@ -38,9 +38,9 @@ export async function registerForecastRoutes(
         offset: ((query.page || 1) - 1) * (query.pageSize || 20),
       };
 
-      const forecasts = await forecastingService.getForecasts(request.tenantId, filters);
+      const forecastResults = await forecastingService.getForecasts(request.tenantId, filters);
 
-      const forecastResponses = forecasts.map(f => ({
+      const forecastResponses = forecastResults.map(f => ({
         id: f.id,
         tenantId: f.tenantId,
         metricName: f.metricName,
@@ -61,20 +61,21 @@ export async function registerForecastRoutes(
       }));
 
       // Get total count for pagination
-      const totalQuery = db
-        .select({ count: sql<number>`count(*)` })
-        .from(forecasts)
-        .where(eq(forecasts.tenantId, request.tenantId));
+      const totalConditions = [eq(forecasts.tenantId, request.tenantId)];
 
       if (query.metricName) {
-        totalQuery.where(eq(forecasts.metricName, query.metricName));
+        totalConditions.push(eq(forecasts.metricName, query.metricName));
       }
 
       if (query.model) {
-        totalQuery.where(eq(forecasts.model, query.model));
+        totalConditions.push(eq(forecasts.model, query.model));
       }
 
-      const totalResult = await totalQuery;
+      const totalResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(forecasts)
+        .where(and(...totalConditions));
+
       const total = totalResult[0]?.count || 0;
 
       return {
@@ -132,6 +133,14 @@ export async function registerForecastRoutes(
       }
 
       const row = result[0];
+      if (!row) {
+        return reply.code(404).send({
+          error: 'Not Found',
+          message: 'Forecast not found',
+        });
+      }
+
+      const forecastValues = (row.forecastValues as any[]) || [];
       return {
         id: row.id,
         tenantId: row.tenantId,
@@ -139,7 +148,7 @@ export async function registerForecastRoutes(
         horizon: row.horizon,
         horizonUnit: row.horizonUnit,
         model: row.model,
-        forecastValues: row.forecastValues.map(fv => ({
+        forecastValues: forecastValues.map((fv: any) => ({
           timestamp: fv.timestamp.toISOString(),
           value: fv.value,
           lowerBound: fv.lowerBound,
@@ -276,6 +285,12 @@ export async function registerForecastRoutes(
       }
 
       const forecast = forecastResult[0];
+      if (!forecast) {
+        return reply.code(404).send({
+          error: 'Not Found',
+          message: 'Forecast not found',
+        });
+      }
 
       // Prepare actual data
       const actualValues = (query.actualData || []).map((d: any) => ({
@@ -284,14 +299,14 @@ export async function registerForecastRoutes(
       }));
 
       // Calculate accuracy metrics (simplified)
-      const forecastValues = forecast.forecastValues;
+      const forecastValues = (forecast.forecastValues as any[]) || [];
       let mse = 0;
       let mae = 0;
       let count = 0;
 
       // Match forecast and actual values by timestamp (simplified)
       for (const actual of actualValues) {
-        const forecastPoint = forecastValues.find(f =>
+        const forecastPoint = forecastValues.find((f: any) =>
           Math.abs(f.timestamp.getTime() - new Date(actual.timestamp).getTime()) < 24 * 60 * 60 * 1000 // Within 1 day
         );
 
@@ -306,14 +321,14 @@ export async function registerForecastRoutes(
       const accuracy = {
         forecastId: forecast.id,
         metricName: forecast.metricName,
-        accuracy: count > 0 ? 1 - Math.min(1, Math.sqrt(mse / count) / Math.max(...actualValues.map(a => a.value))) : 0,
+        accuracy: count > 0 ? 1 - Math.min(1, Math.sqrt(mse / count) / Math.max(...actualValues.map((a: any) => a.value))) : 0,
         mse: count > 0 ? mse / count : undefined,
         mae: count > 0 ? mae / count : undefined,
       };
 
       return {
         actualValues,
-        forecastValues: forecast.forecastValues.map(fv => ({
+        forecastValues: forecastValues.map((fv: any) => ({
           timestamp: fv.timestamp.toISOString(),
           value: fv.value,
           lowerBound: fv.lowerBound,

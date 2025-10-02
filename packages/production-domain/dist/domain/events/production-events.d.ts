@@ -45,19 +45,19 @@ export declare const RecipeCreatedEventSchema: z.ZodObject<{
         medicated: z.ZodBoolean;
         allergenTags: z.ZodArray<z.ZodString, "many">;
     }, "strip", z.ZodTypeAny, {
-        code: string;
         id: string;
+        code: string;
         name: string;
+        version: number;
         medicated: boolean;
         allergenTags: string[];
-        version: number;
     }, {
-        code: string;
         id: string;
+        code: string;
         name: string;
+        version: number;
         medicated: boolean;
         allergenTags: string[];
-        version: number;
     }>;
 }, "strip", z.ZodTypeAny, {
     tenantId: string;
@@ -66,12 +66,12 @@ export declare const RecipeCreatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        code: string;
         id: string;
+        code: string;
         name: string;
+        version: number;
         medicated: boolean;
         allergenTags: string[];
-        version: number;
     };
     correlationId?: string | undefined;
     causationId?: string | undefined;
@@ -82,12 +82,12 @@ export declare const RecipeCreatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        code: string;
         id: string;
+        code: string;
         name: string;
+        version: number;
         medicated: boolean;
         allergenTags: string[];
-        version: number;
     };
     correlationId?: string | undefined;
     causationId?: string | undefined;
@@ -108,14 +108,14 @@ export declare const RecipeUpdatedEventSchema: z.ZodObject<{
         version: z.ZodNumber;
         changes: z.ZodArray<z.ZodString, "many">;
     }, "strip", z.ZodTypeAny, {
-        code: string;
         id: string;
+        code: string;
         name: string;
         version: number;
         changes: string[];
     }, {
-        code: string;
         id: string;
+        code: string;
         name: string;
         version: number;
         changes: string[];
@@ -127,8 +127,8 @@ export declare const RecipeUpdatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        code: string;
         id: string;
+        code: string;
         name: string;
         version: number;
         changes: string[];
@@ -142,8 +142,8 @@ export declare const RecipeUpdatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        code: string;
         id: string;
+        code: string;
         name: string;
         version: number;
         changes: string[];
@@ -165,12 +165,12 @@ export declare const RecipeArchivedEventSchema: z.ZodObject<{
         code: z.ZodString;
         reason: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        code: string;
         id: string;
+        code: string;
         reason?: string | undefined;
     }, {
-        code: string;
         id: string;
+        code: string;
         reason?: string | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
@@ -180,8 +180,8 @@ export declare const RecipeArchivedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        code: string;
         id: string;
+        code: string;
         reason?: string | undefined;
     };
     correlationId?: string | undefined;
@@ -193,8 +193,8 @@ export declare const RecipeArchivedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        code: string;
         id: string;
+        code: string;
         reason?: string | undefined;
     };
     correlationId?: string | undefined;
@@ -218,16 +218,16 @@ export declare const MixOrderCreatedEventSchema: z.ZodObject<{
         customerId: z.ZodOptional<z.ZodString>;
         mobileUnitId: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        type: "Plant" | "Mobile";
         id: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
         recipeId: string;
         targetQtyKg: number;
         customerId?: string | undefined;
         mobileUnitId?: string | undefined;
     }, {
-        type: "Plant" | "Mobile";
         id: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
         recipeId: string;
         targetQtyKg: number;
@@ -241,8 +241,8 @@ export declare const MixOrderCreatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "Plant" | "Mobile";
         id: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
         recipeId: string;
         targetQtyKg: number;
@@ -258,8 +258,8 @@ export declare const MixOrderCreatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "Plant" | "Mobile";
         id: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
         recipeId: string;
         targetQtyKg: number;
@@ -285,14 +285,14 @@ export declare const MixOrderStagedEventSchema: z.ZodObject<{
         recipeId: z.ZodString;
         plannedAt: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        type: "Plant" | "Mobile";
         id: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
         recipeId: string;
         plannedAt: string;
     }, {
-        type: "Plant" | "Mobile";
         id: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
         recipeId: string;
         plannedAt: string;
@@ -304,8 +304,8 @@ export declare const MixOrderStagedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "Plant" | "Mobile";
         id: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
         recipeId: string;
         plannedAt: string;
@@ -319,8 +319,8 @@ export declare const MixOrderStagedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "Plant" | "Mobile";
         id: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
         recipeId: string;
         plannedAt: string;
@@ -344,16 +344,16 @@ export declare const MixOrderStartedEventSchema: z.ZodObject<{
         startedAt: z.ZodString;
         operatorId: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        type: "Plant" | "Mobile";
         id: string;
-        startedAt: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
+        startedAt: string;
         operatorId?: string | undefined;
     }, {
-        type: "Plant" | "Mobile";
         id: string;
-        startedAt: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
+        startedAt: string;
         operatorId?: string | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
@@ -363,10 +363,10 @@ export declare const MixOrderStartedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "Plant" | "Mobile";
         id: string;
-        startedAt: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
+        startedAt: string;
         operatorId?: string | undefined;
     };
     correlationId?: string | undefined;
@@ -378,10 +378,10 @@ export declare const MixOrderStartedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "Plant" | "Mobile";
         id: string;
-        startedAt: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
+        startedAt: string;
         operatorId?: string | undefined;
     };
     correlationId?: string | undefined;
@@ -405,16 +405,16 @@ export declare const MixOrderCompletedEventSchema: z.ZodObject<{
         totalMassKg: z.ZodNumber;
         energyKWh: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        type: "Plant" | "Mobile";
         id: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
         completedAt: string;
         durationMinutes: number;
         totalMassKg: number;
         energyKWh?: number | undefined;
     }, {
-        type: "Plant" | "Mobile";
         id: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
         completedAt: string;
         durationMinutes: number;
@@ -428,8 +428,8 @@ export declare const MixOrderCompletedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "Plant" | "Mobile";
         id: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
         completedAt: string;
         durationMinutes: number;
@@ -445,8 +445,8 @@ export declare const MixOrderCompletedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "Plant" | "Mobile";
         id: string;
+        type: "Plant" | "Mobile";
         orderNumber: string;
         completedAt: string;
         durationMinutes: number;
@@ -805,7 +805,6 @@ export declare const MobileRunStartedEventSchema: z.ZodObject<{
         startedAt: z.ZodString;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        startedAt: string;
         location: {
             lat: number;
             lng: number;
@@ -813,11 +812,11 @@ export declare const MobileRunStartedEventSchema: z.ZodObject<{
         };
         customerId: string;
         mobileUnitId: string;
+        startedAt: string;
         operatorId: string;
         calibrationValid: boolean;
     }, {
         id: string;
-        startedAt: string;
         location: {
             lat: number;
             lng: number;
@@ -825,6 +824,7 @@ export declare const MobileRunStartedEventSchema: z.ZodObject<{
         };
         customerId: string;
         mobileUnitId: string;
+        startedAt: string;
         operatorId: string;
         calibrationValid: boolean;
     }>;
@@ -836,7 +836,6 @@ export declare const MobileRunStartedEventSchema: z.ZodObject<{
     occurredAt: string;
     payload: {
         id: string;
-        startedAt: string;
         location: {
             lat: number;
             lng: number;
@@ -844,6 +843,7 @@ export declare const MobileRunStartedEventSchema: z.ZodObject<{
         };
         customerId: string;
         mobileUnitId: string;
+        startedAt: string;
         operatorId: string;
         calibrationValid: boolean;
     };
@@ -857,7 +857,6 @@ export declare const MobileRunStartedEventSchema: z.ZodObject<{
     occurredAt: string;
     payload: {
         id: string;
-        startedAt: string;
         location: {
             lat: number;
             lng: number;
@@ -865,6 +864,7 @@ export declare const MobileRunStartedEventSchema: z.ZodObject<{
         };
         customerId: string;
         mobileUnitId: string;
+        startedAt: string;
         operatorId: string;
         calibrationValid: boolean;
     };
@@ -954,8 +954,8 @@ export declare const CleaningPerformedEventSchema: z.ZodObject<{
         performedAt: z.ZodString;
         reason: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         id: string;
+        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         validatedBy: string;
         performedAt: string;
         usedMaterialSku?: string | undefined;
@@ -963,8 +963,8 @@ export declare const CleaningPerformedEventSchema: z.ZodObject<{
         mobileRunId?: string | undefined;
         reason?: string | undefined;
     }, {
-        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         id: string;
+        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         validatedBy: string;
         performedAt: string;
         usedMaterialSku?: string | undefined;
@@ -979,8 +979,8 @@ export declare const CleaningPerformedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         id: string;
+        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         validatedBy: string;
         performedAt: string;
         usedMaterialSku?: string | undefined;
@@ -997,8 +997,8 @@ export declare const CleaningPerformedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         id: string;
+        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         validatedBy: string;
         performedAt: string;
         usedMaterialSku?: string | undefined;
@@ -1170,16 +1170,16 @@ export declare const SamplingAddedEventSchema: z.ZodObject<{
         takenBy: z.ZodString;
         retainedSample: z.ZodBoolean;
     }, "strip", z.ZodTypeAny, {
-        batchId: string;
         id: string;
+        batchId: string;
         sampleCode: string;
         takenAt: string;
         analyte: string;
         takenBy: string;
         retainedSample: boolean;
     }, {
-        batchId: string;
         id: string;
+        batchId: string;
         sampleCode: string;
         takenAt: string;
         analyte: string;
@@ -1193,8 +1193,8 @@ export declare const SamplingAddedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        batchId: string;
         id: string;
+        batchId: string;
         sampleCode: string;
         takenAt: string;
         analyte: string;
@@ -1210,8 +1210,8 @@ export declare const SamplingAddedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        batchId: string;
         id: string;
+        batchId: string;
         sampleCode: string;
         takenAt: string;
         analyte: string;
@@ -1243,9 +1243,9 @@ export declare const SamplingResultRecordedEventSchema: z.ZodObject<{
         recordedAt: z.ZodString;
         recordedBy: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        batchId: string;
-        value: number;
         id: string;
+        value: number;
+        batchId: string;
         unit: string;
         sampleCode: string;
         analyte: string;
@@ -1255,9 +1255,9 @@ export declare const SamplingResultRecordedEventSchema: z.ZodObject<{
         recordedBy: string;
         labId?: string | undefined;
     }, {
-        batchId: string;
-        value: number;
         id: string;
+        value: number;
+        batchId: string;
         unit: string;
         sampleCode: string;
         analyte: string;
@@ -1274,9 +1274,9 @@ export declare const SamplingResultRecordedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        batchId: string;
-        value: number;
         id: string;
+        value: number;
+        batchId: string;
         unit: string;
         sampleCode: string;
         analyte: string;
@@ -1295,9 +1295,9 @@ export declare const SamplingResultRecordedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        batchId: string;
-        value: number;
         id: string;
+        value: number;
+        batchId: string;
         unit: string;
         sampleCode: string;
         analyte: string;
@@ -1330,9 +1330,9 @@ export declare const NonConformityCreatedEventSchema: z.ZodObject<{
         discoveredAt: z.ZodString;
         discoveredBy: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        type: "Contamination" | "SpecOut" | "Equipment" | "Process";
         id: string;
-        refType: "batchId" | "mixOrderId" | "mobileRunId";
+        type: "Contamination" | "SpecOut" | "Equipment" | "Process";
+        refType: "mixOrderId" | "batchId" | "mobileRunId";
         refId: string;
         severity: "Low" | "Medium" | "High" | "Critical";
         description: string;
@@ -1340,9 +1340,9 @@ export declare const NonConformityCreatedEventSchema: z.ZodObject<{
         discoveredAt: string;
         discoveredBy: string;
     }, {
-        type: "Contamination" | "SpecOut" | "Equipment" | "Process";
         id: string;
-        refType: "batchId" | "mixOrderId" | "mobileRunId";
+        type: "Contamination" | "SpecOut" | "Equipment" | "Process";
+        refType: "mixOrderId" | "batchId" | "mobileRunId";
         refId: string;
         severity: "Low" | "Medium" | "High" | "Critical";
         description: string;
@@ -1357,9 +1357,9 @@ export declare const NonConformityCreatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "Contamination" | "SpecOut" | "Equipment" | "Process";
         id: string;
-        refType: "batchId" | "mixOrderId" | "mobileRunId";
+        type: "Contamination" | "SpecOut" | "Equipment" | "Process";
+        refType: "mixOrderId" | "batchId" | "mobileRunId";
         refId: string;
         severity: "Low" | "Medium" | "High" | "Critical";
         description: string;
@@ -1376,9 +1376,9 @@ export declare const NonConformityCreatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "Contamination" | "SpecOut" | "Equipment" | "Process";
         id: string;
-        refType: "batchId" | "mixOrderId" | "mobileRunId";
+        type: "Contamination" | "SpecOut" | "Equipment" | "Process";
+        refType: "mixOrderId" | "batchId" | "mobileRunId";
         refId: string;
         severity: "Low" | "Medium" | "High" | "Critical";
         description: string;
@@ -1408,8 +1408,8 @@ export declare const CAPACreatedEventSchema: z.ZodObject<{
         dueDate: z.ZodOptional<z.ZodString>;
         createdBy: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        type: "Correction" | "CorrectiveAction" | "PreventiveAction";
         id: string;
+        type: "Correction" | "CorrectiveAction" | "PreventiveAction";
         createdBy: string;
         title: string;
         priority: "Low" | "Medium" | "High" | "Critical";
@@ -1417,8 +1417,8 @@ export declare const CAPACreatedEventSchema: z.ZodObject<{
         assignedTo?: string | undefined;
         dueDate?: string | undefined;
     }, {
-        type: "Correction" | "CorrectiveAction" | "PreventiveAction";
         id: string;
+        type: "Correction" | "CorrectiveAction" | "PreventiveAction";
         createdBy: string;
         title: string;
         priority: "Low" | "Medium" | "High" | "Critical";
@@ -1433,8 +1433,8 @@ export declare const CAPACreatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "Correction" | "CorrectiveAction" | "PreventiveAction";
         id: string;
+        type: "Correction" | "CorrectiveAction" | "PreventiveAction";
         createdBy: string;
         title: string;
         priority: "Low" | "Medium" | "High" | "Critical";
@@ -1451,8 +1451,8 @@ export declare const CAPACreatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        type: "Correction" | "CorrectiveAction" | "PreventiveAction";
         id: string;
+        type: "Correction" | "CorrectiveAction" | "PreventiveAction";
         createdBy: string;
         title: string;
         priority: "Low" | "Medium" | "High" | "Critical";

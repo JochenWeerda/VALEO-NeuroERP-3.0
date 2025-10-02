@@ -42,28 +42,16 @@ export async function registerCubeRoutes(
     handler: async (request, reply) => {
       const query = request.query as any;
 
-      let dbQuery = db
-        .select()
-        .from(mvContractPositions)
-        .where(eq(mvContractPositions.tenantId, request.tenantId));
+      // Build conditions
+      const conditions = [eq(mvContractPositions.tenantId, request.tenantId)];
 
       // Apply filters
       if (query.commodity) {
-        dbQuery = dbQuery.where(eq(mvContractPositions.commodity, query.commodity));
+        conditions.push(eq(mvContractPositions.commodity, query.commodity));
       }
 
       if (query.month) {
-        dbQuery = dbQuery.where(eq(mvContractPositions.month, query.month));
-      }
-
-      // Apply date range if provided
-      if (query.from || query.to) {
-        // Convert month format (YYYY-MM) to date range
-        if (query.month) {
-          // Already filtered by specific month
-        } else {
-          // Could add date range filtering here if needed
-        }
+        conditions.push(eq(mvContractPositions.month, query.month));
       }
 
       // Pagination
@@ -71,17 +59,20 @@ export async function registerCubeRoutes(
       const pageSize = query.pageSize || 100;
       const offset = (page - 1) * pageSize;
 
-      dbQuery = dbQuery.limit(pageSize).offset(offset);
-
-      const results = await dbQuery;
+      const results = await db
+        .select()
+        .from(mvContractPositions)
+        .where(and(...conditions))
+        .limit(pageSize)
+        .offset(offset);
 
       // Calculate summary
       const summary = {
-        totalShort: results.reduce((sum, r) => sum + (r.shortPosition || 0), 0),
-        totalLong: results.reduce((sum, r) => sum + (r.longPosition || 0), 0),
-        netExposure: results.reduce((sum, r) => sum + (r.netPosition || 0), 0),
+        totalShort: results.reduce((sum, r) => sum + Number(r.shortPosition || 0), 0),
+        totalLong: results.reduce((sum, r) => sum + Number(r.longPosition || 0), 0),
+        netExposure: results.reduce((sum, r) => sum + Number(r.netPosition || 0), 0),
         avgHedgingRatio: results.length > 0
-          ? results.reduce((sum, r) => sum + (r.hedgingRatio || 0), 0) / results.length
+          ? results.reduce((sum, r) => sum + Number(r.hedgingRatio || 0), 0) / results.length
           : 0,
       };
 
@@ -114,26 +105,24 @@ export async function registerCubeRoutes(
     handler: async (request, reply) => {
       const query = request.query as any;
 
-      let dbQuery = db
-        .select()
-        .from(mvWeighingVolumes)
-        .where(eq(mvWeighingVolumes.tenantId, request.tenantId));
+      // Build conditions
+      const conditions = [eq(mvWeighingVolumes.tenantId, request.tenantId)];
 
       // Apply filters
       if (query.commodity) {
-        dbQuery = dbQuery.where(eq(mvWeighingVolumes.commodity, query.commodity));
+        conditions.push(eq(mvWeighingVolumes.commodity, query.commodity));
       }
 
       if (query.customerId) {
-        dbQuery = dbQuery.where(eq(mvWeighingVolumes.customerId, query.customerId));
+        conditions.push(eq(mvWeighingVolumes.customerId, query.customerId));
       }
 
       if (query.siteId) {
-        dbQuery = dbQuery.where(eq(mvWeighingVolumes.siteId, query.siteId));
+        conditions.push(eq(mvWeighingVolumes.siteId, query.siteId));
       }
 
       if (query.period) {
-        dbQuery = dbQuery.where(eq(mvWeighingVolumes.period, query.period));
+        conditions.push(eq(mvWeighingVolumes.period, query.period));
       }
 
       // Pagination
@@ -141,21 +130,24 @@ export async function registerCubeRoutes(
       const pageSize = query.pageSize || 100;
       const offset = (page - 1) * pageSize;
 
-      dbQuery = dbQuery.limit(pageSize).offset(offset);
-
-      const results = await dbQuery;
+      const results = await db
+        .select()
+        .from(mvWeighingVolumes)
+        .where(and(...conditions))
+        .limit(pageSize)
+        .offset(offset);
 
       // Calculate summary
       const summary = {
-        totalWeight: results.reduce((sum, r) => sum + (r.totalWeight || 0), 0),
-        totalTickets: results.reduce((sum, r) => sum + (r.totalTickets || 0), 0),
-        avgWeightPerTicket: results.reduce((sum, r) => sum + (r.totalTickets || 0), 0) > 0
-          ? results.reduce((sum, r) => sum + (r.totalWeight || 0), 0) /
-            results.reduce((sum, r) => sum + (r.totalTickets || 0), 0)
+        totalWeight: results.reduce((sum, r) => sum + Number(r.totalWeight || 0), 0),
+        totalTickets: results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0),
+        avgWeightPerTicket: results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0) > 0
+          ? results.reduce((sum, r) => sum + Number(r.totalWeight || 0), 0) /
+            results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0)
           : 0,
-        overallToleranceRate: results.reduce((sum, r) => sum + (r.totalTickets || 0), 0) > 0
-          ? results.reduce((sum, r) => sum + (r.withinTolerance || 0), 0) /
-            results.reduce((sum, r) => sum + (r.totalTickets || 0), 0)
+        overallToleranceRate: results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0) > 0
+          ? results.reduce((sum, r) => sum + Number(r.withinTolerance || 0), 0) /
+            results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0)
           : 0,
       };
 
@@ -191,18 +183,16 @@ export async function registerCubeRoutes(
     handler: async (request, reply) => {
       const query = request.query as any;
 
-      let dbQuery = db
-        .select()
-        .from(mvQualityStats)
-        .where(eq(mvQualityStats.tenantId, request.tenantId));
+      // Build conditions
+      const conditions = [eq(mvQualityStats.tenantId, request.tenantId)];
 
       // Apply filters
       if (query.commodity) {
-        dbQuery = dbQuery.where(eq(mvQualityStats.commodity, query.commodity));
+        conditions.push(eq(mvQualityStats.commodity, query.commodity));
       }
 
       if (query.period) {
-        dbQuery = dbQuery.where(eq(mvQualityStats.period, query.period));
+        conditions.push(eq(mvQualityStats.period, query.period));
       }
 
       // Pagination
@@ -210,22 +200,25 @@ export async function registerCubeRoutes(
       const pageSize = query.pageSize || 100;
       const offset = (page - 1) * pageSize;
 
-      dbQuery = dbQuery.limit(pageSize).offset(offset);
-
-      const results = await dbQuery;
+      const results = await db
+        .select()
+        .from(mvQualityStats)
+        .where(and(...conditions))
+        .limit(pageSize)
+        .offset(offset);
 
       // Calculate summary
       const summary = {
-        totalSamples: results.reduce((sum, r) => sum + (r.totalSamples || 0), 0),
-        overallPassRate: results.reduce((sum, r) => sum + (r.totalSamples || 0), 0) > 0
-          ? results.reduce((sum, r) => sum + (r.passedSamples || 0), 0) /
-            results.reduce((sum, r) => sum + (r.totalSamples || 0), 0)
+        totalSamples: results.reduce((sum, r) => sum + Number(r.totalSamples || 0), 0),
+        overallPassRate: results.reduce((sum, r) => sum + Number(r.totalSamples || 0), 0) > 0
+          ? results.reduce((sum, r) => sum + Number(r.passedSamples || 0), 0) /
+            results.reduce((sum, r) => sum + Number(r.totalSamples || 0), 0)
           : 0,
         avgMoisture: results.length > 0
-          ? results.reduce((sum, r) => sum + (r.avgMoisture || 0), 0) / results.length
+          ? results.reduce((sum, r) => sum + Number(r.avgMoisture || 0), 0) / results.length
           : 0,
         avgProtein: results.length > 0
-          ? results.reduce((sum, r) => sum + (r.avgProtein || 0), 0) / results.length
+          ? results.reduce((sum, r) => sum + Number(r.avgProtein || 0), 0) / results.length
           : 0,
       };
 
@@ -261,22 +254,20 @@ export async function registerCubeRoutes(
     handler: async (request, reply) => {
       const query = request.query as any;
 
-      let dbQuery = db
-        .select()
-        .from(mvRegulatoryStats)
-        .where(eq(mvRegulatoryStats.tenantId, request.tenantId));
+      // Build conditions
+      const conditions = [eq(mvRegulatoryStats.tenantId, request.tenantId)];
 
       // Apply filters
       if (query.commodity) {
-        dbQuery = dbQuery.where(eq(mvRegulatoryStats.commodity, query.commodity));
+        conditions.push(eq(mvRegulatoryStats.commodity, query.commodity));
       }
 
       if (query.labelType) {
-        dbQuery = dbQuery.where(eq(mvRegulatoryStats.labelType, query.labelType));
+        conditions.push(eq(mvRegulatoryStats.labelType, query.labelType));
       }
 
       if (query.period) {
-        dbQuery = dbQuery.where(eq(mvRegulatoryStats.period, query.period));
+        conditions.push(eq(mvRegulatoryStats.period, query.period));
       }
 
       // Pagination
@@ -284,9 +275,12 @@ export async function registerCubeRoutes(
       const pageSize = query.pageSize || 100;
       const offset = (page - 1) * pageSize;
 
-      dbQuery = dbQuery.limit(pageSize).offset(offset);
-
-      const results = await dbQuery;
+      const results = await db
+        .select()
+        .from(mvRegulatoryStats)
+        .where(and(...conditions))
+        .limit(pageSize)
+        .offset(offset);
 
       // Calculate summary
       const summary = {
@@ -328,22 +322,20 @@ export async function registerCubeRoutes(
     handler: async (request, reply) => {
       const query = request.query as any;
 
-      let dbQuery = db
-        .select()
-        .from(mvFinanceKpis)
-        .where(eq(mvFinanceKpis.tenantId, request.tenantId));
+      // Build conditions
+      const conditions = [eq(mvFinanceKpis.tenantId, request.tenantId)];
 
       // Apply filters
       if (query.commodity) {
-        dbQuery = dbQuery.where(eq(mvFinanceKpis.commodity, query.commodity));
+        conditions.push(eq(mvFinanceKpis.commodity, query.commodity));
       }
 
       if (query.customerId) {
-        dbQuery = dbQuery.where(eq(mvFinanceKpis.customerId, query.customerId));
+        conditions.push(eq(mvFinanceKpis.customerId, query.customerId));
       }
 
       if (query.period) {
-        dbQuery = dbQuery.where(eq(mvFinanceKpis.period, query.period));
+        conditions.push(eq(mvFinanceKpis.period, query.period));
       }
 
       // Pagination
@@ -351,20 +343,23 @@ export async function registerCubeRoutes(
       const pageSize = query.pageSize || 100;
       const offset = (page - 1) * pageSize;
 
-      dbQuery = dbQuery.limit(pageSize).offset(offset);
-
-      const results = await dbQuery;
+      const results = await db
+        .select()
+        .from(mvFinanceKpis)
+        .where(and(...conditions))
+        .limit(pageSize)
+        .offset(offset);
 
       // Calculate summary
       const summary = {
-        totalRevenue: results.reduce((sum, r) => sum + (r.totalRevenue || 0), 0),
-        totalCost: results.reduce((sum, r) => sum + (r.totalCost || 0), 0),
-        totalMargin: results.reduce((sum, r) => sum + (r.grossMargin || 0), 0),
+        totalRevenue: results.reduce((sum, r) => sum + Number(r.totalRevenue || 0), 0),
+        totalCost: results.reduce((sum, r) => sum + Number(r.totalCost || 0), 0),
+        totalMargin: results.reduce((sum, r) => sum + Number(r.grossMargin || 0), 0),
         avgMarginPercentage: results.length > 0
-          ? results.reduce((sum, r) => sum + (r.marginPercentage || 0), 0) / results.length
+          ? results.reduce((sum, r) => sum + Number(r.marginPercentage || 0), 0) / results.length
           : 0,
-        totalOutstanding: results.reduce((sum, r) => sum + (r.outstandingInvoices || 0), 0),
-        totalOverdue: results.reduce((sum, r) => sum + (r.overdueInvoices || 0), 0),
+        totalOutstanding: results.reduce((sum, r) => sum + Number(r.outstandingInvoices || 0), 0),
+        totalOverdue: results.reduce((sum, r) => sum + Number(r.overdueInvoices || 0), 0),
       };
 
       return {
