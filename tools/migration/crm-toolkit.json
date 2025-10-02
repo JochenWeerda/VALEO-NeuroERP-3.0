@@ -1,0 +1,60 @@
+{
+  "version": "1.0",
+  "domain": "crm",
+  "scripts": [
+    {
+      "name": "legacy-inventory",
+      "file": "tools/migration/legacy_inventory.py",
+      "language": "python",
+      "purpose": "Scan legacy codebase and emit CSV/JSON inventory for planning",
+      "example": "python tools/migration/legacy_inventory.py ../VALEO-NeuroERP-2.0 --include crm",
+      "outputs": ["legacy-inventory.csv", "legacy-inventory.json"],
+      "notes": "Use --include filters to narrow down by domain or feature path."
+    },
+    {
+      "name": "run-sql-migration",
+      "file": "tools/migration/run_sql_migration.ts",
+      "language": "typescript",
+      "purpose": "Execute SQL migrations against Postgres using shared pool helper",
+      "example": "ts-node tools/migration/run_sql_migration.ts $env:CRM_DATABASE_URL migrations/sql/crm/001_crm_schema.sql",
+      "outputs": [],
+      "notes": "One file per invocation; wrap in a shell loop to process directories."
+    },
+    {
+      "name": "domain-bootstrap-generator",
+      "file": "tools/codegen/domain_bootstrap_generator.ts",
+      "language": "typescript",
+      "purpose": "Generate domain bootstrap scaffolding (service locator + env bindings)",
+      "example": "ts-node tools/codegen/domain_bootstrap_generator.ts crm",
+      "outputs": ["domains/<domain>/src/bootstrap.ts"],
+      "notes": "Tweaks required when domain-specific service names differ from defaults."
+    },
+    {
+      "name": "entity-generator",
+      "file": "tools/codegen/entity_generator.ts",
+      "language": "typescript",
+      "purpose": "Scaffold branded entities and validation logic",
+      "example": "ts-node tools/codegen/entity_generator.ts crm Customer name:string email?:string",
+      "outputs": ["domains/<domain>/src/core/entities/<entity>.ts"],
+      "notes": "Supports optional fields with ? suffix; extend manually for complex constraints."
+    },
+    {
+      "name": "repository-generator",
+      "file": "tools/codegen/repository_generator.ts",
+      "language": "typescript",
+      "purpose": "Produce repository interface and Postgres implementation skeleton",
+      "example": "ts-node tools/codegen/repository_generator.ts crm Customer",
+      "outputs": ["domains/<domain>/src/core/repositories/<entity>-repository.ts", "domains/<domain>/src/infrastructure/repositories/postgres-<entity>-repository.ts"],
+      "notes": "Integrates with shared Postgres pool helper; remember to dispose pools in tests."
+    },
+    {
+      "name": "test-generator",
+      "file": "tools/codegen/test_generator.ts",
+      "language": "typescript",
+      "purpose": "Generate Jest test baselines for entities/services/repositories/controllers",
+      "example": "ts-node tools/codegen/test_generator.ts crm repository CustomerRepository",
+      "outputs": ["domains/<domain>/tests/..."],
+      "notes": "Generated tests assume Jest with ts-jest; update when moving to swc/vitest."
+    }
+  ]
+}

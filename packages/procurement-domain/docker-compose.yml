@@ -1,0 +1,169 @@
+version: '3.8'
+
+services:
+  procurement-postgres:
+    image: postgres:15-alpine
+    container_name: valero-neuroerp-procurement-postgres
+    environment:
+      POSTGRES_DB: neuroerp_procurement
+      POSTGRES_USER: neuroerp
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5436:5432"
+    volumes:
+      - procurement_postgres_data:/var/lib/postgresql/data
+      - ../../migrations/sql/procurement:/docker-entrypoint-initdb.d
+    networks:
+      - procurement-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U neuroerp -d neuroerp_procurement"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  procurement-redis:
+    image: redis:7-alpine
+    container_name: valero-neuroerp-procurement-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - procurement_redis_data:/data
+    networks:
+      - procurement-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+  procurement-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: valero-neuroerp-procurement
+    environment:
+      NODE_ENV: development
+      DB_HOST: procurement-postgres
+      DB_PORT: 5432
+      DB_NAME: neuroerp_procurement
+      DB_USER: neuroerp
+      DB_PASSWORD: password
+      REDIS_URL: redis://procurement-redis:6379
+      MESSAGING_TYPE: KAFKA
+      MESSAGING_URL: kafka:9092
+      PROCUREMENT_PORT: 3002
+      JWT_SECRET: procurement-jwt-secret-key-for-development
+      AI_MODEL_PATH: ./models/procurement-model.pkl
+      OCR_SERVICE_URL: http://ocr-service:3003
+      SUPPLIER_API_KEY: demo-api-key
+      CATALOG_FEED_URL: https://catalog.valero-neuroerp.com
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./models:/app/models
+      - ./logs:/app/logs
+    depends_on:
+      procurement-postgres:
+        condition: service_healthy
+      procurement-redis:
+        condition: service_healthy
+    networks:
+      - procurement-network
+      - shared-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  procurement-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: valero-neuroerp-procurement-worker
+    environment:
+      NODE_ENV: development
+      DB_HOST: procurement-postgres
+      DB_PORT: 5432
+      DB_NAME: neuroerp_procurement
+      DB_USER: neuroerp
+      DB_PASSWORD: password
+      REDIS_URL: redis://procurement-redis:6379
+      MESSAGING_TYPE: KAFKA
+      MESSAGING_URL: kafka:9092
+      WORKER_MODE: true
+    volumes:
+      - ./models:/app/models
+      - ./logs:/app/logs
+    depends_on:
+      procurement-postgres:
+        condition: service_healthy
+      procurement-redis:
+        condition: service_healthy
+    networks:
+      - procurement-network
+      - shared-network
+    restart: unless-stopped
+
+  procurement-migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migration
+    container_name: valero-neuroerp-procurement-migrations
+    environment:
+      DB_HOST: procurement-postgres
+      DB_PORT: 5432
+      DB_NAME: neuroerp_procurement
+      DB_USER: neuroerp
+      DB_PASSWORD: password
+    depends_on:
+      procurement-postgres:
+        condition: service_healthy
+    networks:
+      - procurement-network
+    profiles:
+      - migration
+
+  procurement-seeder:
+    build:
+      context: .
+      dockerfile: Dockerfile.seeder
+    container_name: valero-neuroerp-procurement-seeder
+    environment:
+      DB_HOST: procurement-postgres
+      DB_PORT: 5432
+      DB_NAME: neuroerp_procurement
+      DB_USER: neuroerp
+      DB_PASSWORD: password
+      SEED_COUNT: 100
+    depends_on:
+      procurement-postgres:
+        condition: service_healthy
+      procurement-migrations:
+        condition: service_completed_successfully
+    networks:
+      - procurement-network
+    profiles:
+      - seed
+
+networks:
+  procurement-network:
+    driver: bridge
+    name: procurement-network
+  shared-network:
+    external: true
+    name: valero-neuroerp-network
+
+volumes:
+  procurement_postgres_data:
+    driver: local
+    name: procurement_postgres_data
+  procurement_redis_data:
+    driver: local
+    name: procurement_redis_data

@@ -1,0 +1,1 @@
+{"version":3,"file":"ledger-service.test.d.ts","sourceRoot":"","sources":["../../../../../packages/finance-domain/tests/unit/ledger-service.test.ts"],"names":[],"mappings":"AAAA;;;;;GAKG;AAGH,OAAO,EAIL,gBAAgB,EASjB,MAAM,gCAAgC,CAAC;AAoxBxC,wBAAgB,iBAAiB,CAAC,SAAS,GAAE,OAAO,CAAC,GAAG,CAAM,GAAG,GAAG,CAanE;AAGD,wBAAgB,gBAAgB,CAAC,SAAS,GAAE,OAAO,CAAC,gBAAgB,CAAM,GAAG,gBAAgB,CAE5F"}

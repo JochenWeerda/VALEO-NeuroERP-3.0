@@ -1,0 +1,15 @@
+{
+ "files": [],
+ "references": [
+   { "path": "./packages/logistics-domain" },
+   { "path": "./packages/logistics-bff" },
+   { "path": "./packages/shared/contracts" },
+   { "path": "./packages/shared/auth" },
+   { "path": "./packages/finance-domain" },
+   { "path": "./packages/inventory-domain" },
+   { "path": "./packages/integration-domain" },
+   { "path": "./packages/utilities" },
+   { "path": "./packages/data-models" },
+   { "path": "./packages/erp-domain" }
+ ]
+}

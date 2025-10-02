@@ -1,0 +1,63 @@
+***REMOVED*** VALEO-NeuroERP-3.0 FastAPI Application Requirements
+***REMOVED*** Adapted from VALEO-NeuroERP-2.0 backend requirements for clean architecture
+
+***REMOVED*** Core FastAPI and async support
+fastapi==0.115.14
+uvicorn[standard]==0.24.0
+starlette==0.46.2
+
+***REMOVED*** Database and ORM
+SQLAlchemy==2.0.41
+alembic==1.13.1
+aiosqlite==0.21.0
+
+***REMOVED*** Pydantic for data validation
+pydantic==2.11.7
+pydantic-settings==2.10.1
+pydantic_core==2.33.2
+
+***REMOVED*** Authentication and security
+python-jose==3.3.0
+passlib==1.7.4
+bcrypt==4.1.2
+
+***REMOVED*** HTTP client for external APIs
+httpx==0.28.1
+aiohttp==3.12.13
+
+***REMOVED*** Logging and monitoring
+python-json-logger==2.0.7
+structlog==24.4.0
+prometheus-client==0.19.0
+
+***REMOVED*** Development and testing
+pytest==8.1.1
+pytest-asyncio==0.23.5
+coverage==7.9.2
+black==24.10.0
+isort==5.13.2
+flake8==7.3.0
+mypy==1.16.1
+
+***REMOVED*** Code quality and utilities
+click==8.2.1
+colorama==0.4.6
+GitPython==3.1.44
+
+***REMOVED*** Data processing
+pandas==2.3.0
+numpy==2.3.1
+pyarrow==20.0.0
+
+***REMOVED*** Configuration
+python-decouple==3.8
+python-dotenv>=1.0.0,<2.0.0
+
+***REMOVED*** Optional: AI/ML integrations (for Phase 4)
+***REMOVED*** langchain==0.3.26
+***REMOVED*** openai==1.91.0
+***REMOVED*** redis==6.2.0
+
+***REMOVED*** Documentation
+Markdown==3.8.2
+Pygments==2.19.2

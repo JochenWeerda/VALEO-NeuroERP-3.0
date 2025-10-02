@@ -1,0 +1,38 @@
+{
+    "compilerOptions": {
+        "target": "ES2021",
+        "module": "CommonJS",
+        "moduleResolution": "Node",
+        "strict": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "rootDir": ".",
+        "outDir": "dist",
+        "resolveJsonModule": true,
+        "types": [
+            "node"
+        ],
+        "baseUrl": ".",
+        "lib": [
+            "es2021"
+        ]
+    },
+    "include": [
+        "domains/crm/src/core/**/*.ts",
+        "domains/crm/src/application/**/*.ts",
+        "domains/crm/src/infrastructure/**/*.ts",
+        "domains/crm/src/presentation/**/*.ts",
+        "domains/crm/tests/**/*.ts",
+        "packages/data-models/src/branded-types.ts",
+        "packages/data-models/src/domain-events.ts",
+        "packages/utilities/src/service-locator.ts",
+        "packages/utilities/src/postgres.ts",
+        "packages/utilities/types/pg.d.ts",
+        "domains/erp/src/**/*.ts",
+        "domains/erp/tests/**/*.ts"
+    ],
+    "exclude": [
+        "dist"
+    ]
+}

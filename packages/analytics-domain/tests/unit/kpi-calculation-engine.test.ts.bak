@@ -1,0 +1,186 @@
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { KpiCalculationEngine } from '../../src/domain/services/kpi-calculation-engine';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+
+// Mock database
+const mockDb = {
+  select: vi.fn(),
+  execute: vi.fn(),
+} as any;
+
+const mockEngine = new KpiCalculationEngine(mockDb);
+
+describe('KpiCalculationEngine', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('calculateHedgingRatio', () => {
+    it('should calculate hedging ratio correctly', async () => {
+      const mockResult = [{ hedgingRatio: 0.75 }];
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue(mockResult),
+          }),
+        }),
+      });
+
+      const context = { tenantId: 'tenant-1' };
+      const result = await mockEngine.calculateHedgingRatio(context);
+
+      expect(result.success).toBe(true);
+      expect(result.kpi.value).toBe(75); // 0.75 * 100
+      expect(result.kpi.unit).toBe('percentage');
+      expect(result.kpi.name).toBe('Hedging Ratio');
+    });
+
+    it('should handle database errors', async () => {
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockRejectedValue(new Error('Database error')),
+          }),
+        }),
+      });
+
+      const context = { tenantId: 'tenant-1' };
+      const result = await mockEngine.calculateHedgingRatio(context);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Database error');
+      expect(result.kpi.value).toBe(0);
+    });
+  });
+
+  describe('calculatePassRate', () => {
+    it('should calculate quality pass rate correctly', async () => {
+      const mockResult = [{ passRate: 0.85 }];
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue(mockResult),
+          }),
+        }),
+      });
+
+      const context = { tenantId: 'tenant-1' };
+      const result = await mockEngine.calculatePassRate(context);
+
+      expect(result.success).toBe(true);
+      expect(result.kpi.value).toBe(85); // 0.85 * 100
+      expect(result.kpi.unit).toBe('percentage');
+      expect(result.kpi.name).toBe('Quality Pass Rate');
+    });
+  });
+
+  describe('calculateTotalRevenue', () => {
+    it('should calculate total revenue correctly', async () => {
+      const mockResult = [{ totalRevenue: 150000 }];
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue(mockResult),
+          }),
+        }),
+      });
+
+      const context = { tenantId: 'tenant-1' };
+      const result = await mockEngine.calculateTotalRevenue(context);
+
+      expect(result.success).toBe(true);
+      expect(result.kpi.value).toBe(150000);
+      expect(result.kpi.unit).toBe('EUR');
+      expect(result.kpi.name).toBe('Total Revenue');
+    });
+  });
+
+  describe('calculateAllKpis', () => {
+    it('should calculate all KPIs and return summary', async () => {
+      // Mock successful results for all KPI calculations
+      const mockHedgingRatio = [{ hedgingRatio: 0.8 }];
+      const mockPassRate = [{ passRate: 0.9 }];
+      const mockTotalRevenue = [{ totalRevenue: 200000 }];
+
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValueOnce(mockHedgingRatio)
+              .mockResolvedValueOnce(mockPassRate)
+              .mockResolvedValueOnce(mockTotalRevenue),
+          }),
+        }),
+      });
+
+      const context = { tenantId: 'tenant-1' };
+      const result = await mockEngine.calculateAllKpis(context);
+
+      expect(result.summary.total).toBeGreaterThan(0);
+      expect(result.summary.successful).toBe(result.summary.total);
+      expect(result.summary.failed).toBe(0);
+      expect(result.results.length).toBe(result.summary.total);
+    });
+
+    it('should handle partial failures', async () => {
+      // Mock some successful and some failed calculations
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValueOnce([{ hedgingRatio: 0.8 }])
+              .mockRejectedValueOnce(new Error('Quality data error'))
+              .mockResolvedValueOnce([{ totalRevenue: 200000 }]),
+          }),
+        }),
+      });
+
+      const context = { tenantId: 'tenant-1' };
+      const result = await mockEngine.calculateAllKpis(context);
+
+      expect(result.summary.failed).toBeGreaterThan(0);
+      expect(result.summary.successful).toBeLessThan(result.summary.total);
+    });
+  });
+
+  describe('validateForecastRequest', () => {
+    it('should validate request parameters', () => {
+      const validRequest = {
+        tenantId: 'tenant-1',
+        metricName: 'revenue',
+        historicalData: [
+          { timestamp: new Date(), value: 100 },
+          { timestamp: new Date(), value: 110 },
+          { timestamp: new Date(), value: 120 },
+        ],
+        horizon: 12,
+        horizonUnit: 'months' as const,
+      };
+
+      expect(() => mockEngine['validateForecastRequest'](validRequest)).not.toThrow();
+    });
+
+    it('should reject invalid horizon', () => {
+      const invalidRequest = {
+        tenantId: 'tenant-1',
+        metricName: 'revenue',
+        historicalData: [{ timestamp: new Date(), value: 100 }],
+        horizon: 400, // Too large
+        horizonUnit: 'months' as const,
+      };
+
+      expect(() => mockEngine['validateForecastRequest'](invalidRequest)).toThrow();
+    });
+
+    it('should reject insufficient historical data', () => {
+      const invalidRequest = {
+        tenantId: 'tenant-1',
+        metricName: 'revenue',
+        historicalData: [{ timestamp: new Date(), value: 100 }], // Only 1 data point
+        horizon: 12,
+        horizonUnit: 'months' as const,
+      };
+
+      expect(() => mockEngine['validateForecastRequest'](invalidRequest)).toThrow();
+    });
+  });
+});
