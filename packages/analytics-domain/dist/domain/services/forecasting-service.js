@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ForecastingService = void 0;
 const drizzle_orm_1 = require("drizzle-orm");
+const schema_1 = require("../../infra/db/schema");
 const forecast_1 = require("../entities/forecast");
 const event_factories_1 = require("../events/event-factories");
 const publisher_1 = require("../../infra/messaging/publisher");
@@ -253,20 +254,20 @@ class ForecastingService {
     async getForecasts(tenantId, filters = {}) {
         let query = this.db
             .select()
-            .from(forecasts)
-            .where((0, drizzle_orm_1.eq)(forecasts.tenantId, tenantId))
-            .orderBy((0, drizzle_orm_1.desc)(forecasts.createdAt));
+            .from(schema_1.forecasts)
+            .where((0, drizzle_orm_1.eq)(schema_1.forecasts.tenantId, tenantId))
+            .orderBy((0, drizzle_orm_1.desc)(schema_1.forecasts.createdAt));
         if (filters.metricName) {
-            query = query.where((0, drizzle_orm_1.eq)(forecasts.metricName, filters.metricName));
+            query = query.where((0, drizzle_orm_1.eq)(schema_1.forecasts.metricName, filters.metricName));
         }
         if (filters.model) {
-            query = query.where((0, drizzle_orm_1.eq)(forecasts.model, filters.model));
+            query = query.where((0, drizzle_orm_1.eq)(schema_1.forecasts.model, filters.model));
         }
         if (filters.fromDate) {
-            query = query.where((0, drizzle_orm_1.gte)(forecasts.createdAt, filters.fromDate));
+            query = query.where((0, drizzle_orm_1.gte)(schema_1.forecasts.createdAt, filters.fromDate));
         }
         if (filters.toDate) {
-            query = query.where((0, drizzle_orm_1.lte)(forecasts.createdAt, filters.toDate));
+            query = query.where((0, drizzle_orm_1.lte)(schema_1.forecasts.createdAt, filters.toDate));
         }
         if (filters.limit) {
             query = query.limit(filters.limit);
@@ -291,8 +292,8 @@ class ForecastingService {
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
         const result = await this.db
-            .delete(forecasts)
-            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(forecasts.tenantId, tenantId), (0, drizzle_orm_1.sql) `${forecasts.createdAt} < ${cutoffDate}`));
+            .delete(schema_1.forecasts)
+            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.forecasts.tenantId, tenantId), (0, drizzle_orm_1.sql) `${schema_1.forecasts.createdAt} < ${cutoffDate}`));
         return result.rowCount || 0;
     }
     validateForecastRequest(request) {
@@ -377,7 +378,7 @@ class ForecastingService {
         return result;
     }
     async saveForecast(forecast) {
-        await this.db.insert(forecasts).values({
+        await this.db.insert(schema_1.forecasts).values({
             id: forecast.id,
             tenantId: forecast.tenantId,
             metricName: forecast.metricName,

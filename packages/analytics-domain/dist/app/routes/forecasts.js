@@ -24,8 +24,8 @@ async function registerForecastRoutes(fastify, db, forecastingService) {
                 limit: query.pageSize || 20,
                 offset: ((query.page || 1) - 1) * (query.pageSize || 20),
             };
-            const forecasts = await forecastingService.getForecasts(request.tenantId, filters);
-            const forecastResponses = forecasts.map(f => ({
+            const forecastResults = await forecastingService.getForecasts(request.tenantId, filters);
+            const forecastResponses = forecastResults.map(f => ({
                 id: f.id,
                 tenantId: f.tenantId,
                 metricName: f.metricName,
@@ -44,17 +44,17 @@ async function registerForecastRoutes(fastify, db, forecastingService) {
                 metadata: f.metadata,
                 version: f.version,
             }));
-            const totalQuery = db
-                .select({ count: sql `count(*)` })
-                .from(forecasts)
-                .where((0, drizzle_orm_1.eq)(forecasts.tenantId, request.tenantId));
+            const totalConditions = [(0, drizzle_orm_1.eq)(schema_1.forecasts.tenantId, request.tenantId)];
             if (query.metricName) {
-                totalQuery.where((0, drizzle_orm_1.eq)(forecasts.metricName, query.metricName));
+                totalConditions.push((0, drizzle_orm_1.eq)(schema_1.forecasts.metricName, query.metricName));
             }
             if (query.model) {
-                totalQuery.where((0, drizzle_orm_1.eq)(forecasts.model, query.model));
+                totalConditions.push((0, drizzle_orm_1.eq)(schema_1.forecasts.model, query.model));
             }
-            const totalResult = await totalQuery;
+            const totalResult = await db
+                .select({ count: (0, drizzle_orm_1.sql) `count(*)` })
+                .from(schema_1.forecasts)
+                .where((0, drizzle_orm_1.and)(...totalConditions));
             const total = totalResult[0]?.count || 0;
             return {
                 data: forecastResponses,
@@ -103,6 +103,13 @@ async function registerForecastRoutes(fastify, db, forecastingService) {
                 });
             }
             const row = result[0];
+            if (!row) {
+                return reply.code(404).send({
+                    error: 'Not Found',
+                    message: 'Forecast not found',
+                });
+            }
+            const forecastValues = row.forecastValues || [];
             return {
                 id: row.id,
                 tenantId: row.tenantId,
@@ -110,7 +117,7 @@ async function registerForecastRoutes(fastify, db, forecastingService) {
                 horizon: row.horizon,
                 horizonUnit: row.horizonUnit,
                 model: row.model,
-                forecastValues: row.forecastValues.map(fv => ({
+                forecastValues: forecastValues.map((fv) => ({
                     timestamp: fv.timestamp.toISOString(),
                     value: fv.value,
                     lowerBound: fv.lowerBound,
@@ -230,16 +237,22 @@ async function registerForecastRoutes(fastify, db, forecastingService) {
                 });
             }
             const forecast = forecastResult[0];
+            if (!forecast) {
+                return reply.code(404).send({
+                    error: 'Not Found',
+                    message: 'Forecast not found',
+                });
+            }
             const actualValues = (query.actualData || []).map((d) => ({
                 timestamp: d.timestamp,
                 value: d.value,
             }));
-            const forecastValues = forecast.forecastValues;
+            const forecastValues = forecast.forecastValues || [];
             let mse = 0;
             let mae = 0;
             let count = 0;
             for (const actual of actualValues) {
-                const forecastPoint = forecastValues.find(f => Math.abs(f.timestamp.getTime() - new Date(actual.timestamp).getTime()) < 24 * 60 * 60 * 1000);
+                const forecastPoint = forecastValues.find((f) => Math.abs(f.timestamp.getTime() - new Date(actual.timestamp).getTime()) < 24 * 60 * 60 * 1000);
                 if (forecastPoint) {
                     const error = actual.value - forecastPoint.value;
                     mse += error * error;
@@ -250,13 +263,13 @@ async function registerForecastRoutes(fastify, db, forecastingService) {
             const accuracy = {
                 forecastId: forecast.id,
                 metricName: forecast.metricName,
-                accuracy: count > 0 ? 1 - Math.min(1, Math.sqrt(mse / count) / Math.max(...actualValues.map(a => a.value))) : 0,
+                accuracy: count > 0 ? 1 - Math.min(1, Math.sqrt(mse / count) / Math.max(...actualValues.map((a) => a.value))) : 0,
                 mse: count > 0 ? mse / count : undefined,
                 mae: count > 0 ? mae / count : undefined,
             };
             return {
                 actualValues,
-                forecastValues: forecast.forecastValues.map(fv => ({
+                forecastValues: forecastValues.map((fv) => ({
                     timestamp: fv.timestamp.toISOString(),
                     value: fv.value,
                     lowerBound: fv.lowerBound,

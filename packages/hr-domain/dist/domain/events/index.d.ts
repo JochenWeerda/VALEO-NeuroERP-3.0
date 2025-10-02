@@ -307,11 +307,11 @@ export declare const RoleUpdatedEventSchema: z.ZodObject<{
         roleId: z.ZodString;
         changes: z.ZodRecord<z.ZodString, z.ZodAny>;
     }, "strip", z.ZodTypeAny, {
-        roleId: string;
         changes: Record<string, any>;
+        roleId: string;
     }, {
-        roleId: string;
         changes: Record<string, any>;
+        roleId: string;
     }>;
 }, "strip", z.ZodTypeAny, {
     tenantId: string;
@@ -320,8 +320,8 @@ export declare const RoleUpdatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        roleId: string;
         changes: Record<string, any>;
+        roleId: string;
     };
     correlationId?: string | undefined;
     causationId?: string | undefined;
@@ -332,8 +332,8 @@ export declare const RoleUpdatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        roleId: string;
         changes: Record<string, any>;
+        roleId: string;
     };
     correlationId?: string | undefined;
     causationId?: string | undefined;

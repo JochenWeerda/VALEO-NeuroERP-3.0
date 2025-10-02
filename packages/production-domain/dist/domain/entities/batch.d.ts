@@ -40,8 +40,8 @@ declare const BatchOutputLotSchema: z.ZodObject<{
     destination: z.ZodEnum<["Inventory", "DirectFarm"]>;
     gmpPlusMarkings: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    batchId: string;
     id: string;
+    batchId: string;
     lotNumber: string;
     qtyKg: number;
     packing: {
@@ -52,8 +52,8 @@ declare const BatchOutputLotSchema: z.ZodObject<{
     destination: "Inventory" | "DirectFarm";
     gmpPlusMarkings?: string[] | undefined;
 }, {
-    batchId: string;
     id: string;
+    batchId: string;
     lotNumber: string;
     qtyKg: number;
     packing: {
@@ -112,8 +112,8 @@ export declare const BatchSchema: z.ZodObject<{
         destination: z.ZodEnum<["Inventory", "DirectFarm"]>;
         gmpPlusMarkings: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        batchId: string;
         id: string;
+        batchId: string;
         lotNumber: string;
         qtyKg: number;
         packing: {
@@ -124,8 +124,8 @@ export declare const BatchSchema: z.ZodObject<{
         destination: "Inventory" | "DirectFarm";
         gmpPlusMarkings?: string[] | undefined;
     }, {
-        batchId: string;
         id: string;
+        batchId: string;
         lotNumber: string;
         qtyKg: number;
         packing: {
@@ -141,13 +141,13 @@ export declare const BatchSchema: z.ZodObject<{
     createdBy: z.ZodOptional<z.ZodString>;
     updatedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    status: "Released" | "Quarantine" | "Rejected";
     id: string;
     tenantId: string;
     batchNumber: string;
     mixOrderId: string;
     producedQtyKg: number;
     startAt: string;
+    status: "Released" | "Quarantine" | "Rejected";
     parentBatches: string[];
     labels: string[];
     inputs: {
@@ -157,8 +157,8 @@ export declare const BatchSchema: z.ZodObject<{
         actualKg: number;
     }[];
     outputs: {
-        batchId: string;
         id: string;
+        batchId: string;
         lotNumber: string;
         qtyKg: number;
         packing: {
@@ -183,8 +183,8 @@ export declare const BatchSchema: z.ZodObject<{
     startAt: string;
     createdAt: string;
     updatedAt: string;
-    status?: "Released" | "Quarantine" | "Rejected" | undefined;
     endAt?: string | undefined;
+    status?: "Released" | "Quarantine" | "Rejected" | undefined;
     parentBatches?: string[] | undefined;
     labels?: string[] | undefined;
     inputs?: {
@@ -194,8 +194,8 @@ export declare const BatchSchema: z.ZodObject<{
         actualKg: number;
     }[] | undefined;
     outputs?: {
-        batchId: string;
         id: string;
+        batchId: string;
         lotNumber: string;
         qtyKg: number;
         packing: {

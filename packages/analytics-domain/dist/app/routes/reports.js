@@ -21,36 +21,33 @@ async function registerReportRoutes(fastify, db, reportGenerator) {
         },
         handler: async (request, reply) => {
             const query = request.query;
-            let dbQuery = db
-                .select()
-                .from(schema_1.reports)
-                .where((0, drizzle_orm_1.eq)(schema_1.reports.tenantId, request.tenantId))
-                .orderBy((0, drizzle_orm_1.desc)(schema_1.reports.generatedAt));
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.reports.tenantId, request.tenantId)];
             if (query.type) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.reports.type, query.type));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.reports.type, query.type));
             }
             if (query.format) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.reports.format, query.format));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.reports.format, query.format));
             }
             if (query.from) {
-                dbQuery = dbQuery.where(sql `${schema_1.reports.generatedAt} >= ${new Date(query.from)}`);
+                conditions.push((0, drizzle_orm_1.sql) `${schema_1.reports.generatedAt} >= ${new Date(query.from)}`);
             }
             if (query.to) {
-                dbQuery = dbQuery.where(sql `${schema_1.reports.generatedAt} <= ${new Date(query.to)}`);
+                conditions.push((0, drizzle_orm_1.sql) `${schema_1.reports.generatedAt} <= ${new Date(query.to)}`);
             }
             const page = query.page || 1;
             const pageSize = query.pageSize || 20;
             const offset = (page - 1) * pageSize;
-            dbQuery = dbQuery.limit(pageSize).offset(offset);
-            const results = await dbQuery;
-            const totalQuery = db
-                .select({ count: sql `count(*)` })
+            const results = await db
+                .select()
                 .from(schema_1.reports)
-                .where((0, drizzle_orm_1.eq)(schema_1.reports.tenantId, request.tenantId));
-            if (query.type) {
-                totalQuery.where((0, drizzle_orm_1.eq)(schema_1.reports.type, query.type));
-            }
-            const totalResult = await totalQuery;
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .orderBy((0, drizzle_orm_1.desc)(schema_1.reports.generatedAt))
+                .limit(pageSize)
+                .offset(offset);
+            const totalResult = await db
+                .select({ count: (0, drizzle_orm_1.sql) `count(*)` })
+                .from(schema_1.reports)
+                .where((0, drizzle_orm_1.and)(...conditions));
             const total = totalResult[0]?.count || 0;
             const reportResponses = results.map(row => ({
                 id: row.id,
@@ -110,6 +107,12 @@ async function registerReportRoutes(fastify, db, reportGenerator) {
                 });
             }
             const row = result[0];
+            if (!row) {
+                return reply.code(404).send({
+                    error: 'Not Found',
+                    message: 'Report not found',
+                });
+            }
             return {
                 id: row.id,
                 tenantId: row.tenantId,
@@ -159,6 +162,12 @@ async function registerReportRoutes(fastify, db, reportGenerator) {
                 });
             }
             const row = result[0];
+            if (!row) {
+                return reply.code(404).send({
+                    error: 'Not Found',
+                    message: 'Report not found',
+                });
+            }
             if (row.uri && row.format !== 'json') {
                 try {
                     const fileStat = await (0, promises_1.stat)(row.uri);
@@ -188,6 +197,7 @@ async function registerReportRoutes(fastify, db, reportGenerator) {
                     });
                 }
             }
+            const metadata = row.metadata;
             return {
                 report: {
                     id: row.id,
@@ -200,9 +210,9 @@ async function registerReportRoutes(fastify, db, reportGenerator) {
                     metadata: row.metadata || {},
                     version: row.version,
                 },
-                content: row.metadata?.data || {},
+                content: metadata?.data || {},
                 contentType: 'application/json',
-                contentLength: JSON.stringify(row.metadata?.data || {}).length,
+                contentLength: JSON.stringify(metadata?.data || {}).length,
             };
         },
     });
@@ -232,9 +242,9 @@ async function registerReportRoutes(fastify, db, reportGenerator) {
                         uri: result.uri,
                         format: body.format,
                         metadata: {
-                            recordCount: result.recordCount,
+                            totalRecords: result.recordCount,
                             executionTimeMs,
-                            data: body.format === 'json' ? result.data : undefined,
+                            ...(body.format === 'json' && { data: result.data }),
                         },
                     });
                     await db.insert(schema_1.reports).values({

@@ -16,33 +16,28 @@ async function registerCubeRoutes(fastify, db, aggregationService) {
         },
         handler: async (request, reply) => {
             const query = request.query;
-            let dbQuery = db
-                .select()
-                .from(schema_1.mvContractPositions)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.tenantId, request.tenantId));
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvContractPositions.tenantId, request.tenantId)];
             if (query.commodity) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.commodity, query.commodity));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.commodity, query.commodity));
             }
             if (query.month) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.month, query.month));
-            }
-            if (query.from || query.to) {
-                if (query.month) {
-                }
-                else {
-                }
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.month, query.month));
             }
             const page = query.page || 1;
             const pageSize = query.pageSize || 100;
             const offset = (page - 1) * pageSize;
-            dbQuery = dbQuery.limit(pageSize).offset(offset);
-            const results = await dbQuery;
+            const results = await db
+                .select()
+                .from(schema_1.mvContractPositions)
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(pageSize)
+                .offset(offset);
             const summary = {
-                totalShort: results.reduce((sum, r) => sum + (r.shortPosition || 0), 0),
-                totalLong: results.reduce((sum, r) => sum + (r.longPosition || 0), 0),
-                netExposure: results.reduce((sum, r) => sum + (r.netPosition || 0), 0),
+                totalShort: results.reduce((sum, r) => sum + Number(r.shortPosition || 0), 0),
+                totalLong: results.reduce((sum, r) => sum + Number(r.longPosition || 0), 0),
+                netExposure: results.reduce((sum, r) => sum + Number(r.netPosition || 0), 0),
                 avgHedgingRatio: results.length > 0
-                    ? results.reduce((sum, r) => sum + (r.hedgingRatio || 0), 0) / results.length
+                    ? results.reduce((sum, r) => sum + Number(r.hedgingRatio || 0), 0) / results.length
                     : 0,
             };
             return {
@@ -71,37 +66,38 @@ async function registerCubeRoutes(fastify, db, aggregationService) {
         },
         handler: async (request, reply) => {
             const query = request.query;
-            let dbQuery = db
-                .select()
-                .from(schema_1.mvWeighingVolumes)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.tenantId, request.tenantId));
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.tenantId, request.tenantId)];
             if (query.commodity) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.commodity, query.commodity));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.commodity, query.commodity));
             }
             if (query.customerId) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.customerId, query.customerId));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.customerId, query.customerId));
             }
             if (query.siteId) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.siteId, query.siteId));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.siteId, query.siteId));
             }
             if (query.period) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.period, query.period));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.period, query.period));
             }
             const page = query.page || 1;
             const pageSize = query.pageSize || 100;
             const offset = (page - 1) * pageSize;
-            dbQuery = dbQuery.limit(pageSize).offset(offset);
-            const results = await dbQuery;
+            const results = await db
+                .select()
+                .from(schema_1.mvWeighingVolumes)
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(pageSize)
+                .offset(offset);
             const summary = {
-                totalWeight: results.reduce((sum, r) => sum + (r.totalWeight || 0), 0),
-                totalTickets: results.reduce((sum, r) => sum + (r.totalTickets || 0), 0),
-                avgWeightPerTicket: results.reduce((sum, r) => sum + (r.totalTickets || 0), 0) > 0
-                    ? results.reduce((sum, r) => sum + (r.totalWeight || 0), 0) /
-                        results.reduce((sum, r) => sum + (r.totalTickets || 0), 0)
+                totalWeight: results.reduce((sum, r) => sum + Number(r.totalWeight || 0), 0),
+                totalTickets: results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0),
+                avgWeightPerTicket: results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0) > 0
+                    ? results.reduce((sum, r) => sum + Number(r.totalWeight || 0), 0) /
+                        results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0)
                     : 0,
-                overallToleranceRate: results.reduce((sum, r) => sum + (r.totalTickets || 0), 0) > 0
-                    ? results.reduce((sum, r) => sum + (r.withinTolerance || 0), 0) /
-                        results.reduce((sum, r) => sum + (r.totalTickets || 0), 0)
+                overallToleranceRate: results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0) > 0
+                    ? results.reduce((sum, r) => sum + Number(r.withinTolerance || 0), 0) /
+                        results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0)
                     : 0,
             };
             return {
@@ -133,32 +129,33 @@ async function registerCubeRoutes(fastify, db, aggregationService) {
         },
         handler: async (request, reply) => {
             const query = request.query;
-            let dbQuery = db
-                .select()
-                .from(schema_1.mvQualityStats)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.tenantId, request.tenantId));
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvQualityStats.tenantId, request.tenantId)];
             if (query.commodity) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.commodity, query.commodity));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.commodity, query.commodity));
             }
             if (query.period) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.period, query.period));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.period, query.period));
             }
             const page = query.page || 1;
             const pageSize = query.pageSize || 100;
             const offset = (page - 1) * pageSize;
-            dbQuery = dbQuery.limit(pageSize).offset(offset);
-            const results = await dbQuery;
+            const results = await db
+                .select()
+                .from(schema_1.mvQualityStats)
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(pageSize)
+                .offset(offset);
             const summary = {
-                totalSamples: results.reduce((sum, r) => sum + (r.totalSamples || 0), 0),
-                overallPassRate: results.reduce((sum, r) => sum + (r.totalSamples || 0), 0) > 0
-                    ? results.reduce((sum, r) => sum + (r.passedSamples || 0), 0) /
-                        results.reduce((sum, r) => sum + (r.totalSamples || 0), 0)
+                totalSamples: results.reduce((sum, r) => sum + Number(r.totalSamples || 0), 0),
+                overallPassRate: results.reduce((sum, r) => sum + Number(r.totalSamples || 0), 0) > 0
+                    ? results.reduce((sum, r) => sum + Number(r.passedSamples || 0), 0) /
+                        results.reduce((sum, r) => sum + Number(r.totalSamples || 0), 0)
                     : 0,
                 avgMoisture: results.length > 0
-                    ? results.reduce((sum, r) => sum + (r.avgMoisture || 0), 0) / results.length
+                    ? results.reduce((sum, r) => sum + Number(r.avgMoisture || 0), 0) / results.length
                     : 0,
                 avgProtein: results.length > 0
-                    ? results.reduce((sum, r) => sum + (r.avgProtein || 0), 0) / results.length
+                    ? results.reduce((sum, r) => sum + Number(r.avgProtein || 0), 0) / results.length
                     : 0,
             };
             return {
@@ -190,24 +187,25 @@ async function registerCubeRoutes(fastify, db, aggregationService) {
         },
         handler: async (request, reply) => {
             const query = request.query;
-            let dbQuery = db
-                .select()
-                .from(schema_1.mvRegulatoryStats)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.tenantId, request.tenantId));
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.tenantId, request.tenantId)];
             if (query.commodity) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.commodity, query.commodity));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.commodity, query.commodity));
             }
             if (query.labelType) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.labelType, query.labelType));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.labelType, query.labelType));
             }
             if (query.period) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.period, query.period));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.period, query.period));
             }
             const page = query.page || 1;
             const pageSize = query.pageSize || 100;
             const offset = (page - 1) * pageSize;
-            dbQuery = dbQuery.limit(pageSize).offset(offset);
-            const results = await dbQuery;
+            const results = await db
+                .select()
+                .from(schema_1.mvRegulatoryStats)
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(pageSize)
+                .offset(offset);
             const summary = {
                 totalEligible: results.reduce((sum, r) => sum + (r.totalEligible || 0), 0),
                 totalIneligible: results.reduce((sum, r) => sum + (r.totalIneligible || 0), 0),
@@ -243,33 +241,34 @@ async function registerCubeRoutes(fastify, db, aggregationService) {
         },
         handler: async (request, reply) => {
             const query = request.query;
-            let dbQuery = db
-                .select()
-                .from(schema_1.mvFinanceKpis)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.tenantId, request.tenantId));
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.tenantId, request.tenantId)];
             if (query.commodity) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.commodity, query.commodity));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.commodity, query.commodity));
             }
             if (query.customerId) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.customerId, query.customerId));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.customerId, query.customerId));
             }
             if (query.period) {
-                dbQuery = dbQuery.where((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.period, query.period));
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.period, query.period));
             }
             const page = query.page || 1;
             const pageSize = query.pageSize || 100;
             const offset = (page - 1) * pageSize;
-            dbQuery = dbQuery.limit(pageSize).offset(offset);
-            const results = await dbQuery;
+            const results = await db
+                .select()
+                .from(schema_1.mvFinanceKpis)
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(pageSize)
+                .offset(offset);
             const summary = {
-                totalRevenue: results.reduce((sum, r) => sum + (r.totalRevenue || 0), 0),
-                totalCost: results.reduce((sum, r) => sum + (r.totalCost || 0), 0),
-                totalMargin: results.reduce((sum, r) => sum + (r.grossMargin || 0), 0),
+                totalRevenue: results.reduce((sum, r) => sum + Number(r.totalRevenue || 0), 0),
+                totalCost: results.reduce((sum, r) => sum + Number(r.totalCost || 0), 0),
+                totalMargin: results.reduce((sum, r) => sum + Number(r.grossMargin || 0), 0),
                 avgMarginPercentage: results.length > 0
-                    ? results.reduce((sum, r) => sum + (r.marginPercentage || 0), 0) / results.length
+                    ? results.reduce((sum, r) => sum + Number(r.marginPercentage || 0), 0) / results.length
                     : 0,
-                totalOutstanding: results.reduce((sum, r) => sum + (r.outstandingInvoices || 0), 0),
-                totalOverdue: results.reduce((sum, r) => sum + (r.overdueInvoices || 0), 0),
+                totalOutstanding: results.reduce((sum, r) => sum + Number(r.outstandingInvoices || 0), 0),
+                totalOverdue: results.reduce((sum, r) => sum + Number(r.overdueInvoices || 0), 0),
             };
             return {
                 data: results.map(row => ({

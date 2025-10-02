@@ -62,11 +62,11 @@ export declare const SamplingResultSchema: z.ZodObject<{
     createdBy: z.ZodOptional<z.ZodString>;
     updatedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    batchId: string;
-    value: number;
     id: string;
-    unit: string;
     tenantId: string;
+    value: number;
+    batchId: string;
+    unit: string;
     createdAt: string;
     updatedAt: string;
     sampleCode: string;
@@ -80,11 +80,11 @@ export declare const SamplingResultSchema: z.ZodObject<{
     labId?: string | undefined;
     docUri?: string | undefined;
 }, {
-    batchId: string;
-    value: number;
     id: string;
-    unit: string;
     tenantId: string;
+    value: number;
+    batchId: string;
+    unit: string;
     createdAt: string;
     updatedAt: string;
     sampleCode: string;
@@ -112,9 +112,9 @@ export declare const RetainedSampleSchema: z.ZodObject<{
     createdBy: z.ZodOptional<z.ZodString>;
     updatedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    batchId: string;
     id: string;
     tenantId: string;
+    batchId: string;
     createdAt: string;
     updatedAt: string;
     sampleCode: string;
@@ -125,9 +125,9 @@ export declare const RetainedSampleSchema: z.ZodObject<{
     notes?: string | undefined;
     disposedAt?: string | undefined;
 }, {
-    batchId: string;
     id: string;
     tenantId: string;
+    batchId: string;
     createdAt: string;
     updatedAt: string;
     sampleCode: string;
@@ -156,13 +156,13 @@ export declare const NonConformitySchema: z.ZodObject<{
     createdBy: z.ZodOptional<z.ZodString>;
     updatedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "Contamination" | "SpecOut" | "Equipment" | "Process";
-    status: "Open" | "InProgress" | "Closed";
     id: string;
     tenantId: string;
+    status: "Open" | "InProgress" | "Closed";
+    type: "Contamination" | "SpecOut" | "Equipment" | "Process";
     createdAt: string;
     updatedAt: string;
-    refType: "batchId" | "mixOrderId" | "mobileRunId";
+    refType: "mixOrderId" | "batchId" | "mobileRunId";
     refId: string;
     severity: "Low" | "Medium" | "High" | "Critical";
     description: string;
@@ -173,12 +173,12 @@ export declare const NonConformitySchema: z.ZodObject<{
     capaId?: string | undefined;
     closedAt?: string | undefined;
 }, {
-    type: "Contamination" | "SpecOut" | "Equipment" | "Process";
     id: string;
     tenantId: string;
+    type: "Contamination" | "SpecOut" | "Equipment" | "Process";
     createdAt: string;
     updatedAt: string;
-    refType: "batchId" | "mixOrderId" | "mobileRunId";
+    refType: "mixOrderId" | "batchId" | "mobileRunId";
     refId: string;
     severity: "Low" | "Medium" | "High" | "Critical";
     description: string;
@@ -208,10 +208,10 @@ export declare const CAPASchema: z.ZodObject<{
     createdBy: z.ZodOptional<z.ZodString>;
     updatedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "Correction" | "CorrectiveAction" | "PreventiveAction";
-    status: "Open" | "InProgress" | "Closed";
     id: string;
     tenantId: string;
+    status: "Open" | "InProgress" | "Closed";
+    type: "Correction" | "CorrectiveAction" | "PreventiveAction";
     createdAt: string;
     updatedAt: string;
     description: string;
@@ -225,9 +225,9 @@ export declare const CAPASchema: z.ZodObject<{
     dueDate?: string | undefined;
     effectiveness?: "Effective" | "NotEffective" | "NotEvaluated" | undefined;
 }, {
-    type: "Correction" | "CorrectiveAction" | "PreventiveAction";
     id: string;
     tenantId: string;
+    type: "Correction" | "CorrectiveAction" | "PreventiveAction";
     createdAt: string;
     updatedAt: string;
     description: string;

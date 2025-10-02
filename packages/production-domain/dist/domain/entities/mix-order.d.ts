@@ -134,10 +134,10 @@ export declare const MixOrderSchema: z.ZodObject<{
     createdBy: z.ZodOptional<z.ZodString>;
     updatedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "Plant" | "Mobile";
-    status: "Draft" | "Staged" | "Running" | "Hold" | "Completed" | "Aborted";
     id: string;
     tenantId: string;
+    status: "Draft" | "Staged" | "Running" | "Hold" | "Completed" | "Aborted";
+    type: "Plant" | "Mobile";
     createdAt: string;
     updatedAt: string;
     orderNumber: string;
@@ -167,9 +167,9 @@ export declare const MixOrderSchema: z.ZodObject<{
     mobileUnitId?: string | undefined;
     notes?: string | undefined;
 }, {
-    type: "Plant" | "Mobile";
     id: string;
     tenantId: string;
+    type: "Plant" | "Mobile";
     createdAt: string;
     updatedAt: string;
     orderNumber: string;

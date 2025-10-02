@@ -898,10 +898,10 @@ class KpiCalculationEngine {
                 .select({
                 eligibilityRate: (0, drizzle_orm_1.sql) `AVG(eligibility_rate)`,
             })
-                .from(mvRegulatoryStats)
-                .where((0, drizzle_orm_1.eq)(mvRegulatoryStats.tenantId, context.tenantId));
+                .from(schema_1.mvRegulatoryStats)
+                .where((0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.tenantId, context.tenantId));
             if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(mvRegulatoryStats.commodity, context.commodity));
+                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.commodity, context.commodity));
             }
             const result = await query.limit(1);
             const value = (result[0]?.eligibilityRate || 0) * 100;

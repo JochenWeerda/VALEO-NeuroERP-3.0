@@ -35,21 +35,21 @@ declare const CleaningSequenceSchema: z.ZodObject<{
     validatedBy: z.ZodString;
     notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
     id: string;
+    type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
     startedAt: string;
     validatedBy: string;
-    endedAt?: string | undefined;
     notes?: string | undefined;
+    endedAt?: string | undefined;
     usedMaterialSku?: string | undefined;
     flushMassKg?: number | undefined;
 }, {
-    type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
     id: string;
+    type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
     startedAt: string;
     validatedBy: string;
-    endedAt?: string | undefined;
     notes?: string | undefined;
+    endedAt?: string | undefined;
     usedMaterialSku?: string | undefined;
     flushMassKg?: number | undefined;
 }>;
@@ -125,21 +125,21 @@ export declare const MobileRunSchema: z.ZodObject<{
         validatedBy: z.ZodString;
         notes: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         id: string;
+        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         startedAt: string;
         validatedBy: string;
-        endedAt?: string | undefined;
         notes?: string | undefined;
+        endedAt?: string | undefined;
         usedMaterialSku?: string | undefined;
         flushMassKg?: number | undefined;
     }, {
-        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         id: string;
+        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         startedAt: string;
         validatedBy: string;
-        endedAt?: string | undefined;
         notes?: string | undefined;
+        endedAt?: string | undefined;
         usedMaterialSku?: string | undefined;
         flushMassKg?: number | undefined;
     }>, "many">>;
@@ -173,12 +173,12 @@ export declare const MobileRunSchema: z.ZodObject<{
         notes?: string | undefined;
     };
     cleaningSequences: {
-        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         id: string;
+        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         startedAt: string;
         validatedBy: string;
-        endedAt?: string | undefined;
         notes?: string | undefined;
+        endedAt?: string | undefined;
         usedMaterialSku?: string | undefined;
         flushMassKg?: number | undefined;
     }[];
@@ -218,12 +218,12 @@ export declare const MobileRunSchema: z.ZodObject<{
     powerSource?: "Generator" | "Grid" | "Battery" | undefined;
     cleaningSequenceId?: string | undefined;
     cleaningSequences?: {
-        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         id: string;
+        type: "DryClean" | "Vacuum" | "Flush" | "WetClean";
         startedAt: string;
         validatedBy: string;
-        endedAt?: string | undefined;
         notes?: string | undefined;
+        endedAt?: string | undefined;
         usedMaterialSku?: string | undefined;
         flushMassKg?: number | undefined;
     }[] | undefined;
