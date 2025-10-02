@@ -239,7 +239,7 @@ export declare class CreditNoteEntity {
     static create(props: CreateCreditNoteInput & {
         tenantId: string;
     }): CreditNoteEntity;
-    static fromPersistence(props: CreditNote): CreditNoteEntity;
+    static fromPersistence(props: any): CreditNoteEntity;
     update(props: UpdateCreditNoteInput): void;
     settle(): void;
     canBeSettled(): boolean;

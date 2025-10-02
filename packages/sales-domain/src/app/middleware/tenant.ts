@@ -31,7 +31,7 @@ export async function tenantMiddleware(request: FastifyRequest, reply: FastifyRe
 
     // Continue to next middleware
   } catch (error) {
-    request.log.error('Tenant middleware error:', error);
+    request.log.error({ error }, 'Tenant middleware error');
     return reply.code(500).send({
       error: 'Internal Server Error',
       message: 'Tenant validation failed',

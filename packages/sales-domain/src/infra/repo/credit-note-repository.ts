@@ -116,8 +116,8 @@ export class CreditNoteRepository {
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
@@ -172,33 +172,28 @@ export class CreditNoteRepository {
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
 
   async create(input: CreateCreditNoteInput & { tenantId: string }): Promise<CreditNoteEntity> {
-    const creditNoteData: CreditNote = {
-      ...input,
-      id: uuidv4(),
-      status: CreditNoteStatus.ISSUED,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      version: 1
-    };
+    const creditNote = CreditNoteEntity.create(input);
+    const creditNoteData = creditNote.toPersistence();
 
     const result = await db
       .insert(creditNotes)
-      .values(creditNoteData)
+      .values(creditNoteData as any)
       .returning();
 
     return CreditNoteEntity.fromPersistence(result[0]);
   }
 
   async update(id: string, tenantId: string, input: UpdateCreditNoteInput): Promise<CreditNoteEntity | null> {
-    const updateData: Partial<CreditNote> = {
+    const updateData: any = {
       ...input,
+      notes: input.notes ?? undefined,
       updatedAt: new Date()
     };
 
@@ -235,7 +230,7 @@ export class CreditNoteRepository {
   }
 
   async updateStatus(id: string, tenantId: string, status: CreditNoteStatusType): Promise<CreditNoteEntity | null> {
-    const updateData: Partial<CreditNote> = {
+    const updateData: any = {
       status,
       updatedAt: new Date()
     };

@@ -118,8 +118,8 @@ export class QuoteRepository {
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
@@ -184,33 +184,29 @@ export class QuoteRepository {
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
 
   async create(input: CreateQuoteInput & { tenantId: string }): Promise<QuoteEntity> {
-    const quoteData: Quote = {
-      ...input,
-      id: uuidv4(),
-      status: input.status || QuoteStatus.DRAFT,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      version: 1
-    };
+    const quote = QuoteEntity.create(input);
+    const quoteData = quote.toPersistence();
 
     const result = await db
       .insert(quotes)
-      .values(quoteData)
+      .values(quoteData as any)
       .returning();
 
     return QuoteEntity.fromPersistence(result[0]);
   }
 
   async update(id: string, tenantId: string, input: UpdateQuoteInput): Promise<QuoteEntity | null> {
-    const updateData: Partial<Quote> = {
+    const updateData: any = {
       ...input,
+      notes: input.notes ?? undefined,
+      validUntil: input.validUntil ?? undefined,
       updatedAt: new Date()
     };
 

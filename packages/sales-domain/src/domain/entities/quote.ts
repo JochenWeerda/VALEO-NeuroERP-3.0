@@ -125,8 +125,23 @@ export class QuoteEntity {
     return new QuoteEntity(quote);
   }
 
-  public static fromPersistence(props: Quote): QuoteEntity {
-    return new QuoteEntity(props);
+  public static fromPersistence(props: any): QuoteEntity {
+    return new QuoteEntity({
+      ...props,
+      subtotalNet: Number(props.subtotalNet),
+      totalDiscount: Number(props.totalDiscount),
+      totalNet: Number(props.totalNet),
+      totalTax: Number(props.totalTax),
+      totalGross: Number(props.totalGross),
+      lines: props.lines.map((line: any) => ({
+        ...line,
+        unitPrice: Number(line.unitPrice),
+        discount: Number(line.discount),
+        totalNet: Number(line.totalNet),
+        totalGross: Number(line.totalGross),
+      })),
+      notes: props.notes ?? undefined,
+    });
   }
 
   public update(props: UpdateQuoteInput): void {
@@ -146,11 +161,11 @@ export class QuoteEntity {
     }
 
     if (props.validUntil !== undefined) {
-      this.props.validUntil = props.validUntil;
+      this.props.validUntil = props.validUntil ?? undefined;
     }
 
     if (props.notes !== undefined) {
-      this.props.notes = props.notes;
+      this.props.notes = props.notes ?? undefined;
     }
 
     if (props.status !== undefined) {

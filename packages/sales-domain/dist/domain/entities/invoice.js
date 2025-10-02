@@ -110,14 +110,30 @@ class InvoiceEntity {
         return new InvoiceEntity(invoice);
     }
     static fromPersistence(props) {
-        return new InvoiceEntity(props);
+        return new InvoiceEntity({
+            ...props,
+            subtotalNet: Number(props.subtotalNet),
+            totalDiscount: Number(props.totalDiscount),
+            totalNet: Number(props.totalNet),
+            totalTax: Number(props.totalTax),
+            totalGross: Number(props.totalGross),
+            lines: props.lines.map((line) => ({
+                ...line,
+                unitPrice: Number(line.unitPrice),
+                discount: Number(line.discount),
+                totalNet: Number(line.totalNet),
+                totalGross: Number(line.totalGross),
+            })),
+            paidAt: props.paidAt ?? undefined,
+            notes: props.notes ?? undefined,
+        });
     }
     update(props) {
         if (props.dueDate !== undefined) {
             this.props.dueDate = props.dueDate;
         }
         if (props.notes !== undefined) {
-            this.props.notes = props.notes;
+            this.props.notes = props.notes ?? undefined;
         }
         if (props.status !== undefined) {
             this.validateStatusTransition(this.props.status, props.status);

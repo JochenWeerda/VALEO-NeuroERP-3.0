@@ -237,17 +237,17 @@ export declare const InvoiceQueryContractSchema: z.ZodObject<{
     pageSize: number;
     status?: "Cancelled" | "Issued" | "Paid" | "Overdue" | undefined;
     customerId?: string | undefined;
-    orderId?: string | undefined;
     search?: string | undefined;
+    orderId?: string | undefined;
     dueDateFrom?: string | undefined;
     dueDateTo?: string | undefined;
 }, {
     status?: "Cancelled" | "Issued" | "Paid" | "Overdue" | undefined;
     customerId?: string | undefined;
-    orderId?: string | undefined;
     search?: string | undefined;
     page?: string | undefined;
     pageSize?: string | undefined;
+    orderId?: string | undefined;
     dueDateFrom?: string | undefined;
     dueDateTo?: string | undefined;
 }>;
