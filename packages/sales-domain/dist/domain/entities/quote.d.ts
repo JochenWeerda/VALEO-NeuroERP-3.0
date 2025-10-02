@@ -19,8 +19,8 @@ export declare const QuoteLineSchema: z.ZodObject<{
     totalGross: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    name: string;
     sku: string;
+    name: string;
     quantity: number;
     unitPrice: number;
     discount: number;
@@ -29,8 +29,8 @@ export declare const QuoteLineSchema: z.ZodObject<{
     description?: string | undefined;
 }, {
     id: string;
-    name: string;
     sku: string;
+    name: string;
     quantity: number;
     unitPrice: number;
     totalNet: number;
@@ -56,8 +56,8 @@ export declare const QuoteSchema: z.ZodObject<{
         totalGross: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
@@ -66,8 +66,8 @@ export declare const QuoteSchema: z.ZodObject<{
         description?: string | undefined;
     }, {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         totalNet: number;
@@ -88,12 +88,17 @@ export declare const QuoteSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
     version: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    version: number;
+    id: string;
+    totalNet: number;
+    totalGross: number;
+    status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
+    tenantId: string;
     customerId: string;
+    quoteNumber: string;
     lines: {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
@@ -101,12 +106,6 @@ export declare const QuoteSchema: z.ZodObject<{
         totalGross: number;
         description?: string | undefined;
     }[];
-    id: string;
-    status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-    tenantId: string;
-    totalNet: number;
-    totalGross: number;
-    quoteNumber: string;
     subtotalNet: number;
     totalDiscount: number;
     taxRate: number;
@@ -114,14 +113,20 @@ export declare const QuoteSchema: z.ZodObject<{
     validUntil: Date;
     createdAt: Date;
     updatedAt: Date;
+    version: number;
     notes?: string | undefined;
 }, {
-    version: number;
+    id: string;
+    totalNet: number;
+    totalGross: number;
+    status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
+    tenantId: string;
     customerId: string;
+    quoteNumber: string;
     lines: {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         totalNet: number;
@@ -129,26 +134,21 @@ export declare const QuoteSchema: z.ZodObject<{
         description?: string | undefined;
         discount?: number | undefined;
     }[];
-    id: string;
-    status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-    tenantId: string;
-    totalNet: number;
-    totalGross: number;
-    quoteNumber: string;
     subtotalNet: number;
     totalDiscount: number;
     validUntil: Date;
     createdAt: Date;
     updatedAt: Date;
+    version: number;
     taxRate?: number | undefined;
     currency?: string | undefined;
     notes?: string | undefined;
 }>;
 export type Quote = z.infer<typeof QuoteSchema>;
 export declare const CreateQuoteInputSchema: z.ZodObject<{
-    customerId: z.ZodString;
     status: z.ZodEnum<["Draft", "Sent", "Accepted", "Rejected", "Expired"]>;
     tenantId: z.ZodString;
+    customerId: z.ZodString;
     quoteNumber: z.ZodString;
     taxRate: z.ZodDefault<z.ZodNumber>;
     currency: z.ZodDefault<z.ZodString>;
@@ -166,50 +166,50 @@ export declare const CreateQuoteInputSchema: z.ZodObject<{
         totalNet: z.ZodNumber;
         totalGross: z.ZodNumber;
     }, "id" | "totalNet" | "totalGross">, "strip", z.ZodTypeAny, {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }, {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
         discount?: number | undefined;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
+    status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
+    tenantId: string;
     customerId: string;
+    quoteNumber: string;
     lines: {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }[];
-    status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-    tenantId: string;
-    quoteNumber: string;
     taxRate: number;
     currency: string;
     validUntil: Date;
     notes?: string | undefined;
 }, {
+    status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
+    tenantId: string;
     customerId: string;
+    quoteNumber: string;
     lines: {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
         discount?: number | undefined;
     }[];
-    status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-    tenantId: string;
-    quoteNumber: string;
     validUntil: Date;
     taxRate?: number | undefined;
     currency?: string | undefined;
@@ -228,15 +228,15 @@ export declare const UpdateQuoteInputSchema: z.ZodObject<{
         totalNet: z.ZodNumber;
         totalGross: z.ZodNumber;
     }, "id" | "totalNet" | "totalGross">, "strip", z.ZodTypeAny, {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }, {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
@@ -246,27 +246,27 @@ export declare const UpdateQuoteInputSchema: z.ZodObject<{
     notes: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     status: z.ZodOptional<z.ZodEnum<["Draft", "Sent", "Accepted", "Rejected", "Expired"]>>;
 }, "strip", z.ZodTypeAny, {
+    status?: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired" | undefined;
     lines?: {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }[] | undefined;
-    status?: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired" | undefined;
     validUntil?: Date | undefined;
     notes?: string | null | undefined;
 }, {
+    status?: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired" | undefined;
     lines?: {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
         discount?: number | undefined;
     }[] | undefined;
-    status?: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired" | undefined;
     validUntil?: Date | undefined;
     notes?: string | null | undefined;
 }>;

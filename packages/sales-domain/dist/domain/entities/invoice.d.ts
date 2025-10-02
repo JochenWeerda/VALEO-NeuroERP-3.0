@@ -18,8 +18,8 @@ export declare const InvoiceLineSchema: z.ZodObject<{
     totalGross: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    name: string;
     sku: string;
+    name: string;
     quantity: number;
     unitPrice: number;
     discount: number;
@@ -28,8 +28,8 @@ export declare const InvoiceLineSchema: z.ZodObject<{
     description?: string | undefined;
 }, {
     id: string;
-    name: string;
     sku: string;
+    name: string;
     quantity: number;
     unitPrice: number;
     totalNet: number;
@@ -56,8 +56,8 @@ export declare const InvoiceSchema: z.ZodObject<{
         totalGross: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
@@ -66,8 +66,8 @@ export declare const InvoiceSchema: z.ZodObject<{
         description?: string | undefined;
     }, {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         totalNet: number;
@@ -89,12 +89,16 @@ export declare const InvoiceSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
     version: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    version: number;
+    id: string;
+    totalNet: number;
+    totalGross: number;
+    status: "Cancelled" | "Issued" | "Paid" | "Overdue";
+    tenantId: string;
     customerId: string;
     lines: {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
@@ -102,29 +106,29 @@ export declare const InvoiceSchema: z.ZodObject<{
         totalGross: number;
         description?: string | undefined;
     }[];
-    id: string;
-    status: "Issued" | "Paid" | "Cancelled" | "Overdue";
-    tenantId: string;
-    totalNet: number;
-    totalGross: number;
     subtotalNet: number;
     totalDiscount: number;
     taxRate: number;
     currency: string;
     createdAt: Date;
     updatedAt: Date;
+    version: number;
     invoiceNumber: string;
     dueDate: Date;
     notes?: string | undefined;
     orderId?: string | undefined;
     paidAt?: Date | undefined;
 }, {
-    version: number;
+    id: string;
+    totalNet: number;
+    totalGross: number;
+    status: "Cancelled" | "Issued" | "Paid" | "Overdue";
+    tenantId: string;
     customerId: string;
     lines: {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         totalNet: number;
@@ -132,15 +136,11 @@ export declare const InvoiceSchema: z.ZodObject<{
         description?: string | undefined;
         discount?: number | undefined;
     }[];
-    id: string;
-    status: "Issued" | "Paid" | "Cancelled" | "Overdue";
-    tenantId: string;
-    totalNet: number;
-    totalGross: number;
     subtotalNet: number;
     totalDiscount: number;
     createdAt: Date;
     updatedAt: Date;
+    version: number;
     invoiceNumber: string;
     dueDate: Date;
     taxRate?: number | undefined;
@@ -151,8 +151,8 @@ export declare const InvoiceSchema: z.ZodObject<{
 }>;
 export type Invoice = z.infer<typeof InvoiceSchema>;
 export declare const CreateInvoiceInputSchema: z.ZodObject<{
-    customerId: z.ZodString;
     tenantId: z.ZodString;
+    customerId: z.ZodString;
     taxRate: z.ZodDefault<z.ZodNumber>;
     currency: z.ZodDefault<z.ZodString>;
     notes: z.ZodOptional<z.ZodString>;
@@ -171,31 +171,31 @@ export declare const CreateInvoiceInputSchema: z.ZodObject<{
         totalNet: z.ZodNumber;
         totalGross: z.ZodNumber;
     }, "id" | "totalNet" | "totalGross">, "strip", z.ZodTypeAny, {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }, {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
         discount?: number | undefined;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
+    tenantId: string;
     customerId: string;
     lines: {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }[];
-    tenantId: string;
     taxRate: number;
     currency: string;
     invoiceNumber: string;
@@ -203,16 +203,16 @@ export declare const CreateInvoiceInputSchema: z.ZodObject<{
     notes?: string | undefined;
     orderId?: string | undefined;
 }, {
+    tenantId: string;
     customerId: string;
     lines: {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
         discount?: number | undefined;
     }[];
-    tenantId: string;
     invoiceNumber: string;
     dueDate: Date;
     taxRate?: number | undefined;
@@ -226,11 +226,11 @@ export declare const UpdateInvoiceInputSchema: z.ZodObject<{
     notes: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     status: z.ZodOptional<z.ZodEnum<["Issued", "Paid", "Overdue", "Cancelled"]>>;
 }, "strip", z.ZodTypeAny, {
-    status?: "Issued" | "Paid" | "Cancelled" | "Overdue" | undefined;
+    status?: "Cancelled" | "Issued" | "Paid" | "Overdue" | undefined;
     notes?: string | null | undefined;
     dueDate?: Date | undefined;
 }, {
-    status?: "Issued" | "Paid" | "Cancelled" | "Overdue" | undefined;
+    status?: "Cancelled" | "Issued" | "Paid" | "Overdue" | undefined;
     notes?: string | null | undefined;
     dueDate?: Date | undefined;
 }>;

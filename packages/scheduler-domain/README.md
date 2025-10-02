@@ -1,217 +1,309 @@
-# @valero-neuroerp/scheduler-domain
+# Scheduler Domain
 
-Enterprise-wide orchestrator for scheduled/timed tasks in the VALEO NeuroERP system.
+A comprehensive scheduling service built with Domain-Driven Design (DDD) principles, providing reliable job scheduling with support for CRON expressions, recurring rules, and event-driven execution.
 
-## Overview
+## Features
 
-The Scheduler Domain provides a comprehensive scheduling system that enables:
-
-- **Schedules**: CRON, RRULE, Fixed-Delay, and One-Shot triggers with calendar support
-- **Jobs**: Configurable job types with retry logic, backoff strategies, and concurrency limits
-- **Runs**: Individual execution instances with status tracking and metrics
-- **Workers**: Distributed worker management with capabilities and heartbeats
-- **Calendars**: Holiday and business day management for scheduling
+- **Multiple Trigger Types**: CRON expressions, RRULE (iCal), fixed delays, and one-shot schedules
+- **Flexible Targets**: Event publishing, HTTP webhooks, and queue messaging
+- **Tenant Isolation**: Multi-tenant support with proper data isolation
+- **Security**: JWT-based authentication with role-based access control (RBAC)
+- **Observability**: OpenTelemetry tracing and structured logging
+- **Health Checks**: Comprehensive health, readiness, and liveness endpoints
+- **Docker Support**: Production-ready containerization
 
 ## Architecture
 
-### Domain-Driven Design (DDD)
-- **Entities**: Schedule, Job, Run, Worker, Calendar
-- **Services**: Scheduling logic, execution management, worker coordination
-- **Events**: Domain events for observability and integration
+### Domain Layer
+- **Entities**: `ScheduleEntity` with business logic and validation
+- **Services**: `SchedulingService` for schedule execution and management
+- **Events**: Domain events for schedule lifecycle
 
-### Key Features
-- **Tenant Isolation**: All resources are tenant-scoped
-- **Time Zone Support**: UTC storage with tenant-specific timezone evaluation
-- **Distributed Execution**: Leader election and worker coordination
-- **Resilience**: Retry logic, dead letter queues, idempotency
-- **Observability**: OpenTelemetry tracing, structured logging, metrics
+### Infrastructure Layer
+- **Repository**: Data access layer with Drizzle ORM
+- **Messaging**: Event publishing infrastructure
+- **Security**: JWT authentication and RBAC
+- **Telemetry**: Logging and tracing
 
-## Domain Entities
+### Application Layer
+- **Routes**: REST API endpoints with OpenAPI documentation
+- **Middleware**: Authentication, tenant isolation, and request logging
+- **Server**: Fastify-based HTTP server
 
-### Schedule
-Represents a scheduled task configuration with triggers, targets, and calendar rules.
-
-**Triggers:**
-- `CRON`: Standard cron expressions
-- `RRULE`: iCal recurrence rules
-- `FIXED_DELAY`: Fixed interval scheduling
-- `ONE_SHOT`: Single execution
-
-**Targets:**
-- `EVENT`: Publish to NATS/Kafka
-- `HTTP`: Webhook with HMAC signing
-- `QUEUE`: Send to message queue
-
-### Job
-Configuration for job types including retry policies and execution constraints.
-
-### Run
-Individual execution instance with status tracking and metrics.
-
-### Worker
-Registered worker nodes with capabilities and health monitoring.
-
-### Calendar
-Holiday and business day definitions for scheduling logic.
-
-## API Design
-
-### REST Endpoints
-- `POST /schedules` - Create schedule
-- `GET /schedules` - List schedules with pagination
-- `GET /schedules/:id` - Get schedule details
-- `PATCH /schedules/:id` - Update schedule
-- `POST /schedules/:id/trigger` - Manual trigger
-- `POST /schedules/:id/backfill` - Backfill missed runs
-
-- `POST /jobs` - Create job configuration
-- `GET /jobs` - List jobs
-- `PATCH /jobs/:id` - Update job
-
-- `GET /runs` - List runs with filtering
-- `GET /runs/:id` - Get run details
-- `POST /runs/:id/retry` - Retry failed run
-- `POST /runs/:id/cancel` - Cancel pending run
-
-- `POST /workers/register` - Register worker
-- `POST /workers/:id/heartbeat` - Worker heartbeat
-- `GET /workers` - List workers
-
-## Database Schema
-
-### Tables
-- `schedules` - Schedule configurations
-- `jobs` - Job type definitions
-- `runs` - Execution instances
-- `workers` - Worker registrations
-- `calendars` - Calendar definitions
-
-### Key Relationships
-- Schedule → Runs (1:N)
-- Job → Runs (1:N)
-- Worker → Runs (1:N)
-
-## Event System
-
-### Domain Events
-- `scheduler.schedule.created|updated|enabled|disabled`
-- `scheduler.run.started|succeeded|failed|missed|dead`
-- `scheduler.worker.registered|heartbeat|offline`
-
-### Integration Events
-Consumed from other domains for trigger-based scheduling.
-
-## Security
-
-- **JWT Authentication**: Bearer token validation
-- **RBAC**: scheduler:admin|read|operate scopes
-- **Tenant Isolation**: All queries filtered by tenantId
-- **HMAC Webhooks**: Signed HTTP targets for security
-
-## Configuration
-
-### Environment Variables
-```bash
-PORT=3080
-POSTGRES_URL=postgres://user:pass@db:5432/scheduler
-NATS_URL=nats://nats:4222
-REDIS_URL=redis://redis:6379
-JWKS_URL=https://auth.example.com/.well-known/jwks.json
-DEFAULT_TZ=Europe/Berlin
-WEBHOOK_HMAC_SECRET=change-me-in-production
-```
-
-## Development
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+
-- PostgreSQL 13+
-- Redis 6+
-- NATS Server
+- PostgreSQL
+- Redis (optional, for distributed locking)
+- NATS (optional, for event publishing)
 
-### Setup
+### Installation
+
 ```bash
 npm install
+```
+
+### Configuration
+
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Configure the following environment variables:
+
+```env
+# Server
+PORT=3080
+HOST=0.0.0.0
+
+# Database
+POSTGRES_URL=postgres://user:pass@localhost:5432/scheduler
+
+# Authentication
+JWKS_URL=https://auth.example.com/.well-known/jwks.json
+
+# Observability
+LOG_LEVEL=info
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+```
+
+### Database Setup
+
+Run the database migrations:
+
+```bash
 npm run migrate:up
+```
+
+### Development
+
+```bash
 npm run dev
 ```
 
-### Testing
-```bash
-npm run test:unit
-npm run test:integration
-npm run test:e2e
-```
+### Production
 
-### Building
 ```bash
 npm run build
 npm start
 ```
 
-## Use Cases
+## API Documentation
 
-### Analytics Domain
-- Nightly KPI rebuilds (CRON 0 2 * * *)
-- Forecast calculations every 6 hours
-- Report generation on demand
+### Create Schedule
 
-### Notifications Domain
-- Daily invoice reminders (business days only)
-- Weekly campaign summaries
-- SLA breach alerts
+```http
+POST /schedules
+Authorization: Bearer <token>
+X-Tenant-Id: <tenant-id>
+Content-Type: application/json
 
-### Document Domain
-- Retention policy enforcement (monthly)
-- Legal hold checks (daily)
-- Archive cleanup (weekly)
-
-### HR Domain
-- Payroll processing (end of month)
-- Time tracking summaries (daily)
-- Compliance reporting (quarterly)
-
-## Monitoring & Observability
-
-### Metrics
-- Schedule execution latency
-- Job success/failure rates
-- Worker utilization
-- Queue depths
-
-### Health Checks
-- Database connectivity
-- Message broker status
-- Worker heartbeats
-- Leader election status
-
-## Deployment
-
-### Docker
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY dist/ ./dist/
-EXPOSE 3080
-CMD ["npm", "start"]
+{
+  "tenantId": "tenant-123",
+  "name": "Daily Report",
+  "tz": "Europe/Berlin",
+  "trigger": {
+    "type": "CRON",
+    "cron": "0 9 * * *"
+  },
+  "target": {
+    "kind": "EVENT",
+    "eventTopic": "reports.daily.generate"
+  },
+  "enabled": true
+}
 ```
 
-### Kubernetes
-- Deployment with leader election
-- Horizontal Pod Autoscaling
-- ConfigMap for calendar data
-- Persistent volume for state
+### List Schedules
 
-## Contributing
+```http
+GET /schedules?tenantId=tenant-123&page=1&pageSize=20
+Authorization: Bearer <token>
+X-Tenant-Id: <tenant-id>
+```
 
-1. Follow DDD principles
-2. Write comprehensive tests
-3. Update OpenAPI documentation
-4. Ensure tenant isolation
-5. Add appropriate logging
+### Update Schedule
+
+```http
+PATCH /schedules/{id}
+Authorization: Bearer <token>
+X-Tenant-Id: <tenant-id>
+Content-Type: application/json
+
+{
+  "enabled": false
+}
+```
+
+## Schedule Types
+
+### CRON Schedules
+```json
+{
+  "trigger": {
+    "type": "CRON",
+    "cron": "0 9 * * 1-5"
+  }
+}
+```
+
+### RRULE Schedules
+```json
+{
+  "trigger": {
+    "type": "RRULE",
+    "rrule": "FREQ=WEEKLY;BYDAY=MO;BYHOUR=9"
+  }
+}
+```
+
+### Fixed Delay Schedules
+```json
+{
+  "trigger": {
+    "type": "FIXED_DELAY",
+    "delaySec": 3600
+  }
+}
+```
+
+### One-shot Schedules
+```json
+{
+  "trigger": {
+    "type": "ONE_SHOT",
+    "startAt": "2024-01-01T09:00:00Z"
+  }
+}
+```
+
+## Target Types
+
+### Event Targets
+```json
+{
+  "target": {
+    "kind": "EVENT",
+    "eventTopic": "my.custom.event"
+  }
+}
+```
+
+### HTTP Targets
+```json
+{
+  "target": {
+    "kind": "HTTP",
+    "http": {
+      "url": "https://api.example.com/webhook",
+      "method": "POST",
+      "headers": {
+        "Authorization": "Bearer token"
+      }
+    }
+  }
+}
+```
+
+### Queue Targets
+```json
+{
+  "target": {
+    "kind": "QUEUE",
+    "queue": {
+      "topic": "my-queue-topic"
+    }
+  }
+}
+```
+
+## Health Checks
+
+### Health Check
+```http
+GET /health
+```
+
+### Readiness Check
+```http
+GET /ready
+```
+
+### Liveness Check
+```http
+GET /live
+```
+
+## Docker
+
+Build the Docker image:
+
+```bash
+docker build -t scheduler-domain .
+```
+
+Run with Docker Compose:
+
+```yaml
+version: '3.8'
+services:
+  scheduler:
+    image: scheduler-domain
+    ports:
+      - "3080:3000"
+    environment:
+      - POSTGRES_URL=postgres://user:pass@db:5432/scheduler
+      - JWKS_URL=https://auth.example.com/.well-known/jwks.json
+    depends_on:
+      - db
+```
+
+## Testing
+
+Run unit tests:
+
+```bash
+npm test
+```
+
+Run tests with coverage:
+
+```bash
+npm run test:coverage
+```
+
+## Development
+
+### Project Structure
+
+```
+src/
+├── app/
+│   ├── middleware/     # Request middleware
+│   ├── routes/         # API routes
+│   └── server.ts       # Fastify server setup
+├── domain/
+│   ├── entities/       # Domain entities
+│   └── services/       # Domain services
+├── infra/
+│   ├── db/            # Database schema and connections
+│   ├── messaging/     # Event publishing
+│   ├── repo/          # Data repositories
+│   ├── security/      # Authentication & authorization
+│   └── telemetry/     # Logging and tracing
+└── index.ts           # Main exports
+```
+
+### Adding New Features
+
+1. **Domain Logic**: Add to `src/domain/`
+2. **API Endpoints**: Add to `src/app/routes/`
+3. **Infrastructure**: Add to `src/infra/`
+4. **Tests**: Add to `tests/`
 
 ## License
 
-Proprietary - VALEO NeuroERP
+MIT

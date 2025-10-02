@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuoteListResponseContractSchema = exports.QuoteQueryContractSchema = exports.QuoteResponseContractSchema = exports.UpdateQuoteContractSchema = exports.CreateQuoteContractSchema = exports.QuoteStatusContractSchema = exports.QuoteLineContractSchema = void 0;
 const zod_1 = require("zod");
+const zod_openapi_1 = require("zod-openapi");
+(0, zod_openapi_1.extendZodWithOpenApi)(zod_1.z);
 const entities_1 = require("../domain/entities");
 // OpenAPI schema for Quote Line
 exports.QuoteLineContractSchema = entities_1.QuoteLineSchema.openapi({
@@ -33,6 +35,8 @@ exports.QuoteStatusContractSchema = zod_1.z.enum([
 exports.CreateQuoteContractSchema = entities_1.CreateQuoteInputSchema.openapi({
     description: 'Quote creation data',
     example: {
+        status: entities_1.QuoteStatus.DRAFT,
+        tenantId: '550e8400-e29b-41d4-a716-446655440000',
         customerId: '550e8400-e29b-41d4-a716-446655440000',
         quoteNumber: 'QT-2024-001',
         lines: [
@@ -45,10 +49,10 @@ exports.CreateQuoteContractSchema = entities_1.CreateQuoteInputSchema.openapi({
                 discount: 10
             }
         ],
-        validUntil: '2024-12-31T23:59:59.000Z',
-        notes: 'This quote is valid for 30 days',
         taxRate: 19,
-        currency: 'EUR'
+        currency: 'EUR',
+        validUntil: new Date('2024-12-31T23:59:59.000Z'),
+        notes: 'This quote is valid for 30 days'
     }
 });
 // OpenAPI schema for Update Quote
@@ -85,11 +89,11 @@ exports.QuoteResponseContractSchema = entities_1.QuoteSchema.omit({ tenantId: tr
         totalGross: 3213.00,
         taxRate: 19,
         currency: 'EUR',
-        validUntil: '2024-12-31T23:59:59.000Z',
+        validUntil: new Date('2024-12-31T23:59:59.000Z'),
         notes: 'This quote is valid for 30 days',
         status: entities_1.QuoteStatus.SENT,
-        createdAt: '2024-01-01T00:00:00.000Z',
-        updatedAt: '2024-01-01T00:00:00.000Z',
+        createdAt: new Date('2024-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2024-01-01T00:00:00.000Z'),
         version: 1
     }
 });

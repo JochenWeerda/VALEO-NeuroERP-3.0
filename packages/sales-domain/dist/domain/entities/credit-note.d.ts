@@ -16,8 +16,8 @@ export declare const CreditNoteLineSchema: z.ZodObject<{
     totalGross: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    name: string;
     sku: string;
+    name: string;
     quantity: number;
     unitPrice: number;
     discount: number;
@@ -26,8 +26,8 @@ export declare const CreditNoteLineSchema: z.ZodObject<{
     description?: string | undefined;
 }, {
     id: string;
-    name: string;
     sku: string;
+    name: string;
     quantity: number;
     unitPrice: number;
     totalNet: number;
@@ -54,8 +54,8 @@ export declare const CreditNoteSchema: z.ZodObject<{
         totalGross: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
@@ -64,8 +64,8 @@ export declare const CreditNoteSchema: z.ZodObject<{
         description?: string | undefined;
     }, {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         totalNet: number;
@@ -87,12 +87,16 @@ export declare const CreditNoteSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
     version: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    version: number;
+    id: string;
+    totalNet: number;
+    totalGross: number;
+    status: "Issued" | "Settled";
+    tenantId: string;
     customerId: string;
     lines: {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
@@ -100,29 +104,29 @@ export declare const CreditNoteSchema: z.ZodObject<{
         totalGross: number;
         description?: string | undefined;
     }[];
-    id: string;
-    status: "Issued" | "Settled";
-    tenantId: string;
-    totalNet: number;
-    totalGross: number;
     subtotalNet: number;
     totalDiscount: number;
     taxRate: number;
     currency: string;
     createdAt: Date;
     updatedAt: Date;
+    version: number;
     invoiceId: string;
     creditNumber: string;
     reason: string;
     notes?: string | undefined;
     settledAt?: Date | undefined;
 }, {
-    version: number;
+    id: string;
+    totalNet: number;
+    totalGross: number;
+    status: "Issued" | "Settled";
+    tenantId: string;
     customerId: string;
     lines: {
         id: string;
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         totalNet: number;
@@ -130,15 +134,11 @@ export declare const CreditNoteSchema: z.ZodObject<{
         description?: string | undefined;
         discount?: number | undefined;
     }[];
-    id: string;
-    status: "Issued" | "Settled";
-    tenantId: string;
-    totalNet: number;
-    totalGross: number;
     subtotalNet: number;
     totalDiscount: number;
     createdAt: Date;
     updatedAt: Date;
+    version: number;
     invoiceId: string;
     creditNumber: string;
     reason: string;
@@ -149,8 +149,8 @@ export declare const CreditNoteSchema: z.ZodObject<{
 }>;
 export type CreditNote = z.infer<typeof CreditNoteSchema>;
 export declare const CreateCreditNoteInputSchema: z.ZodObject<{
-    customerId: z.ZodString;
     tenantId: z.ZodString;
+    customerId: z.ZodString;
     taxRate: z.ZodDefault<z.ZodNumber>;
     currency: z.ZodDefault<z.ZodString>;
     notes: z.ZodOptional<z.ZodString>;
@@ -169,31 +169,31 @@ export declare const CreateCreditNoteInputSchema: z.ZodObject<{
         totalNet: z.ZodNumber;
         totalGross: z.ZodNumber;
     }, "id" | "totalNet" | "totalGross">, "strip", z.ZodTypeAny, {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }, {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
         discount?: number | undefined;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
+    tenantId: string;
     customerId: string;
     lines: {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }[];
-    tenantId: string;
     taxRate: number;
     currency: string;
     invoiceId: string;
@@ -201,16 +201,16 @@ export declare const CreateCreditNoteInputSchema: z.ZodObject<{
     reason: string;
     notes?: string | undefined;
 }, {
+    tenantId: string;
     customerId: string;
     lines: {
-        name: string;
         sku: string;
+        name: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
         discount?: number | undefined;
     }[];
-    tenantId: string;
     invoiceId: string;
     creditNumber: string;
     reason: string;

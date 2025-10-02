@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { extendZodWithOpenApi } from 'zod-openapi';
+
+extendZodWithOpenApi(z);
 
 export const CallOffStatusEnum = z.enum(['Planned', 'Scheduled', 'Delivered', 'Invoiced', 'Cancelled']);
 
@@ -12,7 +15,7 @@ export const CreateCallOffSchema = z.object({
   silo: z.string().optional(),
   customerYard: z.string().optional(),
   notes: z.string().optional(),
-}).openapi('CreateCallOff');
+});
 
 export const UpdateCallOffSchema = z.object({
   qty: z.number().positive().optional(),
@@ -24,7 +27,7 @@ export const UpdateCallOffSchema = z.object({
   silo: z.string().optional(),
   customerYard: z.string().optional(),
   notes: z.string().optional(),
-}).openapi('UpdateCallOff');
+});
 
 export const CallOffResponseSchema = z.object({
   id: z.string().uuid(),
@@ -43,12 +46,12 @@ export const CallOffResponseSchema = z.object({
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   version: z.number(),
-}).openapi('CallOff');
+});
 
 export const MarkDeliveredSchema = z.object({
   actualQty: z.number().positive().optional(),
   notes: z.string().optional(),
-}).openapi('MarkDelivered');
+});
 
 export type CreateCallOff = z.infer<typeof CreateCallOffSchema>;
 export type UpdateCallOff = z.infer<typeof UpdateCallOffSchema>;
