@@ -53,21 +53,21 @@ declare const TargetSchema: z.ZodDiscriminatedUnion<"kind", [z.ZodObject<{
         headers: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
         hmacKeyRef: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        url: string;
         method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+        url: string;
         headers?: Record<string, string> | undefined;
         hmacKeyRef?: string | undefined;
     }, {
         url: string;
-        method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
         headers?: Record<string, string> | undefined;
+        method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
         hmacKeyRef?: string | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
     kind: "HTTP";
     http: {
-        url: string;
         method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+        url: string;
         headers?: Record<string, string> | undefined;
         hmacKeyRef?: string | undefined;
     };
@@ -75,8 +75,8 @@ declare const TargetSchema: z.ZodDiscriminatedUnion<"kind", [z.ZodObject<{
     kind: "HTTP";
     http: {
         url: string;
-        method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
         headers?: Record<string, string> | undefined;
+        method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
         hmacKeyRef?: string | undefined;
     };
 }>, z.ZodObject<{
@@ -89,15 +89,15 @@ declare const TargetSchema: z.ZodDiscriminatedUnion<"kind", [z.ZodObject<{
         topic: string;
     }>;
 }, "strip", z.ZodTypeAny, {
-    kind: "QUEUE";
     queue: {
         topic: string;
     };
+    kind: "QUEUE";
 }, {
-    kind: "QUEUE";
     queue: {
         topic: string;
     };
+    kind: "QUEUE";
 }>]>;
 declare const CalendarConfigSchema: z.ZodObject<{
     holidaysCode: z.ZodOptional<z.ZodString>;
@@ -167,21 +167,21 @@ declare const CreateScheduleInputSchema: z.ZodObject<{
             headers: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
             hmacKeyRef: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            url: string;
             method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            url: string;
             headers?: Record<string, string> | undefined;
             hmacKeyRef?: string | undefined;
         }, {
             url: string;
-            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             headers?: Record<string, string> | undefined;
+            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             hmacKeyRef?: string | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         kind: "HTTP";
         http: {
-            url: string;
             method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            url: string;
             headers?: Record<string, string> | undefined;
             hmacKeyRef?: string | undefined;
         };
@@ -189,8 +189,8 @@ declare const CreateScheduleInputSchema: z.ZodObject<{
         kind: "HTTP";
         http: {
             url: string;
-            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             headers?: Record<string, string> | undefined;
+            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             hmacKeyRef?: string | undefined;
         };
     }>, z.ZodObject<{
@@ -203,15 +203,15 @@ declare const CreateScheduleInputSchema: z.ZodObject<{
             topic: string;
         }>;
     }, "strip", z.ZodTypeAny, {
-        kind: "QUEUE";
         queue: {
             topic: string;
         };
+        kind: "QUEUE";
     }, {
-        kind: "QUEUE";
         queue: {
             topic: string;
         };
+        kind: "QUEUE";
     }>]>;
     payload: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     calendar: z.ZodOptional<z.ZodObject<{
@@ -227,6 +227,7 @@ declare const CreateScheduleInputSchema: z.ZodObject<{
     enabled: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
     name: string;
+    enabled: boolean;
     tz: string;
     trigger: {
         type: "CRON";
@@ -247,20 +248,19 @@ declare const CreateScheduleInputSchema: z.ZodObject<{
     } | {
         kind: "HTTP";
         http: {
-            url: string;
             method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            url: string;
             headers?: Record<string, string> | undefined;
             hmacKeyRef?: string | undefined;
         };
     } | {
-        kind: "QUEUE";
         queue: {
             topic: string;
         };
+        kind: "QUEUE";
     };
-    enabled: boolean;
-    description?: string | undefined;
     payload?: Record<string, any> | undefined;
+    description?: string | undefined;
     calendar?: {
         businessDaysOnly: boolean;
         holidaysCode?: string | undefined;
@@ -287,24 +287,24 @@ declare const CreateScheduleInputSchema: z.ZodObject<{
         kind: "HTTP";
         http: {
             url: string;
-            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             headers?: Record<string, string> | undefined;
+            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             hmacKeyRef?: string | undefined;
         };
     } | {
-        kind: "QUEUE";
         queue: {
             topic: string;
         };
+        kind: "QUEUE";
     };
+    payload?: Record<string, any> | undefined;
+    enabled?: boolean | undefined;
     description?: string | undefined;
     tz?: string | undefined;
-    payload?: Record<string, any> | undefined;
     calendar?: {
         holidaysCode?: string | undefined;
         businessDaysOnly?: boolean | undefined;
     } | undefined;
-    enabled?: boolean | undefined;
 }>;
 declare const UpdateScheduleInputSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
@@ -364,21 +364,21 @@ declare const UpdateScheduleInputSchema: z.ZodObject<{
             headers: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
             hmacKeyRef: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            url: string;
             method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            url: string;
             headers?: Record<string, string> | undefined;
             hmacKeyRef?: string | undefined;
         }, {
             url: string;
-            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             headers?: Record<string, string> | undefined;
+            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             hmacKeyRef?: string | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         kind: "HTTP";
         http: {
-            url: string;
             method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            url: string;
             headers?: Record<string, string> | undefined;
             hmacKeyRef?: string | undefined;
         };
@@ -386,8 +386,8 @@ declare const UpdateScheduleInputSchema: z.ZodObject<{
         kind: "HTTP";
         http: {
             url: string;
-            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             headers?: Record<string, string> | undefined;
+            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             hmacKeyRef?: string | undefined;
         };
     }>, z.ZodObject<{
@@ -400,15 +400,15 @@ declare const UpdateScheduleInputSchema: z.ZodObject<{
             topic: string;
         }>;
     }, "strip", z.ZodTypeAny, {
-        kind: "QUEUE";
         queue: {
             topic: string;
         };
+        kind: "QUEUE";
     }, {
-        kind: "QUEUE";
         queue: {
             topic: string;
         };
+        kind: "QUEUE";
     }>]>>;
     payload: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     calendar: z.ZodOptional<z.ZodObject<{
@@ -423,7 +423,9 @@ declare const UpdateScheduleInputSchema: z.ZodObject<{
     }>>;
     enabled: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
+    payload?: Record<string, any> | undefined;
     name?: string | undefined;
+    enabled?: boolean | undefined;
     description?: string | null | undefined;
     tz?: string | undefined;
     trigger?: {
@@ -445,25 +447,25 @@ declare const UpdateScheduleInputSchema: z.ZodObject<{
     } | {
         kind: "HTTP";
         http: {
-            url: string;
             method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            url: string;
             headers?: Record<string, string> | undefined;
             hmacKeyRef?: string | undefined;
         };
     } | {
-        kind: "QUEUE";
         queue: {
             topic: string;
         };
+        kind: "QUEUE";
     } | undefined;
-    payload?: Record<string, any> | undefined;
     calendar?: {
         businessDaysOnly: boolean;
         holidaysCode?: string | undefined;
     } | undefined;
-    enabled?: boolean | undefined;
 }, {
+    payload?: Record<string, any> | undefined;
     name?: string | undefined;
+    enabled?: boolean | undefined;
     description?: string | null | undefined;
     tz?: string | undefined;
     trigger?: {
@@ -486,22 +488,20 @@ declare const UpdateScheduleInputSchema: z.ZodObject<{
         kind: "HTTP";
         http: {
             url: string;
-            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             headers?: Record<string, string> | undefined;
+            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             hmacKeyRef?: string | undefined;
         };
     } | {
-        kind: "QUEUE";
         queue: {
             topic: string;
         };
+        kind: "QUEUE";
     } | undefined;
-    payload?: Record<string, any> | undefined;
     calendar?: {
         holidaysCode?: string | undefined;
         businessDaysOnly?: boolean | undefined;
     } | undefined;
-    enabled?: boolean | undefined;
 }>;
 declare const ScheduleQuerySchema: z.ZodObject<{
     enabled: z.ZodOptional<z.ZodEffects<z.ZodString, boolean, string>>;
@@ -513,14 +513,14 @@ declare const ScheduleQuerySchema: z.ZodObject<{
     page: number;
     pageSize: number;
     name?: string | undefined;
-    tz?: string | undefined;
     enabled?: boolean | undefined;
+    tz?: string | undefined;
 }, {
     name?: string | undefined;
+    enabled?: string | undefined;
+    tz?: string | undefined;
     page?: string | undefined;
     pageSize?: string | undefined;
-    tz?: string | undefined;
-    enabled?: string | undefined;
 }>;
 declare const ScheduleResponseSchema: z.ZodObject<{
     id: z.ZodString;
@@ -582,21 +582,21 @@ declare const ScheduleResponseSchema: z.ZodObject<{
             headers: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
             hmacKeyRef: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            url: string;
             method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            url: string;
             headers?: Record<string, string> | undefined;
             hmacKeyRef?: string | undefined;
         }, {
             url: string;
-            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             headers?: Record<string, string> | undefined;
+            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             hmacKeyRef?: string | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         kind: "HTTP";
         http: {
-            url: string;
             method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            url: string;
             headers?: Record<string, string> | undefined;
             hmacKeyRef?: string | undefined;
         };
@@ -604,8 +604,8 @@ declare const ScheduleResponseSchema: z.ZodObject<{
         kind: "HTTP";
         http: {
             url: string;
-            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             headers?: Record<string, string> | undefined;
+            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             hmacKeyRef?: string | undefined;
         };
     }>, z.ZodObject<{
@@ -618,15 +618,15 @@ declare const ScheduleResponseSchema: z.ZodObject<{
             topic: string;
         }>;
     }, "strip", z.ZodTypeAny, {
-        kind: "QUEUE";
         queue: {
             topic: string;
         };
+        kind: "QUEUE";
     }, {
-        kind: "QUEUE";
         queue: {
             topic: string;
         };
+        kind: "QUEUE";
     }>]>;
     payload: z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodAny>>;
     calendar: z.ZodNullable<z.ZodObject<{
@@ -646,14 +646,18 @@ declare const ScheduleResponseSchema: z.ZodObject<{
     updatedAt: z.ZodString;
     version: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
+    payload: Record<string, any> | null;
     name: string;
-    id: string;
     tenantId: string;
-    createdAt: string;
-    updatedAt: string;
     version: number;
+    enabled: boolean;
+    id: string;
     description: string | null;
     tz: string;
+    nextFireAt: string | null;
+    lastFireAt: string | null;
+    createdAt: string;
+    updatedAt: string;
     trigger: {
         type: "CRON";
         cron: string;
@@ -673,34 +677,34 @@ declare const ScheduleResponseSchema: z.ZodObject<{
     } | {
         kind: "HTTP";
         http: {
-            url: string;
             method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            url: string;
             headers?: Record<string, string> | undefined;
             hmacKeyRef?: string | undefined;
         };
     } | {
-        kind: "QUEUE";
         queue: {
             topic: string;
         };
+        kind: "QUEUE";
     };
-    payload: Record<string, any> | null;
     calendar: {
         businessDaysOnly: boolean;
         holidaysCode?: string | undefined;
     } | null;
-    enabled: boolean;
-    nextFireAt: string | null;
-    lastFireAt: string | null;
 }, {
+    payload: Record<string, any> | null;
     name: string;
-    id: string;
     tenantId: string;
-    createdAt: string;
-    updatedAt: string;
     version: number;
+    enabled: boolean;
+    id: string;
     description: string | null;
     tz: string;
+    nextFireAt: string | null;
+    lastFireAt: string | null;
+    createdAt: string;
+    updatedAt: string;
     trigger: {
         type: "CRON";
         cron: string;
@@ -721,24 +725,20 @@ declare const ScheduleResponseSchema: z.ZodObject<{
         kind: "HTTP";
         http: {
             url: string;
-            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             headers?: Record<string, string> | undefined;
+            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
             hmacKeyRef?: string | undefined;
         };
     } | {
-        kind: "QUEUE";
         queue: {
             topic: string;
         };
+        kind: "QUEUE";
     };
-    payload: Record<string, any> | null;
     calendar: {
         holidaysCode?: string | undefined;
         businessDaysOnly?: boolean | undefined;
     } | null;
-    enabled: boolean;
-    nextFireAt: string | null;
-    lastFireAt: string | null;
 }>;
 declare const ScheduleListResponseSchema: z.ZodObject<{
     data: z.ZodArray<z.ZodObject<{
@@ -801,21 +801,21 @@ declare const ScheduleListResponseSchema: z.ZodObject<{
                 headers: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
                 hmacKeyRef: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                url: string;
                 method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+                url: string;
                 headers?: Record<string, string> | undefined;
                 hmacKeyRef?: string | undefined;
             }, {
                 url: string;
-                method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
                 headers?: Record<string, string> | undefined;
+                method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
                 hmacKeyRef?: string | undefined;
             }>;
         }, "strip", z.ZodTypeAny, {
             kind: "HTTP";
             http: {
-                url: string;
                 method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+                url: string;
                 headers?: Record<string, string> | undefined;
                 hmacKeyRef?: string | undefined;
             };
@@ -823,8 +823,8 @@ declare const ScheduleListResponseSchema: z.ZodObject<{
             kind: "HTTP";
             http: {
                 url: string;
-                method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
                 headers?: Record<string, string> | undefined;
+                method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
                 hmacKeyRef?: string | undefined;
             };
         }>, z.ZodObject<{
@@ -837,15 +837,15 @@ declare const ScheduleListResponseSchema: z.ZodObject<{
                 topic: string;
             }>;
         }, "strip", z.ZodTypeAny, {
-            kind: "QUEUE";
             queue: {
                 topic: string;
             };
+            kind: "QUEUE";
         }, {
-            kind: "QUEUE";
             queue: {
                 topic: string;
             };
+            kind: "QUEUE";
         }>]>;
         payload: z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodAny>>;
         calendar: z.ZodNullable<z.ZodObject<{
@@ -865,14 +865,18 @@ declare const ScheduleListResponseSchema: z.ZodObject<{
         updatedAt: z.ZodString;
         version: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
+        payload: Record<string, any> | null;
         name: string;
-        id: string;
         tenantId: string;
-        createdAt: string;
-        updatedAt: string;
         version: number;
+        enabled: boolean;
+        id: string;
         description: string | null;
         tz: string;
+        nextFireAt: string | null;
+        lastFireAt: string | null;
+        createdAt: string;
+        updatedAt: string;
         trigger: {
             type: "CRON";
             cron: string;
@@ -892,34 +896,34 @@ declare const ScheduleListResponseSchema: z.ZodObject<{
         } | {
             kind: "HTTP";
             http: {
-                url: string;
                 method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+                url: string;
                 headers?: Record<string, string> | undefined;
                 hmacKeyRef?: string | undefined;
             };
         } | {
-            kind: "QUEUE";
             queue: {
                 topic: string;
             };
+            kind: "QUEUE";
         };
-        payload: Record<string, any> | null;
         calendar: {
             businessDaysOnly: boolean;
             holidaysCode?: string | undefined;
         } | null;
-        enabled: boolean;
-        nextFireAt: string | null;
-        lastFireAt: string | null;
     }, {
+        payload: Record<string, any> | null;
         name: string;
-        id: string;
         tenantId: string;
-        createdAt: string;
-        updatedAt: string;
         version: number;
+        enabled: boolean;
+        id: string;
         description: string | null;
         tz: string;
+        nextFireAt: string | null;
+        lastFireAt: string | null;
+        createdAt: string;
+        updatedAt: string;
         trigger: {
             type: "CRON";
             cron: string;
@@ -940,24 +944,20 @@ declare const ScheduleListResponseSchema: z.ZodObject<{
             kind: "HTTP";
             http: {
                 url: string;
-                method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
                 headers?: Record<string, string> | undefined;
+                method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
                 hmacKeyRef?: string | undefined;
             };
         } | {
-            kind: "QUEUE";
             queue: {
                 topic: string;
             };
+            kind: "QUEUE";
         };
-        payload: Record<string, any> | null;
         calendar: {
             holidaysCode?: string | undefined;
             businessDaysOnly?: boolean | undefined;
         } | null;
-        enabled: boolean;
-        nextFireAt: string | null;
-        lastFireAt: string | null;
     }>, "many">;
     pagination: z.ZodObject<{
         page: z.ZodNumber;
@@ -977,14 +977,18 @@ declare const ScheduleListResponseSchema: z.ZodObject<{
     }>;
 }, "strip", z.ZodTypeAny, {
     data: {
+        payload: Record<string, any> | null;
         name: string;
-        id: string;
         tenantId: string;
-        createdAt: string;
-        updatedAt: string;
         version: number;
+        enabled: boolean;
+        id: string;
         description: string | null;
         tz: string;
+        nextFireAt: string | null;
+        lastFireAt: string | null;
+        createdAt: string;
+        updatedAt: string;
         trigger: {
             type: "CRON";
             cron: string;
@@ -1004,25 +1008,21 @@ declare const ScheduleListResponseSchema: z.ZodObject<{
         } | {
             kind: "HTTP";
             http: {
-                url: string;
                 method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+                url: string;
                 headers?: Record<string, string> | undefined;
                 hmacKeyRef?: string | undefined;
             };
         } | {
-            kind: "QUEUE";
             queue: {
                 topic: string;
             };
+            kind: "QUEUE";
         };
-        payload: Record<string, any> | null;
         calendar: {
             businessDaysOnly: boolean;
             holidaysCode?: string | undefined;
         } | null;
-        enabled: boolean;
-        nextFireAt: string | null;
-        lastFireAt: string | null;
     }[];
     pagination: {
         page: number;
@@ -1032,14 +1032,18 @@ declare const ScheduleListResponseSchema: z.ZodObject<{
     };
 }, {
     data: {
+        payload: Record<string, any> | null;
         name: string;
-        id: string;
         tenantId: string;
-        createdAt: string;
-        updatedAt: string;
         version: number;
+        enabled: boolean;
+        id: string;
         description: string | null;
         tz: string;
+        nextFireAt: string | null;
+        lastFireAt: string | null;
+        createdAt: string;
+        updatedAt: string;
         trigger: {
             type: "CRON";
             cron: string;
@@ -1060,24 +1064,20 @@ declare const ScheduleListResponseSchema: z.ZodObject<{
             kind: "HTTP";
             http: {
                 url: string;
-                method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
                 headers?: Record<string, string> | undefined;
+                method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined;
                 hmacKeyRef?: string | undefined;
             };
         } | {
-            kind: "QUEUE";
             queue: {
                 topic: string;
             };
+            kind: "QUEUE";
         };
-        payload: Record<string, any> | null;
         calendar: {
             holidaysCode?: string | undefined;
             businessDaysOnly?: boolean | undefined;
         } | null;
-        enabled: boolean;
-        nextFireAt: string | null;
-        lastFireAt: string | null;
     }[];
     pagination: {
         page: number;

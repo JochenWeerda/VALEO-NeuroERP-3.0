@@ -39,7 +39,7 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
     // Extract user information from token
     const user: AuthenticatedUser = {
       userId: decoded.sub || decoded.userId,
-      email: decoded.email,
+      email: decoded.email || 'unknown@example.com',
       roles: decoded.roles || [],
       permissions: decoded.permissions || [],
       tenantId: decoded.tenantId || decoded.tenant_id,
@@ -179,8 +179,8 @@ export async function tenantIsolationMiddleware(request: FastifyRequest, reply: 
 
   // Check if user is trying to access data from a different tenant
   // This is an additional security check beyond the database-level tenant isolation
-  if (request.params && 'tenantId' in request.params) {
-    const requestedTenantId = request.params.tenantId as string;
+  if (request.params && typeof request.params === 'object' && 'tenantId' in request.params) {
+    const requestedTenantId = (request.params as any).tenantId as string;
     if (requestedTenantId && requestedTenantId !== userTenantId) {
       return reply.code(403).send({
         error: 'Forbidden',
@@ -192,8 +192,8 @@ export async function tenantIsolationMiddleware(request: FastifyRequest, reply: 
   }
 
   // For query parameters that might specify tenant
-  if (request.query && 'tenantId' in request.query) {
-    const requestedTenantId = request.query.tenantId as string;
+  if (request.query && typeof request.query === 'object' && 'tenantId' in request.query) {
+    const requestedTenantId = (request.query as any).tenantId as string;
     if (requestedTenantId && requestedTenantId !== userTenantId) {
       return reply.code(403).send({
         error: 'Forbidden',
@@ -217,6 +217,3 @@ export const adminOnlyMiddleware = [
   tenantIsolationMiddleware,
   requirePermissions([analyticsPermissions.ADMIN_ANALYTICS]),
 ];
-
-// Export types
-export type { AuthenticatedRequest, AuthenticatedUser };

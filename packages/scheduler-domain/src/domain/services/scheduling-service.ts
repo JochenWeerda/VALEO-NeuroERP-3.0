@@ -96,19 +96,22 @@ export class SchedulingService {
       }
 
       // Calculate next fire time
-      const nextFireAt = success ? await this.calculateNextFireTime(schedule) : undefined;
+      const nextFireAt = success ? await this.calculateNextFireTime(schedule) : null;
 
       // Update schedule with next fire time
-      await this.scheduleRepository.update(schedule.id, {
-        nextFireAt: nextFireAt ?? undefined,
+      const updateData: any = {
         lastFireAt: new Date(),
-      });
+      };
+      if (nextFireAt !== null) {
+        updateData.nextFireAt = nextFireAt;
+      }
+      await this.scheduleRepository.update(schedule.id, updateData);
 
       return {
         success,
         runId: success ? runId : undefined,
         error,
-        nextFireAt,
+        nextFireAt: nextFireAt || undefined,
       };
 
     } catch (err) {
@@ -122,7 +125,7 @@ export class SchedulingService {
   /**
    * Get schedules ready for execution
    */
-  async getSchedulesReadyForExecution(limit: number = 100): Promise<ScheduleEntity[]> {
+  async getSchedulesReadyForExecution(limit: number = 100): Promise<any[]> {
     const now = new Date();
     return await this.scheduleRepository.findEnabledSchedulesBeforeDate(now, limit);
   }
