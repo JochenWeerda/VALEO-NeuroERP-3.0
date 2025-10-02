@@ -75,10 +75,10 @@ export declare const RecipeSchema: z.ZodObject<{
     createdBy: z.ZodOptional<z.ZodString>;
     updatedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    code: string;
-    status: "Active" | "Archived";
     id: string;
     tenantId: string;
+    status: "Active" | "Archived";
+    code: string;
     createdAt: string;
     updatedAt: string;
     name: string;
@@ -99,9 +99,9 @@ export declare const RecipeSchema: z.ZodObject<{
     createdBy?: string | undefined;
     updatedBy?: string | undefined;
 }, {
-    code: string;
     id: string;
     tenantId: string;
+    code: string;
     createdAt: string;
     updatedAt: string;
     name: string;

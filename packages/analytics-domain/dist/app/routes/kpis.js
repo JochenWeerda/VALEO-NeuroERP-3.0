@@ -20,27 +20,28 @@ async function registerKpiRoutes(fastify, db) {
         },
         handler: async (request, reply) => {
             const query = request.query;
-            let dbQuery = db
-                .select()
-                .from(schema_1.kpis)
-                .where((0, drizzle_orm_1.eq)(schema_1.kpis.tenantId, request.tenantId))
-                .orderBy((0, drizzle_orm_1.desc)(schema_1.kpis.calculatedAt));
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.kpis.tenantId, request.tenantId)];
             if (query.name) {
-                dbQuery = dbQuery.where(schema_1.kpis.name.ilike(`%${query.name}%`));
+                conditions.push((0, drizzle_orm_1.ilike)(schema_1.kpis.name, `%${query.name}%`));
             }
             if (query.from) {
-                dbQuery = dbQuery.where(sql `${schema_1.kpis.calculatedAt} >= ${new Date(query.from)}`);
+                conditions.push((0, drizzle_orm_1.sql) `${schema_1.kpis.calculatedAt} >= ${new Date(query.from)}`);
             }
             if (query.to) {
-                dbQuery = dbQuery.where(sql `${schema_1.kpis.calculatedAt} <= ${new Date(query.to)}`);
+                conditions.push((0, drizzle_orm_1.sql) `${schema_1.kpis.calculatedAt} <= ${new Date(query.to)}`);
             }
             const page = query.page || 1;
             const pageSize = query.pageSize || 20;
             const offset = (page - 1) * pageSize;
-            dbQuery = dbQuery.limit(pageSize).offset(offset);
-            const results = await dbQuery;
+            const results = await db
+                .select()
+                .from(schema_1.kpis)
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .orderBy((0, drizzle_orm_1.desc)(schema_1.kpis.calculatedAt))
+                .limit(pageSize)
+                .offset(offset);
             const totalQuery = db
-                .select({ count: sql `count(*)` })
+                .select({ count: (0, drizzle_orm_1.sql) `count(*)` })
                 .from(schema_1.kpis)
                 .where((0, drizzle_orm_1.eq)(schema_1.kpis.tenantId, request.tenantId));
             const totalResult = await totalQuery;
@@ -104,6 +105,12 @@ async function registerKpiRoutes(fastify, db) {
                 });
             }
             const row = result[0];
+            if (!row) {
+                return reply.code(404).send({
+                    error: 'Not Found',
+                    message: 'KPI not found',
+                });
+            }
             return {
                 id: row.id,
                 tenantId: row.tenantId,
@@ -228,6 +235,12 @@ async function registerKpiRoutes(fastify, db) {
                 .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.kpis.id, id), (0, drizzle_orm_1.eq)(schema_1.kpis.tenantId, request.tenantId)))
                 .limit(1);
             const row = updated[0];
+            if (!row) {
+                return reply.code(404).send({
+                    error: 'Not Found',
+                    message: 'KPI not found',
+                });
+            }
             return {
                 id: row.id,
                 tenantId: row.tenantId,
