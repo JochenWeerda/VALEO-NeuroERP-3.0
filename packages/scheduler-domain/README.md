@@ -1,217 +1,309 @@
-***REMOVED*** @valero-neuroerp/scheduler-domain
+***REMOVED*** Scheduler Domain
 
-Enterprise-wide orchestrator for scheduled/timed tasks in the VALEO NeuroERP system.
+A comprehensive scheduling service built with Domain-Driven Design (DDD) principles, providing reliable job scheduling with support for CRON expressions, recurring rules, and event-driven execution.
 
-***REMOVED******REMOVED*** Overview
+***REMOVED******REMOVED*** Features
 
-The Scheduler Domain provides a comprehensive scheduling system that enables:
-
-- **Schedules**: CRON, RRULE, Fixed-Delay, and One-Shot triggers with calendar support
-- **Jobs**: Configurable job types with retry logic, backoff strategies, and concurrency limits
-- **Runs**: Individual execution instances with status tracking and metrics
-- **Workers**: Distributed worker management with capabilities and heartbeats
-- **Calendars**: Holiday and business day management for scheduling
+- **Multiple Trigger Types**: CRON expressions, RRULE (iCal), fixed delays, and one-shot schedules
+- **Flexible Targets**: Event publishing, HTTP webhooks, and queue messaging
+- **Tenant Isolation**: Multi-tenant support with proper data isolation
+- **Security**: JWT-based authentication with role-based access control (RBAC)
+- **Observability**: OpenTelemetry tracing and structured logging
+- **Health Checks**: Comprehensive health, readiness, and liveness endpoints
+- **Docker Support**: Production-ready containerization
 
 ***REMOVED******REMOVED*** Architecture
 
-***REMOVED******REMOVED******REMOVED*** Domain-Driven Design (DDD)
-- **Entities**: Schedule, Job, Run, Worker, Calendar
-- **Services**: Scheduling logic, execution management, worker coordination
-- **Events**: Domain events for observability and integration
+***REMOVED******REMOVED******REMOVED*** Domain Layer
+- **Entities**: `ScheduleEntity` with business logic and validation
+- **Services**: `SchedulingService` for schedule execution and management
+- **Events**: Domain events for schedule lifecycle
 
-***REMOVED******REMOVED******REMOVED*** Key Features
-- **Tenant Isolation**: All resources are tenant-scoped
-- **Time Zone Support**: UTC storage with tenant-specific timezone evaluation
-- **Distributed Execution**: Leader election and worker coordination
-- **Resilience**: Retry logic, dead letter queues, idempotency
-- **Observability**: OpenTelemetry tracing, structured logging, metrics
+***REMOVED******REMOVED******REMOVED*** Infrastructure Layer
+- **Repository**: Data access layer with Drizzle ORM
+- **Messaging**: Event publishing infrastructure
+- **Security**: JWT authentication and RBAC
+- **Telemetry**: Logging and tracing
 
-***REMOVED******REMOVED*** Domain Entities
+***REMOVED******REMOVED******REMOVED*** Application Layer
+- **Routes**: REST API endpoints with OpenAPI documentation
+- **Middleware**: Authentication, tenant isolation, and request logging
+- **Server**: Fastify-based HTTP server
 
-***REMOVED******REMOVED******REMOVED*** Schedule
-Represents a scheduled task configuration with triggers, targets, and calendar rules.
-
-**Triggers:**
-- `CRON`: Standard cron expressions
-- `RRULE`: iCal recurrence rules
-- `FIXED_DELAY`: Fixed interval scheduling
-- `ONE_SHOT`: Single execution
-
-**Targets:**
-- `EVENT`: Publish to NATS/Kafka
-- `HTTP`: Webhook with HMAC signing
-- `QUEUE`: Send to message queue
-
-***REMOVED******REMOVED******REMOVED*** Job
-Configuration for job types including retry policies and execution constraints.
-
-***REMOVED******REMOVED******REMOVED*** Run
-Individual execution instance with status tracking and metrics.
-
-***REMOVED******REMOVED******REMOVED*** Worker
-Registered worker nodes with capabilities and health monitoring.
-
-***REMOVED******REMOVED******REMOVED*** Calendar
-Holiday and business day definitions for scheduling logic.
-
-***REMOVED******REMOVED*** API Design
-
-***REMOVED******REMOVED******REMOVED*** REST Endpoints
-- `POST /schedules` - Create schedule
-- `GET /schedules` - List schedules with pagination
-- `GET /schedules/:id` - Get schedule details
-- `PATCH /schedules/:id` - Update schedule
-- `POST /schedules/:id/trigger` - Manual trigger
-- `POST /schedules/:id/backfill` - Backfill missed runs
-
-- `POST /jobs` - Create job configuration
-- `GET /jobs` - List jobs
-- `PATCH /jobs/:id` - Update job
-
-- `GET /runs` - List runs with filtering
-- `GET /runs/:id` - Get run details
-- `POST /runs/:id/retry` - Retry failed run
-- `POST /runs/:id/cancel` - Cancel pending run
-
-- `POST /workers/register` - Register worker
-- `POST /workers/:id/heartbeat` - Worker heartbeat
-- `GET /workers` - List workers
-
-***REMOVED******REMOVED*** Database Schema
-
-***REMOVED******REMOVED******REMOVED*** Tables
-- `schedules` - Schedule configurations
-- `jobs` - Job type definitions
-- `runs` - Execution instances
-- `workers` - Worker registrations
-- `calendars` - Calendar definitions
-
-***REMOVED******REMOVED******REMOVED*** Key Relationships
-- Schedule → Runs (1:N)
-- Job → Runs (1:N)
-- Worker → Runs (1:N)
-
-***REMOVED******REMOVED*** Event System
-
-***REMOVED******REMOVED******REMOVED*** Domain Events
-- `scheduler.schedule.created|updated|enabled|disabled`
-- `scheduler.run.started|succeeded|failed|missed|dead`
-- `scheduler.worker.registered|heartbeat|offline`
-
-***REMOVED******REMOVED******REMOVED*** Integration Events
-Consumed from other domains for trigger-based scheduling.
-
-***REMOVED******REMOVED*** Security
-
-- **JWT Authentication**: Bearer token validation
-- **RBAC**: scheduler:admin|read|operate scopes
-- **Tenant Isolation**: All queries filtered by tenantId
-- **HMAC Webhooks**: Signed HTTP targets for security
-
-***REMOVED******REMOVED*** Configuration
-
-***REMOVED******REMOVED******REMOVED*** Environment Variables
-```bash
-PORT=3080
-POSTGRES_URL=postgres://user:pass@db:5432/scheduler
-NATS_URL=nats://nats:4222
-REDIS_URL=redis://redis:6379
-JWKS_URL=https://auth.example.com/.well-known/jwks.json
-DEFAULT_TZ=Europe/Berlin
-WEBHOOK_HMAC_SECRET=change-me-in-production
-```
-
-***REMOVED******REMOVED*** Development
+***REMOVED******REMOVED*** Quick Start
 
 ***REMOVED******REMOVED******REMOVED*** Prerequisites
 - Node.js 18+
-- PostgreSQL 13+
-- Redis 6+
-- NATS Server
+- PostgreSQL
+- Redis (optional, for distributed locking)
+- NATS (optional, for event publishing)
 
-***REMOVED******REMOVED******REMOVED*** Setup
+***REMOVED******REMOVED******REMOVED*** Installation
+
 ```bash
 npm install
+```
+
+***REMOVED******REMOVED******REMOVED*** Configuration
+
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Configure the following environment variables:
+
+```env
+***REMOVED*** Server
+PORT=3080
+HOST=0.0.0.0
+
+***REMOVED*** Database
+POSTGRES_URL=postgres://user:pass@localhost:5432/scheduler
+
+***REMOVED*** Authentication
+JWKS_URL=https://auth.example.com/.well-known/jwks.json
+
+***REMOVED*** Observability
+LOG_LEVEL=info
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+```
+
+***REMOVED******REMOVED******REMOVED*** Database Setup
+
+Run the database migrations:
+
+```bash
 npm run migrate:up
+```
+
+***REMOVED******REMOVED******REMOVED*** Development
+
+```bash
 npm run dev
 ```
 
-***REMOVED******REMOVED******REMOVED*** Testing
-```bash
-npm run test:unit
-npm run test:integration
-npm run test:e2e
-```
+***REMOVED******REMOVED******REMOVED*** Production
 
-***REMOVED******REMOVED******REMOVED*** Building
 ```bash
 npm run build
 npm start
 ```
 
-***REMOVED******REMOVED*** Use Cases
+***REMOVED******REMOVED*** API Documentation
 
-***REMOVED******REMOVED******REMOVED*** Analytics Domain
-- Nightly KPI rebuilds (CRON 0 2 * * *)
-- Forecast calculations every 6 hours
-- Report generation on demand
+***REMOVED******REMOVED******REMOVED*** Create Schedule
 
-***REMOVED******REMOVED******REMOVED*** Notifications Domain
-- Daily invoice reminders (business days only)
-- Weekly campaign summaries
-- SLA breach alerts
+```http
+POST /schedules
+Authorization: Bearer <token>
+X-Tenant-Id: <tenant-id>
+Content-Type: application/json
 
-***REMOVED******REMOVED******REMOVED*** Document Domain
-- Retention policy enforcement (monthly)
-- Legal hold checks (daily)
-- Archive cleanup (weekly)
-
-***REMOVED******REMOVED******REMOVED*** HR Domain
-- Payroll processing (end of month)
-- Time tracking summaries (daily)
-- Compliance reporting (quarterly)
-
-***REMOVED******REMOVED*** Monitoring & Observability
-
-***REMOVED******REMOVED******REMOVED*** Metrics
-- Schedule execution latency
-- Job success/failure rates
-- Worker utilization
-- Queue depths
-
-***REMOVED******REMOVED******REMOVED*** Health Checks
-- Database connectivity
-- Message broker status
-- Worker heartbeats
-- Leader election status
-
-***REMOVED******REMOVED*** Deployment
-
-***REMOVED******REMOVED******REMOVED*** Docker
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY dist/ ./dist/
-EXPOSE 3080
-CMD ["npm", "start"]
+{
+  "tenantId": "tenant-123",
+  "name": "Daily Report",
+  "tz": "Europe/Berlin",
+  "trigger": {
+    "type": "CRON",
+    "cron": "0 9 * * *"
+  },
+  "target": {
+    "kind": "EVENT",
+    "eventTopic": "reports.daily.generate"
+  },
+  "enabled": true
+}
 ```
 
-***REMOVED******REMOVED******REMOVED*** Kubernetes
-- Deployment with leader election
-- Horizontal Pod Autoscaling
-- ConfigMap for calendar data
-- Persistent volume for state
+***REMOVED******REMOVED******REMOVED*** List Schedules
 
-***REMOVED******REMOVED*** Contributing
+```http
+GET /schedules?tenantId=tenant-123&page=1&pageSize=20
+Authorization: Bearer <token>
+X-Tenant-Id: <tenant-id>
+```
 
-1. Follow DDD principles
-2. Write comprehensive tests
-3. Update OpenAPI documentation
-4. Ensure tenant isolation
-5. Add appropriate logging
+***REMOVED******REMOVED******REMOVED*** Update Schedule
+
+```http
+PATCH /schedules/{id}
+Authorization: Bearer <token>
+X-Tenant-Id: <tenant-id>
+Content-Type: application/json
+
+{
+  "enabled": false
+}
+```
+
+***REMOVED******REMOVED*** Schedule Types
+
+***REMOVED******REMOVED******REMOVED*** CRON Schedules
+```json
+{
+  "trigger": {
+    "type": "CRON",
+    "cron": "0 9 * * 1-5"
+  }
+}
+```
+
+***REMOVED******REMOVED******REMOVED*** RRULE Schedules
+```json
+{
+  "trigger": {
+    "type": "RRULE",
+    "rrule": "FREQ=WEEKLY;BYDAY=MO;BYHOUR=9"
+  }
+}
+```
+
+***REMOVED******REMOVED******REMOVED*** Fixed Delay Schedules
+```json
+{
+  "trigger": {
+    "type": "FIXED_DELAY",
+    "delaySec": 3600
+  }
+}
+```
+
+***REMOVED******REMOVED******REMOVED*** One-shot Schedules
+```json
+{
+  "trigger": {
+    "type": "ONE_SHOT",
+    "startAt": "2024-01-01T09:00:00Z"
+  }
+}
+```
+
+***REMOVED******REMOVED*** Target Types
+
+***REMOVED******REMOVED******REMOVED*** Event Targets
+```json
+{
+  "target": {
+    "kind": "EVENT",
+    "eventTopic": "my.custom.event"
+  }
+}
+```
+
+***REMOVED******REMOVED******REMOVED*** HTTP Targets
+```json
+{
+  "target": {
+    "kind": "HTTP",
+    "http": {
+      "url": "https://api.example.com/webhook",
+      "method": "POST",
+      "headers": {
+        "Authorization": "Bearer token"
+      }
+    }
+  }
+}
+```
+
+***REMOVED******REMOVED******REMOVED*** Queue Targets
+```json
+{
+  "target": {
+    "kind": "QUEUE",
+    "queue": {
+      "topic": "my-queue-topic"
+    }
+  }
+}
+```
+
+***REMOVED******REMOVED*** Health Checks
+
+***REMOVED******REMOVED******REMOVED*** Health Check
+```http
+GET /health
+```
+
+***REMOVED******REMOVED******REMOVED*** Readiness Check
+```http
+GET /ready
+```
+
+***REMOVED******REMOVED******REMOVED*** Liveness Check
+```http
+GET /live
+```
+
+***REMOVED******REMOVED*** Docker
+
+Build the Docker image:
+
+```bash
+docker build -t scheduler-domain .
+```
+
+Run with Docker Compose:
+
+```yaml
+version: '3.8'
+services:
+  scheduler:
+    image: scheduler-domain
+    ports:
+      - "3080:3000"
+    environment:
+      - POSTGRES_URL=postgres://user:pass@db:5432/scheduler
+      - JWKS_URL=https://auth.example.com/.well-known/jwks.json
+    depends_on:
+      - db
+```
+
+***REMOVED******REMOVED*** Testing
+
+Run unit tests:
+
+```bash
+npm test
+```
+
+Run tests with coverage:
+
+```bash
+npm run test:coverage
+```
+
+***REMOVED******REMOVED*** Development
+
+***REMOVED******REMOVED******REMOVED*** Project Structure
+
+```
+src/
+├── app/
+│   ├── middleware/     ***REMOVED*** Request middleware
+│   ├── routes/         ***REMOVED*** API routes
+│   └── server.ts       ***REMOVED*** Fastify server setup
+├── domain/
+│   ├── entities/       ***REMOVED*** Domain entities
+│   └── services/       ***REMOVED*** Domain services
+├── infra/
+│   ├── db/            ***REMOVED*** Database schema and connections
+│   ├── messaging/     ***REMOVED*** Event publishing
+│   ├── repo/          ***REMOVED*** Data repositories
+│   ├── security/      ***REMOVED*** Authentication & authorization
+│   └── telemetry/     ***REMOVED*** Logging and tracing
+└── index.ts           ***REMOVED*** Main exports
+```
+
+***REMOVED******REMOVED******REMOVED*** Adding New Features
+
+1. **Domain Logic**: Add to `src/domain/`
+2. **API Endpoints**: Add to `src/app/routes/`
+3. **Infrastructure**: Add to `src/infra/`
+4. **Tests**: Add to `tests/`
 
 ***REMOVED******REMOVED*** License
 
-Proprietary - VALEO NeuroERP
+MIT

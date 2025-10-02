@@ -82,10 +82,10 @@ declare const WorkerResponseSchema: z.ZodObject<{
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
+    id: string;
     name: string;
     tenantId: string | null;
     version: number;
-    id: string;
     createdAt: string;
     updatedAt: string;
     status: "Online" | "Offline" | "Maintenance";
@@ -97,10 +97,10 @@ declare const WorkerResponseSchema: z.ZodObject<{
     maxParallel: number;
     currentJobs: number;
 }, {
+    id: string;
     name: string;
     tenantId: string | null;
     version: number;
-    id: string;
     createdAt: string;
     updatedAt: string;
     status: "Online" | "Offline" | "Maintenance";
@@ -135,10 +135,10 @@ declare const WorkerListResponseSchema: z.ZodObject<{
         createdAt: z.ZodString;
         updatedAt: z.ZodString;
     }, "strip", z.ZodTypeAny, {
+        id: string;
         name: string;
         tenantId: string | null;
         version: number;
-        id: string;
         createdAt: string;
         updatedAt: string;
         status: "Online" | "Offline" | "Maintenance";
@@ -150,10 +150,10 @@ declare const WorkerListResponseSchema: z.ZodObject<{
         maxParallel: number;
         currentJobs: number;
     }, {
+        id: string;
         name: string;
         tenantId: string | null;
         version: number;
-        id: string;
         createdAt: string;
         updatedAt: string;
         status: "Online" | "Offline" | "Maintenance";
@@ -183,10 +183,10 @@ declare const WorkerListResponseSchema: z.ZodObject<{
     }>;
 }, "strip", z.ZodTypeAny, {
     data: {
+        id: string;
         name: string;
         tenantId: string | null;
         version: number;
-        id: string;
         createdAt: string;
         updatedAt: string;
         status: "Online" | "Offline" | "Maintenance";
@@ -206,10 +206,10 @@ declare const WorkerListResponseSchema: z.ZodObject<{
     };
 }, {
     data: {
+        id: string;
         name: string;
         tenantId: string | null;
         version: number;
-        id: string;
         createdAt: string;
         updatedAt: string;
         status: "Online" | "Offline" | "Maintenance";

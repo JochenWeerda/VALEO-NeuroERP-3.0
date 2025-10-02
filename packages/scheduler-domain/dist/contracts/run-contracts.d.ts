@@ -63,38 +63,38 @@ declare const RunResponseSchema: z.ZodObject<{
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    payload: Record<string, any> | null;
-    error: string | null;
-    tenantId: string;
-    scheduleId: string | null;
     id: string;
+    tenantId: string;
+    payload: Record<string, any> | null;
     createdAt: string;
     updatedAt: string;
+    scheduleId: string | null;
     jobId: string | null;
     dedupeKey: string | null;
     status: "Pending" | "Running" | "Succeeded" | "Failed" | "Missed" | "Dead";
     startedAt: string | null;
     finishedAt: string | null;
     attempt: number;
+    error: string | null;
     workerId: string | null;
     metrics: {
         latencyMs: number | null;
         durationMs: number | null;
     } | null;
 }, {
-    payload: Record<string, any> | null;
-    error: string | null;
-    tenantId: string;
-    scheduleId: string | null;
     id: string;
+    tenantId: string;
+    payload: Record<string, any> | null;
     createdAt: string;
     updatedAt: string;
+    scheduleId: string | null;
     jobId: string | null;
     dedupeKey: string | null;
     status: "Pending" | "Running" | "Succeeded" | "Failed" | "Missed" | "Dead";
     startedAt: string | null;
     finishedAt: string | null;
     attempt: number;
+    error: string | null;
     workerId: string | null;
     metrics: {
         latencyMs: number | null;
@@ -128,38 +128,38 @@ declare const RunListResponseSchema: z.ZodObject<{
         createdAt: z.ZodString;
         updatedAt: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        payload: Record<string, any> | null;
-        error: string | null;
-        tenantId: string;
-        scheduleId: string | null;
         id: string;
+        tenantId: string;
+        payload: Record<string, any> | null;
         createdAt: string;
         updatedAt: string;
+        scheduleId: string | null;
         jobId: string | null;
         dedupeKey: string | null;
         status: "Pending" | "Running" | "Succeeded" | "Failed" | "Missed" | "Dead";
         startedAt: string | null;
         finishedAt: string | null;
         attempt: number;
+        error: string | null;
         workerId: string | null;
         metrics: {
             latencyMs: number | null;
             durationMs: number | null;
         } | null;
     }, {
-        payload: Record<string, any> | null;
-        error: string | null;
-        tenantId: string;
-        scheduleId: string | null;
         id: string;
+        tenantId: string;
+        payload: Record<string, any> | null;
         createdAt: string;
         updatedAt: string;
+        scheduleId: string | null;
         jobId: string | null;
         dedupeKey: string | null;
         status: "Pending" | "Running" | "Succeeded" | "Failed" | "Missed" | "Dead";
         startedAt: string | null;
         finishedAt: string | null;
         attempt: number;
+        error: string | null;
         workerId: string | null;
         metrics: {
             latencyMs: number | null;
@@ -184,19 +184,19 @@ declare const RunListResponseSchema: z.ZodObject<{
     }>;
 }, "strip", z.ZodTypeAny, {
     data: {
-        payload: Record<string, any> | null;
-        error: string | null;
-        tenantId: string;
-        scheduleId: string | null;
         id: string;
+        tenantId: string;
+        payload: Record<string, any> | null;
         createdAt: string;
         updatedAt: string;
+        scheduleId: string | null;
         jobId: string | null;
         dedupeKey: string | null;
         status: "Pending" | "Running" | "Succeeded" | "Failed" | "Missed" | "Dead";
         startedAt: string | null;
         finishedAt: string | null;
         attempt: number;
+        error: string | null;
         workerId: string | null;
         metrics: {
             latencyMs: number | null;
@@ -211,19 +211,19 @@ declare const RunListResponseSchema: z.ZodObject<{
     };
 }, {
     data: {
-        payload: Record<string, any> | null;
-        error: string | null;
-        tenantId: string;
-        scheduleId: string | null;
         id: string;
+        tenantId: string;
+        payload: Record<string, any> | null;
         createdAt: string;
         updatedAt: string;
+        scheduleId: string | null;
         jobId: string | null;
         dedupeKey: string | null;
         status: "Pending" | "Running" | "Succeeded" | "Failed" | "Missed" | "Dead";
         startedAt: string | null;
         finishedAt: string | null;
         attempt: number;
+        error: string | null;
         workerId: string | null;
         metrics: {
             latencyMs: number | null;
