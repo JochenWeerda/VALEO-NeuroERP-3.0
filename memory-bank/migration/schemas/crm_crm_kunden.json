@@ -1,0 +1,51 @@
+{
+  "schema": "crm",
+  "name": "kunden",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunden_nr",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "firmenname",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kundenbetreuer_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE crm.kunden (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    kunden_nr VARCHAR(20) UNIQUE NOT NULL,\n    firmenname VARCHAR(200) NOT NULL,\n    kundentyp VARCHAR(50) NOT NULL, -- 'GESCHAEFTSKUNDE', 'PRIVATKUNDE', 'GROSSKUNDE', 'TESTKUNDE'\n    branche VARCHAR(100),\n    umsatzklasse VARCHAR(50), -- 'KLEIN', 'MITTEL', 'GROSS', 'PREMIUM'\n    kundenstatus VARCHAR(50) DEFAULT 'AKTIV', -- 'AKTIV', 'INAKTIV', 'GESPERRT', 'GELOESCHT'\n    kundenbewertung INTEGER, -- 1-5 Sterne\n    kundenseit VARCHAR(50), -- 'A', 'B', 'C', 'D'\n    zahlungsziel INTEGER DEFAULT 30, -- Tage\n    skonto_prozent DECIMAL(5,2) DEFAULT 0.00,\n    kundenbetreuer_id UUID,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "crm.kunden"
+}

@@ -1,0 +1,107 @@
+{
+  "schema": "produktion",
+  "name": "qs_dokumentation",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "dokument_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_nr",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_typ",
+      "type": "VARCHAR(50) NOT NULL CHECK (dokument_typ IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "referenz_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "referenz_typ",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_datum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verantwortlicher_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "naechste_pruefung",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.qs_dokumentation (\n    dokument_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    dokument_nr VARCHAR(50) UNIQUE NOT NULL,\n    dokument_typ VARCHAR(50) NOT NULL CHECK (dokument_typ IN ('HACCP', 'EIGENKONTROLLE', 'LIEFERANTENAUDIT', 'PERSONALSCHULUNG', 'WARTUNG')),\n    referenz_id UUID,\n    referenz_typ VARCHAR(50),\n    dokument_datum DATE NOT NULL,\n    verantwortlicher_id UUID,\n    status VARCHAR(20) DEFAULT 'OFFEN' CHECK (status IN ('OFFEN', 'IN_BEARBEITUNG', 'ABGESCHLOSSEN', '\u00dcBERF\u00c4LLIG')),\n    naechste_pruefung DATE,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    erstellt_von UUID,\n    geaendert_von UUID\n);",
+  "table": "produktion.qs_dokumentation"
+}

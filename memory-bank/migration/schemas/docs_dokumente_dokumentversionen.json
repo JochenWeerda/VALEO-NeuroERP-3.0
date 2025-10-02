@@ -1,0 +1,79 @@
+{
+  "schema": "dokumente",
+  "name": "dokumentversionen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "version",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dateiname",
+      "type": "VARCHAR(255) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "original_dateiname",
+      "type": "VARCHAR(255) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dateigroesse",
+      "type": "BIGINT NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dateipfad",
+      "type": "VARCHAR(500)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aenderungsbeschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.dokumentversionen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id) ON DELETE CASCADE,\n    version VARCHAR(20) NOT NULL,\n    dateiname VARCHAR(255) NOT NULL,\n    original_dateiname VARCHAR(255) NOT NULL,\n    dateigroesse BIGINT NOT NULL,\n    dateipfad VARCHAR(500),\n    aenderungsbeschreibung TEXT,\n    erstellt_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.dokumentversionen"
+}

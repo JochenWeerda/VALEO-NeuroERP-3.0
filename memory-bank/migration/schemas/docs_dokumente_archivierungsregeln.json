@@ -1,0 +1,72 @@
+{
+  "schema": "dokumente",
+  "name": "archivierungsregeln",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "regel_name",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kategorie_id",
+      "type": "UUID REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_typ",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "archivierung_nach_tagen",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "loeschung_nach_tagen",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.archivierungsregeln (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    regel_name VARCHAR(100) NOT NULL,\n    beschreibung TEXT,\n    kategorie_id UUID REFERENCES dokumente.dokumentenkategorien(id),\n    dokument_typ VARCHAR(50),\n    archivierung_nach_tagen INTEGER NOT NULL,\n    loeschung_nach_tagen INTEGER,\n    gesetzliche_frist_jahre INTEGER NOT NULL, -- Gesetzliche Aufbewahrungsfrist in Jahren\n    gesetzliche_grundlage VARCHAR(200), -- z.B. \"\u00a7 147 AO\", \"\u00a7 257 HGB\"\n    bereinigung_typ VARCHAR(50) DEFAULT 'ARCHIVIEREN', -- 'ARCHIVIEREN', 'EXPORTIEREN', 'LOESCHEN'\n    export_format VARCHAR(50), -- 'PDF', 'ZIP', 'TAR.GZ'\n    export_ziel VARCHAR(500), -- Pfad f\u00fcr Export\n    aktiv BOOLEAN DEFAULT true,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.archivierungsregeln"
+}

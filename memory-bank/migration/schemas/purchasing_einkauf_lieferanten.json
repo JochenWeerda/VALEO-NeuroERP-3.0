@@ -1,0 +1,149 @@
+{
+  "schema": "einkauf",
+  "name": "lieferanten",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "lieferant_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferant_nr",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "firmenname",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ansprechpartner",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "telefon",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "email",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "webseite",
+      "type": "VARCHAR(200)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "steuernummer",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ust_id",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zahlungsziel",
+      "type": "INTEGER DEFAULT 30",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "skonto_prozent",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "skonto_tage",
+      "type": "INTEGER DEFAULT 0",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kategorie",
+      "type": "VARCHAR(50) CHECK (kategorie IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bewertung",
+      "type": "INTEGER CHECK (bewertung",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE einkauf.lieferanten (\n    lieferant_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    lieferant_nr VARCHAR(50) UNIQUE NOT NULL,\n    firmenname VARCHAR(200) NOT NULL,\n    ansprechpartner VARCHAR(100),\n    telefon VARCHAR(50),\n    email VARCHAR(100),\n    webseite VARCHAR(200),\n    steuernummer VARCHAR(50),\n    ust_id VARCHAR(50),\n    zahlungsziel INTEGER DEFAULT 30,\n    skonto_prozent DECIMAL(5,2) DEFAULT 0,\n    skonto_tage INTEGER DEFAULT 0,\n    kategorie VARCHAR(50) CHECK (kategorie IN ('A', 'B', 'C', 'D\u00dcNGER', 'FUTTERMITTEL', 'PSM', 'MASCHINEN', 'DIENSTLEISTUNG')),\n    status VARCHAR(20) DEFAULT 'AKTIV' CHECK (status IN ('AKTIV', 'INAKTIV', 'GESPERRT')),\n    bewertung INTEGER CHECK (bewertung >= 1 AND bewertung <= 5),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    erstellt_von UUID,\n    geaendert_von UUID\n);",
+  "table": "einkauf.lieferanten"
+}

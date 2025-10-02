@@ -1,0 +1,101 @@
+{
+  "schema": "finanz",
+  "name": "kassenbewegungen",
+  "primaryKey": "id",
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID",
+      "nullable": true,
+      "default": "gen_random_uuid()",
+      "constraints": [
+        "primary-key"
+      ]
+    },
+    {
+      "name": "kasse_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "bewegungstyp",
+      "type": "VARCHAR(50)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "betrag",
+      "type": "DECIMAL(15,2)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "waehrung",
+      "type": "VARCHAR(3)",
+      "nullable": true,
+      "default": "'EUR'",
+      "constraints": []
+    },
+    {
+      "name": "bewegungsdatum",
+      "type": "DATE",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bewegungszeit",
+      "type": "TIME",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zahlungsart",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "buchung_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS finanz.kassenbewegungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    kasse_id UUID REFERENCES finanz.kassen(id),\n    bewegungstyp VARCHAR(50) NOT NULL CHECK (bewegungstyp IN ('Einzahlung', 'Auszahlung')),\n    betrag DECIMAL(15,2) NOT NULL,\n    waehrung VARCHAR(3) DEFAULT 'EUR',\n    bewegungsdatum DATE NOT NULL,\n    bewegungszeit TIME NOT NULL,\n    zahlungsart VARCHAR(50),\n    buchung_id UUID REFERENCES finanz.buchungen(id),\n    beschreibung TEXT,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "finanz.kassenbewegungen"
+}

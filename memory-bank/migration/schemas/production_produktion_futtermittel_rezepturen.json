@@ -1,0 +1,114 @@
+{
+  "schema": "produktion",
+  "name": "futtermittel_rezepturen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "rezeptur_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rezeptur_nr",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bezeichnung",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "tierart",
+      "type": "VARCHAR(50) NOT NULL CHECK (tierart IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lebensphase",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rezeptur_typ",
+      "type": "VARCHAR(50) NOT NULL CHECK (rezeptur_typ IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "version",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gueltig_von",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gueltig_bis",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.futtermittel_rezepturen (\n    rezeptur_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    rezeptur_nr VARCHAR(50) UNIQUE NOT NULL,\n    bezeichnung VARCHAR(200) NOT NULL,\n    tierart VARCHAR(50) NOT NULL CHECK (tierart IN ('RINDER', 'SCHWEINE', 'GEFLUEGEL', 'PFERDE', 'SCHAFE', 'ZIEGEN')),\n    lebensphase VARCHAR(50),\n    rezeptur_typ VARCHAR(50) NOT NULL CHECK (rezeptur_typ IN ('ALLEINFUTTER', 'ERG\u00c4NZUNGSFUTTER', 'MINERALFUTTER', 'VORMISCHUNG')),\n    version VARCHAR(20) NOT NULL,\n    gueltig_von DATE NOT NULL,\n    gueltig_bis DATE,\n    status VARCHAR(20) DEFAULT 'AKTIV' CHECK (status IN ('AKTIV', 'INAKTIV', 'GESPERRT')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    erstellt_von UUID,\n    geaendert_von UUID\n);",
+  "table": "produktion.futtermittel_rezepturen"
+}

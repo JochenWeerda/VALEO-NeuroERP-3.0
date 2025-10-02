@@ -1,0 +1,107 @@
+{
+  "schema": "anlagen",
+  "name": "standorte",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "standortname",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "adresse",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "plz",
+      "type": "VARCHAR(10)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ort",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "land",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kontaktperson",
+      "type": "VARCHAR(255)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "telefon",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "email",
+      "type": "VARCHAR(255)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_aktiv",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "notizen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS anlagen.standorte (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    standortname VARCHAR(100) NOT NULL,\n    adresse TEXT,\n    plz VARCHAR(10),\n    ort VARCHAR(100),\n    land VARCHAR(100),\n    kontaktperson VARCHAR(255),\n    telefon VARCHAR(50),\n    email VARCHAR(255),\n    ist_aktiv BOOLEAN DEFAULT true,\n    notizen TEXT,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "anlagen.standorte"
+}

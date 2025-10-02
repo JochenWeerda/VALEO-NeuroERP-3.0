@@ -1,0 +1,72 @@
+{
+  "schema": "reporting",
+  "name": "drill_down_definitionen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "name",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "quell_bericht_id",
+      "type": "UUID NOT NULL REFERENCES reporting",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ziel_bericht_id",
+      "type": "UUID NOT NULL REFERENCES reporting",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE reporting.drill_down_definitionen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    name VARCHAR(200) NOT NULL,\n    beschreibung TEXT,\n    quell_bericht_id UUID NOT NULL REFERENCES reporting.berichtsvorlagen(id),\n    ziel_bericht_id UUID NOT NULL REFERENCES reporting.berichtsvorlagen(id),\n    drill_down_felder JSONB NOT NULL, -- Mapping zwischen Quell- und Ziel-Feldern\n    aktiv BOOLEAN DEFAULT true,\n    erstellt_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_von UUID REFERENCES personal.mitarbeiter(id),\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "reporting.drill_down_definitionen"
+}

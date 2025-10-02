@@ -1,0 +1,65 @@
+{
+  "schema": "qualitaet",
+  "name": "korrekturmassnahmen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "reklamation_id",
+      "type": "UUID REFERENCES qualitaet",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "massnahme_nr",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verantwortlicher_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "start_datum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "end_datum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE qualitaet.korrekturmassnahmen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    reklamation_id UUID REFERENCES qualitaet.reklamationen(id),\n    massnahme_nr VARCHAR(20) UNIQUE NOT NULL,\n    massnahme_typ VARCHAR(50) NOT NULL, -- 'SOFORTMASSNAHME', 'KORREKTURMASSNAHME', 'VORBEUGEMASSNAHME'\n    beschreibung TEXT NOT NULL,\n    verantwortlicher_id UUID,\n    start_datum DATE,\n    end_datum DATE,\n    status VARCHAR(20) DEFAULT 'GEPLANT', -- 'GEPLANT', 'IN_BEARBEITUNG', 'ABGESCHLOSSEN'\n    effektivitaet VARCHAR(20), -- 'EFFEKTIV', 'TEILWEISE_EFFEKTIV', 'NICHT_EFFEKTIV'\n    bemerkungen TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "qualitaet.korrekturmassnahmen"
+}

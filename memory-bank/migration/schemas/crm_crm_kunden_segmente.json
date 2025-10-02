@@ -1,0 +1,51 @@
+{
+  "schema": "crm",
+  "name": "kunden_segmente",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID NOT NULL REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "segment_id",
+      "type": "UUID NOT NULL REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zuordnungs_datum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE crm.kunden_segmente (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    kunde_id UUID NOT NULL REFERENCES crm.kunden(id),\n    segment_id UUID NOT NULL REFERENCES crm.kundensegmente(id),\n    zuordnungs_datum DATE NOT NULL,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "crm.kunden_segmente"
+}

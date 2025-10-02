@@ -1,0 +1,44 @@
+{
+  "schema": "dokumente",
+  "name": "dokumentzugriffe",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mitarbeiter_id",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "user_agent",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.dokumentzugriffe (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id),\n    mitarbeiter_id UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    zugriff_typ VARCHAR(50) NOT NULL, -- 'ANGEZEIGT', 'HERUNTERGELADEN', 'BEARBEITET', 'GEDRUCKT', 'FREIGEGEBEN'\n    ip_adresse INET,\n    user_agent TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.dokumentzugriffe"
+}

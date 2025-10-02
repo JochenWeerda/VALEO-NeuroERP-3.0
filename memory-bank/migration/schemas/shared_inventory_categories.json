@@ -1,0 +1,58 @@
+{
+  "schema": "",
+  "name": "inventory_categories",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "name",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "description",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "parent_id",
+      "type": "UUID REFERENCES inventory_categories(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "is_active",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS inventory_categories (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    name VARCHAR(100) NOT NULL,\n    description TEXT,\n    parent_id UUID REFERENCES inventory_categories(id),\n    is_active BOOLEAN DEFAULT true,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "inventory_categories"
+}

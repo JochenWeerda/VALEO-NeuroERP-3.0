@@ -1,0 +1,44 @@
+{
+  "schema": "dokumente",
+  "name": "dokument_cache",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "cache_hash",
+      "type": "VARCHAR(64)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ablauf_datum",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.dokument_cache (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id),\n    cache_typ VARCHAR(50) NOT NULL, -- 'THUMBNAIL', 'VORSCHAU', 'METADATEN'\n    cache_daten BYTEA,\n    cache_hash VARCHAR(64),\n    ablauf_datum TIMESTAMP,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.dokument_cache"
+}

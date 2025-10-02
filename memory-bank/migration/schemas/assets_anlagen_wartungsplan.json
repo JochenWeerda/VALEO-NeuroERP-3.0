@@ -1,0 +1,107 @@
+{
+  "schema": "anlagen",
+  "name": "wartungsplan",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anlage_id",
+      "type": "UUID REFERENCES anlagen",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "wartungstyp",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "intervall_typ",
+      "type": "VARCHAR(50) CHECK (intervall_typ IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "intervall_wert",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "naechste_wartung",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "letzte_wartung",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kosten_pro_wartung",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verantwortlicher",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_aktiv",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS anlagen.wartungsplan (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    anlage_id UUID REFERENCES anlagen.anlagen(id),\n    wartungstyp VARCHAR(100) NOT NULL,\n    beschreibung TEXT,\n    intervall_typ VARCHAR(50) CHECK (intervall_typ IN ('Tage', 'Wochen', 'Monate', 'Jahre', 'Betriebsstunden')),\n    intervall_wert INTEGER,\n    naechste_wartung DATE,\n    letzte_wartung DATE,\n    kosten_pro_wartung DECIMAL(10,2),\n    verantwortlicher UUID REFERENCES users(id),\n    ist_aktiv BOOLEAN DEFAULT true,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "anlagen.wartungsplan"
+}

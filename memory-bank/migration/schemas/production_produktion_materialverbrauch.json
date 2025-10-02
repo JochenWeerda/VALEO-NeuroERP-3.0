@@ -1,0 +1,86 @@
+{
+  "schema": "produktion",
+  "name": "materialverbrauch",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "verbrauch_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftrag_id",
+      "type": "UUID NOT NULL REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikel_id",
+      "type": "UUID NOT NULL REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "stuecklisten_position_id",
+      "type": "UUID REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "menge_geplant",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "menge_verbraucht",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "lagerort_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verbrauchsdatum",
+      "type": "DATE DEFAULT CURRENT_DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.materialverbrauch (\n    verbrauch_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    auftrag_id UUID NOT NULL REFERENCES produktion.produktionsauftraege(auftrag_id),\n    artikel_id UUID NOT NULL REFERENCES produktion.artikel(artikel_id),\n    stuecklisten_position_id UUID REFERENCES produktion.stuecklisten_positionen(position_id),\n    menge_geplant DECIMAL(10,4) NOT NULL,\n    menge_verbraucht DECIMAL(10,4) DEFAULT 0,\n    lagerort_id UUID,\n    verbrauchsdatum DATE DEFAULT CURRENT_DATE,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "produktion.materialverbrauch"
+}

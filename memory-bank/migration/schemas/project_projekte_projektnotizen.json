@@ -1,0 +1,72 @@
+{
+  "schema": "projekte",
+  "name": "projektnotizen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "projekt_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aufgabe_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "autor_id",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "titel",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "inhalt",
+      "type": "TEXT NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_oeffentlich",
+      "type": "BOOLEAN DEFAULT TRUE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE projekte.projektnotizen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    projekt_id UUID REFERENCES projekte.projekte(id) ON DELETE CASCADE,\n    aufgabe_id UUID REFERENCES projekte.aufgaben(id) ON DELETE CASCADE,\n    autor_id UUID REFERENCES personal.mitarbeiter(id),\n    titel VARCHAR(200) NOT NULL,\n    inhalt TEXT NOT NULL,\n    ist_oeffentlich BOOLEAN DEFAULT TRUE,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "projekte.projektnotizen"
+}

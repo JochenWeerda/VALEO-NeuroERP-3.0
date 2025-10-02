@@ -1,0 +1,79 @@
+{
+  "schema": "",
+  "name": "abteilungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "abteilungsnummer",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "name",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "leiter_id",
+      "type": "UUID REFERENCES personal(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "standort",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "budget",
+      "type": "DECIMAL(15",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "is_active",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS abteilungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    abteilungsnummer VARCHAR(20) UNIQUE NOT NULL,\n    name VARCHAR(100) NOT NULL,\n    beschreibung TEXT,\n    leiter_id UUID REFERENCES personal(id),\n    standort VARCHAR(100),\n    budget DECIMAL(15,2),\n    is_active BOOLEAN DEFAULT true,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "abteilungen"
+}

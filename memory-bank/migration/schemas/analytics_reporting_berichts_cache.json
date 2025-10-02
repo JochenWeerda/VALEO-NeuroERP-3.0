@@ -1,0 +1,58 @@
+{
+  "schema": "reporting",
+  "name": "berichts_cache",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "cache_key",
+      "type": "VARCHAR(500) NOT NULL UNIQUE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "berichtsvorlage_id",
+      "type": "UUID NOT NULL REFERENCES reporting",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "parameter_hash",
+      "type": "VARCHAR(64) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ergebnis_daten",
+      "type": "JSONB",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ablauf_am",
+      "type": "TIMESTAMP NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE reporting.berichts_cache (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    cache_key VARCHAR(500) NOT NULL UNIQUE,\n    berichtsvorlage_id UUID NOT NULL REFERENCES reporting.berichtsvorlagen(id),\n    parameter_hash VARCHAR(64) NOT NULL,\n    ergebnis_daten JSONB,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    ablauf_am TIMESTAMP NOT NULL\n);",
+  "table": "reporting.berichts_cache"
+}

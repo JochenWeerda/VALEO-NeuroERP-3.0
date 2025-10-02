@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  erp-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: valero-neuroerp-erp-service
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=erp-service
+      - SERVICE_PORT=3002
+      - SERVICE_REGISTRY_URL=http://service-registry:3000
+      - SERVICE_BUS_URL=amqp://rabbitmq:5672
+      - DATABASE_URL=postgresql://erp_user:erp_password@postgres:5432/erp_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+      - service-registry
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - erp-logs:/app/logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Database for ERP domain (Database per Service pattern)
+  postgres:
+    image: postgres:15-alpine
+    container_name: valero-neuroerp-erp-postgres
+    environment:
+      - POSTGRES_DB=erp_db
+      - POSTGRES_USER=erp_user
+      - POSTGRES_PASSWORD=erp_password
+    ports:
+      - "5433:5432"
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    volumes:
+      - erp-postgres-data:/var/lib/postgresql/data
+      - ./config/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U erp_user -d erp_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  valero-neuroerp-network:
+    external: true
+    name: valero-neuroerp-network
+
+volumes:
+  erp-postgres-data:
+  erp-logs:

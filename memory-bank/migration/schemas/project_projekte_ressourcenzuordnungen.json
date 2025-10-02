@@ -1,0 +1,86 @@
+{
+  "schema": "projekte",
+  "name": "ressourcenzuordnungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "projekt_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aufgabe_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ressourcen_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mitarbeiter_id",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "startdatum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "enddatum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "stunden_pro_tag",
+      "type": "DECIMAL(4",
+      "nullable": true,
+      "default": "8",
+      "constraints": []
+    },
+    {
+      "name": "verfuegbarkeit_prozent",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": "100",
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE projekte.ressourcenzuordnungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    projekt_id UUID REFERENCES projekte.projekte(id) ON DELETE CASCADE,\n    aufgabe_id UUID REFERENCES projekte.aufgaben(id) ON DELETE CASCADE,\n    ressourcen_id UUID REFERENCES projekte.projektressourcen(id),\n    mitarbeiter_id UUID REFERENCES personal.mitarbeiter(id),\n    startdatum DATE NOT NULL,\n    enddatum DATE NOT NULL,\n    stunden_pro_tag DECIMAL(4,2) DEFAULT 8,\n    verfuegbarkeit_prozent DECIMAL(5,2) DEFAULT 100,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "projekte.ressourcenzuordnungen"
+}

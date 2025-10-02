@@ -1,0 +1,93 @@
+{
+  "schema": "projekte",
+  "name": "projektdateien",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "projekt_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aufgabe_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dateiname",
+      "type": "VARCHAR(255) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "original_dateiname",
+      "type": "VARCHAR(255) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dateityp",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "groesse_bytes",
+      "type": "BIGINT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pfad",
+      "type": "VARCHAR(500) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "hochgeladen_von",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE projekte.projektdateien (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    projekt_id UUID REFERENCES projekte.projekte(id) ON DELETE CASCADE,\n    aufgabe_id UUID REFERENCES projekte.aufgaben(id) ON DELETE CASCADE,\n    dateiname VARCHAR(255) NOT NULL,\n    original_dateiname VARCHAR(255) NOT NULL,\n    dateityp VARCHAR(50),\n    groesse_bytes BIGINT,\n    pfad VARCHAR(500) NOT NULL,\n    hochgeladen_von UUID REFERENCES personal.mitarbeiter(id),\n    beschreibung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "projekte.projektdateien"
+}

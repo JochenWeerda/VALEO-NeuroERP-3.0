@@ -1,0 +1,37 @@
+{
+  "schema": "reporting",
+  "name": "kpi_werte",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kpi_id",
+      "type": "UUID NOT NULL REFERENCES reporting",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "wert",
+      "type": "DECIMAL(15",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zeitstempel",
+      "type": "TIMESTAMP NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE reporting.kpi_werte (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    kpi_id UUID NOT NULL REFERENCES reporting.kpi_definitionen(id),\n    wert DECIMAL(15,2) NOT NULL,\n    zeitstempel TIMESTAMP NOT NULL,\n    kontext JSONB, -- Zus\u00e4tzliche Kontext-Informationen\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "reporting.kpi_werte"
+}

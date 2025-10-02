@@ -1,0 +1,58 @@
+{
+  "schema": "dokumente",
+  "name": "dokument_tags",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "tag_name",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "farbe",
+      "type": "VARCHAR(7) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aktiv",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.dokument_tags (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    tag_name VARCHAR(100) NOT NULL,\n    beschreibung TEXT,\n    farbe VARCHAR(7) DEFAULT '#666666',\n    aktiv BOOLEAN DEFAULT true,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.dokument_tags"
+}

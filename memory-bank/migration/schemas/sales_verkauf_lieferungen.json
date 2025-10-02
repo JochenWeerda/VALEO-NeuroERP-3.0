@@ -1,0 +1,114 @@
+{
+  "schema": "verkauf",
+  "name": "lieferungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "lieferung_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferung_nr",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftrag_id",
+      "type": "UUID REFERENCES verkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID NOT NULL REFERENCES verkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "liefer_datum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "liefer_zeit",
+      "type": "TIME",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lkw_kennzeichen",
+      "type": "VARCHAR(20)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fahrer_name",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferung_typ",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE verkauf.lieferungen (\n    lieferung_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    lieferung_nr VARCHAR(50) UNIQUE NOT NULL,\n    auftrag_id UUID REFERENCES verkauf.auftraege(auftrag_id),\n    kunde_id UUID NOT NULL REFERENCES verkauf.kunden(kunde_id),\n    liefer_datum DATE NOT NULL,\n    liefer_zeit TIME,\n    lkw_kennzeichen VARCHAR(20),\n    fahrer_name VARCHAR(100),\n    lieferung_typ VARCHAR(20) DEFAULT 'NORMAL' CHECK (lieferung_typ IN ('NORMAL', 'DRINGEND', 'NACHTLIEFERUNG')),\n    status VARCHAR(20) DEFAULT 'ANGEK\u00dcNDIGT' CHECK (status IN ('ANGEK\u00dcNDIGT', 'UNTERWEGS', 'ANGEKOMMEN', 'ENTLADEN', 'ABGESCHLOSSEN')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    erstellt_von UUID,\n    geaendert_von UUID\n);",
+  "table": "verkauf.lieferungen"
+}

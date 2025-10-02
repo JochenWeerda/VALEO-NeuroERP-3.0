@@ -1,0 +1,65 @@
+{
+    "name": "@valero-neuroerp/utilities",
+    "version": "1.0.0",
+    "description": "VALEO NeuroERP 3.0 - Shared Utilities Package",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "lint:fix": "eslint \"src/**/*.ts\" --fix",
+        "lint": "eslint \"src/**/*.ts\"",
+        "build": "node ../../node_modules/typescript/bin/tsc",
+        "test": "jest"
+    },
+    "keywords": [
+        "utilities",
+        "shared",
+        "common",
+        "typescript",
+        "neuroerp"
+    ],
+    "author": "VALEO NeuroERP Team",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/compression": "^1.8.1",
+        "@types/cors": "^2.8.19",
+        "@types/jest": "^29.5.14",
+        "@types/jsonwebtoken": "^9.0.10",
+        "@types/node": "^20.10.0",
+        "@types/pg": "^8.15.5",
+        "@typescript-eslint/eslint-plugin": "^6.21.0",
+        "@typescript-eslint/parser": "^6.21.0",
+        "eslint": "^8.45.0",
+        "jest": "^29.7.0",
+        "tsup": "^7.2.0",
+        "typescript": "^5.2.0"
+    },
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
+    "typesVersions": {
+        "*": {
+            "constants": [
+                "dist/system-constants.d.ts"
+            ],
+            "base-service": [
+                "dist/base-service.d.ts"
+            ],
+            "di-container": [
+                "dist/di-container.d.ts"
+            ],
+            "repository": [
+                "dist/repository.d.ts"
+            ],
+            "query-builder": [
+                "dist/query-builder.d.ts"
+            ],
+            "postgres": [
+                "dist/postgres.d.ts"
+            ]
+        }
+    },
+    "type": "commonjs"
+}

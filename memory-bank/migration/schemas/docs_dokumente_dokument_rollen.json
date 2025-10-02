@@ -1,0 +1,44 @@
+{
+  "schema": "dokumente",
+  "name": "dokument_rollen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rolle_name",
+      "type": "VARCHAR(100) NOT NULL UNIQUE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.dokument_rollen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    rolle_name VARCHAR(100) NOT NULL UNIQUE,\n    beschreibung TEXT,\n    berechtigungen JSONB NOT NULL, -- {'lesen': true, 'bearbeiten': false, 'loeschen': false, 'freigeben': false}\n    sicherheitsstufe INTEGER DEFAULT 1, -- 1-5 (niedrig bis hoch)\n    aktiv BOOLEAN DEFAULT true,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.dokument_rollen"
+}

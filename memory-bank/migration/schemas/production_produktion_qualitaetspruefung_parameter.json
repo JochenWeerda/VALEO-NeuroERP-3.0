@@ -1,0 +1,86 @@
+{
+  "schema": "produktion",
+  "name": "qualitaetspruefung_parameter",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "parameter_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefung_id",
+      "type": "UUID NOT NULL REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "parameter_name",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "soll_wert",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_wert",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "toleranz_min",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "toleranz_max",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "einheit",
+      "type": "VARCHAR(20)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.qualitaetspruefung_parameter (\n    parameter_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    pruefung_id UUID NOT NULL REFERENCES produktion.qualitaetspruefungen(pruefung_id),\n    parameter_name VARCHAR(100) NOT NULL,\n    soll_wert DECIMAL(10,4),\n    ist_wert DECIMAL(10,4),\n    toleranz_min DECIMAL(10,4),\n    toleranz_max DECIMAL(10,4),\n    einheit VARCHAR(20),\n    status VARCHAR(20) DEFAULT 'OFFEN' CHECK (status IN ('OFFEN', 'BESTANDEN', 'NICHT_BESTANDEN')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "produktion.qualitaetspruefung_parameter"
+}

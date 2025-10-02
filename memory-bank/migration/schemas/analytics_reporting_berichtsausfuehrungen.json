@@ -1,0 +1,58 @@
+{
+  "schema": "reporting",
+  "name": "berichtsausfuehrungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "vorlagen_id",
+      "type": "UUID NOT NULL REFERENCES reporting",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ausfuehrungs_name",
+      "type": "VARCHAR(200)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ende_zeit",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dauer_sekunden",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE reporting.berichtsausfuehrungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    vorlagen_id UUID NOT NULL REFERENCES reporting.berichtsvorlagen(id),\n    ausfuehrungs_name VARCHAR(200),\n    parameter_werte JSONB, -- Tats\u00e4chliche Parameterwerte\n    ausfuehrungs_status VARCHAR(50) NOT NULL, -- 'GESTARTET', 'LAEUFT', 'ABGESCHLOSSEN', 'FEHLER'\n    start_zeit TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    ende_zeit TIMESTAMP,\n    dauer_sekunden INTEGER,\n    ergebnis_anzahl INTEGER, -- Anzahl der Datens\u00e4tze\n    fehlermeldung TEXT,\n    erstellt_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "reporting.berichtsausfuehrungen"
+}

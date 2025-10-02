@@ -1,0 +1,79 @@
+{
+  "schema": "produktion",
+  "name": "arbeitsplaetze",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "arbeitsplatz_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "arbeitsplatz_nr",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bezeichnung",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "abteilung_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "standort",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kapazitaet_pro_stunde",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.arbeitsplaetze (\n    arbeitsplatz_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    arbeitsplatz_nr VARCHAR(50) UNIQUE NOT NULL,\n    bezeichnung VARCHAR(200) NOT NULL,\n    abteilung_id UUID,\n    standort VARCHAR(100),\n    kapazitaet_pro_stunde DECIMAL(10,2),\n    status VARCHAR(20) DEFAULT 'AKTIV' CHECK (status IN ('AKTIV', 'INAKTIV', 'WARTUNG')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "produktion.arbeitsplaetze"
+}

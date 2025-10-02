@@ -1,0 +1,65 @@
+{
+  "schema": "dokumente",
+  "name": "bereinigungsprotokoll",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftrag_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_id",
+      "type": "UUID REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "archiviertes_dokument_id",
+      "type": "UUID REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "export_pfad",
+      "type": "VARCHAR(500)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dateigroesse_vorher",
+      "type": "BIGINT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dateigroesse_nachher",
+      "type": "BIGINT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ausgefuehrt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.bereinigungsprotokoll (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    auftrag_id UUID NOT NULL REFERENCES dokumente.bereinigungsauftraege(id),\n    dokument_id UUID REFERENCES dokumente.dokumente(id),\n    archiviertes_dokument_id UUID REFERENCES dokumente.archivierte_dokumente(id),\n    aktion VARCHAR(50) NOT NULL, -- 'ARCHIVIERT', 'EXPORTIERT', 'LOESCHT'\n    status VARCHAR(50) NOT NULL, -- 'ERFOLGREICH', 'FEHLGESCHLAGEN'\n    fehlermeldung TEXT,\n    export_pfad VARCHAR(500),\n    dateigroesse_vorher BIGINT,\n    dateigroesse_nachher BIGINT,\n    ausgefuehrt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.bereinigungsprotokoll"
+}

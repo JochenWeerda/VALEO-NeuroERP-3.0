@@ -1,0 +1,58 @@
+{
+  "schema": "reporting",
+  "name": "versendung_historie",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "versendung_id",
+      "type": "UUID NOT NULL REFERENCES reporting",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ausfuehrungs_zeit",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erfolgreich_versendet",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fehlgeschlagene_versendungen",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fehlermeldung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "export_job_id",
+      "type": "UUID REFERENCES reporting",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE reporting.versendung_historie (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    versendung_id UUID NOT NULL REFERENCES reporting.berichtsversendung(id),\n    ausfuehrungs_zeit TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    status VARCHAR(50) NOT NULL, -- 'ERFOLGREICH', 'FEHLER', 'TEILWEISE'\n    empfaenger_anzahl INTEGER,\n    erfolgreich_versendet INTEGER,\n    fehlgeschlagene_versendungen INTEGER,\n    fehlermeldung TEXT,\n    export_job_id UUID REFERENCES reporting.export_jobs(id)\n);",
+  "table": "reporting.versendung_historie"
+}

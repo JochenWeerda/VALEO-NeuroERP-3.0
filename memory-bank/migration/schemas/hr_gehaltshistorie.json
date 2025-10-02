@@ -1,0 +1,72 @@
+{
+  "schema": "",
+  "name": "gehaltshistorie",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "personal_id",
+      "type": "UUID REFERENCES personal(id) ON DELETE CASCADE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gehaltsdatum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gehalt",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gehaltsart",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "grund",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "genehmigt_von",
+      "type": "UUID REFERENCES personal(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "genehmigt_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS gehaltshistorie (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    personal_id UUID REFERENCES personal(id) ON DELETE CASCADE,\n    gehaltsdatum DATE NOT NULL,\n    gehalt DECIMAL(10,2) NOT NULL,\n    gehaltsart VARCHAR(50) DEFAULT 'grundgehalt' CHECK (gehaltsart IN ('grundgehalt', 'bonus', 'erh\u00f6hung', 'reduzierung')),\n    grund TEXT,\n    genehmigt_von UUID REFERENCES personal(id),\n    genehmigt_am TIMESTAMP,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "gehaltshistorie"
+}

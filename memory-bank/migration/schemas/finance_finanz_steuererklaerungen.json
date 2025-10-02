@@ -1,0 +1,111 @@
+{
+  "schema": "finanz",
+  "name": "steuererklaerungen",
+  "primaryKey": "id",
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID",
+      "nullable": true,
+      "default": "gen_random_uuid()",
+      "constraints": [
+        "primary-key"
+      ]
+    },
+    {
+      "name": "steuerart",
+      "type": "VARCHAR(50)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "jahr",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "periode",
+      "type": "VARCHAR(20)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "meldedatum",
+      "type": "DATE",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "faelligkeitsdatum",
+      "type": "DATE",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "meldebetrag",
+      "type": "DECIMAL(15,2)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": "'Offen' CHECK (status IN ('Offen'",
+      "constraints": []
+    },
+    {
+      "name": "bezahlt_am",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bezahlter_betrag",
+      "type": "DECIMAL(15,2)",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "notizen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS finanz.steuererklaerungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    steuerart VARCHAR(50) NOT NULL,\n    jahr INTEGER NOT NULL,\n    periode VARCHAR(20),\n    meldedatum DATE NOT NULL,\n    faelligkeitsdatum DATE NOT NULL,\n    meldebetrag DECIMAL(15,2) NOT NULL,\n    status VARCHAR(50) DEFAULT 'Offen' CHECK (status IN ('Offen', 'Gemeldet', 'Bezahlt')),\n    bezahlt_am DATE,\n    bezahlter_betrag DECIMAL(15,2) DEFAULT 0,\n    notizen TEXT,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "finanz.steuererklaerungen"
+}

@@ -1,0 +1,65 @@
+{
+  "schema": "crm",
+  "name": "verkaufschancen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "chance_nr",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID NOT NULL REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "titel",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erwarteter_abschluss",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE crm.verkaufschancen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    chance_nr VARCHAR(20) UNIQUE NOT NULL,\n    kunde_id UUID NOT NULL REFERENCES crm.kunden(id),\n    titel VARCHAR(200) NOT NULL,\n    beschreibung TEXT,\n    phase VARCHAR(50) DEFAULT 'ANALYSE', -- 'ANALYSE', 'ANGEBOT', 'VERHANDLUNG', 'ABSCHLUSS', 'GEWONNEN', 'VERLOREN'\n    wahrscheinlichkeit INTEGER, -- 0-100%\n    wert DECIMAL(12,2),\n    erwarteter_abschluss DATE,\n    status VARCHAR(50) DEFAULT 'AKTIV', -- 'AKTIV', 'GEWONNEN', 'VERLOREN', 'PAUSIERT'\n    verantwortlicher_id UUID,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "crm.verkaufschancen"
+}

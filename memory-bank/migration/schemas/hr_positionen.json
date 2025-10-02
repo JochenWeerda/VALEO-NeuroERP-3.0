@@ -1,0 +1,93 @@
+{
+  "schema": "",
+  "name": "positionen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "positionsnummer",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bezeichnung",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "abteilung_id",
+      "type": "UUID REFERENCES abteilungen(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gehaltsstufe",
+      "type": "VARCHAR(20)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "min_gehalt",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "max_gehalt",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anforderungen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "is_active",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS positionen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    positionsnummer VARCHAR(20) UNIQUE NOT NULL,\n    bezeichnung VARCHAR(100) NOT NULL,\n    beschreibung TEXT,\n    abteilung_id UUID REFERENCES abteilungen(id),\n    gehaltsstufe VARCHAR(20),\n    min_gehalt DECIMAL(10,2),\n    max_gehalt DECIMAL(10,2),\n    anforderungen TEXT,\n    is_active BOOLEAN DEFAULT true,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "positionen"
+}

@@ -1,0 +1,86 @@
+{
+  "schema": "anlagen",
+  "name": "abschreibungsplan",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anlage_id",
+      "type": "UUID REFERENCES anlagen",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "jahr",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "monat",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "abschreibungsbetrag",
+      "type": "DECIMAL(15",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "restbuchwert",
+      "type": "DECIMAL(15",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "abschreibungsart",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "buchung_erstellt",
+      "type": "BOOLEAN DEFAULT false",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "buchung_id",
+      "type": "UUID REFERENCES finanz",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS anlagen.abschreibungsplan (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    anlage_id UUID REFERENCES anlagen.anlagen(id),\n    jahr INTEGER NOT NULL,\n    monat INTEGER NOT NULL,\n    abschreibungsbetrag DECIMAL(15,2) NOT NULL,\n    restbuchwert DECIMAL(15,2) NOT NULL,\n    abschreibungsart VARCHAR(50) DEFAULT 'Linear' CHECK (abschreibungsart IN ('Linear', 'Degressiv', 'Leistungsbezogen')),\n    buchung_erstellt BOOLEAN DEFAULT false,\n    buchung_id UUID REFERENCES finanz.buchungen(id),\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    UNIQUE(anlage_id, jahr, monat)\n);",
+  "table": "anlagen.abschreibungsplan"
+}

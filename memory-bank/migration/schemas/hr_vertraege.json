@@ -1,0 +1,114 @@
+{
+  "schema": "",
+  "name": "vertraege",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "personal_id",
+      "type": "UUID REFERENCES personal(id) ON DELETE CASCADE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "vertragsnummer",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "vertragsart",
+      "type": "VARCHAR(50) NOT NULL CHECK (vertragsart IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "vertragsbeginn",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "vertragsende",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "probezeit_bis",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "k\u00fcndigungsfrist",
+      "type": "INTEGER DEFAULT 30",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gehalt",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "wochenarbeitszeit",
+      "type": "INTEGER DEFAULT 40",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "urlaubstage",
+      "type": "INTEGER DEFAULT 30",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "vertragsstatus",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "notizen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS vertraege (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    personal_id UUID REFERENCES personal(id) ON DELETE CASCADE,\n    vertragsnummer VARCHAR(50) UNIQUE NOT NULL,\n    vertragsart VARCHAR(50) NOT NULL CHECK (vertragsart IN ('unbefristet', 'befristet', 'probezeit', 'werkvertrag', 'freelancer')),\n    vertragsbeginn DATE NOT NULL,\n    vertragsende DATE,\n    probezeit_bis DATE,\n    k\u00fcndigungsfrist INTEGER DEFAULT 30,\n    gehalt DECIMAL(10,2) NOT NULL,\n    wochenarbeitszeit INTEGER DEFAULT 40,\n    urlaubstage INTEGER DEFAULT 30,\n    vertragsstatus VARCHAR(50) DEFAULT 'aktiv' CHECK (vertragsstatus IN ('aktiv', 'beendet', 'gek\u00fcndigt', 'verl\u00e4ngert')),\n    notizen TEXT,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "vertraege"
+}

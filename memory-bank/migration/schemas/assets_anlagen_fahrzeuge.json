@@ -1,0 +1,114 @@
+{
+  "schema": "anlagen",
+  "name": "fahrzeuge",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fahrzeug_id",
+      "type": "UUID REFERENCES anlagen",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kennzeichen",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fahrzeugtyp",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "marke",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "modell",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "baujahr",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "farbe",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kraftstoffart",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "tuev_bis",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "versicherung_bis",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "steuer_bis",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kilometerstand",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS anlagen.fahrzeuge (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    fahrzeug_id UUID REFERENCES anlagen.anlagen(id),\n    kennzeichen VARCHAR(20) UNIQUE NOT NULL,\n    fahrzeugtyp VARCHAR(100),\n    marke VARCHAR(100),\n    modell VARCHAR(100),\n    baujahr INTEGER,\n    farbe VARCHAR(50),\n    kraftstoffart VARCHAR(50),\n    hubraum INTEGER, -- in ccm\n    leistung INTEGER, -- in PS\n    getriebe VARCHAR(50),\n    tuev_bis DATE,\n    versicherung_bis DATE,\n    steuer_bis DATE,\n    kilometerstand INTEGER,\n    tankgroesse INTEGER, -- in Litern\n    verbrauch_durchschnitt DECIMAL(5,2), -- l/100km\n    fahrzeugdokumente TEXT[], -- Array von Dokument-URLs\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "anlagen.fahrzeuge"
+}

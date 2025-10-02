@@ -1,0 +1,100 @@
+{
+  "schema": "verkauf",
+  "name": "mahnungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "mahnung_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mahnung_nr",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID NOT NULL REFERENCES verkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rechnung_id",
+      "type": "UUID REFERENCES verkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mahnstufe",
+      "type": "INTEGER NOT NULL CHECK (mahnstufe BETWEEN 1 AND 3)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mahnung_datum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mahngebuehr",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE verkauf.mahnungen (\n    mahnung_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    mahnung_nr VARCHAR(50) UNIQUE NOT NULL,\n    kunde_id UUID NOT NULL REFERENCES verkauf.kunden(kunde_id),\n    rechnung_id UUID REFERENCES verkauf.rechnungen(rechnung_id),\n    mahnstufe INTEGER NOT NULL CHECK (mahnstufe BETWEEN 1 AND 3),\n    mahnung_datum DATE NOT NULL,\n    mahngebuehr DECIMAL(10,2) DEFAULT 0,\n    status VARCHAR(20) DEFAULT 'OFFEN' CHECK (status IN ('OFFEN', 'BEZAHLT', 'STUNDUNG')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    erstellt_von UUID,\n    geaendert_von UUID\n);",
+  "table": "verkauf.mahnungen"
+}

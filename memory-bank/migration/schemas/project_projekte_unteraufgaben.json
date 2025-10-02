@@ -1,0 +1,79 @@
+{
+  "schema": "projekte",
+  "name": "unteraufgaben",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aufgabe_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "unteraufgabenname",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zugewiesen_an",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geschaetzte_stunden",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "tatsaechliche_stunden",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE projekte.unteraufgaben (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    aufgabe_id UUID REFERENCES projekte.aufgaben(id) ON DELETE CASCADE,\n    unteraufgabenname VARCHAR(200) NOT NULL,\n    beschreibung TEXT,\n    status VARCHAR(50) DEFAULT 'offen' CHECK (status IN ('offen', 'in_arbeit', 'abgeschlossen')),\n    zugewiesen_an UUID REFERENCES personal.mitarbeiter(id),\n    geschaetzte_stunden DECIMAL(5,2),\n    tatsaechliche_stunden DECIMAL(5,2),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "projekte.unteraufgaben"
+}

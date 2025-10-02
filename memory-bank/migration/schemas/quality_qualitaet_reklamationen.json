@@ -1,0 +1,100 @@
+{
+  "schema": "qualitaet",
+  "name": "reklamationen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "reklamation_nr",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferant_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "produktionsauftrag_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "reklamation_datum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ursache",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "massnahmen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verantwortlicher_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "loesungs_datum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkungen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE qualitaet.reklamationen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    reklamation_nr VARCHAR(20) UNIQUE NOT NULL,\n    reklamation_typ VARCHAR(50) NOT NULL, -- 'LIEFERANT', 'KUNDE', 'INTERN'\n    artikel_id UUID,\n    lieferant_id UUID,\n    kunde_id UUID,\n    produktionsauftrag_id UUID,\n    reklamation_datum DATE NOT NULL,\n    status VARCHAR(20) DEFAULT 'OFFEN', -- 'OFFEN', 'IN_BEARBEITUNG', 'GELOEST', 'GESCHLOSSEN'\n    prioritaet VARCHAR(20) DEFAULT 'NORMAL', -- 'NIEDRIG', 'NORMAL', 'HOCH', 'KRITISCH'\n    beschreibung TEXT NOT NULL,\n    ursache TEXT,\n    massnahmen TEXT,\n    verantwortlicher_id UUID,\n    loesungs_datum DATE,\n    bemerkungen TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "qualitaet.reklamationen"
+}

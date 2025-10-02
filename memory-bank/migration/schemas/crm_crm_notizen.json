@@ -1,0 +1,65 @@
+{
+  "schema": "crm",
+  "name": "notizen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID NOT NULL REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kontakt_id",
+      "type": "UUID REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "inhalt",
+      "type": "TEXT NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_oeffentlich",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verantwortlicher_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE crm.notizen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    kunde_id UUID NOT NULL REFERENCES crm.kunden(id),\n    kontakt_id UUID REFERENCES crm.kontakte(id),\n    notiz_typ VARCHAR(50) DEFAULT 'ALLGEMEIN', -- 'ALLGEMEIN', 'VERKAUF', 'SUPPORT', 'RECHNUNG', 'SONSTIGES'\n    titel VARCHAR(200),\n    inhalt TEXT NOT NULL,\n    ist_oeffentlich BOOLEAN DEFAULT true,\n    verantwortlicher_id UUID,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "crm.notizen"
+}

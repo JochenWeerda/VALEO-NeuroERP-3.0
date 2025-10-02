@@ -1,0 +1,44 @@
+{
+  "schema": "reporting",
+  "name": "benutzer_dashboards",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mitarbeiter_id",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dashboard_id",
+      "type": "UUID NOT NULL REFERENCES reporting",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_standard",
+      "type": "BOOLEAN DEFAULT false",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE reporting.benutzer_dashboards (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    mitarbeiter_id UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    dashboard_id UUID NOT NULL REFERENCES reporting.dashboards(id),\n    ist_standard BOOLEAN DEFAULT false,\n    layout_anpassungen JSONB, -- Benutzer-spezifische Layout-Anpassungen\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    UNIQUE(mitarbeiter_id, dashboard_id)\n);",
+  "table": "reporting.benutzer_dashboards"
+}

@@ -1,0 +1,86 @@
+{
+  "schema": "qualitaet",
+  "name": "pruefergebnisse",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefung_id",
+      "type": "UUID NOT NULL REFERENCES qualitaet",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "parameter_id",
+      "type": "UUID NOT NULL REFERENCES qualitaet",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gemessener_wert",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "text_wert",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "boolean_wert",
+      "type": "BOOLEAN",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auswahl_wert",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_ok",
+      "type": "BOOLEAN",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE qualitaet.pruefergebnisse (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    pruefung_id UUID NOT NULL REFERENCES qualitaet.qualitaetspruefungen(id),\n    parameter_id UUID NOT NULL REFERENCES qualitaet.pruefparameter(id),\n    gemessener_wert DECIMAL(10,3),\n    text_wert TEXT,\n    boolean_wert BOOLEAN,\n    auswahl_wert VARCHAR(100),\n    ist_ok BOOLEAN,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "qualitaet.pruefergebnisse"
+}

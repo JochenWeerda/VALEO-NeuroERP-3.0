@@ -1,0 +1,114 @@
+{
+  "schema": "einkauf",
+  "name": "lieferanten_artikel",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "lieferanten_artikel_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferant_id",
+      "type": "UUID NOT NULL REFERENCES einkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikel_id",
+      "type": "UUID REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferanten_artikel_nr",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bezeichnung",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "einheit",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mindestbestellmenge",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "lieferzeit_tage",
+      "type": "INTEGER DEFAULT 1",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verpackungseinheit",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "1",
+      "constraints": []
+    },
+    {
+      "name": "verpackungsart",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE einkauf.lieferanten_artikel (\n    lieferanten_artikel_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    lieferant_id UUID NOT NULL REFERENCES einkauf.lieferanten(lieferant_id) ON DELETE CASCADE,\n    artikel_id UUID REFERENCES produktion.artikel(artikel_id),\n    lieferanten_artikel_nr VARCHAR(100),\n    bezeichnung VARCHAR(200) NOT NULL,\n    beschreibung TEXT,\n    einheit VARCHAR(20) NOT NULL,\n    mindestbestellmenge DECIMAL(10,4) DEFAULT 0,\n    lieferzeit_tage INTEGER DEFAULT 1,\n    verpackungseinheit DECIMAL(10,4) DEFAULT 1,\n    verpackungsart VARCHAR(50),\n    status VARCHAR(20) DEFAULT 'AKTIV' CHECK (status IN ('AKTIV', 'INAKTIV', 'GESPERRT')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "einkauf.lieferanten_artikel"
+}

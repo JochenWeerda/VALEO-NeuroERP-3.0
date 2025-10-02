@@ -1,0 +1,161 @@
+{
+  "schema": "finanz",
+  "name": "buchungen",
+  "primaryKey": "id",
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID",
+      "nullable": true,
+      "default": "gen_random_uuid()",
+      "constraints": [
+        "primary-key"
+      ]
+    },
+    {
+      "name": "buchungsnummer",
+      "type": "VARCHAR(50)",
+      "nullable": false,
+      "default": null,
+      "constraints": [
+        "unique"
+      ]
+    },
+    {
+      "name": "buchungsdatum",
+      "type": "DATE",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "belegdatum",
+      "type": "DATE",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "belegnummer",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "buchungstext",
+      "type": "TEXT",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "sollkonto",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "habenkonto",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "betrag",
+      "type": "DECIMAL(15,2)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "waehrung",
+      "type": "VARCHAR(3)",
+      "nullable": true,
+      "default": "'EUR'",
+      "constraints": []
+    },
+    {
+      "name": "steuerbetrag",
+      "type": "DECIMAL(15,2)",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "steuersatz",
+      "type": "DECIMAL(5,2)",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "buchungsart",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "referenz_typ",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "referenz_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_storniert",
+      "type": "BOOLEAN",
+      "nullable": true,
+      "default": "false",
+      "constraints": []
+    },
+    {
+      "name": "storno_buchung_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS finanz.buchungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    buchungsnummer VARCHAR(50) UNIQUE NOT NULL,\n    buchungsdatum DATE NOT NULL,\n    belegdatum DATE NOT NULL,\n    belegnummer VARCHAR(50),\n    buchungstext TEXT NOT NULL,\n    sollkonto UUID REFERENCES finanz.konten(id),\n    habenkonto UUID REFERENCES finanz.konten(id),\n    betrag DECIMAL(15,2) NOT NULL,\n    waehrung VARCHAR(3) DEFAULT 'EUR',\n    steuerbetrag DECIMAL(15,2) DEFAULT 0,\n    steuersatz DECIMAL(5,2) DEFAULT 0,\n    buchungsart VARCHAR(50),\n    referenz_typ VARCHAR(50),\n    referenz_id UUID,\n    ist_storniert BOOLEAN DEFAULT false,\n    storno_buchung_id UUID REFERENCES finanz.buchungen(id),\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "finanz.buchungen"
+}

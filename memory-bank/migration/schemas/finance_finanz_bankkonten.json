@@ -1,0 +1,118 @@
+{
+  "schema": "finanz",
+  "name": "bankkonten",
+  "primaryKey": "id",
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID",
+      "nullable": true,
+      "default": "gen_random_uuid()",
+      "constraints": [
+        "primary-key"
+      ]
+    },
+    {
+      "name": "kontoname",
+      "type": "VARCHAR(100)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bankname",
+      "type": "VARCHAR(100)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "iban",
+      "type": "VARCHAR(34)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bic",
+      "type": "VARCHAR(11)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kontonummer",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "blz",
+      "type": "VARCHAR(10)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "waehrung",
+      "type": "VARCHAR(3)",
+      "nullable": true,
+      "default": "'EUR'",
+      "constraints": []
+    },
+    {
+      "name": "kontostand",
+      "type": "DECIMAL(15,2)",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "letzter_abgleich",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_aktiv",
+      "type": "BOOLEAN",
+      "nullable": true,
+      "default": "true",
+      "constraints": []
+    },
+    {
+      "name": "notizen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS finanz.bankkonten (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    kontoname VARCHAR(100) NOT NULL,\n    bankname VARCHAR(100) NOT NULL,\n    iban VARCHAR(34),\n    bic VARCHAR(11),\n    kontonummer VARCHAR(50),\n    blz VARCHAR(10),\n    waehrung VARCHAR(3) DEFAULT 'EUR',\n    kontostand DECIMAL(15,2) DEFAULT 0,\n    letzter_abgleich DATE,\n    ist_aktiv BOOLEAN DEFAULT true,\n    notizen TEXT,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "finanz.bankkonten"
+}

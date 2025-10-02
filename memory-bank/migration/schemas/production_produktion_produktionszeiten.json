@@ -1,0 +1,79 @@
+{
+  "schema": "produktion",
+  "name": "produktionszeiten",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "zeit_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftrag_id",
+      "type": "UUID NOT NULL REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftrag_position_id",
+      "type": "UUID REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zeittyp",
+      "type": "VARCHAR(50) NOT NULL CHECK (zeittyp IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "start_zeit",
+      "type": "TIMESTAMP NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "end_zeit",
+      "type": "TIMESTAMP NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dauer_min",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "grund",
+      "type": "VARCHAR(200)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.produktionszeiten (\n    zeit_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    auftrag_id UUID NOT NULL REFERENCES produktion.produktionsauftraege(auftrag_id),\n    auftrag_position_id UUID REFERENCES produktion.produktionsauftrag_positionen(position_id),\n    zeittyp VARCHAR(50) NOT NULL CHECK (zeittyp IN ('R\u00dcSTZEIT', 'VORGANGSZEIT', '\u00dcBERGANGSZEIT', 'ST\u00d6RZEIT')),\n    start_zeit TIMESTAMP NOT NULL,\n    end_zeit TIMESTAMP NOT NULL,\n    dauer_min INTEGER,\n    grund VARCHAR(200),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "produktion.produktionszeiten"
+}

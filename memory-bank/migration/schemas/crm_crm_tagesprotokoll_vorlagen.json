@@ -1,0 +1,86 @@
+{
+  "schema": "crm",
+  "name": "tagesprotokoll_vorlagen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "vorlagen_name",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "eintrag_typ",
+      "type": "VARCHAR(50) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "standard_titel",
+      "type": "VARCHAR(200)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "standard_beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "standard_ergebnis",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "standard_naechste_aktion",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aktiv",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE crm.tagesprotokoll_vorlagen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    vorlagen_name VARCHAR(100) NOT NULL,\n    beschreibung TEXT,\n    eintrag_typ VARCHAR(50) NOT NULL,\n    standard_titel VARCHAR(200),\n    standard_beschreibung TEXT,\n    standard_ergebnis TEXT,\n    standard_naechste_aktion TEXT,\n    aktiv BOOLEAN DEFAULT true,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "crm.tagesprotokoll_vorlagen"
+}

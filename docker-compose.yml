@@ -1,214 +1,126 @@
 version: '3.8'
 
 services:
-  # Service Bus (Core Message Bus)
-  service-bus:
-    build:
-      context: ./.platform/service-bus
-      dockerfile: Dockerfile
-    ports:
-      - "5672:5672"    # AMQP
-      - "15672:15672"   # Management UI
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: valeo-neuro-erp-postgres
+    restart: unless-stopped
     environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=admin123
+      POSTGRES_DB: valeo_neuro_erp
+      POSTGRES_USER: valeo_dev
+      POSTGRES_PASSWORD: valeo_dev_2024!
+      POSTGRES_ROOT_PASSWORD: valeo_root_2024!
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
     volumes:
-      - service-bus-data:/var/lib/rabbitmq
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./scripts/postgres.conf:/etc/postgresql/postgresql.conf:ro
     networks:
-      - valero-network
+      - valeo-network
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Service Registry (Service Discovery)
-  service-registry:
-    build:
-      context: ./.platform/service-registry
-      dockerfile: Dockerfile
-    ports:
-      - "8761:8761"
-    environment:
-      - EUREKA_SERVER_PORT=8761
-      - EUREKA_INSTANCE_HOSTNAME=service-registry
-    networks:
-      - valero-network
-    depends_on:
-      - service-bus
-
-  # API Gateway (Unified API Interface)
-  api-gateway:
-    build:
-      context: ./.platform/api-gateway
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    environment:
-      - GATEWAY_PORT=8080
-      - SERVICE_REGISTRY_URL=http://service-registry:8761
-    networks:
-      - valero-network
-    depends_on:
-      - service-registry
-
-  # CRM Service
-  crm-service:
-    build:
-      context: ./domains/crm
-      dockerfile: Dockerfile
-    ports:
-      - "8081:8081"
-    environment:
-      - SERVICE_PORT=8081
-      - SERVICE_NAME=crm-service
-      - SERVICE_REGISTRY_URL=http://service-registry:8761
-      - DATABASE_URL=postgresql://crm_user:crm_pass@crm-db:5432/crm_db
-    networks:
-      - valero-network
-    depends_on:
-      - crm-db
-      - service-registry
-
-  # ERP Service
-  erp-service:
-    build:
-      context: ./domains/erp
-      dockerfile: Dockerfile
-    ports:
-      - "8082:8082"
-    environment:
-      - SERVICE_PORT=8082
-      - SERVICE_NAME=erp-service
-      - SERVICE_REGISTRY_URL=http://service-registry:8761
-      - DATABASE_URL=postgresql://erp_user:erp_pass@erp-db:5432/erp_db
-    networks:
-      - valero-network
-    depends_on:
-      - erp-db
-      - service-registry
-
-  # Analytics Service
-  analytics-service:
-    build:
-      context: ./domains/analytics
-      dockerfile: Dockerfile
-    ports:
-      - "8083:8083"
-    environment:
-      - SERVICE_PORT=8083
-      - SERVICE_NAME=analytics-service
-      - SERVICE_REGISTRY_URL=http://service-registry:8761
-      - DATABASE_URL=postgresql://analytics_user:analytics_pass@analytics-db:5432/analytics_db
-    networks:
-      - valero-network
-    depends_on:
-      - analytics-db
-      - service-registry
-
-  # Integration Service
-  integration-service:
-    build:
-      context: ./domains/integration
-      dockerfile: Dockerfile
-    ports:
-      - "8084:8084"
-    environment:
-      - SERVICE_PORT=8084
-      - SERVICE_NAME=integration-service
-      - SERVICE_REGISTRY_URL=http://service-registry:8761
-      - DATABASE_URL=postgresql://integration_user:integration_pass@integration-db:5432/integration_db
-    networks:
-      - valero-network
-    depends_on:
-      - integration-db
-      - service-registry
-
-  # Databases
-  crm-db:
-    image: postgres:15
-    environment:
-      - POSTGRES_DB=crm_db
-      - POSTGRES_USER=crm_user
-      - POSTGRES_PASSWORD=crm_pass
-    volumes:
-      - crm-db-data:/var/lib/postgresql/data
-    networks:
-      - valero-network
-
-  erp-db:
-    image: postgres:15
-    environment:
-      - POSTGRES_DB=erp_db
-      - POSTGRES_USER=erp_user
-      - POSTGRES_PASSWORD=erp_pass
-    volumes:
-      - erp-db-data:/var/lib/postgresql/data
-    networks:
-      - valero-network
-
-  analytics-db:
-    image: postgres:15
-    environment:
-      - POSTGRES_DB=analytics_db
-      - POSTGRES_USER=analytics_user
-      - POSTGRES_PASSWORD=analytics_pass
-    volumes:
-      - analytics-db-data:/var/lib/postgresql/data
-    networks:
-      - valero-network
-
-  integration-db:
-    image: postgres:15
-    environment:
-      - POSTGRES_DB=integration_db
-      - POSTGRES_USER=integration_user
-      - POSTGRES_PASSWORD=integration_pass
-    volumes:
-      - integration-db-data:/var/lib/postgresql/data
-    networks:
-      - valero-network
-
-  # Monitoring Stack
-  prometheus:
-    image: prom/prometheus:latest
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
-    networks:
-      - valero-network
-
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin123
-    volumes:
-      - grafana-data:/var/lib/grafana
-    networks:
-      - valero-network
+      test: ["CMD-SHELL", "pg_isready -U valeo_dev -d valeo_neuro_erp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
 
   # Redis Cache
   redis:
     image: redis:7-alpine
+    container_name: valeo-neuro-erp-redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis-data:/data
+      - redis_data:/data
+      - ./config/redis.conf:/etc/redis/redis.conf:ro
     networks:
-      - valero-network
+      - valeo-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server /etc/redis/redis.conf
+
+  # Keycloak Identity Provider
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0
+    container_name: valeo-neuro-erp-keycloak
+    restart: unless-stopped
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin123!
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/valeo_neuro_erp
+      KC_DB_USERNAME: valeo_dev
+      KC_DB_PASSWORD: valeo_dev_2024!
+      KC_HOSTNAME: localhost
+      KC_HTTP_PORT: 8080
+      KC_HTTPS_PORT: 8443
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - valeo-network
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e 'GET /health/ready HTTP/1.1\r\nhost: localhost\r\nConnection: close\r\n\r\n' >&3;grep -q '200 OK' <&3"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    command: start-dev
+
+  # pgAdmin Database Management
+  pgadmin:
+    image: dpage/pgadmin4:7
+    container_name: valeo-neuro-erp-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@valeo-neuro-erp.com
+      PGADMIN_DEFAULT_PASSWORD: admin123!
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - valeo-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  # Redis Commander (Web UI for Redis)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: valeo-neuro-erp-redis-commander
+    restart: unless-stopped
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - valeo-network
 
 volumes:
-  service-bus-data:
-  crm-db-data:
-  erp-db-data:
-  analytics-db-data:
-  integration-db-data:
-  grafana-data:
-  redis-data:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
 
 networks:
-  valero-network:
+  valeo-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -1,0 +1,65 @@
+{
+  "schema": "qualitaet",
+  "name": "audits",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "audit_nr",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "audit_ort",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auditiert_von",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auditiert_an",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "naechstes_audit",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE qualitaet.audits (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    audit_nr VARCHAR(20) UNIQUE NOT NULL,\n    audit_typ VARCHAR(50) NOT NULL, -- 'INTERN', 'EXTERN', 'LIEFERANT', 'ZERTIFIZIERER'\n    audit_datum DATE NOT NULL,\n    audit_ort VARCHAR(100),\n    auditiert_von VARCHAR(100),\n    auditiert_an VARCHAR(100),\n    ergebnis VARCHAR(20) NOT NULL, -- 'BESTANDEN', 'MIT_AUFLAGEN', 'NICHT_BESTANDEN'\n    bewertung INTEGER, -- 1-5 Skala\n    bemerkungen TEXT,\n    naechstes_audit DATE,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "qualitaet.audits"
+}

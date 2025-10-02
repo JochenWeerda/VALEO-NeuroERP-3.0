@@ -1,0 +1,93 @@
+{
+  "schema": "dokumente",
+  "name": "dokumente",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_nr",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "titel",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kategorie_id",
+      "type": "UUID REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "original_dateiname",
+      "type": "VARCHAR(255) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dateipfad",
+      "type": "VARCHAR(500)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "version",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "freigegeben_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.dokumente (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    dokument_nr VARCHAR(20) UNIQUE NOT NULL,\n    titel VARCHAR(200) NOT NULL,\n    beschreibung TEXT,\n    kategorie_id UUID REFERENCES dokumente.dokumentenkategorien(id),\n    dokument_typ VARCHAR(50) NOT NULL, -- 'PDF', 'DOC', 'DOCX', 'XLS', 'XLSX', 'PPT', 'PPTX', 'TXT', 'JPG', 'PNG', 'ZIP', 'SONSTIGES'\n    dateiname VARCHAR(255) NOT NULL,\n    original_dateiname VARCHAR(255) NOT NULL,\n    dateigroesse BIGINT NOT NULL, -- Bytes\n    mime_type VARCHAR(100),\n    dateipfad VARCHAR(500),\n    version VARCHAR(20) DEFAULT '1.0',\n    status VARCHAR(50) DEFAULT 'ENTWURF', -- 'ENTWURF', 'FREIGEGEBEN', 'ARCHIVIERT', 'GELOESCHT'\n    freigegeben_von UUID REFERENCES personal.mitarbeiter(id),\n    freigegeben_am TIMESTAMP,\n    erstellt_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.dokumente"
+}

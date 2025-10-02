@@ -1,0 +1,65 @@
+{
+  "schema": "dokumente",
+  "name": "digitale_signaturen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "version_id",
+      "type": "UUID REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "signiert_von",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "signiert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gueltig_bis",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zertifikat_info",
+      "type": "JSONB",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.digitale_signaturen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id),\n    version_id UUID REFERENCES dokumente.versionshistorie_erweitert(id),\n    signatur_typ VARCHAR(50) NOT NULL, -- 'ELEKTRONISCH', 'DIGITAL', 'TIMESTAMP'\n    signatur_hash VARCHAR(64) NOT NULL,\n    signiert_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    signiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    gueltig_bis TIMESTAMP,\n    zertifikat_info JSONB,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.digitale_signaturen"
+}

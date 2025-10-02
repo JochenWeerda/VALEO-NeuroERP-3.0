@@ -1,0 +1,135 @@
+{
+  "schema": "verkauf",
+  "name": "rechnungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "rechnung_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rechnung_nr",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID NOT NULL REFERENCES verkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftrag_id",
+      "type": "UUID REFERENCES verkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferung_id",
+      "type": "UUID REFERENCES verkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rechnungs_datum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "faelligkeits_datum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rechnungs_betrag",
+      "type": "DECIMAL(12",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mwst_betrag",
+      "type": "DECIMAL(12",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "rabatt_betrag",
+      "type": "DECIMAL(12",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "zahlungs_betrag",
+      "type": "DECIMAL(12",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zahlungs_datum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE verkauf.rechnungen (\n    rechnung_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    rechnung_nr VARCHAR(50) UNIQUE NOT NULL,\n    kunde_id UUID NOT NULL REFERENCES verkauf.kunden(kunde_id),\n    auftrag_id UUID REFERENCES verkauf.auftraege(auftrag_id),\n    lieferung_id UUID REFERENCES verkauf.lieferungen(lieferung_id),\n    rechnungs_datum DATE NOT NULL,\n    faelligkeits_datum DATE NOT NULL,\n    rechnungs_betrag DECIMAL(12,2) NOT NULL,\n    mwst_betrag DECIMAL(12,2) DEFAULT 0,\n    rabatt_betrag DECIMAL(12,2) DEFAULT 0,\n    zahlungs_betrag DECIMAL(12,2) DEFAULT 0,\n    status VARCHAR(20) DEFAULT 'OFFEN' CHECK (status IN ('OFFEN', 'TEILZAHLUNG', 'VOLLST\u00c4NDIG', '\u00dcBERF\u00c4LLIG', 'STORNIERT')),\n    zahlungs_datum DATE,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    erstellt_von UUID,\n    geaendert_von UUID\n);",
+  "table": "verkauf.rechnungen"
+}

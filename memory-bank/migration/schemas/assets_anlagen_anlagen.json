@@ -1,0 +1,163 @@
+{
+  "schema": "anlagen",
+  "name": "anlagen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anlagennummer",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bezeichnung",
+      "type": "VARCHAR(255) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anlagenkategorie_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anlagenart",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anschaffungsdatum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anschaffungswert",
+      "type": "DECIMAL(15",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "restbuchwert",
+      "type": "DECIMAL(15",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "standort",
+      "type": "VARCHAR(255)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verantwortlicher",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferant",
+      "type": "VARCHAR(255)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferanten_rechnungsnr",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "garantie_bis",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "versicherungswert",
+      "type": "DECIMAL(15",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "versicherungsnummer",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "technische_daten",
+      "type": "JSONB",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_verfuegbar",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "notizen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS anlagen.anlagen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    anlagennummer VARCHAR(20) UNIQUE NOT NULL,\n    bezeichnung VARCHAR(255) NOT NULL,\n    beschreibung TEXT,\n    anlagenkategorie_id UUID,\n    anlagenart VARCHAR(100),\n    anschaffungsdatum DATE NOT NULL,\n    anschaffungswert DECIMAL(15,2) NOT NULL,\n    restbuchwert DECIMAL(15,2) NOT NULL,\n    standort VARCHAR(255),\n    verantwortlicher UUID REFERENCES users(id),\n    lieferant VARCHAR(255),\n    lieferanten_rechnungsnr VARCHAR(100),\n    garantie_bis DATE,\n    versicherungswert DECIMAL(15,2),\n    versicherungsnummer VARCHAR(100),\n    technische_daten JSONB,\n    bilder TEXT[], -- Array von Bild-URLs\n    dokumente TEXT[], -- Array von Dokument-URLs\n    status VARCHAR(50) DEFAULT 'Aktiv' CHECK (status IN ('Aktiv', 'Inaktiv', 'Verkauft', 'Verschrottet', 'Wartung')),\n    ist_verfuegbar BOOLEAN DEFAULT true,\n    notizen TEXT,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "anlagen.anlagen"
+}

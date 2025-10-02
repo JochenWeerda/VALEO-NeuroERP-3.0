@@ -1,0 +1,121 @@
+{
+  "schema": "",
+  "name": "invoices",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "invoice_number",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "customer_id",
+      "type": "UUID REFERENCES customers(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "sales_order_id",
+      "type": "UUID REFERENCES sales_orders(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "user_id",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "invoice_date",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "due_date",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "subtotal",
+      "type": "DECIMAL(15",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "tax_amount",
+      "type": "DECIMAL(15",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "total_amount",
+      "type": "DECIMAL(15",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "currency",
+      "type": "VARCHAR(3) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "payment_terms",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "notes",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS invoices (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    invoice_number VARCHAR(50) UNIQUE NOT NULL,\n    customer_id UUID REFERENCES customers(id),\n    sales_order_id UUID REFERENCES sales_orders(id),\n    user_id UUID REFERENCES users(id),\n    invoice_date DATE NOT NULL,\n    due_date DATE NOT NULL,\n    status VARCHAR(50) DEFAULT 'draft' CHECK (status IN ('draft', 'sent', 'paid', 'overdue', 'cancelled')),\n    subtotal DECIMAL(15,2) NOT NULL,\n    tax_amount DECIMAL(15,2) DEFAULT 0,\n    total_amount DECIMAL(15,2) GENERATED ALWAYS AS (subtotal + tax_amount) STORED,\n    currency VARCHAR(3) DEFAULT 'EUR',\n    payment_terms VARCHAR(100),\n    notes TEXT,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "invoices"
+}

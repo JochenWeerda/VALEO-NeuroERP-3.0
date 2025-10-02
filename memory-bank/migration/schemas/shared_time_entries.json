@@ -1,0 +1,107 @@
+{
+  "schema": "",
+  "name": "time_entries",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "user_id",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "project_id",
+      "type": "UUID REFERENCES projects(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "task_id",
+      "type": "UUID REFERENCES project_tasks(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "date",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "start_time",
+      "type": "TIME",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "end_time",
+      "type": "TIME",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "description",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "billable",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "approved_by",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "approved_at",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS time_entries (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    user_id UUID REFERENCES users(id),\n    project_id UUID REFERENCES projects(id),\n    task_id UUID REFERENCES project_tasks(id),\n    date DATE NOT NULL,\n    start_time TIME,\n    end_time TIME,\n    duration_hours DECIMAL(5,2) GENERATED ALWAYS AS (\n        CASE \n            WHEN start_time IS NOT NULL AND end_time IS NOT NULL \n            THEN EXTRACT(EPOCH FROM (end_time - start_time)) / 3600\n            ELSE 0\n        END\n    ) STORED,\n    description TEXT,\n    billable BOOLEAN DEFAULT true,\n    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),\n    approved_by UUID REFERENCES users(id),\n    approved_at TIMESTAMP,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "time_entries"
+}

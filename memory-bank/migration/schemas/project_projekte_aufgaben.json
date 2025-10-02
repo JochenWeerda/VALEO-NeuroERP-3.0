@@ -1,0 +1,121 @@
+{
+  "schema": "projekte",
+  "name": "aufgaben",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aufgabenname",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "projekt_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "phasen_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aufgabentyp_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "prioritaet",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zugewiesen_an",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "startdatum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "enddatum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geschaetzte_stunden",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "tatsaechliche_stunden",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fortschritt_prozent",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE projekte.aufgaben (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    aufgabenname VARCHAR(200) NOT NULL,\n    beschreibung TEXT,\n    projekt_id UUID REFERENCES projekte.projekte(id) ON DELETE CASCADE,\n    phasen_id UUID REFERENCES projekte.projektphasen(id) ON DELETE CASCADE,\n    aufgabentyp_id UUID REFERENCES projekte.aufgabentypen(id),\n    status VARCHAR(50) DEFAULT 'offen' CHECK (status IN ('offen', 'in_arbeit', 'review', 'abgeschlossen', 'abgebrochen')),\n    prioritaet VARCHAR(20) DEFAULT 'normal' CHECK (prioritaet IN ('niedrig', 'normal', 'hoch', 'kritisch')),\n    zugewiesen_an UUID REFERENCES personal.mitarbeiter(id),\n    erstellt_von UUID REFERENCES personal.mitarbeiter(id),\n    startdatum DATE,\n    enddatum DATE,\n    geschaetzte_stunden DECIMAL(5,2),\n    tatsaechliche_stunden DECIMAL(5,2),\n    fortschritt_prozent DECIMAL(5,2) DEFAULT 0,\n    vorgaenger_aufgaben TEXT[], -- Array von Aufgabennummern\n    nachfolger_aufgaben TEXT[], -- Array von Aufgabennummern\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "projekte.aufgaben"
+}

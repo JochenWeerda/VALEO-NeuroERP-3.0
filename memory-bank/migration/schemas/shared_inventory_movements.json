@@ -1,0 +1,86 @@
+{
+  "schema": "",
+  "name": "inventory_movements",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "inventory_id",
+      "type": "UUID REFERENCES inventory(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "movement_type",
+      "type": "VARCHAR(50) NOT NULL CHECK (movement_type IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "quantity",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "reference_type",
+      "type": "VARCHAR(50) CHECK (reference_type IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "reference_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "from_location",
+      "type": "VARCHAR(255)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "to_location",
+      "type": "VARCHAR(255)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "user_id",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "notes",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS inventory_movements (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    inventory_id UUID REFERENCES inventory(id),\n    movement_type VARCHAR(50) NOT NULL CHECK (movement_type IN ('in', 'out', 'transfer', 'adjustment')),\n    quantity INTEGER NOT NULL,\n    reference_type VARCHAR(50) CHECK (reference_type IN ('purchase_order', 'sales_order', 'manual', 'system')),\n    reference_id UUID,\n    from_location VARCHAR(255),\n    to_location VARCHAR(255),\n    user_id UUID REFERENCES users(id),\n    notes TEXT,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "inventory_movements"
+}

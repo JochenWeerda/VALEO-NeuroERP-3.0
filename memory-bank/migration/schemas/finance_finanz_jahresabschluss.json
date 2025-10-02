@@ -1,0 +1,134 @@
+{
+  "schema": "finanz",
+  "name": "jahresabschluss",
+  "primaryKey": "id",
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID",
+      "nullable": true,
+      "default": "gen_random_uuid()",
+      "constraints": [
+        "primary-key"
+      ]
+    },
+    {
+      "name": "jahr",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "abschluss_typ",
+      "type": "VARCHAR(50)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "periode_start",
+      "type": "DATE",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "periode_ende",
+      "type": "DATE",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erloese",
+      "type": "DECIMAL(15,2)",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "aufwendungen",
+      "type": "DECIMAL(15,2)",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "gewinn_verlust",
+      "type": "DECIMAL(15,2)",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "aktiva",
+      "type": "DECIMAL(15,2)",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "passiva",
+      "type": "DECIMAL(15,2)",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "eigenkapital",
+      "type": "DECIMAL(15,2)",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": "'Entwurf' CHECK (status IN ('Entwurf'",
+      "constraints": []
+    },
+    {
+      "name": "freigegeben_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "freigegeben_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS finanz.jahresabschluss (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    jahr INTEGER NOT NULL,\n    abschluss_typ VARCHAR(50) NOT NULL CHECK (abschluss_typ IN ('Monat', 'Quartal', 'Jahr')),\n    periode_start DATE NOT NULL,\n    periode_ende DATE NOT NULL,\n    erloese DECIMAL(15,2) DEFAULT 0,\n    aufwendungen DECIMAL(15,2) DEFAULT 0,\n    gewinn_verlust DECIMAL(15,2) DEFAULT 0,\n    aktiva DECIMAL(15,2) DEFAULT 0,\n    passiva DECIMAL(15,2) DEFAULT 0,\n    eigenkapital DECIMAL(15,2) DEFAULT 0,\n    status VARCHAR(50) DEFAULT 'Entwurf' CHECK (status IN ('Entwurf', 'Freigegeben', 'Geschlossen')),\n    freigegeben_von UUID REFERENCES users(id),\n    freigegeben_am TIMESTAMP,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    UNIQUE(jahr, abschluss_typ, periode_start)\n);",
+  "table": "finanz.jahresabschluss"
+}

@@ -1,0 +1,65 @@
+{
+  "schema": "qualitaet",
+  "name": "qualitaetspruefungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefung_nr",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferant_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "produktionsauftrag_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefer_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefdatum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE qualitaet.qualitaetspruefungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    pruefung_nr VARCHAR(20) UNIQUE NOT NULL,\n    pruefung_typ VARCHAR(50) NOT NULL, -- 'EINGANGSKONTROLLE', 'PRODUKTION', 'AUSGANGSKONTROLLE', 'PERIODISCH'\n    artikel_id UUID,\n    lieferant_id UUID,\n    produktionsauftrag_id UUID,\n    pruefer_id UUID,\n    pruefdatum DATE NOT NULL,\n    status VARCHAR(20) NOT NULL DEFAULT 'OFFEN', -- 'OFFEN', 'IN_BEARBEITUNG', 'ABGESCHLOSSEN', 'ABGELEHNT'\n    ergebnis VARCHAR(20), -- 'BESTANDEN', 'NICHT_BESTANDEN', 'MIT_AUFLAGEN'\n    bemerkungen TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "qualitaet.qualitaetspruefungen"
+}

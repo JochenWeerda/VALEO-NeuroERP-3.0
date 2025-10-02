@@ -1,0 +1,44 @@
+{
+  "schema": "dokumente",
+  "name": "suchhistorie",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "benutzer_id",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "suchbegriff",
+      "type": "TEXT NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gefilterte_ergebnisse",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gesamt_ergebnisse",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.suchhistorie (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    benutzer_id UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    suchbegriff TEXT NOT NULL,\n    gefilterte_ergebnisse INTEGER,\n    gesamt_ergebnisse INTEGER,\n    ausgewaehlte_dokumente UUID[], -- Array von Dokument-IDs\n    suchparameter JSONB, -- Gespeicherte Suchparameter\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.suchhistorie"
+}

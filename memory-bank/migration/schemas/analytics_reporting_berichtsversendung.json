@@ -1,0 +1,86 @@
+{
+  "schema": "reporting",
+  "name": "berichtsversendung",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "name",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "berichtsvorlage_id",
+      "type": "UUID NOT NULL REFERENCES reporting",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "export_format",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "letzte_ausfuehrung",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aktiv",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE reporting.berichtsversendung (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    name VARCHAR(200) NOT NULL,\n    beschreibung TEXT,\n    berichtsvorlage_id UUID NOT NULL REFERENCES reporting.berichtsvorlagen(id),\n    versand_typ VARCHAR(50) NOT NULL, -- 'EMAIL', 'SYSTEM', 'API'\n    empfaenger_definition JSONB NOT NULL, -- Empf\u00e4nger-Konfiguration\n    parameter_werte JSONB,\n    export_format VARCHAR(20) DEFAULT 'PDF',\n    zeitplan_typ VARCHAR(50) NOT NULL, -- 'EINMAL', 'TAEGLICH', 'WOECHENTLICH', 'MONATLICH'\n    zeitplan_konfiguration JSONB, -- Cron-\u00e4hnliche Konfiguration\n    naechste_ausfuehrung TIMESTAMP,\n    letzte_ausfuehrung TIMESTAMP,\n    aktiv BOOLEAN DEFAULT true,\n    erstellt_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_von UUID REFERENCES personal.mitarbeiter(id),\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "reporting.berichtsversendung"
+}

@@ -1,0 +1,395 @@
+﻿version: '3.8'
+
+# VALEO NeuroERP 3.0 - Complete MSOA Infrastructure
+# Desktop Docker Development Environment
+
+services:
+  # Platform Services
+  service-registry:
+    build:
+      context: ../../.platform/service-registry
+      dockerfile: Dockerfile
+    container_name: valero-neuroerp-service-registry
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - SERVICE_NAME=service-registry
+      - SERVICE_PORT=3000
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - registry-logs:/app/logs
+
+  api-gateway:
+    build:
+      context: ../../.platform/api-gateway
+      dockerfile: Dockerfile
+    container_name: valero-neuroerp-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - SERVICE_NAME=api-gateway
+      - SERVICE_PORT=8080
+      - SERVICE_REGISTRY_URL=http://service-registry:3000
+    depends_on:
+      - service-registry
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - gateway-logs:/app/logs
+
+  service-bus:
+    image: rabbitmq:3.12-management-alpine
+    container_name: valero-neuroerp-service-bus
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=valero
+      - RABBITMQ_DEFAULT_PASS=neuroerp2025
+      - RABBITMQ_DEFAULT_VHOST=/
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+  # Domain Services
+  crm-service:
+    build:
+      context: ../../domains/crm
+      dockerfile: Dockerfile
+    container_name: valero-neuroerp-crm-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - SERVICE_NAME=crm-service
+      - SERVICE_PORT=3001
+      - SERVICE_REGISTRY_URL=http://service-registry:3000
+      - SERVICE_BUS_URL=amqp://valero:neuroerp2025@rabbitmq:5672/
+      - CRM_DATABASE_URL=postgresql://crm_user:crm_password@crm-postgres:5432/crm_db
+      - DATABASE_URL=postgresql://crm_user:crm_password@crm-postgres:5432/crm_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - service-registry
+      - service-bus
+      - crm-postgres
+      - redis
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - crm-logs:/app/logs
+
+  erp-service:
+    build:
+      context: ../../domains/erp
+      dockerfile: Dockerfile
+    container_name: valero-neuroerp-erp-service
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - SERVICE_NAME=erp-service
+      - SERVICE_PORT=3002
+      - SERVICE_REGISTRY_URL=http://service-registry:3000
+      - SERVICE_BUS_URL=amqp://valero:neuroerp2025@rabbitmq:5672/
+      - ERP_DATABASE_URL=postgresql://erp_user:erp_password@erp-postgres:5432/erp_db
+      - DATABASE_URL=postgresql://erp_user:erp_password@erp-postgres:5432/erp_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - service-registry
+      - service-bus
+      - erp-postgres
+      - redis
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - erp-logs:/app/logs
+
+  analytics-service:
+    build:
+      context: ../../domains/analytics
+      dockerfile: Dockerfile
+    container_name: valero-neuroerp-analytics-service
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - SERVICE_NAME=analytics-service
+      - SERVICE_PORT=3003
+      - SERVICE_REGISTRY_URL=http://service-registry:3000
+      - SERVICE_BUS_URL=amqp://valero:neuroerp2025@rabbitmq:5672/
+      - DATABASE_URL=postgresql://analytics_user:analytics_password@analytics-postgres:5432/analytics_db
+      - REDIS_URL=redis://redis:6379
+      - CLICKHOUSE_URL=http://clickhouse:8123
+    depends_on:
+      - service-registry
+      - service-bus
+      - analytics-postgres
+      - clickhouse
+      - redis
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - analytics-logs:/app/logs
+
+  integration-service:
+    build:
+      context: ../../domains/integration
+      dockerfile: Dockerfile
+    container_name: valero-neuroerp-integration-service
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - SERVICE_NAME=integration-service
+      - SERVICE_PORT=3004
+      - SERVICE_REGISTRY_URL=http://service-registry:3000
+      - SERVICE_BUS_URL=amqp://valero:neuroerp2025@rabbitmq:5672/
+      - DATABASE_URL=postgresql://integration_user:integration_password@integration-postgres:5432/integration_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - service-registry
+      - service-bus
+      - integration-postgres
+      - redis
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - integration-logs:/app/logs
+
+  # Databases (Database per Service pattern)
+  crm-postgres:
+    image: postgres:15-alpine
+    container_name: valero-neuroerp-crm-postgres
+    environment:
+      - POSTGRES_DB=crm_db
+      - POSTGRES_USER=crm_user
+      - POSTGRES_PASSWORD=crm_password
+    ports:
+      - "5431:5432"
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    volumes:
+      - crm-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crm_user -d crm_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  erp-postgres:
+    image: postgres:15-alpine
+    container_name: valero-neuroerp-erp-postgres
+    environment:
+      - POSTGRES_DB=erp_db
+      - POSTGRES_USER=erp_user
+      - POSTGRES_PASSWORD=erp_password
+    ports:
+      - "5432:5432"
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    volumes:
+      - erp-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U erp_user -d erp_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  analytics-postgres:
+    image: postgres:15-alpine
+    container_name: valero-neuroerp-analytics-postgres
+    environment:
+      - POSTGRES_DB=analytics_db
+      - POSTGRES_USER=analytics_user
+      - POSTGRES_PASSWORD=analytics_password
+    ports:
+      - "5433:5432"
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    volumes:
+      - analytics-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U analytics_user -d analytics_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  integration-postgres:
+    image: postgres:15-alpine
+    container_name: valero-neuroerp-integration-postgres
+    environment:
+      - POSTGRES_DB=integration_db
+      - POSTGRES_USER=integration_user
+      - POSTGRES_PASSWORD=integration_password
+    ports:
+      - "5434:5432"
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    volumes:
+      - integration-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U integration_user -d integration_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Caching & Analytics
+  redis:
+    image: redis:7-alpine
+    container_name: valero-neuroerp-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - redis-data:/data
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:23-alpine
+    container_name: valero-neuroerp-clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    environment:
+      - CLICKHOUSE_LISTEN_HOST=0.0.0.0
+      - CLICKHOUSE_TCP_PORT=9000
+      - CLICKHOUSE_HTTP_PORT=8123
+      - CLICKHOUSE_INTERSERVER_HTTP_PORT=9009
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ../clickhouse-config/listen.xml:/etc/clickhouse-server/config.d/listen.xml:ro
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "select 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Monitoring Stack
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: valero-neuroerp-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: valero-neuroerp-grafana
+    ports:
+      - "3005:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - valero-neuroerp-network
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+networks:
+  valero-neuroerp-network:
+    driver: bridge
+    name: valero-neuroerp-network
+
+volumes:
+  # Service logs
+  registry-logs:
+  gateway-logs:
+  crm-logs:
+  erp-logs:
+  analytics-logs:
+  integration-logs:
+
+  # Database data
+  crm-postgres-data:
+  erp-postgres-data:
+  analytics-postgres-data:
+  integration-postgres-data:
+
+  # Infrastructure
+  rabbitmq-data:
+  redis-data:
+  clickhouse-data:
+  prometheus-data:
+  grafana-data:
+

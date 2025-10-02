@@ -1,0 +1,58 @@
+{
+  "schema": "dokumente",
+  "name": "dokument_verschluesselung",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "entschluesselung_erforderlich",
+      "type": "BOOLEAN DEFAULT false",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verschluesselt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verschluesselt_von",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.dokument_verschluesselung (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id) ON DELETE CASCADE,\n    verschluesselungs_typ VARCHAR(50) NOT NULL, -- 'AES256', 'RSA2048', 'KEINE'\n    verschluesselungs_schluessel_hash VARCHAR(255),\n    entschluesselung_erforderlich BOOLEAN DEFAULT false,\n    verschluesselt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    verschluesselt_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.dokument_verschluesselung"
+}

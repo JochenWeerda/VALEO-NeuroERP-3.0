@@ -1,0 +1,86 @@
+{
+  "schema": "reporting",
+  "name": "export_jobs",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "job_name",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "berichtsvorlage_id",
+      "type": "UUID REFERENCES reporting",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ziel_pfad",
+      "type": "VARCHAR(500)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "datei_name",
+      "type": "VARCHAR(200)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ende_zeit",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dauer_sekunden",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "datei_groesse_bytes",
+      "type": "BIGINT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fehlermeldung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE reporting.export_jobs (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    job_name VARCHAR(200) NOT NULL,\n    berichtsvorlage_id UUID REFERENCES reporting.berichtsvorlagen(id),\n    export_format VARCHAR(20) NOT NULL, -- 'PDF', 'EXCEL', 'CSV', 'JSON'\n    parameter_werte JSONB,\n    ziel_pfad VARCHAR(500),\n    datei_name VARCHAR(200),\n    job_status VARCHAR(50) NOT NULL, -- 'QUEUED', 'RUNNING', 'COMPLETED', 'FAILED'\n    start_zeit TIMESTAMP,\n    ende_zeit TIMESTAMP,\n    dauer_sekunden INTEGER,\n    datei_groesse_bytes BIGINT,\n    fehlermeldung TEXT,\n    erstellt_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "reporting.export_jobs"
+}

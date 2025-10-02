@@ -1,0 +1,51 @@
+{
+  "schema": "crm",
+  "name": "kundenhistorie",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID NOT NULL REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "neuer_wert",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aenderungs_datum",
+      "type": "TIMESTAMP NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verantwortlicher_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE crm.kundenhistorie (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    kunde_id UUID NOT NULL REFERENCES crm.kunden(id),\n    aenderung_typ VARCHAR(50) NOT NULL, -- 'STATUS', 'BEWERTUNG', 'UMSATZKLASSE', 'KUNDENSEIT', 'ADRESSE'\n    alter_wert TEXT,\n    neuer_wert TEXT,\n    aenderungs_datum TIMESTAMP NOT NULL,\n    verantwortlicher_id UUID,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "crm.kundenhistorie"
+}

@@ -1,0 +1,65 @@
+{
+  "schema": "dokumente",
+  "name": "audit_trail",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "benutzer_id",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ip_adresse",
+      "type": "INET",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "user_agent",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "session_id",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zeitstempel",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.audit_trail (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id),\n    benutzer_id UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    aktion VARCHAR(100) NOT NULL, -- 'ERSTELLT', 'GELESEN', 'BEARBEITET', 'GELOESCHT', 'FREIGEGEBEN', 'ARCHIVIERT', 'EXPORTIERT'\n    aktion_details JSONB,\n    ip_adresse INET,\n    user_agent TEXT,\n    session_id VARCHAR(100),\n    zeitstempel TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    hash_wert VARCHAR(64), -- SHA256-Hash f\u00fcr Integrit\u00e4tspr\u00fcfung\n    vorheriger_hash VARCHAR(64),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.audit_trail"
+}

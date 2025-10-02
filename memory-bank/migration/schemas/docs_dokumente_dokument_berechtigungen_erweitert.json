@@ -1,0 +1,86 @@
+{
+  "schema": "dokumente",
+  "name": "dokument_berechtigungen_erweitert",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mitarbeiter_id",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rolle_id",
+      "type": "UUID REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gueltig_von",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gueltig_bis",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ip_beschraenkung",
+      "type": "BOOLEAN DEFAULT false",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erteilt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aktiv",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.dokument_berechtigungen_erweitert (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id) ON DELETE CASCADE,\n    mitarbeiter_id UUID REFERENCES personal.mitarbeiter(id),\n    rolle_id UUID REFERENCES dokumente.dokument_rollen(id),\n    berechtigung_typ VARCHAR(50) NOT NULL, -- 'LESEN', 'BEARBEITEN', 'FREIGEBEN', 'LOESCHEN', 'ADMIN', 'ARCHIVIEREN'\n    zeitliche_beschraenkung BOOLEAN DEFAULT false,\n    gueltig_von TIMESTAMP,\n    gueltig_bis TIMESTAMP,\n    ip_beschraenkung BOOLEAN DEFAULT false,\n    erlaubte_ip_bereiche TEXT[], -- Array von IP-Bereichen\n    erteilt_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    erteilt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktiv BOOLEAN DEFAULT true,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.dokument_berechtigungen_erweitert"
+}

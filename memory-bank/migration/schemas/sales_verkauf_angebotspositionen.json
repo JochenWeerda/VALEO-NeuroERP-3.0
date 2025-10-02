@@ -1,0 +1,114 @@
+{
+  "schema": "verkauf",
+  "name": "angebotspositionen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "position_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "angebot_id",
+      "type": "UUID NOT NULL REFERENCES verkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikel_id",
+      "type": "UUID REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "position_nr",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bezeichnung",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "menge",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "einheit",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "einheitspreis",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rabatt_prozent",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "mwst_prozent",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": "19",
+      "constraints": []
+    },
+    {
+      "name": "lieferzeit_tage",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE verkauf.angebotspositionen (\n    position_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    angebot_id UUID NOT NULL REFERENCES verkauf.angebote(angebot_id) ON DELETE CASCADE,\n    artikel_id UUID REFERENCES produktion.artikel(artikel_id),\n    position_nr INTEGER NOT NULL,\n    bezeichnung VARCHAR(200) NOT NULL,\n    beschreibung TEXT,\n    menge DECIMAL(10,4) NOT NULL,\n    einheit VARCHAR(20) NOT NULL,\n    einheitspreis DECIMAL(10,4) NOT NULL,\n    rabatt_prozent DECIMAL(5,2) DEFAULT 0,\n    mwst_prozent DECIMAL(5,2) DEFAULT 19,\n    gesamtpreis DECIMAL(12,2) GENERATED ALWAYS AS (\n        menge * einheitspreis * (1 - rabatt_prozent / 100)\n    ) STORED,\n    lieferzeit_tage INTEGER,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "verkauf.angebotspositionen"
+}

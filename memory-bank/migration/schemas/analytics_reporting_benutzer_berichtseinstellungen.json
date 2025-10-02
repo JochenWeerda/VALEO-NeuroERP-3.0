@@ -1,0 +1,44 @@
+{
+  "schema": "reporting",
+  "name": "benutzer_berichtseinstellungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mitarbeiter_id",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "berichtsvorlage_id",
+      "type": "UUID NOT NULL REFERENCES reporting",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE reporting.benutzer_berichtseinstellungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    mitarbeiter_id UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    berichtsvorlage_id UUID NOT NULL REFERENCES reporting.berichtsvorlagen(id),\n    standard_parameter JSONB, -- Benutzer-spezifische Standard-Parameter\n    export_format VARCHAR(20) DEFAULT 'PDF',\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    UNIQUE(mitarbeiter_id, berichtsvorlage_id)\n);",
+  "table": "reporting.benutzer_berichtseinstellungen"
+}

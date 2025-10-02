@@ -1,0 +1,5 @@
+# VALEO NeuroERP 3.0 environment
+CRM_DATABASE_URL=postgresql://crm_user:crm_password@localhost:5431/crm_db
+ERP_DATABASE_URL=postgresql://erp_user:erp_password@localhost:5432/erp_db
+ANALYTICS_DATABASE_URL=postgresql://analytics_user:analytics_password@localhost:5433/analytics_db
+INTEGRATION_DATABASE_URL=postgresql://integration_user:integration_password@localhost:5434/integration_db

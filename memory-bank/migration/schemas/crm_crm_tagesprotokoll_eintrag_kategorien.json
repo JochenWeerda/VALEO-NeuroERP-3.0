@@ -1,0 +1,37 @@
+{
+  "schema": "crm",
+  "name": "tagesprotokoll_eintrag_kategorien",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "eintrag_id",
+      "type": "UUID NOT NULL REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kategorie_id",
+      "type": "UUID NOT NULL REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE crm.tagesprotokoll_eintrag_kategorien (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    eintrag_id UUID NOT NULL REFERENCES crm.tagesprotokoll_eintraege(id) ON DELETE CASCADE,\n    kategorie_id UUID NOT NULL REFERENCES crm.tagesprotokoll_kategorien(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "crm.tagesprotokoll_eintrag_kategorien"
+}

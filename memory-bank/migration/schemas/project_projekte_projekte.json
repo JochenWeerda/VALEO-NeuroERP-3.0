@@ -1,0 +1,142 @@
+{
+  "schema": "projekte",
+  "name": "projekte",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "projektnummer",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "projektname",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kategorie_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "prioritaet",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "startdatum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "enddatum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_abgeschlossen",
+      "type": "BOOLEAN DEFAULT FALSE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "projektleiter_id",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "budget_geplant",
+      "type": "DECIMAL(15",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "budget_ist",
+      "type": "DECIMAL(15",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "stunden_geplant",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "stunden_ist",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fortschritt_prozent",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE projekte.projekte (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    projektnummer VARCHAR(20) UNIQUE NOT NULL,\n    projektname VARCHAR(200) NOT NULL,\n    beschreibung TEXT,\n    kategorie_id UUID REFERENCES projekte.projektkategorien(id),\n    status VARCHAR(50) DEFAULT 'planung' CHECK (status IN ('planung', 'aktiv', 'pausiert', 'abgeschlossen', 'abgebrochen')),\n    prioritaet VARCHAR(20) DEFAULT 'normal' CHECK (prioritaet IN ('niedrig', 'normal', 'hoch', 'kritisch')),\n    startdatum DATE,\n    enddatum DATE,\n    ist_abgeschlossen BOOLEAN DEFAULT FALSE,\n    projektleiter_id UUID REFERENCES personal.mitarbeiter(id),\n    kunde_id UUID REFERENCES crm.kunden(id),\n    budget_geplant DECIMAL(15,2),\n    budget_ist DECIMAL(15,2),\n    stunden_geplant DECIMAL(10,2),\n    stunden_ist DECIMAL(10,2),\n    fortschritt_prozent DECIMAL(5,2) DEFAULT 0,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "projekte.projekte"
+}

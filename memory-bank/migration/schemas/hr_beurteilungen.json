@@ -1,0 +1,121 @@
+{
+  "schema": "",
+  "name": "beurteilungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "personal_id",
+      "type": "UUID REFERENCES personal(id) ON DELETE CASCADE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beurteilungsdatum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beurteiler_id",
+      "type": "UUID REFERENCES personal(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beurteilungszeitraum_start",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beurteilungszeitraum_ende",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "leistungsbewertung",
+      "type": "INTEGER CHECK (leistungsbewertung",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verhaltensbewertung",
+      "type": "INTEGER CHECK (verhaltensbewertung",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "entwicklungsziele",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ma\u00dfnahmen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gesamtbewertung",
+      "type": "INTEGER CHECK (gesamtbewertung",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "unterschrift_mitarbeiter",
+      "type": "BOOLEAN DEFAULT false",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "unterschrift_vorgesetzter",
+      "type": "BOOLEAN DEFAULT false",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "notizen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS beurteilungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    personal_id UUID REFERENCES personal(id) ON DELETE CASCADE,\n    beurteilungsdatum DATE NOT NULL,\n    beurteiler_id UUID REFERENCES personal(id),\n    beurteilungszeitraum_start DATE,\n    beurteilungszeitraum_ende DATE,\n    leistungsbewertung INTEGER CHECK (leistungsbewertung >= 1 AND leistungsbewertung <= 5),\n    verhaltensbewertung INTEGER CHECK (verhaltensbewertung >= 1 AND verhaltensbewertung <= 5),\n    entwicklungsziele TEXT,\n    ma\u00dfnahmen TEXT,\n    gesamtbewertung INTEGER CHECK (gesamtbewertung >= 1 AND gesamtbewertung <= 5),\n    unterschrift_mitarbeiter BOOLEAN DEFAULT false,\n    unterschrift_vorgesetzter BOOLEAN DEFAULT false,\n    notizen TEXT,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "beurteilungen"
+}

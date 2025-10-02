@@ -1,0 +1,121 @@
+{
+  "schema": "produktion",
+  "name": "produktionsauftrag_positionen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "position_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftrag_id",
+      "type": "UUID NOT NULL REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "arbeitsplan_position_id",
+      "type": "UUID REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "position",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "arbeitsgang_bezeichnung",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "arbeitsplatz_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "maschine_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "personal_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geplante_zeit_min",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "tatsaechliche_zeit_min",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "start_zeit",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "end_zeit",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.produktionsauftrag_positionen (\n    position_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    auftrag_id UUID NOT NULL REFERENCES produktion.produktionsauftraege(auftrag_id),\n    arbeitsplan_position_id UUID REFERENCES produktion.arbeitsplan_positionen(position_id),\n    position INTEGER NOT NULL,\n    arbeitsgang_bezeichnung VARCHAR(200) NOT NULL,\n    arbeitsplatz_id UUID,\n    maschine_id UUID,\n    personal_id UUID,\n    status VARCHAR(20) DEFAULT 'OFFEN' CHECK (status IN ('OFFEN', 'IN_BEARBEITUNG', 'ABGESCHLOSSEN', 'PAUSIERT')),\n    geplante_zeit_min INTEGER,\n    tatsaechliche_zeit_min INTEGER,\n    start_zeit TIMESTAMP,\n    end_zeit TIMESTAMP,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "produktion.produktionsauftrag_positionen"
+}

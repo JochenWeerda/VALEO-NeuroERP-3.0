@@ -1,0 +1,93 @@
+{
+  "schema": "qualitaet",
+  "name": "kalibrierungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "messmittel_id",
+      "type": "UUID NOT NULL REFERENCES qualitaet",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kalibrier_nr",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kalibrier_datum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "naechste_kalibrierung",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kalibrier_stelle",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kalibrierer",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zertifikat_nr",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kosten",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkungen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE qualitaet.kalibrierungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    messmittel_id UUID NOT NULL REFERENCES qualitaet.messmittel(id),\n    kalibrier_nr VARCHAR(20) UNIQUE NOT NULL,\n    kalibrier_datum DATE NOT NULL,\n    naechste_kalibrierung DATE NOT NULL,\n    kalibrier_stelle VARCHAR(100),\n    kalibrierer VARCHAR(100),\n    ergebnis VARCHAR(20) NOT NULL, -- 'BESTANDEN', 'NICHT_BESTANDEN'\n    abweichungen TEXT,\n    zertifikat_nr VARCHAR(100),\n    kosten DECIMAL(10,2),\n    bemerkungen TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "qualitaet.kalibrierungen"
+}

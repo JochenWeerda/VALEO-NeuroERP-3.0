@@ -1,0 +1,128 @@
+{
+  "schema": "anlagen",
+  "name": "wartungsauftraege",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftragsnummer",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anlage_id",
+      "type": "UUID REFERENCES anlagen",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "wartungsplan_id",
+      "type": "UUID REFERENCES anlagen",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "wartungstyp",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geplantes_datum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "tatsaechliches_datum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "prioritaet",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verantwortlicher",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "durchfuehrender",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kosten",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ergebnis",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS anlagen.wartungsauftraege (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    auftragsnummer VARCHAR(50) UNIQUE NOT NULL,\n    anlage_id UUID REFERENCES anlagen.anlagen(id),\n    wartungsplan_id UUID REFERENCES anlagen.wartungsplan(id),\n    wartungstyp VARCHAR(100) NOT NULL,\n    beschreibung TEXT,\n    geplantes_datum DATE,\n    tatsaechliches_datum DATE,\n    status VARCHAR(50) DEFAULT 'Geplant' CHECK (status IN ('Geplant', 'In Bearbeitung', 'Abgeschlossen', 'Abgebrochen')),\n    prioritaet VARCHAR(20) DEFAULT 'Normal' CHECK (prioritaet IN ('Niedrig', 'Normal', 'Hoch', 'Kritisch')),\n    verantwortlicher UUID REFERENCES users(id),\n    durchfuehrender UUID REFERENCES users(id),\n    kosten DECIMAL(10,2),\n    ergebnis TEXT,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "anlagen.wartungsauftraege"
+}

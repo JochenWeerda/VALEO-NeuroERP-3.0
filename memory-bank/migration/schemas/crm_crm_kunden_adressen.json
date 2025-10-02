@@ -1,0 +1,100 @@
+{
+  "schema": "crm",
+  "name": "kunden_adressen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID NOT NULL REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "hausnummer",
+      "type": "VARCHAR(20)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "plz",
+      "type": "VARCHAR(10)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ort",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "land",
+      "type": "VARCHAR(100) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "telefon",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fax",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "email",
+      "type": "VARCHAR(200)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "website",
+      "type": "VARCHAR(200)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_hauptadresse",
+      "type": "BOOLEAN DEFAULT false",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE crm.kunden_adressen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    kunde_id UUID NOT NULL REFERENCES crm.kunden(id),\n    adress_typ VARCHAR(50) NOT NULL, -- 'RECHNUNGSADRESSE', 'LIEFERADRESSE', 'HAUPTADRESSE'\n    strasse VARCHAR(200),\n    hausnummer VARCHAR(20),\n    plz VARCHAR(10),\n    ort VARCHAR(100),\n    land VARCHAR(100) DEFAULT 'Deutschland',\n    telefon VARCHAR(50),\n    fax VARCHAR(50),\n    email VARCHAR(200),\n    website VARCHAR(200),\n    ist_hauptadresse BOOLEAN DEFAULT false,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "crm.kunden_adressen"
+}

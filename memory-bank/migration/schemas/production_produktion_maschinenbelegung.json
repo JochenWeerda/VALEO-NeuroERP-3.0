@@ -1,0 +1,79 @@
+{
+  "schema": "produktion",
+  "name": "maschinenbelegung",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "belegung_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "maschine_id",
+      "type": "UUID NOT NULL REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftrag_position_id",
+      "type": "UUID REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "belegungstyp",
+      "type": "VARCHAR(50) NOT NULL CHECK (belegungstyp IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "start_zeit",
+      "type": "TIMESTAMP NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "end_zeit",
+      "type": "TIMESTAMP NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.maschinenbelegung (\n    belegung_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    maschine_id UUID NOT NULL REFERENCES produktion.maschinen(maschine_id),\n    auftrag_position_id UUID REFERENCES produktion.produktionsauftrag_positionen(position_id),\n    belegungstyp VARCHAR(50) NOT NULL CHECK (belegungstyp IN ('PRODUKTION', 'WARTUNG', 'REPARATUR', 'RUHEZEIT')),\n    start_zeit TIMESTAMP NOT NULL,\n    end_zeit TIMESTAMP NOT NULL,\n    status VARCHAR(20) DEFAULT 'GEPLANT' CHECK (status IN ('GEPLANT', 'AKTIV', 'ABGESCHLOSSEN', 'STORNIERT')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "produktion.maschinenbelegung"
+}

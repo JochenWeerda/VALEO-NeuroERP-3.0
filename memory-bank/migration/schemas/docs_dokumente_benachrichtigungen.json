@@ -1,0 +1,58 @@
+{
+  "schema": "dokumente",
+  "name": "benachrichtigungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_id",
+      "type": "UUID REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "workflow_instanz_id",
+      "type": "UUID REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "betreff",
+      "type": "VARCHAR(200)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "nachricht",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gelesen_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.benachrichtigungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    dokument_id UUID REFERENCES dokumente.dokumente(id),\n    workflow_instanz_id UUID REFERENCES dokumente.workflow_instanzen(id),\n    benachrichtigung_typ VARCHAR(50) NOT NULL, -- 'EMAIL', 'SMS', 'SYSTEM', 'PUSH'\n    empfaenger_id UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    betreff VARCHAR(200),\n    nachricht TEXT,\n    status VARCHAR(50) DEFAULT 'GESENDET', -- 'GESENDET', 'GELESEN', 'FEHLGESCHLAGEN'\n    gesendet_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    gelesen_am TIMESTAMP,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.benachrichtigungen"
+}

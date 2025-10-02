@@ -1,0 +1,142 @@
+{
+  "schema": "lager",
+  "name": "warenausgang_positionen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "position_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "warenausgang_id",
+      "type": "UUID NOT NULL REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "position",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikel_id",
+      "type": "UUID NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verkaufsauftrag_position_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "produktionsauftrag_position_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gewuenschte_menge",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verfuegbare_menge",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "kommissionierte_menge",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "ausgelagerte_menge",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "einheit",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerzone_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerplatz_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kommissionierung_erforderlich",
+      "type": "BOOLEAN DEFAULT TRUE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kommissionierung_status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE lager.warenausgang_positionen (\n    position_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    warenausgang_id UUID NOT NULL REFERENCES lager.warenausgang(warenausgang_id),\n    position INTEGER NOT NULL,\n    artikel_id UUID NOT NULL,\n    verkaufsauftrag_position_id UUID,\n    produktionsauftrag_position_id UUID,\n    gewuenschte_menge DECIMAL(10,4) NOT NULL,\n    verfuegbare_menge DECIMAL(10,4) DEFAULT 0,\n    kommissionierte_menge DECIMAL(10,4) DEFAULT 0,\n    ausgelagerte_menge DECIMAL(10,4) DEFAULT 0,\n    einheit VARCHAR(20) NOT NULL,\n    lagerzone_id UUID REFERENCES lager.lagerzonen(lagerzone_id),\n    lagerplatz_id UUID REFERENCES lager.lagerplaetze(lagerplatz_id),\n    kommissionierung_erforderlich BOOLEAN DEFAULT TRUE,\n    kommissionierung_status VARCHAR(20) DEFAULT 'OFFEN' CHECK (kommissionierung_status IN ('OFFEN', 'IN_BEARBEITUNG', 'ABGESCHLOSSEN')),\n    status VARCHAR(20) DEFAULT 'OFFEN' CHECK (status IN ('OFFEN', 'IN_BEARBEITUNG', 'KOMMISSIONIERT', 'AUSGELAGERT', 'STORNIERT')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "lager.warenausgang_positionen"
+}

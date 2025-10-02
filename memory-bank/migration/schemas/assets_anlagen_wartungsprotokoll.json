@@ -1,0 +1,65 @@
+{
+  "schema": "anlagen",
+  "name": "wartungsprotokoll",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "wartungsauftrag_id",
+      "type": "UUID REFERENCES anlagen",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "protokoll_datum",
+      "type": "TIMESTAMP NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "durchgef\u00fchrte_arbeiten",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verwendete_teile",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beobachtungen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "naechste_massnahmen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS anlagen.wartungsprotokoll (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    wartungsauftrag_id UUID REFERENCES anlagen.wartungsauftraege(id),\n    protokoll_datum TIMESTAMP NOT NULL,\n    durchgef\u00fchrte_arbeiten TEXT,\n    verwendete_teile TEXT,\n    beobachtungen TEXT,\n    naechste_massnahmen TEXT,\n    dokumente TEXT[], -- Array von Dokument-URLs\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "anlagen.wartungsprotokoll"
+}

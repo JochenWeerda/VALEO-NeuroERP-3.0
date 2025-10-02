@@ -1,0 +1,149 @@
+{
+  "schema": "produktion",
+  "name": "mobile_anlagen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "anlage_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anlagen_nr",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bezeichnung",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anlagentyp",
+      "type": "VARCHAR(50) NOT NULL CHECK (anlagentyp IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "hersteller",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "modell",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "seriennummer",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "baujahr",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kapazitaet_kg",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fahrzeug_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fahrer_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "qs_zulassung",
+      "type": "BOOLEAN DEFAULT FALSE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "qs_zulassungsdatum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "qs_ablaufdatum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "letzte_wartung",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "naechste_wartung",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.mobile_anlagen (\n    anlage_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    anlagen_nr VARCHAR(50) UNIQUE NOT NULL,\n    bezeichnung VARCHAR(200) NOT NULL,\n    anlagentyp VARCHAR(50) NOT NULL CHECK (anlagentyp IN ('MAHLWAGEN', 'MISCHWAGEN', 'KOMBINATIONSANLAGE')),\n    hersteller VARCHAR(100),\n    modell VARCHAR(100),\n    seriennummer VARCHAR(100),\n    baujahr INTEGER,\n    kapazitaet_kg DECIMAL(10,2),\n    fahrzeug_id UUID,\n    fahrer_id UUID,\n    qs_zulassung BOOLEAN DEFAULT FALSE,\n    qs_zulassungsdatum DATE,\n    qs_ablaufdatum DATE,\n    status VARCHAR(20) DEFAULT 'AKTIV' CHECK (status IN ('AKTIV', 'INAKTIV', 'WARTUNG', 'QS_GESPERRT')),\n    letzte_wartung DATE,\n    naechste_wartung DATE,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "produktion.mobile_anlagen"
+}

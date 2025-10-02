@@ -1,0 +1,100 @@
+{
+  "schema": "lager",
+  "name": "bewegungspositionen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "position_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bewegung_id",
+      "type": "UUID NOT NULL REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "position",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikel_id",
+      "type": "UUID NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "charge_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "menge",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "einheit",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerplatz_von_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerplatz_nach_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE lager.bewegungspositionen (\n    position_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    bewegung_id UUID NOT NULL REFERENCES lager.lagerbewegungen(bewegung_id),\n    position INTEGER NOT NULL,\n    artikel_id UUID NOT NULL,\n    charge_id UUID REFERENCES lager.chargen(charge_id),\n    menge DECIMAL(10,4) NOT NULL,\n    einheit VARCHAR(20) NOT NULL,\n    lagerplatz_von_id UUID REFERENCES lager.lagerplaetze(lagerplatz_id),\n    lagerplatz_nach_id UUID REFERENCES lager.lagerplaetze(lagerplatz_id),\n    status VARCHAR(20) DEFAULT 'OFFEN' CHECK (status IN ('OFFEN', 'IN_BEARBEITUNG', 'ABGESCHLOSSEN', 'STORNIERT')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "lager.bewegungspositionen"
+}

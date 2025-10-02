@@ -1,0 +1,72 @@
+{
+  "schema": "",
+  "name": "sales_order_items",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "sales_order_id",
+      "type": "UUID REFERENCES sales_orders(id) ON DELETE CASCADE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "inventory_id",
+      "type": "UUID REFERENCES inventory(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "quantity",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "unit_price",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "total_price",
+      "type": "DECIMAL(15",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "shipped_quantity",
+      "type": "INTEGER DEFAULT 0",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "notes",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS sales_order_items (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    sales_order_id UUID REFERENCES sales_orders(id) ON DELETE CASCADE,\n    inventory_id UUID REFERENCES inventory(id),\n    quantity INTEGER NOT NULL,\n    unit_price DECIMAL(10,2) NOT NULL,\n    total_price DECIMAL(15,2) GENERATED ALWAYS AS (quantity * unit_price) STORED,\n    shipped_quantity INTEGER DEFAULT 0,\n    notes TEXT,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "sales_order_items"
+}

@@ -1,0 +1,72 @@
+{
+  "schema": "qualitaet",
+  "name": "messmittel",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "messmittel_nr",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bezeichnung",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "modell",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "seriennummer",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verantwortlicher_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkungen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE qualitaet.messmittel (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    messmittel_nr VARCHAR(20) UNIQUE NOT NULL,\n    bezeichnung VARCHAR(100) NOT NULL,\n    typ VARCHAR(50) NOT NULL, -- 'WAAGE', 'THERMOMETER', 'PH_METER', 'SONSTIGES'\n    hersteller VARCHAR(100),\n    modell VARCHAR(100),\n    seriennummer VARCHAR(100),\n    kalibrier_zyklus INTEGER, -- Tage\n    naechste_kalibrierung DATE,\n    status VARCHAR(20) DEFAULT 'AKTIV', -- 'AKTIV', 'KALIBRIERUNG', 'DEFEKT', 'AUSGEMUSTERT'\n    standort VARCHAR(100),\n    verantwortlicher_id UUID,\n    bemerkungen TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "qualitaet.messmittel"
+}

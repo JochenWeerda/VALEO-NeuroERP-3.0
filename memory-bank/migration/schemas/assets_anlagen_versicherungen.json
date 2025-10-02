@@ -1,0 +1,121 @@
+{
+  "schema": "anlagen",
+  "name": "versicherungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anlage_id",
+      "type": "UUID REFERENCES anlagen",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "versicherungsart",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "versicherer",
+      "type": "VARCHAR(255)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "versicherungsnummer",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "versicherungssumme",
+      "type": "DECIMAL(15",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "jaehrliche_praemie",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zahlungsintervall",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "vertragsbeginn",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "vertragsende",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "telefon",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "email",
+      "type": "VARCHAR(255)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "notizen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS anlagen.versicherungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    anlage_id UUID REFERENCES anlagen.anlagen(id),\n    versicherungsart VARCHAR(100) NOT NULL,\n    versicherer VARCHAR(255),\n    versicherungsnummer VARCHAR(100),\n    versicherungssumme DECIMAL(15,2),\n    jaehrliche_praemie DECIMAL(10,2),\n    zahlungsintervall VARCHAR(50),\n    vertragsbeginn DATE,\n    vertragsende DATE,\n    kuendigungsfrist INTEGER, -- in Tagen\n    ansprechpartner VARCHAR(255),\n    telefon VARCHAR(50),\n    email VARCHAR(255),\n    notizen TEXT,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "anlagen.versicherungen"
+}

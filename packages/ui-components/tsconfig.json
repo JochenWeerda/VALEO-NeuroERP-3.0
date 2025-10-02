@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
+    "types": ["node"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+  },
+  "include": ["src/**/*", "src/components/**/*", "src/hooks/**/*"],
+  "references": [],
+  "exclude": ["dist"]
+}

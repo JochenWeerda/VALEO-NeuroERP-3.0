@@ -1,0 +1,107 @@
+{
+  "schema": "",
+  "name": "project_tasks",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "project_id",
+      "type": "UUID REFERENCES projects(id) ON DELETE CASCADE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "name",
+      "type": "VARCHAR(255) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "description",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "assigned_to",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "start_date",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "due_date",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "priority",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "estimated_hours",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "actual_hours",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "progress_percentage",
+      "type": "INTEGER DEFAULT 0 CHECK (progress_percentage",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS project_tasks (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    project_id UUID REFERENCES projects(id) ON DELETE CASCADE,\n    name VARCHAR(255) NOT NULL,\n    description TEXT,\n    assigned_to UUID REFERENCES users(id),\n    start_date DATE,\n    due_date DATE,\n    status VARCHAR(50) DEFAULT 'todo' CHECK (status IN ('todo', 'in_progress', 'review', 'completed', 'cancelled')),\n    priority VARCHAR(20) DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),\n    estimated_hours DECIMAL(5,2),\n    actual_hours DECIMAL(5,2) DEFAULT 0,\n    progress_percentage INTEGER DEFAULT 0 CHECK (progress_percentage >= 0 AND progress_percentage <= 100),\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "project_tasks"
+}

@@ -1,0 +1,107 @@
+{
+  "schema": "einkauf",
+  "name": "bestellpositionen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "position_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bestellung_id",
+      "type": "UUID NOT NULL REFERENCES einkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferanten_artikel_id",
+      "type": "UUID NOT NULL REFERENCES einkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "position_nr",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bestellmenge",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gelieferte_menge",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "einheitspreis",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rabatt_prozent",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "mwst_prozent",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": "19",
+      "constraints": []
+    },
+    {
+      "name": "liefer_datum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE einkauf.bestellpositionen (\n    position_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    bestellung_id UUID NOT NULL REFERENCES einkauf.bestellungen(bestellung_id) ON DELETE CASCADE,\n    lieferanten_artikel_id UUID NOT NULL REFERENCES einkauf.lieferanten_artikel(lieferanten_artikel_id),\n    position_nr INTEGER NOT NULL,\n    bestellmenge DECIMAL(10,4) NOT NULL,\n    gelieferte_menge DECIMAL(10,4) DEFAULT 0,\n    einheitspreis DECIMAL(10,4) NOT NULL,\n    rabatt_prozent DECIMAL(5,2) DEFAULT 0,\n    mwst_prozent DECIMAL(5,2) DEFAULT 19,\n    gesamtpreis DECIMAL(12,2) GENERATED ALWAYS AS (\n        bestellmenge * einheitspreis * (1 - rabatt_prozent / 100)\n    ) STORED,\n    liefer_datum DATE,\n    status VARCHAR(20) DEFAULT 'OFFEN' CHECK (status IN ('OFFEN', 'TEILLIEFERUNG', 'VOLLST\u00c4NDIG', 'STORNIERT')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "einkauf.bestellpositionen"
+}

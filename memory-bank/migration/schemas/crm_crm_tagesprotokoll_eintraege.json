@@ -1,0 +1,107 @@
+{
+  "schema": "crm",
+  "name": "tagesprotokoll_eintraege",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "protokoll_id",
+      "type": "UUID NOT NULL REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kontakt_id",
+      "type": "UUID REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ergebnis",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "naechste_aktion",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "termin_vereinbarung",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "menge_vereinbarung",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "waehrung_vereinbarung",
+      "type": "VARCHAR(3) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kundenspezifische_absprachen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zeitaufwand_minuten",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE crm.tagesprotokoll_eintraege (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    protokoll_id UUID NOT NULL REFERENCES crm.tagesprotokolle(id) ON DELETE CASCADE,\n    kunde_id UUID REFERENCES crm.kunden(id),\n    kontakt_id UUID REFERENCES crm.kontakte(id),\n    eintrag_typ VARCHAR(50) NOT NULL, -- 'BETRIEBSBESUCH', 'TELEFONAT', 'EMAIL', 'WHATSAPP', 'LIEFERUNG', 'BESTELLUNG', 'ANGEBOT', 'FELDBEGEHUNG', 'MESSE', 'SONSTIGES'\n    kontakt_richtung VARCHAR(20) DEFAULT 'AUSGEHEND', -- 'EINGEHEND', 'AUSGEHEND'\n    titel VARCHAR(200) NOT NULL,\n    beschreibung TEXT,\n    ergebnis TEXT,\n    naechste_aktion TEXT,\n    termin_vereinbarung DATE,\n    menge_vereinbarung DECIMAL(10,2),\n    einheit_vereinbarung VARCHAR(20), -- 'TO', 'LTR', 'KG', 'SACK', 'PALETTE', 'STUECK'\n    preis_vereinbarung DECIMAL(10,2),\n    waehrung_vereinbarung VARCHAR(3) DEFAULT 'EUR',\n    kundenspezifische_absprachen TEXT,\n    zeitaufwand_minuten INTEGER,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "crm.tagesprotokoll_eintraege"
+}

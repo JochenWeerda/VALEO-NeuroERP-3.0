@@ -1,0 +1,121 @@
+{
+  "schema": "lager",
+  "name": "kommissionierauftraege",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "kommissionierauftrag_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kommissionierauftrag_nr",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "warenausgang_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kommissionierauftrag_typ",
+      "type": "VARCHAR(50) NOT NULL CHECK (kommissionierauftrag_typ IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "prioritaet",
+      "type": "INTEGER DEFAULT 5 CHECK (prioritaet BETWEEN 1 AND 10)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kommissionierer_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerort_id",
+      "type": "UUID NOT NULL REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geplante_startzeit",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "tatsaechliche_startzeit",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "tatsaechliche_endzeit",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE lager.kommissionierauftraege (\n    kommissionierauftrag_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    kommissionierauftrag_nr VARCHAR(50) UNIQUE NOT NULL,\n    warenausgang_id UUID REFERENCES lager.warenausgang(warenausgang_id),\n    kommissionierauftrag_typ VARCHAR(50) NOT NULL CHECK (kommissionierauftrag_typ IN ('VERKAUF', 'PRODUKTION', 'INTERN', 'INVENTUR')),\n    prioritaet INTEGER DEFAULT 5 CHECK (prioritaet BETWEEN 1 AND 10),\n    kommissionierer_id UUID,\n    lagerort_id UUID NOT NULL REFERENCES lager.lagerorte(lagerort_id),\n    status VARCHAR(20) DEFAULT 'GEPLANT' CHECK (status IN ('GEPLANT', 'IN_BEARBEITUNG', 'ABGESCHLOSSEN', 'STORNIERT')),\n    geplante_startzeit TIMESTAMP,\n    tatsaechliche_startzeit TIMESTAMP,\n    tatsaechliche_endzeit TIMESTAMP,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    erstellt_von UUID,\n    geaendert_von UUID\n);",
+  "table": "lager.kommissionierauftraege"
+}

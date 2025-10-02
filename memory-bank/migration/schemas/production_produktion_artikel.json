@@ -1,0 +1,156 @@
+{
+  "schema": "produktion",
+  "name": "artikel",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "artikel_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikelnummer",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bezeichnung",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikeltyp",
+      "type": "VARCHAR(50) NOT NULL CHECK (artikeltyp IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "einheit",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gewicht_kg",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "laenge_mm",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "breite_mm",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "hoehe_mm",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "einkaufspreis",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verkaufspreis",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mindestbestand",
+      "type": "INTEGER DEFAULT 0",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "optimalbestand",
+      "type": "INTEGER DEFAULT 0",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerort_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferant_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.artikel (\n    artikel_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    artikelnummer VARCHAR(50) UNIQUE NOT NULL,\n    bezeichnung VARCHAR(200) NOT NULL,\n    beschreibung TEXT,\n    artikeltyp VARCHAR(50) NOT NULL CHECK (artikeltyp IN ('ROHSTOFF', 'HALBFERTIG', 'FERTIGPRODUKT', 'HILFSSTOFF', 'SCHUETTGUT', 'FLUESSIGKEIT', 'GEBINDE')),\n    einheit VARCHAR(20) NOT NULL,\n    gewicht_kg DECIMAL(10,3),\n    laenge_mm DECIMAL(10,2),\n    breite_mm DECIMAL(10,2),\n    hoehe_mm DECIMAL(10,2),\n    einkaufspreis DECIMAL(10,2),\n    verkaufspreis DECIMAL(10,2),\n    mindestbestand INTEGER DEFAULT 0,\n    optimalbestand INTEGER DEFAULT 0,\n    lagerort_id UUID,\n    lieferant_id UUID,\n    status VARCHAR(20) DEFAULT 'AKTIV' CHECK (status IN ('AKTIV', 'INAKTIV', 'GESPERRT')),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    erstellt_von UUID,\n    geaendert_von UUID\n);",
+  "table": "produktion.artikel"
+}

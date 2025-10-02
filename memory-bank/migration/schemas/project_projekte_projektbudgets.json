@@ -1,0 +1,65 @@
+{
+  "schema": "projekte",
+  "name": "projektbudgets",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "projekt_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "budget_jahr",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "budget_typ",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "budget_betrag",
+      "type": "DECIMAL(15",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verbraucht_betrag",
+      "type": "DECIMAL(15",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE projekte.projektbudgets (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    projekt_id UUID REFERENCES projekte.projekte(id) ON DELETE CASCADE,\n    budget_jahr INTEGER NOT NULL,\n    budget_typ VARCHAR(50) DEFAULT 'gesamt' CHECK (budget_typ IN ('gesamt', 'personal', 'material', 'extern')),\n    budget_betrag DECIMAL(15,2) NOT NULL,\n    verbraucht_betrag DECIMAL(15,2) DEFAULT 0,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "projekte.projektbudgets"
+}

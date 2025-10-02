@@ -1,0 +1,205 @@
+{
+  "schema": "",
+  "name": "personal",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "personalnummer",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "vorname",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "nachname",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geburtsdatum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "eintrittsdatum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "austrittsdatum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "abteilung",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "position",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gehalt",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "urlaubstage",
+      "type": "INTEGER DEFAULT 30",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "krankheitstage",
+      "type": "INTEGER DEFAULT 0",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "email",
+      "type": "VARCHAR(255)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "telefon",
+      "type": "VARCHAR(20)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mobile",
+      "type": "VARCHAR(20)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "adresse",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "plz",
+      "type": "VARCHAR(10)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ort",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "land",
+      "type": "VARCHAR(100) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "steuernummer",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "sozialversicherungsnummer",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bankverbindung",
+      "type": "JSONB",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "notfallkontakt",
+      "type": "JSONB",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "qualifikationen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zertifikate",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS personal (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    personalnummer VARCHAR(20) UNIQUE NOT NULL,\n    vorname VARCHAR(100) NOT NULL,\n    nachname VARCHAR(100) NOT NULL,\n    geburtsdatum DATE,\n    eintrittsdatum DATE NOT NULL,\n    austrittsdatum DATE,\n    abteilung VARCHAR(100),\n    position VARCHAR(100),\n    gehalt DECIMAL(10,2),\n    urlaubstage INTEGER DEFAULT 30,\n    krankheitstage INTEGER DEFAULT 0,\n    status VARCHAR(50) DEFAULT 'aktiv' CHECK (status IN ('aktiv', 'inaktiv', 'beurlaubt', 'gek\u00fcndigt')),\n    email VARCHAR(255),\n    telefon VARCHAR(20),\n    mobile VARCHAR(20),\n    adresse TEXT,\n    plz VARCHAR(10),\n    ort VARCHAR(100),\n    land VARCHAR(100) DEFAULT 'Deutschland',\n    steuernummer VARCHAR(50),\n    sozialversicherungsnummer VARCHAR(50),\n    bankverbindung JSONB,\n    notfallkontakt JSONB,\n    qualifikationen TEXT[],\n    zertifikate TEXT[],\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "personal"
+}

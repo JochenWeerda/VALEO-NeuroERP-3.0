@@ -1,0 +1,30 @@
+{
+  "schema": "dokumente",
+  "name": "such_index",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.such_index (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id) ON DELETE CASCADE,\n    volltext_inhalt TEXT, -- Extrahierter Text aus Dokumenten\n    metadaten JSONB, -- Strukturierte Metadaten\n    schluesselwoerter TEXT[], -- Array von Schl\u00fcsselw\u00f6rtern\n    kategorien TEXT[], -- Array von Kategorien\n    tags TEXT[], -- Array von Tags\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.such_index"
+}

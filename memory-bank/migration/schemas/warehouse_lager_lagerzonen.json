@@ -1,0 +1,114 @@
+{
+  "schema": "lager",
+  "name": "lagerzonen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "lagerzone_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerort_id",
+      "type": "UUID NOT NULL REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerzone_nr",
+      "type": "VARCHAR(50) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bezeichnung",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerzone_typ",
+      "type": "VARCHAR(50) NOT NULL CHECK (lagerzone_typ IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "temperatur_min",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "temperatur_max",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "feuchtigkeit_min",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "feuchtigkeit_max",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kapazitaet_m3",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "belegte_kapazitaet_m3",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE lager.lagerzonen (\n    lagerzone_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    lagerort_id UUID NOT NULL REFERENCES lager.lagerorte(lagerort_id),\n    lagerzone_nr VARCHAR(50) NOT NULL,\n    bezeichnung VARCHAR(200) NOT NULL,\n    lagerzone_typ VARCHAR(50) NOT NULL CHECK (lagerzone_typ IN ('ROHSTOFFE', 'HALBFERTIGE', 'FERTIGPRODUKTE', 'HILFSSTOFFE', 'VERPACKUNG', 'RETOUREN')),\n    temperatur_min DECIMAL(5,2),\n    temperatur_max DECIMAL(5,2),\n    feuchtigkeit_min DECIMAL(5,2),\n    feuchtigkeit_max DECIMAL(5,2),\n    kapazitaet_m3 DECIMAL(10,2),\n    belegte_kapazitaet_m3 DECIMAL(10,2) DEFAULT 0,\n    status VARCHAR(20) DEFAULT 'AKTIV' CHECK (status IN ('AKTIV', 'INAKTIV', 'WARTUNG', 'GESPERRT')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    UNIQUE(lagerort_id, lagerzone_nr)\n);",
+  "table": "lager.lagerzonen"
+}

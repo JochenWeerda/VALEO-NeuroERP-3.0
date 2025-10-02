@@ -1,0 +1,58 @@
+{
+  "schema": "dokumente",
+  "name": "versionshistorie_erweitert",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "version",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "revisionssicher",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "archiviert",
+      "type": "BOOLEAN DEFAULT false",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.versionshistorie_erweitert (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id) ON DELETE CASCADE,\n    version VARCHAR(20) NOT NULL,\n    aenderung_typ VARCHAR(50) NOT NULL, -- 'ERSTELLT', 'AKTUALISIERT', 'GELOESCHT', 'WIDERHERGESTELLT', 'FREIGEGEBEN'\n    aenderungsbeschreibung TEXT,\n    aenderungen JSONB, -- Detaillierte \u00c4nderungen\n    datei_hash VARCHAR(64) NOT NULL, -- SHA256-Hash der Datei\n    vorheriger_hash VARCHAR(64),\n    erstellt_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    revisionssicher BOOLEAN DEFAULT true,\n    archiviert BOOLEAN DEFAULT false\n);",
+  "table": "dokumente.versionshistorie_erweitert"
+}

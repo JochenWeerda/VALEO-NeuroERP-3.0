@@ -1,0 +1,128 @@
+{
+  "schema": "lager",
+  "name": "inventur_positionen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "position_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "inventur_id",
+      "type": "UUID NOT NULL REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "position",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikel_id",
+      "type": "UUID NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "charge_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerzone_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerplatz_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "buchbestand",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "istbestand",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "differenz",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "einheit",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "inventur_status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefer_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefdatum",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE lager.inventur_positionen (\n    position_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    inventur_id UUID NOT NULL REFERENCES lager.inventur(inventur_id),\n    position INTEGER NOT NULL,\n    artikel_id UUID NOT NULL,\n    charge_id UUID REFERENCES lager.chargen(charge_id),\n    lagerzone_id UUID REFERENCES lager.lagerzonen(lagerzone_id),\n    lagerplatz_id UUID REFERENCES lager.lagerplaetze(lagerplatz_id),\n    buchbestand DECIMAL(10,4) NOT NULL,\n    istbestand DECIMAL(10,4),\n    differenz DECIMAL(10,4),\n    einheit VARCHAR(20) NOT NULL,\n    inventur_status VARCHAR(20) DEFAULT 'OFFEN' CHECK (inventur_status IN ('OFFEN', 'GEPR\u00dcFT', 'ABGESCHLOSSEN')),\n    pruefer_id UUID,\n    pruefdatum TIMESTAMP,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "lager.inventur_positionen"
+}

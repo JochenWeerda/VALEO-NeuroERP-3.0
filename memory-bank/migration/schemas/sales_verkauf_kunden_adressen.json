@@ -1,0 +1,93 @@
+{
+  "schema": "verkauf",
+  "name": "kunden_adressen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "adresse_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID NOT NULL REFERENCES verkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "adress_typ",
+      "type": "VARCHAR(20) NOT NULL CHECK (adress_typ IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "strasse",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "hausnummer",
+      "type": "VARCHAR(20)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "plz",
+      "type": "VARCHAR(10) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ort",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "land",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_standard",
+      "type": "BOOLEAN DEFAULT FALSE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE verkauf.kunden_adressen (\n    adresse_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    kunde_id UUID NOT NULL REFERENCES verkauf.kunden(kunde_id) ON DELETE CASCADE,\n    adress_typ VARCHAR(20) NOT NULL CHECK (adress_typ IN ('RECHNUNG', 'LIEFERUNG', 'HAUPTADRESSE')),\n    strasse VARCHAR(200) NOT NULL,\n    hausnummer VARCHAR(20),\n    plz VARCHAR(10) NOT NULL,\n    ort VARCHAR(100) NOT NULL,\n    land VARCHAR(50) DEFAULT 'Deutschland',\n    ist_standard BOOLEAN DEFAULT FALSE,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "verkauf.kunden_adressen"
+}

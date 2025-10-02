@@ -1,0 +1,79 @@
+{
+  "schema": "dokumente",
+  "name": "bereinigungsauftraege",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftrag_nr",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ausgefuehrt_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anzahl_dokumente",
+      "type": "INTEGER DEFAULT 0",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erfolgreich_verarbeitet",
+      "type": "INTEGER DEFAULT 0",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fehlgeschlagene_verarbeitung",
+      "type": "INTEGER DEFAULT 0",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ausgefuehrt_von",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kommentar",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.bereinigungsauftraege (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    auftrag_nr VARCHAR(20) UNIQUE NOT NULL,\n    auftrag_typ VARCHAR(50) NOT NULL, -- 'ARCHIVIERUNG', 'EXPORT', 'LOESCHUNG'\n    regel_id UUID REFERENCES dokumente.archivierungsregeln(id),\n    status VARCHAR(50) DEFAULT 'GEPLANT', -- 'GEPLANT', 'IN_BEARBEITUNG', 'ABGESCHLOSSEN', 'FEHLGESCHLAGEN'\n    geplantes_datum DATE NOT NULL,\n    ausgefuehrt_am TIMESTAMP,\n    anzahl_dokumente INTEGER DEFAULT 0,\n    erfolgreich_verarbeitet INTEGER DEFAULT 0,\n    fehlgeschlagene_verarbeitung INTEGER DEFAULT 0,\n    ausgefuehrt_von UUID REFERENCES personal.mitarbeiter(id),\n    kommentar TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.bereinigungsauftraege"
+}

@@ -1,0 +1,93 @@
+{
+  "schema": "verkauf",
+  "name": "lieferpositionen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "lieferposition_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferung_id",
+      "type": "UUID NOT NULL REFERENCES verkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftragsposition_id",
+      "type": "UUID REFERENCES verkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikel_id",
+      "type": "UUID REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "position_nr",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gelieferte_menge",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "einheitspreis",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "chargen_nr",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mindesthaltbarkeit",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE verkauf.lieferpositionen (\n    lieferposition_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    lieferung_id UUID NOT NULL REFERENCES verkauf.lieferungen(lieferung_id) ON DELETE CASCADE,\n    auftragsposition_id UUID REFERENCES verkauf.auftragspositionen(position_id),\n    artikel_id UUID REFERENCES produktion.artikel(artikel_id),\n    position_nr INTEGER NOT NULL,\n    gelieferte_menge DECIMAL(10,4) NOT NULL,\n    einheitspreis DECIMAL(10,4),\n    chargen_nr VARCHAR(100),\n    mindesthaltbarkeit DATE,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "verkauf.lieferpositionen"
+}

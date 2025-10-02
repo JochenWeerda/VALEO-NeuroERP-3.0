@@ -1,0 +1,184 @@
+{
+  "schema": "lager",
+  "name": "lagerbewegungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "bewegung_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bewegungsnummer",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bewegungstyp",
+      "type": "VARCHAR(50) NOT NULL CHECK (bewegungstyp IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikel_id",
+      "type": "UUID NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "charge_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerort_von_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerzone_von_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerplatz_von_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerort_nach_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerzone_nach_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerplatz_nach_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "menge",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "einheit",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bewegungsdatum",
+      "type": "TIMESTAMP NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bewegungszeit",
+      "type": "TIMESTAMP NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "referenz_typ",
+      "type": "VARCHAR(50) CHECK (referenz_typ IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "referenz_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "referenz_nr",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "personal_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE lager.lagerbewegungen (\n    bewegung_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    bewegungsnummer VARCHAR(50) UNIQUE NOT NULL,\n    bewegungstyp VARCHAR(50) NOT NULL CHECK (bewegungstyp IN ('EINLAGERUNG', 'AUSLAGERUNG', 'UMLAGERUNG', 'INVENTUR', 'KOMMISSIONIERUNG', 'RETOURE')),\n    artikel_id UUID NOT NULL,\n    charge_id UUID REFERENCES lager.chargen(charge_id),\n    lagerort_von_id UUID REFERENCES lager.lagerorte(lagerort_id),\n    lagerzone_von_id UUID REFERENCES lager.lagerzonen(lagerzone_id),\n    lagerplatz_von_id UUID REFERENCES lager.lagerplaetze(lagerplatz_id),\n    lagerort_nach_id UUID REFERENCES lager.lagerorte(lagerort_id),\n    lagerzone_nach_id UUID REFERENCES lager.lagerzonen(lagerzone_id),\n    lagerplatz_nach_id UUID REFERENCES lager.lagerplaetze(lagerplatz_id),\n    menge DECIMAL(10,4) NOT NULL,\n    einheit VARCHAR(20) NOT NULL,\n    bewegungsdatum TIMESTAMP NOT NULL,\n    bewegungszeit TIMESTAMP NOT NULL,\n    referenz_typ VARCHAR(50) CHECK (referenz_typ IN ('PRODUKTIONSAUFTRAG', 'BESTELLUNG', 'VERKAUFSAUFTRAG', 'INVENTUR', 'MANUELL')),\n    referenz_id UUID,\n    referenz_nr VARCHAR(50),\n    personal_id UUID,\n    status VARCHAR(20) DEFAULT 'GEPLANT' CHECK (status IN ('GEPLANT', 'IN_BEARBEITUNG', 'ABGESCHLOSSEN', 'STORNIERT')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    erstellt_von UUID,\n    geaendert_von UUID\n);",
+  "table": "lager.lagerbewegungen"
+}

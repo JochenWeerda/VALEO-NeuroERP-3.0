@@ -1,0 +1,79 @@
+{
+  "schema": "produktion",
+  "name": "rezeptur_positionen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "position_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rezeptur_id",
+      "type": "UUID NOT NULL REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikel_id",
+      "type": "UUID NOT NULL REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "position",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "anteil_prozent",
+      "type": "DECIMAL(5",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "menge_kg",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "einheit",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.rezeptur_positionen (\n    position_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    rezeptur_id UUID NOT NULL REFERENCES produktion.futtermittel_rezepturen(rezeptur_id),\n    artikel_id UUID NOT NULL REFERENCES produktion.artikel(artikel_id),\n    position INTEGER NOT NULL,\n    anteil_prozent DECIMAL(5,2) NOT NULL,\n    menge_kg DECIMAL(10,4),\n    einheit VARCHAR(20) NOT NULL,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "produktion.rezeptur_positionen"
+}

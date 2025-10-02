@@ -1,0 +1,128 @@
+{
+  "schema": "projekte",
+  "name": "zeiterfassung",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mitarbeiter_id",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "projekt_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aufgabe_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "unteraufgabe_id",
+      "type": "UUID REFERENCES projekte",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "datum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "startzeit",
+      "type": "TIME",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "endzeit",
+      "type": "TIME",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pause_minuten",
+      "type": "INTEGER DEFAULT 0",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "arbeitsstunden",
+      "type": "DECIMAL(4",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ueberstunden",
+      "type": "DECIMAL(4",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "genehmigt_von",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "genehmigt_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE projekte.zeiterfassung (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    mitarbeiter_id UUID REFERENCES personal.mitarbeiter(id),\n    projekt_id UUID REFERENCES projekte.projekte(id),\n    aufgabe_id UUID REFERENCES projekte.aufgaben(id),\n    unteraufgabe_id UUID REFERENCES projekte.unteraufgaben(id),\n    datum DATE NOT NULL,\n    startzeit TIME,\n    endzeit TIME,\n    pause_minuten INTEGER DEFAULT 0,\n    arbeitsstunden DECIMAL(4,2),\n    ueberstunden DECIMAL(4,2),\n    beschreibung TEXT,\n    status VARCHAR(50) DEFAULT 'offen' CHECK (status IN ('offen', 'genehmigt', 'abgelehnt')),\n    genehmigt_von UUID REFERENCES personal.mitarbeiter(id),\n    genehmigt_am TIMESTAMP,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "projekte.zeiterfassung"
+}

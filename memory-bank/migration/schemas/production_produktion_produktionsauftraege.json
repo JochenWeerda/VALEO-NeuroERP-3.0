@@ -1,0 +1,163 @@
+{
+  "schema": "produktion",
+  "name": "produktionsauftraege",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "auftrag_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftragsnummer",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikel_id",
+      "type": "UUID NOT NULL REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "stueckliste_id",
+      "type": "UUID REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "arbeitsplan_id",
+      "type": "UUID REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftragstyp",
+      "type": "VARCHAR(50) NOT NULL CHECK (auftragstyp IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "menge_geplant",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "menge_fertiggestellt",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "menge_ausschnitt",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "starttermin",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "endtermin",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "tatsaechlicher_start",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "tatsaechliches_ende",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "prioritaet",
+      "type": "INTEGER DEFAULT 5 CHECK (prioritaet BETWEEN 1 AND 10)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftraggeber_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.produktionsauftraege (\n    auftrag_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    auftragsnummer VARCHAR(50) UNIQUE NOT NULL,\n    artikel_id UUID NOT NULL REFERENCES produktion.artikel(artikel_id),\n    stueckliste_id UUID REFERENCES produktion.stuecklisten(stueckliste_id),\n    arbeitsplan_id UUID REFERENCES produktion.arbeitsplaene(arbeitsplan_id),\n    auftragstyp VARCHAR(50) NOT NULL CHECK (auftragstyp IN ('PRODUKTION', 'REPARATUR', 'MONTAGE', 'MAHLEN', 'MISCHEN', 'SPRITZEN', 'KALKEN', 'FRACHT')),\n    status VARCHAR(20) DEFAULT 'ERSTELLT' CHECK (status IN ('ERSTELLT', 'FREIGEGEBEN', 'IN_BEARBEITUNG', 'PAUSIERT', 'ABGESCHLOSSEN', 'STORNIERT')),\n    menge_geplant DECIMAL(10,4) NOT NULL,\n    menge_fertiggestellt DECIMAL(10,4) DEFAULT 0,\n    menge_ausschnitt DECIMAL(10,4) DEFAULT 0,\n    starttermin DATE,\n    endtermin DATE,\n    tatsaechlicher_start TIMESTAMP,\n    tatsaechliches_ende TIMESTAMP,\n    prioritaet INTEGER DEFAULT 5 CHECK (prioritaet BETWEEN 1 AND 10),\n    kunde_id UUID,\n    auftraggeber_id UUID,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    erstellt_von UUID,\n    geaendert_von UUID\n);",
+  "table": "produktion.produktionsauftraege"
+}

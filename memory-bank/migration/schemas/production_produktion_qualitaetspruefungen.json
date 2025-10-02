@@ -1,0 +1,93 @@
+{
+  "schema": "produktion",
+  "name": "qualitaetspruefungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "pruefung_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftrag_id",
+      "type": "UUID REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "auftrag_position_id",
+      "type": "UUID REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefungstyp",
+      "type": "VARCHAR(50) NOT NULL CHECK (pruefungstyp IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefer_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefdatum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefzeit",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ergebnis",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.qualitaetspruefungen (\n    pruefung_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    auftrag_id UUID REFERENCES produktion.produktionsauftraege(auftrag_id),\n    auftrag_position_id UUID REFERENCES produktion.produktionsauftrag_positionen(position_id),\n    pruefungstyp VARCHAR(50) NOT NULL CHECK (pruefungstyp IN ('EINGANGSKONTROLLE', 'ZWISCHENKONTROLLE', 'ENDPR\u00dcFUNG', 'STICHPROBE')),\n    status VARCHAR(20) DEFAULT 'OFFEN' CHECK (status IN ('OFFEN', 'IN_BEARBEITUNG', 'BESTANDEN', 'NICHT_BESTANDEN')),\n    pruefer_id UUID,\n    pruefdatum DATE,\n    pruefzeit TIMESTAMP,\n    ergebnis TEXT,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "produktion.qualitaetspruefungen"
+}

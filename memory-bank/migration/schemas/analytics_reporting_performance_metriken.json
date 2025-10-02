@@ -1,0 +1,51 @@
+{
+  "schema": "reporting",
+  "name": "performance_metriken",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dauer_ms",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "datensatz_anzahl",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "cache_hit",
+      "type": "BOOLEAN",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "benutzer_id",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE reporting.performance_metriken (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    metrik_typ VARCHAR(50) NOT NULL, -- 'BERICHT_AUSFUEHRUNG', 'EXPORT', 'CACHE_HIT'\n    berichtsvorlage_id UUID REFERENCES reporting.berichtsvorlagen(id),\n    dauer_ms INTEGER,\n    datensatz_anzahl INTEGER,\n    cache_hit BOOLEAN,\n    benutzer_id UUID REFERENCES personal.mitarbeiter(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "reporting.performance_metriken"
+}

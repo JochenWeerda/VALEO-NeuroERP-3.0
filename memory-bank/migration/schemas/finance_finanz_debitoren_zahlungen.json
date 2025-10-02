@@ -1,0 +1,115 @@
+{
+  "schema": "finanz",
+  "name": "debitoren_zahlungen",
+  "primaryKey": "id",
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID",
+      "nullable": true,
+      "default": "gen_random_uuid()",
+      "constraints": [
+        "primary-key"
+      ]
+    },
+    {
+      "name": "zahlungsnummer",
+      "type": "VARCHAR(50)",
+      "nullable": false,
+      "default": null,
+      "constraints": [
+        "unique"
+      ]
+    },
+    {
+      "name": "rechnung_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "zahlungsdatum",
+      "type": "DATE",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zahlungsart",
+      "type": "VARCHAR(50)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zahlungsbetrag",
+      "type": "DECIMAL(15,2)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "waehrung",
+      "type": "VARCHAR(3)",
+      "nullable": true,
+      "default": "'EUR'",
+      "constraints": []
+    },
+    {
+      "name": "zahlungsreferenz",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zahlungsinfo",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": "'Eingegangen' CHECK (status IN ('Eingegangen'",
+      "constraints": []
+    },
+    {
+      "name": "verarbeitet_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS finanz.debitoren_zahlungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    zahlungsnummer VARCHAR(50) UNIQUE NOT NULL,\n    rechnung_id UUID REFERENCES finanz.debitoren_rechnungen(id),\n    zahlungsdatum DATE NOT NULL,\n    zahlungsart VARCHAR(50) NOT NULL,\n    zahlungsbetrag DECIMAL(15,2) NOT NULL,\n    waehrung VARCHAR(3) DEFAULT 'EUR',\n    zahlungsreferenz VARCHAR(100),\n    zahlungsinfo TEXT,\n    status VARCHAR(50) DEFAULT 'Eingegangen' CHECK (status IN ('Eingegangen', 'Verarbeitet', 'Storniert')),\n    verarbeitet_am TIMESTAMP,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "finanz.debitoren_zahlungen"
+}

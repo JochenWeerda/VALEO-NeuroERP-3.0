@@ -1,0 +1,51 @@
+{
+  "schema": "dokumente",
+  "name": "performance_metriken",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "einheit",
+      "type": "VARCHAR(20)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "benutzer_id",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_id",
+      "type": "UUID REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "system_info",
+      "type": "JSONB",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.performance_metriken (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    metrik_typ VARCHAR(50) NOT NULL, -- 'SUCHZEIT', 'UPLOAD_ZEIT', 'DOWNLOAD_ZEIT'\n    wert DECIMAL(10,3),\n    einheit VARCHAR(20),\n    benutzer_id UUID REFERENCES personal.mitarbeiter(id),\n    dokument_id UUID REFERENCES dokumente.dokumente(id),\n    system_info JSONB,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.performance_metriken"
+}

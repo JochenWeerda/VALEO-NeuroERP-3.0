@@ -1,0 +1,79 @@
+{
+  "schema": "qualitaet",
+  "name": "qs_dokumentation",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_nr",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "version",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "freigabe_datum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "naechste_pruefung",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "datei_pfad",
+      "type": "VARCHAR(500)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkungen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE qualitaet.qs_dokumentation (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    dokument_nr VARCHAR(20) UNIQUE NOT NULL,\n    dokument_typ VARCHAR(50) NOT NULL, -- 'HACCP', 'EIGENKONTROLLE', 'SUPPLIER_AUDIT', 'INTERNES_AUDIT'\n    titel VARCHAR(200) NOT NULL,\n    beschreibung TEXT,\n    version VARCHAR(20) NOT NULL,\n    status VARCHAR(20) DEFAULT 'ENTWURF', -- 'ENTWURF', 'FREIGEGEBEN', 'ARCHIVIERT'\n    verantwortlicher_id UUID,\n    freigabe_datum DATE,\n    naechste_pruefung DATE,\n    datei_pfad VARCHAR(500),\n    bemerkungen TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "qualitaet.qs_dokumentation"
+}

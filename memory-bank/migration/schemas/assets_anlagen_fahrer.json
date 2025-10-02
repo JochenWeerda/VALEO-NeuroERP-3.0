@@ -1,0 +1,72 @@
+{
+  "schema": "anlagen",
+  "name": "fahrer",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "personal_id",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fuehrerschein_klasse",
+      "type": "VARCHAR(20)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fuehrerschein_erhalten",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fuehrerschein_gueltig_bis",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "notizen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID REFERENCES users(id)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS anlagen.fahrer (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    personal_id UUID REFERENCES personal.personal(id),\n    fuehrerschein_klasse VARCHAR(20),\n    fuehrerschein_erhalten DATE,\n    fuehrerschein_gueltig_bis DATE,\n    fahrerlaubnis_erweitert TEXT[], -- Array von erweiterten Berechtigungen\n    gesundheitszeugnis_gueltig_bis DATE,\n    verantwortlich_fuer_fahrzeuge UUID[], -- Array von Fahrzeug-IDs\n    ist_aktiv BOOLEAN DEFAULT true,\n    notizen TEXT,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "anlagen.fahrer"
+}

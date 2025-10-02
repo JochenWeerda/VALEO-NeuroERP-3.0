@@ -1,0 +1,150 @@
+{
+  "schema": "finanz",
+  "name": "kreditoren_rechnungen",
+  "primaryKey": "id",
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID",
+      "nullable": true,
+      "default": "gen_random_uuid()",
+      "constraints": [
+        "primary-key"
+      ]
+    },
+    {
+      "name": "rechnungsnummer",
+      "type": "VARCHAR(50)",
+      "nullable": false,
+      "default": null,
+      "constraints": [
+        "unique"
+      ]
+    },
+    {
+      "name": "kreditor_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "lieferanten_rechnungsnr",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rechnungsdatum",
+      "type": "DATE",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "faelligkeitsdatum",
+      "type": "DATE",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "netto_betrag",
+      "type": "DECIMAL(15,2)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "steuerbetrag",
+      "type": "DECIMAL(15,2)",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "brutto_betrag",
+      "type": "DECIMAL(15,2)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "waehrung",
+      "type": "VARCHAR(3)",
+      "nullable": true,
+      "default": "'EUR'",
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": "'Offen' CHECK (status IN ('Offen'",
+      "constraints": []
+    },
+    {
+      "name": "bezahlt_am",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bezahlter_betrag",
+      "type": "DECIMAL(15,2)",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "restbetrag",
+      "type": "DECIMAL(15,2)",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "referenz_typ",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "referenz_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS finanz.kreditoren_rechnungen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    rechnungsnummer VARCHAR(50) UNIQUE NOT NULL,\n    kreditor_id UUID REFERENCES finanz.kreditoren(id),\n    lieferanten_rechnungsnr VARCHAR(50),\n    rechnungsdatum DATE NOT NULL,\n    faelligkeitsdatum DATE NOT NULL,\n    netto_betrag DECIMAL(15,2) NOT NULL,\n    steuerbetrag DECIMAL(15,2) DEFAULT 0,\n    brutto_betrag DECIMAL(15,2) NOT NULL,\n    waehrung VARCHAR(3) DEFAULT 'EUR',\n    status VARCHAR(50) DEFAULT 'Offen' CHECK (status IN ('Offen', 'Teilzahlung', 'Bezahlt', 'Storniert')),\n    bezahlt_am DATE,\n    bezahlter_betrag DECIMAL(15,2) DEFAULT 0,\n    restbetrag DECIMAL(15,2) DEFAULT 0,\n    referenz_typ VARCHAR(50),\n    referenz_id UUID,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "finanz.kreditoren_rechnungen"
+}

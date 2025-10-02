@@ -1,0 +1,274 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "VALEO NeuroERP 3.0 - Finance Domain Dashboard",
+    "tags": ["finance", "erp", "valero-neuroerp"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Finance Domain Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"finance-domain\"}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "text": "DOWN",
+                    "color": "red"
+                  },
+                  "1": {
+                    "text": "UP",
+                    "color": "green"
+                  }
+                },
+                "type": "value"
+              }
+            ]
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "API Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(finance_api_response_time_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(finance_api_response_time_seconds_bucket[5m]))",
+            "legendFormat": "50th percentile",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Database Query Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(finance_database_query_duration_seconds_sum[5m]) / rate(finance_database_query_duration_seconds_count[5m])",
+            "legendFormat": "Average query time",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Cache Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "finance_cache_hit_rate",
+            "legendFormat": "Cache hit rate",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "Business Metrics - Invoice Processing",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(finance_invoice_processing_duration_seconds_sum[5m]) / rate(finance_invoice_processing_duration_seconds_count[5m])",
+            "legendFormat": "Average processing time",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(finance_invoice_processing_duration_seconds_bucket{le=\"5\"}[5m])",
+            "legendFormat": "Processed within 5s",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 6,
+        "title": "AI Confidence Scores",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(finance_ai_confidence_score_bucket[5m]))",
+            "legendFormat": "95th percentile confidence",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(finance_ai_confidence_score_bucket[5m]))",
+            "legendFormat": "Median confidence",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        }
+      },
+      {
+        "id": 7,
+        "title": "Event Processing Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(finance_event_processing_latency_seconds_sum[5m]) / rate(finance_event_processing_latency_seconds_count[5m])",
+            "legendFormat": "Average event processing time",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 24
+        }
+      },
+      {
+        "id": 8,
+        "title": "Error Rates",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(finance_errors_total[5m])",
+            "legendFormat": "{{type}} - {{component}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 24
+        }
+      },
+      {
+        "id": 9,
+        "title": "Journal Posting Activity",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(finance_journal_postings_total[5m])",
+            "legendFormat": "{{type}} - {{status}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 32
+        }
+      },
+      {
+        "id": 10,
+        "title": "Audit Trail Integrity",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "finance_audit_trail_integrity",
+            "legendFormat": "{{period}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 32
+        }
+      },
+      {
+        "id": 11,
+        "title": "Bank Reconciliation Success Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "finance_reconciliation_success_rate",
+            "legendFormat": "{{bank_account}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 40
+        }
+      },
+      {
+        "id": 12,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "finance_memory_usage_bytes",
+            "legendFormat": "{{type}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 40
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "version": 0,
+    "links": []
+  }
+}

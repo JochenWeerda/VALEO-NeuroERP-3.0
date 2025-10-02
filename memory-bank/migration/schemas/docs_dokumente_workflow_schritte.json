@@ -1,0 +1,72 @@
+{
+  "schema": "dokumente",
+  "name": "workflow_schritte",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "workflow_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "schritt_name",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "schritt_reihenfolge",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rolle_id",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mitarbeiter_id",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zeitlimit_tage",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.workflow_schritte (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    workflow_id UUID NOT NULL REFERENCES dokumente.workflow_definitionen(id) ON DELETE CASCADE,\n    schritt_name VARCHAR(100) NOT NULL,\n    schritt_reihenfolge INTEGER NOT NULL,\n    rolle_id UUID REFERENCES personal.rollen(id),\n    mitarbeiter_id UUID REFERENCES personal.mitarbeiter(id),\n    aktion VARCHAR(50) NOT NULL, -- 'FREIGEBEN', 'GENEHMIGEN', 'PR\u00dcFEN', 'UNTERZEICHNEN'\n    ist_optional BOOLEAN DEFAULT false,\n    zeitlimit_tage INTEGER,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.workflow_schritte"
+}

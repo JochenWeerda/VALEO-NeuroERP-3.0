@@ -1,0 +1,58 @@
+{
+  "schema": "dokumente",
+  "name": "workflow_instanzen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "workflow_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gestartet_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "abgeschlossen_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.workflow_instanzen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    workflow_id UUID NOT NULL REFERENCES dokumente.workflow_definitionen(id),\n    dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id),\n    status VARCHAR(50) DEFAULT 'AKTIV', -- 'AKTIV', 'ABGESCHLOSSEN', 'ABGEBROCHEN'\n    gestartet_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    gestartet_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    abgeschlossen_am TIMESTAMP,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.workflow_instanzen"
+}

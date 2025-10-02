@@ -1,0 +1,79 @@
+{
+  "schema": "reporting",
+  "name": "berichtsvorlagen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "vorlagen_name",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kategorie_id",
+      "type": "UUID NOT NULL REFERENCES reporting",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "naechster_refresh",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aktiv",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID NOT NULL REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID REFERENCES personal",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE reporting.berichtsvorlagen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    vorlagen_name VARCHAR(200) NOT NULL,\n    beschreibung TEXT,\n    kategorie_id UUID NOT NULL REFERENCES reporting.berichtskategorien(id),\n    bericht_typ VARCHAR(50) NOT NULL, -- 'TABELLE', 'DIAGRAMM', 'DASHBOARD', 'EXPORT'\n    sql_query TEXT NOT NULL,\n    parameter_definition JSONB, -- Definition der Parameter\n    standard_parameter JSONB, -- Standardwerte f\u00fcr Parameter\n    export_formate VARCHAR(100)[], -- ['PDF', 'EXCEL', 'CSV', 'JSON']\n    refresh_intervall INTEGER, -- in Minuten, NULL = manuell\n    letzter_refresh TIMESTAMP,\n    naechster_refresh TIMESTAMP,\n    aktiv BOOLEAN DEFAULT true,\n    erstellt_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_von UUID REFERENCES personal.mitarbeiter(id),\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "reporting.berichtsvorlagen"
+}

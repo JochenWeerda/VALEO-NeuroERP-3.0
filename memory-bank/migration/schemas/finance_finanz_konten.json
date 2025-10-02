@@ -1,0 +1,106 @@
+{
+  "schema": "finanz",
+  "name": "konten",
+  "primaryKey": "id",
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID",
+      "nullable": true,
+      "default": "gen_random_uuid()",
+      "constraints": [
+        "primary-key"
+      ]
+    },
+    {
+      "name": "kontonummer",
+      "type": "VARCHAR(20)",
+      "nullable": false,
+      "default": null,
+      "constraints": [
+        "unique"
+      ]
+    },
+    {
+      "name": "kontobezeichnung",
+      "type": "VARCHAR(255)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kontotyp",
+      "type": "VARCHAR(50)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kontenklasse",
+      "type": "VARCHAR(10)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kontengruppe",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_aktiv",
+      "type": "BOOLEAN",
+      "nullable": true,
+      "default": "true",
+      "constraints": []
+    },
+    {
+      "name": "ist_steuerpflichtig",
+      "type": "BOOLEAN",
+      "nullable": true,
+      "default": "false",
+      "constraints": []
+    },
+    {
+      "name": "steuersatz",
+      "type": "DECIMAL(5,2)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS finanz.konten (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    kontonummer VARCHAR(20) UNIQUE NOT NULL,\n    kontobezeichnung VARCHAR(255) NOT NULL,\n    kontotyp VARCHAR(50) NOT NULL CHECK (kontotyp IN ('Aktiv', 'Passiv', 'Ertrag', 'Aufwand')),\n    kontenklasse VARCHAR(10),\n    kontengruppe VARCHAR(50),\n    ist_aktiv BOOLEAN DEFAULT true,\n    ist_steuerpflichtig BOOLEAN DEFAULT false,\n    steuersatz DECIMAL(5,2),\n    beschreibung TEXT,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "finanz.konten"
+}

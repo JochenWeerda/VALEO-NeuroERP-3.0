@@ -1,0 +1,100 @@
+{
+  "schema": "einkauf",
+  "name": "lieferanten_preise",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "preis_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferanten_artikel_id",
+      "type": "UUID NOT NULL REFERENCES einkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "preistyp",
+      "type": "VARCHAR(20) NOT NULL CHECK (preistyp IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "menge_von",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "menge_bis",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "preis",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "waehrung",
+      "type": "VARCHAR(3) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gueltig_von",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gueltig_bis",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "rabatt_prozent",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE einkauf.lieferanten_preise (\n    preis_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    lieferanten_artikel_id UUID NOT NULL REFERENCES einkauf.lieferanten_artikel(lieferanten_artikel_id) ON DELETE CASCADE,\n    preistyp VARCHAR(20) NOT NULL CHECK (preistyp IN ('LISTENPREIS', 'RABATT', 'SONDERPREIS')),\n    menge_von DECIMAL(10,4) NOT NULL,\n    menge_bis DECIMAL(10,4),\n    preis DECIMAL(10,4) NOT NULL,\n    waehrung VARCHAR(3) DEFAULT 'EUR',\n    gueltig_von DATE NOT NULL,\n    gueltig_bis DATE,\n    rabatt_prozent DECIMAL(5,2) DEFAULT 0,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "einkauf.lieferanten_preise"
+}

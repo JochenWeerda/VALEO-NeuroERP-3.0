@@ -1,0 +1,86 @@
+{
+  "schema": "crm",
+  "name": "leads",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lead_nr",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "firmenname",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ansprechpartner",
+      "type": "VARCHAR(200)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "email",
+      "type": "VARCHAR(200)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "telefon",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verantwortlicher_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "naechster_kontakt",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE crm.leads (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    lead_nr VARCHAR(20) UNIQUE NOT NULL,\n    firmenname VARCHAR(200) NOT NULL,\n    ansprechpartner VARCHAR(200),\n    email VARCHAR(200),\n    telefon VARCHAR(50),\n    quelle VARCHAR(100), -- 'WEBSITE', 'EMPFOHLUNG', 'MESSE', 'WERBUNG', 'SONSTIGES'\n    status VARCHAR(50) DEFAULT 'NEU', -- 'NEU', 'KONTAKTIERT', 'INTERESSIERT', 'VERHANDLUNG', 'GEWONNEN', 'VERLOREN'\n    prioritaet VARCHAR(20) DEFAULT 'NORMAL', -- 'NIEDRIG', 'NORMAL', 'HOCH', 'KRITISCH'\n    wert DECIMAL(12,2),\n    beschreibung TEXT,\n    verantwortlicher_id UUID,\n    naechster_kontakt DATE,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "crm.leads"
+}

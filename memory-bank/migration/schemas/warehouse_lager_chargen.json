@@ -1,0 +1,121 @@
+{
+  "schema": "lager",
+  "name": "chargen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "charge_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikel_id",
+      "type": "UUID NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerort_id",
+      "type": "UUID NOT NULL REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerzone_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerplatz_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "charge_nr",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "los_nr",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "menge",
+      "type": "DECIMAL(10",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "einheit",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "herstellungsdatum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verfallsdatum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "charge_status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "qualitaetsstatus",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE lager.chargen (\n    charge_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    artikel_id UUID NOT NULL,\n    lagerort_id UUID NOT NULL REFERENCES lager.lagerorte(lagerort_id),\n    lagerzone_id UUID REFERENCES lager.lagerzonen(lagerzone_id),\n    lagerplatz_id UUID REFERENCES lager.lagerplaetze(lagerplatz_id),\n    charge_nr VARCHAR(100) NOT NULL,\n    los_nr VARCHAR(100),\n    menge DECIMAL(10,4) NOT NULL,\n    einheit VARCHAR(20) NOT NULL,\n    herstellungsdatum DATE,\n    verfallsdatum DATE,\n    charge_status VARCHAR(20) DEFAULT 'VERF\u00dcGBAR' CHECK (charge_status IN ('VERF\u00dcGBAR', 'RESERVIERT', 'QUALITAET', 'GESPERRT', 'VERBRAUCHT')),\n    qualitaetsstatus VARCHAR(20) DEFAULT 'FREIGEGEBEN' CHECK (qualitaetsstatus IN ('FREIGEGEBEN', 'IN_PR\u00dcFUNG', 'GESPERRT', 'VERWORFEN')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "lager.chargen"
+}

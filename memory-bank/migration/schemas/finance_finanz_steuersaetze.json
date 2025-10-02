@@ -1,0 +1,90 @@
+{
+  "schema": "finanz",
+  "name": "steuersaetze",
+  "primaryKey": "id",
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID",
+      "nullable": true,
+      "default": "gen_random_uuid()",
+      "constraints": [
+        "primary-key"
+      ]
+    },
+    {
+      "name": "steuername",
+      "type": "VARCHAR(100)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "steuersatz",
+      "type": "DECIMAL(5,2)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "steuerart",
+      "type": "VARCHAR(50)",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ist_aktiv",
+      "type": "BOOLEAN",
+      "nullable": true,
+      "default": "true",
+      "constraints": []
+    },
+    {
+      "name": "gueltig_ab",
+      "type": "DATE",
+      "nullable": false,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gueltig_bis",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": [
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    },
+    {
+      "name": "aktualisiert_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS finanz.steuersaetze (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    steuername VARCHAR(100) NOT NULL,\n    steuersatz DECIMAL(5,2) NOT NULL,\n    steuerart VARCHAR(50) NOT NULL CHECK (steuerart IN ('Umsatzsteuer', 'Vorsteuer', 'Lohnsteuer', 'Gewerbesteuer')),\n    ist_aktiv BOOLEAN DEFAULT true,\n    gueltig_ab DATE NOT NULL,\n    gueltig_bis DATE,\n    beschreibung TEXT,\n    erstellt_von UUID REFERENCES users(id),\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "finanz.steuersaetze"
+}

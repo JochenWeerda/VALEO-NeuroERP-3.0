@@ -1,0 +1,72 @@
+{
+  "schema": "qualitaet",
+  "name": "zertifikate",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "zertifikat_nr",
+      "type": "VARCHAR(20) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aussteller",
+      "type": "VARCHAR(100)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ausstellungs_datum",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gueltig_bis",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "datei_pfad",
+      "type": "VARCHAR(500)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkungen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE qualitaet.zertifikate (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    zertifikat_nr VARCHAR(20) UNIQUE NOT NULL,\n    zertifikat_typ VARCHAR(50) NOT NULL, -- 'ISO_9001', 'ISO_14001', 'HACCP', 'QS', 'SONSTIGES'\n    bezeichnung VARCHAR(200) NOT NULL,\n    aussteller VARCHAR(100),\n    ausstellungs_datum DATE,\n    gueltig_bis DATE,\n    status VARCHAR(20) DEFAULT 'AKTIV', -- 'AKTIV', 'ABGELAUFEN', 'WIDERRUFEN'\n    verantwortlicher_id UUID,\n    datei_pfad VARCHAR(500),\n    bemerkungen TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "qualitaet.zertifikate"
+}

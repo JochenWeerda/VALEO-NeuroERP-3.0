@@ -1,0 +1,79 @@
+{
+  "schema": "",
+  "name": "arbeitszeiten",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "personal_id",
+      "type": "UUID REFERENCES personal(id) ON DELETE CASCADE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "datum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "startzeit",
+      "type": "TIME",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "endzeit",
+      "type": "TIME",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pause_minuten",
+      "type": "INTEGER DEFAULT 0",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "arbeitsart",
+      "type": "VARCHAR(50) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "projekt_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "notizen",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE IF NOT EXISTS arbeitszeiten (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    personal_id UUID REFERENCES personal(id) ON DELETE CASCADE,\n    datum DATE NOT NULL,\n    startzeit TIME,\n    endzeit TIME,\n    pause_minuten INTEGER DEFAULT 0,\n    arbeitsstunden DECIMAL(4,2) GENERATED ALWAYS AS (\n        CASE \n            WHEN startzeit IS NOT NULL AND endzeit IS NOT NULL \n            THEN EXTRACT(EPOCH FROM (endzeit - startzeit)) / 3600 - pause_minuten / 60.0\n            ELSE 0\n        END\n    ) STORED,\n    arbeitsart VARCHAR(50) DEFAULT 'normal' CHECK (arbeitsart IN ('normal', '\u00fcberstunden', 'nachtschicht', 'feiertag', 'wochenende')),\n    projekt_id UUID,\n    notizen TEXT,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "arbeitszeiten"
+}

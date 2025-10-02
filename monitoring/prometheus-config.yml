@@ -1,0 +1,54 @@
+# VALEO-NeuroERP-3.0 Prometheus Configuration
+# Week 4: Monitoring & Observability Setup
+# Optimized for ERP applications monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    company: 'VALEO'
+    app: 'NeuroERP-v3'
+    version: '3.0'
+
+# Prometheus scraping configuration for VALEO NeuroERP
+scrape_configs:
+  # Backend API monitoring
+  - job_name: 'valeo-backend'
+    static_configs:
+      - targets: ['localhost:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+    honor_labels: true
+
+  # Frontend application monitoring  
+  - job_name: 'valeo-frontend'
+    static_configs:
+      - targets: ['localhost:3001']
+    metrics_path: '/metrics'
+
+  # Database performance monitoring
+  - job_name: 'valeo-database'
+    static_configs:
+      - targets: ['localhost:5432']
+    metrics_path: '/metrics'
+
+  # Domain services monitoring
+  - job_name: 'valeo-domains'
+    static_configs:
+      - targets: 
+          - 'localhost:3010'  # CRM domain
+          - 'localhost:3011'  # Finance domain
+          - 'localhost:3012'  # Inventory domain
+          - 'localhost:3013'  # Analytics domain
+    scrape_interval: 10s
+
+  # Clean Architecture infrastructure
+  - job_name: 'valeo-infrastructure'
+    static_configs:
+      - targets:
+          - 'localhost:3020'  # Application services
+          - 'localhost:3021'  # Domain repositories
+          - 'localhost:3022'  # Event bus
+          - 'localhost:3023'  # External services
+    scrape_interval: 30s
+

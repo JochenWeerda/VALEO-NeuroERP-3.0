@@ -1,0 +1,585 @@
+name: Inventory Domain CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'domains/inventory/**'
+      - '.github/workflows/inventory-domain-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'domains/inventory/**'
+  schedule:
+    # Run full pipeline daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  NODE_VERSION: '18'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/inventory-domain
+  SONAR_PROJECT_KEY: 'valero-neuroerp-inventory'
+  SONAR_ORGANIZATION: 'valero-neuroerp'
+
+jobs:
+  # ===== QUALITY GATES =====
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    outputs:
+      quality-score: ${{ steps.sonarqube.outputs.quality-gate-status }}
+      coverage: ${{ steps.coverage.outputs.coverage }}
+      security-score: ${{ steps.security.outputs.score }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: domains/inventory/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd domains/inventory
+          npm ci
+
+      - name: Run linting
+        run: |
+          cd domains/inventory
+          npm run lint
+
+      - name: Run TypeScript compilation
+        run: |
+          cd domains/inventory
+          npm run build
+
+      - name: Run unit tests
+        run: |
+          cd domains/inventory
+          npm run test:unit -- --coverage --coverageDirectory=coverage --coverageReporters=json-summary
+
+      - name: Run integration tests
+        run: |
+          cd domains/inventory
+          npm run test:integration
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/inventory_test
+          REDIS_URL: redis://localhost:6379
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            domains/inventory/coverage/
+            domains/inventory/test-results/
+
+      - name: Run SonarQube analysis
+        id: sonarqube
+        uses: sonarsource/sonarqube-scan-action@v2
+        with:
+          projectBaseDir: domains/inventory
+          args: >
+            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ env.SONAR_ORGANIZATION }}
+            -Dsonar.sources=src
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.test.ts,**/*.spec.ts
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.testExecutionReportPaths=test-results/test-report.xml
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Quality gate check
+        run: |
+          if [[ "${{ steps.sonarqube.outputs.quality-gate-status }}" != "PASSED" ]]; then
+            echo "Quality gate failed - blocking deployment"
+            exit 1
+          fi
+
+      - name: Calculate coverage
+        id: coverage
+        run: |
+          COVERAGE=$(jq '.total.lines.pct' domains/inventory/coverage/coverage-summary.json)
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "Coverage below 80% - blocking deployment"
+            exit 1
+          fi
+
+      - name: Security scan
+        id: security
+        uses: securecodewarrior/github-actions-gosec@master
+        with:
+          args: './domains/inventory/src'
+
+  # ===== SECURITY SCANNING =====
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: quality-gate
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd domains/inventory
+          npm ci
+
+      - name: Run npm audit
+        run: |
+          cd domains/inventory
+          npm audit --audit-level=moderate
+
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'VALEO NeuroERP Inventory'
+          path: 'domains/inventory'
+          format: 'ALL'
+          args: >
+            --enableRetired
+            --enableExperimental
+            --nvdValidForHours 24
+
+      - name: Run Snyk container scan
+        uses: snyk/actions/docker@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          args: --file=Dockerfile --sarif-file-output=snyk.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk.sarif
+
+  # ===== PERFORMANCE TESTING =====
+  performance-test:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+    needs: [quality-gate, security-scan]
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: perf_test
+          POSTGRES_DB: inventory_perf
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup k6
+        run: |
+          curl https://github.com/grafana/k6/releases/download/v0.45.0/k6-v0.45.0-linux-amd64.tar.gz -L | tar xvz
+          sudo mv k6-v0.45.0-linux-amd64/k6 /usr/local/bin/
+
+      - name: Run k6 performance tests
+        run: |
+          cd domains/inventory
+          k6 run \
+            --out json=k6-results.json \
+            --out influxdb=http://localhost:8086/k6 \
+            tests/performance/inventory-load-test.js \
+            --vus 50 \
+            --duration 5m
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: |
+            domains/inventory/k6-results.json
+            domains/inventory/tests/performance/
+
+      - name: Performance assertions
+        run: |
+          # Check if response time is within acceptable range
+          AVG_RESPONSE=$(jq '.metrics.http_req_duration.avg' k6-results.json)
+          if (( $(echo "$AVG_RESPONSE > 500" | bc -l) )); then
+            echo "Average response time too high: ${AVG_RESPONSE}ms"
+            exit 1
+          fi
+
+          # Check error rate
+          ERROR_RATE=$(jq '.metrics.http_req_failed.rate' k6-results.json)
+          if (( $(echo "$ERROR_RATE > 0.05" | bc -l) )); then
+            echo "Error rate too high: ${ERROR_RATE}"
+            exit 1
+          fi
+
+  # ===== BUILD & TEST =====
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    needs: [quality-gate, security-scan, performance-test]
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: inventory_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: domains/inventory/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd domains/inventory
+          npm ci
+
+      - name: Run full test suite
+        run: |
+          cd domains/inventory
+          npm run test:ci
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/inventory_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-jwt-secret
+          ENCRYPTION_KEY: test-encryption-key-32-chars
+
+      - name: Build application
+        run: |
+          cd domains/inventory
+          npm run build
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: domains/inventory
+          load: true
+          tags: ${{ env.IMAGE_NAME }}:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Test Docker image
+        run: |
+          docker run --rm ${{ env.IMAGE_NAME }}:test npm run health-check
+
+  # ===== DEPLOYMENT =====
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: domains/inventory
+          push: true
+          tags: |
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/inventory-domain:${{ github.sha }}
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/inventory-domain:staging
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to staging
+        run: |
+          aws eks update-kubeconfig --region eu-central-1 --name valero-staging
+          kubectl apply -f k8s/staging/inventory-deployment.yaml
+          kubectl apply -f k8s/staging/inventory-service.yaml
+          kubectl apply -f k8s/staging/inventory-configmap.yaml
+
+      - name: Run smoke tests
+        run: |
+          # Wait for deployment
+          kubectl wait --for=condition=available --timeout=300s deployment/inventory-domain -n staging
+
+          # Run smoke tests
+          npm run test:smoke -- --env=staging
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          kubectl rollout undo deployment/inventory-domain -n staging
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: domains/inventory
+          push: true
+          tags: |
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/inventory-domain:${{ github.sha }}
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/inventory-domain:latest
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/inventory-domain:v${{ github.run_number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to production with blue-green
+        run: |
+          aws eks update-kubeconfig --region eu-central-1 --name valero-production
+
+          # Blue-green deployment
+          kubectl apply -f k8s/production/inventory-deployment-green.yaml
+          kubectl apply -f k8s/production/inventory-service-green.yaml
+
+          # Wait for green deployment
+          kubectl wait --for=condition=available --timeout=600s deployment/inventory-domain-green -n production
+
+          # Run comprehensive tests
+          npm run test:e2e -- --env=production
+
+          # Switch traffic to green
+          kubectl apply -f k8s/production/inventory-service-blue-green.yaml
+
+          # Monitor for 5 minutes
+          sleep 300
+
+          # If successful, remove blue deployment
+          kubectl delete deployment/inventory-domain-blue -n production
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          # Switch traffic back to blue
+          kubectl apply -f k8s/production/inventory-service-blue.yaml
+          # Remove failed green deployment
+          kubectl delete deployment/inventory-domain-green -n production
+
+  # ===== POST-DEPLOYMENT =====
+  post-deployment:
+    name: Post-Deployment Validation
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Run post-deployment tests
+        run: |
+          # Synthetic monitoring
+          npm run test:synthetic
+
+          # API contract tests
+          npm run test:contract
+
+          # Performance regression tests
+          npm run test:performance-regression
+
+      - name: Update deployment status
+        run: |
+          # Update deployment status in monitoring system
+          curl -X POST ${{ secrets.MONITORING_WEBHOOK }} \
+            -H "Content-Type: application/json" \
+            -d '{
+              "service": "inventory-domain",
+              "version": "${{ github.sha }}",
+              "environment": "${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}",
+              "status": "${{ job.status }}",
+              "timestamp": "'$(date -Iseconds)'"
+            }'
+
+  # ===== FINAL QUALITY GATE =====
+  final-quality-gate:
+    name: Final Quality Gate
+    runs-on: ubuntu-latest
+    needs: [quality-gate, security-scan, performance-test, build-and-test, post-deployment]
+    if: always()
+
+    steps:
+      - name: Final quality assessment
+        run: |
+          # Check all quality metrics
+          if [[ "${{ needs.quality-gate.result }}" != "success" ]]; then
+            echo "❌ Quality gate failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.security-scan.result }}" != "success" ]]; then
+            echo "❌ Security scan failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.performance-test.result }}" != "success" ]]; then
+            echo "❌ Performance test failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.build-and-test.result }}" != "success" ]]; then
+            echo "❌ Build and test failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.post-deployment.result }}" != "success" ]]; then
+            echo "❌ Post-deployment validation failed"
+            exit 1
+          fi
+
+          echo "✅ All quality gates passed - deployment successful!"
+
+      - name: Create deployment report
+        run: |
+          cat > deployment-report.md << EOF
+          # VALEO NeuroERP Inventory Domain Deployment Report
+
+          ## Deployment Details
+          - **Commit**: ${{ github.sha }}
+          - **Branch**: ${{ github.ref }}
+          - **Environment**: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+          - **Timestamp**: $(date -Iseconds)
+
+          ## Quality Metrics
+          - **Quality Gate**: ${{ needs.quality-gate.outputs.quality-score }}
+          - **Test Coverage**: ${{ needs.quality-gate.outputs.coverage }}%
+          - **Security Score**: ${{ needs.quality-gate.outputs.security-score }}/10
+
+          ## Test Results
+          - **Unit Tests**: ${{ needs.quality-gate.result }}
+          - **Integration Tests**: ${{ needs.quality-gate.result }}
+          - **Performance Tests**: ${{ needs.performance-test.result }}
+          - **Security Tests**: ${{ needs.security-scan.result }}
+
+          ## Deployment Status
+          - **Build**: ${{ needs.build-and-test.result }}
+          - **Deploy**: ${{ job.status }}
+          - **Post-Deployment**: ${{ needs.post-deployment.result }}
+
+          ## Rollback Information
+          - **Rollback Available**: Yes
+          - **Previous Version**: ${{ github.event.before }}
+          - **Rollback Command**: kubectl rollout undo deployment/inventory-domain
+          EOF
+
+      - name: Upload deployment report
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-report
+          path: deployment-report.md
+
+      - name: Notify stakeholders
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # Send notification to stakeholders
+          curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+            -H "Content-Type: application/json" \
+            -d '{
+              "text": "🚀 VALEO NeuroERP Inventory Domain deployed to production!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*VALEO NeuroERP Inventory Domain* deployed successfully to production! 🎉"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Version:* ${{ github.sha }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Quality Score:* ${{ needs.quality-gate.outputs.quality-score }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Coverage:* ${{ needs.quality-gate.outputs.coverage }}%"
+                    }
+                  ]
+                }
+              ]
+            }'

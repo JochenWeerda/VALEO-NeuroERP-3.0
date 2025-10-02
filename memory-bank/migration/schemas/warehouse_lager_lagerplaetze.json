@@ -1,0 +1,156 @@
+{
+  "schema": "lager",
+  "name": "lagerplaetze",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "lagerplatz_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerzone_id",
+      "type": "UUID NOT NULL REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerplatz_nr",
+      "type": "VARCHAR(50) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bezeichnung",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerplatz_typ",
+      "type": "VARCHAR(50) NOT NULL CHECK (lagerplatz_typ IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "regal_nr",
+      "type": "VARCHAR(20)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ebene_nr",
+      "type": "VARCHAR(20)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "fach_nr",
+      "type": "VARCHAR(20)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "position_x",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "position_y",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "position_z",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "laenge_m",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "breite_m",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "hoehe_m",
+      "type": "DECIMAL(5",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "volumen_m3",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "max_gewicht_kg",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "belegtes_gewicht_kg",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR(20) DEFAULT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE lager.lagerplaetze (\n    lagerplatz_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    lagerzone_id UUID NOT NULL REFERENCES lager.lagerzonen(lagerzone_id),\n    lagerplatz_nr VARCHAR(50) NOT NULL,\n    bezeichnung VARCHAR(200) NOT NULL,\n    lagerplatz_typ VARCHAR(50) NOT NULL CHECK (lagerplatz_typ IN ('REGAL', 'BODENLAGER', 'HOCHREGAL', 'KLEINLAGER', 'PICKPLATZ')),\n    regal_nr VARCHAR(20),\n    ebene_nr VARCHAR(20),\n    fach_nr VARCHAR(20),\n    position_x DECIMAL(10,2),\n    position_y DECIMAL(10,2),\n    position_z DECIMAL(10,2),\n    laenge_m DECIMAL(5,2),\n    breite_m DECIMAL(5,2),\n    hoehe_m DECIMAL(5,2),\n    volumen_m3 DECIMAL(10,2),\n    max_gewicht_kg DECIMAL(10,2),\n    belegtes_gewicht_kg DECIMAL(10,2) DEFAULT 0,\n    status VARCHAR(20) DEFAULT 'FREI' CHECK (status IN ('FREI', 'BELEGT', 'RESERVIERT', 'WARTUNG', 'GESPERRT')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    UNIQUE(lagerzone_id, lagerplatz_nr)\n);",
+  "table": "lager.lagerplaetze"
+}

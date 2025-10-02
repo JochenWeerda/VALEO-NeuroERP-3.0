@@ -1,0 +1,58 @@
+{
+  "schema": "dokumente",
+  "name": "workflow_templates",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "template_name",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "dokument_typ",
+      "type": "VARCHAR(50)",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kategorie_id",
+      "type": "UUID REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.workflow_templates (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    template_name VARCHAR(100) NOT NULL,\n    beschreibung TEXT,\n    dokument_typ VARCHAR(50),\n    kategorie_id UUID REFERENCES dokumente.dokumentenkategorien(id),\n    workflow_steps JSONB NOT NULL, -- Array von Workflow-Schritten\n    automatische_ausloesung BOOLEAN DEFAULT false,\n    ausloesung_bedingung JSONB, -- Bedingungen f\u00fcr automatische Ausl\u00f6sung\n    benachrichtigungen JSONB, -- E-Mail/SMS-Benachrichtigungen\n    aktiv BOOLEAN DEFAULT true,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.workflow_templates"
+}

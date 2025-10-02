@@ -1,0 +1,51 @@
+{
+  "schema": "crm",
+  "name": "kundenfeedback",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kunde_id",
+      "type": "UUID NOT NULL REFERENCES crm",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "beschreibung",
+      "type": "TEXT NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "verantwortlicher_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE crm.kundenfeedback (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    kunde_id UUID NOT NULL REFERENCES crm.kunden(id),\n    feedback_typ VARCHAR(50) NOT NULL, -- 'BESCHWERDE', 'ANREGUNG', 'LOBGESANG', 'FRAGE'\n    prioritaet VARCHAR(20) DEFAULT 'NORMAL', -- 'NIEDRIG', 'NORMAL', 'HOCH', 'KRITISCH'\n    betreff VARCHAR(200),\n    beschreibung TEXT NOT NULL,\n    status VARCHAR(50) DEFAULT 'OFFEN', -- 'OFFEN', 'IN_BEARBEITUNG', 'GELOEST', 'GESCHLOSSEN'\n    loesung TEXT,\n    verantwortlicher_id UUID,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "crm.kundenfeedback"
+}

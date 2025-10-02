@@ -1,0 +1,114 @@
+{
+  "schema": "produktion",
+  "name": "arbeitsplan_positionen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "position_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "arbeitsplan_id",
+      "type": "UUID NOT NULL REFERENCES produktion",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "position",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "arbeitsgang_bezeichnung",
+      "type": "VARCHAR(200) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "arbeitsplatz_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "maschine_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "personal_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "vorgangszeit_min",
+      "type": "INTEGER NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ruestzeit_min",
+      "type": "INTEGER DEFAULT 0",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "uebergangszeit_min",
+      "type": "INTEGER DEFAULT 0",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "parallel_arbeitsschritte",
+      "type": "INTEGER DEFAULT 1",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "qualitaetspruefung_erforderlich",
+      "type": "BOOLEAN DEFAULT FALSE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE produktion.arbeitsplan_positionen (\n    position_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    arbeitsplan_id UUID NOT NULL REFERENCES produktion.arbeitsplaene(arbeitsplan_id),\n    position INTEGER NOT NULL,\n    arbeitsgang_bezeichnung VARCHAR(200) NOT NULL,\n    arbeitsplatz_id UUID,\n    maschine_id UUID,\n    personal_id UUID,\n    vorgangszeit_min INTEGER NOT NULL,\n    ruestzeit_min INTEGER DEFAULT 0,\n    uebergangszeit_min INTEGER DEFAULT 0,\n    parallel_arbeitsschritte INTEGER DEFAULT 1,\n    qualitaetspruefung_erforderlich BOOLEAN DEFAULT FALSE,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "produktion.arbeitsplan_positionen"
+}

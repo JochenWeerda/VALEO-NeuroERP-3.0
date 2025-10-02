@@ -1,0 +1,79 @@
+{
+  "schema": "qualitaet",
+  "name": "pruefparameter",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "parameter_name",
+      "type": "VARCHAR(100) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "min_wert",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "max_wert",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "soll_wert",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "toleranz_plus",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "toleranz_minus",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "aktiv",
+      "type": "BOOLEAN DEFAULT true",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE qualitaet.pruefparameter (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    parameter_name VARCHAR(100) NOT NULL,\n    parameter_typ VARCHAR(50) NOT NULL, -- 'ZAHL', 'TEXT', 'BOOLEAN', 'AUSWAHL'\n    einheit VARCHAR(20),\n    min_wert DECIMAL(10,3),\n    max_wert DECIMAL(10,3),\n    soll_wert DECIMAL(10,3),\n    toleranz_plus DECIMAL(10,3),\n    toleranz_minus DECIMAL(10,3),\n    auswahl_optionen TEXT[], -- F\u00fcr Auswahl-Parameter\n    beschreibung TEXT,\n    aktiv BOOLEAN DEFAULT true,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "qualitaet.pruefparameter"
+}

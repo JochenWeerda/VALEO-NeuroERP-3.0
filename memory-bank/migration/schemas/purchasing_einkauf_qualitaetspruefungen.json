@@ -1,0 +1,100 @@
+{
+  "schema": "einkauf",
+  "name": "qualitaetspruefungen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "pruefung_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefung_nr",
+      "type": "VARCHAR(50) UNIQUE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferung_id",
+      "type": "UUID REFERENCES einkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lieferposition_id",
+      "type": "UUID REFERENCES einkauf",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruef_datum",
+      "type": "DATE NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefer_id",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "pruefung_typ",
+      "type": "VARCHAR(50) NOT NULL CHECK (pruefung_typ IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "ergebnis",
+      "type": "VARCHAR(20) NOT NULL CHECK (ergebnis IN (",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_von",
+      "type": "UUID",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE einkauf.qualitaetspruefungen (\n    pruefung_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    pruefung_nr VARCHAR(50) UNIQUE NOT NULL,\n    lieferung_id UUID REFERENCES einkauf.lieferungen(lieferung_id),\n    lieferposition_id UUID REFERENCES einkauf.lieferpositionen(lieferposition_id),\n    pruef_datum DATE NOT NULL,\n    pruefer_id UUID,\n    pruefung_typ VARCHAR(50) NOT NULL CHECK (pruefung_typ IN ('VISUELL', 'LABOR', 'GEWICHT', 'FEUCHTE', 'KEIMZAHL', 'TOXINE')),\n    ergebnis VARCHAR(20) NOT NULL CHECK (ergebnis IN ('POSITIV', 'NEGATIV', 'BEDINGT')),\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    erstellt_von UUID,\n    geaendert_von UUID\n);",
+  "table": "einkauf.qualitaetspruefungen"
+}

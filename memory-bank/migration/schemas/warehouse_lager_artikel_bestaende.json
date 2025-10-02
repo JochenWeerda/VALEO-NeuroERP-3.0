@@ -1,0 +1,149 @@
+{
+  "schema": "lager",
+  "name": "artikel_bestaende",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "bestand_id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "artikel_id",
+      "type": "UUID NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerort_id",
+      "type": "UUID NOT NULL REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerzone_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "lagerplatz_id",
+      "type": "UUID REFERENCES lager",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "menge_verfuegbar",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "menge_reserviert",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "menge_in_qualitaet",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "menge_gesperrt",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "menge_gesamt",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "einheit",
+      "type": "VARCHAR(20) NOT NULL",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "durchschnittspreis",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "letzte_bewegung",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "naechste_inventur",
+      "type": "DATE",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "mindestbestand",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "optimalbestand",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "max_bestand",
+      "type": "DECIMAL(10",
+      "nullable": true,
+      "default": "0",
+      "constraints": []
+    },
+    {
+      "name": "bemerkung",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE lager.artikel_bestaende (\n    bestand_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    artikel_id UUID NOT NULL,\n    lagerort_id UUID NOT NULL REFERENCES lager.lagerorte(lagerort_id),\n    lagerzone_id UUID REFERENCES lager.lagerzonen(lagerzone_id),\n    lagerplatz_id UUID REFERENCES lager.lagerplaetze(lagerplatz_id),\n    menge_verfuegbar DECIMAL(10,4) DEFAULT 0,\n    menge_reserviert DECIMAL(10,4) DEFAULT 0,\n    menge_in_qualitaet DECIMAL(10,4) DEFAULT 0,\n    menge_gesperrt DECIMAL(10,4) DEFAULT 0,\n    menge_gesamt DECIMAL(10,4) DEFAULT 0,\n    einheit VARCHAR(20) NOT NULL,\n    durchschnittspreis DECIMAL(10,2),\n    letzte_bewegung TIMESTAMP,\n    naechste_inventur DATE,\n    mindestbestand DECIMAL(10,4) DEFAULT 0,\n    optimalbestand DECIMAL(10,4) DEFAULT 0,\n    max_bestand DECIMAL(10,4) DEFAULT 0,\n    bemerkung TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    UNIQUE(artikel_id, lagerort_id, lagerzone_id, lagerplatz_id)\n);",
+  "table": "lager.artikel_bestaende"
+}

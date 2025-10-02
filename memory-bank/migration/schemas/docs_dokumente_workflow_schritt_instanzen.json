@@ -1,0 +1,65 @@
+{
+  "schema": "dokumente",
+  "name": "workflow_schritt_instanzen",
+  "primaryKey": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "workflow_instanz_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "workflow_schritt_id",
+      "type": "UUID NOT NULL REFERENCES dokumente",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "gestartet_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "abgeschlossen_am",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "kommentar",
+      "type": "TEXT",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "erstellt_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    },
+    {
+      "name": "geaendert_am",
+      "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+      "nullable": true,
+      "default": null,
+      "constraints": []
+    }
+  ],
+  "rawSource": "CREATE TABLE dokumente.workflow_schritt_instanzen (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    workflow_instanz_id UUID NOT NULL REFERENCES dokumente.workflow_instanzen(id) ON DELETE CASCADE,\n    workflow_schritt_id UUID NOT NULL REFERENCES dokumente.workflow_schritte(id),\n    status VARCHAR(50) DEFAULT 'AUSSTEHEND', -- 'AUSSTEHEND', 'IN_BEARBEITUNG', 'ABGESCHLOSSEN', '\u00dcBERSPRUNGEN'\n    zugewiesen_an UUID REFERENCES personal.mitarbeiter(id),\n    gestartet_am TIMESTAMP,\n    abgeschlossen_am TIMESTAMP,\n    kommentar TEXT,\n    erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+  "table": "dokumente.workflow_schritt_instanzen"
+}
