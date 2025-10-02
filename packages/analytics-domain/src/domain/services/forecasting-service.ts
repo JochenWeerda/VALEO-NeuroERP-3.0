@@ -176,7 +176,11 @@ export class ForecastingService {
 
     // Generate forecast values
     const forecastValues: ForecastValue[] = [];
-    const lastTimestamp = historicalData[historicalData.length - 1].timestamp;
+    const lastDataPoint = historicalData[historicalData.length - 1];
+    if (!lastDataPoint) {
+      throw new Error('Historical data is empty');
+    }
+    const lastTimestamp = lastDataPoint.timestamp;
 
     for (let i = 1; i <= horizon; i++) {
       const forecastTimestamp = this.addTimeToDate(lastTimestamp, i, horizonUnit);
@@ -218,14 +222,24 @@ export class ForecastingService {
     const alpha = 0.3; // Smoothing parameter
 
     // Calculate exponentially smoothed values
-    let smoothedValue = values[0];
+    if (values.length === 0 || values[0] === undefined) {
+      throw new Error('Historical data is empty');
+    }
+    let smoothedValue: number = values[0];
     for (let i = 1; i < values.length; i++) {
-      smoothedValue = alpha * values[i] + (1 - alpha) * smoothedValue;
+      const currentValue = values[i];
+      if (currentValue !== undefined) {
+        smoothedValue = alpha * currentValue + (1 - alpha) * smoothedValue;
+      }
     }
 
     // Generate forecast values
     const forecastValues: ForecastValue[] = [];
-    const lastTimestamp = historicalData[historicalData.length - 1].timestamp;
+    const lastDataPoint = historicalData[historicalData.length - 1];
+    if (!lastDataPoint) {
+      throw new Error('Historical data is empty');
+    }
+    const lastTimestamp = lastDataPoint.timestamp;
 
     for (let i = 1; i <= horizon; i++) {
       const forecastTimestamp = this.addTimeToDate(lastTimestamp, i, horizonUnit);
@@ -269,7 +283,11 @@ export class ForecastingService {
 
     // Generate forecast values
     const forecastValues: ForecastValue[] = [];
-    const lastTimestamp = historicalData[historicalData.length - 1].timestamp;
+    const lastDataPoint = historicalData[historicalData.length - 1];
+    if (!lastDataPoint) {
+      throw new Error('Historical data is empty');
+    }
+    const lastTimestamp = lastDataPoint.timestamp;
 
     for (let i = 1; i <= horizon; i++) {
       const forecastTimestamp = this.addTimeToDate(lastTimestamp, i, horizonUnit);
@@ -310,7 +328,11 @@ export class ForecastingService {
 
     // Simple rule: forecast at average with some variation
     const forecastValues: ForecastValue[] = [];
-    const lastTimestamp = historicalData[historicalData.length - 1].timestamp;
+    const lastDataPoint = historicalData[historicalData.length - 1];
+    if (!lastDataPoint) {
+      throw new Error('Historical data is empty');
+    }
+    const lastTimestamp = lastDataPoint.timestamp;
 
     for (let i = 1; i <= horizon; i++) {
       const forecastTimestamp = this.addTimeToDate(lastTimestamp, i, horizonUnit);
@@ -371,7 +393,7 @@ export class ForecastingService {
         throw new Error(`External ML service returned ${response.status}`);
       }
 
-      const result: MLModelResponse = await response.json();
+      const result = await response.json() as MLModelResponse;
 
       const forecastValues: ForecastValue[] = result.forecastValues.map(fv => ({
         timestamp: new Date(fv.timestamp),
@@ -406,48 +428,43 @@ export class ForecastingService {
       offset?: number;
     } = {}
   ): Promise<Forecast[]> {
-    let query = this.db
-      .select()
-      .from(forecasts)
-      .where(eq(forecasts.tenantId, tenantId))
-      .orderBy(desc(forecasts.createdAt));
+    // Build where conditions
+    const conditions = [eq(forecasts.tenantId, tenantId)];
 
     if (filters.metricName) {
-      query = query.where(eq(forecasts.metricName, filters.metricName));
+      conditions.push(eq(forecasts.metricName, filters.metricName));
     }
 
     if (filters.model) {
-      query = query.where(eq(forecasts.model, filters.model));
+      conditions.push(eq(forecasts.model, filters.model as string));
     }
 
     if (filters.fromDate) {
-      query = query.where(gte(forecasts.createdAt, filters.fromDate));
+      conditions.push(gte(forecasts.createdAt, filters.fromDate));
     }
 
     if (filters.toDate) {
-      query = query.where(lte(forecasts.createdAt, filters.toDate));
+      conditions.push(lte(forecasts.createdAt, filters.toDate));
     }
 
-    if (filters.limit) {
-      query = query.limit(filters.limit);
-    }
-
-    if (filters.offset) {
-      query = query.offset(filters.offset);
-    }
-
-    const results = await query;
+    const results = await this.db
+      .select()
+      .from(forecasts)
+      .where(and(...conditions))
+      .orderBy(desc(forecasts.createdAt))
+      .limit(filters.limit || 100)
+      .offset(filters.offset || 0);
 
     return results.map(row => Forecast.create({
       id: row.id,
       tenantId: row.tenantId,
       metricName: row.metricName,
-      horizon: row.horizon,
-      horizonUnit: row.horizonUnit,
-      model: row.model,
+      horizon: Number(row.horizon),
+      horizonUnit: row.horizonUnit as ForecastHorizon,
+      model: row.model as ForecastModel,
       forecastValues: row.forecastValues as ForecastValue[],
-      confidenceInterval: row.confidenceInterval || undefined,
-      metadata: row.metadata || undefined,
+      confidenceInterval: row.confidenceInterval ? Number(row.confidenceInterval) : undefined,
+      metadata: row.metadata ?? undefined,
     }));
   }
 
@@ -496,9 +513,12 @@ export class ForecastingService {
 
     for (let i = 0; i < n; i++) {
       const xDiff = i - xMean;
-      const yDiff = values[i] - yMean;
-      numerator += xDiff * yDiff;
-      denominator += xDiff * xDiff;
+      const currentValue = values[i];
+      if (currentValue !== undefined) {
+        const yDiff = currentValue - yMean;
+        numerator += xDiff * yDiff;
+        denominator += xDiff * xDiff;
+      }
     }
 
     return denominator !== 0 ? numerator / denominator : 0;
@@ -516,9 +536,12 @@ export class ForecastingService {
 
     for (let i = 0; i < n; i++) {
       const xDiff = i - xMean;
-      const yDiff = values[i] - yMean;
-      numerator += xDiff * yDiff;
-      denominator += xDiff * xDiff;
+      const currentValue = values[i];
+      if (currentValue !== undefined) {
+        const yDiff = currentValue - yMean;
+        numerator += xDiff * yDiff;
+        denominator += xDiff * xDiff;
+      }
     }
 
     const slope = denominator !== 0 ? numerator / denominator : 0;
@@ -526,9 +549,12 @@ export class ForecastingService {
 
     // Calculate R²
     for (let i = 0; i < n; i++) {
-      const predicted = intercept + slope * i;
-      ssRes += Math.pow(values[i] - predicted, 2);
-      ssTot += Math.pow(values[i] - yMean, 2);
+      const currentValue = values[i];
+      if (currentValue !== undefined) {
+        const predicted = intercept + slope * i;
+        ssRes += Math.pow(currentValue - predicted, 2);
+        ssTot += Math.pow(currentValue - yMean, 2);
+      }
     }
 
     const r2 = ssTot !== 0 ? 1 - (ssRes / ssTot) : 0;
@@ -575,18 +601,14 @@ export class ForecastingService {
 
   private async saveForecast(forecast: Forecast): Promise<void> {
     await this.db.insert(forecasts).values({
-      id: forecast.id,
       tenantId: forecast.tenantId,
       metricName: forecast.metricName,
       horizon: forecast.horizon,
       horizonUnit: forecast.horizonUnit,
       model: forecast.model,
-      forecastValues: forecast.forecastValues,
-      confidenceInterval: forecast.confidenceInterval,
-      metadata: forecast.metadata,
-      createdAt: forecast.createdAt,
-      updatedAt: new Date(),
-      version: forecast.version,
+      forecastValues: JSON.parse(JSON.stringify(forecast.forecastValues)),
+      confidenceInterval: forecast.confidenceInterval ? String(forecast.confidenceInterval) : null,
+      metadata: forecast.metadata ? JSON.parse(JSON.stringify(forecast.metadata)) : null,
     });
   }
 }

@@ -30,6 +30,7 @@ export declare class ScheduleRepository {
     delete(id: string): Promise<boolean>;
     countByTenant(tenantId: string): Promise<number>;
     countEnabledByTenant(tenantId: string): Promise<number>;
+    findEnabledSchedulesBeforeDate(beforeDate: Date, limit?: number): Promise<Schedule[]>;
     toDomainEntity(schedule: Schedule): ScheduleEntity;
     toDatabaseRecord(entity: ScheduleEntity): NewSchedule;
 }

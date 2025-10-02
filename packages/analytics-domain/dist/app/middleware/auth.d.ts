@@ -49,5 +49,4 @@ export declare const requireCubeAdminAccess: (request: FastifyRequest, reply: Fa
 export declare function tenantIsolationMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<undefined>;
 export declare const analyticsAuthMiddleware: (typeof authMiddleware)[];
 export declare const adminOnlyMiddleware: ((request: FastifyRequest, reply: FastifyReply) => Promise<undefined>)[];
-export type { AuthenticatedRequest, AuthenticatedUser };
 //# sourceMappingURL=auth.d.ts.map

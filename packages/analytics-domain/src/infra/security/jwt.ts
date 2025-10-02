@@ -70,3 +70,8 @@ export function getJWTService(): JWTService {
   }
   return globalJWTService;
 }
+
+// Helper function for backward compatibility
+export async function verifyJWT(token: string): Promise<AuthenticatedUser> {
+  return getJWTService().verifyToken(token);
+}

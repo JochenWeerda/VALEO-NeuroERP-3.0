@@ -19,7 +19,7 @@ async function authMiddleware(request, reply) {
         const decoded = await (0, jwt_1.verifyJWT)(token);
         const user = {
             userId: decoded.sub || decoded.userId,
-            email: decoded.email,
+            email: decoded.email || 'unknown@example.com',
             roles: decoded.roles || [],
             permissions: decoded.permissions || [],
             tenantId: decoded.tenantId || decoded.tenant_id,
@@ -120,7 +120,7 @@ async function tenantIsolationMiddleware(request, reply) {
         });
     }
     const userTenantId = authRequest.user.tenantId;
-    if (request.params && 'tenantId' in request.params) {
+    if (request.params && typeof request.params === 'object' && 'tenantId' in request.params) {
         const requestedTenantId = request.params.tenantId;
         if (requestedTenantId && requestedTenantId !== userTenantId) {
             return reply.code(403).send({
@@ -131,7 +131,7 @@ async function tenantIsolationMiddleware(request, reply) {
             });
         }
     }
-    if (request.query && 'tenantId' in request.query) {
+    if (request.query && typeof request.query === 'object' && 'tenantId' in request.query) {
         const requestedTenantId = request.query.tenantId;
         if (requestedTenantId && requestedTenantId !== userTenantId) {
             return reply.code(403).send({

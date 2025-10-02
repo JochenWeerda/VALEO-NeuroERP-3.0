@@ -101,7 +101,11 @@ class ForecastingService {
         const movingAverage = values.reduce((sum, val) => sum + val, 0) / values.length;
         const trend = this.calculateTrend(values);
         const forecastValues = [];
-        const lastTimestamp = historicalData[historicalData.length - 1].timestamp;
+        const lastDataPoint = historicalData[historicalData.length - 1];
+        if (!lastDataPoint) {
+            throw new Error('Historical data is empty');
+        }
+        const lastTimestamp = lastDataPoint.timestamp;
         for (let i = 1; i <= horizon; i++) {
             const forecastTimestamp = this.addTimeToDate(lastTimestamp, i, horizonUnit);
             const forecastValue = movingAverage + (trend * i);
@@ -127,12 +131,22 @@ class ForecastingService {
         const { historicalData, horizon, horizonUnit } = request;
         const values = historicalData.map(d => d.value);
         const alpha = 0.3;
+        if (values.length === 0 || values[0] === undefined) {
+            throw new Error('Historical data is empty');
+        }
         let smoothedValue = values[0];
         for (let i = 1; i < values.length; i++) {
-            smoothedValue = alpha * values[i] + (1 - alpha) * smoothedValue;
+            const currentValue = values[i];
+            if (currentValue !== undefined) {
+                smoothedValue = alpha * currentValue + (1 - alpha) * smoothedValue;
+            }
         }
         const forecastValues = [];
-        const lastTimestamp = historicalData[historicalData.length - 1].timestamp;
+        const lastDataPoint = historicalData[historicalData.length - 1];
+        if (!lastDataPoint) {
+            throw new Error('Historical data is empty');
+        }
+        const lastTimestamp = lastDataPoint.timestamp;
         for (let i = 1; i <= horizon; i++) {
             const forecastTimestamp = this.addTimeToDate(lastTimestamp, i, horizonUnit);
             forecastValues.push({
@@ -159,7 +173,11 @@ class ForecastingService {
         const n = values.length;
         const { slope, intercept, r2 } = this.calculateLinearRegression(values);
         const forecastValues = [];
-        const lastTimestamp = historicalData[historicalData.length - 1].timestamp;
+        const lastDataPoint = historicalData[historicalData.length - 1];
+        if (!lastDataPoint) {
+            throw new Error('Historical data is empty');
+        }
+        const lastTimestamp = lastDataPoint.timestamp;
         for (let i = 1; i <= horizon; i++) {
             const forecastTimestamp = this.addTimeToDate(lastTimestamp, i, horizonUnit);
             const forecastValue = intercept + slope * (n + i - 1);
@@ -186,7 +204,11 @@ class ForecastingService {
         const values = historicalData.map(d => d.value);
         const average = values.reduce((sum, val) => sum + val, 0) / values.length;
         const forecastValues = [];
-        const lastTimestamp = historicalData[historicalData.length - 1].timestamp;
+        const lastDataPoint = historicalData[historicalData.length - 1];
+        if (!lastDataPoint) {
+            throw new Error('Historical data is empty');
+        }
+        const lastTimestamp = lastDataPoint.timestamp;
         for (let i = 1; i <= horizon; i++) {
             const forecastTimestamp = this.addTimeToDate(lastTimestamp, i, horizonUnit);
             const variation = (Math.random() - 0.5) * 0.2;
@@ -252,40 +274,36 @@ class ForecastingService {
         }
     }
     async getForecasts(tenantId, filters = {}) {
-        let query = this.db
-            .select()
-            .from(schema_1.forecasts)
-            .where((0, drizzle_orm_1.eq)(schema_1.forecasts.tenantId, tenantId))
-            .orderBy((0, drizzle_orm_1.desc)(schema_1.forecasts.createdAt));
+        const conditions = [(0, drizzle_orm_1.eq)(schema_1.forecasts.tenantId, tenantId)];
         if (filters.metricName) {
-            query = query.where((0, drizzle_orm_1.eq)(schema_1.forecasts.metricName, filters.metricName));
+            conditions.push((0, drizzle_orm_1.eq)(schema_1.forecasts.metricName, filters.metricName));
         }
         if (filters.model) {
-            query = query.where((0, drizzle_orm_1.eq)(schema_1.forecasts.model, filters.model));
+            conditions.push((0, drizzle_orm_1.eq)(schema_1.forecasts.model, filters.model));
         }
         if (filters.fromDate) {
-            query = query.where((0, drizzle_orm_1.gte)(schema_1.forecasts.createdAt, filters.fromDate));
+            conditions.push((0, drizzle_orm_1.gte)(schema_1.forecasts.createdAt, filters.fromDate));
         }
         if (filters.toDate) {
-            query = query.where((0, drizzle_orm_1.lte)(schema_1.forecasts.createdAt, filters.toDate));
+            conditions.push((0, drizzle_orm_1.lte)(schema_1.forecasts.createdAt, filters.toDate));
         }
-        if (filters.limit) {
-            query = query.limit(filters.limit);
-        }
-        if (filters.offset) {
-            query = query.offset(filters.offset);
-        }
-        const results = await query;
+        const results = await this.db
+            .select()
+            .from(schema_1.forecasts)
+            .where((0, drizzle_orm_1.and)(...conditions))
+            .orderBy((0, drizzle_orm_1.desc)(schema_1.forecasts.createdAt))
+            .limit(filters.limit || 100)
+            .offset(filters.offset || 0);
         return results.map(row => forecast_1.Forecast.create({
             id: row.id,
             tenantId: row.tenantId,
             metricName: row.metricName,
-            horizon: row.horizon,
+            horizon: Number(row.horizon),
             horizonUnit: row.horizonUnit,
             model: row.model,
             forecastValues: row.forecastValues,
-            confidenceInterval: row.confidenceInterval || undefined,
-            metadata: row.metadata || undefined,
+            confidenceInterval: row.confidenceInterval ? Number(row.confidenceInterval) : undefined,
+            metadata: row.metadata ?? undefined,
         }));
     }
     async cleanupOldForecasts(tenantId, olderThanDays = 90) {
@@ -317,9 +335,12 @@ class ForecastingService {
         let denominator = 0;
         for (let i = 0; i < n; i++) {
             const xDiff = i - xMean;
-            const yDiff = values[i] - yMean;
-            numerator += xDiff * yDiff;
-            denominator += xDiff * xDiff;
+            const currentValue = values[i];
+            if (currentValue !== undefined) {
+                const yDiff = currentValue - yMean;
+                numerator += xDiff * yDiff;
+                denominator += xDiff * xDiff;
+            }
         }
         return denominator !== 0 ? numerator / denominator : 0;
     }
@@ -333,16 +354,22 @@ class ForecastingService {
         let ssTot = 0;
         for (let i = 0; i < n; i++) {
             const xDiff = i - xMean;
-            const yDiff = values[i] - yMean;
-            numerator += xDiff * yDiff;
-            denominator += xDiff * xDiff;
+            const currentValue = values[i];
+            if (currentValue !== undefined) {
+                const yDiff = currentValue - yMean;
+                numerator += xDiff * yDiff;
+                denominator += xDiff * xDiff;
+            }
         }
         const slope = denominator !== 0 ? numerator / denominator : 0;
         const intercept = yMean - slope * xMean;
         for (let i = 0; i < n; i++) {
-            const predicted = intercept + slope * i;
-            ssRes += Math.pow(values[i] - predicted, 2);
-            ssTot += Math.pow(values[i] - yMean, 2);
+            const currentValue = values[i];
+            if (currentValue !== undefined) {
+                const predicted = intercept + slope * i;
+                ssRes += Math.pow(currentValue - predicted, 2);
+                ssTot += Math.pow(currentValue - yMean, 2);
+            }
         }
         const r2 = ssTot !== 0 ? 1 - (ssRes / ssTot) : 0;
         return { slope, intercept, r2 };
@@ -379,18 +406,14 @@ class ForecastingService {
     }
     async saveForecast(forecast) {
         await this.db.insert(schema_1.forecasts).values({
-            id: forecast.id,
             tenantId: forecast.tenantId,
             metricName: forecast.metricName,
             horizon: forecast.horizon,
             horizonUnit: forecast.horizonUnit,
             model: forecast.model,
-            forecastValues: forecast.forecastValues,
-            confidenceInterval: forecast.confidenceInterval,
-            metadata: forecast.metadata,
-            createdAt: forecast.createdAt,
-            updatedAt: new Date(),
-            version: forecast.version,
+            forecastValues: JSON.parse(JSON.stringify(forecast.forecastValues)),
+            confidenceInterval: forecast.confidenceInterval ? String(forecast.confidenceInterval) : null,
+            metadata: forecast.metadata ? JSON.parse(JSON.stringify(forecast.metadata)) : null,
         });
     }
 }

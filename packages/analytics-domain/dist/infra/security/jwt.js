@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.JWTService = void 0;
 exports.createJWTService = createJWTService;
 exports.getJWTService = getJWTService;
+exports.verifyJWT = verifyJWT;
 const jose_1 = require("jose");
 class JWTService {
     options;
@@ -52,5 +53,8 @@ function getJWTService() {
         globalJWTService = createJWTService({ jwksUrl });
     }
     return globalJWTService;
+}
+async function verifyJWT(token) {
+    return getJWTService().verifyToken(token);
 }
 //# sourceMappingURL=jwt.js.map

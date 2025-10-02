@@ -54,8 +54,8 @@ declare const CreateCalendarInputSchema: z.ZodObject<{
         sun?: boolean | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    key: string;
     name: string;
+    key: string;
     holidays: string[];
     businessDays: {
         mon: boolean;
@@ -67,8 +67,8 @@ declare const CreateCalendarInputSchema: z.ZodObject<{
         sun: boolean;
     };
 }, {
-    key: string;
     name: string;
+    key: string;
     holidays?: string[] | undefined;
     businessDays?: {
         mon?: boolean | undefined;
@@ -141,11 +141,11 @@ declare const CalendarQuerySchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     page: number;
     pageSize: number;
-    key?: string | undefined;
     name?: string | undefined;
+    key?: string | undefined;
 }, {
-    key?: string | undefined;
     name?: string | undefined;
+    key?: string | undefined;
     page?: string | undefined;
     pageSize?: string | undefined;
 }>;
@@ -184,8 +184,13 @@ declare const CalendarResponseSchema: z.ZodObject<{
     updatedAt: z.ZodString;
     version: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    key: string;
     name: string;
+    tenantId: string | null;
+    version: number;
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    key: string;
     holidays: string[];
     businessDays: {
         mon: boolean;
@@ -196,14 +201,14 @@ declare const CalendarResponseSchema: z.ZodObject<{
         sat: boolean;
         sun: boolean;
     };
-    id: string;
+}, {
+    name: string;
     tenantId: string | null;
+    version: number;
+    id: string;
     createdAt: string;
     updatedAt: string;
-    version: number;
-}, {
     key: string;
-    name: string;
     holidays: string[];
     businessDays: {
         mon?: boolean | undefined;
@@ -214,11 +219,6 @@ declare const CalendarResponseSchema: z.ZodObject<{
         sat?: boolean | undefined;
         sun?: boolean | undefined;
     };
-    id: string;
-    tenantId: string | null;
-    createdAt: string;
-    updatedAt: string;
-    version: number;
 }>;
 declare const CalendarListResponseSchema: z.ZodObject<{
     data: z.ZodArray<z.ZodObject<{
@@ -256,8 +256,13 @@ declare const CalendarListResponseSchema: z.ZodObject<{
         updatedAt: z.ZodString;
         version: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        key: string;
         name: string;
+        tenantId: string | null;
+        version: number;
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        key: string;
         holidays: string[];
         businessDays: {
             mon: boolean;
@@ -268,14 +273,14 @@ declare const CalendarListResponseSchema: z.ZodObject<{
             sat: boolean;
             sun: boolean;
         };
-        id: string;
+    }, {
+        name: string;
         tenantId: string | null;
+        version: number;
+        id: string;
         createdAt: string;
         updatedAt: string;
-        version: number;
-    }, {
         key: string;
-        name: string;
         holidays: string[];
         businessDays: {
             mon?: boolean | undefined;
@@ -286,11 +291,6 @@ declare const CalendarListResponseSchema: z.ZodObject<{
             sat?: boolean | undefined;
             sun?: boolean | undefined;
         };
-        id: string;
-        tenantId: string | null;
-        createdAt: string;
-        updatedAt: string;
-        version: number;
     }>, "many">;
     pagination: z.ZodObject<{
         page: z.ZodNumber;
@@ -310,8 +310,13 @@ declare const CalendarListResponseSchema: z.ZodObject<{
     }>;
 }, "strip", z.ZodTypeAny, {
     data: {
-        key: string;
         name: string;
+        tenantId: string | null;
+        version: number;
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        key: string;
         holidays: string[];
         businessDays: {
             mon: boolean;
@@ -322,11 +327,6 @@ declare const CalendarListResponseSchema: z.ZodObject<{
             sat: boolean;
             sun: boolean;
         };
-        id: string;
-        tenantId: string | null;
-        createdAt: string;
-        updatedAt: string;
-        version: number;
     }[];
     pagination: {
         page: number;
@@ -336,8 +336,13 @@ declare const CalendarListResponseSchema: z.ZodObject<{
     };
 }, {
     data: {
-        key: string;
         name: string;
+        tenantId: string | null;
+        version: number;
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        key: string;
         holidays: string[];
         businessDays: {
             mon?: boolean | undefined;
@@ -348,11 +353,6 @@ declare const CalendarListResponseSchema: z.ZodObject<{
             sat?: boolean | undefined;
             sun?: boolean | undefined;
         };
-        id: string;
-        tenantId: string | null;
-        createdAt: string;
-        updatedAt: string;
-        version: number;
     }[];
     pagination: {
         page: number;

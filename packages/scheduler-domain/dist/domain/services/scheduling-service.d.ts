@@ -25,7 +25,7 @@ export declare class SchedulingService {
     constructor(scheduleRepository: ScheduleRepository, eventPublisher: EventPublisher, config: SchedulingServiceConfig);
     calculateNextFireTime(schedule: ScheduleEntity): Promise<Date | null>;
     executeSchedule(schedule: ScheduleEntity, context: ScheduleExecutionContext): Promise<ScheduleExecutionResult>;
-    getSchedulesReadyForExecution(limit?: number): Promise<ScheduleEntity[]>;
+    getSchedulesReadyForExecution(limit?: number): Promise<any[]>;
     setScheduleEnabled(scheduleId: string, enabled: boolean): Promise<void>;
     validateSchedule(schedule: ScheduleEntity): Promise<{
         valid: boolean;

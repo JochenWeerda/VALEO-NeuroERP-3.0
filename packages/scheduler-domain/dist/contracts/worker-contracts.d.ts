@@ -52,11 +52,11 @@ declare const WorkerQuerySchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     page: number;
     pageSize: number;
-    status?: "Online" | "Offline" | "Maintenance" | undefined;
     name?: string | undefined;
+    status?: "Online" | "Offline" | "Maintenance" | undefined;
 }, {
-    status?: "Online" | "Offline" | "Maintenance" | undefined;
     name?: string | undefined;
+    status?: "Online" | "Offline" | "Maintenance" | undefined;
     page?: string | undefined;
     pageSize?: string | undefined;
 }>;
@@ -82,34 +82,34 @@ declare const WorkerResponseSchema: z.ZodObject<{
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    status: "Online" | "Offline" | "Maintenance";
     name: string;
-    id: string;
     tenantId: string | null;
+    version: number;
+    id: string;
     createdAt: string;
     updatedAt: string;
-    version: number;
+    status: "Online" | "Offline" | "Maintenance";
     capabilities: {
         queues: string[];
         jobKeys: string[];
     };
-    maxParallel: number;
     heartbeatAt: string;
+    maxParallel: number;
     currentJobs: number;
 }, {
-    status: "Online" | "Offline" | "Maintenance";
     name: string;
-    id: string;
     tenantId: string | null;
+    version: number;
+    id: string;
     createdAt: string;
     updatedAt: string;
-    version: number;
+    status: "Online" | "Offline" | "Maintenance";
     capabilities: {
         queues?: string[] | undefined;
         jobKeys?: string[] | undefined;
     };
-    maxParallel: number;
     heartbeatAt: string;
+    maxParallel: number;
     currentJobs: number;
 }>;
 declare const WorkerListResponseSchema: z.ZodObject<{
@@ -135,34 +135,34 @@ declare const WorkerListResponseSchema: z.ZodObject<{
         createdAt: z.ZodString;
         updatedAt: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        status: "Online" | "Offline" | "Maintenance";
         name: string;
-        id: string;
         tenantId: string | null;
+        version: number;
+        id: string;
         createdAt: string;
         updatedAt: string;
-        version: number;
+        status: "Online" | "Offline" | "Maintenance";
         capabilities: {
             queues: string[];
             jobKeys: string[];
         };
-        maxParallel: number;
         heartbeatAt: string;
+        maxParallel: number;
         currentJobs: number;
     }, {
-        status: "Online" | "Offline" | "Maintenance";
         name: string;
-        id: string;
         tenantId: string | null;
+        version: number;
+        id: string;
         createdAt: string;
         updatedAt: string;
-        version: number;
+        status: "Online" | "Offline" | "Maintenance";
         capabilities: {
             queues?: string[] | undefined;
             jobKeys?: string[] | undefined;
         };
-        maxParallel: number;
         heartbeatAt: string;
+        maxParallel: number;
         currentJobs: number;
     }>, "many">;
     pagination: z.ZodObject<{
@@ -183,19 +183,19 @@ declare const WorkerListResponseSchema: z.ZodObject<{
     }>;
 }, "strip", z.ZodTypeAny, {
     data: {
-        status: "Online" | "Offline" | "Maintenance";
         name: string;
-        id: string;
         tenantId: string | null;
+        version: number;
+        id: string;
         createdAt: string;
         updatedAt: string;
-        version: number;
+        status: "Online" | "Offline" | "Maintenance";
         capabilities: {
             queues: string[];
             jobKeys: string[];
         };
-        maxParallel: number;
         heartbeatAt: string;
+        maxParallel: number;
         currentJobs: number;
     }[];
     pagination: {
@@ -206,19 +206,19 @@ declare const WorkerListResponseSchema: z.ZodObject<{
     };
 }, {
     data: {
-        status: "Online" | "Offline" | "Maintenance";
         name: string;
-        id: string;
         tenantId: string | null;
+        version: number;
+        id: string;
         createdAt: string;
         updatedAt: string;
-        version: number;
+        status: "Online" | "Offline" | "Maintenance";
         capabilities: {
             queues?: string[] | undefined;
             jobKeys?: string[] | undefined;
         };
-        maxParallel: number;
         heartbeatAt: string;
+        maxParallel: number;
         currentJobs: number;
     }[];
     pagination: {

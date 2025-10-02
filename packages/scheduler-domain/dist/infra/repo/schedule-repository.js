@@ -122,6 +122,15 @@ class ScheduleRepository {
             .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.schedules.tenantId, tenantId), (0, drizzle_orm_1.eq)(schema_1.schedules.enabled, true)));
         return result[0]?.count || 0;
     }
+    async findEnabledSchedulesBeforeDate(beforeDate, limit = 100) {
+        const result = await connection_1.db
+            .select()
+            .from(schema_1.schedules)
+            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.schedules.enabled, true), (0, drizzle_orm_1.lte)(schema_1.schedules.nextFireAt, beforeDate)))
+            .orderBy((0, drizzle_orm_1.asc)(schema_1.schedules.nextFireAt))
+            .limit(limit);
+        return result;
+    }
     toDomainEntity(schedule) {
         return new schedule_1.ScheduleEntity({
             id: schedule.id,
