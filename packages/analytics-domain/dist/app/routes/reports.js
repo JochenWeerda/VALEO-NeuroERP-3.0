@@ -238,8 +238,6 @@ async function registerReportRoutes(fastify, db, reportGenerator) {
                         tenantId: request.tenantId,
                         type: body.type,
                         parameters: body.parameters,
-                        generatedAt: new Date(),
-                        uri: result.uri,
                         format: body.format,
                         metadata: {
                             totalRecords: result.recordCount,
@@ -247,6 +245,9 @@ async function registerReportRoutes(fastify, db, reportGenerator) {
                             ...(body.format === 'json' && { data: result.data }),
                         },
                     });
+                    if (result.uri) {
+                        report.uri = result.uri;
+                    }
                     await db.insert(schema_1.reports).values({
                         id: report.id,
                         tenantId: report.tenantId,

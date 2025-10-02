@@ -53,16 +53,19 @@ class SchedulingService {
                 default:
                     error = `Unsupported target type: ${schedule.target.kind}`;
             }
-            const nextFireAt = success ? await this.calculateNextFireTime(schedule) : undefined;
-            await this.scheduleRepository.update(schedule.id, {
-                nextFireAt: nextFireAt || undefined,
+            const nextFireAt = success ? await this.calculateNextFireTime(schedule) : null;
+            const updateData = {
                 lastFireAt: new Date(),
-            });
+            };
+            if (nextFireAt !== null) {
+                updateData.nextFireAt = nextFireAt;
+            }
+            await this.scheduleRepository.update(schedule.id, updateData);
             return {
                 success,
                 runId: success ? runId : undefined,
                 error,
-                nextFireAt,
+                nextFireAt: nextFireAt || undefined,
             };
         }
         catch (err) {

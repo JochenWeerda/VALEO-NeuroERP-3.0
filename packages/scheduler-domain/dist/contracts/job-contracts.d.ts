@@ -35,33 +35,33 @@ declare const CreateJobInputSchema: z.ZodObject<{
     slaSec: z.ZodOptional<z.ZodNumber>;
     enabled: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
+    enabled: boolean;
     key: string;
     queue: string;
-    enabled: boolean;
     priority: number;
     maxAttempts: number;
+    timeoutSec: number;
     backoff: {
         strategy: "FIXED" | "EXPONENTIAL";
         baseSec: number;
         maxSec?: number | undefined;
     };
-    timeoutSec: number;
     concurrencyLimit?: number | undefined;
     slaSec?: number | undefined;
 }, {
     key: string;
-    queue?: string | undefined;
     enabled?: boolean | undefined;
+    queue?: string | undefined;
     priority?: number | undefined;
     maxAttempts?: number | undefined;
+    timeoutSec?: number | undefined;
+    concurrencyLimit?: number | undefined;
+    slaSec?: number | undefined;
     backoff?: {
         strategy?: "FIXED" | "EXPONENTIAL" | undefined;
         baseSec?: number | undefined;
         maxSec?: number | undefined;
     } | undefined;
-    timeoutSec?: number | undefined;
-    concurrencyLimit?: number | undefined;
-    slaSec?: number | undefined;
 }>;
 declare const UpdateJobInputSchema: z.ZodObject<{
     queue: z.ZodOptional<z.ZodString>;
@@ -85,31 +85,31 @@ declare const UpdateJobInputSchema: z.ZodObject<{
     slaSec: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     enabled: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    queue?: string | undefined;
     enabled?: boolean | undefined;
+    queue?: string | undefined;
     priority?: number | undefined;
     maxAttempts?: number | undefined;
+    timeoutSec?: number | undefined;
+    concurrencyLimit?: number | null | undefined;
+    slaSec?: number | null | undefined;
     backoff?: {
         strategy: "FIXED" | "EXPONENTIAL";
         baseSec: number;
         maxSec?: number | undefined;
     } | undefined;
+}, {
+    enabled?: boolean | undefined;
+    queue?: string | undefined;
+    priority?: number | undefined;
+    maxAttempts?: number | undefined;
     timeoutSec?: number | undefined;
     concurrencyLimit?: number | null | undefined;
     slaSec?: number | null | undefined;
-}, {
-    queue?: string | undefined;
-    enabled?: boolean | undefined;
-    priority?: number | undefined;
-    maxAttempts?: number | undefined;
     backoff?: {
         strategy?: "FIXED" | "EXPONENTIAL" | undefined;
         baseSec?: number | undefined;
         maxSec?: number | undefined;
     } | undefined;
-    timeoutSec?: number | undefined;
-    concurrencyLimit?: number | null | undefined;
-    slaSec?: number | null | undefined;
 }>;
 declare const JobQuerySchema: z.ZodObject<{
     enabled: z.ZodOptional<z.ZodEffects<z.ZodString, boolean, string>>;
@@ -120,15 +120,15 @@ declare const JobQuerySchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     page: number;
     pageSize: number;
+    enabled?: boolean | undefined;
     key?: string | undefined;
     queue?: string | undefined;
-    enabled?: boolean | undefined;
 }, {
+    enabled?: string | undefined;
     key?: string | undefined;
+    queue?: string | undefined;
     page?: string | undefined;
     pageSize?: string | undefined;
-    queue?: string | undefined;
-    enabled?: string | undefined;
 }>;
 declare const JobResponseSchema: z.ZodObject<{
     id: z.ZodString;
@@ -158,43 +158,43 @@ declare const JobResponseSchema: z.ZodObject<{
     updatedAt: z.ZodString;
     version: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    key: string;
-    id: string;
     tenantId: string;
+    version: number;
+    enabled: boolean;
+    id: string;
     createdAt: string;
     updatedAt: string;
-    version: number;
+    key: string;
     queue: string;
-    enabled: boolean;
     priority: number;
     maxAttempts: number;
+    timeoutSec: number;
+    concurrencyLimit: number | null;
+    slaSec: number | null;
     backoff: {
         strategy: "FIXED" | "EXPONENTIAL";
         baseSec: number;
         maxSec?: number | undefined;
     };
+}, {
+    tenantId: string;
+    version: number;
+    enabled: boolean;
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    key: string;
+    queue: string;
+    priority: number;
+    maxAttempts: number;
     timeoutSec: number;
     concurrencyLimit: number | null;
     slaSec: number | null;
-}, {
-    key: string;
-    id: string;
-    tenantId: string;
-    createdAt: string;
-    updatedAt: string;
-    version: number;
-    queue: string;
-    enabled: boolean;
-    priority: number;
-    maxAttempts: number;
     backoff: {
         strategy?: "FIXED" | "EXPONENTIAL" | undefined;
         baseSec?: number | undefined;
         maxSec?: number | undefined;
     };
-    timeoutSec: number;
-    concurrencyLimit: number | null;
-    slaSec: number | null;
 }>;
 declare const JobListResponseSchema: z.ZodObject<{
     data: z.ZodArray<z.ZodObject<{
@@ -225,43 +225,43 @@ declare const JobListResponseSchema: z.ZodObject<{
         updatedAt: z.ZodString;
         version: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        key: string;
-        id: string;
         tenantId: string;
+        version: number;
+        enabled: boolean;
+        id: string;
         createdAt: string;
         updatedAt: string;
-        version: number;
+        key: string;
         queue: string;
-        enabled: boolean;
         priority: number;
         maxAttempts: number;
+        timeoutSec: number;
+        concurrencyLimit: number | null;
+        slaSec: number | null;
         backoff: {
             strategy: "FIXED" | "EXPONENTIAL";
             baseSec: number;
             maxSec?: number | undefined;
         };
+    }, {
+        tenantId: string;
+        version: number;
+        enabled: boolean;
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        key: string;
+        queue: string;
+        priority: number;
+        maxAttempts: number;
         timeoutSec: number;
         concurrencyLimit: number | null;
         slaSec: number | null;
-    }, {
-        key: string;
-        id: string;
-        tenantId: string;
-        createdAt: string;
-        updatedAt: string;
-        version: number;
-        queue: string;
-        enabled: boolean;
-        priority: number;
-        maxAttempts: number;
         backoff: {
             strategy?: "FIXED" | "EXPONENTIAL" | undefined;
             baseSec?: number | undefined;
             maxSec?: number | undefined;
         };
-        timeoutSec: number;
-        concurrencyLimit: number | null;
-        slaSec: number | null;
     }>, "many">;
     pagination: z.ZodObject<{
         page: z.ZodNumber;
@@ -281,24 +281,24 @@ declare const JobListResponseSchema: z.ZodObject<{
     }>;
 }, "strip", z.ZodTypeAny, {
     data: {
-        key: string;
-        id: string;
         tenantId: string;
+        version: number;
+        enabled: boolean;
+        id: string;
         createdAt: string;
         updatedAt: string;
-        version: number;
+        key: string;
         queue: string;
-        enabled: boolean;
         priority: number;
         maxAttempts: number;
+        timeoutSec: number;
+        concurrencyLimit: number | null;
+        slaSec: number | null;
         backoff: {
             strategy: "FIXED" | "EXPONENTIAL";
             baseSec: number;
             maxSec?: number | undefined;
         };
-        timeoutSec: number;
-        concurrencyLimit: number | null;
-        slaSec: number | null;
     }[];
     pagination: {
         page: number;
@@ -308,24 +308,24 @@ declare const JobListResponseSchema: z.ZodObject<{
     };
 }, {
     data: {
-        key: string;
-        id: string;
         tenantId: string;
+        version: number;
+        enabled: boolean;
+        id: string;
         createdAt: string;
         updatedAt: string;
-        version: number;
+        key: string;
         queue: string;
-        enabled: boolean;
         priority: number;
         maxAttempts: number;
+        timeoutSec: number;
+        concurrencyLimit: number | null;
+        slaSec: number | null;
         backoff: {
             strategy?: "FIXED" | "EXPONENTIAL" | undefined;
             baseSec?: number | undefined;
             maxSec?: number | undefined;
         };
-        timeoutSec: number;
-        concurrencyLimit: number | null;
-        slaSec: number | null;
     }[];
     pagination: {
         page: number;

@@ -316,8 +316,6 @@ export async function registerReportRoutes(
             tenantId: request.tenantId,
             type: body.type,
             parameters: body.parameters,
-            generatedAt: new Date(),
-            uri: result.uri,
             format: body.format,
             metadata: {
               totalRecords: result.recordCount,
@@ -325,6 +323,11 @@ export async function registerReportRoutes(
               ...(body.format === 'json' && { data: result.data } as any),
             },
           });
+
+          // Set URI if available
+          if (result.uri) {
+            report.uri = result.uri;
+          }
 
           // Save report metadata
           await db.insert(reports).values({

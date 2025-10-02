@@ -64,16 +64,17 @@ class KpiCalculationEngine {
     async calculateHedgingRatio(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvContractPositions.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 hedgingRatio: (0, drizzle_orm_1.sql) `AVG(hedging_ratio)`,
             })
                 .from(schema_1.mvContractPositions)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = result[0]?.hedgingRatio || 0;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -119,16 +120,17 @@ class KpiCalculationEngine {
     async calculateShortPosition(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvContractPositions.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 shortPosition: (0, drizzle_orm_1.sql) `SUM(short_position)`,
             })
                 .from(schema_1.mvContractPositions)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = result[0]?.shortPosition || 0;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -174,16 +176,17 @@ class KpiCalculationEngine {
     async calculateLongPosition(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvContractPositions.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 longPosition: (0, drizzle_orm_1.sql) `SUM(long_position)`,
             })
                 .from(schema_1.mvContractPositions)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = result[0]?.longPosition || 0;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -229,16 +232,17 @@ class KpiCalculationEngine {
     async calculateNetExposure(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvContractPositions.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 netExposure: (0, drizzle_orm_1.sql) `SUM(net_position)`,
             })
                 .from(schema_1.mvContractPositions)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvContractPositions.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = result[0]?.netExposure || 0;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -284,16 +288,17 @@ class KpiCalculationEngine {
     async calculatePassRate(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvQualityStats.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 passRate: (0, drizzle_orm_1.sql) `AVG(pass_rate)`,
             })
                 .from(schema_1.mvQualityStats)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = (result[0]?.passRate || 0) * 100;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -339,16 +344,17 @@ class KpiCalculationEngine {
     async calculateFailureRate(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvQualityStats.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 failureRate: (0, drizzle_orm_1.sql) `AVG(failure_rate)`,
             })
                 .from(schema_1.mvQualityStats)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = (result[0]?.failureRate || 0) * 100;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -394,17 +400,20 @@ class KpiCalculationEngine {
     async calculateAverageMoisture(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [
+                (0, drizzle_orm_1.eq)(schema_1.mvQualityStats.tenantId, context.tenantId),
+                (0, drizzle_orm_1.sql) `avg_moisture IS NOT NULL`
+            ];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 avgMoisture: (0, drizzle_orm_1.sql) `AVG(avg_moisture)`,
             })
                 .from(schema_1.mvQualityStats)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.tenantId, context.tenantId))
-                .where((0, drizzle_orm_1.sql) `avg_moisture IS NOT NULL`);
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = result[0]?.avgMoisture || 0;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -450,17 +459,20 @@ class KpiCalculationEngine {
     async calculateAverageProtein(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [
+                (0, drizzle_orm_1.eq)(schema_1.mvQualityStats.tenantId, context.tenantId),
+                (0, drizzle_orm_1.sql) `avg_protein IS NOT NULL`
+            ];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 avgProtein: (0, drizzle_orm_1.sql) `AVG(avg_protein)`,
             })
                 .from(schema_1.mvQualityStats)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.tenantId, context.tenantId))
-                .where((0, drizzle_orm_1.sql) `avg_protein IS NOT NULL`);
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvQualityStats.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = result[0]?.avgProtein || 0;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -506,16 +518,17 @@ class KpiCalculationEngine {
     async calculateTotalWeight(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 totalWeight: (0, drizzle_orm_1.sql) `SUM(total_weight)`,
             })
                 .from(schema_1.mvWeighingVolumes)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = result[0]?.totalWeight || 0;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -561,16 +574,17 @@ class KpiCalculationEngine {
     async calculateAverageWeight(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 avgWeight: (0, drizzle_orm_1.sql) `AVG(avg_weight)`,
             })
                 .from(schema_1.mvWeighingVolumes)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = result[0]?.avgWeight || 0;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -616,17 +630,18 @@ class KpiCalculationEngine {
     async calculateToleranceCompliance(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 withinTolerance: (0, drizzle_orm_1.sql) `SUM(within_tolerance)`,
                 totalTickets: (0, drizzle_orm_1.sql) `SUM(total_tickets)`,
             })
                 .from(schema_1.mvWeighingVolumes)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvWeighingVolumes.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const withinTolerance = result[0]?.withinTolerance || 0;
             const totalTickets = result[0]?.totalTickets || 0;
             const value = totalTickets > 0 ? (withinTolerance / totalTickets) * 100 : 0;
@@ -674,16 +689,17 @@ class KpiCalculationEngine {
     async calculateTotalRevenue(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 totalRevenue: (0, drizzle_orm_1.sql) `SUM(total_revenue)`,
             })
                 .from(schema_1.mvFinanceKpis)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = result[0]?.totalRevenue || 0;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -729,16 +745,17 @@ class KpiCalculationEngine {
     async calculateGrossMargin(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 avgMargin: (0, drizzle_orm_1.sql) `AVG(margin_percentage)`,
             })
                 .from(schema_1.mvFinanceKpis)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = (result[0]?.avgMargin || 0) * 100;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -784,16 +801,17 @@ class KpiCalculationEngine {
     async calculateOutstandingInvoices(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 outstandingInvoices: (0, drizzle_orm_1.sql) `SUM(outstanding_invoices)`,
             })
                 .from(schema_1.mvFinanceKpis)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = result[0]?.outstandingInvoices || 0;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -839,16 +857,17 @@ class KpiCalculationEngine {
     async calculateOverdueInvoices(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 overdueInvoices: (0, drizzle_orm_1.sql) `SUM(overdue_invoices)`,
             })
                 .from(schema_1.mvFinanceKpis)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvFinanceKpis.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = result[0]?.overdueInvoices || 0;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({
@@ -894,16 +913,17 @@ class KpiCalculationEngine {
     async calculateEligibilityRate(context) {
         const startTime = Date.now();
         try {
-            let query = this.db
+            const conditions = [(0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.tenantId, context.tenantId)];
+            if (context.commodity) {
+                conditions.push((0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.commodity, context.commodity));
+            }
+            const result = await this.db
                 .select({
                 eligibilityRate: (0, drizzle_orm_1.sql) `AVG(eligibility_rate)`,
             })
                 .from(schema_1.mvRegulatoryStats)
-                .where((0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.tenantId, context.tenantId));
-            if (context.commodity) {
-                query = query.where((0, drizzle_orm_1.eq)(schema_1.mvRegulatoryStats.commodity, context.commodity));
-            }
-            const result = await query.limit(1);
+                .where((0, drizzle_orm_1.and)(...conditions))
+                .limit(1);
             const value = (result[0]?.eligibilityRate || 0) * 100;
             const executionTimeMs = Date.now() - startTime;
             const kpi = kpi_1.KPI.create({

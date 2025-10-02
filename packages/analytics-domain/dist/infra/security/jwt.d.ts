@@ -21,4 +21,5 @@ export declare class JWTService {
 }
 export declare function createJWTService(options: JWTOptions): JWTService;
 export declare function getJWTService(): JWTService;
+export declare function verifyJWT(token: string): Promise<AuthenticatedUser>;
 //***REMOVED*** sourceMappingURL=jwt.d.ts.map
