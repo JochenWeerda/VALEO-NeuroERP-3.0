@@ -39,6 +39,23 @@ export class BusinessLogicOrchestrator {
   }
 
   /**
+   * Legacy method for backward compatibility
+   * @deprecated Use execute() instead
+   */
+  public async executeBusinessLogic<TContext>(domain: string, context: TContext): Promise<ExecutionResult<TContext>> {
+    const tempOrchestrator = new BusinessLogicOrchestrator(domain, this.options);
+    return tempOrchestrator.execute(context);
+  }
+
+  /**
+   * Legacy method for backward compatibility
+   * @deprecated Use RuleRegistry.registerRule() instead
+   */
+  public registerRule<TContext>(domain: string, rule: IBusinessRule<TContext>): void {
+    RuleRegistry.registerRule(domain, rule);
+  }
+
+  /**
    * Execute business rules for the given context
    */
   public async execute<TContext>(context: TContext): Promise<ExecutionResult<TContext>> {
@@ -87,13 +104,31 @@ export class BusinessLogicOrchestrator {
           };
         }
 
-        if (rule.applies(context)) {
+        // Check if rule should be executed
+        const shouldExecute = rule.applies ? rule.applies(context) : true;
+
+        if (shouldExecute) {
           if (this.options.logExecution) {
             console.log(`[BusinessLogicOrchestrator] Executing rule: ${rule.name} (Priority: ${rule.priority})`);
           }
 
           try {
-            await rule.execute(context);
+            // Use validation method if available, otherwise use execute method
+            if (rule.validate) {
+              const validationResult = await rule.validate(context);
+              if (!validationResult.isValid) {
+                return {
+                  context,
+                  executedRules,
+                  conflicts,
+                  executionTime: Date.now() - startTime,
+                  success: false,
+                  error: `Validation failed: ${validationResult.errors.map(e => e.message).join(', ')}`
+                };
+              }
+            } else if (rule.execute) {
+              await rule.execute(context);
+            }
             executedRules.push(rule.name);
           } catch (error) {
             console.error(`[BusinessLogicOrchestrator] Error executing rule ${rule.name}:`, error);
