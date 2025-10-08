@@ -9,31 +9,101 @@ import { FinanzBuchung } from '../../core/entities/finanzBuchung.entity';
 
 type DbRow = Record<string, unknown>;
 
+interface FinanzBuchungRow {
+  id: string;
+  buchungsnummer: string | null;
+  buchungsdatum: Date | string;
+  belegdatum: Date | string;
+  belegnummer: string | null;
+  buchungstext: string;
+  sollkonto: string | null;
+  habenkonto: string | null;
+  betrag: number | string;
+  waehrung: string | null;
+  steuerbetrag: number | string | null;
+  steuersatz: number | string | null;
+  buchungsart: string | null;
+  referenz_typ: string | null;
+  referenz_id: string | null;
+  ist_storniert: boolean | null;
+  storno_buchung_id: string | null;
+  erstellt_von: string | null;
+  erstellt_am: Date | string | null;
+  aktualisiert_am: Date | string | null;
+}
+
+const toStringOrUndefined = (value: unknown | null): string | undefined => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+  return typeof value === 'string' ? value : String(value);
+};
+
+const toStringOrEmpty = (value: unknown | null, fallback = ''): string => {
+  return toStringOrUndefined(value) ?? fallback;
+};
+
+const toNumberOrUndefined = (value: unknown | null): number | undefined => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+  return typeof value === 'number' ? value : Number(value);
+};
+
+const toBooleanOrUndefined = (value: unknown | null): boolean | undefined => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (typeof value === 'number') {
+    return value !== 0;
+  }
+  if (typeof value === 'string') {
+    return ['true', '1', 't', 'y'].includes(value.toLowerCase());
+  }
+  return undefined;
+};
+
+const toDateOrUndefined = (value: unknown | null): Date | undefined => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+  if (value instanceof Date) {
+    return value;
+  }
+  const parsed = new Date(String(value));
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
+
 export class FinanzBuchungPostgresRepository {
   public constructor(private readonly pool: Pool) {}
 
   private mapRow(row: DbRow): FinanzBuchung {
+    const record = row as FinanzBuchungRow;
+
     return FinanzBuchung.create({
-      id: row['id'] as any,
-      buchungsnummer: row['buchungsnummer'] as any,
-      buchungsdatum: row['buchungsdatum'] as any,
-      belegdatum: row['belegdatum'] as any,
-      belegnummer: row['belegnummer'] as any,
-      buchungstext: row['buchungstext'] as any,
-      sollkonto: row['sollkonto'] as any,
-      habenkonto: row['habenkonto'] as any,
-      betrag: row['betrag'] as any,
-      waehrung: row['waehrung'] as any,
-      steuerbetrag: row['steuerbetrag'] as any,
-      steuersatz: row['steuersatz'] as any,
-      buchungsart: row['buchungsart'] as any,
-      referenz_typ: row['referenz_typ'] as any,
-      referenz_id: row['referenz_id'] as any,
-      ist_storniert: row['ist_storniert'] as any,
-      storno_buchung_id: row['storno_buchung_id'] as any,
-      erstellt_von: row['erstellt_von'] as any,
-      erstellt_am: row['erstellt_am'] as any,
-      aktualisiert_am: row['aktualisiert_am'] as any,
+      id: toStringOrUndefined(record.id) ?? undefined,
+      buchungsnummer: toStringOrEmpty(record.buchungsnummer),
+      buchungsdatum: toDateOrUndefined(record.buchungsdatum) ?? new Date(),
+      belegdatum: toDateOrUndefined(record.belegdatum) ?? new Date(),
+      belegnummer: toStringOrUndefined(record.belegnummer),
+      buchungstext: toStringOrEmpty(record.buchungstext),
+      sollkonto: toStringOrUndefined(record.sollkonto),
+      habenkonto: toStringOrUndefined(record.habenkonto),
+      betrag: toNumberOrUndefined(record.betrag) ?? 0,
+      waehrung: toStringOrUndefined(record.waehrung),
+      steuerbetrag: toNumberOrUndefined(record.steuerbetrag),
+      steuersatz: toNumberOrUndefined(record.steuersatz),
+      buchungsart: toStringOrUndefined(record.buchungsart),
+      referenz_typ: toStringOrUndefined(record.referenz_typ),
+      referenz_id: toStringOrUndefined(record.referenz_id),
+      ist_storniert: toBooleanOrUndefined(record.ist_storniert),
+      storno_buchung_id: toStringOrUndefined(record.storno_buchung_id),
+      erstellt_von: toStringOrUndefined(record.erstellt_von),
+      erstellt_am: toDateOrUndefined(record.erstellt_am),
+      aktualisiert_am: toDateOrUndefined(record.aktualisiert_am),
     });
   }
 

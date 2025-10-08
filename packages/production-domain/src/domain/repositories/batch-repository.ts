@@ -53,7 +53,7 @@ export interface TraceabilityData {
     lotNumber: string;
     qtyKg: number;
     destination: string;
-    packing: any;
+    packing: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   }>;
   parentBatches: string[];
   labels: string[];

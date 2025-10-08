@@ -41,7 +41,7 @@ export async function sendNotification(
       )
       .limit(1);
 
-    if (!template) throw new Error('Template not found or not active');
+    if (template === undefined || template === null) throw new Error('Template not found or not active');
 
     subject = template.subject ? await renderTemplate(template.subject, input.payload) : undefined;
     bodyText = await renderTemplate(template.bodyText, input.payload);
@@ -66,7 +66,7 @@ export async function sendNotification(
     })
     .returning();
 
-  if (!message) throw new Error('Failed to create message');
+  if (message === undefined || message === null) throw new Error('Failed to create message');
 
   // 3. Dispatch to channel
   try {
@@ -153,7 +153,7 @@ export async function getMessageById(
     .where(and(eq(notificationMessages.id, messageId), eq(notificationMessages.tenantId, tenantId)))
     .limit(1);
 
-  if (!msg) return null;
+  if (msg === undefined || msg === null) return null;
 
   return {
     ...msg,
@@ -161,3 +161,4 @@ export async function getMessageById(
     createdAt: msg.createdAt.toISOString(),
   } as NotificationMessage;
 }
+

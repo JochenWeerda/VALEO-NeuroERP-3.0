@@ -9,9 +9,9 @@ export async function registerLabelRoutes(server: FastifyInstance): Promise<void
   // Evaluate label eligibility
   server.post('/labels/evaluate', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const userId = request.authContext?.userId || 'system';
+    const userId = (request as any).authContext?.userId ?? 'system';
 
-    const input = LabelEvaluateInputSchema.parse({ ...request.body, tenantId });
+    const input = LabelEvaluateInputSchema.parse({ ...(request.body as any), tenantId });
     const evaluation = await evaluateLabel(tenantId, input);
 
     // Optional: Create/Update label record
@@ -34,7 +34,7 @@ export async function registerLabelRoutes(server: FastifyInstance): Promise<void
       .where(and(eq(labels.id, id), eq(labels.tenantId, tenantId)))
       .limit(1);
 
-    if (!label) {
+    if (label === undefined || label === null) {
       reply.code(404).send({ error: 'NotFound', message: 'Label not found' });
       return;
     }
@@ -53,13 +53,13 @@ export async function registerLabelRoutes(server: FastifyInstance): Promise<void
 
     let filtered = results;
     if (query.targetType && query.targetId) {
-      filtered = filtered.filter(l => l.targetType === query.targetType && l.targetId === query.targetId);
+      filtered = filtered.filter((l: any) => l.targetType === query.targetType && l.targetId === query.targetId);
     }
     if (query.code) {
-      filtered = filtered.filter(l => l.code === query.code);
+      filtered = filtered.filter((l: any) => l.code === query.code);
     }
     if (query.status) {
-      filtered = filtered.filter(l => l.status === query.status);
+      filtered = filtered.filter((l: any) => l.status === query.status);
     }
 
     reply.send({ data: filtered, count: filtered.length });
@@ -68,7 +68,7 @@ export async function registerLabelRoutes(server: FastifyInstance): Promise<void
   // Revoke label
   server.post('/labels/:id/revoke', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const userId = request.authContext?.userId || 'system';
+    const userId = (request as any).authContext?.userId ?? 'system';
     const { id } = request.params as { id: string };
     const { reason } = request.body as { reason: string };
 
@@ -84,7 +84,7 @@ export async function registerLabelRoutes(server: FastifyInstance): Promise<void
       .where(and(eq(labels.id, id), eq(labels.tenantId, tenantId)))
       .returning();
 
-    if (!revoked) {
+    if (revoked === undefined || revoked === null) {
       reply.code(404).send({ error: 'NotFound', message: 'Label not found' });
       return;
     }
@@ -92,3 +92,4 @@ export async function registerLabelRoutes(server: FastifyInstance): Promise<void
     reply.send(revoked);
   });
 }
+

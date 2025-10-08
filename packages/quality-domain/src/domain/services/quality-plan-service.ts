@@ -13,7 +13,7 @@ export async function createQualityPlan(data: CreateQualityPlan, userId: string)
     createdBy: userId,
   }).returning();
 
-  if (!plan) {
+  if (plan === undefined || plan === null) {
     throw new Error('Failed to create quality plan');
   }
 
@@ -62,7 +62,7 @@ export async function updateQualityPlan(
     .where(and(eq(qualityPlans.id, planId), eq(qualityPlans.tenantId, tenantId)))
     .returning();
 
-  if (!updated) {
+  if (updated === undefined || updated === null) {
     throw new Error('Quality plan not found or update failed');
   }
 
@@ -129,3 +129,4 @@ export async function deactivateQualityPlan(
     occurredAt: new Date().toISOString(),
   });
 }
+

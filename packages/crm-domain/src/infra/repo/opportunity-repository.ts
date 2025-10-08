@@ -90,8 +90,8 @@ export class OpportunityRepository {
     const total = totalResult[0]?.count || 0;
 
     // Apply sorting
-    const sortBy = pagination.sortBy || 'createdAt';
-    const sortOrder = pagination.sortOrder || 'desc';
+    const sortBy = pagination.sortBy ?? 'createdAt';
+    const sortOrder = pagination.sortOrder ?? 'desc';
 
     const orderBy = sortOrder === 'desc'
       ? desc(opportunities[sortBy])
@@ -114,8 +114,8 @@ export class OpportunityRepository {
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
@@ -164,8 +164,8 @@ export class OpportunityRepository {
     const total = totalResult[0]?.count || 0;
 
     // Apply sorting
-    const sortBy = pagination.sortBy || 'createdAt';
-    const sortOrder = pagination.sortOrder || 'desc';
+    const sortBy = pagination.sortBy ?? 'createdAt';
+    const sortOrder = pagination.sortOrder ?? 'desc';
 
     const orderBy = sortOrder === 'desc'
       ? desc(opportunities[sortBy])
@@ -188,8 +188,8 @@ export class OpportunityRepository {
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
@@ -214,8 +214,12 @@ export class OpportunityRepository {
   }
 
   async update(id: string, tenantId: string, input: UpdateOpportunityInput): Promise<OpportunityEntity | null> {
-    const updateData: Partial<Opportunity> = {
+    const updateData: any = {
       ...input,
+      ownerUserId: input.ownerUserId ?? undefined,
+      expectedCloseDate: input.expectedCloseDate ?? undefined,
+      amountNet: input.amountNet ?? undefined,
+      currency: input.currency ?? undefined,
       updatedAt: new Date()
     };
 

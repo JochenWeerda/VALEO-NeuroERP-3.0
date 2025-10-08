@@ -68,8 +68,8 @@ class OpportunityRepository {
             pagination: {
                 page: pagination.page,
                 pageSize: pagination.pageSize,
-                total,
-                totalPages: Math.ceil(total / pagination.pageSize)
+                total: Number(total),
+                totalPages: Math.ceil(Number(total) / pagination.pageSize)
             }
         };
     }
@@ -123,8 +123,8 @@ class OpportunityRepository {
             pagination: {
                 page: pagination.page,
                 pageSize: pagination.pageSize,
-                total,
-                totalPages: Math.ceil(total / pagination.pageSize)
+                total: Number(total),
+                totalPages: Math.ceil(Number(total) / pagination.pageSize)
             }
         };
     }
@@ -147,6 +147,10 @@ class OpportunityRepository {
     async update(id, tenantId, input) {
         const updateData = {
             ...input,
+            ownerUserId: input.ownerUserId ?? undefined,
+            expectedCloseDate: input.expectedCloseDate ?? undefined,
+            amountNet: input.amountNet ?? undefined,
+            currency: input.currency ?? undefined,
             updatedAt: new Date()
         };
         const result = await connection_1.db

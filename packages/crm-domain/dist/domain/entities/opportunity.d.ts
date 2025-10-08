@@ -23,28 +23,28 @@ export declare const OpportunitySchema: z.ZodObject<{
     version: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    tenantId: string;
-    customerId: string;
     createdAt: Date;
     updatedAt: Date;
-    version: number;
+    tenantId: string;
+    customerId: string;
     title: string;
     stage: "Lead" | "Qualified" | "Proposal" | "Won" | "Lost";
     probability: number;
+    version: number;
     expectedCloseDate?: Date | undefined;
     amountNet?: number | undefined;
     currency?: string | undefined;
     ownerUserId?: string | undefined;
 }, {
     id: string;
-    tenantId: string;
-    customerId: string;
     createdAt: Date;
     updatedAt: Date;
-    version: number;
+    tenantId: string;
+    customerId: string;
     title: string;
     stage: "Lead" | "Qualified" | "Proposal" | "Won" | "Lost";
     probability: number;
+    version: number;
     expectedCloseDate?: Date | undefined;
     amountNet?: number | undefined;
     currency?: string | undefined;
@@ -119,7 +119,7 @@ export declare class OpportunityEntity {
     static create(props: CreateOpportunityInput & {
         tenantId: string;
     }): OpportunityEntity;
-    static fromPersistence(props: Opportunity): OpportunityEntity;
+    static fromPersistence(props: any): OpportunityEntity;
     update(props: UpdateOpportunityInput): void;
     changeStage(newStage: OpportunityStageType): void;
     markAsWon(): void;

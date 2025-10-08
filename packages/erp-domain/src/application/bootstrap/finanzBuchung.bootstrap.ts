@@ -3,6 +3,7 @@
  * Exposes a lightweight initializer returning repository/service/router trio.
  */
 
+import type { Router } from 'express';
 import { Pool } from 'pg';
 import { FinanzBuchungPostgresRepository } from '../../infrastructure/repositories/finanzBuchung-postgres.repository';
 import { FinanzBuchungService } from '../services/finanzBuchung.service';
@@ -12,7 +13,13 @@ export interface FinanzBuchungBootstrapDependencies {
   pool: Pool;
 }
 
-export function initFinanzBuchungModule({ pool }: FinanzBuchungBootstrapDependencies): any {
+export interface FinanzBuchungModule {
+  repository: FinanzBuchungPostgresRepository;
+  service: FinanzBuchungService;
+  router: Router;
+}
+
+export function initFinanzBuchungModule({ pool }: FinanzBuchungBootstrapDependencies): FinanzBuchungModule {
   const repository = new FinanzBuchungPostgresRepository(pool);
   const service = new FinanzBuchungService(repository);
   const router = buildFinanzBuchungRouter({ service, baseRoute: '/erp/finance/bookings' });

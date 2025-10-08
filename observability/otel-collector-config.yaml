@@ -1,0 +1,45 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  otlphttp/jaeger:
+    endpoint: 
+  prometheus:
+    endpoint: 0.0.0.0:9464
+    const_labels:
+      service: hr-domain
+  logging:
+    loglevel: info
+
+processors:
+  batch:
+    timeout: 5s
+  memory_limiter:
+    limit_percentage: 75
+    spike_limit_percentage: 15
+    check_interval: 5s
+  resource:
+    attributes:
+      - key: service.name
+        value: hr-domain
+        action: upsert
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [otlphttp/jaeger]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [prometheus]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [logging]

@@ -22,7 +22,7 @@ export async function evaluateLabel(
   // 1. Lade relevante Policy
   const policy = await getRelevantPolicy(tenantId, input.labelCode, input.targetRef.type);
   
-  if (!policy) {
+  if (policy === undefined || policy === null) {
     return {
       eligible: false,
       status: 'Ineligible',
@@ -46,7 +46,7 @@ export async function evaluateLabel(
   for (const rule of (policy.rules as PolicyRule[])) {
     const ruleResult = await evaluateRule(rule, availableEvidences, input.context);
     
-    if (!ruleResult.passed) {
+    if (ruleResult.passed === undefined || ruleResult.passed === null) {
       if (rule.evidenceRequired && ruleResult.evidenceMissing) {
         missingEvidences.push(`${rule.evidenceType}: ${rule.description}`);
       } else {
@@ -126,7 +126,7 @@ async function getRelevantPolicy(
     )
     .limit(1);
 
-  return policy || null;
+  return policy ?? null;
 }
 
 /**
@@ -163,7 +163,7 @@ async function evaluateRule(
   if (rule.evidenceRequired) {
     const hasEvidence = availableEvidences.some(ev => ev.type === rule.evidenceType);
     
-    if (!hasEvidence) {
+    if (hasEvidence === undefined || hasEvidence === null) {
       return {
         passed: false,
         evidenceMissing: true,
@@ -237,7 +237,7 @@ export async function createOrUpdateLabel(
     const [updated] = await db
       .update(labels)
       .set({
-        ...labelData,
+        ...(labelData as any),
         updatedAt: new Date(),
       })
       .where(eq(labels.id, existing.id))
@@ -259,8 +259,8 @@ export async function createOrUpdateLabel(
       .insert(labels)
       .values({
         tenantId,
-        ...labelData,
-      })
+        ...(labelData as any),
+      } as any)
       .returning();
 
     // Publish event
@@ -276,3 +276,5 @@ export async function createOrUpdateLabel(
     return created;
   }
 }
+
+

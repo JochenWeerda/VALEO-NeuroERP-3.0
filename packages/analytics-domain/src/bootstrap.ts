@@ -15,15 +15,19 @@ const TOKENS = {
 
 const defaultLogger: Logger = {
   debug(message: string, context?: Record<string, unknown>) {
+    // eslint-disable-next-line no-console
     console.debug('[analytics]', message, context);
   },
   info(message: string, context?: Record<string, unknown>) {
+    // eslint-disable-next-line no-console
     console.info('[analytics]', message, context);
   },
   warn(message: string, context?: Record<string, unknown>) {
+    // eslint-disable-next-line no-console
     console.warn('[analytics]', message, context);
   },
   error(message: string, context?: Record<string, unknown>) {
+    // eslint-disable-next-line no-console
     console.error('[analytics]', message, context);
   },
 };

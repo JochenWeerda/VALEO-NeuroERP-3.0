@@ -84,7 +84,10 @@ class InteractionEntity {
         return new InteractionEntity(interaction);
     }
     static fromPersistence(props) {
-        return new InteractionEntity(props);
+        return new InteractionEntity({
+            ...props,
+            contactId: props.contactId ?? undefined,
+        });
     }
     update(props) {
         if (props.subject !== undefined) {

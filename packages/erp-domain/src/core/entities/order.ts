@@ -1,5 +1,4 @@
 import { createId } from '@valero-neuroerp/data-models';
-import type { Brand } from '@valero-neuroerp/data-models';
 
 export type OrderId = string & { readonly __brand: 'OrderId' };
 export type OrderItemId = string & { readonly __brand: 'OrderItemId' };
@@ -76,15 +75,16 @@ export interface OrderFilters {
 }
 
 export const DEFAULT_ORDER_LIMIT = 50;
+const ORDER_NUMBER_RADIX = 36;
 
 export function createOrder(input: CreateOrderInput): Order {
-  if (!input.customerNumber || !input.customerNumber.trim()) {
+  if (!input.customerNumber?.trim()) {
     throw new Error('customerNumber is required');
   }
-  if (!input.debtorNumber || !input.debtorNumber.trim()) {
+  if (!input.debtorNumber?.trim()) {
     throw new Error('debtorNumber is required');
   }
-  if (!input.items.length) {
+  if (input.items.length === undefined || input.items.length === null) {
     throw new Error('order requires at least one item');
   }
 
@@ -145,5 +145,6 @@ function createOrderItem(input: CreateOrderItemInput, timestamp: Date): OrderIte
 }
 
 function generateOrderNumber(): string {
-  return `ORD-${Date.now().toString(36).toUpperCase()}`;
+  return `ORD-${Date.now().toString(ORDER_NUMBER_RADIX).toUpperCase()}`;
 }
+

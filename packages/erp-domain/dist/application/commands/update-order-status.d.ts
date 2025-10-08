@@ -1,5 +1,5 @@
 import { OrderDomainService } from '../../core/domain-services/order-domain-service';
-import type { UpdateOrderStatusDTO, OrderDTO } from '../dto/order-dto';
+import type { OrderDTO, UpdateOrderStatusDTO } from '../dto/order-dto';
 import type { OrderId } from '../../core/entities/order';
 export declare class UpdateOrderStatusCommand {
     private readonly service;

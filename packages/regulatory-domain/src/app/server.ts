@@ -13,7 +13,7 @@ dotenv.config();
 
 const server = fastify({
   logger: pino({
-    level: process.env.LOG_LEVEL || 'info',
+    level: process.env.LOG_LEVEL ?? 'info',
   }),
   disableRequestLogging: false,
   requestIdLogLabel: 'requestId',
@@ -30,7 +30,7 @@ server.register(swagger, {
     },
     servers: [
       {
-        url: process.env.API_BASE_URL || 'http://localhost:3008',
+        url: process.env.API_BASE_URL ?? 'http://localhost:3008',
         description: 'Development server',
       },
     ],
@@ -85,8 +85,8 @@ export async function start(): Promise<void> {
   try {
     await initEventPublisher();
 
-    const port = parseInt(process.env.PORT || '3008', 10);
-    const host = process.env.HOST || '0.0.0.0';
+    const port = parseInt(process.env.PORT ?? '3008', 10);
+    const host = process.env.HOST ?? '0.0.0.0';
 
     await server.listen({ port, host });
     server.log.info(`🚀 Regulatory Domain server listening on ${host}:${port}`);
@@ -121,3 +121,4 @@ if (require.main === module) {
 }
 
 export default server;
+

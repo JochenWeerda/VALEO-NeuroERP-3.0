@@ -22,7 +22,7 @@ export async function retryFailedMessage(
       .where(eq(notificationMessages.id, messageId))
       .limit(1);
 
-    if (!message) {
+    if (message === undefined || message === null) {
       return { success: false, error: 'Message not found' };
     }
 
@@ -88,3 +88,4 @@ export async function processRetryQueue(): Promise<void> {
     await retryFailedMessage(message.tenantId, message.id);
   }
 }
+

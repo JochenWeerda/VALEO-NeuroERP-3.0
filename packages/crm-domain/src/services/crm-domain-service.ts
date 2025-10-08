@@ -28,7 +28,7 @@ export class CRMDomainService {
 
   constructor(private readonly customers: CustomerRepository, options: CRMDomainServiceOptions = {}) {
     this.logger = options.logger ?? noopLogger;
-    this.metrics = options.metrics;
+    this.metrics = options.metrics ?? undefined;
   }
 
   async createCustomer(input: CreateCustomerInput): Promise<Customer> {
@@ -41,7 +41,7 @@ export class CRMDomainService {
 
   async updateCustomer(id: CustomerId, updates: UpdateCustomerInput): Promise<Customer> {
     const existing = await this.customers.findById(id);
-    if (!existing) {
+    if (existing === undefined || existing === null) {
       throw new Error(`Customer ${String(id)} not found`);
     }
     const next = applyCustomerUpdate(existing, updates);
@@ -60,10 +60,11 @@ export class CRMDomainService {
 
   async deleteCustomer(id: CustomerId): Promise<void> {
     const existing = await this.customers.findById(id);
-    if (!existing) {
+    if (existing === undefined || existing === null) {
       throw new Error(`Customer ${String(id)} not found`);
     }
     await this.customers.delete(id);
     this.metrics?.incrementCounter('crm.customer.deleted', { type: existing.type });
   }
 }
+

@@ -26,7 +26,7 @@ export async function createCapa(data: CreateCapa, userId: string): Promise<Capa
     dueDate: new Date(data.dueDate),
   }).returning();
 
-  if (!capa) {
+  if (capa === undefined || capa === null) {
     throw new Error('Failed to create CAPA');
   }
 
@@ -36,7 +36,7 @@ export async function createCapa(data: CreateCapa, userId: string): Promise<Capa
     capaId: capa.id,
     capaNumber: capa.capaNumber,
     type: capa.type,
-    linkedNcIds: data.linkedNcIds || [],
+    linkedNcIds: data.linkedNcIds ?? [],
     occurredAt: new Date().toISOString(),
   });
 
@@ -88,7 +88,7 @@ export async function updateCapa(
     .where(and(eq(capas.id, capaId), eq(capas.tenantId, tenantId)))
     .returning();
 
-  if (!updated) {
+  if (updated === undefined || updated === null) {
     throw new Error('CAPA not found or update failed');
   }
 
@@ -114,7 +114,7 @@ export async function implementCapa(
     .where(and(eq(capas.id, capaId), eq(capas.tenantId, tenantId)))
     .returning();
 
-  if (!updated) {
+  if (updated === undefined || updated === null) {
     throw new Error('CAPA not found');
   }
 
@@ -152,7 +152,7 @@ export async function verifyCapa(
     .where(and(eq(capas.id, capaId), eq(capas.tenantId, tenantId)))
     .returning();
 
-  if (!updated) {
+  if (updated === undefined || updated === null) {
     throw new Error('CAPA not found');
   }
 
@@ -190,7 +190,7 @@ export async function closeCapa(
     .where(and(eq(capas.id, capaId), eq(capas.tenantId, tenantId)))
     .returning();
 
-  if (!updated) {
+  if (updated === undefined || updated === null) {
     throw new Error('CAPA not found');
   }
 
@@ -218,7 +218,7 @@ export async function escalateCapa(
     .where(and(eq(capas.id, capaId), eq(capas.tenantId, tenantId)))
     .returning();
 
-  if (!updated) {
+  if (updated === undefined || updated === null) {
     throw new Error('CAPA not found');
   }
 
@@ -384,3 +384,4 @@ export async function getCapaStatistics(
 
   return { total, byStatus, byType, overdue, averageTimeToClose };
 }
+

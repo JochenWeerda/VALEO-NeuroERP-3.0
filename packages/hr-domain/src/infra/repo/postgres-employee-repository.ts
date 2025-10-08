@@ -3,11 +3,19 @@
  * Temporary implementation for development/testing
  */
 
-import { EmployeeRepository, EmployeeFilters, PaginationOptions, PaginatedResult, DepartmentStatistics } from '../../domain/repositories/employee-repository';
 import { Employee } from '../../domain/entities/employee';
+import {
+  DepartmentStatistics,
+  EmployeeFilters,
+  EmployeeRepository,
+  PaginatedResult,
+  PaginationOptions
+} from '../../domain/repositories/employee-repository';
+
+const UNKNOWN_DEPARTMENT_ID = 'unknown';
 
 export class PostgresEmployeeRepository implements EmployeeRepository {
-  private employees: Map<string, Employee> = new Map();
+  private readonly employees: Map<string, Employee> = new Map();
 
   async save(tenantId: string, employee: Employee): Promise<Employee> {
     // Simple in-memory storage
@@ -31,30 +39,32 @@ export class PostgresEmployeeRepository implements EmployeeRepository {
 
   async findAll(tenantId: string, filters?: EmployeeFilters): Promise<Employee[]> {
     let results = Array.from(this.employees.values()).filter(e => e.tenantId === tenantId);
-    
+
     if (filters) {
-      if (filters.status) {
-        results = results.filter(e => e.status === filters.status);
+      const { status, departmentId, managerId, roleId, search } = filters;
+
+      if (typeof status === 'string' && status.length > 0) {
+        results = results.filter(e => e.status === status);
       }
-      if (filters.departmentId) {
-        results = results.filter(e => e.org.departmentId === filters.departmentId);
+      if (typeof departmentId === 'string' && departmentId.length > 0) {
+        results = results.filter(e => e.org.departmentId === departmentId);
       }
-      if (filters.managerId) {
-        results = results.filter(e => e.org.managerId === filters.managerId);
+      if (typeof managerId === 'string' && managerId.length > 0) {
+        results = results.filter(e => e.org.managerId === managerId);
       }
-      if (filters.roleId) {
-        results = results.filter(e => e.roles.includes(filters.roleId!));
+      if (typeof roleId === 'string' && roleId.length > 0) {
+        results = results.filter(e => e.roles.includes(roleId));
       }
-      if (filters.search) {
-        const search = filters.search.toLowerCase();
-        results = results.filter(e => 
-          e.person.firstName.toLowerCase().includes(search) ||
-          e.person.lastName.toLowerCase().includes(search) ||
-          e.employeeNumber.toLowerCase().includes(search)
+      if (typeof search === 'string' && search.length > 0) {
+        const normalizedSearch = search.toLowerCase();
+        results = results.filter(e =>
+          e.person.firstName.toLowerCase().includes(normalizedSearch) ||
+          e.person.lastName.toLowerCase().includes(normalizedSearch) ||
+          e.employeeNumber.toLowerCase().includes(normalizedSearch)
         );
       }
     }
-    
+
     return results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
@@ -131,28 +141,29 @@ export class PostgresEmployeeRepository implements EmployeeRepository {
     const stats = new Map<string, DepartmentStatistics>();
     
     for (const emp of employees) {
-      const deptId = emp.org.departmentId || 'unknown';
-      if (!stats.has(deptId)) {
-        stats.set(deptId, {
+      const deptId = emp.org.departmentId ?? UNKNOWN_DEPARTMENT_ID;
+      let stat = stats.get(deptId);
+      if (!stat) {
+        stat = {
           departmentId: deptId,
           totalEmployees: 0,
           activeEmployees: 0,
           inactiveEmployees: 0,
           onLeaveEmployees: 0
-        });
+        };
+        stats.set(deptId, stat);
       }
-      
-      const stat = stats.get(deptId)!;
-      stat.totalEmployees++;
+
+      stat.totalEmployees += 1;
       switch (emp.status) {
         case 'Active':
-          stat.activeEmployees++;
+          stat.activeEmployees += 1;
           break;
         case 'Inactive':
-          stat.inactiveEmployees++;
+          stat.inactiveEmployees += 1;
           break;
         case 'OnLeave':
-          stat.onLeaveEmployees++;
+          stat.onLeaveEmployees += 1;
           break;
       }
     }

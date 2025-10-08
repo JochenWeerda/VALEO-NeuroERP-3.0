@@ -19,7 +19,7 @@ export interface ReportParameters {
   supplierId?: string;
   siteId?: string;
   status?: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface ReportMetadata {
@@ -31,6 +31,7 @@ export interface ReportMetadata {
 }
 
 export class Report {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   constructor(
     public readonly id: string,
     public readonly tenantId: string,

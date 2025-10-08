@@ -79,8 +79,8 @@ export class CustomerEntity {
       ...props,
       id: uuidv4(),
       status: props.status || CustomerStatus.PROSPECT,
-      tags: props.tags || [],
-      shippingAddresses: props.shippingAddresses || [],
+      tags: props.tags ?? [],
+      shippingAddresses: props.shippingAddresses ?? [],
       createdAt: now,
       updatedAt: now,
       version: 1

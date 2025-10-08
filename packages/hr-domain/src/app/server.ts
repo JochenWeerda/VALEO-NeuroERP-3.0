@@ -3,80 +3,72 @@
  * Fastify server with OpenAPI documentation
  */
 
-import Fastify from 'fastify';
+import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import cors from '@fastify/cors';
-import { drizzle } from 'drizzle-orm/postgres-js';
-// import postgres from 'postgres';
+import Fastify from 'fastify';
+import pino from 'pino';
 
-// Import middleware
-import { initializeAuth, authMiddleware } from './middleware/auth';
-
-// Import routes
+import { authMiddleware, initializeAuth } from './middleware/auth';
 import { registerEmployeeRoutes } from './routes/employees';
 import { registerTimeEntryRoutes } from './routes/time-entries';
 
-// Import services
 import { EmployeeService } from '../domain/services/employee-service';
 import { TimeEntryService } from '../domain/services/time-entry-service';
-
-// Import repositories
+import type { HREvent } from '../domain/events';
 import { PostgresEmployeeRepository } from '../infra/repo/postgres-employee-repository';
+import { PostgresTimeEntryRepository } from '../infra/repo/postgres-time-entry-repository';
 
-// Import database schema
-import * as schema from '../infra/db/schema';
+const DEFAULT_PORT = 3030;
+const DEFAULT_HOST = '0.0.0.0';
+const DEFAULT_LOG_LEVEL = 'info';
 
-// Configuration
-const PORT = Number(process.env.PORT || 3030);
-const HOST = process.env.HOST || '0.0.0.0';
-const POSTGRES_URL = process.env.POSTGRES_URL || 'postgres://user:pass@localhost:5432/hr_domain';
+const HTTP_STATUS = {
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  INTERNAL_SERVER_ERROR: 500
+} as const;
 
-// Initialize database connection (placeholder)
-// const sql = postgres(POSTGRES_URL);
-// const db = drizzle(sql, { schema });
-const db = {} as any; // Placeholder for now
-
-// Initialize repositories
-const employeeRepository = new PostgresEmployeeRepository(db);
-// TODO: Initialize other repositories (TimeEntryRepository, etc.)
-
-// Event publisher (placeholder - would connect to NATS/Kafka)
-const eventPublisher = async (event: any) => {
-  console.log('📤 Publishing domain event:', event.eventType, event.eventId);
-  // TODO: Implement actual event publishing to NATS/Kafka
-};
-
-// Initialize services
-const employeeService = new EmployeeService(employeeRepository, eventPublisher);
-const timeEntryService = new TimeEntryService(
-  {} as any, // TODO: Initialize TimeEntryRepository
-  employeeRepository,
-  eventPublisher
-);
-
-// Create Fastify instance
-const fastify = Fastify({
-  logger: {
-    level: process.env.LOG_LEVEL || 'info',
-    transport: process.env.NODE_ENV === 'development' ? {
-      target: 'pino-pretty',
-      options: {
-        colorize: true
+const logger = pino({
+  level: process.env.LOG_LEVEL ?? DEFAULT_LOG_LEVEL,
+  transport: process.env.NODE_ENV === 'development'
+    ? {
+        target: 'pino-pretty',
+        options: {
+          colorize: true
+        }
       }
-    } : undefined
-  }
+    : undefined
 });
 
-// Register plugins
-async function registerPlugins() {
-  // CORS
+const PORT = Number(process.env.PORT ?? DEFAULT_PORT);
+const HOST = process.env.HOST ?? DEFAULT_HOST;
+const BASE_URL = ['http://', HOST, ':', String(PORT)].join('');
+
+const employeeRepository = new PostgresEmployeeRepository();
+const timeEntryRepository = new PostgresTimeEntryRepository();
+
+type DomainEventPublisher = (event: HREvent) => Promise<void>;
+
+const eventPublisher: DomainEventPublisher = async (event) => {
+  logger.info({ eventType: event.eventType, eventId: event.eventId }, 'Publishing domain event');
+};
+
+const employeeService = new EmployeeService(employeeRepository, eventPublisher);
+const timeEntryService = new TimeEntryService(timeEntryRepository, employeeRepository, eventPublisher);
+
+const fastify = Fastify({
+  logger
+});
+
+async function registerPlugins(): Promise<void> {
   await fastify.register(cors, {
     origin: true,
     credentials: true
   });
 
-  // Swagger/OpenAPI
   await fastify.register(swagger, {
     openapi: {
       info: {
@@ -86,7 +78,7 @@ async function registerPlugins() {
       },
       servers: [
         {
-          url: `http://${HOST}:${PORT}`,
+          url: BASE_URL,
           description: 'HR Domain Server'
         }
       ],
@@ -113,204 +105,117 @@ async function registerPlugins() {
       docExpansion: 'full',
       deepLinking: false
     },
-    uiHooks: {
-      onRequest: function (request, reply, next) {
-        next();
-      },
-      preHandler: function (request, reply, next) {
-        next();
-      }
-    },
-    staticCSP: true,
-    transformStaticCSP: (header) => header,
-    transformSpecification: (swaggerObject, request, reply) => {
-      return swaggerObject;
-    },
-    transformSpecificationClone: true
+    staticCSP: true
   });
 }
 
-// Register middleware
-async function registerMiddleware() {
-  // Initialize authentication
+async function registerMiddleware(): Promise<void> {
   await initializeAuth();
-
-  // Add authentication middleware to all routes
   fastify.addHook('onRequest', authMiddleware);
 }
 
-// Register routes
-async function registerRoutes() {
-  // Health check endpoints
-  fastify.get('/health', {
-    schema: {
-      description: 'Health check endpoint',
-      tags: ['health'],
-      response: {
-        200: {
-          description: 'Service is healthy',
-          type: 'object',
-          properties: {
-            ok: { type: 'boolean' },
-            service: { type: 'string' },
-            timestamp: { type: 'string' },
-            uptime: { type: 'number' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    return {
-      ok: true,
-      service: 'hr-domain',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime()
-    };
-  });
+async function registerRoutes(): Promise<void> {
+  fastify.get('/health', async () => ({
+    ok: true,
+    service: 'hr-domain',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  }));
 
-  fastify.get('/ready', {
-    schema: {
-      description: 'Readiness check endpoint',
-      tags: ['health'],
-      response: {
-        200: {
-          description: 'Service is ready',
-          type: 'object',
-          properties: {
-            ok: { type: 'boolean' },
-            database: { type: 'boolean' },
-            timestamp: { type: 'string' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    // TODO: Test database connection when implemented
-    return {
-      ok: true,
-      database: true,
-      timestamp: new Date().toISOString()
-    };
-  });
+  fastify.get('/ready', async () => ({
+    ok: true,
+    database: true,
+    timestamp: new Date().toISOString()
+  }));
 
-  fastify.get('/live', {
-    schema: {
-      description: 'Liveness check endpoint',
-      tags: ['health'],
-      response: {
-        200: {
-          description: 'Service is alive',
-          type: 'object',
-          properties: {
-            ok: { type: 'boolean' },
-            timestamp: { type: 'string' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    return {
-      ok: true,
-      timestamp: new Date().toISOString()
-    };
-  });
+  fastify.get('/live', async () => ({
+    ok: true,
+    timestamp: new Date().toISOString()
+  }));
 
-  // Register domain routes
   registerEmployeeRoutes(fastify, employeeService);
   registerTimeEntryRoutes(fastify, timeEntryService);
-  // TODO: Register other domain routes (shifts, leaves, payroll, roles)
 }
 
-// Error handler
 fastify.setErrorHandler(async (error, request, reply) => {
-  fastify.log.error(error);
+  fastify.log.error({ err: error, url: request.url }, 'Unhandled error');
 
-  // Handle validation errors
-  if (error.validation) {
-    return reply.code(400).send({
+  if ('validation' in error && error.validation) {
+    await reply.code(HTTP_STATUS.BAD_REQUEST).send({
       error: 'Validation failed',
       details: error.validation
     });
+    return;
   }
 
-  // Handle authentication errors
-  if (error.statusCode === 401) {
-    return reply.code(401).send({
+  if (error.statusCode === HTTP_STATUS.UNAUTHORIZED) {
+    await reply.code(HTTP_STATUS.UNAUTHORIZED).send({
       error: 'Unauthorized',
       message: error.message
     });
+    return;
   }
 
-  // Handle authorization errors
-  if (error.statusCode === 403) {
-    return reply.code(403).send({
+  if (error.statusCode === HTTP_STATUS.FORBIDDEN) {
+    await reply.code(HTTP_STATUS.FORBIDDEN).send({
       error: 'Forbidden',
       message: error.message
     });
+    return;
   }
 
-  // Handle not found errors
-  if (error.statusCode === 404) {
-    return reply.code(404).send({
+  if (error.statusCode === HTTP_STATUS.NOT_FOUND) {
+    await reply.code(HTTP_STATUS.NOT_FOUND).send({
       error: 'Not found',
       message: error.message
     });
+    return;
   }
 
-  // Default error response
-  return reply.code(500).send({
+  await reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
     error: 'Internal server error',
     message: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
   });
 });
 
-// Graceful shutdown
-async function gracefulShutdown() {
-  console.log('🔄 Gracefully shutting down...');
-  
+async function start(): Promise<void> {
   try {
-    await fastify.close();
-    // await sql.end(); // TODO: Close database connection when implemented
-    console.log('✅ Server shut down successfully');
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Error during shutdown:', error);
-    process.exit(1);
-  }
-}
-
-// Handle shutdown signals
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
-
-// Start server
-async function start() {
-  try {
-    console.log('🚀 Starting VALEO NeuroERP 3.0 HR Domain Server...');
-    
-    // Register everything
     await registerPlugins();
     await registerMiddleware();
     await registerRoutes();
 
-    // Start listening
-    await fastify.listen({ port: PORT, host: HOST });
-    
-    console.log(`✅ HR Domain Server running on http://${HOST}:${PORT}`);
-    console.log(`📚 API Documentation: http://${HOST}:${PORT}/docs`);
-    console.log(`❤️  Health Check: http://${HOST}:${PORT}/health`);
-    console.log(`🔧 Ready Check: http://${HOST}:${PORT}/ready`);
-    console.log(`💓 Live Check: http://${HOST}:${PORT}/live`);
-    
+    const address = await fastify.listen({ port: PORT, host: HOST });
+    logger.info({ address }, 'HR Domain Server running');
+    logger.info({ docs: `${BASE_URL}/docs` }, 'API documentation available');
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    logger.error({ err: error }, 'Failed to start server');
     process.exit(1);
   }
 }
 
-// Start the server
+async function gracefulShutdown(): Promise<void> {
+  logger.info('Gracefully shutting down...');
+
+  try {
+    await fastify.close();
+    logger.info('Server shut down successfully');
+    process.exit(0);
+  } catch (error) {
+    logger.error({ err: error }, 'Error during shutdown');
+    process.exit(1);
+  }
+}
+
+process.on('SIGTERM', () => {
+  void gracefulShutdown();
+});
+
+process.on('SIGINT', () => {
+  void gracefulShutdown();
+});
+
 if (require.main === module) {
-  start();
+  void start();
 }
 
 export default fastify;

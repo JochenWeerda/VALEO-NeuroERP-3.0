@@ -33,7 +33,7 @@ class SlotDockYardService {
     }
     async updateStatus(tenantId, shipmentId, status) {
         const yardVisit = await this.yardRepository.findYardVisitByShipmentId(tenantId, shipmentId);
-        if (!yardVisit) {
+        if (yardVisit === undefined || yardVisit === null) {
             throw new Error(`Yard visit not found for shipment ${shipmentId}`);
         }
         yardVisit.updateStatus(status);

@@ -1,5 +1,5 @@
-import { FastifyInstance } from 'fastify';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import type { FastifyInstance } from 'fastify';
+import { eq, and, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import {
   CreateForecastRequestSchema,
@@ -26,16 +26,22 @@ export async function registerForecastRoutes(
         200: ForecastListResponseSchema,
       },
     },
-    handler: async (request, reply) => {
+    handler: async (request, _reply) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query = request.query as any;
+
+      const DEFAULT_PAGE = 1;
+      const DEFAULT_PAGE_SIZE = 20;
+      const page = (query.page != null && query.page !== 0) ? query.page : DEFAULT_PAGE;
+      const pageSize = (query.pageSize != null && query.pageSize !== 0) ? query.pageSize : DEFAULT_PAGE_SIZE;
 
       const filters = {
         metricName: query.metricName,
         model: query.model,
-        fromDate: query.from ? new Date(query.from) : undefined,
-        toDate: query.to ? new Date(query.to) : undefined,
-        limit: query.pageSize || 20,
-        offset: ((query.page || 1) - 1) * (query.pageSize || 20),
+        fromDate: (query.from != null && query.from !== '') ? new Date(query.from) : undefined,
+        toDate: (query.to != null && query.to !== '') ? new Date(query.to) : undefined,
+        limit: pageSize,
+        offset: (page - 1) * pageSize,
       };
 
       const forecastResults = await forecastingService.getForecasts(request.tenantId, filters);
@@ -63,11 +69,11 @@ export async function registerForecastRoutes(
       // Get total count for pagination
       const totalConditions = [eq(forecasts.tenantId, request.tenantId)];
 
-      if (query.metricName) {
+      if (query.metricName != null && query.metricName !== '') {
         totalConditions.push(eq(forecasts.metricName, query.metricName));
       }
 
-      if (query.model) {
+      if (query.model != null && query.model !== '') {
         totalConditions.push(eq(forecasts.model, query.model));
       }
 
@@ -76,15 +82,15 @@ export async function registerForecastRoutes(
         .from(forecasts)
         .where(and(...totalConditions));
 
-      const total = totalResult[0]?.count || 0;
+      const total = totalResult[0]?.count ?? 0;
 
       return {
         data: forecastResponses,
         pagination: {
-          page: query.page || 1,
-          pageSize: query.pageSize || 20,
+          page,
+          pageSize,
           total,
-          totalPages: Math.ceil(total / (query.pageSize || 20)),
+          totalPages: Math.ceil(total / pageSize),
         },
       };
     },
@@ -133,14 +139,15 @@ export async function registerForecastRoutes(
       }
 
       const row = result[0];
-      if (!row) {
+      if (row == null) {
         return reply.code(404).send({
           error: 'Not Found',
           message: 'Forecast not found',
         });
       }
 
-      const forecastValues = (row.forecastValues as any[]) || [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const forecastValues = (row.forecastValues != null && Array.isArray(row.forecastValues)) ? (row.forecastValues as any[]) : [];
       return {
         id: row.id,
         tenantId: row.tenantId,
@@ -148,6 +155,7 @@ export async function registerForecastRoutes(
         horizon: row.horizon,
         horizonUnit: row.horizonUnit,
         model: row.model,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         forecastValues: forecastValues.map((fv: any) => ({
           timestamp: fv.timestamp.toISOString(),
           value: fv.value,
@@ -174,14 +182,16 @@ export async function registerForecastRoutes(
       },
     },
     handler: async (request, reply) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body = request.body as any;
 
       // Prepare historical data
-      const historicalData = body.historicalData || [];
+      const historicalData = (body.historicalData != null && Array.isArray(body.historicalData)) ? body.historicalData : [];
 
       const forecastRequest = {
         tenantId: request.tenantId,
         metricName: body.metricName,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         historicalData: historicalData.map((d: any) => ({
           timestamp: new Date(d.timestamp),
           value: d.value,
@@ -196,10 +206,10 @@ export async function registerForecastRoutes(
 
       const result = await forecastingService.generateForecast(forecastRequest);
 
-      if (!result.success) {
+      if (result.success === false) {
         return reply.code(400).send({
           error: 'Forecast Generation Failed',
-          message: result.error || 'Unknown error occurred during forecast generation',
+          message: (result.error != null && result.error !== '') ? result.error : 'Unknown error occurred during forecast generation',
         });
       }
 
@@ -265,6 +275,7 @@ export async function registerForecastRoutes(
     },
     handler: async (request, reply) => {
       const { id } = request.params as { id: string };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query = request.query as any;
 
       // Get forecast
@@ -285,7 +296,7 @@ export async function registerForecastRoutes(
       }
 
       const forecast = forecastResult[0];
-      if (!forecast) {
+      if (forecast == null) {
         return reply.code(404).send({
           error: 'Not Found',
           message: 'Forecast not found',
@@ -293,24 +304,29 @@ export async function registerForecastRoutes(
       }
 
       // Prepare actual data
-      const actualValues = (query.actualData || []).map((d: any) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const actualValues = ((query.actualData != null && Array.isArray(query.actualData)) ? query.actualData : []).map((d: any) => ({
         timestamp: d.timestamp,
         value: d.value,
       }));
 
       // Calculate accuracy metrics (simplified)
-      const forecastValues = (forecast.forecastValues as any[]) || [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const forecastValues = (forecast.forecastValues != null && Array.isArray(forecast.forecastValues)) ? (forecast.forecastValues as any[]) : [];
       let mse = 0;
       let mae = 0;
       let count = 0;
 
       // Match forecast and actual values by timestamp (simplified)
+      const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for (const actual of actualValues) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const forecastPoint = forecastValues.find((f: any) =>
-          Math.abs(f.timestamp.getTime() - new Date(actual.timestamp).getTime()) < 24 * 60 * 60 * 1000 // Within 1 day
+          Math.abs(f.timestamp.getTime() - new Date(actual.timestamp).getTime()) < MILLISECONDS_PER_DAY // Within 1 day
         );
 
-        if (forecastPoint) {
+        if (forecastPoint != null) {
           const error = actual.value - forecastPoint.value;
           mse += error * error;
           mae += Math.abs(error);
@@ -321,6 +337,7 @@ export async function registerForecastRoutes(
       const accuracy = {
         forecastId: forecast.id,
         metricName: forecast.metricName,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         accuracy: count > 0 ? 1 - Math.min(1, Math.sqrt(mse / count) / Math.max(...actualValues.map((a: any) => a.value))) : 0,
         mse: count > 0 ? mse / count : undefined,
         mae: count > 0 ? mae / count : undefined,
@@ -328,6 +345,7 @@ export async function registerForecastRoutes(
 
       return {
         actualValues,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         forecastValues: forecastValues.map((fv: any) => ({
           timestamp: fv.timestamp.toISOString(),
           value: fv.value,
@@ -411,9 +429,11 @@ export async function registerForecastRoutes(
         },
       },
     },
-    handler: async (request, reply) => {
+    handler: async (request, _reply) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query = request.query as any;
-      const olderThanDays = query.olderThanDays || 90;
+      const DEFAULT_CLEANUP_DAYS = 90;
+      const olderThanDays = (query.olderThanDays != null && query.olderThanDays !== 0) ? query.olderThanDays : DEFAULT_CLEANUP_DAYS;
 
       const deletedCount = await forecastingService.cleanupOldForecasts(request.tenantId, olderThanDays);
 

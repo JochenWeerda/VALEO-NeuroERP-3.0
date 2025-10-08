@@ -42,7 +42,7 @@ function toNumber(value: unknown): number | undefined {
 }
 
 function toDate(value: unknown): Date | undefined {
-  if (!value) {
+  if (value === undefined || value === null) {
     return undefined;
   }
   return value instanceof Date ? value : new Date(String(value));
@@ -57,13 +57,13 @@ export class FinanzKontoPostgresRepository {
       kontonummer: String(row.kontonummer),
       kontobezeichnung: String(row.kontobezeichnung),
       kontotyp: String(row.kontotyp),
-      kontenklasse: row.kontenklasse ? String(row.kontenklasse) : undefined,
-      kontengruppe: row.kontengruppe ? String(row.kontengruppe) : undefined,
+      kontenklasse: (row.kontenklasse !== undefined && row.kontenklasse !== null) ? String(row.kontenklasse) : undefined,
+      kontengruppe: (row.kontengruppe !== undefined && row.kontengruppe !== null) ? String(row.kontengruppe) : undefined,
       ist_aktiv: toBoolean(row.ist_aktiv),
       ist_steuerpflichtig: toBoolean(row.ist_steuerpflichtig),
       steuersatz: toNumber(row.steuersatz),
-      beschreibung: row.beschreibung ? String(row.beschreibung) : undefined,
-      erstellt_von: row.erstellt_von ? String(row.erstellt_von) : undefined,
+      beschreibung: (row.beschreibung !== undefined && row.beschreibung !== null) ? String(row.beschreibung) : undefined,
+      erstellt_von: (row.erstellt_von !== undefined && row.erstellt_von !== null) ? String(row.erstellt_von) : undefined,
       erstellt_am: toDate(row.erstellt_am),
       aktualisiert_am: toDate(row.aktualisiert_am),
     };
@@ -143,7 +143,7 @@ export class FinanzKontoPostgresRepository {
 
   public async update(entity: FinanzKonto): Promise<FinanzKonto> {
     const primitives = entity.toPrimitives();
-    if (!primitives.id) {
+    if (primitives.id === undefined || primitives.id === null) {
       throw new Error('Cannot update FinanzKonto without primary key');
     }
 
@@ -187,3 +187,4 @@ export class FinanzKontoPostgresRepository {
     await this.pool.query(`DELETE FROM ${TABLE} WHERE id = $1`, [id]);
   }
 }
+

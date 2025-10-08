@@ -9,7 +9,7 @@ function getErpPool(config) {
         return singleton;
     }
     const connectionString = config?.connectionString ?? process.env.ERP_DATABASE_URL;
-    if (!connectionString) {
+    if (connectionString === undefined || connectionString === null) {
         throw new Error('ERP_DATABASE_URL is not defined. Set it before initialising the ERP domain.');
     }
     singleton = new pg_1.Pool({ ...config, connectionString });

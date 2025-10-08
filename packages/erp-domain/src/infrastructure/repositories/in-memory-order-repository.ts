@@ -1,6 +1,6 @@
 import type { OrderId } from '@valero-neuroerp/data-models';
 import { InMemoryRepository } from '@valero-neuroerp/utilities';
-import { Order, OrderFilters, OrderStatus, createOrder, CreateOrderInput, withOrderStatus, cloneOrder } from '../../core/entities/order';
+import { CreateOrderInput, Order, OrderFilters, OrderStatus, cloneOrder, createOrder, withOrderStatus } from '../../core/entities/order';
 import { OrderRepository, buildOrderQuery } from '../../core/repositories/order-repository';
 
 export class InMemoryOrderRepository
@@ -17,10 +17,10 @@ export class InMemoryOrderRepository
   async list(filters?: OrderFilters): Promise<Order[]> {
     const base = await this.findMany(buildOrderQuery(filters));
     const results = base.filter((order) => {
-      if (filters?.from && order.documentDate < filters.from) {
+      if ((filters?.from !== undefined && filters?.from !== null) && order.documentDate < filters.from) {
         return false;
       }
-      if (filters?.to && order.documentDate > filters.to) {
+      if ((filters?.to !== undefined && filters?.to !== null) && order.documentDate > filters.to) {
         return false;
       }
       return true;
@@ -40,7 +40,7 @@ export class InMemoryOrderRepository
 
   async updateStatus(id: OrderId, status: OrderStatus): Promise<Order> {
     const existing = await this.findById(id);
-    if (!existing) {
+    if (existing === undefined || existing === null) {
       throw new Error(`Order ${String(id)} not found`);
     }
     const updated = withOrderStatus(existing, status);
@@ -48,3 +48,4 @@ export class InMemoryOrderRepository
     return cloneOrder(updated);
   }
 }
+

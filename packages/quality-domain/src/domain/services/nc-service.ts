@@ -25,7 +25,7 @@ export async function createNonConformity(data: CreateNonConformity, userId: str
     detectedAt: new Date(data.detectedAt),
   }).returning();
 
-  if (!nc) {
+  if (nc === undefined || nc === null) {
     throw new Error('Failed to create non-conformity');
   }
 
@@ -86,7 +86,7 @@ export async function updateNonConformity(
     .where(and(eq(nonConformities.id, ncId), eq(nonConformities.tenantId, tenantId)))
     .returning();
 
-  if (!updated) {
+  if (updated === undefined || updated === null) {
     throw new Error('Non-conformity not found or update failed');
   }
 
@@ -121,7 +121,7 @@ export async function closeNonConformity(
     .where(and(eq(nonConformities.id, ncId), eq(nonConformities.tenantId, tenantId)))
     .returning();
 
-  if (!updated) {
+  if (updated === undefined || updated === null) {
     throw new Error('Non-conformity not found');
   }
 
@@ -153,7 +153,7 @@ export async function assignNonConformity(
     .where(and(eq(nonConformities.id, ncId), eq(nonConformities.tenantId, tenantId)))
     .returning();
 
-  if (!updated) {
+  if (updated === undefined || updated === null) {
     throw new Error('Non-conformity not found');
   }
 
@@ -177,7 +177,7 @@ export async function linkNcToCapa(
     .where(and(eq(nonConformities.id, ncId), eq(nonConformities.tenantId, tenantId)))
     .returning();
 
-  if (!updated) {
+  if (updated === undefined || updated === null) {
     throw new Error('Non-conformity not found');
   }
 
@@ -309,3 +309,4 @@ export async function getNcStatistics(
 
   return { total, byStatus, bySeverity, byType };
 }
+

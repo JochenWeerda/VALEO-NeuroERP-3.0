@@ -1,6 +1,6 @@
 import type { OrderId } from '@valero-neuroerp/data-models';
 import { InMemoryRepository } from '@valero-neuroerp/utilities';
-import { Order, OrderFilters, OrderStatus, CreateOrderInput } from '../../core/entities/order';
+import { CreateOrderInput, Order, OrderFilters, OrderStatus } from '../../core/entities/order';
 import { OrderRepository } from '../../core/repositories/order-repository';
 export declare class InMemoryOrderRepository extends InMemoryRepository<Order, 'id', OrderId> implements OrderRepository {
     constructor(seed?: CreateOrderInput[]);

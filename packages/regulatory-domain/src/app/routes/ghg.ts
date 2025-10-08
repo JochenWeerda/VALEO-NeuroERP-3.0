@@ -6,7 +6,7 @@ export async function registerGHGRoutes(server: FastifyInstance): Promise<void> 
   // Calculate GHG emissions
   server.post('/ghg/calc', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const userId = request.authContext?.userId || 'system';
+    const userId = (request as any).authContext?.userId ?? 'system';
 
     const input = GHGCalculationInputSchema.parse(request.body);
     const pathway = await calculateGHG(tenantId, input, userId);
@@ -20,10 +20,11 @@ export async function registerGHGRoutes(server: FastifyInstance): Promise<void> 
     const query = request.query as Record<string, string>;
 
     const pathways = await getGHGPathways(tenantId, {
-      commodity: query.commodity,
-      method: query.method,
-    });
+      commodity: query.commodity ?? undefined,
+      method: query.method ?? undefined,
+    } as any);
 
     reply.send({ data: pathways, count: pathways.length });
   });
 }
+

@@ -3,13 +3,19 @@
  * HR-specific roles separate from system-wide roles
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
+
+const ROLE_KEY_MIN_LENGTH = 1;
+const ROLE_KEY_MAX_LENGTH = 100;
+const ROLE_NAME_MIN_LENGTH = 1;
+const ROLE_NAME_MAX_LENGTH = 200;
 
 export const RoleSchema = z.object({
   id: z.string().uuid(),
   tenantId: z.string().uuid(),
-  key: z.string().min(1).max(100),
-  name: z.string().min(1).max(200),
+  key: z.string().min(ROLE_KEY_MIN_LENGTH).max(ROLE_KEY_MAX_LENGTH),
+  name: z.string().min(ROLE_NAME_MIN_LENGTH).max(ROLE_NAME_MAX_LENGTH),
   permissions: z.array(z.string()),
   editable: z.boolean(),
   createdAt: z.string().datetime(),
@@ -21,7 +27,7 @@ export const RoleSchema = z.object({
 export type Role = z.infer<typeof RoleSchema>;
 
 export class RoleEntity {
-  private data: Role;
+  private readonly data: Role;
 
   constructor(data: Role) {
     this.data = RoleSchema.parse(data);
@@ -48,12 +54,11 @@ export class RoleEntity {
 
   // State Changes
   updateName(name: string, updatedBy?: string): RoleEntity {
-    return new RoleEntity({
-      ...this.data,
-      name,
-      updatedAt: new Date().toISOString(),
-      updatedBy
-    });
+    if (name === this.data.name) {
+      return this;
+    }
+
+    return this.clone({ name, updatedBy });
   }
 
   addPermission(permission: string, updatedBy?: string): RoleEntity {
@@ -61,19 +66,19 @@ export class RoleEntity {
       return this;
     }
 
-    return new RoleEntity({
-      ...this.data,
+    return this.clone({
       permissions: [...this.data.permissions, permission],
-      updatedAt: new Date().toISOString(),
       updatedBy
     });
   }
 
   removePermission(permission: string, updatedBy?: string): RoleEntity {
-    return new RoleEntity({
-      ...this.data,
+    if (!this.hasPermission(permission)) {
+      return this;
+    }
+
+    return this.clone({
       permissions: this.data.permissions.filter(p => p !== permission),
-      updatedAt: new Date().toISOString(),
       updatedBy
     });
   }
@@ -83,12 +88,21 @@ export class RoleEntity {
     return { ...this.data };
   }
 
+  private clone(overrides: Partial<Role>): RoleEntity {
+    const now = new Date().toISOString();
+    return new RoleEntity({
+      ...this.data,
+      ...overrides,
+      updatedAt: now
+    });
+  }
+
   // Factory methods
   static create(data: Omit<Role, 'id' | 'createdAt' | 'updatedAt'>): RoleEntity {
     const now = new Date().toISOString();
     return new RoleEntity({
       ...data,
-      id: require('uuid').v4(),
+      id: uuidv4(),
       createdAt: now,
       updatedAt: now
     });

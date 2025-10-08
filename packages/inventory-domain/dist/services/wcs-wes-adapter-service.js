@@ -83,12 +83,12 @@ let WCSWESAdapterService = (() => {
                 }
                 // Publish event
                 await this.publishRoboticsTaskCreatedEvent(roboticsTask);
-                this.metrics.recordDatabaseQueryDuration('robotics.task_creation', (Date.now() - startTime) / 1000, { taskType: 'robotics_task' });
+                this.metrics.recordHistogram('robotics.task_creation.(Date.now() - startTime) / 1000.duration', { taskType: 'robotics_task' });
                 this.metrics.incrementRoboticsTasks('robotics.created', { taskType: 'robotics_task' });
                 return roboticsTask;
             }
             catch (error) {
-                this.metrics.incrementErrorCount('robotics.task_creation_failed', { error: 'task_creation_error' });
+                this.metrics.incrementCounter('robotics.task_creation_failed');
                 throw error;
             }
         }
@@ -112,7 +112,7 @@ let WCSWESAdapterService = (() => {
                 wcsCommand.execution.status = result.success ? 'acknowledged' : 'failed';
                 wcsCommand.execution.response = result.response;
                 wcsCommand.execution.error = result.error;
-                this.metrics.recordDatabaseQueryDuration('wcs', 'command_execution', (Date.now() - startTime) / 1000);
+                this.metrics.recordHistogram('wcs.command_execution.duration', (Date.now() - startTime) / 1000);
                 return wcsCommand;
             }
             catch (error) {
@@ -145,7 +145,7 @@ let WCSWESAdapterService = (() => {
                 };
                 // Publish event
                 await this.publishForecastGeneratedEvent(inventoryForecast);
-                this.metrics.recordDatabaseQueryDuration('forecasting', 'forecast_generation', (Date.now() - startTime) / 1000);
+                this.metrics.recordHistogram('forecasting.forecast_generation.duration', (Date.now() - startTime) / 1000);
                 return inventoryForecast;
             }
             catch (error) {
@@ -177,7 +177,7 @@ let WCSWESAdapterService = (() => {
                     this.anomalies.set(anomaly.anomalyId, anomaly);
                     await this.publishAnomalyDetectedEvent(anomaly);
                 }
-                this.metrics.recordDatabaseQueryDuration('anomaly_detection', 'detection_cycle', (Date.now() - startTime) / 1000);
+                this.metrics.recordHistogram('anomaly_detection.detection_cycle.duration', (Date.now() - startTime) / 1000);
                 this.metrics.incrementAnomaliesDetected(detectedAnomalies.length);
                 return detectedAnomalies;
             }

@@ -23,7 +23,7 @@ export async function initEventConsumer(): Promise<void> {
 }
 
 async function subscribeToInvoiceCreated(): Promise<void> {
-  if (!nc) return;
+  if (nc === undefined || nc === null) return;
 
   const sub = nc.subscribe('sales.invoice.created');
   subscriptions.push(sub);
@@ -74,7 +74,7 @@ async function subscribeToInvoiceCreated(): Promise<void> {
 }
 
 async function subscribeToContractFinalized(): Promise<void> {
-  if (!nc) return;
+  if (nc === undefined || nc === null) return;
 
   const sub = nc.subscribe('contracts.contract.finalized');
   subscriptions.push(sub);
@@ -135,3 +135,4 @@ export async function closeEventConsumer(): Promise<void> {
     nc = null;
   }
 }
+

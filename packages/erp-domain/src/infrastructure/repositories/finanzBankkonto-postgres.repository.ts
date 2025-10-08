@@ -41,7 +41,7 @@ function toBoolean(value: unknown): boolean | undefined {
 }
 
 function toDate(value: unknown): Date | undefined {
-  if (!value) {
+  if (value === undefined || value === null) {
     return undefined;
   }
   return value instanceof Date ? value : new Date(String(value));
@@ -55,16 +55,16 @@ export class FinanzBankkontoPostgresRepository {
       id: row.id as string,
       kontoname: String(row.kontoname),
       bankname: String(row.bankname),
-      iban: row.iban ? String(row.iban) : undefined,
-      bic: row.bic ? String(row.bic) : undefined,
-      kontonummer: row.kontonummer ? String(row.kontonummer) : undefined,
-      blz: row.blz ? String(row.blz) : undefined,
-      waehrung: row.waehrung ? String(row.waehrung) : undefined,
+      iban: (row.iban !== undefined && row.iban !== null) ? String(row.iban) : undefined,
+      bic: (row.bic !== undefined && row.bic !== null) ? String(row.bic) : undefined,
+      kontonummer: (row.kontonummer !== undefined && row.kontonummer !== null) ? String(row.kontonummer) : undefined,
+      blz: (row.blz !== undefined && row.blz !== null) ? String(row.blz) : undefined,
+      waehrung: (row.waehrung !== undefined && row.waehrung !== null) ? String(row.waehrung) : undefined,
       kontostand: toNumber(row.kontostand),
       letzter_abgleich: toDate(row.letzter_abgleich),
       ist_aktiv: toBoolean(row.ist_aktiv),
-      notizen: row.notizen ? String(row.notizen) : undefined,
-      erstellt_von: row.erstellt_von ? String(row.erstellt_von) : undefined,
+      notizen: (row.notizen !== undefined && row.notizen !== null) ? String(row.notizen) : undefined,
+      erstellt_von: (row.erstellt_von !== undefined && row.erstellt_von !== null) ? String(row.erstellt_von) : undefined,
       erstellt_am: toDate(row.erstellt_am),
       aktualisiert_am: toDate(row.aktualisiert_am),
     };
@@ -139,7 +139,7 @@ export class FinanzBankkontoPostgresRepository {
 
   public async update(entity: FinanzBankkonto): Promise<FinanzBankkonto> {
     const primitives = entity.toPrimitives();
-    if (!primitives.id) {
+    if (primitives.id === undefined || primitives.id === null) {
       throw new Error('Cannot update FinanzBankkonto without primary key');
     }
 
@@ -187,3 +187,4 @@ export class FinanzBankkontoPostgresRepository {
     await this.pool.query(`DELETE FROM ${TABLE} WHERE id = $1`, [id]);
   }
 }
+

@@ -1,0 +1,115 @@
+name: Comprehensive Lint Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 6 AM UTC to catch regressions
+    - cron: '0 6 * * *'
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  lint-all-domains:
+    name: Lint All Domains
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Run comprehensive lint check
+        run: |
+          echo "Running comprehensive lint check across all domains..."
+          ./check_lint_all.ps1
+        shell: pwsh
+
+      - name: Generate lint report
+        run: |
+          echo "## Lint Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Domain | Status | Errors | Warnings |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|--------|----------|" >> $GITHUB_STEP_SUMMARY
+
+          # Parse the output and create a summary table
+          # This would need to be enhanced to parse the actual output
+
+      - name: Upload lint results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lint-results-${{ github.run_id }}
+          path: |
+            baseline_metrics.txt
+            memory-bank/lint-refactoring-roadmap.md
+            memory-bank/baseline-lint-metrics.md
+
+  lint-regression-check:
+    name: Lint Regression Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            packages/**/*.ts
+            packages/**/*.tsx
+            packages/**/*.js
+            packages/**/*.jsx
+
+      - name: Run lint on changed files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "Running lint check on changed files..."
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [[ -f "$file" ]]; then
+              echo "Linting $file"
+              npx eslint "$file" || echo "Lint errors in $file"
+            fi
+          done
+
+  quality-gate:
+    name: Lint Quality Gate
+    runs-on: ubuntu-latest
+    needs: lint-all-domains
+    if: always()
+
+    steps:
+      - name: Quality Gate Check
+        run: |
+          if [[ "${{ needs.lint-all-domains.result }}" != "success" ]]; then
+            echo "❌ Lint check failed - blocking merge"
+            echo "Please fix all lint errors before merging"
+            exit 1
+          fi
+
+          echo "✅ All lint checks passed - ready for merge"

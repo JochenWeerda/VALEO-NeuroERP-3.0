@@ -104,7 +104,7 @@ export async function registerCustomerRoutes(
 
       const customer = await customerService.getCustomer(id, 'default-tenant'); // TODO: Get from JWT token
 
-      if (!customer) {
+      if (customer === undefined || customer === null) {
         reply.code(404).send({
           error: 'Not Found',
           message: `Customer ${id} not found`,

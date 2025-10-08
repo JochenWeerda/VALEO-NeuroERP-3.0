@@ -5,11 +5,16 @@
 
 import { RecipeEntity } from '../entities/recipe';
 import { RecipeRepository } from '../repositories/recipe-repository';
-import { 
+import {
+  createRecipeArchivedEvent,
   createRecipeCreatedEvent, 
-  createRecipeUpdatedEvent, 
-  createRecipeArchivedEvent 
+  createRecipeUpdatedEvent 
 } from '../events/event-factories';
+
+// Constants
+const DEFAULT_TOLERANCE_PERCENT = 5;
+const TOLERANCE_UPPER_LIMIT = 105;
+const TOLERANCE_LOWER_LIMIT = 95;
 
 export interface RecipeService {
   // Recipe Management
@@ -106,8 +111,8 @@ export interface SequencingResult {
 
 export class RecipeServiceImpl implements RecipeService {
   constructor(
-    private recipeRepository: RecipeRepository,
-    private eventPublisher: (event: any) => Promise<void>
+    private readonly recipeRepository: RecipeRepository,
+    private readonly eventPublisher: (event: unknown) => Promise<void>
   ) {}
 
   async createRecipe(input: CreateRecipeInput, tenantId: string, userId: string): Promise<RecipeEntity> {
@@ -124,17 +129,17 @@ export class RecipeServiceImpl implements RecipeService {
       name: input.name,
       status: 'Active',
       targetBatchSizeKg: input.targetBatchSizeKg,
-      tolerancePercent: input.tolerancePercent || 5,
+      tolerancePercent: (input.tolerancePercent !== undefined && input.tolerancePercent !== null && input.tolerancePercent !== 0) ? input.tolerancePercent : DEFAULT_TOLERANCE_PERCENT,
       lines: input.lines.map(line => ({
         ingredientSku: line.ingredientSku,
         inclusionKgOrPercent: line.inclusionKgOrPercent,
         seqOrder: line.seqOrder,
-        isPremix: line.isPremix || false
+        isPremix: line.isPremix ?? false
       })),
       qa: {
-        requiresFlushAfter: input.qa.requiresFlushAfter || false,
-        medicated: input.qa.medicated || false,
-        allergenTags: input.qa.allergenTags || []
+        requiresFlushAfter: input.qa.requiresFlushAfter ?? false,
+        medicated: input.qa.medicated ?? false,
+        allergenTags: input.qa.allergenTags ?? []
       },
       createdBy: userId
     });
@@ -171,17 +176,19 @@ export class RecipeServiceImpl implements RecipeService {
     const changes: string[] = [];
 
     // Update fields
-    if (input.name && input.name !== recipe.name) {
-      recipe.updateTargetBatchSize(input.targetBatchSizeKg!, userId);
+    if (input.name != null && input.name !== '' && input.name !== recipe.name) {
+      if (input.targetBatchSizeKg !== undefined && input.targetBatchSizeKg !== null) {
+        recipe.updateTargetBatchSize(input.targetBatchSizeKg, userId);
+      }
       changes.push('name');
     }
 
-    if (input.targetBatchSizeKg && input.targetBatchSizeKg !== recipe.targetBatchSizeKg) {
+    if (input.targetBatchSizeKg != null && input.targetBatchSizeKg !== 0 && input.targetBatchSizeKg !== recipe.targetBatchSizeKg) {
       recipe.updateTargetBatchSize(input.targetBatchSizeKg, userId);
       changes.push('targetBatchSizeKg');
     }
 
-    if (input.tolerancePercent && input.tolerancePercent !== recipe.tolerancePercent) {
+    if (input.tolerancePercent != null && input.tolerancePercent !== 0 && input.tolerancePercent !== recipe.tolerancePercent) {
       recipe.updateTolerance(input.tolerancePercent, userId);
       changes.push('tolerancePercent');
     }
@@ -212,7 +219,7 @@ export class RecipeServiceImpl implements RecipeService {
   }
 
   async archiveRecipe(id: string, reason?: string, tenantId?: string, userId?: string): Promise<RecipeEntity> {
-    if (!tenantId || !userId) {
+    if (tenantId == null || userId == null) {
       throw new Error('TenantId and userId are required');
     }
 
@@ -296,7 +303,7 @@ export class RecipeServiceImpl implements RecipeService {
     const updatedRecipe = recipe.addLine({
       ingredientSku: line.ingredientSku,
       inclusionKgOrPercent: line.inclusionKgOrPercent,
-      isPremix: line.isPremix || false
+      isPremix: line.isPremix ?? false
     }, userId);
 
     // Validate updated recipe
@@ -426,10 +433,10 @@ export class RecipeServiceImpl implements RecipeService {
 
     // Check total inclusion percentage
     const totalPercent = recipe.getTotalInclusionPercent();
-    if (totalPercent > 105) {
-      warnings.push(`Total inclusion percentage is ${totalPercent}%, which exceeds 105%`);
-    } else if (totalPercent < 95) {
-      warnings.push(`Total inclusion percentage is ${totalPercent}%, which is below 95%`);
+    if (totalPercent > TOLERANCE_UPPER_LIMIT) {
+      warnings.push(`Total inclusion percentage is ${totalPercent}%, which exceeds ${TOLERANCE_UPPER_LIMIT}%`);
+    } else if (totalPercent < TOLERANCE_LOWER_LIMIT) {
+      warnings.push(`Total inclusion percentage is ${totalPercent}%, which is below ${TOLERANCE_LOWER_LIMIT}%`);
     }
 
     // Check for duplicate sequence orders
@@ -488,7 +495,7 @@ export class RecipeServiceImpl implements RecipeService {
       
       if (hasDifferentAllergens) {
         requiresFlush = true;
-        flushType = flushType || 'Flush';
+        flushType = flushType ?? 'Flush';
         reasons.push('Different allergen profiles require flush');
       }
     }
@@ -496,7 +503,7 @@ export class RecipeServiceImpl implements RecipeService {
     // Recipe-specific flush requirements
     if (recipe1.requiresFlushAfter()) {
       requiresFlush = true;
-      flushType = flushType || 'Flush';
+      flushType = flushType ?? 'Flush';
       reasons.push('Previous recipe requires flush after production');
     }
 

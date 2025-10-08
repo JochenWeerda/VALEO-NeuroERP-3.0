@@ -50,13 +50,13 @@ export class InvoiceService {
 
   async updateInvoice(id: string, data: UpdateInvoiceData): Promise<InvoiceEntity> {
     const existingInvoice = await this.deps.invoiceRepo.findById(id, data.tenantId);
-    if (!existingInvoice) {
+    if (existingInvoice === undefined || existingInvoice === null) {
       throw new Error(`Invoice ${id} not found`);
     }
 
     const updatedInvoice = await this.deps.invoiceRepo.update(id, data.tenantId, data);
 
-    if (!updatedInvoice) {
+    if (updatedInvoice === undefined || updatedInvoice === null) {
       throw new Error(`Failed to update invoice ${id}`);
     }
 
@@ -65,7 +65,7 @@ export class InvoiceService {
 
   async markInvoiceAsPaid(id: string, tenantId: string): Promise<InvoiceEntity> {
     const invoice = await this.deps.invoiceRepo.findById(id, tenantId);
-    if (!invoice) {
+    if (invoice === undefined || invoice === null) {
       throw new Error(`Invoice ${id} not found`);
     }
 
@@ -75,7 +75,7 @@ export class InvoiceService {
 
     const updatedInvoice = await this.deps.invoiceRepo.updateStatus(id, tenantId, 'Paid');
 
-    if (!updatedInvoice) {
+    if (updatedInvoice === undefined || updatedInvoice === null) {
       throw new Error(`Failed to mark invoice as paid`);
     }
 
@@ -84,7 +84,7 @@ export class InvoiceService {
 
   async markInvoiceAsOverdue(id: string, tenantId: string): Promise<InvoiceEntity> {
     const invoice = await this.deps.invoiceRepo.findById(id, tenantId);
-    if (!invoice) {
+    if (invoice === undefined || invoice === null) {
       throw new Error(`Invoice ${id} not found`);
     }
 
@@ -94,7 +94,7 @@ export class InvoiceService {
 
     const updatedInvoice = await this.deps.invoiceRepo.updateStatus(id, tenantId, 'Overdue');
 
-    if (!updatedInvoice) {
+    if (updatedInvoice === undefined || updatedInvoice === null) {
       throw new Error(`Failed to mark invoice as overdue`);
     }
 
@@ -103,7 +103,7 @@ export class InvoiceService {
 
   async cancelInvoice(id: string, tenantId: string): Promise<InvoiceEntity> {
     const invoice = await this.deps.invoiceRepo.findById(id, tenantId);
-    if (!invoice) {
+    if (invoice === undefined || invoice === null) {
       throw new Error(`Invoice ${id} not found`);
     }
 
@@ -113,7 +113,7 @@ export class InvoiceService {
 
     const updatedInvoice = await this.deps.invoiceRepo.updateStatus(id, tenantId, 'Cancelled');
 
-    if (!updatedInvoice) {
+    if (updatedInvoice === undefined || updatedInvoice === null) {
       throw new Error(`Failed to cancel invoice`);
     }
 

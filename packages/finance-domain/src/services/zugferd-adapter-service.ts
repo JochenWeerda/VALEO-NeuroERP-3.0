@@ -5,7 +5,7 @@
  * Handles parsing, validation, and generation of ZUGFeRD invoices
  */
 
-import { Result, ok, err } from '../core/entities/ar-invoice';
+import { Result, err, ok } from '../core/entities/ar-invoice';
 
 // ===== INTERFACES =====
 
@@ -109,9 +109,9 @@ export interface EInvoiceAdapter {
 
 export class ZUGFeRDAdapterService {
   constructor(
-    private adapter: EInvoiceAdapter,
-    private documentStore: DocumentStore,
-    private eventPublisher: EventPublisher
+    private readonly adapter: EInvoiceAdapter,
+    private readonly documentStore: DocumentStore,
+    private readonly eventPublisher: EventPublisher
   ) {}
 
   /**

@@ -18,8 +18,8 @@ export function setupTelemetry(): NodeSDK | null {
     return null;
   }
 
-  const serviceName = process.env.OTEL_SERVICE_NAME || 'quality-domain';
-  const otlpEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318';
+  const serviceName = process.env.OTEL_SERVICE_NAME ?? 'quality-domain';
+  const otlpEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'http://localhost:4318';
 
   sdk = new NodeSDK({
     resource: new Resource({
@@ -62,7 +62,7 @@ export async function tracingMiddleware(
     'http.method': request.method,
     'http.url': request.url,
     'http.route': request.routerPath,
-    'tenant.id': request.headers['x-tenant-id'] as string || 'unknown',
+    'tenant.id': request.headers['x-tenant-id'] as string ?? 'unknown',
   });
 
   // Store span in request context
@@ -92,3 +92,4 @@ export async function shutdownTelemetry(): Promise<void> {
     console.log('OpenTelemetry shutdown complete');
   }
 }
+

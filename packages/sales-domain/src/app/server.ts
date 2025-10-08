@@ -16,7 +16,7 @@ import { setupTelemetry, tracingMiddleware } from '../infra/telemetry/tracer';
 
 const server = fastify({
   logger: {
-    level: process.env.LOG_LEVEL || 'info',
+    level: process.env.LOG_LEVEL ?? 'info',
     serializers: {
       req: (req: any) => ({
         method: req.method,
@@ -46,7 +46,7 @@ server.register(swagger, {
     },
     servers: [
       {
-        url: process.env.API_BASE_URL || 'http://localhost:3001',
+        url: process.env.API_BASE_URL ?? 'http://localhost:3001',
         description: 'Development server',
       },
     ],
@@ -128,7 +128,7 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 const start = async () => {
   try {
     const port = Number(process.env.PORT) || 3001;
-    const host = process.env.HOST || '0.0.0.0';
+    const host = process.env.HOST ?? '0.0.0.0';
 
     // Initialize event publisher
     const publisher = getEventPublisher();

@@ -22,7 +22,7 @@ class ReturnsService {
     }
     async receive(tenantId, returnId) {
         const order = await this.repository.findReturnOrderById(tenantId, returnId);
-        if (!order) {
+        if (order === undefined || order === null) {
             throw new Error(`Return order ${returnId} not found for tenant ${tenantId}`);
         }
         order.updateStatus('received');

@@ -12,7 +12,7 @@ class RoutingOptimizationService {
     }
     async planRoute(dto) {
         const shipment = await this.shipmentRepository.findShipmentById(dto.tenantId, dto.shipmentId);
-        if (!shipment) {
+        if (shipment === undefined || shipment === null) {
             throw new Error(`Cannot plan route: shipment ${dto.shipmentId} not found for tenant ${dto.tenantId}`);
         }
         const route = route_plan_1.RoutePlan.create({

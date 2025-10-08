@@ -2,11 +2,12 @@
   "name": "@valero-neuroerp/mono",
   "private": true,
   "type": "commonjs",
-  "packageManager": "pnpm@9",
+  "packageManager": "pnpm@9.12.0+sha512.4abf725084d7bcbafbd728bfc7bee61f2f791f977fd87542b3579dcb23504d170d46337945e4c66485cd12d588a0c0e570ed9c477e7ccdd8507cf05f3f92eaca",
   "scripts": {
     "clean": "rimraf ./packages/*/dist",
     "build": "pnpm -r run build",
     "lint": "pnpm -r run lint",
+    "lint:fix": "pnpm -r run lint:fix",
     "test": "pnpm -r run test",
     "check:dupes": "node scripts/check-dupes.cjs",
     "ts:check": "tsc -b tsconfig.build.json",
@@ -14,8 +15,24 @@
   },
   "devDependencies": {
     "@types/node": "^24.6.1",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-perfectionist": "^2.11.0",
+    "eslint-plugin-sonarjs": "^1.0.3",
+    "eslint-plugin-unicorn": "^54.0.0",
+    "eslint-plugin-unused-imports": "^3.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.3",
     "rimraf": "^6.0.0",
     "typescript": "^5.6.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "eslint"
+    ],
+    "*.{json,md}": []
   },
   "dependencies": {
     "dotenv": "^17.2.3"

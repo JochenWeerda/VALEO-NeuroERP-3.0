@@ -10,7 +10,7 @@ export interface FinanceModuleOptions {
   reusePool?: boolean;
 }
 
-export function buildFinanceRouter(options: FinanceModuleOptions = {}): Router {
+export function buildFinanceRouter(_options: FinanceModuleOptions = {}): Router {
   const pool = getErpPool();
   const financeRouter = Router();
 

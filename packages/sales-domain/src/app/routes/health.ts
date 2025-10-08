@@ -68,7 +68,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
 
     const allHealthy = Object.values(checks).every(Boolean);
 
-    if (!allHealthy) {
+    if (allHealthy === undefined || allHealthy === null) {
       return reply.code(503).send({
         status: 'not ready',
         checks,

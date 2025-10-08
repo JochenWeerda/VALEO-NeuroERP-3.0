@@ -122,3 +122,4 @@ const amount = new Money(100.50, 'EUR');
 **Version**: 3.0.0  
 **Last Updated**: October 2025
 
+

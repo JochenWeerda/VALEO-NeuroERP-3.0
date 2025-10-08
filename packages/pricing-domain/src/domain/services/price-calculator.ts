@@ -118,7 +118,7 @@ async function resolveBasePrice(
     )
     .limit(1);
 
-  if (!priceList) {
+  if (priceList === undefined || priceList === null) {
     throw new Error('No active price list found');
   }
 
@@ -126,7 +126,7 @@ async function resolveBasePrice(
   const lines = priceList.lines as PriceListLine[];
   const line = lines.find(l => l.sku === sku && l.active);
 
-  if (!line) {
+  if (line === undefined || line === null) {
     throw new Error(`SKU ${sku} not found in price list`);
   }
 
@@ -267,10 +267,10 @@ async function applyDynamicFormula(
     )
     .limit(1);
 
-  if (!formula) return null;
+  if (formula === undefined || formula === null) return null;
 
   // Evaluate formula
-  const result = await evaluateFormula(formula, input.context || {});
+  const result = await evaluateFormula(formula, input.context ?? {});
 
   return {
     price: result.roundedValue * input.qty,
@@ -317,7 +317,7 @@ async function applyCharges(
   for (const charge of charges) {
     // Check scope
     if (charge.scope === 'SKU' && charge.scopeValue !== input.sku) continue;
-    if (charge.scope === 'Commodity' && !input.sku.startsWith(charge.scopeValue || '')) continue;
+    if (charge.scope === 'Commodity' && !input.sku.startsWith(charge.scopeValue ?? '')) continue;
 
     let value = 0;
     if (charge.method === 'ABS') {
@@ -393,7 +393,7 @@ export async function getQuoteById(tenantId: string, quoteId: string): Promise<P
     .where(and(eq(priceQuotes.id, quoteId), eq(priceQuotes.tenantId, tenantId)))
     .limit(1);
 
-  if (!quote) return null;
+  if (quote === undefined || quote === null) return null;
 
   // Check if expired
   if (new Date(quote.expiresAt) < new Date()) {
@@ -411,3 +411,4 @@ export async function getQuoteById(tenantId: string, quoteId: string): Promise<P
     signature: quote.signature ?? undefined,
   } as PriceQuote;
 }
+

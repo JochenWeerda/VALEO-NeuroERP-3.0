@@ -59,7 +59,7 @@ export async function logAuditEvent(
     })
     .returning();
 
-  if (!event) throw new Error('Failed to log audit event');
+  if (event === undefined || event === null) throw new Error('Failed to log audit event');
 
   logger.info({ eventId: event.id, hash }, 'Audit event logged');
 
@@ -116,7 +116,7 @@ export async function getAuditEventById(
     .where(and(eq(auditEvents.id, eventId), eq(auditEvents.tenantId, tenantId)))
     .limit(1);
 
-  if (!event) return null;
+  if (event === undefined || event === null) return null;
 
   return {
     ...event,
@@ -124,3 +124,4 @@ export async function getAuditEventById(
     createdAt: event.createdAt.toISOString(),
   } as AuditEvent;
 }
+

@@ -109,41 +109,6 @@ export interface EPCISDocumentGeneratedEvent extends InventoryDomainEvent {
     eventCount: number;
     businessLocation: string;
 }
-export interface AISlottingOptimizedEvent extends InventoryDomainEvent {
-    eventType: 'inventory.ai.slotting.optimized';
-    type: 'inventory.ai.slotting.optimized';
-    occurredAt: Date;
-    aggregateVersion: number;
-    sku: string;
-    oldLocation: string;
-    newLocation: string;
-    confidence: number;
-    expectedImprovement: {
-        travelTime: number;
-        throughput: number;
-        spaceUtilization: number;
-    };
-}
-export interface AIForecastEnhancedEvent extends InventoryDomainEvent {
-    eventType: 'inventory.ai.forecast.enhanced';
-    type: 'inventory.ai.forecast.enhanced';
-    occurredAt: Date;
-    aggregateVersion: number;
-    sku: string;
-    forecastType: 'demand' | 'inventory' | 'replenishment';
-    accuracy: number;
-    confidence: number;
-}
-export interface AIModelTrainedEvent extends InventoryDomainEvent {
-    eventType: 'inventory.ai.model.trained';
-    type: 'inventory.ai.model.trained';
-    occurredAt: Date;
-    aggregateVersion: number;
-    modelId: string;
-    modelType: 'slotting' | 'forecasting' | 'anomaly_detection';
-    accuracy: number;
-    trainingDataSize: number;
-}
 export interface EDI940ReceivedEvent extends InventoryDomainEvent {
     eventType: 'inventory.edi.940.received';
     type: 'inventory.edi.940.received';

@@ -80,7 +80,7 @@ export class WeighingService {
   async recordWeight(request: RecordWeightRequest) {
     // Get ticket
     const ticket = await this.ticketRepository.findById(request.ticketId, request.tenantId);
-    if (!ticket) {
+    if (ticket === undefined || ticket === null) {
       throw new Error('Ticket not found');
     }
 
@@ -131,7 +131,7 @@ export class WeighingService {
     // Save changes
     const updatedTicket = await this.ticketRepository.update(request.ticketId, updates, request.tenantId);
 
-    if (!updatedTicket) {
+    if (updatedTicket === undefined || updatedTicket === null) {
       throw new Error('Failed to update ticket');
     }
 
@@ -140,7 +140,7 @@ export class WeighingService {
 
   async completeTicket(id: string, tenantId: string) {
     const ticket = await this.ticketRepository.findById(id, tenantId);
-    if (!ticket) {
+    if (ticket === undefined || ticket === null) {
       throw new Error('Ticket not found');
     }
 
@@ -149,7 +149,7 @@ export class WeighingService {
     }
 
     // Basic validation - should have net weight
-    if (!ticket.netWeight) {
+    if (ticket.netWeight === undefined || ticket.netWeight === null) {
       throw new Error('Ticket must have net weight to be completed');
     }
 
@@ -158,7 +158,7 @@ export class WeighingService {
       completedAt: new Date(),
     }, tenantId);
 
-    if (!updatedTicket) {
+    if (updatedTicket === undefined || updatedTicket === null) {
       throw new Error('Failed to complete ticket');
     }
 
@@ -167,7 +167,7 @@ export class WeighingService {
 
   async cancelTicket(id: string, tenantId: string, reason?: string) {
     const ticket = await this.ticketRepository.findById(id, tenantId);
-    if (!ticket) {
+    if (ticket === undefined || ticket === null) {
       throw new Error('Ticket not found');
     }
 
@@ -175,7 +175,7 @@ export class WeighingService {
       status: 'Cancelled',
     }, tenantId);
 
-    if (!updatedTicket) {
+    if (updatedTicket === undefined || updatedTicket === null) {
       throw new Error('Failed to cancel ticket');
     }
 
@@ -196,7 +196,7 @@ export class WeighingService {
     }>
   ) {
     const ticket = await this.ticketRepository.findById(id, tenantId);
-    if (!ticket) {
+    if (ticket === undefined || ticket === null) {
       throw new Error('Ticket not found');
     }
 
@@ -206,7 +206,7 @@ export class WeighingService {
     }
 
     const updatedTicket = await this.ticketRepository.update(id, updates, tenantId);
-    if (!updatedTicket) {
+    if (updatedTicket === undefined || updatedTicket === null) {
       throw new Error('Failed to update ticket');
     }
 
@@ -242,7 +242,7 @@ export class WeighingService {
 
   async deleteTicket(id: string, tenantId: string): Promise<boolean> {
     const ticket = await this.ticketRepository.findById(id, tenantId);
-    if (!ticket) {
+    if (ticket === undefined || ticket === null) {
       return false;
     }
 
@@ -279,3 +279,4 @@ export class WeighingService {
     return result.data;
   }
 }
+

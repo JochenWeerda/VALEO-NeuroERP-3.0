@@ -22,7 +22,7 @@ export async function registerTemplateRoutes(server: FastifyInstance): Promise<v
 
     const [template] = await db
       .insert(templates)
-      .values(templateData as any)
+      .values(templateData as typeof templates.$inferInsert)
       .returning();
 
     await reply.code(201).send(template);
@@ -39,7 +39,7 @@ export async function registerTemplateRoutes(server: FastifyInstance): Promise<v
       .where(and(eq(templates.tenantId, tenantId), eq(templates.key, key)))
       .limit(1);
 
-    if (!template) {
+    if (template === undefined || template === null) {
       await reply.code(404).send({ error: 'NotFound', message: 'Template not found' });
       return;
     }
@@ -87,11 +87,11 @@ export async function registerTemplateRoutes(server: FastifyInstance): Promise<v
 
     const [updated] = await db
       .update(templates)
-      .set(cleanUpdates as any)
+      .set(cleanUpdates as Partial<typeof templates.$inferInsert>)
       .where(and(eq(templates.tenantId, tenantId), eq(templates.key, key)))
       .returning();
 
-    if (!updated) {
+    if (updated === undefined || updated === null) {
       await reply.code(404).send({ error: 'NotFound', message: 'Template not found' });
       return;
     }
@@ -114,7 +114,7 @@ export async function registerTemplateRoutes(server: FastifyInstance): Promise<v
       .where(and(eq(templates.tenantId, tenantId), eq(templates.key, key)))
       .returning();
 
-    if (!activated) {
+    if (activated === undefined || activated === null) {
       await reply.code(404).send({ error: 'NotFound', message: 'Template not found' });
       return;
     }
@@ -138,7 +138,7 @@ export async function registerTemplateRoutes(server: FastifyInstance): Promise<v
       .where(and(eq(templates.tenantId, tenantId), eq(templates.key, key)))
       .limit(1);
 
-    if (!template) {
+    if (template === undefined || template === null) {
       await reply.code(404).send({ error: 'NotFound', message: 'Template not found' });
       return;
     }
@@ -153,3 +153,4 @@ export async function registerTemplateRoutes(server: FastifyInstance): Promise<v
     });
   });
 }
+

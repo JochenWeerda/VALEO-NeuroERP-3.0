@@ -20,6 +20,8 @@ const STATUS_WEIGHTS = {
     invoiced: 5,
     cancelled: 99,
 };
+const DECIMAL_PRECISION = 2;
+const MAX_ORDER_LIMIT_CAP = 500;
 const CURRENCY_REGEX = /^[A-Z]{3}$/;
 const MAX_TOLERANCE = 0.01;
 class OrderDomainService {
@@ -53,7 +55,7 @@ class OrderDomainService {
     async updateOrderStatus(id, status) {
         this.assertStatus(status);
         const current = await this.repository.findById(id);
-        if (!current) {
+        if (current === undefined || current === null) {
             throw new Error(`Order ${String(id)} not found`);
         }
         if (current.status === status) {
@@ -67,7 +69,7 @@ class OrderDomainService {
     }
     async deleteOrder(id) {
         const existing = await this.repository.findById(id);
-        if (!existing) {
+        if (existing === undefined || existing === null) {
             return;
         }
         if (STATUS_WEIGHTS[existing.status] >= STATUS_WEIGHTS.invoiced) {
@@ -88,9 +90,9 @@ class OrderDomainService {
     assertAmountConsistency(order) {
         const sum = order.items.reduce((acc, item) => acc + item.netPrice, 0);
         if (Math.abs(sum - order.netAmount) > MAX_TOLERANCE) {
-            throw new Error(`Net amount ${order.netAmount} does not match item total ${sum.toFixed(2)}.`);
+            throw new Error(`Net amount ${order.netAmount} does not match item total ${sum.toFixed(DECIMAL_PRECISION)}.`);
         }
-        const gross = Number((order.netAmount + order.vatAmount).toFixed(2));
+        const gross = Number((order.netAmount + order.vatAmount).toFixed(DECIMAL_PRECISION));
         if (Math.abs(gross - order.totalAmount) > MAX_TOLERANCE) {
             throw new Error(`Total amount ${order.totalAmount} does not equal net + VAT (${gross}).`);
         }
@@ -104,6 +106,6 @@ function clampLimit(limit) {
     if (limit <= 0) {
         return order_1.DEFAULT_ORDER_LIMIT;
     }
-    return Math.min(limit, 500);
+    return Math.min(limit, MAX_ORDER_LIMIT_CAP);
 }
 //# sourceMappingURL=order-domain-service.js.map

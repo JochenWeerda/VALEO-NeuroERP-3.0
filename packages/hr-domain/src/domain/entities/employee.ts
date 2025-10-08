@@ -3,12 +3,22 @@
  * Core employee management entity with DDD principles
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
+
+const PERSON_NAME_MIN_LENGTH = 1;
+const PERSON_NAME_MAX_LENGTH = 100;
+const EMPLOYEE_NUMBER_MIN_LENGTH = 1;
+const EMPLOYEE_NUMBER_MAX_LENGTH = 50;
+const INITIAL_VERSION = 1;
+const MANAGER_ROLE_HINTS = ['manager', 'supervisor'] as const;
+
+const employeeStatusSchema = z.enum(['Active', 'Inactive', 'OnLeave']);
 
 // Value Objects
 const PersonSchema = z.object({
-  firstName: z.string().min(1).max(100),
-  lastName: z.string().min(1).max(100),
+  firstName: z.string().min(PERSON_NAME_MIN_LENGTH).max(PERSON_NAME_MAX_LENGTH),
+  lastName: z.string().min(PERSON_NAME_MIN_LENGTH).max(PERSON_NAME_MAX_LENGTH),
   birthDate: z.string().datetime().optional()
 });
 
@@ -24,9 +34,9 @@ const EmploymentSchema = z.object({
 });
 
 const OrganizationSchema = z.object({
-  departmentId: z.string().optional(),
+  departmentId: z.string().uuid().optional(),
   position: z.string().optional(),
-  managerId: z.string().optional()
+  managerId: z.string().uuid().optional()
 });
 
 const PayrollSchema = z.object({
@@ -39,17 +49,17 @@ const PayrollSchema = z.object({
 export const EmployeeSchema = z.object({
   id: z.string().uuid(),
   tenantId: z.string().uuid(),
-  employeeNumber: z.string().min(1).max(50),
+  employeeNumber: z.string().min(EMPLOYEE_NUMBER_MIN_LENGTH).max(EMPLOYEE_NUMBER_MAX_LENGTH),
   person: PersonSchema,
   contact: ContactSchema,
   employment: EmploymentSchema,
   org: OrganizationSchema,
   payroll: PayrollSchema,
-  status: z.enum(['Active', 'Inactive', 'OnLeave']),
+  status: employeeStatusSchema,
   roles: z.array(z.string()),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
-  version: z.number().int().min(1),
+  version: z.number().int().min(INITIAL_VERSION),
   createdBy: z.string().optional(),
   updatedBy: z.string().optional()
 });
@@ -60,10 +70,11 @@ export type Contact = z.infer<typeof ContactSchema>;
 export type Employment = z.infer<typeof EmploymentSchema>;
 export type Organization = z.infer<typeof OrganizationSchema>;
 export type Payroll = z.infer<typeof PayrollSchema>;
+export type EmployeeStatusType = z.infer<typeof employeeStatusSchema>;
 
 // Employee Entity Class
 export class EmployeeEntity {
-  private data: Employee;
+  private readonly data: Employee;
 
   constructor(data: Employee) {
     this.data = EmployeeSchema.parse(data);
@@ -107,87 +118,78 @@ export class EmployeeEntity {
 
   // State Changes
   activate(updatedBy?: string): EmployeeEntity {
-    return new EmployeeEntity({
-      ...this.data,
-      status: 'Active',
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      version: this.data.version + 1
-    });
+    if (this.isActive()) {
+      return this;
+    }
+
+    return this.clone({ status: 'Active', updatedBy });
   }
 
   deactivate(updatedBy?: string): EmployeeEntity {
-    return new EmployeeEntity({
-      ...this.data,
-      status: 'Inactive',
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      version: this.data.version + 1
-    });
+    if (!this.isActive()) {
+      return this;
+    }
+
+    return this.clone({ status: 'Inactive', updatedBy });
   }
 
   setOnLeave(updatedBy?: string): EmployeeEntity {
-    return new EmployeeEntity({
-      ...this.data,
-      status: 'OnLeave',
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      version: this.data.version + 1
-    });
+    if (this.isOnLeave()) {
+      return this;
+    }
+
+    return this.clone({ status: 'OnLeave', updatedBy });
   }
 
   addRole(roleId: string, updatedBy?: string): EmployeeEntity {
     if (this.hasRole(roleId)) {
       return this;
     }
-    
-    return new EmployeeEntity({
-      ...this.data,
+
+    return this.clone({
       roles: [...this.data.roles, roleId],
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      version: this.data.version + 1
+      updatedBy
     });
   }
 
   removeRole(roleId: string, updatedBy?: string): EmployeeEntity {
-    return new EmployeeEntity({
-      ...this.data,
-      roles: this.data.roles.filter(r => r !== roleId),
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      version: this.data.version + 1
+    if (!this.hasRole(roleId)) {
+      return this;
+    }
+
+    return this.clone({
+      roles: this.data.roles.filter(role => role !== roleId),
+      updatedBy
     });
   }
 
   updateContact(contact: Partial<Contact>, updatedBy?: string): EmployeeEntity {
-    return new EmployeeEntity({
-      ...this.data,
+    if (Object.keys(contact).length === 0) {
+      return this;
+    }
+
+    return this.clone({
       contact: { ...this.data.contact, ...contact },
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      version: this.data.version + 1
+      updatedBy
     });
   }
 
   updateOrganization(org: Partial<Organization>, updatedBy?: string): EmployeeEntity {
-    return new EmployeeEntity({
-      ...this.data,
+    if (Object.keys(org).length === 0) {
+      return this;
+    }
+
+    return this.clone({
       org: { ...this.data.org, ...org },
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      version: this.data.version + 1
+      updatedBy
     });
   }
 
   terminate(terminationDate: string, updatedBy?: string): EmployeeEntity {
-    return new EmployeeEntity({
-      ...this.data,
-      employment: { ...this.data.employment, terminationDate },
+    return this.clone({
       status: 'Inactive',
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      version: this.data.version + 1
+      employment: { ...this.data.employment, terminationDate },
+      updatedBy
     });
   }
 
@@ -197,8 +199,9 @@ export class EmployeeEntity {
   }
 
   canManage(): boolean {
-    return this.isActive() && this.data.roles.some(role => 
-      role.includes('manager') || role.includes('supervisor')
+    const lowerCaseRoles = this.data.roles.map(role => role.toLowerCase());
+    return this.isActive() && lowerCaseRoles.some(role =>
+      MANAGER_ROLE_HINTS.some(hint => role.includes(hint))
     );
   }
 
@@ -207,15 +210,25 @@ export class EmployeeEntity {
     return { ...this.data };
   }
 
+  private clone(overrides: Partial<Employee>): EmployeeEntity {
+    const now = new Date().toISOString();
+    return new EmployeeEntity({
+      ...this.data,
+      ...overrides,
+      updatedAt: now,
+      version: this.data.version + 1
+    });
+  }
+
   // Factory methods
   static create(data: Omit<Employee, 'id' | 'createdAt' | 'updatedAt' | 'version'>): EmployeeEntity {
     const now = new Date().toISOString();
     return new EmployeeEntity({
       ...data,
-      id: require('uuid').v4(),
+      id: uuidv4(),
       createdAt: now,
       updatedAt: now,
-      version: 1
+      version: INITIAL_VERSION
     });
   }
 
@@ -223,4 +236,3 @@ export class EmployeeEntity {
     return new EmployeeEntity(data);
   }
 }
-

@@ -3,8 +3,22 @@
  * PostgreSQL schema using Drizzle ORM
  */
 
-import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, date, numeric, index } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  date,
+  index,
+  integer,
+  jsonb,
+  numeric,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  varchar
+} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import type { PayrollItem } from '../../domain/entities/payroll-run';
 
 // Employees table
 export const employees = pgTable('employees', {
@@ -77,10 +91,10 @@ export const timeEntries = pgTable('time_entries', {
   tenantId: uuid('tenant_id').notNull(),
   employeeId: uuid('employee_id').notNull(),
   date: date('date').notNull(),
-  start: timestamp('start').notNull(),
-  end: timestamp('end').notNull(),
+  start: timestamp('start', { withTimezone: true, mode: 'string' }).notNull(),
+  end: timestamp('end', { withTimezone: true, mode: 'string' }).notNull(),
   breakMinutes: integer('break_minutes').notNull().default(0),
-  
+
   // Optional project/cost center
   projectId: uuid('project_id'),
   costCenter: varchar('cost_center', { length: 100 }),
@@ -101,7 +115,9 @@ export const timeEntries = pgTable('time_entries', {
   tenantDateIdx: index('tenant_date_idx').on(table.tenantId, table.date),
   tenantStatusIdx: index('tenant_status_idx').on(table.tenantId, table.status),
   tenantProjectIdx: index('tenant_project_idx').on(table.tenantId, table.projectId),
-  employeeDateRangeIdx: index('employee_date_range_idx').on(table.employeeId, table.start, table.end)
+  tenantStartIdx: index('tenant_start_idx').on(table.tenantId, table.start),
+  employeeDateRangeIdx: index('employee_date_range_idx').on(table.employeeId, table.start, table.end),
+  tenantEmployeeStartUk: uniqueIndex('tenant_employee_start_uk').on(table.tenantId, table.employeeId, table.start)
 }));
 
 // Shifts table
@@ -158,7 +174,7 @@ export const payrollRuns = pgTable('payroll_runs', {
   periodFrom: date('period_from').notNull(),
   periodTo: date('period_to').notNull(),
   status: varchar('status', { length: 20 }).notNull().default('Draft'),
-  items: jsonb('items').$type<any[]>().default([]),
+  items: jsonb('items').$type<PayrollItem[]>().default([]),
   exportedAt: timestamp('exported_at'),
   exportedBy: uuid('exported_by'),
   

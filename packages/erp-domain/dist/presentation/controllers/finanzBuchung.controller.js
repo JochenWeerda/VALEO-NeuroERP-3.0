@@ -6,6 +6,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildFinanzBuchungRouter = buildFinanzBuchungRouter;
 const express_1 = require("express");
+const HTTP_STATUS = {
+    NOT_FOUND: 404,
+    CREATED: 201,
+    NO_CONTENT: 204,
+};
 function buildFinanzBuchungRouter({ service, baseRoute = '/finanzBuchung' }) {
     const router = (0, express_1.Router)();
     router.get(baseRoute, async (_req, res) => {
@@ -14,15 +19,15 @@ function buildFinanzBuchungRouter({ service, baseRoute = '/finanzBuchung' }) {
     });
     router.get(`${baseRoute}/:finanzBuchungId`, async (req, res) => {
         const entity = await service.findById(req.params.finanzBuchungId);
-        if (!entity) {
-            res.status(404).json({ message: 'FinanzBuchung not found' });
+        if (entity === undefined || entity === null) {
+            res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'FinanzBuchung not found' });
             return;
         }
         res.json(entity);
     });
     router.post(baseRoute, async (req, res) => {
         const created = await service.create(req.body);
-        res.status(201).json(created);
+        res.status(HTTP_STATUS.CREATED).json(created);
     });
     router.put(`${baseRoute}/:finanzBuchungId`, async (req, res) => {
         const updated = await service.update(req.params.finanzBuchungId, req.body);
@@ -30,7 +35,7 @@ function buildFinanzBuchungRouter({ service, baseRoute = '/finanzBuchung' }) {
     });
     router.delete(`${baseRoute}/:finanzBuchungId`, async (req, res) => {
         await service.remove(req.params.finanzBuchungId);
-        res.status(204).send();
+        res.status(HTTP_STATUS.NO_CONTENT).send();
     });
     return router;
 }

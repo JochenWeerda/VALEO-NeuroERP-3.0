@@ -495,6 +495,7 @@ export class InventoryControlService {
 
   private async applyInventoryAdjustment(adjustment: InventoryAdjustment): Promise<void> {
     // Mock implementation - would update database
+    // eslint-disable-next-line no-console
     console.log('Applying inventory adjustment:', adjustment.adjustmentId);
   }
 
@@ -518,6 +519,7 @@ export class InventoryControlService {
 
   private async persistReservation(reservation: InventoryReservation): Promise<void> {
     // Mock implementation
+    // eslint-disable-next-line no-console
     console.log('Persisting reservation:', reservation.reservationId);
   }
 
@@ -529,6 +531,7 @@ export class InventoryControlService {
     quantity: number
   ): Promise<void> {
     // Mock implementation
+    // eslint-disable-next-line no-console
     console.log('Updating allocated quantity for', sku, location, quantity);
   }
 
@@ -549,6 +552,7 @@ export class InventoryControlService {
 
   private async updateReservation(reservation: InventoryReservation): Promise<void> {
     // Mock implementation
+    // eslint-disable-next-line no-console
     console.log('Updating reservation:', reservation.reservationId);
   }
 

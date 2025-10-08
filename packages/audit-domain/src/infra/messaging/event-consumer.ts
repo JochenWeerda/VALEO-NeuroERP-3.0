@@ -21,7 +21,7 @@ export async function initEventConsumer(): Promise<void> {
 }
 
 async function subscribeToAllDomainEvents(): Promise<void> {
-  if (!nc) return;
+  if (nc === undefined || nc === null) return;
 
   // Subscribe to all domains: *.*.* (e.g. sales.invoice.created, contracts.contract.updated)
   const sub = nc.subscribe('>');
@@ -87,3 +87,4 @@ export async function closeEventConsumer(): Promise<void> {
     nc = null;
   }
 }
+

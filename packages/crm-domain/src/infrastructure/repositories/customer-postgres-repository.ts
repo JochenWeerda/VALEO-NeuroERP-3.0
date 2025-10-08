@@ -10,7 +10,7 @@ export class CustomerPostgresRepository extends RepositoryBase<Customer, Custome
   }
 
   async findMany(query?: any): Promise<Customer[]> {
-    if (!query) {
+    if (query === undefined || query === null) {
       return Array.from(this.customers.values());
     }
     
@@ -32,7 +32,7 @@ export class CustomerPostgresRepository extends RepositoryBase<Customer, Custome
 
   async update(id: CustomerId, updates: Partial<Customer>): Promise<Customer> {
     const existing = this.customers.get(id);
-    if (!existing) {
+    if (existing === undefined || existing === null) {
       throw new Error(`Customer ${String(id)} not found`);
     }
     
@@ -87,3 +87,4 @@ export class CustomerPostgresRepository extends RepositoryBase<Customer, Custome
     return Array.from(this.customers.values()).find(c => c.customerNumber === customerNumber) ?? null;
   }
 }
+

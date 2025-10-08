@@ -92,8 +92,8 @@ export class OrderRepository {
 
     const total = totalResult[0]?.count || 0;
 
-    const sortBy = pagination.sortBy || 'createdAt';
-    const sortOrder = pagination.sortOrder || 'desc';
+    const sortBy = pagination.sortBy ?? 'createdAt';
+    const sortOrder = pagination.sortOrder ?? 'desc';
     const orderBy = sortOrder === 'desc' ? desc(orders[sortBy]) : asc(orders[sortBy]);
 
     const offset = (pagination.page - 1) * pagination.pageSize;
@@ -152,8 +152,8 @@ export class OrderRepository {
 
     const total = totalResult[0]?.count || 0;
 
-    const sortBy = pagination.sortBy || 'createdAt';
-    const sortOrder = pagination.sortOrder || 'desc';
+    const sortBy = pagination.sortBy ?? 'createdAt';
+    const sortOrder = pagination.sortOrder ?? 'desc';
     const orderBy = sortOrder === 'desc' ? desc(orders[sortBy]) : asc(orders[sortBy]);
 
     const offset = (pagination.page - 1) * pagination.pageSize;

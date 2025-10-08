@@ -46,6 +46,7 @@ export function createReportGeneratedEvent(
   correlationId?: string,
   causationId?: string
 ): ReportGeneratedEvent {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const payload: any = {
     reportId: report.id,
     reportType: report.type,

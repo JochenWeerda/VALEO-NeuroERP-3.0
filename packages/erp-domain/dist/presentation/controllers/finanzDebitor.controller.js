@@ -6,6 +6,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildFinanzDebitorRouter = buildFinanzDebitorRouter;
 const express_1 = require("express");
+const HTTP_STATUS = {
+    NOT_FOUND: 404,
+    CREATED: 201,
+    NO_CONTENT: 204,
+};
 function buildFinanzDebitorRouter({ service, baseRoute = '/finanzDebitor' }) {
     const router = (0, express_1.Router)();
     router.get(baseRoute, async (_req, res) => {
@@ -14,15 +19,15 @@ function buildFinanzDebitorRouter({ service, baseRoute = '/finanzDebitor' }) {
     });
     router.get(`${baseRoute}/:finanzDebitorId`, async (req, res) => {
         const entity = await service.findById(req.params.finanzDebitorId);
-        if (!entity) {
-            res.status(404).json({ message: 'FinanzDebitor not found' });
+        if (entity === undefined || entity === null) {
+            res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'FinanzDebitor not found' });
             return;
         }
         res.json(entity);
     });
     router.post(baseRoute, async (req, res) => {
         const created = await service.create(req.body);
-        res.status(201).json(created);
+        res.status(HTTP_STATUS.CREATED).json(created);
     });
     router.put(`${baseRoute}/:finanzDebitorId`, async (req, res) => {
         const updated = await service.update(req.params.finanzDebitorId, req.body);
@@ -30,7 +35,7 @@ function buildFinanzDebitorRouter({ service, baseRoute = '/finanzDebitor' }) {
     });
     router.delete(`${baseRoute}/:finanzDebitorId`, async (req, res) => {
         await service.remove(req.params.finanzDebitorId);
-        res.status(204).send();
+        res.status(HTTP_STATUS.NO_CONTENT).send();
     });
     return router;
 }

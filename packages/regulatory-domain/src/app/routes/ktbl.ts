@@ -15,7 +15,7 @@ export async function registerKTBLRoutes(server: FastifyInstance): Promise<void>
 
     const parameters = await fetchKTBLEmissionParameters(crop, query.region);
 
-    if (!parameters) {
+    if (parameters === undefined || parameters === null) {
       reply.code(404).send({
         error: 'NotFound',
         message: `No KTBL parameters found for crop: ${crop}`,
@@ -35,7 +35,7 @@ export async function registerKTBLRoutes(server: FastifyInstance): Promise<void>
       region?: string;
     };
 
-    if (!crop) {
+    if (crop === undefined || crop === null) {
       reply.code(400).send({
         error: 'BadRequest',
         message: 'Crop is required',
@@ -44,11 +44,12 @@ export async function registerKTBLRoutes(server: FastifyInstance): Promise<void>
     }
 
     const result = await calculateCropEmissions(crop, {
-      yieldPerHa,
-      fertilizer,
-      region,
-    });
+      yieldPerHa: yieldPerHa ?? undefined,
+      fertilizer: fertilizer ?? undefined,
+      region: region ?? undefined,
+    } as any);
 
     reply.send(result);
   });
 }
+

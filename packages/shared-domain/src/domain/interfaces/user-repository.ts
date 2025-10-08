@@ -50,3 +50,4 @@ export interface UserRepository extends Repository<User> {
   removeUsersFromTenant(tenantId: TenantId): Promise<void>;
 }
 
+

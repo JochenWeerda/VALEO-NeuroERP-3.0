@@ -7,7 +7,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InventoryDomainService = void 0;
 exports.registerInventoryDomainService = registerInventoryDomainService;
-const di_container_1 = require("@valeo-neuroerp-3.0/packages/utilities/src/di-container");
+const bootstrap_1 = require("../../bootstrap");
 // ===== INVENTORY DOMAIN SERVICE nach Clean Architecture =====
 class InventoryDomainService {
     constructor() {
@@ -138,7 +138,7 @@ class InventoryDomainService {
                 {
                     id: 'STK-ERP-PACK-01',
                     productId: 'EPP_HARDWARE_PACK',
-                    warehouseId: 'WHS-' + Date.now(),
+                    warehouseId: ('WHS-' + Date.now()),
                     locationId: 'LOC_A_ARYA-423',
                     quantity: 3,
                     reservedQuantity: 1,
@@ -236,9 +236,8 @@ exports.InventoryDomainService = InventoryDomainService;
  */
 function registerInventoryDomainService() {
     console.log('[INVREG] Registering inventory domain services in DI container...');
-    di_container_1.DIContainer.register('InventoryDomainService', new InventoryDomainService(), {
-        singleton: true,
-        dependencies: []
+    bootstrap_1.DIContainer.register('InventoryDomainService', new InventoryDomainService(), {
+        singleton: true
     });
     console.log('[INVREG] ✓ Inventory domain service binding assigned name ready.');
 }

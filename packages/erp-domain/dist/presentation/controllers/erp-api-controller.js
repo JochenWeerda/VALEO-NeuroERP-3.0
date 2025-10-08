@@ -31,18 +31,18 @@ class ERPApiController {
     }
     async handleGetOrder(request) {
         const id = request.params.id;
-        if (!id) {
+        if (id === undefined || id === null) {
             return { status: 400, body: { message: 'Order id missing.' } };
         }
         const order = await this.getOrder.execute(id);
-        if (!order) {
+        if (order === undefined || order === null) {
             return { status: 404, body: { message: 'Order not found.' } };
         }
         return { status: 200, body: order };
     }
     async handleCreateOrder(request) {
         const body = request.body;
-        if (!body) {
+        if (body === undefined || body === null) {
             return { status: 400, body: { message: 'Request body is required.' } };
         }
         const created = await this.createOrder.execute(body);
@@ -50,7 +50,7 @@ class ERPApiController {
     }
     async handleUpdateStatus(request) {
         const id = request.params.id;
-        if (!id) {
+        if (id === undefined || id === null) {
             return { status: 400, body: { message: 'Order id missing.' } };
         }
         const body = request.body;
@@ -62,7 +62,7 @@ class ERPApiController {
     }
     async handleDeleteOrder(request) {
         const id = request.params.id;
-        if (!id) {
+        if (id === undefined || id === null) {
             return { status: 400, body: { message: 'Order id missing.' } };
         }
         await this.deleteOrder.execute(id);
@@ -78,7 +78,7 @@ function pickString(value) {
 }
 function pickNumber(value) {
     const raw = pickString(value);
-    if (!raw)
+    if (raw === undefined || raw === null)
         return undefined;
     const parsed = Number(raw);
     return Number.isFinite(parsed) ? parsed : undefined;

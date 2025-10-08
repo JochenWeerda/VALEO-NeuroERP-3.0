@@ -3,6 +3,7 @@
  * Event-driven architecture for HR operations
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 
 // Base Event Schema
@@ -287,7 +288,7 @@ export type HREvent =
 // Event factory functions
 export function createEmployeeCreatedEvent(data: EmployeeCreatedEvent['payload'], tenantId: string): EmployeeCreatedEvent {
   return {
-    eventId: require('uuid').v4(),
+    eventId: uuidv4(),
     eventType: 'hr.employee.created',
     eventVersion: 1,
     occurredAt: new Date().toISOString(),
@@ -298,7 +299,7 @@ export function createEmployeeCreatedEvent(data: EmployeeCreatedEvent['payload']
 
 export function createEmployeeUpdatedEvent(data: EmployeeUpdatedEvent['payload'], tenantId: string): EmployeeUpdatedEvent {
   return {
-    eventId: require('uuid').v4(),
+    eventId: uuidv4(),
     eventType: 'hr.employee.updated',
     eventVersion: 1,
     occurredAt: new Date().toISOString(),
@@ -309,7 +310,7 @@ export function createEmployeeUpdatedEvent(data: EmployeeUpdatedEvent['payload']
 
 export function createEmployeeDeactivatedEvent(data: EmployeeDeactivatedEvent['payload'], tenantId: string): EmployeeDeactivatedEvent {
   return {
-    eventId: require('uuid').v4(),
+    eventId: uuidv4(),
     eventType: 'hr.employee.deactivated',
     eventVersion: 1,
     occurredAt: new Date().toISOString(),
@@ -320,7 +321,7 @@ export function createEmployeeDeactivatedEvent(data: EmployeeDeactivatedEvent['p
 
 export function createTimeEntryCreatedEvent(data: TimeEntryCreatedEvent['payload'], tenantId: string): TimeEntryCreatedEvent {
   return {
-    eventId: require('uuid').v4(),
+    eventId: uuidv4(),
     eventType: 'hr.time_entry.created',
     eventVersion: 1,
     occurredAt: new Date().toISOString(),
@@ -331,7 +332,7 @@ export function createTimeEntryCreatedEvent(data: TimeEntryCreatedEvent['payload
 
 export function createTimeEntryApprovedEvent(data: TimeEntryApprovedEvent['payload'], tenantId: string): TimeEntryApprovedEvent {
   return {
-    eventId: require('uuid').v4(),
+    eventId: uuidv4(),
     eventType: 'hr.time_entry.approved',
     eventVersion: 1,
     occurredAt: new Date().toISOString(),
@@ -342,7 +343,7 @@ export function createTimeEntryApprovedEvent(data: TimeEntryApprovedEvent['paylo
 
 export function createTimeEntryRejectedEvent(data: TimeEntryRejectedEvent['payload'], tenantId: string): TimeEntryRejectedEvent {
   return {
-    eventId: require('uuid').v4(),
+    eventId: uuidv4(),
     eventType: 'hr.time_entry.rejected',
     eventVersion: 1,
     occurredAt: new Date().toISOString(),
@@ -353,7 +354,7 @@ export function createTimeEntryRejectedEvent(data: TimeEntryRejectedEvent['paylo
 
 export function createPayrollExportedEvent(data: PayrollExportedEvent['payload'], tenantId: string): PayrollExportedEvent {
   return {
-    eventId: require('uuid').v4(),
+    eventId: uuidv4(),
     eventType: 'hr.payroll.exported',
     eventVersion: 1,
     occurredAt: new Date().toISOString(),

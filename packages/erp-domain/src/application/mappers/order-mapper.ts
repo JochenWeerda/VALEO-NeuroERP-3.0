@@ -1,5 +1,5 @@
 import type { CreateOrderDTO, OrderDTO } from '../dto/order-dto';
-import type { CreateOrderInput, Order, OrderStatus, OrderDocumentType } from '../../core/entities/order';
+import type { CreateOrderInput, Order, OrderDocumentType, OrderStatus } from '../../core/entities/order';
 
 export function toOrderDTO(order: Order): OrderDTO {
   return {
@@ -58,3 +58,4 @@ export function toCreateOrderInput(dto: CreateOrderDTO): CreateOrderInput {
     })),
   };
 }
+

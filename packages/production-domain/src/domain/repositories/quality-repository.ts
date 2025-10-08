@@ -4,11 +4,11 @@
  */
 
 import type { 
-  SamplingPlan, 
-  SamplingResult, 
-  RetainedSample, 
+  CAPA, 
   NonConformity, 
-  CAPA 
+  RetainedSample, 
+  SamplingPlan, 
+  SamplingResult 
 } from '../entities/quality';
 
 export interface SamplingPlanFilters {
@@ -49,6 +49,7 @@ export interface CAPAFilters {
   search?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface PaginationOptions<T = any> {
   page: number;
   pageSize: number;

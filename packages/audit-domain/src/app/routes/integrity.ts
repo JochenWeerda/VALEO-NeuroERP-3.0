@@ -9,7 +9,7 @@ export async function registerIntegrityRoutes(server: FastifyInstance): Promise<
 
     const result = await verifyIntegrity(tenantId, query.from, query.to);
 
-    if (!result.valid) {
+    if (result.valid === undefined || result.valid === null) {
       await reply.code(500).send({
         ...result,
         alert: 'CRITICAL: Audit chain integrity compromised!',
@@ -20,3 +20,4 @@ export async function registerIntegrityRoutes(server: FastifyInstance): Promise<
     await reply.send(result);
   });
 }
+

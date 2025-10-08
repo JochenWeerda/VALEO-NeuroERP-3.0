@@ -1,6 +1,8 @@
 import { FinanzDebitor, FinanzDebitorProps } from '../../core/entities/finanzDebitor.entity';
 import { FinanzDebitorPostgresRepository } from '../../infrastructure/repositories/finanzDebitor-postgres.repository';
 
+const DEFAULT_PAYMENT_TARGET_DAYS = 30;
+
 export interface CreateFinanzDebitorDto {
   kunden_id?: string;
   debitor_nr: string;
@@ -19,7 +21,7 @@ export type UpdateFinanzDebitorDto = Partial<CreateFinanzDebitorDto>;
 
 function normalize(dto: CreateFinanzDebitorDto, existing?: FinanzDebitorProps): FinanzDebitorProps {
   const debitorNr = dto.debitor_nr?.trim();
-  if (!debitorNr) {
+  if (debitorNr === undefined || debitorNr === null) {
     throw new Error('debitor_nr is required');
   }
 
@@ -35,7 +37,7 @@ function normalize(dto: CreateFinanzDebitorDto, existing?: FinanzDebitorProps): 
     kunden_id: dto.kunden_id ?? existing?.kunden_id,
     debitor_nr: debitorNr,
     kreditlimit: dto.kreditlimit ?? existing?.kreditlimit ?? 0,
-    zahlungsziel: dto.zahlungsziel ?? existing?.zahlungsziel ?? 30,
+    zahlungsziel: dto.zahlungsziel ?? existing?.zahlungsziel ?? DEFAULT_PAYMENT_TARGET_DAYS,
     zahlungsart: dto.zahlungsart ?? existing?.zahlungsart,
     bankverbindung: dto.bankverbindung ?? existing?.bankverbindung,
     steuernummer: dto.steuernummer ?? existing?.steuernummer,
@@ -63,7 +65,7 @@ export class FinanzDebitorService {
   public async create(payload: CreateFinanzDebitorDto): Promise<FinanzDebitor> {
     const normalized = normalize(payload);
     const existing = await this.repository.findByDebitorNr(normalized.debitor_nr);
-    if (existing) {
+    if (existing !== undefined && existing !== null) {
       throw new Error(`Debitor ${normalized.debitor_nr} already exists`);
     }
     const entity = FinanzDebitor.create(normalized);
@@ -72,7 +74,7 @@ export class FinanzDebitorService {
 
   public async update(id: string, payload: UpdateFinanzDebitorDto): Promise<FinanzDebitor> {
     const existing = await this.repository.findById(id);
-    if (!existing) {
+    if (existing === undefined || existing === null) {
       throw new Error('FinanzDebitor not found');
     }
 
@@ -92,7 +94,7 @@ export class FinanzDebitorService {
     }, current);
 
     const duplicate = await this.repository.findByDebitorNr(normalized.debitor_nr);
-    if (duplicate && duplicate.toPrimitives().id !== id) {
+    if ((duplicate !== undefined && duplicate !== null) && duplicate.toPrimitives().id !== id) {
       throw new Error(`Another Debitor already uses debitor_nr ${normalized.debitor_nr}`);
     }
 

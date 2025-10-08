@@ -3,15 +3,23 @@
  * Provides baseline CRUD endpoints; extend with domain-specific routes.
  */
 
-import { Router, Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
 import { FinanzKontoService } from '../../application/services/finanzKonto.service';
+
+const HTTP_STATUS = {
+  NOT_FOUND: 404,
+  CREATED: 201,
+  NO_CONTENT: 204,
+} as const;
 
 export interface FinanzKontoRouterDependencies {
   service: FinanzKontoService;
   baseRoute?: string;
 }
 
-export function buildFinanzKontoRouter({ service, baseRoute = '/finanzKonto' }: FinanzKontoRouterDependencies): any {
+export function buildFinanzKontoRouter(
+  { service, baseRoute = '/finanzKonto' }: FinanzKontoRouterDependencies,
+): Router {
   const router = Router();
 
   router.get(baseRoute, async (_req: Request, res: Response) => {
@@ -21,8 +29,8 @@ export function buildFinanzKontoRouter({ service, baseRoute = '/finanzKonto' }: 
 
   router.get(`${baseRoute}/:finanzKontoId`, async (req: Request, res: Response) => {
     const entity = await service.findById(req.params.finanzKontoId);
-    if (!entity) {
-      res.status(404).json({ message: 'FinanzKonto not found' });
+    if (entity === undefined || entity === null) {
+      res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'FinanzKonto not found' });
       return;
     }
     res.json(entity);
@@ -30,7 +38,7 @@ export function buildFinanzKontoRouter({ service, baseRoute = '/finanzKonto' }: 
 
   router.post(baseRoute, async (req: Request, res: Response) => {
     const created = await service.create(req.body);
-    res.status(201).json(created);
+    res.status(HTTP_STATUS.CREATED).json(created);
   });
 
   router.put(`${baseRoute}/:finanzKontoId`, async (req: Request, res: Response) => {
@@ -40,8 +48,9 @@ export function buildFinanzKontoRouter({ service, baseRoute = '/finanzKonto' }: 
 
   router.delete(`${baseRoute}/:finanzKontoId`, async (req: Request, res: Response) => {
     await service.remove(req.params.finanzKontoId);
-    res.status(204).send();
+    res.status(HTTP_STATUS.NO_CONTENT).send();
   });
 
   return router;
 }
+

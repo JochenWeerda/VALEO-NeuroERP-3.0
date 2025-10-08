@@ -112,19 +112,10 @@ class InventoryEntity {
         }
         // Add additional validation rules here
     }
-    static validateUpdateCommand(command) {
+    static validateUpdateCommand(_command) {
         // Add update validation rules here
     }
 }
 exports.InventoryEntity = InventoryEntity;
 // Utility functions
-function getDefaultValue(type) {
-    switch (type) {
-        case 'string': return '';
-        case 'number': return 0;
-        case 'boolean': return false;
-        case 'Date': return new Date();
-        default: return null;
-    }
-}
 //# sourceMappingURL=inventory.js.map

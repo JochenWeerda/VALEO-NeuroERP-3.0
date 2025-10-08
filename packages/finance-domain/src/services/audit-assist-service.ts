@@ -5,7 +5,7 @@
  * and audit package generation for HGB/IFRS compliance
  */
 
-import { err, ok, Result } from '../core/entities/ar-invoice';
+import { Result, err, ok } from '../core/entities/ar-invoice';
 
 // ===== CONSTANTS =====
 

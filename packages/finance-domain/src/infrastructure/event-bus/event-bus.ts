@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
-import { Kafka, Producer, Consumer, EachMessagePayload } from 'kafkajs';
-import { connect, NatsConnection, StringCodec } from 'nats';
-import { Connection, Channel, connect as connectRabbitMQ } from 'amqplib';
+import { Consumer, EachMessagePayload, Kafka, Producer } from 'kafkajs';
+import { NatsConnection, StringCodec, connect } from 'nats';
+import { Channel, Connection, connect as connectRabbitMQ } from 'amqplib';
 import { EventEmitter } from 'events';
 import { MetricsService } from '../observability/metrics-service';
 

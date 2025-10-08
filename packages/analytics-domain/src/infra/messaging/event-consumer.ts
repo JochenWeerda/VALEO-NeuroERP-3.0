@@ -1,14 +1,14 @@
-import { connect, NatsConnection, StringCodec, JSONCodec, Subscription } from 'nats';
-import { eq, and } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
+import { connect, type JSONCodec, type NatsConnection, type Subscription } from 'nats';
 import { Pool } from 'pg';
 import {
   factContracts,
+  factFinance,
   factProduction,
-  factWeighing,
   factQuality,
   factRegulatory,
-  factFinance
+  factWeighing
 } from '../db/schema';
 
 export interface EventConsumerConfig {
@@ -25,23 +25,26 @@ export interface BusinessEvent {
   tenantId: string;
   correlationId?: string;
   causationId?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any;
 }
 
 export class EventConsumer {
   private connection: NatsConnection | null = null;
   private subscription: Subscription | null = null;
-  private db: ReturnType<typeof drizzle>;
-  private pool: Pool;
+  private readonly db: ReturnType<typeof drizzle>;
+  private readonly pool: Pool;
   private isConnected = false;
   private isProcessing = false;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelayMs = 1000;
 
-  constructor(private config: EventConsumerConfig) {
-    this.maxReconnectAttempts = config.maxReconnectAttempts || 5;
-    this.reconnectDelayMs = config.reconnectDelayMs || 1000;
+  constructor(private readonly config: EventConsumerConfig) {
+    const DEFAULT_MAX_RECONNECT_ATTEMPTS = 5;
+    const DEFAULT_RECONNECT_DELAY_MS = 1000;
+    this.maxReconnectAttempts = config.maxReconnectAttempts ?? DEFAULT_MAX_RECONNECT_ATTEMPTS;
+    this.reconnectDelayMs = config.reconnectDelayMs ?? DEFAULT_RECONNECT_DELAY_MS;
 
     // Initialize database connection
     this.pool = new Pool({
@@ -62,15 +65,18 @@ export class EventConsumer {
       this.isConnected = true;
       this.reconnectAttempts = 0;
 
+      // eslint-disable-next-line no-console
       console.log('Analytics event consumer connected to NATS');
 
       // Set up event handlers
       this.connection.closed().then(() => {
         this.isConnected = false;
+        // eslint-disable-next-line no-console
         console.log('NATS connection closed');
       });
 
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to connect to NATS:', error);
       throw error;
     }
@@ -88,16 +94,20 @@ export class EventConsumer {
         callback: this.handleEvent.bind(this),
       });
 
+      // eslint-disable-next-line no-console
       console.log('Started consuming business events');
 
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to start consuming events:', error);
       throw error;
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async handleEvent(err: any, msg: any): Promise<void> {
-    if (err) {
+    if (err != null) {
+      // eslint-disable-next-line no-console
       console.error('Error receiving message:', err);
       return;
     }
@@ -114,6 +124,7 @@ export class EventConsumer {
       const jsonCodec = JSONCodec();
       const event: BusinessEvent = jsonCodec.decode(msg.data) as BusinessEvent;
 
+      // eslint-disable-next-line no-console
       console.log(`Processing event: ${event.eventType} (${event.eventId})`);
 
       await this.processEvent(event);
@@ -121,9 +132,11 @@ export class EventConsumer {
       // Acknowledge successful processing
       msg.ack();
 
+      // eslint-disable-next-line no-console
       console.log(`Successfully processed event: ${event.eventType}`);
 
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error processing event:', error);
 
       // Negative acknowledge to retry
@@ -148,6 +161,7 @@ export class EventConsumer {
     } else if (event.eventType.startsWith('finance.') || event.eventType.startsWith('sales.')) {
       await this.processFinanceEvent(event);
     } else {
+      // eslint-disable-next-line no-console
       console.log(`Ignoring unknown event type: ${event.eventType}`);
     }
   }
@@ -161,19 +175,19 @@ export class EventConsumer {
       eventId: event.eventId,
       eventType: event.eventType,
       occurredAt: new Date(event.occurredAt),
-      contractId: payload.contractId || payload.id,
+      contractId: payload.contractId ?? payload.id,
       customerId: payload.customerId,
       supplierId: payload.supplierId,
       commodity: payload.commodity,
       quantity: payload.quantity,
       unit: payload.unit,
       price: payload.price,
-      currency: payload.currency || 'EUR',
+      currency: payload.currency ?? 'EUR',
       status: payload.status,
-      deliveryStart: payload.deliveryStart ? new Date(payload.deliveryStart) : null,
-      deliveryEnd: payload.deliveryEnd ? new Date(payload.deliveryEnd) : null,
-      contractType: payload.contractType || (payload.supplierId ? 'Purchase' : 'Sales'),
-      hedgingRequired: payload.hedgingRequired || false,
+      deliveryStart: (payload.deliveryStart != null && payload.deliveryStart !== '') ? new Date(payload.deliveryStart) : null,
+      deliveryEnd: (payload.deliveryEnd != null && payload.deliveryEnd !== '') ? new Date(payload.deliveryEnd) : null,
+      contractType: payload.contractType ?? ((payload.supplierId != null && payload.supplierId !== '') ? 'Purchase' : 'Sales'),
+      hedgingRequired: payload.hedgingRequired ?? false,
       metadata: payload,
     };
 
@@ -200,7 +214,7 @@ export class EventConsumer {
       eventId: event.eventId,
       eventType: event.eventType,
       occurredAt: new Date(event.occurredAt),
-      batchId: payload.batchId || payload.id,
+      batchId: payload.batchId ?? payload.id,
       contractId: payload.contractId,
       commodity: payload.commodity,
       quantity: payload.quantity,
@@ -235,7 +249,7 @@ export class EventConsumer {
       eventId: event.eventId,
       eventType: event.eventType,
       occurredAt: new Date(event.occurredAt),
-      ticketId: payload.ticketId || payload.id,
+      ticketId: payload.ticketId ?? payload.id,
       contractId: payload.contractId,
       orderId: payload.orderId,
       customerId: payload.customerId,
@@ -243,7 +257,7 @@ export class EventConsumer {
       grossWeight: payload.grossWeight,
       tareWeight: payload.tareWeight,
       netWeight: payload.netWeight,
-      unit: payload.unit || 'kg',
+      unit: payload.unit ?? 'kg',
       tolerancePercent: payload.tolerancePercent,
       isWithinTolerance: payload.isWithinTolerance,
       status: payload.status,
@@ -275,7 +289,7 @@ export class EventConsumer {
       eventId: event.eventId,
       eventType: event.eventType,
       occurredAt: new Date(event.occurredAt),
-      sampleId: payload.sampleId || payload.id,
+      sampleId: payload.sampleId ?? payload.id,
       batchId: payload.batchId,
       contractId: payload.contractId,
       commodity: payload.commodity,
@@ -317,7 +331,7 @@ export class EventConsumer {
       labelType: payload.labelType,
       isEligible: payload.isEligible,
       certificationNumber: payload.certificationNumber,
-      expiryDate: payload.expiryDate ? new Date(payload.expiryDate) : null,
+      expiryDate: (payload.expiryDate != null && payload.expiryDate !== '') ? new Date(payload.expiryDate) : null,
       issuedBy: payload.issuedBy,
       siteId: payload.siteId,
       metadata: payload,
@@ -345,17 +359,17 @@ export class EventConsumer {
       eventId: event.eventId,
       eventType: event.eventType,
       occurredAt: new Date(event.occurredAt),
-      invoiceId: payload.invoiceId || payload.id,
+      invoiceId: payload.invoiceId ?? payload.id,
       contractId: payload.contractId,
       customerId: payload.customerId,
       supplierId: payload.supplierId,
       commodity: payload.commodity,
-      amount: payload.amount || payload.totalNet || payload.totalGross,
-      currency: payload.currency || 'EUR',
+      amount: payload.amount ?? payload.totalNet ?? payload.totalGross,
+      currency: payload.currency ?? 'EUR',
       type: this.mapEventTypeToFinanceType(event.eventType),
       status: payload.status,
-      dueDate: payload.dueDate ? new Date(payload.dueDate) : null,
-      paidDate: payload.paidAt ? new Date(payload.paidAt) : null,
+      dueDate: (payload.dueDate != null && payload.dueDate !== '') ? new Date(payload.dueDate) : null,
+      paidDate: (payload.paidAt != null && payload.paidAt !== '') ? new Date(payload.paidAt) : null,
       metadata: payload,
     };
 
@@ -416,9 +430,9 @@ export function createEventConsumer(config: EventConsumerConfig): EventConsumer 
 let globalConsumer: EventConsumer | null = null;
 
 export function getEventConsumer(): EventConsumer {
-  if (!globalConsumer) {
-    const natsUrl = process.env.NATS_URL || 'nats://localhost:4222';
-    const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || 'postgresql://localhost:5432/analytics';
+  if (globalConsumer === null) {
+    const natsUrl = process.env.NATS_URL ?? 'nats://localhost:4222';
+    const databaseUrl = process.env.DATABASE_URL ?? process.env.POSTGRES_URL ?? 'postgresql://localhost:5432/analytics';
 
     globalConsumer = createEventConsumer({
       natsUrl,

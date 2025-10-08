@@ -23,7 +23,7 @@ export async function registerEventRoutes(server: FastifyInstance): Promise<void
     const { id } = request.params as { id: string };
 
     const event = await getAuditEventById(tenantId, id);
-    if (!event) {
+    if (event === undefined || event === null) {
       await reply.code(404).send({ error: 'NotFound', message: 'Audit event not found' });
       return;
     }
@@ -46,3 +46,4 @@ export async function registerEventRoutes(server: FastifyInstance): Promise<void
     await reply.send({ count: events.length, events });
   });
 }
+

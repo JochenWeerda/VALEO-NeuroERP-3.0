@@ -62,8 +62,8 @@ class InteractionRepository {
             pagination: {
                 page: pagination.page,
                 pageSize: pagination.pageSize,
-                total,
-                totalPages: Math.ceil(total / pagination.pageSize)
+                total: Number(total),
+                totalPages: Math.ceil(Number(total) / pagination.pageSize)
             }
         };
     }
@@ -111,8 +111,8 @@ class InteractionRepository {
             pagination: {
                 page: pagination.page,
                 pageSize: pagination.pageSize,
-                total,
-                totalPages: Math.ceil(total / pagination.pageSize)
+                total: Number(total),
+                totalPages: Math.ceil(Number(total) / pagination.pageSize)
             }
         };
     }

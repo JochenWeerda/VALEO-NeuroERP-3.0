@@ -1,21 +1,22 @@
-import { eq, and, sql, gte, lte, desc } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
+import { type desc as _desc, type gte as _gte, type lte as _lte } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import {
-  factContracts,
-  factProduction,
-  factWeighing,
-  factQuality,
-  factRegulatory,
-  factFinance,
+  type factContracts as _factContracts,
+  type factFinance as _factFinance,
+  type factProduction as _factProduction,
+  type factQuality as _factQuality,
+  type factRegulatory as _factRegulatory,
+  type factWeighing as _factWeighing,
+  type kpis as _kpis,
   mvContractPositions,
-  mvQualityStats,
   mvFinanceKpis,
-  mvWeighingVolumes,
+  mvQualityStats,
   mvRegulatoryStats,
-  kpis
+  mvWeighingVolumes
 } from '../../infra/db/schema';
 import { KPI } from '../entities/kpi';
-import { createKpiCalculatedEvent } from '../events/event-factories';
+import { type createKpiCalculatedEvent as _createKpiCalculatedEvent } from '../events/event-factories';
 
 export interface KpiCalculationContext {
   tenantId: string;
@@ -34,7 +35,7 @@ export interface KpiCalculationResult {
 }
 
 export class KpiCalculationEngine {
-  constructor(private db: ReturnType<typeof drizzle>) {}
+  constructor(private readonly _db: ReturnType<typeof drizzle>) {}
 
   /**
    * Calculate contract position KPIs

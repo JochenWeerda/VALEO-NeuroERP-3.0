@@ -6,14 +6,15 @@ exports.withOrderStatus = withOrderStatus;
 exports.cloneOrder = cloneOrder;
 const data_models_1 = require("@valero-neuroerp/data-models");
 exports.DEFAULT_ORDER_LIMIT = 50;
+const ORDER_NUMBER_RADIX = 36;
 function createOrder(input) {
-    if (!input.customerNumber || !input.customerNumber.trim()) {
+    if (!input.customerNumber?.trim()) {
         throw new Error('customerNumber is required');
     }
-    if (!input.debtorNumber || !input.debtorNumber.trim()) {
+    if (!input.debtorNumber?.trim()) {
         throw new Error('debtorNumber is required');
     }
-    if (!input.items.length) {
+    if (input.items.length === undefined || input.items.length === null) {
         throw new Error('order requires at least one item');
     }
     const id = (0, data_models_1.createId)('OrderId');
@@ -67,6 +68,6 @@ function createOrderItem(input, timestamp) {
     };
 }
 function generateOrderNumber() {
-    return `ORD-${Date.now().toString(36).toUpperCase()}`;
+    return `ORD-${Date.now().toString(ORDER_NUMBER_RADIX).toUpperCase()}`;
 }
 //# sourceMappingURL=order.js.map

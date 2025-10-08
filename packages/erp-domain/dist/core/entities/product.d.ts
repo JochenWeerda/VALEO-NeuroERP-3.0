@@ -15,7 +15,7 @@ export interface Product {
     category: string;
     description?: string;
     readonly createdAt: Date;
-    readonly updatedAt: Date;
+    updatedAt: Date;
 }
 export interface CreateProductCommand {
     name: string;
@@ -46,7 +46,7 @@ export declare class ProductCreatedEvent implements DomainEvent {
 }
 export declare class ProductUpdatedEvent implements DomainEvent {
     readonly product: Product;
-    readonly changes: Record<string, any>;
+    readonly changes: Record<string, unknown>;
     readonly id: string;
     readonly type = "ProductUpdated";
     readonly aggregateId: ProductId;
@@ -54,7 +54,7 @@ export declare class ProductUpdatedEvent implements DomainEvent {
     readonly version: number;
     readonly occurredOn: Date;
     readonly data: Record<string, unknown>;
-    constructor(product: Product, changes: Record<string, any>);
+    constructor(product: Product, changes: Record<string, unknown>);
 }
 export declare class ProductEntity implements Product {
     readonly id: ProductId;
@@ -65,7 +65,7 @@ export declare class ProductEntity implements Product {
     category: string;
     description?: string;
     readonly createdAt: Date;
-    readonly updatedAt: Date;
+    updatedAt: Date;
     private constructor();
     static create(command: CreateProductCommand): ProductEntity;
     update(command: UpdateProductCommand): ProductEntity;

@@ -269,7 +269,7 @@ export class FinanceDomainBootstrap {
       periodRepository,
       this.eventPublisher,
       mlModel,
-      this.eventBus!,
+      this.eventBus,
       this.metricsService!,
       this.cacheService!,
       this.authService!

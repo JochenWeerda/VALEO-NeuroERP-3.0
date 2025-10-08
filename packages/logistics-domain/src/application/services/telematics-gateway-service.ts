@@ -32,7 +32,7 @@ export class TelematicsGatewayService {
 
   async calculateEta(tenantId: string, shipmentId: string, referenceTime: Date = new Date()): Promise<number | undefined> {
     const route = await this.routeRepository.findRoutePlanByShipmentId(tenantId, shipmentId);
-    if (!route) {
+    if (route === undefined || route === null) {
       return undefined;
     }
 
@@ -55,3 +55,4 @@ export class TelematicsGatewayService {
     return etaMinutes;
   }
 }
+

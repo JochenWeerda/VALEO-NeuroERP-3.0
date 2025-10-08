@@ -76,7 +76,13 @@ class OpportunityEntity {
         return new OpportunityEntity(opportunity);
     }
     static fromPersistence(props) {
-        return new OpportunityEntity(props);
+        return new OpportunityEntity({
+            ...props,
+            ownerUserId: props.ownerUserId ?? undefined,
+            expectedCloseDate: props.expectedCloseDate ?? undefined,
+            amountNet: props.amountNet ? Number(props.amountNet) : undefined,
+            currency: props.currency ?? undefined,
+        });
     }
     update(props) {
         if (props.title !== undefined) {

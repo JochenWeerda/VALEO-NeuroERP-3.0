@@ -50,7 +50,7 @@ export class ContactService {
 
   async updateContact(id: string, data: UpdateContactData): Promise<ContactEntity> {
     const existingContact = await this.deps.contactRepo.findById(id, data.tenantId);
-    if (!existingContact) {
+    if (existingContact === undefined || existingContact === null) {
       throw new Error(`Contact ${id} not found`);
     }
 
@@ -66,7 +66,7 @@ export class ContactService {
 
     const updatedContact = await this.deps.contactRepo.update(id, data.tenantId, data);
 
-    if (!updatedContact) {
+    if (updatedContact === undefined || updatedContact === null) {
       throw new Error(`Failed to update contact ${id}`);
     }
 
@@ -75,7 +75,7 @@ export class ContactService {
 
   async deleteContact(id: string, tenantId: string): Promise<boolean> {
     const contact = await this.deps.contactRepo.findById(id, tenantId);
-    if (!contact) {
+    if (contact === undefined || contact === null) {
       throw new Error(`Contact ${id} not found`);
     }
 
@@ -84,7 +84,7 @@ export class ContactService {
 
   async setPrimaryContact(customerId: string, contactId: string, tenantId: string): Promise<void> {
     const contact = await this.deps.contactRepo.findById(contactId, tenantId);
-    if (!contact) {
+    if (contact === undefined || contact === null) {
       throw new Error(`Contact ${contactId} not found`);
     }
 

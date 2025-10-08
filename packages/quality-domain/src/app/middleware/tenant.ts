@@ -14,7 +14,7 @@ export async function tenantMiddleware(
 
   const tenantId = request.headers['x-tenant-id'] as string;
 
-  if (!tenantId) {
+  if (tenantId === undefined || tenantId === null) {
     reply.code(400).send({
       error: 'BadRequest',
       message: 'Missing x-tenant-id header',
@@ -35,3 +35,4 @@ export async function tenantMiddleware(
   // Optional: Verify tenant exists and is active (could query DB)
   // For now, just validate format
 }
+

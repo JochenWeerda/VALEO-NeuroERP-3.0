@@ -3,7 +3,9 @@
  * Application Layer Service migrated to VALEO-NeuroERP-3.0
  * Warehouse management and inventory operations
  */
-import { Brand } from '@valeo-neuroerp-3.0/packages/data-models/src/branded-types';
+type Brand<K, T> = K & {
+    __brand: T;
+};
 export type ProductId = Brand<string, 'ProductId'>;
 export type StockId = Brand<string, 'StockId'>;
 export type LocationId = Brand<string, 'LocationId'>;
@@ -152,4 +154,5 @@ export declare class InventoryDomainService {
  * Register in DI Container.
  */
 export declare function registerInventoryDomainService(): void;
+export {};
 //# sourceMappingURL=inventory-domain-service.d.ts.map

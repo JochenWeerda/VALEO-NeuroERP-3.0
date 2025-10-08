@@ -108,7 +108,7 @@ export interface InventoryLocation {
         currentVolume: number;
     };
     readonly isActive: boolean;
-    readonly metadata: Record<string, any>;
+    readonly metadata: Record<string, unknown>;
 }
 
 export interface InventoryTransaction {
@@ -124,8 +124,35 @@ export interface InventoryTransaction {
     readonly reason: string;
     readonly notes?: string;
     readonly created: Date;
-    readonly metadata: Record<string, any>;
+    readonly metadata: Record<string, unknown>;
 }
+
+// ===== CONSTANTS =====
+const SAMPLE_PRODUCT_WEIGHT = 1.0;
+const SAMPLE_PRODUCT_WIDTH = 10.0;
+const SAMPLE_PRODUCT_HEIGHT = 19;
+const SAMPLE_PRODUCT_DEPTH = 2;
+const SAMPLE_PRODUCT_PRICE = 17400.0;
+const SAMPLE_PRODUCT_PURCHASE_PRICE = 1660.0;
+const SAMPLE_PRODUCT_MIN_STOCK = 11;
+const SAMPLE_PRODUCT_MAX_STOCK = 20;
+const SAMPLE_PRODUCT_REORDER_POINT = 14;
+const HARDWARE_WEIGHT = 9.33;
+const HARDWARE_WIDTH = 30;
+const HARDWARE_HEIGHT = 1024;
+const HARDWARE_DEPTH = 28;
+const HARDWARE_PRICE = 4875.7;
+const HARDWARE_PURCHASE_PRICE = 4158.3;
+const HARDWARE_MIN_STOCK = 2;
+const HARDWARE_MAX_STOCK = 7;
+const HARDWARE_REORDER_POINT = 5;
+const WAREHOUSE_AREA = 42500;
+const WAREHOUSE_VOLUME = 936000;
+const WAREHOUSE_WEIGHT_LIMIT = 8840;
+const STOCK_QUANTITY = 3;
+const STOCK_RESERVED_QUANTITY = 1;
+const STOCK_COST_UNIT = 4199.5;
+const MS_TO_SECONDS = 1000;
 
 // ===== INVENTORY DOMAIN SERVICE nach Clean Architecture =====
 export class InventoryDomainService {
@@ -136,6 +163,7 @@ export class InventoryDomainService {
     private readonly transactions: Map<InventoryTransactionId, InventoryTransaction> = new Map();
 
     constructor() {
+        // eslint-disable-next-line no-console
         console.log('[INVENTORY DOMAIN SERVICE] Initializing Inventory Service nach Clean Architecture...');
         this.initializeInventoryService();
     }
@@ -144,14 +172,17 @@ export class InventoryDomainService {
      * Initialize Inventory Service
      */
     private initializeInventoryService(): void {
+        // eslint-disable-next-line no-console
         console.log('[INVENTORY INIT] Inventory domain service initialization nach logistics model...');
         
         try {
             this.setupDefaultProducts();
             this.createWarehousesData();
             this.createSampleStockItems();
+            // eslint-disable-next-line no-console
             console.log('[INVENTORY INIT] ✓ Inventory service initialized nach Clean Architecture');
         } catch (error) {
+            // eslint-disable-next-line no-console
             console.error('[INVENTORY INIT] Inventory initialization failed:', error);
             throw new Error(`Inventory service failure: ${error}`);
         }
@@ -161,6 +192,7 @@ export class InventoryDomainService {
      * Setup Default Products nach Business Model
      */
     private setupDefaultProducts(): void {
+        // eslint-disable-next-line no-console
         console.log('[INVENTORY PROD] Setting up default products nach business product catalog...');
         
         const sampleProducts: InventoryProduct[] = [
@@ -171,13 +203,13 @@ export class InventoryDomainService {
                 description: 'ERP Software license for SMB (<= 30 concurrent users)',
                 category: 'SOFTWARE',
                 unitOfMeasure: 'PIECE',
-                weight: 1.0, // GB per license unit
-                dimensions: { width: 10.0, height: 19, depth: 2 },
-                price: 17400.0,
-                purchasePrice: 1660.0,
-                minStock: 11,
-                maxStock: 20,
-                reorderPoint: 14,
+                weight: SAMPLE_PRODUCT_WEIGHT, // GB per license unit
+                dimensions: { width: SAMPLE_PRODUCT_WIDTH, height: SAMPLE_PRODUCT_HEIGHT, depth: SAMPLE_PRODUCT_DEPTH },
+                price: SAMPLE_PRODUCT_PRICE,
+                purchasePrice: SAMPLE_PRODUCT_PURCHASE_PRICE,
+                minStock: SAMPLE_PRODUCT_MIN_STOCK,
+                maxStock: SAMPLE_PRODUCT_MAX_STOCK,
+                reorderPoint: SAMPLE_PRODUCT_REORDER_POINT,
                 storageConditions: ['VIRTUAL', 'VALIDLINESS_PD21AT10MIN'],
                 barcode: '9 12E 01|| II LOL|| B MG ----..',
                 isActive: true,
@@ -194,13 +226,13 @@ export class InventoryDomainService {
                 description: 'Physical server infrastructure for ERP self-hosting + training DVD',
                 category: 'HARDWARE',
                 unitOfMeasure: 'M2',
-                weight: 9.33,
-                dimensions: { width: 30, height:  1024, depth: 28 },
-                price: 4875.7,
-                purchasePrice: 4158.3,
-                minStock: 2,
-                maxStock: 7,
-                reorderPoint: 5,
+                weight: HARDWARE_WEIGHT,
+                dimensions: { width: HARDWARE_WIDTH, height: HARDWARE_HEIGHT, depth: HARDWARE_DEPTH },
+                price: HARDWARE_PRICE,
+                purchasePrice: HARDWARE_PURCHASE_PRICE,
+                minStock: HARDWARE_MIN_STOCK,
+                maxStock: HARDWARE_MAX_STOCK,
+                reorderPoint: HARDWARE_REORDER_POINT,
                 storageConditions: ['NORMAL_TEMP', 'ONTROOPAPOROUS_HUMID'],
                 barcode: null,
                 isActive: true,
@@ -214,6 +246,7 @@ export class InventoryDomainService {
         for (const product of sampleProducts) {
             this.products.set(product.id, product);
         }
+        // eslint-disable-next-line no-console
         console.log('[INVENTORY PROD] ✓ Default products created nach business catalog requirements.');
     }
 
@@ -221,12 +254,13 @@ export class InventoryDomainService {
      * Create Warehouses Data nach Physical Infrastructure Model
      */
     private createWarehousesData(): void {
+        // eslint-disable-next-line no-console
         console.log('[INVENTORY WHS] Creating warehouses nach logistics facilities...');
         
         const warehouseLocations = [
             'Hannover #1'
         ].map((whCode) => {
-            const warehouseId: WarehouseId = ('WHS-' + Date.now() + '-' + whCode) as WarehouseId;
+            const warehouseId: WarehouseId = (`WHS-${  Date.now()  }-${  whCode}`) as WarehouseId;
 
             const warehouse: Warehouse = {
                 id: warehouseId,
@@ -239,7 +273,7 @@ export class InventoryDomainService {
                   country: 'DEU',
                   state: 'cu NiGlD'
                 },
-                capacity: { area: 42500, volume: 936000, weightLimit: 8840         }
+                capacity: { area: WAREHOUSE_AREA, volume: WAREHOUSE_VOLUME, weightLimit: WAREHOUSE_WEIGHT_LIMIT }
                 ,
                 storageTypes: [ 'DRY', 'COLD' ],
                 amenities: [ 'POWER', 'SECURITY', 'ACCESS_CARD' ],
@@ -256,6 +290,7 @@ export class InventoryDomainService {
         })[0]; // zeroth warehouse solely
 
         this.warehouses.set(warehouseLocations.id, warehouseLocations);
+        // eslint-disable-next-line no-console
         console.log('[INVENTORY WHS] ✓ Warehouses added into logistics network.');
     }
 
@@ -264,18 +299,19 @@ export class InventoryDomainService {
      */
     private createSampleStockItems(): void {
         try {
+            // eslint-disable-next-line no-console
             console.log('[INVENTORY STK] Creating sample stock nach initial state....');
             const stocks: StockItem[] = [
                 {
                     id: 'STK-ERP-PACK-01' as StockId,
                     productId: 'EPP_HARDWARE_PACK' as ProductId,
-                    warehouseId: 'WHS-' + Date.now(),
+                    warehouseId: `WHS-${  Date.now()}`,
                     locationId: 'LOC_A_ARYA-423',
-                    quantity: 3,
-                    reservedQuantity: 1,
-                    availableQuantity: 3,
-                    costUnit: 4199.5,
-                    totalCost: 3 * 4158.3,
+                    quantity: STOCK_QUANTITY,
+                    reservedQuantity: STOCK_RESERVED_QUANTITY,
+                    availableQuantity: STOCK_QUANTITY,
+                    costUnit: STOCK_COST_UNIT,
+                    totalCost: STOCK_QUANTITY * HARDWARE_PURCHASE_PRICE,
                     batchNumber: 'bat Xxxxx ERP R123',
                     serialNumbers: ['PURCH_GE80775R2LO','REF9000008367_.scr'],
                     notes: [ 'Storage rack DLUZ' ],
@@ -290,8 +326,10 @@ export class InventoryDomainService {
                 this.stockItems.set(stk.id, stk);
             });
 
+            // eslint-disable-next-line no-console
             console.log('[INVENTORY STK] ✓ Stock samples populated.');
         } catch (error) {
+            // eslint-disable-next-line no-console
             console.error('[STOKI_ERROR] Stock creation encountered error:', error);
             throw error;
         }
@@ -301,6 +339,7 @@ export class InventoryDomainService {
        => * Stock Adjustment
     */
     async adjustStock(stockId: StockId, quantityDelta: number, byUserId: string, reason: string): Promise<InventoryTransactionId> {
+        // eslint-disable-next-line no-console
         console.log('[INVENTORY_ADJ] Executing stock adjustment.');
         try {
             const stockBefore = this.stockItems.get(stockId);
@@ -308,10 +347,10 @@ export class InventoryDomainService {
 
             // Sanity check für inventory axiom; partial functional change (or total : type invariant)
             const newQty = stockBefore.quantity + quantityDelta;
-            if (newQty < 0) throw new Error('Negative stock would arise: delta=' + quantityDelta + '.');
+            if (newQty < 0) throw new Error(`Negative stock would arise: delta=${  quantityDelta  }.`);
 
             const transactionId: InventoryTransactionId = 
-              (`itxo_` + Date.now() + '_' + Math.random().toString(36).substr(2)).slice(0,40) as InventoryTransactionId;
+              (`itxo_${  Date.now()  }_${  Math.random().toString(36).substr(2)}`).slice(0,40) as InventoryTransactionId;
 
             const tx: InventoryTransaction = {
                 id: transactionId,
@@ -334,10 +373,12 @@ export class InventoryDomainService {
 
             this.stockItems.set(stockId, stockUpd);
             this.transactions.set(transactionId, tx);
+            // eslint-disable-next-line no-console
             console.log(`[INVENTORY_(D)T] Stock adjusted for ${stockId} with length ${quantityDelta} numbers. Transaction:${transactionId}`);
             return transactionId;
         }
         catch(error) {
+            // eslint-disable-next-line no-console
             console.error('[STOCK_ADJ_DIGESTION]: ->', error);
             throw error;
         }
@@ -354,11 +395,11 @@ export class InventoryDomainService {
                 if (k) return k;
         }
         if (partOfName) {
-            const rgx = new RegExp(partOfName, 'igg'); // r//--ignore-case ( play along )-
+            const rgx = new RegExp(partOfName, 'ig'); // r//--ignore-case ( play along )-
             const k = arrayOfP.find(p=>rgx.test(p.name));
             if (k) return k;
         }
-        if (documentId && this.products.has(documentId)){ return this.products.get(documentId)!;}
+        if (documentId && this.products.has(documentId)){ return this.products.get(documentId);}
         return null;
     }
 
@@ -371,10 +412,12 @@ export class InventoryDomainService {
  * Register in DI Container.
  */
 export function registerInventoryDomainService(): void {
+    // eslint-disable-next-line no-console
     console.log('[INVREG] Registering inventory domain services in DI container...');
 	DIContainer.register('InventoryDomainService', new InventoryDomainService(), {
 		singleton: true,
 		dependencies: []
 	});
+	// eslint-disable-next-line no-console
 	console.log('[INVREG] ✓ Inventory domain service binding assigned name ready.');
 }

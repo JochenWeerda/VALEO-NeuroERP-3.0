@@ -3,15 +3,23 @@
  * Provides baseline CRUD endpoints; extend with domain-specific routes.
  */
 
-import { Router, Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
 import { FinanzKreditorService } from '../../application/services/finanzKreditor.service';
+
+const HTTP_STATUS = {
+  NOT_FOUND: 404,
+  CREATED: 201,
+  NO_CONTENT: 204,
+} as const;
 
 export interface FinanzKreditorRouterDependencies {
   service: FinanzKreditorService;
   baseRoute?: string;
 }
 
-export function buildFinanzKreditorRouter({ service, baseRoute = '/finanzKreditor' }: FinanzKreditorRouterDependencies): any {
+export function buildFinanzKreditorRouter(
+  { service, baseRoute = '/finanzKreditor' }: FinanzKreditorRouterDependencies,
+): Router {
   const router = Router();
 
   router.get(baseRoute, async (_req: Request, res: Response) => {
@@ -21,8 +29,8 @@ export function buildFinanzKreditorRouter({ service, baseRoute = '/finanzKredito
 
   router.get(`${baseRoute}/:finanzKreditorId`, async (req: Request, res: Response) => {
     const entity = await service.findById(req.params.finanzKreditorId);
-    if (!entity) {
-      res.status(404).json({ message: 'FinanzKreditor not found' });
+    if (entity === undefined || entity === null) {
+      res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'FinanzKreditor not found' });
       return;
     }
     res.json(entity);
@@ -30,7 +38,7 @@ export function buildFinanzKreditorRouter({ service, baseRoute = '/finanzKredito
 
   router.post(baseRoute, async (req: Request, res: Response) => {
     const created = await service.create(req.body);
-    res.status(201).json(created);
+    res.status(HTTP_STATUS.CREATED).json(created);
   });
 
   router.put(`${baseRoute}/:finanzKreditorId`, async (req: Request, res: Response) => {
@@ -40,8 +48,9 @@ export function buildFinanzKreditorRouter({ service, baseRoute = '/finanzKredito
 
   router.delete(`${baseRoute}/:finanzKreditorId`, async (req: Request, res: Response) => {
     await service.remove(req.params.finanzKreditorId);
-    res.status(204).send();
+    res.status(HTTP_STATUS.NO_CONTENT).send();
   });
 
   return router;
 }
+

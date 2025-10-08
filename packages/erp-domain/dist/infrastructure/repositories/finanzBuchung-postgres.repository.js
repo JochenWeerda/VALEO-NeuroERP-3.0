@@ -7,32 +7,73 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FinanzBuchungPostgresRepository = void 0;
 const finanzBuchung_entity_1 = require("../../core/entities/finanzBuchung.entity");
+const toStringOrUndefined = (value) => {
+    if (value === null || value === undefined) {
+        return undefined;
+    }
+    return typeof value === 'string' ? value : String(value);
+};
+const toStringOrEmpty = (value, fallback = '') => {
+    return toStringOrUndefined(value) ?? fallback;
+};
+const toNumberOrUndefined = (value) => {
+    if (value === null || value === undefined) {
+        return undefined;
+    }
+    return typeof value === 'number' ? value : Number(value);
+};
+const toBooleanOrUndefined = (value) => {
+    if (value === null || value === undefined) {
+        return undefined;
+    }
+    if (typeof value === 'boolean') {
+        return value;
+    }
+    if (typeof value === 'number') {
+        return value !== 0;
+    }
+    if (typeof value === 'string') {
+        return ['true', '1', 't', 'y'].includes(value.toLowerCase());
+    }
+    return undefined;
+};
+const toDateOrUndefined = (value) => {
+    if (value === null || value === undefined) {
+        return undefined;
+    }
+    if (value instanceof Date) {
+        return value;
+    }
+    const parsed = new Date(String(value));
+    return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
 class FinanzBuchungPostgresRepository {
     constructor(pool) {
         this.pool = pool;
     }
     mapRow(row) {
+        const record = row;
         return finanzBuchung_entity_1.FinanzBuchung.create({
-            id: row['id'],
-            buchungsnummer: row['buchungsnummer'],
-            buchungsdatum: row['buchungsdatum'],
-            belegdatum: row['belegdatum'],
-            belegnummer: row['belegnummer'],
-            buchungstext: row['buchungstext'],
-            sollkonto: row['sollkonto'],
-            habenkonto: row['habenkonto'],
-            betrag: row['betrag'],
-            waehrung: row['waehrung'],
-            steuerbetrag: row['steuerbetrag'],
-            steuersatz: row['steuersatz'],
-            buchungsart: row['buchungsart'],
-            referenz_typ: row['referenz_typ'],
-            referenz_id: row['referenz_id'],
-            ist_storniert: row['ist_storniert'],
-            storno_buchung_id: row['storno_buchung_id'],
-            erstellt_von: row['erstellt_von'],
-            erstellt_am: row['erstellt_am'],
-            aktualisiert_am: row['aktualisiert_am'],
+            id: toStringOrUndefined(record.id) ?? undefined,
+            buchungsnummer: toStringOrEmpty(record.buchungsnummer),
+            buchungsdatum: toDateOrUndefined(record.buchungsdatum) ?? new Date(),
+            belegdatum: toDateOrUndefined(record.belegdatum) ?? new Date(),
+            belegnummer: toStringOrUndefined(record.belegnummer),
+            buchungstext: toStringOrEmpty(record.buchungstext),
+            sollkonto: toStringOrUndefined(record.sollkonto),
+            habenkonto: toStringOrUndefined(record.habenkonto),
+            betrag: toNumberOrUndefined(record.betrag) ?? 0,
+            waehrung: toStringOrUndefined(record.waehrung),
+            steuerbetrag: toNumberOrUndefined(record.steuerbetrag),
+            steuersatz: toNumberOrUndefined(record.steuersatz),
+            buchungsart: toStringOrUndefined(record.buchungsart),
+            referenz_typ: toStringOrUndefined(record.referenz_typ),
+            referenz_id: toStringOrUndefined(record.referenz_id),
+            ist_storniert: toBooleanOrUndefined(record.ist_storniert),
+            storno_buchung_id: toStringOrUndefined(record.storno_buchung_id),
+            erstellt_von: toStringOrUndefined(record.erstellt_von),
+            erstellt_am: toDateOrUndefined(record.erstellt_am),
+            aktualisiert_am: toDateOrUndefined(record.aktualisiert_am),
         });
     }
     async findById(id) {

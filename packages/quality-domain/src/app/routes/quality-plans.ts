@@ -12,7 +12,7 @@ export async function registerQualityPlanRoutes(server: FastifyInstance): Promis
   // Create quality plan
   server.post('/plans', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const userId = request.authContext?.userId || 'system';
+    const userId = request.authContext?.userId ?? 'system';
 
     const data = CreateQualityPlanSchema.parse({ ...request.body, tenantId });
     const plan = await createQualityPlan(data, userId);
@@ -26,7 +26,7 @@ export async function registerQualityPlanRoutes(server: FastifyInstance): Promis
     const { id } = request.params as { id: string };
 
     const plan = await getQualityPlanById(tenantId, id);
-    if (!plan) {
+    if (plan === undefined || plan === null) {
       reply.code(404).send({ error: 'NotFound', message: 'Quality plan not found' });
       return;
     }
@@ -51,7 +51,7 @@ export async function registerQualityPlanRoutes(server: FastifyInstance): Promis
   // Update quality plan
   server.patch('/plans/:id', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const userId = request.authContext?.userId || 'system';
+    const userId = request.authContext?.userId ?? 'system';
     const { id } = request.params as { id: string };
 
     const data = UpdateQualityPlanSchema.parse(request.body);
@@ -63,10 +63,11 @@ export async function registerQualityPlanRoutes(server: FastifyInstance): Promis
   // Deactivate quality plan
   server.post('/plans/:id/deactivate', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const userId = request.authContext?.userId || 'system';
+    const userId = request.authContext?.userId ?? 'system';
     const { id } = request.params as { id: string };
 
     await deactivateQualityPlan(tenantId, id, userId);
     reply.code(204).send();
   });
 }
+

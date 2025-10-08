@@ -3,16 +3,27 @@
  * Shift planning and scheduling
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
+
+const SHIFT_NAME_MIN_LENGTH = 1;
+const SHIFT_NAME_MAX_LENGTH = 200;
+const MIN_REQUIRED_HEADCOUNT = 1;
+const MILLISECONDS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const MILLISECONDS_PER_HOUR = MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+const MAX_SHIFT_DURATION_HOURS = 24;
+const MIN_SHIFT_DURATION_HOURS = 0.5;
 
 export const ShiftSchema = z.object({
   id: z.string().uuid(),
   tenantId: z.string().uuid(),
-  name: z.string().min(1).max(200),
+  name: z.string().min(SHIFT_NAME_MIN_LENGTH).max(SHIFT_NAME_MAX_LENGTH),
   location: z.string().optional(),
   startsAt: z.string().datetime(),
   endsAt: z.string().datetime(),
-  requiredHeadcount: z.number().int().min(1),
+  requiredHeadcount: z.number().int().min(MIN_REQUIRED_HEADCOUNT),
   assigned: z.array(z.string().uuid()),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -23,7 +34,7 @@ export const ShiftSchema = z.object({
 export type Shift = z.infer<typeof ShiftSchema>;
 
 export class ShiftEntity {
-  private data: Shift;
+  private readonly data: Shift;
 
   constructor(data: Shift) {
     this.data = ShiftSchema.parse(data);
@@ -46,7 +57,7 @@ export class ShiftEntity {
   getDurationHours(): number {
     const startTime = new Date(this.data.startsAt);
     const endTime = new Date(this.data.endsAt);
-    return (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+    return (endTime.getTime() - startTime.getTime()) / MILLISECONDS_PER_HOUR;
   }
 
   getAssignedCount(): number {
@@ -86,17 +97,16 @@ export class ShiftEntity {
       throw new Error('End time must be after start time');
     }
 
-    if (this.data.requiredHeadcount < 1) {
+    if (this.data.requiredHeadcount < MIN_REQUIRED_HEADCOUNT) {
       throw new Error('Required headcount must be at least 1');
     }
 
-    // Check for reasonable shift duration (max 24 hours)
     const durationHours = this.getDurationHours();
-    if (durationHours > 24) {
+    if (durationHours > MAX_SHIFT_DURATION_HOURS) {
       throw new Error('Shift duration cannot exceed 24 hours');
     }
 
-    if (durationHours < 0.5) {
+    if (durationHours < MIN_SHIFT_DURATION_HOURS) {
       throw new Error('Shift duration must be at least 30 minutes');
     }
   }
@@ -107,12 +117,9 @@ export class ShiftEntity {
       throw new Error('Employee is already assigned to this shift');
     }
 
-    return new ShiftEntity({
-      ...this.data,
+    return this.clone({
       assigned: [...this.data.assigned, employeeId],
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      // version: (this.data as any).version ? (this.data as any).version + 1 : 1
+      updatedBy
     });
   }
 
@@ -121,12 +128,9 @@ export class ShiftEntity {
       throw new Error('Employee is not assigned to this shift');
     }
 
-    return new ShiftEntity({
-      ...this.data,
+    return this.clone({
       assigned: this.data.assigned.filter(id => id !== employeeId),
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      // version: (this.data as any).version ? (this.data as any).version + 1 : 1
+      updatedBy
     });
   }
 
@@ -135,33 +139,24 @@ export class ShiftEntity {
       throw new Error('Required headcount must be at least 1');
     }
 
-    return new ShiftEntity({
-      ...this.data,
+    return this.clone({
       requiredHeadcount: headcount,
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      // version: (this.data as any).version ? (this.data as any).version + 1 : 1
+      updatedBy
     });
   }
 
   updateLocation(location: string | undefined, updatedBy?: string): ShiftEntity {
-    return new ShiftEntity({
-      ...this.data,
+    return this.clone({
       location,
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      // version: (this.data as any).version ? (this.data as any).version + 1 : 1
+      updatedBy
     });
   }
 
   updateTimes(startsAt: string, endsAt: string, updatedBy?: string): ShiftEntity {
-    return new ShiftEntity({
-      ...this.data,
+    return this.clone({
       startsAt,
       endsAt,
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      // version: (this.data as any).version ? (this.data as any).version + 1 : 1
+      updatedBy
     });
   }
 
@@ -170,12 +165,21 @@ export class ShiftEntity {
     return { ...this.data };
   }
 
+  private clone(overrides: Partial<Shift>): ShiftEntity {
+    const now = new Date().toISOString();
+    return new ShiftEntity({
+      ...this.data,
+      ...overrides,
+      updatedAt: now
+    });
+  }
+
   // Factory methods
   static create(data: Omit<Shift, 'id' | 'createdAt' | 'updatedAt'>): ShiftEntity {
     const now = new Date().toISOString();
     return new ShiftEntity({
       ...data,
-      id: require('uuid').v4(),
+      id: uuidv4(),
       createdAt: now,
       updatedAt: now
     });

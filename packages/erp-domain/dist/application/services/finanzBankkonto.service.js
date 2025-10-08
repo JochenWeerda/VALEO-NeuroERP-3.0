@@ -5,7 +5,7 @@ const finanzBankkonto_entity_1 = require("../../core/entities/finanzBankkonto.en
 const IBAN_PATTERN = /^[A-Z]{2}[0-9A-Z]{13,30}$/i;
 const BIC_PATTERN = /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/i;
 function toDate(value) {
-    if (!value) {
+    if (value === undefined || value === null) {
         return undefined;
     }
     return value instanceof Date ? value : new Date(value);
@@ -13,10 +13,10 @@ function toDate(value) {
 function normalize(dto, existing) {
     const kontoname = dto.kontoname?.trim();
     const bankname = dto.bankname?.trim();
-    if (!kontoname) {
+    if (kontoname === undefined || kontoname === null) {
         throw new Error('kontoname is required');
     }
-    if (!bankname) {
+    if (bankname === undefined || bankname === null) {
         throw new Error('bankname is required');
     }
     if (dto.iban && !IBAN_PATTERN.test(dto.iban.replace(/\s+/g, ''))) {
@@ -61,7 +61,7 @@ class FinanzBankkontoService {
     }
     async update(id, payload) {
         const existing = await this.repository.findById(id);
-        if (!existing) {
+        if (existing === undefined || existing === null) {
             throw new Error('FinanzBankkonto not found');
         }
         const current = existing.toPrimitives();

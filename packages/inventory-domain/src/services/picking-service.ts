@@ -8,12 +8,20 @@ import { injectable } from 'inversify';
 import { EventBus } from '../infrastructure/event-bus/event-bus';
 import { InventoryMetricsService } from '../infrastructure/observability/metrics-service';
 import {
-  PickTaskCreatedEvent,
   PickCompletedEvent,
-  PickTaskAssignedEvent,
-  WaveCreatedEvent,
-  WaveCompletedEvent
+  PickTaskCreatedEvent,
+  WaveCompletedEvent,
+  WaveCreatedEvent
 } from '../core/domain-events/inventory-domain-events';
+
+const MS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const DEFAULT_PRIORITY = 5;
+const RANDOM_BASE = 36;
+const RANDOM_ID_START = 2;
+const RANDOM_ID_LENGTH = 9;
 
 export interface PickTask {
   taskId: string;
@@ -108,6 +116,38 @@ export interface ZoneConfiguration {
   active: boolean;
 }
 
+export interface OrderDetail {
+  orderId: string;
+  lines: Array<{
+    sku: string;
+    quantity: number;
+  }>;
+}
+
+// Constants
+const BASE_TIME_PER_UNIT_SECONDS = 2;
+const BATCH_STRATEGY_MULTIPLIER = 1.2;
+const ZONE_STRATEGY_MULTIPLIER = 1.1;
+const SINGLE_STRATEGY_MULTIPLIER = 1.0;
+const BATCH_DURATION_MULTIPLIER = 0.8;
+const ZONE_DURATION_MULTIPLIER = 0.9;
+const SINGLE_DURATION_MULTIPLIER = 1.0;
+const SECONDS_TO_MINUTES = 60;
+const HOURS_TO_MS = 24 * 60 * 60 * 1000;
+const SECONDS_TO_HOURS = 3600;
+const HIGH_UTILIZATION_THRESHOLD = 90;
+const LOW_PICKER_UTILIZATION_THRESHOLD = 0.5;
+const LOW_PRODUCTIVITY_THRESHOLD = 0.7;
+const LOCATION_PART_MULTIPLIER_1 = 10000;
+const LOCATION_PART_MULTIPLIER_2 = 100;
+const MS_TO_MINUTES = 1000 * 60;
+const PICKS_PER_HOUR_MULTIPLIER = 60;
+const LINES_PER_HOUR_MULTIPLIER = 60;
+const DEFAULT_ZONE_A = 'A';
+const DEFAULT_ZONE_B = 'B';
+const DEFAULT_ZONE_C = 'C'; // Added for new zones
+const DECIMAL_BASE = 10;
+
 export interface PickerPerformance {
   pickerId: string;
   name: string;
@@ -143,8 +183,8 @@ export interface PickerPerformance {
 @injectable()
 export class PickingService {
   private readonly metrics = new InventoryMetricsService();
-  private zones: Map<string, ZoneConfiguration> = new Map();
-  private activeWaves: Map<string, PickingWave> = new Map();
+  private readonly zones: Map<string, ZoneConfiguration> = new Map();
+  private readonly activeWaves: Map<string, PickingWave> = new Map();
 
   constructor(
     private readonly eventBus: EventBus
@@ -176,7 +216,7 @@ export class PickingService {
         status: 'planned',
         strategy,
         priority: this.calculateWavePriority(tasks),
-        zone: zone || this.assignOptimalZone(tasks),
+        zone: zone ?? this.assignOptimalZone(tasks),
         tasks: groupedTasks,
         totalTasks: groupedTasks.length,
         completedTasks: 0,
@@ -193,7 +233,7 @@ export class PickingService {
       // Publish event
       await this.publishWaveCreatedEvent(wave);
 
-      this.metrics.recordDatabaseQueryDuration('picking.wave_creation', (Date.now() - startTime) / 1000, {});
+      this.metrics.recordDatabaseQueryDuration('picking.wave_creation', (Date.now() - startTime) / MS_PER_SECOND, {});
       this.metrics.incrementPickTasks('created', { strategy });
 
       return wave;
@@ -208,7 +248,7 @@ export class PickingService {
    */
   async releaseWave(waveId: string): Promise<void> {
     const wave = this.activeWaves.get(waveId);
-    if (!wave) {
+    if (wave == null) {
       throw new Error(`Wave ${waveId} not found`);
     }
 
@@ -233,7 +273,7 @@ export class PickingService {
    */
   async startPickTask(taskId: string, pickerId: string): Promise<void> {
     const task = await this.findPickTask(taskId);
-    if (!task) {
+    if (task == null) {
       throw new Error(`Task ${taskId} not found`);
     }
 
@@ -248,7 +288,7 @@ export class PickingService {
     // Update wave progress
     if (task.waveId) {
       const wave = this.activeWaves.get(task.waveId);
-      if (wave) {
+      if (wave != null) {
         wave.status = 'in_progress';
       }
     }
@@ -266,7 +306,7 @@ export class PickingService {
     const startTime = Date.now();
     const task = await this.findPickTask(taskId);
 
-    if (!task) {
+    if (task == null) {
       throw new Error(`Task ${taskId} not found`);
     }
 
@@ -280,10 +320,10 @@ export class PickingService {
     }
 
     task.pickedQuantity = pickedQuantity;
-    task.actualTime = actualTime || (task.startedAt ? (Date.now() - task.startedAt.getTime()) / 1000 : 0);
+    task.actualTime = actualTime ?? (task.startedAt != null ? (Date.now() - task.startedAt.getTime()) / 1000 : 0);
     task.completedAt = new Date();
 
-    if (qualityChecks) {
+    if (qualityChecks != null) {
       task.qualityChecks = qualityChecks;
     }
 
@@ -292,7 +332,7 @@ export class PickingService {
       task.status = 'short';
     } else if (pickedQuantity < task.quantity) {
       task.status = 'short';
-    } else if (qualityChecks && qualityChecks.some(check => !check.passed)) {
+    } else if (qualityChecks != null && qualityChecks.some(check => check.passed === false)) {
       task.status = 'damaged';
     } else {
       task.status = 'completed';
@@ -311,7 +351,7 @@ export class PickingService {
       await this.updatePickerPerformance(task.assignedTo, task);
     }
 
-    this.metrics.recordDatabaseQueryDuration('picking.task_completion', (Date.now() - startTime) / 1000, {});
+    this.metrics.recordDatabaseQueryDuration('picking.task_completion', (Date.now() - startTime) / MS_PER_SECOND, {});
     this.metrics.incrementPickTasks('completed', { status: task.status });
   }
 
@@ -324,7 +364,7 @@ export class PickingService {
     try {
       const performance = await this.calculatePickerPerformance(pickerId, period);
 
-      this.metrics.recordDatabaseQueryDuration('picking.performance_calculation', (Date.now() - startTime) / 1000, {});
+      this.metrics.recordDatabaseQueryDuration('picking.performance_calculation', (Date.now() - startTime) / MS_PER_SECOND, {});
 
       return performance;
     } catch (error) {
@@ -346,27 +386,27 @@ export class PickingService {
     bottlenecks: string[];
   }> {
     const zone = this.zones.get(zoneId);
-    if (!zone) {
+    if (zone == null) {
       throw new Error(`Zone ${zoneId} not found`);
     }
 
     // Calculate current metrics
     const activeTasks = await this.getActiveTasksInZone(zoneId);
-    const completedTasks = await this.getCompletedTasksInZone(zoneId, new Date(Date.now() - 24 * 60 * 60 * 1000)); // Last 24 hours
+    const completedTasks = await this.getCompletedTasksInZone(zoneId, new Date(Date.now() - HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MS_PER_SECOND)); // Last 24 hours
 
     const utilization = (activeTasks.length / zone.capacity.maxConcurrentPickers) * 100;
     const activePickers = new Set(activeTasks.map(task => task.assignedTo).filter(Boolean)).size;
 
     // Calculate average productivity (picks per hour)
     const totalPicks = completedTasks.reduce((sum, task) => sum + task.pickedQuantity, 0);
-    const totalTime = completedTasks.reduce((sum, task) => sum + (task.actualTime || 0), 0) / 3600; // Convert to hours
+    const totalTime = completedTasks.reduce((sum, task) => sum + (task.actualTime ?? 0), 0) / SECONDS_TO_HOURS; // Convert to hours
     const averageProductivity = totalTime > 0 ? totalPicks / totalTime : 0;
 
     // Identify bottlenecks
     const bottlenecks: string[] = [];
-    if (utilization > 90) bottlenecks.push('High utilization');
-    if (activePickers < zone.capacity.maxConcurrentPickers * 0.5) bottlenecks.push('Low picker utilization');
-    if (averageProductivity < zone.capacity.maxTasksPerHour * 0.7) bottlenecks.push('Low productivity');
+    if (utilization > HIGH_UTILIZATION_THRESHOLD) bottlenecks.push('High utilization');
+    if (activePickers < zone.capacity.maxConcurrentPickers * LOW_PICKER_UTILIZATION_THRESHOLD) bottlenecks.push('Low picker utilization');
+    if (averageProductivity < zone.capacity.maxTasksPerHour * LOW_PRODUCTIVITY_THRESHOLD) bottlenecks.push('Low productivity');
 
     return {
       zone,
@@ -390,7 +430,9 @@ export class PickingService {
     const remainingTasks = [...tasks];
 
     // Start from first task
-    let currentTask = remainingTasks.shift()!;
+    const firstTask = remainingTasks.shift();
+    if (firstTask == null) return tasks;
+    let currentTask = firstTask;
     optimizedTasks.push(currentTask);
 
     while (remainingTasks.length > 0) {
@@ -443,7 +485,7 @@ export class PickingService {
         createdAt: new Date()
       };
 
-      this.metrics.recordDatabaseQueryDuration('picking.batch_creation', (Date.now() - startTime) / 1000, {});
+      this.metrics.recordDatabaseQueryDuration('picking.batch_creation', (Date.now() - startTime) / MS_PER_SECOND, {});
 
       return batch;
     } catch (error) {
@@ -473,7 +515,7 @@ export class PickingService {
 
           const pickQuantity = Math.min(line.quantity, inv.availableQty);
           const task: PickTask = {
-            taskId: `pick_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            taskId: `pick_${Date.now()}_${Math.random().toString(RANDOM_BASE).substr(RANDOM_ID_START, RANDOM_ID_LENGTH)}`,
             orderId,
             sku: line.sku,
             location: inv.location,
@@ -482,7 +524,7 @@ export class PickingService {
             quantity: pickQuantity,
             pickedQuantity: 0,
             status: 'pending',
-            priority: line.priority || 5,
+            priority: line.priority || DEFAULT_PRIORITY,
             zone: zone || this.getZoneForLocation(inv.location),
             sequence: 0, // Will be set during optimization
             estimatedTime: this.estimatePickTime(pickQuantity, strategy),
@@ -570,13 +612,13 @@ export class PickingService {
 
   private estimateWaveDuration(tasks: PickTask[], strategy: PickingWave['strategy']): number {
     const totalTime = tasks.reduce((sum, task) => sum + task.estimatedTime, 0);
-    const strategyMultiplier = strategy === 'batch' ? 0.8 : strategy === 'zone' ? 0.9 : 1.0;
-    return Math.ceil((totalTime * strategyMultiplier) / 60); // Convert to minutes
+    const strategyMultiplier = strategy === 'batch' ? BATCH_STRATEGY_MULTIPLIER : strategy === 'zone' ? ZONE_STRATEGY_MULTIPLIER : SINGLE_STRATEGY_MULTIPLIER;
+    return Math.ceil((totalTime * strategyMultiplier) / SECONDS_TO_MINUTES); // Convert to minutes
   }
 
   private async assignPickersToWave(wave: PickingWave): Promise<void> {
     const zone = this.zones.get(wave.zone);
-    if (!zone) return;
+    if (zone == null) return;
 
     // Simple assignment: assign to available pickers
     const availablePickers = zone.pickers.slice(0, Math.min(zone.capacity.maxConcurrentPickers, wave.tasks.length));
@@ -589,8 +631,8 @@ export class PickingService {
   }
 
   private estimatePickTime(quantity: number, strategy: PickingWave['strategy']): number {
-    const baseTimePerUnit = 2; // seconds per unit
-    const strategyMultiplier = strategy === 'batch' ? 1.2 : strategy === 'zone' ? 1.1 : 1.0;
+    const baseTimePerUnit = BASE_TIME_PER_UNIT_SECONDS; // seconds per unit
+    const strategyMultiplier = strategy === 'batch' ? BATCH_STRATEGY_MULTIPLIER : strategy === 'zone' ? ZONE_STRATEGY_MULTIPLIER : SINGLE_STRATEGY_MULTIPLIER;
     return Math.ceil(quantity * baseTimePerUnit * strategyMultiplier);
   }
 
@@ -605,7 +647,9 @@ export class PickingService {
     // Convert location code to number for distance calculation
     const parts = location.split('-');
     if (parts.length >= 3) {
-      return parseInt(parts[1]) * 10000 + parseInt(parts[2]) * 100 + parseInt(parts[3] || '0');
+      return parseInt(parts[1], DECIMAL_BASE) * LOCATION_PART_MULTIPLIER_1 +
+             parseInt(parts[2], DECIMAL_BASE) * LOCATION_PART_MULTIPLIER_2 +
+             parseInt(parts[3] ?? '0', DECIMAL_BASE);
     }
     return 0;
   }
@@ -614,14 +658,14 @@ export class PickingService {
     // Search in all waves
     for (const wave of Array.from(this.activeWaves.values())) {
       const task = wave.tasks.find(t => t.taskId === taskId);
-      if (task) return task;
+      if (task != null) return task;
     }
     return null;
   }
 
   private async updateWaveProgress(waveId: string): Promise<void> {
     const wave = this.activeWaves.get(waveId);
-    if (!wave) return;
+    if (wave == null) return;
 
     wave.completedTasks = wave.tasks.filter(task => task.status === 'completed').length;
     wave.pickedQuantity = wave.tasks.reduce((sum, task) => sum + task.pickedQuantity, 0);
@@ -630,7 +674,7 @@ export class PickingService {
       wave.status = 'completed';
       wave.completedAt = new Date();
       wave.actualDuration = wave.releasedAt ?
-        (wave.completedAt.getTime() - wave.releasedAt.getTime()) / (1000 * 60) : undefined;
+        (wave.completedAt.getTime() - wave.releasedAt.getTime()) / MS_TO_MINUTES : undefined;
 
       // Calculate productivity
       wave.productivity = await this.calculateWaveProductivity(wave);
@@ -640,18 +684,18 @@ export class PickingService {
   }
 
   private async calculateWaveProductivity(wave: PickingWave): Promise<PickingWave['productivity']> {
-    if (!wave.actualDuration || wave.actualDuration === 0) return undefined;
+    if (wave.actualDuration == null || wave.actualDuration === 0) return undefined;
 
     const totalPicks = wave.tasks.reduce((sum, task) => sum + task.pickedQuantity, 0);
     const totalLines = wave.tasks.length;
     const completedTasks = wave.tasks.filter(task => task.status === 'completed');
 
     const accuracy = completedTasks.length / wave.tasks.length;
-    const picksPerHour = (totalPicks / wave.actualDuration) * 60;
-    const linesPerHour = (totalLines / wave.actualDuration) * 60;
+    const picksPerHour = (totalPicks / wave.actualDuration) * PICKS_PER_HOUR_MULTIPLIER;
+    const linesPerHour = (totalLines / wave.actualDuration) * LINES_PER_HOUR_MULTIPLIER;
     const averageTimePerPick = wave.tasks
-      .filter(task => task.actualTime)
-      .reduce((sum, task) => sum + (task.actualTime || 0), 0) / completedTasks.length;
+      .filter(task => task.actualTime != null)
+      .reduce((sum, task) => sum + (task.actualTime ?? 0), 0) / completedTasks.length;
 
     return {
       picksPerHour,
@@ -661,9 +705,9 @@ export class PickingService {
     };
   }
 
-  private async updatePickerPerformance(pickerId: string, task: PickTask): Promise<void> {
+  private async updatePickerPerformance(_pickerId: string, _task: PickTask): Promise<void> {
     // Mock implementation - would update persistent storage
-    console.log(`Updated performance for picker ${pickerId}: task ${task.taskId}`);
+    // intentionally no console output
   }
 
   private async calculatePickerPerformance(pickerId: string, period: string): Promise<PickerPerformance> {
@@ -717,7 +761,7 @@ export class PickingService {
       if (wave.zone === zoneId) {
         tasks.push(...wave.tasks.filter(task =>
           task.status === 'completed' &&
-          task.completedAt &&
+          task.completedAt != null &&
           task.completedAt >= since
         ));
       }
@@ -727,7 +771,7 @@ export class PickingService {
 
   private getZoneForLocation(location: string): string {
     // Mock zone assignment
-    return location.startsWith('A') ? 'A' : 'B';
+    return location.startsWith(DEFAULT_ZONE_A) ? DEFAULT_ZONE_A : DEFAULT_ZONE_B;
   }
 
   private async getOrderLines(orderId: string): Promise<Array<{
@@ -752,10 +796,10 @@ export class PickingService {
     return [
       { location: 'A-01-01-01', availableQty: 50, lot: 'LOT-001' },
       { location: 'A-01-01-02', availableQty: 30, lot: 'LOT-002' }
-    ].filter(inv => !zone || this.getZoneForLocation(inv.location) === zone);
+    ].filter(inv => zone == null || this.getZoneForLocation(inv.location) === zone);
   }
 
-  private async getOrderDetails(orders: string[]): Promise<any[]> {
+  private async getOrderDetails(orders: string[]): Promise<OrderDetail[]> {
     // Mock order details
     return orders.map(orderId => ({
       orderId,
@@ -766,7 +810,7 @@ export class PickingService {
     }));
   }
 
-  private consolidateSkusForBatching(orderDetails: any[]): PickingBatch['skus'] {
+  private consolidateSkusForBatching(orderDetails: OrderDetail[]): PickingBatch['skus'] {
     const skuMap = new Map<string, {
       totalQuantity: number;
       locations: Array<{ location: string; quantity: number; lot?: string }>;
@@ -774,7 +818,7 @@ export class PickingService {
 
     for (const order of orderDetails) {
       for (const line of order.lines) {
-        const existing = skuMap.get(line.sku) || {
+        const existing = skuMap.get(line.sku) ?? {
           totalQuantity: 0,
           locations: []
         };
@@ -794,9 +838,9 @@ export class PickingService {
     return Array.from(skuMap.entries()).map(([sku, data]) => ({ sku, ...data }));
   }
 
-  private calculateBatchPriority(orderDetails: any[]): number {
+  private calculateBatchPriority(orderDetails: OrderDetail[]): number {
     // Calculate based on order priorities
-    return 5; // Mock
+    return DEFAULT_PRIORITY; // Mock
   }
 
   private initializeDefaultZones(): void {
@@ -832,6 +876,23 @@ export class PickingService {
           entryPoint: 'B-ENTRY',
           exitPoint: 'B-EXIT',
           optimalPath: ['B-01-01-01', 'B-01-01-02', 'B-02-01-01']
+        },
+        active: true
+      },
+      {
+        zoneId: 'C',
+        zoneName: 'Bulk Zone C',
+        type: 'bulk',
+        pickers: ['picker6', 'picker7'],
+        locations: ['C-01-01-01', 'C-01-01-02', 'C-02-01-01'],
+        capacity: {
+          maxConcurrentPickers: 4,
+          maxTasksPerHour: 200
+        },
+        routing: {
+          entryPoint: 'C-ENTRY',
+          exitPoint: 'C-EXIT',
+          optimalPath: ['C-01-01-01', 'C-01-01-02', 'C-02-01-01']
         },
         active: true
       }
@@ -908,8 +969,8 @@ export class PickingService {
       orderId: task.orderId,
       sku: task.sku,
       quantity: task.pickedQuantity,
-      pickedBy: task.assignedTo || 'unknown',
-      duration: task.actualTime || 0,
+      pickedBy: task.assignedTo ?? 'unknown',
+      duration: task.actualTime ?? 0,
       accuracy: task.pickedQuantity >= task.quantity ? 100 : (task.pickedQuantity / task.quantity) * 100
     };
 
@@ -931,8 +992,8 @@ export class PickingService {
       waveId: wave.waveId,
       completedTasks: wave.completedTasks,
       totalTasks: wave.totalTasks,
-      duration: wave.actualDuration || 0,
-      productivity: wave.productivity?.picksPerHour || 0
+      duration: wave.actualDuration ?? 0,
+      productivity: wave.productivity?.picksPerHour ?? 0
     };
 
     await this.eventBus.publish(event);
