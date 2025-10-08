@@ -23,3 +23,10 @@ export {
   OrchestratorOptions,
   BusinessLogicOrchestrator
 } from './business-logic-orchestrator';
+
+// Legacy exports for backward compatibility
+import { RuleRegistry } from './rule-registry';
+import { BusinessLogicOrchestrator } from './business-logic-orchestrator';
+
+export const ruleRegistry = RuleRegistry;
+export const businessLogicOrchestrator = new BusinessLogicOrchestrator('default');

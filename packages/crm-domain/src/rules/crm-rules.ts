@@ -4,7 +4,7 @@
  * Domain-specific business rules for Customer Relationship Management
  */
 
-import { BusinessRule, IBusinessRule } from '../../../business-rules/src/business-rule';
+import { BusinessRule, IBusinessRule, ValidationResult } from '../../../business-rules/src/business-rule';
 import { RuleRegistry } from '../../../business-rules/src/rule-registry';
 
 // Define a context for CRM rules
@@ -28,16 +28,28 @@ export class ValidateNewCustomerCreditLimitRule extends BusinessRule<CrmRuleCont
   name = 'ValidateNewCustomerCreditLimit';
   description = 'Ensures new customers do not exceed a default credit limit.';
   priority = 10;
+  domain = 'crm';
 
-  applies(context: CrmRuleContext): boolean {
-    return context.action === 'create' && context.customer.status === 'New' && context.customer.creditLimit > 5000;
-  }
+  async validate(context: CrmRuleContext): Promise<ValidationResult> {
+    const errors: any[] = [];
+    const warnings: any[] = [];
 
-  execute(context: CrmRuleContext): void {
-    context.isValid = false;
-    context.messages.push('New customers cannot have a credit limit greater than 5000.');
-    context.auditTrail.push(`Rule executed: ${this.name} - Credit limit validation failed`);
-    console.log('Rule executed: ValidateNewCustomerCreditLimit - Credit limit exceeded.');
+    if (context.action === 'create' && context.customer.status === 'New' && context.customer.creditLimit > 5000) {
+      errors.push({
+        field: 'creditLimit',
+        message: 'New customers cannot have a credit limit greater than 5000.',
+        code: 'CRM_NEW_CUSTOMER_CREDIT_LIMIT_EXCEEDED',
+        severity: 'error'
+      });
+      context.auditTrail.push(`Rule executed: ${this.name} - Credit limit validation failed`);
+      console.log('Rule executed: ValidateNewCustomerCreditLimit - Credit limit exceeded.');
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+      warnings
+    };
   }
 }
 
