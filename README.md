@@ -1,193 +1,130 @@
-# VALEO NeuroERP 3.0 - Modular Service-Oriented Architecture
+# VALEO NeuroERP 2.5 - Backup Repository
 
-## 🎯 Projekt-Übersicht
+## Overview
 
-**VALEO NeuroERP 3.0** ist die nächste Evolution des Enterprise ERP-Systems - eine vollständig modulare, skalierbare und wartbare Plattform basierend auf der **Modular Service-Oriented Architecture (MSOA)**.
+This repository serves as a backup for the VALEO NeuroERP 3.0 development project. It contains the complete codebase for a comprehensive ERP (Enterprise Resource Planning) system built with modern technologies.
 
-### 🏗️ Architektur-Prinzipien
+## Architecture
 
-- **🎯 Modular Service-Oriented Architecture (MSOA)**: Jedes Feature ist ein isolierter Service
-- **🔧 Domain-Driven Design (DDD)**: Business Domains definieren Systemgrenzen
-- **⚡ Event-Driven Architecture**: Events treiben Business Logic
-- **🚀 Microservice Decomposition**: Services sind unabhängig deploybar
+The system is built using a modular, domain-driven design with the following key components:
 
-### 📁 Projektstruktur
+### Core Domains
+- **Inventory Domain**: Warehouse management, putaway/slotting, cycle counting, EDI integration
+- **ERP Domain**: Order management, financial services (Bankkonto, Buchung, Konto, etc.)
+- **Finance Domain**: AI-powered bookkeeping, bank reconciliation, tax compliance
+- **HR Domain**: Employee management, time tracking, payroll
+- **Production Domain**: Recipe management, quality control, batch tracking
+- **Sales Domain**: Quote and invoice management
+- **Analytics Domain**: KPI calculation, forecasting, reporting
+- **Regulatory Domain**: Compliance checking, GHG calculations, labeling
+- **Logistics Domain**: Dispatch, routing, telematics
+- **Quality Domain**: CAPA management, non-conformities, quality plans
+- **Procurement Domain**: Supplier risk management
+- **Weighing Domain**: Weighing ticket management
+- **Notifications Domain**: Multi-channel notifications
+- **Audit Domain**: Audit logging and integrity checks
+- **Integration Domain**: External system integrations
+- **Scheduler Domain**: Task scheduling and automation
 
-```
-valero-neuroerp-3.0/
-├── 📁 .infrastructure/           # Infrastructure as Code (Desktop Docker First)
-│   ├── docker/                  # Desktop Docker Compose (Development)
-│   ├── kubernetes/              # K8s Manifests (Production Migration Path)
-│   ├── docker-compose/          # Local Development Environment
-│   ├── helm/                    # Helm Charts (Future Production)
-│   └── terraform/               # Cloud Resources (Future Production)
-├── 📁 .platform/                # Platform Services
-│   ├── service-bus/            # Core Message Bus
-│   ├── service-registry/       # Service Discovery
-│   ├── api-gateway/            # Unified API Interface
-│   └── monitoring/             # Observability Stack
-├── 📁 domains/                  # Business Domains
-│   ├── crm/                    # Customer Relationship Management
-│   ├── erp/                    # Enterprise Resource Planning
-│   ├── analytics/              # Business Intelligence
-│   ├── integration/            # Third-Party Connectors
-│   └── shared/                 # Cross-Domain Services
-├── 📁 packages/                 # Shared Libraries
-│   ├── ui-components/          # Design System Components
-│   ├── business-rules/         # Validation Engine
-│   ├── data-models/            # Type Definitions
-│   └── utilities/              # Common Utilities
-├── 📁 tools/                    # Development Tools
-│   ├── codegen/                # Code Generators
-│   ├── testing/                # Test Utilities
-│   ├── migration/              # Migration Scripts
-│   └── ci/                     # CI/CD Pipelines
-├── 📁 docs/                     # Documentation
-│   ├── adr/                    # Architecture Decision Records
-│   ├── api/                    # API Documentation
-│   ├── guides/                 # Developer Guides
-│   └── runbooks/               # Operations Runbooks
-└── 📁 memory-bank/              # Project Memory & Context
-    ├── decisions/              # Architectural Decisions
-    ├── lessons-learned/        # Retrospective Insights
-    ├── technical-debt/         # Known Issues & Debt
-    └── roadmap/                # Future Planning
-```
+### Technical Stack
+- **Backend**: Node.js, TypeScript, Express.js
+- **Database**: PostgreSQL with Drizzle ORM
+- **Event Bus**: Custom event-driven architecture
+- **Observability**: Prometheus, Grafana, OpenTelemetry
+- **Testing**: Jest, Testcontainers
+- **Frontend**: React, Vite, TypeScript (in development)
+- **Infrastructure**: Docker, Kubernetes
 
-### 🚀 Schnellstart
+### Key Features
+- Domain-driven design with clean architecture
+- Event-sourcing and CQRS patterns
+- AI-powered analytics and decision making
+- Multi-tenant architecture
+- Comprehensive audit trails
+- Real-time notifications
+- Regulatory compliance automation
+- Advanced inventory optimization
 
-#### Voraussetzungen
+## Development Status
+
+This is a backup snapshot of the VALEO NeuroERP 3.0 development. The system is under active development with focus on:
+
+- Backend domain services completion
+- Frontend development (React-based)
+- Integration testing
+- Performance optimization
+- Security hardening
+
+## Getting Started
+
+### Prerequisites
 - Node.js 18+
-- Docker Desktop
-- Git LFS
+- PostgreSQL 15+
+- Docker & Docker Compose
+- GitHub CLI (for deployment)
 
-#### Installation
+### Installation
+
+1. Clone the repository:
 ```bash
-# Repository klonen
-git clone https://github.com/JochenWeerda/VALEO-NeuroERP-2.0.git
-cd VALEO-NeuroERP-2.0/valero-neuroerp-3.0
+git clone https://github.com/JochenWeerda/VALEO-NeuroERP-2.5.git
+cd VALEO-NeuroERP-2.5
+```
 
-# Desktop Docker Development Environment starten
+2. Install dependencies:
+```bash
+pnpm install
+```
+
+3. Set up environment variables (copy from `.env.example`)
+
+4. Start databases:
+```bash
 docker-compose up -d
-
-# Services überprüfen
-docker-compose ps
 ```
 
-### 🔧 Entwicklung
-
-#### Service-Template-Struktur
-Jeder Service folgt der gleichen Struktur:
-```
-domains/{domain-name}/
-├── src/
-│   ├── core/                   # Domain Core Logic
-│   │   ├── entities/          # Domain Entities
-│   │   ├── value-objects/     # Value Objects
-│   │   ├── domain-events/     # Domain Events
-│   │   └── domain-services/   # Domain Services
-│   ├── application/           # Application Layer
-│   │   ├── commands/          # Command Handlers
-│   │   ├── queries/           # Query Handlers
-│   │   ├── dto/               # Data Transfer Objects
-│   │   └── events/            # Application Events
-│   ├── infrastructure/        # Infrastructure Layer
-│   │   ├── repositories/      # Data Access
-│   │   ├── external-services/ # External Integrations
-│   │   ├── messaging/         # Message Handling
-│   │   └── persistence/       # Database Layer
-│   └── presentation/          # Presentation Layer
-│       ├── controllers/       # API Controllers
-│       ├── middleware/        # Request Middleware
-│       └── views/             # Response Views
-├── tests/                     # Test Suite
-├── config/                    # Service Configuration
-├── scripts/                   # Service Scripts
-├── docs/                      # Service Documentation
-├── package.json               # Service Dependencies
-├── Dockerfile                 # Container Definition
-├── docker-compose.yml         # Local Development
-└── README.md                  # Service Documentation
+5. Run migrations and build:
+```bash
+pnpm run build
 ```
 
-### 🎯 Kern-Features
+### Running the Application
 
-#### CRM Domain
-- **👥 Customer Management**: Customer Profile Creation & Management
-- **📈 Sales Pipeline**: Lead Management, Opportunity Tracking
-- **📊 Customer Analytics**: Segmentation, Communication Preferences
+```bash
+# Start all services
+pnpm run start:all
 
-#### ERP Domain
-- **📦 Product Management**: Product Catalog, Multi-Warehouse Support
-- **📋 Order Processing**: Order Creation, Inventory Reservation
-- **💰 Financial Integration**: Invoice Generation, Payment Processing
+# Or start individual domains
+pnpm --filter inventory-domain run dev
+```
 
-#### Analytics Domain
-- **📊 Business Intelligence**: Real-time Dashboards, Custom Reports
-- **🔍 Predictive Analytics**: Performance KPIs, Data Export
-- **📈 System Analytics**: User Behavior, Performance Metrics
+## Project Structure
 
-### 🔒 Sicherheit
+```
+packages/
+├── inventory-domain/          # Warehouse & inventory management
+├── erp-domain/               # Core ERP functionality
+├── finance-domain/           # Financial services
+├── hr-domain/               # Human resources
+├── production-domain/        # Manufacturing & quality
+├── analytics-domain/         # Business intelligence
+├── frontend-web/            # React frontend (WIP)
+├── shared/                  # Shared utilities & contracts
+└── ...
 
-- **🔐 JWT + OAuth2**: Sichere Authentifizierung
-- **👥 RBAC**: Rollen-basierte Zugriffskontrolle
-- **🛡️ API Gateway**: Request Validation
-- **🔒 End-to-End Encryption**: Verschlüsselte Kommunikation
+docs/                        # Architecture documentation
+k8s/                        # Kubernetes manifests
+observability/              # Monitoring & logging
+```
 
-### 📊 Performance Standards
+## Contributing
 
-- **⚡ API Response Time**: < 500ms (P95)
-- **📱 Page Load Time**: < 2s
-- **🗄️ Database Query Time**: < 100ms
-- **🔄 Concurrent Users**: 10,000+
+This is a backup repository. For active development, please refer to the main development repository.
 
-### 🧪 Testing
+## License
 
-- **📊 Test Coverage**: > 85%
-- **🔍 ESLint Errors**: 0
-- **✅ TypeScript Strict Mode**: 100%
-- **🚀 Performance Tests**: Automated
+Proprietary - VALEO Internal Use Only
 
-### 📚 Dokumentation
+## Contact
 
-- **📖 Architecture Decision Records (ADRs)**
-- **🔍 OpenAPI Specs** für alle APIs
-- **📝 Component Documentation** mit Storybook
-- **🛠️ Runbooks** für Operations
-
-### 🎯 Roadmap
-
-#### Phase 1: Foundation (Months 1-3)
-- Service Bus Implementation
-- Service Registry Setup
-- Type System Definition
-- Base Module Structure
-
-#### Phase 2: Domain Migration (Months 4-8)
-- CRM Domain Migration
-- ERP Domain Migration
-- Analytics Domain Implementation
-
-#### Phase 3: Integration & Optimization (Months 9-12)
-- System Integration
-- Production Readiness
-- Launch & Optimization
-
-### 🤝 Beitragen
-
-1. **Fork** das Repository
-2. **Branch** erstellen (`git checkout -b feature/amazing-feature`)
-3. **Commit** Änderungen (`git commit -m 'Add amazing feature'`)
-4. **Push** zum Branch (`git push origin feature/amazing-feature`)
-5. **Pull Request** erstellen
-
-### 📄 Lizenz
-
-Dieses Projekt ist unter der MIT-Lizenz lizenziert.
-
----
-
-**Entwickelt mit ❤️ von der VALEO NeuroERP Team**
-
-**Repository**: https://github.com/JochenWeerda/VALEO-NeuroERP-2.0
-**Documentation**: [VALEO_NEUROERP_3.0_MIGRATION_BLUEPRINT.md](../VALEO_NEUROERP_3.0_MIGRATION_BLUEPRINT.md)
+For questions about this backup, please contact the development team.
