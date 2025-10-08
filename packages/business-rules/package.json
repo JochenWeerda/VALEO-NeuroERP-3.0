@@ -1,0 +1,35 @@
+{
+  "name": "@valeo-neuroerp-3.0/business-rules",
+  "version": "1.0.0",
+  "description": "Domain-Driven Business Logic Architecture for VALEO NeuroERP 3.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
+  },
+  "keywords": [
+    "business-rules",
+    "domain-driven-design",
+    "rule-engine",
+    "conflict-detection",
+    "business-logic"
+  ],
+  "author": "VALEO NeuroERP Team",
+  "license": "Proprietary",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JochenWeerda/VALEO-NeuroERP-2.5",
+    "directory": "packages/business-rules"
+  }
+}
