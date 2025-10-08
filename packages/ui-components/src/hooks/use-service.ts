@@ -1,7 +1,7 @@
 // packages/utilities/src/di-container.ts
 export interface DependencyDefinition {
   key: string;
-  factory: () => any;
+  factory: () => unknown;
   dependencies: string[];
   singleton: boolean;
   lazy: boolean;
@@ -9,9 +9,9 @@ export interface DependencyDefinition {
 }
 
 export class DIContainer {
-  private dependencies = new Map<string, DependencyDefinition>();
-  private singletons = new Map<string, any>();
-  private scopedInstances = new Map<string, Map<string, any>>();
+  private readonly dependencies = new Map<string, DependencyDefinition>();
+  private readonly singletons = new Map<string, unknown>();
+  private readonly scopedInstances = new Map<string, Map<string, unknown>>();
   private currentScope: string | null = null;
 
   register<T>(
@@ -27,7 +27,7 @@ export class DIContainer {
     const definition: DependencyDefinition = {
       key,
       factory,
-      dependencies: options.dependencies || [],
+      dependencies: options.dependencies ?? [],
       singleton: options.singleton ?? true,
       lazy: options.lazy ?? false,
       scope: options.scope ?? 'singleton'
@@ -42,14 +42,14 @@ export class DIContainer {
 
   async resolve<T>(key: string): Promise<T> {
     const definition = this.dependencies.get(key);
-    if (!definition) {
+    if (definition === undefined || definition === null) {
       throw new Error(`Dependency ${key} not registered`);
     }
 
     // Check if already resolved in current scope
     if (definition.scope === 'scoped' && this.currentScope) {
       const scopedInstances = this.scopedInstances.get(this.currentScope);
-      if (scopedInstances && scopedInstances.has(key)) {
+      if (scopedInstances?.has(key)) {
         return scopedInstances.get(key);
       }
     }
@@ -58,6 +58,7 @@ export class DIContainer {
     const resolvedDependencies = await this.resolveDependencies(definition.dependencies);
 
     // Create instance
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const instance = definition.factory.apply(null, resolvedDependencies as any);
 
     // Store based on scope
@@ -67,13 +68,18 @@ export class DIContainer {
       if (!this.scopedInstances.has(this.currentScope)) {
         this.scopedInstances.set(this.currentScope, new Map());
       }
-      this.scopedInstances.get(this.currentScope)!.set(key, instance);
+      const scopedMap = this.scopedInstances.get(this.currentScope);
+      if (scopedMap) {
+        scopedMap.set(key, instance);
+      }
     }
 
     return instance;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async resolveDependencies(dependencies: string[]): Promise<any[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const resolved: any[] = [];
     
     for (const dep of dependencies) {
@@ -123,3 +129,4 @@ export class DIContainer {
 
 // Global DI Container
 export const container = new DIContainer();
+

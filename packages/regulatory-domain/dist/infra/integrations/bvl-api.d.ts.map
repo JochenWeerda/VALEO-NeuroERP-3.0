@@ -1,0 +1,1 @@
+{"version":3,"file":"bvl-api.d.ts","sourceRoot":"","sources":["../../../src/infra/integrations/bvl-api.ts"],"names":[],"mappings":"AAaA,wBAAsB,YAAY,CAAC,UAAU,EAAE,MAAM,GAAG,OAAO,CAAC,GAAG,GAAG,IAAI,CAAC,CAqE1E;AAKD,wBAAsB,SAAS,CAAC,KAAK,EAAE,MAAM,EAAE,OAAO,CAAC,EAAE;IACvD,eAAe,CAAC,EAAE,MAAM,CAAC;IACzB,IAAI,CAAC,EAAE,MAAM,CAAC;CACf,GAAG,OAAO,CAAC,GAAG,EAAE,CAAC,CAsCjB"}

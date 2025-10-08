@@ -448,72 +448,6 @@ export interface CycleCountCompletedEvent extends InventoryDomainEvent {
 }
 
 // Returns Events
-export interface ReturnReceivedEvent extends InventoryDomainEvent {
-   eventType: 'inventory.return.received';
-   type: 'inventory.return.received';
-   occurredAt: Date;
-   aggregateVersion: number;
-   returnId: string;
-   orderId: string;
-   items: Array<{
-     sku: string;
-     orderedQty: number;
-     returnedQty: number;
-     approvedQty: number;
-     condition: 'new' | 'used' | 'damaged' | 'defective';
-     disposition: 'pending' | 'restock' | 'scrap' | 'repair' | 'return_to_supplier' | 'donate';
-     notes?: string;
-     images?: string[];
-   }>;
- }
-
-  export interface ReturnProcessedEvent extends InventoryDomainEvent {
-    eventType: 'inventory.return.processed';
-    type: 'inventory.return.processed';
-    occurredAt: Date;
-    aggregateVersion: number;
-    returnId: string;
-    processedBy: string;
-    disposition: 'restock' | 'scrap' | 'repair' | 'return_to_supplier' | 'donate';
-  }
-
-  export interface QuarantineCreatedEvent extends InventoryDomainEvent {
-    eventType: 'inventory.quarantine.created';
-    type: 'inventory.quarantine.created';
-    occurredAt: Date;
-    aggregateVersion: number;
-    quarantineId: string;
-    itemId: string;
-    sku: string;
-    location: string;
-    quantity: number;
-    reason: string;
-    severity: 'low' | 'medium' | 'high' | 'critical';
-    createdBy: string;
-  }
-
-  export interface QuarantineReleasedEvent extends InventoryDomainEvent {
-    eventType: 'inventory.quarantine.released';
-    type: 'inventory.quarantine.released';
-    occurredAt: Date;
-    aggregateVersion: number;
-    quarantineId: string;
-    releasedBy: string;
-    disposition: 'restock' | 'scrap' | 'repair' | 'return_to_supplier' | 'donate';
-    reason: string;
-  }
-
- export interface ReturnDispositionEvent extends InventoryDomainEvent {
-   eventType: 'inventory.return.disposition';
-   type: 'inventory.return.disposition';
-   occurredAt: Date;
-   aggregateVersion: number;
-   returnId: string;
-   disposition: 'restock' | 'scrap' | 'repair' | 'return_to_supplier' | 'donate';
-   reason: string;
- }
-
-// AI Events
 export interface AIAnomalyDetectedEvent extends InventoryDomainEvent {
   eventType: 'inventory.ai.anomaly.detected';
   type: 'inventory.ai.anomaly.detected';
@@ -538,43 +472,6 @@ export interface AIForecastGeneratedEvent extends InventoryDomainEvent {
   confidence: number;
 }
 
-export interface AISlottingOptimizedEvent extends InventoryDomainEvent {
-  eventType: 'inventory.ai.slotting.optimized';
-  type: 'inventory.ai.slotting.optimized';
-  occurredAt: Date;
-  aggregateVersion: number;
-  sku: string;
-  oldLocation: string;
-  newLocation: string;
-  reason: string;
-  aiConfidence: number;
-}
-
-export interface AIForecastEnhancedEvent extends InventoryDomainEvent {
-  eventType: 'inventory.ai.forecast.enhanced';
-  type: 'inventory.ai.forecast.enhanced';
-  occurredAt: Date;
-  aggregateVersion: number;
-  forecastId: string;
-  sku: string;
-  forecastType: 'demand' | 'inventory' | 'replenishment';
-  horizon: number;
-  confidence: number;
-}
-
-export interface AIModelTrainedEvent extends InventoryDomainEvent {
-  eventType: 'inventory.ai.model.trained';
-  type: 'inventory.ai.model.trained';
-  occurredAt: Date;
-  aggregateVersion: number;
-  modelId: string;
-  modelType: 'slotting' | 'forecasting' | 'anomaly_detection';
-  accuracy: number;
-  trainingDataSize: number;
-}
-
-
-// Traceability Events
 export interface TraceabilityQueryEvent extends InventoryDomainEvent {
   eventType: 'inventory.traceability.queried';
   type: 'inventory.traceability.queried';
@@ -583,36 +480,9 @@ export interface TraceabilityQueryEvent extends InventoryDomainEvent {
   queryType: 'lot' | 'serial' | 'product';
   queryId: string;
   queriedBy: string;
-  results: any;
+  results: unknown;
 }
 
-export interface TraceabilityEventCreatedEvent extends InventoryDomainEvent {
-  eventType: 'inventory.traceability.event.created';
-  type: 'inventory.traceability.event.created';
-  occurredAt: Date;
-  aggregateVersion: number;
-  eventId: string;
-  traceabilityEventType: 'object' | 'aggregation' | 'transformation' | 'transaction';
-  identifier: string;
-  location: string;
-  timestamp: Date;
-  actor: string;
-}
-
-export interface EPCISDocumentGeneratedEvent extends InventoryDomainEvent {
-  eventType: 'inventory.epcis.document.generated';
-  type: 'inventory.epcis.document.generated';
-  occurredAt: Date;
-  aggregateVersion: number;
-  documentId: string;
-  documentType: 'master_data' | 'events' | 'query_response';
-  businessProcess: string;
-  sender: string;
-  receiver: string;
-  eventCount: number;
-}
-
-// WCS/WES Events
 export interface RoboticsTaskCreatedEvent extends InventoryDomainEvent {
   eventType: 'inventory.robotics.task.created';
   type: 'inventory.robotics.task.created';
@@ -636,99 +506,6 @@ export interface RoboticsTaskCompletedEvent extends InventoryDomainEvent {
   duration: number;
   success: boolean;
   errorMessage?: string;
-}
-
-// EDI Events
-export interface EDI940ReceivedEvent extends InventoryDomainEvent {
-  eventType: 'inventory.edi.940.received';
-  type: 'inventory.edi.940.received';
-  occurredAt: Date;
-  aggregateVersion: number;
-  warehouseId: string;
-  items: Array<{
-    sku: string;
-    orderedQty: number;
-    returnedQty: number;
-    approvedQty: number;
-    condition: 'new' | 'used' | 'damaged' | 'defective';
-    disposition: 'pending' | 'restock' | 'scrap' | 'repair' | 'return_to_supplier' | 'donate';
-    notes?: string;
-    images?: string[];
-  }>;
-}
-
-export interface EDI943GeneratedEvent extends InventoryDomainEvent {
-  eventType: 'inventory.edi.943.generated';
-  type: 'inventory.edi.943.generated';
-  occurredAt: Date;
-  aggregateVersion: number;
-  warehouseId: string;
-  shipmentId: string;
-  carrier: string;
-  trackingNumber: string;
-}
-
-export interface EDI944ReceivedEvent extends InventoryDomainEvent {
-  eventType: 'inventory.edi.944.received';
-  type: 'inventory.edi.944.received';
-  occurredAt: Date;
-  aggregateVersion: number;
-  warehouseId: string;
-  items: Array<{
-    sku: string;
-    orderedQty: number;
-    returnedQty: number;
-    approvedQty: number;
-    condition: 'new' | 'used' | 'damaged' | 'defective';
-    disposition: 'pending' | 'restock' | 'scrap' | 'repair' | 'return_to_supplier' | 'donate';
-    notes?: string;
-    images?: string[];
-  }>;
-}
-
-export interface EDI945GeneratedEvent extends InventoryDomainEvent {
-  eventType: 'inventory.edi.945.generated';
-  type: 'inventory.edi.945.generated';
-  occurredAt: Date;
-  aggregateVersion: number;
-  warehouseId: string;
-  inventoryId: string;
-  location: string;
-  quantity: number;
-}
-
-export interface EDI947GeneratedEvent extends InventoryDomainEvent {
-  eventType: 'inventory.edi.947.generated';
-  type: 'inventory.edi.947.generated';
-  occurredAt: Date;
-  aggregateVersion: number;
-  warehouseId: string;
-  inventoryId: string;
-  location: string;
-  quantity: number;
-}
-
-// AI Events
-export interface AIForecastGeneratedEvent extends InventoryDomainEvent {
-  eventType: 'inventory.ai.forecast.generated';
-  sku: string;
-  forecastType: 'demand' | 'inventory' | 'replenishment';
-  forecast: Array<{
-    date: Date;
-    quantity: number;
-    confidence: number;
-  }>;
-  model: string;
-  accuracy: number;
-}
-
-export interface AIAnomalyDetectedEvent extends InventoryDomainEvent {
-  eventType: 'inventory.ai.anomaly.detected';
-  anomalyType: 'demand_spike' | 'inventory_discrepancy' | 'location_issue';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  description: string;
-  affectedItems: string[];
-  recommendedActions: string[];
 }
 
 // EDI Events

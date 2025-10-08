@@ -15,7 +15,7 @@ class CRMDomainService {
     constructor(customers, options = {}) {
         this.customers = customers;
         this.logger = options.logger ?? noopLogger;
-        this.metrics = options.metrics;
+        this.metrics = options.metrics ?? undefined;
     }
     async createCustomer(input) {
         this.logger.info('crm.customer.create.start', { name: input.name, type: input.type });

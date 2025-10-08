@@ -33,7 +33,7 @@ export function errorHandler(
   if (error.statusCode === 404) {
     reply.code(404).send({
       error: 'NotFound',
-      message: error.message || 'Resource not found',
+      message: error.message ?? 'Resource not found',
     });
     return;
   }
@@ -46,3 +46,4 @@ export function errorHandler(
       : error.message,
   });
 }
+

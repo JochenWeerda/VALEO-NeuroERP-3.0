@@ -17,7 +17,7 @@ export interface Product {
   category: string;
   description?: string;
   readonly createdAt: Date;
-  readonly updatedAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateProductCommand {
@@ -69,7 +69,7 @@ export class ProductUpdatedEvent implements DomainEvent {
 
   constructor(
     public readonly product: Product,
-    public readonly changes: Record<string, any>
+    public readonly changes: Record<string, unknown>
   ) {
     this.id = `product-updated-${Date.now()}`;
     this.aggregateId = product.id;
@@ -78,6 +78,8 @@ export class ProductUpdatedEvent implements DomainEvent {
     this.data = { product, changes };
   }
 }
+
+const DEFAULT_TAX_RATE = 0.19;
 
 export class ProductEntity implements Product {
   public readonly id: ProductId;
@@ -88,7 +90,7 @@ export class ProductEntity implements Product {
   public category: string;
   public description?: string;
   public readonly createdAt: Date;
-  public readonly updatedAt: Date;
+  public updatedAt: Date;
 
   private constructor(
     id: ProductId,
@@ -136,7 +138,7 @@ export class ProductEntity implements Product {
     // Validate command
     ProductEntity.validateUpdateCommand(command);
 
-    const changes: Record<string, any> = {};
+    const changes: Record<string, unknown> = {};
 
     if (command.name !== undefined) {
       this.name = command.name;
@@ -163,7 +165,7 @@ export class ProductEntity implements Product {
       changes.description = command.description;
     }
 
-    (this as any).updatedAt = new Date();
+    this.updatedAt = new Date();
     changes.updatedAt = this.updatedAt;
 
     return this;
@@ -179,7 +181,7 @@ export class ProductEntity implements Product {
     return true;
   }
 
-  calculateTotalPrice(quantity: number, taxRate: number = 0.19): number {
+  calculateTotalPrice(quantity: number, taxRate = DEFAULT_TAX_RATE): number {
     const netTotal = this.price * quantity;
     return netTotal * (1 + taxRate);
   }
@@ -225,7 +227,7 @@ export function isValidProductId(id: string): boolean {
   return typeof id === 'string' && id.length > 0;
 }
 
-export function formatPrice(price: number, currency: string = 'EUR'): string {
+export function formatPrice(price: number, currency = 'EUR'): string {
   return new Intl.NumberFormat('de-DE', {
     style: 'currency',
     currency

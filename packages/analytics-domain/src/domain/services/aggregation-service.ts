@@ -1,14 +1,12 @@
-import { eq, and, sql, desc, asc } from 'drizzle-orm';
+import { eq, sql, desc } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import {
   factContracts,
-  factProduction,
   factWeighing,
   factQuality,
   factRegulatory,
   factFinance,
   mvContractPositions,
-  mvInventoryBalances,
   mvQualityStats,
   mvRegulatoryStats,
   mvFinanceKpis,

@@ -17,7 +17,7 @@ const logger = pino({ name: 'ktbl-api' });
  * TODO: Aktivieren sobald KTBL-Webanwendung wieder verfügbar
  */
 
-const KTBL_API_BASE_URL = process.env.KTBL_API_URL || 'https://www.ktbl.de/webanwendungen/bek-parameter';
+const KTBL_API_BASE_URL = process.env.KTBL_API_URL ?? 'https://www.ktbl.de/webanwendungen/bek-parameter';
 const KTBL_API_ENABLED = process.env.KTBL_API_ENABLED === 'true';
 
 /**
@@ -54,7 +54,7 @@ export async function fetchKTBLEmissionParameters(
   crop: string,
   region?: string
 ): Promise<KTBLCropParameters | null> {
-  if (!KTBL_API_ENABLED) {
+  if (KTBL_API_ENABLED === undefined || KTBL_API_ENABLED === null) {
     logger.warn('KTBL API is disabled, using fallback data');
     return getKTBLFallbackData(crop, region);
   }
@@ -141,7 +141,7 @@ function getKTBLFallbackData(crop: string, region?: string): KTBLCropParameters 
 
   return {
     crop,
-    region: region || 'DE-Generic',
+    region: region ?? 'DE-Generic',
     yieldPerHa: 3.5, // Generic average
     nitrogenFertilizer: 150, // kg N/ha (generic)
     emissions,
@@ -172,7 +172,7 @@ export async function calculateCropEmissions(
 }> {
   const ktblData = await fetchKTBLEmissionParameters(crop, options?.region);
 
-  if (!ktblData) {
+  if (ktblData === undefined || ktblData === null) {
     throw new Error(`No KTBL data available for crop: ${crop}`);
   }
 
@@ -209,7 +209,7 @@ export async function getKTBLStatus(): Promise<{
   message: string;
   fallbackActive: boolean;
 }> {
-  if (!KTBL_API_ENABLED) {
+  if (KTBL_API_ENABLED === undefined || KTBL_API_ENABLED === null) {
     return {
       available: false,
       lastCheck: new Date().toISOString(),
@@ -250,7 +250,7 @@ const ktblCache: Map<string, { data: KTBLCropParameters; timestamp: number }> = 
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 Tage
 
 export function getCachedKTBLData(crop: string, region?: string): KTBLCropParameters | null {
-  const cacheKey = `${crop}:${region || 'default'}`;
+  const cacheKey = `${crop}:${region ?? 'default'}`;
   const cached = ktblCache.get(cacheKey);
 
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
@@ -262,6 +262,7 @@ export function getCachedKTBLData(crop: string, region?: string): KTBLCropParame
 }
 
 export function setCachedKTBLData(crop: string, region: string | undefined, data: KTBLCropParameters): void {
-  const cacheKey = `${crop}:${region || 'default'}`;
+  const cacheKey = `${crop}:${region ?? 'default'}`;
   ktblCache.set(cacheKey, { data, timestamp: Date.now() });
 }
+

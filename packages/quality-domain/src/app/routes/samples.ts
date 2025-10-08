@@ -13,7 +13,7 @@ export async function registerSampleRoutes(server: FastifyInstance): Promise<voi
   // Create sample
   server.post('/samples', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const userId = request.authContext?.userId || 'system';
+    const userId = request.authContext?.userId ?? 'system';
 
     const data = CreateSampleSchema.parse({ ...request.body, tenantId });
     const sample = await createSample(data, userId);
@@ -27,7 +27,7 @@ export async function registerSampleRoutes(server: FastifyInstance): Promise<voi
     const { id } = request.params as { id: string };
 
     const sample = await getSampleById(tenantId, id);
-    if (!sample) {
+    if (sample === undefined || sample === null) {
       reply.code(404).send({ error: 'NotFound', message: 'Sample not found' });
       return;
     }
@@ -79,3 +79,4 @@ export async function registerSampleRoutes(server: FastifyInstance): Promise<voi
     reply.send(result);
   });
 }
+

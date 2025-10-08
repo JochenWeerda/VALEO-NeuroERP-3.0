@@ -3,7 +3,7 @@ import { trace, Span, Tracer } from '@opentelemetry/api';
 let tracer: Tracer | null = null;
 
 export function getTracer(): Tracer {
-  if (!tracer) {
+  if (tracer === undefined || tracer === null) {
     tracer = trace.getTracer('sales-domain', '1.0.0');
   }
   return tracer;
@@ -34,7 +34,7 @@ export function tracingMiddleware() {
         'http.method': request.method,
         'http.url': request.url,
         'http.user_agent': request.headers['user-agent'] || '',
-        'tenant.id': request.tenantId || '',
+        'tenant.id': request.tenantId ?? '',
         'request.id': request.id,
       });
 

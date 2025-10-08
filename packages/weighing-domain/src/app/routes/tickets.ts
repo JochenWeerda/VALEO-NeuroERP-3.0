@@ -25,7 +25,7 @@ export async function registerTicketRoutes(
     },
     handler: async (request, reply) => {
       const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
+      if (tenantId === undefined || tenantId === null) {
         return reply.code(400).send({ error: 'Tenant ID required' });
       }
 
@@ -63,14 +63,14 @@ export async function registerTicketRoutes(
       const { id } = request.params as { id: string };
       const tenantId = request.headers['x-tenant-id'] as string;
 
-      if (!tenantId) {
+      if (tenantId === undefined || tenantId === null) {
         return reply.code(400).send({ error: 'Tenant ID required' });
       }
 
       try {
         const ticket = await weighingService.getTicket(id, tenantId);
 
-        if (!ticket) {
+        if (ticket === undefined || ticket === null) {
           return reply.code(404).send({ error: 'Ticket not found' });
         }
 
@@ -102,14 +102,14 @@ export async function registerTicketRoutes(
       const { number } = request.params as { number: string };
       const tenantId = request.headers['x-tenant-id'] as string;
 
-      if (!tenantId) {
+      if (tenantId === undefined || tenantId === null) {
         return reply.code(400).send({ error: 'Tenant ID required' });
       }
 
       try {
         const ticket = await weighingService.getTicketByNumber(number, tenantId);
 
-        if (!ticket) {
+        if (ticket === undefined || ticket === null) {
           return reply.code(404).send({ error: 'Ticket not found' });
         }
 
@@ -135,7 +135,7 @@ export async function registerTicketRoutes(
       const tenantId = request.headers['x-tenant-id'] as string;
       const query = request.query as any;
 
-      if (!tenantId) {
+      if (tenantId === undefined || tenantId === null) {
         return reply.code(400).send({ error: 'Tenant ID required' });
       }
 
@@ -174,7 +174,7 @@ export async function registerTicketRoutes(
       const { id } = request.params as { id: string };
       const tenantId = request.headers['x-tenant-id'] as string;
 
-      if (!tenantId) {
+      if (tenantId === undefined || tenantId === null) {
         return reply.code(400).send({ error: 'Tenant ID required' });
       }
 
@@ -210,7 +210,7 @@ export async function registerTicketRoutes(
       const { id } = request.params as { id: string };
       const tenantId = request.headers['x-tenant-id'] as string;
 
-      if (!tenantId) {
+      if (tenantId === undefined || tenantId === null) {
         return reply.code(400).send({ error: 'Tenant ID required' });
       }
 
@@ -249,7 +249,7 @@ export async function registerTicketRoutes(
       const { id } = request.params as { id: string };
       const tenantId = request.headers['x-tenant-id'] as string;
 
-      if (!tenantId) {
+      if (tenantId === undefined || tenantId === null) {
         return reply.code(400).send({ error: 'Tenant ID required' });
       }
 
@@ -291,7 +291,7 @@ export async function registerTicketRoutes(
       const tenantId = request.headers['x-tenant-id'] as string;
       const { reason } = request.body as { reason?: string };
 
-      if (!tenantId) {
+      if (tenantId === undefined || tenantId === null) {
         return reply.code(400).send({ error: 'Tenant ID required' });
       }
 
@@ -326,14 +326,14 @@ export async function registerTicketRoutes(
       const { id } = request.params as { id: string };
       const tenantId = request.headers['x-tenant-id'] as string;
 
-      if (!tenantId) {
+      if (tenantId === undefined || tenantId === null) {
         return reply.code(400).send({ error: 'Tenant ID required' });
       }
 
       try {
         const deleted = await weighingService.deleteTicket(id, tenantId);
 
-        if (!deleted) {
+        if (deleted === undefined || deleted === null) {
           return reply.code(404).send({ error: 'Ticket not found' });
         }
 
@@ -360,7 +360,7 @@ export async function registerTicketRoutes(
     handler: async (request, reply) => {
       const tenantId = request.headers['x-tenant-id'] as string;
 
-      if (!tenantId) {
+      if (tenantId === undefined || tenantId === null) {
         return reply.code(400).send({ error: 'Tenant ID required' });
       }
 
@@ -390,7 +390,7 @@ export async function registerTicketRoutes(
     handler: async (request, reply) => {
       const tenantId = request.headers['x-tenant-id'] as string;
 
-      if (!tenantId) {
+      if (tenantId === undefined || tenantId === null) {
         return reply.code(400).send({ error: 'Tenant ID required' });
       }
 

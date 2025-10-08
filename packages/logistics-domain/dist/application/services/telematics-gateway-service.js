@@ -28,7 +28,7 @@ class TelematicsGatewayService {
     }
     async calculateEta(tenantId, shipmentId, referenceTime = new Date()) {
         const route = await this.routeRepository.findRoutePlanByShipmentId(tenantId, shipmentId);
-        if (!route) {
+        if (route === undefined || route === null) {
             return undefined;
         }
         const remainingLegs = route.legs.filter((leg) => leg.eta.to.getTime() >= referenceTime.getTime());

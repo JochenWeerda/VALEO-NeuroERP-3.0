@@ -3,18 +3,46 @@
  * REST API endpoints for time tracking
  */
 
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { TimeEntryService } from '../../domain/services/time-entry-service';
-import { requireHrPermission, hrPermissions } from '../middleware/auth';
+import { type AuthContext, hrPermissions, requireHrPermission } from '../middleware/auth';
 
-// Request/Response schemas
+const MAX_BREAK_MINUTES = 480;
+const MAX_PAGE_SIZE = 100;
+const MIN_YEAR = 2020;
+const MAX_YEAR = 2030;
+const MIN_MONTH = 1;
+const MAX_MONTH = 12;
+
+const HTTP_STATUS = {
+  OK: 200,
+  CREATED: 201,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  INTERNAL_SERVER_ERROR: 500
+} as const;
+
+const AUTH_REQUIRED = { error: 'Authentication required' } as const;
+
+type AuthenticatedRequest = FastifyRequest & { auth: AuthContext };
+
+function ensureAuth(request: FastifyRequest, reply: FastifyReply): request is AuthenticatedRequest {
+  if (!request.auth) {
+    reply.code(HTTP_STATUS.UNAUTHORIZED).send(AUTH_REQUIRED);
+    return false;
+  }
+  return true;
+}
+
 const CreateTimeEntrySchema = z.object({
   employeeId: z.string().uuid(),
   date: z.string().date(),
   start: z.string().datetime(),
   end: z.string().datetime(),
-  breakMinutes: z.number().int().min(0).max(480).optional(),
+  breakMinutes: z.number().int().min(0).max(MAX_BREAK_MINUTES).optional(),
   projectId: z.string().uuid().optional(),
   costCenter: z.string().optional(),
   source: z.enum(['Manual', 'Terminal', 'Mobile']).optional()
@@ -23,7 +51,7 @@ const CreateTimeEntrySchema = z.object({
 const UpdateTimeEntrySchema = z.object({
   start: z.string().datetime().optional(),
   end: z.string().datetime().optional(),
-  breakMinutes: z.number().int().min(0).max(480).optional(),
+  breakMinutes: z.number().int().min(0).max(MAX_BREAK_MINUTES).optional(),
   projectId: z.string().uuid().optional(),
   costCenter: z.string().optional()
 });
@@ -38,13 +66,12 @@ const TimeEntryFiltersSchema = z.object({
   dateTo: z.string().date().optional(),
   approvedBy: z.string().uuid().optional(),
   page: z.number().int().min(1).optional(),
-  pageSize: z.number().int().min(1).max(100).optional(),
+  pageSize: z.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).optional()
 });
 
-export function registerTimeEntryRoutes(fastify: FastifyInstance, timeEntryService: TimeEntryService) {
-  // Create time entry
+export function registerTimeEntryRoutes(fastify: FastifyInstance, timeEntryService: TimeEntryService): void {
   fastify.post('/hr/api/v1/time-entries', {
     preHandler: [requireHrPermission(hrPermissions.TIME_WRITE)],
     schema: {
@@ -52,32 +79,36 @@ export function registerTimeEntryRoutes(fastify: FastifyInstance, timeEntryServi
       tags: ['time-entries'],
       body: CreateTimeEntrySchema,
       response: {
-        201: {
+        [HTTP_STATUS.CREATED]: {
           description: 'Time entry created successfully',
           type: 'object'
         },
-        400: {
+        [HTTP_STATUS.BAD_REQUEST]: {
           description: 'Invalid input data',
           type: 'object'
         }
       }
     }
-  }, async (request: FastifyRequest<{ Body: z.infer<typeof CreateTimeEntrySchema> }>, reply: FastifyReply) => {
+  }, async (request: FastifyRequest<{ Body: z.infer<typeof CreateTimeEntrySchema> }>, reply: FastifyReply): Promise<void> => {
+    if (!ensureAuth(request, reply)) {
+      return;
+    }
+
     try {
+      const { auth } = request;
       const timeEntry = await timeEntryService.createTimeEntry({
-        tenantId: request.auth!.tenantId,
-        createdBy: request.auth!.userId,
+        tenantId: auth.tenantId,
+        createdBy: auth.userId,
         ...request.body
       });
 
-      return reply.code(201).send(timeEntry);
+      reply.code(HTTP_STATUS.CREATED).send(timeEntry);
     } catch (error) {
-      console.error('Error creating time entry:', error);
-      return reply.code(400).send({ error: error instanceof Error ? error.message : 'Failed to create time entry' });
+      request.log.error({ err: error }, 'Error creating time entry');
+      reply.code(HTTP_STATUS.BAD_REQUEST).send({ error: error instanceof Error ? error.message : 'Failed to create time entry' });
     }
   });
 
-  // Get time entry by ID
   fastify.get('/hr/api/v1/time-entries/:id', {
     preHandler: [requireHrPermission(hrPermissions.TIME_READ)],
     schema: {
@@ -91,27 +122,30 @@ export function registerTimeEntryRoutes(fastify: FastifyInstance, timeEntryServi
         required: ['id']
       },
       response: {
-        200: {
+        [HTTP_STATUS.OK]: {
           description: 'Time entry details',
           type: 'object'
         },
-        404: {
+        [HTTP_STATUS.NOT_FOUND]: {
           description: 'Time entry not found',
           type: 'object'
         }
       }
     }
-  }, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+  }, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void> => {
+    if (!ensureAuth(request, reply)) {
+      return;
+    }
+
     try {
-      const timeEntry = await timeEntryService.getTimeEntry(request.auth!.tenantId, request.params.id);
-      return reply.send(timeEntry);
+      const timeEntry = await timeEntryService.getTimeEntry(request.auth.tenantId, request.params.id);
+      reply.send(timeEntry);
     } catch (error) {
-      console.error('Error getting time entry:', error);
-      return reply.code(404).send({ error: error instanceof Error ? error.message : 'Time entry not found' });
+      request.log.error({ err: error }, 'Error getting time entry');
+      reply.code(HTTP_STATUS.NOT_FOUND).send({ error: error instanceof Error ? error.message : 'Time entry not found' });
     }
   });
 
-  // List time entries
   fastify.get('/hr/api/v1/time-entries', {
     preHandler: [requireHrPermission(hrPermissions.TIME_READ)],
     schema: {
@@ -119,37 +153,39 @@ export function registerTimeEntryRoutes(fastify: FastifyInstance, timeEntryServi
       tags: ['time-entries'],
       querystring: TimeEntryFiltersSchema,
       response: {
-        200: {
-          description: 'List of time entries',
+        [HTTP_STATUS.OK]: {
+          description: 'List of time entries or paginated result',
           type: 'object'
         }
       }
     }
-  }, async (request: FastifyRequest<{ Querystring: z.infer<typeof TimeEntryFiltersSchema> }>, reply: FastifyReply) => {
-    try {
-      const { page, pageSize, sortBy, sortOrder, ...filters } = request.query;
-      
-      let result;
-      if (page && pageSize) {
-        result = await timeEntryService.listTimeEntries(request.auth!.tenantId, filters, {
-          page,
-          pageSize,
-          sortBy,
-          sortOrder,
-          filters
-        });
-      } else {
-        result = await timeEntryService.listTimeEntries(request.auth!.tenantId, filters);
-      }
+  }, async (request: FastifyRequest<{ Querystring: z.infer<typeof TimeEntryFiltersSchema> }>, reply: FastifyReply): Promise<void> => {
+    if (!ensureAuth(request, reply)) {
+      return;
+    }
 
-      return reply.send(result);
+    try {
+      const { auth } = request;
+      const { page, pageSize, sortBy, sortOrder, ...filters } = request.query;
+      const hasPagination = page !== undefined && pageSize !== undefined;
+
+      const result = hasPagination
+        ? await timeEntryService.listTimeEntries(auth.tenantId, filters, {
+            page,
+            pageSize,
+            sortBy,
+            sortOrder,
+            filters
+          })
+        : await timeEntryService.listTimeEntries(auth.tenantId, filters);
+
+      reply.send(result);
     } catch (error) {
-      console.error('Error listing time entries:', error);
-      return reply.code(500).send({ error: 'Failed to list time entries' });
+      request.log.error({ err: error }, 'Error listing time entries');
+      reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Failed to list time entries' });
     }
   });
 
-  // Update time entry
   fastify.patch('/hr/api/v1/time-entries/:id', {
     preHandler: [requireHrPermission(hrPermissions.TIME_WRITE)],
     schema: {
@@ -164,36 +200,36 @@ export function registerTimeEntryRoutes(fastify: FastifyInstance, timeEntryServi
       },
       body: UpdateTimeEntrySchema,
       response: {
-        200: {
+        [HTTP_STATUS.OK]: {
           description: 'Time entry updated successfully',
           type: 'object'
         },
-        404: {
+        [HTTP_STATUS.NOT_FOUND]: {
           description: 'Time entry not found',
           type: 'object'
         }
       }
     }
-  }, async (request: FastifyRequest<{ 
-    Params: { id: string }, 
-    Body: z.infer<typeof UpdateTimeEntrySchema> 
-  }>, reply: FastifyReply) => {
+  }, async (request: FastifyRequest<{ Params: { id: string }; Body: z.infer<typeof UpdateTimeEntrySchema> }>, reply: FastifyReply): Promise<void> => {
+    if (!ensureAuth(request, reply)) {
+      return;
+    }
+
     try {
       const timeEntry = await timeEntryService.updateTimeEntry({
-        tenantId: request.auth!.tenantId,
+        tenantId: request.auth.tenantId,
         timeEntryId: request.params.id,
         updates: request.body,
-        updatedBy: request.auth!.userId
+        updatedBy: request.auth.userId
       });
 
-      return reply.send(timeEntry);
+      reply.send(timeEntry);
     } catch (error) {
-      console.error('Error updating time entry:', error);
-      return reply.code(404).send({ error: error instanceof Error ? error.message : 'Time entry not found' });
+      request.log.error({ err: error }, 'Error updating time entry');
+      reply.code(HTTP_STATUS.NOT_FOUND).send({ error: error instanceof Error ? error.message : 'Time entry not found' });
     }
   });
 
-  // Approve time entry
   fastify.post('/hr/api/v1/time-entries/:id/approve', {
     preHandler: [requireHrPermission(hrPermissions.TIME_APPROVE)],
     schema: {
@@ -207,28 +243,31 @@ export function registerTimeEntryRoutes(fastify: FastifyInstance, timeEntryServi
         required: ['id']
       },
       response: {
-        200: {
-          description: 'Time entry approved successfully',
+        [HTTP_STATUS.OK]: {
+          description: 'Time entry approved',
           type: 'object'
         }
       }
     }
-  }, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+  }, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void> => {
+    if (!ensureAuth(request, reply)) {
+      return;
+    }
+
     try {
       const timeEntry = await timeEntryService.approveTimeEntry({
-        tenantId: request.auth!.tenantId,
+        tenantId: request.auth.tenantId,
         timeEntryId: request.params.id,
-        approvedBy: request.auth!.userId
+        approvedBy: request.auth.userId
       });
 
-      return reply.send(timeEntry);
+      reply.send(timeEntry);
     } catch (error) {
-      console.error('Error approving time entry:', error);
-      return reply.code(400).send({ error: error instanceof Error ? error.message : 'Failed to approve time entry' });
+      request.log.error({ err: error }, 'Error approving time entry');
+      reply.code(HTTP_STATUS.BAD_REQUEST).send({ error: error instanceof Error ? error.message : 'Failed to approve time entry' });
     }
   });
 
-  // Reject time entry
   fastify.post('/hr/api/v1/time-entries/:id/reject', {
     preHandler: [requireHrPermission(hrPermissions.TIME_APPROVE)],
     schema: {
@@ -248,32 +287,32 @@ export function registerTimeEntryRoutes(fastify: FastifyInstance, timeEntryServi
         }
       },
       response: {
-        200: {
-          description: 'Time entry rejected successfully',
+        [HTTP_STATUS.OK]: {
+          description: 'Time entry rejected',
           type: 'object'
         }
       }
     }
-  }, async (request: FastifyRequest<{ 
-    Params: { id: string }, 
-    Body: { reason?: string } 
-  }>, reply: FastifyReply) => {
+  }, async (request: FastifyRequest<{ Params: { id: string }; Body: { reason?: string } }>, reply: FastifyReply): Promise<void> => {
+    if (!ensureAuth(request, reply)) {
+      return;
+    }
+
     try {
       const timeEntry = await timeEntryService.rejectTimeEntry({
-        tenantId: request.auth!.tenantId,
+        tenantId: request.auth.tenantId,
         timeEntryId: request.params.id,
-        rejectedBy: request.auth!.userId,
+        rejectedBy: request.auth.userId,
         reason: request.body.reason
       });
 
-      return reply.send(timeEntry);
+      reply.send(timeEntry);
     } catch (error) {
-      console.error('Error rejecting time entry:', error);
-      return reply.code(400).send({ error: error instanceof Error ? error.message : 'Failed to reject time entry' });
+      request.log.error({ err: error }, 'Error rejecting time entry');
+      reply.code(HTTP_STATUS.BAD_REQUEST).send({ error: error instanceof Error ? error.message : 'Failed to reject time entry' });
     }
   });
 
-  // Get employee time entries
   fastify.get('/hr/api/v1/employees/:employeeId/time-entries', {
     preHandler: [requireHrPermission(hrPermissions.TIME_READ)],
     schema: {
@@ -294,55 +333,58 @@ export function registerTimeEntryRoutes(fastify: FastifyInstance, timeEntryServi
         }
       },
       response: {
-        200: {
+        [HTTP_STATUS.OK]: {
           description: 'Employee time entries',
           type: 'object'
         }
       }
     }
-  }, async (request: FastifyRequest<{ 
-    Params: { employeeId: string }, 
-    Querystring: { from?: string, to?: string } 
-  }>, reply: FastifyReply) => {
+  }, async (request: FastifyRequest<{ Params: { employeeId: string }; Querystring: { from?: string; to?: string } }>, reply: FastifyReply): Promise<void> => {
+    if (!ensureAuth(request, reply)) {
+      return;
+    }
+
     try {
-      const timeEntries = await timeEntryService.getEmployeeTimeEntries(
-        request.auth!.tenantId,
+      const entries = await timeEntryService.getEmployeeTimeEntries(
+        request.auth.tenantId,
         request.params.employeeId,
         request.query.from,
         request.query.to
       );
 
-      return reply.send(timeEntries);
+      reply.send(entries);
     } catch (error) {
-      console.error('Error getting employee time entries:', error);
-      return reply.code(500).send({ error: 'Failed to get employee time entries' });
+      request.log.error({ err: error }, 'Error getting employee time entries');
+      reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Failed to get employee time entries' });
     }
   });
 
-  // Get pending approvals
   fastify.get('/hr/api/v1/time-entries/pending', {
     preHandler: [requireHrPermission(hrPermissions.TIME_APPROVE)],
     schema: {
       description: 'Get time entries pending approval',
       tags: ['time-entries'],
       response: {
-        200: {
+        [HTTP_STATUS.OK]: {
           description: 'Time entries pending approval',
           type: 'object'
         }
       }
     }
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+  }, async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    if (!ensureAuth(request, reply)) {
+      return;
+    }
+
     try {
-      const pendingEntries = await timeEntryService.getPendingApprovals(request.auth!.tenantId);
-      return reply.send(pendingEntries);
+      const pendingEntries = await timeEntryService.getPendingApprovals(request.auth.tenantId);
+      reply.send(pendingEntries);
     } catch (error) {
-      console.error('Error getting pending approvals:', error);
-      return reply.code(500).send({ error: 'Failed to get pending approvals' });
+      request.log.error({ err: error }, 'Error getting pending approvals');
+      reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Failed to get pending approvals' });
     }
   });
 
-  // Get employee time summary
   fastify.get('/hr/api/v1/employees/:employeeId/time-summary', {
     preHandler: [requireHrPermission(hrPermissions.TIME_READ)],
     schema: {
@@ -364,32 +406,32 @@ export function registerTimeEntryRoutes(fastify: FastifyInstance, timeEntryServi
         required: ['from', 'to']
       },
       response: {
-        200: {
+        [HTTP_STATUS.OK]: {
           description: 'Employee time summary',
           type: 'object'
         }
       }
     }
-  }, async (request: FastifyRequest<{ 
-    Params: { employeeId: string }, 
-    Querystring: { from: string, to: string } 
-  }>, reply: FastifyReply) => {
+  }, async (request: FastifyRequest<{ Params: { employeeId: string }; Querystring: { from: string; to: string } }>, reply: FastifyReply): Promise<void> => {
+    if (!ensureAuth(request, reply)) {
+      return;
+    }
+
     try {
       const summary = await timeEntryService.getEmployeeTimeSummary(
-        request.auth!.tenantId,
+        request.auth.tenantId,
         request.params.employeeId,
         request.query.from,
         request.query.to
       );
 
-      return reply.send(summary);
+      reply.send(summary);
     } catch (error) {
-      console.error('Error getting employee time summary:', error);
-      return reply.code(500).send({ error: 'Failed to get employee time summary' });
+      request.log.error({ err: error }, 'Error getting employee time summary');
+      reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Failed to get employee time summary' });
     }
   });
 
-  // Get monthly summary
   fastify.get('/hr/api/v1/employees/:employeeId/monthly-summary/:year/:month', {
     preHandler: [requireHrPermission(hrPermissions.TIME_READ)],
     schema: {
@@ -399,37 +441,38 @@ export function registerTimeEntryRoutes(fastify: FastifyInstance, timeEntryServi
         type: 'object',
         properties: {
           employeeId: { type: 'string', format: 'uuid' },
-          year: { type: 'number', minimum: 2020, maximum: 2030 },
-          month: { type: 'number', minimum: 1, maximum: 12 }
+          year: { type: 'number', minimum: MIN_YEAR, maximum: MAX_YEAR },
+          month: { type: 'number', minimum: MIN_MONTH, maximum: MAX_MONTH }
         },
         required: ['employeeId', 'year', 'month']
       },
       response: {
-        200: {
+        [HTTP_STATUS.OK]: {
           description: 'Monthly time summary',
           type: 'object'
         }
       }
     }
-  }, async (request: FastifyRequest<{ 
-    Params: { employeeId: string, year: string, month: string } 
-  }>, reply: FastifyReply) => {
+  }, async (request: FastifyRequest<{ Params: { employeeId: string; year: string; month: string } }>, reply: FastifyReply): Promise<void> => {
+    if (!ensureAuth(request, reply)) {
+      return;
+    }
+
     try {
       const summary = await timeEntryService.getMonthlySummary(
-        request.auth!.tenantId,
+        request.auth.tenantId,
         request.params.employeeId,
-        parseInt(request.params.year),
-        parseInt(request.params.month)
+        Number.parseInt(request.params.year, 10),
+        Number.parseInt(request.params.month, 10)
       );
 
-      return reply.send(summary);
+      reply.send(summary);
     } catch (error) {
-      console.error('Error getting monthly summary:', error);
-      return reply.code(500).send({ error: 'Failed to get monthly summary' });
+      request.log.error({ err: error }, 'Error getting monthly summary');
+      reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Failed to get monthly summary' });
     }
   });
 
-  // Get yearly summary
   fastify.get('/hr/api/v1/employees/:employeeId/yearly-summary/:year', {
     preHandler: [requireHrPermission(hrPermissions.TIME_READ)],
     schema: {
@@ -439,32 +482,33 @@ export function registerTimeEntryRoutes(fastify: FastifyInstance, timeEntryServi
         type: 'object',
         properties: {
           employeeId: { type: 'string', format: 'uuid' },
-          year: { type: 'number', minimum: 2020, maximum: 2030 }
+          year: { type: 'number', minimum: MIN_YEAR, maximum: MAX_YEAR }
         },
         required: ['employeeId', 'year']
       },
       response: {
-        200: {
+        [HTTP_STATUS.OK]: {
           description: 'Yearly time summary',
           type: 'object'
         }
       }
     }
-  }, async (request: FastifyRequest<{ 
-    Params: { employeeId: string, year: string } 
-  }>, reply: FastifyReply) => {
+  }, async (request: FastifyRequest<{ Params: { employeeId: string; year: string } }>, reply: FastifyReply): Promise<void> => {
+    if (!ensureAuth(request, reply)) {
+      return;
+    }
+
     try {
       const summary = await timeEntryService.getYearlySummary(
-        request.auth!.tenantId,
+        request.auth.tenantId,
         request.params.employeeId,
-        parseInt(request.params.year)
+        Number.parseInt(request.params.year, 10)
       );
 
-      return reply.send(summary);
+      reply.send(summary);
     } catch (error) {
-      console.error('Error getting yearly summary:', error);
-      return reply.code(500).send({ error: 'Failed to get yearly summary' });
+      request.log.error({ err: error }, 'Error getting yearly summary');
+      reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Failed to get yearly summary' });
     }
   });
 }
-

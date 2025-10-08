@@ -47,7 +47,7 @@ export class CRMApiController {
 
   private async handleCreateCustomer(request: HttpRequest): Promise<HttpResponse> {
     const payload = request.body as CreateCustomerDTO | undefined;
-    if (!payload) {
+    if (payload === undefined || payload === null) {
       return { status: 400, body: { message: 'Request body is required' } };
     }
     try {
@@ -60,11 +60,11 @@ export class CRMApiController {
 
   private async handleUpdateCustomer(request: HttpRequest): Promise<HttpResponse> {
     const id = request.params.id;
-    if (!id) {
+    if (id === undefined || id === null) {
       return { status: 400, body: { message: 'Customer id missing' } };
     }
     const payload = request.body as UpdateCustomerDTO | undefined;
-    if (!payload) {
+    if (payload === undefined || payload === null) {
       return { status: 400, body: { message: 'Request body is required' } };
     }
     try {
@@ -77,7 +77,7 @@ export class CRMApiController {
 
   private async handleDeleteCustomer(request: HttpRequest): Promise<HttpResponse> {
     const id = request.params.id;
-    if (!id) {
+    if (id === undefined || id === null) {
       return { status: 400, body: { message: 'Customer id missing' } };
     }
     try {
@@ -88,23 +88,23 @@ export class CRMApiController {
     }
   }
 
-  private parseQuery(query: HttpRequest['query']): GetCustomersQueryDTO {
+  private parseQuery(query: HttpRequest['query']): any {
     const toStringValue = (value: string | string[] | undefined): string | undefined =>
       Array.isArray(value) ? value[0] : value;
 
     return {
-      search: toStringValue(query.search),
-      status: toStringValue(query.status) as GetCustomersQueryDTO['status'],
-      type: toStringValue(query.type) as GetCustomersQueryDTO['type'],
-      limit: toNumber(query.limit),
-      offset: toNumber(query.offset),
+      search: toStringValue(query.search) ?? undefined,
+      status: toStringValue(query.status) as GetCustomersQueryDTO['status'] ?? undefined,
+      type: toStringValue(query.type) as GetCustomersQueryDTO['type'] ?? undefined,
+      limit: toNumber(query.limit) ?? undefined,
+      offset: toNumber(query.offset) ?? undefined,
     };
   }
 }
 
 function toNumber(value: string | string[] | undefined): number | undefined {
   const raw = Array.isArray(value) ? value[0] : value;
-  if (!raw) {
+  if (raw === undefined || raw === null) {
     return undefined;
   }
   const parsed = Number(raw);
@@ -121,3 +121,4 @@ function toHttpError(error: unknown): HttpResponse<{ message: string }> {
   }
   return { status: 500, body: { message: 'Unknown error' } };
 }
+

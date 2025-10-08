@@ -48,7 +48,7 @@ export class InteractionService {
 
   async updateInteraction(id: string, data: UpdateInteractionData): Promise<InteractionEntity> {
     const existingInteraction = await this.deps.interactionRepo.findById(id, data.tenantId);
-    if (!existingInteraction) {
+    if (existingInteraction === undefined || existingInteraction === null) {
       throw new Error(`Interaction ${id} not found`);
     }
 
@@ -59,7 +59,7 @@ export class InteractionService {
 
     const updatedInteraction = await this.deps.interactionRepo.update(id, data.tenantId, data);
 
-    if (!updatedInteraction) {
+    if (updatedInteraction === undefined || updatedInteraction === null) {
       throw new Error(`Failed to update interaction ${id}`);
     }
 
@@ -68,7 +68,7 @@ export class InteractionService {
 
   async deleteInteraction(id: string, tenantId: string): Promise<boolean> {
     const interaction = await this.deps.interactionRepo.findById(id, tenantId);
-    if (!interaction) {
+    if (interaction === undefined || interaction === null) {
       throw new Error(`Interaction ${id} not found`);
     }
 
@@ -102,7 +102,7 @@ export class InteractionService {
     }
   ): Promise<InteractionEntity> {
     const interaction = await this.deps.interactionRepo.findById(interactionId, tenantId);
-    if (!interaction) {
+    if (interaction === undefined || interaction === null) {
       throw new Error(`Interaction ${interactionId} not found`);
     }
 
@@ -121,7 +121,7 @@ export class InteractionService {
       }
     );
 
-    if (!updatedInteraction) {
+    if (updatedInteraction === undefined || updatedInteraction === null) {
       throw new Error(`Failed to add attachment to interaction`);
     }
 
@@ -130,12 +130,12 @@ export class InteractionService {
 
   async removeAttachment(interactionId: string, tenantId: string, attachmentId: string): Promise<InteractionEntity> {
     const interaction = await this.deps.interactionRepo.findById(interactionId, tenantId);
-    if (!interaction) {
+    if (interaction === undefined || interaction === null) {
       throw new Error(`Interaction ${interactionId} not found`);
     }
 
     const attachmentExists = interaction.attachments.some(att => att.id === attachmentId);
-    if (!attachmentExists) {
+    if (attachmentExists === undefined || attachmentExists === null) {
       throw new Error(`Attachment ${attachmentId} not found`);
     }
 
@@ -147,7 +147,7 @@ export class InteractionService {
       { attachments: updatedAttachments }
     );
 
-    if (!updatedInteraction) {
+    if (updatedInteraction === undefined || updatedInteraction === null) {
       throw new Error(`Failed to remove attachment from interaction`);
     }
 

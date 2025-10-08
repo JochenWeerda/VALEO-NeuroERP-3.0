@@ -85,8 +85,14 @@ export class OpportunityEntity {
     return new OpportunityEntity(opportunity);
   }
 
-  public static fromPersistence(props: Opportunity): OpportunityEntity {
-    return new OpportunityEntity(props);
+  public static fromPersistence(props: any): OpportunityEntity {
+    return new OpportunityEntity({
+      ...props,
+      ownerUserId: props.ownerUserId ?? undefined,
+      expectedCloseDate: props.expectedCloseDate ?? undefined,
+      amountNet: props.amountNet ? Number(props.amountNet) : undefined,
+      currency: props.currency ?? undefined,
+    });
   }
 
   public update(props: UpdateOpportunityInput): void {

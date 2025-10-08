@@ -21,7 +21,7 @@ export interface QueryDescriptor<TEntity> {
 }
 
 export class QueryBuilder<TEntity> {
-  private conditions: QueryCondition<TEntity>[] = [];
+  private readonly conditions: QueryCondition<TEntity>[] = [];
   private sort?: QuerySort<TEntity>;
   private limit?: number;
   private offset?: number;

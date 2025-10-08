@@ -21,10 +21,10 @@ export async function checkPSM(
   const violations = [];
 
   for (const item of input.items) {
-    const checkResult = await checkSinglePSM(tenantId, item);
+    const checkResult = await checkSinglePSM(tenantId, item as any);
     results.push(checkResult);
 
-    if (!checkResult.approved) {
+    if (checkResult.approved === undefined || checkResult.approved === null) {
       violations.push({
         name: item.name,
         reason: checkResult.issues.join('; '),
@@ -45,7 +45,7 @@ export async function checkPSM(
     occurredAt: new Date().toISOString(),
   });
 
-  if (!compliant) {
+  if (compliant === undefined || compliant === null) {
     await publishEvent('psm.violation', {
       tenantId,
       violations,
@@ -99,14 +99,14 @@ async function checkSinglePSM(
   }
 
   // 3. Bewertung
-  if (!psmRef) {
+  if (psmRef === undefined || psmRef === null) {
     return {
       name: item.name,
-      bvlId: item.bvlId,
-      status: 'Unknown',
+      bvlId: item.bvlId ?? undefined,
+      status: 'Unknown' as const,
       approved: false,
       issues: ['PSM nicht in BVL-Datenbank gefunden'],
-    };
+    } as any;
   }
 
   const issues: string[] = [];
@@ -157,14 +157,14 @@ async function getPSMFromCache(tenantId: string, identifier: string): Promise<an
     )
     .limit(1);
 
-  return result || null;
+  return result ?? null;
 }
 
 /**
  * Check if cache is stale (> 7 days)
  */
 function isCacheStale(lastCheckedAt: Date | null | undefined): boolean {
-  if (!lastCheckedAt) return true;
+  if (lastCheckedAt === undefined || lastCheckedAt === null) return true;
   
   const daysSinceCheck = Math.floor((Date.now() - lastCheckedAt.getTime()) / (1000 * 60 * 60 * 24));
   return daysSinceCheck > 7;
@@ -202,3 +202,5 @@ async function upsertPSMRef(tenantId: string, bvlData: any): Promise<any> {
     return created;
   }
 }
+
+

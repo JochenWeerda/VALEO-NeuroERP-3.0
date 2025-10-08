@@ -15,7 +15,7 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
   // Create NC
   server.post('/ncs', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const userId = request.authContext?.userId || 'system';
+    const userId = request.authContext?.userId ?? 'system';
 
     const data = CreateNonConformitySchema.parse({ ...request.body, tenantId });
     const nc = await createNonConformity(data, userId);
@@ -29,7 +29,7 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
     const { id } = request.params as { id: string };
 
     const nc = await getNonConformityById(tenantId, id);
-    if (!nc) {
+    if (nc === undefined || nc === null) {
       reply.code(404).send({ error: 'NotFound', message: 'Non-conformity not found' });
       return;
     }
@@ -66,7 +66,7 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
   // Update NC
   server.patch('/ncs/:id', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const userId = request.authContext?.userId || 'system';
+    const userId = request.authContext?.userId ?? 'system';
     const { id } = request.params as { id: string };
 
     const data = UpdateNonConformitySchema.parse(request.body);
@@ -78,7 +78,7 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
   // Close NC
   server.post('/ncs/:id/close', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const userId = request.authContext?.userId || 'system';
+    const userId = request.authContext?.userId ?? 'system';
     const { id } = request.params as { id: string };
     const { comment } = request.body as { comment?: string };
 
@@ -92,7 +92,7 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
     const { id } = request.params as { id: string };
     const { assignedTo } = request.body as { assignedTo: string };
 
-    if (!assignedTo) {
+    if (assignedTo === undefined || assignedTo === null) {
       reply.code(400).send({ error: 'BadRequest', message: 'assignedTo is required' });
       return;
     }
@@ -107,7 +107,7 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
     const { id } = request.params as { id: string };
     const { capaId } = request.body as { capaId: string };
 
-    if (!capaId) {
+    if (capaId === undefined || capaId === null) {
       reply.code(400).send({ error: 'BadRequest', message: 'capaId is required' });
       return;
     }
@@ -129,3 +129,4 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
     reply.send(stats);
   });
 }
+

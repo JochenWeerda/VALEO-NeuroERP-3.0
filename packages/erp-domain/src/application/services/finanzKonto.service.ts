@@ -5,6 +5,9 @@
 import { FinanzKonto, FinanzKontoProps } from '../../core/entities/finanzKonto.entity';
 import { FinanzKontoPostgresRepository } from '../../infrastructure/repositories/finanzKonto-postgres.repository';
 
+const TAX_RATE_MIN = 0;
+const TAX_RATE_MAX = 100;
+
 const ALLOWED_ACCOUNT_TYPES = ['Aktiv', 'Passiv', 'Ertrag', 'Aufwand'];
 
 export interface CreateFinanzKontoDto {
@@ -34,13 +37,13 @@ function normalizeProps(dto: CreateFinanzKontoDto, existing?: FinanzKontoProps):
   const kontobezeichnung = dto.kontobezeichnung?.trim();
   const kontotyp = dto.kontotyp?.trim();
 
-  if (!kontonummer) {
+  if (kontonummer === undefined || kontonummer === null) {
     throw new Error('kontonummer is required');
   }
-  if (!kontobezeichnung) {
+  if (kontobezeichnung === undefined || kontobezeichnung === null) {
     throw new Error('kontobezeichnung is required');
   }
-  if (!kontotyp) {
+  if (kontotyp === undefined || kontotyp === null) {
     throw new Error('kontotyp is required');
   }
 
@@ -49,19 +52,19 @@ function normalizeProps(dto: CreateFinanzKontoDto, existing?: FinanzKontoProps):
     kontonummer,
     kontobezeichnung,
     kontotyp: assertKontotyp(kontotyp),
-    kontenklasse: dto.kontenklasse?.trim() || existing?.kontenklasse,
-    kontengruppe: dto.kontengruppe?.trim() || existing?.kontengruppe,
+    kontenklasse: dto.kontenklasse?.trim() ?? existing?.kontenklasse,
+    kontengruppe: dto.kontengruppe?.trim() ?? existing?.kontengruppe,
     ist_aktiv: dto.ist_aktiv ?? existing?.ist_aktiv ?? true,
     ist_steuerpflichtig: dto.ist_steuerpflichtig ?? existing?.ist_steuerpflichtig ?? false,
     steuersatz: dto.steuersatz ?? existing?.steuersatz,
-    beschreibung: dto.beschreibung?.trim() || existing?.beschreibung,
+    beschreibung: dto.beschreibung?.trim() ?? existing?.beschreibung,
     erstellt_von: dto.erstellt_von ?? existing?.erstellt_von,
     id: existing?.id,
     erstellt_am: existing?.erstellt_am,
     aktualisiert_am: existing?.aktualisiert_am,
   };
 
-  if (payload.steuersatz !== undefined && (payload.steuersatz < 0 || payload.steuersatz > 100)) {
+  if (payload.steuersatz !== undefined && (payload.steuersatz < TAX_RATE_MIN || payload.steuersatz > TAX_RATE_MAX)) {
     throw new Error('steuersatz must be between 0 and 100');
   }
 
@@ -83,7 +86,7 @@ export class FinanzKontoService {
     const normalized = normalizeProps(payload);
 
     const existing = await this.repository.findByKontonummer(normalized.kontonummer);
-    if (existing) {
+    if (existing !== undefined && existing !== null) {
       throw new Error(`FinanzKonto with kontonummer ${normalized.kontonummer} already exists`);
     }
 
@@ -93,7 +96,7 @@ export class FinanzKontoService {
 
   public async update(id: string, payload: UpdateFinanzKontoDto): Promise<FinanzKonto> {
     const existing = await this.repository.findById(id);
-    if (!existing) {
+    if (existing === undefined || existing === null) {
       throw new Error('FinanzKonto not found');
     }
 
@@ -112,7 +115,7 @@ export class FinanzKontoService {
     }, currentProps);
 
     const duplicate = await this.repository.findByKontonummer(normalized.kontonummer);
-    if (duplicate && duplicate.toPrimitives().id !== id) {
+    if ((duplicate !== undefined && duplicate !== null) && duplicate.toPrimitives().id !== id) {
       throw new Error(`Another FinanzKonto already uses kontonummer ${normalized.kontonummer}`);
     }
 

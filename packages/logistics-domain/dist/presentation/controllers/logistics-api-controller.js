@@ -35,7 +35,7 @@ function createLogisticsRouter(deps) {
         try {
             const { tenantId, shipmentId } = req.params;
             const shipment = await deps.shipments.getShipment(tenantId, shipmentId);
-            if (!shipment) {
+            if (shipment === undefined || shipment === null) {
                 res.status(404).json({ message: 'Shipment not found' });
                 return;
             }

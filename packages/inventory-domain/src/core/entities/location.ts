@@ -119,7 +119,7 @@ export class Location {
   }
 
   getDistanceTo(otherLocation: Location): number {
-    if (!this._attributes.coordinates || !otherLocation._attributes.coordinates) {
+    if (this._attributes.coordinates == null || otherLocation._attributes.coordinates == null) {
       return 0; // No coordinate data available
     }
 
@@ -138,7 +138,7 @@ export class Location {
 
   unblock(): void {
     this._attributes.blocked = false;
-    this._attributes.blockReason = undefined as any;
+    this._attributes.blockReason = undefined;
     this._attributes.updatedAt = new Date();
   }
 

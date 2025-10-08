@@ -96,6 +96,9 @@ class CustomerRepository {
     async update(id, tenantId, input) {
         const updateData = {
             ...input,
+            email: input.email ?? undefined,
+            phone: input.phone ?? undefined,
+            vatId: input.vatId ?? undefined,
             updatedAt: new Date()
         };
         const result = await connection_1.db

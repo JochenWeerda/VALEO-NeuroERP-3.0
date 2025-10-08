@@ -70,6 +70,7 @@ export class HttpClient {
     const fullUrl = this.buildUrl(url);
     const requestHeaders = this.buildHeaders(options.headers);
 
+    // eslint-disable-next-line no-undef
     const requestOptions: RequestInit = {
       method,
       headers: requestHeaders,

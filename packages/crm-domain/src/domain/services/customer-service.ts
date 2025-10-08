@@ -48,7 +48,7 @@ export class CustomerService {
   async updateCustomer(id: string, data: UpdateCustomerData): Promise<CustomerEntity> {
     // Get existing customer
     const existingCustomer = await this.deps.customerRepo.findById(id, data.tenantId);
-    if (!existingCustomer) {
+    if (existingCustomer === undefined || existingCustomer === null) {
       throw new Error(`Customer ${id} not found`);
     }
 
@@ -60,7 +60,7 @@ export class CustomerService {
     // Update customer
     const updatedCustomer = await this.deps.customerRepo.update(id, data.tenantId, data);
 
-    if (!updatedCustomer) {
+    if (updatedCustomer === undefined || updatedCustomer === null) {
       throw new Error(`Failed to update customer ${id}`);
     }
 
@@ -70,7 +70,7 @@ export class CustomerService {
   async deleteCustomer(id: string, tenantId: string): Promise<boolean> {
     // Check if customer exists
     const customer = await this.deps.customerRepo.findById(id, tenantId);
-    if (!customer) {
+    if (customer === undefined || customer === null) {
       throw new Error(`Customer ${id} not found`);
     }
 
@@ -82,7 +82,7 @@ export class CustomerService {
 
   async changeCustomerStatus(id: string, tenantId: string, status: CustomerStatusType): Promise<CustomerEntity> {
     const customer = await this.deps.customerRepo.findById(id, tenantId);
-    if (!customer) {
+    if (customer === undefined || customer === null) {
       throw new Error(`Customer ${id} not found`);
     }
 
@@ -96,7 +96,7 @@ export class CustomerService {
 
     const updatedCustomer = await this.deps.customerRepo.updateStatus(id, tenantId, status);
 
-    if (!updatedCustomer) {
+    if (updatedCustomer === undefined || updatedCustomer === null) {
       throw new Error(`Failed to update customer status`);
     }
 
@@ -105,7 +105,7 @@ export class CustomerService {
 
   async addTag(id: string, tenantId: string, tag: string): Promise<CustomerEntity> {
     const customer = await this.deps.customerRepo.findById(id, tenantId);
-    if (!customer) {
+    if (customer === undefined || customer === null) {
       throw new Error(`Customer ${id} not found`);
     }
 
@@ -115,7 +115,7 @@ export class CustomerService {
 
     const updatedCustomer = await this.deps.customerRepo.addTag(id, tenantId, tag);
 
-    if (!updatedCustomer) {
+    if (updatedCustomer === undefined || updatedCustomer === null) {
       throw new Error(`Failed to add tag to customer`);
     }
 
@@ -124,7 +124,7 @@ export class CustomerService {
 
   async removeTag(id: string, tenantId: string, tag: string): Promise<CustomerEntity> {
     const customer = await this.deps.customerRepo.findById(id, tenantId);
-    if (!customer) {
+    if (customer === undefined || customer === null) {
       throw new Error(`Customer ${id} not found`);
     }
 
@@ -134,7 +134,7 @@ export class CustomerService {
 
     const updatedCustomer = await this.deps.customerRepo.removeTag(id, tenantId, tag);
 
-    if (!updatedCustomer) {
+    if (updatedCustomer === undefined || updatedCustomer === null) {
       throw new Error(`Failed to remove tag from customer`);
     }
 

@@ -14,7 +14,7 @@ export class RoutingOptimizationService {
 
   async planRoute(dto: RoutingPlanRequestDto): Promise<RoutePlan> {
     const shipment = await this.shipmentRepository.findShipmentById(dto.tenantId, dto.shipmentId);
-    if (!shipment) {
+    if (shipment === undefined || shipment === null) {
       throw new Error(`Cannot plan route: shipment ${dto.shipmentId} not found for tenant ${dto.tenantId}`);
     }
 
@@ -50,3 +50,4 @@ export class RoutingOptimizationService {
     return route;
   }
 }
+

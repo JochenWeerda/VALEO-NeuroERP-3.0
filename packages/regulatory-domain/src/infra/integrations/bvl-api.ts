@@ -3,7 +3,7 @@ import pino from 'pino';
 
 const logger = pino({ name: 'bvl-api' });
 
-const BVL_API_BASE_URL = process.env.BVL_API_URL || 'https://apps2.bvl.bund.de/psm/jsp';
+const BVL_API_BASE_URL = process.env.BVL_API_URL ?? 'https://apps2.bvl.bund.de/psm/jsp';
 
 /**
  * Fetch PSM data from BVL Online Database
@@ -127,3 +127,4 @@ export async function searchPSM(query: string, filters?: {
 
   return filtered;
 }
+

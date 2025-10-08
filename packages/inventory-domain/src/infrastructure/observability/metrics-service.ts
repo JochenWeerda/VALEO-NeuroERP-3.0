@@ -34,9 +34,9 @@ export interface MetricsService {
 }
 
 export class InventoryMetricsService implements MetricsService {
-  private counters = new Map<string, number>();
-  private gauges = new Map<string, number>();
-  private histograms = new Map<string, number[]>();
+  private readonly counters = new Map<string, number>();
+  private readonly gauges = new Map<string, number>();
+  private readonly histograms = new Map<string, number[]>();
 
   incrementCounter(name: string, labels?: Record<string, string>): void {
     const key = this.getKey(name, labels);

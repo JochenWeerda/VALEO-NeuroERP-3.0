@@ -3,7 +3,7 @@ import type { UpdateOrderStatusCommand } from '../../application/commands/update
 import type { DeleteOrderCommand } from '../../application/commands/delete-order';
 import type { ListOrdersQuery } from '../../application/queries/list-orders';
 import type { GetOrderQuery } from '../../application/queries/get-order';
-import type { CreateOrderDTO, UpdateOrderStatusDTO, OrderDTO } from '../../application/dto/order-dto';
+import type { CreateOrderDTO, UpdateOrderStatusDTO } from '../../application/dto/order-dto';
 import type { OrderId } from '@valero-neuroerp/data-models';
 
 export interface HttpRequest<TBody = unknown> {
@@ -59,11 +59,11 @@ export class ERPApiController {
 
   private async handleGetOrder(request: HttpRequest): Promise<HttpResponse> {
     const id = request.params.id;
-    if (!id) {
+    if (id === undefined || id === null) {
       return { status: 400, body: { message: 'Order id missing.' } };
     }
     const order = await this.getOrder.execute(id as OrderId);
-    if (!order) {
+    if (order === undefined || order === null) {
       return { status: 404, body: { message: 'Order not found.' } };
     }
     return { status: 200, body: order };
@@ -71,7 +71,7 @@ export class ERPApiController {
 
   private async handleCreateOrder(request: HttpRequest): Promise<HttpResponse> {
     const body = request.body as CreateOrderDTO | undefined;
-    if (!body) {
+    if (body === undefined || body === null) {
       return { status: 400, body: { message: 'Request body is required.' } };
     }
     const created = await this.createOrder.execute(body);
@@ -80,11 +80,11 @@ export class ERPApiController {
 
   private async handleUpdateStatus(request: HttpRequest): Promise<HttpResponse> {
     const id = request.params.id;
-    if (!id) {
+    if (id === undefined || id === null) {
       return { status: 400, body: { message: 'Order id missing.' } };
     }
     const body = request.body as UpdateOrderStatusDTO | undefined;
-    if (!body?.status) {
+    if (body?.status == null) {
       return { status: 400, body: { message: 'Status is required.' } };
     }
     const updated = await this.updateOrderStatus.execute(id as OrderId, body);
@@ -93,7 +93,7 @@ export class ERPApiController {
 
   private async handleDeleteOrder(request: HttpRequest): Promise<HttpResponse> {
     const id = request.params.id;
-    if (!id) {
+    if (id === undefined || id === null) {
       return { status: 400, body: { message: 'Order id missing.' } };
     }
     await this.deleteOrder.execute(id as OrderId);
@@ -110,7 +110,9 @@ function pickString(value: string | string[] | undefined): string | undefined {
 
 function pickNumber(value: string | string[] | undefined): number | undefined {
   const raw = pickString(value);
-  if (!raw) return undefined;
+  if (raw === undefined || raw === null) return undefined;
   const parsed = Number(raw);
   return Number.isFinite(parsed) ? parsed : undefined;
 }
+
+

@@ -56,7 +56,7 @@ export class InMemoryRepository<TEntity extends Record<IdField, TId>, IdField ex
   async update(id: TId, updates: Partial<TEntity>): Promise<TEntity> {
     const existing = this.entities.get(id);
     if (!existing) {
-      throw new Error('Entity with id "' + String(id) + '" not found.');
+      throw new Error(`Entity with id "${  String(id)  }" not found.`);
     }
 
     const updated: TEntity = { ...existing, ...updates } as TEntity;
@@ -72,6 +72,8 @@ export class InMemoryRepository<TEntity extends Record<IdField, TId>, IdField ex
 const matchesQuery = <TEntity>(entity: TEntity, query: RepositoryQuery<TEntity>): boolean => {
   return query.conditions.every(condition => matchesCondition(entity, condition));
 };
+
+const EXPECTED_BETWEEN_LENGTH = 2;
 
 const matchesCondition = <TEntity>(
   entity: TEntity,
@@ -102,7 +104,7 @@ const matchesCondition = <TEntity>(
     case 'ilike':
       return stringMatch(value, conditionValue, true);
     case 'between': {
-      if (!Array.isArray(conditionValue) || conditionValue.length !== 2) {
+      if (!Array.isArray(conditionValue) || conditionValue.length !== EXPECTED_BETWEEN_LENGTH) {
         throw new Error('Between operator requires a tuple [min, max].');
       }
       const [minValue, maxValue] = conditionValue as [unknown, unknown];
@@ -130,7 +132,7 @@ const compare = (a: unknown, b: unknown): number => {
     return 0;
   }
 
-  return (a as any) > (b as any) ? 1 : -1;
+  return String(a) > String(b) ? 1 : -1;
 };
 
 const stringMatch = (value: unknown, pattern: unknown, caseInsensitive: boolean): boolean => {
@@ -140,7 +142,7 @@ const stringMatch = (value: unknown, pattern: unknown, caseInsensitive: boolean)
 
   const escapeRegex = /[.*+?^${}()|[\]\\]/g;
   const escapedPattern = pattern.replace(escapeRegex, '\\$&');
-  const wildcardPattern = '^' + escapedPattern.replace(/%/g, '.*').replace(/_/g, '.') + '$';
+  const wildcardPattern = `^${  escapedPattern.replace(/%/g, '.*').replace(/_/g, '.')  }$`;
   const regex = new RegExp(wildcardPattern, caseInsensitive ? 'i' : undefined);
   return regex.test(value);
 };

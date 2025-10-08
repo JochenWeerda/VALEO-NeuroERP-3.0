@@ -18,16 +18,17 @@ export async function registerPSMRoutes(server: FastifyInstance): Promise<void> 
   server.get('/psm/search', async (request, reply) => {
     const query = request.query as Record<string, string>;
 
-    if (!query.q) {
+    if (query.q === undefined || query.q === null) {
       reply.code(400).send({ error: 'BadRequest', message: 'Query parameter "q" is required' });
       return;
     }
 
     const results = await searchPSM(query.q, {
-      activeSubstance: query.activeSubstance,
-      crop: query.crop,
-    });
+      activeSubstance: query.activeSubstance ?? undefined,
+      crop: query.crop ?? undefined,
+    } as any);
 
     reply.send({ data: results, count: results.length });
   });
 }
+

@@ -21,7 +21,7 @@ dotenv.config();
 
 const server = fastify({
   logger: {
-    level: process.env.LOG_LEVEL || 'info',
+    level: process.env.LOG_LEVEL ?? 'info',
     serializers: {
       req: (req) => ({
         method: req.method,
@@ -52,7 +52,7 @@ server.register(swagger, {
     },
     servers: [
       {
-        url: process.env.API_BASE_URL || 'http://localhost:3007',
+        url: process.env.API_BASE_URL ?? 'http://localhost:3007',
         description: 'Development server',
       },
     ],
@@ -118,8 +118,8 @@ export async function start(): Promise<void> {
     // Start hidden monitoring (AI-powered background monitoring)
     startHiddenMonitoring();
 
-    const port = parseInt(process.env.PORT || '3007', 10);
-    const host = process.env.HOST || '0.0.0.0';
+    const port = parseInt(process.env.PORT ?? '3007', 10);
+    const host = process.env.HOST ?? '0.0.0.0';
 
     await server.listen({ port, host });
     server.log.info(`🚀 Quality Domain server listening on ${host}:${port}`);
@@ -156,3 +156,4 @@ if (require.main === module) {
 }
 
 export default server;
+

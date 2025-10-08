@@ -17,6 +17,7 @@ export interface KPIMetadata {
 }
 
 export class KPI {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   constructor(
     public readonly id: string,
     public readonly tenantId: string,

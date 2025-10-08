@@ -4,7 +4,7 @@ exports.buildOrderQuery = void 0;
 const utilities_1 = require("@valero-neuroerp/utilities");
 const buildOrderQuery = (filters) => {
     const builder = (0, utilities_1.createQueryBuilder)();
-    if (!filters) {
+    if (filters === undefined || filters === null) {
         return builder.build();
     }
     if (filters.status) {

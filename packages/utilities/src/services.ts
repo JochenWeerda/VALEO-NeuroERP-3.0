@@ -15,10 +15,10 @@ export interface MetricsRecorder {
 
 export class ServiceLocator {
   private static instance: ServiceLocator;
-  private services = new Map<string, any>();
+  private readonly services = new Map<string, unknown>();
 
   static getInstance(): ServiceLocator {
-    if (!ServiceLocator.instance) {
+    if (ServiceLocator.instance == null) {
       ServiceLocator.instance = new ServiceLocator();
     }
     return ServiceLocator.instance;
@@ -34,10 +34,10 @@ export class ServiceLocator {
 
   resolve<T>(token: string): T {
     const service = this.services.get(token);
-    if (!service) {
+    if (service == null) {
       throw new Error(`Service with token '${token}' not found`);
     }
-    return typeof service === 'function' ? service() : service;
+    return typeof service === 'function' ? (service as () => T)() : service as T;
   }
 
   has(token: string): boolean {
@@ -50,13 +50,13 @@ export class ServiceLocator {
 }
 
 export const metricsService: MetricsRecorder = {
-  incrementCounter(name: string, labels?: Record<string, string>): void {
-    console.log(`[METRICS] Counter ${name} incremented`, labels);
+  incrementCounter(_name: string, _labels?: Record<string, string>): void {
+    // Metrics recording placeholder - implement actual metrics collection
   },
-  recordGauge(name: string, value: number, labels?: Record<string, string>): void {
-    console.log(`[METRICS] Gauge ${name} recorded: ${value}`, labels);
+  recordGauge(_name: string, _value: number, _labels?: Record<string, string>): void {
+    // Metrics recording placeholder - implement actual metrics collection
   },
-  recordHistogram(name: string, value: number, labels?: Record<string, string>): void {
-    console.log(`[METRICS] Histogram ${name} recorded: ${value}`, labels);
+  recordHistogram(_name: string, _value: number, _labels?: Record<string, string>): void {
+    // Metrics recording placeholder - implement actual metrics collection
   },
 };

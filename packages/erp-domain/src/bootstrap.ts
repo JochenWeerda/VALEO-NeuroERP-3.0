@@ -35,27 +35,29 @@ export function registerErpDomain(options: ErpBootstrapOptions = {}): ServiceLoc
 
   locator.registerFactory(TOKENS.service, () => new OrderDomainService(locator.resolve<OrderRepository>(TOKENS.repository)));
 
-  locator.registerFactory(TOKENS.listOrders, () => new ListOrdersQuery(locator.resolve(TOKENS.service) as OrderDomainService));
-  locator.registerFactory(TOKENS.getOrder, () => new GetOrderQuery(locator.resolve(TOKENS.service) as OrderDomainService));
-  locator.registerFactory(TOKENS.createOrder, () => new CreateOrderCommand(locator.resolve(TOKENS.service) as OrderDomainService));
-  locator.registerFactory(TOKENS.updateOrderStatus, () => new UpdateOrderStatusCommand(locator.resolve(TOKENS.service) as OrderDomainService));
-  locator.registerFactory(TOKENS.deleteOrder, () => new DeleteOrderCommand(locator.resolve(TOKENS.service) as OrderDomainService));
+  locator.registerFactory(TOKENS.listOrders, () => new ListOrdersQuery(locator.resolve<OrderDomainService>(TOKENS.service)));
+  locator.registerFactory(TOKENS.getOrder, () => new GetOrderQuery(locator.resolve<OrderDomainService>(TOKENS.service)));
+  locator.registerFactory(TOKENS.createOrder, () => new CreateOrderCommand(locator.resolve<OrderDomainService>(TOKENS.service)));
+  locator.registerFactory(TOKENS.updateOrderStatus, () => new UpdateOrderStatusCommand(locator.resolve<OrderDomainService>(TOKENS.service)));
+  locator.registerFactory(TOKENS.deleteOrder, () => new DeleteOrderCommand(locator.resolve<OrderDomainService>(TOKENS.service)));
 
   locator.registerFactory(TOKENS.controller, () =>
     new ERPApiController(
-      locator.resolve(TOKENS.listOrders) as ListOrdersQuery,
-      locator.resolve(TOKENS.getOrder) as GetOrderQuery,
-      locator.resolve(TOKENS.createOrder) as CreateOrderCommand,
-      locator.resolve(TOKENS.updateOrderStatus) as UpdateOrderStatusCommand,
-      locator.resolve(TOKENS.deleteOrder) as DeleteOrderCommand,
+      locator.resolve<ListOrdersQuery>(TOKENS.listOrders),
+      locator.resolve<GetOrderQuery>(TOKENS.getOrder),
+      locator.resolve<CreateOrderCommand>(TOKENS.createOrder),
+      locator.resolve<UpdateOrderStatusCommand>(TOKENS.updateOrderStatus),
+      locator.resolve<DeleteOrderCommand>(TOKENS.deleteOrder),
     ),
   );
 
   return locator;
 }
 
-export const resolveErpDomainService = (locator: ServiceLocator = ServiceLocator.getInstance()) =>
+export const resolveErpDomainService = (locator: ServiceLocator = ServiceLocator.getInstance()): OrderDomainService =>
   locator.resolve<OrderDomainService>(TOKENS.service);
 
-export const resolveErpController = (locator: ServiceLocator = ServiceLocator.getInstance()) =>
+export const resolveErpController = (locator: ServiceLocator = ServiceLocator.getInstance()): ERPApiController =>
   locator.resolve<ERPApiController>(TOKENS.controller);
+
+

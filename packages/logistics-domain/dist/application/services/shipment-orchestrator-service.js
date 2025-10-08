@@ -33,7 +33,7 @@ class ShipmentOrchestratorService {
     }
     async cancelShipment(tenantId, shipmentId, reason) {
         const shipment = await this.repository.findShipmentById(tenantId, shipmentId);
-        if (!shipment) {
+        if (shipment === undefined || shipment === null) {
             throw new Error(`Shipment ${shipmentId} not found for tenant ${tenantId}`);
         }
         shipment.updateStatus('canceled');

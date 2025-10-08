@@ -27,7 +27,7 @@ export async function createSample(data: CreateSample, userId: string): Promise<
     retainedUntil: data.retainedUntil ? new Date(data.retainedUntil) : undefined,
   }).returning();
 
-  if (!sample) {
+  if (sample === undefined || sample === null) {
     throw new Error('Failed to create sample');
   }
 
@@ -65,7 +65,7 @@ export async function getSampleById(tenantId: string, sampleId: string): Promise
 export async function addSampleResult(data: CreateSampleResult): Promise<SampleResult> {
   // Verify sample exists
   const sample = await getSampleById(data.tenantId, data.sampleId);
-  if (!sample) {
+  if (sample === undefined || sample === null) {
     throw new Error('Sample not found');
   }
 
@@ -75,7 +75,7 @@ export async function addSampleResult(data: CreateSampleResult): Promise<SampleR
     analyzedAt: data.analyzedAt ? new Date(data.analyzedAt) : undefined,
   }).returning();
 
-  if (!result) {
+  if (result === undefined || result === null) {
     throw new Error('Failed to add sample result');
   }
 
@@ -104,7 +104,7 @@ export async function addSampleResult(data: CreateSampleResult): Promise<SampleR
  */
 export async function analyzeSample(tenantId: string, sampleId: string): Promise<{ status: string; allPass: boolean }> {
   const sample = await getSampleById(tenantId, sampleId);
-  if (!sample) {
+  if (sample === undefined || sample === null) {
     throw new Error('Sample not found');
   }
 
@@ -142,7 +142,7 @@ export async function analyzeSample(tenantId: string, sampleId: string): Promise
   });
 
   // If rejected or investigate, consider creating NC automatically
-  if (!allPass) {
+  if (allPass === undefined || allPass === null) {
     await publishEvent('quality.issue.detected', {
       tenantId,
       sampleId,
@@ -201,3 +201,4 @@ export async function listSamples(
 
   return filtered as Sample[];
 }
+

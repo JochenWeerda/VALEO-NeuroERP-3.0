@@ -453,7 +453,7 @@ export class EDIService {
    */
   private async parseEDITransaction(rawMessage: string, expectedType: string, direction: 'inbound' | 'outbound'): Promise<EDITransaction> {
     // Parse ISA segment
-    const isaMatch = rawMessage.match(/ISA\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)~/);
+    const isaMatch = rawMessage.match(/ISA\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)\*([^*]+)~/);
     if (!isaMatch) {
       throw new Error('Invalid EDI message: Missing or malformed ISA segment');
     }
@@ -676,11 +676,13 @@ export class EDIService {
 
   private async processWarehouseShippingOrder(order: EDI940WarehouseShippingOrder): Promise<void> {
     // Create picking tasks, allocate inventory, etc.
+    // eslint-disable-next-line no-console
     console.log(`Processing warehouse shipping order: ${order.shipmentId}`);
   }
 
   private async processTransferReceiptAdvice(receipt: EDI944WarehouseStockTransferReceiptAdvice): Promise<void> {
     // Update inventory, handle discrepancies, etc.
+    // eslint-disable-next-line no-console
     console.log(`Processing transfer receipt advice: ${receipt.transferId}`);
   }
 

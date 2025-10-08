@@ -1,4 +1,4 @@
-import { register, collectDefaultMetrics, Gauge, Counter, Histogram } from 'prom-client';
+import { Counter, Gauge, Histogram, collectDefaultMetrics, register } from 'prom-client';
 
 export class MetricsService {
   private static instance: MetricsService;

@@ -153,7 +153,7 @@ export class AuthService {
 
     try {
       const user = this.users.get(credentials.email);
-      if (!user || !user.isActive) {
+      if (!user?.isActive) {
         this.metrics.incrementErrorCount('authentication', 'invalid_credentials');
         throw new Error('Invalid credentials');
       }
@@ -210,7 +210,7 @@ export class AuthService {
       const decoded = jwt.verify(refreshToken, this.jwtRefreshSecret) as any;
       const user = this.users.get(decoded.email);
 
-      if (!user || !user.isActive) {
+      if (!user?.isActive) {
         throw new Error('User not found or inactive');
       }
 

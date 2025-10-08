@@ -55,6 +55,7 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
     (request as AuthenticatedRequest).tenantId = user.tenantId;
 
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Authentication error:', error);
 
     const message = error instanceof Error ? error.message : 'Invalid token';
@@ -180,6 +181,7 @@ export async function tenantIsolationMiddleware(request: FastifyRequest, reply: 
   // Check if user is trying to access data from a different tenant
   // This is an additional security check beyond the database-level tenant isolation
   if (request.params && typeof request.params === 'object' && 'tenantId' in request.params) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const requestedTenantId = (request.params as any).tenantId as string;
     if (requestedTenantId && requestedTenantId !== userTenantId) {
       return reply.code(403).send({
@@ -193,6 +195,7 @@ export async function tenantIsolationMiddleware(request: FastifyRequest, reply: 
 
   // For query parameters that might specify tenant
   if (request.query && typeof request.query === 'object' && 'tenantId' in request.query) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const requestedTenantId = (request.query as any).tenantId as string;
     if (requestedTenantId && requestedTenantId !== userTenantId) {
       return reply.code(403).send({

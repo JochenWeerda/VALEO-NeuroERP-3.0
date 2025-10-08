@@ -18,7 +18,7 @@ export interface DomainEvent {
   tenantId: string;
   correlationId?: string;
   causationId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 // KPI Events
@@ -29,7 +29,7 @@ export interface KpiCalculatedEvent extends DomainEvent {
     kpiName: string;
     value: number | string | boolean;
     unit: string;
-    context: Record<string, any>;
+    context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
     calculatedAt: string;
   };
 }

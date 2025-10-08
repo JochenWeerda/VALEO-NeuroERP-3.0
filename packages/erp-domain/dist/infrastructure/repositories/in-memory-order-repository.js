@@ -35,7 +35,7 @@ class InMemoryOrderRepository extends utilities_1.InMemoryRepository {
     }
     async updateStatus(id, status) {
         const existing = await this.findById(id);
-        if (!existing) {
+        if (existing === undefined || existing === null) {
             throw new Error(`Order ${String(id)} not found`);
         }
         const updated = (0, order_1.withOrderStatus)(existing, status);

@@ -39,7 +39,7 @@ export class ShipmentOrchestratorService {
 
   async cancelShipment(tenantId: string, shipmentId: string, reason: string): Promise<void> {
     const shipment = await this.repository.findShipmentById(tenantId, shipmentId);
-    if (!shipment) {
+    if (shipment === undefined || shipment === null) {
       throw new Error(`Shipment ${shipmentId} not found for tenant ${tenantId}`);
     }
     shipment.updateStatus('canceled');
@@ -57,3 +57,4 @@ export class ShipmentOrchestratorService {
     return this.repository.findShipmentById(tenantId, shipmentId);
   }
 }
+

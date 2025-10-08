@@ -28,7 +28,7 @@ export async function calculateGHG(
     const defaultKey = `${input.commodity}_BIODIESEL`;
     const defaultValues = REDII_DEFAULT_VALUES[defaultKey];
 
-    if (!defaultValues) {
+    if (defaultValues === undefined || defaultValues === null) {
       throw new Error(`No RED II default values found for ${input.commodity}`);
     }
 
@@ -132,7 +132,7 @@ export async function calculateGHG(
     calculatedBy: userId,
   }).returning();
 
-  if (!pathway) {
+  if (pathway === undefined || pathway === null) {
     throw new Error('Failed to create GHG pathway');
   }
 
@@ -155,7 +155,7 @@ export async function calculateGHG(
  * Calculate transport emissions based on distance and mode
  */
 function calculateTransportEmissions(distance?: number, mode?: string): number {
-  if (!distance) return 0;
+  if (distance === undefined || distance === null) return 0;
 
   // Emission factors in gCO2eq/t·km
   const emissionFactors: Record<string, number> = {
@@ -165,7 +165,7 @@ function calculateTransportEmissions(distance?: number, mode?: string): number {
     'Pipeline': 0.003,
   };
 
-  const factor = emissionFactors[mode || 'Truck'] || 0.062;
+  const factor = emissionFactors[mode ?? 'Truck'] || 0.062;
   return distance * factor;
 }
 
@@ -187,7 +187,7 @@ function determineREDIIThreshold(date: Date): number {
  * Generate pathway key
  */
 function generatePathwayKey(commodity: string, region?: string, method?: string): string {
-  const parts = [region || 'EU', commodity, method || 'Default'];
+  const parts = [region ?? 'EU', commodity, method ?? 'Default'];
   return parts.join('-');
 }
 
@@ -215,3 +215,4 @@ export async function getGHGPathways(
 
   return filtered as GHGPathway[];
 }
+

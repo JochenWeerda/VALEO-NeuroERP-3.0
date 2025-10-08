@@ -87,12 +87,12 @@ let AIAssistanceService = (() => {
                 for (const rec of recommendations) {
                     await this.publishSlottingOptimizedEvent(rec);
                 }
-                this.metrics.recordDatabaseQueryDuration('ai_assistance', 'slotting_recommendations', (Date.now() - startTime) / 1000);
-                this.metrics.incrementAIRecommendations('slotting', recommendations.length);
+                this.metrics.recordHistogram('ai_assistance.slotting_recommendations.duration', (Date.now() - startTime) / 1000);
+                this.metrics.recordGauge('ai_assistance.slotting_recommendations.count', recommendations.length);
                 return recommendations;
             }
             catch (error) {
-                this.metrics.incrementErrorCount('ai_assistance', 'slotting_recommendations_failed');
+                this.metrics.incrementCounter('ai_assistance.slotting_recommendations_failed');
                 throw error;
             }
         }
@@ -121,7 +121,7 @@ let AIAssistanceService = (() => {
                 model.updatedAt = new Date();
                 // Publish event
                 await this.publishForecastEnhancedEvent(sku, enhancedForecast, confidence);
-                this.metrics.recordDatabaseQueryDuration('ai_assistance', 'forecasting_enhancement', (Date.now() - startTime) / 1000);
+                this.metrics.recordHistogram('ai_assistance.forecasting_enhancement.duration', (Date.now() - startTime) / 1000);
                 return {
                     enhancedForecast,
                     modelPerformance: model.performance,
@@ -130,7 +130,7 @@ let AIAssistanceService = (() => {
                 };
             }
             catch (error) {
-                this.metrics.incrementErrorCount('ai_assistance', 'forecasting_enhancement_failed');
+                this.metrics.incrementCounter('ai_assistance.forecasting_enhancement_failed');
                 throw error;
             }
         }
@@ -156,12 +156,12 @@ let AIAssistanceService = (() => {
                     // Publish event
                     await this.publishAnomalyDetectedEvent(enrichedAnomaly);
                 }
-                this.metrics.recordDatabaseQueryDuration('ai_assistance', 'anomaly_detection', (Date.now() - startTime) / 1000);
-                this.metrics.incrementAnomaliesDetected(anomalies.length);
+                this.metrics.recordHistogram('ai_assistance.anomaly_detection.duration', (Date.now() - startTime) / 1000);
+                this.metrics.recordGauge('ai_assistance.anomalies_detected', anomalies.length);
                 return anomalies;
             }
             catch (error) {
-                this.metrics.incrementErrorCount('ai_assistance', 'anomaly_detection_failed');
+                this.metrics.incrementCounter('ai_assistance.anomaly_detection_failed');
                 throw error;
             }
         }
@@ -190,11 +190,11 @@ let AIAssistanceService = (() => {
                 for (const insight of insights) {
                     this.predictiveInsights.set(insight.insightId, insight);
                 }
-                this.metrics.recordDatabaseQueryDuration('ai_assistance', 'predictive_insights', (Date.now() - startTime) / 1000);
+                this.metrics.recordHistogram('ai_assistance.predictive_insights.duration', (Date.now() - startTime) / 1000);
                 return insights.slice(0, 10); // Top 10 insights
             }
             catch (error) {
-                this.metrics.incrementErrorCount('ai_assistance', 'predictive_insights_failed');
+                this.metrics.incrementCounter('ai_assistance.predictive_insights_failed');
                 throw error;
             }
         }
@@ -221,7 +221,7 @@ let AIAssistanceService = (() => {
                 }
                 // Publish event
                 await this.publishModelTrainedEvent(modelId, modelType, performance);
-                this.metrics.recordDatabaseQueryDuration('ai_assistance', 'model_training', (Date.now() - startTime) / 1000);
+                this.metrics.recordHistogram('ai_assistance.model_training.duration', (Date.now() - startTime) / 1000);
                 return {
                     modelId,
                     performance,
@@ -229,7 +229,7 @@ let AIAssistanceService = (() => {
                 };
             }
             catch (error) {
-                this.metrics.incrementErrorCount('ai_assistance', 'model_training_failed');
+                this.metrics.incrementCounter('ai_assistance.model_training_failed');
                 throw error;
             }
         }
@@ -556,17 +556,19 @@ let AIAssistanceService = (() => {
             const event = {
                 eventId: `evt_${Date.now()}`,
                 eventType: 'inventory.ai.slotting.optimized',
+                type: 'inventory.ai.slotting.optimized',
                 aggregateId: recommendation.recommendationId,
                 aggregateType: 'SlottingRecommendation',
                 eventVersion: 1,
                 occurredOn: new Date(),
+                occurredAt: new Date(),
+                aggregateVersion: 1,
                 tenantId: 'default',
-                recommendationId: recommendation.recommendationId,
                 sku: recommendation.sku,
-                fromLocation: recommendation.currentLocation,
-                toLocation: recommendation.recommendedLocation,
-                confidence: recommendation.confidence,
-                expectedSavings: recommendation.expectedBenefits.costSavings
+                oldLocation: recommendation.currentLocation,
+                newLocation: recommendation.recommendedLocation,
+                reason: 'AI optimization',
+                aiConfidence: recommendation.confidence
             };
             await this.eventBus.publish(event);
         }
@@ -574,48 +576,65 @@ let AIAssistanceService = (() => {
             const event = {
                 eventId: `evt_${Date.now()}`,
                 eventType: 'inventory.ai.forecast.enhanced',
+                type: 'inventory.ai.forecast.enhanced',
                 aggregateId: `forecast_${sku}`,
                 aggregateType: 'ForecastingModel',
                 eventVersion: 1,
                 occurredOn: new Date(),
+                occurredAt: new Date(),
+                aggregateVersion: 1,
                 tenantId: 'default',
+                forecastId: `forecast_${sku}_${Date.now()}`,
                 sku,
-                forecastPoints: forecast.length,
-                confidence,
-                accuracy: confidence
+                forecastType: 'demand',
+                horizon: forecast.length,
+                confidence
             };
             await this.eventBus.publish(event);
         }
         async publishAnomalyDetectedEvent(anomaly) {
+            // Map anomaly type to event type
+            const anomalyTypeMap = {
+                'point_anomaly': 'demand_spike',
+                'contextual_anomaly': 'inventory_discrepancy',
+                'collective_anomaly': 'location_issue'
+            };
             const event = {
                 eventId: `evt_${Date.now()}`,
                 eventType: 'inventory.ai.anomaly.detected',
+                type: 'inventory.ai.anomaly.detected',
                 aggregateId: anomaly.patternId,
                 aggregateType: 'AnomalyPattern',
                 eventVersion: 1,
                 occurredOn: new Date(),
+                occurredAt: new Date(),
+                aggregateVersion: 1,
                 tenantId: 'default',
                 anomalyId: anomaly.patternId,
-                type: anomaly.type,
+                anomalyType: anomalyTypeMap[anomaly.type] ?? 'inventory_discrepancy',
                 severity: anomaly.severity,
-                confidence: anomaly.detection.confidence,
-                affectedEntities: anomaly.affectedEntities.length
+                description: anomaly.analysis.rootCause,
+                affectedItems: anomaly.affectedEntities.map(e => e.id)
             };
             await this.eventBus.publish(event);
         }
         async publishModelTrainedEvent(modelId, modelType, performance) {
+            const perfData = performance;
             const event = {
                 eventId: `evt_${Date.now()}`,
                 eventType: 'inventory.ai.model.trained',
+                type: 'inventory.ai.model.trained',
                 aggregateId: modelId,
                 aggregateType: 'AIModel',
                 eventVersion: 1,
                 occurredOn: new Date(),
+                occurredAt: new Date(),
+                aggregateVersion: 1,
                 tenantId: 'default',
                 modelId,
-                modelType,
-                performance: performance.accuracy || 0,
-                trainingDataSize: performance.trainingDataSize || 0
+                modelType: modelType,
+                accuracy: perfData.accuracy ?? 0,
+                trainingDataSize: perfData.trainingDataSize ?? 0
             };
             await this.eventBus.publish(event);
         }

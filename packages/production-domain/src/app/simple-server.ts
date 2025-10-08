@@ -5,8 +5,12 @@
 
 import { createServer } from 'http';
 
-const PORT = Number(process.env.PORT || 3040);
-const HOST = process.env.HOST || '0.0.0.0';
+const DEFAULT_PORT = 3040;
+const DEFAULT_HOST = '0.0.0.0';
+const PORT = Number(process.env.PORT ?? DEFAULT_PORT);
+const HOST = process.env.HOST ?? DEFAULT_HOST;
+
+const HTTP_OK = 200;
 
 const server = createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');
@@ -15,13 +19,13 @@ const server = createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Tenant-Id, X-Request-Id');
 
   if (req.method === 'OPTIONS') {
-    res.writeHead(200);
+    res.writeHead(HTTP_OK);
     res.end();
     return;
   }
 
   if (req.url === '/health') {
-    res.writeHead(200);
+    res.writeHead(HTTP_OK);
     res.end(JSON.stringify({ 
       status: 'ok', 
       service: 'production-domain',
@@ -31,7 +35,7 @@ const server = createServer((req, res) => {
   }
 
   if (req.url === '/ready') {
-    res.writeHead(200);
+    res.writeHead(HTTP_OK);
     res.end(JSON.stringify({ 
       status: 'ready', 
       database: true, 
@@ -42,7 +46,7 @@ const server = createServer((req, res) => {
   }
 
   if (req.url === '/live') {
-    res.writeHead(200);
+    res.writeHead(HTTP_OK);
     res.end(JSON.stringify({ 
       status: 'live', 
       timestamp: new Date().toISOString() 
@@ -51,7 +55,7 @@ const server = createServer((req, res) => {
   }
 
   if (req.url === '/production/api/v1/recipes') {
-    res.writeHead(200);
+    res.writeHead(HTTP_OK);
     res.end(JSON.stringify({ 
       message: 'Production Domain - Recipe Management', 
       version: '0.1.0',
@@ -68,7 +72,7 @@ const server = createServer((req, res) => {
     return;
   }
 
-  res.writeHead(200);
+  res.writeHead(HTTP_OK);
   res.end(JSON.stringify({ 
     message: 'VALEO NeuroERP 3.0 - Production Domain', 
     version: '0.1.0',
@@ -83,30 +87,41 @@ const server = createServer((req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
+  // eslint-disable-next-line no-console
   console.log(`🚀 Starting VALEO NeuroERP 3.0 Production Domain Server...`);
+  // eslint-disable-next-line no-console
   console.log(`✅ Production Domain Server running on http://${HOST}:${PORT}`);
+  // eslint-disable-next-line no-console
   console.log(`❤️  Health Check: http://${HOST}:${PORT}/health`);
+  // eslint-disable-next-line no-console
   console.log(`🔧 Ready Check: http://${HOST}:${PORT}/ready`);
+  // eslint-disable-next-line no-console
   console.log(`💓 Live Check: http://${HOST}:${PORT}/live`);
+  // eslint-disable-next-line no-console
   console.log(`📋 Recipe API: http://${HOST}:${PORT}/production/api/v1/recipes`);
 });
 
 server.on('error', (err) => {
+  // eslint-disable-next-line no-console
   console.error('❌ Server error:', err);
   process.exit(1);
 });
 
 process.on('SIGTERM', () => {
+  // eslint-disable-next-line no-console
   console.log('🔄 Gracefully shutting down...');
   server.close(() => {
+    // eslint-disable-next-line no-console
     console.log('✅ Server shut down successfully');
     process.exit(0);
   });
 });
 
 process.on('SIGINT', () => {
+  // eslint-disable-next-line no-console
   console.log('🔄 Gracefully shutting down...');
   server.close(() => {
+    // eslint-disable-next-line no-console
     console.log('✅ Server shut down successfully');
     process.exit(0);
   });

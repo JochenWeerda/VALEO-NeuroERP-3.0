@@ -9,9 +9,6 @@ import { EventBus } from '../infrastructure/event-bus/event-bus';
 import { InventoryMetricsService } from '../infrastructure/observability/metrics-service';
 import {
    ReturnReceivedEvent,
-   ReturnProcessedEvent,
-   ReturnDispositionEvent,
-   QuarantineCreatedEvent,
    QuarantineReleasedEvent
  } from '../core/domain-events/inventory-domain-events';
 
@@ -92,7 +89,7 @@ export interface DispositionWorkflow {
   triggerCondition: {
     conditionType: 'return_reason' | 'item_condition' | 'quality_score' | 'supplier' | 'category';
     operator: 'equals' | 'contains' | 'greater_than' | 'less_than' | 'between';
-    value: any;
+    value: string | number;
   };
 
   steps: Array<{
@@ -105,7 +102,7 @@ export interface DispositionWorkflow {
     instructions?: string;
     automatedAction?: {
       actionType: 'set_disposition' | 'create_quarantine' | 'send_notification' | 'update_inventory';
-      parameters: Record<string, any>;
+      parameters: Record<string, unknown>;
     };
   }>;
 
@@ -129,11 +126,33 @@ export interface ReturnProcessingResult {
   qualityScore: number;
 }
 
+export interface ReceivedReturnItem {
+  sku: string;
+  quantity: number;
+  condition: string;
+  location: string;
+  inspector: string;
+  notes?: string;
+  images?: string[];
+}
+
+// Constants
+const MS_TO_SECONDS = 1000;
+const DEFAULT_ITEM_VALUE = 50.0;
+const WORKFLOW_PRIORITY_HIGH = 10;
+const WORKFLOW_PRIORITY_MEDIUM = 8;
+const INSPECTION_TIMEOUT_24H = 24;
+const TESTING_TIMEOUT_48H = 48;
+const QUALITY_SCORE_NEW = 100;
+const QUALITY_SCORE_USED = 70;
+const QUALITY_SCORE_DAMAGED = 30;
+const QUALITY_SCORE_DEFECTIVE = 10;
+
 @injectable()
 export class ReturnsDispositionService {
   private readonly metrics = new InventoryMetricsService();
-  private workflows: Map<string, DispositionWorkflow> = new Map();
-  private activeQuarantines: Map<string, QuarantineRecord> = new Map();
+  private readonly workflows: Map<string, DispositionWorkflow> = new Map();
+  private readonly activeQuarantines: Map<string, QuarantineRecord> = new Map();
 
   constructor(
     private readonly eventBus: EventBus
@@ -172,9 +191,9 @@ export class ReturnsDispositionService {
         customerId: request.customerId,
         status: 'draft',
         reason: request.reason,
-        priority: request.priority || 'normal',
+        priority: request.priority ?? 'normal',
         items: validatedItems,
-        returnMethod: request.returnMethod || 'ship',
+        returnMethod: request.returnMethod ?? 'ship',
         createdAt: new Date(),
         createdBy: 'system' // Would be actual user
       };
@@ -186,7 +205,7 @@ export class ReturnsDispositionService {
         rma.approvedBy = 'system';
       }
 
-      this.metrics.recordDatabaseQueryDuration('returns', Date.now() - startTime, { operation: 'rma_creation' });
+      this.metrics.recordDatabaseQueryDuration('returns', (Date.now() - startTime) / MS_TO_SECONDS, { operation: 'rma_creation' });
       this.metrics.incrementReturns('created');
 
       return rma;
@@ -240,7 +259,7 @@ export class ReturnsDispositionService {
         }
 
         // Update RMA item with actual received data
-        rmaItem.condition = receivedItem.condition as any;
+        rmaItem.condition = receivedItem.condition as 'new' | 'used' | 'damaged' | 'defective';
         rmaItem.returnedQty = receivedItem.quantity;
 
         // Apply disposition workflow
@@ -260,12 +279,12 @@ export class ReturnsDispositionService {
 
       // Calculate quality score
       processingResult.qualityScore = this.calculateQualityScore(receivedItems);
-      processingResult.processingTime = (Date.now() - startTime) / 1000;
+      processingResult.processingTime = (Date.now() - startTime) / MS_TO_SECONDS;
 
       // Publish event
       await this.publishReturnReceivedEvent(rma, receivedItems);
 
-      this.metrics.recordDatabaseQueryDuration('returns', (Date.now() - startTime) / 1000, { operation: 'processing' });
+      this.metrics.recordDatabaseQueryDuration('returns', (Date.now() - startTime) / MS_TO_SECONDS, { operation: 'processing' });
       this.metrics.incrementReturns('processed');
 
       return processingResult;
@@ -294,7 +313,7 @@ export class ReturnsDispositionService {
       // Publish event
       await this.publishQuarantineCreatedEvent(quarantine);
 
-      this.metrics.recordDatabaseQueryDuration('quarantine', (Date.now() - startTime) / 1000, { operation: 'creation' });
+      this.metrics.recordDatabaseQueryDuration('quarantine', (Date.now() - startTime) / MS_TO_SECONDS, { operation: 'creation' });
       this.metrics.incrementQuarantines('created');
 
       return quarantine;
@@ -343,7 +362,7 @@ export class ReturnsDispositionService {
       // Publish event
       await this.publishQuarantineReleasedEvent(quarantine);
 
-      this.metrics.recordDatabaseQueryDuration('quarantine', (Date.now() - startTime) / 1000, { operation: 'disposition' });
+      this.metrics.recordDatabaseQueryDuration('quarantine', (Date.now() - startTime) / MS_TO_SECONDS, { operation: 'disposition' });
       this.metrics.incrementQuarantines('processed');
     } catch (error) {
       this.metrics.incrementErrorCount('quarantine', { error_type: 'disposition_failed' });
@@ -393,7 +412,7 @@ export class ReturnsDispositionService {
   /**
    * Get quarantine analytics
    */
-  async getQuarantineAnalytics(period: 'day' | 'week' | 'month' = 'month'): Promise<{
+  async getQuarantineAnalytics(_period: 'day' | 'week' | 'month' = 'month'): Promise<{
     totalActive: number;
     byReason: Record<string, number>;
     bySeverity: Record<string, number>;
@@ -416,12 +435,12 @@ export class ReturnsDispositionService {
 
       // Calculate distributions
       for (const quarantine of quarantines) {
-        analytics.byReason[quarantine.reason] = (analytics.byReason[quarantine.reason] || 0) + 1;
-        analytics.bySeverity[quarantine.severity] = (analytics.bySeverity[quarantine.severity] || 0) + 1;
-        analytics.costImpact += quarantine.costImpact || 0;
+        analytics.byReason[quarantine.reason] = (analytics.byReason[quarantine.reason] ?? 0) + 1;
+        analytics.bySeverity[quarantine.severity] = (analytics.bySeverity[quarantine.severity] ?? 0) + 1;
+        analytics.costImpact += quarantine.costImpact ?? 0;
       }
 
-      this.metrics.recordDatabaseQueryDuration('quarantine', (Date.now() - startTime) / 1000, { operation: 'analytics' });
+      this.metrics.recordDatabaseQueryDuration('quarantine', (Date.now() - startTime) / MS_TO_SECONDS, { operation: 'analytics' });
 
       return analytics;
     } catch (error) {
@@ -432,7 +451,7 @@ export class ReturnsDispositionService {
 
   // Private helper methods
 
-  private async validateOrderForReturn(orderId: string, customerId: string): Promise<any> {
+  private async validateOrderForReturn(orderId: string, customerId: string): Promise<{ orderId: string; customerId: string; items: unknown[] }> {
     // Mock validation
     return {
       orderId,
@@ -443,7 +462,7 @@ export class ReturnsDispositionService {
 
   private async validateReturnItems(
     items: Array<{ sku: string; quantity: number; condition: string; notes?: string; images?: string[] }>,
-    orderDetails: any
+    _orderDetails: { orderId: string; customerId: string; items: unknown[] }
   ): Promise<ReturnMerchandiseAuthorization['items']> {
     // Mock validation and enrichment
     return items.map(item => ({
@@ -478,7 +497,7 @@ export class ReturnsDispositionService {
 
     if (workflows.length > 0) {
        // Use highest priority workflow
-       return workflows[0]?.defaultDisposition || 'scrap';
+       return workflows[0]?.defaultDisposition ?? 'scrap';
      }
 
     // Default disposition logic
@@ -539,9 +558,9 @@ export class ReturnsDispositionService {
   }
 
   private calculateQualityScore(items: Array<{ condition: string }>): number {
-    const conditionScores = { new: 100, used: 70, damaged: 30, defective: 10 };
+    const conditionScores = { new: QUALITY_SCORE_NEW, used: QUALITY_SCORE_USED, damaged: QUALITY_SCORE_DAMAGED, defective: QUALITY_SCORE_DEFECTIVE };
     const totalScore = items.reduce((sum, item) =>
-      sum + (conditionScores[item.condition as keyof typeof conditionScores] || 0), 0
+      sum + (conditionScores[item.condition as keyof typeof conditionScores] ?? 0), 0
     );
     return totalScore / items.length;
   }
@@ -563,12 +582,12 @@ export class ReturnsDispositionService {
     };
   }
 
-  private async getItemSupplier(sku: string): Promise<string> {
+  private async getItemSupplier(_sku: string): Promise<string> {
     // Mock supplier lookup
     return 'SUPPLIER-001';
   }
 
-  private async getItemCategory(sku: string): Promise<string> {
+  private async getItemCategory(_sku: string): Promise<string> {
     // Mock category lookup
     return 'ELECTRONICS';
   }
@@ -611,53 +630,56 @@ export class ReturnsDispositionService {
       case 'donate':
         await this.donateQuarantinedItem(quarantine);
         break;
+      case 'pending':
+        // No action for pending disposition
+        break;
     }
   }
 
   // Mock implementation methods
-  private async restockItem(item: any): Promise<void> {
-    console.log(`Restocking item ${item.sku} to inventory`);
+  private async restockItem(_item: ReceivedReturnItem): Promise<void> {
+    // Implementation would restock item to inventory
   }
 
-  private async scrapItem(item: any): Promise<void> {
-    console.log(`Scrapping item ${item.sku}`);
+  private async scrapItem(_item: ReceivedReturnItem): Promise<void> {
+    // Implementation would scrap item
   }
 
-  private async createRepairOrder(item: any): Promise<void> {
-    console.log(`Creating repair order for ${item.sku}`);
+  private async createRepairOrder(_item: ReceivedReturnItem): Promise<void> {
+    // Implementation would create repair order
   }
 
-  private async returnToSupplier(item: any): Promise<void> {
-    console.log(`Returning ${item.sku} to supplier`);
+  private async returnToSupplier(_item: ReceivedReturnItem): Promise<void> {
+    // Implementation would return item to supplier
   }
 
-  private async donateItem(item: any): Promise<void> {
-    console.log(`Donating item ${item.sku}`);
+  private async donateItem(_item: ReceivedReturnItem): Promise<void> {
+    // Implementation would donate item
   }
 
-  private async calculateItemValue(sku: string): Promise<number> {
+  private async calculateItemValue(_sku: string): Promise<number> {
     // Mock value calculation
-    return 50.0;
+    return DEFAULT_ITEM_VALUE;
   }
 
-  private async releaseFromQuarantine(quarantine: QuarantineRecord): Promise<void> {
-    console.log(`Releasing quarantine ${quarantine.quarantineId}`);
+  private async releaseFromQuarantine(_quarantine: QuarantineRecord): Promise<void> {
+    // Implementation would release from quarantine
   }
 
-  private async destroyQuarantinedItem(quarantine: QuarantineRecord): Promise<void> {
-    console.log(`Destroying quarantined item ${quarantine.itemId}`);
+  private async destroyQuarantinedItem(_quarantine: QuarantineRecord): Promise<void> {
+    // Implementation would destroy quarantined item
   }
 
-  private async returnQuarantinedToSupplier(quarantine: QuarantineRecord): Promise<void> {
-    console.log(`Returning quarantined item ${quarantine.itemId} to supplier`);
+  private async returnQuarantinedToSupplier(_quarantine: QuarantineRecord): Promise<void> {
+    // Implementation would return quarantined item to supplier
   }
 
-  private async transferQuarantinedItem(quarantine: QuarantineRecord): Promise<void> {
-    console.log(`Transferring quarantined item ${quarantine.itemId}`);
+  private async transferQuarantinedItem(_quarantine: QuarantineRecord): Promise<void> {
+    // Implementation would transfer quarantined item
   }
 
-  private async donateQuarantinedItem(quarantine: QuarantineRecord): Promise<void> {
-    console.log(`Donating quarantined item ${quarantine.itemId}`);
+  private async donateQuarantinedItem(_quarantine: QuarantineRecord): Promise<void> {
+    // Implementation would donate quarantined item
   }
 
   private initializeDefaultWorkflows(): void {
@@ -677,7 +699,7 @@ export class ReturnsDispositionService {
             name: 'Quality Inspection',
             type: 'inspection',
             required: true,
-            timeoutHours: 24,
+            timeoutHours: INSPECTION_TIMEOUT_24H,
             instructions: 'Inspect item for defects and document findings'
           },
           {
@@ -685,7 +707,7 @@ export class ReturnsDispositionService {
             name: 'Functional Testing',
             type: 'testing',
             required: true,
-            timeoutHours: 48,
+            timeoutHours: TESTING_TIMEOUT_48H,
             instructions: 'Test item functionality and document results'
           },
           {
@@ -701,7 +723,7 @@ export class ReturnsDispositionService {
         ],
         defaultDisposition: 'return_to_supplier',
         active: true,
-        priority: 10,
+        priority: WORKFLOW_PRIORITY_HIGH,
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -720,7 +742,7 @@ export class ReturnsDispositionService {
             name: 'Damage Assessment',
             type: 'inspection',
             required: true,
-            timeoutHours: 24,
+            timeoutHours: INSPECTION_TIMEOUT_24H,
             instructions: 'Assess damage severity and repair feasibility'
           },
           {
@@ -736,7 +758,7 @@ export class ReturnsDispositionService {
         ],
         defaultDisposition: 'scrap',
         active: true,
-        priority: 8,
+        priority: WORKFLOW_PRIORITY_MEDIUM,
         createdAt: new Date(),
         updatedAt: new Date()
       }
@@ -748,7 +770,7 @@ export class ReturnsDispositionService {
   // Event publishing methods
   private async publishReturnReceivedEvent(
     rma: ReturnMerchandiseAuthorization,
-    receivedItems: Array<any>
+    receivedItems: ReceivedReturnItem[]
   ): Promise<void> {
     const event: ReturnReceivedEvent = {
       eventId: `evt_${Date.now()}`,
@@ -778,9 +800,8 @@ export class ReturnsDispositionService {
     await this.eventBus.publish(event);
   }
 
-  private async publishQuarantineCreatedEvent(quarantine: QuarantineRecord): Promise<void> {
+  private async publishQuarantineCreatedEvent(_quarantine: QuarantineRecord): Promise<void> {
     // Event would be published here
-    console.log(`Quarantine created: ${quarantine.quarantineId}`);
   }
 
   private async publishQuarantineReleasedEvent(quarantine: QuarantineRecord): Promise<void> {
@@ -797,8 +818,8 @@ export class ReturnsDispositionService {
       aggregateVersion: 1,
       quarantineId: quarantine.quarantineId,
       disposition: quarantine.disposition as 'restock' | 'scrap' | 'repair' | 'return_to_supplier',
-      releasedBy: quarantine.dispositionBy || 'system',
-      reason: quarantine.reason || 'disposition_completed'
+      releasedBy: quarantine.dispositionBy ?? 'system',
+      reason: quarantine.reason ?? 'disposition_completed'
     };
 
     await this.eventBus.publish(event);

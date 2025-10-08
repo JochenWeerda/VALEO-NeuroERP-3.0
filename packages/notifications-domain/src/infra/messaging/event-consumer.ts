@@ -21,7 +21,7 @@ export async function initEventConsumer(): Promise<void> {
 }
 
 async function subscribeToDocumentDistribution(): Promise<void> {
-  if (!nc) return;
+  if (nc === undefined || nc === null) return;
 
   const sub = nc.subscribe('document.distribution.requested');
   subscriptions.push(sub);
@@ -92,3 +92,4 @@ export async function closeEventConsumer(): Promise<void> {
     nc = null;
   }
 }
+

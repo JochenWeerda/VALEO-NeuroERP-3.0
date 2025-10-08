@@ -41,7 +41,7 @@ export class SlotDockYardService {
     status: YardVisit['status'],
   ): Promise<YardVisit> {
     const yardVisit = await this.yardRepository.findYardVisitByShipmentId(tenantId, shipmentId);
-    if (!yardVisit) {
+    if (yardVisit === undefined || yardVisit === null) {
       throw new Error(`Yard visit not found for shipment ${shipmentId}`);
     }
     yardVisit.updateStatus(status);
@@ -63,3 +63,4 @@ export class SlotDockYardService {
     this.eventBus.publish(event);
   }
 }
+

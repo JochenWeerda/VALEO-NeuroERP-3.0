@@ -1,13 +1,11 @@
 import type { OrderId } from '@valero-neuroerp/data-models';
 import {
+  CreateOrderInput,
+  DEFAULT_ORDER_LIMIT,
   Order,
   OrderFilters,
   OrderStatus,
-  CreateOrderInput,
-  OrderDocumentType,
   createOrder,
-  withOrderStatus,
-  DEFAULT_ORDER_LIMIT,
 } from '../entities/order';
 import { OrderRepository } from '../repositories/order-repository';
 
@@ -31,6 +29,8 @@ const STATUS_WEIGHTS: Record<OrderStatus, number> = {
   cancelled: 99,
 };
 
+const DECIMAL_PRECISION = 2;
+const MAX_ORDER_LIMIT_CAP = 500;
 const CURRENCY_REGEX = /^[A-Z]{3}$/;
 const MAX_TOLERANCE = 0.01;
 
@@ -41,8 +41,8 @@ export class OrderDomainService {
     const normalized: OrderFilters = {
       status: filters.status,
       documentType: filters.documentType,
-      customerNumber: filters.customerNumber?.trim() || undefined,
-      debtorNumber: filters.debtorNumber?.trim() || undefined,
+      customerNumber: filters.customerNumber?.trim() ?? undefined,
+      debtorNumber: filters.debtorNumber?.trim() ?? undefined,
       from: filters.from,
       to: filters.to,
       limit: clampLimit(filters.limit),
@@ -69,7 +69,7 @@ export class OrderDomainService {
   async updateOrderStatus(id: OrderId, status: OrderStatus): Promise<Order> {
     this.assertStatus(status);
     const current = await this.repository.findById(id);
-    if (!current) {
+    if (current === undefined || current === null) {
       throw new Error(`Order ${String(id)} not found`);
     }
 
@@ -87,7 +87,7 @@ export class OrderDomainService {
 
   async deleteOrder(id: OrderId): Promise<void> {
     const existing = await this.repository.findById(id);
-    if (!existing) {
+    if (existing === undefined || existing === null) {
       return;
     }
     if (STATUS_WEIGHTS[existing.status] >= STATUS_WEIGHTS.invoiced) {
@@ -111,10 +111,10 @@ export class OrderDomainService {
   private assertAmountConsistency(order: CreateOrderInput): void {
     const sum = order.items.reduce((acc, item) => acc + item.netPrice, 0);
     if (Math.abs(sum - order.netAmount) > MAX_TOLERANCE) {
-      throw new Error(`Net amount ${order.netAmount} does not match item total ${sum.toFixed(2)}.`);
+      throw new Error(`Net amount ${order.netAmount} does not match item total ${sum.toFixed(DECIMAL_PRECISION)}.`);
     }
 
-    const gross = Number((order.netAmount + order.vatAmount).toFixed(2));
+    const gross = Number((order.netAmount + order.vatAmount).toFixed(DECIMAL_PRECISION));
     if (Math.abs(gross - order.totalAmount) > MAX_TOLERANCE) {
       throw new Error(`Total amount ${order.totalAmount} does not equal net + VAT (${gross}).`);
     }
@@ -128,5 +128,6 @@ function clampLimit(limit?: number): number | undefined {
   if (limit <= 0) {
     return DEFAULT_ORDER_LIMIT;
   }
-  return Math.min(limit, 500);
+  return Math.min(limit, MAX_ORDER_LIMIT_CAP);
 }
+

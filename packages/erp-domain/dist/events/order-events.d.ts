@@ -1,5 +1,4 @@
-import type { DomainEvent } from '@valero-neuroerp/data-models';
-import type { OrderId } from '@valero-neuroerp/data-models';
+import type { DomainEvent, OrderId } from '@valero-neuroerp/data-models';
 export interface OrderCreatedEvent extends DomainEvent {
     type: 'OrderCreated';
     orderId: OrderId;

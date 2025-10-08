@@ -35,7 +35,7 @@ function toNumber(value) {
     return Number.isFinite(parsed) ? parsed : undefined;
 }
 function toDate(value) {
-    if (!value) {
+    if (value === undefined || value === null) {
         return undefined;
     }
     return value instanceof Date ? value : new Date(String(value));
@@ -126,7 +126,7 @@ class FinanzKontoPostgresRepository {
     }
     async update(entity) {
         const primitives = entity.toPrimitives();
-        if (!primitives.id) {
+        if (primitives.id === undefined || primitives.id === null) {
             throw new Error('Cannot update FinanzKonto without primary key');
         }
         const result = await this.pool.query(`UPDATE ${TABLE}

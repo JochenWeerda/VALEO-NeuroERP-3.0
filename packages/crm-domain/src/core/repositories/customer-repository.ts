@@ -11,7 +11,7 @@ export interface CustomerRepository extends Repository<Customer, CustomerId> {
 export const buildCustomerQuery = (filters?: CustomerFilters): RepositoryQuery<Customer> => {
   const builder = createQueryBuilder<Customer>();
 
-  if (!filters) {
+  if (filters === undefined || filters === null) {
     return builder.build();
   }
 
@@ -38,3 +38,4 @@ export const buildCustomerQuery = (filters?: CustomerFilters): RepositoryQuery<C
 
   return builder.build();
 };
+

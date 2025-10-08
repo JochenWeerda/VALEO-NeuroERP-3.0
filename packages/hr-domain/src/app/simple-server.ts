@@ -3,154 +3,196 @@
  * Simplified version without complex Fastify types
  */
 
-import Fastify from 'fastify';
-import { EmployeeService } from '../domain/services/employee-service';
+import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
+import pino from 'pino';
+
+import { type CreateEmployeeCommand, EmployeeService, type EmployeeStatistics } from '../domain/services/employee-service';
+import type { HREvent } from '../domain/events';
 import { PostgresEmployeeRepository } from '../infra/repo/postgres-employee-repository';
 
-// Configuration
-const PORT = Number(process.env.PORT || 3030);
-const HOST = process.env.HOST || '0.0.0.0';
+const DEFAULT_PORT = 3030;
+const DEFAULT_HOST = '0.0.0.0';
+const DEFAULT_LOG_LEVEL = 'info';
+const DEFAULT_TENANT_ID = 'default-tenant';
+const SYSTEM_USER_ID = 'system';
 
-// Initialize services
+const HTTP_STATUS = {
+  OK: 200,
+  CREATED: 201,
+  BAD_REQUEST: 400,
+  NOT_FOUND: 404,
+  INTERNAL_SERVER_ERROR: 500
+} as const;
+
+const logger = pino({
+  level: process.env.LOG_LEVEL ?? DEFAULT_LOG_LEVEL,
+  transport: process.env.NODE_ENV === 'development'
+    ? {
+        target: 'pino-pretty',
+        options: {
+          colorize: true
+        }
+      }
+    : undefined
+});
+
+const PORT = Number(process.env.PORT ?? DEFAULT_PORT);
+const HOST = process.env.HOST ?? DEFAULT_HOST;
+const BASE_URL = ['http://', HOST, ':', String(PORT)].join('');
+
 const employeeRepository = new PostgresEmployeeRepository();
-const eventPublisher = async (event: any) => {
-  console.log('📤 Publishing domain event:', event.eventType, event.eventId);
+
+type DomainEventPublisher = (event: HREvent) => Promise<void>;
+
+const eventPublisher: DomainEventPublisher = async (event) => {
+  logger.info({ eventType: event.eventType, eventId: event.eventId }, 'Publishing domain event (simple server stub)');
 };
+
 const employeeService = new EmployeeService(employeeRepository, eventPublisher);
 
-// Create Fastify instance
 const fastify = Fastify({
-  logger: {
-    level: process.env.LOG_LEVEL || 'info',
-    transport: process.env.NODE_ENV === 'development' ? {
-      target: 'pino-pretty',
-      options: {
-        colorize: true
-      }
-    } : undefined
-  }
+  logger
 });
 
-// Health check endpoints
-fastify.get('/health', async (request, reply) => {
+type CreateEmployeePayload = Omit<CreateEmployeeCommand, 'tenantId' | 'createdBy'>;
+
+type EmployeeParams = { id: string };
+
+type TenantContext = { tenantId: string; userId: string };
+
+function defaultTenantContext(): TenantContext {
   return {
-    ok: true,
-    service: 'hr-domain',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    tenantId: DEFAULT_TENANT_ID,
+    userId: SYSTEM_USER_ID
   };
-});
+}
 
-fastify.get('/ready', async (request, reply) => {
-  return {
-    ok: true,
-    database: true,
-    timestamp: new Date().toISOString()
-  };
-});
+fastify.get('/health', async () => ({
+  ok: true,
+  service: 'hr-domain-simple',
+  timestamp: new Date().toISOString(),
+  uptime: process.uptime()
+}));
 
-fastify.get('/live', async (request, reply) => {
-  return {
-    ok: true,
-    timestamp: new Date().toISOString()
-  };
-});
+fastify.get('/ready', async () => ({
+  ok: true,
+  database: true,
+  timestamp: new Date().toISOString()
+}));
 
-// Employee routes (simplified)
-fastify.post('/hr/api/v1/employees', async (request, reply) => {
+fastify.get('/live', async () => ({
+  ok: true,
+  timestamp: new Date().toISOString()
+}));
+
+fastify.post('/hr/api/v1/employees', async (
+  request: FastifyRequest<{ Body: CreateEmployeePayload }>,
+  reply: FastifyReply
+) => {
+  const { tenantId, userId } = defaultTenantContext();
+
   try {
-    const body = request.body as any;
     const employee = await employeeService.createEmployee({
-      tenantId: 'default-tenant', // TODO: Get from auth
-      createdBy: 'system', // TODO: Get from auth
-      ...body
+      tenantId,
+      createdBy: userId,
+      ...request.body
     });
-    return reply.code(201).send(employee);
+
+    await reply.code(HTTP_STATUS.CREATED).send(employee);
   } catch (error) {
-    console.error('Error creating employee:', error);
-    return reply.code(400).send({ error: error instanceof Error ? error.message : 'Failed to create employee' });
+    logger.error({ err: error }, 'Error creating employee (simple server)');
+    await reply.code(HTTP_STATUS.BAD_REQUEST).send({
+      error: error instanceof Error ? error.message : 'Failed to create employee'
+    });
   }
 });
 
-fastify.get('/hr/api/v1/employees/:id', async (request, reply) => {
+fastify.get('/hr/api/v1/employees/:id', async (
+  request: FastifyRequest<{ Params: EmployeeParams }>,
+  reply: FastifyReply
+) => {
+  const { tenantId } = defaultTenantContext();
+
   try {
-    const params = request.params as { id: string };
-    const employee = await employeeService.getEmployee('default-tenant', params.id);
-    return reply.send(employee);
+    const employee = await employeeService.getEmployee(tenantId, request.params.id);
+    await reply.code(HTTP_STATUS.OK).send(employee);
   } catch (error) {
-    console.error('Error getting employee:', error);
-    return reply.code(404).send({ error: error instanceof Error ? error.message : 'Employee not found' });
+    logger.error({ err: error, employeeId: request.params.id }, 'Error getting employee (simple server)');
+    await reply.code(HTTP_STATUS.NOT_FOUND).send({
+      error: error instanceof Error ? error.message : 'Employee not found'
+    });
   }
 });
 
-fastify.get('/hr/api/v1/employees', async (request, reply) => {
+fastify.get('/hr/api/v1/employees', async (_request, reply: FastifyReply) => {
+  const { tenantId } = defaultTenantContext();
+
   try {
-    const employees = await employeeService.listEmployees('default-tenant');
-    return reply.send(employees);
+    const employees = await employeeService.listEmployees(tenantId);
+    await reply.code(HTTP_STATUS.OK).send(employees);
   } catch (error) {
-    console.error('Error listing employees:', error);
-    return reply.code(500).send({ error: 'Failed to list employees' });
+    logger.error({ err: error }, 'Error listing employees (simple server)');
+    await reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
+      error: 'Failed to list employees'
+    });
   }
 });
 
-fastify.get('/hr/api/v1/employees/statistics', async (request, reply) => {
+fastify.get('/hr/api/v1/employees/statistics', async (_request, reply: FastifyReply) => {
+  const { tenantId } = defaultTenantContext();
+
   try {
-    const statistics = await employeeService.getEmployeeStatistics('default-tenant');
-    return reply.send(statistics);
+    const statistics: EmployeeStatistics = await employeeService.getEmployeeStatistics(tenantId);
+    await reply.code(HTTP_STATUS.OK).send(statistics);
   } catch (error) {
-    console.error('Error getting employee statistics:', error);
-    return reply.code(500).send({ error: 'Failed to get employee statistics' });
+    logger.error({ err: error }, 'Error getting employee statistics (simple server)');
+    await reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
+      error: 'Failed to get employee statistics'
+    });
   }
 });
 
-// Error handler
 fastify.setErrorHandler(async (error, request, reply) => {
-  fastify.log.error(error);
-  return reply.code(500).send({
+  fastify.log.error({ err: error, url: request.url }, 'Unhandled error (simple server)');
+  await reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
     error: 'Internal server error',
     message: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
   });
 });
 
-// Graceful shutdown
-async function gracefulShutdown() {
-  console.log('🔄 Gracefully shutting down...');
+async function start(): Promise<void> {
+  try {
+    const address = await fastify.listen({ port: PORT, host: HOST });
+    logger.info({ address }, 'Simple HR Domain server running');
+    logger.info({ health: `${BASE_URL}/health` }, 'Health endpoint available');
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to start simple server');
+    process.exit(1);
+  }
+}
+
+async function gracefulShutdown(): Promise<void> {
+  logger.info('Gracefully shutting down simple server...');
   try {
     await fastify.close();
-    console.log('✅ Server shut down successfully');
+    logger.info('Simple server shut down successfully');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error during shutdown:', error);
+    logger.error({ err: error }, 'Error during simple server shutdown');
     process.exit(1);
   }
 }
 
-// Handle shutdown signals
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', () => {
+  void gracefulShutdown();
+});
 
-// Start server
-async function start() {
-  try {
-    console.log('🚀 Starting VALEO NeuroERP 3.0 HR Domain Server...');
-    
-    await fastify.listen({ port: PORT, host: HOST });
-    
-    console.log(`✅ HR Domain Server running on http://${HOST}:${PORT}`);
-    console.log(`❤️  Health Check: http://${HOST}:${PORT}/health`);
-    console.log(`🔧 Ready Check: http://${HOST}:${PORT}/ready`);
-    console.log(`💓 Live Check: http://${HOST}:${PORT}/live`);
-    
-  } catch (error) {
-    console.error('❌ Failed to start server:', error);
-    process.exit(1);
-  }
-}
+process.on('SIGINT', () => {
+  void gracefulShutdown();
+});
 
-// Start the server
 if (require.main === module) {
-  start();
+  void start();
 }
 
 export default fastify;
-

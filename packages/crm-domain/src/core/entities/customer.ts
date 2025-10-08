@@ -74,7 +74,7 @@ export function createCustomer(input: CreateCustomerInput): Customer {
   if (!input.name?.trim()) {
     throw new Error('Customer name is required');
   }
-  if (!input.type) {
+  if (input.type === undefined || input.type === null) {
     throw new Error('Customer type is required');
   }
 
@@ -135,10 +135,12 @@ function generateCustomerNumber(): string {
 }
 
 function normalizeTags(tags?: string[]): string[] {
-  if (!tags) {
+  if (tags === undefined || tags === null) {
     return [];
   }
   return Array.from(new Set(tags.map((tag) => tag.trim()).filter(Boolean)));
 }
 
 export type { Email, PhoneNumber };
+
+

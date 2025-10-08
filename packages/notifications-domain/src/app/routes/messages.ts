@@ -22,7 +22,7 @@ export async function registerMessageRoutes(server: FastifyInstance): Promise<vo
     const { id } = request.params as { id: string };
 
     const message = await getMessageById(tenantId, id);
-    if (!message) {
+    if (message === undefined || message === null) {
       await reply.code(404).send({ error: 'NotFound', message: 'Message not found' });
       return;
     }
@@ -44,3 +44,4 @@ export async function registerMessageRoutes(server: FastifyInstance): Promise<vo
     }
   });
 }
+

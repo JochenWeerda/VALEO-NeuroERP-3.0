@@ -35,7 +35,7 @@ function toBoolean(value) {
     return value === 1 || value === '1' || value === 'true';
 }
 function toDate(value) {
-    if (!value) {
+    if (value === undefined || value === null) {
         return undefined;
     }
     return value instanceof Date ? value : new Date(String(value));
@@ -121,7 +121,7 @@ class FinanzKreditorPostgresRepository {
     }
     async update(entity) {
         const primitives = entity.toPrimitives();
-        if (!primitives.id) {
+        if (primitives.id === undefined || primitives.id === null) {
             throw new Error('Cannot update FinanzKreditor without primary key');
         }
         const result = await this.pool.query(`UPDATE ${TABLE}

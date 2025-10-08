@@ -5,7 +5,7 @@
  * Supports what-if scenarios, uncertainty bands, and performance metrics
  */
 
-import { Result, ok, err } from '../core/entities/ar-invoice';
+import { Result, err, ok } from '../core/entities/ar-invoice';
 
 // ===== INTERFACES =====
 
@@ -126,11 +126,11 @@ export interface CompareScenariosCommand {
 
 export class ForecastingApplicationService {
   constructor(
-    private forecastRepo: ForecastRepository,
-    private scenarioRepo: ScenarioRepository,
-    private historicalDataService: HistoricalDataService,
-    private aiForecastEngine: AIForecastEngine,
-    private eventPublisher: EventPublisher
+    private readonly forecastRepo: ForecastRepository,
+    private readonly scenarioRepo: ScenarioRepository,
+    private readonly historicalDataService: HistoricalDataService,
+    private readonly aiForecastEngine: AIForecastEngine,
+    private readonly eventPublisher: EventPublisher
   ) {}
 
   /**
@@ -352,7 +352,7 @@ export class ForecastingApplicationService {
   /**
    * Get forecast accuracy metrics
    */
-  async getForecastAccuracy(tenantId: string, days: number = 90): Promise<Result<ForecastMetrics>> {
+  async getForecastAccuracy(tenantId: string, days = 90): Promise<Result<ForecastMetrics>> {
     try {
       const recentForecasts = await this.forecastRepo.findRecentForecasts(tenantId, days);
       const actualData = await this.historicalDataService.getActualData(tenantId, days);

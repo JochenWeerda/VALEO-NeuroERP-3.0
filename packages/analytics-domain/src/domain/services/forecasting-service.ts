@@ -16,7 +16,7 @@ export interface ForecastingConfig {
 export interface HistoricalDataPoint {
   timestamp: Date;
   value: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface ForecastRequest {
@@ -27,7 +27,7 @@ export interface ForecastRequest {
   horizonUnit: ForecastHorizon;
   model?: ForecastModel;
   confidenceInterval?: number;
-  parameters?: Record<string, any>;
+  parameters?: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface ForecastResult {
@@ -48,7 +48,7 @@ export interface MLModelResponse {
     confidence?: number;
   }>;
   accuracy?: number;
-  modelParameters?: Record<string, any>;
+  modelParameters?: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export class ForecastingService {
@@ -77,6 +77,7 @@ export class ForecastingService {
 
       let forecastValues: ForecastValue[] = [];
       let accuracy: number | undefined;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let modelParameters: Record<string, any> = {};
 
       // Generate forecast based on model
@@ -163,7 +164,7 @@ export class ForecastingService {
   private async generateARIMAForecast(request: ForecastRequest): Promise<{
     forecastValues: ForecastValue[];
     accuracy?: number;
-    modelParameters: Record<string, any>;
+    modelParameters: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   }> {
     const { historicalData, horizon, horizonUnit } = request;
 
@@ -214,7 +215,7 @@ export class ForecastingService {
   private async generateExponentialSmoothingForecast(request: ForecastRequest): Promise<{
     forecastValues: ForecastValue[];
     accuracy?: number;
-    modelParameters: Record<string, any>;
+    modelParameters: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   }> {
     const { historicalData, horizon, horizonUnit } = request;
 
@@ -271,7 +272,7 @@ export class ForecastingService {
   private async generateLinearRegressionForecast(request: ForecastRequest): Promise<{
     forecastValues: ForecastValue[];
     accuracy?: number;
-    modelParameters: Record<string, any>;
+    modelParameters: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   }> {
     const { historicalData, horizon, horizonUnit } = request;
 
@@ -319,7 +320,7 @@ export class ForecastingService {
   private async generateRuleBasedForecast(request: ForecastRequest): Promise<{
     forecastValues: ForecastValue[];
     accuracy?: number;
-    modelParameters: Record<string, any>;
+    modelParameters: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   }> {
     const { historicalData, horizon, horizonUnit } = request;
 
@@ -364,7 +365,7 @@ export class ForecastingService {
   private async generateExternalForecast(request: ForecastRequest): Promise<{
     forecastValues: ForecastValue[];
     accuracy?: number;
-    modelParameters: Record<string, any>;
+    modelParameters: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   }> {
     if (!this.config.externalMLServiceUrl) {
       throw new Error('External ML service URL not configured');

@@ -6,7 +6,7 @@ export async function registerQuoteRoutes(server: FastifyInstance): Promise<void
   // Calculate price quote
   server.post('/quotes/calc', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const userId = (request as any).authContext?.userId || 'system';
+    const userId = (request as any).authContext?.userId ?? 'system';
 
     const input = CalcQuoteInputSchema.parse(request.body);
     const quote = await calculateQuote(tenantId, input, userId);
@@ -21,7 +21,7 @@ export async function registerQuoteRoutes(server: FastifyInstance): Promise<void
 
     const quote = await getQuoteById(tenantId, id);
     
-    if (!quote) {
+    if (quote === undefined || quote === null) {
       reply.code(404).send({ error: 'NotFound', message: 'Quote not found or expired' });
       return;
     }
@@ -29,3 +29,4 @@ export async function registerQuoteRoutes(server: FastifyInstance): Promise<void
     reply.send(quote);
   });
 }
+

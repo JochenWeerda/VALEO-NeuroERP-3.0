@@ -1,5 +1,5 @@
 import type { OrderId } from '@valero-neuroerp/data-models';
-import { createQueryBuilder, Repository, RepositoryQuery } from '@valero-neuroerp/utilities';
+import { Repository, RepositoryQuery, createQueryBuilder } from '@valero-neuroerp/utilities';
 import { Order, OrderFilters, OrderStatus } from '../entities/order';
 
 export interface OrderRepository extends Repository<Order, OrderId> {
@@ -10,7 +10,7 @@ export interface OrderRepository extends Repository<Order, OrderId> {
 export const buildOrderQuery = (filters?: OrderFilters): RepositoryQuery<Order> => {
   const builder = createQueryBuilder<Order>();
 
-  if (!filters) {
+  if (filters === undefined || filters === null) {
     return builder.build();
   }
 
@@ -22,11 +22,11 @@ export const buildOrderQuery = (filters?: OrderFilters): RepositoryQuery<Order> 
     builder.where('documentType', 'eq', filters.documentType);
   }
 
-  if (filters.customerNumber) {
+  if (filters.customerNumber != null) {
     builder.where('customerNumber', 'eq', filters.customerNumber);
   }
 
-  if (filters.debtorNumber) {
+  if (filters.debtorNumber != null) {
     builder.where('debtorNumber', 'eq', filters.debtorNumber);
   }
 
@@ -40,3 +40,4 @@ export const buildOrderQuery = (filters?: OrderFilters): RepositoryQuery<Order> 
 
   return builder.build();
 };
+

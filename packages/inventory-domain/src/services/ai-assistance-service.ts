@@ -221,7 +221,7 @@ export class AIAssistanceService {
     try {
       // Get or create forecasting model
       let model = this.forecastingModels.get(sku);
-      if (!model) {
+      if (model == null) {
         model = await this.createForecastingModel(sku, historicalData);
         this.forecastingModels.set(sku, model);
       }
@@ -234,7 +234,7 @@ export class AIAssistanceService {
 
       // Calculate confidence and insights
       const confidence = await this.calculateForecastConfidence(enhancedForecast, historicalData);
-      const insights = await this.generateForecastInsights(enhancedForecast, externalFactors);
+      const insights = await this.generateForecastInsights(enhancedForecast as Array<Record<string, unknown>>, externalFactors);
 
       // Update model performance
       model.performance.accuracy = confidence;

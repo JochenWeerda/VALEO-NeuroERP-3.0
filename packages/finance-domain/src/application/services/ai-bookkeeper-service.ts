@@ -343,7 +343,7 @@ export class AIBookkeeperApplicationService implements AIBookingService {
     }
 
     // Otherwise use AI prediction
-    if (aiPrediction && aiPrediction.prediction) {
+    if (aiPrediction?.prediction) {
       return {
         accountId: aiPrediction.prediction,
         accountNumber: aiPrediction.prediction,
@@ -364,7 +364,7 @@ export class AIBookkeeperApplicationService implements AIBookingService {
    */
   private determineDebitAmount(invoice: APInvoice, line: any, account: any): number {
     // For AP invoices, debit expense accounts, credit liability accounts
-    if (account && account.accountNumber && account.accountNumber.startsWith('6')) { // Expense account
+    if (account?.accountNumber?.startsWith('6')) { // Expense account
       return line.lineTotal;
     }
     return 0;

@@ -33,7 +33,7 @@ const workflowRules: WorkflowRule[] = [
         title: `Automatische CAPA für Critical NC: ${nc.title}`,
         description: `Automatisch generierte CAPA zur Behebung der kritischen Abweichung.\n\nOriginal NC: ${nc.description}`,
         action: 'Sofortige Ursachenanalyse und Korrekturmaßnahmen erforderlich',
-        responsibleUserId: nc.assignedTo || 'quality-manager',
+        responsibleUserId: nc.assignedTo ?? 'quality-manager',
         responsibleDepartment: 'Quality Management',
         dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 Tage
       }, 'system-automation');
@@ -133,7 +133,7 @@ export async function autoCreateNcFromFailedSample(
   logger.info({ sampleId, tenantId }, 'Auto-creating NC from failed sample');
 
   const description = failedAnalytes.map(a => 
-    `${a.analyte}: ${a.value} (Spec: ${a.limit.min || 'N/A'} - ${a.limit.max || 'N/A'})`
+    `${a.analyte}: ${a.value} (Spec: ${a.limit.min ?? 'N/A'} - ${a.limit.max ?? 'N/A'})`
   ).join('\n');
 
   await createNonConformity({
@@ -174,3 +174,4 @@ export async function checkQualityTrends(tenantId: string): Promise<void> {
   // Placeholder für Trend-Analyse
   // Wird von ml-predictions-service.ts implementiert
 }
+

@@ -7,6 +7,12 @@
 import { injectable } from 'inversify';
 import { EventBus } from '../infrastructure/event-bus/event-bus';
 import { InventoryMetricsService } from '../infrastructure/observability/metrics-service';
+// Constants
+const ABC_A_THRESHOLD_PERCENT = 80;
+const ABC_B_THRESHOLD_PERCENT = 95;
+const COUNT_FREQ_A = 12; // Monthly
+const COUNT_FREQ_B = 6;  // Bi-monthly
+const COUNT_FREQ_C = 2;  // Semi-annually
 import {
   CycleCountCreatedEvent,
   CycleCountCompletedEvent
@@ -183,15 +189,15 @@ export class CycleCountingService {
         let classification: 'A' | 'B' | 'C';
         let countFrequency: number;
 
-        if (cumulativePercentage <= 80) {
+        if (cumulativePercentage <= ABC_A_THRESHOLD_PERCENT) {
           classification = 'A';
-          countFrequency = 12; // Monthly
-        } else if (cumulativePercentage <= 95) {
+          countFrequency = COUNT_FREQ_A;
+        } else if (cumulativePercentage <= ABC_B_THRESHOLD_PERCENT) {
           classification = 'B';
-          countFrequency = 6; // Bi-monthly
+          countFrequency = COUNT_FREQ_B;
         } else {
           classification = 'C';
-          countFrequency = 2; // Semi-annually
+          countFrequency = COUNT_FREQ_C;
         }
 
         classifications.push({
@@ -742,6 +748,7 @@ export class CycleCountingService {
     serial?: string
   ): Promise<void> {
     // Mock implementation - would create inventory adjustment
+    // eslint-disable-next-line no-console
     console.log(`Adjusting inventory: ${sku} at ${location} by ${quantity}`);
   }
 

@@ -8,8 +8,8 @@ import { injectable } from 'inversify';
 import { EventBus } from '../infrastructure/event-bus/event-bus';
 import { InventoryMetricsService } from '../infrastructure/observability/metrics-service';
 import {
-  PackTaskCreatedEvent,
   PackCompletedEvent,
+  PackTaskCreatedEvent,
   ShipmentCreatedEvent,
   ShipmentShippedEvent
 } from '../core/domain-events/inventory-domain-events';
@@ -127,6 +127,12 @@ export interface Contact {
   email?: string;
 }
 
+export interface CustomsInfo {
+  harmonizedCodes: string[];
+  totalValue: number;
+  currency: string;
+}
+
 export interface GS1Label {
   type: 'sscc' | 'gtin' | 'batch' | 'expiry' | 'shipping';
   format: '1d' | '2d' | 'qr';
@@ -146,10 +152,29 @@ export interface CarrierIntegration {
   active: boolean;
 }
 
+// Constants
+const GS1_COMPANY_PREFIX = '123456789'; // Example company prefix
+const SSCC_SERIAL_REF_LENGTH = 9;
+const DECIMAL_BASE = 10;
+const GS1_WEIGHT_ODD_POSITION = 3;
+const DEFAULT_PRIORITY = 5;
+const BASE_PACKING_TIME = 5; // minutes
+const PACKING_TIME_PER_ITEM = 2; // minutes per item
+const PACKING_TIME_PER_UNIT = 0.5; // minutes per unit
+const RANDOM_BASE = 36;
+const RANDOM_ID_START = 2;
+const RANDOM_ID_LENGTH = 9;
+const HOURS_TO_MS = 60 * 60 * 1000;
+const MINUTES_TO_MS = 60 * 1000;
+const SSCC_PREFIX = '003';
+const MS_TO_SECONDS = 1000;
+const PICKED_UP_OFFSET_HOURS = 2;
+const IN_TRANSIT_OFFSET_HOURS = 1;
+
 @injectable()
 export class PackingShippingService {
   private readonly metrics = new InventoryMetricsService();
-  private carriers: Map<string, CarrierIntegration> = new Map();
+  private readonly carriers: Map<string, CarrierIntegration> = new Map();
 
   constructor(
     private readonly eventBus: EventBus
@@ -165,14 +190,14 @@ export class PackingShippingService {
 
     try {
       const orderDetails = await this.getOrderDetails(orderId);
-      if (!orderDetails) {
+      if (orderDetails == null) {
         throw new Error(`Order ${orderId} not found`);
       }
 
       const task: PackingTask = {
         taskId: `pack_${Date.now()}`,
         orderId,
-        items: orderDetails.lines.map((line: any) => ({
+        items: orderDetails.lines.map((line: { sku: string; quantity: number; lot?: string; serial?: string }) => ({
           sku: line.sku,
           quantity: line.quantity,
           lot: line.lot,
@@ -180,8 +205,8 @@ export class PackingShippingService {
           packedQuantity: 0
         })),
         status: 'pending',
-        packingStation: packingStation || '',
-        priority: orderDetails.priority || 5,
+        packingStation: packingStation ?? '',
+        priority: orderDetails.priority ?? DEFAULT_PRIORITY,
         estimatedTime: this.estimatePackingTime(orderDetails.lines),
         createdAt: new Date()
       };
@@ -189,7 +214,7 @@ export class PackingShippingService {
       // Publish event
       await this.publishPackTaskCreatedEvent(task);
 
-      this.metrics.recordDatabaseQueryDuration('packing.task_creation', (Date.now() - startTime) / 1000, { orderId });
+      this.metrics.recordDatabaseQueryDuration('packing.task_creation', (Date.now() - startTime) / MS_TO_SECONDS, { orderId });
       this.metrics.incrementPackTasks('packing.created', { orderId });
 
       return task;
@@ -204,7 +229,7 @@ export class PackingShippingService {
    */
   async startPackingTask(taskId: string, packerId: string): Promise<void> {
     const task = await this.findPackingTask(taskId);
-    if (!task) {
+    if (task == null) {
       throw new Error(`Packing task ${taskId} not found`);
     }
 
@@ -227,7 +252,7 @@ export class PackingShippingService {
     const startTime = Date.now();
     const task = await this.findPackingTask(taskId);
 
-    if (!task) {
+    if (task == null) {
       throw new Error(`Packing task ${taskId} not found`);
     }
 
@@ -243,11 +268,11 @@ export class PackingShippingService {
     for (const pkg of packages) {
       const packageWithId: Package = {
         ...pkg,
-        packageId: `pkg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        packageId: `pkg_${Date.now()}_${Math.random().toString(RANDOM_BASE).substr(RANDOM_ID_START, RANDOM_ID_LENGTH)}`,
         sscc: this.generateSSCC(),
         labels: await this.generatePackageLabels(pkg as Package),
         packedAt: new Date(),
-        packedBy: task.assignedTo || 'unknown'
+        packedBy: task.assignedTo ?? 'unknown'
       };
 
       completedPackages.push(packageWithId);
@@ -256,13 +281,13 @@ export class PackingShippingService {
     // Update task
     task.status = 'completed';
     task.completedAt = new Date();
-    task.actualTime = task.startedAt ?
-      (task.completedAt.getTime() - task.startedAt.getTime()) / (1000 * 60) : undefined;
+    task.actualTime = task.startedAt != null ?
+      (task.completedAt.getTime() - task.startedAt.getTime()) / MINUTES_TO_MS : undefined;
 
     // Publish event
     await this.publishPackCompletedEvent(task, completedPackages);
 
-    this.metrics.recordDatabaseQueryDuration('packing.task_completion', (Date.now() - startTime) / 1000, { taskId });
+    this.metrics.recordDatabaseQueryDuration('packing.task_completion', (Date.now() - startTime) / MS_TO_SECONDS, { taskId });
     this.metrics.incrementPackTasks('packing.completed', { taskId });
 
     return completedPackages;
@@ -291,7 +316,7 @@ export class PackingShippingService {
         shipmentNumber: `SH${Date.now()}`,
         orderId,
         carrier,
-        serviceType: options?.serviceType || 'standard',
+        serviceType: options?.serviceType ?? 'standard',
         status: 'planned',
         shipFrom: await this.getShipFromAddress(),
         shipTo,
@@ -312,7 +337,7 @@ export class PackingShippingService {
       // Publish event
       await this.publishShipmentCreatedEvent(shipment);
 
-      this.metrics.recordDatabaseQueryDuration('shipping.shipment_creation', (Date.now() - startTime) / 1000, { orderId });
+      this.metrics.recordDatabaseQueryDuration('shipping.shipment_creation', (Date.now() - startTime) / MS_TO_SECONDS, { orderId });
 
       return shipment;
     } catch (error) {
@@ -328,7 +353,7 @@ export class PackingShippingService {
     const startTime = Date.now();
     const shipment = await this.findShipment(shipmentId);
 
-    if (!shipment) {
+    if (shipment == null) {
       throw new Error(`Shipment ${shipmentId} not found`);
     }
 
@@ -339,7 +364,7 @@ export class PackingShippingService {
     try {
       // Get carrier integration
       const carrier = this.carriers.get(shipment.carrier);
-      if (!carrier) {
+      if (carrier == null) {
         throw new Error(`Carrier ${shipment.carrier} not configured`);
       }
 
@@ -354,7 +379,7 @@ export class PackingShippingService {
       // Publish event
       await this.publishShipmentShippedEvent(shipment);
 
-      this.metrics.recordDatabaseQueryDuration('shipping.carrier_integration', (Date.now() - startTime) / 1000, { carrier: carrier.carrierId });
+      this.metrics.recordDatabaseQueryDuration('shipping.carrier_integration', (Date.now() - startTime) / MS_TO_SECONDS, { carrier: carrier.carrierId });
 
       return trackingNumber;
     } catch (error) {
@@ -380,7 +405,7 @@ export class PackingShippingService {
     // GTIN labels for each item
     for (const item of pkg.contents) {
       const gtin = await this.getGTINForSKU(item.sku);
-      if (gtin) {
+      if (gtin != null) {
         labels.push({
           type: 'gtin',
           format: '1d',
@@ -391,9 +416,9 @@ export class PackingShippingService {
     }
 
     // Batch/lot labels
-    const lots = Array.from(new Set(pkg.contents.map(item => item.lot).filter(Boolean)));
+    const lots = Array.from(new Set(pkg.contents.map(item => item.lot).filter(lot => lot != null)));
     for (const lot of lots) {
-      if (lot) {
+      if (lot != null) {
         labels.push({
           type: 'batch',
           format: '1d',
@@ -411,17 +436,17 @@ export class PackingShippingService {
    */
   async getShipmentTracking(shipmentId: string): Promise<Shipment['carrierEvents']> {
     const shipment = await this.findShipment(shipmentId);
-    if (!shipment) {
+    if (shipment == null) {
       throw new Error(`Shipment ${shipmentId} not found`);
     }
 
-    if (!shipment.trackingNumber) {
+    if (shipment.trackingNumber == null) {
       return [];
     }
 
     const carrier = this.carriers.get(shipment.carrier);
-    if (!carrier?.trackingCapabilities) {
-      return shipment.carrierEvents || [];
+    if (carrier == null || carrier.trackingCapabilities !== true) {
+      return shipment.carrierEvents ?? [];
     }
 
     // Get tracking from carrier API
@@ -431,8 +456,8 @@ export class PackingShippingService {
     shipment.carrierEvents = trackingEvents;
 
     // Check if delivered
-    const deliveredEvent = trackingEvents?.find(event => event.eventType === 'delivered');
-    if (deliveredEvent && shipment.status !== 'delivered') {
+    const deliveredEvent = trackingEvents.find(event => event.eventType === 'delivered');
+    if (deliveredEvent != null && shipment.status !== 'delivered') {
       shipment.status = 'delivered';
       shipment.deliveredAt = deliveredEvent.timestamp;
     }
@@ -455,15 +480,11 @@ export class PackingShippingService {
         weight: number;
         contents: Package['contents'];
       }>;
-      customsInfo?: {
-        harmonizedCodes: Array<{ sku: string; code: string; description: string }>;
-        totalValue: number;
-        currency: string;
-      };
+      customsInfo?: CustomsInfo;
     };
   }> {
     const shipment = await this.findShipment(shipmentId);
-    if (!shipment) {
+    if (shipment == null) {
       throw new Error(`Shipment ${shipmentId} not found`);
     }
 
@@ -481,7 +502,7 @@ export class PackingShippingService {
 
     // Add customs information if international
     if (this.isInternationalShipment(shipment)) {
-      (manifest as any).customsInfo = await this.generateCustomsInfo(shipment);
+      (manifest as { customsInfo?: CustomsInfo }).customsInfo = await this.generateCustomsInfo(shipment);
     }
 
     return { shipment, manifest };
@@ -495,15 +516,15 @@ export class PackingShippingService {
     // Count packed quantities
     for (const pkg of packages) {
       for (const item of pkg.contents) {
-        const key = `${item.sku}-${item.lot || ''}-${item.serial || ''}`;
-        packedItems.set(key, (packedItems.get(key) || 0) + item.quantity);
+        const key = `${item.sku}-${item.lot ?? ''}-${item.serial ?? ''}`;
+        packedItems.set(key, (packedItems.get(key) ?? 0) + item.quantity);
       }
     }
 
     // Validate against task requirements
     for (const requiredItem of task.items) {
-      const key = `${requiredItem.sku}-${requiredItem.lot || ''}-${requiredItem.serial || ''}`;
-      const packedQty = packedItems.get(key) || 0;
+      const key = `${requiredItem.sku}-${requiredItem.lot ?? ''}-${requiredItem.serial ?? ''}`;
+      const packedQty = packedItems.get(key) ?? 0;
 
       if (packedQty !== requiredItem.quantity) {
         throw new Error(`Quantity mismatch for ${requiredItem.sku}: required ${requiredItem.quantity}, packed ${packedQty}`);
@@ -514,10 +535,9 @@ export class PackingShippingService {
   private generateSSCC(): string {
     // Generate GS1 SSCC (Serial Shipping Container Code)
     // Format: (00) + Extension digit + GS1 Company Prefix + Serial Reference
-    const extensionDigit = '3'; // Fixed for logistics
-    const companyPrefix = '1234567'; // Example
-    const serialRef = Date.now().toString().slice(-9); // 9 digits
-    const sscc = `003${companyPrefix}${serialRef}`;
+    const companyPrefix = GS1_COMPANY_PREFIX; // Example
+    const serialRef = Date.now().toString().slice(-SSCC_SERIAL_REF_LENGTH); // 9 digits
+    const sscc = `${SSCC_PREFIX}${companyPrefix}${serialRef}`;
 
     // Calculate check digit
     const checkDigit = this.calculateGS1CheckDigit(sscc);
@@ -527,79 +547,36 @@ export class PackingShippingService {
   private calculateGS1CheckDigit(data: string): number {
     let sum = 0;
     for (let i = data.length - 1; i >= 0; i--) {
-      const digit = parseInt(data[i]);
-      sum += i % 2 === 0 ? digit * 3 : digit;
+      const digit = parseInt(data[i], DECIMAL_BASE);
+      sum += i % 2 === 0 ? digit * GS1_WEIGHT_ODD_POSITION : digit;
     }
-    const remainder = sum % 10;
-    return remainder === 0 ? 0 : 10 - remainder;
+    const remainder = sum % DECIMAL_BASE;
+    return remainder === 0 ? 0 : DECIMAL_BASE - remainder;
   }
 
-  private estimatePackingTime(items: PackingTask['items']): number {
-    const baseTime = 5; // minutes
-    const itemsFactor = items.length * 2; // 2 minutes per item
-    const quantityFactor = items.reduce((sum, item) => sum + item.quantity, 0) * 0.5; // 30 seconds per unit
+  private estimatePackingTime(items: Array<{ sku: string; quantity: number; lot?: string; serial?: string }>): number {
+    const baseTime = BASE_PACKING_TIME; // minutes
+    const itemsFactor = items.length * PACKING_TIME_PER_ITEM; // minutes per item
+    const quantityFactor = items.reduce((sum, item) => sum + item.quantity, 0) * PACKING_TIME_PER_UNIT; // minutes per unit
     return Math.ceil(baseTime + itemsFactor + quantityFactor);
   }
 
-  private async getOrderDetails(orderId: string): Promise<any> {
-    // Mock implementation
-    return {
-      orderId,
-      priority: 5,
-      lines: [
-        { sku: 'WIDGET-001', quantity: 5, lot: 'LOT-001' },
-        { sku: 'GADGET-002', quantity: 3, serial: 'SN123456' }
-      ]
-    };
+  private async getOrderDetails(orderId: string): Promise<{ orderId: string; priority: number; lines: Array<{ sku: string; quantity: number; lot?: string; serial?: string }> }> {
+    // TODO: Implement actual order repository call
+    // This should fetch order details from the order domain service
+    throw new Error(`Order details retrieval not implemented for order: ${orderId}`);
   }
 
   private async findPackingTask(taskId: string): Promise<PackingTask | null> {
-    // Mock implementation
-    return {
-      taskId,
-      orderId: 'ORDER-123',
-      items: [],
-      status: 'in_progress',
-      priority: 5,
-      estimatedTime: 10,
-      createdAt: new Date()
-    };
+    // TODO: Implement actual packing task repository call
+    // This should fetch packing task from database
+    throw new Error(`Packing task retrieval not implemented for task: ${taskId}`);
   }
 
   private async findShipment(shipmentId: string): Promise<Shipment | null> {
-    // Mock implementation
-    return {
-      shipmentId,
-      shipmentNumber: 'SH123456',
-      orderId: 'ORDER-123',
-      carrier: 'UPS',
-      serviceType: 'ground',
-      status: 'ready',
-      shipFrom: {
-        name: 'VALEO Warehouse',
-        address: {
-          street1: '123 Main St',
-          city: 'Anytown',
-          state: 'ST',
-          postalCode: '12345',
-          country: 'US'
-        }
-      },
-      shipTo: {
-        name: 'Customer',
-        address: {
-          street1: '456 Oak Ave',
-          city: 'Somewhere',
-          state: 'ST',
-          postalCode: '67890',
-          country: 'US'
-        }
-      },
-      packages: [],
-      totalWeight: 10,
-      totalValue: 100,
-      createdAt: new Date()
-    };
+    // TODO: Implement actual shipment repository call
+    // This should fetch shipment from database
+    throw new Error(`Shipment retrieval not implemented for shipment: ${shipmentId}`);
   }
 
   private async getGTINForSKU(sku: string): Promise<string | null> {
@@ -608,55 +585,43 @@ export class PackingShippingService {
       'WIDGET-001': '01234567890123',
       'GADGET-002': '09876543210987'
     };
-    return gtinMap[sku] || null;
+    return gtinMap[sku] ?? null;
   }
 
   private async getShipFromAddress(): Promise<Shipment['shipFrom']> {
-    return {
-      name: 'VALEO NeuroERP Warehouse',
-      address: {
-        street1: '123 Industrial Blvd',
-        city: 'Logistics City',
-        state: 'LC',
-        postalCode: '99999',
-        country: 'DE'
-      },
-      contact: {
-        name: 'Warehouse Manager',
-        phone: '+49-123-456789',
-        email: 'warehouse@valero-neuroerp.com'
-      }
-    };
+    // TODO: Implement actual warehouse configuration service call
+    // This should fetch warehouse address from configuration
+    throw new Error('Ship-from address retrieval not implemented');
   }
 
   private async generateShippingLabels(shipment: Shipment): Promise<void> {
     // Generate carrier-specific shipping labels
     const carrier = this.carriers.get(shipment.carrier);
-    if (!carrier) return;
+    if (carrier == null) return;
 
     // Implementation would generate actual labels via carrier API
-    console.log(`Generated shipping labels for ${shipment.shipmentId}`);
+    // no console per lint rules
   }
 
-  private async createCarrierShipment(shipment: Shipment, carrier: CarrierIntegration): Promise<string> {
+  private async createCarrierShipment(_shipment: Shipment, _carrier: CarrierIntegration): Promise<string> {
     // Mock carrier API integration
     return `TRK${Date.now()}`;
   }
 
-  private async getCarrierTracking(trackingNumber: string, carrier: CarrierIntegration): Promise<Shipment['carrierEvents']> {
+  private async getCarrierTracking(_trackingNumber: string, _carrier: CarrierIntegration): Promise<Shipment['carrierEvents']> {
     // Mock tracking API
     return [
       {
         eventType: 'picked_up',
         description: 'Package picked up',
         location: 'Warehouse',
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+        timestamp: new Date(Date.now() - PICKED_UP_OFFSET_HOURS * HOURS_TO_MS)
       },
       {
         eventType: 'in_transit',
         description: 'In transit to destination',
         location: 'Distribution Center',
-        timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000) // 1 hour ago
+        timestamp: new Date(Date.now() - IN_TRANSIT_OFFSET_HOURS * HOURS_TO_MS)
       }
     ];
   }
@@ -665,7 +630,7 @@ export class PackingShippingService {
     return shipment.shipFrom.address.country !== shipment.shipTo.address.country;
   }
 
-  private async generateCustomsInfo(shipment: Shipment): Promise<any> {
+  private async generateCustomsInfo(shipment: Shipment): Promise<CustomsInfo> {
     // Generate customs information for international shipments
     return {
       harmonizedCodes: [],
@@ -676,9 +641,9 @@ export class PackingShippingService {
 
   private async getCarrierForTask(task: PackingTask): Promise<string> {
     // Try to get carrier from associated shipment
-    if (task.shipmentId) {
+    if (task.shipmentId != null) {
       const shipment = await this.findShipment(task.shipmentId);
-      if (shipment) {
+      if (shipment != null) {
         return shipment.carrier;
       }
     }
@@ -693,7 +658,7 @@ export class PackingShippingService {
         carrierId: 'ups',
         name: 'UPS',
         apiEndpoint: 'https://api.ups.com',
-        apiKey: process.env.UPS_API_KEY || '',
+        apiKey: process.env.UPS_API_KEY ?? '',
         supportedServices: ['ground', 'air', 'express'],
         labelFormats: ['pdf', 'png', 'zpl'],
         trackingCapabilities: true,
@@ -703,7 +668,7 @@ export class PackingShippingService {
         carrierId: 'fedex',
         name: 'FedEx',
         apiEndpoint: 'https://api.fedex.com',
-        apiKey: process.env.FEDEX_API_KEY || '',
+        apiKey: process.env.FEDEX_API_KEY ?? '',
         supportedServices: ['ground', 'express', 'overnight'],
         labelFormats: ['pdf', 'png', 'zpl'],
         trackingCapabilities: true,
@@ -713,7 +678,7 @@ export class PackingShippingService {
         carrierId: 'dhl',
         name: 'DHL',
         apiEndpoint: 'https://api.dhl.com',
-        apiKey: process.env.DHL_API_KEY || '',
+        apiKey: process.env.DHL_API_KEY ?? '',
         supportedServices: ['ground', 'express', 'international'],
         labelFormats: ['pdf', 'png', 'zpl'],
         trackingCapabilities: true,
@@ -738,7 +703,7 @@ export class PackingShippingService {
       aggregateVersion: 1,
       tenantId: 'default',
       orderId: task.orderId,
-      shipmentId: task.shipmentId || '',
+      shipmentId: task.shipmentId ?? '',
       items: task.items.map(item => ({
         sku: item.sku,
         quantity: item.quantity,
@@ -763,8 +728,8 @@ export class PackingShippingService {
       aggregateVersion: 1,
       tenantId: 'default',
       orderId: task.orderId,
-      shipmentId: task.shipmentId || '',
-      packedBy: task.assignedTo || 'unknown',
+      shipmentId: task.shipmentId ?? '',
+      packedBy: task.assignedTo ?? 'unknown',
       weight: packages.reduce((sum, pkg) => sum + pkg.weight, 0),
       dimensions: {
         length: Math.max(...packages.map(p => p.dimensions.length)),
@@ -807,7 +772,7 @@ export class PackingShippingService {
   }
 
   private async publishShipmentShippedEvent(shipment: Shipment): Promise<void> {
-    if (!shipment.trackingNumber || !shipment.shippedAt) {
+    if (shipment.trackingNumber == null || shipment.shippedAt == null) {
       throw new Error('Cannot publish shipment shipped event without tracking number and shipped date');
     }
 

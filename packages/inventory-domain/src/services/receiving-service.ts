@@ -64,6 +64,23 @@ export interface QualityInspection {
   inspectedAt: Date;
 }
 
+export interface QuantityMismatch {
+  lineId: string;
+  sku: string;
+  expected: number;
+  received: number;
+  variance: number;
+}
+
+// Constants
+const QUANTITY_TOLERANCE_PERCENT = 0.05;
+const MOCK_DOCK_UTILIZATION = 0.85;
+const MOCK_AVERAGE_RECEIVING_TIME = 45;
+const MOCK_QA_PASS_RATE = 0.96;
+const MOCK_MISMATCH_RATE = 0.03;
+const HTTP_OK_STATUS = 200;
+const MS_TO_SECONDS = 1000;
+
 export interface QualityCriterion {
   criterion: string;
   expected: string;
@@ -98,7 +115,7 @@ export class ReceivingService {
         asn.dock = await this.scheduleDockAppointment(asn);
       }
 
-      this.metrics.recordApiResponseTime('receiving.validate_asn', (Date.now() - startTime) / 1000, { asnId: asn.asnId });
+      this.metrics.recordApiResponseTime('receiving.validate_asn', (Date.now() - startTime) / MS_TO_SECONDS, { asnId: asn.asnId });
 
       return asn;
     } catch (error) {
@@ -111,7 +128,7 @@ export class ReceivingService {
    * Start receiving process when truck arrives
    */
   async startReceiving(asnId: string, dock: string, carrierInfo: { driverName?: string; vehicleNumber?: string }): Promise<DockAppointment> {
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     try {
       // Find ASN
@@ -136,7 +153,7 @@ export class ReceivingService {
       asn.status = 'receiving';
       asn.dock = dock;
 
-      this.metrics.recordApiResponseTime('POST', '/receiving/start', 200);
+      this.metrics.recordApiResponseTime('POST', '/receiving/start', HTTP_OK_STATUS);
 
       return appointment;
     } catch (error) {
@@ -158,7 +175,7 @@ export class ReceivingService {
       condition: 'good' | 'damaged' | 'expired';
       qaRequired: boolean;
     }>
-  ): Promise<{ received: ASNLine[]; mismatches: any[] }> {
+  ): Promise<{ received: ASNLine[]; mismatches: QuantityMismatch[] }> {
     const startTime = Date.now();
 
     try {
@@ -182,7 +199,7 @@ export class ReceivingService {
       asnLine.serial = receivedLine.serial || asnLine.serial;
 
         // Check for quantity mismatch
-        if (Math.abs((asnLine.receivedQty || 0) - asnLine.expectedQty) > asnLine.expectedQty * 0.05) { // 5% tolerance
+        if (Math.abs((asnLine.receivedQty || 0) - asnLine.expectedQty) > asnLine.expectedQty * QUANTITY_TOLERANCE_PERCENT) { // 5% tolerance
           mismatches.push({
             lineId: receivedLine.lineId,
             sku: asnLine.sku,
@@ -195,7 +212,7 @@ export class ReceivingService {
         // Perform quality inspection if required
         if (receivedLine.qaRequired) {
           const qaResult = await this.performQualityInspection(asnId, asnLine);
-          asnLine.qaStatus = qaResult.result as any;
+          asnLine.qaStatus = qaResult.result === 'pass' ? 'passed' : qaResult.result === 'fail' ? 'failed' : 'pending';
           asnLine.qaNotes = qaResult.notes;
         } else {
           asnLine.qaStatus = 'passed'; // Auto-pass if no QA required
@@ -214,7 +231,7 @@ export class ReceivingService {
       // Update ASN status
       asn.status = 'completed';
 
-      this.metrics.recordApiResponseTime('receiving.process_goods', (Date.now() - startTime) / 1000, { asnId: asnId });
+      this.metrics.recordApiResponseTime('receiving.process_goods', (Date.now() - startTime) / MS_TO_SECONDS, { asnId: asnId });
 
       return { received, mismatches };
     } catch (error) {
@@ -256,7 +273,7 @@ export class ReceivingService {
           pass: true
         }
       ],
-      result: 'pass',
+      result: 'passed',
       inspectedBy: 'system', // In real implementation, get from auth context
       inspectedAt: new Date()
     };
@@ -314,7 +331,7 @@ export class ReceivingService {
    */
   private storeQualityInspection(inspection: QualityInspection): void {
     // In real implementation, persist to database
-    console.log('Storing quality inspection:', inspection.inspectionId);
+    // Logging removed as per lint rules
   }
 
   /**
@@ -342,7 +359,7 @@ export class ReceivingService {
         uom: line.uom,
         lot: line.lot,
         expDate: line.expDate,
-        qualityStatus: (line.qaStatus || 'pending') as any
+        qualityStatus: line.qaStatus || 'pending'
       }))
     };
 
@@ -352,7 +369,7 @@ export class ReceivingService {
   /**
    * Publish receiving mismatch event
    */
-  private async publishReceivingMismatchEvent(asn: ASN, mismatches: any[]): Promise<void> {
+  private async publishReceivingMismatchEvent(asn: ASN, mismatches: QuantityMismatch[]): Promise<void> {
     const event: ReceivingMismatchEvent = {
       eventId: `evt_${Date.now()}`,
       eventType: 'inventory.receiving.mismatch',
@@ -407,10 +424,10 @@ export class ReceivingService {
   } {
     // In real implementation, calculate from actual data
     return {
-      dockUtilization: 0.85,
-      averageReceivingTime: 45, // minutes
-      qaPassRate: 0.96,
-      mismatchRate: 0.03
+      dockUtilization: MOCK_DOCK_UTILIZATION,
+      averageReceivingTime: MOCK_AVERAGE_RECEIVING_TIME, // minutes
+      qaPassRate: MOCK_QA_PASS_RATE,
+      mismatchRate: MOCK_MISMATCH_RATE
     };
   }
 }

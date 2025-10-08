@@ -3,17 +3,31 @@
  * Vacation, sick leave, and other absence management
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
+
+const MILLISECONDS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const MILLISECONDS_PER_DAY = MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY;
+const MAX_LEAVE_DURATION_DAYS = 365;
+const INCLUSIVE_DAY_OFFSET = 1;
+const DAY_TOLERANCE = 1;
+const INITIAL_VERSION = 1;
+
+const leaveTypeSchema = z.enum(['Vacation', 'Sick', 'Unpaid', 'Other']);
+const leaveStatusSchema = z.enum(['Pending', 'Approved', 'Rejected']);
 
 export const LeaveRequestSchema = z.object({
   id: z.string().uuid(),
   tenantId: z.string().uuid(),
   employeeId: z.string().uuid(),
-  type: z.enum(['Vacation', 'Sick', 'Unpaid', 'Other']),
+  type: leaveTypeSchema,
   from: z.string().date(),
   to: z.string().date(),
   days: z.number().positive(),
-  status: z.enum(['Pending', 'Approved', 'Rejected']),
+  status: leaveStatusSchema,
   approvedBy: z.string().uuid().optional(),
   note: z.string().optional(),
   createdAt: z.string().datetime(),
@@ -24,9 +38,11 @@ export const LeaveRequestSchema = z.object({
 });
 
 export type LeaveRequest = z.infer<typeof LeaveRequestSchema>;
+export type LeaveType = z.infer<typeof leaveTypeSchema>;
+export type LeaveStatus = z.infer<typeof leaveStatusSchema>;
 
 export class LeaveRequestEntity {
-  private data: LeaveRequest;
+  private readonly data: LeaveRequest;
 
   constructor(data: LeaveRequest) {
     this.data = LeaveRequestSchema.parse(data);
@@ -37,11 +53,11 @@ export class LeaveRequestEntity {
   get id(): string { return this.data.id; }
   get tenantId(): string { return this.data.tenantId; }
   get employeeId(): string { return this.data.employeeId; }
-  get type(): string { return this.data.type; }
+  get type(): LeaveType { return this.data.type; }
   get from(): string { return this.data.from; }
   get to(): string { return this.data.to; }
   get days(): number { return this.data.days; }
-  get status(): string { return this.data.status; }
+  get status(): LeaveStatus { return this.data.status; }
   get approvedBy(): string | undefined { return this.data.approvedBy; }
   get note(): string | undefined { return this.data.note; }
   get createdAt(): string { return this.data.createdAt; }
@@ -89,7 +105,7 @@ export class LeaveRequestEntity {
     const fromDate = new Date(this.data.from);
     const toDate = new Date(this.data.to);
     const diffTime = Math.abs(toDate.getTime() - fromDate.getTime());
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end days
+    return Math.ceil(diffTime / MILLISECONDS_PER_DAY) + INCLUSIVE_DAY_OFFSET; // include start and end days
   }
 
   isInPeriod(date: string): boolean {
@@ -116,14 +132,12 @@ export class LeaveRequestEntity {
       throw new Error('Days must be positive');
     }
 
-    // Check for reasonable leave duration (max 365 days)
-    if (this.data.days > 365) {
+    if (this.data.days > MAX_LEAVE_DURATION_DAYS) {
       throw new Error('Leave duration cannot exceed 365 days');
     }
 
-    // Validate that days matches the actual date range
     const actualDays = this.getDurationInDays();
-    if (Math.abs(this.data.days - actualDays) > 1) { // Allow 1 day tolerance for weekend handling
+    if (Math.abs(this.data.days - actualDays) > DAY_TOLERANCE) {
       throw new Error('Declared days must match the date range');
     }
   }
@@ -134,14 +148,11 @@ export class LeaveRequestEntity {
       throw new Error('Leave request cannot be approved in current status');
     }
 
-    return new LeaveRequestEntity({
-      ...this.data,
+    return this.clone({
       status: 'Approved',
       approvedBy,
-      note: note || this.data.note,
-      updatedAt: new Date().toISOString(),
-      updatedBy: approvedBy,
-      version: this.data.version + 1
+      note: note ?? this.data.note,
+      updatedBy: approvedBy
     });
   }
 
@@ -150,14 +161,11 @@ export class LeaveRequestEntity {
       throw new Error('Leave request cannot be rejected in current status');
     }
 
-    return new LeaveRequestEntity({
-      ...this.data,
+    return this.clone({
       status: 'Rejected',
       approvedBy,
-      note: note || this.data.note,
-      updatedAt: new Date().toISOString(),
-      updatedBy: approvedBy,
-      version: this.data.version + 1
+      note: note ?? this.data.note,
+      updatedBy: approvedBy
     });
   }
 
@@ -166,13 +174,7 @@ export class LeaveRequestEntity {
       throw new Error('Leave request cannot be edited in current status');
     }
 
-    return new LeaveRequestEntity({
-      ...this.data,
-      note,
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      version: this.data.version + 1
-    });
+    return this.clone({ note, updatedBy });
   }
 
   updateDates(from: string, to: string, days: number, updatedBy?: string): LeaveRequestEntity {
@@ -180,14 +182,11 @@ export class LeaveRequestEntity {
       throw new Error('Leave request cannot be edited in current status');
     }
 
-    return new LeaveRequestEntity({
-      ...this.data,
+    return this.clone({
       from,
       to,
       days,
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      version: this.data.version + 1
+      updatedBy
     });
   }
 
@@ -196,15 +195,25 @@ export class LeaveRequestEntity {
     return { ...this.data };
   }
 
+  private clone(overrides: Partial<LeaveRequest>): LeaveRequestEntity {
+    const now = new Date().toISOString();
+    return new LeaveRequestEntity({
+      ...this.data,
+      ...overrides,
+      updatedAt: now,
+      version: this.data.version + 1
+    });
+  }
+
   // Factory methods
   static create(data: Omit<LeaveRequest, 'id' | 'createdAt' | 'updatedAt' | 'version'>): LeaveRequestEntity {
     const now = new Date().toISOString();
     return new LeaveRequestEntity({
       ...data,
-      id: require('uuid').v4(),
+      id: uuidv4(),
       createdAt: now,
       updatedAt: now,
-      version: 1
+      version: INITIAL_VERSION
     });
   }
 
