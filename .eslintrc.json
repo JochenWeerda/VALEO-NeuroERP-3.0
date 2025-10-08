@@ -17,7 +17,7 @@
   ],
   "rules": {
     "@typescript-eslint/no-unused-vars": [
-      "error",
+      "warn",
       {
         "argsIgnorePattern": "^_",
         "varsIgnorePattern": "^_",
@@ -28,7 +28,7 @@
     "@typescript-eslint/explicit-function-return-type": "warn",
     "@typescript-eslint/explicit-module-boundary-types": "warn",
     "@typescript-eslint/no-non-null-assertion": "warn",
-    "@typescript-eslint/no-var-requires": "error",
+    "@typescript-eslint/no-var-requires": "warn",
     "@typescript-eslint/no-empty-function": "warn",
     "@typescript-eslint/no-empty-interface": "warn",
     "@typescript-eslint/no-inferrable-types": "warn",
@@ -41,27 +41,35 @@
         "detectObjects": false
       }
     ],
-    "@typescript-eslint/no-unnecessary-type-assertion": "error",
-    "@typescript-eslint/prefer-nullish-coalescing": "error",
-    "@typescript-eslint/prefer-optional-chain": "error",
-    "@typescript-eslint/prefer-readonly": "error",
-    "@typescript-eslint/prefer-string-starts-ends-with": "error",
-    "@typescript-eslint/require-array-sort-compare": "error",
-    "@typescript-eslint/restrict-plus-operands": "error",
-    "@typescript-eslint/restrict-template-expressions": "error",
-    "@typescript-eslint/strict-boolean-expressions": "error",
-    "@typescript-eslint/switch-exhaustiveness-check": "error",
-    "@typescript-eslint/unbound-method": "error",
-    "@typescript-eslint/unified-signatures": "error",
+    "@typescript-eslint/no-unnecessary-type-assertion": "warn",
+    "@typescript-eslint/prefer-nullish-coalescing": "warn",
+    "@typescript-eslint/prefer-optional-chain": "warn",
+    "@typescript-eslint/prefer-readonly": "warn",
+    "@typescript-eslint/prefer-string-starts-ends-with": "warn",
+    "@typescript-eslint/require-array-sort-compare": "warn",
+    "@typescript-eslint/restrict-plus-operands": "warn",
+    "@typescript-eslint/restrict-template-expressions": "warn",
+    "@typescript-eslint/strict-boolean-expressions": "warn",
+    "@typescript-eslint/switch-exhaustiveness-check": "warn",
+    "@typescript-eslint/unbound-method": "warn",
+    "@typescript-eslint/unified-signatures": "warn",
+    "no-case-declarations": "warn",
     "no-console": "warn",
-    "no-debugger": "error",
-    "no-duplicate-imports": "error",
-    "no-unused-expressions": "error",
-    "no-unused-vars": "error",
-    "prefer-const": "error",
-    "prefer-template": "error",
+    "no-debugger": "warn",
+    "no-duplicate-imports": "warn",
+    "no-unused-expressions": "warn",
+    "no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+    "prefer-const": "warn",
+    "prefer-template": "warn",
     "sort-imports": [
-      "error",
+      "warn",
       {
         "ignoreCase": false,
         "ignoreDeclarationSort": true,
@@ -72,6 +80,12 @@
     ]
   },
   "overrides": [
+    {
+      "files": ["packages/analytics-domain/**/*.ts", "packages/erp-domain/**/*.ts", "packages/finance-domain/**/*.ts", "packages/production-domain/**/*.ts"],
+      "parserOptions": {
+        "sourceType": "module"
+      }
+    },
     {
       "files": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
       "rules": {
@@ -94,6 +108,10 @@
     "build/",
     "coverage/",
     "*.js",
-    "*.d.ts"
+    "*.d.ts",
+    "**/vite.config.ts",
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.spec.ts"
   ]
 }

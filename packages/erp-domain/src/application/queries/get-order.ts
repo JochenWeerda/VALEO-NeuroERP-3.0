@@ -8,6 +8,6 @@ export class GetOrderQuery {
 
   async execute(id: OrderId): Promise<OrderDTO | null> {
     const order = await this.service.getOrder(id);
-    return order ? toOrderDTO(order) : null;
+    return (order !== undefined && order !== null) ? toOrderDTO(order) : null;
   }
 }

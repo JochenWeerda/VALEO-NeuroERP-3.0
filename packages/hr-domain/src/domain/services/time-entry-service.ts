@@ -3,10 +3,27 @@
  * Business logic for time tracking and approval
  */
 
-import { TimeEntryEntity, TimeEntry } from '../entities/time-entry';
-import { TimeEntryRepository } from '../repositories/time-entry-repository';
+import pino from 'pino';
+import { TimeEntry, TimeEntryEntity } from '../entities/time-entry';
+import {
+  MonthlySummary,
+  PaginatedResult,
+  PaginationOptions,
+  TimeEntryFilters,
+  TimeEntryRepository,
+  YearlySummary
+} from '../repositories/time-entry-repository';
 import { EmployeeRepository } from '../repositories/employee-repository';
-import { createTimeEntryCreatedEvent, createTimeEntryApprovedEvent, createTimeEntryRejectedEvent } from '../events';
+import {
+  type HREvent,
+  createTimeEntryApprovedEvent,
+  createTimeEntryCreatedEvent,
+  createTimeEntryRejectedEvent
+} from '../events';
+
+const timeEntryServiceLogger = pino({ name: 'time-entry-service' });
+
+type DomainEventPublisher = (event: HREvent) => Promise<void>;
 
 export interface CreateTimeEntryCommand {
   tenantId: string;
@@ -47,21 +64,30 @@ export interface RejectTimeEntryCommand {
   reason?: string;
 }
 
+export interface TimeEntrySummary {
+  totalHours: number;
+  regularHours: number;
+  overtimeHours: number;
+  totalEntries: number;
+  approvedEntries: number;
+  pendingEntries: number;
+}
+
 export class TimeEntryService {
+  private readonly logger = timeEntryServiceLogger;
+
   constructor(
-    private timeEntryRepository: TimeEntryRepository,
-    private employeeRepository: EmployeeRepository,
-    private eventPublisher: (event: any) => Promise<void>
+    private readonly timeEntryRepository: TimeEntryRepository,
+    private readonly employeeRepository: EmployeeRepository,
+    private readonly eventPublisher: DomainEventPublisher
   ) {}
 
   async createTimeEntry(command: CreateTimeEntryCommand): Promise<TimeEntry> {
-    // Validate employee exists
     const employee = await this.employeeRepository.findById(command.tenantId, command.employeeId);
     if (!employee) {
       throw new Error(`Employee with ID ${command.employeeId} not found`);
     }
 
-    // Check for overlapping entries
     const overlappingEntries = await this.timeEntryRepository.findOverlappingEntries(
       command.tenantId,
       command.employeeId,
@@ -73,17 +99,16 @@ export class TimeEntryService {
       throw new Error('Time entry overlaps with existing entries');
     }
 
-    // Create time entry
     const timeEntryData = {
       tenantId: command.tenantId,
       employeeId: command.employeeId,
       date: command.date,
       start: command.start,
       end: command.end,
-      breakMinutes: command.breakMinutes || 0,
+      breakMinutes: command.breakMinutes ?? 0,
       projectId: command.projectId,
       costCenter: command.costCenter,
-      source: command.source || 'Manual',
+      source: command.source ?? 'Manual',
       status: 'Draft' as const,
       createdBy: command.createdBy,
       updatedBy: command.createdBy
@@ -92,23 +117,25 @@ export class TimeEntryService {
     const timeEntry = TimeEntryEntity.create(timeEntryData);
     const savedTimeEntry = await this.timeEntryRepository.save(command.tenantId, timeEntry.toJSON());
 
-    // Publish domain event
-    await this.eventPublisher(createTimeEntryCreatedEvent({
-      timeEntryId: savedTimeEntry.id,
-      employeeId: savedTimeEntry.employeeId,
-      date: savedTimeEntry.date,
-      start: savedTimeEntry.start,
-      end: savedTimeEntry.end,
-      workingMinutes: timeEntry.getWorkingMinutes(),
-      source: savedTimeEntry.source
-    }, command.tenantId));
+    await this.eventPublisher(createTimeEntryCreatedEvent(
+      {
+        timeEntryId: savedTimeEntry.id,
+        employeeId: savedTimeEntry.employeeId,
+        date: savedTimeEntry.date,
+        start: savedTimeEntry.start,
+        end: savedTimeEntry.end,
+        workingMinutes: timeEntry.getWorkingMinutes(),
+        source: savedTimeEntry.source
+      },
+      command.tenantId
+    ));
 
     return savedTimeEntry;
   }
 
   async updateTimeEntry(command: UpdateTimeEntryCommand): Promise<TimeEntry> {
     const existingTimeEntry = await this.timeEntryRepository.findById(command.tenantId, command.timeEntryId);
-    
+
     if (!existingTimeEntry) {
       throw new Error(`Time entry with ID ${command.timeEntryId} not found`);
     }
@@ -119,11 +146,13 @@ export class TimeEntryService {
       throw new Error('Time entry cannot be edited in current status');
     }
 
-    // Check for overlapping entries (excluding current entry)
-    if (command.updates.start || command.updates.end) {
-      const start = command.updates.start || timeEntry.start;
-      const end = command.updates.end || timeEntry.end;
-      
+    const hasUpdatedStart = command.updates.start !== undefined;
+    const hasUpdatedEnd = command.updates.end !== undefined;
+
+    if (hasUpdatedStart || hasUpdatedEnd) {
+      const start = command.updates.start ?? timeEntry.start;
+      const end = command.updates.end ?? timeEntry.end;
+
       const overlappingEntries = await this.timeEntryRepository.findOverlappingEntries(
         command.tenantId,
         timeEntry.employeeId,
@@ -137,13 +166,15 @@ export class TimeEntryService {
       }
     }
 
-    // Apply updates
     let updatedTimeEntry = timeEntry;
 
-    if (command.updates.start || command.updates.end || command.updates.breakMinutes !== undefined) {
+    const shouldUpdateTimes =
+      hasUpdatedStart || hasUpdatedEnd || command.updates.breakMinutes !== undefined;
+
+    if (shouldUpdateTimes) {
       updatedTimeEntry = updatedTimeEntry.updateTimes(
-        command.updates.start || timeEntry.start,
-        command.updates.end || timeEntry.end,
+        command.updates.start ?? timeEntry.start,
+        command.updates.end ?? timeEntry.end,
         command.updates.breakMinutes ?? timeEntry.breakMinutes,
         command.updatedBy
       );
@@ -157,12 +188,12 @@ export class TimeEntryService {
       updatedTimeEntry = updatedTimeEntry.updateCostCenter(command.updates.costCenter, command.updatedBy);
     }
 
-    return await this.timeEntryRepository.save(command.tenantId, updatedTimeEntry.toJSON());
+    return this.timeEntryRepository.save(command.tenantId, updatedTimeEntry.toJSON());
   }
 
   async approveTimeEntry(command: ApproveTimeEntryCommand): Promise<TimeEntry> {
     const existingTimeEntry = await this.timeEntryRepository.findById(command.tenantId, command.timeEntryId);
-    
+
     if (!existingTimeEntry) {
       throw new Error(`Time entry with ID ${command.timeEntryId} not found`);
     }
@@ -171,21 +202,29 @@ export class TimeEntryService {
     const approvedTimeEntry = timeEntry.approve(command.approvedBy);
     const savedTimeEntry = await this.timeEntryRepository.save(command.tenantId, approvedTimeEntry.toJSON());
 
-    // Publish domain event
-    await this.eventPublisher(createTimeEntryApprovedEvent({
-      timeEntryId: savedTimeEntry.id,
-      employeeId: savedTimeEntry.employeeId,
-      approvedBy: savedTimeEntry.approvedBy!,
-      date: savedTimeEntry.date,
-      workingMinutes: approvedTimeEntry.getWorkingMinutes()
-    }, command.tenantId));
+    const { approvedBy } = savedTimeEntry;
+    if (typeof approvedBy !== 'string' || approvedBy.length === 0) {
+      this.logger.error({ timeEntryId: savedTimeEntry.id }, 'Approved time entry missing approver');
+      throw new Error('Approved time entry missing approver');
+    }
+
+    await this.eventPublisher(createTimeEntryApprovedEvent(
+      {
+        timeEntryId: savedTimeEntry.id,
+        employeeId: savedTimeEntry.employeeId,
+        approvedBy,
+        date: savedTimeEntry.date,
+        workingMinutes: approvedTimeEntry.getWorkingMinutes()
+      },
+      command.tenantId
+    ));
 
     return savedTimeEntry;
   }
 
   async rejectTimeEntry(command: RejectTimeEntryCommand): Promise<TimeEntry> {
     const existingTimeEntry = await this.timeEntryRepository.findById(command.tenantId, command.timeEntryId);
-    
+
     if (!existingTimeEntry) {
       throw new Error(`Time entry with ID ${command.timeEntryId} not found`);
     }
@@ -194,20 +233,28 @@ export class TimeEntryService {
     const rejectedTimeEntry = timeEntry.reject(command.rejectedBy);
     const savedTimeEntry = await this.timeEntryRepository.save(command.tenantId, rejectedTimeEntry.toJSON());
 
-    // Publish domain event
-    await this.eventPublisher(createTimeEntryRejectedEvent({
-      timeEntryId: savedTimeEntry.id,
-      employeeId: savedTimeEntry.employeeId,
-      rejectedBy: savedTimeEntry.approvedBy!,
-      reason: command.reason
-    }, command.tenantId));
+    const { approvedBy } = savedTimeEntry;
+    if (typeof approvedBy !== 'string' || approvedBy.length === 0) {
+      this.logger.error({ timeEntryId: savedTimeEntry.id }, 'Rejected time entry missing reviewer');
+      throw new Error('Rejected time entry missing reviewer');
+    }
+
+    await this.eventPublisher(createTimeEntryRejectedEvent(
+      {
+        timeEntryId: savedTimeEntry.id,
+        employeeId: savedTimeEntry.employeeId,
+        rejectedBy: approvedBy,
+        reason: command.reason
+      },
+      command.tenantId
+    ));
 
     return savedTimeEntry;
   }
 
   async getTimeEntry(tenantId: string, timeEntryId: string): Promise<TimeEntry> {
     const timeEntry = await this.timeEntryRepository.findById(tenantId, timeEntryId);
-    
+
     if (!timeEntry) {
       throw new Error(`Time entry with ID ${timeEntryId} not found`);
     }
@@ -215,27 +262,41 @@ export class TimeEntryService {
     return timeEntry;
   }
 
-  async listTimeEntries(tenantId: string, filters?: any, pagination?: any): Promise<any> {
-    if (pagination) {
-      return await this.timeEntryRepository.findWithPagination(tenantId, pagination);
+  async listTimeEntries(
+    tenantId: string,
+    filters?: TimeEntryFilters,
+    pagination?: PaginationOptions
+  ): Promise<TimeEntry[] | PaginatedResult<TimeEntry>> {
+    if (pagination !== undefined) {
+      return this.timeEntryRepository.findWithPagination(tenantId, pagination);
     }
-    
-    return await this.timeEntryRepository.findAll(tenantId, filters);
+
+    return this.timeEntryRepository.findAll(tenantId, filters);
   }
 
-  async getEmployeeTimeEntries(tenantId: string, employeeId: string, fromDate?: string, toDate?: string): Promise<TimeEntry[]> {
-    if (fromDate && toDate) {
-      return await this.timeEntryRepository.findByEmployeeAndDateRange(tenantId, employeeId, fromDate, toDate);
+  async getEmployeeTimeEntries(
+    tenantId: string,
+    employeeId: string,
+    fromDate?: string,
+    toDate?: string
+  ): Promise<TimeEntry[]> {
+    if (fromDate !== undefined && toDate !== undefined) {
+      return this.timeEntryRepository.findByEmployeeAndDateRange(tenantId, employeeId, fromDate, toDate);
     }
-    
-    return await this.timeEntryRepository.findByEmployee(tenantId, employeeId);
+
+    return this.timeEntryRepository.findByEmployee(tenantId, employeeId);
   }
 
   async getPendingApprovals(tenantId: string): Promise<TimeEntry[]> {
-    return await this.timeEntryRepository.findPendingApprovals(tenantId);
+    return this.timeEntryRepository.findPendingApprovals(tenantId);
   }
 
-  async getEmployeeTimeSummary(tenantId: string, employeeId: string, fromDate: string, toDate: string): Promise<any> {
+  async getEmployeeTimeSummary(
+    tenantId: string,
+    employeeId: string,
+    fromDate: string,
+    toDate: string
+  ): Promise<TimeEntrySummary> {
     const totalHours = await this.timeEntryRepository.getEmployeeTotalHours(tenantId, employeeId, fromDate, toDate);
     const overtimeHours = await this.timeEntryRepository.getOvertimeHours(tenantId, employeeId, fromDate, toDate);
     const entries = await this.timeEntryRepository.findByEmployeeAndDateRange(tenantId, employeeId, fromDate, toDate);
@@ -245,17 +306,21 @@ export class TimeEntryService {
       regularHours: totalHours - overtimeHours,
       overtimeHours,
       totalEntries: entries.length,
-      approvedEntries: entries.filter(e => e.status === 'Approved').length,
-      pendingEntries: entries.filter(e => e.status === 'Draft').length
+      approvedEntries: entries.filter(entry => entry.status === 'Approved').length,
+      pendingEntries: entries.filter(entry => entry.status === 'Draft').length
     };
   }
 
-  async getMonthlySummary(tenantId: string, employeeId: string, year: number, month: number): Promise<any> {
-    return await this.timeEntryRepository.getMonthlySummary(tenantId, employeeId, year, month);
+  async getMonthlySummary(
+    tenantId: string,
+    employeeId: string,
+    year: number,
+    month: number
+  ): Promise<MonthlySummary> {
+    return this.timeEntryRepository.getMonthlySummary(tenantId, employeeId, year, month);
   }
 
-  async getYearlySummary(tenantId: string, employeeId: string, year: number): Promise<any> {
-    return await this.timeEntryRepository.getYearlySummary(tenantId, employeeId, year);
+  async getYearlySummary(tenantId: string, employeeId: string, year: number): Promise<YearlySummary> {
+    return this.timeEntryRepository.getYearlySummary(tenantId, employeeId, year);
   }
 }
-

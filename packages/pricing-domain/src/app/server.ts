@@ -9,7 +9,7 @@ import pino from 'pino';
 dotenv.config();
 
 const server = fastify({
-  logger: pino({ level: process.env.LOG_LEVEL || 'info' }),
+  logger: pino({ level: process.env.LOG_LEVEL ?? 'info' }),
   disableRequestLogging: false,
   requestIdLogLabel: 'requestId',
 });
@@ -23,7 +23,7 @@ server.register(swagger, {
       description: 'REST API for Price Calculation (PriceLists, Conditions, Formulas, Quotes)',
       version: '1.0.0',
     },
-    servers: [{ url: process.env.API_BASE_URL || 'http://localhost:3060' }],
+    servers: [{ url: process.env.API_BASE_URL ?? 'http://localhost:3060' }],
     tags: [
       { name: 'quotes', description: 'Price quote calculation' },
       { name: 'pricelists', description: 'Price list management' },
@@ -52,8 +52,8 @@ server.get('/pricing/api/v1/openapi.json', async () => server.swagger());
 export async function start(): Promise<void> {
   try {
     await initEventPublisher();
-    const port = parseInt(process.env.PORT || '3060', 10);
-    const host = process.env.HOST || '0.0.0.0';
+    const port = parseInt(process.env.PORT ?? '3060', 10);
+    const host = process.env.HOST ?? '0.0.0.0';
     await server.listen({ port, host });
     server.log.info(`🚀 Pricing Domain listening on ${host}:${port}`);
     server.log.info(`📚 Docs: http://${host}:${port}/documentation`);
@@ -81,3 +81,4 @@ if (require.main === module) {
 }
 
 export default server;
+

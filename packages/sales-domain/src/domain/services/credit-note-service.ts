@@ -50,13 +50,13 @@ export class CreditNoteService {
 
   async updateCreditNote(id: string, data: UpdateCreditNoteData): Promise<CreditNoteEntity> {
     const existingCreditNote = await this.deps.creditNoteRepo.findById(id, data.tenantId);
-    if (!existingCreditNote) {
+    if (existingCreditNote === undefined || existingCreditNote === null) {
       throw new Error(`Credit note ${id} not found`);
     }
 
     const updatedCreditNote = await this.deps.creditNoteRepo.update(id, data.tenantId, data);
 
-    if (!updatedCreditNote) {
+    if (updatedCreditNote === undefined || updatedCreditNote === null) {
       throw new Error(`Failed to update credit note ${id}`);
     }
 
@@ -65,7 +65,7 @@ export class CreditNoteService {
 
   async settleCreditNote(id: string, tenantId: string): Promise<CreditNoteEntity> {
     const creditNote = await this.deps.creditNoteRepo.findById(id, tenantId);
-    if (!creditNote) {
+    if (creditNote === undefined || creditNote === null) {
       throw new Error(`Credit note ${id} not found`);
     }
 
@@ -75,7 +75,7 @@ export class CreditNoteService {
 
     const updatedCreditNote = await this.deps.creditNoteRepo.updateStatus(id, tenantId, 'Settled');
 
-    if (!updatedCreditNote) {
+    if (updatedCreditNote === undefined || updatedCreditNote === null) {
       throw new Error(`Failed to settle credit note`);
     }
 

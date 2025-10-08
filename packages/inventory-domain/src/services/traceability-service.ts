@@ -12,6 +12,20 @@ import {
   EPCISDocumentGeneratedEvent
 } from '../core/domain-events/inventory-domain-events';
 
+// Constants
+const RANDOM_ID_LENGTH = 9;
+const RANDOM_ID_START = 2;
+const RANDOM_BASE = 36;
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+const EPCIS_EXPIRY_DAYS = 365;
+const GS1_DATE_LENGTH = 8;
+const GS1_DATE_START = 2;
+const GTIN_ITEM_REF_LENGTH = 5;
+const GTIN_ITEM_REF_MAX = 100000;
+const SSCC_SERIAL_LENGTH = 9;
+const GLN_SUFFIX = '00000';
+const SCHEMA_VERSION = '2.0';
+
 export interface EPCISEvent {
   eventId: string;
   eventType: 'object' | 'aggregation' | 'transaction' | 'transformation' | 'association';
@@ -85,7 +99,7 @@ export interface EPCISEvent {
     correctiveEventIDs?: string[];
   };
 
-  customFields?: Record<string, any>;
+  customFields?: Record<string, unknown>;
 }
 
 export interface GS1Identifier {
@@ -138,7 +152,7 @@ export interface TraceabilityChain {
     performedAt: Date;
     performedBy: string;
     location: string;
-    parameters?: Record<string, any>;
+    parameters?: Record<string, unknown>;
     notes?: string;
   }>;
 
@@ -210,14 +224,14 @@ export interface TraceabilityQuery {
     recordTimeStart?: Date;
     recordTimeEnd?: Date;
     disposition?: string;
-    customFilters?: Record<string, any>;
+    customFilters?: Record<string, unknown>;
   };
 
   results: {
     totalEvents: number;
     events: EPCISEvent[];
     chains?: TraceabilityChain[];
-    aggregations?: Record<string, any>;
+    aggregations?: Record<string, unknown>;
   };
 
   executedAt: Date;
@@ -243,7 +257,7 @@ export class TraceabilityService {
     try {
       const epcisEvent: EPCISEvent = {
         ...event,
-        eventId: `epcis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        eventId: `epcis_${Date.now()}_${Math.random().toString(RANDOM_BASE).substr(RANDOM_ID_START, RANDOM_ID_LENGTH)}`
       };
 
       this.epcisEvents.set(epcisEvent.eventId, epcisEvent);
@@ -291,7 +305,7 @@ export class TraceabilityService {
 
         case 'SSCC':
           // SSCC format: (00) + extension digit + 16 digits + check digit
-          const ssccBase = `3${companyPrefix}${Date.now().toString().slice(-9)}`;
+          const ssccBase = `3${companyPrefix}${Date.now().toString().slice(-SSCC_SERIAL_LENGTH)}`;
           const ssccCheck = this.calculateGS1CheckDigit(ssccBase);
           value = ssccBase + ssccCheck;
           humanReadable = value;
@@ -300,7 +314,7 @@ export class TraceabilityService {
 
         case 'GLN':
           // GLN format: 13 digits + check digit
-          const glnBase = companyPrefix + '00000'; // Simplified
+          const glnBase = companyPrefix + GLN_SUFFIX; // Simplified
           const glnCheck = this.calculateGS1CheckDigit(glnBase);
           value = glnBase + glnCheck;
           humanReadable = value;
@@ -372,14 +386,14 @@ export class TraceabilityService {
     try {
       const document: EPCISDocument = {
         documentId: `epcis_doc_${Date.now()}`,
-        schemaVersion: '2.0',
+        schemaVersion: SCHEMA_VERSION,
         creationDate: new Date(),
         epcisBody: {
           eventList: events
         },
         documentMetadata,
         generatedAt: new Date(),
-        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year
+        expiresAt: new Date(Date.now() + EPCIS_EXPIRY_DAYS * MS_PER_DAY) // 1 year
       };
 
       // Publish event
@@ -448,7 +462,7 @@ export class TraceabilityService {
       performedAt: Date;
     }>;
   }> {
-    const genealogy = {
+    const _genealogy = {
       epc,
       parents: [] as string[],
       children: [] as string[],
@@ -466,7 +480,7 @@ export class TraceabilityService {
     for (const event of Array.from(this.epcisEvents.values())) {
       if (event.eventType === 'aggregation' && event.childEPCs?.includes(epc)) {
         if (event.parentEPC) {
-          genealogy.parents.push(event.parentEPC);
+          _genealogy.parents.push(event.parentEPC);
         }
       }
     }
@@ -475,7 +489,7 @@ export class TraceabilityService {
     for (const event of Array.from(this.epcisEvents.values())) {
       if (event.eventType === 'aggregation' && event.parentEPC === epc) {
         if (event.childEPCs) {
-          genealogy.children.push(...event.childEPCs);
+          _genealogy.children.push(...event.childEPCs);
         }
       }
     }
@@ -484,7 +498,7 @@ export class TraceabilityService {
     for (const chain of Array.from(this.traceabilityChains.values())) {
       for (const transformation of chain.transformations) {
         if (transformation.inputEPCs.includes(epc) || transformation.outputEPCs.includes(epc)) {
-          genealogy.transformations.push({
+          _genealogy.transformations.push({
             transformationId: transformation.transformationId,
             type: transformation.transformationType,
             inputs: transformation.inputEPCs,
@@ -495,7 +509,7 @@ export class TraceabilityService {
       }
     }
 
-    return genealogy;
+    return _genealogy;
   }
 
   /**
@@ -561,7 +575,7 @@ export class TraceabilityService {
 
   private generateGTINBase(companyPrefix: string): string {
     // Generate 12-digit base for GTIN-13
-    const itemRef = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
+    const itemRef = Math.floor(Math.random() * GTIN_ITEM_REF_MAX).toString().padStart(GTIN_ITEM_REF_LENGTH, '0');
     return companyPrefix + itemRef;
   }
 
@@ -635,7 +649,7 @@ export class TraceabilityService {
     return event.epcList?.[0] || event.parentEPC || null;
   }
 
-  private generateAggregations(events: EPCISEvent[]): Record<string, any> {
+  private generateAggregations(events: EPCISEvent[]): Record<string, unknown> {
     const aggregations = {
       totalEvents: events.length,
       eventTypes: {} as Record<string, number>,
@@ -737,11 +751,7 @@ export class TraceabilityService {
       tenantId: 'default',
       traceabilityEventType: event.eventType === 'association' ? 'object' : event.eventType,
       epcList: event.epcList || [],
-      businessLocation: event.businessLocation || '',
-      identifier: event.eventId,
-      location: event.businessLocation || '',
-      actor: 'system',
-      timestamp: event.eventTime
+      businessLocation: event.businessLocation || ''
     };
 
     await this.eventBus.publish(traceabilityEvent);
@@ -762,10 +772,7 @@ export class TraceabilityService {
       documentId: document.documentId,
       eventCount: document.epcisBody.eventList.length,
       documentType: 'master_data',
-      businessLocation: '',
-      businessProcess: '',
-      sender: 'system',
-      receiver: 'system'
+      businessLocation: ''
     };
 
     await this.eventBus.publish(epcisEvent);

@@ -11,7 +11,7 @@ let nc: NatsConnection | null = null;
  */
 export async function initEventPublisher(): Promise<void> {
   try {
-    const natsUrl = process.env.NATS_URL || 'nats://localhost:4222';
+    const natsUrl = process.env.NATS_URL ?? 'nats://localhost:4222';
     nc = await connect({ servers: natsUrl });
     logger.info({ natsUrl }, 'Connected to NATS');
   } catch (error) {
@@ -24,7 +24,7 @@ export async function initEventPublisher(): Promise<void> {
  * Publish a domain event
  */
 export async function publishEvent(eventType: string, payload: any): Promise<void> {
-  if (!nc) {
+  if (nc === undefined || nc === null) {
     logger.warn('NATS not connected, skipping event publication');
     return;
   }
@@ -63,3 +63,4 @@ export async function closeEventPublisher(): Promise<void> {
     logger.info('NATS connection closed');
   }
 }
+

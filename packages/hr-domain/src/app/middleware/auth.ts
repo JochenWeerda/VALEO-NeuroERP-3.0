@@ -3,10 +3,11 @@
  * JWT validation with JWKS
  */
 
-import { FastifyRequest, FastifyReply } from 'fastify';
-import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { type JWTPayload as JoseJWTPayload, createRemoteJWKSet, jwtVerify } from 'jose';
+import pino from 'pino';
 
-interface JWTPayload {
+interface AuthenticatedJWTPayload extends JoseJWTPayload {
   sub: string;
   iss: string;
   aud: string | string[];
@@ -15,10 +16,9 @@ interface JWTPayload {
   roles?: string[];
   permissions?: string[];
   tenantId?: string;
-  [key: string]: any;
 }
 
-interface AuthContext {
+export interface AuthContext {
   userId: string;
   tenantId: string;
   roles: string[];
@@ -32,109 +32,144 @@ declare module 'fastify' {
   }
 }
 
-const JWKS_URL = process.env.JWKS_URL || 'https://auth.example.com/.well-known/jwks.json';
-const JWT_ISSUER = process.env.JWT_ISSUER || 'https://auth.example.com';
-const JWT_AUDIENCE = process.env.JWT_AUDIENCE || 'hr-domain';
+const DEFAULT_JWKS_URL = 'https://auth.example.com/.well-known/jwks.json';
+const DEFAULT_JWT_ISSUER = 'https://auth.example.com';
+const DEFAULT_JWT_AUDIENCE = 'hr-domain';
+const BEARER_PREFIX = 'Bearer ';
+const MILLISECONDS_PER_SECOND = 1000;
 
-let jwks: any = null;
+const HTTP_STATUS = {
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403
+} as const;
 
-export async function initializeAuth() {
+const logger = pino({ name: 'auth-middleware' });
+
+const JWKS_URL = process.env.JWKS_URL ?? DEFAULT_JWKS_URL;
+const JWT_ISSUER = process.env.JWT_ISSUER ?? DEFAULT_JWT_ISSUER;
+const JWT_AUDIENCE = process.env.JWT_AUDIENCE ?? DEFAULT_JWT_AUDIENCE;
+
+let jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
+
+export async function initializeAuth(): Promise<void> {
   try {
     jwks = createRemoteJWKSet(new URL(JWKS_URL));
-    console.log('✅ Auth middleware initialized with JWKS:', JWKS_URL);
+    logger.info({ jwksUrl: JWKS_URL }, 'Auth middleware initialized');
   } catch (error) {
-    console.error('❌ Failed to initialize auth middleware:', error);
+    logger.error({ err: error }, 'Failed to initialize auth middleware');
     throw error;
   }
 }
 
-export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
+async function ensureJwks(): Promise<ReturnType<typeof createRemoteJWKSet>> {
+  if (!jwks) {
+    await initializeAuth();
+  }
+  return jwks ?? createRemoteJWKSet(new URL(JWKS_URL));
+}
+
+function resolveTenantId(request: FastifyRequest, jwtPayload: AuthenticatedJWTPayload): string | undefined {
+  if (typeof jwtPayload.tenantId === 'string' && jwtPayload.tenantId.length > 0) {
+    return jwtPayload.tenantId;
+  }
+
+  const tenantHeader = request.headers['x-tenant-id'];
+  if (Array.isArray(tenantHeader)) {
+    return tenantHeader[0];
+  }
+
+  return typeof tenantHeader === 'string' ? tenantHeader : undefined;
+}
+
+export async function authMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   try {
     const authHeader = request.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return reply.code(401).send({ error: 'Missing or invalid authorization header' });
+
+    if (authHeader?.startsWith(BEARER_PREFIX) !== true) {
+      reply.code(HTTP_STATUS.UNAUTHORIZED).send({ error: 'Missing or invalid authorization header' });
+      return;
     }
 
-    const token = authHeader.substring(7);
-    
-    if (!jwks) {
-      await initializeAuth();
-    }
+    const token = authHeader.slice(BEARER_PREFIX.length);
 
-    const { payload } = await jwtVerify(token, jwks, {
+    const keySet = await ensureJwks();
+    const { payload } = await jwtVerify(token, keySet, {
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,
       algorithms: ['RS256', 'RS384', 'RS512']
     });
 
-    const jwtPayload = payload as JWTPayload;
+    const jwtPayload = payload as AuthenticatedJWTPayload;
 
-    // Validate token expiration
-    if (jwtPayload.exp && jwtPayload.exp < Math.floor(Date.now() / 1000)) {
-      return reply.code(401).send({ error: 'Token expired' });
+    if (typeof jwtPayload.exp === 'number') {
+      const currentEpochSeconds = Math.floor(Date.now() / MILLISECONDS_PER_SECOND);
+      if (jwtPayload.exp < currentEpochSeconds) {
+        reply.code(HTTP_STATUS.UNAUTHORIZED).send({ error: 'Token expired' });
+        return;
+      }
     }
 
-    // Extract tenant ID from token or header
-    const tenantId = jwtPayload.tenantId || request.headers['x-tenant-id'] as string;
-    
-    if (!tenantId) {
-      return reply.code(400).send({ error: 'Tenant ID required' });
+    const tenantId = resolveTenantId(request, jwtPayload);
+    if (typeof tenantId !== 'string' || tenantId.length === 0) {
+      reply.code(HTTP_STATUS.BAD_REQUEST).send({ error: 'Tenant ID required' });
+      return;
     }
 
-    // Set auth context
     request.auth = {
       userId: jwtPayload.sub,
       tenantId,
-      roles: jwtPayload.roles || [],
-      permissions: jwtPayload.permissions || [],
+      roles: jwtPayload.roles ?? [],
+      permissions: jwtPayload.permissions ?? [],
       token
     };
-
   } catch (error) {
-    console.error('Auth middleware error:', error);
-    return reply.code(401).send({ error: 'Invalid token' });
+    logger.error({ err: error }, 'Auth middleware error');
+    reply.code(HTTP_STATUS.UNAUTHORIZED).send({ error: 'Invalid token' });
   }
 }
 
-export async function requireAuth(request: FastifyRequest, reply: FastifyReply) {
+export async function requireAuth(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   if (!request.auth) {
-    return reply.code(401).send({ error: 'Authentication required' });
+    reply.code(HTTP_STATUS.UNAUTHORIZED).send({ error: 'Authentication required' });
   }
 }
 
-export async function requireRole(roles: string[]) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
-    if (!request.auth) {
-      return reply.code(401).send({ error: 'Authentication required' });
+type FastifyAuthHandler = (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+
+export function requireRole(roles: string[]): FastifyAuthHandler {
+  return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const { auth } = request;
+    if (!auth) {
+      reply.code(HTTP_STATUS.UNAUTHORIZED).send({ error: 'Authentication required' });
+      return;
     }
 
-    const hasRole = roles.some(role => request.auth!.roles.includes(role));
-    
+    const hasRole = roles.some(role => auth.roles.includes(role));
     if (!hasRole) {
-      return reply.code(403).send({ error: 'Insufficient permissions' });
+      reply.code(HTTP_STATUS.FORBIDDEN).send({ error: 'Insufficient permissions' });
     }
   };
 }
 
-export async function requirePermission(permissions: string[]) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
-    if (!request.auth) {
-      return reply.code(401).send({ error: 'Authentication required' });
+export function requirePermission(permissions: string[]): FastifyAuthHandler {
+  return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const { auth } = request;
+    if (!auth) {
+      reply.code(HTTP_STATUS.UNAUTHORIZED).send({ error: 'Authentication required' });
+      return;
     }
 
-    const hasPermission = permissions.some(permission => 
-      request.auth!.permissions.includes(permission) || 
-      request.auth!.permissions.includes('*')
+    const hasPermission = permissions.some(permission =>
+      auth.permissions.includes(permission) || auth.permissions.includes('*')
     );
-    
+
     if (!hasPermission) {
-      return reply.code(403).send({ error: 'Insufficient permissions' });
+      reply.code(HTTP_STATUS.FORBIDDEN).send({ error: 'Insufficient permissions' });
     }
   };
 }
 
-// HR-specific permission checks
 export const hrPermissions = {
   EMPLOYEE_READ: 'hr:employee:read',
   EMPLOYEE_WRITE: 'hr:employee:write',
@@ -152,19 +187,19 @@ export const hrPermissions = {
   PAYROLL_EXPORT: 'hr:payroll:export',
   ROLE_READ: 'hr:role:read',
   ROLE_WRITE: 'hr:role:write'
-};
+} as const;
 
-export function requireHrPermission(permission: string) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
-    if (!request.auth) {
-      return reply.code(401).send({ error: 'Authentication required' });
+export function requireHrPermission(permission: string): FastifyAuthHandler {
+  return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const { auth } = request;
+    if (!auth) {
+      reply.code(HTTP_STATUS.UNAUTHORIZED).send({ error: 'Authentication required' });
+      return;
     }
 
-    const hasPermission = request.auth.permissions.includes(permission) || 
-                         request.auth.permissions.includes('*');
-    
+    const hasPermission = auth.permissions.includes(permission) || auth.permissions.includes('*');
     if (!hasPermission) {
-      return reply.code(403).send({ error: 'Insufficient permissions' });
+      reply.code(HTTP_STATUS.FORBIDDEN).send({ error: 'Insufficient permissions' });
     }
   };
 }

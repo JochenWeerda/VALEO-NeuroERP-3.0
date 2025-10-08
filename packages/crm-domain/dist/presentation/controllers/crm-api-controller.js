@@ -69,11 +69,11 @@ class CRMApiController {
     parseQuery(query) {
         const toStringValue = (value) => Array.isArray(value) ? value[0] : value;
         return {
-            search: toStringValue(query.search),
-            status: toStringValue(query.status),
-            type: toStringValue(query.type),
-            limit: toNumber(query.limit),
-            offset: toNumber(query.offset),
+            search: toStringValue(query.search) ?? undefined,
+            status: toStringValue(query.status) ?? undefined,
+            type: toStringValue(query.type) ?? undefined,
+            limit: toNumber(query.limit) ?? undefined,
+            offset: toNumber(query.offset) ?? undefined,
         };
     }
 }

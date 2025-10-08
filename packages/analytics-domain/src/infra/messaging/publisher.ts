@@ -1,5 +1,5 @@
-import { connect, NatsConnection, StringCodec, JSONCodec } from 'nats';
-import { AnyDomainEvent, DomainEvent } from '../../domain/events/domain-events';
+import { connect, type NatsConnection, JSONCodec } from 'nats';
+import { type AnyDomainEvent } from '../../domain/events/domain-events';
 
 export interface PublisherConfig {
   natsUrl: string;
@@ -14,16 +14,17 @@ export interface PublishOptions {
 
 export class EventPublisher {
   private connection: NatsConnection | null = null;
-  private stringCodec = StringCodec();
-  private jsonCodec = JSONCodec();
+  private readonly jsonCodec = JSONCodec();
   private isConnected = false;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelayMs = 1000;
 
-  constructor(private config: PublisherConfig) {
-    this.maxReconnectAttempts = config.maxReconnectAttempts || 5;
-    this.reconnectDelayMs = config.reconnectDelayMs || 1000;
+  constructor(private readonly config: PublisherConfig) {
+    const DEFAULT_MAX_RECONNECT_ATTEMPTS = 5;
+    const DEFAULT_RECONNECT_DELAY_MS = 1000;
+    this.maxReconnectAttempts = config.maxReconnectAttempts ?? DEFAULT_MAX_RECONNECT_ATTEMPTS;
+    this.reconnectDelayMs = config.reconnectDelayMs ?? DEFAULT_RECONNECT_DELAY_MS;
   }
 
   async connect(): Promise<void> {
@@ -38,15 +39,18 @@ export class EventPublisher {
       this.isConnected = true;
       this.reconnectAttempts = 0;
 
+      // eslint-disable-next-line no-console
       console.log('Analytics domain event publisher connected to NATS');
 
       // Handle connection events
       this.connection.closed().then(() => {
         this.isConnected = false;
+        // eslint-disable-next-line no-console
         console.log('NATS connection closed');
       });
 
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to connect to NATS:', error);
       throw error;
     }
@@ -69,8 +73,8 @@ export class EventPublisher {
       // Add correlation and causation IDs if provided
       const enrichedEvent = {
         ...event,
-        correlationId: options.correlationId || event.correlationId,
-        causationId: options.causationId || event.causationId,
+        correlationId: options.correlationId ?? event.correlationId,
+        causationId: options.causationId ?? event.causationId,
       };
 
       // Publish to the specific event type subject
@@ -79,9 +83,11 @@ export class EventPublisher {
 
       await this.connection.publish(subject, payload);
 
+      // eslint-disable-next-line no-console
       console.log(`Published analytics event ${event.eventType} with ID ${event.eventId}`);
 
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(`Failed to publish event ${event.eventType}:`, error);
       throw error;
     }
@@ -96,8 +102,8 @@ export class EventPublisher {
       for (const event of events) {
         const enrichedEvent = {
           ...event,
-          correlationId: options.correlationId || event.correlationId,
-          causationId: options.causationId || event.causationId,
+          correlationId: options.correlationId ?? event.correlationId,
+          causationId: options.causationId ?? event.causationId,
         };
 
         const subject = event.eventType;
@@ -109,9 +115,11 @@ export class EventPublisher {
       // Flush to ensure all messages are sent
       await this.connection.flush();
 
+      // eslint-disable-next-line no-console
       console.log(`Published batch of ${events.length} analytics events`);
 
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to publish event batch:', error);
       throw error;
     }
@@ -136,8 +144,8 @@ export function createEventPublisher(config: PublisherConfig): EventPublisher {
 let globalPublisher: EventPublisher | null = null;
 
 export function getEventPublisher(): EventPublisher {
-  if (!globalPublisher) {
-    const natsUrl = process.env.NATS_URL || 'nats://localhost:4222';
+  if (globalPublisher === null) {
+    const natsUrl = process.env.NATS_URL ?? 'nats://localhost:4222';
     globalPublisher = createEventPublisher({ natsUrl });
   }
   return globalPublisher;

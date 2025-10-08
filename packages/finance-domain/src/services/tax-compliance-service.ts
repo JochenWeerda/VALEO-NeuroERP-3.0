@@ -5,7 +5,7 @@
  * Supports DATEV, ELSTER, and EU tax compliance requirements
  */
 
-import { Result, ok, err } from '../core/entities/ar-invoice';
+import { Result, err, ok } from '../core/entities/ar-invoice';
 
 // ===== INTERFACES =====
 
@@ -140,11 +140,11 @@ export interface ValidateTaxComplianceCommand {
 
 export class TaxComplianceApplicationService {
   constructor(
-    private taxCalculationRepo: TaxCalculationRepository,
-    private taxReturnRepo: TaxReturnRepository,
-    private taxValidationRepo: TaxValidationRepository,
-    private eventPublisher: EventPublisher,
-    private countryProfiles: Map<string, CountryTaxProfile>
+    private readonly taxCalculationRepo: TaxCalculationRepository,
+    private readonly taxReturnRepo: TaxReturnRepository,
+    private readonly taxValidationRepo: TaxValidationRepository,
+    private readonly eventPublisher: EventPublisher,
+    private readonly countryProfiles: Map<string, CountryTaxProfile>
   ) {}
 
   /**

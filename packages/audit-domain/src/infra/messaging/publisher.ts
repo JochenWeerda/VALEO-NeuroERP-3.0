@@ -19,7 +19,7 @@ export async function publishEvent(
   eventType: string,
   payload: Record<string, unknown>
 ): Promise<void> {
-  if (!nc) return;
+  if (nc === undefined || nc === null) return;
 
   try {
     const subject = `audit.${eventType}`;
@@ -44,3 +44,4 @@ export async function closeEventPublisher(): Promise<void> {
     nc = null;
   }
 }
+

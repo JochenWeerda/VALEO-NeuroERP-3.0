@@ -127,7 +127,7 @@ export class UserDeactivatedEventHandler implements EventHandler<UserDeactivated
   async handle(event: UserDeactivatedEvent): Promise<void> {
     console.log(`[UserDeactivatedEvent] User deactivated: ${event.aggregateId}`);
     console.log(`  Deactivated at: ${event.data.deactivatedAt}`);
-    console.log(`  Reason: ${event.data.reason || 'No reason provided'}`);
+    console.log(`  Reason: ${event.data.reason ?? 'No reason provided'}`);
     
     // Here you would typically:
     // 1. Revoke active sessions
@@ -220,8 +220,8 @@ export class UserLoggedInEventHandler implements EventHandler<UserLoggedInEvent>
   async handle(event: UserLoggedInEvent): Promise<void> {
     console.log(`[UserLoggedInEvent] User logged in: ${event.aggregateId}`);
     console.log(`  Login at: ${event.data.loginAt}`);
-    console.log(`  IP Address: ${event.data.ipAddress || 'Unknown'}`);
-    console.log(`  User Agent: ${event.data.userAgent || 'Unknown'}`);
+    console.log(`  IP Address: ${event.data.ipAddress ?? 'Unknown'}`);
+    console.log(`  User Agent: ${event.data.userAgent ?? 'Unknown'}`);
     
     // Here you would typically:
     // 1. Update last login timestamp
@@ -256,8 +256,8 @@ export class UserLoggedOutEventHandler implements EventHandler<UserLoggedOutEven
   async handle(event: UserLoggedOutEvent): Promise<void> {
     console.log(`[UserLoggedOutEvent] User logged out: ${event.aggregateId}`);
     console.log(`  Logout at: ${event.data.logoutAt}`);
-    console.log(`  Session ID: ${event.data.sessionId || 'Unknown'}`);
-    console.log(`  Reason: ${event.data.logoutReason || 'User initiated'}`);
+    console.log(`  Session ID: ${event.data.sessionId ?? 'Unknown'}`);
+    console.log(`  Reason: ${event.data.logoutReason ?? 'User initiated'}`);
     
     // Here you would typically:
     // 1. Create audit log
@@ -344,7 +344,7 @@ export class UserDeletedEventHandler implements EventHandler<UserDeletedEvent> {
   async handle(event: UserDeletedEvent): Promise<void> {
     console.log(`[UserDeletedEvent] User deleted: ${event.aggregateId}`);
     console.log(`  Deleted at: ${event.data.deletedAt}`);
-    console.log(`  Reason: ${event.data.reason || 'No reason provided'}`);
+    console.log(`  Reason: ${event.data.reason ?? 'No reason provided'}`);
     
     // Here you would typically:
     // 1. Clean up related data
@@ -373,4 +373,6 @@ export class UserDeletedEventHandler implements EventHandler<UserDeletedEvent> {
     console.log(`Updating metrics for user deletion: ${event.aggregateId}`);
   }
 }
+
+
 

@@ -19,7 +19,7 @@ export interface ForecastValue {
 
 export interface ForecastMetadata {
   trainingDataPoints?: number;
-  modelParameters?: Record<string, any>;
+  modelParameters?: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   accuracyMetrics?: {
     mse?: number;
     rmse?: number;
@@ -32,6 +32,7 @@ export interface ForecastMetadata {
 }
 
 export class Forecast {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   constructor(
     public readonly id: string,
     public readonly tenantId: string,

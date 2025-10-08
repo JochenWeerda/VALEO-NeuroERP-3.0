@@ -4,7 +4,7 @@
  */
 
 // Base branded type factory
-type Brand<K, T> = K & { __brand: T };
+export type Brand<K, T> = K & { __brand: T };
 
 // User and Authentication Types
 export type UserId = Brand<string, 'UserId'>;
@@ -61,4 +61,5 @@ export const createPreferenceId = (value: string): PreferenceId => value as Pref
 export const createWorkflowId = (value: string): WorkflowId => value as WorkflowId;
 export const createProcessId = (value: string): ProcessId => value as ProcessId;
 export const createTaskId = (value: string): TaskId => value as TaskId;
+
 

@@ -305,7 +305,7 @@ export class WeighingTicket implements WeighingTicketEntity {
       throw new Error('Ticket is already completed');
     }
 
-    if (!this.netWeight) {
+    if (this.netWeight === undefined || this.netWeight === null) {
       throw new Error('Cannot complete ticket without net weight');
     }
 
@@ -342,7 +342,7 @@ export class WeighingTicket implements WeighingTicketEntity {
     isWithinTolerance?: boolean;
   } {
     const summary: any = {
-      unit: this.netWeightUnit || 'kg',
+      unit: this.netWeightUnit ?? 'kg',
     };
 
     if (this.grossWeight?.weight) summary.gross = this.grossWeight.weight;
@@ -353,3 +353,4 @@ export class WeighingTicket implements WeighingTicketEntity {
     return summary;
   }
 }
+

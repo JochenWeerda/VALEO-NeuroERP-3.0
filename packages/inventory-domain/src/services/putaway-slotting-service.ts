@@ -40,7 +40,7 @@ export interface SlottingRecommendation {
     throughput: number; // additional picks per hour
     spaceUtilization: number; // percentage improvement
   };
-  aiFeatures: Record<string, any>;
+  aiFeatures: Record<string, unknown>;
 }
 
 export type PutawayStrategy =
@@ -92,10 +92,55 @@ export interface SlottingRule {
   weight: number; // For rule prioritization
 }
 
+export interface AsnDetails {
+  asnId: string;
+  dock: string;
+  lines: Array<{
+    sku: string;
+    gtin?: string;
+    quantity: number;
+    uom: string;
+  }>;
+}
+
+// Constants
+const RANDOM_ID_LENGTH = 9;
+const RANDOM_ID_START = 2;
+const RANDOM_BASE = 36;
+const MS_TO_SECONDS = 1000;
+const AI_CONFIDENCE_DEFAULT = 0.87;
+const DISTANCE_TO_TIME_FACTOR = 100; // 100m = 1 minute
+const SPACE_UTILIZATION_IMPROVEMENT = 5.2;
+const VELOCITY_SCORE_X = 1.0;
+const VELOCITY_SCORE_Y = 0.7;
+const VELOCITY_SCORE_Z = 0.3;
+const CURRENT_UTILIZATION_DEFAULT = 78.5;
+const OPTIMAL_UTILIZATION_DEFAULT = 83.7;
+const ABC_SCORE_A = 100;
+const ABC_SCORE_B = 75;
+const ABC_SCORE_C = 50;
+const DISTANCE_PENALTY_FACTOR = 0.1;
+const VELOCITY_PRIME_SCORE = 100;
+const ZONE_A_BONUS = 50;
+const ZONE_B_BONUS = 25;
+const BASE_PRIORITY = 5;
+const VELOCITY_PRIORITY_BONUS = 10;
+const HAZMAT_PRIORITY_BONUS = 15;
+const TEMP_ZONE_PRIORITY_BONUS = 8;
+const MAX_PRIORITY = 20;
+const BASE_PUTAWAY_TIME = 2; // minutes
+const UNITS_PER_MINUTE = 10;
+const HAZMAT_TIME_MULTIPLIER = 1.5;
+const STANDARD_TIME_MULTIPLIER = 1.0;
+const MOCK_DISTANCE_REDUCTION = 50;
+const MOCK_THROUGHPUT_INCREASE = 5;
+const VELOCITY_RULE_PRIORITY = 10;
+const VELOCITY_RULE_WEIGHT = 100;
+
 @injectable()
 export class PutawaySlottingService {
   private readonly metrics = new InventoryMetricsService();
-  private slottingPolicies: Map<string, SlottingPolicy> = new Map();
+  private readonly slottingPolicies: Map<string, SlottingPolicy> = new Map();
 
   constructor(
     private readonly eventBus: EventBus
@@ -112,7 +157,7 @@ export class PutawaySlottingService {
     try {
       // Get ASN details (would come from receiving service)
       const asnDetails = await this.getAsnDetails(asnId);
-      if (!asnDetails) {
+      if (asnDetails == null) {
         throw new Error(`ASN ${asnId} not found`);
       }
 
@@ -127,12 +172,12 @@ export class PutawaySlottingService {
           asnDetails.dock
         );
 
-        if (!optimalLocation) {
+        if (optimalLocation == null) {
           throw new Error(`No suitable location found for SKU ${line.sku}`);
         }
 
         const task: PutawayTask = {
-          taskId: `putaway_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          taskId: `putaway_${Date.now()}_${Math.random().toString(RANDOM_BASE).substr(RANDOM_ID_START, RANDOM_ID_LENGTH)}`,
           asnId,
           sku: line.sku,
           gtin: line.gtin,
@@ -156,7 +201,7 @@ export class PutawaySlottingService {
       // Publish event
       await this.publishPutawayPlannedEvent(asnId, tasks);
 
-      this.metrics.recordPutawayTime('putaway.plan_putaway', (Date.now() - startTime) / 1000, { strategy: strategy });
+      this.metrics.recordPutawayTime('putaway.plan_putaway', (Date.now() - startTime) / MS_TO_SECONDS, { strategy: strategy });
       this.metrics.incrementPutawayTasks('putaway.planned', { strategy: strategy });
 
       return tasks;
@@ -173,7 +218,7 @@ export class PutawaySlottingService {
     const startTime = Date.now();
 
     try {
-      const targetSkus = skus || await this.getAllSkus();
+      const targetSkus = skus ?? await this.getAllSkus();
       const recommendations: SlottingRecommendation[] = [];
 
       for (const sku of targetSkus) {
@@ -184,12 +229,13 @@ export class PutawaySlottingService {
       }
 
       // Sort by expected improvement
-      recommendations.sort((a, b) =>
-        (b.expectedImprovement.travelTime + b.expectedImprovement.throughput) -
-        (a.expectedImprovement.travelTime + a.expectedImprovement.throughput)
-      );
+      recommendations.sort((a, b) => {
+        const aScore = a.expectedImprovement.travelTime + a.expectedImprovement.throughput;
+        const bScore = b.expectedImprovement.travelTime + b.expectedImprovement.throughput;
+        return bScore - aScore;
+      });
 
-      this.metrics.recordDatabaseQueryDuration('slotting.ai_recommendation', (Date.now() - startTime) / 1000, {});
+      this.metrics.recordDatabaseQueryDuration('slotting.ai_recommendation', (Date.now() - startTime) / MS_TO_SECONDS, {});
 
       return recommendations;
     } catch (error) {
@@ -211,7 +257,7 @@ export class PutawaySlottingService {
       // Publish slotting updated event
       await this.publishSlottingUpdatedEvent(recommendation);
 
-      this.metrics.recordDatabaseQueryDuration('slotting.apply_recommendation', (Date.now() - startTime) / 1000, { sku: recommendation.sku });
+      this.metrics.recordDatabaseQueryDuration('slotting.apply_recommendation', (Date.now() - startTime) / MS_TO_SECONDS, { sku: recommendation.sku });
     } catch (error) {
       this.metrics.incrementErrorCount('slotting.apply_failed', { error: 'apply_error' });
       throw error;
@@ -309,21 +355,21 @@ export class PutawaySlottingService {
       sku,
       currentLocation: currentLocation ?? '',
       recommendedLocation: optimalLocation.code,
-      confidence: 0.87, // AI confidence score
+      confidence: AI_CONFIDENCE_DEFAULT, // AI confidence score
       reasoning: [
         `Velocity class ${skuDetails.velocityClass} items should be in prime locations`,
         `Reduces travel distance by ${distanceReduction}m`,
         `Expected throughput increase: ${throughputIncrease} picks/hour`
       ],
       expectedImprovement: {
-        travelTime: distanceReduction / 100, // Rough estimate: 100m = 1 minute
+        travelTime: distanceReduction / DISTANCE_TO_TIME_FACTOR, // Rough estimate: 100m = 1 minute
         throughput: throughputIncrease,
-        spaceUtilization: 5.2 // percentage improvement
+        spaceUtilization: SPACE_UTILIZATION_IMPROVEMENT // percentage improvement
       },
       aiFeatures: {
-        velocityScore: skuDetails.velocityClass === 'X' ? 1.0 : skuDetails.velocityClass === 'Y' ? 0.7 : 0.3,
-        currentUtilization: 78.5,
-        optimalUtilization: 83.7,
+        velocityScore: skuDetails.velocityClass === 'X' ? VELOCITY_SCORE_X : skuDetails.velocityClass === 'Y' ? VELOCITY_SCORE_Y : VELOCITY_SCORE_Z,
+        currentUtilization: CURRENT_UTILIZATION_DEFAULT,
+        optimalUtilization: OPTIMAL_UTILIZATION_DEFAULT,
         distanceToPrime: distanceReduction
       }
     };
@@ -343,7 +389,7 @@ export class PutawaySlottingService {
       const bScore = this.calculateVelocityScore(b, sku, fromLocation);
       return bScore - aScore; // Higher score = better
     });
-    return sorted[0] || null;
+    return sorted[0] ?? null;
   }
 
   /**
@@ -360,7 +406,7 @@ export class PutawaySlottingService {
       const bScore = this.calculateAbcScore(b, sku, fromLocation);
       return bScore - aScore;
     });
-    return sorted[0] || null;
+    return sorted[0] ?? null;
   }
 
   /**
@@ -385,7 +431,7 @@ export class PutawaySlottingService {
       return aDistance - bDistance;
     });
 
-    return sorted[0] || null;
+    return sorted[0] ?? null;
   }
 
   /**
@@ -405,10 +451,12 @@ export class PutawaySlottingService {
     const sorted = hazmatLocations.sort((a, b) => {
       const aDistance = a.getDistanceTo(this.createLocationFromCode(fromLocation));
       const bDistance = b.getDistanceTo(this.createLocationFromCode(fromLocation));
-      return aDistance - bDistance;
+      const aDist = Number.isNaN(aDistance) ? Number.MAX_VALUE : aDistance;
+      const bDist = Number.isNaN(bDistance) ? Number.MAX_VALUE : bDistance;
+      return aDist - bDist;
     });
 
-    return sorted[0] || null;
+    return sorted[0] ?? null;
   }
 
   /**
@@ -418,13 +466,13 @@ export class PutawaySlottingService {
     let score = 0;
 
     // ABC class preference
-    if (sku.abcClass === 'A' && location.zone === 'A') score += 100;
-    else if (sku.abcClass === 'B' && location.zone === 'B') score += 75;
-    else if (sku.abcClass === 'C' && location.zone === 'C') score += 50;
+    if (sku.abcClass === 'A' && location.zone === 'A') score += ABC_SCORE_A;
+    else if (sku.abcClass === 'B' && location.zone === 'B') score += ABC_SCORE_B;
+    else if (sku.abcClass === 'C' && location.zone === 'C') score += ABC_SCORE_C;
 
     // Distance penalty
     const distance = location.getDistanceTo(this.createLocationFromCode(fromLocation));
-    score -= distance * 0.1;
+    score -= distance * DISTANCE_PENALTY_FACTOR;
 
     return score;
   }
@@ -437,16 +485,16 @@ export class PutawaySlottingService {
 
     // Prime locations for fast-moving items
     if (sku.isFastMoving() && location.isPickLocation()) {
-      score += 100;
+      score += VELOCITY_PRIME_SCORE;
     }
 
     // Distance penalty
     const distance = location.getDistanceTo(this.createLocationFromCode(fromLocation));
-    score -= distance * 0.1;
+    score -= distance * DISTANCE_PENALTY_FACTOR;
 
     // Zone preference
-    if (location.zone === 'A') score += 50;
-    else if (location.zone === 'B') score += 25;
+    if (location.zone === 'A') score += ZONE_A_BONUS;
+    else if (location.zone === 'B') score += ZONE_B_BONUS;
 
     return score;
   }
@@ -456,37 +504,52 @@ export class PutawaySlottingService {
    */
   private calculatePriority(sku: string, strategy: PutawayStrategy): number {
     // Base priority
-    let priority = 5;
+    let priority = BASE_PRIORITY;
 
     // Strategy-based adjustments
     switch (strategy) {
       case 'velocity':
-        priority += 10; // High priority for fast-moving items
+        priority += VELOCITY_PRIORITY_BONUS; // High priority for fast-moving items
         break;
       case 'hazmat':
-        priority += 15; // Critical for hazardous materials
+        priority += HAZMAT_PRIORITY_BONUS; // Critical for hazardous materials
         break;
       case 'temp_zone':
-        priority += 8; // Important for temperature control
+        priority += TEMP_ZONE_PRIORITY_BONUS; // Important for temperature control
+        break;
+      case 'abc':
+        // No additional adjustment by default
+        break;
+      case 'size':
+        // No additional adjustment by default
+        break;
+      case 'family':
+        // No additional adjustment by default
+        break;
+      case 'manual':
+        // Manual strategy keeps base priority
+        break;
+      default:
+        // Ensure exhaustiveness
         break;
     }
 
-    return Math.min(priority, 20); // Cap at 20
+    return Math.min(priority, MAX_PRIORITY); // Cap at 20
   }
 
   /**
    * Estimate putaway time
    */
   private estimatePutawayTime(quantity: number, strategy: PutawayStrategy): number {
-    const baseTime = 2; // minutes
-    const quantityFactor = Math.ceil(quantity / 10); // 10 units per minute
-    const strategyFactor = strategy === 'hazmat' ? 1.5 : 1.0;
+    const baseTime = BASE_PUTAWAY_TIME; // minutes
+    const quantityFactor = Math.ceil(quantity / UNITS_PER_MINUTE); // 10 units per minute
+    const strategyFactor = strategy === 'hazmat' ? HAZMAT_TIME_MULTIPLIER : STANDARD_TIME_MULTIPLIER;
 
     return Math.ceil(baseTime * quantityFactor * strategyFactor);
   }
 
   // Mock data methods (would be replaced with actual database calls)
-  private async getAsnDetails(asnId: string): Promise<any> {
+  private async getAsnDetails(asnId: string): Promise<AsnDetails> {
     return {
       asnId,
       dock: 'DOCK-01',
@@ -543,15 +606,16 @@ export class PutawaySlottingService {
   }
 
   private async updateSkuLocation(sku: string, location: string): Promise<void> {
-    console.log(`Updating ${sku} location to ${location}`);
+    // Implementation would update database
+    // Logging removed as per lint rules
   }
 
   private async calculateDistanceReduction(from: string, to: string): Promise<number> {
-    return 50; // Mock 50m reduction
+    return MOCK_DISTANCE_REDUCTION; // Mock 50m reduction
   }
 
   private async calculateThroughputIncrease(sku: string, location: string): Promise<number> {
-    return 5; // Mock 5 additional picks per hour
+    return MOCK_THROUGHPUT_INCREASE; // Mock 5 additional picks per hour
   }
 
   private createLocationFromCode(code: string): Location {
@@ -580,10 +644,10 @@ export class PutawaySlottingService {
           skuCriteria: { velocityClass: 'X' }
         },
         action: {
-          priority: 10,
+          priority: VELOCITY_RULE_PRIORITY,
           preferredZones: ['A']
         },
-        weight: 100
+        weight: VELOCITY_RULE_WEIGHT
       }],
       zones: ['A', 'B', 'C'],
       active: true,

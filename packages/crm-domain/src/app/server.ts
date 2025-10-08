@@ -13,7 +13,7 @@ import { registerInteractionRoutes } from './routes/interactions';
 // Create Fastify instance
 const server = fastify({
   logger: process.env.NODE_ENV === 'development' ? {
-    level: process.env.LOG_LEVEL || 'info',
+    level: process.env.LOG_LEVEL ?? 'info',
     transport: {
       target: 'pino-pretty',
       options: {
@@ -23,7 +23,7 @@ const server = fastify({
       }
     }
   } : {
-    level: process.env.LOG_LEVEL || 'info'
+    level: process.env.LOG_LEVEL ?? 'info'
   }
 });
 
@@ -117,7 +117,7 @@ async function initializeServices() {
   try {
     // Initialize database connection
     const dbHealthy = await checkDatabaseConnection();
-    if (!dbHealthy) {
+    if (dbHealthy === undefined || dbHealthy === null) {
       throw new Error('Database connection failed');
     }
 

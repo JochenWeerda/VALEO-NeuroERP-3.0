@@ -16,7 +16,7 @@ export async function sendPush(
   try {
     const fcmServerKey = process.env.FCM_SERVER_KEY;
 
-    if (!fcmServerKey) {
+    if (fcmServerKey === undefined || fcmServerKey === null) {
       logger.warn('FCM not configured, push sending disabled');
       return { success: false, error: 'FCM not configured' };
     }
@@ -60,3 +60,4 @@ export async function sendPush(
     return { success: false, error: String(error) };
   }
 }
+

@@ -6,6 +6,8 @@ exports.FinanzKontoService = void 0;
  * Encapsulates use-cases and translates primitives to domain entities.
  */
 const finanzKonto_entity_1 = require("../../core/entities/finanzKonto.entity");
+const TAX_RATE_MIN = 0;
+const TAX_RATE_MAX = 100;
 const ALLOWED_ACCOUNT_TYPES = ['Aktiv', 'Passiv', 'Ertrag', 'Aufwand'];
 function assertKontotyp(value) {
     if (!ALLOWED_ACCOUNT_TYPES.includes(value)) {
@@ -17,13 +19,13 @@ function normalizeProps(dto, existing) {
     const kontonummer = dto.kontonummer?.trim();
     const kontobezeichnung = dto.kontobezeichnung?.trim();
     const kontotyp = dto.kontotyp?.trim();
-    if (!kontonummer) {
+    if (kontonummer === undefined || kontonummer === null) {
         throw new Error('kontonummer is required');
     }
-    if (!kontobezeichnung) {
+    if (kontobezeichnung === undefined || kontobezeichnung === null) {
         throw new Error('kontobezeichnung is required');
     }
-    if (!kontotyp) {
+    if (kontotyp === undefined || kontotyp === null) {
         throw new Error('kontotyp is required');
     }
     const payload = {
@@ -42,7 +44,7 @@ function normalizeProps(dto, existing) {
         erstellt_am: existing?.erstellt_am,
         aktualisiert_am: existing?.aktualisiert_am,
     };
-    if (payload.steuersatz !== undefined && (payload.steuersatz < 0 || payload.steuersatz > 100)) {
+    if (payload.steuersatz !== undefined && (payload.steuersatz < TAX_RATE_MIN || payload.steuersatz > TAX_RATE_MAX)) {
         throw new Error('steuersatz must be between 0 and 100');
     }
     return payload;
@@ -68,7 +70,7 @@ class FinanzKontoService {
     }
     async update(id, payload) {
         const existing = await this.repository.findById(id);
-        if (!existing) {
+        if (existing === undefined || existing === null) {
             throw new Error('FinanzKonto not found');
         }
         const currentProps = existing.toPrimitives();

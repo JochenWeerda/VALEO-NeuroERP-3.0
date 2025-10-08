@@ -51,7 +51,7 @@ export class UserApplicationService {
 
   async deleteUser(userId: UserId, deletedBy?: AuditId): Promise<void> {
     const user = await this.userUseCases.getUser({ userId });
-    if (!user) {
+    if (user === undefined || user === null) {
       throw new Error(`User with ID '${userId}' not found`);
     }
 
@@ -222,3 +222,4 @@ export class UserApplicationService {
     await Promise.all(promises);
   }
 }
+

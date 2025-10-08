@@ -58,7 +58,7 @@ export class OpportunityService {
 
   async updateOpportunity(id: string, data: UpdateOpportunityData): Promise<OpportunityEntity> {
     const existingOpportunity = await this.deps.opportunityRepo.findById(id, data.tenantId);
-    if (!existingOpportunity) {
+    if (existingOpportunity === undefined || existingOpportunity === null) {
       throw new Error(`Opportunity ${id} not found`);
     }
 
@@ -78,7 +78,7 @@ export class OpportunityService {
 
     const updatedOpportunity = await this.deps.opportunityRepo.update(id, data.tenantId, data);
 
-    if (!updatedOpportunity) {
+    if (updatedOpportunity === undefined || updatedOpportunity === null) {
       throw new Error(`Failed to update opportunity ${id}`);
     }
 
@@ -87,7 +87,7 @@ export class OpportunityService {
 
   async changeOpportunityStage(id: string, tenantId: string, stage: OpportunityStageType): Promise<OpportunityEntity> {
     const opportunity = await this.deps.opportunityRepo.findById(id, tenantId);
-    if (!opportunity) {
+    if (opportunity === undefined || opportunity === null) {
       throw new Error(`Opportunity ${id} not found`);
     }
 
@@ -95,7 +95,7 @@ export class OpportunityService {
 
     const updatedOpportunity = await this.deps.opportunityRepo.updateStage(id, tenantId, stage);
 
-    if (!updatedOpportunity) {
+    if (updatedOpportunity === undefined || updatedOpportunity === null) {
       throw new Error(`Failed to update opportunity stage`);
     }
 
@@ -104,7 +104,7 @@ export class OpportunityService {
 
   async markOpportunityAsWon(id: string, tenantId: string): Promise<OpportunityEntity> {
     const opportunity = await this.deps.opportunityRepo.findById(id, tenantId);
-    if (!opportunity) {
+    if (opportunity === undefined || opportunity === null) {
       throw new Error(`Opportunity ${id} not found`);
     }
 
@@ -118,7 +118,7 @@ export class OpportunityService {
 
     const updatedOpportunity = await this.deps.opportunityRepo.markAsWon(id, tenantId);
 
-    if (!updatedOpportunity) {
+    if (updatedOpportunity === undefined || updatedOpportunity === null) {
       throw new Error(`Failed to mark opportunity as won`);
     }
 
@@ -127,7 +127,7 @@ export class OpportunityService {
 
   async markOpportunityAsLost(id: string, tenantId: string): Promise<OpportunityEntity> {
     const opportunity = await this.deps.opportunityRepo.findById(id, tenantId);
-    if (!opportunity) {
+    if (opportunity === undefined || opportunity === null) {
       throw new Error(`Opportunity ${id} not found`);
     }
 
@@ -141,7 +141,7 @@ export class OpportunityService {
 
     const updatedOpportunity = await this.deps.opportunityRepo.markAsLost(id, tenantId);
 
-    if (!updatedOpportunity) {
+    if (updatedOpportunity === undefined || updatedOpportunity === null) {
       throw new Error(`Failed to mark opportunity as lost`);
     }
 
@@ -150,7 +150,7 @@ export class OpportunityService {
 
   async deleteOpportunity(id: string, tenantId: string): Promise<boolean> {
     const opportunity = await this.deps.opportunityRepo.findById(id, tenantId);
-    if (!opportunity) {
+    if (opportunity === undefined || opportunity === null) {
       throw new Error(`Opportunity ${id} not found`);
     }
 

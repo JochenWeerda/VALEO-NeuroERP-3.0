@@ -90,8 +90,8 @@ export class CustomerRepository {
     const total = totalResult[0]?.count || 0;
 
     // Apply sorting
-    const sortBy = pagination.sortBy || 'createdAt';
-    const sortOrder = pagination.sortOrder || 'desc';
+    const sortBy = pagination.sortBy ?? 'createdAt';
+    const sortOrder = pagination.sortOrder ?? 'desc';
 
     const orderBy = sortOrder === 'desc'
       ? desc(customers[sortBy])
@@ -125,8 +125,8 @@ export class CustomerRepository {
       ...input,
       id: uuidv4(),
       status: input.status || CustomerStatus.PROSPECT,
-      tags: input.tags || [],
-      shippingAddresses: input.shippingAddresses || [],
+      tags: input.tags ?? [],
+      shippingAddresses: input.shippingAddresses ?? [],
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 1
@@ -141,8 +141,11 @@ export class CustomerRepository {
   }
 
   async update(id: string, tenantId: string, input: UpdateCustomerInput): Promise<CustomerEntity | null> {
-    const updateData: Partial<Customer> = {
+    const updateData: any = {
       ...input,
+      email: input.email ?? undefined,
+      phone: input.phone ?? undefined,
+      vatId: input.vatId ?? undefined,
       updatedAt: new Date()
     };
 
@@ -198,7 +201,7 @@ export class CustomerRepository {
   async addTag(id: string, tenantId: string, tag: string): Promise<CustomerEntity | null> {
     // First get current tags
     const current = await this.findById(id, tenantId);
-    if (!current) return null;
+    if (current === undefined || current === null) return null;
 
     const currentTags = current.tags;
     if (currentTags.includes(tag)) {
@@ -221,7 +224,7 @@ export class CustomerRepository {
   async removeTag(id: string, tenantId: string, tag: string): Promise<CustomerEntity | null> {
     // First get current tags
     const current = await this.findById(id, tenantId);
-    if (!current) return null;
+    if (current === undefined || current === null) return null;
 
     const currentTags = current.tags;
     const tagIndex = currentTags.indexOf(tag);

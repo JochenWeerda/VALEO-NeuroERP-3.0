@@ -6,6 +6,8 @@ import { randomUUID } from 'crypto';
 import { FinanzBuchung, FinanzBuchungProps } from '../../core/entities/finanzBuchung.entity';
 import { FinanzBuchungPostgresRepository } from '../../infrastructure/repositories/finanzBuchung-postgres.repository';
 
+const RANDOM_SUFFIX_LENGTH = 6;
+
 export interface CreateFinanzBuchungDto {
   buchungsnummer?: string;
   buchungsdatum: string | Date;
@@ -49,16 +51,16 @@ function normalizeBuchung(dto: CreateFinanzBuchungDto, existing?: FinanzBuchungP
   if (Number(dto.betrag) === 0) {
     throw new Error('betrag must not be zero');
   }
-  if (dto.sollkonto && dto.habenkonto && dto.sollkonto === dto.habenkonto) {
+  if (dto.sollkonto != null && dto.habenkonto != null && dto.sollkonto === dto.habenkonto) {
     throw new Error('sollkonto and habenkonto must differ');
   }
 
   const payload: FinanzBuchungProps = {
     ...existing,
-    buchungsnummer: dto.buchungsnummer?.trim() || existing?.buchungsnummer || '',
+    buchungsnummer: dto.buchungsnummer?.trim() ?? existing?.buchungsnummer ?? '',
     buchungsdatum: toDate(dto.buchungsdatum ?? existing?.buchungsdatum ?? new Date()),
     belegdatum: toDate(dto.belegdatum ?? existing?.belegdatum ?? new Date()),
-    belegnummer: dto.belegnummer?.trim() || existing?.belegnummer,
+    belegnummer: dto.belegnummer?.trim() ?? existing?.belegnummer,
     buchungstext: dto.buchungstext.trim(),
     sollkonto: dto.sollkonto ?? existing?.sollkonto,
     habenkonto: dto.habenkonto ?? existing?.habenkonto,
@@ -77,8 +79,8 @@ function normalizeBuchung(dto: CreateFinanzBuchungDto, existing?: FinanzBuchungP
     aktualisiert_am: existing?.aktualisiert_am,
   };
 
-  if (!payload.buchungsnummer) {
-    payload.buchungsnummer = `BCH-${Date.now()}-${randomUUID().slice(0, 6)}`;
+  if (payload.buchungsnummer === undefined || payload.buchungsnummer === null) {
+    payload.buchungsnummer = `BCH-${Date.now()}-${randomUUID().slice(0, RANDOM_SUFFIX_LENGTH)}`;
   }
 
   return payload;
@@ -104,7 +106,7 @@ export class FinanzBuchungService {
 
   public async update(id: string, payload: UpdateFinanzBuchungDto): Promise<FinanzBuchung> {
     const existing = await this.repository.findById(id);
-    if (!existing) {
+    if (existing === undefined || existing === null) {
       throw new Error('FinanzBuchung not found');
     }
 
@@ -138,3 +140,4 @@ export class FinanzBuchungService {
     await this.repository.delete(id);
   }
 }
+

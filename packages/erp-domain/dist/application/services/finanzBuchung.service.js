@@ -7,6 +7,7 @@ exports.FinanzBuchungService = void 0;
  */
 const crypto_1 = require("crypto");
 const finanzBuchung_entity_1 = require("../../core/entities/finanzBuchung.entity");
+const RANDOM_SUFFIX_LENGTH = 6;
 function toDate(value) {
     if (value instanceof Date) {
         return value;
@@ -32,7 +33,7 @@ function normalizeBuchung(dto, existing) {
     }
     const payload = {
         ...existing,
-        buchungsnummer: dto.buchungsnummer?.trim() || existing?.buchungsnummer || '',
+        buchungsnummer: dto.buchungsnummer?.trim() || existing?.buchungsnummer ?? '',
         buchungsdatum: toDate(dto.buchungsdatum ?? existing?.buchungsdatum ?? new Date()),
         belegdatum: toDate(dto.belegdatum ?? existing?.belegdatum ?? new Date()),
         belegnummer: dto.belegnummer?.trim() || existing?.belegnummer,
@@ -53,8 +54,8 @@ function normalizeBuchung(dto, existing) {
         erstellt_am: existing?.erstellt_am,
         aktualisiert_am: existing?.aktualisiert_am,
     };
-    if (!payload.buchungsnummer) {
-        payload.buchungsnummer = `BCH-${Date.now()}-${(0, crypto_1.randomUUID)().slice(0, 6)}`;
+    if (payload.buchungsnummer === undefined || payload.buchungsnummer === null) {
+        payload.buchungsnummer = `BCH-${Date.now()}-${(0, crypto_1.randomUUID)().slice(0, RANDOM_SUFFIX_LENGTH)}`;
     }
     return payload;
 }
@@ -76,7 +77,7 @@ class FinanzBuchungService {
     }
     async update(id, payload) {
         const existing = await this.repository.findById(id);
-        if (!existing) {
+        if (existing === undefined || existing === null) {
             throw new Error('FinanzBuchung not found');
         }
         const existingProps = existing.toPrimitives();

@@ -150,6 +150,7 @@ class InventoryDomainBootstrap {
         // Middleware
         this.app.use((0, helmet_1.default)());
         this.app.use((0, cors_1.default)());
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.app.use((0, compression_1.default)());
         this.app.use(express_1.default.json({ limit: '10mb' }));
         this.app.use(express_1.default.urlencoded({ extended: true }));

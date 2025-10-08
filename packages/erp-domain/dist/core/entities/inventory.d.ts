@@ -18,7 +18,7 @@ export interface Inventory {
     reorderQuantity: number;
     lastUpdated: Date;
     readonly createdAt: Date;
-    readonly updatedAt: Date;
+    updatedAt: Date;
 }
 export interface CreateInventoryCommand {
     name: string;
@@ -55,7 +55,7 @@ export declare class InventoryCreatedEvent implements DomainEvent {
 }
 export declare class InventoryUpdatedEvent implements DomainEvent {
     readonly inventory: Inventory;
-    readonly changes: Record<string, any>;
+    readonly changes: Record<string, unknown>;
     readonly id: string;
     readonly type = "InventoryUpdated";
     readonly aggregateId: InventoryId;
@@ -63,7 +63,7 @@ export declare class InventoryUpdatedEvent implements DomainEvent {
     readonly version: number;
     readonly occurredOn: Date;
     readonly data: Record<string, unknown>;
-    constructor(inventory: Inventory, changes: Record<string, any>);
+    constructor(inventory: Inventory, changes: Record<string, unknown>);
 }
 export declare class InventoryEntity implements Inventory {
     readonly id: InventoryId;
@@ -77,7 +77,7 @@ export declare class InventoryEntity implements Inventory {
     reorderQuantity: number;
     lastUpdated: Date;
     readonly createdAt: Date;
-    readonly updatedAt: Date;
+    updatedAt: Date;
     private constructor();
     static create(command: CreateInventoryCommand): InventoryEntity;
     update(command: UpdateInventoryCommand): InventoryEntity;

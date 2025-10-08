@@ -34,7 +34,7 @@ export async function createDocument(
     )
     .limit(1);
 
-  if (!template) throw new Error('Template not found or not active');
+  if (template === undefined || template === null) throw new Error('Template not found or not active');
 
   // 2. Generate number (if seriesId provided)
   let docNumber: string | undefined;
@@ -81,7 +81,7 @@ export async function createDocument(
     .returning();
 
   const document = insertedDocs[0];
-  if (!document) throw new Error('Failed to create document');
+  if (document === undefined || document === null) throw new Error('Failed to create document');
 
   // 8. Publish event
   await publishEvent('document.created', {
@@ -111,7 +111,7 @@ export async function getDocumentById(
     .where(and(eq(documents.id, documentId), eq(documents.tenantId, tenantId)))
     .limit(1);
 
-  if (!doc) return null;
+  if (doc === undefined || doc === null) return null;
 
   // Convert DB types to Entity types
   return {
@@ -127,10 +127,11 @@ export async function getDocumentFileUrl(
   role: string = 'render'
 ): Promise<string> {
   const doc = await getDocumentById(tenantId, documentId);
-  if (!doc) throw new Error('Document not found');
+  if (doc === undefined || doc === null) throw new Error('Document not found');
 
   const file = (doc.files as Array<{ role: string; uri: string }>).find(f => f.role === role);
-  if (!file) throw new Error(`File with role ${role} not found`);
+  if (file === undefined || file === null) throw new Error(`File with role ${role} not found`);
 
   return generateSignedUrl(file.uri, 3600); // 1h validity
 }
+

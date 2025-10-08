@@ -192,3 +192,4 @@ Die HR-Domain ist **100% erfolgreich implementiert** mit:
 *Architektur: DDD + Clean Architecture + Event-Driven*
 *Technologie: TypeScript + Fastify + Drizzle ORM + PostgreSQL*
 
+

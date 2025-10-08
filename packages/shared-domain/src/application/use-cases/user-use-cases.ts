@@ -138,7 +138,7 @@ export class UserUseCases {
       ) : undefined,
       isActive: true,
       isEmailVerified: false,
-      roles: command.roles || [],
+      roles: command.roles ?? [],
       tenantId: command.tenantId,
       createdBy: command.createdBy
     });
@@ -161,7 +161,7 @@ export class UserUseCases {
 
   async updateUser(command: UpdateUserCommand): Promise<User> {
     const user = await this.userRepository.findById(command.userId as any);
-    if (!user) {
+    if (user === undefined || user === null) {
       throw new Error(`User with ID '${command.userId}' not found`);
     }
 
@@ -197,7 +197,7 @@ export class UserUseCases {
 
   async activateUser(command: ActivateUserCommand): Promise<void> {
     const user = await this.userRepository.findById(command.userId as any);
-    if (!user) {
+    if (user === undefined || user === null) {
       throw new Error(`User with ID '${command.userId}' not found`);
     }
 
@@ -213,7 +213,7 @@ export class UserUseCases {
 
   async deactivateUser(command: DeactivateUserCommand): Promise<void> {
     const user = await this.userRepository.findById(command.userId as any);
-    if (!user) {
+    if (user === undefined || user === null) {
       throw new Error(`User with ID '${command.userId}' not found`);
     }
 
@@ -230,7 +230,7 @@ export class UserUseCases {
 
   async addRoleToUser(command: AddRoleToUserCommand): Promise<void> {
     const user = await this.userRepository.findById(command.userId as any);
-    if (!user) {
+    if (user === undefined || user === null) {
       throw new Error(`User with ID '${command.userId}' not found`);
     }
 
@@ -247,7 +247,7 @@ export class UserUseCases {
 
   async removeRoleFromUser(command: RemoveRoleFromUserCommand): Promise<void> {
     const user = await this.userRepository.findById(command.userId as any);
-    if (!user) {
+    if (user === undefined || user === null) {
       throw new Error(`User with ID '${command.userId}' not found`);
     }
 
@@ -264,7 +264,7 @@ export class UserUseCases {
 
   async loginUser(command: LoginUserCommand): Promise<User> {
     const user = await this.userRepository.findById(command.userId as any);
-    if (!user) {
+    if (user === undefined || user === null) {
       throw new Error(`User with ID '${command.userId}' not found`);
     }
 
@@ -288,7 +288,7 @@ export class UserUseCases {
 
   async verifyUserEmail(userId: UserId): Promise<void> {
     const user = await this.userRepository.findById(userId as any);
-    if (!user) {
+    if (user === undefined || user === null) {
       throw new Error(`User with ID '${userId}' not found`);
     }
 
@@ -424,3 +424,4 @@ export class UserUseCases {
     };
   }
 }
+

@@ -16,7 +16,7 @@ export async function generateDocumentNumber(tenantId: string, seriesId: string)
   `);
 
   const series = result[0];
-  if (!series) throw new Error('Number series not found');
+  if (series === undefined || series === null) throw new Error('Number series not found');
 
   const nextSeq = series.next_seq as number;
   const pattern = series.pattern as string;
@@ -46,3 +46,4 @@ function formatNumber(pattern: string, seq: number): string {
     .replace('{seq5}', String(seq).padStart(5, '0'))
     .replace('{seq}', String(seq));
 }
+

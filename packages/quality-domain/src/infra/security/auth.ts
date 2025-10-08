@@ -1,9 +1,9 @@
 import { FastifyRequest } from 'fastify';
 import { jwtVerify, createRemoteJWKSet, JWTPayload } from 'jose';
 
-const JWKS_URI = process.env.JWKS_URI || '';
-const JWT_ISSUER = process.env.JWT_ISSUER || '';
-const JWT_AUDIENCE = process.env.JWT_AUDIENCE || 'valeo-neuroerp';
+const JWKS_URI = process.env.JWKS_URI ?? '';
+const JWT_ISSUER = process.env.JWT_ISSUER ?? '';
+const JWT_AUDIENCE = process.env.JWT_AUDIENCE ?? 'valeo-neuroerp';
 
 let jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
 
@@ -22,7 +22,7 @@ export interface AuthContext {
  * Verify JWT token
  */
 export async function verifyToken(token: string): Promise<JWTPayload> {
-  if (!jwks) {
+  if (jwks === undefined || jwks === null) {
     throw new Error('JWKS not configured');
   }
 
@@ -48,7 +48,7 @@ export async function extractAuthContext(request: FastifyRequest): Promise<AuthC
   const payload = await verifyToken(token);
 
   const tenantId = request.headers['x-tenant-id'] as string;
-  if (!tenantId) {
+  if (tenantId === undefined || tenantId === null) {
     throw new Error('Missing x-tenant-id header');
   }
 
@@ -77,3 +77,4 @@ export function hasAnyPermission(context: AuthContext, requiredPermissions: stri
   
   return requiredPermissions.some(perm => context.permissions.includes(perm));
 }
+

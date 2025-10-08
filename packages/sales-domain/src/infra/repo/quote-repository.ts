@@ -94,8 +94,8 @@ export class QuoteRepository {
     const total = totalResult[0]?.count || 0;
 
     // Apply sorting
-    const sortBy = pagination.sortBy || 'createdAt';
-    const sortOrder = pagination.sortOrder || 'desc';
+    const sortBy = pagination.sortBy ?? 'createdAt';
+    const sortOrder = pagination.sortOrder ?? 'desc';
 
     const orderBy = sortOrder === 'desc'
       ? desc(quotes[sortBy])
@@ -160,8 +160,8 @@ export class QuoteRepository {
     const total = totalResult[0]?.count || 0;
 
     // Apply sorting
-    const sortBy = pagination.sortBy || 'createdAt';
-    const sortOrder = pagination.sortOrder || 'desc';
+    const sortBy = pagination.sortBy ?? 'createdAt';
+    const sortOrder = pagination.sortOrder ?? 'desc';
 
     const orderBy = sortOrder === 'desc'
       ? desc(quotes[sortBy])

@@ -7,18 +7,18 @@
 
 import { inject, injectable } from 'inversify';
 import {
-  ArInvoiceEntity,
-  ArInvoiceId,
-  CreateArInvoiceCommand,
-  UpdateArInvoiceCommand,
-  RecordPaymentCommand,
-  ProcessDunningCommand,
   ArInvoice,
   ArInvoiceCreatedEvent,
+  ArInvoiceEntity,
+  ArInvoiceId,
   ArInvoiceIssuedEvent,
-  ArInvoicePaymentReceivedEvent,
   ArInvoiceOverdueEvent,
-  DunningProcessedEvent
+  ArInvoicePaymentReceivedEvent,
+  CreateArInvoiceCommand,
+  DunningProcessedEvent,
+  ProcessDunningCommand,
+  RecordPaymentCommand,
+  UpdateArInvoiceCommand
 } from '../core/entities/ar-invoice';
 
 // Import Result types
@@ -43,7 +43,7 @@ const err = <T>(error: string): Result<T> => ({
 });
 
 // Import ZUGFeRD types
-import { ZUGFeRDAdapterService, MockZUGFeRDAdapter, NormalizedInvoice } from './zugferd-adapter-service';
+import { MockZUGFeRDAdapter, NormalizedInvoice, ZUGFeRDAdapterService } from './zugferd-adapter-service';
 
 // ===== DEPENDENCIES =====
 
@@ -81,10 +81,10 @@ export interface Clock {
 
 export class ArInvoiceApplicationService {
   constructor(
-    private arInvoiceRepo: ArInvoiceRepository,
-    private customerRepo: CustomerRepository,
-    private eventPublisher: EventPublisher,
-    private clock: Clock
+    private readonly arInvoiceRepo: ArInvoiceRepository,
+    private readonly customerRepo: CustomerRepository,
+    private readonly eventPublisher: EventPublisher,
+    private readonly clock: Clock
   ) {}
 
   /**

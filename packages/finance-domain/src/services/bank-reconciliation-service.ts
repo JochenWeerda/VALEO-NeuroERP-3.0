@@ -5,7 +5,7 @@
  * and reconciliation of bank transactions with accounting entries
  */
 
-import { Result, ok, err } from '../core/entities/ar-invoice';
+import { Result, err, ok } from '../core/entities/ar-invoice';
 
 // ===== INTERFACES =====
 
@@ -94,13 +94,13 @@ export interface ResolveConflictCommand {
 // ===== SERVICE =====
 
 export class BankReconciliationApplicationService {
-  private parser: BankStatementParser;
+  private readonly parser: BankStatementParser;
 
   constructor(
-    private bankStatementRepo: BankStatementRepository,
-    private matchEngine: AIBankMatchEngine,
-    private journalService: JournalService,
-    private eventPublisher: EventPublisher
+    private readonly bankStatementRepo: BankStatementRepository,
+    private readonly matchEngine: AIBankMatchEngine,
+    private readonly journalService: JournalService,
+    private readonly eventPublisher: EventPublisher
   ) {
     this.parser = new BankStatementParser();
   }

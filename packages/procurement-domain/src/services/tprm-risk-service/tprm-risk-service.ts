@@ -165,63 +165,58 @@ export class TPRMRiskService {
   }> {
     const startTime = Date.now();
 
-    try {
-      // Transform ESG data for risk engine
-      const supplierData: SupplierAssessmentData = {
-        supplierId: request.supplierId,
-        name: 'Supplier Name', // Would be fetched from supplier service
-        country: 'DE', // Would be fetched from supplier service
-        certifications: request.certifications,
-        esgData: {
-          controversies: request.controversies,
-          ...(request.scope3Emissions && { scope3Emissions: request.scope3Emissions }),
-          ...(request.renewableEnergyPercentage && { renewableEnergyPercentage: request.renewableEnergyPercentage }),
-          ...(request.diversityRatio && { diversityRatio: request.diversityRatio }),
-          disclosures: request.disclosures.map(d => ({
-            standard: d.standard,
-            year: d.year,
-            verified: d.verified
-          }))
-        }
-      };
-
-      const context: AssessmentContext = {
-        assessedBy: 'system',
-        assessmentReason: 'manual',
-        criticalityLevel: 'medium'
-      };
-
-      const assessment = await this.riskEngine.assessSupplierRisk(
-        request.supplierId,
-        supplierData,
-        context
-      );
-
-      const esgScore = assessment.esgScore;
-
-      if (!esgScore) {
-        throw new Error('ESG assessment failed');
+    // Transform ESG data for risk engine
+    const supplierData: SupplierAssessmentData = {
+      supplierId: request.supplierId,
+      name: 'Supplier Name', // Would be fetched from supplier service
+      country: 'DE', // Would be fetched from supplier service
+      certifications: request.certifications,
+      esgData: {
+        controversies: request.controversies,
+        ...(request.scope3Emissions && { scope3Emissions: request.scope3Emissions }),
+        ...(request.renewableEnergyPercentage && { renewableEnergyPercentage: request.renewableEnergyPercentage }),
+        ...(request.diversityRatio && { diversityRatio: request.diversityRatio }),
+        disclosures: request.disclosures.map(d => ({
+          standard: d.standard,
+          year: d.year,
+          verified: d.verified
+        }))
       }
+    };
 
-      // Generate ESG-specific recommendations
-      const recommendations = this.generateESGRecommendations(esgScore);
+    const context: AssessmentContext = {
+      assessedBy: 'system',
+      assessmentReason: 'manual',
+      criticalityLevel: 'medium'
+    };
 
-      // this.metrics.recordApiResponseTime('POST', '/tprm/assess-esg', 200, (Date.now() - startTime) / 1000);
+    const assessment = await this.riskEngine.assessSupplierRisk(
+      request.supplierId,
+      supplierData,
+      context
+    );
 
-      return {
-        esgScore: esgScore.overall,
-        categories: {
-          environmental: esgScore.environmental,
-          social: esgScore.social,
-          governance: esgScore.governance
-        },
-        recommendations,
-        controversies: request.controversies
-      };
-    } catch (error) {
-      // this.metrics.incrementErrorCount('tprm', 'esg_assessment_failed');
-      throw error;
+    const esgScore = assessment.esgScore;
+
+    if (!esgScore) {
+      throw new Error('ESG assessment failed');
     }
+
+    // Generate ESG-specific recommendations
+    const recommendations = this.generateESGRecommendations(esgScore);
+
+    // this.metrics.recordApiResponseTime('POST', '/tprm/assess-esg', 200, (Date.now() - startTime) / 1000);
+
+    return {
+      esgScore: esgScore.overall,
+      categories: {
+        environmental: esgScore.environmental,
+        social: esgScore.social,
+        governance: esgScore.governance
+      },
+      recommendations,
+      controversies: request.controversies
+    };
   }
 
   /**

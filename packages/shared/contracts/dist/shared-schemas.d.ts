@@ -237,7 +237,7 @@ export declare const ApiResponse: <T extends z.ZodType>(dataSchema: T) => z.ZodO
     }>>;
     timestamp: z.ZodString;
     requestId: z.ZodOptional<z.ZodString>;
-}>, any> extends infer T_1 ? { [k in keyof T_1]: T_1[k]; } : never, z.baseObjectInputType<{
+}>, any> extends infer T_1 ? { [k in keyof T_1]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
     success: z.ZodBoolean;
     data: z.ZodOptional<T>;
     error: z.ZodOptional<z.ZodObject<{
@@ -255,7 +255,43 @@ export declare const ApiResponse: <T extends z.ZodType>(dataSchema: T) => z.ZodO
     }>>;
     timestamp: z.ZodString;
     requestId: z.ZodOptional<z.ZodString>;
-}> extends infer T_2 ? { [k_1 in keyof T_2]: T_2[k_1]; } : never>;
+}>, any>[k]; } : never, z.baseObjectInputType<{
+    success: z.ZodBoolean;
+    data: z.ZodOptional<T>;
+    error: z.ZodOptional<z.ZodObject<{
+        code: z.ZodString;
+        message: z.ZodString;
+        details: z.ZodOptional<z.ZodAny>;
+    }, "strip", z.ZodTypeAny, {
+        code: string;
+        message: string;
+        details?: any;
+    }, {
+        code: string;
+        message: string;
+        details?: any;
+    }>>;
+    timestamp: z.ZodString;
+    requestId: z.ZodOptional<z.ZodString>;
+}> extends infer T_2 ? { [k_1 in keyof T_2]: z.baseObjectInputType<{
+    success: z.ZodBoolean;
+    data: z.ZodOptional<T>;
+    error: z.ZodOptional<z.ZodObject<{
+        code: z.ZodString;
+        message: z.ZodString;
+        details: z.ZodOptional<z.ZodAny>;
+    }, "strip", z.ZodTypeAny, {
+        code: string;
+        message: string;
+        details?: any;
+    }, {
+        code: string;
+        message: string;
+        details?: any;
+    }>>;
+    timestamp: z.ZodString;
+    requestId: z.ZodOptional<z.ZodString>;
+}>[k_1]; } : never>;
 export type ApiResponse<T> = {
     success: boolean;
     data?: T;

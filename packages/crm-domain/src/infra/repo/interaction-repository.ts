@@ -80,8 +80,8 @@ export class InteractionRepository {
     const total = totalResult[0]?.count || 0;
 
     // Apply sorting
-    const sortBy = pagination.sortBy || 'occurredAt';
-    const sortOrder = pagination.sortOrder || 'desc';
+    const sortBy = pagination.sortBy ?? 'occurredAt';
+    const sortOrder = pagination.sortOrder ?? 'desc';
 
     const orderBy = sortOrder === 'desc'
       ? desc(interactions[sortBy])
@@ -104,8 +104,8 @@ export class InteractionRepository {
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
@@ -146,8 +146,8 @@ export class InteractionRepository {
     const total = totalResult[0]?.count || 0;
 
     // Apply sorting
-    const sortBy = pagination.sortBy || 'occurredAt';
-    const sortOrder = pagination.sortOrder || 'desc';
+    const sortBy = pagination.sortBy ?? 'occurredAt';
+    const sortOrder = pagination.sortOrder ?? 'desc';
 
     const orderBy = sortOrder === 'desc'
       ? desc(interactions[sortBy])
@@ -170,8 +170,8 @@ export class InteractionRepository {
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
@@ -180,7 +180,7 @@ export class InteractionRepository {
     const interactionData: Interaction = {
       ...input,
       id: uuidv4(),
-      attachments: input.attachments || [],
+      attachments: input.attachments ?? [],
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 1
@@ -195,7 +195,7 @@ export class InteractionRepository {
   }
 
   async update(id: string, tenantId: string, input: UpdateInteractionInput): Promise<InteractionEntity | null> {
-    const updateData: Partial<Interaction> = {
+    const updateData: any = {
       ...input,
       updatedAt: new Date()
     };

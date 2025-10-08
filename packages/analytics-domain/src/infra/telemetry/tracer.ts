@@ -1,18 +1,18 @@
 // Mock telemetry implementation for development
 export interface MockSpan {
-  setAttribute: (key: string, value: any) => void;
-  setStatus: (status: any) => void;
-  recordException: (error: Error) => void;
+  setAttribute: (_key: string, _value: unknown) => void;
+  setStatus: (_status: unknown) => void;
+  recordException: (_error: Error) => void;
   end: () => void;
 }
 
 export interface MockTracer {
-  startSpan: (name: string) => MockSpan;
+  startSpan: (_name: string) => MockSpan;
 }
 
 // Mock tracer implementation
 class MockTracerImpl implements MockTracer {
-  startSpan(name: string): MockSpan {
+  startSpan(_name: string): MockSpan {
     return {
       setAttribute: () => {},
       setStatus: () => {},
@@ -61,48 +61,48 @@ export const tracer: MockTracer = new MockTracerImpl();
 
 // Tracing utilities
 export class AnalyticsTracer {
-  static startSpan(name: string, attributes?: Record<string, string | number | boolean>): MockSpan {
+  static startSpan(name: string, _attributes?: Record<string, string | number | boolean>): MockSpan {
     const span = tracer.startSpan(name);
     return span;
   }
 
-  static startKpiCalculation(tenantId: string, kpiName: string): MockSpan {
+  static startKpiCalculation(_tenantId: string, _kpiName: string): MockSpan {
     return this.startSpan('analytics.kpi.calculate');
   }
 
-  static startForecastGeneration(tenantId: string, metricName: string, model: string): MockSpan {
+  static startForecastGeneration(_tenantId: string, _metricName: string, _model: string): MockSpan {
     return this.startSpan('analytics.forecast.generate');
   }
 
-  static startReportGeneration(tenantId: string, reportType: string): MockSpan {
+  static startReportGeneration(_tenantId: string, _reportType: string): MockSpan {
     return this.startSpan('analytics.report.generate');
   }
 
-  static startCubeRefresh(tenantId: string, cubeName: string): MockSpan {
+  static startCubeRefresh(_tenantId: string, _cubeName: string): MockSpan {
     return this.startSpan('analytics.cube.refresh');
   }
 
-  static startEventProcessing(eventType: string, tenantId: string): MockSpan {
+  static startEventProcessing(_eventType: string, _tenantId: string): MockSpan {
     return this.startSpan('analytics.event.process');
   }
 
-  static startDatabaseQuery(operation: string, table: string, tenantId?: string): MockSpan {
+  static startDatabaseQuery(operation: string, _table: string, _tenantId?: string): MockSpan {
     return this.startSpan(`db.${operation}`);
   }
 
-  static setSpanError(span: MockSpan, error: Error): void {
+  static setSpanError(_span: MockSpan, _error: Error): void {
     // No-op
   }
 
-  static addTenantAttributes(span: MockSpan, tenantId: string): void {
+  static addTenantAttributes(_span: MockSpan, _tenantId: string): void {
     // No-op
   }
 
-  static addUserAttributes(span: MockSpan, userId: string, userEmail?: string): void {
+  static addUserAttributes(_span: MockSpan, _userId: string, _userEmail?: string): void {
     // No-op
   }
 
-  static addPerformanceAttributes(span: MockSpan, duration: number, recordCount?: number): void {
+  static addPerformanceAttributes(_span: MockSpan, _duration: number, _recordCount?: number): void {
     // No-op
   }
 }

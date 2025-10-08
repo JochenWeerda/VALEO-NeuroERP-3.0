@@ -1,0 +1,10 @@
+{
+  "name": "@valero-neuroerp/bff",
+  "private": true,
+  "scripts": {
+    "lint": "cd bff-web && npm run lint",
+    "test": "cd bff-web && npm run test",
+    "build": "cd bff-web && npm run build",
+    "dev": "cd bff-web && npm run dev"
+  }
+}

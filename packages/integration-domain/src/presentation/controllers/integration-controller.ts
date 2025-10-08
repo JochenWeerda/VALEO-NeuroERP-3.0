@@ -22,8 +22,7 @@ export class IntegrationController {
 
   // GET /integrations
   async listIntegrations(req: Request, res: Response): Promise<void> {
-    try {
-      const query = validateIntegrationQuery({
+    const query = validateIntegrationQuery({
         page: parseInt(req.query.page as string) || 1,
         limit: parseInt(req.query.limit as string) || 10,
         sortBy: req.query.sortBy as string,
@@ -46,15 +45,11 @@ export class IntegrationController {
         success: true,
         data: result.data
       });
-    } catch (error) {
-      throw error;
-    }
   }
 
   // GET /integrations/:id
   async getIntegration(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
+    const { id } = req.params;
 
       if (!id) {
         throw createNotFoundError('Integration', '');
@@ -76,15 +71,11 @@ export class IntegrationController {
         success: true,
         data: result.data
       });
-    } catch (error) {
-      throw error;
-    }
   }
 
   // POST /integrations
   async createIntegration(req: Request, res: Response): Promise<void> {
-    try {
-      const request = validateCreateIntegrationRequest(req.body);
+    const request = validateCreateIntegrationRequest(req.body);
       const userId = this.extractUserId(req);
 
       const result = await this.integrationService.createIntegration(request, userId);
@@ -102,15 +93,11 @@ export class IntegrationController {
         success: true,
         data: result.data
       });
-    } catch (error) {
-      throw error;
-    }
   }
 
   // PUT /integrations/:id
   async updateIntegration(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
+    const { id } = req.params;
       const request = validateUpdateIntegrationRequest(req.body);
       const userId = this.extractUserId(req);
 
@@ -136,15 +123,11 @@ export class IntegrationController {
         success: true,
         data: result.data
       });
-    } catch (error) {
-      throw error;
-    }
   }
 
   // DELETE /integrations/:id
   async deleteIntegration(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
+    const { id } = req.params;
       const userId = this.extractUserId(req);
 
       if (!id) {
@@ -163,15 +146,11 @@ export class IntegrationController {
       }
 
       res.status(HttpStatusCode.NO_CONTENT).send();
-    } catch (error) {
-      throw error;
-    }
   }
 
   // POST /integrations/:id/activate
   async activateIntegration(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
+    const { id } = req.params;
       const userId = this.extractUserId(req);
 
       if (!id) {
@@ -193,15 +172,11 @@ export class IntegrationController {
         success: true,
         data: result.data
       });
-    } catch (error) {
-      throw error;
-    }
   }
 
   // POST /integrations/:id/deactivate
   async deactivateIntegration(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
+    const { id } = req.params;
       const userId = this.extractUserId(req);
 
       if (!id) {
@@ -223,15 +198,11 @@ export class IntegrationController {
         success: true,
         data: result.data
       });
-    } catch (error) {
-      throw error;
-    }
   }
 
   // GET /integrations/by-name/:name
   async getIntegrationByName(req: Request, res: Response): Promise<void> {
-    try {
-      const { name } = req.params;
+    const { name } = req.params;
 
       if (!name) {
         throw createNotFoundError('Integration', '');
@@ -253,15 +224,11 @@ export class IntegrationController {
         success: true,
         data: result.data
       });
-    } catch (error) {
-      throw error;
-    }
   }
 
   // GET /integrations/by-type/:type
   async getIntegrationsByType(req: Request, res: Response): Promise<void> {
-    try {
-      const { type } = req.params;
+    const { type } = req.params;
 
       if (!type) {
         throw createNotFoundError('Integration type', '');
@@ -279,15 +246,11 @@ export class IntegrationController {
         success: true,
         data: result.data
       });
-    } catch (error) {
-      throw error;
-    }
   }
 
   // GET /integrations/active
   async getActiveIntegrations(req: Request, res: Response): Promise<void> {
-    try {
-      const result = await this.integrationService.getActiveIntegrations();
+    const result = await this.integrationService.getActiveIntegrations();
 
       if (!result.success) {
         throw createInternalServerError('Failed to retrieve active integrations', {
@@ -299,15 +262,11 @@ export class IntegrationController {
         success: true,
         data: result.data
       });
-    } catch (error) {
-      throw error;
-    }
   }
 
   // GET /integrations/statistics
   async getStatistics(req: Request, res: Response): Promise<void> {
-    try {
-      const result = await this.integrationService.getStatistics();
+    const result = await this.integrationService.getStatistics();
 
       if (!result.success) {
         throw createInternalServerError('Failed to retrieve statistics', {
@@ -319,15 +278,11 @@ export class IntegrationController {
         success: true,
         data: result.data
       });
-    } catch (error) {
-      throw error;
-    }
   }
 
   // GET /integrations/health
   async healthCheck(req: Request, res: Response): Promise<void> {
-    try {
-      const result = await this.integrationService.healthCheck();
+    const result = await this.integrationService.healthCheck();
 
       if (!result.success) {
         throw createInternalServerError('Health check failed', {
@@ -339,9 +294,6 @@ export class IntegrationController {
         success: true,
         data: result.data
       });
-    } catch (error) {
-      throw error;
-    }
   }
 
   // Helper method to extract user ID from request

@@ -3,7 +3,7 @@ import postgres from 'postgres';
 import * as schema from './schema';
 
 // Database connection configuration
-const connectionString = process.env.POSTGRES_URL || 'postgres://user:pass@localhost:5432/crm';
+const connectionString = process.env.POSTGRES_URL ?? 'postgres://user:pass@localhost:5432/crm';
 
 // Create postgres client with connection pooling
 const client = postgres(connectionString, {

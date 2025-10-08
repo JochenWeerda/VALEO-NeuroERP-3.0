@@ -33,11 +33,11 @@ export class AuthServiceImpl implements AuthService {
       body: JSON.stringify(credentials)
     });
 
-    if (!response.ok) {
+    if (response.ok === undefined || response.ok === null) {
       throw new Error('Login failed');
     }
 
-    const data = await response.json() as any;
+    const data = await response.json();
     this.currentUser = data.user;
     this.token = data.token;
     
@@ -48,13 +48,13 @@ export class AuthServiceImpl implements AuthService {
     this.currentUser = null;
     this.token = null;
     // Clear token from storage (browser environment only)
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.removeItem('auth_token');
+    if (typeof globalThis !== 'undefined' && 'localStorage' in globalThis) {
+      (globalThis as { localStorage: Storage }).localStorage.removeItem('auth_token');
     }
   }
 
   async getCurrentUser(): Promise<User> {
-    if (!this.currentUser) {
+    if (this.currentUser === undefined || this.currentUser === null) {
       throw new Error('User not authenticated');
     }
     return this.currentUser;
@@ -66,12 +66,14 @@ export class AuthServiceImpl implements AuthService {
 
   async refreshToken(): Promise<string> {
     // Implementation
-    return this.token || '';
+    return this.token ?? '';
   }
 }
 
 // Register Auth Service (commented out for now due to module resolution issues)
 // import { serviceLocator } from '@valero-neuroerp/utilities';
 
-const authService = new AuthServiceImpl();
-// serviceLocator.register<AuthService>('authService', authService);
+const _authService = new AuthServiceImpl();
+// serviceLocator.register<AuthService>('authService', _authService);
+
+

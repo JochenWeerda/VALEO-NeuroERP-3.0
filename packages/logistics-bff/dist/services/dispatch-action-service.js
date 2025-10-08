@@ -80,7 +80,7 @@ class DispatchActionService {
     // Execute quick action
     executeQuickAction(actionId, shipmentId, userId) {
         const quickAction = this.quickActions.find(qa => qa.id === actionId);
-        if (!quickAction)
+        if (quickAction === undefined || quickAction === null)
             return null;
         let actionType;
         switch (actionId) {

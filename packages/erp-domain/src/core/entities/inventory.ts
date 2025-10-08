@@ -20,7 +20,7 @@ export interface Inventory {
   reorderQuantity: number;
   lastUpdated: Date;
   readonly createdAt: Date;
-  readonly updatedAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateInventoryCommand {
@@ -78,7 +78,7 @@ export class InventoryUpdatedEvent implements DomainEvent {
 
   constructor(
     public readonly inventory: Inventory,
-    public readonly changes: Record<string, any>
+    public readonly changes: Record<string, unknown>
   ) {
     this.id = `inventory-updated-${Date.now()}`;
     this.aggregateId = inventory.id;
@@ -100,7 +100,7 @@ export class InventoryEntity implements Inventory {
   public reorderQuantity: number;
   public lastUpdated: Date;
   public readonly createdAt: Date;
-  public readonly updatedAt: Date;
+  public updatedAt: Date;
 
   private constructor(
     id: InventoryId,
@@ -157,7 +157,7 @@ export class InventoryEntity implements Inventory {
     // Validate command
     InventoryEntity.validateUpdateCommand(command);
 
-    const changes: Record<string, any> = {};
+    const changes: Record<string, unknown> = {};
 
     if (command.name !== undefined) {
       this.name = command.name;
@@ -196,7 +196,7 @@ export class InventoryEntity implements Inventory {
       changes.lastUpdated = command.lastUpdated;
     }
 
-    (this as any).updatedAt = new Date();
+    this.updatedAt = new Date();
     changes.updatedAt = this.updatedAt;
 
     return this;
@@ -215,18 +215,9 @@ export class InventoryEntity implements Inventory {
     // Add additional validation rules here
   }
 
-  private static validateUpdateCommand(command: UpdateInventoryCommand): void {
+  private static validateUpdateCommand(_command: UpdateInventoryCommand): void {
     // Add update validation rules here
   }
 }
 
 // Utility functions
-function getDefaultValue(type: string): any {
-  switch (type) {
-    case 'string': return '';
-    case 'number': return 0;
-    case 'boolean': return false;
-    case 'Date': return new Date();
-    default: return null;
-  }
-}

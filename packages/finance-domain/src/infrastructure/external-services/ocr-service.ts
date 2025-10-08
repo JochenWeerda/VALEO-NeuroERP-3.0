@@ -115,7 +115,7 @@ Line Items:
 
     for (const { name, pattern } of patterns) {
       const match = text.match(pattern);
-      if (match && match[1]) {
+      if (match?.[1]) {
         fields.push({
           fieldName: name,
           value: match[1].trim(),

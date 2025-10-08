@@ -1,5 +1,5 @@
 import type { OrderId } from '@valero-neuroerp/data-models';
-import { Order, OrderFilters, OrderStatus, CreateOrderInput } from '../entities/order';
+import { CreateOrderInput, Order, OrderFilters, OrderStatus } from '../entities/order';
 import { OrderRepository } from '../repositories/order-repository';
 export declare class OrderDomainService {
     private readonly repository;

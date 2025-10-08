@@ -23,8 +23,8 @@ export class ListOrdersQuery {
       documentType: options.documentType as OrderFilters['documentType'],
       customerNumber: options.customerNumber,
       debtorNumber: options.debtorNumber,
-      from: options.from ? new Date(options.from) : undefined,
-      to: options.to ? new Date(options.to) : undefined,
+      from: options.from != null ? new Date(options.from) : undefined,
+      to: options.to != null ? new Date(options.to) : undefined,
       limit: options.limit,
       offset: options.offset,
     };

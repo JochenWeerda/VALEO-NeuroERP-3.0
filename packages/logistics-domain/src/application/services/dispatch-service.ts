@@ -14,7 +14,7 @@ export class DispatchService {
 
   async assign(dto: DispatchAssignDto): Promise<DispatchAssignment> {
     const route = await this.routeRepository.findRoutePlanById(dto.tenantId, dto.routeId);
-    if (!route) {
+    if (route === undefined || route === null) {
       throw new Error(`Route ${dto.routeId} not found for tenant ${dto.tenantId}`);
     }
 
@@ -47,3 +47,4 @@ export class DispatchService {
     return assignment;
   }
 }
+

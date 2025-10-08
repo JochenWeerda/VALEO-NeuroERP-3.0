@@ -1,5 +1,5 @@
-import { FastifyInstance } from 'fastify';
-import { eq, and, sql } from 'drizzle-orm';
+import type { FastifyInstance } from 'fastify';
+import { eq, and } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import {
   ContractPositionQuerySchema,
@@ -39,24 +39,27 @@ export async function registerCubeRoutes(
         200: ContractPositionResponseSchema,
       },
     },
-    handler: async (request, reply) => {
+    handler: async (request, _reply) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query = request.query as any;
 
       // Build conditions
       const conditions = [eq(mvContractPositions.tenantId, request.tenantId)];
 
       // Apply filters
-      if (query.commodity) {
+      if (query.commodity != null && query.commodity !== '') {
         conditions.push(eq(mvContractPositions.commodity, query.commodity));
       }
 
-      if (query.month) {
+      if (query.month != null && query.month !== '') {
         conditions.push(eq(mvContractPositions.month, query.month));
       }
 
       // Pagination
-      const page = query.page || 1;
-      const pageSize = query.pageSize || 100;
+      const DEFAULT_PAGE = 1;
+      const DEFAULT_PAGE_SIZE = 100;
+      const page = (query.page != null && query.page !== 0) ? query.page : DEFAULT_PAGE;
+      const pageSize = (query.pageSize != null && query.pageSize !== 0) ? query.pageSize : DEFAULT_PAGE_SIZE;
       const offset = (page - 1) * pageSize;
 
       const results = await db
@@ -68,11 +71,11 @@ export async function registerCubeRoutes(
 
       // Calculate summary
       const summary = {
-        totalShort: results.reduce((sum, r) => sum + Number(r.shortPosition || 0), 0),
-        totalLong: results.reduce((sum, r) => sum + Number(r.longPosition || 0), 0),
-        netExposure: results.reduce((sum, r) => sum + Number(r.netPosition || 0), 0),
+        totalShort: results.reduce((sum, r) => sum + Number((r.shortPosition != null && r.shortPosition !== 0) ? r.shortPosition : 0), 0),
+        totalLong: results.reduce((sum, r) => sum + Number((r.longPosition != null && r.longPosition !== 0) ? r.longPosition : 0), 0),
+        netExposure: results.reduce((sum, r) => sum + Number((r.netPosition != null && r.netPosition !== 0) ? r.netPosition : 0), 0),
         avgHedgingRatio: results.length > 0
-          ? results.reduce((sum, r) => sum + Number(r.hedgingRatio || 0), 0) / results.length
+          ? results.reduce((sum, r) => sum + Number((r.hedgingRatio != null && r.hedgingRatio !== 0) ? r.hedgingRatio : 0), 0) / results.length
           : 0,
       };
 
@@ -102,32 +105,35 @@ export async function registerCubeRoutes(
         200: WeighingVolumeResponseSchema,
       },
     },
-    handler: async (request, reply) => {
+    handler: async (request, _reply) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query = request.query as any;
 
       // Build conditions
       const conditions = [eq(mvWeighingVolumes.tenantId, request.tenantId)];
 
       // Apply filters
-      if (query.commodity) {
+      if (query.commodity != null && query.commodity !== '') {
         conditions.push(eq(mvWeighingVolumes.commodity, query.commodity));
       }
 
-      if (query.customerId) {
+      if (query.customerId != null && query.customerId !== '') {
         conditions.push(eq(mvWeighingVolumes.customerId, query.customerId));
       }
 
-      if (query.siteId) {
+      if (query.siteId != null && query.siteId !== '') {
         conditions.push(eq(mvWeighingVolumes.siteId, query.siteId));
       }
 
-      if (query.period) {
+      if (query.period != null && query.period !== '') {
         conditions.push(eq(mvWeighingVolumes.period, query.period));
       }
 
       // Pagination
-      const page = query.page || 1;
-      const pageSize = query.pageSize || 100;
+      const DEFAULT_PAGE = 1;
+      const DEFAULT_PAGE_SIZE = 100;
+      const page = (query.page != null && query.page !== 0) ? query.page : DEFAULT_PAGE;
+      const pageSize = (query.pageSize != null && query.pageSize !== 0) ? query.pageSize : DEFAULT_PAGE_SIZE;
       const offset = (page - 1) * pageSize;
 
       const results = await db
@@ -139,15 +145,15 @@ export async function registerCubeRoutes(
 
       // Calculate summary
       const summary = {
-        totalWeight: results.reduce((sum, r) => sum + Number(r.totalWeight || 0), 0),
-        totalTickets: results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0),
-        avgWeightPerTicket: results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0) > 0
-          ? results.reduce((sum, r) => sum + Number(r.totalWeight || 0), 0) /
-            results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0)
+        totalWeight: results.reduce((sum, r) => sum + Number((r.totalWeight != null && r.totalWeight !== 0) ? r.totalWeight : 0), 0),
+        totalTickets: results.reduce((sum, r) => sum + Number((r.totalTickets != null && r.totalTickets !== 0) ? r.totalTickets : 0), 0),
+        avgWeightPerTicket: results.reduce((sum, r) => sum + Number((r.totalTickets != null && r.totalTickets !== 0) ? r.totalTickets : 0), 0) > 0
+          ? results.reduce((sum, r) => sum + Number((r.totalWeight != null && r.totalWeight !== 0) ? r.totalWeight : 0), 0) /
+            results.reduce((sum, r) => sum + Number((r.totalTickets != null && r.totalTickets !== 0) ? r.totalTickets : 0), 0)
           : 0,
-        overallToleranceRate: results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0) > 0
-          ? results.reduce((sum, r) => sum + Number(r.withinTolerance || 0), 0) /
-            results.reduce((sum, r) => sum + Number(r.totalTickets || 0), 0)
+        overallToleranceRate: results.reduce((sum, r) => sum + Number((r.totalTickets != null && r.totalTickets !== 0) ? r.totalTickets : 0), 0) > 0
+          ? results.reduce((sum, r) => sum + Number((r.withinTolerance != null && r.withinTolerance !== 0) ? r.withinTolerance : 0), 0) /
+            results.reduce((sum, r) => sum + Number((r.totalTickets != null && r.totalTickets !== 0) ? r.totalTickets : 0), 0)
           : 0,
       };
 
@@ -180,24 +186,27 @@ export async function registerCubeRoutes(
         200: QualityResponseSchema,
       },
     },
-    handler: async (request, reply) => {
+    handler: async (request, _reply) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query = request.query as any;
 
       // Build conditions
       const conditions = [eq(mvQualityStats.tenantId, request.tenantId)];
 
       // Apply filters
-      if (query.commodity) {
+      if (query.commodity != null && query.commodity !== '') {
         conditions.push(eq(mvQualityStats.commodity, query.commodity));
       }
 
-      if (query.period) {
+      if (query.period != null && query.period !== '') {
         conditions.push(eq(mvQualityStats.period, query.period));
       }
 
       // Pagination
-      const page = query.page || 1;
-      const pageSize = query.pageSize || 100;
+      const DEFAULT_PAGE = 1;
+      const DEFAULT_PAGE_SIZE = 100;
+      const page = (query.page != null && query.page !== 0) ? query.page : DEFAULT_PAGE;
+      const pageSize = (query.pageSize != null && query.pageSize !== 0) ? query.pageSize : DEFAULT_PAGE_SIZE;
       const offset = (page - 1) * pageSize;
 
       const results = await db
@@ -209,16 +218,16 @@ export async function registerCubeRoutes(
 
       // Calculate summary
       const summary = {
-        totalSamples: results.reduce((sum, r) => sum + Number(r.totalSamples || 0), 0),
-        overallPassRate: results.reduce((sum, r) => sum + Number(r.totalSamples || 0), 0) > 0
-          ? results.reduce((sum, r) => sum + Number(r.passedSamples || 0), 0) /
-            results.reduce((sum, r) => sum + Number(r.totalSamples || 0), 0)
+        totalSamples: results.reduce((sum, r) => sum + Number((r.totalSamples != null && r.totalSamples !== 0) ? r.totalSamples : 0), 0),
+        overallPassRate: results.reduce((sum, r) => sum + Number((r.totalSamples != null && r.totalSamples !== 0) ? r.totalSamples : 0), 0) > 0
+          ? results.reduce((sum, r) => sum + Number((r.passedSamples != null && r.passedSamples !== 0) ? r.passedSamples : 0), 0) /
+            results.reduce((sum, r) => sum + Number((r.totalSamples != null && r.totalSamples !== 0) ? r.totalSamples : 0), 0)
           : 0,
         avgMoisture: results.length > 0
-          ? results.reduce((sum, r) => sum + Number(r.avgMoisture || 0), 0) / results.length
+          ? results.reduce((sum, r) => sum + Number((r.avgMoisture != null && r.avgMoisture !== 0) ? r.avgMoisture : 0), 0) / results.length
           : 0,
         avgProtein: results.length > 0
-          ? results.reduce((sum, r) => sum + Number(r.avgProtein || 0), 0) / results.length
+          ? results.reduce((sum, r) => sum + Number((r.avgProtein != null && r.avgProtein !== 0) ? r.avgProtein : 0), 0) / results.length
           : 0,
       };
 
@@ -251,28 +260,31 @@ export async function registerCubeRoutes(
         200: RegulatoryResponseSchema,
       },
     },
-    handler: async (request, reply) => {
+    handler: async (request, _reply) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query = request.query as any;
 
       // Build conditions
       const conditions = [eq(mvRegulatoryStats.tenantId, request.tenantId)];
 
       // Apply filters
-      if (query.commodity) {
+      if (query.commodity != null && query.commodity !== '') {
         conditions.push(eq(mvRegulatoryStats.commodity, query.commodity));
       }
 
-      if (query.labelType) {
+      if (query.labelType != null && query.labelType !== '') {
         conditions.push(eq(mvRegulatoryStats.labelType, query.labelType));
       }
 
-      if (query.period) {
+      if (query.period != null && query.period !== '') {
         conditions.push(eq(mvRegulatoryStats.period, query.period));
       }
 
       // Pagination
-      const page = query.page || 1;
-      const pageSize = query.pageSize || 100;
+      const DEFAULT_PAGE = 1;
+      const DEFAULT_PAGE_SIZE = 100;
+      const page = (query.page != null && query.page !== 0) ? query.page : DEFAULT_PAGE;
+      const pageSize = (query.pageSize != null && query.pageSize !== 0) ? query.pageSize : DEFAULT_PAGE_SIZE;
       const offset = (page - 1) * pageSize;
 
       const results = await db
@@ -284,11 +296,11 @@ export async function registerCubeRoutes(
 
       // Calculate summary
       const summary = {
-        totalEligible: results.reduce((sum, r) => sum + (r.totalEligible || 0), 0),
-        totalIneligible: results.reduce((sum, r) => sum + (r.totalIneligible || 0), 0),
-        overallEligibilityRate: results.reduce((sum, r) => sum + ((r.totalEligible || 0) + (r.totalIneligible || 0)), 0) > 0
-          ? results.reduce((sum, r) => sum + (r.totalEligible || 0), 0) /
-            results.reduce((sum, r) => sum + ((r.totalEligible || 0) + (r.totalIneligible || 0)), 0)
+        totalEligible: results.reduce((sum, r) => sum + ((r.totalEligible != null && r.totalEligible !== 0) ? r.totalEligible : 0), 0),
+        totalIneligible: results.reduce((sum, r) => sum + ((r.totalIneligible != null && r.totalIneligible !== 0) ? r.totalIneligible : 0), 0),
+        overallEligibilityRate: results.reduce((sum, r) => sum + (((r.totalEligible != null && r.totalEligible !== 0) ? r.totalEligible : 0) + ((r.totalIneligible != null && r.totalIneligible !== 0) ? r.totalIneligible : 0)), 0) > 0
+          ? results.reduce((sum, r) => sum + ((r.totalEligible != null && r.totalEligible !== 0) ? r.totalEligible : 0), 0) /
+            results.reduce((sum, r) => sum + (((r.totalEligible != null && r.totalEligible !== 0) ? r.totalEligible : 0) + ((r.totalIneligible != null && r.totalIneligible !== 0) ? r.totalIneligible : 0)), 0)
           : 0,
       };
 
@@ -319,28 +331,31 @@ export async function registerCubeRoutes(
         200: FinanceResponseSchema,
       },
     },
-    handler: async (request, reply) => {
+    handler: async (request, _reply) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query = request.query as any;
 
       // Build conditions
       const conditions = [eq(mvFinanceKpis.tenantId, request.tenantId)];
 
       // Apply filters
-      if (query.commodity) {
+      if (query.commodity != null && query.commodity !== '') {
         conditions.push(eq(mvFinanceKpis.commodity, query.commodity));
       }
 
-      if (query.customerId) {
+      if (query.customerId != null && query.customerId !== '') {
         conditions.push(eq(mvFinanceKpis.customerId, query.customerId));
       }
 
-      if (query.period) {
+      if (query.period != null && query.period !== '') {
         conditions.push(eq(mvFinanceKpis.period, query.period));
       }
 
       // Pagination
-      const page = query.page || 1;
-      const pageSize = query.pageSize || 100;
+      const DEFAULT_PAGE = 1;
+      const DEFAULT_PAGE_SIZE = 100;
+      const page = (query.page != null && query.page !== 0) ? query.page : DEFAULT_PAGE;
+      const pageSize = (query.pageSize != null && query.pageSize !== 0) ? query.pageSize : DEFAULT_PAGE_SIZE;
       const offset = (page - 1) * pageSize;
 
       const results = await db
@@ -352,14 +367,14 @@ export async function registerCubeRoutes(
 
       // Calculate summary
       const summary = {
-        totalRevenue: results.reduce((sum, r) => sum + Number(r.totalRevenue || 0), 0),
-        totalCost: results.reduce((sum, r) => sum + Number(r.totalCost || 0), 0),
-        totalMargin: results.reduce((sum, r) => sum + Number(r.grossMargin || 0), 0),
+        totalRevenue: results.reduce((sum, r) => sum + Number((r.totalRevenue != null && r.totalRevenue !== 0) ? r.totalRevenue : 0), 0),
+        totalCost: results.reduce((sum, r) => sum + Number((r.totalCost != null && r.totalCost !== 0) ? r.totalCost : 0), 0),
+        totalMargin: results.reduce((sum, r) => sum + Number((r.grossMargin != null && r.grossMargin !== 0) ? r.grossMargin : 0), 0),
         avgMarginPercentage: results.length > 0
-          ? results.reduce((sum, r) => sum + Number(r.marginPercentage || 0), 0) / results.length
+          ? results.reduce((sum, r) => sum + Number((r.marginPercentage != null && r.marginPercentage !== 0) ? r.marginPercentage : 0), 0) / results.length
           : 0,
-        totalOutstanding: results.reduce((sum, r) => sum + Number(r.outstandingInvoices || 0), 0),
-        totalOverdue: results.reduce((sum, r) => sum + Number(r.overdueInvoices || 0), 0),
+        totalOutstanding: results.reduce((sum, r) => sum + Number((r.outstandingInvoices != null && r.outstandingInvoices !== 0) ? r.outstandingInvoices : 0), 0),
+        totalOverdue: results.reduce((sum, r) => sum + Number((r.overdueInvoices != null && r.overdueInvoices !== 0) ? r.overdueInvoices : 0), 0),
       };
 
       return {
@@ -391,16 +406,18 @@ export async function registerCubeRoutes(
         200: BulkCubeRefreshResponseSchema,
       },
     },
-    handler: async (request, reply) => {
+    handler: async (request, _reply) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body = request.body as any;
 
-      const cubeNames = body.cubeNames || [
+      const DEFAULT_CUBE_NAMES = [
         'contractPositions',
         'qualityStats',
         'regulatoryStats',
         'financeKpis',
         'weighingVolumes',
       ];
+      const cubeNames = (body.cubeNames != null && Array.isArray(body.cubeNames)) ? body.cubeNames : DEFAULT_CUBE_NAMES;
 
       const results = [];
 
@@ -460,7 +477,7 @@ export async function registerCubeRoutes(
       return {
         totalRequested: cubeNames.length,
         successful: results.filter(r => r.success).length,
-        failed: results.filter(r => !r.success).length,
+        failed: results.filter(r => r.success === false).length,
         results,
         totalExecutionTimeMs,
       };
@@ -500,7 +517,7 @@ export async function registerCubeRoutes(
         },
       },
     },
-    handler: async (request, reply) => {
+    handler: async (request, _reply) => {
       const status = await aggregationService.getAggregationStatus(request.tenantId);
 
       return {

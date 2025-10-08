@@ -87,7 +87,7 @@ export class InteractionEntity {
     const interaction: Interaction = {
       ...props,
       id: uuidv4(),
-      attachments: props.attachments || [],
+      attachments: props.attachments ?? [],
       createdAt: now,
       updatedAt: now,
       version: 1
@@ -96,8 +96,11 @@ export class InteractionEntity {
     return new InteractionEntity(interaction);
   }
 
-  public static fromPersistence(props: Interaction): InteractionEntity {
-    return new InteractionEntity(props);
+  public static fromPersistence(props: any): InteractionEntity {
+    return new InteractionEntity({
+      ...props,
+      contactId: props.contactId ?? undefined,
+    });
   }
 
   public update(props: UpdateInteractionInput): void {

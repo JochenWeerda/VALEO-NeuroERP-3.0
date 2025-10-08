@@ -51,7 +51,7 @@ export class OrderService {
 
   async updateOrder(id: string, data: UpdateOrderData): Promise<OrderEntity> {
     const existingOrder = await this.deps.orderRepo.findById(id, data.tenantId);
-    if (!existingOrder) {
+    if (existingOrder === undefined || existingOrder === null) {
       throw new Error(`Order ${id} not found`);
     }
 
@@ -73,7 +73,7 @@ export class OrderService {
 
     const updatedOrder = await this.deps.orderRepo.update(id, data.tenantId, data);
 
-    if (!updatedOrder) {
+    if (updatedOrder === undefined || updatedOrder === null) {
       throw new Error(`Failed to update order ${id}`);
     }
 
@@ -82,7 +82,7 @@ export class OrderService {
 
   async confirmOrder(id: string, tenantId: string): Promise<OrderEntity> {
     const order = await this.deps.orderRepo.findById(id, tenantId);
-    if (!order) {
+    if (order === undefined || order === null) {
       throw new Error(`Order ${id} not found`);
     }
 
@@ -92,7 +92,7 @@ export class OrderService {
 
     const updatedOrder = await this.deps.orderRepo.updateStatus(id, tenantId, 'Confirmed');
 
-    if (!updatedOrder) {
+    if (updatedOrder === undefined || updatedOrder === null) {
       throw new Error(`Failed to confirm order`);
     }
 
@@ -101,7 +101,7 @@ export class OrderService {
 
   async markOrderAsInvoiced(id: string, tenantId: string): Promise<OrderEntity> {
     const order = await this.deps.orderRepo.findById(id, tenantId);
-    if (!order) {
+    if (order === undefined || order === null) {
       throw new Error(`Order ${id} not found`);
     }
 
@@ -111,7 +111,7 @@ export class OrderService {
 
     const updatedOrder = await this.deps.orderRepo.updateStatus(id, tenantId, 'Invoiced');
 
-    if (!updatedOrder) {
+    if (updatedOrder === undefined || updatedOrder === null) {
       throw new Error(`Failed to mark order as invoiced`);
     }
 
@@ -120,7 +120,7 @@ export class OrderService {
 
   async cancelOrder(id: string, tenantId: string): Promise<OrderEntity> {
     const order = await this.deps.orderRepo.findById(id, tenantId);
-    if (!order) {
+    if (order === undefined || order === null) {
       throw new Error(`Order ${id} not found`);
     }
 
@@ -130,7 +130,7 @@ export class OrderService {
 
     const updatedOrder = await this.deps.orderRepo.updateStatus(id, tenantId, 'Cancelled');
 
-    if (!updatedOrder) {
+    if (updatedOrder === undefined || updatedOrder === null) {
       throw new Error(`Failed to cancel order`);
     }
 

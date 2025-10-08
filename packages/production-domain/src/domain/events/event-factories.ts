@@ -5,28 +5,28 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type {
-  RecipeCreatedEvent,
-  RecipeUpdatedEvent,
-  RecipeArchivedEvent,
+  BatchCreatedEvent,
+  BatchQuarantinedEvent,
+  BatchRejectedEvent,
+  BatchReleasedEvent,
+  CAPAClosedEvent,
+  CAPACreatedEvent,
+  CalibrationCheckedEvent,
+  CleaningPerformedEvent,
+  FlushPerformedEvent,
+  MixOrderAbortedEvent,
+  MixOrderCompletedEvent,
   MixOrderCreatedEvent,
   MixOrderStagedEvent,
   MixOrderStartedEvent,
-  MixOrderCompletedEvent,
-  MixOrderAbortedEvent,
-  BatchCreatedEvent,
-  BatchReleasedEvent,
-  BatchQuarantinedEvent,
-  BatchRejectedEvent,
-  MobileRunStartedEvent,
   MobileRunFinishedEvent,
-  CleaningPerformedEvent,
-  FlushPerformedEvent,
-  CalibrationCheckedEvent,
-  SamplingAddedEvent,
-  SamplingResultRecordedEvent,
+  MobileRunStartedEvent,
   NonConformityCreatedEvent,
-  CAPACreatedEvent,
-  CAPAClosedEvent
+  RecipeArchivedEvent,
+  RecipeCreatedEvent,
+  RecipeUpdatedEvent,
+  SamplingAddedEvent,
+  SamplingResultRecordedEvent
 } from './production-events';
 
 // Recipe Event Factories
@@ -397,17 +397,21 @@ export function createCorrelatedEvent<T extends { eventId: string; causationId?:
 }
 
 // Event validation helper
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function validateEventPayload<T>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema: any,
   payload: T
 ): { valid: boolean; errors?: string[] } {
   try {
     schema.parse(payload);
     return { valid: true };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return {
       valid: false,
-      errors: error.errors?.map((e: any) => `${e.path.join('.')}: ${e.message}`) || ['Unknown validation error']
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      errors: (error.errors !== undefined && error.errors !== null) ? error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`) : ['Unknown validation error']
     };
   }
 }

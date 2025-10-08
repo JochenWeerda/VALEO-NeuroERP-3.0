@@ -46,7 +46,7 @@ export async function registerDocumentRoutes(server: FastifyInstance): Promise<v
     const { id } = request.params as { id: string };
 
     const document = await getDocumentById(tenantId, id);
-    if (!document) {
+    if (document === undefined || document === null) {
       await reply.code(404).send({ error: 'NotFound', message: 'Document not found' });
       return;
     }
@@ -64,3 +64,4 @@ export async function registerDocumentRoutes(server: FastifyInstance): Promise<v
     await reply.send({ url, expiresIn: 3600 });
   });
 }
+

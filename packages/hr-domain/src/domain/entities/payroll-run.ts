@@ -3,7 +3,19 @@
  * Payroll preparation and export (no accounting entries)
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
+
+const MILLISECONDS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const MILLISECONDS_PER_DAY = MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY;
+const INCLUSIVE_DAY_OFFSET = 1;
+const MAX_PAYROLL_PERIOD_DAYS = 365;
+const ZERO = 0;
+
+const payrollStatusSchema = z.enum(['Draft', 'Locked', 'Exported']);
 
 const PayrollItemSchema = z.object({
   employeeId: z.string().uuid(),
@@ -22,7 +34,7 @@ export const PayrollRunSchema = z.object({
   id: z.string().uuid(),
   tenantId: z.string().uuid(),
   period: PayrollPeriodSchema,
-  status: z.enum(['Draft', 'Locked', 'Exported']),
+  status: payrollStatusSchema,
   items: z.array(PayrollItemSchema),
   exportedAt: z.string().datetime().optional(),
   exportedBy: z.string().uuid().optional(),
@@ -35,9 +47,10 @@ export const PayrollRunSchema = z.object({
 export type PayrollRun = z.infer<typeof PayrollRunSchema>;
 export type PayrollItem = z.infer<typeof PayrollItemSchema>;
 export type PayrollPeriod = z.infer<typeof PayrollPeriodSchema>;
+export type PayrollRunStatus = z.infer<typeof payrollStatusSchema>;
 
 export class PayrollRunEntity {
-  private data: PayrollRun;
+  private readonly data: PayrollRun;
 
   constructor(data: PayrollRun) {
     this.data = PayrollRunSchema.parse(data);
@@ -48,7 +61,7 @@ export class PayrollRunEntity {
   get id(): string { return this.data.id; }
   get tenantId(): string { return this.data.tenantId; }
   get period(): PayrollPeriod { return this.data.period; }
-  get status(): string { return this.data.status; }
+  get status(): PayrollRunStatus { return this.data.status; }
   get items(): PayrollItem[] { return [...this.data.items]; }
   get exportedAt(): string | undefined { return this.data.exportedAt; }
   get exportedBy(): string | undefined { return this.data.exportedBy; }
@@ -85,26 +98,26 @@ export class PayrollRunEntity {
   }
 
   getTotalHours(): number {
-    return this.data.items.reduce((sum, item) => sum + item.hours, 0);
+    return this.data.items.reduce((sum, item) => sum + item.hours, ZERO);
   }
 
   getTotalGrossAmount(): number {
-    return this.data.items.reduce((sum, item) => sum + (item.grossAmount || 0), 0);
+    return this.data.items.reduce((sum, item) => sum + (item.grossAmount ?? ZERO), ZERO);
   }
 
   getTotalAllowances(): number {
-    return this.data.items.reduce((sum, item) => sum + (item.allowances || 0), 0);
+    return this.data.items.reduce((sum, item) => sum + (item.allowances ?? ZERO), ZERO);
   }
 
   getTotalDeductions(): number {
-    return this.data.items.reduce((sum, item) => sum + (item.deductions || 0), 0);
+    return this.data.items.reduce((sum, item) => sum + (item.deductions ?? ZERO), ZERO);
   }
 
   getPeriodDurationInDays(): number {
     const fromDate = new Date(this.data.period.from);
     const toDate = new Date(this.data.period.to);
     const diffTime = Math.abs(toDate.getTime() - fromDate.getTime());
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return Math.ceil(diffTime / MILLISECONDS_PER_DAY) + INCLUSIVE_DAY_OFFSET;
   }
 
   hasEmployee(employeeId: string): boolean {
@@ -126,7 +139,7 @@ export class PayrollRunEntity {
 
     // Check for reasonable period duration (max 1 year)
     const durationDays = this.getPeriodDurationInDays();
-    if (durationDays > 365) {
+    if (durationDays > MAX_PAYROLL_PERIOD_DAYS) {
       throw new Error('Payroll period cannot exceed 365 days');
     }
 
@@ -135,10 +148,10 @@ export class PayrollRunEntity {
       if (item.hours <= 0) {
         throw new Error('Employee hours must be positive');
       }
-      if (item.allowances && item.allowances < 0) {
+      if (typeof item.allowances === 'number' && item.allowances < 0) {
         throw new Error('Allowances cannot be negative');
       }
-      if (item.deductions && item.deductions < 0) {
+      if (typeof item.deductions === 'number' && item.deductions < 0) {
         throw new Error('Deductions cannot be negative');
       }
     }
@@ -157,12 +170,7 @@ export class PayrollRunEntity {
       throw new Error('Payroll run cannot be locked in current status');
     }
 
-    return new PayrollRunEntity({
-      ...this.data,
-      status: 'Locked',
-      updatedAt: new Date().toISOString(),
-      updatedBy
-    });
+    return this.clone({ status: 'Locked', updatedBy });
   }
 
   export(exportedBy: string): PayrollRunEntity {
@@ -170,12 +178,11 @@ export class PayrollRunEntity {
       throw new Error('Payroll run cannot be exported in current status');
     }
 
-    return new PayrollRunEntity({
-      ...this.data,
+    const timestamp = new Date().toISOString();
+    return this.clone({
       status: 'Exported',
-      exportedAt: new Date().toISOString(),
+      exportedAt: timestamp,
       exportedBy,
-      updatedAt: new Date().toISOString(),
       updatedBy: exportedBy
     });
   }
@@ -189,10 +196,8 @@ export class PayrollRunEntity {
       throw new Error('Employee already exists in payroll run');
     }
 
-    return new PayrollRunEntity({
-      ...this.data,
+    return this.clone({
       items: [...this.data.items, item],
-      updatedAt: new Date().toISOString(),
       updatedBy
     });
   }
@@ -206,10 +211,8 @@ export class PayrollRunEntity {
       item.employeeId === employeeId ? { ...item, ...updates } : item
     );
 
-    return new PayrollRunEntity({
-      ...this.data,
+    return this.clone({
       items: updatedItems,
-      updatedAt: new Date().toISOString(),
       updatedBy
     });
   }
@@ -219,10 +222,8 @@ export class PayrollRunEntity {
       throw new Error('Payroll run cannot be edited in current status');
     }
 
-    return new PayrollRunEntity({
-      ...this.data,
+    return this.clone({
       items: this.data.items.filter(item => item.employeeId !== employeeId),
-      updatedAt: new Date().toISOString(),
       updatedBy
     });
   }
@@ -232,12 +233,21 @@ export class PayrollRunEntity {
     return { ...this.data };
   }
 
+  private clone(overrides: Partial<PayrollRun>): PayrollRunEntity {
+    const now = new Date().toISOString();
+    return new PayrollRunEntity({
+      ...this.data,
+      ...overrides,
+      updatedAt: now
+    });
+  }
+
   // Factory methods
   static create(data: Omit<PayrollRun, 'id' | 'createdAt' | 'updatedAt'>): PayrollRunEntity {
     const now = new Date().toISOString();
     return new PayrollRunEntity({
       ...data,
-      id: require('uuid').v4(),
+      id: uuidv4(),
       createdAt: now,
       updatedAt: now
     });

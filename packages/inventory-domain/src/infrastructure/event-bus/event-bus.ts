@@ -21,7 +21,7 @@ export interface EventBus {
 }
 
 export class InventoryEventBus implements EventBus {
-  private eventHandlers = new Map<string, ((event: DomainEvent) => Promise<void>)[]>();
+  private readonly eventHandlers = new Map<string, ((event: DomainEvent) => Promise<void>)[]>();
 
   async publish(event: DomainEvent): Promise<void> {
     const handlers = this.eventHandlers.get(event.type) || [];
@@ -32,7 +32,7 @@ export class InventoryEventBus implements EventBus {
     if (!this.eventHandlers.has(eventType)) {
       this.eventHandlers.set(eventType, []);
     }
-    this.eventHandlers.get(eventType)!.push(handler);
+    this.eventHandlers.get(eventType).push(handler);
   }
 }
 

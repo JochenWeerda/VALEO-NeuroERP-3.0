@@ -15,7 +15,7 @@ class JWKSManager {
   }
 
   private getJWKSClient() {
-    if (!this.jwksClient) {
+    if (this.jwksClient === undefined || this.jwksClient === null) {
       this.jwksClient = createRemoteJWKSet(new URL(this.config.jwksUrl));
     }
     return this.jwksClient;
@@ -38,8 +38,8 @@ class JWKSManager {
 let jwksManager: JWKSManager | null = null;
 
 function getJWKSManager(): JWKSManager {
-  if (!jwksManager) {
-    const jwksUrl = process.env.JWKS_URL || 'https://auth.example.com/.well-known/jwks.json';
+  if (jwksManager === undefined || jwksManager === null) {
+    const jwksUrl = process.env.JWKS_URL ?? 'https://auth.example.com/.well-known/jwks.json';
     const issuer = process.env.JWT_ISSUER;
     const audience = process.env.JWT_AUDIENCE;
 
@@ -63,3 +63,4 @@ export function createJWT(payload: JWTPayload, expiresIn: string = '1h'): string
   // For now, we'll just return a mock token for development
   return `mock.jwt.token.${Date.now()}`;
 }
+

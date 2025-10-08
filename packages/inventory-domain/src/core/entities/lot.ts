@@ -8,6 +8,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 export type LotStatus = 'active' | 'hold' | 'blocked' | 'expired' | 'consumed';
 
+// Constants
+const DEFAULT_EXPIRY_WARNING_DAYS = 30;
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+const NO_EXPIRY_PRIORITY = 999999;
+const EXPIRED_PRIORITY = -1;
+const GS1_DATE_LENGTH = 8;
+const GS1_DATE_START = 2;
+
 export interface LotAttributes {
   lotId: string;
   lotCode: string;
@@ -29,7 +37,7 @@ export interface LotAttributes {
   uom: string;
   unitCost?: number;
   totalCost?: number;
-  customFields?: Record<string, any>; // For FSMA KDE/CTE fields
+  customFields?: Record<string, unknown>; // For FSMA KDE/CTE fields
   createdAt: Date;
   updatedAt: Date;
 }
@@ -61,14 +69,14 @@ export class Lot {
 
   // Business logic methods
   isExpired(): boolean {
-    if (!this._attributes.expDate) return false;
+    if (this._attributes.expDate == null) return false;
     return new Date() > this._attributes.expDate;
   }
 
-  isExpiringSoon(days: number = 30): boolean {
-    if (!this._attributes.expDate) return false;
+  isExpiringSoon(days = DEFAULT_EXPIRY_WARNING_DAYS): boolean {
+    if (this._attributes.expDate == null) return false;
     const now = new Date();
-    const daysUntilExpiry = Math.floor((this._attributes.expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const daysUntilExpiry = Math.floor((this._attributes.expDate.getTime() - now.getTime()) / MS_PER_DAY);
     return daysUntilExpiry <= days && daysUntilExpiry > 0;
   }
 
@@ -123,7 +131,7 @@ export class Lot {
   releaseHold(): void {
     if (this._attributes.status === 'hold') {
       this._attributes.status = 'active';
-      this._attributes.holdReason = undefined as any;
+      this._attributes.holdReason = undefined;
       this._attributes.updatedAt = new Date();
     }
   }
@@ -151,7 +159,7 @@ export class Lot {
     this._attributes.updatedAt = new Date();
   }
 
-  updateCustomFields(fields: Record<string, any>): void {
+  updateCustomFields(fields: Record<string, unknown>): void {
     this._attributes.customFields = {
       ...this._attributes.customFields,
       ...fields
@@ -161,11 +169,11 @@ export class Lot {
 
   // FEFO (First Expiry, First Out) priority
   getFefoPriority(): number {
-    if (!this._attributes.expDate) return 999999; // No expiry = lowest priority
-    if (this.isExpired()) return -1; // Expired = highest priority (should be handled)
+    if (this._attributes.expDate == null) return NO_EXPIRY_PRIORITY; // No expiry = lowest priority
+    if (this.isExpired()) return EXPIRED_PRIORITY; // Expired = highest priority (should be handled)
 
     const now = new Date();
-    const daysUntilExpiry = Math.floor((this._attributes.expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const daysUntilExpiry = Math.floor((this._attributes.expDate.getTime() - now.getTime()) / MS_PER_DAY);
     return Math.max(0, daysUntilExpiry); // Lower number = higher priority
   }
 
@@ -194,7 +202,7 @@ export class Lot {
       throw new Error('Allocated quantity cannot exceed remaining quantity');
     }
 
-    if (this._attributes.mfgDate && this._attributes.expDate) {
+    if (this._attributes.mfgDate != null && this._attributes.expDate != null) {
       if (this._attributes.mfgDate >= this._attributes.expDate) {
         throw new Error('Manufacturing date must be before expiry date');
       }
@@ -215,25 +223,25 @@ export class Lot {
   // Utility methods
   getAgeInDays(): number {
     const now = new Date();
-    return Math.floor((now.getTime() - this._attributes.receivedDate.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.floor((now.getTime() - this._attributes.receivedDate.getTime()) / MS_PER_DAY);
   }
 
   getDaysUntilExpiry(): number | null {
-    if (!this._attributes.expDate) return null;
+    if (this._attributes.expDate == null) return null;
     const now = new Date();
-    return Math.floor((this._attributes.expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.floor((this._attributes.expDate.getTime() - now.getTime()) / MS_PER_DAY);
   }
 
   hasCustomField(key: string): boolean {
-    return this._attributes.customFields?.[key] !== undefined;
+    return this._attributes.customFields?.[key] != null;
   }
 
-  getCustomField(key: string): any {
+  getCustomField(key: string): unknown {
     return this._attributes.customFields?.[key];
   }
 
   // FSMA 204 compliance helpers
-  getKdeFields(): Record<string, any> {
+  getKdeFields(): Record<string, unknown> {
     return {
       lotNumber: this._attributes.lotCode,
       harvestDate: this._attributes.mfgDate?.toISOString(),
@@ -244,11 +252,11 @@ export class Lot {
   }
 
   // GS1 compliance
-  getGs1LotData(): Record<string, any> {
+  getGs1LotData(): Record<string, unknown> {
     return {
       '10': this._attributes.lotCode, // BATCH/LOT
-      '11': this._attributes.mfgDate?.toISOString().substring(2, 8), // PROD DATE (YYMMDD)
-      '17': this._attributes.expDate?.toISOString().substring(2, 8), // EXP DATE (YYMMDD)
+      '11': this._attributes.mfgDate?.toISOString().substring(GS1_DATE_START, GS1_DATE_LENGTH), // PROD DATE (YYMMDD)
+      '17': this._attributes.expDate?.toISOString().substring(GS1_DATE_START, GS1_DATE_LENGTH), // EXP DATE (YYMMDD)
       '30': this._attributes.remainingQty.toString() // VAR COUNT
     };
   }

@@ -1,0 +1,78 @@
+Checking analytics-domain
+analytics-domain is clean
+Checking audit-domain
+audit-domain is clean
+Checking bff
+bff has lint errors
+npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of npm.
+npm warn Unknown project config "shamefully-hoist". This will stop working in the next major version of npm.
+
+> lint
+> pnpm -r run lint
+Checking contracts-domain
+contracts-domain is clean
+Checking crm-domain
+crm-domain is clean
+Checking data-models
+data-models is clean
+Checking document-domain
+document-domain is clean
+Checking erp-domain
+erp-domain is clean
+Checking finance-domain
+finance-domain is clean
+Checking frontend-web
+frontend-web is clean
+Checking hr-domain
+hr-domain is clean
+Checking integration-domain
+integration-domain is clean
+Checking inventory-domain
+inventory-domain is clean
+Checking inventory-domain-disabled
+inventory-domain-disabled has lint errors
+npm error code ENOENT
+npm error syscall open
+npm error path C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\inventory-domain-disabled\package.json
+npm error errno -4058
+npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open 'C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\inventory-domain-disabled\package.json'
+Checking logistics-bff
+logistics-bff is clean
+Checking logistics-domain
+logistics-domain is clean
+Checking notifications-domain
+notifications-domain is clean
+Checking pricing-domain
+pricing-domain is clean
+Checking procurement-domain
+procurement-domain has lint errors
+
+> @valero-neuroerp/procurement-domain@3.0.0 lint
+> eslint src/**/*.ts
+
+
+Checking production-domain
+production-domain is clean
+Checking quality-domain
+quality-domain is clean
+Checking regulatory-domain
+regulatory-domain is clean
+Checking sales-domain
+sales-domain is clean
+Checking scheduler-domain
+scheduler-domain is clean
+Checking shared
+shared has lint errors
+npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of npm.
+npm warn Unknown project config "shamefully-hoist". This will stop working in the next major version of npm.
+
+> lint
+> pnpm -r run lint
+Checking shared-domain
+shared-domain is clean
+Checking ui-components
+ui-components is clean
+Checking utilities
+utilities is clean
+Checking weighing-domain
+weighing-domain is clean

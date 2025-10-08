@@ -24,14 +24,14 @@ export declare const InteractionSchema: z.ZodObject<{
         mimeType: z.ZodString;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        url: string;
         filename: string;
+        url: string;
         size: number;
         mimeType: string;
     }, {
         id: string;
-        url: string;
         filename: string;
+        url: string;
         size: number;
         mimeType: string;
     }>, "many">>;
@@ -39,42 +39,42 @@ export declare const InteractionSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
     version: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
+    type: "Email" | "Call" | "Visit" | "Note";
     id: string;
-    tenantId: string;
-    customerId: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
+    customerId: string;
     version: number;
-    type: "Email" | "Call" | "Visit" | "Note";
-    content: string;
     subject: string;
+    content: string;
     occurredAt: Date;
     createdBy: string;
     attachments: {
         id: string;
-        url: string;
         filename: string;
+        url: string;
         size: number;
         mimeType: string;
     }[];
     contactId?: string | undefined;
 }, {
+    type: "Email" | "Call" | "Visit" | "Note";
     id: string;
-    tenantId: string;
-    customerId: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
+    customerId: string;
     version: number;
-    type: "Email" | "Call" | "Visit" | "Note";
-    content: string;
     subject: string;
+    content: string;
     occurredAt: Date;
     createdBy: string;
     contactId?: string | undefined;
     attachments?: {
         id: string;
-        url: string;
         filename: string;
+        url: string;
         size: number;
         mimeType: string;
     }[] | undefined;
@@ -98,14 +98,14 @@ export declare const CreateInteractionInputSchema: z.ZodObject<Omit<{
         mimeType: z.ZodString;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        url: string;
         filename: string;
+        url: string;
         size: number;
         mimeType: string;
     }, {
         id: string;
-        url: string;
         filename: string;
+        url: string;
         size: number;
         mimeType: string;
     }>, "many">>;
@@ -113,34 +113,34 @@ export declare const CreateInteractionInputSchema: z.ZodObject<Omit<{
     updatedAt: z.ZodDate;
     version: z.ZodNumber;
 }, "id" | "createdAt" | "updatedAt" | "version">, "strip", z.ZodTypeAny, {
+    type: "Email" | "Call" | "Visit" | "Note";
     tenantId: string;
     customerId: string;
-    type: "Email" | "Call" | "Visit" | "Note";
-    content: string;
     subject: string;
+    content: string;
     occurredAt: Date;
     createdBy: string;
     attachments: {
         id: string;
-        url: string;
         filename: string;
+        url: string;
         size: number;
         mimeType: string;
     }[];
     contactId?: string | undefined;
 }, {
+    type: "Email" | "Call" | "Visit" | "Note";
     tenantId: string;
     customerId: string;
-    type: "Email" | "Call" | "Visit" | "Note";
-    content: string;
     subject: string;
+    content: string;
     occurredAt: Date;
     createdBy: string;
     contactId?: string | undefined;
     attachments?: {
         id: string;
-        url: string;
         filename: string;
+        url: string;
         size: number;
         mimeType: string;
     }[] | undefined;
@@ -158,36 +158,36 @@ export declare const UpdateInteractionInputSchema: z.ZodObject<{
         mimeType: z.ZodString;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        url: string;
         filename: string;
+        url: string;
         size: number;
         mimeType: string;
     }, {
         id: string;
-        url: string;
         filename: string;
+        url: string;
         size: number;
         mimeType: string;
     }>, "many">>;
 }, "strip", z.ZodTypeAny, {
-    content?: string | undefined;
     subject?: string | undefined;
+    content?: string | undefined;
     occurredAt?: Date | undefined;
     attachments?: {
         id: string;
-        url: string;
         filename: string;
+        url: string;
         size: number;
         mimeType: string;
     }[] | undefined;
 }, {
-    content?: string | undefined;
     subject?: string | undefined;
+    content?: string | undefined;
     occurredAt?: Date | undefined;
     attachments?: {
         id: string;
-        url: string;
         filename: string;
+        url: string;
         size: number;
         mimeType: string;
     }[] | undefined;
@@ -201,14 +201,14 @@ export declare const AttachmentSchema: z.ZodObject<{
     mimeType: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    url: string;
     filename: string;
+    url: string;
     size: number;
     mimeType: string;
 }, {
     id: string;
-    url: string;
     filename: string;
+    url: string;
     size: number;
     mimeType: string;
 }>;
@@ -219,7 +219,7 @@ export declare class InteractionEntity {
     static create(props: CreateInteractionInput & {
         tenantId: string;
     }): InteractionEntity;
-    static fromPersistence(props: Interaction): InteractionEntity;
+    static fromPersistence(props: any): InteractionEntity;
     update(props: UpdateInteractionInput): void;
     addAttachment(attachment: Omit<Attachment, 'id'>): void;
     removeAttachment(attachmentId: string): void;

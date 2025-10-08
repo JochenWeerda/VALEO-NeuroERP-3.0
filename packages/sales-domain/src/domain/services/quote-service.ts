@@ -55,7 +55,7 @@ export class QuoteService {
 
   async updateQuote(id: string, data: UpdateQuoteData): Promise<QuoteEntity> {
     const existingQuote = await this.deps.quoteRepo.findById(id, data.tenantId);
-    if (!existingQuote) {
+    if (existingQuote === undefined || existingQuote === null) {
       throw new Error(`Quote ${id} not found`);
     }
 
@@ -77,7 +77,7 @@ export class QuoteService {
 
     const updatedQuote = await this.deps.quoteRepo.update(id, data.tenantId, data);
 
-    if (!updatedQuote) {
+    if (updatedQuote === undefined || updatedQuote === null) {
       throw new Error(`Failed to update quote ${id}`);
     }
 
@@ -86,7 +86,7 @@ export class QuoteService {
 
   async deleteQuote(id: string, tenantId: string): Promise<boolean> {
     const quote = await this.deps.quoteRepo.findById(id, tenantId);
-    if (!quote) {
+    if (quote === undefined || quote === null) {
       throw new Error(`Quote ${id} not found`);
     }
 
@@ -100,7 +100,7 @@ export class QuoteService {
 
   async sendQuote(id: string, tenantId: string): Promise<QuoteEntity> {
     const quote = await this.deps.quoteRepo.findById(id, tenantId);
-    if (!quote) {
+    if (quote === undefined || quote === null) {
       throw new Error(`Quote ${id} not found`);
     }
 
@@ -110,7 +110,7 @@ export class QuoteService {
 
     const updatedQuote = await this.deps.quoteRepo.updateStatus(id, tenantId, 'Sent');
 
-    if (!updatedQuote) {
+    if (updatedQuote === undefined || updatedQuote === null) {
       throw new Error(`Failed to send quote`);
     }
 
@@ -119,7 +119,7 @@ export class QuoteService {
 
   async acceptQuote(id: string, tenantId: string): Promise<QuoteEntity> {
     const quote = await this.deps.quoteRepo.findById(id, tenantId);
-    if (!quote) {
+    if (quote === undefined || quote === null) {
       throw new Error(`Quote ${id} not found`);
     }
 
@@ -129,7 +129,7 @@ export class QuoteService {
 
     const updatedQuote = await this.deps.quoteRepo.updateStatus(id, tenantId, 'Accepted');
 
-    if (!updatedQuote) {
+    if (updatedQuote === undefined || updatedQuote === null) {
       throw new Error(`Failed to accept quote`);
     }
 
@@ -138,7 +138,7 @@ export class QuoteService {
 
   async rejectQuote(id: string, tenantId: string): Promise<QuoteEntity> {
     const quote = await this.deps.quoteRepo.findById(id, tenantId);
-    if (!quote) {
+    if (quote === undefined || quote === null) {
       throw new Error(`Quote ${id} not found`);
     }
 
@@ -148,7 +148,7 @@ export class QuoteService {
 
     const updatedQuote = await this.deps.quoteRepo.updateStatus(id, tenantId, 'Rejected');
 
-    if (!updatedQuote) {
+    if (updatedQuote === undefined || updatedQuote === null) {
       throw new Error(`Failed to reject quote`);
     }
 
@@ -157,7 +157,7 @@ export class QuoteService {
 
   async expireQuote(id: string, tenantId: string): Promise<QuoteEntity> {
     const quote = await this.deps.quoteRepo.findById(id, tenantId);
-    if (!quote) {
+    if (quote === undefined || quote === null) {
       throw new Error(`Quote ${id} not found`);
     }
 
@@ -167,7 +167,7 @@ export class QuoteService {
 
     const updatedQuote = await this.deps.quoteRepo.updateStatus(id, tenantId, 'Expired');
 
-    if (!updatedQuote) {
+    if (updatedQuote === undefined || updatedQuote === null) {
       throw new Error(`Failed to expire quote`);
     }
 

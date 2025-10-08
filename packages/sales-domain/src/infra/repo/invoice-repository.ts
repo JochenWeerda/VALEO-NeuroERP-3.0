@@ -111,8 +111,8 @@ export class InvoiceRepository {
 
     const total = totalResult[0]?.count || 0;
 
-    const sortBy = pagination.sortBy || 'createdAt';
-    const sortOrder = pagination.sortOrder || 'desc';
+    const sortBy = pagination.sortBy ?? 'createdAt';
+    const sortOrder = pagination.sortOrder ?? 'desc';
     const orderBy = sortOrder === 'desc' ? desc(invoices[sortBy]) : asc(invoices[sortBy]);
 
     const offset = (pagination.page - 1) * pagination.pageSize;
@@ -175,8 +175,8 @@ export class InvoiceRepository {
 
     const total = totalResult[0]?.count || 0;
 
-    const sortBy = pagination.sortBy || 'createdAt';
-    const sortOrder = pagination.sortOrder || 'desc';
+    const sortBy = pagination.sortBy ?? 'createdAt';
+    const sortOrder = pagination.sortOrder ?? 'desc';
     const orderBy = sortOrder === 'desc' ? desc(invoices[sortBy]) : asc(invoices[sortBy]);
 
     const offset = (pagination.page - 1) * pagination.pageSize;

@@ -13,9 +13,9 @@ export function initRedis(): Redis {
     return redis;
   }
 
-  const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+  const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379';
   const redisPassword = process.env.REDIS_PASSWORD;
-  const redisDb = parseInt(process.env.REDIS_DB || '0', 10);
+  const redisDb = parseInt(process.env.REDIS_DB ?? '0', 10);
 
   redis = new Redis(redisUrl, {
     password: redisPassword || undefined,
@@ -69,7 +69,7 @@ export function cached(ttl: number = 300) {
 
     descriptor.value = async function (...args: any[]) {
       const redis = getRedis();
-      if (!redis) {
+      if (redis === undefined || redis === null) {
         // No Redis, just call original method
         return originalMethod.apply(this, args);
       }
@@ -109,7 +109,7 @@ export function cached(ttl: number = 300) {
  */
 export async function getCache<T>(key: string): Promise<T | null> {
   const redis = getRedis();
-  if (!redis) return null;
+  if (redis === undefined || redis === null) return null;
 
   try {
     const value = await redis.get(key);
@@ -125,7 +125,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
  */
 export async function setCache(key: string, value: any, ttl: number = 300): Promise<void> {
   const redis = getRedis();
-  if (!redis) return;
+  if (redis === undefined || redis === null) return;
 
   try {
     await redis.setex(key, ttl, JSON.stringify(value));
@@ -139,7 +139,7 @@ export async function setCache(key: string, value: any, ttl: number = 300): Prom
  */
 export async function deleteCache(key: string): Promise<void> {
   const redis = getRedis();
-  if (!redis) return;
+  if (redis === undefined || redis === null) return;
 
   try {
     await redis.del(key);
@@ -153,7 +153,7 @@ export async function deleteCache(key: string): Promise<void> {
  */
 export async function deleteCachePattern(pattern: string): Promise<void> {
   const redis = getRedis();
-  if (!redis) return;
+  if (redis === undefined || redis === null) return;
 
   try {
     const keys = await redis.keys(pattern);
@@ -165,3 +165,4 @@ export async function deleteCachePattern(pattern: string): Promise<void> {
     logger.error({ error, pattern }, 'Failed to delete cache pattern');
   }
 }
+

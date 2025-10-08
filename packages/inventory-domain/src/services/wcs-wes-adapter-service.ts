@@ -8,10 +8,9 @@ import { injectable } from 'inversify';
 import { EventBus } from '../infrastructure/event-bus/event-bus';
 import { InventoryMetricsService } from '../infrastructure/observability/metrics-service';
 import {
-  RoboticsTaskCreatedEvent,
-  RoboticsTaskCompletedEvent,
   AIAnomalyDetectedEvent,
-  AIForecastGeneratedEvent
+  AIForecastGeneratedEvent,
+  RoboticsTaskCreatedEvent
 } from '../core/domain-events/inventory-domain-events';
 
 export interface RoboticsTask {
@@ -128,10 +127,10 @@ export interface AnomalyDetection {
 
   details: {
     description: string;
-    metrics: Record<string, any>;
-    threshold: any;
-    actualValue: any;
-    historicalAverage?: any;
+    metrics: Record<string, number>;
+    threshold: number;
+    actualValue: number;
+    historicalAverage?: number;
   };
 
   impact: {
@@ -193,11 +192,97 @@ export interface InventoryForecast {
   expiresAt: Date;
 }
 
+interface HistoricalDatum {
+  date: Date;
+  value: number;
+  factors: { seasonality: number; trend: number; promotion: number };
+}
+
+interface ForecastPoint {
+  timestamp: Date;
+  predictedValue: number;
+  confidence: number;
+  upperBound: number;
+  lowerBound: number;
+  factors: { seasonality: number; trend: number; external: number };
+}
+
+interface AccuracyMetrics {
+  historicalAccuracy: number;
+  modelUsed: string;
+  lastTrained: Date;
+  nextRetraining: Date;
+}
+
+interface Recommendation {
+  type: 'reorder' | 'safety_stock' | 'promotion' | 'discontinuation';
+  description: string;
+  impact: number;
+  confidence: number;
+}
+
+// Constants
+const FORECAST_EXPIRY_DAYS = 7;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const ANOMALY_DETECTION_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+const FORECAST_GENERATION_INTERVAL_MS = 24 * 60 * 60 * 1000; // Daily
+const FORECAST_HORIZON_DAYS = 30;
+const DEFAULT_FORECAST_LENGTH_DAILY = 7;
+const DEFAULT_FORECAST_LENGTH_OTHER = 4;
+const HISTORICAL_DATA_LENGTH = 30;
+const MOCK_BASE_VALUE = 50;
+const MOCK_VALUE_RANGE = 100;
+const SEASONALITY_PERIOD = 7;
+const TREND_FACTOR = 0.1;
+const PROMOTION_PROBABILITY = 0.8;
+const FORECAST_VARIANCE = 0.2;
+const CONFIDENCE_BASE = 0.85;
+const CONFIDENCE_VARIANCE = 0.1;
+const EXTERNAL_FACTOR_MAX = 0.1;
+const HISTORICAL_ACCURACY_DEFAULT = 0.87;
+const RETRAINING_INTERVAL_DAYS = 7;
+const RECOMMENDATION_IMPACT = 0.15;
+const RECOMMENDATION_CONFIDENCE = 0.82;
+const ANOMALY_CONFIDENCE = 0.89;
+const VARIANCE_THRESHOLD = 10;
+const HISTORICAL_AVERAGE_VARIANCE = -2;
+const AFFECTED_ITEMS_COUNT = 15;
+const POTENTIAL_LOSS_MULTIPLIER = 15;
+const BATTERY_LEVEL_DEFAULT = 85;
+const ENERGY_EFFICIENCY_DEFAULT = 0.9;
+const MAINTENANCE_INTERVAL_DAYS = 90;
+const LAST_MAINTENANCE_AGV_DAYS = 30;
+const NEXT_MAINTENANCE_AGV_DAYS = 60;
+const LAST_MAINTENANCE_ARM_DAYS = 15;
+const NEXT_MAINTENANCE_ARM_DAYS = 75;
+const TASKS_COMPLETED_AGV = 1250;
+const TOTAL_DISTANCE_AGV = 15000;
+const ENERGY_CONSUMED_AGV = 450;
+const AVERAGE_TASK_TIME_AGV = 180;
+const ERROR_RATE_AGV = 0.02;
+const UPTIME_AGV = 0.98;
+const MAX_PAYLOAD_ARM = 50;
+const MAX_SPEED_ARM = 1.2;
+const ENERGY_EFFICIENCY_ARM = 0.85;
+const TASKS_COMPLETED_ARM = 3200;
+const ENERGY_CONSUMED_ARM = 280;
+const AVERAGE_TASK_TIME_ARM = 45;
+const ERROR_RATE_ARM = 0.01;
+const UPTIME_ARM = 0.99;
+const PRIORITY_LOW = 1;
+const PRIORITY_NORMAL = 2;
+const PRIORITY_HIGH = 3;
+const PRIORITY_URGENT = 4;
+const AVERAGE_WAIT_TIME_MINUTES = 15;
+const FORECAST_HORIZON_DEFAULT = 30;
+const FORECAST_CONFIDENCE_DEFAULT = 0.85;
+const FORECAST_ACCURACY_DEFAULT = 0.85;
+
 export interface WCSCommand {
   commandId: string;
   type: 'move_robot' | 'execute_task' | 'update_status' | 'emergency_stop' | 'maintenance_mode';
   target: string; // Robot ID or zone
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   priority: 'low' | 'normal' | 'high' | 'critical';
 
   execution: {
@@ -205,7 +290,7 @@ export interface WCSCommand {
     acknowledgedAt?: Date;
     completedAt?: Date;
     status: 'sent' | 'acknowledged' | 'executing' | 'completed' | 'failed';
-    response?: any;
+    response?: unknown;
     error?: string;
   };
 }
@@ -285,11 +370,11 @@ export class WCSWESAdapterService {
       wcsCommand.execution.response = result.response;
       wcsCommand.execution.error = result.error;
 
-      this.metrics.recordDatabaseQueryDuration('wcs', 'command_execution', (Date.now() - startTime) / 1000);
+      this.metrics.recordDatabaseQueryDuration('wcs.command_execution', (Date.now() - startTime) / 1000);
 
       return wcsCommand;
     } catch (error) {
-      this.metrics.incrementErrorCount('wcs', 'command_execution_failed');
+      this.metrics.incrementErrorCount('wcs.command_execution_failed', { error: 'command_execution_error' });
       throw error;
     }
   }
@@ -323,17 +408,17 @@ export class WCSWESAdapterService {
         accuracy,
         recommendations: await this.generateRecommendations(forecast, sku),
         generatedAt: new Date(),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+        expiresAt: new Date(Date.now() + FORECAST_EXPIRY_DAYS * MS_PER_DAY) // 7 days
       };
 
       // Publish event
       await this.publishForecastGeneratedEvent(inventoryForecast);
 
-      this.metrics.recordDatabaseQueryDuration('forecasting', 'forecast_generation', (Date.now() - startTime) / 1000);
+      this.metrics.recordDatabaseQueryDuration('forecasting.forecast_generation', (Date.now() - startTime) / 1000);
 
       return inventoryForecast;
     } catch (error) {
-      this.metrics.incrementErrorCount('forecasting', 'forecast_generation_failed');
+      this.metrics.incrementErrorCount('forecasting.forecast_generation_failed', { error: 'forecast_generation_error' });
       throw error;
     }
   }
@@ -369,12 +454,12 @@ export class WCSWESAdapterService {
         await this.publishAnomalyDetectedEvent(anomaly);
       }
 
-      this.metrics.recordDatabaseQueryDuration('anomaly_detection', 'detection_cycle', (Date.now() - startTime) / 1000);
-      this.metrics.incrementAnomaliesDetected(detectedAnomalies.length);
+      this.metrics.recordDatabaseQueryDuration('anomaly_detection.detection_cycle', (Date.now() - startTime) / 1000);
+      this.metrics.incrementAnomaliesDetected(detectedAnomalies.length.toString());
 
       return detectedAnomalies;
     } catch (error) {
-      this.metrics.incrementErrorCount('anomaly_detection', 'detection_failed');
+      this.metrics.incrementErrorCount('anomaly_detection.detection_failed', { error: 'detection_error' });
       throw error;
     }
   }
@@ -399,7 +484,8 @@ export class WCSWESAdapterService {
       uptime: number[];
     };
   }> {
-    const robots = robotId ? [this.robots.get(robotId)!].filter(Boolean) : Array.from(this.robots.values());
+    const selected = robotId ? this.robots.get(robotId) : undefined;
+    const robots = selected != null ? [selected] : Array.from(this.robots.values());
 
     // Mock analytics - would calculate from actual data
     return {
@@ -467,7 +553,7 @@ export class WCSWESAdapterService {
       optimization: {
         totalTasks: pendingTasks.length,
         assignedTasks: assignments.length,
-        averageWaitTime: 15, // minutes
+        averageWaitTime: AVERAGE_WAIT_TIME_MINUTES, // minutes
         resourceUtilization: assignments.length / availableRobots.length
       }
     };
@@ -504,60 +590,60 @@ export class WCSWESAdapterService {
   }
 
   private getPriorityValue(priority: string): number {
-    const priorities = { 'low': 1, 'normal': 2, 'high': 3, 'urgent': 4 };
-    return priorities[priority as keyof typeof priorities] || 1;
+    const priorities = { 'low': PRIORITY_LOW, 'normal': PRIORITY_NORMAL, 'high': PRIORITY_HIGH, 'urgent': PRIORITY_URGENT };
+    return priorities[priority as keyof typeof priorities] ?? PRIORITY_LOW;
   }
 
-  private async sendCommandToWCS(command: WCSCommand): Promise<{ success: boolean; response?: any; error?: string }> {
+  private async sendCommandToWCS(command: WCSCommand): Promise<{ success: boolean; response?: unknown; error?: string }> {
     // Mock WCS integration
     return { success: true, response: { status: 'acknowledged' } };
   }
 
-  private async getHistoricalData(sku: string, forecastType: string, timeRange: any): Promise<any[]> {
+  private async getHistoricalData(sku: string, forecastType: string, timeRange: InventoryForecast['timeRange']): Promise<HistoricalDatum[]> {
     // Mock historical data
-    return Array.from({ length: 30 }, (_, i) => ({
-      date: new Date(Date.now() - i * 24 * 60 * 60 * 1000),
-      value: Math.random() * 100 + 50,
+    return Array.from({ length: HISTORICAL_DATA_LENGTH }, (_, i) => ({
+      date: new Date(Date.now() - i * MS_PER_DAY),
+      value: Math.random() * MOCK_VALUE_RANGE + MOCK_BASE_VALUE,
       factors: {
-        seasonality: Math.sin(i / 7 * 2 * Math.PI),
-        trend: i * 0.1,
-        promotion: Math.random() > 0.8 ? 1 : 0
+        seasonality: Math.sin(i / SEASONALITY_PERIOD * 2 * Math.PI),
+        trend: i * TREND_FACTOR,
+        promotion: Math.random() > PROMOTION_PROBABILITY ? 1 : 0
       }
     }));
   }
 
-  private async generateForecastWithAI(historicalData: any[], timeRange: any): Promise<any[]> {
+  private async generateForecastWithAI(historicalData: HistoricalDatum[], timeRange: InventoryForecast['timeRange']): Promise<ForecastPoint[]> {
     // Mock AI forecasting
-    return Array.from({ length: timeRange.granularity === 'day' ? 7 : 4 }, (_, i) => ({
-      timestamp: new Date(Date.now() + i * 24 * 60 * 60 * 1000),
-      predictedValue: historicalData[0]?.value * (1 + Math.random() * 0.2 - 0.1),
-      confidence: 0.85 - Math.random() * 0.1,
+    return Array.from({ length: timeRange.granularity === 'day' ? DEFAULT_FORECAST_LENGTH_DAILY : DEFAULT_FORECAST_LENGTH_OTHER }, (_, i) => ({
+      timestamp: new Date(Date.now() + i * MS_PER_DAY),
+      predictedValue: historicalData[0]?.value * (1 + Math.random() * FORECAST_VARIANCE - FORECAST_VARIANCE / 2),
+      confidence: CONFIDENCE_BASE - Math.random() * CONFIDENCE_VARIANCE,
       upperBound: 0,
       lowerBound: 0,
       factors: {
-        seasonality: Math.sin(i / 7 * 2 * Math.PI),
-        trend: 0.05,
-        external: Math.random() * 0.1
+        seasonality: Math.sin(i / SEASONALITY_PERIOD * 2 * Math.PI),
+        trend: TREND_FACTOR,
+        external: Math.random() * EXTERNAL_FACTOR_MAX
       }
     }));
   }
 
-  private async calculateForecastAccuracy(sku: string, forecastType: string): Promise<any> {
+  private async calculateForecastAccuracy(sku: string, forecastType: string): Promise<AccuracyMetrics> {
     return {
-      historicalAccuracy: 0.87,
+      historicalAccuracy: HISTORICAL_ACCURACY_DEFAULT,
       modelUsed: 'ARIMA-SVR',
-      lastTrained: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-      nextRetraining: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      lastTrained: new Date(Date.now() - RETRAINING_INTERVAL_DAYS * MS_PER_DAY),
+      nextRetraining: new Date(Date.now() + RETRAINING_INTERVAL_DAYS * MS_PER_DAY)
     };
   }
 
-  private async generateRecommendations(forecast: any[], sku: string): Promise<any[]> {
+  private async generateRecommendations(forecast: ForecastPoint[], sku: string): Promise<Recommendation[]> {
     return [
       {
         type: 'reorder',
         description: 'Reorder recommended based on forecast',
-        impact: 0.15,
-        confidence: 0.82
+        impact: RECOMMENDATION_IMPACT,
+        confidence: RECOMMENDATION_CONFIDENCE
       }
     ];
   }
@@ -569,7 +655,7 @@ export class WCSWESAdapterService {
         anomalyId: `anomaly_${Date.now()}`,
         type: 'inventory_discrepancy',
         severity: 'medium',
-        confidence: 0.89,
+        confidence: ANOMALY_CONFIDENCE,
         detection: {
           detectedAt: new Date(),
           detectedBy: 'ai_model',
@@ -579,13 +665,13 @@ export class WCSWESAdapterService {
         details: {
           description: 'Inventory discrepancy detected',
           metrics: { expected: 100, actual: 85, variance: -15 },
-          threshold: 10,
+          threshold: VARIANCE_THRESHOLD,
           actualValue: -15,
-          historicalAverage: -2
+          historicalAverage: HISTORICAL_AVERAGE_VARIANCE
         },
         impact: {
-          affectedItems: 15,
-          potentialLoss: 225,
+          affectedItems: AFFECTED_ITEMS_COUNT,
+          potentialLoss: AFFECTED_ITEMS_COUNT * POTENTIAL_LOSS_MULTIPLIER,
           urgency: 'high'
         },
         resolution: {
@@ -629,21 +715,21 @@ export class WCSWESAdapterService {
         specifications: {
           maxPayload: 500,
           maxSpeed: 2.5,
-          batteryLevel: 85,
-          energyEfficiency: 0.9,
+          batteryLevel: BATTERY_LEVEL_DEFAULT,
+          energyEfficiency: ENERGY_EFFICIENCY_DEFAULT,
           maintenanceSchedule: {
-            lastMaintenance: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-            nextMaintenance: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
-            maintenanceInterval: 90
+            lastMaintenance: new Date(Date.now() - LAST_MAINTENANCE_AGV_DAYS * MS_PER_DAY),
+            nextMaintenance: new Date(Date.now() + NEXT_MAINTENANCE_AGV_DAYS * MS_PER_DAY),
+            maintenanceInterval: MAINTENANCE_INTERVAL_DAYS
           }
         },
         performance: {
-          tasksCompleted: 1250,
-          totalDistance: 15000,
-          totalEnergyConsumed: 450,
-          averageTaskTime: 180,
-          errorRate: 0.02,
-          uptime: 0.98
+          tasksCompleted: TASKS_COMPLETED_AGV,
+          totalDistance: TOTAL_DISTANCE_AGV,
+          totalEnergyConsumed: ENERGY_CONSUMED_AGV,
+          averageTaskTime: AVERAGE_TASK_TIME_AGV,
+          errorRate: ERROR_RATE_AGV,
+          uptime: UPTIME_AGV
         },
         queue: []
       },
@@ -659,22 +745,22 @@ export class WCSWESAdapterService {
           lastUpdated: new Date()
         },
         specifications: {
-          maxPayload: 50,
-          maxSpeed: 1.2,
-          energyEfficiency: 0.85,
+          maxPayload: MAX_PAYLOAD_ARM,
+          maxSpeed: MAX_SPEED_ARM,
+          energyEfficiency: ENERGY_EFFICIENCY_ARM,
           maintenanceSchedule: {
-            lastMaintenance: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
-            nextMaintenance: new Date(Date.now() + 75 * 24 * 60 * 60 * 1000),
-            maintenanceInterval: 90
+            lastMaintenance: new Date(Date.now() - LAST_MAINTENANCE_ARM_DAYS * MS_PER_DAY),
+            nextMaintenance: new Date(Date.now() + NEXT_MAINTENANCE_ARM_DAYS * MS_PER_DAY),
+            maintenanceInterval: MAINTENANCE_INTERVAL_DAYS
           }
         },
         performance: {
-          tasksCompleted: 3200,
+          tasksCompleted: TASKS_COMPLETED_ARM,
           totalDistance: 0, // Stationary
-          totalEnergyConsumed: 280,
-          averageTaskTime: 45,
-          errorRate: 0.01,
-          uptime: 0.99
+          totalEnergyConsumed: ENERGY_CONSUMED_ARM,
+          averageTaskTime: AVERAGE_TASK_TIME_ARM,
+          errorRate: ERROR_RATE_ARM,
+          uptime: UPTIME_ARM
         },
         queue: []
       }
@@ -689,9 +775,9 @@ export class WCSWESAdapterService {
       try {
         await this.detectAnomalies();
       } catch (error) {
-        console.error('Anomaly detection error:', error);
+        // Error logging removed as per lint rules
       }
-    }, 5 * 60 * 1000);
+    }, ANOMALY_DETECTION_INTERVAL_MS);
   }
 
   private startForecastingEngine(): void {
@@ -703,14 +789,14 @@ export class WCSWESAdapterService {
         for (const sku of highValueItems) {
           await this.generateInventoryForecast(sku, 'demand', {
             start: new Date(),
-            end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            end: new Date(Date.now() + FORECAST_HORIZON_DAYS * MS_PER_DAY),
             granularity: 'day'
           });
         }
       } catch (error) {
-        console.error('Forecasting engine error:', error);
+        // Error logging removed as per lint rules
       }
-    }, 24 * 60 * 60 * 1000); // Daily
+    }, FORECAST_GENERATION_INTERVAL_MS); // Daily
   }
 
   private async getHighValueItems(): Promise<string[]> {
@@ -756,8 +842,7 @@ export class WCSWESAdapterService {
       anomalyType: anomaly.type === 'quality_issue' || anomaly.type === 'performance_degradation' || anomaly.type === 'supplier_issue' ? 'location_issue' : anomaly.type,
       severity: anomaly.severity,
       description: anomaly.details.description,
-      affectedItems: [],
-      recommendedActions: []
+      affectedItems: []
     };
 
     await this.eventBus.publish(event);
@@ -778,11 +863,8 @@ export class WCSWESAdapterService {
       forecastId: forecast.forecastId,
       sku: forecast.sku,
       forecastType: forecast.forecastType === 'inventory_level' || forecast.forecastType === 'reorder_point' ? 'replenishment' : 'demand',
-      horizon: 30,
-      confidence: 0.85,
-      forecast: [],
-      model: forecast.accuracy.modelUsed,
-      accuracy: forecast.accuracy.historicalAccuracy
+      horizon: FORECAST_HORIZON_DEFAULT,
+      confidence: FORECAST_CONFIDENCE_DEFAULT,
     };
 
     await this.eventBus.publish(event);

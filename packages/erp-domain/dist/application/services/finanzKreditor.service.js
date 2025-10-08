@@ -2,9 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FinanzKreditorService = void 0;
 const finanzKreditor_entity_1 = require("../../core/entities/finanzKreditor.entity");
+const DEFAULT_PAYMENT_TARGET_DAYS = 30;
 function normalize(dto, existing) {
     const kreditorNr = dto.kreditor_nr?.trim();
-    if (!kreditorNr) {
+    if (kreditorNr === undefined || kreditorNr === null) {
         throw new Error('kreditor_nr is required');
     }
     // kreditlimit validation removed as it's not in DTO
@@ -15,7 +16,7 @@ function normalize(dto, existing) {
         ...existing,
         lieferanten_id: dto.lieferanten_id ?? existing?.lieferanten_id,
         kreditor_nr: kreditorNr,
-        zahlungsziel: dto.zahlungsziel ?? existing?.zahlungsziel ?? 30,
+        zahlungsziel: dto.zahlungsziel ?? existing?.zahlungsziel ?? DEFAULT_PAYMENT_TARGET_DAYS,
         zahlungsart: dto.zahlungsart ?? existing?.zahlungsart,
         bankverbindung: dto.bankverbindung ?? existing?.bankverbindung,
         steuernummer: dto.steuer_id ?? existing?.steuernummer,
@@ -48,7 +49,7 @@ class FinanzKreditorService {
     }
     async update(id, payload) {
         const existing = await this.repository.findById(id);
-        if (!existing) {
+        if (existing === undefined || existing === null) {
             throw new Error('FinanzKreditor not found');
         }
         const current = existing.toPrimitives();

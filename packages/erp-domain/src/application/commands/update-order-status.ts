@@ -1,5 +1,5 @@
 import { OrderDomainService } from '../../core/domain-services/order-domain-service';
-import type { UpdateOrderStatusDTO, OrderDTO } from '../dto/order-dto';
+import type { OrderDTO, UpdateOrderStatusDTO } from '../dto/order-dto';
 import { toOrderDTO } from '../mappers/order-mapper';
 import type { OrderId, OrderStatus } from '../../core/entities/order';
 
@@ -12,3 +12,4 @@ export class UpdateOrderStatusCommand {
     return toOrderDTO(updated);
   }
 }
+

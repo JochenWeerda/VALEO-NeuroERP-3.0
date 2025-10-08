@@ -8,9 +8,10 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
+import { EventBus } from './infrastructure/event-bus/event-bus';
 
 export class DIContainer {
-  private static readonly services = new Map<string, any>();
+  private static readonly services = new Map<string, unknown>();
 
   static register<T>(key: string, service: T, _options?: { singleton?: boolean }): void {
     this.services.set(key, service);
@@ -30,6 +31,14 @@ import { ReceivingService } from './services/receiving-service';
 import { PutawaySlottingService } from './services/putaway-slotting-service';
 import { EventBusFactory, EventBusType } from './infrastructure/event-bus/event-bus';
 import { InventoryMetricsService } from './infrastructure/observability/metrics-service';
+
+// ===== CONSTANTS =====
+const QUERY_LOG_LENGTH = 100;
+const EXPRESS_JSON_LIMIT = '10mb';
+const DEFAULT_DB_PORT = 5436;
+const DEFAULT_INVENTORY_PORT = 3002;
+const DEFAULT_DOCK_COUNT = 4;
+const DEFAULT_ZONE_COUNT = 6;
 
 // ===== CONFIGURATION =====
 
@@ -60,7 +69,7 @@ interface InventoryConfig {
 // ===== DATABASE CONNECTION =====
 
 export class PostgresConnection {
-  private readonly pool: any; // Would be pg.Pool in real implementation
+  private readonly pool: unknown; // Would be pg.Pool in real implementation
 
   constructor(private readonly config: InventoryConfig['database']) {
     this.initializeConnection();
@@ -68,24 +77,20 @@ export class PostgresConnection {
 
   private initializeConnection(): void {
     // PostgreSQL connection pool setup would go here
-    console.log('[INVENTORY DB] PostgreSQL connection initialized');
   }
 
-  async query<T = any>(query: string, _params?: any[]): Promise<{ rows: T[]; rowCount: number }> {
+  async query<T = any>(query: string, _params?: unknown[]): Promise<{ rows: T[]; rowCount: number }> {
     // Database query implementation would go here
-    console.log(`[INVENTORY DB] Executing query: ${query.substring(0, 100)}...`);
     return { rows: [], rowCount: 0 };
   }
 
-  async transaction<T>(callback: (client: any) => Promise<T>): Promise<T> {
+  async transaction<T>(callback: (client: unknown) => Promise<T>): Promise<T> {
     // Transaction implementation would go here
-    console.log('[INVENTORY DB] Starting transaction');
     return await callback(this);
   }
 
   async close(): Promise<void> {
     // Connection cleanup would go here
-    console.log('[INVENTORY DB] Connection closed');
   }
 }
 
@@ -95,7 +100,7 @@ export class InventoryDomainBootstrap {
   private app?: express.Application;
   private readonly config: InventoryConfig;
   private db?: PostgresConnection;
-  private eventBus?: any;
+  private eventBus?: unknown;
   private metricsService?: InventoryMetricsService;
 
   constructor(config: InventoryConfig) {
@@ -106,30 +111,22 @@ export class InventoryDomainBootstrap {
    * Initialize the inventory domain
    */
   async initialize(): Promise<express.Application> {
-    console.log('[INVENTORY BOOTSTRAP] Initializing Inventory Domain...');
+    // 1. Initialize database connection
+    await this.initializeDatabase();
 
-    try {
-      // 1. Initialize database connection
-      await this.initializeDatabase();
+    // 2. Initialize event-driven architecture
+    await this.initializeEventBus();
 
-      // 2. Initialize event-driven architecture
-      await this.initializeEventBus();
+    // 3. Initialize observability
+    await this.initializeObservability();
 
-      // 3. Initialize observability
-      await this.initializeObservability();
+    // 4. Initialize services
+    await this.initializeServices();
 
-      // 4. Initialize services
-      await this.initializeServices();
+    // 5. Initialize API
+    await this.initializeAPI();
 
-      // 5. Initialize API
-      await this.initializeAPI();
-
-      console.log('[INVENTORY BOOTSTRAP] ✅ Inventory Domain initialized successfully');
-      return this.app!;
-    } catch (error) {
-      console.error('[INVENTORY BOOTSTRAP] ❌ Initialization failed:', error);
-      throw error;
-    }
+    return this.app;
   }
 
   /**
@@ -137,7 +134,6 @@ export class InventoryDomainBootstrap {
    */
   private async initializeDatabase(): Promise<void> {
     this.db = new PostgresConnection(this.config.database);
-    console.log('[INVENTORY BOOTSTRAP] Database connection established');
   }
 
   /**
@@ -147,7 +143,6 @@ export class InventoryDomainBootstrap {
     const eventBusType = (process.env.EVENT_BUS_TYPE as EventBusType) || 'in-memory';
     this.eventBus = EventBusFactory.create(eventBusType);
     await this.eventBus.start();
-    console.log(`[INVENTORY BOOTSTRAP] Event bus initialized: ${eventBusType}`);
   }
 
   /**
@@ -155,7 +150,6 @@ export class InventoryDomainBootstrap {
    */
   private async initializeObservability(): Promise<void> {
     this.metricsService = new InventoryMetricsService();
-    console.log('[INVENTORY BOOTSTRAP] Observability initialized');
   }
 
   /**
@@ -172,8 +166,6 @@ export class InventoryDomainBootstrap {
 
     // Register services in DI container
     this.registerServices(receivingService, putawayService);
-
-    console.log('[INVENTORY BOOTSTRAP] Domain services initialized');
   }
 
   /**
@@ -186,8 +178,6 @@ export class InventoryDomainBootstrap {
     DIContainer.register('EventBus', this.eventBus, { singleton: true });
     DIContainer.register('MetricsService', this.metricsService, { singleton: true });
     DIContainer.register('Database', this.db, { singleton: true });
-
-    console.log('[INVENTORY BOOTSTRAP] Services registered in DI container');
   }
 
   /**
@@ -204,7 +194,7 @@ export class InventoryDomainBootstrap {
     this.app.use(helmet());
     this.app.use(cors());
     this.app.use(compression());
-    this.app.use(express.json({ limit: '10mb' }));
+    this.app.use(express.json({ limit: EXPRESS_JSON_LIMIT }));
     this.app.use(express.urlencoded({ extended: true }));
 
     // API routes
@@ -259,7 +249,7 @@ export class InventoryDomainBootstrap {
     // Metrics endpoint
     this.app.get('/metrics', async (req, res) => {
       try {
-        const metrics = this.metricsService!.getMetrics();
+        const metrics = this.metricsService.getMetrics();
         res.set('Content-Type', 'text/plain; charset=utf-8');
         res.send(metrics);
       } catch (error) {
@@ -267,7 +257,6 @@ export class InventoryDomainBootstrap {
       }
     });
 
-    console.log('[INVENTORY BOOTSTRAP] API layer initialized');
   }
 
   /**
@@ -281,13 +270,7 @@ export class InventoryDomainBootstrap {
     const port = this.config.server.port;
 
     return new Promise((resolve) => {
-      this.app!.listen(port, () => {
-        console.log(`[INVENTORY SERVER] 🚀 Inventory Domain running on port ${port}`);
-        console.log(`[INVENTORY SERVER] Environment: ${this.config.server.environment}`);
-        console.log(`[INVENTORY SERVER] GS1 Compliance: ${this.config.wms.enableGs1Compliance}`);
-        console.log(`[INVENTORY SERVER] EPCIS Tracking: ${this.config.wms.enableEpcisTracking}`);
-        console.log(`[INVENTORY SERVER] Health check: http://localhost:${port}/health`);
-        console.log(`[INVENTORY SERVER] Metrics: http://localhost:${port}/metrics`);
+      this.app.listen(port, () => {
         resolve();
       });
     });
@@ -297,8 +280,6 @@ export class InventoryDomainBootstrap {
    * Graceful shutdown
    */
   async shutdown(): Promise<void> {
-    console.log('[INVENTORY BOOTSTRAP] Shutting down Inventory Domain...');
-
     if (this.eventBus !== undefined) {
       await this.eventBus.stop();
     }
@@ -306,8 +287,6 @@ export class InventoryDomainBootstrap {
     if (this.db !== undefined) {
       await this.db.close();
     }
-
-    console.log('[INVENTORY BOOTSTRAP] ✅ Shutdown complete');
   }
 }
 
@@ -323,22 +302,22 @@ export function getDefaultInventoryConfig(): InventoryConfig {
   return {
     database: {
       host: process.env.DB_HOST ?? 'localhost',
-      port: parseInt(process.env.DB_PORT ?? '5436'),
+      port: parseInt(process.env.DB_PORT ?? DEFAULT_DB_PORT.toString()),
       database: process.env.DB_NAME ?? 'neuroerp_inventory',
       user: process.env.DB_USER ?? 'neuroerp',
       password: process.env.DB_PASSWORD ?? 'password'
     },
     messaging: {
-      type: (process.env.MESSAGING_TYPE as any) ?? 'KAFKA',
+      type: (process.env.MESSAGING_TYPE as 'KAFKA' | 'NATS' | 'RABBITMQ') ?? 'KAFKA',
       connectionString: process.env.MESSAGING_URL ?? 'localhost:9092'
     },
     server: {
-      port: parseInt(process.env.INVENTORY_PORT ?? '3002'),
+      port: parseInt(process.env.INVENTORY_PORT ?? DEFAULT_INVENTORY_PORT.toString()),
       environment: process.env.NODE_ENV ?? 'development'
     },
     wms: {
-      defaultDockCount: parseInt(process.env.DEFAULT_DOCK_COUNT ?? '4'),
-      defaultZoneCount: parseInt(process.env.DEFAULT_ZONE_COUNT ?? '6'),
+      defaultDockCount: parseInt(process.env.DEFAULT_DOCK_COUNT ?? DEFAULT_DOCK_COUNT.toString()),
+      defaultZoneCount: parseInt(process.env.DEFAULT_ZONE_COUNT ?? DEFAULT_ZONE_COUNT.toString()),
       enableGs1Compliance: process.env.ENABLE_GS1 === 'true',
       enableEpcisTracking: process.env.ENABLE_EPCIS === 'true'
     }
@@ -365,19 +344,16 @@ if (require.main === module) {
 
       // Graceful shutdown handling
       process.on('SIGTERM', async () => {
-        console.log('[INVENTORY DOMAIN] SIGTERM received, shutting down gracefully');
         await domain.shutdown();
         process.exit(0);
       });
 
       process.on('SIGINT', async () => {
-        console.log('[INVENTORY DOMAIN] SIGINT received, shutting down gracefully');
         await domain.shutdown();
         process.exit(0);
       });
     })
     .catch((error) => {
-      console.error('[INVENTORY DOMAIN] Failed to start:', error);
       process.exit(1);
     });
 }

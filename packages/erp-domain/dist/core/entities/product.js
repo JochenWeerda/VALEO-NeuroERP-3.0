@@ -38,6 +38,7 @@ class ProductUpdatedEvent {
     }
 }
 exports.ProductUpdatedEvent = ProductUpdatedEvent;
+const DEFAULT_TAX_RATE = 0.19;
 class ProductEntity {
     constructor(id, name, sku, price, category, createdAt, updatedAt, status, description) {
         this.id = id;
@@ -97,7 +98,7 @@ class ProductEntity {
         // This would typically check inventory levels
         return true;
     }
-    calculateTotalPrice(quantity, taxRate = 0.19) {
+    calculateTotalPrice(quantity, taxRate = DEFAULT_TAX_RATE) {
         const netTotal = this.price * quantity;
         return netTotal * (1 + taxRate);
     }

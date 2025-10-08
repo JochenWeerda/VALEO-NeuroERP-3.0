@@ -2,9 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FinanzDebitorService = void 0;
 const finanzDebitor_entity_1 = require("../../core/entities/finanzDebitor.entity");
+const DEFAULT_PAYMENT_TARGET_DAYS = 30;
 function normalize(dto, existing) {
     const debitorNr = dto.debitor_nr?.trim();
-    if (!debitorNr) {
+    if (debitorNr === undefined || debitorNr === null) {
         throw new Error('debitor_nr is required');
     }
     if (dto.kreditlimit !== undefined && dto.kreditlimit < 0) {
@@ -18,7 +19,7 @@ function normalize(dto, existing) {
         kunden_id: dto.kunden_id ?? existing?.kunden_id,
         debitor_nr: debitorNr,
         kreditlimit: dto.kreditlimit ?? existing?.kreditlimit ?? 0,
-        zahlungsziel: dto.zahlungsziel ?? existing?.zahlungsziel ?? 30,
+        zahlungsziel: dto.zahlungsziel ?? existing?.zahlungsziel ?? DEFAULT_PAYMENT_TARGET_DAYS,
         zahlungsart: dto.zahlungsart ?? existing?.zahlungsart,
         bankverbindung: dto.bankverbindung ?? existing?.bankverbindung,
         steuernummer: dto.steuernummer ?? existing?.steuernummer,
@@ -52,7 +53,7 @@ class FinanzDebitorService {
     }
     async update(id, payload) {
         const existing = await this.repository.findById(id);
-        if (!existing) {
+        if (existing === undefined || existing === null) {
             throw new Error('FinanzDebitor not found');
         }
         const current = existing.toPrimitives();

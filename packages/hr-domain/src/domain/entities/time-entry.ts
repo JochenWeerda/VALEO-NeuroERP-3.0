@@ -3,7 +3,21 @@
  * Time tracking with validation and business rules
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
+
+const MAX_BREAK_MINUTES = 480;
+const MILLISECONDS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const MILLISECONDS_PER_MINUTE = MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE;
+const MINUTES_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR;
+const DEFAULT_MAX_DAILY_HOURS = 8;
+const INITIAL_VERSION = 1;
+
+const timeEntrySourceSchema = z.enum(['Manual', 'Terminal', 'Mobile']);
+const timeEntryStatusSchema = z.enum(['Draft', 'Approved', 'Rejected']);
 
 export const TimeEntrySchema = z.object({
   id: z.string().uuid(),
@@ -12,23 +26,25 @@ export const TimeEntrySchema = z.object({
   date: z.string().date(),
   start: z.string().datetime(),
   end: z.string().datetime(),
-  breakMinutes: z.number().int().min(0).max(480), // Max 8 hours break
+  breakMinutes: z.number().int().min(0).max(MAX_BREAK_MINUTES), // Max 8 hours break
   projectId: z.string().uuid().optional(),
   costCenter: z.string().optional(),
-  source: z.enum(['Manual', 'Terminal', 'Mobile']),
-  status: z.enum(['Draft', 'Approved', 'Rejected']),
+  source: timeEntrySourceSchema,
+  status: timeEntryStatusSchema,
   approvedBy: z.string().uuid().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
-  version: z.number().int().min(1),
+  version: z.number().int().min(INITIAL_VERSION),
   createdBy: z.string().optional(),
   updatedBy: z.string().optional()
 });
 
 export type TimeEntry = z.infer<typeof TimeEntrySchema>;
+export type TimeEntrySource = z.infer<typeof timeEntrySourceSchema>;
+export type TimeEntryStatus = z.infer<typeof timeEntryStatusSchema>;
 
 export class TimeEntryEntity {
-  private data: TimeEntry;
+  private readonly data: TimeEntry;
 
   constructor(data: TimeEntry) {
     this.data = TimeEntrySchema.parse(data);
@@ -45,8 +61,8 @@ export class TimeEntryEntity {
   get breakMinutes(): number { return this.data.breakMinutes; }
   get projectId(): string | undefined { return this.data.projectId; }
   get costCenter(): string | undefined { return this.data.costCenter; }
-  get source(): string { return this.data.source; }
-  get status(): string { return this.data.status; }
+  get source(): TimeEntrySource { return this.data.source; }
+  get status(): TimeEntryStatus { return this.data.status; }
   get approvedBy(): string | undefined { return this.data.approvedBy; }
   get createdAt(): string { return this.data.createdAt; }
   get updatedAt(): string { return this.data.updatedAt; }
@@ -80,16 +96,16 @@ export class TimeEntryEntity {
   getWorkingMinutes(): number {
     const startTime = new Date(this.data.start);
     const endTime = new Date(this.data.end);
-    const totalMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / (1000 * 60));
+    const totalMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / MILLISECONDS_PER_MINUTE);
     return Math.max(0, totalMinutes - this.data.breakMinutes);
   }
 
   getWorkingHours(): number {
-    return this.getWorkingMinutes() / 60;
+    return this.getWorkingMinutes() / MINUTES_PER_HOUR;
   }
 
-  getOvertimeMinutes(maxDailyHours: number = 8): number {
-    const maxMinutes = maxDailyHours * 60;
+  getOvertimeMinutes(maxDailyHours = DEFAULT_MAX_DAILY_HOURS): number {
+    const maxMinutes = maxDailyHours * MINUTES_PER_HOUR;
     const workingMinutes = this.getWorkingMinutes();
     return Math.max(0, workingMinutes - maxMinutes);
   }
@@ -103,13 +119,13 @@ export class TimeEntryEntity {
       throw new Error('End time must be after start time');
     }
 
-    const totalMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / (1000 * 60));
+    const totalMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / MILLISECONDS_PER_MINUTE);
     if (this.data.breakMinutes > totalMinutes) {
       throw new Error('Break time cannot exceed total time');
     }
 
     // Check for reasonable working hours (max 24 hours)
-    if (totalMinutes > 24 * 60) {
+    if (totalMinutes > MINUTES_PER_DAY) {
       throw new Error('Working time cannot exceed 24 hours');
     }
   }
@@ -120,13 +136,10 @@ export class TimeEntryEntity {
       throw new Error('Time entry cannot be approved in current status');
     }
 
-    return new TimeEntryEntity({
-      ...this.data,
+    return this.clone({
       status: 'Approved',
       approvedBy,
-      updatedAt: new Date().toISOString(),
-      updatedBy: approvedBy,
-      version: this.data.version + 1
+      updatedBy: approvedBy
     });
   }
 
@@ -135,13 +148,10 @@ export class TimeEntryEntity {
       throw new Error('Time entry cannot be rejected in current status');
     }
 
-    return new TimeEntryEntity({
-      ...this.data,
+    return this.clone({
       status: 'Rejected',
       approvedBy,
-      updatedAt: new Date().toISOString(),
-      updatedBy: approvedBy,
-      version: this.data.version + 1
+      updatedBy: approvedBy
     });
   }
 
@@ -150,14 +160,11 @@ export class TimeEntryEntity {
       throw new Error('Time entry cannot be edited in current status');
     }
 
-    return new TimeEntryEntity({
-      ...this.data,
+    return this.clone({
       start,
       end,
       breakMinutes,
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      version: this.data.version + 1
+      updatedBy
     });
   }
 
@@ -166,13 +173,7 @@ export class TimeEntryEntity {
       throw new Error('Time entry cannot be edited in current status');
     }
 
-    return new TimeEntryEntity({
-      ...this.data,
-      projectId,
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      version: this.data.version + 1
-    });
+    return this.clone({ projectId, updatedBy });
   }
 
   updateCostCenter(costCenter: string | undefined, updatedBy?: string): TimeEntryEntity {
@@ -180,13 +181,7 @@ export class TimeEntryEntity {
       throw new Error('Time entry cannot be edited in current status');
     }
 
-    return new TimeEntryEntity({
-      ...this.data,
-      costCenter,
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-      version: this.data.version + 1
-    });
+    return this.clone({ costCenter, updatedBy });
   }
 
   // Export for persistence
@@ -194,15 +189,25 @@ export class TimeEntryEntity {
     return { ...this.data };
   }
 
+  private clone(overrides: Partial<TimeEntry>): TimeEntryEntity {
+    const now = new Date().toISOString();
+    return new TimeEntryEntity({
+      ...this.data,
+      ...overrides,
+      updatedAt: now,
+      version: this.data.version + 1
+    });
+  }
+
   // Factory methods
   static create(data: Omit<TimeEntry, 'id' | 'createdAt' | 'updatedAt' | 'version'>): TimeEntryEntity {
     const now = new Date().toISOString();
     return new TimeEntryEntity({
       ...data,
-      id: require('uuid').v4(),
+      id: uuidv4(),
       createdAt: now,
       updatedAt: now,
-      version: 1
+      version: INITIAL_VERSION
     });
   }
 

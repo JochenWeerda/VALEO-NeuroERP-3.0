@@ -19,7 +19,7 @@ const weighingService = new WeighingService(ticketRepository);
 // Create Fastify app
 const app = fastify({
   logger: {
-    level: process.env.LOG_LEVEL || 'info',
+    level: process.env.LOG_LEVEL ?? 'info',
     transport: {
       target: 'pino-pretty',
       options: {
@@ -102,8 +102,8 @@ process.on('SIGTERM', () => closeGracefully('SIGTERM'));
 // Start server
 const start = async () => {
   try {
-    const port = parseInt(process.env.PORT || '3005', 10);
-    const host = process.env.HOST || '0.0.0.0';
+    const port = parseInt(process.env.PORT ?? '3005', 10);
+    const host = process.env.HOST ?? '0.0.0.0';
 
     await app.listen({ port, host });
 
