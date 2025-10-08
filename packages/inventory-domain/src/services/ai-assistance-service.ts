@@ -7,6 +7,15 @@
 import { injectable } from 'inversify';
 import { EventBus } from '../infrastructure/event-bus/event-bus';
 import { InventoryMetricsService } from '../infrastructure/observability/metrics-service';
+// Time/Threshold constants
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const MS_PER_SECOND = 1000;
+const MS_TO_SECONDS = MS_PER_SECOND;
+const MS_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MS_PER_SECOND;
+const EVENING_HOUR_THRESHOLD = 17;
+const TOP_INSIGHTS_LIMIT = 10;
 import {
   AISlottingOptimizedEvent,
   AIForecastEnhancedEvent,
@@ -331,7 +340,7 @@ export class AIAssistanceService {
 
       this.metrics.recordDatabaseQueryDuration('ai_assistance', 'predictive_insights', (Date.now() - startTime) / 1000);
 
-      return insights.slice(0, 10); // Top 10 insights
+      return insights.slice(0, TOP_INSIGHTS_LIMIT); // Top 10 insights
     } catch (error) {
       this.metrics.incrementErrorCount('ai_assistance', 'predictive_insights_failed');
       throw error;
@@ -539,8 +548,8 @@ export class AIAssistanceService {
 
   private async generateEnhancedForecast(model: ForecastingModel, enhancedData: any[]): Promise<any[]> {
     // Generate forecast using the model
-    return Array.from({ length: 30 }, (_, i) => ({
-      date: new Date(Date.now() + i * 24 * 60 * 60 * 1000),
+    return Array.from({ length: TOP_INSIGHTS_LIMIT * 3 }, (_, i) => ({
+      date: new Date(Date.now() + i * MS_PER_DAY),
       predicted: Math.random() * 100 + 50,
       confidence: 0.8 - Math.random() * 0.2
     }));
@@ -719,7 +728,7 @@ export class AIAssistanceService {
   }
 
   private async getTimeBasedAssistance(timeOfDay: number): Promise<any[]> {
-    if (timeOfDay > 17) { // After 5 PM
+    if (timeOfDay > EVENING_HOUR_THRESHOLD) {
       return [
         {
           type: 'alert',
@@ -749,9 +758,10 @@ export class AIAssistanceService {
         // Retrain models with new data
         await this.retrainModels();
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Continuous learning error:', error);
       }
-    }, 24 * 60 * 60 * 1000); // Daily retraining
+    }, MS_PER_DAY); // Daily retraining
   }
 
   private async retrainModels(): Promise<void> {
