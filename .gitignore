@@ -283,3 +283,6 @@ memory-bank/
 !.env.example
 !.gitkeep
 
+
+*storybook.log
+storybook-static
