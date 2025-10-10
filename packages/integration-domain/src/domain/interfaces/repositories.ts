@@ -2,7 +2,7 @@
  * Repository Interfaces
  */
 
-import type { PaginationOptions, PaginatedResult, Result } from '@shared/types/common.js';
+import type { PaginatedResult, PaginationOptions, Result } from '@shared/types/common.js';
 
 // Re-export shared types for convenience
 export type { PaginationOptions, PaginatedResult, Result } from '@shared/types/common.js';

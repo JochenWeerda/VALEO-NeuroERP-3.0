@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { GuidedBuyingEngine, BuyingContext } from '../catalog-service/guided-buying-engine';
+import { BuyingContext, GuidedBuyingEngine } from '../catalog-service/guided-buying-engine';
 import { ThreeWayMatchEngine } from '../receiving-service/three-way-match-engine';
 import { PerformanceAnalyticsService, SupplierPerformanceScore } from './performance-analytics';
 

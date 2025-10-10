@@ -2,7 +2,7 @@
  * Unit of Work Pattern Implementation
  */
 
-import type { UnitOfWork, IntegrationRepository, WebhookRepository, SyncJobRepository } from '@domain/interfaces/repositories.js';
+import type { IntegrationRepository, SyncJobRepository, UnitOfWork, WebhookRepository } from '@domain/interfaces/repositories.js';
 import type { DatabaseConnection, DatabaseTransaction } from '../external/database-connection.js';
 import { InMemoryIntegrationRepository } from './in-memory-integration-repository.js';
 import { InMemoryWebhookRepository } from './in-memory-webhook-repository.js';
@@ -75,7 +75,7 @@ export class PostgresUnitOfWork implements UnitOfWork {
   private committed = false;
   private rolledBack = false;
 
-  constructor(private connection: DatabaseConnection) {
+  constructor(private readonly connection: DatabaseConnection) {
     // Initialize repositories with connection (will be updated with transaction)
     this.integrations = new PostgresIntegrationRepository(connection);
     this.webhooks = new PostgresWebhookRepository(connection);

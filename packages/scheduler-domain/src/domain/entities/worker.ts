@@ -145,7 +145,7 @@ export class WorkerEntity {
     return true;
   }
 
-  public isHealthy(heartbeatTimeoutSec: number = 300): boolean {
+  public isHealthy(heartbeatTimeoutSec = 300): boolean {
     // Consider unhealthy if no heartbeat for more than timeout
     const now = new Date();
     const timeSinceHeartbeat = (now.getTime() - this.heartbeatAt.getTime()) / 1000;

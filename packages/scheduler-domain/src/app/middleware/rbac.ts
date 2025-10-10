@@ -1,4 +1,4 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { getJWTAuthenticator } from '../../infra/security/jwt';
 
 export interface PermissionRequirement {

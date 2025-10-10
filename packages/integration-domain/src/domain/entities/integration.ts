@@ -39,7 +39,7 @@ export interface IntegrationProps {
 export class Integration implements BaseEntity {
   private _events: Array<IntegrationCreatedEvent | IntegrationUpdatedEvent> = [];
 
-  constructor(private props: IntegrationProps) {}
+  constructor(private readonly props: IntegrationProps) {}
 
   // Factory method
   static create(

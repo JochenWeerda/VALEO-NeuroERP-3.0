@@ -1,0 +1,55 @@
+{
+  "id": "supplier_invoice",
+  "title": "Eingangsrechnung",
+  "fields": [
+    {
+      "name": "number",
+      "label": "Belegnummer",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "date",
+      "label": "Datum",
+      "type": "date",
+      "required": true
+    },
+    {
+      "name": "supplierId",
+      "label": "Lieferant",
+      "type": "lookup",
+      "entity": "suppliers",
+      "required": true
+    },
+    {
+      "name": "total",
+      "label": "Gesamt",
+      "type": "number",
+      "required": true
+    }
+  ],
+  "lines": {
+    "name": "lines",
+    "label": "Positionen",
+    "columns": [
+      {
+        "name": "article",
+        "label": "Artikel",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "qty",
+        "label": "Menge",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "price",
+        "label": "Einkaufspreis",
+        "type": "number",
+        "required": true
+      }
+    ]
+  }
+}

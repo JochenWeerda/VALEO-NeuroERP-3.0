@@ -1,5 +1,5 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
-import { getJWTAuthenticator, AuthContext } from '../../infra/security/jwt';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { AuthContext, getJWTAuthenticator } from '../../infra/security/jwt';
 
 declare module 'fastify' {
   interface FastifyRequest {

@@ -53,7 +53,7 @@ export type BatchInput = z.infer<typeof BatchInputSchema>;
 export type BatchOutputLot = z.infer<typeof BatchOutputLotSchema>;
 
 export class BatchEntity {
-  private data: Batch;
+  private readonly data: Batch;
 
   constructor(data: Batch) {
     this.data = BatchSchema.parse(data);
@@ -316,6 +316,7 @@ export class BatchEntity {
   }
 
   // Traceability methods
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getTraceabilityData(): any {
     return {
       batchId: this.data.id,

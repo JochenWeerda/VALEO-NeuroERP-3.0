@@ -3,7 +3,7 @@
  */
 
 import { SyncJob } from '@domain/entities/sync-job.js';
-import type { SyncJobRepository, PaginationOptions, PaginatedResult, Result } from '@domain/interfaces/repositories.js';
+import type { PaginatedResult, PaginationOptions, Result, SyncJobRepository } from '@domain/interfaces/repositories.js';
 
 export class InMemorySyncJobRepository implements SyncJobRepository {
   private syncJobs = new Map<string, SyncJob>();

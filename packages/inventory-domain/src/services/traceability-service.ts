@@ -8,8 +8,8 @@ import { injectable } from 'inversify';
 import { EventBus } from '../infrastructure/event-bus/event-bus';
 import { InventoryMetricsService } from '../infrastructure/observability/metrics-service';
 import {
-  TraceabilityEventCreatedEvent,
-  EPCISDocumentGeneratedEvent
+  EPCISDocumentGeneratedEvent,
+  TraceabilityEventCreatedEvent
 } from '../core/domain-events/inventory-domain-events';
 
 // Constants
@@ -241,8 +241,8 @@ export interface TraceabilityQuery {
 @injectable()
 export class TraceabilityService {
   private readonly metrics = new InventoryMetricsService();
-  private epcisEvents: Map<string, EPCISEvent> = new Map();
-  private traceabilityChains: Map<string, TraceabilityChain> = new Map();
+  private readonly epcisEvents: Map<string, EPCISEvent> = new Map();
+  private readonly traceabilityChains: Map<string, TraceabilityChain> = new Map();
 
   constructor(
     private readonly eventBus: EventBus
@@ -544,7 +544,7 @@ export class TraceabilityService {
 
   private async updateTraceabilityChains(event: EPCISEvent): Promise<void> {
     // Find or create traceability chains for EPCs in this event
-    const epcs = [...(event.epcList || []), ...(event.childEPCs || []), event.parentEPC].filter(Boolean) as string[];
+    const epcs = [...(event.epcList || []), ...(event.childEPCs || []), event.parentEPC].filter(Boolean);
 
     for (const epc of epcs) {
       let chain = Array.from(this.traceabilityChains.values()).find(c =>

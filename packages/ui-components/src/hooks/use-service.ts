@@ -47,9 +47,9 @@ export class DIContainer {
     }
 
     // Check if already resolved in current scope
-    if (definition.scope === 'scoped' && this.currentScope) {
+    if (definition.scope === 'scoped' && typeof this.currentScope === 'string' && this.currentScope.length > 0) {
       const scopedInstances = this.scopedInstances.get(this.currentScope);
-      if (scopedInstances?.has(key)) {
+      if (scopedInstances !== undefined && scopedInstances.has(key)) {
         return scopedInstances.get(key);
       }
     }
@@ -64,12 +64,12 @@ export class DIContainer {
     // Store based on scope
     if (definition.scope === 'singleton') {
       this.singletons.set(key, instance);
-    } else if (definition.scope === 'scoped' && this.currentScope) {
+    } else if (definition.scope === 'scoped' && typeof this.currentScope === 'string' && this.currentScope.length > 0) {
       if (!this.scopedInstances.has(this.currentScope)) {
         this.scopedInstances.set(this.currentScope, new Map());
       }
       const scopedMap = this.scopedInstances.get(this.currentScope);
-      if (scopedMap) {
+      if (scopedMap !== undefined) {
         scopedMap.set(key, instance);
       }
     }

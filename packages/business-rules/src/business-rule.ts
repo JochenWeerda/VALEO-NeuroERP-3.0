@@ -39,14 +39,16 @@ export interface IBusinessRule<TContext> {
 export abstract class BusinessRule<TContext> implements IBusinessRule<TContext> {
   public abstract name: string;
   public abstract description: string;
-  public priority: number = 100; // Default priority
+  public priority = 100; // Default priority
   public domain?: string;
-  public version: string = '1.0.0';
-  public enabled: boolean = true;
+  public version = '1.0.0';
+  public enabled = true;
 
   // Legacy validation method - can be overridden
-  public async validate(context: TContext): Promise<ValidationResult> {
+  public async validate(_context: TContext): Promise<ValidationResult> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errors: any[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const warnings: any[] = [];
 
     // Default implementation - override in subclasses
@@ -58,11 +60,11 @@ export abstract class BusinessRule<TContext> implements IBusinessRule<TContext> 
   }
 
   // New execution methods - can be overridden
-  public applies(context: TContext): boolean {
+  public applies(_context: TContext): boolean {
     return true; // Default: always applies
   }
 
-  public execute(context: TContext): Promise<void> | void {
+  public execute(_context: TContext): Promise<void> | void {
     // Default: do nothing
   }
 }

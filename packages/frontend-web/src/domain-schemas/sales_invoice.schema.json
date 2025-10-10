@@ -1,0 +1,96 @@
+{
+  "id": "sales_invoice",
+  "title": "Rechnung",
+  "fields": [
+    {
+      "name": "number",
+      "label": "Rechnungs-Nr.",
+      "type": "string",
+      "required": true,
+      "placeholder": "INV-2025-0001"
+    },
+    {
+      "name": "date",
+      "label": "Rechnungsdatum",
+      "type": "date",
+      "required": true
+    },
+    {
+      "name": "customerId",
+      "label": "Kunde",
+      "type": "lookup",
+      "required": true,
+      "lookup": "/api/mcp/customers/search",
+      "placeholder": "Kunde suchen..."
+    },
+    {
+      "name": "sourceOrder",
+      "label": "Auftrag (Quelle)",
+      "type": "string",
+      "required": false,
+      "placeholder": "SO-2025-0001"
+    },
+    {
+      "name": "sourceDelivery",
+      "label": "Lieferschein (Quelle)",
+      "type": "string",
+      "required": false,
+      "placeholder": "DL-2025-0001"
+    },
+    {
+      "name": "paymentTerms",
+      "label": "Zahlungsbedingungen",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "value": "net30", "label": "30 Tage netto" },
+        { "value": "net14", "label": "14 Tage netto" },
+        { "value": "cash", "label": "Sofort" }
+      ]
+    },
+    {
+      "name": "dueDate",
+      "label": "Fälligkeitsdatum",
+      "type": "date",
+      "required": true
+    },
+    {
+      "name": "notes",
+      "label": "Notizen",
+      "type": "text",
+      "required": false
+    }
+  ],
+  "lines": {
+    "name": "lines",
+    "label": "Positionen",
+    "columns": [
+      {
+        "name": "article",
+        "label": "Artikel",
+        "type": "lookup",
+        "required": true,
+        "lookup": "/api/mcp/articles/search"
+      },
+      {
+        "name": "qty",
+        "label": "Menge",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "price",
+        "label": "Preis",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "vatRate",
+        "label": "MwSt %",
+        "type": "number",
+        "required": true
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,102 @@
+# AlertManager Configuration für VALEO-NeuroERP
+
+global:
+  resolve_timeout: 5m
+
+# Templates für Notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route Configuration
+route:
+  group_by: ['alertname', 'cluster', 'severity']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default'
+  
+  routes:
+    # Critical Alerts → Sofort an On-Call
+    - match:
+        severity: critical
+      receiver: 'oncall-critical'
+      continue: true
+    
+    # Warning Alerts → Team-Channel
+    - match:
+        severity: warning
+      receiver: 'team-warnings'
+    
+    # Security Alerts → Security-Team
+    - match:
+        component: security
+      receiver: 'security-team'
+      continue: true
+
+# Receivers (Notification-Channels)
+receivers:
+  # Default (Email)
+  - name: 'default'
+    email_configs:
+      - to: 'alerts@valeo-erp.com'
+        from: 'alertmanager@valeo-erp.com'
+        smarthost: 'smtp.example.com:587'
+        auth_username: 'alertmanager@valeo-erp.com'
+        auth_password: '${SMTP_PASSWORD}'
+        headers:
+          Subject: '[VALEO-ERP] {{ .GroupLabels.alertname }}'
+
+  # Critical Alerts (PagerDuty + Email)
+  - name: 'oncall-critical'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY}'
+        description: '{{ .GroupLabels.alertname }}: {{ .CommonAnnotations.summary }}'
+    email_configs:
+      - to: 'oncall@valeo-erp.com'
+        from: 'alertmanager@valeo-erp.com'
+        smarthost: 'smtp.example.com:587'
+        headers:
+          Subject: '🚨 [CRITICAL] {{ .GroupLabels.alertname }}'
+
+  # Team Warnings (Slack/Teams)
+  - name: 'team-warnings'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#valeo-erp-alerts'
+        title: '⚠️ {{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.description }}'
+        send_resolved: true
+    # Alternativ: Microsoft Teams
+    # webhook_configs:
+    #   - url: '${TEAMS_WEBHOOK_URL}'
+
+  # Security Team (Email + Slack)
+  - name: 'security-team'
+    email_configs:
+      - to: 'security@valeo-erp.com'
+        from: 'alertmanager@valeo-erp.com'
+        smarthost: 'smtp.example.com:587'
+        headers:
+          Subject: '🔒 [SECURITY] {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#valeo-erp-security'
+        title: '🔒 {{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.description }}'
+
+# Inhibit Rules (Unterdrückt Alerts basierend auf anderen)
+inhibit_rules:
+  # Wenn Database down, keine einzelnen API-Errors
+  - source_match:
+      alertname: 'DatabaseDown'
+    target_match:
+      component: 'api'
+    equal: ['namespace']
+  
+  # Wenn Pod not ready, keine Memory-Alerts
+  - source_match:
+      alertname: 'PodNotReady'
+    target_match:
+      component: 'resources'
+    equal: ['pod']
+

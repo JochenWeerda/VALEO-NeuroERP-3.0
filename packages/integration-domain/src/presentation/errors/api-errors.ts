@@ -126,28 +126,28 @@ export class ConflictError extends ApiError {
 }
 
 export class UnauthorizedError extends ApiError {
-  constructor(message: string = 'Authentication required') {
+  constructor(message = 'Authentication required') {
     super(message, HttpStatusCode.UNAUTHORIZED, 'UNAUTHORIZED');
     this.name = 'UnauthorizedError';
   }
 }
 
 export class ForbiddenError extends ApiError {
-  constructor(message: string = 'Access forbidden') {
+  constructor(message = 'Access forbidden') {
     super(message, HttpStatusCode.FORBIDDEN, 'FORBIDDEN');
     this.name = 'ForbiddenError';
   }
 }
 
 export class InternalServerError extends ApiError {
-  constructor(message: string = 'Internal server error', details?: Record<string, unknown>) {
+  constructor(message = 'Internal server error', details?: Record<string, unknown>) {
     super(message, HttpStatusCode.INTERNAL_SERVER_ERROR, 'INTERNAL_SERVER_ERROR', details);
     this.name = 'InternalServerError';
   }
 }
 
 export class ServiceUnavailableError extends ApiError {
-  constructor(message: string = 'Service temporarily unavailable') {
+  constructor(message = 'Service temporarily unavailable') {
     super(message, HttpStatusCode.SERVICE_UNAVAILABLE, 'SERVICE_UNAVAILABLE');
     this.name = 'ServiceUnavailableError';
   }

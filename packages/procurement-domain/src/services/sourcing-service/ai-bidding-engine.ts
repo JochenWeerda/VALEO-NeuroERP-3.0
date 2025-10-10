@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { Bid, Rfq, AwardRecommendation } from '../../core/entities/rfq';
+import { AwardRecommendation, Bid, Rfq } from '../../core/entities/rfq';
 import { SupplierId } from '../../core/entities/supplier';
 
 export interface BidAnalysisResult {
@@ -197,7 +197,7 @@ export class AIBiddingEngine {
 
     // Calculate overall score using weighted average
     const weights = rfq.evaluationCriteria.reduce((acc, criterion) => {
-      acc[criterion.criterion as keyof typeof acc] = criterion.weight / 100;
+      acc[criterion.criterion] = criterion.weight / 100;
       return acc;
     }, {
       price: 0.4,

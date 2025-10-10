@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { PunchOutSetup, PunchOutSession, PunchOutProtocol, PunchOutService } from '../../core/entities/catalog';
+import { PunchOutProtocol, PunchOutService, PunchOutSession, PunchOutSetup } from '../../core/entities/catalog';
 
 export interface PunchOutRequest {
   supplierId: string;

@@ -2,7 +2,7 @@
  * Request Validation Middleware
  */
 
-import { ZodSchema, ZodError } from 'zod';
+import { ZodError, ZodSchema } from 'zod';
 import { createValidationError } from '../errors/api-errors.js';
 
 export interface ValidationOptions {

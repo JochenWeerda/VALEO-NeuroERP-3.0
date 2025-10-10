@@ -3,7 +3,7 @@
  */
 
 import { Integration } from '@domain/entities/integration.js';
-import type { IntegrationRepository, PaginationOptions, PaginatedResult, Result } from '@domain/interfaces/repositories.js';
+import type { IntegrationRepository, PaginatedResult, PaginationOptions, Result } from '@domain/interfaces/repositories.js';
 import type { IntegrationId } from '@domain/values/integration-id.js';
 
 export class InMemoryIntegrationRepository implements IntegrationRepository {

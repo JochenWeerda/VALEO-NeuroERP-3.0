@@ -3,11 +3,11 @@
  */
 
 import { Webhook } from '@domain/entities/webhook.js';
-import type { WebhookRepository, PaginationOptions, PaginatedResult, Result } from '@domain/interfaces/repositories.js';
+import type { PaginatedResult, PaginationOptions, Result, WebhookRepository } from '@domain/interfaces/repositories.js';
 import type { DatabaseConnection } from '../external/database-connection.js';
 
 export class PostgresWebhookRepository implements WebhookRepository {
-  constructor(private connection: DatabaseConnection) {}
+  constructor(private readonly connection: DatabaseConnection) {}
 
   async findById(id: string): Promise<Result<Webhook | null, Error>> {
     try {

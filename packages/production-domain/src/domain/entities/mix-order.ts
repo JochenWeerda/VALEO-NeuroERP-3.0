@@ -52,7 +52,7 @@ export type Location = z.infer<typeof LocationSchema>;
 export type MixStep = z.infer<typeof MixStepSchema>;
 
 export class MixOrderEntity {
-  private data: MixOrder;
+  private readonly data: MixOrder;
 
   constructor(data: MixOrder) {
     this.data = MixOrderSchema.parse(data);
@@ -130,7 +130,7 @@ export class MixOrderEntity {
   }
 
   getDurationMinutes(): number {
-    if (!this.data.steps.length) return 0;
+    if (this.data.steps.length === 0) return 0;
     
     const startTime = new Date(this.data.steps[0].startedAt);
     const lastStep = this.data.steps[this.data.steps.length - 1];
@@ -141,13 +141,13 @@ export class MixOrderEntity {
 
   getTotalMassProcessed(): number {
     return this.data.steps.reduce((total, step) => {
-      return total + (step.actuals?.massKg || 0);
+      return total + (step.actuals?.massKg ?? 0);
     }, 0);
   }
 
   getTotalEnergyConsumed(): number {
     return this.data.steps.reduce((total, step) => {
-      return total + (step.actuals?.energyKWh || 0);
+      return total + (step.actuals?.energyKWh ?? 0);
     }, 0);
   }
 
@@ -180,7 +180,8 @@ export class MixOrderEntity {
     const stepsWithEndTime = this.data.steps.filter(step => step.endedAt);
     for (const step of stepsWithEndTime) {
       const startTime = new Date(step.startedAt);
-      const endTime = new Date(step.endedAt!);
+      if (step.endedAt === undefined || step.endedAt === null) continue;
+      const endTime = new Date(step.endedAt);
       
       if (endTime <= startTime) {
         throw new Error(`Step ${step.type} has invalid time range`);
@@ -220,7 +221,7 @@ export class MixOrderEntity {
       throw new Error('Mix order cannot be put on hold in current status');
     }
 
-    const notes = reason ? `${this.data.notes || ''}\n[HOLD] ${reason}`.trim() : this.data.notes;
+    const notes = reason ? `${this.data.notes ?? ''}\n[HOLD] ${reason}`.trim() : this.data.notes;
 
     return new MixOrderEntity({
       ...this.data,
@@ -249,7 +250,7 @@ export class MixOrderEntity {
       throw new Error('Mix order cannot be aborted in current status');
     }
 
-    const notes = reason ? `${this.data.notes || ''}\n[ABORTED] ${reason}`.trim() : this.data.notes;
+    const notes = reason ? `${this.data.notes ?? ''}\n[ABORTED] ${reason}`.trim() : this.data.notes;
 
     return new MixOrderEntity({
       ...this.data,

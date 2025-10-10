@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-alerts
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+data:
+  alerts.yml: |
+    groups:
+      - name: valeo-erp-alerts
+        interval: 30s
+        rules:
+          # High Error Rate Alert
+          - alert: ErrorRateHigh
+            expr: rate(api_requests_total{status=~"5.."}[5m]) > 0.05
+            for: 5m
+            labels:
+              severity: critical
+              component: api
+            annotations:
+              summary: "High error rate detected in VALEO-ERP"
+              description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+              runbook_url: "https://docs.valeo-erp.com/runbooks/alerts#errorratehigh"
+          
+          # High Latency Alert
+          - alert: LatencyHigh
+            expr: histogram_quantile(0.95, rate(api_request_duration_seconds_bucket[5m])) > 0.5
+            for: 5m
+            labels:
+              severity: warning
+              component: api
+            annotations:
+              summary: "High latency detected in VALEO-ERP"
+              description: "P95 latency is {{ $value }}s (threshold: 500ms)"
+              runbook_url: "https://docs.valeo-erp.com/runbooks/alerts#latencyhigh"
+          
+          # SSE Disconnect Rate High
+          - alert: SSEDisconnectsHigh
+            expr: increase(sse_connections_active[5m]) < -10
+            for: 5m
+            labels:
+              severity: warning
+              component: sse
+            annotations:
+              summary: "High SSE disconnect rate"
+              description: "More than 10 disconnects in 5 minutes"
+              runbook_url: "https://docs.valeo-erp.com/runbooks/alerts#ssedisconnectshigh"
+          
+          # Database Connection Failures
+          - alert: DatabaseDown
+            expr: probe_success{job="postgresql"} == 0
+            for: 1m
+            labels:
+              severity: critical
+              component: database
+            annotations:
+              summary: "Database connection failed"
+              description: "PostgreSQL is not reachable"
+              runbook_url: "https://docs.valeo-erp.com/runbooks/alerts#databasedown"
+          
+          # Pod Not Ready
+          - alert: PodNotReady
+            expr: kube_pod_status_ready{namespace="production",pod=~"valeo-erp.*"} == 0
+            for: 5m
+            labels:
+              severity: warning
+              component: kubernetes
+            annotations:
+              summary: "VALEO-ERP pod not ready"
+              description: "Pod {{ $labels.pod }} has been not ready for 5 minutes"
+          
+          # High Memory Usage
+          - alert: MemoryUsageHigh
+            expr: container_memory_usage_bytes{namespace="production",pod=~"valeo-erp.*"} / container_spec_memory_limit_bytes > 0.9
+            for: 5m
+            labels:
+              severity: warning
+              component: resources
+            annotations:
+              summary: "High memory usage in VALEO-ERP"
+              description: "Memory usage is {{ $value | humanizePercentage }} (threshold: 90%)"
+          
+          # Workflow Transition Failures
+          - alert: WorkflowTransitionFailures
+            expr: rate(workflow_transitions_total{status="failed"}[5m]) > 0.1
+            for: 5m
+            labels:
+              severity: warning
+              component: workflow
+            annotations:
+              summary: "High workflow transition failure rate"
+              description: "{{ $value }} transitions failing per second"
+          
+          # Auth Failures (Bruteforce-Detection)
+          - alert: AuthFailuresHigh
+            expr: rate(api_requests_total{endpoint="/api/auth/login",status="401"}[5m]) > 5
+            for: 2m
+            labels:
+              severity: critical
+              component: security
+            annotations:
+              summary: "High authentication failure rate - possible bruteforce attack"
+              description: "{{ $value }} failed login attempts per second"
+              runbook_url: "https://docs.valeo-erp.com/runbooks/alerts#authfailureshigh"
+

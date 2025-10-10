@@ -1,0 +1,316 @@
+{
+  "id": "valeo-staging",
+  "realm": "valeo-staging",
+  "displayName": "VALEO NeuroERP - Staging",
+  "displayNameHtml": "<div class=\"kc-logo-text\"><span>VALEO NeuroERP</span></div>",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "registrationEmailAsUsername": false,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 5,
+  "defaultSignatureAlgorithm": "RS256",
+  "revokeRefreshToken": false,
+  "refreshTokenMaxReuse": 0,
+  "accessTokenLifespan": 900,
+  "accessTokenLifespanForImplicitFlow": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "ssoSessionIdleTimeoutRememberMe": 0,
+  "ssoSessionMaxLifespanRememberMe": 0,
+  "offlineSessionIdleTimeout": 2592000,
+  "offlineSessionMaxLifespanEnabled": false,
+  "offlineSessionMaxLifespan": 5184000,
+  "accessCodeLifespan": 60,
+  "accessCodeLifespanUserAction": 300,
+  "accessCodeLifespanLogin": 1800,
+  "actionTokenGeneratedByAdminLifespan": 43200,
+  "actionTokenGeneratedByUserLifespan": 300,
+  "clients": [
+    {
+      "clientId": "valeo-erp-staging",
+      "name": "VALEO NeuroERP Frontend (Staging)",
+      "description": "Frontend-Client für Staging-Umgebung",
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "webOrigins": [
+        "http://localhost:3001",
+        "http://localhost:3000",
+        "http://127.0.0.1:3001"
+      ],
+      "redirectUris": [
+        "http://localhost:3001/callback",
+        "http://localhost:3001/*",
+        "http://127.0.0.1:3001/callback",
+        "http://127.0.0.1:3001/*"
+      ],
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": true,
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ],
+      "attributes": {
+        "access.token.lifespan": "900",
+        "pkce.code.challenge.method": "S256"
+      }
+    }
+  ],
+  "clientScopes": [
+    {
+      "name": "sales:read",
+      "description": "Read access to sales documents",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      }
+    },
+    {
+      "name": "sales:write",
+      "description": "Write access to sales documents",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      }
+    },
+    {
+      "name": "sales:approve",
+      "description": "Approve sales documents",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      }
+    },
+    {
+      "name": "sales:post",
+      "description": "Post sales documents to accounting",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      }
+    },
+    {
+      "name": "policy:read",
+      "description": "Read policy configurations",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      }
+    },
+    {
+      "name": "policy:write",
+      "description": "Write policy configurations",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      }
+    },
+    {
+      "name": "admin:all",
+      "description": "Full administrative access",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      }
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Standard user role",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "admin",
+        "description": "Administrator role with full access",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "sales_manager",
+        "description": "Sales manager with approve rights",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "readonly",
+        "description": "Read-only access to all documents",
+        "composite": false,
+        "clientRole": false
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "test-admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "Administrator",
+      "email": "test-admin@valeo-staging.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["user", "admin"],
+      "clientRoles": {
+        "valeo-erp-staging": ["sales:read", "sales:write", "sales:approve", "sales:post", "policy:read", "policy:write", "admin:all"]
+      },
+      "attributes": {
+        "department": ["IT"],
+        "employee_id": ["EMP-ADMIN-001"]
+      }
+    },
+    {
+      "username": "test-user",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "User",
+      "email": "test-user@valeo-staging.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["user"],
+      "clientRoles": {
+        "valeo-erp-staging": ["sales:read", "sales:write", "policy:read"]
+      },
+      "attributes": {
+        "department": ["Sales"],
+        "employee_id": ["EMP-USER-001"]
+      }
+    },
+    {
+      "username": "test-sales-manager",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "Sales Manager",
+      "email": "test-sales-mgr@valeo-staging.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["user", "sales_manager"],
+      "clientRoles": {
+        "valeo-erp-staging": ["sales:read", "sales:write", "sales:approve", "policy:read"]
+      },
+      "attributes": {
+        "department": ["Sales"],
+        "employee_id": ["EMP-SALESMGR-001"]
+      }
+    },
+    {
+      "username": "test-readonly",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "Readonly",
+      "email": "test-readonly@valeo-staging.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["user", "readonly"],
+      "clientRoles": {
+        "valeo-erp-staging": ["sales:read", "policy:read"]
+      },
+      "attributes": {
+        "department": ["Audit"],
+        "employee_id": ["EMP-READONLY-001"]
+      }
+    }
+  ],
+  "scopeMappings": [
+    {
+      "clientScope": "sales:read",
+      "roles": ["user", "admin", "sales_manager", "readonly"]
+    },
+    {
+      "clientScope": "sales:write",
+      "roles": ["user", "admin", "sales_manager"]
+    },
+    {
+      "clientScope": "sales:approve",
+      "roles": ["admin", "sales_manager"]
+    },
+    {
+      "clientScope": "sales:post",
+      "roles": ["admin"]
+    },
+    {
+      "clientScope": "policy:read",
+      "roles": ["user", "admin", "sales_manager", "readonly"]
+    },
+    {
+      "clientScope": "policy:write",
+      "roles": ["admin"]
+    },
+    {
+      "clientScope": "admin:all",
+      "roles": ["admin"]
+    }
+  ],
+  "defaultDefaultClientScopes": [
+    "role_list",
+    "profile",
+    "email",
+    "roles",
+    "web-origins"
+  ],
+  "internationalizationEnabled": true,
+  "supportedLocales": ["de", "en"],
+  "defaultLocale": "de",
+  "loginTheme": "keycloak",
+  "accountTheme": "keycloak.v2",
+  "adminTheme": "keycloak.v2",
+  "emailTheme": "keycloak"
+}
+

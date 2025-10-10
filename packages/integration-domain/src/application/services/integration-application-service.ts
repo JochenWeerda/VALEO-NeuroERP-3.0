@@ -5,30 +5,30 @@
 import type { UnitOfWork } from '@domain/interfaces/repositories.js';
 import type { Result } from '@domain/interfaces/repositories.js';
 import { 
-  CreateIntegrationCommand,
-  UpdateIntegrationCommand,
-  DeleteIntegrationCommand,
   ActivateIntegrationCommand,
-  DeactivateIntegrationCommand,
-  CreateIntegrationUseCase,
-  UpdateIntegrationUseCase,
-  DeleteIntegrationUseCase,
   ActivateIntegrationUseCase,
+  CreateIntegrationCommand,
+  CreateIntegrationUseCase,
+  DeactivateIntegrationCommand,
   DeactivateIntegrationUseCase,
-  GetIntegrationQuery,
-  ListIntegrationsQuery,
-  GetIntegrationByNameQuery,
-  GetIntegrationsByTypeQuery,
+  DeleteIntegrationCommand,
+  DeleteIntegrationUseCase,
   GetActiveIntegrationsQuery,
+  GetIntegrationByNameQuery,
+  GetIntegrationQuery,
   GetIntegrationQueryHandler,
-  ListIntegrationsQueryHandler
+  GetIntegrationsByTypeQuery,
+  ListIntegrationsQuery,
+  ListIntegrationsQueryHandler,
+  UpdateIntegrationCommand,
+  UpdateIntegrationUseCase
 } from '../use-cases/integration-use-cases.js';
 import type { 
   CreateIntegrationRequest,
-  UpdateIntegrationRequest,
+  IntegrationListResponse,
   IntegrationQuery,
   IntegrationResponse,
-  IntegrationListResponse
+  UpdateIntegrationRequest
 } from '../dto/integration-dto.js';
 
 export class IntegrationApplicationService {
@@ -40,7 +40,7 @@ export class IntegrationApplicationService {
   private getIntegrationQueryHandler: GetIntegrationQueryHandler;
   private listIntegrationsQueryHandler: ListIntegrationsQueryHandler;
 
-  constructor(private unitOfWork: UnitOfWork) {
+  constructor(private readonly unitOfWork: UnitOfWork) {
     // Initialize use cases
     this.createIntegrationUseCase = new CreateIntegrationUseCase(unitOfWork);
     this.updateIntegrationUseCase = new UpdateIntegrationUseCase(unitOfWork);

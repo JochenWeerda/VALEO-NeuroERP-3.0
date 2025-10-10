@@ -4,7 +4,7 @@
 
 import type { BaseEntity, EntityStatus } from '@shared/types/common.js';
 import { SyncJobId } from '../values/sync-job-id.js';
-import { SyncJobCreatedEvent, SyncJobStartedEvent, SyncJobCompletedEvent, SyncJobFailedEvent } from '../events/sync-job-events.js';
+import { SyncJobCompletedEvent, SyncJobCreatedEvent, SyncJobFailedEvent, SyncJobStartedEvent } from '../events/sync-job-events.js';
 
 export type SyncJobStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
@@ -55,7 +55,7 @@ export interface SyncJobProps {
 export class SyncJob implements BaseEntity {
   private _events: Array<SyncJobCreatedEvent | SyncJobStartedEvent | SyncJobCompletedEvent | SyncJobFailedEvent> = [];
 
-  constructor(private props: SyncJobProps) {}
+  constructor(private readonly props: SyncJobProps) {}
 
   // Factory method
   static create(

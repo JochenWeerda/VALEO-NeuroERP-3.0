@@ -1,1 +1,1 @@
-{"version":3,"file":"simple-server.d.ts","sourceRoot":"","sources":["../../src/app/simple-server.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAkBH,QAAA,MAAM,OAAO,goBAUX,CAAC;AA2HH,eAAe,OAAO,CAAC"}
+{"version":3,"file":"simple-server.d.ts","sourceRoot":"","sources":["../../src/app/simple-server.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAGH,OAAO,IAAI,MAAM,MAAM,CAAC;AA8CxB,QAAA,MAAM,OAAO,gnBAEX,CAAC;AA+IH,eAAe,OAAO,CAAC"}

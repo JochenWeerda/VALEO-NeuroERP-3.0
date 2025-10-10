@@ -7,6 +7,7 @@ import { Request, Response, Router } from 'express';
 import { FinanzBuchungService } from '../../application/services/finanzBuchung.service';
 
 const HTTP_STATUS = {
+  BAD_REQUEST: 400,
   NOT_FOUND: 404,
   CREATED: 201,
   NO_CONTENT: 204,
@@ -28,7 +29,12 @@ export function buildFinanzBuchungRouter(
   });
 
   router.get(`${baseRoute}/:finanzBuchungId`, async (req: Request, res: Response) => {
-    const entity = await service.findById(req.params.finanzBuchungId);
+    const id = req.params.finanzBuchungId;
+    if (id === null || id === undefined || id.trim().length === 0) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzBuchungId parameter is required' });
+      return;
+    }
+    const entity = await service.findById(id);
     if (entity === undefined || entity === null) {
       res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'FinanzBuchung not found' });
       return;
@@ -42,12 +48,22 @@ export function buildFinanzBuchungRouter(
   });
 
   router.put(`${baseRoute}/:finanzBuchungId`, async (req: Request, res: Response) => {
-    const updated = await service.update(req.params.finanzBuchungId, req.body);
+    const id = req.params.finanzBuchungId;
+    if (id === null || id === undefined || id.trim().length === 0) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzBuchungId parameter is required' });
+      return;
+    }
+    const updated = await service.update(id, req.body);
     res.json(updated);
   });
 
   router.delete(`${baseRoute}/:finanzBuchungId`, async (req: Request, res: Response) => {
-    await service.remove(req.params.finanzBuchungId);
+    const id = req.params.finanzBuchungId;
+    if (id === null || id === undefined || id.trim().length === 0) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzBuchungId parameter is required' });
+      return;
+    }
+    await service.remove(id);
     res.status(HTTP_STATUS.NO_CONTENT).send();
   });
 

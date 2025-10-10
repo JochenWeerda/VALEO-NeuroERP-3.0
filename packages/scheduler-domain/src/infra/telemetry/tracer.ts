@@ -1,4 +1,4 @@
-import { trace, Span, Tracer, SpanStatusCode } from '@opentelemetry/api';
+import { Span, SpanStatusCode, Tracer, trace } from '@opentelemetry/api';
 
 export interface TracingConfig {
   serviceName: string;
@@ -7,9 +7,9 @@ export interface TracingConfig {
 }
 
 export class TracingService {
-  private tracer: Tracer;
+  private readonly tracer: Tracer;
 
-  constructor(private config: TracingConfig) {
+  constructor(private readonly config: TracingConfig) {
     this.tracer = trace.getTracer(config.serviceName, config.serviceVersion);
   }
 

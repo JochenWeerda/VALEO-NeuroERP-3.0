@@ -33,12 +33,12 @@ function normalizeProps(dto, existing) {
         kontonummer,
         kontobezeichnung,
         kontotyp: assertKontotyp(kontotyp),
-        kontenklasse: dto.kontenklasse?.trim() || existing?.kontenklasse,
-        kontengruppe: dto.kontengruppe?.trim() || existing?.kontengruppe,
+        kontenklasse: dto.kontenklasse?.trim() ?? existing?.kontenklasse,
+        kontengruppe: dto.kontengruppe?.trim() ?? existing?.kontengruppe,
         ist_aktiv: dto.ist_aktiv ?? existing?.ist_aktiv ?? true,
         ist_steuerpflichtig: dto.ist_steuerpflichtig ?? existing?.ist_steuerpflichtig ?? false,
         steuersatz: dto.steuersatz ?? existing?.steuersatz,
-        beschreibung: dto.beschreibung?.trim() || existing?.beschreibung,
+        beschreibung: dto.beschreibung?.trim() ?? existing?.beschreibung,
         erstellt_von: dto.erstellt_von ?? existing?.erstellt_von,
         id: existing?.id,
         erstellt_am: existing?.erstellt_am,
@@ -62,7 +62,7 @@ class FinanzKontoService {
     async create(payload) {
         const normalized = normalizeProps(payload);
         const existing = await this.repository.findByKontonummer(normalized.kontonummer);
-        if (existing) {
+        if (existing !== undefined && existing !== null) {
             throw new Error(`FinanzKonto with kontonummer ${normalized.kontonummer} already exists`);
         }
         const entity = finanzKonto_entity_1.FinanzKonto.create(normalized);
@@ -87,7 +87,7 @@ class FinanzKontoService {
             erstellt_von: currentProps.erstellt_von,
         }, currentProps);
         const duplicate = await this.repository.findByKontonummer(normalized.kontonummer);
-        if (duplicate && duplicate.toPrimitives().id !== id) {
+        if ((duplicate !== undefined && duplicate !== null) && duplicate.toPrimitives().id !== id) {
             throw new Error(`Another FinanzKonto already uses kontonummer ${normalized.kontonummer}`);
         }
         const entity = finanzKonto_entity_1.FinanzKonto.create({ ...normalized, id });

@@ -397,9 +397,8 @@ export function createCorrelatedEvent<T extends { eventId: string; causationId?:
 }
 
 // Event validation helper
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function validateEventPayload<T>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
   schema: any,
   payload: T
 ): { valid: boolean; errors?: string[] } {

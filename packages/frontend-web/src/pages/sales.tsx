@@ -5,9 +5,11 @@ import { useMcpQuery } from "@/lib/mcp"
 
 type Order = { id: string; customer: string; total: number; currency: string; status: 'draft'|'confirmed'|'shipped' }
 
-export default function SalesPanel() {
+const DECIMAL_PLACES = 2
+
+export default function SalesPanel(): JSX.Element {
   const { data, isLoading } = useMcpQuery<{ data: Order[] }>('sales','list',[])
-  const rows = data?.data ?? []
+  const rows: Order[] = (data?.data ?? []) as Order[]
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">Sales</h2>
@@ -25,11 +27,11 @@ export default function SalesPanel() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map(o => (
+              {rows.map((o: Order): JSX.Element => (
                 <TableRow key={o.id}>
                   <TableCell className="font-mono">{o.id}</TableCell>
                   <TableCell>{o.customer}</TableCell>
-                  <TableCell className="text-right">{o.total.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">{o.total.toFixed(DECIMAL_PLACES)}</TableCell>
                   <TableCell>{o.currency}</TableCell>
                   <TableCell>{o.status}</TableCell>
                   <TableCell className="text-right"><Button size="sm" variant="secondary">Open</Button></TableCell>

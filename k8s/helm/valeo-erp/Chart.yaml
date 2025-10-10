@@ -1,0 +1,15 @@
+apiVersion: v2
+name: valeo-erp
+description: VALEO-NeuroERP Helm Chart
+type: application
+version: 3.0.0
+appVersion: "3.0.0"
+keywords:
+  - erp
+  - warehouse
+  - inventory
+home: https://github.com/valeo/neuroerp
+maintainers:
+  - name: VALEO Team
+    email: support@valeo-erp.com
+

@@ -376,7 +376,7 @@ export class Requisition {
     if (!this.approval) return false;
 
     const currentStep = this.approval.steps[this.approval.currentStep - 1];
-    if (!currentStep || !currentStep.dueDate) return false;
+    if (!currentStep?.dueDate) return false;
 
     return new Date() > currentStep.dueDate;
   }

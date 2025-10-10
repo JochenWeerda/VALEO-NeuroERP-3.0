@@ -2,6 +2,11 @@
 
 ## Production-Ready Enterprise Resource Planning System
 
+![Deploy Staging](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/deploy-staging.yml/badge.svg)
+![Security Scan](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/security-scan.yml/badge.svg)
+![License](https://img.shields.io/badge/license-Proprietary-red)
+![Version](https://img.shields.io/badge/version-3.0.0-blue)
+
 **Status:** ✅ **Production Ready** | **Version:** 3.0.0 | **Authentication:** ✅ OIDC Enabled
 
 A comprehensive, production-ready ERP system with modern authentication, real-time capabilities, and enterprise-grade security.
@@ -159,6 +164,35 @@ For development without OIDC setup, the system includes demo authentication endp
 
 ## 🚢 Deployment
 
+### Staging Deployment (Docker Desktop on Windows)
+
+**Quick-Start:**
+```powershell
+# Deploy Staging-Stack
+.\scripts\staging-deploy.ps1
+
+# Run Smoke-Tests
+.\scripts\smoke-tests-staging.sh
+
+# Access Frontend
+# http://localhost:3001
+# Login: test-admin / Test123!
+```
+
+**Auto-Deploy via GitHub Actions:**
+```bash
+# Push to develop branch triggers automatic deployment
+git push origin develop
+
+# Or manually trigger via GitHub UI:
+# https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/deploy-staging.yml
+```
+
+**Dokumentation:**
+- [STAGING-DEPLOYMENT.md](./STAGING-DEPLOYMENT.md) - Vollständige Staging-Anleitung
+- [GITHUB-ACTIONS-STAGING-SETUP.md](./GITHUB-ACTIONS-STAGING-SETUP.md) - Auto-Deploy Setup
+- [scripts/README.md](./scripts/README.md) - Scripts-Dokumentation
+
 ### Production Deployment
 ```bash
 # Build and deploy with Docker
@@ -168,10 +202,14 @@ docker-compose -f docker-compose.prod.yml up -d
 kubectl apply -f k8s/
 ```
 
+**Dokumentation:**
+- [DEPLOYMENT-PLAN.md](./DEPLOYMENT-PLAN.md) - Production-Deployment-Plan
+- [PRODUCTION-AUTH-SETUP.md](./PRODUCTION-AUTH-SETUP.md) - Authentication-Setup
+
 ### Environment Configuration
 - **Development:** `.env` with local configuration
+- **Staging:** `env.example.staging` - Docker Desktop (Windows)
 - **Production:** Environment variables or Kubernetes secrets
-- **Staging:** Separate environment with test data
 
 ## 📈 Monitoring & Observability
 
@@ -203,10 +241,15 @@ For technical support or questions:
 ---
 
 **🆕 Latest Updates:**
+- ✅ **Staging-Deployment vollständig automatisiert** (Docker Desktop + GitHub Actions)
+- ✅ **18 automatisierte Smoke-Tests** für Staging-Umgebung
 - ✅ **Production-ready authentication system** with OIDC
 - ✅ **Real API integration** (no more mocks)
 - ✅ **Complete frontend-backend integration**
 - ✅ **Enterprise security features**
 - ✅ **Docker and Kubernetes deployment ready**
+- ✅ **Auto-Deploy bei Push auf develop-Branch**
 
 **VALEO NeuroERP 3.0 - Production Ready! 🚀**
+
+**Repository:** https://github.com/JochenWeerda/VALEO-NeuroERP-3.0

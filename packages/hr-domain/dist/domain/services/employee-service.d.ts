@@ -3,7 +3,9 @@
  * Business logic for employee management
  */
 import { Employee } from '../entities/employee';
-import { EmployeeRepository } from '../repositories/employee-repository';
+import { DepartmentStatistics, EmployeeFilters, EmployeeRepository, PaginatedResult, PaginationOptions } from '../repositories/employee-repository';
+import { type HREvent } from '../events';
+type DomainEventPublisher = (event: HREvent) => Promise<void>;
 export interface CreateEmployeeCommand {
     tenantId: string;
     employeeNumber: string;
@@ -73,10 +75,17 @@ export interface DeactivateEmployeeCommand {
     terminationDate?: string;
     updatedBy?: string;
 }
+export interface EmployeeStatistics {
+    totalEmployees: number;
+    activeEmployees: number;
+    inactiveEmployees: number;
+    departmentBreakdown: DepartmentStatistics[];
+}
 export declare class EmployeeService {
-    private employeeRepository;
-    private eventPublisher;
-    constructor(employeeRepository: EmployeeRepository, eventPublisher: (event: any) => Promise<void>);
+    private readonly employeeRepository;
+    private readonly eventPublisher;
+    private readonly logger;
+    constructor(employeeRepository: EmployeeRepository, eventPublisher: DomainEventPublisher);
     createEmployee(command: CreateEmployeeCommand): Promise<Employee>;
     updateEmployee(command: UpdateEmployeeCommand): Promise<Employee>;
     assignRole(command: AssignRoleCommand): Promise<Employee>;
@@ -84,7 +93,8 @@ export declare class EmployeeService {
     deactivateEmployee(command: DeactivateEmployeeCommand): Promise<Employee>;
     reactivateEmployee(tenantId: string, employeeId: string, updatedBy?: string): Promise<Employee>;
     getEmployee(tenantId: string, employeeId: string): Promise<Employee>;
-    listEmployees(tenantId: string, filters?: any, pagination?: any): Promise<any>;
-    getEmployeeStatistics(tenantId: string): Promise<any>;
+    listEmployees(tenantId: string, filters?: EmployeeFilters, pagination?: PaginationOptions): Promise<Employee[] | PaginatedResult<Employee>>;
+    getEmployeeStatistics(tenantId: string): Promise<EmployeeStatistics>;
 }
+export {};
 //# sourceMappingURL=employee-service.d.ts.map

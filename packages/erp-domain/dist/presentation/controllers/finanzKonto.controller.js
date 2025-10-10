@@ -18,7 +18,12 @@ function buildFinanzKontoRouter({ service, baseRoute = '/finanzKonto' }) {
         res.json(result);
     });
     router.get(`${baseRoute}/:finanzKontoId`, async (req, res) => {
-        const entity = await service.findById(req.params.finanzKontoId);
+        const id = req.params.finanzKontoId;
+        if (!id) {
+            res.status(400).json({ message: 'finanzKontoId parameter is required' });
+            return;
+        }
+        const entity = await service.findById(id);
         if (entity === undefined || entity === null) {
             res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'FinanzKonto not found' });
             return;
@@ -30,11 +35,21 @@ function buildFinanzKontoRouter({ service, baseRoute = '/finanzKonto' }) {
         res.status(HTTP_STATUS.CREATED).json(created);
     });
     router.put(`${baseRoute}/:finanzKontoId`, async (req, res) => {
-        const updated = await service.update(req.params.finanzKontoId, req.body);
+        const id = req.params.finanzKontoId;
+        if (!id) {
+            res.status(400).json({ message: 'finanzKontoId parameter is required' });
+            return;
+        }
+        const updated = await service.update(id, req.body);
         res.json(updated);
     });
     router.delete(`${baseRoute}/:finanzKontoId`, async (req, res) => {
-        await service.remove(req.params.finanzKontoId);
+        const id = req.params.finanzKontoId;
+        if (!id) {
+            res.status(400).json({ message: 'finanzKontoId parameter is required' });
+            return;
+        }
+        await service.remove(id);
         res.status(HTTP_STATUS.NO_CONTENT).send();
     });
     return router;

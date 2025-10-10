@@ -23,7 +23,7 @@ export class ConflictDetector {
   /**
    * Detect conflicts in a set of business rules
    */
-  public static detectConflicts<TContext>(
+  public static detectConflicts<_TContext = unknown>(
     rules: Array<{ name: string; description: string; priority: number }>,
     domain: string
   ): RuleConflict[] {
@@ -50,7 +50,10 @@ export class ConflictDetector {
       if (!priorityGroups.has(rule.priority)) {
         priorityGroups.set(rule.priority, []);
       }
-      priorityGroups.get(rule.priority)!.push(rule.name);
+      const group = priorityGroups.get(rule.priority);
+      if (group !== undefined) {
+        group.push(rule.name);
+      }
     });
 
     priorityGroups.forEach((ruleNames, priority) => {

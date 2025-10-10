@@ -18,6 +18,21 @@ from app.core.database import create_tables
 from app.api.v1.api import api_router
 from app.core.logging import setup_logging
 from app.core.container_config import configure_container  # Import container configuration
+from app.policy.router import router as policy_router  # Policy Manager
+from app.auth.router import router as auth_router  # Authentication
+from app.documents.router import router as documents_router  # Documents & Flows
+from app.forms.router import router as forms_router  # Form Specs
+from app.lookup.router import router as lookup_router  # Lookup/Autocomplete
+from app.routers.print_router import router as print_router  # Print & Archive
+from app.routers.export_router import router as export_router  # Export CSV/XLSX
+from app.routers.workflow_router import router as workflow_router  # Workflow & Approval
+from app.routers.sse_router import router as sse_router  # SSE Streams
+from app.routers.verify_router import router as verify_router  # Document Verification
+from app.routers.gdpr_router import router as gdpr_router  # GDPR Compliance
+from app.routers.numbering_router import router as numbering_router  # Numbering Service
+from app.routers.admin_dms_router import router as admin_dms_router  # Admin DMS Integration
+from app.routers.dms_webhook_router import router as dms_webhook_router  # DMS Webhooks & Inbox
+from prometheus_client import make_asgi_app
 
 # Setup logging
 setup_logging()
@@ -111,16 +126,31 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": "Internal server error", "type": "internal_error"}
     )
 
-# Health check endpoint
-@app.get("/health")
+# Health check endpoint (liveness)
+@app.get("/healthz")
 async def health_check():
-    """Health check endpoint"""
+    """Liveness probe - basic health check"""
     return {
         "status": "healthy",
         "service": "VALEO-NeuroERP API",
         "version": "3.0.0",
         "timestamp": time.time()
     }
+
+# Readiness check endpoint
+@app.get("/readyz")
+async def readiness_check():
+    """Readiness probe - checks dependencies"""
+    from app.core.health import readiness_check as do_readiness_check
+    result = await do_readiness_check()
+    
+    if not result["ready"]:
+        return JSONResponse(
+            status_code=503,
+            content=result
+        )
+    
+    return result
 
 # Root endpoint
 @app.get("/")
@@ -136,6 +166,46 @@ async def root():
 
 # Include API routers
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Include Authentication Router (⚠️ NUR FÜR ENTWICKLUNG!)
+app.include_router(auth_router)
+
+# Include Policy Manager (direkt, ohne prefix - hat eigenen prefix)
+app.include_router(policy_router)
+
+# Include Documents & Forms (Phase O - Belegfluss)
+app.include_router(documents_router)
+app.include_router(forms_router)
+app.include_router(lookup_router)
+
+# Include Print & Export (Phase P - Dokumenten-Druck)
+app.include_router(print_router)
+app.include_router(export_router)
+
+# Include Workflow & Approval (Phase Q - Workflow-Management)
+app.include_router(workflow_router)
+
+# Include SSE Streams (Phase P - Realtime Events)
+app.include_router(sse_router)
+
+# Include Document Verification (Phase Q - Document Integrity)
+app.include_router(verify_router)
+
+# Include GDPR Compliance
+app.include_router(gdpr_router)
+
+# Include Numbering Service (PostgreSQL)
+app.include_router(numbering_router)
+
+# Include Admin DMS Integration
+app.include_router(admin_dms_router)
+
+# Include DMS Webhooks & Inbox
+app.include_router(dms_webhook_router)
+
+# Mount Prometheus metrics endpoint
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
 
 if __name__ == "__main__":
     uvicorn.run(

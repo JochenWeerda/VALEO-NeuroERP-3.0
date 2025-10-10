@@ -31,10 +31,10 @@ const COST_SAVINGS_PER_YEAR = 1250;
 const FORECAST_EXPIRES_DAYS = 30;
 const CONFIDENCE_ACCURACY_BASE = 0.87;
 import {
-  AISlottingOptimizedEvent,
-  AIForecastEnhancedEvent,
   AIAnomalyDetectedEvent,
-  AIModelTrainedEvent
+  AIForecastEnhancedEvent,
+  AIModelTrainedEvent,
+  AISlottingOptimizedEvent
 } from '../core/domain-events/inventory-domain-events';
 
 export interface SlottingRecommendation {

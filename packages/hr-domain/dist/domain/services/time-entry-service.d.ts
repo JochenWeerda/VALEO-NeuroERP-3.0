@@ -3,8 +3,10 @@
  * Business logic for time tracking and approval
  */
 import { TimeEntry } from '../entities/time-entry';
-import { TimeEntryRepository } from '../repositories/time-entry-repository';
+import { MonthlySummary, PaginatedResult, PaginationOptions, TimeEntryFilters, TimeEntryRepository, YearlySummary } from '../repositories/time-entry-repository';
 import { EmployeeRepository } from '../repositories/employee-repository';
+import { type HREvent } from '../events';
+type DomainEventPublisher = (event: HREvent) => Promise<void>;
 export interface CreateTimeEntryCommand {
     tenantId: string;
     employeeId: string;
@@ -40,21 +42,31 @@ export interface RejectTimeEntryCommand {
     rejectedBy: string;
     reason?: string;
 }
+export interface TimeEntrySummary {
+    totalHours: number;
+    regularHours: number;
+    overtimeHours: number;
+    totalEntries: number;
+    approvedEntries: number;
+    pendingEntries: number;
+}
 export declare class TimeEntryService {
-    private timeEntryRepository;
-    private employeeRepository;
-    private eventPublisher;
-    constructor(timeEntryRepository: TimeEntryRepository, employeeRepository: EmployeeRepository, eventPublisher: (event: any) => Promise<void>);
+    private readonly timeEntryRepository;
+    private readonly employeeRepository;
+    private readonly eventPublisher;
+    private readonly logger;
+    constructor(timeEntryRepository: TimeEntryRepository, employeeRepository: EmployeeRepository, eventPublisher: DomainEventPublisher);
     createTimeEntry(command: CreateTimeEntryCommand): Promise<TimeEntry>;
     updateTimeEntry(command: UpdateTimeEntryCommand): Promise<TimeEntry>;
     approveTimeEntry(command: ApproveTimeEntryCommand): Promise<TimeEntry>;
     rejectTimeEntry(command: RejectTimeEntryCommand): Promise<TimeEntry>;
     getTimeEntry(tenantId: string, timeEntryId: string): Promise<TimeEntry>;
-    listTimeEntries(tenantId: string, filters?: any, pagination?: any): Promise<any>;
+    listTimeEntries(tenantId: string, filters?: TimeEntryFilters, pagination?: PaginationOptions): Promise<TimeEntry[] | PaginatedResult<TimeEntry>>;
     getEmployeeTimeEntries(tenantId: string, employeeId: string, fromDate?: string, toDate?: string): Promise<TimeEntry[]>;
     getPendingApprovals(tenantId: string): Promise<TimeEntry[]>;
-    getEmployeeTimeSummary(tenantId: string, employeeId: string, fromDate: string, toDate: string): Promise<any>;
-    getMonthlySummary(tenantId: string, employeeId: string, year: number, month: number): Promise<any>;
-    getYearlySummary(tenantId: string, employeeId: string, year: number): Promise<any>;
+    getEmployeeTimeSummary(tenantId: string, employeeId: string, fromDate: string, toDate: string): Promise<TimeEntrySummary>;
+    getMonthlySummary(tenantId: string, employeeId: string, year: number, month: number): Promise<MonthlySummary>;
+    getYearlySummary(tenantId: string, employeeId: string, year: number): Promise<YearlySummary>;
 }
+export {};
 //# sourceMappingURL=time-entry-service.d.ts.map

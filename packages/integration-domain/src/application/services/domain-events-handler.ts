@@ -4,19 +4,19 @@
 
 import type { 
   IntegrationCreatedEvent,
-  IntegrationUpdatedEvent,
-  IntegrationDeletedEvent
+  IntegrationDeletedEvent,
+  IntegrationUpdatedEvent
 } from '@domain/events/integration-events.js';
 import type {
   WebhookCreatedEvent,
-  WebhookTriggeredEvent,
-  WebhookFailedEvent
+  WebhookFailedEvent,
+  WebhookTriggeredEvent
 } from '@domain/events/webhook-events.js';
 import type {
-  SyncJobCreatedEvent,
-  SyncJobStartedEvent,
   SyncJobCompletedEvent,
-  SyncJobFailedEvent
+  SyncJobCreatedEvent,
+  SyncJobFailedEvent,
+  SyncJobStartedEvent
 } from '@domain/events/sync-job-events.js';
 import type { BaseDomainEvent } from '@domain/events/base-domain-event.js';
 
@@ -216,7 +216,7 @@ export class SyncJobFailedEventHandler implements DomainEventHandler<SyncJobFail
  * Event Handler Registry
  */
 export class EventHandlerRegistry {
-  constructor(private eventBus: EventBus) {}
+  constructor(private readonly eventBus: EventBus) {}
 
   registerAllHandlers(): void {
     // Register integration event handlers
@@ -251,7 +251,7 @@ export class EventHandlerRegistry {
  * Event Publisher Service
  */
 export class EventPublisherService {
-  constructor(private eventBus: EventBus) {}
+  constructor(private readonly eventBus: EventBus) {}
 
   async publishDomainEvents(events: BaseDomainEvent[]): Promise<void> {
     const promises = events.map(event => this.eventBus.publish(event));

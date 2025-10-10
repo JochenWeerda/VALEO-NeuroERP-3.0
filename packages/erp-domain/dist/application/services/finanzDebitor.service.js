@@ -45,7 +45,7 @@ class FinanzDebitorService {
     async create(payload) {
         const normalized = normalize(payload);
         const existing = await this.repository.findByDebitorNr(normalized.debitor_nr);
-        if (existing) {
+        if (existing !== undefined && existing !== null) {
             throw new Error(`Debitor ${normalized.debitor_nr} already exists`);
         }
         const entity = finanzDebitor_entity_1.FinanzDebitor.create(normalized);
@@ -71,7 +71,7 @@ class FinanzDebitorService {
             erstellt_von: current.erstellt_von,
         }, current);
         const duplicate = await this.repository.findByDebitorNr(normalized.debitor_nr);
-        if (duplicate && duplicate.toPrimitives().id !== id) {
+        if ((duplicate !== undefined && duplicate !== null) && duplicate.toPrimitives().id !== id) {
             throw new Error(`Another Debitor already uses debitor_nr ${normalized.debitor_nr}`);
         }
         const entity = finanzDebitor_entity_1.FinanzDebitor.create({ ...normalized, id });

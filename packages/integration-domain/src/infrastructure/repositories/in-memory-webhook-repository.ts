@@ -3,7 +3,7 @@
  */
 
 import { Webhook } from '@domain/entities/webhook.js';
-import type { WebhookRepository, PaginationOptions, PaginatedResult, Result } from '@domain/interfaces/repositories.js';
+import type { PaginatedResult, PaginationOptions, Result, WebhookRepository } from '@domain/interfaces/repositories.js';
 
 export class InMemoryWebhookRepository implements WebhookRepository {
   private webhooks = new Map<string, Webhook>();

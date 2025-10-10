@@ -7,7 +7,8 @@
 import { IBusinessRule } from './business-rule';
 
 export class RuleRegistry {
-  private static rules: Map<string, IBusinessRule<any>[]> = new Map();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private static readonly rules: Map<string, IBusinessRule<any>[]> = new Map();
 
   /**
    * Register a business rule for a specific domain
@@ -25,7 +26,7 @@ export class RuleRegistry {
    * Get all rules for a specific domain, sorted by priority
    */
   public static getRulesForDomain<TContext>(domain: string): IBusinessRule<TContext>[] {
-    return (RuleRegistry.rules.get(domain) || []) as IBusinessRule<TContext>[];
+    return (RuleRegistry.rules.get(domain) ?? []) as IBusinessRule<TContext>[];
   }
 
   /**
@@ -39,7 +40,8 @@ export class RuleRegistry {
    * Get rule count for a domain
    */
   public static getRuleCountForDomain(domain: string): number {
-    return RuleRegistry.rules.get(domain)?.length || 0;
+    const domainRules = RuleRegistry.rules.get(domain);
+    return (domainRules !== undefined && domainRules.length > 0) ? domainRules.length : 0;
   }
 
   /**
@@ -59,6 +61,7 @@ export class RuleRegistry {
     const initialLength = domainRules.length;
     RuleRegistry.rules.set(domain, domainRules.filter(rule => rule.name !== ruleName));
 
-    return RuleRegistry.rules.get(domain)!.length < initialLength;
+    const updatedRules = RuleRegistry.rules.get(domain);
+    return updatedRules !== undefined && updatedRules.length < initialLength;
   }
 }

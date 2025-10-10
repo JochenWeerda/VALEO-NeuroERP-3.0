@@ -5,7 +5,7 @@
  */
 
 import { RuleRegistry } from './rule-registry';
-import { ConflictDetector, RuleConflict, ConflictAnalysisResult } from './conflict-detection';
+import { ConflictAnalysisResult, ConflictDetector, RuleConflict } from './conflict-detection';
 import { IBusinessRule } from './business-rule';
 
 export interface ExecutionResult<TContext> {
@@ -30,7 +30,7 @@ const DEFAULT_OPTIONS: OrchestratorOptions = {
 };
 
 export class BusinessLogicOrchestrator {
-  private domain: string;
+  private readonly domain: string;
   private options: OrchestratorOptions;
 
   constructor(domain: string, options: Partial<OrchestratorOptions> = {}) {
@@ -67,7 +67,7 @@ export class BusinessLogicOrchestrator {
       const rules = RuleRegistry.getRulesForDomain<TContext>(this.domain);
 
       if (this.options.logExecution) {
-        console.log(`[BusinessLogicOrchestrator] Executing ${rules.length} rules for domain "${this.domain}"`);
+        console.info(`[BusinessLogicOrchestrator] Executing ${rules.length} rules for domain "${this.domain}"`);
       }
 
       // 2. Conflict Detection
@@ -75,7 +75,7 @@ export class BusinessLogicOrchestrator {
       const conflictAnalysis = ConflictDetector.analyzeConflicts(conflicts);
 
       if (this.options.logExecution) {
-        console.log(`[BusinessLogicOrchestrator] Conflict analysis: ${conflictAnalysis.summary}`);
+        console.info(`[BusinessLogicOrchestrator] Conflict analysis: ${conflictAnalysis.summary}`);
       }
 
       // 3. Fail if there are errors and failOnConflicts is true
@@ -109,7 +109,7 @@ export class BusinessLogicOrchestrator {
 
         if (shouldExecute) {
           if (this.options.logExecution) {
-            console.log(`[BusinessLogicOrchestrator] Executing rule: ${rule.name} (Priority: ${rule.priority})`);
+            console.info(`[BusinessLogicOrchestrator] Executing rule: ${rule.name} (Priority: ${rule.priority})`);
           }
 
           try {
@@ -138,7 +138,7 @@ export class BusinessLogicOrchestrator {
               conflicts,
               executionTime: Date.now() - startTime,
               success: false,
-              error: `Rule execution failed: ${rule.name} - ${error}`
+              error: `Rule execution failed: ${rule.name} - ${String(error)}`
             };
           }
         }
@@ -147,7 +147,7 @@ export class BusinessLogicOrchestrator {
       const executionTime = Date.now() - startTime;
 
       if (this.options.logExecution) {
-        console.log(`[BusinessLogicOrchestrator] Execution completed successfully in ${executionTime}ms. Executed ${executedRules.length} rules.`);
+        console.info(`[BusinessLogicOrchestrator] Execution completed successfully in ${executionTime}ms. Executed ${executedRules.length} rules.`);
       }
 
       return {
@@ -166,7 +166,7 @@ export class BusinessLogicOrchestrator {
         conflicts: [],
         executionTime: Date.now() - startTime,
         success: false,
-        error: `Unexpected error: ${error}`
+        error: `Unexpected error: ${String(error)}`
       };
     }
   }
@@ -174,6 +174,7 @@ export class BusinessLogicOrchestrator {
   /**
    * Get rules for this domain (for inspection/debugging)
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public getRules(): IBusinessRule<any>[] {
     return RuleRegistry.getRulesForDomain(this.domain);
   }

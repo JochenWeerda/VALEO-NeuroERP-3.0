@@ -15,7 +15,8 @@ from app.api.v1.endpoints import (
     accounts,
     journal_entries,
     articles,
-    warehouses
+    warehouses,
+    policies
 )
 
 # Create main API router
@@ -78,4 +79,10 @@ api_router.include_router(
     warehouses,
     prefix="/warehouses",
     tags=["inventory", "warehouses"]
+)
+
+api_router.include_router(
+    policies.router,
+    prefix="/mcp",
+    tags=["mcp", "policies"]
 )

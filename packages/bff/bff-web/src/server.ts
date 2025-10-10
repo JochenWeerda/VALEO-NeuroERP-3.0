@@ -1,71 +1,133 @@
-// import Fastify from 'fastify';
-// import cors from '@fastify/cors';
-// import { initTRPC } from '@trpc/server';
-// import * as trpcAdapter from '@trpc/server/adapters/fastify';
-// import { JWTValidator } from '@valero-neuroerp/auth';
-// import { RBACPolicy } from '@valero-neuroerp/auth';
-// import { TenantContextManager } from '@valero-neuroerp/auth';
+import { type IncomingMessage, type ServerResponse, createServer } from 'http';
+import { getKpis, getTrends } from './services/analytics';
+import { listInventory } from './services/inventory';
+import { listContracts } from './services/contracts';
+import { listPriceItems } from './services/pricing';
+import { listSalesOrders } from './services/sales';
+import { listWeighingTickets } from './services/weighing';
 
-// Import route handlers
-// import { dashboardRoutes } from './routes/dashboard';
-// import { shipmentRoutes } from './routes/shipments';
-// import { orderRoutes } from './routes/orders';
-// import { inventoryRoutes } from './routes/inventory';
-
-// Simple HTTP server for now
-import { createServer } from 'http';
-
-/* eslint-disable @typescript-eslint/strict-boolean-expressions */
-
-// HTTP status codes and constants
 const httpStatusOk = 200;
 const httpStatusOptions = 200;
+const httpStatusMethodNotAllowed = 405;
+const httpStatusBadRequest = 400;
+const httpStatusInternalServerError = 500;
 const defaultPort = 4001;
-const hostDefault = '0.0.0.0';
+const defaultHost = '0.0.0.0';
+const minUrlSegments = 4;
+const actionSegmentIndex = 3;
 
-// Simple logger to replace console statements
 const logger = {
   info: (message: string): void => {
-    // eslint-disable-next-line no-console
-    console.log(`ℹ️  ${message}`);
+    console.log(`[INFO] ${message}`);
   },
   warn: (message: string): void => {
-    // eslint-disable-next-line no-console
-    console.warn(`⚠️  ${message}`);
+    console.warn(`[WARN] ${message}`);
   },
   error: (message: string): void => {
-    // eslint-disable-next-line no-console
-    console.error(`❌ ${message}`);
+    console.error(`[ERROR] ${message}`);
   }
 };
 
-// Initialize tRPC (commented out for now)
-// const t = initTRPC.create();
+interface McpResponse<T> {
+  ok: boolean;
+  data?: T;
+  error?: string;
+}
 
-// Create tRPC router (commented out for now)
-// const appRouter = t.router({
-//   health: t.procedure.query(() => ({ status: 'ok', timestamp: new Date().toISOString() })),
-// });
+const emptyList = { data: [] };
 
-// Export type for client
-// export type AppRouter = typeof appRouter;
+function sendJson<T>(res: ServerResponse, statusCode: number, payload: McpResponse<T>): void {
+  res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(payload));
+}
 
-// Initialize services
-// const jwtValidator = new JWTValidator({
-//   issuer: process.env.JWT_ISSUER || 'valero-neuroerp',
-//   audience: process.env.JWT_AUDIENCE || 'neuroerp-api'
-// });
+async function collectRequestBody(req: IncomingMessage): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
 
-// const rbacPolicy = new RBACPolicy({
-//   roles: [], // TODO: Load from configuration
-//   permissions: [] // TODO: Load from configuration
-// });
+    req.on('data', (chunk: Buffer) => {
+      chunks.push(chunk);
+    });
 
-// const tenantContext = new TenantContextManager();
+    req.on('end', () => {
+      if (chunks.length === 0) {
+        resolve(undefined);
+        return;
+      }
+      const raw = Buffer.concat(chunks).toString('utf-8');
+      try {
+        resolve(JSON.parse(raw));
+      } catch {
+        resolve(raw);
+      }
+    });
 
-// Create simple HTTP server
+    req.on('error', (error) => {
+      reject(error);
+    });
+  });
+}
+
+async function handleMcpRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const method = (req.method ?? 'GET').toUpperCase();
+  if (!['GET', 'POST'].includes(method)) {
+    sendJson(res, httpStatusMethodNotAllowed, { ok: false, error: 'Method not allowed' });
+    return;
+  }
+
+  const url = req.url ?? '';
+  const segments = url.split('/').filter(Boolean);
+  if (segments.length < minUrlSegments) {
+    sendJson(res, httpStatusBadRequest, { ok: false, error: 'Invalid MCP request' });
+    return;
+  }
+
+  const service = segments[2];
+  const action = segments.slice(actionSegmentIndex).join('/');
+
+  if (method === 'POST') {
+    try {
+      await collectRequestBody(req);
+    } catch (error) {
+      logger.warn(`Failed to read request body: ${(error as Error).message}`);
+    }
+  }
+
+  try {
+    let responseData: unknown;
+    switch (`${service}:${action}`) {
+      case 'analytics:kpis':
+        responseData = { data: await getKpis() };
+        break;
+      case 'analytics:trends':
+        responseData = { data: await getTrends() };
+        break;
+      case 'inventory:list':
+        responseData = { data: await listInventory() };
+        break;
+      case 'contracts:list':
+        responseData = { data: await listContracts() };
+        break;
+      case 'pricing:list':
+        responseData = { data: await listPriceItems() };
+        break;
+      case 'sales:list':
+        responseData = { data: await listSalesOrders() };
+        break;
+      case 'weighing:list':
+        responseData = { data: await listWeighingTickets() };
+        break;
+      default:
+        responseData = emptyList;
+    }
+    sendJson(res, httpStatusOk, { ok: true, data: responseData });
+  } catch (error) {
+    logger.error(`Failed to handle MCP request: ${(error as Error).message}`);
+    sendJson(res, httpStatusInternalServerError, { ok: false, error: 'Internal server error' });
+  }
+}
+
 const server = createServer((req, res) => {
-  // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -76,44 +138,54 @@ const server = createServer((req, res) => {
     return;
   }
 
-  // Health check endpoint
-  if (req.url === '/health' && req.method === 'GET') {
-    res.writeHead(httpStatusOk, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      ok: true,
-      service: 'bff-web',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime()
-    }));
+  if (req.url?.startsWith('/api/mcp/') ?? false) {
+    handleMcpRequest(req, res).catch((error: Error) => {
+      logger.error(`Failed to handle MCP request: ${error.message}`);
+      sendJson(res, httpStatusInternalServerError, { ok: false, error: 'Internal server error' });
+    });
     return;
   }
 
-  // Default response
-  res.writeHead(httpStatusOk, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({
-    message: 'VALEO NeuroERP 3.0 - BFF-Web',
-    version: '0.1.0',
-    endpoints: {
-      health: '/health',
-      status: 'running'
+  if (req.url === '/health' && req.method === 'GET') {
+    sendJson(res, httpStatusOk, {
+      ok: true,
+      data: {
+        service: 'bff-web',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+      }
+    });
+    return;
+  }
+
+  sendJson(res, httpStatusOk, {
+    ok: true,
+    data: {
+      message: 'VALEO NeuroERP 3.0 - BFF-Web',
+      version: '0.1.0',
+      endpoints: {
+        health: '/health',
+        status: 'running'
+      }
     }
-  }));
+  });
 });
 
-// Helper function to find an available port
 async function findAvailablePort(startPort: number): Promise<number> {
   return new Promise((resolve, reject) => {
     const testServer = createServer();
 
-    testServer.listen(startPort, '0.0.0.0', () => {
+    testServer.listen(startPort, defaultHost, () => {
       const address = testServer.address();
-      const port = typeof address === 'string' ? parseInt(address.split(':').pop() ?? '0', 10) : (address as { port: number }).port;
+      const port =
+        typeof address === 'string'
+          ? parseInt(address.split(':').pop() ?? '0', 10)
+          : (address as { port: number }).port;
       testServer.close(() => resolve(port));
     });
 
     testServer.on('error', (error: Error & { code?: string }) => {
       if (error.code === 'EADDRINUSE') {
-        // Try next port
         findAvailablePort(startPort + 1).then(resolve).catch(reject);
       } else {
         reject(error);
@@ -122,51 +194,42 @@ async function findAvailablePort(startPort: number): Promise<number> {
   });
 }
 
-// Start server function with better error handling
 async function startServer(): Promise<void> {
   const portEnv = process.env.PORT;
-  const portValue = portEnv ? Number(portEnv) : defaultPort;
+  const desiredPort = typeof portEnv === 'string' && portEnv.trim().length > 0 ? Number(portEnv) : defaultPort;
   const hostEnv = process.env.HOST;
-  const host = hostEnv ?? hostDefault;
+  const host = hostEnv ?? defaultHost;
 
   try {
-    // Try to find an available port starting from the default
-    const port = await findAvailablePort(defaultPort);
+    const port = await findAvailablePort(desiredPort);
 
-    if (port !== portValue) {
-      logger.warn(`Port ${portValue} is occupied, using port ${port} instead`);
-      logger.warn(`To avoid this, ensure no other services are using port ${portValue}`);
-      logger.warn('Or set PORT environment variable to use a different port');
+    if (port !== desiredPort) {
+      logger.warn(`Port ${desiredPort} is occupied, using port ${port} instead`);
+      logger.warn('Set PORT environment variable to force a different port.');
     }
 
     server.listen(port, host, () => {
       logger.info(`BFF-Web server running on http://${host}:${port}`);
       logger.info(`Health check: http://${host}:${port}/health`);
-      logger.info(`Service: VALEO NeuroERP 3.0 - BFF-Web v0.1.0`);
+      logger.info('Serving sample responses for MCP endpoints.');
     });
 
     server.on('error', (error: Error & { code?: string }) => {
       if (error.code === 'EADDRINUSE') {
         logger.error(`Port ${port} is already in use`);
-        logger.error('Check if another instance is running:');
-        logger.error(`  - Use 'netstat -ano | findstr :${port}' to find the process`);
-        logger.error('  - Use \'taskkill /PID <PID> /F\' to stop it');
-        logger.error('  - Or set PORT environment variable to use a different port');
+        logger.error(`Use 'netstat -ano | findstr :${port}' to find the process.`);
       } else {
-        const message = error.message ? (error.message.length > 0 ? error.message : 'Unknown error') : 'Unknown error';
+        const message = typeof error.message === 'string' && error.message.trim().length > 0 ? error.message : 'Unknown error';
         logger.error(`Failed to start server: ${message}`);
       }
       process.exit(1);
     });
-
   } catch (error) {
     logger.error(`Failed to start server: ${error instanceof Error ? error.message : String(error)}`);
-    logger.error('This might be due to port conflicts or insufficient permissions');
     process.exit(1);
   }
 }
 
-// Start the server
 startServer().catch((error) => {
   logger.error(`Failed to start server: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);

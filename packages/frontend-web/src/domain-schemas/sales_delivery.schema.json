@@ -1,0 +1,78 @@
+{
+  "id": "sales_delivery",
+  "title": "Lieferschein",
+  "fields": [
+    {
+      "name": "number",
+      "label": "Lieferschein-Nr.",
+      "type": "string",
+      "required": true,
+      "placeholder": "DL-2025-0001"
+    },
+    {
+      "name": "date",
+      "label": "Lieferdatum",
+      "type": "date",
+      "required": true
+    },
+    {
+      "name": "customerId",
+      "label": "Kunde",
+      "type": "lookup",
+      "required": true,
+      "lookup": "/api/mcp/customers/search",
+      "placeholder": "Kunde suchen..."
+    },
+    {
+      "name": "sourceOrder",
+      "label": "Auftrag (Quelle)",
+      "type": "string",
+      "required": false,
+      "placeholder": "SO-2025-0001"
+    },
+    {
+      "name": "deliveryAddress",
+      "label": "Lieferadresse",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "carrier",
+      "label": "Spediteur",
+      "type": "select",
+      "required": false,
+      "options": [
+        { "value": "dhl", "label": "DHL" },
+        { "value": "ups", "label": "UPS" },
+        { "value": "dpd", "label": "DPD" },
+        { "value": "self", "label": "Selbstabholung" }
+      ]
+    },
+    {
+      "name": "notes",
+      "label": "Notizen",
+      "type": "text",
+      "required": false
+    }
+  ],
+  "lines": {
+    "name": "lines",
+    "label": "Positionen",
+    "columns": [
+      {
+        "name": "article",
+        "label": "Artikel",
+        "type": "lookup",
+        "required": true,
+        "lookup": "/api/mcp/articles/search"
+      },
+      {
+        "name": "qty",
+        "label": "Menge",
+        "type": "number",
+        "required": true
+      }
+    ]
+  }
+}
+

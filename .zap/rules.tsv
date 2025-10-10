@@ -1,0 +1,13 @@
+# OWASP ZAP Rules Configuration
+# Format: RULE_ID	ACTION	REASON
+
+# Ignore these checks (already configured correctly)
+10020	IGNORE	X-Frame-Options header configured correctly
+10021	IGNORE	Strict-Transport-Security present
+10038	IGNORE	Content-Security-Policy configured
+10096	IGNORE	X-Content-Type-Options configured
+
+# Warn on these
+10063	WARN	Feature/Permissions-Policy check
+10109	WARN	Modern Web Application check
+

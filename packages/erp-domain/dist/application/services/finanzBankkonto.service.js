@@ -19,18 +19,18 @@ function normalize(dto, existing) {
     if (bankname === undefined || bankname === null) {
         throw new Error('bankname is required');
     }
-    if (dto.iban && !IBAN_PATTERN.test(dto.iban.replace(/\s+/g, ''))) {
+    if (dto.iban != null && !IBAN_PATTERN.test(dto.iban.replace(/\s+/g, ''))) {
         throw new Error('iban format is invalid');
     }
-    if (dto.bic && !BIC_PATTERN.test(dto.bic)) {
+    if (dto.bic != null && !BIC_PATTERN.test(dto.bic)) {
         throw new Error('bic format is invalid');
     }
     return {
         ...existing,
         kontoname,
         bankname,
-        iban: dto.iban ? dto.iban.replace(/\s+/g, '').toUpperCase() : existing?.iban,
-        bic: dto.bic ? dto.bic.toUpperCase() : existing?.bic,
+        iban: dto.iban != null ? dto.iban.replace(/\s+/g, '').toUpperCase() : existing?.iban,
+        bic: dto.bic != null ? dto.bic.toUpperCase() : existing?.bic,
         kontonummer: dto.kontonummer ?? existing?.kontonummer,
         blz: dto.blz ?? existing?.blz,
         waehrung: dto.waehrung ?? existing?.waehrung ?? 'EUR',

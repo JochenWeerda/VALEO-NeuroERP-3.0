@@ -1,4 +1,4 @@
-import { ScheduleEntity, TriggerType, TargetType } from '../entities';
+import { ScheduleEntity, TargetType, TriggerType } from '../entities';
 import { ScheduleRepository } from '../../infra/repo/schedule-repository';
 import { EventPublisher } from '../../infra/messaging/publisher';
 import { v4 as uuidv4 } from 'uuid';
@@ -25,9 +25,9 @@ export interface ScheduleExecutionResult {
 
 export class SchedulingService {
   constructor(
-    private scheduleRepository: ScheduleRepository,
-    private eventPublisher: EventPublisher,
-    private config: SchedulingServiceConfig
+    private readonly scheduleRepository: ScheduleRepository,
+    private readonly eventPublisher: EventPublisher,
+    private readonly config: SchedulingServiceConfig
   ) {}
 
   /**
@@ -125,7 +125,7 @@ export class SchedulingService {
   /**
    * Get schedules ready for execution
    */
-  async getSchedulesReadyForExecution(limit: number = 100): Promise<any[]> {
+  async getSchedulesReadyForExecution(limit = 100): Promise<any[]> {
     const now = new Date();
     return await this.scheduleRepository.findEnabledSchedulesBeforeDate(now, limit);
   }

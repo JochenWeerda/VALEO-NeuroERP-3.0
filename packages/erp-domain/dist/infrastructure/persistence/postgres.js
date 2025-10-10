@@ -5,7 +5,7 @@ exports.closeErpPool = closeErpPool;
 const pg_1 = require("pg");
 let singleton = null;
 function getErpPool(config) {
-    if (singleton) {
+    if (singleton !== null) {
         return singleton;
     }
     const connectionString = config?.connectionString ?? process.env.ERP_DATABASE_URL;
@@ -16,7 +16,7 @@ function getErpPool(config) {
     return singleton;
 }
 async function closeErpPool() {
-    if (singleton) {
+    if (singleton !== null) {
         await singleton.end();
         singleton = null;
     }

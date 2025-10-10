@@ -15,10 +15,10 @@ class InMemoryOrderRepository extends utilities_1.InMemoryRepository {
     async list(filters) {
         const base = await this.findMany((0, order_repository_1.buildOrderQuery)(filters));
         const results = base.filter((order) => {
-            if (filters?.from && order.documentDate < filters.from) {
+            if ((filters?.from !== undefined && filters?.from !== null) && order.documentDate < filters.from) {
                 return false;
             }
-            if (filters?.to && order.documentDate > filters.to) {
+            if ((filters?.to !== undefined && filters?.to !== null) && order.documentDate > filters.to) {
                 return false;
             }
             return true;

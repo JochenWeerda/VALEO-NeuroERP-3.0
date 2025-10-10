@@ -1,0 +1,90 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-backup
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "valeo-erp.selectorLabels" . | nindent 12 }}
+            job: backup
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: {{ include "valeo-erp.serviceAccountName" . }}
+          
+          containers:
+          - name: backup
+            image: postgres:15-alpine
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -e
+                TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                BACKUP_FILE="valeo_erp_backup_${TIMESTAMP}.sql.gz"
+                
+                echo "Starting backup: ${BACKUP_FILE}"
+                
+                pg_dump -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d ${DB_NAME} \
+                  --format=plain --no-owner --no-acl \
+                  | gzip > /backups/daily/${BACKUP_FILE}
+                
+                echo "Backup completed: /backups/daily/${BACKUP_FILE}"
+                
+                # Monthly backup (on 1st)
+                if [ "$(date +%d)" = "01" ]; then
+                  cp /backups/daily/${BACKUP_FILE} /backups/monthly/${BACKUP_FILE}
+                  echo "Monthly backup created"
+                fi
+                
+                # Cleanup old backups
+                find /backups/daily -name "*.sql.gz" -mtime +${RETENTION_DAYS} -delete
+                find /backups/monthly -name "*.sql.gz" -mtime +$((RETENTION_MONTHS * 30)) -delete
+                
+                echo "Backup retention applied"
+                
+                # Optional: Upload to S3/Azure
+                {{- if .Values.backup.s3.enabled }}
+                aws s3 cp /backups/daily/${BACKUP_FILE} \
+                  s3://{{ .Values.backup.s3.bucket }}/backups/postgresql/${BACKUP_FILE}
+                echo "Uploaded to S3"
+                {{- end }}
+            
+            env:
+              - name: DB_HOST
+                value: {{ .Values.postgresql.host | quote }}
+              - name: DB_PORT
+                value: {{ .Values.postgresql.port | quote }}
+              - name: DB_USER
+                value: {{ .Values.postgresql.user | quote }}
+              - name: DB_NAME
+                value: {{ .Values.postgresql.database | quote }}
+              - name: PGPASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.postgresql.existingSecret }}
+                    key: password
+              - name: RETENTION_DAYS
+                value: {{ .Values.backup.retentionDays | quote }}
+              - name: RETENTION_MONTHS
+                value: {{ .Values.backup.retentionMonths | quote }}
+            
+            volumeMounts:
+              - name: backup-storage
+                mountPath: /backups
+          
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: {{ include "valeo-erp.fullname" . }}-backup-pvc
+{{- end }}
+

@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { SupplierId } from '../../core/entities/supplier';
-import { RiskAssessmentEngine, RiskAssessment, SupplierAssessmentData, AssessmentContext, RiskLevel } from './risk-assessment-engine';
+import { AssessmentContext, RiskAssessment, RiskAssessmentEngine, RiskLevel, SupplierAssessmentData } from './risk-assessment-engine';
 
 export interface TPRMAssessmentRequest {
   supplierId: SupplierId;

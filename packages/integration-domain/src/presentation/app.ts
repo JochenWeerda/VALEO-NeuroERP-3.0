@@ -2,7 +2,7 @@
  * Express Application Setup
  */
 
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express, { Application, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -27,7 +27,7 @@ export class IntegrationApiApp {
   private config: Required<AppConfig>;
 
   constructor(
-    private integrationService: any,
+    private readonly integrationService: any,
     config: AppConfig
   ) {
     this.app = express();

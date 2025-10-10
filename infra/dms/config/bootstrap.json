@@ -1,0 +1,65 @@
+{
+  "document_types": [
+    "sales_order",
+    "delivery",
+    "invoice",
+    "purchase_order",
+    "goods_receipt",
+    "supplier_invoice",
+    "contract"
+  ],
+  "metadata_types": [
+    {
+      "name": "number",
+      "label": "Number",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "domain",
+      "label": "Domain",
+      "type": "choice",
+      "choices": ["sales", "purchase", "logistics", "contract"]
+    },
+    {
+      "name": "customerId",
+      "label": "Customer",
+      "type": "text"
+    },
+    {
+      "name": "supplierId",
+      "label": "Supplier",
+      "type": "text"
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "type": "choice",
+      "choices": ["draft", "pending", "approved", "posted", "rejected"]
+    },
+    {
+      "name": "hash",
+      "label": "Hash",
+      "type": "text"
+    },
+    {
+      "name": "date",
+      "label": "Date",
+      "type": "date"
+    }
+  ],
+  "metadata_bindings": {
+    "invoice": ["number", "domain", "customerId", "status", "hash", "date"],
+    "delivery": ["number", "domain", "customerId", "status", "hash", "date"],
+    "sales_order": ["number", "domain", "customerId", "status", "hash", "date"],
+    "purchase_order": ["number", "domain", "supplierId", "status", "hash", "date"],
+    "goods_receipt": ["number", "domain", "supplierId", "status", "hash", "date"],
+    "supplier_invoice": ["number", "domain", "supplierId", "status", "hash", "date"],
+    "contract": ["number", "domain", "status", "date", "hash"]
+  },
+  "ocr": {
+    "languages": ["deu", "eng"],
+    "enable": true
+  }
+}
+

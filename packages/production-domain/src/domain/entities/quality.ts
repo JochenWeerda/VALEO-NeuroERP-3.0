@@ -106,7 +106,7 @@ export type CAPA = z.infer<typeof CAPASchema>;
 
 // Sampling Plan Entity
 export class SamplingPlanEntity {
-  private data: SamplingPlan;
+  private readonly data: SamplingPlan;
 
   constructor(data: SamplingPlan) {
     this.data = SamplingPlanSchema.parse(data);
@@ -167,7 +167,7 @@ export class SamplingPlanEntity {
 
 // Sampling Result Entity
 export class SamplingResultEntity {
-  private data: SamplingResult;
+  private readonly data: SamplingResult;
 
   constructor(data: SamplingResult) {
     this.data = SamplingResultSchema.parse(data);
@@ -242,7 +242,7 @@ export class SamplingResultEntity {
 
 // Retained Sample Entity
 export class RetainedSampleEntity {
-  private data: RetainedSample;
+  private readonly data: RetainedSample;
 
   constructor(data: RetainedSample) {
     this.data = RetainedSampleSchema.parse(data);
@@ -284,7 +284,7 @@ export class RetainedSampleEntity {
     return new RetainedSampleEntity({
       ...this.data,
       disposedAt,
-      notes: notes ? `${this.data.notes || ''}\n[DISPOSED] ${notes}`.trim() : this.data.notes,
+      notes: notes ? `${this.data.notes ?? ''}\n[DISPOSED] ${notes}`.trim() : this.data.notes,
       updatedAt: new Date().toISOString(),
       updatedBy
     });
@@ -307,7 +307,7 @@ export class RetainedSampleEntity {
 
 // Non-Conformity Entity
 export class NonConformityEntity {
-  private data: NonConformity;
+  private readonly data: NonConformity;
 
   constructor(data: NonConformity) {
     this.data = NonConformitySchema.parse(data);
@@ -400,7 +400,7 @@ export class NonConformityEntity {
 
 // CAPA Entity
 export class CAPAEntity {
-  private data: CAPA;
+  private readonly data: CAPA;
 
   constructor(data: CAPA) {
     this.data = CAPASchema.parse(data);
