@@ -1,5 +1,5 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
-import { getLogger, LogContext } from '../../infra/telemetry/logger';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { LogContext, getLogger } from '../../infra/telemetry/logger';
 import { getTracingService } from '../../infra/telemetry/tracer';
 
 declare module 'fastify' {

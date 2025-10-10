@@ -1,0 +1,102 @@
+***REMOVED*** AlertManager Configuration für VALEO-NeuroERP
+
+global:
+  resolve_timeout: 5m
+
+***REMOVED*** Templates für Notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+***REMOVED*** Route Configuration
+route:
+  group_by: ['alertname', 'cluster', 'severity']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default'
+  
+  routes:
+    ***REMOVED*** Critical Alerts → Sofort an On-Call
+    - match:
+        severity: critical
+      receiver: 'oncall-critical'
+      continue: true
+    
+    ***REMOVED*** Warning Alerts → Team-Channel
+    - match:
+        severity: warning
+      receiver: 'team-warnings'
+    
+    ***REMOVED*** Security Alerts → Security-Team
+    - match:
+        component: security
+      receiver: 'security-team'
+      continue: true
+
+***REMOVED*** Receivers (Notification-Channels)
+receivers:
+  ***REMOVED*** Default (Email)
+  - name: 'default'
+    email_configs:
+      - to: 'alerts@valeo-erp.com'
+        from: 'alertmanager@valeo-erp.com'
+        smarthost: 'smtp.example.com:587'
+        auth_username: 'alertmanager@valeo-erp.com'
+        auth_password: '${SMTP_PASSWORD}'
+        headers:
+          Subject: '[VALEO-ERP] {{ .GroupLabels.alertname }}'
+
+  ***REMOVED*** Critical Alerts (PagerDuty + Email)
+  - name: 'oncall-critical'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY}'
+        description: '{{ .GroupLabels.alertname }}: {{ .CommonAnnotations.summary }}'
+    email_configs:
+      - to: 'oncall@valeo-erp.com'
+        from: 'alertmanager@valeo-erp.com'
+        smarthost: 'smtp.example.com:587'
+        headers:
+          Subject: '🚨 [CRITICAL] {{ .GroupLabels.alertname }}'
+
+  ***REMOVED*** Team Warnings (Slack/Teams)
+  - name: 'team-warnings'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '***REMOVED***valeo-erp-alerts'
+        title: '⚠️ {{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.description }}'
+        send_resolved: true
+    ***REMOVED*** Alternativ: Microsoft Teams
+    ***REMOVED*** webhook_configs:
+    ***REMOVED***   - url: '${TEAMS_WEBHOOK_URL}'
+
+  ***REMOVED*** Security Team (Email + Slack)
+  - name: 'security-team'
+    email_configs:
+      - to: 'security@valeo-erp.com'
+        from: 'alertmanager@valeo-erp.com'
+        smarthost: 'smtp.example.com:587'
+        headers:
+          Subject: '🔒 [SECURITY] {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '***REMOVED***valeo-erp-security'
+        title: '🔒 {{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.description }}'
+
+***REMOVED*** Inhibit Rules (Unterdrückt Alerts basierend auf anderen)
+inhibit_rules:
+  ***REMOVED*** Wenn Database down, keine einzelnen API-Errors
+  - source_match:
+      alertname: 'DatabaseDown'
+    target_match:
+      component: 'api'
+    equal: ['namespace']
+  
+  ***REMOVED*** Wenn Pod not ready, keine Memory-Alerts
+  - source_match:
+      alertname: 'PodNotReady'
+    target_match:
+      component: 'resources'
+    equal: ['pod']
+

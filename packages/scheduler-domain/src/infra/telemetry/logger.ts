@@ -10,7 +10,7 @@ export interface LogContext {
 }
 
 export class Logger {
-  private logger: pino.Logger;
+  private readonly logger: pino.Logger;
 
   constructor(options: pino.LoggerOptions = {}) {
     this.logger = pino({

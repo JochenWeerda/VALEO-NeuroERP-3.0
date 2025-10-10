@@ -9,8 +9,8 @@ import { EventBus } from '../infrastructure/event-bus/event-bus';
 import { InventoryMetricsService } from '../infrastructure/observability/metrics-service';
 import {
   InventoryAdjustedEvent,
-  LotCreatedEvent,
   LotConsumedEvent,
+  LotCreatedEvent,
   ReservationCreatedEvent,
   ReservationReleasedEvent
 } from '../core/domain-events/inventory-domain-events';
@@ -299,7 +299,7 @@ export class InventoryControlService {
     quantity: number,
     lot?: string,
     serial?: string,
-    reason: string = 'transfer'
+    reason = 'transfer'
   ): Promise<void> {
     const startTime = Date.now();
 
@@ -397,7 +397,7 @@ export class InventoryControlService {
   /**
    * Get inventory aging report
    */
-  async getInventoryAging(days: number = 90): Promise<Array<{
+  async getInventoryAging(days = 90): Promise<Array<{
     sku: string;
     location: string;
     lot?: string;

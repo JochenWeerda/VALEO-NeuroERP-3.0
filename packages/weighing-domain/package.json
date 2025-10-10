@@ -21,7 +21,7 @@
     "migrate:gen": "drizzle-kit generate:pg",
     "migrate:up": "drizzle-kit up:pg",
     "migrate:down": "drizzle-kit down:pg",
-    "lint": "echo 'lint placeholder'",
+    "lint": "eslint src/**/*.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {

@@ -7,6 +7,7 @@ import { Request, Response, Router } from 'express';
 import { FinanzDebitorService } from '../../application/services/finanzDebitor.service';
 
 const HTTP_STATUS = {
+  BAD_REQUEST: 400,
   NOT_FOUND: 404,
   CREATED: 201,
   NO_CONTENT: 204,
@@ -28,7 +29,12 @@ export function buildFinanzDebitorRouter(
   });
 
   router.get(`${baseRoute}/:finanzDebitorId`, async (req: Request, res: Response) => {
-    const entity = await service.findById(req.params.finanzDebitorId);
+    const id = req.params.finanzDebitorId;
+    if (id === null || id === undefined || id.trim().length === 0) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzDebitorId parameter is required' });
+      return;
+    }
+    const entity = await service.findById(id);
     if (entity === undefined || entity === null) {
       res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'FinanzDebitor not found' });
       return;
@@ -42,12 +48,22 @@ export function buildFinanzDebitorRouter(
   });
 
   router.put(`${baseRoute}/:finanzDebitorId`, async (req: Request, res: Response) => {
-    const updated = await service.update(req.params.finanzDebitorId, req.body);
+    const id = req.params.finanzDebitorId;
+    if (id === null || id === undefined || id.trim().length === 0) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzDebitorId parameter is required' });
+      return;
+    }
+    const updated = await service.update(id, req.body);
     res.json(updated);
   });
 
   router.delete(`${baseRoute}/:finanzDebitorId`, async (req: Request, res: Response) => {
-    await service.remove(req.params.finanzDebitorId);
+    const id = req.params.finanzDebitorId;
+    if (id === null || id === undefined || id.trim().length === 0) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzDebitorId parameter is required' });
+      return;
+    }
+    await service.remove(id);
     res.status(HTTP_STATUS.NO_CONTENT).send();
   });
 

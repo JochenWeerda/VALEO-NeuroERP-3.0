@@ -12,6 +12,7 @@ exports.createTimeEntryCreatedEvent = createTimeEntryCreatedEvent;
 exports.createTimeEntryApprovedEvent = createTimeEntryApprovedEvent;
 exports.createTimeEntryRejectedEvent = createTimeEntryRejectedEvent;
 exports.createPayrollExportedEvent = createPayrollExportedEvent;
+const uuid_1 = require("uuid");
 const zod_1 = require("zod");
 // Base Event Schema
 exports.BaseEventSchema = zod_1.z.object({
@@ -225,7 +226,7 @@ exports.PayrollExportedEventSchema = exports.BaseEventSchema.extend({
 // Event factory functions
 function createEmployeeCreatedEvent(data, tenantId) {
     return {
-        eventId: require('uuid').v4(),
+        eventId: (0, uuid_1.v4)(),
         eventType: 'hr.employee.created',
         eventVersion: 1,
         occurredAt: new Date().toISOString(),
@@ -235,7 +236,7 @@ function createEmployeeCreatedEvent(data, tenantId) {
 }
 function createEmployeeUpdatedEvent(data, tenantId) {
     return {
-        eventId: require('uuid').v4(),
+        eventId: (0, uuid_1.v4)(),
         eventType: 'hr.employee.updated',
         eventVersion: 1,
         occurredAt: new Date().toISOString(),
@@ -245,7 +246,7 @@ function createEmployeeUpdatedEvent(data, tenantId) {
 }
 function createEmployeeDeactivatedEvent(data, tenantId) {
     return {
-        eventId: require('uuid').v4(),
+        eventId: (0, uuid_1.v4)(),
         eventType: 'hr.employee.deactivated',
         eventVersion: 1,
         occurredAt: new Date().toISOString(),
@@ -255,7 +256,7 @@ function createEmployeeDeactivatedEvent(data, tenantId) {
 }
 function createTimeEntryCreatedEvent(data, tenantId) {
     return {
-        eventId: require('uuid').v4(),
+        eventId: (0, uuid_1.v4)(),
         eventType: 'hr.time_entry.created',
         eventVersion: 1,
         occurredAt: new Date().toISOString(),
@@ -265,7 +266,7 @@ function createTimeEntryCreatedEvent(data, tenantId) {
 }
 function createTimeEntryApprovedEvent(data, tenantId) {
     return {
-        eventId: require('uuid').v4(),
+        eventId: (0, uuid_1.v4)(),
         eventType: 'hr.time_entry.approved',
         eventVersion: 1,
         occurredAt: new Date().toISOString(),
@@ -275,7 +276,7 @@ function createTimeEntryApprovedEvent(data, tenantId) {
 }
 function createTimeEntryRejectedEvent(data, tenantId) {
     return {
-        eventId: require('uuid').v4(),
+        eventId: (0, uuid_1.v4)(),
         eventType: 'hr.time_entry.rejected',
         eventVersion: 1,
         occurredAt: new Date().toISOString(),
@@ -285,7 +286,7 @@ function createTimeEntryRejectedEvent(data, tenantId) {
 }
 function createPayrollExportedEvent(data, tenantId) {
     return {
-        eventId: require('uuid').v4(),
+        eventId: (0, uuid_1.v4)(),
         eventType: 'hr.payroll.exported',
         eventVersion: 1,
         occurredAt: new Date().toISOString(),

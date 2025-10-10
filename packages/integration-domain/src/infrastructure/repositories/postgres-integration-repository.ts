@@ -3,11 +3,11 @@
  */
 
 import { Integration } from '@domain/entities/integration.js';
-import type { IntegrationRepository, PaginationOptions, PaginatedResult, Result } from '@domain/interfaces/repositories.js';
+import type { IntegrationRepository, PaginatedResult, PaginationOptions, Result } from '@domain/interfaces/repositories.js';
 import type { DatabaseConnection } from '../external/database-connection.js';
 
 export class PostgresIntegrationRepository implements IntegrationRepository {
-  constructor(private connection: DatabaseConnection) {}
+  constructor(private readonly connection: DatabaseConnection) {}
 
   async findById(id: string): Promise<Result<Integration | null, Error>> {
     try {

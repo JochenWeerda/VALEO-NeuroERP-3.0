@@ -5,16 +5,28 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LeaveRequestEntity = exports.LeaveRequestSchema = void 0;
+const uuid_1 = require("uuid");
 const zod_1 = require("zod");
+const MILLISECONDS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const MILLISECONDS_PER_DAY = MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY;
+const MAX_LEAVE_DURATION_DAYS = 365;
+const INCLUSIVE_DAY_OFFSET = 1;
+const DAY_TOLERANCE = 1;
+const INITIAL_VERSION = 1;
+const leaveTypeSchema = zod_1.z.enum(['Vacation', 'Sick', 'Unpaid', 'Other']);
+const leaveStatusSchema = zod_1.z.enum(['Pending', 'Approved', 'Rejected']);
 exports.LeaveRequestSchema = zod_1.z.object({
     id: zod_1.z.string().uuid(),
     tenantId: zod_1.z.string().uuid(),
     employeeId: zod_1.z.string().uuid(),
-    type: zod_1.z.enum(['Vacation', 'Sick', 'Unpaid', 'Other']),
+    type: leaveTypeSchema,
     from: zod_1.z.string().date(),
     to: zod_1.z.string().date(),
     days: zod_1.z.number().positive(),
-    status: zod_1.z.enum(['Pending', 'Approved', 'Rejected']),
+    status: leaveStatusSchema,
     approvedBy: zod_1.z.string().uuid().optional(),
     note: zod_1.z.string().optional(),
     createdAt: zod_1.z.string().datetime(),
@@ -75,7 +87,7 @@ class LeaveRequestEntity {
         const fromDate = new Date(this.data.from);
         const toDate = new Date(this.data.to);
         const diffTime = Math.abs(toDate.getTime() - fromDate.getTime());
-        return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end days
+        return Math.ceil(diffTime / MILLISECONDS_PER_DAY) + INCLUSIVE_DAY_OFFSET; // include start and end days
     }
     isInPeriod(date) {
         return date >= this.data.from && date <= this.data.to;
@@ -96,13 +108,11 @@ class LeaveRequestEntity {
         if (this.data.days <= 0) {
             throw new Error('Days must be positive');
         }
-        // Check for reasonable leave duration (max 365 days)
-        if (this.data.days > 365) {
+        if (this.data.days > MAX_LEAVE_DURATION_DAYS) {
             throw new Error('Leave duration cannot exceed 365 days');
         }
-        // Validate that days matches the actual date range
         const actualDays = this.getDurationInDays();
-        if (Math.abs(this.data.days - actualDays) > 1) { // Allow 1 day tolerance for weekend handling
+        if (Math.abs(this.data.days - actualDays) > DAY_TOLERANCE) {
             throw new Error('Declared days must match the date range');
         }
     }
@@ -111,69 +121,63 @@ class LeaveRequestEntity {
         if (!this.canApprove()) {
             throw new Error('Leave request cannot be approved in current status');
         }
-        return new LeaveRequestEntity({
-            ...this.data,
+        return this.clone({
             status: 'Approved',
             approvedBy,
-            note: note || this.data.note,
-            updatedAt: new Date().toISOString(),
-            updatedBy: approvedBy,
-            version: this.data.version + 1
+            note: note ?? this.data.note,
+            updatedBy: approvedBy
         });
     }
     reject(approvedBy, note) {
         if (!this.canReject()) {
             throw new Error('Leave request cannot be rejected in current status');
         }
-        return new LeaveRequestEntity({
-            ...this.data,
+        return this.clone({
             status: 'Rejected',
             approvedBy,
-            note: note || this.data.note,
-            updatedAt: new Date().toISOString(),
-            updatedBy: approvedBy,
-            version: this.data.version + 1
+            note: note ?? this.data.note,
+            updatedBy: approvedBy
         });
     }
     updateNote(note, updatedBy) {
         if (!this.canEdit()) {
             throw new Error('Leave request cannot be edited in current status');
         }
-        return new LeaveRequestEntity({
-            ...this.data,
-            note,
-            updatedAt: new Date().toISOString(),
-            updatedBy,
-            version: this.data.version + 1
-        });
+        return this.clone({ note, updatedBy });
     }
     updateDates(from, to, days, updatedBy) {
         if (!this.canEdit()) {
             throw new Error('Leave request cannot be edited in current status');
         }
-        return new LeaveRequestEntity({
-            ...this.data,
+        return this.clone({
             from,
             to,
             days,
-            updatedAt: new Date().toISOString(),
-            updatedBy,
-            version: this.data.version + 1
+            updatedBy
         });
     }
     // Export for persistence
     toJSON() {
         return { ...this.data };
     }
+    clone(overrides) {
+        const now = new Date().toISOString();
+        return new LeaveRequestEntity({
+            ...this.data,
+            ...overrides,
+            updatedAt: now,
+            version: this.data.version + 1
+        });
+    }
     // Factory methods
     static create(data) {
         const now = new Date().toISOString();
         return new LeaveRequestEntity({
             ...data,
-            id: require('uuid').v4(),
+            id: (0, uuid_1.v4)(),
             createdAt: now,
             updatedAt: now,
-            version: 1
+            version: INITIAL_VERSION
         });
     }
     static fromJSON(data) {

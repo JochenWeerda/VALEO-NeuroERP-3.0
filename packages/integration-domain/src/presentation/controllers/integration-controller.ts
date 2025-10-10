@@ -6,19 +6,19 @@ import type { Request, Response } from 'express';
 import { IntegrationApplicationService } from '@application/services/integration-application-service.js';
 import { 
   validateCreateIntegrationRequest,
-  validateUpdateIntegrationRequest,
-  validateIntegrationQuery 
+  validateIntegrationQuery,
+  validateUpdateIntegrationRequest 
 } from '@application/dto/integration-dto.js';
 import { 
   HttpStatusCode,
-  createNotFoundError,
   createConflictError,
   createInternalServerError,
+  createNotFoundError,
   createUnauthorizedError
 } from '../errors/api-errors.js';
 
 export class IntegrationController {
-  constructor(private integrationService: IntegrationApplicationService) {}
+  constructor(private readonly integrationService: IntegrationApplicationService) {}
 
   // GET /integrations
   async listIntegrations(req: Request, res: Response): Promise<void> {

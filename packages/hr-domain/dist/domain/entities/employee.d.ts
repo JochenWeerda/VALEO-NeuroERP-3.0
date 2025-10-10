@@ -3,6 +3,7 @@
  * Core employee management entity with DDD principles
  */
 import { z } from 'zod';
+declare const employeeStatusSchema: z.ZodEnum<["Active", "Inactive", "OnLeave"]>;
 declare const PersonSchema: z.ZodObject<{
     firstName: z.ZodString;
     lastName: z.ZodString;
@@ -139,10 +140,10 @@ export declare const EmployeeSchema: z.ZodObject<{
     createdBy: z.ZodOptional<z.ZodString>;
     updatedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    status: "Active" | "Inactive" | "OnLeave";
     id: string;
     tenantId: string;
     employeeNumber: string;
-    status: "Active" | "Inactive" | "OnLeave";
     person: {
         firstName: string;
         lastName: string;
@@ -174,10 +175,10 @@ export declare const EmployeeSchema: z.ZodObject<{
     createdBy?: string | undefined;
     updatedBy?: string | undefined;
 }, {
+    status: "Active" | "Inactive" | "OnLeave";
     id: string;
     tenantId: string;
     employeeNumber: string;
-    status: "Active" | "Inactive" | "OnLeave";
     person: {
         firstName: string;
         lastName: string;
@@ -215,8 +216,9 @@ export type Contact = z.infer<typeof ContactSchema>;
 export type Employment = z.infer<typeof EmploymentSchema>;
 export type Organization = z.infer<typeof OrganizationSchema>;
 export type Payroll = z.infer<typeof PayrollSchema>;
+export type EmployeeStatusType = z.infer<typeof employeeStatusSchema>;
 export declare class EmployeeEntity {
-    private data;
+    private readonly data;
     constructor(data: Employee);
     get id(): string;
     get tenantId(): string;
@@ -247,6 +249,7 @@ export declare class EmployeeEntity {
     canWork(): boolean;
     canManage(): boolean;
     toJSON(): Employee;
+    private clone;
     static create(data: Omit<Employee, 'id' | 'createdAt' | 'updatedAt' | 'version'>): EmployeeEntity;
     static fromJSON(data: Employee): EmployeeEntity;
 }

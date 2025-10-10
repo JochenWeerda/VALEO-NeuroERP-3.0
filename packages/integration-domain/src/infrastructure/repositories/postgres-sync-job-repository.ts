@@ -3,11 +3,11 @@
  */
 
 import { SyncJob } from '@domain/entities/sync-job.js';
-import type { SyncJobRepository, PaginationOptions, PaginatedResult, Result } from '@domain/interfaces/repositories.js';
+import type { PaginatedResult, PaginationOptions, Result, SyncJobRepository } from '@domain/interfaces/repositories.js';
 import type { DatabaseConnection } from '../external/database-connection.js';
 
 export class PostgresSyncJobRepository implements SyncJobRepository {
-  constructor(private connection: DatabaseConnection) {}
+  constructor(private readonly connection: DatabaseConnection) {}
 
   async findById(id: string): Promise<Result<SyncJob | null, Error>> {
     try {

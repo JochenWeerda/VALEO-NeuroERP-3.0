@@ -28,15 +28,15 @@ function normalizeBuchung(dto, existing) {
     if (Number(dto.betrag) === 0) {
         throw new Error('betrag must not be zero');
     }
-    if (dto.sollkonto && dto.habenkonto && dto.sollkonto === dto.habenkonto) {
+    if (dto.sollkonto != null && dto.habenkonto != null && dto.sollkonto === dto.habenkonto) {
         throw new Error('sollkonto and habenkonto must differ');
     }
     const payload = {
         ...existing,
-        buchungsnummer: dto.buchungsnummer?.trim() || existing?.buchungsnummer ?? '',
+        buchungsnummer: dto.buchungsnummer?.trim() ?? existing?.buchungsnummer ?? '',
         buchungsdatum: toDate(dto.buchungsdatum ?? existing?.buchungsdatum ?? new Date()),
         belegdatum: toDate(dto.belegdatum ?? existing?.belegdatum ?? new Date()),
-        belegnummer: dto.belegnummer?.trim() || existing?.belegnummer,
+        belegnummer: dto.belegnummer?.trim() ?? existing?.belegnummer,
         buchungstext: dto.buchungstext.trim(),
         sollkonto: dto.sollkonto ?? existing?.sollkonto,
         habenkonto: dto.habenkonto ?? existing?.habenkonto,

@@ -1,65 +1,58 @@
-***REMOVED*** VALEO-NeuroERP-3.0 Container Implementation
-***REMOVED*** Week 5 - Containerization & Orchestration Setup
-***REMOVED*** Clean Architecture Container Configuration
+***REMOVED*** Multi-stage build for VALEO-NeuroERP Backend
+***REMOVED*** Stage 1: Builder
+FROM python:3.11-slim as builder
 
-FROM node:18-alpine AS base
+WORKDIR /build
 
-***REMOVED*** Security best practices
-RUN apk add --no-cache \
-    dumb-init \
-    && addgroup -g 1001 -S valeo \
-    && adduser -S neuroerp -u 1001
+***REMOVED*** Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-USER neuroerp
+***REMOVED*** Copy requirements
+COPY requirements.txt .
+
+***REMOVED*** Install Python dependencies
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+***REMOVED*** Stage 2: Runtime
+FROM python:3.11-slim
+
+***REMOVED*** Create non-root user
+RUN groupadd -r appuser -g 1000 && \
+    useradd -r -u 1000 -g appuser appuser
+
 WORKDIR /app
 
-***REMOVED*** Copy package files first for dependency caching
-COPY --chown=neuroerp package*.json ./
-COPY --chown=neuroerp yarn.lock* ./
+***REMOVED*** Install runtime dependencies only
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
 
-***REMOVED*** Install dependencies
-ENV NODE_ENV=production
-RUN npm ci --only=production && npm cache clean --force
+***REMOVED*** Copy Python packages from builder
+COPY --from=builder /root/.local /home/appuser/.local
 
-***REMOVED*** Copy Clean Architecture domain source code
-COPY --chown=neuroerp --from=base domains/ ./domains/
+***REMOVED*** Copy application code
+COPY --chown=appuser:appuser . .
 
-***REMOVED*** Copy business logic services
-COPY --chown=neuroerp --from=base app/core/ ./app/core/
-COPY --chown=neuroerp --from=base app/api/ ./app/api/
-COPY --chown=neuroerp --from=base app/services/ ./app/services/
+***REMOVED*** Create directories with correct permissions
+RUN mkdir -p /app/data /app/logs /tmp && \
+    chown -R appuser:appuser /app/data /app/logs /tmp
 
-***REMOVED*** Copy configuration
-COPY --chown=neuroerp config/ ./config/
-COPY --chown=neuroerp .env* ./
+***REMOVED*** Set PATH for user-installed packages
+ENV PATH=/home/appuser/.local/bin:$PATH
 
-***REMOVED*** Build Clean Architecture Services
-RUN npm run build:domains
-RUN npm run build:api
+***REMOVED*** Switch to non-root user
+USER 1000:1000
 
-***REMOVED*** Production stage
-FROM node:18-alpine AS production
+***REMOVED*** Expose port
+EXPOSE 8000
 
-RUN apk add --no-cache dumb-init && \
-    addgroup -g 1001 -S valeo && \
-    adduser -S neuroerp -u 1001
+***REMOVED*** Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"
 
-USER neuroerp
-WORKDIR /app
-
-***REMOVED*** Copy production dependencies and built application
-COPY --chown=neuroerp --from=base /app/node_modules ./node_modules
-COPY --chown=neuroerp --from=base /app/package*.json ./
-COPY --chown=neuroerp --from=base /app/dist ./dist
-COPY --chown=neuroerp --from=base /app/config ./config
-
-***REMOVED*** Health checks for Kubernetes
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node healthcheck.js
-
-EXPOSE 3000
-
-***REMOVED*** Start with dumb-init for proper signal handling
-ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/server.js"]
-
+***REMOVED*** Run application
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

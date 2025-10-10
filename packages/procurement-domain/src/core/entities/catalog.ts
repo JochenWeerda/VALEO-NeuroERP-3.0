@@ -377,7 +377,7 @@ export class PunchOutService {
     return session.status === 'active' && new Date() < session.expiresAt;
   }
 
-  public static extendSession(session: PunchOutSession, minutes: number = 30): void {
+  public static extendSession(session: PunchOutSession, minutes = 30): void {
     session.expiresAt = new Date(session.expiresAt.getTime() + minutes * 60 * 1000);
     session.lastActivity = new Date();
   }

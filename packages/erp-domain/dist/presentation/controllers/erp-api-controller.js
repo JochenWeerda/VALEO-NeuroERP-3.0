@@ -54,7 +54,7 @@ class ERPApiController {
             return { status: 400, body: { message: 'Order id missing.' } };
         }
         const body = request.body;
-        if (!body?.status) {
+        if (body?.status == null) {
             return { status: 400, body: { message: 'Status is required.' } };
         }
         const updated = await this.updateOrderStatus.execute(id, body);

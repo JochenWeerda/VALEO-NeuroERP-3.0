@@ -59,7 +59,7 @@ export type CalibrationCheck = z.infer<typeof CalibrationCheckSchema>;
 export type CleaningSequence = z.infer<typeof CleaningSequenceSchema>;
 
 export class MobileRunEntity {
-  private data: MobileRun;
+  private readonly data: MobileRun;
 
   constructor(data: MobileRun) {
     this.data = MobileRunSchema.parse(data);
@@ -104,7 +104,7 @@ export class MobileRunEntity {
     return check.scaleOk && check.moistureOk && check.temperatureOk;
   }
 
-  isCalibrationExpired(maxDays: number = 30): boolean {
+  isCalibrationExpired(maxDays = 30): boolean {
     const checkDate = new Date(this.data.calibrationCheck.date);
     const now = new Date();
     const diffDays = (now.getTime() - checkDate.getTime()) / (1000 * 60 * 60 * 24);
@@ -131,7 +131,7 @@ export class MobileRunEntity {
   getTotalFlushMass(): number {
     return this.data.cleaningSequences
       .filter(seq => seq.type === 'Flush' && seq.flushMassKg)
-      .reduce((total, seq) => total + (seq.flushMassKg || 0), 0);
+      .reduce((total, seq) => total + (seq.flushMassKg ?? 0), 0);
   }
 
   getCleaningHistory(): CleaningSequence[] {
@@ -239,7 +239,7 @@ export class MobileRunEntity {
     const updatedSequence: CleaningSequence = {
       ...sequence,
       endedAt,
-      notes: notes ? `${sequence.notes || ''}\n${notes}`.trim() : sequence.notes
+      notes: notes ? `${sequence.notes ?? ''}\n${notes}`.trim() : sequence.notes
     };
 
     const updatedSequences = [...this.data.cleaningSequences];

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import { eq, and, sql, desc, asc, gte, lte, like, or, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, isNull, like, lte, or, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { schedules, Schedule, NewSchedule } from '../db/schema';
+import { NewSchedule, Schedule, schedules } from '../db/schema';
 import { ScheduleEntity } from '../../domain/entities/schedule';
 
 export interface ScheduleQuery {
@@ -185,7 +185,7 @@ export class ScheduleRepository {
     return result[0]?.count || 0;
   }
 
-  async findEnabledSchedulesBeforeDate(beforeDate: Date, limit: number = 100): Promise<Schedule[]> {
+  async findEnabledSchedulesBeforeDate(beforeDate: Date, limit = 100): Promise<Schedule[]> {
     const result = await db
       .select()
       .from(schedules)

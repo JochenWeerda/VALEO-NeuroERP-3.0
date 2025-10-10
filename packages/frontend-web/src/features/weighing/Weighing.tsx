@@ -42,14 +42,14 @@ const fetchTodayTickets = async (): Promise<WeighingTicket[]> => {
   const startOfDay = new Date(now)
   startOfDay.setHours(0, 0, 0, 0)
 
-  const response = await apiClient.get<unknown>('/weighing/api/v1/tickets', {
+  const payload = await apiClient.get<unknown>('/weighing/api/v1/tickets', {
     params: {
       from: startOfDay.toISOString(),
       to: now.toISOString(),
     },
   })
 
-  const parsed = ticketsResponseSchema.safeParse(response.data)
+  const parsed = ticketsResponseSchema.safeParse(payload)
   if (parsed.success) {
     return parsed.data
   }
@@ -243,6 +243,7 @@ export default function Weighing(): ReactElement {
     </div>
   )
 }
+
 
 
 
