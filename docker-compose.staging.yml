@@ -57,7 +57,6 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres-staging:5432/valeo_neuro_erp_staging
       KC_DB_USERNAME: valeo_staging
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-valeo_staging_2024!}
-      KC_DB_SCHEMA: keycloak
       KC_HOSTNAME: localhost
       KC_HOSTNAME_PORT: 8180
       KC_HTTP_PORT: 8080
@@ -83,13 +82,12 @@ services:
 
   # Backend API (Staging)
   backend-staging:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: production
-    image: valeo-erp-backend:staging
+    image: python:3.11-slim
     container_name: valeo-staging-backend
     restart: unless-stopped
+    working_dir: /app
+    command: >
+      sh -c "apt-get update -qq && apt-get install -y -qq curl libpq-dev && pip install --quiet -r requirements.txt && pip install --quiet email-validator && python main.py"
     environment:
       # Application
       APP_ENV: staging
@@ -132,6 +130,7 @@ services:
     networks:
       - valeo-staging-network
     volumes:
+      - .:/app
       - ./data:/app/data
       - ./logs/staging:/app/logs
     healthcheck:
@@ -143,14 +142,14 @@ services:
 
   # BFF (Backend for Frontend) - Staging
   bff-staging:
-    build:
-      context: ./packages/bff/bff-web
-      dockerfile: Dockerfile
-    image: valeo-erp-bff:staging
+    image: node:20
     container_name: valeo-staging-bff
     restart: unless-stopped
+    working_dir: /app/packages/bff/bff-web
+    command: >
+      sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 4000"
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       HOST: 0.0.0.0
       PORT: 4000
       BACKEND_API_URL: http://backend-staging:8000
@@ -160,49 +159,54 @@ services:
       - "4001:4000"
     depends_on:
       backend-staging:
-        condition: service_healthy
+        condition: service_started
       redis-staging:
         condition: service_healthy
     networks:
       - valeo-staging-network
+    volumes:
+      - .:/app
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      test: ["CMD-SHELL", "curl -f http://localhost:4000/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 60s
 
   # Frontend (Staging)
   frontend-staging:
-    build:
-      context: ./packages/frontend-web
-      dockerfile: Dockerfile
-      target: production
-      args:
-        VITE_API_URL: http://localhost:8001
-        VITE_BFF_URL: http://localhost:4001
-        VITE_OIDC_DISCOVERY_URL: http://localhost:8180/realms/valeo-staging/.well-known/openid-configuration
-        VITE_OIDC_CLIENT_ID: valeo-erp-staging
-        VITE_OIDC_REDIRECT_URI: http://localhost:3001/callback
-        VITE_DEMO_MODE: "false"
-    image: valeo-erp-frontend:staging
+    image: node:20
     container_name: valeo-staging-frontend
     restart: unless-stopped
+    working_dir: /app
+    command: >
+      sh -c "corepack enable && corepack prepare pnpm@9.12.0 --activate && cd /app && pnpm install --frozen-lockfile && pnpm --filter frontend-web dev -- --host 0.0.0.0 --port 3000"
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
+      VITE_API_URL: http://localhost:8001
+      VITE_BFF_URL: http://localhost:4001
+      VITE_OIDC_DISCOVERY_URL: http://localhost:8180/realms/valeo-staging/.well-known/openid-configuration
+      VITE_OIDC_CLIENT_ID: valeo-erp-staging
+      VITE_OIDC_REDIRECT_URI: http://localhost:3001/callback
+      VITE_DEMO_MODE: "false"
+      CHOKIDAR_USEPOLLING: "1"
     ports:
-      - "3001:80"
+      - "3001:3000"
     depends_on:
       backend-staging:
-        condition: service_healthy
+        condition: service_started
       bff-staging:
-        condition: service_healthy
+        condition: service_started
     networks:
       - valeo-staging-network
+    volumes:
+      - .:/app
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 60s
 
   # pgAdmin (Staging)
   pgadmin-staging:

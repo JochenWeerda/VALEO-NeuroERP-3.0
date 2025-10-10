@@ -8,6 +8,8 @@ from __future__ import annotations
 import os
 import logging
 from datetime import datetime
+from typing import Annotated
+from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database_pg import get_db
@@ -176,7 +178,7 @@ class NumberingServicePG:
 
 
 # Dependency für FastAPI
-async def get_numbering_pg(db: AsyncSession = get_db()) -> NumberingServicePG:
+async def get_numbering_pg(db: Annotated[AsyncSession, Depends(get_db)]) -> NumberingServicePG:
     """FastAPI Dependency für NumberingServicePG"""
     return NumberingServicePG(db)
 

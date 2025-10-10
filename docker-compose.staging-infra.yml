@@ -1,0 +1,139 @@
+version: '3.8'
+
+# ===================================
+# Staging Infrastructure Only
+# ===================================
+# PostgreSQL, Redis, Keycloak
+# Backend/Frontend starten nativ (siehe README)
+
+services:
+  # PostgreSQL Database (Staging)
+  postgres-staging:
+    image: postgres:15-alpine
+    container_name: valeo-staging-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: valeo_neuro_erp_staging
+      POSTGRES_USER: valeo_staging
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-valeo_staging_2024!}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5532:5432"
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    networks:
+      - valeo-staging-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U valeo_staging -d valeo_neuro_erp_staging"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis Cache (Staging)
+  redis-staging:
+    image: redis:7-alpine
+    container_name: valeo-staging-redis
+    restart: unless-stopped
+    ports:
+      - "6479:6379"
+    volumes:
+      - redis_staging_data:/data
+    networks:
+      - valeo-staging-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes
+
+  # Keycloak Identity Provider (Staging)
+  keycloak-staging:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: valeo-staging-keycloak
+    restart: unless-stopped
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin123!}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-staging:5432/valeo_neuro_erp_staging
+      KC_DB_USERNAME: valeo_staging
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-valeo_staging_2024!}
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8180
+      KC_HTTP_PORT: 8080
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+    ports:
+      - "8180:8080"
+    depends_on:
+      postgres-staging:
+        condition: service_healthy
+    networks:
+      - valeo-staging-network
+    volumes:
+      - ./config/keycloak/realm-staging.json:/opt/keycloak/data/import/realm-staging.json:ro
+      - keycloak_staging_data:/opt/keycloak/data
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080 && echo -e 'GET /health/ready HTTP/1.1\\r\\nhost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '200 OK' <&3"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    command: start-dev --import-realm
+
+  # pgAdmin (Staging)
+  pgadmin-staging:
+    image: dpage/pgadmin4:8
+    container_name: valeo-staging-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@valeo-staging.local
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123!}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "5151:80"
+    depends_on:
+      postgres-staging:
+        condition: service_healthy
+    networks:
+      - valeo-staging-network
+    volumes:
+      - pgadmin_staging_data:/var/lib/pgadmin
+
+  # Redis Commander (Staging)
+  redis-commander-staging:
+    image: rediscommander/redis-commander:latest
+    container_name: valeo-staging-redis-commander
+    restart: unless-stopped
+    environment:
+      REDIS_HOSTS: staging:redis-staging:6379
+      HTTP_USER: admin
+      HTTP_PASSWORD: ${REDIS_COMMANDER_PASSWORD:-admin123!}
+    ports:
+      - "8181:8081"
+    depends_on:
+      redis-staging:
+        condition: service_healthy
+    networks:
+      - valeo-staging-network
+
+volumes:
+  postgres_staging_data:
+    driver: local
+  redis_staging_data:
+    driver: local
+  keycloak_staging_data:
+    driver: local
+  pgadmin_staging_data:
+    driver: local
+
+networks:
+  valeo-staging-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
+
