@@ -4,6 +4,7 @@ Data erasure and privacy endpoints
 """
 
 from fastapi import APIRouter, HTTPException, Depends
+from typing import Annotated
 from sqlalchemy import text
 from app.core.database_pg import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,7 +18,7 @@ router = APIRouter(prefix="/api/gdpr", tags=["gdpr"])
 @router.delete("/erase/{user_id}")
 async def erase_user_data(
     user_id: str,
-    db: AsyncSession = Depends(get_db)
+    db: Annotated[AsyncSession, Depends(get_db)]
 ):
     """
     GDPR Right to Erasure (Art. 17)
@@ -63,7 +64,7 @@ async def erase_user_data(
 @router.get("/export/{user_id}")
 async def export_user_data(
     user_id: str,
-    db: AsyncSession = Depends(get_db)
+    db: Annotated[AsyncSession, Depends(get_db)]
 ):
     """
     GDPR Right to Data Portability (Art. 20)

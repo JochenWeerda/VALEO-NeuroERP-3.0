@@ -5,7 +5,7 @@ Scope-basierte Zugriffskontrolle
 
 from fastapi import HTTPException, Depends
 from typing import List, Optional
-from app.auth.oidc import get_current_user
+from app.auth.deps_oidc import get_current_user
 
 
 def require_scopes(*required_scopes: str):
