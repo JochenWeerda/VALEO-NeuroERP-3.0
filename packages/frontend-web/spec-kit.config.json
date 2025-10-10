@@ -1,0 +1,118 @@
+{
+  "$schema": "https://raw.githubusercontent.com/github/spec-kit/main/schema/config.schema.json",
+  "name": "VALEO NeuroERP Frontend",
+  "version": "2.5.0",
+  "description": "Spec Kit configuration for VALEO NeuroERP frontend components",
+
+  "outDir": "./specs",
+  "include": [
+    "src/components/**/*.tsx",
+    "src/features/**/*.tsx",
+    "src/pages/**/*.tsx",
+    "!src/**/*.test.tsx",
+    "!src/**/*.spec.tsx"
+  ],
+
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    ".nuxt",
+    "coverage"
+  ],
+
+  "styleTokens": [
+    "tailwind.config.js",
+    "src/lib/utils.ts"
+  ],
+
+  "designSystem": {
+    "name": "VALEO Design System",
+    "version": "1.0.0",
+    "tokens": {
+      "colors": "tailwind.config.js",
+      "typography": "src/styles/typography.css",
+      "spacing": "tailwind.config.js",
+      "components": "src/components/ui/"
+    }
+  },
+
+  "generators": {
+    "component": {
+      "template": "react-typescript",
+      "props": "typescript",
+      "styles": "tailwind",
+      "tests": "vitest"
+    },
+    "page": {
+      "template": "nextjs-page",
+      "layout": "responsive",
+      "seo": true
+    }
+  },
+
+  "integrations": {
+    "genxais": {
+      "enabled": true,
+      "planPhase": {
+        "autoGenerateSpecs": true,
+        "linkToStories": true
+      },
+      "createPhase": {
+        "useSpecsAsContext": true,
+        "validateAgainstSpecs": true
+      },
+      "reflectPhase": {
+        "autoUpdateSpecs": true,
+        "regressionDetection": true
+      }
+    },
+    "storybook": {
+      "enabled": false,
+      "outputDir": "./.storybook/specs"
+    }
+  },
+
+  "validation": {
+    "accessibility": {
+      "enabled": true,
+      "standards": ["WCAG2.1", "Section508"],
+      "automated": true,
+      "manual": ["color-contrast", "keyboard-navigation", "screen-reader"]
+    },
+    "responsive": {
+      "enabled": true,
+      "breakpoints": ["mobile", "tablet", "desktop", "wide"],
+      "mobileFirst": true,
+      "touchTargets": "44px"
+    },
+    "performance": {
+      "enabled": true,
+      "maxBundleSize": "500KB",
+      "maxFirstPaint": "2000ms",
+      "maxLargestContentfulPaint": "2500ms",
+      "maxCumulativeLayoutShift": "0.1"
+    },
+    "designSystem": {
+      "enabled": true,
+      "tokens": ["tailwind.config.js"],
+      "maxVariantsPerComponent": 3,
+      "requireDesignTokens": true,
+      "enforceAria": true
+    },
+    "mcp": {
+      "enabled": true,
+      "standards": ["modelcontextprotocol.io"],
+      "auditAllActions": true,
+      "idempotentOperations": true
+    }
+  },
+
+  "metadata": {
+    "author": "VALEO NeuroERP Team",
+    "repository": "https://github.com/JochenWeerda/VALEO-NeuroERP-2.5",
+    "license": "Proprietary",
+    "tags": ["react", "typescript", "tailwind", "design-system", "erp"]
+  }
+}
