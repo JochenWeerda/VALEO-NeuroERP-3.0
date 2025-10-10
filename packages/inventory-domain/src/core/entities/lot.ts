@@ -10,7 +10,11 @@ export type LotStatus = 'active' | 'hold' | 'blocked' | 'expired' | 'consumed';
 
 // Constants
 const DEFAULT_EXPIRY_WARNING_DAYS = 30;
-const MS_PER_DAY = 1000 * 60 * 60 * 24;
+const MS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const MS_PER_DAY = MS_PER_SECOND * SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY;
 const NO_EXPIRY_PRIORITY = 999999;
 const EXPIRED_PRIORITY = -1;
 const GS1_DATE_LENGTH = 8;

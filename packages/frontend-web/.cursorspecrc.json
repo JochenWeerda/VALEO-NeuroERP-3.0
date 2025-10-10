@@ -1,0 +1,13 @@
+{
+  "sources": ["../**/domain-specs/**/*.yml", "../**/domain-specs/**/*.yaml", "../**/domain-specs/**/*.json"],
+  "outputDir": "src/speckit",
+  "generators": {
+    "react-components": {
+      "path": "src/components/generated",
+      "style": "tailwind",
+      "accessibility": true,
+      "mcpIntegration": true,
+      "drawer": true
+    }
+  }
+}

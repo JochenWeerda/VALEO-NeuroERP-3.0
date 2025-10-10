@@ -1,0 +1,236 @@
+{
+  "$schema": "https://raw.githubusercontent.com/github/spec-kit/main/schema/spec.schema.json",
+  "name": "Button",
+  "description": "Primary button component for VALEO NeuroERP actions",
+  "version": "1.0.0",
+  "category": "ui",
+  "domain": "shared",
+
+  "component": {
+    "framework": "react",
+    "language": "typescript",
+    "library": "shadcn/ui"
+  },
+
+  "props": {
+    "interface": {
+      "children": {
+        "type": "ReactNode",
+        "required": true,
+        "description": "Button content"
+      },
+      "variant": {
+        "type": "'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'",
+        "default": "'default'",
+        "description": "Visual style variant"
+      },
+      "size": {
+        "type": "'default' | 'sm' | 'lg' | 'icon'",
+        "default": "'default'",
+        "description": "Button size"
+      },
+      "disabled": {
+        "type": "boolean",
+        "default": "false",
+        "description": "Disabled state"
+      },
+      "onClick": {
+        "type": "(event: MouseEvent<HTMLButtonElement>) => void",
+        "required": false,
+        "description": "Click handler"
+      },
+      "className": {
+        "type": "string",
+        "required": false,
+        "description": "Additional CSS classes"
+      }
+    }
+  },
+
+  "variants": [
+    {
+      "name": "default",
+      "description": "Primary action button",
+      "props": { "variant": "default" },
+      "styles": {
+        "backgroundColor": "hsl(var(--primary))",
+        "color": "hsl(var(--primary-foreground))",
+        "hover": "hsl(var(--primary) / 0.9)"
+      }
+    },
+    {
+      "name": "destructive",
+      "description": "Danger/destructive action",
+      "props": { "variant": "destructive" },
+      "styles": {
+        "backgroundColor": "hsl(var(--destructive))",
+        "color": "hsl(var(--destructive-foreground))"
+      }
+    },
+    {
+      "name": "outline",
+      "description": "Outlined button style",
+      "props": { "variant": "outline" },
+      "styles": {
+        "border": "1px solid hsl(var(--border))",
+        "backgroundColor": "transparent"
+      }
+    }
+  ],
+
+  "sizes": [
+    {
+      "name": "sm",
+      "description": "Small button",
+      "props": { "size": "sm" },
+      "styles": {
+        "height": "2.25rem",
+        "padding": "0 0.75rem",
+        "fontSize": "0.875rem"
+      }
+    },
+    {
+      "name": "default",
+      "description": "Default button size",
+      "props": { "size": "default" },
+      "styles": {
+        "height": "2.5rem",
+        "padding": "0 1rem",
+        "fontSize": "0.875rem"
+      }
+    },
+    {
+      "name": "lg",
+      "description": "Large button",
+      "props": { "size": "lg" },
+      "styles": {
+        "height": "2.75rem",
+        "padding": "0 2rem",
+        "fontSize": "1rem"
+      }
+    }
+  ],
+
+  "states": [
+    {
+      "name": "disabled",
+      "description": "Disabled button state",
+      "props": { "disabled": true },
+      "styles": {
+        "opacity": "0.5",
+        "cursor": "not-allowed",
+        "pointerEvents": "none"
+      }
+    },
+    {
+      "name": "loading",
+      "description": "Loading state with spinner",
+      "custom": true,
+      "styles": {
+        "position": "relative",
+        "pointerEvents": "none"
+      }
+    }
+  ],
+
+  "events": [
+    {
+      "name": "onClick",
+      "description": "Button click event",
+      "payload": "MouseEvent<HTMLButtonElement>",
+      "bubbles": true
+    },
+    {
+      "name": "onFocus",
+      "description": "Button focus event",
+      "payload": "FocusEvent<HTMLButtonElement>"
+    },
+    {
+      "name": "onBlur",
+      "description": "Button blur event",
+      "payload": "FocusEvent<HTMLButtonElement>"
+    }
+  ],
+
+  "accessibility": {
+    "role": "button",
+    "aria-label": "Supported via children content",
+    "keyboard": {
+      "enter": "Activates button",
+      "space": "Activates button"
+    },
+    "screenReader": "Content announced via children",
+    "focus": {
+      "visible": true,
+      "order": "DOM order"
+    }
+  },
+
+  "responsive": {
+    "mobile": {
+      "sizes": ["sm", "default"],
+      "touchTarget": "44px minimum"
+    },
+    "tablet": {
+      "sizes": ["default", "lg"]
+    },
+    "desktop": {
+      "sizes": ["default", "lg"]
+    }
+  },
+
+  "dependencies": [
+    {
+      "name": "React",
+      "version": "^18.0.0",
+      "type": "runtime"
+    },
+    {
+      "name": "Tailwind CSS",
+      "version": "^3.0.0",
+      "type": "build"
+    },
+    {
+      "name": "class-variance-authority",
+      "version": "^0.7.0",
+      "type": "runtime"
+    }
+  ],
+
+  "usage": {
+    "examples": [
+      {
+        "title": "Basic Button",
+        "code": "<Button>Click me</Button>"
+      },
+      {
+        "title": "Destructive Action",
+        "code": "<Button variant=\"destructive\">Delete</Button>"
+      },
+      {
+        "title": "Disabled State",
+        "code": "<Button disabled>Disabled</Button>"
+      }
+    ]
+  },
+
+  "testing": {
+    "unit": {
+      "click": "Should call onClick handler",
+      "disabled": "Should not trigger onClick when disabled",
+      "variants": "Should apply correct styles for each variant"
+    },
+    "accessibility": {
+      "keyboard": "Should be keyboard navigable",
+      "screenReader": "Should announce content correctly"
+    }
+  },
+
+  "metadata": {
+    "author": "VALEO NeuroERP Team",
+    "created": "2025-10-08",
+    "lastModified": "2025-10-08",
+    "tags": ["button", "ui", "action", "interactive"],
+    "designSystem": "VALEO v1.0.0"
+  }
+}

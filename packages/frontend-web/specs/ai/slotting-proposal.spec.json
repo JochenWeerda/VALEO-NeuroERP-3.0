@@ -1,0 +1,237 @@
+{
+  "$schema": "https://raw.githubusercontent.com/github/spec-kit/main/schema/ai-action.schema.json",
+  "name": "ProposeSlotting",
+  "version": "1.0.0",
+  "category": "inventory-optimization",
+  "description": "AI-powered slotting recommendations for optimal warehouse layout",
+
+  "trigger": {
+    "events": ["item.received", "slotting.analysis", "utilization.threshold"],
+    "uiTriggers": ["button.click", "menu.select", "hotkey"],
+    "conditions": {
+      "minItems": 1,
+      "warehouseActive": true,
+      "optimizationEnabled": true
+    }
+  },
+
+  "mcpTool": {
+    "name": "inventory.proposeSlotting",
+    "description": "Generate optimal slotting recommendations using AI analysis",
+    "parameters": {
+      "item": {
+        "type": "InboundItem",
+        "description": "Item to be slotted",
+        "required": true
+      },
+      "warehouse": {
+        "type": "WarehouseLayout",
+        "description": "Current warehouse configuration",
+        "required": true
+      },
+      "constraints": {
+        "type": "SlottingConstraints",
+        "description": "Business rules and constraints",
+        "required": false
+      },
+      "optimizationMode": {
+        "type": "'velocity' | 'space' | 'accessibility' | 'balanced'",
+        "description": "Primary optimization objective",
+        "default": "balanced",
+        "required": false
+      }
+    },
+    "returns": {
+      "type": "SlottingRecommendation[]",
+      "description": "Array of slotting recommendations with confidence scores"
+    },
+    "idempotent": true,
+    "audited": true,
+    "timeout": 5000
+  },
+
+  "ui": {
+    "panel": {
+      "position": "side",
+      "size": "medium",
+      "title": "Slotting Assistant",
+      "icon": "package-2",
+      "collapsible": true,
+      "resizable": true
+    },
+    "trigger": {
+      "type": "floating-action-button",
+      "position": "bottom-right",
+      "icon": "sparkles",
+      "label": "Optimize Slotting",
+      "shortcut": "Ctrl+Shift+S"
+    },
+    "display": {
+      "recommendations": {
+        "format": "card-list",
+        "showConfidence": true,
+        "showReasoning": true,
+        "allowOverride": true
+      },
+      "visualization": {
+        "type": "warehouse-heatmap",
+        "interactive": true,
+        "showBeforeAfter": true
+      },
+      "metrics": {
+        "improvement": "percentage",
+        "confidence": "score",
+        "timeSaved": "minutes"
+      }
+    }
+  },
+
+  "interactions": {
+    "userActions": [
+      {
+        "action": "acceptRecommendation",
+        "description": "Apply the recommended slotting",
+        "confirmation": "required",
+        "undo": "supported"
+      },
+      {
+        "action": "modifyConstraints",
+        "description": "Adjust optimization parameters",
+        "ui": "constraint-editor"
+      },
+      {
+        "action": "viewAnalysis",
+        "description": "Show detailed analysis",
+        "ui": "analysis-modal"
+      },
+      {
+        "action": "scheduleOptimization",
+        "description": "Plan optimization for later",
+        "ui": "scheduler"
+      }
+    ],
+    "aiResponses": [
+      {
+        "type": "recommendation",
+        "format": "structured-card",
+        "elements": ["slot", "confidence", "reasoning", "metrics"]
+      },
+      {
+        "type": "explanation",
+        "format": "natural-language",
+        "tone": "professional",
+        "detailLevel": "comprehensive"
+      },
+      {
+        "type": "question",
+        "format": "clarifying-question",
+        "responseType": "user-input"
+      }
+    ]
+  },
+
+  "validation": {
+    "preConditions": [
+      {
+        "check": "warehouseLayoutValid",
+        "description": "Warehouse layout must be properly configured"
+      },
+      {
+        "check": "itemDataComplete",
+        "description": "Item data must include dimensions and velocity"
+      },
+      {
+        "check": "permissions",
+        "description": "User must have slotting permissions"
+      }
+    ],
+    "postConditions": [
+      {
+        "check": "slotAvailable",
+        "description": "Recommended slot must be available"
+      },
+      {
+        "check": "constraintsSatisfied",
+        "description": "All business constraints must be met"
+      },
+      {
+        "check": "improvementPositive",
+        "description": "Recommendation must provide measurable improvement"
+      }
+    ]
+  },
+
+  "performance": {
+    "responseTime": "< 3 seconds",
+    "confidenceThreshold": "0.7",
+    "maxRecommendations": 5,
+    "caching": {
+      "warehouseLayout": "5 minutes",
+      "itemData": "1 hour",
+      "recommendations": "10 minutes"
+    }
+  },
+
+  "accessibility": {
+    "compliance": "WCAG 2.1 AA",
+    "keyboardNavigation": true,
+    "screenReader": true,
+    "highContrast": true,
+    "reducedMotion": true
+  },
+
+  "errorHandling": {
+    "networkFailure": {
+      "fallback": "cached-recommendations",
+      "retry": "exponential-backoff",
+      "timeout": 10000
+    },
+    "invalidData": {
+      "fallback": "manual-input-request",
+      "validation": "client-side"
+    },
+    "permissionDenied": {
+      "fallback": "read-only-mode",
+      "notification": "user-friendly-message"
+    }
+  },
+
+  "analytics": {
+    "usage": {
+      "acceptanceRate": true,
+      "responseTime": true,
+      "errorRate": true
+    },
+    "business": {
+      "timeSaved": true,
+      "efficiencyGain": true,
+      "userSatisfaction": true
+    },
+    "technical": {
+      "apiLatency": true,
+      "cacheHitRate": true,
+      "errorTypes": true
+    }
+  },
+
+  "integration": {
+    "eventBus": {
+      "publish": ["slotting.recommended", "slotting.applied"],
+      "subscribe": ["item.received", "warehouse.updated"]
+    },
+    "audit": {
+      "enabled": true,
+      "level": "detailed",
+      "retention": "7 years"
+    }
+  },
+
+  "metadata": {
+    "author": "VALEO NeuroERP Team",
+    "created": "2025-10-08",
+    "tags": ["ai", "copilot", "slotting", "optimization", "warehouse"],
+    "dependencies": ["inventory-domain", "ai-assistance-service"],
+    "marketAlignment": "SAP Joule + Oracle Redwood AI assistants",
+    "businessValue": "30% improvement in warehouse efficiency"
+  }
+}
