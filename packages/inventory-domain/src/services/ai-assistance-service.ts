@@ -16,6 +16,20 @@ const MS_TO_SECONDS = MS_PER_SECOND;
 const MS_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MS_PER_SECOND;
 const EVENING_HOUR_THRESHOLD = 17;
 const TOP_INSIGHTS_LIMIT = 10;
+const HIGH_CONFIDENCE_THRESHOLD = 0.7;
+const HIGH_VELOCITY_THRESHOLD = 10;
+const TOP_RECOMMENDATIONS_LIMIT = 5;
+const RECOMMENDATION_EXPIRES_DAYS = 7;
+const AVG_TRAVEL_TIME_SECONDS = 120;
+const PICKING_ACCURACY_DEFAULT = 0.98;
+const SLOT_UTILIZATION_DEFAULT = 0.85;
+const THROUGHPUT_DEFAULT = 150;
+const TRAVEL_TIME_REDUCTION_SECONDS = 45;
+const PICKING_EFFICIENCY_IMPROVEMENT = 0.15;
+const INVENTORY_ACCURACY_IMPROVEMENT = 0.02;
+const COST_SAVINGS_PER_YEAR = 1250;
+const FORECAST_EXPIRES_DAYS = 30;
+const CONFIDENCE_ACCURACY_BASE = 0.87;
 import {
   AISlottingOptimizedEvent,
   AIForecastEnhancedEvent,
@@ -50,7 +64,7 @@ export interface ForecastingModel {
   modelId: string;
   sku: string;
   modelType: 'arima' | 'prophet' | 'neural_network' | 'ensemble' | 'hybrid';
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   performance: {
     accuracy: number;
     meanAbsoluteError: number;
@@ -60,7 +74,7 @@ export interface ForecastingModel {
     nextRetraining: Date;
   };
   features: string[];
-  hyperparameters: Record<string, any>;
+  hyperparameters: Record<string, number | string | boolean>;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -129,11 +143,11 @@ export interface PredictiveInsight {
 
   data: {
     timeRange: { start: Date; end: Date };
-    metrics: Record<string, any>;
+    metrics: Record<string, number | string | boolean>;
     visualization: {
       type: 'line' | 'bar' | 'scatter' | 'heatmap';
-      data: any;
-      config: Record<string, any>;
+      data: Array<Record<string, unknown>>;
+      config: Record<string, number | string | boolean>;
     };
   };
 
@@ -152,13 +166,30 @@ export interface PredictiveInsight {
   expiresAt: Date;
 }
 
+type WarehouseLayout = Record<string, unknown>;
+type PickingHistory = ReadonlyArray<Record<string, unknown>>;
+interface InventoryItem {
+  sku: string;
+  location: string;
+  picksPerDay: number;
+  averageTravelTime: number;
+  velocity: number;
+}
+interface SlottingOpportunity {
+  sku: string;
+  currentLocation: string;
+  pickingFrequency: number;
+  travelTime: number;
+  opportunity: string;
+}
+
 @injectable()
 export class AIAssistanceService {
   private readonly metrics = new InventoryMetricsService();
-  private slottingRecommendations: Map<string, SlottingRecommendation> = new Map();
-  private forecastingModels: Map<string, ForecastingModel> = new Map();
-  private anomalyPatterns: Map<string, AnomalyPattern> = new Map();
-  private predictiveInsights: Map<string, PredictiveInsight> = new Map();
+  private readonly slottingRecommendations: Map<string, SlottingRecommendation> = new Map();
+  private readonly forecastingModels: Map<string, ForecastingModel> = new Map();
+  private readonly anomalyPatterns: Map<string, AnomalyPattern> = new Map();
+  private readonly predictiveInsights: Map<string, PredictiveInsight> = new Map();
 
   constructor(
     private readonly eventBus: EventBus
@@ -170,7 +201,11 @@ export class AIAssistanceService {
   /**
    * Generate AI-powered slotting recommendations
    */
-  async generateSlottingRecommendations(warehouseLayout: any, inventoryData: any, pickingHistory: any): Promise<SlottingRecommendation[]> {
+  async generateSlottingRecommendations(
+    warehouseLayout: WarehouseLayout,
+    inventoryData: InventoryItem[],
+    pickingHistory: PickingHistory
+  ): Promise<SlottingRecommendation[]> {
     const startTime = Date.now();
 
     try {
@@ -190,7 +225,7 @@ export class AIAssistanceService {
           warehouseLayout
         );
 
-        if (recommendation.confidence > 0.7) { // Only high-confidence recommendations
+        if (recommendation.confidence > HIGH_CONFIDENCE_THRESHOLD) {
           recommendations.push(recommendation);
           this.slottingRecommendations.set(recommendation.recommendationId, recommendation);
         }
@@ -206,7 +241,7 @@ export class AIAssistanceService {
         await this.publishSlottingOptimizedEvent(rec);
       }
 
-      this.metrics.recordDatabaseQueryDuration('ai_assistance', 'slotting_recommendations', (Date.now() - startTime) / 1000);
+      this.metrics.recordDatabaseQueryDuration('ai_assistance', 'slotting_recommendations', (Date.now() - startTime) / MS_TO_SECONDS);
       this.metrics.incrementAIRecommendations('slotting', recommendations.length);
 
       return recommendations;
@@ -219,9 +254,13 @@ export class AIAssistanceService {
   /**
    * Enhance forecasting with advanced AI models
    */
-  async enhanceForecasting(sku: string, historicalData: any[], externalFactors: any): Promise<{
-    enhancedForecast: any[];
-    modelPerformance: any;
+  async enhanceForecasting(
+    sku: string,
+    historicalData: Array<Record<string, unknown>>,
+    externalFactors: unknown
+  ): Promise<{
+    enhancedForecast: Array<{ date: Date; predicted: number; confidence: number }>;
+    modelPerformance: ForecastingModel['performance'];
     confidence: number;
     insights: string[];
   }> {
@@ -253,7 +292,7 @@ export class AIAssistanceService {
       // Publish event
       await this.publishForecastEnhancedEvent(sku, enhancedForecast, confidence);
 
-      this.metrics.recordDatabaseQueryDuration('ai_assistance', 'forecasting_enhancement', (Date.now() - startTime) / 1000);
+      this.metrics.recordDatabaseQueryDuration('ai_assistance', 'forecasting_enhancement', (Date.now() - startTime) / MS_TO_SECONDS);
 
       return {
         enhancedForecast,
@@ -270,7 +309,7 @@ export class AIAssistanceService {
   /**
    * Advanced anomaly detection with AI
    */
-  async detectAnomalies(dataStreams: any[], detectionConfig: any): Promise<AnomalyPattern[]> {
+  async detectAnomalies(dataStreams: readonly unknown[], detectionConfig: unknown): Promise<AnomalyPattern[]> {
     const startTime = Date.now();
 
     try {
@@ -295,7 +334,7 @@ export class AIAssistanceService {
         await this.publishAnomalyDetectedEvent(enrichedAnomaly);
       }
 
-      this.metrics.recordDatabaseQueryDuration('ai_assistance', 'anomaly_detection', (Date.now() - startTime) / 1000);
+      this.metrics.recordDatabaseQueryDuration('ai_assistance', 'anomaly_detection', (Date.now() - startTime) / MS_TO_SECONDS);
       this.metrics.incrementAnomaliesDetected(anomalies.length);
 
       return anomalies;
@@ -308,7 +347,7 @@ export class AIAssistanceService {
   /**
    * Generate predictive insights
    */
-  async generatePredictiveInsights(data: any, context: any): Promise<PredictiveInsight[]> {
+  async generatePredictiveInsights(data: Record<string, unknown>, context: Record<string, unknown>): Promise<PredictiveInsight[]> {
     const startTime = Date.now();
 
     try {
@@ -338,7 +377,7 @@ export class AIAssistanceService {
         this.predictiveInsights.set(insight.insightId, insight);
       }
 
-      this.metrics.recordDatabaseQueryDuration('ai_assistance', 'predictive_insights', (Date.now() - startTime) / 1000);
+      this.metrics.recordDatabaseQueryDuration('ai_assistance', 'predictive_insights', (Date.now() - startTime) / MS_TO_SECONDS);
 
       return insights.slice(0, TOP_INSIGHTS_LIMIT); // Top 10 insights
     } catch (error) {
@@ -350,9 +389,9 @@ export class AIAssistanceService {
   /**
    * Train and update AI models
    */
-  async trainModels(modelType: 'slotting' | 'forecasting' | 'anomaly_detection', trainingData: any): Promise<{
+  async trainModels(modelType: 'slotting' | 'forecasting' | 'anomaly_detection', trainingData: unknown): Promise<{
     modelId: string;
-    performance: any;
+    performance: Record<string, number>;
     improvements: string[];
   }> {
     const startTime = Date.now();
@@ -361,7 +400,7 @@ export class AIAssistanceService {
       const modelId = `model_${modelType}_${Date.now()}`;
 
       // Train model based on type
-      let performance: any;
+      let performance: Record<string, number>;
       let improvements: string[];
 
       switch (modelType) {
@@ -379,7 +418,7 @@ export class AIAssistanceService {
       // Publish event
       await this.publishModelTrainedEvent(modelId, modelType, performance);
 
-      this.metrics.recordDatabaseQueryDuration('ai_assistance', 'model_training', (Date.now() - startTime) / 1000);
+      this.metrics.recordDatabaseQueryDuration('ai_assistance', 'model_training', (Date.now() - startTime) / MS_TO_SECONDS);
 
       return {
         modelId,
@@ -408,7 +447,7 @@ export class AIAssistanceService {
     confidence: number;
     action?: {
       type: string;
-      parameters: any;
+      parameters: Record<string, unknown>;
     };
   }>> {
     const recommendations = [];
@@ -441,26 +480,35 @@ export class AIAssistanceService {
     // Sort by confidence and relevance
     return recommendations
       .sort((a, b) => b.confidence - a.confidence)
-      .slice(0, 5); // Top 5 recommendations
+      .slice(0, TOP_RECOMMENDATIONS_LIMIT);
   }
 
   // Private helper methods
 
-  private async analyzeCurrentSlottingEfficiency(warehouseLayout: any, pickingHistory: any): Promise<any> {
+  private async analyzeCurrentSlottingEfficiency(_warehouseLayout: WarehouseLayout, _pickingHistory: PickingHistory): Promise<{
+    averageTravelTime: number;
+    pickingAccuracy: number;
+    slotUtilization: number;
+    throughput: number;
+  }> {
     // Analyze travel distances, picking times, etc.
     return {
-      averageTravelTime: 120, // seconds
-      pickingAccuracy: 0.98,
-      slotUtilization: 0.85,
-      throughput: 150 // items/hour
+      averageTravelTime: AVG_TRAVEL_TIME_SECONDS,
+      pickingAccuracy: PICKING_ACCURACY_DEFAULT,
+      slotUtilization: SLOT_UTILIZATION_DEFAULT,
+      throughput: THROUGHPUT_DEFAULT
     };
   }
 
-  private async identifySlottingOpportunities(inventoryData: any, pickingHistory: any, warehouseLayout: any): Promise<any[]> {
+  private async identifySlottingOpportunities(
+    inventoryData: InventoryItem[],
+    _pickingHistory: PickingHistory,
+    _warehouseLayout: WarehouseLayout
+  ): Promise<SlottingOpportunity[]> {
     // Identify SKUs that could benefit from relocation
     return inventoryData
-      .filter((item: any) => item.velocity > 10) // High-velocity items
-      .map((item: any) => ({
+      .filter((item: InventoryItem) => item.velocity > HIGH_VELOCITY_THRESHOLD)
+      .map((item: InventoryItem) => ({
         sku: item.sku,
         currentLocation: item.location,
         pickingFrequency: item.picksPerDay,
@@ -470,9 +518,9 @@ export class AIAssistanceService {
   }
 
   private async generateSlottingRecommendation(
-    opportunity: any,
-    currentEfficiency: any,
-    warehouseLayout: any
+    opportunity: SlottingOpportunity,
+    currentEfficiency: { averageTravelTime: number; pickingAccuracy: number; slotUtilization: number; throughput: number },
+    warehouseLayout: WarehouseLayout
   ): Promise<SlottingRecommendation> {
     // Use ML to recommend optimal location
     const recommendedLocation = await this.predictOptimalLocation(opportunity, warehouseLayout);
@@ -498,21 +546,25 @@ export class AIAssistanceService {
         riskLevel: 'low'
       },
       generatedAt: new Date(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+      expiresAt: new Date(Date.now() + RECOMMENDATION_EXPIRES_DAYS * MS_PER_DAY)
     };
   }
 
-  private async predictOptimalLocation(opportunity: any, warehouseLayout: any): Promise<string> {
+  private async predictOptimalLocation(_opportunity: SlottingOpportunity, _warehouseLayout: WarehouseLayout): Promise<string> {
     // ML-based location prediction
     return 'A-01-01-01'; // Example optimal location
   }
 
-  private async calculateExpectedBenefits(opportunity: any, newLocation: string, currentEfficiency: any): Promise<any> {
+  private async calculateExpectedBenefits(
+    _opportunity: SlottingOpportunity,
+    _newLocation: string,
+    _currentEfficiency: { averageTravelTime: number; pickingAccuracy: number; slotUtilization: number; throughput: number }
+  ): Promise<{ travelTimeReduction: number; pickingEfficiency: number; inventoryAccuracy: number; costSavings: number }> {
     return {
-      travelTimeReduction: 45, // seconds
-      pickingEfficiency: 0.15, // 15% improvement
-      inventoryAccuracy: 0.02, // 2% improvement
-      costSavings: 1250 // € per year
+      travelTimeReduction: TRAVEL_TIME_REDUCTION_SECONDS,
+      pickingEfficiency: PICKING_EFFICIENCY_IMPROVEMENT,
+      inventoryAccuracy: INVENTORY_ACCURACY_IMPROVEMENT,
+      costSavings: COST_SAVINGS_PER_YEAR
     };
   }
 
@@ -528,7 +580,7 @@ export class AIAssistanceService {
         meanSquaredError: 245.8,
         trainingDataSize: historicalData.length,
         lastTrained: new Date(),
-        nextRetraining: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        nextRetraining: new Date(Date.now() + 7 * MS_PER_DAY)
       },
       features: ['seasonality', 'trend', 'external_factors'],
       hyperparameters: { learning_rate: 0.01, epochs: 100 },
@@ -546,7 +598,10 @@ export class AIAssistanceService {
     }));
   }
 
-  private async generateEnhancedForecast(model: ForecastingModel, enhancedData: any[]): Promise<any[]> {
+  private async generateEnhancedForecast(
+    _model: ForecastingModel,
+    _enhancedData: readonly unknown[]
+  ): Promise<Array<{ date: Date; predicted: number; confidence: number }>> {
     // Generate forecast using the model
     return Array.from({ length: TOP_INSIGHTS_LIMIT * 3 }, (_, i) => ({
       date: new Date(Date.now() + i * MS_PER_DAY),
@@ -555,12 +610,18 @@ export class AIAssistanceService {
     }));
   }
 
-  private async calculateForecastConfidence(forecast: any[], historicalData: any[]): Promise<number> {
+  private async calculateForecastConfidence(
+    _forecast: readonly unknown[],
+    _historicalData: readonly unknown[]
+  ): Promise<number> {
     // Calculate confidence based on historical accuracy
-    return 0.87;
+    return CONFIDENCE_ACCURACY_BASE;
   }
 
-  private async generateForecastInsights(forecast: any[], externalFactors: any): Promise<string[]> {
+  private async generateForecastInsights(
+    _forecast: readonly unknown[],
+    _externalFactors: unknown
+  ): Promise<string[]> {
     return [
       'Strong seasonal pattern detected',
       'External promotion factor increases demand by 25%',
@@ -568,18 +629,25 @@ export class AIAssistanceService {
     ];
   }
 
-  private async detectWithIsolationForest(dataStreams: any[], config: any): Promise<AnomalyPattern[]> {
-    // Isolation Forest anomaly detection
+  // Replace any-typed detection helpers with unknown and mark unused params
+  private async detectWithIsolationForest(
+    _dataStreams: readonly unknown[],
+    _config: unknown
+  ): Promise<AnomalyPattern[]> {
     return [];
   }
 
-  private async detectWithAutoencoder(dataStreams: any[], config: any): Promise<AnomalyPattern[]> {
-    // Autoencoder-based anomaly detection
+  private async detectWithAutoencoder(
+    _dataStreams: readonly unknown[],
+    _config: unknown
+  ): Promise<AnomalyPattern[]> {
     return [];
   }
 
-  private async detectWithStatisticalMethods(dataStreams: any[], config: any): Promise<AnomalyPattern[]> {
-    // Statistical anomaly detection
+  private async detectWithStatisticalMethods(
+    _dataStreams: readonly unknown[],
+    _config: unknown
+  ): Promise<AnomalyPattern[]> {
     return [];
   }
 
@@ -588,33 +656,26 @@ export class AIAssistanceService {
     return anomalies;
   }
 
-  private async enrichAnomaly(anomaly: AnomalyPattern, dataStreams: any[]): Promise<AnomalyPattern> {
-    // Add root cause analysis and recommendations
+  private async enrichAnomaly(
+    anomaly: AnomalyPattern,
+    _dataStreams: readonly unknown[]
+  ): Promise<AnomalyPattern> {
     return {
       ...anomaly,
       analysis: {
         rootCause: 'Supplier delay',
         contributingFactors: [
-          {
-            factor: 'Supplier lead time increase',
-            impact: 0.8,
-            evidence: 'Historical data shows 20% increase'
-          }
+          { factor: 'Supplier lead time increase', impact: 0.8, evidence: 'Historical data shows 20% increase' }
         ],
         similarIncidents: ['anomaly_001', 'anomaly_002'],
         recommendedActions: [
-          {
-            action: 'Contact supplier',
-            priority: 'high',
-            expectedImpact: 'Reduce delay by 50%',
-            timeline: 'Within 2 hours'
-          }
+          { action: 'Contact supplier', priority: 'high', expectedImpact: 'Reduce delay by 50%', timeline: 'Within 2 hours' }
         ]
       }
     };
   }
 
-  private async analyzeTrends(data: any, context: any): Promise<PredictiveInsight[]> {
+  private async analyzeTrends(_data: unknown, _context: unknown): Promise<PredictiveInsight[]> {
     return [
       {
         insightId: `insight_trend_${Date.now()}`,
@@ -622,50 +683,26 @@ export class AIAssistanceService {
         title: 'Increasing Demand Trend',
         description: 'Demand for SKU-001 has been increasing by 15% monthly',
         confidence: 0.92,
-        impact: {
-          level: 'high',
-          affected: ['SKU-001'],
-          potentialValue: 50000
-        },
-        data: {
-          timeRange: { start: new Date(), end: new Date() },
-          metrics: {},
-          visualization: {
-            type: 'line',
-            data: [],
-            config: {}
-          }
-        },
+        impact: { level: 'high', affected: ['SKU-001'], potentialValue: 50000 },
+        data: { timeRange: { start: new Date(), end: new Date() }, metrics: {}, visualization: { type: 'line', data: [], config: {} } },
         recommendations: [
-          {
-            action: 'Increase safety stock',
-            rationale: 'Prevent stockouts during peak demand',
-            expectedOutcome: 'Reduce stockout risk by 80%',
-            implementation: {
-              complexity: 'medium',
-              timeline: '1 week',
-              resources: ['Inventory Manager']
-            }
-          }
+          { action: 'Increase safety stock', rationale: 'Prevent stockouts during peak demand', expectedOutcome: 'Reduce stockout risk by 80%', implementation: { complexity: 'medium', timeline: '1 week', resources: ['Inventory Manager'] } }
         ],
         generatedAt: new Date(),
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        expiresAt: new Date(Date.now() + FORECAST_EXPIRES_DAYS * MS_PER_DAY)
       }
     ];
   }
 
-  private async detectSeasonality(data: any, context: any): Promise<PredictiveInsight[]> {
-    // Seasonality detection
+  private async detectSeasonality(_data: unknown, _context: unknown): Promise<PredictiveInsight[]> {
     return [];
   }
 
-  private async analyzeCorrelations(data: any, context: any): Promise<PredictiveInsight[]> {
-    // Correlation analysis
+  private async analyzeCorrelations(_data: unknown, _context: unknown): Promise<PredictiveInsight[]> {
     return [];
   }
 
-  private async generatePredictions(data: any, context: any): Promise<PredictiveInsight[]> {
-    // Predictive modeling
+  private async generatePredictions(_data: unknown, _context: unknown): Promise<PredictiveInsight[]> {
     return [];
   }
 
@@ -690,40 +727,21 @@ export class AIAssistanceService {
     };
   }
 
-  private async getPickingAssistance(context: any): Promise<any[]> {
+  private async getPickingAssistance(_context: unknown): Promise<any[]> {
     return [
-      {
-        type: 'suggestion',
-        title: 'Optimize Picking Path',
-        description: 'Consider picking items in A-zone first for better efficiency',
-        confidence: 0.85,
-        action: {
-          type: 'reorder_picking_list',
-          parameters: { zone: 'A' }
-        }
-      }
+      { type: 'suggestion', title: 'Optimize Picking Path', description: 'Consider picking items in A-zone first for better efficiency', confidence: 0.85, action: { type: 'reorder_picking_list', parameters: { zone: 'A' } } }
     ];
   }
 
-  private async getReceivingAssistance(context: any): Promise<any[]> {
+  private async getReceivingAssistance(_context: unknown): Promise<any[]> {
     return [
-      {
-        type: 'warning',
-        title: 'Quality Check Required',
-        description: 'Previous shipments from this supplier had quality issues',
-        confidence: 0.78
-      }
+      { type: 'warning', title: 'Quality Check Required', description: 'Previous shipments from this supplier had quality issues', confidence: 0.78 }
     ];
   }
 
-  private async getLocationAssistance(location: string): Promise<any[]> {
+  private async getLocationAssistance(_location: string): Promise<any[]> {
     return [
-      {
-        type: 'optimization',
-        title: 'Slotting Opportunity',
-        description: 'Consider moving high-velocity items to this location',
-        confidence: 0.82
-      }
+      { type: 'optimization', title: 'Slotting Opportunity', description: 'Consider moving high-velocity items to this location', confidence: 0.82 }
     ];
   }
 
@@ -741,13 +759,13 @@ export class AIAssistanceService {
     return [];
   }
 
-  private async getProactiveAssistance(recentActions: string[]): Promise<any[]> {
-    // Analyze recent actions and provide proactive suggestions
+  private async getProactiveAssistance(_recentActions: readonly string[]): Promise<any[]> {
     return [];
   }
 
   private initializeAIModels(): void {
     // Initialize pre-trained models
+    // eslint-disable-next-line no-console
     console.log('AI models initialized');
   }
 
@@ -766,6 +784,7 @@ export class AIAssistanceService {
 
   private async retrainModels(): Promise<void> {
     // Retrain models with accumulated data
+    // eslint-disable-next-line no-console
     console.log('Retraining AI models...');
   }
 
@@ -790,7 +809,11 @@ export class AIAssistanceService {
     await this.eventBus.publish(event);
   }
 
-  private async publishForecastEnhancedEvent(sku: string, forecast: any[], confidence: number): Promise<void> {
+  private async publishForecastEnhancedEvent(
+    sku: string,
+    forecast: Array<{ date: Date; predicted: number; confidence: number }>,
+    confidence: number
+  ): Promise<void> {
     const event: AIForecastEnhancedEvent = {
       eventId: `evt_${Date.now()}`,
       eventType: 'inventory.ai.forecast.enhanced',
@@ -804,7 +827,6 @@ export class AIAssistanceService {
       confidence,
       accuracy: confidence
     };
-
     await this.eventBus.publish(event);
   }
 
@@ -827,7 +849,11 @@ export class AIAssistanceService {
     await this.eventBus.publish(event);
   }
 
-  private async publishModelTrainedEvent(modelId: string, modelType: string, performance: any): Promise<void> {
+  private async publishModelTrainedEvent(
+    modelId: string,
+    modelType: string,
+    performance: { accuracy?: number; trainingDataSize?: number }
+  ): Promise<void> {
     const event: AIModelTrainedEvent = {
       eventId: `evt_${Date.now()}`,
       eventType: 'inventory.ai.model.trained',
@@ -838,10 +864,9 @@ export class AIAssistanceService {
       tenantId: 'default',
       modelId,
       modelType,
-      performance: performance.accuracy || 0,
-      trainingDataSize: performance.trainingDataSize || 0
+      performance: performance.accuracy ?? 0,
+      trainingDataSize: performance.trainingDataSize ?? 0
     };
-
     await this.eventBus.publish(event);
   }
 }

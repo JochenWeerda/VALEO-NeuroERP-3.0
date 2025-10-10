@@ -4,7 +4,13 @@
  * Represents a Stock Keeping Unit with GS1 compliance and WMS attributes
  */
 
-import { v4 as uuidv4 } from 'uuid';
+// uuidv4 wurde nicht verwendet
+// Zeitkonstanten
+const MS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const MS_PER_DAY = MS_PER_SECOND * SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY;
 
 export interface SkuAttributes {
   sku: string;
@@ -83,7 +89,7 @@ export class Sku {
   canExpire(expiryDate: Date): boolean {
     if (!this._attributes.shelfLifeDays) return false;
     const now = new Date();
-    const daysUntilExpiry = Math.floor((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const daysUntilExpiry = Math.floor((expiryDate.getTime() - now.getTime()) / MS_PER_DAY);
     return daysUntilExpiry <= this._attributes.shelfLifeDays;
   }
 

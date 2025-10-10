@@ -224,8 +224,11 @@ interface Recommendation {
 // Constants
 const FORECAST_EXPIRY_DAYS = 7;
 const MS_PER_SECOND = 1000;
+// eslint-disable-next-line @typescript-eslint/no-magic-numbers
 const MS_PER_MINUTE = 60 * MS_PER_SECOND;
+// eslint-disable-next-line @typescript-eslint/no-magic-numbers
 const MS_PER_HOUR = 60 * MS_PER_MINUTE;
+// eslint-disable-next-line @typescript-eslint/no-magic-numbers
 const MS_PER_DAY = 24 * MS_PER_HOUR;
 const ANOMALY_DETECTION_INTERVAL_MS = 5 * MS_PER_MINUTE; // 5 minutes
 const FORECAST_GENERATION_INTERVAL_MS = MS_PER_DAY; // Daily
@@ -301,9 +304,9 @@ export interface WCSCommand {
 @injectable()
 export class WCSWESAdapterService {
   private readonly metrics = new InventoryMetricsService();
-  private robots: Map<string, Robot> = new Map();
-  private activeTasks: Map<string, RoboticsTask> = new Map();
-  private anomalies: Map<string, AnomalyDetection> = new Map();
+  private readonly robots: Map<string, Robot> = new Map();
+  private readonly activeTasks: Map<string, RoboticsTask> = new Map();
+  private readonly anomalies: Map<string, AnomalyDetection> = new Map();
 
   constructor(
     private readonly eventBus: EventBus

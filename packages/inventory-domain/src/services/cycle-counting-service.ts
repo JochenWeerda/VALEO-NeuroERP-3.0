@@ -7,6 +7,12 @@
 import { injectable } from 'inversify';
 import { EventBus } from '../infrastructure/event-bus/event-bus';
 import { InventoryMetricsService } from '../infrastructure/observability/metrics-service';
+// Time constants
+const MS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const MS_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MS_PER_SECOND;
 // Constants
 const ABC_A_THRESHOLD_PERCENT = 80;
 const ABC_B_THRESHOLD_PERCENT = 95;
@@ -307,7 +313,7 @@ export class CycleCountingService {
             scheduleId: `schedule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             policyId,
             scheduledDate: new Date(currentDate),
-            dueDate: new Date(currentDate.getTime() + 24 * 60 * 60 * 1000), // Next day
+            dueDate: new Date(currentDate.getTime() + MS_PER_DAY), // Next day
             items,
             status: 'pending',
             createdAt: new Date()

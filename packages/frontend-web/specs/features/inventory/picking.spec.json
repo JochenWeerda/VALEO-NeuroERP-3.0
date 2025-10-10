@@ -1,0 +1,143 @@
+{
+  "$schema": "https://raw.githubusercontent.com/github/spec-kit/main/schema/feature.schema.json",
+  "name": "Picking",
+  "version": "1.0.0",
+  "category": "inventory",
+  "description": "Voice-guided, AI-optimized warehouse picking with real-time optimization",
+
+  "businessValue": {
+    "problem": "Inefficient picking processes, errors, and suboptimal routes",
+    "solution": "AI-optimized picking routes, voice guidance, and real-time optimization",
+    "kpi": {
+      "pickingEfficiency": "+35% faster picking",
+      "errorReduction": "95% fewer picking errors",
+      "routeOptimization": "25% less walking distance"
+    }
+  },
+
+  "components": [
+    {
+      "name": "PickingWorkstation",
+      "type": "workspace",
+      "description": "Main picking interface with voice guidance and AI optimization",
+      "props": {
+        "pickList": "PickList",
+        "currentLocation": "Location",
+        "voiceEnabled": "boolean",
+        "onItemPicked": "(item: PickItem, quantity: number) => void"
+      },
+      "behaviors": {
+        "voiceGuidance": true,
+        "routeOptimization": true,
+        "realTimeSync": true,
+        "errorPrevention": true
+      }
+    },
+    {
+      "name": "PickListDisplay",
+      "type": "data-display",
+      "description": "Optimized pick list with priority sorting and progress tracking",
+      "props": {
+        "items": "PickItem[]",
+        "sortBy": "'location' | 'priority' | 'quantity'",
+        "showProgress": "boolean"
+      },
+      "features": {
+        "batchPicking": true,
+        "clusterPicking": true,
+        "wavePicking": true
+      }
+    },
+    {
+      "name": "PickingCopilot",
+      "type": "copilot",
+      "description": "AI assistant for picking optimization and guidance",
+      "mcpTool": "inventory.optimizePicking",
+      "triggers": ["route.start", "error.detected", "efficiency.drop"],
+      "capabilities": {
+        "routeOptimization": true,
+        "errorPrediction": true,
+        "performanceCoaching": true,
+        "alternativeRoutes": true
+      }
+    }
+  ],
+
+  "workflows": [
+    {
+      "name": "SingleOrderPicking",
+      "steps": [
+        "pickListAssignment",
+        "routeOptimization",
+        "voiceGuidedPicking",
+        "qualityVerification",
+        "packingAreaDelivery"
+      ],
+      "estimatedTime": "12-18 minutes",
+      "automationLevel": "75%"
+    },
+    {
+      "name": "BatchPicking",
+      "steps": [
+        "batchAssignment",
+        "clusterOptimization",
+        "sequentialPicking",
+        "consolidationPoint",
+        "finalSorting"
+      ],
+      "estimatedTime": "25-40 minutes",
+      "automationLevel": "85%"
+    }
+  ],
+
+  "integrations": {
+    "mcpTools": [
+      {
+        "name": "inventory.optimizePicking",
+        "description": "AI-powered picking route optimization",
+        "parameters": {
+          "pickList": "PickList",
+          "warehouseLayout": "WarehouseLayout",
+          "pickerProfile": "PickerProfile"
+        },
+        "returns": "OptimizedRoute"
+      },
+      {
+        "name": "inventory.predictPickingErrors",
+        "description": "Predict and prevent picking errors",
+        "parameters": {
+          "currentPick": "PickItem",
+          "historicalData": "PickingHistory"
+        },
+        "returns": "ErrorPrediction"
+      }
+    ]
+  },
+
+  "responsive": {
+    "mobile": {
+      "layout": "single-item-focus",
+      "voiceControl": "primary",
+      "gesturePicking": "swipe-to-confirm"
+    },
+    "wearable": {
+      "layout": "minimal-ui",
+      "voiceOnly": true,
+      "hapticFeedback": true
+    }
+  },
+
+  "offline": {
+    "capabilities": "full",
+    "syncStrategy": "real-time-when-available",
+    "conflictResolution": "last-write-wins",
+    "dataRetention": "current-shift"
+  },
+
+  "qualityGates": {
+    "accuracy": "> 99.5% picking accuracy",
+    "efficiency": "< 15 min per standard order",
+    "errorRate": "< 0.5% picking errors",
+    "voiceRecognition": "> 95% accuracy"
+  }
+}
