@@ -8,7 +8,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
-import { EventBus } from './infrastructure/event-bus/event-bus';
+import type { EventBus } from './infrastructure/event-bus/event-bus';
 
 export class DIContainer {
   private static readonly services = new Map<string, unknown>();

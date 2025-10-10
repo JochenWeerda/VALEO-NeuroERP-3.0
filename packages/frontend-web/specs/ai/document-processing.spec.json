@@ -1,0 +1,185 @@
+{
+  "$schema": "https://raw.githubusercontent.com/github/spec-kit/main/schema/ai-action.schema.json",
+  "name": "DocumentProcessing",
+  "version": "1.0.0",
+  "category": "document-automation",
+  "description": "AI-powered document processing and data extraction for ERP workflows",
+
+  "trigger": {
+    "events": ["document.uploaded", "invoice.received", "contract.created"],
+    "uiTriggers": ["file.drop", "scan.button", "import.menu"],
+    "conditions": {
+      "fileType": ["pdf", "image", "email"],
+      "fileSize": "< 50MB",
+      "processingEnabled": true
+    }
+  },
+
+  "mcpTool": {
+    "name": "document.extractData",
+    "description": "Extract structured data from unstructured documents using AI",
+    "parameters": {
+      "file": {
+        "type": "File",
+        "description": "Document file to process",
+        "required": true
+      },
+      "documentType": {
+        "type": "'invoice' | 'contract' | 'delivery-note' | 'custom'",
+        "description": "Type of document for specialized processing",
+        "required": true
+      },
+      "extractionRules": {
+        "type": "ExtractionRule[]",
+        "description": "Custom extraction rules and validations",
+        "required": false
+      },
+      "confidenceThreshold": {
+        "type": "number",
+        "description": "Minimum confidence score for auto-approval",
+        "default": 0.85,
+        "required": false
+      }
+    },
+    "returns": {
+      "type": "ExtractedData",
+      "description": "Structured data with confidence scores and validation status"
+    },
+    "idempotent": true,
+    "audited": true,
+    "timeout": 30000
+  },
+
+  "ui": {
+    "panel": {
+      "position": "modal",
+      "size": "large",
+      "title": "Document Processing Assistant",
+      "icon": "file-text",
+      "steps": ["upload", "processing", "review", "confirm"]
+    },
+    "upload": {
+      "dragDrop": true,
+      "fileBrowser": true,
+      "camera": true,
+      "batchProcessing": true,
+      "maxFiles": 10
+    },
+    "processing": {
+      "progress": true,
+      "realTime": true,
+      "cancelable": true,
+      "preview": true
+    },
+    "review": {
+      "fieldValidation": true,
+      "confidenceIndicators": true,
+      "manualOverride": true,
+      "batchApproval": true
+    }
+  },
+
+  "documentTypes": [
+    {
+      "type": "invoice",
+      "fields": ["supplier", "amount", "date", "tax", "items"],
+      "validations": ["amount-calculation", "tax-compliance", "supplier-verification"]
+    },
+    {
+      "type": "contract",
+      "fields": ["parties", "terms", "value", "duration", "signatures"],
+      "validations": ["legal-compliance", "signature-verification", "term-analysis"]
+    },
+    {
+      "type": "delivery-note",
+      "fields": ["order-number", "items", "quantities", "delivery-date"],
+      "validations": ["order-matching", "quantity-verification", "date-consistency"]
+    }
+  ],
+
+  "aiCapabilities": {
+    "ocr": {
+      "languages": ["de", "en", "nl"],
+      "accuracy": "> 95%",
+      "handwriting": true
+    },
+    "entityExtraction": {
+      "dates": true,
+      "amounts": true,
+      "companies": true,
+      "addresses": true
+    },
+    "validation": {
+      "crossReference": true,
+      "businessRules": true,
+      "formatCompliance": true
+    },
+    "learning": {
+      "feedbackLoop": true,
+      "accuracyImprovement": true,
+      "customRules": true
+    }
+  },
+
+  "integrations": {
+    "erp": {
+      "autoCreate": ["invoice", "contract", "delivery"],
+      "dataMapping": true,
+      "workflowTrigger": true
+    },
+    "archive": {
+      "versioning": true,
+      "searchIndexing": true,
+      "retention": true
+    },
+    "approval": {
+      "workflowIntegration": true,
+      "escalationRules": true,
+      "auditTrail": true
+    }
+  },
+
+  "performance": {
+    "processingTime": {
+      "simple": "< 5 seconds",
+      "complex": "< 30 seconds",
+      "batch": "< 2 minutes"
+    },
+    "accuracy": {
+      "target": "> 95%",
+      "validation": "human-review",
+      "improvement": "continuous"
+    },
+    "scalability": {
+      "concurrent": "50 documents",
+      "queue": "unlimited",
+      "caching": "intelligent"
+    }
+  },
+
+  "security": {
+    "encryption": "end-to-end",
+    "accessControl": "role-based",
+    "audit": "complete",
+    "gdpr": "compliant",
+    "retention": "configurable"
+  },
+
+  "analytics": {
+    "processing": {
+      "successRate": true,
+      "processingTime": true,
+      "accuracyTrends": true
+    },
+    "business": {
+      "timeSaved": true,
+      "errorReduction": true,
+      "userSatisfaction": true
+    },
+    "ai": {
+      "modelPerformance": true,
+      "learningProgress": true,
+      "customRuleUsage": true
+    }
+  }
+}
