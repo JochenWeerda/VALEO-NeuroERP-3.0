@@ -59,8 +59,8 @@ const quantityFormatter = new Intl.NumberFormat('de-DE', {
 const dateFormatter = new Intl.DateTimeFormat('de-DE')
 
 const fetchContracts = async (): Promise<Contract[]> => {
-  const response = await apiClient.get<unknown>('/contracts/api/v1/contracts')
-  const parsed = contractsResponseSchema.safeParse(response.data)
+  const payload = await apiClient.get<unknown>('/contracts/api/v1/contracts')
+  const parsed = contractsResponseSchema.safeParse(payload)
   if (parsed.success) {
     return parsed.data
   }
@@ -269,3 +269,4 @@ export default function Contracts(): ReactElement {
     </div>
   )
 }
+

@@ -43,7 +43,7 @@ export type RecipeLine = z.infer<typeof RecipeLineSchema>;
 export type QARequirements = z.infer<typeof QARequirementsSchema>;
 
 export class RecipeEntity {
-  private data: Recipe;
+  private readonly data: Recipe;
 
   constructor(data: Recipe) {
     this.data = RecipeSchema.parse(data);

@@ -3,6 +3,8 @@
  * Vacation, sick leave, and other absence management
  */
 import { z } from 'zod';
+declare const leaveTypeSchema: z.ZodEnum<["Vacation", "Sick", "Unpaid", "Other"]>;
+declare const leaveStatusSchema: z.ZodEnum<["Pending", "Approved", "Rejected"]>;
 export declare const LeaveRequestSchema: z.ZodObject<{
     id: z.ZodString;
     tenantId: z.ZodString;
@@ -20,10 +22,10 @@ export declare const LeaveRequestSchema: z.ZodObject<{
     createdBy: z.ZodOptional<z.ZodString>;
     updatedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    type: "Vacation" | "Sick" | "Unpaid" | "Other";
+    status: "Pending" | "Approved" | "Rejected";
     id: string;
     tenantId: string;
-    type: "Vacation" | "Sick" | "Unpaid" | "Other";
-    status: "Approved" | "Rejected" | "Pending";
     createdAt: string;
     updatedAt: string;
     version: number;
@@ -36,10 +38,10 @@ export declare const LeaveRequestSchema: z.ZodObject<{
     approvedBy?: string | undefined;
     note?: string | undefined;
 }, {
+    type: "Vacation" | "Sick" | "Unpaid" | "Other";
+    status: "Pending" | "Approved" | "Rejected";
     id: string;
     tenantId: string;
-    type: "Vacation" | "Sick" | "Unpaid" | "Other";
-    status: "Approved" | "Rejected" | "Pending";
     createdAt: string;
     updatedAt: string;
     version: number;
@@ -53,17 +55,19 @@ export declare const LeaveRequestSchema: z.ZodObject<{
     note?: string | undefined;
 }>;
 export type LeaveRequest = z.infer<typeof LeaveRequestSchema>;
+export type LeaveType = z.infer<typeof leaveTypeSchema>;
+export type LeaveStatus = z.infer<typeof leaveStatusSchema>;
 export declare class LeaveRequestEntity {
-    private data;
+    private readonly data;
     constructor(data: LeaveRequest);
     get id(): string;
     get tenantId(): string;
     get employeeId(): string;
-    get type(): string;
+    get type(): LeaveType;
     get from(): string;
     get to(): string;
     get days(): number;
-    get status(): string;
+    get status(): LeaveStatus;
     get approvedBy(): string | undefined;
     get note(): string | undefined;
     get createdAt(): string;
@@ -87,7 +91,9 @@ export declare class LeaveRequestEntity {
     updateNote(note: string | undefined, updatedBy?: string): LeaveRequestEntity;
     updateDates(from: string, to: string, days: number, updatedBy?: string): LeaveRequestEntity;
     toJSON(): LeaveRequest;
+    private clone;
     static create(data: Omit<LeaveRequest, 'id' | 'createdAt' | 'updatedAt' | 'version'>): LeaveRequestEntity;
     static fromJSON(data: LeaveRequest): LeaveRequestEntity;
 }
+export {};
 //# sourceMappingURL=leave-request.d.ts.map

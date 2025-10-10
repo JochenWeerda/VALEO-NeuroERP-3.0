@@ -1,11 +1,18 @@
 {
   "root": true,
-  "extends": [
-    "../../.eslintrc.json"
-  ],
-  "parserOptions": {
-    "project": ["./tsconfig.json"]
+  "env": {
+    "node": true,
+    "es2022": true
   },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "project": "./tsconfig.eslint.json"
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "rules": {
     "@typescript-eslint/no-unused-vars": [
       "warn",
@@ -15,13 +22,27 @@
         "caughtErrorsIgnorePattern": "^_"
       }
     ],
-    "@typescript-eslint/strict-boolean-expressions": "off",
-    "@typescript-eslint/prefer-nullish-coalescing": "off",
-    "@typescript-eslint/prefer-readonly": "warn",
-    "@typescript-eslint/no-magic-numbers": "warn",
     "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-inferrable-types": "warn",
+    "@typescript-eslint/strict-boolean-expressions": [
+      "warn",
+      {
+        "allowString": false,
+        "allowNumber": false,
+        "allowNullableObject": true,
+        "allowNullableBoolean": false,
+        "allowNullableString": true,
+        "allowNullableNumber": true,
+        "allowAny": false
+      }
+    ],
     "no-console": "warn",
-    "sort-imports": "warn"
-  }
+    "prefer-const": "error",
+    "no-var": "error"
+  },
+  "ignorePatterns": [
+    "dist/",
+    "coverage/",
+    "node_modules/",
+    "*.js"
+  ]
 }

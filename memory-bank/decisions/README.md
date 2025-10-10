@@ -2,8 +2,8 @@
 
 ## ADR-001: Service Bus Architecture
 
-**Status:** Accepted  
-**Date:** 2025-09-24  
+**Status:** Accepted
+**Date:** 2025-09-24
 **Context:** Need for reliable inter-service communication in MSOA
 
 ### Decision
@@ -24,8 +24,8 @@ We will use RabbitMQ as our primary message broker for the service bus architect
 
 ## ADR-002: Domain-Driven Design Implementation
 
-**Status:** Accepted  
-**Date:** 2025-09-24  
+**Status:** Accepted
+**Date:** 2025-09-24
 **Context:** Need for clear business domain boundaries
 
 ### Decision
@@ -46,8 +46,8 @@ We will implement Domain-Driven Design (DDD) with bounded contexts for each busi
 
 ## ADR-003: Event-Driven Architecture Pattern
 
-**Status:** Accepted  
-**Date:** 2025-09-24  
+**Status:** Accepted
+**Date:** 2025-09-24
 **Context:** Need for loose coupling and asynchronous processing
 
 ### Decision
@@ -68,8 +68,8 @@ We will implement Event-Driven Architecture with event sourcing for audit trails
 
 ## ADR-004: Microservice Boundaries
 
-**Status:** Accepted  
-**Date:** 2025-09-24  
+**Status:** Accepted
+**Date:** 2025-09-24
 **Context:** Need to define service boundaries and responsibilities
 
 ### Decision
@@ -90,8 +90,8 @@ We will define microservice boundaries based on business capabilities and data o
 
 ## ADR-005: Testing Strategy
 
-**Status:** Accepted  
-**Date:** 2025-09-24  
+**Status:** Accepted
+**Date:** 2025-09-24
 **Context:** Need for comprehensive testing approach
 
 ### Decision
@@ -112,8 +112,8 @@ We will implement a multi-layered testing strategy with 85%+ coverage requiremen
 
 ## ADR-006: Security Framework
 
-**Status:** Accepted  
-**Date:** 2025-09-24  
+**Status:** Accepted
+**Date:** 2025-09-24
 **Context:** Need for comprehensive security framework
 
 ### Decision
@@ -129,3 +129,47 @@ We will implement Zero-Trust Architecture with JWT + OAuth2 authentication.
 - **Positive**: High security, industry standards
 - **Negative**: Complex token management
 - **Mitigation**: Centralized identity management, token rotation
+
+---
+
+## ADR-007: BFF Service Integration Architecture
+
+**Status:** Accepted
+**Date:** 2025-10-09
+**Context:** Need to replace stubbed responses with real service integrations in the Backend-for-Frontend (BFF) layer
+
+### Decision
+We will implement real service integrations in the BFF layer using dedicated service modules that provide business logic and data access, replacing hardcoded stub responses.
+
+### Rationale
+- **Maintainability**: Service modules encapsulate business logic and data access patterns
+- **Testability**: Isolated services enable focused unit testing
+- **Scalability**: Service layer can be optimized independently
+- **Consistency**: Standardized response formats across all MCP endpoints
+
+### Consequences
+- **Positive**: Improved code organization, better testability, real data integration
+- **Negative**: Additional abstraction layer complexity
+- **Mitigation**: Clear service boundaries, comprehensive documentation
+
+---
+
+## ADR-008: Docker-Based Development Workflow
+
+**Status:** Accepted
+**Date:** 2025-10-09
+**Context:** Need for consistent development environment and automated testing across different machines
+
+### Decision
+We will use Docker Compose for local development with dedicated containers for BFF, SSE server, and frontend, plus automated Playwright smoke tests.
+
+### Rationale
+- **Consistency**: Identical environments across development machines
+- **Isolation**: Services run in separate containers with proper networking
+- **Testing**: Automated smoke tests ensure functionality in containerized environment
+- **CI/CD Ready**: Docker setup mirrors production deployment
+
+### Consequences
+- **Positive**: Consistent development experience, automated testing, production parity
+- **Negative**: Initial container setup complexity, resource overhead
+- **Mitigation**: Comprehensive documentation, optimized Docker images

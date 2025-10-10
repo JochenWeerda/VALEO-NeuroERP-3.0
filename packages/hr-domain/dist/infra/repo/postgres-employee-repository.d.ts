@@ -2,10 +2,10 @@
  * In-Memory Employee Repository for VALEO NeuroERP 3.0 HR Domain
  * Temporary implementation for development/testing
  */
-import { EmployeeRepository, EmployeeFilters, PaginationOptions, PaginatedResult, DepartmentStatistics } from '../../domain/repositories/employee-repository';
 import { Employee } from '../../domain/entities/employee';
+import { DepartmentStatistics, EmployeeFilters, EmployeeRepository, PaginatedResult, PaginationOptions } from '../../domain/repositories/employee-repository';
 export declare class PostgresEmployeeRepository implements EmployeeRepository {
-    private employees;
+    private readonly employees;
     save(tenantId: string, employee: Employee): Promise<Employee>;
     findById(tenantId: string, id: string): Promise<Employee | null>;
     findByEmployeeNumber(tenantId: string, employeeNumber: string): Promise<Employee | null>;

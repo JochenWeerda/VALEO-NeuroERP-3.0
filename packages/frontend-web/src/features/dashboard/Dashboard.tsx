@@ -66,8 +66,8 @@ const integerFormatter = new Intl.NumberFormat('de-DE')
 const dateFormatter = new Intl.DateTimeFormat('de-DE')
 
 const fetchKpis = async (): Promise<KpiResult> => {
-  const response = await apiClient.get<unknown>('/analytics/api/v1/kpis')
-  const parsed = kpiSchema.safeParse(response.data)
+  const payload = await apiClient.get<unknown>('/analytics/api/v1/kpis')
+  const parsed = kpiSchema.safeParse(payload)
   if (parsed.success) {
     return parsed.data
   }
@@ -83,8 +83,8 @@ const fetchKpis = async (): Promise<KpiResult> => {
 }
 
 const fetchTrend = async (): Promise<TrendPoint[]> => {
-  const response = await apiClient.get<unknown>('/analytics/api/v1/cubes/contract-positions')
-  const parsed = trendResponseSchema.safeParse(response.data)
+  const payload = await apiClient.get<unknown>('/analytics/api/v1/cubes/contract-positions')
+  const parsed = trendResponseSchema.safeParse(payload)
   if (parsed.success) {
     return parsed.data.slice(-TREND_HISTORY_LIMIT)
   }
@@ -275,6 +275,7 @@ export default function Dashboard(): ReactElement {
     </div>
   )
 }
+
 
 
 

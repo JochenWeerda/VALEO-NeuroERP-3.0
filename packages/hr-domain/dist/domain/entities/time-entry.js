@@ -5,7 +5,19 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TimeEntryEntity = exports.TimeEntrySchema = void 0;
+const uuid_1 = require("uuid");
 const zod_1 = require("zod");
+const MAX_BREAK_MINUTES = 480;
+const MILLISECONDS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const MILLISECONDS_PER_MINUTE = MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE;
+const MINUTES_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR;
+const DEFAULT_MAX_DAILY_HOURS = 8;
+const INITIAL_VERSION = 1;
+const timeEntrySourceSchema = zod_1.z.enum(['Manual', 'Terminal', 'Mobile']);
+const timeEntryStatusSchema = zod_1.z.enum(['Draft', 'Approved', 'Rejected']);
 exports.TimeEntrySchema = zod_1.z.object({
     id: zod_1.z.string().uuid(),
     tenantId: zod_1.z.string().uuid(),
@@ -13,15 +25,15 @@ exports.TimeEntrySchema = zod_1.z.object({
     date: zod_1.z.string().date(),
     start: zod_1.z.string().datetime(),
     end: zod_1.z.string().datetime(),
-    breakMinutes: zod_1.z.number().int().min(0).max(480), // Max 8 hours break
+    breakMinutes: zod_1.z.number().int().min(0).max(MAX_BREAK_MINUTES), // Max 8 hours break
     projectId: zod_1.z.string().uuid().optional(),
     costCenter: zod_1.z.string().optional(),
-    source: zod_1.z.enum(['Manual', 'Terminal', 'Mobile']),
-    status: zod_1.z.enum(['Draft', 'Approved', 'Rejected']),
+    source: timeEntrySourceSchema,
+    status: timeEntryStatusSchema,
     approvedBy: zod_1.z.string().uuid().optional(),
     createdAt: zod_1.z.string().datetime(),
     updatedAt: zod_1.z.string().datetime(),
-    version: zod_1.z.number().int().min(1),
+    version: zod_1.z.number().int().min(INITIAL_VERSION),
     createdBy: zod_1.z.string().optional(),
     updatedBy: zod_1.z.string().optional()
 });
@@ -69,14 +81,14 @@ class TimeEntryEntity {
     getWorkingMinutes() {
         const startTime = new Date(this.data.start);
         const endTime = new Date(this.data.end);
-        const totalMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / (1000 * 60));
+        const totalMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / MILLISECONDS_PER_MINUTE);
         return Math.max(0, totalMinutes - this.data.breakMinutes);
     }
     getWorkingHours() {
-        return this.getWorkingMinutes() / 60;
+        return this.getWorkingMinutes() / MINUTES_PER_HOUR;
     }
-    getOvertimeMinutes(maxDailyHours = 8) {
-        const maxMinutes = maxDailyHours * 60;
+    getOvertimeMinutes(maxDailyHours = DEFAULT_MAX_DAILY_HOURS) {
+        const maxMinutes = maxDailyHours * MINUTES_PER_HOUR;
         const workingMinutes = this.getWorkingMinutes();
         return Math.max(0, workingMinutes - maxMinutes);
     }
@@ -87,12 +99,12 @@ class TimeEntryEntity {
         if (endTime <= startTime) {
             throw new Error('End time must be after start time');
         }
-        const totalMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / (1000 * 60));
+        const totalMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / MILLISECONDS_PER_MINUTE);
         if (this.data.breakMinutes > totalMinutes) {
             throw new Error('Break time cannot exceed total time');
         }
         // Check for reasonable working hours (max 24 hours)
-        if (totalMinutes > 24 * 60) {
+        if (totalMinutes > MINUTES_PER_DAY) {
             throw new Error('Working time cannot exceed 24 hours');
         }
     }
@@ -101,79 +113,67 @@ class TimeEntryEntity {
         if (!this.canApprove()) {
             throw new Error('Time entry cannot be approved in current status');
         }
-        return new TimeEntryEntity({
-            ...this.data,
+        return this.clone({
             status: 'Approved',
             approvedBy,
-            updatedAt: new Date().toISOString(),
-            updatedBy: approvedBy,
-            version: this.data.version + 1
+            updatedBy: approvedBy
         });
     }
     reject(approvedBy) {
         if (!this.canReject()) {
             throw new Error('Time entry cannot be rejected in current status');
         }
-        return new TimeEntryEntity({
-            ...this.data,
+        return this.clone({
             status: 'Rejected',
             approvedBy,
-            updatedAt: new Date().toISOString(),
-            updatedBy: approvedBy,
-            version: this.data.version + 1
+            updatedBy: approvedBy
         });
     }
     updateTimes(start, end, breakMinutes, updatedBy) {
         if (!this.canEdit()) {
             throw new Error('Time entry cannot be edited in current status');
         }
-        return new TimeEntryEntity({
-            ...this.data,
+        return this.clone({
             start,
             end,
             breakMinutes,
-            updatedAt: new Date().toISOString(),
-            updatedBy,
-            version: this.data.version + 1
+            updatedBy
         });
     }
     updateProject(projectId, updatedBy) {
         if (!this.canEdit()) {
             throw new Error('Time entry cannot be edited in current status');
         }
-        return new TimeEntryEntity({
-            ...this.data,
-            projectId,
-            updatedAt: new Date().toISOString(),
-            updatedBy,
-            version: this.data.version + 1
-        });
+        return this.clone({ projectId, updatedBy });
     }
     updateCostCenter(costCenter, updatedBy) {
         if (!this.canEdit()) {
             throw new Error('Time entry cannot be edited in current status');
         }
-        return new TimeEntryEntity({
-            ...this.data,
-            costCenter,
-            updatedAt: new Date().toISOString(),
-            updatedBy,
-            version: this.data.version + 1
-        });
+        return this.clone({ costCenter, updatedBy });
     }
     // Export for persistence
     toJSON() {
         return { ...this.data };
+    }
+    clone(overrides) {
+        const now = new Date().toISOString();
+        return new TimeEntryEntity({
+            ...this.data,
+            ...overrides,
+            updatedAt: now,
+            version: this.data.version + 1
+        });
     }
     // Factory methods
     static create(data) {
         const now = new Date().toISOString();
         return new TimeEntryEntity({
             ...data,
-            id: require('uuid').v4(),
+            id: (0, uuid_1.v4)(),
             createdAt: now,
             updatedAt: now,
-            version: 1
+            version: INITIAL_VERSION
         });
     }
     static fromJSON(data) {

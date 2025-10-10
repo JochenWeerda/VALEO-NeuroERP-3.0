@@ -22,6 +22,7 @@ import {
   type SearchDomainKey,
   performGlobalSearch,
 } from '@/features/global-search'
+import { GlobalStatusIndicator } from './GlobalStatusIndicator'
 
 interface AppShellProps {
   children: ReactNode
@@ -364,6 +365,7 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
               <GlobalSearch />
             </div>
             <div className="flex items-center gap-4">
+              <GlobalStatusIndicator />
               <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1">
                 <span className="text-xs font-semibold uppercase text-slate-500">Tenant</span>
                 <span className="text-sm font-medium text-slate-900">{tenantLabel}</span>

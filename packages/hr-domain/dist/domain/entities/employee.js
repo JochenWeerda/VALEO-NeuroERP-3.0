@@ -5,11 +5,19 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmployeeEntity = exports.EmployeeSchema = void 0;
+const uuid_1 = require("uuid");
 const zod_1 = require("zod");
+const PERSON_NAME_MIN_LENGTH = 1;
+const PERSON_NAME_MAX_LENGTH = 100;
+const EMPLOYEE_NUMBER_MIN_LENGTH = 1;
+const EMPLOYEE_NUMBER_MAX_LENGTH = 50;
+const INITIAL_VERSION = 1;
+const MANAGER_ROLE_HINTS = ['manager', 'supervisor'];
+const employeeStatusSchema = zod_1.z.enum(['Active', 'Inactive', 'OnLeave']);
 // Value Objects
 const PersonSchema = zod_1.z.object({
-    firstName: zod_1.z.string().min(1).max(100),
-    lastName: zod_1.z.string().min(1).max(100),
+    firstName: zod_1.z.string().min(PERSON_NAME_MIN_LENGTH).max(PERSON_NAME_MAX_LENGTH),
+    lastName: zod_1.z.string().min(PERSON_NAME_MIN_LENGTH).max(PERSON_NAME_MAX_LENGTH),
     birthDate: zod_1.z.string().datetime().optional()
 });
 const ContactSchema = zod_1.z.object({
@@ -22,9 +30,9 @@ const EmploymentSchema = zod_1.z.object({
     type: zod_1.z.enum(['Full', 'Part', 'Temp'])
 });
 const OrganizationSchema = zod_1.z.object({
-    departmentId: zod_1.z.string().optional(),
+    departmentId: zod_1.z.string().uuid().optional(),
     position: zod_1.z.string().optional(),
-    managerId: zod_1.z.string().optional()
+    managerId: zod_1.z.string().uuid().optional()
 });
 const PayrollSchema = zod_1.z.object({
     taxClass: zod_1.z.string().optional(),
@@ -35,17 +43,17 @@ const PayrollSchema = zod_1.z.object({
 exports.EmployeeSchema = zod_1.z.object({
     id: zod_1.z.string().uuid(),
     tenantId: zod_1.z.string().uuid(),
-    employeeNumber: zod_1.z.string().min(1).max(50),
+    employeeNumber: zod_1.z.string().min(EMPLOYEE_NUMBER_MIN_LENGTH).max(EMPLOYEE_NUMBER_MAX_LENGTH),
     person: PersonSchema,
     contact: ContactSchema,
     employment: EmploymentSchema,
     org: OrganizationSchema,
     payroll: PayrollSchema,
-    status: zod_1.z.enum(['Active', 'Inactive', 'OnLeave']),
+    status: employeeStatusSchema,
     roles: zod_1.z.array(zod_1.z.string()),
     createdAt: zod_1.z.string().datetime(),
     updatedAt: zod_1.z.string().datetime(),
-    version: zod_1.z.number().int().min(1),
+    version: zod_1.z.number().int().min(INITIAL_VERSION),
     createdBy: zod_1.z.string().optional(),
     updatedBy: zod_1.z.string().optional()
 });
@@ -87,79 +95,64 @@ class EmployeeEntity {
     }
     // State Changes
     activate(updatedBy) {
-        return new EmployeeEntity({
-            ...this.data,
-            status: 'Active',
-            updatedAt: new Date().toISOString(),
-            updatedBy,
-            version: this.data.version + 1
-        });
+        if (this.isActive()) {
+            return this;
+        }
+        return this.clone({ status: 'Active', updatedBy });
     }
     deactivate(updatedBy) {
-        return new EmployeeEntity({
-            ...this.data,
-            status: 'Inactive',
-            updatedAt: new Date().toISOString(),
-            updatedBy,
-            version: this.data.version + 1
-        });
+        if (!this.isActive()) {
+            return this;
+        }
+        return this.clone({ status: 'Inactive', updatedBy });
     }
     setOnLeave(updatedBy) {
-        return new EmployeeEntity({
-            ...this.data,
-            status: 'OnLeave',
-            updatedAt: new Date().toISOString(),
-            updatedBy,
-            version: this.data.version + 1
-        });
+        if (this.isOnLeave()) {
+            return this;
+        }
+        return this.clone({ status: 'OnLeave', updatedBy });
     }
     addRole(roleId, updatedBy) {
         if (this.hasRole(roleId)) {
             return this;
         }
-        return new EmployeeEntity({
-            ...this.data,
+        return this.clone({
             roles: [...this.data.roles, roleId],
-            updatedAt: new Date().toISOString(),
-            updatedBy,
-            version: this.data.version + 1
+            updatedBy
         });
     }
     removeRole(roleId, updatedBy) {
-        return new EmployeeEntity({
-            ...this.data,
-            roles: this.data.roles.filter(r => r !== roleId),
-            updatedAt: new Date().toISOString(),
-            updatedBy,
-            version: this.data.version + 1
+        if (!this.hasRole(roleId)) {
+            return this;
+        }
+        return this.clone({
+            roles: this.data.roles.filter(role => role !== roleId),
+            updatedBy
         });
     }
     updateContact(contact, updatedBy) {
-        return new EmployeeEntity({
-            ...this.data,
+        if (Object.keys(contact).length === 0) {
+            return this;
+        }
+        return this.clone({
             contact: { ...this.data.contact, ...contact },
-            updatedAt: new Date().toISOString(),
-            updatedBy,
-            version: this.data.version + 1
+            updatedBy
         });
     }
     updateOrganization(org, updatedBy) {
-        return new EmployeeEntity({
-            ...this.data,
+        if (Object.keys(org).length === 0) {
+            return this;
+        }
+        return this.clone({
             org: { ...this.data.org, ...org },
-            updatedAt: new Date().toISOString(),
-            updatedBy,
-            version: this.data.version + 1
+            updatedBy
         });
     }
     terminate(terminationDate, updatedBy) {
-        return new EmployeeEntity({
-            ...this.data,
-            employment: { ...this.data.employment, terminationDate },
+        return this.clone({
             status: 'Inactive',
-            updatedAt: new Date().toISOString(),
-            updatedBy,
-            version: this.data.version + 1
+            employment: { ...this.data.employment, terminationDate },
+            updatedBy
         });
     }
     // Validation
@@ -167,21 +160,31 @@ class EmployeeEntity {
         return this.isActive() && !this.isOnLeave();
     }
     canManage() {
-        return this.isActive() && this.data.roles.some(role => role.includes('manager') || role.includes('supervisor'));
+        const lowerCaseRoles = this.data.roles.map(role => role.toLowerCase());
+        return this.isActive() && lowerCaseRoles.some(role => MANAGER_ROLE_HINTS.some(hint => role.includes(hint)));
     }
     // Export for persistence
     toJSON() {
         return { ...this.data };
+    }
+    clone(overrides) {
+        const now = new Date().toISOString();
+        return new EmployeeEntity({
+            ...this.data,
+            ...overrides,
+            updatedAt: now,
+            version: this.data.version + 1
+        });
     }
     // Factory methods
     static create(data) {
         const now = new Date().toISOString();
         return new EmployeeEntity({
             ...data,
-            id: require('uuid').v4(),
+            id: (0, uuid_1.v4)(),
             createdAt: now,
             updatedAt: now,
-            version: 1
+            version: INITIAL_VERSION
         });
     }
     static fromJSON(data) {

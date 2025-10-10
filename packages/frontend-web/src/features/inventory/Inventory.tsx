@@ -68,8 +68,8 @@ const qualityConfig: Record<(typeof QUALITY_STATES)[number], { label: string; ba
 }
 
 const fetchInventory = async (): Promise<InventoryLot[]> => {
-  const response = await apiClient.get<unknown>('/inventory/api/v1/lots')
-  const parsed = inventoryResponseSchema.safeParse(response.data)
+  const payload = await apiClient.get<unknown>('/inventory/api/v1/lots')
+  const parsed = inventoryResponseSchema.safeParse(payload)
   if (parsed.success) {
     return parsed.data
   }
@@ -277,4 +277,5 @@ export default function Inventory(): ReactElement {
     </div>
   )
 }
+
 

@@ -8,7 +8,7 @@ class GetOrderQuery {
     }
     async execute(id) {
         const order = await this.service.getOrder(id);
-        return order ? (0, order_mapper_1.toOrderDTO)(order) : null;
+        return (order !== undefined && order !== null) ? (0, order_mapper_1.toOrderDTO)(order) : null;
     }
 }
 exports.GetOrderQuery = GetOrderQuery;

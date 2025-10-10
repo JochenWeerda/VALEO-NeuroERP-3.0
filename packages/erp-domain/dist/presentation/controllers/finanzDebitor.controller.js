@@ -18,7 +18,12 @@ function buildFinanzDebitorRouter({ service, baseRoute = '/finanzDebitor' }) {
         res.json(result);
     });
     router.get(`${baseRoute}/:finanzDebitorId`, async (req, res) => {
-        const entity = await service.findById(req.params.finanzDebitorId);
+        const id = req.params.finanzDebitorId;
+        if (!id) {
+            res.status(400).json({ message: 'finanzDebitorId parameter is required' });
+            return;
+        }
+        const entity = await service.findById(id);
         if (entity === undefined || entity === null) {
             res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'FinanzDebitor not found' });
             return;
@@ -30,11 +35,21 @@ function buildFinanzDebitorRouter({ service, baseRoute = '/finanzDebitor' }) {
         res.status(HTTP_STATUS.CREATED).json(created);
     });
     router.put(`${baseRoute}/:finanzDebitorId`, async (req, res) => {
-        const updated = await service.update(req.params.finanzDebitorId, req.body);
+        const id = req.params.finanzDebitorId;
+        if (!id) {
+            res.status(400).json({ message: 'finanzDebitorId parameter is required' });
+            return;
+        }
+        const updated = await service.update(id, req.body);
         res.json(updated);
     });
     router.delete(`${baseRoute}/:finanzDebitorId`, async (req, res) => {
-        await service.remove(req.params.finanzDebitorId);
+        const id = req.params.finanzDebitorId;
+        if (!id) {
+            res.status(400).json({ message: 'finanzDebitorId parameter is required' });
+            return;
+        }
+        await service.remove(id);
         res.status(HTTP_STATUS.NO_CONTENT).send();
     });
     return router;

@@ -5,11 +5,15 @@
     "main":  "dist/index.js",
     "types":  "dist/index.d.ts",
     "scripts":  {
-                    "lint:fix":  "eslint \"src/**/*.ts\" --fix",
-                    "lint":  "eslint \"src/**/*.ts\"",
-                    "build":  "node ../../node_modules/typescript/bin/tsc",
-                    "test":  "jest"
-                },
+                     "lint:fix":  "eslint \"src/**/*.ts\" --fix",
+                     "lint":  "eslint \"src/**/*.ts\"",
+                     "build":  "node ../../node_modules/typescript/bin/tsc",
+                     "test":  "jest"
+                 },
+    "jest": {
+      "preset": "ts-jest",
+      "testEnvironment": "node"
+    },
     "keywords":  [
                      "data-models",
                      "types",

@@ -45,7 +45,7 @@ export declare const ShiftSchema: z.ZodObject<{
 }>;
 export type Shift = z.infer<typeof ShiftSchema>;
 export declare class ShiftEntity {
-    private data;
+    private readonly data;
     constructor(data: Shift);
     get id(): string;
     get tenantId(): string;
@@ -72,6 +72,7 @@ export declare class ShiftEntity {
     updateLocation(location: string | undefined, updatedBy?: string): ShiftEntity;
     updateTimes(startsAt: string, endsAt: string, updatedBy?: string): ShiftEntity;
     toJSON(): Shift;
+    private clone;
     static create(data: Omit<Shift, 'id' | 'createdAt' | 'updatedAt'>): ShiftEntity;
     static fromJSON(data: Shift): ShiftEntity;
 }

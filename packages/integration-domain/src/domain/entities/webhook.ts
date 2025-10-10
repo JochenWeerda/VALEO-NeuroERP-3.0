@@ -4,7 +4,7 @@
 
 import type { BaseEntity, EntityStatus } from '@shared/types/common.js';
 import { WebhookId } from '../values/webhook-id.js';
-import { WebhookCreatedEvent, WebhookTriggeredEvent, WebhookFailedEvent } from '../events/webhook-events.js';
+import { WebhookCreatedEvent, WebhookFailedEvent, WebhookTriggeredEvent } from '../events/webhook-events.js';
 
 export interface WebhookConfig {
   url: string;
@@ -41,7 +41,7 @@ export interface WebhookProps {
 export class Webhook implements BaseEntity {
   private _events: Array<WebhookCreatedEvent | WebhookTriggeredEvent | WebhookFailedEvent> = [];
 
-  constructor(private props: WebhookProps) {}
+  constructor(private readonly props: WebhookProps) {}
 
   // Factory method
   static create(

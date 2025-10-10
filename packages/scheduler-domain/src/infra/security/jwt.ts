@@ -1,4 +1,4 @@
-import { createRemoteJWKSet, jwtVerify, JWTPayload } from 'jose';
+import { JWTPayload, createRemoteJWKSet, jwtVerify } from 'jose';
 
 export interface JWTOptions {
   jwksUrl: string;
@@ -24,7 +24,7 @@ export interface AuthContext {
 export class JWTAuthenticator {
   private jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
 
-  constructor(private options: JWTOptions) {}
+  constructor(private readonly options: JWTOptions) {}
 
   async initialize(): Promise<void> {
     this.jwks = createRemoteJWKSet(new URL(this.options.jwksUrl));

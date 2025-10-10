@@ -16,7 +16,7 @@ export abstract class BaseDomainEvent {
   constructor(
     eventType: string,
     aggregateId: string,
-    version: number = 1,
+    version = 1,
     metadata: Record<string, unknown> = {}
   ) {
     this.eventId = generateId();

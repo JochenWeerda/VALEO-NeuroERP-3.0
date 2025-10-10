@@ -13,10 +13,10 @@ const buildOrderQuery = (filters) => {
     if (filters.documentType) {
         builder.where('documentType', 'eq', filters.documentType);
     }
-    if (filters.customerNumber) {
+    if (filters.customerNumber != null) {
         builder.where('customerNumber', 'eq', filters.customerNumber);
     }
-    if (filters.debtorNumber) {
+    if (filters.debtorNumber != null) {
         builder.where('debtorNumber', 'eq', filters.debtorNumber);
     }
     if (typeof filters.limit === 'number') {

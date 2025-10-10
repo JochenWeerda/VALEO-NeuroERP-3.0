@@ -79,7 +79,7 @@ export class CalendarEntity {
   }
 
   public getNextWorkingDay(fromDate: Date): Date {
-    let date = new Date(fromDate);
+    const date = new Date(fromDate);
 
     // Start from the next day
     date.setDate(date.getDate() + 1);
@@ -93,7 +93,7 @@ export class CalendarEntity {
   }
 
   public getPreviousWorkingDay(fromDate: Date): Date {
-    let date = new Date(fromDate);
+    const date = new Date(fromDate);
 
     // Start from the previous day
     date.setDate(date.getDate() - 1);
@@ -109,9 +109,9 @@ export class CalendarEntity {
   public addWorkingDays(date: Date, days: number): Date {
     if (days === 0) return new Date(date);
 
-    let result = new Date(date);
+    const result = new Date(date);
     let remaining = Math.abs(days);
-    let direction = days > 0 ? 1 : -1;
+    const direction = days > 0 ? 1 : -1;
 
     while (remaining > 0) {
       result.setDate(result.getDate() + direction);
@@ -125,7 +125,7 @@ export class CalendarEntity {
 
   public getWorkingDaysInRange(startDate: Date, endDate: Date): Date[] {
     const workingDays: Date[] = [];
-    let current = new Date(startDate);
+    const current = new Date(startDate);
 
     while (current <= endDate) {
       if (this.isWorkingDay(current)) {

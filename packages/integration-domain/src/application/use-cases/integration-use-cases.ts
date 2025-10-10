@@ -8,10 +8,10 @@ import { Integration } from '@domain/entities/integration.js';
 import { IntegrationCreatedEvent, IntegrationUpdatedEvent } from '@domain/events/integration-events.js';
 import type { 
   CreateIntegrationRequest, 
-  UpdateIntegrationRequest, 
+  IntegrationListResponse, 
   IntegrationQuery,
   IntegrationResponse,
-  IntegrationListResponse 
+  UpdateIntegrationRequest 
 } from '../dto/integration-dto.js';
 
 // Commands
@@ -74,7 +74,7 @@ export class GetActiveIntegrationsQuery {
 
 // Use Case Handlers
 export class CreateIntegrationUseCase {
-  constructor(private unitOfWork: UnitOfWork) {}
+  constructor(private readonly unitOfWork: UnitOfWork) {}
 
   async execute(command: CreateIntegrationCommand): Promise<Result<IntegrationResponse, Error>> {
     try {
@@ -148,7 +148,7 @@ export class CreateIntegrationUseCase {
 }
 
 export class UpdateIntegrationUseCase {
-  constructor(private unitOfWork: UnitOfWork) {}
+  constructor(private readonly unitOfWork: UnitOfWork) {}
 
   async execute(command: UpdateIntegrationCommand): Promise<Result<IntegrationResponse, Error>> {
     try {
@@ -248,7 +248,7 @@ export class UpdateIntegrationUseCase {
 }
 
 export class DeleteIntegrationUseCase {
-  constructor(private unitOfWork: UnitOfWork) {}
+  constructor(private readonly unitOfWork: UnitOfWork) {}
 
   async execute(command: DeleteIntegrationCommand): Promise<Result<void, Error>> {
     try {
@@ -285,7 +285,7 @@ export class DeleteIntegrationUseCase {
 }
 
 export class ActivateIntegrationUseCase {
-  constructor(private unitOfWork: UnitOfWork) {}
+  constructor(private readonly unitOfWork: UnitOfWork) {}
 
   async execute(command: ActivateIntegrationCommand): Promise<Result<IntegrationResponse, Error>> {
     try {
@@ -348,7 +348,7 @@ export class ActivateIntegrationUseCase {
 }
 
 export class DeactivateIntegrationUseCase {
-  constructor(private unitOfWork: UnitOfWork) {}
+  constructor(private readonly unitOfWork: UnitOfWork) {}
 
   async execute(command: DeactivateIntegrationCommand): Promise<Result<IntegrationResponse, Error>> {
     try {
@@ -412,7 +412,7 @@ export class DeactivateIntegrationUseCase {
 
 // Query Handlers
 export class GetIntegrationQueryHandler {
-  constructor(private unitOfWork: UnitOfWork) {}
+  constructor(private readonly unitOfWork: UnitOfWork) {}
 
   async execute(query: GetIntegrationQuery): Promise<Result<IntegrationResponse | null, Error>> {
     try {
@@ -456,7 +456,7 @@ export class GetIntegrationQueryHandler {
 }
 
 export class ListIntegrationsQueryHandler {
-  constructor(private unitOfWork: UnitOfWork) {}
+  constructor(private readonly unitOfWork: UnitOfWork) {}
 
   async execute(query: ListIntegrationsQuery): Promise<Result<IntegrationListResponse, Error>> {
     try {

@@ -32,8 +32,8 @@ class OrderDomainService {
         const normalized = {
             status: filters.status,
             documentType: filters.documentType,
-            customerNumber: filters.customerNumber?.trim() || undefined,
-            debtorNumber: filters.debtorNumber?.trim() || undefined,
+            customerNumber: filters.customerNumber?.trim() ?? undefined,
+            debtorNumber: filters.debtorNumber?.trim() ?? undefined,
             from: filters.from,
             to: filters.to,
             limit: clampLimit(filters.limit),

@@ -1,0 +1,88 @@
+# Prometheus Configuration für VALEO-NeuroERP
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'valeo-erp'
+    environment: 'production'
+
+# AlertManager Configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Load Alert Rules
+rule_files:
+  - 'alerts.yml'
+
+# Scrape Configurations
+scrape_configs:
+  # VALEO-ERP API
+  - job_name: 'valeo-erp'
+    static_configs:
+      - targets: ['host.docker.internal:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # Prometheus selbst
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # AlertManager
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+
+  # Grafana
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+
+  # PostgreSQL (falls Exporter vorhanden)
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    # Optional: Postgres-Exporter als separater Container
+
+  # Node-Exporter (für Host-Metriken)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    # Optional: Node-Exporter für CPU/Memory/Disk
+
+  # Kubernetes-Pods (für Production)
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+    
+    relabel_configs:
+      # Nur Pods mit prometheus.io/scrape annotation
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      
+      # Port aus annotation
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        target_label: __address__
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+      
+      # Path aus annotation
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      
+      # Labels
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+

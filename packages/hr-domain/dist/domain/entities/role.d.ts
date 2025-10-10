@@ -39,7 +39,7 @@ export declare const RoleSchema: z.ZodObject<{
 }>;
 export type Role = z.infer<typeof RoleSchema>;
 export declare class RoleEntity {
-    private data;
+    private readonly data;
     constructor(data: Role);
     get id(): string;
     get tenantId(): string;
@@ -55,6 +55,7 @@ export declare class RoleEntity {
     addPermission(permission: string, updatedBy?: string): RoleEntity;
     removePermission(permission: string, updatedBy?: string): RoleEntity;
     toJSON(): Role;
+    private clone;
     static create(data: Omit<Role, 'id' | 'createdAt' | 'updatedAt'>): RoleEntity;
     static fromJSON(data: Role): RoleEntity;
 }

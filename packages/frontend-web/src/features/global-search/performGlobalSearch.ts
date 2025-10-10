@@ -104,10 +104,10 @@ export const performGlobalSearch = async (term: string): Promise<GlobalSearchSum
 
   const settled = await Promise.allSettled(
     requests.map(async ({ key, url }) => {
-      const response = await apiClient.get<unknown>(url, { params })
+      const payload = await apiClient.get<unknown>(url, { params })
       return {
         key,
-        data: response.data,
+        payload,
       }
     })
   )
@@ -126,7 +126,7 @@ export const performGlobalSearch = async (term: string): Promise<GlobalSearchSum
     const { key } = requests[index]
 
     if (result.status === 'fulfilled') {
-      const entries = normalizeListPayload(result.value.data)
+      const entries = normalizeListPayload(result.value.payload)
       totals[key] = entries.length
     } else {
       const reason = result.reason
@@ -149,3 +149,4 @@ export const performGlobalSearch = async (term: string): Promise<GlobalSearchSum
     errors,
   }
 }
+

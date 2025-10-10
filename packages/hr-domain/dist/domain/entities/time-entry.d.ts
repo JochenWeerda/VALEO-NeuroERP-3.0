@@ -3,6 +3,8 @@
  * Time tracking with validation and business rules
  */
 import { z } from 'zod';
+declare const timeEntrySourceSchema: z.ZodEnum<["Manual", "Terminal", "Mobile"]>;
+declare const timeEntryStatusSchema: z.ZodEnum<["Draft", "Approved", "Rejected"]>;
 export declare const TimeEntrySchema: z.ZodObject<{
     id: z.ZodString;
     tenantId: z.ZodString;
@@ -22,10 +24,10 @@ export declare const TimeEntrySchema: z.ZodObject<{
     createdBy: z.ZodOptional<z.ZodString>;
     updatedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    status: "Approved" | "Rejected" | "Draft";
+    date: string;
     id: string;
     tenantId: string;
-    status: "Draft" | "Approved" | "Rejected";
-    date: string;
     createdAt: string;
     updatedAt: string;
     version: number;
@@ -40,10 +42,10 @@ export declare const TimeEntrySchema: z.ZodObject<{
     projectId?: string | undefined;
     costCenter?: string | undefined;
 }, {
+    status: "Approved" | "Rejected" | "Draft";
+    date: string;
     id: string;
     tenantId: string;
-    status: "Draft" | "Approved" | "Rejected";
-    date: string;
     createdAt: string;
     updatedAt: string;
     version: number;
@@ -59,8 +61,10 @@ export declare const TimeEntrySchema: z.ZodObject<{
     costCenter?: string | undefined;
 }>;
 export type TimeEntry = z.infer<typeof TimeEntrySchema>;
+export type TimeEntrySource = z.infer<typeof timeEntrySourceSchema>;
+export type TimeEntryStatus = z.infer<typeof timeEntryStatusSchema>;
 export declare class TimeEntryEntity {
-    private data;
+    private readonly data;
     constructor(data: TimeEntry);
     get id(): string;
     get tenantId(): string;
@@ -71,8 +75,8 @@ export declare class TimeEntryEntity {
     get breakMinutes(): number;
     get projectId(): string | undefined;
     get costCenter(): string | undefined;
-    get source(): string;
-    get status(): string;
+    get source(): TimeEntrySource;
+    get status(): TimeEntryStatus;
     get approvedBy(): string | undefined;
     get createdAt(): string;
     get updatedAt(): string;
@@ -93,7 +97,9 @@ export declare class TimeEntryEntity {
     updateProject(projectId: string | undefined, updatedBy?: string): TimeEntryEntity;
     updateCostCenter(costCenter: string | undefined, updatedBy?: string): TimeEntryEntity;
     toJSON(): TimeEntry;
+    private clone;
     static create(data: Omit<TimeEntry, 'id' | 'createdAt' | 'updatedAt' | 'version'>): TimeEntryEntity;
     static fromJSON(data: TimeEntry): TimeEntryEntity;
 }
+export {};
 //# sourceMappingURL=time-entry.d.ts.map

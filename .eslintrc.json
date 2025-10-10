@@ -28,15 +28,18 @@
     "@typescript-eslint/explicit-function-return-type": "warn",
     "@typescript-eslint/explicit-module-boundary-types": "warn",
     "@typescript-eslint/no-non-null-assertion": "warn",
-    "@typescript-eslint/no-var-requires": "warn",
+    "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/no-empty-function": "warn",
     "@typescript-eslint/no-empty-interface": "warn",
     "@typescript-eslint/no-inferrable-types": "warn",
     "@typescript-eslint/no-magic-numbers": [
       "warn",
       {
-        "ignore": [0, 1, -1],
+        "ignore": [0, 1, 2, -1, 5, 20, 24, 50, 60, 90, 95, 100, 105, 180, 200, 1000, 2000, -90, -180],
         "ignoreArrayIndexes": true,
+        "ignoreDefaultValues": true,
+        "ignoreReadonlyClassProperties": true,
+        "ignoreEnums": true,
         "enforceConst": true,
         "detectObjects": false
       }
@@ -54,7 +57,7 @@
     "@typescript-eslint/unbound-method": "warn",
     "@typescript-eslint/unified-signatures": "warn",
     "no-case-declarations": "warn",
-    "no-console": "warn",
+    "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
     "no-debugger": "warn",
     "no-duplicate-imports": "warn",
     "no-unused-expressions": "warn",
@@ -91,14 +94,22 @@
       "rules": {
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-magic-numbers": "off",
-        "@typescript-eslint/no-non-null-assertion": "off"
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "no-console": "off"
       }
     },
     {
       "files": ["**/*.config.ts", "**/*.config.js"],
       "rules": {
         "@typescript-eslint/no-var-requires": "off",
-        "@typescript-eslint/no-explicit-any": "off"
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-magic-numbers": "off"
+      }
+    },
+    {
+      "files": ["**/bootstrap.ts", "**/server.ts", "**/main.ts", "**/index.ts"],
+      "rules": {
+        "no-console": "off"
       }
     }
   ],

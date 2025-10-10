@@ -11,3 +11,4 @@ from .journal_entries import router as journal_entries
 from .articles import router as articles
 from .warehouses import router as warehouses
 from .chart_of_accounts import router as chart_of_accounts
+from . import policies

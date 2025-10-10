@@ -3,6 +3,7 @@
  * Payroll preparation and export (no accounting entries)
  */
 import { z } from 'zod';
+declare const payrollStatusSchema: z.ZodEnum<["Draft", "Locked", "Exported"]>;
 declare const PayrollItemSchema: z.ZodObject<{
     employeeId: z.ZodString;
     hours: z.ZodNumber;
@@ -72,9 +73,9 @@ export declare const PayrollRunSchema: z.ZodObject<{
     createdBy: z.ZodOptional<z.ZodString>;
     updatedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    status: "Draft" | "Locked" | "Exported";
     id: string;
     tenantId: string;
-    status: "Draft" | "Locked" | "Exported";
     createdAt: string;
     updatedAt: string;
     period: {
@@ -93,9 +94,9 @@ export declare const PayrollRunSchema: z.ZodObject<{
     exportedBy?: string | undefined;
     exportedAt?: string | undefined;
 }, {
+    status: "Draft" | "Locked" | "Exported";
     id: string;
     tenantId: string;
-    status: "Draft" | "Locked" | "Exported";
     createdAt: string;
     updatedAt: string;
     period: {
@@ -117,13 +118,14 @@ export declare const PayrollRunSchema: z.ZodObject<{
 export type PayrollRun = z.infer<typeof PayrollRunSchema>;
 export type PayrollItem = z.infer<typeof PayrollItemSchema>;
 export type PayrollPeriod = z.infer<typeof PayrollPeriodSchema>;
+export type PayrollRunStatus = z.infer<typeof payrollStatusSchema>;
 export declare class PayrollRunEntity {
-    private data;
+    private readonly data;
     constructor(data: PayrollRun);
     get id(): string;
     get tenantId(): string;
     get period(): PayrollPeriod;
-    get status(): string;
+    get status(): PayrollRunStatus;
     get items(): PayrollItem[];
     get exportedAt(): string | undefined;
     get exportedBy(): string | undefined;
@@ -150,6 +152,7 @@ export declare class PayrollRunEntity {
     updateEmployeeItem(employeeId: string, updates: Partial<PayrollItem>, updatedBy?: string): PayrollRunEntity;
     removeEmployeeItem(employeeId: string, updatedBy?: string): PayrollRunEntity;
     toJSON(): PayrollRun;
+    private clone;
     static create(data: Omit<PayrollRun, 'id' | 'createdAt' | 'updatedAt'>): PayrollRunEntity;
     static fromJSON(data: PayrollRun): PayrollRunEntity;
 }
