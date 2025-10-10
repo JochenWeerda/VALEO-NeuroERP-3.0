@@ -64,8 +64,8 @@ const currencyFormatter = new Intl.NumberFormat('de-DE', {
 const dateFormatter = new Intl.DateTimeFormat('de-DE')
 
 const fetchOrders = async (): Promise<SalesOrder[]> => {
-  const response = await apiClient.get<unknown>('/sales/api/v1/orders')
-  const parsed = ordersResponseSchema.safeParse(response.data)
+  const payload = await apiClient.get<unknown>('/sales/api/v1/orders')
+  const parsed = ordersResponseSchema.safeParse(payload)
   if (parsed.success) {
     return parsed.data
   }
@@ -73,8 +73,8 @@ const fetchOrders = async (): Promise<SalesOrder[]> => {
 }
 
 const fetchInvoices = async (): Promise<SalesInvoice[]> => {
-  const response = await apiClient.get<unknown>('/sales/api/v1/invoices')
-  const parsed = invoicesResponseSchema.safeParse(response.data)
+  const payload = await apiClient.get<unknown>('/sales/api/v1/invoices')
+  const parsed = invoicesResponseSchema.safeParse(payload)
   if (parsed.success) {
     return parsed.data
   }
@@ -273,3 +273,4 @@ export default function Sales(): ReactElement {
     </div>
   )
 }
+

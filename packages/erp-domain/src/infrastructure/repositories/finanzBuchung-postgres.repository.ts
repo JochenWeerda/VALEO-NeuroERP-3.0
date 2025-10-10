@@ -81,7 +81,7 @@ export class FinanzBuchungPostgresRepository {
   public constructor(private readonly pool: Pool) {}
 
   private mapRow(row: DbRow): FinanzBuchung {
-    const record = row as FinanzBuchungRow;
+    const record = row as unknown as FinanzBuchungRow;
 
     return FinanzBuchung.create({
       id: toStringOrUndefined(record.id) ?? undefined,

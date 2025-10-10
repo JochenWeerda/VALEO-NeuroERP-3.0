@@ -1,0 +1,50 @@
+***REMOVED*** Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+***REMOVED*** IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.cursor/
+
+***REMOVED*** Git
+.git/
+.gitignore
+
+***REMOVED*** Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+***REMOVED*** Documentation
+docs/
+*.md
+!README.md
+
+***REMOVED*** Node (if any)
+node_modules/
+packages/
+
+***REMOVED*** Data
+data/
+logs/
+*.log
+
+***REMOVED*** OS
+.DS_Store
+Thumbs.db
+
+***REMOVED*** Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+

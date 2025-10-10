@@ -1,4 +1,4 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 
 export async function tenantMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   // Tenant isolation is handled in the auth middleware

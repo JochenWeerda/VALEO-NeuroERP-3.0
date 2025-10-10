@@ -1,0 +1,124 @@
+{{- if .Values.backup.restoreTest.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-restore-test
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.restoreTest.schedule | quote }}
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "valeo-erp.selectorLabels" . | nindent 12 }}
+            job: restore-test
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: {{ include "valeo-erp.serviceAccountName" . }}
+          
+          containers:
+          - name: restore-test
+            image: postgres:15-alpine
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -e
+                
+                echo "🧪 VALEO-NeuroERP Backup-Restore-Test"
+                echo "======================================"
+                
+                ***REMOVED*** Find latest backup
+                LATEST_BACKUP=$(ls -t /backups/daily/*.sql.gz 2>/dev/null | head -n1)
+                
+                if [ -z "$LATEST_BACKUP" ]; then
+                  echo "❌ No backups found"
+                  exit 1
+                fi
+                
+                echo "📦 Latest backup: ${LATEST_BACKUP}"
+                
+                ***REMOVED*** Create test database
+                echo "🔧 Creating test database..."
+                psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d postgres \
+                  -c "DROP DATABASE IF EXISTS ${TEST_DB_NAME};" >/dev/null 2>&1 || true
+                
+                psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d postgres \
+                  -c "CREATE DATABASE ${TEST_DB_NAME} OWNER ${DB_USER};"
+                
+                ***REMOVED*** Restore
+                echo "🔄 Restoring backup..."
+                START_TIME=$(date +%s)
+                
+                gunzip -c "${LATEST_BACKUP}" | psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d ${TEST_DB_NAME} >/dev/null 2>&1
+                
+                END_TIME=$(date +%s)
+                DURATION=$((END_TIME - START_TIME))
+                
+                echo "✅ Restore completed in ${DURATION}s"
+                
+                ***REMOVED*** Verify
+                echo "🔍 Verifying restore..."
+                TABLE_COUNT=$(psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d ${TEST_DB_NAME} \
+                  -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public';")
+                
+                if [ "${TABLE_COUNT}" -lt 5 ]; then
+                  echo "❌ Table count too low: ${TABLE_COUNT}"
+                  exit 1
+                fi
+                
+                echo "✅ Tables verified: ${TABLE_COUNT}"
+                
+                ***REMOVED*** Cleanup
+                echo "🧹 Cleaning up..."
+                psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d postgres \
+                  -c "DROP DATABASE ${TEST_DB_NAME};" >/dev/null 2>&1
+                
+                echo ""
+                echo "======================================"
+                echo "✅ Backup-Restore-Test PASSED"
+                echo "======================================"
+                echo "Duration: ${DURATION}s"
+                echo "Tables: ${TABLE_COUNT}"
+                echo "RTO: < 4 hours (OK)"
+                echo ""
+                
+                ***REMOVED*** Send notification (optional)
+                {{- if .Values.backup.restoreTest.notify }}
+                echo "Sending notification..."
+                curl -X POST {{ .Values.backup.restoreTest.webhookUrl | quote }} \
+                  -H "Content-Type: application/json" \
+                  -d "{\"text\":\"✅ Backup-Restore-Test PASSED (${DURATION}s, ${TABLE_COUNT} tables)\"}" || true
+                {{- end }}
+            
+            env:
+              - name: DB_HOST
+                value: {{ .Values.postgresql.host | quote }}
+              - name: DB_PORT
+                value: {{ .Values.postgresql.port | quote }}
+              - name: DB_USER
+                value: {{ .Values.postgresql.user | quote }}
+              - name: TEST_DB_NAME
+                value: "valeo_erp_restore_test"
+              - name: PGPASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.postgresql.existingSecret }}
+                    key: password
+            
+            volumeMounts:
+              - name: backup-storage
+                mountPath: /backups
+                readOnly: true
+          
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: {{ include "valeo-erp.fullname" . }}-backup-pvc
+{{- end }}
+

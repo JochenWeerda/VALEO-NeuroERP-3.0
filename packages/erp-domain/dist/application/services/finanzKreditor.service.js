@@ -41,7 +41,7 @@ class FinanzKreditorService {
     async create(payload) {
         const normalized = normalize(payload);
         const existing = await this.repository.findByKreditorNr(normalized.kreditor_nr);
-        if (existing) {
+        if (existing !== undefined && existing !== null) {
             throw new Error(`Kreditor ${normalized.kreditor_nr} already exists`);
         }
         const entity = finanzKreditor_entity_1.FinanzKreditor.create(normalized);
@@ -65,7 +65,7 @@ class FinanzKreditorService {
             erstellt_von: current.erstellt_von,
         }, current);
         const duplicate = await this.repository.findByKreditorNr(normalized.kreditor_nr);
-        if (duplicate && duplicate.toPrimitives().id !== id) {
+        if ((duplicate !== undefined && duplicate !== null) && duplicate.toPrimitives().id !== id) {
             throw new Error(`Another Kreditor already uses kreditor_nr ${normalized.kreditor_nr}`);
         }
         const entity = finanzKreditor_entity_1.FinanzKreditor.create({ ...normalized, id });

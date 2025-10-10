@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, Sparkles } from "lucide-react"
 
-export function Toolbar({ onSearch, onCopilot }: { onSearch?: (v: string)=>void; onCopilot?: ()=>void }) {
+export function Toolbar({ onSearch, onCopilot }: { onSearch?: (v: string)=>void; onCopilot?: ()=>void }): JSX.Element {
   return (
     <div className="flex gap-2 mb-4">
       <div className="relative flex-1">

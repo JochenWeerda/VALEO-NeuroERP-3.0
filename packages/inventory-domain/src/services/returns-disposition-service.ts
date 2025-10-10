@@ -8,8 +8,8 @@ import { injectable } from 'inversify';
 import { EventBus } from '../infrastructure/event-bus/event-bus';
 import { InventoryMetricsService } from '../infrastructure/observability/metrics-service';
 import {
-   ReturnReceivedEvent,
-   QuarantineReleasedEvent
+   QuarantineReleasedEvent,
+   ReturnReceivedEvent
  } from '../core/domain-events/inventory-domain-events';
 
 export interface ReturnMerchandiseAuthorization {

@@ -18,7 +18,12 @@ function buildFinanzBuchungRouter({ service, baseRoute = '/finanzBuchung' }) {
         res.json(result);
     });
     router.get(`${baseRoute}/:finanzBuchungId`, async (req, res) => {
-        const entity = await service.findById(req.params.finanzBuchungId);
+        const id = req.params.finanzBuchungId;
+        if (!id) {
+            res.status(400).json({ message: 'finanzBuchungId parameter is required' });
+            return;
+        }
+        const entity = await service.findById(id);
         if (entity === undefined || entity === null) {
             res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'FinanzBuchung not found' });
             return;
@@ -30,11 +35,21 @@ function buildFinanzBuchungRouter({ service, baseRoute = '/finanzBuchung' }) {
         res.status(HTTP_STATUS.CREATED).json(created);
     });
     router.put(`${baseRoute}/:finanzBuchungId`, async (req, res) => {
-        const updated = await service.update(req.params.finanzBuchungId, req.body);
+        const id = req.params.finanzBuchungId;
+        if (!id) {
+            res.status(400).json({ message: 'finanzBuchungId parameter is required' });
+            return;
+        }
+        const updated = await service.update(id, req.body);
         res.json(updated);
     });
     router.delete(`${baseRoute}/:finanzBuchungId`, async (req, res) => {
-        await service.remove(req.params.finanzBuchungId);
+        const id = req.params.finanzBuchungId;
+        if (!id) {
+            res.status(400).json({ message: 'finanzBuchungId parameter is required' });
+            return;
+        }
+        await service.remove(id);
         res.status(HTTP_STATUS.NO_CONTENT).send();
     });
     return router;

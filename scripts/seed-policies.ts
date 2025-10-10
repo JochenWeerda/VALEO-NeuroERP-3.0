@@ -1,0 +1,58 @@
+/**
+ * Seed-Script für Policy-Datenbank
+ * Befüllt die SQLite-Datenbank mit Standard-Policies
+ *
+ * Ausführen: ts-node scripts/seed-policies.ts
+ */
+
+import { PolicyStore, type Rule } from "../src/services/policy/store-sqlite"
+
+const store = new PolicyStore("data/policies.db")
+
+const defaultPolicies: Rule[] = [
+  {
+    id: "pricing.auto.adjust",
+    when: { kpiId: "margin", severity: ["warn", "crit"] },
+    action: "pricing.adjust",
+    params: { deltaPct: { warn: 1, crit: 3 } },
+    limits: { maxDailyPct: 3, maxWeeklyPct: 7 },
+    window: { days: [1, 2, 3, 4, 5], start: "08:00", end: "18:00" },
+    approval: {
+      required: true,
+      roles: ["manager", "admin"],
+      bypassIfSeverity: "crit",
+    },
+    autoExecute: false,
+    autoSuggest: true,
+  },
+  {
+    id: "inventory.auto.reorder",
+    when: { kpiId: "stock", severity: ["warn", "crit"] },
+    action: "inventory.reorder",
+    params: { qty: { warn: 250, crit: 500 } },
+    limits: { maxDailyQty: 2000 },
+    window: { days: [1, 2, 3, 4, 5, 6], start: "07:00", end: "20:00" },
+    approval: { required: false },
+    autoExecute: true,
+    autoSuggest: true,
+  },
+  {
+    id: "sales.notify.drop",
+    when: { kpiId: "rev", severity: ["warn", "crit"] },
+    action: "sales.notify",
+    params: {
+      topic: "Umsatzabweichung",
+      messageTemplate: "Umsatz {delta}% – bitte prüfen.",
+    },
+    window: { days: [0, 1, 2, 3, 4, 5, 6], start: "00:00", end: "23:59" },
+    approval: { required: false },
+    autoExecute: true,
+    autoSuggest: true,
+  },
+]
+
+store.bulkUpsert(defaultPolicies)
+
+// eslint-disable-next-line no-console
+console.log(`✅ Seeded ${defaultPolicies.length} policies to data/policies.db`)
+

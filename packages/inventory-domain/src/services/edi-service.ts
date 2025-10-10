@@ -255,7 +255,7 @@ export interface EDI947WarehouseInventoryAdjustmentAdvice {
 @injectable()
 export class EDIService {
   private readonly metrics = new InventoryMetricsService();
-  private transactions: Map<string, EDITransaction> = new Map();
+  private readonly transactions: Map<string, EDITransaction> = new Map();
   private readonly segmentSeparator = '~';
   private readonly elementSeparator = '*';
   private readonly subelementSeparator = '>';

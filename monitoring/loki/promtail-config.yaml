@@ -1,0 +1,81 @@
+***REMOVED*** Promtail Configuration für VALEO-NeuroERP
+***REMOVED*** Sendet Logs zu Loki (zentrales Log-Aggregation)
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  ***REMOVED*** Kubernetes Pod Logs
+  - job_name: kubernetes-pods
+    kubernetes_sd_configs:
+      - role: pod
+    
+    relabel_configs:
+      ***REMOVED*** Nur VALEO-ERP Pods
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+        regex: valeo-erp
+        action: keep
+      
+      ***REMOVED*** Namespace
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      
+      ***REMOVED*** Pod-Name
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      
+      ***REMOVED*** Container-Name
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        target_label: container
+    
+    pipeline_stages:
+      ***REMOVED*** Parse JSON-Logs
+      - json:
+          expressions:
+            time: time
+            level: level
+            name: name
+            message: message
+      
+      ***REMOVED*** Labels extrahieren
+      - labels:
+          level:
+          name:
+      
+      ***REMOVED*** Timestamp
+      - timestamp:
+          source: time
+          format: RFC3339
+      
+      ***REMOVED*** Output
+      - output:
+          source: message
+
+  ***REMOVED*** Docker Container Logs (für Development)
+  - job_name: docker
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker
+          __path__: /var/lib/docker/containers/*/*-json.log
+    
+    pipeline_stages:
+      - json:
+          expressions:
+            stream: stream
+            log: log
+      
+      - labels:
+          stream:
+      
+      - output:
+          source: log
+

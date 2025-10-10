@@ -47,18 +47,18 @@ export declare const EmployeeCreatedEventSchema: z.ZodObject<{
         departmentId: z.ZodOptional<z.ZodString>;
         position: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        employeeNumber: string;
         firstName: string;
         lastName: string;
         hireDate: string;
+        employeeNumber: string;
         employeeId: string;
         departmentId?: string | undefined;
         position?: string | undefined;
     }, {
-        employeeNumber: string;
         firstName: string;
         lastName: string;
         hireDate: string;
+        employeeNumber: string;
         employeeId: string;
         departmentId?: string | undefined;
         position?: string | undefined;
@@ -70,10 +70,10 @@ export declare const EmployeeCreatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        employeeNumber: string;
         firstName: string;
         lastName: string;
         hireDate: string;
+        employeeNumber: string;
         employeeId: string;
         departmentId?: string | undefined;
         position?: string | undefined;
@@ -87,10 +87,10 @@ export declare const EmployeeCreatedEventSchema: z.ZodObject<{
     eventVersion: number;
     occurredAt: string;
     payload: {
-        employeeNumber: string;
         firstName: string;
         lastName: string;
         hireDate: string;
+        employeeNumber: string;
         employeeId: string;
         departmentId?: string | undefined;
         position?: string | undefined;

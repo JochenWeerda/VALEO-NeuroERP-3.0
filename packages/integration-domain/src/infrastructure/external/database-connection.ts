@@ -177,7 +177,7 @@ export class DatabaseConnectionManager {
  * Database Schema Manager
  */
 export class DatabaseSchemaManager {
-  constructor(private connection: DatabaseConnection) {}
+  constructor(private readonly connection: DatabaseConnection) {}
 
   async createTables(): Promise<void> {
     const schemas = [

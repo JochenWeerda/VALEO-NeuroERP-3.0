@@ -20,8 +20,8 @@ const COUNT_FREQ_A = 12; // Monthly
 const COUNT_FREQ_B = 6;  // Bi-monthly
 const COUNT_FREQ_C = 2;  // Semi-annually
 import {
-  CycleCountCreatedEvent,
-  CycleCountCompletedEvent
+  CycleCountCompletedEvent,
+  CycleCountCreatedEvent
 } from '../core/domain-events/inventory-domain-events';
 
 export interface CycleCountPolicy {
@@ -161,8 +161,8 @@ export interface CycleCountPerformance {
 @injectable()
 export class CycleCountingService {
   private readonly metrics = new InventoryMetricsService();
-  private policies: Map<string, CycleCountPolicy> = new Map();
-  private activeCounts: Map<string, CycleCount> = new Map();
+  private readonly policies: Map<string, CycleCountPolicy> = new Map();
+  private readonly activeCounts: Map<string, CycleCount> = new Map();
 
   constructor(
     private readonly eventBus: EventBus

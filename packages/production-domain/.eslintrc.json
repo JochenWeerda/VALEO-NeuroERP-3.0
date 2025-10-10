@@ -1,0 +1,17 @@
+{
+  "root": false,
+  "rules": {
+    "@typescript-eslint/strict-boolean-expressions": [
+      "warn",
+      {
+        "allowString": false,
+        "allowNumber": false,
+        "allowNullableObject": true,
+        "allowNullableBoolean": false,
+        "allowNullableString": true,
+        "allowNullableNumber": true,
+        "allowAny": false
+      }
+    ]
+  }
+}

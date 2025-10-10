@@ -47,15 +47,15 @@ class FinanzKreditorPostgresRepository {
     mapRow(row) {
         const props = {
             id: row.id,
-            lieferanten_id: row.lieferanten_id ? String(row.lieferanten_id) : undefined,
+            lieferanten_id: (row.lieferanten_id !== undefined && row.lieferanten_id !== null) ? String(row.lieferanten_id) : undefined,
             kreditor_nr: String(row.kreditor_nr),
             zahlungsziel: toNumber(row.zahlungsziel),
-            zahlungsart: row.zahlungsart ? String(row.zahlungsart) : undefined,
-            bankverbindung: row.bankverbindung ? String(row.bankverbindung) : undefined,
-            steuernummer: row.steuer_id ? String(row.steuer_id) : undefined,
+            zahlungsart: (row.zahlungsart !== undefined && row.zahlungsart !== null) ? String(row.zahlungsart) : undefined,
+            bankverbindung: (row.bankverbindung !== undefined && row.bankverbindung !== null) ? String(row.bankverbindung) : undefined,
+            steuernummer: (row.steuer_id !== undefined && row.steuer_id !== null) ? String(row.steuer_id) : undefined,
             ist_aktiv: toBoolean(row.ist_aktiv),
-            notizen: row.notizen ? String(row.notizen) : undefined,
-            erstellt_von: row.erstellt_von ? String(row.erstellt_von) : undefined,
+            notizen: (row.notizen !== undefined && row.notizen !== null) ? String(row.notizen) : undefined,
+            erstellt_von: (row.erstellt_von !== undefined && row.erstellt_von !== null) ? String(row.erstellt_von) : undefined,
             erstellt_am: toDate(row.erstellt_am),
             aktualisiert_am: toDate(row.aktualisiert_am),
         };

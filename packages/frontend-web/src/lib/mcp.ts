@@ -1,9 +1,14 @@
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 
 // MCP Request/Response types
 type McpRequest<T> = { service: string; action: string; payload?: T }
 type McpResponse<R> = { ok: boolean; data?: R; error?: string }
+
+// Constants for magic numbers
+const STALE_TIME_MINUTES = 5
+const MINUTES_TO_MS = 60
+const SECONDS_TO_MS = 1000
 
 // MCP fetch function (placeholder for actual MCP bridge)
 export function mcpFetch<TReq, TRes>(req: McpRequest<TReq>): Promise<McpResponse<TRes>> {
@@ -12,21 +17,21 @@ export function mcpFetch<TReq, TRes>(req: McpRequest<TReq>): Promise<McpResponse
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(req.payload ?? {}),
-  }).then(r => r.json())
+  }).then((r): Promise<McpResponse<TRes>> => r.json())
 }
 
 // React Query hooks for MCP
-export function useMcpQuery<TRes>(service: string, action: string, key: unknown[]) {
+export function useMcpQuery<TRes>(service: string, action: string, key: unknown[]): ReturnType<typeof useQuery<McpResponse<TRes>>> {
   return useQuery({
     queryKey: ['mcp', service, action, ...key],
-    queryFn: () => mcpFetch<void, TRes>({ service, action }),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    queryFn: (): Promise<McpResponse<TRes>> => mcpFetch<void, TRes>({ service, action }),
+    staleTime: STALE_TIME_MINUTES * MINUTES_TO_MS * SECONDS_TO_MS,
   })
 }
 
-export function useMcpMutation<TReq, TRes>(service: string, action: string) {
+export function useMcpMutation<TReq, TRes>(service: string, action: string): ReturnType<typeof useMutation<McpResponse<TRes>, Error, TReq>> {
   return useMutation({
-    mutationFn: (payload: TReq) => mcpFetch<TReq, TRes>({ service, action, payload }),
+    mutationFn: (payload: TReq): Promise<McpResponse<TRes>> => mcpFetch<TReq, TRes>({ service, action, payload }),
   })
 }
 
@@ -128,7 +133,7 @@ export class McpError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: any
+    public details?: unknown
   ) {
     super(message)
     this.name = 'McpError'

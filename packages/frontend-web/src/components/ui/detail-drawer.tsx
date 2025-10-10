@@ -9,7 +9,7 @@ interface DetailDrawerProps {
   children: React.ReactNode
 }
 
-export function DetailDrawer({ title, open, onClose, children }: DetailDrawerProps) {
+export function DetailDrawer({ title, open, onClose, children }: DetailDrawerProps): JSX.Element {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">

@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { CatalogItem, Catalog } from '../../core/entities/catalog';
+import { Catalog, CatalogItem } from '../../core/entities/catalog';
 
 export interface BuyingContext {
   userId: string;
