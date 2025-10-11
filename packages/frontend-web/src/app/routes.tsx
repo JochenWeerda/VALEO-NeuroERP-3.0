@@ -122,6 +122,12 @@ const BiodiversitaetRoute = createLazyRoute(() => import('@/pages/nachhaltigkeit
 const CrossComplianceRoute = createLazyRoute(() => import('@/pages/compliance/cross-compliance'))
 const QSChecklisteRoute = createLazyRoute(() => import('@/pages/compliance/qs-checkliste'))
 const ZertifikateListeRoute = createLazyRoute(() => import('@/pages/zertifikate/liste'))
+const BVLUmsatzmeldungRoute = createLazyRoute(() => import('@/pages/compliance/bvl-umsatzmeldung'))
+const PCNUFIRoute = createLazyRoute(() => import('@/pages/compliance/pcn-ufi'))
+const ENNIMeldungenRoute = createLazyRoute(() => import('@/pages/compliance/enni-meldungen'))
+const VVVORegisterRoute = createLazyRoute(() => import('@/pages/compliance/vvvo-register'))
+const SachkundeRegisterRoute = createLazyRoute(() => import('@/pages/compliance/sachkunde-register'))
+const SaatgutNachbauRoute = createLazyRoute(() => import('@/pages/compliance/saatgut-nachbau'))
 
 // CRM
 const KontakteListeRoute = createLazyRoute(() => import('@/pages/crm/kontakte-liste'))
@@ -151,6 +157,8 @@ const BwaRoute = createLazyRoute(() => import('@/pages/fibu/bwa'))
 const AnlagenRoute = createLazyRoute(() => import('@/pages/fibu/anlagen'))
 const SachkontoRoute = createLazyRoute(() => import('@/pages/fibu/sachkonto'))
 const OPVerwaltungRoute = createLazyRoute(() => import('@/pages/fibu/op-verwaltung'))
+const SicherheitenRoute = createLazyRoute(() => import('@/pages/fibu/sicherheiten'))
+const KreditlinienRoute = createLazyRoute(() => import('@/pages/fibu/kreditlinien'))
 
 // Controlling
 const PlanIstRoute = createLazyRoute(() => import('@/pages/controlling/plan-ist'))
@@ -312,6 +320,12 @@ const routeConfig: RouteObject[] = [
       { path: 'compliance/cross-compliance', element: <CrossComplianceRoute /> },
       { path: 'compliance/qs-checkliste', element: <QSChecklisteRoute /> },
       { path: 'zertifikate/liste', element: <ZertifikateListeRoute /> },
+      { path: 'compliance/bvl-umsatzmeldung', element: <BVLUmsatzmeldungRoute /> },
+      { path: 'compliance/pcn-ufi', element: <PCNUFIRoute /> },
+      { path: 'compliance/enni-meldungen', element: <ENNIMeldungenRoute /> },
+      { path: 'compliance/vvvo-register', element: <VVVORegisterRoute /> },
+      { path: 'compliance/sachkunde-register', element: <SachkundeRegisterRoute /> },
+      { path: 'compliance/saatgut-nachbau', element: <SaatgutNachbauRoute /> },
       
       // CRM & Marketing
       { path: 'crm/kontakte-liste', element: <KontakteListeRoute /> },
@@ -332,6 +346,8 @@ const routeConfig: RouteObject[] = [
       { path: 'fibu/anlagen', element: <AnlagenRoute /> },
       { path: 'fibu/sachkonto', element: <SachkontoRoute /> },
       { path: 'fibu/op-verwaltung', element: <OPVerwaltungRoute /> },
+      { path: 'fibu/sicherheiten', element: <SicherheitenRoute /> },
+      { path: 'fibu/kreditlinien', element: <KreditlinienRoute /> },
       { path: 'fibu/kostenstellenrechnung', element: <KostenstellenrechnungRoute /> },
       { path: 'fibu/zahlungseingaenge', element: <ZahlungseingaengeRoute /> },
       { path: 'fibu/zahlungsvorschlaege', element: <ZahlungsvorschlaegeRoute /> },
