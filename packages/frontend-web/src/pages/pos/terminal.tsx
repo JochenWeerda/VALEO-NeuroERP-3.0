@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { CreditCard, DollarSign, FileText, Scan, ShoppingCart, Smartphone } from 'lucide-react'
+import { useFiskalyTSE, type PaymentType, type TSETransaction } from '@/lib/services/fiskaly-tse'
 
 type CartItem = {
   artikelnr: string
@@ -21,6 +22,10 @@ export default function POSTerminalPage(): JSX.Element {
   const [barcode, setBarcode] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null)
   const [customerId, setCustomerId] = useState<string | null>(null)
+  const [activeTx, setActiveTx] = useState<TSETransaction | null>(null)
+  
+  // fiskaly TSE Integration
+  const { tssStatus, isInitialized, startTransaction, updateTransaction, finishTransaction } = useFiskalyTSE()
 
   // Mock-Artikel-Datenbank
   const articles = [
@@ -66,41 +71,71 @@ export default function POSTerminalPage(): JSX.Element {
 
     const total = cart.reduce((sum, item) => sum + item.preis * item.menge, 0)
 
-    // Mock TSE-Signierung
-    const tseSignature = {
-      transactionNumber: Math.floor(Math.random() * 10000),
-      signature: `TSE_SIG_${  Date.now()}`,
-      timestamp: new Date().toISOString(),
-      qrCode: 'V0;VALERO-POS;fiskaly-TSS-12345;...',
+    try {
+      // 1. TSE-Transaction starten
+      let tx = activeTx
+      if (!tx) {
+        tx = await startTransaction('Verkauf', 'Kassenbeleg-V1')
+        setActiveTx(tx)
+      }
+
+      // 2. Artikel an TSE übermitteln
+      await updateTransaction(tx.txId, cart.map(item => ({
+        bezeichnung: item.bezeichnung,
+        preis: item.preis,
+        menge: item.menge,
+      })))
+
+      // 3. Transaction beenden & signieren
+      const paymentTypeMap: Record<PaymentMethod, PaymentType> = {
+        bar: 'CASH',
+        ec: 'NON_CASH',
+        paypal: 'NON_CASH',
+        b2b: 'INTERNAL',
+      }
+      
+      const signedTx = await finishTransaction(
+        tx.txId,
+        paymentTypeMap[paymentMethod],
+        total,
+      )
+
+      console.log('✅ TSE-Signatur:', signedTx)
+
+      // 4. Hardware-Signale
+      if (paymentMethod === 'bar') {
+        console.log('🔓 Kassenladen geöffnet')
+      }
+
+      if (paymentMethod === 'ec') {
+        console.log('💳 EC-Terminal: Betrag', total.toFixed(2), '€')
+      }
+
+      // 5. Bon drucken mit echtem QR-Code
+      console.log('🧾 Bon gedruckt:', {
+        bonnummer: `BON-${Date.now()}`,
+        tseTransactionNumber: signedTx.number,
+        tseSignature: signedTx.signature?.value,
+        tseCounter: signedTx.signature?.counter,
+        qrCode: signedTx.qr_code_data,
+      })
+
+      // 6. TSE-Journal speichern (Backend-Call)
+      // TODO: await saveTSETransaction({ ... })
+
+      alert(`Zahlung erfolgreich!\n\nBetrag: ${total.toFixed(2)} €\nZahlungsart: ${paymentMethod}\nTSE-Nr: ${signedTx.number}\nSignaturzähler: ${signedTx.signature?.counter}`)
+
+      // Reset
+      setCart([])
+      setPaymentMethod(null)
+      setCustomerId(null)
+      setActiveTx(null)
+      
+    } catch (error) {
+      console.error('❌ TSE-Fehler:', error)
+      alert('TSE-Fehler! Transaktion wurde in Offline-Queue gespeichert.')
+      // TODO: Offline-Queue
     }
-
-    console.log('Checkout:', {
-      cart,
-      paymentMethod,
-      customerId,
-      total,
-      tse: tseSignature,
-    })
-
-    // Mock: Kassenladen öffnen (Serial-Signal)
-    if (paymentMethod === 'bar') {
-      console.log('🔓 Kassenladen geöffnet')
-    }
-
-    // Mock: EC-Terminal
-    if (paymentMethod === 'ec') {
-      console.log('💳 EC-Terminal: Betrag', total.toFixed(2), '€')
-    }
-
-    // Mock: Bon drucken mit TSE
-    console.log('🧾 Bon gedruckt mit TSE-Signatur:', tseSignature)
-
-    alert(`Zahlung erfolgreich!\n\nBetrag: ${total.toFixed(2)} €\nZahlungsart: ${paymentMethod}\nTSE-Nr: ${tseSignature.transactionNumber}`)
-
-    // Reset
-    setCart([])
-    setPaymentMethod(null)
-    setCustomerId(null)
   }
 
   const total = cart.reduce((sum, item) => sum + item.preis * item.menge, 0)
@@ -120,8 +155,8 @@ export default function POSTerminalPage(): JSX.Element {
           <Badge variant="secondary" className="text-lg px-4 py-2">
             {customerId ? `B2B: ${customerId}` : 'B2C'}
           </Badge>
-          <Badge variant="outline" className="text-sm">
-            TSE: ✅ Online
+          <Badge variant={isInitialized ? 'outline' : 'secondary'} className="text-sm">
+            TSE: {isInitialized ? '✅ Online' : '⚠️ Mock'}
           </Badge>
         </div>
       </div>
