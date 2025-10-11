@@ -32,6 +32,7 @@ from app.routers.gdpr_router import router as gdpr_router  # GDPR Compliance
 from app.routers.numbering_router import router as numbering_router  # Numbering Service
 from app.routers.admin_dms_router import router as admin_dms_router  # Admin DMS Integration
 from app.routers.dms_webhook_router import router as dms_webhook_router  # DMS Webhooks & Inbox
+from app.routers.fibu_router import router as fibu_router  # Finanzbuchhaltung (130 Masken)
 from prometheus_client import make_asgi_app
 
 # Setup logging
@@ -202,6 +203,9 @@ app.include_router(admin_dms_router)
 
 # Include DMS Webhooks & Inbox
 app.include_router(dms_webhook_router)
+
+# Include Finanzbuchhaltung (130 Masken Integration)
+app.include_router(fibu_router)
 
 # Mount Prometheus metrics endpoint
 metrics_app = make_asgi_app()
