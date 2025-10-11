@@ -127,6 +127,7 @@ const ZertifikateListeRoute = createLazyRoute(() => import('@/pages/zertifikate/
 const KontakteListeRoute = createLazyRoute(() => import('@/pages/crm/kontakte-liste'))
 const BetriebsprofileRoute = createLazyRoute(() => import('@/pages/crm/betriebsprofile'))
 const LeadsRoute = createLazyRoute(() => import('@/pages/crm/leads'))
+const AktivitaetenRoute = createLazyRoute(() => import('@/pages/crm/aktivitaeten'))
 
 // Marketing
 const KampagnenRoute = createLazyRoute(() => import('@/pages/marketing/kampagnen'))
@@ -316,6 +317,7 @@ const routeConfig: RouteObject[] = [
       { path: 'crm/kontakte-liste', element: <KontakteListeRoute /> },
       { path: 'crm/betriebsprofile', element: <BetriebsprofileRoute /> },
       { path: 'crm/leads', element: <LeadsRoute /> },
+      { path: 'crm/aktivitaeten', element: <AktivitaetenRoute /> },
       { path: 'marketing/kampagnen', element: <KampagnenRoute /> },
       
       // Finanzen
