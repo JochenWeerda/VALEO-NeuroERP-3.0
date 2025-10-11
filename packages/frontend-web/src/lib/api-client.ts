@@ -1,101 +1,68 @@
 /**
- * API-Client mit automatischer Token-Injection
- * Handles token refresh und 401-Errors
+ * API Client
+ * Axios-basierter HTTP-Client mit Interceptors
  */
-
+import axios, { type AxiosInstance } from 'axios'
 import { auth } from './auth'
 
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
-interface RequestOptions extends RequestInit {
-  method?: HttpMethod
-}
+class APIClient {
+  private client: AxiosInstance
 
-export class APIClient {
-  private readonly baseUrl: string
-
-  private static readonly HTTP_STATUS_UNAUTHORIZED = 401
-
-  constructor(baseUrl?: string) {
-    const envBaseUrl = import.meta.env.VITE_API_BASE_URL
-    this.baseUrl = baseUrl ?? envBaseUrl ?? 'http://localhost:8000'
-  }
-
-  async fetch(endpoint: string, options: RequestOptions = {}): Promise<Response> {
-    const token = auth.getAccessToken()
-    const headers = new Headers(options.headers)
-
-    if (typeof token === 'string') {
-      headers.set('Authorization', `Bearer ${token}`)
-    }
-
-    if (options.body != null && !headers.has('Content-Type')) {
-      headers.set('Content-Type', 'application/json')
-    }
-
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      ...options,
-      headers,
+  constructor() {
+    this.client = axios.create({
+      baseURL: API_BASE_URL,
+      timeout: 30000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
 
-    if (response.status === APIClient.HTTP_STATUS_UNAUTHORIZED) {
-      const refreshed = await auth.refreshAccessToken()
-      if (!refreshed) {
-        auth.logout()
-        window.location.href = '/login'
-        throw new Error('Session expired. Please login again.')
-      }
+    // Request Interceptor (Auth Token)
+    this.client.interceptors.request.use(
+      (config) => {
+        const token = auth.getAccessToken()
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`
+        }
+        return config
+      },
+      (error) => Promise.reject(error),
+    )
 
-      const newToken = auth.getAccessToken()
-      if (typeof newToken === 'string') {
-        headers.set('Authorization', `Bearer ${newToken}`)
-      }
-
-      return fetch(`${this.baseUrl}${endpoint}`, {
-        ...options,
-        headers,
-      })
-    }
-
-    return response
+    // Response Interceptor (Error Handling)
+    this.client.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          // Token expired - redirect to login
+          auth.clearTokens()
+          window.location.href = '/login'
+        }
+        return Promise.reject(error)
+      },
+    )
   }
 
-  async get<T = unknown>(endpoint: string): Promise<T> {
-    const response = await this.fetch(endpoint, { method: 'GET' })
-    if (!response.ok) {
-      throw new Error(`GET ${endpoint} failed: ${response.status}`)
-    }
-    return (await response.json()) as T
+  get<T>(url: string, config?: Parameters<AxiosInstance['get']>[1]) {
+    return this.client.get<T>(url, config)
   }
 
-  async post<T = unknown>(endpoint: string, data?: unknown): Promise<T> {
-    const response = await this.fetch(endpoint, {
-      method: 'POST',
-      body: data !== undefined ? JSON.stringify(data) : undefined,
-    })
-    if (!response.ok) {
-      throw new Error(`POST ${endpoint} failed: ${response.status}`)
-    }
-    return (await response.json()) as T
+  post<T>(url: string, data?: unknown, config?: Parameters<AxiosInstance['post']>[2]) {
+    return this.client.post<T>(url, data, config)
   }
 
-  async put<T = unknown>(endpoint: string, data?: unknown): Promise<T> {
-    const response = await this.fetch(endpoint, {
-      method: 'PUT',
-      body: data !== undefined ? JSON.stringify(data) : undefined,
-    })
-    if (!response.ok) {
-      throw new Error(`PUT ${endpoint} failed: ${response.status}`)
-    }
-    return (await response.json()) as T
+  put<T>(url: string, data?: unknown, config?: Parameters<AxiosInstance['put']>[2]) {
+    return this.client.put<T>(url, data, config)
   }
 
-  async delete<T = unknown>(endpoint: string): Promise<T> {
-    const response = await this.fetch(endpoint, { method: 'DELETE' })
-    if (!response.ok) {
-      throw new Error(`DELETE ${endpoint} failed: ${response.status}`)
-    }
-    return (await response.json()) as T
+  patch<T>(url: string, data?: unknown, config?: Parameters<AxiosInstance['patch']>[2]) {
+    return this.client.patch<T>(url, data, config)
+  }
+
+  delete<T>(url: string, config?: Parameters<AxiosInstance['delete']>[1]) {
+    return this.client.delete<T>(url, config)
   }
 }
 
