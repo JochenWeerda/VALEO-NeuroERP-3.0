@@ -14,7 +14,8 @@
     "dev": "pnpm -r run dev",
     "mcp:dev": "ts-node src/mcp-server.ts",
     "policy:seed": "ts-node scripts/seed-policies.ts",
-    "policy:init": "pnpm run policy:seed && echo Policy-Datenbank bereit!"
+    "policy:init": "pnpm run policy:seed && echo Policy-Datenbank bereit!",
+    "lint-staged": "lint-staged"
   },
   "devDependencies": {
     "@playwright/test": "1.48.0",

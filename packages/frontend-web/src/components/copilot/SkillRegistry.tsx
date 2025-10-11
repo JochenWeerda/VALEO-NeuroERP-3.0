@@ -1,103 +1,156 @@
-/**
- * VALEO Skill Registry
- * Inspiriert von SAP Joule Studio
- * 
- * Skills = Kleine, fokussierte AI-Funktionen
- * Agents = Orchestrieren mehrere Skills
- * 
- * Architektur:
- * - Skills: Atomar, wiederverwendbar, testbar
- * - Agents: Workflows, Multi-Step, Decision-Making
- * - MCP-Integration: Skills = MCP-Tools, Agents = MCP-Prompts
- */
+﻿export type SkillCategory = 'data-retrieval' | 'data-modification' | 'analysis' | 'workflow'
 
-import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata';
-
-/**
- * Skill-Definition (angelehnt an SAP Joule Studio)
- */
-export interface ValeoSkill {
-  id: string;
-  name: string;
-  description: string;
-  category: 'data-retrieval' | 'data-modification' | 'analysis' | 'workflow';
-  
-  // Eingabe-Schema
-  input: {
-    parameters: Record<string, {
-      type: string;
-      required: boolean;
-      description: string;
-    }>;
-  };
-  
-  // Ausgabe-Schema
-  output: {
-    type: string;
-    schema: any;
-  };
-  
-  // Erforderliche Scopes
-  requiredScopes: string[];
-  
-  // MCP-Metadaten
-  mcp: {
-    toolName: string;
-    grounding: 'user-data' | 'system-data' | 'none';
-    explainable: boolean;
-  };
-  
-  // Ausführungs-Funktion (Phase 3)
-  execute?: (params: any, context: any) => Promise<any>;
+export interface SkillContextBase {
+  tenantId: string
+  userId: string
+  locale?: string
 }
 
-/**
- * Agent-Definition (Multi-Step-Workflows)
- */
-export interface ValeoAgent {
-  id: string;
-  name: string;
-  description: string;
-  skills: string[];  // Referenz zu Skill-IDs
-  
-  workflow: {
-    steps: Array<{
-      skillId: string;
-      condition?: (context: any) => boolean;
-      onSuccess?: string;  // Nächster Step
-      onError?: string;    // Fehler-Handling
-    }>;
-  };
-  
-  // MCP-Integration
-  mcp: {
-    promptTemplate: string;
-    contextRequired: string[];
-  };
+type ParameterDefinition = {
+  description: string
+  required: boolean
+  type: 'string' | 'number' | 'boolean' | 'json'
 }
 
-/**
- * Skill-Registry (vorkonfigurierte Skills)
- */
-export const valeoSkills: ValeoSkill[] = [
-  // Skill 1: Kunden suchen
-  {
+export type ParameterSchema<Params extends Record<string, unknown>> = {
+  parameters: { [K in keyof Params]: ParameterDefinition }
+}
+
+export interface OutputDescriptor<Result> {
+  type: 'object' | 'array' | 'scalar'
+  schema: Result
+}
+
+export interface ExecutionResult<Result> {
+  success: boolean
+  data: Result
+  message?: string
+}
+
+export type ExecuteFn<Params, Result, Context> = (
+  params: Params,
+  context: Context
+) => Promise<ExecutionResult<Result>>
+
+export interface SkillDefinition<
+  Id extends string,
+  Params extends Record<string, unknown>,
+  Result,
+  Context extends SkillContextBase,
+> {
+  readonly id: Id
+  readonly name: string
+  readonly description: string
+  readonly category: SkillCategory
+  readonly input: ParameterSchema<Params>
+  readonly output: OutputDescriptor<Result>
+  readonly requiredScopes: readonly string[]
+  readonly mcp: {
+    toolName: string
+    grounding: 'user-data' | 'system-data' | 'none'
+    explainable: boolean
+  }
+  readonly execute?: ExecuteFn<Params, Result, Context>
+}
+
+const createSkill = <Id extends string, Params extends Record<string, unknown>, Result, Context extends SkillContextBase>(
+  definition: SkillDefinition<Id, Params, Result, Context>,
+): SkillDefinition<Id, Params, Result, Context> => definition
+
+interface CustomerSummary {
+  id: string
+  name: string
+  city?: string
+}
+
+interface SearchCustomerParams extends Record<string, unknown> {
+  query: string
+}
+
+interface SearchCustomerContext extends SkillContextBase {
+  defaultCountry?: string
+}
+
+interface ArticlePriceParams extends Record<string, unknown> {
+  articleNumber: string
+  customer?: string
+}
+
+interface ArticlePriceResult {
+  price: number
+  currency: string
+  validUntil?: string
+}
+
+interface ArticlePriceContext extends SkillContextBase {
+  currency: string
+}
+
+interface SalesOrderItemInput {
+  articleId: string
+  quantity: number
+  price?: number
+}
+
+interface CreateSalesOrderParams extends Record<string, unknown> {
+  customer: string
+  items: SalesOrderItemInput[]
+  requestedDate?: string
+}
+
+interface CreateSalesOrderResult {
+  orderId: string
+  status: 'draft' | 'submitted'
+}
+
+interface CreateSalesOrderContext extends SkillContextBase {
+  channel: 'web' | 'mobile' | 'api'
+}
+
+interface PolicyCheckParams extends Record<string, unknown> {
+  action: string
+  data: Record<string, unknown>
+}
+
+interface PolicyCheckResult {
+  allowed: boolean
+  violations: string[]
+  warnings: string[]
+}
+
+interface PolicyCheckContext extends SkillContextBase {
+  policyVersion: string
+}
+
+interface StockCheckParams extends Record<string, unknown> {
+  articleNumber: string
+  warehouse?: string
+}
+
+interface StockCheckResult {
+  available: number
+  reserved: number
+  incoming: number
+}
+
+interface StockCheckContext extends SkillContextBase {
+  defaultWarehouse?: string
+}
+
+export const valeoSkills = {
+  searchCustomer: createSkill<'search-customer', SearchCustomerParams, CustomerSummary[], SearchCustomerContext>({
     id: 'search-customer',
-    name: 'Kunde suchen',
-    description: 'Sucht Kunden nach Name, Nummer oder Ort',
+    name: 'Search customer',
+    description: 'Searches customers by name, number or city',
     category: 'data-retrieval',
     input: {
       parameters: {
-        query: {
-          type: 'string',
-          required: true,
-          description: 'Suchbegriff (Name, Nummer, Ort)',
-        },
+        query: { type: 'string', required: true, description: 'Query string (name, number, city)' },
       },
     },
     output: {
       type: 'array',
-      schema: { /* CustomerSchema */ },
+      schema: [],
     },
     requiredScopes: ['sales:read', 'crm:read'],
     mcp: {
@@ -105,31 +158,21 @@ export const valeoSkills: ValeoSkill[] = [
       grounding: 'user-data',
       explainable: true,
     },
-  },
-
-  // Skill 2: Artikel-Preis abrufen
-  {
+  }),
+  getArticlePrice: createSkill<'get-article-price', ArticlePriceParams, ArticlePriceResult, ArticlePriceContext>({
     id: 'get-article-price',
-    name: 'Artikel-Preis abrufen',
-    description: 'Holt aktuellen Verkaufspreis für Artikel',
+    name: 'Get article price',
+    description: 'Fetches current price for an article optionally for a customer',
     category: 'data-retrieval',
     input: {
       parameters: {
-        articleNumber: {
-          type: 'string',
-          required: true,
-          description: 'Artikel-Nummer',
-        },
-        customer: {
-          type: 'string',
-          required: false,
-          description: 'Kunde (für kundenspezifische Preise)',
-        },
+        articleNumber: { type: 'string', required: true, description: 'Article identifier' },
+        customer: { type: 'string', required: false, description: 'Customer identifier' },
       },
     },
     output: {
       type: 'object',
-      schema: { price: 'number', currency: 'string' },
+      schema: { price: 0, currency: 'EUR' },
     },
     requiredScopes: ['sales:read'],
     mcp: {
@@ -137,24 +180,22 @@ export const valeoSkills: ValeoSkill[] = [
       grounding: 'system-data',
       explainable: true,
     },
-  },
-
-  // Skill 3: Verkaufsauftrag erstellen
-  {
+  }),
+  createSalesOrder: createSkill<'create-sales-order', CreateSalesOrderParams, CreateSalesOrderResult, CreateSalesOrderContext>({
     id: 'create-sales-order',
-    name: 'Verkaufsauftrag erstellen',
-    description: 'Erstellt einen neuen Verkaufsauftrag',
-    category: 'data-modification',
+    name: 'Create sales order',
+    description: 'Creates a sales order with validation steps',
+    category: 'workflow',
     input: {
       parameters: {
-        customer: { type: 'string', required: true, description: 'Kunden-ID' },
-        articles: { type: 'array', required: true, description: 'Artikel-Liste' },
-        deliveryDate: { type: 'date', required: false, description: 'Lieferdatum' },
+        customer: { type: 'string', required: true, description: 'Customer identifier' },
+        items: { type: 'json', required: true, description: 'Array of line items' },
+        requestedDate: { type: 'string', required: false, description: 'Requested delivery date (ISO 8601)' },
       },
     },
     output: {
       type: 'object',
-      schema: { orderId: 'string', status: 'string' },
+      schema: { orderId: 'SO-000001', status: 'draft' as CreateSalesOrderResult['status'] },
     },
     requiredScopes: ['sales:write'],
     mcp: {
@@ -162,23 +203,21 @@ export const valeoSkills: ValeoSkill[] = [
       grounding: 'user-data',
       explainable: true,
     },
-  },
-
-  // Skill 4: Policy-Check ausführen
-  {
+  }),
+  checkPolicy: createSkill<'check-policy', PolicyCheckParams, PolicyCheckResult, PolicyCheckContext>({
     id: 'check-policy',
-    name: 'Policy-Check',
-    description: 'Prüft ob Aktion gegen Policies verstößt',
+    name: 'Check policy',
+    description: 'Validates an action against policy rules',
     category: 'analysis',
     input: {
       parameters: {
-        action: { type: 'string', required: true, description: 'Aktion (z.B. "submit-order")' },
-        data: { type: 'object', required: true, description: 'Zu prüfende Daten' },
+        action: { type: 'string', required: true, description: 'Action identifier' },
+        data: { type: 'json', required: true, description: 'Payload for validation' },
       },
     },
     output: {
       type: 'object',
-      schema: { violations: 'array', warnings: 'array', allowed: 'boolean' },
+      schema: { allowed: true, violations: [], warnings: [] },
     },
     requiredScopes: ['policy:read'],
     mcp: {
@@ -186,23 +225,21 @@ export const valeoSkills: ValeoSkill[] = [
       grounding: 'system-data',
       explainable: true,
     },
-  },
-
-  // Skill 5: Bestandsprüfung
-  {
+  }),
+  checkStock: createSkill<'check-stock', StockCheckParams, StockCheckResult, StockCheckContext>({
     id: 'check-stock',
-    name: 'Bestand prüfen',
-    description: 'Prüft verfügbaren Bestand für Artikel',
+    name: 'Check stock',
+    description: 'Checks inventory levels for an article',
     category: 'data-retrieval',
     input: {
       parameters: {
-        articleNumber: { type: 'string', required: true, description: 'Artikel-Nummer' },
-        warehouse: { type: 'string', required: false, description: 'Lager' },
+        articleNumber: { type: 'string', required: true, description: 'Article identifier' },
+        warehouse: { type: 'string', required: false, description: 'Warehouse identifier' },
       },
     },
     output: {
       type: 'object',
-      schema: { available: 'number', reserved: 'number', incoming: 'number' },
+      schema: { available: 0, reserved: 0, incoming: 0 },
     },
     requiredScopes: ['inventory:read'],
     mcp: {
@@ -210,119 +247,37 @@ export const valeoSkills: ValeoSkill[] = [
       grounding: 'system-data',
       explainable: true,
     },
-  },
-];
+  }),
+} as const
 
-/**
- * Agent-Registry (Workflow-Orchestrierung)
- */
-export const valeoAgents: ValeoAgent[] = [
-  // Agent 1: Auftrags-Assistent
-  {
-    id: 'order-assistant',
-    name: 'Auftrags-Assistent',
-    description: 'Hilft beim Erstellen von Verkaufsaufträgen mit Preis- und Bestandsprüfung',
-    skills: ['search-customer', 'get-article-price', 'check-stock', 'check-policy', 'create-sales-order'],
-    workflow: {
-      steps: [
-        {
-          skillId: 'search-customer',
-          onSuccess: 'get-article-price',
-        },
-        {
-          skillId: 'get-article-price',
-          onSuccess: 'check-stock',
-        },
-        {
-          skillId: 'check-stock',
-          condition: (ctx) => ctx.stock.available > 0,
-          onSuccess: 'check-policy',
-          onError: 'notify-out-of-stock',
-        },
-        {
-          skillId: 'check-policy',
-          condition: (ctx) => ctx.policy.allowed,
-          onSuccess: 'create-sales-order',
-          onError: 'notify-policy-violation',
-        },
-        {
-          skillId: 'create-sales-order',
-        },
-      ],
-    },
-    mcp: {
-      promptTemplate: `Du bist ein Verkaufsauftrag-Assistent für VALEO-ERP.
-        Hilf dem Benutzer beim Erstellen eines Auftrags:
-        1. Finde den Kunden
-        2. Prüfe Artikel-Preise
-        3. Prüfe Bestand
-        4. Prüfe Policies
-        5. Erstelle Auftrag
-        
-        Sei präzise, freundlich und erkläre jeden Schritt.`,
-      contextRequired: ['user-permissions', 'current-page'],
-    },
-  },
+export type ValeoSkillId = keyof typeof valeoSkills
 
-  // Agent 2: Nachbestell-Assistent
-  {
-    id: 'reorder-assistant',
-    name: 'Nachbestell-Assistent',
-    description: 'Identifiziert Artikel unter Mindestbestand und schlägt Nachbestellungen vor',
-    skills: ['check-stock'],
-    workflow: {
-      steps: [
-        {
-          skillId: 'check-stock',
-          condition: (ctx) => ctx.stock.available < ctx.stock.minLevel,
-          onSuccess: 'suggest-reorder',
-        },
-      ],
-    },
-    mcp: {
-      promptTemplate: `Analysiere Bestände und schlage Nachbestellungen vor.
-        Berücksichtige: Mindestbestand, Lieferzeit, Lagerkosten.`,
-      contextRequired: ['inventory-data', 'supplier-data'],
-    },
-  },
-];
+type SkillMap = typeof valeoSkills
 
-/**
- * Skill-Executor (Phase 3)
- */
+type SkillEntry<Id extends ValeoSkillId> = SkillMap[Id]
+
+export type SkillParams<Id extends ValeoSkillId> = SkillEntry<Id> extends SkillDefinition<string, infer Params, unknown, SkillContextBase>
+  ? Params
+  : never
+
+export type SkillContext<Id extends ValeoSkillId> = SkillEntry<Id> extends SkillDefinition<string, Record<string, unknown>, unknown, infer Context>
+  ? Context
+  : never
+
+export type SkillResult<Id extends ValeoSkillId> = SkillEntry<Id> extends SkillDefinition<string, Record<string, unknown>, infer Result, SkillContextBase>
+  ? Result
+  : never
+
 export class SkillExecutor {
-  constructor(private mcpClient?: any) {}
-
-  async executeSkill(skillId: string, params: any, context: any): Promise<any> {
-    const skill = valeoSkills.find((s) => s.id === skillId);
-    if (!skill) {
-      throw new Error(`Skill not found: ${skillId}`);
+  async executeSkill<Id extends ValeoSkillId>(
+    skillId: Id,
+    params: SkillParams<Id>,
+    context: SkillContext<Id>,
+  ): Promise<ExecutionResult<SkillResult<Id>>> {
+    const skill = valeoSkills[skillId]
+    if (!skill.execute) {
+      return { success: true, data: skill.output.schema as SkillResult<Id> }
     }
-
-    // Phase 3: Echte MCP-Tool-Ausführung
-    // return await this.mcpClient.executeTool(skill.mcp.toolName, params);
-
-    // Aktuell: Mock
-    console.log(`[Skill] Executing: ${skill.name}`, { params, context });
-    return { success: true, data: {} };
-  }
-
-  async executeAgent(agentId: string, initialContext: any): Promise<any> {
-    const agent = valeoAgents.find((a) => a.id === agentId);
-    if (!agent) {
-      throw new Error(`Agent not found: ${agentId}`);
-    }
-
-    // Phase 3: Multi-Step-Workflow mit MCP
-    console.log(`[Agent] Executing: ${agent.name}`);
-    
-    let context = { ...initialContext };
-    for (const step of agent.workflow.steps) {
-      const result = await this.executeSkill(step.skillId, {}, context);
-      context = { ...context, ...result.data };
-    }
-
-    return context;
+    return skill.execute(params, context) as Promise<ExecutionResult<SkillResult<Id>>>
   }
 }
-

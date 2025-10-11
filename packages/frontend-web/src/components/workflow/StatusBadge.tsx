@@ -6,19 +6,19 @@ interface StatusBadgeProps {
   'data-testid'?: string
 }
 
-export function StatusBadge({ status, 'data-testid': testId }: StatusBadgeProps) {
-  const variants: Record<WorkflowState, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    draft: 'outline',
-    pending: 'secondary',
-    approved: 'default',
-    posted: 'default',
-    rejected: 'destructive',
-  }
+const STATUS_VARIANTS: Record<WorkflowState, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  draft: 'outline',
+  pending: 'secondary',
+  approved: 'default',
+  posted: 'default',
+  rejected: 'destructive',
+}
 
+export function StatusBadge({ status, 'data-testid': testId }: StatusBadgeProps): JSX.Element {
+  const label = status.toUpperCase()
   return (
-    <Badge variant={variants[status]} data-testid={testId}>
-      {status.toUpperCase()}
+    <Badge variant={STATUS_VARIANTS[status]} data-testid={testId}>
+      {label}
     </Badge>
   )
 }
-

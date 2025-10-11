@@ -1,7 +1,7 @@
 import { useLive } from '@/state/live'
 import NavLiveStatus from '@/components/app/NavLiveStatus'
 
-export default function LiveMonitorPage() {
+export default function LiveMonitorPage(): JSX.Element {
   const { sales, inventory, policy } = useLive()
   return (
     <div className="container py-6 space-y-6">
