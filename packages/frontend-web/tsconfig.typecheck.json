@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/app/**/*",
+    "src/components/navigation/**/*",
+    "src/components/patterns/**/*",
+    "src/components/ui/**/*",
+    "src/vite-env.d.ts",
+    "src/shared/**/*",
+    "src/features/agrar/**/*",
+    "src/pages/agrar/**/*",
+    "src/hooks/useFeature.ts",
+    "src/hooks/useSSE.ts",
+    "src/lib/mcp-event-bus.ts",
+    "src/lib/sse-client.ts",
+    "src/lib/useMcpRealtime.ts",
+    "src/main.tsx",
+    "src/types/**/*"
+  ],
+  "exclude": ["node_modules", "dist"]
+}
