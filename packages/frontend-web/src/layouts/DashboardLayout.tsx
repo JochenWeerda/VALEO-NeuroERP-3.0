@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { Outlet } from "react-router-dom"
 import { AppShell } from "@/components/navigation/AppShell"
 import { AdvisorDock } from "@/features/copilot/AdvisorDock"
+import { CallWidget } from "@/components/cti/CallWidget"
 import { useFeature } from "@/hooks/useFeature"
 import { type McpRealtimeEvent, useMcpConnectionState, useMcpRealtime } from "@/lib/useMcpRealtime"
 
@@ -67,6 +68,7 @@ export default function AppLayout(): JSX.Element {
         ) : null}
       </div>
       <AdvisorDock />
+      <CallWidget />
     </AppShell>
   )
 }
