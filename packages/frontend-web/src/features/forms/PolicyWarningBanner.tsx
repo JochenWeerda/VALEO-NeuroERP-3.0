@@ -1,4 +1,3 @@
-import * as React from "react"
 import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { type Alert, decide } from "@/policy/engine"

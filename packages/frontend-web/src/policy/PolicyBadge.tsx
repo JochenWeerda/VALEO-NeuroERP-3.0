@@ -1,4 +1,3 @@
-import * as React from "react"
 import { type Alert, decide } from "./engine"
 
 type Role = "admin" | "manager" | "operator"
