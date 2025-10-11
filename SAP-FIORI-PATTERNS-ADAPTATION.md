@@ -906,28 +906,38 @@ const semanticColors = {
 
 ---
 
-***REMOVED******REMOVED*** ✅ NÄCHSTE SCHRITTE
+***REMOVED******REMOVED*** 🚀 Frontend Roadmap & TODO (Stand 2024-10-10)
 
-***REMOVED******REMOVED******REMOVED*** Heute (Pattern-Implementation):
+| Priorität | Fokusbereich | Deliverables | Status | Nächster Schritt |
+|-----------|--------------|--------------|--------|------------------|
+| 1 | Navigation aktivieren | `AppShell` in `main.tsx`, Sidebar-Konfiguration, Command Palette Shortcuts | Offen | `AppLayout` ablösen, Smoke-Test mit `pnpm dev` |
+| 1 | Fiori-Patterns fertigstellen | `ObjectPage`, `Wizard`, `OverviewPage` + Stories inkl. MCP-Metadaten | Offen | Komponenten-Gerüst in `src/components/patterns` anlegen |
+| 1 | i18n-Loader abschließen | Custom Backend-Loader + Fallback-Handling, Language Switcher | In Arbeit | Loader implementieren, gegen Translation-API testen |
+| 2 | Agrar-Masken Welle 1 | Saatgut-Stamm (ObjectPage), Saatgut-Bestellung (Wizard), Dünger-Liste (ListReport) | Offen | Mock-Datenquelle anbinden, Seiten unter `pages/agrar` erzeugen |
+| 2 | Routing & API-Wiring | Agrar-Routing, React Query Keys, Service-Layer für Saatgut/Dünger | Offen | Routen im Router ergänzen, BFF/Backend-Stubs prüfen |
+| 3 | Storybook & QA | Stories für Patterns + Navigation, A11y-Linting (`node setup-storybook.mjs`), Visual Smoke Tests | Offen | Stories hinzufügen, `pnpm storybook` + `pnpm lint` ausführen |
+| 3 | Observability UX | Loading/Empty/Error-State-Kit, Telemetry-Hooks, KPI-Tiles für OverviewPage | Backlog | Nach Welle 1 priorisieren |
 
-```bash
-***REMOVED*** 1. Pattern-Components erstellen
-cd packages/frontend-web
-mkdir -p src/components/patterns
+***REMOVED******REMOVED******REMOVED*** Priorität 1 – nächste Session (2–3 h)
+1. **AppShell live schalten:** `packages/frontend-web/src/main.tsx` auf `AppShell` migrieren, Sidebar-Domainlinks synchronisieren, Command Palette Shortcut testen.
+2. **ObjectPage & Wizard:** Komponenten-Framework nach Fiori-Spezifikation bauen, Form-Slots + Header-Actions definieren, Storybook-Stories mit MCP-Parametern versehen.
+3. **OverviewPage:** KPI-Cards, Analytic-Tiles und Quick-Actions bereitstellen, Mock-Daten aus Saatgut-Prognosen verwenden.
+4. **i18n-Backend-Loader:** Loader an Translation-Endpoints hängen, Fallback-Strategie dokumentieren und Language Switcher in TopBar verdrahten.
 
-***REMOVED*** 2. Erste Pattern implementieren
-***REMOVED*** - ListReport.tsx (Sales Orders)
-***REMOVED*** - ObjectPage.tsx (Order Details)
+***REMOVED******REMOVED******REMOVED*** Priorität 2 – Umsetzung danach (4–6 h)
+1. **Agrar-Masken (10 Stück):** Start mit Saatgut-Stamm/-Liste/-Bestellung, Dünger-Stamm/-Liste nachziehen; Patterns wiederverwenden, i18n-Keys anlegen.
+2. **Routing & API:** Agrar-Modul unter `/agrar/*`, Service-Hooks (React Query) für Saatgut/Dünger, erste Mock-APIs an Backend anbinden.
+3. **Belegfolge & Policies:** Nummernkreise im Wizard berücksichtigen, Policy-Checks via MCP-Skill registrieren.
 
-***REMOVED*** 3. In Storybook dokumentieren
-pnpm storybook
-```
+***REMOVED******REMOVED******REMOVED*** Priorität 3 – Ergänzungen (2 h)
+1. **Storybook-Abdeckung:** Navigation + Patterns + Ask VALEO integrieren, Controls & Docs Tabs pflegen.
+2. **A11y & QA:** `eslint-plugin-jsx-a11y` aktivieren, Keyboard-Paths & Screenreader-Labels prüfen.
+3. **Telemetry & Logging:** UX-Metriken für OverviewPage (KPI-Ladezeiten), Error-Boundaries mit Toast-Feedback.
 
-***REMOVED******REMOVED******REMOVED*** Diese Woche:
-
-1. ⏳ Alle 6 Fiori-Patterns implementieren
-2. ⏳ Bestehende Pages migrieren
-3. ⏳ Storybook-Stories für alle Patterns
+***REMOVED******REMOVED******REMOVED*** Laufende Pflege
+- Fortschritt nach jedem Block in `AGRAR-MASKEN-IMPLEMENTATION-STATUS.md` und diesem Dokument spiegeln.
+- Neue i18n-Keys sofort in Translation-API-Seed aufnehmen (`app/seeds/translations_seed.py`).
+- Jede neue Page erhält MCP-Metadaten (siehe `UI-UX-MCP-INTEGRATION-ROADMAP.md` Vorgaben).
 
 ---
 

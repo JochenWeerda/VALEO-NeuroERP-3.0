@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Table } from '@/components/ui/table'
 import { useToast } from '@/hooks/use-toast'
-import { FileText, CheckCircle2, XCircle, ExternalLink } from 'lucide-react'
+import { CheckCircle2, ExternalLink, FileText, XCircle } from 'lucide-react'
 
 interface InboxDocument {
   id: string
@@ -16,91 +15,148 @@ interface InboxDocument {
   status: string
 }
 
-export default function InboxPage() {
+interface InboxListResponse {
+  ok: boolean
+  items?: InboxDocument[]
+  message?: string
+}
+
+interface InboxCreateResponse {
+  ok: boolean
+  number?: string
+  message?: string
+}
+
+const INBOX_ENDPOINT = '/api/dms/inbox'
+const CREATE_ENDPOINT = (id: string): string => `${INBOX_ENDPOINT}/${id}/create`
+const DELETE_ENDPOINT = (id: string): string => `${INBOX_ENDPOINT}/${id}`
+const HIGH_CONFIDENCE_THRESHOLD = 0.8
+const MEDIUM_CONFIDENCE_THRESHOLD = 0.5
+const DELETE_CONFIRMATION_MESSAGE = 'Dokument wirklich verwerfen?'
+
+const isNonEmptyString = (value: unknown): value is string => {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+const getFieldValue = (fields: Record<string, string>, key: string): string | undefined => {
+  const value = fields[key]
+  return isNonEmptyString(value) ? value : undefined
+}
+
+const getConfidenceBadge = (confidence: number): JSX.Element => {
+  if (confidence >= HIGH_CONFIDENCE_THRESHOLD) {
+    return <Badge variant="default">Hoch {(confidence * 100).toFixed(0)}%</Badge>
+  }
+  if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) {
+    return <Badge variant="secondary">Mittel {(confidence * 100).toFixed(0)}%</Badge>
+  }
+  return <Badge variant="destructive">Niedrig {(confidence * 100).toFixed(0)}%</Badge>
+}
+
+const formatCurrency = (value: string): string => `${value} EUR`
+
+export default function InboxPage(): JSX.Element {
   const { toast } = useToast()
   const [documents, setDocuments] = useState<InboxDocument[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState<boolean>(true)
 
-  useEffect(() => {
-    loadInbox()
-  }, [])
-
-  async function loadInbox() {
+  const loadInbox = useCallback(async (): Promise<void> => {
     try {
       setLoading(true)
-      const response = await fetch('/api/dms/inbox')
-      const data = await response.json()
-      
-      if (data.ok) {
-        setDocuments(data.items || [])
+      const response = await fetch(INBOX_ENDPOINT)
+      const data = (await response.json()) as InboxListResponse
+
+      if (data.ok && Array.isArray(data.items)) {
+        setDocuments(data.items)
+      } else {
+        setDocuments([])
+        if (isNonEmptyString(data.message)) {
+          toast({
+            title: 'Keine Dokumente',
+            description: data.message,
+          })
+        }
       }
-    } catch (e) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unbekannter Fehler'
       toast({
         title: 'Fehler beim Laden',
-        description: e instanceof Error ? e.message : 'Unbekannter Fehler',
+        description: message,
         variant: 'destructive',
       })
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
 
-  async function createFromInbox(doc: InboxDocument) {
+  useEffect(() => {
+    void loadInbox()
+  }, [loadInbox])
+
+  const createFromInbox = useCallback(async (doc: InboxDocument): Promise<void> => {
     try {
-      const response = await fetch(`/api/dms/inbox/${doc.id}/create`, {
+      const response = await fetch(CREATE_ENDPOINT(doc.id), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),  // Keine Overrides
+        body: JSON.stringify({}),
       })
-      
-      const data = await response.json()
-      
+
+      const data = (await response.json()) as InboxCreateResponse
+
       if (data.ok) {
         toast({
-          title: '✅ Beleg erstellt',
-          description: `Belegnummer: ${data.number}`,
+          title: 'Beleg erstellt',
+          description: isNonEmptyString(data.number) ? `Belegnummer: ${data.number}` : undefined,
         })
-        loadInbox()  // Reload
+        await loadInbox()
+        return
       }
-    } catch (e) {
+
+      toast({
+        title: 'Erstellen fehlgeschlagen',
+        description: data.message ?? 'Unbekannter Fehler',
+        variant: 'destructive',
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unbekannter Fehler'
       toast({
         title: 'Fehler beim Erstellen',
-        description: e instanceof Error ? e.message : 'Unbekannter Fehler',
+        description: message,
         variant: 'destructive',
       })
     }
-  }
+  }, [loadInbox, toast])
 
-  async function deleteFromInbox(docId: string) {
-    if (!confirm('Dokument wirklich verwerfen?')) return
+  const deleteFromInbox = useCallback(async (docId: string): Promise<void> => {
+    if (!window.confirm(DELETE_CONFIRMATION_MESSAGE)) {
+      return
+    }
 
     try {
-      await fetch(`/api/dms/inbox/${docId}`, { method: 'DELETE' })
-      
+      const response = await fetch(DELETE_ENDPOINT(docId), { method: 'DELETE' })
+      if (!response.ok) {
+        throw new Error(`Status ${response.status}`)
+      }
+
       toast({
         title: 'Dokument verworfen',
       })
-      
-      loadInbox()
-    } catch (e) {
+
+      await loadInbox()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unbekannter Fehler'
       toast({
-        title: 'Fehler beim Löschen',
-        description: e instanceof Error ? e.message : 'Unbekannter Fehler',
+        title: 'Fehler beim Loeschen',
+        description: message,
         variant: 'destructive',
       })
     }
-  }
-
-  const getConfidenceBadge = (confidence: number) => {
-    if (confidence >= 0.8) return <Badge variant="default">Hoch ({(confidence * 100).toFixed(0)}%)</Badge>
-    if (confidence >= 0.5) return <Badge variant="secondary">Mittel ({(confidence * 100).toFixed(0)}%)</Badge>
-    return <Badge variant="destructive">Niedrig ({(confidence * 100).toFixed(0)}%)</Badge>
-  }
+  }, [loadInbox, toast])
 
   if (loading) {
     return (
       <div className="container mx-auto py-8">
-        <p className="text-center text-muted-foreground">Lädt...</p>
+        <p className="text-center text-muted-foreground">Laedt...</p>
       </div>
     )
   }
@@ -118,7 +174,7 @@ export default function InboxPage() {
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Keine eingehenden Dokumente</p>
               <p className="text-sm mt-2">
-                Dokumente werden automatisch angezeigt wenn sie im DMS hochgeladen werden
+                Dokumente werden automatisch angezeigt, wenn sie im DMS hochgeladen werden.
               </p>
             </div>
           </CardContent>
@@ -137,16 +193,24 @@ export default function InboxPage() {
       </div>
 
       <div className="grid gap-4">
-        {documents.map((doc) => (
-          <Card key={doc.id}>
+        {documents.map((doc) => {
+          const invoiceNumber = getFieldValue(doc.parsed_fields, 'invoice_number')
+          const supplier = getFieldValue(doc.parsed_fields, 'supplier')
+          const invoiceDate = getFieldValue(doc.parsed_fields, 'date')
+          const invoiceTotal = getFieldValue(doc.parsed_fields, 'total')
+          const supplierId = getFieldValue(doc.parsed_fields, 'supplier_id')
+          const domain = getFieldValue(doc.parsed_fields, 'domain')
+
+          return (
+            <Card key={doc.id}>
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <CardTitle className="text-lg">
-                    {doc.parsed_fields.invoice_number || doc.id}
+                    {invoiceNumber ?? doc.id}
                   </CardTitle>
                   <CardDescription>
-                    {doc.parsed_fields.supplier || 'Unbekannter Lieferant'}
+                    {supplier ?? 'Unbekannter Lieferant'}
                   </CardDescription>
                 </div>
                 {getConfidenceBadge(doc.confidence)}
@@ -155,62 +219,55 @@ export default function InboxPage() {
 
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {doc.parsed_fields.date && (
+                {invoiceDate != null && (
                   <div>
                     <p className="text-sm font-medium text-gray-500">Datum</p>
-                    <p className="text-base">{doc.parsed_fields.date}</p>
+                    <p className="text-base">{invoiceDate}</p>
                   </div>
                 )}
-                {doc.parsed_fields.total && (
+                {invoiceTotal != null && (
                   <div>
                     <p className="text-sm font-medium text-gray-500">Betrag</p>
-                    <p className="text-base font-semibold">{doc.parsed_fields.total} €</p>
+                    <p className="text-base font-semibold">
+                      {formatCurrency(invoiceTotal)}
+                    </p>
                   </div>
                 )}
-                {doc.parsed_fields.supplier_id && (
+                {supplierId != null && (
                   <div>
                     <p className="text-sm font-medium text-gray-500">Lieferanten-ID</p>
-                    <p className="text-base">{doc.parsed_fields.supplier_id}</p>
+                    <p className="text-base">{supplierId}</p>
                   </div>
                 )}
-                {doc.parsed_fields.domain && (
+                {domain != null && (
                   <div>
                     <p className="text-sm font-medium text-gray-500">Domain</p>
-                    <Badge variant="outline">{doc.parsed_fields.domain}</Badge>
+                    <Badge variant="outline">{domain}</Badge>
                   </div>
                 )}
               </div>
 
               <div className="flex gap-2 pt-2">
-                <Button
-                  variant="default"
-                  onClick={() => createFromInbox(doc)}
-                >
+                <Button variant="default" onClick={() => { void createFromInbox(doc) }}>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
                   Beleg erstellen
                 </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={() => window.open(doc.dms_url, '_blank')}
-                >
+
+                <Button variant="outline" onClick={() => window.open(doc.dms_url, '_blank', 'noopener')}>
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  Im DMS öffnen
+                  Im DMS oeffnen
                 </Button>
-                
-                <Button
-                  variant="destructive"
-                  onClick={() => deleteFromInbox(doc.id)}
-                >
+
+                <Button variant="destructive" onClick={() => { void deleteFromInbox(doc.id) }}>
                   <XCircle className="h-4 w-4 mr-2" />
                   Verwerfen
                 </Button>
               </div>
             </CardContent>
           </Card>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
 }
-

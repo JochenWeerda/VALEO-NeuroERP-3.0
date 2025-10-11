@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Loader2, Download } from 'lucide-react'
+import { Download, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 interface BatchPrintButtonProps {
@@ -9,11 +9,11 @@ interface BatchPrintButtonProps {
   onComplete?: () => void
 }
 
-export function BatchPrintButton({ selectedIds, domain, onComplete }: BatchPrintButtonProps) {
-  const [loading, setLoading] = useState(false)
+export function BatchPrintButton({ selectedIds, domain, onComplete }: BatchPrintButtonProps): JSX.Element {
+  const [loading, setLoading] = useState<boolean>(false)
   const { toast } = useToast()
 
-  const handleBatchPrint = async () => {
+  const handleBatchPrint = async (): Promise<void> => {
     if (selectedIds.length === 0) {
       toast({
         title: 'No documents selected',

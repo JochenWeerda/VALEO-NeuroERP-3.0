@@ -13,34 +13,31 @@ export function buildZodFromSchema(schema: FormSchema): z.ZodObject<z.ZodRawShap
   const shape: Record<string, z.ZodTypeAny> = {}
 
   for (const f of schema.fields) {
-    let t: z.ZodTypeAny = z.any()
+    let fieldSchema: z.ZodTypeAny = z.any()
 
-    // Type-Mapping
     if (
       f.type === "string" ||
       f.type === "text" ||
       f.type === "select" ||
       f.type === "lookup"
     ) {
-      t = z.string()
-    }
-    if (f.type === "number") {
-      t = z.number()
-      if (f.min !== undefined) {
-        t = t.min(f.min)
+      const stringSchema = z.string()
+      fieldSchema = stringSchema
+    } else if (f.type === "number") {
+      let numberSchema = z.number()
+      if (typeof f.min === "number") {
+        numberSchema = numberSchema.min(f.min)
       }
-      if (f.max !== undefined) {
-        t = t.max(f.max)
+      if (typeof f.max === "number") {
+        numberSchema = numberSchema.max(f.max)
       }
-    }
-    if (f.type === "date") {
-      t = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
+      fieldSchema = numberSchema
+    } else if (f.type === "date") {
+      fieldSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
     }
 
-    // Required/Optional
-    t = f.required === true ? t : t.optional()
-
-    shape[f.name] = t
+    fieldSchema = f.required === true ? fieldSchema : fieldSchema.optional()
+    shape[f.name] = fieldSchema
   }
 
   // Lines (Positionen)

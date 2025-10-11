@@ -27,5 +27,6 @@
     }
   },
   "include": ["src", "vite.config.ts"],
+  "exclude": ["node_modules", "dist", "vite.config.performance.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

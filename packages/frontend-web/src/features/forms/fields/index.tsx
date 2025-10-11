@@ -1,32 +1,14 @@
-import * as React from "react"
-import { useEffect, useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
+﻿import { useEffect, useState } from 'react'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 
-type Field = {
+export type Field = {
   name: string
   label: string
-  type: "string" | "number" | "date" | "text" | "select" | "lookup" | "lines"
+  type: 'string' | 'number' | 'date' | 'text' | 'select' | 'lookup' | 'lines'
   required?: boolean
   options?: Array<{ value: string; label: string }>
   placeholder?: string
@@ -35,182 +17,65 @@ type Field = {
   lookup?: string
 }
 
-type Props = {
+export type FieldRendererProps = {
   field: Field
   value: unknown
-  onChange: (v: unknown) => void
+  onChange: (value: unknown) => void
 }
 
-export function FieldRenderer({ field, value, onChange }: Props): JSX.Element {
-  // Textarea
-  if (field.type === "text") {
-    return (
-      <Textarea
-        id={field.name}
-        value={String(value ?? "")}
-        onChange={(e): void => {
-          onChange(e.target.value)
-        }}
-        placeholder={field.placeholder}
-      />
-    )
-  }
+const DEFAULT_DEBOUNCE_MS = 350
 
-  // Number
-  if (field.type === "number") {
-    return (
-      <Input
-        id={field.name}
-        type="number"
-        value={Number(value ?? 0)}
-        onChange={(e): void => {
-          onChange(Number(e.target.value))
-        }}
-        placeholder={field.placeholder}
-        min={field.min}
-        max={field.max}
-      />
-    )
-  }
-
-  // Date
-  if (field.type === "date") {
-    return (
-      <Input
-        id={field.name}
-        type="date"
-        value={String(value ?? "")}
-        onChange={(e): void => {
-          onChange(e.target.value)
-        }}
-      />
-    )
-  }
-
-  // Select (Dropdown)
-  if (field.type === "select") {
-    return (
-      <Select
-        value={String(value ?? "")}
-        onValueChange={(v): void => {
-          onChange(v)
-        }}
-      >
-        <SelectTrigger id={field.name}>
-          <SelectValue placeholder={field.placeholder ?? "Bitte wählen"} />
-        </SelectTrigger>
-        <SelectContent>
-          {field.options?.map(
-            (o): JSX.Element => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
-              </SelectItem>
-            )
-          )}
-        </SelectContent>
-      </Select>
-    )
-  }
-
-  // Lookup (mit Debounce-Suche)
-  if (field.type === "lookup") {
-    return (
-      <LookupField
-        id={field.name}
-        value={String(value ?? "")}
-        onChange={onChange}
-        lookupUrl={field.lookup ?? ""}
-        placeholder={field.placeholder}
-        field={field}
-      />
-    )
-  }
-
-  // Default: String
-  return (
-    <Input
-      id={field.name}
-      value={String(value ?? "")}
-      onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
-        onChange(e.target.value)
-      }}
-      placeholder={field.placeholder}
-    />
-  )
-}
-
-const DEFAULT_DEBOUNCE_MS = 500
-const LOOKUP_DEBOUNCE_MS = 400
-
-/**
- * Debounce Hook
- */
-function useDebounced<T>(val: T, delay = DEFAULT_DEBOUNCE_MS): T {
-  const [v, setV] = useState(val)
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setV(val)
-    }, delay)
-    return (): void => {
-      clearTimeout(t)
-    }
-  }, [val, delay])
-  return v
-}
-
-/**
- * Lookup-Field mit Command/Popover und Debounce
- */
-type LookupProps = {
+type LookupResultItem = {
   id: string
+  label?: string
+  name?: string
+  hint?: string
+}
+
+type LookupProps = {
   value: string
-  onChange: (v: unknown) => void
-  lookupUrl: string
-  placeholder?: string
+  onChange: (value: string) => void
   field: Field
 }
 
-function LookupField({ id, value, onChange, lookupUrl, placeholder, field }: LookupProps): JSX.Element {
+function LookupField({ value, onChange, field }: LookupProps): JSX.Element {
   const [open, setOpen] = useState(false)
-  const [q, setQ] = useState("")
-  const dq = useDebounced(q, LOOKUP_DEBOUNCE_MS)
-  const [items, setItems] = useState<
-    Array<{ id: string; label?: string; name?: string; hint?: string }>
-  >([])
+  const [query, setQuery] = useState('')
+  const debouncedQuery = useDebounced(query)
+  const [items, setItems] = useState<LookupResultItem[]>([])
 
-  const entity =
-    field.lookup?.split("/").pop() ??
-    (field.name?.toLowerCase().includes("customer") ? "customers" : "articles")
+  const entity = field.lookup?.split('/').pop() ?? (field.name.toLowerCase().includes('customer') ? 'customers' : 'articles')
+  const baseEndpoint = field.lookup ?? `/api/mcp/lookup/${entity}`
 
   useEffect(() => {
-    let ignore = false
-    async function run(): Promise<void> {
-      if (dq.length === 0) {
+    let cancelled = false
+
+    const fetchItems = async (): Promise<void> => {
+      if (debouncedQuery.trim().length === 0) {
         setItems([])
         return
       }
       try {
-        const res = await fetch(
-          `/api/mcp/lookup/${entity}?q=${encodeURIComponent(dq)}`
-        )
-        const js = (await res.json()) as {
-          ok: boolean
-          data: Array<{ id: string; label?: string; name?: string; hint?: string }>
-        }
-        if (!ignore) {
-          setItems(js?.data ?? [])
+        const response = await fetch(`${baseEndpoint}?q=${encodeURIComponent(debouncedQuery)}`)
+        const payload = (await response.json()) as { ok: boolean; data?: LookupResultItem[] }
+        if (!cancelled) {
+          setItems(Array.isArray(payload.data) ? payload.data : [])
         }
       } catch {
-        if (!ignore) {
+        if (!cancelled) {
           setItems([])
         }
       }
     }
-    void run()
-    return (): void => {
-      ignore = true
+
+    void fetchItems()
+
+    return () => {
+      cancelled = true
     }
-  }, [dq, entity])
+  }, [baseEndpoint, debouncedQuery])
+
+  const placeholderText = field.placeholder ?? `Suche ${entity}...`
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -218,49 +83,41 @@ function LookupField({ id, value, onChange, lookupUrl, placeholder, field }: Loo
         <div className="flex gap-2">
           <Input
             id={field.name}
-            value={String(value ?? "")}
-            onChange={(e): void => {
-              onChange(e.target.value)
-            }}
-            placeholder={field.placeholder ?? `Suche ${entity}…`}
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder={placeholderText}
           />
           <Input
             className="max-w-[40%]"
-            placeholder="Suche…"
-            value={q}
-            onChange={(e): void => {
-              setQ(e.target.value)
-            }}
+            placeholder="Suche..."
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
           />
         </div>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]">
         <Command>
-          <CommandInput placeholder={`Suchen in ${entity}…`} />
+          <CommandInput placeholder={`Suchen in ${entity}...`} value={query} onValueChange={setQuery} />
           <CommandList>
             <CommandEmpty>Nichts gefunden</CommandEmpty>
             <CommandGroup>
-              {items.map(
-                (it): JSX.Element => (
-                  <CommandItem
-                    key={it.id}
-                    value={it.id}
-                    onSelect={(): void => {
-                      onChange(it.id)
-                      setOpen(false)
-                    }}
-                  >
-                    <div className="flex flex-col">
-                      <span className="font-medium">
-                        {it.label ?? it.name ?? it.id}
-                      </span>
-                      {it.hint !== undefined && (
-                        <span className="text-xs opacity-70">{it.hint}</span>
-                      )}
-                    </div>
-                  </CommandItem>
-                )
-              )}
+              {items.map((item) => (
+                <CommandItem
+                  key={item.id}
+                  value={item.id}
+                  onSelect={() => {
+                    onChange(item.id)
+                    setOpen(false)
+                  }}
+                >
+                  <div className="flex flex-col">
+                    <span className="font-medium">{item.label ?? item.name ?? item.id}</span>
+                    {typeof item.hint === 'string' && item.hint.length > 0 && (
+                      <span className="text-xs opacity-70">{item.hint}</span>
+                    )}
+                  </div>
+                </CommandItem>
+              ))}
             </CommandGroup>
           </CommandList>
         </Command>
@@ -269,3 +126,81 @@ function LookupField({ id, value, onChange, lookupUrl, placeholder, field }: Loo
   )
 }
 
+function useDebounced<T>(value: T, delay: number = DEFAULT_DEBOUNCE_MS): T {
+  const [debounced, setDebounced] = useState<T>(value)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(timer)
+  }, [value, delay])
+
+  return debounced
+}
+
+export function FieldRenderer({ field, value, onChange }: FieldRendererProps): JSX.Element {
+  switch (field.type) {
+    case 'text':
+      return (
+        <Textarea
+          id={field.name}
+          value={String(value ?? '')}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={field.placeholder}
+        />
+      )
+    case 'number':
+      return (
+        <Input
+          id={field.name}
+          type="number"
+          value={Number(value ?? 0)}
+          onChange={(event) => onChange(Number(event.target.value))}
+          placeholder={field.placeholder}
+          min={field.min}
+          max={field.max}
+        />
+      )
+    case 'date':
+      return (
+        <Input
+          id={field.name}
+          type="date"
+          value={String(value ?? '')}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      )
+    case 'select':
+      return (
+        <Select value={String(value ?? '')} onValueChange={(selected) => onChange(selected)}>
+          <SelectTrigger id={field.name}>
+            <SelectValue placeholder={field.placeholder ?? 'Bitte waehlen'} />
+          </SelectTrigger>
+          <SelectContent>
+            {field.options?.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )
+    case 'lookup':
+      return (
+        <LookupField
+          value={String(value ?? '')}
+          onChange={(next) => onChange(next)}
+          field={field}
+        />
+      )
+    case 'string':
+    default:
+      return (
+        <Input
+          id={field.name}
+          value={String(value ?? '')}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={field.placeholder}
+        />
+      )
+  }
+}

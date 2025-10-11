@@ -6,7 +6,7 @@
   "parserOptions": {
     "ecmaVersion": 2020,
     "sourceType": "module",
-    "project": "./tsconfig.json"
+    "project": "./tsconfig.eslint.json"
   },
   "env": {
     "node": true,
@@ -121,6 +121,7 @@
     "*.js",
     "*.d.ts",
     "**/vite.config.ts",
+    "**/vite.config.performance.ts",
     "**/__tests__/**",
     "**/*.test.ts",
     "**/*.spec.ts"
