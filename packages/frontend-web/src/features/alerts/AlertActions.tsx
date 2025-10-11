@@ -1,4 +1,3 @@
-import * as React from "react"
 import { useState } from "react"
 import type { Alert } from "./rules"
 import { Button } from "@/components/ui/button"
