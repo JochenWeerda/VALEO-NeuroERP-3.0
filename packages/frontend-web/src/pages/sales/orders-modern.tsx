@@ -9,10 +9,10 @@
  */
 
 import { PageToolbar, ToolbarAction } from '@/components/navigation/PageToolbar';
-import { Plus, Download, Upload, Filter, Archive } from 'lucide-react';
+import { Archive, Download, Filter, Plus, Sparkles, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-export default function SalesOrdersModernPage() {
+export default function SalesOrdersModernPage(): JSX.Element {
   const navigate = useNavigate();
 
   // Primäraktionen (max 3-4) - direkt sichtbar
@@ -33,7 +33,7 @@ export default function SalesOrdersModernPage() {
       id: 'export',
       label: 'Export',
       icon: <Download className="h-4 w-4" />,
-      onClick: () => console.log('Export'),
+      onClick: () => console.info('Export requested'),
       variant: 'outline',
       mcp: {
         intent: 'export-data',
@@ -48,7 +48,7 @@ export default function SalesOrdersModernPage() {
       id: 'import',
       label: 'Importieren',
       icon: <Upload className="h-4 w-4" />,
-      onClick: () => console.log('Import'),
+      onClick: () => console.info('Import requested'),
       mcp: {
         intent: 'import-data',
       },
@@ -57,7 +57,7 @@ export default function SalesOrdersModernPage() {
       id: 'filter',
       label: 'Erweiterte Filter',
       icon: <Filter className="h-4 w-4" />,
-      onClick: () => console.log('Filter'),
+      onClick: () => console.info('Advanced filter requested'),
       mcp: {
         intent: 'filter-data',
       },
@@ -66,7 +66,7 @@ export default function SalesOrdersModernPage() {
       id: 'archive',
       label: 'Archivieren',
       icon: <Archive className="h-4 w-4" />,
-      onClick: () => console.log('Archive'),
+      onClick: () => console.info('Archive requested'),
       variant: 'destructive',
       mcp: {
         intent: 'archive-data',

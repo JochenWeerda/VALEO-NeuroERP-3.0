@@ -1,50 +1,38 @@
-/**
- * Login Page
- * OIDC/OAuth2 Login-Flow (Production)
- */
-
 import { useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 
-export default function LoginPage() {
+const DASHBOARD_PATH = '/dashboard'
+
+export default function LoginPage(): JSX.Element {
   const { login, loading, isAuthenticated } = useAuth()
 
   useEffect(() => {
-    // Redirect if already authenticated
     if (isAuthenticated) {
-      window.location.href = '/dashboard'
+      window.location.href = DASHBOARD_PATH
     }
   }, [isAuthenticated])
 
-  const handleLogin = async () => {
+  const handleLogin = async (): Promise<void> => {
     try {
       await login()
-      // Will redirect to OIDC provider
-    } catch (e) {
-      console.error('Login failed:', e)
+    } catch (error) {
+      console.error('Login failed:', error)
     }
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">VALEO NeuroERP</CardTitle>
-          <CardDescription>
-            Melden Sie sich mit Ihrem Unternehmens-Account an
-          </CardDescription>
+          <CardDescription>Melden Sie sich mit Ihrem Unternehmens-Account an.</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
-          <Button
-            onClick={handleLogin}
-            disabled={loading}
-            className="w-full"
-            size="lg"
-          >
+          <Button onClick={() => { void handleLogin() }} disabled={loading} className="w-full" size="lg">
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -56,16 +44,11 @@ export default function LoginPage() {
           </Button>
 
           <div className="text-center text-sm text-muted-foreground">
-            <p>
-              Sichere Anmeldung über Ihren Identity-Provider
-            </p>
-            <p className="mt-2 text-xs">
-              Unterstützt: Azure AD, Keycloak, Okta, Auth0
-            </p>
+            <p>Sichere Anmeldung ueber Ihren Identity-Provider.</p>
+            <p className="mt-2 text-xs">Unterstuetzt: Azure AD, Keycloak, Okta, Auth0.</p>
           </div>
         </CardContent>
       </Card>
     </div>
   )
 }
-

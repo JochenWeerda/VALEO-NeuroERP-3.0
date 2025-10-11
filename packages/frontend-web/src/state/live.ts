@@ -17,20 +17,51 @@ type LiveState = {
   setWorkflowEvent: (e: WorkflowEvent) => void
 }
 
+const POLICY_HISTORY_LIMIT = 100
+
 export const useLive = create<LiveState>((set) => ({
   sales: {},
   inventory: {},
   policy: [],
   workflow: {},
-  setSalesDoc: (d) => set(s => ({ sales: { ...s.sales, [d.id]: d } })),
-  setInventoryEvt: (e) => set(s => ({ inventory: { ...s.inventory, [e.sku]: e } })),
-  pushPolicy: (a) => set(s => {
-    const seen = new Set(s.policy.map(p => p.id))
-    if (seen.has(a.id)) return s
-    return { policy: [a, ...s.policy].slice(0, 100) }
-  }),
-  sweepPolicy: (ttlMs) => set(s => ({ policy: s.policy.filter(p => Date.now() - p.ts < ttlMs) })),
-  setWorkflowEvent: (e) => set(s => ({
-    workflow: { ...s.workflow, [`${e.domain}:${e.number}`]: e }
-  })),
+  setSalesDoc: (doc: SalesDoc): void => {
+    set((state) => ({
+      sales: {
+        ...state.sales,
+        [doc.id]: doc,
+      },
+    }))
+  },
+  setInventoryEvt: (event: InventoryEvent): void => {
+    set((state) => ({
+      inventory: {
+        ...state.inventory,
+        [event.sku]: event,
+      },
+    }))
+  },
+  pushPolicy: (alert: PolicyAlert): void => {
+    set((state) => {
+      const alreadyKnown = state.policy.some((item) => item.id === alert.id)
+      if (alreadyKnown) {
+        return { policy: state.policy }
+      }
+      return {
+        policy: [alert, ...state.policy].slice(0, POLICY_HISTORY_LIMIT),
+      }
+    })
+  },
+  sweepPolicy: (ttlMs: number): void => {
+    set((state) => ({
+      policy: state.policy.filter((item) => Date.now() - item.ts < ttlMs),
+    }))
+  },
+  setWorkflowEvent: (event: WorkflowEvent): void => {
+    set((state) => ({
+      workflow: {
+        ...state.workflow,
+        [`${event.domain}:${event.number}`]: event,
+      },
+    }))
+  },
 }))

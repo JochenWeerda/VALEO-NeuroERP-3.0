@@ -9,6 +9,8 @@ interface StatusInfo {
   lastCheck: number
 }
 
+const HEALTH_CHECK_INTERVAL_MS = 30_000
+
 /**
  * Global Status Indicator
  * Shows system health in navigation header
@@ -55,7 +57,7 @@ export default function GlobalStatusIndicator(): JSX.Element {
   // Initial check and periodic monitoring
   useEffect(() => {
     checkHealth()
-    const interval = setInterval(checkHealth, 30000) // 30 seconds
+    const interval = setInterval(checkHealth, HEALTH_CHECK_INTERVAL_MS)
     return () => clearInterval(interval)
   }, [])
 

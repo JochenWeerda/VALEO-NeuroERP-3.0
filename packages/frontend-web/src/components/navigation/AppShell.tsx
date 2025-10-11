@@ -1,25 +1,15 @@
-/**
- * AppShell - Moderne ERP-Navigation
- * Kein Ribbon - Hybrid-Ansatz mit:
- * - Sidebar (Domänen)
- * - Top-Header (Suche, User)
- * - Kontextuelle Page-Toolbar
- * - Command Palette (Ctrl+K)
- * 
- * MCP-Ready: Alle Actions mit Metadaten für Phase 3
- */
-
-import { ReactNode, useState } from 'react';
-import { CommandPalette } from './CommandPalette';
-import { Sidebar } from './Sidebar';
-import { TopBar } from './TopBar';
-import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata';
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { CommandPalette } from './CommandPalette'
+import { Sidebar } from './Sidebar'
+import { TopBar } from './TopBar'
+import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
+import { useFeature } from '@/hooks/useFeature'
 
 interface AppShellProps {
-  children: ReactNode;
+  children: ReactNode
+  enableCommandPalette?: boolean
 }
 
-// MCP-Metadaten für AppShell (Phase 3 Vorbereitung)
 export const appShellMCP = createMCPMetadata('AppShell', 'navigation', {
   accessibility: {
     role: 'application',
@@ -38,58 +28,84 @@ export const appShellMCP = createMCPMetadata('AppShell', 'navigation', {
     testable: true,
     contextAware: true,
   },
-});
+})
 
-export function AppShell({ children }: AppShellProps) {
-  const [commandOpen, setCommandOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+export function AppShell({ children, enableCommandPalette = true }: AppShellProps): JSX.Element {
+  const commandPaletteFeatureEnabled = useFeature('commandPalette')
+  const commandPaletteAvailable = enableCommandPalette && commandPaletteFeatureEnabled
+  const [commandOpen, setCommandOpen] = useState<boolean>(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false)
 
-  // Command Palette mit Ctrl/Cmd+K
-  useState(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setCommandOpen((open) => !open);
+  const handleToggleSidebar = useCallback((): void => {
+    setSidebarCollapsed((collapsed) => !collapsed)
+  }, [])
+
+  const handleCommandOpen = useCallback((): void => {
+    if (commandPaletteAvailable) {
+      setCommandOpen(true)
+    }
+  }, [commandPaletteAvailable])
+
+  const handleCommandToggle = useCallback(
+    (open: boolean): void => {
+      if (!commandPaletteAvailable) {
+        setCommandOpen(false)
+        return
       }
-    };
+      setCommandOpen(open)
+    },
+    [commandPaletteAvailable],
+  )
 
-    document.addEventListener('keydown', down);
-    return () => document.removeEventListener('keydown', down);
-  });
+  useEffect(() => {
+    if (!commandPaletteAvailable) {
+      setCommandOpen(false)
+      return
+    }
+
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault()
+        setCommandOpen((open) => !open)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [commandPaletteAvailable])
+
+  const commandPaletteProps = useMemo(() => {
+    if (!commandPaletteAvailable) {
+      return null
+    }
+    return {
+      open: commandOpen,
+      onOpenChange: handleCommandToggle,
+    }
+  }, [commandOpen, commandPaletteAvailable, handleCommandToggle])
 
   return (
-    <div 
+    <div
       className="flex h-screen overflow-hidden bg-background"
       data-mcp-component="app-shell"
       data-mcp-version="1.0.0"
     >
-      {/* Sidebar - Domänen-Navigation */}
-      <Sidebar 
-        collapsed={sidebarCollapsed} 
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-      />
+      <Sidebar collapsed={sidebarCollapsed} onToggle={handleToggleSidebar} />
 
-      {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Top-Bar - Suche, Ask VALEO, User */}
-        <TopBar onCommandOpen={() => setCommandOpen(true)} />
+        <TopBar
+          onCommandOpen={handleCommandOpen}
+          commandPaletteEnabled={commandPaletteAvailable}
+        />
 
-        {/* Page Content (mit PageHeader + Toolbar) */}
-        <main 
-          className="flex-1 overflow-y-auto overflow-x-hidden"
-          role="main"
-          aria-label="Main content"
-        >
+        <main className="flex-1 overflow-y-auto overflow-x-hidden" role="main" aria-label="Main content">
           {children}
         </main>
       </div>
 
-      {/* Command Palette - Ctrl/Cmd+K */}
-      <CommandPalette 
-        open={commandOpen}
-        onOpenChange={setCommandOpen}
-      />
+      {commandPaletteProps ? <CommandPalette {...commandPaletteProps} /> : null}
     </div>
-  );
+  )
 }
-
