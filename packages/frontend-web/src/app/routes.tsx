@@ -66,6 +66,7 @@ const MischfutterProduktionRoute = createLazyRoute(() => import('@/pages/produkt
 
 // Verkauf & Kunden
 const KundenStammRoute = createLazyRoute(() => import('@/pages/verkauf/kunden-stamm'))
+const KundenStammEnhancedRoute = createLazyRoute(() => import('@/pages/verkauf/kunden-stamm-enhanced'))
 const KundenListeRoute = createLazyRoute(() => import('@/pages/verkauf/kunden-liste'))
 
 // Einkauf & Lieferanten
@@ -266,6 +267,7 @@ const routeConfig: RouteObject[] = [
       
       // Verkauf & Kunden
       { path: 'verkauf/kunden-stamm', element: <KundenStammRoute /> },
+      { path: 'verkauf/kunden-stamm-enhanced/:id', element: <KundenStammEnhancedRoute /> },
       { path: 'verkauf/kunden-liste', element: <KundenListeRoute /> },
       
       // Einkauf
