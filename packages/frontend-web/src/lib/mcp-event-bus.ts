@@ -96,9 +96,11 @@ class McpEventBus {
   private readonly stateListeners = new Set<ConnectionListener>();
   private connectionState: ConnectionState = "idle";
   private readonly registeredTypes = new Set<string>();
-  private eventsUrl: string | undefined = typeof import.meta !== "undefined"
-    ? (import.meta.env?.VITE_MCP_EVENTS_URL as string | undefined)
-    : undefined;
+  private eventsUrl: string | undefined =
+    typeof import.meta !== "undefined" && typeof import.meta.env?.VITE_MCP_EVENTS_URL === "string"
+      ? import.meta.env.VITE_MCP_EVENTS_URL
+      : undefined;
+  private sseOptions: SSEOptions = {};
 
   addConnectionListener(listener: ConnectionListener): () => void {
     this.stateListeners.add(listener);
@@ -146,14 +148,15 @@ class McpEventBus {
       return;
     }
     this.eventsUrl = url;
-    if (this.client) {
-      this.client.stop();
-      this.client = undefined;
-      this.transition("idle");
-      if (this.shouldRun()) {
-        this.ensureClient();
-      }
-    }
+    this.applyOptions({ url });
+  }
+
+  setAuthTokenResolver(resolver?: () => string | undefined): void {
+    this.applyOptions({ getToken: resolver });
+  }
+
+  setWithCredentials(enabled: boolean): void {
+    this.applyOptions({ withCredentials: enabled });
   }
 
   getConnectionState(): ConnectionState {
@@ -170,8 +173,10 @@ class McpEventBus {
     if (!this.shouldRun()) {
       return;
     }
-    const options: SSEOptions = {};
-    if (typeof this.eventsUrl === 'string' && this.eventsUrl.length > 0) {
+    const options: SSEOptions = {
+      ...this.sseOptions,
+    };
+    if ((typeof options.url !== "string" || options.url.length === 0) && typeof this.eventsUrl === "string" && this.eventsUrl.length > 0) {
       options.url = this.eventsUrl;
     }
     this.client = new SSEClient(
@@ -192,6 +197,18 @@ class McpEventBus {
     }
     this.transition("connecting");
     this.client.start();
+  }
+
+  private applyOptions(partial: SSEOptions): void {
+    this.sseOptions = { ...this.sseOptions, ...partial };
+    if (this.client) {
+      this.client.stop();
+      this.client = undefined;
+      this.transition("idle");
+    }
+    if (this.shouldRun()) {
+      this.ensureClient();
+    }
   }
 
   private registerServiceTypes(service: string): void {

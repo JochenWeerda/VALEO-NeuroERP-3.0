@@ -1,13 +1,4 @@
-/**
- * TopBar - Globale Header-Leiste
- * Kein Ribbon! Nur Essentials:
- * - Global-Search
- * - Command-Palette-Trigger
- * - Ask VALEO (AI) - Phase 3
- * - User-Menu
- */
-
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,12 +6,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Search, Command as CommandIcon, User, LogOut, HelpCircle, Sparkles } from 'lucide-react';
-import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata';
+} from '@/components/ui/dropdown-menu'
+import { Command as CommandIcon, HelpCircle, LogOut, Search, Settings, Sparkles, User } from 'lucide-react'
+import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 
 interface TopBarProps {
-  onCommandOpen: () => void;
+  onCommandOpen?: () => void
+  commandPaletteEnabled?: boolean
 }
 
 export const topBarMCP = createMCPMetadata('TopBar', 'navigation', {
@@ -38,14 +30,20 @@ export const topBarMCP = createMCPMetadata('TopBar', 'navigation', {
     explainable: true,
     contextAware: true,
   },
-});
+})
 
-export function TopBar({ onCommandOpen }: TopBarProps) {
-  // Simulated user (replace with useAuth())
+export function TopBar({ onCommandOpen, commandPaletteEnabled = true }: TopBarProps): JSX.Element {
   const user = {
     name: 'Test Admin',
     email: 'test-admin@valeo.local',
-  };
+  }
+
+  const handleSearchClick = (): void => {
+    if (!commandPaletteEnabled) {
+      return
+    }
+    onCommandOpen?.()
+  }
 
   return (
     <header
@@ -53,22 +51,22 @@ export function TopBar({ onCommandOpen }: TopBarProps) {
       role="banner"
       data-mcp-component="top-bar"
     >
-      {/* Global Search (öffnet Command Palette) */}
       <div className="flex-1 max-w-md">
         <Button
           variant="outline"
           className="w-full justify-start text-muted-foreground"
-          onClick={onCommandOpen}
+          onClick={handleSearchClick}
+          disabled={!commandPaletteEnabled}
         >
           <Search className="mr-2 h-4 w-4" />
           <span>Suche... (Ctrl+K)</span>
           <kbd className="ml-auto hidden rounded bg-muted px-2 py-0.5 text-xs lg:inline">
-            <CommandIcon className="h-3 w-3" />K
+            <CommandIcon className="h-3 w-3" />
+            K
           </kbd>
         </Button>
       </div>
 
-      {/* Ask VALEO - AI-Assistenz (Phase 3) */}
       <Button
         variant="ghost"
         size="icon"
@@ -80,24 +78,14 @@ export function TopBar({ onCommandOpen }: TopBarProps) {
         <span className="sr-only">AI-Hilfe</span>
       </Button>
 
-      {/* Help */}
-      <Button
-        variant="ghost"
-        size="icon"
-        title="Hilfe"
-      >
+      <Button variant="ghost" size="icon" title="Hilfe">
         <HelpCircle className="h-5 w-5" />
         <span className="sr-only">Hilfe</span>
       </Button>
 
-      {/* User-Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="rounded-full"
-          >
+          <Button variant="ghost" size="icon" className="rounded-full">
             <User className="h-5 w-5" />
             <span className="sr-only">User menu</span>
           </Button>
@@ -126,6 +114,5 @@ export function TopBar({ onCommandOpen }: TopBarProps) {
         </DropdownMenuContent>
       </DropdownMenu>
     </header>
-  );
+  )
 }
-

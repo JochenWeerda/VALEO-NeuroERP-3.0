@@ -1,15 +1,14 @@
-﻿import { useEffect } from "react";
-import { mcpEventBus } from "@/lib/mcp-event-bus";
-import type { MCPEvent } from "@/lib/mcp-events";
+import { useEffect } from 'react'
+import { useSSEContext } from '@/app/providers/SSEProvider'
+import type { MCPEvent } from '@/lib/mcp-events'
 
-export function useSSE(onEvent: (event: MCPEvent) => void, url?: string): void {
+export function useSSE(onEvent: (event: MCPEvent) => void): void {
+  const { addTypedListener } = useSSEContext()
+
   useEffect(() => {
-    if (typeof url === 'string' && url.length > 0) {
-      mcpEventBus.setEventsUrl(url);
-    }
-    const unsubscribe = mcpEventBus.addTypedListener(onEvent);
+    const unsubscribe = addTypedListener(onEvent)
     return () => {
-      unsubscribe();
-    };
-  }, [onEvent, url]);
+      unsubscribe()
+    }
+  }, [addTypedListener, onEvent])
 }

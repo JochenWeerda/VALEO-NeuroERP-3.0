@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { CheckCircle2, XCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Loader2, XCircle } from 'lucide-react'
 
 type VerificationResult = {
   valid: boolean
@@ -14,31 +14,53 @@ type VerificationResult = {
   message: string
 }
 
-export default function VerifyPage() {
+export default function VerifyPage(): JSX.Element {
   const { domain, number, hash } = useParams<{ domain: string; number: string; hash?: string }>()
-  const [searchParams] = useSearchParams()
   const [result, setResult] = useState<VerificationResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const buildVerifyUrl = (docDomain: string, docNumber: string, docHash?: string): string => {
+    if (typeof docHash === 'string' && docHash.length > 0) {
+      return `/verify/${docDomain}/${docNumber}/${docHash}`
+    }
+    return `/verify/${docDomain}/${docNumber}`
+  }
+
+  const isVerificationResult = (payload: unknown): payload is VerificationResult => {
+    if (payload == null || typeof payload !== 'object') {
+      return false
+    }
+
+    const candidate = payload as Partial<VerificationResult>
+    return (
+      typeof candidate.valid === 'boolean' ||
+      typeof candidate.status === 'string' ||
+      typeof candidate.number === 'string'
+    )
+  }
+
   useEffect(() => {
-    async function verify() {
+    async function verify(): Promise<void> {
       try {
         setLoading(true)
         setError(null)
 
-        const url = hash
-          ? `/verify/${domain}/${number}/${hash}`
-          : `/verify/${domain}/${number}`
+        const url = buildVerifyUrl(domain, number, hash)
 
         const response = await fetch(url)
-        const data = await response.json()
+        const data: unknown = await response.json()
 
         if (!response.ok) {
-          throw new Error(data.detail || 'Verification failed')
+          const detail = typeof (data as { detail?: string }).detail === 'string' ? (data as { detail: string }).detail : null
+          throw new Error(detail ?? 'Verification failed')
         }
 
-        setResult(data)
+        if (isVerificationResult(data)) {
+          setResult(data)
+        } else {
+          throw new Error('Ungültige Antwort vom Server')
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error')
       } finally {
@@ -46,12 +68,12 @@ export default function VerifyPage() {
       }
     }
 
-    if (domain && number) {
-      verify()
+    if (typeof domain === 'string' && typeof number === 'string') {
+      void verify()
     }
   }, [domain, number, hash])
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string): JSX.Element => {
     const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       posted: 'default',
       approved: 'secondary',
@@ -59,17 +81,18 @@ export default function VerifyPage() {
       rejected: 'destructive',
       unknown: 'destructive',
     }
-    return <Badge variant={variants[status] || 'outline'}>{status.toUpperCase()}</Badge>
-  }
+    const variant = variants[status] ?? 'outline'
+    return <Badge variant={variant}>{status.toUpperCase()}</Badge>
+}
 
-  const getDomainLabel = (domain: string) => {
+  const getDomainLabel = (domainValue: string): string => {
     const labels: Record<string, string> = {
       sales: 'Sales Order',
       purchase: 'Purchase Order',
       invoice: 'Invoice',
       delivery: 'Delivery Note',
     }
-    return labels[domain] || domain
+    return labels[domainValue] ?? domainValue
   }
 
   if (loading) {
@@ -87,7 +110,7 @@ export default function VerifyPage() {
     )
   }
 
-  if (error) {
+  if (error !== null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Card className="w-full max-w-md border-red-200">
@@ -105,7 +128,7 @@ export default function VerifyPage() {
     )
   }
 
-  if (!result) {
+  if (result == null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Card className="w-full max-w-md">
@@ -118,7 +141,7 @@ export default function VerifyPage() {
     )
   }
 
-  const isValid = result.valid !== false && result.status !== 'unknown'
+  const isValid = result.valid === true && result.status !== 'unknown'
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -161,7 +184,7 @@ export default function VerifyPage() {
             </div>
           </div>
 
-          {hash && (
+          {typeof hash === 'string' && hash.length > 0 && (
             <div className="pt-4 border-t">
               <p className="text-sm font-medium text-gray-500 mb-2">Verification Hash</p>
               <code className="text-xs bg-gray-100 p-2 rounded block break-all font-mono">

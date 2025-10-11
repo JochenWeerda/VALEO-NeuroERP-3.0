@@ -1,24 +1,25 @@
 /**
- * i18n (Internationalization) Support
- * Simple translation system for DE/EN
+ * Minimal i18n helper with German and English defaults.
  */
 
 type Locale = 'de' | 'en'
 
-interface Translations {
-  [key: string]: string | Translations
+type TranslationNode = string | TranslationRecord
+
+interface TranslationRecord {
+  [key: string]: TranslationNode
 }
 
-const translations: Record<Locale, Translations> = {
+const translations: Record<Locale, TranslationRecord> = {
   de: {
     common: {
       save: 'Speichern',
       cancel: 'Abbrechen',
-      delete: 'Löschen',
+      delete: 'Loeschen',
       edit: 'Bearbeiten',
-      close: 'Schließen',
+      close: 'Schliessen',
       search: 'Suchen',
-      loading: 'Lädt...',
+      loading: 'Laedt...',
       error: 'Fehler',
       success: 'Erfolgreich',
     },
@@ -80,40 +81,60 @@ const translations: Record<Locale, Translations> = {
 
 let currentLocale: Locale = 'de'
 
+const LOCAL_STORAGE_KEY = 'locale'
+
+type TranslationPath = string
+
+type LookupResult = string | TranslationRecord | undefined
+
 export function setLocale(locale: Locale): void {
   currentLocale = locale
-  localStorage.setItem('locale', locale)
-  document.documentElement.lang = locale
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(LOCAL_STORAGE_KEY, locale)
+    document.documentElement.lang = locale
+  }
 }
 
 export function getLocale(): Locale {
-  const stored = localStorage.getItem('locale') as Locale | null
-  return stored || currentLocale
+  if (typeof window === 'undefined') {
+    return currentLocale
+  }
+  const stored = window.localStorage.getItem(LOCAL_STORAGE_KEY) as Locale | null
+  return stored ?? currentLocale
 }
 
-export function t(key: string): string {
-  const keys = key.split('.')
-  let value: any = translations[currentLocale]
+function resolveTranslation(locale: Locale, path: TranslationPath): LookupResult {
+  const segments = path.split('.')
+  let cursor: TranslationNode = translations[locale]
 
-  for (const k of keys) {
-    if (value && typeof value === 'object') {
-      value = value[k]
-    } else {
-      return key // Return key if translation not found
+  for (const segment of segments) {
+    if (typeof cursor === 'string') {
+      return cursor
     }
+    const next = cursor[segment]
+    if (next === undefined) {
+      return undefined
+    }
+    cursor = next
   }
 
-  return typeof value === 'string' ? value : key
+  return cursor
 }
 
-// Initialize locale from localStorage
+export function t(path: TranslationPath): string {
+  const value = resolveTranslation(currentLocale, path)
+  if (typeof value === 'string') {
+    return value
+  }
+  return path
+}
+
 if (typeof window !== 'undefined') {
-  const stored = localStorage.getItem('locale') as Locale | null
+  const stored = window.localStorage.getItem(LOCAL_STORAGE_KEY) as Locale | null
   if (stored) {
     currentLocale = stored
     document.documentElement.lang = stored
   }
 }
 
-export { type Locale }
-
+export type { Locale }

@@ -1,6 +1,5 @@
-import * as React from "react"
-import { useEffect, useState } from "react"
-import { Card } from "@/components/ui/card"
+import { useEffect, useState } from 'react'
+import { Card } from '@/components/ui/card'
 
 type ArchiveEntry = {
   timestamp: string
@@ -16,9 +15,8 @@ type Props = {
   number: string
 }
 
-/**
- * ArchivePanel - Zeigt Archiv-Historie für Beleg
- */
+const HASH_PREVIEW_LENGTH = 10
+
 export default function ArchivePanel({ domain, number }: Props): JSX.Element {
   const [items, setItems] = useState<ArchiveEntry[]>([])
   const [loading, setLoading] = useState<boolean>(true)
@@ -27,11 +25,11 @@ export default function ArchivePanel({ domain, number }: Props): JSX.Element {
     void loadHistory()
   }, [domain, number])
 
-  async function loadHistory(): Promise<void> {
+  const loadHistory = async (): Promise<void> => {
     try {
       const response = await fetch(`/api/documents/${domain}/${number}/history`)
-      const data = (await response.json()) as { ok: boolean; items: ArchiveEntry[] }
-      setItems(data.items ?? [])
+      const data = (await response.json()) as { ok: boolean; items?: ArchiveEntry[] }
+      setItems(Array.isArray(data.items) ? data.items : [])
     } catch {
       setItems([])
     } finally {
@@ -40,20 +38,19 @@ export default function ArchivePanel({ domain, number }: Props): JSX.Element {
   }
 
   return (
-    <Card className="p-4 space-y-2">
+    <Card className="space-y-2 p-4">
       <div className="font-semibold">Archiv</div>
-      {loading && <div className="text-sm opacity-70">Lädt...</div>}
+      {loading && <div className="text-sm opacity-70">L&auml;dt...</div>}
       {!loading && items.length === 0 && (
-        <div className="text-sm opacity-70">Keine Archiv-Einträge</div>
+        <div className="text-sm opacity-70">Keine Archiv-Eintr&auml;ge</div>
       )}
-      <ul className="text-sm space-y-1">
-        {items.map(
-          (it, i): JSX.Element => (
-            <li key={i} className="flex items-center justify-between">
-              <span>
-                {new Date(it.ts * 1000).toLocaleString()} · {it.sha256.slice(0, 10)}
-                …
-              </span>
+      <ul className="space-y-1 text-sm">
+        {items.map((item) => {
+          const preview = item.sha256.slice(0, HASH_PREVIEW_LENGTH)
+          const timestamp = new Date(item.ts * 1000).toLocaleString()
+          return (
+            <li key={`${item.sha256}-${item.ts}`} className="flex items-center justify-between gap-3">
+              <span>{`${timestamp} - ${preview}`}</span>
               <a
                 className="underline"
                 href={`/api/documents/${domain}/${number}/print`}
@@ -64,9 +61,8 @@ export default function ArchivePanel({ domain, number }: Props): JSX.Element {
               </a>
             </li>
           )
-        )}
+        })}
       </ul>
     </Card>
   )
 }
-

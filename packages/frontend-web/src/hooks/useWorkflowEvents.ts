@@ -1,103 +1,136 @@
 import { useSSE } from '@/lib/sse'
 import { useToast } from '@/hooks/use-toast'
+import { type WorkflowAction } from './useWorkflow'
 
-/**
- * Workflow Events Hook
- * Listens to workflow SSE events and shows appropriate toasts
- * Handles audit events, replay, and status notifications
- */
+type WorkflowEventTopic = 'workflow' | 'audit'
+type WorkflowReplayType = 'live' | 'replay'
+
+interface BaseEventPayload {
+  topic: WorkflowEventTopic
+}
+
+interface WorkflowEventPayload extends BaseEventPayload {
+  topic: 'workflow'
+  domain: string
+  number: string
+  action: WorkflowAction
+  type?: WorkflowReplayType
+}
+
+type AuditEventType = 'export' | 'audit_access'
+
+interface AuditEventPayload extends BaseEventPayload {
+  topic: 'audit'
+  type: AuditEventType
+  user?: string
+  domain?: string
+  count?: number
+}
+
+type KnownEventPayload = WorkflowEventPayload | AuditEventPayload
+
+const ACTION_LABELS: Record<WorkflowAction, string> = {
+  submit: 'eingereicht',
+  approve: 'freigegeben',
+  reject: 'abgelehnt',
+  post: 'gebucht',
+}
+
+const AUDIT_ACCESS_THRESHOLD = 10
+
+const isKnownEventPayload = (payload: unknown): payload is KnownEventPayload => {
+  if (payload == null || typeof payload !== 'object') {
+    return false
+  }
+
+  const candidate = payload as Partial<KnownEventPayload>
+  return candidate.topic === 'workflow' || candidate.topic === 'audit'
+}
+
+const isWorkflowEventPayload = (payload: KnownEventPayload): payload is WorkflowEventPayload => {
+  return (
+    payload.topic === 'workflow' &&
+    typeof payload.domain === 'string' &&
+    typeof payload.number === 'string' &&
+    typeof payload.action === 'string'
+  )
+}
+
+const isAuditEventPayload = (payload: KnownEventPayload): payload is AuditEventPayload => {
+  return payload.topic === 'audit' && typeof payload.type === 'string'
+}
+
+const formatActionLabel = (action: WorkflowAction): string => {
+  return ACTION_LABELS[action] ?? action
+}
+
 export function useWorkflowEvents(): void {
   const { toast } = useToast()
 
-  // SSE listener for workflow events
-  useSSE('workflow', (eventData: any) => {
-    try {
-      // Handle workflow state transition events
-      if (eventData.topic === 'workflow') {
-        handleWorkflowEvent(eventData)
-      }
-      // Handle audit events (exports, access logs, etc.)
-      else if (eventData.topic === 'audit') {
-        handleAuditEvent(eventData)
-      }
-    } catch (error) {
-      console.error('Error processing workflow event:', error)
-    }
-  })
-
-  // Handle workflow state transition events
-  const handleWorkflowEvent = (event: any): void => {
-    const { domain, number, action, type } = event
-
-    if (type === 'replay') {
-      // Skip toasts for replay events to avoid spam
+  const handleWorkflowEvent = (event: WorkflowEventPayload): void => {
+    if (event.type === 'replay') {
       return
     }
 
-    // German action labels
-    const actionLabels: Record<string, string> = {
-      submit: 'eingereicht',
-      approve: 'freigegeben',
-      reject: 'abgelehnt',
-      post: 'gebucht'
-    }
+    const message = `${event.domain.toUpperCase()} ${event.number}: ${formatActionLabel(event.action)}`
+    const title = event.action === 'reject' ? 'Workflow abgelehnt' : 'Workflow aktualisiert'
 
-    const actionLabel = actionLabels[action] || action
-    const message = `${domain?.toUpperCase()} ${number}: ${actionLabel}`
-
-    // Different toast styles based on action
-    if (action === 'reject') {
-      toast({
-        title: '❌ ' + message,
-        variant: 'destructive',
-      })
-    } else {
-      toast({
-        title: '✅ ' + message,
-      })
-    }
+    toast({
+      title: `${title}: ${message}`,
+      variant: event.action === 'reject' ? 'destructive' : 'default',
+    })
   }
 
-  // Handle audit events (exports, access logs, etc.)
-  const handleAuditEvent = (event: any): void => {
-    const { type, user, domain, count } = event
-
-    switch (type) {
+  const handleAuditEvent = (event: AuditEventPayload): void => {
+    switch (event.type) {
       case 'export':
         toast({
-          title: `📊 Export: ${count} ${domain}-Datensätze von ${user}`,
+          title: 'Audit Export abgeschlossen',
+          description: `${event.count ?? 0} ${event.domain ?? 'Unbekannt'}-Eintraege von ${event.user ?? 'Unbekannt'}`,
         })
         break
       case 'audit_access':
-        // Only show for unusual access patterns
-        if (count && count > 10) {
+        if ((event.count ?? 0) > AUDIT_ACCESS_THRESHOLD) {
           toast({
-            title: `🔍 Häufiger Audit-Zugriff: ${domain} ${count}x`,
-            variant: 'default',
+            title: 'Audit Zugriffshaeufigkeit',
+            description: `${event.domain ?? 'Unbekannt'} ${event.count}x`,
           })
         }
         break
       default:
-        console.log('Audit event:', event)
+        console.info('Unbekannter Audit-Event', event)
     }
   }
+
+  useSSE('workflow', (rawEvent) => {
+    if (!isKnownEventPayload(rawEvent)) {
+      return
+    }
+
+    if (isWorkflowEventPayload(rawEvent)) {
+      handleWorkflowEvent(rawEvent)
+    } else if (isAuditEventPayload(rawEvent)) {
+      handleAuditEvent(rawEvent)
+    }
+  })
 }
 
-/**
- * Workflow Replay Hook
- * Can fetch and replay workflow events since a timestamp
- */
-export function useWorkflowReplay() {
-  const replayEvents = async (since: number = 0): Promise<any[]> => {
+interface WorkflowReplayResponse {
+  ok: boolean
+  events?: WorkflowEventPayload[]
+}
+
+export function useWorkflowReplay(): { replayEvents: (since?: number) => Promise<WorkflowEventPayload[]> } {
+  const replayEvents = async (since = 0): Promise<WorkflowEventPayload[]> => {
     try {
       const response = await fetch(`/api/workflow/replay/workflow?since=${since}`)
-      const data = await response.json()
+      const data = (await response.json()) as WorkflowReplayResponse
 
       if (data.ok) {
-        return data.events || []
+        return data.events ?? []
       }
 
-      console.warn('Replay failed:', data)
+      console.warn('Workflow replay failed:', data)
       return []
     } catch (error) {
       console.error('Error replaying workflow events:', error)

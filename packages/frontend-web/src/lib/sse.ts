@@ -1,54 +1,81 @@
 import { useEffect, useRef } from 'react'
 
-export function useSSE(
-  channel: string,
-  onMessage: (data: unknown) => void,
-  opts?: {
-    onStatus?: (s: 'open' | 'closed' | 'error') => void
-    heartbeatMs?: number
-  }
-) {
+type SSEStatus = 'open' | 'closed' | 'error'
+
+const RECONNECT_DELAY_MS = 1_500
+
+interface UseSSEOptions {
+  onStatus?: (status: SSEStatus) => void
+  heartbeatMs?: number
+}
+
+export function useSSE(channel: string, onMessage: (data: unknown) => void, opts?: UseSSEOptions): void {
   const handler = useRef(onMessage)
   handler.current = onMessage
 
   useEffect(() => {
-    let es: EventSource | null = null
-    let timer: any = null
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    let eventSource: EventSource | null = null
+    let reconnectTimeout: number | undefined
+    let heartbeatInterval: number | undefined
     let stopped = false
 
-    function connect() {
-      if (stopped) return
-      es = new EventSource(`/api/stream/${channel}`)
+    const clearReconnect = (): void => {
+      if (reconnectTimeout !== undefined) {
+        window.clearTimeout(reconnectTimeout)
+        reconnectTimeout = undefined
+      }
+    }
+
+    const clearHeartbeat = (): void => {
+      if (heartbeatInterval !== undefined) {
+        window.clearInterval(heartbeatInterval)
+        heartbeatInterval = undefined
+      }
+    }
+
+    const connect = (): void => {
+      if (stopped) {
+        return
+      }
+
+      eventSource = new EventSource(`/api/stream/${channel}`)
       opts?.onStatus?.('open')
-      es.onmessage = (e) => {
+
+      eventSource.onmessage = (event): void => {
         try {
-          handler.current(JSON.parse(e.data))
+          handler.current(JSON.parse(event.data))
         } catch {
           // ignore parse errors
         }
       }
-      es.onerror = () => {
+
+      eventSource.onerror = (): void => {
         opts?.onStatus?.('error')
-        es?.close()
-        es = null
-        // Reconnect with backoff
-        timer = setTimeout(connect, 1500)
+        eventSource?.close()
+        eventSource = null
+        clearReconnect()
+        reconnectTimeout = window.setTimeout(connect, RECONNECT_DELAY_MS)
       }
     }
 
     connect()
 
-    if (opts?.heartbeatMs && opts.heartbeatMs > 0) {
-      const hb = setInterval(() => {
-        // no-op: browser EventSource keeps alive; server may send comments
+    if (typeof opts?.heartbeatMs === 'number' && opts.heartbeatMs > 0) {
+      heartbeatInterval = window.setInterval((): void => {
+        // browser EventSource keeps the connection alive; hook reserved for future metrics
       }, opts.heartbeatMs)
-      timer = hb
     }
 
     return () => {
       stopped = true
-      if (timer) clearInterval(timer)
-      es?.close()
+      clearReconnect()
+      clearHeartbeat()
+      eventSource?.close()
+      opts?.onStatus?.('closed')
     }
-  }, [channel])
+  }, [channel, opts?.heartbeatMs, opts?.onStatus])
 }

@@ -26,12 +26,14 @@ export interface AuthConfig {
 // Auth-Config aus ENV
 const config: AuthConfig = {
   oidc: {
-    discoveryUrl: import.meta.env.VITE_OIDC_DISCOVERY_URL || '',
-    clientId: import.meta.env.VITE_OIDC_CLIENT_ID || '',
-    redirectUri: import.meta.env.VITE_OIDC_REDIRECT_URI || `${window.location.origin}/callback`,
+    discoveryUrl: import.meta.env.VITE_OIDC_DISCOVERY_URL ?? '',
+    clientId: import.meta.env.VITE_OIDC_CLIENT_ID ?? '',
+    redirectUri: import.meta.env.VITE_OIDC_REDIRECT_URI ?? `${window.location.origin}/callback`,
     scopes: ['openid', 'profile', 'email', 'offline_access'],
   },
 }
+
+const RANDOM_STRING_LENGTH = 32
 
 class AuthService {
   private accessToken: string | null = null
@@ -43,7 +45,7 @@ class AuthService {
     this.accessToken = localStorage.getItem('access_token')
     this.refreshToken = localStorage.getItem('refresh_token')
     
-    if (this.accessToken) {
+    if (this.accessToken != null) {
       try {
         this.user = jwtDecode<User>(this.accessToken)
         
@@ -61,7 +63,7 @@ class AuthService {
    * Startet OIDC-Login-Flow
    */
   async login(): Promise<void> {
-    if (!config.oidc.discoveryUrl) {
+    if (config.oidc.discoveryUrl.length === 0) {
       throw new Error('OIDC not configured. Set VITE_OIDC_DISCOVERY_URL')
     }
 
@@ -70,8 +72,8 @@ class AuthService {
     const discovery = await discoveryResponse.json()
 
     // Generate state & nonce
-    const state = this.generateRandomString(32)
-    const nonce = this.generateRandomString(32)
+    const state = this.generateRandomString(RANDOM_STRING_LENGTH)
+    const nonce = this.generateRandomString(RANDOM_STRING_LENGTH)
 
     sessionStorage.setItem('auth_state', state)
     sessionStorage.setItem('auth_nonce', nonce)
@@ -138,10 +140,10 @@ class AuthService {
    */
   private setTokens(accessToken: string, refreshToken?: string): void {
     this.accessToken = accessToken
-    this.refreshToken = refreshToken || null
+    this.refreshToken = refreshToken ?? null
 
     localStorage.setItem('access_token', accessToken)
-    if (refreshToken) {
+    if (typeof refreshToken === 'string') {
       localStorage.setItem('refresh_token', refreshToken)
     }
 
@@ -158,7 +160,7 @@ class AuthService {
    * Refresh Access-Token mit Refresh-Token
    */
   async refreshAccessToken(): Promise<boolean> {
-    if (!this.refreshToken) {
+    if (this.refreshToken == null) {
       return false
     }
 
@@ -232,14 +234,16 @@ class AuthService {
    * Prüft ob User bestimmte Scope hat
    */
   hasScope(scope: string): boolean {
-    return this.user?.scopes?.includes(scope) || false
+    return (this.user?.scopes?.includes(scope)) ?? false
   }
 
   /**
    * Prüft ob User bestimmte Rolle hat
    */
   hasRole(role: string): boolean {
-    return this.user?.roles?.includes(role) || this.user?.scopes?.includes('admin:all') || false
+    const hasRole = (this.user?.roles?.includes(role)) ?? false
+    const hasAdminScope = (this.user?.scopes?.includes('admin:all')) ?? false
+    return hasRole || hasAdminScope
   }
 
   /**

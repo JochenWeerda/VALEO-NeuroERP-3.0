@@ -1,36 +1,36 @@
 /**
  * Ask VALEO - AI-Copilot-Komponente
  * Inspiriert von SAP Joule Design Guidelines
- * 
+ *
  * Design-Prinzipien (SAP Joule adaptiert):
  * 1. Explainable AI - Transparenz bei Empfehlungen
  * 2. Kontextuelle Integration - Mitlaufende Action Bar
  * 3. Grounding - Nur auf verfügbare Daten
  * 4. Progressive Disclosure - Erst einfach, dann komplex
  * 5. Feedback-Loop - Laden, Erfolg, Fehler klar kommunizieren
- * 
+ *
  * MCP-Integration: Phase 3 ready
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import {
-  Sparkles,
-  Send,
-  Loader2,
   AlertCircle,
   CheckCircle,
   Lightbulb,
+  Loader2,
+  Send,
+  Sparkles,
   Wand2,
 } from 'lucide-react';
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata';
@@ -60,15 +60,14 @@ export const askValeoMCP = createMCPMetadata('AskValeo', 'dialog', {
 interface AskValeoProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  // Context vom aktuellen Page
   pageContext?: {
-    domain: string;              // 'sales', 'inventory', etc.
-    currentDocument?: string;    // 'SO-00001'
-    availableActions?: string[]; // ['create', 'edit', 'post']
+    domain: string;
+    currentDocument?: string;
+    availableActions?: string[];
   };
 }
 
-interface AISuggestion {
+export interface AISuggestion {
   type: 'action' | 'info' | 'warning' | 'tip';
   title: string;
   description: string;
@@ -76,57 +75,70 @@ interface AISuggestion {
   actionLabel?: string;
 }
 
-export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps) {
-  const [prompt, setPrompt] = useState('');
-  const [loading, setLoading] = useState(false);
+export interface AskValeoRuntimeContext {
+  domain?: string;
+  currentDocument?: string;
+  [key: string]: unknown;
+}
+
+type AskValeoPageContext = AskValeoProps['pageContext'];
+
+const DEFAULT_DOMAIN = 'sales';
+const AI_RESPONSE_DELAY_MS = 1_500;
+const QUICK_ACTIONS: readonly string[] = [
+  'Wie erstelle ich einen Auftrag?',
+  'Zeige offene Rechnungen',
+  'Welche Artikel sind unter Mindestbestand?',
+  'Erkläre das Policy-Framework',
+];
+
+const DOMAIN_SUGGESTIONS: Record<string, AISuggestion[]> = {
+  sales: [
+    {
+      type: 'action',
+      title: 'Verkaufsauftrag erstellen',
+      description: 'Erstelle einen neuen Auftrag für den zuletzt verwendeten Kunden',
+      actionLabel: 'Erstellen',
+      action: () => console.info('MCP: create-order suggestion triggered'),
+    },
+    {
+      type: 'tip',
+      title: 'Offene Aufträge prüfen',
+      description: 'Du hast 3 Aufträge über Lieferdatum. Soll ich diese anzeigen?',
+      actionLabel: 'Anzeigen',
+    },
+  ],
+  inventory: [
+    {
+      type: 'warning',
+      title: 'Bestandswarnung',
+      description: '2 Artikel unter Mindestbestand. Nachbestellung empfohlen.',
+      actionLabel: 'Nachbestellen',
+    },
+  ],
+};
+
+export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps): JSX.Element {
+  const [prompt, setPrompt] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
   const [response, setResponse] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Kontextuelle Vorschläge basierend auf Page
+  const domainKey = useMemo<string>(() => pageContext?.domain ?? DEFAULT_DOMAIN, [pageContext?.domain]);
+
   useEffect(() => {
-    if (open && pageContext) {
-      generateContextualSuggestions(pageContext);
+    if (!open) {
+      return;
     }
-  }, [open, pageContext]);
+    setSuggestions(DOMAIN_SUGGESTIONS[domainKey] ?? []);
+  }, [domainKey, open]);
 
-  const generateContextualSuggestions = (context: typeof pageContext) => {
-    // Phase 3: Echte MCP-Integration
-    // Aktuell: Mock-Suggestions basierend auf Kontext
-    
-    const domainSuggestions: Record<string, AISuggestion[]> = {
-      sales: [
-        {
-          type: 'action',
-          title: 'Verkaufsauftrag erstellen',
-          description: 'Erstelle einen neuen Auftrag für den zuletzt verwendeten Kunden',
-          actionLabel: 'Erstellen',
-          action: () => console.log('MCP: create-order'),
-        },
-        {
-          type: 'tip',
-          title: 'Offene Aufträge prüfen',
-          description: 'Du hast 3 Aufträge über Lieferdatum. Soll ich diese anzeigen?',
-          actionLabel: 'Anzeigen',
-        },
-      ],
-      inventory: [
-        {
-          type: 'warning',
-          title: 'Bestandswarnung',
-          description: '2 Artikel unter Mindestbestand. Nachbestellung empfohlen.',
-          actionLabel: 'Nachbestellen',
-        },
-      ],
-    };
-
-    setSuggestions(
-      domainSuggestions[context?.domain || 'sales'] || []
-    );
-  };
-
-  const handleSubmit = async () => {
-    if (!prompt.trim()) return;
+  const processPrompt = async (value: string): Promise<void> => {
+    const trimmedPrompt = value.trim();
+    if (trimmedPrompt.length === 0) {
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -134,17 +146,22 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps) {
 
     try {
       // Phase 3: Echte MCP-Browser-Integration
-      // const result = await mcp.askQuestion(prompt, pageContext);
-      
+      // const result = await mcp.askQuestion(trimmedPrompt, pageContext);
+
       // Aktuell: Mock-Response
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, AI_RESPONSE_DELAY_MS));
+
       setResponse(
-        `🤖 VALEO-Antwort (Phase 3 Simulation):\n\n` +
-        `Deine Frage: "${prompt}"\n\n` +
-        `Kontext: ${pageContext?.domain || 'unknown'}\n\n` +
-        `In Phase 3 wird hier die echte AI-Antwort via MCP-Browser erscheinen. ` +
-        `Die Metadaten sind bereits vorbereitet!`
+        [
+          '💡 VALEO-Antwort (Phase 3 Simulation):',
+          '',
+          `Deine Frage: "${trimmedPrompt}"`,
+          '',
+          `Kontext: ${pageContext?.domain ?? 'unbekannt'}`,
+          '',
+          'In Phase 3 wird hier die echte AI-Antwort via MCP-Browser erscheinen.',
+          'Die Metadaten sind bereits vorbereitet!',
+        ].join('\n'),
       );
     } catch (err) {
       setError('Fehler bei der AI-Anfrage. Bitte versuche es erneut.');
@@ -153,24 +170,27 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps) {
     }
   };
 
-  // SAP Joule-Principle: Quick-Actions (häufige Fragen)
-  const quickActions = [
-    'Wie erstelle ich einen Auftrag?',
-    'Zeige offene Rechnungen',
-    'Welche Artikel sind unter Mindestbestand?',
-    'Erkläre das Policy-Framework',
-  ];
+  const handleSubmit = async (): Promise<void> => {
+    await processPrompt(prompt);
+  };
+
+  const handleQuickAction = (question: string): void => {
+    setPrompt(question);
+    void processPrompt(question);
+  };
+
+  const hasResponse = response !== null;
+  const hasError = error !== null;
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onOpenChange={onOpenChange}
-      // MCP-Metadaten
       aria-labelledby="ask-valeo-title"
       data-mcp-component="ask-valeo"
       data-mcp-page-context={pageContext?.domain}
     >
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle id="ask-valeo-title" className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -181,105 +201,79 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps) {
           </DialogTitle>
           <DialogDescription>
             Stelle Fragen zu VALEO-ERP oder erhalte Vorschläge für deine aktuelle Aufgabe.
-            {pageContext && (
-              <span className="block mt-1 text-xs">
-                📍 Kontext: <strong>{pageContext.domain}</strong>
-                {pageContext.currentDocument && ` | Dokument: ${pageContext.currentDocument}`}
+            {pageContext != null && (
+              <span className="mt-1 block text-xs">
+                🔍 Kontext: <strong>{pageContext.domain}</strong>
+                {typeof pageContext.currentDocument === 'string' && pageContext.currentDocument.length > 0
+                  ? ` | Dokument: ${pageContext.currentDocument}`
+                  : ''}
               </span>
             )}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Prompt-Input (SAP Joule Pattern) */}
           <div className="relative">
             <Textarea
               placeholder="z.B. 'Wie erstelle ich einen Verkaufsauftrag?' oder 'Zeige Artikel unter Mindestbestand'"
               value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && e.ctrlKey) {
-                  handleSubmit();
+              onChange={(event) => setPrompt(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+                  event.preventDefault();
+                  void processPrompt(event.currentTarget.value);
                 }
               }}
-              className="min-h-24 pr-12"
-              aria-label="AI-Prompt eingeben"
-              data-mcp-input="ai-prompt"
+              aria-label="Frage an Ask VALEO"
+              rows={4}
             />
             <Button
-              size="icon"
-              onClick={handleSubmit}
-              disabled={!prompt.trim() || loading}
-              className="absolute bottom-2 right-2"
-              aria-label="Frage senden"
+              variant="ghost"
+              size="sm"
+              className="absolute bottom-3 right-3 gap-2"
+              onClick={() => {
+                setPrompt('Welche Aufgaben stehen als nächstes an?');
+              }}
             >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
+              <Lightbulb className="h-4 w-4" />
+              Inspiration
             </Button>
           </div>
 
-          {/* Quick-Actions (SAP Joule: häufige Fragen) */}
-          <div>
-            <p className="text-xs text-muted-foreground mb-2">
-              💡 Schnell-Aktionen:
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {quickActions.map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPrompt(action)}
-                  className="text-xs"
-                  data-mcp-quick-action={idx}
-                >
-                  <Lightbulb className="mr-1 h-3 w-3" />
-                  {action}
-                </Button>
-              ))}
-            </div>
+          <div className="grid grid-cols-2 gap-2">
+            {QUICK_ACTIONS.map((action) => (
+              <Button
+                key={action}
+                variant="secondary"
+                size="sm"
+                className="justify-start gap-2"
+                onClick={() => handleQuickAction(action)}
+              >
+                <Wand2 className="h-4 w-4" />
+                {action}
+              </Button>
+            ))}
           </div>
 
-          {/* Kontextuelle Vorschläge (SAP Joule: Context-Aware) */}
           {suggestions.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-sm font-semibold flex items-center gap-2">
-                <Wand2 className="h-4 w-4" />
-                Vorschläge für dich:
-              </p>
-              {suggestions.map((sug, idx) => (
+            <div className="space-y-3 rounded-md border border-dashed bg-muted/50 p-3">
+              <p className="text-xs font-semibold uppercase text-muted-foreground">Kontextuelle Vorschläge</p>
+              {suggestions.map((sug) => (
                 <div
-                  key={idx}
-                  className={`p-3 rounded-md border ${
-                    sug.type === 'warning'
-                      ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-950/20'
-                      : 'bg-muted'
-                  }`}
-                  data-mcp-suggestion-type={sug.type}
+                  key={`${sug.title}-${sug.type}`}
+                  className="rounded-md border border-border bg-background p-3 shadow-sm"
                 >
                   <div className="flex items-start gap-2">
-                    {sug.type === 'warning' && (
-                      <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
-                    )}
-                    {sug.type === 'action' && (
-                      <Sparkles className="h-4 w-4 text-primary mt-0.5" />
-                    )}
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{sug.title}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {sug.description}
-                      </p>
+                    <Badge variant={sug.type === 'warning' ? 'destructive' : 'outline'} className="mt-0.5">
+                      {sug.type.toUpperCase()}
+                    </Badge>
+                    <div className="flex-1 space-y-1">
+                      <p className="font-medium">{sug.title}</p>
+                      <p className="text-sm text-muted-foreground">{sug.description}</p>
                     </div>
                     {sug.action && (
-                      <Button
-                        size="sm"
-                        variant={sug.type === 'warning' ? 'destructive' : 'default'}
-                        onClick={sug.action}
-                      >
-                        {sug.actionLabel || 'Ausführen'}
+                      <Button variant={sug.type === 'warning' ? 'destructive' : 'default'} onClick={sug.action}>
+                        {sug.actionLabel ?? 'Ausführen'}
                       </Button>
                     )}
                   </div>
@@ -288,29 +282,26 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps) {
             </div>
           )}
 
-          {/* AI-Response (SAP Joule: Explainable) */}
-          {response && (
-            <div className="p-4 rounded-md bg-primary/10 border border-primary/20">
+          {hasResponse && (
+            <div className="rounded-md border border-primary/20 bg-primary/10 p-4">
               <div className="flex items-start gap-2">
-                <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
                 <div className="flex-1">
-                  <p className="text-sm whitespace-pre-wrap">{response}</p>
+                  <p className="whitespace-pre-wrap text-sm">{response}</p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Error-Feedback (SAP Joule: Clear Error-Handling) */}
-          {error && (
-            <div className="p-4 rounded-md bg-destructive/10 border border-destructive/20">
+          {hasError && (
+            <div className="rounded-md border border-destructive/20 bg-destructive/10 p-4">
               <div className="flex items-start gap-2">
-                <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
+                <AlertCircle className="mt-0.5 h-5 w-5 text-destructive" />
                 <p className="text-sm">{error}</p>
               </div>
             </div>
           )}
 
-          {/* Loading-State (SAP Joule: Feedback) */}
           {loading && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -318,27 +309,18 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps) {
             </div>
           )}
 
-          {/* Phase 3 Hinweis */}
-          <div className="p-3 rounded-md bg-muted/50 border border-dashed">
-            <p className="text-xs text-muted-foreground">
-              <strong>ℹ️  Phase 3 Preview:</strong> Diese Komponente ist bereit für MCP-Browser-Integration.
-              Alle Metadaten (Intent, Context, Actions) sind vorbereitet.
-              In Phase 3 wird hier echte AI via @modelcontext/browser-adapter integriert.
-            </p>
+          <div className="rounded-md border border-dashed bg-muted/50 p-3 text-xs text-muted-foreground">
+            <strong>🚀 Phase 3 Preview:</strong> Diese Komponente ist bereit für MCP-Browser-Integration.
+            Alle Metadaten (Intent, Context, Actions) sind vorbereitet. In Phase 3 wird hier echte AI via
+            @modelcontext/browser-adapter integriert.
           </div>
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Schließen
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!prompt.trim() || loading}
-          >
+          <Button onClick={handleSubmit} disabled={prompt.trim().length === 0 || loading}>
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -370,7 +352,7 @@ interface JouleActionBarProps {
   };
 }
 
-export function JouleActionBar({ onAskClick, pageContext }: JouleActionBarProps) {
+export function JouleActionBar({ onAskClick, pageContext }: JouleActionBarProps): JSX.Element {
   return (
     <div
       className="fixed bottom-6 right-6 z-50"
@@ -380,16 +362,13 @@ export function JouleActionBar({ onAskClick, pageContext }: JouleActionBarProps)
       <Button
         size="lg"
         onClick={onAskClick}
-        className="rounded-full shadow-lg hover:shadow-xl transition-shadow"
+        className="flex items-center justify-center gap-2 rounded-full shadow-lg transition-shadow hover:shadow-xl"
         aria-label="Ask VALEO AI Assistant"
       >
-        <Sparkles className="mr-2 h-5 w-5" />
+        <Sparkles className="h-5 w-5" />
         Ask VALEO
-        {pageContext?.hasSuggestions && (
-          <Badge 
-            variant="destructive" 
-            className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center"
-          >
+        {pageContext?.hasSuggestions === true && (
+          <Badge variant="destructive" className="ml-2 flex h-5 w-5 items-center justify-center rounded-full p-0">
             !
           </Badge>
         )}
@@ -400,20 +379,20 @@ export function JouleActionBar({ onAskClick, pageContext }: JouleActionBarProps)
 
 /**
  * Phase 3: MCP-Integration-Hooks
- * 
+ *
  * Diese werden in Phase 3 implementiert:
  */
 
-// Hook für AI-Fragen (Phase 3)
-export function useAskValeo(context: any) {
-  // const mcp = useMCP();
-  
-  const ask = async (question: string) => {
+export function useAskValeo(_context: AskValeoRuntimeContext): {
+  ask: (question: string) => Promise<{ answer: string; suggestions: AISuggestion[] }>
+  getSuggestions: () => Promise<AISuggestion[]>
+} {
+  const ask = async (_question: string): Promise<{ answer: string; suggestions: AISuggestion[] }> => {
     // return await mcp.ask(question, context);
     return { answer: 'Phase 3 Placeholder', suggestions: [] };
   };
 
-  const getSuggestions = async () => {
+  const getSuggestions = async (): Promise<AISuggestion[]> => {
     // return await mcp.getSuggestions(context);
     return [];
   };
@@ -421,18 +400,20 @@ export function useAskValeo(context: any) {
   return { ask, getSuggestions };
 }
 
-// Hook für kontextuelle Vorschläge (Phase 3)
-export function useContextualSuggestions(pageContext: any) {
+export function useContextualSuggestions(pageContext: AskValeoPageContext): AISuggestion[] {
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
 
   useEffect(() => {
     // Phase 3: Echte MCP-Abfrage
     // const result = await mcp.getContextualSuggestions(pageContext);
-    
+
     // Aktuell: Mock
-    setSuggestions([]);
+    if (pageContext) {
+      setSuggestions(DOMAIN_SUGGESTIONS[pageContext.domain] ?? []);
+    } else {
+      setSuggestions([]);
+    }
   }, [pageContext]);
 
   return suggestions;
 }
-

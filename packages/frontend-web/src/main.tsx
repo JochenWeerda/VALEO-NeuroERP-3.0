@@ -1,56 +1,55 @@
-import React from 'react'
+import { StrictMode, useMemo } from 'react'
 import ReactDOM from 'react-dom/client'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import AppLayout from './layouts/DashboardLayout'
-import AnalyticsDashboard from './pages/analytics'
-import ContractsPanel from './pages/contracts'
-import PricingPanel from './pages/pricing.tsx'
-import InventoryPanel from './pages/inventory.tsx'
-import WeighingPanel from './pages/weighing.tsx'
-import SalesPanel from './pages/sales.tsx'
-import DocumentPanel from './pages/document.tsx'
-import PolicyManagerPage from './pages/policy-manager'
-import SalesOrderEditorPage from './pages/sales/order-editor'
-import SalesDeliveryEditorPage from './pages/sales/delivery-editor'
-import SalesInvoiceEditorPage from './pages/sales/invoice-editor'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { RouterProvider } from 'react-router-dom'
+import { FeatureFlagProvider } from '@/app/providers/FeatureFlagProvider'
+import { SSEProvider } from '@/app/providers/SSEProvider'
+import { router } from '@/app/routes'
 import { ToastProvider } from '@/components/ui/toast-provider'
+import { auth } from '@/lib/auth'
+import { createQueryClient } from '@/lib/query'
+import { useFeature } from '@/hooks/useFeature'
 import './index.css'
 
-const queryClient = new QueryClient()
+const queryClient = createQueryClient()
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <AppLayout />,
-    children: [
-      { index: true, element: <AnalyticsDashboard /> },
-      { path: 'analytics', element: <AnalyticsDashboard /> },
-      { path: 'contracts', element: <ContractsPanel /> },
-      { path: 'pricing', element: <PricingPanel /> },
-      { path: 'inventory', element: <InventoryPanel /> },
-      { path: 'weighing', element: <WeighingPanel /> },
-      { path: 'sales', element: <SalesPanel /> },
-      { path: 'document', element: <DocumentPanel /> },
-      { path: 'policies', element: <PolicyManagerPage /> },
-      { path: 'sales/order', element: <SalesOrderEditorPage /> },
-      { path: 'sales/delivery', element: <SalesDeliveryEditorPage /> },
-      { path: 'sales/invoice', element: <SalesInvoiceEditorPage /> },
-    ],
-  },
-])
+const resolveSseToken = (): string | undefined => {
+  return auth.getAccessToken() ?? undefined
+}
 
-if (typeof document !== 'undefined') {
-  const rootElement = document.getElementById('root')
-  if (rootElement) {
-    ReactDOM.createRoot(rootElement).render(
-      <React.StrictMode>
-        <QueryClientProvider client={queryClient}>
-          <ToastProvider>
-            <RouterProvider router={router} />
-          </ToastProvider>
-        </QueryClientProvider>
-      </React.StrictMode>,
-    )
-  }
+const sseUrl = (import.meta.env as Record<string, string | undefined>).VITE_MCP_EVENTS_URL
+
+function Application(): JSX.Element {
+  const sseEnabled = useFeature('sse')
+
+  const providerConfig = useMemo(
+    () => ({
+      url: sseUrl,
+      enabled: sseEnabled,
+      withCredentials: true,
+    }),
+    [sseEnabled],
+  )
+
+  return (
+    <SSEProvider {...providerConfig} tokenResolver={resolveSseToken}>
+      <ToastProvider>
+        <RouterProvider router={router} />
+      </ToastProvider>
+    </SSEProvider>
+  )
+}
+
+const rootElement = document.getElementById('root')
+
+if (rootElement instanceof HTMLElement) {
+  ReactDOM.createRoot(rootElement).render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <FeatureFlagProvider>
+          <Application />
+        </FeatureFlagProvider>
+      </QueryClientProvider>
+    </StrictMode>,
+  )
 }

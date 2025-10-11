@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, CheckCircle2, ExternalLink } from 'lucide-react'
+import { CheckCircle2, ExternalLink, Loader2 } from 'lucide-react'
 
-type BootstrapResult = { 
+type BootstrapResult = {
   ok: boolean
   created?: number
   updated?: number
@@ -27,166 +27,200 @@ type DmsStatus = {
   message?: string
 }
 
-export default function DmsIntegrationCard() {
+type TestConnectionResult = {
+  ok: boolean
+  error?: string
+}
+
+type TestState = 'idle' | 'ok' | 'fail'
+
+const DEFAULT_BASE_URL = 'http://localhost:8010'
+const UNKNOWN_ERROR_MESSAGE = 'Unbekannter Fehler'
+const BOOTSTRAP_SUCCESS_TITLE = 'Mayan-DMS integriert'
+const BOOTSTRAP_FAILURE_TITLE = 'Bootstrap-Fehler'
+const VALIDATION_FAILURE_TITLE = 'Validierung fehlgeschlagen'
+const VALIDATION_FAILURE_DESCRIPTION = 'Bitte Base-URL und Token eingeben'
+
+const isNonEmptyString = (value: unknown): value is string => {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+const formatBootstrapSummary = (result: BootstrapResult): string => {
+  const docTypes = typeof result.document_types === 'number' ? result.document_types : 0
+  const metadataTypes = typeof result.metadata_types === 'number' ? result.metadata_types : 0
+  const created = typeof result.created === 'number' ? result.created : 0
+  const updated = typeof result.updated === 'number' ? result.updated : 0
+
+  return `${docTypes} Dokumenttypen, ${metadataTypes} Metadaten, ${created} Bindings, ${updated} aktualisiert`
+}
+
+const openExternal = (target?: string): void => {
+  if (isNonEmptyString(target)) {
+    window.open(target, '_blank', 'noopener')
+  }
+}
+
+export default function DmsIntegrationCard(): JSX.Element {
   const { toast } = useToast()
-  const [open, setOpen] = useState(false)
-  const [base, setBase] = useState('http://localhost:8010')
-  const [token, setToken] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [tested, setTested] = useState<'idle' | 'ok' | 'fail'>('idle')
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false)
+  const [baseUrl, setBaseUrl] = useState<string>(DEFAULT_BASE_URL)
+  const [token, setToken] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
+  const [testState, setTestState] = useState<TestState>('idle')
   const [status, setStatus] = useState<DmsStatus | null>(null)
 
-  useEffect(() => {
-    loadStatus()
+  const hasCredentials = useMemo(() => isNonEmptyString(baseUrl) && isNonEmptyString(token), [baseUrl, token])
+  const isConfigured = status?.configured === true
+  const configuredBaseUrl = isConfigured && isNonEmptyString(status?.base) ? status.base : undefined
+
+  const loadStatus = useCallback(async (): Promise<void> => {
+    try {
+      const response = await fetch('/api/admin/dms/status')
+      const data = (await response.json()) as DmsStatus
+
+      setStatus(data)
+      if (isNonEmptyString(data.base)) {
+        setBaseUrl(data.base)
+      }
+    } catch (error) {
+      console.error('Failed to load DMS status:', error)
+    }
   }, [])
 
-  async function loadStatus() {
-    try {
-      const r = await fetch('/api/admin/dms/status')
-      const data: DmsStatus = await r.json()
-      setStatus(data)
-      if (data.base) {
-        setBase(data.base)
-      }
-    } catch (e) {
-      console.error('Failed to load DMS status:', e)
-    }
+  useEffect(() => {
+    void loadStatus()
+  }, [loadStatus])
+
+  const notifyValidationFailure = (): void => {
+    toast({
+      title: VALIDATION_FAILURE_TITLE,
+      description: VALIDATION_FAILURE_DESCRIPTION,
+      variant: 'destructive',
+    })
   }
 
-  async function testConnection() {
-    if (!base || !token) {
-      toast({
-        title: 'Validierung fehlgeschlagen',
-        description: 'Bitte Base-URL und Token eingeben',
-        variant: 'destructive',
-      })
+  const testConnection = useCallback(async (): Promise<void> => {
+    if (!hasCredentials) {
+      notifyValidationFailure()
       return
     }
 
     setLoading(true)
     try {
-      const r = await fetch('/api/admin/dms/test', {
+      const response = await fetch('/api/admin/dms/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ base, token }),
+        body: JSON.stringify({ base: baseUrl, token }),
       })
-      const j = await r.json()
-      setTested(j.ok ? 'ok' : 'fail')
-      
+
+      const payload = (await response.json()) as TestConnectionResult
+      const nextState: TestState = payload.ok ? 'ok' : 'fail'
+      setTestState(nextState)
+
       toast({
-        title: j.ok ? '✅ Verbindung OK' : '❌ Fehlgeschlagen',
-        description: j.ok ? 'Mayan-API erreichbar.' : (j.error ?? 'Unbekannter Fehler'),
-        variant: j.ok ? 'default' : 'destructive',
+        title: payload.ok ? 'Verbindung getestet' : 'Verbindung fehlgeschlagen',
+        description: payload.ok ? 'Die Mayan-API ist erreichbar.' : (payload.error ?? UNKNOWN_ERROR_MESSAGE),
+        variant: payload.ok ? 'default' : 'destructive',
       })
-    } catch (e) {
-      setTested('fail')
+    } catch (error) {
+      setTestState('fail')
       toast({
         title: 'Verbindungsfehler',
-        description: e instanceof Error ? e.message : 'Unbekannter Fehler',
+        description: error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE,
         variant: 'destructive',
       })
     } finally {
       setLoading(false)
     }
-  }
+  }, [baseUrl, hasCredentials, toast, token])
 
-  async function bootstrap() {
-    if (!base || !token) {
-      toast({
-        title: 'Validierung fehlgeschlagen',
-        description: 'Bitte Base-URL und Token eingeben',
-        variant: 'destructive',
-      })
+  const bootstrap = useCallback(async (): Promise<void> => {
+    if (!hasCredentials) {
+      notifyValidationFailure()
       return
     }
 
     setLoading(true)
     try {
-      const r = await fetch('/api/admin/dms/bootstrap', {
+      const response = await fetch('/api/admin/dms/bootstrap', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ base, token }),
+        body: JSON.stringify({ base: baseUrl, token }),
       })
-      const j: BootstrapResult = await r.json()
-      
-      if (j.ok) {
+
+      const payload = (await response.json()) as BootstrapResult
+      if (payload.ok) {
         toast({
-          title: '✅ Mayan-DMS integriert',
-          description: `${j.document_types} DocTypes, ${j.metadata_types} Metadata, ${j.created} Bindings`,
+          title: BOOTSTRAP_SUCCESS_TITLE,
+          description: formatBootstrapSummary(payload),
+          variant: 'default',
         })
-        setOpen(false)
-        loadStatus()  // Reload status
-      } else {
-        toast({
-          title: '❌ Bootstrap-Fehler',
-          description: j.message ?? 'Bitte Logs prüfen',
-          variant: 'destructive',
-        })
+        setDialogOpen(false)
+        setTestState('ok')
+        await loadStatus()
+        return
       }
-    } catch (e) {
+
       toast({
-        title: 'Bootstrap-Fehler',
-        description: e instanceof Error ? e.message : 'Unbekannter Fehler',
+        title: BOOTSTRAP_FAILURE_TITLE,
+        description: payload.message ?? UNKNOWN_ERROR_MESSAGE,
+        variant: 'destructive',
+      })
+    } catch (error) {
+      toast({
+        title: BOOTSTRAP_FAILURE_TITLE,
+        description: error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE,
         variant: 'destructive',
       })
     } finally {
       setLoading(false)
     }
-  }
+  }, [baseUrl, hasCredentials, loadStatus, toast, token])
 
   return (
-    <Card className="p-6 space-y-4">
-      <CardHeader className="p-0">
-        <div className="flex items-start justify-between">
+    <Card className="border border-dashed">
+      <CardHeader>
+        <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <CardTitle className="text-xl">Mayan-DMS integrieren</CardTitle>
-            <CardDescription>
-              Zentrale Dokumentenablage mit OCR, Versionierung & Volltext. 
-              Wird nahtlos mit VALEO NeuroERP verbunden.
-            </CardDescription>
+            <CardTitle>Mayan DMS</CardTitle>
+            <CardDescription>DMS-Integration fuellt Inbox, Dokument-Metadaten und Workflow.</CardDescription>
           </div>
-          {status?.configured && (
-            <Badge variant="default" className="bg-green-600">
-              <CheckCircle2 className="h-3 w-3 mr-1" />
-              Verbunden
+          {isConfigured && (
+            <Badge variant="default" className="gap-1">
+              <CheckCircle2 className="h-4 w-4" />
+              Aktiv
             </Badge>
           )}
         </div>
       </CardHeader>
 
       <CardContent className="p-0 space-y-4">
-        {status?.configured ? (
-          <div className="space-y-3">
+        {isConfigured ? (
+          <div className="space-y-3 p-6">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>Base-URL:</span>
-              <code className="bg-gray-100 px-2 py-1 rounded text-xs">{status.base}</code>
+              <code className="bg-gray-100 px-2 py-1 rounded text-xs">{configuredBaseUrl}</code>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>Document Types:</span>
-              <Badge variant="outline">{status.document_types}</Badge>
+              <Badge variant="outline">{status?.document_types ?? 0}</Badge>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>Metadata Types:</span>
-              <Badge variant="outline">{status.metadata_types}</Badge>
+              <Badge variant="outline">{status?.metadata_types ?? 0}</Badge>
             </div>
             <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => window.open(status.base, '_blank')}
-              >
+              <Button variant="outline" onClick={() => openExternal(configuredBaseUrl)} disabled={!isNonEmptyString(configuredBaseUrl)}>
                 <ExternalLink className="h-4 w-4 mr-2" />
-                Im DMS öffnen
+                Im DMS oeffnen
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => setOpen(true)}
-              >
+              <Button variant="outline" onClick={() => setDialogOpen(true)}>
                 Neu konfigurieren
               </Button>
             </div>
           </div>
         ) : (
-          <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button>Jetzt einrichten</Button>
             </DialogTrigger>
@@ -194,53 +228,56 @@ export default function DmsIntegrationCard() {
               <DialogHeader>
                 <DialogTitle>Mayan-DMS verbinden</DialogTitle>
               </DialogHeader>
-              
+
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
                   <Label htmlFor="base">DMS-Basis-URL</Label>
                   <Input
                     id="base"
-                    value={base}
-                    onChange={(e) => setBase(e.target.value)}
+                    value={baseUrl}
+                    onChange={(event) => setBaseUrl(event.target.value)}
                     placeholder="http://localhost:8010"
                     disabled={loading}
                   />
                   <p className="text-xs text-muted-foreground">
-                    URL zu Ihrer Mayan-DMS-Instanz (inkl. http:// oder https://)
+                    URL zu Ihrer Mayan-DMS-Instanz (inklusive http:// oder https://).
                   </p>
                 </div>
-                
+
                 <div className="grid gap-2">
                   <Label htmlFor="token">API-Token</Label>
                   <Input
                     id="token"
                     type="password"
                     value={token}
-                    onChange={(e) => setToken(e.target.value)}
-                    placeholder="Token aus Mayan-Admin-Panel"
+                    onChange={(event) => setToken(event.target.value)}
+                    placeholder="Token aus dem Mayan-Admin-Panel"
                     disabled={loading}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Erstellen Sie einen API-Token in Mayan unter: Einstellungen → API-Token
+                    Erstellen Sie einen API-Token in Mayan unter Einstellungen -&gt; API-Token.
                   </p>
                 </div>
 
-                {tested !== 'idle' && (
-                  <div className={`p-3 rounded-lg ${tested === 'ok' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-                    <p className={`text-sm font-medium ${tested === 'ok' ? 'text-green-900' : 'text-red-900'}`}>
-                      {tested === 'ok' ? '✅ Verbindung erfolgreich getestet' : '❌ Verbindung fehlgeschlagen'}
+                {testState !== 'idle' && (
+                  <div
+                    className={`p-3 rounded-lg ${
+                      testState === 'ok' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                    }`}
+                  >
+                    <p
+                      className={`text-sm font-medium ${
+                        testState === 'ok' ? 'text-green-900' : 'text-red-900'
+                      }`}
+                    >
+                      {testState === 'ok' ? 'Verbindung erfolgreich getestet' : 'Verbindung fehlgeschlagen'}
                     </p>
                   </div>
                 )}
               </div>
 
               <DialogFooter className="gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={testConnection}
-                  disabled={loading || !token || !base}
-                >
+                <Button type="button" variant="secondary" onClick={() => { void testConnection() }} disabled={loading || !hasCredentials}>
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -249,16 +286,16 @@ export default function DmsIntegrationCard() {
                   ) : (
                     <>
                       Verbindung testen
-                      {tested === 'ok' && ' ✅'}
-                      {tested === 'fail' && ' ❌'}
+                      {testState === 'ok' && ' OK'}
+                      {testState === 'fail' && ' Fehler'}
                     </>
                   )}
                 </Button>
-                
+
                 <Button
                   type="button"
-                  onClick={bootstrap}
-                  disabled={loading || !token || !base || tested !== 'ok'}
+                  onClick={() => { void bootstrap() }}
+                  disabled={loading || !hasCredentials || testState !== 'ok'}
                 >
                   {loading ? (
                     <>
@@ -277,4 +314,3 @@ export default function DmsIntegrationCard() {
     </Card>
   )
 }
-

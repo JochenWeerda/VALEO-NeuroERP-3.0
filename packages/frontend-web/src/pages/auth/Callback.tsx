@@ -1,51 +1,52 @@
-/**
- * OIDC Callback Page
- * Handles redirect from OIDC provider
- */
-
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, XCircle } from 'lucide-react'
 
-export default function CallbackPage() {
+const isNonEmptyString = (value: unknown): value is string => {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+const LOGIN_PATH = '/login'
+
+export default function CallbackPage(): JSX.Element {
   const [searchParams] = useSearchParams()
   const { handleCallback } = useAuth()
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const processCallback = async () => {
-      const code = searchParams.get('code')
-      const state = searchParams.get('state')
+    const processCallback = async (): Promise<void> => {
+      const codeParam = searchParams.get('code')
+      const stateParam = searchParams.get('state')
       const errorParam = searchParams.get('error')
 
-      // Check for error from OIDC provider
-      if (errorParam) {
+      if (isNonEmptyString(errorParam)) {
         setError(`Authentication failed: ${errorParam}`)
         return
       }
 
-      // Validate parameters
-      if (!code || !state) {
+      const code = isNonEmptyString(codeParam) ? codeParam : null
+      const state = isNonEmptyString(stateParam) ? stateParam : null
+
+      if (code == null || state == null) {
         setError('Missing code or state parameter')
         return
       }
 
       try {
         await handleCallback(code, state)
-        // Will redirect to dashboard
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Authentication failed')
+      } catch (callbackError) {
+        setError(callbackError instanceof Error ? callbackError.message : 'Authentication failed')
       }
     }
 
-    processCallback()
-  }, [searchParams, handleCallback])
+    void processCallback()
+  }, [handleCallback, searchParams])
 
-  if (error) {
+  if (error != null) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <Card className="w-full max-w-md border-red-200">
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -56,8 +57,8 @@ export default function CallbackPage() {
           <CardContent>
             <p className="text-sm text-red-600">{error}</p>
             <div className="mt-4">
-              <a href="/login" className="text-sm text-blue-600 hover:underline">
-                Zurück zur Anmeldung
+              <a href={LOGIN_PATH} className="text-sm text-blue-600 hover:underline">
+                Zurueck zur Anmeldung
               </a>
             </div>
           </CardContent>
@@ -67,7 +68,7 @@ export default function CallbackPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardContent className="pt-6">
           <div className="flex flex-col items-center gap-4">
@@ -79,4 +80,3 @@ export default function CallbackPage() {
     </div>
   )
 }
-

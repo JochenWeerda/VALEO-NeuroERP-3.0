@@ -5,8 +5,8 @@
 
 import { ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '@/hooks/useAuth'
 import { Loader2 } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
 
 interface ProtectedRouteProps {
   children: ReactNode
@@ -14,73 +14,64 @@ interface ProtectedRouteProps {
   requiredRoles?: string[]
 }
 
-export function ProtectedRoute({ 
-  children, 
-  requiredScopes = [], 
-  requiredRoles = [] 
-}: ProtectedRouteProps) {
+export function ProtectedRoute({
+  children,
+  requiredScopes = [],
+  requiredRoles = [],
+}: ProtectedRouteProps): JSX.Element | null {
   const { isAuthenticated, loading, hasScope, hasRole, user } = useAuth()
+  const isLoading = loading === true
+  const authenticated = isAuthenticated === true
 
-  // Loading state
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     )
   }
 
-  // Not authenticated → Redirect to login
-  if (!isAuthenticated) {
+  if (!authenticated) {
     return <Navigate to="/login" replace />
   }
 
-  // Check required scopes
   if (requiredScopes.length > 0) {
-    const hasRequiredScope = requiredScopes.some((scope) => hasScope(scope))
-    
+    const hasRequiredScope = requiredScopes.some((scope) => hasScope(scope) === true)
+
     if (!hasRequiredScope) {
       return (
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center space-y-4">
+        <div className="flex h-screen items-center justify-center">
+          <div className="space-y-4 text-center">
             <h1 className="text-2xl font-bold text-red-600">Zugriff verweigert</h1>
             <p className="text-muted-foreground">
               Sie haben nicht die erforderlichen Berechtigungen für diese Seite.
             </p>
-            <p className="text-sm text-muted-foreground">
-              Erforderlich: {requiredScopes.join(' oder ')}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Ihre Scopes: {user?.scopes?.join(', ') || 'keine'}
-            </p>
+            <p className="text-sm text-muted-foreground">Erforderlich: {requiredScopes.join(' oder ')}</p>
+            <p className="text-sm text-muted-foreground">Ihre Scopes: {(user?.scopes ?? []).join(', ') || 'keine'}</p>
           </div>
         </div>
       )
     }
   }
 
-  // Check required roles
   if (requiredRoles.length > 0) {
-    const hasRequiredRole = requiredRoles.some((role) => hasRole(role))
-    
+    const hasRequiredRole = requiredRoles.some((role) => hasRole(role) === true)
+
     if (!hasRequiredRole) {
       return (
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center space-y-4">
+        <div className="flex h-screen items-center justify-center">
+          <div className="space-y-4 text-center">
             <h1 className="text-2xl font-bold text-red-600">Zugriff verweigert</h1>
             <p className="text-muted-foreground">
               Sie haben nicht die erforderliche Rolle für diese Seite.
             </p>
-            <p className="text-sm text-muted-foreground">
-              Erforderlich: {requiredRoles.join(' oder ')}
-            </p>
+            <p className="text-sm text-muted-foreground">Erforderlich: {requiredRoles.join(' oder ')}</p>
           </div>
         </div>
       )
     }
   }
 
-  // Authenticated & authorized → Render children
   return <>{children}</>
 }
 

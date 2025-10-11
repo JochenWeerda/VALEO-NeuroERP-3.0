@@ -1,7 +1,7 @@
 /**
  * Command Palette - Herzstück der modernen Navigation
  * Ersetzt Ribbon-Overload durch beschreibbare Aktionen
- * 
+ *
  * Features:
  * - Ctrl/Cmd+K zum Öffnen
  * - Fuzzy-Search über alle Aktionen
@@ -10,9 +10,8 @@
  * - MCP-Ready für AI-Integration
  */
 
-import { useEffect, useState } from 'react';
+import { type ComponentType, useMemo, useState } from 'react'
 import {
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -20,26 +19,31 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from '@/components/ui/command';
-import { useNavigate } from 'react-router-dom';
-import {
-  FileText,
-  Package,
-  ShoppingCart,
-  Users,
-  Calculator,
-  Settings,
-  Search,
-  HelpCircle,
-} from 'lucide-react';
-import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata';
+} from '@/components/ui/command'
+import { useNavigate } from 'react-router-dom'
+import { Calculator, FileText, HelpCircle, Package, Settings, ShoppingCart, Sprout, Warehouse } from 'lucide-react'
+import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
+import { useFeature } from '@/hooks/useFeature'
 
 interface CommandPaletteProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
-// MCP-Metadaten für Command Palette
+interface PaletteCommand {
+  id: string
+  label: string
+  keywords: string[]
+  icon: ComponentType<{ className?: string }>
+  action: () => void
+  category: string
+  mcp?: {
+    intent: string
+    businessDomain: string
+    requiredScopes?: string[]
+  }
+}
+
 export const commandPaletteMCP = createMCPMetadata('CommandPalette', 'navigation', {
   accessibility: {
     role: 'dialog',
@@ -53,43 +57,22 @@ export const commandPaletteMCP = createMCPMetadata('CommandPalette', 'navigation
     businessDomain: 'core',
   },
   mcpHints: {
-    autoFillable: true,       // AI kann Suchbegriff vorschlagen
-    explainable: true,         // AI kann verfügbare Commands erklären
+    autoFillable: true,
+    explainable: true,
     testable: true,
-    contextAware: true,        // Kontext-abhängige Vorschläge
+    contextAware: true,
   },
-});
+})
 
-// Command-Registry (MCP-ready)
-interface Command {
-  id: string;
-  label: string;
-  keywords: string[];
-  icon: React.ComponentType<{ className?: string }>;
-  action: () => void;
-  category: string;
-  // MCP-Metadaten
-  mcp?: {
-    intent: string;
-    businessDomain: string;
-    requiredScopes?: string[];
-  };
-}
-
-export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
-  const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-
-  // Command-Registry mit MCP-Metadaten
-  const commands: Command[] = [
-    // Sales
+const createCommands = (navigate: ReturnType<typeof useNavigate>, agrarEnabled: boolean): PaletteCommand[] => {
+  const commands: PaletteCommand[] = [
     {
       id: 'sales-order-new',
       label: 'Neuer Verkaufsauftrag',
       keywords: ['sales', 'order', 'so', 'auftrag', 'neu'],
       icon: ShoppingCart,
       category: 'Sales',
-      action: () => navigate('/sales/orders/new'),
+      action: (): void => navigate('/sales/orders/new'),
       mcp: {
         intent: 'create-sales-order',
         businessDomain: 'sales',
@@ -102,7 +85,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       keywords: ['sales', 'delivery', 'lieferung', 'versand'],
       icon: Package,
       category: 'Sales',
-      action: () => navigate('/sales/deliveries/new'),
+      action: (): void => navigate('/sales/deliveries/new'),
       mcp: {
         intent: 'create-delivery',
         businessDomain: 'sales',
@@ -115,117 +98,169 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       keywords: ['sales', 'invoice', 'rechnung', 'faktura'],
       icon: FileText,
       category: 'Sales',
-      action: () => navigate('/sales/invoices/new'),
+      action: (): void => navigate('/sales/invoices/new'),
       mcp: {
         intent: 'create-invoice',
         businessDomain: 'sales',
         requiredScopes: ['sales:write'],
       },
     },
-
-    // Inventory
     {
       id: 'inventory-adjust',
       label: 'Bestandskorrektur',
       keywords: ['inventory', 'bestand', 'korrektur', 'adjust'],
       icon: Package,
       category: 'Lager',
-      action: () => navigate('/inventory/adjust'),
+      action: (): void => navigate('/inventory/adjust'),
       mcp: {
         intent: 'adjust-inventory',
         businessDomain: 'inventory',
       },
     },
-
-    // Finance
     {
       id: 'finance-booking',
       label: 'Buchung erfassen',
       keywords: ['finance', 'buchung', 'fibu', 'booking'],
       icon: Calculator,
       category: 'Finanzen',
-      action: () => navigate('/finance/bookings/new'),
+      action: (): void => navigate('/finance/bookings/new'),
       mcp: {
         intent: 'create-booking',
         businessDomain: 'finance',
       },
     },
+  ];
 
-    // Customers
-    {
-      id: 'customers-list',
-      label: 'Kunden anzeigen',
-      keywords: ['customers', 'kunden', 'debitor'],
-      icon: Users,
-      category: 'Stammdaten',
-      action: () => navigate('/customers'),
-      mcp: {
-        intent: 'view-customers',
-        businessDomain: 'master-data',
+  if (agrarEnabled) {
+    commands.push(
+      {
+        id: 'agrar-seed-list',
+        label: 'Saatgut-Liste oeffnen',
+        keywords: ['agrar', 'saatgut', 'liste', 'seed'],
+        icon: Sprout,
+        category: 'Agrar',
+        action: (): void => navigate('/agrar/saatgut'),
+        mcp: {
+          intent: 'open-seed-list',
+          businessDomain: 'agrar',
+        },
       },
-    },
+      {
+        id: 'agrar-seed-master',
+        label: 'Saatgut Stammdaten',
+        keywords: ['agrar', 'saatgut', 'stamm', 'detail'],
+        icon: Sprout,
+        category: 'Agrar',
+        action: (): void => navigate('/agrar/saatgut/stamm?id=SEED-00123'),
+        mcp: {
+          intent: 'open-seed-master',
+          businessDomain: 'agrar',
+        },
+      },
+      {
+        id: 'agrar-seed-order',
+        label: 'Saatgut-Bestellung anlegen',
+        keywords: ['agrar', 'saatgut', 'bestellung', 'wizard'],
+        icon: ShoppingCart,
+        category: 'Agrar',
+        action: (): void => navigate('/agrar/saatgut/bestellung'),
+        mcp: {
+          intent: 'create-seed-order',
+          businessDomain: 'agrar',
+        },
+      },
+      {
+        id: 'agrar-fertilizer-list',
+        label: 'Duenger-Liste oeffnen',
+        keywords: ['agrar', 'duenger', 'fertilizer', 'liste'],
+        icon: Warehouse,
+        category: 'Agrar',
+        action: (): void => navigate('/agrar/duenger'),
+        mcp: {
+          intent: 'open-fertilizer-list',
+          businessDomain: 'agrar',
+        },
+      },
+    );
+  }
 
-    // Settings
+  commands.push(
     {
       id: 'settings',
-      label: 'Einstellungen',
-      keywords: ['settings', 'einstellungen', 'config'],
+      label: 'Systemeinstellungen',
+      keywords: ['system', 'settings', 'einstellungen'],
       icon: Settings,
       category: 'System',
-      action: () => navigate('/settings'),
+      action: (): void => navigate('/settings'),
       mcp: {
         intent: 'configure-system',
         businessDomain: 'admin',
         requiredScopes: ['admin:all'],
       },
     },
-
-    // Help (MCP-Integration Beispiel)
     {
       id: 'help-ai',
       label: 'Ask VALEO (AI-Hilfe)',
       keywords: ['help', 'hilfe', 'ai', 'ask', 'frage'],
       icon: HelpCircle,
       category: 'Hilfe',
-      action: () => {
-        // Phase 3: Öffnet AI-Chat-Interface
-        console.log('AI-Hilfe wird in Phase 3 aktiviert (MCP-Browser)');
+      action: (): void => {
+        if (import.meta.env.DEV) {
+          console.info('AI-Hilfe wird in Phase 3 aktiviert (MCP-Browser)');
+        }
       },
       mcp: {
         intent: 'ai-assistance',
         businessDomain: 'help',
       },
     },
-  ];
+  );
 
-  // Fuzzy-Search (einfache Implementation)
-  const filteredCommands = commands.filter((cmd) => {
-    const searchLower = search.toLowerCase();
-    return (
-      cmd.label.toLowerCase().includes(searchLower) ||
-      cmd.keywords.some((kw) => kw.includes(searchLower))
-    );
-  });
+  return commands;
+};
 
-  // Gruppiere nach Kategorie
-  const groupedCommands = filteredCommands.reduce((acc, cmd) => {
-    if (!acc[cmd.category]) {
-      acc[cmd.category] = [];
+export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX.Element {
+  const navigate = useNavigate()
+  const agrarEnabled = useFeature('agrar')
+  const [search, setSearch] = useState<string>('')
+
+  const commands = useMemo<PaletteCommand[]>(() => {
+    const baseCommands = createCommands(navigate, agrarEnabled)
+    return agrarEnabled ? baseCommands : baseCommands.filter((cmd) => cmd.category !== 'Agrar')
+  }, [agrarEnabled, navigate])
+
+  const filteredCommands = useMemo(() => {
+    const searchLower = search.trim().toLowerCase()
+    if (searchLower.length === 0) {
+      return commands
     }
-    acc[cmd.category].push(cmd);
-    return acc;
-  }, {} as Record<string, Command[]>);
+    return commands.filter((cmd) => {
+      return (
+        cmd.label.toLowerCase().includes(searchLower) ||
+        cmd.keywords.some((keyword) => keyword.toLowerCase().includes(searchLower))
+      )
+    })
+  }, [commands, search])
+
+  const groupedCommands = useMemo(() => {
+    return filteredCommands.reduce<Record<string, PaletteCommand[]>>((accumulator, cmd) => {
+      if (accumulator[cmd.category] === undefined) {
+        accumulator[cmd.category] = []
+      }
+      accumulator[cmd.category].push(cmd)
+      return accumulator
+    }, {})
+  }, [filteredCommands])
 
   return (
-    <CommandDialog 
-      open={open} 
+    <CommandDialog
+      open={open}
       onOpenChange={onOpenChange}
-      // MCP-Metadaten
       aria-label="Command palette"
       data-mcp-component="command-palette"
     >
-      <CommandInput 
-        placeholder="Aktion suchen... (z.B. 'Auftrag', 'Buchung')" 
+      <CommandInput
+        placeholder="Aktion suchen... (z.B. 'Auftrag', 'Buchung')"
         value={search}
         onValueChange={setSearch}
       />
@@ -233,7 +268,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         <CommandEmpty>
           Keine Aktionen gefunden.
           <div className="mt-2 text-xs text-muted-foreground">
-            Tipp: Versuche allgemeinere Begriffe wie "Auftrag" oder "Kunde"
+            Tipp: Versuche allgemeinere Begriffe wie &quot;Auftrag&quot; oder &quot;Kunde&quot;
           </div>
         </CommandEmpty>
 
@@ -242,17 +277,16 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             {idx > 0 && <CommandSeparator />}
             <CommandGroup heading={category}>
               {cmds.map((cmd) => {
-                const Icon = cmd.icon;
+                const Icon = cmd.icon
                 return (
                   <CommandItem
                     key={cmd.id}
                     value={cmd.label}
                     keywords={cmd.keywords}
                     onSelect={() => {
-                      cmd.action();
-                      onOpenChange(false);
+                      cmd.action()
+                      onOpenChange(false)
                     }}
-                    // MCP-Metadaten für einzelne Actions
                     data-mcp-action={cmd.id}
                     data-mcp-intent={cmd.mcp?.intent}
                     data-mcp-domain={cmd.mcp?.businessDomain}
@@ -260,33 +294,34 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                     <Icon className="mr-2 h-4 w-4" />
                     <span>{cmd.label}</span>
                     {cmd.mcp?.requiredScopes && (
-                      <span className="ml-auto text-xs text-muted-foreground">
-                        {cmd.mcp.requiredScopes[0]}
-                      </span>
+                      <span className="ml-auto text-xs text-muted-foreground">{cmd.mcp.requiredScopes[0]}</span>
                     )}
                   </CommandItem>
-                );
+                )
               })}
             </CommandGroup>
           </div>
         ))}
 
-        {/* MCP-Integration Hinweis (Phase 3) */}
-        {search.includes('ai') || search.includes('help') && (
+        {(search.toLowerCase().includes('ai') || search.toLowerCase().includes('help')) && (
           <>
             <CommandSeparator />
-            <CommandGroup heading="💡 Tipp">
-              <CommandItem disabled>
+            <CommandGroup heading="Ask VALEO">
+              <CommandItem
+                value="Ask VALEO"
+                onSelect={() => {
+                  navigate('/copilot')
+                  onOpenChange(false)
+                }}
+              >
                 <HelpCircle className="mr-2 h-4 w-4" />
-                <span className="text-xs">
-                  AI-Assistenz kommt in Phase 3 (MCP-Browser)
-                </span>
+                Ask VALEO öffnen
               </CommandItem>
             </CommandGroup>
           </>
         )}
       </CommandList>
     </CommandDialog>
-  );
+  )
 }
 

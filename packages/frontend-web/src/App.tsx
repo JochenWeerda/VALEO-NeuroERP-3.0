@@ -35,10 +35,9 @@ function AppContent(): ReactElement {
 
 function App(): ReactElement {
   const handleEvent = useCallback((event: MCPEvent): void => {
-    routeMCPEvent(event);
-  }, []);
-  const sseUrl = (import.meta.env?.VITE_MCP_EVENTS_URL as string | undefined) ?? undefined;
-  useSSE(handleEvent, sseUrl);
+    routeMCPEvent(event)
+  }, [])
+  useSSE(handleEvent)
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -205,3 +205,4 @@ echo "4. Monitor: https://staging.erp.valeo.example.com/metrics"
 echo ""
 echo -e "${GREEN}🎉 Ready for UAT!${NC}"
 
+

@@ -1,52 +1,56 @@
-import { Button } from '@/components/ui/button'
-import { useWorkflow } from '@/hooks/useWorkflow'
-import { StatusBadge } from '@/components/workflow/StatusBadge'
 import { Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { StatusBadge } from '@/components/workflow/StatusBadge'
+import { useWorkflow } from '@/hooks/useWorkflow'
 
 interface ApprovalPanelProps {
   domain: 'sales' | 'purchase'
-  doc: {
-    number: string
-    lines?: Array<{
-      article?: string
-      qty?: number
-      price?: number
-      cost?: number
-    }>
-    total?: number
-    [key: string]: any
-  }
+  doc: ApprovalDocument
 }
 
-export default function ApprovalPanel({ domain, doc }: ApprovalPanelProps) {
+type ApprovalLine = {
+  article?: string
+  qty?: number
+  price?: number
+  cost?: number
+}
+
+type ApprovalDocument = {
+  number: string
+  lines?: ApprovalLine[]
+  total?: number
+} & Record<string, unknown>
+
+export default function ApprovalPanel({ domain, doc }: ApprovalPanelProps): JSX.Element {
   const { state, transition, loading } = useWorkflow(domain, doc.number)
 
-  // Berechne erlaubte Aktionen basierend auf State
-  const can = {
+  const allowedActions = {
     submit: state === 'draft',
     approve: state === 'pending',
     reject: state === 'pending',
     post: state === 'approved',
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     const result = await transition('submit', doc)
     if (!result.ok) {
       console.error('Submit failed:', result.error)
     }
   }
 
-  const handleApprove = async () => {
+  const handleApprove = async (): Promise<void> => {
     const result = await transition('approve', doc)
     if (!result.ok) {
       console.error('Approve failed:', result.error)
     }
   }
 
-  const handleReject = async () => {
-    // In Production: Dialog für Ablehnungsgrund
+  const handleReject = async (): Promise<void> => {
+    // In production: ask for a rejection reason via a dialog
     const reason = prompt('Ablehnungsgrund:')
-    if (!reason) return
+    if (reason == null || reason.trim().length === 0) {
+      return
+    }
 
     const result = await transition('reject', { ...doc, reason })
     if (!result.ok) {
@@ -54,9 +58,10 @@ export default function ApprovalPanel({ domain, doc }: ApprovalPanelProps) {
     }
   }
 
-  const handlePost = async () => {
-    // Confirmation-Dialog für finale Buchung
-    if (!confirm('Beleg wirklich buchen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+  const handlePost = async (): Promise<void> => {
+    // Confirmation dialog for final posting
+    const confirmed = confirm('Beleg wirklich buchen? Diese Aktion kann nicht rueckgaengig gemacht werden.')
+    if (!confirmed) {
       return
     }
 
@@ -67,50 +72,33 @@ export default function ApprovalPanel({ domain, doc }: ApprovalPanelProps) {
   }
 
   return (
-    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border">
+    <div className="flex items-center gap-3 rounded-lg border bg-gray-50 p-4">
       <StatusBadge status={state} data-testid="approval-status-badge" />
 
       <div className="flex-1" />
 
       <div className="flex items-center gap-2">
-        {loading && (
-          <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-        )}
+        {loading ? <Loader2 className="h-4 w-4 animate-spin text-gray-500" /> : null}
 
-        {can.submit && (
-          <Button
-            disabled={loading}
-            onClick={handleSubmit}
-            variant="outline"
-            data-testid="btn-submit"
-          >
+        {allowedActions.submit ? (
+          <Button disabled={loading} onClick={handleSubmit} variant="outline" data-testid="btn-submit">
             Einreichen
           </Button>
-        )}
+        ) : null}
 
-        {can.approve && (
-          <Button
-            disabled={loading}
-            onClick={handleApprove}
-            variant="default"
-            data-testid="btn-approve"
-          >
+        {allowedActions.approve ? (
+          <Button disabled={loading} onClick={handleApprove} variant="default" data-testid="btn-approve">
             Freigeben
           </Button>
-        )}
+        ) : null}
 
-        {can.reject && (
-          <Button
-            disabled={loading}
-            onClick={handleReject}
-            variant="destructive"
-            data-testid="btn-reject"
-          >
+        {allowedActions.reject ? (
+          <Button disabled={loading} onClick={handleReject} variant="destructive" data-testid="btn-reject">
             Ablehnen
           </Button>
-        )}
+        ) : null}
 
-        {can.post && (
+        {allowedActions.post ? (
           <Button
             disabled={loading}
             onClick={handlePost}
@@ -120,7 +108,7 @@ export default function ApprovalPanel({ domain, doc }: ApprovalPanelProps) {
           >
             Buchen
           </Button>
-        )}
+        ) : null}
       </div>
     </div>
   )

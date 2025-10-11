@@ -75,6 +75,18 @@ python main.py  # Backend API
 cd packages/frontend-web && npm run dev  # Frontend
 ```
 
+### Frontend Commands (pnpm)
+
+```bash
+cd packages/frontend-web
+pnpm install
+pnpm dev          # Start Vite Dev-Server
+pnpm build        # Production Build
+pnpm typecheck    # TypeScript Project Check
+pnpm lint         # ESLint (fails on warnings)
+pnpm storybook    # UI Workbench
+```
+
 3. **Configure Authentication:**
 ```bash
 # Copy environment template
@@ -210,6 +222,7 @@ kubectl apply -f k8s/
 - **Development:** `.env` with local configuration
 - **Staging:** `env.example.staging` - Docker Desktop (Windows)
 - **Production:** Environment variables or Kubernetes secrets
+- **Feature Flags:** `VITE_FEATURE_SSE`, `VITE_FEATURE_COMMAND_PALETTE`, `VITE_FEATURE_AGRAR` (remote overrides via `VITE_FLAGS_URL`, fallback to `/flags.json`)
 
 ## 📈 Monitoring & Observability
 

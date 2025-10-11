@@ -68,6 +68,18 @@ export const queryKeys = {
     all: ["document"] as const,
     file: (id: string) => [...queryKeys.document.all, "file", id] as const,
   },
+  agrar: {
+    seeds: {
+      all: ["agrar", "seeds"] as const,
+      list: () => [...queryKeys.agrar.seeds.all, "list"] as const,
+      detail: (id: string) => [...queryKeys.agrar.seeds.all, "detail", id] as const,
+    },
+    fertilizers: {
+      all: ["agrar", "fertilizers"] as const,
+      list: () => [...queryKeys.agrar.fertilizers.all, "list"] as const,
+      detail: (id: string) => [...queryKeys.agrar.fertilizers.all, "detail", id] as const,
+    },
+  },
 } as const
 
 export const mutationKeys = {
@@ -76,6 +88,11 @@ export const mutationKeys = {
   },
   weighing: {
     approve: ["weighing", "approve"] as const,
+  },
+  agrar: {
+    seedOrders: {
+      create: ["agrar", "seed-orders", "create"] as const,
+    },
   },
 } as const
 

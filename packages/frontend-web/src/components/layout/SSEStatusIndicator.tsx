@@ -1,93 +1,90 @@
-import { useEffect, useState } from 'react'
-import { Wifi, WifiOff, AlertCircle } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { AlertCircle, Wifi, WifiOff } from 'lucide-react'
 
 type SSEStatus = 'connected' | 'reconnecting' | 'disconnected' | 'error'
+
+interface SSEStatusEventDetail {
+  status: SSEStatus
+  channel: string
+}
 
 interface SSEStatusIndicatorProps {
   channel?: string
   'data-testid'?: string
 }
 
-export function SSEStatusIndicator({ channel = 'all', 'data-testid': testId }: SSEStatusIndicatorProps) {
+const STATUS_POLL_INTERVAL_MS = 5_000
+
+const STATUS_CONFIG: Record<
+  SSEStatus,
+  { icon: typeof Wifi; color: string; bgColor: string; label: string }
+> = {
+  connected: {
+    icon: Wifi,
+    color: 'text-green-600',
+    bgColor: 'bg-green-100',
+    label: 'Connected',
+  },
+  reconnecting: {
+    icon: AlertCircle,
+    color: 'text-yellow-600',
+    bgColor: 'bg-yellow-100',
+    label: 'Reconnecting',
+  },
+  error: {
+    icon: WifiOff,
+    color: 'text-red-600',
+    bgColor: 'bg-red-100',
+    label: 'Error',
+  },
+  disconnected: {
+    icon: WifiOff,
+    color: 'text-gray-600',
+    bgColor: 'bg-gray-100',
+    label: 'Disconnected',
+  },
+}
+
+export function SSEStatusIndicator({
+  channel = 'all',
+  'data-testid': testId,
+}: SSEStatusIndicatorProps): JSX.Element {
   const [status, setStatus] = useState<SSEStatus>('disconnected')
-  const [connectionCount, setConnectionCount] = useState(0)
+  const [connectionCount, setConnectionCount] = useState<number>(0)
 
   useEffect(() => {
-    // Listen to SSE connection events
-    const handleSSEStatus = (event: CustomEvent<{ status: SSEStatus; channel: string }>) => {
-      if (channel === 'all' || event.detail.channel === channel) {
-        setStatus(event.detail.status)
+    const handleSSEStatus = (event: Event): void => {
+      if (!(event instanceof CustomEvent)) {
+        return
+      }
+      const detail = event.detail as SSEStatusEventDetail
+      if (channel === 'all' || detail.channel === channel) {
+        setStatus(detail.status)
       }
     }
 
-    window.addEventListener('sse:status' as any, handleSSEStatus)
+    window.addEventListener('sse:status', handleSSEStatus as EventListener)
 
-    // Simulate connection check
-    const checkConnection = () => {
-      // In production, this would check actual SSE connection status
+    const intervalId = setInterval(() => {
       setStatus('connected')
       setConnectionCount((prev) => prev + 1)
-    }
-
-    const interval = setInterval(checkConnection, 5000)
-    checkConnection()
+    }, STATUS_POLL_INTERVAL_MS)
 
     return () => {
-      window.removeEventListener('sse:status' as any, handleSSEStatus)
-      clearInterval(interval)
+      window.removeEventListener('sse:status', handleSSEStatus as EventListener)
+      clearInterval(intervalId)
     }
   }, [channel])
 
-  const getStatusConfig = () => {
-    switch (status) {
-      case 'connected':
-        return {
-          icon: Wifi,
-          color: 'text-green-600',
-          bgColor: 'bg-green-100',
-          label: 'Connected',
-        }
-      case 'reconnecting':
-        return {
-          icon: AlertCircle,
-          color: 'text-yellow-600',
-          bgColor: 'bg-yellow-100',
-          label: 'Reconnecting',
-        }
-      case 'error':
-        return {
-          icon: WifiOff,
-          color: 'text-red-600',
-          bgColor: 'bg-red-100',
-          label: 'Error',
-        }
-      default:
-        return {
-          icon: WifiOff,
-          color: 'text-gray-600',
-          bgColor: 'bg-gray-100',
-          label: 'Disconnected',
-        }
-    }
-  }
-
-  const config = getStatusConfig()
-  const Icon = config.icon
+  const { icon: Icon, color, bgColor, label } = useMemo(() => STATUS_CONFIG[status], [status])
 
   return (
-    <div
-      className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm"
-      data-testid={testId}
-      data-status={status}
-    >
-      <div className={`rounded-full p-1 ${config.bgColor}`}>
-        <Icon className={`h-4 w-4 ${config.color}`} />
+    <div className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm" data-testid={testId} data-status={status}>
+      <div className={`rounded-full p-1 ${bgColor}`}>
+        <Icon className={`h-4 w-4 ${color}`} />
       </div>
-      <span className={`font-medium ${config.color}`}>{config.label}</span>
-      {status === 'connected' && (
-        <span className="text-xs text-gray-500">({connectionCount})</span>
-      )}
+      <span className={`font-medium ${color}`}>{label}</span>
+      {status === 'connected' && <span className="text-xs text-gray-500">({connectionCount})</span>}
     </div>
   )
 }
-

@@ -1,5 +1,5 @@
-﻿import { toast } from "@/hooks/use-toast";
-import type { MCPEvent, ToastEvent, WorkflowEvent } from "@/lib/mcp-events";
+import { toast } from "@/hooks/use-toast";
+import type { MCPEvent, ToastEvent } from "@/lib/mcp-events";
 
 function mapVariant(variant: ToastEvent["variant"]): "default" | "destructive" {
   return variant === "destructive" ? "destructive" : "default";
@@ -17,39 +17,35 @@ export function routeMCPEvent(event: MCPEvent): void {
     }
     case "notif": {
       // Placeholder for future notification center integration
-      // e.g. notificationStore.add(event)
       break;
     }
     case "log": {
       if (import.meta.env.DEV) {
-        const scope = (typeof event.scope === 'string' && event.scope.length > 0) ? `[${event.scope}] ` : "";
+        const scope =
+          typeof event.scope === "string" && event.scope.length > 0 ? `[${event.scope}] ` : "";
         console.info(`${scope}${event.text}`);
       }
       break;
     }
     case "workflow": {
-      const workflowEvent = event as WorkflowEvent;
-      const actionLabels = {
+      const actionLabels: Record<string, string> = {
         submit: "eingereicht",
         approve: "freigegeben",
         reject: "abgelehnt",
-        post: "gebucht"
+        post: "gebucht",
       };
-      const domainLabels = {
+      const domainLabels: Record<string, string> = {
         sales: "Verkauf",
-        purchase: "Einkauf"
+        purchase: "Einkauf",
       };
 
       toast({
-        title: `Beleg ${actionLabels[workflowEvent.action]}`,
-        description: `${domainLabels[workflowEvent.domain]} ${workflowEvent.number}: ${workflowEvent.fromState} → ${workflowEvent.toState}`,
-        variant: workflowEvent.action === "reject" ? "destructive" : "default",
+        title: `Beleg ${actionLabels[event.action] ?? event.action}`,
+        description: `${domainLabels[event.domain] ?? event.domain} ${event.number}: ${event.fromState} -> ${event.toState}`,
+        variant: event.action === "reject" ? "destructive" : "default",
       });
       break;
     }
-    case "job":
-    case "agent":
-    case "task":
     default:
       break;
   }

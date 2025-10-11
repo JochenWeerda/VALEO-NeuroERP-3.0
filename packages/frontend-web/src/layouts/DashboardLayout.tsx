@@ -1,74 +1,72 @@
-import { useCallback, useState } from "react"
-import { NavLink, Outlet } from "react-router-dom"
-import { Menu } from "lucide-react"
-import { type McpRealtimeEvent, useMcpConnectionState, useMcpRealtime } from "@/lib/useMcpRealtime"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { Outlet } from "react-router-dom"
+import { AppShell } from "@/components/navigation/AppShell"
 import { AdvisorDock } from "@/features/copilot/AdvisorDock"
-
-const nav = [
-  { to: '/', label: 'Dashboard' },
-  { to: '/contracts', label: 'Contracts' },
-  { to: '/pricing', label: 'Pricing' },
-  { to: '/inventory', label: 'Inventory' },
-  { to: '/weighing', label: 'Weighing' },
-  { to: '/sales', label: 'Sales' },
-  { to: '/document', label: 'Document' },
-  { to: '/policies', label: 'Policies' },
-]
+import { useFeature } from "@/hooks/useFeature"
+import { type McpRealtimeEvent, useMcpConnectionState, useMcpRealtime } from "@/lib/useMcpRealtime"
 
 export default function AppLayout(): JSX.Element {
-  const [lastEvent, setLastEvent] = useState<string>('–')
-  const connectionState = useMcpConnectionState()
+  const commandPaletteEnabled = useFeature('commandPalette')
+  const realtimeEnabled = useFeature('sse')
 
-  const handleAnyEvent = useCallback((event: McpRealtimeEvent): void => {
-    if (event.rawType === 'heartbeat') {
-      return
+  const [lastEvent, setLastEvent] = useState<string>(realtimeEnabled ? "idle" : "disabled")
+  const connectionState = useMcpConnectionState({ enabled: realtimeEnabled })
+
+  useEffect(() => {
+    if (!realtimeEnabled) {
+      setLastEvent("disabled")
     }
-    setLastEvent(`${event.service}:${event.rawType}`)
-  }, [])
+  }, [realtimeEnabled])
 
-  useMcpRealtime('*', handleAnyEvent)
+  const handleAnyEvent = useCallback(
+    (event: McpRealtimeEvent): void => {
+      if (!realtimeEnabled) {
+        return
+      }
+      if (event.rawType === "heartbeat") {
+        return
+      }
+      setLastEvent(`${event.service}:${event.rawType}`)
+    },
+    [realtimeEnabled],
+  )
 
-  const connectionLabel = connectionState === 'open'
-    ? 'Connected'
-    : connectionState === 'error'
-      ? 'Disconnected'
-      : 'Connecting'
+  useMcpRealtime("*", handleAnyEvent, { enabled: realtimeEnabled })
 
-  const connectionClass = connectionState === 'open'
-    ? 'text-green-600'
-    : connectionState === 'error'
-      ? 'text-red-500'
-      : 'text-amber-500'
+  const connectionMeta = useMemo(() => {
+    if (!realtimeEnabled) {
+      return {
+        label: "Disabled",
+        className: "text-slate-500",
+      }
+    }
+    if (connectionState === "open") {
+      return { label: "Connected", className: "text-green-600" }
+    }
+    if (connectionState === "error") {
+      return { label: "Disconnected", className: "text-red-500" }
+    }
+    return { label: "Connecting", className: "text-amber-500" }
+  }, [connectionState, realtimeEnabled])
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b">
-        <div className="container flex items-center gap-3 py-3">
-          <Menu className="h-5 w-5 opacity-60" />
-          <h1 className="text-lg font-semibold">VALEO NeuroERP</h1>
-          <nav className="ml-auto flex gap-4">
-            {nav.map((n) => (
-              <NavLink
-                key={n.to}
-                to={n.to}
-                className={({ isActive }): string =>
-                  `text-sm ${isActive ? 'font-semibold underline' : 'opacity-80 hover:opacity-100'}`
-                }
-              >
-                {n.label}
-              </NavLink>
-            ))}
-          </nav>
+    <AppShell enableCommandPalette={commandPaletteEnabled}>
+      <div className="flex h-full flex-col">
+        <div className="flex-1 overflow-y-auto bg-background p-6">
+          <Outlet />
         </div>
-        <div className="container flex items-center justify-end pb-2 text-xs text-muted-foreground">
-          <span className={`${connectionClass} font-medium`}>Realtime: {connectionLabel}</span>
-          <span className="ml-3 truncate" title={lastEvent}>Last event: {lastEvent}</span>
-        </div>
-      </header>
-      <main className="container py-6">
-        <Outlet />
-      </main>
+        {realtimeEnabled ? (
+          <footer className="border-t bg-muted/40 px-6 py-2 text-xs text-muted-foreground">
+            <div className="flex items-center justify-between gap-2">
+              <span className={`${connectionMeta.className} font-medium`}>Realtime: {connectionMeta.label}</span>
+              <span className="truncate" title={lastEvent}>
+                Last event: {lastEvent}
+              </span>
+            </div>
+          </footer>
+        ) : null}
+      </div>
       <AdvisorDock />
-    </div>
+    </AppShell>
   )
 }
