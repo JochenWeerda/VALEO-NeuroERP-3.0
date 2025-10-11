@@ -14,8 +14,14 @@ export type ColumnDef<T> = {
   className?: string
 }
 
+export type LegacyColumnDef<T> = {
+  key: keyof T | string
+  label: string
+  render?: (item: T) => ReactNode
+}
+
 interface DataTableProps<T> {
-  columns: ColumnDef<T>[]
+  columns: ColumnDef<T>[] | LegacyColumnDef<T>[]
   data: T[]
   selectable?: boolean
   onSelectionChange?: (selected: T[]) => void
@@ -28,11 +34,26 @@ export function DataTable<T>({ columns, data, selectable, onSelectionChange }: D
     }
   }, [onSelectionChange, selectable])
 
+  const isLegacyFormat = (col: ColumnDef<T> | LegacyColumnDef<T>): col is LegacyColumnDef<T> => {
+    return 'key' in col && 'label' in col
+  }
+
+  const normalizedColumns: ColumnDef<T>[] = columns.map((col) => {
+    if (isLegacyFormat(col)) {
+      return {
+        accessorKey: col.key as string,
+        header: col.label,
+        cell: col.render ? (args: ColumnRenderArgs<T>) => col.render?.(args.row.original) : undefined,
+      }
+    }
+    return col
+  })
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          {columns.map((column) => (
+          {normalizedColumns.map((column) => (
             <TableHead key={String(column.accessorKey)} className={column.className}>
               {column.header}
             </TableHead>
@@ -42,7 +63,7 @@ export function DataTable<T>({ columns, data, selectable, onSelectionChange }: D
       <TableBody>
         {data.map((row, rowIndex) => (
           <TableRow key={rowIndex}>
-            {columns.map((column) => {
+            {normalizedColumns.map((column) => {
               const cellContent =
                 typeof column.cell === 'function'
                   ? column.cell({ row: { original: row } })

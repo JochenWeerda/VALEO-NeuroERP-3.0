@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/**/*",
+    ".storybook/**/*",
+    "vite.config.ts",
+    "vite.config.performance.ts"
+  ],
+  "exclude": ["node_modules", "dist", "test-results"]
+}
