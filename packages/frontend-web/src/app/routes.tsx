@@ -187,7 +187,14 @@ const MonitoringAlertsRoute = createLazyRoute(() => import('@/pages/monitoring/a
 // Personal
 const MitarbeiterListeRoute = createLazyRoute(() => import('@/pages/personal/mitarbeiter-liste'))
 const ZeiterfassungRoute = createLazyRoute(() => import('@/pages/personal/zeiterfassung'))
+const StundenzettelRoute = createLazyRoute(() => import('@/pages/personal/stundenzettel'))
+const SchulungenRoute = createLazyRoute(() => import('@/pages/personal/schulungen'))
 const SchichtplanRoute = createLazyRoute(() => import('@/pages/schichtplan/liste'))
+
+// POS
+const POSTerminalRoute = createLazyRoute(() => import('@/pages/pos/terminal'))
+const TSEJournalRoute = createLazyRoute(() => import('@/pages/pos/tse-journal'))
+const TagesabschlussEnhancedRoute = createLazyRoute(() => import('@/pages/pos/tagesabschluss-enhanced'))
 
 // Fuhrpark
 const FahrzeugeRoute = createLazyRoute(() => import('@/pages/fuhrpark/fahrzeuge'))
@@ -382,7 +389,14 @@ const routeConfig: RouteObject[] = [
       // Personal
       { path: 'personal/mitarbeiter-liste', element: <MitarbeiterListeRoute /> },
       { path: 'personal/zeiterfassung', element: <ZeiterfassungRoute /> },
+      { path: 'personal/stundenzettel', element: <StundenzettelRoute /> },
+      { path: 'personal/schulungen', element: <SchulungenRoute /> },
       { path: 'schichtplan/liste', element: <SchichtplanRoute /> },
+      
+      // POS
+      { path: 'pos/terminal', element: <POSTerminalRoute /> },
+      { path: 'pos/tse-journal', element: <TSEJournalRoute /> },
+      { path: 'pos/tagesabschluss-enhanced', element: <TagesabschlussEnhancedRoute /> },
       
       // Fuhrpark
       { path: 'fuhrpark/fahrzeuge', element: <FahrzeugeRoute /> },
