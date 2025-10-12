@@ -104,3 +104,9 @@
 - **Tests erweitert:** Neben bestehenden Contract-Checks existieren nun API-Auth-Prüfungen für Pytest und Playwright (skippbar via `API_URL`).[`tests/test_auth_middleware.py:1` `playwright-tests/auth-api.spec.ts:1`]
 
 > **Hinweis:** Für zukünftige Releases sollten Migrationen (`alembic/versions`) angepasst, Seed-Skripte bereitgestellt und CI-Pipelines so erweitert werden, dass die neuen Tests automatisiert laufen (inkl. Bereitstellung des Dev-Tokens).
+
+### 6.1 Next Steps (Technische Sofortmaßnahmen)
+- FastAPI-Backend einmal starten, damit `create_tables()` die neue `policy_rules`-Tabelle erzeugt, bevor Seed-Skripte laufen.
+- `API_DEV_TOKEN` bzw. `VITE_API_DEV_TOKEN` setzen (Standard: `dev-token`) oder echten OIDC-Flow integrieren, um 401-Antworten zu vermeiden.
+- Seed-Daten für Artikel pflegen, damit die POS-Suche unmittelbar Ergebnisse ausliefert.
+- Für Playwright-API-Checks `API_URL` (und optional `API_DEV_TOKEN`) exportieren, sobald die Tests automatisiert ausgeführt werden sollen.
