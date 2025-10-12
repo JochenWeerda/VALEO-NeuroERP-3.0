@@ -434,6 +434,11 @@ const routeConfig: RouteObject[] = [
   },
 ]
 
-export const router = createBrowserRouter(routeConfig)
+export const router = createBrowserRouter(routeConfig, {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true,
+  },
+})
 
 export const routes = routeConfig
