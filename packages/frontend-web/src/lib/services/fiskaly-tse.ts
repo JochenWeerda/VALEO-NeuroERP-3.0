@@ -53,7 +53,7 @@ export class FiskalyTSE {
     this.enabled = config.enabled
 
     this.client = axios.create({
-      baseURL: config.baseUrl || 'https://kassensichv.io/api/v1',
+      baseURL: config.baseUrl ?? 'https://kassensichv.io/api/v1',
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ export class FiskalyTSE {
   /**
    * Transaction starten (beim Warenkorb-Start)
    */
-  async startTransaction(processData: string, processType = 'Kassenbeleg-V1'): Promise<TSETransaction> {
+  async startTransaction(_processData: string, _processType = 'Kassenbeleg-V1'): Promise<TSETransaction> {
     if (!this.enabled) {
       // Mock für Development
       return {

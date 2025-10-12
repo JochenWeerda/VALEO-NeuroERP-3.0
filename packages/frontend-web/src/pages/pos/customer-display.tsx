@@ -11,31 +11,51 @@ type CartItem = {
   image?: string
 }
 
-// Mock-State (später: WebSocket)
-const usePOSSync = () => {
+// WebSocket Sync with POS Terminal
+const usePOSSync = (terminalId = 'terminal-1') => {
   const [cart, setCart] = useState<CartItem[]>([])
   const [total, setTotal] = useState(0)
+  const [connected, setConnected] = useState(false)
   
-  // Simuliere WebSocket-Updates
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Mock-Daten für Demo
-      const mockCart: CartItem[] = [
-        { artikelnr: 'A-001', bezeichnung: 'Blumenerde Premium 20L', ean: '4012345678901', preis: 12.99, menge: 2, image: '🌱' },
-        { artikelnr: 'A-003', bezeichnung: 'Rasendünger 5kg', ean: '4012345678903', preis: 24.99, menge: 1, image: '🌿' },
-      ]
-      setCart(mockCart)
-      setTotal(mockCart.reduce((sum, item) => sum + item.preis * item.menge, 0))
-    }, 5000)
+    const ws = new WebSocket(`ws://localhost:8000/api/v1/ws/pos/${terminalId}`)
     
-    return () => clearInterval(interval)
-  }, [])
+    ws.onopen = () => {
+      console.log('✅ CustomerDisplay WebSocket connected')
+      setConnected(true)
+    }
+    
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data)
+      setCart(data.cart || [])
+      setTotal(data.total || 0)
+    }
+    
+    ws.onerror = (error) => {
+      console.error('❌ WebSocket error:', error)
+      setConnected(false)
+    }
+    
+    ws.onclose = () => {
+      console.log('🔌 WebSocket disconnected - attempting reconnect...')
+      setConnected(false)
+      
+      // Auto-reconnect after 3 seconds
+      setTimeout(() => {
+        console.log('🔄 Reconnecting...')
+      }, 3000)
+    }
+    
+    return () => {
+      ws.close()
+    }
+  }, [terminalId])
   
-  return { cart, total }
+  return { cart, total, connected }
 }
 
 export default function CustomerDisplayPage(): JSX.Element {
-  const { cart, total } = usePOSSync()
+  const { cart, total, connected } = usePOSSync()
   const currentTime = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 
   return (
@@ -44,7 +64,12 @@ export default function CustomerDisplayPage(): JSX.Element {
       <div className="p-8 text-center border-b border-white/20">
         <h1 className="text-5xl font-bold mb-2">Willkommen bei VALERO</h1>
         <p className="text-2xl opacity-90">Haus & Gartenmarkt</p>
-        <div className="mt-4 text-lg opacity-75">{currentTime} Uhr</div>
+        <div className="mt-4 flex items-center justify-center gap-4">
+          <span className="text-lg opacity-75">{currentTime} Uhr</span>
+          <Badge variant={connected ? 'default' : 'secondary'} className="text-sm">
+            {connected ? '🟢 Verbunden' : '⚪ Getrennt'}
+          </Badge>
+        </div>
       </div>
 
       {/* Artikel-Liste */}
