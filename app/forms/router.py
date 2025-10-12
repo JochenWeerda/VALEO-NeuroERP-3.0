@@ -4,14 +4,52 @@ API-Endpoints für Form-Specs (Schema-Definitionen)
 """
 
 from __future__ import annotations
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from typing import Dict, Any
+from pydantic import BaseModel
 import logging
+
+class FollowRequest(BaseModel):
+    source_id: str
+    fromType: str
+    toType: str
+    payload: Dict[str, Any]
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/mcp/form-specs", tags=["forms"])
+
+# Flow-Matrix: (fromType, toType) -> transform_fn
+def order_to_delivery(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Transformiert Auftrag zu Lieferung"""
+    return {
+        **payload,
+        "type": "sales_delivery",
+        "number": payload.get("number", "").replace("SO-", "DL-")
+    }
+
+def order_to_invoice(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Transformiert Auftrag zu Rechnung"""
+    return {
+        **payload,
+        "type": "sales_invoice",
+        "number": payload.get("number", "").replace("SO-", "INV-")
+    }
+
+def delivery_to_invoice(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Transformiert Lieferung zu Rechnung"""
+    return {
+        **payload,
+        "type": "sales_invoice",
+        "number": payload.get("number", "").replace("DL-", "INV-")
+    }
+
+FLOW: Dict[tuple[str, str], Any] = {
+    ("sales_order", "sales_delivery"): order_to_delivery,
+    ("sales_order", "sales_invoice"): order_to_invoice,
+    ("sales_delivery", "sales_invoice"): delivery_to_invoice,
+}
 
 # Form-Specs (In echt: aus DB/Datei laden)
 SCHEMAS: Dict[str, Dict[str, Any]] = {

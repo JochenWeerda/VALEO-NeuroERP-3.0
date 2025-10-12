@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
-import { AlertTriangle, Gift, Plus, Scan, Search } from 'lucide-react'
+import { AlertTriangle, Gift, Plus, Scan } from 'lucide-react'
 
 type GiftCard = {
   id: string

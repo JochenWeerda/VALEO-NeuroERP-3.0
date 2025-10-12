@@ -5,6 +5,7 @@ Periodically publishes pending events from outbox table
 
 import asyncio
 import logging
+from typing import Optional
 from sqlalchemy.orm import Session
 
 from ..core.database import SessionLocal
