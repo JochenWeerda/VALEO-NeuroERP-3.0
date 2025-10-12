@@ -22,7 +22,10 @@
     "storybook": "storybook dev -p 6006",
     "storybook:smoke": "storybook dev -p 6006 --ci --smoke-test",
     "build-storybook": "storybook build",
-    "typecheck": "pnpm run type-check"
+    "typecheck": "pnpm run type-check",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -51,6 +54,7 @@
     "i18next-http-backend": "^3.0.2",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.439.0",
+    "oidc-client-ts": "^3.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.3.8",
@@ -64,9 +68,6 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.0.1",
-    "@testing-library/user-event": "^14.6.1",
     "@playwright/test": "1.48.0",
     "@storybook/addon-docs": "^8.6.14",
     "@storybook/addon-essentials": "^8.6.14",
@@ -77,6 +78,9 @@
     "@storybook/react": "^8.6.14",
     "@storybook/react-vite": "^8.6.14",
     "@storybook/test": "^8.6.14",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
