@@ -3,8 +3,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { CreditCard, DollarSign, FileText, Scan, ShoppingCart, Smartphone } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { CreditCard, DollarSign, FileText, Scan, ShoppingCart, Smartphone, Grid3x3, Search } from 'lucide-react'
 import { useFiskalyTSE, type PaymentType, type TSETransaction } from '@/lib/services/fiskaly-tse'
+import { ChangeCalculator } from '@/components/pos/ChangeCalculator'
+import { ArticleSearch } from '@/components/pos/ArticleSearch'
 
 type CartItem = {
   artikelnr: string
@@ -23,9 +27,11 @@ export default function POSTerminalPage(): JSX.Element {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null)
   const [customerId, setCustomerId] = useState<string | null>(null)
   const [activeTx, setActiveTx] = useState<TSETransaction | null>(null)
+  const [showChangeCalculator, setShowChangeCalculator] = useState(false)
+  const [tendered, setTendered] = useState<number>(0)
   
   // fiskaly TSE Integration
-  const { tssStatus, isInitialized, startTransaction, updateTransaction, finishTransaction } = useFiskalyTSE()
+  const { isInitialized, startTransaction, updateTransaction, finishTransaction } = useFiskalyTSE()
 
   // Mock-Artikel-Datenbank
   const articles = [
@@ -66,10 +72,29 @@ export default function POSTerminalPage(): JSX.Element {
     }
   }
 
-  async function handleCheckout(): Promise<void> {
-    if (!paymentMethod) return
+  function handlePaymentMethodSelect(method: PaymentMethod): void {
+    setPaymentMethod(method)
+    
+    // Bei Bar-Zahlung: Wechselgeld-Rechner öffnen
+    if (method === 'bar') {
+      setShowChangeCalculator(true)
+    } else {
+      // Andere Zahlungsarten: Direkt checkout
+      handleCheckout(method)
+    }
+  }
+
+  async function handleCheckout(method?: PaymentMethod): Promise<void> {
+    const selectedMethod = method ?? paymentMethod
+    if (!selectedMethod) return
 
     const total = cart.reduce((sum, item) => sum + item.preis * item.menge, 0)
+    
+    // Bei Bar-Zahlung: Prüfe ob genug gegeben wurde
+    if (selectedMethod === 'bar' && tendered < total) {
+      alert(`Fehlbetrag: ${(total - tendered).toFixed(2)} €`)
+      return
+    }
 
     try {
       // 1. TSE-Transaction starten
@@ -96,18 +121,18 @@ export default function POSTerminalPage(): JSX.Element {
       
       const signedTx = await finishTransaction(
         tx.txId,
-        paymentTypeMap[paymentMethod],
+        paymentTypeMap[selectedMethod],
         total,
       )
 
       console.log('✅ TSE-Signatur:', signedTx)
 
       // 4. Hardware-Signale
-      if (paymentMethod === 'bar') {
+      if (selectedMethod === 'bar') {
         console.log('🔓 Kassenladen geöffnet')
       }
 
-      if (paymentMethod === 'ec') {
+      if (selectedMethod === 'ec') {
         console.log('💳 EC-Terminal: Betrag', total.toFixed(2), '€')
       }
 
@@ -123,13 +148,16 @@ export default function POSTerminalPage(): JSX.Element {
       // 6. TSE-Journal speichern (Backend-Call)
       // TODO: await saveTSETransaction({ ... })
 
-      alert(`Zahlung erfolgreich!\n\nBetrag: ${total.toFixed(2)} €\nZahlungsart: ${paymentMethod}\nTSE-Nr: ${signedTx.number}\nSignaturzähler: ${signedTx.signature?.counter}`)
+      const change = selectedMethod === 'bar' ? tendered - total : 0
+      alert(`Zahlung erfolgreich!\n\nBetrag: ${total.toFixed(2)} €\nZahlungsart: ${selectedMethod}${change > 0 ? `\nWechselgeld: ${change.toFixed(2)} €` : ''}\nTSE-Nr: ${signedTx.number}\nSignaturzähler: ${signedTx.signature?.counter}`)
 
       // Reset
       setCart([])
       setPaymentMethod(null)
       setCustomerId(null)
       setActiveTx(null)
+      setShowChangeCalculator(false)
+      setTendered(0)
       
     } catch (error) {
       console.error('❌ TSE-Fehler:', error)
@@ -207,8 +235,9 @@ export default function POSTerminalPage(): JSX.Element {
             <Button
               size="lg"
               variant={paymentMethod === 'bar' ? 'default' : 'outline'}
-              onClick={() => setPaymentMethod('bar')}
+              onClick={() => handlePaymentMethodSelect('bar')}
               className="gap-2"
+              disabled={cart.length === 0}
             >
               <DollarSign className="h-5 w-5" />
               Bar
@@ -216,8 +245,9 @@ export default function POSTerminalPage(): JSX.Element {
             <Button
               size="lg"
               variant={paymentMethod === 'ec' ? 'default' : 'outline'}
-              onClick={() => setPaymentMethod('ec')}
+              onClick={() => handlePaymentMethodSelect('ec')}
               className="gap-2"
+              disabled={cart.length === 0}
             >
               <CreditCard className="h-5 w-5" />
               EC-Karte
@@ -225,8 +255,9 @@ export default function POSTerminalPage(): JSX.Element {
             <Button
               size="lg"
               variant={paymentMethod === 'paypal' ? 'default' : 'outline'}
-              onClick={() => setPaymentMethod('paypal')}
+              onClick={() => handlePaymentMethodSelect('paypal')}
               className="gap-2"
+              disabled={cart.length === 0}
             >
               <Smartphone className="h-5 w-5" />
               PayPal
@@ -234,64 +265,126 @@ export default function POSTerminalPage(): JSX.Element {
             <Button
               size="lg"
               variant={paymentMethod === 'b2b' ? 'default' : 'outline'}
-              onClick={() => setPaymentMethod('b2b')}
+              onClick={() => handlePaymentMethodSelect('b2b')}
               className="gap-2"
+              disabled={cart.length === 0}
             >
               <FileText className="h-5 w-5" />
               B2B-Beleg
             </Button>
           </div>
-
-          <Button
-            size="lg"
-            className="mt-4 w-full text-lg"
-            disabled={cart.length === 0 || !paymentMethod}
-            onClick={handleCheckout}
-          >
-            Bezahlen ({total.toFixed(2)} €)
-          </Button>
         </div>
 
         {/* Artikelauswahl (Rechts) */}
         <div className="flex-1 p-4 flex flex-col">
           <h2 className="text-xl font-bold mb-4">Artikel</h2>
 
-          {/* Barcode-Scanner */}
-          <div className="mb-4">
-            <div className="relative">
-              <Scan className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                placeholder="Barcode scannen oder eingeben..."
-                value={barcode}
-                onChange={(e) => setBarcode(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleBarcodeInput(barcode)
-                }}
-                className="pl-10 text-lg"
-                autoFocus
-              />
-            </div>
-          </div>
+          <Tabs defaultValue="grid" className="flex-1 flex flex-col">
+            <TabsList className="grid w-full grid-cols-3 mb-4">
+              <TabsTrigger value="scanner" className="gap-2">
+                <Scan className="h-4 w-4" />
+                Scanner
+              </TabsTrigger>
+              <TabsTrigger value="grid" className="gap-2">
+                <Grid3x3 className="h-4 w-4" />
+                Grid
+              </TabsTrigger>
+              <TabsTrigger value="search" className="gap-2">
+                <Search className="h-4 w-4" />
+                Suche
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Artikel-Grid (Touch-optimiert) */}
-          <div className="grid grid-cols-3 gap-4 overflow-auto">
-            {articles.map((article) => (
-              <Card
-                key={article.ean}
-                className="cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => addToCart(article)}
-              >
-                <CardContent className="p-6 text-center">
-                  <div className="text-6xl mb-3">{article.image}</div>
-                  <div className="font-semibold mb-1">{article.bezeichnung}</div>
-                  <div className="text-2xl font-bold text-primary">{article.preis.toFixed(2)} €</div>
-                  <div className="text-xs text-muted-foreground mt-1 font-mono">{article.artikelnr}</div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+            {/* Barcode-Scanner Tab */}
+            <TabsContent value="scanner" className="flex-1">
+              <div className="relative">
+                <Scan className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  placeholder="Barcode scannen oder eingeben..."
+                  value={barcode}
+                  onChange={(e) => setBarcode(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleBarcodeInput(barcode)
+                  }}
+                  className="pl-10 text-lg h-14"
+                  autoFocus
+                />
+              </div>
+              <p className="text-sm text-muted-foreground mt-4 text-center">
+                Barcode mit Scanner erfassen oder manuell eingeben und Enter drücken
+              </p>
+            </TabsContent>
+
+            {/* Artikel-Grid Tab (Touch-optimiert) */}
+            <TabsContent value="grid" className="flex-1 overflow-auto">
+              <div className="grid grid-cols-3 gap-4">
+                {articles.map((article) => (
+                  <Card
+                    key={article.ean}
+                    className="cursor-pointer hover:shadow-lg transition-shadow"
+                    onClick={() => addToCart(article)}
+                  >
+                    <CardContent className="p-6 text-center">
+                      <div className="text-6xl mb-3">{article.image}</div>
+                      <div className="font-semibold mb-1">{article.bezeichnung}</div>
+                      <div className="text-2xl font-bold text-primary">{article.preis.toFixed(2)} €</div>
+                      <div className="text-xs text-muted-foreground mt-1 font-mono">{article.artikelnr}</div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            {/* Autocomplete-Suche Tab */}
+            <TabsContent value="search" className="flex-1">
+              <ArticleSearch
+                onSelect={(article) => {
+                  addToCart({
+                    artikelnr: article.artikelnr,
+                    bezeichnung: article.bezeichnung,
+                    ean: article.ean ?? '',
+                    preis: article.preis,
+                    image: article.image,
+                  })
+                }}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
+
+      {/* Wechselgeld-Rechner Dialog */}
+      <Dialog open={showChangeCalculator} onOpenChange={setShowChangeCalculator}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Barzahlung</DialogTitle>
+          </DialogHeader>
+          <ChangeCalculator
+            total={total}
+            onTenderedChange={setTendered}
+          />
+          <div className="flex gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowChangeCalculator(false)
+                setPaymentMethod(null)
+                setTendered(0)
+              }}
+              className="flex-1"
+            >
+              Abbrechen
+            </Button>
+            <Button
+              onClick={() => handleCheckout()}
+              disabled={tendered < total}
+              className="flex-1 text-lg"
+            >
+              Bezahlung abschließen
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
