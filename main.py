@@ -101,6 +101,10 @@ if not settings.DEBUG:
 from app.middleware.metrics import PrometheusMiddleware
 app.add_middleware(PrometheusMiddleware)
 
+# Add Correlation ID middleware
+from app.middleware.correlation import CorrelationMiddleware
+app.add_middleware(CorrelationMiddleware)
+
 # Authentication middleware
 @app.middleware("http")
 async def enforce_bearer_token(request: Request, call_next):
