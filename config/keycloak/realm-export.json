@@ -1,0 +1,209 @@
+{
+  "realm": "valeo-neuro-erp",
+  "enabled": true,
+  "displayName": "VALEO NeuroERP",
+  "displayNameHtml": "<b>VALEO</b> NeuroERP 3.0",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 5,
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "System Administrator - Full Access",
+        "composite": false
+      },
+      {
+        "name": "user",
+        "description": "Standard User - Basic Access",
+        "composite": false
+      },
+      {
+        "name": "auditor",
+        "description": "Auditor - Read-Only Access + Audit Logs",
+        "composite": false
+      },
+      {
+        "name": "finance_manager",
+        "description": "Finance Manager - Finance Module Access",
+        "composite": false
+      },
+      {
+        "name": "inventory_manager",
+        "description": "Inventory Manager - Inventory Module Access",
+        "composite": false
+      },
+      {
+        "name": "crm_manager",
+        "description": "CRM Manager - CRM Module Access",
+        "composite": false
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "valeo-neuro-erp-frontend",
+      "name": "VALEO NeuroERP Frontend",
+      "description": "React Frontend Application",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://localhost:5173/*",
+        "http://localhost:8000/auth/callback"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:8000"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "email",
+        "profile",
+        "roles"
+      ]
+    },
+    {
+      "clientId": "valeo-neuro-erp-backend",
+      "name": "VALEO NeuroERP Backend",
+      "description": "FastAPI Backend Service",
+      "enabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "valeo-backend-secret-dev-change-in-prod",
+      "redirectUris": [
+        "http://localhost:8000/auth/callback"
+      ],
+      "defaultClientScopes": [
+        "email",
+        "profile",
+        "roles"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin@valeo-erp.local",
+      "firstName": "System",
+      "lastName": "Administrator",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin", "user"],
+      "attributes": {
+        "tenant_id": ["system"]
+      }
+    },
+    {
+      "username": "user",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "user@valeo-erp.local",
+      "firstName": "Test",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "user123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["user"],
+      "attributes": {
+        "tenant_id": ["demo-tenant"]
+      }
+    },
+    {
+      "username": "finance",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "finance@valeo-erp.local",
+      "firstName": "Finance",
+      "lastName": "Manager",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "finance123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["user", "finance_manager"],
+      "attributes": {
+        "tenant_id": ["demo-tenant"]
+      }
+    }
+  ],
+  "clientScopes": [
+    {
+      "name": "roles",
+      "description": "User roles and permissions",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true"
+          }
+        },
+        {
+          "name": "tenant_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "tenant_id",
+            "user.attribute": "tenant_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ]
+}
+
