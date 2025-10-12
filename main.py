@@ -214,6 +214,10 @@ app.include_router(finance_router, prefix="/api/v1/finance", tags=["Finance"])
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
 
+# Include Agents API (Phase 3 - Agentik)
+from app.api.v1.endpoints.agents import router as agents_router
+app.include_router(agents_router, prefix="/api/v1/agents", tags=["Agents"])
+
 # Include Authentication Router (⚠️ NUR FÜR ENTWICKLUNG!)
 app.include_router(auth_router)
 

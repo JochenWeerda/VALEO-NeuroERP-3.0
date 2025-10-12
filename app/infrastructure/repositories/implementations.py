@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 
 from .base_repository import BaseRepositoryImpl
-from . import (
+from .interfaces import (
     TenantRepository, UserRepository, CustomerRepository, LeadRepository,
     ContactRepository, ArticleRepository, WarehouseRepository,
     StockMovementRepository, InventoryCountRepository,
