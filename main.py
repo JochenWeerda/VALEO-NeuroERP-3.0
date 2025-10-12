@@ -218,6 +218,12 @@ app.mount("/metrics", metrics_app)
 from app.api.v1.endpoints.agents import router as agents_router
 app.include_router(agents_router, prefix="/api/v1/agents", tags=["Agents"])
 
+# Include Health & System Metrics API (Phase 4 - Observability for AI)
+from app.api.v1.endpoints.health import router as health_router
+from app.api.v1.endpoints.system_metrics import router as system_metrics_router
+app.include_router(health_router, tags=["Health"])
+app.include_router(system_metrics_router, prefix="/api/v1/metrics", tags=["System Metrics"])
+
 # Include RAG API (Phase 3 - Semantic Search)
 from app.api.v1.endpoints.rag import router as rag_router
 app.include_router(rag_router, prefix="/api/v1/rag", tags=["RAG"])
