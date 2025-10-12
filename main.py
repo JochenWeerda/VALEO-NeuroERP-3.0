@@ -218,6 +218,14 @@ app.mount("/metrics", metrics_app)
 from app.api.v1.endpoints.agents import router as agents_router
 app.include_router(agents_router, prefix="/api/v1/agents", tags=["Agents"])
 
+# Include RAG API (Phase 3 - Semantic Search)
+from app.api.v1.endpoints.rag import router as rag_router
+app.include_router(rag_router, prefix="/api/v1/rag", tags=["RAG"])
+
+# Include WebSocket API (Phase 3 - Realtime)
+from app.api.v1.endpoints.websocket import router as websocket_router
+app.include_router(websocket_router, prefix="/api/v1", tags=["WebSocket"])
+
 # Include Authentication Router (⚠️ NUR FÜR ENTWICKLUNG!)
 app.include_router(auth_router)
 

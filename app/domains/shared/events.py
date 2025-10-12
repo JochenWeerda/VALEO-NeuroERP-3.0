@@ -5,7 +5,7 @@ Provides abstract base classes and in-memory stub for event publishing
 
 import logging
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Callable, Dict, Type
 from uuid import uuid4
@@ -13,16 +13,12 @@ from uuid import uuid4
 logger = logging.getLogger(__name__)
 
 
-@dataclass
+@dataclass(kw_only=True)
 class DomainEvent(ABC):
     """Base class for all domain events."""
     aggregate_id: str
     timestamp: datetime
-    event_id: str = None
-    
-    def __post_init__(self):
-        if self.event_id is None:
-            self.event_id = str(uuid4())
+    event_id: str = field(default_factory=lambda: str(uuid4()))
 
 
 class IEventPublisher(ABC):

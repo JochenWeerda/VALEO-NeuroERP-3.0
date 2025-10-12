@@ -43,19 +43,22 @@ export const dashboardKeys = {
 }
 
 // Hooks
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useSalesDashboard() {
   return useQuery({
     queryKey: dashboardKeys.sales(),
     queryFn: async () => {
       // TODO: Real endpoint /api/v1/dashboard/sales
       // For now, aggregate from customers + orders
-      const customersResponse = await apiClient.get('/api/v1/crm/customers')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const customersResponse = await apiClient.get<{ items: any[], total: number }>('/api/v1/crm/customers')
       const customers = customersResponse.data.items || []
       
       return {
         totalRevenue: 450000,
         totalOrders: 156,
         avgOrderValue: 2885,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         topCustomers: customers.slice(0, 5).map((c: any) => ({
           id: c.id,
           name: c.name,
@@ -67,18 +70,22 @@ export function useSalesDashboard() {
   })
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useInventoryDashboard() {
   return useQuery({
     queryKey: dashboardKeys.inventory(),
     queryFn: async () => {
       // TODO: Real endpoint /api/v1/dashboard/inventory
-      const articlesResponse = await apiClient.get('/api/v1/articles')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const articlesResponse = await apiClient.get<{ items: any[], total: number }>('/api/v1/articles')
       const articles = articlesResponse.data.items || []
       
       return {
         totalArticles: articles.length,
         totalValue: 275000,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         lowStockCount: articles.filter((a: any) => a.stock_quantity < (a.min_stock || 10)).length,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         topArticles: articles.slice(0, 5).map((a: any) => ({
           id: a.id,
           name: a.name,
@@ -90,14 +97,17 @@ export function useInventoryDashboard() {
   })
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useExecutiveDashboard() {
   return useQuery({
     queryKey: dashboardKeys.executive(),
     queryFn: async () => {
       // Combine sales + inventory data
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const [salesRes, articlesRes] = await Promise.all([
-        apiClient.get('/api/v1/crm/customers'),
-        apiClient.get('/api/v1/articles')
+        apiClient.get<{ items: any[], total: number }>('/api/v1/crm/customers'),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        apiClient.get<{ items: any[], total: number }>('/api/v1/articles')
       ])
       
       return {

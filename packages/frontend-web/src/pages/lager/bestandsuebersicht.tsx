@@ -68,7 +68,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <TrendingDown className="h-5 w-5 text-orange-600" />
-              <span className="text-2xl font-bold">{bestand.reichweite}</span>
+              <span className="text-2xl font-bold">{bestand.totalArticles}</span>
             </div>
           </CardContent>
         </Card>
@@ -87,11 +87,11 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <div key={i} className="flex items-center justify-between rounded-lg border p-4">
                 <div>
                   <div className="font-semibold">{artikel.name}</div>
-                  <div className="text-sm text-muted-foreground">{artikel.menge} t</div>
+                  <div className="text-sm text-muted-foreground">{artikel.quantity} Stk</div>
                 </div>
                 <div className="text-right">
                   <div className="font-bold">
-                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(artikel.wert)}
+                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(artikel.value)}
                   </div>
                   <Badge variant="outline">#{i + 1}</Badge>
                 </div>

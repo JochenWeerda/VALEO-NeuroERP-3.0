@@ -107,7 +107,9 @@ export function useLiveInventory(): { status: LiveStatus } {
 }
 
 export function usePolicyAlerts(): { status: LiveStatus; policy: ReturnType<typeof useLive>['policy'] } {
-  const { pushPolicy, sweepPolicy, policy } = useLive()
+  const pushPolicy = useLive((state) => state.pushPolicy)
+  const sweepPolicy = useLive((state) => state.sweepPolicy)
+  const policy = useLive((state) => state.policy)
   const [status, setStatus] = useState<LiveStatus>('closed')
 
   useSSE(
