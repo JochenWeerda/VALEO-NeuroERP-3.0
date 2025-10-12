@@ -1,19 +1,23 @@
 # Default values for valeo-erp
-replicaCount: 2
+# This is a YAML-formatted file.
+
+replicaCount: 3
 
 image:
-  repository: valeo-erp/backend
-  pullPolicy: IfNotPresent
-  tag: "3.0.0"
+  repository: ghcr.io/jochenweerda/valeo-neuroerp-3.0
+  pullPolicy: Always
+  tag: "latest"
 
-imagePullSecrets: []
+imagePullSecrets:
+  - name: ghcr-secret
+
 nameOverride: ""
-fullnameOverride: ""
+fullnameOverride: "valeo-app"
 
 serviceAccount:
   create: true
   annotations: {}
-  name: ""
+  name: "valeo-app"
 
 podAnnotations:
   prometheus.io/scrape: "true"
@@ -23,15 +27,14 @@ podAnnotations:
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 1000
-  runAsGroup: 1000
   fsGroup: 1000
 
 securityContext:
+  allowPrivilegeEscalation: false
   capabilities:
     drop:
     - ALL
-  readOnlyRootFilesystem: true
-  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
 
 service:
   type: ClusterIP
@@ -44,122 +47,110 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   hosts:
-    - host: erp.valeo.example.com
+    - host: erp.valeo-landhandel.de
       paths:
         - path: /
           pathType: Prefix
   tls:
     - secretName: valeo-erp-tls
       hosts:
-        - erp.valeo.example.com
+        - erp.valeo-landhandel.de
 
 resources:
   limits:
     cpu: 1000m
-    memory: 1Gi
+    memory: 2Gi
   requests:
     cpu: 250m
     memory: 512Mi
 
 autoscaling:
   enabled: true
-  minReplicas: 2
+  minReplicas: 3
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
 
 livenessProbe:
   httpGet:
-    path: /healthz
+    path: /health/live
     port: 8000
-  initialDelaySeconds: 10
-  periodSeconds: 30
+  initialDelaySeconds: 30
+  periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3
 
 readinessProbe:
   httpGet:
-    path: /readyz
+    path: /ready
     port: 8000
-  initialDelaySeconds: 5
-  periodSeconds: 10
-  timeoutSeconds: 5
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
   failureThreshold: 3
 
 startupProbe:
   httpGet:
-    path: /healthz
+    path: /health/startup
     port: 8000
   initialDelaySeconds: 0
   periodSeconds: 5
-  timeoutSeconds: 5
+  timeoutSeconds: 3
   failureThreshold: 30
 
-nodeSelector: {}
-
-tolerations: []
-
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                  - valeo-erp
-          topologyKey: kubernetes.io/hostname
-
-# Environment variables
 env:
-  - name: DATABASE_URL
-    valueFrom:
-      secretKeyRef:
-        name: valeo-erp-secrets
-        key: database-url
-  - name: OIDC_DISCOVERY_URL
-    valueFrom:
-      configMapKeyRef:
-        name: valeo-erp-config
-        key: oidc-discovery-url
-  - name: DEBUG
-    value: "false"
   - name: LOG_LEVEL
     value: "INFO"
+  - name: ENABLE_METRICS
+    value: "true"
+  - name: ENABLE_TRACING
+    value: "true"
 
-# PostgreSQL (if using subchart)
+# PostgreSQL (Bitnami Chart)
 postgresql:
-  enabled: false
+  enabled: true
   auth:
     username: valeo
     password: changeme
-    database: valeo_erp
+    database: valeo_neuro_erp
+  primary:
+    persistence:
+      enabled: true
+      size: 20Gi
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
 
-# Redis (if using subchart)
+# Redis (Bitnami Chart)
 redis:
-  enabled: false
-  auth:
-    enabled: true
-    password: changeme
-
-# Backup Configuration
-backup:
   enabled: true
-  schedule: "0 2 * * *"  # Daily at 2 AM UTC
-  retentionDays: 30
-  retentionMonths: 12
-  
-  s3:
+  auth:
     enabled: false
-    bucket: valeo-backups
-    region: eu-central-1
-  
-  restoreTest:
-    enabled: true
-    schedule: "0 3 1 */3 *"  # Quarterly: 1st of month, every 3 months, at 3 AM
-    notify: false
-    webhookUrl: ""  # Slack/Teams webhook for notifications
+  master:
+    persistence:
+      enabled: true
+      size: 8Gi
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 50m
 
+# Keycloak (Bitnami Chart)
+keycloak:
+  enabled: true
+  auth:
+    adminUser: admin
+    adminPassword: changeme
+  postgresql:
+    enabled: true
+  ingress:
+    enabled: true
+    hostname: auth.valeo-landhandel.de
+    tls: true
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 200m

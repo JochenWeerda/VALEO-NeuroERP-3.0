@@ -183,6 +183,7 @@ const RollenVerwaltungRoute = createLazyRoute(() => import('@/pages/admin/rollen
 const AuditLogRoute = createLazyRoute(() => import('@/pages/admin/audit-log'))
 const SystemEinstellungenRoute = createLazyRoute(() => import('@/pages/einstellungen/system'))
 const MonitoringAlertsRoute = createLazyRoute(() => import('@/pages/admin/monitoring/alerts'))
+const ComplianceDashboardRoute = createLazyRoute(() => import('@/pages/admin/compliance-dashboard'))
 
 // Personal
 const MitarbeiterListeRoute = createLazyRoute(() => import('@/pages/personal/mitarbeiter-liste'))
@@ -386,6 +387,7 @@ const routeConfig: RouteObject[] = [
       { path: 'admin/rollen-verwaltung', element: <RollenVerwaltungRoute /> },
       { path: 'admin/audit-log', element: <AuditLogRoute /> },
       { path: 'admin/monitoring/alerts', element: <MonitoringAlertsRoute /> },
+      { path: 'admin/compliance', element: <ComplianceDashboardRoute /> },
       { path: 'einstellungen/system', element: <SystemEinstellungenRoute /> },
       
       // Personal

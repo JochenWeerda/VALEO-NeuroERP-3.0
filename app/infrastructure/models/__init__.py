@@ -294,3 +294,23 @@ class PolicyRule(Base):
     auto_suggest = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+# Audit & Compliance Models
+class AuditLog(Base):
+    """Audit log for compliance tracking"""
+    __tablename__ = "audit_logs"
+    __table_args__ = {"schema": "domain_shared", "extend_existing": True}
+
+    id = Column(String, primary_key=True)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    user_id = Column(String, ForeignKey("domain_shared.users.id"), nullable=False)
+    user_email = Column(String(100), nullable=False)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    action = Column(String(50), nullable=False)
+    entity_type = Column(String(50), nullable=False)
+    entity_id = Column(String, nullable=False)
+    changes = Column(postgresql.JSONB(astext_type=Text()), nullable=False)
+    ip_address = Column(String(50), nullable=True)
+    user_agent = Column(String(200), nullable=True)
+    correlation_id = Column(String(50), nullable=True)
