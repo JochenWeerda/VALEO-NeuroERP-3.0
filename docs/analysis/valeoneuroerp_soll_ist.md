@@ -30,68 +30,77 @@
 ## 3. Ist-Stand (Repository-Analyse)
 
 ### 3.1 Architektur und Backend
-- FastAPI-Monolith mit gemeinsamem Startpunkt (`main.py`), keine getrennten Microservices oder Eventbus-Anbindung sichtbar.[`main.py:10`]
-- Dependency-Injection-Konfiguration bricht, weil zentrale Repository-Implementierungen nicht importiert werden (`TenantRepositoryImpl` etc.).[`app/core/container_config.py:16` `app/core/container_config.py:58`]
-- Persistenz uneinheitlich: Mischung aus SQLAlchemy-Interfaces und direkten SQLite-Dateizugriffen (`valeo_neuro_erp.db`).[`app/api/v1/endpoints/articles.py:6` `app/api/v1/endpoints/articles.py:15`]
-- Alembic-Migration definiert andere Schemas als ORM-Modelle (z. B. `tenants` vs. `shared_tenants`), Gefahr divergenter Datenmodelle.[`alembic/versions/001_initial_schema.py:24` `app/infrastructure/models/__init__.py:17`]
+- FastAPI-Monolith mit gemeinsamem Startpunkt (`main.py`); Serviceabtrennung und Eventbus fehlen weiterhin.[`main.py:10`]
+- Dependency-Injection nutzt jetzt konkrete Repository-Implementierungen und Session-Factories; Container wird erfolgreich initialisiert.[`app/core/container_config.py:16` `app/core/container_config.py:58`]
+- Persistenz vereinheitlicht: Artikel-, Lager- und Finanz-Endpunkte greifen via SQLAlchemy auf PostgreSQL zu; SQLite-Pfade im API-Layer wurden entfernt.[`app/api/v1/endpoints/articles.py:1` `app/api/v1/endpoints/warehouses.py:1` `app/api/v1/endpoints/chart_of_accounts.py:1`]
+- Alembic-Schema muss um neue `policy_rules`-Tabelle ergänzt werden, damit Migrationen den aktuellen Datenstand widerspiegeln.[`app/infrastructure/models/__init__.py:152`]
 
 ### 3.2 Module und Domains
 - Zahlreiche Domain-Pakete unter `/domains` und `/packages/*-domain`, jedoch ueberwiegend in-memory oder kommentierte Exporte ohne Infrastruktur-Anbindung.[`packages/inventory-domain/src/index.ts:4`]
 - API-Schichten nutzen generische Repository-Schnittstellen, aber produktive Services liefern Mock-Daten und umgehen Persistenz (z. B. CustomerService).[`app/core/production_service_implementations.py:30` `app/core/production_service_implementations.py:182`]
 
 ### 3.3 KI-Integration
-- MCP/LangGraph lediglich als Skript- und Dokumentationsartefakte vorhanden; keine produktive Backend-Anbindung oder RAG/Memory-Bindings nachweisbar.[`scripts/create_langgraph_integration.py:42`]
-- Frontend-MCP-Client ruft `/api/mcp/...` auf, waehrend Backend-Router unter `/mcp/policy` registriert ist - Requests laufen ins Leere.[`packages/frontend-web/src/lib/mcp.ts:16` `app/api/v1/api.py:85` `app/api/v1/endpoints/policies.py:21`]
-- SSE-Client erwartet `/api/events?stream=mcp`, Backend bietet `/api/stream/{channel}` - Echtzeitpfad inkonsistent.[`packages/frontend-web/src/lib/sse-client.ts:62` `app/routers/sse_router.py:9`]
+- Policy-Engine persistiert jetzt in PostgreSQL; MCP-Routen liegen konsistent unter `/api/mcp/policy`, SSE-Endpunkte unterstützen sowohl `/api/stream/{channel}` als auch `/api/events`.[`app/api/v1/endpoints/policies.py:21` `app/routers/sse_router.py:1`]
+- Frontend-MCP-Client adressiert weiterhin `/api/mcp`; koordinierte Authentifizierung und echte Agenten-Workflows (LangGraph, RAG) fehlen nach wie vor.[`packages/frontend-web/src/lib/mcp.ts:16` `scripts/create_langgraph_integration.py:42`]
 
 ### 3.4 Frontend und UX
-- Umfangreiche Page-Struktur, aber ueberwiegend Hardcoded-Daten (Dashboards, POS-Suche) und fehlende API-Kopplung.[`packages/frontend-web/src/pages/dashboard/sales-dashboard.tsx:6` `packages/frontend-web/src/components/pos/ArticleSearch.tsx:23`]
-- Storybook, Design Tokens, Accessibility-Roadmap dokumentiert, jedoch keine belegten automatisierten Tests oder Coverage im Repo.
+- Die POS-Artikel-Suche nutzt nun die Live-API (`/api/v1/articles`) inklusive Fehler- und Ladezuständen; viele übrige Seiten bleiben jedoch mit Mock-Daten hinterlegt.[`packages/frontend-web/src/components/pos/ArticleSearch.tsx:1` `packages/frontend-web/src/pages/dashboard/sales-dashboard.tsx:6`]
+- Storybook-/Design-Dokumentation existiert weiterhin; automatisierte UI-Tests oder Coverage-Berichte wurden nicht ergänzt.
 
 ### 3.5 Qualitaet und Betriebsfaehigkeit
-- Tests: Vereinzelte Playwright-Contracttests greifen auf OpenAPI-Endpoints zu, setzen funktionierendes Backend voraus - derzeit nicht erfuellbar.[`contract-tests/openapi-validator.spec.ts:6`]
-- Sicherheit: OIDC-Konfiguration existiert nur als Client-Shell, keine Policy-Enforcement oder Tokenvalidierung serverseitig.[`app/core/config.py:44` `app/core/production_service_implementations.py:135`]
-- Observability und Deployment: Docker/K8s-Artefakte und Monitoring-Skripte vorhanden, aber keine Integration in laufenden Code (keine Prometheus-Instrumentierung in Services).
+- Tests: Zusätzlich zu den vorhandenen Playwright-Skripten existieren jetzt API-Auth-Checks (Pytest & Playwright); sie erfordern einen laufenden Backend-Server und gültige Tokens.[`tests/test_auth_middleware.py:1` `playwright-tests/auth-api.spec.ts:1`]
+- Sicherheit: Lightweight-Bearer-Middleware schützt zentrale Endpunkte; echter OIDC-/RBAC-Fluss und Audit-Telemetrie fehlen weiterhin.[`main.py:24` `app/core/security.py:1`]
+- Observability und Deployment: Monitoring-Artefakte unverändert dokumentiert, jedoch keine aktive Integration (Prometheus- bzw. Tracing-Code bleibt ausständig).
 
 ## 4. Soll-/Ist-Vergleich
 
 | Bereich | Soll (Anspruch) | Ist (aktuell) | Abweichung / Kommentar |
 |---------|-----------------|---------------|------------------------|
 | Architektur | MSOA/DDD mit BFF, Eventbus, autonome Domains.[`VALEO-NEUROERP-DOMAIN-OVERVIEW.md:13`] | FastAPI-Monolith ohne Serviceabtrennung, Eventbus fehlt.[`main.py:10`] | Hoher Gap: Zielarchitektur nicht umgesetzt. |
-| Backend (Domains, Events) | Persistente Domain-Services mit Events, Polyglotte DB.[`valeo_neuro_erp_architekturdiagramm_msoa_agentik.jsx:224`] | Mischung aus Platzhalter-Services, SQLite-Zugriff, divergente Schemata.[`app/api/v1/endpoints/articles.py:15`] | Kritische Inkonsistenz zwischen Claim und Implementierung. |
-| Frontend / UI-UX | Multimodal, datengetriebene Workflows, Storybook-led UX.[`UI-UX-MCP-INTEGRATION-ROADMAP.md:16`] | Statische Mock-Dashboards, keine Storybook-Artefakte im Build, keine Sprach/Touch-Interaktionen.[`packages/frontend-web/src/components/pos/ArticleSearch.tsx:23`] | UX-Vision nur dokumentiert. |
-| KI-Integration (LangGraph, MCP, RAG) | Agentische Layer als Co-Piloten, Echtzeit-SSE, RAG-Anbindung.[`valeo_neuro_erp_architekturdiagramm_msoa_agentik.jsx:143`] | Scripts und Clients ohne lauffaehigen Server-Endpunkt; Pfade inkonsistent.[`packages/frontend-web/src/lib/mcp.ts:16`] | KI-Funktionalitaet faktisch nicht verfuegbar. |
-| Datenmodell / API | PostgreSQL + Drizzle/SQLAlchemy, OpenAPI-konforme Services.[`README.md:23`] | Mischung aus SQLite-File, unvollstaendigen Repos, OpenAPI-Tests scheitern an Luecken.[`app/core/container_config.py:58`] | Datenhaltung nicht konform zum Zielbild. |
-| Prozessintelligenz / Agentik | Policy-/Agenten-Engine mit Auto-Execute und Audit.[`VALEO-NEUROERP-DOMAIN-OVERVIEW.md:132`] | Policy Engine existiert lokal (SQLite), aber ohne Governance/Audit-Flows oder MCP-Einbindung.[`app/services/policy_service.py:24`] | Ansaetze vorhanden, jedoch isoliert. |
-| Sicherheit / Datenschutz | OIDC, RBAC/ABAC, Audit Logging auf Events.[`README.md:5`] | Auth-Service nur clientseitig, Backend-Endpunkte ohne Token-Pruefung, Audit-Services Platzhalter.[`app/core/production_service_implementations.py:135`] | Compliance-Risiko: Security nur dokumentiert. |
-| Dokumentation / CI/CD | GitHub Actions, Deployment-Guides, laufende Pipelines.[`README.md:5`] | Umfangreiche Dokumente vorhanden, aber keine Evidenz fuer funktionsfaehige Pipelines im Code (Tests nicht konfigurierbar).[`contract-tests/openapi-validator.spec.ts:6`] | Dokumentation ueberholt Implementierung. |
+| Backend (Domains, Events) | Persistente Domain-Services mit Events, Polyglotte DB.[`valeo_neuro_erp_architekturdiagramm_msoa_agentik.jsx:224`] | Monolith nutzt jetzt konsistente SQLAlchemy-Repos; Event-Layer & Microservice-Trennung fehlen weiterhin.[`app/core/container_config.py:16`] | Fortschritt bei Persistenz, strukturelle Entkopplung offen. |
+| Frontend / UI-UX | Multimodal, datengetriebene Workflows, Storybook-led UX.[`UI-UX-MCP-INTEGRATION-ROADMAP.md:16`] | POS-Suche verwendet reale API; übrige UIs überwiegend statisch, keine multimodalen Interaktionen.[`packages/frontend-web/src/components/pos/ArticleSearch.tsx:1`] | Teilfortschritt, Großteil der Vision unbedient. |
+| KI-Integration (LangGraph, MCP, RAG) | Agentische Layer als Co-Piloten, Echtzeit-SSE, RAG-Anbindung.[`valeo_neuro_erp_architekturdiagramm_msoa_agentik.jsx:143`] | MCP-/SSE-Routen konsolidiert, Policy-Regeln in Postgres; Agenten- und RAG-Layer weiterhin inaktiv.[`app/services/policy_service.py:1`] | Infrastruktur vorbereitet, Funktionalität fehlt. |
+| Datenmodell / API | PostgreSQL + Drizzle/SQLAlchemy, OpenAPI-konforme Services.[`README.md:23`] | Kerndomänen (CRM/Inventory/Finance Policies) bedienen Postgres; Migrationen müssen aktualisiert & getestet werden.[`app/api/v1/endpoints/articles.py:1`] | Basis konsolidiert, Migration/Testabdeckung offen. |
+| Prozessintelligenz / Agentik | Policy-/Agenten-Engine mit Auto-Execute und Audit.[`VALEO-NEUROERP-DOMAIN-OVERVIEW.md:132`] | PolicyEngine läuft serverseitig, Audit-/Approval-Flows und Agentenorchestrierung fehlen.[`app/services/policy_service.py:1`] | Fortschritt, aber Governance-Komponenten fehlen. |
+| Sicherheit / Datenschutz | OIDC, RBAC/ABAC, Audit Logging auf Events.[`README.md:5`] | Bearer-Auth erzwingt Dev-Token; vollständige OIDC-Integration & Audit-Pipeline stehen aus.[`main.py:24`] | Minimale Absicherung vorhanden, Compliance-Risiko reduziert aber nicht gelöst. |
+| Dokumentation / CI/CD | GitHub Actions, Deployment-Guides, laufende Pipelines.[`README.md:5`] | Tests für Auth vorhanden; CI-Konfigurationen weiterhin nicht nachweislich aktiv.[`playwright-tests/auth-api.spec.ts:1`] | Dokumentation + Tests existieren, Automatisierung unklar. |
 
 ## 5. Schlussfolgerungen und Empfehlungen
 
 ### 5.1 Kritische Luecken
-- Fehlende Serviceabtrennung und defekte DI-Konfiguration verhindern produktive Backend-Funktion.[`app/core/container_config.py:16`]
-- Datenpersistenz uneinheitlich; SQLite-Bypass widerspricht Multi-Tenant/Postgres-Ziel.[`app/api/v1/endpoints/articles.py:15`]
-- MCP-/LangGraph-Versprechen ohne funktionsfaehige Schnittstellen, damit kein KI-Mehrwert.[`packages/frontend-web/src/lib/mcp.ts:16`]
-- Sicherheits- und Compliance-Anforderungen nicht erfuellt (kein serverseitiger OIDC-Abgleich, keine Audit-Pipeline).[`app/core/production_service_implementations.py:135`]
+- Architektur bleibt monolithisch ohne Domain-Boundaries und Eventing; Roadmap zur schrittweisen Service-Trennung fehlt.[`main.py:10`]
+- Agentische Fähigkeiten (LangGraph, Workflow-Co-Piloten) sind weiterhin nicht implementiert; bestehende Policy-Layer benötigt Approval/Audit-Struktur.[`app/services/policy_service.py:1`]
+- Sicherheitsmodell basiert derzeit auf Dev-Token; echte OIDC-/RBAC-Anbindung und revisionssichere Audit-Pipeline fehlen.[`app/core/security.py:1`]
+- CI/CD-Vertrauen gering: Tests existieren lokal, aber keine automatisierte Ausführung oder Qualitätsmetriken dokumentiert.[`playwright-tests/auth-api.spec.ts:1`]
 
 ### 5.2 Quick Wins
-- Reparatur der DI-Registrierungen, Import der Repository-Implementierungen und Konfiguration eines konsistenten PostgreSQL-Zugriffs.
-- Vereinheitlichung der API-Pfade (`/api/mcp` und `/mcp/policy`) und Einfuehrung eines Gateways fuer MCP-Actions.
-- Einfuehrung realistischer Seed-Daten und API-Adapter im Frontend, um Mock-Dashboards schrittweise an echte Endpunkte zu koppeln.
-- Aktivierung von Auth-Middleware in FastAPI (z. B. OAuth2/JWT-Pruefung) auf kritischen Routen.
+- Migrationen aktualisieren und Testdaten-Seed bereitstellen, damit neue Postgres-Tabellen reproduzierbar sind (inkl. `policy_rules`).
+- Weitere Kernseiten (Dashboards, CRM) vom Mock-Modus auf die vorhandenen API-Endpunkte umstellen.
+- Dev-Token in `.env` konfigurierbar machen und OIDC-Stubs vorbereiten (Discovery-URL, Tokenprüfung), um Testläufe ohne Hardcodings zu ermöglichen.
+- Automatisierte Ausführung der neuen Auth-Tests in CI (z. B. GitHub Actions) etablieren und Ergebnisse dokumentieren.
 
 ### 5.3 Strategische Massnahmen
-- Architektur-Refactor: Priorisierte Domains in klar abgegrenzte Module trennen (zunaechst innerhalb des Monolithen), Events ueber Message-Bus einfuehren.
-- Aufbau eines gemeinsamen Policy-/Agent-Backends, das PolicyStore, RAG-Speicher und LangGraph orchestriert; Definition einheitlicher Contracts.
-- Implementierung eines konsistenten Data-Access-Layers (SQLAlchemy + Alembic) mit Migrationen, Tests und Eliminierung aller SQLite-Pfade.
-- UX-Initiative: Storybook in CI etablieren, Design Tokens verankern, User Flows mit echten Daten aufbauen, Vorbereitung fuer Touch/Voice-Eingaenge.
-- Security und Compliance: Zentraler AuthZ-Layer, Audit Logging pro Domain, DSGVO/GxP-Kontrollen operationalisieren.
+- Architektur-Refactor: Domain-Grenzen intern schärfen (Service-Kernel, Event-Publishing) und Fahrplan Richtung echte Microservices definieren.
+- KI/Agentik: LangGraph-/RAG-Layer reaktivieren, Policy-Entscheidungen mit Approval-/Audit-Strömen und Realtime-Feedback verschmelzen.
+- Daten & Tests: Alembic-Migrationen harmonisieren, Integrationstests für Kern-APIs (CRM, Inventory, Finance) etablieren, Observability (Prometheus/Tracing) anbinden.
+- UX-Initiative: Design-System produktiv (Storybook in CI), multimodale Eingaben prototypisch umsetzen, reale Workflows (z. B. POS, Dashboard) mit KPI-Daten versorgen.
+- Security & Compliance: Vollständige OIDC/RBAC-Implementierung, Audit-Logging je Domain und Datenschutzkontrollen produktiv schalten.
 
 ### 5.4 Priorisierte Roadmap
-- Phase 1 (0-4 Wochen): Backend-DI fixen, Postgres-Anbindung finalisieren, REST-Endpunkte (CRM, Inventory, Policy) lauffaehig machen, Frontend auf echte APIs umstellen, Auth-Guards aktivieren.
-- Phase 2 (1-3 Monate): Events und Domain-Boundaries schaerfen, MCP-Gateway mit Policy Engine verbinden, Storybook und UX-Guidelines produktiv, Observability-Stack einbinden, erste automatisierte Tests.
-- Phase 3 (3-6 Monate): LangGraph/RAG-Integration produktiv, Agenten-Orchestrierung mit Feedback-Schleifen, Microservice-Ausgliederung (z. B. Finance, Inventory), Compliance- und Security-Haertung.
+- Phase 1 (0-4 Wochen): Migrationen & Seed-Skripte aktualisieren, weitere UI-Flows an APIs anbinden, CI-Pipeline um auth/tests erweitern, OIDC-Konfiguration vorbereiten.
+- Phase 2 (1-3 Monate): Domain-Events & internes Messaging etablieren, Observability (Metrics/Tracing) integrieren, Storybook + Design Tokens in CI verankern, erste Agenten-Workflows pilotieren.
+- Phase 3 (3-6 Monate): LangGraph/RAG produktiv, Approval-/Audit-Flows ausbauen, priorisierte Domains (Finance, Inventory) modularisieren, Compliance-/Security-Zertifizierungen vorbereiten.
 
 ---
 
 **Refactoring-Idee (optional):** Ein Service-Kernel innerhalb des Monolithen etabliert klare Domain-Interfaces, abstrahiert Events via internes Publish/Subscribe und schafft damit einen evolutionaeren Pfad zur echten MSOA ohne Big-Bang-Migration.
+
+## 6. Fortschritts-Notizen (Stand aktueller Implementierung)
+
+- **Persistenz vereinheitlicht:** Artikel-, Lager- und Finanz-Endpunkte arbeiten vollständig über SQLAlchemy/PostgreSQL; die neue `policy_rules`-Tabelle sorgt für konsistente KI-Regeln.[`app/api/v1/endpoints/articles.py:1` `app/infrastructure/models/__init__.py:152`]
+- **MCP/SSE konsolidiert:** Einheitliche Pfade (`/api/mcp/policy`, `/api/stream/{channel}`, `/api/events`) stellen Frontend- und Backend-Parität sicher; PolicyStore nutzt gemeinsame Service-Logik.[`app/api/v1/endpoints/policies.py:21` `app/routers/sse_router.py:1` `app/policy/store.py:1`]
+- **Auth-Baseline aktiv:** Middleware erfordert Bearer-Token (Dev-Token fallback), zusätzliche Tests prüfen Schutzmechanismen.[`main.py:24` `app/core/security.py:1` `tests/test_auth_middleware.py:1`]
+- **Frontend-Anbindung gestartet:** POS-Suche konsumiert Live-Daten; weitere Seiten müssen noch von Mock-Ständen gelöst werden.[`packages/frontend-web/src/components/pos/ArticleSearch.tsx:1`]
+- **Tests erweitert:** Neben bestehenden Contract-Checks existieren nun API-Auth-Prüfungen für Pytest und Playwright (skippbar via `API_URL`).[`tests/test_auth_middleware.py:1` `playwright-tests/auth-api.spec.ts:1`]
+
+> **Hinweis:** Für zukünftige Releases sollten Migrationen (`alembic/versions`) angepasst, Seed-Skripte bereitgestellt und CI-Pipelines so erweitert werden, dass die neuen Tests automatisiert laufen (inkl. Bereitstellung des Dev-Tokens).
