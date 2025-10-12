@@ -1,0 +1,79 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: valeo-services
+  namespace: valeo-erp
+spec:
+  hosts:
+    - "api.valeo-erp.com"
+  gateways:
+    - valeo-gateway
+  http:
+    # CRM Routes
+    - match:
+        - uri:
+            prefix: /api/v1/crm
+      route:
+        - destination:
+            host: crm-service
+            port:
+              number: 8001
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,reset,connect-failure
+      timeout: 10s
+    
+    # Inventory Routes  
+    - match:
+        - uri:
+            prefix: /api/v1/inventory
+      route:
+        - destination:
+            host: inventory-service
+            port:
+              number: 8002
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+      timeout: 10s
+    
+    # Finance Routes
+    - match:
+        - uri:
+            prefix: /api/v1/finance
+      route:
+        - destination:
+            host: finance-service
+            port:
+              number: 8003
+          weight: 90
+        - destination:
+            host: finance-service-canary
+            port:
+              number: 8003
+          weight: 10  # 10% canary traffic
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+      timeout: 10s
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: valeo-gateway
+  namespace: valeo-erp
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: valeo-api-tls
+      hosts:
+        - "api.valeo-erp.com"
+

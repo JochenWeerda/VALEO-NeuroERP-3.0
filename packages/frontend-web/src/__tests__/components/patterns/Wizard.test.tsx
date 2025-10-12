@@ -73,8 +73,8 @@ describe('Wizard', () => {
     const weiterButton = screen.getByRole('button', { name: /weiter/i })
     fireEvent.click(weiterButton)
     
-    // Im letzten Schritt sollte Abschließen-Button erscheinen
-    const abschliessenButton = screen.getByRole('button', { name: /abschließen/i })
+    // Im letzten Schritt sollte der "Abschliessen"-Button erscheinen
+    const abschliessenButton = screen.getByRole('button', { name: /abschliessen/i })
     fireEvent.click(abschliessenButton)
     
     expect(onFinish).toHaveBeenCalled()
