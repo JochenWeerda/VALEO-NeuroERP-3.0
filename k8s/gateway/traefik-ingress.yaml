@@ -1,0 +1,62 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: valeo-api-ingress
+  namespace: valeo-erp
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # CRM Service
+    - match: Host(`api.valeo-erp.com`) && PathPrefix(`/api/v1/crm`)
+      kind: Rule
+      services:
+        - name: crm-service
+          port: 8001
+      middlewares:
+        - name: rate-limit
+        - name: auth-check
+    
+    # Inventory Service
+    - match: Host(`api.valeo-erp.com`) && PathPrefix(`/api/v1/inventory`)
+      kind: Rule
+      services:
+        - name: inventory-service
+          port: 8002
+      middlewares:
+        - name: rate-limit
+        - name: auth-check
+    
+    # Finance Service
+    - match: Host(`api.valeo-erp.com`) && PathPrefix(`/api/v1/finance`)
+      kind: Rule
+      services:
+        - name: finance-service
+          port: 8003
+      middlewares:
+        - name: rate-limit
+        - name: auth-check
+
+  tls:
+    secretName: valeo-api-tls
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: rate-limit
+  namespace: valeo-erp
+spec:
+  rateLimit:
+    average: 100
+    burst: 200
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: auth-check
+  namespace: valeo-erp
+spec:
+  forwardAuth:
+    address: http://keycloak:8080/auth/verify
+    trustForwardHeader: true
+

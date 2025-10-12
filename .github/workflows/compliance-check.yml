@@ -1,0 +1,161 @@
+name: Compliance Checks
+
+on:
+  schedule:
+    # Weekly on Monday at 6:00 AM
+    - cron: '0 6 * * 1'
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches: [main]
+    paths:
+      - 'tests/compliance/**'
+      - 'app/api/v1/endpoints/gdpr.py'
+      - 'docs/compliance/**'
+
+jobs:
+  gdpr-compliance:
+    name: GDPR Compliance Tests
+    runs-on: ubuntu-latest
+    
+    env:
+      DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024!@localhost:5432/valeo_neuro_erp
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: valeo_neuro_erp
+          POSTGRES_USER: valeo_dev
+          POSTGRES_PASSWORD: valeo_dev_2024!
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U valeo_dev"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+      
+      - name: Initialize database
+        run: |
+          python scripts/init_db.py
+      
+      - name: Run GDPR Tests
+        run: |
+          pytest tests/compliance/test_gdpr.py -v --tb=short
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gdpr-test-results
+          path: pytest-report.xml
+
+  gobd-compliance:
+    name: GoBD Compliance Tests
+    runs-on: ubuntu-latest
+    
+    env:
+      DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024!@localhost:5432/valeo_neuro_erp
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: valeo_neuro_erp
+          POSTGRES_USER: valeo_dev
+          POSTGRES_PASSWORD: valeo_dev_2024!
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U valeo_dev"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+      
+      - name: Initialize database
+        run: |
+          python scripts/init_db.py
+          python -m app.seeds.inventory_seed
+      
+      - name: Run GoBD Tests
+        run: |
+          pytest tests/compliance/test_gobd.py -v --tb=short
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gobd-test-results
+          path: pytest-report.xml
+
+  compliance-report:
+    name: Generate Compliance Report
+    runs-on: ubuntu-latest
+    needs: [gdpr-compliance, gobd-compliance]
+    if: always()
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download Test Results
+        uses: actions/download-artifact@v4
+        with:
+          path: test-results
+      
+      - name: Generate Report
+        run: |
+          echo "# Compliance Test Report" > compliance-report.md
+          echo "**Date:** $(date)" >> compliance-report.md
+          echo "" >> compliance-report.md
+          echo "## GDPR Tests" >> compliance-report.md
+          cat test-results/gdpr-test-results/pytest-report.xml || echo "No GDPR results"
+          echo "" >> compliance-report.md
+          echo "## GoBD Tests" >> compliance-report.md
+          cat test-results/gobd-test-results/pytest-report.xml || echo "No GoBD results"
+      
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-report
+          path: compliance-report.md
+      
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('compliance-report.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+

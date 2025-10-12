@@ -1,0 +1,130 @@
+# SLO-based Alert Rules for VALEO NeuroERP
+# Integrated with monitoring/slo/service-level-objectives.yaml
+
+groups:
+  - name: slo_violations
+    interval: 30s
+    rules:
+      # API Availability SLO
+      - alert: APIAvailabilitySLOViolation
+        expr: avg_over_time(up{job="valeo-app"}[30d]) < 0.999
+        for: 5m
+        labels:
+          severity: critical
+          slo: api_availability
+        annotations:
+          summary: "API Availability SLO violated"
+          description: "API availability {{ $value | humanizePercentage }} is below 99.9% target"
+
+      # API Latency p95 SLO
+      - alert: APILatencyP95SLOWarning
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 0.7
+        for: 5m
+        labels:
+          severity: warning
+          slo: api_latency_p95
+        annotations:
+          summary: "API Latency p95 exceeds warning threshold"
+          description: "p95 latency {{ $value }}s exceeds 700ms warning threshold"
+
+      - alert: APILatencyP95SLOCritical
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.0
+        for: 5m
+        labels:
+          severity: critical
+          slo: api_latency_p95
+        annotations:
+          summary: "API Latency p95 SLO violated"
+          description: "p95 latency {{ $value }}s exceeds 1000ms target"
+
+      # Error Rate SLO
+      - alert: APIErrorRateSLOWarning
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) /
+          sum(rate(http_requests_total[5m])) > 0.005
+        for: 5m
+        labels:
+          severity: warning
+          slo: api_error_rate
+        annotations:
+          summary: "API Error Rate exceeds warning threshold"
+          description: "Error rate {{ $value | humanizePercentage }} exceeds 0.5% warning threshold"
+
+      - alert: APIErrorRateSLOCritical
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) /
+          sum(rate(http_requests_total[5m])) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          slo: api_error_rate
+        annotations:
+          summary: "API Error Rate SLO violated"
+          description: "Error rate {{ $value | humanizePercentage }} exceeds 1% target"
+
+  - name: business_slos
+    interval: 1m
+    rules:
+      # Workflow Success Rate
+      - alert: WorkflowSuccessRateLow
+        expr: |
+          sum(rate(workflow_transitions_total{status="completed"}[5m])) /
+          sum(rate(workflow_transitions_total[5m])) < 0.90
+        for: 1h
+        labels:
+          severity: warning
+          slo: workflow_success_rate
+        annotations:
+          summary: "Workflow success rate below target"
+          description: "Only {{ $value | humanizePercentage }} of workflows completing successfully"
+
+      # Compliance Violations
+      - alert: ComplianceViolationRateHigh
+        expr: |
+          sum(rate(compliance_violations_total[1h])) /
+          sum(rate(compliance_checks_total[1h])) > 0.05
+        for: 1h
+        labels:
+          severity: warning
+          slo: compliance_violation_rate
+        annotations:
+          summary: "High compliance violation rate"
+          description: "{{ $value | humanizePercentage }} of compliance checks failing"
+
+  - name: infrastructure_health
+    interval: 30s
+    rules:
+      # Pod Restarts
+      - alert: PodRestartingTooOften
+        expr: rate(kube_pod_container_status_restarts_total[15m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod {{ $labels.pod }} restarting frequently"
+          description: "Pod has restarted {{ $value }} times in the last 15 minutes"
+
+      # OOM Kills
+      - alert: PodOOMKilled
+        expr: |
+          sum by (namespace, pod) (
+            kube_pod_container_status_terminated_reason{reason="OOMKilled"}
+          ) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pod {{ $labels.pod }} was OOM killed"
+          description: "Pod ran out of memory and was terminated"
+
+      # Service-Mesh Health
+      - alert: IstioSidecarNotReady
+        expr: |
+          sum by (namespace, pod) (
+            kube_pod_status_phase{phase!="Running"}
+          ) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Istio sidecar not ready in {{ $labels.pod }}"
+

@@ -1,0 +1,184 @@
+version: "3.8"
+
+# Microservices Stack for VALEO-NeuroERP
+# 3 isolated services: CRM, Inventory, Finance
+
+services:
+  # CRM Service
+  crm-service:
+    build:
+      context: .
+      dockerfile: services/crm/Dockerfile
+    container_name: valeo-crm
+    environment:
+      - DATABASE_URL=postgresql://valeo:${POSTGRES_PASSWORD}@postgres:5432/valeo_neuro_erp
+      - REDIS_URL=redis://redis:6379/0
+      - NATS_SERVERS=nats://nats:4222
+      - LOG_LEVEL=INFO
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - valeo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Inventory Service
+  inventory-service:
+    build:
+      context: .
+      dockerfile: services/inventory/Dockerfile
+    container_name: valeo-inventory
+    environment:
+      - DATABASE_URL=postgresql://valeo:${POSTGRES_PASSWORD}@postgres:5432/valeo_neuro_erp
+      - REDIS_URL=redis://redis:6379/0
+      - NATS_SERVERS=nats://nats:4222
+      - LOG_LEVEL=INFO
+    ports:
+      - "8002:8002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - valeo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Finance Service
+  finance-service:
+    build:
+      context: .
+      dockerfile: services/finance/Dockerfile
+    container_name: valeo-finance
+    environment:
+      - DATABASE_URL=postgresql://valeo:${POSTGRES_PASSWORD}@postgres:5432/valeo_neuro_erp
+      - REDIS_URL=redis://redis:6379/0
+      - NATS_SERVERS=nats://nats:4222
+      - LOG_LEVEL=INFO
+    ports:
+      - "8003:8003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - valeo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Gateway (Traefik)
+  gateway:
+    image: traefik:v2.11
+    container_name: valeo-gateway
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--metrics.prometheus=true"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./k8s/gateway/traefik-config.yml:/etc/traefik/traefik.yml:ro
+    networks:
+      - valeo-network
+    restart: unless-stopped
+
+  # PostgreSQL (shared)
+  postgres:
+    image: postgres:15-alpine
+    container_name: valeo-postgres
+    environment:
+      POSTGRES_DB: valeo_neuro_erp
+      POSTGRES_USER: valeo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - valeo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U valeo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (shared)
+  redis:
+    image: redis:7-alpine
+    container_name: valeo-redis
+    command: redis-server --appendonly yes --maxmemory 1gb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - valeo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # NATS (shared)
+  nats:
+    image: nats:2.10-alpine
+    container_name: valeo-nats
+    command:
+      - "--jetstream"
+      - "--store_dir=/data"
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - nats_data:/data
+    networks:
+      - valeo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  valeo-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  nats_data:
+

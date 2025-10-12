@@ -228,6 +228,10 @@ app.include_router(system_metrics_router, prefix="/api/v1/metrics", tags=["Syste
 from app.api.v1.endpoints.audit import router as audit_router
 app.include_router(audit_router, prefix="/api/v1/audit", tags=["Audit"])
 
+# Include GDPR API (Compliance)
+from app.api.v1.endpoints.gdpr import router as gdpr_router
+app.include_router(gdpr_router, prefix="/api/v1/gdpr", tags=["GDPR"])
+
 # Include RAG API (Phase 3 - Semantic Search)
 from app.api.v1.endpoints.rag import router as rag_router
 app.include_router(rag_router, prefix="/api/v1/rag", tags=["RAG"])

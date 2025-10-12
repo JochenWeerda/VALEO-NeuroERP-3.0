@@ -1,0 +1,118 @@
+# AlertManager Routing Configuration
+# Production-ready with multiple receivers
+
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@valeo-erp.com'
+  smtp_auth_username: 'alerts@valeo-erp.com'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+  slack_api_url: '${SLACK_WEBHOOK_URL}'
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+
+route:
+  receiver: 'default'
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 5m
+  repeat_interval: 4h
+  
+  routes:
+    # Critical alerts go to PagerDuty + Email
+    - match:
+        severity: critical
+      receiver: oncall-critical
+      continue: false
+      group_wait: 0s
+      repeat_interval: 5m
+
+    # SLO violations to SRE team
+    - match_re:
+        slo: api_.*|workflow_.*|compliance_.*
+      receiver: sre-team
+      continue: true
+      group_interval: 10m
+
+    # Warning alerts to Slack
+    - match:
+        severity: warning
+      receiver: team-warnings
+      continue: false
+      group_interval: 15m
+
+    # Business alerts to specific teams
+    - match:
+        domain: crm
+      receiver: crm-team
+    - match:
+        domain: finance
+      receiver: finance-team
+    - match:
+        domain: inventory
+      receiver: inventory-team
+
+receivers:
+  # Default receiver (logs only)
+  - name: 'default'
+    email_configs:
+      - to: 'ops@valeo-erp.com'
+        headers:
+          Subject: '[VALEO-ERP] Alert: {{ .GroupLabels.alertname }}'
+
+  # Critical on-call (PagerDuty + Email)
+  - name: 'oncall-critical'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY}'
+        description: '{{ .GroupLabels.alertname }}'
+        details:
+          firing: '{{ template "pagerduty.default.instances" .Alerts.Firing }}'
+    email_configs:
+      - to: 'oncall@valeo-erp.com,ops-lead@valeo-erp.com'
+        headers:
+          Subject: '🚨 [CRITICAL] {{ .GroupLabels.alertname }}'
+        html: '{{ template "email.html" . }}'
+
+  # SRE Team (Email + Slack)
+  - name: 'sre-team'
+    slack_configs:
+      - channel: '#sre-alerts'
+        title: 'SLO Violation: {{ .GroupLabels.slo }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+    email_configs:
+      - to: 'sre@valeo-erp.com'
+
+  # Team warnings (Slack only)
+  - name: 'team-warnings'
+    slack_configs:
+      - channel: '#alerts'
+        title: '⚠️ {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        color: 'warning'
+
+  # CRM Team
+  - name: 'crm-team'
+    slack_configs:
+      - channel: '#crm-alerts'
+        title: 'CRM Alert: {{ .GroupLabels.alertname }}'
+
+  # Finance Team  
+  - name: 'finance-team'
+    slack_configs:
+      - channel: '#finance-alerts'
+        title: 'Finance Alert: {{ .GroupLabels.alertname }}'
+
+  # Inventory Team
+  - name: 'inventory-team'
+    slack_configs:
+      - channel: '#inventory-alerts'
+        title: 'Inventory Alert: {{ .GroupLabels.alertname }}'
+
+inhibit_rules:
+  # Suppress dependent alerts
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']
+

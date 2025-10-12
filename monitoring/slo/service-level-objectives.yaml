@@ -1,0 +1,116 @@
+# Service Level Objectives (SLOs) für VALEO NeuroERP
+# Based on Google SRE Best Practices
+
+slos:
+  # API Availability
+  - name: api_availability
+    description: API should be available 99.9% of the time
+    sli:
+      metric: up{job="valeo-app"}
+      window: 30d
+    target: 0.999
+    alerts:
+      - severity: critical
+        threshold: 0.995  # Alert wenn unter 99.5%
+        duration: 5m
+
+  # API Latency (p95)
+  - name: api_latency_p95
+    description: 95% of requests should complete within 500ms
+    sli:
+      metric: histogram_quantile(0.95, http_request_duration_seconds_bucket)
+      window: 1h
+    target: 0.5  # 500ms
+    alerts:
+      - severity: warning
+        threshold: 0.7  # 700ms
+        duration: 5m
+      - severity: critical
+        threshold: 1.0  # 1000ms
+        duration: 5m
+
+  # API Latency (p99)
+  - name: api_latency_p99
+    description: 99% of requests should complete within 1000ms
+    sli:
+      metric: histogram_quantile(0.99, http_request_duration_seconds_bucket)
+      window: 1h
+    target: 1.0  # 1000ms
+    alerts:
+      - severity: critical
+        threshold: 2.0  # 2000ms
+        duration: 5m
+
+  # Error Rate
+  - name: api_error_rate
+    description: Less than 0.1% of requests should fail
+    sli:
+      metric: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])
+      window: 1h
+    target: 0.001  # 0.1%
+    alerts:
+      - severity: warning
+        threshold: 0.005  # 0.5%
+        duration: 5m
+      - severity: critical
+        threshold: 0.01  # 1%
+        duration: 5m
+
+  # Database Query Performance
+  - name: database_query_latency_p95
+    description: 95% of DB queries should complete within 100ms
+    sli:
+      metric: histogram_quantile(0.95, db_query_duration_seconds_bucket)
+      window: 1h
+    target: 0.1  # 100ms
+    alerts:
+      - severity: warning
+        threshold: 0.2  # 200ms
+        duration: 10m
+
+  # Event-Bus Health
+  - name: nats_availability
+    description: NATS Event-Bus should be available 99.95%
+    sli:
+      metric: up{job="nats"}
+      window: 30d
+    target: 0.9995
+    alerts:
+      - severity: critical
+        threshold: 0.99
+        duration: 1m
+
+  # Workflow Success Rate
+  - name: workflow_success_rate
+    description: 95% of workflows should complete successfully
+    sli:
+      metric: |
+        sum(rate(workflow_transitions_total{status="completed"}[5m])) /
+        sum(rate(workflow_transitions_total[5m]))
+      window: 24h
+    target: 0.95
+    alerts:
+      - severity: warning
+        threshold: 0.90
+        duration: 1h
+      - severity: critical
+        threshold: 0.80
+        duration: 30m
+
+  # Compliance Violations
+  - name: compliance_violation_rate
+    description: Less than 1% of compliance checks should fail
+    sli:
+      metric: |
+        sum(rate(compliance_violations_total[1h])) /
+        sum(rate(compliance_checks_total[1h]))
+      window: 24h
+    target: 0.01  # < 1%
+    alerts:
+      - severity: warning
+        threshold: 0.05  # 5%
+        duration: 1h
+      - severity: critical
+        threshold: 0.10  # 10%
+        duration: 30m
+
