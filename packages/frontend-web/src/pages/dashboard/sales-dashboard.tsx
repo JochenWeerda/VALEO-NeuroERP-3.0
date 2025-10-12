@@ -1,19 +1,21 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { BarChart3, Euro, FileText, TrendingUp, Users } from 'lucide-react'
+import { BarChart3, Euro, FileText, TrendingUp, Users, Loader2 } from 'lucide-react'
+import { useSalesDashboard } from '@/lib/api/dashboard'
 
 export default function SalesDashboardPage(): JSX.Element {
-  const dashboard = {
-    umsatzHeute: 12500,
-    umsatzMonat: 285000,
-    auftraegeOffen: 15,
-    kundenAktiv: 42,
-    wachstum: 8.3,
-    topKunden: [
-      { name: 'Landhandel Nord', umsatz: 45000 },
-      { name: 'Agrar Süd', umsatz: 38000 },
-      { name: 'Müller GmbH', umsatz: 32000 },
-    ],
+  const { data: dashboard, isLoading } = useSalesDashboard()
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+  
+  if (!dashboard) {
+    return <div>Keine Daten verfügbar</div>
   }
 
   return (
@@ -30,7 +32,7 @@ export default function SalesDashboardPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(dashboard.umsatzHeute)}
+              {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(dashboard.totalRevenue / 30)}
             </div>
           </CardContent>
         </Card>
@@ -43,7 +45,7 @@ export default function SalesDashboardPage(): JSX.Element {
             <div className="flex items-center gap-2">
               <Euro className="h-5 w-5 text-blue-600" />
               <span className="text-2xl font-bold">
-                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(dashboard.umsatzMonat)}
+                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(dashboard.totalRevenue)}
               </span>
             </div>
           </CardContent>
@@ -51,24 +53,26 @@ export default function SalesDashboardPage(): JSX.Element {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Wachstum</CardTitle>
+            <CardTitle className="text-sm font-medium">Ø Auftragswert</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">+{dashboard.wachstum}%</span>
+              <span className="text-2xl font-bold text-green-600">
+                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(dashboard.avgOrderValue)}
+              </span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Aufträge Offen</CardTitle>
+            <CardTitle className="text-sm font-medium">Aufträge Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              <span className="text-2xl font-bold">{dashboard.auftraegeOffen}</span>
+              <span className="text-2xl font-bold">{dashboard.totalOrders}</span>
             </div>
           </CardContent>
         </Card>
@@ -80,7 +84,7 @@ export default function SalesDashboardPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              <span className="text-2xl font-bold">{dashboard.kundenAktiv}</span>
+              <span className="text-2xl font-bold">{dashboard.topCustomers.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -95,14 +99,14 @@ export default function SalesDashboardPage(): JSX.Element {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {dashboard.topKunden.map((kunde, i) => (
+            {dashboard.topCustomers.map((kunde, i) => (
               <div key={i} className="flex items-center justify-between rounded-lg border p-4">
                 <div>
                   <div className="font-semibold">{kunde.name}</div>
                   <Badge variant="outline" className="mt-1">#{i + 1}</Badge>
                 </div>
                 <div className="text-xl font-bold">
-                  {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(kunde.umsatz)}
+                  {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(kunde.revenue)}
                 </div>
               </div>
             ))}

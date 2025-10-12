@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func
 
 from ..interfaces import AccountRepository
-from ....core.models import Account
+from ....infrastructure.models import Account
 
 logger = logging.getLogger(__name__)
 

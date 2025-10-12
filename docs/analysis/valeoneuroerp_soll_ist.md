@@ -110,3 +110,7 @@
 - `API_DEV_TOKEN` bzw. `VITE_API_DEV_TOKEN` setzen (Standard: `dev-token`) oder echten OIDC-Flow integrieren, um 401-Antworten zu vermeiden.
 - Seed-Daten fÃ¼r Artikel pflegen, damit die POS-Suche unmittelbar Ergebnisse ausliefert.
 - FÃ¼r Playwright-API-Checks `API_URL` (und optional `API_DEV_TOKEN`) exportieren, sobald die Tests automatisiert ausgefÃ¼hrt werden sollen.
+### 6.2 Phase 2 Kickoff
+- Backend prüft Bearer-Tokens jetzt über OIDC/JWKS (Dev-Token bleibt als Fallback), inklusive Cache und neuer Tests.
+- Setup-Doku ergänzt: neue ENV-Variablen (OIDC_CLIENT_ID, OIDC_ISSUER_URL, OIDC_JWKS_URL) und Alembic-basierter DB-Init Workflow.
+- Inventory-Seed nutzt nun migrationskonforme Schemas (domain_inventory.*) und legt Demo-Tenant + Artikel an.

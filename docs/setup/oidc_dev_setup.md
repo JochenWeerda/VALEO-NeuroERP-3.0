@@ -8,6 +8,9 @@ Dieser Leitfaden beschreibt, wie VALEO-NeuroERP lokal oder in Testumgebungen mit
 |----------|--------------|---------|
 | `API_DEV_TOKEN` | Backend-Bearer-Token, das Requests ohne externen IdP erlaubt. | `dev-token` |
 | `VITE_API_DEV_TOKEN` | Entsprechendes Token für das Frontend (z. B. POS/Storybook). | `dev-token` |
+| `OIDC_CLIENT_ID` | Optional eigenes Client-ID-Mapping, falls vom Backend abweichend. | `KEYCLOAK_CLIENT_ID` |
+| `OIDC_ISSUER_URL` | Überschreibt den automatisch abgeleiteten Issuer (z. B. bei Auth0). | – |
+| `OIDC_JWKS_URL` | Fixe JWKS-URL; sonst wird sie aus Keycloak-URL/Realm berechnet. | – |
 
 - Setze beide Werte in `.env` bzw. `packages/frontend-web/.env` oder nutze die Einträge aus `.env.example` / `packages/frontend-web/env.example`.
 - In CI werden die Tokens ebenfalls gesetzt; für private Forks empfiehlt sich ein projektspezifisches Secret.
