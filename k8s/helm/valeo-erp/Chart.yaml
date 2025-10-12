@@ -1,15 +1,30 @@
 apiVersion: v2
 name: valeo-erp
-description: VALEO-NeuroERP Helm Chart
+description: VALEO NeuroERP 3.0 - Complete ERP System
 type: application
 version: 3.0.0
 appVersion: "3.0.0"
 keywords:
   - erp
-  - warehouse
-  - inventory
-home: https://github.com/valeo/neuroerp
+  - agriculture
+  - landhandel
+  - ai
+home: https://github.com/JochenWeerda/VALEO-NeuroERP-3.0
+sources:
+  - https://github.com/JochenWeerda/VALEO-NeuroERP-3.0
 maintainers:
-  - name: VALEO Team
-    email: support@valeo-erp.com
-
+  - name: Jochen Weerda
+    email: jochen@valeo-erp.com
+dependencies:
+  - name: postgresql
+    version: "12.x.x"
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+  - name: redis
+    version: "18.x.x"
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  - name: keycloak
+    version: "17.x.x"
+    repository: https://charts.bitnami.com/bitnami
+    condition: keycloak.enabled

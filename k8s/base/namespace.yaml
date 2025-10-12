@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: valeo-erp
+  labels:
+    name: valeo-erp
+    environment: production
+

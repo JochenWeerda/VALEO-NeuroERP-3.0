@@ -224,6 +224,10 @@ from app.api.v1.endpoints.system_metrics import router as system_metrics_router
 app.include_router(health_router, tags=["Health"])
 app.include_router(system_metrics_router, prefix="/api/v1/metrics", tags=["System Metrics"])
 
+# Include Audit API (Compliance)
+from app.api.v1.endpoints.audit import router as audit_router
+app.include_router(audit_router, prefix="/api/v1/audit", tags=["Audit"])
+
 # Include RAG API (Phase 3 - Semantic Search)
 from app.api.v1.endpoints.rag import router as rag_router
 app.include_router(rag_router, prefix="/api/v1/rag", tags=["RAG"])
