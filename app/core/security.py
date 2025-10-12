@@ -35,6 +35,9 @@ async def require_bearer_token(
     if _is_path_exempt(request.url.path):
         return ""
 
+    if not isinstance(credentials, HTTPAuthorizationCredentials):
+        credentials = await http_bearer(request)
+
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
