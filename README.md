@@ -95,6 +95,7 @@ cp .env.example .env
 # Configure your OIDC provider in .env:
 # VITE_OIDC_DISCOVERY_URL=https://your-provider.com/.well-known/openid_configuration
 # VITE_OIDC_CLIENT_ID=your-client-id
+# API_DEV_TOKEN=dev-token  # Change for local security
 ```
 
 4. **Access the application:**
@@ -219,10 +220,22 @@ kubectl apply -f k8s/
 - [PRODUCTION-AUTH-SETUP.md](./PRODUCTION-AUTH-SETUP.md) - Authentication-Setup
 
 ### Environment Configuration
-- **Development:** `.env` with local configuration
+- **Development:** `.env` with local configuration (`API_DEV_TOKEN`, `API_URL`, database DSN)
+- **Frontend Dev:** `packages/frontend-web/env.example` (`VITE_API_DEV_TOKEN`, `VITE_API_BASE_URL`)
 - **Staging:** `env.example.staging` - Docker Desktop (Windows)
 - **Production:** Environment variables or Kubernetes secrets
 - **Feature Flags:** `VITE_FEATURE_SSE`, `VITE_FEATURE_COMMAND_PALETTE`, `VITE_FEATURE_AGRAR` (remote overrides via `VITE_FLAGS_URL`, fallback to `/flags.json`)
+
+### Database Init & Seed Data
+```bash
+# Initialize database schema (runs SQLAlchemy Base metadata)
+python scripts/init_db.py
+
+# Insert sample inventory data for POS/Inventory views
+python -m app.seeds.inventory_seed
+```
+
+> Playwright API checks require `API_URL` (and optionally `API_DEV_TOKEN`) to be exported before running `pnpm playwright test`.
 
 ## 📈 Monitoring & Observability
 

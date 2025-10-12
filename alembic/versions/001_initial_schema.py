@@ -325,6 +325,23 @@ def upgrade():
         schema='infrastructure'
     )
 
+    op.create_table('policy_rules',
+        sa.Column('id', sa.String(length=255), nullable=False),
+        sa.Column('tenant_id', sa.String(length=255), nullable=True),
+        sa.Column('when_kpi_id', sa.String(length=255), nullable=False),
+        sa.Column('when_severity', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+        sa.Column('action', sa.String(length=255), nullable=False),
+        sa.Column('params', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column('limits', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column('window', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column('approval', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column('auto_execute', sa.Boolean(), nullable=True, server_default=sa.text('false')),
+        sa.Column('auto_suggest', sa.Boolean(), nullable=True, server_default=sa.text('true')),
+        sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('updated_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.PrimaryKeyConstraint('id')
+    )
+
     op.create_table('audit_log',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('user_id', postgresql.UUID(as_uuid=True), nullable=True),
@@ -423,6 +440,7 @@ def downgrade():
     op.drop_index('idx_customers_tenant', schema='domain_crm')
 
     # Drop tables
+    op.drop_table('policy_rules')
     op.drop_table('audit_log', schema='infrastructure')
     op.drop_table('outbox', schema='infrastructure')
     op.drop_table('event_store', schema='infrastructure')
