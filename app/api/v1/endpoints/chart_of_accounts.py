@@ -2,63 +2,63 @@
 Chart of Accounts management endpoints
 """
 
-from fastapi import APIRouter, HTTPException
-import sqlite3
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+
+from ....core.database import get_db
+from ....infrastructure.models import Account as AccountModel
+from ..schemas.base import PaginatedResponse
+from ..schemas.finance import Account
 
 router = APIRouter()
 
-
-@router.get("/")
-async def get_chart_of_accounts():
-    """Get all accounts"""
-    try:
-        conn = sqlite3.connect("valeo_neuro_erp.db")
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT id, account_number, account_name, account_type, category, is_active FROM erp_chart_of_accounts")
-        accounts = cursor.fetchall()
-
-        result = []
-        for account in accounts:
-            result.append({
-                "id": account[0],
-                "account_number": account[1],
-                "account_name": account[2],
-                "account_type": account[3],
-                "category": account[4],
-                "is_active": bool(account[5])
-            })
-
-        conn.close()
-        return result
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+DEFAULT_TENANT = "system"
 
 
-@router.get("/{account_id}")
-async def get_account(account_id: str):
-    """Get account by ID"""
-    try:
-        conn = sqlite3.connect("valeo_neuro_erp.db")
-        cursor = conn.cursor()
+@router.get("/", response_model=PaginatedResponse[Account])
+async def list_accounts(
+    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    search: Optional[str] = Query(None, description="Search in account number or name"),
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(50, ge=1, le=200, description="Maximum number of records"),
+    db: Session = Depends(get_db),
+):
+    """Return a paginated list of chart-of-account entries."""
+    effective_tenant = tenant_id or DEFAULT_TENANT
 
-        cursor.execute("SELECT id, account_number, account_name, account_type, category, is_active FROM erp_chart_of_accounts WHERE id = ?", (account_id,))
-        account = cursor.fetchone()
+    query = db.query(AccountModel).filter(AccountModel.is_active == True)  # noqa: E712
+    query = query.filter(AccountModel.tenant_id == effective_tenant)
 
-        conn.close()
+    if search:
+        like = f"%{search}%"
+        query = query.filter(
+            (AccountModel.account_number.ilike(like)) | (AccountModel.account_name.ilike(like))
+        )
 
-        if not account:
-            raise HTTPException(status_code=404, detail="Account not found")
+    total = query.count()
+    items = query.offset(skip).limit(limit).all()
 
-        return {
-            "id": account[0],
-            "account_number": account[1],
-            "account_name": account[2],
-            "account_type": account[3],
-            "category": account[4],
-            "is_active": bool(account[5])
-        }
+    page = (skip // limit) + 1
+    pages = (total + limit - 1) // limit if total else 1
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    return PaginatedResponse[Account](
+        items=[Account.model_validate(item) for item in items],
+        total=total,
+        page=page,
+        size=limit,
+        pages=pages,
+        has_next=(skip + limit) < total,
+        has_prev=skip > 0,
+    )
+
+
+@router.get("/{account_id}", response_model=Account)
+async def get_account(account_id: str, db: Session = Depends(get_db)):
+    """Fetch a single account by identifier."""
+    account = db.query(AccountModel).filter(AccountModel.id == account_id).first()
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
+    return Account.model_validate(account)
+

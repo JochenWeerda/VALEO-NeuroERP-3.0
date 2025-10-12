@@ -86,6 +86,15 @@ class Settings(BaseSettings):
     DEFAULT_PAGE_SIZE: int = 50
     MAX_PAGE_SIZE: int = 1000
 
+    # API Authentication
+    API_DEV_TOKEN: Optional[str] = "dev-token"
+    API_AUTH_EXEMPT_PATHS: List[str] = [
+        "/api/v1/health",
+        "/api/v1/health/ready",
+        "/api/v1/health/live",
+        "/api/v1/health/database",
+    ]
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

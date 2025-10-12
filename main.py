@@ -5,7 +5,7 @@ Main entry point for the ERP system API
 """
 
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
@@ -16,7 +16,9 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.database import create_tables
 from app.api.v1.api import api_router
+from app.api.v1.endpoints import policies as policies_v1
 from app.core.logging import setup_logging
+from app.core.security import require_bearer_token
 from app.core.container_config import configure_container  # Import container configuration
 from app.policy.router import router as policy_router  # Policy Manager
 from app.auth.router import router as auth_router  # Authentication
@@ -94,6 +96,18 @@ if not settings.DEBUG:
         allowed_hosts=settings.ALLOWED_HOSTS,
     )
 
+# Authentication middleware
+@app.middleware("http")
+async def enforce_bearer_token(request: Request, call_next):
+    """
+    Enforce bearer-token authentication for protected API routes.
+    """
+    try:
+        await require_bearer_token(request)
+    except HTTPException as exc:
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    return await call_next(request)
+
 # Request logging middleware
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
@@ -106,15 +120,24 @@ async def log_requests(request: Request, call_next):
     try:
         response = await call_next(request)
         process_time = time.time() - start_time
-
-        # Log response
-        logger.info(".2f")
-
+        logger.info(
+            "%s %s completed in %.2fs with status %s",
+            request.method,
+            request.url.path,
+            process_time,
+            response.status_code,
+        )
         return response
 
     except Exception as e:
         process_time = time.time() - start_time
-        logger.error(".2f")
+        logger.error(
+            "%s %s failed in %.2fs: %s",
+            request.method,
+            request.url.path,
+            process_time,
+            e,
+        )
         raise
 
 # Global exception handler
@@ -167,6 +190,7 @@ async def root():
 
 # Include API routers
 app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(policies_v1.router, prefix='/api/mcp')
 
 # Include Authentication Router (⚠️ NUR FÜR ENTWICKLUNG!)
 app.include_router(auth_router)
@@ -219,3 +243,5 @@ if __name__ == "__main__":
         reload=settings.DEBUG,
         log_level="info"
     )
+
+
