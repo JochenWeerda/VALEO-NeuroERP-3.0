@@ -1,0 +1,2 @@
+"""CRM infrastructure layer."""
+
