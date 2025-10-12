@@ -5,6 +5,8 @@
 import axios, { type AxiosInstance } from 'axios'
 import { auth } from './auth'
 
+const DEV_TOKEN = import.meta.env.VITE_API_DEV_TOKEN as string | undefined
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 class APIClient {
@@ -22,7 +24,7 @@ class APIClient {
     // Request Interceptor (Auth Token)
     this.client.interceptors.request.use(
       (config) => {
-        const token = auth.getAccessToken()
+        const token = auth.getAccessToken() ?? DEV_TOKEN
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }
@@ -67,3 +69,8 @@ class APIClient {
 }
 
 export const apiClient = new APIClient()
+
+
+
+
+
