@@ -1,0 +1,100 @@
+version: "3.8"
+
+# Event-Bus Stack für VALEO-NeuroERP
+# NATS für Event-Streaming, Outbox für Transactional Messaging
+
+services:
+  # NATS Server - Event Bus
+  nats:
+    image: nats:2.10-alpine
+    container_name: valeo-nats
+    command:
+      - "--jetstream"
+      - "--store_dir=/data"
+      - "--max_file_store=10GB"
+      - "--max_payload=10MB"
+    ports:
+      - "4222:4222"  # Client connections
+      - "8222:8222"  # HTTP monitoring
+      - "6222:6222"  # Cluster routing
+    volumes:
+      - nats_data:/data
+    networks:
+      - eventbus
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # NATS Streaming (optional - für persistente Streams)
+  nats-streaming:
+    image: nats-streaming:0.25-alpine
+    container_name: valeo-nats-streaming
+    command:
+      - "--store=file"
+      - "--dir=/data"
+      - "--cluster_id=valeo-cluster"
+      - "--max_channels=1000"
+      - "--max_msgs=1000000"
+    ports:
+      - "4223:4222"
+    volumes:
+      - nats_streaming_data:/data
+    networks:
+      - eventbus
+    restart: unless-stopped
+    depends_on:
+      - nats
+
+  # Redis - für Saga State Management & Caching
+  redis:
+    image: redis:7-alpine
+    container_name: valeo-redis
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - eventbus
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # PostgreSQL - für Outbox Pattern & Saga State
+  postgres-events:
+    image: postgres:15-alpine
+    container_name: valeo-postgres-events
+    environment:
+      POSTGRES_DB: valeo_events
+      POSTGRES_USER: valeo
+      POSTGRES_PASSWORD: valeo_dev_password
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    volumes:
+      - postgres_events_data:/var/lib/postgresql/data
+      - ./database/init-eventbus.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - eventbus
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U valeo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  eventbus:
+    driver: bridge
+
+volumes:
+  nats_data:
+  nats_streaming_data:
+  redis_data:
+  postgres_events_data:
+
