@@ -228,11 +228,18 @@ kubectl apply -f k8s/
 
 ### Database Init & Seed Data
 ```bash
+# Start local PostgreSQL (falls noch nicht vorhanden)
+docker run --name neuroerp-db -d \
+  -e POSTGRES_DB=valeo_neuro_erp \
+  -e POSTGRES_USER=valeo_dev \
+  -e POSTGRES_PASSWORD=valeo_dev_2024! \
+  -p 5432:5432 postgres:15
+
 # Initialize database schema (runs SQLAlchemy Base metadata)
-python scripts/init_db.py
+PYTHONPATH=. python scripts/init_db.py
 
 # Insert sample inventory data for POS/Inventory views
-python -m app.seeds.inventory_seed
+PYTHONPATH=. python -m app.seeds.inventory_seed
 ```
 
 > Playwright API checks require `API_URL` (and optionally `API_DEV_TOKEN`) to be exported before running `pnpm playwright test`.
@@ -240,6 +247,7 @@ python -m app.seeds.inventory_seed
 ### OIDC / Auth Setup
 - Schnelleinführung: siehe `docs/setup/oidc_dev_setup.md` für Dev-Token, Keycloak-Docker und Provider-spezifische Hinweise.
 - Für produktive Tenants Dev-Token deaktivieren und Tokens per JWT verifizieren (siehe Roadmap Phase 2).
+- Relevante Variablen: `OIDC_CLIENT_ID`, `OIDC_ISSUER_URL`, `OIDC_JWKS_URL` (werden sonst aus Keycloak-Einstellungen abgeleitet).
 
 ## 📈 Monitoring & Observability
 

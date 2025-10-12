@@ -58,6 +58,9 @@ class Settings(BaseSettings):
     KEYCLOAK_REALM: str = "valeo-neuro-erp"
     KEYCLOAK_CLIENT_ID: str = "valeo-neuro-erp-backend"
     KEYCLOAK_CLIENT_SECRET: Optional[str] = None
+    OIDC_CLIENT_ID: Optional[str] = None
+    OIDC_ISSUER_URL: Optional[str] = None
+    OIDC_JWKS_URL: Optional[str] = None
 
     # Logging Configuration
     LOG_LEVEL: str = "INFO"

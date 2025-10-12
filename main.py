@@ -9,6 +9,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
+from prometheus_client import make_asgi_app
 import logging
 import time
 from contextlib import asynccontextmanager
@@ -95,6 +96,10 @@ if not settings.DEBUG:
         TrustedHostMiddleware,
         allowed_hosts=settings.ALLOWED_HOSTS,
     )
+
+# Add Prometheus metrics middleware
+from app.middleware.metrics import PrometheusMiddleware
+app.add_middleware(PrometheusMiddleware)
 
 # Authentication middleware
 @app.middleware("http")
@@ -191,6 +196,19 @@ async def root():
 # Include API routers
 app.include_router(api_router, prefix=settings.API_V1_STR)
 app.include_router(policies_v1.router, prefix='/api/mcp')
+
+# Include Domain routers (Phase 1 - Service-Kernel)
+from app.domains.crm.api import router as crm_router
+from app.domains.inventory.api import router as inventory_router
+from app.domains.finance.api import router as finance_router
+
+app.include_router(crm_router, prefix="/api/v1/crm", tags=["CRM"])
+app.include_router(inventory_router, prefix="/api/v1/inventory", tags=["Inventory"])
+app.include_router(finance_router, prefix="/api/v1/finance", tags=["Finance"])
+
+# Mount Prometheus metrics endpoint
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
 
 # Include Authentication Router (⚠️ NUR FÜR ENTWICKLUNG!)
 app.include_router(auth_router)

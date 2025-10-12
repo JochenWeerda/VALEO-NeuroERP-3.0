@@ -1,11 +1,29 @@
 # Repository implementations package
 
-from .lead_repository_impl import LeadRepositoryImpl
-from .contact_repository_impl import ContactRepositoryImpl
-from .account_repository_impl import AccountRepositoryImpl
+from .implementations import (
+    TenantRepositoryImpl,
+    UserRepositoryImpl,
+    CustomerRepositoryImpl,
+    LeadRepositoryImpl,
+    ContactRepositoryImpl,
+    ArticleRepositoryImpl,
+    WarehouseRepositoryImpl,
+    StockMovementRepositoryImpl,
+    InventoryCountRepositoryImpl,
+    AccountRepositoryImpl,
+    JournalEntryRepositoryImpl,
+)
 
 __all__ = [
-    'LeadRepositoryImpl',
-    'ContactRepositoryImpl',
-    'AccountRepositoryImpl'
+    "TenantRepositoryImpl",
+    "UserRepositoryImpl",
+    "CustomerRepositoryImpl",
+    "LeadRepositoryImpl",
+    "ContactRepositoryImpl",
+    "ArticleRepositoryImpl",
+    "WarehouseRepositoryImpl",
+    "StockMovementRepositoryImpl",
+    "InventoryCountRepositoryImpl",
+    "AccountRepositoryImpl",
+    "JournalEntryRepositoryImpl",
 ]

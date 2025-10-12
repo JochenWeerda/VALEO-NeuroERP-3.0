@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func
 
 from ..interfaces import LeadRepository
-from ....core.models import Lead
+from ....infrastructure.models import Lead
 
 logger = logging.getLogger(__name__)
 

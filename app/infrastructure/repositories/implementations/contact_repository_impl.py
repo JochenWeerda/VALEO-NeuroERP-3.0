@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func
 
 from ..interfaces import ContactRepository
-from ....core.models import Contact
+from ....infrastructure.models import Contact
 
 logger = logging.getLogger(__name__)
 

@@ -1,3 +1,4 @@
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -18,9 +19,14 @@ if config.config_file_name is not None:
 # MetaData object for 'autogenerate' support
 metadata = MetaData()
 
+def _get_database_url() -> str:
+    """Return database URL from environment or config."""
+    default_url = config.get_main_option("sqlalchemy.url")
+    return os.getenv("DATABASE_URL", default_url)
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
-    url = config.get_main_option("sqlalchemy.url")
+    url = _get_database_url()
     context.configure(
         url=url,
         target_metadata=metadata,
@@ -33,8 +39,11 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
+    section = config.get_section(config.config_ini_section)
+    section["sqlalchemy.url"] = _get_database_url()
+
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
+        section,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

@@ -6,6 +6,7 @@ Database entities following domain-driven design
 from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Text, ForeignKey, DECIMAL
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import func
 import uuid
 
@@ -15,7 +16,8 @@ from ...core.database import Base
 # Shared Models
 class Tenant(Base):
     """Tenant model for multi-tenancy"""
-    __tablename__ = "shared_tenants"
+    __tablename__ = "tenants"
+    __table_args__ = {"schema": "domain_shared", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(100), nullable=False)
@@ -28,7 +30,8 @@ class Tenant(Base):
 
 class User(Base):
     """User model"""
-    __tablename__ = "shared_users"
+    __tablename__ = "users"
+    __table_args__ = {"schema": "domain_shared", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     keycloak_id = Column(String, nullable=True)
@@ -37,7 +40,7 @@ class User(Base):
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
     roles = Column(Text, default="[]")  # JSON array of roles
-    tenant_id = Column(String, ForeignKey("shared_tenants.id"), nullable=False)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     is_active = Column(Boolean, default=True)
     last_login = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -48,7 +51,8 @@ class User(Base):
 # CRM Models
 class Customer(Base):
     """Customer model"""
-    __tablename__ = "crm_customers"
+    __tablename__ = "customers"
+    __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     customer_number = Column(String(50), nullable=False)
@@ -65,7 +69,7 @@ class Customer(Base):
     credit_limit = Column(DECIMAL(15, 2), nullable=True)
     payment_terms = Column(String(50), nullable=True)
     tax_id = Column(String(50), nullable=True)
-    tenant_id = Column(String, ForeignKey("shared_tenants.id"), nullable=False)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -74,7 +78,8 @@ class Customer(Base):
 
 class Lead(Base):
     """Lead model"""
-    __tablename__ = "crm_leads"
+    __tablename__ = "leads"
+    __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     source = Column(String(50), nullable=False)
@@ -85,10 +90,10 @@ class Lead(Base):
     contact_person = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False)
     phone = Column(String(20), nullable=True)
-    assigned_to = Column(String, ForeignKey("shared_users.id"), nullable=True)
+    assigned_to = Column(String, ForeignKey("domain_shared.users.id"), nullable=True)
     converted_at = Column(DateTime(timezone=True), nullable=True)
-    converted_to_customer_id = Column(String, ForeignKey("crm_customers.id"), nullable=True)
-    tenant_id = Column(String, ForeignKey("shared_tenants.id"), nullable=False)
+    converted_to_customer_id = Column(String, ForeignKey("domain_crm.customers.id"), nullable=True)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -97,7 +102,8 @@ class Lead(Base):
 
 class Contact(Base):
     """Contact model"""
-    __tablename__ = "crm_contacts"
+    __tablename__ = "contacts"
+    __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     first_name = Column(String(50), nullable=False)
@@ -106,7 +112,7 @@ class Contact(Base):
     phone = Column(String(20), nullable=True)
     position = Column(String(50), nullable=True)
     department = Column(String(50), nullable=True)
-    customer_id = Column(String, ForeignKey("crm_customers.id"), nullable=False)
+    customer_id = Column(String, ForeignKey("domain_crm.customers.id"), nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -116,7 +122,8 @@ class Contact(Base):
 # Inventory Models
 class Article(Base):
     """Article/Product model"""
-    __tablename__ = "inventory_articles"
+    __tablename__ = "articles"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     article_number = Column(String(50), nullable=False)
@@ -137,7 +144,7 @@ class Article(Base):
     current_stock = Column(DECIMAL(10, 2), default=0)
     reserved_stock = Column(DECIMAL(10, 2), default=0)
     available_stock = Column(DECIMAL(10, 2), default=0)
-    tenant_id = Column(String, ForeignKey("shared_tenants.id"), nullable=False)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -146,7 +153,8 @@ class Article(Base):
 
 class Warehouse(Base):
     """Warehouse model"""
-    __tablename__ = "inventory_warehouses"
+    __tablename__ = "warehouses"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     warehouse_code = Column(String(20), nullable=False)
@@ -209,6 +217,7 @@ class InventoryCount(Base):
 class Account(Base):
     """Chart of accounts model"""
     __tablename__ = "finance_accounts"
+    __table_args__ = {"schema": "domain_erp", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     account_number = Column(String(20), nullable=False)
@@ -220,7 +229,7 @@ class Account(Base):
     is_summary = Column(Boolean, default=False)
     balance = Column(DECIMAL(15, 2), default=0)
     last_transaction_date = Column(DateTime(timezone=True), nullable=True)
-    tenant_id = Column(String, ForeignKey("shared_tenants.id"), nullable=False)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
