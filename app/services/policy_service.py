@@ -1,15 +1,20 @@
 """
 Policy Service - Policy-Framework für Alert-Actions
-Verwaltung von Policy-Regeln mit SQLite-Persistenz
+Verwaltung von Policy-Regeln mit PostgreSQL-Persistenz
 """
 
-import sqlite3
-import json
-from typing import List, Dict, Any, Optional, Literal
-from datetime import datetime
-from pathlib import Path
-from pydantic import BaseModel, Field
+from __future__ import annotations
 
+import json
+from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional, Literal
+
+from pydantic import BaseModel, Field
+from sqlalchemy import delete, select
+from sqlalchemy.orm import Session
+
+from app.core.database import SessionLocal
+from app.infrastructure.models import PolicyRule
 
 # Types
 Severity = Literal["ok", "warn", "crit"]
@@ -71,168 +76,105 @@ class Decision(BaseModel):
 
 
 class PolicyStore:
-    """SQLite-basierte Policy-Persistenz"""
+    """PostgreSQL-basierte Policy-Persistenz."""
 
-    def __init__(self, db_path: str = "data/policies.db"):
-        self.db_path = db_path
-        Path(db_path).parent.mkdir(parents=True, exist_ok=True)
-        self._init_db()
+    def __init__(self, session_factory: Callable[[], Session] = SessionLocal):
+        self._session_factory = session_factory
 
-    def _init_db(self):
-        """Initialisiert Datenbank-Schema"""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute("PRAGMA journal_mode=WAL")
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS policies (
-                    id TEXT PRIMARY KEY,
-                    when_kpiId TEXT NOT NULL,
-                    when_severity TEXT NOT NULL,
-                    action TEXT NOT NULL,
-                    params TEXT,
-                    limits TEXT,
-                    window TEXT,
-                    approval TEXT,
-                    autoExecute INTEGER,
-                    autoSuggest INTEGER
-                )
-            """)
-            conn.commit()
-
+    # Query operations --------------------------------------------------
     def list(self) -> List[Rule]:
-        """Listet alle Policies auf"""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.execute("SELECT * FROM policies ORDER BY id")
-            rows = cursor.fetchall()
-
-            rules = []
-            for row in rows:
-                rule_dict = {
-                    "id": row["id"],
-                    "when": {
-                        "kpiId": row["when_kpiId"],
-                        "severity": json.loads(row["when_severity"])
-                    },
-                    "action": row["action"],
-                    "params": json.loads(row["params"]) if row["params"] else None,
-                    "limits": json.loads(row["limits"]) if row["limits"] else None,
-                    "window": json.loads(row["window"]) if row["window"] else None,
-                    "approval": json.loads(row["approval"]) if row["approval"] else None,
-                    "autoExecute": bool(row["autoExecute"]),
-                    "autoSuggest": bool(row["autoSuggest"]),
-                }
-                rules.append(Rule(**rule_dict))
-
-            return rules
+        """Listet alle Policies auf."""
+        with self._session_factory() as session:
+            rows = session.execute(
+                select(PolicyRule).order_by(PolicyRule.id)
+            ).scalars().all()
+            return [self._to_rule(row) for row in rows]
 
     def get(self, rule_id: str) -> Optional[Rule]:
-        """Holt einzelne Policy"""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.execute("SELECT * FROM policies WHERE id = ?", (rule_id,))
-            row = cursor.fetchone()
+        """Holt einzelne Policy."""
+        with self._session_factory() as session:
+            entity = session.get(PolicyRule, rule_id)
+            return self._to_rule(entity) if entity else None
 
-            if not row:
-                return None
+    # Mutation operations -----------------------------------------------
+    def upsert(self, rule: Rule) -> None:
+        """Erstellt oder aktualisiert eine Policy."""
+        with self._session_factory() as session:
+            entity = session.get(PolicyRule, rule.id)
+            if entity is None:
+                entity = PolicyRule(id=rule.id)
 
-            rule_dict = {
-                "id": row["id"],
-                "when": {
-                    "kpiId": row["when_kpiId"],
-                    "severity": json.loads(row["when_severity"])
-                },
-                "action": row["action"],
-                "params": json.loads(row["params"]) if row["params"] else None,
-                "limits": json.loads(row["limits"]) if row["limits"] else None,
-                "window": json.loads(row["window"]) if row["window"] else None,
-                "approval": json.loads(row["approval"]) if row["approval"] else None,
-                "autoExecute": bool(row["autoExecute"]),
-                "autoSuggest": bool(row["autoSuggest"]),
-            }
-            return Rule(**rule_dict)
+            entity.when_kpi_id = rule.when.kpiId
+            entity.when_severity = rule.when.severity
+            entity.action = rule.action
+            entity.params = rule.params
+            entity.limits = rule.limits
+            entity.window = rule.window.dict() if rule.window else None
+            entity.approval = rule.approval.dict() if rule.approval else None
+            entity.auto_execute = bool(rule.autoExecute)
+            entity.auto_suggest = bool(rule.autoSuggest)
 
-    def upsert(self, rule: Rule):
-        """Erstellt oder aktualisiert Policy"""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
-                INSERT INTO policies (id, when_kpiId, when_severity, action, params, limits, window, approval, autoExecute, autoSuggest)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(id) DO UPDATE SET
-                    when_kpiId=excluded.when_kpiId,
-                    when_severity=excluded.when_severity,
-                    action=excluded.action,
-                    params=excluded.params,
-                    limits=excluded.limits,
-                    window=excluded.window,
-                    approval=excluded.approval,
-                    autoExecute=excluded.autoExecute,
-                    autoSuggest=excluded.autoSuggest
-            """, (
-                rule.id,
-                rule.when.kpiId,
-                json.dumps(rule.when.severity),
-                rule.action,
-                json.dumps(rule.params) if rule.params else None,
-                json.dumps(rule.limits) if rule.limits else None,
-                json.dumps(rule.window.dict()) if rule.window else None,
-                json.dumps(rule.approval.dict()) if rule.approval else None,
-                1 if rule.autoExecute else 0,
-                1 if rule.autoSuggest else 0,
-            ))
-            conn.commit()
+            session.add(entity)
+            session.commit()
 
-    def bulk_upsert(self, rules: List[Rule]):
-        """Bulk-Upsert (transaktional)"""
-        with sqlite3.connect(self.db_path) as conn:
+    def bulk_upsert(self, rules: List[Rule]) -> None:
+        """Upsert für mehrere Policies."""
+        with self._session_factory() as session:
             for rule in rules:
-                conn.execute("""
-                    INSERT INTO policies (id, when_kpiId, when_severity, action, params, limits, window, approval, autoExecute, autoSuggest)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ON CONFLICT(id) DO UPDATE SET
-                        when_kpiId=excluded.when_kpiId,
-                        when_severity=excluded.when_severity,
-                        action=excluded.action,
-                        params=excluded.params,
-                        limits=excluded.limits,
-                        window=excluded.window,
-                        approval=excluded.approval,
-                        autoExecute=excluded.autoExecute,
-                        autoSuggest=excluded.autoSuggest
-                """, (
-                    rule.id,
-                    rule.when.kpiId,
-                    json.dumps(rule.when.severity),
-                    rule.action,
-                    json.dumps(rule.params) if rule.params else None,
-                    json.dumps(rule.limits) if rule.limits else None,
-                    json.dumps(rule.window.dict()) if rule.window else None,
-                    json.dumps(rule.approval.dict()) if rule.approval else None,
-                    1 if rule.autoExecute else 0,
-                    1 if rule.autoSuggest else 0,
-                ))
-            conn.commit()
+                entity = session.get(PolicyRule, rule.id) or PolicyRule(id=rule.id)
+                entity.when_kpi_id = rule.when.kpiId
+                entity.when_severity = rule.when.severity
+                entity.action = rule.action
+                entity.params = rule.params
+                entity.limits = rule.limits
+                entity.window = rule.window.dict() if rule.window else None
+                entity.approval = rule.approval.dict() if rule.approval else None
+                entity.auto_execute = bool(rule.autoExecute)
+                entity.auto_suggest = bool(rule.autoSuggest)
+                session.add(entity)
+            session.commit()
 
-    def delete(self, rule_id: str):
-        """Löscht Policy"""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute("DELETE FROM policies WHERE id = ?", (rule_id,))
-            conn.commit()
+    def delete(self, rule_id: str) -> None:
+        """Löscht eine Policy."""
+        with self._session_factory() as session:
+            session.execute(delete(PolicyRule).where(PolicyRule.id == rule_id))
+            session.commit()
 
+    # Import / Export ---------------------------------------------------
     def export_json(self) -> str:
-        """Exportiert alle Policies als JSON"""
+        """Exportiert alle Policies als JSON."""
         rules = self.list()
         return json.dumps({"rules": [r.dict() for r in rules]}, indent=2)
 
-    def restore_json(self, json_str: str):
-        """Importiert Policies aus JSON (ersetzt alle!)"""
+    def restore_json(self, json_str: str) -> None:
+        """Importiert Policies aus JSON (ersetzt alle vorhandenen Einträge)."""
         data = json.loads(json_str)
-        rules = [Rule(**r) for r in data["rules"]]
+        rules = [Rule(**r) for r in data.get("rules", [])]
 
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute("DELETE FROM policies")
-            conn.commit()
+        with self._session_factory() as session:
+            session.execute(delete(PolicyRule))
+            session.commit()
 
-        self.bulk_upsert(rules)
+        if rules:
+            self.bulk_upsert(rules)
+
+    # Utilities ---------------------------------------------------------
+    @staticmethod
+    def _to_rule(entity: PolicyRule | None) -> Rule | None:
+        if entity is None:
+            return None
+
+        return Rule(
+            id=entity.id,
+            when={"kpiId": entity.when_kpi_id, "severity": entity.when_severity or []},
+            action=entity.action,
+            params=entity.params,
+            limits=entity.limits,
+            window=Window(**entity.window) if entity.window else None,
+            approval=Approval(**entity.approval) if entity.approval else None,
+            autoExecute=entity.auto_execute,
+            autoSuggest=entity.auto_suggest,
+        )
 
 
 class PolicyEngine:
@@ -247,13 +189,11 @@ class PolicyEngine:
         if now is None:
             now = datetime.now()
 
-        # Wochentag prüfen (0=Mo..6=So in datetime vs 0=So..6=Sa in Policy)
         day = now.weekday()  # 0=Mo..6=So
         day_policy = (day + 1) % 7  # Convert zu 0=So..6=Sa
         if day_policy not in window.days:
             return False
 
-        # Zeitfenster prüfen
         start_h, start_m = map(int, window.start.split(":"))
         end_h, end_m = map(int, window.end.split(":"))
         current_minutes = now.hour * 60 + now.minute
@@ -266,14 +206,12 @@ class PolicyEngine:
     def resolve_params(rule: Rule, severity: Severity, alert: Optional[Alert] = None) -> Dict[str, Any]:
         """Löst Parameter-Platzhalter auf"""
         params = rule.params or {}
-        resolved = {}
+        resolved: Dict[str, Any] = {}
 
         for key, value in params.items():
             if isinstance(value, dict) and "warn" in value and "crit" in value:
-                # Severity-abhängige Werte
                 resolved[key] = value.get(severity, value.get("warn"))
             elif isinstance(value, str) and alert and alert.delta is not None and "{delta}" in value:
-                # Delta-Platzhalter
                 resolved[key] = value.replace("{delta}", str(alert.delta))
             else:
                 resolved[key] = value
@@ -283,7 +221,6 @@ class PolicyEngine:
     @staticmethod
     def decide(user_roles: List[str], alert: Alert, rules: List[Rule]) -> Decision:
         """Policy-Entscheidung treffen"""
-        # Matching rule finden
         rule = next(
             (r for r in rules if r.when.kpiId == alert.kpiId and alert.severity in r.when.severity),
             None
@@ -292,14 +229,11 @@ class PolicyEngine:
         if not rule:
             return Decision(type="deny", reason="No matching rule")
 
-        # Zeitfenster prüfen
         if not PolicyEngine.within_window(rule.window):
             return Decision(type="deny", reason="Outside window")
 
-        # Parameter auflösen
         params = PolicyEngine.resolve_params(rule, alert.severity, alert)
 
-        # Approval prüfen
         needs_approval = False
         if rule.approval and rule.approval.required:
             if not (rule.approval.bypassIfSeverity and alert.severity == rule.approval.bypassIfSeverity):
@@ -317,4 +251,3 @@ class PolicyEngine:
             ruleId=rule.id,
             resolvedParams=params
         )
-

@@ -13,10 +13,17 @@ from ..infrastructure.repositories import (
     AccountRepository, JournalEntryRepository
 )
 from ..infrastructure.repositories.implementations import (
-    # TenantRepositoryImpl, UserRepositoryImpl, CustomerRepositoryImpl,
-    LeadRepositoryImpl, ContactRepositoryImpl, AccountRepositoryImpl,
-    # ArticleRepositoryImpl, WarehouseRepositoryImpl, StockMovementRepositoryImpl,
-    # InventoryCountRepositoryImpl, JournalEntryRepositoryImpl
+    TenantRepositoryImpl,
+    UserRepositoryImpl,
+    CustomerRepositoryImpl,
+    LeadRepositoryImpl,
+    ContactRepositoryImpl,
+    ArticleRepositoryImpl,
+    WarehouseRepositoryImpl,
+    StockMovementRepositoryImpl,
+    InventoryCountRepositoryImpl,
+    AccountRepositoryImpl,
+    JournalEntryRepositoryImpl,
 )
 from .services import (
     TenantService, UserService, CustomerService, LeadService, ContactService,
@@ -157,9 +164,18 @@ def configure_container():
             return False
 
     # Register production services (replacing placeholders)
-    container.register(TenantService, ProductionTenantService)
-    container.register(UserService, ProductionUserService)
-    container.register(CustomerService, ProductionCustomerService)
+    def create_tenant_service():
+        return ProductionTenantService(SessionLocal)
+
+    def create_user_service():
+        return ProductionUserService(SessionLocal)
+
+    def create_customer_service():
+        return ProductionCustomerService(SessionLocal)
+
+    container.register_factory(TenantService, create_tenant_service)
+    container.register_factory(UserService, create_user_service)
+    container.register_factory(CustomerService, create_customer_service)
 
     # Register other services as placeholders for now
     # These will be replaced with actual implementations as we build them

@@ -18,7 +18,7 @@ from app.services.policy_service import (
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/policy", tags=["policy"])
+router = APIRouter(tags=["policy"])
 
 # Global Policy Store Instance
 policy_store = PolicyStore()
@@ -54,7 +54,7 @@ class RestoreRequest(BaseModel):
 
 # Endpoints
 
-@router.get("/list")
+@router.get("/policy/list")
 async def list_policies() -> Dict[str, Any]:
     """
     Listet alle Policies auf
@@ -70,7 +70,7 @@ async def list_policies() -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/upsert")
+@router.post("/policy/upsert")
 async def upsert_policies(request: UpsertRequest) -> Dict[str, Any]:
     """
     Erstellt oder aktualisiert Policies (bulk)
@@ -90,7 +90,7 @@ async def upsert_policies(request: UpsertRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/create")
+@router.post("/policy/create")
 async def create_policy(rule: Rule) -> Dict[str, Any]:
     """
     Erstellt oder aktualisiert eine einzelne Policy
@@ -110,7 +110,7 @@ async def create_policy(rule: Rule) -> Dict[str, Any]:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/update")
+@router.post("/policy/update")
 async def update_policy(rule: Rule) -> Dict[str, Any]:
     """
     Aktualisiert eine existierende Policy
@@ -136,7 +136,7 @@ async def update_policy(rule: Rule) -> Dict[str, Any]:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/delete")
+@router.post("/policy/delete")
 async def delete_policy(request: DeleteRequest) -> Dict[str, Any]:
     """
     Löscht eine Policy
@@ -162,7 +162,7 @@ async def delete_policy(request: DeleteRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/test", response_model=TestResponse)
+@router.post("/policy/test", response_model=TestResponse)
 async def test_policy(request: TestRequest) -> TestResponse:
     """
     Test-Simulator - testet Policy-Entscheidung gegen Alert
@@ -183,7 +183,7 @@ async def test_policy(request: TestRequest) -> TestResponse:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/export")
+@router.get("/policy/export")
 async def export_policies():
     """
     Exportiert alle Policies als JSON-Download
@@ -207,7 +207,7 @@ async def export_policies():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/restore")
+@router.post("/policy/restore")
 async def restore_policies(request: RestoreRequest) -> Dict[str, Any]:
     """
     Importiert Policies aus JSON (ACHTUNG: ersetzt alle!)

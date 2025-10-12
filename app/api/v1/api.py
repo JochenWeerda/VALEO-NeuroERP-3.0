@@ -22,6 +22,12 @@ from app.api.v1.endpoints import (
 # Create main API router
 api_router = APIRouter()
 
+
+@api_router.get("/status", tags=["meta"])
+async def api_status():
+    """Lightweight status endpoint for authenticated clients."""
+    return {"status": "ok"}
+
 # Include domain routers
 api_router.include_router(
     health,

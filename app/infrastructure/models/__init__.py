@@ -260,3 +260,23 @@ class JournalEntryLine(Base):
     credit = Column(DECIMAL(15, 2), default=0)
     description = Column(String(200), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+# Policy Engine Models
+class PolicyRule(Base):
+    """MCP policy rule model"""
+    __tablename__ = "policy_rules"
+
+    id = Column(String, primary_key=True)
+    tenant_id = Column(String, ForeignKey("shared_tenants.id"), nullable=True)
+    when_kpi_id = Column(String, nullable=False)
+    when_severity = Column(postgresql.JSONB(astext_type=Text()), nullable=False)
+    action = Column(String, nullable=False)
+    params = Column(postgresql.JSONB(astext_type=Text()), nullable=True)
+    limits = Column(postgresql.JSONB(astext_type=Text()), nullable=True)
+    window = Column(postgresql.JSONB(astext_type=Text()), nullable=True)
+    approval = Column(postgresql.JSONB(astext_type=Text()), nullable=True)
+    auto_execute = Column(Boolean, default=False)
+    auto_suggest = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
