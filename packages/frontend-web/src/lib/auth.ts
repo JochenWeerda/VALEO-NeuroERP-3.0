@@ -197,6 +197,13 @@ class AuthService {
   /**
    * Logout (lokale Tokens löschen)
    */
+  clearTokens(): void {
+    this.logout()
+  }
+
+  /**
+   * Logout (alias)
+   */
   logout(): void {
     this.accessToken = null
     this.refreshToken = null
@@ -265,3 +272,18 @@ class AuthService {
 
 // Singleton
 export const auth = new AuthService()
+
+export function getAccessToken(): string | null {
+  return auth.getAccessToken()
+}
+
+export function clearAuthSession(): void {
+  auth.logout()
+}
+
+export function handleUnauthorized(): void {
+  auth.logout()
+  if (typeof window !== 'undefined') {
+    window.location.assign('/login')
+  }
+}

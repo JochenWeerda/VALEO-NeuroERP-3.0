@@ -1,0 +1,12 @@
+{
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Loeschen",
+    "edit": "Bearbeiten",
+    "close": "Schliessen"
+  },
+  "status": {
+    "ok": "Alles in Ordnung"
+  }
+}

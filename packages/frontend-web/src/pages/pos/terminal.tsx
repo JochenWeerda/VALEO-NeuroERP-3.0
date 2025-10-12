@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -29,9 +29,43 @@ export default function POSTerminalPage(): JSX.Element {
   const [activeTx, setActiveTx] = useState<TSETransaction | null>(null)
   const [showChangeCalculator, setShowChangeCalculator] = useState(false)
   const [tendered, setTendered] = useState<number>(0)
+  const wsRef = useRef<WebSocket | null>(null)
   
   // fiskaly TSE Integration
   const { isInitialized, startTransaction, updateTransaction, finishTransaction } = useFiskalyTSE()
+  
+  // WebSocket für CustomerDisplay-Sync
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:8000/api/v1/ws/pos/terminal-1')
+    
+    ws.onopen = () => {
+      console.log('✅ POS WebSocket connected')
+    }
+    
+    ws.onerror = (error) => {
+      console.error('❌ POS WebSocket error:', error)
+    }
+    
+    ws.onclose = () => {
+      console.log('🔌 POS WebSocket disconnected')
+    }
+    
+    wsRef.current = ws
+    
+    return () => {
+      ws.close()
+    }
+  }, [])
+  
+  // Broadcast cart changes
+  useEffect(() => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        cart,
+        total: cart.reduce((sum, item) => sum + item.preis * item.menge, 0)
+      }))
+    }
+  }, [cart])
 
   // Mock-Artikel-Datenbank
   const articles = [
@@ -344,7 +378,7 @@ export default function POSTerminalPage(): JSX.Element {
                     bezeichnung: article.bezeichnung,
                     ean: article.ean ?? '',
                     preis: article.preis,
-                    image: article.image,
+                    image: article.image ?? '📦',
                   })
                 }}
               />
