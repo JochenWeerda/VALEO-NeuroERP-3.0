@@ -6,6 +6,9 @@ import { FeatureFlagProvider } from '@/app/providers/FeatureFlagProvider'
 import { SSEProvider } from '@/app/providers/SSEProvider'
 import { router } from '@/app/routes'
 import { ToastProvider } from '@/components/ui/toast-provider'
+import { CommandPalette } from '@/components/command/CommandPalette'
+import { AskVALEO } from '@/components/ai/AskVALEO'
+import { SemanticSearch } from '@/components/search/SemanticSearch'
 import { auth } from '@/lib/auth'
 import { createQueryClient } from '@/lib/query'
 import { useFeature } from '@/hooks/useFeature'
@@ -35,6 +38,9 @@ function Application(): JSX.Element {
     <SSEProvider {...providerConfig} tokenResolver={resolveSseToken}>
       <ToastProvider>
         <RouterProvider router={router} />
+        <CommandPalette />
+        <AskVALEO />
+        <SemanticSearch />
       </ToastProvider>
     </SSEProvider>
   )
