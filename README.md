@@ -237,6 +237,10 @@ python -m app.seeds.inventory_seed
 
 > Playwright API checks require `API_URL` (and optionally `API_DEV_TOKEN`) to be exported before running `pnpm playwright test`.
 
+### OIDC / Auth Setup
+- Schnelleinführung: siehe `docs/setup/oidc_dev_setup.md` für Dev-Token, Keycloak-Docker und Provider-spezifische Hinweise.
+- Für produktive Tenants Dev-Token deaktivieren und Tokens per JWT verifizieren (siehe Roadmap Phase 2).
+
 ## 📈 Monitoring & Observability
 
 - **Metrics:** Prometheus metrics at `/metrics`
