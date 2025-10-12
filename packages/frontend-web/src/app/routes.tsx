@@ -195,6 +195,8 @@ const SchichtplanRoute = createLazyRoute(() => import('@/pages/schichtplan/liste
 const POSTerminalRoute = createLazyRoute(() => import('@/pages/pos/terminal'))
 const TSEJournalRoute = createLazyRoute(() => import('@/pages/pos/tse-journal'))
 const TagesabschlussEnhancedRoute = createLazyRoute(() => import('@/pages/pos/tagesabschluss-enhanced'))
+const GiftCardsRoute = createLazyRoute(() => import('@/pages/pos/gift-cards'))
+const RabatteRoute = createLazyRoute(() => import('@/pages/pos/rabatte'))
 
 // Fuhrpark
 const FahrzeugeRoute = createLazyRoute(() => import('@/pages/fuhrpark/fahrzeuge'))
@@ -397,6 +399,8 @@ const routeConfig: RouteObject[] = [
       { path: 'pos/terminal', element: <POSTerminalRoute /> },
       { path: 'pos/tse-journal', element: <TSEJournalRoute /> },
       { path: 'pos/tagesabschluss-enhanced', element: <TagesabschlussEnhancedRoute /> },
+      { path: 'pos/gift-cards', element: <GiftCardsRoute /> },
+      { path: 'pos/rabatte', element: <RabatteRoute /> },
       
       // Fuhrpark
       { path: 'fuhrpark/fahrzeuge', element: <FahrzeugeRoute /> },
