@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: valeo-app
+  namespace: valeo-erp
+  labels:
+    app: valeo-app
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8000
+    protocol: TCP
+  selector:
+    app: valeo-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: valeo-redis
+  namespace: valeo-erp
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+  selector:
+    app: valeo-redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: valeo-nats
+  namespace: valeo-erp
+spec:
+  type: ClusterIP
+  ports:
+  - name: client
+    port: 4222
+    targetPort: 4222
+  - name: monitoring
+    port: 8222
+    targetPort: 8222
+  selector:
+    app: valeo-nats
+
