@@ -46,6 +46,23 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov pytest-asyncio bandit safety
 
+      - name: Validate L3 mapping definitions
+        run: |
+          if [ -f config/l3_mapping.yaml ]; then
+            python scripts/validate_mapping.py \
+              --mapping config/l3_mapping.yaml \
+              --raw docs/data/l3/raw_tables.json \
+              --fail-on-warn \
+              --report-unmapped
+          else
+            echo "::warning::config/l3_mapping.yaml not found; validating template instead"
+            python scripts/validate_mapping.py \
+              --mapping config/l3_mapping.template.yaml \
+              --raw docs/data/l3/raw_tables.json \
+              --fail-on-warn \
+              --report-unmapped
+          fi
+
       - name: Initialize database schema & seed data
         run: |
           python scripts/init_db.py

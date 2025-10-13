@@ -1,0 +1,160 @@
+ABSCHLUSS:
+  JAHR:
+    target: domain_finance.period_closure.fiscal_year
+    type: integer
+    nullable: false
+    notes: "Fiscal year extracted from legacy ABSCHLUSS header."
+  MONAT:
+    target: domain_finance.period_closure.fiscal_period
+    type: integer
+    nullable: false
+    notes: "Maps 1-12 monthly periods into 4-4-5 support layer."
+  CODE1:
+    target: domain_finance.period_closure.dim_cost_center
+    type: text
+    nullable: false
+    transform: map_enum
+    notes: "Legacy CODE1 → cost center dimension (see dim_cost_center)."
+  CODE2:
+    target: domain_finance.period_closure.dim_profit_center
+    type: text
+    nullable: false
+    transform: map_enum
+    notes: "Legacy CODE2 → profit center dimension (dim_profit_center)."
+  CODE3:
+    target: domain_finance.period_closure.dim_account_line
+    type: text
+    nullable: true
+    transform: map_enum
+    notes: "Legacy CODE3 mapped onto reporting line dimension."
+  CODE4:
+    target: domain_finance.period_closure.dim_project_tag
+    type: text
+    nullable: true
+    transform: map_enum
+    notes: "Legacy CODE4 maps project/contract tags."
+  CODE5:
+    target: domain_finance.period_closure.dim_region
+    type: text
+    nullable: true
+    transform: map_enum
+    notes: "Legacy CODE5 → region / market segment dimension."
+
+ABSAGEGRUND:
+  ID:
+    target: domain_crm.cancellation_reason.cancel_reason_id
+    type: integer
+    nullable: false
+    notes: "Primary key reused as surrogate for CRM cancel reasons."
+  TEXT:
+    target: domain_crm.cancellation_reason.description
+    type: text
+    nullable: false
+    transform: strip
+    notes: "Legacy description cleaned for CRM drop-down."
+
+AUFTRAG:
+  WAEHRCODE:
+    target: domain_finance.sales_order.currency_code
+    type: text
+    nullable: false
+    transform: uppercase
+    notes: "Legacy currency codes mapped to ISO 4217."
+  WAEHRKURS:
+    target: domain_finance.sales_order.fx_rate
+    type: decimal
+    nullable: false
+    notes: "Spot FX rate stored alongside order header."
+  DTANGELEGTAM:
+    target: domain_finance.sales_order.fx_rate_ts
+    type: datetime
+    nullable: false
+    transform: parse_datetime
+    notes: "Order creation timestamp reused as FX rate reference."
+  NETTOTG:
+    target: domain_finance.sales_order.amount_txn
+    type: decimal
+    nullable: false
+    notes: "Net amount in transaction currency (legacy NETTOTG)."
+  NETTOTGSIC:
+    target: domain_finance.sales_order.amount_base
+    type: decimal
+    nullable: false
+    notes: "Net amount converted to base currency (legacy NETTOTGSIC)."
+  AUFTSTATUS:
+    target: domain_crm.opportunity.stage
+    type: text
+    nullable: false
+    transform: map_enum
+    notes: "Order status code drives CRM pipeline stage mapping."
+  ID_AUFTRAGABLEHN:
+    target: domain_crm.opportunity.cancel_reason_id
+    type: integer
+    nullable: true
+    notes: "Foreign key reference to ABSAGEGRUND for lost deals."
+
+WWS_ANGEBOT:
+  STATUS:
+    target: domain_crm.opportunity.status
+    type: text
+    nullable: false
+    transform: map_enum
+    notes: "Offer status enumeration normalized to CRM opportunity status."
+
+WWS_ARECHNUNG3:
+  RECHNUNGNR:
+    target: domain_inventory.stock_movement.reference_document
+    type: text
+    nullable: true
+    notes: "Invoice number as reference for stock movement."
+  CHARGENNR:
+    target: domain_inventory.stock_item.lot_id
+    type: text
+    nullable: false
+    transform: strip
+    notes: "Charge/lot number captured for traceability (mandatory)."
+  GTMENGE:
+    target: domain_inventory.stock_movement.quantity
+    type: decimal
+    nullable: false
+    notes: "Gross quantity moved per ledger record."
+
+PERSONAL:
+  PERSONALNR:
+    target: domain_hr.person.person_id
+    type: uuid
+    nullable: false
+    transform: hash_uuid
+    notes: "Derived UUID from legacy personnel number (PII safe)."
+  EINTRITT1:
+    target: domain_hr.employment.employment_start
+    type: date
+    nullable: false
+    transform: parse_date
+    notes: "Start date of primary employment contract."
+  AUSTRITT1:
+    target: domain_hr.employment.employment_end
+    type: date
+    nullable: true
+    transform: parse_date
+    notes: "End date when contract terminated; nullable for active staff."
+
+WWS_REZEPTUR1:
+  REZEPTURNR:
+    target: domain_mfg.bill_of_material.bom_id
+    type: integer
+    nullable: false
+    notes: "Recipe number acts as manufacturing BOM identifier."
+
+WWS_PRODUKTIONSAUFTRAG:
+  PRODUKTIONSAUFTRAGID:
+    target: domain_mfg.production_order.routing_id
+    type: integer
+    nullable: false
+    notes: "Production order ID reused as routing identifier."
+  STATUSDATUM:
+    target: domain_mfg.production_event.event_ts
+    type: datetime
+    nullable: false
+    transform: combine_datetime(STATUSZEIT)
+    notes: "Combine date and STATUSZEIT to obtain event timestamp."
