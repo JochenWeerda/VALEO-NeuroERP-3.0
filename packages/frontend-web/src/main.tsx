@@ -38,9 +38,10 @@ function Application(): JSX.Element {
     <SSEProvider {...providerConfig} tokenResolver={resolveSseToken}>
       <ToastProvider>
         <RouterProvider router={router} />
-        <CommandPalette />
-        <AskVALEO />
-        <SemanticSearch />
+        {/* TODO: Diese Komponenten müssen in Router-Kontext verschoben werden */}
+        {/* <CommandPalette /> */}
+        {/* <AskVALEO /> */}
+        {/* <SemanticSearch /> */}
       </ToastProvider>
     </SSEProvider>
   )

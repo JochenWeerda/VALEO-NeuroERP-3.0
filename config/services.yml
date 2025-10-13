@@ -1,0 +1,124 @@
+# VALEO-NeuroERP Service-Konfiguration
+# Zentrale Übersicht aller Services und ihrer Ports
+
+services:
+  # Frontend
+  frontend:
+    name: "Frontend (Vite Dev Server)"
+    port: 3000
+    command: "cd packages/frontend-web && pnpm vite"
+    health_check: "http://localhost:3000"
+    required: true
+    type: "node"
+    
+  # Backend
+  backend:
+    name: "Backend (FastAPI/Uvicorn)"
+    port: 8000
+    command: "python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    health_check: "http://localhost:8000/health"
+    required: true
+    type: "python"
+    
+  # Database
+  postgres:
+    name: "PostgreSQL Database"
+    port: 5432
+    command: "docker"
+    container: "valeo-postgres"
+    health_check: "docker exec valeo-postgres pg_isready -U valeo"
+    required: true
+    type: "docker"
+    
+  # Cache
+  redis:
+    name: "Redis Cache"
+    port: 6379
+    command: "docker"
+    container: "valeo-redis"
+    health_check: "docker exec valeo-redis redis-cli ping"
+    required: false  # Optional für Testing
+    type: "docker"
+    
+  # Event Bus
+  nats:
+    name: "NATS Event Bus"
+    port: 4222
+    port_monitoring: 8222
+    command: "docker"
+    container: "valeo-nats"
+    health_check: "curl -s http://localhost:8222/healthz"
+    required: false  # Optional für Testing
+    type: "docker"
+    
+  # Authentication (Optional)
+  keycloak:
+    name: "Keycloak Auth Server"
+    port: 8080
+    command: "docker"
+    container: "valeo-keycloak"
+    health_check: "curl -s http://localhost:8080/health/ready"
+    required: false  # Optional für Testing
+    type: "docker"
+    startup_time: 120  # Keycloak braucht länger zum Starten
+    
+  # Monitoring (Optional - nur für Production)
+  prometheus:
+    name: "Prometheus Metrics"
+    port: 9090
+    command: "docker"
+    container: "valeo-prometheus"
+    health_check: "curl -s http://localhost:9090/-/healthy"
+    required: false
+    type: "docker"
+    
+  grafana:
+    name: "Grafana Dashboard"
+    port: 3001  # Nicht 3000 - das ist für Frontend!
+    command: "docker"
+    container: "valeo-grafana"
+    health_check: "curl -s http://localhost:3001/api/health"
+    required: false
+    type: "docker"
+    
+  loki:
+    name: "Loki Log Aggregation"
+    port: 3100
+    command: "docker"
+    container: "valeo-loki"
+    health_check: "curl -s http://localhost:3100/ready"
+    required: false
+    type: "docker"
+
+# Service-Abhängigkeiten
+dependencies:
+  backend:
+    - postgres  # Backend braucht PostgreSQL
+  frontend:
+    - backend   # Frontend braucht Backend
+
+# Startup-Reihenfolge
+startup_order:
+  1:
+    - postgres
+    - redis
+    - nats
+  2:
+    - backend
+  3:
+    - frontend
+  4:  # Optional
+    - keycloak
+    - prometheus
+    - grafana
+    - loki
+
+# Testing-Minimal-Set (nur das Nötigste)
+testing_services:
+  required:
+    - postgres
+    - backend
+    - frontend
+  optional:
+    - redis
+
