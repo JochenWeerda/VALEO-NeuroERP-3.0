@@ -1,0 +1,33 @@
+# Placeholder mapping between L3 tables/columns and VALEO-NeuroERP targets.
+# Fill this incrementally before running `scripts/import_l3.py`.
+#
+# Each entry contains the legacy table/column plus the intended target
+# (schema.table.column) and optional transformation hints.
+#
+# Example:
+#   ABSCHLUSS:
+#     JAHR:
+#       target: domain_finance.period_closure.fiscal_year
+#       type: integer
+#       notes: "Year extracted as integer"
+
+ABSCHLUSS:
+  JAHR:
+    target: domain_finance.period_closure.fiscal_year
+    type: integer
+    notes: "Example mapping – adjust according to the finance domain model."
+  MONAT:
+    target: domain_finance.period_closure.fiscal_month
+    type: integer
+    notes: "Ensure month is 1..12."
+
+ABSAGEGRUND:
+  ID:
+    target: domain_crm.cancellation_reason.id
+    type: integer
+    notes: "Primary key; consider mapping to UUID if required."
+  TEXT:
+    target: domain_crm.cancellation_reason.description
+    type: text
+
+# Add further tables/columns here.

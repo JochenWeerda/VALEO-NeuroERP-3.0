@@ -218,6 +218,7 @@ kubectl apply -f k8s/
 **Dokumentation:**
 - [DEPLOYMENT-PLAN.md](./DEPLOYMENT-PLAN.md) - Production-Deployment-Plan
 - [PRODUCTION-AUTH-SETUP.md](./PRODUCTION-AUTH-SETUP.md) - Authentication-Setup
+- [docs/db/l3_import.md](./docs/db/l3_import.md) - L3 Datenimport & Bootstrap
 
 ### Environment Configuration
 - **Development:** `.env` with local configuration (`API_DEV_TOKEN`, `API_URL`, database DSN)
