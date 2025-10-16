@@ -109,6 +109,16 @@ class ContactRepository(BaseRepository[T, TCreate, TUpdate], ABC):
     pass
 
 
+class ActivityRepository(BaseRepository[T, TCreate, TUpdate], ABC):
+    """Activity repository interface"""
+    pass
+
+
+class FarmProfileRepository(BaseRepository[T, TCreate, TUpdate], ABC):
+    """Farm profile repository interface"""
+    pass
+
+
 # Inventory Repository Interfaces
 class ArticleRepository(BaseRepository[T, TCreate, TUpdate], ABC):
     """Article repository interface"""

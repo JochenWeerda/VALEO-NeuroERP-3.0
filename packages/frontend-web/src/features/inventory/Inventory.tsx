@@ -109,7 +109,7 @@ export default function Inventory(): ReactElement {
     isError,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.inventory.lots(),
+    queryKey: queryKeys.inventory.articles.all,
     queryFn: fetchInventory,
   })
 

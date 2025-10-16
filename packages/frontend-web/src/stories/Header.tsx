@@ -1,4 +1,4 @@
-import React from 'react';
+// React import removed - not needed with new JSX transform
 
 import { Button } from './Button';
 import './header.css';

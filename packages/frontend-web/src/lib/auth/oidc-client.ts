@@ -97,10 +97,11 @@ export class OIDCClient {
     if (!user) return []
 
     // Try different claim locations
+    const profile = user.profile as any
     const roles = 
-      user.profile.roles || 
-      user.profile.realm_access?.roles ||
-      user.profile['https://valeo-erp.com/roles'] ||
+      profile.roles || 
+      profile.realm_access?.roles ||
+      profile['https://valeo-erp.com/roles'] ||
       []
 
     return Array.isArray(roles) ? roles : [roles]
@@ -121,7 +122,8 @@ export class OIDCClient {
     const user = await this.getUser()
     if (!user) return null
 
-    return user.profile.tenant_id || user.profile.tid || 'system'
+    const profile = user.profile as any
+    return profile.tenant_id || profile.tid || 'system'
   }
 
   /**
@@ -135,7 +137,9 @@ export class OIDCClient {
    * Silent renew (refresh token in background)
    */
   async renewToken(): Promise<User> {
-    return await this.userManager.signinSilent()
+    const user = await this.userManager.signinSilent()
+    if (!user) throw new Error('Failed to renew token')
+    return user
   }
 
   /**

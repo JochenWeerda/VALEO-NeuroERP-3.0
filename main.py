@@ -111,10 +111,30 @@ async def enforce_bearer_token(request: Request, call_next):
     """
     Enforce bearer-token authentication for protected API routes.
     """
+    # Handle OPTIONS requests (CORS preflight) - skip auth and add CORS headers
+    if request.method == "OPTIONS":
+        response = JSONResponse(status_code=200, content={})
+        origin = request.headers.get("origin")
+        if origin and origin in [str(o) for o in settings.BACKEND_CORS_ORIGINS]:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Methods"] = "*"
+            response.headers["Access-Control-Allow-Headers"] = "*"
+        return response
+    
     try:
         await require_bearer_token(request)
     except HTTPException as exc:
-        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+        # Return error response with CORS headers
+        response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+        # Add CORS headers manually for error responses
+        origin = request.headers.get("origin")
+        if origin and origin in [str(o) for o in settings.BACKEND_CORS_ORIGINS]:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Methods"] = "*"
+            response.headers["Access-Control-Allow-Headers"] = "*"
+        return response
     return await call_next(request)
 
 # Request logging middleware
@@ -204,19 +224,21 @@ app.include_router(policies_v1.router, prefix='/api/mcp')
 # Include Domain routers (Phase 1 - Service-Kernel)
 from app.domains.crm.api import router as crm_router
 from app.domains.inventory.api import router as inventory_router
+from app.domains.agrar.api import router as agrar_router
 from app.domains.finance.api import router as finance_router
 
 app.include_router(crm_router, prefix="/api/v1/crm", tags=["CRM"])
 app.include_router(inventory_router, prefix="/api/v1/inventory", tags=["Inventory"])
+app.include_router(agrar_router, prefix="/api/v1/agrar", tags=["Agrar"])
 app.include_router(finance_router, prefix="/api/v1/finance", tags=["Finance"])
 
 # Mount Prometheus metrics endpoint
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
 
-# Include Agents API (Phase 3 - Agentik)
-from app.api.v1.endpoints.agents import router as agents_router
-app.include_router(agents_router, prefix="/api/v1/agents", tags=["Agents"])
+# Include Agents API (Phase 3 - Agentik) - TEMPORARILY DISABLED for CRM testing
+# from app.api.v1.endpoints.agents import router as agents_router
+# app.include_router(agents_router, prefix="/api/v1/agents", tags=["Agents"])
 
 # Include Health & System Metrics API (Phase 4 - Observability for AI)
 from app.api.v1.endpoints.health import router as health_router
@@ -232,9 +254,9 @@ app.include_router(audit_router, prefix="/api/v1/audit", tags=["Audit"])
 from app.api.v1.endpoints.gdpr import router as gdpr_router
 app.include_router(gdpr_router, prefix="/api/v1/gdpr", tags=["GDPR"])
 
-# Include RAG API (Phase 3 - Semantic Search)
-from app.api.v1.endpoints.rag import router as rag_router
-app.include_router(rag_router, prefix="/api/v1/rag", tags=["RAG"])
+# Include RAG API (Phase 3 - Semantic Search) - TEMPORARILY DISABLED for CRM testing
+# from app.api.v1.endpoints.rag import router as rag_router
+# app.include_router(rag_router, prefix="/api/v1/rag", tags=["RAG"])
 
 # Include WebSocket API (Phase 3 - Realtime)
 from app.api.v1.endpoints.websocket import router as websocket_router

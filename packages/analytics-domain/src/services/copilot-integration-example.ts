@@ -36,7 +36,7 @@ export function setupMCPServerWithCopilot(): http.Server {
     "upgrade",
     (request: IncomingMessage, socket: Duplex, head: Buffer): void => {
       if (request.url === "/mcp/copilot/ws") {
-        wss.handleUpgrade(request, socket, head, (ws): void => {
+        wss.handleUpgrade(request, socket, head, (ws: any): void => {
           wss.emit("connection", ws, request)
         })
       }

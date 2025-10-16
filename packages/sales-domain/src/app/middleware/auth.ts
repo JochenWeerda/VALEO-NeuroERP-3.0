@@ -37,7 +37,7 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
     
     request.user = {
       userId: payload.sub ?? 'unknown',
-      tenantId: payloadTenantId || headerTenant ?? 'unknown',
+      tenantId: payloadTenantId || (headerTenant ?? 'unknown'),
       roles: Array.isArray(payload.roles) ? payload.roles : [],
       permissions: Array.isArray(payload.permissions) ? payload.permissions : [],
     };

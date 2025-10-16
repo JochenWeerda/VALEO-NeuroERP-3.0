@@ -1,0 +1,201 @@
+// Prisma-Schema für VALEO NeuroERP 3.0 - ERP Domain
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ANFRAGEN (Bedarfsanforderungen)
+// ============================================================================
+
+model Anfrage {
+  id             String   @id @default(cuid())
+  anfrageNummer  String   @unique
+  typ            String   // 'BANF' | 'ANF'
+  anforderer     String
+  artikel        String
+  menge          Decimal  @db.Decimal(16, 3)
+  einheit        String
+  prioritaet     String   // 'niedrig' | 'normal' | 'hoch' | 'dringend'
+  faelligkeit    DateTime
+  status         String   @default("ENTWURF") // 'ENTWURF' | 'FREIGEGEBEN' | 'ANGEBOTSPHASE'
+  begruendung    String
+  kostenstelle   String?
+  projekt        String?
+  bemerkungen    String?
+  tenantId      String
+  version        Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  // Relationen
+  angebote       Angebot[]
+
+  @@map("anfragen")
+}
+
+// ============================================================================
+// ANGEBOTE (Lieferantenangebote)
+// ============================================================================
+
+model Angebot {
+  id                String   @id @default(cuid())
+  angebotNummer     String   @unique
+  anfrageId         String?
+  lieferantId       String
+  artikel           String
+  menge             Decimal  @db.Decimal(16, 3)
+  einheit           String
+  preis             Decimal  @db.Decimal(16, 4)
+  waehrung          String   @default("EUR")
+  lieferzeit        Int      // Tage
+  gueltigBis        DateTime
+  status            String   @default("ERFASST") // 'ERFASST' | 'GEPRUEFT' | 'GENEHMIGT' | 'ABGELEHNT'
+  mindestabnahme    Int?
+  zahlungsbedingungen String?
+  incoterms         String?
+  bemerkungen       String?
+  tenantId              String
+  version           Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  deletedAt         DateTime?
+
+  // Relationen
+  anfrage           Anfrage? @relation(fields: [anfrageId], references: [id])
+
+  @@map("angebote")
+}
+
+// ============================================================================
+// AUFTRAGSBESTÄTIGUNGEN
+// ============================================================================
+
+model Auftragsbestaetigung {
+  id                    String   @id @default(cuid())
+  bestaetigungsNummer   String   @unique
+  bestellungId          String
+  status                String   @default("OFFEN") // 'OFFEN' | 'GEPRUEFT' | 'BESTAETIGT'
+  bestaetigteTermine    Json     // Array von {positionId, bestaetigterTermin, abweichung}
+  preisabweichungen     Json     // Array von {positionId, urspruenglicherPreis, neuerPreis, begruendung}
+  bemerkungen           String?
+  tenantId          String
+  version               Int      @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  deletedAt             DateTime?
+
+  @@map("auftragsbestaetigungen")
+}
+
+// ============================================================================
+// ANLIEFERAVISE
+// ============================================================================
+
+model Anlieferavis {
+  id                    String   @id @default(cuid())
+  avisNummer            String   @unique
+  bestellungId          String
+  status                String   @default("GESENDET") // 'GESENDET' | 'BESTAETIGT' | 'STORNIERT'
+  geplantesAnlieferDatum DateTime
+  fahrzeug              Json     // {kennzeichen, fahrer, telefon}
+  positionen            Json     // Array von {positionId, menge, chargenNummer, verpackung}
+  bemerkungen           String?
+  tenantId       String
+  version               Int      @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  deletedAt             DateTime?
+
+  @@map("anlieferavise")
+}
+
+// ============================================================================
+// RECHNUNGSEINGANG
+// ============================================================================
+
+model Rechnungseingang {
+  id                    String   @id @default(cuid())
+  rechnungsNummer       String   @unique
+  lieferantId           String
+  bestellungId          String?
+  wareneingangId        String?
+  rechnungsDatum        DateTime
+  status                String   @default("ERFASST") // 'ERFASST' | 'GEPRUEFT' | 'FREIGEGEBEN' | 'VERBUCHT' | 'BEZAHLT'
+  bruttoBetrag          Decimal  @db.Decimal(16, 2)
+  nettoBetrag           Decimal  @db.Decimal(16, 2)
+  steuerBetrag          Decimal  @db.Decimal(16, 2)
+  steuerSatz            Decimal  @db.Decimal(5, 2)
+  skonto                Json     // {prozent, betrag, frist}
+  zahlungsziel          String   // z.B. "30 Tage"
+  positionen            Json     // Array von {artikelId, menge, preis, steuerSatz, gesamt}
+  abweichungen          Json?    // Array von {typ, beschreibung, betrag}
+  bemerkungen           String?
+  tenantId              String
+  version               Int      @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  deletedAt             DateTime?
+
+  @@map("rechnungseingaenge")
+}
+
+// ============================================================================
+// WORKFLOW & AUDIT
+// ============================================================================
+
+model WorkflowRule {
+  id            String   @id @default(cuid())
+  triggerEntity String
+  triggerAction String
+  targetEntity  String
+  targetAction  String
+  condition     String?
+  active        Boolean  @default(true)
+  tenantId      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("workflow_rules")
+}
+
+model WorkflowExecution {
+  id            String   @id @default(cuid())
+  ruleId        String
+  triggerEntity String
+  triggerAction String
+  targetEntity  String
+  targetAction  String
+  status        String   // 'SUCCESS' | 'FAILED' | 'PENDING' | 'RUNNING'
+  startedAt     DateTime
+  completedAt   DateTime?
+  errorMessage  String?
+  actorId       String
+  tenantId   String
+  createdAt     DateTime @default(now())
+
+  @@map("workflow_executions")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  entity     String
+  entityId   String
+  action     String
+  before     Json?
+  after      Json?
+  timestamp  DateTime @default(now())
+  tenantId   String
+  ipAddress  String?
+  userAgent  String?
+
+  @@index([entity, entityId])
+  @@index([actorId, timestamp])
+  @@map("audit_logs")
+}

@@ -76,7 +76,7 @@ export function SemanticSearch() {
 
         // Transform to SearchResults
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const searchResults: SearchResult[] = data.results?.map((r: any) => ({
+        const searchResults: SearchResult[] = (data as any).results?.map((r: any) => ({
           id: r.id || r.metadata?.id || 'unknown',
           type: r.metadata?.type || 'document',
           title: r.metadata?.name || r.document || 'Unbekannt',

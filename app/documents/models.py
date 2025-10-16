@@ -21,6 +21,10 @@ class SalesOrder(BaseModel):
     number: str
     date: str  # YYYY-MM-DD
     customerId: str
+    salesOfferId: Optional[str] = None  # Referenz zum SalesOffer
+    status: str = "ENTWURF"  # Status-Management
+    contactPerson: Optional[str] = None
+    deliveryDate: Optional[str] = None
     deliveryAddress: Optional[str] = ""
     paymentTerms: str = "net30"
     notes: Optional[str] = ""
@@ -35,6 +39,8 @@ class SalesDelivery(BaseModel):
     sourceOrder: Optional[str] = None
     deliveryAddress: str
     carrier: Optional[str] = None
+    deliveryDate: Optional[str] = None  # Lieferdatum
+    status: str = "ENTWURF"  # Status-Management: ENTWURF → VERSENDET → GELIEFERT
     notes: Optional[str] = ""
     lines: List[DocLine] = Field(default_factory=list)
 
@@ -48,8 +54,13 @@ class SalesInvoice(BaseModel):
     sourceDelivery: Optional[str] = None
     paymentTerms: str = "net30"
     dueDate: str
+    status: str = "ENTWURF"  # Status-Management: ENTWURF → VERSENDET → BEZAHLT → ÜBERFÄLLIG
     notes: Optional[str] = ""
     lines: List[DocLine] = Field(default_factory=list)
+    # Gesamtbeträge
+    subtotalNet: float = 0.0  # Netto-Summe
+    totalTax: float = 0.0     # Steuer-Summe
+    totalGross: float = 0.0   # Brutto-Summe
 
 
 class FollowRequest(BaseModel):

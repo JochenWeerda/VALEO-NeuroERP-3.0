@@ -529,7 +529,7 @@ export class AIBankMatchEngine implements MatchEngine {
   }
 
   private generateExplanation(line: BankStatementLine, confidence: number): string {
-    const reasons = [];
+    const reasons: string[] = [];
 
     if (confidence > 0.8) {
       reasons.push('High confidence match based on amount and purpose analysis');

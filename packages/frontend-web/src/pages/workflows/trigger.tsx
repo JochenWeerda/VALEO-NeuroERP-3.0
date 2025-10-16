@@ -13,7 +13,7 @@ export default function WorkflowTriggerPage(): JSX.Element {
   
   const handleTrigger = async (): Promise<void> => {
     try {
-      const result = await triggerWorkflow.mutateAsync('system')
+      const result = await triggerWorkflow.mutateAsync('system') as any
       setLastWorkflowId(result.workflow_id)
       
       // Navigate to approval page

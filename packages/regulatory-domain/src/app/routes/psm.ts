@@ -8,7 +8,7 @@ export async function registerPSMRoutes(server: FastifyInstance): Promise<void> 
   server.post('/psm/check', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
 
-    const input = PSMCheckInputSchema.parse({ ...request.body, tenantId });
+    const input = PSMCheckInputSchema.parse({ ...(request.body as any), tenantId });
     const result = await checkPSM(tenantId, input);
 
     reply.send(result);

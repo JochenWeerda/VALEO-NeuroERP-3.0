@@ -21,6 +21,10 @@ import {
   Building2,
   Leaf,
   AlertCircle,
+  UserCog,
+  Target,
+  Calendar,
+  Tractor,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
@@ -62,6 +66,18 @@ const navItems: NavItem[] = [
       { id: 'lieferung', label: 'Lieferungen', icon: Truck, path: '/sales/delivery', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
       { id: 'rechnung', label: 'Rechnungen', icon: FileText, path: '/sales/invoice', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
       { id: 'kunden', label: 'Kunden', icon: Users, path: '/verkauf/kunden-liste', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
+    ],
+  },
+  {
+    id: 'crm',
+    label: 'CRM & Marketing',
+    icon: UserCog,
+    mcp: { businessDomain: 'crm', scope: 'crm:read' },
+    children: [
+      { id: 'kontakte', label: 'Kontakte', icon: Users, path: '/crm/kontakte-liste', mcp: { businessDomain: 'crm', scope: 'crm:read' } },
+      { id: 'leads', label: 'Leads', icon: Target, path: '/crm/leads', mcp: { businessDomain: 'crm', scope: 'crm:read' } },
+      { id: 'aktivitaeten', label: 'Aktivitäten', icon: Calendar, path: '/crm/aktivitaeten', mcp: { businessDomain: 'crm', scope: 'crm:read' } },
+      { id: 'betriebsprofile', label: 'Betriebsprofile', icon: Tractor, path: '/crm/betriebsprofile', mcp: { businessDomain: 'crm', scope: 'crm:read' } },
     ],
   },
   {
@@ -180,7 +196,7 @@ export const sidebarMCP = createMCPMetadata('Sidebar', 'navigation', {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps): JSX.Element {
   const agrarEnabled = useFeature('agrar')
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['verkauf', 'fibu']))
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['verkauf', 'crm', 'fibu']))
 
   function toggleGroup(id: string): void {
     setExpandedGroups((prev) => {

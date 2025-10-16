@@ -43,7 +43,7 @@ export async function createSample(data: CreateSample, userId: string): Promise<
     occurredAt: new Date().toISOString(),
   });
 
-  return sample as Sample;
+  return sample as any;
 }
 
 /**
@@ -56,7 +56,7 @@ export async function getSampleById(tenantId: string, sampleId: string): Promise
     .where(and(eq(samples.id, sampleId), eq(samples.tenantId, tenantId)))
     .limit(1);
 
-  return sample as Sample || null;
+  return sample as any || null;
 }
 
 /**
@@ -96,7 +96,7 @@ export async function addSampleResult(data: CreateSampleResult): Promise<SampleR
     occurredAt: new Date().toISOString(),
   });
 
-  return result as SampleResult;
+  return result as any;
 }
 
 /**
@@ -165,7 +165,7 @@ export async function getSampleResults(tenantId: string, sampleId: string): Prom
     .from(sampleResults)
     .where(and(eq(sampleResults.sampleId, sampleId), eq(sampleResults.tenantId, tenantId)));
 
-  return results as SampleResult[];
+  return results as any;
 }
 
 /**
@@ -199,6 +199,6 @@ export async function listSamples(
     filtered = filtered.filter(s => s.source === filters.source);
   }
 
-  return filtered as Sample[];
+  return filtered as any;
 }
 

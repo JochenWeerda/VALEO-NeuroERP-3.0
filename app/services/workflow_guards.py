@@ -68,3 +68,62 @@ def guard_has_submit_role(payload: dict) -> tuple[bool, str]:
     user = payload.get("user_info", {})
     roles = user.get("roles", [])
     return ("sales" in roles or "purchase" in roles or "admin" in roles, "Insufficient permissions for submit")
+
+
+def guard_psm_farmer_declaration_required(payload: dict) -> tuple[bool, str]:
+    """
+    Prüft ob PSM eine Erklärung des Landwirts erfordert
+
+    Args:
+        payload: PSM-Daten
+
+    Returns:
+        (ok, reason)
+    """
+    psm = payload.get("psm", {})
+    if psm.get("ausgangsstoff_explosivstoffe") and not psm.get("erklaerung_landwirt_status"):
+        return (False, "Farmer declaration required for PSM with explosive precursors")
+    return (True, "ok")
+
+
+def guard_psm_approval_valid(payload: dict) -> tuple[bool, str]:
+    """
+    Prüft ob PSM-Zulassung noch gültig ist
+
+    Args:
+        payload: PSM-Daten
+
+    Returns:
+        (ok, reason)
+    """
+    from datetime import datetime
+    psm = payload.get("psm", {})
+    ablauf = psm.get("zulassung_ablauf")
+    if ablauf and isinstance(ablauf, str):
+        ablauf_date = datetime.fromisoformat(ablauf.replace('Z', '+00:00'))
+        if ablauf_date < datetime.now():
+            return (False, "PSM approval has expired")
+    return (True, "ok")
+
+
+def guard_psm_expertise_required(payload: dict) -> tuple[bool, str]:
+    """
+    Prüft ob Sachkunde-Nachweis für PSM-Abgabe erforderlich ist
+
+    Args:
+        payload: Verkaufsdaten mit PSM-Artikeln
+
+    Returns:
+        (ok, reason)
+    """
+    user = payload.get("user_info", {})
+    has_expertise = user.get("psm_sachkunde_gueltig", False)
+
+    # Prüfe ob PSM im Warenkorb sind
+    lines = payload.get("lines", [])
+    has_psm = any(line.get("article_type") == "PSM" for line in lines)
+
+    if has_psm and not has_expertise:
+        return (False, "Valid PSM expertise certificate required for PSM sales")
+
+    return (True, "ok")

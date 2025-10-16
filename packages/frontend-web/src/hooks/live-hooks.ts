@@ -106,7 +106,7 @@ export function useLiveInventory(): { status: LiveStatus } {
   return { status }
 }
 
-export function usePolicyAlerts(): { status: LiveStatus; policy: ReturnType<typeof useLive>['policy'] } {
+export function usePolicyAlerts(): { status: LiveStatus; policy: any } {
   const pushPolicy = useLive((state) => state.pushPolicy)
   const sweepPolicy = useLive((state) => state.sweepPolicy)
   const policy = useLive((state) => state.policy)

@@ -5,6 +5,7 @@ import { registerQuoteRoutes } from './routes/quotes';
 import { registerOrderRoutes } from './routes/orders';
 import { registerInvoiceRoutes } from './routes/invoices';
 import { registerCreditNoteRoutes } from './routes/credit-notes';
+import { registerSalesOfferRoutes } from './routes/sales-offers';
 import { authMiddleware } from './middleware/auth';
 import { tenantMiddleware } from './middleware/tenant';
 import { requestIdMiddleware } from './middleware/request-id';
@@ -41,7 +42,7 @@ server.register(swagger, {
     openapi: '3.0.3',
     info: {
       title: 'Sales Domain API',
-      description: 'REST API for Sales Domain operations (Quotes, Orders, Invoices, Credit Notes)',
+      description: 'REST API for Sales Domain operations (Quotes, Sales Offers, Orders, Invoices, Credit Notes)',
       version: '1.0.0',
     },
     servers: [
@@ -98,6 +99,7 @@ server.setErrorHandler(errorHandler);
 // Register routes
 server.register(healthRoutes);
 server.register(registerQuoteRoutes);
+server.register(registerSalesOfferRoutes);
 server.register(registerOrderRoutes);
 server.register(registerInvoiceRoutes);
 server.register(registerCreditNoteRoutes);

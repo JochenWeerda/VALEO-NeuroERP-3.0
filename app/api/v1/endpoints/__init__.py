@@ -6,6 +6,8 @@ from .users import router as users
 from .customers import router as customers
 from .leads import router as leads
 from .contacts import router as contacts
+from . import activities
+from . import farm_profiles
 from .accounts import router as accounts
 from .journal_entries import router as journal_entries
 from .articles import router as articles

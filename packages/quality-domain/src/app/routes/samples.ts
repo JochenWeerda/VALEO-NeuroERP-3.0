@@ -15,7 +15,7 @@ export async function registerSampleRoutes(server: FastifyInstance): Promise<voi
     const tenantId = request.headers['x-tenant-id'] as string;
     const userId = request.authContext?.userId ?? 'system';
 
-    const data = CreateSampleSchema.parse({ ...request.body, tenantId });
+    const data = CreateSampleSchema.parse({ ...request.body as any, tenantId });
     const sample = await createSample(data, userId);
 
     reply.code(201).send(sample);
@@ -40,12 +40,12 @@ export async function registerSampleRoutes(server: FastifyInstance): Promise<voi
     const tenantId = request.headers['x-tenant-id'] as string;
     const query = request.query as Record<string, string>;
 
-    const samples = await listSamples(tenantId, {
-      batchId: query.batchId,
-      contractId: query.contractId,
-      status: query.status,
-      source: query.source,
-    });
+    const filters: { batchId?: string; contractId?: string; status?: string; source?: string } = {};
+    if (query.batchId) filters.batchId = query.batchId;
+    if (query.contractId) filters.contractId = query.contractId;
+    if (query.status) filters.status = query.status;
+    if (query.source) filters.source = query.source;
+    const samples = await listSamples(tenantId, filters);
 
     reply.send({ data: samples, count: samples.length });
   });
@@ -55,7 +55,7 @@ export async function registerSampleRoutes(server: FastifyInstance): Promise<voi
     const tenantId = request.headers['x-tenant-id'] as string;
     const { id } = request.params as { id: string };
 
-    const data = CreateSampleResultSchema.parse({ ...request.body, tenantId, sampleId: id });
+    const data = CreateSampleResultSchema.parse({ ...request.body as any, tenantId, sampleId: id });
     const result = await addSampleResult(data);
 
     reply.code(201).send(result);

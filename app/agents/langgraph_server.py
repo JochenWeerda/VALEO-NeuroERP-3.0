@@ -14,7 +14,8 @@ from .workflows.bestellvorschlag import (
     check_sales_history,
     generate_order_proposal,
     wait_for_human_approval,
-    create_purchase_order
+    create_purchase_order,
+    run_bestellvorschlag_workflow
 )
 
 logger = logging.getLogger(__name__)
@@ -88,31 +89,14 @@ def get_bestellvorschlag_workflow():
 
 async def invoke_bestellvorschlag(tenant_id: str, correlation_id: str) -> BestellvorschlagState:
     """
-    Invoke Bestellvorschlag workflow.
-    
+    Invoke Bestellvorschlag workflow using the new LangGraph implementation.
+
     Returns state at checkpoint (before approval).
     """
-    workflow = get_bestellvorschlag_workflow()
-    
-    initial_state: BestellvorschlagState = {
-        "correlation_id": correlation_id,
-        "tenant_id": tenant_id,
-        "low_stock_articles": [],
-        "sales_history": [],
-        "supplier_recommendations": [],
-        "proposal": None,
-        "approved": False,
-        "rejection_reason": None,
-        "order_id": None,
-        "created_at": None,
-    }
-    
-    config = {"configurable": {"thread_id": correlation_id}}
-    
-    # Run until checkpoint
-    result = await workflow.ainvoke(initial_state, config)
-    
-    logger.info(f"Workflow paused at approval checkpoint: {correlation_id}")
+    # Use the new LangGraph-based workflow
+    result = await run_bestellvorschlag_workflow(tenant_id, correlation_id)
+
+    logger.info(f"Bestellvorschlag workflow paused at approval checkpoint: {correlation_id}")
     return result
 
 

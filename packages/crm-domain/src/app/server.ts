@@ -133,7 +133,7 @@ async function initializeServices() {
       customerService
     };
   } catch (error) {
-    server.log.error('Failed to initialize services:', error);
+    server.log.error('Failed to initialize services:', error as any);
     throw error;
   }
 }
@@ -163,7 +163,7 @@ async function gracefulShutdown() {
 
     server.log.info('Graceful shutdown completed');
   } catch (error) {
-    server.log.error('Error during graceful shutdown:', error);
+    server.log.error('Error during graceful shutdown:', error as any);
     process.exit(1);
   }
 }
@@ -186,7 +186,7 @@ async function startServer() {
     server.log.info(`API Documentation available at http://localhost:${port}/docs`);
 
   } catch (error) {
-    server.log.error('Failed to start server:', error);
+    server.log.error('Failed to start server:', error as any);
     process.exit(1);
   }
 }

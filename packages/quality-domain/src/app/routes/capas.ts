@@ -19,7 +19,7 @@ export async function registerCapaRoutes(server: FastifyInstance): Promise<void>
     const tenantId = request.headers['x-tenant-id'] as string;
     const userId = request.authContext?.userId ?? 'system';
 
-    const data = CreateCapaSchema.parse({ ...request.body, tenantId });
+    const data = CreateCapaSchema.parse({ ...(request.body as any), tenantId });
     const capa = await createCapa(data, userId);
 
     reply.code(201).send(capa);
@@ -52,7 +52,7 @@ export async function registerCapaRoutes(server: FastifyInstance): Promise<void>
         responsibleUserId: query.responsibleUserId,
         overdue: query.overdue === 'true',
         search: query.search,
-      },
+      } as any,
       {
         page: query.page ? parseInt(query.page) : 1,
         limit: query.limit ? parseInt(query.limit) : 50,
@@ -141,10 +141,10 @@ export async function registerCapaRoutes(server: FastifyInstance): Promise<void>
     const tenantId = request.headers['x-tenant-id'] as string;
     const query = request.query as Record<string, string>;
 
-    const stats = await getCapaStatistics(tenantId, {
-      startDate: query.startDate,
-      endDate: query.endDate,
-    });
+    const filters: { startDate?: string; endDate?: string } = {};
+    if (query.startDate) filters.startDate = query.startDate;
+    if (query.endDate) filters.endDate = query.endDate;
+    const stats = await getCapaStatistics(tenantId, filters);
 
     reply.send(stats);
   });

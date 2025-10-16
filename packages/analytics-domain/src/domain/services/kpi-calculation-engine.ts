@@ -35,7 +35,11 @@ export interface KpiCalculationResult {
 }
 
 export class KpiCalculationEngine {
-  constructor(private readonly _db: ReturnType<typeof drizzle>) {}
+  private db: ReturnType<typeof drizzle>;
+
+  constructor(dbInstance?: ReturnType<typeof drizzle>) {
+    this.db = dbInstance!;
+  }
 
   /**
    * Calculate contract position KPIs

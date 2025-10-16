@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { connect, type JSONCodec, type NatsConnection, type Subscription } from 'nats';
+import { connect, JSONCodec, type NatsConnection, type Subscription } from 'nats';
 import { Pool } from 'pg';
 import {
   factContracts,

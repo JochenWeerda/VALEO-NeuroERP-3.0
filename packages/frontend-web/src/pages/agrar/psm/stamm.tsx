@@ -21,6 +21,9 @@ type PSMData = {
   bienenschutz: boolean
   auflagen: string[]
   status: 'aktiv' | 'auslaufend' | 'widerrufen'
+  ausgangsstoffExplosivstoffe: boolean
+  erklaerungLandwirtErforderlich: boolean
+  erklaerungLandwirtStatus: string | null
 }
 
 export default function PSMStammPage(): JSX.Element {
@@ -38,6 +41,9 @@ export default function PSMStammPage(): JSX.Element {
     bienenschutz: false,
     auflagen: ['NT101', 'NW468', 'B4'],
     status: 'aktiv',
+    ausgangsstoffExplosivstoffe: false,
+    erklaerungLandwirtErforderlich: false,
+    erklaerungLandwirtStatus: null,
   })
 
   async function handleSave(): Promise<void> {
@@ -82,6 +88,7 @@ export default function PSMStammPage(): JSX.Element {
           <TabsTrigger value="zulassung">Zulassung</TabsTrigger>
           <TabsTrigger value="anwendung">Anwendung</TabsTrigger>
           <TabsTrigger value="sicherheit">Sicherheit</TabsTrigger>
+          <TabsTrigger value="erklaerung">Erklärung Landwirt</TabsTrigger>
         </TabsList>
 
         <TabsContent value="allgemein" className="space-y-4">
@@ -195,6 +202,67 @@ export default function PSMStammPage(): JSX.Element {
                   ))}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="erklaerung" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldAlert className="h-5 w-5" />
+                Erklärung des Landwirts (§ 64 PflSchG)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={psm.ausgangsstoffExplosivstoffe}
+                    onChange={(e) => setPSM({ ...psm, ausgangsstoffExplosivstoffe: e.target.checked })}
+                    className="h-4 w-4"
+                  />
+                  <Label>Ausgangsstoff für Explosivstoffe (Ammoniumnitrat, Schwefelsäure, etc.)</Label>
+                </div>
+                {psm.ausgangsstoffExplosivstoffe && (
+                  <div className="ml-6 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={psm.erklaerungLandwirtErforderlich}
+                        onChange={(e) => setPSM({ ...psm, erklaerungLandwirtErforderlich: e.target.checked })}
+                        className="h-4 w-4"
+                      />
+                      <Label>Erklärung des Landwirts erforderlich</Label>
+                    </div>
+                    {psm.erklaerungLandwirtErforderlich && (
+                      <div className="ml-6">
+                        <Label>Status der Erklärung</Label>
+                        <select
+                          value={psm.erklaerungLandwirtStatus || ''}
+                          onChange={(e) => setPSM({ ...psm, erklaerungLandwirtStatus: e.target.value || null })}
+                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                        >
+                          <option value="">Nicht eingereicht</option>
+                          <option value="eingegangen">Eingegangen</option>
+                          <option value="geprueft">Geprüft</option>
+                          <option value="abgelehnt">Abgelehnt</option>
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              {psm.ausgangsstoffExplosivstoffe && psm.erklaerungLandwirtErforderlich && (
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-900">
+                    <strong>Hinweis:</strong> Bei Abgabe dieses PSM-Mittels muss der Landwirt eine Erklärung
+                    über die beabsichtigte Verwendung abgeben. Die Erklärung wird im DMS-System gespeichert
+                    und dient der Compliance-Nachweisführung.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

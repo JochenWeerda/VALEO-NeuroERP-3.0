@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildFinanzKreditorRouter = buildFinanzKreditorRouter;
 const express_1 = require("express");
 const HTTP_STATUS = {
+    BAD_REQUEST: 400,
     NOT_FOUND: 404,
     CREATED: 201,
     NO_CONTENT: 204,
@@ -19,8 +20,8 @@ function buildFinanzKreditorRouter({ service, baseRoute = '/finanzKreditor' }) {
     });
     router.get(`${baseRoute}/:finanzKreditorId`, async (req, res) => {
         const id = req.params.finanzKreditorId;
-        if (!id) {
-            res.status(400).json({ message: 'finanzKreditorId parameter is required' });
+        if (id === null || id === undefined || id.trim().length === 0) {
+            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzKreditorId parameter is required' });
             return;
         }
         const entity = await service.findById(id);
@@ -36,8 +37,8 @@ function buildFinanzKreditorRouter({ service, baseRoute = '/finanzKreditor' }) {
     });
     router.put(`${baseRoute}/:finanzKreditorId`, async (req, res) => {
         const id = req.params.finanzKreditorId;
-        if (!id) {
-            res.status(400).json({ message: 'finanzKreditorId parameter is required' });
+        if (id === null || id === undefined || id.trim().length === 0) {
+            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzKreditorId parameter is required' });
             return;
         }
         const updated = await service.update(id, req.body);
@@ -45,8 +46,8 @@ function buildFinanzKreditorRouter({ service, baseRoute = '/finanzKreditor' }) {
     });
     router.delete(`${baseRoute}/:finanzKreditorId`, async (req, res) => {
         const id = req.params.finanzKreditorId;
-        if (!id) {
-            res.status(400).json({ message: 'finanzKreditorId parameter is required' });
+        if (id === null || id === undefined || id.trim().length === 0) {
+            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzKreditorId parameter is required' });
             return;
         }
         await service.remove(id);

@@ -68,7 +68,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
   const steps = [
     {
       id: 'lieferant',
-      label: 'Lieferant',
+      title: 'Lieferant',
       content: (
         <div className="space-y-4">
           <div>
@@ -111,7 +111,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
     },
     {
       id: 'positionen',
-      label: 'Positionen',
+      title: 'Positionen',
       content: (
         <div className="space-y-4">
           {bestellung.positionen.map((pos, index) => (
@@ -188,7 +188,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
     },
     {
       id: 'lieferung',
-      label: 'Lieferung',
+      title: 'Lieferung',
       content: (
         <div className="space-y-4">
           <div>
@@ -216,7 +216,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
     },
     {
       id: 'zusammenfassung',
-      label: 'Zusammenfassung',
+      title: 'Zusammenfassung',
       content: (
         <div className="space-y-6">
           <Card>
@@ -282,7 +282,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
       <Wizard
         title="Neue Bestellung anlegen"
         steps={steps}
-        onComplete={handleSubmit}
+        onFinish={handleSubmit}
         onCancel={() => navigate('/einkauf/bestellungen-liste')}
       />
     </div>

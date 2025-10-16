@@ -51,10 +51,10 @@ export async function registerCustomerRoutes(
   }, async (request, reply) => {
     try {
       const customerData = request.body;
-      const context = request.routeContext as RouteContext;
+      const context = (request as any).routeContext as RouteContext;
 
       const customer = await customerService.createCustomer({
-        ...customerData,
+        ...(customerData as any),
         tenantId: 'default-tenant' // TODO: Get from JWT token
       });
 
@@ -100,7 +100,7 @@ export async function registerCustomerRoutes(
   }, async (request, reply) => {
     try {
       const { id } = request.params as { id: string };
-      const context = request.routeContext as RouteContext;
+      const context = (request as any).routeContext as RouteContext;
 
       const customer = await customerService.getCustomer(id, 'default-tenant'); // TODO: Get from JWT token
 
@@ -139,7 +139,7 @@ export async function registerCustomerRoutes(
   }, async (request, reply) => {
     try {
       const query = request.query as any;
-      const context = request.routeContext as RouteContext;
+      const context = (request as any).routeContext as RouteContext;
 
       // Parse pagination
       const page = Number(query.page) || 1;
@@ -200,7 +200,7 @@ export async function registerCustomerRoutes(
     try {
       const { id } = request.params as { id: string };
       const updateData = request.body;
-      const context = request.routeContext as RouteContext;
+      const context = (request as any).routeContext as RouteContext;
 
       const customer = await customerService.updateCustomer(id, {
         ...updateData,
@@ -254,7 +254,7 @@ export async function registerCustomerRoutes(
   }, async (request, reply) => {
     try {
       const { id } = request.params as { id: string };
-      const context = request.routeContext as RouteContext;
+      const context = (request as any).routeContext as RouteContext;
 
       await customerService.deleteCustomer(id, 'default-tenant'); // TODO: Get from JWT token
 
@@ -309,7 +309,7 @@ export async function registerCustomerRoutes(
     try {
       const { id } = request.params as { id: string };
       const { status } = request.body as { status: string };
-      const context = request.routeContext as RouteContext;
+      const context = (request as any).routeContext as RouteContext;
 
       const customer = await customerService.changeCustomerStatus(
         id,
@@ -363,7 +363,7 @@ export async function registerCustomerRoutes(
     try {
       const { id } = request.params as { id: string };
       const { tag } = request.body as { tag: string };
-      const context = request.routeContext as RouteContext;
+      const context = (request as any).routeContext as RouteContext;
 
       const customer = await customerService.addTag(
         id,
@@ -414,7 +414,7 @@ export async function registerCustomerRoutes(
   }, async (request, reply) => {
     try {
       const { id, tag } = request.params as { id: string; tag: string };
-      const context = request.routeContext as RouteContext;
+      const context = (request as any).routeContext as RouteContext;
 
       const customer = await customerService.removeTag(
         id,

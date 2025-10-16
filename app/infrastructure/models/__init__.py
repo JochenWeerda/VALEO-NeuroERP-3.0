@@ -119,6 +119,44 @@ class Contact(Base):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
 
+class Activity(Base):
+    """CRM Activity model"""
+    __tablename__ = "activities"
+    __table_args__ = {"schema": "domain_crm", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    type = Column(String(20), nullable=False)  # meeting, call, email, note
+    title = Column(String(200), nullable=False)
+    customer = Column(String(100), nullable=False)
+    contact_person = Column(String(100), nullable=False)
+    date = Column(DateTime(timezone=True), nullable=False)
+    status = Column(String(20), nullable=False)  # planned, completed, overdue
+    assigned_to = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class FarmProfile(Base):
+    """Farm Profile model for agricultural operations"""
+    __tablename__ = "farm_profiles"
+    __table_args__ = {"schema": "domain_crm", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    farm_name = Column(String(200), nullable=False)
+    owner = Column(String(100), nullable=False)
+    total_area = Column(Float, nullable=False)  # in hectares
+    crops = Column(postgresql.JSONB(astext_type=Text()), nullable=True, default="[]")  # JSON array of {crop, area}
+    livestock = Column(postgresql.JSONB(astext_type=Text()), nullable=True, default="[]")  # JSON array of {type, count}
+    location = Column(postgresql.JSONB(astext_type=Text()), nullable=True)  # {latitude, longitude, address}
+    certifications = Column(postgresql.JSONB(astext_type=Text()), nullable=True, default="[]")  # JSON array of strings
+    notes = Column(Text, nullable=True)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
 # Inventory Models
 class Article(Base):
     """Article/Product model"""
@@ -314,3 +352,15 @@ class AuditLog(Base):
     ip_address = Column(String(50), nullable=True)
     user_agent = Column(String(200), nullable=True)
     correlation_id = Column(String(50), nullable=True)
+
+
+# Import Agrar models
+from .agrar_models import (
+    Saatgut,
+    SaatgutLizenz,
+    Duenger,
+    DuengerMischung,
+    PSM,
+    Sachkunde,
+    Biostimulanz
+)

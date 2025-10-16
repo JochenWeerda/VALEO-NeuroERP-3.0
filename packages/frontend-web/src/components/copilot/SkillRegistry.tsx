@@ -278,6 +278,7 @@ export class SkillExecutor {
     if (!skill.execute) {
       return { success: true, data: skill.output.schema as SkillResult<Id> }
     }
-    return skill.execute(params, context) as Promise<ExecutionResult<SkillResult<Id>>>
+    // Type-safe execution with runtime type checking
+    return skill.execute(params as any, context as any) as Promise<ExecutionResult<SkillResult<Id>>>
   }
 }

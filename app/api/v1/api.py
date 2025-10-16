@@ -12,12 +12,17 @@ from app.api.v1.endpoints import (
     customers,
     leads,
     contacts,
+    activities,
+    farm_profiles,
     accounts,
     journal_entries,
     articles,
     warehouses,
     policies
 )
+
+# Import agrar domain routers
+from app.domains.agrar.api import psm, psm_proplanta
 
 # Create main API router
 api_router = APIRouter()
@@ -47,20 +52,32 @@ api_router.include_router(
 
 api_router.include_router(
     customers,
-    prefix="/customers",
+    prefix="/crm/customers",
     tags=["crm", "customers"]
 )
 
 api_router.include_router(
     leads,
-    prefix="/leads",
+    prefix="/crm/leads",
     tags=["crm", "leads"]
 )
 
 api_router.include_router(
     contacts,
-    prefix="/contacts",
+    prefix="/crm/contacts",
     tags=["crm", "contacts"]
+)
+
+api_router.include_router(
+    activities.router,
+    prefix="/crm/activities",
+    tags=["crm", "activities"]
+)
+
+api_router.include_router(
+    farm_profiles.router,
+    prefix="/crm/farm-profiles",
+    tags=["crm", "farm-profiles"]
 )
 
 api_router.include_router(
@@ -91,4 +108,17 @@ api_router.include_router(
     policies.router,
     prefix="/mcp",
     tags=["mcp", "policies"]
+)
+
+# Agrar domain routers
+api_router.include_router(
+    psm.router,
+    prefix="/agrar/psm",
+    tags=["agrar", "psm"]
+)
+
+api_router.include_router(
+    psm_proplanta.router,
+    prefix="/agrar/psm/proplanta",
+    tags=["agrar", "psm", "proplanta", "integration"]
 )

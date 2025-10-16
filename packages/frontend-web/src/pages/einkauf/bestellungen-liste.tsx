@@ -1,179 +1,198 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { ListReport } from '@/components/mask-builder'
+import { useMaskActions } from '@/components/mask-builder/hooks'
+import { createApiClient } from '@/components/mask-builder/utils/api'
+import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
-import { DataTable } from '@/components/ui/data-table'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileDown, Plus, Search } from 'lucide-react'
+import { ListConfig } from '@/components/mask-builder/types'
 
-type Bestellung = {
-  id: string
-  nummer: string
-  datum: string
-  lieferant: string
-  betrag: number
-  liefertermin: string
-  status: 'offen' | 'bestaetigt' | 'teilgeliefert' | 'geliefert' | 'storniert'
-}
+// API Client für Bestellungen
+const apiClient = createApiClient('/api/einkauf')
 
-const mockBestellungen: Bestellung[] = [
-  {
-    id: '1',
-    nummer: 'PO-2025-0001',
-    datum: '2025-10-08',
-    lieferant: 'Saatgut AG',
-    betrag: 25000.0,
-    liefertermin: '2025-10-20',
-    status: 'bestaetigt',
+// Konfiguration für Bestellungen ListReport
+const bestellungenConfig: ListConfig = {
+  title: 'Bestellungen',
+  subtitle: 'Einkaufsbestellungen verwalten',
+  type: 'list-report',
+  columns: [
+    {
+      key: 'nummer',
+      label: 'Bestell-Nr.',
+      sortable: true,
+      render: (value) => <code className="text-sm font-mono">{value}</code>
+    },
+    {
+      key: 'lieferant',
+      label: 'Lieferant',
+      sortable: true,
+      filterable: true
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      sortable: true,
+      filterable: true,
+      render: (value) => {
+        const statusLabels = {
+          'ENTWURF': { label: 'Entwurf', variant: 'secondary' as const },
+          'FREIGEGEBEN': { label: 'Freigegeben', variant: 'default' as const },
+          'TEILGELIEFERT': { label: 'Teilgeliefert', variant: 'secondary' as const },
+          'VOLLGELIEFERT': { label: 'Vollgeliefert', variant: 'outline' as const },
+          'STORNIERT': { label: 'Storniert', variant: 'destructive' as const }
+        }
+        const status = statusLabels[value as keyof typeof statusLabels] || { label: value, variant: 'secondary' as const }
+        return <Badge variant={status.variant}>{status.label}</Badge>
+      }
+    },
+    {
+      key: 'liefertermin',
+      label: 'Liefertermin',
+      sortable: true,
+      render: (value) => formatDate(value)
+    },
+    {
+      key: 'gesamtbetrag',
+      label: 'Gesamtbetrag',
+      sortable: true,
+      render: (value) => `${formatNumber(value, 2)} €`
+    },
+    {
+      key: 'createdAt',
+      label: 'Erstellt',
+      sortable: true,
+      render: (value) => formatDate(value)
+    }
+  ],
+  filters: [
+    {
+      name: 'status',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { value: 'ENTWURF', label: 'Entwurf' },
+        { value: 'FREIGEGEBEN', label: 'Freigegeben' },
+        { value: 'TEILGELIEFERT', label: 'Teilgeliefert' },
+        { value: 'VOLLGELIEFERT', label: 'Vollgeliefert' },
+        { value: 'STORNIERT', label: 'Storniert' }
+      ]
+    },
+    {
+      name: 'lieferant',
+      label: 'Lieferant',
+      type: 'text'
+    }
+  ],
+  bulkActions: [
+    {
+      key: 'freigeben',
+      label: 'Freigeben',
+      type: 'primary',
+      onClick: () => console.log('Freigeben clicked')
+    },
+    {
+      key: 'stornieren',
+      label: 'Stornieren',
+      type: 'danger',
+      onClick: () => console.log('Stornieren clicked')
+    },
+    {
+      key: 'drucken',
+      label: 'Drucken',
+      type: 'secondary',
+      onClick: () => console.log('Drucken clicked')
+    }
+  ],
+  defaultSort: { field: 'createdAt', direction: 'desc' },
+  pageSize: 25,
+  api: {
+    baseUrl: '/api/einkauf/bestellungen',
+    endpoints: {
+      list: '/api/einkauf/bestellungen',
+      get: '/api/einkauf/bestellungen/{id}',
+      create: '/api/einkauf/bestellungen',
+      update: '/api/einkauf/bestellungen/{id}',
+      delete: '/api/einkauf/bestellungen/{id}'
+    }
   },
-  {
-    id: '2',
-    nummer: 'PO-2025-0002',
-    datum: '2025-10-09',
-    lieferant: 'Dünger GmbH',
-    betrag: 18500.5,
-    liefertermin: '2025-10-15',
-    status: 'teilgeliefert',
-  },
-  {
-    id: '3',
-    nummer: 'PO-2025-0003',
-    datum: '2025-10-10',
-    lieferant: 'Agrar-Handel Nord',
-    betrag: 12200.0,
-    liefertermin: '2025-10-25',
-    status: 'offen',
-  },
-]
-
-const statusVariantMap: Record<Bestellung['status'], 'default' | 'outline' | 'secondary' | 'destructive'> = {
-  offen: 'default',
-  bestaetigt: 'secondary',
-  teilgeliefert: 'secondary',
-  geliefert: 'outline',
-  storniert: 'destructive',
-}
-
-const statusLabelMap: Record<Bestellung['status'], string> = {
-  offen: 'Offen',
-  bestaetigt: 'Bestätigt',
-  teilgeliefert: 'Teilgeliefert',
-  geliefert: 'Geliefert',
-  storniert: 'Storniert',
+  permissions: ['einkauf.read', 'einkauf.write'],
+  actions: []
 }
 
 export default function BestellungenListePage(): JSX.Element {
   const navigate = useNavigate()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<Bestellung['status'] | 'alle'>('alle')
+  const [data, setData] = useState<any[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
 
-  const filteredBestellungen = mockBestellungen.filter((bestellung) => {
-    const matchesSearch =
-      bestellung.nummer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      bestellung.lieferant.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'alle' || bestellung.status === statusFilter
-    return matchesSearch && matchesStatus
+  const { handleAction } = useMaskActions(async (action: string, item: any) => {
+    if (action === 'edit' && item) {
+      navigate(`/einkauf/bestellungen/${item.id}`)
+    } else if (action === 'delete' && item) {
+      if (confirm(`Bestellung "${item.nummer}" wirklich löschen?`)) {
+        try {
+          await apiClient.delete(`/bestellungen/${item.id}`)
+          loadData() // Liste neu laden
+        } catch (error) {
+          alert('Fehler beim Löschen')
+        }
+      }
+    } else if (action === 'freigeben' && item) {
+      try {
+        await apiClient.post(`/bestellungen/${item.id}/freigeben`)
+        loadData()
+      } catch (error) {
+        alert('Fehler beim Freigeben')
+      }
+    }
   })
 
-  const columns = [
-    {
-      key: 'nummer' as const,
-      label: 'Bestellnummer',
-      render: (bestellung: Bestellung) => (
-        <button
-          onClick={() => navigate(`/einkauf/bestellung/${bestellung.id}`)}
-          className="font-medium text-blue-600 hover:underline"
-        >
-          {bestellung.nummer}
-        </button>
-      ),
-    },
-    {
-      key: 'datum' as const,
-      label: 'Bestelldatum',
-      render: (bestellung: Bestellung) => new Date(bestellung.datum).toLocaleDateString('de-DE'),
-    },
-    {
-      key: 'lieferant' as const,
-      label: 'Lieferant',
-    },
-    {
-      key: 'betrag' as const,
-      label: 'Betrag',
-      render: (bestellung: Bestellung) =>
-        new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(bestellung.betrag),
-    },
-    {
-      key: 'liefertermin' as const,
-      label: 'Liefertermin',
-      render: (bestellung: Bestellung) => new Date(bestellung.liefertermin).toLocaleDateString('de-DE'),
-    },
-    {
-      key: 'status' as const,
-      label: 'Status',
-      render: (bestellung: Bestellung) => (
-        <Badge variant={statusVariantMap[bestellung.status]}>{statusLabelMap[bestellung.status]}</Badge>
-      ),
-    },
-  ]
+  const loadData = async () => {
+    setLoading(true)
+    try {
+      const response = await apiClient.get('/bestellungen')
+      if (response.success) {
+        setData((response.data as any).data || [])
+        setTotal((response.data as any).total || 0)
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Daten:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const handleCreate = () => {
+    navigate('/einkauf/bestellung-anlegen')
+  }
+
+  const handleEdit = (item: any) => {
+    handleAction('edit', item)
+  }
+
+  const handleDelete = (item: any) => {
+    handleAction('delete', item)
+  }
+
+  const handleExport = () => {
+    alert('Export-Funktion wird implementiert')
+  }
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Bestellungen</h1>
-          <p className="text-muted-foreground">Übersicht aller Einkaufsbestellungen</p>
-        </div>
-        <Button onClick={() => navigate('/einkauf/bestellung-anlegen')} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Neue Bestellung
-        </Button>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Filter & Suche</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Suche nach Nummer oder Lieferant..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as Bestellung['status'] | 'alle')}
-              className="rounded-md border border-input bg-background px-3 py-2"
-            >
-              <option value="alle">Alle Status</option>
-              <option value="offen">Offen</option>
-              <option value="bestaetigt">Bestätigt</option>
-              <option value="teilgeliefert">Teilgeliefert</option>
-              <option value="geliefert">Geliefert</option>
-              <option value="storniert">Storniert</option>
-            </select>
-            <Button variant="outline" className="gap-2">
-              <FileDown className="h-4 w-4" />
-              Export
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="pt-6">
-          <DataTable data={filteredBestellungen} columns={columns} />
-          <div className="mt-4 text-sm text-muted-foreground">
-            {filteredBestellungen.length} von {mockBestellungen.length} Bestellung(en) angezeigt
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <ListReport
+      config={bestellungenConfig}
+      data={data}
+      total={total}
+      onCreate={handleCreate}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
+      onExport={handleExport}
+      onImport={() => alert('Import-Funktion wird implementiert')}
+      isLoading={loading}
+    />
   )
 }

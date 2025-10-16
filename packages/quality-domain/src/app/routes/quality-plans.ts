@@ -14,7 +14,7 @@ export async function registerQualityPlanRoutes(server: FastifyInstance): Promis
     const tenantId = request.headers['x-tenant-id'] as string;
     const userId = request.authContext?.userId ?? 'system';
 
-    const data = CreateQualityPlanSchema.parse({ ...request.body, tenantId });
+    const data = CreateQualityPlanSchema.parse({ ...request.body as any, tenantId });
     const plan = await createQualityPlan(data, userId);
 
     reply.code(201).send(plan);
@@ -39,11 +39,11 @@ export async function registerQualityPlanRoutes(server: FastifyInstance): Promis
     const tenantId = request.headers['x-tenant-id'] as string;
     const query = request.query as Record<string, string>;
 
-    const plans = await listQualityPlans(tenantId, {
-      commodity: query.commodity,
-      contractId: query.contractId,
-      active: query.active === 'true',
-    });
+    const filters: { commodity?: string; contractId?: string; active?: boolean } = {};
+    if (query.commodity) filters.commodity = query.commodity;
+    if (query.contractId) filters.contractId = query.contractId;
+    if (query.active !== undefined) filters.active = query.active === 'true';
+    const plans = await listQualityPlans(tenantId, filters);
 
     reply.send({ data: plans, count: plans.length });
   });
@@ -54,7 +54,7 @@ export async function registerQualityPlanRoutes(server: FastifyInstance): Promis
     const userId = request.authContext?.userId ?? 'system';
     const { id } = request.params as { id: string };
 
-    const data = UpdateQualityPlanSchema.parse(request.body);
+    const data = UpdateQualityPlanSchema.parse(request.body as any);
     const plan = await updateQualityPlan(tenantId, id, data, userId);
 
     reply.send(plan);

@@ -244,15 +244,17 @@ export async function createOrUpdateLabel(
       .returning();
 
     // Publish event
-    await publishEvent('label.updated', {
-      tenantId,
-      labelId: updated.id,
-      code: updated.code,
-      status: updated.status,
-      occurredAt: new Date().toISOString(),
-    });
+    if (updated) {
+      await publishEvent('label.updated', {
+        tenantId,
+        labelId: updated.id,
+        code: updated.code,
+        status: updated.status,
+        occurredAt: new Date().toISOString(),
+      });
+    }
 
-    return updated;
+    return updated!;
   } else {
     // Create
     const [created] = await db
@@ -264,14 +266,16 @@ export async function createOrUpdateLabel(
       .returning();
 
     // Publish event
-    await publishEvent(`label.${evaluation.status.toLowerCase()}`, {
-      tenantId,
-      labelId: created.id,
-      code: created.code,
-      targetType: created.targetType,
-      targetId: created.targetId,
-      occurredAt: new Date().toISOString(),
-    });
+    if (created) {
+      await publishEvent(`label.${evaluation.status.toLowerCase()}`, {
+        tenantId,
+        labelId: created.id,
+        code: created.code,
+        targetType: created.targetType,
+        targetId: created.targetId,
+        occurredAt: new Date().toISOString(),
+      });
+    }
 
     return created;
   }

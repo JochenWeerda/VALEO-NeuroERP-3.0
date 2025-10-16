@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from './schema';
 
-const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL ?? 'postgres://localhost:5432/quality_db';
+const connectionString = process.env.DATABASE_URL || (process.env.POSTGRES_URL ?? 'postgres://localhost:5432/quality_db');
 
 // Create postgres client
 const client = postgres(connectionString, {

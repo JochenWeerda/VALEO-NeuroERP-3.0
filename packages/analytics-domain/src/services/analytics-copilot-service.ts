@@ -6,7 +6,9 @@
 
 import type { Request, Response, NextFunction } from "express"
 import express from "express"
+// @ts-ignore - node-fetch is an optional dependency
 import fetch from "node-fetch"
+// @ts-ignore - ws is an optional dependency
 import { WebSocketServer, type WebSocket } from "ws"
 import { z } from "zod"
 
@@ -331,6 +333,7 @@ Antworte im JSON-Format:
           forecast: { sales: nextSales, anomaly },
           summary: forecastSummary,
           factors,
+          suggestions: [], // Required by InsightSchema
         }
 
         // Broadcast an WebSocket-Clients

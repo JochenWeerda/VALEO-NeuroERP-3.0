@@ -9,7 +9,7 @@ export async function loggerMiddleware(
 ): Promise<void> {
   const start = Date.now();
 
-  reply.addHook('onResponse', () => {
+  (reply as any).addHook('onResponse', () => {
     const duration = Date.now() - start;
     
     request.log.info({

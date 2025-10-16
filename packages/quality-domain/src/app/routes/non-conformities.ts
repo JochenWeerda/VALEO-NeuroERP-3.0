@@ -17,7 +17,7 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
     const tenantId = request.headers['x-tenant-id'] as string;
     const userId = request.authContext?.userId ?? 'system';
 
-    const data = CreateNonConformitySchema.parse({ ...request.body, tenantId });
+    const data = CreateNonConformitySchema.parse({ ...request.body as any, tenantId });
     const nc = await createNonConformity(data, userId);
 
     reply.code(201).send(nc);
@@ -42,18 +42,19 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
     const tenantId = request.headers['x-tenant-id'] as string;
     const query = request.query as Record<string, string>;
 
+    const filters: { batchId?: string; contractId?: string; status?: string; severity?: string; type?: string; supplierId?: string; assignedTo?: string; search?: string } = {};
+    if (query.batchId) filters.batchId = query.batchId;
+    if (query.contractId) filters.contractId = query.contractId;
+    if (query.status) filters.status = query.status;
+    if (query.severity) filters.severity = query.severity;
+    if (query.type) filters.type = query.type;
+    if (query.supplierId) filters.supplierId = query.supplierId;
+    if (query.assignedTo) filters.assignedTo = query.assignedTo;
+    if (query.search) filters.search = query.search;
+    
     const result = await listNonConformities(
       tenantId,
-      {
-        batchId: query.batchId,
-        contractId: query.contractId,
-        status: query.status,
-        severity: query.severity,
-        type: query.type,
-        supplierId: query.supplierId,
-        assignedTo: query.assignedTo,
-        search: query.search,
-      },
+      filters,
       {
         page: query.page ? parseInt(query.page) : 1,
         limit: query.limit ? parseInt(query.limit) : 50,
@@ -69,7 +70,7 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
     const userId = request.authContext?.userId ?? 'system';
     const { id } = request.params as { id: string };
 
-    const data = UpdateNonConformitySchema.parse(request.body);
+    const data = UpdateNonConformitySchema.parse(request.body as any);
     const nc = await updateNonConformity(tenantId, id, data, userId);
 
     reply.send(nc);
@@ -80,7 +81,7 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
     const tenantId = request.headers['x-tenant-id'] as string;
     const userId = request.authContext?.userId ?? 'system';
     const { id } = request.params as { id: string };
-    const { comment } = request.body as { comment?: string };
+    const { comment } = request.body as any as { comment?: string };
 
     const nc = await closeNonConformity(tenantId, id, userId, comment);
     reply.send(nc);
@@ -90,7 +91,7 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
   server.post('/ncs/:id/assign', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
     const { id } = request.params as { id: string };
-    const { assignedTo } = request.body as { assignedTo: string };
+    const { assignedTo } = request.body as any as { assignedTo: string };
 
     if (assignedTo === undefined || assignedTo === null) {
       reply.code(400).send({ error: 'BadRequest', message: 'assignedTo is required' });
@@ -105,7 +106,7 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
   server.post('/ncs/:id/link-capa', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
     const { id } = request.params as { id: string };
-    const { capaId } = request.body as { capaId: string };
+    const { capaId } = request.body as any as { capaId: string };
 
     if (capaId === undefined || capaId === null) {
       reply.code(400).send({ error: 'BadRequest', message: 'capaId is required' });
@@ -121,10 +122,10 @@ export async function registerNonConformityRoutes(server: FastifyInstance): Prom
     const tenantId = request.headers['x-tenant-id'] as string;
     const query = request.query as Record<string, string>;
 
-    const stats = await getNcStatistics(tenantId, {
-      startDate: query.startDate,
-      endDate: query.endDate,
-    });
+    const statsFilters: { startDate?: string; endDate?: string } = {};
+    if (query.startDate) statsFilters.startDate = query.startDate;
+    if (query.endDate) statsFilters.endDate = query.endDate;
+    const stats = await getNcStatistics(tenantId, statsFilters);
 
     reply.send(stats);
   });

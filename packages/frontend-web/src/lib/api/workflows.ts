@@ -50,8 +50,9 @@ export function useWorkflowStatus(workflowId: string) {
       return response.data
     },
     enabled: !!workflowId,
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
       // Stop polling if workflow is completed or rejected
+      const data = query.state.data as any
       if (data?.status === 'completed' || data?.status === 'rejected') {
         return false
       }
@@ -65,14 +66,14 @@ export function useTriggerWorkflow() {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: async (tenant_id = 'system') => {
+    mutationFn: async (tenant_id: string = 'system') => {
       const response = await apiClient.post('/api/v1/agents/bestellvorschlag/trigger', {
         tenant_id,
         parameters: {}
       })
       return response.data
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: workflowKeys.status(data.workflow_id) })
     },
   })
