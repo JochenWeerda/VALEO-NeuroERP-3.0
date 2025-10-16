@@ -18,10 +18,10 @@ import { Button } from "@/components/ui/button"
 import { useMcpQuery } from "@/lib/mcp"
 import { useToast } from "@/components/ui/toast-provider"
 import { Toolbar } from "@/components/ui/toolbar"
-import { Download, FileText, BarChart3, TrendingUp, Users, Package, Euro } from "lucide-react"
+import { Download, BarChart3, TrendingUp, Users, Package, Euro } from "lucide-react"
 import { useState } from "react"
 
-const ANIMATION_DURATION = 0.3
+// const ANIMATION_DURATION = 0.3
 const CHART_HEIGHT = 300
 
 type ReportType = 'sales-performance' | 'customer-analytics' | 'product-analytics' | 'financial-analytics' | 'trend-analytics'
@@ -33,6 +33,20 @@ interface ReportData {
     generatedAt: string
     dataPoints: number
   }
+  totalRevenue?: number
+  totalOrders?: number
+  averageOrderValue?: number
+  totalUniqueCustomers?: number
+  totalUniqueProducts?: number
+  conversionRates?: any
+  topCustomers?: any[]
+  topProductsByRevenue?: any[]
+  topProductsByQuantity?: any[]
+  customerAcquisitionTrends?: any[]
+  revenue?: any
+  outstandingPayments?: any
+  revenueTrends?: any[]
+  orderVolumeTrends?: any[]
 }
 
 const REPORT_TYPES = [
@@ -52,7 +66,7 @@ export default function ReportsDashboard(): JSX.Element {
   const { data: reportData, isLoading } = useMcpQuery<ReportData>(
     "reports",
     selectedReport,
-    startDate && endDate ? { start_date: startDate, end_date: endDate } : {}
+    (startDate && endDate ? { start_date: startDate, end_date: endDate } : {}) as any
   )
 
   const handleExport = async (format: 'json' | 'csv' = 'json') => {
@@ -95,8 +109,8 @@ export default function ReportsDashboard(): JSX.Element {
               <h4 className="font-semibold mb-2">Umsatz nach Status</h4>
               <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
                 <BarChart data={[
-                  { name: 'Bezahlt', value: data.totalRevenue },
-                  { name: 'Ausstehend', value: data.totalRevenue * 0.2 }, // Mock data
+                  { name: 'Bezahlt', value: data?.totalRevenue ?? 0 },
+                  { name: 'Ausstehend', value: (data?.totalRevenue ?? 0) * 0.2 }, // Mock data
                 ]}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
@@ -126,7 +140,7 @@ export default function ReportsDashboard(): JSX.Element {
                       { name: 'Anfrage → Angebot', value: data.conversionRates.inquiryToOffer },
                       { name: 'Angebot → Auftrag', value: data.conversionRates.offerToOrder },
                       { name: 'Auftrag → Rechnung', value: data.conversionRates.orderToInvoice },
-                    ].map((entry, index) => (
+                    ].map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={['#10B981', '#3B82F6', '#8B5CF6'][index % 3]} />
                     ))}
                   </Pie>
@@ -143,7 +157,7 @@ export default function ReportsDashboard(): JSX.Element {
             <Card className="p-4">
               <h4 className="font-semibold mb-2">Top Kunden nach Umsatz</h4>
               <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
-                <BarChart data={data.topCustomers.slice(0, 5)} layout="horizontal">
+                <BarChart data={(data?.topCustomers ?? []).slice(0, 5)} layout="horizontal">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
                   <YAxis dataKey="customerId" type="category" width={80} />
@@ -155,7 +169,7 @@ export default function ReportsDashboard(): JSX.Element {
             <Card className="p-4">
               <h4 className="font-semibold mb-2">Kundenakquise-Trends</h4>
               <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
-                <LineChart data={Object.entries(data.customerAcquisitionTrends).map(([month, count]) => ({ month, count }))}>
+                <LineChart data={Object.entries(data?.customerAcquisitionTrends ?? {}).map(([month, count]) => ({ month, count }))}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
@@ -173,7 +187,7 @@ export default function ReportsDashboard(): JSX.Element {
             <Card className="p-4">
               <h4 className="font-semibold mb-2">Top Produkte nach Umsatz</h4>
               <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
-                <BarChart data={data.topProductsByRevenue.slice(0, 5)}>
+                <BarChart data={(data?.topProductsByRevenue ?? []).slice(0, 5)}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="article" angle={-45} textAnchor="end" height={80} />
                   <YAxis />
@@ -185,7 +199,7 @@ export default function ReportsDashboard(): JSX.Element {
             <Card className="p-4">
               <h4 className="font-semibold mb-2">Top Produkte nach Menge</h4>
               <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
-                <BarChart data={data.topProductsByQuantity.slice(0, 5)}>
+                <BarChart data={(data?.topProductsByQuantity ?? []).slice(0, 5)}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="article" angle={-45} textAnchor="end" height={80} />
                   <YAxis />
@@ -242,7 +256,7 @@ export default function ReportsDashboard(): JSX.Element {
             <Card className="p-4">
               <h4 className="font-semibold mb-2">Umsatztrend</h4>
               <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
-                <LineChart data={Object.entries(data.revenueTrends).map(([period, value]) => ({ period, value }))}>
+                <LineChart data={Object.entries(data?.revenueTrends ?? {}).map(([period, value]) => ({ period, value }))}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="period" />
                   <YAxis />
@@ -254,7 +268,7 @@ export default function ReportsDashboard(): JSX.Element {
             <Card className="p-4">
               <h4 className="font-semibold mb-2">Auftragsvolumen</h4>
               <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
-                <LineChart data={Object.entries(data.orderVolumeTrends).map(([period, value]) => ({ period, value }))}>
+                <LineChart data={Object.entries(data?.orderVolumeTrends ?? {}).map(([period, value]) => ({ period, value }))}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="period" />
                   <YAxis />
