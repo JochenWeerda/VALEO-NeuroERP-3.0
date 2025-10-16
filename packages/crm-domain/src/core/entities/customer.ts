@@ -102,7 +102,7 @@ export function createCustomer(input: CreateCustomerInput): Customer {
     leadScore: input.leadScore,
     notes: input.notes,
     tags: normalizeTags(input.tags),
-  };
+  } as any;
 }
 
 export function applyCustomerUpdate(customer: Customer, updates: UpdateCustomerInput): Customer {
@@ -127,7 +127,7 @@ export function applyCustomerUpdate(customer: Customer, updates: UpdateCustomerI
     notes: updates.notes ?? customer.notes,
     tags: updates.tags ? normalizeTags(updates.tags) : customer.tags,
     updatedAt: new Date(),
-  };
+  } as any;
 }
 
 function generateCustomerNumber(): string {

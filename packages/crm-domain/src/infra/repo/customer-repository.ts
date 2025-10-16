@@ -40,7 +40,7 @@ export class CustomerRepository {
       return null;
     }
 
-    return CustomerEntity.fromPersistence(result[0]);
+    return CustomerEntity.fromPersistence(result[0] as any);
   }
 
   async findByNumber(number: string, tenantId: string): Promise<CustomerEntity | null> {
@@ -54,7 +54,7 @@ export class CustomerRepository {
       return null;
     }
 
-    return CustomerEntity.fromPersistence(result[0]);
+    return CustomerEntity.fromPersistence(result[0] as any);
   }
 
   async findAll(
@@ -107,15 +107,15 @@ export class CustomerRepository {
       .limit(pagination.pageSize)
       .offset(offset);
 
-    const entities = result.map(customer => CustomerEntity.fromPersistence(customer));
+    const entities = result.map(customer => CustomerEntity.fromPersistence(customer as any));
 
     return {
       data: entities,
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
@@ -134,10 +134,10 @@ export class CustomerRepository {
 
     const result = await db
       .insert(customers)
-      .values(customerData)
+      .values(customerData as any)
       .returning();
 
-    return CustomerEntity.fromPersistence(result[0]);
+    return CustomerEntity.fromPersistence(result[0] as any);
   }
 
   async update(id: string, tenantId: string, input: UpdateCustomerInput): Promise<CustomerEntity | null> {
@@ -159,7 +159,7 @@ export class CustomerRepository {
       return null;
     }
 
-    return CustomerEntity.fromPersistence(result[0]);
+    return CustomerEntity.fromPersistence(result[0] as any);
   }
 
   async delete(id: string, tenantId: string): Promise<boolean> {
@@ -195,7 +195,7 @@ export class CustomerRepository {
       return null;
     }
 
-    return CustomerEntity.fromPersistence(result[0]);
+    return CustomerEntity.fromPersistence(result[0] as any);
   }
 
   async addTag(id: string, tenantId: string, tag: string): Promise<CustomerEntity | null> {
@@ -218,7 +218,7 @@ export class CustomerRepository {
       .where(and(eq(customers.id, id), eq(customers.tenantId, tenantId)))
       .returning();
 
-    return CustomerEntity.fromPersistence(result[0]);
+    return CustomerEntity.fromPersistence(result[0] as any);
   }
 
   async removeTag(id: string, tenantId: string, tag: string): Promise<CustomerEntity | null> {
@@ -242,6 +242,6 @@ export class CustomerRepository {
       .where(and(eq(customers.id, id), eq(customers.tenantId, tenantId)))
       .returning();
 
-    return CustomerEntity.fromPersistence(result[0]);
+    return CustomerEntity.fromPersistence(result[0] as any);
   }
 }

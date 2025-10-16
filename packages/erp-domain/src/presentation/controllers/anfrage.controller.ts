@@ -103,7 +103,7 @@ export class AnfrageController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const anfrage = await this.anfrageService.freigebenAnfrage(id, tenantId, actorId)
+      const anfrage = await this.anfrageService.freigebenAnfrage(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -124,7 +124,7 @@ export class AnfrageController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const anfrage = await this.anfrageService.updateAnfrage(id, tenantId, req.body, actorId)
+      const anfrage = await this.anfrageService.updateAnfrage(id as string, tenantId, req.body, actorId)
 
       res.json({
         success: true,
@@ -145,7 +145,7 @@ export class AnfrageController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      await this.anfrageService.deleteAnfrage(id, tenantId, actorId)
+      await this.anfrageService.deleteAnfrage(id as string, tenantId, actorId)
 
       res.json({
         success: true,

@@ -20,12 +20,12 @@ export function initRedis(): Redis {
   redis = new Redis(redisUrl, {
     password: redisPassword || undefined,
     db: redisDb,
-    retryStrategy(times) {
+    retryStrategy(times: any) {
       const delay = Math.min(times * 50, 2000);
       return delay;
     },
     maxRetriesPerRequest: 3,
-  });
+  } as any);
 
   redis.on('connect', () => {
     logger.info('Redis connected');

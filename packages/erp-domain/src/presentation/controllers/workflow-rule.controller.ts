@@ -40,7 +40,7 @@ export class WorkflowRuleController {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const rule = await this.workflowRuleService.getWorkflowRuleById(id, tenantId)
+      const rule = await this.workflowRuleService.getWorkflowRuleById(id as string, tenantId)
 
       if (!rule) {
         res.status(404).json({
@@ -97,7 +97,7 @@ export class WorkflowRuleController {
       const { triggerEntity, triggerAction } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const rules = await this.workflowRuleService.getMatchingRules(triggerEntity, triggerAction, tenantId)
+      const rules = await this.workflowRuleService.getMatchingRules(triggerEntity as string, triggerAction as string, tenantId)
 
       res.json({
         success: true,
@@ -118,7 +118,7 @@ export class WorkflowRuleController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const rule = await this.workflowRuleService.activateWorkflowRule(id, tenantId, actorId)
+      const rule = await this.workflowRuleService.activateWorkflowRule(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -139,7 +139,7 @@ export class WorkflowRuleController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const rule = await this.workflowRuleService.deactivateWorkflowRule(id, tenantId, actorId)
+      const rule = await this.workflowRuleService.deactivateWorkflowRule(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -160,7 +160,7 @@ export class WorkflowRuleController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const rule = await this.workflowRuleService.updateWorkflowRule(id, tenantId, req.body, actorId)
+      const rule = await this.workflowRuleService.updateWorkflowRule(id as string, tenantId, req.body, actorId)
 
       res.json({
         success: true,
@@ -181,7 +181,7 @@ export class WorkflowRuleController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      await this.workflowRuleService.deleteWorkflowRule(id, tenantId, actorId)
+      await this.workflowRuleService.deleteWorkflowRule(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -201,7 +201,7 @@ export class WorkflowRuleController {
       const { triggerEntity, triggerAction } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const result = await this.workflowRuleService.executeWorkflowRules(triggerEntity, triggerAction, tenantId, req.body)
+      const result = await this.workflowRuleService.executeWorkflowRules(triggerEntity as string, triggerAction as string, tenantId, req.body)
 
       res.json({
         success: true,

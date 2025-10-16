@@ -68,7 +68,7 @@ export class SalesOfferController {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const salesOffer = await this.salesOfferService.getSalesOfferById(id, tenantId)
+      const salesOffer = await this.salesOfferService.getSalesOfferById(id as string, tenantId)
 
       if (!salesOffer) {
         res.status(404).json({
@@ -122,7 +122,7 @@ export class SalesOfferController {
       const { inquiryId } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const salesOffers = await this.salesOfferService.getSalesOffersByCustomerInquiry(inquiryId, tenantId)
+      const salesOffers = await this.salesOfferService.getSalesOffersByCustomerInquiry(inquiryId as string, tenantId)
 
       res.json({
         success: true,
@@ -143,7 +143,7 @@ export class SalesOfferController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const salesOffer = await this.salesOfferService.sendSalesOffer(id, tenantId, actorId)
+      const salesOffer = await this.salesOfferService.sendSalesOffer(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -164,7 +164,7 @@ export class SalesOfferController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const salesOffer = await this.salesOfferService.acceptSalesOffer(id, tenantId, actorId)
+      const salesOffer = await this.salesOfferService.acceptSalesOffer(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -185,7 +185,7 @@ export class SalesOfferController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const salesOffer = await this.salesOfferService.rejectSalesOffer(id, tenantId, actorId)
+      const salesOffer = await this.salesOfferService.rejectSalesOffer(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -206,7 +206,7 @@ export class SalesOfferController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const salesOffer = await this.salesOfferService.updateSalesOffer(id, tenantId, req.body, actorId)
+      const salesOffer = await this.salesOfferService.updateSalesOffer(id as string, tenantId, req.body, actorId)
 
       res.json({
         success: true,
@@ -227,7 +227,7 @@ export class SalesOfferController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      await this.salesOfferService.deleteSalesOffer(id, tenantId, actorId)
+      await this.salesOfferService.deleteSalesOffer(id as string, tenantId, actorId)
 
       res.json({
         success: true,

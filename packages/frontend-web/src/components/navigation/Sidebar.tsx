@@ -66,6 +66,8 @@ const navItems: NavItem[] = [
       { id: 'lieferung', label: 'Lieferungen', icon: Truck, path: '/sales/delivery', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
       { id: 'rechnung', label: 'Rechnungen', icon: FileText, path: '/sales/invoice', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
       { id: 'kunden', label: 'Kunden', icon: Users, path: '/verkauf/kunden-liste', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
+      { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/analytics', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
+      { id: 'reports', label: 'Berichte', icon: FileText, path: '/reports', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
     ],
   },
   {
