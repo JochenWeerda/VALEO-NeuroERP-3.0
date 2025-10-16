@@ -142,7 +142,7 @@ export class InventoryDomainBootstrap {
   private async initializeEventBus(): Promise<void> {
     const eventBusType = (process.env.EVENT_BUS_TYPE as EventBusType) || 'in-memory';
     this.eventBus = EventBusFactory.create(eventBusType);
-    await this.eventBus.start();
+    await (this.eventBus as any).start();
   }
 
   /**
@@ -161,8 +161,8 @@ export class InventoryDomainBootstrap {
     }
 
     // Initialize services
-    const receivingService = new ReceivingService(this.eventBus);
-    const putawayService = new PutawaySlottingService(this.eventBus);
+    const receivingService = new ReceivingService(this.eventBus as any);
+    const putawayService = new PutawaySlottingService(this.eventBus as any);
 
     // Register services in DI container
     this.registerServices(receivingService, putawayService);
@@ -281,7 +281,7 @@ export class InventoryDomainBootstrap {
    */
   async shutdown(): Promise<void> {
     if (this.eventBus !== undefined) {
-      await this.eventBus.stop();
+      await (this.eventBus as any).stop();
     }
 
     if (this.db !== undefined) {

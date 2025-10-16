@@ -14,6 +14,7 @@ type PSM = {
   kulturen: string[]
   zulassungBis: string
   status: 'aktiv' | 'auslaufend' | 'widerrufen'
+  erklaerungLandwirtStatus: string | null
 }
 
 const mockPSM: PSM[] = [
@@ -24,6 +25,7 @@ const mockPSM: PSM[] = [
     kulturen: ['Getreide', 'Mais', 'Raps'],
     zulassungBis: '2026-12-31',
     status: 'aktiv',
+    erklaerungLandwirtStatus: null,
   },
   {
     id: '2',
@@ -32,6 +34,7 @@ const mockPSM: PSM[] = [
     kulturen: ['Getreide', 'Raps'],
     zulassungBis: '2025-06-30',
     status: 'auslaufend',
+    erklaerungLandwirtStatus: null,
   },
 ]
 
@@ -81,6 +84,24 @@ export default function PSMListePage(): JSX.Element {
           {psm.status === 'aktiv' ? 'Aktiv' : psm.status === 'auslaufend' ? 'Auslaufend' : 'Widerrufen'}
         </Badge>
       ),
+    },
+    {
+      key: 'erklaerungLandwirtStatus' as const,
+      label: 'Erklärung Landwirt',
+      render: (psm: PSM) => {
+        if (!psm.erklaerungLandwirtStatus) return <span className="text-muted-foreground">-</span>
+        const statusColors = {
+          'eingegangen': 'bg-yellow-100 text-yellow-800',
+          'geprueft': 'bg-green-100 text-green-800',
+          'abgelehnt': 'bg-red-100 text-red-800',
+        }
+        return (
+          <Badge className={statusColors[psm.erklaerungLandwirtStatus as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}>
+            {psm.erklaerungLandwirtStatus === 'eingegangen' ? 'Eingegangen' :
+             psm.erklaerungLandwirtStatus === 'geprueft' ? 'Geprüft' : 'Abgelehnt'}
+          </Badge>
+        )
+      },
     },
   ]
 

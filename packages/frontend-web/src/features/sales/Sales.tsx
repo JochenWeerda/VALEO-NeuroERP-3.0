@@ -91,7 +91,7 @@ export default function Sales(): ReactElement {
     isError: ordersError,
     refetch: refetchOrders,
   } = useQuery({
-    queryKey: queryKeys.sales.orders(),
+    queryKey: queryKeys.sales.orders.all,
     queryFn: fetchOrders,
   })
 
@@ -101,7 +101,7 @@ export default function Sales(): ReactElement {
     isError: invoicesError,
     refetch: refetchInvoices,
   } = useQuery({
-    queryKey: queryKeys.sales.invoices(),
+    queryKey: queryKeys.sales.invoices.all,
     queryFn: fetchInvoices,
   })
 

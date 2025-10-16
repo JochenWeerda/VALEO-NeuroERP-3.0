@@ -120,18 +120,18 @@ function calculateRiskScore(features: Record<string, number>): {
   };
 
   const factors = [
-    { factor: 'Critical NC Rate', impact: Math.round(features.criticalRate * weights.criticalRate) },
-    { factor: 'Major NC Rate', impact: Math.round(features.majorRate * weights.majorRate) },
-    { factor: 'Spec Violations', impact: Math.round(features.specOutRate * weights.specOutRate) },
-    { factor: 'Contamination Rate', impact: Math.round(features.contaminationRate * weights.contaminationRate) },
-    { factor: 'Trend (increasing)', impact: Math.round(Math.max(0, features.trend) * weights.trend) },
-    { factor: 'Slow Closure Time', impact: Math.round(Math.min(1, features.avgClosureTime / 30) * weights.avgClosureTime) },
+    { factor: 'Critical NC Rate', impact: Math.round((features.criticalRate ?? 0) * weights.criticalRate) },
+    { factor: 'Major NC Rate', impact: Math.round((features.majorRate ?? 0) * weights.majorRate) },
+    { factor: 'Spec Violations', impact: Math.round((features.specOutRate ?? 0) * weights.specOutRate) },
+    { factor: 'Contamination Rate', impact: Math.round((features.contaminationRate ?? 0) * weights.contaminationRate) },
+    { factor: 'Trend (increasing)', impact: Math.round(Math.max(0, features.trend ?? 0) * weights.trend) },
+    { factor: 'Slow Closure Time', impact: Math.round(Math.min(1, (features.avgClosureTime ?? 0) / 30) * weights.avgClosureTime) },
   ];
 
   const riskScore = Math.min(100, factors.reduce((sum, f) => sum + f.impact, 0));
   
   // Confidence basierend auf Datenmenge
-  const confidence = Math.min(1, features.total / 50); // Mindestens 50 NCs für hohe Confidence
+  const confidence = Math.min(1, (features.total ?? 0) / 50); // Mindestens 50 NCs für hohe Confidence
 
   return { riskScore, confidence, factors };
 }
@@ -208,7 +208,7 @@ export async function detectAnomalies(
   // Anomalien = Werte außerhalb von ±2 Standardabweichungen
   const anomalies = results
     .map((r, i) => {
-      const value = values[i];
+      const value = values[i] ?? 0;
       const deviation = Math.abs(value - mean) / stdDev;
       
       if (deviation > 2) {

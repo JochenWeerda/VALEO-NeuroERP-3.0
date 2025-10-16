@@ -3,6 +3,7 @@ export * from './quote';
 export * from './order';
 export * from './invoice';
 export * from './credit-note';
+export * from './sales-offer';
 
 // Re-export commonly used types
 export type {
@@ -37,8 +38,16 @@ export type {
   CreditNoteStatusType
 } from './credit-note';
 
+export type {
+  SalesOffer,
+  CreateSalesOfferInput,
+  UpdateSalesOfferInput,
+  SalesOfferStatusType
+} from './sales-offer';
+
 // Re-export enums
 export { QuoteStatus } from './quote';
 export { OrderStatus } from './order';
 export { InvoiceStatus } from './invoice';
 export { CreditNoteStatus } from './credit-note';
+export { SalesOfferStatus } from './sales-offer';

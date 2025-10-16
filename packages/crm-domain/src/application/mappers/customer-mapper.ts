@@ -38,7 +38,7 @@ export function toCustomerDTO(customer: Customer): CustomerDTO {
     tags: customer.tags,
     createdAt: customer.createdAt.toISOString(),
     updatedAt: customer.updatedAt.toISOString(),
-  };
+  } as CustomerDTO;
 }
 
 export function toCreateCustomerInput(dto: CreateCustomerDTO): CreateCustomerInput {
@@ -61,7 +61,7 @@ export function toCreateCustomerInput(dto: CreateCustomerDTO): CreateCustomerInp
     leadScore: dto.leadScore,
     notes: dto.notes,
     tags: dto.tags,
-  };
+  } as CreateCustomerInput;
 }
 
 export function toUpdateCustomerInput(dto: UpdateCustomerDTO): UpdateCustomerInput {
@@ -84,7 +84,7 @@ export function toUpdateCustomerInput(dto: UpdateCustomerDTO): UpdateCustomerInp
     leadScore: dto.leadScore,
     notes: dto.notes,
     tags: dto.tags,
-  };
+  } as UpdateCustomerInput;
 }
 
 export function toCustomerFilters(query: GetCustomersQueryLike): CustomerFilters {
@@ -95,7 +95,7 @@ export function toCustomerFilters(query: GetCustomersQueryLike): CustomerFilters
     tags: query.tags,
     limit: query.limit,
     offset: query.offset,
-  };
+  } as CustomerFilters;
 }
 
 export const toCustomerId = (value: string): CustomerId => value as CustomerId;

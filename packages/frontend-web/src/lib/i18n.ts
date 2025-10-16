@@ -111,7 +111,7 @@ function resolveTranslation(locale: Locale, path: TranslationPath): LookupResult
     if (typeof cursor === 'string') {
       return cursor
     }
-    const record = cursor
+    const record: Record<string, TranslationNode> = cursor as any
     const next: TranslationNode | undefined = record[segment]
     if (next === undefined) {
       return undefined

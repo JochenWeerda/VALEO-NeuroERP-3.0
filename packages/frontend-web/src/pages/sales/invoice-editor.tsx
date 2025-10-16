@@ -18,6 +18,7 @@ type SalesInvoice = {
   sourceDelivery?: string
   paymentTerms: string
   dueDate: string
+  status: string
   notes?: string
   lines: Array<{
     article: string
@@ -25,6 +26,9 @@ type SalesInvoice = {
     price: number
     vatRate: number
   }>
+  subtotalNet: number
+  totalTax: number
+  totalGross: number
 }
 
 /**
@@ -41,8 +45,12 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
     dueDate: new Date(Date.now() + NET_30_DAYS * DAYS_IN_MS)
       .toISOString()
       .slice(0, ISO_DATE_LENGTH),
+    status: "ENTWURF",
     notes: "",
     lines: [{ article: "", qty: 1, price: 0, vatRate: 19 }],
+    subtotalNet: 0,
+    totalTax: 0,
+    totalGross: 0,
   })
 
   async function save(v: SalesInvoice): Promise<void> {

@@ -1,4 +1,19 @@
-ABSCHLUSS:
+Browser-Automation-Setup (MCP)
+Systematisches Testing: Verkauf (20 Masken)
+Systematisches Testing: Einkauf (18 Masken)
+Systematisches Testing: Lager (15 Masken)
+Systematisches Testing: Finanzen (25 Masken)
+Systematisches Testing: Agrar (35 Masken)
+Systematisches Testing: Restliche Kategorien (68 Masken)
+Test-Report generieren & Bugs priorisierenBrowser-Automation-Setup (MCP)
+Systematisches Testing: Verkauf (20 Masken)
+Systematisches Testing: Einkauf (18 Masken)
+Systematisches Testing: Lager (15 Masken)
+Systematisches Testing: Finanzen (25 Masken)
+Systematisches Testing: Agrar (35 Masken)
+Systematisches Testing: Restliche Kategorien (68 Masken)
+Test-Report generieren & Bugs priorisierenABSCHLUSS:
+Test-Report generieren & Bugs priorisierenABSCHLUSS:
   JAHR:
     target: domain_finance.period_closure.fiscal_year
     type: integer

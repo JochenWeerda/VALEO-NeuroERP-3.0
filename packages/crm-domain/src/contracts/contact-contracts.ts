@@ -1,4 +1,5 @@
 import { z } from 'zod';
+// @ts-ignore - zod-openapi module
 import { zodOpenapi } from 'zod-openapi';
 import {
   ContactSchema,

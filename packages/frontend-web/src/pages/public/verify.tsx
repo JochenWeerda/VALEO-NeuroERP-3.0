@@ -15,7 +15,7 @@ type VerificationResult = {
 }
 
 export default function VerifyPage(): JSX.Element {
-  const { domain, number, hash } = useParams<{ domain: string; number: string; hash?: string }>()
+  const { domain, number, hash } = useParams<{ domain?: string; number?: string; hash?: string }>()
   const [result, setResult] = useState<VerificationResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -46,7 +46,7 @@ export default function VerifyPage(): JSX.Element {
         setLoading(true)
         setError(null)
 
-        const url = buildVerifyUrl(domain, number, hash)
+        const url = buildVerifyUrl(domain || '', number || '', hash || '')
 
         const response = await fetch(url)
         const data: unknown = await response.json()
