@@ -2,7 +2,7 @@ import "@testing-library/jest-dom/vitest";
 
 // Optional shims for JSDOM gaps that surface in component tests.
 if (!("matchMedia" in window)) {
-  window.matchMedia = ((query: string) => ({
+  (window as any).matchMedia = ((query: string) => ({
     matches: false,
     media: query,
     onchange: null,

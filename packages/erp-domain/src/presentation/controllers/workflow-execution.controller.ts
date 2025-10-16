@@ -41,7 +41,7 @@ export class WorkflowExecutionController {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const execution = await this.workflowExecutionService.getWorkflowExecutionById(id, tenantId)
+      const execution = await this.workflowExecutionService.getWorkflowExecutionById(id as string, tenantId)
 
       if (!execution) {
         res.status(404).json({
@@ -96,7 +96,7 @@ export class WorkflowExecutionController {
       const { ruleId } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const executions = await this.workflowExecutionService.getWorkflowExecutionsByRule(ruleId, tenantId)
+      const executions = await this.workflowExecutionService.getWorkflowExecutionsByRule(ruleId as string, tenantId)
 
       res.json({
         success: true,
@@ -117,7 +117,7 @@ export class WorkflowExecutionController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const execution = await this.workflowExecutionService.startWorkflowExecution(id, tenantId, actorId)
+      const execution = await this.workflowExecutionService.startWorkflowExecution(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -138,7 +138,7 @@ export class WorkflowExecutionController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const execution = await this.workflowExecutionService.succeedWorkflowExecution(id, tenantId, actorId)
+      const execution = await this.workflowExecutionService.succeedWorkflowExecution(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -160,7 +160,7 @@ export class WorkflowExecutionController {
       const actorId = req.user?.id || 'system'
       const errorMessage = req.body.errorMessage || 'Unbekannter Fehler'
 
-      const execution = await this.workflowExecutionService.failWorkflowExecution(id, tenantId, actorId, errorMessage)
+      const execution = await this.workflowExecutionService.failWorkflowExecution(id as string, tenantId, actorId, errorMessage)
 
       res.json({
         success: true,
@@ -181,7 +181,7 @@ export class WorkflowExecutionController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const execution = await this.workflowExecutionService.retryWorkflowExecution(id, tenantId, actorId)
+      const execution = await this.workflowExecutionService.retryWorkflowExecution(id as string, tenantId, actorId)
 
       res.json({
         success: true,

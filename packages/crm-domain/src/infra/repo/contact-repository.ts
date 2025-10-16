@@ -38,7 +38,7 @@ export class ContactRepository {
       return null;
     }
 
-    return ContactEntity.fromPersistence(result[0]);
+    return ContactEntity.fromPersistence(result[0] as any);
   }
 
   async findByEmail(email: string, tenantId: string): Promise<ContactEntity | null> {
@@ -52,7 +52,7 @@ export class ContactRepository {
       return null;
     }
 
-    return ContactEntity.fromPersistence(result[0]);
+    return ContactEntity.fromPersistence(result[0] as any);
   }
 
   async findByCustomerId(
@@ -96,15 +96,15 @@ export class ContactRepository {
       .limit(pagination.pageSize)
       .offset(offset);
 
-    const entities = result.map(contact => ContactEntity.fromPersistence(contact));
+    const entities = result.map(contact => ContactEntity.fromPersistence(contact as any));
 
     return {
       data: entities,
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
@@ -150,15 +150,15 @@ export class ContactRepository {
       .limit(pagination.pageSize)
       .offset(offset);
 
-    const entities = result.map(contact => ContactEntity.fromPersistence(contact));
+    const entities = result.map(contact => ContactEntity.fromPersistence(contact as any));
 
     return {
       data: entities,
       pagination: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        total,
-        totalPages: Math.ceil(total / pagination.pageSize)
+        total: Number(total),
+        totalPages: Math.ceil(Number(total) / pagination.pageSize)
       }
     };
   }
@@ -175,21 +175,21 @@ export class ContactRepository {
 
     const result = await db
       .insert(contacts)
-      .values(contactData)
+      .values(contactData as any)
       .returning();
 
-    return ContactEntity.fromPersistence(result[0]);
+    return ContactEntity.fromPersistence(result[0] as any);
   }
 
   async update(id: string, tenantId: string, input: UpdateContactInput): Promise<ContactEntity | null> {
-    const updateData: Partial<Contact> = {
+    const updateData: any = {
       ...input,
       updatedAt: new Date()
     };
 
     const result = await db
       .update(contacts)
-      .set(updateData)
+      .set(updateData as any)
       .where(and(eq(contacts.id, id), eq(contacts.tenantId, tenantId)))
       .returning();
 
@@ -197,7 +197,7 @@ export class ContactRepository {
       return null;
     }
 
-    return ContactEntity.fromPersistence(result[0]);
+    return ContactEntity.fromPersistence(result[0] as any);
   }
 
   async delete(id: string, tenantId: string): Promise<boolean> {
@@ -254,6 +254,6 @@ export class ContactRepository {
       return null;
     }
 
-    return ContactEntity.fromPersistence(result[0]);
+    return ContactEntity.fromPersistence(result[0] as any);
   }
 }

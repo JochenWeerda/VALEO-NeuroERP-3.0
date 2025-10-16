@@ -49,7 +49,7 @@ export class RechnungseingangController {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const rechnung = await this.rechnungseingangService.getRechnungseingangById(id, tenantId)
+      const rechnung = await this.rechnungseingangService.getRechnungseingangById(id as string, tenantId)
 
       if (!rechnung) {
         res.status(404).json({
@@ -105,7 +105,7 @@ export class RechnungseingangController {
       const { bestellungId } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const rechnungen = await this.rechnungseingangService.getRechnungseingaengeByBestellung(bestellungId, tenantId)
+      const rechnungen = await this.rechnungseingangService.getRechnungseingaengeByBestellung(bestellungId as string, tenantId)
 
       res.json({
         success: true,
@@ -125,7 +125,7 @@ export class RechnungseingangController {
       const { wareneingangId } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const rechnungen = await this.rechnungseingangService.getRechnungseingaengeByWareneingang(wareneingangId, tenantId)
+      const rechnungen = await this.rechnungseingangService.getRechnungseingaengeByWareneingang(wareneingangId as string, tenantId)
 
       res.json({
         success: true,
@@ -146,7 +146,7 @@ export class RechnungseingangController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const rechnung = await this.rechnungseingangService.pruefenRechnungseingang(id, tenantId, actorId)
+      const rechnung = await this.rechnungseingangService.pruefenRechnungseingang(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -167,7 +167,7 @@ export class RechnungseingangController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const rechnung = await this.rechnungseingangService.freigebenRechnungseingang(id, tenantId, actorId)
+      const rechnung = await this.rechnungseingangService.freigebenRechnungseingang(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -188,7 +188,7 @@ export class RechnungseingangController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const rechnung = await this.rechnungseingangService.verbuchenRechnungseingang(id, tenantId, actorId)
+      const rechnung = await this.rechnungseingangService.verbuchenRechnungseingang(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -209,7 +209,7 @@ export class RechnungseingangController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const rechnung = await this.rechnungseingangService.bezahlenRechnungseingang(id, tenantId, actorId)
+      const rechnung = await this.rechnungseingangService.bezahlenRechnungseingang(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -230,7 +230,7 @@ export class RechnungseingangController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const rechnung = await this.rechnungseingangService.updateRechnungseingang(id, tenantId, req.body, actorId)
+      const rechnung = await this.rechnungseingangService.updateRechnungseingang(id as string, tenantId, req.body, actorId)
 
       res.json({
         success: true,
@@ -251,7 +251,7 @@ export class RechnungseingangController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      await this.rechnungseingangService.deleteRechnungseingang(id, tenantId, actorId)
+      await this.rechnungseingangService.deleteRechnungseingang(id as string, tenantId, actorId)
 
       res.json({
         success: true,

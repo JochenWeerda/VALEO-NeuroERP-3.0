@@ -24,7 +24,7 @@ export async function createCapa(data: CreateCapa, userId: string): Promise<Capa
     capaNumber,
     createdBy: userId,
     dueDate: new Date(data.dueDate),
-  }).returning();
+  } as any).returning();
 
   if (capa === undefined || capa === null) {
     throw new Error('Failed to create CAPA');

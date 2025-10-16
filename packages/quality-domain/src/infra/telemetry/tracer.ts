@@ -1,4 +1,5 @@
 import { NodeSDK } from '@opentelemetry/sdk-node';
+// @ts-ignore - Optional dependency
 import { OTLPTraceExporter } from '@opentelemetry/exporter-otlp-http';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
@@ -67,7 +68,7 @@ export async function tracingMiddleware(
 
   // Store span in request context
   context.with(trace.setSpan(context.active(), span), () => {
-    reply.addHook('onResponse', () => {
+    (reply as any).addHook('onResponse', () => {
       span.setAttributes({
         'http.status_code': reply.statusCode,
       });

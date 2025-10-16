@@ -21,8 +21,10 @@ from app.api.v1.endpoints import (
     policies
 )
 
-# Import agrar domain routers
+# Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
+from app.documents.router import router as documents_router
+from app.reports.router import router as reports_router
 
 # Create main API router
 api_router = APIRouter()
@@ -108,6 +110,17 @@ api_router.include_router(
     policies.router,
     prefix="/mcp",
     tags=["mcp", "policies"]
+)
+
+# Documents and Reports routers
+api_router.include_router(
+    documents_router,
+    tags=["documents", "sales"]
+)
+
+api_router.include_router(
+    reports_router,
+    tags=["reports", "analytics", "dashboard"]
 )
 
 # Agrar domain routers

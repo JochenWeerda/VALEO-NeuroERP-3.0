@@ -203,7 +203,7 @@ export async function registerCustomerRoutes(
       const context = (request as any).routeContext as RouteContext;
 
       const customer = await customerService.updateCustomer(id, {
-        ...updateData,
+        ...(updateData as any),
         tenantId: 'default-tenant' // TODO: Get from JWT token
       });
 

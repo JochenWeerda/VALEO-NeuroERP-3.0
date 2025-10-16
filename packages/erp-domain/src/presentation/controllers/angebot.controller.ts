@@ -49,7 +49,7 @@ export class AngebotController {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const angebot = await this.angebotService.getAngebotById(id, tenantId)
+      const angebot = await this.angebotService.getAngebotById(id as string, tenantId)
 
       if (!angebot) {
         res.status(404).json({
@@ -104,7 +104,7 @@ export class AngebotController {
       const { anfrageId } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const angebote = await this.angebotService.getAngeboteByAnfrage(anfrageId, tenantId)
+      const angebote = await this.angebotService.getAngeboteByAnfrage(anfrageId as string, tenantId)
 
       res.json({
         success: true,
@@ -125,7 +125,7 @@ export class AngebotController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const angebot = await this.angebotService.pruefenAngebot(id, tenantId, actorId)
+      const angebot = await this.angebotService.pruefenAngebot(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -146,7 +146,7 @@ export class AngebotController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const angebot = await this.angebotService.genehmigenAngebot(id, tenantId, actorId)
+      const angebot = await this.angebotService.genehmigenAngebot(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -167,7 +167,7 @@ export class AngebotController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const angebot = await this.angebotService.ablehnenAngebot(id, tenantId, actorId)
+      const angebot = await this.angebotService.ablehnenAngebot(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -188,7 +188,7 @@ export class AngebotController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const angebot = await this.angebotService.updateAngebot(id, tenantId, req.body, actorId)
+      const angebot = await this.angebotService.updateAngebot(id as string, tenantId, req.body, actorId)
 
       res.json({
         success: true,
@@ -209,7 +209,7 @@ export class AngebotController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      await this.angebotService.deleteAngebot(id, tenantId, actorId)
+      await this.angebotService.deleteAngebot(id as string, tenantId, actorId)
 
       res.json({
         success: true,

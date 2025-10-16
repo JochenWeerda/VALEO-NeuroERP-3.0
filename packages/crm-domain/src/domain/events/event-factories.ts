@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+﻿import { v4 as uuidv4 } from 'uuid';
 import {
   DomainEvent,
   CustomerCreatedEvent,
@@ -35,7 +35,7 @@ function createBaseEvent(
     correlationId,
     causationId,
     metadata
-  };
+  } as any;
 }
 
 // Customer Event Factories
@@ -63,7 +63,7 @@ export function createCustomerCreatedEvent(
       status: customer.status,
       ownerUserId: customer.ownerUserId
     }
-  };
+  } as any;
 }
 
 export function createCustomerUpdatedEvent(
@@ -88,7 +88,7 @@ export function createCustomerUpdatedEvent(
       customerId: customer.id,
       changes
     }
-  };
+  } as any;
 }
 
 export function createCustomerStatusChangedEvent(
@@ -114,7 +114,7 @@ export function createCustomerStatusChangedEvent(
       oldStatus,
       newStatus: customer.status
     }
-  };
+  } as any;
 }
 
 export function createCustomerDeletedEvent(
@@ -137,7 +137,7 @@ export function createCustomerDeletedEvent(
     payload: {
       customerId: customer.id
     }
-  };
+  } as any;
 }
 
 // Contact Event Factories
@@ -164,7 +164,7 @@ export function createContactCreatedEvent(
       email: contact.email,
       isPrimary: contact.isPrimary
     }
-  };
+  } as any;
 }
 
 export function createContactUpdatedEvent(
@@ -189,7 +189,7 @@ export function createContactUpdatedEvent(
       contactId: contact.id,
       changes
     }
-  };
+  } as any;
 }
 
 export function createContactDeletedEvent(
@@ -213,7 +213,7 @@ export function createContactDeletedEvent(
       contactId: contact.id,
       customerId: contact.customerId
     }
-  };
+  } as any;
 }
 
 // Opportunity Event Factories
@@ -242,7 +242,7 @@ export function createOpportunityCreatedEvent(
       amountNet: opportunity.amountNet,
       probability: opportunity.probability
     }
-  };
+  } as any;
 }
 
 export function createOpportunityUpdatedEvent(
@@ -267,7 +267,7 @@ export function createOpportunityUpdatedEvent(
       opportunityId: opportunity.id,
       changes
     }
-  };
+  } as any;
 }
 
 export function createOpportunityStageChangedEvent(
@@ -295,7 +295,7 @@ export function createOpportunityStageChangedEvent(
       amountNet: opportunity.amountNet,
       probability: opportunity.probability
     }
-  };
+  } as any;
 }
 
 export function createOpportunityWonEvent(
@@ -321,7 +321,7 @@ export function createOpportunityWonEvent(
       amountNet: opportunity.amountNet,
       probability: opportunity.probability
     }
-  };
+  } as any;
 }
 
 export function createOpportunityLostEvent(
@@ -347,7 +347,7 @@ export function createOpportunityLostEvent(
       amountNet: opportunity.amountNet,
       probability: opportunity.probability
     }
-  };
+  } as any;
 }
 
 export function createOpportunityDeletedEvent(
@@ -370,7 +370,7 @@ export function createOpportunityDeletedEvent(
     payload: {
       opportunityId: opportunity.id
     }
-  };
+  } as any;
 }
 
 // Interaction Event Factories
@@ -399,7 +399,7 @@ export function createInteractionCreatedEvent(
       subject: interaction.subject,
       occurredAt: interaction.occurredAt.toISOString()
     }
-  };
+  } as any;
 }
 
 export function createInteractionUpdatedEvent(
@@ -424,7 +424,7 @@ export function createInteractionUpdatedEvent(
       interactionId: interaction.id,
       changes
     }
-  };
+  } as any;
 }
 
 export function createInteractionDeletedEvent(
@@ -448,5 +448,5 @@ export function createInteractionDeletedEvent(
       interactionId: interaction.id,
       customerId: interaction.customerId
     }
-  };
+  } as any;
 }

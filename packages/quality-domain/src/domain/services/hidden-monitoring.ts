@@ -65,7 +65,7 @@ export class HiddenMonitoringService {
    */
   stop(): void {
     if (this.intervalId) {
-      clearInterval(this.intervalId);
+      clearInterval(this.intervalId as any);
       this.intervalId = null;
     }
     this.isRunning = false;

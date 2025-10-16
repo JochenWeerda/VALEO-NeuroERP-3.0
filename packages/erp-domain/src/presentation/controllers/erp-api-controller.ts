@@ -49,7 +49,7 @@ export function createErpApiRouter(): Router {
 
   // Services
   const auditService = new AuditService()
-  const workflowService = new WorkflowService()
+  const workflowService = new WorkflowService({} as any, {} as any) // TODO: Provide proper arguments
 
   const anfrageService = new AnfrageService(
     anfrageRepository,

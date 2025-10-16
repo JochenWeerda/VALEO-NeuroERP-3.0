@@ -25,7 +25,7 @@ export async function createSample(data: CreateSample, userId: string): Promise<
     sampleCode,
     takenAt: new Date(data.takenAt),
     retainedUntil: data.retainedUntil ? new Date(data.retainedUntil) : undefined,
-  }).returning();
+  } as any).returning();
 
   if (sample === undefined || sample === null) {
     throw new Error('Failed to create sample');
@@ -73,7 +73,7 @@ export async function addSampleResult(data: CreateSampleResult): Promise<SampleR
   const [result] = await db.insert(sampleResults).values({
     ...data,
     analyzedAt: data.analyzedAt ? new Date(data.analyzedAt) : undefined,
-  }).returning();
+  } as any).returning();
 
   if (result === undefined || result === null) {
     throw new Error('Failed to add sample result');

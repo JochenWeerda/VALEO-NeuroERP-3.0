@@ -24,7 +24,7 @@ const noopLogger: Logger = {
 
 export class CRMDomainService {
   private readonly logger: Logger;
-  private readonly metrics?: MetricsRecorder;
+  private readonly metrics: MetricsRecorder | undefined;
 
   constructor(private readonly customers: CustomerRepository, options: CRMDomainServiceOptions = {}) {
     this.logger = options.logger ?? noopLogger;

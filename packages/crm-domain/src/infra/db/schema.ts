@@ -54,7 +54,7 @@ export const opportunities = pgTable('opportunities', {
   stage: text('stage', { enum: ['Lead', 'Qualified', 'Proposal', 'Won', 'Lost'] }).notNull().default('Lead'),
   expectedCloseDate: timestamp('expected_close_date'),
   amountNet: numeric('amount_net', { precision: 15, scale: 2 }),
-  currency: text('currency', { length: 3 }),
+  currency: text('currency'),
   probability: numeric('probability', { precision: 3, scale: 2 }).notNull().default('0.10'),
   ownerUserId: uuid('owner_user_id'),
   createdAt: timestamp('created_at').notNull().defaultNow(),

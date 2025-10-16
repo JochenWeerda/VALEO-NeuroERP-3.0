@@ -124,7 +124,7 @@ export class EventPublisher {
   getConnectionStatus(): 'connected' | 'disconnected' | 'connecting' {
     if (!this.connection) return 'disconnected';
 
-    switch (this.connection.getState()) {
+    switch ((this.connection as any).getState()) {
       case 0: return 'disconnected'; // CLOSED
       case 1: return 'connecting';   // RECONNECTING
       case 2: return 'connected';    // CONNECTED

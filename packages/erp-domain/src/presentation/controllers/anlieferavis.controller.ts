@@ -41,7 +41,7 @@ export class AnlieferavisController {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const avis = await this.anlieferavisService.getAnlieferavisById(id, tenantId)
+      const avis = await this.anlieferavisService.getAnlieferavisById(id as string, tenantId)
 
       if (!avis) {
         res.status(404).json({
@@ -95,7 +95,7 @@ export class AnlieferavisController {
       const { bestellungId } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const avis = await this.anlieferavisService.getAnlieferavisByBestellung(bestellungId, tenantId)
+      const avis = await this.anlieferavisService.getAnlieferavisByBestellung(bestellungId as string, tenantId)
 
       if (!avis) {
         res.status(404).json({
@@ -124,7 +124,7 @@ export class AnlieferavisController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const avis = await this.anlieferavisService.bestaetigenAnlieferavis(id, tenantId, actorId)
+      const avis = await this.anlieferavisService.bestaetigenAnlieferavis(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -145,7 +145,7 @@ export class AnlieferavisController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const avis = await this.anlieferavisService.stornierenAnlieferavis(id, tenantId, actorId)
+      const avis = await this.anlieferavisService.stornierenAnlieferavis(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -166,7 +166,7 @@ export class AnlieferavisController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const avis = await this.anlieferavisService.updateAnlieferavis(id, tenantId, req.body, actorId)
+      const avis = await this.anlieferavisService.updateAnlieferavis(id as string, tenantId, req.body, actorId)
 
       res.json({
         success: true,
@@ -187,7 +187,7 @@ export class AnlieferavisController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      await this.anlieferavisService.deleteAnlieferavis(id, tenantId, actorId)
+      await this.anlieferavisService.deleteAnlieferavis(id as string, tenantId, actorId)
 
       res.json({
         success: true,

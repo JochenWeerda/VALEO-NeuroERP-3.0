@@ -103,19 +103,19 @@ export class OpportunityEntity {
       this.props.stage = props.stage;
     }
     if (props.expectedCloseDate !== undefined) {
-      this.props.expectedCloseDate = props.expectedCloseDate;
+      this.props.expectedCloseDate = props.expectedCloseDate ?? undefined;
     }
     if (props.amountNet !== undefined) {
-      this.props.amountNet = props.amountNet;
+      this.props.amountNet = props.amountNet ?? undefined;
     }
     if (props.currency !== undefined) {
-      this.props.currency = props.currency;
+      this.props.currency = props.currency ?? undefined;
     }
     if (props.probability !== undefined) {
       this.props.probability = props.probability;
     }
     if (props.ownerUserId !== undefined) {
-      this.props.ownerUserId = props.ownerUserId;
+      this.props.ownerUserId = props.ownerUserId ?? undefined;
     }
 
     this.props.updatedAt = new Date();

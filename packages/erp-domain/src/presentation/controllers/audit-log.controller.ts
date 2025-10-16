@@ -39,7 +39,7 @@ export class AuditLogController {
       const { entity, entityId } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const logs = await this.auditLogService.getAuditLogsByEntity(entity, entityId, tenantId)
+      const logs = await this.auditLogService.getAuditLogsByEntity(entity as string, entityId as string, tenantId)
 
       res.json({
         success: true,
@@ -63,7 +63,7 @@ export class AuditLogController {
         offset: req.query.offset ? parseInt(req.query.offset as string) : undefined
       }
 
-      const logs = await this.auditLogService.getAuditLogsByActor(actorId, tenantId, options)
+      const logs = await this.auditLogService.getAuditLogsByActor(actorId as string, tenantId, options)
 
       res.json({
         success: true,
@@ -83,7 +83,7 @@ export class AuditLogController {
       const { entity, entityId } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const trail = await this.auditLogService.getAuditTrail(entity, entityId, tenantId)
+      const trail = await this.auditLogService.getAuditTrail(entity as string, entityId as string, tenantId)
 
       res.json({
         success: true,
@@ -125,7 +125,7 @@ export class AuditLogController {
       const fromDate = new Date(req.query.fromDate as string)
       const toDate = new Date(req.query.toDate as string)
 
-      const report = await this.auditLogService.getUserActivityReport(actorId, tenantId, fromDate, toDate)
+      const report = await this.auditLogService.getUserActivityReport(actorId as string, tenantId, fromDate, toDate)
 
       res.json({
         success: true,

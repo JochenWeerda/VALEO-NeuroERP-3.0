@@ -40,7 +40,7 @@ export class AuftragsbestaetigungController {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const ab = await this.auftragsbestaetigungService.getAuftragsbestaetigungById(id, tenantId)
+      const ab = await this.auftragsbestaetigungService.getAuftragsbestaetigungById(id as string, tenantId)
 
       if (!ab) {
         res.status(404).json({
@@ -94,7 +94,7 @@ export class AuftragsbestaetigungController {
       const { bestellungId } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
 
-      const ab = await this.auftragsbestaetigungService.getAuftragsbestaetigungByBestellung(bestellungId, tenantId)
+      const ab = await this.auftragsbestaetigungService.getAuftragsbestaetigungByBestellung(bestellungId as string, tenantId)
 
       if (!ab) {
         res.status(404).json({
@@ -123,7 +123,7 @@ export class AuftragsbestaetigungController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const ab = await this.auftragsbestaetigungService.pruefenAuftragsbestaetigung(id, tenantId, actorId)
+      const ab = await this.auftragsbestaetigungService.pruefenAuftragsbestaetigung(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -144,7 +144,7 @@ export class AuftragsbestaetigungController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const ab = await this.auftragsbestaetigungService.bestaetigenAuftragsbestaetigung(id, tenantId, actorId)
+      const ab = await this.auftragsbestaetigungService.bestaetigenAuftragsbestaetigung(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -165,7 +165,7 @@ export class AuftragsbestaetigungController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      const ab = await this.auftragsbestaetigungService.updateAuftragsbestaetigung(id, tenantId, req.body, actorId)
+      const ab = await this.auftragsbestaetigungService.updateAuftragsbestaetigung(id as string, tenantId, req.body, actorId)
 
       res.json({
         success: true,
@@ -186,7 +186,7 @@ export class AuftragsbestaetigungController {
       const tenantId = req.headers['x-tenant-id'] as string
       const actorId = req.user?.id || 'system'
 
-      await this.auftragsbestaetigungService.deleteAuftragsbestaetigung(id, tenantId, actorId)
+      await this.auftragsbestaetigungService.deleteAuftragsbestaetigung(id as string, tenantId, actorId)
 
       res.json({
         success: true,
