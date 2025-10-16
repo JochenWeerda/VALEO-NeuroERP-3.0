@@ -23,7 +23,7 @@ export async function createNonConformity(data: CreateNonConformity, userId: str
     ...data,
     ncNumber,
     detectedAt: new Date(data.detectedAt),
-  }).returning();
+  } as any).returning();
 
   if (nc === undefined || nc === null) {
     throw new Error('Failed to create non-conformity');

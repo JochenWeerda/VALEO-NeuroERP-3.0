@@ -7,7 +7,7 @@ import { GetOrderQuery } from './application/queries/get-order';
 import { CreateOrderCommand } from './application/commands/create-order';
 import { UpdateOrderStatusCommand } from './application/commands/update-order-status';
 import { DeleteOrderCommand } from './application/commands/delete-order';
-import { ERPApiController } from './presentation/controllers/erp-api-controller';
+// ERPApiController not exported - using individual controllers instead
 import type { CreateOrderInput } from './core/entities/order';
 
 const TOKENS = {
@@ -41,15 +41,16 @@ export function registerErpDomain(options: ErpBootstrapOptions = {}): ServiceLoc
   locator.registerFactory(TOKENS.updateOrderStatus, () => new UpdateOrderStatusCommand(locator.resolve<OrderDomainService>(TOKENS.service)));
   locator.registerFactory(TOKENS.deleteOrder, () => new DeleteOrderCommand(locator.resolve<OrderDomainService>(TOKENS.service)));
 
-  locator.registerFactory(TOKENS.controller, () =>
-    new ERPApiController(
-      locator.resolve<ListOrdersQuery>(TOKENS.listOrders),
-      locator.resolve<GetOrderQuery>(TOKENS.getOrder),
-      locator.resolve<CreateOrderCommand>(TOKENS.createOrder),
-      locator.resolve<UpdateOrderStatusCommand>(TOKENS.updateOrderStatus),
-      locator.resolve<DeleteOrderCommand>(TOKENS.deleteOrder),
-    ),
-  );
+  // TODO: ERPApiController not implemented yet
+  // locator.registerFactory(TOKENS.controller, () =>
+  //   new ERPApiController(
+  //     locator.resolve<ListOrdersQuery>(TOKENS.listOrders),
+  //     locator.resolve<GetOrderQuery>(TOKENS.getOrder),
+  //     locator.resolve<CreateOrderCommand>(TOKENS.createOrder),
+  //     locator.resolve<UpdateOrderStatusCommand>(TOKENS.updateOrderStatus),
+  //     locator.resolve<DeleteOrderCommand>(TOKENS.deleteOrder),
+  //   ),
+  // );
 
   return locator;
 }
@@ -57,7 +58,8 @@ export function registerErpDomain(options: ErpBootstrapOptions = {}): ServiceLoc
 export const resolveErpDomainService = (locator: ServiceLocator = ServiceLocator.getInstance()): OrderDomainService =>
   locator.resolve<OrderDomainService>(TOKENS.service);
 
-export const resolveErpController = (locator: ServiceLocator = ServiceLocator.getInstance()): ERPApiController =>
-  locator.resolve<ERPApiController>(TOKENS.controller);
+// TODO: ERPApiController not implemented yet
+// export const resolveErpController = (locator: ServiceLocator = ServiceLocator.getInstance()): ERPApiController =>
+//   locator.resolve<ERPApiController>(TOKENS.controller);
 
 

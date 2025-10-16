@@ -98,7 +98,7 @@ export class CustomerEntity {
       this.props.name = props.name;
     }
     if (props.vatId !== undefined) {
-      this.props.vatId = props.vatId;
+      this.props.vatId = props.vatId ?? undefined;
     }
     if (props.billingAddress !== undefined) {
       this.props.billingAddress = props.billingAddress;
@@ -107,10 +107,10 @@ export class CustomerEntity {
       this.props.shippingAddresses = props.shippingAddresses;
     }
     if (props.email !== undefined) {
-      this.props.email = props.email;
+      this.props.email = props.email ?? undefined;
     }
     if (props.phone !== undefined) {
-      this.props.phone = props.phone;
+      this.props.phone = props.phone ?? undefined;
     }
     if (props.tags !== undefined) {
       this.props.tags = props.tags;
@@ -119,7 +119,7 @@ export class CustomerEntity {
       this.props.status = props.status;
     }
     if (props.ownerUserId !== undefined) {
-      this.props.ownerUserId = props.ownerUserId;
+      this.props.ownerUserId = props.ownerUserId ?? undefined;
     }
 
     this.props.updatedAt = new Date();

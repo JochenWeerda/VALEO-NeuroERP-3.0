@@ -11,7 +11,7 @@ export async function createQualityPlan(data: CreateQualityPlan, userId: string)
   const [plan] = await db.insert(qualityPlans).values({
     ...data,
     createdBy: userId,
-  }).returning();
+  } as any).returning();
 
   if (plan === undefined || plan === null) {
     throw new Error('Failed to create quality plan');

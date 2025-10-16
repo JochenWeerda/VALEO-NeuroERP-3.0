@@ -145,7 +145,7 @@ export async function autoCreateNcFromFailedSample(
     description: `Folgende Analyten außerhalb Spezifikation:\n${description}`,
     detectedAt: new Date().toISOString(),
     detectedBy: 'system-automation',
-  }, 'system-automation');
+  } as any, 'system-automation');
 }
 
 /**

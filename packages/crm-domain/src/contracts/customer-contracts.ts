@@ -35,6 +35,7 @@ export const CustomerStatusContractSchema = z.enum([CustomerStatus.ACTIVE, Custo
 export const CreateCustomerContractSchema = CreateCustomerInputSchema.openapi({
   description: 'Customer creation data',
   example: {
+    tenantId: 'default',
     number: 'CUST-001',
     name: 'Acme Corporation',
     vatId: 'US123456789',

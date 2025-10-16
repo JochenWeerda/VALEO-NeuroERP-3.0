@@ -73,19 +73,19 @@ export class ContactEntity {
       this.props.lastName = props.lastName;
     }
     if (props.role !== undefined) {
-      this.props.role = props.role;
+      this.props.role = props.role ?? undefined;
     }
     if (props.email !== undefined) {
-      this.props.email = props.email;
+      this.props.email = props.email ?? undefined;
     }
     if (props.phone !== undefined) {
-      this.props.phone = props.phone;
+      this.props.phone = props.phone ?? undefined;
     }
     if (props.isPrimary !== undefined) {
       this.props.isPrimary = props.isPrimary;
     }
     if (props.notes !== undefined) {
-      this.props.notes = props.notes;
+      this.props.notes = props.notes ?? undefined;
     }
 
     this.props.updatedAt = new Date();

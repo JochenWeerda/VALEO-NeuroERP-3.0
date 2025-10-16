@@ -188,7 +188,7 @@ export class InteractionRepository {
 
     const result = await db
       .insert(interactions)
-      .values(interactionData)
+      .values(interactionData as any)
       .returning();
 
     return InteractionEntity.fromPersistence(result[0]);

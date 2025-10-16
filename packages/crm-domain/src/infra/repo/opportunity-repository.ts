@@ -207,7 +207,7 @@ export class OpportunityRepository {
 
     const result = await db
       .insert(opportunities)
-      .values(opportunityData)
+      .values(opportunityData as any)
       .returning();
 
     return OpportunityEntity.fromPersistence(result[0]);
