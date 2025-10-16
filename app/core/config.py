@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     ALLOWED_HOSTS: List[str] = ["localhost", "127.0.0.1"]
 
     ***REMOVED*** Database Configuration
-    DATABASE_URL: str = "postgresql://valeo:valeo_secure_password_2025@localhost:5432/valeo_neuro_erp"
+    DATABASE_URL: str = "postgresql://valeo_dev:REDACTED_PASSWORD@127.0.0.1:5432/valeo_neuro_erp"
     DATABASE_CONNECT_ARGS: dict = {}
 
     ***REMOVED*** Redis Configuration

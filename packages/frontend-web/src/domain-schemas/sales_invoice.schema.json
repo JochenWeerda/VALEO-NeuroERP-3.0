@@ -55,10 +55,43 @@
       "required": true
     },
     {
+      "name": "status",
+      "label": "Status",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "value": "ENTWURF", "label": "Entwurf" },
+        { "value": "VERSENDET", "label": "Versendet" },
+        { "value": "BEZAHLT", "label": "Bezahlt" },
+        { "value": "ÜBERFÄLLIG", "label": "Überfällig" }
+      ]
+    },
+    {
       "name": "notes",
       "label": "Notizen",
       "type": "text",
       "required": false
+    },
+    {
+      "name": "subtotalNet",
+      "label": "Netto-Summe",
+      "type": "number",
+      "required": true,
+      "readonly": true
+    },
+    {
+      "name": "totalTax",
+      "label": "Steuer-Summe",
+      "type": "number",
+      "required": true,
+      "readonly": true
+    },
+    {
+      "name": "totalGross",
+      "label": "Brutto-Summe",
+      "type": "number",
+      "required": true,
+      "readonly": true
     }
   ],
   "lines": {

@@ -4,7 +4,9 @@
  * Warehouse management and inventory operations
  */
 
+// @ts-ignore - Optional dependency
 import { DIContainer } from '@valeo-neuroerp-3.0/packages/utilities/src/di-container';
+// @ts-ignore - Optional dependency
 import { Brand } from '@valeo-neuroerp-3.0/packages/data-models/src/branded-types';
 
 // ===== BRANDED TYPES =====

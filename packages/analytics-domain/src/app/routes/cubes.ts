@@ -71,11 +71,11 @@ export async function registerCubeRoutes(
 
       // Calculate summary
       const summary = {
-        totalShort: results.reduce((sum, r) => sum + Number((r.shortPosition != null && r.shortPosition !== 0) ? r.shortPosition : 0), 0),
-        totalLong: results.reduce((sum, r) => sum + Number((r.longPosition != null && r.longPosition !== 0) ? r.longPosition : 0), 0),
-        netExposure: results.reduce((sum, r) => sum + Number((r.netPosition != null && r.netPosition !== 0) ? r.netPosition : 0), 0),
+        totalShort: results.reduce((sum, r) => sum + Number((r.shortPosition != null && Number(r.shortPosition) !== 0) ? r.shortPosition : 0), 0),
+        totalLong: results.reduce((sum, r) => sum + Number((r.longPosition != null && Number(r.longPosition) !== 0) ? r.longPosition : 0), 0),
+        netExposure: results.reduce((sum, r) => sum + Number((r.netPosition != null && Number(r.netPosition) !== 0) ? r.netPosition : 0), 0),
         avgHedgingRatio: results.length > 0
-          ? results.reduce((sum, r) => sum + Number((r.hedgingRatio != null && r.hedgingRatio !== 0) ? r.hedgingRatio : 0), 0) / results.length
+          ? results.reduce((sum, r) => sum + Number((r.hedgingRatio != null && Number(r.hedgingRatio) !== 0) ? r.hedgingRatio : 0), 0) / results.length
           : 0,
       };
 
@@ -145,15 +145,15 @@ export async function registerCubeRoutes(
 
       // Calculate summary
       const summary = {
-        totalWeight: results.reduce((sum, r) => sum + Number((r.totalWeight != null && r.totalWeight !== 0) ? r.totalWeight : 0), 0),
-        totalTickets: results.reduce((sum, r) => sum + Number((r.totalTickets != null && r.totalTickets !== 0) ? r.totalTickets : 0), 0),
-        avgWeightPerTicket: results.reduce((sum, r) => sum + Number((r.totalTickets != null && r.totalTickets !== 0) ? r.totalTickets : 0), 0) > 0
-          ? results.reduce((sum, r) => sum + Number((r.totalWeight != null && r.totalWeight !== 0) ? r.totalWeight : 0), 0) /
-            results.reduce((sum, r) => sum + Number((r.totalTickets != null && r.totalTickets !== 0) ? r.totalTickets : 0), 0)
+        totalWeight: results.reduce((sum, r) => sum + Number((r.totalWeight != null && Number(r.totalWeight) !== 0) ? r.totalWeight : 0), 0),
+        totalTickets: results.reduce((sum, r) => sum + Number((r.totalTickets != null && Number(r.totalTickets) !== 0) ? r.totalTickets : 0), 0),
+        avgWeightPerTicket: results.reduce((sum, r) => sum + Number((r.totalTickets != null && Number(r.totalTickets) !== 0) ? r.totalTickets : 0), 0) > 0
+          ? results.reduce((sum, r) => sum + Number((r.totalWeight != null && Number(r.totalWeight) !== 0) ? r.totalWeight : 0), 0) /
+            results.reduce((sum, r) => sum + Number((r.totalTickets != null && Number(r.totalTickets) !== 0) ? r.totalTickets : 0), 0)
           : 0,
-        overallToleranceRate: results.reduce((sum, r) => sum + Number((r.totalTickets != null && r.totalTickets !== 0) ? r.totalTickets : 0), 0) > 0
-          ? results.reduce((sum, r) => sum + Number((r.withinTolerance != null && r.withinTolerance !== 0) ? r.withinTolerance : 0), 0) /
-            results.reduce((sum, r) => sum + Number((r.totalTickets != null && r.totalTickets !== 0) ? r.totalTickets : 0), 0)
+        overallToleranceRate: results.reduce((sum, r) => sum + Number((r.totalTickets != null && Number(r.totalTickets) !== 0) ? r.totalTickets : 0), 0) > 0
+          ? results.reduce((sum, r) => sum + Number((r.withinTolerance != null && Number(r.withinTolerance) !== 0) ? r.withinTolerance : 0), 0) /
+            results.reduce((sum, r) => sum + Number((r.totalTickets != null && Number(r.totalTickets) !== 0) ? r.totalTickets : 0), 0)
           : 0,
       };
 
@@ -218,16 +218,16 @@ export async function registerCubeRoutes(
 
       // Calculate summary
       const summary = {
-        totalSamples: results.reduce((sum, r) => sum + Number((r.totalSamples != null && r.totalSamples !== 0) ? r.totalSamples : 0), 0),
-        overallPassRate: results.reduce((sum, r) => sum + Number((r.totalSamples != null && r.totalSamples !== 0) ? r.totalSamples : 0), 0) > 0
-          ? results.reduce((sum, r) => sum + Number((r.passedSamples != null && r.passedSamples !== 0) ? r.passedSamples : 0), 0) /
-            results.reduce((sum, r) => sum + Number((r.totalSamples != null && r.totalSamples !== 0) ? r.totalSamples : 0), 0)
+        totalSamples: results.reduce((sum, r) => sum + Number((r.totalSamples != null && Number(r.totalSamples) !== 0) ? r.totalSamples : 0), 0),
+        overallPassRate: results.reduce((sum, r) => sum + Number((r.totalSamples != null && Number(r.totalSamples) !== 0) ? r.totalSamples : 0), 0) > 0
+          ? results.reduce((sum, r) => sum + Number((r.passedSamples != null && Number(r.passedSamples) !== 0) ? r.passedSamples : 0), 0) /
+            results.reduce((sum, r) => sum + Number((r.totalSamples != null && Number(r.totalSamples) !== 0) ? r.totalSamples : 0), 0)
           : 0,
         avgMoisture: results.length > 0
-          ? results.reduce((sum, r) => sum + Number((r.avgMoisture != null && r.avgMoisture !== 0) ? r.avgMoisture : 0), 0) / results.length
+          ? results.reduce((sum, r) => sum + Number((r.avgMoisture != null && Number(r.avgMoisture) !== 0) ? r.avgMoisture : 0), 0) / results.length
           : 0,
         avgProtein: results.length > 0
-          ? results.reduce((sum, r) => sum + Number((r.avgProtein != null && r.avgProtein !== 0) ? r.avgProtein : 0), 0) / results.length
+          ? results.reduce((sum, r) => sum + Number((r.avgProtein != null && Number(r.avgProtein) !== 0) ? r.avgProtein : 0), 0) / results.length
           : 0,
       };
 
@@ -367,14 +367,14 @@ export async function registerCubeRoutes(
 
       // Calculate summary
       const summary = {
-        totalRevenue: results.reduce((sum, r) => sum + Number((r.totalRevenue != null && r.totalRevenue !== 0) ? r.totalRevenue : 0), 0),
-        totalCost: results.reduce((sum, r) => sum + Number((r.totalCost != null && r.totalCost !== 0) ? r.totalCost : 0), 0),
-        totalMargin: results.reduce((sum, r) => sum + Number((r.grossMargin != null && r.grossMargin !== 0) ? r.grossMargin : 0), 0),
+        totalRevenue: results.reduce((sum, r) => sum + Number((r.totalRevenue != null && Number(r.totalRevenue) !== 0) ? r.totalRevenue : 0), 0),
+        totalCost: results.reduce((sum, r) => sum + Number((r.totalCost != null && Number(r.totalCost) !== 0) ? r.totalCost : 0), 0),
+        totalMargin: results.reduce((sum, r) => sum + Number((r.grossMargin != null && Number(r.grossMargin) !== 0) ? r.grossMargin : 0), 0),
         avgMarginPercentage: results.length > 0
-          ? results.reduce((sum, r) => sum + Number((r.marginPercentage != null && r.marginPercentage !== 0) ? r.marginPercentage : 0), 0) / results.length
+          ? results.reduce((sum, r) => sum + Number((r.marginPercentage != null && Number(r.marginPercentage) !== 0) ? r.marginPercentage : 0), 0) / results.length
           : 0,
-        totalOutstanding: results.reduce((sum, r) => sum + Number((r.outstandingInvoices != null && r.outstandingInvoices !== 0) ? r.outstandingInvoices : 0), 0),
-        totalOverdue: results.reduce((sum, r) => sum + Number((r.overdueInvoices != null && r.overdueInvoices !== 0) ? r.overdueInvoices : 0), 0),
+        totalOutstanding: results.reduce((sum, r) => sum + Number((r.outstandingInvoices != null && Number(r.outstandingInvoices) !== 0) ? r.outstandingInvoices : 0), 0),
+        totalOverdue: results.reduce((sum, r) => sum + Number((r.overdueInvoices != null && Number(r.overdueInvoices) !== 0) ? r.overdueInvoices : 0), 0),
       };
 
       return {

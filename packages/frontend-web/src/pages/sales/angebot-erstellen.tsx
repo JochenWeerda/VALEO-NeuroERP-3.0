@@ -75,7 +75,7 @@ export default function AngebotErstellenPage(): JSX.Element {
   const steps = [
     {
       id: 'kunde',
-      label: 'Kunde',
+      title: 'Kunde',
       content: (
         <div className="space-y-4">
           <div>
@@ -124,7 +124,7 @@ export default function AngebotErstellenPage(): JSX.Element {
     },
     {
       id: 'konditionen',
-      label: 'Konditionen',
+      title: 'Konditionen',
       content: (
         <div className="space-y-4">
           <div>
@@ -160,7 +160,7 @@ export default function AngebotErstellenPage(): JSX.Element {
     },
     {
       id: 'positionen',
-      label: 'Positionen',
+      title: 'Positionen',
       content: (
         <div className="space-y-4">
           {angebot.positionen.map((pos, index) => (
@@ -237,7 +237,7 @@ export default function AngebotErstellenPage(): JSX.Element {
     },
     {
       id: 'notizen',
-      label: 'Notizen',
+      title: 'Notizen',
       content: (
         <div className="space-y-4">
           <div>
@@ -255,7 +255,7 @@ export default function AngebotErstellenPage(): JSX.Element {
     },
     {
       id: 'zusammenfassung',
-      label: 'Zusammenfassung',
+      title: 'Zusammenfassung',
       content: (
         <div className="space-y-6">
           <Card>
@@ -338,7 +338,7 @@ export default function AngebotErstellenPage(): JSX.Element {
       <Wizard
         title="Neues Angebot erstellen"
         steps={steps}
-        onComplete={handleSubmit}
+        onFinish={handleSubmit}
         onCancel={() => navigate('/sales/angebote-liste')}
       />
     </div>

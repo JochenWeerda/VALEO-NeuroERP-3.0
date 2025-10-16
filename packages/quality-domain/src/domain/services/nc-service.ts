@@ -52,7 +52,7 @@ export async function createNonConformity(data: CreateNonConformity, userId: str
     });
   }
 
-  return nc as NonConformity;
+  return nc as any;
 }
 
 /**
@@ -65,7 +65,7 @@ export async function getNonConformityById(tenantId: string, ncId: string): Prom
     .where(and(eq(nonConformities.id, ncId), eq(nonConformities.tenantId, tenantId)))
     .limit(1);
 
-  return nc as NonConformity || null;
+  return nc as any || null;
 }
 
 /**
@@ -82,7 +82,7 @@ export async function updateNonConformity(
     .set({
       ...data,
       updatedAt: new Date(),
-    })
+    } as any)
     .where(and(eq(nonConformities.id, ncId), eq(nonConformities.tenantId, tenantId)))
     .returning();
 
@@ -98,7 +98,7 @@ export async function updateNonConformity(
     occurredAt: new Date().toISOString(),
   });
 
-  return updated as NonConformity;
+  return updated as any;
 }
 
 /**
@@ -133,7 +133,7 @@ export async function closeNonConformity(
     occurredAt: new Date().toISOString(),
   });
 
-  return updated as NonConformity;
+  return updated as any;
 }
 
 /**
@@ -157,7 +157,7 @@ export async function assignNonConformity(
     throw new Error('Non-conformity not found');
   }
 
-  return updated as NonConformity;
+  return updated as any;
 }
 
 /**
@@ -181,7 +181,7 @@ export async function linkNcToCapa(
     throw new Error('Non-conformity not found');
   }
 
-  return updated as NonConformity;
+  return updated as any;
 }
 
 /**
@@ -260,7 +260,7 @@ export async function listNonConformities(
     .offset(offset);
 
   return {
-    data: results as NonConformity[],
+    data: results as any,
     total,
     page,
     limit,

@@ -3,12 +3,14 @@ export * from './quote-repository';
 export * from './order-repository';
 export * from './invoice-repository';
 export * from './credit-note-repository';
+export * from './sales-offer-repository';
 
 // Re-export commonly used repository instances
 export { QuoteRepository } from './quote-repository';
 export { OrderRepository } from './order-repository';
 export { InvoiceRepository } from './invoice-repository';
 export { CreditNoteRepository } from './credit-note-repository';
+export { SalesOfferRepository } from './sales-offer-repository';
 
 // Re-export types
 export type {
@@ -28,3 +30,7 @@ export type {
 export type {
   CreditNoteFilters
 } from './credit-note-repository';
+
+export type {
+  SalesOfferFilters
+} from './sales-offer-repository';

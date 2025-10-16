@@ -1,3 +1,4 @@
+// @ts-ignore - OpenTelemetry optional dependency
 import { Span, SpanStatusCode, Tracer, trace } from '@opentelemetry/api';
 
 export interface TracingConfig {

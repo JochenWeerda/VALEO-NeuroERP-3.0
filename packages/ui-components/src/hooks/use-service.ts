@@ -50,7 +50,7 @@ export class DIContainer {
     if (definition.scope === 'scoped' && typeof this.currentScope === 'string' && this.currentScope.length > 0) {
       const scopedInstances = this.scopedInstances.get(this.currentScope);
       if (scopedInstances !== undefined && scopedInstances.has(key)) {
-        return scopedInstances.get(key);
+        return scopedInstances.get(key) as T;
       }
     }
 
@@ -74,7 +74,7 @@ export class DIContainer {
       }
     }
 
-    return instance;
+    return instance as T;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
