@@ -168,8 +168,23 @@ def _find_jwk(keys: List[Dict[str, Any]], kid: Optional[str]) -> Optional[Dict[s
 
 
 def _is_path_exempt(path: str) -> bool:
+    """
+    Prüft ob ein Pfad von Auth exemptiert ist.
+    Unterstützt exakte Matches und Prefix-Matches (endend mit /).
+    """
     if not path.startswith("/api"):
         return True
 
     normalized = path.rstrip("/")
-    return normalized in {p.rstrip("/") for p in settings.API_AUTH_EXEMPT_PATHS}
+    
+    for exempt_path in settings.API_AUTH_EXEMPT_PATHS:
+        # Prefix-Match für Pfade mit / am Ende
+        if exempt_path.endswith("/"):
+            prefix = exempt_path.rstrip("/")
+            if normalized.startswith(prefix):
+                return True
+        # Exakter Match
+        elif normalized == exempt_path.rstrip("/"):
+            return True
+    
+    return False

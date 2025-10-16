@@ -27,7 +27,7 @@ export async function createQualityPlan(data: CreateQualityPlan, userId: string)
     occurredAt: new Date().toISOString(),
   });
 
-  return plan as QualityPlan;
+  return plan as any;
 }
 
 /**
@@ -40,7 +40,7 @@ export async function getQualityPlanById(tenantId: string, planId: string): Prom
     .where(and(eq(qualityPlans.id, planId), eq(qualityPlans.tenantId, tenantId)))
     .limit(1);
 
-  return plan as QualityPlan || null;
+  return plan as any || null;
 }
 
 /**
@@ -58,7 +58,7 @@ export async function updateQualityPlan(
       ...data,
       updatedBy: userId,
       updatedAt: new Date(),
-    })
+    } as any)
     .where(and(eq(qualityPlans.id, planId), eq(qualityPlans.tenantId, tenantId)))
     .returning();
 
@@ -73,7 +73,7 @@ export async function updateQualityPlan(
     occurredAt: new Date().toISOString(),
   });
 
-  return updated as QualityPlan;
+  return updated as any;
 }
 
 /**
@@ -102,7 +102,7 @@ export async function listQualityPlans(
     filtered = filtered.filter(p => p.active === filters.active);
   }
 
-  return filtered as QualityPlan[];
+  return filtered as any;
 }
 
 /**

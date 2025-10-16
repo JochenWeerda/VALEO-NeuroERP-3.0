@@ -1,0 +1,297 @@
+name: Codebase Index (Qdrant) Nightly
+
+on:
+  schedule:
+    - cron: "15 00 * * *"   # täglich 00:15 UTC (~02:15 CET/CEST)
+  workflow_dispatch:
+
+jobs:
+  index-and-alert:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      QDRANT_URL: ${{ secrets.QDRANT_URL }}                 # z.B. https://<cluster>.<region>.cloud.qdrant.io
+      QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
+      EMBEDDING_MODEL: text-embedding-3-large               # 3072 dims (empfohlen)
+      ALERT_RAM_THRESHOLD_PCT: "80"                         # Warnen ab 80 %
+      ALERT_VECTORS_HARDLIMIT: "120000"                     # grobe Kapazitätsgrenze Free Tier
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}   # optional
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install deps
+        run: |
+          npm -v
+          mkdir -p scripts
+          npm init -y
+          npm install openai@^4 undici glob@^10
+
+      - name: Write indexer script
+        run: |
+          cat > scripts/index-codebase.mjs <<'EOF'
+          import { createHash } from "node:crypto";
+          import { readFile, stat, readdir } from "node:fs/promises";
+          import { join, extname } from "node:path";
+          import { request } from "undici";
+          import { glob } from "glob";
+          import OpenAI from "openai";
+
+          const {
+            OPENAI_API_KEY, QDRANT_URL, QDRANT_API_KEY,
+            EMBEDDING_MODEL = "text-embedding-3-large"
+          } = process.env;
+
+          if (!OPENAI_API_KEY || !QDRANT_URL || !QDRANT_API_KEY) {
+            console.error("Missing env: OPENAI_API_KEY / QDRANT_URL / QDRANT_API_KEY");
+            process.exit(1);
+          }
+
+          const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+
+          // Define domains with their collections and glob patterns (angepasst an deine Struktur)
+          const domains = [
+            {
+              name: "inventory",
+              collection: "valeo-inventory",
+              globInclude: "app/domains/inventory/**.{py,md,sql,yml,yaml,json}",
+              globExclude: "node_modules/** dist/** build/** .git/** __pycache__/** *.pyc **/migrations/versions/**"
+            },
+            {
+              name: "crm",
+              collection: "valeo-crm",
+              globInclude: "app/domains/crm/**.{py,md,sql,yml,yaml,json}",
+              globInclude: "packages/crm-domain/**.{ts,js,json}",
+              globExclude: "node_modules/** dist/** build/** .git/** __pycache__/** *.pyc **/migrations/versions/**"
+            },
+            {
+              name: "shared",
+              collection: "valeo-shared",
+              globInclude: "app/domains/shared/**.{py,md,sql,yml,yaml,json}",
+              globExclude: "node_modules/** dist/** build/** .git/** __pycache__/** *.pyc **/migrations/versions/**"
+            },
+            // Add more domains as needed, e.g., finance, etc.
+          ];
+
+          async function ensureCollection(collectionName, dims) {
+            try {
+              const res = await request(`${QDRANT_URL}/collections/${collectionName}`, {
+                method: "GET",
+                headers: { "api-key": QDRANT_API_KEY }
+              });
+              if (res.statusCode === 200) return;
+            } catch (e) {
+              console.warn(`Collection check failed for ${collectionName}: ${e.message}`);
+            }
+
+            // create collection
+            const create = await request(`${QDRANT_URL}/collections/${collectionName}`, {
+              method: "PUT",
+              headers: {
+                "api-key": QDRANT_API_KEY,
+                "content-type": "application/json"
+              },
+              body: JSON.stringify({
+                vectors: { size: dims, distance: "Cosine" }
+              })
+            });
+            if (create.statusCode >= 300) {
+              const body = await create.body.text();
+              throw new Error(`Create collection failed: ${create.statusCode} ${body}`);
+            }
+          }
+
+          async function scrollByHash(collectionName, hash) {
+            const body = {
+              filter: { must: [{ key: "hash", match: { value: hash } }] },
+              with_payload: true,
+              limit: 1
+            };
+            const r = await request(`${QDRANT_URL}/collections/${collectionName}/points/scroll`, {
+              method: "POST",
+              headers: { "api-key": QDRANT_API_KEY, "content-type": "application/json" },
+              body: JSON.stringify(body)
+            });
+            const data = await r.body.json();
+            return (data.points && data.points.length) ? data.points[0] : null;
+          }
+
+          function chunk(text, maxChars = 2000) {
+            const chunks = [];
+            for (let i = 0; i < text.length; i += maxChars) {
+              chunks.push(text.slice(i, i + maxChars));
+            }
+            return chunks;
+          }
+
+          async function embedBatch(inputs) {
+            // inputs: string[]
+            const resp = await openai.embeddings.create({
+              model: EMBEDDING_MODEL,
+              input: inputs
+            });
+            return resp.data.map(d => d.embedding);
+          }
+
+          async function upsert(collectionName, points) {
+            if (!points.length) return;
+            const r = await request(`${QDRANT_URL}/collections/${collectionName}/points`, {
+              method: "PUT",
+              headers: { "api-key": QDRANT_API_KEY, "content-type": "application/json" },
+              body: JSON.stringify({ points })
+            });
+            if (r.statusCode >= 300) {
+              const body = await r.body.text();
+              throw new Error(`Upsert failed: ${r.statusCode} ${body}`);
+            }
+          }
+
+          function sha256(s) {
+            return createHash("sha256").update(s).digest("hex");
+          }
+
+          async function indexDomain(domain) {
+            const dims = EMBEDDING_MODEL.includes("large") ? 3072 : 1536;
+            await ensureCollection(domain.collection, dims);
+
+            const files = await glob(domain.globInclude, { ignore: domain.globExclude.split(" "), nodir: true });
+            let processed = 0, skipped = 0, upserted = 0, errors = 0;
+
+            for (const path of files) {
+              try {
+                const content = await readFile(path, "utf8");
+                // quick skip for empty or generated files
+                if (!content.trim().length || content.includes("Generated by Alembic")) { skipped++; continue; }
+
+                const contentHash = sha256(content);
+                const existing = await scrollByHash(domain.collection, contentHash);
+                if (existing) { skipped++; continue; }
+
+                // split file into chunks
+                const parts = chunk(content, 2000);
+                const vectors = await embedBatch(parts);
+
+                const baseId = sha256(path + ":" + contentHash).slice(0, 24);
+                const points = parts.map((p, i) => ({
+                  id: `${baseId}-${i}`,
+                  vector: vectors[i],
+                  payload: {
+                    path, part: i, total: parts.length,
+                    hash: contentHash,
+                    ext: extname(path),
+                    domain: domain.name,
+                    timestamp: new Date().toISOString()
+                  }
+                }));
+
+                await upsert(domain.collection, points);
+                upserted += points.length;
+                processed++;
+                if (processed % 25 === 0) {
+                  console.log(`[${domain.name}] ... processed ${processed}, upserted chunks ${upserted}, skipped ${skipped}, errors ${errors}`);
+                }
+              } catch (e) {
+                console.warn(`Error processing ${path}: ${e.message}`);
+                errors++;
+              }
+            }
+
+            console.log(`[${domain.name}] DONE: files processed=${processed}, chunks upserted=${upserted}, skipped=${skipped}, errors=${errors}`);
+          }
+
+          async function main() {
+            for (const domain of domains) {
+              await indexDomain(domain);
+            }
+          }
+
+          main().catch(e => { console.error(e); process.exit(1); });
+          EOF
+
+      - name: Write usage checker
+        run: |
+          cat > scripts/qdrant-usage-check.mjs <<'EOF'
+          import { request } from "undici";
+
+          const {
+            QDRANT_URL, QDRANT_API_KEY,
+            ALERT_RAM_THRESHOLD_PCT = "80",
+            ALERT_VECTORS_HARDLIMIT = "120000",
+            SLACK_WEBHOOK_URL
+          } = process.env;
+
+          const collections = ["valeo-inventory", "valeo-crm", "valeo-shared"]; // Add more as needed
+
+          async function getCollectionInfo(collectionName) {
+            const r = await request(`${QDRANT_URL}/collections/${collectionName}`, {
+              method: "GET",
+              headers: { "api-key": QDRANT_API_KEY }
+            });
+            if (r.statusCode !== 200) throw new Error(`Collection ${collectionName} info failed`);
+            const data = await r.body.json();
+            return data?.result;
+          }
+
+          function estimateMemoryMB(vectorsCount, dims) {
+            // Qdrant stores float32 => 4 bytes per dim, add ~30% index/overhead
+            const raw = vectorsCount * dims * 4;
+            return Math.ceil((raw * 1.3) / (1024 * 1024));
+          }
+
+          async function notifySlack(text) {
+            if (!SLACK_WEBHOOK_URL) return;
+            await request(SLACK_WEBHOOK_URL, {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ text })
+            });
+          }
+
+          (async () => {
+            let totalVectors = 0, totalEstMB = 0, alerts = [];
+
+            for (const coll of collections) {
+              try {
+                const info = await getCollectionInfo(coll);
+                const dims = info?.config?.params?.vectors?.size ?? 3072;
+                const vectors = info?.points_count ?? 0;
+                const estMB = estimateMemoryMB(vectors, dims);
+                totalVectors += vectors;
+                totalEstMB += estMB;
+
+                const pct = Math.round((estMB / 1024) * 100);
+                const hardlimit = parseInt(ALERT_VECTORS_HARDLIMIT, 10);
+                const threshold = parseInt(ALERT_RAM_THRESHOLD_PCT, 10);
+
+                if (pct >= threshold) alerts.push(`${coll}: RAM ${pct}% (~${estMB} MB)`);
+                if (vectors >= hardlimit) alerts.push(`${coll}: Vectors ${vectors} >= ${hardlimit}`);
+
+                console.log(`${coll}: vectors=${vectors}, dims=${dims}, estRAM=${estMB}MB (${pct}%)`);
+              } catch (e) {
+                console.warn(`Skipping ${coll}: ${e.message}`);
+              }
+            }
+
+            const totalPct = Math.round((totalEstMB / 1024) * 100);
+            console.log(`TOTAL: vectors=${totalVectors}, estRAM=${totalEstMB}MB (${totalPct}%)`);
+
+            if (alerts.length) {
+              const msg = `:warning: Qdrant Alert: ${alerts.join("; ")}\nTotal: vectors=${totalVectors}, estRAM=${totalEstMB}MB (${totalPct}%)`;
+              console.warn(msg);
+              await notifySlack(msg);
+              // Mark workflow as "failed" to surface in GitHub UI:
+              process.exit(2);
+            }
+          })().catch(e => { console.error(e); process.exit(1); });
+          EOF
+
+      - name: Run indexer
+        run: node scripts/index-codebase.mjs
+
+      - name: Check usage / thresholds
+        run: node scripts/qdrant-usage-check.mjs

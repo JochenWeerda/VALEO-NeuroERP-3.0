@@ -14,7 +14,7 @@ from .interfaces import (
     AccountRepository, JournalEntryRepository
 )
 from ..models import (
-    Tenant, User, Customer, Lead, Contact, Article, Warehouse,
+    Tenant, User, Customer, Lead, Contact, Activity, FarmProfile, Article, Warehouse,
     StockMovement, InventoryCount, Account, JournalEntry, JournalEntryLine
 )
 
@@ -69,6 +69,68 @@ class ContactRepositoryImpl(BaseRepositoryImpl[Contact, dict, dict], ContactRepo
     """Contact repository implementation"""
     def __init__(self, session: Session):
         super().__init__(session, Contact)
+
+
+class ActivityRepositoryImpl(BaseRepositoryImpl[Activity, dict, dict], ContactRepository):
+    """Activity repository implementation with SQLAlchemy"""
+    def __init__(self, session: Session):
+        super().__init__(session, Activity)
+    
+    async def get_all(self, tenant_id: str, skip: int = 0, limit: int = 100, **kwargs) -> list[Activity]:
+        """Get all activities with filtering"""
+        query = self.session.query(Activity)
+        
+        # Apply filters
+        if 'type' in kwargs and kwargs['type']:
+            query = query.filter(Activity.type == kwargs['type'])
+        if 'status' in kwargs and kwargs['status']:
+            query = query.filter(Activity.status == kwargs['status'])
+        
+        return query.offset(skip).limit(limit).all()
+    
+    async def count(self, tenant_id: str, **kwargs) -> int:
+        """Count activities"""
+        query = self.session.query(Activity)
+        
+        if 'type' in kwargs and kwargs['type']:
+            query = query.filter(Activity.type == kwargs['type'])
+        if 'status' in kwargs and kwargs['status']:
+            query = query.filter(Activity.status == kwargs['status'])
+        
+        return query.count()
+
+
+class FarmProfileRepositoryImpl(BaseRepositoryImpl[FarmProfile, dict, dict], ContactRepository):
+    """Farm profile repository implementation with SQLAlchemy"""
+    def __init__(self, session: Session):
+        super().__init__(session, FarmProfile)
+    
+    async def get_all(self, tenant_id: str, skip: int = 0, limit: int = 100, **kwargs) -> list[FarmProfile]:
+        """Get all farm profiles with filtering"""
+        query = self.session.query(FarmProfile)
+        
+        # Apply search filter
+        if 'search' in kwargs and kwargs['search']:
+            search_term = f"%{kwargs['search']}%"
+            query = query.filter(
+                (FarmProfile.farm_name.ilike(search_term)) | 
+                (FarmProfile.owner.ilike(search_term))
+            )
+        
+        return query.offset(skip).limit(limit).all()
+    
+    async def count(self, tenant_id: str, **kwargs) -> int:
+        """Count farm profiles"""
+        query = self.session.query(FarmProfile)
+        
+        if 'search' in kwargs and kwargs['search']:
+            search_term = f"%{kwargs['search']}%"
+            query = query.filter(
+                (FarmProfile.farm_name.ilike(search_term)) | 
+                (FarmProfile.owner.ilike(search_term))
+            )
+        
+        return query.count()
 
 
 

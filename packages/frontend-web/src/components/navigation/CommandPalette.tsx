@@ -21,7 +21,7 @@ import {
   CommandSeparator,
 } from '@/components/ui/command'
 import { useNavigate } from 'react-router-dom'
-import { Calculator, FileText, HelpCircle, Package, Settings, ShoppingCart, Sprout, Warehouse } from 'lucide-react'
+import { Calculator, FileText, HelpCircle, Package, Settings, ShoppingCart, Sprout, Warehouse, Users, Target, Calendar, Tractor } from 'lucide-react'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 import { useFeature } from '@/hooks/useFeature'
 
@@ -103,6 +103,58 @@ const createCommands = (navigate: ReturnType<typeof useNavigate>, agrarEnabled: 
         intent: 'create-invoice',
         businessDomain: 'sales',
         requiredScopes: ['sales:write'],
+      },
+    },
+    {
+      id: 'crm-contacts-list',
+      label: 'Kontakte anzeigen',
+      keywords: ['crm', 'kontakte', 'contacts', 'liste'],
+      icon: Users,
+      category: 'CRM',
+      action: (): void => navigate('/crm/kontakte-liste'),
+      mcp: {
+        intent: 'view-contacts',
+        businessDomain: 'crm',
+        requiredScopes: ['crm:read'],
+      },
+    },
+    {
+      id: 'crm-leads-list',
+      label: 'Leads anzeigen',
+      keywords: ['crm', 'leads', 'verkaufschancen', 'opportunities'],
+      icon: Target,
+      category: 'CRM',
+      action: (): void => navigate('/crm/leads'),
+      mcp: {
+        intent: 'view-leads',
+        businessDomain: 'crm',
+        requiredScopes: ['crm:read'],
+      },
+    },
+    {
+      id: 'crm-activities-list',
+      label: 'Aktivitäten anzeigen',
+      keywords: ['crm', 'aktivitäten', 'activities', 'termine'],
+      icon: Calendar,
+      category: 'CRM',
+      action: (): void => navigate('/crm/aktivitaeten'),
+      mcp: {
+        intent: 'view-activities',
+        businessDomain: 'crm',
+        requiredScopes: ['crm:read'],
+      },
+    },
+    {
+      id: 'crm-farmprofiles-list',
+      label: 'Betriebsprofile anzeigen',
+      keywords: ['crm', 'betriebsprofile', 'farm', 'landwirt'],
+      icon: Tractor,
+      category: 'CRM',
+      action: (): void => navigate('/crm/betriebsprofile'),
+      mcp: {
+        intent: 'view-farm-profiles',
+        businessDomain: 'crm',
+        requiredScopes: ['crm:read'],
       },
     },
     {

@@ -15,6 +15,8 @@ type SalesDelivery = {
   sourceOrder?: string
   deliveryAddress: string
   carrier?: string
+  deliveryDate?: string
+  status: string
   notes?: string
   lines: Array<{
     article: string
@@ -34,6 +36,8 @@ export default function SalesDeliveryEditorPage(): JSX.Element {
     customerId: "",
     deliveryAddress: "",
     carrier: "dhl",
+    deliveryDate: new Date().toISOString().slice(0, ISO_DATE_LENGTH),
+    status: "ENTWURF",
     notes: "",
     lines: [{ article: "", qty: 1 }],
   })
@@ -86,7 +90,7 @@ export default function SalesDeliveryEditorPage(): JSX.Element {
           id: "1",
           type: "Lieferschein",
           number: delivery.number,
-          status: "Entwurf",
+          status: delivery.status,
         }}
         nextTypes={[{ to: "invoice", label: "Rechnung" }]}
         onCreateFollowUp={createFollowUp}

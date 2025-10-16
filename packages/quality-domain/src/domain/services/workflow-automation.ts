@@ -36,7 +36,7 @@ const workflowRules: WorkflowRule[] = [
         responsibleUserId: nc.assignedTo ?? 'quality-manager',
         responsibleDepartment: 'Quality Management',
         dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 Tage
-      }, 'system-automation');
+      } as any, 'system-automation');
     },
     enabled: true,
   },

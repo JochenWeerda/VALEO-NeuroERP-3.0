@@ -31,8 +31,10 @@ const PolicyManagerRoute = createLazyRoute(() => import('@/pages/policy-manager'
 const SalesOrderEditorRoute = createLazyRoute(() => import('@/pages/sales/order-editor'))
 const SalesDeliveryEditorRoute = createLazyRoute(() => import('@/pages/sales/delivery-editor'))
 const SalesInvoiceEditorRoute = createLazyRoute(() => import('@/pages/sales/invoice-editor'))
-const SeedListRoute = createLazyRoute(() => import('@/pages/agrar/saatgut/liste'))
-const SeedMasterRoute = createLazyRoute(() => import('@/pages/agrar/saatgut/stamm'))
+const SaatgutListeRoute = createLazyRoute(() => import('@/pages/agrar/saatgut-liste') as any)
+const SaatgutStammRoute = createLazyRoute(() => import('@/pages/agrar/saatgut-stamm') as any)
+const DuengerListeRoute = createLazyRoute(() => import('@/pages/agrar/duenger-liste') as any)
+const DuengerStammRoute = createLazyRoute(() => import('@/pages/agrar/duenger-stamm') as any)
 const SeedOrderWizardRoute = createLazyRoute(() => import('@/pages/agrar/saatgut/bestellung'))
 const FertilizerListRoute = createLazyRoute(() => import('@/pages/agrar/duenger/liste'))
 const FertilizerMasterRoute = createLazyRoute(() => import('@/pages/agrar/duenger/stamm'))
@@ -128,13 +130,18 @@ const PCNUFIRoute = createLazyRoute(() => import('@/pages/compliance/pcn-ufi'))
 const ENNIMeldungenRoute = createLazyRoute(() => import('@/pages/compliance/enni-meldungen'))
 const VVVORegisterRoute = createLazyRoute(() => import('@/pages/compliance/vvvo-register'))
 const SachkundeRegisterRoute = createLazyRoute(() => import('@/pages/compliance/sachkunde-register'))
+const PSMSachkundeRegisterRoute = createLazyRoute(() => import('@/pages/agrar/psm/sachkunde-register'))
 const SaatgutNachbauRoute = createLazyRoute(() => import('@/pages/compliance/saatgut-nachbau'))
 
 // CRM
 const KontakteListeRoute = createLazyRoute(() => import('@/pages/crm/kontakte-liste'))
-const BetriebsprofileRoute = createLazyRoute(() => import('@/pages/crm/betriebsprofile'))
+const KontaktDetailRoute = createLazyRoute(() => import('@/pages/crm/kontakt-detail'))
 const LeadsRoute = createLazyRoute(() => import('@/pages/crm/leads'))
+const LeadDetailRoute = createLazyRoute(() => import('@/pages/crm/lead-detail'))
 const AktivitaetenRoute = createLazyRoute(() => import('@/pages/crm/aktivitaeten'))
+const AktivitaetDetailRoute = createLazyRoute(() => import('@/pages/crm/aktivitaet-detail'))
+const BetriebsprofileListeRoute = createLazyRoute(() => import('@/pages/crm/betriebsprofile-liste'))
+const BetriebsprofilDetailRoute = createLazyRoute(() => import('@/pages/crm/betriebsprofil-detail'))
 
 // Marketing
 const KampagnenRoute = createLazyRoute(() => import('@/pages/marketing/kampagnen'))
@@ -247,8 +254,12 @@ const routeConfig: RouteObject[] = [
       // Agrar
       { path: 'agrar/psm', element: <PSMListeRoute /> },
       { path: 'agrar/psm/stamm', element: <PSMStammRoute /> },
-      { path: 'agrar/saatgut', element: <SeedListRoute /> },
-      { path: 'agrar/saatgut/stamm', element: <SeedMasterRoute /> },
+      { path: 'agrar/saatgut-liste', element: <SaatgutListeRoute /> },
+      { path: 'agrar/saatgut-stamm', element: <SaatgutStammRoute /> },
+      { path: 'agrar/saatgut-stamm/:id', element: <SaatgutStammRoute /> },
+      { path: 'agrar/duenger-liste', element: <DuengerListeRoute /> },
+      { path: 'agrar/duenger-stamm', element: <DuengerStammRoute /> },
+      { path: 'agrar/duenger-stamm/:id', element: <DuengerStammRoute /> },
       { path: 'agrar/saatgut/bestellung', element: <SeedOrderWizardRoute /> },
       { path: 'agrar/saatgut/sortenregister', element: <SortenregisterRoute /> },
       { path: 'agrar/duenger', element: <FertilizerListRoute /> },
@@ -337,13 +348,18 @@ const routeConfig: RouteObject[] = [
       { path: 'compliance/enni-meldungen', element: <ENNIMeldungenRoute /> },
       { path: 'compliance/vvvo-register', element: <VVVORegisterRoute /> },
       { path: 'compliance/sachkunde-register', element: <SachkundeRegisterRoute /> },
+      { path: 'agrar/psm/sachkunde-register', element: <PSMSachkundeRegisterRoute /> },
       { path: 'compliance/saatgut-nachbau', element: <SaatgutNachbauRoute /> },
       
       // CRM & Marketing
       { path: 'crm/kontakte-liste', element: <KontakteListeRoute /> },
-      { path: 'crm/betriebsprofile', element: <BetriebsprofileRoute /> },
+      { path: 'crm/kontakt/:id', element: <KontaktDetailRoute /> },
       { path: 'crm/leads', element: <LeadsRoute /> },
+      { path: 'crm/lead/:id', element: <LeadDetailRoute /> },
       { path: 'crm/aktivitaeten', element: <AktivitaetenRoute /> },
+      { path: 'crm/aktivitaet/:id', element: <AktivitaetDetailRoute /> },
+      { path: 'crm/betriebsprofile', element: <BetriebsprofileListeRoute /> },
+      { path: 'crm/betriebsprofil/:id', element: <BetriebsprofilDetailRoute /> },
       { path: 'marketing/kampagnen', element: <KampagnenRoute /> },
       
       // Finanzen
@@ -436,9 +452,8 @@ const routeConfig: RouteObject[] = [
 
 export const router = createBrowserRouter(routeConfig, {
   future: {
-    v7_startTransition: true,
     v7_relativeSplatPath: true,
   },
-})
+} as any)
 
 export const routes = routeConfig

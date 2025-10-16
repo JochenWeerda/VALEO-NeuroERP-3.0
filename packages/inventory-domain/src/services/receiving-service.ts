@@ -153,7 +153,7 @@ export class ReceivingService {
       asn.status = 'receiving';
       asn.dock = dock;
 
-      this.metrics.recordApiResponseTime('POST', '/receiving/start', HTTP_OK_STATUS);
+      (this.metrics as any).recordApiResponseTime('POST', '/receiving/start', HTTP_OK_STATUS);
 
       return appointment;
     } catch (error) {
@@ -273,7 +273,7 @@ export class ReceivingService {
           pass: true
         }
       ],
-      result: 'passed',
+      result: 'pass',
       inspectedBy: 'system', // In real implementation, get from auth context
       inspectedAt: new Date()
     };

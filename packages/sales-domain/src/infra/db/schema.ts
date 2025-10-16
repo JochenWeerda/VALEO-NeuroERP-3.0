@@ -1,5 +1,34 @@
 import { pgTable, uuid, text, varchar, timestamp, boolean, integer, numeric, jsonb, index } from 'drizzle-orm/pg-core';
 
+// Sales Offer Table
+export const salesOffers = pgTable('sales_offers', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull(),
+  customerInquiryId: uuid('customer_inquiry_id'),
+  customerId: uuid('customer_id').notNull(),
+  offerNumber: text('offer_number').notNull().unique(),
+  subject: text('subject').notNull(),
+  description: text('description').notNull(),
+  totalAmount: numeric('total_amount', { precision: 15, scale: 2 }).notNull(),
+  currency: varchar('currency', { length: 3 }).notNull().default('EUR'),
+  validUntil: timestamp('valid_until').notNull(),
+  status: text('status', { enum: ['ENTWURF', 'VERSENDET', 'ANGENOMMEN', 'ABGELEHNT', 'ABGELAUFEN'] }).notNull().default('ENTWURF'),
+  contactPerson: text('contact_person'),
+  deliveryDate: timestamp('delivery_date'),
+  paymentTerms: text('payment_terms'),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  deletedAt: timestamp('deleted_at'),
+  version: integer('version').notNull().default(1)
+}, (table) => ({
+  tenantIdx: index('sales_offers_tenant_idx').on(table.tenantId),
+  customerIdx: index('sales_offers_customer_idx').on(table.customerId),
+  customerInquiryIdx: index('sales_offers_customer_inquiry_idx').on(table.customerInquiryId),
+  statusIdx: index('sales_offers_status_idx').on(table.status),
+  validUntilIdx: index('sales_offers_valid_until_idx').on(table.validUntil)
+}));
+
 // Quote Table
 export const quotes = pgTable('quotes', {
   id: uuid('id').primaryKey().defaultRandom(),

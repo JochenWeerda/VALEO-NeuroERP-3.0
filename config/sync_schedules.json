@@ -1,0 +1,49 @@
+{
+  "psm_weekly": {
+    "interval_hours": 168,
+    "enabled": true,
+    "article_groups": [
+      "PSM"
+    ],
+    "max_items": 1000,
+    "next_run": "2025-10-22T10:18:32.380935",
+    "last_run": null,
+    "last_status": "idle"
+  },
+  "psm_monthly": {
+    "interval_hours": 720,
+    "enabled": true,
+    "article_groups": [
+      "PSM"
+    ],
+    "max_items": 2000,
+    "next_run": "2025-11-14T10:18:32.380935",
+    "last_run": null,
+    "last_status": "idle"
+  },
+  "articles_weekend": {
+    "interval_hours": 168,
+    "enabled": true,
+    "article_groups": [
+      "DUENGER",
+      "SAATGUT",
+      "BIOSTIMULANZ"
+    ],
+    "max_items": 5000,
+    "next_run": "2025-10-18T02:00:00",
+    "last_run": null,
+    "last_status": "idle"
+  },
+  "prices_nightly": {
+    "interval_hours": 24,
+    "enabled": true,
+    "article_groups": [
+      "PRICES",
+      "COMPETITOR_PRICES"
+    ],
+    "max_items": 10000,
+    "next_run": "2025-10-16T01:00:00",
+    "last_run": null,
+    "last_status": "idle"
+  }
+}

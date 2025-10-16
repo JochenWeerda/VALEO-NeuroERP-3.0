@@ -128,3 +128,92 @@ class Contact(ContactBase, TimestampMixin, SoftDeleteMixin):
     """Full contact schema"""
     id: str = Field(..., description="Contact ID")
     customer_id: str = Field(..., description="Customer ID")
+
+
+# Activity Schemas
+class ActivityBase(BaseSchema):
+    """Base activity schema"""
+    type: str = Field(..., max_length=20, description="Activity type (meeting, call, email, note)")
+    title: str = Field(..., min_length=1, max_length=200, description="Activity title")
+    customer: str = Field(..., min_length=1, max_length=100, description="Customer name")
+    contact_person: str = Field(..., min_length=1, max_length=100, description="Contact person")
+    date: datetime = Field(..., description="Activity date")
+    status: str = Field(..., max_length=20, description="Activity status (planned, completed, overdue)")
+    assigned_to: str = Field(..., max_length=100, description="Assigned user")
+    description: Optional[str] = Field(None, description="Activity description")
+
+
+class ActivityCreate(ActivityBase):
+    """Schema for creating an activity"""
+    pass
+
+
+class ActivityUpdate(BaseSchema):
+    """Schema for updating an activity"""
+    type: Optional[str] = Field(None, max_length=20, description="Activity type")
+    title: Optional[str] = Field(None, min_length=1, max_length=200, description="Activity title")
+    customer: Optional[str] = Field(None, min_length=1, max_length=100, description="Customer name")
+    contact_person: Optional[str] = Field(None, min_length=1, max_length=100, description="Contact person")
+    date: Optional[datetime] = Field(None, description="Activity date")
+    status: Optional[str] = Field(None, max_length=20, description="Activity status")
+    assigned_to: Optional[str] = Field(None, max_length=100, description="Assigned user")
+    description: Optional[str] = Field(None, description="Activity description")
+
+
+class Activity(ActivityBase, TimestampMixin):
+    """Full activity schema"""
+    id: str = Field(..., description="Activity ID")
+
+
+# Farm Profile Schemas
+class CropItem(BaseSchema):
+    """Crop item schema"""
+    crop: str = Field(..., max_length=100, description="Crop name")
+    area: float = Field(..., ge=0, description="Area in hectares")
+
+
+class LivestockItem(BaseSchema):
+    """Livestock item schema"""
+    type: str = Field(..., max_length=100, description="Livestock type")
+    count: int = Field(..., ge=0, description="Number of animals")
+
+
+class LocationInfo(BaseSchema):
+    """Location information schema"""
+    latitude: float = Field(..., description="Latitude coordinate")
+    longitude: float = Field(..., description="Longitude coordinate")
+    address: str = Field(..., max_length=500, description="Full address")
+
+
+class FarmProfileBase(BaseSchema):
+    """Base farm profile schema"""
+    farm_name: str = Field(..., min_length=1, max_length=200, description="Farm name")
+    owner: str = Field(..., min_length=1, max_length=100, description="Farm owner")
+    total_area: float = Field(..., ge=0, description="Total area in hectares")
+    crops: list[CropItem] = Field(default_factory=list, description="Crops grown")
+    livestock: list[LivestockItem] = Field(default_factory=list, description="Livestock")
+    location: Optional[LocationInfo] = Field(None, description="Farm location")
+    certifications: list[str] = Field(default_factory=list, description="Certifications")
+    notes: Optional[str] = Field(None, description="Additional notes")
+
+
+class FarmProfileCreate(FarmProfileBase):
+    """Schema for creating a farm profile"""
+    pass
+
+
+class FarmProfileUpdate(BaseSchema):
+    """Schema for updating a farm profile"""
+    farm_name: Optional[str] = Field(None, min_length=1, max_length=200, description="Farm name")
+    owner: Optional[str] = Field(None, min_length=1, max_length=100, description="Farm owner")
+    total_area: Optional[float] = Field(None, ge=0, description="Total area in hectares")
+    crops: Optional[list[CropItem]] = Field(None, description="Crops grown")
+    livestock: Optional[list[LivestockItem]] = Field(None, description="Livestock")
+    location: Optional[LocationInfo] = Field(None, description="Farm location")
+    certifications: Optional[list[str]] = Field(None, description="Certifications")
+    notes: Optional[str] = Field(None, description="Additional notes")
+
+
+class FarmProfile(FarmProfileBase, TimestampMixin):
+    """Full farm profile schema"""
+    id: str = Field(..., description="Farm profile ID")

@@ -13,6 +13,7 @@ import Inventory from './features/inventory/Inventory'
 import Sales from './features/sales/Sales'
 import Weighing from './features/weighing/Weighing'
 import LiveMonitorPage from './pages/system/live-monitor'
+import PSMAbgabedokumentationPage from './pages/agrar/psm/abgabedokumentation'
 import { createQueryClient } from './lib/query'
 import './App.css'
 
@@ -28,6 +29,7 @@ function AppContent(): ReactElement {
         <Route element={<Weighing />} path="/weighing" />
         <Route element={<Sales />} path="/sales" />
         <Route element={<LiveMonitorPage />} path="/system/live-monitor" />
+        <Route element={<PSMAbgabedokumentationPage />} path="/agrar/psm/abgabedokumentation/:psmId" />
       </Routes>
     </AppShell>
   )

@@ -510,7 +510,7 @@ export class RecipeServiceImpl implements RecipeService {
     return {
       compatible: !requiresFlush,
       requiresFlush,
-      flushType,
+      flushType: flushType as any,
       reasons
     };
   }

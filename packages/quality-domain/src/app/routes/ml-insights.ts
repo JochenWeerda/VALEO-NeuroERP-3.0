@@ -11,13 +11,13 @@ export async function registerMLInsightsRoutes(server: FastifyInstance): Promise
   // NC Risk Prediction
   server.get('/ml/nc-risk', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const query = request.query as Record<string, string>;
+    const query = request.query as any as Record<string, string>;
 
-    const prediction = await predictNcRisk(tenantId, {
-      commodity: query.commodity,
-      supplierId: query.supplierId,
-      productionLine: query.productionLine,
-    });
+    const filters: { commodity?: string; supplierId?: string; productionLine?: string } = {};
+    if (query.commodity) filters.commodity = query.commodity;
+    if (query.supplierId) filters.supplierId = query.supplierId;
+    if (query.productionLine) filters.productionLine = query.productionLine;
+    const prediction = await predictNcRisk(tenantId, filters);
 
     reply.send(prediction);
   });
@@ -26,7 +26,7 @@ export async function registerMLInsightsRoutes(server: FastifyInstance): Promise
   server.get('/ml/anomalies/:analyte', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
     const { analyte } = request.params as { analyte: string };
-    const query = request.query as Record<string, string>;
+    const query = request.query as any as Record<string, string>;
 
     const timeWindowDays = query.days ? parseInt(query.days) : 30;
     
@@ -55,13 +55,14 @@ export async function registerMLInsightsRoutes(server: FastifyInstance): Promise
   // Alert History
   server.get('/alerts', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const query = request.query as Record<string, string>;
+    const query = request.query as any as Record<string, string>;
 
-    const alerts = getAlertHistory(tenantId, {
+    const alertFilters: { severity?: any; category?: any; since?: Date } = {
       severity: query.severity as any,
       category: query.category as any,
-      since: query.since ? new Date(query.since) : undefined,
-    });
+    };
+    if (query.since) alertFilters.since = new Date(query.since);
+    const alerts = getAlertHistory(tenantId, alertFilters);
 
     reply.send({ data: alerts, count: alerts.length });
   });
@@ -69,7 +70,7 @@ export async function registerMLInsightsRoutes(server: FastifyInstance): Promise
   // Alert Statistics
   server.get('/alerts/stats', async (request, reply) => {
     const tenantId = request.headers['x-tenant-id'] as string;
-    const query = request.query as Record<string, string>;
+    const query = request.query as any as Record<string, string>;
 
     const days = query.days ? parseInt(query.days) : 7;
     const stats = getAlertStatistics(tenantId, days);

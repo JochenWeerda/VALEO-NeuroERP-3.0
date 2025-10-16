@@ -50,8 +50,38 @@ async def upsert_sales_delivery(doc: SalesDelivery) -> dict:
 async def upsert_sales_invoice(doc: SalesInvoice) -> dict:
     """Erstellt oder aktualisiert Rechnung"""
     try:
+        # Berechne Gesamtbeträge falls nicht gesetzt
+        if doc.subtotalNet == 0 and doc.lines:
+            doc.subtotalNet = sum(
+                (line.qty * line.price) for line in doc.lines if line.price
+            )
+            doc.totalTax = sum(
+                (line.qty * line.price * line.vatRate / 100) for line in doc.lines if line.price
+            )
+            doc.totalGross = doc.subtotalNet + doc.totalTax
+
+        # Status-Transition-Logik
+        existing = _DB.get(doc.number)
+        if existing:
+            old_status = existing.get("status", "ENTWURF")
+            new_status = doc.status
+
+            # Erlaubte Übergänge
+            allowed_transitions = {
+                "ENTWURF": ["VERSENDET"],
+                "VERSENDET": ["BEZAHLT", "ÜBERFÄLLIG"],
+                "BEZAHLT": [],  # Final status
+                "ÜBERFÄLLIG": ["BEZAHLT"],  # Kann noch bezahlt werden
+            }
+
+            if new_status not in allowed_transitions.get(old_status, []):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid status transition: {old_status} → {new_status}"
+                )
+
         _DB[doc.number] = doc.model_dump()
-        logger.info(f"Saved sales invoice: {doc.number}")
+        logger.info(f"Saved sales invoice: {doc.number} (status: {doc.status})")
         return {"ok": True, "number": doc.number}
     except Exception as e:
         logger.error(f"Failed to save sales invoice: {e}")
@@ -79,6 +109,22 @@ FLOW: Dict[tuple[str, str], Callable[[dict], dict]] = {
         "sourceOrder": payload["number"],
         "deliveryAddress": payload.get("deliveryAddress", ""),
         "carrier": "dhl",
+        "deliveryDate": payload.get("deliveryDate"),
+        "status": "ENTWURF",
+        "lines": payload.get("lines", []),
+    },
+    # Offer → Order
+    ("sales_offer", "sales_order"): lambda payload: {
+        "number": payload["number"].replace("SO", "SO"),
+        "date": payload["date"],
+        "customerId": payload["customerId"],
+        "salesOfferId": payload["number"],
+        "status": "ENTWURF",
+        "contactPerson": payload.get("contactPerson"),
+        "deliveryDate": payload.get("deliveryDate"),
+        "deliveryAddress": payload.get("deliveryAddress"),
+        "paymentTerms": payload.get("paymentTerms", "net30"),
+        "notes": payload.get("notes", ""),
         "lines": payload.get("lines", []),
     },
     # Order → Invoice (direkt)
@@ -89,9 +135,18 @@ FLOW: Dict[tuple[str, str], Callable[[dict], dict]] = {
         "sourceOrder": payload["number"],
         "paymentTerms": payload.get("paymentTerms", "net30"),
         "dueDate": payload["date"],  # TODO: +30 Tage berechnen
+        "status": "ENTWURF",
         "lines": payload.get("lines", []),
-        "total": sum(
+        "subtotalNet": sum(
             (line.get("qty", 0) * line.get("price", 0))
+            for line in payload.get("lines", [])
+        ),
+        "totalTax": sum(
+            (line.get("qty", 0) * line.get("price", 0) * line.get("vatRate", 0) / 100)
+            for line in payload.get("lines", [])
+        ),
+        "totalGross": sum(
+            (line.get("qty", 0) * line.get("price", 0) * (1 + line.get("vatRate", 0) / 100))
             for line in payload.get("lines", [])
         ),
     },
@@ -104,10 +159,23 @@ FLOW: Dict[tuple[str, str], Callable[[dict], dict]] = {
         "sourceDelivery": payload["number"],
         "paymentTerms": "net30",
         "dueDate": payload["date"],  # TODO: +30 Tage berechnen
+        "status": "ENTWURF",
         "lines": [
             {**line, "price": 0, "vatRate": 19}
             for line in payload.get("lines", [])
         ],
+        "subtotalNet": sum(
+            (line.get("qty", 0) * line.get("price", 0))
+            for line in payload.get("lines", [])
+        ),
+        "totalTax": sum(
+            (line.get("qty", 0) * line.get("price", 0) * line.get("vatRate", 19) / 100)
+            for line in payload.get("lines", [])
+        ),
+        "totalGross": sum(
+            (line.get("qty", 0) * line.get("price", 0) * (1 + line.get("vatRate", 19) / 100))
+            for line in payload.get("lines", [])
+        ),
     },
 }
 

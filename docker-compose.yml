@@ -173,7 +173,65 @@ services:
     networks:
       - valeo-network
 
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: valeo-neuro-erp-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024!@postgres:5432/valeo_neuro_erp
+      REDIS_URL: redis://redis:6379/0
+      KEYCLOAK_URL: http://keycloak:8080
+      API_DEV_TOKEN: dev-token
+      AI_SERVICE_URL: http://ai:5000
+      DEBUG: "true"
+      LOG_LEVEL: INFO
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - valeo-network
+    volumes:
+      - ./app:/app/app
+      - ./main.py:/app/main.py
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  ai:
+    build:
+      context: ./services/ai
+      dockerfile: Dockerfile
+    container_name: valeo-neuro-erp-ai
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024!@postgres:5432/valeo_neuro_erp
+      REDIS_URL: redis://redis:6379/1
+      BACKEND_API_URL: http://backend:8000/api/v1
+      API_DEV_TOKEN: dev-token
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      DEBUG: "true"
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - valeo-network
+    volumes:
+      - ./services/ai/app:/app/app
+      - ./services/ai/main.py:/app/main.py
+      - ai_data:/app/data
+
 volumes:
+  ai_data:
+    driver: local
   postgres_data:
     driver: local
   redis_data:

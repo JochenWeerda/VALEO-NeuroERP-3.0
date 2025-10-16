@@ -32,7 +32,7 @@ describe('InMemoryUserRepository', () => {
   describe('Basic CRUD Operations', () => {
     it('should save and find user by id', async () => {
       await repository.save(user);
-      const foundUser = await repository.findById(user.id);
+      const foundUser = await repository.findById(user.id as any);
       
       expect(foundUser).not.toBeNull();
       expect(foundUser?.id).toBe(user.id);
@@ -134,15 +134,15 @@ describe('InMemoryUserRepository', () => {
       user.deactivate();
       await repository.update(user);
       
-      await repository.activateUser(user.id);
-      const activatedUser = await repository.findById(user.id);
+      await repository.activateUser(user.id as any);
+      const activatedUser = await repository.findById(user.id as any);
       
       expect(activatedUser?.isActive).toBe(true);
     });
 
     it('should deactivate user', async () => {
-      await repository.deactivateUser(user.id);
-      const deactivatedUser = await repository.findById(user.id);
+      await repository.deactivateUser(user.id as any);
+      const deactivatedUser = await repository.findById(user.id as any);
       
       expect(deactivatedUser?.isActive).toBe(false);
     });
@@ -151,16 +151,16 @@ describe('InMemoryUserRepository', () => {
       user.verifyEmail();
       await repository.update(user);
       
-      await repository.verifyUserEmail(user.id);
-      const verifiedUser = await repository.findById(user.id);
+      await repository.verifyUserEmail(user.id as any);
+      const verifiedUser = await repository.findById(user.id as any);
       
       expect(verifiedUser?.isEmailVerified).toBe(true);
     });
 
     it('should update last login', async () => {
       const beforeLogin = user.lastLoginAt;
-      await repository.updateLastLogin(user.id);
-      const updatedUser = await repository.findById(user.id);
+      await repository.updateLastLogin(user.id as any);
+      const updatedUser = await repository.findById(user.id as any);
       
       expect(updatedUser?.lastLoginAt).not.toBe(beforeLogin);
       expect(updatedUser?.lastLoginAt).toBeInstanceOf(Date);
@@ -174,23 +174,23 @@ describe('InMemoryUserRepository', () => {
 
     it('should add role to user', async () => {
       const newRoleId = createRoleId('role-999');
-      await repository.addRoleToUser(user.id, newRoleId);
+      await repository.addRoleToUser(user.id as any, newRoleId);
       
-      const updatedUser = await repository.findById(user.id);
+      const updatedUser = await repository.findById(user.id as any);
       expect(updatedUser?.hasRole(newRoleId)).toBe(true);
     });
 
     it('should remove role from user', async () => {
       const roleId = createRoleId('role-789');
-      await repository.removeRoleFromUser(user.id, roleId);
+      await repository.removeRoleFromUser(user.id as any, roleId);
       
-      const updatedUser = await repository.findById(user.id);
+      const updatedUser = await repository.findById(user.id as any);
       expect(updatedUser?.hasRole(roleId)).toBe(false);
     });
 
     it('should check if user has role', async () => {
       const roleId = createRoleId('role-789');
-      const hasRole = await repository.hasRole(user.id, roleId);
+      const hasRole = await repository.hasRole(user.id as any, roleId);
       
       expect(hasRole).toBe(true);
     });
@@ -254,9 +254,9 @@ describe('InMemoryUserRepository', () => {
       await repository.update(user);
       await repository.update(user2);
       
-      await repository.bulkActivateUsers([user.id, user2.id]);
+      await repository.bulkActivateUsers([user.id as any, user2.id as any]);
       
-      const activatedUser1 = await repository.findById(user.id);
+      const activatedUser1 = await repository.findById(user.id as any);
       const activatedUser2 = await repository.findById(user2.id);
       
       expect(activatedUser1?.isActive).toBe(true);
@@ -264,9 +264,9 @@ describe('InMemoryUserRepository', () => {
     });
 
     it('should bulk deactivate users', async () => {
-      await repository.bulkDeactivateUsers([user.id, user2.id]);
+      await repository.bulkDeactivateUsers([user.id as any, user2.id as any]);
       
-      const deactivatedUser1 = await repository.findById(user.id);
+      const deactivatedUser1 = await repository.findById(user.id as any);
       const deactivatedUser2 = await repository.findById(user2.id);
       
       expect(deactivatedUser1?.isActive).toBe(false);
@@ -276,7 +276,7 @@ describe('InMemoryUserRepository', () => {
     it('should bulk delete users', async () => {
       await repository.bulkDeleteUsers([user.id as any, user2.id as any]);
       
-      const deletedUser1 = await repository.findById(user.id);
+      const deletedUser1 = await repository.findById(user.id as any);
       const deletedUser2 = await repository.findById(user2.id);
       
       expect(deletedUser1).toBeNull();
