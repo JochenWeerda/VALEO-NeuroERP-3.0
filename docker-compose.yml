@@ -61,6 +61,7 @@ services:
       KC_HOSTNAME: localhost
       KC_HTTP_PORT: 8080
       KC_HTTPS_PORT: 8443
+      KC_HEALTH_ENABLED: "true"
     ports:
       - "8080:8080"
     depends_on:
