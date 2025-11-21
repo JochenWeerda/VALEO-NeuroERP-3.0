@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { BackButton } from '@/components/BackButton'
 import { AlertCircle, Euro, FileDown, Search } from 'lucide-react'
 
 type OffenerPosten = {
@@ -87,9 +88,12 @@ export default function KreditorenPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-6">
-      <div>
-        <h1 className="text-3xl font-bold">Kreditorenbuchhaltung</h1>
-        <p className="text-muted-foreground">Offene Posten Lieferanten</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Kreditorenbuchhaltung</h1>
+          <p className="text-muted-foreground">Offene Posten Lieferanten</p>
+        </div>
+        <BackButton to="/fibu/op-verwaltung" label="Zurück zur OP-Verwaltung" />
       </div>
 
       {skontoVerfuegbar > 0 && (

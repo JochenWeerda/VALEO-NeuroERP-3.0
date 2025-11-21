@@ -4,6 +4,7 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Dunning
 const dunningSchema = z.object({
@@ -276,11 +277,41 @@ export default function DunningEditorPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'generate') {
-      // Mahnung generieren
-      alert('Mahnungsgenerierung-Funktion wird implementiert')
+      // Mahnung generieren - berechne Gesamtforderung und generiere Text
+      const gesamtForderung = (formData.amount as number || 0) + (formData.dunningFee as number || 0) + (formData.interest as number || 0)
+      formData.totalAmount = gesamtForderung
+
+      // Generiere Standard-Mahntext basierend auf Mahnstufe
+      if (!formData.text || (formData.text as string).trim() === '') {
+        const mahnstufe = formData.dunningLevel as number || 1
+        const betrag = formData.amount as number || 0
+        const frist = formData.paymentDeadline as string || '7 Tage'
+
+        formData.text = `Sehr geehrte Damen und Herren,
+
+trotz ${mahnstufe > 1 ? `${mahnstufe - 1}. Mahnung und ` : ''}Zahlungserinnerung steht Ihre Rechnung noch offen.
+Wir bitten Sie, den offenen Betrag von ${betrag.toFixed(2)} € innerhalb von ${frist} zu begleichen.
+
+Bei Zahlungseingang innerhalb der Zahlungsfrist erlassen wir die Mahngebühr.
+
+Mit freundlichen Grüßen`
+      }
+
+      toast({
+        title: 'Mahnung generiert',
+        description: `Mahnung der Stufe ${formData.dunningLevel} wurde erstellt.`,
+      })
     } else if (action === 'preview') {
       // Vorschau
-      window.open('/api/finance/dunning/preview', '_blank')
+      if (!id || id === 'new') {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie die Mahnung zuerst.',
+        })
+        return
+      }
+      window.open(`/api/finance/dunning/${id}/preview`, '_blank')
     } else if (action === 'send') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
@@ -291,18 +322,69 @@ export default function DunningEditorPage(): JSX.Element {
       try {
         await saveData({ ...formData, status: 'sent', sentDate: new Date().toISOString().split('T')[0] })
         setIsDirty(false)
+        toast({
+          title: 'Mahnung versendet',
+          description: 'Die Mahnung wurde erfolgreich versendet.',
+        })
         navigate('/finance/dunning')
       } catch (error) {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'payment') {
       // Zahlung buchen
-      alert('Zahlungsbuchung-Funktion wird implementiert')
+      if (!id || id === 'new') {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie die Mahnung zuerst.',
+        })
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/finance/dunning/${id}/payment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify({
+            betrag: formData.totalAmount || 0,
+            datum: new Date().toISOString().split('T')[0]
+          })
+        })
+
+        if (response.ok) {
+          formData.status = 'paid'
+          formData.paymentDate = new Date().toISOString().split('T')[0]
+          toast({
+            title: 'Zahlung gebucht',
+            description: 'Die Zahlung wurde erfolgreich gebucht.',
+          })
+        } else {
+          const error = await response.json()
+          toast({
+            variant: 'destructive',
+            title: 'Fehler bei Zahlung',
+            description: error.detail || 'Zahlung konnte nicht gebucht werden.',
+          })
+        }
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Netzwerkfehler',
+          description: 'Verbindung zum Server fehlgeschlagen.',
+        })
+      }
     } else if (action === 'escalate') {
       if (window.confirm('Mahnung wirklich eskalieren?')) {
         try {
           await saveData({ ...formData, status: 'escalated' })
           setIsDirty(false)
+          toast({
+            title: 'Mahnung eskaliert',
+            description: 'Die Mahnung wurde eskaliert.',
+          })
           navigate('/finance/dunning')
         } catch (error) {
           // Error wird bereits in useMaskData behandelt
@@ -313,13 +395,25 @@ export default function DunningEditorPage(): JSX.Element {
         try {
           await saveData({ ...formData, status: 'collection' })
           setIsDirty(false)
+          toast({
+            title: 'Inkasso übergeben',
+            description: 'Der Fall wurde an das Inkasso-Büro übergeben.',
+          })
           navigate('/finance/dunning')
         } catch (error) {
           // Error wird bereits in useMaskData behandelt
         }
       }
     } else if (action === 'export') {
-      window.open('/api/finance/dunning/export', '_blank')
+      if (!id || id === 'new') {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie die Mahnung zuerst.',
+        })
+        return
+      }
+      window.open(`/api/finance/dunning/${id}/export`, '_blank')
     }
   })
 

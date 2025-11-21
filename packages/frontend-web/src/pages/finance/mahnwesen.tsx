@@ -4,6 +4,7 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Mahnwesen
 const mahnwesenSchema = z.object({
@@ -247,11 +248,41 @@ export default function MahnwesenPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'generate') {
-      // Mahnung generieren
-      alert('Mahnungsgenerierung-Funktion wird implementiert')
+      // Mahnung generieren - berechne Gesamtforderung
+      const gesamtForderung = (formData.betrag || 0) + (formData.mahngebuehr || 0) + (formData.zinsen || 0)
+      formData.gesamtForderung = gesamtForderung
+
+      // Generiere Standard-Mahntext basierend auf Mahnstufe
+      if (!formData.text || formData.text.trim() === '') {
+        const mahnstufe = formData.mahnstufe || 1
+        const betrag = formData.betrag || 0
+        const frist = formData.frist || '7 Tage'
+
+        formData.text = `Sehr geehrte Damen und Herren,
+
+trotz ${mahnstufe > 1 ? `${mahnstufe - 1}. Mahnung und ` : ''}Zahlungserinnerung steht Ihre Rechnung noch offen.
+Wir bitten Sie, den offenen Betrag von ${betrag.toFixed(2)} € innerhalb von ${frist} zu begleichen.
+
+Bei Zahlungseingang innerhalb der Zahlungsfrist erlassen wir die Mahngebühr.
+
+Mit freundlichen Grüßen`
+      }
+
+      toast({
+        title: 'Mahnung generiert',
+        description: `Mahnung der Stufe ${formData.mahnstufe} wurde erstellt.`,
+      })
     } else if (action === 'preview') {
       // Vorschau
-      window.open('/api/finance/mahnwesen/preview', '_blank')
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie die Mahnung zuerst.',
+        })
+        return
+      }
+      window.open(`/api/finance/mahnwesen/${formData.id}/preview`, '_blank')
     } else if (action === 'send') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
@@ -262,18 +293,111 @@ export default function MahnwesenPage(): JSX.Element {
       try {
         await saveData(formData)
         setIsDirty(false)
+        toast({
+          title: 'Mahnung versendet',
+          description: 'Die Mahnung wurde erfolgreich versendet.',
+        })
         navigate('/finance/mahnwesen')
       } catch (error) {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'payment') {
       // Zahlung buchen
-      alert('Zahlungsbuchung-Funktion wird implementiert')
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie die Mahnung zuerst.',
+        })
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/finance/mahnwesen/${formData.id}/payment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify({
+            betrag: formData.gesamtForderung || 0,
+            datum: new Date().toISOString().split('T')[0]
+          })
+        })
+
+        if (response.ok) {
+          formData.status = 'bezahlt'
+          formData.zahlungEingang = new Date().toISOString().split('T')[0]
+          toast({
+            title: 'Zahlung gebucht',
+            description: 'Die Zahlung wurde erfolgreich gebucht.',
+          })
+        } else {
+          const error = await response.json()
+          toast({
+            variant: 'destructive',
+            title: 'Fehler bei Zahlung',
+            description: error.detail || 'Zahlung konnte nicht gebucht werden.',
+          })
+        }
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Netzwerkfehler',
+          description: 'Verbindung zum Server fehlgeschlagen.',
+        })
+      }
     } else if (action === 'inkasso') {
       // Inkasso übergeben
-      alert('Inkasso-Funktion wird implementiert')
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie die Mahnung zuerst.',
+        })
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/finance/mahnwesen/${formData.id}/inkasso`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+
+        if (response.ok) {
+          formData.status = 'inkasso'
+          toast({
+            title: 'Inkasso übergeben',
+            description: 'Der Fall wurde an das Inkasso-Büro übergeben.',
+          })
+        } else {
+          const error = await response.json()
+          toast({
+            variant: 'destructive',
+            title: 'Fehler bei Inkasso-Übergabe',
+            description: error.detail || 'Inkasso-Übergabe fehlgeschlagen.',
+          })
+        }
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Netzwerkfehler',
+          description: 'Verbindung zum Server fehlgeschlagen.',
+        })
+      }
     } else if (action === 'export') {
-      window.open('/api/finance/mahnwesen/export', '_blank')
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie die Mahnung zuerst.',
+        })
+        return
+      }
+      window.open(`/api/finance/mahnwesen/${formData.id}/export`, '_blank')
     }
   })
 

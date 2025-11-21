@@ -38,8 +38,8 @@ export type FormSchema = {
 type Props<T> = {
   schema: FormSchema
   data: T
-  onChange?: (partial: Partial<T>) => void
-  onSubmit: (values: T) => Promise<void> | void
+  onChange?: (_partial: Partial<T>) => void
+  onSubmit: (_values: T) => Promise<void> | void
   submitLabel?: string
 }
 
@@ -198,7 +198,7 @@ function LinesEditor({
 }: {
   columns: LineCol[]
   value: unknown[]
-  onChange: (rows: unknown[]) => void
+  onChange: (_rows: unknown[]) => void
 }): JSX.Element {
   const rows = value as Record<string, unknown>[]
 

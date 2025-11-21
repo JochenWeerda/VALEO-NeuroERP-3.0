@@ -119,8 +119,8 @@ const DuengerStammPage: React.FC = () => {
   // Queries
   const { data: duenger, isLoading } = useQuery({
     queryKey: ['duenger', id],
-    queryFn: () => apiClient.getDuenger(id!),
-    enabled: isEditing,
+    queryFn: () => apiClient.getDuenger(id ?? ''),
+    enabled: isEditing && !!id,
   });
 
   // Mutations
@@ -132,7 +132,7 @@ const DuengerStammPage: React.FC = () => {
       navigate('/agrar/duenger-liste');
     },
     onError: (error: any) => {
-      toast.error('Fehler beim Erstellen: ' + error.message);
+      toast.error(`Fehler beim Erstellen: ${error.message}`);
       if (error.response?.data?.detail) {
         setErrors({ general: error.response.data.detail });
       }
@@ -146,7 +146,7 @@ const DuengerStammPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['duenger', id] });
     },
     onError: (error: any) => {
-      toast.error('Fehler beim Aktualisieren: ' + error.message);
+      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
     },
   });
 

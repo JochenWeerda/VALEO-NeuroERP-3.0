@@ -11,6 +11,7 @@ const quotes_1 = require("./routes/quotes");
 const orders_1 = require("./routes/orders");
 const invoices_1 = require("./routes/invoices");
 const credit_notes_1 = require("./routes/credit-notes");
+const sales_offers_1 = require("./routes/sales-offers");
 const auth_1 = require("./middleware/auth");
 const tenant_1 = require("./middleware/tenant");
 const request_id_1 = require("./middleware/request-id");
@@ -21,7 +22,7 @@ const publisher_1 = require("../infra/messaging/publisher");
 const tracer_1 = require("../infra/telemetry/tracer");
 const server = (0, fastify_1.default)({
     logger: {
-        level: process.env.LOG_LEVEL || 'info',
+        level: process.env.LOG_LEVEL ?? 'info',
         serializers: {
             req: (req) => ({
                 method: req.method,
@@ -46,12 +47,12 @@ server.register(swagger_1.default, {
         openapi: '3.0.3',
         info: {
             title: 'Sales Domain API',
-            description: 'REST API for Sales Domain operations (Quotes, Orders, Invoices, Credit Notes)',
+            description: 'REST API for Sales Domain operations (Quotes, Sales Offers, Orders, Invoices, Credit Notes)',
             version: '1.0.0',
         },
         servers: [
             {
-                url: process.env.API_BASE_URL || 'http://localhost:3001',
+                url: process.env.API_BASE_URL ?? 'http://localhost:3001',
                 description: 'Development server',
             },
         ],
@@ -97,6 +98,7 @@ server.setErrorHandler(error_handler_1.errorHandler);
 // Register routes
 server.register(health_1.healthRoutes);
 server.register(quotes_1.registerQuoteRoutes);
+server.register(sales_offers_1.registerSalesOfferRoutes);
 server.register(orders_1.registerOrderRoutes);
 server.register(invoices_1.registerInvoiceRoutes);
 server.register(credit_notes_1.registerCreditNoteRoutes);
@@ -123,7 +125,7 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 const start = async () => {
     try {
         const port = Number(process.env.PORT) || 3001;
-        const host = process.env.HOST || '0.0.0.0';
+        const host = process.env.HOST ?? '0.0.0.0';
         // Initialize event publisher
         const publisher = (0, publisher_1.getEventPublisher)();
         await publisher.connect();

@@ -1,0 +1,235 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-10-23T16:41:46.959454",
+  "source": "L3-Migration",
+  "mask": {
+    "id": "artikelstamm",
+    "name": "Artikel-Stammdaten",
+    "route": "/artikel/stamm",
+    "category": "Stammdaten",
+    "priority": 5
+  },
+  "form": {
+    "fields": [
+      {
+        "name": "artikel_nr",
+        "label": "Artikel-Nr.",
+        "type": "lookup",
+        "required": true,
+        "validation": "unique",
+        "maxLength": 20,
+        "uiHint": "with_search_button"
+      },
+      {
+        "name": "kurztext",
+        "label": "Kurztext",
+        "type": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "artikel_gruppe",
+        "label": "Artikel-Gruppe",
+        "type": "lookup",
+        "required": false,
+        "uiHint": "with_search_button"
+      },
+      {
+        "name": "bezeichnung",
+        "label": "Bezeichnung",
+        "type": "string",
+        "required": true,
+        "maxLength": 255
+      },
+      {
+        "name": "beschreibung",
+        "label": "Beschreibung",
+        "type": "text",
+        "required": false,
+        "uiHint": "multiline"
+      },
+      {
+        "name": "matchcode_2",
+        "label": "2. Matchcode",
+        "type": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "artikel_gesperrt",
+        "label": "Artikel gesperrt",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "name": "artikel_art",
+        "label": "Artikel-Art",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "standard",
+            "label": "Standard"
+          },
+          {
+            "value": "dienstleistung",
+            "label": "Dienstleistung"
+          },
+          {
+            "value": "verpackung",
+            "label": "Verpackung"
+          }
+        ]
+      },
+      {
+        "name": "mengen_einheit",
+        "label": "Mengen-Einheit",
+        "type": "lookup",
+        "required": true,
+        "uiHint": "with_search_button"
+      },
+      {
+        "name": "gewicht",
+        "label": "Gewicht",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "hl_gewicht",
+        "label": "hl-Gewicht",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "steuerschluessel",
+        "label": "Steuerschlüssel",
+        "type": "lookup",
+        "required": true,
+        "uiHint": "with_search_button"
+      },
+      {
+        "name": "steuersatz",
+        "label": "Steuersatz %",
+        "type": "percentage",
+        "required": true
+      }
+    ],
+    "validation": {},
+    "layout": {
+      "type": "tabs",
+      "tabs": [
+        {
+          "id": "einheiten",
+          "label": "Einheiten",
+          "fields": [
+            "mengen_einheit",
+            "gewicht",
+            "hl_gewicht"
+          ]
+        },
+        {
+          "id": "preise",
+          "label": "Preise",
+          "fields": []
+        },
+        {
+          "id": "rabatte",
+          "label": "Rabatte",
+          "fields": []
+        },
+        {
+          "id": "saatgut",
+          "label": "Saatgut",
+          "fields": []
+        }
+      ]
+    }
+  },
+  "database": {
+    "table": "artikelstamm",
+    "columns": [
+      {
+        "name": "artikel_nr",
+        "type": "INTEGER",
+        "nullable": false,
+        "length": 20,
+        "unique": true
+      },
+      {
+        "name": "kurztext",
+        "type": "VARCHAR",
+        "nullable": true,
+        "length": 50
+      },
+      {
+        "name": "artikel_gruppe_id",
+        "type": "INTEGER",
+        "nullable": true
+      },
+      {
+        "name": "bezeichnung",
+        "type": "VARCHAR",
+        "nullable": false,
+        "length": 255
+      },
+      {
+        "name": "beschreibung",
+        "type": "TEXT",
+        "nullable": true
+      },
+      {
+        "name": "matchcode_2",
+        "type": "VARCHAR",
+        "nullable": true,
+        "length": 50
+      },
+      {
+        "name": "gesperrt",
+        "type": "BOOLEAN",
+        "nullable": true
+      },
+      {
+        "name": "artikel_art",
+        "type": "VARCHAR",
+        "nullable": true
+      },
+      {
+        "name": "einheit_id",
+        "type": "INTEGER",
+        "nullable": false
+      },
+      {
+        "name": "gewicht",
+        "type": "DECIMAL",
+        "nullable": true
+      },
+      {
+        "name": "hl_gewicht",
+        "type": "DECIMAL",
+        "nullable": true
+      },
+      {
+        "name": "steuerschluessel_id",
+        "type": "INTEGER",
+        "nullable": false
+      },
+      {
+        "name": "steuersatz",
+        "type": "DECIMAL",
+        "nullable": false
+      }
+    ],
+    "relations": [
+      {
+        "table": "artikel_gruppen",
+        "foreign_key": "artikel_gruppe_id",
+        "display_field": "bezeichnung"
+      },
+      {
+        "table": "einheiten",
+        "foreign_key": "einheit_id",
+        "display_field": "bezeichnung"
+      }
+    ]
+  }
+}

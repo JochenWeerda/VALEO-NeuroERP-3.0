@@ -1,0 +1,411 @@
+{
+  "version": "1.0",
+  "name": "Kundenstamm L3 Migration",
+  "description": "Komplette Masken-Konfiguration für Kundenstamm aus L3 ERP",
+  "created": "2025-10-26",
+  "tables": {
+    "kunden": {
+      "title": "Kundenstamm",
+      "description": "Haupttabelle für Kundenstamm mit 60 Feldern",
+      "icon": "users",
+      "sections": [
+        {
+          "id": "allgemein",
+          "title": "Allgemein",
+          "fields": [
+            {
+              "name": "kunden_nr",
+              "label": "Kundennummer",
+              "type": "text",
+              "required": true,
+              "readonly": true,
+              "width": "w-1/4"
+            },
+            {
+              "name": "name1",
+              "label": "Name 1",
+              "type": "text",
+              "required": true,
+              "width": "w-1/3"
+            },
+            {
+              "name": "name2",
+              "label": "Name 2",
+              "type": "text",
+              "width": "w-1/3"
+            },
+            {
+              "name": "name3",
+              "label": "Name 3",
+              "type": "text",
+              "width": "w-1/3"
+            }
+          ]
+        },
+        {
+          "id": "anschrift",
+          "title": "Anschrift",
+          "fields": [
+            {
+              "name": "strasse",
+              "label": "Straße",
+              "type": "text",
+              "width": "w-2/3"
+            },
+            {
+              "name": "plz",
+              "label": "PLZ",
+              "type": "text",
+              "maxLength": 10,
+              "width": "w-1/3"
+            },
+            {
+              "name": "ort",
+              "label": "Ort",
+              "type": "text",
+              "width": "w-1/2"
+            },
+            {
+              "name": "land",
+              "label": "Land",
+              "type": "text",
+              "width": "w-1/2"
+            },
+            {
+              "name": "postfach",
+              "label": "Postfach",
+              "type": "text",
+              "width": "w-1/3"
+            },
+            {
+              "name": "postfach_plz",
+              "label": "Postfach PLZ",
+              "type": "activation",
+              "maxLength": 10,
+              "width": "w-1/3"
+            },
+            {
+              "name": "postfach_ort",
+              "label": "Postfach Ort",
+              "type": "text",
+              "width": "w-1/3"
+            }
+          ]
+        },
+        {
+          "id": "kontakt",
+          "title": "Kontakt",
+          "fields": [
+            {
+              "name": "tel",
+              "label": "Telefon",
+              "type": "tel",
+              "width": "w-1/3"
+            },
+            {
+              "name": "fax",
+              "label": "Fax",
+              "type": "tel",
+              "width": "w-1/3"
+            },
+            {
+              "name": "email",
+              "label": "E-Mail",
+              "type": "email",
+              "width": "w-1/3"
+            },
+            {
+              "name": "homepage",
+              "label": "Homepage",
+              "type": "url",
+              "width": "w-full"
+            }
+          ]
+        },
+        {
+          "id": "rechnung_kontoauszug",
+          "title": "Rechnung / Kontoauszug",
+          "fields": [
+            {
+              "name": "kontonutzung_rechnung",
+              "label": "Kontonutzung Rechnung",
+              "type": "checkbox"
+            },
+            {
+              "name": "kontoauszug_gewuenscht",
+              "label": "Kontoauszug gewünscht",
+              "type": "checkbox"
+            },
+            {
+              "name": "saldo_druck_rechnung",
+              "label": "Saldo-Druck Rechnung",
+              "type": "checkbox"
+            },
+            {
+              "name": "druck_verbot_rechnung",
+              "label": "Druck-Verbot Rechnung",
+              "type": "checkbox"
+            },
+            {
+              "name": "einzel_abrechnung",
+              "label": "Einzel-Abrechnung",
+              "type": "select",
+              "options": ["Einzel", "Sammel"]
+            },
+            {
+              "name": "sammel_abrechnung",
+              "label": "Sammel-Abrechnung",
+              "type": "checkbox"
+            },
+            {
+              "name": "bonus_berechtigung",
+              "label": "Bonus-Berechtigung",
+              "type": "checkbox"
+            }
+          ]
+        },
+        {
+          "id": "preise_rabatte",
+          "title": "Preise / Rabatte",
+          "fields": [
+            {
+              "name": "direktes_konto",
+              "label": "Direktes Konto",
+              "type": "checkbox"
+            },
+            {
+              "name": "rabatt_verrechnung",
+              "label": "Rabatt-Verrechnung",
+              "type": "select",
+              "options": ["Sofort", "Nachträglich"]
+            },
+            {
+              "name": "selbstabholer_rabatt",
+              "label": "Selbstabholer-Rabatt (%)",
+              "type": "number",
+              "min": 0,
+              "max": 100,
+              "step": 0.01
+            },
+            {
+              "name": "preisermittlung_sorten",
+              "label": "Preisermittlung Sorten",
+              "type": "checkbox"
+            },
+            {
+              "name": "gueltig_ab",
+              "label": "Gültig ab",
+              "type": "date"
+            },
+            {
+              "name": "gueltig_bis",
+              "label": "Gültig bis",
+              "type": "date"
+            }
+          ]
+        },
+        {
+          "id": "bank_zahlungsverkehr",
+          "title": "Bank / Zahlungsverkehr",
+          "fields": [
+            {
+              "name": "zahlungsbedingungen_tage",
+              "label": "Zahlungsbedingungen (Tage)",
+              "type": "number",
+              "min": 0,
+              "max": 365
+            },
+            {
+              "name": "skonto",
+              "label": "Skonto (%)",
+              "type": "number",
+              "min": 0,
+              "max": 100,
+              "step": 0.01
+            },
+            {
+              "name": "netto_kasse",
+              "label": "Netto-Kasse",
+              "type": "checkbox"
+            },
+            {
+              "name": "mahnwesen",
+              "label": "Mahnwesen",
+              "type": "checkbox"
+            },
+            {
+              "name": "lastschriftverfahren",
+              "label": "Lastschriftverfahren",
+              "type": "select",
+              "options": ["SEPA", "Mandat", "Keines"]
+            },
+            {
+              "name": "bank",
+              "label": "Bank",
+              "type": "text"
+            },
+            {
+              "name": "iban",
+              "label": "IBAN",
+              "type": "text",
+              "maxLength": 34
+            },
+            {
+              "name": "bic",
+              "label": "BIC",
+              "type": "text",
+              "maxLength": 11
+            },
+            {
+              "name": "waehrung",
+              "label": "Währung",
+              "type": "select",
+              "options": ["EUR", "USD", "GBP", "CHF"],
+              "default": "EUR"
+            }
+          ]
+        },
+        {
+          "id": "sonstiges",
+          "title": "Sonstiges",
+          "fields": [
+            {
+              "name": "sprachschluessel",
+              "label": "Sprachschlüssel",
+              "type": "select",
+              "options": ["DE", "EN", "FR", "NL"],
+              "default": "DE"
+            },
+            {
+              "name": "marktpreis_auswertung",
+              "label": "Marktpreis-Auswertung",
+              "type": "checkbox"
+            },
+            {
+              "name": "webshop_kunde",
+              "label": "Webshop-Kunde",
+              "type": "checkbox"
+            }
+          ]
+        }
+      ],
+      "detail_tables": [
+        {
+          "table": "kunden_profil",
+          "title": "Kundenprofil",
+          "icon": "user-circle"
+        },
+        {
+          "table": "kunden_ansprechpartner",
+          "title": "Ansprechpartner",
+          "icon": "user-group",
+          "multiple": true
+        },
+        {
+          "table": "kunden_versand",
+          "title": "Versandinformationen",
+          "icon": "truck"
+        },
+        {
+          "table": "kunden_lieferung_zahlung",
+          "title": "Liefer(fung)/Zahlung",
+          "icon": "currency-euro"
+        },
+        {
+          "table": "kunden_datenschutz",
+          "title": "Datenschutz",
+          "icon": "shield-check"
+        },
+        {
+          "table": "kunden_genossenschaft",
+          "title": "Genossenschaftsanteile",
+          "icon": "building-library"
+        },
+        {
+          "table": "kunden_freitext",
+          "title": "Freitext / Chef-Anweisung",
+          "icon": "document-text"
+        },
+        {
+          "table": "kunden_allgemein_erweitert",
+          "title": "Allgemein Erweitert",
+          "icon": "cog-6-tooth"
+        }
+      ],
+      "detail_tables_multiple": [
+        {
+          "table": "kunden_email_verteiler",
+          "title": "E-Mail-Verteiler",
+          "icon": "envelope"
+        },
+        {
+          "table": "kunden_betriebsgemeinschaften",
+          "title": "Betriebsgemeinschaften",
+          "icon": "squares-2x2"
+        },
+        {
+          "table": "kunden_cpd_konto",
+          "title": "CPD-Konto",
+          "icon": "credit-card"
+        },
+        {
+          "table": "kunden_rabatte_detail",
+          "title": "Kundenrabatte Detail",
+          "icon": "percent-badge"
+        },
+        {
+          "table": "kunden_preise_detail",
+          "title": "Vereinbarte Kundenpreise",
+          "icon": "tag"
+        }
+      ]
+    }
+  },
+  "validation_rules": {
+    "kunden.email": {
+      "type": "email",
+      "required": false
+    },
+    "kunden.kunden_nr": {
+      "type": "string",
+      "required": true,
+      "pattern": "^[A-Z0-9]{1,20}$"
+    },
+    "kunden.plz": {
+      "type": "string",
+      "maxLength": 10
+    },
+    "kunden.selbstabholer_rabatt": {
+      "type": "number",
+      "min": 0,
+      "max": 100
+    }
+  },
+  "actions": [
+    {
+      "name": "save",
+      "label": "Speichern",
+      "icon": "check",
+      "variant": "default"
+    },
+    {
+      "name": "delete",
+      "label": "Löschen",
+      "icon": "trash",
+      "variant": "destructive"
+    },
+    {
+      "name": "print",
+      "label": "Drucken",
+      "icon": "printer",
+      "variant": "outline"
+    },
+    {
+      "name": "duplicate",
+      "label": "Duplizieren",
+      "icon": "documents",
+      "variant": "outline"
+    }
+  ]
+}
+

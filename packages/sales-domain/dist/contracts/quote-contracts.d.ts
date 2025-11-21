@@ -11,8 +11,8 @@ export declare const QuoteLineContractSchema: z.ZodObject<{
     totalGross: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    sku: string;
     name: string;
+    sku: string;
     quantity: number;
     unitPrice: number;
     discount: number;
@@ -21,8 +21,8 @@ export declare const QuoteLineContractSchema: z.ZodObject<{
     description?: string | undefined;
 }, {
     id: string;
-    sku: string;
     name: string;
+    sku: string;
     quantity: number;
     unitPrice: number;
     totalNet: number;
@@ -32,14 +32,14 @@ export declare const QuoteLineContractSchema: z.ZodObject<{
 }>;
 export declare const QuoteStatusContractSchema: z.ZodEnum<["Draft", "Sent", "Accepted", "Rejected", "Expired"]>;
 export declare const CreateQuoteContractSchema: z.ZodObject<{
-    status: z.ZodEnum<["Draft", "Sent", "Accepted", "Rejected", "Expired"]>;
-    tenantId: z.ZodString;
-    customerId: z.ZodString;
-    quoteNumber: z.ZodString;
-    taxRate: z.ZodDefault<z.ZodNumber>;
     currency: z.ZodDefault<z.ZodString>;
-    validUntil: z.ZodDate;
+    taxRate: z.ZodDefault<z.ZodNumber>;
     notes: z.ZodOptional<z.ZodString>;
+    status: z.ZodEnum<["Draft", "Sent", "Accepted", "Rejected", "Expired"]>;
+    validUntil: z.ZodDate;
+    customerId: z.ZodString;
+    tenantId: z.ZodString;
+    quoteNumber: z.ZodString;
 } & {
     lines: z.ZodArray<z.ZodObject<Omit<{
         id: z.ZodString;
@@ -52,53 +52,53 @@ export declare const CreateQuoteContractSchema: z.ZodObject<{
         totalNet: z.ZodNumber;
         totalGross: z.ZodNumber;
     }, "id" | "totalNet" | "totalGross">, "strip", z.ZodTypeAny, {
-        sku: string;
         name: string;
+        sku: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }, {
-        sku: string;
         name: string;
+        sku: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
         discount?: number | undefined;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
+    currency: string;
+    taxRate: number;
     status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-    tenantId: string;
+    validUntil: Date;
     customerId: string;
-    quoteNumber: string;
+    tenantId: string;
     lines: {
-        sku: string;
         name: string;
+        sku: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }[];
-    taxRate: number;
-    currency: string;
-    validUntil: Date;
+    quoteNumber: string;
     notes?: string | undefined;
 }, {
     status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-    tenantId: string;
+    validUntil: Date;
     customerId: string;
-    quoteNumber: string;
+    tenantId: string;
     lines: {
-        sku: string;
         name: string;
+        sku: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
         discount?: number | undefined;
     }[];
-    validUntil: Date;
-    taxRate?: number | undefined;
+    quoteNumber: string;
     currency?: string | undefined;
+    taxRate?: number | undefined;
     notes?: string | undefined;
 }>;
 export declare const UpdateQuoteContractSchema: z.ZodObject<{
@@ -113,15 +113,15 @@ export declare const UpdateQuoteContractSchema: z.ZodObject<{
         totalNet: z.ZodNumber;
         totalGross: z.ZodNumber;
     }, "id" | "totalNet" | "totalGross">, "strip", z.ZodTypeAny, {
-        sku: string;
         name: string;
+        sku: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }, {
-        sku: string;
         name: string;
+        sku: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
@@ -131,29 +131,29 @@ export declare const UpdateQuoteContractSchema: z.ZodObject<{
     notes: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     status: z.ZodOptional<z.ZodEnum<["Draft", "Sent", "Accepted", "Rejected", "Expired"]>>;
 }, "strip", z.ZodTypeAny, {
+    notes?: string | null | undefined;
     status?: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired" | undefined;
+    validUntil?: Date | undefined;
     lines?: {
-        sku: string;
         name: string;
+        sku: string;
         quantity: number;
         unitPrice: number;
         discount: number;
         description?: string | undefined;
     }[] | undefined;
-    validUntil?: Date | undefined;
-    notes?: string | null | undefined;
 }, {
+    notes?: string | null | undefined;
     status?: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired" | undefined;
+    validUntil?: Date | undefined;
     lines?: {
-        sku: string;
         name: string;
+        sku: string;
         quantity: number;
         unitPrice: number;
         description?: string | undefined;
         discount?: number | undefined;
     }[] | undefined;
-    validUntil?: Date | undefined;
-    notes?: string | null | undefined;
 }>;
 export declare const QuoteResponseContractSchema: z.ZodObject<Omit<{
     id: z.ZodString;
@@ -172,8 +172,8 @@ export declare const QuoteResponseContractSchema: z.ZodObject<Omit<{
         totalGross: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        sku: string;
         name: string;
+        sku: string;
         quantity: number;
         unitPrice: number;
         discount: number;
@@ -182,8 +182,8 @@ export declare const QuoteResponseContractSchema: z.ZodObject<Omit<{
         description?: string | undefined;
     }, {
         id: string;
-        sku: string;
         name: string;
+        sku: string;
         quantity: number;
         unitPrice: number;
         totalNet: number;
@@ -205,15 +205,20 @@ export declare const QuoteResponseContractSchema: z.ZodObject<Omit<{
     version: z.ZodNumber;
 }, "tenantId">, "strip", z.ZodTypeAny, {
     id: string;
+    currency: string;
+    taxRate: number;
+    status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
+    version: number;
+    createdAt: Date;
+    updatedAt: Date;
+    validUntil: Date;
+    customerId: string;
     totalNet: number;
     totalGross: number;
-    status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-    customerId: string;
-    quoteNumber: string;
     lines: {
         id: string;
-        sku: string;
         name: string;
+        sku: string;
         quantity: number;
         unitPrice: number;
         discount: number;
@@ -223,24 +228,22 @@ export declare const QuoteResponseContractSchema: z.ZodObject<Omit<{
     }[];
     subtotalNet: number;
     totalDiscount: number;
-    taxRate: number;
-    currency: string;
-    validUntil: Date;
-    createdAt: Date;
-    updatedAt: Date;
-    version: number;
+    quoteNumber: string;
     notes?: string | undefined;
 }, {
     id: string;
+    status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
+    version: number;
+    createdAt: Date;
+    updatedAt: Date;
+    validUntil: Date;
+    customerId: string;
     totalNet: number;
     totalGross: number;
-    status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-    customerId: string;
-    quoteNumber: string;
     lines: {
         id: string;
-        sku: string;
         name: string;
+        sku: string;
         quantity: number;
         unitPrice: number;
         totalNet: number;
@@ -250,12 +253,9 @@ export declare const QuoteResponseContractSchema: z.ZodObject<Omit<{
     }[];
     subtotalNet: number;
     totalDiscount: number;
-    validUntil: Date;
-    createdAt: Date;
-    updatedAt: Date;
-    version: number;
-    taxRate?: number | undefined;
+    quoteNumber: string;
     currency?: string | undefined;
+    taxRate?: number | undefined;
     notes?: string | undefined;
 }>;
 export declare const QuoteQueryContractSchema: z.ZodObject<{
@@ -270,14 +270,14 @@ export declare const QuoteQueryContractSchema: z.ZodObject<{
     page: number;
     pageSize: number;
     status?: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired" | undefined;
-    customerId?: string | undefined;
     search?: string | undefined;
+    customerId?: string | undefined;
     validUntilFrom?: string | undefined;
     validUntilTo?: string | undefined;
 }, {
     status?: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired" | undefined;
-    customerId?: string | undefined;
     search?: string | undefined;
+    customerId?: string | undefined;
     page?: string | undefined;
     pageSize?: string | undefined;
     validUntilFrom?: string | undefined;
@@ -301,8 +301,8 @@ export declare const QuoteListResponseContractSchema: z.ZodObject<{
             totalGross: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
             id: string;
-            sku: string;
             name: string;
+            sku: string;
             quantity: number;
             unitPrice: number;
             discount: number;
@@ -311,8 +311,8 @@ export declare const QuoteListResponseContractSchema: z.ZodObject<{
             description?: string | undefined;
         }, {
             id: string;
-            sku: string;
             name: string;
+            sku: string;
             quantity: number;
             unitPrice: number;
             totalNet: number;
@@ -334,15 +334,20 @@ export declare const QuoteListResponseContractSchema: z.ZodObject<{
         version: z.ZodNumber;
     }, "tenantId">, "strip", z.ZodTypeAny, {
         id: string;
+        currency: string;
+        taxRate: number;
+        status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
+        version: number;
+        createdAt: Date;
+        updatedAt: Date;
+        validUntil: Date;
+        customerId: string;
         totalNet: number;
         totalGross: number;
-        status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-        customerId: string;
-        quoteNumber: string;
         lines: {
             id: string;
-            sku: string;
             name: string;
+            sku: string;
             quantity: number;
             unitPrice: number;
             discount: number;
@@ -352,24 +357,22 @@ export declare const QuoteListResponseContractSchema: z.ZodObject<{
         }[];
         subtotalNet: number;
         totalDiscount: number;
-        taxRate: number;
-        currency: string;
-        validUntil: Date;
-        createdAt: Date;
-        updatedAt: Date;
-        version: number;
+        quoteNumber: string;
         notes?: string | undefined;
     }, {
         id: string;
+        status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
+        version: number;
+        createdAt: Date;
+        updatedAt: Date;
+        validUntil: Date;
+        customerId: string;
         totalNet: number;
         totalGross: number;
-        status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-        customerId: string;
-        quoteNumber: string;
         lines: {
             id: string;
-            sku: string;
             name: string;
+            sku: string;
             quantity: number;
             unitPrice: number;
             totalNet: number;
@@ -379,12 +382,9 @@ export declare const QuoteListResponseContractSchema: z.ZodObject<{
         }[];
         subtotalNet: number;
         totalDiscount: number;
-        validUntil: Date;
-        createdAt: Date;
-        updatedAt: Date;
-        version: number;
-        taxRate?: number | undefined;
+        quoteNumber: string;
         currency?: string | undefined;
+        taxRate?: number | undefined;
         notes?: string | undefined;
     }>, "many">;
     pagination: z.ZodObject<{
@@ -393,28 +393,33 @@ export declare const QuoteListResponseContractSchema: z.ZodObject<{
         total: z.ZodNumber;
         totalPages: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
+        total: number;
         page: number;
         pageSize: number;
-        total: number;
         totalPages: number;
     }, {
+        total: number;
         page: number;
         pageSize: number;
-        total: number;
         totalPages: number;
     }>;
 }, "strip", z.ZodTypeAny, {
     data: {
         id: string;
+        currency: string;
+        taxRate: number;
+        status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
+        version: number;
+        createdAt: Date;
+        updatedAt: Date;
+        validUntil: Date;
+        customerId: string;
         totalNet: number;
         totalGross: number;
-        status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-        customerId: string;
-        quoteNumber: string;
         lines: {
             id: string;
-            sku: string;
             name: string;
+            sku: string;
             quantity: number;
             unitPrice: number;
             discount: number;
@@ -424,32 +429,30 @@ export declare const QuoteListResponseContractSchema: z.ZodObject<{
         }[];
         subtotalNet: number;
         totalDiscount: number;
-        taxRate: number;
-        currency: string;
-        validUntil: Date;
-        createdAt: Date;
-        updatedAt: Date;
-        version: number;
+        quoteNumber: string;
         notes?: string | undefined;
     }[];
     pagination: {
+        total: number;
         page: number;
         pageSize: number;
-        total: number;
         totalPages: number;
     };
 }, {
     data: {
         id: string;
+        status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
+        version: number;
+        createdAt: Date;
+        updatedAt: Date;
+        validUntil: Date;
+        customerId: string;
         totalNet: number;
         totalGross: number;
-        status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-        customerId: string;
-        quoteNumber: string;
         lines: {
             id: string;
-            sku: string;
             name: string;
+            sku: string;
             quantity: number;
             unitPrice: number;
             totalNet: number;
@@ -459,18 +462,15 @@ export declare const QuoteListResponseContractSchema: z.ZodObject<{
         }[];
         subtotalNet: number;
         totalDiscount: number;
-        validUntil: Date;
-        createdAt: Date;
-        updatedAt: Date;
-        version: number;
-        taxRate?: number | undefined;
+        quoteNumber: string;
         currency?: string | undefined;
+        taxRate?: number | undefined;
         notes?: string | undefined;
     }[];
     pagination: {
+        total: number;
         page: number;
         pageSize: number;
-        total: number;
         totalPages: number;
     };
 }>;

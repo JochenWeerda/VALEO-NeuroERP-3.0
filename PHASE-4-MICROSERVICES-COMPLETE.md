@@ -92,7 +92,7 @@ k8s/gateway/traefik-ingress.yaml
 Routes:
 - /api/v1/crm/* → crm-service:8001
 - /api/v1/inventory/* → inventory-service:8002
-- /api/v1/finance/* → finance-service:8003
+- /api/v1/* (Finance) → finance-service:8003
 
 Middlewares:
 - Rate-Limiting (100 avg, 200 burst)

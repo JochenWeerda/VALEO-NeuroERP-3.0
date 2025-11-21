@@ -60,7 +60,7 @@ class PsmService {
   // Search & List
   async searchPsm(query: string, limit = 10): Promise<PsmDto[]> {
     const params = new URLSearchParams({ q: query, limit: limit.toString() });
-    const response = await fetch(`${this.baseUrl}/search?${params}`);
+    const response = await fetch(`${this.baseUrl}/search?${String(params)}`);
 
     if (!response.ok) {
       throw new Error(`Failed to search PSM: ${response.statusText}`);
@@ -88,7 +88,7 @@ class PsmService {
       }
     });
 
-    const response = await fetch(`${this.baseUrl}?${params}`);
+    const response = await fetch(`${this.baseUrl}?${String(params)}`);
 
     if (!response.ok) {
       throw new Error(`Failed to list PSM: ${response.statusText}`);

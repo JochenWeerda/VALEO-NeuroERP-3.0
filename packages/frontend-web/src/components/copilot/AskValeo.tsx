@@ -59,7 +59,7 @@ export const askValeoMCP = createMCPMetadata('AskValeo', 'dialog', {
 
 interface AskValeoProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
   pageContext?: {
     domain: string;
     currentDocument?: string;
@@ -384,7 +384,7 @@ export function JouleActionBar({ onAskClick, pageContext }: JouleActionBarProps)
  */
 
 export function useAskValeo(_context: AskValeoRuntimeContext): {
-  ask: (question: string) => Promise<{ answer: string; suggestions: AISuggestion[] }>
+  ask: (_question: string) => Promise<{ answer: string; suggestions: AISuggestion[] }>
   getSuggestions: () => Promise<AISuggestion[]>
 } {
   const ask = async (_question: string): Promise<{ answer: string; suggestions: AISuggestion[] }> => {

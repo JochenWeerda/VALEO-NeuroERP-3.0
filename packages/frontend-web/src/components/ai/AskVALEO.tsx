@@ -25,7 +25,6 @@ type Message = {
   timestamp: Date
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function AskVALEO() {
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')

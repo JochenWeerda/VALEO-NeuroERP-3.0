@@ -3,21 +3,34 @@ Finance Microservice
 Isolated FastAPI service for Financial Management
 """
 
-from fastapi import FastAPI, Depends
+from contextlib import asynccontextmanager
+
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import make_asgi_app
 from sqlalchemy.orm import Session
 import logging
 
-from app.core.config import settings
-from app.core.database import get_db, Base, engine
-from app.domains.finance.api import router as finance_router
-from app.middleware.metrics import PrometheusMiddleware
-from app.middleware.correlation import CorrelationMiddleware
-from app.core.logging import setup_logging
+from services.finance.app.core.config import settings
+from services.finance.app.core.database import get_db, Base, engine
+from services.finance.app.domains.finance.api import router as finance_router
+from services.finance.app.middleware.metrics import PrometheusMiddleware
+from services.finance.app.middleware.correlation import CorrelationMiddleware
+from services.finance.app.core.logging import setup_logging
 
 setup_logging(json_format=True)
 logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    logger.info("Finance Service starting…")
+    Base.metadata.create_all(bind=engine)
+    try:
+        yield
+    finally:
+        logger.info("Finance Service shutting down…")
+
 
 app = FastAPI(
     title="VALEO Finance Service",
@@ -25,6 +38,7 @@ app = FastAPI(
     version="3.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -38,7 +52,7 @@ app.add_middleware(
 app.add_middleware(PrometheusMiddleware)
 app.add_middleware(CorrelationMiddleware)
 
-app.include_router(finance_router, prefix="/api/v1/finance", tags=["Finance"])
+app.include_router(finance_router, prefix="/api/v1", tags=["Finance"])
 
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
@@ -54,16 +68,6 @@ async def ready(db: Session = Depends(get_db)):
         return {"service": "finance", "status": "ready", "database": "healthy"}
     except Exception as e:
         return {"service": "finance", "status": "not_ready", "error": str(e)}
-
-@app.on_event("startup")
-async def startup():
-    logger.info("Finance Service starting...")
-    Base.metadata.create_all(bind=engine)
-    logger.info("Finance Service ready on port 8003")
-
-@app.on_event("shutdown")
-async def shutdown():
-    logger.info("Finance Service shutting down...")
 
 if __name__ == "__main__":
     import uvicorn

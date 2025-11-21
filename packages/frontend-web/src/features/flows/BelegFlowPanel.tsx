@@ -16,7 +16,7 @@ type NextType = {
 type Props = {
   current: Node
   nextTypes: NextType[]
-  onCreateFollowUp: (toType: string) => void
+  onCreateFollowUp: (_toType: string) => void
 }
 
 /**

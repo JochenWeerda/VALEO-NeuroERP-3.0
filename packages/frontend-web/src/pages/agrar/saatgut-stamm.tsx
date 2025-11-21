@@ -107,8 +107,8 @@ const SaatgutStammPage: React.FC = () => {
   // Queries
   const { data: saatgut, isLoading } = useQuery({
     queryKey: ['saatgut', id],
-    queryFn: () => apiClient.getSaatgut(id!),
-    enabled: isEditing,
+    queryFn: () => apiClient.getSaatgut(id ?? ''),
+    enabled: isEditing && !!id,
   });
 
   // Mutations
@@ -120,7 +120,7 @@ const SaatgutStammPage: React.FC = () => {
       navigate('/agrar/saatgut-liste');
     },
     onError: (error: any) => {
-      toast.error('Fehler beim Erstellen: ' + error.message);
+      toast.error(`Fehler beim Erstellen: ${error.message}`);
       if (error.response?.data?.detail) {
         setErrors({ general: error.response.data.detail });
       }
@@ -134,7 +134,7 @@ const SaatgutStammPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['saatgut', id] });
     },
     onError: (error: any) => {
-      toast.error('Fehler beim Aktualisieren: ' + error.message);
+      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
     },
   });
 

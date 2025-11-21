@@ -30,8 +30,8 @@ export default function KontaktDetailPage(): JSX.Element {
   })
 
   const { data: existingContact, isLoading } = useQuery({
-    queryKey: queryKeys.crm.contacts.detail(id!),
-    queryFn: () => crmService.getContact(id!),
+    queryKey: queryKeys.crm.contacts.detail(id ?? ''),
+    queryFn: () => crmService.getContact(id ?? ''),
     enabled: !isNew && !!id,
   })
 
@@ -58,10 +58,10 @@ export default function KontaktDetailPage(): JSX.Element {
   const updateMutation = useMutation({
     mutationKey: mutationKeys.crm.contacts.update,
     mutationFn: (data: Partial<Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>>) =>
-      crmService.updateContact(id!, data),
+      crmService.updateContact(id ?? '', data),
     onSuccess: () => {
       toast.push('Kontakt erfolgreich aktualisiert')
-      queryClient.invalidateQueries({ queryKey: queryKeys.crm.contacts.detail(id!) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.crm.contacts.detail(id ?? '') })
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.contacts.all })
     },
     onError: (error) => {
@@ -72,7 +72,7 @@ export default function KontaktDetailPage(): JSX.Element {
 
   const deleteMutation = useMutation({
     mutationKey: mutationKeys.crm.contacts.delete,
-    mutationFn: () => crmService.deleteContact(id!),
+    mutationFn: () => crmService.deleteContact(id ?? ''),
     onSuccess: () => {
       toast.push('Kontakt erfolgreich gelöscht')
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.contacts.all })

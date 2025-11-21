@@ -15,8 +15,8 @@ interface ListReportProps {
   data: any[]
   total: number
   onCreate?: () => void
-  onEdit?: (item: any) => void
-  onDelete?: (item: any) => void
+  onEdit?: (_item: any) => void
+  onDelete?: (_item: any) => void
   onExport?: () => void
   onImport?: () => void
   isLoading?: boolean
@@ -55,7 +55,7 @@ const ListReport: React.FC<ListReportProps> = ({
 
       const matchesSearch = searchableFields.some(field => {
         const value = item[field]
-        return value && value.toString().toLowerCase().includes(searchLower)
+        return value?.toString().toLowerCase().includes(searchLower)
       })
 
       if (!matchesSearch) return false

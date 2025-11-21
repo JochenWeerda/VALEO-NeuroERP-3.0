@@ -209,7 +209,7 @@ export function StockManagement() {
           <DialogHeader>
             <DialogTitle>Stock Movement - {selectedArticle?.name}</DialogTitle>
           </DialogHeader>
-          <StockMovementForm
+          <StockMovementFormDialog
             article={selectedArticle}
             warehouses={warehouses?.items || []}
             onSubmit={(movement) => createMovement.mutate(movement)}
@@ -225,12 +225,12 @@ export function StockManagement() {
 interface StockMovementFormProps {
   article: Article | null;
   warehouses: any[];
-  onSubmit: (movement: StockMovementForm) => void;
+  onSubmit: (_movement: StockMovementForm) => void;
   isSubmitting: boolean;
   onCancel: () => void;
 }
 
-function StockMovementForm({ article, warehouses, onSubmit, isSubmitting, onCancel }: StockMovementFormProps) {
+function StockMovementFormDialog({ article, warehouses, onSubmit, isSubmitting, onCancel }: StockMovementFormProps) {
   const [formData, setFormData] = useState<StockMovementForm>({
     article_id: article?.id || '',
     warehouse_id: warehouses[0]?.id || '',
