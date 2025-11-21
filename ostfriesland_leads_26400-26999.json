@@ -1,0 +1,664 @@
+{
+  "timestamp": "2025-11-20T15:57:32.625008",
+  "total_leads": 15985,
+  "total_plz": 68,
+  "total_gap_amount": 0.0,
+  "plz_stats": {
+    "26871": {
+      "count": 288,
+      "total_amount": 0.0,
+      "cities": [
+        "Papenburg, Stadt"
+      ]
+    },
+    "26899": {
+      "count": 264,
+      "total_amount": 0.0,
+      "cities": [
+        "Rhede (Ems)"
+      ]
+    },
+    "26553": {
+      "count": 206,
+      "total_amount": 0.0,
+      "cities": [
+        "Dornum"
+      ]
+    },
+    "26903": {
+      "count": 137,
+      "total_amount": 0.0,
+      "cities": [
+        "Surwold"
+      ]
+    },
+    "26892": {
+      "count": 377,
+      "total_amount": 0.0,
+      "cities": [
+        "Heede",
+        "Lehe",
+        "Wippingen",
+        "Kluse",
+        "Dörpen"
+      ]
+    },
+    "26897": {
+      "count": 276,
+      "total_amount": 0.0,
+      "cities": [
+        "Hilkenbrook",
+        "Breddenberg",
+        "Esterwegen",
+        "Bockhorst"
+      ]
+    },
+    "26844": {
+      "count": 291,
+      "total_amount": 0.0,
+      "cities": [
+        "Jemgum"
+      ]
+    },
+    "26907": {
+      "count": 100,
+      "total_amount": 0.0,
+      "cities": [
+        "Walchum"
+      ]
+    },
+    "26789": {
+      "count": 147,
+      "total_amount": 0.0,
+      "cities": [
+        "Leer (Ostfriesland), Stadt"
+      ]
+    },
+    "26826": {
+      "count": 267,
+      "total_amount": 0.0,
+      "cities": [
+        "Weener, Stadt"
+      ]
+    },
+    "26906": {
+      "count": 124,
+      "total_amount": 0.0,
+      "cities": [
+        "Dersum"
+      ]
+    },
+    "26901": {
+      "count": 295,
+      "total_amount": 0.0,
+      "cities": [
+        "Lorup",
+        "Rastdorf"
+      ]
+    },
+    "26670": {
+      "count": 488,
+      "total_amount": 0.0,
+      "cities": [
+        "Uplengen"
+      ]
+    },
+    "26427": {
+      "count": 492,
+      "total_amount": 0.0,
+      "cities": [
+        "Esens, Stadt",
+        "Neuharlingersiel",
+        "Werdum",
+        "Moorweg",
+        "Dunum",
+        "Stedesdorf",
+        "Holtgast"
+      ]
+    },
+    "26434": {
+      "count": 594,
+      "total_amount": 0.0,
+      "cities": [
+        "Wangerland"
+      ]
+    },
+    "26936": {
+      "count": 158,
+      "total_amount": 0.0,
+      "cities": [
+        "Stadland"
+      ]
+    },
+    "26757": {
+      "count": 33,
+      "total_amount": 0.0,
+      "cities": [
+        "Borkum, Stadt"
+      ]
+    },
+    "26935": {
+      "count": 106,
+      "total_amount": 0.0,
+      "cities": [
+        "Stadland"
+      ]
+    },
+    "26736": {
+      "count": 441,
+      "total_amount": 0.0,
+      "cities": [
+        "Krummhörn"
+      ]
+    },
+    "26506": {
+      "count": 308,
+      "total_amount": 0.0,
+      "cities": [
+        "Norden, Stadt"
+      ]
+    },
+    "26655": {
+      "count": 472,
+      "total_amount": 0.0,
+      "cities": [
+        "Alt Bennebek",
+        "Westerstede, Stadt"
+      ]
+    },
+    "26802": {
+      "count": 463,
+      "total_amount": 0.0,
+      "cities": [
+        "Moormerland"
+      ]
+    },
+    "26831": {
+      "count": 283,
+      "total_amount": 0.0,
+      "cities": [
+        "Bunde"
+      ]
+    },
+    "26409": {
+      "count": 639,
+      "total_amount": 0.0,
+      "cities": [
+        "Friedeburg",
+        "Werdum",
+        "Wittmund, Stadt"
+      ]
+    },
+    "26939": {
+      "count": 467,
+      "total_amount": 0.0,
+      "cities": [
+        "Ovelgönne"
+      ]
+    },
+    "26759": {
+      "count": 160,
+      "total_amount": 0.0,
+      "cities": [
+        "Hinte"
+      ]
+    },
+    "26532": {
+      "count": 252,
+      "total_amount": 0.0,
+      "cities": [
+        "Großheide"
+      ]
+    },
+    "26639": {
+      "count": 187,
+      "total_amount": 0.0,
+      "cities": [
+        "Wiesmoor, Stadt"
+      ]
+    },
+    "26629": {
+      "count": 495,
+      "total_amount": 0.0,
+      "cities": [
+        "Großefehn"
+      ]
+    },
+    "26605": {
+      "count": 281,
+      "total_amount": 0.0,
+      "cities": [
+        "Aurich, Stadt"
+      ]
+    },
+    "26529": {
+      "count": 232,
+      "total_amount": 0.0,
+      "cities": [
+        "Osteel",
+        "Upgant-Schott",
+        "Wirdum",
+        "Rechtsupweg",
+        "Leezdorf",
+        "Marienhafe, Flecken"
+      ]
+    },
+    "26931": {
+      "count": 338,
+      "total_amount": 0.0,
+      "cities": [
+        "Elsfleth, Stadt"
+      ]
+    },
+    "26904": {
+      "count": 118,
+      "total_amount": 0.0,
+      "cities": [
+        "Börger"
+      ]
+    },
+    "26847": {
+      "count": 145,
+      "total_amount": 0.0,
+      "cities": [
+        "Detern, Flecken"
+      ]
+    },
+    "26632": {
+      "count": 548,
+      "total_amount": 0.0,
+      "cities": [
+        "Ihlow",
+        "Carpin"
+      ]
+    },
+    "26849": {
+      "count": 127,
+      "total_amount": 0.0,
+      "cities": [
+        "Filsum"
+      ]
+    },
+    "26721": {
+      "count": 17,
+      "total_amount": 0.0,
+      "cities": [
+        "Emden, Stadt"
+      ]
+    },
+    "26842": {
+      "count": 107,
+      "total_amount": 0.0,
+      "cities": [
+        "Ostrhauderfehn"
+      ]
+    },
+    "26683": {
+      "count": 305,
+      "total_amount": 0.0,
+      "cities": [
+        "Saterland"
+      ]
+    },
+    "26835": {
+      "count": 279,
+      "total_amount": 0.0,
+      "cities": [
+        "Neukamperfehn",
+        "Hesel",
+        "Holtland",
+        "Schwerinsdorf",
+        "Brinkum",
+        "Firrel"
+      ]
+    },
+    "26419": {
+      "count": 147,
+      "total_amount": 0.0,
+      "cities": [
+        "Schortens, Stadt"
+      ]
+    },
+    "26446": {
+      "count": 555,
+      "total_amount": 0.0,
+      "cities": [
+        "Friedeburg"
+      ]
+    },
+    "26919": {
+      "count": 107,
+      "total_amount": 0.0,
+      "cities": [
+        "Brake (Unterweser), Stadt"
+      ]
+    },
+    "26452": {
+      "count": 112,
+      "total_amount": 0.0,
+      "cities": [
+        "Sande"
+      ]
+    },
+    "26969": {
+      "count": 489,
+      "total_amount": 0.0,
+      "cities": [
+        "Butjadingen"
+      ]
+    },
+    "26810": {
+      "count": 305,
+      "total_amount": 0.0,
+      "cities": [
+        "Westoverledingen"
+      ]
+    },
+    "26817": {
+      "count": 286,
+      "total_amount": 0.0,
+      "cities": [
+        "Rhauderfehn"
+      ]
+    },
+    "26909": {
+      "count": 125,
+      "total_amount": 0.0,
+      "cities": [
+        "Neubörger",
+        "Neulehe"
+      ]
+    },
+    "26676": {
+      "count": 215,
+      "total_amount": 0.0,
+      "cities": [
+        "Barßel"
+      ]
+    },
+    "26689": {
+      "count": 256,
+      "total_amount": 0.0,
+      "cities": [
+        "Apen"
+      ]
+    },
+    "26624": {
+      "count": 377,
+      "total_amount": 0.0,
+      "cities": [
+        "Südbrookmerland"
+      ]
+    },
+    "26465": {
+      "count": 10,
+      "total_amount": 0.0,
+      "cities": [
+        "Langeoog"
+      ]
+    },
+    "26937": {
+      "count": 129,
+      "total_amount": 0.0,
+      "cities": [
+        "Stadland"
+      ]
+    },
+    "26607": {
+      "count": 440,
+      "total_amount": 0.0,
+      "cities": [
+        "Aurich, Stadt"
+      ]
+    },
+    "26954": {
+      "count": 257,
+      "total_amount": 0.0,
+      "cities": [
+        "Nordenham, Stadt"
+      ]
+    },
+    "26603": {
+      "count": 13,
+      "total_amount": 0.0,
+      "cities": [
+        "Aurich, Stadt"
+      ]
+    },
+    "26524": {
+      "count": 134,
+      "total_amount": 0.0,
+      "cities": [
+        "Berumbur",
+        "Hagermarsch",
+        "Halbemond",
+        "Lütetsburg",
+        "Hage, Flecken"
+      ]
+    },
+    "26723": {
+      "count": 111,
+      "total_amount": 0.0,
+      "cities": [
+        "Emden, Stadt"
+      ]
+    },
+    "26556": {
+      "count": 172,
+      "total_amount": 0.0,
+      "cities": [
+        "Westerholt",
+        "Schweindorf",
+        "Eversmeer",
+        "Nenndorf",
+        "Utarp"
+      ]
+    },
+    "26487": {
+      "count": 88,
+      "total_amount": 0.0,
+      "cities": [
+        "Neuschoo",
+        "Blomberg"
+      ]
+    },
+    "26441": {
+      "count": 107,
+      "total_amount": 0.0,
+      "cities": [
+        "Jever, Stadt"
+      ]
+    },
+    "26845": {
+      "count": 40,
+      "total_amount": 0.0,
+      "cities": [
+        "Nortmoor"
+      ]
+    },
+    "26489": {
+      "count": 48,
+      "total_amount": 0.0,
+      "cities": [
+        "Ochtersum"
+      ]
+    },
+    "26725": {
+      "count": 99,
+      "total_amount": 0.0,
+      "cities": [
+        "Emden, Stadt"
+      ]
+    },
+    "26548": {
+      "count": 36,
+      "total_amount": 0.0,
+      "cities": [
+        "Norderney, Stadt"
+      ]
+    },
+    "26486": {
+      "count": 3,
+      "total_amount": 0.0,
+      "cities": [
+        "Wangerooge, Nordseebad"
+      ]
+    },
+    "26474": {
+      "count": 14,
+      "total_amount": 0.0,
+      "cities": [
+        "Spiekeroog"
+      ]
+    },
+    "26571": {
+      "count": 3,
+      "total_amount": 0.0,
+      "cities": [
+        "Juist, Inselgemeinde"
+      ]
+    }
+  },
+  "sample_leads": [
+    {
+      "row": 7,
+      "plz": "26871",
+      "name": "",
+      "city": "Papenburg, Stadt",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 8,
+      "plz": "26871",
+      "name": "",
+      "city": "Papenburg, Stadt",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 9,
+      "plz": "26871",
+      "name": "",
+      "city": "Papenburg, Stadt",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 10,
+      "plz": "26871",
+      "name": "",
+      "city": "Papenburg, Stadt",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 33,
+      "plz": "26899",
+      "name": "",
+      "city": "Rhede (Ems)",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 34,
+      "plz": "26899",
+      "name": "",
+      "city": "Rhede (Ems)",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 35,
+      "plz": "26899",
+      "name": "",
+      "city": "Rhede (Ems)",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 49,
+      "plz": "26553",
+      "name": "",
+      "city": "Dornum",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 50,
+      "plz": "26553",
+      "name": "",
+      "city": "Dornum",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 51,
+      "plz": "26553",
+      "name": "",
+      "city": "Dornum",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 52,
+      "plz": "26553",
+      "name": "",
+      "city": "Dornum",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 53,
+      "plz": "26553",
+      "name": "",
+      "city": "Dornum",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 54,
+      "plz": "26903",
+      "name": "",
+      "city": "Surwold",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 55,
+      "plz": "26903",
+      "name": "",
+      "city": "Surwold",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 56,
+      "plz": "26871",
+      "name": "",
+      "city": "Papenburg, Stadt",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 57,
+      "plz": "26871",
+      "name": "",
+      "city": "Papenburg, Stadt",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 58,
+      "plz": "26871",
+      "name": "",
+      "city": "Papenburg, Stadt",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 63,
+      "plz": "26892",
+      "name": "",
+      "city": "Heede",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 64,
+      "plz": "26892",
+      "name": "",
+      "city": "Heede",
+      "gap_amount": 0.0
+    },
+    {
+      "row": 67,
+      "plz": "26897",
+      "name": "",
+      "city": "Esterwegen",
+      "gap_amount": 0.0
+    }
+  ]
+}
