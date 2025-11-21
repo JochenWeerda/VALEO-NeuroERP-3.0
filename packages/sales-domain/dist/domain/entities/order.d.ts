@@ -90,7 +90,7 @@ export declare const OrderSchema: z.ZodObject<{
     id: string;
     totalNet: number;
     totalGross: number;
-    status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
+    status: "Cancelled" | "Draft" | "Confirmed" | "Invoiced";
     tenantId: string;
     customerId: string;
     lines: {
@@ -118,7 +118,7 @@ export declare const OrderSchema: z.ZodObject<{
     id: string;
     totalNet: number;
     totalGross: number;
-    status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
+    status: "Cancelled" | "Draft" | "Confirmed" | "Invoiced";
     tenantId: string;
     customerId: string;
     lines: {
@@ -180,7 +180,7 @@ export declare const CreateOrderInputSchema: z.ZodObject<{
         discount?: number | undefined;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
-    status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
+    status: "Cancelled" | "Draft" | "Confirmed" | "Invoiced";
     tenantId: string;
     customerId: string;
     lines: {
@@ -197,7 +197,7 @@ export declare const CreateOrderInputSchema: z.ZodObject<{
     notes?: string | undefined;
     expectedDeliveryDate?: Date | undefined;
 }, {
-    status: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
+    status: "Cancelled" | "Draft" | "Confirmed" | "Invoiced";
     tenantId: string;
     customerId: string;
     lines: {
@@ -245,7 +245,7 @@ export declare const UpdateOrderInputSchema: z.ZodObject<{
     notes: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     status: z.ZodOptional<z.ZodEnum<["Draft", "Confirmed", "Invoiced", "Cancelled"]>>;
 }, "strip", z.ZodTypeAny, {
-    status?: "Draft" | "Confirmed" | "Invoiced" | "Cancelled" | undefined;
+    status?: "Cancelled" | "Draft" | "Confirmed" | "Invoiced" | undefined;
     lines?: {
         sku: string;
         name: string;
@@ -257,7 +257,7 @@ export declare const UpdateOrderInputSchema: z.ZodObject<{
     notes?: string | null | undefined;
     expectedDeliveryDate?: Date | null | undefined;
 }, {
-    status?: "Draft" | "Confirmed" | "Invoiced" | "Cancelled" | undefined;
+    status?: "Cancelled" | "Draft" | "Confirmed" | "Invoiced" | undefined;
     lines?: {
         sku: string;
         name: string;

@@ -14,12 +14,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreditNoteService = exports.InvoiceService = exports.OrderService = exports.QuoteService = void 0;
+exports.SalesOfferService = exports.CreditNoteService = exports.InvoiceService = exports.OrderService = exports.QuoteService = void 0;
 // Export all services
 __exportStar(require("./quote-service"), exports);
 __exportStar(require("./order-service"), exports);
 __exportStar(require("./invoice-service"), exports);
 __exportStar(require("./credit-note-service"), exports);
+__exportStar(require("./sales-offer-service"), exports);
 // Re-export commonly used service classes
 var quote_service_1 = require("./quote-service");
 Object.defineProperty(exports, "QuoteService", { enumerable: true, get: function () { return quote_service_1.QuoteService; } });
@@ -29,4 +30,6 @@ var invoice_service_1 = require("./invoice-service");
 Object.defineProperty(exports, "InvoiceService", { enumerable: true, get: function () { return invoice_service_1.InvoiceService; } });
 var credit_note_service_1 = require("./credit-note-service");
 Object.defineProperty(exports, "CreditNoteService", { enumerable: true, get: function () { return credit_note_service_1.CreditNoteService; } });
+var sales_offer_service_1 = require("./sales-offer-service");
+Object.defineProperty(exports, "SalesOfferService", { enumerable: true, get: function () { return sales_offer_service_1.SalesOfferService; } });
 //# sourceMappingURL=index.js.map

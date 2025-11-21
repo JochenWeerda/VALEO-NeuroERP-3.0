@@ -28,7 +28,7 @@ class StarfaceCTIService {
   private config: StarfaceConfig
   private ws: WebSocket | null = null
   private reconnectTimeout = 5000
-  private eventCallbacks: Map<string, ((data: unknown) => void)[]> = new Map()
+  private eventCallbacks: Map<string, ((_data: unknown) => void)[]> = new Map()
 
   constructor(config: StarfaceConfig) {
     this.config = config
@@ -50,8 +50,8 @@ class StarfaceCTIService {
       }
 
       this.ws.onmessage = (event) => {
-        const data = JSON.parse(event.data)
-        this.handleEvent(data)
+        const _data = JSON.parse(event.data)
+        this.handleEvent(_data)
       }
 
       this.ws.onerror = (error) => {
@@ -98,7 +98,7 @@ class StarfaceCTIService {
   /**
    * Event-Listener registrieren
    */
-  on(event: string, callback: (data: unknown) => void): void {
+  on(event: string, callback: (_data: unknown) => void): void {
     const callbacks = this.eventCallbacks.get(event) ?? []
     callbacks.push(callback)
     this.eventCallbacks.set(event, callbacks)

@@ -260,15 +260,43 @@ PYTHONPATH=. python -m app.seeds.inventory_seed
 
 ## 🤝 Contributing
 
+### Human Contributors
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
 4. Add tests for new functionality
 5. Submit a pull request
 
+### AI Contributors
+AI-powered tools are recognized as internal contributors to VALEO NeuroERP development:
+
+- **AI as Co-Developer**: AI assistants may generate code, documentation, and concepts
+- **Review Required**: All AI-generated contributions must pass the same review process as human contributions
+- **Transparency**: Clearly mark AI involvement in commit messages and pull request descriptions
+- **Internal Data Only**: Only VALEO-internal information may be used as AI input
+- **No External Sharing**: AI outputs remain VALEO proprietary and may not be distributed externally
+
+### Commit Message Guidelines
+- Use `[AI-Assisted]` for commits involving AI tool usage
+- Use `[AI-Generated]` for commits containing primarily AI-generated code
+- Include brief description of AI tool used (e.g., "using GitHub Copilot", "using Claude")
+- Example: `[AI-Assisted] Implement user authentication flow using GitHub Copilot`
+
 ## 📄 License
 
 Proprietary - VALEO Internal Use Only
+
+### AI Collaboration Policy
+
+VALEO NeuroERP 3.0 embraces AI-assisted development while maintaining strict internal control and transparency:
+
+- **AI Tools Permitted**: AI-powered development assistants are explicitly authorized for code analysis, generation, and documentation
+- **Internal Use Only**: All AI-generated content remains VALEO proprietary and may not be shared externally
+- **Review Process**: AI contributions follow the same pull request and code review workflows as human contributions
+- **Transparency**: All AI-assisted changes are documented with appropriate commit messages and PR descriptions
+- **Input Restrictions**: Only VALEO-internal data and code may be used as input for AI tools
+
+See [LICENSE](LICENSE) for complete terms regarding AI collaboration.
 
 ## 🆘 Support
 
@@ -288,6 +316,7 @@ For technical support or questions:
 - ✅ **Enterprise security features**
 - ✅ **Docker and Kubernetes deployment ready**
 - ✅ **Auto-Deploy bei Push auf develop-Branch**
+- 🤖 **AI Collaboration Framework implemented** - AI tools now recognized as internal contributors with full transparency and compliance
 
 **VALEO NeuroERP 3.0 - Production Ready! 🚀**
 

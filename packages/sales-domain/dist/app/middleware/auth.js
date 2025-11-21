@@ -19,8 +19,8 @@ async function authMiddleware(request, reply) {
         const payloadTenantId = typeof payload.tenantId === 'string' ? payload.tenantId : null;
         const headerTenant = typeof headerTenantId === 'string' ? headerTenantId : null;
         request.user = {
-            userId: payload.sub || 'unknown',
-            tenantId: payloadTenantId || headerTenant || 'unknown',
+            userId: payload.sub ?? 'unknown',
+            tenantId: payloadTenantId || (headerTenant ?? 'unknown'),
             roles: Array.isArray(payload.roles) ? payload.roles : [],
             permissions: Array.isArray(payload.permissions) ? payload.permissions : [],
         };

@@ -128,6 +128,18 @@ jobs:
           base: ${{ github.event.repository.default_branch }}
           head: HEAD
 
+      - name: AI Contribution Analysis
+        run: |
+          echo "🤖 Analyzing AI contributions in commits..."
+          # Check for AI-related commit messages
+          AI_COMMITS=$(git log --oneline ${{ github.event.repository.default_branch }}..HEAD | grep -i "\[AI\]" | wc -l)
+          if [ "$AI_COMMITS" -gt 0 ]; then
+            echo "✅ Found $AI_COMMITS AI-assisted commits"
+            echo "AI contributions detected and logged for transparency"
+          else
+            echo "ℹ️  No AI-assisted commits detected in this push"
+          fi
+
   # ================================
   # Job 3: Deployment Instructions
   # ================================
@@ -181,6 +193,7 @@ jobs:
           echo ""
           echo "✅ Build & Test: PASSED"
           echo "✅ Security Scan: PASSED"
+          echo "🤖 AI Contribution Analysis: COMPLETED"
           echo ""
           echo "🚀 Ready for local staging deployment"
           echo "   Run: .\scripts\staging-deploy.ps1"

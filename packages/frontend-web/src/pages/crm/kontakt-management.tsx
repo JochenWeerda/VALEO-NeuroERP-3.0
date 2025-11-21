@@ -5,6 +5,7 @@ import { useMaskActions } from '@/components/mask-builder/hooks'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { toast } from '@/hooks/use-toast'
 
 // API Client für Kontakte
 const apiClient = createApiClient('/api/crm')
@@ -258,7 +259,11 @@ export default function KontaktManagementPage(): JSX.Element {
           await apiClient.delete(`/kontakte/${item.id}`)
           loadData() // Liste neu laden
         } catch (error) {
-          alert('Fehler beim Löschen')
+          toast({
+            variant: 'destructive',
+            title: 'Fehler beim Löschen',
+            description: 'Der Kontakt konnte nicht gelöscht werden.',
+          })
         }
       }
     }
@@ -296,7 +301,37 @@ export default function KontaktManagementPage(): JSX.Element {
   }
 
   const handleExport = () => {
-    alert('Export-Funktion wird implementiert')
+    try {
+      // Create CSV content
+      const csvHeader = 'Name;Firma;E-Mail;Telefon;Mobil;Abteilung;Priorität;Status\n'
+      const csvContent = data.map((kontakt: any) =>
+        `"${kontakt.name}";"${kontakt.firma || ''}";"${kontakt.email || ''}";"${kontakt.telefon || ''}";"${kontakt.mobil || ''}";"${kontakt.abteilung || ''}";"${kontakt.prioritaet || ''}";"${kontakt.status || 'aktiv'}"`
+      ).join('\n')
+
+      const csv = csvHeader + csvContent
+
+      // Create and download file
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `kontakt-management-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: 'Export erfolgreich',
+        description: `${data.length} Kontakte wurden exportiert.`,
+      })
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Export fehlgeschlagen',
+        description: 'Beim Exportieren ist ein Fehler aufgetreten.',
+      })
+    }
   }
 
   return (
@@ -308,7 +343,12 @@ export default function KontaktManagementPage(): JSX.Element {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onExport={handleExport}
-      onImport={() => alert('Import-Funktion wird implementiert')}
+      onImport={() => {
+        toast({
+          title: 'Import-Funktion',
+          description: 'CSV-Import wird in der nächsten Version verfügbar sein.',
+        })
+      }}
       isLoading={loading}
     />
   )

@@ -4,6 +4,7 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für OP-Debitoren
 const opDebitorenSchema = z.object({
@@ -147,17 +148,17 @@ const opDebitorenConfig: MaskConfig = {
       key: 'zahlungen_custom',
       label: '',
       fields: [],
-      customRender: (data: any, onChange: (data: any) => void) => (
+      customRender: (_data: any, onChange: (_data: any) => void) => (
         <ZahlungenTable
-          data={data.zahlungen || []}
-          gesamtBetrag={data.betrag || 0}
+          data={_data.zahlungen || []}
+          gesamtBetrag={_data.betrag || 0}
           onChange={(zahlungen) => {
             const totalPaid = zahlungen.reduce((sum: number, z: any) => sum + (z.betrag || 0), 0)
             onChange({
-              ...data,
+              ..._data,
               zahlungen,
-              offen: (data.betrag || 0) - totalPaid,
-              letzteZahlung: zahlungen.length > 0 ? zahlungen[zahlungen.length - 1].datum : data.letzteZahlung
+              offen: (_data.betrag || 0) - totalPaid,
+              letzteZahlung: zahlungen.length > 0 ? zahlungen[zahlungen.length - 1].datum : _data.letzteZahlung
             })
           }}
         />
@@ -242,13 +243,13 @@ const opDebitorenConfig: MaskConfig = {
 }
 
 // Zahlungen-Tabelle Komponente
-function ZahlungenTable({ data, gesamtBetrag, onChange }: {
+function ZahlungenTable({ data: _data, gesamtBetrag, onChange }: {
   data: any[],
   gesamtBetrag: number,
-  onChange: (data: any[]) => void
+  onChange: (_data: any[]) => void
 }) {
   const addZahlung = () => {
-    onChange([...data, {
+    onChange([..._data, {
       datum: new Date().toISOString().split('T')[0],
       betrag: 0,
       typ: 'zahlung',
@@ -257,16 +258,16 @@ function ZahlungenTable({ data, gesamtBetrag, onChange }: {
   }
 
   const updateZahlung = (index: number, field: string, value: any) => {
-    const newData = [...data]
+    const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
   }
 
   const removeZahlung = (index: number) => {
-    onChange(data.filter((_, i) => i !== index))
+    onChange(_data.filter((_, i) => i !== index))
   }
 
-  const totalPaid = data.reduce((sum, z) => sum + (z.betrag || 0), 0)
+  const totalPaid = _data.reduce((sum, z) => sum + (z.betrag || 0), 0)
   const remaining = gesamtBetrag - totalPaid
 
   return (
@@ -296,7 +297,7 @@ function ZahlungenTable({ data, gesamtBetrag, onChange }: {
             </tr>
           </thead>
           <tbody>
-            {data.map((zahlung, index) => (
+            {_data.map((zahlung, index) => (
               <tr key={index} className="border">
                 <td className="px-4 py-2 border">
                   <input
@@ -366,11 +367,54 @@ export default function OPDebitorenPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'zahlung') {
-      // Zahlung buchen
-      alert('Zahlungsbuchung-Funktion wird implementiert')
+      // Zahlung buchen - fügt automatisch eine neue Zahlung hinzu
+      const newZahlung = {
+        datum: new Date().toISOString().split('T')[0],
+        betrag: formData.offen || 0,
+        typ: 'zahlung' as const,
+        referenz: `Z-${Date.now()}`
+      }
+
+      const updatedZahlungen = [...(formData.zahlungen || []), newZahlung]
+      const totalPaid = updatedZahlungen.reduce((sum: number, z: any) => sum + (z.betrag || 0), 0)
+
+      formData.zahlungen = updatedZahlungen
+      formData.offen = (formData.betrag || 0) - totalPaid
+      formData.letzteZahlung = newZahlung.datum
+
+      toast({
+        title: 'Zahlung gebucht',
+        description: `${newZahlung.betrag.toFixed(2)} € wurden als Zahlung gebucht.`,
+      })
     } else if (action === 'skonto') {
       // Skonto nutzen
-      alert('Skonto-Funktion wird implementiert')
+      if (!formData.skontoBetrag || formData.skontoBetrag <= 0) {
+        toast({
+          variant: 'destructive',
+          title: 'Kein Skonto verfügbar',
+          description: 'Für diesen OP ist kein Skonto verfügbar.',
+        })
+        return
+      }
+
+      const skontoZahlung = {
+        datum: new Date().toISOString().split('T')[0],
+        betrag: formData.skontoBetrag,
+        typ: 'skonto' as const,
+        referenz: `SK-${Date.now()}`
+      }
+
+      const updatedZahlungen = [...(formData.zahlungen || []), skontoZahlung]
+      const totalPaid = updatedZahlungen.reduce((sum: number, z: any) => sum + (z.betrag || 0), 0)
+
+      formData.zahlungen = updatedZahlungen
+      formData.offen = (formData.betrag || 0) - totalPaid
+      formData.letzteZahlung = skontoZahlung.datum
+
+      toast({
+        title: 'Skonto genutzt',
+        description: `${skontoZahlung.betrag.toFixed(2)} € Skonto wurden genutzt.`,
+      })
     } else if (action === 'ausgleich') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
@@ -381,15 +425,65 @@ export default function OPDebitorenPage(): JSX.Element {
       try {
         await saveData(formData)
         setIsDirty(false)
+        toast({
+          title: 'OP ausgeglichen',
+          description: 'Der offene Posten wurde erfolgreich ausgeglichen.',
+        })
         navigate('/finance/op-debitoren')
       } catch (error) {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'mahnung') {
       // Mahnung erstellen
-      alert('Mahnung-Funktion wird implementiert')
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie den OP zuerst.',
+        })
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/finance/op-debitoren/${formData.id}/mahnung`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+
+        if (response.ok) {
+          formData.mahnstufe = (formData.mahnstufe || 0) + 1
+          toast({
+            title: 'Mahnung erstellt',
+            description: `${formData.mahnstufe}. Mahnung wurde erstellt.`,
+          })
+        } else {
+          const error = await response.json()
+          toast({
+            variant: 'destructive',
+            title: 'Fehler bei Mahnung',
+            description: error.detail || 'Mahnung konnte nicht erstellt werden.',
+          })
+        }
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Netzwerkfehler',
+          description: 'Verbindung zum Server fehlgeschlagen.',
+        })
+      }
     } else if (action === 'export') {
-      window.open('/api/finance/op-debitoren/export', '_blank')
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie den OP zuerst.',
+        })
+        return
+      }
+      window.open(`/api/finance/op-debitoren/${formData.id}/export`, '_blank')
     }
   })
 

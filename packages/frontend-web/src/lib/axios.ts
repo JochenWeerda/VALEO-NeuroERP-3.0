@@ -28,14 +28,14 @@ const PARAM_INDEX_SECOND = 1
 const PARAM_INDEX_THIRD = 2
 
 type RequestFulfilled = NonNullable<Parameters<typeof api.interceptors.request.use>[typeof PARAM_INDEX_FIRST]>
-type InternalRequestConfig = RequestFulfilled extends (value: infer T) => unknown ? T : never
+type InternalRequestConfig = RequestFulfilled extends (_value: infer T) => unknown ? T : never
 
 type ResponseRejected = Parameters<typeof api.interceptors.response.use>[typeof PARAM_INDEX_SECOND]
-type ResponseError = ResponseRejected extends (error: infer T) => unknown ? T : unknown
+type ResponseError = ResponseRejected extends (_error: infer T) => unknown ? T : unknown
 
 type HeadersLike = (NonNullable<InternalRequestConfig["headers"]> & {
-  set?: (name: string, value: string) => void
-  get?: (name: string) => string | null | undefined
+  set?: (_name: string, _value: string) => void
+  get?: (_name: string) => string | null | undefined
 }) | Record<string, string>
 
 type GetConfig = Parameters<typeof api.get>[typeof PARAM_INDEX_SECOND]

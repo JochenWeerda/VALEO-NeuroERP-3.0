@@ -4,6 +4,7 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Zahlungslauf Kreditoren
 const zahlungslaufSchema = z.object({
@@ -125,13 +126,13 @@ const zahlungslaufConfig: MaskConfig = {
       key: 'zahlungen_custom',
       label: '',
       fields: [],
-      customRender: (data: any, onChange: (data: any) => void) => (
+      customRender: (_data: any, onChange: (_data: any) => void) => (
         <ZahlungenTable
-          data={data.zahlungen || []}
+          data={_data.zahlungen || []}
           onChange={(zahlungen) => {
             const gesamtBetrag = zahlungen.reduce((sum: number, z: any) => sum + (z.betrag || 0), 0)
             onChange({
-              ...data,
+              ..._data,
               zahlungen,
               gesamtBetrag,
               anzahlZahlungen: zahlungen.length
@@ -226,9 +227,9 @@ const zahlungslaufConfig: MaskConfig = {
 }
 
 // Zahlungen-Tabelle Komponente
-function ZahlungenTable({ data, onChange }: { data: any[], onChange: (data: any[]) => void }) {
+function ZahlungenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
   const addZahlung = () => {
-    onChange([...data, {
+    onChange([..._data, {
       kreditorId: '',
       kreditorName: '',
       iban: '',
@@ -242,13 +243,13 @@ function ZahlungenTable({ data, onChange }: { data: any[], onChange: (data: any[
   }
 
   const updateZahlung = (index: number, field: string, value: any) => {
-    const newData = [...data]
+    const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
   }
 
   const removeZahlung = (index: number) => {
-    onChange(data.filter((_, i) => i !== index))
+    onChange(_data.filter((_, i) => i !== index))
   }
 
   return (
@@ -277,7 +278,7 @@ function ZahlungenTable({ data, onChange }: { data: any[], onChange: (data: any[
             </tr>
           </thead>
           <tbody>
-            {data.map((zahlung, index) => (
+            {_data.map((zahlung, index) => (
               <tr key={index} className="border">
                 <td className="px-4 py-2 border">
                   <div>
@@ -391,20 +392,71 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'add-payment') {
       // Neue Zahlung hinzufügen wird in der Tabelle behandelt
-      alert('Verwenden Sie die Tabelle um Zahlungen hinzuzufügen')
+      // Dieser Button ist redundant, da die Tabelle ihren eigenen Button hat
+      return
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
-        alert('Validierung erfolgreich!')
+        toast({
+          title: 'Validierung erfolgreich',
+          description: 'Alle Daten sind korrekt.',
+        })
       } else {
         showValidationToast(isValid.errors)
       }
     } else if (action === 'preview') {
       // SEPA-Vorschau
-      window.open('/api/finance/zahlungslauf-kreditoren/preview', '_blank')
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie zuerst den Zahlungslauf.',
+        })
+        return
+      }
+      window.open(`/api/finance/zahlungslauf-kreditoren/${formData.id}/preview`, '_blank')
     } else if (action === 'approve') {
       // Freigeben
-      alert('Freigabe-Funktion wird implementiert')
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie zuerst den Zahlungslauf.',
+        })
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/finance/zahlungslauf-kreditoren/${formData.id}/approve`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+
+        if (response.ok) {
+          toast({
+            title: 'Freigabe erfolgreich',
+            description: 'Der Zahlungslauf wurde freigegeben.',
+          })
+          // Refresh data
+          window.location.reload()
+        } else {
+          const error = await response.json()
+          toast({
+            variant: 'destructive',
+            title: 'Fehler bei Freigabe',
+            description: error.detail || 'Unbekannter Fehler',
+          })
+        }
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Netzwerkfehler',
+          description: 'Verbindung zum Server fehlgeschlagen.',
+        })
+      }
     } else if (action === 'execute') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
@@ -420,7 +472,15 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'export') {
-      window.open('/api/finance/zahlungslauf-kreditoren/export', '_blank')
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie zuerst den Zahlungslauf.',
+        })
+        return
+      }
+      window.open(`/api/finance/zahlungslauf-kreditoren/${formData.id}/export`, '_blank')
     }
   })
 

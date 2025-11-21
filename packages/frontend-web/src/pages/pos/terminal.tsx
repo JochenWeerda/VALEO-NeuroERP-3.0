@@ -9,6 +9,7 @@ import { CreditCard, DollarSign, FileText, Scan, ShoppingCart, Smartphone, Grid3
 import { useFiskalyTSE, type PaymentType, type TSETransaction } from '@/lib/services/fiskaly-tse'
 import { ChangeCalculator } from '@/components/pos/ChangeCalculator'
 import { ArticleSearch } from '@/components/pos/ArticleSearch'
+import { toast } from '@/hooks/use-toast'
 
 type CartItem = {
   artikelnr: string
@@ -126,7 +127,11 @@ export default function POSTerminalPage(): JSX.Element {
     
     // Bei Bar-Zahlung: Prüfe ob genug gegeben wurde
     if (selectedMethod === 'bar' && tendered < total) {
-      alert(`Fehlbetrag: ${(total - tendered).toFixed(2)} €`)
+      toast({
+        variant: 'destructive',
+        title: 'Unzureichender Betrag',
+        description: `Fehlbetrag: ${(total - tendered).toFixed(2)} €`,
+      })
       return
     }
 
@@ -183,7 +188,10 @@ export default function POSTerminalPage(): JSX.Element {
       // TODO: await saveTSETransaction({ ... })
 
       const change = selectedMethod === 'bar' ? tendered - total : 0
-      alert(`Zahlung erfolgreich!\n\nBetrag: ${total.toFixed(2)} €\nZahlungsart: ${selectedMethod}${change > 0 ? `\nWechselgeld: ${change.toFixed(2)} €` : ''}\nTSE-Nr: ${signedTx.number}\nSignaturzähler: ${signedTx.signature?.counter}`)
+      toast({
+        title: 'Zahlung erfolgreich!',
+        description: `Betrag: ${total.toFixed(2)} €\nZahlungsart: ${selectedMethod}${change > 0 ? `\nWechselgeld: ${change.toFixed(2)} €` : ''}\nTSE-Nr: ${signedTx.number}`,
+      })
 
       // Reset
       setCart([])
@@ -195,7 +203,11 @@ export default function POSTerminalPage(): JSX.Element {
       
     } catch (error) {
       console.error('❌ TSE-Fehler:', error)
-      alert('TSE-Fehler! Transaktion wurde in Offline-Queue gespeichert.')
+      toast({
+        variant: 'destructive',
+        title: 'TSE-Fehler',
+        description: 'Transaktion wurde in Offline-Queue gespeichert.',
+      })
       // TODO: Offline-Queue
     }
   }

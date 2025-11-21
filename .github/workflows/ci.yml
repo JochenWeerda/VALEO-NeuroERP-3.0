@@ -138,6 +138,117 @@ jobs:
           path: packages/frontend-web/playwright-report
           retention-days: 7
 
+  workflow-service:
+    name: Workflow Service Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: services/workflow
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Static analysis
+        working-directory: services/workflow
+        run: python -m compileall app main.py
+
+      - name: Run workflow service tests
+        working-directory: services/workflow
+        run: |
+          if [ -d "tests" ]; then \
+            pytest; \
+          else \
+            echo "Keine Tests gefunden, übersprungen."; \
+          fi
+
+  infrastat-compliance:
+    name: InfraStat Service Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: services/compliance/infrastat
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run InfraStat tests
+        env:
+          PYTHONPATH: services/compliance/infrastat
+        run: |
+          pytest services/compliance/infrastat/tests
+
+  zoll-compliance:
+    name: Zoll Service Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: services/compliance/zoll
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run Zoll tests
+        env:
+          PYTHONPATH: services/compliance/zoll
+        run: |
+          pytest services/compliance/zoll/tests
+
+  rag-sync:
+    name: RAG Sync Dry Run
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: tools/rag-sync
+        run: pip install -r requirements.txt
+
+      - name: Execute RAG sync (dry run)
+        run: |
+          python tools/rag-sync/rag_sync.py \
+            --source knowledge-base \
+            --output /tmp/rag-sync-output.json \
+            --dry-run \
+            --embedding-provider auto \
+            --verbose
+          ls -lah /tmp/rag-sync-output.json
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || '' }}
+
   security-scan:
     name: Security Scanning
     runs-on: ubuntu-latest
@@ -165,10 +276,163 @@ jobs:
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
 
+  infrastat-integration:
+    name: InfraStat Integration Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r services/compliance/infrastat/requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Start integration stack
+        run: docker compose -f docker-compose.integration.yml up -d --build
+
+      - name: Run InfraStat integration tests
+        env:
+          PYTHONPATH: services/compliance/infrastat
+        run: |
+          pytest services/compliance/infrastat/tests/integration
+
+      - name: Stop integration stack
+        if: always()
+        run: docker compose -f docker-compose.integration.yml down --remove-orphans
+
+  finance-gobd-tests:
+    name: Finance GoBD Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies (finance + shared)
+        run: |
+          pip install -r services/finance/requirements.txt
+          pip install pytest pytest-asyncio
+      - name: Run GoBD tests
+        env:
+          PYTHONPATH: packages/finance-shared/src
+        run: |
+          pytest services/finance/tests/compliance/test_gobd.py -q
+
+  inventory-epcis-tests:
+    name: Inventory EPCIS Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: valeo_neuro_erp
+          POSTGRES_USER: valeo_dev
+          POSTGRES_PASSWORD: valeo_dev_2024!
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U valeo_dev"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      nats:
+        image: nats:2.10-alpine
+        ports:
+          - 4222:4222
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies (inventory)
+        working-directory: services/inventory
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run EPCIS API tests
+        env:
+          PYTHONPATH: services/inventory
+          INVENTORY_DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024!@localhost:5432/valeo_neuro_erp
+        run: |
+          pytest services/inventory/tests/test_epcis.py -q
+
+      - name: Run EPCIS NATS integration test
+        env:
+          PYTHONPATH: services/inventory
+          INVENTORY_DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024!@localhost:5432/valeo_neuro_erp
+        run: |
+          pytest services/inventory/tests/test_nats_integration.py -q
+
+  audit-e2e:
+    name: Audit-Domain E2E
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install ts-node
+        run: npm i -g ts-node typescript
+      - name: Run Audit E2E smoke
+        run: node -r ts-node/register domains/finance/tests/e2e/audit-e2e.ts
+  staging-dry-run:
+    name: Staging Dry-Run (Helm Lint & Template)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.13.3
+      - name: Helm Lint
+        run: |
+          helm lint k8s/helm/valeo-erp
+      - name: Helm Template (Inventory)
+        run: |
+          helm template valeo-erp k8s/helm/valeo-erp \
+            -f docs/deployment/helm/infra/values-inventory.yaml \
+            --set image.tag=dryrun-$(git rev-parse --short HEAD) \
+            --debug > /dev/null
+      - name: Helm Template (Zoll)
+        run: |
+          if [ -f docs/deployment/helm/infra/values-zoll.yaml ]; then
+            helm template valeo-erp k8s/helm/valeo-erp \
+              -f docs/deployment/helm/infra/values-zoll.yaml \
+              --set image.tag=dryrun-$(git rev-parse --short HEAD) \
+              --debug > /dev/null
+          fi
+      - name: Helm Template (InfraStat)
+        run: |
+          if [ -f docs/deployment/helm/infra/values-infrastat.yaml ]; then
+            helm template valeo-erp k8s/helm/valeo-erp \
+              -f docs/deployment/helm/infra/values-infrastat.yaml \
+              --set image.tag=dryrun-$(git rev-parse --short HEAD) \
+              --debug > /dev/null
+          fi
+
   build:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
-    needs: [test, frontend-test, security-scan]
+    needs: [test, frontend-test, workflow-service, infrastat-compliance, zoll-compliance, infrastat-integration, rag-sync, security-scan]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     permissions:

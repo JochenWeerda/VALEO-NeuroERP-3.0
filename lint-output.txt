@@ -1,0 +1,369 @@
+﻿
+> @valero-neuroerp/frontend-web@0.1.0 lint C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web
+> eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0
+
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\app\providers\SSEProvider.tsx
+  13:22  warning  'listener' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  14:24  warning  'service' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+  14:41  warning  'listener' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\copilot\AskValeo.tsx
+  387:9  warning  'question' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\copilot\SkillRegistry.tsx
+  31:3  warning  'params' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+  32:3  warning  'context' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\mask-builder\ObjectPage.tsx
+   20:12  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  185:17  warning  Unexpected lexical declaration in case block                            no-case-declarations
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\mask-builder\OverviewPage.tsx
+   10:15  warning  'action' is defined but never used. Allowed unused args must match /^_/u                    no-unused-vars
+  115:8   warning  Prefer using an optional chain expression instead, as it's more concise and easier to read  @typescript-eslint/prefer-optional-chain
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\mask-builder\Wizard.tsx
+   18:16  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  205:17  warning  Unexpected lexical declaration in case block                            no-case-declarations
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\mask-builder\Worklist.tsx
+  15:14  warning  'item' is defined but never used. Allowed unused args must match /^_/u    no-unused-vars
+  15:34  warning  'action' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\mask-builder\adapters\l3-mask-adapter.ts
+    6:42  warning  'TextField' is defined but never used. Allowed unused vars must match /^_/u              no-unused-vars
+  221:10  warning  'convertSectionsToTabs' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\mask-builder\hooks\useMaskActions.ts
+  5:4   warning  'action' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  5:20  warning  'data' is defined but never used. Allowed unused args must match /^_/u    no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\mask-builder\types.ts
+  123:16  warning  'data' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+  131:13  warning  'value' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  131:25  warning  'row' is defined but never used. Allowed unused args must match /^_/u    no-unused-vars
+  159:15  warning  'item' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+  160:13  warning  'item' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+  165:18  warning  'item' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\mask-builder\utils\api.ts
+  64:41  warning  Invalid type "URLSearchParams" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\mask-builder\utils\formatting.ts
+  46:10  warning  Unexpected string concatenation  prefer-template
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\mask-builder\utils\validation.ts
+    9:25  warning  Unnecessary escape character: \+                                         no-useless-escape
+   10:46  warning  Unnecessary escape character: \(                                         no-useless-escape
+   10:48  warning  Unnecessary escape character: \)                                         no-useless-escape
+  112:73  warning  'value' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\navigation\CommandPalette.tsx
+  30:18  warning  'open' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\patterns\ListReport.tsx
+  41:15  warning  'query' is defined but never used. Allowed unused args must match /^_/u     no-unused-vars
+  46:24  warning  'selected' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\patterns\ObjectPage.tsx
+  21:22  warning  'sectionId' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\patterns\Wizard.tsx
+  28:19  warning  'stepId' is defined but never used. Allowed unused args must match /^_/u         no-unused-vars
+  31:17  warning  'currentStepId' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  32:21  warning  'currentStepId' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\pos\ArticleSearch.tsx
+  19:14  warning  'article' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\pos\ChangeCalculator.tsx
+  9:23  warning  'tendered' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\pos\MultiTenderPayment.tsx
+  18:22  warning  'payments' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\realtime\RealtimeProvider.tsx
+   12:15  warning  'eventType' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+   12:34  warning  'handler' is defined but never used. Allowed unused args must match /^_/u    no-unused-vars
+   12:44  warning  'data' is defined but never used. Allowed unused args must match /^_/u       no-unused-vars
+   37:55  warning  'data' is defined but never used. Allowed unused args must match /^_/u       no-unused-vars
+   84:35  warning  'data' is defined but never used. Allowed unused args must match /^_/u       no-unused-vars
+  129:13  warning  'data' is defined but never used. Allowed unused args must match /^_/u       no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\search\SemanticSearch.tsx
+  31:1  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/explicit-module-boundary-types')
+  78:9  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\ui\data-table.tsx
+  13:11  warning  'args' is defined but never used. Allowed unused args must match /^_/u      no-unused-vars
+  20:13  warning  'item' is defined but never used. Allowed unused args must match /^_/u      no-unused-vars
+  27:24  warning  'selected' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\ui\toast-provider.tsx
+  4:21  warning  'msg' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\components\ui\toolbar.tsx
+  5:64  warning  'v' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\design\tokens.ts
+  28:7  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\features\copilot\useCopilotChat.ts
+  21:17  warning  'text' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\features\document\DropUpload.tsx
+  5:13  warning  'files' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\features\flows\BelegFlowPanel.tsx
+  19:22  warning  'toType' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\features\forms\FormBuilder.tsx
+   41:15  warning  'partial' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+   42:14  warning  'values' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+  201:14  warning  'rows' is defined but never used. Allowed unused args must match /^_/u     no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\features\forms\LinesEditor.withLookup.tsx
+  22:14  warning  'rows' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\features\forms\fields\index.tsx
+  23:14  warning  'value' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  37:14  warning  'value' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\features\forms\fields\inline-lookup.tsx
+  28:12  warning  'item' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\features\inventory\AdjustForm.tsx
+  11:14  warning  'value' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\features\inventory\PutawayForm.tsx
+  12:14  warning  'value' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\features\inventory\StockManagement.tsx
+  228:14  warning  'movement' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  233:10  warning  'StockMovementForm' is already defined                                      no-redeclare
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\features\pricing\PricingForm.tsx
+  15:14  warning  'v' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\features\pricing\TierRow.tsx
+  12:14  warning  'idx' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  12:27  warning  'v' is defined but never used. Allowed unused args must match /^_/u    no-unused-vars
+  13:14  warning  'idx' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\features\weighing\TicketForm.tsx
+  12:14  warning  'value' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\hooks\use-toast.ts
+  132:25  warning  'state' is defined but never used. Allowed unused args must match /^_/u    no-unused-vars
+  148:12  warning  'props' is defined but never used. Allowed unused args must match /^_/u    no-unused-vars
+  181:13  warning  'toastId' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\hooks\useAuth.ts
+  10:20  warning  'code' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+  10:34  warning  'state' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  11:14  warning  'scope' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  12:13  warning  'role' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\hooks\useI18n.ts
+  9:15  warning  'locale' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\hooks\useListActions.ts
+   6:35  warning  'formatDateForExport' is defined but never used. Allowed unused vars must match /^_/u      no-unused-vars
+   6:56  warning  'formatCurrencyForExport' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  13:15  warning  'id' is defined but never used. Allowed unused args must match /^_/u                       no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\hooks\useSSE.ts
+  5:34  warning  'event' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\hooks\useWorkflow.ts
+  32:16  warning  'action' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+  32:40  warning  'payload' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\hooks\useWorkflowEvents.ts
+  123:55  warning  'since' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\api\crm.ts
+   76:34  warning  Invalid type "URLSearchParams" of template literal expression  @typescript-eslint/restrict-template-expressions
+  146:30  warning  Invalid type "URLSearchParams" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\api\dashboard.ts
+   46:1  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/explicit-module-boundary-types')
+   53:7  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+   61:9  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+   73:1  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/explicit-module-boundary-types')
+   79:7  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+   86:9  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+   88:9  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+  100:1  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/explicit-module-boundary-types')
+  106:7  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+  109:9  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\api\fibu.ts
+  5:1  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/explicit-module-boundary-types')
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\api\inventory.ts
+  66:41  warning  Invalid type "URLSearchParams" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\api\workflows.ts
+  42:1   error    Unused eslint-disable directive (no problems were reported from '@typescript-eslint/explicit-module-boundary-types')
+  64:1   error    Unused eslint-disable directive (no problems were reported from '@typescript-eslint/explicit-module-boundary-types')
+  69:24  warning  Type string trivially inferred from a string literal, remove type annotation                                          @typescript-eslint/no-inferrable-types
+  82:1   error    Unused eslint-disable directive (no problems were reported from '@typescript-eslint/explicit-module-boundary-types')
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\axios.ts
+  31:56  warning  'value' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  34:48  warning  'error' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  37:10  warning  'name' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+  37:24  warning  'value' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  38:10  warning  'name' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\export-utils.ts
+  151:57  warning  Type string trivially inferred from a string literal, remove type annotation  @typescript-eslint/no-inferrable-types
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\hooks\useSSE.ts
+  10:3   error    Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+  23:16  warning  'message' is defined but never used. Allowed unused args must match /^_/u                                             no-unused-vars
+  24:14  warning  'error' is defined but never used. Allowed unused args must match /^_/u                                               no-unused-vars
+  29:1   error    Unused eslint-disable directive (no problems were reported from '@typescript-eslint/explicit-module-boundary-types')
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\mcp-event-bus.ts
+  14:36  warning  'event' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  15:33  warning  'event' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  16:35  warning  'state' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\mcp-realtime.ts
+  3:18  warning  'event' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\mcp.ts
+  135:12  warning  'code' is defined but never used. Allowed unused args must match /^_/u     no-unused-vars
+  136:12  warning  'details' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\services\starface-cti.ts
+   31:41  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  101:32  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\sse-client.ts
+  12:13  warning  'eventType' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  12:32  warning  'event' is defined but never used. Allowed unused args must match /^_/u      no-unused-vars
+  14:14  warning  'event' is defined but never used. Allowed unused args must match /^_/u      no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\sse.ts
+   8:15  warning  'status' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  12:53  warning  'data' is defined but never used. Allowed unused args must match /^_/u    no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\lib\useMcpRealtime.ts
+  12:13  warning  'event' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\agrar\duenger-stamm.tsx
+  122:41  warning  Forbidden non-null assertion     @typescript-eslint/no-non-null-assertion
+  135:19  warning  Unexpected string concatenation  prefer-template
+  149:19  warning  Unexpected string concatenation  prefer-template
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\agrar\saatgut-stamm.tsx
+  110:41  warning  Forbidden non-null assertion     @typescript-eslint/no-non-null-assertion
+  123:19  warning  Unexpected string concatenation  prefer-template
+  137:19  warning  Unexpected string concatenation  prefer-template
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\agrar\saatgut\bestellung.tsx
+  248:9  warning  Unexpected lexical declaration in case block  no-case-declarations
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\crm\aktivitaet-detail.tsx
+  35:47  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  36:43  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  63:33  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  66:81  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  77:49  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\crm\betriebsprofil-detail.tsx
+  40:49  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  41:46  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  66:36  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  69:83  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\crm\kontakt-detail.tsx
+  33:45  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  34:42  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  61:32  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  64:79  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  75:48  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\crm\kontakte-liste.tsx
+   9:43  warning  'FileText' is defined but never used. Allowed unused vars must match /^_/u        no-unused-vars
+  12:10  warning  'useListActions' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\crm\kunden-stamm-modern.tsx
+  10:1  warning  '@/components/mask-builder/adapters/l3-mask-adapter' import is duplicated  no-duplicate-imports
+  73:9  warning  Unexpected lexical declaration in case block                               no-case-declarations
+  74:9  warning  Unexpected lexical declaration in case block                               no-case-declarations
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\crm\lead-detail.tsx
+  38:42  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  39:39  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  66:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  69:76  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  80:45  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\finance\abschluss.tsx
+  221:44  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  237:44  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  332:74  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  422:77  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\finance\bank-abgleich.tsx
+  114:44  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  213:75  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\finance\buchungserfassung.tsx
+   98:44  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  196:76  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\finance\kasse.tsx
+  142:44  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  176:44  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  284:78  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  399:14  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\finance\lastschriften-debitoren.tsx
+  131:44  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  232:75  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\finance\op-debitoren.tsx
+  150:44  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  248:14  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\finance\ustva.tsx
+  256:44  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  351:74  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\finance\zahlungslauf-kreditoren.tsx
+  128:44  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  229:71  warning  'data' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\reports.tsx
+  275:54  warning  Invalid type "ValueType" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\verkauf\kunden-stamm.tsx
+  62:9  warning  Prefer using an optional chain expression instead, as it's more concise and easier to read  @typescript-eslint/prefer-optional-chain
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\pages\workflow\workflow-regeln.tsx
+  268:12  warning  'rule' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\services\psm-service.ts
+  63:60  warning  Invalid type "URLSearchParams" of template literal expression  @typescript-eslint/restrict-template-expressions
+  91:53  warning  Invalid type "URLSearchParams" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\state\live.ts
+  13:17  warning  'd' is defined but never used. Allowed unused args must match /^_/u      no-unused-vars
+  14:21  warning  'e' is defined but never used. Allowed unused args must match /^_/u      no-unused-vars
+  15:16  warning  'a' is defined but never used. Allowed unused args must match /^_/u      no-unused-vars
+  16:17  warning  'ttlMs' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  17:22  warning  'e' is defined but never used. Allowed unused args must match /^_/u      no-unused-vars
+
+C:\Users\Jochen\VALEO-NeuroERP-3.0\packages\frontend-web\src\test-setup.ts
+  20:5  error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-empty-function')
+
+Ô£û 192 problems (20 errors, 172 warnings)
+  20 errors and 8 warnings potentially fixable with the `--fix` option.
+
+ÔÇëELIFECYCLEÔÇë Command failed with exit code 1.

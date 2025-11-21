@@ -128,13 +128,13 @@ const lastschriftenConfig: MaskConfig = {
       key: 'lastschriften_custom',
       label: '',
       fields: [],
-      customRender: (data: any, onChange: (data: any) => void) => (
+      customRender: (_data: any, onChange: (_data: any) => void) => (
         <LastschriftenTable
-          data={data.lastschriften || []}
+          data={_data.lastschriften || []}
           onChange={(lastschriften) => {
             const gesamtBetrag = lastschriften.reduce((sum: number, l: any) => sum + (l.betrag || 0), 0)
             onChange({
-              ...data,
+              ..._data,
               lastschriften,
               gesamtBetrag,
               anzahlLastschriften: lastschriften.length
@@ -229,9 +229,9 @@ const lastschriftenConfig: MaskConfig = {
 }
 
 // Lastschriften-Tabelle Komponente
-function LastschriftenTable({ data, onChange }: { data: any[], onChange: (data: any[]) => void }) {
+function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
   const addLastschrift = () => {
-    onChange([...data, {
+    onChange([..._data, {
       debitorId: '',
       debitorName: '',
       iban: '',
@@ -246,13 +246,13 @@ function LastschriftenTable({ data, onChange }: { data: any[], onChange: (data: 
   }
 
   const updateLastschrift = (index: number, field: string, value: any) => {
-    const newData = [...data]
+    const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
   }
 
   const removeLastschrift = (index: number) => {
-    onChange(data.filter((_, i) => i !== index))
+    onChange(_data.filter((_, i) => i !== index))
   }
 
   return (
@@ -282,7 +282,7 @@ function LastschriftenTable({ data, onChange }: { data: any[], onChange: (data: 
             </tr>
           </thead>
           <tbody>
-            {data.map((lastschrift, index) => (
+            {_data.map((lastschrift, index) => (
               <tr key={index} className="border">
                 <td className="px-4 py-2 border">
                   <div>

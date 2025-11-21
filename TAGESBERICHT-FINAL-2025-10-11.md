@@ -47,7 +47,7 @@
 - `/api/v1/crm/customers` - vollständiges CRUD
 - `/api/v1/crm/leads` - vollständiges CRUD
 - `/api/v1/inventory/warehouses` - vollständiges CRUD
-- `/api/v1/finance/*` - konsolidiert
+- `/api/v1/*` (Finance) - konsolidiert
 
 **Gesamt:** ~15 neue Endpoints
 

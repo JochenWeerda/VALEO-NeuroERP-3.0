@@ -36,7 +36,7 @@ class QuoteService {
     }
     async updateQuote(id, data) {
         const existingQuote = await this.deps.quoteRepo.findById(id, data.tenantId);
-        if (!existingQuote) {
+        if (existingQuote === undefined || existingQuote === null) {
             throw new Error(`Quote ${id} not found`);
         }
         // Business validation
@@ -54,14 +54,14 @@ class QuoteService {
             }
         }
         const updatedQuote = await this.deps.quoteRepo.update(id, data.tenantId, data);
-        if (!updatedQuote) {
+        if (updatedQuote === undefined || updatedQuote === null) {
             throw new Error(`Failed to update quote ${id}`);
         }
         return updatedQuote;
     }
     async deleteQuote(id, tenantId) {
         const quote = await this.deps.quoteRepo.findById(id, tenantId);
-        if (!quote) {
+        if (quote === undefined || quote === null) {
             throw new Error(`Quote ${id} not found`);
         }
         // Business rule: only draft quotes can be deleted
@@ -72,56 +72,56 @@ class QuoteService {
     }
     async sendQuote(id, tenantId) {
         const quote = await this.deps.quoteRepo.findById(id, tenantId);
-        if (!quote) {
+        if (quote === undefined || quote === null) {
             throw new Error(`Quote ${id} not found`);
         }
         if (!quote.canBeSent()) {
             throw new Error('Quote cannot be sent in its current state');
         }
         const updatedQuote = await this.deps.quoteRepo.updateStatus(id, tenantId, 'Sent');
-        if (!updatedQuote) {
+        if (updatedQuote === undefined || updatedQuote === null) {
             throw new Error(`Failed to send quote`);
         }
         return updatedQuote;
     }
     async acceptQuote(id, tenantId) {
         const quote = await this.deps.quoteRepo.findById(id, tenantId);
-        if (!quote) {
+        if (quote === undefined || quote === null) {
             throw new Error(`Quote ${id} not found`);
         }
         if (!quote.canBeAccepted()) {
             throw new Error('Quote cannot be accepted in its current state');
         }
         const updatedQuote = await this.deps.quoteRepo.updateStatus(id, tenantId, 'Accepted');
-        if (!updatedQuote) {
+        if (updatedQuote === undefined || updatedQuote === null) {
             throw new Error(`Failed to accept quote`);
         }
         return updatedQuote;
     }
     async rejectQuote(id, tenantId) {
         const quote = await this.deps.quoteRepo.findById(id, tenantId);
-        if (!quote) {
+        if (quote === undefined || quote === null) {
             throw new Error(`Quote ${id} not found`);
         }
         if (quote.status !== 'Sent') {
             throw new Error('Only sent quotes can be rejected');
         }
         const updatedQuote = await this.deps.quoteRepo.updateStatus(id, tenantId, 'Rejected');
-        if (!updatedQuote) {
+        if (updatedQuote === undefined || updatedQuote === null) {
             throw new Error(`Failed to reject quote`);
         }
         return updatedQuote;
     }
     async expireQuote(id, tenantId) {
         const quote = await this.deps.quoteRepo.findById(id, tenantId);
-        if (!quote) {
+        if (quote === undefined || quote === null) {
             throw new Error(`Quote ${id} not found`);
         }
         if (quote.status === 'Expired' || quote.status === 'Rejected' || quote.status === 'Accepted') {
             return quote; // Already in terminal state
         }
         const updatedQuote = await this.deps.quoteRepo.updateStatus(id, tenantId, 'Expired');
-        if (!updatedQuote) {
+        if (updatedQuote === undefined || updatedQuote === null) {
             throw new Error(`Failed to expire quote`);
         }
         return updatedQuote;

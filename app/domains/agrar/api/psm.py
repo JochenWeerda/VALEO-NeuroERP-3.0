@@ -3,7 +3,7 @@ PSM API endpoints
 Full CRUD for Pflanzenschutzmittel-Stammdaten management
 """
 
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session

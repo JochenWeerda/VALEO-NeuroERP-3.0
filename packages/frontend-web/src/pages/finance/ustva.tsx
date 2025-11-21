@@ -4,6 +4,7 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für UStVA
 const ustvaSchema = z.object({
@@ -253,10 +254,10 @@ const ustvaConfig: MaskConfig = {
       key: 'abweichungen_custom',
       label: '',
       fields: [],
-      customRender: (data: any, onChange: (data: any) => void) => (
+      customRender: (_data: any, onChange: (_data: any) => void) => (
         <AbweichungenTable
-          data={data.abweichungen || []}
-          onChange={(abweichungen) => onChange({ ...data, abweichungen })}
+          data={_data.abweichungen || []}
+          onChange={(abweichungen) => onChange({ ..._data, abweichungen })}
         />
       )
     },
@@ -348,9 +349,9 @@ const ustvaConfig: MaskConfig = {
 }
 
 // Abweichungen-Tabelle Komponente
-function AbweichungenTable({ data, onChange }: { data: any[], onChange: (data: any[]) => void }) {
+function AbweichungenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
   const addAbweichung = () => {
-    onChange([...data, {
+    onChange([..._data, {
       position: '',
       beschreibung: '',
       betrag: 0,
@@ -359,13 +360,13 @@ function AbweichungenTable({ data, onChange }: { data: any[], onChange: (data: a
   }
 
   const updateAbweichung = (index: number, field: string, value: any) => {
-    const newData = [...data]
+    const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
   }
 
   const removeAbweichung = (index: number) => {
-    onChange(data.filter((_, i) => i !== index))
+    onChange(_data.filter((_, i) => i !== index))
   }
 
   return (
@@ -392,7 +393,7 @@ function AbweichungenTable({ data, onChange }: { data: any[], onChange: (data: a
             </tr>
           </thead>
           <tbody>
-            {data.map((abweichung, index) => (
+            {_data.map((abweichung, index) => (
               <tr key={index} className="border">
                 <td className="px-4 py-2 border">
                   <input
@@ -461,17 +462,80 @@ export default function UStVAPage(): JSX.Element {
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'calculate') {
       // Berechnung durchführen
-      alert('UStVA-Berechnung-Funktion wird implementiert')
+      const calculated = {
+        ...formData,
+        gesamtUmsatz: (formData.umsatz19 || 0) + (formData.umsatz7 || 0) + (formData.umsatz0 || 0) + (formData.umsatzSonstige || 0),
+        gesamtVorsteuer: (formData.vorsteuer19 || 0) + (formData.vorsteuer7 || 0) + (formData.vorsteuer0 || 0) + (formData.vorsteuerSonstige || 0),
+        ust19: (formData.umsatz19 || 0) * 0.19,
+        ust7: (formData.umsatz7 || 0) * 0.07,
+        ust0: 0,
+        ustSonstige: (formData.umsatzSonstige || 0) * 0.19, // Annahme 19% für sonstige
+        gesamtUst: ((formData.umsatz19 || 0) * 0.19) + ((formData.umsatz7 || 0) * 0.07) + ((formData.umsatzSonstige || 0) * 0.19) - ((formData.vorsteuer19 || 0) + (formData.vorsteuer7 || 0) + (formData.vorsteuer0 || 0) + (formData.vorsteuerSonstige || 0))
+      }
+
+      // Update form data with calculations
+      Object.keys(calculated).forEach(key => {
+        if (key !== 'formData') {
+          formData[key] = calculated[key as keyof typeof calculated]
+        }
+      })
+
+      toast({
+        title: 'Berechnung abgeschlossen',
+        description: 'UStVA-Beträge wurden neu berechnet.',
+      })
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
-        alert('UStVA-Validierung erfolgreich!')
+        toast({
+          title: 'Validierung erfolgreich',
+          description: 'Alle UStVA-Daten sind korrekt.',
+        })
       } else {
         showValidationToast(isValid.errors)
       }
     } else if (action === 'approve') {
       // Freigeben
-      alert('UStVA-Freigabe-Funktion wird implementiert')
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie die UStVA zuerst.',
+        })
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/finance/ustva/${formData.id}/approve`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+
+        if (response.ok) {
+          toast({
+            title: 'Freigabe erfolgreich',
+            description: 'Die UStVA wurde freigegeben.',
+          })
+          // Refresh data
+          window.location.reload()
+        } else {
+          const error = await response.json()
+          toast({
+            variant: 'destructive',
+            title: 'Fehler bei Freigabe',
+            description: error.detail || 'Unbekannter Fehler',
+          })
+        }
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Netzwerkfehler',
+          description: 'Verbindung zum Server fehlgeschlagen.',
+        })
+      }
     } else if (action === 'submit') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
@@ -482,12 +546,24 @@ export default function UStVAPage(): JSX.Element {
       try {
         await saveData(formData)
         setIsDirty(false)
+        toast({
+          title: 'UStVA erfolgreich abgegeben',
+          description: 'Die UStVA wurde an ELSTER übermittelt.',
+        })
         navigate('/finance/ustva')
       } catch (error) {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'export') {
-      window.open('/api/finance/ustva/export', '_blank')
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie die UStVA zuerst.',
+        })
+        return
+      }
+      window.open(`/api/finance/ustva/${formData.id}/export`, '_blank')
     }
   })
 

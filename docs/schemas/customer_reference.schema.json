@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CustomerReference",
+  "type": "object",
+  "required": ["customer_id", "type", "display_name", "status", "master_domain_owner"],
+  "properties": {
+    "customer_id": { "type": "string", "format": "uuid" },
+    "external_ids": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["system", "value"],
+        "properties": {
+          "system": { "type": "string" },
+          "value": { "type": "string" },
+          "link": { "type": "string", "format": "uri", "nullable": true }
+        }
+      }
+    },
+    "type": { "type": "string", "enum": ["company", "person", "partner"] },
+    "display_name": { "type": "string" },
+    "status": { "type": "string", "enum": ["prospect", "active", "dormant", "former", "blacklisted"] },
+    "lifecycle_stage": { "type": "string" },
+    "industry": { "type": "string" },
+    "region": { "type": "string" },
+    "risk_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "lead_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "churn_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "master_domain_owner": { "type": "string", "enum": ["crm-core", "finance", "erp", "external"] },
+    "consent_flags": {
+      "type": "object",
+      "properties": {
+        "marketing": { "type": "boolean" },
+        "service": { "type": "boolean" },
+        "partner_share": { "type": "boolean" }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

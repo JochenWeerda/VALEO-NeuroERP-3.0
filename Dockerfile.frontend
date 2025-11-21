@@ -1,0 +1,23 @@
+FROM node:20
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and install dependencies
+COPY packages/frontend-web/package.json ./
+RUN npm install
+
+# Copy source code
+COPY packages/frontend-web/ ./
+
+# Copy vite config to root for proper config loading
+RUN cp vite.config.js /app/vite.config.js 2>/dev/null || true
+
+# Add node_modules/.bin to PATH
+ENV PATH="/app/node_modules/.bin:$PATH"
+
+# Expose port
+EXPOSE 3000
+
+# Default command will be overridden in docker-compose.yml
+CMD ["vite", "--host", "0.0.0.0", "--port", "3000"]

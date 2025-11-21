@@ -1,0 +1,46 @@
+{
+  "endpoint": "POST /ai/crm/rag/search",
+  "description": "Semantic search across customer-related documents, notes, tickets, emails.",
+  "request": {
+    "body": {
+      "customer": { "$ref": "../schemas/customer_reference.schema.json" },
+      "query": "string",
+      "filters": {
+        "types": ["email", "ticket", "document", "contract", "knowledge"],
+        "channel": ["email", "phone", "chat"],
+        "date_range": {
+          "from": "2025-10-01T00:00:00Z",
+          "to": "2025-11-13T23:59:59Z"
+        }
+      },
+      "pagination": { "limit": 10, "cursor": null },
+      "include_chunks": true
+    }
+  },
+  "response": {
+    "200": {
+      "body": {
+        "results": [
+          {
+            "id": "doc-123",
+            "type": "ticket",
+            "score": 0.82,
+            "title": "Ticket #789 - Delivery delay",
+            "snippet": "Customer reported delayed pallet...",
+            "metadata": {
+              "channel": "email",
+              "created_at": "2025-11-10T08:11:00Z",
+              "link": "https://app.valeo/crm/tickets/789"
+            },
+            "chunk": "full text excerpt",
+            "source_reference": {
+              "service": "crm-service",
+              "entity_id": "ticket-789"
+            }
+          }
+        ],
+        "next_cursor": null
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: valeo_compliance
+      POSTGRES_USER: valeo_compliance
+      POSTGRES_PASSWORD: valeo_dev_2024!
+    ports:
+      - "5435:5432"
+
+  workflow-mock:
+    build:
+      context: services/workflow-mock
+    ports:
+      - "5206:5100"
+
+  infrastat:
+    build:
+      context: services/compliance/infrastat
+    environment:
+      INFRASTAT_DATABASE_URL: postgresql+asyncpg://valeo_compliance:valeo_dev_2024!@postgres:5432/valeo_compliance
+      INFRASTAT_EVENT_BUS_ENABLED: "false"
+      INFRASTAT_WORKFLOW_SERVICE_URL: http://workflow-mock:5100
+      INFRASTAT_SUBMISSION_ENABLED: "false"
+    depends_on:
+      - postgres
+      - workflow-mock
+    ports:
+      - "5205:5200"

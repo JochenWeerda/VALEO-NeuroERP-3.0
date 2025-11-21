@@ -15,13 +15,12 @@ import time
 from app.auth.deps import require_roles, get_current_user, User
 from app.auth.guards import require_scopes
 from app.core.sse import sse_hub
+from app.repositories.document_repository import DocumentRepository
+from app.core.dependency_container import container
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/export", tags=["export"])
-
-# Mock DB (TODO: durch echte DB ersetzen)
-_DB: Dict[str, dict] = {}
 
 
 @router.get("/{domain}")
@@ -30,6 +29,7 @@ async def export_documents(
     from_date: str = Query(""),
     to_date: str = Query(""),
     fmt: str = Query("csv"),
+    tenant_id: str = Query("system", description="Tenant ID"),
     user: dict = Depends(require_scopes("docs:export")),
 ) -> FileResponse:
     """
@@ -45,8 +45,40 @@ async def export_documents(
         Export-Datei
     """
     try:
-        # Filter documents (TODO: echte Filterung)
-        docs = list(_DB.values())
+        # Get DocumentRepository from container
+        doc_repo = container.resolve(DocumentRepository)
+
+        # Get all documents for the domain (TODO: Add date filtering to repository)
+        # For now, get all and filter in memory
+        from datetime import datetime
+        docs = []
+
+        # This is a simplified approach - in production, add date filtering to repository
+        # For now, we'll get a reasonable number of recent documents
+        all_docs = doc_repo.list_by_type(domain, limit=1000)  # Get recent documents
+
+        # Filter by date if provided
+        for doc_header in all_docs:
+            doc_dict = doc_repo.to_dict(doc_header)
+
+            # Date filtering
+            if from_date or to_date:
+                doc_date = doc_dict.get("date")
+                if doc_date:
+                    try:
+                        doc_date_obj = datetime.fromisoformat(doc_date).date()
+                        if from_date:
+                            from_date_obj = datetime.fromisoformat(from_date).date()
+                            if doc_date_obj < from_date_obj:
+                                continue
+                        if to_date:
+                            to_date_obj = datetime.fromisoformat(to_date).date()
+                            if doc_date_obj > to_date_obj:
+                                continue
+                    except (ValueError, TypeError):
+                        pass  # Skip date filtering if date parsing fails
+
+            docs.append(doc_dict)
 
         # Flatten für Export
         rows = []

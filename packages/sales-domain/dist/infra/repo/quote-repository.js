@@ -52,8 +52,8 @@ class QuoteRepository {
             .where((0, drizzle_orm_1.and)(...conditions));
         const total = totalResult[0]?.count || 0;
         // Apply sorting
-        const sortBy = pagination.sortBy || 'createdAt';
-        const sortOrder = pagination.sortOrder || 'desc';
+        const sortBy = pagination.sortBy ?? 'createdAt';
+        const sortOrder = pagination.sortOrder ?? 'desc';
         const orderBy = sortOrder === 'desc'
             ? (0, drizzle_orm_1.desc)(schema_1.quotes[sortBy])
             : (0, drizzle_orm_1.asc)(schema_1.quotes[sortBy]);
@@ -101,8 +101,8 @@ class QuoteRepository {
             .where((0, drizzle_orm_1.and)(...conditions));
         const total = totalResult[0]?.count || 0;
         // Apply sorting
-        const sortBy = pagination.sortBy || 'createdAt';
-        const sortOrder = pagination.sortOrder || 'desc';
+        const sortBy = pagination.sortBy ?? 'createdAt';
+        const sortOrder = pagination.sortOrder ?? 'desc';
         const orderBy = sortOrder === 'desc'
             ? (0, drizzle_orm_1.desc)(schema_1.quotes[sortBy])
             : (0, drizzle_orm_1.asc)(schema_1.quotes[sortBy]);

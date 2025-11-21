@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+WORKDIR /workspace
+
+# Install dependencies
+COPY services/inventory/requirements.txt /workspace/services/inventory/requirements.txt
+RUN pip install --no-cache-dir -r /workspace/services/inventory/requirements.txt \
+    && pip install --no-cache-dir pytest pytest-asyncio
+
+# Copy full repo (tests included)
+COPY . /workspace
+
+ENV PYTHONPATH=/workspace/services/inventory
+
+WORKDIR /workspace
+
+CMD ["pytest", "-q", "services/inventory/tests"]
+
+

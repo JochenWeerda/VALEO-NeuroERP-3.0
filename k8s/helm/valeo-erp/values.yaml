@@ -154,3 +154,101 @@ keycloak:
     requests:
       memory: 512Mi
       cpu: 200m
+
+workflowSupport:
+  enabled: true
+  nats:
+    image: nats:2.10-alpine
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+  postgres:
+    image: postgres:15-alpine
+    storage:
+      size: 10Gi
+      storageClassName: ""
+    credentials:
+      username: valeo_dev
+      password: valeo_dev_2024!
+      database: valeo_events
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+infrastat:
+  enabled: false
+  image:
+    repository: ghcr.io/valeo-neuroerp/infrastat
+    tag: latest
+    pullPolicy: IfNotPresent
+  env:
+    INFRASTAT_SUBMISSION_ENABLED: "false"
+    INFRASTAT_SUBMISSION_RETRY_ATTEMPTS: "3"
+    INFRASTAT_SUBMISSION_RETRY_DELAY_SECONDS: "10"
+    INFRASTAT_EVENT_BUS_ENABLED: "true"
+  secretRefs:
+    - env: INFRASTAT_SUBMISSION_USERNAME
+      name: infrastat-idev
+      key: username
+    - env: INFRASTAT_SUBMISSION_PASSWORD
+      name: infrastat-idev
+      key: password
+    - env: INFRASTAT_SUBMISSION_CLIENT_CERT
+      name: infrastat-idev
+      key: clientCert
+    - env: INFRASTAT_SUBMISSION_CLIENT_KEY
+      name: infrastat-idev
+      key: clientKey
+  servicePort: 5200
+  resources: {}
+
+zoll:
+  enabled: false
+  image:
+    repository: ghcr.io/valeo-neuroerp/zoll-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  env:
+    ZOLL_SANCTIONS_REFRESH_INTERVAL_MINUTES: "60"
+    ZOLL_SANCTIONS_REFRESH_BACKOFF_MINUTES: "15"
+    ZOLL_SANCTIONS_REFRESH_MAX_BACKOFF_MINUTES: "720"
+    ZOLL_WORKFLOW_TENANT: "zoll"
+  secretRefs:
+    - env: ZOLL_OFAC_API_KEY
+      name: zoll-sanctions
+      key: ofacApiKey
+    - env: ZOLL_EU_API_KEY
+      name: zoll-sanctions
+      key: euApiKey
+  servicePort: 5300
+  resources: {}
+
+alerts:
+  infrastatEnabled: false
+  inventoryEnabled: false
+
+inventory:
+  enabled: true
+  image:
+    repository: ghcr.io/valeo-neuroerp/inventory
+    tag: latest
+    pullPolicy: IfNotPresent
+  env:
+    INVENTORY_EVENT_BUS_ENABLED: "true"
+    INVENTORY_EVENT_BUS_URL: "nats://nats:4222"
+    INVENTORY_DEFAULT_TENANT: "default"
+    # Optional Eskalation
+    INVENTORY_TEAMS_WEBHOOK_URL: ""
+    INVENTORY_ESCALATION_EMAIL: ""
+  secretRefs: []
+  servicePort: 5400
+  resources: {}

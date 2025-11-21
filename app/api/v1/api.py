@@ -14,17 +14,22 @@ from app.api.v1.endpoints import (
     contacts,
     activities,
     farm_profiles,
+    opportunities,
+    cases,
     accounts,
     journal_entries,
     articles,
     warehouses,
-    policies
+    policies,
+    gap,
+    prospecting
 )
 
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.documents.router import router as documents_router
 from app.reports.router import router as reports_router
+from app.verkauf.router import router as verkauf_router
 
 # Create main API router
 api_router = APIRouter()
@@ -83,6 +88,18 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    opportunities.router,
+    prefix="/crm/opportunities",
+    tags=["crm", "opportunities"]
+)
+
+api_router.include_router(
+    cases.router,
+    prefix="/crm/cases",
+    tags=["crm", "cases"]
+)
+
+api_router.include_router(
     accounts,
     prefix="/accounts",
     tags=["finance", "accounts"]
@@ -110,6 +127,22 @@ api_router.include_router(
     policies.router,
     prefix="/mcp",
     tags=["mcp", "policies"]
+)
+
+api_router.include_router(
+    gap.router,
+    tags=["gap", "prospecting"]
+)
+
+api_router.include_router(
+    prospecting.router,
+    tags=["prospecting", "leads"]
+)
+
+api_router.include_router(
+    verkauf_router,
+    prefix="/verkauf",
+    tags=["verkauf", "kundenstamm"]
 )
 
 # Documents and Reports routers

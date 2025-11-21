@@ -1,0 +1,27 @@
+infrastat:
+  enabled: true
+  image:
+    repository: ghcr.io/valeo-neuroerp/infrastat
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  env:
+    INFRASTAT_SUBMISSION_ENABLED: "true"
+    INFRASTAT_SUBMISSION_RETRY_ATTEMPTS: "5"
+    INFRASTAT_SUBMISSION_RETRY_DELAY_SECONDS: "60"
+    INFRASTAT_SUBMISSION_VERIFY_SSL: "true"
+    INFRASTAT_EVENT_BUS_ENABLED: "true"
+  secretRefs:
+    - env: INFRASTAT_SUBMISSION_USERNAME
+      name: infrastat-idev
+      key: username
+    - env: INFRASTAT_SUBMISSION_PASSWORD
+      name: infrastat-idev
+      key: password
+    - env: INFRASTAT_SUBMISSION_CLIENT_CERT
+      name: infrastat-idev
+      key: clientCert
+    - env: INFRASTAT_SUBMISSION_CLIENT_KEY
+      name: infrastat-idev
+      key: clientKey
+alerts:
+  infrastatEnabled: true

@@ -1,0 +1,83 @@
+{
+  "expo": {
+    "name": "VALEO CRM Mobile",
+    "slug": "valeo-crm-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#007AFF"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.valeo.crm.mobile",
+      "buildNumber": "1.0.0",
+      "requireFullScreen": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to scan business cards and documents.",
+        "NSLocationWhenInUseUsageDescription": "This app uses location to track customer visits and provide location-based services.",
+        "NSPhotoLibraryUsageDescription": "This app accesses photos to attach images to customer records and activities.",
+        "NSMicrophoneUsageDescription": "This app uses the microphone to record voice notes for customer interactions."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#007AFF"
+      },
+      "package": "com.valeo.crm.mobile",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.VIBRATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.WAKE_LOCK"
+      ],
+      "googleServicesFile": "./google-services.json"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#007AFF",
+          "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-secure-store"
+      ],
+      [
+        "expo-local-authentication"
+      ],
+      [
+        "expo-camera"
+      ],
+      [
+        "expo-location"
+      ],
+      [
+        "expo-sqlite"
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "valeo-crm-mobile"
+      }
+    }
+  }
+}

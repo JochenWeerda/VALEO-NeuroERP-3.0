@@ -18,7 +18,7 @@ export interface ObjectPageProps {
   keyInfo?: ReactNode
   sections: ObjectPageSection[]
   initialSectionId?: string
-  onSectionChange?: (sectionId: string) => void
+  onSectionChange?: (_sectionId: string) => void
   primaryActions?: ToolbarAction[]
   overflowActions?: ToolbarAction[]
   editMode?: boolean

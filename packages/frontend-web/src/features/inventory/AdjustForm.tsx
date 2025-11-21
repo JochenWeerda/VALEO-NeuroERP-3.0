@@ -8,7 +8,7 @@ import { parseDE } from "@/lib/number-de"
 
 export function AdjustForm({ sku, onSubmit, submitting }: {
   sku: string
-  onSubmit: (value: AdjustInput) => void
+  onSubmit: (_value: AdjustInput) => void
   submitting?: boolean
 }): JSX.Element {
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<AdjustInput>({

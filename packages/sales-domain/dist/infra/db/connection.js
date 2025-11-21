@@ -43,7 +43,7 @@ const postgres_js_1 = require("drizzle-orm/postgres-js");
 const postgres_1 = __importDefault(require("postgres"));
 const schema = __importStar(require("./schema"));
 // Database connection configuration
-const connectionString = process.env.POSTGRES_URL || 'postgres://user:pass@localhost:5432/sales';
+const connectionString = process.env.POSTGRES_URL ?? 'postgres://user:pass@localhost:5432/sales';
 // Create postgres client with connection pooling
 const client = (0, postgres_1.default)(connectionString, {
     max: 20, // Maximum number of connections

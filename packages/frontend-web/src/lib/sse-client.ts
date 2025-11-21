@@ -9,9 +9,9 @@ export type SSEOptions = {
 }
 
 type SSEHandlers = {
-  onEvent: (eventType: string, event: MessageEvent<string>) => void
+  onEvent: (_eventType: string, _event: MessageEvent<string>) => void
   onOpen?: () => void
-  onError?: (event: Event) => void
+  onError?: (_event: Event) => void
 }
 
 const DEFAULT_HEARTBEAT_MS = 25_000

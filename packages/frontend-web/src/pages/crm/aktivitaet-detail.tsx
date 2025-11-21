@@ -32,8 +32,8 @@ export default function AktivitaetDetailPage(): JSX.Element {
   })
 
   const { data: existingActivity, isLoading } = useQuery({
-    queryKey: queryKeys.crm.activities.detail(id!),
-    queryFn: () => crmService.getActivity(id!),
+    queryKey: queryKeys.crm.activities.detail(id ?? ''),
+    queryFn: () => crmService.getActivity(id ?? ''),
     enabled: !isNew && !!id,
   })
 
@@ -60,10 +60,10 @@ export default function AktivitaetDetailPage(): JSX.Element {
   const updateMutation = useMutation({
     mutationKey: mutationKeys.crm.activities.update,
     mutationFn: (data: Partial<Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>>) =>
-      crmService.updateActivity(id!, data),
+      crmService.updateActivity(id ?? '', data),
     onSuccess: () => {
       toast.push('Aktivität erfolgreich aktualisiert')
-      queryClient.invalidateQueries({ queryKey: queryKeys.crm.activities.detail(id!) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.crm.activities.detail(id ?? '') })
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.activities.all })
     },
     onError: (error) => {
@@ -74,7 +74,7 @@ export default function AktivitaetDetailPage(): JSX.Element {
 
   const deleteMutation = useMutation({
     mutationKey: mutationKeys.crm.activities.delete,
-    mutationFn: () => crmService.deleteActivity(id!),
+    mutationFn: () => crmService.deleteActivity(id ?? ''),
     onSuccess: () => {
       toast.push('Aktivität erfolgreich gelöscht')
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.activities.all })

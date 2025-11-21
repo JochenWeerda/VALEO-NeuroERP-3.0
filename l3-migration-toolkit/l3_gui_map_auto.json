@@ -1,0 +1,223 @@
+[
+  {
+    "name": "fur",
+    "type": "other",
+    "x_pct": 8.5,
+    "y_pct": 1.3,
+    "absolute": {
+      "x": 163,
+      "y": 13
+    },
+    "bbox": {
+      "left": 157,
+      "top": 8,
+      "width": 13,
+      "height": 11
+    },
+    "confidence": 85
+  },
+  {
+    "name": "Handelsbetriebe",
+    "type": "other",
+    "x_pct": 11.3,
+    "y_pct": 1.3,
+    "absolute": {
+      "x": 217,
+      "y": 13
+    },
+    "bbox": {
+      "left": 175,
+      "top": 7,
+      "width": 84,
+      "height": 12
+    },
+    "confidence": 87
+  },
+  {
+    "name": "PRODUKTION",
+    "type": "menu_tab",
+    "x_pct": 25.2,
+    "y_pct": 3.9,
+    "absolute": {
+      "x": 484,
+      "y": 39
+    },
+    "bbox": {
+      "left": 451,
+      "top": 35,
+      "width": 67,
+      "height": 8
+    },
+    "confidence": 77
+  },
+  {
+    "name": "AUSWERTUNGEN",
+    "type": "menu_tab",
+    "x_pct": 30.3,
+    "y_pct": 3.9,
+    "absolute": {
+      "x": 582,
+      "y": 39
+    },
+    "bbox": {
+      "left": 538,
+      "top": 35,
+      "width": 88,
+      "height": 8
+    },
+    "confidence": 83
+  },
+  {
+    "name": "°",
+    "type": "other",
+    "x_pct": 23.8,
+    "y_pct": 9.3,
+    "absolute": {
+      "x": 457,
+      "y": 92
+    },
+    "bbox": {
+      "left": 455,
+      "top": 72,
+      "width": 5,
+      "height": 40
+    },
+    "confidence": 69
+  },
+  {
+    "name": "Nachrichten",
+    "type": "ribbon_icon",
+    "x_pct": 29.6,
+    "y_pct": 9.8,
+    "absolute": {
+      "x": 568,
+      "y": 97
+    },
+    "bbox": {
+      "left": 537,
+      "top": 93,
+      "width": 63,
+      "height": 9
+    },
+    "confidence": 92
+  },
+  {
+    "name": "Kalender",
+    "type": "ribbon_icon",
+    "x_pct": 37.5,
+    "y_pct": 9.8,
+    "absolute": {
+      "x": 720,
+      "y": 97
+    },
+    "bbox": {
+      "left": 698,
+      "top": 93,
+      "width": 45,
+      "height": 9
+    },
+    "confidence": 75
+  },
+  {
+    "name": "Kalender",
+    "type": "ribbon_icon",
+    "x_pct": 42.0,
+    "y_pct": 9.8,
+    "absolute": {
+      "x": 807,
+      "y": 97
+    },
+    "bbox": {
+      "left": 784,
+      "top": 83,
+      "width": 47,
+      "height": 28
+    },
+    "confidence": 85
+  },
+  {
+    "name": "E-Mail",
+    "type": "ribbon_icon",
+    "x_pct": 44.7,
+    "y_pct": 9.8,
+    "absolute": {
+      "x": 858,
+      "y": 97
+    },
+    "bbox": {
+      "left": 842,
+      "top": 93,
+      "width": 32,
+      "height": 9
+    },
+    "confidence": 89
+  },
+  {
+    "name": "Dokumente",
+    "type": "ribbon_icon",
+    "x_pct": 47.7,
+    "y_pct": 9.8,
+    "absolute": {
+      "x": 916,
+      "y": 97
+    },
+    "bbox": {
+      "left": 886,
+      "top": 93,
+      "width": 60,
+      "height": 9
+    },
+    "confidence": 90
+  },
+  {
+    "name": "Letzte",
+    "type": "ribbon_icon",
+    "x_pct": 50.6,
+    "y_pct": 9.8,
+    "absolute": {
+      "x": 972,
+      "y": 97
+    },
+    "bbox": {
+      "left": 958,
+      "top": 83,
+      "width": 29,
+      "height": 28
+    },
+    "confidence": 93
+  },
+  {
+    "name": "Wiedervorlage",
+    "type": "ribbon_icon",
+    "x_pct": 33.8,
+    "y_pct": 10.0,
+    "absolute": {
+      "x": 648,
+      "y": 99
+    },
+    "bbox": {
+      "left": 611,
+      "top": 93,
+      "width": 75,
+      "height": 12
+    },
+    "confidence": 89
+  },
+  {
+    "name": "Kommunikation",
+    "type": "ribbon_icon",
+    "x_pct": 41.3,
+    "y_pct": 12.7,
+    "absolute": {
+      "x": 793,
+      "y": 126
+    },
+    "bbox": {
+      "left": 754,
+      "top": 122,
+      "width": 79,
+      "height": 8
+    },
+    "confidence": 93
+  }
+]

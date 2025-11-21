@@ -1,0 +1,11 @@
+{
+  "review_date": "2025-10-26",
+  "total_fields": 184,
+  "issues": {
+    "long_fieldnames": 0,
+    "type_mismatches": 2,
+    "missing_transformations": 0,
+    "missing_constraints": 16
+  },
+  "quality_score": 90.21739130434783
+}

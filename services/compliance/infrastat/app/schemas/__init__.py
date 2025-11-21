@@ -1,0 +1,2 @@
+"""Pydantic-Schemas für InfraStat."""
+

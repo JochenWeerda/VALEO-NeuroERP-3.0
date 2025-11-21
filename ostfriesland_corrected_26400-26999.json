@@ -1,0 +1,1217 @@
+{
+  "timestamp": "2025-11-20T16:01:10.827606",
+  "total_leads": 15985,
+  "total_plz": 68,
+  "total_gap_amount": 471537110.57000285,
+  "average_amount_per_lead": 29498.724464810937,
+  "plz_stats": {
+    "26871": {
+      "count": 288,
+      "total_amount": 10360712.179999994,
+      "average_amount": 35974.695069444424,
+      "cities": [
+        "Papenburg, Stadt"
+      ],
+      "top_lead": {
+        "row": 229969,
+        "plz": "26871",
+        "name": "",
+        "city": "Papenburg, Stadt",
+        "gap_amount": 3308112.69,
+        "measure_code": ""
+      }
+    },
+    "26899": {
+      "count": 264,
+      "total_amount": 4947683.319999996,
+      "average_amount": 18741.22469696968,
+      "cities": [
+        "Rhede (Ems)"
+      ],
+      "top_lead": {
+        "row": 239854,
+        "plz": "26899",
+        "name": "",
+        "city": "Rhede (Ems)",
+        "gap_amount": 237960.85,
+        "measure_code": ""
+      }
+    },
+    "26553": {
+      "count": 206,
+      "total_amount": 8792298.819999998,
+      "average_amount": 42681.0622330097,
+      "cities": [
+        "Dornum"
+      ],
+      "top_lead": {
+        "row": 54960,
+        "plz": "26553",
+        "name": "",
+        "city": "Dornum",
+        "gap_amount": 170069.51,
+        "measure_code": ""
+      }
+    },
+    "26903": {
+      "count": 137,
+      "total_amount": 3971247.2699999977,
+      "average_amount": 28987.206350364948,
+      "cities": [
+        "Surwold"
+      ],
+      "top_lead": {
+        "row": 557512,
+        "plz": "26903",
+        "name": "",
+        "city": "Surwold",
+        "gap_amount": 424928.05,
+        "measure_code": ""
+      }
+    },
+    "26892": {
+      "count": 377,
+      "total_amount": 6526075.400000001,
+      "average_amount": 17310.54482758621,
+      "cities": [
+        "Kluse",
+        "Dörpen",
+        "Heede",
+        "Lehe",
+        "Wippingen"
+      ],
+      "top_lead": {
+        "row": 239404,
+        "plz": "26892",
+        "name": "",
+        "city": "Dörpen",
+        "gap_amount": 264117.31,
+        "measure_code": ""
+      }
+    },
+    "26897": {
+      "count": 276,
+      "total_amount": 3536111.5200000014,
+      "average_amount": 12811.99826086957,
+      "cities": [
+        "Esterwegen",
+        "Hilkenbrook",
+        "Breddenberg",
+        "Bockhorst"
+      ],
+      "top_lead": {
+        "row": 239442,
+        "plz": "26897",
+        "name": "",
+        "city": "Esterwegen",
+        "gap_amount": 134176.81,
+        "measure_code": ""
+      }
+    },
+    "26844": {
+      "count": 291,
+      "total_amount": 15651135.44,
+      "average_amount": 53783.97058419244,
+      "cities": [
+        "Jemgum"
+      ],
+      "top_lead": {
+        "row": 883602,
+        "plz": "26844",
+        "name": "",
+        "city": "Jemgum",
+        "gap_amount": 413433.17,
+        "measure_code": ""
+      }
+    },
+    "26907": {
+      "count": 100,
+      "total_amount": 2296691.54,
+      "average_amount": 22966.9154,
+      "cities": [
+        "Walchum"
+      ],
+      "top_lead": {
+        "row": 240039,
+        "plz": "26907",
+        "name": "",
+        "city": "Walchum",
+        "gap_amount": 500000.0,
+        "measure_code": ""
+      }
+    },
+    "26789": {
+      "count": 147,
+      "total_amount": 4708958.919999994,
+      "average_amount": 32033.734149659824,
+      "cities": [
+        "Leer (Ostfriesland), Stadt"
+      ],
+      "top_lead": {
+        "row": 883603,
+        "plz": "26789",
+        "name": "",
+        "city": "Leer (Ostfriesland), Stadt",
+        "gap_amount": 676811.11,
+        "measure_code": ""
+      }
+    },
+    "26826": {
+      "count": 267,
+      "total_amount": 9212530.130000008,
+      "average_amount": 34503.85816479404,
+      "cities": [
+        "Weener, Stadt"
+      ],
+      "top_lead": {
+        "row": 252656,
+        "plz": "26826",
+        "name": "",
+        "city": "Weener, Stadt",
+        "gap_amount": 109785.64,
+        "measure_code": ""
+      }
+    },
+    "26906": {
+      "count": 124,
+      "total_amount": 1800616.8600000003,
+      "average_amount": 14521.103709677422,
+      "cities": [
+        "Dersum"
+      ],
+      "top_lead": {
+        "row": 94849,
+        "plz": "26906",
+        "name": "",
+        "city": "Dersum",
+        "gap_amount": 61203.34,
+        "measure_code": ""
+      }
+    },
+    "26901": {
+      "count": 295,
+      "total_amount": 3228547.91,
+      "average_amount": 10944.23020338983,
+      "cities": [
+        "Lorup",
+        "Rastdorf"
+      ],
+      "top_lead": {
+        "row": 796222,
+        "plz": "26901",
+        "name": "",
+        "city": "Rastdorf",
+        "gap_amount": 40167.9,
+        "measure_code": ""
+      }
+    },
+    "26670": {
+      "count": 488,
+      "total_amount": 8263460.940000009,
+      "average_amount": 16933.321598360675,
+      "cities": [
+        "Uplengen"
+      ],
+      "top_lead": {
+        "row": 240018,
+        "plz": "26670",
+        "name": "",
+        "city": "Uplengen",
+        "gap_amount": 436882.22,
+        "measure_code": ""
+      }
+    },
+    "26427": {
+      "count": 492,
+      "total_amount": 14403489.260000013,
+      "average_amount": 29275.384674796773,
+      "cities": [
+        "Stedesdorf",
+        "Esens, Stadt",
+        "Dunum",
+        "Moorweg",
+        "Neuharlingersiel",
+        "Holtgast",
+        "Werdum"
+      ],
+      "top_lead": {
+        "row": 933498,
+        "plz": "26427",
+        "name": "",
+        "city": "Moorweg",
+        "gap_amount": 1285500.0,
+        "measure_code": ""
+      }
+    },
+    "26434": {
+      "count": 594,
+      "total_amount": 20476709.759999942,
+      "average_amount": 34472.575353535256,
+      "cities": [
+        "Wangerland"
+      ],
+      "top_lead": {
+        "row": 933503,
+        "plz": "26434",
+        "name": "",
+        "city": "Wangerland",
+        "gap_amount": 2179800.0,
+        "measure_code": ""
+      }
+    },
+    "26936": {
+      "count": 158,
+      "total_amount": 5578561.810000006,
+      "average_amount": 35307.35322784814,
+      "cities": [
+        "Stadland"
+      ],
+      "top_lead": {
+        "row": 776803,
+        "plz": "26936",
+        "name": "",
+        "city": "Stadland",
+        "gap_amount": 152862.35,
+        "measure_code": ""
+      }
+    },
+    "26757": {
+      "count": 33,
+      "total_amount": 3141056.5100000002,
+      "average_amount": 95183.53060606061,
+      "cities": [
+        "Borkum, Stadt"
+      ],
+      "top_lead": {
+        "row": 90513,
+        "plz": "26757",
+        "name": "",
+        "city": "Borkum, Stadt",
+        "gap_amount": 302527.61,
+        "measure_code": ""
+      }
+    },
+    "26935": {
+      "count": 106,
+      "total_amount": 4401366.9700000025,
+      "average_amount": 41522.3299056604,
+      "cities": [
+        "Stadland"
+      ],
+      "top_lead": {
+        "row": 307129,
+        "plz": "26935",
+        "name": "",
+        "city": "Stadland",
+        "gap_amount": 113584.64,
+        "measure_code": ""
+      }
+    },
+    "26736": {
+      "count": 441,
+      "total_amount": 18881056.130000014,
+      "average_amount": 42814.1862358277,
+      "cities": [
+        "Krummhörn"
+      ],
+      "top_lead": {
+        "row": 933475,
+        "plz": "26736",
+        "name": "",
+        "city": "Krummhörn",
+        "gap_amount": 1352625.0,
+        "measure_code": ""
+      }
+    },
+    "26506": {
+      "count": 308,
+      "total_amount": 40868860.33000005,
+      "average_amount": 132691.10496753262,
+      "cities": [
+        "Norden, Stadt"
+      ],
+      "top_lead": {
+        "row": 693378,
+        "plz": "26506",
+        "name": "",
+        "city": "Norden, Stadt",
+        "gap_amount": 5372785.54,
+        "measure_code": ""
+      }
+    },
+    "26655": {
+      "count": 472,
+      "total_amount": 9446380.789999997,
+      "average_amount": 20013.51862288135,
+      "cities": [
+        "Westerstede, Stadt",
+        "Alt Bennebek"
+      ],
+      "top_lead": {
+        "row": 899206,
+        "plz": "26655",
+        "name": "",
+        "city": "Westerstede, Stadt",
+        "gap_amount": 224397.17,
+        "measure_code": ""
+      }
+    },
+    "26802": {
+      "count": 463,
+      "total_amount": 12592822.490000013,
+      "average_amount": 27198.32071274301,
+      "cities": [
+        "Moormerland"
+      ],
+      "top_lead": {
+        "row": 180259,
+        "plz": "26802",
+        "name": "",
+        "city": "Moormerland",
+        "gap_amount": 386054.49,
+        "measure_code": ""
+      }
+    },
+    "26831": {
+      "count": 283,
+      "total_amount": 12067524.840000026,
+      "average_amount": 42641.430530035424,
+      "cities": [
+        "Bunde"
+      ],
+      "top_lead": {
+        "row": 703967,
+        "plz": "26831",
+        "name": "",
+        "city": "Bunde",
+        "gap_amount": 1000000.0,
+        "measure_code": ""
+      }
+    },
+    "26409": {
+      "count": 639,
+      "total_amount": 15518629.400000013,
+      "average_amount": 24285.805007824747,
+      "cities": [
+        "Wittmund, Stadt",
+        "Werdum",
+        "Friedeburg"
+      ],
+      "top_lead": {
+        "row": 883604,
+        "plz": "26409",
+        "name": "",
+        "city": "Wittmund, Stadt",
+        "gap_amount": 236142.15,
+        "measure_code": ""
+      }
+    },
+    "26939": {
+      "count": 467,
+      "total_amount": 12272126.609999985,
+      "average_amount": 26278.643704496753,
+      "cities": [
+        "Ovelgönne"
+      ],
+      "top_lead": {
+        "row": 147423,
+        "plz": "26939",
+        "name": "",
+        "city": "Ovelgönne",
+        "gap_amount": 172393.42,
+        "measure_code": ""
+      }
+    },
+    "26759": {
+      "count": 160,
+      "total_amount": 6718779.760000002,
+      "average_amount": 41992.37350000001,
+      "cities": [
+        "Hinte"
+      ],
+      "top_lead": {
+        "row": 54923,
+        "plz": "26759",
+        "name": "",
+        "city": "Hinte",
+        "gap_amount": 105107.86,
+        "measure_code": ""
+      }
+    },
+    "26532": {
+      "count": 252,
+      "total_amount": 4998956.650000004,
+      "average_amount": 19837.12956349208,
+      "cities": [
+        "Großheide"
+      ],
+      "top_lead": {
+        "row": 239508,
+        "plz": "26532",
+        "name": "",
+        "city": "Großheide",
+        "gap_amount": 401329.12,
+        "measure_code": ""
+      }
+    },
+    "26639": {
+      "count": 187,
+      "total_amount": 4124904.9800000004,
+      "average_amount": 22058.31540106952,
+      "cities": [
+        "Wiesmoor, Stadt"
+      ],
+      "top_lead": {
+        "row": 143520,
+        "plz": "26639",
+        "name": "",
+        "city": "Wiesmoor, Stadt",
+        "gap_amount": 123542.55,
+        "measure_code": ""
+      }
+    },
+    "26629": {
+      "count": 495,
+      "total_amount": 12922119.82999999,
+      "average_amount": 26105.292585858566,
+      "cities": [
+        "Großefehn"
+      ],
+      "top_lead": {
+        "row": 387007,
+        "plz": "26629",
+        "name": "",
+        "city": "Großefehn",
+        "gap_amount": 313064.68,
+        "measure_code": ""
+      }
+    },
+    "26605": {
+      "count": 281,
+      "total_amount": 4265685.860000003,
+      "average_amount": 15180.376725978658,
+      "cities": [
+        "Aurich, Stadt"
+      ],
+      "top_lead": {
+        "row": 339590,
+        "plz": "26605",
+        "name": "",
+        "city": "Aurich, Stadt",
+        "gap_amount": 52870.38,
+        "measure_code": ""
+      }
+    },
+    "26529": {
+      "count": 232,
+      "total_amount": 5434047.919999996,
+      "average_amount": 23422.62034482757,
+      "cities": [
+        "Wirdum",
+        "Rechtsupweg",
+        "Upgant-Schott",
+        "Osteel",
+        "Marienhafe, Flecken",
+        "Leezdorf"
+      ],
+      "top_lead": {
+        "row": 239721,
+        "plz": "26529",
+        "name": "",
+        "city": "Marienhafe, Flecken",
+        "gap_amount": 499996.35,
+        "measure_code": ""
+      }
+    },
+    "26931": {
+      "count": 338,
+      "total_amount": 10176372.889999986,
+      "average_amount": 30107.612100591672,
+      "cities": [
+        "Elsfleth, Stadt"
+      ],
+      "top_lead": {
+        "row": 955225,
+        "plz": "26931",
+        "name": "",
+        "city": "Elsfleth, Stadt",
+        "gap_amount": 125172.67,
+        "measure_code": ""
+      }
+    },
+    "26904": {
+      "count": 118,
+      "total_amount": 2180177.4500000007,
+      "average_amount": 18476.08008474577,
+      "cities": [
+        "Börger"
+      ],
+      "top_lead": {
+        "row": 929432,
+        "plz": "26904",
+        "name": "",
+        "city": "Börger",
+        "gap_amount": 80160.17,
+        "measure_code": ""
+      }
+    },
+    "26847": {
+      "count": 145,
+      "total_amount": 3440862.9900000026,
+      "average_amount": 23730.089586206916,
+      "cities": [
+        "Detern, Flecken"
+      ],
+      "top_lead": {
+        "row": 985215,
+        "plz": "26847",
+        "name": "",
+        "city": "Detern, Flecken",
+        "gap_amount": 57081.43,
+        "measure_code": ""
+      }
+    },
+    "26632": {
+      "count": 548,
+      "total_amount": 12302286.000000017,
+      "average_amount": 22449.427007299302,
+      "cities": [
+        "Ihlow",
+        "Carpin"
+      ],
+      "top_lead": {
+        "row": 856162,
+        "plz": "26632",
+        "name": "",
+        "city": "Ihlow",
+        "gap_amount": 103637.65,
+        "measure_code": ""
+      }
+    },
+    "26849": {
+      "count": 127,
+      "total_amount": 2361858.04,
+      "average_amount": 18597.307401574802,
+      "cities": [
+        "Filsum"
+      ],
+      "top_lead": {
+        "row": 20241,
+        "plz": "26849",
+        "name": "",
+        "city": "Filsum",
+        "gap_amount": 68986.65,
+        "measure_code": ""
+      }
+    },
+    "26721": {
+      "count": 17,
+      "total_amount": 1434972.09,
+      "average_amount": 84410.12294117648,
+      "cities": [
+        "Emden, Stadt"
+      ],
+      "top_lead": {
+        "row": 898748,
+        "plz": "26721",
+        "name": "",
+        "city": "Emden, Stadt",
+        "gap_amount": 537428.98,
+        "measure_code": ""
+      }
+    },
+    "26842": {
+      "count": 107,
+      "total_amount": 1676844.7699999996,
+      "average_amount": 15671.446448598126,
+      "cities": [
+        "Ostrhauderfehn"
+      ],
+      "top_lead": {
+        "row": 239811,
+        "plz": "26842",
+        "name": "",
+        "city": "Ostrhauderfehn",
+        "gap_amount": 39180.76,
+        "measure_code": ""
+      }
+    },
+    "26683": {
+      "count": 305,
+      "total_amount": 3904059.01,
+      "average_amount": 12800.193475409835,
+      "cities": [
+        "Saterland"
+      ],
+      "top_lead": {
+        "row": 419664,
+        "plz": "26683",
+        "name": "",
+        "city": "Saterland",
+        "gap_amount": 69721.5,
+        "measure_code": ""
+      }
+    },
+    "26835": {
+      "count": 279,
+      "total_amount": 4818280.399999992,
+      "average_amount": 17269.822222222192,
+      "cities": [
+        "Holtland",
+        "Hesel",
+        "Brinkum",
+        "Schwerinsdorf",
+        "Neukamperfehn",
+        "Firrel"
+      ],
+      "top_lead": {
+        "row": 980792,
+        "plz": "26835",
+        "name": "",
+        "city": "Hesel",
+        "gap_amount": 298728.0,
+        "measure_code": ""
+      }
+    },
+    "26419": {
+      "count": 147,
+      "total_amount": 3759722.0399999977,
+      "average_amount": 25576.34040816325,
+      "cities": [
+        "Schortens, Stadt"
+      ],
+      "top_lead": {
+        "row": 624760,
+        "plz": "26419",
+        "name": "",
+        "city": "Schortens, Stadt",
+        "gap_amount": 83358.08,
+        "measure_code": ""
+      }
+    },
+    "26446": {
+      "count": 555,
+      "total_amount": 12509561.870000001,
+      "average_amount": 22539.751117117117,
+      "cities": [
+        "Friedeburg"
+      ],
+      "top_lead": {
+        "row": 239007,
+        "plz": "26446",
+        "name": "",
+        "city": "Friedeburg",
+        "gap_amount": 171730.52,
+        "measure_code": ""
+      }
+    },
+    "26919": {
+      "count": 107,
+      "total_amount": 5661832.620000002,
+      "average_amount": 52914.32355140189,
+      "cities": [
+        "Brake (Unterweser), Stadt"
+      ],
+      "top_lead": {
+        "row": 574493,
+        "plz": "26919",
+        "name": "",
+        "city": "Brake (Unterweser), Stadt",
+        "gap_amount": 277756.6,
+        "measure_code": ""
+      }
+    },
+    "26452": {
+      "count": 112,
+      "total_amount": 5892209.009999999,
+      "average_amount": 52609.00901785713,
+      "cities": [
+        "Sande"
+      ],
+      "top_lead": {
+        "row": 146168,
+        "plz": "26452",
+        "name": "",
+        "city": "Sande",
+        "gap_amount": 153237.68,
+        "measure_code": ""
+      }
+    },
+    "26969": {
+      "count": 489,
+      "total_amount": 20975949.510000028,
+      "average_amount": 42895.60226993871,
+      "cities": [
+        "Butjadingen"
+      ],
+      "top_lead": {
+        "row": 344832,
+        "plz": "26969",
+        "name": "",
+        "city": "Butjadingen",
+        "gap_amount": 324474.99,
+        "measure_code": ""
+      }
+    },
+    "26810": {
+      "count": 305,
+      "total_amount": 8230256.370000003,
+      "average_amount": 26984.447114754108,
+      "cities": [
+        "Westoverledingen"
+      ],
+      "top_lead": {
+        "row": 933505,
+        "plz": "26810",
+        "name": "",
+        "city": "Westoverledingen",
+        "gap_amount": 638528.46,
+        "measure_code": ""
+      }
+    },
+    "26817": {
+      "count": 286,
+      "total_amount": 5677390.919999995,
+      "average_amount": 19851.017202797186,
+      "cities": [
+        "Rhauderfehn"
+      ],
+      "top_lead": {
+        "row": 214091,
+        "plz": "26817",
+        "name": "",
+        "city": "Rhauderfehn",
+        "gap_amount": 75829.2,
+        "measure_code": ""
+      }
+    },
+    "26909": {
+      "count": 125,
+      "total_amount": 1475081.1999999997,
+      "average_amount": 11800.649599999997,
+      "cities": [
+        "Neubörger",
+        "Neulehe"
+      ],
+      "top_lead": {
+        "row": 864768,
+        "plz": "26909",
+        "name": "",
+        "city": "Neubörger",
+        "gap_amount": 43301.31,
+        "measure_code": ""
+      }
+    },
+    "26676": {
+      "count": 215,
+      "total_amount": 3016619.9699999993,
+      "average_amount": 14030.790558139532,
+      "cities": [
+        "Barßel"
+      ],
+      "top_lead": {
+        "row": 919871,
+        "plz": "26676",
+        "name": "",
+        "city": "Barßel",
+        "gap_amount": 79992.37,
+        "measure_code": ""
+      }
+    },
+    "26689": {
+      "count": 256,
+      "total_amount": 5584012.510000001,
+      "average_amount": 21812.548867187503,
+      "cities": [
+        "Apen"
+      ],
+      "top_lead": {
+        "row": 239283,
+        "plz": "26689",
+        "name": "",
+        "city": "Apen",
+        "gap_amount": 522103.61,
+        "measure_code": ""
+      }
+    },
+    "26624": {
+      "count": 377,
+      "total_amount": 12535205.920000006,
+      "average_amount": 33249.88307692309,
+      "cities": [
+        "Südbrookmerland"
+      ],
+      "top_lead": {
+        "row": 931792,
+        "plz": "26624",
+        "name": "",
+        "city": "Südbrookmerland",
+        "gap_amount": 997992.01,
+        "measure_code": ""
+      }
+    },
+    "26465": {
+      "count": 10,
+      "total_amount": 390054.03,
+      "average_amount": 39005.403000000006,
+      "cities": [
+        "Langeoog"
+      ],
+      "top_lead": {
+        "row": 887895,
+        "plz": "26465",
+        "name": "",
+        "city": "Langeoog",
+        "gap_amount": 66082.82,
+        "measure_code": ""
+      }
+    },
+    "26937": {
+      "count": 129,
+      "total_amount": 5509490.419999999,
+      "average_amount": 42709.22806201549,
+      "cities": [
+        "Stadland"
+      ],
+      "top_lead": {
+        "row": 343574,
+        "plz": "26937",
+        "name": "",
+        "city": "Stadland",
+        "gap_amount": 118019.37,
+        "measure_code": ""
+      }
+    },
+    "26607": {
+      "count": 440,
+      "total_amount": 7927962.100000008,
+      "average_amount": 18018.0956818182,
+      "cities": [
+        "Aurich, Stadt"
+      ],
+      "top_lead": {
+        "row": 382138,
+        "plz": "26607",
+        "name": "",
+        "city": "Aurich, Stadt",
+        "gap_amount": 299582.6,
+        "measure_code": ""
+      }
+    },
+    "26954": {
+      "count": 257,
+      "total_amount": 10471047.969999997,
+      "average_amount": 40743.37731517509,
+      "cities": [
+        "Nordenham, Stadt"
+      ],
+      "top_lead": {
+        "row": 159334,
+        "plz": "26954",
+        "name": "",
+        "city": "Nordenham, Stadt",
+        "gap_amount": 149906.55,
+        "measure_code": ""
+      }
+    },
+    "26603": {
+      "count": 13,
+      "total_amount": 1350991.8799999997,
+      "average_amount": 103922.45230769228,
+      "cities": [
+        "Aurich, Stadt"
+      ],
+      "top_lead": {
+        "row": 574372,
+        "plz": "26603",
+        "name": "",
+        "city": "Aurich, Stadt",
+        "gap_amount": 303329.06,
+        "measure_code": ""
+      }
+    },
+    "26524": {
+      "count": 134,
+      "total_amount": 5190202.76,
+      "average_amount": 38732.85641791044,
+      "cities": [
+        "Lütetsburg",
+        "Hage, Flecken",
+        "Halbemond",
+        "Hagermarsch",
+        "Berumbur"
+      ],
+      "top_lead": {
+        "row": 239529,
+        "plz": "26524",
+        "name": "",
+        "city": "Hage, Flecken",
+        "gap_amount": 509618.36,
+        "measure_code": ""
+      }
+    },
+    "26723": {
+      "count": 111,
+      "total_amount": 3481579.42,
+      "average_amount": 31365.58036036036,
+      "cities": [
+        "Emden, Stadt"
+      ],
+      "top_lead": {
+        "row": 421310,
+        "plz": "26723",
+        "name": "",
+        "city": "Emden, Stadt",
+        "gap_amount": 190094.29,
+        "measure_code": ""
+      }
+    },
+    "26556": {
+      "count": 172,
+      "total_amount": 2761711.1899999995,
+      "average_amount": 16056.460406976741,
+      "cities": [
+        "Utarp",
+        "Westerholt",
+        "Schweindorf",
+        "Nenndorf",
+        "Eversmeer"
+      ],
+      "top_lead": {
+        "row": 795741,
+        "plz": "26556",
+        "name": "",
+        "city": "Westerholt",
+        "gap_amount": 86496.77,
+        "measure_code": ""
+      }
+    },
+    "26487": {
+      "count": 88,
+      "total_amount": 1553246.1600000001,
+      "average_amount": 17650.524545454547,
+      "cities": [
+        "Neuschoo",
+        "Blomberg"
+      ],
+      "top_lead": {
+        "row": 690869,
+        "plz": "26487",
+        "name": "",
+        "city": "Blomberg",
+        "gap_amount": 64941.42,
+        "measure_code": ""
+      }
+    },
+    "26441": {
+      "count": 107,
+      "total_amount": 4646687.430000001,
+      "average_amount": 43426.98532710281,
+      "cities": [
+        "Jever, Stadt"
+      ],
+      "top_lead": {
+        "row": 1024610,
+        "plz": "26441",
+        "name": "",
+        "city": "Jever, Stadt",
+        "gap_amount": 304507.19,
+        "measure_code": ""
+      }
+    },
+    "26845": {
+      "count": 40,
+      "total_amount": 1679316.84,
+      "average_amount": 41982.921,
+      "cities": [
+        "Nortmoor"
+      ],
+      "top_lead": {
+        "row": 933502,
+        "plz": "26845",
+        "name": "",
+        "city": "Nortmoor",
+        "gap_amount": 346758.73,
+        "measure_code": ""
+      }
+    },
+    "26489": {
+      "count": 48,
+      "total_amount": 591443.2199999997,
+      "average_amount": 12321.733749999994,
+      "cities": [
+        "Ochtersum"
+      ],
+      "top_lead": {
+        "row": 333724,
+        "plz": "26489",
+        "name": "",
+        "city": "Ochtersum",
+        "gap_amount": 75817.2,
+        "measure_code": ""
+      }
+    },
+    "26725": {
+      "count": 99,
+      "total_amount": 5635411.52,
+      "average_amount": 56923.34868686868,
+      "cities": [
+        "Emden, Stadt"
+      ],
+      "top_lead": {
+        "row": 595481,
+        "plz": "26725",
+        "name": "",
+        "city": "Emden, Stadt",
+        "gap_amount": 215794.23,
+        "measure_code": ""
+      }
+    },
+    "26548": {
+      "count": 36,
+      "total_amount": 888715.1599999998,
+      "average_amount": 24686.532222222217,
+      "cities": [
+        "Norderney, Stadt"
+      ],
+      "top_lead": {
+        "row": 928747,
+        "plz": "26548",
+        "name": "",
+        "city": "Norderney, Stadt",
+        "gap_amount": 188855.41,
+        "measure_code": ""
+      }
+    },
+    "26486": {
+      "count": 3,
+      "total_amount": 15453.39,
+      "average_amount": 5151.13,
+      "cities": [
+        "Wangerooge, Nordseebad"
+      ],
+      "top_lead": {
+        "row": 164968,
+        "plz": "26486",
+        "name": "",
+        "city": "Wangerooge, Nordseebad",
+        "gap_amount": 5151.13,
+        "measure_code": ""
+      }
+    },
+    "26474": {
+      "count": 14,
+      "total_amount": 390049.45,
+      "average_amount": 27860.675,
+      "cities": [
+        "Spiekeroog"
+      ],
+      "top_lead": {
+        "row": 767304,
+        "plz": "26474",
+        "name": "",
+        "city": "Spiekeroog",
+        "gap_amount": 51643.82,
+        "measure_code": ""
+      }
+    },
+    "26571": {
+      "count": 3,
+      "total_amount": 31041.9,
+      "average_amount": 10347.300000000001,
+      "cities": [
+        "Juist, Inselgemeinde"
+      ],
+      "top_lead": {
+        "row": 375843,
+        "plz": "26571",
+        "name": "",
+        "city": "Juist, Inselgemeinde",
+        "gap_amount": 23887.5,
+        "measure_code": ""
+      }
+    }
+  },
+  "top_leads": [
+    {
+      "row": 693378,
+      "plz": "26506",
+      "name": "",
+      "city": "Norden, Stadt",
+      "gap_amount": 5372785.54,
+      "measure_code": ""
+    },
+    {
+      "row": 693379,
+      "plz": "26506",
+      "name": "",
+      "city": "Norden, Stadt",
+      "gap_amount": 5372785.54,
+      "measure_code": ""
+    },
+    {
+      "row": 693380,
+      "plz": "26506",
+      "name": "",
+      "city": "Norden, Stadt",
+      "gap_amount": 5372785.54,
+      "measure_code": ""
+    },
+    {
+      "row": 693381,
+      "plz": "26506",
+      "name": "",
+      "city": "Norden, Stadt",
+      "gap_amount": 5372785.54,
+      "measure_code": ""
+    },
+    {
+      "row": 693382,
+      "plz": "26506",
+      "name": "",
+      "city": "Norden, Stadt",
+      "gap_amount": 5372785.54,
+      "measure_code": ""
+    },
+    {
+      "row": 693383,
+      "plz": "26506",
+      "name": "",
+      "city": "Norden, Stadt",
+      "gap_amount": 5372785.54,
+      "measure_code": ""
+    },
+    {
+      "row": 229969,
+      "plz": "26871",
+      "name": "",
+      "city": "Papenburg, Stadt",
+      "gap_amount": 3308112.69,
+      "measure_code": ""
+    },
+    {
+      "row": 933503,
+      "plz": "26434",
+      "name": "",
+      "city": "Wangerland",
+      "gap_amount": 2179800.0,
+      "measure_code": ""
+    },
+    {
+      "row": 933475,
+      "plz": "26736",
+      "name": "",
+      "city": "Krummhörn",
+      "gap_amount": 1352625.0,
+      "measure_code": ""
+    },
+    {
+      "row": 933498,
+      "plz": "26427",
+      "name": "",
+      "city": "Moorweg",
+      "gap_amount": 1285500.0,
+      "measure_code": ""
+    }
+  ]
+}

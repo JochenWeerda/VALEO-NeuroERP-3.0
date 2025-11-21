@@ -114,7 +114,7 @@ class InMemoryEventPublisher(IEventPublisher):
 - `DELETE /api/v1/inventory/warehouses/{id}` - Soft delete
 
 #### **Finance-APIs:**
-- `/api/v1/finance/*` - Consolidated from fibu_router
+- `/api/v1/*` (Finance) - Consolidated from fibu_router
 
 **Gesamt:** ~15 neue/konsolidierte Endpoints
 
@@ -144,7 +144,7 @@ class InMemoryEventPublisher(IEventPublisher):
 
 **Bereits Live:**
 - `pos/terminal.tsx` → `/api/v1/articles` (ArticleSearch)
-- `fibu/debitoren.tsx` → `/api/v1/finance/*` (Fibu-Hooks)
+- `fibu/debitoren.tsx` → `/api/v1/*` (Fibu-Hooks)
 
 **Noch Mock (20%):**
 - Admin-Bereiche (Benutzer, Rollen, Audit)

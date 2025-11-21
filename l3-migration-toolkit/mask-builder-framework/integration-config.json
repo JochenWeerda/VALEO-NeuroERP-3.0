@@ -1,0 +1,112 @@
+{
+  "sidebar_items": [
+    {
+      "id": "overview",
+      "label": "Übersicht",
+      "icon": "LayoutDashboard",
+      "path": "/verkauf/kunden-stamm/overview"
+    },
+    {
+      "id": "master",
+      "label": "Stammdaten",
+      "icon": "IdCard",
+      "path": "/verkauf/kunden-stamm/master"
+    },
+    {
+      "id": "addresses",
+      "label": "Adressen",
+      "icon": "MapPinned",
+      "path": "/verkauf/kunden-stamm/addresses"
+    },
+    {
+      "id": "contacts",
+      "label": "Kontakte & Ansprechpartner",
+      "icon": "Users",
+      "path": "/verkauf/kunden-stamm/contacts"
+    },
+    {
+      "id": "billingTax",
+      "label": "Abrechnung & Steuern",
+      "icon": "Receipt",
+      "path": "/verkauf/kunden-stamm/billingTax"
+    },
+    {
+      "id": "payment",
+      "label": "Bank & Zahlungsverkehr",
+      "icon": "CreditCard",
+      "path": "/verkauf/kunden-stamm/payment"
+    },
+    {
+      "id": "pricing",
+      "label": "Preise & Rabatte",
+      "icon": "Tag",
+      "path": "/verkauf/kunden-stamm/pricing"
+    },
+    {
+      "id": "profiles",
+      "label": "Kundenprofil",
+      "icon": "Building",
+      "path": "/verkauf/kunden-stamm/profiles"
+    },
+    {
+      "id": "freetext",
+      "label": "Freitext & Anweisungen",
+      "icon": "FileText",
+      "path": "/verkauf/kunden-stamm/freetext"
+    },
+    {
+      "id": "history",
+      "label": "Historie & Logs",
+      "icon": "History",
+      "path": "/verkauf/kunden-stamm/history"
+    }
+  ],
+  "backend_routes": [
+    {
+      "path": "/api/v1/kunden_ansprechpartner",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "subtable": "kunden_ansprechpartner"
+    },
+    {
+      "path": "/api/v1/kunden_profil",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "subtable": "kunden_profil"
+    },
+    {
+      "path": "/api/v1/kunden_freitext",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "subtable": "kunden_freitext"
+    }
+  ],
+  "frontend_routes": [],
+  "sql_tables": [
+    "kunden_profil",
+    "kunden_ansprechpartner",
+    "kunden_versand",
+    "kunden_lieferung_zahlung",
+    "kunden_datenschutz",
+    "kunden_genossenschaft",
+    "kunden_email_verteiler",
+    "kunden_betriebsgemeinschaften",
+    "kunden_freitext",
+    "kunden_allgemein_erweitert",
+    "kunden_cpd_konto",
+    "kunden_rabatte_detail",
+    "kunden_preise_detail"
+  ]
+}

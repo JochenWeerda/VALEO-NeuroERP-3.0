@@ -94,7 +94,6 @@ export declare const QuoteSchema: z.ZodObject<{
     status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
     tenantId: string;
     customerId: string;
-    quoteNumber: string;
     lines: {
         id: string;
         sku: string;
@@ -110,10 +109,11 @@ export declare const QuoteSchema: z.ZodObject<{
     totalDiscount: number;
     taxRate: number;
     currency: string;
-    validUntil: Date;
     createdAt: Date;
     updatedAt: Date;
     version: number;
+    quoteNumber: string;
+    validUntil: Date;
     notes?: string | undefined;
 }, {
     id: string;
@@ -122,7 +122,6 @@ export declare const QuoteSchema: z.ZodObject<{
     status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
     tenantId: string;
     customerId: string;
-    quoteNumber: string;
     lines: {
         id: string;
         sku: string;
@@ -136,10 +135,11 @@ export declare const QuoteSchema: z.ZodObject<{
     }[];
     subtotalNet: number;
     totalDiscount: number;
-    validUntil: Date;
     createdAt: Date;
     updatedAt: Date;
     version: number;
+    quoteNumber: string;
+    validUntil: Date;
     taxRate?: number | undefined;
     currency?: string | undefined;
     notes?: string | undefined;
@@ -149,11 +149,11 @@ export declare const CreateQuoteInputSchema: z.ZodObject<{
     status: z.ZodEnum<["Draft", "Sent", "Accepted", "Rejected", "Expired"]>;
     tenantId: z.ZodString;
     customerId: z.ZodString;
-    quoteNumber: z.ZodString;
     taxRate: z.ZodDefault<z.ZodNumber>;
     currency: z.ZodDefault<z.ZodString>;
-    validUntil: z.ZodDate;
     notes: z.ZodOptional<z.ZodString>;
+    quoteNumber: z.ZodString;
+    validUntil: z.ZodDate;
 } & {
     lines: z.ZodArray<z.ZodObject<Omit<{
         id: z.ZodString;
@@ -184,7 +184,6 @@ export declare const CreateQuoteInputSchema: z.ZodObject<{
     status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
     tenantId: string;
     customerId: string;
-    quoteNumber: string;
     lines: {
         sku: string;
         name: string;
@@ -195,13 +194,13 @@ export declare const CreateQuoteInputSchema: z.ZodObject<{
     }[];
     taxRate: number;
     currency: string;
+    quoteNumber: string;
     validUntil: Date;
     notes?: string | undefined;
 }, {
     status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
     tenantId: string;
     customerId: string;
-    quoteNumber: string;
     lines: {
         sku: string;
         name: string;
@@ -210,6 +209,7 @@ export declare const CreateQuoteInputSchema: z.ZodObject<{
         description?: string | undefined;
         discount?: number | undefined;
     }[];
+    quoteNumber: string;
     validUntil: Date;
     taxRate?: number | undefined;
     currency?: string | undefined;
@@ -255,8 +255,8 @@ export declare const UpdateQuoteInputSchema: z.ZodObject<{
         discount: number;
         description?: string | undefined;
     }[] | undefined;
-    validUntil?: Date | undefined;
     notes?: string | null | undefined;
+    validUntil?: Date | undefined;
 }, {
     status?: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired" | undefined;
     lines?: {
@@ -267,8 +267,8 @@ export declare const UpdateQuoteInputSchema: z.ZodObject<{
         description?: string | undefined;
         discount?: number | undefined;
     }[] | undefined;
-    validUntil?: Date | undefined;
     notes?: string | null | undefined;
+    validUntil?: Date | undefined;
 }>;
 export type UpdateQuoteInput = z.infer<typeof UpdateQuoteInputSchema>;
 export declare class QuoteEntity {

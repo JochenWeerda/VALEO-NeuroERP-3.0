@@ -1,7 +1,35 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.creditNotesRelations = exports.invoicesRelations = exports.ordersRelations = exports.quotesRelations = exports.creditNotes = exports.invoices = exports.orders = exports.quotes = void 0;
+exports.creditNotesRelations = exports.invoicesRelations = exports.ordersRelations = exports.quotesRelations = exports.creditNotes = exports.invoices = exports.orders = exports.quotes = exports.salesOffers = void 0;
 const pg_core_1 = require("drizzle-orm/pg-core");
+// Sales Offer Table
+exports.salesOffers = (0, pg_core_1.pgTable)('sales_offers', {
+    id: (0, pg_core_1.uuid)('id').primaryKey().defaultRandom(),
+    tenantId: (0, pg_core_1.uuid)('tenant_id').notNull(),
+    customerInquiryId: (0, pg_core_1.uuid)('customer_inquiry_id'),
+    customerId: (0, pg_core_1.uuid)('customer_id').notNull(),
+    offerNumber: (0, pg_core_1.text)('offer_number').notNull().unique(),
+    subject: (0, pg_core_1.text)('subject').notNull(),
+    description: (0, pg_core_1.text)('description').notNull(),
+    totalAmount: (0, pg_core_1.numeric)('total_amount', { precision: 15, scale: 2 }).notNull(),
+    currency: (0, pg_core_1.varchar)('currency', { length: 3 }).notNull().default('EUR'),
+    validUntil: (0, pg_core_1.timestamp)('valid_until').notNull(),
+    status: (0, pg_core_1.text)('status', { enum: ['ENTWURF', 'VERSENDET', 'ANGENOMMEN', 'ABGELEHNT', 'ABGELAUFEN'] }).notNull().default('ENTWURF'),
+    contactPerson: (0, pg_core_1.text)('contact_person'),
+    deliveryDate: (0, pg_core_1.timestamp)('delivery_date'),
+    paymentTerms: (0, pg_core_1.text)('payment_terms'),
+    notes: (0, pg_core_1.text)('notes'),
+    createdAt: (0, pg_core_1.timestamp)('created_at').notNull().defaultNow(),
+    updatedAt: (0, pg_core_1.timestamp)('updated_at').notNull().defaultNow(),
+    deletedAt: (0, pg_core_1.timestamp)('deleted_at'),
+    version: (0, pg_core_1.integer)('version').notNull().default(1)
+}, (table) => ({
+    tenantIdx: (0, pg_core_1.index)('sales_offers_tenant_idx').on(table.tenantId),
+    customerIdx: (0, pg_core_1.index)('sales_offers_customer_idx').on(table.customerId),
+    customerInquiryIdx: (0, pg_core_1.index)('sales_offers_customer_inquiry_idx').on(table.customerInquiryId),
+    statusIdx: (0, pg_core_1.index)('sales_offers_status_idx').on(table.status),
+    validUntilIdx: (0, pg_core_1.index)('sales_offers_valid_until_idx').on(table.validUntil)
+}));
 // Quote Table
 exports.quotes = (0, pg_core_1.pgTable)('quotes', {
     id: (0, pg_core_1.uuid)('id').primaryKey().defaultRandom(),

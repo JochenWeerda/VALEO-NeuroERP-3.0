@@ -1,0 +1,166 @@
+{
+  "version": "1.0",
+  "source": "L3 ERP",
+  "target": "VALEO-NeuroERP",
+  "generated": "2025-10-26",
+  "masks": [
+    {
+      "l3_mask": "Kunden",
+      "valeo_mask": "kundenstamm",
+      "route": "/verkauf/kunden-stamm",
+      "fields": [
+        {
+          "l3_field": "Kunden-Nr.",
+          "valeo_field": "kunden_nr",
+          "type": "lookup",
+          "transformation": "uppercase"
+        },
+        {
+          "l3_field": "Name 1:",
+          "valeo_field": "name1",
+          "type": "string",
+          "transformation": "trim"
+        },
+        {
+          "l3_field": "Name 2:",
+          "valeo_field": "name2",
+          "type": "string",
+          "transformation": "trim"
+        },
+        {
+          "l3_field": "Straße:",
+          "valeo_field": "strasse",
+          "type": "string",
+          "transformation": "trim"
+        },
+        {
+          "l3_field": "PLZ:",
+          "valeo_field": "plz",
+          "type": "string",
+          "transformation": "uppercase"
+        },
+        {
+          "l3_field": "Ort:",
+          "valeo_field": "ort",
+          "type": "string",
+          "transformation": "trim"
+        },
+        {
+          "l3_field": "Tel:",
+          "valeo_field": "tel",
+          "type": "string",
+          "transformation": "phone_format"
+        },
+        {
+          "l3_field": "E-Mail:",
+          "valeo_field": "email",
+          "type": "string",
+          "transformation": "lowercase"
+        },
+        {
+          "l3_field": "Kontonutzung für Rechnung",
+          "valeo_field": "kontonutzung_rechnung",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "l3_field": "Kontoauszug gewünscht",
+          "valeo_field": "kontoauszug_gewuenscht",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "l3_field": "Saldo Druck Rechnung",
+          "valeo_field": "saldo_druck_rechnung",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "l3_field": "Einzel-Abrechnung / Sammel-Abrechnung",
+          "valeo_field": "einzel_abrechnung",
+          "type": "select",
+          "options": ["Einzel", "Sammel"]
+        },
+        {
+          "l3_field": "Direktes Konto",
+          "valeo_field": "direktes_konto",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "l3_field": "Selbstabholer-Rabatt",
+          "valeo_field": "selbstabholer_rabatt",
+          "type": "number",
+          "unit": "%",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "l3_field": "Zahlungsbedingungen (Tage / Skonto / netto Kasse)",
+          "valeo_field": "zahlungsbedingungen_tage",
+          "type": "number",
+          "unit": "Tage",
+          "min": 0,
+          "max": 365
+        },
+        {
+          "l3_field": "Skonto",
+          "valeo_field": "skonto",
+          "type": "number",
+          "unit": "%",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "l3_field": "Bank / IBAN / BIC",
+          "valeo_field": "iban",
+          "type": "string",
+          "validation": "iban"
+        },
+        {
+          "l3_field": "Währung",
+          "valeo_field": "waehrung",
+          "type": "select",
+          "options": ["EUR", "USD", "GBP", "CHF"],
+          "default": "EUR"
+        },
+        {
+          "l3_field": "Webshop-Kunde ja/nein",
+          "valeo_field": "webshop_kunde",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "l3_field": "Webshop Kunden-Nr.",
+          "valeo_field": "webshop_kunden_nr",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "transformations": {
+    "uppercase": "Convert to uppercase",
+    "lowercase": "Convert to lowercase",
+    "trim": "Remove leading/trailing whitespace",
+    "phone_format": "Format phone number (remove spaces, normalize)",
+    "iban": "Validate IBAN format (XX99 XXXX XXXX XXXX XXXX XX)"
+  },
+  "data_types": {
+    "lookup": "Field with search/lookup button",
+    "string": "Text field",
+    "number": "Numeric field",
+    "boolean": "Checkbox (true/false)",
+    "select": "Dropdown with predefined options",
+    "date": "Date picker",
+    "currency": "Price field with currency symbol",
+    "text": "Multi-line text field"
+  },
+  "migration_notes": [
+    "Alle Felder wurden aus L3 Screenshots extrahiert",
+    "Tabellenstruktur entspricht exakt L3-Einteilung",
+    "Foreign Keys müssen beim Import überprüft werden",
+    "Bulk-Import sollte Transaktionen verwenden",
+    "Datenvalidierung vor Import durchführen"
+  ]
+}
+

@@ -1,0 +1,459 @@
+{
+  "resource": "customer",
+  "version": "3.0.0",
+  "i18n": "de-DE",
+  "routing": {
+    "basePath": "/crm/customers",
+    "param": "customerId"
+  },
+  "layout": {
+    "header": {
+      "primary": [
+        { "comp": "Text", "bind": "customer.code", "label": "Kundennummer", "size": "lg" },
+        { "comp": "BadgeSelect", "bind": "customer.status", "optionsRef": "crm.customer.status" },
+        { "comp": "TagList", "bind": "meta.tags" }
+      ],
+      "secondary": [
+        { "comp": "Select", "bind": "customer.location_id", "label": "Niederlassung" },
+        { "comp": "Select", "bind": "customer.cost_center", "label": "Kostenstelle" },
+        { "comp": "Toggle", "bind": "customer.is_active", "label": "Aktiv" }
+      ],
+      "actions": [
+        { "id": "save", "label": "Speichern", "type": "primary" },
+        { "id": "new", "label": "Neu", "type": "default" },
+        { "id": "duplicate", "label": "Duplizieren", "type": "default" },
+        { "id": "more", "label": "Weitere", "type": "menu", "items": ["archive","delete","export","history"] }
+      ]
+    },
+    "nav": [
+      { "id": "overview", "label": "Übersicht", "icon": "UserSquare" },
+      { "id": "master", "label": "Stammdaten", "icon": "IdCard" },
+      { "id": "addresses", "label": "Adressen", "icon": "MapPinned" },
+      { "id": "billingTax", "label": "Abrechnung & Steuern", "icon": "Receipt" },
+      { "id": "forms", "label": "Formulare & Dokumente", "icon": "FileText" },
+      { "id": "communication", "label": "Kommunikation", "icon": "MessagesSquare" },
+      { "id": "prefs", "label": "Präferenzen & Flags", "icon": "Settings2" },
+      { "id": "notes", "label": "Notizen & Info", "icon": "StickyNote" },
+      { "id": "history", "label": "Historie & Logs", "icon": "History" }
+    ]
+  },
+  "views": [
+    {
+      "id": "overview",
+      "sections": [
+        {
+          "title": "Kunde",
+          "grid": 2,
+          "fields": [
+            { "comp": "Text", "bind": "party.name.primary", "label": "Name" },
+            { "comp": "Select", "bind": "customer.account_manager", "label": "Betreuer" },
+            { "comp": "BadgeSelect", "bind": "customer.abc_class", "label": "ABC-Klasse", "optionsRef": "crm.customer.abc" },
+            { "comp": "Select", "bind": "customer.customer_group", "label": "Kundengruppe" }
+          ]
+        },
+        {
+          "title": "Kontakt",
+          "grid": 3,
+          "fields": [
+            { "comp": "Text", "bind": "contact.phone_primary", "label": "Telefon" },
+            { "comp": "Text", "bind": "contact.phone_secondary", "label": "Mobil" },
+            { "comp": "Email", "bind": "contact.email", "label": "E-Mail" }
+          ]
+        },
+        {
+          "title": "Adresse",
+          "grid": 3,
+          "fields": [
+            { "comp": "Text", "bind": "address.main.street", "label": "Straße" },
+            { "comp": "Text", "bind": "address.main.postcode", "label": "PLZ", "width": "xs" },
+            { "comp": "Text", "bind": "address.main.city", "label": "Ort" },
+            { "comp": "CountrySelect", "bind": "address.main.country", "label": "Land" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "master",
+      "tabs": [
+        {
+          "id": "ident",
+          "label": "Identität",
+          "sections": [
+            {
+              "title": "Namen",
+              "grid": 3,
+              "fields": [
+                { "comp": "Text", "bind": "party.name.primary", "label": "Name 1", "validators": ["required"] },
+                { "comp": "Text", "bind": "party.name.additional1", "label": "Name 2", "optional": true },
+                { "comp": "Text", "bind": "party.name.additional2", "label": "Name 3", "optional": true }
+              ]
+            },
+            {
+              "title": "Anrede",
+              "grid": 2,
+              "fields": [
+                { "comp": "Select", "bind": "contact.salutation", "label": "Anrede", "optionsRef": "common.salutation" },
+                { 
+                  "comp": "Text", 
+                  "bind": "contact.letter_salutation", 
+                  "label": "Briefanrede",
+                  "aiAssist": { 
+                    "from": ["contact.salutation", "party.name.primary"], 
+                    "prompt": "Erzeuge formelle deutsche Briefanrede."
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "contact",
+          "label": "Kontakt",
+          "sections": [
+            {
+              "title": "Kommunikationsdaten",
+              "grid": 3,
+              "fields": [
+                { "comp": "Text", "bind": "contact.phone_primary", "label": "Telefon" },
+                { "comp": "Text", "bind": "contact.phone_secondary", "label": "Mobil" },
+                { "comp": "Email", "bind": "contact.email", "label": "E-Mail" },
+                { "comp": "Url", "bind": "contact.homepage", "label": "Homepage", "span": 3 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "metadata",
+          "label": "Meta",
+          "sections": [
+            {
+              "title": "Vertrieb",
+              "grid": 3,
+              "fields": [
+                { "comp": "Select", "bind": "customer.account_manager", "label": "Betreuer" },
+                { "comp": "BadgeSelect", "bind": "customer.abc_class", "label": "ABC-Klasse", "optionsRef": "crm.customer.abc" },
+                { "comp": "Select", "bind": "customer.customer_group", "label": "Kundengruppe" }
+              ]
+            },
+            {
+              "title": "Freifelder & Infos",
+              "grid": 4,
+              "fields": [
+                { "comp": "Text", "bind": "meta.region", "label": "Gebiet" },
+                { "comp": "Text", "bind": "meta.info1", "label": "Info 1" },
+                { "comp": "Text", "bind": "meta.info2", "label": "Info 2" },
+                { "comp": "Text", "bind": "meta.info3", "label": "Info 3" },
+                { "comp": "Text", "bind": "meta.info4", "label": "Info 4" },
+                { "comp": "Text", "bind": "meta.custom.free1", "label": "Frei 1" },
+                { "comp": "Text", "bind": "meta.custom.free2", "label": "Frei 2" },
+                { "comp": "Text", "bind": "meta.custom.free3", "label": "Frei 3" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "addresses",
+      "sections": [
+        {
+          "title": "Hauptadresse",
+          "grid": 3,
+          "fields": [
+            { "comp": "Text", "bind": "address.main.street", "label": "Straße", "validators": ["required"] },
+            { "comp": "Text", "bind": "address.main.postcode", "label": "PLZ", "validators": ["postcode"] },
+            { "comp": "Text", "bind": "address.main.city", "label": "Ort", "validators": ["required"] },
+            { "comp": "CountrySelect", "bind": "address.main.country", "label": "Land", "validators": ["required"] }
+          ]
+        },
+        {
+          "title": "Rechnungsadresse",
+          "grid": 3,
+          "fields": [
+            { "comp": "AddressMirrorToggle", "bind": "address.invoice.use_main", "label": "= Hauptadresse" },
+            { "comp": "Text", "bind": "address.invoice.street", "label": "Straße" },
+            { "comp": "Text", "bind": "address.invoice.postcode", "label": "PLZ" },
+            { "comp": "Text", "bind": "address.invoice.city", "label": "Ort" },
+            { "comp": "CountrySelect", "bind": "address.invoice.country", "label": "Land" }
+          ]
+        },
+        {
+          "title": "Lieferadresse",
+          "grid": 3,
+          "fields": [
+            { "comp": "AddressMirrorToggle", "bind": "address.delivery.use_main", "label": "= Hauptadresse" },
+            { "comp": "Text", "bind": "address.delivery.street", "label": "Straße" },
+            { "comp": "Text", "bind": "address.delivery.postcode", "label": "PLZ" },
+            { "comp": "Text", "bind": "address.delivery.city", "label": "Ort" },
+            { "comp": "CountrySelect", "bind": "address.delivery.country", "label": "Land" }
+          ]
+        },
+        {
+          "title": "Postfach",
+          "grid": 2,
+          "fields": [
+            { "comp": "Text", "bind": "address.po_box.postcode", "label": "Postf.-PLZ" },
+            { "comp": "Text", "bind": "address.po_box.city", "label": "Postf.-Ort" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "billingTax",
+      "sections": [
+        {
+          "title": "Debitorik",
+          "grid": 3,
+          "fields": [
+            { "comp": "Text", "bind": "finance.debtor_number", "label": "Deb.-Kto (Haupt)", "validators": ["alnum"] },
+            { "comp": "Select", "bind": "finance.payment_terms_id", "label": "Zahlungsbedingung" },
+            { "comp": "Text", "bind": "finance.sepa_mandate_ref", "label": "SEPA-Mandatsref." }
+          ]
+        },
+        {
+          "title": "Steuern & IDs",
+          "grid": 3,
+          "fields": [
+            { 
+              "comp": "Text", 
+              "bind": "tax.vat_id", 
+              "label": "USt-IdNr.", 
+              "validators": ["vatId"],
+              "aiValidate": { 
+                "tool": "vies.checkVat", 
+                "argsMap": { "vatId": "tax.vat_id", "countryCode": "address.main.country" } 
+              },
+              "postAction": "showValidationBadge"
+            },
+            { "comp": "Text", "bind": "tax.tax_number", "label": "Steuernummer" },
+            { "comp": "Text", "bind": "tax.gln", "label": "GLN", "optional": true }
+          ]
+        },
+        {
+          "title": "Sperren & Gründe",
+          "grid": 2,
+          "fields": [
+            { "comp": "Toggle", "bind": "customer.is_blocked", "label": "Gesperrt" },
+            { "comp": "TextArea", "bind": "customer.block_reason", "label": "Sperrgrund" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "forms",
+      "sections": [
+        {
+          "title": "Standardformulare",
+          "grid": 3,
+          "fields": [
+            { "comp": "Select", "bind": "forms.invoice_form_id", "label": "Rechnungsformular" },
+            { "comp": "Select", "bind": "forms.delivery_note_form_id", "label": "Lieferscheinformular" },
+            { "comp": "Select", "bind": "forms.email_template_id", "label": "E-Mail-Template" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "communication",
+      "sections": [
+        {
+          "title": "Kommunikationspräferenzen",
+          "grid": 3,
+          "fields": [
+            { "comp": "MultiSelect", "bind": "contact.preferred_channels", "label": "Bevorzugte Kanäle", "optionsRef": "common.channels" },
+            { "comp": "Toggle", "bind": "contact.allow_marketing", "label": "Marketing erlaubt" },
+            { "comp": "Toggle", "bind": "contact.allow_sms", "label": "SMS erlaubt" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prefs",
+      "sections": [
+        {
+          "title": "Kundeneinstellungen",
+          "grid": 3,
+          "fields": [
+            { "comp": "Select", "bind": "customer.price_list_id", "label": "Preisliste", "optional": true },
+            { "comp": "Select", "bind": "customer.currency", "label": "Währung", "optional": true },
+            { "comp": "Select", "bind": "customer.language", "label": "Sprache", "optional": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notes",
+      "sections": [
+        {
+          "title": "Notizen",
+          "grid": 1,
+          "fields": [
+            { "comp": "RichText", "bind": "notes.long", "label": "Interne Notiz" }
+          ]
+        },
+        {
+          "title": "Infofelder",
+          "grid": 4,
+          "fields": [
+            { "comp": "Text", "bind": "meta.info1", "label": "Info 1" },
+            { "comp": "Text", "bind": "meta.info2", "label": "Info 2" },
+            { "comp": "Text", "bind": "meta.info3", "label": "Info 3" },
+            { "comp": "Text", "bind": "meta.info4", "label": "Info 4" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "history",
+      "sections": [
+        {
+          "title": "Änderungsverlauf",
+          "grid": 1,
+          "fields": [
+            { "comp": "AuditLog", "bind": "audit" }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "rules": {
+      "party.name.primary": { "required": true, "min": 2 },
+      "address.main.city": { "required": true },
+      "address.main.postcode": { "pattern": "^[A-Za-z0-9 -]{3,10}$" },
+      "tax.vat_id": { "if": "address.main.country == 'DE'", "pattern": "^(DE)?[0-9]{9}$" }
+    }
+  },
+  "ui": {
+    "responsive": true,
+    "breakpoints": {
+      "sm": { "columns": 1, "nav": "bottom", "useAccordions": true, "stickyFooterActions": true },
+      "md": { "columns": 2, "nav": "side", "useAccordions": false, "stickyFooterActions": true },
+      "lg": { "columns": 3, "nav": "side", "useAccordions": false, "stickyFooterActions": false }
+    },
+    "touch": { "minTargetSizePx": 44, "swipeActions": true },
+    "performance": { "virtualLists": true, "deferHeavyPanels": true },
+    "offline": {
+      "enabled": true,
+      "clientCache": true,
+      "queuedWrites": true,
+      "optimisticUI": true
+    },
+    "lowAttentionMode": {
+      "enabled": true,
+      "aiFieldCompact": true,
+      "showDetailsOnTap": true
+    },
+    "a11y": {
+      "ariaLabels": true,
+      "keyboardShortcuts": true,
+      "reducedMotion": true
+    }
+  },
+  "ai": {
+    "enabled": true,
+    "intentBar": {
+      "shortcut": "Mod+k",
+      "actions": [
+        { 
+          "id": "gen_letter_salutation", 
+          "label": "Briefanrede vorschlagen", 
+          "inputs": ["contact.salutation", "party.name.primary"], 
+          "writes": ["contact.letter_salutation"] 
+        },
+        { 
+          "id": "validate_vat", 
+          "label": "USt-ID prüfen (VIES)", 
+          "inputs": ["tax.vat_id", "address.main.country"], 
+          "sidePanel": "aiPanel" 
+        },
+        { 
+          "id": "detect_duplicates", 
+          "label": "Dubletten prüfen", 
+          "inputs": ["party.name.primary", "contact.email", "contact.phone_primary"] 
+        },
+        { 
+          "id": "summarize_customer", 
+          "label": "Kunden-Zusammenfassung", 
+          "context": ["history", "orders", "invoices"], 
+          "sidePanel": "aiPanel" 
+        },
+        {
+          "id": "duplicate_customer",
+          "label": "Kunden duplizieren",
+          "context": ["customer.code", "party.name.primary"]
+        },
+        {
+          "id": "check_address",
+          "label": "Adresse prüfen",
+          "inputs": ["address.main.postcode", "address.main.city"],
+          "tool": "geo.resolve"
+        },
+        {
+          "id": "send_welcome_email",
+          "label": "Kundenbegrüßung mailen",
+          "context": ["contact.email", "party.name.primary"],
+          "generative": true,
+          "template": "customer_welcome"
+        },
+        {
+          "id": "request_sepa_mandate",
+          "label": "SEPA-Mandat anfordern",
+          "context": ["contact.email", "customer.code"],
+          "generative": true,
+          "template": "sepa_mandate_request"
+        },
+        {
+          "id": "create_address_confirmation",
+          "label": "Adressbestätigung erstellen",
+          "context": ["address.main", "party.name.primary"],
+          "generative": true,
+          "template": "address_confirmation"
+        }
+      ]
+    },
+    "validators": [
+      { 
+        "id": "smart_address_check", 
+        "on": ["address.main.postcode", "address.main.city"], 
+        "severity": "warning" 
+      },
+      { 
+        "id": "required_min_set", 
+        "fields": ["party.name.primary", "address.main.city", "contact.email"], 
+        "message": "Mindestsatz an Stammdaten nicht erfüllt." 
+      }
+    ],
+    "ragPanels": {
+      "aiPanel": {
+        "title": "Assistent",
+        "sources": ["erp.orders", "erp.invoices", "crm.activities"],
+        "actions": ["suggest_next_best_action", "create_task", "open_email_draft"]
+      }
+    },
+    "mcp": {
+      "tools": [
+        { "name": "vies.checkVat", "args": ["vatId", "countryCode"] },
+        { "name": "geo.resolve", "args": ["street", "postcode", "city", "country"] },
+        { "name": "scoring.duplicate", "args": ["name", "email", "phone"] }
+      ]
+    },
+    "telemetry": { "formFriction": true, "autoFix": true },
+    "roleContext": {
+      "enabled": true,
+      "weightedSuggestions": {
+        "sales": ["detect_duplicates", "summarize_customer", "send_welcome_email"],
+        "accounting": ["validate_vat", "check_address", "request_sepa_mandate"],
+        "admin": ["duplicate_customer", "create_address_confirmation"]
+      }
+    },
+    "serverEndpoints": {
+      "intent": "/ai/intent",
+      "validate": "/ai/validate",
+      "rag": "/ai/rag",
+      "streaming": true,
+      "idempotent": true
+    }
+  }
+}
+

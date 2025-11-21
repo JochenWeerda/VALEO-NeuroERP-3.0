@@ -44,6 +44,14 @@ def create_tables():
     """
     try:
         logger.info("Creating database tables...")
+        
+        # Import all models to register them with Base
+        try:
+            from app.crm import models as crm_models
+            logger.info("CRM models imported")
+        except Exception as e:
+            logger.warning(f"CRM models import failed: {e}")
+        
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created successfully")
     except Exception as e:

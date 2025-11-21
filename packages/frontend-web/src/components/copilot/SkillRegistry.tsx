@@ -13,7 +13,7 @@ type ParameterDefinition = {
 }
 
 export type ParameterSchema<Params extends Record<string, unknown>> = {
-  parameters: { [K in keyof Params]: ParameterDefinition }
+  parameters: { [_K in keyof Params]: ParameterDefinition }
 }
 
 export interface OutputDescriptor<Result> {
@@ -28,8 +28,8 @@ export interface ExecutionResult<Result> {
 }
 
 export type ExecuteFn<Params, Result, Context> = (
-  params: Params,
-  context: Context
+  _params: Params,
+  _context: Context
 ) => Promise<ExecutionResult<Result>>
 
 export interface SkillDefinition<

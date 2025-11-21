@@ -56,8 +56,18 @@ async def list_accounts(
         # Use provided tenant_id or default to system for now
         effective_tenant_id = tenant_id or "system"
 
-        accounts = await account_repo.get_all(effective_tenant_id, skip, limit, account_type, category)
-        total = await account_repo.count(effective_tenant_id, account_type, category)
+        accounts = await account_repo.get_all(
+            effective_tenant_id,
+            skip,
+            limit,
+            account_type=account_type,
+            category=category
+        )
+        total = await account_repo.count(
+            effective_tenant_id,
+            account_type=account_type,
+            category=category
+        )
 
         return PaginatedResponse[Account](
             items=[Account.model_validate(account) for account in accounts],

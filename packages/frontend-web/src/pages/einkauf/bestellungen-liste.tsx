@@ -6,6 +6,7 @@ import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { toast } from '@/hooks/use-toast'
 
 // API Client für Bestellungen
 const apiClient = createApiClient('/api/einkauf')
@@ -179,7 +180,37 @@ export default function BestellungenListePage(): JSX.Element {
   }
 
   const handleExport = () => {
-    alert('Export-Funktion wird implementiert')
+    try {
+      // Create CSV content
+      const csvHeader = 'Bestell-Nr.;Lieferant;Status;Liefertermin;Gesamtbetrag;Erstellt\n'
+      const csvContent = data.map((bestellung: any) =>
+        `"${bestellung.nummer}";"${bestellung.lieferant}";"${bestellung.status}";"${bestellung.liefertermin}";"${bestellung.gesamtbetrag}";"${bestellung.createdAt}"`
+      ).join('\n')
+
+      const csv = csvHeader + csvContent
+
+      // Create and download file
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `bestellungen-liste-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: 'Export erfolgreich',
+        description: `${data.length} Bestellungen wurden exportiert.`,
+      })
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Export fehlgeschlagen',
+        description: 'Beim Exportieren ist ein Fehler aufgetreten.',
+      })
+    }
   }
 
   return (
@@ -191,7 +222,12 @@ export default function BestellungenListePage(): JSX.Element {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onExport={handleExport}
-      onImport={() => alert('Import-Funktion wird implementiert')}
+      onImport={() => {
+        toast({
+          title: 'Import-Funktion',
+          description: 'CSV-Import wird in der nächsten Version verfügbar sein.',
+        })
+      }}
       isLoading={loading}
     />
   )

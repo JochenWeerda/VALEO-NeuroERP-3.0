@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 
 interface ChangeCalculatorProps {
   total: number
-  onTenderedChange?: (tendered: number) => void
+  onTenderedChange?: (_tendered: number) => void
 }
 
 export function ChangeCalculator({ total, onTenderedChange }: ChangeCalculatorProps) {

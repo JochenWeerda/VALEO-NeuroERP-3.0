@@ -1,161 +1,132 @@
 """
-CRM Lead management endpoints
-RESTful API for lead management with clean architecture
+CRM Lead endpoints proxied through crm-core.
 """
 
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from uuid import UUID
 
-from ....core.database import get_db
-from ....infrastructure.repositories import LeadRepository
-from ....core.dependency_container import container
-from ..schemas.crm import (
-    LeadCreate, LeadUpdate, Lead
-)
+import httpx
+from fastapi import APIRouter, HTTPException, Query, status
+
+from ....core.config import settings
+from ....integrations import crm_core_client
 from ..schemas.base import PaginatedResponse
+from ..schemas.crm import Lead, LeadCreate, LeadUpdate
 
 router = APIRouter()
 
 
-@router.post("/", response_model=Lead, status_code=201)
-async def create_lead(
-    lead_data: LeadCreate,
-    db: Session = Depends(get_db)
-):
-    """
-    Create a new lead.
+def _adapt_lead(core_lead: crm_core_client.CRMCoreLead) -> dict:
+    tenant_uuid = UUID(settings.DEFAULT_TENANT_ID)
+    return {
+        "id": core_lead.id,
+        "tenant_id": tenant_uuid,
+        "source": core_lead.source or "unknown",
+        "status": core_lead.status,
+        "priority": core_lead.priority,
+        "estimated_value": core_lead.estimated_value,
+        "company_name": core_lead.company_name,
+        "contact_person": core_lead.contact_person,
+        "email": core_lead.email,
+        "phone": core_lead.phone,
+        "assigned_to": core_lead.assigned_to,
+        "created_at": core_lead.created_at,
+        "updated_at": core_lead.updated_at,
+        "converted_at": None,
+        "converted_to_customer_id": None,
+        "is_active": True,
+        "deleted_at": None,
+    }
 
-    This endpoint allows creating a new sales lead in the CRM system.
-    """
-    try:
-        lead_repo = container.resolve(LeadRepository)
-        lead = await lead_repo.create(lead_data.model_dump(), lead_data.tenant_id)
-        return Lead.model_validate(lead)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create lead: {str(e)}")
+
+def _map_create_payload(payload: LeadCreate) -> dict:
+    body = payload.model_dump()
+    return {
+        "company_name": body["company_name"],
+        "contact_person": body["contact_person"],
+        "email": body["email"],
+        "phone": body.get("phone"),
+        "status": body["status"],
+        "priority": body["priority"],
+        "source": body["source"],
+        "estimated_value": float(body["estimated_value"]) if body.get("estimated_value") is not None else None,
+        "assigned_to": body.get("assigned_to"),
+        "notes": None,
+    }
+
+
+def _map_update_payload(payload: LeadUpdate) -> dict:
+    body = payload.model_dump(exclude_unset=True)
+    if "estimated_value" in body and body["estimated_value"] is not None:
+        body["estimated_value"] = float(body["estimated_value"])
+    return body
 
 
 @router.get("/", response_model=PaginatedResponse[Lead])
 async def list_leads(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
-    status: Optional[str] = Query(None, description="Filter by status"),
-    assigned_to: Optional[str] = Query(None, description="Filter by assigned user"),
-    skip: int = Query(0, ge=0, description="Number of items to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of items to return"),
-    db: Session = Depends(get_db)
+    status_filter: str | None = Query(None, alias="status"),
+    search: str | None = Query(None, description="Search in company/contact"),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
 ):
-    """
-    List leads with pagination and filtering.
-
-    Retrieve a paginated list of leads with optional filtering.
-    """
     try:
-        lead_repo = container.resolve(LeadRepository)
-
-        # Use provided tenant_id or default to system for now
-        effective_tenant_id = tenant_id or "system"
-
-        leads = await lead_repo.get_all(effective_tenant_id, skip, limit, status, assigned_to)
-        total = await lead_repo.count(effective_tenant_id, status, assigned_to)
-
-        return PaginatedResponse[Lead](
-            items=[Lead.model_validate(lead) for lead in leads],
-            total=total,
-            page=(skip // limit) + 1,
-            size=limit,
-            pages=(total + limit - 1) // limit,
-            has_next=(skip + limit) < total,
-            has_prev=skip > 0
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to list leads: {str(e)}")
+        leads, total = await crm_core_client.list_leads(status=status_filter, search=search, skip=skip, limit=limit)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to list leads: {exc}") from exc
+    items = [_adapt_lead(lead) for lead in leads]
+    pages = (total + limit - 1) // limit if limit else 0
+    return PaginatedResponse[Lead](
+        items=[Lead.model_validate(item) for item in items],
+        total=total,
+        page=(skip // limit) + 1 if limit else 1,
+        size=limit,
+        pages=pages,
+        has_next=(skip + limit) < total,
+        has_prev=skip > 0,
+    )
 
 
 @router.get("/{lead_id}", response_model=Lead)
-async def get_lead(
-    lead_id: str,
-    db: Session = Depends(get_db)
-):
-    """
-    Get lead by ID.
-
-    Retrieve detailed information about a specific lead.
-    """
+async def get_lead(lead_id: str):
     try:
-        lead_repo = container.resolve(LeadRepository)
-        lead = await lead_repo.get_by_id(lead_id, "system")  # TODO: tenant context
-        if not lead:
-            raise HTTPException(status_code=404, detail="Lead not found")
-        return Lead.model_validate(lead)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve lead: {str(e)}")
+        lead = await crm_core_client.get_lead(lead_id)
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 404:
+            raise HTTPException(status_code=404, detail="Lead not found") from exc
+        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve lead: {exc}") from exc
+    return Lead.model_validate(_adapt_lead(lead))
+
+
+@router.post("/", response_model=Lead, status_code=status.HTTP_201_CREATED)
+async def create_lead(payload: LeadCreate):
+    try:
+        created = await crm_core_client.create_lead(_map_create_payload(payload))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to create lead: {exc}") from exc
+    return Lead.model_validate(_adapt_lead(created))
 
 
 @router.put("/{lead_id}", response_model=Lead)
-async def update_lead(
-    lead_id: str,
-    lead_data: LeadUpdate,
-    db: Session = Depends(get_db)
-):
-    """
-    Update lead information.
-
-    Modify lead details such as status, priority, or assignment.
-    """
+async def update_lead(lead_id: str, payload: LeadUpdate):
     try:
-        lead_repo = container.resolve(LeadRepository)
-        lead = await lead_repo.update(lead_id, lead_data.model_dump(exclude_unset=True), "system")  # TODO: tenant context
-        if not lead:
-            raise HTTPException(status_code=404, detail="Lead not found")
-        return Lead.model_validate(lead)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to update lead: {str(e)}")
+        updated = await crm_core_client.update_lead(lead_id, _map_update_payload(payload))
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 404:
+            raise HTTPException(status_code=404, detail="Lead not found") from exc
+        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to update lead: {exc}") from exc
+    return Lead.model_validate(_adapt_lead(updated))
 
 
-@router.post("/{lead_id}/convert", response_model=dict)
-async def convert_lead(
-    lead_id: str,
-    customer_id: str,
-    db: Session = Depends(get_db)
-):
-    """
-    Convert lead to customer.
-
-    Convert a qualified lead into a customer record.
-    """
+@router.delete("/{lead_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_lead(lead_id: str):
     try:
-        lead_repo = container.resolve(LeadRepository)
-        success = await lead_repo.convert_to_customer(lead_id, customer_id, "system")  # TODO: tenant context
-        if not success:
-            raise HTTPException(status_code=400, detail="Failed to convert lead")
-        return {"message": "Lead converted successfully", "customer_id": customer_id}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to convert lead: {str(e)}")
-
-
-@router.delete("/{lead_id}", status_code=204)
-async def delete_lead(
-    lead_id: str,
-    db: Session = Depends(get_db)
-):
-    """
-    Delete lead (soft delete).
-
-    Mark a lead as inactive. This is a soft delete operation.
-    """
-    try:
-        lead_repo = container.resolve(LeadRepository)
-        success = await lead_repo.delete(lead_id, "system")  # TODO: tenant context
-        if not success:
-            raise HTTPException(status_code=404, detail="Lead not found")
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to delete lead: {str(e)}")
+        await crm_core_client.delete_lead(lead_id)
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 404:
+            raise HTTPException(status_code=404, detail="Lead not found") from exc
+        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to delete lead: {exc}") from exc

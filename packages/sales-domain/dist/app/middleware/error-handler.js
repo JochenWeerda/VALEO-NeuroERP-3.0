@@ -27,7 +27,7 @@ function errorHandler(error, request, reply) {
     const statusCode = error.statusCode || 500;
     const message = statusCode >= 500 ? 'Internal server error' : error.message;
     return reply.code(statusCode).send({
-        error: error.name || 'Error',
+        error: error.name ?? 'Error',
         message,
         ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
     });

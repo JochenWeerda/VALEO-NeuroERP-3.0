@@ -1,0 +1,40 @@
+{
+  "endpoint": "POST /ai/crm/summarize-thread",
+  "description": "Summarise multi-channel conversation threads for agents.",
+  "request": {
+    "body": {
+      "customer": { "$ref": "../schemas/customer_reference.schema.json" },
+      "thread": {
+        "id": "string",
+        "channel": "email|phone|chat|mixed",
+        "messages": [
+          {
+            "id": "msg-1",
+            "timestamp": "2025-11-12T10:00:00Z",
+            "author": "customer|agent|bot",
+            "text": "message text",
+            "metadata": { "subject": "Order delay" }
+          }
+        ]
+      },
+      "output_preferences": {
+        "language": "de-DE",
+        "style": "executive-brief|detailed",
+        "include_action_items": true
+      }
+    }
+  },
+  "response": {
+    "200": {
+      "body": {
+        "summary": "string",
+        "key_points": ["bullet", "..."],
+        "customer_sentiment": "positive|neutral|negative",
+        "recommended_actions": [
+          { "description": "Offer 10% discount", "confidence": 0.82 }
+        ],
+        "sources": ["msg-1", "msg-4"]
+      }
+    }
+  }
+}

@@ -1,0 +1,229 @@
+{
+  "Rechnung/Kontoauszug": [
+    "Kontonutzung für Rechnung",
+    "Kontoauszug gewünscht",
+    "Saldo Druck Rechnung",
+    "Druck Werbetext auf Rechnung / Lieferschein",
+    "Versandpauschalen berechnen",
+    "Einzel-Abrechnung",
+    "Sammel-Abrechnung",
+    "Sammel-Abrechnung ohne Einzel-Abrechnung",
+    "Bonus-Berechtigung",
+    "Bemerkenswerte Forderung",
+    "Selbstabrechner (Verkauf/Zukauf)"
+  ],
+  "Kundenrabatte": [
+    "Artikel-Nr.",
+    "Bezeichnung",
+    "Rabatt",
+    "Rabatt gültig bis",
+    "Rabatt-Liste übernehmen",
+    "Rabatt-Liste speichern"
+  ],
+  "Vereinbarte Kundenpreise": [
+    "Artikel-Nr.",
+    "Bezeichnung",
+    "Preis netto",
+    "Preis inkl. Fracht",
+    "Preis-Einheit",
+    "Rabatt erlaubt",
+    "Sonderfracht",
+    "Zahlungsbedingung",
+    "Gültig bis",
+    "Bediener"
+  ],
+  "Preise/Rabatte (global)": [
+    "Direktes Konto",
+    "Rabatt-Verrechnung",
+    "Selbstabholer-Rabatt",
+    "Preisermittlung/Sorten",
+    "Direktabzug",
+    "Wochenpreis EC-Basis"
+  ],
+  "Bank/Zahlungsverkehr": [
+    "Zahlungsbedingungen (Skonto/Tage)",
+    "Mahnwesen",
+    "SEPA-Verfahren",
+    "Mandat",
+    "Bank",
+    "IBAN",
+    "Währung",
+    "Umrechnungskurs",
+    "Zinstabelle Soll/Haben",
+    "Letzter Zinstermin",
+    "Saldo letzte Zinsabrechnung"
+  ],
+  "Wegbeschreibung": [
+    "Lade-Information",
+    "Allgemeine Angaben"
+  ],
+  "Sonstiges": [
+    "Nachkalkulation",
+    "Formulare",
+    "Offene Posten nicht aufrufen",
+    "Versicherung",
+    "Sprachschlüssel",
+    "Statistik-Kennzeichen",
+    "Landwirtschaftsamt",
+    "Marktpreis-Auswertung",
+    "Webshop-Kennzeichen"
+  ],
+  "Selektionen": [
+    "Schlüssel",
+    "Berechnung"
+  ],
+  "Schnittstelle": [
+    "Tankkarte",
+    "EAN-Code",
+    "Kundenkarten-Kennzeichen",
+    "EDIFACT INVOIC",
+    "EDIFACT ORDERS",
+    "EDIFACT DESADV",
+    "Rechnungs-Sammeldruck",
+    "Webshop Kundennr.",
+    "Webshop Bezeichnung"
+  ],
+  "Kundenprofil": [
+    "Firmenname",
+    "Gründung",
+    "Jahresumsatz",
+    "Berufsgenossenschaft",
+    "Berufsgen.-Nr.",
+    "Branche",
+    "Mitbewerber",
+    "Engpässe",
+    "Organisationsstruktur",
+    "Mitarbeiteranzahl",
+    "Wettbewerbsdifferenzierung",
+    "Betriebsrat",
+    "Unternehmensphilosophie"
+  ],
+  "Versandinformationen": [
+    "Versandart Rechnung",
+    "Mahnung",
+    "Kontaktzusammenstellung",
+    "Dispo-Nummer",
+    "Initialisierungsweisung",
+    "Versandmedium"
+  ],
+  "Lieferung/Zahlung": [
+    "Lieferbedingung",
+    "Zahlungsbedingung",
+    "Fälligkeit ab",
+    "Pro-Forma-Rechnung",
+    "Pro-Forma-Rabatte",
+    "Einzel-/Sammelversand-Avis"
+  ],
+  "Datenschutz": [
+    "Einwilligung",
+    "Anlagedatum",
+    "Anlagebearbeiter",
+    "Zusatzbemerkung"
+  ],
+  "Genossenschaftsanteile": [
+    "Geschäftsguthaben-Konto",
+    "Mitgliedschaft gekündigt",
+    "Kündigungsgrund",
+    "Datum Kündigung",
+    "Datum Austritt",
+    "Mitgliedsnummer",
+    "Pflichtanteile",
+    "Eintrittsdatum"
+  ],
+  "E-Mail-Verteiler": [
+    "Verteilername",
+    "Bezeichnung",
+    "E-Mail-Adresse"
+  ],
+  "Langtext": [
+    "Freitextfeld"
+  ],
+  "Betriebsgemeinschaften": [
+    "Verbundnummer",
+    "Mitglieder",
+    "Kundennummer",
+    "Anteil %"
+  ],
+  "Chef-Anweisung": [
+    "Freitextfeld oder Anweisungsbereich"
+  ],
+  "Ansprechpartner": [
+    "Name",
+    "Vorname",
+    "Position",
+    "Abteilung",
+    "Telefon 1/2",
+    "Mobil",
+    "E-Mail",
+    "Adresse",
+    "Anrede",
+    "Briefanrede",
+    "Geburtsdatum",
+    "Hobbys",
+    "Empfänger Rechnung per Mail",
+    "Empfänger Mahnung",
+    "Kontaktart",
+    "Erstanlage",
+    "CAD-System",
+    "Softwaresysteme",
+    "Datenschutzbeauftragter"
+  ],
+  "Kundenanschrift": [
+    "Name 1–3",
+    "Straße",
+    "Land",
+    "PLZ",
+    "Ort",
+    "Postfach",
+    "Telefon",
+    "Telefax",
+    "E-Mail",
+    "Homepage",
+    "Anrede",
+    "Briefanrede",
+    "Freifelder",
+    "Gebiet"
+  ],
+  "Allgemein": [
+    "Staat",
+    "Bundesland",
+    "Kunde seit",
+    "Debitoren-Konto",
+    "Deb.-Kto. Hauptkonto",
+    "Disponent",
+    "Vertriebsbeauftragter",
+    "ABC/Umsatzstatus",
+    "Betriebsnummer",
+    "UST-ID-Nr.",
+    "Steuernummer",
+    "Sperrgrund",
+    "Kundengruppe",
+    "Fax-Sperre",
+    "Infofelder 4–6"
+  ],
+  "CPD Konto": [
+    "Kundennummer",
+    "Debitoren-Konto",
+    "Suchbegriff",
+    "Rechnungsadresse",
+    "Geschäftsstelle",
+    "Kostenstelle",
+    "Rechnungsart",
+    "Sammelrechnung",
+    "Rechnungsformular",
+    "VB",
+    "Gebiet",
+    "Zahlungsbedingungen"
+  ],
+  "Menüstruktur (Navigation)": [
+    "Kunden/Lieferanten",
+    "Kundengruppen",
+    "CPD-Konto anlegen",
+    "CPD-Konten zurücksetzen",
+    "Preisvereinbarungen",
+    "Rabatt-Listen",
+    "Lieferanten",
+    "Interne Kalkulation"
+  ]
+}
+

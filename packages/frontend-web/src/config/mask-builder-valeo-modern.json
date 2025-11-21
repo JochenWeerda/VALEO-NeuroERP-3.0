@@ -1,0 +1,3197 @@
+{
+  "resource": "customer",
+  "version": "3.0.0",
+  "i18n": "de-DE",
+  "routing": {
+    "basePath": "/crm/customers",
+    "param": "customerId"
+  },
+  "layout": {
+    "header": {
+      "primary": [
+        {
+          "comp": "Text",
+          "bind": "customer.code",
+          "label": "Kundennummer",
+          "size": "lg"
+        },
+        {
+          "comp": "BadgeSelect",
+          "bind": "customer.status",
+          "optionsRef": "crm.customer.status"
+        },
+        {
+          "comp": "TagList",
+          "bind": "meta.tags"
+        }
+      ],
+      "secondary": [
+        {
+          "comp": "Select",
+          "bind": "customer.location_id",
+          "label": "Niederlassung"
+        },
+        {
+          "comp": "Select",
+          "bind": "customer.cost_center",
+          "label": "Kostenstelle"
+        },
+        {
+          "comp": "Toggle",
+          "bind": "customer.is_active",
+          "label": "Aktiv"
+        }
+      ],
+      "actions": [
+        {
+          "id": "save",
+          "label": "Speichern",
+          "type": "primary"
+        },
+        {
+          "id": "new",
+          "label": "Neu",
+          "type": "default"
+        },
+        {
+          "id": "duplicate",
+          "label": "Duplizieren",
+          "type": "default"
+        },
+        {
+          "id": "more",
+          "label": "Weitere",
+          "type": "menu",
+          "items": [
+            "archive",
+            "delete",
+            "export",
+            "history"
+          ]
+        }
+      ]
+    },
+    "nav": [
+      {
+        "id": "overview",
+        "label": "Übersicht",
+        "icon": "UserSquare"
+      },
+      {
+        "id": "master",
+        "label": "Stammdaten",
+        "icon": "IdCard"
+      },
+      {
+        "id": "addresses",
+        "label": "Adressen",
+        "icon": "MapPinned"
+      },
+      {
+        "id": "billingTax",
+        "label": "Abrechnung & Steuern",
+        "icon": "Receipt"
+      },
+      {
+        "id": "forms",
+        "label": "Formulare & Dokumente",
+        "icon": "FileText"
+      },
+      {
+        "id": "communication",
+        "label": "Kommunikation",
+        "icon": "MessagesSquare"
+      },
+      {
+        "id": "prefs",
+        "label": "Präferenzen & Flags",
+        "icon": "Settings2"
+      },
+      {
+        "id": "notes",
+        "label": "Notizen & Info",
+        "icon": "StickyNote"
+      },
+      {
+        "id": "history",
+        "label": "Historie & Logs",
+        "icon": "History"
+      },
+      {
+        "id": "table_kunden",
+        "label": "Kunden",
+        "icon": "Layers"
+      },
+      {
+        "id": "table_kunden_profil",
+        "label": "Kunden Profil",
+        "icon": "Layers"
+      },
+      {
+        "id": "table_kunden_ansprechpartner",
+        "label": "Kunden Ansprechpartner",
+        "icon": "Layers"
+      },
+      {
+        "id": "table_kunden_versand",
+        "label": "Kunden Versand",
+        "icon": "Layers"
+      },
+      {
+        "id": "table_kunden_lieferung_zahlung",
+        "label": "Kunden Lieferung Zahlung",
+        "icon": "Layers"
+      },
+      {
+        "id": "table_kunden_datenschutz",
+        "label": "Kunden Datenschutz",
+        "icon": "Layers"
+      },
+      {
+        "id": "table_kunden_genossenschaft",
+        "label": "Kunden Genossenschaft",
+        "icon": "Layers"
+      },
+      {
+        "id": "table_kunden_email_verteiler",
+        "label": "Kunden Email Verteiler",
+        "icon": "Layers"
+      },
+      {
+        "id": "table_kunden_betriebsgemeinschaften",
+        "label": "Kunden Betriebsgemeinschaften",
+        "icon": "Layers"
+      },
+      {
+        "id": "table_kunden_freitext",
+        "label": "Kunden Freitext",
+        "icon": "Layers"
+      },
+      {
+        "id": "table_kunden_allgemein_erweitert",
+        "label": "Kunden Allgemein Erweitert",
+        "icon": "Layers"
+      },
+      {
+        "id": "table_kunden_cpd_konto",
+        "label": "Kunden Cpd Konto",
+        "icon": "Layers"
+      },
+      {
+        "id": "table_kunden_rabatte_detail",
+        "label": "Kunden Rabatte Detail",
+        "icon": "Layers"
+      },
+      {
+        "id": "table_kunden_preise_detail",
+        "label": "Kunden Preise Detail",
+        "icon": "Layers"
+      }
+    ]
+  },
+  "views": [
+    {
+      "id": "overview",
+      "sections": [
+        {
+          "title": "Kunde",
+          "grid": 2,
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "party.name.primary",
+              "label": "Name"
+            },
+            {
+              "comp": "Select",
+              "bind": "customer.account_manager",
+              "label": "Betreuer"
+            },
+            {
+              "comp": "BadgeSelect",
+              "bind": "customer.abc_class",
+              "label": "ABC-Klasse",
+              "optionsRef": "crm.customer.abc"
+            },
+            {
+              "comp": "Select",
+              "bind": "customer.customer_group",
+              "label": "Kundengruppe"
+            }
+          ]
+        },
+        {
+          "title": "Kontakt",
+          "grid": 3,
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "contact.phone_primary",
+              "label": "Telefon"
+            },
+            {
+              "comp": "Text",
+              "bind": "contact.phone_secondary",
+              "label": "Mobil"
+            },
+            {
+              "comp": "Email",
+              "bind": "contact.email",
+              "label": "E-Mail"
+            }
+          ]
+        },
+        {
+          "title": "Adresse",
+          "grid": 3,
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "address.main.street",
+              "label": "Straße"
+            },
+            {
+              "comp": "Text",
+              "bind": "address.main.postcode",
+              "label": "PLZ",
+              "width": "xs"
+            },
+            {
+              "comp": "Text",
+              "bind": "address.main.city",
+              "label": "Ort"
+            },
+            {
+              "comp": "CountrySelect",
+              "bind": "address.main.country",
+              "label": "Land"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "master",
+      "tabs": [
+        {
+          "id": "ident",
+          "label": "Identität",
+          "sections": [
+            {
+              "title": "Namen",
+              "grid": 3,
+              "fields": [
+                {
+                  "comp": "Text",
+                  "bind": "party.name.primary",
+                  "label": "Name 1",
+                  "validators": [
+                    "required"
+                  ]
+                },
+                {
+                  "comp": "Text",
+                  "bind": "party.name.additional1",
+                  "label": "Name 2",
+                  "optional": true
+                },
+                {
+                  "comp": "Text",
+                  "bind": "party.name.additional2",
+                  "label": "Name 3",
+                  "optional": true
+                }
+              ]
+            },
+            {
+              "title": "Anrede",
+              "grid": 2,
+              "fields": [
+                {
+                  "comp": "Select",
+                  "bind": "contact.salutation",
+                  "label": "Anrede",
+                  "optionsRef": "common.salutation"
+                },
+                {
+                  "comp": "Text",
+                  "bind": "contact.letter_salutation",
+                  "label": "Briefanrede",
+                  "aiAssist": {
+                    "from": [
+                      "contact.salutation",
+                      "party.name.primary"
+                    ],
+                    "prompt": "Erzeuge formelle deutsche Briefanrede."
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "contact",
+          "label": "Kontakt",
+          "sections": [
+            {
+              "title": "Kommunikationsdaten",
+              "grid": 3,
+              "fields": [
+                {
+                  "comp": "Text",
+                  "bind": "contact.phone_primary",
+                  "label": "Telefon"
+                },
+                {
+                  "comp": "Text",
+                  "bind": "contact.phone_secondary",
+                  "label": "Mobil"
+                },
+                {
+                  "comp": "Email",
+                  "bind": "contact.email",
+                  "label": "E-Mail"
+                },
+                {
+                  "comp": "Url",
+                  "bind": "contact.homepage",
+                  "label": "Homepage",
+                  "span": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "metadata",
+          "label": "Meta",
+          "sections": [
+            {
+              "title": "Vertrieb",
+              "grid": 3,
+              "fields": [
+                {
+                  "comp": "Select",
+                  "bind": "customer.account_manager",
+                  "label": "Betreuer"
+                },
+                {
+                  "comp": "BadgeSelect",
+                  "bind": "customer.abc_class",
+                  "label": "ABC-Klasse",
+                  "optionsRef": "crm.customer.abc"
+                },
+                {
+                  "comp": "Select",
+                  "bind": "customer.customer_group",
+                  "label": "Kundengruppe"
+                }
+              ]
+            },
+            {
+              "title": "Freifelder & Infos",
+              "grid": 4,
+              "fields": [
+                {
+                  "comp": "Text",
+                  "bind": "meta.region",
+                  "label": "Gebiet"
+                },
+                {
+                  "comp": "Text",
+                  "bind": "meta.info1",
+                  "label": "Info 1"
+                },
+                {
+                  "comp": "Text",
+                  "bind": "meta.info2",
+                  "label": "Info 2"
+                },
+                {
+                  "comp": "Text",
+                  "bind": "meta.info3",
+                  "label": "Info 3"
+                },
+                {
+                  "comp": "Text",
+                  "bind": "meta.info4",
+                  "label": "Info 4"
+                },
+                {
+                  "comp": "Text",
+                  "bind": "meta.custom.free1",
+                  "label": "Frei 1"
+                },
+                {
+                  "comp": "Text",
+                  "bind": "meta.custom.free2",
+                  "label": "Frei 2"
+                },
+                {
+                  "comp": "Text",
+                  "bind": "meta.custom.free3",
+                  "label": "Frei 3"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "addresses",
+      "sections": [
+        {
+          "title": "Hauptadresse",
+          "grid": 3,
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "address.main.street",
+              "label": "Straße",
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "address.main.postcode",
+              "label": "PLZ",
+              "validators": [
+                "postcode"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "address.main.city",
+              "label": "Ort",
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "CountrySelect",
+              "bind": "address.main.country",
+              "label": "Land",
+              "validators": [
+                "required"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Rechnungsadresse",
+          "grid": 3,
+          "fields": [
+            {
+              "comp": "AddressMirrorToggle",
+              "bind": "address.invoice.use_main",
+              "label": "= Hauptadresse"
+            },
+            {
+              "comp": "Text",
+              "bind": "address.invoice.street",
+              "label": "Straße"
+            },
+            {
+              "comp": "Text",
+              "bind": "address.invoice.postcode",
+              "label": "PLZ"
+            },
+            {
+              "comp": "Text",
+              "bind": "address.invoice.city",
+              "label": "Ort"
+            },
+            {
+              "comp": "CountrySelect",
+              "bind": "address.invoice.country",
+              "label": "Land"
+            }
+          ]
+        },
+        {
+          "title": "Lieferadresse",
+          "grid": 3,
+          "fields": [
+            {
+              "comp": "AddressMirrorToggle",
+              "bind": "address.delivery.use_main",
+              "label": "= Hauptadresse"
+            },
+            {
+              "comp": "Text",
+              "bind": "address.delivery.street",
+              "label": "Straße"
+            },
+            {
+              "comp": "Text",
+              "bind": "address.delivery.postcode",
+              "label": "PLZ"
+            },
+            {
+              "comp": "Text",
+              "bind": "address.delivery.city",
+              "label": "Ort"
+            },
+            {
+              "comp": "CountrySelect",
+              "bind": "address.delivery.country",
+              "label": "Land"
+            }
+          ]
+        },
+        {
+          "title": "Postfach",
+          "grid": 2,
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "address.po_box.postcode",
+              "label": "Postf.-PLZ"
+            },
+            {
+              "comp": "Text",
+              "bind": "address.po_box.city",
+              "label": "Postf.-Ort"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "billingTax",
+      "sections": [
+        {
+          "title": "Debitorik",
+          "grid": 3,
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "finance.debtor_number",
+              "label": "Deb.-Kto (Haupt)",
+              "validators": [
+                "alnum"
+              ]
+            },
+            {
+              "comp": "Select",
+              "bind": "finance.payment_terms_id",
+              "label": "Zahlungsbedingung"
+            },
+            {
+              "comp": "Text",
+              "bind": "finance.sepa_mandate_ref",
+              "label": "SEPA-Mandatsref."
+            }
+          ]
+        },
+        {
+          "title": "Steuern & IDs",
+          "grid": 3,
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "tax.vat_id",
+              "label": "USt-IdNr.",
+              "validators": [
+                "vatId"
+              ],
+              "aiValidate": {
+                "tool": "vies.checkVat",
+                "argsMap": {
+                  "vatId": "tax.vat_id",
+                  "countryCode": "address.main.country"
+                }
+              },
+              "postAction": "showValidationBadge"
+            },
+            {
+              "comp": "Text",
+              "bind": "tax.tax_number",
+              "label": "Steuernummer"
+            },
+            {
+              "comp": "Text",
+              "bind": "tax.gln",
+              "label": "GLN",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "title": "Sperren & Gründe",
+          "grid": 2,
+          "fields": [
+            {
+              "comp": "Toggle",
+              "bind": "customer.is_blocked",
+              "label": "Gesperrt"
+            },
+            {
+              "comp": "TextArea",
+              "bind": "customer.block_reason",
+              "label": "Sperrgrund"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "forms",
+      "sections": [
+        {
+          "title": "Standardformulare",
+          "grid": 3,
+          "fields": [
+            {
+              "comp": "Select",
+              "bind": "forms.invoice_form_id",
+              "label": "Rechnungsformular"
+            },
+            {
+              "comp": "Select",
+              "bind": "forms.delivery_note_form_id",
+              "label": "Lieferscheinformular"
+            },
+            {
+              "comp": "Select",
+              "bind": "forms.email_template_id",
+              "label": "E-Mail-Template"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "communication",
+      "sections": [
+        {
+          "title": "Kommunikationspräferenzen",
+          "grid": 3,
+          "fields": [
+            {
+              "comp": "MultiSelect",
+              "bind": "contact.preferred_channels",
+              "label": "Bevorzugte Kanäle",
+              "optionsRef": "common.channels"
+            },
+            {
+              "comp": "Toggle",
+              "bind": "contact.allow_marketing",
+              "label": "Marketing erlaubt"
+            },
+            {
+              "comp": "Toggle",
+              "bind": "contact.allow_sms",
+              "label": "SMS erlaubt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prefs",
+      "sections": [
+        {
+          "title": "Kundeneinstellungen",
+          "grid": 3,
+          "fields": [
+            {
+              "comp": "Select",
+              "bind": "customer.price_list_id",
+              "label": "Preisliste",
+              "optional": true
+            },
+            {
+              "comp": "Select",
+              "bind": "customer.currency",
+              "label": "Währung",
+              "optional": true
+            },
+            {
+              "comp": "Select",
+              "bind": "customer.language",
+              "label": "Sprache",
+              "optional": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notes",
+      "sections": [
+        {
+          "title": "Notizen",
+          "grid": 1,
+          "fields": [
+            {
+              "comp": "RichText",
+              "bind": "notes.long",
+              "label": "Interne Notiz"
+            }
+          ]
+        },
+        {
+          "title": "Infofelder",
+          "grid": 4,
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "meta.info1",
+              "label": "Info 1"
+            },
+            {
+              "comp": "Text",
+              "bind": "meta.info2",
+              "label": "Info 2"
+            },
+            {
+              "comp": "Text",
+              "bind": "meta.info3",
+              "label": "Info 3"
+            },
+            {
+              "comp": "Text",
+              "bind": "meta.info4",
+              "label": "Info 4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "history",
+      "sections": [
+        {
+          "title": "Änderungsverlauf",
+          "grid": 1,
+          "fields": [
+            {
+              "comp": "AuditLog",
+              "bind": "audit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "table_kunden",
+      "label": "Kunden",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            }
+          ],
+          "grid": 3
+        },
+        {
+          "title": "Allgemein",
+          "fields": [
+            {
+              "comp": "DateTime",
+              "bind": "kunden.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden.geaendert_am",
+              "label": "Geaendert Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.geloescht",
+              "label": "Geloescht",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        },
+        {
+          "title": "Kunden-Anschrift",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden.name1",
+              "label": "Name1",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.name2",
+              "label": "Name2",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.name3",
+              "label": "Name3",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.strasse",
+              "label": "Strasse",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.plz",
+              "label": "Plz",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.ort",
+              "label": "Ort",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.land",
+              "label": "Land",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.postfach",
+              "label": "Postfach",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.postfach_plz",
+              "label": "Postfach Plz",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.postfach_ort",
+              "label": "Postfach Ort",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.tel",
+              "label": "Tel",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.fax",
+              "label": "Fax",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.email",
+              "label": "Email",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.homepage",
+              "label": "Homepage",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        },
+        {
+          "title": "Rechnung/Kontoauszug",
+          "fields": [
+            {
+              "comp": "Toggle",
+              "bind": "kunden.kontonutzung_rechnung",
+              "label": "Kontonutzung Rechnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.kontoauszug_gewuenscht",
+              "label": "Kontoauszug Gewuenscht",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.saldo_druck_rechnung",
+              "label": "Saldo Druck Rechnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.druck_verbot_rechnung",
+              "label": "Druck Verbot Rechnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.druck_werbetext",
+              "label": "Druck Werbetext",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.versandpauschalen_berechnen",
+              "label": "Versandpauschalen Berechnen",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.einzel_abrechnung",
+              "label": "Einzel Abrechnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.sammel_abrechnung",
+              "label": "Sammel Abrechnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.sammel_abrechnung_ohne_einzel",
+              "label": "Sammel Abrechnung Ohne Einzel",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.sammel_abrechnungskennzeichen",
+              "label": "Sammel Abrechnungskennzeichen",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.bonus_berechtigung",
+              "label": "Bonus Berechtigung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.bonus_rechnungsempfaenger_id",
+              "label": "Bonus Rechnungsempfaenger Id",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.bemerkenswerte_forderung",
+              "label": "Bemerkenswerte Forderung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.selbstabrechnung_durch_kunden",
+              "label": "Selbstabrechnung Durch Kunden",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.selbstabrechner_verkauf_zukauf",
+              "label": "Selbstabrechner Verkauf Zukauf",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.kunden_zusatz",
+              "label": "Kunden Zusatz",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        },
+        {
+          "title": "Kundenrabatte",
+          "fields": [
+            {
+              "comp": "Number",
+              "bind": "kunden.rabatt_liste_id",
+              "label": "Rabatt Liste Id",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.rabatt_liste_speichern",
+              "label": "Rabatt Liste Speichern",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        },
+        {
+          "title": "Preise / Rabatte",
+          "fields": [
+            {
+              "comp": "Toggle",
+              "bind": "kunden.direktes_konto",
+              "label": "Direktes Konto",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.rabatt_verrechnung",
+              "label": "Rabatt Verrechnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden.selbstabholer_rabatt",
+              "label": "Selbstabholer Rabatt",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.preisermittlung_sorten",
+              "label": "Preisermittlung Sorten",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.direktabzug",
+              "label": "Direktabzug",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.wochenpreis_ec_basis",
+              "label": "Wochenpreis Ec Basis",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden.gueltig_ab",
+              "label": "Gueltig Ab",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden.gueltig_bis",
+              "label": "Gueltig Bis",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        },
+        {
+          "title": "Bank / Zahlungsverkehr",
+          "fields": [
+            {
+              "comp": "Number",
+              "bind": "kunden.zahlungsbedingungen_tage",
+              "label": "Zahlungsbedingungen Tage",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden.skonto",
+              "label": "Skonto",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.netto_kasse",
+              "label": "Netto Kasse",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.mahnwesen",
+              "label": "Mahnwesen",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.lastschriftverfahren",
+              "label": "Lastschriftverfahren",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.sepa_verfahren",
+              "label": "Sepa Verfahren",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.mandat",
+              "label": "Mandat",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.bank",
+              "label": "Bank",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.iban",
+              "label": "Iban",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.bic",
+              "label": "Bic",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.umrechnung_euro",
+              "label": "Umrechnung Euro",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden.umrechnungskurs",
+              "label": "Umrechnungskurs",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.waehrung",
+              "label": "Waehrung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden.zinstabelle_id",
+              "label": "Zinstabelle Id",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden.letzter_zinstermin",
+              "label": "Letzter Zinstermin",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden.saldo_letzte_zinsabrechnung",
+              "label": "Saldo Letzte Zinsabrechnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.verrechnung_automatisch",
+              "label": "Verrechnung Automatisch",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        },
+        {
+          "title": "Wegbeschreibung",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden.lade_information",
+              "label": "Lade Information",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.allgemeine_angaben",
+              "label": "Allgemeine Angaben",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        },
+        {
+          "title": "Sonstiges",
+          "fields": [
+            {
+              "comp": "Toggle",
+              "bind": "kunden.nachkalkulation",
+              "label": "Nachkalkulation",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden.formular_id",
+              "label": "Formular Id",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.offene_posten_nicht_aufrufen",
+              "label": "Offene Posten Nicht Aufrufen",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.versicherung",
+              "label": "Versicherung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.sprachschluessel",
+              "label": "Sprachschluessel",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.statistik_kennzeichen",
+              "label": "Statistik Kennzeichen",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.landwirtschaftsamt_betriebsnummer",
+              "label": "Landwirtschaftsamt Betriebsnummer",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.marktpreis_auswertung",
+              "label": "Marktpreis Auswertung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden.schwellenwert",
+              "label": "Schwellenwert",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.webshop_kunde",
+              "label": "Webshop Kunde",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        },
+        {
+          "title": "Selektionen",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden.selektion_schluessel",
+              "label": "Selektion Schluessel",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.selektion_berechnung",
+              "label": "Selektion Berechnung",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        },
+        {
+          "title": "Schnittstelle",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden.tankkarte_ean_code",
+              "label": "Tankkarte Ean Code",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.kundenkarten_kennzeichen",
+              "label": "Kundenkarten Kennzeichen",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.edifact_invoic",
+              "label": "Edifact Invoic",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.edifact_orders",
+              "label": "Edifact Orders",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.edifact_desadv",
+              "label": "Edifact Desadv",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden.rechnungs_sammeldruck",
+              "label": "Rechnungs Sammeldruck",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.webshop_kunden_nr",
+              "label": "Webshop Kunden Nr.",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.webshop_bezeichnung",
+              "label": "Webshop Bezeichnung",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        },
+        {
+          "title": "Indizes",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        },
+        {
+          "title": "Full-Text-Search",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        },
+        {
+          "title": "Trigger für automatische Update-Zeitstempel",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.RETURNS",
+              "label": "Returns",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.RETURN",
+              "label": "Return",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden.BEFORE",
+              "label": "Before",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden.FOR",
+              "label": "For",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden.EXECUTE",
+              "label": "Execute",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    },
+    {
+      "id": "table_kunden_profil",
+      "label": "Kunden Profil",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden_profil.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_profil.firmenname",
+              "label": "Firmenname",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden_profil.gruendung",
+              "label": "Gruendung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden_profil.jahresumsatz",
+              "label": "Jahresumsatz",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_profil.berufsgenossenschaft",
+              "label": "Berufsgenossenschaft",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_profil.berufsgen_nr",
+              "label": "Berufsgen Nr.",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_profil.branche",
+              "label": "Branche",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_profil.mitbewerber",
+              "label": "Mitbewerber",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_profil.engpaesse",
+              "label": "Engpaesse",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_profil.organisationsstruktur",
+              "label": "Organisationsstruktur",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden_profil.mitarbeiteranzahl",
+              "label": "Mitarbeiteranzahl",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_profil.wettbewerbsdifferenzierung",
+              "label": "Wettbewerbsdifferenzierung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden_profil.betriebsrat",
+              "label": "Betriebsrat",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_profil.unternehmensphilosophie",
+              "label": "Unternehmensphilosophie",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_profil.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_profil.geaendert_am",
+              "label": "Geaendert Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_profil.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_profil.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    },
+    {
+      "id": "table_kunden_ansprechpartner",
+      "label": "Kunden Ansprechpartner",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.id",
+              "label": "Id",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden_ansprechpartner.prioritaet",
+              "label": "Prioritaet",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.vorname",
+              "label": "Vorname",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.nachname",
+              "label": "Nachname",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.position",
+              "label": "Position",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.abteilung",
+              "label": "Abteilung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.telefon1",
+              "label": "Telefon1",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.telefon2",
+              "label": "Telefon2",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.mobil",
+              "label": "Mobil",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.email",
+              "label": "Email",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.strasse",
+              "label": "Strasse",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.plz",
+              "label": "Plz",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.ort",
+              "label": "Ort",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.anrede",
+              "label": "Anrede",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.briefanrede",
+              "label": "Briefanrede",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden_ansprechpartner.geburtsdatum",
+              "label": "Geburtsdatum",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.hobbys",
+              "label": "Hobbys",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.info1",
+              "label": "Info1",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.info2",
+              "label": "Info2",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden_ansprechpartner.empfanger_rechnung_email",
+              "label": "Empfanger Rechnung Email",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden_ansprechpartner.empfanger_mahnung_email",
+              "label": "Empfanger Mahnung Email",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.kontaktart",
+              "label": "Kontaktart",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden_ansprechpartner.erstanlage",
+              "label": "Erstanlage",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.cad_system",
+              "label": "Cad System",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.softwaresysteme",
+              "label": "Softwaresysteme",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden_ansprechpartner.datenschutzbeauftragter",
+              "label": "Datenschutzbeauftragter",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_ansprechpartner.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_ansprechpartner.geaendert_am",
+              "label": "Geaendert Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_ansprechpartner.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    },
+    {
+      "id": "table_kunden_versand",
+      "label": "Kunden Versand",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden_versand.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_versand.versandart_rechnung",
+              "label": "Versandart Rechnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_versand.versandart_mahnung",
+              "label": "Versandart Mahnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_versand.versandart_kontakt",
+              "label": "Versandart Kontakt",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_versand.dispo_nummer",
+              "label": "Dispo Nummer",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_versand.initialisierungsweisung",
+              "label": "Initialisierungsweisung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_versand.versandmedium",
+              "label": "Versandmedium",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_versand.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_versand.geaendert_am",
+              "label": "Geaendert Am",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    },
+    {
+      "id": "table_kunden_lieferung_zahlung",
+      "label": "Kunden Lieferung Zahlung",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden_lieferung_zahlung.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_lieferung_zahlung.lieferbedingung",
+              "label": "Lieferbedingung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_lieferung_zahlung.zahlungsbedingung",
+              "label": "Zahlungsbedingung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_lieferung_zahlung.faelligkeit_ab",
+              "label": "Faelligkeit Ab",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden_lieferung_zahlung.pro_forma_rechnung",
+              "label": "Pro Forma Rechnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden_lieferung_zahlung.pro_forma_rabatt1",
+              "label": "Pro Forma Rabatt1",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden_lieferung_zahlung.pro_forma_rabatt2",
+              "label": "Pro Forma Rabatt2",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_lieferung_zahlung.einzel_sammelversand_avis",
+              "label": "Einzel Sammelversand Avis",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_lieferung_zahlung.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_lieferung_zahlung.geaendert_am",
+              "label": "Geaendert Am",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    },
+    {
+      "id": "table_kunden_datenschutz",
+      "label": "Kunden Datenschutz",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden_datenschutz.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden_datenschutz.einwilligung",
+              "label": "Einwilligung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden_datenschutz.anlagedatum",
+              "label": "Anlagedatum",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_datenschutz.anlagebearbeiter",
+              "label": "Anlagebearbeiter",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_datenschutz.zusatzbemerkung",
+              "label": "Zusatzbemerkung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_datenschutz.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_datenschutz.geaendert_am",
+              "label": "Geaendert Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_datenschutz.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    },
+    {
+      "id": "table_kunden_genossenschaft",
+      "label": "Kunden Genossenschaft",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden_genossenschaft.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_genossenschaft.geschaeftsguthaben_konto",
+              "label": "Geschaeftsguthaben Konto",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden_genossenschaft.mitgliedschaft_gekuendigt",
+              "label": "Mitgliedschaft Gekuendigt",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_genossenschaft.kuendigungsgrund",
+              "label": "Kuendigungsgrund",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden_genossenschaft.datum_kuendigung",
+              "label": "Datum Kuendigung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden_genossenschaft.datum_austritt",
+              "label": "Datum Austritt",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_genossenschaft.mitgliedsnummer",
+              "label": "Mitgliedsnummer",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden_genossenschaft.pflichtanteile",
+              "label": "Pflichtanteile",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden_genossenschaft.eintrittsdatum",
+              "label": "Eintrittsdatum",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_genossenschaft.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_genossenschaft.geaendert_am",
+              "label": "Geaendert Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_genossenschaft.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    },
+    {
+      "id": "table_kunden_email_verteiler",
+      "label": "Kunden Email Verteiler",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden_email_verteiler.id",
+              "label": "Id",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_email_verteiler.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_email_verteiler.verteilername",
+              "label": "Verteilername",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_email_verteiler.bezeichnung",
+              "label": "Bezeichnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_email_verteiler.email",
+              "label": "Email",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_email_verteiler.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_email_verteiler.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_email_verteiler.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    },
+    {
+      "id": "table_kunden_betriebsgemeinschaften",
+      "label": "Kunden Betriebsgemeinschaften",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden_betriebsgemeinschaften.id",
+              "label": "Id",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_betriebsgemeinschaften.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_betriebsgemeinschaften.verbundnummer",
+              "label": "Verbundnummer",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_betriebsgemeinschaften.mitglieder_kunden_nr",
+              "label": "Mitglieder Kunden Nr.",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden_betriebsgemeinschaften.anteil_prozent",
+              "label": "Anteil Prozent",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_betriebsgemeinschaften.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_betriebsgemeinschaften.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_betriebsgemeinschaften.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    },
+    {
+      "id": "table_kunden_freitext",
+      "label": "Kunden Freitext",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden_freitext.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_freitext.chef_anweisung",
+              "label": "Chef Anweisung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_freitext.langtext",
+              "label": "Langtext",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_freitext.bemerkungen",
+              "label": "Bemerkungen",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_freitext.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_freitext.geaendert_am",
+              "label": "Geaendert Am",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    },
+    {
+      "id": "table_kunden_allgemein_erweitert",
+      "label": "Kunden Allgemein Erweitert",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.staat",
+              "label": "Staat",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.bundesland",
+              "label": "Bundesland",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden_allgemein_erweitert.kunde_seit",
+              "label": "Kunde Seit",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.debitoren_konto",
+              "label": "Debitoren Konto",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.deb_kto_hauptkonto",
+              "label": "Deb Kto Hauptkonto",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.disponent",
+              "label": "Disponent",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.vertriebsbeauftragter",
+              "label": "Vertriebsbeauftragter",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.abc_umsatzstatus",
+              "label": "Abc Umsatzstatus",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.betriebsnummer",
+              "label": "Betriebsnummer",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.ust_id_nr",
+              "label": "Ust Id Nr.",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.steuernummer",
+              "label": "Steuernummer",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.sperrgrund",
+              "label": "Sperrgrund",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.kundengruppe",
+              "label": "Kundengruppe",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden_allgemein_erweitert.fax_sperre",
+              "label": "Fax Sperre",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.infofeld4",
+              "label": "Infofeld4",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.infofeld5",
+              "label": "Infofeld5",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.infofeld6",
+              "label": "Infofeld6",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_allgemein_erweitert.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_allgemein_erweitert.geaendert_am",
+              "label": "Geaendert Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_allgemein_erweitert.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    },
+    {
+      "id": "table_kunden_cpd_konto",
+      "label": "Kunden Cpd Konto",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.id",
+              "label": "Id",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.debitoren_konto",
+              "label": "Debitoren Konto",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.suchbegriff",
+              "label": "Suchbegriff",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.rechnungsadresse",
+              "label": "Rechnungsadresse",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.geschaeftsstelle",
+              "label": "Geschaeftsstelle",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.kostenstelle",
+              "label": "Kostenstelle",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.rechnungsart",
+              "label": "Rechnungsart",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden_cpd_konto.sammelrechnung",
+              "label": "Sammelrechnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.rechnungsformular",
+              "label": "Rechnungsformular",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.vb",
+              "label": "Vb",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.gebiet",
+              "label": "Gebiet",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.zahlungsbedingungen",
+              "label": "Zahlungsbedingungen",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_cpd_konto.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_cpd_konto.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    },
+    {
+      "id": "table_kunden_rabatte_detail",
+      "label": "Kunden Rabatte Detail",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden_rabatte_detail.id",
+              "label": "Id",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_rabatte_detail.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_rabatte_detail.artikel_nr",
+              "label": "Artikel Nr.",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_rabatte_detail.bezeichnung",
+              "label": "Bezeichnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden_rabatte_detail.rabatt",
+              "label": "Rabatt",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden_rabatte_detail.rabatt_gueltig_bis",
+              "label": "Rabatt Gueltig Bis",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden_rabatte_detail.rabatt_liste_id",
+              "label": "Rabatt Liste Id",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_rabatte_detail.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_rabatte_detail.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_rabatte_detail.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    },
+    {
+      "id": "table_kunden_preise_detail",
+      "label": "Kunden Preise Detail",
+      "sections": [
+        {
+          "title": "============================================================================",
+          "fields": [
+            {
+              "comp": "Text",
+              "bind": "kunden_preise_detail.id",
+              "label": "Id",
+              "optional": false,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_preise_detail.kunden_nr",
+              "label": "Kunden Nr.",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_preise_detail.artikel_nr",
+              "label": "Artikel Nr.",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_preise_detail.bezeichnung",
+              "label": "Bezeichnung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden_preise_detail.preis_netto",
+              "label": "Preis Netto",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden_preise_detail.preis_inkl_fracht",
+              "label": "Preis Inkl Fracht",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_preise_detail.preis_einheit",
+              "label": "Preis Einheit",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Toggle",
+              "bind": "kunden_preise_detail.rabatt_erlaubt",
+              "label": "Rabatt Erlaubt",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Number",
+              "bind": "kunden_preise_detail.sonderfracht",
+              "label": "Sonderfracht",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_preise_detail.zahlungsbedingung",
+              "label": "Zahlungsbedingung",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Date",
+              "bind": "kunden_preise_detail.gueltig_bis",
+              "label": "Gueltig Bis",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_preise_detail.bediener",
+              "label": "Bediener",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "DateTime",
+              "bind": "kunden_preise_detail.erstellt_am",
+              "label": "Erstellt Am",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_preise_detail.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            },
+            {
+              "comp": "Text",
+              "bind": "kunden_preise_detail.CREATE",
+              "label": "Create",
+              "optional": true,
+              "validators": []
+            }
+          ],
+          "grid": 3
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "rules": {
+      "party.name.primary": {
+        "required": true,
+        "min": 2
+      },
+      "address.main.city": {
+        "required": true
+      },
+      "address.main.postcode": {
+        "pattern": "^[A-Za-z0-9 -]{3,10}$"
+      },
+      "tax.vat_id": {
+        "if": "address.main.country == 'DE'",
+        "pattern": "^(DE)?[0-9]{9}$"
+      }
+    }
+  },
+  "ui": {
+    "responsive": true,
+    "breakpoints": {
+      "sm": {
+        "columns": 1,
+        "nav": "bottom",
+        "useAccordions": true,
+        "stickyFooterActions": true
+      },
+      "md": {
+        "columns": 2,
+        "nav": "side",
+        "useAccordions": false,
+        "stickyFooterActions": true
+      },
+      "lg": {
+        "columns": 3,
+        "nav": "side",
+        "useAccordions": false,
+        "stickyFooterActions": false
+      }
+    },
+    "touch": {
+      "minTargetSizePx": 44,
+      "swipeActions": true
+    },
+    "performance": {
+      "virtualLists": true,
+      "deferHeavyPanels": true
+    },
+    "offline": {
+      "enabled": true,
+      "clientCache": true,
+      "queuedWrites": true,
+      "optimisticUI": true
+    },
+    "lowAttentionMode": {
+      "enabled": true,
+      "aiFieldCompact": true,
+      "showDetailsOnTap": true
+    },
+    "a11y": {
+      "ariaLabels": true,
+      "keyboardShortcuts": true,
+      "reducedMotion": true
+    }
+  },
+  "ai": {
+    "enabled": true,
+    "intentBar": {
+      "shortcut": "Mod+k",
+      "actions": [
+        {
+          "id": "gen_letter_salutation",
+          "label": "Briefanrede vorschlagen",
+          "inputs": [
+            "contact.salutation",
+            "party.name.primary"
+          ],
+          "writes": [
+            "contact.letter_salutation"
+          ]
+        },
+        {
+          "id": "validate_vat",
+          "label": "USt-ID prüfen (VIES)",
+          "inputs": [
+            "tax.vat_id",
+            "address.main.country"
+          ],
+          "sidePanel": "aiPanel"
+        },
+        {
+          "id": "detect_duplicates",
+          "label": "Dubletten prüfen",
+          "inputs": [
+            "party.name.primary",
+            "contact.email",
+            "contact.phone_primary"
+          ]
+        },
+        {
+          "id": "summarize_customer",
+          "label": "Kunden-Zusammenfassung",
+          "context": [
+            "history",
+            "orders",
+            "invoices"
+          ],
+          "sidePanel": "aiPanel"
+        },
+        {
+          "id": "duplicate_customer",
+          "label": "Kunden duplizieren",
+          "context": [
+            "customer.code",
+            "party.name.primary"
+          ]
+        },
+        {
+          "id": "check_address",
+          "label": "Adresse prüfen",
+          "inputs": [
+            "address.main.postcode",
+            "address.main.city"
+          ],
+          "tool": "geo.resolve"
+        },
+        {
+          "id": "send_welcome_email",
+          "label": "Kundenbegrüßung mailen",
+          "context": [
+            "contact.email",
+            "party.name.primary"
+          ],
+          "generative": true,
+          "template": "customer_welcome"
+        },
+        {
+          "id": "request_sepa_mandate",
+          "label": "SEPA-Mandat anfordern",
+          "context": [
+            "contact.email",
+            "customer.code"
+          ],
+          "generative": true,
+          "template": "sepa_mandate_request"
+        },
+        {
+          "id": "create_address_confirmation",
+          "label": "Adressbestätigung erstellen",
+          "context": [
+            "address.main",
+            "party.name.primary"
+          ],
+          "generative": true,
+          "template": "address_confirmation"
+        }
+      ]
+    },
+    "validators": [
+      {
+        "id": "smart_address_check",
+        "on": [
+          "address.main.postcode",
+          "address.main.city"
+        ],
+        "severity": "warning"
+      },
+      {
+        "id": "required_min_set",
+        "fields": [
+          "party.name.primary",
+          "address.main.city",
+          "contact.email"
+        ],
+        "message": "Mindestsatz an Stammdaten nicht erfüllt."
+      }
+    ],
+    "ragPanels": {
+      "aiPanel": {
+        "title": "Assistent",
+        "sources": [
+          "erp.orders",
+          "erp.invoices",
+          "crm.activities"
+        ],
+        "actions": [
+          "suggest_next_best_action",
+          "create_task",
+          "open_email_draft"
+        ]
+      }
+    },
+    "mcp": {
+      "tools": [
+        {
+          "name": "vies.checkVat",
+          "args": [
+            "vatId",
+            "countryCode"
+          ]
+        },
+        {
+          "name": "geo.resolve",
+          "args": [
+            "street",
+            "postcode",
+            "city",
+            "country"
+          ]
+        },
+        {
+          "name": "scoring.duplicate",
+          "args": [
+            "name",
+            "email",
+            "phone"
+          ]
+        }
+      ]
+    },
+    "telemetry": {
+      "formFriction": true,
+      "autoFix": true
+    },
+    "roleContext": {
+      "enabled": true,
+      "weightedSuggestions": {
+        "sales": [
+          "detect_duplicates",
+          "summarize_customer",
+          "send_welcome_email"
+        ],
+        "accounting": [
+          "validate_vat",
+          "check_address",
+          "request_sepa_mandate"
+        ],
+        "admin": [
+          "duplicate_customer",
+          "create_address_confirmation"
+        ]
+      }
+    },
+    "serverEndpoints": {
+      "intent": "/ai/intent",
+      "validate": "/ai/validate",
+      "rag": "/ai/rag",
+      "streaming": true,
+      "idempotent": true
+    }
+  }
+}

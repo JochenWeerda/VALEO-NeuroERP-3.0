@@ -6,8 +6,8 @@ export function isValidEmail(email: string): boolean {
 }
 
 export function isValidPhone(phone: string): boolean {
-  const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
-  return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))
+  const phoneRegex = /^[+]?[1-9]\d{0,15}$/
+  return phoneRegex.test(phone.replace(/[\s\-()]/g, ''))
 }
 
 export function isValidDate(dateString: string): boolean {
@@ -109,7 +109,7 @@ export function validatePasswordStrength(password: string): {
   }
 }
 
-export function validateBusinessRules(data: any, rules: Record<string, (value: any) => boolean>): Record<string, string> {
+export function validateBusinessRules(data: any, rules: Record<string, (_value: any) => boolean>): Record<string, string> {
   const errors: Record<string, string> = {}
 
   Object.entries(rules).forEach(([field, validator]) => {

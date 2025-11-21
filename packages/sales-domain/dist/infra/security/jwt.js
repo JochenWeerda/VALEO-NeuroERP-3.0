@@ -10,7 +10,7 @@ class JWKSManager {
         this.config = config;
     }
     getJWKSClient() {
-        if (!this.jwksClient) {
+        if (this.jwksClient === undefined || this.jwksClient === null) {
             this.jwksClient = (0, jose_1.createRemoteJWKSet)(new URL(this.config.jwksUrl));
         }
         return this.jwksClient;
@@ -29,8 +29,8 @@ class JWKSManager {
 // Global JWKS manager instance
 let jwksManager = null;
 function getJWKSManager() {
-    if (!jwksManager) {
-        const jwksUrl = process.env.JWKS_URL || 'https://auth.example.com/.well-known/jwks.json';
+    if (jwksManager === undefined || jwksManager === null) {
+        const jwksUrl = process.env.JWKS_URL ?? 'https://auth.example.com/.well-known/jwks.json';
         const issuer = process.env.JWT_ISSUER;
         const audience = process.env.JWT_AUDIENCE;
         const config = { jwksUrl };

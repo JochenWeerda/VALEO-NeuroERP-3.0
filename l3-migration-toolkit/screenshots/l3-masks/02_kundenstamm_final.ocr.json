@@ -1,0 +1,110 @@
+{
+  "raw_text": "BB Kunden’ =\n\nINTERESSENT_,\n\nInteressentenny Niederlassung a\nsuchbegrif Kostenstelle: iB Loy\nx\nErstanlage: 26.10.2025 H\nDNeu « < > »\nATSWART ONDENDATENT\nsuchen Of eee ¥] | fkunoen-anscamier || Recun.-anscrrieT [BS] fattcemen |_recHnuncenyrorMuare  sonstices fe\nAllgernein Name Stent: p ] [Deutschland\nBi Kindendsten) Name 2: Bundesland:\n[E) Ansprechpartner\nFy chetarweisung Name 3: Kunde seit\n Lieteranten-Avtikel [| Strate: Debitoren-Konto Bezugsquelle\n1] Versandinformationer | | anayptz/Ort 1 1 Deb.-Kto, Haupt i Bl\n> Eigenschaften pisponent\n> I Abrechnung Postf/PLZ/Or i Disponent | Lispene\nTel t:fTel.2 ve: Dspere\nTelefax ABC-/Umsatzstatus\nAnrede/Briefanr Betriebs-Nr\nE-Mail Sy || ust0-ne\n\" Homepage: Steuer-Nr.\nFrei Sperre-Grund\nFrei 2 Kunden-Gruppe: [\nFrel 3 FaxSperte in)\nGebiet Cl\n_UNDENDATEN YJ not Info [p F\nWB AKTIONEN 1] tntee: Infos: fo lI\nBannane J] infos Infa.& [ooo i\n‘OKI [[abbrechen\n\n",
+  "fields": [
+    {
+      "label": "Kostenstelle",
+      "type": "string",
+      "example_value": "",
+      "position": {
+        "left": 394,
+        "top": 72,
+        "width": 66,
+        "height": 26
+      },
+      "confidence": 73
+    },
+    {
+      "label": "Erstanlage",
+      "type": "string",
+      "example_value": "",
+      "position": {
+        "left": 6,
+        "top": 97,
+        "width": 52,
+        "height": 31
+      },
+      "confidence": 69
+    },
+    {
+      "label": "3",
+      "type": "string",
+      "example_value": "",
+      "position": {
+        "left": 240,
+        "top": 262,
+        "width": 5,
+        "height": 31
+      },
+      "confidence": 88
+    },
+    {
+      "label": "Strate",
+      "type": "string",
+      "example_value": "",
+      "position": {
+        "left": 206,
+        "top": 298,
+        "width": 31,
+        "height": 9
+      },
+      "confidence": 65
+    },
+    {
+      "label": "ve",
+      "type": "string",
+      "example_value": "pisponent",
+      "position": {
+        "left": 574,
+        "top": 360,
+        "width": 13,
+        "height": 28
+      },
+      "confidence": 70
+    },
+    {
+      "label": "Homepage",
+      "type": "string",
+      "example_value": "",
+      "position": {
+        "left": 206,
+        "top": 466,
+        "width": 57,
+        "height": 12
+      },
+      "confidence": 79
+    },
+    {
+      "label": "Kunden-Gruppe",
+      "type": "string",
+      "example_value": "",
+      "position": {
+        "left": 575,
+        "top": 503,
+        "width": 83,
+        "height": 31
+      },
+      "confidence": 81
+    },
+    {
+      "label": "Infos",
+      "type": "string",
+      "example_value": "fo",
+      "position": {
+        "left": 837,
+        "top": 865,
+        "width": 28,
+        "height": 9
+      },
+      "confidence": 64
+    }
+  ],
+  "tabs": [],
+  "metadata": {
+    "image_size": [
+      1289,
+      965
+    ],
+    "total_words": 129,
+    "avg_confidence": 76.34013605442176
+  }
+}

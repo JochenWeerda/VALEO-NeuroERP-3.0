@@ -33,25 +33,25 @@ class CreditNoteService {
     }
     async updateCreditNote(id, data) {
         const existingCreditNote = await this.deps.creditNoteRepo.findById(id, data.tenantId);
-        if (!existingCreditNote) {
+        if (existingCreditNote === undefined || existingCreditNote === null) {
             throw new Error(`Credit note ${id} not found`);
         }
         const updatedCreditNote = await this.deps.creditNoteRepo.update(id, data.tenantId, data);
-        if (!updatedCreditNote) {
+        if (updatedCreditNote === undefined || updatedCreditNote === null) {
             throw new Error(`Failed to update credit note ${id}`);
         }
         return updatedCreditNote;
     }
     async settleCreditNote(id, tenantId) {
         const creditNote = await this.deps.creditNoteRepo.findById(id, tenantId);
-        if (!creditNote) {
+        if (creditNote === undefined || creditNote === null) {
             throw new Error(`Credit note ${id} not found`);
         }
         if (!creditNote.canBeSettled()) {
             throw new Error('Credit note cannot be settled in its current state');
         }
         const updatedCreditNote = await this.deps.creditNoteRepo.updateStatus(id, tenantId, 'Settled');
-        if (!updatedCreditNote) {
+        if (updatedCreditNote === undefined || updatedCreditNote === null) {
             throw new Error(`Failed to settle credit note`);
         }
         return updatedCreditNote;

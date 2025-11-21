@@ -1,0 +1,20 @@
+groups:
+  - name: infrastat-alerts
+    rules:
+      - alert: InfraStatSubmissionFailureRateHigh
+        expr: infrastat_submission_failure_ratio > 0.2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "InfraStat Submission Failure Rate hoch"
+          description: "Mehr als 20% der Übermittlungen an IDEV schlagen seit 10 Minuten fehl."
+
+      - alert: InfraStatValidationFailures
+        expr: rate(infrastat_validation_failure_total[15m]) > 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "InfraStat Validation Failures"
+          description: "Es wurden Validierungsfehler registriert – prüfen Sie ETL-Daten."

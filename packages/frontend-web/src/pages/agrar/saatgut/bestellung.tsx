@@ -244,7 +244,7 @@ export default function SaatgutBestellungPage(): JSX.Element {
           </Card>
         )
 
-      case 3:
+      case 3: {
         const empfohleneMenge = calculateEmpfohleneMenge()
         return (
           <Card>
@@ -298,11 +298,12 @@ export default function SaatgutBestellungPage(): JSX.Element {
                   </Select>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )
-
-      case 4:
+              </CardContent>
+            </Card>
+          )
+      }
+  
+        case 4:
         return (
           <Card>
             <CardHeader>

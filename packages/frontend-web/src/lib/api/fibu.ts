@@ -2,7 +2,6 @@
  * Finanzbuchhaltung API Client
  * TanStack Query Hooks für alle Fibu-Endpoints
  */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 

@@ -6,6 +6,7 @@ import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { toast } from '@/hooks/use-toast'
 
 // API Client für Kunden
 const apiClient = createApiClient('/api/crm')
@@ -231,7 +232,37 @@ export default function KundenListePage(): JSX.Element {
   }
 
   const handleExport = () => {
-    alert('Export-Funktion wird implementiert')
+    try {
+      // Create CSV content
+      const csvHeader = 'Firma;Ort;Telefon;E-Mail;Gesamtumsatz;Status\n'
+      const csvContent = data.map((customer: any) =>
+        `"${customer.firma || `${customer.vorname} ${customer.nachname}`}";"${customer.plz} ${customer.ort}";"${customer.telefon || ''}";"${customer.email || ''}";"${customer.umsatzGesamt || 0}";"${customer.status || 'aktiv'}"`
+      ).join('\n')
+
+      const csv = csvHeader + csvContent
+
+      // Create and download file
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `kunden-liste-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: 'Export erfolgreich',
+        description: `${data.length} Kunden wurden exportiert.`,
+      })
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Export fehlgeschlagen',
+        description: 'Beim Exportieren ist ein Fehler aufgetreten.',
+      })
+    }
   }
 
   return (

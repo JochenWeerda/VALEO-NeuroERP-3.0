@@ -15,15 +15,23 @@
     "mcp:dev": "ts-node src/mcp-server.ts",
     "policy:seed": "ts-node scripts/seed-policies.ts",
     "policy:init": "pnpm run policy:seed && echo Policy-Datenbank bereit!",
-    "lint-staged": "lint-staged"
+    "lint-staged": "lint-staged",
+    "test:e2e:smoke": "playwright test --grep @smoke --project=smoke",
+    "test:e2e:full": "playwright test --grep @full --project=full",
+    "test:e2e:fallback": "playwright test --grep @fallback --project=fallback-verification",
+    "test:e2e:report": "playwright show-report"
   },
   "devDependencies": {
     "@playwright/test": "1.48.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/express": "^5.0.3",
     "@types/node": "^24.6.1",
+    "@types/pg": "^8.15.6",
+    "@types/uuid": "^11.0.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "commander": "^14.0.2",
+    "csv-parse": "^6.1.0",
     "eslint": "^8.57.0",
     "eslint-plugin-perfectionist": "^2.11.0",
     "eslint-plugin-sonarjs": "^1.0.3",
@@ -32,9 +40,11 @@
     "express": "^5.1.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.3",
+    "pg": "^8.16.3",
     "rimraf": "^6.0.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "uuid": "^13.0.0"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

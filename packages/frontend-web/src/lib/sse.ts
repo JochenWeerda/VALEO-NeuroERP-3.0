@@ -5,11 +5,11 @@ type SSEStatus = 'open' | 'closed' | 'error'
 const RECONNECT_DELAY_MS = 1_500
 
 interface UseSSEOptions {
-  onStatus?: (status: SSEStatus) => void
+  onStatus?: (_status: SSEStatus) => void
   heartbeatMs?: number
 }
 
-export function useSSE(channel: string, onMessage: (data: unknown) => void, opts?: UseSSEOptions): void {
+export function useSSE(channel: string, onMessage: (_data: unknown) => void, opts?: UseSSEOptions): void {
   const handler = useRef(onMessage)
   handler.current = onMessage
 

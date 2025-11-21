@@ -1,7 +1,7 @@
 import { type ReactNode, createContext, useContext, useState } from "react"
 import * as Toast from "@radix-ui/react-toast"
 
-type Ctx = { push: (msg: string) => void }
+type Ctx = { push: (_msg: string) => void }
 const ToastCtx = createContext<Ctx>({ push: () => undefined })
 export const useToast = (): Ctx => useContext(ToastCtx)
 

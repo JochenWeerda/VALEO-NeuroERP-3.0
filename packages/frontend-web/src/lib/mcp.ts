@@ -133,7 +133,7 @@ export class McpError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: unknown
+    public _details?: unknown
   ) {
     super(message)
     this.name = 'McpError'
