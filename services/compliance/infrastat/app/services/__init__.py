@@ -1,0 +1,2 @@
+"""Service-Layer für InfraStat."""
+

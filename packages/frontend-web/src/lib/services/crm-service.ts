@@ -156,28 +156,28 @@ export const crmService = {
     await apiClient.delete(`/api/v1/crm/activities/${id}`)
   },
 
-  // Farm Profiles
+  // Betriebsprofile (Farm Profiles)
   async getFarmProfiles(params?: { search?: string; limit?: number; offset?: number }) {
-    const response = await apiClient.get<{ data: FarmProfile[]; total: number }>('/api/v1/crm/farm-profiles', { params })
+    const response = await apiClient.get<{ data: FarmProfile[]; total: number }>('/api/v1/crm/betriebsprofile', { params })
     return response.data
   },
 
   async getFarmProfile(id: string) {
-    const response = await apiClient.get<{ data: FarmProfile }>(`/api/v1/crm/farm-profiles/${id}`)
+    const response = await apiClient.get<{ data: FarmProfile }>(`/api/v1/crm/betriebsprofile/${id}`)
     return response.data.data
   },
 
   async createFarmProfile(data: Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>) {
-    const response = await apiClient.post<{ data: FarmProfile }>('/api/v1/crm/farm-profiles', data)
+    const response = await apiClient.post<{ data: FarmProfile }>('/api/v1/crm/betriebsprofile', data)
     return response.data.data
   },
 
   async updateFarmProfile(id: string, data: Partial<Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>>) {
-    const response = await apiClient.put<{ data: FarmProfile }>(`/api/v1/crm/farm-profiles/${id}`, data)
+    const response = await apiClient.put<{ data: FarmProfile }>(`/api/v1/crm/betriebsprofile/${id}`, data)
     return response.data.data
   },
 
   async deleteFarmProfile(id: string) {
-    await apiClient.delete(`/api/v1/crm/farm-profiles/${id}`)
+    await apiClient.delete(`/api/v1/crm/betriebsprofile/${id}`)
   },
 }

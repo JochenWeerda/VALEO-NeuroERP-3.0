@@ -9,13 +9,11 @@ import { useQueryClient } from '@tanstack/react-query'
 
 type RealtimeContextValue = {
   isConnected: boolean
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  subscribe: (eventType: string, handler: (data: any) => void) => () => void
+  subscribe: (_eventType: string, _handler: (_data: any) => void) => () => void
 }
 
 const RealtimeContext = createContext<RealtimeContextValue | null>(null)
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useRealtime() {
   const context = useContext(RealtimeContext)
   if (!context) {
@@ -30,22 +28,19 @@ type RealtimeProviderProps = {
   enabled?: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function RealtimeProvider({
   children,
   channel = 'default',
   enabled = true,
 }: RealtimeProviderProps) {
   const queryClient = useQueryClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const eventHandlers = React.useRef<Map<string, Set<(data: any) => void>>>(
+  const eventHandlers = React.useRef<Map<string, Set<(_data: any) => void>>>(
     new Map()
   )
 
   const handleMessage = useCallback(
     (message: SSEMessage) => {
       const eventType = message.event ?? message.data.event ?? 'message'
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const handlers = eventHandlers.current.get(eventType)
 
       if (handlers) {
@@ -86,8 +81,7 @@ export function RealtimeProvider({
   })
 
   const subscribe = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (eventType: string, handler: (data: any) => void) => {
+    (eventType: string, handler: (_data: any) => void) => {
       if (!eventHandlers.current.has(eventType)) {
         eventHandlers.current.set(eventType, new Set())
       }
@@ -130,10 +124,9 @@ export function RealtimeProvider({
 /**
  * Hook to subscribe to specific realtime events
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
 export function useRealtimeEvent<T = any>(
   eventType: string,
-  handler: (data: T) => void
+  handler: (_data: T) => void
 ) {
   const { subscribe } = useRealtime()
 

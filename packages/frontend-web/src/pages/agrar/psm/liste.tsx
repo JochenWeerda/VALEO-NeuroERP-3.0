@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, Plus, Search } from 'lucide-react'
+import { toast } from '@/hooks/use-toast'
 
 type PSM = {
   id: string
@@ -41,6 +42,46 @@ const mockPSM: PSM[] = [
 export default function PSMListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+
+  const handleExport = () => {
+    try {
+      // Filter data based on search term
+      const filteredData = mockPSM.filter(psm =>
+        psm.mittel.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        psm.wirkstoff.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+
+      // Create CSV content
+      const csvHeader = 'Mittel;Wirkstoff;Kulturen;Zulassung bis;Status;Erklärung Landwirt\n'
+      const csvContent = filteredData.map(psm =>
+        `"${psm.mittel}";"${psm.wirkstoff}";"${psm.kulturen.join(', ')}";"${psm.zulassungBis}";"${psm.status}";"${psm.erklaerungLandwirtStatus || ''}"`
+      ).join('\n')
+
+      const csv = csvHeader + csvContent
+
+      // Create and download file
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `psm-liste-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: 'Export erfolgreich',
+        description: `${filteredData.length} PSM-Datensätze wurden exportiert.`,
+      })
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Export fehlgeschlagen',
+        description: 'Beim Exportieren ist ein Fehler aufgetreten.',
+      })
+    }
+  }
 
   const columns = [
     {
@@ -133,7 +174,7 @@ export default function PSMListePage(): JSX.Element {
                 className="pl-10"
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

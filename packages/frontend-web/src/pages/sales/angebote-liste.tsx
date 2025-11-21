@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileDown, FileText, Plus, Search } from 'lucide-react'
+import { useListActions } from '@/hooks/useListActions'
+import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
 
 type Angebot = {
   id: string
@@ -72,6 +74,20 @@ export default function AngeboteListePage(): JSX.Element {
       angebot.kunde.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'alle' || angebot.status === statusFilter
     return matchesSearch && matchesStatus
+  })
+
+  const exportData = filteredAngebote.map(a => ({
+    Angebotsnummer: a.nummer,
+    Datum: formatDateForExport(a.datum),
+    Kunde: a.kunde,
+    Betrag: formatCurrencyForExport(a.betrag),
+    'Gültig bis': formatDateForExport(a.gueltigBis),
+    Status: statusLabelMap[a.status],
+  }))
+
+  const { handleExport, handlePrint } = useListActions({
+    data: exportData,
+    entityName: 'angebote',
   })
 
   const columns = [
@@ -155,11 +171,11 @@ export default function AngeboteListePage(): JSX.Element {
               <option value="abgelehnt">Abgelehnt</option>
               <option value="abgelaufen">Abgelaufen</option>
             </select>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handlePrint}>
               <FileText className="h-4 w-4" />
               Drucken
             </Button>

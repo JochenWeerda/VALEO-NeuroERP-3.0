@@ -5,7 +5,7 @@ async function tenantMiddleware(request, reply) {
     try {
         // Extract tenant ID from header
         const tenantId = request.headers['x-tenant-id'];
-        if (!tenantId) {
+        if (tenantId === undefined || tenantId === null) {
             return reply.code(400).send({
                 error: 'Bad Request',
                 message: 'Missing x-tenant-id header',

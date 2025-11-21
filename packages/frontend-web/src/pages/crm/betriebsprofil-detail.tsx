@@ -37,8 +37,8 @@ export default function BetriebsprofilePage(): JSX.Element {
   })
 
   const { data, isLoading } = useQuery({
-    queryKey: queryKeys.crm.farmProfiles.detail(id!),
-    queryFn: () => crmService.getFarmProfile(id!),
+    queryKey: queryKeys.crm.farmProfiles.detail(id ?? ''),
+    queryFn: () => crmService.getFarmProfile(id ?? ''),
     enabled: !isNew && !!id,
   })
 
@@ -63,10 +63,10 @@ export default function BetriebsprofilePage(): JSX.Element {
 
   const updateMutation = useMutation({
     mutationFn: (data: Partial<Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>>) =>
-      crmService.updateFarmProfile(id!, data),
+      crmService.updateFarmProfile(id ?? '', data),
     onSuccess: () => {
       toast.push('Betriebsprofil erfolgreich aktualisiert')
-      queryClient.invalidateQueries({ queryKey: queryKeys.crm.farmProfiles.detail(id!) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.crm.farmProfiles.detail(id ?? '') })
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.farmProfiles.all })
     },
     onError: (error) => {

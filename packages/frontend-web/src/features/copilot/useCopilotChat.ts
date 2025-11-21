@@ -18,7 +18,7 @@ type ChatResponse = {
  */
 export function useCopilotChat(): {
   messages: Message[]
-  sendMessage: (text: string) => Promise<void>
+  sendMessage: (_text: string) => Promise<void>
   loading: boolean
 } {
   const [messages, setMessages] = useState<Message[]>([])

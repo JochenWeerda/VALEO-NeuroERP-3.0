@@ -1,0 +1,60 @@
+{{- if .Values.zoll.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-zoll
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "valeo-erp.name" . }}-zoll
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "valeo-erp.name" . }}-zoll
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ include "valeo-erp.serviceAccountName" . }}
+      containers:
+        - name: zoll
+          image: "{{ .Values.zoll.image.repository }}:{{ .Values.zoll.image.tag }}"
+          imagePullPolicy: {{ default "IfNotPresent" .Values.zoll.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.zoll.servicePort }}
+              name: http
+          env:
+            {{- range $key, $val := .Values.zoll.env }}
+            - name: {{ $key }}
+              value: "{{ $val }}"
+            {{- end }}
+            {{- range $ref := .Values.zoll.secretRefs }}
+            - name: {{ $ref.env }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $ref.name }}
+                  key: {{ $ref.key }}
+            {{- end }}
+          {{- if .Values.zoll.resources }}
+          resources:
+            {{- toYaml .Values.zoll.resources | nindent 12 }}
+          {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-zoll
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: {{ include "valeo-erp.name" . }}-zoll
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: http
+      port: {{ .Values.zoll.servicePort }}
+      targetPort: {{ .Values.zoll.servicePort }}
+{{- end }}

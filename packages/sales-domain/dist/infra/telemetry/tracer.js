@@ -7,7 +7,7 @@ exports.tracingMiddleware = tracingMiddleware;
 const api_1 = require("@opentelemetry/api");
 let tracer = null;
 function getTracer() {
-    if (!tracer) {
+    if (tracer === undefined || tracer === null) {
         tracer = api_1.trace.getTracer('sales-domain', '1.0.0');
     }
     return tracer;
@@ -33,7 +33,7 @@ function tracingMiddleware() {
                 'http.method': request.method,
                 'http.url': request.url,
                 'http.user_agent': request.headers['user-agent'] || '',
-                'tenant.id': request.tenantId || '',
+                'tenant.id': request.tenantId ?? '',
                 'request.id': request.id,
             });
             // Store span in request for later use

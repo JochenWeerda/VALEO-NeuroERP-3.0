@@ -4,6 +4,7 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Kasse
 const kasseSchema = z.object({
@@ -139,19 +140,19 @@ const kasseConfig: MaskConfig = {
       key: 'bewegungen_custom',
       label: '',
       fields: [],
-      customRender: (data: any, onChange: (data: any) => void) => (
+      customRender: (_data: any, onChange: (_data: any) => void) => (
         <KassenbewegungenTable
-          data={data.bewegungen || []}
+          data={_data.bewegungen || []}
           onChange={(bewegungen) => {
             const sollEinlagen = bewegungen.filter((b: any) => b.typ === 'einlage').reduce((sum: number, b: any) => sum + (b.betrag || 0), 0)
             const sollAuszahlungen = bewegungen.filter((b: any) => b.typ === 'auszahlung').reduce((sum: number, b: any) => sum + (b.betrag || 0), 0)
             const istEinlagen = sollEinlagen // Vereinfacht - in Realität würden Ist-Werte manuell erfasst
             const istAuszahlungen = sollAuszahlungen
-            const endbestand = (data.anfangsbestand || 0) + istEinlagen - istAuszahlungen
-            const differenz = Math.abs(endbestand - (data.endbestand || 0))
+            const endbestand = (_data.anfangsbestand || 0) + istEinlagen - istAuszahlungen
+            const differenz = Math.abs(endbestand - (_data.endbestand || 0))
 
             onChange({
-              ...data,
+              ..._data,
               bewegungen,
               sollEinlagen,
               sollAuszahlungen,
@@ -173,16 +174,16 @@ const kasseConfig: MaskConfig = {
       key: 'kassensturz_custom',
       label: '',
       fields: [],
-      customRender: (data: any, onChange: (data: any) => void) => (
+      customRender: (_data: any, onChange: (_data: any) => void) => (
         <KassensturzForm
-          data={data.kassensturz || {
+          data={_data.kassensturz || {
             scheine: {},
             muenzen: {},
             gesamtGezaehlt: 0,
             differenzKassensturz: 0
           }}
-          erwarteterBestand={data.endbestand || 0}
-          onChange={(kassensturz) => onChange({ ...data, kassensturz })}
+          erwarteterBestand={_data.endbestand || 0}
+          onChange={(kassensturz) => onChange({ ..._data, kassensturz })}
         />
       )
     },
@@ -281,9 +282,9 @@ const kasseConfig: MaskConfig = {
 }
 
 // Kassenbewegungen-Tabelle Komponente
-function KassenbewegungenTable({ data, onChange }: { data: any[], onChange: (data: any[]) => void }) {
+function KassenbewegungenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
   const addBewegung = () => {
-    onChange([...data, {
+    onChange([..._data, {
       typ: 'einlage',
       betrag: 0,
       verwendungszweck: '',
@@ -293,13 +294,13 @@ function KassenbewegungenTable({ data, onChange }: { data: any[], onChange: (dat
   }
 
   const updateBewegung = (index: number, field: string, value: any) => {
-    const newData = [...data]
+    const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
   }
 
   const removeBewegung = (index: number) => {
-    onChange(data.filter((_, i) => i !== index))
+    onChange(_data.filter((_, i) => i !== index))
   }
 
   return (
@@ -327,7 +328,7 @@ function KassenbewegungenTable({ data, onChange }: { data: any[], onChange: (dat
             </tr>
           </thead>
           <tbody>
-            {data.map((bewegung, index) => (
+            {_data.map((bewegung, index) => (
               <tr key={index} className="border">
                 <td className="px-4 py-2 border">
                   <select
@@ -393,16 +394,16 @@ function KassenbewegungenTable({ data, onChange }: { data: any[], onChange: (dat
 }
 
 // Kassensturz-Form Komponente
-function KassensturzForm({ data, erwarteterBestand, onChange }: {
+function KassensturzForm({ data: _data, erwarteterBestand, onChange }: {
   data: any,
   erwarteterBestand: number,
-  onChange: (data: any) => void
+  onChange: (_data: any) => void
 }) {
   const scheine = [500, 200, 100, 50, 20, 10, 5].map(s => s.toString())
   const muenzen = [2, 1, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01].map(m => m.toString())
 
   const updateAnzahl = (typ: 'scheine' | 'muenzen', wert: string, anzahl: number) => {
-    const newData = { ...data }
+    const newData = { ..._data }
     if (!newData[typ]) newData[typ] = {}
     newData[typ][wert] = anzahl
 
@@ -438,12 +439,12 @@ function KassensturzForm({ data, erwarteterBestand, onChange }: {
                 <input
                   type="number"
                   min="0"
-                  value={data.scheine?.[schein] || 0}
+                  value={_data.scheine?.[schein] || 0}
                   onChange={(e) => updateAnzahl('scheine', schein, parseInt(e.target.value) || 0)}
                   className="w-20 p-1 border rounded text-right"
                 />
                 <span className="w-16 text-right">
-                  {(parseFloat(schein) * (data.scheine?.[schein] || 0)).toFixed(2)} €
+                  {(parseFloat(schein) * (_data.scheine?.[schein] || 0)).toFixed(2)} €
                 </span>
               </div>
             ))}
@@ -460,12 +461,12 @@ function KassensturzForm({ data, erwarteterBestand, onChange }: {
                 <input
                   type="number"
                   min="0"
-                  value={data.muenzen?.[münze] || 0}
+                  value={_data.muenzen?.[münze] || 0}
                   onChange={(e) => updateAnzahl('muenzen', münze, parseInt(e.target.value) || 0)}
                   className="w-20 p-1 border rounded text-right"
                 />
                 <span className="w-16 text-right">
-                  {(parseFloat(münze) * (data.muenzen?.[münze] || 0)).toFixed(2)} €
+                  {(parseFloat(münze) * (_data.muenzen?.[münze] || 0)).toFixed(2)} €
                 </span>
               </div>
             ))}
@@ -482,12 +483,12 @@ function KassensturzForm({ data, erwarteterBestand, onChange }: {
           </div>
           <div>
             <label className="block text-sm font-medium">Gezählter Bestand</label>
-            <div className="text-lg font-semibold">{(data.gesamtGezaehlt || 0).toFixed(2)} €</div>
+            <div className="text-lg font-semibold">{(_data.gesamtGezaehlt || 0).toFixed(2)} €</div>
           </div>
           <div>
             <label className="block text-sm font-medium">Differenz</label>
-            <div className={`text-lg font-semibold ${Math.abs(data.differenzKassensturz || 0) > 0.01 ? 'text-red-600' : 'text-green-600'}`}>
-              {(data.differenzKassensturz || 0).toFixed(2)} €
+            <div className={`text-lg font-semibold ${Math.abs(_data.differenzKassensturz || 0) > 0.01 ? 'text-red-600' : 'text-green-600'}`}>
+              {(_data.differenzKassensturz || 0).toFixed(2)} €
             </div>
           </div>
         </div>
@@ -510,20 +511,60 @@ export default function KassePage(): JSX.Element {
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'add-movement') {
       // Neue Bewegung hinzufügen wird in der Tabelle behandelt
-      alert('Verwenden Sie die Tabelle um Bewegungen hinzuzufügen')
+      toast({
+        title: 'Bewegung hinzufügen',
+        description: 'Verwenden Sie die Tabelle im Bewegungen-Tab um neue Kassenbewegungen hinzuzufügen.',
+      })
     } else if (action === 'count-cash') {
       // Kassensturz wird im Tab behandelt
-      alert('Führen Sie den Kassensturz im entsprechenden Tab durch')
+      toast({
+        title: 'Kassensturz',
+        description: 'Führen Sie den Kassensturz im Kassensturz-Tab durch.',
+      })
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
-        alert('Kassenabschluss-Validierung erfolgreich!')
+        const differenz = Math.abs(formData.differenz || 0)
+        const kassensturzDifferenz = Math.abs(formData.kassensturz?.differenzKassensturz || 0)
+
+        if (differenz < 0.01 && kassensturzDifferenz < 0.01) {
+          toast({
+            title: 'Validierung erfolgreich',
+            description: 'Kassenabschluss ist korrekt und kann freigegeben werden.',
+          })
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Validierung fehlgeschlagen',
+            description: `Buchungsdifferenz: ${differenz.toFixed(2)} €, Kassensturzdifferenz: ${kassensturzDifferenz.toFixed(2)} €`,
+          })
+        }
       } else {
         showValidationToast(isValid.errors)
       }
     } else if (action === 'close') {
-      // Tagesabschluss
-      alert('Tagesabschluss-Funktion wird implementiert')
+      // Tagesabschluss - setze Status auf geschlossen
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie den Kassenabschluss zuerst.',
+        })
+        return
+      }
+
+      try {
+        const updatedData = { ...formData, status: 'geschlossen' }
+        await saveData(updatedData)
+        setIsDirty(false)
+        toast({
+          title: 'Tagesabschluss durchgeführt',
+          description: 'Der Kassenabschluss wurde geschlossen.',
+        })
+        navigate('/finance/kasse')
+      } catch (error) {
+        // Error wird bereits in useMaskData behandelt
+      }
     } else if (action === 'approve') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
@@ -531,15 +572,44 @@ export default function KassePage(): JSX.Element {
         return
       }
 
+      const differenz = Math.abs(formData.differenz || 0)
+      const kassensturzDifferenz = Math.abs(formData.kassensturz?.differenzKassensturz || 0)
+
+      if (differenz >= 0.01 || kassensturzDifferenz >= 0.01) {
+        toast({
+          variant: 'destructive',
+          title: 'Freigabe nicht möglich',
+          description: 'Kassenabschluss muss ausgeglichen sein.',
+        })
+        return
+      }
+
       try {
-        await saveData(formData)
+        const updatedData = {
+          ...formData,
+          status: 'freigegeben',
+          freigegebenAm: new Date().toISOString().split('T')[0]
+        }
+        await saveData(updatedData)
         setIsDirty(false)
+        toast({
+          title: 'Kassenabschluss freigegeben',
+          description: 'Der Tagesabschluss wurde erfolgreich freigegeben.',
+        })
         navigate('/finance/kasse')
       } catch (error) {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'export') {
-      window.open('/api/finance/kasse/export', '_blank')
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler',
+          description: 'Speichern Sie den Kassenabschluss zuerst.',
+        })
+        return
+      }
+      window.open(`/api/finance/kasse/${formData.id}/export`, '_blank')
     }
   })
 

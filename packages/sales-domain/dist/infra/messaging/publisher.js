@@ -110,8 +110,8 @@ function createEventPublisher(config) {
 // Global publisher instance
 let globalPublisher = null;
 function getEventPublisher() {
-    if (!globalPublisher) {
-        const natsUrl = process.env.NATS_URL || 'nats://localhost:4222';
+    if (globalPublisher === undefined || globalPublisher === null) {
+        const natsUrl = process.env.NATS_URL ?? 'nats://localhost:4222';
         globalPublisher = createEventPublisher({ natsUrl });
     }
     return globalPublisher;

@@ -50,8 +50,8 @@ class OrderRepository {
             .from(schema_1.orders)
             .where((0, drizzle_orm_1.and)(...conditions));
         const total = totalResult[0]?.count || 0;
-        const sortBy = pagination.sortBy || 'createdAt';
-        const sortOrder = pagination.sortOrder || 'desc';
+        const sortBy = pagination.sortBy ?? 'createdAt';
+        const sortOrder = pagination.sortOrder ?? 'desc';
         const orderBy = sortOrder === 'desc' ? (0, drizzle_orm_1.desc)(schema_1.orders[sortBy]) : (0, drizzle_orm_1.asc)(schema_1.orders[sortBy]);
         const offset = (pagination.page - 1) * pagination.pageSize;
         const result = await connection_1.db
@@ -94,8 +94,8 @@ class OrderRepository {
             .from(schema_1.orders)
             .where((0, drizzle_orm_1.and)(...conditions));
         const total = totalResult[0]?.count || 0;
-        const sortBy = pagination.sortBy || 'createdAt';
-        const sortOrder = pagination.sortOrder || 'desc';
+        const sortBy = pagination.sortBy ?? 'createdAt';
+        const sortOrder = pagination.sortOrder ?? 'desc';
         const orderBy = sortOrder === 'desc' ? (0, drizzle_orm_1.desc)(schema_1.orders[sortBy]) : (0, drizzle_orm_1.asc)(schema_1.orders[sortBy]);
         const offset = (pagination.page - 1) * pagination.pageSize;
         const result = await connection_1.db

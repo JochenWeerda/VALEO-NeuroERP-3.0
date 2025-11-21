@@ -7,9 +7,11 @@ from sqlalchemy.orm import sessionmaker, Session
 import os
 
 ***REMOVED*** Database URL aus ENV
+***REMOVED*** WICHTIG: Im Docker-Container ist host="db" (Service-Name)
+***REMOVED*** Lokal (ohne Docker): host="localhost"
 DATABASE_URL = os.environ.get(
     "DATABASE_URL",
-    "postgresql://valeo_dev:REDACTED_PASSWORD@localhost:5432/valeo_neuro_erp"
+    "postgresql://postgres:postgres@localhost:5432/valeo"
 )
 
 ***REMOVED*** Engine erstellen

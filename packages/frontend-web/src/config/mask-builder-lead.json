@@ -1,0 +1,181 @@
+{
+  "resource": "lead",
+  "version": "1.0.0",
+  "tabs": [
+    {
+      "id": "masterdata",
+      "label": "Stammdaten",
+      "sections": [
+        {
+          "id": "lead_basic",
+          "label": "Basisinformationen",
+          "layout": {
+            "columns": 2
+          },
+          "fields": [
+            {
+              "id": "lead.company",
+              "binding": "lead.company",
+              "label": "Firma",
+              "component": "TextField",
+              "coreField": true,
+              "required": true,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "id": "lead.contact_person",
+              "binding": "lead.contact_person",
+              "label": "Ansprechpartner",
+              "component": "TextField",
+              "coreField": true,
+              "required": true,
+              "validators": [
+                "required"
+              ]
+            },
+            {
+              "id": "lead.email",
+              "binding": "lead.email",
+              "label": "E-Mail",
+              "component": "TextField",
+              "coreField": true,
+              "required": true,
+              "validators": [
+                "required",
+                "email"
+              ]
+            },
+            {
+              "id": "lead.phone",
+              "binding": "lead.phone",
+              "label": "Telefon",
+              "component": "TextField",
+              "coreField": false,
+              "required": false
+            },
+            {
+              "id": "lead.source",
+              "binding": "lead.source",
+              "label": "Quelle",
+              "component": "Select",
+              "coreField": true,
+              "required": true,
+              "validators": [
+                "required"
+              ],
+              "optionsRef": "leadSources"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "status",
+      "label": "Status",
+      "sections": [
+        {
+          "id": "lead_status",
+          "label": "Lead-Status",
+          "layout": {
+            "columns": 2
+          },
+          "fields": [
+            {
+              "id": "lead.potential",
+              "binding": "lead.potential",
+              "label": "Potenzial",
+              "component": "TextField",
+              "coreField": false,
+              "required": false
+            },
+            {
+              "id": "lead.priority",
+              "binding": "lead.priority",
+              "label": "Priorität",
+              "component": "Select",
+              "coreField": false,
+              "required": false,
+              "optionsRef": "leadPriorities"
+            },
+            {
+              "id": "lead.status",
+              "binding": "lead.status",
+              "label": "Status",
+              "component": "Select",
+              "coreField": true,
+              "required": true,
+              "validators": [
+                "required"
+              ],
+              "optionsRef": "leadStatuses"
+            },
+            {
+              "id": "lead.assigned_to",
+              "binding": "lead.assigned_to",
+              "label": "Zugeordnet an",
+              "component": "Select",
+              "coreField": true,
+              "required": true,
+              "validators": [
+                "required"
+              ],
+              "optionsRef": "leadOwners"
+            },
+            {
+              "id": "lead.expected_close_date",
+              "binding": "lead.expected_close_date",
+              "label": "Erwartetes Abschlussdatum",
+              "component": "DatePicker",
+              "coreField": false,
+              "required": false
+            }
+          ]
+        },
+        {
+          "id": "lead_notes",
+          "label": "Notizen",
+          "layout": {
+            "columns": 1
+          },
+          "fields": [
+            {
+              "id": "lead.notes",
+              "binding": "lead.notes",
+              "label": "Notizen",
+              "component": "TextArea",
+              "coreField": false,
+              "required": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validators": {
+    "required": {
+      "type": "required",
+      "message": "Dieses Feld ist erforderlich."
+    },
+    "email": {
+      "type": "pattern",
+      "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+      "message": "Bitte eine gültige E-Mail-Adresse eingeben."
+    }
+  },
+  "api": {
+    "get": {
+      "mode": "hook",
+      "hook": "useLead"
+    },
+    "create": {
+      "mode": "hook",
+      "hook": "useCreateLead"
+    },
+    "update": {
+      "mode": "hook",
+      "hook": "useUpdateLead"
+    }
+  }
+}

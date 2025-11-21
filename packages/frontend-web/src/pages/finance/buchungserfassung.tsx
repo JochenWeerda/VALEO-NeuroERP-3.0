@@ -95,14 +95,14 @@ const buchungConfig: MaskConfig = {
       key: 'buchungszeilen_custom',
       label: '',
       fields: [],
-      customRender: (data: any, onChange: (data: any) => void) => (
+      customRender: (_data: any, onChange: (_data: any) => void) => (
         <BuchungszeilenTable
-          data={data.buchungszeilen || []}
+          data={_data.buchungszeilen || []}
           onChange={(zeilen) => {
             const gesamtSoll = zeilen.reduce((sum: number, z: any) => sum + (z.soll || 0), 0)
             const gesamtHaben = zeilen.reduce((sum: number, z: any) => sum + (z.haben || 0), 0)
             onChange({
-              ...data,
+              ..._data,
               buchungszeilen: zeilen,
               gesamtSoll,
               gesamtHaben,
@@ -193,9 +193,9 @@ const buchungConfig: MaskConfig = {
 }
 
 // Buchungszeilen-Tabelle Komponente
-function BuchungszeilenTable({ data, onChange }: { data: any[], onChange: (data: any[]) => void }) {
+function BuchungszeilenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
   const addRow = () => {
-    onChange([...data, {
+    onChange([..._data, {
       konto: '',
       soll: 0,
       haben: 0,
@@ -207,13 +207,13 @@ function BuchungszeilenTable({ data, onChange }: { data: any[], onChange: (data:
   }
 
   const updateRow = (index: number, field: string, value: any) => {
-    const newData = [...data]
+    const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
   }
 
   const removeRow = (index: number) => {
-    onChange(data.filter((_, i) => i !== index))
+    onChange(_data.filter((_, i) => i !== index))
   }
 
   return (
@@ -242,7 +242,7 @@ function BuchungszeilenTable({ data, onChange }: { data: any[], onChange: (data:
             </tr>
           </thead>
           <tbody>
-            {data.map((row, index) => (
+            {_data.map((row, index) => (
               <tr key={index} className="border">
                 <td className="px-4 py-2 border">
                   <input

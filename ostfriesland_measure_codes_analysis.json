@@ -1,0 +1,835 @@
+{
+  "timestamp": "2024-11-20",
+  "total_leads": 15985,
+  "total_amount": 471537110.57000285,
+  "measure_codes": {
+    "I.1": {
+      "count": 5098,
+      "total_amount": 115857464.28000021,
+      "avg_amount": 22726.062040015735,
+      "percentage": 31.892399124178915,
+      "top_plz": {
+        "26409": 206,
+        "26434": 181,
+        "26446": 172,
+        "26670": 169,
+        "26655": 169,
+        "26632": 166,
+        "26629": 151,
+        "26607": 149,
+        "26427": 147,
+        "26892": 146
+      },
+      "sample_leads": [
+        {
+          "name": "A. & A. Kruse GbR",
+          "plz": "26871",
+          "city": "Papenburg, Stadt",
+          "amount": 37417.37
+        },
+        {
+          "name": "A. & G. Büning GbR",
+          "plz": "26899",
+          "city": "Rhede (Ems)",
+          "amount": 11665.72
+        },
+        {
+          "name": "A. & H. Lindena GbR",
+          "plz": "26553",
+          "city": "Dornum",
+          "amount": 60327.5
+        }
+      ]
+    },
+    "V.1": {
+      "count": 1780,
+      "total_amount": 62683656.149999894,
+      "avg_amount": 35215.53716292129,
+      "percentage": 11.13543947450735,
+      "top_plz": {
+        "26434": 92,
+        "26409": 87,
+        "26446": 81,
+        "26632": 71,
+        "26670": 70,
+        "26969": 69,
+        "26939": 68,
+        "26802": 67,
+        "26427": 64,
+        "26629": 63
+      },
+      "sample_leads": [
+        {
+          "name": "A. & A. Kruse GbR",
+          "plz": "26871",
+          "city": "Papenburg, Stadt",
+          "amount": 37417.37
+        },
+        {
+          "name": "A. & H. Lindena GbR",
+          "plz": "26553",
+          "city": "Dornum",
+          "amount": 60327.5
+        },
+        {
+          "name": "A. & L. Funke GbR",
+          "plz": "26897",
+          "city": "Esterwegen",
+          "amount": 33409.93
+        }
+      ]
+    },
+    "I.4": {
+      "count": 1914,
+      "total_amount": 58116507.66999992,
+      "avg_amount": 30363.9016039707,
+      "percentage": 11.97372536753206,
+      "top_plz": {
+        "26632": 85,
+        "26409": 84,
+        "26427": 79,
+        "26434": 79,
+        "26736": 76,
+        "26629": 72,
+        "26969": 69,
+        "26624": 67,
+        "26446": 65,
+        "26939": 62
+      },
+      "sample_leads": [
+        {
+          "name": "A. & A. Kruse GbR",
+          "plz": "26871",
+          "city": "Papenburg, Stadt",
+          "amount": 37417.37
+        },
+        {
+          "name": "A. & G. Büning GbR",
+          "plz": "26899",
+          "city": "Rhede (Ems)",
+          "amount": 11665.72
+        },
+        {
+          "name": "A. & H. Lindena GbR",
+          "plz": "26553",
+          "city": "Dornum",
+          "amount": 60327.5
+        }
+      ]
+    },
+    "I.2": {
+      "count": 5096,
+      "total_amount": 115851280.36000021,
+      "avg_amount": 22733.767731554202,
+      "percentage": 31.87988739443228,
+      "top_plz": {
+        "26409": 206,
+        "26434": 181,
+        "26446": 172,
+        "26670": 169,
+        "26655": 169,
+        "26632": 166,
+        "26629": 151,
+        "26607": 149,
+        "26427": 147,
+        "26892": 146
+      },
+      "sample_leads": [
+        {
+          "name": "A. & A. Kruse GbR",
+          "plz": "26871",
+          "city": "Papenburg, Stadt",
+          "amount": 37417.37
+        },
+        {
+          "name": "A. & G. Büning GbR",
+          "plz": "26899",
+          "city": "Rhede (Ems)",
+          "amount": 11665.72
+        },
+        {
+          "name": "A. & H. Lindena GbR",
+          "plz": "26553",
+          "city": "Dornum",
+          "amount": 60327.5
+        }
+      ]
+    },
+    "VI.15": {
+      "count": 746,
+      "total_amount": 27701789.610000007,
+      "avg_amount": 37133.76623324398,
+      "percentage": 4.666875195495777,
+      "top_plz": {
+        "26844": 57,
+        "26969": 53,
+        "26736": 47,
+        "26624": 46,
+        "26897": 35,
+        "26831": 33,
+        "26826": 30,
+        "26506": 29,
+        "26954": 29,
+        "26632": 27
+      },
+      "sample_leads": [
+        {
+          "name": "A. & H. Lindena GbR",
+          "plz": "26553",
+          "city": "Dornum",
+          "amount": 60327.5
+        },
+        {
+          "name": "A. & L. Funke GbR",
+          "plz": "26897",
+          "city": "Esterwegen",
+          "amount": 33409.93
+        },
+        {
+          "name": "A. & M. Pennemann GbR",
+          "plz": "26871",
+          "city": "Papenburg, Stadt",
+          "amount": 18064.01
+        }
+      ]
+    },
+    "VI.16": {
+      "count": 136,
+      "total_amount": 7916650.529999999,
+      "avg_amount": 58210.6656617647,
+      "percentage": 0.8507976227713482,
+      "top_plz": {
+        "26446": 9,
+        "26427": 7,
+        "26629": 7,
+        "26434": 6,
+        "26826": 6,
+        "26969": 5,
+        "26817": 5,
+        "26670": 4,
+        "26937": 4,
+        "26409": 4
+      },
+      "sample_leads": [
+        {
+          "name": "A. + H. Schulz GbR",
+          "plz": "26871",
+          "city": "Papenburg, Stadt",
+          "amount": 10097.99
+        },
+        {
+          "name": "Abels, Arno",
+          "plz": "26670",
+          "city": "Uplengen",
+          "amount": 35719.18
+        },
+        {
+          "name": "Achgelis, Bernd",
+          "plz": "26935",
+          "city": "Stadland",
+          "amount": 64775.36
+        }
+      ]
+    },
+    "I.3": {
+      "count": 450,
+      "total_amount": 16698089.33,
+      "avg_amount": 37106.86517777778,
+      "percentage": 2.8151391929934313,
+      "top_plz": {
+        "26409": 24,
+        "26434": 23,
+        "26939": 22,
+        "26802": 19,
+        "26632": 16,
+        "26427": 16,
+        "26969": 15,
+        "26810": 14,
+        "26670": 14,
+        "26629": 14
+      },
+      "sample_leads": [
+        {
+          "name": "Abma, Bouwe",
+          "plz": "26434",
+          "city": "Wangerland",
+          "amount": 29958.27
+        },
+        {
+          "name": "Aden GbR",
+          "plz": "26802",
+          "city": "Moormerland",
+          "amount": 44847.13
+        },
+        {
+          "name": "Aden, Martin",
+          "plz": "26605",
+          "city": "Aurich, Stadt",
+          "amount": 3861.4
+        }
+      ]
+    },
+    "I.6": {
+      "count": 617,
+      "total_amount": 14196068.799999991,
+      "avg_amount": 23008.21523500809,
+      "percentage": 3.8598686268376605,
+      "top_plz": {
+        "26802": 30,
+        "26446": 29,
+        "26969": 26,
+        "26607": 22,
+        "26434": 20,
+        "26939": 20,
+        "26670": 20,
+        "26532": 19,
+        "26629": 19,
+        "26655": 17
+      },
+      "sample_leads": [
+        {
+          "name": "Abma, Doekele",
+          "plz": "26936",
+          "city": "Stadland",
+          "amount": 29937.68
+        },
+        {
+          "name": "Achgelis, Bernd",
+          "plz": "26935",
+          "city": "Stadland",
+          "amount": 64775.36
+        },
+        {
+          "name": "Ackerstaff, Hermann",
+          "plz": "26844",
+          "city": "Jemgum",
+          "amount": 10407.17
+        }
+      ]
+    },
+    "IV.3": {
+      "count": 15,
+      "total_amount": 781648.96,
+      "avg_amount": 52109.93066666667,
+      "percentage": 0.09383797309978105,
+      "top_plz": {
+        "26721": 1,
+        "26603": 1,
+        "26939": 1,
+        "26736": 1,
+        "26689": 1,
+        "26427": 1,
+        "26817": 1,
+        "26446": 1,
+        "26655": 1,
+        "26629": 1
+      },
+      "sample_leads": [
+        {
+          "name": "agilio GmbH",
+          "plz": "26721",
+          "city": "Emden, Stadt",
+          "amount": 56430.89
+        },
+        {
+          "name": "Baier, Thomas",
+          "plz": "26603",
+          "city": "Aurich, Stadt",
+          "amount": 42855.34
+        },
+        {
+          "name": "Biohof Strückhausen eG",
+          "plz": "26939",
+          "city": "Ovelgönne",
+          "amount": 58984.99
+        }
+      ]
+    },
+    "II.4": {
+      "count": 2,
+      "total_amount": 111968.37,
+      "avg_amount": 55984.185,
+      "percentage": 0.012511729746637472,
+      "top_plz": {
+        "26506": 1,
+        "26897": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Balßen, Heinrich",
+          "plz": "26506",
+          "city": "Norden, Stadt",
+          "amount": 80812.84
+        },
+        {
+          "name": "Gebken, Wilhelm",
+          "plz": "26897",
+          "city": "Esterwegen",
+          "amount": 31155.53
+        }
+      ]
+    },
+    "II.1": {
+      "count": 2,
+      "total_amount": 111968.37,
+      "avg_amount": 55984.185,
+      "percentage": 0.012511729746637472,
+      "top_plz": {
+        "26506": 1,
+        "26897": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Balßen, Heinrich",
+          "plz": "26506",
+          "city": "Norden, Stadt",
+          "amount": 80812.84
+        },
+        {
+          "name": "Gebken, Wilhelm",
+          "plz": "26897",
+          "city": "Esterwegen",
+          "amount": 31155.53
+        }
+      ]
+    },
+    "V.8": {
+      "count": 3,
+      "total_amount": 26910.0,
+      "avg_amount": 8970.0,
+      "percentage": 0.01876759461995621,
+      "top_plz": {
+        "26871": 1,
+        "26419": 1,
+        "26603": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Beratungsring Aschendorf-Hasselbrock e. ",
+          "plz": "26871",
+          "city": "Papenburg, Stadt",
+          "amount": 5056.0
+        },
+        {
+          "name": "Beratungsring f. Rindviehh. Friesl.-WHV ",
+          "plz": "26419",
+          "city": "Schortens, Stadt",
+          "amount": 6656.0
+        },
+        {
+          "name": "Beratungsring Ostfriesland e. V.",
+          "plz": "26603",
+          "city": "Aurich, Stadt",
+          "amount": 15198.0
+        }
+      ]
+    },
+    "VI.19": {
+      "count": 11,
+      "total_amount": 706754.4500000001,
+      "avg_amount": 64250.40454545455,
+      "percentage": 0.06881451360650609,
+      "top_plz": {
+        "26639": 2,
+        "26607": 2,
+        "26906": 1,
+        "26871": 1,
+        "26789": 1,
+        "26831": 1,
+        "26683": 1,
+        "26553": 1,
+        "26903": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Brand, Bernhard",
+          "plz": "26906",
+          "city": "Dersum",
+          "amount": 61203.34
+        },
+        {
+          "name": "Bruns, Leo",
+          "plz": "26871",
+          "city": "Papenburg, Stadt",
+          "amount": 10526.81
+        },
+        {
+          "name": "Dietermann, Hauke",
+          "plz": "26639",
+          "city": "Wiesmoor, Stadt",
+          "amount": 123542.55
+        }
+      ]
+    },
+    "VI.5": {
+      "count": 8,
+      "total_amount": 7587734.89,
+      "avg_amount": 948466.86125,
+      "percentage": 0.050046918986549886,
+      "top_plz": {
+        "26427": 1,
+        "26802": 1,
+        "26842": 1,
+        "26810": 1,
+        "26506": 1,
+        "26844": 1,
+        "26789": 1,
+        "26871": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Deich- und Sielacht Harlingerland",
+          "plz": "26427",
+          "city": "Esens, Stadt",
+          "amount": 207036.03
+        },
+        {
+          "name": "Entwässerungsverband Oldersum",
+          "plz": "26802",
+          "city": "Moormerland",
+          "amount": 386054.49
+        },
+        {
+          "name": "Gemeinde Ostrhauderfehn",
+          "plz": "26842",
+          "city": "Ostrhauderfehn",
+          "amount": 39180.76
+        }
+      ]
+    },
+    "VI.7": {
+      "count": 27,
+      "total_amount": 12253520.36,
+      "avg_amount": 453834.0874074074,
+      "percentage": 0.16890835157960588,
+      "top_plz": {
+        "26409": 3,
+        "26831": 2,
+        "26736": 2,
+        "26446": 1,
+        "26826": 1,
+        "26689": 1,
+        "26892": 1,
+        "26629": 1,
+        "26532": 1,
+        "26524": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Ev.-luth. Kirchengemeinde Reepsholt",
+          "plz": "26446",
+          "city": "Friedeburg",
+          "amount": 160981.53
+        },
+        {
+          "name": "Ev.-ref. Kirchengemeinde Landschaftspold",
+          "plz": "26831",
+          "city": "Bunde",
+          "amount": 52223.48
+        },
+        {
+          "name": "Ev.-ref. Kirchengemeinde Vellage",
+          "plz": "26826",
+          "city": "Weener, Stadt",
+          "amount": 49490.07
+        }
+      ]
+    },
+    "V.7": {
+      "count": 10,
+      "total_amount": 1443939.47,
+      "avg_amount": 144393.947,
+      "percentage": 0.06255864873318737,
+      "top_plz": {
+        "26802": 2,
+        "26892": 2,
+        "26532": 1,
+        "26632": 1,
+        "26603": 1,
+        "26789": 1,
+        "26835": 1,
+        "26826": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Ev.-ref. Kirchengemeinde Rorichum",
+          "plz": "26802",
+          "city": "Moormerland",
+          "amount": 12400.0
+        },
+        {
+          "name": "Gemeinde Dörpen",
+          "plz": "26892",
+          "city": "Dörpen",
+          "amount": 264117.31
+        },
+        {
+          "name": "Gemeinde Großheide",
+          "plz": "26532",
+          "city": "Großheide",
+          "amount": 401329.12
+        }
+      ]
+    },
+    "VI.24": {
+      "count": 24,
+      "total_amount": 2953827.8499999996,
+      "avg_amount": 123076.16041666665,
+      "percentage": 0.15014075695964968,
+      "top_plz": {
+        "26689": 2,
+        "26624": 2,
+        "26655": 2,
+        "26524": 1,
+        "26904": 1,
+        "26897": 1,
+        "26629": 1,
+        "26802": 1,
+        "26452": 1,
+        "26835": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Freundeskreis Schlosspark Lütetsburg e. ",
+          "plz": "26524",
+          "city": "Lütetsburg",
+          "amount": 76700.48
+        },
+        {
+          "name": "Gemeinde Apen",
+          "plz": "26689",
+          "city": "Apen",
+          "amount": 522103.61
+        },
+        {
+          "name": "Gemeinde Börger",
+          "plz": "26904",
+          "city": "Börger",
+          "amount": 26000.0
+        }
+      ]
+    },
+    "VI.18": {
+      "count": 3,
+      "total_amount": 364897.1,
+      "avg_amount": 121632.36666666665,
+      "percentage": 0.01876759461995621,
+      "top_plz": {
+        "26892": 1,
+        "26897": 1,
+        "26441": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Ganseforth, Heinrich",
+          "plz": "26892",
+          "city": "Heede",
+          "amount": 29234.38
+        },
+        {
+          "name": "Gebken, Wilhelm",
+          "plz": "26897",
+          "city": "Esterwegen",
+          "amount": 31155.53
+        },
+        {
+          "name": "WKKH Agrar Seefeld GmbH & Co. KG",
+          "plz": "26441",
+          "city": "Jever, Stadt",
+          "amount": 304507.19
+        }
+      ]
+    },
+    "VI.17": {
+      "count": 1,
+      "total_amount": 29234.38,
+      "avg_amount": 29234.38,
+      "percentage": 0.006255864873318736,
+      "top_plz": {
+        "26892": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Ganseforth, Heinrich",
+          "plz": "26892",
+          "city": "Heede",
+          "amount": 29234.38
+        }
+      ]
+    },
+    "IV.5": {
+      "count": 1,
+      "total_amount": 3308112.69,
+      "avg_amount": 3308112.69,
+      "percentage": 0.006255864873318736,
+      "top_plz": {
+        "26871": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Gartenbauzentrale Papenburg eG",
+          "plz": "26871",
+          "city": "Papenburg, Stadt",
+          "amount": 3308112.69
+        }
+      ]
+    },
+    "VI.4": {
+      "count": 22,
+      "total_amount": 16609165.140000002,
+      "avg_amount": 754962.0518181819,
+      "percentage": 0.13762902721301218,
+      "top_plz": {
+        "26434": 3,
+        "26969": 3,
+        "26607": 2,
+        "26903": 1,
+        "26603": 1,
+        "26441": 1,
+        "26789": 1,
+        "26506": 1,
+        "26844": 1,
+        "26721": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Hobbie, Hinderk",
+          "plz": "26434",
+          "city": "Wangerland",
+          "amount": 573343.15
+        },
+        {
+          "name": "Janssen, Udo",
+          "plz": "26607",
+          "city": "Aurich, Stadt",
+          "amount": 299582.6
+        },
+        {
+          "name": "Kroeger, Michael",
+          "plz": "26903",
+          "city": "Surwold",
+          "amount": 424928.05
+        }
+      ]
+    },
+    "IV.8": {
+      "count": 9,
+      "total_amount": 35137.740000000005,
+      "avg_amount": 3904.193333333334,
+      "percentage": 0.05630278385986863,
+      "top_plz": {
+        "26603": 1,
+        "26655": 1,
+        "26725": 1,
+        "26639": 1,
+        "26954": 1,
+        "26897": 1,
+        "26789": 1,
+        "26892": 1,
+        "26835": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Imkerverein Aurich e. V.",
+          "plz": "26603",
+          "city": "Aurich, Stadt",
+          "amount": 4899.33
+        },
+        {
+          "name": "Imkerverein Bad Zwischenahn/Westerstede ",
+          "plz": "26655",
+          "city": "Westerstede, Stadt",
+          "amount": 8661.59
+        },
+        {
+          "name": "Imkerverein Emden-Krummhörn e. V.",
+          "plz": "26725",
+          "city": "Emden, Stadt",
+          "amount": 8524.45
+        }
+      ]
+    },
+    "V.3": {
+      "count": 2,
+      "total_amount": 200110.88999999998,
+      "avg_amount": 100055.44499999999,
+      "percentage": 0.012511729746637472,
+      "top_plz": {
+        "26655": 1,
+        "26849": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Janssen-Gensch GbR",
+          "plz": "26655",
+          "city": "Alt Bennebek",
+          "amount": 196677.86
+        },
+        {
+          "name": "Vieth, Gerd Lüken",
+          "plz": "26849",
+          "city": "Filsum",
+          "amount": 3433.03
+        }
+      ]
+    },
+    "VI.21": {
+      "count": 6,
+      "total_amount": 319159.63999999996,
+      "avg_amount": 53193.27333333332,
+      "percentage": 0.03753518923991242,
+      "top_plz": {
+        "26419": 1,
+        "26939": 1,
+        "26919": 1,
+        "26607": 1,
+        "26603": 1,
+        "26789": 1
+      },
+      "sample_leads": [
+        {
+          "name": "Kreislandvolkverband Friesland e. V.",
+          "plz": "26419",
+          "city": "Schortens, Stadt",
+          "amount": 9835.2
+        },
+        {
+          "name": "Kreislandvolkverband Wesermarsch e. V.",
+          "plz": "26939",
+          "city": "Ovelgönne",
+          "amount": 8220.92
+        },
+        {
+          "name": "Landkreis Wesermarsch",
+          "plz": "26919",
+          "city": "Brake (Unterweser), Stadt",
+          "amount": 277756.6
+        }
+      ]
+    },
+    "VI.1": {
+      "count": 2,
+      "total_amount": 5671513.54,
+      "avg_amount": 2835756.77,
+      "percentage": 0.012511729746637472,
+      "top_plz": {
+        "26506": 1,
+        "26835": 1
+      },
+      "sample_leads": [
+        {
+          "name": "NLWKN",
+          "plz": "26506",
+          "city": "Norden, Stadt",
+          "amount": 5372785.54
+        },
+        {
+          "name": "Wasserversorgungsverband Moormerland-Upl",
+          "plz": "26835",
+          "city": "Hesel",
+          "amount": 298728.0
+        }
+      ]
+    }
+  }
+}

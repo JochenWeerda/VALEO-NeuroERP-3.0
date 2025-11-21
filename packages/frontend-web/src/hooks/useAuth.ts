@@ -7,9 +7,9 @@ interface AuthHook {
   isAuthenticated: boolean
   login: () => Promise<void>
   logout: () => void
-  handleCallback: (code: string, state: string) => Promise<void>
-  hasScope: (scope: string) => boolean
-  hasRole: (role: string) => boolean
+  handleCallback: (_code: string, _state: string) => Promise<void>
+  hasScope: (_scope: string) => boolean
+  hasRole: (_role: string) => boolean
 }
 
 const DASHBOARD_PATH = '/dashboard'
@@ -62,10 +62,10 @@ export function useAuth(): AuthHook {
     safeRedirect(LOGIN_PATH)
   }
 
-  const handleCallback = async (code: string, state: string): Promise<void> => {
+  const handleCallback = async (_code: string, _state: string): Promise<void> => {
     setSafeLoading(true)
     try {
-      await auth.handleCallback(code, state)
+      await auth.handleCallback(_code, _state)
       setSafeUser(auth.getUser())
       safeRedirect(DASHBOARD_PATH)
     } catch (error) {
@@ -83,7 +83,7 @@ export function useAuth(): AuthHook {
     login,
     logout,
     handleCallback,
-    hasScope: (scope: string): boolean => auth.hasScope(scope),
-    hasRole: (role: string): boolean => auth.hasRole(role),
+    hasScope: (_scope: string): boolean => auth.hasScope(_scope),
+    hasRole: (_role: string): boolean => auth.hasRole(_role),
   }
 }

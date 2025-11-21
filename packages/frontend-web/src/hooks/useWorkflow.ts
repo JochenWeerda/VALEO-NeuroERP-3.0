@@ -29,7 +29,7 @@ type WorkflowStateResponse = {
 interface WorkflowHook {
   state: WorkflowState
   loading: boolean
-  transition: (action: WorkflowAction, payload?: Record<string, unknown>) => Promise<WorkflowTransitionResponse>
+  transition: (_action: WorkflowAction, _payload?: Record<string, unknown>) => Promise<WorkflowTransitionResponse>
   refresh: () => Promise<void>
 }
 
@@ -86,15 +86,15 @@ export function useWorkflow(domain: 'sales' | 'purchase', number: string): Workf
   }, [domain, number])
 
   const transition = useCallback(async (
-    action: WorkflowAction,
-    payload: Record<string, unknown> = {},
+    _action: WorkflowAction,
+    _payload: Record<string, unknown> = {},
   ): Promise<WorkflowTransitionResponse> => {
     setLoading(true)
     try {
       const response = await fetch(`/api/workflow/${domain}/${number}/transition`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, ...payload }),
+        body: JSON.stringify({ action: _action, ..._payload }),
       })
       const json = (await response.json()) as WorkflowTransitionResponse
       if (json.ok && json.state) {

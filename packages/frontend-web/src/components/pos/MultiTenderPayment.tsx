@@ -15,7 +15,7 @@ export type PaymentEntry = {
 
 interface MultiTenderPaymentProps {
   total: number
-  onPaymentsChange: (payments: PaymentEntry[]) => void
+  onPaymentsChange: (_payments: PaymentEntry[]) => void
 }
 
 export function MultiTenderPayment({ total, onPaymentsChange }: MultiTenderPaymentProps) {

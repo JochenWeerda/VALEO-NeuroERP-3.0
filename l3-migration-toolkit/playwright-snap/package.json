@@ -1,0 +1,24 @@
+{
+  "name": "l3-screenshot-automation",
+  "version": "2.0.0",
+  "description": "L3-Masken Screenshot & Analyse Tool für VALEO-NeuroERP Migration",
+  "type": "module",
+  "scripts": {
+    "install:pw": "npx playwright install --with-deps chromium",
+    "snap": "node snap-single.js",
+    "snap:all": "node snap-all-masks.js",
+    "snap:schedule": "node snap-scheduler.js",
+    "analyze": "node analyze-masks.js",
+    "extract:fields": "node extract-form-fields.js"
+  },
+  "dependencies": {
+    "csv-parse": "^6.1.0",
+    "node-schedule": "^2.1.1",
+    "playwright": "^1.48.0",
+    "sharp": "^0.33.5",
+    "tesseract.js": "^5.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}

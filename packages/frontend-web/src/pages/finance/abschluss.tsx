@@ -218,10 +218,10 @@ const abschlussConfig: MaskConfig = {
       key: 'abgrenzungen_custom',
       label: '',
       fields: [],
-      customRender: (data: any, onChange: (data: any) => void) => (
+      customRender: (_data: any, onChange: (_data: any) => void) => (
         <AbgrenzungenTable
-          data={data.rechnungsabgrenzungsposten || []}
-          onChange={(rechnungsabgrenzungsposten) => onChange({ ...data, rechnungsabgrenzungsposten })}
+          data={_data.rechnungsabgrenzungsposten || []}
+          onChange={(rechnungsabgrenzungsposten) => onChange({ ..._data, rechnungsabgrenzungsposten })}
         />
       )
     },
@@ -234,10 +234,10 @@ const abschlussConfig: MaskConfig = {
       key: 'rueckstellungen_custom',
       label: '',
       fields: [],
-      customRender: (data: any, onChange: (data: any) => void) => (
+      customRender: (_data: any, onChange: (_data: any) => void) => (
         <RueckstellungenTable
-          data={data.rueckstellungen || []}
-          onChange={(rueckstellungen) => onChange({ ...data, rueckstellungen })}
+          data={_data.rueckstellungen || []}
+          onChange={(rueckstellungen) => onChange({ ..._data, rueckstellungen })}
         />
       )
     },
@@ -329,9 +329,9 @@ const abschlussConfig: MaskConfig = {
 }
 
 // Abgrenzungen-Tabelle Komponente
-function AbgrenzungenTable({ data, onChange }: { data: any[], onChange: (data: any[]) => void }) {
+function AbgrenzungenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
   const addPosten = () => {
-    onChange([...data, {
+    onChange([..._data, {
       beschreibung: '',
       betrag: 0,
       typ: 'aktiv'
@@ -339,13 +339,13 @@ function AbgrenzungenTable({ data, onChange }: { data: any[], onChange: (data: a
   }
 
   const updatePosten = (index: number, field: string, value: any) => {
-    const newData = [...data]
+    const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
   }
 
   const removePosten = (index: number) => {
-    onChange(data.filter((_, i) => i !== index))
+    onChange(_data.filter((_, i) => i !== index))
   }
 
   return (
@@ -371,7 +371,7 @@ function AbgrenzungenTable({ data, onChange }: { data: any[], onChange: (data: a
             </tr>
           </thead>
           <tbody>
-            {data.map((posten, index) => (
+            {_data.map((posten, index) => (
               <tr key={index} className="border">
                 <td className="px-4 py-2 border">
                   <input
@@ -419,9 +419,9 @@ function AbgrenzungenTable({ data, onChange }: { data: any[], onChange: (data: a
 }
 
 // Rückstellungen-Tabelle Komponente
-function RueckstellungenTable({ data, onChange }: { data: any[], onChange: (data: any[]) => void }) {
+function RueckstellungenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
   const addRueckstellung = () => {
-    onChange([...data, {
+    onChange([..._data, {
       beschreibung: '',
       betrag: 0,
       zweck: ''
@@ -429,13 +429,13 @@ function RueckstellungenTable({ data, onChange }: { data: any[], onChange: (data
   }
 
   const updateRueckstellung = (index: number, field: string, value: any) => {
-    const newData = [...data]
+    const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
   }
 
   const removeRueckstellung = (index: number) => {
-    onChange(data.filter((_, i) => i !== index))
+    onChange(_data.filter((_, i) => i !== index))
   }
 
   return (
@@ -461,7 +461,7 @@ function RueckstellungenTable({ data, onChange }: { data: any[], onChange: (data
             </tr>
           </thead>
           <tbody>
-            {data.map((rueckstellung, index) => (
+            {_data.map((rueckstellung, index) => (
               <tr key={index} className="border">
                 <td className="px-4 py-2 border">
                   <input

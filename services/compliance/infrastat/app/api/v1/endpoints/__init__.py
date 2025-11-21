@@ -1,0 +1,2 @@
+"""InfraStat API Endpoints."""
+

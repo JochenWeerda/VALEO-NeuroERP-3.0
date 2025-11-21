@@ -7,7 +7,6 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 
 export type SSEMessage = {
   event?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any
   timestamp?: string
 }
@@ -20,13 +19,12 @@ export type UseSSEOptions = {
   autoConnect?: boolean
   reconnectInterval?: number
   maxReconnectAttempts?: number
-  onMessage?: (message: SSEMessage) => void
-  onError?: (error: Error) => void
+  onMessage?: (_message: SSEMessage) => void
+  onError?: (_error: Error) => void
   onConnect?: () => void
   onDisconnect?: () => void
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useSSE(options: UseSSEOptions) {
   const {
     channel,

@@ -33,7 +33,7 @@ class OrderService {
     }
     async updateOrder(id, data) {
         const existingOrder = await this.deps.orderRepo.findById(id, data.tenantId);
-        if (!existingOrder) {
+        if (existingOrder === undefined || existingOrder === null) {
             throw new Error(`Order ${id} not found`);
         }
         // Business validation
@@ -51,49 +51,49 @@ class OrderService {
             }
         }
         const updatedOrder = await this.deps.orderRepo.update(id, data.tenantId, data);
-        if (!updatedOrder) {
+        if (updatedOrder === undefined || updatedOrder === null) {
             throw new Error(`Failed to update order ${id}`);
         }
         return updatedOrder;
     }
     async confirmOrder(id, tenantId) {
         const order = await this.deps.orderRepo.findById(id, tenantId);
-        if (!order) {
+        if (order === undefined || order === null) {
             throw new Error(`Order ${id} not found`);
         }
         if (!order.canBeConfirmed()) {
             throw new Error('Order cannot be confirmed in its current state');
         }
         const updatedOrder = await this.deps.orderRepo.updateStatus(id, tenantId, 'Confirmed');
-        if (!updatedOrder) {
+        if (updatedOrder === undefined || updatedOrder === null) {
             throw new Error(`Failed to confirm order`);
         }
         return updatedOrder;
     }
     async markOrderAsInvoiced(id, tenantId) {
         const order = await this.deps.orderRepo.findById(id, tenantId);
-        if (!order) {
+        if (order === undefined || order === null) {
             throw new Error(`Order ${id} not found`);
         }
         if (!order.canBeInvoiced()) {
             throw new Error('Order cannot be invoiced in its current state');
         }
         const updatedOrder = await this.deps.orderRepo.updateStatus(id, tenantId, 'Invoiced');
-        if (!updatedOrder) {
+        if (updatedOrder === undefined || updatedOrder === null) {
             throw new Error(`Failed to mark order as invoiced`);
         }
         return updatedOrder;
     }
     async cancelOrder(id, tenantId) {
         const order = await this.deps.orderRepo.findById(id, tenantId);
-        if (!order) {
+        if (order === undefined || order === null) {
             throw new Error(`Order ${id} not found`);
         }
         if (!order.canBeCancelled()) {
             throw new Error('Order cannot be cancelled in its current state');
         }
         const updatedOrder = await this.deps.orderRepo.updateStatus(id, tenantId, 'Cancelled');
-        if (!updatedOrder) {
+        if (updatedOrder === undefined || updatedOrder === null) {
             throw new Error(`Failed to cancel order`);
         }
         return updatedOrder;
