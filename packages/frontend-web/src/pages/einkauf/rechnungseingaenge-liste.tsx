@@ -1,77 +1,90 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { toast } from '@/hooks/use-toast'
 
 // API Client für Rechnungseingänge
 const apiClient = createApiClient('/api/einkauf')
 
-// Konfiguration für Rechnungseingänge ListReport
-const rechnungseingaengeConfig: ListConfig = {
-  title: 'Rechnungseingänge',
-  subtitle: 'Eingehende Lieferantenrechnungen verwalten',
+// Konfiguration für Rechnungseingänge ListReport (wird in Komponente mit i18n erstellt)
+const createRechnungseingaengeConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+  title: entityTypeLabel,
+  titleKey: 'crud.list.title',
+  subtitle: t('crud.subtitles.manageInvoiceReceipts'),
+  subtitleKey: 'crud.subtitles.manageInvoiceReceipts',
   type: 'list-report',
   columns: [
     {
       key: 'rechnungsNummer',
-      label: 'Rechnungs-Nr.',
+      label: t('crud.fields.invoiceNumber'),
+      labelKey: 'crud.fields.invoiceNumber',
       sortable: true,
       render: (value) => <code className="text-sm font-mono">{value}</code>
     },
     {
       key: 'lieferant',
-      label: 'Lieferant',
+      label: t('crud.entities.supplier'),
+      labelKey: 'crud.entities.supplier',
       sortable: true,
       filterable: true
     },
     {
       key: 'bestellung',
-      label: 'Bestellung',
+      label: t('crud.entities.purchaseOrder'),
+      labelKey: 'crud.entities.purchaseOrder',
       sortable: true,
       render: (value) => value?.nummer || '-'
     },
     {
       key: 'wareneingang',
-      label: 'Wareneingang',
+      label: t('crud.fields.goodsReceipt'),
+      labelKey: 'crud.fields.goodsReceipt',
       sortable: true,
       render: (value) => value?.nummer || '-'
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('crud.fields.status'),
+      labelKey: 'crud.fields.status',
       sortable: true,
       filterable: true,
       render: (value) => {
-        const statusLabels = {
-          'ERFASST': { label: 'Erfasst', variant: 'secondary' as const },
-          'GEPRUEFT': { label: 'Geprüft', variant: 'default' as const },
-          'FREIGEGEBEN': { label: 'Freigegeben', variant: 'outline' as const },
-          'VERBUCHT': { label: 'Verbucht', variant: 'outline' as const },
-          'BEZAHLT': { label: 'Bezahlt', variant: 'outline' as const }
+        const statusLabel = getStatusLabel(t, value as string, value as string)
+        const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
+          'ERFASST': 'secondary',
+          'GEPRUEFT': 'default',
+          'FREIGEGEBEN': 'outline',
+          'VERBUCHT': 'outline',
+          'BEZAHLT': 'outline'
         }
-        const status = statusLabels[value as keyof typeof statusLabels] || { label: value, variant: 'secondary' as const }
-        return <Badge variant={status.variant}>{status.label}</Badge>
+        return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
       key: 'bruttoBetrag',
-      label: 'Brutto (€)',
+      label: t('crud.fields.grossAmount') + ' (€)',
+      labelKey: 'crud.fields.grossAmount',
       sortable: true,
       render: (value) => `${formatNumber(value, 2)} €`
     },
     {
       key: 'rechnungsDatum',
-      label: 'Rechnungsdatum',
+      label: t('crud.fields.invoiceDate'),
+      labelKey: 'crud.fields.invoiceDate',
       sortable: true,
       render: (value) => formatDate(value)
     },
     {
       key: 'createdAt',
-      label: 'Erstellt',
+      label: t('crud.fields.createdAt'),
+      labelKey: 'crud.fields.createdAt',
       sortable: true,
       render: (value) => formatDate(value)
     }
@@ -79,38 +92,43 @@ const rechnungseingaengeConfig: ListConfig = {
   filters: [
     {
       name: 'status',
-      label: 'Status',
+      label: t('crud.fields.status'),
+      labelKey: 'crud.fields.status',
       type: 'select',
       options: [
-        { value: 'ERFASST', label: 'Erfasst' },
-        { value: 'GEPRUEFT', label: 'Geprüft' },
-        { value: 'FREIGEGEBEN', label: 'Freigegeben' },
-        { value: 'VERBUCHT', label: 'Verbucht' },
-        { value: 'BEZAHLT', label: 'Bezahlt' }
+        { value: 'ERFASST', label: t('status.recorded'), labelKey: 'status.recorded' },
+        { value: 'GEPRUEFT', label: t('status.reviewed'), labelKey: 'status.reviewed' },
+        { value: 'FREIGEGEBEN', label: t('status.approved'), labelKey: 'status.approved' },
+        { value: 'VERBUCHT', label: t('status.posted'), labelKey: 'status.posted' },
+        { value: 'BEZAHLT', label: t('status.paid'), labelKey: 'status.paid' }
       ]
     },
     {
       name: 'lieferant',
-      label: 'Lieferant',
+      label: t('crud.entities.supplier'),
+      labelKey: 'crud.entities.supplier',
       type: 'text'
     }
   ],
   bulkActions: [
     {
       key: 'pruefen',
-      label: 'Prüfen',
+      label: t('crud.actions.review'),
+      labelKey: 'crud.actions.review',
       type: 'secondary',
       onClick: () => console.log('Prüfen clicked')
     },
     {
       key: 'freigeben',
-      label: 'Freigeben',
+      label: t('crud.actions.approve'),
+      labelKey: 'crud.actions.approve',
       type: 'primary',
       onClick: () => console.log('Freigeben clicked')
     },
     {
       key: 'verbuchen',
-      label: 'Verbuchen',
+      label: t('crud.actions.post'),
+      labelKey: 'crud.actions.post',
       type: 'primary',
       onClick: () => console.log('Verbuchen clicked')
     }
@@ -129,24 +147,31 @@ const rechnungseingaengeConfig: ListConfig = {
   },
   permissions: ['einkauf.read', 'einkauf.write', 'finance.read'],
   actions: []
-}
+})
 
 export default function RechnungseingaengeListePage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const entityType = 'invoiceReceipt'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Rechnungseingang')
+  const rechnungseingaengeConfig = createRechnungseingaengeConfig(t, entityTypeLabel)
 
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
       navigate(`/einkauf/rechnungseingaenge/${item.id}`)
     } else if (action === 'delete' && item) {
-      if (confirm(`Rechnung "${item.rechnungsNummer}" wirklich löschen?`)) {
+      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {
           await apiClient.delete(`/rechnungseingaenge/${item.id}`)
           loadData() // Liste neu laden
         } catch (error) {
-          alert('Fehler beim Löschen')
+          toast({
+            variant: 'destructive',
+            title: t('crud.messages.deleteError', { entityType: entityTypeLabel })
+          })
         }
       }
     }
@@ -184,7 +209,34 @@ export default function RechnungseingaengeListePage(): JSX.Element {
   }
 
   const handleExport = () => {
-    alert('Export-Funktion wird implementiert')
+    try {
+      const csvHeader = `${t('crud.fields.invoiceNumber')};${t('crud.entities.supplier')};${t('crud.fields.grossAmount')};${t('crud.fields.status')}\n`
+      const csvContent = data.map((rechnung: any) =>
+        `"${rechnung.rechnungsNummer}";"${rechnung.lieferant}";"${rechnung.bruttoBetrag}";"${rechnung.status}"`
+      ).join('\n')
+
+      const csv = csvHeader + csvContent
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `rechnungseingaenge-liste-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: t('crud.messages.exportSuccess'),
+        description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
+      })
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.exportError'),
+        description: t('crud.messages.exportFailed'),
+      })
+    }
   }
 
   return (
@@ -196,7 +248,12 @@ export default function RechnungseingaengeListePage(): JSX.Element {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onExport={handleExport}
-      onImport={() => alert('Import-Funktion wird implementiert')}
+      onImport={() => {
+        toast({
+          title: t('crud.messages.importInfo'),
+          description: t('crud.messages.importComingSoon'),
+        })
+      }}
       isLoading={loading}
     />
   )

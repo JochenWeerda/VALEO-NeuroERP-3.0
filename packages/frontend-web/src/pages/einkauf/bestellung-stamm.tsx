@@ -1,47 +1,49 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
-// Zod-Schema für Bestellung
-const bestellungSchema = z.object({
-  nummer: z.string().min(1, "Bestellnummer ist erforderlich"),
-  lieferantId: z.string().min(1, "Lieferant ist erforderlich"),
+// Zod-Schema für Bestellung (wird in Komponente mit i18n erstellt)
+const createBestellungSchema = (t: any) => z.object({
+  nummer: z.string().min(1, t('crud.messages.validationError')),
+  lieferantId: z.string().min(1, t('crud.messages.validationError')),
   status: z.enum(['ENTWURF', 'FREIGEGEBEN', 'TEILGELIEFERT', 'VOLLGELIEFERT', 'STORNIERT']),
-  liefertermin: z.string().min(1, "Liefertermin ist erforderlich"),
+  liefertermin: z.string().min(1, t('crud.messages.validationError')),
   zahlungsbedingungen: z.string().optional(),
   positionen: z.array(z.object({
-    artikelId: z.string().min(1, "Artikel ist erforderlich"),
-    menge: z.number().min(0.1, "Menge muss größer 0 sein"),
-    einheit: z.string().min(1, "Einheit ist erforderlich"),
-    preis: z.number().min(0, "Preis muss >= 0 sein"),
+    artikelId: z.string().min(1, t('crud.messages.validationError')),
+    menge: z.number().min(0.1, t('crud.messages.validationError')),
+    einheit: z.string().min(1, t('crud.messages.validationError')),
+    preis: z.number().min(0, t('crud.messages.validationError')),
     wunschtermin: z.string().optional()
-  })).min(1, "Mindestens eine Position erforderlich"),
+  })).min(1, t('crud.messages.validationError')),
   bemerkungen: z.string().optional()
 })
 
-// Konfiguration für Bestellung ObjectPage
-const bestellungConfig: MaskConfig = {
-  title: 'Bestellung',
-  subtitle: 'Einkaufsbestellung bearbeiten',
+// Konfiguration für Bestellung ObjectPage (wird in Komponente mit i18n erstellt)
+const createBestellungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+  title: entityTypeLabel,
+  subtitle: t('crud.actions.edit'),
   type: 'object-page',
   tabs: [
     {
       key: 'stammdaten',
-      label: 'Stammdaten',
+      label: t('crud.detail.basicInfo'),
       fields: [
         {
           name: 'nummer',
-          label: 'Bestellnummer',
+          label: t('crud.fields.number'),
           type: 'text',
           required: true,
           readonly: true
         },
         {
           name: 'lieferantId',
-          label: 'Lieferant',
+          label: t('crud.entities.supplier'),
           type: 'lookup',
           required: true,
           endpoint: '/api/partners?type=supplier',
@@ -50,88 +52,88 @@ const bestellungConfig: MaskConfig = {
         },
         {
           name: 'status',
-          label: 'Status',
+          label: t('crud.fields.status'),
           type: 'select',
           required: true,
           options: [
-            { value: 'ENTWURF', label: 'Entwurf' },
-            { value: 'FREIGEGEBEN', label: 'Freigegeben' },
-            { value: 'TEILGELIEFERT', label: 'Teilgeliefert' },
-            { value: 'VOLLGELIEFERT', label: 'Vollgeliefert' },
-            { value: 'STORNIERT', label: 'Storniert' }
+            { value: 'ENTWURF', label: t('status.draft') },
+            { value: 'FREIGEGEBEN', label: t('status.approved') },
+            { value: 'TEILGELIEFERT', label: t('status.partial') },
+            { value: 'VOLLGELIEFERT', label: t('status.completed') },
+            { value: 'STORNIERT', label: t('status.cancelled') }
           ]
         },
         {
           name: 'liefertermin',
-          label: 'Liefertermin',
+          label: t('crud.fields.deliveryDate'),
           type: 'date',
           required: true
         },
         {
           name: 'zahlungsbedingungen',
-          label: 'Zahlungsbedingungen',
+          label: t('crud.fields.paymentTerms'),
           type: 'select',
           options: [
-            { value: 'sofort', label: 'Sofortzahlung' },
-            { value: '14tage', label: '14 Tage' },
-            { value: '30tage', label: '30 Tage' },
-            { value: '60tage', label: '60 Tage' }
+            { value: 'sofort', label: t('crud.fields.paymentTermsImmediate') },
+            { value: '14tage', label: t('crud.fields.paymentTermsNet14') },
+            { value: '30tage', label: t('crud.fields.paymentTermsNet30') },
+            { value: '60tage', label: t('crud.fields.paymentTermsNet60') }
           ]
         }
       ]
     },
     {
       key: 'positionen',
-      label: 'Positionen',
+      label: t('crud.fields.items'),
       fields: [
         {
           name: 'positionen',
-          label: 'Bestellpositionen',
+          label: t('crud.fields.items'),
           type: 'table',
           required: true,
           columns: [
             {
               key: 'artikelId',
-              label: 'Artikel',
+              label: t('crud.fields.product'),
               type: 'lookup',
               required: true
             },
             {
               key: 'menge',
-              label: 'Menge',
+              label: t('crud.fields.quantity'),
               type: 'number',
               required: true
             },
             {
               key: 'einheit',
-              label: 'Einheit',
+              label: t('crud.fields.unit'),
               type: 'select',
               required: true
             },
             {
               key: 'preis',
-              label: 'Preis',
+              label: t('crud.fields.price'),
               type: 'number'
             },
             {
               key: 'wunschtermin',
-              label: 'Wunschtermin',
+              label: t('crud.fields.dueDate'),
               type: 'date'
             }
           ] as any,
-          helpText: 'Bestellpositionen verwalten'
+          helpText: t('crud.fields.items')
         }
       ]
     },
     {
       key: 'belege',
-      label: 'Belege',
+      label: t('crud.detail.additionalInfo'),
       fields: [
         {
           name: 'bemerkungen',
-          label: 'Bemerkungen',
+          label: t('crud.fields.notes'),
           type: 'textarea',
-          placeholder: 'Zusätzliche Informationen zur Bestellung...'
+          placeholder: t('crud.fields.notes')
         }
       ]
     }
@@ -139,19 +141,19 @@ const bestellungConfig: MaskConfig = {
   actions: [
     {
       key: 'freigeben',
-      label: 'Freigeben',
+      label: t('crud.actions.approve'),
       type: 'primary',
       onClick: () => console.log('Freigeben clicked')
     },
     {
       key: 'stornieren',
-      label: 'Stornieren',
+      label: t('crud.actions.cancel'),
       type: 'danger',
       onClick: () => console.log('Stornieren clicked')
     },
     {
       key: 'drucken',
-      label: 'Drucken',
+      label: t('crud.actions.print'),
       type: 'secondary',
       onClick: () => console.log('Drucken clicked')
     }
@@ -166,14 +168,18 @@ const bestellungConfig: MaskConfig = {
       delete: '/api/einkauf/bestellungen/{id}'
     }
   },
-  validation: bestellungSchema,
+  validation: createBestellungSchema(t),
   permissions: ['einkauf.read', 'einkauf.write']
-}
+})
 
 export default function BestellungStammPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [loading, setLoading] = useState(false)
+  const entityType = 'purchaseOrder'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bestellung')
+  const bestellungConfig = createBestellungConfig(t, entityTypeLabel)
 
   const { data, saveData } = useMaskData({
     apiUrl: bestellungConfig.api.baseUrl,
@@ -186,14 +192,14 @@ export default function BestellungStammPage(): JSX.Element {
       await saveData(formData)
       navigate('/einkauf/bestellungen-liste')
     } catch (error) {
-      console.error('Fehler beim Speichern:', error)
+      console.error(t('crud.messages.updateError', { entityType: entityTypeLabel }), error)
     } finally {
       setLoading(false)
     }
   }
 
   const handleCancel = () => {
-    if (confirm('Änderungen wirklich verwerfen?')) {
+    if (confirm(t('crud.messages.discardChanges'))) {
       navigate('/einkauf/bestellungen-liste')
     }
   }

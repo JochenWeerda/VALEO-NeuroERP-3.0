@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { createApiClient } from '@/components/mask-builder/utils/api'
@@ -7,60 +8,69 @@ import { formatDate, formatNumber } from '@/components/mask-builder/utils/format
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { toast } from '@/hooks/use-toast'
+import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 
 // API Client für Bestellungen
 const apiClient = createApiClient('/api/einkauf')
 
-// Konfiguration für Bestellungen ListReport
-const bestellungenConfig: ListConfig = {
-  title: 'Bestellungen',
-  subtitle: 'Einkaufsbestellungen verwalten',
+// Konfiguration für Bestellungen ListReport (wird in Komponente mit i18n erstellt)
+const createBestellungenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+  title: entityTypeLabel,
+  titleKey: 'crud.list.title',
+  subtitle: t('crud.subtitles.managePurchaseOrders'),
+  subtitleKey: 'crud.subtitles.managePurchaseOrders',
   type: 'list-report',
   columns: [
     {
       key: 'nummer',
-      label: 'Bestell-Nr.',
+      label: t('crud.fields.orderNumber'),
+      labelKey: 'crud.fields.orderNumber',
       sortable: true,
       render: (value) => <code className="text-sm font-mono">{value}</code>
     },
     {
       key: 'lieferant',
-      label: 'Lieferant',
+      label: t('crud.entities.supplier'),
+      labelKey: 'crud.entities.supplier',
       sortable: true,
       filterable: true
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('crud.fields.status'),
+      labelKey: 'crud.fields.status',
       sortable: true,
       filterable: true,
       render: (value) => {
-        const statusLabels = {
-          'ENTWURF': { label: 'Entwurf', variant: 'secondary' as const },
-          'FREIGEGEBEN': { label: 'Freigegeben', variant: 'default' as const },
-          'TEILGELIEFERT': { label: 'Teilgeliefert', variant: 'secondary' as const },
-          'VOLLGELIEFERT': { label: 'Vollgeliefert', variant: 'outline' as const },
-          'STORNIERT': { label: 'Storniert', variant: 'destructive' as const }
+        const statusLabel = getStatusLabel(t, value as string, value as string)
+        const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
+          'ENTWURF': 'secondary',
+          'FREIGEGEBEN': 'default',
+          'TEILGELIEFERT': 'secondary',
+          'VOLLGELIEFERT': 'outline',
+          'STORNIERT': 'destructive'
         }
-        const status = statusLabels[value as keyof typeof statusLabels] || { label: value, variant: 'secondary' as const }
-        return <Badge variant={status.variant}>{status.label}</Badge>
+        return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
       key: 'liefertermin',
-      label: 'Liefertermin',
+      label: t('crud.fields.deliveryDate'),
+      labelKey: 'crud.fields.deliveryDate',
       sortable: true,
       render: (value) => formatDate(value)
     },
     {
       key: 'gesamtbetrag',
-      label: 'Gesamtbetrag',
+      label: t('crud.fields.totalAmount'),
+      labelKey: 'crud.fields.totalAmount',
       sortable: true,
       render: (value) => `${formatNumber(value, 2)} €`
     },
     {
       key: 'createdAt',
-      label: 'Erstellt',
+      label: t('crud.fields.createdAt'),
+      labelKey: 'crud.fields.createdAt',
       sortable: true,
       render: (value) => formatDate(value)
     }
@@ -68,38 +78,43 @@ const bestellungenConfig: ListConfig = {
   filters: [
     {
       name: 'status',
-      label: 'Status',
+      label: t('crud.fields.status'),
+      labelKey: 'crud.fields.status',
       type: 'select',
       options: [
-        { value: 'ENTWURF', label: 'Entwurf' },
-        { value: 'FREIGEGEBEN', label: 'Freigegeben' },
-        { value: 'TEILGELIEFERT', label: 'Teilgeliefert' },
-        { value: 'VOLLGELIEFERT', label: 'Vollgeliefert' },
-        { value: 'STORNIERT', label: 'Storniert' }
+        { value: 'ENTWURF', label: t('status.draft'), labelKey: 'status.draft' },
+        { value: 'FREIGEGEBEN', label: t('status.approved'), labelKey: 'status.approved' },
+        { value: 'TEILGELIEFERT', label: t('status.partial'), labelKey: 'status.partial' },
+        { value: 'VOLLGELIEFERT', label: t('crud.status.fullyDelivered'), labelKey: 'crud.status.fullyDelivered' },
+        { value: 'STORNIERT', label: t('status.cancelled'), labelKey: 'status.cancelled' }
       ]
     },
     {
       name: 'lieferant',
-      label: 'Lieferant',
+      label: t('crud.entities.supplier'),
+      labelKey: 'crud.entities.supplier',
       type: 'text'
     }
   ],
   bulkActions: [
     {
       key: 'freigeben',
-      label: 'Freigeben',
+      label: t('crud.actions.approve'),
+      labelKey: 'crud.actions.approve',
       type: 'primary',
       onClick: () => console.log('Freigeben clicked')
     },
     {
       key: 'stornieren',
-      label: 'Stornieren',
+      label: t('crud.actions.cancel'),
+      labelKey: 'crud.actions.cancel',
       type: 'danger',
       onClick: () => console.log('Stornieren clicked')
     },
     {
       key: 'drucken',
-      label: 'Drucken',
+      label: t('crud.actions.print'),
+      labelKey: 'crud.actions.print',
       type: 'secondary',
       onClick: () => console.log('Drucken clicked')
     }
@@ -118,24 +133,31 @@ const bestellungenConfig: ListConfig = {
   },
   permissions: ['einkauf.read', 'einkauf.write'],
   actions: []
-}
+})
 
 export default function BestellungenListePage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const entityType = 'purchaseOrder'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bestellung')
+  const bestellungenConfig = createBestellungenConfig(t, entityTypeLabel)
 
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
       navigate(`/einkauf/bestellungen/${item.id}`)
     } else if (action === 'delete' && item) {
-      if (confirm(`Bestellung "${item.nummer}" wirklich löschen?`)) {
+      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {
           await apiClient.delete(`/bestellungen/${item.id}`)
           loadData() // Liste neu laden
         } catch (error) {
-          alert('Fehler beim Löschen')
+          toast({
+            variant: 'destructive',
+            title: t('crud.messages.deleteError', { entityType: entityTypeLabel })
+          })
         }
       }
     } else if (action === 'freigeben' && item) {
@@ -143,7 +165,10 @@ export default function BestellungenListePage(): JSX.Element {
         await apiClient.post(`/bestellungen/${item.id}/freigeben`)
         loadData()
       } catch (error) {
-        alert('Fehler beim Freigeben')
+        toast({
+          variant: 'destructive',
+          title: t('crud.messages.updateError', { entityType: entityTypeLabel })
+        })
       }
     }
   })
@@ -201,14 +226,14 @@ export default function BestellungenListePage(): JSX.Element {
       document.body.removeChild(link)
 
       toast({
-        title: 'Export erfolgreich',
-        description: `${data.length} Bestellungen wurden exportiert.`,
+        title: t('crud.messages.exportSuccess'),
+        description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
       })
     } catch (error) {
       toast({
         variant: 'destructive',
-        title: 'Export fehlgeschlagen',
-        description: 'Beim Exportieren ist ein Fehler aufgetreten.',
+        title: t('crud.messages.exportError'),
+        description: t('crud.messages.exportFailed'),
       })
     }
   }

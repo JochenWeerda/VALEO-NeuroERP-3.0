@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,13 +12,17 @@ import { Save, Loader2, ArrowLeft, User, Trash2 } from 'lucide-react'
 import { queryKeys, mutationKeys } from '@/lib/query'
 import { crmService, type Contact } from '@/lib/services/crm-service'
 import { useToast } from '@/components/ui/toast-provider'
+import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 
 export default function KontaktDetailPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams()
   const queryClient = useQueryClient()
   const toast = useToast()
   const isNew = !id || id === 'neu'
+  const entityType = 'contact'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kontakt')
 
   const [contact, setContact] = useState<Partial<Contact>>({
     name: '',
@@ -45,12 +50,12 @@ export default function KontaktDetailPage(): JSX.Element {
     mutationKey: mutationKeys.crm.contacts.create,
     mutationFn: (data: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>) => crmService.createContact(data),
     onSuccess: () => {
-      toast.push('Kontakt erfolgreich erstellt')
+      toast.push(getSuccessMessage(t, 'create', entityType))
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.contacts.all })
       navigate('/crm/kontakte-liste')
     },
     onError: (error) => {
-      toast.push('Fehler beim Erstellen des Kontakts')
+      toast.push(getErrorMessage(t, 'create', entityType))
       console.error('Create error:', error)
     },
   })
@@ -60,12 +65,12 @@ export default function KontaktDetailPage(): JSX.Element {
     mutationFn: (data: Partial<Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>>) =>
       crmService.updateContact(id ?? '', data),
     onSuccess: () => {
-      toast.push('Kontakt erfolgreich aktualisiert')
+      toast.push(getSuccessMessage(t, 'update', entityType))
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.contacts.detail(id ?? '') })
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.contacts.all })
     },
     onError: (error) => {
-      toast.push('Fehler beim Aktualisieren des Kontakts')
+      toast.push(getErrorMessage(t, 'update', entityType))
       console.error('Update error:', error)
     },
   })
@@ -74,19 +79,19 @@ export default function KontaktDetailPage(): JSX.Element {
     mutationKey: mutationKeys.crm.contacts.delete,
     mutationFn: () => crmService.deleteContact(id ?? ''),
     onSuccess: () => {
-      toast.push('Kontakt erfolgreich gelöscht')
+      toast.push(getSuccessMessage(t, 'delete', entityType))
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.contacts.all })
       navigate('/crm/kontakte-liste')
     },
     onError: (error) => {
-      toast.push('Fehler beim Löschen des Kontakts')
+      toast.push(getErrorMessage(t, 'delete', entityType))
       console.error('Delete error:', error)
     },
   })
 
   const handleSave = () => {
     if (!contact.name || !contact.company || !contact.email) {
-      toast.push('Bitte füllen Sie alle Pflichtfelder aus')
+      toast.push(t('crud.messages.fillRequiredFields'))
       return
     }
 
@@ -98,7 +103,7 @@ export default function KontaktDetailPage(): JSX.Element {
   }
 
   const handleDelete = () => {
-    if (window.confirm('Möchten Sie diesen Kontakt wirklich löschen?')) {
+    if (window.confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
       deleteMutation.mutate()
     }
   }
@@ -121,10 +126,17 @@ export default function KontaktDetailPage(): JSX.Element {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Lade Kontakt...</span>
+        <span className="ml-2">{t('crud.list.loading', { entityType: entityTypeLabel })}</span>
       </div>
     )
   }
+
+  const pageTitle = isNew 
+    ? `${t('crud.actions.create')} ${entityTypeLabel}`
+    : getDetailTitle(t, entityTypeLabel, contact.name || entityTypeLabel)
+  const pageSubtitle = isNew 
+    ? t('crud.detail.createNew', { entityType: entityTypeLabel })
+    : contact.company || t('crud.detail.details', { entityType: entityTypeLabel })
 
   return (
     <div className="space-y-6 p-6">
@@ -132,17 +144,13 @@ export default function KontaktDetailPage(): JSX.Element {
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate('/crm/kontakte-liste')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Zurück
+            {t('common.back')}
           </Button>
           <div className="flex items-center gap-3">
             <User className="h-8 w-8 text-blue-600" />
             <div>
-              <h1 className="text-3xl font-bold">
-                {isNew ? 'Neuer Kontakt' : contact.name || 'Kontakt'}
-              </h1>
-              <p className="text-muted-foreground">
-                {isNew ? 'Erstellen Sie einen neuen Kontakt' : contact.company || 'Kontaktdetails'}
-              </p>
+              <h1 className="text-3xl font-bold">{pageTitle}</h1>
+              <p className="text-muted-foreground">{pageSubtitle}</p>
             </div>
           </div>
         </div>
@@ -156,11 +164,11 @@ export default function KontaktDetailPage(): JSX.Element {
             >
               {deleteMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               <Trash2 className="h-4 w-4 mr-2" />
-              Löschen
+              {t('common.delete')}
             </Button>
           )}
           <Button variant="outline" onClick={() => navigate('/crm/kontakte-liste')}>
-            Abbrechen
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={handleSave}
@@ -171,7 +179,7 @@ export default function KontaktDetailPage(): JSX.Element {
               <Loader2 className="h-4 w-4 animate-spin" />
             )}
             <Save className="h-4 w-4" />
-            {isNew ? 'Erstellen' : 'Speichern'}
+            {isNew ? t('crud.actions.create') : t('crud.actions.save')}
           </Button>
         </div>
       </div>
@@ -179,56 +187,56 @@ export default function KontaktDetailPage(): JSX.Element {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Kontaktdaten</CardTitle>
+            <CardTitle>{t('crud.fields.contactData')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="name">Name *</Label>
+              <Label htmlFor="name">{t('crud.fields.name')} *</Label>
               <Input
                 id="name"
                 value={contact.name || ''}
                 onChange={(e) => updateField('name', e.target.value)}
-                placeholder="z.B. Max Mustermann"
+                placeholder={t('crud.tooltips.placeholders.name')}
               />
             </div>
             <div>
-              <Label htmlFor="company">Unternehmen *</Label>
+              <Label htmlFor="company">{t('crud.fields.company')} *</Label>
               <Input
                 id="company"
                 value={contact.company || ''}
                 onChange={(e) => updateField('company', e.target.value)}
-                placeholder="z.B. Mustermann GmbH"
+                placeholder={t('crud.tooltips.placeholders.companyName')}
               />
             </div>
             <div>
-              <Label htmlFor="email">E-Mail *</Label>
+              <Label htmlFor="email">{t('crud.fields.email')} *</Label>
               <Input
                 id="email"
                 type="email"
                 value={contact.email || ''}
                 onChange={(e) => updateField('email', e.target.value)}
-                placeholder="z.B. max@mustermann.de"
+                placeholder={t('crud.tooltips.placeholders.email')}
               />
             </div>
             <div>
-              <Label htmlFor="phone">Telefon</Label>
+              <Label htmlFor="phone">{t('crud.fields.phone')}</Label>
               <Input
                 id="phone"
                 value={contact.phone || ''}
                 onChange={(e) => updateField('phone', e.target.value)}
-                placeholder="z.B. +49 123 456789"
+                placeholder={t('crud.tooltips.placeholders.phone')}
               />
             </div>
             <div>
-              <Label htmlFor="type">Typ</Label>
+              <Label htmlFor="type">{t('crud.fields.type')}</Label>
               <Select value={contact.type || 'customer'} onValueChange={(value) => updateField('type', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Typ auswählen" />
+                  <SelectValue placeholder={t('crud.tooltips.placeholders.selectType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="customer">Kunde</SelectItem>
-                  <SelectItem value="supplier">Lieferant</SelectItem>
-                  <SelectItem value="farmer">Landwirt</SelectItem>
+                  <SelectItem value="customer">{getEntityTypeLabel(t, 'customer', 'Kunde')}</SelectItem>
+                  <SelectItem value="supplier">{getEntityTypeLabel(t, 'supplier', 'Lieferant')}</SelectItem>
+                  <SelectItem value="farmer">{getEntityTypeLabel(t, 'farmer', 'Landwirt')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -237,54 +245,54 @@ export default function KontaktDetailPage(): JSX.Element {
 
         <Card>
           <CardHeader>
-            <CardTitle>Adresse & Notizen</CardTitle>
+            <CardTitle>{t('crud.fields.addressAndNotes')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="street">Straße</Label>
+              <Label htmlFor="street">{t('crud.fields.street')}</Label>
               <Input
                 id="street"
                 value={contact.address?.street || ''}
                 onChange={(e) => updateAddress('street', e.target.value)}
-                placeholder="z.B. Musterstraße 123"
+                placeholder={t('crud.tooltips.placeholders.street')}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="zipCode">PLZ</Label>
+                <Label htmlFor="zipCode">{t('crud.fields.postalCode')}</Label>
                 <Input
                   id="zipCode"
                   value={contact.address?.zipCode || ''}
                   onChange={(e) => updateAddress('zipCode', e.target.value)}
-                  placeholder="z.B. 12345"
+                  placeholder={t('crud.tooltips.placeholders.postalCode')}
                 />
               </div>
               <div>
-                <Label htmlFor="city">Stadt</Label>
+                <Label htmlFor="city">{t('crud.fields.city')}</Label>
                 <Input
                   id="city"
                   value={contact.address?.city || ''}
                   onChange={(e) => updateAddress('city', e.target.value)}
-                  placeholder="z.B. Berlin"
+                  placeholder={t('crud.tooltips.placeholders.city')}
                 />
               </div>
             </div>
             <div>
-              <Label htmlFor="country">Land</Label>
+              <Label htmlFor="country">{t('crud.fields.country')}</Label>
               <Input
                 id="country"
                 value={contact.address?.country || ''}
                 onChange={(e) => updateAddress('country', e.target.value)}
-                placeholder="z.B. Deutschland"
+                placeholder={t('crud.tooltips.placeholders.country')}
               />
             </div>
             <div>
-              <Label htmlFor="notes">Notizen</Label>
+              <Label htmlFor="notes">{t('crud.fields.notes')}</Label>
               <Textarea
                 id="notes"
                 value={contact.notes || ''}
                 onChange={(e) => updateField('notes', e.target.value)}
-                placeholder="Zusätzliche Informationen..."
+                placeholder={t('crud.tooltips.placeholders.notes')}
                 rows={4}
               />
             </div>

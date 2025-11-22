@@ -1,22 +1,24 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
-// Zod-Schema für Kunden
-const kundenSchema = z.object({
-  firma: z.string().min(1, "Firmenname ist erforderlich"),
+// Zod-Schema für Kunden (wird in Komponente mit i18n erstellt)
+const createKundenSchema = (t: any) => z.object({
+  firma: z.string().min(1, t('crud.messages.validationError')),
   anrede: z.string().optional(),
   vorname: z.string().optional(),
-  nachname: z.string().min(1, "Nachname ist erforderlich"),
-  strasse: z.string().min(1, "Straße ist erforderlich"),
-  plz: z.string().regex(/^\d{5}$/, "PLZ muss 5-stellig sein"),
-  ort: z.string().min(1, "Ort ist erforderlich"),
+  nachname: z.string().min(1, t('crud.messages.validationError')),
+  strasse: z.string().min(1, t('crud.messages.validationError')),
+  plz: z.string().regex(/^\d{5}$/, t('crud.messages.validationError')),
+  ort: z.string().min(1, t('crud.messages.validationError')),
   land: z.string().default("DE"),
   telefon: z.string().optional(),
-  email: z.string().email("Ungültige E-Mail-Adresse").optional().or(z.literal("")),
+  email: z.string().email(t('crud.messages.validationError')).optional().or(z.literal("")),
   ustId: z.string().optional(),
   steuernummer: z.string().optional(),
   kreditlimit: z.number().min(0).default(0),
@@ -29,46 +31,46 @@ const kundenSchema = z.object({
   bemerkungen: z.string().optional()
 })
 
-// Konfiguration für Kunden ObjectPage
-const kundenConfig: MaskConfig = {
-  title: 'Kunden-Stammdaten',
-  subtitle: 'Verwaltung von Geschäftspartner-Stammdaten',
+// Konfiguration für Kunden ObjectPage (wird in Komponente mit i18n erstellt)
+const createKundenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+  title: entityTypeLabel,
+  subtitle: t('crud.detail.manage', { entityType: entityTypeLabel }),
   type: 'object-page',
   tabs: [
     {
       key: 'stammdaten',
-      label: 'Stammdaten',
+      label: t('crud.detail.basicInfo'),
       fields: [
         {
           name: 'firma',
-          label: 'Firmenname',
+          label: t('crud.fields.companyName'),
           type: 'text',
           required: true,
-          placeholder: 'z.B. Müller Landwirtschaft GmbH'
+          placeholder: t('crud.tooltips.placeholders.companyName')
         },
         {
           name: 'anrede',
-          label: 'Anrede',
+          label: t('crud.fields.salutation'),
           type: 'select',
           options: [
-            { value: 'herr', label: 'Herr' },
-            { value: 'frau', label: 'Frau' },
-            { value: 'familie', label: 'Familie' },
-            { value: 'firma', label: 'Firma' }
+            { value: 'herr', label: t('crud.fields.salutationMr') },
+            { value: 'frau', label: t('crud.fields.salutationMrs') },
+            { value: 'familie', label: t('crud.fields.salutationFamily') },
+            { value: 'firma', label: t('crud.fields.salutationCompany') }
           ]
         },
         {
           name: 'vorname',
-          label: 'Vorname',
+          label: t('crud.fields.firstName'),
           type: 'text',
-          placeholder: 'Max'
+          placeholder: t('crud.tooltips.placeholders.firstName')
         },
         {
           name: 'nachname',
-          label: 'Nachname',
+          label: t('crud.fields.lastName'),
           type: 'text',
           required: true,
-          placeholder: 'Müller'
+          placeholder: t('crud.tooltips.placeholders.lastName')
         }
       ],
       layout: 'grid',
@@ -76,42 +78,42 @@ const kundenConfig: MaskConfig = {
     },
     {
       key: 'adresse',
-      label: 'Adresse',
+      label: t('crud.fields.address'),
       fields: [
         {
           name: 'strasse',
-          label: 'Straße und Hausnummer',
+          label: t('crud.fields.street'),
           type: 'text',
           required: true,
-          placeholder: 'Musterstraße 123'
+          placeholder: t('crud.tooltips.placeholders.street')
         },
         {
           name: 'plz',
-          label: 'PLZ',
+          label: t('crud.fields.postalCode'),
           type: 'text',
           required: true,
           maxLength: 5,
-          placeholder: '12345'
+          placeholder: t('crud.tooltips.placeholders.postalCode')
         },
         {
           name: 'ort',
-          label: 'Ort',
+          label: t('crud.fields.city'),
           type: 'text',
           required: true,
-          placeholder: 'Musterstadt'
+          placeholder: t('crud.tooltips.placeholders.city')
         },
         {
           name: 'land',
-          label: 'Land',
+          label: t('crud.fields.country'),
           type: 'select',
           required: true,
           options: [
-            { value: 'DE', label: 'Deutschland' },
-            { value: 'AT', label: 'Österreich' },
-            { value: 'CH', label: 'Schweiz' },
-            { value: 'NL', label: 'Niederlande' },
-            { value: 'DK', label: 'Dänemark' },
-            { value: 'PL', label: 'Polen' }
+            { value: 'DE', label: t('crud.fields.countryDE') },
+            { value: 'AT', label: t('crud.fields.countryAT') },
+            { value: 'CH', label: t('crud.fields.countryCH') },
+            { value: 'NL', label: t('crud.fields.countryNL') },
+            { value: 'DK', label: t('crud.fields.countryDK') },
+            { value: 'PL', label: t('crud.fields.countryPL') }
           ]
         }
       ],
@@ -120,37 +122,37 @@ const kundenConfig: MaskConfig = {
     },
     {
       key: 'kontakt',
-      label: 'Kontakt',
+      label: t('crud.fields.contact'),
       fields: [
         {
           name: 'telefon',
-          label: 'Telefon',
+          label: t('crud.fields.phone'),
           type: 'text',
-          placeholder: '+49 123 456789'
+          placeholder: t('crud.tooltips.placeholders.phone')
         },
         {
           name: 'email',
-          label: 'E-Mail',
+          label: t('crud.fields.email'),
           type: 'text',
-          placeholder: 'max.mueller@example.com'
+          placeholder: t('crud.tooltips.placeholders.email')
         }
       ]
     },
     {
       key: 'steuern',
-      label: 'Steuern & Recht',
+      label: t('crud.fields.taxesAndLegal'),
       fields: [
         {
           name: 'ustId',
-          label: 'USt-ID',
+          label: t('crud.fields.vatId'),
           type: 'text',
-          placeholder: 'DE123456789'
+          placeholder: t('crud.tooltips.placeholders.vatId')
         },
         {
           name: 'steuernummer',
-          label: 'Steuernummer',
+          label: t('crud.fields.taxNumber'),
           type: 'text',
-          placeholder: '123/456/78901'
+          placeholder: t('crud.tooltips.placeholders.taxNumber')
         }
       ],
       layout: 'grid',
@@ -158,47 +160,47 @@ const kundenConfig: MaskConfig = {
     },
     {
       key: 'konditionen',
-      label: 'Konditionen',
+      label: t('crud.fields.terms'),
       fields: [
         {
           name: 'kreditlimit',
-          label: 'Kreditlimit (€)',
+          label: t('crud.fields.creditLimit'),
           type: 'number',
           min: 0,
           step: 100,
-          placeholder: '5000'
+          placeholder: t('crud.tooltips.placeholders.creditLimit')
         },
         {
           name: 'zahlungsbedingungen',
-          label: 'Zahlungsbedingungen',
+          label: t('crud.fields.paymentTerms'),
           type: 'select',
           options: [
-            { value: 'sofort', label: 'Sofort' },
-            { value: '7 Tage', label: '7 Tage' },
-            { value: '14 Tage', label: '14 Tage' },
-            { value: '30 Tage', label: '30 Tage' },
-            { value: '60 Tage', label: '60 Tage' }
+            { value: 'sofort', label: t('crud.fields.paymentTermsImmediate') },
+            { value: '7 Tage', label: t('crud.fields.paymentTerms7Days') },
+            { value: '14 Tage', label: t('crud.fields.paymentTermsNet14') },
+            { value: '30 Tage', label: t('crud.fields.paymentTermsNet30') },
+            { value: '60 Tage', label: t('crud.fields.paymentTermsNet60') }
           ]
         },
         {
           name: 'rabatt',
-          label: 'Rabatt (%)',
+          label: t('crud.fields.discountPercent'),
           type: 'number',
           min: 0,
           max: 100,
           step: 0.5,
-          placeholder: '2.5'
+          placeholder: t('crud.tooltips.placeholders.discount')
         },
         {
           name: 'bonitaet',
-          label: 'Bonität',
+          label: t('crud.fields.creditRating'),
           type: 'select',
           options: [
-            { value: 'ausgezeichnet', label: 'Ausgezeichnet' },
-            { value: 'gut', label: 'Gut' },
-            { value: 'mittel', label: 'Mittel' },
-            { value: 'schlecht', label: 'Schlecht' },
-            { value: 'unklar', label: 'Unklar' }
+            { value: 'ausgezeichnet', label: t('crud.fields.creditRatingExcellent') },
+            { value: 'gut', label: t('crud.fields.creditRatingGood') },
+            { value: 'mittel', label: t('crud.fields.creditRatingMedium') },
+            { value: 'schlecht', label: t('crud.fields.creditRatingPoor') },
+            { value: 'unklar', label: t('crud.fields.creditRatingUnclear') }
           ]
         }
       ],
@@ -207,17 +209,17 @@ const kundenConfig: MaskConfig = {
     },
     {
       key: 'umsatz',
-      label: 'Umsatz & Historie',
+      label: t('crud.fields.revenueAndHistory'),
       fields: [
         {
           name: 'letzteBestellung',
-          label: 'Letzte Bestellung',
+          label: t('crud.fields.lastOrder'),
           type: 'date',
           readonly: true
         },
         {
           name: 'umsatzGesamt',
-          label: 'Gesamtumsatz (€)',
+          label: t('crud.fields.totalRevenue'),
           type: 'number',
           readonly: true,
           min: 0,
@@ -225,12 +227,12 @@ const kundenConfig: MaskConfig = {
         },
         {
           name: 'status',
-          label: 'Status',
+          label: t('crud.fields.status'),
           type: 'select',
           options: [
-            { value: 'aktiv', label: 'Aktiv' },
-            { value: 'inaktiv', label: 'Inaktiv' },
-            { value: 'gesperrt', label: 'Gesperrt' }
+            { value: 'aktiv', label: t('status.active') },
+            { value: 'inaktiv', label: t('status.inactive') },
+            { value: 'gesperrt', label: t('crud.fields.statusBlocked') }
           ]
         }
       ],
@@ -239,13 +241,13 @@ const kundenConfig: MaskConfig = {
     },
     {
       key: 'bemerkungen',
-      label: 'Bemerkungen',
+      label: t('crud.fields.notes'),
       fields: [
         {
           name: 'bemerkungen',
-          label: 'Interne Bemerkungen',
+          label: t('crud.fields.internalNotes'),
           type: 'textarea',
-          placeholder: 'Zusätzliche Informationen, Vorlieben, Besonderheiten...'
+          placeholder: t('crud.tooltips.placeholders.customerNotes')
         }
       ]
     }
@@ -253,13 +255,13 @@ const kundenConfig: MaskConfig = {
   actions: [
     {
       key: 'validate',
-      label: 'Validieren',
+      label: t('crud.actions.validate'),
       type: 'secondary',
       onClick: () => {}
     },
     {
       key: 'save',
-      label: 'Speichern',
+      label: t('crud.actions.save'),
       type: 'primary',
       onClick: () => {}
     }
@@ -274,13 +276,17 @@ const kundenConfig: MaskConfig = {
       delete: '/api/crm/kunden/{id}'
     }
   },
-  validation: kundenSchema,
+  validation: createKundenSchema(t),
   permissions: ['crm.write', 'customer.admin']
-}
+})
 
 export default function KundenStammPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const entityType = 'customer'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kunde')
+  const kundenConfig = createKundenConfig(t, entityTypeLabel)
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: kundenConfig.api.baseUrl,
@@ -307,7 +313,7 @@ export default function KundenStammPage(): JSX.Element {
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
-        alert('Validierung erfolgreich!')
+        alert(t('crud.messages.validationSuccess'))
       } else {
         showValidationToast(isValid.errors)
       }
@@ -319,7 +325,7 @@ export default function KundenStammPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm('Ungespeicherte Änderungen gehen verloren. Wirklich abbrechen?')) {
+    if (isDirty && !confirm(t('crud.messages.discardChanges'))) {
       return
     }
     navigate('/crm/kunden/liste')

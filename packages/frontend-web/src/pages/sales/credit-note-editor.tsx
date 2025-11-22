@@ -1,64 +1,66 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
-// Zod-Schema für CreditNote
-const creditNoteSchema = z.object({
-  number: z.string().min(1, "Gutschriftsnummer ist erforderlich"),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Datum muss YYYY-MM-DD Format haben"),
-  customerId: z.string().min(1, "Kunde ist erforderlich"),
+// Zod-Schema für CreditNote (wird in Komponente mit i18n erstellt)
+const createCreditNoteSchema = (t: any) => z.object({
+  number: z.string().min(1, t('crud.messages.validationError')),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
+  customerId: z.string().min(1, t('crud.messages.validationError')),
   sourceInvoice: z.string().optional(),
   sourceOrder: z.string().optional(),
   reason: z.enum(['return', 'discount', 'error', 'complaint', 'other'], {
-    errorMap: () => ({ message: "Gültiger Grund erforderlich" })
+    errorMap: () => ({ message: t('crud.messages.validationError') })
   }),
   reasonText: z.string().optional(),
-  paymentTerms: z.string().min(1, "Zahlungsbedingungen sind erforderlich"),
-  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fälligkeitsdatum muss YYYY-MM-DD Format haben"),
+  paymentTerms: z.string().min(1, t('crud.messages.validationError')),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
   status: z.enum(['draft', 'approved', 'sent', 'paid', 'cancelled']),
   notes: z.string().optional(),
   lines: z.array(z.object({
-    article: z.string().min(1, "Artikel ist erforderlich"),
-    qty: z.number().positive("Menge muss positiv sein"),
-    price: z.number().positive("Preis muss positiv sein"),
-    vatRate: z.number().min(0).max(100, "MwSt-Satz muss 0-100% sein"),
-    discount: z.number().min(0).max(100, "Rabatt muss 0-100% sein").default(0)
-  })).min(1, "Mindestens eine Position erforderlich"),
+    article: z.string().min(1, t('crud.messages.validationError')),
+    qty: z.number().positive(t('crud.messages.validationError')),
+    price: z.number().positive(t('crud.messages.validationError')),
+    vatRate: z.number().min(0).max(100, t('crud.messages.validationError')),
+    discount: z.number().min(0).max(100, t('crud.messages.validationError')).default(0)
+  })).min(1, t('crud.messages.validationError')),
   subtotalNet: z.number().min(0),
   totalTax: z.number().min(0),
   totalDiscount: z.number().min(0),
   totalGross: z.number().min(0)
 })
 
-// Konfiguration für CreditNote ObjectPage
-const creditNoteConfig: MaskConfig = {
-  title: 'Gutschrift erstellen/bearbeiten',
-  subtitle: 'Gutschriften für Korrekturen und Rückerstattungen',
+// Konfiguration für CreditNote ObjectPage (wird in Komponente mit i18n erstellt)
+const createCreditNoteConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+  title: `${t('crud.actions.create')}/${t('crud.actions.edit')} ${entityTypeLabel}`,
+  subtitle: t('crud.tooltips.fields.creditNote'),
   type: 'object-page',
   tabs: [
     {
       key: 'grunddaten',
-      label: 'Grunddaten',
+      label: t('crud.detail.basicInfo'),
       fields: [
         {
           name: 'number',
-          label: 'Gutschriftsnummer',
+          label: t('crud.fields.number'),
           type: 'text',
           required: true,
-          placeholder: 'CN-2025-0001'
+          placeholder: t('crud.tooltips.placeholders.creditNoteNumber')
         },
         {
           name: 'date',
-          label: 'Datum',
+          label: t('crud.fields.date'),
           type: 'date',
           required: true
         },
         {
           name: 'customerId',
-          label: 'Kunde',
+          label: t('crud.entities.customer'),
           type: 'lookup',
           required: true,
           endpoint: '/api/customers',
@@ -67,43 +69,43 @@ const creditNoteConfig: MaskConfig = {
         },
         {
           name: 'sourceInvoice',
-          label: 'Ursprungsrechnung',
+          label: t('crud.fields.sourceInvoice'),
           type: 'lookup',
           endpoint: '/api/invoices',
           displayField: 'number',
           valueField: 'id',
-          helpText: 'Optionale Verknüpfung zur ursprünglichen Rechnung'
+          helpText: t('crud.tooltips.fields.sourceInvoice')
         },
         {
           name: 'reason',
-          label: 'Grund',
+          label: t('crud.fields.reason'),
           type: 'select',
           required: true,
           options: [
-            { value: 'return', label: 'Rücksendung' },
-            { value: 'discount', label: 'Nachlass' },
-            { value: 'error', label: 'Fehlerkorrektur' },
-            { value: 'complaint', label: 'Reklamation' },
-            { value: 'other', label: 'Sonstiges' }
+            { value: 'return', label: t('crud.fields.reasonReturn') },
+            { value: 'discount', label: t('crud.fields.reasonDiscount') },
+            { value: 'error', label: t('crud.fields.reasonError') },
+            { value: 'complaint', label: t('crud.fields.reasonComplaint') },
+            { value: 'other', label: t('crud.dialogs.amend.types.other') }
           ]
         },
         {
           name: 'reasonText',
-          label: 'Grund-Details',
+          label: t('crud.fields.reasonDetails'),
           type: 'textarea',
-          placeholder: 'Detaillierte Begründung für die Gutschrift...'
+          placeholder: t('crud.tooltips.placeholders.creditNoteReason')
         },
         {
           name: 'status',
-          label: 'Status',
+          label: t('crud.fields.status'),
           type: 'select',
           required: true,
           options: [
-            { value: 'draft', label: 'Entwurf' },
-            { value: 'approved', label: 'Genehmigt' },
-            { value: 'sent', label: 'Versendet' },
-            { value: 'paid', label: 'Bezahlt' },
-            { value: 'cancelled', label: 'Storniert' }
+            { value: 'draft', label: t('status.draft') },
+            { value: 'approved', label: t('status.approved') },
+            { value: 'sent', label: t('status.sent') },
+            { value: 'paid', label: t('status.paid') },
+            { value: 'cancelled', label: t('status.cancelled') }
           ]
         }
       ],
@@ -112,63 +114,63 @@ const creditNoteConfig: MaskConfig = {
     },
     {
       key: 'positionen',
-      label: 'Positionen',
+      label: t('crud.fields.items'),
       fields: [
         {
           name: 'lines',
-          label: 'Gutschrifts-Positionen',
+          label: t('crud.fields.creditNoteItems'),
           type: 'table',
           required: true,
           columns: [
-            { key: 'article', label: 'Artikel', type: 'lookup', required: true },
-            { key: 'qty', label: 'Menge', type: 'number', required: true },
-            { key: 'price', label: 'Preis', type: 'number', required: true },
-            { key: 'vatRate', label: 'MwSt %', type: 'number', required: true },
-            { key: 'discount', label: 'Rabatt %', type: 'number' }
+            { key: 'article', label: t('crud.fields.product'), type: 'lookup', required: true },
+            { key: 'qty', label: t('crud.fields.quantity'), type: 'number', required: true },
+            { key: 'price', label: t('crud.fields.price'), type: 'number', required: true },
+            { key: 'vatRate', label: t('crud.fields.taxRate') + ' %', type: 'number', required: true },
+            { key: 'discount', label: t('crud.fields.discount') + ' %', type: 'number' }
           ],
           minRows: 1,
-          helpText: 'Positionen der Gutschrift mit Artikeln, Mengen und Preisen'
+          helpText: t('crud.tooltips.fields.creditNoteItems')
         }
       ]
     },
     {
       key: 'betrag',
-      label: 'Betrag',
+      label: t('crud.fields.amounts'),
       fields: [
         {
           name: 'subtotalNet',
-          label: 'Netto-Betrag',
+          label: t('crud.fields.netAmount'),
           type: 'number',
           required: true,
           step: 0.01,
           readonly: true,
-          helpText: 'Summe aller Positionen ohne MwSt'
+          helpText: t('crud.tooltips.fields.subtotalNet')
         },
         {
           name: 'totalDiscount',
-          label: 'Gesamt-Rabatt',
+          label: t('crud.fields.totalDiscount'),
           type: 'number',
           step: 0.01,
           readonly: true,
-          helpText: 'Summe aller Rabatte'
+          helpText: t('crud.tooltips.fields.totalDiscount')
         },
         {
           name: 'totalTax',
-          label: 'MwSt Gesamt',
+          label: t('crud.fields.totalTax'),
           type: 'number',
           required: true,
           step: 0.01,
           readonly: true,
-          helpText: 'Gesamte Mehrwertsteuer'
+          helpText: t('crud.tooltips.fields.totalTax')
         },
         {
           name: 'totalGross',
-          label: 'Brutto-Betrag',
+          label: t('crud.fields.grossAmount'),
           type: 'number',
           required: true,
           step: 0.01,
           readonly: true,
-          helpText: 'Endbetrag der Gutschrift'
+          helpText: t('crud.tooltips.fields.totalGross')
         }
       ],
       layout: 'grid',
@@ -176,23 +178,23 @@ const creditNoteConfig: MaskConfig = {
     },
     {
       key: 'zahlung',
-      label: 'Zahlung & Fälligkeit',
+      label: t('crud.fields.paymentAndDue'),
       fields: [
         {
           name: 'paymentTerms',
-          label: 'Zahlungsbedingungen',
+          label: t('crud.fields.paymentTerms'),
           type: 'select',
           required: true,
           options: [
-            { value: 'immediate', label: 'Sofort' },
-            { value: 'net30', label: '30 Tage netto' },
-            { value: 'net60', label: '60 Tage netto' },
-            { value: 'net90', label: '90 Tage netto' }
+            { value: 'immediate', label: t('crud.fields.paymentTermsImmediate') },
+            { value: 'net30', label: t('crud.fields.paymentTermsNet30') },
+            { value: 'net60', label: t('crud.fields.paymentTermsNet60') },
+            { value: 'net90', label: t('crud.fields.paymentTermsNet90') }
           ]
         },
         {
           name: 'dueDate',
-          label: 'Fälligkeitsdatum',
+          label: t('crud.fields.dueDate'),
           type: 'date',
           required: true
         }
@@ -200,13 +202,13 @@ const creditNoteConfig: MaskConfig = {
     },
     {
       key: 'notizen',
-      label: 'Notizen',
+      label: t('crud.fields.notes'),
       fields: [
         {
           name: 'notes',
-          label: 'Interne Notizen',
+          label: t('crud.fields.internalNotes'),
           type: 'textarea',
-          placeholder: 'Zusätzliche Informationen zur Gutschrift...'
+          placeholder: t('crud.tooltips.placeholders.creditNoteNotes')
         }
       ]
     }
@@ -214,37 +216,37 @@ const creditNoteConfig: MaskConfig = {
   actions: [
     {
       key: 'calculate',
-      label: 'Neu berechnen',
+      label: t('crud.actions.recalculate'),
       type: 'secondary',
       onClick: () => {}
     },
     {
       key: 'preview',
-      label: 'Vorschau',
+      label: t('crud.actions.preview'),
       type: 'secondary',
       onClick: () => {}
     },
     {
       key: 'approve',
-      label: 'Genehmigen',
+      label: t('crud.actions.approve'),
       type: 'primary',
       onClick: () => {}
     },
     {
       key: 'send',
-      label: 'Versenden',
+      label: t('crud.actions.send'),
       type: 'primary',
       onClick: () => {}
     },
     {
       key: 'print',
-      label: 'Drucken',
+      label: t('crud.actions.print'),
       type: 'secondary',
       onClick: () => {}
     },
     {
       key: 'cancel',
-      label: 'Stornieren',
+      label: t('crud.actions.cancel'),
       type: 'danger',
       onClick: () => {}
     }
@@ -259,14 +261,18 @@ const creditNoteConfig: MaskConfig = {
       delete: '/api/sales/credit-notes/{id}'
     }
   },
-  validation: creditNoteSchema,
+  validation: createCreditNoteSchema(t),
   permissions: ['sales.write', 'sales.credit_notes']
-}
+})
 
 export default function CreditNoteEditorPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams()
   const [isDirty, setIsDirty] = useState(false)
+  const entityType = 'creditNote'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Gutschrift')
+  const creditNoteConfig = createCreditNoteConfig(t, entityTypeLabel)
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: creditNoteConfig.api.baseUrl,
@@ -278,7 +284,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
   const { handleAction } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'calculate') {
       // Beträge neu berechnen
-      alert('Neuberechnung-Funktion wird implementiert')
+      alert(t('crud.messages.recalculateFunction'))
     } else if (action === 'preview') {
       // Vorschau anzeigen
       window.open('/api/sales/credit-notes/preview', '_blank')
@@ -313,7 +319,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
     } else if (action === 'print') {
       window.open('/api/sales/credit-notes/print', '_blank')
     } else if (action === 'cancel') {
-      if (window.confirm('Gutschrift wirklich stornieren?')) {
+      if (window.confirm(t('crud.dialogs.cancel.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {
           await saveData({ ...formData, status: 'cancelled' })
           setIsDirty(false)
@@ -330,7 +336,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm('Ungespeicherte Änderungen gehen verloren. Wirklich abbrechen?')) {
+    if (isDirty && !confirm(t('crud.messages.discardChanges'))) {
       return
     }
     navigate('/sales/credit-notes')

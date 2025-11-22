@@ -1,80 +1,82 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
-// Zod-Schema für Anfrage
-const anfrageSchema = z.object({
-  anfrageNummer: z.string().min(1, "Anfrage-Nummer ist erforderlich"),
+// Zod-Schema für Anfrage (wird in Komponente mit i18n erstellt)
+const createAnfrageSchema = (t: any) => z.object({
+  anfrageNummer: z.string().min(1, t('crud.messages.validationError')),
   typ: z.enum(['BANF', 'ANF']),
-  anforderer: z.string().min(1, "Anforderer ist erforderlich"),
-  artikel: z.string().min(1, "Artikel ist erforderlich"),
-  menge: z.number().min(0.1, "Menge muss > 0 sein"),
-  einheit: z.string().min(1, "Einheit ist erforderlich"),
+  anforderer: z.string().min(1, t('crud.messages.validationError')),
+  artikel: z.string().min(1, t('crud.messages.validationError')),
+  menge: z.number().min(0.1, t('crud.messages.validationError')),
+  einheit: z.string().min(1, t('crud.messages.validationError')),
   prioritaet: z.enum(['niedrig', 'normal', 'hoch', 'dringend']),
-  faelligkeit: z.string().min(1, "Fälligkeit ist erforderlich"),
+  faelligkeit: z.string().min(1, t('crud.messages.validationError')),
   status: z.enum(['ENTWURF', 'FREIGEGEBEN', 'ANGEBOTSPHASE']),
-  begruendung: z.string().min(1, "Begründung ist erforderlich"),
+  begruendung: z.string().min(1, t('crud.messages.validationError')),
   kostenstelle: z.string().optional(),
   projekt: z.string().optional(),
   bemerkungen: z.string().optional()
 })
 
-// Konfiguration für Anfrage ObjectPage
-const anfrageConfig: MaskConfig = {
-  title: 'Bedarfsanforderung',
-  subtitle: 'Interne Bedarfsmeldung oder Anfrage erstellen',
+// Konfiguration für Anfrage ObjectPage (wird in Komponente mit i18n erstellt)
+const createAnfrageConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+  title: entityTypeLabel,
+  subtitle: t('crud.actions.create'),
   type: 'object-page',
   tabs: [
     {
       key: 'stammdaten',
-      label: 'Stammdaten',
+      label: t('crud.detail.basicInfo'),
       fields: [
         {
           name: 'anfrageNummer',
-          label: 'Anfrage-Nummer',
+          label: t('crud.fields.number'),
           type: 'text',
           required: true,
           readonly: true
         },
         {
           name: 'typ',
-          label: 'Typ',
+          label: t('crud.fields.type'),
           type: 'select',
           required: true,
           options: [
-            { value: 'BANF', label: 'Bedarfsanforderung (BANF)' },
-            { value: 'ANF', label: 'Anfrage (ANF)' }
+            { value: 'BANF', label: t('crud.entities.purchaseRequest') + ' (BANF)' },
+            { value: 'ANF', label: t('crud.entities.purchaseRequest') + ' (ANF)' }
           ]
         },
         {
           name: 'anforderer',
-          label: 'Anforderer',
+          label: t('crud.fields.requestedBy'),
           type: 'text',
           required: true
         },
         {
           name: 'status',
-          label: 'Status',
+          label: t('crud.fields.status'),
           type: 'select',
           required: true,
           options: [
-            { value: 'ENTWURF', label: 'Entwurf' },
-            { value: 'FREIGEGEBEN', label: 'Freigegeben' },
-            { value: 'ANGEBOTSPHASE', label: 'Angebotsphase' }
+            { value: 'ENTWURF', label: t('status.draft') },
+            { value: 'FREIGEGEBEN', label: t('status.approved') },
+            { value: 'ANGEBOTSPHASE', label: t('status.pending') }
           ]
         }
       ]
     },
     {
       key: 'bedarf',
-      label: 'Bedarf',
+      label: t('crud.fields.requirement'),
       fields: [
         {
           name: 'artikel',
-          label: 'Artikel',
+          label: t('crud.fields.product'),
           type: 'lookup',
           required: true,
           endpoint: '/api/articles',
@@ -83,13 +85,13 @@ const anfrageConfig: MaskConfig = {
         },
         {
           name: 'menge',
-          label: 'Menge',
+          label: t('crud.fields.quantity'),
           type: 'number',
           required: true
         },
         {
           name: 'einheit',
-          label: 'Einheit',
+          label: t('crud.fields.unit'),
           type: 'select',
           required: true,
           options: [
@@ -101,19 +103,19 @@ const anfrageConfig: MaskConfig = {
         },
         {
           name: 'prioritaet',
-          label: 'Priorität',
+          label: t('crud.fields.priority'),
           type: 'select',
           required: true,
           options: [
-            { value: 'niedrig', label: 'Niedrig' },
-            { value: 'normal', label: 'Normal' },
-            { value: 'hoch', label: 'Hoch' },
-            { value: 'dringend', label: 'Dringend' }
+            { value: 'niedrig', label: t('crud.fields.priorityLow') },
+            { value: 'normal', label: t('crud.fields.priorityNormal') },
+            { value: 'hoch', label: t('crud.fields.priorityHigh') },
+            { value: 'dringend', label: t('crud.fields.priorityUrgent') }
           ]
         },
         {
           name: 'faelligkeit',
-          label: 'Fällig bis',
+          label: t('crud.fields.dueDate'),
           type: 'date',
           required: true
         }
@@ -121,18 +123,18 @@ const anfrageConfig: MaskConfig = {
     },
     {
       key: 'details',
-      label: 'Details',
+      label: t('crud.detail.additionalInfo'),
       fields: [
         {
           name: 'begruendung',
-          label: 'Begründung',
+          label: t('crud.fields.reason'),
           type: 'textarea',
           required: true,
-          placeholder: 'Warum wird dieser Bedarf angemeldet?'
+          placeholder: t('crud.tooltips.placeholders.reason')
         },
         {
           name: 'kostenstelle',
-          label: 'Kostenstelle',
+          label: t('crud.fields.costCenter'),
           type: 'lookup',
           endpoint: '/api/cost-centers',
           displayField: 'name',
@@ -140,7 +142,7 @@ const anfrageConfig: MaskConfig = {
         },
         {
           name: 'projekt',
-          label: 'Projekt',
+          label: t('crud.fields.project'),
           type: 'lookup',
           endpoint: '/api/projects',
           displayField: 'name',
@@ -148,9 +150,9 @@ const anfrageConfig: MaskConfig = {
         },
         {
           name: 'bemerkungen',
-          label: 'Bemerkungen',
+          label: t('crud.fields.notes'),
           type: 'textarea',
-          placeholder: 'Zusätzliche Informationen...'
+          placeholder: t('crud.tooltips.placeholders.notes')
         }
       ]
     }
@@ -158,13 +160,13 @@ const anfrageConfig: MaskConfig = {
   actions: [
     {
       key: 'freigeben',
-      label: 'Freigeben',
+      label: t('crud.actions.approve'),
       type: 'primary',
       onClick: () => console.log('Freigeben clicked')
     },
     {
       key: 'inBestellung',
-      label: 'In Bestellung umwandeln',
+      label: t('crud.actions.convertToOrder'),
       type: 'secondary',
       onClick: () => console.log('In Bestellung clicked')
     }
@@ -179,14 +181,18 @@ const anfrageConfig: MaskConfig = {
       delete: '/api/einkauf/anfragen/{id}'
     }
   },
-  validation: anfrageSchema,
+  validation: createAnfrageSchema(t),
   permissions: ['einkauf.read', 'einkauf.write']
-}
+})
 
 export default function AnfrageStammPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [loading, setLoading] = useState(false)
+  const entityType = 'purchaseRequest'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Anfrage')
+  const anfrageConfig = createAnfrageConfig(t, entityTypeLabel)
 
   const { data, saveData } = useMaskData({
     apiUrl: anfrageConfig.api.baseUrl,
@@ -199,14 +205,14 @@ export default function AnfrageStammPage(): JSX.Element {
       await saveData(formData)
       navigate('/einkauf/anfragen')
     } catch (error) {
-      console.error('Fehler beim Speichern:', error)
+      console.error(t('crud.messages.updateError', { entityType: entityTypeLabel }), error)
     } finally {
       setLoading(false)
     }
   }
 
   const handleCancel = () => {
-    if (confirm('Änderungen wirklich verwerfen?')) {
+    if (confirm(t('crud.messages.discardChanges'))) {
       navigate('/einkauf/anfragen')
     }
   }
