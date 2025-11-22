@@ -5,7 +5,9 @@ import { SalesOfferFilter, SalesOfferSort } from '../../infra/repositories/sales
 
 // Initialize services
 const repository = new SalesOfferRepository();
-const salesOfferService = new SalesOfferService(repository);
+const salesOfferService = new SalesOfferService({
+  salesOfferRepository: repository
+});
 
 // Helper function to get authenticated user ID
 function getAuthenticatedUserId(request: any): string {
@@ -552,5 +554,133 @@ export async function registerSalesOfferRoutes(fastify: FastifyInstance) {
         return reply.code(500).send({ error: (error as Error).message });
       }
     });
+
+    // CRITICAL: POST /sales-offers/:id/convert-to-order - Convert accepted offer to order
+    salesOfferRoutes.post('/:id/convert-to-order', {
+      schema: {
+        description: 'Convert accepted sales offer to sales order',
+        tags: ['Sales Offers'],
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'string' },
+          },
+        },
+        body: {
+          type: 'object',
+          properties: {
+            deliveryDate: { type: 'string', format: 'date' },
+            paymentTerms: { type: 'string' },
+            notes: { type: 'string' }
+          }
+        },
+        response: {
+          201: {
+            type: 'object',
+            properties: {
+              orderId: { type: 'string' },
+              orderNumber: { type: 'string' },
+              status: { type: 'string' },
+              totalAmount: { type: 'number' },
+              message: { type: 'string' }
+            }
+          },
+        },
+      },
+    }, async (request, reply) => {
+      try {
+        const { id } = request.params as { id: string };
+        const body = request.body as any;
+        const convertedBy = getAuthenticatedUserId(request);
+
+        // Import the SalesOrderService here to avoid circular dependencies
+        const { SalesOrderService } = await import('../../domain/services/sales-order-service');
+        const { SalesOrderRepository } = await import('../../infra/repositories/sales-order-repository');
+        
+        // Create services for conversion
+        const salesOrderRepository = new SalesOrderRepository();
+        const salesOrderService = new SalesOrderService({ 
+          salesOrderRepository, 
+          salesOfferService 
+        });
+
+        // Convert offer to order
+        const order = await salesOrderService.convertOfferToOrder(
+          id, 
+          convertedBy,
+          {
+            deliveryDate: body.deliveryDate ? new Date(body.deliveryDate) : undefined,
+            paymentTerms: body.paymentTerms,
+            notes: body.notes
+          }
+        );
+
+        return reply.code(201).send({
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          status: order.status,
+          totalAmount: order.totalAmount,
+          message: `Sales offer ${id} successfully converted to order ${order.orderNumber}`
+        });
+      } catch (error) {
+        const errorMessage = (error as Error).message;
+        
+        // Return appropriate HTTP status codes based on error type
+        if (errorMessage.includes('not found')) {
+          return reply.code(404).send({ error: errorMessage });
+        } else if (errorMessage.includes('accepted') || errorMessage.includes('expired') || errorMessage.includes('already converted')) {
+          return reply.code(400).send({ error: errorMessage });
+        } else {
+          return reply.code(500).send({ error: errorMessage });
+        }
+      }
+    });
+
+    // GET /sales-offers/:id/orders - Get orders created from this offer
+    salesOfferRoutes.get('/:id/orders', {
+      schema: {
+        description: 'Get sales orders created from this offer',
+        tags: ['Sales Offers'],
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'string' },
+          },
+        },
+        response: {
+          200: { type: 'array' },
+        },
+      },
+    }, async (request, reply) => {
+      try {
+        const { id } = request.params as { id: string };
+
+        // Import the SalesOrderService
+        const { SalesOrderService } = await import('../../domain/services/sales-order-service');
+        const { SalesOrderRepository } = await import('../../infra/repositories/sales-order-repository');
+        
+        const salesOrderRepository = new SalesOrderRepository();
+        const salesOrderService = new SalesOrderService({ 
+          salesOrderRepository, 
+          salesOfferService 
+        });
+
+        const orders = await salesOrderService.getSalesOrdersBySourceOffer(id);
+
+        return orders.map(order => ({
+          id: order.id,
+          orderNumber: order.orderNumber,
+          status: order.status,
+          orderDate: order.orderDate.toISOString(),
+          totalAmount: order.totalAmount,
+          createdAt: order.createdAt.toISOString()
+        }));
+      } catch (error) {
+        return reply.code(500).send({ error: (error as Error).message });
+      }
+    });
+
   }, { prefix: '/sales-offers' });
 }

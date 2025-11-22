@@ -277,9 +277,9 @@ export declare const QuoteQueryContractSchema: z.ZodObject<{
 }, {
     status?: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired" | undefined;
     search?: string | undefined;
-    customerId?: string | undefined;
     page?: string | undefined;
     pageSize?: string | undefined;
+    customerId?: string | undefined;
     validUntilFrom?: string | undefined;
     validUntilTo?: string | undefined;
 }>;
