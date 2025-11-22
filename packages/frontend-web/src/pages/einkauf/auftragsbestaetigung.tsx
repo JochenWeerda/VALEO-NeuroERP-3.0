@@ -1,18 +1,20 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
-// Zod-Schema für Auftragsbestätigung
-const auftragsbestaetigungSchema = z.object({
-  bestellungId: z.string().min(1, "Bestellung ist erforderlich"),
-  bestaetigungsNummer: z.string().min(1, "Bestätigungsnummer ist erforderlich"),
+// Zod-Schema für Auftragsbestätigung (wird in Komponente mit i18n erstellt)
+const createAuftragsbestaetigungSchema = (t: any) => z.object({
+  bestellungId: z.string().min(1, t('crud.messages.validationError')),
+  bestaetigungsNummer: z.string().min(1, t('crud.messages.validationError')),
   status: z.enum(['OFFEN', 'GEPRUEFT', 'BESTAETIGT']),
   bestaetigteTermine: z.array(z.object({
     positionId: z.string(),
-    bestaetigterTermin: z.string().min(1, "Termin ist erforderlich"),
+    bestaetigterTermin: z.string().min(1, t('crud.messages.validationError')),
     abweichung: z.string().optional()
   })),
   preisabweichungen: z.array(z.object({
@@ -24,19 +26,19 @@ const auftragsbestaetigungSchema = z.object({
   bemerkungen: z.string().optional()
 })
 
-// Konfiguration für Auftragsbestätigung ObjectPage
-const auftragsbestaetigungConfig: MaskConfig = {
-  title: 'Auftragsbestätigung',
-  subtitle: 'Lieferanten-Rückmeldung zu Bestellung',
+// Konfiguration für Auftragsbestätigung ObjectPage (wird in Komponente mit i18n erstellt)
+const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+  title: entityTypeLabel,
+  subtitle: t('crud.tooltips.fields.orderConfirmation'),
   type: 'object-page',
   tabs: [
     {
       key: 'stammdaten',
-      label: 'Stammdaten',
+      label: t('crud.detail.basicInfo'),
       fields: [
         {
           name: 'bestellungId',
-          label: 'Bestellung',
+          label: t('crud.entities.purchaseOrder'),
           type: 'lookup',
           required: true,
           endpoint: '/api/einkauf/bestellungen?status=FREIGEGEBEN',
@@ -45,100 +47,100 @@ const auftragsbestaetigungConfig: MaskConfig = {
         },
         {
           name: 'bestaetigungsNummer',
-          label: 'AB-Nummer',
+          label: t('crud.fields.confirmationNumber'),
           type: 'text',
           required: true
         },
         {
           name: 'status',
-          label: 'Status',
+          label: t('crud.fields.status'),
           type: 'select',
           required: true,
           options: [
-            { value: 'OFFEN', label: 'Offen' },
-            { value: 'GEPRUEFT', label: 'Geprüft' },
-            { value: 'BESTAETIGT', label: 'Bestätigt' }
+            { value: 'OFFEN', label: t('status.pending') },
+            { value: 'GEPRUEFT', label: t('status.reviewed') },
+            { value: 'BESTAETIGT', label: t('status.confirmed') }
           ]
         }
       ]
     },
     {
       key: 'termine',
-      label: 'Terminbestätigungen',
+      label: t('crud.fields.dateConfirmations'),
       fields: [
         {
           name: 'bestaetigteTermine',
-          label: 'Terminabweichungen',
+          label: t('crud.fields.dateDeviations'),
           type: 'table',
           columns: [
             {
               key: 'positionId',
-              label: 'Position',
+              label: t('crud.fields.item'),
               type: 'text',
               required: true
             },
             {
               key: 'bestaetigterTermin',
-              label: 'Bestätigter Termin',
+              label: t('crud.fields.confirmedDate'),
               type: 'date',
               required: true
             },
             {
               key: 'abweichung',
-              label: 'Abweichung',
+              label: t('crud.fields.deviation'),
               type: 'text'
             }
           ] as any,
-          helpText: 'Terminliche Abweichungen vom Lieferanten'
+          helpText: t('crud.tooltips.fields.dateDeviations')
         }
       ]
     },
     {
       key: 'preise',
-      label: 'Preisabweichungen',
+      label: t('crud.fields.priceDeviations'),
       fields: [
         {
           name: 'preisabweichungen',
-          label: 'Preisänderungen',
+          label: t('crud.fields.priceChanges'),
           type: 'table',
           columns: [
             {
               key: 'positionId',
-              label: 'Position',
+              label: t('crud.fields.item'),
               type: 'text',
               required: true
             },
             {
               key: 'urspruenglicherPreis',
-              label: 'Ursprünglicher Preis',
+              label: t('crud.fields.originalPrice'),
               type: 'number',
               required: true
             },
             {
               key: 'neuerPreis',
-              label: 'Neuer Preis',
+              label: t('crud.fields.newPrice'),
               type: 'number',
               required: true
             },
             {
               key: 'begruendung',
-              label: 'Begründung',
+              label: t('crud.fields.reason'),
               type: 'text'
             }
           ] as any,
-          helpText: 'Preisliche Abweichungen vom Lieferanten'
+          helpText: t('crud.tooltips.fields.priceDeviations')
         }
       ]
     },
     {
       key: 'belege',
-      label: 'Belege',
+      label: t('crud.detail.additionalInfo'),
       fields: [
         {
           name: 'bemerkungen',
-          label: 'Bemerkungen',
+          label: t('crud.fields.notes'),
           type: 'textarea',
-          placeholder: 'Zusätzliche Informationen zur Auftragsbestätigung...'
+          placeholder: t('crud.tooltips.placeholders.confirmationNotes')
         }
       ]
     }
@@ -146,13 +148,13 @@ const auftragsbestaetigungConfig: MaskConfig = {
   actions: [
     {
       key: 'pruefen',
-      label: 'Prüfen',
+      label: t('crud.actions.review'),
       type: 'secondary',
       onClick: () => console.log('Prüfen clicked')
     },
     {
       key: 'bestaetigen',
-      label: 'Bestätigen',
+      label: t('crud.actions.confirm'),
       type: 'primary',
       onClick: () => console.log('Bestätigen clicked')
     }
@@ -167,14 +169,18 @@ const auftragsbestaetigungConfig: MaskConfig = {
       delete: '/api/einkauf/auftragsbestaetigungen/{id}'
     }
   },
-  validation: auftragsbestaetigungSchema,
+  validation: createAuftragsbestaetigungSchema(t),
   permissions: ['einkauf.read', 'einkauf.write']
-}
+})
 
 export default function AuftragsbestaetigungPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [loading, setLoading] = useState(false)
+  const entityType = 'orderConfirmation'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Auftragsbestätigung')
+  const auftragsbestaetigungConfig = createAuftragsbestaetigungConfig(t, entityTypeLabel)
 
   const { data, saveData } = useMaskData({
     apiUrl: auftragsbestaetigungConfig.api.baseUrl,
@@ -187,14 +193,14 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
       await saveData(formData)
       navigate('/einkauf/auftragsbestaetigungen')
     } catch (error) {
-      console.error('Fehler beim Speichern:', error)
+      console.error(t('crud.messages.updateError', { entityType: entityTypeLabel }), error)
     } finally {
       setLoading(false)
     }
   }
 
   const handleCancel = () => {
-    if (confirm('Änderungen wirklich verwerfen?')) {
+    if (confirm(t('crud.messages.discardChanges'))) {
       navigate('/einkauf/auftragsbestaetigungen')
     }
   }

@@ -1,10 +1,12 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/components/ui/toast-provider"
 import { FormBuilder, type FormSchema } from "@/features/forms/FormBuilder"
 import { BelegFlowPanel } from "@/features/flows/BelegFlowPanel"
 import ApprovalPanel from "@/features/workflow/ApprovalPanel"
 import deliverySchema from "@/domain-schemas/sales_delivery.schema.json"
+import { getEntityTypeLabel, getSuccessMessage, getErrorMessage, getStatusLabel } from "@/features/crud/utils/i18n-helpers"
 
 const ISO_DATE_LENGTH = 10
 
@@ -29,7 +31,10 @@ type SalesDelivery = {
  * Lieferschein erstellen/bearbeiten
  */
 export default function SalesDeliveryEditorPage(): JSX.Element {
+  const { t } = useTranslation()
   const { push } = useToast()
+  const entityType = 'delivery'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lieferschein')
   const [delivery, setDelivery] = useState<SalesDelivery>({
     number: "DL-2025-0001",
     date: new Date().toISOString().slice(0, ISO_DATE_LENGTH),
@@ -54,9 +59,9 @@ export default function SalesDeliveryEditorPage(): JSX.Element {
         throw new Error("Save failed")
       }
 
-      push("✔ Lieferschein gespeichert")
+      push(getSuccessMessage(t, 'update', entityType))
     } catch {
-      push("❌ Fehler beim Speichern")
+      push(getErrorMessage(t, 'update', entityType))
     }
   }
 
@@ -77,9 +82,10 @@ export default function SalesDeliveryEditorPage(): JSX.Element {
       }
 
       const data = (await response.json()) as { ok: boolean; number: string }
-      push(`✔ Rechnung erstellt: ${data.number}`)
+      const invoiceTypeLabel = getEntityTypeLabel(t, 'invoice', 'Rechnung')
+      push(`${getSuccessMessage(t, 'create', 'invoice')}: ${data.number}`)
     } catch {
-      push("❌ Fehler beim Erstellen der Rechnung")
+      push(getErrorMessage(t, 'create', 'invoice'))
     }
   }
 
@@ -88,11 +94,11 @@ export default function SalesDeliveryEditorPage(): JSX.Element {
       <BelegFlowPanel
         current={{
           id: "1",
-          type: "Lieferschein",
+          type: entityTypeLabel,
           number: delivery.number,
-          status: delivery.status,
+          status: getStatusLabel(t, delivery.status, delivery.status),
         }}
-        nextTypes={[{ to: "invoice", label: "Rechnung" }]}
+        nextTypes={[{ to: "invoice", label: getEntityTypeLabel(t, 'invoice', 'Rechnung') }]}
         onCreateFollowUp={createFollowUp}
       />
 
@@ -106,7 +112,7 @@ export default function SalesDeliveryEditorPage(): JSX.Element {
             setDelivery((o) => ({ ...o, ...p }))
           }}
           onSubmit={save}
-          submitLabel="Lieferschein speichern"
+          submitLabel={`${t('crud.actions.save')} ${entityTypeLabel}`}
         />
       </Card>
     </div>

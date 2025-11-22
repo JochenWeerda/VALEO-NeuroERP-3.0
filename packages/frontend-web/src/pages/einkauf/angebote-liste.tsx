@@ -1,82 +1,96 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { toast } from '@/hooks/use-toast'
 
 // API Client für Angebote
 const apiClient = createApiClient('/api/einkauf')
 
-// Konfiguration für Angebote ListReport
-const angeboteConfig: ListConfig = {
-  title: 'Lieferantenangebote',
-  subtitle: 'Eingehende Preisangebote verwalten',
+// Konfiguration für Angebote ListReport (wird in Komponente mit i18n erstellt)
+const createAngeboteConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+  title: entityTypeLabel,
+  titleKey: 'crud.list.title',
+  subtitle: t('crud.subtitles.managePurchaseOffers'),
+  subtitleKey: 'crud.subtitles.managePurchaseOffers',
   type: 'list-report',
   columns: [
     {
       key: 'angebotNummer',
-      label: 'Angebot-Nr.',
+      label: t('crud.fields.offerNumber'),
+      labelKey: 'crud.fields.offerNumber',
       sortable: true,
       render: (value) => <code className="text-sm font-mono">{value}</code>
     },
     {
       key: 'anfrage',
-      label: 'Anfrage',
+      label: t('crud.entities.purchaseRequest'),
+      labelKey: 'crud.entities.purchaseRequest',
       sortable: true,
       render: (value) => value?.anfrageNummer || '-'
     },
     {
       key: 'lieferant',
-      label: 'Lieferant',
+      label: t('crud.entities.supplier'),
+      labelKey: 'crud.entities.supplier',
       sortable: true,
       filterable: true
     },
     {
       key: 'artikel',
-      label: 'Artikel',
+      label: t('crud.fields.product'),
+      labelKey: 'crud.fields.product',
       sortable: true,
       filterable: true
     },
     {
       key: 'preis',
-      label: 'Preis',
+      label: t('crud.fields.price'),
+      labelKey: 'crud.fields.price',
       sortable: true,
-      render: (value, item) => `${formatNumber(value, 2)} €/${item.einheit || 'Stk'}`
+      render: (value, item) => `${formatNumber(value, 2)} €/${item.einheit || t('crud.fields.unit')}`
     },
     {
       key: 'gueltigBis',
-      label: 'Gültig bis',
+      label: t('crud.fields.validUntil'),
+      labelKey: 'crud.fields.validUntil',
       sortable: true,
       render: (value) => formatDate(value)
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('crud.fields.status'),
+      labelKey: 'crud.fields.status',
       sortable: true,
       filterable: true,
       render: (value) => {
-        const statusLabels = {
-          'ERFASST': { label: 'Erfasst', variant: 'secondary' as const },
-          'GEPRUEFT': { label: 'Geprüft', variant: 'default' as const },
-          'GENEHMIGT': { label: 'Genehmigt', variant: 'outline' as const },
-          'ABGELEHNT': { label: 'Abgelehnt', variant: 'destructive' as const }
+        const statusLabel = getStatusLabel(t, value as string, value as string)
+        const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
+          'ERFASST': 'secondary',
+          'GEPRUEFT': 'default',
+          'GENEHMIGT': 'outline',
+          'ABGELEHNT': 'destructive'
         }
-        const status = statusLabels[value as keyof typeof statusLabels] || { label: value, variant: 'secondary' as const }
-        return <Badge variant={status.variant}>{status.label}</Badge>
+        return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
       key: 'lieferzeit',
-      label: 'Lieferzeit',
+      label: t('crud.fields.deliveryTime'),
+      labelKey: 'crud.fields.deliveryTime',
       sortable: true,
-      render: (value) => `${value} Tage`
+      render: (value) => `${value} ${t('crud.fields.days')}`
     },
     {
       key: 'createdAt',
-      label: 'Erstellt',
+      label: t('crud.fields.createdAt'),
+      labelKey: 'crud.fields.createdAt',
       sortable: true,
       render: (value) => formatDate(value)
     }
@@ -84,48 +98,55 @@ const angeboteConfig: ListConfig = {
   filters: [
     {
       name: 'status',
-      label: 'Status',
+      label: t('crud.fields.status'),
+      labelKey: 'crud.fields.status',
       type: 'select',
       options: [
-        { value: 'ERFASST', label: 'Erfasst' },
-        { value: 'GEPRUEFT', label: 'Geprüft' },
-        { value: 'GENEHMIGT', label: 'Genehmigt' },
-        { value: 'ABGELEHNT', label: 'Abgelehnt' }
+        { value: 'ERFASST', label: t('status.recorded'), labelKey: 'status.recorded' },
+        { value: 'GEPRUEFT', label: t('status.reviewed'), labelKey: 'status.reviewed' },
+        { value: 'GENEHMIGT', label: t('status.approved'), labelKey: 'status.approved' },
+        { value: 'ABGELEHNT', label: t('status.rejected'), labelKey: 'status.rejected' }
       ]
     },
     {
       name: 'lieferant',
-      label: 'Lieferant',
+      label: t('crud.entities.supplier'),
+      labelKey: 'crud.entities.supplier',
       type: 'text'
     },
     {
       name: 'artikel',
-      label: 'Artikel',
+      label: t('crud.fields.product'),
+      labelKey: 'crud.fields.product',
       type: 'text'
     }
   ],
   bulkActions: [
     {
       key: 'pruefen',
-      label: 'Prüfen',
+      label: t('crud.actions.review'),
+      labelKey: 'crud.actions.review',
       type: 'secondary',
       onClick: () => console.log('Prüfen clicked')
     },
     {
       key: 'genehmigen',
-      label: 'Genehmigen',
+      label: t('crud.actions.approve'),
+      labelKey: 'crud.actions.approve',
       type: 'primary',
       onClick: () => console.log('Genehmigen clicked')
     },
     {
       key: 'ablehnen',
-      label: 'Ablehnen',
+      label: t('crud.actions.reject'),
+      labelKey: 'crud.actions.reject',
       type: 'danger',
       onClick: () => console.log('Ablehnen clicked')
     },
     {
       key: 'inBestellung',
-      label: 'In Bestellung umwandeln',
+      label: t('crud.actions.convertToOrder'),
+      labelKey: 'crud.actions.convertToOrder',
       type: 'secondary',
       onClick: () => console.log('In Bestellung clicked')
     }
@@ -144,24 +165,31 @@ const angeboteConfig: ListConfig = {
   },
   permissions: ['einkauf.read', 'einkauf.write'],
   actions: []
-}
+})
 
 export default function AngeboteListePage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const entityType = 'purchaseOffer'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Angebot')
+  const angeboteConfig = createAngeboteConfig(t, entityTypeLabel)
 
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
       navigate(`/einkauf/angebote/${item.id}`)
     } else if (action === 'delete' && item) {
-      if (confirm(`Angebot "${item.angebotNummer}" wirklich löschen?`)) {
+      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {
           await apiClient.delete(`/angebote/${item.id}`)
           loadData() // Liste neu laden
         } catch (error) {
-          alert('Fehler beim Löschen')
+          toast({
+            variant: 'destructive',
+            title: t('crud.messages.deleteError', { entityType: entityTypeLabel })
+          })
         }
       }
     }
@@ -199,7 +227,34 @@ export default function AngeboteListePage(): JSX.Element {
   }
 
   const handleExport = () => {
-    alert('Export-Funktion wird implementiert')
+    try {
+      const csvHeader = `${t('crud.fields.offerNumber')};${t('crud.entities.supplier')};${t('crud.fields.product')};${t('crud.fields.price')};${t('crud.fields.status')}\n`
+      const csvContent = data.map((angebot: any) =>
+        `"${angebot.angebotNummer}";"${angebot.lieferant}";"${angebot.artikel}";"${angebot.preis}";"${angebot.status}"`
+      ).join('\n')
+
+      const csv = csvHeader + csvContent
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `angebote-liste-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: t('crud.messages.exportSuccess'),
+        description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
+      })
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.exportError'),
+        description: t('crud.messages.exportFailed'),
+      })
+    }
   }
 
   return (
@@ -211,7 +266,12 @@ export default function AngeboteListePage(): JSX.Element {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onExport={handleExport}
-      onImport={() => alert('Import-Funktion wird implementiert')}
+      onImport={() => {
+        toast({
+          title: t('crud.messages.importInfo'),
+          description: t('crud.messages.importComingSoon'),
+        })
+      }}
       isLoading={loading}
     />
   )

@@ -1,22 +1,24 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
-// Zod-Schema für Angebot
-const angebotSchema = z.object({
-  angebotNummer: z.string().min(1, "Angebot-Nummer ist erforderlich"),
+// Zod-Schema für Angebot (wird in Komponente mit i18n erstellt)
+const createAngebotSchema = (t: any) => z.object({
+  angebotNummer: z.string().min(1, t('crud.messages.validationError')),
   anfrageId: z.string().optional(),
-  lieferantId: z.string().min(1, "Lieferant ist erforderlich"),
-  artikel: z.string().min(1, "Artikel ist erforderlich"),
-  menge: z.number().min(0.1, "Menge muss > 0 sein"),
-  einheit: z.string().min(1, "Einheit ist erforderlich"),
-  preis: z.number().min(0, "Preis muss >= 0 sein"),
+  lieferantId: z.string().min(1, t('crud.messages.validationError')),
+  artikel: z.string().min(1, t('crud.messages.validationError')),
+  menge: z.number().min(0.1, t('crud.messages.validationError')),
+  einheit: z.string().min(1, t('crud.messages.validationError')),
+  preis: z.number().min(0, t('crud.messages.validationError')),
   waehrung: z.string().default('EUR'),
-  lieferzeit: z.number().min(1, "Lieferzeit muss >= 1 Tag sein"),
-  gueltigBis: z.string().min(1, "Gültigkeitsdatum ist erforderlich"),
+  lieferzeit: z.number().min(1, t('crud.messages.validationError')),
+  gueltigBis: z.string().min(1, t('crud.messages.validationError')),
   status: z.enum(['ERFASST', 'GEPRUEFT', 'GENEHMIGT', 'ABGELEHNT']),
   mindestabnahme: z.number().optional(),
   zahlungsbedingungen: z.string().optional(),
@@ -24,35 +26,35 @@ const angebotSchema = z.object({
   bemerkungen: z.string().optional()
 })
 
-// Konfiguration für Angebot ObjectPage
-const angebotConfig: MaskConfig = {
-  title: 'Lieferantenangebot',
-  subtitle: 'Preisangebot von Lieferanten verwalten',
+// Konfiguration für Angebot ObjectPage (wird in Komponente mit i18n erstellt)
+const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+  title: entityTypeLabel,
+  subtitle: t('crud.actions.edit'),
   type: 'object-page',
   tabs: [
     {
       key: 'stammdaten',
-      label: 'Stammdaten',
+      label: t('crud.detail.basicInfo'),
       fields: [
         {
           name: 'angebotNummer',
-          label: 'Angebot-Nummer',
+          label: t('crud.fields.number'),
           type: 'text',
           required: true,
           readonly: true
         },
         {
           name: 'anfrageId',
-          label: 'Anfrage',
+          label: t('crud.entities.purchaseRequest'),
           type: 'lookup',
           endpoint: '/api/einkauf/anfragen?status=FREIGEGEBEN',
           displayField: 'anfrageNummer',
           valueField: 'id',
-          helpText: 'Verknüpfung mit bestehender Anfrage (optional)'
+          helpText: t('crud.tooltips.fields.linkedRequest')
         },
         {
           name: 'lieferantId',
-          label: 'Lieferant',
+          label: t('crud.entities.supplier'),
           type: 'lookup',
           required: true,
           endpoint: '/api/partners?type=supplier',
@@ -61,25 +63,25 @@ const angebotConfig: MaskConfig = {
         },
         {
           name: 'status',
-          label: 'Status',
+          label: t('crud.fields.status'),
           type: 'select',
           required: true,
           options: [
-            { value: 'ERFASST', label: 'Erfasst' },
-            { value: 'GEPRUEFT', label: 'Geprüft' },
-            { value: 'GENEHMIGT', label: 'Genehmigt' },
-            { value: 'ABGELEHNT', label: 'Abgelehnt' }
+            { value: 'ERFASST', label: t('status.recorded') },
+            { value: 'GEPRUEFT', label: t('status.reviewed') },
+            { value: 'GENEHMIGT', label: t('status.approved') },
+            { value: 'ABGELEHNT', label: t('status.rejected') }
           ]
         }
       ]
     },
     {
       key: 'angebot',
-      label: 'Angebotsdetails',
+      label: t('crud.detail.offerDetails'),
       fields: [
         {
           name: 'artikel',
-          label: 'Artikel',
+          label: t('crud.fields.product'),
           type: 'lookup',
           required: true,
           endpoint: '/api/articles',
@@ -88,13 +90,13 @@ const angebotConfig: MaskConfig = {
         },
         {
           name: 'menge',
-          label: 'Menge',
+          label: t('crud.fields.quantity'),
           type: 'number',
           required: true
         },
         {
           name: 'einheit',
-          label: 'Einheit',
+          label: t('crud.fields.unit'),
           type: 'select',
           required: true,
           options: [
@@ -106,13 +108,13 @@ const angebotConfig: MaskConfig = {
         },
         {
           name: 'preis',
-          label: 'Preis',
+          label: t('crud.fields.price'),
           type: 'number',
           required: true
         },
         {
           name: 'waehrung',
-          label: 'Währung',
+          label: t('crud.fields.currency'),
           type: 'select',
           options: [
             { value: 'EUR', label: 'EUR' },
@@ -122,13 +124,13 @@ const angebotConfig: MaskConfig = {
         },
         {
           name: 'lieferzeit',
-          label: 'Lieferzeit (Tage)',
+          label: t('crud.fields.deliveryTime'),
           type: 'number',
           required: true
         },
         {
           name: 'gueltigBis',
-          label: 'Gültig bis',
+          label: t('crud.fields.validUntil'),
           type: 'date',
           required: true
         }
@@ -136,23 +138,23 @@ const angebotConfig: MaskConfig = {
     },
     {
       key: 'konditionen',
-      label: 'Konditionen',
+      label: t('crud.fields.conditions'),
       fields: [
         {
           name: 'mindestabnahme',
-          label: 'Mindestabnahme',
+          label: t('crud.fields.minimumOrder'),
           type: 'number',
-          helpText: 'Mindestmenge für Rabatte'
+          helpText: t('crud.tooltips.fields.minimumOrder')
         },
         {
           name: 'zahlungsbedingungen',
-          label: 'Zahlungsbedingungen',
+          label: t('crud.fields.paymentTerms'),
           type: 'text',
-          placeholder: 'z.B. 30 Tage netto'
+          placeholder: t('crud.tooltips.placeholders.paymentTerms')
         },
         {
           name: 'incoterms',
-          label: 'Incoterms',
+          label: t('crud.fields.incoterms'),
           type: 'select',
           options: [
             { value: 'EXW', label: 'EXW - Ab Werk' },
@@ -166,9 +168,9 @@ const angebotConfig: MaskConfig = {
         },
         {
           name: 'bemerkungen',
-          label: 'Bemerkungen',
+          label: t('crud.fields.notes'),
           type: 'textarea',
-          placeholder: 'Zusätzliche Informationen zum Angebot...'
+          placeholder: t('crud.tooltips.placeholders.offerNotes')
         }
       ]
     }
@@ -176,25 +178,25 @@ const angebotConfig: MaskConfig = {
   actions: [
     {
       key: 'pruefen',
-      label: 'Prüfen',
+      label: t('crud.actions.review'),
       type: 'secondary',
       onClick: () => console.log('Prüfen clicked')
     },
     {
       key: 'genehmigen',
-      label: 'Genehmigen',
+      label: t('crud.actions.approve'),
       type: 'primary',
       onClick: () => console.log('Genehmigen clicked')
     },
     {
       key: 'ablehnen',
-      label: 'Ablehnen',
+      label: t('crud.actions.reject'),
       type: 'danger',
       onClick: () => console.log('Ablehnen clicked')
     },
     {
       key: 'inBestellung',
-      label: 'In Bestellung umwandeln',
+      label: t('crud.actions.convertToOrder'),
       type: 'secondary',
       onClick: () => console.log('In Bestellung clicked')
     }
@@ -209,14 +211,18 @@ const angebotConfig: MaskConfig = {
       delete: '/api/einkauf/angebote/{id}'
     }
   },
-  validation: angebotSchema,
+  validation: createAngebotSchema(t),
   permissions: ['einkauf.read', 'einkauf.write']
-}
+})
 
 export default function AngebotStammPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [loading, setLoading] = useState(false)
+  const entityType = 'purchaseOffer'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Angebot')
+  const angebotConfig = createAngebotConfig(t, entityTypeLabel)
 
   const { data, saveData } = useMaskData({
     apiUrl: angebotConfig.api.baseUrl,
@@ -229,14 +235,14 @@ export default function AngebotStammPage(): JSX.Element {
       await saveData(formData)
       navigate('/einkauf/angebote')
     } catch (error) {
-      console.error('Fehler beim Speichern:', error)
+      console.error(t('crud.messages.updateError', { entityType: entityTypeLabel }), error)
     } finally {
       setLoading(false)
     }
   }
 
   const handleCancel = () => {
-    if (confirm('Änderungen wirklich verwerfen?')) {
+    if (confirm(t('crud.messages.discardChanges'))) {
       navigate('/einkauf/angebote')
     }
   }
