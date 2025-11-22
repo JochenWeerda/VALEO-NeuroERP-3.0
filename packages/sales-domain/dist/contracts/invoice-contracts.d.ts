@@ -244,9 +244,9 @@ export declare const InvoiceQueryContractSchema: z.ZodObject<{
 }, {
     status?: "Issued" | "Cancelled" | "Paid" | "Overdue" | undefined;
     search?: string | undefined;
-    customerId?: string | undefined;
     page?: string | undefined;
     pageSize?: string | undefined;
+    customerId?: string | undefined;
     orderId?: string | undefined;
     dueDateFrom?: string | undefined;
     dueDateTo?: string | undefined;

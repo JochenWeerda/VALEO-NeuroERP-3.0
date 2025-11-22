@@ -58,11 +58,11 @@ export interface AmendmentEntity {
   type: AmendmentTypeValue;
   reason: string;
   changes: Record<string, any>;
-  approvedBy?: string;
-  approvedAt?: Date;
+  approvedBy?: string | undefined;
+  approvedAt?: Date | undefined;
   status: AmendmentStatusValue;
-  effectiveAt?: Date;
-  notes?: string;
+  effectiveAt?: Date | undefined;
+  notes?: string | undefined;
   createdAt: Date;
   updatedAt: Date;
   version: number;

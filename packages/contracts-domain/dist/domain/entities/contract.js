@@ -103,6 +103,7 @@ class Contract {
     pricing;
     delivery;
     status;
+    documentId;
     createdAt;
     updatedAt;
     version;
@@ -120,6 +121,8 @@ class Contract {
         this.pricing = props.pricing;
         this.delivery = props.delivery;
         this.status = props.status;
+        if (props.documentId)
+            this.documentId = props.documentId;
         this.createdAt = props.createdAt;
         this.updatedAt = props.updatedAt;
         this.version = props.version;

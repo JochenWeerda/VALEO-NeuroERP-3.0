@@ -240,9 +240,9 @@ export declare const CreditNoteQueryContractSchema: z.ZodObject<{
 }, {
     status?: "Issued" | "Settled" | undefined;
     search?: string | undefined;
-    customerId?: string | undefined;
     page?: string | undefined;
     pageSize?: string | undefined;
+    customerId?: string | undefined;
     invoiceId?: string | undefined;
 }>;
 export declare const CreditNoteListResponseContractSchema: z.ZodObject<{

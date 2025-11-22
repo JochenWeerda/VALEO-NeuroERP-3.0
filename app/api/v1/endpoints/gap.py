@@ -11,9 +11,11 @@ import shutil
 import re
 from datetime import datetime
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, UploadFile, File, Depends
 from pydantic import BaseModel
 from sqlalchemy import text
+from sqlalchemy.orm import Session
+from app.core.database import get_db
 
 router = APIRouter(prefix="/gap", tags=["gap", "prospecting"])
 

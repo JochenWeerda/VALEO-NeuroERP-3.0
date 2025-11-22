@@ -1,23 +1,25 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
+import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
-// Zod-Schema für Bank-Abgleich
-const bankAbgleichSchema = z.object({
-  kontoId: z.string().min(1, "Konto ist erforderlich"),
-  periode: z.string().regex(/^\d{4}-\d{2}$/, "Periode muss YYYY-MM Format haben"),
+// Zod-Schema für Bank-Abgleich (wird in Komponente mit i18n erstellt)
+const createBankAbgleichSchema = (t: any) => z.object({
+  kontoId: z.string().min(1, t('crud.messages.validationError')),
+  periode: z.string().regex(/^\d{4}-\d{2}$/, t('crud.messages.validationError')),
   camtFile: z.string().optional(),
   startSaldo: z.number(),
   endSaldo: z.number(),
   gebuchteUmsaetze: z.number(),
   nichtZugeordnet: z.number(),
   zugeordnet: z.number(),
-  abgleichsDifferenz: z.number().max(0.01, "Abgleich muss ausgeglichen sein"),
-  abgleichsDatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Abgleichsdatum muss YYYY-MM-DD Format haben"),
+  abgleichsDifferenz: z.number().max(0.01, t('crud.messages.validationError')),
+  abgleichsDatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
   regelAngewendet: z.array(z.object({
     regelName: z.string(),
     treffer: z.number(),
@@ -25,45 +27,45 @@ const bankAbgleichSchema = z.object({
   })).optional()
 })
 
-// Konfiguration für Bank-Abgleich ObjectPage
-const bankAbgleichConfig: MaskConfig = {
-  title: 'Bank (Kontoauszug-Abgleich)',
-  subtitle: 'CAMT-Import und automatische Buchungszuordnung',
+// Konfiguration für Bank-Abgleich ObjectPage (wird in Komponente mit i18n erstellt)
+const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+  title: entityTypeLabel,
+  subtitle: t('crud.fields.bankReconciliation'),
   type: 'object-page',
   tabs: [
     {
       key: 'import',
-      label: 'CAMT-Import',
+      label: t('crud.fields.camtImport'),
       fields: [
         {
           name: 'kontoId',
-          label: 'Bankkonto',
+          label: t('crud.fields.bankAccount'),
           type: 'select',
           required: true,
           options: [
-            { value: '1200', label: '1200 - Bankkonto Deutsche Bank' },
-            { value: '1300', label: '1300 - Bankkonto Commerzbank' },
-            { value: '1400', label: '1400 - Bankkonto Sparkasse' }
+            { value: '1200', label: '1200 - ' + t('crud.fields.bankAccount') + ' Deutsche Bank' },
+            { value: '1300', label: '1300 - ' + t('crud.fields.bankAccount') + ' Commerzbank' },
+            { value: '1400', label: '1400 - ' + t('crud.fields.bankAccount') + ' Sparkasse' }
           ]
         },
         {
           name: 'periode',
-          label: 'Periode',
+          label: t('crud.fields.period'),
           type: 'text',
           required: true,
-          placeholder: '2025-01',
+          placeholder: t('crud.tooltips.placeholders.period'),
           pattern: '^\\d{4}-\\d{2}$'
          } as any, {},
         {
           name: 'camtFile',
-          label: 'CAMT-Datei',
+          label: t('crud.fields.camtFile'),
           type: 'file',
           accept: '.xml,.camt',
-           } as any, {helpText: 'CAMT.053 oder CAMT.054 Datei vom Bankserver'
+           } as any, {helpText: t('crud.tooltips.fields.camtFile')
         },
         {
           name: 'abgleichsDatum',
-          label: 'Abgleichsdatum',
+          label: t('crud.fields.reconciliationDate'),
           type: 'date',
           required: true
         }
@@ -73,31 +75,31 @@ const bankAbgleichConfig: MaskConfig = {
     },
     {
       key: 'salden',
-      label: 'Salden',
+      label: t('crud.fields.balances'),
       fields: [
         {
           name: 'startSaldo',
-          label: 'Anfangssaldo',
+          label: t('crud.fields.openingBalance'),
           type: 'number',
           readonly: true,
           step: 0.01,
-          helpText: 'Aus CAMT-Datei importiert'
+          helpText: t('crud.tooltips.fields.importedFromCamt')
         },
         {
           name: 'endSaldo',
-          label: 'Endsaldo',
+          label: t('crud.fields.closingBalance'),
           type: 'number',
           readonly: true,
           step: 0.01,
-          helpText: 'Aus CAMT-Datei importiert'
+          helpText: t('crud.tooltips.fields.importedFromCamt')
         },
         {
           name: 'gebuchteUmsaetze',
-          label: 'Gebuchte Umsätze',
+          label: t('crud.fields.bookedTransactions'),
           type: 'number',
           readonly: true,
           step: 0.01,
-          helpText: 'Summe aller importierten Umsätze'
+          helpText: t('crud.tooltips.fields.sumOfImportedTransactions')
         }
       ],
       layout: 'grid',
@@ -105,7 +107,7 @@ const bankAbgleichConfig: MaskConfig = {
     },
     {
       key: 'zuordnung',
-      label: 'Zuordnung',
+      label: t('crud.fields.assignment'),
       fields: []
     } as any,
     {
@@ -121,18 +123,18 @@ const bankAbgleichConfig: MaskConfig = {
     },
     {
       key: 'regeln',
-      label: 'Regeln & Statistik',
+      label: t('crud.fields.rulesAndStatistics'),
       fields: [
         {
           name: 'regelAngewendet',
-          label: 'Angewendete Regeln',
+          label: t('crud.fields.appliedRules'),
           type: 'custom',
-           } as any, {customRender: (value: any) => (
+           } as any, {          customRender: (value: any) => (
             <div className="space-y-2">
               {(value || []).map((regel: any, index: number) => (
                 <div key={index} className="flex justify-between p-2 bg-gray-50 rounded">
                   <span>{regel.regelName}</span>
-                  <span>{regel.zugeordnet}/{regel.treffer} Treffer</span>
+                  <span>{regel.zugeordnet}/{regel.treffer} {t('crud.fields.matches')}</span>
                 </div>
               ))}
             </div>
@@ -142,27 +144,27 @@ const bankAbgleichConfig: MaskConfig = {
     },
     {
       key: 'abgleich',
-      label: 'Abgleich',
+      label: t('crud.fields.reconciliation'),
       fields: [
         {
           name: 'zugeordnet',
-          label: 'Zugeordnete Umsätze',
+          label: t('crud.fields.assignedTransactions'),
           type: 'number',
           readonly: true
         },
         {
           name: 'nichtZugeordnet',
-          label: 'Nicht zugeordnete Umsätze',
+          label: t('crud.fields.unassignedTransactions'),
           type: 'number',
           readonly: true
         },
         {
           name: 'abgleichsDifferenz',
-          label: 'Abgleichsdifferenz',
+          label: t('crud.fields.reconciliationDifference'),
           type: 'number',
           readonly: true,
           step: 0.01,
-          helpText: 'Muss 0,00 sein für erfolgreichen Abgleich'
+          helpText: t('crud.tooltips.fields.reconciliationMustBeZero')
         }
       ],
       layout: 'grid',
@@ -172,27 +174,27 @@ const bankAbgleichConfig: MaskConfig = {
   actions: [
     {
       key: 'import',
-      label: 'CAMT Import',
+      label: t('crud.actions.camtImport'),
       type: 'secondary'
     , onClick: () => {} },
     {
       key: 'auto-assign',
-      label: 'Auto-Zuordnung',
+      label: t('crud.actions.autoAssign'),
       type: 'secondary'
     , onClick: () => {} },
     {
       key: 'validate',
-      label: 'Prüfen',
+      label: t('crud.actions.validate'),
       type: 'secondary'
     , onClick: () => {} },
     {
       key: 'book',
-      label: 'Buchen',
+      label: t('crud.actions.book'),
       type: 'primary'
     , onClick: () => {} },
     {
       key: 'export',
-      label: 'Export',
+      label: t('crud.actions.export'),
       type: 'secondary'
     , onClick: () => {} }
   ],
@@ -206,12 +208,13 @@ const bankAbgleichConfig: MaskConfig = {
       delete: '/api/finance/bank/{id}'
     }
   } as any,
-  validation: bankAbgleichSchema,
+  validation: createBankAbgleichSchema(t),
   permissions: ['fibu.read', 'fibu.write']
-}
+})
 
 // Bank-Zuordnung Tabelle Komponente
 function BankZuordnungTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
+  const { t } = useTranslation()
   const updateZuordnung = (index: number, field: string, value: any) => {
     const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
@@ -227,9 +230,9 @@ function BankZuordnungTable({ data: _data, onChange }: { data: any[], onChange: 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Bankumsätze zuordnen</h3>
+        <h3 className="text-lg font-semibold">{t('crud.fields.assignBankTransactions')}</h3>
         <div className="text-sm text-gray-600">
-          {_data.filter(d => d.zugeordnet).length} von {_data.length} zugeordnet
+          {t('crud.fields.assignedCount', { assigned: _data.filter(d => d.zugeordnet).length, total: _data.length })}
         </div>
       </div>
 
@@ -237,12 +240,12 @@ function BankZuordnungTable({ data: _data, onChange }: { data: any[], onChange: 
         <table className="min-w-full border border-gray-300">
           <thead className="bg-gray-50 sticky top-0">
             <tr>
-              <th className="px-4 py-2 border">Datum</th>
-              <th className="px-4 py-2 border">Betrag</th>
-              <th className="px-4 py-2 border">Verwendungszweck</th>
-              <th className="px-4 py-2 border">Gegenkonto</th>
-              <th className="px-4 py-2 border">OP-Referenz</th>
-              <th className="px-4 py-2 border">Zugeordnet</th>
+              <th className="px-4 py-2 border">{t('crud.fields.date')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.amount')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.purpose')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.counterAccount')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.opReference')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.assigned')}</th>
             </tr>
           </thead>
           <tbody>
@@ -261,7 +264,7 @@ function BankZuordnungTable({ data: _data, onChange }: { data: any[], onChange: 
                     value={row.gegenkonto || ''}
                     onChange={(e) => updateZuordnung(index, 'gegenkonto', e.target.value)}
                     className="w-full p-1 border rounded text-sm"
-                    placeholder="z.B. 4400"
+                    placeholder={t('crud.tooltips.placeholders.account')}
                   />
                 </td>
                 <td className="px-4 py-2 border">
@@ -270,7 +273,7 @@ function BankZuordnungTable({ data: _data, onChange }: { data: any[], onChange: 
                     value={row.opReferenz || ''}
                     onChange={(e) => updateZuordnung(index, 'opReferenz', e.target.value)}
                     className="w-full p-1 border rounded text-sm"
-                    placeholder="OP-12345"
+                    placeholder={t('crud.tooltips.placeholders.opReference')}
                   />
                 </td>
                 <td className="px-4 py-2 border text-center">
@@ -291,8 +294,12 @@ function BankZuordnungTable({ data: _data, onChange }: { data: any[], onChange: 
 }
 
 export default function BankAbgleichPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const entityType = 'bankReconciliation'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bank-Abgleich')
+  const bankAbgleichConfig = createBankAbgleichConfig(t, entityTypeLabel)
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: bankAbgleichConfig.api.baseUrl,
@@ -321,16 +328,16 @@ export default function BankAbgleichPage(): JSX.Element {
       formData.abgleichsDifferenz = Math.abs(formData.startSaldo + formData.gebuchteUmsaetze - formData.endSaldo)
 
       toast({
-        title: 'CAMT-Datei importiert',
-        description: `${mockUmsaetze.length} Umsätze wurden erfolgreich importiert.`,
+        title: t('crud.messages.camtFileImported'),
+        description: t('crud.messages.camtFileImportedDesc', { count: mockUmsaetze.length }),
       })
     } else if (action === 'auto-assign') {
       // Auto-Zuordnung - wende einfache Regeln an
       if (!formData.zuordnungData || formData.zuordnungData.length === 0) {
         toast({
           variant: 'destructive',
-          title: 'Keine Daten',
-          description: 'Importieren Sie zuerst eine CAMT-Datei.',
+          title: t('crud.messages.noData'),
+          description: t('crud.messages.importCamtFileFirst'),
         })
         return
       }
@@ -366,8 +373,8 @@ export default function BankAbgleichPage(): JSX.Element {
       formData.nichtZugeordnet = formData.zuordnungData.length - formData.zugeordnet
 
       toast({
-        title: 'Auto-Zuordnung abgeschlossen',
-        description: `${zugeordnetCount} Umsätze wurden automatisch zugeordnet.`,
+        title: t('crud.messages.autoAssignCompleted'),
+        description: t('crud.messages.autoAssignCompletedDesc', { count: zugeordnetCount }),
       })
     } else if (action === 'validate') {
       const isValid = validate(formData)
@@ -375,14 +382,14 @@ export default function BankAbgleichPage(): JSX.Element {
         const differenz = Math.abs(formData.abgleichsDifferenz || 0)
         if (differenz < 0.01) {
           toast({
-            title: 'Validierung erfolgreich',
-            description: 'Alle Daten sind korrekt und der Abgleich ist ausgeglichen.',
+            title: t('crud.messages.validationSuccess'),
+            description: t('crud.messages.reconciliationBalanced'),
           })
         } else {
           toast({
             variant: 'destructive',
-            title: 'Abgleich nicht ausgeglichen',
-            description: `Differenz: ${differenz.toFixed(2)} €`,
+            title: t('crud.messages.reconciliationNotBalanced'),
+            description: t('crud.messages.reconciliationNotBalancedDesc', { difference: differenz.toFixed(2) }),
           })
         }
       } else {
@@ -399,8 +406,8 @@ export default function BankAbgleichPage(): JSX.Element {
       if (differenz >= 0.01) {
         toast({
           variant: 'destructive',
-          title: 'Buchung nicht möglich',
-          description: 'Der Abgleich muss ausgeglichen sein.',
+          title: t('crud.messages.bookingNotPossible'),
+          description: t('crud.messages.reconciliationMustBeBalanced'),
         })
         return
       }
@@ -409,8 +416,8 @@ export default function BankAbgleichPage(): JSX.Element {
         await saveData(formData)
         setIsDirty(false)
         toast({
-          title: 'Abgleich gebucht',
-          description: 'Alle zugeordneten Umsätze wurden erfolgreich gebucht.',
+          title: t('crud.messages.reconciliationBooked'),
+          description: t('crud.messages.reconciliationBookedDesc'),
         })
         navigate('/finance/bank')
       } catch (error) {
@@ -420,8 +427,8 @@ export default function BankAbgleichPage(): JSX.Element {
       if (!formData.id) {
         toast({
           variant: 'destructive',
-          title: 'Fehler',
-          description: 'Speichern Sie den Abgleich zuerst.',
+          title: t('common.error'),
+          description: t('crud.messages.saveReconciliationFirst'),
         })
         return
       }
@@ -434,7 +441,7 @@ export default function BankAbgleichPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm('Ungespeicherte Änderungen gehen verloren. Wirklich abbrechen?')) {
+    if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
       return
     }
     navigate('/finance/bank')

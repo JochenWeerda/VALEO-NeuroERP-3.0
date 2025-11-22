@@ -11,7 +11,7 @@ export interface SalesOfferServiceDependencies {
 }
 
 export class SalesOfferService {
-  constructor(private repository: SalesOfferRepository) {}
+  constructor(private deps: SalesOfferServiceDependencies) {}
 
   /**
    * Create a new sales offer
@@ -70,7 +70,7 @@ export class SalesOfferService {
     );
 
     // Save to repository
-    return await this.repository.create(offer);
+    return await this.deps.salesOfferRepository.create(offer);
   }
 
   /**
@@ -91,7 +91,7 @@ export class SalesOfferService {
     },
     updatedBy: string
   ): Promise<SalesOffer> {
-    const existingOffer = await this.repository.findById(id);
+    const existingOffer = await this.deps.salesOfferRepository.findById(id);
     if (!existingOffer) {
       throw new Error(`Sales offer with id ${id} not found`);
     }
@@ -132,7 +132,7 @@ export class SalesOfferService {
       }
     );
 
-    return await this.repository.update(id, updatedOffer);
+    return await this.deps.salesOfferRepository.update(id, updatedOffer);
   }
 
   /**
@@ -150,7 +150,7 @@ export class SalesOfferService {
       notes?: string;
     }
   ): Promise<SalesOffer> {
-    const existingOffer = await this.repository.findById(offerId);
+    const existingOffer = await this.deps.salesOfferRepository.findById(offerId);
     if (!existingOffer) {
       throw new Error(`Sales offer with id ${offerId} not found`);
     }
@@ -171,7 +171,7 @@ export class SalesOfferService {
     );
 
     const updatedOffer = existingOffer.addItem(newItem);
-    return await this.repository.update(offerId, updatedOffer);
+    return await this.deps.salesOfferRepository.update(offerId, updatedOffer);
   }
 
   /**
@@ -186,7 +186,7 @@ export class SalesOfferService {
       notes?: string;
     }
   ): Promise<SalesOffer> {
-    const existingOffer = await this.repository.findById(offerId);
+    const existingOffer = await this.deps.salesOfferRepository.findById(offerId);
     if (!existingOffer) {
       throw new Error(`Sales offer with id ${offerId} not found`);
     }
@@ -223,14 +223,14 @@ export class SalesOfferService {
     }
 
     const updatedOffer = existingOffer.updateItem(updatedItem);
-    return await this.repository.update(offerId, updatedOffer);
+    return await this.deps.salesOfferRepository.update(offerId, updatedOffer);
   }
 
   /**
    * Remove item from sales offer
    */
   async removeItemFromOffer(offerId: string, itemId: string): Promise<SalesOffer> {
-    const existingOffer = await this.repository.findById(offerId);
+    const existingOffer = await this.deps.salesOfferRepository.findById(offerId);
     if (!existingOffer) {
       throw new Error(`Sales offer with id ${offerId} not found`);
     }
@@ -240,14 +240,14 @@ export class SalesOfferService {
     }
 
     const updatedOffer = existingOffer.removeItem(itemId);
-    return await this.repository.update(offerId, updatedOffer);
+    return await this.deps.salesOfferRepository.update(offerId, updatedOffer);
   }
 
   /**
    * Send sales offer to customer
    */
   async sendSalesOffer(offerId: string, sentBy: string): Promise<SalesOffer> {
-    const existingOffer = await this.repository.findById(offerId);
+    const existingOffer = await this.deps.salesOfferRepository.findById(offerId);
     if (!existingOffer) {
       throw new Error(`Sales offer with id ${offerId} not found`);
     }
@@ -257,61 +257,61 @@ export class SalesOfferService {
     }
 
     const sentOffer = existingOffer.send(sentBy);
-    return await this.repository.update(offerId, sentOffer);
+    return await this.deps.salesOfferRepository.update(offerId, sentOffer);
   }
 
   /**
    * Accept sales offer
    */
   async acceptSalesOffer(offerId: string, acceptedBy: string): Promise<SalesOffer> {
-    const existingOffer = await this.repository.findById(offerId);
+    const existingOffer = await this.deps.salesOfferRepository.findById(offerId);
     if (!existingOffer) {
       throw new Error(`Sales offer with id ${offerId} not found`);
     }
 
     const acceptedOffer = existingOffer.accept(acceptedBy);
-    return await this.repository.update(offerId, acceptedOffer);
+    return await this.deps.salesOfferRepository.update(offerId, acceptedOffer);
   }
 
   /**
    * Reject sales offer
    */
   async rejectSalesOffer(offerId: string, rejectedBy: string, reason: string): Promise<SalesOffer> {
-    const existingOffer = await this.repository.findById(offerId);
+    const existingOffer = await this.deps.salesOfferRepository.findById(offerId);
     if (!existingOffer) {
       throw new Error(`Sales offer with id ${offerId} not found`);
     }
 
     const rejectedOffer = existingOffer.reject(rejectedBy, reason);
-    return await this.repository.update(offerId, rejectedOffer);
+    return await this.deps.salesOfferRepository.update(offerId, rejectedOffer);
   }
 
   /**
    * Get sales offer by ID
    */
   async getSalesOfferById(id: string): Promise<SalesOffer | null> {
-    return await this.repository.findById(id);
+    return await this.deps.salesOfferRepository.findById(id);
   }
 
   /**
    * Get sales offer by offer number
    */
   async getSalesOfferByNumber(offerNumber: string): Promise<SalesOffer | null> {
-    return await this.repository.findByOfferNumber(offerNumber);
+    return await this.deps.salesOfferRepository.findByOfferNumber(offerNumber);
   }
 
   /**
    * Get sales offers by customer
    */
   async getSalesOffersByCustomer(customerId: string): Promise<SalesOffer[]> {
-    return await this.repository.findByCustomerId(customerId);
+    return await this.deps.salesOfferRepository.findByCustomerId(customerId);
   }
 
   /**
    * Get sales offers by customer inquiry
    */
   async getSalesOffersByInquiry(customerInquiryId: string): Promise<SalesOffer[]> {
-    return await this.repository.findByCustomerInquiryId(customerInquiryId);
+    return await this.deps.salesOfferRepository.findByCustomerInquiryId(customerInquiryId);
   }
 
   /**
@@ -323,28 +323,28 @@ export class SalesOfferService {
     page: number = 1,
     pageSize: number = 20
   ): Promise<PaginatedResult<SalesOffer>> {
-    return await this.repository.findAll(filter, sort, page, pageSize);
+    return await this.deps.salesOfferRepository.findAll(filter, sort, page, pageSize);
   }
 
   /**
    * Get expired sales offers
    */
   async getExpiredSalesOffers(): Promise<SalesOffer[]> {
-    return await this.repository.findExpired();
+    return await this.deps.salesOfferRepository.findExpired();
   }
 
   /**
    * Get valid sales offers
    */
   async getValidSalesOffers(): Promise<SalesOffer[]> {
-    return await this.repository.findValid();
+    return await this.deps.salesOfferRepository.findValid();
   }
 
   /**
    * Delete sales offer
    */
   async deleteSalesOffer(id: string): Promise<boolean> {
-    const existingOffer = await this.repository.findById(id);
+    const existingOffer = await this.deps.salesOfferRepository.findById(id);
     if (!existingOffer) {
       return false;
     }
@@ -353,7 +353,7 @@ export class SalesOfferService {
       throw new Error('Only draft offers can be deleted');
     }
 
-    return await this.repository.delete(id);
+    return await this.deps.salesOfferRepository.delete(id);
   }
 
   /**
@@ -366,7 +366,7 @@ export class SalesOfferService {
     averageValue: number;
     conversionRate: number;
   }> {
-    return await this.repository.getStatistics();
+    return await this.deps.salesOfferRepository.getStatistics();
   }
 
   /**
@@ -415,7 +415,7 @@ export class SalesOfferService {
       }
     );
 
-    return await this.repository.create(offer);
+    return await this.deps.salesOfferRepository.create(offer);
   }
 
   /**

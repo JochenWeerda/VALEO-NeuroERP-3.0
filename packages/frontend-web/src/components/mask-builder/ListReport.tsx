@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Search, Filter, Plus, Download, Upload } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { ListConfig, ListColumn } from './types'
+import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 
 interface ListReportProps {
   config: ListConfig
@@ -33,6 +35,7 @@ const ListReport: React.FC<ListReportProps> = ({
   onImport,
   isLoading = false
 }) => {
+  const { t } = useTranslation()
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, any>>({})
@@ -43,6 +46,42 @@ const ListReport: React.FC<ListReportProps> = ({
 
   const pageSize = config.pageSize || 25
   const totalPages = Math.ceil(total / pageSize)
+
+  // i18n-Helper für Titel und Untertitel
+  const displayTitle = config.titleKey ? t(config.titleKey) : config.title
+  const displaySubtitle = config.subtitleKey ? t(config.subtitleKey) : config.subtitle
+
+  // i18n-Helper für Spalten-Labels
+  const getColumnLabel = (column: ListColumn): string => {
+    if (column.labelKey) {
+      return t(column.labelKey)
+    }
+    return column.label
+  }
+
+  // i18n-Helper für Filter-Labels
+  const getFilterLabel = (filter: any): string => {
+    if (filter.labelKey) {
+      return t(filter.labelKey)
+    }
+    return filter.label
+  }
+
+  // i18n-Helper für Filter-Placeholder
+  const getFilterPlaceholder = (filter: any): string => {
+    if (filter.placeholderKey) {
+      return t(filter.placeholderKey)
+    }
+    return filter.placeholder || ''
+  }
+
+  // i18n-Helper für Bulk-Action-Labels
+  const getBulkActionLabel = (action: any): string => {
+    if (action.labelKey) {
+      return t(action.labelKey)
+    }
+    return action.label
+  }
 
   // Filter data based on search and filters
   const filteredData = data.filter(item => {
@@ -109,15 +148,17 @@ const ListReport: React.FC<ListReportProps> = ({
   const handleBulkAction = (action: any) => {
     if (selectedItems.length === 0) {
       toast({
-        title: "Keine Elemente ausgewählt",
-        description: "Bitte wählen Sie mindestens ein Element aus.",
+        title: t('crud.messages.noSelection'),
+        description: t('crud.messages.selectAtLeastOne'),
         variant: "destructive",
       })
       return
     }
 
     // Handle bulk actions
-    console.log('Bulk action:', action, selectedItems)
+    if (action.onClick) {
+      action.onClick(selectedItems)
+    }
   }
 
   const renderCell = (column: ListColumn, item: any) => {
@@ -131,7 +172,7 @@ const ListReport: React.FC<ListReportProps> = ({
     if (typeof value === 'boolean') {
       return (
         <Badge variant={value ? 'default' : 'secondary'}>
-          {value ? 'Ja' : 'Nein'}
+          {value ? t('common.yes') : t('common.no')}
         </Badge>
       )
     }
@@ -149,28 +190,28 @@ const ListReport: React.FC<ListReportProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{config.title}</h1>
-          {config.subtitle && (
-            <p className="text-muted-foreground">{config.subtitle}</p>
+          <h1 className="text-3xl font-bold">{displayTitle}</h1>
+          {displaySubtitle && (
+            <p className="text-muted-foreground">{displaySubtitle}</p>
           )}
         </div>
         <div className="flex gap-2">
           {onImport && (
             <Button variant="outline" onClick={onImport} className="gap-2">
               <Upload className="h-4 w-4" />
-              Import
+              {t('crud.actions.import')}
             </Button>
           )}
           {onExport && (
             <Button variant="outline" onClick={onExport} className="gap-2">
               <Download className="h-4 w-4" />
-              Export
+              {t('crud.actions.export')}
             </Button>
           )}
           {onCreate && (
             <Button onClick={onCreate} className="gap-2">
               <Plus className="h-4 w-4" />
-              Neu
+              {t('crud.actions.new')}
             </Button>
           )}
         </div>
@@ -181,18 +222,18 @@ const ListReport: React.FC<ListReportProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="h-5 w-5" />
-            Suche & Filter
+            {t('crud.list.searchAndFilter')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Search */}
             <div>
-              <Label>Suche</Label>
+              <Label>{t('common.search')}</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Suchen..."
+                  placeholder={t('crud.list.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -203,26 +244,26 @@ const ListReport: React.FC<ListReportProps> = ({
             {/* Dynamic filters */}
             {config.filters?.map(filter => (
               <div key={filter.name}>
-                <Label>{filter.label}</Label>
+                <Label>{getFilterLabel(filter)}</Label>
                 {filter.type === 'select' ? (
                   <Select
                     value={filters[filter.name] || ''}
                     onValueChange={(value) => handleFilterChange(filter.name, value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder={filter.placeholder} />
+                      <SelectValue placeholder={getFilterPlaceholder(filter)} />
                     </SelectTrigger>
                     <SelectContent>
                       {(filter as any).options?.map((option: any) => (
                         <SelectItem key={option.value} value={option.value}>
-                          {option.label}
+                          {option.labelKey ? t(option.labelKey) : option.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 ) : (
                   <Input
-                    placeholder={filter.placeholder}
+                    placeholder={getFilterPlaceholder(filter)}
                     value={filters[filter.name] || ''}
                     onChange={(e) => handleFilterChange(filter.name, e.target.value)}
                   />
@@ -239,7 +280,7 @@ const ListReport: React.FC<ListReportProps> = ({
           <CardContent className="pt-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">
-                {selectedItems.length} Element(e) ausgewählt
+                {t('crud.list.selectedItems', { count: selectedItems.length })}
               </span>
               <div className="flex gap-2">
                 {config.bulkActions.map(action => (
@@ -250,7 +291,7 @@ const ListReport: React.FC<ListReportProps> = ({
                     onClick={() => handleBulkAction(action)}
                     className="gap-2"
                   >
-                    {action.label}
+                    {getBulkActionLabel(action)}
                   </Button>
                 ))}
               </div>
@@ -263,7 +304,7 @@ const ListReport: React.FC<ListReportProps> = ({
       <Card>
         <CardHeader>
           <CardTitle>
-            Ergebnisse ({filteredData.length} von {total})
+            {t('crud.list.results', { count: filteredData.length, total })}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -291,7 +332,7 @@ const ListReport: React.FC<ListReportProps> = ({
                       onClick={() => column.sortable && handleSort(column.key)}
                     >
                       <div className="flex items-center gap-2">
-                        {column.label}
+                        {getColumnLabel(column)}
                         {column.sortable && sortField === column.key && (
                           <span className="text-xs">
                             {sortDirection === 'asc' ? '↑' : '↓'}
@@ -300,20 +341,20 @@ const ListReport: React.FC<ListReportProps> = ({
                       </div>
                     </TableHead>
                   ))}
-                  <TableHead className="w-20">Aktionen</TableHead>
+                  <TableHead className="w-20">{t('crud.list.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={config.columns.length + 2} className="text-center py-8">
-                      Laden...
+                      {t('crud.list.loading', { entityType: displayTitle })}
                     </TableCell>
                   </TableRow>
                 ) : paginatedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={config.columns.length + 2} className="text-center py-8">
-                      Keine Daten gefunden
+                      {t('crud.list.noResults', { entityType: displayTitle })}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -345,7 +386,7 @@ const ListReport: React.FC<ListReportProps> = ({
                               size="sm"
                               onClick={() => onEdit(item)}
                             >
-                              Bearbeiten
+                              {t('crud.actions.edit')}
                             </Button>
                           )}
                           {onDelete && (
@@ -355,7 +396,7 @@ const ListReport: React.FC<ListReportProps> = ({
                               onClick={() => onDelete(item)}
                               className="text-red-600 hover:text-red-700"
                             >
-                              Löschen
+                              {t('crud.actions.delete')}
                             </Button>
                           )}
                         </div>
@@ -377,11 +418,11 @@ const ListReport: React.FC<ListReportProps> = ({
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
           >
-            Vorherige
+            {t('crud.list.previous')}
           </Button>
 
           <span className="text-sm">
-            Seite {currentPage} von {totalPages}
+            {t('crud.list.page')} {currentPage} {t('crud.list.of')} {totalPages}
           </span>
 
           <Button
@@ -389,7 +430,7 @@ const ListReport: React.FC<ListReportProps> = ({
             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
           >
-            Nächste
+            {t('crud.list.next')}
           </Button>
         </div>
       )}
