@@ -142,7 +142,7 @@ export interface ContractEntity {
   type: ContractTypeValue;
   commodity: CommodityTypeValue;
   counterpartyId: string;
-  incoterm?: string;
+  incoterm?: string | undefined;
   deliveryWindow: {
     from: Date;
     to: Date;
@@ -150,11 +150,12 @@ export interface ContractEntity {
   qty: {
     unit: 't' | 'mt';
     contracted: number;
-    tolerance?: number;
+    tolerance?: number | undefined;
   };
   pricing: PricingTerms;
   delivery: DeliveryTerms;
   status: ContractStatusValue;
+  documentId?: string | undefined; // Reference to generated contract document
   createdAt: Date;
   updatedAt: Date;
   version: number;
@@ -170,10 +171,11 @@ export class Contract implements ContractEntity {
   public counterpartyId: string;
   public incoterm?: string;
   public deliveryWindow: { from: Date; to: Date; };
-  public qty: { unit: 't' | 'mt'; contracted: number; tolerance?: number; };
+  public qty: { unit: 't' | 'mt'; contracted: number; tolerance?: number | undefined; };
   public pricing: PricingTerms;
   public delivery: DeliveryTerms;
   public status: ContractStatusValue;
+  public documentId?: string;
   public createdAt: Date;
   public updatedAt: Date;
   public version: number;
@@ -191,6 +193,7 @@ export class Contract implements ContractEntity {
     this.pricing = props.pricing;
     this.delivery = props.delivery;
     this.status = props.status;
+    if (props.documentId) this.documentId = props.documentId;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
     this.version = props.version;

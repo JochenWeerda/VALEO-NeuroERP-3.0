@@ -1,204 +1,363 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvoiceRepository = void 0;
-const drizzle_orm_1 = require("drizzle-orm");
-const connection_1 = require("../db/connection");
-const schema_1 = require("../db/schema");
-const entities_1 = require("../../domain/entities");
-class InvoiceRepository {
-    async findById(id, tenantId) {
-        const result = await connection_1.db
-            .select()
-            .from(schema_1.invoices)
-            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.id, id), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
-            .limit(1);
-        if (result.length === 0) {
-            return null;
-        }
-        return entities_1.InvoiceEntity.fromPersistence(result[0]);
+var drizzle_orm_1 = require("drizzle-orm");
+var connection_1 = require("../db/connection");
+var schema_1 = require("../db/schema");
+var entities_1 = require("../../domain/entities");
+var InvoiceRepository = /** @class */ (function () {
+    function InvoiceRepository() {
     }
-    async findByNumber(invoiceNumber, tenantId) {
-        const result = await connection_1.db
-            .select()
-            .from(schema_1.invoices)
-            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.invoiceNumber, invoiceNumber), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
-            .limit(1);
-        if (result.length === 0) {
-            return null;
-        }
-        return entities_1.InvoiceEntity.fromPersistence(result[0]);
-    }
-    async findByOrderId(orderId, tenantId) {
-        const result = await connection_1.db
-            .select()
-            .from(schema_1.invoices)
-            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.orderId, orderId), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
-            .limit(1);
-        if (result.length === 0) {
-            return null;
-        }
-        return entities_1.InvoiceEntity.fromPersistence(result[0]);
-    }
-    async findByCustomerId(customerId, tenantId, filters = {}, pagination = { page: 1, pageSize: 20 }) {
-        const conditions = [
-            (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId),
-            (0, drizzle_orm_1.eq)(schema_1.invoices.customerId, customerId)
-        ];
-        if (filters.orderId) {
-            conditions.push((0, drizzle_orm_1.eq)(schema_1.invoices.orderId, filters.orderId));
-        }
-        if (filters.status) {
-            conditions.push((0, drizzle_orm_1.eq)(schema_1.invoices.status, filters.status));
-        }
-        if (filters.search) {
-            conditions.push((0, drizzle_orm_1.ilike)(schema_1.invoices.invoiceNumber, `%${filters.search}%`));
-        }
-        if (filters.dueDateFrom) {
-            conditions.push((0, drizzle_orm_1.gte)(schema_1.invoices.dueDate, filters.dueDateFrom));
-        }
-        if (filters.dueDateTo) {
-            conditions.push((0, drizzle_orm_1.lte)(schema_1.invoices.dueDate, filters.dueDateTo));
-        }
-        const totalResult = await connection_1.db
-            .select({ count: schema_1.invoices.id })
-            .from(schema_1.invoices)
-            .where((0, drizzle_orm_1.and)(...conditions));
-        const total = totalResult[0]?.count || 0;
-        const sortBy = pagination.sortBy ?? 'createdAt';
-        const sortOrder = pagination.sortOrder ?? 'desc';
-        const orderBy = sortOrder === 'desc' ? (0, drizzle_orm_1.desc)(schema_1.invoices[sortBy]) : (0, drizzle_orm_1.asc)(schema_1.invoices[sortBy]);
-        const offset = (pagination.page - 1) * pagination.pageSize;
-        const result = await connection_1.db
-            .select()
-            .from(schema_1.invoices)
-            .where((0, drizzle_orm_1.and)(...conditions))
-            .orderBy(orderBy)
-            .limit(pagination.pageSize)
-            .offset(offset);
-        const entities = result.map(invoice => entities_1.InvoiceEntity.fromPersistence(invoice));
-        return {
-            data: entities,
-            pagination: {
-                page: pagination.page,
-                pageSize: pagination.pageSize,
-                total: Number(total),
-                totalPages: Math.ceil(Number(total) / pagination.pageSize)
-            }
-        };
-    }
-    async findAll(tenantId, filters = {}, pagination = { page: 1, pageSize: 20 }) {
-        const conditions = [(0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)];
-        if (filters.customerId) {
-            conditions.push((0, drizzle_orm_1.eq)(schema_1.invoices.customerId, filters.customerId));
-        }
-        if (filters.orderId) {
-            conditions.push((0, drizzle_orm_1.eq)(schema_1.invoices.orderId, filters.orderId));
-        }
-        if (filters.status) {
-            conditions.push((0, drizzle_orm_1.eq)(schema_1.invoices.status, filters.status));
-        }
-        if (filters.search) {
-            conditions.push((0, drizzle_orm_1.ilike)(schema_1.invoices.invoiceNumber, `%${filters.search}%`));
-        }
-        if (filters.dueDateFrom) {
-            conditions.push((0, drizzle_orm_1.gte)(schema_1.invoices.dueDate, filters.dueDateFrom));
-        }
-        if (filters.dueDateTo) {
-            conditions.push((0, drizzle_orm_1.lte)(schema_1.invoices.dueDate, filters.dueDateTo));
-        }
-        const totalResult = await connection_1.db
-            .select({ count: schema_1.invoices.id })
-            .from(schema_1.invoices)
-            .where((0, drizzle_orm_1.and)(...conditions));
-        const total = totalResult[0]?.count || 0;
-        const sortBy = pagination.sortBy ?? 'createdAt';
-        const sortOrder = pagination.sortOrder ?? 'desc';
-        const orderBy = sortOrder === 'desc' ? (0, drizzle_orm_1.desc)(schema_1.invoices[sortBy]) : (0, drizzle_orm_1.asc)(schema_1.invoices[sortBy]);
-        const offset = (pagination.page - 1) * pagination.pageSize;
-        const result = await connection_1.db
-            .select()
-            .from(schema_1.invoices)
-            .where((0, drizzle_orm_1.and)(...conditions))
-            .orderBy(orderBy)
-            .limit(pagination.pageSize)
-            .offset(offset);
-        const entities = result.map(invoice => entities_1.InvoiceEntity.fromPersistence(invoice));
-        return {
-            data: entities,
-            pagination: {
-                page: pagination.page,
-                pageSize: pagination.pageSize,
-                total: Number(total),
-                totalPages: Math.ceil(Number(total) / pagination.pageSize)
-            }
-        };
-    }
-    async create(input) {
-        const invoice = entities_1.InvoiceEntity.create(input);
-        const invoiceData = invoice.toPersistence();
-        const result = await connection_1.db
-            .insert(schema_1.invoices)
-            .values(invoiceData)
-            .returning();
-        return entities_1.InvoiceEntity.fromPersistence(result[0]);
-    }
-    async update(id, tenantId, input) {
-        const updateData = {
-            ...input,
-            notes: input.notes ?? undefined,
-            dueDate: input.dueDate ?? undefined,
-            updatedAt: new Date()
-        };
-        const result = await connection_1.db
-            .update(schema_1.invoices)
-            .set(updateData)
-            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.id, id), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
-            .returning();
-        if (result.length === 0) {
-            return null;
-        }
-        return entities_1.InvoiceEntity.fromPersistence(result[0]);
-    }
-    async delete(id, tenantId) {
-        const result = await connection_1.db
-            .delete(schema_1.invoices)
-            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.id, id), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
-            .returning({ id: schema_1.invoices.id });
-        return result.length > 0;
-    }
-    async exists(id, tenantId) {
-        const result = await connection_1.db
-            .select({ id: schema_1.invoices.id })
-            .from(schema_1.invoices)
-            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.id, id), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
-            .limit(1);
-        return result.length > 0;
-    }
-    async updateStatus(id, tenantId, status) {
-        const updateData = {
-            status,
-            updatedAt: new Date()
-        };
-        if (status === entities_1.InvoiceStatus.PAID) {
-            updateData.paidAt = new Date();
-        }
-        const result = await connection_1.db
-            .update(schema_1.invoices)
-            .set(updateData)
-            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.id, id), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
-            .returning();
-        if (result.length === 0) {
-            return null;
-        }
-        return entities_1.InvoiceEntity.fromPersistence(result[0]);
-    }
-    async getOverdueInvoices(tenantId) {
-        const result = await connection_1.db
-            .select()
-            .from(schema_1.invoices)
-            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId), (0, drizzle_orm_1.eq)(schema_1.invoices.status, entities_1.InvoiceStatus.ISSUED), (0, drizzle_orm_1.lte)(schema_1.invoices.dueDate, new Date())));
-        return result.map(invoice => entities_1.InvoiceEntity.fromPersistence(invoice));
-    }
-}
+    InvoiceRepository.prototype.findById = function (id, tenantId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, connection_1.db
+                            .select()
+                            .from(schema_1.invoices)
+                            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.id, id), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
+                            .limit(1)];
+                    case 1:
+                        result = _a.sent();
+                        if (result.length === 0) {
+                            return [2 /*return*/, null];
+                        }
+                        return [2 /*return*/, entities_1.InvoiceEntity.fromPersistence(result[0])];
+                }
+            });
+        });
+    };
+    InvoiceRepository.prototype.findByNumber = function (invoiceNumber, tenantId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, connection_1.db
+                            .select()
+                            .from(schema_1.invoices)
+                            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.invoiceNumber, invoiceNumber), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
+                            .limit(1)];
+                    case 1:
+                        result = _a.sent();
+                        if (result.length === 0) {
+                            return [2 /*return*/, null];
+                        }
+                        return [2 /*return*/, entities_1.InvoiceEntity.fromPersistence(result[0])];
+                }
+            });
+        });
+    };
+    InvoiceRepository.prototype.findByOrderId = function (orderId, tenantId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, connection_1.db
+                            .select()
+                            .from(schema_1.invoices)
+                            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.orderId, orderId), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
+                            .limit(1)];
+                    case 1:
+                        result = _a.sent();
+                        if (result.length === 0) {
+                            return [2 /*return*/, null];
+                        }
+                        return [2 /*return*/, entities_1.InvoiceEntity.fromPersistence(result[0])];
+                }
+            });
+        });
+    };
+    InvoiceRepository.prototype.findByCustomerId = function (customerId_1, tenantId_1) {
+        return __awaiter(this, arguments, void 0, function (customerId, tenantId, filters, pagination) {
+            var conditions, totalResult, total, sortBy, sortOrder, orderBy, offset, result, entities;
+            var _a, _b, _c;
+            if (filters === void 0) { filters = {}; }
+            if (pagination === void 0) { pagination = { page: 1, pageSize: 20 }; }
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        conditions = [
+                            (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId),
+                            (0, drizzle_orm_1.eq)(schema_1.invoices.customerId, customerId)
+                        ];
+                        if (filters.orderId) {
+                            conditions.push((0, drizzle_orm_1.eq)(schema_1.invoices.orderId, filters.orderId));
+                        }
+                        if (filters.status) {
+                            conditions.push((0, drizzle_orm_1.eq)(schema_1.invoices.status, filters.status));
+                        }
+                        if (filters.search) {
+                            conditions.push((0, drizzle_orm_1.ilike)(schema_1.invoices.invoiceNumber, "%".concat(filters.search, "%")));
+                        }
+                        if (filters.dueDateFrom) {
+                            conditions.push((0, drizzle_orm_1.gte)(schema_1.invoices.dueDate, filters.dueDateFrom));
+                        }
+                        if (filters.dueDateTo) {
+                            conditions.push((0, drizzle_orm_1.lte)(schema_1.invoices.dueDate, filters.dueDateTo));
+                        }
+                        return [4 /*yield*/, connection_1.db
+                                .select({ count: schema_1.invoices.id })
+                                .from(schema_1.invoices)
+                                .where(drizzle_orm_1.and.apply(void 0, conditions))];
+                    case 1:
+                        totalResult = _d.sent();
+                        total = ((_a = totalResult[0]) === null || _a === void 0 ? void 0 : _a.count) || 0;
+                        sortBy = (_b = pagination.sortBy) !== null && _b !== void 0 ? _b : 'createdAt';
+                        sortOrder = (_c = pagination.sortOrder) !== null && _c !== void 0 ? _c : 'desc';
+                        orderBy = sortOrder === 'desc' ? (0, drizzle_orm_1.desc)(schema_1.invoices[sortBy]) : (0, drizzle_orm_1.asc)(schema_1.invoices[sortBy]);
+                        offset = (pagination.page - 1) * pagination.pageSize;
+                        return [4 /*yield*/, connection_1.db
+                                .select()
+                                .from(schema_1.invoices)
+                                .where(drizzle_orm_1.and.apply(void 0, conditions))
+                                .orderBy(orderBy)
+                                .limit(pagination.pageSize)
+                                .offset(offset)];
+                    case 2:
+                        result = _d.sent();
+                        entities = result.map(function (invoice) { return entities_1.InvoiceEntity.fromPersistence(invoice); });
+                        return [2 /*return*/, {
+                                data: entities,
+                                pagination: {
+                                    page: pagination.page,
+                                    pageSize: pagination.pageSize,
+                                    total: Number(total),
+                                    totalPages: Math.ceil(Number(total) / pagination.pageSize)
+                                }
+                            }];
+                }
+            });
+        });
+    };
+    InvoiceRepository.prototype.findAll = function (tenantId_1) {
+        return __awaiter(this, arguments, void 0, function (tenantId, filters, pagination) {
+            var conditions, totalResult, total, sortBy, sortOrder, orderBy, offset, result, entities;
+            var _a, _b, _c;
+            if (filters === void 0) { filters = {}; }
+            if (pagination === void 0) { pagination = { page: 1, pageSize: 20 }; }
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        conditions = [(0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)];
+                        if (filters.customerId) {
+                            conditions.push((0, drizzle_orm_1.eq)(schema_1.invoices.customerId, filters.customerId));
+                        }
+                        if (filters.orderId) {
+                            conditions.push((0, drizzle_orm_1.eq)(schema_1.invoices.orderId, filters.orderId));
+                        }
+                        if (filters.status) {
+                            conditions.push((0, drizzle_orm_1.eq)(schema_1.invoices.status, filters.status));
+                        }
+                        if (filters.search) {
+                            conditions.push((0, drizzle_orm_1.ilike)(schema_1.invoices.invoiceNumber, "%".concat(filters.search, "%")));
+                        }
+                        if (filters.dueDateFrom) {
+                            conditions.push((0, drizzle_orm_1.gte)(schema_1.invoices.dueDate, filters.dueDateFrom));
+                        }
+                        if (filters.dueDateTo) {
+                            conditions.push((0, drizzle_orm_1.lte)(schema_1.invoices.dueDate, filters.dueDateTo));
+                        }
+                        return [4 /*yield*/, connection_1.db
+                                .select({ count: schema_1.invoices.id })
+                                .from(schema_1.invoices)
+                                .where(drizzle_orm_1.and.apply(void 0, conditions))];
+                    case 1:
+                        totalResult = _d.sent();
+                        total = ((_a = totalResult[0]) === null || _a === void 0 ? void 0 : _a.count) || 0;
+                        sortBy = (_b = pagination.sortBy) !== null && _b !== void 0 ? _b : 'createdAt';
+                        sortOrder = (_c = pagination.sortOrder) !== null && _c !== void 0 ? _c : 'desc';
+                        orderBy = sortOrder === 'desc' ? (0, drizzle_orm_1.desc)(schema_1.invoices[sortBy]) : (0, drizzle_orm_1.asc)(schema_1.invoices[sortBy]);
+                        offset = (pagination.page - 1) * pagination.pageSize;
+                        return [4 /*yield*/, connection_1.db
+                                .select()
+                                .from(schema_1.invoices)
+                                .where(drizzle_orm_1.and.apply(void 0, conditions))
+                                .orderBy(orderBy)
+                                .limit(pagination.pageSize)
+                                .offset(offset)];
+                    case 2:
+                        result = _d.sent();
+                        entities = result.map(function (invoice) { return entities_1.InvoiceEntity.fromPersistence(invoice); });
+                        return [2 /*return*/, {
+                                data: entities,
+                                pagination: {
+                                    page: pagination.page,
+                                    pageSize: pagination.pageSize,
+                                    total: Number(total),
+                                    totalPages: Math.ceil(Number(total) / pagination.pageSize)
+                                }
+                            }];
+                }
+            });
+        });
+    };
+    InvoiceRepository.prototype.create = function (input) {
+        return __awaiter(this, void 0, void 0, function () {
+            var invoice, invoiceData, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        invoice = entities_1.InvoiceEntity.create(input);
+                        invoiceData = invoice.toPersistence();
+                        return [4 /*yield*/, connection_1.db
+                                .insert(schema_1.invoices)
+                                .values(invoiceData)
+                                .returning()];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, entities_1.InvoiceEntity.fromPersistence(result[0])];
+                }
+            });
+        });
+    };
+    InvoiceRepository.prototype.update = function (id, tenantId, input) {
+        return __awaiter(this, void 0, void 0, function () {
+            var updateData, result;
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        updateData = __assign(__assign({}, input), { notes: (_a = input.notes) !== null && _a !== void 0 ? _a : undefined, dueDate: (_b = input.dueDate) !== null && _b !== void 0 ? _b : undefined, updatedAt: new Date() });
+                        return [4 /*yield*/, connection_1.db
+                                .update(schema_1.invoices)
+                                .set(updateData)
+                                .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.id, id), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
+                                .returning()];
+                    case 1:
+                        result = _c.sent();
+                        if (result.length === 0) {
+                            return [2 /*return*/, null];
+                        }
+                        return [2 /*return*/, entities_1.InvoiceEntity.fromPersistence(result[0])];
+                }
+            });
+        });
+    };
+    InvoiceRepository.prototype.delete = function (id, tenantId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, connection_1.db
+                            .delete(schema_1.invoices)
+                            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.id, id), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
+                            .returning({ id: schema_1.invoices.id })];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result.length > 0];
+                }
+            });
+        });
+    };
+    InvoiceRepository.prototype.exists = function (id, tenantId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, connection_1.db
+                            .select({ id: schema_1.invoices.id })
+                            .from(schema_1.invoices)
+                            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.id, id), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
+                            .limit(1)];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result.length > 0];
+                }
+            });
+        });
+    };
+    InvoiceRepository.prototype.updateStatus = function (id, tenantId, status) {
+        return __awaiter(this, void 0, void 0, function () {
+            var updateData, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        updateData = {
+                            status: status,
+                            updatedAt: new Date()
+                        };
+                        if (status === entities_1.InvoiceStatus.PAID) {
+                            updateData.paidAt = new Date();
+                        }
+                        return [4 /*yield*/, connection_1.db
+                                .update(schema_1.invoices)
+                                .set(updateData)
+                                .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.id, id), (0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId)))
+                                .returning()];
+                    case 1:
+                        result = _a.sent();
+                        if (result.length === 0) {
+                            return [2 /*return*/, null];
+                        }
+                        return [2 /*return*/, entities_1.InvoiceEntity.fromPersistence(result[0])];
+                }
+            });
+        });
+    };
+    InvoiceRepository.prototype.getOverdueInvoices = function (tenantId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, connection_1.db
+                            .select()
+                            .from(schema_1.invoices)
+                            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.invoices.tenantId, tenantId), (0, drizzle_orm_1.eq)(schema_1.invoices.status, entities_1.InvoiceStatus.ISSUED), (0, drizzle_orm_1.lte)(schema_1.invoices.dueDate, new Date())))];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result.map(function (invoice) { return entities_1.InvoiceEntity.fromPersistence(invoice); })];
+                }
+            });
+        });
+    };
+    return InvoiceRepository;
+}());
 exports.InvoiceRepository = InvoiceRepository;
-//# sourceMappingURL=invoice-repository.js.map

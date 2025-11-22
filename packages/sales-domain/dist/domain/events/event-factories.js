@@ -14,11 +14,11 @@ exports.createInvoiceOverdueEvent = createInvoiceOverdueEvent;
 exports.createInvoiceCancelledEvent = createInvoiceCancelledEvent;
 exports.createCreditNoteIssuedEvent = createCreditNoteIssuedEvent;
 exports.createCreditNoteSettledEvent = createCreditNoteSettledEvent;
-const uuid_1 = require("uuid");
-const domain_events_1 = require("./domain-events");
+var uuid_1 = require("uuid");
+var domain_events_1 = require("./domain-events");
 // Quote Event Factories
 function createQuoteCreatedEvent(quote, correlationId, causationId) {
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.QUOTE_CREATED,
         eventVersion: 1,
@@ -40,7 +40,7 @@ function createQuoteCreatedEvent(quote, correlationId, causationId) {
     return event;
 }
 function createQuoteAcceptedEvent(quote, correlationId, causationId) {
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.QUOTE_ACCEPTED,
         eventVersion: 1,
@@ -61,7 +61,7 @@ function createQuoteAcceptedEvent(quote, correlationId, causationId) {
     return event;
 }
 function createQuoteRejectedEvent(quote, correlationId, causationId) {
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.QUOTE_REJECTED,
         eventVersion: 1,
@@ -80,7 +80,7 @@ function createQuoteRejectedEvent(quote, correlationId, causationId) {
     return event;
 }
 function createQuoteExpiredEvent(quote, correlationId, causationId) {
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.QUOTE_EXPIRED,
         eventVersion: 1,
@@ -100,7 +100,7 @@ function createQuoteExpiredEvent(quote, correlationId, causationId) {
 }
 // Order Event Factories
 function createOrderCreatedEvent(order, correlationId, causationId) {
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.ORDER_CREATED,
         eventVersion: 1,
@@ -121,7 +121,7 @@ function createOrderCreatedEvent(order, correlationId, causationId) {
     return event;
 }
 function createOrderConfirmedEvent(order, correlationId, causationId) {
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.ORDER_CONFIRMED,
         eventVersion: 1,
@@ -142,7 +142,7 @@ function createOrderConfirmedEvent(order, correlationId, causationId) {
     return event;
 }
 function createOrderInvoicedEvent(order, invoiceId, invoiceNumber, correlationId, causationId) {
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.ORDER_INVOICED,
         eventVersion: 1,
@@ -152,8 +152,8 @@ function createOrderInvoicedEvent(order, invoiceId, invoiceNumber, correlationId
             orderId: order.id,
             customerId: order.customerId,
             orderNumber: order.orderNumber,
-            invoiceId,
-            invoiceNumber
+            invoiceId: invoiceId,
+            invoiceNumber: invoiceNumber
         }
     };
     if (correlationId)
@@ -163,7 +163,7 @@ function createOrderInvoicedEvent(order, invoiceId, invoiceNumber, correlationId
     return event;
 }
 function createOrderCancelledEvent(order, correlationId, causationId) {
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.ORDER_CANCELLED,
         eventVersion: 1,
@@ -183,7 +183,7 @@ function createOrderCancelledEvent(order, correlationId, causationId) {
 }
 // Invoice Event Factories
 function createInvoiceIssuedEvent(invoice, correlationId, causationId) {
-    const payload = {
+    var payload = {
         invoiceId: invoice.id,
         customerId: invoice.customerId,
         invoiceNumber: invoice.invoiceNumber,
@@ -194,13 +194,13 @@ function createInvoiceIssuedEvent(invoice, correlationId, causationId) {
     if (invoice.orderId) {
         payload.orderId = invoice.orderId;
     }
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.INVOICE_ISSUED,
         eventVersion: 1,
         occurredAt: new Date().toISOString(),
         tenantId: invoice.tenantId,
-        payload
+        payload: payload
     };
     if (correlationId)
         event.correlationId = correlationId;
@@ -209,7 +209,7 @@ function createInvoiceIssuedEvent(invoice, correlationId, causationId) {
     return event;
 }
 function createInvoicePaidEvent(invoice, correlationId, causationId) {
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.INVOICE_PAID,
         eventVersion: 1,
@@ -231,7 +231,7 @@ function createInvoicePaidEvent(invoice, correlationId, causationId) {
     return event;
 }
 function createInvoiceOverdueEvent(invoice, correlationId, causationId) {
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.INVOICE_OVERDUE,
         eventVersion: 1,
@@ -253,7 +253,7 @@ function createInvoiceOverdueEvent(invoice, correlationId, causationId) {
     return event;
 }
 function createInvoiceCancelledEvent(invoice, correlationId, causationId) {
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.INVOICE_CANCELLED,
         eventVersion: 1,
@@ -273,7 +273,7 @@ function createInvoiceCancelledEvent(invoice, correlationId, causationId) {
 }
 // Credit Note Event Factories
 function createCreditNoteIssuedEvent(creditNote, correlationId, causationId) {
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.CREDIT_NOTE_ISSUED,
         eventVersion: 1,
@@ -296,7 +296,7 @@ function createCreditNoteIssuedEvent(creditNote, correlationId, causationId) {
     return event;
 }
 function createCreditNoteSettledEvent(creditNote, correlationId, causationId) {
-    const event = {
+    var event = {
         eventId: (0, uuid_1.v4)(),
         eventType: domain_events_1.DomainEventType.CREDIT_NOTE_SETTLED,
         eventVersion: 1,
@@ -318,4 +318,3 @@ function createCreditNoteSettledEvent(creditNote, correlationId, causationId) {
         event.causationId = causationId;
     return event;
 }
-//# sourceMappingURL=event-factories.js.map

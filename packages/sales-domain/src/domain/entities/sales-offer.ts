@@ -127,14 +127,14 @@ export class SalesOffer {
   public readonly id: string;
   public readonly offerNumber: string;
   public readonly customerId: string;
-  public readonly customerInquiryId?: string;
+  public readonly customerInquiryId: string | undefined;
   public readonly subject: string;
   public readonly description: string;
   public readonly status: SalesOfferStatus;
   public readonly validUntil: Date;
-  public readonly contactPerson?: string;
-  public readonly deliveryDate?: Date;
-  public readonly paymentTerms?: string;
+  public readonly contactPerson: string | undefined;
+  public readonly deliveryDate: Date | undefined;
+  public readonly paymentTerms: string | undefined;
   public readonly currency: string;
   public readonly items: SalesOfferItem[];
   public readonly subtotal: number;

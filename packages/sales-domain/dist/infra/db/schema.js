@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.creditNotesRelations = exports.invoicesRelations = exports.ordersRelations = exports.quotesRelations = exports.creditNotes = exports.invoices = exports.orders = exports.quotes = exports.salesOffers = void 0;
-const pg_core_1 = require("drizzle-orm/pg-core");
+var pg_core_1 = require("drizzle-orm/pg-core");
 // Sales Offer Table
 exports.salesOffers = (0, pg_core_1.pgTable)('sales_offers', {
     id: (0, pg_core_1.uuid)('id').primaryKey().defaultRandom(),
@@ -23,13 +23,13 @@ exports.salesOffers = (0, pg_core_1.pgTable)('sales_offers', {
     updatedAt: (0, pg_core_1.timestamp)('updated_at').notNull().defaultNow(),
     deletedAt: (0, pg_core_1.timestamp)('deleted_at'),
     version: (0, pg_core_1.integer)('version').notNull().default(1)
-}, (table) => ({
+}, function (table) { return ({
     tenantIdx: (0, pg_core_1.index)('sales_offers_tenant_idx').on(table.tenantId),
     customerIdx: (0, pg_core_1.index)('sales_offers_customer_idx').on(table.customerId),
     customerInquiryIdx: (0, pg_core_1.index)('sales_offers_customer_inquiry_idx').on(table.customerInquiryId),
     statusIdx: (0, pg_core_1.index)('sales_offers_status_idx').on(table.status),
     validUntilIdx: (0, pg_core_1.index)('sales_offers_valid_until_idx').on(table.validUntil)
-}));
+}); });
 // Quote Table
 exports.quotes = (0, pg_core_1.pgTable)('quotes', {
     id: (0, pg_core_1.uuid)('id').primaryKey().defaultRandom(),
@@ -49,12 +49,12 @@ exports.quotes = (0, pg_core_1.pgTable)('quotes', {
     createdAt: (0, pg_core_1.timestamp)('created_at').notNull().defaultNow(),
     updatedAt: (0, pg_core_1.timestamp)('updated_at').notNull().defaultNow(),
     version: (0, pg_core_1.integer)('version').notNull().default(1)
-}, (table) => ({
+}, function (table) { return ({
     tenantIdx: (0, pg_core_1.index)('quotes_tenant_idx').on(table.tenantId),
     customerIdx: (0, pg_core_1.index)('quotes_customer_idx').on(table.customerId),
     statusIdx: (0, pg_core_1.index)('quotes_status_idx').on(table.status),
     validUntilIdx: (0, pg_core_1.index)('quotes_valid_until_idx').on(table.validUntil)
-}));
+}); });
 // Order Table
 exports.orders = (0, pg_core_1.pgTable)('orders', {
     id: (0, pg_core_1.uuid)('id').primaryKey().defaultRandom(),
@@ -74,18 +74,18 @@ exports.orders = (0, pg_core_1.pgTable)('orders', {
     createdAt: (0, pg_core_1.timestamp)('created_at').notNull().defaultNow(),
     updatedAt: (0, pg_core_1.timestamp)('updated_at').notNull().defaultNow(),
     version: (0, pg_core_1.integer)('version').notNull().default(1)
-}, (table) => ({
+}, function (table) { return ({
     tenantIdx: (0, pg_core_1.index)('orders_tenant_idx').on(table.tenantId),
     customerIdx: (0, pg_core_1.index)('orders_customer_idx').on(table.customerId),
     statusIdx: (0, pg_core_1.index)('orders_status_idx').on(table.status),
     deliveryDateIdx: (0, pg_core_1.index)('orders_delivery_date_idx').on(table.expectedDeliveryDate)
-}));
+}); });
 // Invoice Table
 exports.invoices = (0, pg_core_1.pgTable)('invoices', {
     id: (0, pg_core_1.uuid)('id').primaryKey().defaultRandom(),
     tenantId: (0, pg_core_1.uuid)('tenant_id').notNull(),
     customerId: (0, pg_core_1.uuid)('customer_id').notNull(),
-    orderId: (0, pg_core_1.uuid)('order_id').references(() => exports.orders.id, { onDelete: 'set null' }),
+    orderId: (0, pg_core_1.uuid)('order_id').references(function () { return exports.orders.id; }, { onDelete: 'set null' }),
     invoiceNumber: (0, pg_core_1.text)('invoice_number').notNull().unique(),
     lines: (0, pg_core_1.jsonb)('lines').$type().notNull(),
     subtotalNet: (0, pg_core_1.numeric)('subtotal_net', { precision: 15, scale: 2 }).notNull(),
@@ -101,19 +101,19 @@ exports.invoices = (0, pg_core_1.pgTable)('invoices', {
     createdAt: (0, pg_core_1.timestamp)('created_at').notNull().defaultNow(),
     updatedAt: (0, pg_core_1.timestamp)('updated_at').notNull().defaultNow(),
     version: (0, pg_core_1.integer)('version').notNull().default(1)
-}, (table) => ({
+}, function (table) { return ({
     tenantIdx: (0, pg_core_1.index)('invoices_tenant_idx').on(table.tenantId),
     customerIdx: (0, pg_core_1.index)('invoices_customer_idx').on(table.customerId),
     orderIdx: (0, pg_core_1.index)('invoices_order_idx').on(table.orderId),
     statusIdx: (0, pg_core_1.index)('invoices_status_idx').on(table.status),
     dueDateIdx: (0, pg_core_1.index)('invoices_due_date_idx').on(table.dueDate)
-}));
+}); });
 // Credit Note Table
 exports.creditNotes = (0, pg_core_1.pgTable)('credit_notes', {
     id: (0, pg_core_1.uuid)('id').primaryKey().defaultRandom(),
     tenantId: (0, pg_core_1.uuid)('tenant_id').notNull(),
     customerId: (0, pg_core_1.uuid)('customer_id').notNull(),
-    invoiceId: (0, pg_core_1.uuid)('invoice_id').notNull().references(() => exports.invoices.id, { onDelete: 'cascade' }),
+    invoiceId: (0, pg_core_1.uuid)('invoice_id').notNull().references(function () { return exports.invoices.id; }, { onDelete: 'cascade' }),
     creditNumber: (0, pg_core_1.text)('credit_number').notNull().unique(),
     lines: (0, pg_core_1.jsonb)('lines').$type().notNull(),
     subtotalNet: (0, pg_core_1.numeric)('subtotal_net', { precision: 15, scale: 2 }).notNull(),
@@ -129,12 +129,12 @@ exports.creditNotes = (0, pg_core_1.pgTable)('credit_notes', {
     createdAt: (0, pg_core_1.timestamp)('created_at').notNull().defaultNow(),
     updatedAt: (0, pg_core_1.timestamp)('updated_at').notNull().defaultNow(),
     version: (0, pg_core_1.integer)('version').notNull().default(1)
-}, (table) => ({
+}, function (table) { return ({
     tenantIdx: (0, pg_core_1.index)('credit_notes_tenant_idx').on(table.tenantId),
     customerIdx: (0, pg_core_1.index)('credit_notes_customer_idx').on(table.customerId),
     invoiceIdx: (0, pg_core_1.index)('credit_notes_invoice_idx').on(table.invoiceId),
     statusIdx: (0, pg_core_1.index)('credit_notes_status_idx').on(table.status)
-}));
+}); });
 // Export table references for foreign keys
 exports.quotesRelations = {
     orders: exports.orders
@@ -150,4 +150,3 @@ exports.invoicesRelations = {
 exports.creditNotesRelations = {
     invoice: exports.invoices
 };
-//# sourceMappingURL=schema.js.map

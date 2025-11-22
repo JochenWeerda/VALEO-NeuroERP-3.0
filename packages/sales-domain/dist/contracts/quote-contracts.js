@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuoteListResponseContractSchema = exports.QuoteQueryContractSchema = exports.QuoteResponseContractSchema = exports.UpdateQuoteContractSchema = exports.CreateQuoteContractSchema = exports.QuoteStatusContractSchema = exports.QuoteLineContractSchema = void 0;
-const zod_1 = require("zod");
-const zod_openapi_1 = require("zod-openapi");
+var zod_1 = require("zod");
+var zod_openapi_1 = require("zod-openapi");
 (0, zod_openapi_1.extendZodWithOpenApi)(zod_1.z);
-const entities_1 = require("../domain/entities");
+var entities_1 = require("../domain/entities");
 // OpenAPI schema for Quote Line
 exports.QuoteLineContractSchema = entities_1.QuoteLineSchema.openapi({
     description: 'Quote line item',
@@ -127,4 +127,3 @@ exports.QuoteListResponseContractSchema = zod_1.z.object({
 }).openapi({
     description: 'Paginated quote list response'
 });
-//# sourceMappingURL=quote-contracts.js.map

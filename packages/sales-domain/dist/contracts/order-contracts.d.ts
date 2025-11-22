@@ -277,9 +277,9 @@ export declare const OrderQueryContractSchema: z.ZodObject<{
 }, {
     status?: "Draft" | "Confirmed" | "Invoiced" | "Cancelled" | undefined;
     search?: string | undefined;
-    customerId?: string | undefined;
     page?: string | undefined;
     pageSize?: string | undefined;
+    customerId?: string | undefined;
     expectedDeliveryDateFrom?: string | undefined;
     expectedDeliveryDateTo?: string | undefined;
 }>;

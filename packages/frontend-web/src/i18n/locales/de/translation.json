@@ -23,7 +23,9 @@
     "back": "Zurück",
     "unknownError": "Unbekannter Fehler",
     "notSpecified": "Nicht angegeben",
-    "other": "Sonstige"
+    "other": "Sonstige",
+    "yes": "Ja",
+    "no": "Nein"
   },
   "status": {
     "ok": "Alles in Ordnung",
@@ -44,6 +46,7 @@
     "rejected": "Abgelehnt",
     "posted": "Verbucht",
     "paid": "Bezahlt",
+    "sent": "Versendet",
     "confirmed": "Bestätigt",
     "locked": "Gesperrt",
     "blocked": "Gesperrt",
@@ -52,6 +55,7 @@
     "delivered": "Geliefert",
     "invoiced": "Fakturiert",
     "partiallyDelivered": "Teilgeliefert",
+    "fullyDelivered": "Vollständig geliefert",
     "overdue": "Überfällig",
     "planned": "Geplant",
     "inTransit": "Unterwegs",
@@ -194,6 +198,7 @@
       "updatedBy": "Geändert von",
       "id": "ID",
       "number": "Nummer",
+      "orderNumber": "Bestellnummer",
       "email": "E-Mail",
       "phone": "Telefon",
       "address": "Adresse",
@@ -202,6 +207,7 @@
       "quantity": "Menge",
       "price": "Preis",
       "total": "Gesamt",
+      "totalAmount": "Gesamtbetrag",
       "priority": "Priorität",
       "assignedTo": "Zugewiesen an",
       "dueDate": "Fälligkeitsdatum",
@@ -488,7 +494,9 @@
       "contactData": "Kontaktdaten",
       "addressAndNotes": "Adresse & Notizen",
       "cash": "Kasse",
-      "invoice": "Rechnung"
+      "invoice": "Rechnung",
+      "today": "Heute",
+      "thisWeek": "Diese Woche"
     },
       "reasonReturn": "Rücksendung",
       "reasonDiscount": "Nachlass",
@@ -506,6 +514,7 @@
       "paymentTermsNet90": "90 Tage netto"
     },
       "deliveryDate": "Liefertermin",
+      "fullyDelivered": "Vollständig geliefert",
       "paymentTerms": "Zahlungsbedingung",
       "paymentTermsNet30": "30 Tage netto",
       "paymentTermsNet14": "14 Tage 2% Skonto",

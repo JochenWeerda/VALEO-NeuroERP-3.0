@@ -85,7 +85,7 @@ const createBestellungenConfig = (t: any, entityTypeLabel: string): ListConfig =
         { value: 'ENTWURF', label: t('status.draft'), labelKey: 'status.draft' },
         { value: 'FREIGEGEBEN', label: t('status.approved'), labelKey: 'status.approved' },
         { value: 'TEILGELIEFERT', label: t('status.partial'), labelKey: 'status.partial' },
-        { value: 'VOLLGELIEFERT', label: t('crud.status.fullyDelivered'), labelKey: 'crud.status.fullyDelivered' },
+        { value: 'VOLLGELIEFERT', label: t('crud.fields.fullyDelivered'), labelKey: 'crud.fields.fullyDelivered' },
         { value: 'STORNIERT', label: t('status.cancelled'), labelKey: 'status.cancelled' }
       ]
     },
@@ -182,7 +182,7 @@ export default function BestellungenListePage(): JSX.Element {
         setTotal((response.data as any).total || 0)
       }
     } catch (error) {
-      console.error('Fehler beim Laden der Daten:', error)
+      console.error(t('crud.messages.loadDataError'), error)
     } finally {
       setLoading(false)
     }
@@ -207,7 +207,7 @@ export default function BestellungenListePage(): JSX.Element {
   const handleExport = () => {
     try {
       // Create CSV content
-      const csvHeader = 'Bestell-Nr.;Lieferant;Status;Liefertermin;Gesamtbetrag;Erstellt\n'
+      const csvHeader = `${t('crud.fields.orderNumber')};${t('crud.entities.supplier')};${t('crud.fields.status')};${t('crud.fields.deliveryDate')};${t('crud.fields.totalAmount')};${t('crud.fields.createdAt')}\n`
       const csvContent = data.map((bestellung: any) =>
         `"${bestellung.nummer}";"${bestellung.lieferant}";"${bestellung.status}";"${bestellung.liefertermin}";"${bestellung.gesamtbetrag}";"${bestellung.createdAt}"`
       ).join('\n')
@@ -219,7 +219,7 @@ export default function BestellungenListePage(): JSX.Element {
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
       link.setAttribute('href', url)
-      link.setAttribute('download', `bestellungen-liste-${new Date().toISOString().split('T')[0]}.csv`)
+      link.setAttribute('download', `${t('crud.entities.purchaseOrder')}-${new Date().toISOString().split('T')[0]}.csv`)
       link.style.visibility = 'hidden'
       document.body.appendChild(link)
       link.click()
@@ -249,8 +249,8 @@ export default function BestellungenListePage(): JSX.Element {
       onExport={handleExport}
       onImport={() => {
         toast({
-          title: 'Import-Funktion',
-          description: 'CSV-Import wird in der nächsten Version verfügbar sein.',
+          title: t('crud.messages.importInfo'),
+          description: t('crud.messages.importComingSoon'),
         })
       }}
       isLoading={loading}

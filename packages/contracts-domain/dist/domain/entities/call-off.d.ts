@@ -32,35 +32,35 @@ export declare const CallOffSchema: z.ZodObject<{
     version: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
     status: "Cancelled" | "Planned" | "Scheduled" | "Delivered" | "Invoiced";
-    contractId: string;
     tenantId: string;
-    version: number;
     qty: number;
+    version: number;
+    contractId: string;
     window: {
         from: string;
         to: string;
     };
-    notes?: string | undefined;
     id?: string | undefined;
     createdAt?: Date | undefined;
     updatedAt?: Date | undefined;
+    notes?: string | undefined;
     site?: string | undefined;
     silo?: string | undefined;
     customerYard?: string | undefined;
 }, {
-    contractId: string;
     tenantId: string;
     qty: number;
+    contractId: string;
     window: {
         from: string;
         to: string;
     };
     status?: "Cancelled" | "Planned" | "Scheduled" | "Delivered" | "Invoiced" | undefined;
-    notes?: string | undefined;
     id?: string | undefined;
     createdAt?: Date | undefined;
     updatedAt?: Date | undefined;
     version?: number | undefined;
+    notes?: string | undefined;
     site?: string | undefined;
     silo?: string | undefined;
     customerYard?: string | undefined;

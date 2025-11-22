@@ -1,23 +1,25 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
+import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
-// Zod-Schema für Mahnwesen
-const mahnwesenSchema = z.object({
-  opId: z.string().min(1, "OP-Referenz ist erforderlich"),
-  debitorId: z.string().min(1, "Debitor ist erforderlich"),
-  mahnstufe: z.number().min(1).max(3, "Mahnstufe muss 1-3 sein"),
-  mahnDatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Mahndatum muss YYYY-MM-DD Format haben"),
-  faelligkeit: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fälligkeit muss YYYY-MM-DD Format haben"),
-  betrag: z.number().positive("Betrag muss positiv sein"),
-  mahngebuehr: z.number().min(0, "Mahngebühr kann nicht negativ sein").default(0),
-  zinsen: z.number().min(0, "Zinsen können nicht negativ sein").default(0),
-  gesamtForderung: z.number().positive("Gesamtforderung muss positiv sein"),
-  text: z.string().min(1, "Mahntext ist erforderlich"),
+// Zod-Schema für Mahnwesen (wird in Komponente mit i18n erstellt)
+const createMahnwesenSchema = (t: any) => z.object({
+  opId: z.string().min(1, t('crud.messages.validationError')),
+  debitorId: z.string().min(1, t('crud.messages.validationError')),
+  mahnstufe: z.number().min(1).max(3, t('crud.messages.validationError')),
+  mahnDatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
+  faelligkeit: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
+  betrag: z.number().positive(t('crud.messages.validationError')),
+  mahngebuehr: z.number().min(0, t('crud.messages.validationError')).default(0),
+  zinsen: z.number().min(0, t('crud.messages.validationError')).default(0),
+  gesamtForderung: z.number().positive(t('crud.messages.validationError')),
+  text: z.string().min(1, t('crud.messages.validationError')),
   frist: z.string().optional(),
   status: z.enum(['erstellt', 'versendet', 'bezahlt', 'inkasso']),
   versandDatum: z.string().optional(),
@@ -25,26 +27,26 @@ const mahnwesenSchema = z.object({
   notizen: z.string().optional()
 })
 
-// Konfiguration für Mahnwesen ObjectPage
-const mahnwesenConfig: MaskConfig = {
-  title: 'Mahnwesen',
-  subtitle: 'Mahnungen erstellen und verwalten',
+// Konfiguration für Mahnwesen ObjectPage (wird in Komponente mit i18n erstellt)
+const createMahnwesenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+  title: entityTypeLabel,
+  subtitle: t('crud.actions.edit'),
   type: 'object-page',
   tabs: [
     {
       key: 'grunddaten',
-      label: 'Grunddaten',
+      label: t('crud.detail.basicInfo'),
       fields: [
         {
           name: 'opId',
-          label: 'OP-Referenz',
+          label: t('crud.fields.opReference'),
           type: 'text',
           required: true,
-          placeholder: 'OP-2025-0001'
+          placeholder: t('crud.tooltips.placeholders.opReference')
         },
         {
           name: 'debitorId',
-          label: 'Debitor',
+          label: t('crud.entities.debtor'),
           type: 'select',
           required: true,
           options: [
@@ -55,37 +57,37 @@ const mahnwesenConfig: MaskConfig = {
         },
         {
           name: 'mahnstufe',
-          label: 'Mahnstufe',
+          label: t('crud.fields.dunningLevel'),
           type: 'select',
           required: true,
           options: [
-            { value: 1, label: '1. Mahnung' },
-            { value: 2, label: '2. Mahnung' },
-            { value: 3, label: '3. Mahnung' }
+            { value: 1, label: t('crud.fields.dunningLevel1') },
+            { value: 2, label: t('crud.fields.dunningLevel2') },
+            { value: 3, label: t('crud.fields.dunningLevel3') }
           ]
         },
         {
           name: 'mahnDatum',
-          label: 'Mahndatum',
+          label: t('crud.fields.dunningDate'),
           type: 'date',
           required: true
         },
         {
           name: 'faelligkeit',
-          label: 'Ursprüngliche Fälligkeit',
+          label: t('crud.fields.originalDueDate'),
           type: 'date',
           required: true
         },
         {
           name: 'status',
-          label: 'Status',
+          label: t('crud.fields.status'),
           type: 'select',
           required: true,
           options: [
-            { value: 'erstellt', label: 'Erstellt' },
-            { value: 'versendet', label: 'Versendet' },
-            { value: 'bezahlt', label: 'Bezahlt' },
-            { value: 'inkasso', label: 'Inkasso' }
+            { value: 'erstellt', label: t('status.recorded') },
+            { value: 'versendet', label: t('status.sent') },
+            { value: 'bezahlt', label: t('status.paid') },
+            { value: 'inkasso', label: t('crud.fields.collection') }
           ]
         }
       ],
@@ -94,41 +96,41 @@ const mahnwesenConfig: MaskConfig = {
     },
     {
       key: 'betrag',
-      label: 'Betrag',
+      label: t('crud.fields.amount'),
       fields: [
         {
           name: 'betrag',
-          label: 'Offener Betrag',
+          label: t('crud.fields.openAmount'),
           type: 'number',
           required: true,
           step: 0.01,
           readonly: true,
-          helpText: 'Aus OP übernommen'
+          helpText: t('crud.tooltips.fields.amountFromOp')
         },
         {
           name: 'mahngebuehr',
-          label: 'Mahngebühr',
+          label: t('crud.fields.dunningFee'),
           type: 'number',
           step: 0.01,
-          placeholder: '5.00',
-          helpText: 'Pauschale Mahngebühr'
+          placeholder: t('crud.tooltips.placeholders.dunningFee'),
+          helpText: t('crud.tooltips.fields.dunningFee')
         },
         {
           name: 'zinsen',
-          label: 'Verzugszinsen',
+          label: t('crud.fields.interest'),
           type: 'number',
           step: 0.01,
-          placeholder: '0.00',
-          helpText: 'Berechnete Verzugszinsen'
+          placeholder: t('crud.tooltips.placeholders.interest'),
+          helpText: t('crud.tooltips.fields.interest')
         },
         {
           name: 'gesamtForderung',
-          label: 'Gesamtforderung',
+          label: t('crud.fields.totalClaim'),
           type: 'number',
           required: true,
           step: 0.01,
           readonly: true,
-          helpText: 'Betrag + Gebühr + Zinsen'
+          helpText: t('crud.tooltips.fields.totalClaim')
         }
       ],
       layout: 'grid',
@@ -136,55 +138,48 @@ const mahnwesenConfig: MaskConfig = {
     },
     {
       key: 'text',
-      label: 'Mahntext',
+      label: t('crud.fields.dunningText'),
       fields: [
         {
           name: 'text',
-          label: 'Mahnungstext',
+          label: t('crud.fields.dunningText'),
           type: 'textarea',
           required: true,
-          placeholder: `Sehr geehrte Damen und Herren,
-
-trotz Zahlungserinnerung steht Ihre Rechnung noch offen.
-Wir bitten Sie, den offenen Betrag innerhalb von 7 Tagen zu begleichen.
-
-Bei Zahlungseingang innerhalb der Zahlungsfrist erlassen wir die Mahngebühr.
-
-Mit freundlichen Grüßen`
+          placeholder: t('crud.tooltips.placeholders.dunningText')
         },
         {
           name: 'frist',
-          label: 'Zahlungsfrist',
+          label: t('crud.fields.paymentDeadline'),
           type: 'text',
-          placeholder: '7 Tage'
+          placeholder: t('crud.tooltips.placeholders.paymentDeadline')
         }
       ]
     },
     {
       key: 'versand',
-      label: 'Versand & Zahlung',
+      label: t('crud.fields.shippingAndPayment'),
       fields: [
         {
           name: 'versandDatum',
-          label: 'Versanddatum',
+          label: t('crud.fields.sentDate'),
           type: 'date'
         },
         {
           name: 'zahlungEingang',
-          label: 'Zahlungseingang',
+          label: t('crud.fields.paymentReceived'),
           type: 'date'
         }
       ]
     },
     {
       key: 'notizen',
-      label: 'Notizen',
+      label: t('crud.fields.notes'),
       fields: [
         {
           name: 'notizen',
-          label: 'Interne Notizen',
+          label: t('crud.fields.internalNotes'),
           type: 'textarea',
-          placeholder: 'Zusätzliche Informationen zur Mahnung...'
+          placeholder: t('crud.tooltips.placeholders.dunningNotes')
         }
       ]
     }
@@ -192,32 +187,32 @@ Mit freundlichen Grüßen`
   actions: [
     {
       key: 'generate',
-      label: 'Mahnung generieren',
+      label: t('crud.actions.generateDunning'),
       type: 'secondary'
     , onClick: () => {} },
     {
       key: 'preview',
-      label: 'Vorschau',
+      label: t('crud.actions.preview'),
       type: 'secondary'
     , onClick: () => {} },
     {
       key: 'send',
-      label: 'Versenden',
+      label: t('crud.actions.send'),
       type: 'primary'
     , onClick: () => {} },
     {
       key: 'payment',
-      label: 'Zahlung buchen',
+      label: t('crud.actions.bookPayment'),
       type: 'secondary'
     , onClick: () => {} },
     {
       key: 'inkasso',
-      label: 'Inkasso übergeben',
+      label: t('crud.actions.handOverToCollection'),
       type: 'danger'
     , onClick: () => {} },
     {
       key: 'export',
-      label: 'PDF Export',
+      label: t('crud.actions.pdfExport'),
       type: 'secondary'
     , onClick: () => {} }
   ],
@@ -231,13 +226,17 @@ Mit freundlichen Grüßen`
       delete: '/api/finance/mahnwesen/{id}'
     }
   } as any,
-  validation: mahnwesenSchema,
+  validation: createMahnwesenSchema(t),
   permissions: ['fibu.read', 'fibu.write']
-}
+})
 
 export default function MahnwesenPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const entityType = 'dunning'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Mahnwesen')
+  const mahnwesenConfig = createMahnwesenConfig(t, entityTypeLabel)
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: mahnwesenConfig.api.baseUrl,
@@ -258,27 +257,24 @@ export default function MahnwesenPage(): JSX.Element {
         const betrag = formData.betrag || 0
         const frist = formData.frist || '7 Tage'
 
-        formData.text = `Sehr geehrte Damen und Herren,
-
-trotz ${mahnstufe > 1 ? `${mahnstufe - 1}. Mahnung und ` : ''}Zahlungserinnerung steht Ihre Rechnung noch offen.
-Wir bitten Sie, den offenen Betrag von ${betrag.toFixed(2)} € innerhalb von ${frist} zu begleichen.
-
-Bei Zahlungseingang innerhalb der Zahlungsfrist erlassen wir die Mahngebühr.
-
-Mit freundlichen Grüßen`
+        formData.text = t('crud.messages.dunningTextTemplate', {
+          mahnstufeText: mahnstufe > 1 ? t('crud.messages.dunningTextPrevious', { level: mahnstufe - 1 }) + ' ' : '',
+          betrag: betrag.toFixed(2),
+          frist: frist
+        })
       }
 
       toast({
-        title: 'Mahnung generiert',
-        description: `Mahnung der Stufe ${formData.mahnstufe} wurde erstellt.`,
+        title: t('crud.messages.dunningGenerated'),
+        description: t('crud.messages.dunningGeneratedDesc', { level: formData.mahnstufe }),
       })
     } else if (action === 'preview') {
       // Vorschau
       if (!formData.id) {
         toast({
           variant: 'destructive',
-          title: 'Fehler',
-          description: 'Speichern Sie die Mahnung zuerst.',
+          title: t('common.error'),
+          description: t('crud.messages.saveFirst'),
         })
         return
       }
@@ -294,8 +290,8 @@ Mit freundlichen Grüßen`
         await saveData(formData)
         setIsDirty(false)
         toast({
-          title: 'Mahnung versendet',
-          description: 'Die Mahnung wurde erfolgreich versendet.',
+          title: t('crud.messages.dunningSent'),
+          description: t('crud.messages.dunningSentDesc'),
         })
         navigate('/finance/mahnwesen')
       } catch (error) {
@@ -306,8 +302,8 @@ Mit freundlichen Grüßen`
       if (!formData.id) {
         toast({
           variant: 'destructive',
-          title: 'Fehler',
-          description: 'Speichern Sie die Mahnung zuerst.',
+          title: t('common.error'),
+          description: t('crud.messages.saveFirst'),
         })
         return
       }
@@ -329,22 +325,22 @@ Mit freundlichen Grüßen`
           formData.status = 'bezahlt'
           formData.zahlungEingang = new Date().toISOString().split('T')[0]
           toast({
-            title: 'Zahlung gebucht',
-            description: 'Die Zahlung wurde erfolgreich gebucht.',
+            title: t('crud.messages.paymentBooked'),
+            description: t('crud.messages.paymentBookedDesc'),
           })
         } else {
           const error = await response.json()
           toast({
             variant: 'destructive',
-            title: 'Fehler bei Zahlung',
-            description: error.detail || 'Zahlung konnte nicht gebucht werden.',
+            title: t('crud.messages.paymentError'),
+            description: error.detail || t('crud.messages.paymentErrorDesc'),
           })
         }
       } catch (error) {
         toast({
           variant: 'destructive',
-          title: 'Netzwerkfehler',
-          description: 'Verbindung zum Server fehlgeschlagen.',
+          title: t('crud.messages.networkError'),
+          description: t('crud.messages.networkErrorDesc'),
         })
       }
     } else if (action === 'inkasso') {
@@ -352,8 +348,8 @@ Mit freundlichen Grüßen`
       if (!formData.id) {
         toast({
           variant: 'destructive',
-          title: 'Fehler',
-          description: 'Speichern Sie die Mahnung zuerst.',
+          title: t('common.error'),
+          description: t('crud.messages.saveFirst'),
         })
         return
       }
@@ -370,30 +366,30 @@ Mit freundlichen Grüßen`
         if (response.ok) {
           formData.status = 'inkasso'
           toast({
-            title: 'Inkasso übergeben',
-            description: 'Der Fall wurde an das Inkasso-Büro übergeben.',
+            title: t('crud.messages.collectionHandedOver'),
+            description: t('crud.messages.collectionHandedOverDesc'),
           })
         } else {
           const error = await response.json()
           toast({
             variant: 'destructive',
-            title: 'Fehler bei Inkasso-Übergabe',
-            description: error.detail || 'Inkasso-Übergabe fehlgeschlagen.',
+            title: t('crud.messages.collectionError'),
+            description: error.detail || t('crud.messages.collectionErrorDesc'),
           })
         }
       } catch (error) {
         toast({
           variant: 'destructive',
-          title: 'Netzwerkfehler',
-          description: 'Verbindung zum Server fehlgeschlagen.',
+          title: t('crud.messages.networkError'),
+          description: t('crud.messages.networkErrorDesc'),
         })
       }
     } else if (action === 'export') {
       if (!formData.id) {
         toast({
           variant: 'destructive',
-          title: 'Fehler',
-          description: 'Speichern Sie die Mahnung zuerst.',
+          title: t('common.error'),
+          description: t('crud.messages.saveFirst'),
         })
         return
       }
@@ -406,7 +402,7 @@ Mit freundlichen Grüßen`
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm('Ungespeicherte Änderungen gehen verloren. Wirklich abbrechen?')) {
+    if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
       return
     }
     navigate('/finance/mahnwesen')

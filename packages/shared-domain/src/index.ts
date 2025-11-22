@@ -15,6 +15,12 @@ export * from './application/index.js';
 // Infrastructure Layer
 export * from './infrastructure/index.js';
 
+// CRUD Framework
+export * from './crud/index.js';
+
+// Print Service
+export * from './print/index.js';
+
 // Re-export commonly used types for convenience
 export type {
   UserId,

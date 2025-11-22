@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvoiceListResponseContractSchema = exports.InvoiceQueryContractSchema = exports.InvoiceResponseContractSchema = exports.UpdateInvoiceContractSchema = exports.CreateInvoiceContractSchema = exports.InvoiceStatusContractSchema = exports.InvoiceLineContractSchema = void 0;
-const zod_1 = require("zod");
-const entities_1 = require("../domain/entities");
+var zod_1 = require("zod");
+var entities_1 = require("../domain/entities");
 // OpenAPI schema for Invoice Line
 exports.InvoiceLineContractSchema = entities_1.InvoiceLineSchema.openapi({
     description: 'Invoice line item',
@@ -126,4 +126,3 @@ exports.InvoiceListResponseContractSchema = zod_1.z.object({
 }).openapi({
     description: 'Paginated invoice list response'
 });
-//# sourceMappingURL=invoice-contracts.js.map

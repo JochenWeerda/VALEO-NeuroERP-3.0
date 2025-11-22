@@ -32,4 +32,3 @@ var credit_note_1 = require("./credit-note");
 Object.defineProperty(exports, "CreditNoteStatus", { enumerable: true, get: function () { return credit_note_1.CreditNoteStatus; } });
 var sales_offer_1 = require("./sales-offer");
 Object.defineProperty(exports, "SalesOfferStatus", { enumerable: true, get: function () { return sales_offer_1.SalesOfferStatus; } });
-//# sourceMappingURL=index.js.map

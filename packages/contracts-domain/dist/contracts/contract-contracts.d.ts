@@ -217,16 +217,16 @@ export declare const CreateContractSchema: z.ZodObject<{
     }>;
 }, "strip", z.ZodTypeAny, {
     type: "Buy" | "Sell";
-    qty: {
-        unit: "t" | "mt";
-        contracted: number;
-        tolerance?: number | undefined;
-    };
     commodity: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER";
     counterpartyId: string;
     deliveryWindow: {
         from: string;
         to: string;
+    };
+    qty: {
+        unit: "t" | "mt";
+        contracted: number;
+        tolerance?: number | undefined;
     };
     pricing: {
         mode: "FORWARD_CASH" | "BASIS" | "HTA" | "DEFERRED" | "MIN_PRICE" | "FIXED" | "INDEXED";
@@ -256,16 +256,16 @@ export declare const CreateContractSchema: z.ZodObject<{
     incoterm?: string | undefined;
 }, {
     type: "Buy" | "Sell";
-    qty: {
-        unit: "t" | "mt";
-        contracted: number;
-        tolerance?: number | undefined;
-    };
     commodity: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER";
     counterpartyId: string;
     deliveryWindow: {
         from: string;
         to: string;
+    };
+    qty: {
+        unit: "t" | "mt";
+        contracted: number;
+        tolerance?: number | undefined;
     };
     pricing: {
         mode: "FORWARD_CASH" | "BASIS" | "HTA" | "DEFERRED" | "MIN_PRICE" | "FIXED" | "INDEXED";
@@ -408,14 +408,14 @@ export declare const UpdateContractSchema: z.ZodObject<{
         qualitySpecs?: Record<string, any> | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    qty?: {
-        contracted?: number | undefined;
-        tolerance?: number | undefined;
-    } | undefined;
     incoterm?: string | undefined;
     deliveryWindow?: {
         from: string;
         to: string;
+    } | undefined;
+    qty?: {
+        contracted?: number | undefined;
+        tolerance?: number | undefined;
     } | undefined;
     pricing?: {
         mode: "FORWARD_CASH" | "BASIS" | "HTA" | "DEFERRED" | "MIN_PRICE" | "FIXED" | "INDEXED";
@@ -443,14 +443,14 @@ export declare const UpdateContractSchema: z.ZodObject<{
         qualitySpecs?: Record<string, any> | undefined;
     } | undefined;
 }, {
-    qty?: {
-        contracted?: number | undefined;
-        tolerance?: number | undefined;
-    } | undefined;
     incoterm?: string | undefined;
     deliveryWindow?: {
         from: string;
         to: string;
+    } | undefined;
+    qty?: {
+        contracted?: number | undefined;
+        tolerance?: number | undefined;
     } | undefined;
     pricing?: {
         mode: "FORWARD_CASH" | "BASIS" | "HTA" | "DEFERRED" | "MIN_PRICE" | "FIXED" | "INDEXED";
@@ -605,23 +605,21 @@ export declare const ContractResponseSchema: z.ZodObject<{
     updatedAt: z.ZodString;
     version: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
+    status: "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Cancelled" | "Defaulted";
     type: "Buy" | "Sell";
-    status: "Cancelled" | "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Defaulted";
     id: string;
     tenantId: string;
-    createdAt: string;
-    updatedAt: string;
-    version: number;
-    qty: {
-        unit: "t" | "mt";
-        contracted: number;
-        tolerance?: number | undefined;
-    };
+    contractNo: string;
     commodity: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER";
     counterpartyId: string;
     deliveryWindow: {
         from: string;
         to: string;
+    };
+    qty: {
+        unit: "t" | "mt";
+        contracted: number;
+        tolerance?: number | undefined;
     };
     pricing: {
         mode: "FORWARD_CASH" | "BASIS" | "HTA" | "DEFERRED" | "MIN_PRICE" | "FIXED" | "INDEXED";
@@ -648,26 +646,26 @@ export declare const ContractResponseSchema: z.ZodObject<{
         } | undefined;
         qualitySpecs?: Record<string, any> | undefined;
     };
-    contractNo: string;
+    createdAt: string;
+    updatedAt: string;
+    version: number;
     incoterm?: string | undefined;
 }, {
+    status: "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Cancelled" | "Defaulted";
     type: "Buy" | "Sell";
-    status: "Cancelled" | "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Defaulted";
     id: string;
     tenantId: string;
-    createdAt: string;
-    updatedAt: string;
-    version: number;
-    qty: {
-        unit: "t" | "mt";
-        contracted: number;
-        tolerance?: number | undefined;
-    };
+    contractNo: string;
     commodity: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER";
     counterpartyId: string;
     deliveryWindow: {
         from: string;
         to: string;
+    };
+    qty: {
+        unit: "t" | "mt";
+        contracted: number;
+        tolerance?: number | undefined;
     };
     pricing: {
         mode: "FORWARD_CASH" | "BASIS" | "HTA" | "DEFERRED" | "MIN_PRICE" | "FIXED" | "INDEXED";
@@ -694,7 +692,9 @@ export declare const ContractResponseSchema: z.ZodObject<{
         } | undefined;
         qualitySpecs?: Record<string, any> | undefined;
     };
-    contractNo: string;
+    createdAt: string;
+    updatedAt: string;
+    version: number;
     incoterm?: string | undefined;
 }>;
 export declare const ContractListQuerySchema: z.ZodObject<{
@@ -709,21 +709,21 @@ export declare const ContractListQuerySchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     page: number;
     pageSize: number;
+    status?: "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Cancelled" | "Defaulted" | undefined;
     type?: "Buy" | "Sell" | undefined;
-    status?: "Cancelled" | "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Defaulted" | undefined;
     commodity?: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER" | undefined;
     counterpartyId?: string | undefined;
     deliveryFrom?: string | undefined;
     deliveryTo?: string | undefined;
 }, {
+    status?: "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Cancelled" | "Defaulted" | undefined;
     type?: "Buy" | "Sell" | undefined;
-    status?: "Cancelled" | "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Defaulted" | undefined;
     commodity?: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER" | undefined;
     counterpartyId?: string | undefined;
-    deliveryFrom?: string | undefined;
-    deliveryTo?: string | undefined;
     page?: number | undefined;
     pageSize?: number | undefined;
+    deliveryFrom?: string | undefined;
+    deliveryTo?: string | undefined;
 }>;
 export declare const ContractListResponseSchema: z.ZodObject<{
     data: z.ZodArray<z.ZodObject<{
@@ -853,23 +853,21 @@ export declare const ContractListResponseSchema: z.ZodObject<{
         updatedAt: z.ZodString;
         version: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
+        status: "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Cancelled" | "Defaulted";
         type: "Buy" | "Sell";
-        status: "Cancelled" | "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Defaulted";
         id: string;
         tenantId: string;
-        createdAt: string;
-        updatedAt: string;
-        version: number;
-        qty: {
-            unit: "t" | "mt";
-            contracted: number;
-            tolerance?: number | undefined;
-        };
+        contractNo: string;
         commodity: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER";
         counterpartyId: string;
         deliveryWindow: {
             from: string;
             to: string;
+        };
+        qty: {
+            unit: "t" | "mt";
+            contracted: number;
+            tolerance?: number | undefined;
         };
         pricing: {
             mode: "FORWARD_CASH" | "BASIS" | "HTA" | "DEFERRED" | "MIN_PRICE" | "FIXED" | "INDEXED";
@@ -896,26 +894,26 @@ export declare const ContractListResponseSchema: z.ZodObject<{
             } | undefined;
             qualitySpecs?: Record<string, any> | undefined;
         };
-        contractNo: string;
+        createdAt: string;
+        updatedAt: string;
+        version: number;
         incoterm?: string | undefined;
     }, {
+        status: "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Cancelled" | "Defaulted";
         type: "Buy" | "Sell";
-        status: "Cancelled" | "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Defaulted";
         id: string;
         tenantId: string;
-        createdAt: string;
-        updatedAt: string;
-        version: number;
-        qty: {
-            unit: "t" | "mt";
-            contracted: number;
-            tolerance?: number | undefined;
-        };
+        contractNo: string;
         commodity: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER";
         counterpartyId: string;
         deliveryWindow: {
             from: string;
             to: string;
+        };
+        qty: {
+            unit: "t" | "mt";
+            contracted: number;
+            tolerance?: number | undefined;
         };
         pricing: {
             mode: "FORWARD_CASH" | "BASIS" | "HTA" | "DEFERRED" | "MIN_PRICE" | "FIXED" | "INDEXED";
@@ -942,7 +940,9 @@ export declare const ContractListResponseSchema: z.ZodObject<{
             } | undefined;
             qualitySpecs?: Record<string, any> | undefined;
         };
-        contractNo: string;
+        createdAt: string;
+        updatedAt: string;
+        version: number;
         incoterm?: string | undefined;
     }>, "many">;
     pagination: z.ZodObject<{
@@ -951,35 +951,33 @@ export declare const ContractListResponseSchema: z.ZodObject<{
         total: z.ZodNumber;
         totalPages: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
+        total: number;
         page: number;
         pageSize: number;
-        total: number;
         totalPages: number;
     }, {
+        total: number;
         page: number;
         pageSize: number;
-        total: number;
         totalPages: number;
     }>;
 }, "strip", z.ZodTypeAny, {
     data: {
+        status: "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Cancelled" | "Defaulted";
         type: "Buy" | "Sell";
-        status: "Cancelled" | "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Defaulted";
         id: string;
         tenantId: string;
-        createdAt: string;
-        updatedAt: string;
-        version: number;
-        qty: {
-            unit: "t" | "mt";
-            contracted: number;
-            tolerance?: number | undefined;
-        };
+        contractNo: string;
         commodity: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER";
         counterpartyId: string;
         deliveryWindow: {
             from: string;
             to: string;
+        };
+        qty: {
+            unit: "t" | "mt";
+            contracted: number;
+            tolerance?: number | undefined;
         };
         pricing: {
             mode: "FORWARD_CASH" | "BASIS" | "HTA" | "DEFERRED" | "MIN_PRICE" | "FIXED" | "INDEXED";
@@ -1006,34 +1004,34 @@ export declare const ContractListResponseSchema: z.ZodObject<{
             } | undefined;
             qualitySpecs?: Record<string, any> | undefined;
         };
-        contractNo: string;
+        createdAt: string;
+        updatedAt: string;
+        version: number;
         incoterm?: string | undefined;
     }[];
     pagination: {
+        total: number;
         page: number;
         pageSize: number;
-        total: number;
         totalPages: number;
     };
 }, {
     data: {
+        status: "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Cancelled" | "Defaulted";
         type: "Buy" | "Sell";
-        status: "Cancelled" | "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Defaulted";
         id: string;
         tenantId: string;
-        createdAt: string;
-        updatedAt: string;
-        version: number;
-        qty: {
-            unit: "t" | "mt";
-            contracted: number;
-            tolerance?: number | undefined;
-        };
+        contractNo: string;
         commodity: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER";
         counterpartyId: string;
         deliveryWindow: {
             from: string;
             to: string;
+        };
+        qty: {
+            unit: "t" | "mt";
+            contracted: number;
+            tolerance?: number | undefined;
         };
         pricing: {
             mode: "FORWARD_CASH" | "BASIS" | "HTA" | "DEFERRED" | "MIN_PRICE" | "FIXED" | "INDEXED";
@@ -1060,13 +1058,15 @@ export declare const ContractListResponseSchema: z.ZodObject<{
             } | undefined;
             qualitySpecs?: Record<string, any> | undefined;
         };
-        contractNo: string;
+        createdAt: string;
+        updatedAt: string;
+        version: number;
         incoterm?: string | undefined;
     }[];
     pagination: {
+        total: number;
         page: number;
         pageSize: number;
-        total: number;
         totalPages: number;
     };
 }>;

@@ -1,90 +1,92 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
-// Zod-Schema für Lastschriften Debitoren
-const lastschriftenSchema = z.object({
-  laufNummer: z.string().min(1, "Laufnummer ist erforderlich"),
-  ausfuehrungsDatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Ausführungsdatum muss YYYY-MM-DD Format haben"),
-  gesamtBetrag: z.number().positive("Gesamtbetrag muss positiv sein"),
-  anzahlLastschriften: z.number().min(1, "Mindestens eine Lastschrift erforderlich"),
+// Zod-Schema für Lastschriften Debitoren (wird in Komponente mit i18n erstellt)
+const createLastschriftenSchema = (t: any) => z.object({
+  laufNummer: z.string().min(1, t('crud.messages.validationError')),
+  ausfuehrungsDatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
+  gesamtBetrag: z.number().positive(t('crud.messages.validationError')),
+  anzahlLastschriften: z.number().min(1, t('crud.messages.validationError')),
   status: z.enum(['entwurf', 'freigegeben', 'ausgefuehrt', 'storniert']),
   freigegebenAm: z.string().optional(),
   freigegebenDurch: z.string().optional(),
   ausgefuehrtAm: z.string().optional(),
 
   // SEPA-Details
-  creditorId: z.string().min(1, "Creditor-ID ist erforderlich"),
-  auftraggeberName: z.string().min(1, "Auftraggeber-Name ist erforderlich"),
-  auftraggeberIban: z.string().regex(/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/, "IBAN-Format ungültig"),
+  creditorId: z.string().min(1, t('crud.messages.validationError')),
+  auftraggeberName: z.string().min(1, t('crud.messages.validationError')),
+  auftraggeberIban: z.string().regex(/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/, t('crud.messages.validationError')),
 
   // Lastschriften
   lastschriften: z.array(z.object({
-    debitorId: z.string().min(1, "Debitor ist erforderlich"),
-    debitorName: z.string().min(1, "Debitor-Name ist erforderlich"),
-    iban: z.string().regex(/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/, "IBAN-Format ungültig"),
+    debitorId: z.string().min(1, t('crud.messages.validationError')),
+    debitorName: z.string().min(1, t('crud.messages.validationError')),
+    iban: z.string().regex(/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/, t('crud.messages.validationError')),
     bic: z.string().optional(),
-    betrag: z.number().positive("Betrag muss positiv sein"),
-    mandatReferenz: z.string().min(1, "Mandatsreferenz ist erforderlich"),
-    mandatDatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Mandatsdatum muss YYYY-MM-DD Format haben"),
-    verwendungszweck: z.string().min(1, "Verwendungszweck ist erforderlich"),
+    betrag: z.number().positive(t('crud.messages.validationError')),
+    mandatReferenz: z.string().min(1, t('crud.messages.validationError')),
+    mandatDatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
+    verwendungszweck: z.string().min(1, t('crud.messages.validationError')),
     sequenzTyp: z.enum(['FRST', 'RCUR', 'FNAL', 'OOFF'], {
-      errorMap: () => ({ message: "Sequenztyp muss FRST, RCUR, FNAL oder OOFF sein" })
+      errorMap: () => ({ message: t('crud.messages.validationError') })
     }),
     opReferenz: z.string().optional()
-  })).min(1, "Mindestens eine Lastschrift erforderlich"),
+  })).min(1, t('crud.messages.validationError')),
 
   notizen: z.string().optional()
 })
 
-// Konfiguration für Lastschriften Debitoren ObjectPage
-const lastschriftenConfig: MaskConfig = {
-  title: 'Lastschriften Debitoren',
-  subtitle: 'SEPA-Lastschriften von Kunden einziehen',
+// Konfiguration für Lastschriften Debitoren ObjectPage (wird in Komponente mit i18n erstellt)
+const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+  title: entityTypeLabel,
+  subtitle: t('crud.fields.collectSepaDirectDebits'),
   type: 'object-page',
   tabs: [
     {
       key: 'grunddaten',
-      label: 'Grunddaten',
+      label: t('crud.detail.basicInfo'),
       fields: [
         {
           name: 'laufNummer',
-          label: 'Laufnummer',
+          label: t('crud.fields.runNumber'),
           type: 'text',
           required: true,
-          placeholder: 'LS-2025-001'
+          placeholder: t('crud.tooltips.placeholders.directDebitRunNumber')
         },
         {
           name: 'ausfuehrungsDatum',
-          label: 'Ausführungsdatum',
+          label: t('crud.fields.executionDate'),
           type: 'date',
           required: true
         },
         {
           name: 'status',
-          label: 'Status',
+          label: t('crud.fields.status'),
           type: 'select',
           required: true,
           options: [
-            { value: 'entwurf', label: 'Entwurf' },
-            { value: 'freigegeben', label: 'Freigegeben' },
-            { value: 'ausgefuehrt', label: 'Ausgeführt' },
-            { value: 'storniert', label: 'Storniert' }
+            { value: 'entwurf', label: t('status.draft') },
+            { value: 'freigegeben', label: t('status.approved') },
+            { value: 'ausgefuehrt', label: t('crud.fields.executed') },
+            { value: 'storniert', label: t('crud.fields.cancelled') }
           ]
         },
         {
           name: 'gesamtBetrag',
-          label: 'Gesamtbetrag',
+          label: t('crud.fields.totalAmount'),
           type: 'number',
           readonly: true,
           step: 0.01
         },
         {
           name: 'anzahlLastschriften',
-          label: 'Anzahl Lastschriften',
+          label: t('crud.fields.numberOfDirectDebits'),
           type: 'number',
           readonly: true
         }
@@ -94,34 +96,34 @@ const lastschriftenConfig: MaskConfig = {
     },
     {
       key: 'creditor',
-      label: 'Creditor-Informationen',
+      label: t('crud.fields.creditorInformation'),
       fields: [
         {
           name: 'creditorId',
-          label: 'Creditor-ID (CI)',
+          label: t('crud.fields.creditorId'),
           type: 'text',
           required: true,
-          placeholder: 'DE98ZZZ09999999999'
+          placeholder: t('crud.tooltips.placeholders.creditorId')
         },
         {
           name: 'auftraggeberName',
-          label: 'Auftraggeber-Name',
+          label: t('crud.fields.originatorName'),
           type: 'text',
           required: true,
-          placeholder: 'Ihre Firma GmbH'
+          placeholder: t('crud.tooltips.placeholders.companyName')
         },
         {
           name: 'auftraggeberIban',
-          label: 'Auftraggeber-IBAN',
+          label: t('crud.fields.originatorIban'),
           type: 'text',
           required: true,
-          placeholder: 'DE89370400440532013000'
+          placeholder: t('crud.tooltips.placeholders.iban')
         }
       ]
     },
     {
       key: 'lastschriften',
-      label: 'Lastschriften',
+      label: t('crud.fields.directDebits'),
       fields: []
     } as any,
     {
@@ -145,23 +147,23 @@ const lastschriftenConfig: MaskConfig = {
     },
     {
       key: 'freigabe',
-      label: 'Freigabe & Ausführung',
+      label: t('crud.fields.approvalAndExecution'),
       fields: [
         {
           name: 'freigegebenAm',
-          label: 'Freigegeben am',
+          label: t('crud.fields.approvedOn'),
           type: 'date',
           readonly: true
         },
         {
           name: 'freigegebenDurch',
-          label: 'Freigegeben durch',
+          label: t('crud.fields.approvedBy'),
           type: 'text',
           readonly: true
         },
         {
           name: 'ausgefuehrtAm',
-          label: 'Ausgeführt am',
+          label: t('crud.fields.executedOn'),
           type: 'date',
           readonly: true
         }
@@ -171,13 +173,13 @@ const lastschriftenConfig: MaskConfig = {
     },
     {
       key: 'notizen',
-      label: 'Notizen',
+      label: t('crud.fields.notes'),
       fields: [
         {
           name: 'notizen',
-          label: 'Interne Notizen',
+          label: t('crud.fields.internalNotes'),
           type: 'textarea',
-          placeholder: 'Zusätzliche Informationen zum Lastschriftlauf...'
+          placeholder: t('crud.tooltips.placeholders.directDebitRunNotes')
         }
       ]
     }
@@ -185,32 +187,32 @@ const lastschriftenConfig: MaskConfig = {
   actions: [
     {
       key: 'add-direct-debit',
-      label: 'Lastschrift hinzufügen',
+      label: t('crud.actions.addDirectDebit'),
       type: 'secondary'
     , onClick: () => {} },
     {
       key: 'validate-mandates',
-      label: 'Mandate prüfen',
+      label: t('crud.actions.validateMandates'),
       type: 'secondary'
     , onClick: () => {} },
     {
       key: 'preview',
-      label: 'SEPA-Vorschau',
+      label: t('crud.actions.sepaPreview'),
       type: 'secondary'
     , onClick: () => {} },
     {
       key: 'approve',
-      label: 'Freigeben',
+      label: t('crud.actions.approve'),
       type: 'primary'
     , onClick: () => {} },
     {
       key: 'execute',
-      label: 'Ausführen',
+      label: t('crud.actions.execute'),
       type: 'primary'
     , onClick: () => {} },
     {
       key: 'export',
-      label: 'SEPA-Export',
+      label: t('crud.actions.sepaExport'),
       type: 'secondary'
     , onClick: () => {} }
   ],
@@ -224,12 +226,13 @@ const lastschriftenConfig: MaskConfig = {
       delete: '/api/finance/lastschriften-debitoren/{id}'
     }
   } as any,
-  validation: lastschriftenSchema,
+  validation: createLastschriftenSchema(t),
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
-}
+})
 
 // Lastschriften-Tabelle Komponente
 function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
+  const { t } = useTranslation()
   const addLastschrift = () => {
     onChange([..._data, {
       debitorId: '',
@@ -258,12 +261,12 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Lastschriften</h3>
+        <h3 className="text-lg font-semibold">{t('crud.fields.directDebits')}</h3>
         <button
           onClick={addLastschrift}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          + Lastschrift hinzufügen
+          + {t('crud.actions.addDirectDebit')}
         </button>
       </div>
 
@@ -271,14 +274,14 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
         <table className="min-w-full border border-gray-300">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-2 border">Debitor</th>
-              <th className="px-4 py-2 border">IBAN</th>
-              <th className="px-4 py-2 border">Betrag</th>
-              <th className="px-4 py-2 border">Mandat</th>
-              <th className="px-4 py-2 border">Sequenz</th>
-              <th className="px-4 py-2 border">Verwendungszweck</th>
-              <th className="px-4 py-2 border">OP-Ref</th>
-              <th className="px-4 py-2 border">Aktionen</th>
+              <th className="px-4 py-2 border">{t('crud.entities.debtor')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.iban')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.amount')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.mandate')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.sequence')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.purpose')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.opReference')}</th>
+              <th className="px-4 py-2 border">{t('crud.actions.delete')}</th>
             </tr>
           </thead>
           <tbody>
@@ -291,14 +294,14 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
                       value={lastschrift.debitorId}
                       onChange={(e) => updateLastschrift(index, 'debitorId', e.target.value)}
                       className="w-full p-1 border rounded text-sm mb-1"
-                      placeholder="Debitor-Nr"
+                      placeholder={t('crud.tooltips.placeholders.debtorNumber')}
                     />
                     <input
                       type="text"
                       value={lastschrift.debitorName}
                       onChange={(e) => updateLastschrift(index, 'debitorName', e.target.value)}
                       className="w-full p-1 border rounded text-sm"
-                      placeholder="Name"
+                      placeholder={t('crud.fields.name')}
                     />
                   </div>
                 </td>
@@ -309,14 +312,14 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
                       value={lastschrift.iban}
                       onChange={(e) => updateLastschrift(index, 'iban', e.target.value)}
                       className="w-full p-1 border rounded text-sm mb-1"
-                      placeholder="IBAN"
+                      placeholder={t('crud.fields.iban')}
                     />
                     <input
                       type="text"
                       value={lastschrift.bic || ''}
                       onChange={(e) => updateLastschrift(index, 'bic', e.target.value)}
                       className="w-full p-1 border rounded text-sm"
-                      placeholder="BIC (optional)"
+                      placeholder={t('crud.tooltips.placeholders.bicOptional')}
                     />
                   </div>
                 </td>
@@ -336,7 +339,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
                       value={lastschrift.mandatReferenz}
                       onChange={(e) => updateLastschrift(index, 'mandatReferenz', e.target.value)}
                       className="w-full p-1 border rounded text-sm mb-1"
-                      placeholder="Mandatsref."
+                      placeholder={t('crud.tooltips.placeholders.mandateReference')}
                     />
                     <input
                       type="date"
@@ -352,10 +355,10 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
                     onChange={(e) => updateLastschrift(index, 'sequenzTyp', e.target.value)}
                     className="w-full p-1 border rounded"
                   >
-                    <option value="FRST">FRST - Erste</option>
-                    <option value="RCUR">RCUR - Wiederholung</option>
-                    <option value="FNAL">FNAL - Letzte</option>
-                    <option value="OOFF">OOFF - Einmalig</option>
+                    <option value="FRST">{t('crud.fields.sequenceFRST')}</option>
+                    <option value="RCUR">{t('crud.fields.sequenceRCUR')}</option>
+                    <option value="FNAL">{t('crud.fields.sequenceFNAL')}</option>
+                    <option value="OOFF">{t('crud.fields.sequenceOOFF')}</option>
                   </select>
                 </td>
                 <td className="px-4 py-2 border">
@@ -364,7 +367,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
                     value={lastschrift.verwendungszweck}
                     onChange={(e) => updateLastschrift(index, 'verwendungszweck', e.target.value)}
                     className="w-full p-1 border rounded"
-                    placeholder="Rechnung 12345"
+                    placeholder={t('crud.tooltips.placeholders.invoiceNumber')}
                   />
                 </td>
                 <td className="px-4 py-2 border">
@@ -373,7 +376,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
                     value={lastschrift.opReferenz || ''}
                     onChange={(e) => updateLastschrift(index, 'opReferenz', e.target.value)}
                     className="w-full p-1 border rounded text-sm"
-                    placeholder="OP-12345"
+                    placeholder={t('crud.tooltips.placeholders.opReference')}
                   />
                 </td>
                 <td className="px-4 py-2 border">
@@ -394,8 +397,12 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
 }
 
 export default function LastschriftenDebitorenPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const entityType = 'directDebit'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lastschriften Debitoren')
+  const lastschriftenConfig = createLastschriftenConfig(t, entityTypeLabel)
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: lastschriftenConfig.api.baseUrl,
@@ -407,16 +414,16 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'add-direct-debit') {
       // Neue Lastschrift hinzufügen wird in der Tabelle behandelt
-      alert('Verwenden Sie die Tabelle um Lastschriften hinzuzufügen')
+      alert(t('crud.messages.useTableToAddDirectDebits'))
     } else if (action === 'validate-mandates') {
       // Mandate prüfen
-      alert('Mandatsprüfung-Funktion wird implementiert')
+      alert(t('crud.messages.mandateValidationInfo'))
     } else if (action === 'preview') {
       // SEPA-Vorschau
       window.open('/api/finance/lastschriften-debitoren/preview', '_blank')
     } else if (action === 'approve') {
       // Freigeben
-      alert('Freigabe-Funktion wird implementiert')
+      alert(t('crud.messages.approvalFunctionInfo'))
     } else if (action === 'execute') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
@@ -441,7 +448,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm('Ungespeicherte Änderungen gehen verloren. Wirklich abbrechen?')) {
+    if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
       return
     }
     navigate('/finance/lastschriften-debitoren')

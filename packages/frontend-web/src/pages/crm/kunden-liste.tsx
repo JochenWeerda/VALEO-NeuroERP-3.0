@@ -238,7 +238,7 @@ export default function KundenListePage(): JSX.Element {
         setTotal((response.data as any).total || 0)
       }
     } catch (error) {
-      console.error('Fehler beim Laden der Daten:', error)
+      console.error(t('crud.messages.loadDataError'), error)
     } finally {
       setLoading(false)
     }

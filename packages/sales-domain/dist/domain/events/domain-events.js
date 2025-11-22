@@ -19,4 +19,3 @@ exports.DomainEventType = {
     CREDIT_NOTE_ISSUED: 'sales.credit_note.issued',
     CREDIT_NOTE_SETTLED: 'sales.credit_note.settled'
 };
-//# sourceMappingURL=domain-events.js.map

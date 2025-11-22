@@ -5,11 +5,15 @@ import { PriceListLine, TierBreak } from '../entities/price-list';
 import { ConditionRule } from '../entities/condition-set';
 import { evaluateFormula } from '../calc/formula-engine';
 import { publishEvent } from '../../infra/messaging/publisher';
+import { SeasonalPricingService } from './seasonal-pricing-service';
 import { eq, and, lte, gte, or, isNull } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
 import pino from 'pino';
 
 const logger = pino({ name: 'price-calculator' });
+
+// Initialize seasonal pricing service
+const seasonalPricingService = new SeasonalPricingService({});
 
 /**
  * Calculate Price Quote
@@ -29,6 +33,14 @@ export async function calculateQuote(
   const baseResult = await resolveBasePrice(tenantId, input.sku, input.qty);
   components.push(...baseResult.components);
   runningTotal = baseResult.price;
+
+  // 1.5. SEASONAL: Apply seasonal pricing adjustment (based on OCA sale_agriculture pattern)
+  const orderDate = input.context?.orderDate ? new Date(input.context.orderDate) : new Date();
+  const seasonalResult = await applySeasonalPricing(tenantId, input, baseResult.price / input.qty, orderDate);
+  if (seasonalResult) {
+    components.push(...seasonalResult.components);
+    runningTotal = seasonalResult.price;
+  }
 
   // 2. CONDITIONS: Apply customer/segment conditions
   const conditionResult = await applyConditions(tenantId, input, runningTotal);
@@ -152,6 +164,54 @@ async function resolveBasePrice(
       calculatedFrom: priceList.id,
     }],
   };
+}
+
+/**
+ * Step 1.5: Apply Seasonal Pricing (based on OCA sale_agriculture pattern)
+ */
+async function applySeasonalPricing(
+  tenantId: string,
+  input: CalcQuoteInput,
+  baseUnitPrice: number,
+  orderDate: Date
+): Promise<{ price: number; components: PriceComponent[] } | null> {
+  try {
+    // Extract commodity from SKU (e.g., "WHEAT-11.5" -> "WHEAT")
+    const commodity = input.sku.split('-')[0] || input.sku;
+    
+    const seasonalPrice = await seasonalPricingService.getSeasonalPrice(
+      tenantId,
+      input.sku,
+      baseUnitPrice,
+      orderDate,
+      {
+        commodity: commodity,
+        category: input.context?.category
+      }
+    );
+
+    // If no adjustment, return null
+    if (seasonalPrice.adjustment === 0 || !seasonalPrice.appliedRule) {
+      return null;
+    }
+
+    const adjustedTotalPrice = seasonalPrice.adjustedPrice * input.qty;
+
+    return {
+      price: adjustedTotalPrice,
+      components: [{
+        type: 'Seasonal',
+        key: `Seasonal-${seasonalPrice.season}`,
+        description: `Seasonal pricing (${seasonalPrice.season}): ${seasonalPrice.appliedRule.name} - ${seasonalPrice.adjustmentType === 'PERCENTAGE' ? `${seasonalPrice.appliedRule.adjustmentValue}%` : seasonalPrice.adjustmentType === 'MULTIPLIER' ? `×${seasonalPrice.appliedRule.adjustmentValue}` : `€${seasonalPrice.appliedRule.adjustmentValue}`}`,
+        value: seasonalPrice.adjustment * input.qty,
+        basis: baseUnitPrice * input.qty,
+        calculatedFrom: seasonalPrice.appliedRule.id,
+      }],
+    };
+  } catch (error) {
+    logger.warn({ error, tenantId, sku: input.sku }, 'Failed to apply seasonal pricing, using base price');
+    return null; // Fallback to base price if seasonal pricing fails
+  }
 }
 
 /**

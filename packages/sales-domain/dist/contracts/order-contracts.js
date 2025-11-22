@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderListResponseContractSchema = exports.OrderQueryContractSchema = exports.OrderResponseContractSchema = exports.UpdateOrderContractSchema = exports.CreateOrderContractSchema = exports.OrderStatusContractSchema = exports.OrderLineContractSchema = void 0;
-const zod_1 = require("zod");
-const zod_openapi_1 = require("zod-openapi");
+var zod_1 = require("zod");
+var zod_openapi_1 = require("zod-openapi");
 (0, zod_openapi_1.extendZodWithOpenApi)(zod_1.z);
-const entities_1 = require("../domain/entities");
+var entities_1 = require("../domain/entities");
 // OpenAPI schema for Order Line
 exports.OrderLineContractSchema = entities_1.OrderLineSchema.openapi({
     description: 'Order line item',
@@ -125,4 +125,3 @@ exports.OrderListResponseContractSchema = zod_1.z.object({
 }).openapi({
     description: 'Paginated order list response'
 });
-//# sourceMappingURL=order-contracts.js.map

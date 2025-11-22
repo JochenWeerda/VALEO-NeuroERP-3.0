@@ -16,20 +16,20 @@ export declare const FulfilmentResponseSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         event: string;
         timestamp: string;
-        notes?: string | undefined;
         qty?: number | undefined;
+        notes?: string | undefined;
         price?: number | undefined;
     }, {
         event: string;
         timestamp: string;
-        notes?: string | undefined;
         qty?: number | undefined;
+        notes?: string | undefined;
         price?: number | undefined;
     }>, "many">;
     lastUpdated: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    contractId: string;
     tenantId: string;
+    contractId: string;
     deliveredQty: number;
     pricedQty: number;
     invoicedQty: number;
@@ -37,15 +37,15 @@ export declare const FulfilmentResponseSchema: z.ZodObject<{
     timeline: {
         event: string;
         timestamp: string;
-        notes?: string | undefined;
         qty?: number | undefined;
+        notes?: string | undefined;
         price?: number | undefined;
     }[];
     lastUpdated: string;
     avgPrice?: number | undefined;
 }, {
-    contractId: string;
     tenantId: string;
+    contractId: string;
     deliveredQty: number;
     pricedQty: number;
     invoicedQty: number;
@@ -53,8 +53,8 @@ export declare const FulfilmentResponseSchema: z.ZodObject<{
     timeline: {
         event: string;
         timestamp: string;
-        notes?: string | undefined;
         qty?: number | undefined;
+        notes?: string | undefined;
         price?: number | undefined;
     }[];
     lastUpdated: string;
@@ -68,13 +68,13 @@ export declare const PricingFixingSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     value: number;
     kind: "BASIS" | "FUTURES" | "MIN_PRICE_DECISION";
-    notes?: string | undefined;
     futuresMonth?: string | undefined;
+    notes?: string | undefined;
 }, {
     value: number;
     kind: "BASIS" | "FUTURES" | "MIN_PRICE_DECISION";
-    notes?: string | undefined;
     futuresMonth?: string | undefined;
+    notes?: string | undefined;
 }>;
 export type FulfilmentResponse = z.infer<typeof FulfilmentResponseSchema>;
 export type PricingFixing = z.infer<typeof PricingFixingSchema>;

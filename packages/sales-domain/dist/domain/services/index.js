@@ -32,4 +32,3 @@ var credit_note_service_1 = require("./credit-note-service");
 Object.defineProperty(exports, "CreditNoteService", { enumerable: true, get: function () { return credit_note_service_1.CreditNoteService; } });
 var sales_offer_service_1 = require("./sales-offer-service");
 Object.defineProperty(exports, "SalesOfferService", { enumerable: true, get: function () { return sales_offer_service_1.SalesOfferService; } });
-//# sourceMappingURL=index.js.map

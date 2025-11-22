@@ -53,4 +53,3 @@ Object.defineProperty(exports, "CreditNoteQueryContractSchema", { enumerable: tr
 Object.defineProperty(exports, "CreditNoteListResponseContractSchema", { enumerable: true, get: function () { return credit_note_contracts_1.CreditNoteListResponseContractSchema; } });
 Object.defineProperty(exports, "CreditNoteLineContractSchema", { enumerable: true, get: function () { return credit_note_contracts_1.CreditNoteLineContractSchema; } });
 Object.defineProperty(exports, "CreditNoteStatusContractSchema", { enumerable: true, get: function () { return credit_note_contracts_1.CreditNoteStatusContractSchema; } });
-//# sourceMappingURL=index.js.map

@@ -1,16 +1,18 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
+import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
-// Zod-Schema für UStVA
-const ustvaSchema = z.object({
-  periode: z.string().regex(/^\d{4}-\d{2}$/, "Periode muss YYYY-MM Format haben"),
+// Zod-Schema für UStVA (wird in Komponente mit i18n erstellt)
+const createUstvaSchema = (t: any) => z.object({
+  periode: z.string().regex(/^\d{4}-\d{2}$/, t('crud.messages.validationError')),
   voranmeldungszeitraum: z.enum(['monatlich', 'quartalsweise']),
-  steuerpflichtiger: z.string().min(1, "Steuerpflichtiger ist erforderlich"),
+  steuerpflichtiger: z.string().min(1, t('crud.messages.validationError')),
   ustId: z.string().optional(),
   steuerberater: z.string().optional(),
 
@@ -52,63 +54,63 @@ const ustvaSchema = z.object({
   notizen: z.string().optional()
 })
 
-// Konfiguration für UStVA ObjectPage
-const ustvaConfig: MaskConfig = {
-  title: 'Umsatzsteuervoranmeldung (UStVA)',
-  subtitle: 'UStVA erstellen und an ELSTER übermitteln',
+// Konfiguration für UStVA ObjectPage (wird in Komponente mit i18n erstellt)
+const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+  title: entityTypeLabel,
+  subtitle: t('crud.fields.createAndSubmitUstva'),
   type: 'object-page',
   tabs: [
     {
       key: 'grunddaten',
-      label: 'Grunddaten',
+      label: t('crud.detail.basicInfo'),
       fields: [
         {
           name: 'periode',
-          label: 'Periode',
+          label: t('crud.fields.period'),
           type: 'text',
           required: true,
-          placeholder: '2025-01',
+          placeholder: t('crud.tooltips.placeholders.period'),
           pattern: '^\\d{4}-\\d{2}$'
          } as any, {},
         {
           name: 'voranmeldungszeitraum',
-          label: 'Voranmeldungszeitraum',
+          label: t('crud.fields.declarationPeriod'),
           type: 'select',
           required: true,
           options: [
-            { value: 'monatlich', label: 'Monatlich' },
-            { value: 'quartalsweise', label: 'Quartalsweise' }
+            { value: 'monatlich', label: t('crud.fields.monthly') },
+            { value: 'quartalsweise', label: t('crud.fields.quarterly') }
           ]
         },
         {
           name: 'steuerpflichtiger',
-          label: 'Steuerpflichtiger',
+          label: t('crud.fields.taxpayer'),
           type: 'text',
           required: true,
-          placeholder: 'Firmenname'
+          placeholder: t('crud.tooltips.placeholders.company')
         },
         {
           name: 'ustId',
-          label: 'USt-ID',
+          label: t('crud.fields.vatId'),
           type: 'text',
-          placeholder: 'DE123456789'
+          placeholder: t('crud.tooltips.placeholders.vatId')
         },
         {
           name: 'steuerberater',
-          label: 'Steuerberater',
+          label: t('crud.fields.taxAdvisor'),
           type: 'text',
-          placeholder: 'Name des Steuerberaters'
+          placeholder: t('crud.tooltips.placeholders.taxAdvisor')
         },
         {
           name: 'status',
-          label: 'Status',
+          label: t('crud.fields.status'),
           type: 'select',
           required: true,
           options: [
-            { value: 'entwurf', label: 'Entwurf' },
-            { value: 'pruefung', label: 'In Prüfung' },
-            { value: 'freigegeben', label: 'Freigegeben' },
-            { value: 'abgegeben', label: 'Abgegeben' }
+            { value: 'entwurf', label: t('status.draft') },
+            { value: 'pruefung', label: t('crud.fields.inReview') },
+            { value: 'freigegeben', label: t('status.approved') },
+            { value: 'abgegeben', label: t('crud.fields.submitted') }
           ]
         }
       ],
@@ -117,39 +119,39 @@ const ustvaConfig: MaskConfig = {
     },
     {
       key: 'umsatz',
-      label: 'Umsätze',
+      label: t('crud.fields.revenue'),
       fields: [
         {
           name: 'umsatz19',
-          label: 'Umsätze 19% (§66)',
+          label: t('crud.fields.revenue19'),
           type: 'number',
           step: 0.01,
-          placeholder: '0.00'
+          placeholder: t('crud.tooltips.placeholders.amount')
         },
         {
           name: 'umsatz7',
-          label: 'Umsätze 7% (§35)',
+          label: t('crud.fields.revenue7'),
           type: 'number',
           step: 0.01,
-          placeholder: '0.00'
+          placeholder: t('crud.tooltips.placeholders.amount')
         },
         {
           name: 'umsatz0',
-          label: 'Umsätze 0% (§48)',
+          label: t('crud.fields.revenue0'),
           type: 'number',
           step: 0.01,
-          placeholder: '0.00'
+          placeholder: t('crud.tooltips.placeholders.amount')
         },
         {
           name: 'umsatzSonstige',
-          label: 'Sonstige Umsätze (§67)',
+          label: t('crud.fields.revenueOther'),
           type: 'number',
           step: 0.01,
-          placeholder: '0.00'
+          placeholder: t('crud.tooltips.placeholders.amount')
         },
         {
           name: 'gesamtUmsatz',
-          label: 'Gesamtumsatz',
+          label: t('crud.fields.totalRevenue'),
           type: 'number',
           readonly: true,
           step: 0.01
@@ -160,39 +162,39 @@ const ustvaConfig: MaskConfig = {
     },
     {
       key: 'vorsteuer',
-      label: 'Vorsteuer',
+      label: t('crud.fields.inputTax'),
       fields: [
         {
           name: 'vorsteuer19',
-          label: 'Vorsteuer 19% (§60)',
+          label: t('crud.fields.inputTax19'),
           type: 'number',
           step: 0.01,
-          placeholder: '0.00'
+          placeholder: t('crud.tooltips.placeholders.amount')
         },
         {
           name: 'vorsteuer7',
-          label: 'Vorsteuer 7% (§61)',
+          label: t('crud.fields.inputTax7'),
           type: 'number',
           step: 0.01,
-          placeholder: '0.00'
+          placeholder: t('crud.tooltips.placeholders.amount')
         },
         {
           name: 'vorsteuer0',
-          label: 'Vorsteuer 0% (§62)',
+          label: t('crud.fields.inputTax0'),
           type: 'number',
           step: 0.01,
-          placeholder: '0.00'
+          placeholder: t('crud.tooltips.placeholders.amount')
         },
         {
           name: 'vorsteuerSonstige',
-          label: 'Sonstige Vorsteuer (§63)',
+          label: t('crud.fields.inputTaxOther'),
           type: 'number',
           step: 0.01,
-          placeholder: '0.00'
+          placeholder: t('crud.tooltips.placeholders.amount')
         },
         {
           name: 'gesamtVorsteuer',
-          label: 'Gesamtvorsteuer',
+          label: t('crud.fields.totalInputTax'),
           type: 'number',
           readonly: true,
           step: 0.01
@@ -203,43 +205,43 @@ const ustvaConfig: MaskConfig = {
     },
     {
       key: 'berechnung',
-      label: 'Berechnung',
+      label: t('crud.fields.calculation'),
       fields: [
         {
           name: 'ust19',
-          label: 'USt 19%',
+          label: t('crud.fields.vat19'),
           type: 'number',
           readonly: true,
           step: 0.01
         },
         {
           name: 'ust7',
-          label: 'USt 7%',
+          label: t('crud.fields.vat7'),
           type: 'number',
           readonly: true,
           step: 0.01
         },
         {
           name: 'ust0',
-          label: 'USt 0%',
+          label: t('crud.fields.vat0'),
           type: 'number',
           readonly: true,
           step: 0.01
         },
         {
           name: 'ustSonstige',
-          label: 'USt Sonstige',
+          label: t('crud.fields.vatOther'),
           type: 'number',
           readonly: true,
           step: 0.01
         },
         {
           name: 'gesamtUst',
-          label: 'Gesamt USt',
+          label: t('crud.fields.totalVat'),
           type: 'number',
           readonly: true,
           step: 0.01,
-          helpText: 'Umsatzsteuer abzüglich Vorsteuer'
+          helpText: t('crud.tooltips.fields.vatMinusInputTax')
         }
       ],
       layout: 'grid',
@@ -247,7 +249,7 @@ const ustvaConfig: MaskConfig = {
     },
     {
       key: 'abweichungen',
-      label: 'Abweichungen',
+      label: t('crud.fields.deviations'),
       fields: []
     } as any,
     {
@@ -263,32 +265,32 @@ const ustvaConfig: MaskConfig = {
     },
     {
       key: 'freigabe',
-      label: 'Freigabe & Abgabe',
+      label: t('crud.fields.approvalAndSubmission'),
       fields: [
         {
           name: 'freigegebenAm',
-          label: 'Freigegeben am',
+          label: t('crud.fields.approvedOn'),
           type: 'date',
           readonly: true
         },
         {
           name: 'freigegebenDurch',
-          label: 'Freigegeben durch',
+          label: t('crud.fields.approvedBy'),
           type: 'text',
           readonly: true
         },
         {
           name: 'abgegebenAm',
-          label: 'Abgegeben am',
+          label: t('crud.fields.submittedOn'),
           type: 'date',
           readonly: true
         },
         {
           name: 'elsterReferenz',
-          label: 'ELSTER-Referenz',
+          label: t('crud.fields.elsterReference'),
           type: 'text',
           readonly: true,
-          placeholder: 'ELSTER-Bestätigungsnummer'
+          placeholder: t('crud.tooltips.placeholders.elsterReference')
         }
       ],
       layout: 'grid',
@@ -296,13 +298,13 @@ const ustvaConfig: MaskConfig = {
     },
     {
       key: 'notizen',
-      label: 'Notizen',
+      label: t('crud.fields.notes'),
       fields: [
         {
           name: 'notizen',
-          label: 'Interne Notizen',
+          label: t('crud.fields.internalNotes'),
           type: 'textarea',
-          placeholder: 'Zusätzliche Informationen zur UStVA...'
+          placeholder: t('crud.tooltips.placeholders.ustvaNotes')
         }
       ]
     }
@@ -310,27 +312,27 @@ const ustvaConfig: MaskConfig = {
   actions: [
     {
       key: 'calculate',
-      label: 'Berechnen',
+      label: t('crud.actions.recalculate'),
       type: 'secondary'
     , onClick: () => {} },
     {
       key: 'validate',
-      label: 'Prüfen',
+      label: t('crud.actions.validate'),
       type: 'secondary'
     , onClick: () => {} },
     {
       key: 'approve',
-      label: 'Freigeben',
+      label: t('crud.actions.approve'),
       type: 'primary'
     , onClick: () => {} },
     {
       key: 'submit',
-      label: 'An ELSTER übermitteln',
+      label: t('crud.actions.submitToElster'),
       type: 'primary'
     , onClick: () => {} },
     {
       key: 'export',
-      label: 'XML Export',
+      label: t('crud.actions.xmlExport'),
       type: 'secondary'
     , onClick: () => {} }
   ],
@@ -344,12 +346,13 @@ const ustvaConfig: MaskConfig = {
       delete: '/api/finance/ustva/{id}'
     }
   } as any,
-  validation: ustvaSchema,
+  validation: createUstvaSchema(t),
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
-}
+})
 
 // Abweichungen-Tabelle Komponente
 function AbweichungenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
+  const { t } = useTranslation()
   const addAbweichung = () => {
     onChange([..._data, {
       position: '',
@@ -372,12 +375,12 @@ function AbweichungenTable({ data: _data, onChange }: { data: any[], onChange: (
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Abweichungen</h3>
+        <h3 className="text-lg font-semibold">{t('crud.fields.deviations')}</h3>
         <button
           onClick={addAbweichung}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          + Abweichung hinzufügen
+          + {t('crud.actions.addDeviation')}
         </button>
       </div>
 
@@ -385,11 +388,11 @@ function AbweichungenTable({ data: _data, onChange }: { data: any[], onChange: (
         <table className="min-w-full border border-gray-300">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-2 border">Position</th>
-              <th className="px-4 py-2 border">Beschreibung</th>
-              <th className="px-4 py-2 border">Betrag</th>
-              <th className="px-4 py-2 border">Grund</th>
-              <th className="px-4 py-2 border">Aktionen</th>
+              <th className="px-4 py-2 border">{t('crud.fields.position')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.description')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.amount')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.reason')}</th>
+              <th className="px-4 py-2 border">{t('crud.actions.delete')}</th>
             </tr>
           </thead>
           <tbody>
@@ -401,7 +404,7 @@ function AbweichungenTable({ data: _data, onChange }: { data: any[], onChange: (
                     value={abweichung.position}
                     onChange={(e) => updateAbweichung(index, 'position', e.target.value)}
                     className="w-full p-1 border rounded"
-                    placeholder="z.B. §66"
+                    placeholder={t('crud.tooltips.placeholders.position')}
                   />
                 </td>
                 <td className="px-4 py-2 border">
@@ -410,7 +413,7 @@ function AbweichungenTable({ data: _data, onChange }: { data: any[], onChange: (
                     value={abweichung.beschreibung}
                     onChange={(e) => updateAbweichung(index, 'beschreibung', e.target.value)}
                     className="w-full p-1 border rounded"
-                    placeholder="Beschreibung der Abweichung"
+                    placeholder={t('crud.tooltips.placeholders.deviationDescription')}
                   />
                 </td>
                 <td className="px-4 py-2 border">
@@ -428,7 +431,7 @@ function AbweichungenTable({ data: _data, onChange }: { data: any[], onChange: (
                     value={abweichung.grund}
                     onChange={(e) => updateAbweichung(index, 'grund', e.target.value)}
                     className="w-full p-1 border rounded"
-                    placeholder="Begründung"
+                    placeholder={t('crud.tooltips.placeholders.reason')}
                   />
                 </td>
                 <td className="px-4 py-2 border">
@@ -449,8 +452,12 @@ function AbweichungenTable({ data: _data, onChange }: { data: any[], onChange: (
 }
 
 export default function UStVAPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const entityType = 'ustva'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Umsatzsteuervoranmeldung')
+  const ustvaConfig = createUstvaConfig(t, entityTypeLabel)
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: ustvaConfig.api.baseUrl,
@@ -481,15 +488,15 @@ export default function UStVAPage(): JSX.Element {
       })
 
       toast({
-        title: 'Berechnung abgeschlossen',
-        description: 'UStVA-Beträge wurden neu berechnet.',
+        title: t('crud.messages.calculationCompleted'),
+        description: t('crud.messages.ustvaAmountsRecalculated'),
       })
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
         toast({
-          title: 'Validierung erfolgreich',
-          description: 'Alle UStVA-Daten sind korrekt.',
+          title: t('crud.messages.validationSuccess'),
+          description: t('crud.messages.ustvaDataCorrect'),
         })
       } else {
         showValidationToast(isValid.errors)
@@ -499,8 +506,8 @@ export default function UStVAPage(): JSX.Element {
       if (!formData.id) {
         toast({
           variant: 'destructive',
-          title: 'Fehler',
-          description: 'Speichern Sie die UStVA zuerst.',
+          title: t('common.error'),
+          description: t('crud.messages.saveUstvaFirst'),
         })
         return
       }
@@ -516,8 +523,8 @@ export default function UStVAPage(): JSX.Element {
 
         if (response.ok) {
           toast({
-            title: 'Freigabe erfolgreich',
-            description: 'Die UStVA wurde freigegeben.',
+            title: t('crud.messages.approvalSuccess'),
+            description: t('crud.messages.ustvaApproved'),
           })
           // Refresh data
           window.location.reload()
@@ -525,15 +532,15 @@ export default function UStVAPage(): JSX.Element {
           const error = await response.json()
           toast({
             variant: 'destructive',
-            title: 'Fehler bei Freigabe',
-            description: error.detail || 'Unbekannter Fehler',
+            title: t('crud.messages.approvalError'),
+            description: error.detail || t('common.unknownError'),
           })
         }
       } catch (error) {
         toast({
           variant: 'destructive',
-          title: 'Netzwerkfehler',
-          description: 'Verbindung zum Server fehlgeschlagen.',
+          title: t('crud.messages.networkError'),
+          description: t('crud.messages.networkErrorDesc'),
         })
       }
     } else if (action === 'submit') {
@@ -547,8 +554,8 @@ export default function UStVAPage(): JSX.Element {
         await saveData(formData)
         setIsDirty(false)
         toast({
-          title: 'UStVA erfolgreich abgegeben',
-          description: 'Die UStVA wurde an ELSTER übermittelt.',
+          title: t('crud.messages.ustvaSubmitted'),
+          description: t('crud.messages.ustvaSubmittedDesc'),
         })
         navigate('/finance/ustva')
       } catch (error) {
@@ -558,8 +565,8 @@ export default function UStVAPage(): JSX.Element {
       if (!formData.id) {
         toast({
           variant: 'destructive',
-          title: 'Fehler',
-          description: 'Speichern Sie die UStVA zuerst.',
+          title: t('common.error'),
+          description: t('crud.messages.saveUstvaFirst'),
         })
         return
       }
@@ -572,7 +579,7 @@ export default function UStVAPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm('Ungespeicherte Änderungen gehen verloren. Wirklich abbrechen?')) {
+    if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
       return
     }
     navigate('/finance/ustva')
