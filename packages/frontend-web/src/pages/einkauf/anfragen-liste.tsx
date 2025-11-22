@@ -1,98 +1,112 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { toast } from '@/hooks/use-toast'
 
 // API Client für Anfragen
 const apiClient = createApiClient('/api/einkauf')
 
-// Konfiguration für Anfragen ListReport
-const anfragenConfig: ListConfig = {
-  title: 'Bedarfsanforderungen',
-  subtitle: 'Interne Bedarfsmeldungen und Anfragen',
+// Konfiguration für Anfragen ListReport (wird in Komponente mit i18n erstellt)
+const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+  title: entityTypeLabel,
+  titleKey: 'crud.list.title',
+  subtitle: t('crud.subtitles.managePurchaseRequests'),
+  subtitleKey: 'crud.subtitles.managePurchaseRequests',
   type: 'list-report',
   columns: [
     {
       key: 'anfrageNummer',
-      label: 'Anfrage-Nr.',
+      label: t('crud.fields.requestNumber'),
+      labelKey: 'crud.fields.requestNumber',
       sortable: true,
       render: (value) => <code className="text-sm font-mono">{value}</code>
     },
     {
       key: 'typ',
-      label: 'Typ',
+      label: t('crud.fields.type'),
+      labelKey: 'crud.fields.type',
       sortable: true,
       filterable: true,
       render: (value) => {
-        const typLabels = {
-          'BANF': 'Bedarfsanforderung',
-          'ANF': 'Anfrage'
+        const typLabels: Record<string, string> = {
+          'BANF': t('crud.fields.requisition'),
+          'ANF': t('crud.entities.purchaseRequest')
         }
-        return <Badge variant="outline">{typLabels[value as keyof typeof typLabels] || value}</Badge>
+        return <Badge variant="outline">{typLabels[value] || value}</Badge>
       }
     },
     {
       key: 'anforderer',
-      label: 'Anforderer',
+      label: t('crud.fields.requester'),
+      labelKey: 'crud.fields.requester',
       sortable: true,
       filterable: true
     },
     {
       key: 'artikel',
-      label: 'Artikel',
+      label: t('crud.fields.product'),
+      labelKey: 'crud.fields.product',
       sortable: true,
       filterable: true
     },
     {
       key: 'menge',
-      label: 'Menge',
+      label: t('crud.fields.quantity'),
+      labelKey: 'crud.fields.quantity',
       sortable: true,
-      render: (value, item) => `${formatNumber(value, 2)} ${item.einheit || 'Stk'}`
+      render: (value, item) => `${formatNumber(value, 2)} ${item.einheit || t('crud.fields.unit')}`
     },
     {
       key: 'prioritaet',
-      label: 'Priorität',
+      label: t('crud.fields.priority'),
+      labelKey: 'crud.fields.priority',
       sortable: true,
       filterable: true,
       render: (value) => {
-        const prioLabels = {
-          'niedrig': { label: 'Niedrig', variant: 'secondary' as const },
-          'normal': { label: 'Normal', variant: 'default' as const },
-          'hoch': { label: 'Hoch', variant: 'destructive' as const },
-          'dringend': { label: 'Dringend', variant: 'destructive' as const }
+        const prioLabels: Record<string, { label: string; variant: 'secondary' | 'default' | 'destructive' }> = {
+          'niedrig': { label: t('crud.fields.priorityLow'), variant: 'secondary' },
+          'normal': { label: t('crud.fields.priorityNormal'), variant: 'default' },
+          'hoch': { label: t('crud.fields.priorityHigh'), variant: 'destructive' },
+          'dringend': { label: t('crud.fields.priorityUrgent'), variant: 'destructive' }
         }
-        const prio = prioLabels[value as keyof typeof prioLabels] || { label: value, variant: 'secondary' as const }
+        const prio = prioLabels[value] || { label: value, variant: 'secondary' as const }
         return <Badge variant={prio.variant}>{prio.label}</Badge>
       }
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('crud.fields.status'),
+      labelKey: 'crud.fields.status',
       sortable: true,
       filterable: true,
       render: (value) => {
-        const statusLabels = {
-          'ENTWURF': { label: 'Entwurf', variant: 'secondary' as const },
-          'FREIGEGEBEN': { label: 'Freigegeben', variant: 'default' as const },
-          'ANGEBOTSPHASE': { label: 'Angebotsphase', variant: 'outline' as const }
+        const statusLabel = getStatusLabel(t, value as string, value as string)
+        const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
+          'ENTWURF': 'secondary',
+          'FREIGEGEBEN': 'default',
+          'ANGEBOTSPHASE': 'outline'
         }
-        const status = statusLabels[value as keyof typeof statusLabels] || { label: value, variant: 'secondary' as const }
-        return <Badge variant={status.variant}>{status.label}</Badge>
+        return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
       key: 'faelligkeit',
-      label: 'Fällig bis',
+      label: t('crud.fields.dueDate'),
+      labelKey: 'crud.fields.dueDate',
       sortable: true,
       render: (value) => formatDate(value)
     },
     {
       key: 'createdAt',
-      label: 'Erstellt',
+      label: t('crud.fields.createdAt'),
+      labelKey: 'crud.fields.createdAt',
       sortable: true,
       render: (value) => formatDate(value)
     }
@@ -100,46 +114,52 @@ const anfragenConfig: ListConfig = {
   filters: [
     {
       name: 'status',
-      label: 'Status',
+      label: t('crud.fields.status'),
+      labelKey: 'crud.fields.status',
       type: 'select',
       options: [
-        { value: 'ENTWURF', label: 'Entwurf' },
-        { value: 'FREIGEGEBEN', label: 'Freigegeben' },
-        { value: 'ANGEBOTSPHASE', label: 'Angebotsphase' }
+        { value: 'ENTWURF', label: t('status.draft'), labelKey: 'status.draft' },
+        { value: 'FREIGEGEBEN', label: t('status.approved'), labelKey: 'status.approved' },
+        { value: 'ANGEBOTSPHASE', label: t('crud.status.offerPhase'), labelKey: 'crud.status.offerPhase' }
       ]
     },
     {
       name: 'prioritaet',
-      label: 'Priorität',
+      label: t('crud.fields.priority'),
+      labelKey: 'crud.fields.priority',
       type: 'select',
       options: [
-        { value: 'niedrig', label: 'Niedrig' },
-        { value: 'normal', label: 'Normal' },
-        { value: 'hoch', label: 'Hoch' },
-        { value: 'dringend', label: 'Dringend' }
+        { value: 'niedrig', label: t('crud.fields.priorityLow'), labelKey: 'crud.fields.priorityLow' },
+        { value: 'normal', label: t('crud.fields.priorityNormal'), labelKey: 'crud.fields.priorityNormal' },
+        { value: 'hoch', label: t('crud.fields.priorityHigh'), labelKey: 'crud.fields.priorityHigh' },
+        { value: 'dringend', label: t('crud.fields.priorityUrgent'), labelKey: 'crud.fields.priorityUrgent' }
       ]
     },
     {
       name: 'anforderer',
-      label: 'Anforderer',
+      label: t('crud.fields.requester'),
+      labelKey: 'crud.fields.requester',
       type: 'text'
     },
     {
       name: 'artikel',
-      label: 'Artikel',
+      label: t('crud.fields.product'),
+      labelKey: 'crud.fields.product',
       type: 'text'
     }
   ],
   bulkActions: [
     {
       key: 'freigeben',
-      label: 'Freigeben',
+      label: t('crud.actions.approve'),
+      labelKey: 'crud.actions.approve',
       type: 'primary',
       onClick: () => console.log('Freigeben clicked')
     },
     {
       key: 'inBestellung',
-      label: 'In Bestellung umwandeln',
+      label: t('crud.actions.convertToOrder'),
+      labelKey: 'crud.actions.convertToOrder',
       type: 'secondary',
       onClick: () => console.log('In Bestellung clicked')
     }
@@ -158,24 +178,31 @@ const anfragenConfig: ListConfig = {
   },
   permissions: ['einkauf.read', 'einkauf.write'],
   actions: []
-}
+})
 
 export default function AnfragenListePage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const entityType = 'purchaseRequest'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Anfrage')
+  const anfragenConfig = createAnfragenConfig(t, entityTypeLabel)
 
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
       navigate(`/einkauf/anfragen/${item.id}`)
     } else if (action === 'delete' && item) {
-      if (confirm(`Anfrage "${item.anfrageNummer}" wirklich löschen?`)) {
+      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {
           await apiClient.delete(`/anfragen/${item.id}`)
           loadData() // Liste neu laden
         } catch (error) {
-          alert('Fehler beim Löschen')
+          toast({
+            variant: 'destructive',
+            title: t('crud.messages.deleteError', { entityType: entityTypeLabel })
+          })
         }
       }
     }
@@ -213,7 +240,34 @@ export default function AnfragenListePage(): JSX.Element {
   }
 
   const handleExport = () => {
-    alert('Export-Funktion wird implementiert')
+    try {
+      const csvHeader = `${t('crud.fields.requestNumber')};${t('crud.fields.requester')};${t('crud.fields.product')};${t('crud.fields.quantity')};${t('crud.fields.status')}\n`
+      const csvContent = data.map((anfrage: any) =>
+        `"${anfrage.anfrageNummer}";"${anfrage.anforderer}";"${anfrage.artikel}";"${anfrage.menge}";"${anfrage.status}"`
+      ).join('\n')
+
+      const csv = csvHeader + csvContent
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `anfragen-liste-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: t('crud.messages.exportSuccess'),
+        description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
+      })
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.exportError'),
+        description: t('crud.messages.exportFailed'),
+      })
+    }
   }
 
   return (
@@ -225,7 +279,12 @@ export default function AnfragenListePage(): JSX.Element {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onExport={handleExport}
-      onImport={() => alert('Import-Funktion wird implementiert')}
+      onImport={() => {
+        toast({
+          title: t('crud.messages.importInfo'),
+          description: t('crud.messages.importComingSoon'),
+        })
+      }}
       isLoading={loading}
     />
   )
