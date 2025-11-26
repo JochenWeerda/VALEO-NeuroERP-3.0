@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { AlertCircle, CheckCircle2, Loader2, XCircle } from 'lucide-react'
+import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 
 type VerificationResult = {
   valid: boolean
@@ -15,6 +17,7 @@ type VerificationResult = {
 }
 
 export default function VerifyPage(): JSX.Element {
+  const { t } = useTranslation()
   const { domain, number, hash } = useParams<{ domain?: string; number?: string; hash?: string }>()
   const [result, setResult] = useState<VerificationResult | null>(null)
   const [loading, setLoading] = useState(true)
@@ -82,7 +85,8 @@ export default function VerifyPage(): JSX.Element {
       unknown: 'destructive',
     }
     const variant = variants[status] ?? 'outline'
-    return <Badge variant={variant}>{status.toUpperCase()}</Badge>
+    const translated = getStatusLabel(t, status, status)
+    return <Badge variant={variant}>{translated}</Badge>
 }
 
   const getDomainLabel = (domainValue: string): string => {

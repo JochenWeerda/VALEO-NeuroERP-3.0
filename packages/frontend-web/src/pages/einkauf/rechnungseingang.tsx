@@ -63,17 +63,34 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
           name: 'bestellungId',
           label: t('crud.entities.purchaseOrder'),
           type: 'lookup',
-          endpoint: '/api/einkauf/bestellungen',
-          displayField: 'nummer',
+          endpoint: '/api/mcp/documents/purchase_order',
+          displayField: 'number',
           valueField: 'id',
-          helpText: t('crud.tooltips.fields.linkedOrder')
+          helpText: t('crud.tooltips.fields.linkedOrder'),
+          onChange: async (value: string) => {
+            // Automatisches Laden von PO-Daten
+            if (value) {
+              try {
+                const response = await fetch(`/api/mcp/documents/purchase_order/${value}`)
+                if (response.ok) {
+                  const po = await response.json()
+                  // Setze Lieferant automatisch
+                  if (po.supplierId) {
+                    // Trigger update for supplierId field
+                  }
+                }
+              } catch (error) {
+                console.error('Fehler beim Laden der Bestellung:', error)
+              }
+            }
+          }
         },
         {
           name: 'wareneingangId',
           label: t('crud.fields.goodsReceipt'),
           type: 'lookup',
-          endpoint: '/api/lager/wareneingaenge',
-          displayField: 'nummer',
+          endpoint: '/api/purchase-workflow/goods-receipts',
+          displayField: 'number',
           valueField: 'id',
           helpText: t('crud.tooltips.fields.linkedGoodsReceipt')
         },
@@ -127,7 +144,48 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
         {
           name: 'steuerSatz',
           label: t('crud.fields.taxRate') + ' (%)',
-          type: 'number'
+          type: 'number',
+          helpText: t('crud.tooltips.fields.taxRate')
+        },
+        {
+          name: 'steuerCode',
+          label: t('crud.fields.taxCode'),
+          type: 'select',
+          options: [
+            { value: 'VAT_19', label: '19% MwSt. (VAT_19)' },
+            { value: 'VAT_7', label: '7% MwSt. (VAT_7)' },
+            { value: 'VAT_0', label: '0% MwSt. (VAT_0)' },
+            { value: 'REVERSE_CHARGE', label: t('crud.fields.reverseCharge') },
+            { value: 'EXEMPT', label: t('crud.fields.exempt') }
+          ],
+          helpText: t('crud.tooltips.fields.taxCode')
+        },
+        {
+          name: 'accountCode',
+          label: t('crud.fields.accountCode'),
+          type: 'lookup',
+          endpoint: '/api/finance/accounts',
+          displayField: 'number',
+          valueField: 'id',
+          helpText: t('crud.tooltips.fields.accountCode')
+        },
+        {
+          name: 'costCenter',
+          label: t('crud.fields.costCenter'),
+          type: 'lookup',
+          endpoint: '/api/finance/cost-centers',
+          displayField: 'name',
+          valueField: 'id',
+          helpText: t('crud.tooltips.fields.costCenter')
+        },
+        {
+          name: 'project',
+          label: t('crud.fields.project'),
+          type: 'lookup',
+          endpoint: '/api/projects',
+          displayField: 'name',
+          valueField: 'id',
+          helpText: t('crud.tooltips.fields.project')
         }
       ]
     },
@@ -235,6 +293,19 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
             }
           ] as any,
           helpText: t('crud.tooltips.fields.deviations')
+        },
+        {
+          name: 'matchStatus',
+          label: t('crud.fields.matchStatus'),
+          type: 'select',
+          readonly: true,
+          options: [
+            { value: 'MATCHED', label: t('status.matched') },
+            { value: 'PARTIAL', label: t('status.partial') },
+            { value: 'UNMATCHED', label: t('status.unmatched') },
+            { value: 'EXCEPTION', label: t('crud.fields.exceptions') }
+          ],
+          helpText: t('crud.tooltips.fields.matchStatus')
         }
       ]
     },
@@ -269,6 +340,16 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
       label: t('crud.actions.post'),
       type: 'primary',
       onClick: () => console.log('Verbuchen clicked')
+    },
+    {
+      key: 'abgleich',
+      label: t('crud.actions.match'),
+      type: 'secondary',
+      onClick: (data: any) => {
+        if (data.id) {
+          navigate(`/einkauf/rechnung-abgleich?invoiceId=${data.id}`)
+        }
+      }
     }
   ],
   api: {

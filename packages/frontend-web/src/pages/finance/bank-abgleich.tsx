@@ -60,9 +60,9 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
           name: 'camtFile',
           label: t('crud.fields.camtFile'),
           type: 'file',
-          accept: '.xml,.camt',
-           } as any, {helpText: t('crud.tooltips.fields.camtFile')
-        },
+          accept: '.xml,.camt,.940,.sta,.csv',
+          helpText: t('crud.tooltips.fields.camtFile')
+        } as any,
         {
           name: 'abgleichsDatum',
           label: t('crud.fields.reconciliationDate'),
@@ -165,6 +165,14 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
           readonly: true,
           step: 0.01,
           helpText: t('crud.tooltips.fields.reconciliationMustBeZero')
+        },
+        {
+          name: 'accountingBalance',
+          label: t('crud.fields.accountingBalance'),
+          type: 'number',
+          readonly: true,
+          step: 0.01,
+          helpText: t('crud.tooltips.fields.accountingBalanceFromLedger')
         }
       ],
       layout: 'grid',
@@ -310,27 +318,95 @@ export default function BankAbgleichPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'import') {
-      // CAMT Import - simuliere Import von Beispieldaten
-      const mockUmsaetze = [
-        { datum: '2025-01-15', betrag: -1250.00, verwendungszweck: 'Rechnung RE-2025-0123 Müller GmbH', gegenkonto: '4400', opReferenz: 'OP-2025-0001', zugeordnet: false },
-        { datum: '2025-01-16', betrag: 3500.00, verwendungszweck: 'Kundenüberweisung K001 Schmidt KG', gegenkonto: '1400', opReferenz: 'OP-2025-0002', zugeordnet: false },
-        { datum: '2025-01-17', betrag: -450.00, verwendungszweck: 'Büromaterial Bürobedarf AG', gegenkonto: '4650', opReferenz: '', zugeordnet: false },
-        { datum: '2025-01-18', betrag: -89.50, verwendungszweck: 'Stromabrechnung Stadtwerke', gegenkonto: '4100', opReferenz: '', zugeordnet: false },
-        { datum: '2025-01-19', betrag: 2200.00, verwendungszweck: 'Verkauf Getreide Bauer e.K.', gegenkonto: '4400', opReferenz: 'OP-2025-0003', zugeordnet: false }
-      ]
+      // Bank Statement Import - use real API
+      if (!formData.camtFile) {
+        toast({
+          variant: 'destructive',
+          title: t('crud.messages.validationError'),
+          description: t('crud.messages.selectFileFirst'),
+        })
+        return
+      }
 
-      formData.zuordnungData = mockUmsaetze
-      formData.startSaldo = 15000.00
-      formData.endSaldo = 16910.50
-      formData.gebuchteUmsaetze = mockUmsaetze.reduce((sum, u) => sum + u.betrag, 0)
-      formData.nichtZugeordnet = mockUmsaetze.length
-      formData.zugeordnet = 0
-      formData.abgleichsDifferenz = Math.abs(formData.startSaldo + formData.gebuchteUmsaetze - formData.endSaldo)
+      if (!formData.kontoId) {
+        toast({
+          variant: 'destructive',
+          title: t('crud.messages.validationError'),
+          description: t('crud.messages.selectBankAccountFirst'),
+        })
+        return
+      }
 
-      toast({
-        title: t('crud.messages.camtFileImported'),
-        description: t('crud.messages.camtFileImportedDesc', { count: mockUmsaetze.length }),
-      })
+      try {
+        // Determine file format from extension
+        const fileName = formData.camtFile.name || ''
+        let format = 'CSV'
+        if (fileName.endsWith('.xml') || fileName.endsWith('.camt')) {
+          format = 'CAMT'
+        } else if (fileName.endsWith('.940') || fileName.endsWith('.sta')) {
+          format = 'MT940'
+        }
+
+        // Create FormData for file upload
+        const uploadFormData = new FormData()
+        uploadFormData.append('file', formData.camtFile)
+
+        // Call import API
+        const response = await fetch(
+          `/api/v1/finance/bank-statements/import?format=${format}&bank_account_id=${formData.kontoId}&tenant_id=system`,
+          {
+            method: 'POST',
+            body: uploadFormData,
+          }
+        )
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.detail || t('crud.messages.importError'))
+        }
+
+        const result = await response.json()
+
+        // Transform API response to form data format
+        const umsaetze = result.lines.map((line: any) => ({
+          datum: line.booking_date,
+          betrag: parseFloat(line.amount),
+          verwendungszweck: line.remittance_info || line.reference || '',
+          gegenkonto: '', // Will be assigned during matching
+          opReferenz: line.reference || '',
+          zugeordnet: line.status === 'MATCHED',
+          creditor_name: line.creditor_name,
+          debtor_name: line.debtor_name
+        }))
+
+        formData.zuordnungData = umsaetze
+        formData.startSaldo = parseFloat(result.opening_balance)
+        formData.endSaldo = parseFloat(result.closing_balance)
+        formData.gebuchteUmsaetze = umsaetze.reduce((sum: number, u: any) => sum + u.betrag, 0)
+        formData.nichtZugeordnet = umsaetze.filter((u: any) => !u.zugeordnet).length
+        formData.zugeordnet = umsaetze.filter((u: any) => u.zugeordnet).length
+        formData.abgleichsDifferenz = Math.abs(formData.startSaldo + formData.gebuchteUmsaetze - formData.endSaldo)
+        formData.statementId = result.statement_id
+
+        toast({
+          title: t('crud.messages.camtFileImported'),
+          description: t('crud.messages.camtFileImportedDesc', { count: result.imported_lines }),
+        })
+
+        if (result.import_errors && result.import_errors.length > 0) {
+          toast({
+            variant: 'destructive',
+            title: t('crud.messages.importWarnings'),
+            description: `${result.error_lines} ${t('crud.messages.linesWithErrors')}`,
+          })
+        }
+      } catch (error: any) {
+        toast({
+          variant: 'destructive',
+          title: t('crud.messages.importError'),
+          description: error.message || t('crud.messages.importFailed'),
+        })
+      }
     } else if (action === 'auto-assign') {
       // Auto-Zuordnung - wende einfache Regeln an
       if (!formData.zuordnungData || formData.zuordnungData.length === 0) {
@@ -377,10 +453,33 @@ export default function BankAbgleichPage(): JSX.Element {
         description: t('crud.messages.autoAssignCompletedDesc', { count: zugeordnetCount }),
       })
     } else if (action === 'validate') {
-      const isValid = validate(formData)
-      if (isValid.isValid) {
-        const differenz = Math.abs(formData.abgleichsDifferenz || 0)
-        if (differenz < 0.01) {
+      // Validate reconciliation using backend API
+      if (!formData.statementId || !formData.kontoId) {
+        toast({
+          variant: 'destructive',
+          title: t('crud.messages.validationError'),
+          description: t('crud.messages.importCamtFileFirst'),
+        })
+        return
+      }
+
+      try {
+        const response = await fetch(
+          `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=system&auto_book=false`
+        )
+
+        if (!response.ok) {
+          throw new Error(t('crud.messages.reconciliationError'))
+        }
+
+        const result = await response.json()
+
+        // Update form data with reconciliation results
+        formData.abgleichsDifferenz = Math.abs(result.balance_comparison.difference)
+        formData.zugeordnet = result.line_counts?.matched || 0
+        formData.nichtZugeordnet = result.line_counts?.unmatched || 0
+
+        if (result.balance_comparison.is_balanced && result.total_differences === 0) {
           toast({
             title: t('crud.messages.validationSuccess'),
             description: t('crud.messages.reconciliationBalanced'),
@@ -389,11 +488,23 @@ export default function BankAbgleichPage(): JSX.Element {
           toast({
             variant: 'destructive',
             title: t('crud.messages.reconciliationNotBalanced'),
-            description: t('crud.messages.reconciliationNotBalancedDesc', { difference: differenz.toFixed(2) }),
+            description: t('crud.messages.reconciliationNotBalancedDesc', { 
+              difference: result.balance_comparison.difference.toFixed(2) 
+            }),
           })
         }
-      } else {
-        showValidationToast(isValid.errors)
+
+        // Show differences if any
+        if (result.differences && result.differences.length > 0) {
+          formData.differences = result.differences
+          formData.bookingSuggestions = result.booking_suggestions
+        }
+      } catch (error: any) {
+        toast({
+          variant: 'destructive',
+          title: t('crud.messages.reconciliationError'),
+          description: error.message || t('crud.messages.networkError'),
+        })
       }
     } else if (action === 'book') {
       const isValid = validate(formData)

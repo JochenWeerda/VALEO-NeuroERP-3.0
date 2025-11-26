@@ -271,6 +271,7 @@ class Account(Base):
     balance = Column(DECIMAL(15, 2), default=0)
     last_transaction_date = Column(DateTime(timezone=True), nullable=True)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    parent_account_id = Column(String, ForeignKey("domain_erp.finance_accounts.id"), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

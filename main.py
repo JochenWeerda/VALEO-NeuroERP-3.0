@@ -104,7 +104,17 @@ app = FastAPI(
 )
 
 # Set up CORS
-if settings.BACKEND_CORS_ORIGINS:
+if settings.DEBUG:
+    # In dev: allow all origins to avoid local CORS blocks between 3000/8000
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_origin_regex=".*",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+elif settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
@@ -351,5 +361,4 @@ if __name__ == "__main__":
         reload=settings.DEBUG,
         log_level="info"
     )
-
 

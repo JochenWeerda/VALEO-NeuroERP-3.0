@@ -1,0 +1,68 @@
+Capability_ID;Capability;Subcapability;Priorität(MUSS/SOLL/KANN);NeuroERP_Status(Yes/Partial/No);Evidence_Screenshot_IDs;Evidence_Flow_IDs;Gap_Beschreibung;Loesungstyp(A/B/C/D);Prioritaet(1-5);Owner;Notes;Baseline_ERP
+FIBU-GL-01;Hauptbuch (GL);Kontenplan & Kontenstamm;MUSS;Partial;20251124_095102_03_finance_module.png;finance_mission_2025-11-24T08-51-19.344194;Kontenplan-Seite vorhanden (chart-of-accounts.tsx), aber Hierarchie/Hierarchieauswertung unklar;D;2;Frontend;Seite vorhanden, Funktionalität prüfen;Odoo-ähnlich
+FIBU-GL-02;Hauptbuch (GL);Belegprinzip & Nummernkreise;MUSS;Partial;;;Nummernkreise in documents/router.py vorhanden, aber Belegprinzip/Storno-Dialog unklar;C;2;Backend;Prüfen ob Storno/Korrekturbelege vollständig;Basic
+FIBU-GL-03;Hauptbuch (GL);Journalbuchungen (manuell);MUSS;Yes;20251124_095108_05_create_invoice_form.png;finance_mission_2025-11-24T08-51-19.344194;Buchungserfassung.tsx vorhanden, API journal_entries.py vorhanden, Validierung (Saldo 0) vorhanden;A;1;Backend;Funktional, aber UI/UX prüfen;Odoo-ähnlich
+FIBU-GL-04;Hauptbuch (GL);Sammel-/Massenbuchungen;SOLL;No;;;Kein Import-Screen für CSV/Excel/API gefunden;C;3;Backend;Neues Feature erforderlich;Missing
+FIBU-GL-05;Hauptbuch (GL);Periodensteuerung;MUSS;No;;;Keine Perioden-Admin-Screen gefunden, keine Sperrlogik;C;2;Backend;Kritisch für GoBD-Compliance;Missing
+FIBU-GL-06;Hauptbuch (GL);Fremdwährung & Wechselkurse;SOLL;No;;;Keine Währungssetup/FX-Buchung gefunden;C;3;Backend;Nice-to-have;Missing
+FIBU-GL-07;Hauptbuch (GL);Automatische Buchungsschemata;SOLL;No;;;Keine Schema-Setup/Auto-Post gefunden;C;3;Backend;Nice-to-have;Missing
+FIBU-GL-08;Hauptbuch (GL);Kostenrechnung-Integrationspunkte;KANN;No;;;Keine Dimensionen (Kostenstellen/Kostenträger) gefunden;C;4;Backend;Optional;Missing
+FIBU-AR-01;Debitoren (AR);Debitorenstamm;MUSS;Partial;20251124_095105_04_invoices_list.png;finance_mission_2025-11-24T08-51-19.344194;debitoren-liste.tsx vorhanden, aber Stammdaten/Adressen/USt-ID/Kreditlimit unklar;D;2;Frontend;Seite vorhanden, Vollständigkeit prüfen;Basic
+FIBU-AR-02;Debitoren (AR);Ausgangsrechnungen;MUSS;Partial;20251124_095105_04_invoices_list.png;20251124_095108_05_create_invoice_form.png;finance_mission_2025-11-24T08-51-19.344194;Invoices-Liste und Create Invoice vorhanden, API finance_invoices.py erstellt, aber GL-Buchung/OP-Erzeugung unklar;B;1;Backend;Formular vorhanden, Backend-Integration prüfen;Odoo-ähnlich
+FIBU-AR-03;Debitoren (AR);Zahlungseingänge & Matching;MUSS;No;;;Kein Payment-Match-UI gefunden, keine Bankimport-Funktionalität;C;1;Backend;Kritisch für OP-Verwaltung;Missing
+FIBU-AR-04;Debitoren (AR);Mahnwesen / Dunning;SOLL;Partial;20251124_095102_03_finance_module.png;;mahnwesen.tsx und dunning-editor.tsx vorhanden, aber Mahnstufen/Gebühren/Sperrlogik unklar;D;3;Frontend;Seite vorhanden, Funktionalität prüfen;Basic
+FIBU-AR-05;Debitoren (AR);OP-Verwaltung & Ausgleich;MUSS;Partial;20251124_095102_03_finance_module.png;;op-debitoren.tsx vorhanden, aber Ausgleich/Verrechnung/Audit-Trail unklar;D;2;Frontend;Seite vorhanden, Funktionalität prüfen;Basic
+FIBU-AP-01;Kreditoren (AP);Kreditorenstamm;MUSS;Partial;20251124_095102_03_finance_module.png;;kreditoren-stamm.tsx vorhanden, aber Stammdaten/Bankdaten/IBAN-Validierung unklar;D;2;Frontend;Seite vorhanden, Vollständigkeit prüfen;Basic
+FIBU-AP-02;Kreditoren (AP);Eingangsrechnungen;MUSS;No;;;Keine Eingangsrechnungen-Seite/API gefunden;C;1;Backend;Kritisch für AP-Prozess;Missing
+FIBU-AP-03;Kreditoren (AP);Prüf-/Freigabeworkflow;SOLL;No;;;Kein Workflow-Setup/UI gefunden;C;3;Backend;Nice-to-have;Missing
+FIBU-AP-04;Kreditoren (AP);Zahlungsläufe / SEPA;MUSS;Partial;20251124_095102_03_finance_module.png;;zahlungslauf-kreditoren.tsx vorhanden, aber SEPA XML Export/Status/Rückläufer unklar;D;2;Frontend;Seite vorhanden, SEPA-Export prüfen;Basic
+FIBU-AP-05;Kreditoren (AP);OP-Verwaltung & Ausgleich;MUSS;No;;;Keine OP-Liste für Kreditoren gefunden;C;2;Backend;Erforderlich für AP;Missing
+FIBU-BNK-01;Bank/Cash;Bankkontenstamm;MUSS;Partial;;;Bankkonten in database/schema.sql vorhanden, aber Bankstamm-UI unklar;D;2;Frontend;Schema vorhanden, UI prüfen;Basic
+FIBU-BNK-02;Bank/Cash;Kontoauszugsimport;MUSS;Partial;20251124_095102_03_finance_module.png;;bank-abgleich.tsx vorhanden, aber CAMT/MT940/CSV-Import unklar;D;2;Frontend;Seite vorhanden, Import-Formate prüfen;Basic
+FIBU-BNK-03;Bank/Cash;Automatisches Matching;SOLL;No;;;Keine Match-UI/regelbasiertes Matching gefunden;C;3;Backend;Nice-to-have;Missing
+FIBU-BNK-04;Bank/Cash;Bankabstimmung;MUSS;Partial;20251124_095102_03_finance_module.png;;bank-abgleich.tsx vorhanden, aber Saldoabgleich/Differenzliste unklar;D;2;Frontend;Seite vorhanden, Funktionalität prüfen;Basic
+FIBU-FA-01;Anlagen (FA);Anlageklassen & AfA;SOLL;No;;;Keine Anlageklassen-Setup gefunden;C;4;Backend;Optional;Missing
+FIBU-FA-02;Anlagen (FA);Zugänge;SOLL;No;;;Kein FA-Create-Flow gefunden;C;4;Backend;Optional;Missing
+FIBU-FA-03;Anlagen (FA);Abschreibungslauf;SOLL;No;;;Kein Depreciation-Run gefunden;C;4;Backend;Optional;Missing
+FIBU-FA-04;Anlagen (FA);Abgänge & Umbuchungen;SOLL;No;;;Kein Disposal-Flow gefunden;C;4;Backend;Optional;Missing
+FIBU-FA-05;Anlagen (FA);Anlagenspiegel;SOLL;No;;;Kein Report gefunden;C;4;Backend;Optional;Missing
+FIBU-TAX-01;Steuern/Compliance;Steuerschlüssel-System;MUSS;Partial;20251124_095102_03_finance_module.png;;steuerschluessel.tsx vorhanden, aber Steuerarten/Sätze/Länderlogik/Reverse-Charge unklar;D;2;Frontend;Seite vorhanden, Vollständigkeit prüfen;Basic
+FIBU-TAX-02;Steuern/Compliance;USt-Voranmeldung / ZM / OSS;SOLL;Partial;20251124_095102_03_finance_module.png;;ustva.tsx vorhanden, aber Export Behördenformat (ELSTER) unklar;D;3;Frontend;Seite vorhanden, Export-Format prüfen;Basic
+FIBU-TAX-03;Steuern/Compliance;E-Rechnung (ZUGFeRD/XRechnung);SOLL;No;;;Keine E-Invoice-UI/Import/Export gefunden;C;3;Backend;Nice-to-have;Missing
+FIBU-COMP-01;Steuern/Compliance;GoBD / Audit Trail;MUSS;Partial;;;GoBDAuditTrail in services/finance vorhanden, aber Audit-View/Historie/Logs unklar;B;1;Backend;Backend vorhanden, UI fehlt;Basic
+FIBU-CLS-01;Abschluss & Kontrolle;Abschlusschecklisten;SOLL;No;;;Keine Closing-Checklist gefunden;C;3;Backend;Nice-to-have;Missing
+FIBU-CLS-02;Abschluss & Kontrolle;Nebenbuch-Abstimmung;MUSS;No;;;Keine Reconciliation-Reports gefunden;C;2;Backend;Erforderlich für Abschluss;Missing
+FIBU-CLS-03;Abschluss & Kontrolle;Abgrenzungen/Rückstellungen;SOLL;No;;;Kein Accruals-Flow gefunden;C;3;Backend;Nice-to-have;Missing
+FIBU-REP-01;Reporting;Standardreports (Bilanz/GuV/BWA etc.);MUSS;Partial;20251124_095059_02_dashboard.png;finance_mission_2025-11-24T08-51-19.344194;Dashboard vorhanden, aber Bilanz/GuV/BWA/Saldenliste/Journal/OP-Listen unklar;D;2;Frontend;Dashboard vorhanden, Reports prüfen;Basic
+FIBU-REP-02;Reporting;Drilldown & Analyse;SOLL;No;;;Kein Drilldown-Trace gefunden;C;3;Backend;Nice-to-have;Missing
+FIBU-IC-01;Intercompany;IC-Partner & Konten;KANN;No;;;Kein IC-Setup gefunden;C;5;Backend;Optional;Missing
+FIBU-IC-02;Intercompany;Verrechnung/Eliminierung;KANN;No;;;Keine IC-Recon-Reports gefunden;C;5;Backend;Optional;Missing
+PROC-SUP-01;Supplier Lifecycle;Lieferantenstamm;MUSS;Partial;;;lieferanten-liste.tsx und lieferanten-stamm.tsx vorhanden, aber Vollständigkeit prüfen: Adressen/Ansprechpartner vorhanden, Bankdaten/Steuerinfos/Gruppen/Sperren/Archivieren unklar;D;2;Frontend;Seiten vorhanden: packages/frontend-web/src/pages/einkauf/lieferanten-liste.tsx, lieferanten-stamm.tsx;Basic
+PROC-SUP-02;Supplier Lifecycle;Lieferantenbewertung;SOLL;No;;;Keine Bewertungs-UI/Score-System gefunden, keine Kriterien (Qualität, Termintreue, Preis, Service);C;3;Backend;Nice-to-have;Missing
+PROC-SUP-03;Supplier Lifecycle;Compliance/Dokumente;SOLL;No;;;Keine Dokumentenverwaltung für Lieferanten gefunden (Zertifikate, Rahmenverträge, NDA, ESG);C;3;Backend;Nice-to-have;Missing
+PROC-REQ-01;Requisition-to-Order;Bedarfsmeldung (PR);MUSS;Partial;;;anfrage-stamm.tsx und anfragen-liste.tsx vorhanden, Status-Workflow (ENTWURF → FREIGEGEBEN → ANGEBOTSPHASE) vorhanden, aber Übergang zu Bestellung prüfen;D;1;Frontend;Seiten vorhanden: packages/frontend-web/src/pages/einkauf/anfrage-stamm.tsx, anfragen-liste.tsx;Basic
+PROC-REQ-02;Requisition-to-Order;Bedarfsgenehmigung;MUSS;Partial;;;Workflow-System vorhanden: workflow_service.py, useWorkflow.ts, purchase-order-workflow-service.ts mit Auto-Approval-Threshold, aber Approval-Logik nach Betrag/Warengruppe/Kostenstelle prüfen;B;1;Backend;Backend vorhanden: app/services/workflow_service.py, packages/purchase-domain/src/domain/services/purchase-order-workflow-service.ts;Basic
+PROC-REQ-03;Requisition-to-Order;Katalog / Guided Buying;KANN;No;;;Kein Katalog-System gefunden, keine interne Kataloge/Punchout;C;4;Backend;Optional;Missing
+PROC-RFQ-01;Sourcing/RFQ;Anfrage / RFQ;SOLL;Partial;;;anfragen-liste.tsx und anfrage-stamm.tsx vorhanden, aber RFQ-Versand an Lieferanten prüfen;D;2;Frontend;Seiten vorhanden, RFQ-Versand prüfen;Basic
+PROC-RFQ-02;Sourcing/RFQ;Lieferantenangebote / Bids;SOLL;No;;;Keine Bid-Erfassung gefunden, keine Angebots-Import-Funktionalität;C;3;Backend;Nice-to-have;Missing
+PROC-RFQ-03;Sourcing/RFQ;Angebotsvergleich / Award;SOLL;No;;;Keine Vergleichsmatrix gefunden (Preis/Leadtime/Score), keine Entscheidungsdoku;C;3;Backend;Nice-to-have;Missing
+PROC-CTR-01;Sourcing/RFQ;Rahmenverträge;SOLL;Partial;;;contracts-v2.tsx vorhanden, aber Abrufe gegen Vertrag prüfen;D;2;Frontend;Seite vorhanden, Abruf-Funktionalität prüfen;Basic
+PROC-PO-01;Purchase Orders;Bestellung erstellen;MUSS;Partial;;;bestellung-anlegen.tsx, bestellungen-liste.tsx, bestellung-stamm.tsx vorhanden, API: /api/mcp/documents/purchase_order, aber Vollständigkeit prüfen (Incoterms, Referenzierung zu Bedarf/RFQ/Vertrag);D;1;Frontend;Seiten vorhanden: packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx, bestellungen-liste.tsx, bestellung-stamm.tsx;Basic
+PROC-PO-02;Purchase Orders;PO-Änderung & Storno;MUSS;No;;;Keine Change-Log/Versionierung gefunden, keine Genehmigungslogik bei Änderungen;C;2;Backend;Erforderlich für Audit;Missing
+PROC-PO-03;Purchase Orders;PO-Kommunikation;SOLL;Partial;;;Print-Funktion vorhanden, aber Email/Portal-Versand prüfen;D;3;Frontend;Print vorhanden, Email/Portal prüfen;Basic
+PROC-PO-04;Purchase Orders;Bestellabrufe / Lieferpläne;KANN;No;;;Keine Abruf-Funktionalität gefunden, keine Lieferplan/Release-Logik;C;4;Backend;Optional;Missing
+PROC-GR-01;Receipt-to-Verify;Wareneingang;MUSS;No;;;Keine GR-Funktionalität gefunden, keine Buchung gegen PO (Teil-/Restmengen, Backorder);C;1;Backend;Kritisch für Source-to-Pay;Missing
+PROC-GR-02;Receipt-to-Verify;Retouren an Lieferant;SOLL;No;;;Keine Retouren-Funktionalität gefunden, keine Rücksendung/Gutschriftbezug;C;3;Backend;Nice-to-have;Missing
+PROC-SE-01;Receipt-to-Verify;Service Entry Sheet (SES);SOLL;No;;;Keine SES-Funktionalität gefunden, keine Leistungserfassung/Prüfung/Freigabe;C;3;Backend;Nice-to-have;Missing
+PROC-IV-01;Invoice-to-Pay;Eingangsrechnung;MUSS;Partial;;;rechnungseingang.tsx und rechnungseingaenge-liste.tsx vorhanden, Backend API: app/api/v1/endpoints/ap_invoices.py, aber PDF/OCR/API-Import fehlt, Steuer/Kontierung/Anlagebezug prüfen;D;1;Frontend;Seiten vorhanden: packages/frontend-web/src/pages/einkauf/rechnungseingang.tsx, rechnungseingaenge-liste.tsx, Backend: ap_invoices.py;Basic
+PROC-IV-02;Invoice-to-Pay;2/3-Wege-Abgleich;MUSS;No;;;Keine Abgleich-Funktionalität gefunden (Menge/Preis/Toleranzen), keine Blockierung bei Abweichungen;C;1;Backend;Kritisch für AP;Missing
+PROC-IV-03;Invoice-to-Pay;Rechnungsfreigabe;MUSS;Partial;;;Workflow vorhanden (workflow_service.py), aber Approval-Logik nach Toleranzen/Betrag/Warengruppe prüfen;B;1;Backend;Workflow vorhanden, Approval-Regeln prüfen;Basic
+PROC-PAY-01;Invoice-to-Pay;Zahlungsläufe;MUSS;Partial;;;zahlungslauf-kreditoren.tsx vorhanden, aber SEPA-Export/Status/Skonto prüfen;D;1;Frontend;Seite vorhanden, SEPA-Export prüfen;Basic
+PROC-PAY-02;Invoice-to-Pay;Gutschriften/Belastungen;SOLL;No;;;Keine Credit/Debit-Memo-Funktionalität gefunden, keine Verrechnung;C;3;Backend;Nice-to-have;Missing
+PROC-REP-01;Reporting;Standardreports Einkauf;MUSS;No;;;Keine Procurement-Reports gefunden (Offene Bestellungen, Spend-Analyse, Lieferantenperformance);C;2;Backend;Erforderlich;Missing
+PROC-REP-02;Reporting;Belegkette / Audit Trail;SOLL;No;;;Keine Drilldown-Funktionalität gefunden (Bedarf → RFQ → PO → GR/SES → IV → Pay);C;3;Backend;Nice-to-have;Missing
+PROC-AUTH-01;Rollen/Workflows;Rollenmodell Einkauf;MUSS;Partial;;;RBAC vorhanden, aber Rollen prüfen (Bedarfsersteller, Genehmiger, Einkäufer, Wareneingang, AP, Admin);B;1;Backend;RBAC vorhanden, Rollen-Definition prüfen;Basic
+PROC-AUTH-02;Rollen/Workflows;Workflow-Regeln;MUSS;Partial;;;Workflow-System vorhanden (workflow_service.py, purchase-order-workflow-service.ts), aber Regeln prüfen (Freigaben, Toleranzen, Eskalation);B;1;Backend;Workflow vorhanden, Regeln prüfen;Basic
+PROC-INT-01;Integrationen;API / Import / Export;MUSS;Partial;;;API vorhanden (/api/mcp/documents/purchase_order), aber Import/Export (CSV/Excel/API/Webhooks) prüfen;B;2;Backend;API vorhanden, Import/Export prüfen;Basic
+PROC-INT-02;Integrationen;EDI / Lieferantenportal;KANN;No;;;Keine EDI-Funktionalität gefunden (ORDERS, ORDRSP, DESADV, INVOIC), kein Portal-Self-Service;C;4;Backend;Optional;Missing
+PROC-INT-03;Integrationen;Katalog / Punchout;KANN;No;;;Keine Punchout-Funktionalität gefunden (OCI/cXML), kein Preis-Sync;C;5;Backend;Optional;Missing

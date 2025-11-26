@@ -1,11 +1,19 @@
-import { type PropsWithChildren, createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { type PropsWithChildren, createContext, useContext, useEffect, useState } from 'react'
 import { defaultFlags, loadEnvFlags, loadRemoteFlags } from '@/shared/config/featureFlags'
 import type { FeatureFlags, FeatureKey } from '@/shared/config/featureFlags.types'
 
 const FeatureFlagContext = createContext<FeatureFlags>(defaultFlags)
 
+// Initialisiere Flags außerhalb der Komponente, um Hook-Probleme zu vermeiden
+let initialFlags: FeatureFlags
+try {
+  initialFlags = { ...defaultFlags, ...loadEnvFlags() }
+} catch (error) {
+  console.warn('Failed to load env flags:', error)
+  initialFlags = defaultFlags
+}
+
 export function FeatureFlagProvider({ children }: PropsWithChildren): JSX.Element {
-  const initialFlags = useMemo<FeatureFlags>(() => ({ ...defaultFlags, ...loadEnvFlags() }), [])
   const [flags, setFlags] = useState<FeatureFlags>(initialFlags)
 
   useEffect(() => {

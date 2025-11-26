@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react'
+import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 
 type WorkflowExecution = {
   id: string
@@ -58,6 +60,7 @@ const mockExecutions: WorkflowExecution[] = [
 ]
 
 export default function WorkflowMonitoringPage(): JSX.Element {
+  const { t } = useTranslation()
   const [executions] = useState<WorkflowExecution[]>(mockExecutions)
 
   const getStatusIcon = (status: string) => {
@@ -82,7 +85,9 @@ export default function WorkflowMonitoringPage(): JSX.Element {
       RUNNING: 'secondary' as const,
       PENDING: 'secondary' as const
     }
-    return <Badge variant={variants[status as keyof typeof variants] || 'secondary'}>{status}</Badge>
+    const statusKey = status.toLowerCase()
+    const translated = getStatusLabel(t, statusKey, status)
+    return <Badge variant={variants[status as keyof typeof variants] || 'secondary'}>{translated}</Badge>
   }
 
   const columns = [

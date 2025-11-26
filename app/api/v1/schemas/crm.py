@@ -27,6 +27,13 @@ class CustomerBase(BaseSchema):
     country: Optional[str] = Field(None, max_length=50, description="Country")
     industry: Optional[str] = Field(None, max_length=50, description="Industry sector")
     website: Optional[str] = Field(None, max_length=100, description="Company website")
+    # Sales-spezifische Felder (nur neue)
+    price_group: Optional[str] = Field(None, max_length=50, description="Price group (standard, premium, wholesale, retail)")
+    tax_category: Optional[str] = Field(None, max_length=50, description="Tax category (standard, reduced, zero, reverse_charge, exempt)")
+    # Bestehende Felder werden über Mapping verwendet:
+    # customer_segment → analytics.segment (Frontend)
+    # industry → profile.industry_code (Frontend)
+    # region → region (crm-core)
 
     @field_validator("name", mode="before")
     @classmethod
@@ -55,6 +62,9 @@ class CustomerUpdate(BaseSchema):
     country: Optional[str] = Field(None, max_length=50, description="Country")
     industry: Optional[str] = Field(None, max_length=50, description="Industry sector")
     website: Optional[str] = Field(None, max_length=100, description="Company website")
+    # Sales-spezifische Felder (nur neue)
+    price_group: Optional[str] = Field(None, max_length=50, description="Price group")
+    tax_category: Optional[str] = Field(None, max_length=50, description="Tax category")
     is_active: Optional[bool] = Field(None, description="Whether customer is active")
 
 
@@ -65,6 +75,9 @@ class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
     credit_limit: Optional[Decimal] = Field(None, ge=0, description="Credit limit")
     payment_terms: Optional[int] = Field(None, ge=0, description="Payment terms in days")
     tax_id: Optional[str] = Field(None, max_length=50, description="Tax identification number")
+    # Sales-spezifische Felder (nur neue)
+    price_group: Optional[str] = Field(None, max_length=50, description="Price group")
+    tax_category: Optional[str] = Field(None, max_length=50, description="Tax category")
 
 
 # Lead Schemas

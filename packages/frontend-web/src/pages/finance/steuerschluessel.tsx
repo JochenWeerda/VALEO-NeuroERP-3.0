@@ -1,169 +1,224 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
+import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { z } from 'zod'
 
-// Zod-Schema für Steuerschlüssel
-const steuerschluesselSchema = z.object({
-  code: z.string().regex(/^\d{1,2}$/, "Code muss 1-2-stellig sein"),
-  bezeichnung: z.string().min(1, "Bezeichnung ist erforderlich"),
-  steuersatz: z.number().min(0).max(100, "Steuersatz muss zwischen 0-100% liegen"),
-  ustvaPosition: z.string().min(1, "UStVA-Position ist erforderlich"),
-  ustvaBezeichnung: z.string().min(1, "UStVA-Bezeichnung ist erforderlich"),
-  intracom: z.boolean().default(false),
-  export: z.boolean().default(false),
-  reverseCharge: z.boolean().default(false),
-  gueltigVon: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Datum muss YYYY-MM-DD Format haben"),
-  gueltigBis: z.string().optional(),
-  notizen: z.string().optional()
-})
-
-// Konfiguration für Steuerschlüssel ObjectPage
-const steuerschluesselConfig: MaskConfig = {
-  title: 'Steuerschlüssel & MwSt-Sätze',
-  subtitle: 'Verwaltung der Steuerschlüssel und Umsatzsteuersätze',
-  type: 'object-page',
-  tabs: [
-    {
-      key: 'allgemein',
-      label: 'Allgemein',
-      fields: [
-        {
-          name: 'code',
-          label: 'Steuerschlüssel',
-          type: 'text',
-          required: true,
-          placeholder: 'z.B. 1, 9, 10',
-          maxLength: 2,
-          helpText: 'Offizieller Steuerschlüssel nach deutschem Steuerrecht'
-        },
-        {
-          name: 'bezeichnung',
-          label: 'Bezeichnung',
-          type: 'text',
-          required: true,
-          placeholder: 'z.B. Umsatzsteuer 19%'
-        },
-        {
-          name: 'steuersatz',
-          label: 'Steuersatz (%)',
-          type: 'number',
-          required: true,
-          min: 0,
-          max: 100,
-          step: 0.01,
-          placeholder: '19.00'
-        },
-        {
-          name: 'gueltigVon',
-          label: 'Gültig von',
-          type: 'date',
-          required: true
-        },
-        {
-          name: 'gueltigBis',
-          label: 'Gültig bis',
-          type: 'date',
-          helpText: 'Leer lassen für unbefristete Gültigkeit'
-        }
-      ],
-      layout: 'grid',
-      columns: 2
-    },
-    {
-      key: 'ustva',
-      label: 'UStVA-Mapping',
-      fields: [
-        {
-          name: 'ustvaPosition',
-          label: 'UStVA-Position',
-          type: 'text',
-          required: true,
-          placeholder: 'z.B. 66, 81, 35, 77',
-          helpText: 'Position in der Umsatzsteuervoranmeldung'
-        },
-        {
-          name: 'ustvaBezeichnung',
-          label: 'UStVA-Bezeichnung',
-          type: 'text',
-          required: true,
-          placeholder: 'z.B. Steuerpflichtige Umsätze 19%'
-        }
-      ]
-    },
-    {
-      key: 'sonderfaelle',
-      label: 'Sonderfälle',
-      fields: [
-        {
-          name: 'intracom',
-          label: 'Intracommunity-Lieferung',
-          type: 'boolean',
-          helpText: 'Für innergemeinschaftliche Lieferungen (EU)'
-        },
-        {
-          name: 'export',
-          label: 'Ausfuhr/Export',
-          type: 'boolean',
-          helpText: 'Für Ausfuhren außerhalb der EU'
-        },
-        {
-          name: 'reverseCharge',
-          label: 'Reverse Charge',
-          type: 'boolean',
-          helpText: 'Umkehrung der Steuerschuldnerschaft'
-        }
-      ]
-    },
-    {
-      key: 'notizen',
-      label: 'Notizen',
-      fields: [
-        {
-          name: 'notizen',
-          label: 'Interne Notizen',
-          type: 'textarea',
-          placeholder: 'Zusätzliche Informationen zum Steuerschlüssel...'
-        }
-      ]
-    }
-  ],
-  actions: [
-    {
-      key: 'validate',
-      label: 'Validieren',
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'save',
-      label: 'Speichern',
-      type: 'primary'
-    , onClick: () => {} },
-    {
-      key: 'ustva-export',
-      label: 'UStVA Export',
-      type: 'secondary'
-    , onClick: () => {} }
-  ],
-  api: {
-    baseUrl: '/api/finance/steuerschluessel',
-    endpoints: {
-      list: '/api/finance/steuerschluessel',
-      get: '/api/finance/steuerschluessel/{id}',
-      create: '/api/finance/steuerschluessel',
-      update: '/api/finance/steuerschluessel/{id}',
-      delete: '/api/finance/steuerschluessel/{id}'
-    }
-  } as any,
-  validation: steuerschluesselSchema,
-  permissions: ['fibu.read', 'fibu.write']
-}
+const entityType = 'taxKey'
 
 export default function SteuerschluesselPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Steuerschlüssel')
+
+  // Zod-Schema für Steuerschlüssel
+  const steuerschluesselSchema = z.object({
+    code: z.string().regex(/^\d{1,2}$/, t('crud.validation.taxKeyCodeFormat')),
+    bezeichnung: z.string().min(1, t('crud.validation.required', { field: t('crud.fields.description') })),
+    steuersatz: z.number().min(0).max(100, t('crud.validation.taxRateRange')),
+    ustvaPosition: z.string().min(1, t('crud.validation.required', { field: t('crud.fields.ustvaPosition') })),
+    ustvaBezeichnung: z.string().min(1, t('crud.validation.required', { field: t('crud.fields.ustvaBezeichnung') })),
+    intracom: z.boolean().default(false),
+    export: z.boolean().default(false),
+    reverseCharge: z.boolean().default(false),
+    gueltigVon: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.validation.dateFormat')),
+    gueltigBis: z.string().optional(),
+    notizen: z.string().optional(),
+    debitAccount: z.string().optional(),
+    creditAccount: z.string().optional(),
+    country: z.string().default('DE'),
+    region: z.string().optional()
+  })
+
+  // Konfiguration für Steuerschlüssel ObjectPage
+  const steuerschluesselConfig: MaskConfig = {
+    title: entityTypeLabel,
+    subtitle: t('crud.tooltips.taxKeyManagement'),
+    type: 'object-page',
+    tabs: [
+      {
+        key: 'allgemein',
+        label: t('crud.detail.basicInfo'),
+        fields: [
+          {
+            name: 'code',
+            label: t('crud.fields.taxKeyCode'),
+            type: 'text',
+            required: true,
+            placeholder: t('crud.placeholders.taxKeyCode'),
+            maxLength: 2,
+            helpText: t('crud.tooltips.fields.taxKeyCode')
+          },
+          {
+            name: 'bezeichnung',
+            label: t('crud.fields.description'),
+            type: 'text',
+            required: true,
+            placeholder: t('crud.placeholders.taxKeyDescription')
+          },
+          {
+            name: 'steuersatz',
+            label: t('crud.fields.taxRate'),
+            type: 'number',
+            required: true,
+            min: 0,
+            max: 100,
+            step: 0.01,
+            placeholder: '19.00',
+            helpText: t('crud.tooltips.fields.taxRate')
+          },
+          {
+            name: 'country',
+            label: t('crud.fields.country'),
+            type: 'select',
+            required: true,
+            options: [
+              { value: 'DE', label: t('crud.fields.countryDE') },
+              { value: 'AT', label: t('crud.fields.countryAT') },
+              { value: 'CH', label: t('crud.fields.countryCH') },
+              { value: 'NL', label: t('crud.fields.countryNL') },
+              { value: 'FR', label: t('crud.fields.countryFR') }
+            ],
+            helpText: t('crud.tooltips.fields.taxKeyCountry')
+          },
+          {
+            name: 'region',
+            label: t('crud.fields.region'),
+            type: 'text',
+            placeholder: t('crud.placeholders.region'),
+            helpText: t('crud.tooltips.fields.region')
+          },
+          {
+            name: 'gueltigVon',
+            label: t('crud.fields.validFrom'),
+            type: 'date',
+            required: true
+          },
+          {
+            name: 'gueltigBis',
+            label: t('crud.fields.validUntil'),
+            type: 'date',
+            helpText: t('crud.tooltips.fields.validUntil')
+          }
+        ],
+        layout: 'grid',
+        columns: 2
+      },
+      {
+        key: 'ustva',
+        label: t('crud.fields.ustvaMapping'),
+        fields: [
+          {
+            name: 'ustvaPosition',
+            label: t('crud.fields.ustvaPosition'),
+            type: 'text',
+            required: true,
+            placeholder: t('crud.placeholders.ustvaPosition'),
+            helpText: t('crud.tooltips.fields.ustvaPosition')
+          },
+          {
+            name: 'ustvaBezeichnung',
+            label: t('crud.fields.ustvaBezeichnung'),
+            type: 'text',
+            required: true,
+            placeholder: t('crud.placeholders.ustvaBezeichnung'),
+            helpText: t('crud.tooltips.fields.ustvaBezeichnung')
+          }
+        ]
+      },
+      {
+        key: 'sonderfaelle',
+        label: t('crud.fields.specialCases'),
+        fields: [
+          {
+            name: 'intracom',
+            label: t('crud.fields.intracomDelivery'),
+            type: 'boolean',
+            helpText: t('crud.tooltips.fields.intracomDelivery')
+          },
+          {
+            name: 'export',
+            label: t('crud.fields.export'),
+            type: 'boolean',
+            helpText: t('crud.tooltips.fields.export')
+          },
+          {
+            name: 'reverseCharge',
+            label: t('crud.fields.reverseCharge'),
+            type: 'boolean',
+            helpText: t('crud.tooltips.fields.reverseCharge')
+          }
+        ]
+      },
+      {
+        key: 'konten',
+        label: t('crud.fields.accounts'),
+        fields: [
+          {
+            name: 'debitAccount',
+            label: t('crud.fields.debitAccount'),
+            type: 'text',
+            placeholder: t('crud.placeholders.accountNumber'),
+            helpText: t('crud.tooltips.fields.debitAccount')
+          },
+          {
+            name: 'creditAccount',
+            label: t('crud.fields.creditAccount'),
+            type: 'text',
+            placeholder: t('crud.placeholders.accountNumber'),
+            helpText: t('crud.tooltips.fields.creditAccount')
+          }
+        ],
+        layout: 'grid',
+        columns: 2
+      },
+      {
+        key: 'notizen',
+        label: t('crud.fields.notes'),
+        fields: [
+          {
+            name: 'notizen',
+            label: t('crud.fields.internalNotes'),
+            type: 'textarea',
+            placeholder: t('crud.placeholders.internalNotes')
+          }
+        ]
+      }
+    ],
+    actions: [
+      {
+        key: 'validate',
+        label: t('crud.actions.validate'),
+        type: 'secondary'
+      },
+      {
+        key: 'save',
+        label: t('crud.actions.save'),
+        type: 'primary'
+      },
+      {
+        key: 'ustva-export',
+        label: t('crud.actions.ustvaExport'),
+        type: 'secondary'
+      }
+    ],
+    api: {
+      baseUrl: '/api/v1/finance/tax-keys',
+      endpoints: {
+        list: '/api/v1/finance/tax-keys',
+        get: '/api/v1/finance/tax-keys/{id}',
+        create: '/api/v1/finance/tax-keys',
+        update: '/api/v1/finance/tax-keys/{id}',
+        delete: '/api/v1/finance/tax-keys/{id}'
+      }
+    } as any,
+    validation: steuerschluesselSchema,
+    permissions: ['fibu.read', 'fibu.write']
+  }
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: steuerschluesselConfig.api.baseUrl,
@@ -181,7 +236,26 @@ export default function SteuerschluesselPage(): JSX.Element {
       }
 
       try {
-        await saveData(formData)
+        // Transform form data to match API schema
+        const apiData = {
+          code: formData.code,
+          bezeichnung: formData.bezeichnung,
+          steuersatz: parseFloat(formData.steuersatz),
+          ustva_position: formData.ustvaPosition,
+          ustva_bezeichnung: formData.ustvaBezeichnung,
+          intracom: formData.intracom || false,
+          export: formData.export || false,
+          reverse_charge: formData.reverseCharge || false,
+          gueltig_von: formData.gueltigVon,
+          gueltig_bis: formData.gueltigBis || null,
+          notizen: formData.notizen || null,
+          debit_account: formData.debitAccount || null,
+          credit_account: formData.creditAccount || null,
+          country: formData.country || 'DE',
+          region: formData.region || null
+        }
+
+        await saveData(apiData)
         setIsDirty(false)
         navigate('/finance/steuerschluessel')
       } catch (error) {
@@ -190,13 +264,18 @@ export default function SteuerschluesselPage(): JSX.Element {
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
-        alert('Validierung erfolgreich!')
+        // Show success message via toast
+        const { toast } = await import('@/components/ui/toast')
+        toast({
+          title: t('crud.messages.validationSuccess'),
+          description: t('crud.messages.taxKeyValid'),
+        })
       } else {
         showValidationToast(isValid.errors)
       }
     } else if (action === 'ustva-export') {
-      // UStVA Export
-      window.open('/api/finance/steuerschluessel/export', '_blank')
+      // UStVA Export - redirect to export endpoint
+      window.open('/api/v1/finance/tax-keys/export', '_blank')
     }
   })
 
@@ -205,7 +284,7 @@ export default function SteuerschluesselPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm('Ungespeicherte Änderungen gehen verloren. Wirklich abbrechen?')) {
+    if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
       return
     }
     navigate('/finance/steuerschluessel')

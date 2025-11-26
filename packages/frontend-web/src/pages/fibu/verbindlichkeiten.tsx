@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, FileDown, Search } from 'lucide-react'
+import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 
 type Verbindlichkeit = {
   id: string
@@ -58,14 +60,8 @@ const statusVariantMap: Record<Verbindlichkeit['status'], 'default' | 'outline' 
   skontofähig: 'default',
 }
 
-const statusLabelMap: Record<Verbindlichkeit['status'], string> = {
-  offen: 'Offen',
-  teilbezahlt: 'Teilbezahlt',
-  bezahlt: 'Bezahlt',
-  skontofähig: 'Skontofähig',
-}
-
 export default function VerbindlichkeitenPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<Verbindlichkeit['status'] | 'alle'>('alle')
@@ -127,7 +123,7 @@ export default function VerbindlichkeitenPage(): JSX.Element {
       key: 'status' as const,
       label: 'Status',
       render: (verb: Verbindlichkeit) => (
-        <Badge variant={statusVariantMap[verb.status]}>{statusLabelMap[verb.status]}</Badge>
+        <Badge variant={statusVariantMap[verb.status]}>{getStatusLabel(t, verb.status, verb.status)}</Badge>
       ),
     },
   ]

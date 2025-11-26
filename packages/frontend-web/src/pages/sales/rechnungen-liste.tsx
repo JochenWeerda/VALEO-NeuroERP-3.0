@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -6,8 +6,14 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileDown, Receipt, Search } from 'lucide-react'
+import { FileDown, FileText, Receipt, Search } from 'lucide-react'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { AdvancedFilters, FilterConfig } from '@/components/list/AdvancedFilters'
+import { CSVImport } from '@/components/list/CSVImport'
+import { useToast } from '@/hooks/use-toast'
+import { useListActions } from '@/hooks/useListActions'
+import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
+import { saveDocument } from '@/lib/document-api'
 
 type Rechnung = {
   id: string
@@ -67,31 +73,153 @@ const statusVariantMap: Record<
 export default function RechnungenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { toast } = useToast()
   const entityType = 'invoice'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Rechnung')
   const pageTitle = getListTitle(t, entityTypeLabel)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<Rechnung['status'] | 'alle'>('alle')
+  const [rechnungen, setRechnungen] = useState<Rechnung[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showImport, setShowImport] = useState(false)
+  const [filterValues, setFilterValues] = useState<Record<string, any>>({})
 
-  const getStatusLabelLocal = (status: Rechnung['status']): string => {
-    const statusMap: Record<Rechnung['status'], string> = {
-      offen: t('status.pending'),
-      teilbezahlt: t('status.partial'),
-      bezahlt: t('status.paid'),
-      ueberfaellig: t('status.overdue'),
-      storniert: t('status.cancelled'),
+
+  // Lade Daten von API
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch('/api/mcp/documents/sales_invoice?skip=0&limit=100')
+        if (response.ok) {
+          const result = await response.json()
+          if (result.ok && result.data) {
+            // Transformiere API-Daten
+            const transformed = result.data.map((doc: any) => ({
+              id: doc.number,
+              nummer: doc.number,
+              datum: doc.date,
+              kunde: doc.customerId || '',
+              auftragsNr: doc.sourceOrder || '',
+              betrag: doc.totalGross || 0,
+              faelligAm: doc.dueDate || '',
+              status: (doc.status?.toLowerCase() || 'offen') as Rechnung['status'],
+            }))
+            setRechnungen(transformed.length > 0 ? transformed : mockRechnungen)
+          } else {
+            setRechnungen(mockRechnungen)
+          }
+        } else {
+          setRechnungen(mockRechnungen)
+        }
+      } catch (error) {
+        console.error('Fehler beim Laden der Rechnungen:', error)
+        setRechnungen(mockRechnungen)
+      } finally {
+        setLoading(false)
+      }
     }
-    return statusMap[status] || status
-  }
+    loadData()
+  }, [])
 
-  const filteredRechnungen = mockRechnungen.filter((rechnung) => {
+  // Filter-Konfiguration für AdvancedFilters
+  const filterConfig: FilterConfig[] = [
+    {
+      key: 'status',
+      label: t('crud.fields.status'),
+      type: 'select',
+      options: [
+        { value: 'offen', label: t('status.pending') },
+        { value: 'teilbezahlt', label: t('status.partial') },
+        { value: 'bezahlt', label: t('status.paid') },
+        { value: 'ueberfaellig', label: t('status.overdue') },
+        { value: 'storniert', label: t('status.cancelled') },
+      ],
+    },
+    {
+      key: 'datum',
+      label: t('crud.fields.invoiceDate'),
+      type: 'date',
+    },
+    {
+      key: 'kunde',
+      label: t('crud.entities.customer'),
+      type: 'text',
+    },
+    {
+      key: 'faelligAm',
+      label: t('crud.fields.dueDate'),
+      type: 'date',
+    },
+  ]
+
+  const filteredRechnungen = rechnungen.filter((rechnung) => {
     const matchesSearch =
       rechnung.nummer.toLowerCase().includes(searchTerm.toLowerCase()) ||
       rechnung.kunde.toLowerCase().includes(searchTerm.toLowerCase()) ||
       rechnung.auftragsNr.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'alle' || rechnung.status === statusFilter
+    
+    // Erweiterte Filter
+    if (filterValues.status && rechnung.status !== filterValues.status) return false
+    if (filterValues.kunde && !rechnung.kunde.toLowerCase().includes(filterValues.kunde.toLowerCase())) return false
+    if (filterValues.datum) {
+      const rechnungDate = new Date(rechnung.datum).toISOString().split('T')[0]
+      if (rechnungDate !== filterValues.datum) return false
+    }
+    if (filterValues.faelligAm) {
+      const faelligDate = new Date(rechnung.faelligAm).toISOString().split('T')[0]
+      if (faelligDate !== filterValues.faelligAm) return false
+    }
+    
     return matchesSearch && matchesStatus
   })
+
+  const exportData = filteredRechnungen.map(r => ({
+    Rechnungsnummer: r.nummer,
+    Datum: formatDateForExport(r.datum),
+    Kunde: r.kunde,
+    Auftragsnummer: r.auftragsNr,
+    Betrag: formatCurrencyForExport(r.betrag),
+    'Fällig am': formatDateForExport(r.faelligAm),
+    Status: getStatusLabel(t, r.status, r.status),
+  }))
+
+  const { handleExport, handlePrint } = useListActions({
+    data: exportData,
+    entityName: 'rechnungen',
+  })
+
+  const handleImport = async (importData: any[]) => {
+    try {
+      for (const row of importData) {
+        const doc = {
+          number: row.Rechnungsnummer || row.number || `INV-${Date.now()}`,
+          date: row.Datum || row.date || new Date().toISOString().split('T')[0],
+          customerId: row.Kunde || row.customerId || '',
+          sourceOrder: row.Auftragsnummer || row.sourceOrder || '',
+          status: 'ENTWURF',
+          dueDate: row['Fällig am'] || row.dueDate || '',
+          lines: [],
+          subtotalNet: 0,
+          totalTax: 0,
+          totalGross: parseFloat(row.Betrag?.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0,
+        }
+        await saveDocument('sales_invoice', doc)
+      }
+      toast({
+        title: t('crud.messages.importSuccess'),
+        description: `${importData.length} Rechnungen wurden importiert.`,
+      })
+      window.location.reload()
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.importError'),
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+      })
+    }
+  }
 
   const columns = [
     {
@@ -144,7 +272,7 @@ export default function RechnungenListePage(): JSX.Element {
       key: 'status' as const,
       label: t('crud.fields.status'),
       render: (rechnung: Rechnung) => (
-        <Badge variant={statusVariantMap[rechnung.status]}>{getStatusLabelLocal(rechnung.status)}</Badge>
+        <Badge variant={statusVariantMap[rechnung.status]}>{getStatusLabel(t, rechnung.status, rechnung.status)}</Badge>
       ),
     },
   ]
@@ -189,13 +317,39 @@ export default function RechnungenListePage(): JSX.Element {
               <option value="ueberfaellig">{t('status.overdue')}</option>
               <option value="storniert">{t('status.cancelled')}</option>
             </select>
-            <Button variant="outline" className="gap-2">
+            <AdvancedFilters
+              filters={filterConfig}
+              values={filterValues}
+              onChange={setFilterValues}
+              onReset={() => setFilterValues({})}
+            />
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
-              {t('crud.actions.export')}
+              {t('crud.print.export')}
+            </Button>
+            <Button variant="outline" className="gap-2" onClick={handlePrint}>
+              <FileText className="h-4 w-4" />
+              {t('crud.actions.print')}
+            </Button>
+            <Button variant="outline" className="gap-2" onClick={() => setShowImport(!showImport)}>
+              <FileText className="h-4 w-4" />
+              {t('crud.actions.import')}
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {showImport && (
+        <Card>
+          <CardContent className="pt-6">
+            <CSVImport
+              onImport={handleImport}
+              expectedColumns={['Rechnungsnummer', 'Datum', 'Kunde', 'Auftragsnummer', 'Betrag', 'Fällig am', 'Status']}
+              entityName="Rechnungen"
+            />
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardContent className="pt-6">

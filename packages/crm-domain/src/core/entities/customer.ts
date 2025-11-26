@@ -33,6 +33,9 @@ export interface Customer {
   leadScore?: number;
   notes?: string;
   tags: string[];
+  // Sales-spezifische Felder (SALES-CRM-02)
+  priceGroup?: string;  // NEU: sales.price_group (standard, premium, wholesale, retail)
+  taxCategory?: string;  // NEU: tax.category (standard, reduced, zero, reverse_charge, exempt)
   updatedAt: Date;
 }
 
@@ -55,6 +58,9 @@ export interface CreateCustomerInput {
   leadScore?: number;
   notes?: string;
   tags?: string[];
+  // Sales-spezifische Felder (SALES-CRM-02)
+  priceGroup?: string;  // NEU: sales.price_group
+  taxCategory?: string;  // NEU: tax.category
 }
 
 export type UpdateCustomerInput = Partial<CreateCustomerInput> & { status?: CustomerStatus };

@@ -6,6 +6,9 @@ import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mas
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { StornoDialog } from '@/components/finance/StornoDialog'
+import { financeService } from '@/lib/services/finance-service'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Buchungserfassung (wird in Komponente mit i18n erstellt)
 const createBuchungSchema = (t: any) => z.object({
@@ -320,6 +323,8 @@ export default function BuchungserfassungPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const [isStornoDialogOpen, setIsStornoDialogOpen] = useState(false)
+  const [isStornoLoading, setIsStornoLoading] = useState(false)
   const entityType = 'booking'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Buchungserfassung')
   const buchungConfig = createBuchungConfig(t, entityTypeLabel)
@@ -354,10 +359,16 @@ export default function BuchungserfassungPage(): JSX.Element {
         showValidationToast(isValid.errors)
       }
     } else if (action === 'storno') {
-      if (confirm(t('crud.messages.reverseBookingConfirm'))) {
-        // Storno-Logik würde hier implementiert
-        alert(t('crud.messages.reverseBookingInfo'))
+      // Prüfe ob Buchung bereits gespeichert wurde
+      if (!formData.id && !formData.belegnummer) {
+        toast({
+          variant: 'destructive',
+          title: t('common.error'),
+          description: t('crud.messages.saveFirst'),
+        })
+        return
       }
+      setIsStornoDialogOpen(true)
     } else if (action === 'export') {
       window.open('/api/finance/buchungen/export', '_blank')
     }
@@ -374,13 +385,51 @@ export default function BuchungserfassungPage(): JSX.Element {
     navigate('/finance/buchungen')
   }
 
+  const handleStornoConfirm = async (reason: string) => {
+    setIsStornoLoading(true)
+    try {
+      const entryId = data?.id || data?.belegnummer
+      if (!entryId) {
+        throw new Error('Buchung-ID nicht gefunden')
+      }
+
+      await financeService.reverseJournalEntry(entryId, reason)
+      
+      toast({
+        title: t('crud.messages.stornoSuccess'),
+        description: t('crud.messages.stornoSuccess'),
+      })
+      
+      setIsStornoDialogOpen(false)
+      navigate('/finance/buchungen')
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.stornoError'),
+        description: error instanceof Error ? error.message : t('common.unknownError'),
+      })
+    } finally {
+      setIsStornoLoading(false)
+    }
+  }
+
   return (
-    <ObjectPage
-      config={buchungConfig}
-      data={data}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-    />
+    <>
+      <ObjectPage
+        config={buchungConfig}
+        data={data}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+      />
+      <StornoDialog
+        open={isStornoDialogOpen}
+        onOpenChange={setIsStornoDialogOpen}
+        onConfirm={handleStornoConfirm}
+        entryNumber={data?.belegnummer}
+        entryDate={data?.buchungsdatum}
+        isLoading={isStornoLoading}
+      />
+    </>
   )
 }

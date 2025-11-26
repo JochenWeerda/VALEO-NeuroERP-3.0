@@ -22,7 +22,31 @@ from app.api.v1.endpoints import (
     warehouses,
     policies,
     gap,
-    prospecting
+    prospecting,
+    finance_invoices,
+    audit,
+    accounting_periods,
+    payment_matching,
+    ap_invoices,
+    bank_accounts,
+    debtors,
+    open_items,
+    bank_statement_import,
+    bank_reconciliation,
+    tax_keys,
+    subsidiary_ledger_reconciliation,
+    financial_reports,
+    bulk_journal_import,
+    exchange_rates,
+    booking_templates,
+    dunning,
+    ap_approval_workflow,
+    payment_runs,
+    auto_matching,
+    vat_return_export,
+    closing_checklists,
+    iban_lookup,
+    credit_debit_memos
 )
 
 # Import domain routers
@@ -109,6 +133,143 @@ api_router.include_router(
     journal_entries,
     prefix="/journal-entries",
     tags=["finance", "journal-entries"]
+)
+
+api_router.include_router(
+    finance_invoices.router,
+    tags=["finance", "invoices"]
+)
+
+api_router.include_router(
+    audit.router,
+    prefix="/audit",
+    tags=["audit", "compliance", "gobd"]
+)
+
+api_router.include_router(
+    accounting_periods.router,
+    prefix="/finance/periods",
+    tags=["finance", "periods", "gobd"]
+)
+
+api_router.include_router(
+    payment_matching.router,
+    prefix="/finance/payments",
+    tags=["finance", "payments", "matching", "ar"]
+)
+
+api_router.include_router(
+    ap_invoices.router,
+    prefix="/finance",
+    tags=["finance", "ap", "invoices"]
+)
+
+api_router.include_router(
+    credit_debit_memos.router,
+    prefix="/v1",
+    tags=["procurement", "ap", "memos"]
+)
+
+api_router.include_router(
+    debtors.router,
+    prefix="/finance",
+    tags=["finance", "debtors"]
+)
+
+api_router.include_router(
+    open_items.router,
+    prefix="/finance",
+    tags=["finance", "open-items"]
+)
+
+api_router.include_router(
+    bank_statement_import.router,
+    prefix="/finance",
+    tags=["finance", "bank-statements"]
+)
+
+api_router.include_router(
+    bank_reconciliation.router,
+    prefix="/finance",
+    tags=["finance", "bank-reconciliation"]
+)
+
+api_router.include_router(
+    tax_keys.router,
+    prefix="/finance",
+    tags=["finance", "tax"]
+)
+
+api_router.include_router(
+    subsidiary_ledger_reconciliation.router,
+    prefix="/finance",
+    tags=["finance", "reconciliation"]
+)
+
+api_router.include_router(
+    financial_reports.router,
+    prefix="/finance",
+    tags=["finance", "reports"]
+)
+
+api_router.include_router(
+    bulk_journal_import.router,
+    prefix="/finance",
+    tags=["finance", "import"]
+)
+
+api_router.include_router(
+    exchange_rates.router,
+    prefix="/finance",
+    tags=["finance", "currency"]
+)
+
+api_router.include_router(
+    booking_templates.router,
+    prefix="/finance",
+    tags=["finance", "templates"]
+)
+
+api_router.include_router(
+    dunning.router,
+    prefix="/finance",
+    tags=["finance", "dunning"]
+)
+
+api_router.include_router(
+    ap_approval_workflow.router,
+    prefix="/finance",
+    tags=["finance", "ap", "approval"]
+)
+
+api_router.include_router(
+    payment_runs.router,
+    prefix="/finance",
+    tags=["finance", "ap", "sepa"]
+)
+
+api_router.include_router(
+    auto_matching.router,
+    prefix="/finance",
+    tags=["finance", "bank", "matching"]
+)
+
+api_router.include_router(
+    vat_return_export.router,
+    prefix="/finance",
+    tags=["finance", "tax", "vat"]
+)
+
+api_router.include_router(
+    closing_checklists.router,
+    prefix="/finance",
+    tags=["finance", "closing"]
+)
+
+api_router.include_router(
+    iban_lookup.router,
+    prefix="/finance",
+    tags=["finance", "iban", "validation"]
 )
 
 api_router.include_router(

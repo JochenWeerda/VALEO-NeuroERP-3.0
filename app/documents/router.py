@@ -4,32 +4,38 @@ API-Endpoints für Belegverwaltung & Folgebeleg-Erstellung
 """
 
 from __future__ import annotations
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
+from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 from typing import Dict, Callable, Any, List, Optional
 import logging
 from datetime import datetime, timedelta
 from collections import defaultdict
 
-from .models import CustomerInquiry, SalesOffer, SalesOrder, SalesDelivery, SalesInvoice, PaymentReceived, FollowRequest
+from .models import (
+    CustomerInquiry, SalesOffer, SalesOrder, SalesDelivery, SalesInvoice, PaymentReceived,
+    PurchaseRequest, PurchaseOffer, PurchaseOrder, FollowRequest
+)
+from .router_helpers import (
+    get_repository, save_to_store, get_from_store, list_from_store, delete_from_store
+)
+from app.core.database import get_db
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/mcp/documents", tags=["documents"])
-
-# In-Memory Store (TODO: durch echte DB ersetzen)
-_DB: Dict[str, dict] = {}
 
 
 # --- CRUD Endpoints ---
 
 
 @router.post("/customer_inquiry")
-async def upsert_customer_inquiry(doc: CustomerInquiry) -> dict:
+async def upsert_customer_inquiry(doc: CustomerInquiry, db: Session = Depends(get_db)) -> dict:
     """Erstellt oder aktualisiert Kundenanfrage"""
     try:
+        repo = get_repository(db)
         # Status-Transition-Logik
-        existing = _DB.get(doc.number)
+        existing = get_from_store("customer_inquiry", doc.number, repo)
         if existing:
             old_status = existing.get("status", "OFFEN")
             new_status = doc.status
@@ -48,30 +54,34 @@ async def upsert_customer_inquiry(doc: CustomerInquiry) -> dict:
                     detail=f"Invalid status transition: {old_status} → {new_status}"
                 )
 
-        _DB[doc.number] = doc.model_dump()
+        result = save_to_store("customer_inquiry", doc.number, doc.model_dump(), repo)
         logger.info(f"Saved customer inquiry: {doc.number} (status: {doc.status})")
-        return {"ok": True, "number": doc.number}
+        return result
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to save customer inquiry: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/sales_offer")
-async def upsert_sales_offer(doc: SalesOffer) -> dict:
+async def upsert_sales_offer(doc: SalesOffer, db: Session = Depends(get_db)) -> dict:
     """Erstellt oder aktualisiert Verkaufsangebot"""
     try:
+        repo = get_repository(db)
         # Berechne Gesamtbeträge falls nicht gesetzt
+        doc_data = doc.model_dump()
         if doc.subtotalNet == 0 and doc.lines:
-            doc.subtotalNet = sum(
+            doc_data["subtotalNet"] = sum(
                 (line.qty * line.price) for line in doc.lines if line.price
             )
-            doc.totalTax = sum(
+            doc_data["totalTax"] = sum(
                 (line.qty * line.price * line.vatRate / 100) for line in doc.lines if line.price
             )
-            doc.totalGross = doc.subtotalNet + doc.totalTax
+            doc_data["totalGross"] = doc_data["subtotalNet"] + doc_data["totalTax"]
 
         # Status-Transition-Logik
-        existing = _DB.get(doc.number)
+        existing = get_from_store("sales_offer", doc.number, repo)
         if existing:
             old_status = existing.get("status", "ENTWURF")
             new_status = doc.status
@@ -90,21 +100,22 @@ async def upsert_sales_offer(doc: SalesOffer) -> dict:
                     detail=f"Invalid status transition: {old_status} → {new_status}"
                 )
 
-        _DB[doc.number] = doc.model_dump()
+        result = save_to_store("sales_offer", doc.number, doc_data, repo)
         logger.info(f"Saved sales offer: {doc.number} (status: {doc.status})")
-        return {"ok": True, "number": doc.number}
+        return result
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to save sales offer: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/sales_order")
-async def upsert_sales_order(doc: SalesOrder) -> dict:
+async def upsert_sales_order(doc: SalesOrder, db: Session = Depends(get_db)) -> dict:
     """Erstellt oder aktualisiert Verkaufsauftrag"""
     try:
-        _DB[doc.number] = doc.model_dump()
-        logger.info(f"Saved sales order: {doc.number}")
-        return {"ok": True, "number": doc.number}
+        repo = get_repository(db)
+        return save_to_store("sales_order", doc.number, doc.model_dump(), repo)
     except Exception as e:
         logger.error(f"Failed to save sales order: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -114,7 +125,9 @@ async def upsert_sales_order(doc: SalesOrder) -> dict:
 async def upsert_sales_delivery(doc: SalesDelivery) -> dict:
     """Erstellt oder aktualisiert Lieferschein"""
     try:
-        _DB[doc.number] = doc.model_dump()
+        # Wird durch save_to_store ersetzt
+        repo = get_repository(db)
+        save_to_store("sales_delivery", doc.number, doc.model_dump(), repo)
         logger.info(f"Saved sales delivery: {doc.number}")
         return {"ok": True, "number": doc.number}
     except Exception as e:
@@ -123,21 +136,23 @@ async def upsert_sales_delivery(doc: SalesDelivery) -> dict:
 
 
 @router.post("/sales_invoice")
-async def upsert_sales_invoice(doc: SalesInvoice) -> dict:
+async def upsert_sales_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) -> dict:
     """Erstellt oder aktualisiert Rechnung"""
     try:
+        repo = get_repository(db)
         # Berechne Gesamtbeträge falls nicht gesetzt
+        doc_data = doc.model_dump()
         if doc.subtotalNet == 0 and doc.lines:
-            doc.subtotalNet = sum(
+            doc_data["subtotalNet"] = sum(
                 (line.qty * line.price) for line in doc.lines if line.price
             )
-            doc.totalTax = sum(
+            doc_data["totalTax"] = sum(
                 (line.qty * line.price * line.vatRate / 100) for line in doc.lines if line.price
             )
-            doc.totalGross = doc.subtotalNet + doc.totalTax
+            doc_data["totalGross"] = doc_data["subtotalNet"] + doc_data["totalTax"]
 
         # Status-Transition-Logik
-        existing = _DB.get(doc.number)
+        existing = get_from_store("sales_invoice", doc.number, repo)
         if existing:
             old_status = existing.get("status", "ENTWURF")
             new_status = doc.status
@@ -156,20 +171,23 @@ async def upsert_sales_invoice(doc: SalesInvoice) -> dict:
                     detail=f"Invalid status transition: {old_status} → {new_status}"
                 )
 
-        _DB[doc.number] = doc.model_dump()
+        result = save_to_store("sales_invoice", doc.number, doc_data, repo)
         logger.info(f"Saved sales invoice: {doc.number} (status: {doc.status})")
-        return {"ok": True, "number": doc.number}
+        return result
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to save sales invoice: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/payment_received")
-async def upsert_payment_received(doc: PaymentReceived) -> dict:
+async def upsert_payment_received(doc: PaymentReceived, db: Session = Depends(get_db)) -> dict:
     """Erstellt oder aktualisiert Zahlungseingang"""
     try:
+        repo = get_repository(db)
         # Status-Transition-Logik
-        existing = _DB.get(doc.number)
+        existing = get_from_store("payment_received", doc.number, repo)
         if existing:
             old_status = existing.get("status", "EINGEGANGEN")
             new_status = doc.status
@@ -187,21 +205,304 @@ async def upsert_payment_received(doc: PaymentReceived) -> dict:
                     detail=f"Invalid status transition: {old_status} → {new_status}"
                 )
 
-        _DB[doc.number] = doc.model_dump()
+        result = save_to_store("payment_received", doc.number, doc.model_dump(), repo)
         logger.info(f"Saved payment received: {doc.number} (status: {doc.status})")
-        return {"ok": True, "number": doc.number}
+        return result
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to save payment received: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{doc_number}")
-async def get_document(doc_number: str) -> dict:
-    """Holt einzelnen Beleg"""
-    doc = _DB.get(doc_number)
-    if not doc:
-        raise HTTPException(status_code=404, detail="Document not found")
-    return {"ok": True, "data": doc}
+# --- Purchase Endpoints ---
+
+
+@router.post("/purchase_request")
+async def upsert_purchase_request(doc: PurchaseRequest, db: Session = Depends(get_db)) -> dict:
+    """Erstellt oder aktualisiert Einkaufsanfrage"""
+    try:
+        repo = get_repository(db)
+        # Status-Transition-Logik
+        existing = get_from_store("purchase_request", doc.number, repo)
+        if existing:
+            old_status = existing.get("status", "OFFEN")
+            new_status = doc.status
+
+            # Erlaubte Übergänge
+            allowed_transitions = {
+                "OFFEN": ["IN_BEARBEITUNG"],
+                "IN_BEARBEITUNG": ["BESTELLT", "ABGELEHNT"],
+                "BESTELLT": [],  # Final status
+                "ABGELEHNT": [],  # Final status
+            }
+
+            if new_status not in allowed_transitions.get(old_status, []):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid status transition: {old_status} → {new_status}"
+                )
+
+        result = save_to_store("purchase_request", doc.number, doc.model_dump(), repo)
+        logger.info(f"Saved purchase request: {doc.number} (status: {doc.status})")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to save purchase request: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/purchase_offer")
+async def upsert_purchase_offer(doc: PurchaseOffer, db: Session = Depends(get_db)) -> dict:
+    """Erstellt oder aktualisiert Einkaufsangebot"""
+    try:
+        repo = get_repository(db)
+        # Berechne Gesamtbeträge falls nicht gesetzt
+        doc_data = doc.model_dump()
+        if doc.subtotalNet == 0 and doc.lines:
+            doc_data["subtotalNet"] = sum(
+                (line.qty * line.price) for line in doc.lines if line.price
+            )
+            doc_data["totalTax"] = sum(
+                (line.qty * line.price * line.vatRate / 100) for line in doc.lines if line.price and line.vatRate
+            )
+            doc_data["totalGross"] = doc_data["subtotalNet"] + doc_data["totalTax"]
+
+        # Status-Transition-Logik
+        existing = get_from_store("purchase_offer", doc.number, repo)
+        if existing:
+            old_status = existing.get("status", "ENTWURF")
+            new_status = doc.status
+
+            # Erlaubte Übergänge
+            allowed_transitions = {
+                "ENTWURF": ["EINGEGANGEN"],
+                "EINGEGANGEN": ["ANGENOMMEN", "ABGELEHNT"],
+                "ANGENOMMEN": [],  # Final status
+                "ABGELEHNT": [],  # Final status
+            }
+
+            if new_status not in allowed_transitions.get(old_status, []):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid status transition: {old_status} → {new_status}"
+                )
+
+        result = save_to_store("purchase_offer", doc.number, doc_data, repo)
+        logger.info(f"Saved purchase offer: {doc.number} (status: {doc.status})")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to save purchase offer: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/purchase_order")
+async def upsert_purchase_order(doc: PurchaseOrder, db: Session = Depends(get_db)) -> dict:
+    """Erstellt oder aktualisiert Kaufauftrag"""
+    try:
+        repo = get_repository(db)
+        # Berechne Gesamtbeträge falls nicht gesetzt
+        doc_data = doc.model_dump()
+        if doc.subtotalNet == 0 and doc.lines:
+            doc_data["subtotalNet"] = sum(
+                (line.qty * line.price) for line in doc.lines if line.price
+            )
+            doc_data["totalTax"] = sum(
+                (line.qty * line.price * line.vatRate / 100) for line in doc.lines if line.price and line.vatRate
+            )
+            doc_data["totalGross"] = doc_data["subtotalNet"] + doc_data["totalTax"]
+
+        # Status-Transition-Logik
+        existing = get_from_store("purchase_order", doc.number, repo)
+        if existing:
+            old_status = existing.get("status", "ENTWURF")
+            new_status = doc.status
+
+            # Erlaubte Übergänge
+            allowed_transitions = {
+                "ENTWURF": ["FREIGEGEBEN"],
+                "FREIGEGEBEN": ["TEILGELIEFERT", "VOLLGELIEFERT", "STORNIERT"],
+                "TEILGELIEFERT": ["VOLLGELIEFERT", "STORNIERT"],
+                "VOLLGELIEFERT": [],  # Final status
+                "STORNIERT": [],  # Final status
+            }
+
+            if new_status not in allowed_transitions.get(old_status, []):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid status transition: {old_status} → {new_status}"
+                )
+
+        result = save_to_store("purchase_order", doc.number, doc_data, repo)
+        logger.info(f"Saved purchase order: {doc.number} (status: {doc.status})")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to save purchase order: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# --- GET Endpoints ---
+
+
+@router.get("/{doc_type}")
+async def list_documents(doc_type: str, skip: int = 0, limit: int = 100) -> dict:
+    """Holt Liste aller Belege eines Typs"""
+    try:
+        # Filtere nach Dokumenttyp
+        filtered_docs = []
+        for key, value in _DB.items():
+            # Prüfe ob Dokumentnummer dem Typ entspricht (z.B. "PO-" für purchase_order)
+            type_prefixes = {
+                "customer_inquiry": ["INQ-"],
+                "sales_offer": ["SO-", "ANG-"],
+                "sales_order": ["SO-"],
+                "sales_delivery": ["DL-"],
+                "sales_invoice": ["INV-"],
+                "payment_received": ["PAY-"],
+                "purchase_request": ["PR-"],
+                "purchase_offer": ["POF-"],
+                "purchase_order": ["PO-", "EK-"],
+            }
+            
+            prefixes = type_prefixes.get(doc_type, [])
+            if any(key.startswith(prefix) for prefix in prefixes) or doc_type in str(value.get("type", "")):
+                filtered_docs.append(value)
+        
+        # Pagination
+        total = len(filtered_docs)
+        paginated_docs = filtered_docs[skip:skip + limit]
+        
+        return {
+            "ok": True,
+            "data": paginated_docs,
+            "total": total,
+            "skip": skip,
+            "limit": limit
+        }
+    except Exception as e:
+        logger.error(f"Failed to list documents: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{doc_type}/{doc_number}")
+async def get_document(doc_type: str, doc_number: str, db: Session = Depends(get_db)) -> dict:
+    """Holt einzelnen Beleg nach Typ und Nummer"""
+    try:
+        repo = get_repository(db)
+        doc = get_from_store(doc_type, doc_number, repo)
+        if not doc:
+            raise HTTPException(status_code=404, detail="Document not found")
+        return {"ok": True, "data": doc}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get document: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/{doc_type}/{doc_number}")
+async def update_document(doc_type: str, doc_number: str, doc: dict, db: Session = Depends(get_db)) -> dict:
+    """Aktualisiert einen Beleg"""
+    try:
+        repo = get_repository(db)
+        existing = get_from_store(doc_type, doc_number, repo)
+        if not existing:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        # Validiere Status-Transitionen falls Status geändert wird
+        old_status = existing.get("status")
+        new_status = doc.get("status")
+        
+        if old_status and new_status and old_status != new_status:
+            # Status-Transition-Validierung (vereinfacht - könnte erweitert werden)
+            # Die spezifische Validierung erfolgt in den POST-Endpoints
+            pass
+        
+        # Aktualisiere Dokument
+        updated_data = {**existing, **doc, "number": doc_number}
+        result = save_to_store(doc_type, doc_number, updated_data, repo)
+        logger.info(f"Updated document: {doc_number}")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update document: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/{doc_type}/{doc_number}")
+async def delete_document(doc_type: str, doc_number: str, db: Session = Depends(get_db)) -> dict:
+    """Löscht einen Beleg"""
+    try:
+        repo = get_repository(db)
+        doc = get_from_store(doc_type, doc_number, repo)
+        if not doc:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        # Prüfe ob Dokument gelöscht werden kann (z.B. nicht wenn bereits verarbeitet)
+        status = doc.get("status", "")
+        
+        # Finale Status erlauben keine Löschung
+        final_statuses = ["BEZAHLT", "VOLLGELIEFERT", "ABGEGLICHEN", "STORNIERT"]
+        if status in final_statuses:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot delete document with final status: {status}"
+            )
+        
+        deleted = delete_from_store(doc_type, doc_number, repo)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        logger.info(f"Deleted document: {doc_number}")
+        return {"ok": True, "number": doc_number, "message": "Document deleted"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to delete document: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/{doc_type}")
+async def bulk_delete_documents(doc_type: str, numbers: List[str] = Query(...)) -> dict:
+    """Löscht mehrere Belege gleichzeitig"""
+    try:
+        deleted = []
+        failed = []
+        
+        for doc_number in numbers:
+            if doc_number not in _DB:
+                failed.append({"number": doc_number, "error": "Not found"})
+                continue
+            
+            doc = _DB[doc_number]
+            status = doc.get("status", "")
+            
+            # Finale Status erlauben keine Löschung
+            final_statuses = ["BEZAHLT", "VOLLGELIEFERT", "ABGEGLICHEN", "STORNIERT"]
+            if status in final_statuses:
+                failed.append({"number": doc_number, "error": f"Cannot delete with status: {status}"})
+                continue
+            
+            del _DB[doc_number]
+            deleted.append(doc_number)
+        
+        return {
+            "ok": True,
+            "deleted": deleted,
+            "failed": failed,
+            "total": len(numbers),
+            "deleted_count": len(deleted),
+            "failed_count": len(failed)
+        }
+    except Exception as e:
+        logger.error(f"Failed to bulk delete documents: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # --- Belegfluss-Engine ---
@@ -300,6 +601,42 @@ FLOW: Dict[tuple[str, str], Callable[[dict], dict]] = {
             (line.get("qty", 0) * line.get("price", 0) * (1 + line.get("vatRate", 19) / 100))
             for line in payload.get("lines", [])
         ),
+    },
+    # Purchase Flows
+    # Purchase Request → Purchase Offer
+    ("purchase_request", "purchase_offer"): lambda payload: {
+        "number": payload["number"].replace("PR", "POF"),
+        "date": payload["date"],
+        "supplierId": payload.get("supplierId", ""),
+        "purchaseRequestId": payload["number"],
+        "status": "ENTWURF",
+        "contactPerson": payload.get("contactPerson"),
+        "validUntil": payload.get("deadline"),
+        "deliveryDate": None,
+        "deliveryAddress": "",
+        "paymentTerms": "net30",
+        "notes": f"Aus Anfrage {payload['number']}: {payload.get('notes', '')}",
+        "lines": payload.get("lines", []),
+        "subtotalNet": 0,
+        "totalTax": 0,
+        "totalGross": 0,
+    },
+    # Purchase Offer → Purchase Order
+    ("purchase_offer", "purchase_order"): lambda payload: {
+        "number": payload["number"].replace("POF", "PO"),
+        "date": payload["date"],
+        "supplierId": payload["supplierId"],
+        "purchaseOfferId": payload["number"],
+        "status": "ENTWURF",
+        "contactPerson": payload.get("contactPerson"),
+        "deliveryDate": payload.get("deliveryDate"),
+        "deliveryAddress": payload.get("deliveryAddress", ""),
+        "paymentTerms": payload.get("paymentTerms", "net30"),
+        "notes": payload.get("notes", ""),
+        "lines": payload.get("lines", []),
+        "subtotalNet": payload.get("subtotalNet", 0),
+        "totalTax": payload.get("totalTax", 0),
+        "totalGross": payload.get("totalGross", 0),
     },
     # Invoice → PaymentReceived
     ("sales_invoice", "payment_received"): lambda payload: {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
@@ -6,6 +6,9 @@ import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mas
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { validateIBAN, formatIBAN, lookupIBAN } from '@/lib/utils/iban-validator'
+import { useIbanLookup } from '@/hooks/useIbanLookup'
+import { toast } from 'sonner'
 
 // Zod-Schema für Kreditoren-Stammdaten (wird in Komponente mit i18n erstellt)
 const createKreditorenSchema = (t: any) => z.object({
@@ -22,7 +25,12 @@ const createKreditorenSchema = (t: any) => z.object({
   steuernummer: z.string().optional(),
 
   // Bankverbindung
-  iban: z.string().regex(/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/, t('crud.messages.validationError')).optional().or(z.literal("")),
+  iban: z.string()
+    .optional()
+    .or(z.literal(""))
+    .refine((val) => !val || val.trim() === "" || validateIBAN(val), {
+      message: t('crud.messages.invalidIban'),
+    }),
   bic: z.string().optional(),
   bankname: z.string().optional(),
   kontoinhaber: z.string().optional(),
@@ -297,16 +305,61 @@ export default function KreditorenStammPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const [formData, setFormData] = useState<any>({})
   const entityType = 'creditor'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kreditor')
   const kreditorenConfig = createKreditorenConfig(t, entityTypeLabel)
 
-  const { data, loading, saveData } = useMaskData({
+  const { data, loading, saveData, updateData } = useMaskData({
     apiUrl: kreditorenConfig.api.baseUrl,
     id: 'new'
   })
 
   const { validate, showValidationToast } = useMaskValidation(kreditorenConfig.validation)
+
+  // IBAN Lookup Hook
+  const { performLookup, isLoading: isIbanLoading, lookupData } = useIbanLookup({
+    onSuccess: (result) => {
+      if (result.valid && result.bank_name) {
+        // Auto-fill bank name and BIC if available
+        const updatedData = { ...formData }
+        if (result.bank_name) {
+          updatedData.bankname = result.bank_name
+        }
+        if (result.bic) {
+          updatedData.bic = result.bic
+        }
+        setFormData(updatedData)
+        updateData?.(updatedData)
+        
+        toast.success(t('crud.messages.ibanLookupSuccess', { 
+          defaultValue: 'Bankinformationen automatisch ausgefüllt',
+          bankName: result.bank_name 
+        }))
+      }
+    },
+    onError: (error) => {
+      // Silent error - user can still enter IBAN manually
+      console.warn('IBAN lookup failed:', error)
+    },
+    autoLookup: false // Manual lookup via button
+  })
+
+  // Auto-lookup IBAN when it changes and seems complete
+  useEffect(() => {
+    const iban = formData?.iban
+    if (iban && iban.replace(/\s/g, '').length >= 15) {
+      const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
+      if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
+        // Debounce: wait a bit before looking up
+        const timer = setTimeout(() => {
+          performLookup(normalized)
+        }, 1000) // 1 second debounce
+        
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [formData?.iban, performLookup])
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
@@ -338,6 +391,41 @@ export default function KreditorenStammPage(): JSX.Element {
     }
   })
 
+  // Handle form data changes for IBAN lookup
+  const handleFormChange = (newData: any) => {
+    setFormData(newData)
+    setIsDirty(true)
+    
+    // Auto-lookup IBAN when it changes
+    const iban = newData?.iban
+    if (iban && iban.replace(/\s/g, '').length >= 15) {
+      const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
+      if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
+        // Debounce: wait a bit before looking up
+        const timer = setTimeout(() => {
+          performLookup(normalized)
+        }, 1000) // 1 second debounce
+        
+        return () => clearTimeout(timer)
+      }
+    }
+  }
+
+  // Update form data when IBAN lookup succeeds
+  useEffect(() => {
+    if (lookupData?.valid && lookupData.bank_name && formData) {
+      const updatedData = { ...formData }
+      if (lookupData.bank_name && !updatedData.bankname) {
+        updatedData.bankname = lookupData.bank_name
+      }
+      if (lookupData.bic && !updatedData.bic) {
+        updatedData.bic = lookupData.bic
+      }
+      setFormData(updatedData)
+      updateData?.(updatedData)
+    }
+  }, [lookupData, formData, updateData])
+
   const handleSave = async (formData: any) => {
     await handleAction('save', formData)
   }
@@ -352,10 +440,11 @@ export default function KreditorenStammPage(): JSX.Element {
   return (
     <ObjectPage
       config={kreditorenConfig}
-      data={data}
+      data={data || formData}
+      onChange={handleFormChange}
       onSave={handleSave}
       onCancel={handleCancel}
-      isLoading={loading}
+      isLoading={loading || isIbanLoading}
     />
   )
 }

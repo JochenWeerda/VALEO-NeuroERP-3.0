@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from uuid import UUID, uuid4
 
-from sqlalchemy import Column, DateTime, Enum as SQLEnum, Float, ForeignKey, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Enum as SQLEnum, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -41,10 +41,13 @@ class Opportunity(Base):
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    number: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)  # Opportunity number
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
-    amount: Mapped[float | None] = mapped_column(Float)
+    amount: Mapped[float | None] = mapped_column(Float)  # Deal value
+    currency: Mapped[str | None] = mapped_column(String(3), default="EUR")  # Currency code
     probability: Mapped[float | None] = mapped_column(Float, default=0.0)
+    expected_revenue: Mapped[float | None] = mapped_column(Float)  # amount * probability
     expected_close_date: Mapped[datetime | None] = mapped_column(DateTime)
     actual_close_date: Mapped[datetime | None] = mapped_column(DateTime)
 
@@ -69,14 +72,21 @@ class Opportunity(Base):
     )
 
     lead_source: Mapped[str | None] = mapped_column(String(128))
-    assigned_to: Mapped[str | None] = mapped_column(String(64))
+    source: Mapped[str | None] = mapped_column(String(128))  # Lead source (web, referral, etc.)
+    campaign_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)  # Marketing campaign
+    assigned_to: Mapped[str | None] = mapped_column(String(64))  # Owner/User ID
+    owner_id: Mapped[str | None] = mapped_column(String(64))  # Alias for assigned_to
     customer_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)
     contact_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text)  # Additional notes
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_by: Mapped[str | None] = mapped_column(String(64))  # User who created
+    updated_by: Mapped[str | None] = mapped_column(String(64))  # User who last updated
 
     quotes: Mapped[list["Quote"]] = relationship(back_populates="opportunity", cascade="all, delete-orphan")
+    history: Mapped[list["OpportunityHistory"]] = relationship(back_populates="opportunity", cascade="all, delete-orphan")
 
 
 class Quote(Base):
@@ -153,3 +163,37 @@ class SalesActivity(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     opportunity: Mapped[Opportunity | None] = relationship("Opportunity")
+
+
+class OpportunityStage(Base):
+    """Lookup table for opportunity stages with default probabilities and required fields."""
+    __tablename__ = "crm_sales_opportunity_stages"
+
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)  # Stage name
+    stage_key: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)  # Key for enum mapping
+    order: Mapped[int] = mapped_column(Float, nullable=False, default=0)  # Display order
+    probability_default: Mapped[float | None] = mapped_column(Float)  # Default probability for this stage
+    required_fields: Mapped[str | None] = mapped_column(Text)  # JSON array of required field names
+    is_closed: Mapped[bool] = mapped_column(default=False)  # Is this a closed stage (won/lost)
+    is_won: Mapped[bool] = mapped_column(default=False)  # Is this a won stage
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class OpportunityHistory(Base):
+    """Audit trail for opportunity changes."""
+    __tablename__ = "crm_sales_opportunity_history"
+
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    opportunity_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("crm_sales_opportunities.id"), nullable=False, index=True)
+    field_name: Mapped[str] = mapped_column(String(128), nullable=False)  # Field that changed
+    old_value: Mapped[str | None] = mapped_column(Text)  # Previous value (as string)
+    new_value: Mapped[str | None] = mapped_column(Text)  # New value (as string)
+    changed_by: Mapped[str] = mapped_column(String(64), nullable=False)  # User who made the change
+    changed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    change_reason: Mapped[str | None] = mapped_column(Text)  # Optional reason for change
+
+    opportunity: Mapped[Opportunity] = relationship(back_populates="history")

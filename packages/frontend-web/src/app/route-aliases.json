@@ -65,6 +65,10 @@
       "path": "copilot"
     },
     {
+      "module": "@/pages/contracts-v2",
+      "path": "contracts"
+    },
+    {
       "module": "@/pages/crm/aktivitaet-detail",
       "path": "crm/aktivitaet/:id"
     },
@@ -89,6 +93,110 @@
       "path": "crm/lead/:id"
     },
     {
+      "module": "@/pages/crm/opportunities-liste",
+      "path": "crm/opportunities"
+    },
+    {
+      "module": "@/pages/crm/opportunity-detail",
+      "path": "crm/opportunity/:id"
+    },
+    {
+      "module": "@/pages/crm/opportunity-detail",
+      "path": "crm/opportunity/new"
+    },
+    {
+      "module": "@/pages/crm/opportunities-kanban",
+      "path": "crm/opportunities-kanban"
+    },
+    {
+      "module": "@/pages/crm/opportunities-forecast",
+      "path": "crm/opportunities-forecast"
+    },
+    {
+      "module": "@/pages/crm/consent-management",
+      "path": "crm/consents"
+    },
+    {
+      "module": "@/pages/crm/consent-detail",
+      "path": "crm/consent/:id"
+    },
+    {
+      "module": "@/pages/crm/consent-detail",
+      "path": "crm/consent/new"
+    },
+    {
+      "module": "@/pages/crm/consent-confirm",
+      "path": "crm/consent/confirm"
+    },
+    {
+      "module": "@/pages/crm/gdpr-requests",
+      "path": "crm/gdpr-requests"
+    },
+    {
+      "module": "@/pages/crm/gdpr-request-detail",
+      "path": "crm/gdpr-request/:id"
+    },
+    {
+      "module": "@/pages/crm/gdpr-request-detail",
+      "path": "crm/gdpr-request/new"
+    },
+    {
+      "module": "@/pages/crm/gdpr-request-public",
+      "path": "crm/gdpr-request-public"
+    },
+    {
+      "module": "@/pages/crm/segments",
+      "path": "crm/segments"
+    },
+    {
+      "module": "@/pages/crm/segment-detail",
+      "path": "crm/segment/:id"
+    },
+    {
+      "module": "@/pages/crm/segment-detail",
+      "path": "crm/segment/new"
+    },
+    {
+      "module": "@/pages/crm/campaigns",
+      "path": "crm/campaigns"
+    },
+    {
+      "module": "@/pages/crm/campaign-detail",
+      "path": "crm/campaign/:id"
+    },
+    {
+      "module": "@/pages/crm/campaign-detail",
+      "path": "crm/campaign/new"
+    },
+    {
+      "module": "@/pages/crm/campaigns",
+      "path": "crm/campaigns"
+    },
+    {
+      "module": "@/pages/crm/campaign-detail",
+      "path": "crm/campaign/:id"
+    },
+    {
+      "module": "@/pages/crm/campaign-detail",
+      "path": "crm/campaign/new"
+    },
+    {
+      "module": "@/pages/crm/campaign-templates",
+      "path": "crm/campaign-templates"
+    },
+    {
+      "module": "@/pages/crm/campaign-template-detail",
+      "path": "crm/campaign-template/:id"
+    },
+    {
+      "module": "@/pages/crm/campaign-template-detail",
+      "path": "crm/campaign-template/new"
+    },
+    {
+      "module": "@/pages/crm/campaign-performance-dashboard",
+      "path": "crm/campaign-performance"
+    },
+    {
       "module": "@/pages/dashboard/einkauf-dashboard",
       "path": "dashboard/einkauf"
     },
@@ -104,6 +212,62 @@
       "module": "@/pages/export/umsatzsteuervoranmeldung",
       "path": "export/ustva"
     },
+    {
+      "module": "@/pages/finance/index",
+      "path": "finance"
+    },
+    {
+      "module": "@/pages/finance/invoices-list",
+      "path": "finance/invoices"
+    },
+    {
+      "module": "@/pages/finance/invoice-form",
+      "path": "finance/invoices/new"
+    },
+    {
+      "module": "@/pages/finance/audit-trail",
+      "path": "finance/audit-trail"
+    },
+    {
+      "module": "@/pages/finance/periods",
+      "path": "finance/periods"
+    },
+    {
+      "module": "@/pages/finance/payment-matching",
+      "path": "finance/payments"
+    },
+    {
+      "module": "@/pages/finance/ap-invoices-list",
+      "path": "finance/ap/invoices"
+    },
+    {
+      "module": "@/pages/finance/ap-invoice-form",
+      "path": "finance/ap/invoices/new"
+    },
+    {
+      "module": "@/pages/finance/ap-invoice-form",
+      "path": "finance/ap/invoices/:id"
+    },
+    {
+      "module": "@/pages/finance/op-kreditoren",
+      "path": "finance/op-kreditoren"
+    },
+    {
+      "module": "@/pages/finance/debitoren-stamm",
+      "path": "finance/debitoren"
+    },
+    {
+      "module": "@/pages/finance/debitoren-stamm",
+      "path": "finance/debitoren/:id"
+    },
+        {
+          "module": "@/pages/finance/bankkonten-stamm",
+          "path": "finance/bankkonten"
+        },
+        {
+          "module": "@/pages/finance/bankkonten-stamm",
+          "path": "finance/bankkonten/:id"
+        },
     {
       "module": "@/pages/fibu/buchungsjournal",
       "path": "finance/bookings/new"

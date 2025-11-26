@@ -246,14 +246,15 @@ export default function ContractsPageV2(): JSX.Element {
   }, [contracts, query]);
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Active':
+    const statusLower = status.toLowerCase();
+    switch (statusLower) {
+      case 'active':
         return 'bg-green-100 text-green-800';
-      case 'Fulfilled':
+      case 'fulfilled':
         return 'bg-blue-100 text-blue-800';
-      case 'Cancelled':
+      case 'cancelled':
         return 'bg-red-100 text-red-800';
-      case 'Draft':
+      case 'draft':
         return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -278,7 +279,7 @@ export default function ContractsPageV2(): JSX.Element {
             printTitle={getListTitle(t, entityTypeLabel)}
           />
           <Button onClick={() => {/* Navigate to create */}}>
-            {t('crud.actions.new')} {entityTypeLabel}
+            {t('crud.actions.createContract')}
           </Button>
         </div>
       </div>
@@ -314,7 +315,7 @@ export default function ContractsPageV2(): JSX.Element {
                   <TableCell>{contract.commodity}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(contract.status)}>
-                      {getStatusLabel(t, contract.status, contract.status)}
+                      {getStatusLabel(t, contract.status.toLowerCase(), contract.status)}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -340,7 +341,7 @@ export default function ContractsPageV2(): JSX.Element {
                       >
                         {t('crud.actions.edit')}
                       </Button>
-                      {contract.status !== 'Cancelled' && contract.status !== 'Fulfilled' && (
+                      {contract.status.toLowerCase() !== 'cancelled' && contract.status.toLowerCase() !== 'fulfilled' && (
                         <>
                           <Button
                             size="sm"
@@ -496,7 +497,7 @@ export default function ContractsPageV2(): JSX.Element {
                 <p><strong>{t('crud.fields.number')}:</strong> {selectedContract.contractNo}</p>
                 <p><strong>{t('crud.fields.type')}:</strong> {selectedContract.type}</p>
                 <p><strong>{t('crud.fields.commodity')}:</strong> {selectedContract.commodity}</p>
-                <p><strong>{t('crud.fields.status')}:</strong> {getStatusLabel(t, selectedContract.status, selectedContract.status)}</p>
+                <p><strong>{t('crud.fields.status')}:</strong> {getStatusLabel(t, selectedContract.status.toLowerCase(), selectedContract.status)}</p>
                 <p><strong>{t('crud.fields.quantity')}:</strong> {selectedContract.qty.contracted} {selectedContract.qty.unit}</p>
                 <p><strong>{t('crud.fields.deliveryWindow')}:</strong> {new Date(selectedContract.deliveryWindow.from).toLocaleDateString('de-DE')} - {new Date(selectedContract.deliveryWindow.to).toLocaleDateString('de-DE')}</p>
               </div>
@@ -511,7 +512,7 @@ export default function ContractsPageV2(): JSX.Element {
                       <div className="flex justify-between items-start">
                         <div>
                           <p><strong>{t('crud.fields.type')}:</strong> {amendment.type}</p>
-                          <p><strong>{t('crud.fields.status')}:</strong> {getStatusLabel(t, amendment.status, amendment.status)}</p>
+                          <p><strong>{t('crud.fields.status')}:</strong> {getStatusLabel(t, amendment.status.toLowerCase(), amendment.status)}</p>
                           <p><strong>{t('crud.fields.reason')}:</strong> {amendment.reason}</p>
                           <p className="text-xs text-muted-foreground">
                             {new Date(amendment.createdAt).toLocaleString('de-DE')}

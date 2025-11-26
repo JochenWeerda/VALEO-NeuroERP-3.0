@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -64,18 +64,47 @@ export default function LieferungenListePage(): JSX.Element {
   const pageTitle = getListTitle(t, entityTypeLabel)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<Lieferung['status'] | 'alle'>('alle')
+  const [lieferungen, setLieferungen] = useState<Lieferung[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const getStatusLabelLocal = (status: Lieferung['status']): string => {
-    const statusMap: Record<Lieferung['status'], string> = {
-      geplant: t('status.planned'),
-      unterwegs: t('status.inTransit'),
-      zugestellt: t('status.delivered'),
-      storniert: t('status.cancelled'),
+
+  // Lade Daten von API
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch('/api/mcp/documents/sales_delivery?skip=0&limit=100')
+        if (response.ok) {
+          const result = await response.json()
+          if (result.ok && result.data) {
+            // Transformiere API-Daten
+            const transformed = result.data.map((doc: any) => ({
+              id: doc.number,
+              nummer: doc.number,
+              datum: doc.date,
+              kunde: doc.customerId || '',
+              auftragsNr: doc.sourceOrder || '',
+              menge: doc.lines?.reduce((sum: number, line: any) => sum + (line.qty || 0), 0) || 0,
+              status: (doc.status?.toLowerCase() || 'geplant') as Lieferung['status'],
+            }))
+            setLieferungen(transformed.length > 0 ? transformed : mockLieferungen)
+          } else {
+            setLieferungen(mockLieferungen)
+          }
+        } else {
+          setLieferungen(mockLieferungen)
+        }
+      } catch (error) {
+        console.error('Fehler beim Laden der Lieferungen:', error)
+        setLieferungen(mockLieferungen)
+      } finally {
+        setLoading(false)
+      }
     }
-    return statusMap[status] || status
-  }
+    loadData()
+  }, [])
 
-  const filteredLieferungen = mockLieferungen.filter((lieferung) => {
+  const filteredLieferungen = lieferungen.filter((lieferung) => {
     const matchesSearch =
       lieferung.nummer.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lieferung.kunde.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -126,7 +155,7 @@ export default function LieferungenListePage(): JSX.Element {
       key: 'status' as const,
       label: t('crud.fields.status'),
       render: (lieferung: Lieferung) => (
-        <Badge variant={statusVariantMap[lieferung.status]}>{getStatusLabelLocal(lieferung.status)}</Badge>
+        <Badge variant={statusVariantMap[lieferung.status]}>{getStatusLabel(t, lieferung.status, lieferung.status)}</Badge>
       ),
     },
   ]
