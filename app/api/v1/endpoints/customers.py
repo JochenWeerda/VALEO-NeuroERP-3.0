@@ -134,7 +134,7 @@ def _adapt_customer(core_customer: CRMCoreCustomer) -> Customer:
 
 def _map_create_payload(customer_data: CustomerCreate) -> dict[str, Optional[str]]:
     """Convert monolith DTO into crm-core payload."""
-    return {
+    payload = {
         "display_name": customer_data.company_name,
         "email": customer_data.email,
         "phone": customer_data.phone,
@@ -142,6 +142,12 @@ def _map_create_payload(customer_data: CustomerCreate) -> dict[str, Optional[str
         "region": customer_data.city or customer_data.country,
         "notes": _compose_notes(customer_data),
     }
+    # Neue Sales-Felder hinzufügen (werden in domain_crm.crm_customers gespeichert)
+    if hasattr(customer_data, 'price_group') and customer_data.price_group:
+        payload["price_group"] = customer_data.price_group
+    if hasattr(customer_data, 'tax_category') and customer_data.tax_category:
+        payload["tax_category"] = customer_data.tax_category
+    return payload
 
 
 def _map_update_payload(customer_data: CustomerUpdate) -> dict[str, Optional[str]]:
@@ -152,6 +158,9 @@ def _map_update_payload(customer_data: CustomerUpdate) -> dict[str, Optional[str
         "phone": "phone",
         "industry": "industry",
         "city": "region",
+        # Neue Sales-Felder (SALES-CRM-02)
+        "price_group": "price_group",
+        "tax_category": "tax_category",
     }
     data = customer_data.model_dump(exclude_unset=True)
     for source, target in mapped_fields.items():

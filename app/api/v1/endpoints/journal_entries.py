@@ -41,6 +41,23 @@ async def create_journal_entry(
                 detail=f"Journal entry does not balance. Debit: {total_debit}, Credit: {total_credit}"
             )
 
+        # FIBU-GL-05: Check if period is open for bookings
+        if entry_data.period:
+            from sqlalchemy import text
+            period_check = db.execute(
+                text("""
+                    SELECT status FROM finance_accounting_periods
+                    WHERE tenant_id = :tenant_id AND period = :period
+                """),
+                {"tenant_id": entry_data.tenant_id, "period": entry_data.period}
+            ).fetchone()
+
+            if period_check and period_check[0] != "OPEN":
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"Period {entry_data.period} is {period_check[0]}. Bookings are blocked for closed periods."
+                )
+
         entry_repo = container.resolve(JournalEntryRepository)
 
         # Create the entry data
