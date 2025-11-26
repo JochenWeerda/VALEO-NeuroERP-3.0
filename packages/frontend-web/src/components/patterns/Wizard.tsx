@@ -25,11 +25,11 @@ export interface WizardProps {
   subtitle?: string
   steps: WizardStep[]
   initialStepId?: string
-  onStepChange?: (stepId: string) => void
+  onStepChange?: (_stepId: string) => void
   onCancel?: () => void
   onFinish?: () => void
-  onNextStep?: (currentStepId: string) => void
-  onPreviousStep?: (currentStepId: string) => void
+  onNextStep?: (_currentStepId: string) => void
+  onPreviousStep?: (_currentStepId: string) => void
   labels?: Partial<WizardLabels>
   loading?: boolean
   allowStepNavigation?: boolean

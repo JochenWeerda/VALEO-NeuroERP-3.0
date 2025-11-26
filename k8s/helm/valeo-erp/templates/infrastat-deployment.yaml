@@ -1,0 +1,60 @@
+{{- if .Values.infrastat.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-infrastat
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "valeo-erp.name" . }}-infrastat
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "valeo-erp.name" . }}-infrastat
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ include "valeo-erp.serviceAccountName" . }}
+      containers:
+        - name: infrastat
+          image: "{{ .Values.infrastat.image.repository }}:{{ .Values.infrastat.image.tag }}"
+          imagePullPolicy: {{ default "IfNotPresent" .Values.infrastat.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.infrastat.servicePort }}
+              name: http
+          env:
+            {{- range $key, $val := .Values.infrastat.env }}
+            - name: {{ $key }}
+              value: "{{ $val }}"
+            {{- end }}
+            {{- range $ref := .Values.infrastat.secretRefs }}
+            - name: {{ $ref.env }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $ref.name }}
+                  key: {{ $ref.key }}
+            {{- end }}
+          {{- if .Values.infrastat.resources }}
+          resources:
+            {{- toYaml .Values.infrastat.resources | nindent 12 }}
+          {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-infrastat
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: {{ include "valeo-erp.name" . }}-infrastat
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: http
+      port: {{ .Values.infrastat.servicePort }}
+      targetPort: {{ .Values.infrastat.servicePort }}
+{{- end }}

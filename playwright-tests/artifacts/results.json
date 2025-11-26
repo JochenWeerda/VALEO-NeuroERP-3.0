@@ -1,0 +1,123 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\Jochen\\VALEO-NeuroERP-3.0\\playwright.config.ts",
+    "rootDir": "C:/Users/Jochen/VALEO-NeuroERP-3.0/playwright-tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": "C:\\Users\\Jochen\\VALEO-NeuroERP-3.0\\playwright.global-setup.mjs",
+    "globalTeardown": "C:\\Users\\Jochen\\VALEO-NeuroERP-3.0\\playwright.global-teardown.mjs",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "playwright-tests/artifacts/html-report"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "playwright-tests/artifacts/results.json"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 15000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/Users/Jochen/VALEO-NeuroERP-3.0/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "auth-api",
+        "name": "auth-api",
+        "testDir": "C:/Users/Jochen/VALEO-NeuroERP-3.0/playwright-tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/auth-api\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Jochen/VALEO-NeuroERP-3.0/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "smoke",
+        "name": "smoke",
+        "testDir": "C:/Users/Jochen/VALEO-NeuroERP-3.0/playwright-tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*smoke\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Jochen/VALEO-NeuroERP-3.0/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "full",
+        "name": "full",
+        "testDir": "C:/Users/Jochen/VALEO-NeuroERP-3.0/playwright-tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Jochen/VALEO-NeuroERP-3.0/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "fallback-verification",
+        "name": "fallback-verification",
+        "testDir": "C:/Users/Jochen/VALEO-NeuroERP-3.0/playwright-tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/fallback-verification\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "version": "1.48.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [],
+  "errors": [
+    {
+      "message": "Error: pnpm --filter frontend-web build exited with code 1",
+      "stack": "Error: pnpm --filter frontend-web build exited with code 1\n    at ChildProcess.<anonymous> (C:\\Users\\Jochen\\VALEO-NeuroERP-3.0\\playwright.global-setup.mjs:28:16)",
+      "location": {
+        "file": "C:\\Users\\Jochen\\VALEO-NeuroERP-3.0\\playwright.global-setup.mjs",
+        "column": 16,
+        "line": 28
+      },
+      "snippet": "   at ..\\playwright.global-setup.mjs:28\n\n\u001b[0m \u001b[90m 26 |\u001b[39m         resolve()\u001b[33m;\u001b[39m\n \u001b[90m 27 |\u001b[39m       } \u001b[36melse\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 28 |\u001b[39m         reject(\u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m`${command} ${args.join(\" \")} exited with code ${code}`\u001b[39m))\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 29 |\u001b[39m       }\n \u001b[90m 30 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 31 |\u001b[39m     proc\u001b[33m.\u001b[39mon(\u001b[32m\"error\"\u001b[39m\u001b[33m,\u001b[39m reject)\u001b[33m;\u001b[39m\u001b[0m"
+    }
+  ],
+  "stats": {
+    "startTime": "2025-11-16T01:55:21.692Z",
+    "duration": 2625.0460000000003,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

@@ -265,7 +265,7 @@ export default function WorkflowRegelnPage(): JSX.Element {
 
 interface WorkflowRuleFormProps {
   rule: WorkflowRule | null
-  onSave: (rule: Partial<WorkflowRule>) => void
+  onSave: (_rule: Partial<WorkflowRule>) => void
   onCancel: () => void
 }
 

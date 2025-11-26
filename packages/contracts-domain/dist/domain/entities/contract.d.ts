@@ -262,20 +262,20 @@ export declare const ContractSchema: z.ZodObject<{
     updatedAt: z.ZodOptional<z.ZodDate>;
     version: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
+    status: "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Cancelled" | "Defaulted";
     type: "Buy" | "Sell";
-    status: "Cancelled" | "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Defaulted";
     tenantId: string;
-    version: number;
-    qty: {
-        unit: "t" | "mt";
-        contracted: number;
-        tolerance?: number | undefined;
-    };
+    contractNo: string;
     commodity: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER";
     counterpartyId: string;
     deliveryWindow: {
         from: string;
         to: string;
+    };
+    qty: {
+        unit: "t" | "mt";
+        contracted: number;
+        tolerance?: number | undefined;
     };
     pricing: {
         mode: "FORWARD_CASH" | "BASIS" | "HTA" | "DEFERRED" | "MIN_PRICE" | "FIXED" | "INDEXED";
@@ -302,24 +302,25 @@ export declare const ContractSchema: z.ZodObject<{
         } | undefined;
         qualitySpecs?: Record<string, any> | undefined;
     };
-    contractNo: string;
+    version: number;
     id?: string | undefined;
+    incoterm?: string | undefined;
     createdAt?: Date | undefined;
     updatedAt?: Date | undefined;
-    incoterm?: string | undefined;
 }, {
     type: "Buy" | "Sell";
     tenantId: string;
-    qty: {
-        unit: "t" | "mt";
-        contracted: number;
-        tolerance?: number | undefined;
-    };
+    contractNo: string;
     commodity: "WHEAT" | "BARLEY" | "RAPESEED" | "SOYMEAL" | "COMPOUND_FEED" | "FERTILIZER";
     counterpartyId: string;
     deliveryWindow: {
         from: string;
         to: string;
+    };
+    qty: {
+        unit: "t" | "mt";
+        contracted: number;
+        tolerance?: number | undefined;
     };
     pricing: {
         mode: "FORWARD_CASH" | "BASIS" | "HTA" | "DEFERRED" | "MIN_PRICE" | "FIXED" | "INDEXED";
@@ -346,13 +347,12 @@ export declare const ContractSchema: z.ZodObject<{
         } | undefined;
         qualitySpecs?: Record<string, any> | undefined;
     };
-    contractNo: string;
-    status?: "Cancelled" | "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Defaulted" | undefined;
+    status?: "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Cancelled" | "Defaulted" | undefined;
     id?: string | undefined;
+    incoterm?: string | undefined;
     createdAt?: Date | undefined;
     updatedAt?: Date | undefined;
     version?: number | undefined;
-    incoterm?: string | undefined;
 }>;
 export interface PricingTerms {
     mode: PricingModeValue;
@@ -386,7 +386,7 @@ export interface ContractEntity {
     type: ContractTypeValue;
     commodity: CommodityTypeValue;
     counterpartyId: string;
-    incoterm?: string;
+    incoterm?: string | undefined;
     deliveryWindow: {
         from: Date;
         to: Date;
@@ -394,11 +394,12 @@ export interface ContractEntity {
     qty: {
         unit: 't' | 'mt';
         contracted: number;
-        tolerance?: number;
+        tolerance?: number | undefined;
     };
     pricing: PricingTerms;
     delivery: DeliveryTerms;
     status: ContractStatusValue;
+    documentId?: string | undefined;
     createdAt: Date;
     updatedAt: Date;
     version: number;
@@ -418,11 +419,12 @@ export declare class Contract implements ContractEntity {
     qty: {
         unit: 't' | 'mt';
         contracted: number;
-        tolerance?: number;
+        tolerance?: number | undefined;
     };
     pricing: PricingTerms;
     delivery: DeliveryTerms;
     status: ContractStatusValue;
+    documentId?: string;
     createdAt: Date;
     updatedAt: Date;
     version: number;

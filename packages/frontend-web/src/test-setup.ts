@@ -17,11 +17,9 @@ if (!("matchMedia" in window)) {
 // Polyfill ResizeObserver if not present (JSDOM < v20).
 if (!("ResizeObserver" in window)) {
   class ResizeObserver {
-    /* eslint-disable @typescript-eslint/no-empty-function */
     observe() {}
     unobserve() {}
     disconnect() {}
-    /* eslint-enable @typescript-eslint/no-empty-function */
   }
   // @ts-expect-error - polyfill assignment
   window.ResizeObserver = ResizeObserver;

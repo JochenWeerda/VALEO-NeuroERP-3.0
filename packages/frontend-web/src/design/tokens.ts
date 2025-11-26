@@ -25,7 +25,6 @@ export function getToken(path: string): unknown {
   const segments = path.split(".").filter(Boolean) as PathSegments[];
   return segments.reduce<unknown>((acc, segment) => {
     if (acc && typeof acc === "object" && segment in acc) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (acc as Record<PathSegments, unknown>)[segment];
     }
     throw new Error(`Design token "${path}" not found.`);

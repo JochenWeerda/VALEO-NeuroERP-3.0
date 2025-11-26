@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { useToast } from '@/hooks/use-toast'
 
 interface ActionHandler {
-  (action: string, data?: any): Promise<void> | void
+  (_action: string, _data?: any): Promise<void> | void
 }
 
 export function useMaskActions(onAction?: ActionHandler) {

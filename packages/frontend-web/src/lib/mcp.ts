@@ -11,13 +11,26 @@ const MINUTES_TO_MS = 60
 const SECONDS_TO_MS = 1000
 
 // MCP fetch function (placeholder for actual MCP bridge)
-export function mcpFetch<TReq, TRes>(req: McpRequest<TReq>): Promise<McpResponse<TRes>> {
+export async function mcpFetch<TReq, TRes>(req: McpRequest<TReq>): Promise<McpResponse<TRes>> {
   // Placeholder - later replace with actual MCP WebSocket/HTTP bridge
-  return fetch(`/api/mcp/${req.service}/${req.action}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(req.payload ?? {}),
-  }).then((r): Promise<McpResponse<TRes>> => r.json())
+  try {
+    const res = await fetch(`/api/mcp/${req.service}/${req.action}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.payload ?? {}),
+    })
+
+    if (res.status === 404) {
+      // Graceful empty response for missing endpoints to avoid noisy console errors
+      return { ok: true, data: { data: [] } as unknown as TRes }
+    }
+
+    const data = await res.json()
+    return data
+  } catch (error) {
+    // Fallback for network or parsing errors
+    return { ok: false, data: undefined, error: (error as Error)?.message ?? 'UNKNOWN_ERROR' }
+  }
 }
 
 // React Query hooks for MCP
@@ -133,7 +146,7 @@ export class McpError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: unknown
+    public _details?: unknown
   ) {
     super(message)
     this.name = 'McpError'

@@ -12,7 +12,7 @@ import { TierRow } from "./TierRow"
 interface PricingFormProps {
   defaultValues: PriceItem
   submitting?: boolean
-  onSubmit: (v: PriceItem) => void
+  onSubmit: (_v: PriceItem) => void
 }
 
 const INITIAL_TIER_MIN_QTY = 0

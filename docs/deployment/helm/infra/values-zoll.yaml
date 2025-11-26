@@ -1,0 +1,18 @@
+zoll:
+  enabled: true
+  image:
+    repository: ghcr.io/valeo-neuroerp/zoll-service
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  env:
+    ZOLL_SANCTIONS_REFRESH_INTERVAL_MINUTES: "120"
+    ZOLL_SANCTIONS_REFRESH_BACKOFF_MINUTES: "30"
+    ZOLL_SANCTIONS_REFRESH_MAX_BACKOFF_MINUTES: "720"
+    ZOLL_WORKFLOW_TENANT: "zoll"
+  secretRefs:
+    - env: ZOLL_OFAC_API_KEY
+      name: zoll-sanctions
+      key: ofacApiKey
+    - env: ZOLL_EU_API_KEY
+      name: zoll-sanctions
+      key: euApiKey

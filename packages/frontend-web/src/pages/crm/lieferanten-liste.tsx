@@ -6,6 +6,7 @@ import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { toast } from '@/hooks/use-toast'
 
 // API Client für Lieferanten
 const apiClient = createApiClient('/api/crm')
@@ -319,7 +320,37 @@ export default function LieferantenListePage(): JSX.Element {
   }
 
   const handleExport = () => {
-    alert('Export-Funktion wird implementiert')
+    try {
+      // Create CSV content
+      const csvHeader = 'Firma;Ort;Land;Telefon;E-Mail;Z-Bedingungen;Rabatt;Min-Bestellwert;Lieferzeit;QS-Zert;Bio-Zert;Gesamtumsatz;Status\n'
+      const csvContent = data.map((lieferant: any) =>
+        `"${lieferant.firma}";"${lieferant.plz} ${lieferant.ort}";"${lieferant.land || ''}";"${lieferant.telefon || ''}";"${lieferant.email || ''}";"${lieferant.zahlungsbedingungen || '30 Tage'}";"${lieferant.rabatt || 0}";"${lieferant.mindestbestellwert || 0}";"${lieferant.lieferzeit || 0}";"${lieferant.qualitaetszertifikat ? 'Ja' : 'Nein'}";"${lieferant.bioZertifiziert ? 'Ja' : 'Nein'}";"${lieferant.umsatzGesamt || 0}";"${lieferant.status || 'aktiv'}"`
+      ).join('\n')
+
+      const csv = csvHeader + csvContent
+
+      // Create and download file
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `lieferanten-liste-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: 'Export erfolgreich',
+        description: `${data.length} Lieferanten wurden exportiert.`,
+      })
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Export fehlgeschlagen',
+        description: 'Beim Exportieren ist ein Fehler aufgetreten.',
+      })
+    }
   }
 
   return (
@@ -331,7 +362,12 @@ export default function LieferantenListePage(): JSX.Element {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onExport={handleExport}
-      onImport={() => alert('Import-Funktion wird implementiert')}
+      onImport={() => {
+        toast({
+          title: 'Import-Funktion',
+          description: 'CSV-Import wird in der nächsten Version verfügbar sein.',
+        })
+      }}
       isLoading={loading}
     />
   )

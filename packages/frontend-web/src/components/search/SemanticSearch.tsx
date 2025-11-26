@@ -28,7 +28,6 @@ type SearchResult = {
   metadata?: Record<string, string>
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function SemanticSearch() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -75,7 +74,6 @@ export function SemanticSearch() {
         const data = response.data
 
         // Transform to SearchResults
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const searchResults: SearchResult[] = (data as any).results?.map((r: any) => ({
           id: r.id || r.metadata?.id || 'unknown',
           type: r.metadata?.type || 'document',

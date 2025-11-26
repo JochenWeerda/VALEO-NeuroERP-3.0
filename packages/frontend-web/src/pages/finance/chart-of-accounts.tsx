@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,28 +11,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { FileDown, Plus, Search, Edit, Trash2, Loader2, Building2, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { FileDown, Plus, Search, Edit, Trash2, Loader2, Building2, TrendingUp, TrendingDown, DollarSign, ListTree } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { queryKeys } from '@/lib/query'
-import { financeService, type Account } from '@/lib/services/finance-service'
+import { financeService, type Account, type AccountHierarchy } from '@/lib/services/finance-service'
 import { toast } from 'sonner'
+import { TreeView, type TreeNode } from '@/components/ui/tree-view'
 
 // Form schemas
 const accountCreateSchema = z.object({
-  account_number: z.string().min(1, 'Kontonummer ist erforderlich').max(20, 'Max. 20 Zeichen'),
-  account_name: z.string().min(1, 'Kontoname ist erforderlich').max(100, 'Max. 100 Zeichen'),
+  account_number: z.string().min(1).max(20),
+  account_name: z.string().min(1).max(100),
   account_type: z.enum(['asset', 'liability', 'equity', 'revenue', 'expense']),
-  category: z.string().min(1, 'Kategorie ist erforderlich'),
+  category: z.string().min(1),
   currency: z.string().length(3, 'Währung muss 3 Zeichen haben').default('EUR'),
   allow_manual_entries: z.boolean().default(true),
 })
 
 const accountUpdateSchema = z.object({
-  account_name: z.string().min(1, 'Kontoname ist erforderlich').max(100, 'Max. 100 Zeichen').optional(),
+  account_name: z.string().min(1).max(100).optional(),
   account_type: z.enum(['asset', 'liability', 'equity', 'revenue', 'expense']).optional(),
-  category: z.string().min(1, 'Kategorie ist erforderlich').optional(),
+  category: z.string().min(1).optional(),
   currency: z.string().length(3, 'Währung muss 3 Zeichen haben').optional(),
   allow_manual_entries: z.boolean().optional(),
 })
@@ -40,6 +43,7 @@ type AccountCreateForm = z.infer<typeof accountCreateSchema>
 type AccountUpdateForm = z.infer<typeof accountUpdateSchema>
 
 export default function ChartOfAccountsPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
@@ -56,6 +60,14 @@ export default function ChartOfAccountsPage(): JSX.Element {
       search: searchTerm || undefined,
       limit: 100,
     }),
+  })
+
+  const { data: hierarchyData, isLoading: isLoadingHierarchy } = useQuery({
+    queryKey: ['accounts', 'hierarchy', typeFilter],
+    queryFn: () => financeService.getAccountsHierarchy({
+      account_type: typeFilter !== 'all' ? typeFilter : undefined,
+    }),
+    enabled: true, // Always load hierarchy
   })
 
   const accounts = accountsData?.items || []
@@ -164,7 +176,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
   const columns = [
     {
       key: 'account_number' as const,
-      label: 'Kontonummer',
+      label: t('crud.fields.accountNumber'),
       render: (account: Account) => (
         <button
           onClick={() => navigate(`/finance/accounts/${account.id}`)}
@@ -176,15 +188,31 @@ export default function ChartOfAccountsPage(): JSX.Element {
     },
     {
       key: 'account_name' as const,
-      label: 'Kontoname',
-      render: (account: Account) => (
-        <div>
-          <div className="font-medium">{account.account_name}</div>
-          <div className="text-sm text-muted-foreground">
-            {financeService.getAccountCategoryLabel(account.category)}
+      label: t('crud.fields.accountName'),
+      render: (account: Account) => {
+        const getCategoryLabel = (cat: string) => {
+          const categoryMap: Record<string, string> = {
+            'current_assets': t('crud.fields.accountCategoryCurrentAssets'),
+            'fixed_assets': t('crud.fields.accountCategoryFixedAssets'),
+            'current_liabilities': t('crud.fields.accountCategoryCurrentLiabilities'),
+            'long_term_liabilities': t('crud.fields.accountCategoryLongTermLiabilities'),
+            'equity': t('crud.fields.accountCategoryEquity'),
+            'revenue': t('crud.fields.accountCategoryRevenue'),
+            'cost_of_goods_sold': t('crud.fields.accountCategoryCostOfGoodsSold'),
+            'operating_expenses': t('crud.fields.accountCategoryOperatingExpenses'),
+            'other_expenses': t('crud.fields.accountCategoryOtherExpenses')
+          }
+          return categoryMap[cat] || cat
+        }
+        return (
+          <div>
+            <div className="font-medium">{account.account_name}</div>
+            <div className="text-sm text-muted-foreground">
+              {getCategoryLabel(account.category)}
+            </div>
           </div>
-        </div>
-      ),
+        )
+      },
     },
     {
       key: 'account_type' as const,
@@ -207,7 +235,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
         <div className={`font-mono text-right ${
           account.balance >= 0 ? 'text-green-600' : 'text-red-600'
         }`}>
-          {financeService.formatCurrency(account.balance, account.currency)}
+          {new Intl.NumberFormat('de-DE', { style: 'currency', currency: account.currency || 'EUR' }).format(account.balance)}
         </div>
       ),
     },
@@ -307,7 +335,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
                   name="account_number"
                   render={({ field }: any) => (
                     <FormItem>
-                      <FormLabel>Kontonummer *</FormLabel>
+                      <FormLabel>{t('crud.fields.accountNumber')} *</FormLabel>
                       <FormControl>
                         <Input placeholder="z.B. 1000" {...field} />
                       </FormControl>
@@ -320,7 +348,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
                   name="account_name"
                   render={({ field }: any) => (
                     <FormItem>
-                      <FormLabel>Kontoname *</FormLabel>
+                      <FormLabel>{t('crud.fields.accountName')} *</FormLabel>
                       <FormControl>
                         <Input placeholder="z.B. Kasse" {...field} />
                       </FormControl>
@@ -333,19 +361,19 @@ export default function ChartOfAccountsPage(): JSX.Element {
                   name="account_type"
                   render={({ field }: any) => (
                     <FormItem>
-                      <FormLabel>Kontotyp *</FormLabel>
+                      <FormLabel>{t('crud.fields.accountType')} *</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Typ auswählen" />
+                            <SelectValue placeholder={t('crud.fields.selectType')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="asset">Aktiva</SelectItem>
-                          <SelectItem value="liability">Passiva</SelectItem>
-                          <SelectItem value="equity">Eigenkapital</SelectItem>
-                          <SelectItem value="revenue">Erlöse</SelectItem>
-                          <SelectItem value="expense">Aufwendungen</SelectItem>
+                          <SelectItem value="asset">{t('crud.fields.accountTypeAsset')}</SelectItem>
+                          <SelectItem value="liability">{t('crud.fields.accountTypeLiability')}</SelectItem>
+                          <SelectItem value="equity">{t('crud.fields.accountTypeEquity')}</SelectItem>
+                          <SelectItem value="revenue">{t('crud.fields.accountTypeRevenue')}</SelectItem>
+                          <SelectItem value="expense">{t('crud.fields.accountTypeExpense')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -357,23 +385,23 @@ export default function ChartOfAccountsPage(): JSX.Element {
                   name="category"
                   render={({ field }: any) => (
                     <FormItem>
-                      <FormLabel>Kategorie *</FormLabel>
+                      <FormLabel>{t('crud.fields.accountCategory')} *</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Kategorie auswählen" />
+                            <SelectValue placeholder={t('crud.fields.selectCategory')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="current_assets">Umlaufvermögen</SelectItem>
-                          <SelectItem value="fixed_assets">Anlagevermögen</SelectItem>
-                          <SelectItem value="current_liabilities">Kurzfristige Verbindlichkeiten</SelectItem>
-                          <SelectItem value="long_term_liabilities">Langfristige Verbindlichkeiten</SelectItem>
-                          <SelectItem value="equity">Eigenkapital</SelectItem>
-                          <SelectItem value="revenue">Erlöse</SelectItem>
-                          <SelectItem value="cost_of_goods_sold">Wareneinsatz</SelectItem>
-                          <SelectItem value="operating_expenses">Betriebliche Aufwendungen</SelectItem>
-                          <SelectItem value="other_expenses">Sonstige Aufwendungen</SelectItem>
+                          <SelectItem value="current_assets">{t('crud.fields.accountCategoryCurrentAssets')}</SelectItem>
+                          <SelectItem value="fixed_assets">{t('crud.fields.accountCategoryFixedAssets')}</SelectItem>
+                          <SelectItem value="current_liabilities">{t('crud.fields.accountCategoryCurrentLiabilities')}</SelectItem>
+                          <SelectItem value="long_term_liabilities">{t('crud.fields.accountCategoryLongTermLiabilities')}</SelectItem>
+                          <SelectItem value="equity">{t('crud.fields.accountCategoryEquity')}</SelectItem>
+                          <SelectItem value="revenue">{t('crud.fields.accountCategoryRevenue')}</SelectItem>
+                          <SelectItem value="cost_of_goods_sold">{t('crud.fields.accountCategoryCostOfGoodsSold')}</SelectItem>
+                          <SelectItem value="operating_expenses">{t('crud.fields.accountCategoryOperatingExpenses')}</SelectItem>
+                          <SelectItem value="other_expenses">{t('crud.fields.accountCategoryOtherExpenses')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -419,7 +447,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Aktiva</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('crud.fields.accountTypeAsset')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -431,7 +459,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Passiva</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('crud.fields.accountTypeLiability')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -488,7 +516,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
             <div className="relative flex-1 min-w-64">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Suche nach Kontonummer oder -name..."
+                placeholder={t('crud.fields.searchAccountPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -496,27 +524,27 @@ export default function ChartOfAccountsPage(): JSX.Element {
             </div>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Alle Typen" />
+                <SelectValue placeholder={t('crud.fields.allTypes')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Alle Typen</SelectItem>
-                <SelectItem value="asset">Aktiva</SelectItem>
-                <SelectItem value="liability">Passiva</SelectItem>
-                <SelectItem value="equity">Eigenkapital</SelectItem>
-                <SelectItem value="revenue">Erlöse</SelectItem>
-                <SelectItem value="expense">Aufwendungen</SelectItem>
+                <SelectItem value="all">{t('crud.fields.allTypes')}</SelectItem>
+                <SelectItem value="asset">{t('crud.fields.accountTypeAsset')}</SelectItem>
+                <SelectItem value="liability">{t('crud.fields.accountTypeLiability')}</SelectItem>
+                <SelectItem value="equity">{t('crud.fields.accountTypeEquity')}</SelectItem>
+                <SelectItem value="revenue">{t('crud.fields.accountTypeRevenue')}</SelectItem>
+                <SelectItem value="expense">{t('crud.fields.accountTypeExpense')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Alle Kategorien" />
+                <SelectValue placeholder={t('crud.fields.allCategories')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Alle Kategorien</SelectItem>
-                <SelectItem value="current_assets">Umlaufvermögen</SelectItem>
-                <SelectItem value="fixed_assets">Anlagevermögen</SelectItem>
-                <SelectItem value="current_liabilities">Kurzfristige Verbindlichkeiten</SelectItem>
-                <SelectItem value="long_term_liabilities">Langfristige Verbindlichkeiten</SelectItem>
+                <SelectItem value="all">{t('crud.fields.allCategories')}</SelectItem>
+                <SelectItem value="current_assets">{t('crud.fields.accountCategoryCurrentAssets')}</SelectItem>
+                <SelectItem value="fixed_assets">{t('crud.fields.accountCategoryFixedAssets')}</SelectItem>
+                <SelectItem value="current_liabilities">{t('crud.fields.accountCategoryCurrentLiabilities')}</SelectItem>
+                <SelectItem value="long_term_liabilities">{t('crud.fields.accountCategoryLongTermLiabilities')}</SelectItem>
                 <SelectItem value="equity">Eigenkapital</SelectItem>
                 <SelectItem value="revenue">Erlöse</SelectItem>
                 <SelectItem value="cost_of_goods_sold">Wareneinsatz</SelectItem>
@@ -532,17 +560,65 @@ export default function ChartOfAccountsPage(): JSX.Element {
         </CardContent>
       </Card>
 
-      {/* Accounts Table */}
+      {/* Accounts Table / Hierarchy View */}
       <Card>
         <CardContent className="pt-6">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
-              <span className="ml-2">Lade Konten...</span>
-            </div>
-          ) : (
-            <DataTable data={filteredAccounts} columns={columns} />
-          )}
+          <Tabs defaultValue="table" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="table">Tabellenansicht</TabsTrigger>
+              <TabsTrigger value="hierarchy" className="gap-2">
+                <ListTree className="h-4 w-4" />
+                Hierarchie
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="table">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <span className="ml-2">Lade Konten...</span>
+                </div>
+              ) : (
+                <DataTable data={filteredAccounts} columns={columns} />
+              )}
+            </TabsContent>
+            <TabsContent value="hierarchy">
+              {isLoadingHierarchy ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <span className="ml-2">Lade Hierarchie...</span>
+                </div>
+              ) : hierarchyData && hierarchyData.length > 0 ? (
+                <div className="space-y-4">
+                  {hierarchyData.map((rootAccount) => {
+                    const convertToTreeNode = (acc: AccountHierarchy): TreeNode => ({
+                      id: acc.id,
+                      label: `${acc.account_number} - ${acc.account_name} (${new Intl.NumberFormat('de-DE', { style: 'currency', currency: acc.currency || 'EUR' }).format(acc.balance)})`,
+                      children: acc.children.map(convertToTreeNode),
+                      data: acc,
+                    })
+                    return (
+                      <TreeView
+                        key={rootAccount.id}
+                        nodes={[convertToTreeNode(rootAccount)]}
+                        onNodeClick={(node) => {
+                          const account = node.data as AccountHierarchy
+                          if (account) {
+                            handleEdit(account as any)
+                          }
+                        }}
+                        defaultExpanded={[rootAccount.id]}
+                        className="border rounded-lg p-4"
+                      />
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  Keine Konten gefunden. Erstellen Sie ein neues Konto, um zu beginnen.
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -559,7 +635,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
                 name="account_name"
                 render={({ field }: any) => (
                   <FormItem>
-                    <FormLabel>Kontoname *</FormLabel>
+                    <FormLabel>{t('crud.fields.accountName')} *</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -572,47 +648,47 @@ export default function ChartOfAccountsPage(): JSX.Element {
                 name="account_type"
                 render={({ field }: any) => (
                   <FormItem>
-                    <FormLabel>Kontotyp *</FormLabel>
+                    <FormLabel>{t('crud.fields.accountType')} *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Typ auswählen" />
+                          <SelectValue placeholder={t('crud.fields.selectType')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="asset">Aktiva</SelectItem>
-                        <SelectItem value="liability">Passiva</SelectItem>
-                        <SelectItem value="equity">Eigenkapital</SelectItem>
-                        <SelectItem value="revenue">Erlöse</SelectItem>
-                        <SelectItem value="expense">Aufwendungen</SelectItem>
+                        <SelectItem value="asset">{t('crud.fields.accountTypeAsset')}</SelectItem>
+                        <SelectItem value="liability">{t('crud.fields.accountTypeLiability')}</SelectItem>
+                        <SelectItem value="equity">{t('crud.fields.accountTypeEquity')}</SelectItem>
+                        <SelectItem value="revenue">{t('crud.fields.accountTypeRevenue')}</SelectItem>
+                        <SelectItem value="expense">{t('crud.fields.accountTypeExpense')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={updateForm.control}
-                name="category"
-                render={({ field }: any) => (
-                  <FormItem>
-                    <FormLabel>Kategorie *</FormLabel>
+                <FormField
+                  control={updateForm.control}
+                  name="category"
+                  render={({ field }: any) => (
+                    <FormItem>
+                    <FormLabel>{t('crud.fields.accountCategory')} *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Kategorie auswählen" />
+                          <SelectValue placeholder={t('crud.fields.selectCategory')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="current_assets">Umlaufvermögen</SelectItem>
-                        <SelectItem value="fixed_assets">Anlagevermögen</SelectItem>
-                        <SelectItem value="current_liabilities">Kurzfristige Verbindlichkeiten</SelectItem>
-                        <SelectItem value="long_term_liabilities">Langfristige Verbindlichkeiten</SelectItem>
-                        <SelectItem value="equity">Eigenkapital</SelectItem>
-                        <SelectItem value="revenue">Erlöse</SelectItem>
-                        <SelectItem value="cost_of_goods_sold">Wareneinsatz</SelectItem>
-                        <SelectItem value="operating_expenses">Betriebliche Aufwendungen</SelectItem>
-                        <SelectItem value="other_expenses">Sonstige Aufwendungen</SelectItem>
+                        <SelectItem value="current_assets">{t('crud.fields.accountCategoryCurrentAssets')}</SelectItem>
+                        <SelectItem value="fixed_assets">{t('crud.fields.accountCategoryFixedAssets')}</SelectItem>
+                        <SelectItem value="current_liabilities">{t('crud.fields.accountCategoryCurrentLiabilities')}</SelectItem>
+                        <SelectItem value="long_term_liabilities">{t('crud.fields.accountCategoryLongTermLiabilities')}</SelectItem>
+                        <SelectItem value="equity">{t('crud.fields.accountCategoryEquity')}</SelectItem>
+                        <SelectItem value="revenue">{t('crud.fields.accountCategoryRevenue')}</SelectItem>
+                        <SelectItem value="cost_of_goods_sold">{t('crud.fields.accountCategoryCostOfGoodsSold')}</SelectItem>
+                        <SelectItem value="operating_expenses">{t('crud.fields.accountCategoryOperatingExpenses')}</SelectItem>
+                        <SelectItem value="other_expenses">{t('crud.fields.accountCategoryOtherExpenses')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

@@ -17,8 +17,13 @@ export interface Account {
   balance: number
   allow_manual_entries: boolean
   is_active: boolean
+  parent_account_id?: string | null
   created_at: string
   updated_at: string
+}
+
+export interface AccountHierarchy extends Account {
+  children: AccountHierarchy[]
 }
 
 export interface AccountCreate {
@@ -29,6 +34,7 @@ export interface AccountCreate {
   category: string
   currency?: string
   allow_manual_entries?: boolean
+  parent_account_id?: string | null
 }
 
 export interface AccountUpdate {
@@ -96,27 +102,35 @@ export const financeService = {
       pages: number
       has_next: boolean
       has_prev: boolean
-    }>('/api/v1/finance/chart-of-accounts/', { params })
+    }>('/api/v1/chart-of-accounts/', { params })
+    return response.data
+  },
+
+  async getAccountsHierarchy(params?: {
+    tenant_id?: string
+    account_type?: string
+  }): Promise<AccountHierarchy[]> {
+    const response = await apiClient.get<AccountHierarchy[]>('/api/v1/accounts/hierarchy', { params })
     return response.data
   },
 
   async getAccount(id: string) {
-    const response = await apiClient.get<{ data: Account }>(`/api/v1/finance/chart-of-accounts/${id}`)
+    const response = await apiClient.get<{ data: Account }>(`/api/v1/chart-of-accounts/${id}`)
     return response.data.data
   },
 
   async createAccount(data: AccountCreate) {
-    const response = await apiClient.post<{ data: Account }>('/api/v1/finance/chart-of-accounts/', data)
+    const response = await apiClient.post<{ data: Account }>('/api/v1/chart-of-accounts/', data)
     return response.data.data
   },
 
   async updateAccount(id: string, data: AccountUpdate) {
-    const response = await apiClient.put<{ data: Account }>(`/api/v1/finance/chart-of-accounts/${id}`, data)
+    const response = await apiClient.put<{ data: Account }>(`/api/v1/chart-of-accounts/${id}`, data)
     return response.data.data
   },
 
   async deleteAccount(id: string) {
-    await apiClient.delete(`/api/v1/finance/chart-of-accounts/${id}`)
+    await apiClient.delete(`/api/v1/chart-of-accounts/${id}`)
   },
 
   // Journal Entries
@@ -135,34 +149,45 @@ export const financeService = {
       pages: number
       has_next: boolean
       has_prev: boolean
-    }>('/api/v1/finance/journal-entries/', { params })
+    }>('/api/v1/journal-entries/', { params })
     return response.data
   },
 
   async getJournalEntry(id: string) {
-    const response = await apiClient.get<{ data: JournalEntry }>(`/api/v1/finance/journal-entries/${id}`)
+    const response = await apiClient.get<{ data: JournalEntry }>(`/api/v1/journal-entries/${id}`)
     return response.data.data
   },
 
   async createJournalEntry(data: Omit<JournalEntry, 'id' | 'created_at' | 'updated_at' | 'lines'> & {
     lines: Omit<JournalEntryLine, 'id' | 'tenant_id' | 'journal_entry_id' | 'created_at' | 'updated_at'>[]
   }) {
-    const response = await apiClient.post<{ data: JournalEntry }>('/api/v1/finance/journal-entries/', data)
+    const response = await apiClient.post<{ data: JournalEntry }>('/api/v1/journal-entries/', data)
     return response.data.data
   },
 
   async updateJournalEntry(id: string, data: Partial<Pick<JournalEntry, 'entry_date' | 'posting_date' | 'description' | 'reference'>>) {
-    const response = await apiClient.put<{ data: JournalEntry }>(`/api/v1/finance/journal-entries/${id}`, data)
+    const response = await apiClient.put<{ data: JournalEntry }>(`/api/v1/journal-entries/${id}`, data)
     return response.data.data
   },
 
   async postJournalEntry(id: string) {
-    const response = await apiClient.post<{ data: JournalEntry }>(`/api/v1/finance/journal-entries/${id}/post`)
+    const response = await apiClient.post<{ data: JournalEntry }>(`/api/v1/journal-entries/${id}/post`)
     return response.data.data
   },
 
   async deleteJournalEntry(id: string) {
-    await apiClient.delete(`/api/v1/finance/journal-entries/${id}`)
+    await apiClient.delete(`/api/v1/journal-entries/${id}`)
+  },
+
+  async reverseJournalEntry(id: string, reason: string) {
+    const response = await apiClient.post<{
+      message: string
+      original_entry_id: string
+      reversal_entry_id: string
+    }>(`/api/v1/journal-entries/${id}/reverse`, null, {
+      params: { reason },
+    })
+    return response.data
   },
 
   // Utility functions

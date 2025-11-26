@@ -5,6 +5,7 @@ import { AdvisorDock } from "@/features/copilot/AdvisorDock"
 import { CallWidget } from "@/components/cti/CallWidget"
 import { useFeature } from "@/hooks/useFeature"
 import { type McpRealtimeEvent, useMcpConnectionState, useMcpRealtime } from "@/lib/useMcpRealtime"
+import { GlobalButtonHandler } from "@/components/GlobalButtonHandler"
 
 export default function AppLayout(): JSX.Element {
   const commandPaletteEnabled = useFeature('commandPalette')
@@ -67,6 +68,7 @@ export default function AppLayout(): JSX.Element {
           </footer>
         ) : null}
       </div>
+      <GlobalButtonHandler />
       <AdvisorDock />
       <CallWidget />
     </AppShell>

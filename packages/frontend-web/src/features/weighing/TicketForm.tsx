@@ -9,7 +9,7 @@ import { formatDE, parseDE } from "@/lib/number-de"
 
 export function TicketForm({ defaultValues, onSubmit, submitting }: {
   defaultValues: Ticket
-  onSubmit: (value: Ticket) => void
+  onSubmit: (_value: Ticket) => void
   submitting?: boolean
 }): JSX.Element {
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<Ticket>({

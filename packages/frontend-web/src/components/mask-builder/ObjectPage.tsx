@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -17,7 +17,8 @@ import { MaskConfig, Field } from './types'
 interface ObjectPageProps {
   config: MaskConfig
   data?: any
-  onSave: (data: any) => Promise<void>
+  onChange?: (_data: any) => void
+  onSave: (_data: any) => Promise<void>
   onCancel: () => void
   isLoading?: boolean
 }
@@ -25,6 +26,7 @@ interface ObjectPageProps {
 const ObjectPage: React.FC<ObjectPageProps> = ({
   config,
   data,
+  onChange,
   onSave,
   onCancel,
   isLoading = false
@@ -32,6 +34,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
   const { toast } = useToast()
   const [activeTab, setActiveTab] = useState(config.tabs[0]?.key || '')
   const [isDirty, setIsDirty] = useState(false)
+  const isInternalUpdateRef = useRef(false)
 
   // Create dynamic Zod schema from config
   const createSchema = (tabs: MaskConfig['tabs']) => {
@@ -97,16 +100,28 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
 
   // Watch for changes to mark form as dirty
   useEffect(() => {
-    const subscription = watch(() => setIsDirty(true))
+    const subscription = watch((value) => {
+      setIsDirty(true)
+      if (onChange) {
+        isInternalUpdateRef.current = true
+        onChange(value)
+      }
+    })
     return () => subscription.unsubscribe()
-  }, [watch])
+  }, [watch, onChange])
 
   // Reset dirty state when data changes
   useEffect(() => {
-    if (data) {
-      reset(data)
-      setIsDirty(false)
+    if (!data) {
+      return
     }
+    if (isInternalUpdateRef.current) {
+      isInternalUpdateRef.current = false
+      return
+    }
+
+    reset(data)
+    setIsDirty(false)
   }, [data, reset])
 
   const onSubmit = async (formData: any) => {
@@ -181,7 +196,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                   </div>
                 )
 
-              case 'select':
+              case 'select': {
                 const selectField = field as any
                 return (
                   <Select
@@ -189,7 +204,12 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                     onValueChange={controllerField.onChange}
                     disabled={field.readonly}
                   >
-                    <SelectTrigger className={error ? 'border-red-500' : ''}>
+                    <SelectTrigger
+                      id={field.name}
+                      aria-label={field.label}
+                      type="select"
+                      className={error ? 'border-red-500' : ''}
+                    >
                       <SelectValue placeholder={field.placeholder} />
                     </SelectTrigger>
                     <SelectContent>
@@ -201,6 +221,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                     </SelectContent>
                   </Select>
                 )
+              }
 
               case 'date':
                 return (

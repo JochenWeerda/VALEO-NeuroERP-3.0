@@ -45,8 +45,8 @@ class BaseRepository(Generic[T, TCreate, TUpdate], ABC):
         pass
 
     @abstractmethod
-    async def count(self, tenant_id: str) -> int:
-        """Count entities for tenant"""
+    async def count(self, tenant_id: str, **kwargs) -> int:
+        """Count entities for tenant with optional filtering"""
         pass
 
 

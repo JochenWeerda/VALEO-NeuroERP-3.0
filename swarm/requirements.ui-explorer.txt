@@ -1,0 +1,7 @@
+browser-use
+playwright
+aiohttp
+python-dotenv
+pydantic
+openai
+

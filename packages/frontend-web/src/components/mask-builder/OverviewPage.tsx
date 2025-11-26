@@ -7,7 +7,7 @@ import { OverviewConfig, OverviewCard, OverviewChart } from './types'
 
 interface OverviewPageProps {
   config: OverviewConfig
-  onAction?: (action: string) => void
+  onAction?: (_action: string) => void
   isLoading?: boolean
 }
 
@@ -112,7 +112,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
       )}
 
       {/* Additional Sections */}
-      {config.sections && config.sections.map((section, index) => (
+      {config.sections?.map((section, index) => (
         <Card key={index}>
           <CardHeader>
             <CardTitle>{section.title}</CardTitle>

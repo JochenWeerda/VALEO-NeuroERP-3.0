@@ -6,7 +6,7 @@ interface I18nHook {
   t: typeof t
   locale: Locale
   loading: boolean
-  setLocale: (locale: Locale) => Promise<void>
+  setLocale: (_locale: Locale) => Promise<void>
 }
 
 export function useI18n(): I18nHook {

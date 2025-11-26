@@ -3,8 +3,9 @@ Concrete repository implementations for VALEO-NeuroERP
 SQLAlchemy-based implementations of repository interfaces
 """
 
+from datetime import datetime
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func
+from sqlalchemy import and_, func, or_
 
 from .base_repository import BaseRepositoryImpl
 from .interfaces import (
@@ -58,11 +59,80 @@ class CustomerRepositoryImpl(BaseRepositoryImpl[Customer, dict, dict], CustomerR
     def __init__(self, session: Session):
         super().__init__(session, Customer)
 
+    async def get_by_customer_number(self, customer_number: str, tenant_id: str) -> Customer | None:
+        """Return an active customer by customer number for the current tenant."""
+        return (
+            self.session.query(Customer)
+            .filter(
+                and_(
+                    Customer.customer_number == customer_number,
+                    Customer.tenant_id == tenant_id,
+                    Customer.is_active == True,
+                )
+            )
+            .first()
+        )
+
+    async def get_all(
+        self,
+        tenant_id: str,
+        skip: int = 0,
+        limit: int = 100,
+        search: str | None = None,
+        **kwargs
+    ) -> list[Customer]:
+        """Get customers for a tenant with optional search."""
+        query = self.session.query(Customer).filter(Customer.is_active == True)
+
+        if tenant_id:
+            query = query.filter(Customer.tenant_id == tenant_id)
+
+        if search:
+            like = f"%{search}%"
+            query = query.filter(
+                or_(
+                    Customer.company_name.ilike(like),
+                    Customer.contact_person.ilike(like)
+                )
+            )
+
+        return query.order_by(Customer.company_name.asc()).offset(skip).limit(limit).all()
+
+    async def count(self, tenant_id: str, search: str | None = None, **kwargs) -> int:
+        """Count customers for a tenant with optional search."""
+        query = self.session.query(Customer).filter(Customer.is_active == True)
+
+        if tenant_id:
+            query = query.filter(Customer.tenant_id == tenant_id)
+
+        if search:
+            like = f"%{search}%"
+            query = query.filter(
+                or_(
+                    Customer.company_name.ilike(like),
+                    Customer.contact_person.ilike(like)
+                )
+            )
+
+        return query.count()
+
 
 class LeadRepositoryImpl(BaseRepositoryImpl[Lead, dict, dict], LeadRepository):
     """Lead repository implementation"""
     def __init__(self, session: Session):
         super().__init__(session, Lead)
+
+    async def convert_to_customer(self, lead_id: str, customer_id: str, tenant_id: str) -> bool:
+        """Mark lead as converted to a customer."""
+        lead = await self.get_by_id(lead_id, tenant_id)
+        if not lead:
+            return False
+
+        lead.status = "converted"
+        lead.converted_to_customer_id = customer_id
+        lead.converted_at = datetime.utcnow()
+        self.session.commit()
+        return True
 
 
 class ContactRepositoryImpl(BaseRepositoryImpl[Contact, dict, dict], ContactRepository):
@@ -301,7 +371,7 @@ class AccountRepositoryImpl(AccountRepository):
         except Exception as e:
             return False
 
-    async def count(self, tenant_id: str) -> int:
+    async def count(self, tenant_id: str, **kwargs) -> int:
         """Count entities for tenant."""
         try:
             query = self.session.query(Account).filter(
@@ -310,6 +380,14 @@ class AccountRepositoryImpl(AccountRepository):
 
             if tenant_id:
                 query = query.filter(Account.tenant_id == tenant_id)
+
+            account_type = kwargs.get("account_type")
+            if account_type:
+                query = query.filter(Account.account_type == account_type)
+
+            category = kwargs.get("category")
+            if category:
+                query = query.filter(Account.category == category)
 
             return query.count()
         except Exception as e:
