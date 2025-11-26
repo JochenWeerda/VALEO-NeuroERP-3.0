@@ -286,3 +286,8 @@ memory-bank/
 
 *storybook.log
 storybook-static
+
+# Ignore Python bytecode
+__pycache__/
+*.pyc
+
