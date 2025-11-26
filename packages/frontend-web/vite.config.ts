@@ -14,10 +14,32 @@ export default defineConfig(({ mode }) => {
   const DEFAULT_BACKEND_PROXY = process.env.VITE_BACKEND_PROXY || env.VITE_BACKEND_PROXY || 'http://localhost:8000'
 
   return {
-  plugins: [react()],
+  plugins: [
+    react({
+      jsxRuntime: 'automatic',
+    }),
+    // Health endpoint plugin for Docker health checks
+    {
+      name: 'health-endpoint',
+      configureServer(server) {
+        server.middlewares.use('/health', (_req, res, _next) => {
+          res.statusCode = 200;
+          res.end('ok');
+        });
+      },
+    },
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+    },
+    dedupe: ['react', 'react-dom'],
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react/jsx-runtime'],
+    exclude: [],
+    esbuildOptions: {
+      dedupe: ['react', 'react-dom'],
     },
   },
   server: {

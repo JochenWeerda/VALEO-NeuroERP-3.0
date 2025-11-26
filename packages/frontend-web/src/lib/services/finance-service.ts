@@ -17,8 +17,13 @@ export interface Account {
   balance: number
   allow_manual_entries: boolean
   is_active: boolean
+  parent_account_id?: string | null
   created_at: string
   updated_at: string
+}
+
+export interface AccountHierarchy extends Account {
+  children: AccountHierarchy[]
 }
 
 export interface AccountCreate {
@@ -29,6 +34,7 @@ export interface AccountCreate {
   category: string
   currency?: string
   allow_manual_entries?: boolean
+  parent_account_id?: string | null
 }
 
 export interface AccountUpdate {
@@ -100,6 +106,14 @@ export const financeService = {
     return response.data
   },
 
+  async getAccountsHierarchy(params?: {
+    tenant_id?: string
+    account_type?: string
+  }): Promise<AccountHierarchy[]> {
+    const response = await apiClient.get<AccountHierarchy[]>('/api/v1/accounts/hierarchy', { params })
+    return response.data
+  },
+
   async getAccount(id: string) {
     const response = await apiClient.get<{ data: Account }>(`/api/v1/chart-of-accounts/${id}`)
     return response.data.data
@@ -163,6 +177,17 @@ export const financeService = {
 
   async deleteJournalEntry(id: string) {
     await apiClient.delete(`/api/v1/journal-entries/${id}`)
+  },
+
+  async reverseJournalEntry(id: string, reason: string) {
+    const response = await apiClient.post<{
+      message: string
+      original_entry_id: string
+      reversal_entry_id: string
+    }>(`/api/v1/journal-entries/${id}/reverse`, null, {
+      params: { reason },
+    })
+    return response.data
   },
 
   // Utility functions

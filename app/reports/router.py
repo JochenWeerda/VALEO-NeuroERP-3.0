@@ -11,7 +11,7 @@ import logging
 
 from .services import ReportsService
 from .models import ReportResponse, ReportMetadata
-from ..documents.router import _DB  ***REMOVED*** Import the shared DB store
+from ..documents.router_helpers import _DB  ***REMOVED*** Import the shared DB store
 
 logger = logging.getLogger(__name__)
 

@@ -173,11 +173,13 @@ class McpEventBus {
     if (!this.shouldRun()) {
       return;
     }
-    const options: SSEOptions = {
-      ...this.sseOptions,
-    };
+    const options: SSEOptions = { ...this.sseOptions };
     if ((typeof options.url !== "string" || options.url.length === 0) && typeof this.eventsUrl === "string" && this.eventsUrl.length > 0) {
       options.url = this.eventsUrl;
+    }
+    if (!options.url) {
+      // No endpoint configured -> skip creating the client
+      return;
     }
     this.client = new SSEClient(
       {

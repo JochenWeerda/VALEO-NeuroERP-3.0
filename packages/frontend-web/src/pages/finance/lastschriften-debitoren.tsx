@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
@@ -6,6 +6,8 @@ import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mas
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { lookupIBAN, formatIBAN, validateIBAN } from '@/lib/utils/iban-validator'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Lastschriften Debitoren (wird in Komponente mit i18n erstellt)
 const createLastschriftenSchema = (t: any) => z.object({
@@ -248,9 +250,44 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
     }])
   }
 
-  const updateLastschrift = (index: number, field: string, value: any) => {
+  const updateLastschrift = async (index: number, field: string, value: any) => {
     const newData = [..._data]
-    newData[index] = { ...newData[index], [field]: value }
+    
+    // Format IBAN if field is iban
+    if (field === 'iban' && value) {
+      const normalized = value.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
+      const formatted = formatIBAN(normalized)
+      newData[index] = { ...newData[index], [field]: formatted }
+      
+      // Auto-lookup IBAN when it changes and seems complete
+      if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
+        // Debounce IBAN lookup
+        setTimeout(async () => {
+          try {
+            const result = await lookupIBAN(normalized)
+            if (result.valid && result.bic) {
+              const updatedData = [..._data]
+              updatedData[index] = {
+                ...updatedData[index],
+                iban: formatted,
+                bic: result.bic || updatedData[index].bic
+              }
+              onChange(updatedData)
+              toast.success(t('crud.messages.ibanLookupSuccess', {
+                defaultValue: 'BIC automatisch ausgefüllt',
+                bankName: result.bank_name || ''
+              }))
+            }
+          } catch (error) {
+            // Silent error for auto-lookup
+            console.warn('IBAN lookup failed:', error)
+          }
+        }, 1000)
+      }
+    } else {
+      newData[index] = { ...newData[index], [field]: value }
+    }
+    
     onChange(newData)
   }
 
@@ -400,16 +437,47 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const [formData, setFormData] = useState<any>({})
   const entityType = 'directDebit'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lastschriften Debitoren')
   const lastschriftenConfig = createLastschriftenConfig(t, entityTypeLabel)
 
-  const { data, loading, saveData } = useMaskData({
+  const { data, loading, saveData, updateData } = useMaskData({
     apiUrl: lastschriftenConfig.api.baseUrl,
     id: 'new'
   })
 
   const { validate, showValidationToast } = useMaskValidation(lastschriftenConfig.validation)
+
+  // Handle form data changes for IBAN lookup
+  const handleFormChange = (newData: any) => {
+    setFormData(newData)
+    setIsDirty(true)
+    
+    // Auto-lookup Auftraggeber-IBAN when it changes
+    const auftraggeberIban = newData?.auftraggeberIban
+    if (auftraggeberIban && auftraggeberIban.replace(/\s/g, '').length >= 15) {
+      const normalized = auftraggeberIban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
+      if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
+        setTimeout(async () => {
+          try {
+            const result = await lookupIBAN(normalized)
+            if (result.valid && result.bic) {
+              const updatedData = { ...newData, auftraggeberIban: formatIBAN(normalized) }
+              setFormData(updatedData)
+              updateData?.(updatedData)
+              toast.success(t('crud.messages.ibanLookupSuccess', {
+                defaultValue: 'BIC automatisch ausgefüllt',
+                bankName: result.bank_name || ''
+              }))
+            }
+          } catch (error) {
+            console.warn('IBAN lookup failed:', error)
+          }
+        }, 1000) // 1 second debounce
+      }
+    }
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'add-direct-debit') {
@@ -457,7 +525,8 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   return (
     <ObjectPage
       config={lastschriftenConfig}
-      data={data}
+      data={data || formData}
+      onChange={handleFormChange}
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading}

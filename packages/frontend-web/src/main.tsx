@@ -13,6 +13,7 @@ import { ToastProvider } from '@/components/ui/toast-provider'
 import { auth } from '@/lib/auth'
 import { createQueryClient } from '@/lib/query'
 import { useFeature } from '@/hooks/useFeature'
+import '@/i18n/config' // Initialize i18n
 import './index.css'
 
 const queryClient = createQueryClient()
@@ -21,10 +22,11 @@ const resolveSseToken = (): string | undefined => {
   return auth.getAccessToken() ?? undefined
 }
 
-const sseUrl = (import.meta.env as Record<string, string | undefined>).VITE_MCP_EVENTS_URL
-
 function Application(): JSX.Element {
-  const sseEnabled = useFeature('sse')
+  // useFeature kann nur innerhalb von FeatureFlagProvider verwendet werden
+  // Da Application innerhalb von FeatureFlagProvider ist, sollte es funktionieren
+  const sseUrl = (import.meta.env as Record<string, string | undefined>).VITE_MCP_EVENTS_URL
+  const sseEnabled = useFeature('sse') && Boolean(sseUrl)
 
   const providerConfig = useMemo(
     () => ({
@@ -51,7 +53,11 @@ function Application(): JSX.Element {
 const rootElement = document.getElementById('root')
 
 if (rootElement instanceof HTMLElement) {
-  ReactDOM.createRoot(rootElement).render(
+  const existingRoot = (rootElement as any).__reactRoot ?? null
+  const root = existingRoot ?? ReactDOM.createRoot(rootElement)
+  ;(rootElement as any).__reactRoot = root
+
+  root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <FeatureFlagProvider>

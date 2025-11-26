@@ -1,6 +1,7 @@
 import maskBuilderCustomer from '@/config/mask-builder-customer.json'
 import { CUSTOMER_FIELDS } from '@/config/l3-customer-field-registry'
 import type { Customer, CustomerCreate } from '@/lib/api/crm'
+import type { Lead } from '@/lib/services/crm-service'
 
 export type MaskCustomerData = Record<string, unknown>
 
@@ -63,6 +64,52 @@ export function mapMaskToCustomer(data: MaskCustomerData): CustomerCreate {
   setNested(result, 'customer.search_key', searchKey)
 
   return result as CustomerCreate
+}
+
+export type MaskLeadData = Record<string, unknown>
+
+export function mapLeadToMask(lead?: Lead | null): MaskLeadData {
+  if (!lead) {
+    return {}
+  }
+
+  return {
+    'lead.company': lead.company,
+    'lead.contact_person': lead.contactPerson,
+    'lead.email': lead.email ?? '',
+    'lead.phone': lead.phone ?? '',
+    'lead.source': lead.source,
+    'lead.potential': lead.potential,
+    'lead.priority': lead.priority,
+    'lead.status': lead.status,
+    'lead.assigned_to': lead.assignedTo ?? '',
+    'lead.expected_close_date': lead.expectedCloseDate ?? '',
+    'lead.notes': lead.notes ?? '',
+  }
+}
+
+export function mapMaskToLead(data: MaskLeadData): Partial<Lead> {
+  const potentialRaw = data['lead.potential']
+  const potential =
+    typeof potentialRaw === 'number'
+      ? potentialRaw
+      : potentialRaw
+        ? Number(potentialRaw)
+        : undefined
+
+  return {
+    company: (data['lead.company'] as string) ?? '',
+    contactPerson: (data['lead.contact_person'] as string) ?? '',
+    email: (data['lead.email'] as string) ?? undefined,
+    phone: (data['lead.phone'] as string) ?? undefined,
+    source: (data['lead.source'] as string) ?? '',
+    potential,
+    priority: (data['lead.priority'] as Lead['priority']) ?? 'medium',
+    status: (data['lead.status'] as Lead['status']) ?? 'new',
+    assignedTo: (data['lead.assigned_to'] as string) ?? undefined,
+    expectedCloseDate: (data['lead.expected_close_date'] as string) ?? undefined,
+    notes: (data['lead.notes'] as string) ?? undefined,
+  }
 }
 
 export function getNested<T = unknown>(source: unknown, path: string): T | undefined {
