@@ -1,4 +1,4 @@
-export type FieldPriority = "core" | "optional" | "legacy";
+Ôªøexport type FieldPriority = "core" | "optional" | "legacy";
 
 export interface CustomerFieldDef {
   key: string;
@@ -8,7 +8,7 @@ export interface CustomerFieldDef {
   priority: FieldPriority;
 }
 
-export const CUSTOMER_FIELDS: CustomerFieldDef[
+export const CUSTOMER_FIELDS: CustomerFieldDef[] = [
   {
     key: "customer.customer_number",
     label: "Kundennr.",
@@ -95,14 +95,14 @@ export const CUSTOMER_FIELDS: CustomerFieldDef[
   },
   {
     key: "customer.sales_rep",
-    label: "VB (Auﬂendienst)",
+    label: "VB (Au√üendienst)",
     tab: "masterdata",
     section: "masterdata_responsibility",
     priority: "core",
   },
   {
     key: "address.street",
-    label: "Straﬂe",
+    label: "Stra√üe",
     tab: "address",
     section: "address_main",
     priority: "core",
@@ -277,14 +277,14 @@ export const CUSTOMER_FIELDS: CustomerFieldDef[
   },
   {
     key: "finance.invoice.account_usage",
-    label: "Kontonutzung f¸r Rechnung",
+    label: "Kontonutzung f√ºr Rechnung",
     tab: "finance",
     section: "finance_invoice_account",
     priority: "optional",
   },
   {
     key: "finance.invoice.account_statement_requested",
-    label: "Kontoauszug gew¸nscht",
+    label: "Kontoauszug gew√ºnscht",
     tab: "finance",
     section: "finance_invoice_account",
     priority: "optional",
@@ -298,7 +298,7 @@ export const CUSTOMER_FIELDS: CustomerFieldDef[
   },
   {
     key: "finance.invoice.bonus_recipient",
-    label: "Bonus-/Rechnungsempf‰nger",
+    label: "Bonus-/Rechnungsempf√§nger",
     tab: "finance",
     section: "finance_invoice_account",
     priority: "optional",
@@ -347,7 +347,7 @@ export const CUSTOMER_FIELDS: CustomerFieldDef[
   },
   {
     key: "profile.industry_code",
-    label: "Branche (mit Schl¸ssel)",
+    label: "Branche (mit Schl√ºssel)",
     tab: "marketing",
     section: "marketing_customer_profile",
     priority: "core",
@@ -368,7 +368,7 @@ export const CUSTOMER_FIELDS: CustomerFieldDef[
   },
   {
     key: "profile.founded_at",
-    label: "Gr¸ndung",
+    label: "Gr√ºndung",
     tab: "marketing",
     section: "marketing_customer_profile",
     priority: "optional",
@@ -382,7 +382,7 @@ export const CUSTOMER_FIELDS: CustomerFieldDef[
   },
   {
     key: "cooperative.share_account",
-    label: "Gesch‰ftsguthaben-Konto",
+    label: "Gesch√§ftsguthaben-Konto",
     tab: "cooperative",
     section: "cooperative_shares",
     priority: "optional",
@@ -403,7 +403,7 @@ export const CUSTOMER_FIELDS: CustomerFieldDef[
   },
   {
     key: "contacts.primary.priority",
-    label: "Priorit‰t (Ansprechpartner)",
+    label: "Priorit√§t (Ansprechpartner)",
     tab: "contacts",
     section: "contacts_list",
     priority: "optional",
@@ -536,7 +536,7 @@ export const CUSTOMER_FIELDS: CustomerFieldDef[
   },
   {
     key: "privacy.consent_until",
-    label: "Einwilligung g¸ltig bis",
+    label: "Einwilligung g√ºltig bis",
     tab: "quality_compliance",
     section: "privacy_consent",
     priority: "optional",
@@ -927,3 +927,4 @@ export const CUSTOMER_FIELDS: CustomerFieldDef[
     priority: "optional",
   }
 ];
+

@@ -176,6 +176,22 @@ export default function BestellungenListePage(): JSX.Element {
   const loadData = async () => {
     setLoading(true)
     try {
+      // Versuche zuerst MCP-API, dann Fallback auf alte API
+      try {
+        const response = await fetch('/api/mcp/documents/purchase_order?skip=0&limit=100')
+        if (response.ok) {
+          const result = await response.json()
+          if (result.ok && result.data) {
+            setData(result.data)
+            setTotal(result.total || result.data.length)
+            return
+          }
+        }
+      } catch (mcpError) {
+        console.warn('MCP-API nicht verfügbar, verwende Fallback:', mcpError)
+      }
+      
+      // Fallback auf alte API
       const response = await apiClient.get('/bestellungen')
       if (response.success) {
         setData((response.data as any).data || [])

@@ -1,0 +1,33 @@
+Capability_ID;Capability;Subcapability;Priorität(MUSS/SOLL/KANN);NeuroERP_Status(Yes/Partial/No);Evidence_Screenshot_IDs;Evidence_Flow_IDs;Gap_Beschreibung;Loesungstyp(A/B/C/D);Prioritaet(1-5);Owner;Notes;Baseline_ERP
+SALES-CRM-01;CRM/Lead-to-Opportunity;Lead-Erfassung & Quellen;SOLL;;;;;;;;
+SALES-CRM-02;CRM/Lead-to-Opportunity;Kunden-/Kontaktstamm (Sales-Sicht);MUSS;Yes;;;swarm/handoffs/feature-sales-crm-02-complete.md;;;Feature-Engineer;Preisgruppe und Steuerkategorie implementiert;SAP/Oracle/Odoo
+SALES-CRM-03;CRM/Lead-to-Opportunity;Opportunities / Pipeline;SOLL;;;;;;;;
+SALES-CRM-04;CRM/Lead-to-Opportunity;Aktivitäten & Aufgaben;SOLL;;;;;;;;
+SALES-CRM-05;CRM/Lead-to-Opportunity;Forecasting & Ziele;KANN;;;;;;;;
+SALES-PRD-01;Produkt/Preis;Produktkatalog Verkauf;MUSS;;;;;;;;
+SALES-PRC-01;Produkt/Preis;Preislisten & Preisfindung;MUSS;;;;;;;;
+SALES-PRC-02;Produkt/Preis;Rabatte/Gutschriften/Bonifikationen;SOLL;;;;;;;;
+SALES-PRC-03;Produkt/Preis;Steuern im Verkauf;MUSS;;;;;;;;
+SALES-QTN-01;Angebot/Quote-to-Order;Angebotsmanagement;MUSS;Partial;20251124_131338_04_offers_list.png,20251124_131341_05_create_offer_form.png;SALES-QTN-01,SALES-QTN-02;Angebotsliste und Create-Formular vorhanden, aber vollständige Funktionalität (Versionierung, Ablauf, Konvertierung) unklar;C;3;Frontend;Seite vorhanden, Funktionalität prüfen;Basic
+SALES-QTN-02;Angebot/Quote-to-Order;Angebotsdokumente;SOLL;;;;;;;;
+SALES-QTN-03;Angebot/Quote-to-Order;Angebotsvergleich & Verhandlungsstatus;KANN;;;;;;;;
+SALES-ORD-01;Order Management;Auftragserfassung (Sales Order);MUSS;Partial;20251124_131349_06_orders_list.png,20251124_131352_07_create_order_form.png;SALES-ORD-01,SALES-ORD-02;Orders-Liste und Create-Formular vorhanden, aber vollständige Funktionalität (Validierung, Status-Workflow, Bestätigung) unklar;C;3;Frontend;Seite vorhanden, Funktionalität prüfen;Basic
+SALES-ORD-02;Order Management;Auftragsänderung & Storno;MUSS;;;;;;;;
+SALES-DLV-01;Fulfillment;Lieferabwicklung;MUSS;Partial;20251124_131359_08_deliveries_list.png;SALES-DLV-01;Deliveries-Liste vorhanden, aber vollständige Funktionalität (Teil-/Restlieferungen, Lieferstatus, Tracking) unklar;C;3;Frontend;Seite vorhanden, Funktionalität prüfen;Basic
+SALES-DLV-02;Fulfillment;Versandarten & Tracking;SOLL;;;;;;;;
+SALES-DLV-03;Fulfillment;Dropship / Direktversand;KANN;;;;;;;;
+SALES-BIL-01;Billing-to-Cash;Rechnungsstellung;MUSS;Partial;20251124_131406_09_invoices_list.png;SALES-BIL-01;Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellung aus Lieferung/Auftrag, Validierung, Versand) unklar;C;3;Frontend;Seite vorhanden, Funktionalität prüfen;Basic
+SALES-BIL-02;Billing-to-Cash;E-Rechnung & Formate;SOLL;;;;;;;;
+SALES-COL-01;Billing-to-Cash;Forderungsmanagement / Mahnung;SOLL;;;;;;;;
+SALES-PAY-01;Billing-to-Cash;Zahlungseingänge & Ausgleich;MUSS;;;;;;;;
+SALES-RMA-01;Retouren/Reklamation;Retourenprozess (RMA);SOLL;;;;;;;;
+SALES-RMA-02;Retouren/Reklamation;Reklamation & Ersatz;SOLL;;;;;;;;
+SALES-REP-01;Reporting;Standard-Reports;MUSS;;;;;;;;
+SALES-REP-02;Reporting;Drilldown & Belegkette;SOLL;;;;;;;;
+SALES-REP-03;Reporting;Sales Analytics / KPI;KANN;;;;;;;;
+SALES-AUTH-01;Rollen/Workflows;Rollenmodell Sales;MUSS;;;;;;;;
+SALES-AUTH-02;Rollen/Workflows;Freigabeworkflows;SOLL;;;;;;;;
+SALES-INT-01;Integrationen;API / Import / Export;MUSS;;;;;;;;
+SALES-INT-02;Integrationen;EDI / B2B Integration;KANN;;;;;;;;
+SALES-INT-03;Integrationen;Shop / POS / Marktplätze;KANN;;;;;;;;
+

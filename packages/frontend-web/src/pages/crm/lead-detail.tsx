@@ -318,7 +318,7 @@ function LegacyLeadDetailPage(): JSX.Element {
   const statusLabel = getStatusLabel(t, lead.status || 'new', lead.status || 'new')
 
   const pageTitle = isNew 
-    ? t('crud.actions.create') + ' " + entityTypeLabel
+    ? t('crud.actions.create') + ' ' + entityTypeLabel
     : lead.company 
       ? getDetailTitle(t, entityTypeLabel, lead.company)
       : entityTypeLabel

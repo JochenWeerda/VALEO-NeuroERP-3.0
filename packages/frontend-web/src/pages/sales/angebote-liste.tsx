@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,10 @@ import { FileDown, FileText, Plus, Search } from 'lucide-react'
 import { useListActions } from '@/hooks/useListActions'
 import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { AdvancedFilters, FilterConfig } from '@/components/list/AdvancedFilters'
+import { CSVImport } from '@/components/list/CSVImport'
+import { useToast } from '@/hooks/use-toast'
+import { saveDocument } from '@/lib/document-api'
 
 type Angebot = {
   id: string
@@ -61,26 +65,127 @@ const statusVariantMap: Record<Angebot['status'], 'default' | 'outline' | 'secon
 export default function AngeboteListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<Angebot['status'] | 'alle'>('alle')
+  const [angebote, setAngebote] = useState<Angebot[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showImport, setShowImport] = useState(false)
+  const [filterValues, setFilterValues] = useState<Record<string, any>>({})
 
   const entityType = 'offer'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Angebot')
 
-  const statusLabelMap: Record<Angebot['status'], string> = {
-    offen: getStatusLabel(t, 'offen', 'Offen'),
-    angenommen: getStatusLabel(t, 'angenommen', 'Angenommen'),
-    abgelehnt: getStatusLabel(t, 'abgelehnt', 'Abgelehnt'),
-    abgelaufen: getStatusLabel(t, 'abgelaufen', 'Abgelaufen'),
-  }
 
-  const filteredAngebote = mockAngebote.filter((angebot) => {
+  // Lade Daten von API
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch('/api/mcp/documents/sales_offer?skip=0&limit=100')
+        if (response.ok) {
+          const result = await response.json()
+          if (result.ok && result.data) {
+            // Transformiere API-Daten in lokales Format
+            const transformed = result.data.map((doc: any) => ({
+              id: doc.number,
+              nummer: doc.number,
+              datum: doc.date,
+              kunde: doc.customerId || '',
+              betrag: doc.totalGross || 0,
+              status: (doc.status?.toLowerCase() || 'offen') as Angebot['status'],
+              gueltigBis: doc.validUntil || '',
+            }))
+            setAngebote(transformed.length > 0 ? transformed : mockAngebote)
+          } else {
+            setAngebote(mockAngebote)
+          }
+        } else {
+          setAngebote(mockAngebote)
+        }
+      } catch (error) {
+        console.error('Fehler beim Laden der Angebote:', error)
+        setAngebote(mockAngebote)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadData()
+  }, [])
+
+  // Filter-Konfiguration für AdvancedFilters
+  const filterConfig: FilterConfig[] = [
+    {
+      key: 'status',
+      label: t('crud.fields.status'),
+      type: 'select',
+      options: [
+        { value: 'offen', label: getStatusLabel(t, 'offen', 'Offen') },
+        { value: 'angenommen', label: getStatusLabel(t, 'angenommen', 'Angenommen') },
+        { value: 'abgelehnt', label: getStatusLabel(t, 'abgelehnt', 'Abgelehnt') },
+        { value: 'abgelaufen', label: getStatusLabel(t, 'abgelaufen', 'Abgelaufen') },
+      ],
+    },
+    {
+      key: 'datum',
+      label: t('crud.fields.date'),
+      type: 'date',
+    },
+    {
+      key: 'kunde',
+      label: t('crud.entities.customer'),
+      type: 'text',
+    },
+  ]
+
+  const filteredAngebote = angebote.filter((angebot) => {
     const matchesSearch =
       angebot.nummer.toLowerCase().includes(searchTerm.toLowerCase()) ||
       angebot.kunde.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'alle' || angebot.status === statusFilter
+    
+    // Erweiterte Filter
+    if (filterValues.status && angebot.status !== filterValues.status) return false
+    if (filterValues.kunde && !angebot.kunde.toLowerCase().includes(filterValues.kunde.toLowerCase())) return false
+    if (filterValues.datum) {
+      const angebotDate = new Date(angebot.datum).toISOString().split('T')[0]
+      if (angebotDate !== filterValues.datum) return false
+    }
+    
     return matchesSearch && matchesStatus
   })
+
+  const handleImport = async (importData: any[]) => {
+    try {
+      for (const row of importData) {
+        // Transformiere CSV-Daten in Dokument-Format
+        const doc = {
+          number: row.Angebotsnummer || row.number || `ANG-${Date.now()}`,
+          date: row.Datum || row.date || new Date().toISOString().split('T')[0],
+          customerId: row.Kunde || row.customerId || '',
+          status: 'ENTWURF',
+          validUntil: row['Gültig bis'] || row.validUntil || '',
+          lines: [],
+          subtotalNet: 0,
+          totalTax: 0,
+          totalGross: parseFloat(row.Betrag?.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0,
+        }
+        await saveDocument('sales_offer', doc)
+      }
+      toast({
+        title: t('crud.messages.importSuccess'),
+        description: `${importData.length} Angebote wurden importiert.`,
+      })
+      // Daten neu laden
+      window.location.reload()
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.importError'),
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+      })
+    }
+  }
 
   const exportData = filteredAngebote.map(a => ({
     Angebotsnummer: a.nummer,
@@ -88,7 +193,7 @@ export default function AngeboteListePage(): JSX.Element {
     Kunde: a.kunde,
     Betrag: formatCurrencyForExport(a.betrag),
     'Gültig bis': formatDateForExport(a.gueltigBis),
-    Status: statusLabelMap[a.status],
+    Status: getStatusLabel(t, a.status, a.status),
   }))
 
   const { handleExport, handlePrint } = useListActions({
@@ -133,7 +238,7 @@ export default function AngeboteListePage(): JSX.Element {
       key: 'status' as const,
       label: t('crud.fields.status'),
       render: (angebot: Angebot) => (
-        <Badge variant={statusVariantMap[angebot.status]}>{statusLabelMap[angebot.status]}</Badge>
+        <Badge variant={statusVariantMap[angebot.status]}>{getStatusLabel(t, angebot.status, angebot.status)}</Badge>
       ),
     },
   ]
@@ -172,11 +277,17 @@ export default function AngeboteListePage(): JSX.Element {
               className="rounded-md border border-input bg-background px-3 py-2"
             >
               <option value="alle">{t('crud.list.allStatus', { defaultValue: 'Alle Status' })}</option>
-              <option value="offen">{statusLabelMap.offen}</option>
-              <option value="angenommen">{statusLabelMap.angenommen}</option>
-              <option value="abgelehnt">{statusLabelMap.abgelehnt}</option>
-              <option value="abgelaufen">{statusLabelMap.abgelaufen}</option>
+              <option value="offen">{getStatusLabel(t, 'offen', 'Offen')}</option>
+              <option value="angenommen">{getStatusLabel(t, 'angenommen', 'Angenommen')}</option>
+              <option value="abgelehnt">{getStatusLabel(t, 'abgelehnt', 'Abgelehnt')}</option>
+              <option value="abgelaufen">{getStatusLabel(t, 'abgelaufen', 'Abgelaufen')}</option>
             </select>
+            <AdvancedFilters
+              filters={filterConfig}
+              values={filterValues}
+              onChange={setFilterValues}
+              onReset={() => setFilterValues({})}
+            />
             <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               {t('crud.print.export')}
@@ -185,9 +296,25 @@ export default function AngeboteListePage(): JSX.Element {
               <FileText className="h-4 w-4" />
               {t('crud.actions.print')}
             </Button>
+            <Button variant="outline" className="gap-2" onClick={() => setShowImport(!showImport)}>
+              <FileText className="h-4 w-4" />
+              {t('crud.actions.import')}
+            </Button>
           </div>
         </CardContent>
       </Card>
+
+      {showImport && (
+        <Card>
+          <CardContent className="pt-6">
+            <CSVImport
+              onImport={handleImport}
+              expectedColumns={['Angebotsnummer', 'Datum', 'Kunde', 'Betrag', 'Gültig bis', 'Status']}
+              entityName="Angebote"
+            />
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardContent className="pt-6">

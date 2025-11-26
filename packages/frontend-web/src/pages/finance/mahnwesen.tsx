@@ -217,13 +217,13 @@ const createMahnwesenConfig = (t: any, entityTypeLabel: string): MaskConfig => (
     , onClick: () => {} }
   ],
   api: {
-    baseUrl: '/api/finance/mahnwesen',
+    baseUrl: '/api/v1/finance/dunning',
     endpoints: {
-      list: '/api/finance/mahnwesen',
-      get: '/api/finance/mahnwesen/{id}',
-      create: '/api/finance/mahnwesen',
-      update: '/api/finance/mahnwesen/{id}',
-      delete: '/api/finance/mahnwesen/{id}'
+      list: '/api/v1/finance/dunning',
+      get: '/api/v1/finance/dunning/{id}',
+      create: '/api/v1/finance/dunning',
+      update: '/api/v1/finance/dunning/{id}',
+      delete: '/api/v1/finance/dunning/{id}'
     }
   } as any,
   validation: createMahnwesenSchema(t),
@@ -355,11 +355,10 @@ export default function MahnwesenPage(): JSX.Element {
       }
 
       try {
-        const response = await fetch(`/api/finance/mahnwesen/${formData.id}/inkasso`, {
-          method: 'POST',
+        const response = await fetch(`/api/v1/finance/dunning/${formData.id}/send`, {
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },
         })
 
@@ -393,7 +392,7 @@ export default function MahnwesenPage(): JSX.Element {
         })
         return
       }
-      window.open(`/api/finance/mahnwesen/${formData.id}/export`, '_blank')
+      window.open(`/api/v1/finance/dunning/${formData.id}/export`, '_blank')
     }
   })
 

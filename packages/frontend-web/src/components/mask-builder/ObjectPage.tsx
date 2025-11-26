@@ -204,7 +204,12 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                     onValueChange={controllerField.onChange}
                     disabled={field.readonly}
                   >
-                    <SelectTrigger className={error ? 'border-red-500' : ''}>
+                    <SelectTrigger
+                      id={field.name}
+                      aria-label={field.label}
+                      type="select"
+                      className={error ? 'border-red-500' : ''}
+                    >
                       <SelectValue placeholder={field.placeholder} />
                     </SelectTrigger>
                     <SelectContent>

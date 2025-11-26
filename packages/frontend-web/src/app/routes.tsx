@@ -32,7 +32,11 @@ const routerConfig: RouteObject[] = [
   },
 ]
 
-export const router = createBrowserRouter(routerConfig)
+export const router = createBrowserRouter(routerConfig, {
+  future: {
+    v7_startTransition: true,
+  },
+})
 
 function buildAutoRoutes(): RouteObject[] {
   return Object.entries(pageModules)

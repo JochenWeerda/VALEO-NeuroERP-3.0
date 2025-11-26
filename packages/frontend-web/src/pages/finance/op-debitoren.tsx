@@ -1,21 +1,24 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
-import { toast } from '@/hooks/use-toast'
+import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { toast } from 'sonner'
+import { apiClient } from '@/lib/api-client'
 
-// Zod-Schema für OP-Debitoren
-const opDebitorenSchema = z.object({
-  debitorId: z.string().min(1, "Debitor ist erforderlich"),
-  opNummer: z.string().min(1, "OP-Nummer ist erforderlich"),
+// Zod-Schema für OP-Debitoren (wird in Komponente mit i18n erstellt)
+const createOpDebitorenSchema = (t: any) => z.object({
+  debitorId: z.string().min(1, t('crud.messages.validationError')),
+  opNummer: z.string().min(1, t('crud.messages.validationError')),
   rechnungId: z.string().optional(),
-  buchungsdatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Buchungsdatum muss YYYY-MM-DD Format haben"),
-  faelligkeit: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fälligkeit muss YYYY-MM-DD Format haben"),
-  betrag: z.number().positive("Betrag muss positiv sein"),
+  buchungsdatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
+  faelligkeit: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
+  betrag: z.number().positive(t('crud.messages.validationError')),
   waehrung: z.string().default("EUR"),
-  offen: z.number().min(0, "Offener Betrag kann nicht negativ sein"),
+  offen: z.number().min(0, t('crud.messages.validationError')),
   skontoBetrag: z.number().min(0).optional(),
   skontoDatum: z.string().optional(),
   zahlungen: z.array(z.object({
@@ -30,19 +33,19 @@ const opDebitorenSchema = z.object({
   notizen: z.string().optional()
 })
 
-// Konfiguration für OP-Debitoren ObjectPage
-const opDebitorenConfig: MaskConfig = {
-  title: 'OP-Verwaltung (Debitoren)',
-  subtitle: 'Offene Posten verwalten und Zahlungen zuordnen',
+// Konfiguration für OP-Debitoren ObjectPage (wird in Komponente mit i18n erstellt)
+const createOpDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+  title: entityTypeLabel,
+  subtitle: t('crud.fields.opKreditoren.subtitle'),
   type: 'object-page',
   tabs: [
     {
       key: 'grunddaten',
-      label: 'Grunddaten',
+      label: t('crud.detail.basicInfo'),
       fields: [
         {
           name: 'debitorId',
-          label: 'Debitor',
+          label: t('crud.entities.debtor'),
           type: 'select',
           required: true,
           options: [
@@ -53,40 +56,40 @@ const opDebitorenConfig: MaskConfig = {
         },
         {
           name: 'opNummer',
-          label: 'OP-Nummer',
+          label: t('crud.fields.opReference'),
           type: 'text',
           required: true,
-          placeholder: 'OP-2025-0001'
+          placeholder: t('crud.tooltips.placeholders.opReference')
         },
         {
           name: 'rechnungId',
-          label: 'Rechnung',
+          label: t('crud.fields.invoiceNumber'),
           type: 'text',
-          placeholder: 'RE-2025-0001'
+          placeholder: t('crud.tooltips.placeholders.invoiceNumber')
         },
         {
           name: 'buchungsdatum',
-          label: 'Buchungsdatum',
+          label: t('crud.fields.bookingDate'),
           type: 'date',
           required: true
         },
         {
           name: 'faelligkeit',
-          label: 'Fälligkeit',
+          label: t('crud.fields.dueDate'),
           type: 'date',
           required: true
         },
         {
           name: 'status',
-          label: 'Status',
+          label: t('crud.fields.status'),
           type: 'select',
           required: true,
           options: [
-            { value: 'offen', label: 'Offen' },
-            { value: 'teilbezahlt', label: 'Teilbezahlt' },
-            { value: 'ausgeglichen', label: 'Ausgeglichen' },
-            { value: 'mahnung', label: 'Mahnung' },
-            { value: 'inkasso', label: 'Inkasso' }
+            { value: 'offen', label: t('status.open') },
+            { value: 'teilbezahlt', label: t('status.partial') },
+            { value: 'ausgeglichen', label: t('status.settled') },
+            { value: 'mahnung', label: t('crud.entities.dunning') },
+            { value: 'inkasso', label: t('crud.fields.collection') }
           ]
         }
       ],
@@ -95,11 +98,11 @@ const opDebitorenConfig: MaskConfig = {
     },
     {
       key: 'betrag',
-      label: 'Betrag',
+      label: t('crud.fields.amounts'),
       fields: [
         {
           name: 'betrag',
-          label: 'Gesamtbetrag',
+          label: t('crud.fields.totalAmount'),
           type: 'number',
           required: true,
           step: 0.01,
@@ -107,7 +110,7 @@ const opDebitorenConfig: MaskConfig = {
         },
         {
           name: 'waehrung',
-          label: 'Währung',
+          label: t('crud.fields.currency'),
           type: 'select',
           options: [
             { value: 'EUR', label: 'EUR' },
@@ -117,23 +120,23 @@ const opDebitorenConfig: MaskConfig = {
         },
         {
           name: 'offen',
-          label: 'Offener Betrag',
+          label: t('crud.fields.openAmount'),
           type: 'number',
           readonly: true,
           step: 0.01
         },
         {
           name: 'skontoBetrag',
-          label: 'Skonto-Betrag',
+          label: t('crud.fields.discountAmount'),
           type: 'number',
           step: 0.01,
-          helpText: 'Verfügbarer Skonto-Betrag'
+          helpText: t('crud.tooltips.fields.discountAvailable')
         },
         {
           name: 'skontoDatum',
-          label: 'Skonto bis',
+          label: t('crud.fields.discountDeadline'),
           type: 'date',
-          helpText: 'Skonto-Frist'
+          helpText: t('crud.tooltips.fields.discountDeadline')
         }
       ],
       layout: 'grid',
@@ -141,7 +144,7 @@ const opDebitorenConfig: MaskConfig = {
     },
     {
       key: 'zahlungen',
-      label: 'Zahlungen',
+      label: t('crud.fields.payments'),
       fields: []
     } as any,
     {
@@ -161,27 +164,28 @@ const opDebitorenConfig: MaskConfig = {
               letzteZahlung: zahlungen.length > 0 ? zahlungen[zahlungen.length - 1].datum : _data.letzteZahlung
             })
           }}
+          t={t}
         />
       )
     },
     {
       key: 'mahnwesen',
-      label: 'Mahnwesen',
+      label: t('crud.entities.dunning'),
       fields: [
         {
           name: 'mahnstufe',
-          label: 'Mahnstufe',
+          label: t('crud.fields.dunningLevel'),
           type: 'select',
           options: [
-            { value: 0, label: '0 - Keine Mahnung' },
-            { value: 1, label: '1. Mahnung' },
-            { value: 2, label: '2. Mahnung' },
-            { value: 3, label: '3. Mahnung' }
+            { value: 0, label: t('crud.fields.noDunning') },
+            { value: 1, label: '1. ' + t('crud.entities.dunning') },
+            { value: 2, label: '2. ' + t('crud.entities.dunning') },
+            { value: 3, label: '3. ' + t('crud.entities.dunning') }
           ]
         },
         {
           name: 'letzteZahlung',
-          label: 'Letzte Zahlung',
+          label: t('crud.fields.lastPayment'),
           type: 'date',
           readonly: true
         }
@@ -189,13 +193,13 @@ const opDebitorenConfig: MaskConfig = {
     },
     {
       key: 'notizen',
-      label: 'Notizen',
+      label: t('crud.fields.notes'),
       fields: [
         {
           name: 'notizen',
-          label: 'Interne Notizen',
+          label: t('crud.fields.internalNotes'),
           type: 'textarea',
-          placeholder: 'Zusätzliche Informationen zur Forderung...'
+          placeholder: t('crud.tooltips.placeholders.opNotes')
         }
       ]
     }
@@ -203,50 +207,55 @@ const opDebitorenConfig: MaskConfig = {
   actions: [
     {
       key: 'zahlung',
-      label: 'Zahlung buchen',
-      type: 'secondary'
-    , onClick: () => {} },
+      label: t('crud.actions.recordPayment'),
+      type: 'secondary',
+      onClick: () => {}
+    },
     {
       key: 'skonto',
-      label: 'Skonto nutzen',
-      type: 'secondary'
-    , onClick: () => {} },
+      label: t('crud.actions.useDiscount'),
+      type: 'secondary',
+      onClick: () => {}
+    },
     {
       key: 'ausgleich',
-      label: 'Ausgleichen',
-      type: 'primary'
-    , onClick: () => {} },
+      label: t('crud.actions.settle'),
+      type: 'primary',
+      onClick: () => {}
+    },
     {
       key: 'mahnung',
-      label: 'Mahnung erstellen',
+      label: t('crud.actions.createDunning'),
       type: 'danger',
       onClick: () => {}
     },
     {
       key: 'export',
-      label: 'Export',
-      type: 'secondary'
-    , onClick: () => {} }
+      label: t('crud.actions.export'),
+      type: 'secondary',
+      onClick: () => {}
+    }
   ],
   api: {
-    baseUrl: '/api/finance/op-debitoren',
+    baseUrl: '/api/v1/finance/open-items',
     endpoints: {
-      list: '/api/finance/op-debitoren',
-      get: '/api/finance/op-debitoren/{id}',
-      create: '/api/finance/op-debitoren',
-      update: '/api/finance/op-debitoren/{id}',
-      delete: '/api/finance/op-debitoren/{id}'
+      list: '/api/v1/finance/open-items',
+      get: '/api/v1/finance/open-items/{id}',
+      create: '/api/v1/finance/open-items',
+      update: '/api/v1/finance/open-items/{id}',
+      delete: '/api/v1/finance/open-items/{id}'
     }
   } as any,
-  validation: opDebitorenSchema,
+  validation: createOpDebitorenSchema(t),
   permissions: ['fibu.read', 'fibu.write']
-}
+})
 
 // Zahlungen-Tabelle Komponente
-function ZahlungenTable({ data: _data, gesamtBetrag, onChange }: {
+function ZahlungenTable({ data: _data, gesamtBetrag, onChange, t }: {
   data: any[],
   gesamtBetrag: number,
-  onChange: (_data: any[]) => void
+  onChange: (_data: any[]) => void,
+  t: any
 }) {
   const addZahlung = () => {
     onChange([..._data, {
@@ -273,14 +282,14 @@ function ZahlungenTable({ data: _data, gesamtBetrag, onChange }: {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Zahlungen</h3>
+        <h3 className="text-lg font-semibold">{t('crud.fields.payments')}</h3>
         <div className="text-sm">
-          <span className="font-semibold">Offen: {remaining.toFixed(2)} €</span>
+          <span className="font-semibold">{t('crud.fields.openAmount')}: {remaining.toFixed(2)} €</span>
           <button
             onClick={addZahlung}
             className="ml-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            + Zahlung hinzufügen
+            + {t('crud.actions.addPayment')}
           </button>
         </div>
       </div>
@@ -289,11 +298,11 @@ function ZahlungenTable({ data: _data, gesamtBetrag, onChange }: {
         <table className="min-w-full border border-gray-300">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-2 border">Datum</th>
-              <th className="px-4 py-2 border">Betrag</th>
-              <th className="px-4 py-2 border">Typ</th>
-              <th className="px-4 py-2 border">Referenz</th>
-              <th className="px-4 py-2 border">Aktionen</th>
+              <th className="px-4 py-2 border">{t('crud.fields.date')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.amount')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.type')}</th>
+              <th className="px-4 py-2 border">{t('crud.fields.reference')}</th>
+              <th className="px-4 py-2 border">{t('crud.actions.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -322,10 +331,10 @@ function ZahlungenTable({ data: _data, gesamtBetrag, onChange }: {
                     onChange={(e) => updateZahlung(index, 'typ', e.target.value)}
                     className="w-full p-1 border rounded"
                   >
-                    <option value="zahlung">Zahlung</option>
-                    <option value="skonto">Skonto</option>
-                    <option value="gutschrift">Gutschrift</option>
-                    <option value="storno">Storno</option>
+                    <option value="zahlung">{t('crud.fields.payment')}</option>
+                    <option value="skonto">{t('crud.fields.discount')}</option>
+                    <option value="gutschrift">{t('crud.entities.creditNote')}</option>
+                    <option value="storno">{t('crud.actions.reverse')}</option>
                   </select>
                 </td>
                 <td className="px-4 py-2 border">
@@ -334,7 +343,7 @@ function ZahlungenTable({ data: _data, gesamtBetrag, onChange }: {
                     value={zahlung.referenz || ''}
                     onChange={(e) => updateZahlung(index, 'referenz', e.target.value)}
                     className="w-full p-1 border rounded"
-                    placeholder="z.B. Bank-123"
+                    placeholder={t('crud.tooltips.placeholders.paymentReference')}
                   />
                 </td>
                 <td className="px-4 py-2 border">
@@ -355,8 +364,12 @@ function ZahlungenTable({ data: _data, gesamtBetrag, onChange }: {
 }
 
 export default function OPDebitorenPage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const entityType = 'openItem'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'OP-Verwaltung (Debitoren)')
+  const opDebitorenConfig = createOpDebitorenConfig(t, entityTypeLabel)
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: opDebitorenConfig.api.baseUrl,
@@ -382,18 +395,11 @@ export default function OPDebitorenPage(): JSX.Element {
       formData.offen = (formData.betrag || 0) - totalPaid
       formData.letzteZahlung = newZahlung.datum
 
-      toast({
-        title: 'Zahlung gebucht',
-        description: `${newZahlung.betrag.toFixed(2)} € wurden als Zahlung gebucht.`,
-      })
+      toast.success(t('crud.messages.paymentRecorded', { amount: newZahlung.betrag.toFixed(2) }))
     } else if (action === 'skonto') {
       // Skonto nutzen
       if (!formData.skontoBetrag || formData.skontoBetrag <= 0) {
-        toast({
-          variant: 'destructive',
-          title: 'Kein Skonto verfügbar',
-          description: 'Für diesen OP ist kein Skonto verfügbar.',
-        })
+        toast.error(t('crud.messages.noDiscountAvailable'))
         return
       }
 
@@ -411,10 +417,7 @@ export default function OPDebitorenPage(): JSX.Element {
       formData.offen = (formData.betrag || 0) - totalPaid
       formData.letzteZahlung = skontoZahlung.datum
 
-      toast({
-        title: 'Skonto genutzt',
-        description: `${skontoZahlung.betrag.toFixed(2)} € Skonto wurden genutzt.`,
-      })
+      toast.success(t('crud.messages.discountUsed', { amount: skontoZahlung.betrag.toFixed(2) }))
     } else if (action === 'ausgleich') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
@@ -422,25 +425,53 @@ export default function OPDebitorenPage(): JSX.Element {
         return
       }
 
-      try {
-        await saveData(formData)
-        setIsDirty(false)
-        toast({
-          title: 'OP ausgeglichen',
-          description: 'Der offene Posten wurde erfolgreich ausgeglichen.',
-        })
-        navigate('/finance/op-debitoren')
-      } catch (error) {
-        // Error wird bereits in useMaskData behandelt
+      if (!formData.id) {
+        toast.error(t('crud.messages.saveFirst'))
+        return
+      }
+
+      // Process all payments as settlements
+      if (formData.zahlungen && formData.zahlungen.length > 0) {
+        try {
+          for (const zahlung of formData.zahlungen) {
+            if (zahlung.typ === 'storno') {
+              // Skip reversed payments
+              continue
+            }
+
+            const settlement = {
+              op_id: formData.id,
+              payment_amount: zahlung.betrag,
+              payment_date: zahlung.datum,
+              payment_reference: zahlung.referenz || `Z-${Date.now()}`,
+              payment_type: zahlung.typ === 'skonto' ? 'discount' : 'payment',
+              notes: zahlung.typ === 'gutschrift' ? t('crud.entities.creditNote') : null
+            }
+
+            await apiClient.post(`/api/v1/finance/open-items/${formData.id}/settle`, settlement)
+          }
+
+          toast.success(t('crud.messages.settlementSuccess'))
+          setIsDirty(false)
+          navigate('/finance/op-debitoren')
+        } catch (error: any) {
+          toast.error(error.message || t('crud.messages.settlementError'))
+        }
+      } else {
+        // No payments to settle, just save the OP
+        try {
+          await saveData(formData)
+          setIsDirty(false)
+          toast.success(t('crud.messages.saveSuccess', { entityType: entityTypeLabel }))
+          navigate('/finance/op-debitoren')
+        } catch (error) {
+          // Error wird bereits in useMaskData behandelt
+        }
       }
     } else if (action === 'mahnung') {
       // Mahnung erstellen
       if (!formData.id) {
-        toast({
-          variant: 'destructive',
-          title: 'Fehler',
-          description: 'Speichern Sie den OP zuerst.',
-        })
+        toast.error(t('crud.messages.saveFirst'))
         return
       }
 
@@ -455,35 +486,20 @@ export default function OPDebitorenPage(): JSX.Element {
 
         if (response.ok) {
           formData.mahnstufe = (formData.mahnstufe || 0) + 1
-          toast({
-            title: 'Mahnung erstellt',
-            description: `${formData.mahnstufe}. Mahnung wurde erstellt.`,
-          })
+          toast.success(t('crud.messages.dunningCreated', { level: formData.mahnstufe }))
         } else {
           const error = await response.json()
-          toast({
-            variant: 'destructive',
-            title: 'Fehler bei Mahnung',
-            description: error.detail || 'Mahnung konnte nicht erstellt werden.',
-          })
+          toast.error(error.detail || t('crud.messages.dunningError'))
         }
       } catch (error) {
-        toast({
-          variant: 'destructive',
-          title: 'Netzwerkfehler',
-          description: 'Verbindung zum Server fehlgeschlagen.',
-        })
+        toast.error(t('crud.messages.networkError'))
       }
     } else if (action === 'export') {
       if (!formData.id) {
-        toast({
-          variant: 'destructive',
-          title: 'Fehler',
-          description: 'Speichern Sie den OP zuerst.',
-        })
+        toast.error(t('crud.messages.saveFirstGeneric'))
         return
       }
-      window.open(`/api/finance/op-debitoren/${formData.id}/export`, '_blank')
+      window.open(`/api/v1/finance/open-items/${formData.id}/export`, '_blank')
     }
   })
 
@@ -492,7 +508,7 @@ export default function OPDebitorenPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm('Ungespeicherte Änderungen gehen verloren. Wirklich abbrechen?')) {
+    if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
       return
     }
     navigate('/finance/op-debitoren')

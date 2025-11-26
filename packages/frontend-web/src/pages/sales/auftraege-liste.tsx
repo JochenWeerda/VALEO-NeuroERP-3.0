@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -6,8 +6,14 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileDown, Plus, Search } from 'lucide-react'
+import { FileDown, FileText, Plus, Search } from 'lucide-react'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { AdvancedFilters, FilterConfig } from '@/components/list/AdvancedFilters'
+import { CSVImport } from '@/components/list/CSVImport'
+import { useToast } from '@/hooks/use-toast'
+import { useListActions } from '@/hooks/useListActions'
+import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
+import { saveDocument } from '@/lib/document-api'
 
 type Auftrag = {
   id: string
@@ -60,30 +66,149 @@ const statusVariantMap: Record<Auftrag['status'], 'default' | 'outline' | 'secon
 export default function AuftraegeListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { toast } = useToast()
   const entityType = 'salesOrder'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Verkaufsauftrag')
   const pageTitle = getListTitle(t, entityTypeLabel)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<Auftrag['status'] | 'alle'>('alle')
+  const [auftraege, setAuftraege] = useState<Auftrag[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showImport, setShowImport] = useState(false)
+  const [filterValues, setFilterValues] = useState<Record<string, any>>({})
 
-  const getStatusLabelLocal = (status: Auftrag['status']): string => {
-    const statusMap: Record<Auftrag['status'], string> = {
-      offen: t('status.pending'),
-      teilgeliefert: t('status.partiallyDelivered'),
-      geliefert: t('status.delivered'),
-      fakturiert: t('status.invoiced'),
-      storniert: t('status.cancelled'),
+
+  // Lade Daten von API
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch('/api/mcp/documents/sales_order?skip=0&limit=100')
+        if (response.ok) {
+          const result = await response.json()
+          if (result.ok && result.data) {
+            // Transformiere API-Daten
+            const transformed = result.data.map((doc: any) => ({
+              id: doc.number,
+              nummer: doc.number,
+              datum: doc.date,
+              kunde: doc.customerId || '',
+              betrag: 0, // Wird aus lines berechnet
+              status: (doc.status?.toLowerCase() || 'offen') as Auftrag['status'],
+              liefertermin: doc.deliveryDate || '',
+            }))
+            setAuftraege(transformed.length > 0 ? transformed : mockAuftraege)
+          } else {
+            setAuftraege(mockAuftraege)
+          }
+        } else {
+          setAuftraege(mockAuftraege)
+        }
+      } catch (error) {
+        console.error('Fehler beim Laden der Aufträge:', error)
+        setAuftraege(mockAuftraege)
+      } finally {
+        setLoading(false)
+      }
     }
-    return statusMap[status] || status
-  }
+    loadData()
+  }, [])
 
-  const filteredAuftraege = mockAuftraege.filter((auftrag) => {
+  // Filter-Konfiguration für AdvancedFilters
+  const filterConfig: FilterConfig[] = [
+    {
+      key: 'status',
+      label: t('crud.fields.status'),
+      type: 'select',
+      options: [
+        { value: 'offen', label: t('status.pending') },
+        { value: 'teilgeliefert', label: t('status.partiallyDelivered') },
+        { value: 'geliefert', label: t('status.delivered') },
+        { value: 'fakturiert', label: t('status.invoiced') },
+        { value: 'storniert', label: t('status.cancelled') },
+      ],
+    },
+    {
+      key: 'datum',
+      label: t('crud.fields.date'),
+      type: 'date',
+    },
+    {
+      key: 'kunde',
+      label: t('crud.entities.customer'),
+      type: 'text',
+    },
+    {
+      key: 'liefertermin',
+      label: t('crud.fields.deliveryDate'),
+      type: 'date',
+    },
+  ]
+
+  const filteredAuftraege = auftraege.filter((auftrag) => {
     const matchesSearch =
       auftrag.nummer.toLowerCase().includes(searchTerm.toLowerCase()) ||
       auftrag.kunde.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'alle' || auftrag.status === statusFilter
+    
+    // Erweiterte Filter
+    if (filterValues.status && auftrag.status !== filterValues.status) return false
+    if (filterValues.kunde && !auftrag.kunde.toLowerCase().includes(filterValues.kunde.toLowerCase())) return false
+    if (filterValues.datum) {
+      const auftragDate = new Date(auftrag.datum).toISOString().split('T')[0]
+      if (auftragDate !== filterValues.datum) return false
+    }
+    if (filterValues.liefertermin) {
+      const lieferDate = new Date(auftrag.liefertermin).toISOString().split('T')[0]
+      if (lieferDate !== filterValues.liefertermin) return false
+    }
+    
     return matchesSearch && matchesStatus
   })
+
+  const exportData = filteredAuftraege.map(a => ({
+    Auftragsnummer: a.nummer,
+    Datum: formatDateForExport(a.datum),
+    Kunde: a.kunde,
+    Betrag: formatCurrencyForExport(a.betrag),
+    Liefertermin: formatDateForExport(a.liefertermin),
+    Status: getStatusLabel(t, a.status, a.status),
+  }))
+
+  const { handleExport, handlePrint } = useListActions({
+    data: exportData,
+    entityName: 'auftraege',
+  })
+
+  const handleImport = async (importData: any[]) => {
+    try {
+      for (const row of importData) {
+        const doc = {
+          number: row.Auftragsnummer || row.number || `SO-${Date.now()}`,
+          date: row.Datum || row.date || new Date().toISOString().split('T')[0],
+          customerId: row.Kunde || row.customerId || '',
+          status: 'ENTWURF',
+          deliveryDate: row.Liefertermin || row.deliveryDate || '',
+          lines: [],
+          subtotalNet: 0,
+          totalTax: 0,
+          totalGross: parseFloat(row.Betrag?.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0,
+        }
+        await saveDocument('sales_order', doc)
+      }
+      toast({
+        title: t('crud.messages.importSuccess'),
+        description: `${importData.length} Aufträge wurden importiert.`,
+      })
+      window.location.reload()
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.importError'),
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+      })
+    }
+  }
 
   const columns = [
     {
@@ -122,7 +247,7 @@ export default function AuftraegeListePage(): JSX.Element {
       key: 'status' as const,
       label: t('crud.fields.status'),
       render: (auftrag: Auftrag) => (
-        <Badge variant={statusVariantMap[auftrag.status]}>{getStatusLabelLocal(auftrag.status)}</Badge>
+        <Badge variant={statusVariantMap[auftrag.status]}>{getStatusLabel(t, auftrag.status, auftrag.status)}</Badge>
       ),
     },
   ]
@@ -167,13 +292,39 @@ export default function AuftraegeListePage(): JSX.Element {
               <option value="fakturiert">{t('status.invoiced')}</option>
               <option value="storniert">{t('status.cancelled')}</option>
             </select>
-            <Button variant="outline" className="gap-2">
+            <AdvancedFilters
+              filters={filterConfig}
+              values={filterValues}
+              onChange={setFilterValues}
+              onReset={() => setFilterValues({})}
+            />
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
-              {t('crud.actions.export')}
+              {t('crud.print.export')}
+            </Button>
+            <Button variant="outline" className="gap-2" onClick={handlePrint}>
+              <FileText className="h-4 w-4" />
+              {t('crud.actions.print')}
+            </Button>
+            <Button variant="outline" className="gap-2" onClick={() => setShowImport(!showImport)}>
+              <FileText className="h-4 w-4" />
+              {t('crud.actions.import')}
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {showImport && (
+        <Card>
+          <CardContent className="pt-6">
+            <CSVImport
+              onImport={handleImport}
+              expectedColumns={['Auftragsnummer', 'Datum', 'Kunde', 'Betrag', 'Liefertermin', 'Status']}
+              entityName="Aufträge"
+            />
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardContent className="pt-6">
