@@ -2,7 +2,7 @@ import { eq, and, ilike, gte, lte, desc, asc } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db/connection';
 import { salesOffers } from '../db/schema';
-import { SalesOfferEntity, SalesOffer, CreateSalesOfferInput, UpdateSalesOfferInput, SalesOfferStatus, SalesOfferStatusType } from '../../domain/entities';
+import { SalesOffer, CreateSalesOfferInput, UpdateSalesOfferInput, SalesOfferStatus } from '../../domain/entities';
 
 export interface SalesOfferFilters {
   customerId?: string;

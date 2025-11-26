@@ -1,0 +1,141 @@
+{
+  "mission": "Sales Module Exploration",
+  "timestamp": "2025-11-24T12-14-17.798878",
+  "base_url": "http://localhost:3000",
+  "screenshots": [
+    {
+      "filename": "20251124_131329_01_homepage.png",
+      "filepath": "evidence\\screenshots\\sales\\20251124_131329_01_homepage.png",
+      "description": "Startseite / Login",
+      "timestamp": "20251124_131329",
+      "url": "http://localhost:3000/"
+    },
+    {
+      "filename": "20251124_131331_02_dashboard.png",
+      "filepath": "evidence\\screenshots\\sales\\20251124_131331_02_dashboard.png",
+      "description": "Dashboard nach Login",
+      "timestamp": "20251124_131331",
+      "url": "http://localhost:3000/"
+    },
+    {
+      "filename": "20251124_131334_03_sales_module.png",
+      "filepath": "evidence\\screenshots\\sales\\20251124_131334_03_sales_module.png",
+      "description": "Sales-Modul Übersicht",
+      "timestamp": "20251124_131334",
+      "url": "http://localhost:3000/dashboard/sales"
+    },
+    {
+      "filename": "20251124_131338_04_offers_list.png",
+      "filepath": "evidence\\screenshots\\sales\\20251124_131338_04_offers_list.png",
+      "description": "Offers-Liste",
+      "timestamp": "20251124_131338",
+      "url": "http://localhost:3000/sales"
+    },
+    {
+      "filename": "20251124_131341_05_create_offer_form.png",
+      "filepath": "evidence\\screenshots\\sales\\20251124_131341_05_create_offer_form.png",
+      "description": "Angebot erstellen - Formular",
+      "timestamp": "20251124_131341",
+      "url": "http://localhost:3000/sales/angebot/neu"
+    },
+    {
+      "filename": "20251124_131349_06_orders_list.png",
+      "filepath": "evidence\\screenshots\\sales\\20251124_131349_06_orders_list.png",
+      "description": "Orders-Liste",
+      "timestamp": "20251124_131349",
+      "url": "http://localhost:3000/sales/order"
+    },
+    {
+      "filename": "20251124_131352_07_create_order_form.png",
+      "filepath": "evidence\\screenshots\\sales\\20251124_131352_07_create_order_form.png",
+      "description": "Auftrag erstellen - Formular",
+      "timestamp": "20251124_131352",
+      "url": "http://localhost:3000/finance/bookings/new"
+    },
+    {
+      "filename": "20251124_131359_08_deliveries_list.png",
+      "filepath": "evidence\\screenshots\\sales\\20251124_131359_08_deliveries_list.png",
+      "description": "Deliveries-Liste",
+      "timestamp": "20251124_131359",
+      "url": "http://localhost:3000/sales/delivery"
+    },
+    {
+      "filename": "20251124_131406_09_invoices_list.png",
+      "filepath": "evidence\\screenshots\\sales\\20251124_131406_09_invoices_list.png",
+      "description": "Invoices-Liste",
+      "timestamp": "20251124_131406",
+      "url": "http://localhost:3000/sales/invoice"
+    }
+  ],
+  "flows": [
+    {
+      "flow_id": "SALES-NAV-01",
+      "description": "Sales Module Navigation"
+    },
+    {
+      "flow_id": "SALES-QTN-01",
+      "description": "Offers List View"
+    },
+    {
+      "flow_id": "SALES-QTN-02",
+      "description": "Create Offer Form"
+    },
+    {
+      "flow_id": "SALES-ORD-01",
+      "description": "Orders List View"
+    },
+    {
+      "flow_id": "SALES-ORD-02",
+      "description": "Create Order Form"
+    },
+    {
+      "flow_id": "SALES-DLV-01",
+      "description": "Deliveries List View"
+    },
+    {
+      "flow_id": "SALES-BIL-01",
+      "description": "Invoices List View"
+    }
+  ],
+  "findings": [
+    {
+      "type": "form_analysis",
+      "capability": "SALES-QTN-01",
+      "fields_found": 4,
+      "sample_fields": [
+        {
+          "label": "z.B. Landhandel Nord GmbH",
+          "type": "text"
+        },
+        {
+          "label": "Name des Ansprechpartners",
+          "type": "text"
+        },
+        {
+          "label": "z.B. info@firma.de",
+          "type": "email"
+        },
+        {
+          "label": "z.B. +49 123 456789",
+          "type": "tel"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "screenshots_count": 9,
+    "findings_count": 1,
+    "flows_count": 7,
+    "explored_modules": [
+      "Sales",
+      "Offers",
+      "Orders",
+      "Deliveries",
+      "Invoices"
+    ],
+    "capabilities_touched": [
+      "SALES-QTN-01"
+    ],
+    "status": "completed"
+  }
+}

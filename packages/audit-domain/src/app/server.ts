@@ -4,6 +4,7 @@ import swaggerUi from '@fastify/swagger-ui';
 import dotenv from 'dotenv';
 import { registerEventRoutes } from './routes/events';
 import { registerIntegrityRoutes } from './routes/integrity';
+import { registerChangeLogRoutes } from './routes/change-logs';
 import { initEventPublisher, closeEventPublisher } from '../infra/messaging/publisher';
 import { initEventConsumer, closeEventConsumer } from '../infra/messaging/event-consumer';
 import pino from 'pino';
@@ -35,6 +36,7 @@ server.get('/live', async () => ({ status: 'alive' }));
 
 void server.register(registerEventRoutes, { prefix: '/audit/api/v1' });
 void server.register(registerIntegrityRoutes, { prefix: '/audit/api/v1' });
+void server.register(registerChangeLogRoutes, { prefix: '/audit/api/v1' });
 server.get('/audit/api/v1/openapi.json', async () => server.swagger());
 
 export async function start(): Promise<void> {

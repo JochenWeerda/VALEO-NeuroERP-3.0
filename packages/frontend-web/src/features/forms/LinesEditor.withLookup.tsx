@@ -19,7 +19,7 @@ type RowRecord<ColumnName extends string> = Record<ColumnName, RowValue>
 interface LinesEditorWithLookupProps<ColumnName extends string> {
   columns: LineColumn<ColumnName>[]
   value: Array<RowRecord<ColumnName>>
-  onChange: (rows: Array<RowRecord<ColumnName>>) => void
+  onChange: (_rows: Array<RowRecord<ColumnName>>) => void
 }
 
 const DEFAULT_NUMERIC_VALUE = 0

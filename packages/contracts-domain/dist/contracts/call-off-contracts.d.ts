@@ -54,8 +54,8 @@ export declare const UpdateCallOffSchema: z.ZodObject<{
     customerYard: z.ZodOptional<z.ZodString>;
     notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    notes?: string | undefined;
     qty?: number | undefined;
+    notes?: string | undefined;
     window?: {
         from: string;
         to: string;
@@ -64,8 +64,8 @@ export declare const UpdateCallOffSchema: z.ZodObject<{
     silo?: string | undefined;
     customerYard?: string | undefined;
 }, {
-    notes?: string | undefined;
     qty?: number | undefined;
+    notes?: string | undefined;
     window?: {
         from: string;
         to: string;
@@ -100,12 +100,12 @@ export declare const CallOffResponseSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     status: "Cancelled" | "Planned" | "Scheduled" | "Delivered" | "Invoiced";
     id: string;
-    contractId: string;
     tenantId: string;
+    qty: number;
     createdAt: string;
     updatedAt: string;
     version: number;
-    qty: number;
+    contractId: string;
     window: {
         from: string;
         to: string;
@@ -117,12 +117,12 @@ export declare const CallOffResponseSchema: z.ZodObject<{
 }, {
     status: "Cancelled" | "Planned" | "Scheduled" | "Delivered" | "Invoiced";
     id: string;
-    contractId: string;
     tenantId: string;
+    qty: number;
     createdAt: string;
     updatedAt: string;
     version: number;
-    qty: number;
+    contractId: string;
     window: {
         from: string;
         to: string;

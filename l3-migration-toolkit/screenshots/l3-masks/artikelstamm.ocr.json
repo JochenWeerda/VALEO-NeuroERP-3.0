@@ -1,0 +1,65 @@
+{
+  "raw_text": "By crm\nAng fut.\nHB Einkaureienienten Weitere ~\n\nEE] Strecken | fly Kunden ~\n\nKontrakte Artikel +\n\nStammdaten\n\nartikel,\n\nS a Se\n\nS By i\n\nNachrichten Wiedervorlage.Kolender Team Kalender\nKommunikation &\n\nE-Mail\nDakumente\n\nLetzte Dokumente\n\n‘ARTIKEL, STAMMOATEN = I\n\nKurtext |\n\nBezeichnung |\n\nBeschreibung\n\n2, Matchcade\n\nB Details\n\n| Clarke gespent\n\nDOKUMENTATION\n\nDruck Beschreibung\naut Anfr/Bestell\nauf Angebot\nauf Auftragsbest\nauf Lieferschein\nauf Rechnung\nauf Kontrakt\nauf Wiegeschein\n\nsie\n\n4 | | | |\n\nKENNZEICHNUNG  PREISE RABATTE LH SAATGUT BAUGRUPPE —BAUIGRUPPE.\nMengen-Einheit . Gewicht: kg] Preis je\nhi-Gewicht: kg Verpackungsart <I\nEinhSehl.,Einhelt,Umrechnung . Emhelt Runden Gebinde & iL_l-\n\nKennz, Disposition:\n\nVerp. Material-Verbrauch ——_Paletten\n\nSteuerschlissel %\n\nHaupt-Artikel-Nr.\n\nBewertungs-Art\n\nBewertung-Prazent: | q\n\nArtikel-Nr\n\n[eet Auswant a\n\nFolgeartikel\n\nFo\n\nCd\n\n> Lieferanten Bg Kalkulstion [2] Arbeitsginge EQ verf, Bestand [B) Lager-Bestand ®lKunden-Preise E] ProveListen Hf Zus. Felder 9\n\n© | Cevovrstion Bates eiketen\n\n‘Abbrechen,\n\nOK\n\nBediener: IW - Jochen Weerda Firma: 1 - Hin\n\nich Folkerts Landhandel _ Niederlassung: -\n\n‘Version: 25.06.03 - FB\n\n",
+  "fields": [
+    {
+      "label": "Gewicht",
+      "type": "string",
+      "example_value": "",
+      "position": {
+        "left": 546,
+        "top": 382,
+        "width": 46,
+        "height": 26
+      },
+      "confidence": 89
+    },
+    {
+      "label": "Disposition",
+      "type": "string",
+      "example_value": "",
+      "position": {
+        "left": 753,
+        "top": 482,
+        "width": 57,
+        "height": 12
+      },
+      "confidence": 91
+    },
+    {
+      "label": "Firma",
+      "type": "number",
+      "example_value": "1",
+      "position": {
+        "left": 549,
+        "top": 950,
+        "width": 28,
+        "height": 9
+      },
+      "confidence": 75
+    },
+    {
+      "label": "‘Version",
+      "type": "string",
+      "example_value": "",
+      "position": {
+        "left": 986,
+        "top": 950,
+        "width": 37,
+        "height": 9
+      },
+      "confidence": 66
+    }
+  ],
+  "tabs": [
+    "SAATGUT",
+    "DOKUMENTATION"
+  ],
+  "metadata": {
+    "image_size": [
+      1391,
+      965
+    ],
+    "total_words": 161,
+    "avg_confidence": 76.58703071672355
+  }
+}

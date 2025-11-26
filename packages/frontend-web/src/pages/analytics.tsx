@@ -20,6 +20,8 @@ import { useForecast } from "@/features/analytics/useForecast"
 import { useKpiAlerts } from "@/features/alerts/useKpiAlerts"
 import { KpiHeatmap } from "@/features/alerts/KpiHeatmap"
 import { AlertBanner, AlertList } from "@/features/alerts/AlertBanner"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 
 const ANIMATION_DURATION = 0.3
 const CHART_HEIGHT = 250
@@ -63,8 +65,19 @@ export default function AnalyticsDashboard(): JSX.Element {
     }
   })
 
-  const kpis = kpiData?.data?.data ?? []
-  const trends = trendData?.data?.data ?? []
+  // Fallbacks: render empty cards/charts when endpoints are missing (404)
+  const emptyKpiFallback: KPI[] = [
+    { id: "kpi-1", label: "Umsatz", value: 0, delta: 0, unit: "€" },
+    { id: "kpi-2", label: "Marge", value: 0, delta: 0, unit: "€" },
+    { id: "kpi-3", label: "Aufträge", value: 0, delta: 0, unit: "€" },
+    { id: "kpi-4", label: "Lagerbestand", value: 0, delta: 0, unit: "€" },
+  ]
+  const rawKpis = kpiData?.ok === false ? [] : kpiData?.data?.data ?? []
+  const rawTrends = trendData?.ok === false ? [] : trendData?.data?.data ?? []
+  const kpis = rawKpis.length === 0 ? emptyKpiFallback : rawKpis
+  const trends = rawTrends
+
+  const showEmptyState = rawKpis.length === 0 && rawTrends.length === 0
 
   const handleSearch = (_value: string): void => {
     // Search functionality to be implemented
@@ -79,9 +92,20 @@ export default function AnalyticsDashboard(): JSX.Element {
       <h2 className="text-2xl font-bold">Dashboard</h2>
       <Toolbar onSearch={handleSearch} onCopilot={handleCopilot} />
 
+      {showEmptyState && (
+        <Alert variant="default" className="bg-amber-50 border-amber-200 text-amber-800">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Aktuell keine Daten gefunden. Die Widgets zeigen Platzhalter.</AlertDescription>
+        </Alert>
+      )}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {kpis.map((k): JSX.Element => (
+        {kpis.map((k, idx): JSX.Element => {
+          const label = k.label?.trim() || `Kennzahl ${idx + 1}`
+          const valueText = `${k.value.toLocaleString("de-DE")} ${k.unit ?? ""}`.trim()
+          const deltaText = `${k.delta >= 0 ? "▲" : "▼"} ${Math.abs(k.delta).toFixed(DECIMAL_PLACES)} %`
+          return (
           <motion.div
             key={k.id}
             initial={{ opacity: 0, y: 10 }}
@@ -89,21 +113,19 @@ export default function AnalyticsDashboard(): JSX.Element {
             transition={{ duration: ANIMATION_DURATION }}
           >
             <Card className="p-4 shadow-md bg-gradient-to-br from-emerald-50 to-white">
-              <div className="text-sm opacity-70">{k.label}</div>
-              <div className="text-2xl font-bold">
-                {k.value.toLocaleString("de-DE")}
-                {k.unit ?? ""}
-              </div>
+              <div className="text-sm opacity-70">{label}</div>
+              <div className="text-2xl font-bold">{valueText}</div>
               <div
                 className={`text-sm ${
                   k.delta >= 0 ? "text-green-600" : "text-red-600"
                 }`}
               >
-                {k.delta >= 0 ? "▲" : "▼"} {Math.abs(k.delta).toFixed(DECIMAL_PLACES)} %
+                {deltaText}
               </div>
             </Card>
           </motion.div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Charts */}

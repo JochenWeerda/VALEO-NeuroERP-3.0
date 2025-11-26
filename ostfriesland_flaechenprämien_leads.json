@@ -1,0 +1,3154 @@
+{
+  "timestamp": "2025-11-20T16:08:07.563968",
+  "analysis_focus": "Flächenprämien zur Betriebsgrösse-Bewertung",
+  "area_premium_codes": {
+    "I.1": "Basis-Direktzahlung",
+    "I.2": "Umverteilungsz. für Nachhaltigkeit",
+    "I.3": "Zahlung für Junglandwirte",
+    "I.4": "Gekoppelte Einkommensstützung",
+    "I.6": "Kleinerzeugerregelung",
+    "V.1": "Agrarumwelt-Klimamaßnahmen"
+  },
+  "statistics": {
+    "total_payments_processed": 15985,
+    "area_premium_payments": 14955,
+    "excluded_payments": 1030,
+    "unique_farms": 5078,
+    "total_area_premiums_eur": 383403066.59000254,
+    "avg_premiums_per_farm": 75502.7701043723
+  },
+  "farm_size_distribution": {
+    "Grossbetrieb": 1194,
+    "Kleinbetrieb": 1066,
+    "Sehr kleiner Betrieb": 624,
+    "Kleinstbetrieb": 1180,
+    "Mittelgrosser Betrieb": 1014
+  },
+  "top_leads": [
+    {
+      "name": "NLWKN",
+      "plz": "26506",
+      "city": "Norden, Stadt",
+      "total_area_premiums": 10745571.08,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 5372785.54
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 5372785.54
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (35819+ ha)"
+    },
+    {
+      "name": "Johannshof GbR",
+      "plz": "26629",
+      "city": "Großefehn",
+      "total_area_premiums": 1565323.4,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 313064.68
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 313064.68
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 313064.68
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 313064.68
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 313064.68
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (5218+ ha)"
+    },
+    {
+      "name": "Borkumer Landwirtschafts-u. Weidegenossenschaft eG",
+      "plz": "26757",
+      "city": "Borkum, Stadt",
+      "total_area_premiums": 1512638.0499999998,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 302527.61
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 302527.61
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 302527.61
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 302527.61
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 302527.61
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (5042+ ha)"
+    },
+    {
+      "name": "Hof Seeverns GbR",
+      "plz": "26969",
+      "city": "Butjadingen",
+      "total_area_premiums": 1297899.96,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 324474.99
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 324474.99
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 324474.99
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 324474.99
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (4326+ ha)"
+    },
+    {
+      "name": "Engeln, Ludger",
+      "plz": "26871",
+      "city": "Papenburg, Stadt",
+      "total_area_premiums": 1296910.76,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 324227.69
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 324227.69
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 324227.69
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 324227.69
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (4323+ ha)"
+    },
+    {
+      "name": "Liebich, Menno",
+      "plz": "26725",
+      "city": "Emden, Stadt",
+      "total_area_premiums": 1294765.3800000001,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 215794.23
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 215794.23
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 215794.23
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 215794.23
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 215794.23
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 215794.23
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (4316+ ha)"
+    },
+    {
+      "name": "Heiko Holthusen & Partner GbR",
+      "plz": "26919",
+      "city": "Brake (Unterweser), Stadt",
+      "total_area_premiums": 1286788.35,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 257357.67
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 257357.67
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 257357.67
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 257357.67
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 257357.67
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (4289+ ha)"
+    },
+    {
+      "name": "Kroeger, Michael",
+      "plz": "26903",
+      "city": "Surwold",
+      "total_area_premiums": 1274784.15,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 424928.05
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 424928.05
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 424928.05
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (4249+ ha)"
+    },
+    {
+      "name": "Weserinsel Strohauser Plate GbR",
+      "plz": "26919",
+      "city": "Brake (Unterweser), Stadt",
+      "total_area_premiums": 1222127.65,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 244425.53
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 244425.53
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 244425.53
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 244425.53
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 244425.53
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (4074+ ha)"
+    },
+    {
+      "name": "Schütze, Alfred",
+      "plz": "26757",
+      "city": "Borkum, Stadt",
+      "total_area_premiums": 997631.35,
+      "premium_codes": [
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 199526.27
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 199526.27
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 199526.27
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 199526.27
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 199526.27
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (3325+ ha)"
+    },
+    {
+      "name": "Rohde, Anschar",
+      "plz": "26936",
+      "city": "Stadland",
+      "total_area_premiums": 917174.1,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 152862.35
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 152862.35
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 152862.35
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 152862.35
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 152862.35
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 152862.35
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (3057+ ha)"
+    },
+    {
+      "name": "WKKH Agrar Seefeld GmbH & Co. KG",
+      "plz": "26441",
+      "city": "Jever, Stadt",
+      "total_area_premiums": 913521.5700000001,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 304507.19
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 304507.19
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 304507.19
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (3045+ ha)"
+    },
+    {
+      "name": "Janssen, Udo",
+      "plz": "26607",
+      "city": "Aurich, Stadt",
+      "total_area_premiums": 898747.7999999999,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 299582.6
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 299582.6
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 299582.6
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2996+ ha)"
+    },
+    {
+      "name": "Okken & Hensmann GbR",
+      "plz": "26810",
+      "city": "Westoverledingen",
+      "total_area_premiums": 859119.55,
+      "premium_codes": [
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 171823.91
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 171823.91
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 171823.91
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 171823.91
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 171823.91
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2864+ ha)"
+    },
+    {
+      "name": "Straubinger, Rene",
+      "plz": "26871",
+      "city": "Papenburg, Stadt",
+      "total_area_premiums": 854012.0,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 213503.0
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 213503.0
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 213503.0
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 213503.0
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2847+ ha)"
+    },
+    {
+      "name": "Behrends, Jens",
+      "plz": "26553",
+      "city": "Dornum",
+      "total_area_premiums": 850347.55,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 170069.51
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 170069.51
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 170069.51
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 170069.51
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 170069.51
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2834+ ha)"
+    },
+    {
+      "name": "Janssen-Gensch GbR",
+      "plz": "26655",
+      "city": "Alt Bennebek",
+      "total_area_premiums": 786711.44,
+      "premium_codes": [
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 196677.86
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 196677.86
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 196677.86
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 196677.86
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2622+ ha)"
+    },
+    {
+      "name": "Meedehof GbR",
+      "plz": "26624",
+      "city": "Südbrookmerland",
+      "total_area_premiums": 764398.7,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 152879.74
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 152879.74
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 152879.74
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 152879.74
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 152879.74
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2548+ ha)"
+    },
+    {
+      "name": "Junkhoff, Arno",
+      "plz": "26802",
+      "city": "Moormerland",
+      "total_area_premiums": 759481.25,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 151896.25
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 151896.25
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 151896.25
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 151896.25
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 151896.25
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2532+ ha)"
+    },
+    {
+      "name": "Heikens, Gerd-Udo",
+      "plz": "26736",
+      "city": "Krummhörn",
+      "total_area_premiums": 730509.28,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 182627.32
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 182627.32
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 182627.32
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 182627.32
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2435+ ha)"
+    },
+    {
+      "name": "Ippen & Partner GbR",
+      "plz": "26506",
+      "city": "Norden, Stadt",
+      "total_area_premiums": 694017.0,
+      "premium_codes": [
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 138803.4
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 138803.4
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 138803.4
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 138803.4
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 138803.4
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2313+ ha)"
+    },
+    {
+      "name": "Janssen, Gerd Jannes",
+      "plz": "26529",
+      "city": "Wirdum",
+      "total_area_premiums": 692491.64,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 173122.91
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 173122.91
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 173122.91
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 173122.91
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2308+ ha)"
+    },
+    {
+      "name": "Luitjens GbR",
+      "plz": "26831",
+      "city": "Bunde",
+      "total_area_premiums": 667619.2999999999,
+      "premium_codes": [
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 133523.86
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 133523.86
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 133523.86
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 133523.86
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 133523.86
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2225+ ha)"
+    },
+    {
+      "name": "Albert & Annegret Aeissen GbR",
+      "plz": "26831",
+      "city": "Bunde",
+      "total_area_premiums": 667388.6,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 133477.72
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 133477.72
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 133477.72
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 133477.72
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 133477.72
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2225+ ha)"
+    },
+    {
+      "name": "Dreyer, Birgit",
+      "plz": "26931",
+      "city": "Elsfleth, Stadt",
+      "total_area_premiums": 618936.85,
+      "premium_codes": [
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 123787.37
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 123787.37
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 123787.37
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 123787.37
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 123787.37
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2063+ ha)"
+    },
+    {
+      "name": "Roß & Schöningh Agrarbetriebs KG",
+      "plz": "26736",
+      "city": "Krummhörn",
+      "total_area_premiums": 618749.97,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 206249.99
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 206249.99
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 206249.99
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2062+ ha)"
+    },
+    {
+      "name": "Eekhoff, Hillrich",
+      "plz": "26844",
+      "city": "Jemgum",
+      "total_area_premiums": 618695.08,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 154673.77
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 154673.77
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 154673.77
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 154673.77
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2062+ ha)"
+    },
+    {
+      "name": "Groen, Gerd",
+      "plz": "26969",
+      "city": "Butjadingen",
+      "total_area_premiums": 614801.9,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 122960.38
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 122960.38
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 122960.38
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 122960.38
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 122960.38
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2049+ ha)"
+    },
+    {
+      "name": "Dreyer, Heiko",
+      "plz": "26736",
+      "city": "Krummhörn",
+      "total_area_premiums": 602917.48,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 150729.37
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 150729.37
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 150729.37
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 150729.37
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2010+ ha)"
+    },
+    {
+      "name": "Hümme, Matthias",
+      "plz": "26969",
+      "city": "Butjadingen",
+      "total_area_premiums": 601596.45,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 120319.29
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 120319.29
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 120319.29
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 120319.29
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 120319.29
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (2005+ ha)"
+    },
+    {
+      "name": "Düser, Harald",
+      "plz": "26954",
+      "city": "Nordenham, Stadt",
+      "total_area_premiums": 599626.2,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 149906.55
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 149906.55
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 149906.55
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 149906.55
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1999+ ha)"
+    },
+    {
+      "name": "Pape, Ulrich",
+      "plz": "26736",
+      "city": "Krummhörn",
+      "total_area_premiums": 589302.65,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 117860.53
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 117860.53
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 117860.53
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 117860.53
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 117860.53
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1964+ ha)"
+    },
+    {
+      "name": "Spekker, Ronald",
+      "plz": "26844",
+      "city": "Jemgum",
+      "total_area_premiums": 584157.2,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 146039.3
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 146039.3
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 146039.3
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 146039.3
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1947+ ha)"
+    },
+    {
+      "name": "Loerts, Jens",
+      "plz": "26844",
+      "city": "Jemgum",
+      "total_area_premiums": 579905.6,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 144976.4
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 144976.4
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 144976.4
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 144976.4
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1933+ ha)"
+    },
+    {
+      "name": "Biohof Grabhorn GbR",
+      "plz": "26937",
+      "city": "Stadland",
+      "total_area_premiums": 573733.35,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 114746.67
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 114746.67
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 114746.67
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 114746.67
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 114746.67
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1912+ ha)"
+    },
+    {
+      "name": "Nicolaas & Jacobus van Stee GbR",
+      "plz": "26736",
+      "city": "Krummhörn",
+      "total_area_premiums": 570649.3500000001,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 190216.45
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 190216.45
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 190216.45
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1902+ ha)"
+    },
+    {
+      "name": "Kleemann, Tjade-Berend",
+      "plz": "26723",
+      "city": "Emden, Stadt",
+      "total_area_premiums": 570282.87,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 190094.29
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 190094.29
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 190094.29
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1901+ ha)"
+    },
+    {
+      "name": "Haxsen, Hans",
+      "plz": "26935",
+      "city": "Stadland",
+      "total_area_premiums": 567923.2,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 113584.64
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 113584.64
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 113584.64
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 113584.64
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 113584.64
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1893+ ha)"
+    },
+    {
+      "name": "Nordmann, Harald",
+      "plz": "26969",
+      "city": "Butjadingen",
+      "total_area_premiums": 548696.4,
+      "premium_codes": [
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 137174.1
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 137174.1
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 137174.1
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 137174.1
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1829+ ha)"
+    },
+    {
+      "name": "Albers, Fritz Hermann",
+      "plz": "26427",
+      "city": "Neuharlingersiel",
+      "total_area_premiums": 544343.36,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 136085.84
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 136085.84
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 136085.84
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 136085.84
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1814+ ha)"
+    },
+    {
+      "name": "Renken GbR",
+      "plz": "26969",
+      "city": "Butjadingen",
+      "total_area_premiums": 529717.3200000001,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 176572.44
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 176572.44
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 176572.44
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1766+ ha)"
+    },
+    {
+      "name": "Damken, Dennis",
+      "plz": "26936",
+      "city": "Stadland",
+      "total_area_premiums": 529516.4,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 132379.1
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 132379.1
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 132379.1
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 132379.1
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1765+ ha)"
+    },
+    {
+      "name": "SAP Landwirtschafts GbR",
+      "plz": "26553",
+      "city": "Dornum",
+      "total_area_premiums": 527869.45,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 105573.89
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 105573.89
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 105573.89
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 105573.89
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 105573.89
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1760+ ha)"
+    },
+    {
+      "name": "Stöhr, Folkert",
+      "plz": "26452",
+      "city": "Sande",
+      "total_area_premiums": 519966.0,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 129991.5
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 129991.5
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 129991.5
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 129991.5
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1733+ ha)"
+    },
+    {
+      "name": "Schuirmann, Christian",
+      "plz": "26632",
+      "city": "Ihlow",
+      "total_area_premiums": 518188.25,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 103637.65
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 103637.65
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 103637.65
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 103637.65
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 103637.65
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1727+ ha)"
+    },
+    {
+      "name": "Dittmann, Cornelius",
+      "plz": "26939",
+      "city": "Ovelgönne",
+      "total_area_premiums": 517180.26,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 172393.42
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 172393.42
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 172393.42
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1724+ ha)"
+    },
+    {
+      "name": "Gellermann, Bernhard",
+      "plz": "26446",
+      "city": "Friedeburg",
+      "total_area_premiums": 515191.55999999994,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 171730.52
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 171730.52
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 171730.52
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1717+ ha)"
+    },
+    {
+      "name": "Schneider, Janko",
+      "plz": "26532",
+      "city": "Großheide",
+      "total_area_premiums": 502397.88,
+      "premium_codes": [
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 125599.47
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 125599.47
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 125599.47
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 125599.47
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1675+ ha)"
+    },
+    {
+      "name": "van_t Oever, Edwin",
+      "plz": "26931",
+      "city": "Elsfleth, Stadt",
+      "total_area_premiums": 500690.68,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 125172.67
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 125172.67
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 125172.67
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 125172.67
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1669+ ha)"
+    },
+    {
+      "name": "Goeman GbR",
+      "plz": "26939",
+      "city": "Ovelgönne",
+      "total_area_premiums": 499970.44999999995,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 99994.09
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 99994.09
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 99994.09
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 99994.09
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 99994.09
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1667+ ha)"
+    },
+    {
+      "name": "Hof Wrisse GbR",
+      "plz": "26629",
+      "city": "Großefehn",
+      "total_area_premiums": 498309.5,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 99661.9
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 99661.9
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 99661.9
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 99661.9
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 99661.9
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1661+ ha)"
+    },
+    {
+      "name": "Hartmann, Peter",
+      "plz": "26844",
+      "city": "Jemgum",
+      "total_area_premiums": 494445.88,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 123611.47
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 123611.47
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 123611.47
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 123611.47
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1648+ ha)"
+    },
+    {
+      "name": "Dietermann, Hauke",
+      "plz": "26639",
+      "city": "Wiesmoor, Stadt",
+      "total_area_premiums": 494170.2,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 123542.55
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 123542.55
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 123542.55
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 123542.55
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1647+ ha)"
+    },
+    {
+      "name": "Ohling, Karsten",
+      "plz": "26759",
+      "city": "Hinte",
+      "total_area_premiums": 491023.6,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 98204.72
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 98204.72
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 98204.72
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 98204.72
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 98204.72
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1637+ ha)"
+    },
+    {
+      "name": "Köhne, Niklas",
+      "plz": "26954",
+      "city": "Nordenham, Stadt",
+      "total_area_premiums": 486409.4,
+      "premium_codes": [
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 121602.35
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 121602.35
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 121602.35
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 121602.35
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1621+ ha)"
+    },
+    {
+      "name": "Janssen-Spriekenborg GbR",
+      "plz": "26810",
+      "city": "Westoverledingen",
+      "total_area_premiums": 485840.12,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 121460.03
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 121460.03
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 121460.03
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 121460.03
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1619+ ha)"
+    },
+    {
+      "name": "Becker Quanens GbR",
+      "plz": "26434",
+      "city": "Wangerland",
+      "total_area_premiums": 481435.89999999997,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 96287.18
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 96287.18
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 96287.18
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 96287.18
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 96287.18
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1605+ ha)"
+    },
+    {
+      "name": "Peter & Susanne Beerepoot GbR",
+      "plz": "26954",
+      "city": "Nordenham, Stadt",
+      "total_area_premiums": 476947.37999999995,
+      "premium_codes": [
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 79491.23
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 79491.23
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 79491.23
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 79491.23
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 79491.23
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 79491.23
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1590+ ha)"
+    },
+    {
+      "name": "Hof Butendiek GmbH & Co. KG",
+      "plz": "26937",
+      "city": "Stadland",
+      "total_area_premiums": 472077.48,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 118019.37
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 118019.37
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 118019.37
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 118019.37
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1574+ ha)"
+    },
+    {
+      "name": "Landwirtschaft Dornumer Vorwerk GbR",
+      "plz": "26553",
+      "city": "Dornum",
+      "total_area_premiums": 465986.72,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 116496.68
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 116496.68
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 116496.68
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 116496.68
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1553+ ha)"
+    },
+    {
+      "name": "Harm Oncken GbR",
+      "plz": "26452",
+      "city": "Sande",
+      "total_area_premiums": 461853.45,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 92370.69
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 92370.69
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 92370.69
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 92370.69
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 92370.69
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1540+ ha)"
+    },
+    {
+      "name": "von der Lieth, Thorsten",
+      "plz": "26954",
+      "city": "Nordenham, Stadt",
+      "total_area_premiums": 459974.10000000003,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 91994.82
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 91994.82
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 91994.82
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 91994.82
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 91994.82
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1533+ ha)"
+    },
+    {
+      "name": "Dirk & Arno Rickels GbR",
+      "plz": "26452",
+      "city": "Sande",
+      "total_area_premiums": 459713.04,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 153237.68
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 153237.68
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 153237.68
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1532+ ha)"
+    },
+    {
+      "name": "Hicken, Klaas",
+      "plz": "26441",
+      "city": "Jever, Stadt",
+      "total_area_premiums": 456752.52,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 152250.84
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 152250.84
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 152250.84
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1523+ ha)"
+    },
+    {
+      "name": "Gruis, Berend",
+      "plz": "26831",
+      "city": "Bunde",
+      "total_area_premiums": 453654.92,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 113413.73
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 113413.73
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 113413.73
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 113413.73
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1512+ ha)"
+    },
+    {
+      "name": "Wirtschaftsbetriebe Ippen GbR",
+      "plz": "26506",
+      "city": "Norden, Stadt",
+      "total_area_premiums": 451120.26,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 150373.42
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 150373.42
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 150373.42
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1504+ ha)"
+    },
+    {
+      "name": "Brader, Enno",
+      "plz": "26441",
+      "city": "Jever, Stadt",
+      "total_area_premiums": 449104.64999999997,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 149701.55
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 149701.55
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 149701.55
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1497+ ha)"
+    },
+    {
+      "name": "Woltmann GbR",
+      "plz": "26434",
+      "city": "Wangerland",
+      "total_area_premiums": 447856.65,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 89571.33
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 89571.33
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 89571.33
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 89571.33
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 89571.33
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1493+ ha)"
+    },
+    {
+      "name": "Hullmann, Carsten",
+      "plz": "26954",
+      "city": "Nordenham, Stadt",
+      "total_area_premiums": 446327.72,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 111581.93
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 111581.93
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 111581.93
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 111581.93
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1488+ ha)"
+    },
+    {
+      "name": "Kruse, Helmke",
+      "plz": "26434",
+      "city": "Wangerland",
+      "total_area_premiums": 443063.4600000001,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 73843.91
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 73843.91
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 73843.91
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 73843.91
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 73843.91
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 73843.91
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1477+ ha)"
+    },
+    {
+      "name": "Mammen, Andreas",
+      "plz": "26409",
+      "city": "Wittmund, Stadt",
+      "total_area_premiums": 442829.46,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 147609.82
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 147609.82
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 147609.82
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1476+ ha)"
+    },
+    {
+      "name": "Padeken Agrar GbR",
+      "plz": "26939",
+      "city": "Ovelgönne",
+      "total_area_premiums": 441361.35000000003,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 88272.27
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 88272.27
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 88272.27
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 88272.27
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 88272.27
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1471+ ha)"
+    },
+    {
+      "name": "Goeman, Peter-Enno",
+      "plz": "26826",
+      "city": "Weener, Stadt",
+      "total_area_premiums": 439142.56,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 109785.64
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 109785.64
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 109785.64
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 109785.64
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1464+ ha)"
+    },
+    {
+      "name": "Fleckviehhof Brink GbR",
+      "plz": "26826",
+      "city": "Weener, Stadt",
+      "total_area_premiums": 436066.24,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 109016.56
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 109016.56
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 109016.56
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 109016.56
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1454+ ha)"
+    },
+    {
+      "name": "Willms, Menz-Arno",
+      "plz": "26434",
+      "city": "Wangerland",
+      "total_area_premiums": 435830.64,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 108957.66
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 108957.66
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 108957.66
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 108957.66
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1453+ ha)"
+    },
+    {
+      "name": "Brouwer, Jan Kees",
+      "plz": "26937",
+      "city": "Stadland",
+      "total_area_premiums": 432484.72,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 108121.18
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 108121.18
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 108121.18
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 108121.18
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1442+ ha)"
+    },
+    {
+      "name": "Wegmann, Heinz-Wilhelm",
+      "plz": "26757",
+      "city": "Borkum, Stadt",
+      "total_area_premiums": 431440.89999999997,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 86288.18
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 86288.18
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 86288.18
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 86288.18
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 86288.18
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1438+ ha)"
+    },
+    {
+      "name": "Janßen GbR Pumpe",
+      "plz": "26969",
+      "city": "Butjadingen",
+      "total_area_premiums": 424083.08,
+      "premium_codes": [
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 106020.77
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 106020.77
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 106020.77
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 106020.77
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1414+ ha)"
+    },
+    {
+      "name": "Muteus & Jan Smidt GbR",
+      "plz": "26725",
+      "city": "Emden, Stadt",
+      "total_area_premiums": 421997.16,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 105499.29
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 105499.29
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 105499.29
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 105499.29
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1407+ ha)"
+    },
+    {
+      "name": "Behrends, Deddo",
+      "plz": "26759",
+      "city": "Hinte",
+      "total_area_premiums": 420431.44,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 105107.86
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 105107.86
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 105107.86
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 105107.86
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1401+ ha)"
+    },
+    {
+      "name": "Manning GbR",
+      "plz": "26419",
+      "city": "Schortens, Stadt",
+      "total_area_premiums": 416790.4,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 83358.08
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 83358.08
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 83358.08
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 83358.08
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 83358.08
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1389+ ha)"
+    },
+    {
+      "name": "Troff, Heiko-Jan",
+      "plz": "26844",
+      "city": "Jemgum",
+      "total_area_premiums": 413116.25,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 82623.25
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 82623.25
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 82623.25
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 82623.25
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 82623.25
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1377+ ha)"
+    },
+    {
+      "name": "Jörg & Nina Arens GbR",
+      "plz": "26935",
+      "city": "Stadland",
+      "total_area_premiums": 406675.6,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 81335.12
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 81335.12
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 81335.12
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 81335.12
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 81335.12
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1356+ ha)"
+    },
+    {
+      "name": "Jochens, Rüdiger",
+      "plz": "26446",
+      "city": "Friedeburg",
+      "total_area_premiums": 403734.88,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 100933.72
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 100933.72
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 100933.72
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 100933.72
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1346+ ha)"
+    },
+    {
+      "name": "Noosten Agrar KG",
+      "plz": "26524",
+      "city": "Hagermarsch",
+      "total_area_premiums": 401888.28,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 133962.76
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 133962.76
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 133962.76
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1340+ ha)"
+    },
+    {
+      "name": "Thomßen GbR",
+      "plz": "26452",
+      "city": "Sande",
+      "total_area_premiums": 401874.64999999997,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 80374.93
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 80374.93
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 80374.93
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 80374.93
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 80374.93
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1340+ ha)"
+    },
+    {
+      "name": "S+W Schütte GbR",
+      "plz": "26904",
+      "city": "Börger",
+      "total_area_premiums": 400800.85,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 80160.17
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 80160.17
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 80160.17
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 80160.17
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 80160.17
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1336+ ha)"
+    },
+    {
+      "name": "Dirksen, Fokke",
+      "plz": "26427",
+      "city": "Stedesdorf",
+      "total_area_premiums": 399698.10000000003,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 133232.7
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 133232.7
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 133232.7
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1332+ ha)"
+    },
+    {
+      "name": "Francksen, Frerk",
+      "plz": "26969",
+      "city": "Butjadingen",
+      "total_area_premiums": 398358.2,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 99589.55
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 99589.55
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 99589.55
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 99589.55
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1328+ ha)"
+    },
+    {
+      "name": "de Vries, Rainer Hinrich",
+      "plz": "26632",
+      "city": "Ihlow",
+      "total_area_premiums": 397839.80000000005,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 79567.96
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 79567.96
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 79567.96
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 79567.96
+        },
+        {
+          "code": "I.3",
+          "description": "Zahlung für Junglandwirte",
+          "amount": 79567.96
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1326+ ha)"
+    },
+    {
+      "name": "Brouwer, Wilco",
+      "plz": "26969",
+      "city": "Butjadingen",
+      "total_area_premiums": 397031.95,
+      "premium_codes": [
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 79406.39
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 79406.39
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 79406.39
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 79406.39
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 79406.39
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1323+ ha)"
+    },
+    {
+      "name": "Schneider, Theo",
+      "plz": "26629",
+      "city": "Großefehn",
+      "total_area_premiums": 395653.45,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 79130.69
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 79130.69
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 79130.69
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 79130.69
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 79130.69
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1319+ ha)"
+    },
+    {
+      "name": "Tjaden, Folkert",
+      "plz": "26624",
+      "city": "Südbrookmerland",
+      "total_area_premiums": 393517.44,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 98379.36
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 98379.36
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 98379.36
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 98379.36
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1312+ ha)"
+    },
+    {
+      "name": "Cornelius, Tobias",
+      "plz": "26935",
+      "city": "Stadland",
+      "total_area_premiums": 393121.4,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 98280.35
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 98280.35
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 98280.35
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 98280.35
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1310+ ha)"
+    },
+    {
+      "name": "Wuttge, Martin",
+      "plz": "26736",
+      "city": "Krummhörn",
+      "total_area_premiums": 392064.12,
+      "premium_codes": [
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 98016.03
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 98016.03
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 98016.03
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 98016.03
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1307+ ha)"
+    },
+    {
+      "name": "Folkens, Folkert",
+      "plz": "26954",
+      "city": "Nordenham, Stadt",
+      "total_area_premiums": 389696.04,
+      "premium_codes": [
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 129898.68
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 129898.68
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 129898.68
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1299+ ha)"
+    },
+    {
+      "name": "Bonsemeyer GbR",
+      "plz": "26725",
+      "city": "Emden, Stadt",
+      "total_area_premiums": 384878.12,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 96219.53
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 96219.53
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 96219.53
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 96219.53
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1283+ ha)"
+    },
+    {
+      "name": "Ruprecht, Lutz",
+      "plz": "26969",
+      "city": "Butjadingen",
+      "total_area_premiums": 384468.48,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 96117.12
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 96117.12
+        },
+        {
+          "code": "I.6",
+          "description": "Kleinerzeugerregelung",
+          "amount": 96117.12
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 96117.12
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1282+ ha)"
+    },
+    {
+      "name": "Dirks, Harald",
+      "plz": "26736",
+      "city": "Krummhörn",
+      "total_area_premiums": 382459.32,
+      "premium_codes": [
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 127486.44
+        },
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 127486.44
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 127486.44
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1275+ ha)"
+    },
+    {
+      "name": "Poppen, Hermann",
+      "plz": "26607",
+      "city": "Aurich, Stadt",
+      "total_area_premiums": 380879.0,
+      "premium_codes": [
+        {
+          "code": "I.1",
+          "description": "Basis-Direktzahlung",
+          "amount": 95219.75
+        },
+        {
+          "code": "I.2",
+          "description": "Umverteilungsz. für Nachhaltigkeit",
+          "amount": 95219.75
+        },
+        {
+          "code": "I.4",
+          "description": "Gekoppelte Einkommensstützung",
+          "amount": 95219.75
+        },
+        {
+          "code": "V.1",
+          "description": "Agrarumwelt-Klimamaßnahmen",
+          "amount": 95219.75
+        }
+      ],
+      "lead_score": 10,
+      "farm_size_estimate": "Grossbetrieb (1270+ ha)"
+    }
+  ]
+}

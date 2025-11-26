@@ -2,7 +2,7 @@ import * as React from "react"
 import { useDropzone } from "react-dropzone"
 
 interface DropUploadProps {
-  onFiles: (files: File[]) => void
+  onFiles: (_files: File[]) => void
 }
 
 export function DropUpload({ onFiles }: DropUploadProps): JSX.Element {

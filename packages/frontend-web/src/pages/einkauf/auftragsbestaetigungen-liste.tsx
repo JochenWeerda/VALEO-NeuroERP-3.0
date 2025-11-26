@@ -1,57 +1,67 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { toast } from '@/hooks/use-toast'
 
 // API Client für Auftragsbestätigungen
 const apiClient = createApiClient('/api/einkauf')
 
-// Konfiguration für Auftragsbestätigungen ListReport
-const auftragsbestaetigungenConfig: ListConfig = {
-  title: 'Auftragsbestätigungen',
-  subtitle: 'Lieferanten-Rückmeldungen verwalten',
+// Konfiguration für Auftragsbestätigungen ListReport (wird in Komponente mit i18n erstellt)
+const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+  title: entityTypeLabel,
+  titleKey: 'crud.list.title',
+  subtitle: t('crud.subtitles.manageOrderConfirmations'),
+  subtitleKey: 'crud.subtitles.manageOrderConfirmations',
   type: 'list-report',
   columns: [
     {
       key: 'bestaetigungsNummer',
-      label: 'AB-Nr.',
+      label: t('crud.fields.confirmationNumber'),
+      labelKey: 'crud.fields.confirmationNumber',
       sortable: true,
       render: (value) => <code className="text-sm font-mono">{value}</code>
     },
     {
       key: 'bestellung',
-      label: 'Bestellung',
+      label: t('crud.entities.purchaseOrder'),
+      labelKey: 'crud.entities.purchaseOrder',
       sortable: true,
       render: (value) => value?.nummer || '-'
     },
     {
       key: 'lieferant',
-      label: 'Lieferant',
+      label: t('crud.entities.supplier'),
+      labelKey: 'crud.entities.supplier',
       sortable: true,
       filterable: true
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('crud.fields.status'),
+      labelKey: 'crud.fields.status',
       sortable: true,
       filterable: true,
       render: (value) => {
-        const statusLabels = {
-          'OFFEN': { label: 'Offen', variant: 'secondary' as const },
-          'GEPRUEFT': { label: 'Geprüft', variant: 'default' as const },
-          'BESTAETIGT': { label: 'Bestätigt', variant: 'outline' as const }
+        const statusLabel = getStatusLabel(t, value as string, value as string)
+        const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
+          'OFFEN': 'secondary',
+          'GEPRUEFT': 'default',
+          'BESTAETIGT': 'outline'
         }
-        const status = statusLabels[value as keyof typeof statusLabels] || { label: value, variant: 'secondary' as const }
-        return <Badge variant={status.variant}>{status.label}</Badge>
+        return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
       key: 'createdAt',
-      label: 'Erstellt',
+      label: t('crud.fields.createdAt'),
+      labelKey: 'crud.fields.createdAt',
       sortable: true,
       render: (value) => formatDate(value)
     }
@@ -59,30 +69,34 @@ const auftragsbestaetigungenConfig: ListConfig = {
   filters: [
     {
       name: 'status',
-      label: 'Status',
+      label: t('crud.fields.status'),
+      labelKey: 'crud.fields.status',
       type: 'select',
       options: [
-        { value: 'OFFEN', label: 'Offen' },
-        { value: 'GEPRUEFT', label: 'Geprüft' },
-        { value: 'BESTAETIGT', label: 'Bestätigt' }
+        { value: 'OFFEN', label: t('status.pending'), labelKey: 'status.pending' },
+        { value: 'GEPRUEFT', label: t('status.reviewed'), labelKey: 'status.reviewed' },
+        { value: 'BESTAETIGT', label: t('status.confirmed'), labelKey: 'status.confirmed' }
       ]
     },
     {
       name: 'lieferant',
-      label: 'Lieferant',
+      label: t('crud.entities.supplier'),
+      labelKey: 'crud.entities.supplier',
       type: 'text'
     }
   ],
   bulkActions: [
     {
       key: 'pruefen',
-      label: 'Prüfen',
+      label: t('crud.actions.review'),
+      labelKey: 'crud.actions.review',
       type: 'secondary',
       onClick: () => console.log('Prüfen clicked')
     },
     {
       key: 'bestaetigen',
-      label: 'Bestätigen',
+      label: t('crud.actions.confirm'),
+      labelKey: 'crud.actions.confirm',
       type: 'primary',
       onClick: () => console.log('Bestätigen clicked')
     }
@@ -101,24 +115,31 @@ const auftragsbestaetigungenConfig: ListConfig = {
   },
   permissions: ['einkauf.read', 'einkauf.write'],
   actions: []
-}
+})
 
 export default function AuftragsbestaetigungenListePage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const entityType = 'orderConfirmation'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Auftragsbestätigung')
+  const auftragsbestaetigungenConfig = createAuftragsbestaetigungenConfig(t, entityTypeLabel)
 
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
       navigate(`/einkauf/auftragsbestaetigungen/${item.id}`)
     } else if (action === 'delete' && item) {
-      if (confirm(`Auftragsbestätigung "${item.bestaetigungsNummer}" wirklich löschen?`)) {
+      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {
           await apiClient.delete(`/auftragsbestaetigungen/${item.id}`)
           loadData() // Liste neu laden
         } catch (error) {
-          alert('Fehler beim Löschen')
+          toast({
+            variant: 'destructive',
+            title: t('crud.messages.deleteError', { entityType: entityTypeLabel })
+          })
         }
       }
     }
@@ -156,7 +177,34 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
   }
 
   const handleExport = () => {
-    alert('Export-Funktion wird implementiert')
+    try {
+      const csvHeader = `${t('crud.fields.confirmationNumber')};${t('crud.entities.purchaseOrder')};${t('crud.entities.supplier')};${t('crud.fields.status')}\n`
+      const csvContent = data.map((ab: any) =>
+        `"${ab.bestaetigungsNummer}";"${ab.bestellung?.nummer || ''}";"${ab.lieferant}";"${ab.status}"`
+      ).join('\n')
+
+      const csv = csvHeader + csvContent
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `auftragsbestaetigungen-liste-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: t('crud.messages.exportSuccess'),
+        description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
+      })
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.exportError'),
+        description: t('crud.messages.exportFailed'),
+      })
+    }
   }
 
   return (
@@ -168,7 +216,12 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onExport={handleExport}
-      onImport={() => alert('Import-Funktion wird implementiert')}
+      onImport={() => {
+        toast({
+          title: t('crud.messages.importInfo'),
+          description: t('crud.messages.importComingSoon'),
+        })
+      }}
       isLoading={loading}
     />
   )

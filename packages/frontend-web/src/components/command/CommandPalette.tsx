@@ -3,7 +3,7 @@
  * Quick navigation and actions for VALEO NeuroERP
  */
 
-import { useState, useEffect } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   CommandDialog,
@@ -14,10 +14,7 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command'
-import {
-  FileText, Users, Package, TrendingUp, Settings, 
-  Search, Plus, Calculator, Shield, Zap
-} from 'lucide-react'
+import { NAVIGATION_SHORTCUTS, ACTION_SHORTCUTS, AI_SHORTCUTS } from '@/app/navigation/manifest'
 
 type CommandAction = {
   id: string
@@ -28,7 +25,6 @@ type CommandAction = {
   keywords?: string[]
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function CommandPalette() {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -46,116 +42,64 @@ export function CommandPalette() {
     return () => document.removeEventListener('keydown', down)
   }, [])
 
-  // Define commands
-  const commands: CommandAction[] = [
-    // Navigation
-    {
-      id: 'nav-kunden',
-      label: 'Kunden-Liste',
-      icon: <Users className="h-4 w-4" />,
-      action: () => navigate('/verkauf/kunden-liste'),
-      category: 'navigation',
-      keywords: ['kunden', 'crm', 'customer']
-    },
-    {
-      id: 'nav-artikel',
-      label: 'Artikel-Stammdaten',
-      icon: <Package className="h-4 w-4" />,
-      action: () => navigate('/artikel/liste'),
-      category: 'navigation',
-      keywords: ['artikel', 'products', 'lager']
-    },
-    {
-      id: 'nav-rechnungen',
-      label: 'Rechnungen',
-      icon: <FileText className="h-4 w-4" />,
-      action: () => navigate('/fibu/rechnungen'),
-      category: 'navigation',
-      keywords: ['rechnung', 'invoice', 'finance']
-    },
-    {
-      id: 'nav-dashboard',
-      label: 'Verkaufs-Dashboard',
-      icon: <TrendingUp className="h-4 w-4" />,
-      action: () => navigate('/dashboard/sales-dashboard'),
-      category: 'navigation',
-      keywords: ['dashboard', 'kpi', 'analytics']
-    },
-    {
-      id: 'nav-bestand',
-      label: 'Bestandsübersicht',
-      icon: <Package className="h-4 w-4" />,
-      action: () => navigate('/lager/bestandsuebersicht'),
-      category: 'navigation',
-      keywords: ['lager', 'bestand', 'inventory']
-    },
-    {
-      id: 'nav-einstellungen',
-      label: 'System-Einstellungen',
-      icon: <Settings className="h-4 w-4" />,
-      action: () => navigate('/einstellungen/system'),
-      category: 'navigation',
-      keywords: ['settings', 'config', 'admin']
-    },
+  const navigationCommands = useMemo<CommandAction[]>(
+    () =>
+      NAVIGATION_SHORTCUTS.map((shortcut) => {
+        const Icon = shortcut.icon
+        return {
+          id: `nav-${shortcut.id}`,
+          label: shortcut.label,
+          icon: <Icon className="h-4 w-4" />,
+          action: () => navigate(shortcut.path),
+          category: 'navigation' as const,
+          keywords: shortcut.keywords,
+        }
+      }),
+    [navigate],
+  )
 
-    // Actions
-    {
-      id: 'action-new-customer',
-      label: 'Neuer Kunde anlegen',
-      icon: <Plus className="h-4 w-4" />,
-      action: () => navigate('/verkauf/kunde/neu'),
-      category: 'actions',
-      keywords: ['neu', 'create', 'kunde', 'customer']
-    },
-    {
-      id: 'action-new-invoice',
-      label: 'Neue Rechnung erstellen',
-      icon: <Plus className="h-4 w-4" />,
-      action: () => navigate('/fibu/rechnung/neu'),
-      category: 'actions',
-      keywords: ['neu', 'create', 'rechnung', 'invoice']
-    },
-    {
-      id: 'action-bestellvorschlag',
-      label: 'Bestellvorschlag generieren',
-      icon: <Calculator className="h-4 w-4" />,
-      action: () => navigate('/workflows/trigger'),
-      category: 'actions',
-      keywords: ['bestellung', 'order', 'ai', 'workflow']
-    },
+  const actionCommands = useMemo<CommandAction[]>(
+    () =>
+      ACTION_SHORTCUTS.map((shortcut) => {
+        const Icon = shortcut.icon
+        return {
+          id: shortcut.id,
+          label: shortcut.label,
+          icon: <Icon className="h-4 w-4" />,
+          action: () => navigate(shortcut.path),
+          category: 'actions' as const,
+          keywords: shortcut.keywords,
+        }
+      }),
+    [navigate],
+  )
 
-    // AI Features
-    {
-      id: 'ai-ask-valeo',
-      label: 'Ask VALEO (AI-Copilot)',
-      icon: <Zap className="h-4 w-4" />,
-      action: () => {
-        // Trigger Ask VALEO Dialog
-        window.dispatchEvent(new CustomEvent('open-ask-valeo'))
-      },
-      category: 'ai',
-      keywords: ['ai', 'copilot', 'assistant', 'help']
-    },
-    {
-      id: 'ai-search',
-      label: 'Semantische Suche',
-      icon: <Search className="h-4 w-4" />,
-      action: () => {
-        // Trigger Semantic Search Dialog
-        window.dispatchEvent(new CustomEvent('open-semantic-search'))
-      },
-      category: 'ai',
-      keywords: ['search', 'find', 'semantic', 'rag']
-    },
-    {
-      id: 'ai-compliance',
-      label: 'Compliance-Check durchführen',
-      icon: <Shield className="h-4 w-4" />,
-      action: () => navigate('/admin/compliance'),
-      category: 'ai',
-      keywords: ['compliance', 'audit', 'check']
-    },
-  ]
+  const aiCommands = useMemo<CommandAction[]>(
+    () =>
+      AI_SHORTCUTS.map((shortcut) => {
+        const Icon = shortcut.icon
+        const base = {
+          id: shortcut.id,
+          label: shortcut.label,
+          icon: <Icon className="h-4 w-4" />,
+          category: 'ai' as const,
+          keywords: shortcut.keywords,
+        }
+        if (shortcut.type === 'navigate') {
+          return {
+            ...base,
+            action: () => navigate(shortcut.path),
+          }
+        }
+        return {
+          ...base,
+          action: () => window.dispatchEvent(new CustomEvent(shortcut.eventName)),
+        }
+      }),
+    [navigate],
+  )
+
+  const commands: CommandAction[] = [...navigationCommands, ...actionCommands, ...aiCommands]
 
   const handleSelect = (command: CommandAction) => {
     command.action()

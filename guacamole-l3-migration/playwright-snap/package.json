@@ -1,0 +1,18 @@
+{
+  "name": "l3-screenshot-automation",
+  "version": "1.0.0",
+  "description": "Automatische Screenshots von L3-Masken via Guacamole",
+  "type": "module",
+  "scripts": {
+    "install:pw": "npx playwright install --with-deps chromium",
+    "snap": "node snap.js",
+    "snap:all-masks": "node snap-all-masks.js",
+    "analyze": "node analyze-screenshots.js"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0",
+    "sharp": "^0.33.5",
+    "tesseract.js": "^5.1.1"
+  }
+}
+

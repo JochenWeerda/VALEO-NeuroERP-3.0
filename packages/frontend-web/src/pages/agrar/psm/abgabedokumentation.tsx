@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { BackButton } from '@/components/BackButton'
 import { AlertTriangle, FileText, Save, User, Calendar, CheckCircle, XCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
@@ -186,9 +187,7 @@ export default function PSMAbgabeDokumentationPage(): JSX.Element {
           <p className="text-muted-foreground">Abgabe von {abgabe.psmName} an {abgabe.kundeName}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate('/agrar/psm/liste')}>
-            Zurück zur Liste
-          </Button>
+          <BackButton to="/agrar/psm" label="Zurück zu PSM-Übersicht" />
           <Button onClick={handleSave} disabled={isLoading} className="gap-2">
             <Save className="h-4 w-4" />
             Speichern

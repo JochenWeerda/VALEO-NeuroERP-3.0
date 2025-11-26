@@ -161,7 +161,7 @@ spec:
         host: valeo-crm-service
     - match:
     - uri:
-        prefix: /api/v1/finance
+        prefix: /api/v1
     route:
     - destination:
         host: valeo-finance-service

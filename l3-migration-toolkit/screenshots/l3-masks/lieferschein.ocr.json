@@ -1,0 +1,38 @@
+{
+  "raw_text": "i aa eB Yio | & S& mm 8\n\nCRM Ang /Auftr, Einkauf-Verw. Strecken Kontrakte Weitere | Kunden Artikel | Nachrichten Wiedervorlage Kalender Team Kalender E-Mail Dokurmente Letzte Dokumente\n\nUbersichten Stammdaten Kommunikation\n\nBediener W = Jochen Weerda Firma: 1= Hinrich Folkerts Landhandel ~ Niederlassung: = ‘Version: 25.06.03 = FB\n\n",
+  "fields": [
+    {
+      "label": "Niederlassung",
+      "type": "string",
+      "example_value": "=",
+      "position": {
+        "left": 446,
+        "top": 976,
+        "width": 73,
+        "height": 12
+      },
+      "confidence": 81
+    },
+    {
+      "label": "‘Version",
+      "type": "number",
+      "example_value": "25.06.03",
+      "position": {
+        "left": 664,
+        "top": 976,
+        "width": 37,
+        "height": 9
+      },
+      "confidence": 66
+    }
+  ],
+  "tabs": [],
+  "metadata": {
+    "image_size": [
+      1920,
+      991
+    ],
+    "total_words": 49,
+    "avg_confidence": 76.47727272727273
+  }
+}

@@ -61,7 +61,7 @@ export class ApiClient {
   }
 
   async get<T>(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
-    const url = params ? `${endpoint}?${new URLSearchParams(params)}` : endpoint
+    const url = params ? `${endpoint}?${String(new URLSearchParams(params))}` : endpoint
     return this.request<T>(url)
   }
 

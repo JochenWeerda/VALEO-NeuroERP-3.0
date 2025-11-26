@@ -11,9 +11,9 @@ export type McpRealtimeEvent = {
   timestamp: number;
 };
 
-export type McpRealtimeListener = (event: McpRealtimeEvent) => void;
-export type McpTypedListener = (event: MCPEvent) => void;
-export type ConnectionListener = (state: ConnectionState) => void;
+export type McpRealtimeListener = (_event: McpRealtimeEvent) => void;
+export type McpTypedListener = (_event: MCPEvent) => void;
+export type ConnectionListener = (_state: ConnectionState) => void;
 
 const ALL_SERVICES_TOKEN = "*";
 
@@ -173,15 +173,17 @@ class McpEventBus {
     if (!this.shouldRun()) {
       return;
     }
-    const options: SSEOptions = {
-      ...this.sseOptions,
-    };
+    const options: SSEOptions = { ...this.sseOptions };
     if ((typeof options.url !== "string" || options.url.length === 0) && typeof this.eventsUrl === "string" && this.eventsUrl.length > 0) {
       options.url = this.eventsUrl;
     }
+    if (!options.url) {
+      // No endpoint configured -> skip creating the client
+      return;
+    }
     this.client = new SSEClient(
       {
-        onEvent: (eventType, event) => this.handleEvent(eventType, event),
+        onEvent: (_eventType, _event) => this.handleEvent(_eventType, _event),
         onOpen: () => this.transition("open"),
         onError: (): void => {
           this.transition("error");
@@ -246,7 +248,7 @@ class McpEventBus {
     wildcard?.forEach((listener) => listener(event));
   }
 
-  private handleEvent(eventType: string, event: MessageEvent<string>): void {
+  private handleEvent(_eventType: string, event: MessageEvent<string>): void {
     if (this.connectionState !== "open") {
       this.transition("open");
     }
@@ -256,7 +258,7 @@ class McpEventBus {
       this.typedListeners.forEach((listener) => listener(parsed));
     }
 
-    const normalized = normalizeEvent(eventType, parsed);
+    const normalized = normalizeEvent(_eventType, parsed);
     this.dispatchServiceEvent(normalized);
   }
 

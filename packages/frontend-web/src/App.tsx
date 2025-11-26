@@ -7,7 +7,7 @@ import { routeMCPEvent } from '@/lib/event-router'
 import type { MCPEvent } from '@/lib/mcp-events'
 
 import { Toaster } from './components/ui/toaster'
-import Contracts from './features/contracts/Contracts'
+import ContractsPageV2 from './pages/contracts-v2'
 import Dashboard from './features/dashboard/Dashboard'
 import Inventory from './features/inventory/Inventory'
 import Sales from './features/sales/Sales'
@@ -24,7 +24,7 @@ function AppContent(): ReactElement {
     <AppShell>
       <Routes>
         <Route element={<Dashboard />} path="/" />
-        <Route element={<Contracts />} path="/contracts" />
+        <Route element={<ContractsPageV2 />} path="/contracts" />
         <Route element={<Inventory />} path="/inventory" />
         <Route element={<Weighing />} path="/weighing" />
         <Route element={<Sales />} path="/sales" />

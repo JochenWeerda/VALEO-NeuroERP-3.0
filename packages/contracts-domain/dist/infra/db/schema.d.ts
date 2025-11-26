@@ -292,7 +292,7 @@ export declare const contracts: import("drizzle-orm/pg-core").PgTableWithColumns
             tableName: "contracts";
             dataType: "string";
             columnType: "PgText";
-            data: "Cancelled" | "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Defaulted";
+            data: "Draft" | "Active" | "PartiallyFulfilled" | "Fulfilled" | "Cancelled" | "Defaulted";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -733,7 +733,7 @@ export declare const amendments: import("drizzle-orm/pg-core").PgTableWithColumn
             tableName: "amendments";
             dataType: "string";
             columnType: "PgText";
-            data: "Pending" | "Approved" | "Rejected" | "Cancelled";
+            data: "Cancelled" | "Pending" | "Approved" | "Rejected";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -848,7 +848,7 @@ export declare const hedgeRefs: import("drizzle-orm/pg-core").PgTableWithColumns
             tableName: "hedge_refs";
             dataType: "string";
             columnType: "PgText";
-            data: "FUTURES" | "OPTIONS";
+            data: "OPTIONS" | "FUTURES";
             driverParam: string;
             notNull: true;
             hasDefault: false;

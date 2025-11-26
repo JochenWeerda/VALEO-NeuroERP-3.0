@@ -1,0 +1,29 @@
+[
+  {
+    "id": "UAT-0000",
+    "seite": "Beispiel: sales/angebote",
+    "rolle": "admin",
+    "schritt": "Export",
+    "schweregrad": "S4-Niedrig",
+    "kurztitel": "Beispiel-Bug: Export-Dateiname fehlt Datum",
+    "beschreibung": "Erwartet: export-2025-10-16.csv / Ergebnis: export.csv",
+    "reproduktion": [
+      "1. Navigiere zu /sales/angebote",
+      "2. Klicke Export-Button",
+      "3. Prüfe Dateiname im Download"
+    ],
+    "umgebung": {
+      "browser": "Chrome 141",
+      "url": "http://localhost:3000/sales/angebote",
+      "zeit": "2025-10-16T14:30:00Z",
+      "tenant": "QA-UAT-01",
+      "build": "dev"
+    },
+    "artefakte": {
+      "screenshot": "playwright-tests/artifacts/example/UAT-0000.png",
+      "har": "playwright-tests/artifacts/example/UAT-0000.har",
+      "console": "playwright-tests/artifacts/example/UAT-0000-console.log"
+    }
+  }
+]
+
