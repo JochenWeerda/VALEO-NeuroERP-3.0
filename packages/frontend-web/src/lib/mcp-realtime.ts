@@ -1,6 +1,6 @@
 const RECONNECT_DELAY_MS = 1000
 
-type Listener = (event: { service: string; type: string; payload: unknown }) => void
+type Listener = (_event: { service: string; type: string; payload: unknown }) => void
 let socket: WebSocket | null = null
 const listeners = new Set<Listener>()
 

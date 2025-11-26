@@ -4,18 +4,19 @@ exports.getTracer = getTracer;
 exports.createSpan = createSpan;
 exports.setupTelemetry = setupTelemetry;
 exports.tracingMiddleware = tracingMiddleware;
-const api_1 = require("@opentelemetry/api");
-let tracer = null;
+var api_1 = require("@opentelemetry/api");
+var tracer = null;
 function getTracer() {
-    if (!tracer) {
+    if (tracer === undefined || tracer === null) {
         tracer = api_1.trace.getTracer('sales-domain', '1.0.0');
     }
     return tracer;
 }
 function createSpan(name, attributes) {
-    const span = getTracer().startSpan(name);
+    var span = getTracer().startSpan(name);
     if (attributes) {
-        Object.entries(attributes).forEach(([key, value]) => {
+        Object.entries(attributes).forEach(function (_a) {
+            var key = _a[0], value = _a[1];
             span.setAttribute(key, value);
         });
     }
@@ -28,29 +29,30 @@ function setupTelemetry() {
 // Middleware for tracing requests
 function tracingMiddleware() {
     return {
-        onRequest: (request, reply, done) => {
-            const span = createSpan(`HTTP ${request.method} ${request.url}`, {
+        onRequest: function (request, reply, done) {
+            var _a;
+            var span = createSpan("HTTP ".concat(request.method, " ").concat(request.url), {
                 'http.method': request.method,
                 'http.url': request.url,
                 'http.user_agent': request.headers['user-agent'] || '',
-                'tenant.id': request.tenantId || '',
+                'tenant.id': (_a = request.tenantId) !== null && _a !== void 0 ? _a : '',
                 'request.id': request.id,
             });
             // Store span in request for later use
             request.tracingSpan = span;
             done();
         },
-        onResponse: (request, reply, done) => {
+        onResponse: function (request, reply, done) {
             if (request.tracingSpan) {
-                const span = request.tracingSpan;
+                var span = request.tracingSpan;
                 span.setAttribute('http.status_code', reply.statusCode);
                 span.end();
             }
             done();
         },
-        onError: (request, reply, error, done) => {
+        onError: function (request, reply, error, done) {
             if (request.tracingSpan) {
-                const span = request.tracingSpan;
+                var span = request.tracingSpan;
                 span.recordException(error);
                 span.setAttribute('error', true);
                 span.setAttribute('error.message', error.message);
@@ -60,4 +62,3 @@ function tracingMiddleware() {
         },
     };
 }
-//# sourceMappingURL=tracer.js.map

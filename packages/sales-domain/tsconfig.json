@@ -1,32 +1,14 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.build.json",
   "compilerOptions": {
-    "outDir": "./dist",
     "rootDir": "./src",
+    "outDir": "./dist",
     "baseUrl": "./src",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "removeComments": false,
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "types": ["node"],
-    "module": "CommonJS",
-    "target": "ES2022",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "paths": {
+      "@/*": ["./*"],
+      "@/shared/*": ["../shared/*"]
+    },
+    "exactOptionalPropertyTypes": false
   },
   "include": [
     "src/**/*"
@@ -34,7 +16,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "tests",
     "**/*.test.ts",
     "**/*.spec.ts"
   ]

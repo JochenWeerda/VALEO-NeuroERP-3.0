@@ -1,0 +1,25 @@
+{
+  "source": "LibreOffice Calc gefilterte PLZ 26XXX CSV",
+  "timestamp": "2025-11-20T16:14:22.261213",
+  "analysis_focus": "Flaechenprämien fuer Betriebsgroessenschaetzung",
+  "statistics": {
+    "total_rows_processed": 20825,
+    "area_premium_payments": 0,
+    "excluded_payments": 20825,
+    "unique_farms": 0,
+    "total_area_premiums_eur": 0.0,
+    "average_per_farm": 0
+  },
+  "plz_distribution": {},
+  "measure_code_stats": {},
+  "farm_size_distribution": {},
+  "area_premium_codes_used": {
+    "I.1": "Basis-Direktzahlung (Flaechenprämie)",
+    "I.2": "Umverteilungsz. fuer Nachhaltigkeit (Flaechenprämie)",
+    "I.3": "Zahlung fuer Junglandwirte (Flaechenprämie)",
+    "I.4": "Gekoppelte Einkommenstuetzung (Flaechenprämie)",
+    "I.6": "Kleinerzeugerregelung (Flaechenprämie)",
+    "V.1": "Agrarumwelt-Klimamassnahmen (meist flaechenbezogen)"
+  },
+  "top_leads": []
+}

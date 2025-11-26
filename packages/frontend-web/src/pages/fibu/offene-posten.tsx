@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Euro, FileDown, Search } from 'lucide-react'
+import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 
 type OffenerPosten = {
   id: string
@@ -83,14 +85,6 @@ const statusVariantMap: Record<
   inkasso: 'destructive',
 }
 
-const statusLabelMap: Record<OffenerPosten['status'], string> = {
-  faellig: 'Fällig',
-  ueberfaellig: 'Überfällig',
-  mahnung1: 'Mahnung 1',
-  mahnung2: 'Mahnung 2',
-  mahnung3: 'Mahnung 3',
-  inkasso: 'Inkasso',
-}
 
 export default function OffenePostenPage(): JSX.Element {
   const navigate = useNavigate()
@@ -170,7 +164,7 @@ export default function OffenePostenPage(): JSX.Element {
       key: 'status' as const,
       label: 'Status',
       render: (posten: OffenerPosten) => (
-        <Badge variant={statusVariantMap[posten.status]}>{statusLabelMap[posten.status]}</Badge>
+        <Badge variant={statusVariantMap[posten.status]}>{getStatusLabel(t, posten.status, posten.status)}</Badge>
       ),
     },
   ]

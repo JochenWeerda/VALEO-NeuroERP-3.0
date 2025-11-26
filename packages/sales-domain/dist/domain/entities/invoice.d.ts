@@ -92,9 +92,10 @@ export declare const InvoiceSchema: z.ZodObject<{
     id: string;
     totalNet: number;
     totalGross: number;
-    status: "Cancelled" | "Issued" | "Paid" | "Overdue";
+    status: "Issued" | "Paid" | "Overdue" | "Cancelled";
     tenantId: string;
     customerId: string;
+    invoiceNumber: string;
     lines: {
         id: string;
         sku: string;
@@ -110,21 +111,21 @@ export declare const InvoiceSchema: z.ZodObject<{
     totalDiscount: number;
     taxRate: number;
     currency: string;
+    dueDate: Date;
     createdAt: Date;
     updatedAt: Date;
     version: number;
-    invoiceNumber: string;
-    dueDate: Date;
-    notes?: string | undefined;
     orderId?: string | undefined;
     paidAt?: Date | undefined;
+    notes?: string | undefined;
 }, {
     id: string;
     totalNet: number;
     totalGross: number;
-    status: "Cancelled" | "Issued" | "Paid" | "Overdue";
+    status: "Issued" | "Paid" | "Overdue" | "Cancelled";
     tenantId: string;
     customerId: string;
+    invoiceNumber: string;
     lines: {
         id: string;
         sku: string;
@@ -138,27 +139,26 @@ export declare const InvoiceSchema: z.ZodObject<{
     }[];
     subtotalNet: number;
     totalDiscount: number;
+    dueDate: Date;
     createdAt: Date;
     updatedAt: Date;
     version: number;
-    invoiceNumber: string;
-    dueDate: Date;
+    orderId?: string | undefined;
     taxRate?: number | undefined;
     currency?: string | undefined;
-    notes?: string | undefined;
-    orderId?: string | undefined;
     paidAt?: Date | undefined;
+    notes?: string | undefined;
 }>;
 export type Invoice = z.infer<typeof InvoiceSchema>;
 export declare const CreateInvoiceInputSchema: z.ZodObject<{
     tenantId: z.ZodString;
     customerId: z.ZodString;
-    taxRate: z.ZodDefault<z.ZodNumber>;
-    currency: z.ZodDefault<z.ZodString>;
-    notes: z.ZodOptional<z.ZodString>;
     orderId: z.ZodOptional<z.ZodString>;
     invoiceNumber: z.ZodString;
+    taxRate: z.ZodDefault<z.ZodNumber>;
+    currency: z.ZodDefault<z.ZodString>;
     dueDate: z.ZodDate;
+    notes: z.ZodOptional<z.ZodString>;
 } & {
     lines: z.ZodArray<z.ZodObject<Omit<{
         id: z.ZodString;
@@ -188,6 +188,7 @@ export declare const CreateInvoiceInputSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     tenantId: string;
     customerId: string;
+    invoiceNumber: string;
     lines: {
         sku: string;
         name: string;
@@ -198,13 +199,13 @@ export declare const CreateInvoiceInputSchema: z.ZodObject<{
     }[];
     taxRate: number;
     currency: string;
-    invoiceNumber: string;
     dueDate: Date;
-    notes?: string | undefined;
     orderId?: string | undefined;
+    notes?: string | undefined;
 }, {
     tenantId: string;
     customerId: string;
+    invoiceNumber: string;
     lines: {
         sku: string;
         name: string;
@@ -213,12 +214,11 @@ export declare const CreateInvoiceInputSchema: z.ZodObject<{
         description?: string | undefined;
         discount?: number | undefined;
     }[];
-    invoiceNumber: string;
     dueDate: Date;
+    orderId?: string | undefined;
     taxRate?: number | undefined;
     currency?: string | undefined;
     notes?: string | undefined;
-    orderId?: string | undefined;
 }>;
 export type CreateInvoiceInput = z.infer<typeof CreateInvoiceInputSchema>;
 export declare const UpdateInvoiceInputSchema: z.ZodObject<{
@@ -226,13 +226,13 @@ export declare const UpdateInvoiceInputSchema: z.ZodObject<{
     notes: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     status: z.ZodOptional<z.ZodEnum<["Issued", "Paid", "Overdue", "Cancelled"]>>;
 }, "strip", z.ZodTypeAny, {
-    status?: "Cancelled" | "Issued" | "Paid" | "Overdue" | undefined;
-    notes?: string | null | undefined;
+    status?: "Issued" | "Paid" | "Overdue" | "Cancelled" | undefined;
     dueDate?: Date | undefined;
+    notes?: string | null | undefined;
 }, {
-    status?: "Cancelled" | "Issued" | "Paid" | "Overdue" | undefined;
-    notes?: string | null | undefined;
+    status?: "Issued" | "Paid" | "Overdue" | "Cancelled" | undefined;
     dueDate?: Date | undefined;
+    notes?: string | null | undefined;
 }>;
 export type UpdateInvoiceInput = z.infer<typeof UpdateInvoiceInputSchema>;
 export declare class InvoiceEntity {

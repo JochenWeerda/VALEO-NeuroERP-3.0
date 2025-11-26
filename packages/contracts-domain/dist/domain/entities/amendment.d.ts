@@ -31,35 +31,35 @@ export declare const AmendmentSchema: z.ZodObject<{
     updatedAt: z.ZodOptional<z.ZodDate>;
     version: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
+    status: "Cancelled" | "Pending" | "Approved" | "Rejected";
     type: "QtyChange" | "WindowChange" | "PriceRuleChange" | "CounterpartyChange" | "DeliveryTermsChange" | "Other";
-    reason: string;
-    changes: Record<string, any>;
-    status: "Pending" | "Approved" | "Rejected" | "Cancelled";
-    contractId: string;
     tenantId: string;
     version: number;
-    notes?: string | undefined;
-    id?: string | undefined;
-    approvedBy?: string | undefined;
-    approvedAt?: string | undefined;
-    effectiveAt?: string | undefined;
-    createdAt?: Date | undefined;
-    updatedAt?: Date | undefined;
-}, {
-    type: "QtyChange" | "WindowChange" | "PriceRuleChange" | "CounterpartyChange" | "DeliveryTermsChange" | "Other";
+    contractId: string;
     reason: string;
     changes: Record<string, any>;
-    contractId: string;
-    tenantId: string;
-    status?: "Pending" | "Approved" | "Rejected" | "Cancelled" | undefined;
-    notes?: string | undefined;
     id?: string | undefined;
+    createdAt?: Date | undefined;
+    updatedAt?: Date | undefined;
     approvedBy?: string | undefined;
     approvedAt?: string | undefined;
     effectiveAt?: string | undefined;
+    notes?: string | undefined;
+}, {
+    type: "QtyChange" | "WindowChange" | "PriceRuleChange" | "CounterpartyChange" | "DeliveryTermsChange" | "Other";
+    tenantId: string;
+    contractId: string;
+    reason: string;
+    changes: Record<string, any>;
+    status?: "Cancelled" | "Pending" | "Approved" | "Rejected" | undefined;
+    id?: string | undefined;
     createdAt?: Date | undefined;
     updatedAt?: Date | undefined;
     version?: number | undefined;
+    approvedBy?: string | undefined;
+    approvedAt?: string | undefined;
+    effectiveAt?: string | undefined;
+    notes?: string | undefined;
 }>;
 export interface AmendmentEntity {
     id: string;
@@ -68,11 +68,11 @@ export interface AmendmentEntity {
     type: AmendmentTypeValue;
     reason: string;
     changes: Record<string, any>;
-    approvedBy?: string;
-    approvedAt?: Date;
+    approvedBy?: string | undefined;
+    approvedAt?: Date | undefined;
     status: AmendmentStatusValue;
-    effectiveAt?: Date;
-    notes?: string;
+    effectiveAt?: Date | undefined;
+    notes?: string | undefined;
     createdAt: Date;
     updatedAt: Date;
     version: number;

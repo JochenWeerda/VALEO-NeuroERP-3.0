@@ -1,0 +1,205 @@
+#!/usr/bin/env python3
+"""
+Erstellt Mappings für Untertabellen
+"""
+
+import json
+
+# Definition der Untertabellen
+subtable_mappings = {
+    "kunden_profil": {
+        "description": "Firmeninformationen und Unternehmensprofil",
+        "fields": [
+            {"l3_field": "Firmenname", "valeo_field": "firmenname", "type": "string", "transformation": "trim"},
+            {"l3_field": "Gründung", "valeo_field": "gruendung", "type": "date"},
+            {"l3_field": "Jahresumsatz", "valeo_field": "jahresumsatz", "type": "number", "unit": "EUR"},
+            {"l3_field": "Berufsgenossenschaft", "valeo_field": "berufsgenossenschaft", "type": "string"},
+            {"l3_field": "Berufsgen.-Nr.", "valeo_field": "berufsgen_nr", "type": "string"},
+            {"l3_field": "Branche", "valeo_field": "branche", "type": "string"},
+            {"l3_field": "Mitbewerber", "valeo_field": "mitbewerber", "type": "text"},
+            {"l3_field": "Engpässe", "valeo_field": "engpaesse", "type": "text"},
+            {"l3_field": "Organisationsstruktur", "valeo_field": "organisationsstruktur", "type": "text"},
+            {"l3_field": "Mitarbeiteranzahl", "valeo_field": "mitarbeiteranzahl", "type": "number", "min": 0},
+            {"l3_field": "Wettbewerbsdifferenzierung", "valeo_field": "wettbewerbsdifferenzierung", "type": "text"},
+            {"l3_field": "Betriebsrat", "valeo_field": "betriebsrat", "type": "boolean", "default": False},
+            {"l3_field": "Unternehmensphilosophie", "valeo_field": "unternehmensphilosophie", "type": "text"}
+        ]
+    },
+    "kunden_ansprechpartner": {
+        "description": "Kontaktpersonen (mehrfach möglich)",
+        "fields": [
+            {"l3_field": "Name", "valeo_field": "nachname", "type": "string", "transformation": "trim"},
+            {"l3_field": "Vorname", "valeo_field": "vorname", "type": "string", "transformation": "trim"},
+            {"l3_field": "Position", "valeo_field": "position", "type": "string"},
+            {"l3_field": "Abteilung", "valeo_field": "abteilung", "type": "string"},
+            {"l3_field": "Telefon 1/2", "valeo_field": "telefon1", "type": "string", "transformation": "phone_format"},
+            {"l3_field": "Mobil", "valeo_field": "mobil", "type": "string", "transformation": "phone_format"},
+            {"l3_field": "E-Mail", "valeo_field": "email", "type": "string", "transformation": "lowercase", "validation": "email"},
+            {"l3_field": "Adresse", "valeo_field": "strasse", "type": "string"},
+            {"l3_field": "PLZ", "valeo_field": "plz", "type": "string", "transformation": "uppercase"},
+            {"l3_field": "Ort", "valeo_field": "ort", "type": "string"},
+            {"l3_field": "Anrede", "valeo_field": "anrede", "type": "string"},
+            {"l3_field": "Briefanrede", "valeo_field": "briefanrede", "type": "string"},
+            {"l3_field": "Geburtsdatum", "valeo_field": "geburtsdatum", "type": "date"},
+            {"l3_field": "Hobbys", "valeo_field": "hobbys", "type": "text"},
+            {"l3_field": "Info 1", "valeo_field": "info1", "type": "text"},
+            {"l3_field": "Info 2", "valeo_field": "info2", "type": "text"},
+            {"l3_field": "Empfänger Rechnung per Mail", "valeo_field": "empfanger_rechnung_email", "type": "boolean", "default": False},
+            {"l3_field": "Empfänger Mahnung", "valeo_field": "empfanger_mahnung_email", "type": "boolean", "default": False},
+            {"l3_field": "Kontaktart", "valeo_field": "kontaktart", "type": "string"},
+            {"l3_field": "Erstanlage", "valeo_field": "erstanlage", "type": "date"},
+            {"l3_field": "CAD-System", "valeo_field": "cad_system", "type": "string"},
+            {"l3_field": "Softwaresysteme", "valeo_field": "softwaresysteme", "type": "string"},
+            {"l3_field": "Datenschutzbeauftragter", "valeo_field": "datenschutzbeauftragter", "type": "boolean", "default": False}
+        ]
+    },
+    "kunden_versand": {
+        "description": "Versandoptionen und -medien",
+        "fields": [
+            {"l3_field": "Versandart Rechnung", "valeo_field": "versandart_rechnung", "type": "select", "options": ["Brief", "E-Mail", "ZUGFeRD"]},
+            {"l3_field": "Mahnung", "valeo_field": "versandart_mahnung", "type": "select", "options": ["Brief", "E-Mail"]},
+            {"l3_field": "Kontaktzusammenstellung", "valeo_field": "versandart_kontakt", "type": "select", "options": ["Brief", "E-Mail"]},
+            {"l3_field": "Dispo-Nummer", "valeo_field": "dispo_nummer", "type": "string"},
+            {"l3_field": "Initialisierungsweisung", "valeo_field": "initialisierungsweisung", "type": "text"},
+            {"l3_field": "Versandmedium", "valeo_field": "versandmedium", "type": "select", "options": ["Brief", "E-Mail", "ZUGFeRD", "Kombiniert"]}
+        ]
+    },
+    "kunden_lieferung_zahlung": {
+        "description": "Liefer- und Zahlungsbedingungen",
+        "fields": [
+            {"l3_field": "Lieferbedingung", "valeo_field": "lieferbedingung", "type": "string"},
+            {"l3_field": "Zahlungsbedingung", "valeo_field": "zahlungsbedingung", "type": "string"},
+            {"l3_field": "Fälligkeit ab", "valeo_field": "faelligkeit_ab", "type": "select", "options": ["Rechnungsdatum", "Termin", "Valuta"]},
+            {"l3_field": "Pro-Forma-Rechnung", "valeo_field": "pro_forma_rechnung", "type": "boolean", "default": False},
+            {"l3_field": "Pro-Forma-Rabatte", "valeo_field": "pro_forma_rabatt1", "type": "number", "unit": "%", "min": 0, "max": 100},
+            {"l3_field": "Einzel-/Sammelversand-Avis", "valeo_field": "einzel_sammelversand_avis", "type": "select", "options": ["Einzel", "Sammel"]}
+        ]
+    },
+    "kunden_datenschutz": {
+        "description": "GDPR-konforme Datenverarbeitung",
+        "fields": [
+            {"l3_field": "Einwilligung", "valeo_field": "einwilligung", "type": "boolean", "default": False},
+            {"l3_field": "Anlagedatum", "valeo_field": "anlagedatum", "type": "date"},
+            {"l3_field": "Anlagebearbeiter", "valeo_field": "anlagebearbeiter", "type": "string"},
+            {"l3_field": "Zusatzbemerkung", "valeo_field": "zusatzbemerkung", "type": "text"}
+        ]
+    },
+    "kunden_genossenschaft": {
+        "description": "Mitgliedschaft und Anteile",
+        "fields": [
+            {"l3_field": "Geschäftsguthaben-Konto", "valeo_field": "geschaeftsguthaben_konto", "type": "string"},
+            {"l3_field": "Mitgliedschaft gekündigt", "valeo_field": "mitgliedschaft_gekuendigt", "type": "boolean", "default": False},
+            {"l3_field": "Kündigungsgrund", "valeo_field": "kuendigungsgrund", "type": "text"},
+            {"l3_field": "Datum Kündigung", "valeo_field": "datum_kuendigung", "type": "date"},
+            {"l3_field": "Datum Austritt", "valeo_field": "datum_austritt", "type": "date"},
+            {"l3_field": "Mitgliedsnummer", "valeo_field": "mitgliedsnummer", "type": "string"},
+            {"l3_field": "Pflichtanteile", "valeo_field": "pflichtanteile", "type": "number", "min": 0},
+            {"l3_field": "Eintrittsdatum", "valeo_field": "eintrittsdatum", "type": "date"}
+        ]
+    },
+    "kunden_email_verteiler": {
+        "description": "E-Mail-Verteilerlisten (mehrfach)",
+        "fields": [
+            {"l3_field": "Verteilername", "valeo_field": "verteilername", "type": "string"},
+            {"l3_field": "Bezeichnung", "valeo_field": "bezeichnung", "type": "string"},
+            {"l3_field": "E-Mail-Adresse", "valeo_field": "email", "type": "string", "transformation": "lowercase", "validation": "email"}
+        ]
+    },
+    "kunden_betriebsgemeinschaften": {
+        "description": "Verbundmitgliedschaften (mehrfach)",
+        "fields": [
+            {"l3_field": "Verbundnummer", "valeo_field": "verbundnummer", "type": "string"},
+            {"l3_field": "Mitglieder", "valeo_field": "mitglieder_kunden_nr", "type": "lookup"},
+            {"l3_field": "Kundennummer", "valeo_field": "mitglieder_kunden_nr", "type": "lookup"},
+            {"l3_field": "Anteil %", "valeo_field": "anteil_prozent", "type": "number", "unit": "%", "min": 0, "max": 100}
+        ]
+    },
+    "kunden_freitext": {
+        "description": "Freitextfelder und Anweisungen",
+        "fields": [
+            {"l3_field": "Chef-Anweisung", "valeo_field": "chef_anweisung", "type": "text"},
+            {"l3_field": "Langtext", "valeo_field": "langtext", "type": "text"},
+            {"l3_field": "Freitextfeld", "valeo_field": "bemerkungen", "type": "text"}
+        ]
+    },
+    "kunden_allgemein_erweitert": {
+        "description": "Erweiterte allgemeine Informationen",
+        "fields": [
+            {"l3_field": "Staat", "valeo_field": "staat", "type": "string"},
+            {"l3_field": "Bundesland", "valeo_field": "bundesland", "type": "string"},
+            {"l3_field": "Kunde seit", "valeo_field": "kunde_seit", "type": "date"},
+            {"l3_field": "Debitoren-Konto", "valeo_field": "debitoren_konto", "type": "string"},
+            {"l3_field": "Deb.-Kto. Hauptkonto", "valeo_field": "deb_kto_hauptkonto", "type": "string"},
+            {"l3_field": "Disponent", "valeo_field": "disponent", "type": "string"},
+            {"l3_field": "Vertriebsbeauftragter", "valeo_field": "vertriebsbeauftragter", "type": "string"},
+            {"l3_field": "ABC/Umsatzstatus", "valeo_field": "abc_umsatzstatus", "type": "string"},
+            {"l3_field": "Betriebsnummer", "valeo_field": "betriebsnummer", "type": "string"},
+            {"l3_field": "UST-ID-Nr.", "valeo_field": "ust_id_nr", "type": "string"},
+            {"l3_field": "Steuernummer", "valeo_field": "steuernummer", "type": "string"},
+            {"l3_field": "Sperrgrund", "valeo_field": "sperrgrund", "type": "text"},
+            {"l3_field": "Kundengruppe", "valeo_field": "kundengruppe", "type": "string"},
+            {"l3_field": "Fax-Sperre", "valeo_field": "fax_sperre", "type": "boolean", "default": False},
+            {"l3_field": "Infofelder 4–6", "valeo_field": "infofeld4", "type": "text"}
+        ]
+    },
+    "kunden_cpd_konto": {
+        "description": "CPD-Konten (mehrfach)",
+        "fields": [
+            {"l3_field": "Kundennummer", "valeo_field": "kunden_nr", "type": "lookup"},
+            {"l3_field": "Debitoren-Konto", "valeo_field": "debitoren_konto", "type": "string"},
+            {"l3_field": "Suchbegriff", "valeo_field": "suchbegriff", "type": "string"},
+            {"l3_field": "Rechnungsadresse", "valeo_field": "rechnungsadresse", "type": "text"},
+            {"l3_field": "Geschäftsstelle", "valeo_field": "geschaeftsstelle", "type": "string"},
+            {"l3_field": "Kostenstelle", "valeo_field": "kostenstelle", "type": "string"},
+            {"l3_field": "Rechnungsart", "valeo_field": "rechnungsart", "type": "string"},
+            {"l3_field": "Sammelrechnung", "valeo_field": "sammelrechnung", "type": "boolean", "default": False},
+            {"l3_field": "Rechnungsformular", "valeo_field": "rechnungsformular", "type": "string"},
+            {"l3_field": "VB", "valeo_field": "vb", "type": "string"},
+            {"l3_field": "Gebiet", "valeo_field": "gebiet", "type": "string"},
+            {"l3_field": "Zahlungsbedingungen", "valeo_field": "zahlungsbedingungen", "type": "text"}
+        ]
+    },
+    "kunden_rabatte_detail": {
+        "description": "Artikel-spezifische Rabatte (mehrfach)",
+        "fields": [
+            {"l3_field": "Artikel-Nr.", "valeo_field": "artikel_nr", "type": "lookup"},
+            {"l3_field": "Bezeichnung", "valeo_field": "bezeichnung", "type": "string"},
+            {"l3_field": "Rabatt", "valeo_field": "rabatt", "type": "number", "unit": "%", "min": 0, "max": 100},
+            {"l3_field": "Rabatt gültig bis", "valeo_field": "rabatt_gueltig_bis", "type": "date"},
+            {"l3_field": "Rabatt-Liste übernehmen", "valeo_field": "rabatt_liste_id", "type": "lookup"},
+            {"l3_field": "Rabatt-Liste speichern", "valeo_field": "rabatt_liste_speichern", "type": "boolean", "default": False}
+        ]
+    },
+    "kunden_preise_detail": {
+        "description": "Individuelle Preise pro Artikel (mehrfach)",
+        "fields": [
+            {"l3_field": "Artikel-Nr.", "valeo_field": "artikel_nr", "type": "lookup"},
+            {"l3_field": "Bezeichnung", "valeo_field": "bezeichnung", "type": "string"},
+            {"l3_field": "Preis netto", "valeo_field": "preis_netto", "type": "number", "unit": "EUR"},
+            {"l3_field": "Preis inkl. Fracht", "valeo_field": "preis_inkl_fracht", "type": "number", "unit": "EUR"},
+            {"l3_field": "Preis-Einheit", "valeo_field": "preis_einheit", "type": "string"},
+            {"l3_field": "Rabatt erlaubt", "valeo_field": "rabatt_erlaubt", "type": "boolean", "default": True},
+            {"l3_field": "Sonderfracht", "valeo_field": "sonderfracht", "type": "number", "unit": "EUR"},
+            {"l3_field": "Zahlungsbedingung", "valeo_field": "zahlungsbedingung", "type": "string"},
+            {"l3_field": "Gültig bis", "valeo_field": "gueltig_bis", "type": "date"},
+            {"l3_field": "Bediener", "valeo_field": "bediener", "type": "string"}
+        ]
+    }
+}
+
+# Speichere Untertabellen-Mappings
+output_file = 'schemas/mappings/subtable-mappings.json'
+with open(output_file, 'w', encoding='utf-8') as f:
+    json.dump(subtable_mappings, f, ensure_ascii=False, indent=2)
+
+print("=" * 80)
+print("✅ UNTERTABELLEN-MAPPINGS ERSTELLT")
+print("=" * 80)
+print(f"\n📄 Datei: {output_file}")
+print(f"📊 Untertabellen: {len(subtable_mappings)}")
+print(f"📋 Felder gesamt: {sum(len(v['fields']) for v in subtable_mappings.values())}")
+
+print("\n🗂️  Übersicht:")
+for table_name, table_info in subtable_mappings.items():
+    print(f"   • {table_name}: {len(table_info['fields'])} Felder - {table_info['description']}")
+

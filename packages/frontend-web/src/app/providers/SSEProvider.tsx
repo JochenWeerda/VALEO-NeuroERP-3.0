@@ -10,14 +10,14 @@ type SSEProviderProps = PropsWithChildren<{
 }>
 
 interface SSEContextValue {
-  addTypedListener: (listener: McpTypedListener) => () => void
-  addServiceListener: (service: string, listener: McpRealtimeListener) => () => void
+  addTypedListener: (_listener: McpTypedListener) => () => void
+  addServiceListener: (_service: string, _listener: McpRealtimeListener) => () => void
   connectionState: ConnectionState
 }
 
 const defaultContextValue: SSEContextValue = {
-  addTypedListener: (listener) => mcpEventBus.addTypedListener(listener),
-  addServiceListener: (service, listener) => mcpEventBus.addServiceListener(service, listener),
+  addTypedListener: (_listener) => mcpEventBus.addTypedListener(_listener),
+  addServiceListener: (_service, _listener) => mcpEventBus.addServiceListener(_service, _listener),
   connectionState: 'idle',
 }
 
@@ -51,8 +51,8 @@ export function SSEProvider({
 
   const value = useMemo<SSEContextValue>(
     () => ({
-      addTypedListener: (listener) => mcpEventBus.addTypedListener(listener),
-      addServiceListener: (service, listener) => mcpEventBus.addServiceListener(service, listener),
+      addTypedListener: (_listener) => mcpEventBus.addTypedListener(_listener),
+      addServiceListener: (_service, _listener) => mcpEventBus.addServiceListener(_service, _listener),
       connectionState,
     }),
     [connectionState],

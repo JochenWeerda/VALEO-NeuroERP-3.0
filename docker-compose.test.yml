@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: test_inventory_db
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpassword
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "testuser"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "4222:4222"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "4222"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  inventory-test:
+    build:
+      context: .
+      dockerfile: services/inventory/Dockerfile.test
+    environment:
+      INVENTORY_EVENT_BUS_URL: nats://nats:4222
+      # Let unit tests that use sqlite manage their own DB;
+      # integration test sets its own ENV to postgres or uses nats url above.
+    depends_on:
+      - postgres
+      - nats
+    working_dir: /workspace
+    command: >
+      sh -lc "pytest -q services/inventory/tests"
+

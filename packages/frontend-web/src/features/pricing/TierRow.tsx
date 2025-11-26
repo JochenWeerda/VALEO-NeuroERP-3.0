@@ -9,8 +9,8 @@ const MIN_QUANTITY = 0
 interface TierRowProps {
   index: number
   value: { minQty: number; net: number }
-  onChange: (idx: number, v: { minQty: number; net: number }) => void
-  onRemove: (idx: number) => void
+  onChange: (_idx: number, _v: { minQty: number; net: number }) => void
+  onRemove: (_idx: number) => void
 }
 
 export function TierRow({ index, value, onChange, onRemove }: TierRowProps): JSX.Element {

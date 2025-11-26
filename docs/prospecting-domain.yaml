@@ -1,0 +1,140 @@
+domain: prospecting
+description: >
+  Domäne für externe Potenzial- und Leaddaten (GAP-Begünstigte, Zertifizierungen, Potenzial-Snapshots).
+  Liefert verdichtete Kennzahlen und Lead-Kandidaten an das CRM.
+
+entities:
+  GapPayment:
+    table: gap_payments
+    description: Rohdaten zu GAP-Zahlungen je Begünstigten / Maßnahme / Jahr.
+    fields:
+      id:                { type: bigint, pk: true }
+      ref_year:          { type: int, required: true }
+      data_source:       { type: string, required: true, description: "z.B. agrarzahlungen_de_2024" }
+
+      member_state:      { type: string, required: true, length: 2 }
+      region_code:       { type: string, required: false }
+      region_name:       { type: string, required: false }
+
+      beneficiary_name_raw:  { type: string, required: true }
+      beneficiary_name_norm: { type: string, required: false, description: "Bereinigt für Matching" }
+
+      street_raw:        { type: string, required: false }
+      postal_code:       { type: string, required: false }
+      city:              { type: string, required: false }
+      country_code:      { type: string, required: false, default: "DE" }
+
+      measure_code:      { type: string, required: false }
+      measure_description:{ type: string, required: false }
+
+      amount_egfl:       { type: decimal(14,2), required: false }
+      amount_eler:       { type: decimal(14,2), required: false }
+      amount_national_cofin: { type: decimal(14,2), required: false }
+      amount_total:      { type: decimal(14,2), required: false }
+
+      load_batch_id:     { type: uuid, required: true }
+      loaded_at:         { type: timestamp, required: true }
+      raw_row:           { type: jsonb, required: false }
+
+  GapPaymentAgg:
+    view: gap_payments_direct_agg
+    description: Aggregation flächenrelevanter Zahlungen je Begünstigten/PLZ/Jahr.
+    fields:
+      ref_year:             { type: int }
+      beneficiary_name_norm:{ type: string }
+      postal_code:          { type: string }
+      city:                 { type: string }
+      direct_total_eur:     { type: decimal(14,2) }
+
+  GapCustomerMatch:
+    table: gap_customer_match
+    description: Matching zwischen CRM-Kunden und GAP-Begünstigten je Jahr.
+    fields:
+      id:                     { type: bigint, pk: true }
+      ref_year:               { type: int, required: true }
+      customer_id:            { type: uuid, required: true, ref: crm.Customer.id }
+      customer_name_norm:     { type: string, required: true }
+      beneficiary_name_norm:  { type: string, required: true }
+      postal_code:            { type: string, required: false }
+      city:                   { type: string, required: false }
+
+      match_score:            { type: decimal(5,2), required: true }
+      match_method:           { type: string, required: true, enum: [exact_name_plz_city, trigram, manual] }
+      is_confident:           { type: boolean, required: true, default: false }
+      status:                 { type: string, required: true, enum: [auto-match, manual-accepted, manual-rejected, ambiguous], default: auto-match }
+
+      gap_direct_total_eur:   { type: decimal(14,2), required: false }
+      gap_estimated_area_ha:  { type: decimal(14,2), required: false }
+
+      notes:                  { type: text, required: false }
+      created_at:             { type: timestamp, required: true }
+      updated_at:             { type: timestamp, required: true }
+
+  CustomerPotentialSnapshot:
+    table: customer_potential_snapshot
+    description: Jährliches Potenzial-Foto je Kunde (Fläche, Potenziale, Share-of-Wallet, Segment).
+    fields:
+      id:                           { type: bigint, pk: true }
+      ref_year:                     { type: int, required: true }
+      customer_id:                  { type: uuid, required: true, ref: crm.Customer.id }
+
+      gap_direct_total_eur:         { type: decimal(14,2), required: false }
+      gap_estimated_area_ha:        { type: decimal(14,2), required: false }
+
+      potential_seed_eur:           { type: decimal(14,2), required: false }
+      potential_fertilizer_eur:     { type: decimal(14,2), required: false }
+      potential_psm_eur:            { type: decimal(14,2), required: false }
+      potential_total_eur:          { type: decimal(14,2), required: false }
+
+      turnover_total_last_year_eur: { type: decimal(14,2), required: false }
+      share_of_wallet_total_pct:    { type: decimal(5,2), required: false }
+
+      segment:                      { type: string, enum: [A, B, C], required: false }
+      potential_notes:              { type: text, required: false }
+
+      computed_at:                  { type: timestamp, required: true }
+
+  ExternalCertification:
+    table: prospecting_certifications
+    description: Zusammenfassung externer Zertifizierungsdaten (Bio, QS, QM-Milch, etc.).
+    fields:
+      id:                   { type: bigint, pk: true }
+      customer_id:          { type: uuid, required: false, ref: crm.Customer.id }
+      prospect_key:         { type: string, required: false }
+
+      source_system:        { type: string, required: true, enum: [bvk_bio, eu_traces, naturelsand, qs, qm_milch, other] }
+      source_ref:           { type: string, required: false }
+
+      company_name:         { type: string, required: true }
+      address:              { type: string, required: false }
+      postal_code:          { type: string, required: false }
+      city:                 { type: string, required: false }
+      country_code:         { type: string, required: false, default: "DE" }
+
+      certificate_number:   { type: string, required: false }
+      control_body:         { type: string, required: false }
+      scope:                { type: string, required: false }
+      valid_from:           { type: date, required: false }
+      valid_to:             { type: date, required: false }
+      status:               { type: string, required: false, enum: [active, suspended, expired] }
+
+      imported_at:          { type: timestamp, required: true }
+
+  LeadCandidate:
+    view: prospecting_lead_candidates
+    description: Sicht, die aus Aggregaten / Matchings fertige Lead-Kandidaten generiert.
+    fields:
+      ref_year:                { type: int }
+      source_system:           { type: string }
+      prospect_name:           { type: string }
+      postal_code:             { type: string }
+      city:                    { type: string }
+      estimated_area_ha:       { type: decimal(14,2) }
+      estimated_potential_eur: { type: decimal(14,2) }
+      segment:                 { type: string, enum: [A,B,C] }
+      region_cluster:          { type: string }
+      lead_priority:           { type: string, enum: [high, medium, low] }
+      is_existing_customer:    { type: boolean }
+      matched_customer_id:     { type: uuid, required: false }
+      is_core_customer:        { type: boolean }
+      suggested_owner:         { type: uuid, required: false, ref: crm.User.id }

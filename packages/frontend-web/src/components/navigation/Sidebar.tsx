@@ -1,183 +1,23 @@
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import {
-  BarChart3,
-  Calculator,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   ChevronUp,
-  FileText,
-  LayoutDashboard,
-  Package,
-  Scale,
   Settings,
-  ShieldCheck,
-  ShoppingCart,
-  Sprout,
-  Users,
-  Euro,
-  Truck,
-  Building2,
-  Leaf,
-  AlertCircle,
-  UserCog,
-  Target,
-  Calendar,
-  Tractor,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 import { useFeature } from '@/hooks/useFeature'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { NAV_LINKS, NAV_SECTIONS, type NavItem } from '@/app/navigation/manifest'
+import { resolveRoutePathFromModule } from '@/app/navigation/route-paths'
 
 interface SidebarProps {
   collapsed: boolean
   onToggle: () => void
 }
-
-type NavItem = {
-  id: string
-  label: string
-  icon: typeof LayoutDashboard
-  path?: string
-  children?: NavItem[]
-  mcp: { businessDomain: string; scope: string }
-  featureKey?: 'agrar'
-}
-
-const navItems: NavItem[] = [
-  {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: LayoutDashboard,
-    path: '/',
-    mcp: { businessDomain: 'core', scope: 'core:read' },
-  },
-  {
-    id: 'verkauf',
-    label: 'Verkauf',
-    icon: ShoppingCart,
-    mcp: { businessDomain: 'sales', scope: 'sales:read' },
-    children: [
-      { id: 'sales-dashboard', label: 'Dashboard', icon: BarChart3, path: '/dashboard/sales', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
-      { id: 'angebot', label: 'Angebote', icon: FileText, path: '/sales', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
-      { id: 'auftrag', label: 'Aufträge', icon: FileText, path: '/sales/order', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
-      { id: 'lieferung', label: 'Lieferungen', icon: Truck, path: '/sales/delivery', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
-      { id: 'rechnung', label: 'Rechnungen', icon: FileText, path: '/sales/invoice', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
-      { id: 'kunden', label: 'Kunden', icon: Users, path: '/verkauf/kunden-liste', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
-      { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/analytics', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
-      { id: 'reports', label: 'Berichte', icon: FileText, path: '/reports', mcp: { businessDomain: 'sales', scope: 'sales:read' } },
-    ],
-  },
-  {
-    id: 'crm',
-    label: 'CRM & Marketing',
-    icon: UserCog,
-    mcp: { businessDomain: 'crm', scope: 'crm:read' },
-    children: [
-      { id: 'kontakte', label: 'Kontakte', icon: Users, path: '/crm/kontakte-liste', mcp: { businessDomain: 'crm', scope: 'crm:read' } },
-      { id: 'leads', label: 'Leads', icon: Target, path: '/crm/leads', mcp: { businessDomain: 'crm', scope: 'crm:read' } },
-      { id: 'aktivitaeten', label: 'Aktivitäten', icon: Calendar, path: '/crm/aktivitaeten', mcp: { businessDomain: 'crm', scope: 'crm:read' } },
-      { id: 'betriebsprofile', label: 'Betriebsprofile', icon: Tractor, path: '/crm/betriebsprofile', mcp: { businessDomain: 'crm', scope: 'crm:read' } },
-    ],
-  },
-  {
-    id: 'einkauf',
-    label: 'Einkauf',
-    icon: ShoppingCart,
-    mcp: { businessDomain: 'procurement', scope: 'procurement:read' },
-    children: [
-      { id: 'einkauf-dashboard', label: 'Dashboard', icon: BarChart3, path: '/dashboard/einkauf', mcp: { businessDomain: 'procurement', scope: 'procurement:read' } },
-      { id: 'bestellvorschlaege', label: 'Bestellvorschläge', icon: AlertCircle, path: '/einkauf/bestellvorschlaege', mcp: { businessDomain: 'procurement', scope: 'procurement:read' } },
-      { id: 'bestellungen', label: 'Bestellungen', icon: FileText, path: '/contracts', mcp: { businessDomain: 'procurement', scope: 'procurement:read' } },
-      { id: 'wareneingang', label: 'Wareneingang', icon: Package, path: '/charge/wareneingang', mcp: { businessDomain: 'procurement', scope: 'procurement:read' } },
-      { id: 'lieferanten', label: 'Lieferanten', icon: Users, path: '/einkauf/lieferanten-liste', mcp: { businessDomain: 'procurement', scope: 'procurement:read' } },
-      { id: 'warengruppen', label: 'Warengruppen', icon: Package, path: '/einkauf/warengruppen', mcp: { businessDomain: 'procurement', scope: 'procurement:read' } },
-      { id: 'disposition', label: 'Disposition', icon: Calculator, path: '/disposition/liste', mcp: { businessDomain: 'procurement', scope: 'procurement:read' } },
-    ],
-  },
-  {
-    id: 'fibu',
-    label: 'Finanzbuchhaltung',
-    icon: Euro,
-    mcp: { businessDomain: 'finance', scope: 'finance:read' },
-    children: [
-      { id: 'hauptbuch', label: 'Hauptbuch', icon: FileText, path: '/fibu/hauptbuch', mcp: { businessDomain: 'finance', scope: 'finance:read' } },
-      { id: 'debitoren', label: 'Debitoren', icon: Euro, path: '/fibu/debitoren', mcp: { businessDomain: 'finance', scope: 'finance:read' } },
-      { id: 'kreditoren', label: 'Kreditoren', icon: Euro, path: '/fibu/kreditoren', mcp: { businessDomain: 'finance', scope: 'finance:read' } },
-      { id: 'buchungsjournal', label: 'Buchungsjournal', icon: FileText, path: '/fibu/buchungsjournal', mcp: { businessDomain: 'finance', scope: 'finance:read' } },
-      { id: 'kontenplan', label: 'Kontenplan', icon: FileText, path: '/fibu/kontenplan', mcp: { businessDomain: 'finance', scope: 'finance:read' } },
-      { id: 'bilanz', label: 'Bilanz', icon: BarChart3, path: '/fibu/bilanz', mcp: { businessDomain: 'finance', scope: 'finance:read' } },
-      { id: 'guv', label: 'GuV', icon: BarChart3, path: '/fibu/guv', mcp: { businessDomain: 'finance', scope: 'finance:read' } },
-      { id: 'bwa', label: 'BWA', icon: BarChart3, path: '/fibu/bwa', mcp: { businessDomain: 'finance', scope: 'finance:read' } },
-      { id: 'anlagen', label: 'Anlagenbuchhaltung', icon: Building2, path: '/fibu/anlagen', mcp: { businessDomain: 'finance', scope: 'finance:read' } },
-      { id: 'op-verwaltung', label: 'OP-Verwaltung', icon: Euro, path: '/fibu/op-verwaltung', mcp: { businessDomain: 'finance', scope: 'finance:read' } },
-    ],
-  },
-  {
-    id: 'lager',
-    label: 'Lager & Logistik',
-    icon: Package,
-    mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
-    children: [
-      { id: 'bestandsuebersicht', label: 'Bestandsübersicht', icon: BarChart3, path: '/lager/bestandsuebersicht', mcp: { businessDomain: 'inventory', scope: 'inventory:read' } },
-      { id: 'einlagerung', label: 'Einlagerung', icon: Package, path: '/lager/einlagerung', mcp: { businessDomain: 'inventory', scope: 'inventory:read' } },
-      { id: 'auslagerung', label: 'Auslagerung', icon: Package, path: '/lager/auslagerung', mcp: { businessDomain: 'inventory', scope: 'inventory:read' } },
-      { id: 'inventur', label: 'Inventur', icon: FileText, path: '/lager/inventur', mcp: { businessDomain: 'inventory', scope: 'inventory:read' } },
-      { id: 'tourenplanung', label: 'Tourenplanung', icon: Truck, path: '/logistik/tourenplanung', mcp: { businessDomain: 'logistics', scope: 'logistics:read' } },
-      { id: 'verladung', label: 'Verladung', icon: Truck, path: '/verladung/liste', mcp: { businessDomain: 'logistics', scope: 'logistics:read' } },
-    ],
-  },
-  {
-    id: 'agrar',
-    label: 'Agrar',
-    icon: Sprout,
-    mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
-    featureKey: 'agrar',
-    children: [
-      { id: 'psm', label: 'Pflanzenschutzmittel', icon: Leaf, path: '/agrar/psm', mcp: { businessDomain: 'agrar', scope: 'agrar:read' } },
-      { id: 'saatgut', label: 'Saatgut', icon: Sprout, path: '/agrar/saatgut', mcp: { businessDomain: 'agrar', scope: 'agrar:read' } },
-      { id: 'duenger', label: 'Dünger', icon: Leaf, path: '/agrar/duenger', mcp: { businessDomain: 'agrar', scope: 'agrar:read' } },
-      { id: 'feldbuch', label: 'Feldbuch', icon: FileText, path: '/agrar/feldbuch/schlagkartei', mcp: { businessDomain: 'agrar', scope: 'agrar:read' } },
-      { id: 'futter', label: 'Futtermittel', icon: Package, path: '/futter/einzel/liste', mcp: { businessDomain: 'agrar', scope: 'agrar:read' } },
-    ],
-  },
-  {
-    id: 'annahme',
-    label: 'Waage & Annahme',
-    icon: Scale,
-    mcp: { businessDomain: 'logistics', scope: 'logistics:read' },
-    children: [
-      { id: 'warteschlange', label: 'Warteschlange', icon: Truck, path: '/annahme/warteschlange', mcp: { businessDomain: 'logistics', scope: 'logistics:read' } },
-      { id: 'waage-liste', label: 'Waagen', icon: Scale, path: '/waage/liste', mcp: { businessDomain: 'logistics', scope: 'logistics:read' } },
-      { id: 'wiegungen', label: 'Wiegungen', icon: FileText, path: '/waage/wiegungen', mcp: { businessDomain: 'logistics', scope: 'logistics:read' } },
-    ],
-  },
-  {
-    id: 'compliance',
-    label: 'Compliance & QS',
-    icon: ShieldCheck,
-    mcp: { businessDomain: 'compliance', scope: 'compliance:read' },
-    children: [
-      { id: 'policies', label: 'Policies', icon: ShieldCheck, path: '/policies', mcp: { businessDomain: 'compliance', scope: 'compliance:read' } },
-      { id: 'zulassungen', label: 'Zulassungen', icon: FileText, path: '/compliance/zulassungen-register', mcp: { businessDomain: 'compliance', scope: 'compliance:read' } },
-      { id: 'eudr', label: 'EUDR-Compliance', icon: Leaf, path: '/nachhaltigkeit/eudr-compliance', mcp: { businessDomain: 'compliance', scope: 'compliance:read' } },
-      { id: 'labor', label: 'Labor', icon: FileText, path: '/qualitaet/labor-liste', mcp: { businessDomain: 'quality', scope: 'quality:read' } },
-      { id: 'zertifikate', label: 'Zertifikate', icon: ShieldCheck, path: '/zertifikate/liste', mcp: { businessDomain: 'compliance', scope: 'compliance:read' } },
-    ],
-  },
-  {
-    id: 'admin',
-    label: 'Administration',
-    icon: Settings,
-    mcp: { businessDomain: 'admin', scope: 'admin:read' },
-    children: [
-      { id: 'benutzer', label: 'Benutzer', icon: Users, path: '/admin/benutzer-liste', mcp: { businessDomain: 'admin', scope: 'admin:read' } },
-      { id: 'monitoring', label: 'Monitoring', icon: AlertCircle, path: '/monitoring/alerts', mcp: { businessDomain: 'admin', scope: 'admin:read' } },
-    ],
-  },
-]
 
 export const sidebarMCP = createMCPMetadata('Sidebar', 'navigation', {
   accessibility: {
@@ -198,7 +38,20 @@ export const sidebarMCP = createMCPMetadata('Sidebar', 'navigation', {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps): JSX.Element {
   const agrarEnabled = useFeature('agrar')
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['verkauf', 'crm', 'fibu']))
+  const navItems: NavItem[] = NAV_SECTIONS
+  const filteredNavItems = navItems.filter((item) => (item.featureKey === 'agrar' ? agrarEnabled : true))
+  const allGroupIds = filteredNavItems
+    .filter((item) => item.children && item.children.length > 0)
+    .map((item) => item.id)
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
+    new Set(allGroupIds),
+  )
+  const settingsPath = useMemo(
+    () =>
+      NAV_LINKS.find((entry) => entry.id === 'system-einstellungen')?.path ??
+      resolveRoutePathFromModule('@/pages/einstellungen/system', 'einstellungen/system'),
+    [],
+  )
 
   function toggleGroup(id: string): void {
     setExpandedGroups((prev) => {
@@ -228,9 +81,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps): JSX.Element {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-2">
-        {navItems
-          .filter((item) => (item.featureKey === 'agrar' ? agrarEnabled : true))
-          .map((item) => {
+        {filteredNavItems.map((item) => {
             const Icon = item.icon
             const isExpanded = expandedGroups.has(item.id)
             const hasChildren = item.children && item.children.length > 0
@@ -309,7 +160,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps): JSX.Element {
 
       <div className="border-t p-2">
         <NavLink
-          to="/einstellungen/system"
+          to={settingsPath}
           className={({ isActive }) =>
             cn(
               'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',

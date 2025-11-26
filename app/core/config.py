@@ -5,7 +5,7 @@ Centralized configuration management using Pydantic settings
 
 import secrets
 from typing import List, Optional, Union
-from pydantic import AnyHttpUrl, field_validator, ValidationInfo
+from pydantic import Field, field_validator, ValidationInfo
 from pydantic_settings import BaseSettings
 
 
@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     # CORS Configuration
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
+    BACKEND_CORS_ORIGINS: List[str] = [
         "http://localhost:3000",  # React dev server
         "http://localhost:3001",  # Vite dev server (Fallback)
         "http://localhost:8080",  # Vue dev server
@@ -47,7 +47,10 @@ class Settings(BaseSettings):
     ALLOWED_HOSTS: List[str] = ["localhost", "127.0.0.1"]
 
     # Database Configuration
-    DATABASE_URL: str = "postgresql://valeo_dev:valeo_dev_2024!@127.0.0.1:5432/valeo_neuro_erp"
+    DATABASE_URL: str = Field(
+        default="postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_neuro_erp",
+        env="DATABASE_URL"
+    )
     DATABASE_CONNECT_ARGS: dict = {}
 
     # Redis Configuration
@@ -76,6 +79,17 @@ class Settings(BaseSettings):
     ENABLE_TRACING: bool = False
     ENABLE_CACHE: bool = True
 
+    # Downstream CRM services
+    CRM_CORE_BASE_URL: str = "http://localhost:5600"
+    CRM_CORE_HTTP_TIMEOUT_SECONDS: float = 5.0
+    CRM_SALES_BASE_URL: str = "http://localhost:5700"
+    CRM_SALES_HTTP_TIMEOUT_SECONDS: float = 5.0
+    CRM_SERVICE_BASE_URL: str = "http://localhost:5800"
+    CRM_SERVICE_HTTP_TIMEOUT_SECONDS: float = 5.0
+
+    # Multi-tenancy defaults
+    DEFAULT_TENANT_ID: str = "00000000-0000-0000-0000-000000000001"
+
     # External Services
     EMAIL_SMTP_SERVER: Optional[str] = None
     EMAIL_SMTP_PORT: Optional[int] = None
@@ -97,6 +111,7 @@ class Settings(BaseSettings):
         "/api/v1/health/ready",
         "/api/v1/health/live",
         "/api/v1/health/database",
+        "/api/v1/gap/pipeline/status",  # GAP Pipeline Status (für Admin-UI)
     ]
 
     class Config:

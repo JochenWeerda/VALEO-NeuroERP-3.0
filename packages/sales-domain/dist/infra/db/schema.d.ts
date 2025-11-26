@@ -1,3 +1,238 @@
+export declare const salesOffers: import("drizzle-orm/pg-core").PgTableWithColumns<{
+    name: "sales_offers";
+    schema: undefined;
+    columns: {
+        id: import("drizzle-orm/pg-core").PgColumn<{
+            name: "id";
+            tableName: "sales_offers";
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        tenantId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "tenant_id";
+            tableName: "sales_offers";
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        customerInquiryId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "customer_inquiry_id";
+            tableName: "sales_offers";
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        customerId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "customer_id";
+            tableName: "sales_offers";
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        offerNumber: import("drizzle-orm/pg-core").PgColumn<{
+            name: "offer_number";
+            tableName: "sales_offers";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        subject: import("drizzle-orm/pg-core").PgColumn<{
+            name: "subject";
+            tableName: "sales_offers";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        description: import("drizzle-orm/pg-core").PgColumn<{
+            name: "description";
+            tableName: "sales_offers";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        totalAmount: import("drizzle-orm/pg-core").PgColumn<{
+            name: "total_amount";
+            tableName: "sales_offers";
+            dataType: "string";
+            columnType: "PgNumeric";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        currency: import("drizzle-orm/pg-core").PgColumn<{
+            name: "currency";
+            tableName: "sales_offers";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        validUntil: import("drizzle-orm/pg-core").PgColumn<{
+            name: "valid_until";
+            tableName: "sales_offers";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        status: import("drizzle-orm/pg-core").PgColumn<{
+            name: "status";
+            tableName: "sales_offers";
+            dataType: "string";
+            columnType: "PgText";
+            data: "ENTWURF" | "VERSENDET" | "ANGENOMMEN" | "ABGELEHNT" | "ABGELAUFEN";
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            enumValues: ["ENTWURF", "VERSENDET", "ANGENOMMEN", "ABGELEHNT", "ABGELAUFEN"];
+            baseColumn: never;
+        }, {}, {}>;
+        contactPerson: import("drizzle-orm/pg-core").PgColumn<{
+            name: "contact_person";
+            tableName: "sales_offers";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        deliveryDate: import("drizzle-orm/pg-core").PgColumn<{
+            name: "delivery_date";
+            tableName: "sales_offers";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        paymentTerms: import("drizzle-orm/pg-core").PgColumn<{
+            name: "payment_terms";
+            tableName: "sales_offers";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        notes: import("drizzle-orm/pg-core").PgColumn<{
+            name: "notes";
+            tableName: "sales_offers";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        createdAt: import("drizzle-orm/pg-core").PgColumn<{
+            name: "created_at";
+            tableName: "sales_offers";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        updatedAt: import("drizzle-orm/pg-core").PgColumn<{
+            name: "updated_at";
+            tableName: "sales_offers";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        deletedAt: import("drizzle-orm/pg-core").PgColumn<{
+            name: "deleted_at";
+            tableName: "sales_offers";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        version: import("drizzle-orm/pg-core").PgColumn<{
+            name: "version";
+            tableName: "sales_offers";
+            dataType: "number";
+            columnType: "PgInteger";
+            data: number;
+            driverParam: string | number;
+            notNull: true;
+            hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+    };
+    dialect: "pg";
+}>;
 export declare const quotes: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "quotes";
     schema: undefined;
@@ -374,7 +609,7 @@ export declare const orders: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "orders";
             dataType: "string";
             columnType: "PgText";
-            data: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
+            data: "Cancelled" | "Draft" | "Confirmed" | "Invoiced";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -609,7 +844,7 @@ export declare const invoices: import("drizzle-orm/pg-core").PgTableWithColumns<
             tableName: "invoices";
             dataType: "string";
             columnType: "PgText";
-            data: "Cancelled" | "Issued" | "Paid" | "Overdue";
+            data: "Issued" | "Paid" | "Overdue" | "Cancelled";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -1100,7 +1335,7 @@ export declare const quotesRelations: {
                 tableName: "orders";
                 dataType: "string";
                 columnType: "PgText";
-                data: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
+                data: "Cancelled" | "Draft" | "Confirmed" | "Invoiced";
                 driverParam: string;
                 notNull: true;
                 hasDefault: true;
@@ -1548,7 +1783,7 @@ export declare const ordersRelations: {
                 tableName: "invoices";
                 dataType: "string";
                 columnType: "PgText";
-                data: "Cancelled" | "Issued" | "Paid" | "Overdue";
+                data: "Issued" | "Paid" | "Overdue" | "Cancelled";
                 driverParam: string;
                 notNull: true;
                 hasDefault: true;
@@ -1761,7 +1996,7 @@ export declare const invoicesRelations: {
                 tableName: "orders";
                 dataType: "string";
                 columnType: "PgText";
-                data: "Draft" | "Confirmed" | "Invoiced" | "Cancelled";
+                data: "Cancelled" | "Draft" | "Confirmed" | "Invoiced";
                 driverParam: string;
                 notNull: true;
                 hasDefault: true;
@@ -2233,7 +2468,7 @@ export declare const creditNotesRelations: {
                 tableName: "invoices";
                 dataType: "string";
                 columnType: "PgText";
-                data: "Cancelled" | "Issued" | "Paid" | "Overdue";
+                data: "Issued" | "Paid" | "Overdue" | "Cancelled";
                 driverParam: string;
                 notNull: true;
                 hasDefault: true;

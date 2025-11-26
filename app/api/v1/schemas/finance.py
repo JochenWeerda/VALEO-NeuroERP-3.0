@@ -19,6 +19,7 @@ class AccountBase(BaseModel):
     category: str = Field(..., description="Account category")
     currency: str = Field(default="EUR", min_length=3, max_length=3, description="Currency code")
     allow_manual_entries: bool = Field(default=True, description="Allow manual journal entries")
+    parent_account_id: Optional[str] = Field(None, description="Parent account ID for hierarchy")
 
     @field_validator('account_type')
     @classmethod
@@ -43,6 +44,7 @@ class AccountBase(BaseModel):
 class AccountCreate(AccountBase):
     """Schema for creating accounts"""
     tenant_id: str = Field(..., description="Tenant ID")
+    parent_account_id: Optional[str] = Field(None, description="Parent account ID for hierarchy")
 
 
 class AccountUpdate(BaseModel):
@@ -60,11 +62,17 @@ class Account(AccountBase):
     tenant_id: str
     balance: Decimal = Field(default=Decimal('0.00'), description="Current balance")
     is_active: bool = Field(default=True, description="Account status")
+    parent_account_id: Optional[str] = Field(None, description="Parent account ID for hierarchy")
     created_at: datetime
     updated_at: datetime
 
     class Config:
         from_attributes = True
+
+
+class AccountHierarchy(Account):
+    """Account with hierarchy information"""
+    children: List['AccountHierarchy'] = Field(default_factory=list, description="Child accounts")
 
 
 # Journal Entry Line Schemas
@@ -216,3 +224,107 @@ class GeneralLedgerEntry(BaseModel):
     credit_amount: Decimal
     balance: Decimal
     reference: Optional[str] = None
+
+
+# Bank Account Schemas
+class BankAccountBase(BaseModel):
+    """Base bank account schema"""
+    account_number: str = Field(..., min_length=1, max_length=50, description="Bank account number")
+    bank_name: str = Field(..., min_length=1, max_length=255, description="Bank name")
+    iban: Optional[str] = Field(None, max_length=34, description="IBAN")
+    bic: Optional[str] = Field(None, max_length=11, description="BIC/SWIFT code")
+    currency: str = Field(default="EUR", min_length=3, max_length=3, description="Currency code")
+    balance: Decimal = Field(default=Decimal('0.00'), description="Current balance")
+    is_active: bool = Field(default=True, description="Account status")
+
+
+class BankAccountCreate(BankAccountBase):
+    """Schema for creating bank accounts"""
+    tenant_id: str = Field(..., description="Tenant ID")
+
+
+class BankAccountUpdate(BaseModel):
+    """Schema for updating bank accounts"""
+    bank_name: Optional[str] = Field(None, min_length=1, max_length=255)
+    iban: Optional[str] = Field(None, max_length=34)
+    bic: Optional[str] = Field(None, max_length=11)
+    currency: Optional[str] = Field(None, min_length=3, max_length=3)
+    balance: Optional[Decimal] = None
+    is_active: Optional[bool] = None
+
+
+class BankAccount(BankAccountBase):
+    """Full bank account schema"""
+    id: str
+    tenant_id: str
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+# Debtor Schemas
+class DebtorBase(BaseModel):
+    """Base debtor schema"""
+    debtor_number: str = Field(..., min_length=1, max_length=50, description="Debtor number")
+    company_name: str = Field(..., min_length=1, max_length=255, description="Company name")
+    contact_person: Optional[str] = Field(None, max_length=255, description="Contact person")
+    street: str = Field(..., min_length=1, max_length=255, description="Street address")
+    postal_code: str = Field(..., min_length=1, max_length=10, description="Postal code")
+    city: str = Field(..., min_length=1, max_length=100, description="City")
+    country: str = Field(default="DE", min_length=2, max_length=2, description="Country code")
+    phone: Optional[str] = Field(None, max_length=50, description="Phone number")
+    email: Optional[str] = Field(None, max_length=255, description="Email address")
+    vat_id: Optional[str] = Field(None, max_length=50, description="VAT ID")
+    tax_number: Optional[str] = Field(None, max_length=50, description="Tax number")
+    iban: Optional[str] = Field(None, max_length=34, description="IBAN")
+    bic: Optional[str] = Field(None, max_length=11, description="BIC/SWIFT code")
+    bank_name: Optional[str] = Field(None, max_length=255, description="Bank name")
+    account_holder: Optional[str] = Field(None, max_length=255, description="Account holder")
+    payment_terms_days: int = Field(default=30, ge=0, description="Payment terms in days")
+    discount_days: int = Field(default=0, ge=0, description="Discount days")
+    discount_percent: Decimal = Field(default=Decimal('0.00'), ge=0, le=100, description="Discount percentage")
+    credit_limit: Decimal = Field(default=Decimal('0.00'), ge=0, description="Credit limit")
+    is_active: bool = Field(default=True, description="Debtor status")
+    notes: Optional[str] = Field(None, description="Internal notes")
+
+
+class DebtorCreate(DebtorBase):
+    """Schema for creating debtors"""
+    tenant_id: str = Field(..., description="Tenant ID")
+
+
+class DebtorUpdate(BaseModel):
+    """Schema for updating debtors"""
+    company_name: Optional[str] = Field(None, min_length=1, max_length=255)
+    contact_person: Optional[str] = Field(None, max_length=255)
+    street: Optional[str] = Field(None, min_length=1, max_length=255)
+    postal_code: Optional[str] = Field(None, min_length=1, max_length=10)
+    city: Optional[str] = Field(None, min_length=1, max_length=100)
+    country: Optional[str] = Field(None, min_length=2, max_length=2)
+    phone: Optional[str] = Field(None, max_length=50)
+    email: Optional[str] = Field(None, max_length=255)
+    vat_id: Optional[str] = Field(None, max_length=50)
+    tax_number: Optional[str] = Field(None, max_length=50)
+    iban: Optional[str] = Field(None, max_length=34)
+    bic: Optional[str] = Field(None, max_length=11)
+    bank_name: Optional[str] = Field(None, max_length=255)
+    account_holder: Optional[str] = Field(None, max_length=255)
+    payment_terms_days: Optional[int] = Field(None, ge=0)
+    discount_days: Optional[int] = Field(None, ge=0)
+    discount_percent: Optional[Decimal] = Field(None, ge=0, le=100)
+    credit_limit: Optional[Decimal] = Field(None, ge=0)
+    is_active: Optional[bool] = None
+    notes: Optional[str] = None
+
+
+class Debtor(DebtorBase):
+    """Full debtor schema"""
+    id: str
+    tenant_id: str
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True

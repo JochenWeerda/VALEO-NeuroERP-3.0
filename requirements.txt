@@ -5,6 +5,7 @@
 fastapi==0.115.14
 uvicorn[standard]==0.24.0
 starlette==0.46.2
+python-multipart==0.0.9
 
 # Database and ORM
 SQLAlchemy==2.0.41
@@ -28,6 +29,7 @@ bcrypt==4.1.2
 # HTTP client for external APIs
 httpx==0.28.1
 aiohttp==3.12.13
+requests==2.32.3
 
 # Logging and monitoring
 python-json-logger==2.0.7
@@ -44,6 +46,8 @@ black==24.10.0
 isort==5.13.2
 flake8==7.3.0
 mypy==1.16.1
+apscheduler==3.10.4
+nats-py==2.6.0
 
 # Code quality and utilities
 click==8.2.1

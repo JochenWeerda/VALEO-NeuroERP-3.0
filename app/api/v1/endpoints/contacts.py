@@ -1,133 +1,148 @@
 """
-CRM Contact management endpoints
-RESTful API for contact management with clean architecture
+CRM Contact management endpoints proxied via crm-core
 """
 
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from datetime import datetime
+from typing import Any, Dict, Optional
 
-from ....core.database import get_db
-from ....infrastructure.repositories import ContactRepository
-from ....core.dependency_container import container
-from ..schemas.crm import (
-    ContactCreate, ContactUpdate, Contact
-)
-from ..schemas.base import PaginatedResponse
+import httpx
+from fastapi import APIRouter, HTTPException, Query, status
+
+from ....integrations import crm_core_client
+from ..schemas.crm import ContactCreate, ContactUpdate
 
 router = APIRouter()
 
 
-@router.post("/", response_model=Contact, status_code=201)
-async def create_contact(
-    contact_data: ContactCreate,
-    db: Session = Depends(get_db)
-):
-    """
-    Create a new contact.
+def _adapt_contact(core_contact: crm_core_client.CRMCoreContact) -> Dict[str, Any]:
+    full_name = " ".join(filter(None, [core_contact.first_name, core_contact.last_name])).strip()
+    if not full_name:
+        full_name = core_contact.email or "Kontakt"
+    created_at = core_contact.created_at or datetime.utcnow().isoformat()
+    updated_at = core_contact.updated_at or created_at
+    notes_parts = [value for value in [core_contact.job_title, core_contact.department] if value]
+    notes = " - ".join(notes_parts) if notes_parts else None
+    return {
+        "id": core_contact.id,
+        "name": full_name,
+        "company": core_contact.customer_name or "",
+        "email": core_contact.email or "",
+        "phone": core_contact.phone or "",
+        "type": "customer",
+        "address": None,
+        "notes": notes,
+        "createdAt": created_at,
+        "updatedAt": updated_at,
+    }
 
-    This endpoint allows creating a new contact associated with a customer.
-    """
-    try:
-        contact_repo = container.resolve(ContactRepository)
-        contact = await contact_repo.create(contact_data.model_dump(), "system")  # TODO: tenant context
-        return Contact.model_validate(contact)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create contact: {str(e)}")
+
+def _map_create_payload(payload: ContactCreate) -> Dict[str, Any]:
+    body = payload.model_dump()
+    return {
+        "customer_id": str(body["customer_id"]),
+        "first_name": body["first_name"],
+        "last_name": body["last_name"],
+        "email": body.get("email"),
+        "phone": body.get("phone"),
+        "job_title": body.get("position"),
+        "department": body.get("department"),
+    }
 
 
-@router.get("/", response_model=PaginatedResponse[Contact])
+def _map_update_payload(payload: ContactUpdate) -> Dict[str, Any]:
+    body = payload.model_dump(exclude_unset=True)
+    mapped: Dict[str, Any] = {}
+    if "first_name" in body:
+        mapped["first_name"] = body["first_name"]
+    if "last_name" in body:
+        mapped["last_name"] = body["last_name"]
+    if "email" in body:
+        mapped["email"] = body["email"]
+    if "phone" in body:
+        mapped["phone"] = body["phone"]
+    if "position" in body:
+        mapped["job_title"] = body["position"]
+    if "department" in body:
+        mapped["department"] = body["department"]
+    return mapped
+
+
+@router.get("/")
 async def list_contacts(
     customer_id: Optional[str] = Query(None, description="Filter by customer ID"),
+    search: Optional[str] = Query(None, description="Client-side search term"),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of items to return"),
-    db: Session = Depends(get_db)
 ):
-    """
-    List contacts with pagination and filtering.
-
-    Retrieve a paginated list of contacts, optionally filtered by customer.
-    """
     try:
-        contact_repo = container.resolve(ContactRepository)
-
-        contacts = await contact_repo.get_all("system", skip, limit, customer_id)  # TODO: tenant context
-        total = await contact_repo.count("system", customer_id)  # TODO: tenant context
-
-        return PaginatedResponse[Contact](
-            items=[Contact.model_validate(contact) for contact in contacts],
-            total=total,
-            page=(skip // limit) + 1,
-            size=limit,
-            pages=(total + limit - 1) // limit,
-            has_next=(skip + limit) < total,
-            has_prev=skip > 0
+        core_contacts, total = await crm_core_client.list_contacts(
+            customer_id=customer_id,
+            search=search,
+            skip=skip,
+            limit=limit,
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to list contacts: {str(e)}")
-
-
-@router.get("/{contact_id}", response_model=Contact)
-async def get_contact(
-    contact_id: str,
-    db: Session = Depends(get_db)
-):
-    """
-    Get contact by ID.
-
-    Retrieve detailed information about a specific contact.
-    """
-    try:
-        contact_repo = container.resolve(ContactRepository)
-        contact = await contact_repo.get_by_id(contact_id, "system")  # TODO: tenant context
-        if not contact:
-            raise HTTPException(status_code=404, detail="Contact not found")
-        return Contact.model_validate(contact)
+        data = [_adapt_contact(contact) for contact in core_contacts]
+        if search:
+            needle = search.lower()
+            data = [
+                contact
+                for contact in data
+                if needle in contact["name"].lower()
+                or needle in contact["company"].lower()
+                or needle in contact["email"].lower()
+            ]
+            total = len(data)
+        return {"data": data, "total": total}
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve contact: {str(e)}")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to list contacts: {exc}") from exc
 
 
-@router.put("/{contact_id}", response_model=Contact)
-async def update_contact(
-    contact_id: str,
-    contact_data: ContactUpdate,
-    db: Session = Depends(get_db)
-):
-    """
-    Update contact information.
-
-    Modify contact details such as name, email, or position.
-    """
+@router.get("/{contact_id}")
+async def get_contact(contact_id: str):
     try:
-        contact_repo = container.resolve(ContactRepository)
-        contact = await contact_repo.update(contact_id, contact_data.model_dump(exclude_unset=True), "system")  # TODO: tenant context
-        if not contact:
-            raise HTTPException(status_code=404, detail="Contact not found")
-        return Contact.model_validate(contact)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to update contact: {str(e)}")
+        contact = await crm_core_client.get_contact(contact_id)
+    except httpx.HTTPStatusError as exc:  # type: ignore[name-defined]
+        if exc.response.status_code == 404:
+            raise HTTPException(status_code=404, detail="Contact not found") from exc
+        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve contact: {exc}") from exc
+    return {"data": _adapt_contact(contact)}
 
 
-@router.delete("/{contact_id}", status_code=204)
-async def delete_contact(
-    contact_id: str,
-    db: Session = Depends(get_db)
-):
-    """
-    Delete contact (soft delete).
-
-    Mark a contact as inactive. This is a soft delete operation.
-    """
+@router.post("/", status_code=status.HTTP_201_CREATED)
+async def create_contact(contact_data: ContactCreate):
     try:
-        contact_repo = container.resolve(ContactRepository)
-        success = await contact_repo.delete(contact_id, "system")  # TODO: tenant context
-        if not success:
-            raise HTTPException(status_code=404, detail="Contact not found")
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to delete contact: {str(e)}")
+        payload = _map_create_payload(contact_data)
+        created = await crm_core_client.create_contact(payload)
+        return {"data": _adapt_contact(created)}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to create contact: {exc}") from exc
+
+
+@router.put("/{contact_id}")
+async def update_contact(contact_id: str, contact_data: ContactUpdate):
+    try:
+        payload = _map_update_payload(contact_data)
+        updated = await crm_core_client.update_contact(contact_id, payload)
+        return {"data": _adapt_contact(updated)}
+    except httpx.HTTPStatusError as exc:  # type: ignore[name-defined]
+        if exc.response.status_code == 404:
+            raise HTTPException(status_code=404, detail="Contact not found") from exc
+        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to update contact: {exc}") from exc
+
+
+@router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_contact(contact_id: str):
+    try:
+        await crm_core_client.delete_contact(contact_id)
+    except httpx.HTTPStatusError as exc:  # type: ignore[name-defined]
+        if exc.response.status_code == 404:
+            raise HTTPException(status_code=404, detail="Contact not found") from exc
+        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to delete contact: {exc}") from exc

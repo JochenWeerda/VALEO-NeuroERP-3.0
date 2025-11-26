@@ -9,7 +9,7 @@ import { parseDE } from "@/lib/number-de"
 export function PutawayForm({ sku, fromLocation, onSubmit, submitting }: {
   sku: string
   fromLocation?: string
-  onSubmit: (value: PutawayInput) => void
+  onSubmit: (_value: PutawayInput) => void
   submitting?: boolean
 }): JSX.Element {
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<PutawayInput>({

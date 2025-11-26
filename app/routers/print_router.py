@@ -15,13 +15,12 @@ from app.services.archive_service import archive
 from app.services.workflow_service import workflow
 from app.routers.workflow_router import _STATE
 from app.integrations.dms_client import upload_document, is_configured as is_dms_configured
+from app.repositories.document_repository import DocumentRepository
+from app.core.dependency_container import container
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/documents", tags=["print"])
-
-# Mock DB (TODO: durch echte DB ersetzen)
-_DB: Dict[str, dict] = {}
 
 
 @router.get("/{domain}/{doc_id}/print")
@@ -37,10 +36,20 @@ async def print_document(domain: str, doc_id: str) -> FileResponse:
         PDF-Datei als FileResponse
     """
     try:
-        # Beleg aus DB holen
-        doc = _DB.get(doc_id)
-        if not doc:
+        # Get DocumentRepository from container
+        doc_repo = container.resolve(DocumentRepository)
+
+        # Beleg aus DB holen - try to find by ID first, then by number if needed
+        doc_header = doc_repo.get_by_id(doc_id)
+        if not doc_header:
+            # Try to find by number if ID lookup fails
+            doc_header = doc_repo.get_by_number(domain, doc_id)
+
+        if not doc_header:
             raise HTTPException(status_code=404, detail="Document not found")
+
+        # Convert DocumentHeader to dict format expected by PDF service
+        doc = doc_repo.to_dict(doc_header)
 
         # Workflow-Status holen
         workflow_status = _STATE.get((domain, doc_id), "draft")

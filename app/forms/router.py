@@ -9,6 +9,8 @@ from fastapi.responses import JSONResponse
 from typing import Dict, Any
 from pydantic import BaseModel
 import logging
+from app.core.dependency_container import container
+from app.infrastructure.repositories import CustomerRepository, ArticleRepository
 
 class FollowRequest(BaseModel):
     source_id: str
@@ -323,35 +325,47 @@ async def create_follow_up(req: FollowRequest) -> dict:
 
 
 @router.get("/customers/search")
-async def search_customers(q: str = "") -> dict:
+async def search_customers(q: str = "", tenant_id: str = "system") -> dict:
     """Sucht Kunden (Autocomplete)"""
-    # TODO: Echte DB-Suche implementieren
-    mock_customers = [
-        {"id": "CUST-001", "label": "Müller GmbH"},
-        {"id": "CUST-002", "label": "Schmidt AG"},
-        {"id": "CUST-003", "label": "Weber & Co. KG"},
-        {"id": "CUST-004", "label": "Meyer Handel"},
-        {"id": "CUST-005", "label": "Bauer Logistik"},
-    ]
+    try:
+        customer_repo = container.resolve(CustomerRepository)
+        customers = await customer_repo.get_all(tenant_id, search=q, limit=10)
 
-    filtered = [c for c in mock_customers if q.lower() in c["label"].lower()]
-    logger.debug(f"Customer search: '{q}' → {len(filtered)} results")
-    return {"ok": True, "data": filtered}
+        # Format for autocomplete
+        results = [
+            {
+                "id": c.customer_number or str(c.id),
+                "label": c.company_name or f"{c.contact_person} ({c.customer_number})"
+            }
+            for c in customers
+        ]
+
+        logger.debug(f"Customer search: '{q}' → {len(results)} results")
+        return {"ok": True, "data": results}
+    except Exception as e:
+        logger.error(f"Customer search failed: {e}")
+        return {"ok": False, "error": str(e)}
 
 
 @router.get("/articles/search")
-async def search_articles(q: str = "") -> dict:
+async def search_articles(q: str = "", tenant_id: str = "system") -> dict:
     """Sucht Artikel (Autocomplete)"""
-    # TODO: Echte DB-Suche implementieren
-    mock_articles = [
-        {"id": "ART-001", "label": "Apfel Elstar (kg)"},
-        {"id": "ART-002", "label": "Birne Conference (kg)"},
-        {"id": "ART-003", "label": "Kartoffel festkochend (kg)"},
-        {"id": "ART-004", "label": "Tomate rund (kg)"},
-        {"id": "ART-005", "label": "Gurke Salat (Stk)"},
-    ]
+    try:
+        article_repo = container.resolve(ArticleRepository)
+        articles = await article_repo.get_all(tenant_id, search=q, limit=10)
 
-    filtered = [a for a in mock_articles if q.lower() in a["label"].lower()]
-    logger.debug(f"Article search: '{q}' → {len(filtered)} results")
-    return {"ok": True, "data": filtered}
+        # Format for autocomplete
+        results = [
+            {
+                "id": a.article_number or str(a.id),
+                "label": f"{a.name} ({a.unit})"
+            }
+            for a in articles
+        ]
+
+        logger.debug(f"Article search: '{q}' → {len(results)} results")
+        return {"ok": True, "data": results}
+    except Exception as e:
+        logger.error(f"Article search failed: {e}")
+        return {"ok": False, "error": str(e)}
 

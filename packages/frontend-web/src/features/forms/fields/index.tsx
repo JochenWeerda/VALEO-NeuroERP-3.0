@@ -20,7 +20,7 @@ export type Field = {
 export type FieldRendererProps = {
   field: Field
   value: unknown
-  onChange: (value: unknown) => void
+  onChange: (_value: unknown) => void
 }
 
 const DEFAULT_DEBOUNCE_MS = 350
@@ -34,7 +34,7 @@ type LookupResultItem = {
 
 type LookupProps = {
   value: string
-  onChange: (value: string) => void
+  onChange: (_value: string) => void
   field: Field
 }
 

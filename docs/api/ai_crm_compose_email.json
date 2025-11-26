@@ -1,0 +1,50 @@
+{
+  "endpoint": "POST /ai/crm/compose-email",
+  "description": "Generate or refine an email draft using customer + interaction context.",
+  "request": {
+    "content_type": "application/json",
+    "body": {
+      "customer": {
+        "$ref": "../schemas/customer_reference.schema.json"
+      },
+      "interaction_context": {
+        "thread_id": "string",
+        "recent_messages": [
+          {
+            "role": "customer|agent",
+            "timestamp": "2025-11-13T09:42:00Z",
+            "text": "string"
+          }
+        ]
+      },
+      "intent": {
+        "type": "reply|follow-up|proposal|escalation",
+        "language": "de-DE",
+        "tone": "formal|friendly|urgent",
+        "constraints": ["max 250 words", "mention SLA"]
+      },
+      "draft": {
+        "subject": "optional existing subject",
+        "body": "optional body to rewrite"
+      },
+      "attachments": [
+        { "id": "doc-123", "filename": "offer.pdf" }
+      ]
+    }
+  },
+  "response": {
+    "200": {
+      "content_type": "application/json",
+      "body": {
+        "subject": "string",
+        "body": "markdown/html text",
+        "highlights": ["bullet point summary"],
+        "follow_up_tasks": [
+          { "title": "Call customer", "due_at": "2025-11-14T08:00:00Z" }
+        ],
+        "tokens_used": 1234,
+        "safety_flags": []
+      }
+    }
+  }
+}

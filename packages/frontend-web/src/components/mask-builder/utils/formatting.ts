@@ -43,11 +43,11 @@ export function formatFileSize(bytes: number): string {
 
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text
-  return text.substring(0, maxLength) + '...'
+  return `${text.substring(0, maxLength)}...`
 }
 
 export function capitalizeFirst(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
+  return `${text.charAt(0).toUpperCase()}${text.slice(1).toLowerCase()}`
 }
 
 export function formatList(items: string[], maxItems = 3): string {

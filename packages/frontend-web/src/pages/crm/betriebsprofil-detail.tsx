@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,13 +14,17 @@ import { Save, Tractor, Plus, Minus, Loader2, ArrowLeft, MapPin } from 'lucide-r
 import { queryKeys } from '@/lib/query'
 import { crmService, type FarmProfile } from '@/lib/services/crm-service'
 import { useToast } from '@/components/ui/toast-provider'
+import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 
 export default function BetriebsprofilePage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams()
   const queryClient = useQueryClient()
   const toast = useToast()
   const isNew = !id || id === 'neu'
+  const entityType = 'account'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Betriebsprofil')
 
   const [farmProfile, setFarmProfile] = useState<Partial<FarmProfile>>({
     farmName: '',
@@ -37,8 +42,8 @@ export default function BetriebsprofilePage(): JSX.Element {
   })
 
   const { data, isLoading } = useQuery({
-    queryKey: queryKeys.crm.farmProfiles.detail(id!),
-    queryFn: () => crmService.getFarmProfile(id!),
+    queryKey: queryKeys.crm.farmProfiles.detail(id ?? ''),
+    queryFn: () => crmService.getFarmProfile(id ?? ''),
     enabled: !isNew && !!id,
   })
 
@@ -51,26 +56,26 @@ export default function BetriebsprofilePage(): JSX.Element {
   const createMutation = useMutation({
     mutationFn: (data: Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>) => crmService.createFarmProfile(data),
     onSuccess: () => {
-      toast.push('Betriebsprofil erfolgreich erstellt')
+      toast.push(getSuccessMessage(t, 'create', entityType))
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.farmProfiles.all })
       navigate('/crm/betriebsprofile')
     },
     onError: (error) => {
-      toast.push('Fehler beim Erstellen des Betriebsprofils')
+      toast.push(getErrorMessage(t, 'create', entityType))
       console.error('Create error:', error)
     },
   })
 
   const updateMutation = useMutation({
     mutationFn: (data: Partial<Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>>) =>
-      crmService.updateFarmProfile(id!, data),
+      crmService.updateFarmProfile(id ?? '', data),
     onSuccess: () => {
-      toast.push('Betriebsprofil erfolgreich aktualisiert')
-      queryClient.invalidateQueries({ queryKey: queryKeys.crm.farmProfiles.detail(id!) })
+      toast.push(getSuccessMessage(t, 'update', entityType))
+      queryClient.invalidateQueries({ queryKey: queryKeys.crm.farmProfiles.detail(id ?? '') })
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.farmProfiles.all })
     },
     onError: (error) => {
-      toast.push('Fehler beim Aktualisieren des Betriebsprofils')
+      toast.push(getErrorMessage(t, 'update', entityType))
       console.error('Update error:', error)
     },
   })
@@ -139,10 +144,14 @@ export default function BetriebsprofilePage(): JSX.Element {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Lade Betriebsprofil...</span>
+        <span className="ml-2">{t('crud.list.loading', { entityType: entityTypeLabel })}</span>
       </div>
     )
   }
+
+  const pageTitle = isNew 
+    ? `${t('crud.actions.create')} ${entityTypeLabel}`
+    : getDetailTitle(t, entityTypeLabel, farmProfile.farmName || entityTypeLabel)
 
   return (
     <div className="space-y-6 p-6">
@@ -151,24 +160,22 @@ export default function BetriebsprofilePage(): JSX.Element {
           {!isNew && (
             <Button variant="outline" size="sm" onClick={() => navigate('/crm/betriebsprofile')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Zurück
+              {t('common.back')}
             </Button>
           )}
           <div className="flex items-center gap-3">
             <Tractor className="h-8 w-8 text-green-600" />
             <div>
-              <h1 className="text-3xl font-bold">
-                {isNew ? 'Neues Betriebsprofil' : farmProfile.farmName || 'Betriebsprofil'}
-              </h1>
+              <h1 className="text-3xl font-bold">{pageTitle}</h1>
               <p className="text-muted-foreground">
-                {isNew ? 'Erstellen Sie ein neues Betriebsprofil' : `Inhaber: ${farmProfile.owner || 'Nicht angegeben'}`}
+                {isNew ? t('crud.detail.createNew', { entityType: entityTypeLabel }) : `${t('crud.fields.owner')}: ${farmProfile.owner || t('common.notSpecified')}`}
               </p>
             </div>
           </div>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => navigate('/crm/betriebsprofile')}>
-            Abbrechen
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={handleSave}
@@ -179,54 +186,54 @@ export default function BetriebsprofilePage(): JSX.Element {
               <Loader2 className="h-4 w-4 animate-spin" />
             )}
             <Save className="h-4 w-4" />
-            {isNew ? 'Erstellen' : 'Speichern'}
+            {isNew ? t('crud.actions.create') : t('crud.actions.save')}
           </Button>
         </div>
       </div>
 
       <Tabs defaultValue="allgemein" className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="allgemein">Allgemein</TabsTrigger>
-          <TabsTrigger value="kulturen">Kulturen</TabsTrigger>
-          <TabsTrigger value="tiere">Tierbestand</TabsTrigger>
-          <TabsTrigger value="standort">Standort</TabsTrigger>
-          <TabsTrigger value="zertifizierungen">Zertifizierungen</TabsTrigger>
+          <TabsTrigger value="allgemein">{t('crud.tabs.general')}</TabsTrigger>
+          <TabsTrigger value="kulturen">{t('crud.fields.crops')}</TabsTrigger>
+          <TabsTrigger value="tiere">{t('crud.fields.livestock')}</TabsTrigger>
+          <TabsTrigger value="standort">{t('crud.fields.location')}</TabsTrigger>
+          <TabsTrigger value="zertifizierungen">{t('crud.fields.certifications')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="allgemein">
           <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Grunddaten</CardTitle>
+                <CardTitle>{t('crud.tabs.basicData')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="farmName">Betriebsname *</Label>
+                  <Label htmlFor="farmName">{t('crud.fields.farmName')} *</Label>
                   <Input
                     id="farmName"
                     value={farmProfile.farmName || ''}
                     onChange={(e) => updateField('farmName', e.target.value)}
-                    placeholder="z.B. Hof Schmidt GmbH"
+                    placeholder={t('crud.tooltips.placeholders.farmNameExample')}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="owner">Inhaber *</Label>
+                  <Label htmlFor="owner">{t('crud.fields.owner')} *</Label>
                   <Input
                     id="owner"
                     value={farmProfile.owner || ''}
                     onChange={(e) => updateField('owner', e.target.value)}
-                    placeholder="z.B. Hermann Schmidt"
+                    placeholder={t('crud.tooltips.placeholders.ownerExample')}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="totalArea">Gesamtfläche (ha) *</Label>
+                  <Label htmlFor="totalArea">{t('crud.fields.totalArea')} ({t('crud.fields.hectares')}) *</Label>
                   <Input
                     id="totalArea"
                     type="number"
                     step="0.01"
                     value={farmProfile.totalArea || ''}
                     onChange={(e) => updateField('totalArea', parseFloat(e.target.value) || 0)}
-                    placeholder="z.B. 250.5"
+                    placeholder={t('crud.tooltips.placeholders.areaExample')}
                   />
                 </div>
               </CardContent>
@@ -234,13 +241,13 @@ export default function BetriebsprofilePage(): JSX.Element {
 
             <Card>
               <CardHeader>
-                <CardTitle>Notizen</CardTitle>
+                <CardTitle>{t('crud.fields.notes')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Textarea
                   value={farmProfile.notes || ''}
                   onChange={(e) => updateField('notes', e.target.value)}
-                  placeholder="Zusätzliche Informationen zum Betrieb..."
+                  placeholder={t('crud.tooltips.placeholders.farmNotes')}
                   rows={6}
                 />
               </CardContent>
@@ -251,10 +258,10 @@ export default function BetriebsprofilePage(): JSX.Element {
         <TabsContent value="kulturen">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Anbauflächen</CardTitle>
+              <CardTitle>{t('crud.fields.cropAreas')}</CardTitle>
               <Button onClick={addCrop} size="sm" className="gap-2">
                 <Plus className="h-4 w-4" />
-                Kultur hinzufügen
+                {t('crud.actions.addCrop')}
               </Button>
             </CardHeader>
             <CardContent>
@@ -262,15 +269,15 @@ export default function BetriebsprofilePage(): JSX.Element {
                 {farmProfile.crops?.map((crop, index) => (
                   <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
                     <div className="flex-1">
-                      <Label>Kultur</Label>
+                      <Label>{t('crud.fields.crop')}</Label>
                       <Input
                         value={crop.crop}
                         onChange={(e) => updateCrop(index, 'crop', e.target.value)}
-                        placeholder="z.B. Weizen"
+                        placeholder={t('crud.tooltips.placeholders.cropExample')}
                       />
                     </div>
                     <div className="w-32">
-                      <Label>Fläche (ha)</Label>
+                      <Label>{t('crud.fields.area')} ({t('crud.fields.hectares')})</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -292,12 +299,12 @@ export default function BetriebsprofilePage(): JSX.Element {
 
                 <div className="mt-6 p-4 bg-muted rounded-lg">
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold">Gesamtfläche Anbau:</span>
-                    <span className="text-lg font-bold">{totalCropArea.toFixed(2)} ha</span>
+                    <span className="font-semibold">{t('crud.fields.totalCropArea')}:</span>
+                    <span className="text-lg font-bold">{totalCropArea.toFixed(2)} {t('crud.fields.hectares')}</span>
                   </div>
                   {farmProfile.totalArea && totalCropArea > farmProfile.totalArea && (
                     <p className="text-sm text-red-600 mt-2">
-                      ⚠️ Anbaufläche überschreitet Gesamtfläche des Betriebs
+                      ⚠️ {t('crud.messages.cropAreaExceedsTotal')}
                     </p>
                   )}
                 </div>
@@ -309,10 +316,10 @@ export default function BetriebsprofilePage(): JSX.Element {
         <TabsContent value="tiere">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Tierbestand</CardTitle>
+              <CardTitle>{t('crud.fields.livestock')}</CardTitle>
               <Button onClick={addLivestock} size="sm" className="gap-2">
                 <Plus className="h-4 w-4" />
-                Tierart hinzufügen
+                {t('crud.actions.addLivestockType')}
               </Button>
             </CardHeader>
             <CardContent>
@@ -320,28 +327,28 @@ export default function BetriebsprofilePage(): JSX.Element {
                 {farmProfile.livestock?.map((animal, index) => (
                   <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
                     <div className="flex-1">
-                      <Label>Tierart</Label>
+                      <Label>{t('crud.fields.animalType')}</Label>
                       <Select
                         value={animal.type}
                         onValueChange={(value) => updateLivestock(index, 'type', value)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Tierart auswählen" />
+                          <SelectValue placeholder={t('crud.tooltips.placeholders.selectAnimalType')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Milchkühe">Milchkühe</SelectItem>
-                          <SelectItem value="Mastbullen">Mastbullen</SelectItem>
-                          <SelectItem value="Kälber">Kälber</SelectItem>
-                          <SelectItem value="Schweine">Schweine</SelectItem>
-                          <SelectItem value="Schafe">Schafe</SelectItem>
-                          <SelectItem value="Geflügel">Geflügel</SelectItem>
-                          <SelectItem value="Pferde">Pferde</SelectItem>
-                          <SelectItem value="Sonstige">Sonstige</SelectItem>
+                          <SelectItem value="Milchkühe">{t('livestock.dairyCows')}</SelectItem>
+                          <SelectItem value="Mastbullen">{t('livestock.beefCattle')}</SelectItem>
+                          <SelectItem value="Kälber">{t('livestock.calves')}</SelectItem>
+                          <SelectItem value="Schweine">{t('livestock.pigs')}</SelectItem>
+                          <SelectItem value="Schafe">{t('livestock.sheep')}</SelectItem>
+                          <SelectItem value="Geflügel">{t('livestock.poultry')}</SelectItem>
+                          <SelectItem value="Pferde">{t('livestock.horses')}</SelectItem>
+                          <SelectItem value="Sonstige">{t('common.other')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="w-32">
-                      <Label>Anzahl</Label>
+                      <Label>{t('crud.fields.count')}</Label>
                       <Input
                         type="number"
                         value={animal.count || ''}
@@ -362,9 +369,9 @@ export default function BetriebsprofilePage(): JSX.Element {
 
                 <div className="mt-6 p-4 bg-muted rounded-lg">
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold">Gesamt Viehbestand:</span>
+                    <span className="font-semibold">{t('crud.fields.totalLivestock')}:</span>
                     <span className="text-lg font-bold">
-                      {farmProfile.livestock?.reduce((sum, animal) => sum + (animal.count || 0), 0) || 0} Tiere
+                      {farmProfile.livestock?.reduce((sum, animal) => sum + (animal.count || 0), 0) || 0} {t('crud.fields.animals')}
                     </span>
                   </div>
                 </div>
@@ -378,12 +385,12 @@ export default function BetriebsprofilePage(): JSX.Element {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5" />
-                Standort & Geodaten
+                {t('crud.fields.locationAndGeodata')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="address">Adresse</Label>
+                <Label htmlFor="address">{t('crud.fields.address')}</Label>
                 <Textarea
                   id="address"
                   value={farmProfile.location?.address || ''}

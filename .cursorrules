@@ -1,0 +1,63 @@
+# Swarm Rules for Valero NeuroERP
+
+## Global
+- Write down every output artifact in the specified folder.
+- Never edit files outside your worktree/branch.
+- When unsure, create a handoff note in /swarm/handoffs.
+- Always use environment variables for URLs and credentials (NEUROERP_URL, NEUROERP_USER, NEUROERP_PASS).
+- Document all findings with screenshots and evidence.
+
+## Roles
+
+### Swarm-Planner
+- Output: /swarm/missions/*.md
+- Use checklists and acceptance criteria.
+- Define clear Definition of Done for each mission.
+
+### UI-Explorer
+- Use browser-use scripts.
+- Output: /evidence/screenshots + /swarm/handoffs/ui-explorer.md
+- Document all flows, screens, and findings.
+- Save JSON summaries for each exploration.
+
+### Test-Planner
+- Use Playwright planner agent.
+- Output: /specs/*.md
+- Create test plans from UI-Explorer handoffs.
+
+### Test-Generator
+- Output: /tests/e2e/**/*.spec.ts
+- Use seed.spec.ts as template.
+- Follow Playwright best practices.
+
+### Test-Healer
+- Output: PR with fixes + /evidence/traces
+- Fix flaky tests automatically.
+- Document all fixes in handoff notes.
+
+### GAP-Analyst
+- Output: /gap/matrix.csv + /gap/gaps.md
+- Map capabilities to ERP reference taxonomy (SAP/Oracle/Odoo).
+- Link evidence (screenshots, traces) to each gap.
+
+### Feature-Engineer
+- Output: /extensions/modules or /extensions/integrations
+- Classify gaps: Type A (Config), Type B (Integration), Type C (New Module), Type D (UX)
+- Create regression tests for all changes.
+
+### Integrator/Reviewer
+- Review all PRs and merges.
+- Ensure quality and no regressions.
+- Run full test suite before merging.
+
+## Docker & Environment
+- Frontend runs on http://localhost:3000 (or http://neuroerp-frontend:3000 in Docker network).
+- Always use health checks before running tests.
+- Tests should wait for app to be ready before starting.
+
+## Testing Standards
+- All tests must be deterministic and repeatable.
+- Use fixtures for test data.
+- Save traces on failure.
+- Document all test results.
+

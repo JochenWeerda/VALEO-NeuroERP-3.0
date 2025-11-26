@@ -7,6 +7,8 @@ from fastapi import APIRouter, HTTPException
 from typing import Literal
 import hashlib
 import logging
+from app.repositories.document_repository import DocumentRepository
+from app.core.dependency_container import container
 
 logger = logging.getLogger(__name__)
 
@@ -27,31 +29,48 @@ async def verify_document(
 ):
     """
     Public endpoint for document verification via QR code
-    
+
     Args:
         domain: Document type
         number: Document number
         hash: SHA256 hash (first 16 chars)
-    
+
     Returns:
         Verification result with document metadata
     """
     try:
-        # TODO: Fetch document from database
-        # For now, mock response
-        
-        # In production: Calculate hash from actual document
-        # expected_hash = calculate_hash(domain, number, document.content)
-        
-        # Mock verification (always valid for demo)
-        is_valid = True  # expected_hash == hash
-        
+        # Get DocumentRepository from container
+        doc_repo = container.resolve(DocumentRepository)
+
+        # Fetch document from database
+        doc_header = doc_repo.get_by_number(domain, number)
+        if not doc_header:
+            return {
+                "valid": False,
+                "domain": domain,
+                "number": number,
+                "status": "not_found",
+                "hash": hash,
+                "message": "Document not found"
+            }
+
+        # Convert to dict for hash calculation
+        doc_dict = doc_repo.to_dict(doc_header)
+
+        # Calculate hash from document content
+        # Use document data as content for hash calculation
+        import json
+        content = json.dumps(doc_dict, sort_keys=True)
+        expected_hash = calculate_hash(domain, number, content)
+
+        is_valid = expected_hash == hash
+
         return {
             "valid": is_valid,
             "domain": domain,
             "number": number,
-            "status": "posted" if is_valid else "unknown",
-            "date": "2025-10-09",
+            "status": doc_header.status,
+            "date": doc_header.date.isoformat() if doc_header.date else None,
             "hash": hash,
             "message": "Document is valid and authentic" if is_valid else "Document verification failed"
         }
@@ -68,25 +87,38 @@ async def verify_document_simple(
 ):
     """
     Simple verification without hash (checks if document exists)
-    
+
     Args:
         domain: Document type
         number: Document number
-    
+
     Returns:
         Document existence and basic metadata
     """
     try:
-        # TODO: Fetch document from database
-        
-        return {
-            "exists": True,
-            "domain": domain,
-            "number": number,
-            "status": "posted",
-            "date": "2025-10-09",
-            "message": "Document exists"
-        }
+        # Get DocumentRepository from container
+        doc_repo = container.resolve(DocumentRepository)
+
+        # Check if document exists
+        doc_header = doc_repo.get_by_number(domain, number)
+
+        if doc_header:
+            return {
+                "exists": True,
+                "domain": domain,
+                "number": number,
+                "status": doc_header.status,
+                "date": doc_header.date.isoformat() if doc_header.date else None,
+                "message": "Document exists"
+            }
+        else:
+            return {
+                "exists": False,
+                "domain": domain,
+                "number": number,
+                "status": "not_found",
+                "message": "Document not found"
+            }
     
     except Exception as e:
         logger.error(f"Verification failed: {e}")

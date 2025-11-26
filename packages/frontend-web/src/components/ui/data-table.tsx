@@ -10,21 +10,21 @@ export type ColumnRenderArgs<T> = {
 export type ColumnDef<T> = {
   accessorKey: keyof T | string
   header: ReactNode
-  cell?: (args: ColumnRenderArgs<T>) => ReactNode
+  cell?: (_args: ColumnRenderArgs<T>) => ReactNode
   className?: string
 }
 
 export type LegacyColumnDef<T> = {
   key: keyof T | string
   label: string
-  render?: (item: T) => ReactNode
+  render?: (_item: T) => ReactNode
 }
 
 interface DataTableProps<T> {
   columns: ColumnDef<T>[] | LegacyColumnDef<T>[]
   data: T[]
   selectable?: boolean
-  onSelectionChange?: (selected: T[]) => void
+  onSelectionChange?: (_selected: T[]) => void
 }
 
 export function DataTable<T>({ columns, data, selectable, onSelectionChange }: DataTableProps<T>): JSX.Element {
@@ -43,7 +43,7 @@ export function DataTable<T>({ columns, data, selectable, onSelectionChange }: D
       return {
         accessorKey: col.key as string,
         header: col.label,
-        cell: col.render ? (args: ColumnRenderArgs<T>) => col.render?.(args.row.original) : undefined,
+        cell: col.render ? (_args: ColumnRenderArgs<T>) => col.render?.(_args.row.original) : undefined,
       }
     }
     return col

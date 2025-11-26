@@ -1,0 +1,48 @@
+{
+  "endpoint": "POST /ai/crm/next-best-actions",
+  "description": "Generate prioritised next steps for a customer, combining AI + predictive scores.",
+  "request": {
+    "body": {
+      "customer": { "$ref": "../schemas/customer_reference.schema.json" },
+      "context": {
+        "open_opportunities": [
+          { "id": "opp-1", "stage": "proposal", "amount": 25000, "probability": 0.54 }
+        ],
+        "open_tickets": [
+          { "id": "ticket-7", "priority": "high", "sla_due_at": "2025-11-13T15:00:00Z" }
+        ],
+        "recent_interactions": [
+          { "id": "int-1", "timestamp": "2025-11-12T13:00:00Z", "channel": "email", "summary": "Requested pricing" }
+        ],
+        "analytics": {
+          "lead_score": 0.78,
+          "churn_score": 0.21,
+          "clv": 54000
+        },
+        "business_goals": ["retain", "upsell", "resolve_ticket"]
+      }
+    }
+  },
+  "response": {
+    "200": {
+      "body": {
+        "actions": [
+          {
+            "title": "Call customer about delayed delivery",
+            "description": "Reference order #123, propose expedited shipping.",
+            "type": "call|email|task|meeting",
+            "priority": "high|medium|low",
+            "confidence": 0.87,
+            "due_at": "2025-11-13T16:00:00Z",
+            "linked_entities": [
+              { "type": "ticket", "id": "ticket-7" }
+            ]
+          }
+        ],
+        "explanations": [
+          "High churn risk due to three unresolved tickets in last month."
+        ]
+      }
+    }
+  }
+}

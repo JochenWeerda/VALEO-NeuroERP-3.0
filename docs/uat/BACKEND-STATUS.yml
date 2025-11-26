@@ -1,0 +1,50 @@
+# Backend-Verfügbarkeit pro Domain
+# Status: real (vollständig), partial (teilweise), mock (Frontend-Only)
+
+domains:
+  sales:
+    status: real
+    endpoints:
+      - /api/sales_order
+      - /api/sales_delivery
+      - /api/sales_invoice
+      - /api/lookup/customers
+      - /api/lookup/articles
+    note: "Phase O komplett implementiert"
+  
+  agrar:
+    status: partial
+    real:
+      - /api/agrar/psm
+    mock:
+      - /api/agrar/saatgut
+      - /api/agrar/duenger
+    note: "PSM vollständig, Saatgut/Dünger Frontend-Only"
+  
+  crm:
+    status: mock
+    note: "Frontend-Only, keine Backend-Persistenz. API-Dummy für Lookup."
+    endpoints: []
+  
+  finance:
+    status: partial
+    real:
+      - /api/finance/bookings
+    mock:
+      - /api/finance/datev-export
+      - /api/finance/sepa-export
+    note: "Buchungserfassung real, Exports sind Dummy/Mock"
+  
+  inventory:
+    status: real
+    endpoints:
+      - /api/articles
+      - /api/inventory/movements
+      - /api/inventory/stock
+    note: "Artikel & Lagerbewegungen vollständig"
+
+# Test-Strategie
+# - real: Voller CRUD-Test, Validierung, Persistenz
+# - partial: Nur real-Endpoints testen, Mock skippen oder als "Schaufenster" markieren
+# - mock: UI-Tests nur, keine Backend-Calls erwarten
+

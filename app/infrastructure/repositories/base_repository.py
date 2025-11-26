@@ -179,8 +179,8 @@ class BaseRepositoryImpl(Generic[T, TCreate, TUpdate]):
             logger.error(f"Error checking existence of {self.model_class.__name__} {id}: {e}")
             return False
 
-    async def count(self, tenant_id: str) -> int:
-        """Count entities for tenant."""
+    async def count(self, tenant_id: str, **kwargs) -> int:
+        """Count entities for tenant with optional filtering."""
         try:
             query = self.session.query(self.model_class).filter(
                 self.model_class.is_active == True
@@ -189,6 +189,10 @@ class BaseRepositoryImpl(Generic[T, TCreate, TUpdate]):
             # Add tenant filter if model supports it
             if hasattr(self.model_class, 'tenant_id'):
                 query = query.filter(self.model_class.tenant_id == tenant_id)
+
+            for key, value in kwargs.items():
+                if value is not None and hasattr(self.model_class, key):
+                    query = query.filter(getattr(self.model_class, key).ilike(f"%{value}%"))
 
             return query.count()
         except SQLAlchemyError as e:

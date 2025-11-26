@@ -28,7 +28,7 @@ spec:
         - name: auth-check
     
     # Finance Service
-    - match: Host(`api.valeo-erp.com`) && PathPrefix(`/api/v1/finance`)
+    - match: Host(`api.valeo-erp.com`) && PathPrefix(`/api/v1`)
       kind: Rule
       services:
         - name: finance-service

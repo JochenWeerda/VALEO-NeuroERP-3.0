@@ -33,35 +33,35 @@ export declare const AmendmentResponseSchema: z.ZodObject<{
     updatedAt: z.ZodString;
     version: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
+    status: "Cancelled" | "Pending" | "Approved" | "Rejected";
     type: "QtyChange" | "WindowChange" | "PriceRuleChange" | "CounterpartyChange" | "DeliveryTermsChange" | "Other";
-    reason: string;
-    changes: Record<string, any>;
-    status: "Pending" | "Approved" | "Rejected" | "Cancelled";
     id: string;
-    contractId: string;
     tenantId: string;
     createdAt: string;
     updatedAt: string;
     version: number;
-    notes?: string | undefined;
+    contractId: string;
+    reason: string;
+    changes: Record<string, any>;
     approvedBy?: string | undefined;
     approvedAt?: string | undefined;
     effectiveAt?: string | undefined;
+    notes?: string | undefined;
 }, {
+    status: "Cancelled" | "Pending" | "Approved" | "Rejected";
     type: "QtyChange" | "WindowChange" | "PriceRuleChange" | "CounterpartyChange" | "DeliveryTermsChange" | "Other";
-    reason: string;
-    changes: Record<string, any>;
-    status: "Pending" | "Approved" | "Rejected" | "Cancelled";
     id: string;
-    contractId: string;
     tenantId: string;
     createdAt: string;
     updatedAt: string;
     version: number;
-    notes?: string | undefined;
+    contractId: string;
+    reason: string;
+    changes: Record<string, any>;
     approvedBy?: string | undefined;
     approvedAt?: string | undefined;
     effectiveAt?: string | undefined;
+    notes?: string | undefined;
 }>;
 export declare const ApproveAmendmentSchema: z.ZodObject<{
     notes: z.ZodOptional<z.ZodString>;

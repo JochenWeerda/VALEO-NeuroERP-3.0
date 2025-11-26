@@ -46,7 +46,11 @@ class Customer(Base):
     # Sales data
     last_order_date = Column(DateTime(timezone=True))
     total_revenue = Column(DECIMAL(15, 2), default=0)
-    customer_segment = Column(String(20), default="C")
+    customer_segment = Column(String(20), default="C")  # Bestehend, wird zu analytics.segment gemappt
+    price_group = Column(String(50))  # NEU: sales.price_group
+    tax_category = Column(String(50))  # NEU: tax.category
+    # industry und region: Werden aus crm-core gemappt (bestehend)
+    # customer_price_list: Wird über customer.price_list_id verwaltet (bestehend)
 
     # Status
     status = Column(String(20), default="aktiv")

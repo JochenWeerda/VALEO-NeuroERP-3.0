@@ -12,7 +12,7 @@ import { WorklistConfig, WorklistItem } from './types'
 interface WorklistProps {
   config: WorklistConfig
   items: WorklistItem[]
-  onAction: (item: WorklistItem, action: string) => void
+  onAction: (_item: WorklistItem, _action: string) => void
   isLoading?: boolean
 }
 

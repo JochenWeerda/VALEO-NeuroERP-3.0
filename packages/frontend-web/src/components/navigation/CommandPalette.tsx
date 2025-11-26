@@ -27,7 +27,7 @@ import { useFeature } from '@/hooks/useFeature'
 
 interface CommandPaletteProps {
   open: boolean
-  onOpenChange: (open: boolean) => void
+  onOpenChange: (_open: boolean) => void
 }
 
 interface PaletteCommand {

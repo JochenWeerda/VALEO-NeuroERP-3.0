@@ -40,6 +40,39 @@ services:
       retries: 3
       start_period: 40s
 
+  # Inventory Service (EPCIS)
+  inventory-service:
+    build:
+      context: ./services/inventory
+      dockerfile: Dockerfile
+    container_name: valeo-inventory
+    environment:
+      INVENTORY_DATABASE_URL: postgresql+asyncpg://valeo:${POSTGRES_PASSWORD}@postgres:5432/valeo_neuro_erp
+      INVENTORY_EVENT_BUS_ENABLED: "true"
+      INVENTORY_EVENT_BUS_URL: nats://nats:4222
+      INVENTORY_DEFAULT_TENANT: default
+      INVENTORY_TEAMS_WEBHOOK_URL: ${INVENTORY_TEAMS_WEBHOOK_URL:-}
+      INVENTORY_ESCALATION_EMAIL: ${INVENTORY_ESCALATION_EMAIL:-}
+      INVENTORY_RATE_LIMIT_PER_MINUTE: "600"
+      INVENTORY_NATS_FAILURE_THRESHOLD: "5"
+      INVENTORY_NATS_CIRCUIT_BREAKER_OPEN_SECONDS: "60"
+    ports:
+      - "5400:5400"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - valeo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5400/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   # PostgreSQL
   postgres:
     image: postgres:15-alpine

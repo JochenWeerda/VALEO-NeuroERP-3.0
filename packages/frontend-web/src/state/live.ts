@@ -10,11 +10,11 @@ type LiveState = {
   inventory: Record<string, InventoryEvent>
   policy: PolicyAlert[]
   workflow: Record<string, WorkflowEvent>
-  setSalesDoc: (d: SalesDoc) => void
-  setInventoryEvt: (e: InventoryEvent) => void
-  pushPolicy: (a: PolicyAlert) => void
-  sweepPolicy: (ttlMs: number) => void
-  setWorkflowEvent: (e: WorkflowEvent) => void
+  setSalesDoc: (_d: SalesDoc) => void
+  setInventoryEvt: (_e: InventoryEvent) => void
+  pushPolicy: (_a: PolicyAlert) => void
+  sweepPolicy: (_ttlMs: number) => void
+  setWorkflowEvent: (_e: WorkflowEvent) => void
 }
 
 const POLICY_HISTORY_LIMIT = 100
@@ -25,17 +25,17 @@ export const useLive = create<LiveState>((set) => ({
   policy: [],
   workflow: {},
   setSalesDoc: (doc: SalesDoc): void => {
-    set((state) => ({
+    set((_state) => ({
       sales: {
-        ...state.sales,
+        ..._state.sales,
         [doc.id]: doc,
       },
     }))
   },
   setInventoryEvt: (event: InventoryEvent): void => {
-    set((state) => ({
+    set((_state) => ({
       inventory: {
-        ...state.inventory,
+        ..._state.inventory,
         [event.sku]: event,
       },
     }))
@@ -51,15 +51,15 @@ export const useLive = create<LiveState>((set) => ({
       }
     })
   },
-  sweepPolicy: (ttlMs: number): void => {
-    set((state) => ({
-      policy: state.policy.filter((item) => Date.now() - item.ts < ttlMs),
+  sweepPolicy: (_ttlMs: number): void => {
+    set((_state) => ({
+      policy: _state.policy.filter((item) => Date.now() - item.ts < _ttlMs),
     }))
   },
   setWorkflowEvent: (event: WorkflowEvent): void => {
-    set((state) => ({
+    set((_state) => ({
       workflow: {
-        ...state.workflow,
+        ..._state.workflow,
         [`${event.domain}:${event.number}`]: event,
       },
     }))

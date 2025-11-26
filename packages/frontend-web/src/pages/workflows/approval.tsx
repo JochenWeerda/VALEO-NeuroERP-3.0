@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { BackButton } from '@/components/BackButton'
 import { 
   CheckCircle, XCircle, Loader2, AlertCircle, 
   Package, Euro, Clock 
@@ -91,18 +92,21 @@ export default function WorkflowApprovalPage(): JSX.Element {
             <h1 className="text-3xl font-bold">Bestellvorschlag freigeben</h1>
             <p className="text-muted-foreground">Workflow: {workflowId}</p>
           </div>
-          <Badge 
-            variant={
-              workflow.status === 'completed' ? 'default' :
-              workflow.status === 'rejected' ? 'destructive' :
-              'secondary'
-            }
-            className="text-lg px-4 py-2"
-          >
-            {workflow.status === 'pending_approval' && '⏳ Wartet auf Freigabe'}
-            {workflow.status === 'completed' && '✅ Genehmigt'}
-            {workflow.status === 'rejected' && '❌ Abgelehnt'}
-          </Badge>
+          <div className="flex gap-2 items-center">
+            <BackButton to="/workflows" label="Zurück zu Workflows" />
+            <Badge 
+              variant={
+                workflow.status === 'completed' ? 'default' :
+                workflow.status === 'rejected' ? 'destructive' :
+                'secondary'
+              }
+              className="text-lg px-4 py-2"
+            >
+              {workflow.status === 'pending_approval' && '⏳ Wartet auf Freigabe'}
+              {workflow.status === 'completed' && '✅ Genehmigt'}
+              {workflow.status === 'rejected' && '❌ Abgelehnt'}
+            </Badge>
+          </div>
         </div>
         
         {/* Proposal Details */}

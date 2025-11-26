@@ -15,7 +15,7 @@ import { WizardConfig, WizardStep, Field } from './types'
 
 interface WizardProps {
   config: WizardConfig
-  onComplete: (data: any) => void
+  onComplete: (_data: any) => void
   onCancel: () => void
   isLoading?: boolean
 }
@@ -201,7 +201,7 @@ const Wizard: React.FC<WizardProps> = ({
                   </div>
                 )
 
-              case 'select':
+              case 'select': {
                 const selectField = field as any
                 return (
                   <Select
@@ -220,6 +220,7 @@ const Wizard: React.FC<WizardProps> = ({
                     </SelectContent>
                   </Select>
                 )
+              }
 
               case 'date':
                 return (

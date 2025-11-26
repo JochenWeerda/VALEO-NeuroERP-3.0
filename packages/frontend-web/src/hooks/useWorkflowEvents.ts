@@ -120,10 +120,10 @@ interface WorkflowReplayResponse {
   events?: WorkflowEventPayload[]
 }
 
-export function useWorkflowReplay(): { replayEvents: (since?: number) => Promise<WorkflowEventPayload[]> } {
-  const replayEvents = async (since = 0): Promise<WorkflowEventPayload[]> => {
+export function useWorkflowReplay(): { replayEvents: (_since?: number) => Promise<WorkflowEventPayload[]> } {
+  const replayEvents = async (_since = 0): Promise<WorkflowEventPayload[]> => {
     try {
-      const response = await fetch(`/api/workflow/replay/workflow?since=${since}`)
+      const response = await fetch(`/api/workflow/replay/workflow?since=${_since}`)
       const data = (await response.json()) as WorkflowReplayResponse
 
       if (data.ok) {

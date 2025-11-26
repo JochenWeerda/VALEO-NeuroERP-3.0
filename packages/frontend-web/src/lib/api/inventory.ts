@@ -31,11 +31,27 @@ type PaginatedResponse<T> = {
   size: number
 }
 
+export type LotTrace = {
+  lot_id: string
+  sku: string
+  lot_number: string
+  transactions: Array<{
+    id: string
+    transaction_type: string
+    quantity: number
+    reference?: string | null
+    created_at: string
+    from_location_id?: string | null
+    to_location_id?: string | null
+  }>
+}
+
 // Query Keys
 export const inventoryKeys = {
   all: ['inventory'] as const,
   warehouses: () => [...inventoryKeys.all, 'warehouses'] as const,
   warehouse: (id: string) => [...inventoryKeys.warehouses(), id] as const,
+  lotTrace: (id?: string) => [...inventoryKeys.all, 'lot-trace', id] as const,
 }
 
 // Warehouse Hooks
@@ -47,7 +63,7 @@ export function useWarehouses(filters?: { is_active?: boolean }) {
       if (filters?.is_active !== undefined) params.append('is_active', String(filters.is_active))
       
       const response = await apiClient.get<PaginatedResponse<Warehouse>>(
-        `/api/v1/inventory/warehouses?${params}`
+        `/api/v1/inventory/warehouses?${String(params)}`
       )
       return response.data
     },
@@ -104,6 +120,18 @@ export function useDeleteWarehouse() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.warehouses() })
     },
+  })
+}
+
+export function useLotTrace(lotId?: string) {
+  return useQuery({
+    queryKey: inventoryKeys.lotTrace(lotId),
+    queryFn: async () => {
+      const response = await apiClient.get<LotTrace>(`/api/v1/inventory/lots/${lotId}`)
+      return response.data
+    },
+    enabled: Boolean(lotId),
+    staleTime: 30_000,
   })
 }
 

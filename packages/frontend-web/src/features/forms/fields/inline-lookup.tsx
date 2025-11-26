@@ -25,7 +25,7 @@ export function useDebounced<T>(value: T, delay: number = DEFAULT_DEBOUNCE_MS): 
 
 interface InlineArticleLookupProps {
   value: string
-  onPick: (item: ArticleLookupItem) => void
+  onPick: (_item: ArticleLookupItem) => void
 }
 
 interface ArticleLookupResponse {

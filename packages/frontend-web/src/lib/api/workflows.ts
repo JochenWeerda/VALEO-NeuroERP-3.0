@@ -39,7 +39,6 @@ export const workflowKeys = {
 }
 
 // Hooks
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useWorkflowStatus(workflowId: string) {
   return useQuery({
     queryKey: workflowKeys.status(workflowId),
@@ -61,12 +60,11 @@ export function useWorkflowStatus(workflowId: string) {
   })
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useTriggerWorkflow() {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: async (tenant_id: string = 'system') => {
+    mutationFn: async (tenant_id = 'system') => {
       const response = await apiClient.post('/api/v1/agents/bestellvorschlag/trigger', {
         tenant_id,
         parameters: {}
@@ -79,7 +77,6 @@ export function useTriggerWorkflow() {
   })
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useApproveWorkflow() {
   const queryClient = useQueryClient()
   

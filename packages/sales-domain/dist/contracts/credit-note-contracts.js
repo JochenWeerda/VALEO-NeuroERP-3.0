@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreditNoteListResponseContractSchema = exports.CreditNoteQueryContractSchema = exports.CreditNoteResponseContractSchema = exports.UpdateCreditNoteContractSchema = exports.CreateCreditNoteContractSchema = exports.CreditNoteStatusContractSchema = exports.CreditNoteLineContractSchema = void 0;
-const zod_1 = require("zod");
-const entities_1 = require("../domain/entities");
+var zod_1 = require("zod");
+var entities_1 = require("../domain/entities");
 // OpenAPI schema for Credit Note Line
 exports.CreditNoteLineContractSchema = entities_1.CreditNoteLineSchema.openapi({
     description: 'Credit note line item',
@@ -120,4 +120,3 @@ exports.CreditNoteListResponseContractSchema = zod_1.z.object({
 }).openapi({
     description: 'Paginated credit note list response'
 });
-//# sourceMappingURL=credit-note-contracts.js.map

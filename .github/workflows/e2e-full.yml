@@ -1,0 +1,116 @@
+name: E2E Full UAT Tests
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Täglich um 2 Uhr nachts
+  workflow_dispatch:
+
+jobs:
+  full-uat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
+      
+      - name: Setup Test Environment
+        run: |
+          cp .env.uat .env
+          echo "VALEO_TENANT=QA-UAT-01" >> .env
+          echo "VALEO_BASE_URL=http://localhost:3000" >> .env
+      
+      - name: Build Application
+        run: pnpm build
+      
+      - name: Start Backend (Background)
+        run: |
+          python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 10
+      
+      - name: Start Frontend (Background)
+        run: |
+          cd packages/frontend-web
+          pnpm preview --port 3000 &
+          sleep 10
+      
+      - name: Run Full UAT Tests
+        run: pnpm exec playwright test --project=full
+        env:
+          PLAYWRIGHT_RUN_ID: ${{ github.run_id }}-full
+          BUILD_ID: ${{ github.sha }}
+      
+      - name: Run Fallback Verification
+        run: pnpm exec playwright test --project=fallback-verification
+        env:
+          PLAYWRIGHT_RUN_ID: ${{ github.run_id }}-fallback
+          BUILD_ID: ${{ github.sha }}
+      
+      - name: Upload Full Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-uat-artifacts-${{ github.run_id }}
+          path: |
+            playwright-tests/artifacts/
+            playwright-report/
+          retention-days: 30
+      
+      - name: Upload Coverage Matrix
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-matrix-full
+          path: docs/uat/COVERAGE-MATRIX.csv
+          retention-days: 90
+      
+      - name: Upload Bug List
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bug-list
+          path: docs/uat/BUGLIST.json
+          retention-days: 90
+      
+      - name: Generate UAT Summary
+        if: always()
+        run: |
+          echo "# Full UAT Summary" > docs/uat/UAT-SUMMARY.md
+          echo "" >> docs/uat/UAT-SUMMARY.md
+          echo "**Run ID:** ${{ github.run_id }}" >> docs/uat/UAT-SUMMARY.md
+          echo "**Build:** ${{ github.sha }}" >> docs/uat/UAT-SUMMARY.md
+          echo "**Datum:** $(date -u)" >> docs/uat/UAT-SUMMARY.md
+          echo "" >> docs/uat/UAT-SUMMARY.md
+          echo "## KPIs" >> docs/uat/UAT-SUMMARY.md
+          echo "- Tests gesamt: TBD" >> docs/uat/UAT-SUMMARY.md
+          echo "- Bestanden: TBD" >> docs/uat/UAT-SUMMARY.md
+          echo "- Fehlgeschlagen: TBD" >> docs/uat/UAT-SUMMARY.md
+          echo "- Übersprungen: TBD" >> docs/uat/UAT-SUMMARY.md
+          echo "" >> docs/uat/UAT-SUMMARY.md
+          cat docs/uat/UAT-SUMMARY.md >> $GITHUB_STEP_SUMMARY
+      
+      - name: Upload Summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uat-summary
+          path: docs/uat/UAT-SUMMARY.md
+          retention-days: 90
+

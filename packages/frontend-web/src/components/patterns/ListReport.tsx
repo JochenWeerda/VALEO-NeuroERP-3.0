@@ -38,12 +38,12 @@ export interface ListReportProps<T> {
   
   // Filter & Suche
   searchPlaceholder?: string;
-  onSearch?: (query: string) => void;
+  onSearch?: (_query: string) => void;
   filterOptions?: FilterOption[];
   
   // Features
   selectable?: boolean;
-  onSelectionChange?: (selected: T[]) => void;
+  onSelectionChange?: (_selected: T[]) => void;
   
   // MCP
   mcpContext?: {

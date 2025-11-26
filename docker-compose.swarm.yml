@@ -1,0 +1,81 @@
+version: "3.9"
+
+services:
+  # Frontend (kann auch das bestehende Frontend nutzen, wenn es bereits läuft)
+  # Option 1: Eigenes Frontend für Swarm (empfohlen für isolierte Tests)
+  neuroerp-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: valeo-neuro-erp-frontend-swarm
+    restart: unless-stopped
+    working_dir: /app
+    command: >
+      sh -lc "npm install && npm run dev -- --host 0.0.0.0 --port 3000"
+    environment:
+      NODE_ENV: development
+      VITE_MCP_EVENTS_URL: http://localhost:5174/api/events?stream=mcp
+      VITE_BFF_PROXY: http://bff-web:4001
+      VITE_SSE_PROXY: http://localhost:5174
+      VITE_BACKEND_PROXY: http://backend:8000
+    ports:
+      - "3001:3000"  # Anderer Port, um Konflikte mit bestehendem Frontend zu vermeiden
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || wget -qO- http://localhost:3000/health.html || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    volumes:
+      - ./packages/frontend-web:/app
+      - frontend_node_modules:/app/node_modules
+    networks:
+      - swarm-network
+
+  # Playwright Tests
+  neuroerp-tests:
+    image: mcr.microsoft.com/playwright:v1.56.1-noble
+    container_name: valeo-neuro-erp-tests
+    working_dir: /work
+    volumes:
+      - ./:/work
+      - ./evidence/traces:/work/evidence/traces
+    environment:
+      - NEUROERP_URL=http://neuroerp-frontend:3000
+      - NEUROERP_USER=${NEUROERP_USER:-admin}
+      - NEUROERP_PASS=${NEUROERP_PASS:-admin123}
+    depends_on:
+      neuroerp-frontend:
+        condition: service_healthy
+    networks:
+      - swarm-network
+    command: ["npx", "playwright", "test"]
+
+  # UI Explorer (Browser-Use Agent)
+  neuroerp-ui-explorer:
+    build:
+      context: .
+      dockerfile: swarm/Dockerfile.ui-explorer
+    container_name: valeo-neuro-erp-ui-explorer
+    working_dir: /work
+    volumes:
+      - ./:/work
+      - ./evidence/screenshots:/work/evidence/screenshots
+    environment:
+      - NEUROERP_URL=http://neuroerp-frontend:3000
+      - NEUROERP_USER=${NEUROERP_USER:-admin}
+      - NEUROERP_PASS=${NEUROERP_PASS:-admin123}
+    depends_on:
+      neuroerp-frontend:
+        condition: service_healthy
+    networks:
+      - swarm-network
+    command: ["python", "swarm/ui_explorer.py"]
+
+volumes:
+  frontend_node_modules:
+
+networks:
+  swarm-network:
+    driver: bridge
+

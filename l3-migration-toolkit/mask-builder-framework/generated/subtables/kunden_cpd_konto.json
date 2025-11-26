@@ -1,0 +1,221 @@
+{
+  "$schema": "https://valeo-neuroerp.com/schemas/mask-builder/v3.1.0",
+  "meta": {
+    "name": "kunden_cpd_konto",
+    "description": "CPD-Konto für Kundenstamm",
+    "version": "3.1.0",
+    "author": "VALEO-NeuroERP Team",
+    "created": "2025-10-26",
+    "lastModified": "2025-10-26"
+  },
+  "resource": "kunden_cpd_konto",
+  "i18n": "de-DE",
+  "routing": {
+    "basePath": "/verkauf/kunden-stamm/kunden_cpd_konto",
+    "param": "id",
+    "listPath": "/{{MODULE}}/{{RESOURCE}}-liste"
+  },
+  "ui": {
+    "responsive": true,
+    "breakpoints": {
+      "sm": {
+        "columns": 1,
+        "nav": "bottom",
+        "useAccordions": true,
+        "stickyFooterActions": true,
+        "showQuickActions": true
+      },
+      "md": {
+        "columns": 2,
+        "nav": "side",
+        "useAccordions": false,
+        "stickyFooterActions": true,
+        "showQuickActions": true
+      },
+      "lg": {
+        "columns": 3,
+        "nav": "side",
+        "useAccordions": false,
+        "stickyFooterActions": false,
+        "showQuickActions": false
+      }
+    },
+    "touch": {
+      "minTargetSizePx": 44,
+      "swipeActions": true,
+      "hapticFeedback": true
+    },
+    "performance": {
+      "virtualLists": true,
+      "deferHeavyPanels": true,
+      "lazyLoadImages": true
+    },
+    "accessibility": {
+      "ariaLabels": true,
+      "keyboardShortcuts": true,
+      "focusManagement": true,
+      "reducedMotion": true
+    }
+  },
+  "ai": {
+    "enabled": true,
+    "intentBar": {
+      "shortcut": "Mod+k",
+      "placeholder": "Befehl oder Frage eingeben...",
+      "actions": []
+    },
+    "validators": [],
+    "ragPanels": {},
+    "mcp": {
+      "tools": []
+    },
+    "telemetry": {
+      "formFriction": true,
+      "autoFix": true,
+      "usageAnalytics": true
+    }
+  },
+  "layout": {
+    "header": {
+      "sticky": true,
+      "primary": [],
+      "secondary": [],
+      "actions": [
+        {
+          "id": "save",
+          "label": "Speichern",
+          "type": "primary",
+          "icon": "Save",
+          "shortcut": "Mod+s"
+        },
+        {
+          "id": "new",
+          "label": "Neu",
+          "type": "default",
+          "icon": "Plus",
+          "shortcut": "Mod+n"
+        },
+        {
+          "id": "duplicate",
+          "label": "Duplizieren",
+          "type": "default",
+          "icon": "Copy",
+          "shortcut": "Mod+d"
+        },
+        {
+          "id": "more",
+          "label": "Weitere",
+          "type": "menu",
+          "icon": "MoreVertical",
+          "items": [
+            "archive",
+            "delete",
+            "export",
+            "history",
+            "print"
+          ]
+        }
+      ]
+    },
+    "nav": [
+      {
+        "id": "main",
+        "label": "CPD-Konto",
+        "icon": "FileText"
+      }
+    ],
+    "footer": {
+      "show": true,
+      "showInfo": true,
+      "showValidationErrors": true
+    }
+  },
+  "views": [
+    {
+      "id": "main",
+      "label": "CPD-Konto",
+      "sections": [
+        {
+          "title": "CPD-Konto",
+          "grid": 3,
+          "fields": [
+            {
+              "comp": "String",
+              "bind": "debitoren_konto",
+              "label": "Debitoren-Konto"
+            },
+            {
+              "comp": "String",
+              "bind": "suchbegriff",
+              "label": "Suchbegriff"
+            },
+            {
+              "comp": "Text",
+              "bind": "rechnungsadresse",
+              "label": "Rechnungsadresse",
+              "span": 3
+            },
+            {
+              "comp": "String",
+              "bind": "geschaeftsstelle",
+              "label": "Geschäftsstelle"
+            },
+            {
+              "comp": "String",
+              "bind": "kostenstelle",
+              "label": "Kostenstelle"
+            },
+            {
+              "comp": "String",
+              "bind": "rechnungsart",
+              "label": "Rechnungsart"
+            },
+            {
+              "comp": "Boolean",
+              "bind": "sammelrechnung",
+              "label": "Sammelrechnung"
+            },
+            {
+              "comp": "String",
+              "bind": "rechnungsformular",
+              "label": "Rechnungsformular"
+            },
+            {
+              "comp": "String",
+              "bind": "vb",
+              "label": "VB"
+            },
+            {
+              "comp": "String",
+              "bind": "gebiet",
+              "label": "Gebiet"
+            },
+            {
+              "comp": "Text",
+              "bind": "zahlungsbedingungen",
+              "label": "Zahlungsbedingungen",
+              "span": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "subtables": {},
+  "validation": {
+    "rules": {},
+    "messages": {
+      "required": "Dieses Feld ist erforderlich",
+      "pattern": "Ungültiges Format",
+      "min": "Wert zu niedrig",
+      "max": "Wert zu hoch"
+    }
+  },
+  "behavior": {
+    "autoSave": false,
+    "draftMode": true,
+    "confirmDelete": true,
+    "confirmNavigation": true,
+    "showChangesSummary": true
+  }
+}

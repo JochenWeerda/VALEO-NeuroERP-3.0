@@ -21,6 +21,10 @@ from app.api.v1.endpoints import policies as policies_v1
 from app.core.logging import setup_logging
 from app.core.security import require_bearer_token
 from app.core.container_config import configure_container  # Import container configuration
+
+# Logger muss vor der Verwendung definiert werden
+logger = logging.getLogger(__name__)
+
 from app.policy.router import router as policy_router  # Policy Manager
 from app.auth.router import router as auth_router  # Authentication
 from app.documents.router import router as documents_router  # Documents & Flows
@@ -36,11 +40,30 @@ from app.routers.numbering_router import router as numbering_router  # Numbering
 from app.routers.admin_dms_router import router as admin_dms_router  # Admin DMS Integration
 from app.routers.dms_webhook_router import router as dms_webhook_router  # DMS Webhooks & Inbox
 from app.routers.fibu_router import router as fibu_router  # Finanzbuchhaltung (130 Masken)
+
+# Import domain-specific routers with error handling
+try:
+    from app.crm.router import router as crm_router  # CRM
+except ImportError:
+    crm_router = None
+    logger.warning("CRM router not available")
+
+try:
+    from app.finance.router import router as finance_router  # Finance (DATEV, SEPA)
+except ImportError:
+    finance_router = None
+    logger.warning("Finance router not available")
+
+try:
+    from app.einkauf.router import router as einkauf_router  # Einkauf/Beschaffung
+except ImportError:
+    einkauf_router = None
+    logger.warning("Einkauf router not available")
+
 from prometheus_client import make_asgi_app
 
 # Setup logging
 setup_logging()
-logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -81,7 +104,17 @@ app = FastAPI(
 )
 
 # Set up CORS
-if settings.BACKEND_CORS_ORIGINS:
+if settings.DEBUG:
+    # In dev: allow all origins to avoid local CORS blocks between 3000/8000
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_origin_regex=".*",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+elif settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
@@ -222,15 +255,30 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 app.include_router(policies_v1.router, prefix='/api/mcp')
 
 # Include Domain routers (Phase 1 - Service-Kernel)
-from app.domains.crm.api import router as crm_router
-from app.domains.inventory.api import router as inventory_router
-from app.domains.agrar.api import router as agrar_router
-from app.domains.finance.api import router as finance_router
+# CRM
+if crm_router:
+    app.include_router(crm_router, prefix="/api/v1", tags=["CRM"])
 
-app.include_router(crm_router, prefix="/api/v1/crm", tags=["CRM"])
-app.include_router(inventory_router, prefix="/api/v1/inventory", tags=["Inventory"])
-app.include_router(agrar_router, prefix="/api/v1/agrar", tags=["Agrar"])
-app.include_router(finance_router, prefix="/api/v1/finance", tags=["Finance"])
+# Finance (DATEV, SEPA)
+if finance_router:
+    app.include_router(finance_router, tags=["Finance"])
+
+# Einkauf/Beschaffung
+if einkauf_router:
+    app.include_router(einkauf_router, tags=["Einkauf"])
+
+# Legacy domain routers
+try:
+    from app.domains.inventory.api import router as inventory_router
+    app.include_router(inventory_router, prefix="/api/v1/inventory", tags=["Inventory"])
+except ImportError:
+    logger.warning("Inventory router not available")
+
+try:
+    from app.domains.agrar.api import router as agrar_router
+    app.include_router(agrar_router, prefix="/api/v1/agrar", tags=["Agrar"])
+except ImportError:
+    logger.warning("Agrar router not available")
 
 # Mount Prometheus metrics endpoint
 metrics_app = make_asgi_app()
@@ -313,5 +361,4 @@ if __name__ == "__main__":
         reload=settings.DEBUG,
         log_level="info"
     )
-
 

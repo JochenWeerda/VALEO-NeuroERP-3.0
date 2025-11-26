@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 
 // API Client für Anlieferavis
 const apiClient = createApiClient('/api/einkauf')
 
 // Konfiguration für Anlieferavis ListReport
-const anlieferavisConfig: ListConfig = {
+const createAnlieferavisConfig = (t: any): ListConfig => ({
   title: 'Anlieferavis',
   subtitle: 'Lieferavise für Wareneingangsvorbereitung',
   type: 'list-report',
@@ -40,13 +42,13 @@ const anlieferavisConfig: ListConfig = {
       sortable: true,
       filterable: true,
       render: (value) => {
-        const statusLabels = {
-          'GESENDET': { label: 'Gesendet', variant: 'secondary' as const },
-          'BESTAETIGT': { label: 'Bestätigt', variant: 'outline' as const },
-          'STORNIERT': { label: 'Storniert', variant: 'destructive' as const }
+        const statusLabel = getStatusLabel(t, (value as string).toLowerCase(), value as string)
+        const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
+          'GESENDET': 'secondary',
+          'BESTAETIGT': 'outline',
+          'STORNIERT': 'destructive'
         }
-        const status = statusLabels[value as keyof typeof statusLabels] || { label: value, variant: 'secondary' as const }
-        return <Badge variant={status.variant}>{status.label}</Badge>
+        return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
@@ -118,10 +120,12 @@ const anlieferavisConfig: ListConfig = {
   },
   permissions: ['einkauf.read', 'einkauf.write', 'warehouse.read'],
   actions: []
-}
+})
 
 export default function AnlieferavisListePage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
+  const anlieferavisConfig = createAnlieferavisConfig(t)
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)

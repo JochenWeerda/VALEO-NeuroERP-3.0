@@ -1,0 +1,194 @@
+{
+  "$schema": "https://valeo-neuroerp.com/schemas/mask-builder/v3.1.0",
+  "meta": {
+    "name": "kunden_rabatte_detail",
+    "description": "Rabatte Detail für Kundenstamm",
+    "version": "3.1.0",
+    "author": "VALEO-NeuroERP Team",
+    "created": "2025-10-26",
+    "lastModified": "2025-10-26"
+  },
+  "resource": "kunden_rabatte_detail",
+  "i18n": "de-DE",
+  "routing": {
+    "basePath": "/verkauf/kunden-stamm/kunden_rabatte_detail",
+    "param": "id",
+    "listPath": "/{{MODULE}}/{{RESOURCE}}-liste"
+  },
+  "ui": {
+    "responsive": true,
+    "breakpoints": {
+      "sm": {
+        "columns": 1,
+        "nav": "bottom",
+        "useAccordions": true,
+        "stickyFooterActions": true,
+        "showQuickActions": true
+      },
+      "md": {
+        "columns": 2,
+        "nav": "side",
+        "useAccordions": false,
+        "stickyFooterActions": true,
+        "showQuickActions": true
+      },
+      "lg": {
+        "columns": 3,
+        "nav": "side",
+        "useAccordions": false,
+        "stickyFooterActions": false,
+        "showQuickActions": false
+      }
+    },
+    "touch": {
+      "minTargetSizePx": 44,
+      "swipeActions": true,
+      "hapticFeedback": true
+    },
+    "performance": {
+      "virtualLists": true,
+      "deferHeavyPanels": true,
+      "lazyLoadImages": true
+    },
+    "accessibility": {
+      "ariaLabels": true,
+      "keyboardShortcuts": true,
+      "focusManagement": true,
+      "reducedMotion": true
+    }
+  },
+  "ai": {
+    "enabled": true,
+    "intentBar": {
+      "shortcut": "Mod+k",
+      "placeholder": "Befehl oder Frage eingeben...",
+      "actions": []
+    },
+    "validators": [],
+    "ragPanels": {},
+    "mcp": {
+      "tools": []
+    },
+    "telemetry": {
+      "formFriction": true,
+      "autoFix": true,
+      "usageAnalytics": true
+    }
+  },
+  "layout": {
+    "header": {
+      "sticky": true,
+      "primary": [],
+      "secondary": [],
+      "actions": [
+        {
+          "id": "save",
+          "label": "Speichern",
+          "type": "primary",
+          "icon": "Save",
+          "shortcut": "Mod+s"
+        },
+        {
+          "id": "new",
+          "label": "Neu",
+          "type": "default",
+          "icon": "Plus",
+          "shortcut": "Mod+n"
+        },
+        {
+          "id": "duplicate",
+          "label": "Duplizieren",
+          "type": "default",
+          "icon": "Copy",
+          "shortcut": "Mod+d"
+        },
+        {
+          "id": "more",
+          "label": "Weitere",
+          "type": "menu",
+          "icon": "MoreVertical",
+          "items": [
+            "archive",
+            "delete",
+            "export",
+            "history",
+            "print"
+          ]
+        }
+      ]
+    },
+    "nav": [
+      {
+        "id": "main",
+        "label": "Rabatte Detail",
+        "icon": "FileText"
+      }
+    ],
+    "footer": {
+      "show": true,
+      "showInfo": true,
+      "showValidationErrors": true
+    }
+  },
+  "views": [
+    {
+      "id": "main",
+      "label": "Rabatte Detail",
+      "sections": [
+        {
+          "title": "Rabatte Detail",
+          "grid": 3,
+          "fields": [
+            {
+              "comp": "Lookup",
+              "bind": "artikel_nr",
+              "label": "Artikel-Nr."
+            },
+            {
+              "comp": "String",
+              "bind": "bezeichnung",
+              "label": "Bezeichnung"
+            },
+            {
+              "comp": "Number",
+              "bind": "rabatt",
+              "label": "Rabatt (%)"
+            },
+            {
+              "comp": "Date",
+              "bind": "rabatt_gueltig_bis",
+              "label": "Rabatt gültig bis"
+            },
+            {
+              "comp": "Lookup",
+              "bind": "rabatt_liste_id",
+              "label": "Rabatt-Liste"
+            },
+            {
+              "comp": "Boolean",
+              "bind": "rabatt_liste_speichern",
+              "label": "Rabatt-Liste speichern"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "subtables": {},
+  "validation": {
+    "rules": {},
+    "messages": {
+      "required": "Dieses Feld ist erforderlich",
+      "pattern": "Ungültiges Format",
+      "min": "Wert zu niedrig",
+      "max": "Wert zu hoch"
+    }
+  },
+  "behavior": {
+    "autoSave": false,
+    "draftMode": true,
+    "confirmDelete": true,
+    "confirmNavigation": true,
+    "showChangesSummary": true
+  }
+}

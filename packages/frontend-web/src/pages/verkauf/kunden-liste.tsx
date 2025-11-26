@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
-import { FileDown, Plus, Search, Users, Loader2, AlertCircle } from 'lucide-react'
+import { FileDown, Plus, Search, Users, Loader2, AlertCircle, FileText } from 'lucide-react'
 import { useCustomers } from '@/lib/api/crm'
+import { useListActions } from '@/hooks/useListActions'
 
 export default function KundenListePage(): JSX.Element {
   const navigate = useNavigate()
@@ -19,6 +20,20 @@ export default function KundenListePage(): JSX.Element {
   })
 
   const customers = data?.items ?? []
+  
+  const exportData = customers.map(c => ({
+    Kundennummer: c.customer_number,
+    Name: c.name,
+    Email: c.email || '-',
+    Telefon: c.phone || '-',
+    Zahlungsziel: `${c.payment_terms} Tage`,
+    Status: c.is_active ? 'Aktiv' : 'Inaktiv',
+  }))
+
+  const { handleExport, handlePrint } = useListActions({
+    data: exportData,
+    entityName: 'kunden',
+  })
   
   const columns = [
     {
@@ -151,9 +166,13 @@ export default function KundenListePage(): JSX.Element {
                 className="pl-10" 
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
+            </Button>
+            <Button variant="outline" className="gap-2" onClick={handlePrint}>
+              <FileText className="h-4 w-4" />
+              Drucken
             </Button>
           </div>
         </CardContent>

@@ -21,11 +21,14 @@ export type FieldType =
 export interface BaseField {
   name: string
   label: string
+  labelKey?: string // i18n-Key für Label
   type: FieldType
   required?: boolean
   readonly?: boolean
   placeholder?: string
+  placeholderKey?: string // i18n-Key für Placeholder
   helpText?: string
+  helpTextKey?: string // i18n-Key für Help-Text
   validation?: any
   defaultValue?: any
 }
@@ -45,7 +48,7 @@ export interface NumberField extends BaseField {
 
 export interface SelectField extends BaseField {
   type: 'select'
-  options: Array<{ value: string | number; label: string }>
+  options: Array<{ value: string | number; label: string; labelKey?: string }>
   multiple?: boolean
 }
 
@@ -90,7 +93,9 @@ export interface Action {
 
 export interface MaskConfig {
   title: string
+  titleKey?: string // i18n-Key für Titel
   subtitle?: string
+  subtitleKey?: string // i18n-Key für Untertitel
   type: MaskType
   tabs: Tab[]
   actions: Action[]
@@ -120,22 +125,23 @@ export interface WizardStep {
 export interface WizardConfig extends Omit<MaskConfig, 'tabs' | 'type'> {
   type: 'wizard'
   steps: WizardStep[]
-  onComplete: (data: any) => void
+  onComplete: (_data: any) => void
 }
 
 export interface ListColumn {
   key: string
   label: string
+  labelKey?: string // i18n-Key für Label
   sortable?: boolean
   filterable?: boolean
-  render?: (value: any, row: any) => React.ReactNode
+  render?: (_value: any, _row: any) => React.ReactNode
 }
 
 export interface ListConfig extends Omit<MaskConfig, 'tabs' | 'type'> {
   type: 'list-report'
   columns: ListColumn[]
-  filters?: Field[]
-  bulkActions?: Action[]
+  filters?: Array<Field & { labelKey?: string; placeholderKey?: string }>
+  bulkActions?: Array<Action & { labelKey?: string }>
   defaultSort?: { field: string; direction: 'asc' | 'desc' }
   pageSize?: number
 }
@@ -156,13 +162,13 @@ export interface WorklistAction {
   label: string
   type?: 'primary' | 'secondary' | 'danger'
   icon?: string
-  condition: (item: WorklistItem) => boolean
-  onClick: (item: WorklistItem) => void
+  condition: (_item: WorklistItem) => boolean
+  onClick: (_item: WorklistItem) => void
 }
 
 export interface WorklistConfig extends Omit<MaskConfig, 'tabs' | 'actions' | 'type'> {
   type: 'worklist'
-  itemTemplate: (item: WorklistItem) => React.ReactNode
+  itemTemplate: (_item: WorklistItem) => React.ReactNode
   actions: WorklistAction[]
   filters?: Field[]
   groupBy?: string

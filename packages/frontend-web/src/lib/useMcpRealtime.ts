@@ -9,7 +9,7 @@ interface RealtimeOptions {
 
 export function useMcpRealtime(
   service: string,
-  handler: (event: McpRealtimeEvent) => void,
+  handler: (_event: McpRealtimeEvent) => void,
   options?: RealtimeOptions,
 ): void {
   const { enabled = true } = options ?? {}

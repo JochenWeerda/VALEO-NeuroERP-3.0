@@ -1,0 +1,88 @@
+version: "3.9"
+
+services:
+  # PostgreSQL für Guacamole
+  postgres:
+    image: postgres:14
+    container_name: l3-postgres
+    environment:
+      POSTGRES_USER: guacamole_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-GuacSecure2024!}
+      POSTGRES_DB: guacamole_db
+      TZ: Europe/Berlin
+    volumes:
+      - l3-pg-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      l3-network:
+        ipv4_address: 172.25.0.10
+
+  # Guacamole Daemon
+  guacd:
+    image: guacamole/guacd:latest
+    container_name: l3-guacd
+    restart: unless-stopped
+    networks:
+      l3-network:
+        ipv4_address: 172.25.0.11
+
+  # Guacamole Web-UI
+  guacamole:
+    image: guacamole/guacamole:latest
+    container_name: l3-guacamole
+    depends_on:
+      - postgres
+      - guacd
+    environment:
+      GUACD_HOSTNAME: l3-guacd
+      POSTGRESQL_HOSTNAME: l3-postgres
+      POSTGRESQL_DATABASE: guacamole_db
+      POSTGRESQL_USER: guacamole_user
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD:-GuacSecure2024!}
+      POSTGRESQL_AUTO_CREATE_ACCOUNTS: "true"
+      TZ: Europe/Berlin
+    ports:
+      - "8090:8080"   # Port 8090 (um Konflikte zu vermeiden)
+    restart: unless-stopped
+    networks:
+      l3-network:
+        ipv4_address: 172.25.0.12
+
+  # Webtop (Linux Desktop im Browser)
+  webtop:
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    container_name: l3-webtop
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+      - CUSTOM_USER=valeo
+      - PASSWORD=${WEBTOP_PASSWORD:-ValeoWebtop2024!}
+    volumes:
+      - l3-webtop-config:/config
+      - l3-screenshots:/config/screenshots
+      - ./shared:/shared  # Für Datenaustausch
+    ports:
+      - "3010:3000"   # Port 3010 (Frontend auf 3000, VALEO Backend auf 8000)
+    shm_size: "2gb"
+    restart: unless-stopped
+    networks:
+      l3-network:
+        ipv4_address: 172.25.0.13
+
+networks:
+  l3-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/24
+          gateway: 172.25.0.1
+
+volumes:
+  l3-pg-data:
+    name: l3-migration-postgres-data
+  l3-webtop-config:
+    name: l3-migration-webtop-config
+  l3-screenshots:
+    name: l3-migration-screenshots
+

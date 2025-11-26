@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 from ....infrastructure.repositories import UserRepository
 from ....core.dependency_container import container
+from ....auth.deps_oidc import get_current_user, User as OIDCUser
 from ..schemas.shared import (
     UserCreate, UserUpdate, User,
     UserLogin, TokenResponse, ChangePasswordRequest
@@ -52,7 +53,7 @@ async def create_user(
 
 @router.get("/me", response_model=User)
 async def get_current_user(
-    # TODO: Add authentication dependency
+    oidc_user: OIDCUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -60,13 +61,25 @@ async def get_current_user(
 
     Returns the profile information of the currently authenticated user.
     """
-    # TODO: Implement after authentication middleware
-    raise HTTPException(status_code=501, detail="Authentication not yet implemented")
+    try:
+        user_repo = container.resolve(UserRepository)
+
+        # Get user by ID (sub from OIDC token)
+        user = await user_repo.get_by_id(oidc_user["sub"], "system")  # TODO: Extract tenant from token
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        return User.model_validate(user)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve current user: {str(e)}")
 
 
 @router.get("/{user_id}", response_model=User)
 async def get_user(
     user_id: str,
+    oidc_user: OIDCUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -76,8 +89,11 @@ async def get_user(
     """
     try:
         user_repo = container.resolve(UserRepository)
-        # TODO: Add tenant context from authentication
-        user = await user_repo.get_by_id(user_id, "system")  # Temporary
+
+        # Extract tenant from OIDC claims (assuming tenant is in custom claims)
+        tenant_id = oidc_user.get("raw", {}).get("tenant_id", "system")
+
+        user = await user_repo.get_by_id(user_id, tenant_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         return User.model_validate(user)
@@ -92,6 +108,7 @@ async def list_users(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of items to return"),
+    oidc_user: OIDCUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -102,9 +119,8 @@ async def list_users(
     try:
         user_repo = container.resolve(UserRepository)
 
-        # Use provided tenant_id or default to system for now
-        # TODO: Get tenant from authenticated user context
-        effective_tenant_id = tenant_id or "system"
+        # Use provided tenant_id or extract from authenticated user
+        effective_tenant_id = tenant_id or oidc_user.get("raw", {}).get("tenant_id", "system")
 
         users = await user_repo.get_all(effective_tenant_id, skip, limit)
         total = await user_repo.count(effective_tenant_id)
@@ -126,6 +142,7 @@ async def list_users(
 async def update_user(
     user_id: str,
     user_data: UserUpdate,
+    oidc_user: OIDCUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -136,13 +153,16 @@ async def update_user(
     try:
         user_repo = container.resolve(UserRepository)
 
+        # Extract tenant from OIDC claims
+        tenant_id = oidc_user.get("raw", {}).get("tenant_id", "system")
+
         # Check for email conflicts if email is being updated
         if user_data.email:
-            existing = await user_repo.get_by_email(user_data.email, "system")  # TODO: tenant context
+            existing = await user_repo.get_by_email(user_data.email, tenant_id)
             if existing and existing.id != user_id:
                 raise HTTPException(status_code=400, detail="Email already exists")
 
-        user = await user_repo.update(user_id, user_data.model_dump(exclude_unset=True), "system")  # TODO: tenant context
+        user = await user_repo.update(user_id, user_data.model_dump(exclude_unset=True), tenant_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         return User.model_validate(user)
@@ -155,6 +175,7 @@ async def update_user(
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
     user_id: str,
+    oidc_user: OIDCUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -164,7 +185,11 @@ async def delete_user(
     """
     try:
         user_repo = container.resolve(UserRepository)
-        success = await user_repo.delete(user_id, "system")  # TODO: tenant context
+
+        # Extract tenant from OIDC claims
+        tenant_id = oidc_user.get("raw", {}).get("tenant_id", "system")
+
+        success = await user_repo.delete(user_id, tenant_id)
         if not success:
             raise HTTPException(status_code=404, detail="User not found")
     except HTTPException:
@@ -173,7 +198,7 @@ async def delete_user(
         raise HTTPException(status_code=500, detail=f"Failed to delete user: {str(e)}")
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=dict)
 async def login(
     login_data: UserLogin,
     db: Session = Depends(get_db)
@@ -181,22 +206,35 @@ async def login(
     """
     User login.
 
-    Authenticate a user and return access tokens.
+    Note: This system uses OIDC authentication. Direct login is handled by the OIDC provider.
+    This endpoint provides information about the authentication flow.
     """
-    # TODO: Implement authentication logic
-    raise HTTPException(status_code=501, detail="Authentication not yet implemented")
+    return {
+        "message": "OIDC Authentication Required",
+        "info": "This system uses OpenID Connect (OIDC) for authentication. Please use the OIDC provider login flow.",
+        "oidc_provider": "Keycloak",
+        "login_url": "/auth/login",  # Placeholder - actual URL would be configured
+        "status": "redirect_required"
+    }
 
 
 @router.post("/change-password")
 async def change_password(
     password_data: ChangePasswordRequest,
-    # TODO: Add current user dependency
+    oidc_user: OIDCUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     Change user password.
 
-    Allow authenticated users to change their password.
+    Note: Password changes are handled by the OIDC provider (Keycloak).
+    This endpoint provides information about the password change flow.
     """
-    # TODO: Implement password change logic
-    raise HTTPException(status_code=501, detail="Password change not yet implemented")
+    return {
+        "message": "OIDC Password Change Required",
+        "info": "Password changes must be performed through the OIDC provider (Keycloak) interface.",
+        "user_id": oidc_user["sub"],
+        "oidc_provider": "Keycloak",
+        "change_url": "/auth/account",  # Placeholder - actual URL would be configured
+        "status": "external_action_required"
+    }

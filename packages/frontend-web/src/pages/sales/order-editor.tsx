@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/components/ui/toast-provider"
 import { FormBuilder, type FormSchema } from "@/features/forms/FormBuilder"
@@ -6,6 +7,7 @@ import { BelegFlowPanel } from "@/features/flows/BelegFlowPanel"
 import { PolicyWarningBanner } from "@/features/forms/PolicyWarningBanner"
 import ApprovalPanel from "@/features/workflow/ApprovalPanel"
 import orderSchema from "@/domain-schemas/sales_order.schema.json"
+import { getEntityTypeLabel, getSuccessMessage, getErrorMessage, getStatusLabel } from "@/features/crud/utils/i18n-helpers"
 
 type SalesOrder = {
   number: string
@@ -28,7 +30,10 @@ type SalesOrder = {
 const ISO_DATE_LENGTH = 10
 
 export default function SalesOrderEditorPage(): JSX.Element {
+  const { t } = useTranslation()
   const { push } = useToast()
+  const entityType = 'salesOrder'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Verkaufsauftrag')
   const [order, setOrder] = useState<SalesOrder>({
     number: "SO-2025-0001",
     date: new Date().toISOString().slice(0, ISO_DATE_LENGTH),
@@ -50,9 +55,9 @@ export default function SalesOrderEditorPage(): JSX.Element {
         throw new Error("Save failed")
       }
 
-      push("✔ Auftrag gespeichert")
+      push(getSuccessMessage(t, 'update', entityType))
     } catch {
-      push("❌ Fehler beim Speichern")
+      push(getErrorMessage(t, 'update', entityType))
     }
   }
 
@@ -73,13 +78,16 @@ export default function SalesOrderEditorPage(): JSX.Element {
       }
 
       const data = (await response.json()) as { ok: boolean; number: string }
-
-      push(`✔ ${toType === "delivery" ? "Lieferschein" : "Rechnung"} erstellt: ${data.number}`)
+      const followUpTypeLabel = toType === "delivery" 
+        ? getEntityTypeLabel(t, 'delivery', 'Lieferschein')
+        : getEntityTypeLabel(t, 'invoice', 'Rechnung')
+      
+      push(`${getSuccessMessage(t, 'create', toType)}: ${data.number}`)
 
       // TODO: Navigate to new document
       // navigate(`/sales/${toType}/${data.number}`)
     } catch {
-      push("❌ Fehler beim Erstellen des Folgebelegs")
+      push(getErrorMessage(t, 'create', 'followUp'))
     }
   }
 
@@ -88,13 +96,13 @@ export default function SalesOrderEditorPage(): JSX.Element {
       <BelegFlowPanel
         current={{
           id: "1",
-          type: "Verkaufsauftrag",
+          type: entityTypeLabel,
           number: order.number,
-          status: "Entwurf",
+          status: t('status.draft'),
         }}
         nextTypes={[
-          { to: "delivery", label: "Lieferschein" },
-          { to: "invoice", label: "Rechnung" },
+          { to: "delivery", label: getEntityTypeLabel(t, 'delivery', 'Lieferschein') },
+          { to: "invoice", label: getEntityTypeLabel(t, 'invoice', 'Rechnung') },
         ]}
         onCreateFollowUp={createFollowUp}
       />
@@ -115,7 +123,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
             setOrder((o) => ({ ...o, ...p }))
           }}
           onSubmit={save}
-          submitLabel="Auftrag speichern"
+          submitLabel={`${t('crud.actions.save')} ${entityTypeLabel}`}
         />
       </Card>
     </div>

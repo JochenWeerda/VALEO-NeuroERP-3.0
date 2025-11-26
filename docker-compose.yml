@@ -9,8 +9,8 @@ services:
     environment:
       POSTGRES_DB: valeo_neuro_erp
       POSTGRES_USER: valeo_dev
-      POSTGRES_PASSWORD: valeo_dev_2024!
-      POSTGRES_ROOT_PASSWORD: valeo_root_2024!
+      POSTGRES_PASSWORD: valeo_dev_2024
+      POSTGRES_ROOT_PASSWORD: valeo_root_2024
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
@@ -57,10 +57,11 @@ services:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/valeo_neuro_erp
       KC_DB_USERNAME: valeo_dev
-      KC_DB_PASSWORD: valeo_dev_2024!
+      KC_DB_PASSWORD: valeo_dev_2024
       KC_HOSTNAME: localhost
       KC_HTTP_PORT: 8080
       KC_HTTPS_PORT: 8443
+      KC_HEALTH_ENABLED: "true"
     ports:
       - "8080:8080"
     depends_on:
@@ -77,6 +78,25 @@ services:
     command: start-dev
 
   # pgAdmin Database Management
+  # NATS Event Bus (shared)
+  nats:
+    image: nats:2.10-alpine
+    container_name: valeo-neuro-erp-nats
+    restart: unless-stopped
+    command:
+      - "--jetstream"
+      - "--http_port=8222"
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    networks:
+      - valeo-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   pgadmin:
     image: dpage/pgadmin4:7
     container_name: valeo-neuro-erp-pgadmin
@@ -113,6 +133,7 @@ services:
   bff-web:
     image: node:20
     container_name: valeo-neuro-erp-bff-web
+    restart: unless-stopped
     working_dir: /app/packages/bff/bff-web
     command: >
       sh -lc "npm install && npm run dev -- --host 0.0.0.0 --port 4001"
@@ -123,6 +144,12 @@ services:
       CHOKIDAR_USEPOLLING: "1"
     ports:
       - "4001:4001"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:4001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     volumes:
       - .:/app
       - bff_node_modules:/app/packages/bff/bff-web/node_modules
@@ -132,14 +159,21 @@ services:
   dev-sse:
     image: node:20
     container_name: valeo-neuro-erp-dev-sse
+    restart: unless-stopped
     working_dir: /app
     command: >
-      sh -lc "corepack enable && corepack prepare pnpm@9.12.0 --activate && pnpm install && pnpm exec tsx scripts/dev-sse-server.ts"
+      sh -lc "corepack enable && corepack prepare pnpm@9.12.0 --activate && if [ ! -d node_modules/.pnpm ]; then pnpm install; fi && node scripts/dev-sse-server.js"
     environment:
       NODE_ENV: development
       CHOKIDAR_USEPOLLING: "1"
     ports:
       - "5174:5174"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:5174/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     volumes:
       - .:/app
       - root_node_modules:/app/node_modules
@@ -148,28 +182,33 @@ services:
       - valeo-network
 
   frontend-web:
-    image: node:20
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
     container_name: valeo-neuro-erp-frontend
+    restart: unless-stopped
     working_dir: /app
     command: >
-      sh -lc "corepack enable && corepack prepare pnpm@9.12.0 --activate && pnpm install && pnpm --filter frontend-web dev -- --host 0.0.0.0 --port 3000"
+      sh -lc "npm install && npm run dev -- --host 0.0.0.0 --port 3000"
     environment:
       NODE_ENV: development
-      VITE_MCP_EVENTS_URL: http://dev-sse:5174/api/events?stream=mcp
+      VITE_MCP_EVENTS_URL: http://localhost:5174/api/events?stream=mcp
       VITE_BFF_PROXY: http://bff-web:4001
-      VITE_SSE_PROXY: http://dev-sse:5174
+      VITE_SSE_PROXY: http://localhost:5174
+      VITE_BACKEND_PROXY: http://backend:8000
+      VITE_ENABLE_PROSPECTING_UI: "true"
+      VITE_API_BASE_URL: http://localhost:8000
       CHOKIDAR_USEPOLLING: "1"
     ports:
       - "3000:3000"
     depends_on:
       bff-web:
-        condition: service_started
+        condition: service_healthy
       dev-sse:
-        condition: service_started
+        condition: service_healthy
     volumes:
-      - .:/app
-      - root_node_modules:/app/node_modules
-      - pnpm_store:/root/.local/share/pnpm/store
+      - ./packages/frontend-web:/app
+      - frontend_node_modules:/app/node_modules
     networks:
       - valeo-network
 
@@ -180,13 +219,19 @@ services:
     container_name: valeo-neuro-erp-backend
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024!@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp
       REDIS_URL: redis://redis:6379/0
       KEYCLOAK_URL: http://keycloak:8080
       API_DEV_TOKEN: dev-token
       AI_SERVICE_URL: http://ai:5000
       DEBUG: "true"
       LOG_LEVEL: INFO
+      CRM_CORE_BASE_URL: http://crm-core:5600
+      CRM_CORE_HTTP_TIMEOUT_SECONDS: 5
+      CRM_SALES_BASE_URL: http://crm-sales:5700
+      CRM_SALES_HTTP_TIMEOUT_SECONDS: 5
+      CRM_SERVICE_BASE_URL: http://crm-service:5800
+      CRM_SERVICE_HTTP_TIMEOUT_SECONDS: 5
     ports:
       - "8000:8000"
     depends_on:
@@ -201,6 +246,266 @@ services:
       - ./main.py:/app/main.py
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
+  inventory-service:
+    build:
+      context: ./services/inventory
+      dockerfile: Dockerfile
+    container_name: valeo-neuro-erp-inventory
+    restart: unless-stopped
+    environment:
+      INVENTORY_DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp
+      INVENTORY_DEBUG: "true"
+      INVENTORY_EVENT_BUS_ENABLED: "true"
+      INVENTORY_EVENT_BUS_URL: nats://nats:4222
+      INVENTORY_DEFAULT_TENANT: default
+      INVENTORY_TEAMS_WEBHOOK_URL: ""
+      INVENTORY_ESCALATION_EMAIL: ""
+      INVENTORY_RATE_LIMIT_PER_MINUTE: "600"
+      INVENTORY_NATS_FAILURE_THRESHOLD: "5"
+      INVENTORY_NATS_CIRCUIT_BREAKER_OPEN_SECONDS: "60"
+      INVENTORY_BACKEND_CORS_ORIGINS: '["http://localhost:3000","http://frontend-web:3000","http://bff-web:4001"]'
+    ports:
+      - "5400:5400"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+    networks:
+      - valeo-network
+
+  crm-core:
+    build:
+      context: ./services/crm-core
+      dockerfile: Dockerfile
+    # no container_name to preserve DNS service alias
+    restart: unless-stopped
+    environment:
+      CRM_CORE_DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp
+      CRM_CORE_DEBUG: "true"
+      CRM_CORE_DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
+      CRM_CORE_BACKEND_CORS_ORIGINS: '["http://localhost:3000","http://frontend-web:3000","http://bff-web:4001"]'
+    ports:
+      - "5600:5600"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      valeo-network:
+        aliases:
+          - crm-core
+          - valeo-crm-core
+
+  crm-sales:
+    build:
+      context: ./services/crm-sales
+      dockerfile: Dockerfile
+    container_name: valeo-neuro-erp-crm-sales
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024!@postgres:5432/valeo_neuro_erp
+      SERVICE_NAME: crm-sales
+      DEBUG: "true"
+      DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
+      CORS_ORIGINS: '["http://localhost:3000","http://frontend-web:3000","http://bff-web:4001"]'
+    ports:
+      - "5700:5700"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - valeo-network
+
+  crm-service:
+    build:
+      context: ./services/crm-service
+      dockerfile: Dockerfile
+    container_name: valeo-neuro-erp-crm-service
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024!@postgres:5432/valeo_neuro_erp
+      SERVICE_NAME: crm-service
+      DEBUG: "true"
+      DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
+      CORS_ORIGINS: '["http://localhost:3000","http://frontend-web:3000","http://bff-web:4001"]'
+    ports:
+      - "5800:5800"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - valeo-network
+
+  crm-workflow:
+    build:
+      context: ./services/crm-workflow
+      dockerfile: Dockerfile
+    container_name: valeo-neuro-erp-crm-workflow
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024!@postgres:5432/valeo_neuro_erp
+      REDIS_URL: redis://redis:6379/2
+      SERVICE_NAME: crm-workflow
+      DEBUG: "true"
+      DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
+      CORS_ORIGINS: '["http://localhost:3000","http://frontend-web:3000","http://bff-web:4001"]'
+      EVENT_BUS_ENABLED: "true"
+    ports:
+      - "5900:5900"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - valeo-network
+
+  crm-analytics:
+    build:
+      context: ./services/crm-analytics
+      dockerfile: Dockerfile
+    container_name: valeo-neuro-erp-crm-analytics
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024!@postgres:5432/valeo_neuro_erp
+      REDIS_URL: redis://redis:6379/4
+      SERVICE_NAME: crm-analytics
+      DEBUG: "true"
+      DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
+      CORS_ORIGINS: '["http://localhost:3000","http://frontend-web:3000","http://bff-web:4001"]'
+      CRM_CORE_BASE_URL: http://crm-core:5600
+      CRM_SALES_BASE_URL: http://crm-sales:5700
+      CRM_SERVICE_BASE_URL: http://crm-service:5800
+      CRM_WORKFLOW_BASE_URL: http://crm-workflow:5900
+    ports:
+      - "6000:6000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - valeo-network
+
+  crm-communication:
+    build:
+      context: ./services/crm-communication
+      dockerfile: Dockerfile
+    container_name: valeo-neuro-erp-crm-communication
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024!@postgres:5432/valeo_neuro_erp
+      REDIS_URL: redis://redis:6379/6
+      SERVICE_NAME: crm-communication
+      DEBUG: "true"
+      DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
+      CORS_ORIGINS: '["http://localhost:3000","http://frontend-web:3000","http://bff-web:4001"]'
+      SMTP_SERVER: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USE_TLS: "true"
+      CRM_CORE_BASE_URL: http://crm-core:5600
+      CRM_SALES_BASE_URL: http://crm-sales:5700
+      CRM_SERVICE_BASE_URL: http://crm-service:5800
+    ports:
+      - "6100:6100"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - valeo-network
+
+  crm-ai:
+    build:
+      context: ./services/crm-ai
+      dockerfile: Dockerfile
+    container_name: valeo-neuro-erp-crm-ai
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024!@postgres:5432/valeo_neuro_erp
+      REDIS_URL: redis://redis:6379/8
+      SERVICE_NAME: crm-ai
+      DEBUG: "true"
+      DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
+      CORS_ORIGINS: '["http://localhost:3000","http://frontend-web:3000","http://bff-web:4001"]'
+      CRM_CORE_BASE_URL: http://crm-core:5600
+      CRM_SALES_BASE_URL: http://crm-sales:5700
+      CRM_SERVICE_BASE_URL: http://crm-service:5800
+      CRM_ANALYTICS_BASE_URL: http://crm-analytics:6000
+      CRM_COMMUNICATION_BASE_URL: http://crm-communication:6100
+    ports:
+      - "6200:6200"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - valeo-network
+
+  crm-multichannel:
+    build:
+      context: ./services/crm-multichannel
+      dockerfile: Dockerfile
+    container_name: valeo-neuro-erp-crm-multichannel
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024!@postgres:5432/valeo_neuro_erp
+      REDIS_URL: redis://redis:6379/10
+      SERVICE_NAME: crm-multichannel
+      DEBUG: "true"
+      DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
+      CORS_ORIGINS: '["http://localhost:3000","http://frontend-web:3000","http://bff-web:4001"]'
+      CRM_CORE_BASE_URL: http://crm-core:5600
+      CRM_SALES_BASE_URL: http://crm-sales:5700
+      CRM_SERVICE_BASE_URL: http://crm-service:5800
+      CRM_COMMUNICATION_BASE_URL: http://crm-communication:6100
+      WEBHOOK_SECRET: dev-webhook-secret
+      FACEBOOK_APP_ID: ${FACEBOOK_APP_ID:-}
+      TWITTER_API_KEY: ${TWITTER_API_KEY:-}
+      SHOPIFY_API_KEY: ${SHOPIFY_API_KEY:-}
+    ports:
+      - "6300:6300"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - valeo-network
+
+  crm-security:
+    build:
+      context: ./services/crm-security
+      dockerfile: Dockerfile
+    container_name: valeo-neuro-erp-crm-security
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024!@postgres:5432/valeo_neuro_erp
+      REDIS_URL: redis://redis:6379/12
+      SERVICE_NAME: crm-security
+      DEBUG: "true"
+      DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
+      CORS_ORIGINS: '["http://localhost:3000","http://frontend-web:3000","http://bff-web:4001"]'
+      SECRET_KEY: dev-security-secret-key-change-in-production
+      ENCRYPTION_KEY: dev-encryption-key-32-chars-long
+      SECURITY_ALERT_EMAILS: '["security@company.com"]'
+      COMPLIANCE_REPORT_RECIPIENTS: '["compliance@company.com"]'
+      ALLOWED_HOSTS: '["*"]'
+      SSL_CERT_FILE: ""
+      SSL_KEY_FILE: ""
+      ENABLE_HTTPS: "false"
+    ports:
+      - "6400:6400"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - valeo-network
+
   ai:
     build:
       context: ./services/ai
@@ -208,7 +513,7 @@ services:
     container_name: valeo-neuro-erp-ai
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024!@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp
       REDIS_URL: redis://redis:6379/1
       BACKEND_API_URL: http://backend:8000/api/v1
       API_DEV_TOKEN: dev-token
@@ -239,6 +544,8 @@ volumes:
   pgadmin_data:
     driver: local
   root_node_modules:
+    driver: local
+  frontend_node_modules:
     driver: local
   pnpm_store:
     driver: local

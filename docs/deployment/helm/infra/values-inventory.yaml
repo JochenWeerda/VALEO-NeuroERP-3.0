@@ -1,0 +1,23 @@
+inventory:
+  enabled: true
+  image:
+    repository: ghcr.io/valeo-neuroerp/inventory
+    tag: latest
+  env:
+    INVENTORY_EVENT_BUS_ENABLED: "true"
+    INVENTORY_EVENT_BUS_URL: "nats://nats:4222"
+    INVENTORY_DEFAULT_TENANT: "default"
+    # Eskalation (optional; besser via Secret referenzieren)
+    INVENTORY_TEAMS_WEBHOOK_URL: ""
+    INVENTORY_ESCALATION_EMAIL: "oncall@example.com"
+  secretRefs:
+    # Beispiel: Teams Webhook via Secret injizieren
+    - env: INVENTORY_TEAMS_WEBHOOK_URL
+      name: inventory-teams-webhook
+      key: url
+  servicePort: 5400
+  resources: {}
+
+alerts:
+  inventoryEnabled: true
+

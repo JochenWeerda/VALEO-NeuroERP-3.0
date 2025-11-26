@@ -3,7 +3,7 @@ Finance Account management endpoints
 RESTful API for chart of accounts management with clean architecture
 """
 
-from typing import Optional
+from typing import Optional, List, Dict
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
@@ -11,7 +11,7 @@ from ....core.database import get_db
 from ....infrastructure.repositories import AccountRepository
 from ....core.dependency_container import container
 from ..schemas.finance import (
-    AccountCreate, AccountUpdate, Account
+    AccountCreate, AccountUpdate, Account, AccountHierarchy
 )
 from ..schemas.base import PaginatedResponse
 
@@ -56,8 +56,18 @@ async def list_accounts(
         # Use provided tenant_id or default to system for now
         effective_tenant_id = tenant_id or "system"
 
-        accounts = await account_repo.get_all(effective_tenant_id, skip, limit, account_type, category)
-        total = await account_repo.count(effective_tenant_id, account_type, category)
+        accounts = await account_repo.get_all(
+            effective_tenant_id,
+            skip,
+            limit,
+            account_type=account_type,
+            category=category
+        )
+        total = await account_repo.count(
+            effective_tenant_id,
+            account_type=account_type,
+            category=category
+        )
 
         return PaginatedResponse[Account](
             items=[Account.model_validate(account) for account in accounts],
@@ -176,3 +186,72 @@ async def get_account_balance(
         return {"account_id": account_id, "balance": balance}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve account balance: {str(e)}")
+
+
+@router.get("/hierarchy", response_model=List[AccountHierarchy])
+async def get_accounts_hierarchy(
+    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    account_type: Optional[str] = Query(None, description="Filter by account type"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get accounts as hierarchical tree.
+
+    Retrieve all accounts organized in a hierarchical structure based on parent_account_id.
+    """
+    try:
+        from ....infrastructure.models import Account as AccountModel
+        
+        effective_tenant_id = tenant_id or "system"
+        
+        # Query all accounts
+        query = db.query(AccountModel).filter(
+            AccountModel.tenant_id == effective_tenant_id,
+            AccountModel.is_active == True,
+            AccountModel.deleted_at.is_(None)
+        )
+        
+        if account_type:
+            query = query.filter(AccountModel.account_type == account_type)
+        
+        all_accounts = query.all()
+        
+        # Build account map
+        account_map: Dict[str, AccountHierarchy] = {}
+        root_accounts: List[AccountHierarchy] = []
+        
+        # First pass: create all account objects
+        from datetime import datetime
+        for acc in all_accounts:
+            account_dict = {
+                "id": str(acc.id),
+                "tenant_id": acc.tenant_id,
+                "account_number": acc.account_number,
+                "account_name": acc.account_name,
+                "account_type": acc.account_type,
+                "category": acc.category,
+                "currency": getattr(acc, 'currency', 'EUR') or "EUR",
+                "allow_manual_entries": getattr(acc, 'allow_manual_entries', True),
+                "balance": float(acc.balance) if acc.balance else 0.0,
+                "is_active": acc.is_active,
+                "parent_account_id": str(acc.parent_account_id) if acc.parent_account_id else None,
+                "created_at": acc.created_at if acc.created_at else datetime.now(),
+                "updated_at": acc.updated_at if acc.updated_at else datetime.now(),
+                "children": []
+            }
+            account_hierarchy = AccountHierarchy(**account_dict)
+            account_map[str(acc.id)] = account_hierarchy
+        
+        # Second pass: build hierarchy
+        for acc in all_accounts:
+            account_hierarchy = account_map[str(acc.id)]
+            if acc.parent_account_id:
+                parent_id = str(acc.parent_account_id)
+                if parent_id in account_map:
+                    account_map[parent_id].children.append(account_hierarchy)
+            else:
+                root_accounts.append(account_hierarchy)
+        
+        return root_accounts
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve account hierarchy: {str(e)}")

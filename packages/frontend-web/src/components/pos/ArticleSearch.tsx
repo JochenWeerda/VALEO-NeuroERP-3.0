@@ -16,7 +16,7 @@ export type Article = {
 }
 
 interface ArticleSearchProps {
-  onSelect: (article: Article) => void
+  onSelect: (_article: Article) => void
   placeholder?: string
   autoFocus?: boolean
 }

@@ -1,12 +1,10 @@
 import i18n from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
-import Backend from 'i18next-http-backend'
 import { initReactI18next } from 'react-i18next'
 
 import de from './locales/de/translation.json'
 
 i18n
-  .use(Backend)
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
@@ -25,10 +23,6 @@ i18n
     interpolation: {
       escapeValue: false,
     },
-    backend: {
-      loadPath: '/locales/{{lng}}/{{ns}}.json',
-      addPath: '/locales/{{lng}}/{{ns}}.json',
-    },
     react: {
       useSuspense: false,
     },
@@ -46,9 +40,9 @@ type LanguageInfo = {
 export const availableLanguages: ReadonlyArray<LanguageInfo> = [
   { code: 'de', name: 'Deutsch', flag: '????', available: true },
   { code: 'en', name: 'English', flag: '????', available: false },
-  { code: 'fr', name: 'Français', flag: '????', available: false },
-  { code: 'es', name: 'Español', flag: '????', available: false },
-  { code: 'pt', name: 'Português', flag: '????', available: false },
+  { code: 'fr', name: 'Franï¿½ais', flag: '????', available: false },
+  { code: 'es', name: 'Espaï¿½ol', flag: '????', available: false },
+  { code: 'pt', name: 'Portuguï¿½s', flag: '????', available: false },
   { code: 'zh', name: '??', flag: '????', available: false },
 ]
 

@@ -1,0 +1,34 @@
+Capability_ID;Capability;Subcapability;Priorität(MUSS/SOLL/KANN);NeuroERP_Status(Yes/Partial/No);Evidence_Screenshot_IDs;Evidence_Flow_IDs;Gap_Beschreibung;Loesungstyp(A/B/C/D);Prioritaet(1-5);Owner;Notes;Baseline_ERP
+CRM-ACC-01;Stammdaten & 360° View;Accounts / Firmenstamm;MUSS;Partial;;;Fehlt: Mehrere Adressen, Dublettencheck, Änderungsprotokoll;B;3;CRM-Team;Grundfunktion vorhanden (kunden-stamm.tsx), erweitern;SAP/Odoo
+CRM-CON-01;Stammdaten & 360° View;Kontakte / Personenstamm;MUSS;Partial;;;Fehlt: Opt-in/Opt-out Management, Kommunikationspräferenzen;B;3;CRM-Team;Grundfunktion vorhanden (kontakte-liste.tsx), erweitern;SAP/Odoo
+CRM-REL-01;Stammdaten & 360° View;Beziehungen & Hierarchien;SOLL;No;;;Komplett fehlend: Konzernhierarchie, Tochter/Partner;C;4;CRM-Team;Neues Modul erforderlich;SAP/Odoo
+CRM-360-01;Stammdaten & 360° View;Customer Timeline;SOLL;Partial;;;Fehlt: Vollständige Timeline-View, Filter nach Typ/Datum/Owner;B;3;CRM-Team;Aktivitäten vorhanden, Timeline-View fehlt;SAP/Odoo
+CRM-LED-01;Lead Management;Lead-Erfassung & Quellen;MUSS;Yes;;;Grundfunktion vorhanden, Quelle/Kampagne nachvollziehbar;A;2;CRM-Team;leads.tsx, lead-detail.tsx vorhanden;SAP/Odoo
+CRM-LED-02;Lead Management;Lead-Qualifizierung & Scoring;SOLL;Partial;;;Fehlt: Regelbasiertes Scoring, automatische Priorisierung;C;4;CRM-Team;Status vorhanden, Scoring fehlt;SAP/Odoo
+CRM-LED-03;Lead Management;Lead-Routing / Zuweisung;SOLL;No;;;Komplett fehlend: Automatische Zuweisung, SLA, Eskalation;C;4;CRM-Team;Neues Modul erforderlich;SAP/Odoo
+CRM-LED-04;Lead Management;Dedupe & Merge;SOLL;No;;;Komplett fehlend: Dubletten-Erkennung, Merge-Funktion;C;4;CRM-Team;Neues Modul erforderlich;SAP/Odoo
+CRM-OPP-01;Opportunities;Opportunities / Deals;MUSS;No;;;Komplett fehlend: Sales Pipeline, Deals, Stages, Wahrscheinlichkeit;C;1;Sales-Team;Kritisch für Sales, neues Modul erforderlich;SAP/Odoo
+CRM-OPP-02;Opportunities;Stage-/Process-Templates;SOLL;No;;;Komplett fehlend: Stage-Modelle, Pflichtfelder je Stage;C;3;Sales-Team;Abhängig von CRM-OPP-01;SAP/Odoo
+CRM-OPP-03;Opportunities;Forecasting;SOLL;No;;;Komplett fehlend: Forecast-Reports, Snapshots;C;4;Sales-Team;Abhängig von CRM-OPP-01;SAP/Odoo
+CRM-OPP-04;Opportunities;Angebots-/Auftragsbezug;SOLL;Partial;;;Fehlt: Link Opportunity → Quote/Order, Belegkette;B;3;Sales-Team;Sales-Module vorhanden, Verknüpfung fehlt;SAP/Odoo
+CRM-ACT-01;Aktivitäten;Aufgaben, Calls, Meetings;MUSS;Yes;;;Grundfunktion vorhanden, Account/Lead/Deal-Zuordnung vorhanden;A;2;CRM-Team;aktivitaeten.tsx, aktivitaet-detail.tsx vorhanden;SAP/Odoo
+CRM-ACT-02;Aktivitäten;Kalender-/Email-Integration;SOLL;No;;;Komplett fehlend: Outlook/Google Sync, Mail-Logging;C;3;CRM-Team;Neue Integration erforderlich;SAP/Odoo
+CRM-ACT-03;Aktivitäten;Vorlagen / Sequenzen;KANN;No;;;Komplett fehlend: Email-Templates, Call-Skripte, Sequenzen;C;5;CRM-Team;Nice-to-have;SAP/Odoo
+MKT-CAM-01;Marketing Automation;Kampagnenmanagement;MUSS;Partial;;;Grundfunktion vorhanden (kampagnen.tsx), fehlt: KPIs, Tracking, Budget-Management;B;2;Marketing-Team;Basis vorhanden, erweitern;SAP/Odoo
+MKT-SEG-01;Marketing Automation;Segmente & Zielgruppen;MUSS;No;;;Komplett fehlend: Regelbasierte Segmente, automatische Aktualisierung;C;2;Marketing-Team;Kritisch für Marketing, neues Modul erforderlich;SAP/Odoo
+MKT-AUT-01;Marketing Automation;Nurture / Journeys;SOLL;No;;;Komplett fehlend: Multi-step Journeys, Branch-Logik;C;4;Marketing-Team;Neues Modul erforderlich;SAP/Odoo
+MKT-EML-01;Marketing Automation;Email-Marketing;MUSS;Partial;;;Grundfunktion vorhanden (crm-communication service), fehlt: A/B Tests, Bounce-Handling;B;2;Marketing-Team;Service vorhanden, UI/Features erweitern;SAP/Odoo
+MKT-LND-01;Marketing Automation;Landingpages & Forms;SOLL;No;;;Komplett fehlend: Form Builder, Captchas, Double-Opt-In;C;3;Marketing-Team;Neues Modul erforderlich;SAP/Odoo
+MKT-EVT-01;Marketing Automation;Event-/Webinar-Marketing;KANN;No;;;Komplett fehlend: Event-Management, Registrierungen;C;5;Marketing-Team;Nice-to-have;SAP/Odoo
+MKT-SOC-01;Marketing Automation;Social/Ads Tracking;KANN;No;;;Komplett fehlend: UTM-Tracking, Attribution;C;5;Marketing-Team;Nice-to-have;SAP/Odoo
+CRM-CNS-01;Consent & Compliance;Opt-in/Opt-out & Consent Log;MUSS;No;;;Komplett fehlend: Consent-Management, Historie, revisionssicher;C;1;Compliance-Team;Kritisch für DSGVO, neues Modul erforderlich;SAP/Odoo
+CRM-CNS-02;Consent & Compliance;DSGVO-Funktionen;MUSS;No;;;Komplett fehlend: Auskunft, Löschung, Anonymisierung, Export;C;1;Compliance-Team;Kritisch für DSGVO, neues Modul erforderlich;SAP/Odoo
+CRM-REP-01;Reporting;Standard-CRM-Reports;MUSS;Partial;;;Fehlt: Conversion Funnel, Pipeline-Reports, Win-Rate;B;2;CRM-Team;Basis vorhanden, Reports erweitern;SAP/Odoo
+CRM-REP-02;Reporting;Marketing-KPIs;SOLL;No;;;Komplett fehlend: Open/Click/CTR, CAC, ROI, Attribution;C;3;Marketing-Team;Neues Modul erforderlich;SAP/Odoo
+CRM-REP-03;Reporting;Drilldown Ketten;SOLL;Partial;;;Fehlt: Vollständige Belegkette, Drilldown-View;B;3;CRM-Team;Basis vorhanden, erweitern;SAP/Odoo
+CRM-AUTH-01;Rollen/Workflows;Rollenmodell CRM/MKT;MUSS;Partial;;;Grundfunktion vorhanden, fehlt: Team-/Region-/Account-basierte Rechte;B;2;Admin-Team;RBAC vorhanden, erweitern;SAP/Odoo
+CRM-AUTH-02;Rollen/Workflows;Workflow-Engines;SOLL;No;;;Komplett fehlend: Workflow-Engine, Freigaben, Eskalation;C;3;Admin-Team;Neues Modul erforderlich;SAP/Odoo
+CRM-INT-01;Integrationen;API / Import / Export;MUSS;Partial;;;Grundfunktion vorhanden, fehlt: Webhooks, Bulk-Operations;B;2;Dev-Team;API vorhanden, erweitern;SAP/Odoo
+CRM-INT-02;Integrationen;Tracking/Event Bus;SOLL;Partial;;;Grundfunktion vorhanden, fehlt: Event-Log, Auswertung;B;3;Dev-Team;Events vorhanden, Log/Auswertung fehlt;SAP/Odoo
+CRM-INT-03;Integrationen;Dritttools/Connectoren;KANN;No;;;Komplett fehlend: Connectoren für Meta/Google Ads, Mailchimp, Outlook/Google;C;4;Dev-Team;Nice-to-have;SAP/Odoo
+

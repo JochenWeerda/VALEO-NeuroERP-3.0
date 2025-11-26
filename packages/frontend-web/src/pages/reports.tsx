@@ -272,7 +272,7 @@ export default function ReportsDashboard(): JSX.Element {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="period" />
                   <YAxis />
-                  <Tooltip formatter={(value) => [`${value}`, 'Aufträge']} />
+                  <Tooltip formatter={(value) => [`${String(value)}`, 'Aufträge']} />
                   <Line type="monotone" dataKey="value" stroke="#EF4444" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
