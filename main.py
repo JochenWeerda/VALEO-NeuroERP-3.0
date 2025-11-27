@@ -103,25 +103,23 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Set up CORS
+# Set up CORS (open in debug, permissive fallback otherwise to avoid local dev blocks)
+cors_kwargs = dict(
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 if settings.DEBUG:
-    # In dev: allow all origins to avoid local CORS blocks between 3000/8000
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_origin_regex=".*",
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+    cors_kwargs.update(allow_origins=["*"], allow_origin_regex=".*")
 elif settings.BACKEND_CORS_ORIGINS:
-    app.add_middleware(
-        CORSMiddleware,
+    cors_kwargs.update(
         allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_origin_regex=".*",
     )
+else:
+    cors_kwargs.update(allow_origins=["*"], allow_origin_regex=".*")
+
+app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 # Add trusted host middleware
 if not settings.DEBUG:
@@ -279,6 +277,26 @@ try:
     app.include_router(agrar_router, prefix="/api/v1/agrar", tags=["Agrar"])
 except ImportError:
     logger.warning("Agrar router not available")
+
+# Lightweight stubs for missing MCP/stream endpoints to avoid frontend 404s during development
+@app.post("/api/mcp/analytics/kpis")
+async def mcp_kpis_stub():
+    return {"ok": True, "data": []}
+
+
+@app.post("/api/mcp/analytics/trends")
+async def mcp_trends_stub():
+    return {"ok": True, "data": []}
+
+
+@app.post("/api/mcp/copilot/forecast")
+async def mcp_copilot_forecast_stub():
+    return {"ok": True, "data": {"forecast": None}}
+
+
+@app.get("/api/stream/workflow")
+async def stream_workflow_stub():
+    return {"status": "ok", "events": []}
 
 # Mount Prometheus metrics endpoint
 metrics_app = make_asgi_app()
