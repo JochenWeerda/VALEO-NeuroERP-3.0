@@ -1,19 +1,21 @@
 ***REMOVED*** VALEO NeuroERP 3.0 🚀
 
-***REMOVED******REMOVED***  Enterprise Resource Planning System
+***REMOVED******REMOVED*** Production-Ready Enterprise Resource Planning System
 
 ![Deploy Staging](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/deploy-staging.yml/badge.svg)
 ![Security Scan](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/security-scan.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-Proprietary-red)
 ![Version](https://img.shields.io/badge/version-3.0.0-blue)
 
-**Status:** in development | **Version:** 3.0.0 | **Authentication:** ✅ OIDC Enabled
+**Status:** 🚧 **In Development** | **Version:** 3.0.0-alpha | **Authentication:** ✅ OIDC Enabled
 
-A comprehensive, ERP system with modern authentication, real-time capabilities, and enterprise-grade security.
+> ⚠️ **Hinweis:** Das System befindet sich noch in aktiver Entwicklung. Es fehlen noch etliche Tests, GAP-Schließungen und Issue-Resolutionen, bevor es als production-ready eingestuft werden kann.
+
+A comprehensive ERP system in development with modern authentication, real-time capabilities, and enterprise-grade security foundations.
 
 ***REMOVED******REMOVED*** 🌟 Key Features
 
-***REMOVED******REMOVED******REMOVED*** ✅  Authentication
+***REMOVED******REMOVED******REMOVED*** ✅ Production-Ready Authentication
 - **OIDC Integration** with Azure AD, Keycloak, Auth0 support
 - **JWT Token Management** with automatic refresh
 - **Multi-Provider Support** for enterprise SSO
@@ -27,7 +29,7 @@ A comprehensive, ERP system with modern authentication, real-time capabilities, 
 - **Deployment:** Docker + Kubernetes ready
 
 ***REMOVED******REMOVED******REMOVED*** 🔗 Live API Integration
-- **Production Backend Schnittstellen** 
+- **Production Backend Schnittstellen** (not mocks)
 - **Real-Time Data Flow** between frontend and backend
 - **Comprehensive Error Handling** and logging
 - **Request/Response Interceptors** for authentication
@@ -318,6 +320,61 @@ For technical support or questions:
 - ✅ **Auto-Deploy bei Push auf develop-Branch**
 - 🤖 **AI Collaboration Framework implemented** - AI tools now recognized as internal contributors with full transparency and compliance
 
-**VALEO NeuroERP 3.0 - in development 🚀**
+**VALEO NeuroERP 3.0 - Production Ready! 🚀**
+
+**Repository:** https://github.com/JochenWeerda/VALEO-NeuroERP-3.0
+
+- **Transparency**: Clearly mark AI involvement in commit messages and pull request descriptions
+- **Internal Data Only**: Only VALEO-internal information may be used as AI input
+- **No External Sharing**: AI outputs remain VALEO proprietary and may not be distributed externally
+
+***REMOVED******REMOVED******REMOVED*** Commit Message Guidelines
+- Use `[AI-Assisted]` for commits involving AI tool usage
+- Use `[AI-Generated]` for commits containing primarily AI-generated code
+- Include brief description of AI tool used (e.g., "using GitHub Copilot", "using Claude")
+- Example: `[AI-Assisted] Implement user authentication flow using GitHub Copilot`
+
+***REMOVED******REMOVED*** 📄 License
+
+Proprietary - VALEO Internal Use Only
+
+***REMOVED******REMOVED******REMOVED*** AI Collaboration Policy
+
+VALEO NeuroERP 3.0 embraces AI-assisted development while maintaining strict internal control and transparency:
+
+- **AI Tools Permitted**: AI-powered development assistants are explicitly authorized for code analysis, generation, and documentation
+- **Internal Use Only**: All AI-generated content remains VALEO proprietary and may not be shared externally
+- **Review Process**: AI contributions follow the same pull request and code review workflows as human contributions
+- **Transparency**: All AI-assisted changes are documented with appropriate commit messages and PR descriptions
+- **Input Restrictions**: Only VALEO-internal data and code may be used as input for AI tools
+
+See [LICENSE](LICENSE) for complete terms regarding AI collaboration.
+
+***REMOVED******REMOVED*** 🆘 Support
+
+For technical support or questions:
+- **Documentation:** See `/docs` folder
+- **API Documentation:** Visit `/docs` when running
+- **Health Check:** Use `/healthz` endpoint
+
+---
+
+**🆕 Latest Updates:**
+- ✅ **Staging-Deployment vollständig automatisiert** (Docker Desktop + GitHub Actions)
+- ✅ **18 automatisierte Smoke-Tests** für Staging-Umgebung
+- ✅ **Authentication system** with OIDC (in development)
+- ✅ **Real API integration** (no more mocks)
+- ✅ **Complete frontend-backend integration**
+- ✅ **Enterprise security features** (foundation in place)
+- ✅ **Docker and Kubernetes deployment ready**
+- ✅ **Auto-Deploy bei Push auf develop-Branch**
+- 🤖 **AI Collaboration Framework implemented** - AI tools now recognized as internal contributors with full transparency and compliance
+- 🚧 **Finance-Modul** mit 23 Backend-APIs implementiert
+- 🚧 **IBAN-Lookup-Integration** mit openiban.com
+- 🚧 **Umfassende i18n-Integration** für deutsche Sprache
+
+**VALEO NeuroERP 3.0 - In Active Development 🚧**
+
+> ⚠️ **Status:** Das System befindet sich in aktiver Entwicklung. Vor einer Production-Freigabe müssen noch Tests vervollständigt, GAPs geschlossen und Issues behoben werden.
 
 **Repository:** https://github.com/JochenWeerda/VALEO-NeuroERP-3.0
