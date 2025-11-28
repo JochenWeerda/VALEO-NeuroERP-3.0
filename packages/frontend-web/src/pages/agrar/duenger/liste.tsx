@@ -261,12 +261,12 @@ export default function DuengerListePage(): JSX.Element {
               />
             </div>
             <div>
-              <Select value={typFilter} onValueChange={setTypFilter}>
+              <Select value={typFilter || 'all'} onValueChange={(v) => setTypFilter(v === 'all' ? '' : v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Typ" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alle Typen</SelectItem>
+                  <SelectItem value="all">Alle Typen</SelectItem>
                   {uniqueTypes.map(type => (
                     <SelectItem key={type} value={type}>{type}</SelectItem>
                   ))}
@@ -274,12 +274,12 @@ export default function DuengerListePage(): JSX.Element {
               </Select>
             </div>
             <div>
-              <Select value={herstellerFilter} onValueChange={setHerstellerFilter}>
+              <Select value={herstellerFilter || 'all'} onValueChange={(v) => setHerstellerFilter(v === 'all' ? '' : v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Hersteller" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alle Hersteller</SelectItem>
+                  <SelectItem value="all">Alle Hersteller</SelectItem>
                   {uniqueHersteller.map(hersteller => (
                     <SelectItem key={hersteller} value={hersteller}>{hersteller}</SelectItem>
                   ))}
@@ -287,12 +287,12 @@ export default function DuengerListePage(): JSX.Element {
               </Select>
             </div>
             <div>
-              <Select value={erklaerungFilter} onValueChange={setErklaerungFilter}>
+              <Select value={erklaerungFilter || 'all'} onValueChange={(v) => setErklaerungFilter(v === 'all' ? '' : v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Erklärung" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alle</SelectItem>
+                  <SelectItem value="all">Alle</SelectItem>
                   <SelectItem value="erforderlich">Erklärung erforderlich</SelectItem>
                   <SelectItem value="ausstehend">Ausstehend</SelectItem>
                   <SelectItem value="geprueft">Geprüft</SelectItem>

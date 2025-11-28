@@ -46,7 +46,8 @@ from app.api.v1.endpoints import (
     vat_return_export,
     closing_checklists,
     iban_lookup,
-    credit_debit_memos
+    credit_debit_memos,
+    portal_shop,
 )
 
 # Import domain routers
@@ -328,4 +329,11 @@ api_router.include_router(
     psm_proplanta.router,
     prefix="/agrar/psm/proplanta",
     tags=["agrar", "psm", "proplanta", "integration"]
+)
+
+# Kundenportal
+api_router.include_router(
+    portal_shop.router,
+    prefix="/portal",
+    tags=["portal", "shop", "customer"]
 )

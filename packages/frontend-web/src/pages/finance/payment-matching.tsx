@@ -81,8 +81,8 @@ export default function PaymentMatchingPage(): JSX.Element {
       }
       const data: PaymentEntry[] = await response.json()
       setPayments(data)
-    } catch (error) {
-      console.error('Error fetching payments:', error)
+    } catch (_error) {
+      // API nicht erreichbar - Benutzer wird per Toast benachrichtigt
       toast({
         title: t('common.error'),
         description: t('crud.feedback.fetchError', { entityType: 'Zahlungen' }),
@@ -128,8 +128,8 @@ export default function PaymentMatchingPage(): JSX.Element {
       setCsvFile(null)
       setBankAccount('')
       await fetchUnmatchedPayments()
-    } catch (error) {
-      console.error('Error importing CSV:', error)
+    } catch (_error) {
+      // Import fehlgeschlagen - Benutzer wird per Toast benachrichtigt
       toast({
         title: t('common.error'),
         description: t('finance.payments.importError'),
@@ -146,8 +146,8 @@ export default function PaymentMatchingPage(): JSX.Element {
       }
       const data: OpenItemMatch[] = await response.json()
       setOpenItems(data)
-    } catch (error) {
-      console.error('Error fetching open items:', error)
+    } catch (_error) {
+      // Keine offenen Posten gefunden oder API nicht erreichbar
       setOpenItems([])
     }
   }
@@ -177,11 +177,12 @@ export default function PaymentMatchingPage(): JSX.Element {
       setSelectedOpId('')
       setOpenItems([])
       await fetchUnmatchedPayments()
-    } catch (error: any) {
-      console.error('Error matching payment:', error)
+    } catch (error: unknown) {
+      // Matching fehlgeschlagen - Benutzer wird per Toast benachrichtigt
+      const errorMessage = error instanceof Error ? error.message : t('finance.payments.matchError')
       toast({
         title: t('common.error'),
-        description: error.message || t('finance.payments.matchError'),
+        description: errorMessage,
         variant: 'destructive',
       })
     }
@@ -199,8 +200,8 @@ export default function PaymentMatchingPage(): JSX.Element {
         description: t('finance.payments.autoMatchSuccess', { count: results.length }),
       })
       await fetchUnmatchedPayments()
-    } catch (error) {
-      console.error('Error auto-matching:', error)
+    } catch (_error) {
+      // Auto-Matching fehlgeschlagen - Benutzer wird per Toast benachrichtigt
       toast({
         title: t('common.error'),
         description: t('finance.payments.autoMatchError'),

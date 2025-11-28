@@ -79,7 +79,7 @@ const createBuchungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           required: true,
           placeholder: t('crud.tooltips.placeholders.period'),
           pattern: '^\\d{4}-\\d{2}$'
-         } as any, {},
+        } as any,
         {
           name: 'buchungstext',
           label: t('crud.fields.bookingText'),
@@ -156,8 +156,8 @@ const createBuchungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           label: t('crud.fields.uploadDocument'),
           type: 'file',
           accept: '.pdf,.jpg,.jpeg,.png',
-           } as any, {helpText: t('crud.tooltips.fields.gobdDocumentArchiving')
-        }
+          helpText: t('crud.tooltips.fields.gobdDocumentArchiving')
+        } as any
       ]
     }
   ],

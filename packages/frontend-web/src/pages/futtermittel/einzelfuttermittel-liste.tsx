@@ -170,8 +170,10 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
         setData((response.data as any).data || [])
         setTotal((response.data as any).total || 0)
       }
-    } catch (error) {
-      console.error('Fehler beim Laden der Daten:', error)
+    } catch (_error) {
+      // API nicht erreichbar - leere Daten beibehalten
+      setData([])
+      setTotal(0)
     } finally {
       setLoading(false)
     }

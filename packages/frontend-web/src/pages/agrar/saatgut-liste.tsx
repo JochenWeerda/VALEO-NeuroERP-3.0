@@ -16,16 +16,26 @@ import { CheckCircle, XCircle, Edit, Eye } from 'lucide-react';
 // API Client
 const apiClient = {
   async getSaatgutList(params: any = {}) {
-    const queryString = new URLSearchParams(params).toString();
-    const response = await fetch(`/api/v1/agrar/saatgut?${queryString}`);
-    if (!response.ok) throw new Error('Failed to fetch Saatgut list');
-    return response.json();
+    try {
+      const queryString = new URLSearchParams(params).toString();
+      const response = await fetch(`/api/v1/agrar/saatgut?${queryString}`);
+      if (!response.ok) throw new Error('Failed to fetch Saatgut list');
+      return response.json();
+    } catch (_error) {
+      // API nicht erreichbar - leere Daten zurückgeben
+      return { items: [], total: 0 };
+    }
   },
 
   async getSaatgutStats() {
-    const response = await fetch('/api/v1/agrar/saatgut/stats/overview');
-    if (!response.ok) throw new Error('Failed to fetch stats');
-    return response.json();
+    try {
+      const response = await fetch('/api/v1/agrar/saatgut/stats/overview');
+      if (!response.ok) throw new Error('Failed to fetch stats');
+      return response.json();
+    } catch (_error) {
+      // API nicht erreichbar - leere Stats zurückgeben
+      return { total_saatgut: 0, by_art: {}, stock_summary: { total_stock: 0 } };
+    }
   },
 };
 
