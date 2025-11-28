@@ -52,8 +52,8 @@ export async function listDocuments(
     
     const result = await response.json()
     return result as DocumentListResponse
-  } catch (error) {
-    console.error(`Error loading ${docType}:`, error)
+  } catch (_error) {
+    // API nicht erreichbar - stille Fehlerbehandlung, da Fallback-Objekt zurückgegeben wird
     return {
       ok: false,
       data: [],
@@ -83,7 +83,7 @@ export async function getDocument(
     
     return await response.json() as DocumentResponse
   } catch (error) {
-    console.error(`Error loading document ${docNumber}:`, error)
+    // API nicht erreichbar - Fehler wird im Response-Objekt zurückgegeben
     return { ok: false, error: String(error) }
   }
 }
@@ -109,7 +109,7 @@ export async function saveDocument(
     
     return await response.json() as DocumentResponse
   } catch (error) {
-    console.error(`Error saving document:`, error)
+    // API nicht erreichbar - Fehler wird im Response-Objekt zurückgegeben
     return { ok: false, error: String(error) }
   }
 }
@@ -136,7 +136,7 @@ export async function updateDocument(
     
     return await response.json() as DocumentResponse
   } catch (error) {
-    console.error(`Error updating document:`, error)
+    // API nicht erreichbar - Fehler wird im Response-Objekt zurückgegeben
     return { ok: false, error: String(error) }
   }
 }
@@ -160,7 +160,7 @@ export async function deleteDocument(
     
     return await response.json() as DocumentResponse
   } catch (error) {
-    console.error(`Error deleting document:`, error)
+    // API nicht erreichbar - Fehler wird im Response-Objekt zurückgegeben
     return { ok: false, error: String(error) }
   }
 }
@@ -195,7 +195,7 @@ export async function bulkDeleteDocuments(
     
     return await response.json() as BulkDeleteResponse
   } catch (error) {
-    console.error(`Error bulk deleting documents:`, error)
+    // API nicht erreichbar - Fehler wird im Response-Objekt zurückgegeben
     return { ok: false, error: String(error) }
   }
 }

@@ -80,6 +80,36 @@ export default defineConfig(({ mode }) => {
   build: {
     outDir: 'dist',
     sourcemap: true,
+    chunkSizeWarningLimit: 500,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor-Chunk: React Core
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          // UI-Chunk: Radix UI Komponenten
+          ui: [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-select',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-toast',
+            '@radix-ui/react-tooltip',
+            '@radix-ui/react-popover',
+            'lucide-react',
+          ],
+          // Charts-Chunk: Recharts (schwer)
+          charts: ['recharts'],
+          // Forms-Chunk: Formular-Bibliotheken
+          forms: ['react-hook-form', 'zod', '@hookform/resolvers'],
+          // Query-Chunk: Data-Fetching
+          query: ['@tanstack/react-query', 'axios'],
+          // Utils-Chunk: Hilfsfunktionen
+          utils: ['date-fns', 'clsx', 'tailwind-merge', 'class-variance-authority'],
+          // i18n-Chunk: Internationalisierung
+          i18n: ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
+        },
+      },
+    },
   },
   test: {
     globals: true,

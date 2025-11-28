@@ -40,7 +40,10 @@ function Application(): JSX.Element {
   return (
     <SSEProvider {...providerConfig} tokenResolver={resolveSseToken}>
       <ToastProvider>
-        <RouterProvider router={router} />
+        <RouterProvider 
+          router={router} 
+          future={{ v7_startTransition: true }}
+        />
         {/* TODO: Diese Komponenten müssen in Router-Kontext verschoben werden */}
         {/* <CommandPalette /> */}
         {/* <AskVALEO /> */}

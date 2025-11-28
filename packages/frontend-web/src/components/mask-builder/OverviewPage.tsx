@@ -2,6 +2,7 @@ import React from 'react'
 // Badge import removed - not used
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { TrendingUp, TrendingDown, BarChart3, PieChart, LineChart } from 'lucide-react'
 import { OverviewConfig, OverviewCard, OverviewChart } from './types'
 
@@ -10,6 +11,66 @@ interface OverviewPageProps {
   onAction?: (_action: string) => void
   isLoading?: boolean
 }
+
+// Skeleton-Komponente für KPI-Karten
+const KpiCardSkeleton: React.FC<{ title?: string }> = ({ title }) => (
+  <Card>
+    <CardHeader className="pb-2">
+      <CardTitle className="text-sm font-medium flex items-center justify-between">
+        {title || <Skeleton className="h-4 w-24" />}
+        <Skeleton className="h-5 w-5 rounded" />
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <Skeleton className="h-8 w-20 mb-2" />
+      <Skeleton className="h-3 w-32" />
+    </CardContent>
+  </Card>
+)
+
+// Skeleton-Komponente für Charts
+const ChartSkeleton: React.FC<{ title?: string }> = ({ title }) => (
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2">
+        <Skeleton className="h-5 w-5" />
+        {title || <Skeleton className="h-5 w-32" />}
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <Skeleton className="h-64 w-full" />
+    </CardContent>
+  </Card>
+)
+
+// Skeleton-Layout für das gesamte Dashboard
+const DashboardSkeleton: React.FC<{ config: OverviewConfig }> = ({ config }) => (
+  <div className="space-y-6 p-6">
+    {/* Header */}
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold">{config.title}</h1>
+        {config.subtitle && (
+          <p className="text-muted-foreground">{config.subtitle}</p>
+        )}
+      </div>
+    </div>
+
+    {/* KPI Cards Skeleton */}
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {config.cards?.map((card, i) => (
+        <KpiCardSkeleton key={i} title={card.title} />
+      )) || [1, 2, 3, 4].map(i => <KpiCardSkeleton key={i} />)}
+    </div>
+
+    {/* Charts Skeleton */}
+    <div className="grid gap-6 md:grid-cols-2">
+      {config.charts?.map((chart, i) => (
+        <ChartSkeleton key={i} title={chart.title} />
+      )) || [1, 2].map(i => <ChartSkeleton key={i} />)}
+    </div>
+  </div>
+)
 
 const OverviewPage: React.FC<OverviewPageProps> = ({
   config,
@@ -64,13 +125,9 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
     )
   }
 
+  // Während des Ladens: Skeleton-Vorschau mit Struktur
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2">Laden...</span>
-      </div>
-    )
+    return <DashboardSkeleton config={config} />
   }
 
   return (

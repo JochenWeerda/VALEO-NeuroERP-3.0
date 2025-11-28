@@ -1,0 +1,38 @@
+{
+  "crud": {
+    "campaigns": {
+      "performanceDashboard": "Kampagnen-Performance",
+      "performanceDashboardDescription": "Übersicht über alle Marketing-Kampagnen und deren Performance",
+      "timeRange": {
+        "7d": "Letzte 7 Tage",
+        "30d": "Letzte 30 Tage",
+        "90d": "Letzte 90 Tage",
+        "1y": "Letztes Jahr"
+      },
+      "summary": {
+        "totalCampaigns": "Kampagnen gesamt"
+      },
+      "performanceChart": "Performance-Verlauf",
+      "performanceChartDescription": "Entwicklung der Kampagnen-Metriken über Zeit",
+      "campaignComparison": "Kampagnen-Vergleich",
+      "campaignComparisonDescription": "Vergleich der Top 10 Kampagnen",
+      "typeDistribution": "Typ-Verteilung",
+      "typeDistributionDescription": "Verteilung der Kampagnen nach Typ",
+      "summaryMetrics": "Zusammenfassung",
+      "summaryMetricsDescription": "Gesamt-Metriken aller Kampagnen",
+      "topCampaigns": "Top Kampagnen",
+      "topCampaignsDescription": "Top 5 Kampagnen nach Conversions",
+      "allCampaigns": "Alle Kampagnen",
+      "allCampaignsDescription": "Vollständige Liste aller Kampagnen"
+    },
+    "fields": {
+      "avgOpenRate": "Ø Öffnungsrate",
+      "avgClickRate": "Ø Klickrate",
+      "avgConversionRate": "Ø Konversionsrate",
+      "totalOpened": "Gesamt geöffnet",
+      "totalClicked": "Gesamt geklickt",
+      "totalConverted": "Gesamt konvertiert",
+      "totalSpent": "Gesamt ausgegeben"
+    }
+  }
+}

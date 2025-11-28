@@ -1,21 +1,97 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { BarChart3, Euro, FileText, TrendingUp, Users, Loader2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { BarChart3, Euro, FileText, TrendingUp, Users, AlertCircle } from 'lucide-react'
 import { useSalesDashboard } from '@/lib/api/dashboard'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+
+// Skeleton-Komponente für KPI-Karten
+function KpiCardSkeleton({ title, icon: Icon }: { title: string; icon?: React.ElementType }) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center gap-2">
+          {Icon && <Icon className="h-5 w-5 text-muted-foreground/50" />}
+          <Skeleton className="h-8 w-24" />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// Skeleton-Komponente für Top-Kunden Liste
+function TopCustomersSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <BarChart3 className="h-5 w-5" />
+          Top-Kunden (Monat)
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex items-center justify-between rounded-lg border p-4">
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-5 w-12" />
+              </div>
+              <Skeleton className="h-7 w-24" />
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// Dashboard-Skeleton für Ladevorgang und Vorschau
+function DashboardSkeleton({ showMessage = false }: { showMessage?: boolean }) {
+  return (
+    <div className="space-y-6 p-6">
+      <div>
+        <h1 className="text-3xl font-bold">Verkaufs-Dashboard</h1>
+        <p className="text-muted-foreground">Aktuelle Kennzahlen</p>
+      </div>
+
+      {showMessage && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Keine Daten vorhanden</AlertTitle>
+          <AlertDescription>
+            Es sind noch keine Verkaufsdaten verfügbar. Sobald Aufträge und Rechnungen erstellt werden, erscheinen hier die Kennzahlen.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-5">
+        <KpiCardSkeleton title="Umsatz Heute" />
+        <KpiCardSkeleton title="Umsatz Monat" icon={Euro} />
+        <KpiCardSkeleton title="Ø Auftragswert" icon={TrendingUp} />
+        <KpiCardSkeleton title="Aufträge Gesamt" icon={FileText} />
+        <KpiCardSkeleton title="Kunden Aktiv" icon={Users} />
+      </div>
+
+      <TopCustomersSkeleton />
+    </div>
+  )
+}
 
 export default function SalesDashboardPage(): JSX.Element {
   const { data: dashboard, isLoading } = useSalesDashboard()
   
+  // Während des Ladens zeigen wir eine Skeleton-Vorschau
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
+    return <DashboardSkeleton />
   }
   
+  // Wenn keine Daten vorhanden sind, zeigen wir eine Vorschau mit Hinweis
   if (!dashboard) {
-    return <div>Keine Daten verfügbar</div>
+    return <DashboardSkeleton showMessage />
   }
 
   return (
