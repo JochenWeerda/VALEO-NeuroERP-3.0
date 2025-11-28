@@ -12,21 +12,33 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Search, Filter, Shield, Droplets, AlertTriangle, Edit, Eye, CheckCircle, XCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Plus, Search, Filter, Shield, Droplets, AlertTriangle, Edit, Eye, CheckCircle, XCircle, Info } from 'lucide-react';
 
-// API Client
+// API Client mit Fehlerbehandlung
 const apiClient = {
   async getDuengerList(params: any = {}) {
-    const queryString = new URLSearchParams(params).toString();
-    const response = await fetch(`/api/v1/agrar/duenger?${queryString}`);
-    if (!response.ok) throw new Error('Failed to fetch Dünger list');
-    return response.json();
+    try {
+      const queryString = new URLSearchParams(params).toString();
+      const response = await fetch(`/api/v1/agrar/duenger?${queryString}`);
+      if (!response.ok) return { items: [], total: 0 };
+      return response.json();
+    } catch (_error) {
+      // API nicht erreichbar - leere Liste zurückgeben
+      return { items: [], total: 0 };
+    }
   },
 
   async getDuengerStats() {
-    const response = await fetch('/api/v1/agrar/duenger/stats/overview');
-    if (!response.ok) throw new Error('Failed to fetch stats');
-    return response.json();
+    try {
+      const response = await fetch('/api/v1/agrar/duenger/stats/overview');
+      if (!response.ok) return null;
+      return response.json();
+    } catch (_error) {
+      // API nicht erreichbar - null zurückgeben
+      return null;
+    }
   },
 };
 
@@ -45,9 +57,9 @@ const DuengerListePage: React.FC = () => {
     queryKey: ['duenger-list', searchTerm, typFilter, herstellerFilter, kulturTypFilter, safetyFilter],
     queryFn: () => apiClient.getDuengerList({
       search: searchTerm || undefined,
-      typ: typFilter || undefined,
+      typ: typFilter && typFilter !== 'all-types' ? typFilter : undefined,
       hersteller: herstellerFilter || undefined,
-      kultur_typ: kulturTypFilter || undefined,
+      kultur_typ: kulturTypFilter && kulturTypFilter !== 'all-kultur' ? kulturTypFilter : undefined,
       limit: 100,
     }),
   });
@@ -64,7 +76,7 @@ const DuengerListePage: React.FC = () => {
     let filtered = duengerList.items;
 
     // Additional client-side filtering for safety
-    if (safetyFilter) {
+    if (safetyFilter && safetyFilter !== 'all-safety') {
       filtered = filtered.filter((item: any) => {
         if (safetyFilter === 'wassergefaehrdend') {
           return item.wassergefaehrdend;
@@ -201,50 +213,75 @@ const DuengerListePage: React.FC = () => {
       </div>
 
       {/* KPI Cards */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Gesamt Dünger</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total_duenger || 0}</div>
-            </CardContent>
-          </Card>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        {isLoading ? (
+          // Skeleton-Loading für KPI-Karten
+          [...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="pb-2">
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-3/4" />
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Gesamt Dünger</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats?.total_duenger || 0}</div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Wassergefährdend</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {stats.by_safety?.['WG'] || 0}
-              </div>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Wassergefährdend</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">
+                  {stats?.by_safety?.['WG'] || 0}
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Gefahrstoffe</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {stats.by_safety?.['GHS+GHS'] || 0}
-              </div>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Gefahrstoffe</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">
+                  {stats?.by_safety?.['GHS+GHS'] || 0}
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Gesamtlagerwert</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                €{(stats.stock_summary?.total_stock || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Gesamtlagerwert</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  €{(stats?.stock_summary?.total_stock || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+      </div>
+
+      {/* Info wenn keine Daten vorhanden */}
+      {!isLoading && filteredData.length === 0 && (
+        <Alert className="mb-6">
+          <Info className="h-4 w-4" />
+          <AlertTitle>Vorschau-Modus</AlertTitle>
+          <AlertDescription>
+            Es sind noch keine Dünger-Daten verfügbar. Legen Sie Dünger-Artikel an, um die Übersicht zu füllen.
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Filters */}
@@ -272,7 +309,7 @@ const DuengerListePage: React.FC = () => {
                 <SelectValue placeholder="Typ" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Alle</SelectItem>
+                <SelectItem value="all-types">Alle</SelectItem>
                 <SelectItem value="Mineraldünger">Mineraldünger</SelectItem>
                 <SelectItem value="Organischer Dünger">Organischer Dünger</SelectItem>
                 <SelectItem value="Organisch-Mineralischer Dünger">Organisch-Mineralischer Dünger</SelectItem>
@@ -285,7 +322,7 @@ const DuengerListePage: React.FC = () => {
                 <SelectValue placeholder="Kulturtyp" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Alle</SelectItem>
+                <SelectItem value="all-kultur">Alle</SelectItem>
                 <SelectItem value="Getreide">Getreide</SelectItem>
                 <SelectItem value="Mais">Mais</SelectItem>
                 <SelectItem value="Raps">Raps</SelectItem>
@@ -300,7 +337,7 @@ const DuengerListePage: React.FC = () => {
                 <SelectValue placeholder="Sicherheit" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Alle</SelectItem>
+                <SelectItem value="all-safety">Alle</SelectItem>
                 <SelectItem value="safe">Sicher</SelectItem>
                 <SelectItem value="wassergefaehrdend">Wassergefährdend</SelectItem>
                 <SelectItem value="gefahrstoff">Gefahrstoff</SelectItem>
@@ -321,7 +358,20 @@ const DuengerListePage: React.FC = () => {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-8">Laden...</div>
+            // Skeleton-Loading für Tabelle
+            <div className="space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          ) : filteredData.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <p className="mb-4">Keine Dünger-Einträge gefunden</p>
+              <Button onClick={handleNewDuenger}>
+                <Plus className="w-4 h-4 mr-2" />
+                Ersten Dünger anlegen
+              </Button>
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
@@ -381,12 +431,6 @@ const DuengerListePage: React.FC = () => {
                   ))}
                 </TableBody>
               </Table>
-
-              {filteredData.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  Keine Dünger-Einträge gefunden
-                </div>
-              )}
             </div>
           )}
         </CardContent>

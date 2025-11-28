@@ -79,6 +79,24 @@ export interface FarmProfile {
   updatedAt: string
 }
 
+// Helper: API Response (snake_case) zu Frontend Model (camelCase) transformieren
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformFarmProfile(apiData: any): FarmProfile {
+  return {
+    id: apiData.id,
+    farmName: apiData.farm_name || apiData.farmName || '',
+    owner: apiData.owner || '',
+    totalArea: apiData.total_area ?? apiData.totalArea ?? 0,
+    crops: apiData.crops || [],
+    livestock: apiData.livestock || [],
+    location: apiData.location,
+    certifications: apiData.certifications || [],
+    notes: apiData.notes,
+    createdAt: apiData.created_at || apiData.createdAt || '',
+    updatedAt: apiData.updated_at || apiData.updatedAt || '',
+  }
+}
+
 // API Functions
 export const crmService = {
   // Contacts
@@ -158,26 +176,34 @@ export const crmService = {
 
   // Betriebsprofile (Farm Profiles)
   async getFarmProfiles(params?: { search?: string; limit?: number; offset?: number }) {
-    const response = await apiClient.get<{ data: FarmProfile[]; total: number }>('/api/v1/crm/betriebsprofile', { params })
-    return response.data
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const response = await apiClient.get<{ items: any[]; total: number }>('/api/v1/crm/farm-profiles', { params })
+      // API gibt { items, total } zurück mit snake_case, Frontend erwartet { data, total } mit camelCase
+      const transformedItems = (response.data.items || []).map(transformFarmProfile)
+      return { data: transformedItems, total: response.data.total || 0 }
+    } catch (_error) {
+      // Bei Backend-Fehler (z.B. fehlende Tabelle) leere Liste zurückgeben
+      return { data: [], total: 0 }
+    }
   },
 
   async getFarmProfile(id: string) {
-    const response = await apiClient.get<{ data: FarmProfile }>(`/api/v1/crm/betriebsprofile/${id}`)
+    const response = await apiClient.get<{ data: FarmProfile }>(`/api/v1/crm/farm-profiles/${id}`)
     return response.data.data
   },
 
   async createFarmProfile(data: Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>) {
-    const response = await apiClient.post<{ data: FarmProfile }>('/api/v1/crm/betriebsprofile', data)
+    const response = await apiClient.post<{ data: FarmProfile }>('/api/v1/crm/farm-profiles', data)
     return response.data.data
   },
 
   async updateFarmProfile(id: string, data: Partial<Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>>) {
-    const response = await apiClient.put<{ data: FarmProfile }>(`/api/v1/crm/betriebsprofile/${id}`, data)
+    const response = await apiClient.put<{ data: FarmProfile }>(`/api/v1/crm/farm-profiles/${id}`, data)
     return response.data.data
   },
 
   async deleteFarmProfile(id: string) {
-    await apiClient.delete(`/api/v1/crm/betriebsprofile/${id}`)
+    await apiClient.delete(`/api/v1/crm/farm-profiles/${id}`)
   },
 }

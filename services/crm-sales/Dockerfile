@@ -2,9 +2,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-***REMOVED*** Install system dependencies
+***REMOVED*** Install system dependencies (inkl. postgresql-client für pg_isready)
 RUN apt-get update && apt-get install -y \
     gcc \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 ***REMOVED*** Copy requirements and install Python dependencies
@@ -14,8 +15,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 ***REMOVED*** Copy application code
 COPY . .
 
+***REMOVED*** Entrypoint für automatische Migrationen
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
+RUN sed -i 's/\r$//' ./docker-entrypoint.sh && chmod +x ./docker-entrypoint.sh
+
 ***REMOVED*** Expose port
 EXPOSE 5700
 
-***REMOVED*** Run the application
-CMD ["python", "main.py"]
+***REMOVED*** Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD python -c "import http.client; conn=http.client.HTTPConnection('localhost', 5700, timeout=5); conn.request('GET', '/health'); resp=conn.getresponse(); exit(0 if resp.status==200 else 1)"
+
+***REMOVED*** Entrypoint führt Migrationen aus und startet dann den Server
+ENTRYPOINT ["./docker-entrypoint.sh"]
