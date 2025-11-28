@@ -102,21 +102,21 @@ const createBestellungenConfig = (t: any, entityTypeLabel: string): ListConfig =
       label: t('crud.actions.approve'),
       labelKey: 'crud.actions.approve',
       type: 'primary',
-      onClick: () => console.log('Freigeben clicked')
+      onClick: () => { /* Freigabe über handleAction gesteuert */ }
     },
     {
       key: 'stornieren',
       label: t('crud.actions.cancel'),
       labelKey: 'crud.actions.cancel',
       type: 'danger',
-      onClick: () => console.log('Stornieren clicked')
+      onClick: () => { /* Storno-Funktion - noch nicht implementiert */ }
     },
     {
       key: 'drucken',
       label: t('crud.actions.print'),
       labelKey: 'crud.actions.print',
       type: 'secondary',
-      onClick: () => console.log('Drucken clicked')
+      onClick: () => { /* Druck-Funktion - noch nicht implementiert */ }
     }
   ],
   defaultSort: { field: 'createdAt', direction: 'desc' },
@@ -187,8 +187,8 @@ export default function BestellungenListePage(): JSX.Element {
             return
           }
         }
-      } catch (mcpError) {
-        console.warn('MCP-API nicht verfügbar, verwende Fallback:', mcpError)
+      } catch (_mcpError) {
+        // MCP-API nicht verfügbar - stille Fallback-Nutzung
       }
       
       // Fallback auf alte API
@@ -197,8 +197,8 @@ export default function BestellungenListePage(): JSX.Element {
         setData((response.data as any).data || [])
         setTotal((response.data as any).total || 0)
       }
-    } catch (error) {
-      console.error(t('crud.messages.loadDataError'), error)
+    } catch (_error) {
+      // API nicht erreichbar - stille Fehlerbehandlung
     } finally {
       setLoading(false)
     }

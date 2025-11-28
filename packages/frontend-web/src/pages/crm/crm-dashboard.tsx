@@ -131,9 +131,8 @@ export default function CRMDashboardPage(): JSX.Element {
         setKpiData((response.data as any).kpis || mockKPIs)
         setChartData((response.data as any).charts || mockChartData)
       }
-    } catch (error) {
-      console.error('Fehler beim Laden des CRM-Dashboards:', error)
-      // Bei Fehler bleiben Mock-Daten erhalten
+    } catch (_error) {
+      // Bei Fehler bleiben Mock-Daten erhalten - stille Fehlerbehandlung
     } finally {
       setLoading(false)
     }

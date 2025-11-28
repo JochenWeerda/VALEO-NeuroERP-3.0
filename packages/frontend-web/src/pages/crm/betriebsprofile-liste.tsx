@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
-import { FileDown, Plus, Search, Tractor, Loader2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { FileDown, Plus, Search, Tractor, AlertCircle } from 'lucide-react'
 import { queryKeys } from '@/lib/query'
 import { crmService, type FarmProfile } from '@/lib/services/crm-service'
 import { getEntityTypeLabel, getListTitle } from '@/features/crud/utils/i18n-helpers'
@@ -16,7 +18,7 @@ export default function BetriebsprofileListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const entityType = 'account'
+  const entityType = 'farmProfile'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Betriebsprofil')
 
   const { data: profilesData, isLoading, error } = useQuery({
@@ -47,7 +49,7 @@ export default function BetriebsprofileListePage(): JSX.Element {
     {
       key: 'totalArea' as const,
       label: t('crud.fields.totalArea'),
-      render: (profile: FarmProfile) => `${profile.totalArea.toFixed(2)} ha`,
+      render: (profile: FarmProfile) => `${(profile.totalArea || 0).toFixed(2)} ha`,
     },
     {
       key: 'crops' as const,
@@ -82,15 +84,52 @@ export default function BetriebsprofileListePage(): JSX.Element {
     },
   ]
 
+  // Skeleton-Komponente für KPI-Karten
+  const KpiCardSkeleton = () => (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium">
+          <Skeleton className="h-4 w-24" />
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-8 w-16" />
+      </CardContent>
+    </Card>
+  )
+
+  // Skeleton-Komponente für Tabelle
+  const TableSkeleton = () => (
+    <div className="space-y-3">
+      <div className="flex gap-4 border-b pb-3">
+        {columns.map((col, i) => (
+          <Skeleton key={i} className="h-4 w-24" />
+        ))}
+      </div>
+      {[...Array(5)].map((_, rowIdx) => (
+        <div key={rowIdx} className="flex gap-4 py-3 border-b">
+          {columns.map((_, colIdx) => (
+            <Skeleton key={colIdx} className="h-4 w-20" />
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+
   if (error) {
     return (
       <div className="space-y-4 p-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600">{t('crud.messages.loadError')}</h1>
-          <p className="text-muted-foreground">
-            {error instanceof Error ? error.message : t('common.unknownError')}
-          </p>
+        <div className="flex items-center gap-2">
+          <Tractor className="h-8 w-8 text-green-600" />
+          <h1 className="text-3xl font-bold">{getListTitle(t, entityTypeLabel)}</h1>
         </div>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>{t('crud.messages.loadError')}</AlertTitle>
+          <AlertDescription>
+            {error instanceof Error ? error.message : t('common.unknownError')}
+          </AlertDescription>
+        </Alert>
       </div>
     )
   }
@@ -103,53 +142,80 @@ export default function BetriebsprofileListePage(): JSX.Element {
             <Tractor className="h-8 w-8 text-green-600" />
             {getListTitle(t, entityTypeLabel)}
           </h1>
-          <p className="text-muted-foreground">
-            {isLoading ? t('crud.list.loading', { entityType: entityTypeLabel }) : t('crud.list.total', { count: totalProfiles, entityType: t('crud.fields.farms') })}
-          </p>
+          <div className="text-muted-foreground text-sm">
+            {isLoading ? (
+              <Skeleton className="h-4 w-32 mt-1" />
+            ) : (
+              t('crud.list.total', { count: totalProfiles, entityType: t('crud.fields.farms') })
+            )}
+          </div>
         </div>
         <Button onClick={() => navigate('/crm/betriebsprofil/neu')} className="gap-2">
           <Plus className="h-4 w-4" />
-          {t('crud.actions.new')} {entityTypeLabel}
+          Neues {entityTypeLabel}
         </Button>
       </div>
 
+      {/* KPI-Karten mit Skeleton-Loading */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t('crud.fields.totalFarms')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalProfiles}</div>
-          </CardContent>
-        </Card>
+        {isLoading ? (
+          <>
+            <KpiCardSkeleton />
+            <KpiCardSkeleton />
+            <KpiCardSkeleton />
+            <KpiCardSkeleton />
+          </>
+        ) : (
+          <>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">{t('crud.fields.totalFarms')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{totalProfiles}</div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t('crud.fields.totalArea')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{totalArea.toFixed(0)} {t('crud.fields.hectares')}</div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">{t('crud.fields.totalArea')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{totalArea.toFixed(0)} {t('crud.fields.hectares')}</div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t('crud.fields.averageFarmSize')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{avgArea.toFixed(1)} {t('crud.fields.hectares')}</div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">{t('crud.fields.averageFarmSize')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{avgArea.toFixed(1)} {t('crud.fields.hectares')}</div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t('crud.fields.organicCertified')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{bioProfiles}</div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">{t('crud.fields.organicCertified')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{bioProfiles}</div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
+
+      {/* Info-Alert wenn keine Daten */}
+      {!isLoading && profiles.length === 0 && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Keine Betriebsprofile vorhanden</AlertTitle>
+          <AlertDescription>
+            Es sind noch keine Betriebsprofile angelegt. Klicken Sie auf &quot;Neues Betriebsprofil&quot;, um das erste Profil zu erstellen.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>
@@ -177,10 +243,7 @@ export default function BetriebsprofileListePage(): JSX.Element {
       <Card>
         <CardContent className="pt-6">
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
-              <span className="ml-2">{t('crud.list.loading', { entityType: entityTypeLabel })}</span>
-            </div>
+            <TableSkeleton />
           ) : (
             <DataTable data={profiles} columns={columns} />
           )}

@@ -1,6 +1,7 @@
 import { type ComponentType, Suspense, lazy } from 'react'
 import { type RouteObject, createBrowserRouter } from 'react-router-dom'
 import AppLayout from '@/layouts/DashboardLayout'
+import CustomerPortalLayout from '@/layouts/CustomerPortalLayout'
 import { ErrorBoundary } from '@/shared/errors/ErrorBoundary'
 import { PageLoader } from '@/app/PageLoader'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -24,7 +25,19 @@ const AUTO_ROUTE_IGNORE_PATTERNS: RegExp[] = [
 
 const lazyComponentCache = new WeakMap<PageModuleFactory, ComponentType<unknown>>()
 
+// Separate portal routes from main app routes
+function isPortalModule(modulePath: string): boolean {
+  return modulePath.includes('/portal/')
+}
+
 const routerConfig: RouteObject[] = [
+  // Kundenportal mit eigenem Layout
+  {
+    path: '/portal',
+    element: <CustomerPortalLayout />,
+    children: buildPortalRoutes(),
+  },
+  // Hauptanwendung
   {
     path: '/',
     element: <AppLayout />,
@@ -32,15 +45,36 @@ const routerConfig: RouteObject[] = [
   },
 ]
 
+function buildPortalRoutes(): RouteObject[] {
+  return Object.entries(pageModules)
+    .filter(([modulePath]) => isPortalModule(modulePath) && isAutoRoutable(modulePath))
+    .map(([modulePath, loader]) => {
+      const routePath = modulePathToRoutePath(modulePath).replace('portal/', '').replace('portal', '')
+      const element = createRouteElement(loader)
+      
+      // Index route for /portal
+      if (routePath === '' || routePath === '/') {
+        return { index: true, element }
+      }
+      
+      return { path: routePath, element }
+    })
+}
+
 export const router = createBrowserRouter(routerConfig, {
   future: {
     v7_startTransition: true,
+    v7_relativeSplatPath: true,
+    v7_fetcherPersist: true,
+    v7_normalizeFormMethod: true,
+    v7_partialHydration: true,
+    v7_skipActionErrorRevalidation: true,
   },
 })
 
 function buildAutoRoutes(): RouteObject[] {
   return Object.entries(pageModules)
-    .filter(([modulePath]) => isAutoRoutable(modulePath))
+    .filter(([modulePath]) => isAutoRoutableMainApp(modulePath))
     .map(([modulePath, loader]) => createRouteObject(modulePath, loader))
     .sort(compareRouteObjects)
 }
@@ -105,6 +139,14 @@ function isAutoRoutable(modulePath: string): boolean {
     return false
   }
   return !AUTO_ROUTE_IGNORE_PATTERNS.some((pattern) => pattern.test(modulePath))
+}
+
+function isAutoRoutableMainApp(modulePath: string): boolean {
+  // Exclude portal modules from main app routes
+  if (isPortalModule(modulePath)) {
+    return false
+  }
+  return isAutoRoutable(modulePath)
 }
 
 function compareRouteObjects(a: RouteObject, b: RouteObject): number {

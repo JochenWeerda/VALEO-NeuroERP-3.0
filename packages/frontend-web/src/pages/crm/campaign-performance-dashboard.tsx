@@ -5,7 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ArrowLeft, TrendingUp, TrendingDown, Mail, MousePointerClick, Target, BarChart3, Users, Calendar } from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ArrowLeft, TrendingUp, TrendingDown, Mail, MousePointerClick, Target, BarChart3, Users, Calendar, Info } from 'lucide-react'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate, formatCurrency } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
@@ -76,8 +78,8 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
         const perf = Array.isArray(performanceRes) ? performanceRes : (performanceRes.data || [])
         setPerformance(perf)
       }
-    } catch (error) {
-      console.error('Fehler beim Laden der Performance-Daten:', error)
+    } catch (_error) {
+      // Stille Fehlerbehandlung - Toast informiert Benutzer
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadError')
@@ -187,16 +189,7 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
     }
   ]
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-          <p>{t('crud.messages.loading')}</p>
-        </div>
-      </div>
-    )
-  }
+  const hasData = campaigns.length > 0 || (summary && summary.totalCampaigns > 0)
 
   return (
     <div className="space-y-6 p-6">
@@ -224,60 +217,88 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
         </div>
       </div>
 
-      {/* Summary Cards */}
-      {summary && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t('crud.campaigns.summary.totalCampaigns')}</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.totalCampaigns}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t('crud.fields.sentCount')}</CardTitle>
-              <Mail className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.totalSent.toLocaleString()}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t('crud.fields.avgOpenRate')}</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.avgOpenRate.toFixed(1)}%</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t('crud.fields.avgConversionRate')}</CardTitle>
-              <Target className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.avgConversionRate.toFixed(1)}%</div>
-            </CardContent>
-          </Card>
-        </div>
+      {/* Info-Alert wenn keine Daten vorhanden */}
+      {!loading && !hasData && (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertTitle>{t('crud.campaigns.noDataTitle')}</AlertTitle>
+          <AlertDescription>
+            {t('crud.campaigns.noDataDescription')}
+          </AlertDescription>
+        </Alert>
       )}
+
+      {/* Summary Cards - mit Skeleton bei Loading oder Preview bei keinen Daten */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t('crud.campaigns.summary.totalCampaigns')}</CardTitle>
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <div className="text-2xl font-bold">{summary?.totalCampaigns || 0}</div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t('crud.fields.sentCount')}</CardTitle>
+            <Mail className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-8 w-24" />
+            ) : (
+              <div className="text-2xl font-bold">{(summary?.totalSent || 0).toLocaleString()}</div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t('crud.fields.avgOpenRate')}</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <div className="text-2xl font-bold">{(summary?.avgOpenRate || 0).toFixed(1)}%</div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t('crud.fields.avgConversionRate')}</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <div className="text-2xl font-bold">{(summary?.avgConversionRate || 0).toFixed(1)}%</div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {chartData.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('crud.campaigns.performanceChart')}</CardTitle>
-              <CardDescription>{t('crud.campaigns.performanceChartDescription')}</CardDescription>
-            </CardHeader>
-            <CardContent>
+        {/* Performance Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('crud.campaigns.performanceChart')}</CardTitle>
+            <CardDescription>{t('crud.campaigns.performanceChartDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -291,17 +312,27 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
                   <Line type="monotone" dataKey="converted" stroke="#ff7300" name={t('crud.fields.conversionCount')} />
                 </LineChart>
               </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg bg-muted/20">
+                <div className="text-center text-muted-foreground">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>{t('crud.campaigns.chartPreview')}</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-        {campaignChartData.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('crud.campaigns.campaignComparison')}</CardTitle>
-              <CardDescription>{t('crud.campaigns.campaignComparisonDescription')}</CardDescription>
-            </CardHeader>
-            <CardContent>
+        {/* Campaign Comparison Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('crud.campaigns.campaignComparison')}</CardTitle>
+            <CardDescription>{t('crud.campaigns.campaignComparisonDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : campaignChartData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={campaignChartData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -315,17 +346,27 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
                   <Bar dataKey="converted" fill="#ff7300" name={t('crud.fields.conversionCount')} />
                 </BarChart>
               </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg bg-muted/20">
+                <div className="text-center text-muted-foreground">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>{t('crud.campaigns.chartPreview')}</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-        {typeChartData.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('crud.campaigns.typeDistribution')}</CardTitle>
-              <CardDescription>{t('crud.campaigns.typeDistributionDescription')}</CardDescription>
-            </CardHeader>
-            <CardContent>
+        {/* Type Distribution Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('crud.campaigns.typeDistribution')}</CardTitle>
+            <CardDescription>{t('crud.campaigns.typeDistributionDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : typeChartData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -345,75 +386,126 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
                   <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg bg-muted/20">
+                <div className="text-center text-muted-foreground">
+                  <Target className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>{t('crud.campaigns.chartPreview')}</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-        {summary && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('crud.campaigns.summaryMetrics')}</CardTitle>
-              <CardDescription>{t('crud.campaigns.summaryMetricsDescription')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-sm text-muted-foreground">{t('crud.fields.totalOpened')}</div>
-                  <div className="text-2xl font-bold">{summary.totalOpened.toLocaleString()}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-muted-foreground">{t('crud.fields.totalClicked')}</div>
-                  <div className="text-2xl font-bold">{summary.totalClicked.toLocaleString()}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-muted-foreground">{t('crud.fields.totalConverted')}</div>
-                  <div className="text-2xl font-bold">{summary.totalConverted.toLocaleString()}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-muted-foreground">{t('crud.fields.totalSpent')}</div>
-                  <div className="text-2xl font-bold">{formatCurrency(summary.totalSpent)}</div>
-                </div>
+        {/* Summary Metrics Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('crud.campaigns.summaryMetrics')}</CardTitle>
+            <CardDescription>{t('crud.campaigns.summaryMetricsDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-muted-foreground">{t('crud.fields.totalOpened')}</div>
+                {loading ? (
+                  <Skeleton className="h-8 w-20 mt-1" />
+                ) : (
+                  <div className="text-2xl font-bold">{(summary?.totalOpened || 0).toLocaleString()}</div>
+                )}
               </div>
-              <div className="pt-4 border-t">
-                <div className="text-sm text-muted-foreground mb-2">{t('crud.fields.avgClickRate')}</div>
-                <div className="text-2xl font-bold">{summary.avgClickRate.toFixed(1)}%</div>
+              <div>
+                <div className="text-sm text-muted-foreground">{t('crud.fields.totalClicked')}</div>
+                {loading ? (
+                  <Skeleton className="h-8 w-20 mt-1" />
+                ) : (
+                  <div className="text-2xl font-bold">{(summary?.totalClicked || 0).toLocaleString()}</div>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div>
+                <div className="text-sm text-muted-foreground">{t('crud.fields.totalConverted')}</div>
+                {loading ? (
+                  <Skeleton className="h-8 w-20 mt-1" />
+                ) : (
+                  <div className="text-2xl font-bold">{(summary?.totalConverted || 0).toLocaleString()}</div>
+                )}
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">{t('crud.fields.totalSpent')}</div>
+                {loading ? (
+                  <Skeleton className="h-8 w-24 mt-1" />
+                ) : (
+                  <div className="text-2xl font-bold">{formatCurrency(summary?.totalSpent || 0)}</div>
+                )}
+              </div>
+            </div>
+            <div className="pt-4 border-t">
+              <div className="text-sm text-muted-foreground mb-2">{t('crud.fields.avgClickRate')}</div>
+              {loading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <div className="text-2xl font-bold">{(summary?.avgClickRate || 0).toFixed(1)}%</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Top Campaigns */}
-      {topCampaigns.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('crud.campaigns.topCampaigns')}</CardTitle>
-            <CardDescription>{t('crud.campaigns.topCampaignsDescription')}</CardDescription>
-          </CardHeader>
-          <CardContent>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('crud.campaigns.topCampaigns')}</CardTitle>
+          <CardDescription>{t('crud.campaigns.topCampaignsDescription')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          ) : topCampaigns.length > 0 ? (
             <DataTable
               data={topCampaigns}
               columns={campaignColumns}
             />
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div className="py-8 text-center text-muted-foreground">
+              <Target className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p>{t('crud.campaigns.noTopCampaigns')}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* All Campaigns */}
-      {campaigns.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('crud.campaigns.allCampaigns')}</CardTitle>
-            <CardDescription>{t('crud.campaigns.allCampaignsDescription')}</CardDescription>
-          </CardHeader>
-          <CardContent>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('crud.campaigns.allCampaigns')}</CardTitle>
+          <CardDescription>{t('crud.campaigns.allCampaignsDescription')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="space-y-3">
+              {[...Array(10)].map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          ) : campaigns.length > 0 ? (
             <DataTable
               data={campaigns}
               columns={campaignColumns}
             />
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div className="py-8 text-center text-muted-foreground">
+              <Mail className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p>{t('crud.campaigns.noCampaigns')}</p>
+              <Button variant="outline" className="mt-4" onClick={() => navigate('/crm/campaigns/new')}>
+                {t('crud.campaigns.createFirst')}
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

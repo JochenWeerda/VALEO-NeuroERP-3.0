@@ -148,18 +148,38 @@ const createKundenListConfig = (t: any, entityTypeLabel: string): ListConfig => 
       type: 'text'
     },
     {
-      name: 'umsatzGesamt',
+      name: 'umsatzGesamtMin',
       label: t('crud.fields.revenueFrom'),
       labelKey: 'crud.fields.revenueFrom',
       type: 'number',
-      min: 0
+      min: 0,
+      step: 100,
+      placeholder: t('crud.tooltips.placeholders.minRevenue'),
+      placeholderKey: 'crud.tooltips.placeholders.minRevenue'
     },
     {
-      name: 'umsatzGesamt',
+      name: 'umsatzGesamtMax',
       label: t('crud.fields.revenueTo'),
       labelKey: 'crud.fields.revenueTo',
       type: 'number',
-      min: 0
+      min: 0,
+      step: 100,
+      placeholder: t('crud.tooltips.placeholders.maxRevenue'),
+      placeholderKey: 'crud.tooltips.placeholders.maxRevenue'
+    },
+    {
+      name: 'letzteBestellungVon',
+      label: t('crud.fields.orderDateFrom'),
+      labelKey: 'crud.fields.orderDateFrom',
+      type: 'date',
+      maxDate: new Date().toISOString().split('T')[0]
+    },
+    {
+      name: 'letzteBestellungBis',
+      label: t('crud.fields.orderDateTo'),
+      labelKey: 'crud.fields.orderDateTo',
+      type: 'date',
+      maxDate: new Date().toISOString().split('T')[0]
     }
   ],
   bulkActions: [
@@ -168,21 +188,21 @@ const createKundenListConfig = (t: any, entityTypeLabel: string): ListConfig => 
       label: t('crud.actions.export'),
       labelKey: 'crud.actions.export',
       type: 'secondary',
-      onClick: () => console.log('Export clicked')
+      onClick: () => { /* Export-Funktion wird über onExport-Handler gesteuert */ }
     },
     {
       key: 'newsletter',
       label: t('crud.actions.sendNewsletter'),
       labelKey: 'crud.actions.sendNewsletter',
       type: 'secondary',
-      onClick: () => console.log('Newsletter clicked')
+      onClick: () => { /* Newsletter-Funktion - noch nicht implementiert */ }
     },
     {
       key: 'block',
       label: t('crud.actions.block'),
       labelKey: 'crud.actions.block',
       type: 'danger',
-      onClick: () => console.log('Block clicked')
+      onClick: () => { /* Block-Funktion - noch nicht implementiert */ }
     }
   ],
   defaultSort: { field: 'firma', direction: 'asc' },
@@ -237,8 +257,8 @@ export default function KundenListePage(): JSX.Element {
         setData((response.data as any).data || [])
         setTotal((response.data as any).total || 0)
       }
-    } catch (error) {
-      console.error(t('crud.messages.loadDataError'), error)
+    } catch (_error) {
+      // API nicht erreichbar - stille Fehlerbehandlung
     } finally {
       setLoading(false)
     }
