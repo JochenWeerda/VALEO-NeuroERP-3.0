@@ -203,8 +203,8 @@ export default function GDPRRequestsPage(): JSX.Element {
         setData(items)
         setTotal(items.length)
       }
-    } catch (error) {
-      console.error('Fehler beim Laden der GDPR-Requests:', error)
+    } catch {
+      // Silent error handling - toast notification already shown
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadError')
