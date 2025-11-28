@@ -534,6 +534,136 @@ services:
       - ./services/ai/main.py:/app/main.py
       - ai_data:/app/data
 
+  # ===========================================
+  # DMS (Document Management System)
+  # Paperless-ngx als Slave-Backend
+  # ===========================================
+  
+  # Redis für Paperless-ngx (separater Redis für DMS)
+  paperless-redis:
+    image: redis:7-alpine
+    container_name: valeo-neuro-erp-paperless-redis
+    restart: unless-stopped
+    networks:
+      - valeo-network
+    volumes:
+      - paperless_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL für Paperless-ngx (separater DB für DMS)
+  paperless-db:
+    image: postgres:15-alpine
+    container_name: valeo-neuro-erp-paperless-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: ${PAPERLESS_DB_PASSWORD:-paperless_dev_2024}
+    networks:
+      - valeo-network
+    volumes:
+      - paperless_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paperless -d paperless"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Paperless-ngx DMS Backend
+  paperless:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: valeo-neuro-erp-paperless
+    restart: unless-stopped
+    depends_on:
+      paperless-db:
+        condition: service_healthy
+      paperless-redis:
+        condition: service_healthy
+    ports:
+      - "8001:8000"  # Paperless Web UI (Admin-Zugang)
+    environment:
+      # Database
+      PAPERLESS_REDIS: redis://paperless-redis:6379
+      PAPERLESS_DBHOST: paperless-db
+      PAPERLESS_DBUSER: paperless
+      PAPERLESS_DBPASS: ${PAPERLESS_DB_PASSWORD:-paperless_dev_2024}
+      PAPERLESS_DBNAME: paperless
+      # Security
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY:-change-me-in-production-32-chars}
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER:-admin}
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD:-admin123!}
+      # Localization
+      PAPERLESS_TIME_ZONE: Europe/Berlin
+      PAPERLESS_OCR_LANGUAGE: deu+eng
+      PAPERLESS_DATE_ORDER: DMY
+      PAPERLESS_FILENAME_FORMAT: "{created_year}/{correspondent}/{title}"
+      # URL Configuration
+      PAPERLESS_URL: http://localhost:8001
+      # Performance
+      PAPERLESS_TASK_WORKERS: 2
+      PAPERLESS_THREADS_PER_WORKER: 2
+      # Consumer Settings
+      PAPERLESS_CONSUMER_RECURSIVE: "true"
+      PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
+      # API Token für DMS-Adapter (wird nach erstem Start generiert)
+      # PAPERLESS_AUTO_LOGIN_USERNAME: ""
+    networks:
+      - valeo-network
+    volumes:
+      - paperless_data:/usr/src/paperless/data
+      - paperless_media:/usr/src/paperless/media
+      - paperless_export:/usr/src/paperless/export
+      - paperless_consume:/usr/src/paperless/consume
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # DMS-Adapter Service (Brücke zwischen NeuroERP und Paperless)
+  dms-adapter:
+    build:
+      context: ./services/dms-adapter
+      dockerfile: Dockerfile
+    container_name: valeo-neuro-erp-dms-adapter
+    restart: unless-stopped
+    depends_on:
+      paperless:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8002:8000"
+    environment:
+      # Paperless Connection
+      PAPERLESS_URL: http://paperless:8000
+      PAPERLESS_TOKEN: ${PAPERLESS_API_TOKEN:-}
+      PAPERLESS_TIMEOUT: 30
+      # Database (für Document References)
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp
+      # Security
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-production}
+      # Tag Configuration
+      TAG_PREFIX_TENANT: TENANT
+      TAG_PREFIX_OBJECT_TYPE: OBJ
+      TAG_PREFIX_OBJECT_ID: OBJID
+      TAG_PREFIX_DOCTYPE: DOCTYPE
+      # Debug
+      DEBUG: "true"
+    networks:
+      - valeo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/dms/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
 volumes:
   ai_data:
     driver: local
@@ -550,6 +680,19 @@ volumes:
   pnpm_store:
     driver: local
   bff_node_modules:
+    driver: local
+  # Paperless-ngx DMS Volumes
+  paperless_redis_data:
+    driver: local
+  paperless_db_data:
+    driver: local
+  paperless_data:
+    driver: local
+  paperless_media:
+    driver: local
+  paperless_export:
+    driver: local
+  paperless_consume:
     driver: local
 
 networks:

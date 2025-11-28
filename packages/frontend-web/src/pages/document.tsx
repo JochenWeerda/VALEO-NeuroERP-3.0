@@ -17,16 +17,19 @@ import {
   FileImage, 
   File, 
   Search, 
-  Upload, 
   Trash2, 
   ScanLine,
   Info,
   FolderOpen,
   Shield,
   CheckCircle2,
-  Calendar
+  Calendar,
+  Download,
+  Link2,
+  Inbox
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { dmsService, type Document as DmsDocument } from "@/lib/services/dms-service"
 
 const KB_PRECISION = 0
 
@@ -194,24 +197,80 @@ function DocumentSkeleton() {
 
 export default function DocumentPanel(): JSX.Element {
   const { t } = useTranslation()
-  const { data, isLoading, isError } = useMcpQuery<{ data: Doc[] }>('document', 'list', [])
+  const { data, isLoading: mcpLoading } = useMcpQuery<{ data: Doc[] }>('document', 'list', [])
   const [useMockData, setUseMockData] = React.useState(false)
+  const [dmsConnected, setDmsConnected] = React.useState(false)
+  const [dmsDocuments, setDmsDocuments] = React.useState<DmsDocument[]>([])
+  const [dmsLoading, setDmsLoading] = React.useState(true)
   
-  // Verwende Mock-Daten wenn API nicht verfügbar
+  // Tenant-ID (TODO: Aus Auth-Context holen)
+  const tenantId = "00000000-0000-0000-0000-000000000001"
+  
+  // Verwende Mock-Daten wenn keine API verfügbar
   const apiRows: Doc[] = (data?.data ?? []) as Doc[]
-  const rows = useMockData || (apiRows.length === 0 && !isLoading) ? mockDocuments : apiRows
+  
+  // Kombiniere DMS- und MCP-Daten, oder nutze Mock-Daten
+  const rows: Doc[] = React.useMemo(() => {
+    if (dmsConnected && dmsDocuments.length > 0) {
+      // DMS-Daten in Doc-Format konvertieren
+      return dmsDocuments.map(d => ({
+        id: String(d.id),
+        title: d.title,
+        type: d.fileType || 'pdf',
+        sizeKB: d.sizeKb || 0,
+        ts: d.createdAt || new Date().toISOString(),
+      }))
+    }
+    if (apiRows.length > 0) {
+      return apiRows
+    }
+    if (useMockData) {
+      return mockDocuments
+    }
+    return []
+  }, [dmsConnected, dmsDocuments, apiRows, useMockData])
   
   const [q, setQ] = React.useState<string>("")
   const { push } = useToast()
   const qc = useQueryClient()
   const key = ['mcp', 'document', 'list'] as const
 
-  // Prüfe ob API verfügbar ist
+  // Prüfe DMS-Adapter Verbindung und lade Dokumente
   React.useEffect(() => {
-    if (!isLoading && apiRows.length === 0) {
+    const checkDmsAndLoad = async () => {
+      setDmsLoading(true)
+      try {
+        const health = await dmsService.healthCheck()
+        if (health.status === 'healthy' || health.status === 'degraded') {
+          setDmsConnected(health.paperlessConnected)
+          
+          if (health.paperlessConnected) {
+            // Lade Dokumente vom DMS
+            const result = await dmsService.listDocuments(tenantId, {
+              businessObjectType: 'QM_DOCUMENT',
+            })
+            setDmsDocuments(result.data)
+          }
+        }
+      } catch {
+        // DMS nicht verfügbar - stille Fehlerbehandlung
+        setDmsConnected(false)
+      } finally {
+        setDmsLoading(false)
+      }
+    }
+    
+    checkDmsAndLoad()
+  }, [tenantId])
+
+  // Fallback zu Mock-Daten wenn keine API verfügbar
+  React.useEffect(() => {
+    if (!mcpLoading && !dmsLoading && apiRows.length === 0 && dmsDocuments.length === 0) {
       setUseMockData(true)
     }
-  }, [isLoading, apiRows.length])
+  }, [mcpLoading, dmsLoading, apiRows.length, dmsDocuments.length])
+  
+  const isLoading = mcpLoading || dmsLoading
 
   useMcpRealtime('document', (evt): void => {
     if (evt.type === 'uploaded' || evt.type === 'deleted' || evt.type === 'scanned') {
@@ -242,14 +301,37 @@ export default function DocumentPanel(): JSX.Element {
     if (files.length === 0) return
 
     for (const f of files) {
-      const fd = new FormData()
-      fd.append('file', f, f.name)
+      try {
+        if (dmsConnected) {
+          // Upload über DMS-Adapter
+          await dmsService.uploadDocument({
+            file: f,
+            tenantId,
+            title: f.name,
+            businessObjectType: 'QM_DOCUMENT',
+            documentType: 'qm_dokument',
+          })
+          push(`✔ Hochgeladen: ${f.name}`)
+          
+          // Dokumente neu laden
+          const result = await dmsService.listDocuments(tenantId, {
+            businessObjectType: 'QM_DOCUMENT',
+          })
+          setDmsDocuments(result.data)
+        } else {
+          // Fallback auf MCP-Upload
+          const fd = new FormData()
+          fd.append('file', f, f.name)
 
-      upload.mutate(fd, {
-        onSuccess: (): void => push(`✔ Hochgeladen: ${f.name}`),
-        onError: (): void => push(`❌ Upload fehlgeschlagen: ${f.name}`),
-        onSettled: (): Promise<void> => qc.invalidateQueries({ queryKey: key }),
-      })
+          upload.mutate(fd, {
+            onSuccess: (): void => push(`✔ Hochgeladen: ${f.name}`),
+            onError: (): void => push(`❌ Upload fehlgeschlagen: ${f.name}`),
+            onSettled: (): Promise<void> => qc.invalidateQueries({ queryKey: key }),
+          })
+        }
+      } catch {
+        push(`❌ Upload fehlgeschlagen: ${f.name}`)
+      }
     }
   }
 
@@ -260,12 +342,29 @@ export default function DocumentPanel(): JSX.Element {
     })
   }
 
-  const handleDelete = (id: string): void => {
-    remove.mutate({ id }, {
-      onSuccess: (): void => push("✔ Gelöscht"),
-      onError: (): void => push("❌ Löschen fehlgeschlagen"),
-      onSettled: (): Promise<void> => qc.invalidateQueries({ queryKey: key })
-    })
+  const handleDelete = async (id: string): Promise<void> => {
+    try {
+      if (dmsConnected) {
+        // Löschen über DMS-Adapter
+        await dmsService.deleteDocument(parseInt(id), tenantId)
+        push("✔ Gelöscht")
+        
+        // Dokumente neu laden
+        const result = await dmsService.listDocuments(tenantId, {
+          businessObjectType: 'QM_DOCUMENT',
+        })
+        setDmsDocuments(result.data)
+      } else {
+        // Fallback auf MCP-Delete
+        remove.mutate({ id }, {
+          onSuccess: (): void => push("✔ Gelöscht"),
+          onError: (): void => push("❌ Löschen fehlgeschlagen"),
+          onSettled: (): Promise<void> => qc.invalidateQueries({ queryKey: key })
+        })
+      }
+    } catch {
+      push("❌ Löschen fehlgeschlagen")
+    }
   }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -295,14 +394,28 @@ export default function DocumentPanel(): JSX.Element {
         </p>
       </div>
 
+      {/* DMS Status Alert */}
+      {dmsConnected && (
+        <Alert className="bg-green-50 border-green-200">
+          <CheckCircle2 className="h-4 w-4 text-green-600" />
+          <AlertTitle className="text-green-800">DMS verbunden</AlertTitle>
+          <AlertDescription className="text-green-700">
+            Paperless-ngx Dokumentenmanagement ist aktiv. Dokumente werden automatisch per OCR verarbeitet.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       {/* Vorschau-Modus Alert */}
-      {useMockData && (
+      {useMockData && !dmsConnected && (
         <Alert>
           <Info className="h-4 w-4" />
           <AlertTitle>Vorschau-Modus</AlertTitle>
           <AlertDescription>
             Das Dokumentenmanagement-Backend ist nicht verfügbar. Es werden Beispieldaten angezeigt.
-            Funktionen wie Upload, Scan und Löschen sind im Vorschau-Modus deaktiviert.
+            <br />
+            <span className="text-sm mt-1 block">
+              Um DMS zu aktivieren: <code className="bg-muted px-1 rounded">docker-compose up paperless dms-adapter -d</code>
+            </span>
           </AlertDescription>
         </Alert>
       )}
