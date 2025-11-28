@@ -64,7 +64,10 @@
     "unknown": "Unbekannt",
     "unmatched": "Nicht zugeordnet",
     "matched": "Zugeordnet",
-    "manual": "Manuell zugeordnet"
+    "manual": "Manuell zugeordnet",
+    "granted": "Erteilt",
+    "denied": "Abgelehnt",
+    "revoked": "Widerrufen"
   },
   "crud": {
     "actions": {
@@ -160,7 +163,8 @@
       "duplicate": "Duplizieren",
       "activate": "Aktivieren",
       "deactivate": "Deaktivieren",
-      "next": "Weiter"
+      "next": "Weiter",
+      "markCompleted": "Als abgeschlossen markieren"
     },
     "kanban": {
       "pipeline": "Pipeline: {{entityType}}",
@@ -847,7 +851,17 @@
       "totalClicked": "Gesamt geklickt",
       "totalConverted": "Gesamt konvertiert",
       "totalSpent": "Gesamtausgaben",
-      "spent": "Ausgaben"
+      "spent": "Ausgaben",
+      "channel": "Kanal",
+      "consentType": "Einwilligungstyp",
+      "grantedAt": "Erteilt am",
+      "confirmedAt": "Bestätigt am",
+      "source": "Quelle",
+      "requestType": "Anfrageart",
+      "requestedAt": "Angefragt am",
+      "completedAt": "Abgeschlossen am",
+      "verifiedAt": "Verifiziert am",
+      "selfRequest": "Selbstanfrage"
     },
     "messages": {
       "createSuccess": "{{entityType}} erfolgreich erstellt",
@@ -987,7 +1001,11 @@
       "approvalRequired": "Genehmigung erforderlich",
       "approvalRequiredDesc": "Diese Bestellung wurde bereits freigegeben. Änderungen erfordern eine erneute Genehmigung.",
       "duplicatesFound": "{{count}} mögliche Dublette(n) gefunden",
-      "noDuplicatesFound": "Keine Dubletten gefunden"
+      "noDuplicatesFound": "Keine Dubletten gefunden",
+      "yes": "Ja",
+      "no": "Nein",
+      "consentRevoked": "Einwilligung widerrufen",
+      "consentRevokeError": "Fehler beim Widerrufen der Einwilligung"
     },
     "audit": {
       "title": "Änderungshistorie",
@@ -1090,7 +1108,23 @@
       "manageTemplates": "Kampagnen-Vorlagen verwalten",
       "manageSegments": "Zielgruppen-Segmente verwalten",
       "procurementReports": "Standardreports für den Einkauf (Offene Bestellungen, Spend-Analyse, Lieferantenperformance, Toleranzen)",
-      "manageOrderConfirmations": "Lieferanten-Rückmeldungen verwalten"
+      "manageOrderConfirmations": "Lieferanten-Rückmeldungen verwalten",
+      "manageConsents": "Einwilligungen verwalten und DSGVO-Compliance sicherstellen",
+      "manageGDPRRequests": "DSGVO-Anfragen (Auskunft, Löschung, Widerspruch) bearbeiten"
+    },
+    "sources": {
+      "webForm": "Web-Formular",
+      "api": "API",
+      "import": "Import",
+      "manual": "Manuell"
+    },
+    "gdpr": {
+      "requestTypes": {
+        "access": "Auskunftsrecht",
+        "deletion": "Löschungsrecht",
+        "portability": "Datenübertragbarkeit",
+        "objection": "Widerspruchsrecht"
+      }
     },
     "campaigns": {
       "performanceDashboard": "Kampagnen-Performance",
