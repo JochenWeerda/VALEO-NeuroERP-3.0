@@ -246,8 +246,8 @@ export default function ConsentManagementPage(): JSX.Element {
         setData(items)
         setTotal(items.length)
       }
-    } catch (error) {
-      console.error('Fehler beim Laden der Consents:', error)
+    } catch {
+      // Silent error handling - toast notification already shown
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadError')
