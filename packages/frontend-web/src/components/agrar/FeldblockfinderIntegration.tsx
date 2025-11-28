@@ -14,13 +14,16 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ExternalLink, MapPin, AlertTriangle, Maximize2, RefreshCw } from 'lucide-react'
 
 // Bundesländer mit Feldblockfinder-URLs
+// Hinweis: Die meisten Bundesländer-Portale setzen X-Frame-Options: sameorigin,
+// was iframe-Einbettung verhindert. Daher wird auf externe Links verwiesen.
 const BUNDESLAENDER: Record<string, { name: string; url: string; iframeSupported: boolean; description?: string }> = {
   'niedersachsen': {
     name: 'Niedersachsen',
-    // Neue Schlaginfo-URL (modernes GIS-Portal)
+    // Schlaginfo-URL (modernes GIS-Portal)
     // Quelle: https://sla.niedersachsen.de/agrarfoerderung/schlaginfo/
+    // Hinweis: iframe blockiert durch X-Frame-Options: sameorigin
     url: 'https://sla.niedersachsen.de/agrarfoerderung/schlaginfo/',
-    iframeSupported: true, // Teste iframe-Unterstützung
+    iframeSupported: false, // Server blockiert iframe via X-Frame-Options
     description: 'SLA Niedersachsen Schlaginfo - Feldblöcke, LE, Düngeverordnung'
   },
   'bayern': {
@@ -283,17 +286,20 @@ export function FeldblockfinderIntegration({
             )}
 
             {/* Info für Niedersachsen Schlaginfo */}
-            {selectedBundesland === 'niedersachsen' && bundeslandInfo.iframeSupported && (
+            {selectedBundesland === 'niedersachsen' && (
               <Alert className="bg-green-50 border-green-200">
                 <MapPin className="h-4 w-4 text-green-600" />
                 <AlertTitle className="text-green-800">Niedersachsen Schlaginfo</AlertTitle>
                 <AlertDescription className="text-green-700">
-                  <p>Nutzen Sie folgende Funktionen:</p>
+                  <p>Öffnen Sie das Portal im neuen Tab und nutzen Sie folgende Funktionen:</p>
                   <ul className="list-disc list-inside mt-2 text-sm">
                     <li><strong>Suche Agrarförderung</strong>: Feldblock nach FLIK oder LE nach FLEK suchen</li>
                     <li><strong>Shape-Download</strong>: Feldblöcke, Landschaftselemente, aktuelle Schläge</li>
-                    <li><strong>NDüngGewNPVO</strong>: Nitrat- und Phosphat-Kulissen</li>
+                    <li><strong>NDüngGewNPVO</strong>: Nitrat- und Phosphat-Kulissen (Düngeverordnung)</li>
                   </ul>
+                  <p className="mt-2 text-xs italic">
+                    Hinweis: Eine direkte Einbettung ist aus Sicherheitsgründen nicht möglich.
+                  </p>
                 </AlertDescription>
               </Alert>
             )}
