@@ -313,6 +313,15 @@ export const mutationKeys = {
   },
 } as const
 
+/**
+ * Performance-optimierte Query Client Konfiguration
+ * 
+ * - staleTime: 5 Minuten (Daten gelten als frisch)
+ * - gcTime: 30 Minuten (Cache wird nach 30 Min gelöscht)
+ * - refetchOnWindowFocus: false (keine Auto-Refetch bei Tab-Wechsel)
+ * - refetchOnMount: 'always' nur wenn stale (Standard)
+ * - refetchInterval: false (kein automatisches Polling)
+ */
 export const createQueryClient = (): QueryClient => {
   return new QueryClient({
     defaultOptions: {
@@ -322,10 +331,36 @@ export const createQueryClient = (): QueryClient => {
         retry: shouldRetryQuery,
         refetchOnWindowFocus: false,
         refetchOnReconnect: true,
+        refetchOnMount: true,
+        // Strukturelles Sharing für bessere Performance bei großen Datenmengen
+        structuralSharing: true,
+        // Netzwerk-Modus: Online-First mit Fallback auf Cache
+        networkMode: 'offlineFirst',
       },
       mutations: {
         retry: false,
+        // Netzwerk-Modus für Mutations
+        networkMode: 'online',
       },
     },
   })
 }
+
+/**
+ * Query-Optionen für häufig genutzte Daten (z.B. Stammdaten)
+ * Längere Cache-Zeit für selten geänderte Daten
+ */
+export const LONG_CACHE_OPTIONS = {
+  staleTime: 15 * SECONDS_PER_MINUTE * ONE_SECOND_MS, // 15 Minuten
+  gcTime: 60 * SECONDS_PER_MINUTE * ONE_SECOND_MS, // 1 Stunde
+} as const
+
+/**
+ * Query-Optionen für Echtzeit-Daten (z.B. Dashboard)
+ * Kürzere Cache-Zeit für häufig geänderte Daten
+ */
+export const REALTIME_CACHE_OPTIONS = {
+  staleTime: 30 * ONE_SECOND_MS, // 30 Sekunden
+  gcTime: FIVE_MINUTES * SECONDS_PER_MINUTE * ONE_SECOND_MS, // 5 Minuten
+  refetchInterval: 60 * ONE_SECOND_MS, // Alle 60 Sekunden aktualisieren
+} as const
