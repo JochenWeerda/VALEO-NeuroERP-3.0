@@ -172,19 +172,19 @@ const mischfuttermittelListConfig: ListConfig = {
       key: 'export',
       label: 'Exportieren',
       type: 'secondary',
-      onClick: () => console.log('Export clicked')
+      onClick: () => { /* Export-Logik implementieren */ }
     },
     {
       key: 'recalculate',
       label: 'Nährwerte neu berechnen',
       type: 'secondary',
-      onClick: () => console.log('Recalculate clicked')
+      onClick: () => { /* Neuberechnung implementieren */ }
     },
     {
       key: 'delete',
       label: 'Löschen',
       type: 'danger',
-      onClick: () => console.log('Bulk delete clicked')
+      onClick: () => { /* Bulk-Delete implementieren */ }
     }
   ],
   defaultSort: { field: 'name', direction: 'asc' },
@@ -232,8 +232,10 @@ export default function MischfuttermittelListePage(): JSX.Element {
         setData((response.data as any).data || [])
         setTotal((response.data as any).total || 0)
       }
-    } catch (error) {
-      console.error('Fehler beim Laden der Daten:', error)
+    } catch (_error) {
+      // API nicht erreichbar - leere Daten beibehalten
+      setData([])
+      setTotal(0)
     } finally {
       setLoading(false)
     }

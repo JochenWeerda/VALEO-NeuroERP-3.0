@@ -50,7 +50,7 @@ interface ReportData {
 }
 
 const REPORT_TYPES = [
-  { id: 'sales-performance' as ReportType, label: 'Verkaufsperformance', icon: BarChart3, color: '***REMOVED***10B981' },
+  { id: 'sales-performance' as ReportType, label: 'Verkaufs\u00ADperformance', icon: BarChart3, color: '***REMOVED***10B981' },
   { id: 'customer-analytics' as ReportType, label: 'Kundenanalyse', icon: Users, color: '***REMOVED***3B82F6' },
   { id: 'product-analytics' as ReportType, label: 'Produktanalyse', icon: Package, color: '***REMOVED***8B5CF6' },
   { id: 'financial-analytics' as ReportType, label: 'Finanzanalyse', icon: Euro, color: '***REMOVED***F59E0B' },
@@ -66,7 +66,7 @@ export default function ReportsDashboard(): JSX.Element {
   const { data: reportData, isLoading } = useMcpQuery<ReportData>(
     "reports",
     selectedReport,
-    (startDate && endDate ? { start_date: startDate, end_date: endDate } : {}) as any
+    [startDate, endDate]
   )
 
   const handleExport = async (format: 'json' | 'csv' = 'json') => {
@@ -126,20 +126,20 @@ export default function ReportsDashboard(): JSX.Element {
                 <PieChart>
                   <Pie
                     data={[
-                      { name: 'Anfrage → Angebot', value: data.conversionRates.inquiryToOffer },
-                      { name: 'Angebot → Auftrag', value: data.conversionRates.offerToOrder },
-                      { name: 'Auftrag → Rechnung', value: data.conversionRates.orderToInvoice },
+                      { name: 'Anfrage → Angebot', value: data?.conversionRates?.inquiryToOffer ?? 0 },
+                      { name: 'Angebot → Auftrag', value: data?.conversionRates?.offerToOrder ?? 0 },
+                      { name: 'Auftrag → Rechnung', value: data?.conversionRates?.orderToInvoice ?? 0 },
                     ]}
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
                     dataKey="value"
-                    label={({ name, value }) => `${name}: ${value.toFixed(1)}%`}
+                    label={({ name, value }) => `${name}: ${(value ?? 0).toFixed(1)}%`}
                   >
                     {[
-                      { name: 'Anfrage → Angebot', value: data.conversionRates.inquiryToOffer },
-                      { name: 'Angebot → Auftrag', value: data.conversionRates.offerToOrder },
-                      { name: 'Auftrag → Rechnung', value: data.conversionRates.orderToInvoice },
+                      { name: 'Anfrage → Angebot', value: data?.conversionRates?.inquiryToOffer ?? 0 },
+                      { name: 'Angebot → Auftrag', value: data?.conversionRates?.offerToOrder ?? 0 },
+                      { name: 'Auftrag → Rechnung', value: data?.conversionRates?.orderToInvoice ?? 0 },
                     ].map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={['***REMOVED***10B981', '***REMOVED***3B82F6', '***REMOVED***8B5CF6'][index % 3]} />
                     ))}

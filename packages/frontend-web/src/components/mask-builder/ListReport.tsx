@@ -48,8 +48,8 @@ const ListReport: React.FC<ListReportProps> = ({
   const totalPages = Math.ceil(total / pageSize)
 
   // i18n-Helper für Titel und Untertitel
-  const displayTitle = config.titleKey ? t(config.titleKey) : config.title
-  const displaySubtitle = config.subtitleKey ? t(config.subtitleKey) : config.subtitle
+  const displayTitle = config.titleKey ? t(config.titleKey, { entityType: config.title }) : config.title
+  const displaySubtitle = config.subtitleKey ? t(config.subtitleKey, { entityType: config.title }) : config.subtitle
 
   // i18n-Helper für Spalten-Labels
   const getColumnLabel = (column: ListColumn): string => {
@@ -261,6 +261,30 @@ const ListReport: React.FC<ListReportProps> = ({
                       ))}
                     </SelectContent>
                   </Select>
+                ) : filter.type === 'number' ? (
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      placeholder={getFilterPlaceholder(filter) || t('crud.placeholders.enterAmount')}
+                      value={filters[filter.name] || ''}
+                      onChange={(e) => handleFilterChange(filter.name, e.target.value)}
+                      min={(filter as any).min}
+                      max={(filter as any).max}
+                      step={(filter as any).step || '0.01'}
+                      className="pr-8"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">€</span>
+                  </div>
+                ) : filter.type === 'date' ? (
+                  <Input
+                    type="date"
+                    placeholder={getFilterPlaceholder(filter)}
+                    value={filters[filter.name] || ''}
+                    onChange={(e) => handleFilterChange(filter.name, e.target.value)}
+                    max={(filter as any).maxDate || new Date().toISOString().split('T')[0]}
+                    min={(filter as any).minDate}
+                    lang="de-DE"
+                  />
                 ) : (
                   <Input
                     placeholder={getFilterPlaceholder(filter)}

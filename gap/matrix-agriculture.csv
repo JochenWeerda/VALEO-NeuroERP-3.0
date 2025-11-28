@@ -1,0 +1,21 @@
+ID,Domain,Capability,Subcapability,Status,Gap_Beschreibung,Loesungstyp,Prioritaet,Evidence,Erstellt
+AGR-FLD-01,Feldverwaltung,Schlagverwaltung,Schläge anlegen/bearbeiten,Partial,Basis vorhanden - keine API-Anbindung,Type B,P0,packages/frontend-web/src/pages/agrar/feldbuch/schlagkartei.tsx,2025-11-27
+AGR-FLD-02,Feldverwaltung,Schlagverwaltung,Mandantenfähigkeit,Implemented,Multi-Tenant Kundenauswahl implementiert,Type C,P0,packages/frontend-web/src/pages/agrar/feldbuch/schlagkartei.tsx,2025-11-27
+AGR-FLD-03,Feldverwaltung,Feldblockfinder,iframe-Integration,Implemented,Feldblockfinder-Komponente mit Bundesland-Auswahl erstellt,Type B,P0,packages/frontend-web/src/components/agrar/FeldblockfinderIntegration.tsx,2025-11-27
+AGR-FLD-04,Feldverwaltung,Feldkarten,GIS-Visualisierung,Partial,Basis Kartendarstellung vorhanden,Type C,P1,,2025-11-27
+AGR-FLD-05,Feldverwaltung,Feldgrenzen,Polygon-Erfassung,No,Keine Polygon-Erfassung möglich,Type C,P2,,2025-11-27
+AGR-OPS-01,Feldoperationen,Maßnahmen-Dokumentation,Erfassung Düngung/PSM,Implemented,Erweiterte Maßnahmen-Dokumentation implementiert,Type B,P0,packages/frontend-web/src/pages/agrar/feldbuch/massnahmen.tsx,2025-11-27
+AGR-OPS-02,Feldoperationen,Maßnahmen-Dokumentation,Mandantenfähigkeit,Implemented,Multi-Tenant Kundenzuordnung implementiert,Type C,P0,packages/frontend-web/src/pages/agrar/feldbuch/massnahmen.tsx,2025-11-27
+AGR-OPS-03,Feldoperationen,Maßnahmen-Dokumentation,Mitarbeiter-Zuordnung,Implemented,Anwender-Feld in Maßnahmen hinzugefügt,Type C,P1,packages/frontend-web/src/pages/agrar/feldbuch/massnahmen.tsx,2025-11-27
+AGR-OPS-04,Feldoperationen,Feldkalender,Planung/Terminierung,No,Kein Planungskalender vorhanden,Type C,P1,,2025-11-27
+AGR-OPS-05,Feldoperationen,GPS-Tracking,Maschinen-Position,No,Keine GPS-Integration,Type B,P3,,2025-11-27
+AGR-INV-01,Betriebsmittel,Düngemittel,Bestandsverwaltung,Partial,Stammdaten vorhanden - keine Bestandsführung,Type A,P1,packages/frontend-web/src/pages/agrar/duenger-liste.tsx,2025-11-27
+AGR-INV-02,Betriebsmittel,Pflanzenschutzmittel,PSM-Register,Partial,Stammdaten vorhanden - PSM-Auflagen fehlen teilweise,Type A,P1,packages/frontend-web/src/pages/agrar/psm/liste.tsx,2025-11-27
+AGR-INV-03,Betriebsmittel,Saatgut,Sortenregister,Partial,Basis vorhanden,Type A,P2,packages/frontend-web/src/pages/agrar/saatgut-liste.tsx,2025-11-27
+AGR-INV-04,Betriebsmittel,Automatische Nachbestellung,Mindestbestand-Warnung,No,Keine automatische Nachbestellung,Type B,P2,,2025-11-27
+AGR-COM-01,Compliance,Düngebilanz,Stoffstrombilanz,No,Keine Düngebilanz-Berechnung,Type C,P0,,2025-11-27
+AGR-COM-02,Compliance,PSM-Dokumentation,Spritztagebuch,Implemented,Spritztagebuch-Tab mit PflSchG-Hinweis implementiert,Type A,P0,packages/frontend-web/src/pages/agrar/feldbuch/massnahmen.tsx,2025-11-27
+AGR-COM-03,Compliance,Cross-Compliance,CC-Berichte,No,Keine Cross-Compliance-Berichte,Type C,P1,,2025-11-27
+AGR-COM-04,Compliance,GQS/QS-Export,Qualitätssicherung,No,Kein QS-Export,Type B,P2,,2025-11-27
+AGR-COM-05,Compliance,LEA-Export,Förderanträge,No,Kein LEA-Export,Type B,P2,,2025-11-27
+
