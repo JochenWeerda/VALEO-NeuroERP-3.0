@@ -14,11 +14,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ExternalLink, MapPin, AlertTriangle, Maximize2, RefreshCw } from 'lucide-react'
 
 // Bundesländer mit Feldblockfinder-URLs
-const BUNDESLAENDER: Record<string, { name: string; url: string; iframeSupported: boolean }> = {
+const BUNDESLAENDER: Record<string, { name: string; url: string; iframeSupported: boolean; description?: string }> = {
   'niedersachsen': {
     name: 'Niedersachsen',
-    url: 'https://sla.niedersachsen.de/mapbender_sla/frames/login_flink.php',
-    iframeSupported: false // FLINK blockiert iframe
+    // Neue Schlaginfo-URL (modernes GIS-Portal)
+    // Quelle: https://sla.niedersachsen.de/agrarfoerderung/schlaginfo/
+    url: 'https://sla.niedersachsen.de/agrarfoerderung/schlaginfo/',
+    iframeSupported: true, // Teste iframe-Unterstützung
+    description: 'SLA Niedersachsen Schlaginfo - Feldblöcke, LE, Düngeverordnung'
   },
   'bayern': {
     name: 'Bayern',
@@ -279,6 +282,22 @@ export function FeldblockfinderIntegration({
               </Alert>
             )}
 
+            {/* Info für Niedersachsen Schlaginfo */}
+            {selectedBundesland === 'niedersachsen' && bundeslandInfo.iframeSupported && (
+              <Alert className="bg-green-50 border-green-200">
+                <MapPin className="h-4 w-4 text-green-600" />
+                <AlertTitle className="text-green-800">Niedersachsen Schlaginfo</AlertTitle>
+                <AlertDescription className="text-green-700">
+                  <p>Nutzen Sie folgende Funktionen:</p>
+                  <ul className="list-disc list-inside mt-2 text-sm">
+                    <li><strong>Suche Agrarförderung</strong>: Feldblock nach FLIK oder LE nach FLEK suchen</li>
+                    <li><strong>Shape-Download</strong>: Feldblöcke, Landschaftselemente, aktuelle Schläge</li>
+                    <li><strong>NDüngGewNPVO</strong>: Nitrat- und Phosphat-Kulissen</li>
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Loading Skeleton */}
             {isLoading && (
               <div className="space-y-4">
@@ -288,15 +307,24 @@ export function FeldblockfinderIntegration({
 
             {/* iframe (Versuch) */}
             {bundeslandInfo.iframeSupported && !isLoading && !iframeError && (
-              <div className="border rounded-lg overflow-hidden" style={{ height }}>
-                <iframe
-                  src={bundeslandInfo.url}
-                  className="w-full h-full"
-                  title={`Feldblockfinder ${bundeslandInfo.name}`}
-                  onLoad={handleIframeLoad}
-                  onError={handleIframeError}
-                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                />
+              <div className="space-y-2">
+                <div className="border rounded-lg overflow-hidden relative" style={{ height }}>
+                  <iframe
+                    src={bundeslandInfo.url}
+                    className="w-full h-full"
+                    title={`Feldblockfinder ${bundeslandInfo.name}`}
+                    onLoad={handleIframeLoad}
+                    onError={handleIframeError}
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Falls die Karte nicht angezeigt wird, öffnen Sie den{' '}
+                  <button onClick={openExternalLink} className="text-primary underline">
+                    Feldblockfinder im neuen Tab
+                  </button>.
+                </p>
               </div>
             )}
 
