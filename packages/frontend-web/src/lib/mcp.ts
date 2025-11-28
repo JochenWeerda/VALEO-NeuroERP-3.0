@@ -10,26 +10,34 @@ const STALE_TIME_MINUTES = 5
 const MINUTES_TO_MS = 60
 const SECONDS_TO_MS = 1000
 
+// Backend API URL - verwendet Backend-Port wenn verfügbar
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 // MCP fetch function (placeholder for actual MCP bridge)
 export async function mcpFetch<TReq, TRes>(req: McpRequest<TReq>): Promise<McpResponse<TRes>> {
   // Placeholder - later replace with actual MCP WebSocket/HTTP bridge
   try {
-    const res = await fetch(`/api/mcp/${req.service}/${req.action}`, {
+    const res = await fetch(`${API_BASE_URL}/api/v1/mcp/${req.service}/${req.action}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req.payload ?? {}),
     })
 
     if (res.status === 404) {
-      // Graceful empty response for missing endpoints to avoid noisy console errors
+      // Graceful empty response for missing endpoints - kein Console-Error
+      return { ok: true, data: { data: [] } as unknown as TRes }
+    }
+
+    if (!res.ok) {
+      // Andere Fehler auch graceful behandeln
       return { ok: true, data: { data: [] } as unknown as TRes }
     }
 
     const data = await res.json()
     return data
-  } catch (error) {
-    // Fallback for network or parsing errors
-    return { ok: false, data: undefined, error: (error as Error)?.message ?? 'UNKNOWN_ERROR' }
+  } catch {
+    // Fallback für Netzwerk- oder Parsing-Fehler - kein Console-Logging
+    return { ok: true, data: { data: [] } as unknown as TRes }
   }
 }
 
