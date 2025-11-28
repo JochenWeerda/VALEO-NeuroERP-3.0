@@ -47,12 +47,20 @@ export function useForecast(): {
 
     setLoading(true)
 
-    fetch("/api/mcp/copilot/forecast", {
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+    fetch(`${apiBaseUrl}/api/v1/mcp/copilot/forecast`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ trends: trendData.data }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          // Graceful handling - forecast ist optional
+          return { ok: false }
+        }
+        return response.json()
+      })
       .then((json: ForecastResponse) => {
         if (json.ok === true && json.data !== undefined) {
           setResult(json.data)
