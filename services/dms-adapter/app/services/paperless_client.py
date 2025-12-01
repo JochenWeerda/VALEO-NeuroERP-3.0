@@ -187,10 +187,11 @@ class PaperlessClient:
     ***REMOVED*** ==================== Health ====================
     
     async def health_check(self) -> bool:
-        """Prüfe ob Paperless erreichbar ist"""
+        """Prüfe ob Paperless erreichbar ist und API-Token gültig ist"""
         try:
             async with self._get_client() as client:
-                response = await client.get("/")
+                ***REMOVED*** Verwende /documents/ Endpoint - gibt 200 bei gültigem Token
+                response = await client.get("/documents/", params={"page_size": 1})
                 return response.status_code == 200
         except Exception as e:
             logger.warning(f"Paperless health check failed: {e}")
