@@ -101,6 +101,39 @@
     --input: var(--color-neutral-700-hsl);
     --ring: var(--color-brand-primary-400-hsl);
   }
+
+  /* Warehouse High-Contrast Theme - Optimiert für Lager-Terminals */
+  .theme-warehouse {
+    --background: 0 0% 10%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 15%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 43 96% 56%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 43 96% 56%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 25%;
+    --input: 0 0% 20%;
+    --ring: 43 96% 56%;
+    --radius: 0.375rem;
+
+    /* Warehouse-spezifische Farben */
+    --warehouse-eingang: 142 71% 45%;
+    --warehouse-ausgang: 25 95% 53%;
+    --warehouse-inventur: 263 70% 50%;
+    --warehouse-umlagerung: 187 94% 43%;
+    --warehouse-success: 142 71% 45%;
+    --warehouse-warning: 43 96% 56%;
+    --warehouse-error: 0 84% 60%;
+  }
 }
 
 @layer base {
