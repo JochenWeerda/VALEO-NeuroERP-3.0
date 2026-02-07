@@ -7,7 +7,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Command as CommandIcon, HelpCircle, LogOut, Search, Settings, Sparkles, User } from 'lucide-react'
+import { NotificationCenter } from '@/components/ui/notification-center'
+import { Command as CommandIcon, HelpCircle, LogOut, Moon, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
+import { useTheme } from '@/hooks/useTheme'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 
 interface TopBarProps {
@@ -33,6 +35,7 @@ export const topBarMCP = createMCPMetadata('TopBar', 'navigation', {
 })
 
 export function TopBar({ onCommandOpen, commandPaletteEnabled = true }: TopBarProps): JSX.Element {
+  const { isDark, toggleTheme } = useTheme()
   const user = {
     name: 'Test Admin',
     email: 'test-admin@valeo.local',
@@ -76,6 +79,18 @@ export function TopBar({ onCommandOpen, commandPaletteEnabled = true }: TopBarPr
       >
         <Sparkles className="h-5 w-5 text-primary" />
         <span className="sr-only">AI-Hilfe</span>
+      </Button>
+
+      <NotificationCenter />
+
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={toggleTheme}
+        title={isDark ? 'Zum hellen Modus wechseln' : 'Zum dunklen Modus wechseln'}
+        aria-label={isDark ? 'Zum hellen Modus wechseln' : 'Zum dunklen Modus wechseln'}
+      >
+        {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
       </Button>
 
       <Button variant="ghost" size="icon" title="Hilfe">
