@@ -1,8 +1,8 @@
-"""Merge multiple heads
+"""merge heads
 
-Revision ID: eca81651f8ba
-Revises: 7f8529f27eb0, add_agrar_mod, 4601a09c0fc1
-Create Date: 2025-10-16 06:38:49.706725
+Revision ID: 4b6600ac3926
+Revises: add_crm_discount, add_documents_json, portal_001, procurement_p0_001
+Create Date: 2026-02-10 10:42:34.098810
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 ***REMOVED*** revision identifiers, used by Alembic.
-revision: str = 'eca81651f8ba'
-down_revision: Union[str, None] = ('7f8529f27eb0', 'add_agrar_mod', '4601a09c0fc1')
+revision: str = '4b6600ac3926'
+down_revision: Union[str, None] = ('add_crm_discount', 'add_documents_json', 'portal_001', 'procurement_p0_001')
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

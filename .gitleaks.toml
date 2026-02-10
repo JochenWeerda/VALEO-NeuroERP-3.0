@@ -1,0 +1,24 @@
+***REMOVED*** Gitleaks configuration for VALEO-NeuroERP-3.0
+***REMOVED*** Goal: prevent accidental secret commits (API keys, passwords, private keys).
+
+title = "VALEO-NeuroERP gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlist for known non-secret test strings and generated artifacts."
+paths = [
+  '''^docs/''',
+  '''^memory/''',
+  '''^memory-bank/''',
+  '''^de_modules/''',
+  '''^htmlcov/''',
+  '''^coverage\.xml$''',
+  '''^lint-output\.txt$''',
+]
+
+regexes = [
+  ***REMOVED*** Dummy dev token used in tests
+  '''dev-token''',
+]

@@ -13,6 +13,7 @@ Kundenportal-Tabellen für:
 """
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 
 ***REMOVED*** revision identifiers, used by Alembic.
@@ -26,25 +27,31 @@ def upgrade() -> None:
     ***REMOVED*** Schema erstellen falls nicht vorhanden
     op.execute("CREATE SCHEMA IF NOT EXISTS domain_portal")
     
-    ***REMOVED*** Enum-Typen erstellen
-    op.execute("""
-        DO $$ BEGIN
-            CREATE TYPE domain_portal.contract_status AS ENUM ('NONE', 'ACTIVE', 'LOW', 'EXHAUSTED');
-        EXCEPTION
-            WHEN duplicate_object THEN null;
-        END $$;
-    """)
-    
-    op.execute("""
-        DO $$ BEGIN
-            CREATE TYPE domain_portal.order_status AS ENUM (
-                'DRAFT', 'SUBMITTED', 'CONFIRMED', 'IN_PROGRESS', 
-                'SHIPPED', 'DELIVERED', 'CANCELLED'
-            );
-        EXCEPTION
-            WHEN duplicate_object THEN null;
-        END $$;
-    """)
+    contract_status_enum = postgresql.ENUM(
+        "NONE",
+        "ACTIVE",
+        "LOW",
+        "EXHAUSTED",
+        name="contract_status",
+        schema="domain_portal",
+        create_type=False,
+    )
+    order_status_enum = postgresql.ENUM(
+        "DRAFT",
+        "SUBMITTED",
+        "CONFIRMED",
+        "IN_PROGRESS",
+        "SHIPPED",
+        "DELIVERED",
+        "CANCELLED",
+        name="order_status",
+        schema="domain_portal",
+        create_type=False,
+    )
+
+    ***REMOVED*** Enum-Typen erstellen (idempotent)
+    contract_status_enum.create(op.get_bind(), checkfirst=True)
+    order_status_enum.create(op.get_bind(), checkfirst=True)
     
     ***REMOVED*** Kundenkontrakte
     op.create_table(
@@ -61,8 +68,7 @@ def upgrade() -> None:
         sa.Column('unit', sa.String(20), nullable=False),
         sa.Column('total_quantity', sa.Numeric(12, 2), nullable=False),
         sa.Column('remaining_quantity', sa.Numeric(12, 2), nullable=False),
-        sa.Column('status', sa.Enum('NONE', 'ACTIVE', 'LOW', 'EXHAUSTED', name='contract_status', schema='domain_portal'), 
-                  nullable=False, server_default='ACTIVE'),
+        sa.Column('status', contract_status_enum, nullable=False, server_default='ACTIVE'),
         sa.Column('valid_from', sa.DateTime(timezone=True), nullable=False),
         sa.Column('valid_until', sa.DateTime(timezone=True), nullable=False),
         sa.Column('notes', sa.Text, nullable=True),
@@ -107,10 +113,7 @@ def upgrade() -> None:
         sa.Column('customer_name', sa.String(200), nullable=False),
         sa.Column('order_number', sa.String(50), nullable=False, unique=True),
         sa.Column('order_date', sa.DateTime(timezone=True), server_default=sa.func.now()),
-        sa.Column('status', sa.Enum('DRAFT', 'SUBMITTED', 'CONFIRMED', 'IN_PROGRESS', 
-                                    'SHIPPED', 'DELIVERED', 'CANCELLED', 
-                                    name='order_status', schema='domain_portal'),
-                  nullable=False, server_default='SUBMITTED'),
+        sa.Column('status', order_status_enum, nullable=False, server_default='SUBMITTED'),
         sa.Column('total_net', sa.Numeric(12, 2), server_default='0'),
         sa.Column('total_gross', sa.Numeric(12, 2), server_default='0'),
         sa.Column('delivery_address', sa.Text, nullable=True),
