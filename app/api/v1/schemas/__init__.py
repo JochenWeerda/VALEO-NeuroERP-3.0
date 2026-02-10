@@ -66,28 +66,28 @@ from .finance import (
 )
 
 __all__ = [
-    ***REMOVED*** Base schemas
+    # Base schemas
     "BaseSchema", "TimestampMixin", "SoftDeleteMixin",
     "PaginationParams", "PaginatedResponse", "APIResponse",
     "ErrorResponse", "HealthResponse", "DatabaseHealthResponse",
 
-    ***REMOVED*** Shared schemas
+    # Shared schemas
     "Tenant", "TenantCreate", "TenantUpdate",
     "User", "UserCreate", "UserUpdate", "UserLogin", "TokenResponse",
     "PasswordResetRequest", "PasswordReset", "PasswordChange",
 
-    ***REMOVED*** CRM schemas
+    # CRM schemas
     "Customer", "CustomerCreate", "CustomerUpdate",
     "Lead", "LeadCreate", "LeadUpdate",
     "Contact", "ContactCreate", "ContactUpdate",
 
-    ***REMOVED*** Inventory schemas
+    # Inventory schemas
     "Article", "ArticleCreate", "ArticleUpdate",
     "Warehouse", "WarehouseCreate", "WarehouseUpdate",
     "StockMovement", "StockMovementCreate",
     "InventoryCount", "InventoryCountCreate",
 
-    ***REMOVED*** Finance schemas
+    # Finance schemas
     "Account", "AccountCreate", "AccountUpdate",
     "JournalEntry", "JournalEntryCreate", "JournalEntryUpdate",
     "JournalEntryLine", "JournalEntryLineCreate"

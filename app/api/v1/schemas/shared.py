@@ -11,7 +11,7 @@ from uuid import UUID
 from .base import BaseSchema, PaginatedResponse
 
 
-***REMOVED*** Tenant Schemas
+# Tenant Schemas
 class Tenant(BaseSchema):
     """Tenant schema"""
     id: str
@@ -40,7 +40,7 @@ class TenantUpdate(BaseSchema):
     settings: Optional[str] = None
 
 
-***REMOVED*** User Schemas
+# User Schemas
 class User(BaseSchema):
     """User schema"""
     id: str
@@ -85,7 +85,7 @@ class UserLogin(BaseSchema):
     password: str = Field(..., description="User password")
 
 
-***REMOVED*** Authentication Schemas
+# Authentication Schemas
 class LoginRequest(BaseSchema):
     """Login request schema"""
     username: str = Field(..., description="Username or email")

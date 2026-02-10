@@ -9,7 +9,7 @@ import time
 import jwt
 from typing import List, TypedDict
 
-***REMOVED*** Environment Configuration
+# Environment Configuration
 JWT_SECRET = os.environ.get("JWT_SECRET", "dev-insecure-change-me")
 JWT_ALG = os.environ.get("JWT_ALG", "HS256")
 JWT_EXPIRE_MIN = int(os.environ.get("JWT_EXPIRE_MIN", "60"))
@@ -17,11 +17,11 @@ JWT_EXPIRE_MIN = int(os.environ.get("JWT_EXPIRE_MIN", "60"))
 
 class Claims(TypedDict, total=False):
     """JWT Claims Structure"""
-    sub: str  ***REMOVED*** Subject (User ID)
-    roles: List[str]  ***REMOVED*** User Roles
-    exp: int  ***REMOVED*** Expiration Time
-    iat: int  ***REMOVED*** Issued At
-    iss: str  ***REMOVED*** Issuer
+    sub: str  # Subject (User ID)
+    roles: List[str]  # User Roles
+    exp: int  # Expiration Time
+    iat: int  # Issued At
+    iss: str  # Issuer
 
 
 def create_access_token(

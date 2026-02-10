@@ -30,9 +30,9 @@ class TeamRole(Enum):
 
 class EscalationLevel(Enum):
     """Incident escalation levels"""
-    LEVEL_1 = "level_1"  ***REMOVED*** Initial response team
-    LEVEL_2 = "level_2"  ***REMOVED*** Extended response team
-    LEVEL_3 = "level_3"  ***REMOVED*** Executive crisis management
+    LEVEL_1 = "level_1"  # Initial response team
+    LEVEL_2 = "level_2"  # Extended response team
+    LEVEL_3 = "level_3"  # Executive crisis management
 
 
 class ResponsePhase(Enum):
@@ -63,7 +63,7 @@ class TeamMember:
     role: TeamRole
     primary_contact: str
     secondary_contact: str
-    availability_hours: str  ***REMOVED*** e.g., "24/7", "business_hours"
+    availability_hours: str  # e.g., "24/7", "business_hours"
     skills: List[str]
     certifications: List[str]
     is_active: bool = True
@@ -80,7 +80,7 @@ class EscalationRule:
     trigger_conditions: Dict[str, Any]
     target_level: EscalationLevel
     required_roles: List[TeamRole]
-    time_to_escalate: int  ***REMOVED*** minutes
+    time_to_escalate: int  # minutes
     notification_channels: List[str]
     is_active: bool = True
     created_at: datetime = field(default_factory=datetime.utcnow)
@@ -122,7 +122,7 @@ class ResponseWorkflow:
     incident_type: str
     phases: List[Dict[str, Any]]
     required_roles: List[TeamRole]
-    estimated_duration: int  ***REMOVED*** minutes
+    estimated_duration: int  # minutes
     success_criteria: List[str]
     is_active: bool = True
     last_updated: datetime = field(default_factory=datetime.utcnow)
@@ -139,20 +139,20 @@ class ISO27001SecurityIncidentResponseTeam:
         self.incident_response = incident_response_service
         self.communication = communication_service
 
-        ***REMOVED*** Team management
+        # Team management
         self.team_members: Dict[str, TeamMember] = {}
         self.escalation_rules: Dict[str, EscalationRule] = {}
         self.incident_assignments: List[IncidentAssignment] = {}
         self.communication_logs: List[CommunicationLog] = {}
         self.response_workflows: Dict[str, ResponseWorkflow] = {}
 
-        ***REMOVED*** Team configuration
+        # Team configuration
         self.team_config = self._initialize_team_config()
 
-        ***REMOVED*** Escalation procedures
+        # Escalation procedures
         self.escalation_procedures = self._initialize_escalation_procedures()
 
-        ***REMOVED*** Communication templates
+        # Communication templates
         self.communication_templates = self._initialize_communication_templates()
 
     def _initialize_team_config(self) -> Dict[str, Any]:
@@ -162,15 +162,15 @@ class ISO27001SecurityIncidentResponseTeam:
             'extended_team_size': 15,
             'crisis_team_size': 25,
             'response_sla': {
-                'critical': 15,  ***REMOVED*** minutes
-                'high': 60,      ***REMOVED*** minutes
-                'medium': 240,   ***REMOVED*** minutes
-                'low': 1440      ***REMOVED*** minutes (24 hours)
+                'critical': 15,  # minutes
+                'high': 60,      # minutes
+                'medium': 240,   # minutes
+                'low': 1440      # minutes (24 hours)
             },
             'training_requirements': {
                 'annual_training': True,
                 'incident_simulation': True,
-                'certification_renewal': 3  ***REMOVED*** years
+                'certification_renewal': 3  # years
             },
             'communication_channels': [
                 'email', 'sms', 'phone', 'slack', 'teams'
@@ -309,13 +309,13 @@ class ISO27001SecurityIncidentResponseTeam:
         Assign incident to appropriate team members based on severity and type
         Returns assignment details
         """
-        ***REMOVED*** Determine escalation level based on severity
+        # Determine escalation level based on severity
         escalation_level = self._determine_escalation_level(incident_severity, incident_type)
 
-        ***REMOVED*** Get required roles for this level
+        # Get required roles for this level
         required_roles = self.escalation_procedures[escalation_level]['required_roles']
 
-        ***REMOVED*** Find available team members for each role
+        # Find available team members for each role
         assignments = []
         for role in required_roles:
             member = self._find_available_team_member(role)
@@ -338,10 +338,10 @@ class ISO27001SecurityIncidentResponseTeam:
                     'contact': member.primary_contact
                 })
 
-                ***REMOVED*** Update member's response count
+                # Update member's response count
                 member.response_count += 1
 
-        ***REMOVED*** Send notifications to assigned members
+        # Send notifications to assigned members
         self._notify_team_assignments(incident_id, assignments)
 
         logger.info(f"Incident {incident_id} assigned to {len(assignments)} team members at {escalation_level.value}")
@@ -364,7 +364,7 @@ class ISO27001SecurityIncidentResponseTeam:
 
     def _find_available_team_member(self, role: TeamRole) -> Optional[TeamMember]:
         """Find an available team member for the specified role"""
-        ***REMOVED*** In production, this would check current assignments, availability, etc.
+        # In production, this would check current assignments, availability, etc.
         for member in self.team_members.values():
             if member.role == role and member.is_active:
                 return member
@@ -373,7 +373,7 @@ class ISO27001SecurityIncidentResponseTeam:
     def _notify_team_assignments(self, incident_id: str, assignments: List[Dict[str, Any]]):
         """Notify team members of their assignments"""
         for assignment in assignments:
-            ***REMOVED*** In production, this would send actual notifications
+            # In production, this would send actual notifications
             logger.info(f"Notified {assignment['member_name']} of assignment to incident {incident_id}")
 
     def execute_response_workflow(self, incident_id: str, workflow_id: str) -> str:
@@ -389,7 +389,7 @@ class ISO27001SecurityIncidentResponseTeam:
 
         logger.info(f"Starting response workflow {workflow.name} for incident {incident_id}")
 
-        ***REMOVED*** Execute workflow phases
+        # Execute workflow phases
         for phase in workflow.phases:
             self._execute_workflow_phase(incident_id, phase, execution_id)
 
@@ -409,7 +409,7 @@ class ISO27001SecurityIncidentResponseTeam:
         elif phase_type == 'assessment':
             self._execute_assessment_phase(incident_id, phase)
         else:
-            ***REMOVED*** Manual phase - log for human execution
+            # Manual phase - log for human execution
             logger.info(f"Manual phase {phase_name} requires human execution")
 
     def _execute_automated_phase(self, incident_id: str, phase: Dict[str, Any]):
@@ -424,7 +424,7 @@ class ISO27001SecurityIncidentResponseTeam:
                 self._collect_evidence(incident_id, action.get('evidence_types', []))
             elif action_type == 'notify_stakeholders':
                 self._notify_stakeholders(incident_id, action.get('stakeholders', []))
-            ***REMOVED*** Add more automated actions as needed
+            # Add more automated actions as needed
 
     def _execute_communication_phase(self, incident_id: str, phase: Dict[str, Any]):
         """Execute a communication phase"""
@@ -450,22 +450,22 @@ class ISO27001SecurityIncidentResponseTeam:
                 self._perform_impact_assessment(incident_id)
             elif assessment_type == 'root_cause_analysis':
                 self._perform_root_cause_analysis(incident_id)
-            ***REMOVED*** Add more assessment types as needed
+            # Add more assessment types as needed
 
     def _isolate_system(self, system_name: str):
         """Isolate a system to contain an incident"""
         logger.warning(f"Isolating system: {system_name}")
-        ***REMOVED*** In production, this would trigger actual system isolation
+        # In production, this would trigger actual system isolation
 
     def _collect_evidence(self, incident_id: str, evidence_types: List[str]):
         """Collect evidence for incident investigation"""
         logger.info(f"Collecting evidence for incident {incident_id}: {evidence_types}")
-        ***REMOVED*** In production, this would trigger evidence collection procedures
+        # In production, this would trigger evidence collection procedures
 
     def _notify_stakeholders(self, incident_id: str, stakeholders: List[str]):
         """Notify stakeholders about the incident"""
         logger.info(f"Notifying stakeholders for incident {incident_id}: {stakeholders}")
-        ***REMOVED*** In production, this would send actual notifications
+        # In production, this would send actual notifications
 
     def _perform_impact_assessment(self, incident_id: str):
         """Perform impact assessment"""
@@ -500,11 +500,11 @@ class ISO27001SecurityIncidentResponseTeam:
 
     def get_team_performance_metrics(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Get security incident response team performance metrics"""
-        ***REMOVED*** Filter data by tenant
+        # Filter data by tenant
         tenant_members = [m for m in self.team_members.values() if m.id.startswith(tenant_id)]
         tenant_assignments = [a for a in self.incident_assignments.values() if a.id.startswith(tenant_id)]
 
-        ***REMOVED*** Calculate metrics
+        # Calculate metrics
         team_stats = self._calculate_team_statistics(tenant_members)
         performance_stats = self._calculate_performance_statistics(tenant_assignments)
         training_stats = self._calculate_training_statistics(tenant_members)
@@ -526,13 +526,13 @@ class ISO27001SecurityIncidentResponseTeam:
         total_members = len(members)
         active_members = len([m for m in members if m.is_active])
 
-        ***REMOVED*** Count by role
+        # Count by role
         role_counts = {}
         for member in members:
             role_key = member.role.value
             role_counts[role_key] = role_counts.get(role_key, 0) + 1
 
-        ***REMOVED*** Availability analysis
+        # Availability analysis
         availability_counts = {}
         for member in members:
             avail = member.availability_hours
@@ -552,12 +552,12 @@ class ISO27001SecurityIncidentResponseTeam:
 
         total_assignments = len(assignments)
 
-        ***REMOVED*** Calculate response times (simplified - would need actual timing data)
-        ***REMOVED*** For now, use placeholder metrics
-        avg_response_time = 45  ***REMOVED*** minutes
-        success_rate = 95  ***REMOVED*** percentage
+        # Calculate response times (simplified - would need actual timing data)
+        # For now, use placeholder metrics
+        avg_response_time = 45  # minutes
+        success_rate = 95  # percentage
 
-        ***REMOVED*** Count by role
+        # Count by role
         role_assignments = {}
         for assignment in assignments:
             role_key = assignment.role.value
@@ -578,12 +578,12 @@ class ISO27001SecurityIncidentResponseTeam:
         trained_members = len([m for m in members if m.last_training])
         training_compliance = (trained_members / len(members)) * 100 if members else 0
 
-        ***REMOVED*** Check for expired training
+        # Check for expired training
         expired_training = 0
         for member in members:
             if member.last_training:
                 days_since_training = (datetime.utcnow() - member.last_training).days
-                if days_since_training > 365:  ***REMOVED*** Annual training requirement
+                if days_since_training > 365:  # Annual training requirement
                     expired_training += 1
 
         return {
@@ -596,19 +596,19 @@ class ISO27001SecurityIncidentResponseTeam:
         """Assess overall team readiness"""
         readiness_score = 100
 
-        ***REMOVED*** Check team size
+        # Check team size
         active_members = len([m for m in members if m.is_active])
         if active_members < self.team_config['core_team_size']:
             readiness_score -= 20
 
-        ***REMOVED*** Check role coverage
+        # Check role coverage
         required_roles = set(TeamRole)
         available_roles = set(m.role for m in members if m.is_active)
         missing_roles = required_roles - available_roles
         if missing_roles:
             readiness_score -= len(missing_roles) * 5
 
-        ***REMOVED*** Check training compliance
+        # Check training compliance
         training_compliance = len([m for m in members if m.last_training and
                                   (datetime.utcnow() - m.last_training).days <= 365])
         if members and (training_compliance / len(members)) < 0.8:
@@ -646,29 +646,29 @@ class ISO27001SecurityIncidentResponseTeam:
         """Assess ISO 27001 team compliance"""
         issues = []
 
-        ***REMOVED*** Check team size
+        # Check team size
         active_members = len([m for m in members if m.is_active])
         if active_members < self.team_config['core_team_size']:
             issues.append(f"Insufficient team size: {active_members} active members, minimum {self.team_config['core_team_size']} required")
 
-        ***REMOVED*** Check role coverage
+        # Check role coverage
         required_roles = set(TeamRole)
         available_roles = set(m.role for m in members if m.is_active)
         missing_roles = required_roles - available_roles
         if missing_roles:
             issues.append(f"Missing team roles: {', '.join(r.value for r in missing_roles)}")
 
-        ***REMOVED*** Check training compliance
+        # Check training compliance
         untrained_members = len([m for m in members if not m.last_training or
                                 (datetime.utcnow() - m.last_training).days > 365])
         if untrained_members > 0:
             issues.append(f"{untrained_members} team members lack current training")
 
-        ***REMOVED*** Check escalation rules
+        # Check escalation rules
         if len(self.escalation_rules) < 3:
             issues.append("Insufficient escalation rules defined")
 
-        ***REMOVED*** Check response workflows
+        # Check response workflows
         if len(self.response_workflows) < 5:
             issues.append("Insufficient response workflows defined")
 

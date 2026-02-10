@@ -12,10 +12,10 @@ from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Config-Pfad
+# Config-Pfad
 CONFIG_PATH = Path("data/config/dms.json")
 
-***REMOVED*** Lade Config (falls vorhanden)
+# Lade Config (falls vorhanden)
 _cfg = {}
 if CONFIG_PATH.exists():
     try:
@@ -23,9 +23,9 @@ if CONFIG_PATH.exists():
     except Exception as e:
         logger.warning(f"Failed to load DMS config: {e}")
 
-***REMOVED*** DMS-Connection (ENV-Override möglich)
+# DMS-Connection (ENV-Override möglich)
 DMS_BASE = os.environ.get("DMS_BASE") or _cfg.get("base") or "http://localhost:8010"
-DMS_TOKEN = os.environ.get("DMS_TOKEN") or ""  ***REMOVED*** Token nie in Config speichern!
+DMS_TOKEN = os.environ.get("DMS_TOKEN") or ""  # Token nie in Config speichern!
 
 
 def get_client() -> httpx.Client:
@@ -64,7 +64,7 @@ def upload_document(
         Response mit document_id
     """
     try:
-        ***REMOVED*** Hole Document-Type-ID aus Config
+        # Hole Document-Type-ID aus Config
         if not CONFIG_PATH.exists():
             raise ValueError("DMS not configured. Run bootstrap first.")
         
@@ -77,7 +77,7 @@ def upload_document(
         doc_type_id = doc_types[domain]
         
         with get_client() as client:
-            ***REMOVED*** Upload file
+            # Upload file
             with open(file_path, "rb") as f:
                 files = {"file": f}
                 data = {"document_type_id": doc_type_id}
@@ -88,7 +88,7 @@ def upload_document(
                 result = response.json()
                 document_id = result["id"]
                 
-                ***REMOVED*** Set metadata (falls vorhanden)
+                # Set metadata (falls vorhanden)
                 if metadata:
                     meta_ids = config.get("metadata_types", {})
                     

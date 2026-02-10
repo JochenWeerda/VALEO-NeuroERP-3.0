@@ -73,7 +73,7 @@ async def audit_log(limit: int = 100) -> Dict[str, Any]:
     Returns:
         Recent audit log entries
     """
-    ***REMOVED*** TODO: Implement actual audit log reading from database
+    # TODO: Implement actual audit log reading from database
     return {
         "total": 0,
         "limit": limit,

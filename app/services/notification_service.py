@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class NotificationChannel:
     """Configuration for a notification channel"""
     name: str
-    type: str  ***REMOVED*** email, teams, telegram, sms
+    type: str  # email, teams, telegram, sms
     enabled: bool
     config: Dict[str, Any]
 
@@ -33,7 +33,7 @@ class NotificationService:
 
     def _load_channels(self):
         """Load notification channels from configuration"""
-        ***REMOVED*** Email channel
+        # Email channel
         self.channels['email'] = NotificationChannel(
             name='email',
             type='email',
@@ -42,12 +42,12 @@ class NotificationService:
                 'smtp_server': 'smtp.gmail.com',
                 'smtp_port': 587,
                 'username': 'noreply@valeo-neuroerp.de',
-                'password': 'your-email-password',  ***REMOVED*** Should come from env/secrets
+                'password': 'your-email-password',  # Should come from env/secrets
                 'from_email': 'noreply@valeo-neuroerp.de'
             }
         )
 
-        ***REMOVED*** Microsoft Teams channel
+        # Microsoft Teams channel
         self.channels['teams'] = NotificationChannel(
             name='teams',
             type='teams',
@@ -57,7 +57,7 @@ class NotificationService:
             }
         )
 
-        ***REMOVED*** Telegram channel
+        # Telegram channel
         self.channels['telegram'] = NotificationChannel(
             name='telegram',
             type='telegram',
@@ -126,11 +126,11 @@ class NotificationService:
         for rep_id, report_data in reports.items():
             sales_rep = report_data['sales_rep']
 
-            ***REMOVED*** Format report for different channels
+            # Format report for different channels
             markdown_report = self._format_report_for_channel(report_data, 'markdown')
             html_report = self._format_report_for_channel(report_data, 'html')
 
-            ***REMOVED*** Send via email
+            # Send via email
             if self.channels['email'].enabled:
                 email_result = self.send_notification(
                     'email',
@@ -145,7 +145,7 @@ class NotificationService:
                     'error': email_result.get('error')
                 })
 
-            ***REMOVED*** Send to Teams
+            # Send to Teams
             if self.channels['teams'].enabled:
                 teams_result = self.send_notification(
                     'teams',
@@ -160,7 +160,7 @@ class NotificationService:
                     'error': teams_result.get('error')
                 })
 
-            ***REMOVED*** Send to Telegram
+            # Send to Telegram
             if self.channels['telegram'].enabled:
                 telegram_result = self.send_notification(
                     'telegram',
@@ -182,7 +182,7 @@ class NotificationService:
         config = self.channels['email'].config
 
         try:
-            ***REMOVED*** Create message
+            # Create message
             msg = MIMEMultipart('alternative')
             msg['Subject'] = subject
             msg['From'] = config['from_email']
@@ -193,7 +193,7 @@ class NotificationService:
             else:
                 msg.attach(MIMEText(message, 'plain'))
 
-            ***REMOVED*** Send email
+            # Send email
             server = smtplib.SMTP(config['smtp_server'], config['smtp_port'])
             server.starttls()
             server.login(config['username'], config['password'])
@@ -210,7 +210,7 @@ class NotificationService:
         config = self.channels['teams'].config
 
         try:
-            ***REMOVED*** Format for Teams
+            # Format for Teams
             if message_type == 'markdown':
                 teams_message = {
                     "@type": "MessageCard",
@@ -250,7 +250,7 @@ class NotificationService:
             chat_id = config['chat_ids'].get(recipient, config['chat_ids'].get('management'))
 
             if message_type == 'markdown':
-                ***REMOVED*** Convert basic markdown to HTML for Telegram
+                # Convert basic markdown to HTML for Telegram
                 telegram_message = message.replace('**', '<b>').replace('**', '</b>')
                 telegram_message = telegram_message.replace('*', '<i>').replace('*', '</i>')
             else:
@@ -300,10 +300,10 @@ class NotificationService:
         summary = data['summary']
 
         lines = [
-            f"***REMOVED*** 📊 Tagesprotokoll – Außendienst ({sales_rep.first_name} {sales_rep.last_name})",
+            f"# 📊 Tagesprotokoll – Außendienst ({sales_rep.first_name} {sales_rep.last_name})",
             f"**Datum:** {report_date}",
             "",
-            "***REMOVED******REMOVED*** 📈 Zusammenfassung",
+            "## 📈 Zusammenfassung",
             f"- **Besuche:** {summary['total_visits']}",
             f"- **Aktivitäten:** {summary['total_activities']}",
             f"- **Zeit:** {summary['total_time_minutes']} Minuten",
@@ -315,7 +315,7 @@ class NotificationService:
 
         if summary['main_topics']:
             lines.extend([
-                "***REMOVED******REMOVED*** 🎯 Hauptthemen",
+                "## 🎯 Hauptthemen",
                 *[f"- {topic}" for topic in summary['main_topics'][:5]],
                 ""
             ])
@@ -331,9 +331,9 @@ class NotificationService:
         <head>
             <style>
                 body {{ font-family: Arial, sans-serif; margin: 20px; }}
-                .header {{ background: ***REMOVED***f0f0f0; padding: 15px; border-radius: 5px; }}
-                .summary {{ background: ***REMOVED***e8f4f8; padding: 10px; margin: 10px 0; }}
-                .topics {{ background: ***REMOVED***f8f0e8; padding: 10px; margin: 10px 0; }}
+                .header {{ background: #f0f0f0; padding: 15px; border-radius: 5px; }}
+                .summary {{ background: #e8f4f8; padding: 10px; margin: 10px 0; }}
+                .topics {{ background: #f8f0e8; padding: 10px; margin: 10px 0; }}
             </style>
         </head>
         <body>
@@ -384,7 +384,7 @@ HAUPTTHEMEN:
         """.strip()
 
 
-***REMOVED*** Global notification service instance
+# Global notification service instance
 notification_service = NotificationService()
 
 
@@ -393,9 +393,9 @@ def send_daily_reports_notification(reports: Dict[str, Any]):
     return notification_service.send_daily_reports(reports)
 
 
-***REMOVED*** For testing
+# For testing
 if __name__ == "__main__":
-    ***REMOVED*** Test notification
+    # Test notification
     test_report = {
         'rep1': {
             'sales_rep': type('obj', (object,), {'first_name': 'Test', 'last_name': 'User', 'email': 'test@example.com'})(),

@@ -24,7 +24,7 @@ class DocumentRepository:
         try:
             import uuid
             
-            ***REMOVED*** Prüfe ob Dokument existiert
+            # Prüfe ob Dokument existiert
             existing = self.db.execute(
                 text("""
                     SELECT id, data FROM documents 
@@ -33,14 +33,14 @@ class DocumentRepository:
                 {"doc_type": doc_type, "doc_number": doc_number}
             ).fetchone()
             
-            ***REMOVED*** Stelle sicher, dass number im data enthalten ist
+            # Stelle sicher, dass number im data enthalten ist
             data["number"] = doc_number
             data["type"] = doc_type
             
             now = datetime.utcnow()
             
             if existing:
-                ***REMOVED*** Update
+                # Update
                 self.db.execute(
                     text("""
                         UPDATE documents 
@@ -50,7 +50,7 @@ class DocumentRepository:
                     {"id": existing.id, "data": json.dumps(data), "updated_at": now}
                 )
             else:
-                ***REMOVED*** Insert
+                # Insert
                 doc_id = str(uuid.uuid4())
                 self.db.execute(
                     text("""
@@ -87,7 +87,7 @@ class DocumentRepository:
             ).fetchone()
             
             if result:
-                ***REMOVED*** PostgreSQL JSONB wird bereits als dict zurückgegeben
+                # PostgreSQL JSONB wird bereits als dict zurückgegeben
                 if isinstance(result.data, dict):
                     return result.data
                 return json.loads(result.data) if isinstance(result.data, str) else result.data
@@ -111,7 +111,7 @@ class DocumentRepository:
             """
             params = {"doc_type": doc_type, "skip": skip, "limit": limit}
             
-            ***REMOVED*** Filter hinzufügen falls vorhanden
+            # Filter hinzufügen falls vorhanden
             if filters:
                 if "status" in filters:
                     query += " AND data::jsonb->>'status' = :status"
@@ -123,7 +123,7 @@ class DocumentRepository:
             query += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
             
             results = self.db.execute(text(query), params).fetchall()
-            ***REMOVED*** PostgreSQL JSONB wird bereits als dict zurückgegeben
+            # PostgreSQL JSONB wird bereits als dict zurückgegeben
             return [
                 row.data if isinstance(row.data, dict) else json.loads(row.data) 
                 for row in results

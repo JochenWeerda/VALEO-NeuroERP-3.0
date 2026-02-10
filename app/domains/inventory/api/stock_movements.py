@@ -108,7 +108,7 @@ async def create_stock_movement(
 
     effective_tenant = tenant_id or effective_tenant
 
-    ***REMOVED*** Use the inventory service to process the movement
+    # Use the inventory service to process the movement
     service = InventoryService(db)
     try:
         movement = service.process_stock_movement(

@@ -37,7 +37,7 @@ def get_customer_id_from_token(tenant_id: str) -> str:
     Extrahiert Kunden-ID aus Token.
     TODO: Echte Implementierung mit JWT/Auth
     """
-    ***REMOVED*** Placeholder - wird später durch echte Auth ersetzt
+    # Placeholder - wird später durch echte Auth ersetzt
     return "customer-demo-001"
 
 
@@ -61,7 +61,7 @@ async def get_portal_products(
     """
     effective_customer = customer_id or get_customer_id_from_token(tenant_id)
     
-    ***REMOVED*** Basis-Query für Artikel
+    # Basis-Query für Artikel
     query = db.query(ArticleModel).filter(
         and_(
             ArticleModel.tenant_id == tenant_id,
@@ -69,11 +69,11 @@ async def get_portal_products(
         )
     )
     
-    ***REMOVED*** Filter nach Kategorie
+    # Filter nach Kategorie
     if kategorie and kategorie != "alle":
         query = query.filter(ArticleModel.category == kategorie)
     
-    ***REMOVED*** Suche
+    # Suche
     if search:
         like = f"%{search}%"
         query = query.filter(
@@ -87,7 +87,7 @@ async def get_portal_products(
     total = query.count()
     articles = query.offset(skip).limit(limit).all()
     
-    ***REMOVED*** Lade Kontrakte für diesen Kunden
+    # Lade Kontrakte für diesen Kunden
     contracts = db.query(CustomerContract).filter(
         and_(
             CustomerContract.tenant_id == tenant_id,
@@ -98,7 +98,7 @@ async def get_portal_products(
     ).all()
     contract_by_article = {c.article_id: c for c in contracts}
     
-    ***REMOVED*** Lade Vorkäufe für diesen Kunden
+    # Lade Vorkäufe für diesen Kunden
     pre_purchases = db.query(CustomerPrePurchase).filter(
         and_(
             CustomerPrePurchase.tenant_id == tenant_id,
@@ -109,7 +109,7 @@ async def get_portal_products(
     ).all()
     pre_purchase_by_article = {pp.article_id: pp for pp in pre_purchases}
     
-    ***REMOVED*** Lade Bestellhistorie (letzte 42 Tage)
+    # Lade Bestellhistorie (letzte 42 Tage)
     cutoff_date = datetime.utcnow() - timedelta(days=42)
     order_history = db.query(CustomerOrderHistory).filter(
         and_(
@@ -120,7 +120,7 @@ async def get_portal_products(
     ).all()
     history_by_article = {h.article_id: h for h in order_history}
     
-    ***REMOVED*** Baue Portal-Produkte
+    # Baue Portal-Produkte
     products = []
     has_contracts = 0
     has_pre_purchases = 0
@@ -130,7 +130,7 @@ async def get_portal_products(
         pre_purchase = pre_purchase_by_article.get(article.id)
         history = history_by_article.get(article.id)
         
-        ***REMOVED*** Letzte Bestellung
+        # Letzte Bestellung
         last_order = None
         if history:
             last_order = LastOrderInfo(
@@ -139,7 +139,7 @@ async def get_portal_products(
                 unit=article.unit
             )
         
-        ***REMOVED*** Kontrakt-Status ermitteln
+        # Kontrakt-Status ermitteln
         contract_status = ContractStatus.NONE
         contract_price = None
         contract_total = None
@@ -152,7 +152,7 @@ async def get_portal_products(
             contract_total = contract.total_quantity
             contract_remaining = contract.remaining_quantity
         
-        ***REMOVED*** Vorkauf-Daten
+        # Vorkauf-Daten
         is_pre_purchase = False
         pp_price = None
         pp_total = None
@@ -173,10 +173,10 @@ async def get_portal_products(
             beschreibung=article.description,
             einheit=article.unit,
             preis=article.sales_price,
-            rabattPreis=None,  ***REMOVED*** TODO: Aktionspreise aus separater Tabelle
+            rabattPreis=None,  # TODO: Aktionspreise aus separater Tabelle
             verfuegbar=article.available_stock > 0,
             bestand=article.available_stock,
-            zertifikate=[],  ***REMOVED*** TODO: Zertifikate aus separater Tabelle
+            zertifikate=[],  # TODO: Zertifikate aus separater Tabelle
             letzteBestellung=last_order,
             contractStatus=contract_status,
             contractPrice=contract_price,
@@ -189,7 +189,7 @@ async def get_portal_products(
         )
         products.append(product)
     
-    ***REMOVED*** Sortierung: Vorkäufe zuerst, dann Kontrakte, dann kürzlich bestellt
+    # Sortierung: Vorkäufe zuerst, dann Kontrakte, dann kürzlich bestellt
     def sort_key(p: PortalProduct):
         score = 0
         if p.is_pre_purchase:
@@ -230,15 +230,15 @@ async def create_order(
     """
     effective_customer = customer_id or get_customer_id_from_token(tenant_id)
     
-    ***REMOVED*** Lade Kundendaten
-    ***REMOVED*** TODO: Echte Kundenabfrage
+    # Lade Kundendaten
+    # TODO: Echte Kundenabfrage
     customer_name = "Demo-Kunde"
     customer_number = "K-DEMO-001"
     
-    ***REMOVED*** Generiere Bestellnummer
+    # Generiere Bestellnummer
     order_number = f"PO-{datetime.utcnow().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8].upper()}"
     
-    ***REMOVED*** Erstelle Bestellung
+    # Erstelle Bestellung
     order = CustomerOrder(
         tenant_id=tenant_id,
         customer_id=effective_customer,
@@ -252,13 +252,13 @@ async def create_order(
     )
     
     db.add(order)
-    db.flush()  ***REMOVED*** ID generieren
+    db.flush()  # ID generieren
     
     total_net = Decimal("0")
     order_items = []
     
     for item_data in order_data.items:
-        ***REMOVED*** Lade Artikel
+        # Lade Artikel
         article = db.query(ArticleModel).filter(
             and_(
                 ArticleModel.id == item_data.article_id,
@@ -272,7 +272,7 @@ async def create_order(
                 detail=f"Artikel {item_data.article_id} nicht gefunden"
             )
         
-        ***REMOVED*** Prüfe Vorkauf
+        # Prüfe Vorkauf
         pre_purchase = db.query(CustomerPrePurchase).filter(
             and_(
                 CustomerPrePurchase.article_id == item_data.article_id,
@@ -282,7 +282,7 @@ async def create_order(
             )
         ).first()
         
-        ***REMOVED*** Prüfe Kontrakt
+        # Prüfe Kontrakt
         contract = db.query(CustomerContract).filter(
             and_(
                 CustomerContract.article_id == item_data.article_id,
@@ -292,7 +292,7 @@ async def create_order(
             )
         ).first()
         
-        ***REMOVED*** Berechne Preise und Mengen
+        # Berechne Preise und Mengen
         quantity = item_data.quantity
         quantity_from_credit = Decimal("0")
         quantity_at_list = Decimal("0")
@@ -300,30 +300,30 @@ async def create_order(
         price_source = PriceSource.LIST
         
         if pre_purchase and pre_purchase.remaining_quantity > 0:
-            ***REMOVED*** Vorkauf hat Priorität
+            # Vorkauf hat Priorität
             credit_qty = min(quantity, pre_purchase.remaining_quantity)
             quantity_from_credit = credit_qty
             quantity_at_list = quantity - credit_qty
             
-            ***REMOVED*** Vorkauf-Guthaben reduzieren
+            # Vorkauf-Guthaben reduzieren
             pre_purchase.remaining_quantity -= credit_qty
             
             unit_price = Decimal("0") if quantity_at_list == 0 else article.sales_price
             price_source = PriceSource.PRE_PURCHASE
             
         elif contract and contract.remaining_quantity > 0:
-            ***REMOVED*** Kontrakt verwenden
+            # Kontrakt verwenden
             contract_qty = min(quantity, contract.remaining_quantity)
             
-            ***REMOVED*** Kontrakt-Menge reduzieren
+            # Kontrakt-Menge reduzieren
             contract.remaining_quantity -= contract_qty
             contract.status = contract.calculate_status()
             
             unit_price = contract.contract_price
             price_source = PriceSource.CONTRACT
         
-        ***REMOVED*** Gesamtpreis berechnen
-        ***REMOVED*** Bei Vorkauf: Nur der Teil über das Guthaben hinaus kostet
+        # Gesamtpreis berechnen
+        # Bei Vorkauf: Nur der Teil über das Guthaben hinaus kostet
         if price_source == PriceSource.PRE_PURCHASE:
             total_price = quantity_at_list * article.sales_price
         else:
@@ -331,7 +331,7 @@ async def create_order(
         
         total_net += total_price
         
-        ***REMOVED*** Bestellposition erstellen
+        # Bestellposition erstellen
         order_item = CustomerOrderItem(
             order_id=order.id,
             article_id=article.id,
@@ -351,7 +351,7 @@ async def create_order(
         db.add(order_item)
         order_items.append(order_item)
         
-        ***REMOVED*** Bestellhistorie aktualisieren
+        # Bestellhistorie aktualisieren
         history = db.query(CustomerOrderHistory).filter(
             and_(
                 CustomerOrderHistory.article_id == article.id,
@@ -380,14 +380,14 @@ async def create_order(
             )
             db.add(history)
     
-    ***REMOVED*** Bestellung finalisieren
+    # Bestellung finalisieren
     order.total_net = total_net
-    order.total_gross = total_net * Decimal("1.19")  ***REMOVED*** TODO: MwSt aus Config
+    order.total_gross = total_net * Decimal("1.19")  # TODO: MwSt aus Config
     
     db.commit()
     db.refresh(order)
     
-    ***REMOVED*** Response bauen
+    # Response bauen
     return OrderResponse(
         id=order.id,
         order_number=order.order_number,
@@ -449,7 +449,7 @@ async def list_orders(
     
     items = []
     for order in orders:
-        ***REMOVED*** Lade erste Position für Haupt-Artikel
+        # Lade erste Position für Haupt-Artikel
         first_item = db.query(CustomerOrderItem).filter(
             CustomerOrderItem.order_id == order.id
         ).first()

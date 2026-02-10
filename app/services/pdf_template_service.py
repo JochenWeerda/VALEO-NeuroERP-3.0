@@ -23,13 +23,13 @@ class PDFTemplateConfig:
     """PDF-Template-Konfiguration aus ENV"""
     
     def __init__(self):
-        self.language: Language = os.environ.get("PDF_TEMPLATE_LANG", "de").lower()  ***REMOVED*** type: ignore
-        self.page_size: PageSize = os.environ.get("PDF_PAGE_SIZE", "A4").upper()  ***REMOVED*** type: ignore
+        self.language: Language = os.environ.get("PDF_TEMPLATE_LANG", "de").lower()  # type: ignore
+        self.page_size: PageSize = os.environ.get("PDF_PAGE_SIZE", "A4").upper()  # type: ignore
         self.logo_path = os.environ.get("PDF_LOGO_PATH", "data/branding/logo.png")
-        self.primary_color = os.environ.get("PDF_PRIMARY_COLOR", "***REMOVED***003366")
-        self.secondary_color = os.environ.get("PDF_SECONDARY_COLOR", "***REMOVED***0066CC")
+        self.primary_color = os.environ.get("PDF_PRIMARY_COLOR", "#003366")
+        self.secondary_color = os.environ.get("PDF_SECONDARY_COLOR", "#0066CC")
         
-        ***REMOVED*** Company Info
+        # Company Info
         self.company_name = os.environ.get("COMPANY_NAME", "VALEO GmbH")
         self.company_address = os.environ.get("COMPANY_ADDRESS", "Musterstraße 123")
         self.company_city = os.environ.get("COMPANY_CITY", "12345 Musterstadt")
@@ -118,12 +118,12 @@ class PDFTemplateService:
         """Rendert PDF-Header mit Logo und Company-Info"""
         page_width, page_height = self.config.get_page_size()
         
-        ***REMOVED*** Logo
+        # Logo
         logo = self.config.get_logo()
         if logo:
             c.drawImage(logo, 20*mm, page_height - 40*mm, width=40*mm, height=20*mm, preserveAspectRatio=True)
         
-        ***REMOVED*** Company Info (rechts)
+        # Company Info (rechts)
         c.setFont("Helvetica", 8)
         x = page_width - 70*mm
         y = page_height - 25*mm
@@ -136,12 +136,12 @@ class PDFTemplateService:
         c.drawString(x, y - 15*mm, self.config.company_phone)
         c.drawString(x, y - 18*mm, self.config.company_email)
         
-        ***REMOVED*** Document Title
+        # Document Title
         c.setFont("Helvetica-Bold", 16)
-        c.setFillColorRGB(0, 0.2, 0.4)  ***REMOVED*** Primary color
+        c.setFillColorRGB(0, 0.2, 0.4)  # Primary color
         c.drawString(20*mm, page_height - 50*mm, self.t(doc_type))
         
-        ***REMOVED*** Document Info
+        # Document Info
         c.setFont("Helvetica", 10)
         c.setFillColorRGB(0, 0, 0)
         c.drawString(20*mm, page_height - 60*mm, f"{self.t('number')}: {doc_number}")
@@ -154,19 +154,19 @@ class PDFTemplateService:
         c.setFont("Helvetica", 8)
         c.setFillColorRGB(0.5, 0.5, 0.5)
         
-        ***REMOVED*** Page number
+        # Page number
         c.drawString(
             page_width / 2 - 10*mm,
             15*mm,
             f"{self.t('page')} {page_num} {self.t('of')} {total_pages}"
         )
         
-        ***REMOVED*** Company footer
+        # Company footer
         footer_text = f"{self.config.company_name} | {self.config.company_website} | {self.config.company_email}"
         c.drawCentredString(page_width / 2, 10*mm, footer_text)
 
 
-***REMOVED*** Singleton
+# Singleton
 _template_service: PDFTemplateService | None = None
 
 

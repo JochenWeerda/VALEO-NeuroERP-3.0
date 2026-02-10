@@ -29,7 +29,7 @@ class RAGIndexer:
         """
         articles = db.query(Article).filter(
             Article.tenant_id == tenant_id,
-            Article.is_active == True  ***REMOVED*** noqa: E712
+            Article.is_active == True  # noqa: E712
         ).all()
         
         if not articles:
@@ -41,7 +41,7 @@ class RAGIndexer:
         ids = []
         
         for article in articles:
-            ***REMOVED*** Combine name and description for better search
+            # Combine name and description for better search
             text = f"{article.name}"
             if article.description:
                 text += f" - {article.description}"
@@ -98,7 +98,7 @@ class RAGIndexer:
         """
         customers = db.query(Customer).filter(
             Customer.tenant_id == tenant_id,
-            Customer.is_active == True  ***REMOVED*** noqa: E712
+            Customer.is_active == True  # noqa: E712
         ).all()
         
         if not customers:
@@ -110,7 +110,7 @@ class RAGIndexer:
         ids = []
         
         for customer in customers:
-            ***REMOVED*** Combine relevant fields
+            # Combine relevant fields
             text = f"{customer.name}"
             if customer.address:
                 text += f" - {customer.address}"
@@ -167,7 +167,7 @@ class RAGIndexer:
             )
 
 
-***REMOVED*** Global instance
+# Global instance
 _indexer: Optional[RAGIndexer] = None
 
 

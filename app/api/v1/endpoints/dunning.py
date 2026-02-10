@@ -159,7 +159,7 @@ async def list_dunning_rules(
         
     except Exception as e:
         logger.error(f"Error listing dunning rules: {e}")
-        ***REMOVED*** Return default rules if table doesn't exist
+        # Return default rules if table doesn't exist
         return [
             DunningRuleResponse(
                 id="1",
@@ -222,7 +222,7 @@ async def create_dunning_rule(
     Create a new dunning rule.
     """
     try:
-        ***REMOVED*** Check if rule for this level already exists
+        # Check if rule for this level already exists
         check_query = text("""
             SELECT id FROM domain_erp.dunning_rules
             WHERE level = :level AND tenant_id = :tenant_id AND active = true
@@ -239,7 +239,7 @@ async def create_dunning_rule(
                 detail=f"Active dunning rule for level {rule.level} already exists"
             )
         
-        ***REMOVED*** Insert new rule
+        # Insert new rule
         rule_id = str(uuid.uuid4())
         
         insert_query = text("""
@@ -308,13 +308,13 @@ async def process_dunning(
     Process dunning for overdue open items based on rules.
     """
     try:
-        ***REMOVED*** Get active dunning rules
+        # Get active dunning rules
         rules = await list_dunning_rules(active_only=True, tenant_id=request.tenant_id, db=db)
         
         if not rules:
             raise HTTPException(status_code=400, detail="No active dunning rules found")
         
-        ***REMOVED*** Get overdue open items
+        # Get overdue open items
         if request.op_ids:
             op_query = text("""
                 SELECT id, debtor_id, booking_date, due_date, open_amount, dunning_level
@@ -362,13 +362,13 @@ async def process_dunning(
             open_amount = Decimal(str(op_row[4]))
             current_dunning_level = int(op_row[5]) if op_row[5] else 0
             
-            ***REMOVED*** Calculate days overdue
+            # Calculate days overdue
             days_overdue = (today - due_date).days
             
             if days_overdue < 0:
-                continue  ***REMOVED*** Not overdue yet
+                continue  # Not overdue yet
             
-            ***REMOVED*** Find applicable rule
+            # Find applicable rule
             applicable_rule = None
             for rule in sorted(rules, key=lambda r: r.level, reverse=True):
                 if rule.days_overdue_min <= days_overdue:
@@ -378,14 +378,14 @@ async def process_dunning(
                             break
             
             if not applicable_rule:
-                continue  ***REMOVED*** No rule applies or already at max level
+                continue  # No rule applies or already at max level
             
-            ***REMOVED*** Calculate fees and interest
+            # Calculate fees and interest
             dunning_fee = applicable_rule.fee_amount
             if applicable_rule.fee_percentage > 0:
                 dunning_fee += open_amount * (applicable_rule.fee_percentage / Decimal("100.00"))
             
-            ***REMOVED*** Calculate interest (simple interest: amount * rate * days / 365)
+            # Calculate interest (simple interest: amount * rate * days / 365)
             interest = Decimal("0.00")
             if applicable_rule.interest_rate > 0:
                 interest = open_amount * (applicable_rule.interest_rate / Decimal("100.00")) * Decimal(str(days_overdue)) / Decimal("365.00")
@@ -393,7 +393,7 @@ async def process_dunning(
             total_amount = open_amount + dunning_fee + interest
             payment_deadline = today + timedelta(days=applicable_rule.payment_deadline_days)
             
-            ***REMOVED*** Create dunning notice
+            # Create dunning notice
             dunning_id = str(uuid.uuid4())
             dunning_insert = text("""
                 INSERT INTO domain_erp.dunning_notices
@@ -409,7 +409,7 @@ async def process_dunning(
                           sent_date, payment_date, notes, created_at, updated_at
             """)
             
-            ***REMOVED*** Replace placeholders in description
+            # Replace placeholders in description
             description = applicable_rule.description_template.replace("{{days_overdue}}", str(days_overdue))
             
             row = db.execute(dunning_insert, {
@@ -429,7 +429,7 @@ async def process_dunning(
                 "notes": description
             }).fetchone()
             
-            ***REMOVED*** Update open item dunning level
+            # Update open item dunning level
             update_op_query = text("""
                 UPDATE domain_erp.offene_posten
                 SET dunning_level = :dunning_level, updated_at = NOW()
@@ -442,7 +442,7 @@ async def process_dunning(
                 "tenant_id": request.tenant_id
             })
             
-            ***REMOVED*** Block customer if rule requires it
+            # Block customer if rule requires it
             if applicable_rule.block_customer:
                 block_debtor_query = text("""
                     UPDATE domain_erp.debtors
@@ -497,7 +497,7 @@ async def create_dunning(
     Create a manual dunning notice.
     """
     try:
-        ***REMOVED*** Get dunning rule for level
+        # Get dunning rule for level
         rule_query = text("""
             SELECT fee_amount, fee_percentage, interest_rate, payment_deadline_days, description_template
             FROM domain_erp.dunning_rules
@@ -510,13 +510,13 @@ async def create_dunning(
             "tenant_id": tenant_id
         }).fetchone()
         
-        ***REMOVED*** Calculate fees
+        # Calculate fees
         if rule_row:
             dunning_fee = Decimal(str(rule_row[0]))
             if Decimal(str(rule_row[1])) > 0:
                 dunning_fee += dunning.open_amount * (Decimal(str(rule_row[1])) / Decimal("100.00"))
             
-            ***REMOVED*** Calculate interest
+            # Calculate interest
             days_overdue = (dunning.dunning_date - dunning.due_date).days
             if Decimal(str(rule_row[2])) > 0 and days_overdue > 0:
                 interest = dunning.open_amount * (Decimal(str(rule_row[2])) / Decimal("100.00")) * Decimal(str(days_overdue)) / Decimal("365.00")
@@ -526,13 +526,13 @@ async def create_dunning(
             payment_deadline_days = int(rule_row[3])
             description_template = str(rule_row[4])
         else:
-            ***REMOVED*** Default values if no rule found
+            # Default values if no rule found
             dunning_fee = dunning.custom_fee or Decimal("5.00")
             interest = dunning.custom_interest or Decimal("0.00")
             payment_deadline_days = 14
             description_template = "Mahnung Stufe {{dunning_level}}"
         
-        ***REMOVED*** Override with custom values if provided
+        # Override with custom values if provided
         if dunning.custom_fee is not None:
             dunning_fee = dunning.custom_fee
         if dunning.custom_interest is not None:
@@ -541,7 +541,7 @@ async def create_dunning(
         total_amount = dunning.open_amount + dunning_fee + interest
         payment_deadline = dunning.dunning_date + timedelta(days=payment_deadline_days)
         
-        ***REMOVED*** Create dunning notice
+        # Create dunning notice
         dunning_id = str(uuid.uuid4())
         dunning_insert = text("""
             INSERT INTO domain_erp.dunning_notices
@@ -574,7 +574,7 @@ async def create_dunning(
             "notes": dunning.notes or description_template.replace("{{dunning_level}}", str(dunning.dunning_level))
         }).fetchone()
         
-        ***REMOVED*** Update open item dunning level
+        # Update open item dunning level
         update_op_query = text("""
             UPDATE domain_erp.offene_posten
             SET dunning_level = :dunning_level, updated_at = NOW()

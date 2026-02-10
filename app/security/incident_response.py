@@ -63,37 +63,37 @@ class Incident:
     assigned_to: Optional[str] = None
     tenant_id: str = "system"
 
-    ***REMOVED*** Impact assessment
+    # Impact assessment
     affected_assets: List[str] = field(default_factory=list)
     affected_users: int = 0
     data_compromised: bool = False
     data_classification: str = "internal"
 
-    ***REMOVED*** Response tracking
+    # Response tracking
     containment_actions: List[Dict[str, Any]] = field(default_factory=list)
     eradication_actions: List[Dict[str, Any]] = field(default_factory=list)
     recovery_actions: List[Dict[str, Any]] = field(default_factory=list)
 
-    ***REMOVED*** Timeline
+    # Timeline
     contained_at: Optional[datetime] = None
     eradicated_at: Optional[datetime] = None
     recovered_at: Optional[datetime] = None
     closed_at: Optional[datetime] = None
 
-    ***REMOVED*** Communication
+    # Communication
     stakeholders_notified: List[str] = field(default_factory=list)
     external_notifications: List[Dict[str, Any]] = field(default_factory=list)
 
-    ***REMOVED*** Evidence and analysis
+    # Evidence and analysis
     evidence_collected: List[Dict[str, Any]] = field(default_factory=list)
     forensic_analysis: Dict[str, Any] = field(default_factory=dict)
     root_cause_analysis: str = ""
 
-    ***REMOVED*** Lessons learned
+    # Lessons learned
     lessons_learned: List[str] = field(default_factory=list)
     preventive_actions: List[str] = field(default_factory=list)
 
-    ***REMOVED*** Metadata
+    # Metadata
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
 
@@ -121,17 +121,17 @@ class ISO27001IncidentResponse:
         self.alert_service = alert_service
         self.notification_service = notification_service
 
-        ***REMOVED*** Incident tracking
+        # Incident tracking
         self.active_incidents: Dict[str, Incident] = {}
         self.incident_history: List[Incident] = []
 
-        ***REMOVED*** Response plans
+        # Response plans
         self.response_plans = self._initialize_response_plans()
 
-        ***REMOVED*** Escalation matrix
+        # Escalation matrix
         self.escalation_matrix = self._initialize_escalation_matrix()
 
-        ***REMOVED*** SLA definitions
+        # SLA definitions
         self.sla_targets = {
             IncidentSeverity.LOW: timedelta(hours=4),
             IncidentSeverity.MEDIUM: timedelta(hours=2),
@@ -264,14 +264,14 @@ class ISO27001IncidentResponse:
         Detect and create incident from monitoring alerts
         Returns incident ID if created
         """
-        ***REMOVED*** Analyze detection data
+        # Analyze detection data
         incident_category = self._classify_detection(detection_data)
         if not incident_category:
             return None
 
         severity = self._assess_severity(detection_data, incident_category)
 
-        ***REMOVED*** Create incident
+        # Create incident
         incident = Incident(
             id=str(uuid.uuid4()),
             title=detection_data.get('title', f'{incident_category.value.title()} Incident'),
@@ -290,10 +290,10 @@ class ISO27001IncidentResponse:
             }]
         )
 
-        ***REMOVED*** Store incident
+        # Store incident
         self.active_incidents[incident.id] = incident
 
-        ***REMOVED*** Log to audit
+        # Log to audit
         if self.audit_service:
             self.audit_service.log_security_event({
                 'event_type': 'incident_detected',
@@ -303,7 +303,7 @@ class ISO27001IncidentResponse:
                 'details': detection_data
             })
 
-        ***REMOVED*** Trigger immediate response
+        # Trigger immediate response
         self._trigger_immediate_response(incident)
 
         logger.warning(f"Security incident detected: {incident.id} - {incident.title}")
@@ -313,7 +313,7 @@ class ISO27001IncidentResponse:
         """Classify detection data into incident category"""
         detection_type = detection_data.get('type', '')
 
-        ***REMOVED*** Classification logic based on detection type
+        # Classification logic based on detection type
         classification_map = {
             'failed_login': IncidentCategory.UNAUTHORIZED_ACCESS,
             'suspicious_traffic': IncidentCategory.UNAUTHORIZED_ACCESS,
@@ -334,7 +334,7 @@ class ISO27001IncidentResponse:
         """Assess incident severity based on detection data"""
         severity_score = 0
 
-        ***REMOVED*** Base severity by category
+        # Base severity by category
         base_severity = {
             IncidentCategory.UNAUTHORIZED_ACCESS: 3,
             IncidentCategory.DATA_BREACH: 8,
@@ -350,7 +350,7 @@ class ISO27001IncidentResponse:
 
         severity_score = base_severity.get(category, 3)
 
-        ***REMOVED*** Adjust based on impact indicators
+        # Adjust based on impact indicators
         if detection_data.get('privileged_access', False):
             severity_score += 2
         if detection_data.get('data_exfiltration', False):
@@ -360,7 +360,7 @@ class ISO27001IncidentResponse:
         if detection_data.get('financial_impact', False):
             severity_score += 2
 
-        ***REMOVED*** Classify final severity
+        # Classify final severity
         if severity_score >= 10:
             return IncidentSeverity.CRITICAL
         elif severity_score >= 7:
@@ -377,29 +377,29 @@ class ISO27001IncidentResponse:
             logger.error(f"No response plan for incident category: {incident.category}")
             return
 
-        ***REMOVED*** Execute immediate actions
+        # Execute immediate actions
         for action in response_plan.immediate_actions:
             self._execute_response_action(incident, action, "immediate")
 
-        ***REMOVED*** Assign to response team
+        # Assign to response team
         escalation_info = self.escalation_matrix[incident.severity]
         incident.assigned_to = escalation_info['response_team'][0]
 
-        ***REMOVED*** Send alerts
+        # Send alerts
         self._send_incident_alerts(incident, escalation_info)
 
     def _execute_response_action(self, incident: Incident, action: str, phase: str):
         """Execute a specific response action"""
-        ***REMOVED*** Log action execution
+        # Log action execution
         action_record = {
             'action': action,
             'phase': phase,
             'executed_at': datetime.utcnow().isoformat(),
             'executed_by': 'automated_system',
-            'status': 'completed'  ***REMOVED*** In production, this would be actual execution result
+            'status': 'completed'  # In production, this would be actual execution result
         }
 
-        ***REMOVED*** Add to appropriate action list
+        # Add to appropriate action list
         if phase == 'immediate':
             incident.containment_actions.append(action_record)
         elif phase == 'containment':
@@ -442,7 +442,7 @@ class ISO27001IncidentResponse:
         incident.status = new_status
         incident.updated_at = datetime.utcnow()
 
-        ***REMOVED*** Execute status-specific actions
+        # Execute status-specific actions
         if new_status == IncidentStatus.CONTAINED:
             incident.contained_at = datetime.utcnow()
             self._execute_containment_actions(incident)
@@ -456,13 +456,13 @@ class ISO27001IncidentResponse:
             incident.closed_at = datetime.utcnow()
             self._close_incident(incident)
 
-        ***REMOVED*** Update additional data
+        # Update additional data
         if update_data:
             for key, value in update_data.items():
                 if hasattr(incident, key):
                     setattr(incident, key, value)
 
-        ***REMOVED*** Log status change
+        # Log status change
         if self.audit_service:
             self.audit_service.log_security_event({
                 'event_type': 'incident_status_changed',
@@ -479,15 +479,15 @@ class ISO27001IncidentResponse:
         """Execute containment actions"""
         response_plan = self.response_plans.get(incident.category)
         if response_plan:
-            ***REMOVED*** Additional containment actions beyond immediate
-            for action in response_plan.recovery_procedures[:2]:  ***REMOVED*** First 2 as containment
+            # Additional containment actions beyond immediate
+            for action in response_plan.recovery_procedures[:2]:  # First 2 as containment
                 self._execute_response_action(incident, action, "containment")
 
     def _execute_eradication_actions(self, incident: Incident):
         """Execute eradication actions"""
         response_plan = self.response_plans.get(incident.category)
         if response_plan:
-            for action in response_plan.preventive_measures[:2]:  ***REMOVED*** First 2 as eradication
+            for action in response_plan.preventive_measures[:2]:  # First 2 as eradication
                 self._execute_response_action(incident, action, "eradication")
 
     def _execute_recovery_actions(self, incident: Incident):
@@ -499,11 +499,11 @@ class ISO27001IncidentResponse:
 
     def _close_incident(self, incident: Incident):
         """Close incident and move to history"""
-        ***REMOVED*** Move to history
+        # Move to history
         self.incident_history.append(incident)
         del self.active_incidents[incident.id]
 
-        ***REMOVED*** Generate lessons learned report
+        # Generate lessons learned report
         self._generate_lessons_learned(incident)
 
         logger.info(f"Incident {incident.id} closed and moved to history")
@@ -518,14 +518,14 @@ class ISO27001IncidentResponse:
 
         incident.lessons_learned = lessons
 
-        ***REMOVED*** In production, this would trigger a formal lessons learned meeting
+        # In production, this would trigger a formal lessons learned meeting
         logger.info(f"Lessons learned generated for incident {incident.id}")
 
     def get_incident_report(self, incident_id: str) -> Optional[Dict[str, Any]]:
         """Get detailed incident report"""
         incident = self.active_incidents.get(incident_id)
         if not incident:
-            ***REMOVED*** Check history
+            # Check history
             for hist_incident in self.incident_history:
                 if hist_incident.id == incident_id:
                     incident = hist_incident
@@ -567,18 +567,18 @@ class ISO27001IncidentResponse:
 
     def get_incident_dashboard(self, tenant_id: str = 'system') -> Dict[str, Any]:
         """Get incident dashboard data"""
-        ***REMOVED*** Filter incidents by tenant
+        # Filter incidents by tenant
         tenant_incidents = [
             incident for incident in self.active_incidents.values()
             if incident.tenant_id == tenant_id
         ]
 
         recent_incidents = [
-            incident for incident in self.incident_history[-10:]  ***REMOVED*** Last 10 closed incidents
+            incident for incident in self.incident_history[-10:]  # Last 10 closed incidents
             if incident.tenant_id == tenant_id
         ]
 
-        ***REMOVED*** Calculate metrics
+        # Calculate metrics
         severity_counts = {}
         for incident in tenant_incidents + recent_incidents:
             severity_counts[incident.severity.value] = severity_counts.get(incident.severity.value, 0) + 1
@@ -587,7 +587,7 @@ class ISO27001IncidentResponse:
         for incident in tenant_incidents:
             status_counts[incident.status.value] = status_counts.get(incident.status.value, 0) + 1
 
-        ***REMOVED*** Calculate MTTR (Mean Time To Resolution)
+        # Calculate MTTR (Mean Time To Resolution)
         resolved_incidents = [i for i in recent_incidents if i.closed_at and i.detected_at]
         if resolved_incidents:
             total_resolution_time = sum(
@@ -611,7 +611,7 @@ class ISO27001IncidentResponse:
                     'severity': i.severity.value,
                     'status': i.status.value,
                     'detected_at': i.detected_at.isoformat()
-                } for i in recent_incidents[-5:]  ***REMOVED*** Last 5
+                } for i in recent_incidents[-5:]  # Last 5
             ],
             'generated_at': datetime.utcnow().isoformat()
         }
@@ -620,7 +620,7 @@ class ISO27001IncidentResponse:
         """
         Simulate incident response drill for training purposes
         """
-        ***REMOVED*** Create mock incident
+        # Create mock incident
         mock_incident = Incident(
             id=f"drill-{uuid.uuid4()}",
             title=f"Simulated {incident_type.value.title()} Incident",
@@ -633,7 +633,7 @@ class ISO27001IncidentResponse:
             tenant_id='training'
         )
 
-        ***REMOVED*** Execute response plan (without actual actions)
+        # Execute response plan (without actual actions)
         response_plan = self.response_plans.get(incident_type)
         simulation_results = {
             'incident_id': mock_incident.id,

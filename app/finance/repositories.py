@@ -125,14 +125,14 @@ class BuchungRepository:
 
     def update_konten_saldi(self, tenant_id: str, soll_konto: str, haben_konto: str, betrag: Decimal):
         """Update account balances after booking"""
-        ***REMOVED*** Update Soll-Konto (increase)
+        # Update Soll-Konto (increase)
         soll = self.db.execute(
             select(Konto).where(and_(Konto.tenant_id == tenant_id, Konto.kontonummer == soll_konto))
         ).scalar_one_or_none()
         if soll:
             soll.saldo += betrag
 
-        ***REMOVED*** Update Haben-Konto (decrease)
+        # Update Haben-Konto (decrease)
         haben = self.db.execute(
             select(Konto).where(and_(Konto.tenant_id == tenant_id, Konto.kontonummer == haben_konto))
         ).scalar_one_or_none()

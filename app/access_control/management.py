@@ -138,7 +138,7 @@ class AccessRequest:
     access_level: AccessLevel
     justification: str
     escalation_type: PrivilegeEscalationType
-    requested_duration: int  ***REMOVED*** minutes
+    requested_duration: int  # minutes
     status: AccessRequestStatus = AccessRequestStatus.PENDING
     approved_by: Optional[str] = None
     approved_at: Optional[datetime] = None
@@ -182,8 +182,8 @@ class SecurityPolicy:
 class AccessReview:
     """Access rights review"""
     id: str
-    review_type: str  ***REMOVED*** periodic, event-driven, user-initiated
-    scope: str  ***REMOVED*** all_users, department, role
+    review_type: str  # periodic, event-driven, user-initiated
+    scope: str  # all_users, department, role
     reviewer: str
     status: str = "planned"
     scheduled_date: datetime = field(default_factory=lambda: datetime.utcnow() + timedelta(days=90))
@@ -204,7 +204,7 @@ class ISO27001AccessControlManagement:
         self.auth = auth_service
         self.audit = audit_service
 
-        ***REMOVED*** Access control components
+        # Access control components
         self.user_accounts: Dict[str, UserAccount] = {}
         self.user_roles: Dict[str, UserRole] = {}
         self.resource_permissions: Dict[str, ResourcePermission] = {}
@@ -214,10 +214,10 @@ class ISO27001AccessControlManagement:
         self.security_policies: Dict[str, SecurityPolicy] = {}
         self.access_reviews: List[AccessReview] = {}
 
-        ***REMOVED*** Security configuration
+        # Security configuration
         self.security_config = self._initialize_security_config()
 
-        ***REMOVED*** Default roles and policies
+        # Default roles and policies
         self._initialize_default_roles()
         self._initialize_default_policies()
 
@@ -342,7 +342,7 @@ class ISO27001AccessControlManagement:
         """
         user_id = str(uuid.uuid4())
 
-        ***REMOVED*** Hash password
+        # Hash password
         password_hash = self._hash_password(user_data['password'])
 
         user = UserAccount(
@@ -358,7 +358,7 @@ class ISO27001AccessControlManagement:
 
         self.user_accounts[user_id] = user
 
-        ***REMOVED*** Assign default role
+        # Assign default role
         self.assign_user_role(user_id, 'user')
 
         logger.info(f"User account created: {user.username} ({user.email})")
@@ -377,7 +377,7 @@ class ISO27001AccessControlManagement:
         if user_id not in self.user_accounts or role_id not in self.user_roles:
             return False
 
-        ***REMOVED*** In a real implementation, this would update a user-role mapping table
+        # In a real implementation, this would update a user-role mapping table
         logger.info(f"Role {role_id} assigned to user {user_id}")
         return True
 
@@ -391,15 +391,15 @@ class ISO27001AccessControlManagement:
         if not user or not user.is_active:
             return None
 
-        ***REMOVED*** Check if account is locked
+        # Check if account is locked
         if user.account_locked:
             return None
 
-        ***REMOVED*** Verify password
+        # Verify password
         if not self._verify_password(password, user.password_hash):
             user.login_attempts += 1
 
-            ***REMOVED*** Lock account if too many failed attempts
+            # Lock account if too many failed attempts
             if user.login_attempts >= self.security_config['password_policy']['lockout_attempts']:
                 user.account_locked = True
                 user.lock_reason = "Too many failed login attempts"
@@ -407,11 +407,11 @@ class ISO27001AccessControlManagement:
 
             return None
 
-        ***REMOVED*** Reset login attempts on successful login
+        # Reset login attempts on successful login
         user.login_attempts = 0
         user.last_login = datetime.utcnow()
 
-        ***REMOVED*** Create session
+        # Create session
         session_id = self._create_user_session(user.id, ip_address, user_agent)
 
         logger.info(f"User {username} authenticated successfully")
@@ -463,7 +463,7 @@ class ISO27001AccessControlManagement:
 
         session = self.active_sessions[session_id]
 
-        ***REMOVED*** Check session validity
+        # Check session validity
         if session.status != SessionStatus.ACTIVE:
             return False
 
@@ -471,13 +471,13 @@ class ISO27001AccessControlManagement:
             session.status = SessionStatus.EXPIRED
             return False
 
-        ***REMOVED*** Update last activity
+        # Update last activity
         session.last_activity = datetime.utcnow()
 
-        ***REMOVED*** Check permissions (simplified - in real implementation would check user roles and permissions)
+        # Check permissions (simplified - in real implementation would check user roles and permissions)
         has_access = self._check_user_permissions(session.user_id, resource_type, resource_id, required_access)
 
-        ***REMOVED*** Log access attempt
+        # Log access attempt
         self._log_access_attempt(session, resource_type, resource_id, required_access, has_access)
 
         return has_access
@@ -485,9 +485,9 @@ class ISO27001AccessControlManagement:
     def _check_user_permissions(self, user_id: str, resource_type: str, resource_id: str,
                                required_access: AccessLevel) -> bool:
         """Check if user has required permissions"""
-        ***REMOVED*** Simplified permission check - in real implementation would be more complex
-        ***REMOVED*** Check user's roles and associated permissions
-        return True  ***REMOVED*** Placeholder - assume access granted
+        # Simplified permission check - in real implementation would be more complex
+        # Check user's roles and associated permissions
+        return True  # Placeholder - assume access granted
 
     def _log_access_attempt(self, session: UserSession, resource_type: str, resource_id: str,
                            access_level: AccessLevel, success: bool):
@@ -568,18 +568,18 @@ class ISO27001AccessControlManagement:
 
         user = self.user_accounts[user_id]
 
-        ***REMOVED*** Verify old password
+        # Verify old password
         if not self._verify_password(old_password, user.password_hash):
             return False
 
-        ***REMOVED*** Validate new password against policy
+        # Validate new password against policy
         if not self._validate_password_policy(new_password):
             return False
 
-        ***REMOVED*** Hash and update password
+        # Hash and update password
         user.password_hash = self._hash_password(new_password)
         user.password_changed_at = datetime.utcnow()
-        user.login_attempts = 0  ***REMOVED*** Reset failed attempts
+        user.login_attempts = 0  # Reset failed attempts
 
         logger.info(f"Password changed for user {user.username}")
         return True
@@ -641,22 +641,22 @@ class ISO27001AccessControlManagement:
 
     def get_access_control_report(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Generate comprehensive access control report"""
-        ***REMOVED*** Get active users and sessions
+        # Get active users and sessions
         active_users = len([u for u in self.user_accounts.values() if u.is_active])
         active_sessions = len([s for s in self.active_sessions.values() if s.status == SessionStatus.ACTIVE])
 
-        ***REMOVED*** Get recent access logs (last 24 hours)
+        # Get recent access logs (last 24 hours)
         recent_logs = [log for log in self.access_logs
                       if (datetime.utcnow() - log.timestamp).days < 1]
 
-        ***REMOVED*** Get pending access requests
+        # Get pending access requests
         pending_requests = len([r for r in self.access_requests.values()
                                if r.status == AccessRequestStatus.PENDING])
 
-        ***REMOVED*** Calculate access metrics
+        # Calculate access metrics
         access_metrics = self._calculate_access_metrics(recent_logs)
 
-        ***REMOVED*** Get security policy compliance
+        # Get security policy compliance
         policy_compliance = self._assess_policy_compliance()
 
         return {
@@ -686,16 +686,16 @@ class ISO27001AccessControlManagement:
         total_attempts = len(recent_logs)
         successful_attempts = len([log for log in recent_logs if log.success])
 
-        ***REMOVED*** Calculate access patterns
+        # Calculate access patterns
         access_by_resource = {}
         failed_attempts_by_reason = {}
 
         for log in recent_logs:
-            ***REMOVED*** Count by resource type
+            # Count by resource type
             resource_key = f"{log.resource_type}:{log.resource_id}"
             access_by_resource[resource_key] = access_by_resource.get(resource_key, 0) + 1
 
-            ***REMOVED*** Count failed attempts by reason
+            # Count failed attempts by reason
             if not log.success:
                 failed_attempts_by_reason[log.failure_reason] = failed_attempts_by_reason.get(log.failure_reason, 0) + 1
 
@@ -749,7 +749,7 @@ class ISO27001AccessControlManagement:
 
         compliant_users = 0
         for user in active_users:
-            ***REMOVED*** Check if password was changed within policy period
+            # Check if password was changed within policy period
             if user.password_changed_at:
                 days_since_change = (datetime.utcnow() - user.password_changed_at).days
                 if days_since_change <= self.security_config['password_policy']['max_age_days']:
@@ -765,7 +765,7 @@ class ISO27001AccessControlManagement:
 
         compliant_sessions = 0
         for session in active_sessions:
-            ***REMOVED*** Check session duration
+            # Check session duration
             duration_hours = (datetime.utcnow() - session.started_at).total_seconds() / 3600
             if duration_hours <= self.security_config['session_policy']['max_session_duration_hours']:
                 compliant_sessions += 1
@@ -774,11 +774,11 @@ class ISO27001AccessControlManagement:
 
     def _check_access_review_compliance(self) -> float:
         """Check access review compliance"""
-        ***REMOVED*** Check if reviews are conducted on schedule
+        # Check if reviews are conducted on schedule
         recent_reviews = len([r for r in self.access_reviews
                             if r.completed_date and (datetime.utcnow() - r.completed_date).days <= 90])
 
-        ***REMOVED*** Assume we should have at least 4 reviews per year
+        # Assume we should have at least 4 reviews per year
         expected_reviews = 4
         compliance = min(recent_reviews / expected_reviews * 100, 100)
 
@@ -797,7 +797,7 @@ class ISO27001AccessControlManagement:
         """Get recent security events"""
         recent_events = []
 
-        ***REMOVED*** Get recent failed login attempts
+        # Get recent failed login attempts
         failed_logins = [log for log in self.access_logs
                         if not log.success and log.action == 'login'
                         and (datetime.utcnow() - log.timestamp).hours < 24]
@@ -810,7 +810,7 @@ class ISO27001AccessControlManagement:
                 'description': f"{len(failed_logins)} failed login attempts in last 24 hours"
             })
 
-        ***REMOVED*** Get privilege escalation requests
+        # Get privilege escalation requests
         pending_escalations = len([r for r in self.access_requests.values()
                                   if r.status == AccessRequestStatus.PENDING])
 
@@ -822,7 +822,7 @@ class ISO27001AccessControlManagement:
                 'description': f"{pending_escalations} privilege escalation requests pending approval"
             })
 
-        ***REMOVED*** Get terminated sessions
+        # Get terminated sessions
         terminated_sessions = len([s for s in self.active_sessions.values()
                                   if s.status == SessionStatus.TERMINATED
                                   and (datetime.utcnow() - s.last_activity).hours < 24])
@@ -879,17 +879,17 @@ class ISO27001AccessControlManagement:
         for user in active_users:
             score = 100
 
-            ***REMOVED*** Check password age
+            # Check password age
             if user.password_changed_at:
                 days_since_change = (datetime.utcnow() - user.password_changed_at).days
                 if days_since_change > self.security_config['password_policy']['max_age_days']:
                     score -= 20
 
-            ***REMOVED*** Check MFA
+            # Check MFA
             if not user.mfa_enabled:
                 score -= 15
 
-            ***REMOVED*** Check account lockouts
+            # Check account lockouts
             if user.account_locked:
                 score -= 10
 
@@ -899,9 +899,9 @@ class ISO27001AccessControlManagement:
 
     def _check_access_policy_compliance(self) -> float:
         """Check access control policy compliance"""
-        ***REMOVED*** Check if policies are defined and active
+        # Check if policies are defined and active
         active_policies = len([p for p in self.security_policies.values() if p.is_active])
-        required_policies = 3  ***REMOVED*** password, session, access
+        required_policies = 3  # password, session, access
 
         return min(active_policies / required_policies * 100, 100)
 
@@ -911,11 +911,11 @@ class ISO27001AccessControlManagement:
         if not active_users:
             return 100.0
 
-        ***REMOVED*** Check MFA adoption
+        # Check MFA adoption
         mfa_users = len([u for u in active_users if u.mfa_enabled])
         mfa_score = (mfa_users / len(active_users)) * 100
 
-        ***REMOVED*** Check password policy compliance
+        # Check password policy compliance
         password_compliance = self._check_password_policy_compliance()
 
         return (mfa_score + password_compliance) / 2
@@ -926,11 +926,11 @@ class ISO27001AccessControlManagement:
 
     def _check_privilege_management_compliance(self) -> float:
         """Check privilege management compliance"""
-        ***REMOVED*** Check for pending privilege escalation requests
+        # Check for pending privilege escalation requests
         pending_requests = len([r for r in self.access_requests.values()
                                if r.status == AccessRequestStatus.PENDING])
 
-        ***REMOVED*** Lower score if too many pending requests
+        # Lower score if too many pending requests
         base_score = 100
         if pending_requests > 10:
             base_score -= 20

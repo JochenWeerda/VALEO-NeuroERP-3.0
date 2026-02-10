@@ -94,7 +94,7 @@ async def create_customer(
     """Create a new customer."""
     effective_tenant = tenant_id or DEFAULT_TENANT
     
-    ***REMOVED*** Check if customer_number already exists
+    # Check if customer_number already exists
     existing = (
         db.query(CustomerModel)
         .filter(

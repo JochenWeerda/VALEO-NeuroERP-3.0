@@ -47,7 +47,7 @@ class ReportsService:
         """Generate sales performance report"""
         docs = self._filter_by_date_range(list(self._db.values()), start_date, end_date)
 
-        ***REMOVED*** Calculate metrics
+        # Calculate metrics
         sales_orders = [d for d in docs if d.get("number", "").startswith("SO")]
         sales_invoices = [d for d in docs if d.get("number", "").startswith("INV")]
         customer_inquiries = [d for d in docs if d.get("number", "").startswith("INQ")]
@@ -57,7 +57,7 @@ class ReportsService:
         total_orders = len(sales_orders)
         avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
 
-        ***REMOVED*** Conversion rates
+        # Conversion rates
         inquiry_to_offer_rate = len(sales_offers) / len(customer_inquiries) * 100 if customer_inquiries else 0
         offer_to_order_rate = len(sales_orders) / len(sales_offers) * 100 if sales_offers else 0
         order_to_invoice_rate = len(sales_invoices) / len(sales_orders) * 100 if sales_orders else 0
@@ -79,7 +79,7 @@ class ReportsService:
         docs = self._filter_by_date_range(list(self._db.values()), start_date, end_date)
         sales_invoices = [d for d in docs if d.get("number", "").startswith("INV")]
 
-        ***REMOVED*** Group by customer
+        # Group by customer
         customer_revenue = defaultdict(float)
         customer_orders = defaultdict(int)
 
@@ -89,7 +89,7 @@ class ReportsService:
                 customer_revenue[customer_id] += inv.get("totalGross", 0)
                 customer_orders[customer_id] += 1
 
-        ***REMOVED*** Top customers by revenue
+        # Top customers by revenue
         top_customers = sorted(
             [{"customerId": cid, "totalRevenue": rev, "orderCount": customer_orders[cid]}
              for cid, rev in customer_revenue.items()],
@@ -97,7 +97,7 @@ class ReportsService:
             reverse=True
         )[:10]
 
-        ***REMOVED*** Customer acquisition (new customers per month)
+        # Customer acquisition (new customers per month)
         customer_first_order = {}
         for inv in sales_invoices:
             cid = inv.get("customerId")
@@ -108,7 +108,7 @@ class ReportsService:
 
         acquisition_trends = defaultdict(int)
         for date in customer_first_order.values():
-            month = date[:7]  ***REMOVED*** YYYY-MM
+            month = date[:7]  # YYYY-MM
             acquisition_trends[month] += 1
 
         return CustomerAnalyticsReport(
@@ -123,7 +123,7 @@ class ReportsService:
         docs = self._filter_by_date_range(list(self._db.values()), start_date, end_date)
         sales_invoices = [d for d in docs if d.get("number", "").startswith("INV")]
 
-        ***REMOVED*** Aggregate product data
+        # Aggregate product data
         product_sales = defaultdict(lambda: {"quantity": 0, "revenue": 0.0, "orderCount": 0})
 
         for inv in sales_invoices:
@@ -137,14 +137,14 @@ class ReportsService:
                     product_sales[article]["revenue"] += qty * price
                     product_sales[article]["orderCount"] += 1
 
-        ***REMOVED*** Top products by revenue
+        # Top products by revenue
         top_products_revenue = sorted(
             [{"article": art, **data} for art, data in product_sales.items()],
             key=lambda x: x["revenue"],
             reverse=True
         )[:10]
 
-        ***REMOVED*** Top products by quantity
+        # Top products by quantity
         top_products_quantity = sorted(
             [{"article": art, **data} for art, data in product_sales.items()],
             key=lambda x: x["quantity"],
@@ -164,12 +164,12 @@ class ReportsService:
         sales_invoices = [d for d in docs if d.get("number", "").startswith("INV")]
         payments = [d for d in docs if d.get("number", "").startswith("PAY")]
 
-        ***REMOVED*** Revenue breakdown
+        # Revenue breakdown
         total_revenue = sum(inv.get("totalGross", 0) for inv in sales_invoices)
         paid_revenue = sum(inv.get("totalGross", 0) for inv in sales_invoices if inv.get("status") == "BEZAHLT")
         outstanding_revenue = total_revenue - paid_revenue
 
-        ***REMOVED*** Outstanding payments by age
+        # Outstanding payments by age
         outstanding_invoices = [inv for inv in sales_invoices if inv.get("status") in ["VERSENDET", "ÜBERFÄLLIG"]]
         current_outstanding = 0
         overdue_30 = 0
@@ -196,7 +196,7 @@ class ReportsService:
                 except ValueError:
                     current_outstanding += inv.get("totalGross", 0)
 
-        ***REMOVED*** Payment methods distribution
+        # Payment methods distribution
         payment_methods = defaultdict(float)
         for pay in payments:
             method = pay.get("paymentMethod", "Unknown")
@@ -225,7 +225,7 @@ class ReportsService:
         sales_orders = [d for d in docs if d.get("number", "").startswith("SO")]
         customer_inquiries = [d for d in docs if d.get("number", "").startswith("INQ")]
 
-        ***REMOVED*** Group by period
+        # Group by period
         def get_period_key(date_str: str) -> str:
             date = datetime.fromisoformat(date_str)
             if period == "daily":
@@ -233,7 +233,7 @@ class ReportsService:
             elif period == "weekly":
                 week_start = date - timedelta(days=date.weekday())
                 return week_start.strftime("%Y-%W")
-            else:  ***REMOVED*** monthly
+            else:  # monthly
                 return date.strftime("%Y-%m")
 
         revenue_trends = defaultdict(float)
@@ -258,7 +258,7 @@ class ReportsService:
                 key = get_period_key(date)
                 inquiry_trends[key] += 1
 
-        ***REMOVED*** Sort trends by period
+        # Sort trends by period
         sorted_revenue = dict(sorted(revenue_trends.items()))
         sorted_orders = dict(sorted(order_trends.items()))
         sorted_inquiries = dict(sorted(inquiry_trends.items()))
@@ -280,13 +280,13 @@ class ReportsService:
         customer_inquiries = [d for d in docs if d.get("number", "").startswith("INQ")]
         sales_offers = [d for d in docs if d.get("number", "").startswith("SO") and "validUntil" in d]
 
-        ***REMOVED*** Calculate metrics
+        # Calculate metrics
         total_revenue = sum(inv.get("totalGross", 0) for inv in sales_invoices if inv.get("status") == "BEZAHLT")
         total_orders = len(sales_orders)
         active_customers = len(set(inv.get("customerId") for inv in sales_invoices if inv.get("customerId")))
         outstanding_invoices = len([inv for inv in sales_invoices if inv.get("status") in ["VERSENDET", "ÜBERFÄLLIG"]])
 
-        ***REMOVED*** Conversion rate (offers to orders)
+        # Conversion rate (offers to orders)
         conversion_rate = len(sales_orders) / len(sales_offers) * 100 if sales_offers else 0
 
         return DashboardSummary(

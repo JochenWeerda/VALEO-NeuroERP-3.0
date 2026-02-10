@@ -40,7 +40,7 @@ class WsHub:
                 logger.warning(f"Failed to send to client: {e}")
                 dead.append(ws)
 
-        ***REMOVED*** Cleanup tote Connections
+        # Cleanup tote Connections
         for ws in dead:
             self.disconnect(ws)
 
@@ -50,6 +50,6 @@ class WsHub:
             )
 
 
-***REMOVED*** Global Hub Instance
+# Global Hub Instance
 hub = WsHub()
 

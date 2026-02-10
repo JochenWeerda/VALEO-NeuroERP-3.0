@@ -9,14 +9,14 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from .jwt import decode_token
 
-***REMOVED*** Bearer-Token-Schema
+# Bearer-Token-Schema
 bearer = HTTPBearer(auto_error=True)
 
 
 class User(TypedDict, total=False):
     """Authenticated User Object"""
-    sub: str  ***REMOVED*** User ID / Username
-    roles: List[str]  ***REMOVED*** User Roles
+    sub: str  # User ID / Username
+    roles: List[str]  # User Roles
 
 
 def get_current_user(

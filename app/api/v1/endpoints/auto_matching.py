@@ -48,7 +48,7 @@ class MatchSuggestion(BaseModel):
     statement_line_id: str
     op_id: str
     confidence: float = Field(..., ge=0, le=1)
-    match_type: str  ***REMOVED*** EXACT_AMOUNT, REFERENCE, IBAN, DATE_RANGE, COMBINED
+    match_type: str  # EXACT_AMOUNT, REFERENCE, IBAN, DATE_RANGE, COMBINED
     match_reason: str
     amount_difference: Optional[Decimal] = None
     date_difference_days: Optional[int] = None
@@ -134,7 +134,7 @@ async def list_matching_rules(
         
     except Exception as e:
         logger.error(f"Error listing matching rules: {e}")
-        ***REMOVED*** Return default rules if table doesn't exist
+        # Return default rules if table doesn't exist
         return [
             MatchingRule(
                 rule_name="Exact Amount Match",
@@ -239,12 +239,12 @@ def _extract_reference_numbers(text: str) -> List[str]:
     if not text:
         return []
     
-    ***REMOVED*** Common patterns: RE-2024-001, INV-12345, 2024/001, etc.
+    # Common patterns: RE-2024-001, INV-12345, 2024/001, etc.
     patterns = [
-        r'RE[-/]\d{4}[-/]\d+',  ***REMOVED*** RE-2024-001
-        r'INV[-/]\d+',  ***REMOVED*** INV-12345
-        r'\d{4}[/-]\d+',  ***REMOVED*** 2024/001
-        r'\d{6,}',  ***REMOVED*** Long numeric strings
+        r'RE[-/]\d{4}[-/]\d+',  # RE-2024-001
+        r'INV[-/]\d+',  # INV-12345
+        r'\d{4}[/-]\d+',  # 2024/001
+        r'\d{6,}',  # Long numeric strings
     ]
     
     references = []
@@ -265,9 +265,9 @@ def _calculate_amount_match_confidence(
     
     if difference <= tolerance:
         return 1.0
-    elif difference <= op_amount * Decimal("0.01"):  ***REMOVED*** 1% tolerance
+    elif difference <= op_amount * Decimal("0.01"):  # 1% tolerance
         return 0.95
-    elif difference <= op_amount * Decimal("0.05"):  ***REMOVED*** 5% tolerance
+    elif difference <= op_amount * Decimal("0.05"):  # 5% tolerance
         return 0.85
     else:
         return max(0.0, 1.0 - float(difference / op_amount))
@@ -284,15 +284,15 @@ def _calculate_reference_match_confidence(
     statement_ref_upper = statement_reference.upper().strip()
     op_ref_upper = op_reference.upper().strip()
     
-    ***REMOVED*** Exact match
+    # Exact match
     if statement_ref_upper == op_ref_upper:
         return 1.0
     
-    ***REMOVED*** Contains match
+    # Contains match
     if statement_ref_upper in op_ref_upper or op_ref_upper in statement_ref_upper:
         return 0.9
     
-    ***REMOVED*** Extract reference numbers
+    # Extract reference numbers
     statement_refs = _extract_reference_numbers(statement_reference)
     op_refs = _extract_reference_numbers(op_reference)
     
@@ -336,10 +336,10 @@ async def auto_match(
     Perform automatic matching of bank statement lines with open items.
     """
     try:
-        ***REMOVED*** Get matching rules
+        # Get matching rules
         rules = await list_matching_rules(active_only=True, tenant_id=request.tenant_id, db=db)
         
-        ***REMOVED*** Get unmatched bank statement lines
+        # Get unmatched bank statement lines
         if request.statement_id:
             lines_query = text("""
                 SELECT id, booking_date, amount, currency, reference, remittance_info,
@@ -368,7 +368,7 @@ async def auto_match(
             
             lines_rows = db.execute(lines_query, params).fetchall()
         
-        ***REMOVED*** Get open items
+        # Get open items
         op_query = text("""
             SELECT id, rechnungsnr, kunde_id, kunde_name, betrag, offen, faelligkeit, zahlbar
             FROM domain_erp.offene_posten
@@ -377,7 +377,7 @@ async def auto_match(
         
         op_rows = db.execute(op_query, {"tenant_id": request.tenant_id}).fetchall()
         
-        ***REMOVED*** Build open items lookup
+        # Build open items lookup
         open_items = {}
         for op_row in op_rows:
             op_id = str(op_row[0])
@@ -394,7 +394,7 @@ async def auto_match(
         
         results = []
         
-        ***REMOVED*** Process each statement line
+        # Process each statement line
         for line_row in lines_rows:
             line_id = str(line_row[0])
             line_booking_date = line_row[1]
@@ -405,14 +405,14 @@ async def auto_match(
             line_creditor_iban = str(line_row[6]) if line_row[6] else ""
             line_debtor_iban = str(line_row[7]) if line_row[7] else ""
             
-            ***REMOVED*** Combine reference and remittance info
+            # Combine reference and remittance info
             full_reference = f"{line_reference} {line_remittance}".strip()
             
             suggestions = []
             best_match = None
             best_confidence = 0.0
             
-            ***REMOVED*** Try each matching rule
+            # Try each matching rule
             for rule in sorted(rules, key=lambda r: r.priority, reverse=True):
                 if rule.match_type == "amount":
                     tolerance = Decimal(str(rule.conditions.get("tolerance", 0.01)))
@@ -485,17 +485,17 @@ async def auto_match(
                 elif rule.match_type == "iban":
                     date_range = rule.conditions.get("date_range_days", 90)
                     
-                    ***REMOVED*** Get customer IBAN from debtor master data
+                    # Get customer IBAN from debtor master data
                     for op_id, op in open_items.items():
                         if op["open_amount"] <= 0:
                             continue
                         
-                        ***REMOVED*** Check if IBAN matches (would need to query debtor master data)
-                        ***REMOVED*** For now, skip IBAN matching
+                        # Check if IBAN matches (would need to query debtor master data)
+                        # For now, skip IBAN matching
                         pass
                 
                 elif rule.match_type == "combined":
-                    ***REMOVED*** Combine multiple factors
+                    # Combine multiple factors
                     for op_id, op in open_items.items():
                         if op["open_amount"] <= 0:
                             continue
@@ -526,15 +526,15 @@ async def auto_match(
                             date_difference_days=abs((line_booking_date - op["due_date"]).days)
                         ))
             
-            ***REMOVED*** Sort suggestions by confidence
+            # Sort suggestions by confidence
             suggestions.sort(key=lambda x: x.confidence, reverse=True)
             
-            ***REMOVED*** Determine if we should auto-match
+            # Determine if we should auto-match
             auto_matched = False
             matched_op_id = None
             
             if request.auto_apply and best_match and best_confidence >= request.min_confidence:
-                ***REMOVED*** Find applicable rule
+                # Find applicable rule
                 applicable_rule = None
                 for rule in rules:
                     if best_confidence >= rule.confidence_threshold and rule.auto_apply:
@@ -545,7 +545,7 @@ async def auto_match(
                     matched_op_id = best_match
                     auto_matched = True
                     
-                    ***REMOVED*** Update statement line
+                    # Update statement line
                     update_line_query = text("""
                         UPDATE domain_erp.bank_statement_lines
                         SET status = 'MATCHED', matched_op_id = :op_id, matched_at = NOW(), updated_at = NOW()
@@ -558,7 +558,7 @@ async def auto_match(
                         "tenant_id": request.tenant_id
                     })
                     
-                    ***REMOVED*** Create match record
+                    # Create match record
                     match_id = str(uuid.uuid4())
                     match_insert = text("""
                         INSERT INTO domain_erp.bank_matches
@@ -586,7 +586,7 @@ async def auto_match(
                 auto_matched=auto_matched,
                 matched_by="SYSTEM" if auto_matched else None,
                 matched_at=datetime.now() if auto_matched else None,
-                suggestions=suggestions[:5]  ***REMOVED*** Top 5 suggestions
+                suggestions=suggestions[:5]  # Top 5 suggestions
             ))
         
         db.commit()
@@ -610,7 +610,7 @@ async def apply_match(
     Manually apply a match suggestion.
     """
     try:
-        ***REMOVED*** Update statement line
+        # Update statement line
         update_line_query = text("""
             UPDATE domain_erp.bank_statement_lines
             SET status = 'MATCHED', matched_op_id = :op_id, matched_at = NOW(), updated_at = NOW()
@@ -626,7 +626,7 @@ async def apply_match(
         if result.rowcount == 0:
             raise HTTPException(status_code=404, detail="Statement line not found")
         
-        ***REMOVED*** Create match record
+        # Create match record
         match_id = str(uuid.uuid4())
         match_insert = text("""
             INSERT INTO domain_erp.bank_matches
@@ -639,7 +639,7 @@ async def apply_match(
             "tenant_id": tenant_id,
             "line_id": line_id,
             "op_id": op_id,
-            "confidence": 1.0,  ***REMOVED*** Manual match = 100% confidence
+            "confidence": 1.0,  # Manual match = 100% confidence
             "match_type": "MANUAL",
             "auto_matched": False
         })
@@ -691,7 +691,7 @@ async def get_matching_statistics(
         matched_lines = int(row[1]) if row[1] else 0
         unmatched_lines = int(row[2]) if row[2] else 0
         
-        ***REMOVED*** Get auto-matched vs manual
+        # Get auto-matched vs manual
         auto_query = text("""
             SELECT COUNT(*) FROM domain_erp.bank_matches
             WHERE tenant_id = :tenant_id AND auto_matched = true
@@ -705,7 +705,7 @@ async def get_matching_statistics(
         auto_matched = int(db.execute(auto_query, auto_params).scalar() or 0)
         manual_matched = matched_lines - auto_matched
         
-        ***REMOVED*** Get average confidence
+        # Get average confidence
         conf_query = text("""
             SELECT AVG(confidence) FROM domain_erp.bank_matches
             WHERE tenant_id = :tenant_id
@@ -718,7 +718,7 @@ async def get_matching_statistics(
         
         avg_confidence = float(db.execute(conf_query, conf_params).scalar() or 0.0)
         
-        ***REMOVED*** Get by match type
+        # Get by match type
         type_query = text("""
             SELECT match_type, COUNT(*) FROM domain_erp.bank_matches
             WHERE tenant_id = :tenant_id

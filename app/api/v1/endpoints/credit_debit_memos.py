@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/einkauf", tags=["procurement", "ap", "memos"])
 
 
-***REMOVED*** Pydantic Models
+# Pydantic Models
 class MemoItem(BaseModel):
     """Memo Position"""
     productId: Optional[str] = None
@@ -139,22 +139,22 @@ async def create_credit_memo(
     try:
         repo = get_repository(db)
         
-        ***REMOVED*** Berechne Summen
+        # Berechne Summen
         net_amount, tax_amount, gross_amount = calculate_memo_totals(memo.items)
         
-        ***REMOVED*** Generiere ID und Nummer
+        # Generiere ID und Nummer
         memo_id = str(uuid.uuid4())
         memo_number = f"CM-{datetime.now().strftime('%Y')}-{memo_id[:8].upper()}"
         
-        ***REMOVED*** Hole Lieferantennamen
+        # Hole Lieferantennamen
         supplier_name = get_supplier_name(memo.supplierId, db)
         
-        ***REMOVED*** Hole Rechnungsnummer falls vorhanden
+        # Hole Rechnungsnummer falls vorhanden
         invoice_number = None
         if memo.invoiceId:
             invoice_number = get_invoice_number(memo.invoiceId, db)
         
-        ***REMOVED*** Erstelle Credit Memo Objekt
+        # Erstelle Credit Memo Objekt
         credit_memo = {
             "id": memo_id,
             "number": memo_number,
@@ -173,10 +173,10 @@ async def create_credit_memo(
             "settled": False,
             "settledInvoiceIds": [],
             "createdAt": datetime.now().isoformat(),
-            "createdBy": "system",  ***REMOVED*** TODO: Get from auth context
+            "createdBy": "system",  # TODO: Get from auth context
         }
         
-        ***REMOVED*** Speichere in Store
+        # Speichere in Store
         save_to_store("credit_memo", memo_id, credit_memo, repo)
         
         return CreditMemoResponse(**credit_memo)
@@ -196,22 +196,22 @@ async def create_debit_memo(
     try:
         repo = get_repository(db)
         
-        ***REMOVED*** Berechne Summen
+        # Berechne Summen
         net_amount, tax_amount, gross_amount = calculate_memo_totals(memo.items)
         
-        ***REMOVED*** Generiere ID und Nummer
+        # Generiere ID und Nummer
         memo_id = str(uuid.uuid4())
         memo_number = f"DM-{datetime.now().strftime('%Y')}-{memo_id[:8].upper()}"
         
-        ***REMOVED*** Hole Lieferantennamen
+        # Hole Lieferantennamen
         supplier_name = get_supplier_name(memo.supplierId, db)
         
-        ***REMOVED*** Hole Rechnungsnummer falls vorhanden
+        # Hole Rechnungsnummer falls vorhanden
         invoice_number = None
         if memo.invoiceId:
             invoice_number = get_invoice_number(memo.invoiceId, db)
         
-        ***REMOVED*** Erstelle Debit Memo Objekt
+        # Erstelle Debit Memo Objekt
         debit_memo = {
             "id": memo_id,
             "number": memo_number,
@@ -230,10 +230,10 @@ async def create_debit_memo(
             "settled": False,
             "settledInvoiceIds": [],
             "createdAt": datetime.now().isoformat(),
-            "createdBy": "system",  ***REMOVED*** TODO: Get from auth context
+            "createdBy": "system",  # TODO: Get from auth context
         }
         
-        ***REMOVED*** Speichere in Store
+        # Speichere in Store
         save_to_store("debit_memo", memo_id, debit_memo, repo)
         
         return DebitMemoResponse(**debit_memo)
@@ -257,7 +257,7 @@ async def list_credit_memos(
         repo = get_repository(db)
         all_memos = list_from_store("credit_memo", repo)
         
-        ***REMOVED*** Filter
+        # Filter
         filtered_memos = []
         for memo in all_memos:
             if supplier_id and memo.get("supplierId") != supplier_id:
@@ -266,10 +266,10 @@ async def list_credit_memos(
                 continue
             filtered_memos.append(memo)
         
-        ***REMOVED*** Sortiere nach Datum (neueste zuerst)
+        # Sortiere nach Datum (neueste zuerst)
         filtered_memos.sort(key=lambda x: x.get("memoDate", ""), reverse=True)
         
-        ***REMOVED*** Pagination
+        # Pagination
         paginated_memos = filtered_memos[skip:skip + limit]
         
         return [CreditMemoResponse(**memo) for memo in paginated_memos]
@@ -293,7 +293,7 @@ async def list_debit_memos(
         repo = get_repository(db)
         all_memos = list_from_store("debit_memo", repo)
         
-        ***REMOVED*** Filter
+        # Filter
         filtered_memos = []
         for memo in all_memos:
             if supplier_id and memo.get("supplierId") != supplier_id:
@@ -302,10 +302,10 @@ async def list_debit_memos(
                 continue
             filtered_memos.append(memo)
         
-        ***REMOVED*** Sortiere nach Datum (neueste zuerst)
+        # Sortiere nach Datum (neueste zuerst)
         filtered_memos.sort(key=lambda x: x.get("memoDate", ""), reverse=True)
         
-        ***REMOVED*** Pagination
+        # Pagination
         paginated_memos = filtered_memos[skip:skip + limit]
         
         return [DebitMemoResponse(**memo) for memo in paginated_memos]
@@ -366,7 +366,7 @@ async def settle_credit_memo(
     try:
         repo = get_repository(db)
         
-        ***REMOVED*** Hole Credit Memo
+        # Hole Credit Memo
         memo = get_from_store("credit_memo", memo_id, repo)
         if not memo:
             raise HTTPException(status_code=404, detail="Credit memo not found")
@@ -374,7 +374,7 @@ async def settle_credit_memo(
         if memo.get("settled"):
             raise HTTPException(status_code=400, detail="Credit memo already settled")
         
-        ***REMOVED*** Validiere Rechnungen
+        # Validiere Rechnungen
         for invoice_id in settlement.invoiceIds:
             invoice = get_from_store("ap_invoice", invoice_id, repo)
             if not invoice:
@@ -385,7 +385,7 @@ async def settle_credit_memo(
                     detail=f"Invoice {invoice_id} belongs to different supplier"
                 )
         
-        ***REMOVED*** Aktualisiere Credit Memo
+        # Aktualisiere Credit Memo
         memo["settled"] = True
         memo["settledInvoiceIds"] = settlement.invoiceIds
         memo["status"] = "SETTLED"
@@ -393,8 +393,8 @@ async def settle_credit_memo(
         
         save_to_store("credit_memo", memo_id, memo, repo)
         
-        ***REMOVED*** TODO: Aktualisiere offene Beträge der Rechnungen
-        ***REMOVED*** Dies würde normalerweise über die Open Items API erfolgen
+        # TODO: Aktualisiere offene Beträge der Rechnungen
+        # Dies würde normalerweise über die Open Items API erfolgen
         
         return {
             "status": "ok",
@@ -421,7 +421,7 @@ async def settle_debit_memo(
     try:
         repo = get_repository(db)
         
-        ***REMOVED*** Hole Debit Memo
+        # Hole Debit Memo
         memo = get_from_store("debit_memo", memo_id, repo)
         if not memo:
             raise HTTPException(status_code=404, detail="Debit memo not found")
@@ -429,7 +429,7 @@ async def settle_debit_memo(
         if memo.get("settled"):
             raise HTTPException(status_code=400, detail="Debit memo already settled")
         
-        ***REMOVED*** Validiere Rechnungen
+        # Validiere Rechnungen
         for invoice_id in settlement.invoiceIds:
             invoice = get_from_store("ap_invoice", invoice_id, repo)
             if not invoice:
@@ -440,7 +440,7 @@ async def settle_debit_memo(
                     detail=f"Invoice {invoice_id} belongs to different supplier"
                 )
         
-        ***REMOVED*** Aktualisiere Debit Memo
+        # Aktualisiere Debit Memo
         memo["settled"] = True
         memo["settledInvoiceIds"] = settlement.invoiceIds
         memo["status"] = "SETTLED"
@@ -448,8 +448,8 @@ async def settle_debit_memo(
         
         save_to_store("debit_memo", memo_id, memo, repo)
         
-        ***REMOVED*** TODO: Aktualisiere offene Beträge der Rechnungen
-        ***REMOVED*** Dies würde normalerweise über die Open Items API erfolgen
+        # TODO: Aktualisiere offene Beträge der Rechnungen
+        # Dies würde normalerweise über die Open Items API erfolgen
         
         return {
             "status": "ok",

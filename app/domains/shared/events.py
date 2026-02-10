@@ -52,10 +52,10 @@ class InMemoryEventPublisher(IEventPublisher):
             }
         )
         
-        ***REMOVED*** Store in memory log
+        # Store in memory log
         self._event_log.append(event)
         
-        ***REMOVED*** Notify handlers
+        # Notify handlers
         event_type = type(event)
         if event_type in self._handlers:
             for handler in self._handlers[event_type]:
@@ -76,7 +76,7 @@ class InMemoryEventPublisher(IEventPublisher):
         return self._event_log[-limit:]
 
 
-***REMOVED*** Singleton instance
+# Singleton instance
 _event_publisher = InMemoryEventPublisher()
 
 

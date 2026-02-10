@@ -35,7 +35,7 @@ class NATSEventPublisher(IEventPublisher):
         """Publish event to NATS or fallback to logging."""
         
         if not self.enabled:
-            ***REMOVED*** Fallback: Just log
+            # Fallback: Just log
             logger.info(
                 f"Event (fallback): {event.__class__.__name__}",
                 extra={
@@ -47,7 +47,7 @@ class NATSEventPublisher(IEventPublisher):
             return
         
         try:
-            ***REMOVED*** Serialize event
+            # Serialize event
             event_data = {
                 "event_type": event.__class__.__name__,
                 "event_id": event.event_id,
@@ -56,11 +56,11 @@ class NATSEventPublisher(IEventPublisher):
                 "payload": self._serialize_event(event)
             }
             
-            ***REMOVED*** Publish to NATS
+            # Publish to NATS
             subject = f"domain.{event.__class__.__module__.split('.')[-2]}.{event.__class__.__name__}"
             
-            ***REMOVED*** TODO: Actual NATS publish
-            ***REMOVED*** await self._client.publish(subject, json.dumps(event_data).encode())
+            # TODO: Actual NATS publish
+            # await self._client.publish(subject, json.dumps(event_data).encode())
             
             logger.info(
                 f"Event published to NATS: {subject}",
@@ -73,7 +73,7 @@ class NATSEventPublisher(IEventPublisher):
             
         except Exception as e:
             logger.error(f"Failed to publish event to NATS: {e}", exc_info=True)
-            ***REMOVED*** Fallback: at least log the event
+            # Fallback: at least log the event
             logger.warning(f"Event fallback-logged: {event.__class__.__name__}")
     
     def _serialize_event(self, event: DomainEvent) -> dict:
@@ -81,7 +81,7 @@ class NATSEventPublisher(IEventPublisher):
         from dataclasses import asdict
         data = asdict(event)
         
-        ***REMOVED*** Convert datetime to ISO string
+        # Convert datetime to ISO string
         for key, value in data.items():
             if isinstance(value, datetime):
                 data[key] = value.isoformat()
@@ -94,10 +94,10 @@ class NATSEventPublisher(IEventPublisher):
             return
         
         try:
-            ***REMOVED*** TODO: Actual NATS connection
-            ***REMOVED*** from nats.aio.client import Client as NATS
-            ***REMOVED*** self._client = NATS()
-            ***REMOVED*** await self._client.connect(self.nats_url)
+            # TODO: Actual NATS connection
+            # from nats.aio.client import Client as NATS
+            # self._client = NATS()
+            # await self._client.connect(self.nats_url)
             logger.info("NATS connection established")
         except Exception as e:
             logger.error(f"Failed to connect to NATS: {e}")
@@ -106,7 +106,7 @@ class NATSEventPublisher(IEventPublisher):
     async def disconnect(self) -> None:
         """Disconnect from NATS server."""
         if self._client:
-            ***REMOVED*** TODO: Actual disconnect
-            ***REMOVED*** await self._client.close()
+            # TODO: Actual disconnect
+            # await self._client.close()
             logger.info("NATS connection closed")
 

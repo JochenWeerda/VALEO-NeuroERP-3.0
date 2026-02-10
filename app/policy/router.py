@@ -37,7 +37,7 @@ def get_store() -> PolicyStore:
 router = APIRouter(prefix="/api/mcp/policy", tags=["policy"])
 
 
-***REMOVED*** --- CRUD ---
+# --- CRUD ---
 
 
 @router.get("/list")
@@ -66,7 +66,7 @@ async def create_policy(
     - Bulk: { "rules": [Rule, ...] }
     """
     try:
-        ***REMOVED*** Bulk-Import?
+        # Bulk-Import?
         if "rules" in payload:
             env = RulesEnvelope.model_validate(payload)
             store.bulk_upsert(env.rules)
@@ -77,7 +77,7 @@ async def create_policy(
             )
             return {"ok": True, "count": len(env.rules)}
 
-        ***REMOVED*** Einzelne Rule
+        # Einzelne Rule
         rule = Rule.model_validate(payload)
         store.upsert(rule)
         logger.info(f"Created policy: {rule.id} by {user['sub']}")
@@ -138,7 +138,7 @@ async def delete_policy(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-***REMOVED*** --- Test / Simulator ---
+# --- Test / Simulator ---
 
 
 @router.post("/test")
@@ -166,7 +166,7 @@ async def test_decision(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-***REMOVED*** --- Export JSON ---
+# --- Export JSON ---
 
 
 @router.get("/export", dependencies=[Depends(require_roles("admin"))])
@@ -188,7 +188,7 @@ async def export_json(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-***REMOVED*** --- Backup / Restore (DB-Datei) ---
+# --- Backup / Restore (DB-Datei) ---
 
 BACKUP_DIR = os.environ.get("POLICY_BACKUP_DIR", "data/backups")
 Path(BACKUP_DIR).mkdir(parents=True, exist_ok=True)
@@ -248,19 +248,19 @@ async def restore_db(
         if not src.exists():
             raise HTTPException(status_code=400, detail="Backup not found")
 
-        ***REMOVED*** Safety-Backup vor Restore
+        # Safety-Backup vor Restore
         ts = datetime.datetime.now().isoformat().replace(":", "-").replace(".", "-")
         safety = Path(BACKUP_DIR) / f"pre-restore-{ts}.db"
         if Path(DEFAULT_DB).exists():
             shutil.copyfile(DEFAULT_DB, safety)
 
-        ***REMOVED*** Restore
+        # Restore
         shutil.copyfile(src, DEFAULT_DB)
         logger.warning(
             f"Restored policies from {src} by {user['sub']} (safety backup: {safety})"
         )
 
-        ***REMOVED*** Broadcast
+        # Broadcast
         bg.add_task(
             hub.broadcast,
             {"service": "policy", "type": "restored", "from": str(src)},
@@ -278,7 +278,7 @@ async def restore_db(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-***REMOVED*** --- WebSocket ---
+# --- WebSocket ---
 
 
 @router.websocket("/ws")
@@ -296,7 +296,7 @@ async def ws_policy(websocket: WebSocket):
     await hub.connect(websocket)
     try:
         while True:
-            ***REMOVED*** Simple ping/pong - ignoriere Content
+            # Simple ping/pong - ignoriere Content
             await websocket.receive_text()
     except WebSocketDisconnect:
         hub.disconnect(websocket)

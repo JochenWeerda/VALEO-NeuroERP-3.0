@@ -31,17 +31,17 @@ async def create_journal_entry(
     The entry must balance (total debit = total credit).
     """
     try:
-        ***REMOVED*** Validate that the entry balances
+        # Validate that the entry balances
         total_debit = sum(line.debit_amount for line in entry_data.lines)
         total_credit = sum(line.credit_amount for line in entry_data.lines)
 
-        if abs(total_debit - total_credit) > 0.01:  ***REMOVED*** Allow for small rounding differences
+        if abs(total_debit - total_credit) > 0.01:  # Allow for small rounding differences
             raise HTTPException(
                 status_code=400,
                 detail=f"Journal entry does not balance. Debit: {total_debit}, Credit: {total_credit}"
             )
 
-        ***REMOVED*** FIBU-GL-05: Check if period is open for bookings
+        # FIBU-GL-05: Check if period is open for bookings
         if entry_data.period:
             from sqlalchemy import text
             period_check = db.execute(
@@ -60,7 +60,7 @@ async def create_journal_entry(
 
         entry_repo = container.resolve(JournalEntryRepository)
 
-        ***REMOVED*** Create the entry data
+        # Create the entry data
         entry_dict = entry_data.model_dump()
         entry_dict['total_debit'] = total_debit
         entry_dict['total_credit'] = total_credit
@@ -91,10 +91,10 @@ async def list_journal_entries(
     try:
         entry_repo = container.resolve(JournalEntryRepository)
 
-        ***REMOVED*** Use provided tenant_id or default to system for now
+        # Use provided tenant_id or default to system for now
         effective_tenant_id = tenant_id or "system"
 
-        ***REMOVED*** Convert date strings to datetime if provided
+        # Convert date strings to datetime if provided
         start_dt = datetime.fromisoformat(start_date) if start_date else None
         end_dt = datetime.fromisoformat(end_date) if end_date else None
 
@@ -102,11 +102,11 @@ async def list_journal_entries(
             start_date, end_date, effective_tenant_id
         ) if start_date and end_date else await entry_repo.get_all(effective_tenant_id, skip, limit)
 
-        ***REMOVED*** Apply status filter if provided
+        # Apply status filter if provided
         if status:
             entries = [e for e in entries if e.status == status]
 
-        ***REMOVED*** Apply pagination
+        # Apply pagination
         total = len(entries)
         paginated_entries = entries[skip:skip + limit]
 
@@ -135,7 +135,7 @@ async def get_journal_entry(
     """
     try:
         entry_repo = container.resolve(JournalEntryRepository)
-        entry = await entry_repo.get_by_id(entry_id, "system")  ***REMOVED*** TODO: tenant context
+        entry = await entry_repo.get_by_id(entry_id, "system")  # TODO: tenant context
         if not entry:
             raise HTTPException(status_code=404, detail="Journal entry not found")
         return JournalEntry.model_validate(entry)
@@ -159,14 +159,14 @@ async def update_journal_entry(
     try:
         entry_repo = container.resolve(JournalEntryRepository)
 
-        ***REMOVED*** Check if entry is still in draft status
+        # Check if entry is still in draft status
         existing_entry = await entry_repo.get_by_id(entry_id, "system")
         if not existing_entry:
             raise HTTPException(status_code=404, detail="Journal entry not found")
         if existing_entry.status != "draft":
             raise HTTPException(status_code=400, detail="Only draft entries can be modified")
 
-        entry = await entry_repo.update(entry_id, entry_data.model_dump(exclude_unset=True), "system")  ***REMOVED*** TODO: tenant context
+        entry = await entry_repo.update(entry_id, entry_data.model_dump(exclude_unset=True), "system")  # TODO: tenant context
         if not entry:
             raise HTTPException(status_code=404, detail="Journal entry not found")
         return JournalEntry.model_validate(entry)
@@ -189,11 +189,11 @@ async def post_journal_entry(
     """
     try:
         entry_repo = container.resolve(JournalEntryRepository)
-        success = await entry_repo.post_entry(entry_id, "system")  ***REMOVED*** TODO: tenant context
+        success = await entry_repo.post_entry(entry_id, "system")  # TODO: tenant context
         if not success:
             raise HTTPException(status_code=400, detail="Failed to post journal entry")
 
-        ***REMOVED*** Return the updated entry
+        # Return the updated entry
         entry = await entry_repo.get_by_id(entry_id, "system")
         return JournalEntry.model_validate(entry)
     except HTTPException:
@@ -215,7 +215,7 @@ async def reverse_journal_entry(
     """
     try:
         entry_repo = container.resolve(JournalEntryRepository)
-        reversal_entry = await entry_repo.reverse_entry(entry_id, reason, "system")  ***REMOVED*** TODO: tenant context
+        reversal_entry = await entry_repo.reverse_entry(entry_id, reason, "system")  # TODO: tenant context
         if not reversal_entry:
             raise HTTPException(status_code=400, detail="Failed to create reversal entry")
 
@@ -243,14 +243,14 @@ async def delete_journal_entry(
     try:
         entry_repo = container.resolve(JournalEntryRepository)
 
-        ***REMOVED*** Check if entry is still in draft status
+        # Check if entry is still in draft status
         existing_entry = await entry_repo.get_by_id(entry_id, "system")
         if not existing_entry:
             raise HTTPException(status_code=404, detail="Journal entry not found")
         if existing_entry.status != "draft":
             raise HTTPException(status_code=400, detail="Only draft entries can be deleted")
 
-        success = await entry_repo.delete(entry_id, "system")  ***REMOVED*** TODO: tenant context
+        success = await entry_repo.delete(entry_id, "system")  # TODO: tenant context
         if not success:
             raise HTTPException(status_code=404, detail="Journal entry not found")
     except HTTPException:

@@ -72,27 +72,27 @@ class QualityIssue:
     reported_by: str
     assigned_to: Optional[str] = None
 
-    ***REMOVED*** Tracking
+    # Tracking
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
     resolved_at: Optional[datetime] = None
     due_date: Optional[datetime] = None
 
-    ***REMOVED*** Root cause and resolution
+    # Root cause and resolution
     root_cause: str = ""
     resolution: str = ""
     preventive_actions: List[str] = field(default_factory=list)
 
-    ***REMOVED*** Impact assessment
+    # Impact assessment
     affected_processes: List[str] = field(default_factory=list)
     business_impact: str = ""
     customer_impact: str = ""
 
-    ***REMOVED*** Evidence
+    # Evidence
     evidence: Dict[str, Any] = field(default_factory=dict)
     attachments: List[str] = field(default_factory=list)
 
-    ***REMOVED*** Metadata
+    # Metadata
     tenant_id: str = "system"
     tags: List[str] = field(default_factory=list)
 
@@ -118,7 +118,7 @@ class QualityGateResult:
     score: float
     issues: List[str]
     timestamp: datetime
-    duration: Optional[int] = None  ***REMOVED*** seconds
+    duration: Optional[int] = None  # seconds
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -133,15 +133,15 @@ class ISO9001QualityAssurance:
         self.monitoring = monitoring_service
         self.notifications = notification_service
 
-        ***REMOVED*** Quality tracking
+        # Quality tracking
         self.quality_issues: Dict[str, QualityIssue] = {}
         self.quality_metrics: List[QualityMetricData] = []
         self.quality_gates: List[QualityGateResult] = []
 
-        ***REMOVED*** Quality thresholds
+        # Quality thresholds
         self.quality_thresholds = self._initialize_quality_thresholds()
 
-        ***REMOVED*** SLA definitions
+        # SLA definitions
         self.sla_targets = {
             QualityIssueSeverity.CRITICAL: timedelta(hours=4),
             QualityIssueSeverity.MAJOR: timedelta(days=2),
@@ -153,49 +153,49 @@ class ISO9001QualityAssurance:
         """Initialize quality thresholds for different metrics"""
         return {
             QualityMetric.DEFECT_DENSITY.value: {
-                'target': 0.5,  ***REMOVED*** defects per 1000 lines of code
+                'target': 0.5,  # defects per 1000 lines of code
                 'warning': 1.0,
                 'critical': 2.0,
                 'trend_period_days': 30
             },
             QualityMetric.TEST_COVERAGE.value: {
-                'target': 80.0,  ***REMOVED*** percentage
+                'target': 80.0,  # percentage
                 'warning': 70.0,
                 'critical': 60.0,
                 'trend_period_days': 7
             },
             QualityMetric.DEPLOYMENT_SUCCESS_RATE.value: {
-                'target': 95.0,  ***REMOVED*** percentage
+                'target': 95.0,  # percentage
                 'warning': 90.0,
                 'critical': 85.0,
                 'trend_period_days': 30
             },
             QualityMetric.MEAN_TIME_TO_RESOLUTION.value: {
-                'target': 24.0,  ***REMOVED*** hours
+                'target': 24.0,  # hours
                 'warning': 48.0,
                 'critical': 72.0,
                 'trend_period_days': 30
             },
             QualityMetric.CUSTOMER_SATISFACTION.value: {
-                'target': 4.5,  ***REMOVED*** out of 5
+                'target': 4.5,  # out of 5
                 'warning': 4.0,
                 'critical': 3.5,
                 'trend_period_days': 90
             },
             QualityMetric.PROCESS_COMPLIANCE.value: {
-                'target': 95.0,  ***REMOVED*** percentage
+                'target': 95.0,  # percentage
                 'warning': 90.0,
                 'critical': 85.0,
                 'trend_period_days': 30
             },
             QualityMetric.CODE_QUALITY_SCORE.value: {
-                'target': 85.0,  ***REMOVED*** percentage
+                'target': 85.0,  # percentage
                 'warning': 75.0,
                 'critical': 65.0,
                 'trend_period_days': 7
             },
             QualityMetric.SECURITY_VULNERABILITIES.value: {
-                'target': 0,  ***REMOVED*** count
+                'target': 0,  # count
                 'warning': 5,
                 'critical': 10,
                 'trend_period_days': 7
@@ -226,12 +226,12 @@ class ISO9001QualityAssurance:
             tags=issue_data.get('tags', [])
         )
 
-        ***REMOVED*** Set due date based on SLA
+        # Set due date based on SLA
         issue.due_date = datetime.utcnow() + self.sla_targets[issue.severity]
 
         self.quality_issues[issue_id] = issue
 
-        ***REMOVED*** Trigger notifications
+        # Trigger notifications
         self._notify_issue_reported(issue)
 
         logger.info(f"Quality issue reported: {issue_id} - {issue.title}")
@@ -262,14 +262,14 @@ class ISO9001QualityAssurance:
         issue = self.quality_issues[issue_id]
         old_status = issue.status
 
-        ***REMOVED*** Update fields
+        # Update fields
         for key, value in update_data.items():
             if hasattr(issue, key):
                 setattr(issue, key, value)
 
         issue.updated_at = datetime.utcnow()
 
-        ***REMOVED*** Status-specific actions
+        # Status-specific actions
         if 'status' in update_data:
             new_status = QualityIssueStatus[update_data['status']]
             if new_status == QualityIssueStatus.RESOLVED:
@@ -278,7 +278,7 @@ class ISO9001QualityAssurance:
                 if not issue.resolved_at:
                     issue.resolved_at = datetime.utcnow()
 
-        ***REMOVED*** Notify stakeholders
+        # Notify stakeholders
         self._notify_issue_updated(issue, old_status)
 
         logger.info(f"Quality issue updated: {issue_id} - {old_status.value} -> {issue.status.value}")
@@ -318,7 +318,7 @@ class ISO9001QualityAssurance:
 
         self.quality_metrics.append(metric_data)
 
-        ***REMOVED*** Check thresholds and trigger alerts
+        # Check thresholds and trigger alerts
         self._check_metric_thresholds(metric_data)
 
         logger.debug(f"Quality metric recorded: {metric.value} = {value} for {component}")
@@ -368,7 +368,7 @@ class ISO9001QualityAssurance:
         """
         start_time = datetime.utcnow()
 
-        ***REMOVED*** Perform gate checks
+        # Perform gate checks
         passed, score, issues = self._perform_gate_checks(gate, component, tenant_id)
 
         end_time = datetime.utcnow()
@@ -386,7 +386,7 @@ class ISO9001QualityAssurance:
 
         self.quality_gates.append(result)
 
-        ***REMOVED*** Block deployment if gate fails
+        # Block deployment if gate fails
         if not passed and gate in [QualityGate.BUILD, QualityGate.SECURITY_SCAN, QualityGate.DEPLOYMENT]:
             self._block_deployment(component, gate, issues)
 
@@ -401,31 +401,31 @@ class ISO9001QualityAssurance:
         score = 100.0
 
         if gate == QualityGate.CODE_COMMIT:
-            ***REMOVED*** Check code quality
+            # Check code quality
             score, issues = self._check_code_quality(component)
 
         elif gate == QualityGate.PULL_REQUEST:
-            ***REMOVED*** Check PR quality
+            # Check PR quality
             score, issues = self._check_pull_request_quality(component)
 
         elif gate == QualityGate.BUILD:
-            ***REMOVED*** Check build success
+            # Check build success
             score, issues = self._check_build_quality(component)
 
         elif gate == QualityGate.UNIT_TEST:
-            ***REMOVED*** Check test coverage and results
+            # Check test coverage and results
             score, issues = self._check_test_quality(component)
 
         elif gate == QualityGate.SECURITY_SCAN:
-            ***REMOVED*** Check security scan results
+            # Check security scan results
             score, issues = self._check_security_quality(component)
 
         elif gate == QualityGate.PERFORMANCE_TEST:
-            ***REMOVED*** Check performance metrics
+            # Check performance metrics
             score, issues = self._check_performance_quality(component)
 
-        ***REMOVED*** Determine pass/fail
-        passed = score >= 80.0  ***REMOVED*** 80% quality threshold
+        # Determine pass/fail
+        passed = score >= 80.0  # 80% quality threshold
 
         return passed, score, issues
 
@@ -433,23 +433,23 @@ class ISO9001QualityAssurance:
         """Check code quality metrics"""
         issues = []
 
-        ***REMOVED*** Get recent metrics for component
+        # Get recent metrics for component
         recent_metrics = [
-            m for m in self.quality_metrics[-50:]  ***REMOVED*** Last 50 metrics
+            m for m in self.quality_metrics[-50:]  # Last 50 metrics
             if m.component == component and m.metric in [QualityMetric.CODE_QUALITY_SCORE, QualityMetric.DEFECT_DENSITY]
         ]
 
         if not recent_metrics:
             return 85.0, ["No recent code quality metrics available"]
 
-        ***REMOVED*** Calculate average quality score
+        # Calculate average quality score
         quality_scores = [m.value for m in recent_metrics if m.metric == QualityMetric.CODE_QUALITY_SCORE]
         defect_density = [m.value for m in recent_metrics if m.metric == QualityMetric.DEFECT_DENSITY]
 
         avg_quality = statistics.mean(quality_scores) if quality_scores else 75.0
         avg_defects = statistics.mean(defect_density) if defect_density else 1.0
 
-        ***REMOVED*** Penalize for high defect density
+        # Penalize for high defect density
         if avg_defects > 1.0:
             avg_quality -= (avg_defects - 1.0) * 10
 
@@ -462,7 +462,7 @@ class ISO9001QualityAssurance:
         """Check test quality and coverage"""
         issues = []
 
-        ***REMOVED*** Get test coverage metrics
+        # Get test coverage metrics
         coverage_metrics = [
             m.value for m in self.quality_metrics[-10:]
             if m.component == component and m.metric == QualityMetric.TEST_COVERAGE
@@ -476,7 +476,7 @@ class ISO9001QualityAssurance:
         if avg_coverage < 80:
             issues.append(f"Test coverage too low: {avg_coverage:.1f}% (target: 80%)")
 
-        ***REMOVED*** Calculate score based on coverage
+        # Calculate score based on coverage
         score = min(avg_coverage, 100)
 
         return score, issues
@@ -485,7 +485,7 @@ class ISO9001QualityAssurance:
         """Check security scan results"""
         issues = []
 
-        ***REMOVED*** Get security vulnerability metrics
+        # Get security vulnerability metrics
         vuln_metrics = [
             m.value for m in self.quality_metrics[-5:]
             if m.component == component and m.metric == QualityMetric.SECURITY_VULNERABILITIES
@@ -499,24 +499,24 @@ class ISO9001QualityAssurance:
         if avg_vulns > 5:
             issues.append(f"Too many security vulnerabilities: {avg_vulns:.0f} (max: 5)")
 
-        ***REMOVED*** Calculate score (inverse of vulnerabilities)
+        # Calculate score (inverse of vulnerabilities)
         score = max(100 - (avg_vulns * 5), 0)
 
         return score, issues
 
     def _check_pull_request_quality(self, component: str) -> Tuple[float, List[str]]:
         """Check pull request quality"""
-        ***REMOVED*** Simplified PR quality check
+        # Simplified PR quality check
         return 85.0, []
 
     def _check_build_quality(self, component: str) -> Tuple[float, List[str]]:
         """Check build quality"""
-        ***REMOVED*** Simplified build quality check
+        # Simplified build quality check
         return 95.0, []
 
     def _check_performance_quality(self, component: str) -> Tuple[float, List[str]]:
         """Check performance quality"""
-        ***REMOVED*** Simplified performance check
+        # Simplified performance check
         return 88.0, []
 
     def _block_deployment(self, component: str, gate: QualityGate, issues: List[str]):
@@ -534,23 +534,23 @@ class ISO9001QualityAssurance:
 
     def get_quality_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Get quality management dashboard"""
-        ***REMOVED*** Filter data by tenant
+        # Filter data by tenant
         tenant_issues = [
             issue for issue in self.quality_issues.values()
             if issue.tenant_id == tenant_id
         ]
 
         tenant_metrics = [
-            metric for metric in self.quality_metrics[-100:]  ***REMOVED*** Last 100 metrics
+            metric for metric in self.quality_metrics[-100:]  # Last 100 metrics
             if metric.tenant_id == tenant_id
         ]
 
         tenant_gates = [
-            gate for gate in self.quality_gates[-50:]  ***REMOVED*** Last 50 gates
+            gate for gate in self.quality_gates[-50:]  # Last 50 gates
             if gate.metadata.get('tenant_id') == tenant_id
         ]
 
-        ***REMOVED*** Calculate metrics
+        # Calculate metrics
         issue_stats = self._calculate_issue_statistics(tenant_issues)
         metric_trends = self._calculate_metric_trends(tenant_metrics)
         gate_stats = self._calculate_gate_statistics(tenant_gates)
@@ -579,7 +579,7 @@ class ISO9001QualityAssurance:
             status_counts[issue.status.value] = status_counts.get(issue.status.value, 0) + 1
 
             if issue.resolved_at and issue.created_at:
-                resolution_time = (issue.resolved_at - issue.created_at).total_seconds() / 3600  ***REMOVED*** hours
+                resolution_time = (issue.resolved_at - issue.created_at).total_seconds() / 3600  # hours
                 resolution_times.append(resolution_time)
 
         avg_resolution_time = statistics.mean(resolution_times) if resolution_times else 0
@@ -595,14 +595,14 @@ class ISO9001QualityAssurance:
         """Calculate quality metric trends"""
         trends = {}
 
-        ***REMOVED*** Group by metric type
+        # Group by metric type
         metric_groups = {}
         for metric in metrics:
             if metric.metric.value not in metric_groups:
                 metric_groups[metric.metric.value] = []
             metric_groups[metric.metric.value].append(metric.value)
 
-        ***REMOVED*** Calculate trends for each metric
+        # Calculate trends for each metric
         for metric_name, values in metric_groups.items():
             if len(values) >= 2:
                 current = statistics.mean(values[-3:]) if len(values) >= 3 else values[-1]
@@ -650,15 +650,15 @@ class ISO9001QualityAssurance:
         """Calculate overall quality score (0-100)"""
         score = 100.0
 
-        ***REMOVED*** Penalize for open issues
+        # Penalize for open issues
         open_issues = issue_stats.get('by_status', {}).get('OPEN', 0)
         score -= min(open_issues * 2, 30)
 
-        ***REMOVED*** Penalize for failed gates
+        # Penalize for failed gates
         pass_rate = gate_stats.get('pass_rate', 100)
         score -= (100 - pass_rate) * 0.5
 
-        ***REMOVED*** Penalize for metric violations
+        # Penalize for metric violations
         critical_metrics = sum(1 for trend in metric_trends.values() if trend['status'] == 'CRITICAL')
         warning_metrics = sum(1 for trend in metric_trends.values() if trend['status'] == 'WARNING')
 
@@ -671,7 +671,7 @@ class ISO9001QualityAssurance:
         """Get active quality alerts"""
         alerts = []
 
-        ***REMOVED*** Check for overdue issues
+        # Check for overdue issues
         overdue_issues = [
             issue for issue in self.quality_issues.values()
             if issue.tenant_id == tenant_id and issue.due_date and
@@ -687,7 +687,7 @@ class ISO9001QualityAssurance:
                 'days_overdue': (datetime.utcnow() - issue.due_date).days
             })
 
-        ***REMOVED*** Check for failing quality gates
+        # Check for failing quality gates
         recent_gates = [gate for gate in self.quality_gates[-10:] if not gate.passed]
         for gate in recent_gates:
             alerts.append({
@@ -730,7 +730,7 @@ class ISO9001QualityAssurance:
         """Generate quality improvement recommendations"""
         recommendations = []
 
-        ***REMOVED*** Issue-based recommendations
+        # Issue-based recommendations
         issue_stats = dashboard['issue_statistics']
         if issue_stats['total'] > 10:
             recommendations.append("Implement preventive measures to reduce quality issue volume")
@@ -739,14 +739,14 @@ class ISO9001QualityAssurance:
         if open_critical > 0:
             recommendations.append("Prioritize resolution of critical quality issues")
 
-        ***REMOVED*** Metric-based recommendations
+        # Metric-based recommendations
         for metric_name, trend in dashboard['metric_trends'].items():
             if trend['status'] == 'CRITICAL':
                 recommendations.append(f"Immediate action required for {metric_name} (currently {trend['current']})")
             elif trend['status'] == 'WARNING':
                 recommendations.append(f"Monitor and improve {metric_name} (target: {trend['target']})")
 
-        ***REMOVED*** Gate-based recommendations
+        # Gate-based recommendations
         gate_stats = dashboard['gate_statistics']
         if gate_stats['pass_rate'] < 90:
             recommendations.append("Improve quality gate compliance through process improvements")

@@ -12,16 +12,16 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Bearer-Token-Schema
+# Bearer-Token-Schema
 bearer = HTTPBearer(auto_error=True)
 
 
 class User(TypedDict, total=False):
     """Authenticated User Object (OIDC)"""
-    sub: str  ***REMOVED*** Subject (User ID)
-    roles: List[str]  ***REMOVED*** User Roles
-    scopes: List[str]  ***REMOVED*** Token Scopes
-    raw: dict  ***REMOVED*** Raw Claims
+    sub: str  # Subject (User ID)
+    roles: List[str]  # User Roles
+    scopes: List[str]  # Token Scopes
+    raw: dict  # Raw Claims
 
 
 async def get_current_user(
@@ -144,7 +144,7 @@ def require_roles_and_scopes(roles: List[str], scopes: List[str]):
     """
 
     async def _dep(user: User = Depends(get_current_user)) -> User:
-        ***REMOVED*** Rollen-Check
+        # Rollen-Check
         user_roles = set(user.get("roles") or [])
         if not user_roles.intersection(set(roles)):
             raise HTTPException(
@@ -152,7 +152,7 @@ def require_roles_and_scopes(roles: List[str], scopes: List[str]):
                 detail=f"Insufficient role. Required: {roles}",
             )
 
-        ***REMOVED*** Scope-Check
+        # Scope-Check
         user_scopes = set(user.get("scopes") or [])
         if not user_scopes.issuperset(set(scopes)):
             raise HTTPException(

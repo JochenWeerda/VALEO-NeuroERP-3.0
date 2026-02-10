@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field, field_validator
 from uuid import UUID
 
 
-***REMOVED*** Account Schemas
+# Account Schemas
 class AccountBase(BaseModel):
     """Base account schema"""
     account_number: str = Field(..., min_length=1, max_length=20, description="Account number")
@@ -75,7 +75,7 @@ class AccountHierarchy(Account):
     children: List['AccountHierarchy'] = Field(default_factory=list, description="Child accounts")
 
 
-***REMOVED*** Journal Entry Line Schemas
+# Journal Entry Line Schemas
 class JournalEntryLineBase(BaseModel):
     """Base journal entry line schema"""
     account_id: str = Field(..., description="Account ID")
@@ -92,7 +92,7 @@ class JournalEntryLineBase(BaseModel):
     @field_validator('debit_amount', 'credit_amount', 'tax_amount')
     @classmethod
     def validate_amounts(cls, v):
-        ***REMOVED*** Ensure amounts have at most 2 decimal places
+        # Ensure amounts have at most 2 decimal places
         if v != v.quantize(Decimal('0.01')):
             raise ValueError('Amount must have at most 2 decimal places')
         return v
@@ -100,7 +100,7 @@ class JournalEntryLineBase(BaseModel):
     @field_validator('debit_amount', 'credit_amount')
     @classmethod
     def validate_line_amounts(cls, v, info):
-        ***REMOVED*** Either debit or credit must be zero, but not both
+        # Either debit or credit must be zero, but not both
         if info.field_name == 'debit_amount':
             credit_amount = info.data.get('credit_amount', Decimal('0.00'))
             if v > 0 and credit_amount > 0:
@@ -129,7 +129,7 @@ class JournalEntryLine(JournalEntryLineBase):
         from_attributes = True
 
 
-***REMOVED*** Journal Entry Schemas
+# Journal Entry Schemas
 class JournalEntryBase(BaseModel):
     """Base journal entry schema"""
     entry_number: str = Field(..., min_length=1, max_length=50, description="Entry number")
@@ -190,7 +190,7 @@ class JournalEntry(JournalEntryBase):
         from_attributes = True
 
 
-***REMOVED*** Financial Reporting Schemas
+# Financial Reporting Schemas
 class AccountBalance(BaseModel):
     """Account balance information"""
     account_id: str
@@ -226,7 +226,7 @@ class GeneralLedgerEntry(BaseModel):
     reference: Optional[str] = None
 
 
-***REMOVED*** Bank Account Schemas
+# Bank Account Schemas
 class BankAccountBase(BaseModel):
     """Base bank account schema"""
     account_number: str = Field(..., min_length=1, max_length=50, description="Bank account number")
@@ -264,7 +264,7 @@ class BankAccount(BankAccountBase):
         from_attributes = True
 
 
-***REMOVED*** Debtor Schemas
+# Debtor Schemas
 class DebtorBase(BaseModel):
     """Base debtor schema"""
     debtor_number: str = Field(..., min_length=1, max_length=50, description="Debtor number")

@@ -19,12 +19,12 @@ class DocLine(BaseModel):
 class CustomerInquiry(BaseModel):
     """Kundenanfrage"""
     number: str
-    date: str  ***REMOVED*** YYYY-MM-DD
+    date: str  # YYYY-MM-DD
     customerId: str
-    status: str = "OFFEN"  ***REMOVED*** Status-Management: OFFEN → IN_BEARBEITUNG → ANGEBOTEN → ABGELEHNT
+    status: str = "OFFEN"  # Status-Management: OFFEN → IN_BEARBEITUNG → ANGEBOTEN → ABGELEHNT
     contactPerson: Optional[str] = None
-    inquiryType: str = "STANDARD"  ***REMOVED*** STANDARD, PROJEKT, SUPPORT
-    priority: str = "NORMAL"  ***REMOVED*** HOCH, NORMAL, NIEDRIG
+    inquiryType: str = "STANDARD"  # STANDARD, PROJEKT, SUPPORT
+    priority: str = "NORMAL"  # HOCH, NORMAL, NIEDRIG
     description: Optional[str] = ""
     requirements: Optional[str] = ""
     deadline: Optional[str] = None
@@ -35,29 +35,29 @@ class CustomerInquiry(BaseModel):
 class SalesOffer(BaseModel):
     """Verkaufsangebot"""
     number: str
-    date: str  ***REMOVED*** YYYY-MM-DD
+    date: str  # YYYY-MM-DD
     customerId: str
-    status: str = "ENTWURF"  ***REMOVED*** Status-Management: ENTWURF → VERSENDET → ANGENOMMEN → ABGELEHNT
+    status: str = "ENTWURF"  # Status-Management: ENTWURF → VERSENDET → ANGENOMMEN → ABGELEHNT
     contactPerson: Optional[str] = None
-    validUntil: Optional[str] = None  ***REMOVED*** Gültig bis
+    validUntil: Optional[str] = None  # Gültig bis
     deliveryDate: Optional[str] = None
     deliveryAddress: Optional[str] = ""
     paymentTerms: str = "net30"
     notes: Optional[str] = ""
     lines: List[DocLine] = Field(default_factory=list)
-    ***REMOVED*** Gesamtbeträge
-    subtotalNet: float = 0.0  ***REMOVED*** Netto-Summe
-    totalTax: float = 0.0     ***REMOVED*** Steuer-Summe
-    totalGross: float = 0.0   ***REMOVED*** Brutto-Summe
+    # Gesamtbeträge
+    subtotalNet: float = 0.0  # Netto-Summe
+    totalTax: float = 0.0     # Steuer-Summe
+    totalGross: float = 0.0   # Brutto-Summe
 
 
 class SalesOrder(BaseModel):
     """Verkaufsauftrag"""
     number: str
-    date: str  ***REMOVED*** YYYY-MM-DD
+    date: str  # YYYY-MM-DD
     customerId: str
-    salesOfferId: Optional[str] = None  ***REMOVED*** Referenz zum SalesOffer
-    status: str = "ENTWURF"  ***REMOVED*** Status-Management
+    salesOfferId: Optional[str] = None  # Referenz zum SalesOffer
+    status: str = "ENTWURF"  # Status-Management
     contactPerson: Optional[str] = None
     deliveryDate: Optional[str] = None
     deliveryAddress: Optional[str] = ""
@@ -74,8 +74,8 @@ class SalesDelivery(BaseModel):
     sourceOrder: Optional[str] = None
     deliveryAddress: str
     carrier: Optional[str] = None
-    deliveryDate: Optional[str] = None  ***REMOVED*** Lieferdatum
-    status: str = "ENTWURF"  ***REMOVED*** Status-Management: ENTWURF → VERSENDET → GELIEFERT
+    deliveryDate: Optional[str] = None  # Lieferdatum
+    status: str = "ENTWURF"  # Status-Management: ENTWURF → VERSENDET → GELIEFERT
     notes: Optional[str] = ""
     lines: List[DocLine] = Field(default_factory=list)
 
@@ -89,36 +89,36 @@ class SalesInvoice(BaseModel):
     sourceDelivery: Optional[str] = None
     paymentTerms: str = "net30"
     dueDate: str
-    status: str = "ENTWURF"  ***REMOVED*** Status-Management: ENTWURF → VERSENDET → BEZAHLT → ÜBERFÄLLIG
+    status: str = "ENTWURF"  # Status-Management: ENTWURF → VERSENDET → BEZAHLT → ÜBERFÄLLIG
     notes: Optional[str] = ""
     lines: List[DocLine] = Field(default_factory=list)
-    ***REMOVED*** Gesamtbeträge
-    subtotalNet: float = 0.0  ***REMOVED*** Netto-Summe
-    totalTax: float = 0.0     ***REMOVED*** Steuer-Summe
-    totalGross: float = 0.0   ***REMOVED*** Brutto-Summe
+    # Gesamtbeträge
+    subtotalNet: float = 0.0  # Netto-Summe
+    totalTax: float = 0.0     # Steuer-Summe
+    totalGross: float = 0.0   # Brutto-Summe
 
 
 class PaymentReceived(BaseModel):
     """Zahlungseingang"""
     number: str
-    date: str  ***REMOVED*** YYYY-MM-DD
-    salesInvoiceId: str  ***REMOVED*** Referenz zur SalesInvoice
-    amount: float  ***REMOVED*** Zahlungsbetrag
-    paymentMethod: str  ***REMOVED*** Zahlungsart (Überweisung, Lastschrift, Bar, etc.)
-    bankReference: Optional[str] = None  ***REMOVED*** Bankverbindung oder Zahlungsreferenz
-    status: str = "EINGEGANGEN"  ***REMOVED*** Status-Management: EINGEGANGEN → VERBUCHT → ABGEGLICHEN
+    date: str  # YYYY-MM-DD
+    salesInvoiceId: str  # Referenz zur SalesInvoice
+    amount: float  # Zahlungsbetrag
+    paymentMethod: str  # Zahlungsart (Überweisung, Lastschrift, Bar, etc.)
+    bankReference: Optional[str] = None  # Bankverbindung oder Zahlungsreferenz
+    status: str = "EINGEGANGEN"  # Status-Management: EINGEGANGEN → VERBUCHT → ABGEGLICHEN
     notes: Optional[str] = ""
 
 
 class PurchaseRequest(BaseModel):
     """Einkaufsanfrage"""
     number: str
-    date: str  ***REMOVED*** YYYY-MM-DD
+    date: str  # YYYY-MM-DD
     supplierId: Optional[str] = None
-    status: str = "OFFEN"  ***REMOVED*** Status-Management: OFFEN → IN_BEARBEITUNG → BESTELLT → ABGELEHNT
+    status: str = "OFFEN"  # Status-Management: OFFEN → IN_BEARBEITUNG → BESTELLT → ABGELEHNT
     contactPerson: Optional[str] = None
-    requestType: str = "STANDARD"  ***REMOVED*** STANDARD, DRINGEND, PLANUNG
-    priority: str = "NORMAL"  ***REMOVED*** HOCH, NORMAL, NIEDRIG
+    requestType: str = "STANDARD"  # STANDARD, DRINGEND, PLANUNG
+    priority: str = "NORMAL"  # HOCH, NORMAL, NIEDRIG
     description: Optional[str] = ""
     requirements: Optional[str] = ""
     deadline: Optional[str] = None
@@ -129,40 +129,40 @@ class PurchaseRequest(BaseModel):
 class PurchaseOffer(BaseModel):
     """Einkaufsangebot"""
     number: str
-    date: str  ***REMOVED*** YYYY-MM-DD
+    date: str  # YYYY-MM-DD
     supplierId: str
-    purchaseRequestId: Optional[str] = None  ***REMOVED*** Referenz zur PurchaseRequest
-    status: str = "ENTWURF"  ***REMOVED*** Status-Management: ENTWURF → EINGEGANGEN → ANGENOMMEN → ABGELEHNT
+    purchaseRequestId: Optional[str] = None  # Referenz zur PurchaseRequest
+    status: str = "ENTWURF"  # Status-Management: ENTWURF → EINGEGANGEN → ANGENOMMEN → ABGELEHNT
     contactPerson: Optional[str] = None
-    validUntil: Optional[str] = None  ***REMOVED*** Gültig bis
+    validUntil: Optional[str] = None  # Gültig bis
     deliveryDate: Optional[str] = None
     deliveryAddress: Optional[str] = ""
     paymentTerms: str = "net30"
     notes: Optional[str] = ""
     lines: List[DocLine] = Field(default_factory=list)
-    ***REMOVED*** Gesamtbeträge
-    subtotalNet: float = 0.0  ***REMOVED*** Netto-Summe
-    totalTax: float = 0.0     ***REMOVED*** Steuer-Summe
-    totalGross: float = 0.0   ***REMOVED*** Brutto-Summe
+    # Gesamtbeträge
+    subtotalNet: float = 0.0  # Netto-Summe
+    totalTax: float = 0.0     # Steuer-Summe
+    totalGross: float = 0.0   # Brutto-Summe
 
 
 class PurchaseOrder(BaseModel):
     """Kaufauftrag"""
     number: str
-    date: str  ***REMOVED*** YYYY-MM-DD
+    date: str  # YYYY-MM-DD
     supplierId: str
-    purchaseOfferId: Optional[str] = None  ***REMOVED*** Referenz zum PurchaseOffer
-    status: str = "ENTWURF"  ***REMOVED*** Status-Management: ENTWURF → FREIGEGEBEN → TEILGELIEFERT → VOLLGELIEFERT → STORNIERT
+    purchaseOfferId: Optional[str] = None  # Referenz zum PurchaseOffer
+    status: str = "ENTWURF"  # Status-Management: ENTWURF → FREIGEGEBEN → TEILGELIEFERT → VOLLGELIEFERT → STORNIERT
     contactPerson: Optional[str] = None
     deliveryDate: Optional[str] = None
     deliveryAddress: Optional[str] = ""
     paymentTerms: str = "net30"
     notes: Optional[str] = ""
     lines: List[DocLine] = Field(default_factory=list)
-    ***REMOVED*** Gesamtbeträge
-    subtotalNet: float = 0.0  ***REMOVED*** Netto-Summe
-    totalTax: float = 0.0     ***REMOVED*** Steuer-Summe
-    totalGross: float = 0.0   ***REMOVED*** Brutto-Summe
+    # Gesamtbeträge
+    subtotalNet: float = 0.0  # Netto-Summe
+    totalTax: float = 0.0     # Steuer-Summe
+    totalGross: float = 0.0   # Brutto-Summe
 
 
 class FollowRequest(BaseModel):

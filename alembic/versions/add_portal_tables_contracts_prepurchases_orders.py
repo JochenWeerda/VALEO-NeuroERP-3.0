@@ -16,7 +16,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision = 'portal_001'
 down_revision = 'ff7b1a7899b4'
 branch_labels = None
@@ -24,7 +24,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Schema erstellen falls nicht vorhanden
+    # Schema erstellen falls nicht vorhanden
     op.execute("CREATE SCHEMA IF NOT EXISTS domain_portal")
     
     contract_status_enum = postgresql.ENUM(
@@ -49,11 +49,11 @@ def upgrade() -> None:
         create_type=False,
     )
 
-    ***REMOVED*** Enum-Typen erstellen (idempotent)
+    # Enum-Typen erstellen (idempotent)
     contract_status_enum.create(op.get_bind(), checkfirst=True)
     order_status_enum.create(op.get_bind(), checkfirst=True)
     
-    ***REMOVED*** Kundenkontrakte
+    # Kundenkontrakte
     op.create_table(
         'customer_contracts',
         sa.Column('id', sa.String(36), primary_key=True),
@@ -78,7 +78,7 @@ def upgrade() -> None:
         schema='domain_portal'
     )
     
-    ***REMOVED*** Vorkäufe
+    # Vorkäufe
     op.create_table(
         'customer_pre_purchases',
         sa.Column('id', sa.String(36), primary_key=True),
@@ -103,7 +103,7 @@ def upgrade() -> None:
         schema='domain_portal'
     )
     
-    ***REMOVED*** Kundenbestellungen
+    # Kundenbestellungen
     op.create_table(
         'customer_orders',
         sa.Column('id', sa.String(36), primary_key=True),
@@ -125,7 +125,7 @@ def upgrade() -> None:
         schema='domain_portal'
     )
     
-    ***REMOVED*** Bestellpositionen
+    # Bestellpositionen
     op.create_table(
         'customer_order_items',
         sa.Column('id', sa.String(36), primary_key=True),
@@ -145,7 +145,7 @@ def upgrade() -> None:
         schema='domain_portal'
     )
     
-    ***REMOVED*** Bestellhistorie
+    # Bestellhistorie
     op.create_table(
         'customer_order_history',
         sa.Column('id', sa.String(36), primary_key=True),
@@ -163,7 +163,7 @@ def upgrade() -> None:
         schema='domain_portal'
     )
     
-    ***REMOVED*** Indizes für Performance
+    # Indizes für Performance
     op.create_index('ix_customer_contracts_lookup', 'customer_contracts', 
                     ['tenant_id', 'customer_id', 'article_id'], schema='domain_portal')
     op.create_index('ix_customer_pre_purchases_lookup', 'customer_pre_purchases',
@@ -175,20 +175,20 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    ***REMOVED*** Indizes entfernen
+    # Indizes entfernen
     op.drop_index('ix_customer_order_history_lookup', table_name='customer_order_history', schema='domain_portal')
     op.drop_index('ix_customer_orders_date', table_name='customer_orders', schema='domain_portal')
     op.drop_index('ix_customer_pre_purchases_lookup', table_name='customer_pre_purchases', schema='domain_portal')
     op.drop_index('ix_customer_contracts_lookup', table_name='customer_contracts', schema='domain_portal')
     
-    ***REMOVED*** Tabellen entfernen
+    # Tabellen entfernen
     op.drop_table('customer_order_history', schema='domain_portal')
     op.drop_table('customer_order_items', schema='domain_portal')
     op.drop_table('customer_orders', schema='domain_portal')
     op.drop_table('customer_pre_purchases', schema='domain_portal')
     op.drop_table('customer_contracts', schema='domain_portal')
     
-    ***REMOVED*** Enum-Typen entfernen
+    # Enum-Typen entfernen
     op.execute("DROP TYPE IF EXISTS domain_portal.order_status")
     op.execute("DROP TYPE IF EXISTS domain_portal.contract_status")
 

@@ -65,13 +65,13 @@ from app.api.v1.endpoints import (
     master_data,
 )
 
-***REMOVED*** Import domain routers
+# Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.documents.router import router as documents_router
 from app.reports.router import router as reports_router
 from app.verkauf.router import router as verkauf_router
 
-***REMOVED*** Create main API router
+# Create main API router
 api_router = APIRouter()
 
 
@@ -80,7 +80,7 @@ async def api_status():
     """Lightweight status endpoint for authenticated clients."""
     return {"status": "ok"}
 
-***REMOVED*** Include domain routers
+# Include domain routers
 api_router.include_router(
     health,
     prefix="/health",
@@ -322,7 +322,7 @@ api_router.include_router(
     tags=["verkauf", "kundenstamm"]
 )
 
-***REMOVED*** Documents and Reports routers
+# Documents and Reports routers
 api_router.include_router(
     documents_router,
     tags=["documents", "sales"]
@@ -333,7 +333,7 @@ api_router.include_router(
     tags=["reports", "analytics", "dashboard"]
 )
 
-***REMOVED*** Agrar domain routers
+# Agrar domain routers
 api_router.include_router(
     psm.router,
     prefix="/agrar/psm",
@@ -346,7 +346,7 @@ api_router.include_router(
     tags=["agrar", "psm", "proplanta", "integration"]
 )
 
-***REMOVED*** Kundenportal
+# Kundenportal
 api_router.include_router(
     portal_shop.router,
     prefix="/portal",

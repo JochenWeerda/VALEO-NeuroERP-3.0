@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-***REMOVED*** Active WebSocket connections per terminal
+# Active WebSocket connections per terminal
 active_terminals: Dict[str, Set[WebSocket]] = {}
 
 
@@ -25,7 +25,7 @@ async def pos_websocket(websocket: WebSocket, terminal_id: str):
     """
     await websocket.accept()
     
-    ***REMOVED*** Register connection
+    # Register connection
     if terminal_id not in active_terminals:
         active_terminals[terminal_id] = set()
     active_terminals[terminal_id].add(websocket)
@@ -34,23 +34,23 @@ async def pos_websocket(websocket: WebSocket, terminal_id: str):
     
     try:
         while True:
-            ***REMOVED*** Receive cart update from POS-Terminal
+            # Receive cart update from POS-Terminal
             data = await websocket.receive_text()
             cart_data = json.loads(data)
             
             logger.debug(f"Cart update from {terminal_id}: {len(cart_data.get('cart', []))} items")
             
-            ***REMOVED*** Broadcast to all connected displays for this terminal
+            # Broadcast to all connected displays for this terminal
             for client in active_terminals[terminal_id]:
-                if client != websocket:  ***REMOVED*** Don't send back to sender
+                if client != websocket:  # Don't send back to sender
                     try:
                         await client.send_text(data)
                     except:
-                        ***REMOVED*** Remove dead connections
+                        # Remove dead connections
                         active_terminals[terminal_id].discard(client)
     
     except WebSocketDisconnect:
-        ***REMOVED*** Remove connection
+        # Remove connection
         active_terminals[terminal_id].discard(websocket)
         if not active_terminals[terminal_id]:
             del active_terminals[terminal_id]
@@ -75,14 +75,14 @@ async def workflow_websocket(websocket: WebSocket, workflow_id: str):
     
     try:
         while True:
-            ***REMOVED*** Receive commands (e.g., "cancel", "pause")
+            # Receive commands (e.g., "cancel", "pause")
             data = await websocket.receive_text()
             command = json.loads(data)
             
             logger.info(f"Workflow command: {command}")
             
-            ***REMOVED*** Send progress updates
-            ***REMOVED*** TODO: Hook into workflow execution
+            # Send progress updates
+            # TODO: Hook into workflow execution
             await websocket.send_json({
                 "type": "progress",
                 "workflow_id": workflow_id,

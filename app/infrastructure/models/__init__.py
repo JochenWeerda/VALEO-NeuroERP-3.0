@@ -13,7 +13,7 @@ import uuid
 from ...core.database import Base
 
 
-***REMOVED*** Shared Models
+# Shared Models
 class Tenant(Base):
     """Tenant model for multi-tenancy"""
     __tablename__ = "tenants"
@@ -39,7 +39,7 @@ class User(Base):
     email = Column(String(100), nullable=False, unique=True)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
-    roles = Column(Text, default="[]")  ***REMOVED*** JSON array of roles
+    roles = Column(Text, default="[]")  # JSON array of roles
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     is_active = Column(Boolean, default=True)
     last_login = Column(DateTime(timezone=True), nullable=True)
@@ -48,7 +48,7 @@ class User(Base):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
 
-***REMOVED*** CRM Models
+# CRM Models
 class Customer(Base):
     """Customer model"""
     __tablename__ = "customers"
@@ -126,12 +126,12 @@ class Activity(Base):
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    type = Column(String(20), nullable=False)  ***REMOVED*** meeting, call, email, note
+    type = Column(String(20), nullable=False)  # meeting, call, email, note
     title = Column(String(200), nullable=False)
     customer = Column(String(100), nullable=False)
     contact_person = Column(String(100), nullable=False)
     date = Column(DateTime(timezone=True), nullable=False)
-    status = Column(String(20), nullable=False)  ***REMOVED*** planned, completed, overdue
+    status = Column(String(20), nullable=False)  # planned, completed, overdue
     assigned_to = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=True)
@@ -147,18 +147,18 @@ class FarmProfile(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     farm_name = Column(String(200), nullable=False)
     owner = Column(String(100), nullable=False)
-    total_area = Column(Float, nullable=False)  ***REMOVED*** in hectares
-    crops = Column(postgresql.JSONB(astext_type=Text()), nullable=True, default="[]")  ***REMOVED*** JSON array of {crop, area}
-    livestock = Column(postgresql.JSONB(astext_type=Text()), nullable=True, default="[]")  ***REMOVED*** JSON array of {type, count}
-    location = Column(postgresql.JSONB(astext_type=Text()), nullable=True)  ***REMOVED*** {latitude, longitude, address}
-    certifications = Column(postgresql.JSONB(astext_type=Text()), nullable=True, default="[]")  ***REMOVED*** JSON array of strings
+    total_area = Column(Float, nullable=False)  # in hectares
+    crops = Column(postgresql.JSONB(astext_type=Text()), nullable=True, default="[]")  # JSON array of {crop, area}
+    livestock = Column(postgresql.JSONB(astext_type=Text()), nullable=True, default="[]")  # JSON array of {type, count}
+    location = Column(postgresql.JSONB(astext_type=Text()), nullable=True)  # {latitude, longitude, address}
+    certifications = Column(postgresql.JSONB(astext_type=Text()), nullable=True, default="[]")  # JSON array of strings
     notes = Column(Text, nullable=True)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
-***REMOVED*** Inventory Models
+# Inventory Models
 class Article(Base):
     """Article/Product model"""
     __tablename__ = "articles"
@@ -223,7 +223,7 @@ class StockMovement(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=False)
     warehouse_id = Column(String, ForeignKey("domain_inventory.warehouses.id"), nullable=False)
-    movement_type = Column(String(20), nullable=False)  ***REMOVED*** in, out, transfer, adjustment
+    movement_type = Column(String(20), nullable=False)  # in, out, transfer, adjustment
     quantity = Column(DECIMAL(10, 2), nullable=False)
     unit_cost = Column(DECIMAL(10, 2), nullable=True)
     reference_number = Column(String(50), nullable=True)
@@ -244,7 +244,7 @@ class InventoryCount(Base):
     warehouse_id = Column(String, ForeignKey("domain_inventory.warehouses.id"), nullable=False)
     count_date = Column(DateTime(timezone=True), server_default=func.now())
     counted_by = Column(String, ForeignKey("domain_shared.users.id"), nullable=False)
-    status = Column(String(20), default="draft")  ***REMOVED*** draft, completed, approved
+    status = Column(String(20), default="draft")  # draft, completed, approved
     total_items = Column(Integer, default=0)
     discrepancies_found = Column(Integer, default=0)
     approved_by = Column(String, ForeignKey("domain_shared.users.id"), nullable=True)
@@ -254,7 +254,7 @@ class InventoryCount(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
-***REMOVED*** Finance Models
+# Finance Models
 class Account(Base):
     """Chart of accounts model"""
     __tablename__ = "finance_accounts"
@@ -263,7 +263,7 @@ class Account(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     account_number = Column(String(20), nullable=False)
     account_name = Column(String(100), nullable=False)
-    account_type = Column(String(20), nullable=False)  ***REMOVED*** asset, liability, equity, revenue, expense
+    account_type = Column(String(20), nullable=False)  # asset, liability, equity, revenue, expense
     category = Column(String(50), nullable=False)
     subcategory = Column(String(50), nullable=True)
     description = Column(Text, nullable=True)
@@ -290,7 +290,7 @@ class JournalEntry(Base):
     description = Column(String(200), nullable=False)
     reference = Column(String(50), nullable=True)
     source = Column(String(50), nullable=False)
-    status = Column(String(20), default="draft")  ***REMOVED*** draft, posted, reversed
+    status = Column(String(20), default="draft")  # draft, posted, reversed
     total_debit = Column(DECIMAL(15, 2), default=0)
     total_credit = Column(DECIMAL(15, 2), default=0)
     posted_by = Column(String, ForeignKey("domain_shared.users.id"), nullable=True)
@@ -315,7 +315,7 @@ class JournalEntryLine(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
-***REMOVED*** Policy Engine Models
+# Policy Engine Models
 class PolicyRule(Base):
     """MCP policy rule model"""
     __tablename__ = "policy_rules"
@@ -336,7 +336,7 @@ class PolicyRule(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
-***REMOVED*** Audit & Compliance Models
+# Audit & Compliance Models
 class AuditLog(Base):
     """Audit log for compliance tracking"""
     __tablename__ = "audit_logs"
@@ -356,7 +356,7 @@ class AuditLog(Base):
     correlation_id = Column(String(50), nullable=True)
 
 
-***REMOVED*** Import Agrar models
+# Import Agrar models
 from .agrar_models import (
     Saatgut,
     SaatgutLizenz,

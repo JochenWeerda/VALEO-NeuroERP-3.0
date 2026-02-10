@@ -58,7 +58,7 @@ class PaymentRunResponse(BaseModel):
     initiator_bic: str
     total_amount: Decimal
     payment_count: int
-    status: str  ***REMOVED*** draft, approved, executed, cancelled, returned
+    status: str  # draft, approved, executed, cancelled, returned
     approved_at: Optional[datetime]
     approved_by: Optional[str]
     executed_at: Optional[datetime]
@@ -124,95 +124,95 @@ class SEPAXMLGenerator:
         if execution_date is None:
             execution_date = date.today()
         
-        ***REMOVED*** Register namespace
+        # Register namespace
         ET.register_namespace('', self.NAMESPACE)
         
-        ***REMOVED*** Root element
+        # Root element
         root = ET.Element("Document", xmlns=self.NAMESPACE)
         
-        ***REMOVED*** CstmrCdtTrfInitn (Customer Credit Transfer Initiation)
+        # CstmrCdtTrfInitn (Customer Credit Transfer Initiation)
         cct_initn = ET.SubElement(root, "CstmrCdtTrfInitn")
         
-        ***REMOVED*** Group Header
+        # Group Header
         grp_hdr = ET.SubElement(cct_initn, "GrpHdr")
         ET.SubElement(grp_hdr, "MsgId").text = message_id
         ET.SubElement(grp_hdr, "CreDtTm").text = datetime.now().isoformat()
         ET.SubElement(grp_hdr, "NbOfTxs").text = str(len(payments))
         
-        ***REMOVED*** Calculate total amount
+        # Calculate total amount
         total_amount = sum(payment.amount for payment in payments)
         ET.SubElement(grp_hdr, "CtrlSum").text = self._format_decimal(total_amount)
         
-        ***REMOVED*** Initiating Party
+        # Initiating Party
         initg_pty = ET.SubElement(grp_hdr, "InitgPty")
         ET.SubElement(initg_pty, "Nm").text = self.initiator_name
         
-        ***REMOVED*** Payment Information
+        # Payment Information
         pmt_inf = ET.SubElement(cct_initn, "PmtInf")
         pmt_inf_id = f"PMT-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
         ET.SubElement(pmt_inf, "PmtInfId").text = pmt_inf_id
-        ET.SubElement(pmt_inf, "PmtMtd").text = "TRF"  ***REMOVED*** Transfer
+        ET.SubElement(pmt_inf, "PmtMtd").text = "TRF"  # Transfer
         ET.SubElement(pmt_inf, "BtchBookg").text = "false"
         ET.SubElement(pmt_inf, "NbOfTxs").text = str(len(payments))
         ET.SubElement(pmt_inf, "CtrlSum").text = self._format_decimal(total_amount)
         
-        ***REMOVED*** Payment Type Information
+        # Payment Type Information
         pmt_tp_inf = ET.SubElement(pmt_inf, "PmtTpInf")
         svc_lvl = ET.SubElement(pmt_tp_inf, "SvcLvl")
         ET.SubElement(svc_lvl, "Cd").text = "SEPA"
         
-        ***REMOVED*** Requested Execution Date
+        # Requested Execution Date
         reqd_exctn_dt = ET.SubElement(pmt_inf, "ReqdExctnDt")
         reqd_exctn_dt.text = execution_date.strftime("%Y-%m-%d")
         
-        ***REMOVED*** Debtor (Initiator)
+        # Debtor (Initiator)
         dbtr = ET.SubElement(pmt_inf, "Dbtr")
         ET.SubElement(dbtr, "Nm").text = self.initiator_name
         
-        ***REMOVED*** Debtor Account
+        # Debtor Account
         dbtr_acct = ET.SubElement(pmt_inf, "DbtrAcct")
         dbtr_acct_id = ET.SubElement(dbtr_acct, "Id")
         ET.SubElement(dbtr_acct_id, "IBAN").text = self.initiator_iban
         
-        ***REMOVED*** Debtor Agent (Bank)
+        # Debtor Agent (Bank)
         dbtr_agt = ET.SubElement(pmt_inf, "DbtrAgt")
         fin_instn_id = ET.SubElement(dbtr_agt, "FinInstnId")
         ET.SubElement(fin_instn_id, "BIC").text = self.initiator_bic
         
-        ***REMOVED*** Credit Transfer Transaction Information
+        # Credit Transfer Transaction Information
         for idx, payment in enumerate(payments, start=1):
             cdt_trf_tx_inf = ET.SubElement(pmt_inf, "CdtTrfTxInf")
             
-            ***REMOVED*** Payment Identification
+            # Payment Identification
             pmt_id = ET.SubElement(cdt_trf_tx_inf, "PmtId")
             end_to_end_id = payment.end_to_end_id or f"E2E-{payment.invoice_number or payment.op_id or idx}"
             ET.SubElement(pmt_id, "EndToEndId").text = end_to_end_id
             
-            ***REMOVED*** Amount
+            # Amount
             amt = ET.SubElement(cdt_trf_tx_inf, "Amt")
             instd_amt = ET.SubElement(amt, "InstdAmt", Ccy="EUR")
             instd_amt.text = self._format_decimal(payment.amount)
             
-            ***REMOVED*** Creditor Agent (Bank) - optional for SEPA
+            # Creditor Agent (Bank) - optional for SEPA
             if payment.bic:
                 cdtr_agt = ET.SubElement(cdt_trf_tx_inf, "CdtrAgt")
                 fin_instn_id = ET.SubElement(cdtr_agt, "FinInstnId")
                 ET.SubElement(fin_instn_id, "BIC").text = self._format_bic(payment.bic)
             
-            ***REMOVED*** Creditor
+            # Creditor
             cdtr = ET.SubElement(cdt_trf_tx_inf, "Cdtr")
             ET.SubElement(cdtr, "Nm").text = payment.creditor_name
             
-            ***REMOVED*** Creditor Account
+            # Creditor Account
             cdtr_acct = ET.SubElement(cdt_trf_tx_inf, "CdtrAcct")
             cdtr_acct_id = ET.SubElement(cdtr_acct, "Id")
             ET.SubElement(cdtr_acct_id, "IBAN").text = self._format_iban(payment.iban)
             
-            ***REMOVED*** Remittance Information
+            # Remittance Information
             rmt_inf = ET.SubElement(cdt_trf_tx_inf, "RmtInf")
             ET.SubElement(rmt_inf, "Ustrd").text = payment.purpose
         
-        ***REMOVED*** Convert to string and prettify
+        # Convert to string and prettify
         rough_string = ET.tostring(root, encoding='utf-8')
         reparsed = minidom.parseString(rough_string)
         return reparsed.toprettyxml(indent="  ", encoding='utf-8').decode('utf-8')
@@ -261,7 +261,7 @@ async def create_payment_run(
             "notes": payment_run.notes
         }).fetchone()
         
-        ***REMOVED*** Insert payment items
+        # Insert payment items
         for idx, payment in enumerate(payment_run.payments, start=1):
             payment_id = f"{run_id}-P{idx}"
             payment_insert = text("""
@@ -295,7 +295,7 @@ async def create_payment_run(
         
         db.commit()
         
-        ***REMOVED*** Get payments for response
+        # Get payments for response
         payments_query = text("""
             SELECT creditor_id, creditor_name, iban, bic, amount, purpose, op_id, invoice_number,
                    discount_used, discount_amount, end_to_end_id, status
@@ -380,7 +380,7 @@ async def list_payment_runs(
         
         result = []
         for row in rows:
-            ***REMOVED*** Get payments for each run
+            # Get payments for each run
             payments_query = text("""
                 SELECT creditor_id, creditor_name, iban, bic, amount, purpose, op_id, invoice_number,
                        discount_used, discount_amount, end_to_end_id, status
@@ -462,7 +462,7 @@ async def get_payment_run(
         if not row:
             raise HTTPException(status_code=404, detail="Payment run not found")
         
-        ***REMOVED*** Get payments
+        # Get payments
         payments_query = text("""
             SELECT creditor_id, creditor_name, iban, bic, amount, purpose, op_id, invoice_number,
                    discount_used, discount_amount, end_to_end_id, status
@@ -568,13 +568,13 @@ async def execute_payment_run(
     Execute a payment run (generate SEPA XML and settle open items).
     """
     try:
-        ***REMOVED*** Get payment run
+        # Get payment run
         payment_run = await get_payment_run(run_id, tenant_id, db)
         
         if payment_run.status != "approved":
             raise HTTPException(status_code=400, detail="Payment run must be approved before execution")
         
-        ***REMOVED*** Generate SEPA XML
+        # Generate SEPA XML
         generator = SEPAXMLGenerator(
             initiator_name=payment_run.initiator_name,
             initiator_iban=payment_run.initiator_iban,
@@ -591,10 +591,10 @@ async def execute_payment_run(
             execution_date=payment_run.execution_date
         )
         
-        ***REMOVED*** Save SEPA file
+        # Save SEPA file
         sepa_file_id = f"SEPA-{run_id}"
         
-        ***REMOVED*** Update payment run status
+        # Update payment run status
         update_query = text("""
             UPDATE domain_erp.payment_runs
             SET status = 'executed', executed_at = NOW(), sepa_file_id = :sepa_file_id, updated_at = NOW()
@@ -607,7 +607,7 @@ async def execute_payment_run(
             "sepa_file_id": sepa_file_id
         })
         
-        ***REMOVED*** Update payment items status
+        # Update payment items status
         update_items_query = text("""
             UPDATE domain_erp.payment_run_items
             SET status = 'executed', updated_at = NOW()
@@ -619,11 +619,11 @@ async def execute_payment_run(
             "tenant_id": tenant_id
         })
         
-        ***REMOVED*** Settle open items
+        # Settle open items
         for payment in payment_run.payments:
             if payment.get("op_id"):
                 try:
-                    ***REMOVED*** Settle open item
+                    # Settle open item
                     settle_query = text("""
                         UPDATE domain_erp.offene_posten
                         SET offen = offen - :amount, updated_at = NOW()
@@ -636,7 +636,7 @@ async def execute_payment_run(
                         "amount": payment["amount"]
                     })
                     
-                    ***REMOVED*** If fully settled, mark as closed
+                    # If fully settled, mark as closed
                     check_query = text("""
                         UPDATE domain_erp.offene_posten
                         SET offen = 0, updated_at = NOW()
@@ -678,7 +678,7 @@ async def get_sepa_xml(
         if payment_run.status != "executed":
             raise HTTPException(status_code=400, detail="Payment run must be executed to generate SEPA XML")
         
-        ***REMOVED*** Generate SEPA XML
+        # Generate SEPA XML
         generator = SEPAXMLGenerator(
             initiator_name=payment_run.initiator_name,
             initiator_iban=payment_run.initiator_iban,
@@ -721,7 +721,7 @@ async def return_payment(
     Process a returned payment (Rückläufer).
     """
     try:
-        ***REMOVED*** Find payment item
+        # Find payment item
         payment_query = text("""
             SELECT id, payment_run_id, op_id, amount, creditor_id
             FROM domain_erp.payment_run_items
@@ -741,7 +741,7 @@ async def return_payment(
         op_id = str(payment_row[2]) if payment_row[2] else None
         amount = Decimal(str(payment_row[4]))
         
-        ***REMOVED*** Update payment item status
+        # Update payment item status
         update_payment_query = text("""
             UPDATE domain_erp.payment_run_items
             SET status = 'returned', updated_at = NOW()
@@ -753,7 +753,7 @@ async def return_payment(
             "tenant_id": tenant_id
         })
         
-        ***REMOVED*** Reopen open item if it was settled
+        # Reopen open item if it was settled
         if op_id:
             reopen_query = text("""
                 UPDATE domain_erp.offene_posten
@@ -767,7 +767,7 @@ async def return_payment(
                 "amount": amount
             })
         
-        ***REMOVED*** Create return record
+        # Create return record
         return_id = str(uuid.uuid4())
         return_insert = text("""
             INSERT INTO domain_erp.payment_returns

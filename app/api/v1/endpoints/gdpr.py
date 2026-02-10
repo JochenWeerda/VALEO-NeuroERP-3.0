@@ -37,7 +37,7 @@ async def export_user_data(
             User, Customer, AuditLog, JournalEntry
         )
         
-        ***REMOVED*** Get user
+        # Get user
         user = db.query(User).filter(
             User.id == user_id,
             User.tenant_id == tenant_id
@@ -49,7 +49,7 @@ async def export_user_data(
                 detail="User not found"
             )
         
-        ***REMOVED*** Collect all user data
+        # Collect all user data
         data = {
             "personal_data": {
                 "id": user.id,
@@ -72,7 +72,7 @@ async def export_user_data(
             }
         }
         
-        ***REMOVED*** Get audit logs
+        # Get audit logs
         audit_logs = db.query(AuditLog).filter(
             AuditLog.user_id == user_id
         ).limit(1000).all()
@@ -120,7 +120,7 @@ async def delete_user_data(
     try:
         from app.infrastructure.models import User, AuditLog
         
-        ***REMOVED*** Get user
+        # Get user
         user = db.query(User).filter(
             User.id == user_id,
             User.tenant_id == tenant_id
@@ -132,17 +132,17 @@ async def delete_user_data(
                 detail="User not found"
             )
         
-        ***REMOVED*** Strategy: Soft-Delete + Anonymization
-        ***REMOVED*** Hard-Delete würde GoBD-Audit-Trail verletzen
+        # Strategy: Soft-Delete + Anonymization
+        # Hard-Delete würde GoBD-Audit-Trail verletzen
         
-        ***REMOVED*** 1. Anonymize personal data
+        # 1. Anonymize personal data
         user.email = f"deleted-{user_id}@anonymized.local"
         user.first_name = "Deleted"
         user.last_name = "User"
         user.deleted_at = datetime.utcnow()
         user.is_active = False
         
-        ***REMOVED*** 2. Anonymize in audit logs (nur PII)
+        # 2. Anonymize in audit logs (nur PII)
         db.query(AuditLog).filter(
             AuditLog.user_id == user_id
         ).update({
@@ -177,10 +177,10 @@ async def export_portable_data(
     
     logger.info(f"GDPR portable-export requested for user: {user_id}")
     
-    ***REMOVED*** Same as data-export but in standardized format
+    # Same as data-export but in standardized format
     data = await export_user_data(user_id, request, db)
     
-    ***REMOVED*** Add portability-specific metadata
+    # Add portability-specific metadata
     data["portability_metadata"] = {
         "format": "JSON",
         "schema_version": "1.0",

@@ -36,7 +36,7 @@ class BankStatementLine(BaseModel):
     creditor_iban: Optional[str] = None
     debtor_name: Optional[str] = None
     debtor_iban: Optional[str] = None
-    status: str = "UNMATCHED"  ***REMOVED*** UNMATCHED, MATCHED, PARTIAL
+    status: str = "UNMATCHED"  # UNMATCHED, MATCHED, PARTIAL
     errors: Optional[List[str]] = None
 
 
@@ -61,17 +61,17 @@ def parse_camt053(content: bytes) -> dict:
     try:
         root = ET.fromstring(content)
         
-        ***REMOVED*** Register namespaces
+        # Register namespaces
         namespaces = {
             'camt': 'urn:iso:std:iso:20022:tech:xsd:camt.053.001.02'
         }
         
-        ***REMOVED*** Extract account info
+        # Extract account info
         acct_elem = root.find('.//camt:Acct', namespaces)
         iban = acct_elem.find('.//camt:Id//camt:IBAN', namespaces)
         account_iban = iban.text if iban is not None else None
         
-        ***REMOVED*** Extract balances
+        # Extract balances
         bal_elem = root.find('.//camt:Bal', namespaces)
         opening_balance = Decimal("0.00")
         closing_balance = Decimal("0.00")
@@ -81,38 +81,38 @@ def parse_camt053(content: bytes) -> dict:
             if amt_elem is not None:
                 opening_balance = Decimal(amt_elem.text)
         
-        ***REMOVED*** Extract all entries
+        # Extract all entries
         entries = []
         ntry_elements = root.findall('.//camt:Ntry', namespaces)
         
         for idx, ntry in enumerate(ntry_elements):
             try:
-                ***REMOVED*** Booking date
+                # Booking date
                 bookg_date_elem = ntry.find('.//camt:BookgDt//camt:Dt', namespaces)
                 booking_date = datetime.strptime(bookg_date_elem.text, '%Y-%m-%d').date() if bookg_date_elem is not None else date.today()
                 
-                ***REMOVED*** Value date
+                # Value date
                 val_date_elem = ntry.find('.//camt:ValDt//camt:Dt', namespaces)
                 value_date = datetime.strptime(val_date_elem.text, '%Y-%m-%d').date() if val_date_elem is not None else booking_date
                 
-                ***REMOVED*** Amount
+                # Amount
                 amt_elem = ntry.find('.//camt:Amt', namespaces)
                 amount = Decimal(amt_elem.text) if amt_elem is not None else Decimal("0.00")
                 
-                ***REMOVED*** Credit/Debit indicator
+                # Credit/Debit indicator
                 cdt_dbt_ind = ntry.find('.//camt:CdtDbtInd', namespaces)
                 if cdt_dbt_ind is not None and cdt_dbt_ind.text == 'DBIT':
                     amount = -amount
                 
-                ***REMOVED*** Reference
+                # Reference
                 ref_elem = ntry.find('.//camt:Refs//camt:AcctSvcrRef', namespaces)
                 reference = ref_elem.text if ref_elem is not None else None
                 
-                ***REMOVED*** Remittance info
+                # Remittance info
                 rmt_inf_elem = ntry.find('.//camt:RmtInf//camt:Ustrd', namespaces)
                 remittance_info = rmt_inf_elem.text if rmt_inf_elem is not None else None
                 
-                ***REMOVED*** Creditor/Debtor info
+                # Creditor/Debtor info
                 creditor_name = None
                 creditor_iban = None
                 debtor_name = None
@@ -148,7 +148,7 @@ def parse_camt053(content: bytes) -> dict:
                 logger.warning(f"Error parsing CAMT entry {idx}: {e}")
                 continue
         
-        ***REMOVED*** Calculate closing balance
+        # Calculate closing balance
         closing_balance = opening_balance + sum(entry['amount'] for entry in entries)
         
         return {
@@ -182,23 +182,23 @@ def parse_mt940(content: bytes) -> dict:
             if not line:
                 continue
             
-            ***REMOVED*** Account identification (IBAN)
+            # Account identification (IBAN)
             if line.startswith(':25:'):
                 account_iban = line[4:].strip()
             
-            ***REMOVED*** Opening balance
+            # Opening balance
             elif line.startswith(':60F:') or line.startswith(':60M:'):
-                ***REMOVED*** Format: :60F:CYYMMDDEUR1234,56
+                # Format: :60F:CYYMMDDEUR1234,56
                 balance_str = line[5:].strip()
                 if len(balance_str) >= 10:
                     currency = balance_str[7:10]
                     amount_str = balance_str[10:].replace(',', '.')
                     opening_balance = Decimal(amount_str)
             
-            ***REMOVED*** Statement line
+            # Statement line
             elif line.startswith(':61:'):
-                ***REMOVED*** Format: :61:YYMMDDMMDDD1234,56NTRFNONREF//1234567890
-                ***REMOVED*** Parse date, amount, reference
+                # Format: :61:YYMMDDMMDDD1234,56NTRFNONREF//1234567890
+                # Parse date, amount, reference
                 data = line[4:].strip()
                 if len(data) >= 6:
                     try:
@@ -207,17 +207,17 @@ def parse_mt940(content: bytes) -> dict:
                         if len(data) >= 12:
                             booking_date = datetime.strptime(data[6:12], '%y%m%d').date()
                         
-                        ***REMOVED*** Find amount (starts after dates, ends before transaction code)
+                        # Find amount (starts after dates, ends before transaction code)
                         amount_match = re.search(r'([\d,]+\.?\d*)', data[12:])
                         if amount_match:
                             amount_str = amount_match.group(1).replace(',', '.')
                             amount = Decimal(amount_str)
                             
-                            ***REMOVED*** Check debit/credit indicator
+                            # Check debit/credit indicator
                             if 'D' in data[12:20]:
                                 amount = -amount
                             
-                            ***REMOVED*** Extract reference (after //)
+                            # Extract reference (after //)
                             ref_match = re.search(r'//(.+)', data)
                             reference = ref_match.group(1) if ref_match else None
                             
@@ -234,15 +234,15 @@ def parse_mt940(content: bytes) -> dict:
                         logger.warning(f"Error parsing MT940 line: {e}")
                         continue
             
-            ***REMOVED*** Transaction details
+            # Transaction details
             elif line.startswith(':86:') and current_entry:
-                ***REMOVED*** Remittance info
+                # Remittance info
                 remittance_info = line[4:].strip()
                 current_entry['remittance_info'] = remittance_info
                 entries.append(current_entry)
                 current_entry = {}
         
-        ***REMOVED*** Calculate closing balance
+        # Calculate closing balance
         closing_balance = opening_balance + sum(entry['amount'] for entry in entries)
         
         return {
@@ -270,22 +270,22 @@ def parse_csv(content: bytes) -> dict:
         
         for idx, row in enumerate(csv_reader):
             try:
-                ***REMOVED*** Date
+                # Date
                 date_str = row.get('date', row.get('datum', ''))
                 booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
                 value_date = booking_date
                 
-                ***REMOVED*** Amount
+                # Amount
                 amount_str = str(row.get('amount', row.get('betrag', '0'))).replace(',', '.')
                 amount = Decimal(amount_str)
                 
-                ***REMOVED*** Reference
+                # Reference
                 reference = row.get('reference', row.get('referenz', ''))
                 
-                ***REMOVED*** Remittance info
+                # Remittance info
                 remittance_info = row.get('remittance_info', row.get('verwendungszweck', ''))
                 
-                ***REMOVED*** Creditor/Debtor
+                # Creditor/Debtor
                 creditor_name = row.get('creditor_name', row.get('empfaenger', ''))
                 debtor_name = row.get('debtor_name', row.get('auftraggeber', ''))
                 
@@ -305,12 +305,12 @@ def parse_csv(content: bytes) -> dict:
                 logger.warning(f"Error parsing CSV row {idx}: {e}")
                 continue
         
-        ***REMOVED*** Calculate closing balance (if opening balance provided)
+        # Calculate closing balance (if opening balance provided)
         if entries:
             closing_balance = opening_balance + sum(entry['amount'] for entry in entries)
         
         return {
-            'account_iban': None,  ***REMOVED*** CSV doesn't always have IBAN
+            'account_iban': None,  # CSV doesn't always have IBAN
             'opening_balance': opening_balance,
             'closing_balance': closing_balance,
             'entries': entries
@@ -334,7 +334,7 @@ async def import_bank_statement(
     try:
         content = await file.read()
         
-        ***REMOVED*** Parse based on format
+        # Parse based on format
         if format.upper() == 'CAMT':
             parsed = parse_camt053(content)
         elif format.upper() == 'MT940':
@@ -344,7 +344,7 @@ async def import_bank_statement(
         else:
             raise HTTPException(status_code=400, detail=f"Unsupported format: {format}")
         
-        ***REMOVED*** Get bank account IBAN if not provided
+        # Get bank account IBAN if not provided
         if not parsed['account_iban']:
             account_query = text("""
                 SELECT iban FROM domain_erp.bank_accounts
@@ -357,11 +357,11 @@ async def import_bank_statement(
             if account_row:
                 parsed['account_iban'] = account_row[0]
         
-        ***REMOVED*** Create statement record
-        ***REMOVED*** Note: If bank_statements table doesn't exist, we'll store in a JSONB column or skip
+        # Create statement record
+        # Note: If bank_statements table doesn't exist, we'll store in a JSONB column or skip
         statement_id = f"STMT-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{bank_account_id[:8]}"
         
-        ***REMOVED*** Try to create statement record (table may not exist yet)
+        # Try to create statement record (table may not exist yet)
         try:
             statement_insert = text("""
                 INSERT INTO domain_erp.bank_statements
@@ -387,9 +387,9 @@ async def import_bank_statement(
             })
         except Exception as e:
             logger.warning(f"bank_statements table may not exist: {e}")
-            ***REMOVED*** Continue without database storage - data will be returned in response
+            # Continue without database storage - data will be returned in response
         
-        ***REMOVED*** Import statement lines
+        # Import statement lines
         import_errors = []
         imported_lines = []
         
@@ -397,7 +397,7 @@ async def import_bank_statement(
             try:
                 line_id = f"{statement_id}-L{entry['line_number']}"
                 
-                ***REMOVED*** Try to insert into bank_statement_lines table
+                # Try to insert into bank_statement_lines table
                 try:
                     line_insert = text("""
                         INSERT INTO domain_erp.bank_statement_lines
@@ -428,7 +428,7 @@ async def import_bank_statement(
                     })
                 except Exception as table_error:
                     logger.warning(f"bank_statement_lines table may not exist: {table_error}")
-                    ***REMOVED*** Continue without database storage
+                    # Continue without database storage
                 
                 imported_lines.append(BankStatementLine(
                     line_number=entry['line_number'],
@@ -453,9 +453,9 @@ async def import_bank_statement(
         except Exception:
             db.rollback()
         
-        ***REMOVED*** Auto-match if requested
+        # Auto-match if requested
         if auto_match and imported_lines:
-            ***REMOVED*** TODO: Implement auto-matching logic
+            # TODO: Implement auto-matching logic
             pass
         
         return BankStatementImportResult(
@@ -519,7 +519,7 @@ async def get_statement_lines(
             for row in rows
         ]
     except Exception as e:
-        ***REMOVED*** If table doesn't exist, return empty list
+        # If table doesn't exist, return empty list
         logger.warning(f"Error fetching statement lines (table may not exist): {e}")
         return []
 

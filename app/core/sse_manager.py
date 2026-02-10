@@ -103,7 +103,7 @@ class SSEManager:
                 )
                 dead_connections.append(conn)
         
-        ***REMOVED*** Clean up dead connections
+        # Clean up dead connections
         for conn in dead_connections:
             self.unregister(channel, conn)
         
@@ -202,7 +202,7 @@ class SSEManager:
         }
 
 
-***REMOVED*** Global instance
+# Global instance
 _sse_manager: Optional[SSEManager] = None
 
 
@@ -214,24 +214,24 @@ def get_sse_manager() -> SSEManager:
     return _sse_manager
 
 
-***REMOVED*** SSE Stream Generator
+# SSE Stream Generator
 async def sse_event_generator(request: Request, connection: SSEConnection):
     """Generate SSE events for a connection."""
     try:
         while True:
-            ***REMOVED*** Check if client disconnected
+            # Check if client disconnected
             if await request.is_disconnected():
                 logger.info(f"Client disconnected: {connection.client_id}")
                 break
             
             try:
-                ***REMOVED*** Wait for next message with timeout
+                # Wait for next message with timeout
                 message = await asyncio.wait_for(
                     connection.get(),
                     timeout=1.0
                 )
                 
-                ***REMOVED*** Format SSE message
+                # Format SSE message
                 event_type = message.get("event", "message")
                 data = message.get("data", {})
                 
@@ -241,7 +241,7 @@ async def sse_event_generator(request: Request, connection: SSEConnection):
                 yield sse_message
                 
             except asyncio.TimeoutError:
-                ***REMOVED*** No message, continue loop
+                # No message, continue loop
                 continue
             
     except asyncio.CancelledError:
@@ -249,7 +249,7 @@ async def sse_event_generator(request: Request, connection: SSEConnection):
     except Exception as e:
         logger.error(f"SSE stream error: {e}", exc_info=True)
     finally:
-        ***REMOVED*** Cleanup connection
+        # Cleanup connection
         manager = get_sse_manager()
         manager.unregister(connection.channel, connection)
 
@@ -269,7 +269,7 @@ async def create_sse_stream(
     manager = get_sse_manager()
     manager.register(channel, connection)
     
-    ***REMOVED*** Send initial connection message
+    # Send initial connection message
     await connection.send({
         "event": "connected",
         "data": {
@@ -285,7 +285,7 @@ async def create_sse_stream(
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",  ***REMOVED*** Disable nginx buffering
+            "X-Accel-Buffering": "no",  # Disable nginx buffering
         }
     )
 

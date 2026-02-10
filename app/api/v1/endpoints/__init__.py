@@ -1,4 +1,4 @@
-***REMOVED*** VALEO-NeuroERP API v1 Endpoints Package
+# VALEO-NeuroERP API v1 Endpoints Package
 
 from .health import router as health
 from .tenants import router as tenants

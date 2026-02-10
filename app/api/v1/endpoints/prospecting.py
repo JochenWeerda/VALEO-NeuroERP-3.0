@@ -15,7 +15,7 @@ router = APIRouter(prefix="/prospecting", tags=["prospecting", "leads"])
 async def get_lead_candidates(
     ref_year: int = Query(..., description="Referenzjahr"),
     min_potential: Optional[float] = Query(None, description="Mindestpotenzial in EUR"),
-    ***REMOVED*** region parameter removed in favor of zip_code range
+    # region parameter removed in favor of zip_code range
     zip_code_start: Optional[str] = Query(None, description="PLZ-Bereich Start (z.B. 26000)"),
     zip_code_end: Optional[str] = Query(None, description="PLZ-Bereich Ende (z.B. 26999)"),
     source: Optional[str] = Query(None, description="Quelle (gap_de, cap_eu, etc.)"),
@@ -35,14 +35,14 @@ async def get_lead_candidates(
     db = next(get_db())
     
     try:
-        ***REMOVED*** Prüfe zuerst, ob Snapshot-Daten vorhanden sind
+        # Prüfe zuerst, ob Snapshot-Daten vorhanden sind
         snapshot_count = db.execute(
             text("SELECT COUNT(*) FROM customer_potential_snapshot WHERE ref_year = :ref_year"),
             {"ref_year": ref_year}
         ).scalar() or 0
         
         if snapshot_count > 0:
-            ***REMOVED*** Verwende Snapshot-Daten (ursprüngliche Logik)
+            # Verwende Snapshot-Daten (ursprüngliche Logik)
             query = """
                 SELECT DISTINCT
                     s.ref_year,
@@ -81,10 +81,10 @@ async def get_lead_candidates(
                 WHERE s.ref_year = :ref_year
             """
         else:
-            ***REMOVED*** 🔍 KRUMMHÖRN-TEST: Spezielle Analyse für Spaltenverschiebungs-Diagnose
+            # 🔍 KRUMMHÖRN-TEST: Spezielle Analyse für Spaltenverschiebungs-Diagnose
             print(f"[DEBUG KRUMMHÖRN] Suche nach PLZ 26736 und Krummhörn...")
             
-            ***REMOVED*** Test-Query für Krummhörn
+            # Test-Query für Krummhörn
             krummhoern_check = db.execute(text("""
                 SELECT 
                     beneficiary_name_norm, postal_code, city, direct_total_eur
@@ -98,7 +98,7 @@ async def get_lead_candidates(
             for i, row in enumerate(krummhoern_results):
                 print(f"[DEBUG KRUMMHÖRN {i+1}] Name: {row[0]}, PLZ: {row[1]}, Ort: {row[2]}, Betrag: {row[3]}")
             
-            ***REMOVED*** PLZ-Verteilung in 267xx Bereich prüfen
+            # PLZ-Verteilung in 267xx Bereich prüfen
             plz_267_check = db.execute(text("""
                 SELECT postal_code, COUNT(*) as count
                 FROM gap_payments_direct_agg 
@@ -113,7 +113,7 @@ async def get_lead_candidates(
             for row in plz_267_results:
                 print(f"[DEBUG PLZ 267xx] PLZ {row[0]}: {row[1]} Einträge")
                 
-            ***REMOVED*** ECHTE GAP-DATEN mit korrekter Spalten-Reihenfolge
+            # ECHTE GAP-DATEN mit korrekter Spalten-Reihenfolge
             query = """
                 SELECT 
                     g.ref_year,                                                    -- row[0]
@@ -140,24 +140,24 @@ async def get_lead_candidates(
         
         params = {"ref_year": ref_year}
         
-        ***REMOVED*** Filter für GAP-direkt-basierte Query mit korrigierter Spalten-Reihenfolge
+        # Filter für GAP-direkt-basierte Query mit korrigierter Spalten-Reihenfolge
         if only_new_prospects:
-            ***REMOVED*** Alle GAP-Daten sind per Definition neue Prospekte (da keine Matches)
+            # Alle GAP-Daten sind per Definition neue Prospekte (da keine Matches)
             pass
         
         if min_potential is not None:
-            ***REMOVED*** Berechnung: (direct_total_eur * 1.037) >= min_potential
-            estimated_potential_threshold = min_potential / 1.037  ***REMOVED*** Rückrechnung
+            # Berechnung: (direct_total_eur * 1.037) >= min_potential
+            estimated_potential_threshold = min_potential / 1.037  # Rückrechnung
             query += " AND g.direct_total_eur >= :min_potential_threshold"
             params["min_potential_threshold"] = estimated_potential_threshold
         
         if segment:
-            ***REMOVED*** Vereinfachte Segment-Filter
+            # Vereinfachte Segment-Filter
             if segment == 'A':
                 query += " AND g.direct_total_eur >= 10000"
             elif segment == 'C':
                 query += " AND g.direct_total_eur < 5000"
-            ***REMOVED*** Segment 'B' wird nicht gefiltert (Standard)
+            # Segment 'B' wird nicht gefiltert (Standard)
         
         if zip_code_start and zip_code_end:
             query += " AND g.postal_code >= :zip_start AND g.postal_code <= :zip_end"
@@ -170,22 +170,22 @@ async def get_lead_candidates(
         if only_high_priority:
             query += " AND g.direct_total_eur >= 10000"
         
-        ***REMOVED*** Sortierung nach Potenzial
+        # Sortierung nach Potenzial
         query += """
             ORDER BY 
                 g.direct_total_eur DESC
         """
         
-        ***REMOVED*** Limit
+        # Limit
         if limit:
             query += " LIMIT :limit"
             params["limit"] = limit
         
-        ***REMOVED*** Führe Query aus
+        # Führe Query aus
         result = db.execute(text(query), params)
         rows = result.fetchall()
         
-        ***REMOVED*** Konvertiere zu Dict-Liste
+        # Konvertiere zu Dict-Liste
         candidates = []
         for row in rows:
             candidate = {
@@ -207,7 +207,7 @@ async def get_lead_candidates(
                 "has_qs": bool(row[15]),
                 "has_qm_milk": bool(row[16]),
                 "suggested_owner_id": row[17],
-                ***REMOVED*** Debug-Information
+                # Debug-Information
                 "_debug_data_source": "snapshots" if snapshot_count > 0 else "gap_direct",
                 "_debug_snapshot_count": snapshot_count
             }

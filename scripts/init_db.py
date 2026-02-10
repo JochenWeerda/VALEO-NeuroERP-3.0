@@ -19,8 +19,8 @@ if str(PROJECT_ROOT) not in sys.path:
 def main() -> None:
     config_path = PROJECT_ROOT / "alembic.ini"
     alembic_cfg = Config(str(config_path))
-    ***REMOVED*** CI / local ephemeral Postgres can be briefly unavailable even after the
-    ***REMOVED*** container reports "started". Retry to avoid flaky pipelines.
+    # CI / local ephemeral Postgres can be briefly unavailable even after the
+    # container reports "started". Retry to avoid flaky pipelines.
     deadline = time.time() + 60
     last_err: Exception | None = None
     while time.time() < deadline:

@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
 from app.infrastructure.models import PolicyRule
 
-***REMOVED*** Types
+# Types
 Severity = Literal["ok", "warn", "crit"]
 Role = Literal["admin", "manager", "operator"]
 
@@ -81,7 +81,7 @@ class PolicyStore:
     def __init__(self, session_factory: Callable[[], Session] = SessionLocal):
         self._session_factory = session_factory
 
-    ***REMOVED*** Query operations --------------------------------------------------
+    # Query operations --------------------------------------------------
     def list(self) -> List[Rule]:
         """Listet alle Policies auf."""
         with self._session_factory() as session:
@@ -96,7 +96,7 @@ class PolicyStore:
             entity = session.get(PolicyRule, rule_id)
             return self._to_rule(entity) if entity else None
 
-    ***REMOVED*** Mutation operations -----------------------------------------------
+    # Mutation operations -----------------------------------------------
     def upsert(self, rule: Rule) -> None:
         """Erstellt oder aktualisiert eine Policy."""
         with self._session_factory() as session:
@@ -140,7 +140,7 @@ class PolicyStore:
             session.execute(delete(PolicyRule).where(PolicyRule.id == rule_id))
             session.commit()
 
-    ***REMOVED*** Import / Export ---------------------------------------------------
+    # Import / Export ---------------------------------------------------
     def export_json(self) -> str:
         """Exportiert alle Policies als JSON."""
         rules = self.list()
@@ -158,7 +158,7 @@ class PolicyStore:
         if rules:
             self.bulk_upsert(rules)
 
-    ***REMOVED*** Utilities ---------------------------------------------------------
+    # Utilities ---------------------------------------------------------
     @staticmethod
     def _to_rule(entity: PolicyRule | None) -> Rule | None:
         if entity is None:
@@ -189,8 +189,8 @@ class PolicyEngine:
         if now is None:
             now = datetime.now()
 
-        day = now.weekday()  ***REMOVED*** 0=Mo..6=So
-        day_policy = (day + 1) % 7  ***REMOVED*** Convert zu 0=So..6=Sa
+        day = now.weekday()  # 0=Mo..6=So
+        day_policy = (day + 1) % 7  # Convert zu 0=So..6=Sa
         if day_policy not in window.days:
             return False
 

@@ -48,7 +48,7 @@ class SSEHub:
                 except asyncio.QueueFull:
                     dead_queues.add(queue)
             
-            ***REMOVED*** Cleanup full queues
+            # Cleanup full queues
             for queue in dead_queues:
                 self._channels[channel].discard(queue)
     
@@ -57,7 +57,7 @@ class SSEHub:
         return len(self._channels.get(channel, set()))
 
 
-***REMOVED*** Global SSE-Hub
+# Global SSE-Hub
 sse_hub = SSEHub()
 
 
@@ -69,20 +69,20 @@ async def sse_stream(request: Request, channel: str):
     
     async def event_generator():
         try:
-            ***REMOVED*** Initial connection message
+            # Initial connection message
             yield f"data: {json.dumps({'type': 'connected', 'channel': channel})}\n\n"
             
             while True:
-                ***REMOVED*** Check if client disconnected
+                # Check if client disconnected
                 if await request.is_disconnected():
                     break
                 
                 try:
-                    ***REMOVED*** Wait for message with timeout
+                    # Wait for message with timeout
                     data = await asyncio.wait_for(queue.get(), timeout=30.0)
                     yield f"data: {json.dumps(data)}\n\n"
                 except asyncio.TimeoutError:
-                    ***REMOVED*** Send keepalive
+                    # Send keepalive
                     yield f": keepalive\n\n"
         
         finally:
@@ -94,6 +94,6 @@ async def sse_stream(request: Request, channel: str):
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",  ***REMOVED*** Disable nginx buffering
+            "X-Accel-Buffering": "no",  # Disable nginx buffering
         }
     )

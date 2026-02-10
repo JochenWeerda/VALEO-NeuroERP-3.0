@@ -29,14 +29,14 @@ class WeeklyReportService:
             Dictionary with weekly report data
         """
         if week_start is None:
-            ***REMOVED*** Get last Monday
+            # Get last Monday
             today = datetime.now()
-            days_since_monday = today.weekday()  ***REMOVED*** 0 = Monday, 6 = Sunday
-            week_start = today - timedelta(days=days_since_monday + 7)  ***REMOVED*** Last Monday
+            days_since_monday = today.weekday()  # 0 = Monday, 6 = Sunday
+            week_start = today - timedelta(days=days_since_monday + 7)  # Last Monday
 
         week_end = week_start + timedelta(days=6)
 
-        ***REMOVED*** Get all active sales reps
+        # Get all active sales reps
         sales_reps = self.db.query(self.db.query().filter(
             and_(
                 self.db.query().c.is_active == True,
@@ -64,7 +64,7 @@ class WeeklyReportService:
     def _generate_rep_weekly_report(self, sales_rep_id: str, week_start: datetime, week_end: datetime) -> Optional[Dict[str, Any]]:
         """Generate weekly report for a specific sales rep"""
 
-        ***REMOVED*** Get activities for the week
+        # Get activities for the week
         activities = self.db.query(self.db.query().filter(
             and_(
                 self.db.query().c.assigned_to == sales_rep_id,
@@ -74,7 +74,7 @@ class WeeklyReportService:
             )
         )).order_by(self.db.query().c.activity_date).all()
 
-        ***REMOVED*** Get visit reports for the week
+        # Get visit reports for the week
         visits = self.db.query(self.db.query().filter(
             and_(
                 self.db.query().c.sales_rep == sales_rep_id,
@@ -86,13 +86,13 @@ class WeeklyReportService:
         if not activities and not visits:
             return None
 
-        ***REMOVED*** Calculate metrics
+        # Calculate metrics
         metrics = self._calculate_weekly_metrics(activities, visits, week_start, week_end)
 
-        ***REMOVED*** Analyze trends
+        # Analyze trends
         trends = self._analyze_weekly_trends(activities, visits, sales_rep_id)
 
-        ***REMOVED*** Generate insights
+        # Generate insights
         insights = self._generate_weekly_insights(metrics, trends)
 
         return {
@@ -107,30 +107,30 @@ class WeeklyReportService:
     def _calculate_weekly_metrics(self, activities: List[Any], visits: List[Any], week_start: datetime, week_end: datetime) -> Dict[str, Any]:
         """Calculate key weekly metrics"""
 
-        ***REMOVED*** Basic counts
+        # Basic counts
         total_activities = len(activities)
         total_visits = len(visits)
 
-        ***REMOVED*** Time and distance
+        # Time and distance
         total_minutes = sum(activity.duration_minutes or 0 for activity in activities)
         total_kilometers = sum(float(visit.kilometers_driven or 0) for visit in visits)
 
-        ***REMOVED*** Activity types
+        # Activity types
         activity_types = {}
         for activity in activities:
             activity_types[activity.activity_type] = activity_types.get(activity.activity_type, 0) + 1
 
-        ***REMOVED*** Visit metrics
+        # Visit metrics
         unique_customers = len(set(visit.customer_id for visit in visits))
 
-        ***REMOVED*** Orders and quotes
+        # Orders and quotes
         total_orders = sum(len(visit.orders_placed or []) for visit in visits)
         total_quotes = sum(len(visit.quotes_created or []) for visit in visits)
 
-        ***REMOVED*** Conversion rates
+        # Conversion rates
         conversion_rate = (total_orders / max(1, total_quotes)) * 100 if total_quotes > 0 else 0
 
-        ***REMOVED*** Customer feedback (simplified)
+        # Customer feedback (simplified)
         positive_feedback = sum(1 for visit in visits if visit.customer_feedback and
                                any(word in visit.customer_feedback.lower()
                                    for word in ['gut', 'zufrieden', 'super', 'exzellent']))
@@ -146,14 +146,14 @@ class WeeklyReportService:
             'quotes_created': total_quotes,
             'conversion_rate': conversion_rate,
             'positive_feedback_count': positive_feedback,
-            'avg_activities_per_day': total_activities / 5,  ***REMOVED*** Business days
+            'avg_activities_per_day': total_activities / 5,  # Business days
             'avg_visits_per_day': total_visits / 5
         }
 
     def _analyze_weekly_trends(self, activities: List[Any], visits: List[Any], sales_rep_id: str) -> Dict[str, Any]:
         """Analyze trends compared to previous weeks"""
 
-        ***REMOVED*** Get previous week data for comparison
+        # Get previous week data for comparison
         prev_week_start = datetime.now() - timedelta(days=14)
         prev_week_end = datetime.now() - timedelta(days=8)
 
@@ -189,7 +189,7 @@ class WeeklyReportService:
 
         insights = []
 
-        ***REMOVED*** Activity volume insights
+        # Activity volume insights
         if metrics['avg_activities_per_day'] > 15:
             insights.append({
                 'type': 'high_activity',
@@ -198,7 +198,7 @@ class WeeklyReportService:
                 'recommendation': 'Qualität vor Quantität priorisieren'
             })
 
-        ***REMOVED*** Conversion insights
+        # Conversion insights
         if metrics['conversion_rate'] > 30:
             insights.append({
                 'type': 'strong_conversion',
@@ -214,7 +214,7 @@ class WeeklyReportService:
                 'recommendation': 'Angebotsprozess und Preisstrategie überprüfen'
             })
 
-        ***REMOVED*** Trend insights
+        # Trend insights
         if trends['activities_change'] > 20:
             insights.append({
                 'type': 'activity_increase',
@@ -223,7 +223,7 @@ class WeeklyReportService:
                 'recommendation': 'Positiven Trend beibehalten'
             })
 
-        ***REMOVED*** Customer feedback insights
+        # Customer feedback insights
         if metrics['positive_feedback_count'] > metrics['total_visits'] * 0.8:
             insights.append({
                 'type': 'excellent_feedback',
@@ -259,18 +259,18 @@ class WeeklyReportService:
     def _top_performers(self, activities: List[Any], visits: List[Any]) -> Dict[str, Any]:
         """Identify top performing customers and activities"""
 
-        ***REMOVED*** Top customers by visits
+        # Top customers by visits
         customer_visits = {}
         for visit in visits:
             customer_visits[visit.customer_id] = customer_visits.get(visit.customer_id, 0) + 1
 
         top_customers = sorted(customer_visits.items(), key=lambda x: x[1], reverse=True)[:5]
 
-        ***REMOVED*** Most successful activity types
+        # Most successful activity types
         activity_success = {}
         for activity in activities:
-            ***REMOVED*** Simplified success metric
-            success_score = 1  ***REMOVED*** Could be enhanced with actual success tracking
+            # Simplified success metric
+            success_score = 1  # Could be enhanced with actual success tracking
             activity_success[activity.activity_type] = activity_success.get(activity.activity_type, 0) + success_score
 
         top_activities = sorted(activity_success.items(), key=lambda x: x[1], reverse=True)[:3]
@@ -285,7 +285,7 @@ class WeeklyReportService:
 
         challenges = []
 
-        ***REMOVED*** Check for days with no activity
+        # Check for days with no activity
         daily_breakdown = self._daily_breakdown(activities, visits, datetime.now() - timedelta(days=7), datetime.now() - timedelta(days=1))
 
         inactive_days = [day for day, stats in daily_breakdown.items() if stats['activities'] == 0 and stats['visits'] == 0]
@@ -297,7 +297,7 @@ class WeeklyReportService:
                 'recommendation': 'Tagesplanung optimieren oder zusätzliche Aufgaben zuweisen'
             })
 
-        ***REMOVED*** Check for low conversion
+        # Check for low conversion
         total_quotes = sum(len(visit.quotes_created or []) for visit in visits)
         total_orders = sum(len(visit.orders_placed or []) for visit in visits)
 
@@ -324,10 +324,10 @@ class WeeklyReportService:
         insights = data['insights']
 
         lines = [
-            f"***REMOVED*** 📈 Wöchentlicher Verkaufsreport – {rep.first_name} {rep.last_name}",
+            f"# 📈 Wöchentlicher Verkaufsreport – {rep.first_name} {rep.last_name}",
             f"**Zeitraum:** {week_start} bis {week_end}",
             "",
-            "***REMOVED******REMOVED*** 📊 Kennzahlen",
+            "## 📊 Kennzahlen",
             f"- **Aktivitäten:** {metrics['total_activities']} ({metrics['avg_activities_per_day']:.1f}/Tag)",
             f"- **Kundenbesuche:** {metrics['total_visits']} ({metrics['avg_visits_per_day']:.1f}/Tag)",
             f"- **Einzigartige Kunden:** {metrics['unique_customers']}",
@@ -337,7 +337,7 @@ class WeeklyReportService:
             f"- **Angebote:** {metrics['quotes_created']}",
             f"- **Conversion-Rate:** {metrics['conversion_rate']:.1f}%",
             "",
-            "***REMOVED******REMOVED*** 📈 Trends zur Vorwoche",
+            "## 📈 Trends zur Vorwoche",
             f"- **Aktivitäten:** {trends['activities_change']:+.1f}%",
             f"- **Besuche:** {trends['visits_change']:+.1f}%",
             f"- **Produktivität:** {trends['productivity_trend']}",
@@ -347,7 +347,7 @@ class WeeklyReportService:
 
         if insights:
             lines.extend([
-                "***REMOVED******REMOVED*** 💡 KI-Insights",
+                "## 💡 KI-Insights",
                 *[f"- **{insight['type'].replace('_', ' ').title()}:** {insight['message']}" for insight in insights],
                 ""
             ])
@@ -355,7 +355,7 @@ class WeeklyReportService:
         return "\n".join(lines)
 
 
-***REMOVED*** Scheduled task function
+# Scheduled task function
 def generate_weekly_reports():
     """Scheduled function to generate and send weekly reports"""
     from ....core.database import get_db
@@ -368,12 +368,12 @@ def generate_weekly_reports():
         reports = service.generate_weekly_reports()
 
         if reports:
-            ***REMOVED*** Send reports via notification service
+            # Send reports via notification service
             results = {}
             for rep_id, report_data in reports.items():
                 markdown_report = service.format_weekly_report_markdown(report_data)
 
-                ***REMOVED*** Send to management team
+                # Send to management team
                 result = notification_service.send_notification(
                     'teams',
                     'management',
@@ -401,6 +401,6 @@ def generate_weekly_reports():
 
 
 if __name__ == "__main__":
-    ***REMOVED*** For testing
+    # For testing
     results = generate_weekly_reports()
     print(f"Weekly report execution result: {results}")

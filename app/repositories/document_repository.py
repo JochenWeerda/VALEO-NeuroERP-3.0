@@ -41,7 +41,7 @@ class DocumentRepository:
             created_by=created_by,
         )
 
-        ***REMOVED*** Lines erstellen
+        # Lines erstellen
         for idx, line_data in enumerate(lines):
             line = DocumentLine(
                 id=str(uuid.uuid4()),
@@ -55,7 +55,7 @@ class DocumentRepository:
             )
             header.lines.append(line)
 
-        ***REMOVED*** Total berechnen
+        # Total berechnen
         header.total = sum(
             (line.quantity or 0) * (line.price or 0) for line in header.lines
         )

@@ -22,7 +22,7 @@ class ProductionEmailService:
         """Send email with production SMTP integration."""
         try:
             logger.info(f"Production Email Service: Sending email to {to}")
-            ***REMOVED*** Production SMTP implementation here
+            # Production SMTP implementation here
             return True
         except Exception as e:
             logger.error(f"Failed to send email to {to}: {e}")
@@ -32,7 +32,7 @@ class ProductionEmailService:
         """Send templated email with context."""
         try:
             logger.info(f"Production Email Service: Sending template '{template}' to {to}")
-            ***REMOVED*** Production template engine implementation
+            # Production template engine implementation
             return True
         except Exception as e:
             logger.error(f"Failed to send template email to {to}: {e}")
@@ -51,7 +51,7 @@ class ProductionNotificationService:
         """Send user notification with database storage."""
         try:
             logger.info(f"Production Notification Service: Sending notification to user {user_id}")
-            ***REMOVED*** Store in database notification table
+            # Store in database notification table
             notification_data = {
                 "id": str(uuid.uuid4()),
                 "user_id": user_id,
@@ -71,7 +71,7 @@ class ProductionNotificationService:
         """Get user notifications from database."""
         try:
             logger.info(f"Production Notification Service: Getting notifications for user {user_id}")
-            ***REMOVED*** Query database for user notifications
+            # Query database for user notifications
             return []
         except Exception as e:
             logger.error(f"Failed to get notifications for user {user_id}: {e}")
@@ -111,7 +111,7 @@ class ProductionAuditService:
         """Get audit log entries from database."""
         try:
             logger.info(f"Production Audit Service: Getting audit log for {resource}/{resource_id}")
-            ***REMOVED*** Query database for audit entries
+            # Query database for audit entries
             return []
         except Exception as e:
             logger.error(f"Failed to get audit log: {e}")

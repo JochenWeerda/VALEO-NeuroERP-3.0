@@ -39,12 +39,12 @@ class Asset:
     id: str
     name: str
     type: AssetType
-    classification: str  ***REMOVED*** public, internal, confidential, restricted
+    classification: str  # public, internal, confidential, restricted
     owner: str
     tenant_id: str
     description: str
     location: str
-    value: int  ***REMOVED*** Business value score 1-10
+    value: int  # Business value score 1-10
     created_at: datetime
     last_assessed: Optional[datetime] = None
 
@@ -54,8 +54,8 @@ class Threat:
     """Threat representation"""
     id: str
     name: str
-    category: str  ***REMOVED*** natural, human, technical
-    likelihood: int  ***REMOVED*** 1-5 scale
+    category: str  # natural, human, technical
+    likelihood: int  # 1-5 scale
     description: str
 
 
@@ -64,7 +64,7 @@ class Vulnerability:
     """Vulnerability representation"""
     id: str
     name: str
-    severity: int  ***REMOVED*** 1-5 scale
+    severity: int  # 1-5 scale
     description: str
     affected_assets: List[str]
 
@@ -100,12 +100,12 @@ class ISMSRiskAssessment:
             'likelihood': {'rare': 1, 'unlikely': 2, 'possible': 3, 'likely': 4, 'almost_certain': 5}
         }
 
-        ***REMOVED*** ISO 27001 Risk Assessment Frequency
+        # ISO 27001 Risk Assessment Frequency
         self.assessment_intervals = {
-            RiskLevel.LOW: 365,      ***REMOVED*** Annual
-            RiskLevel.MEDIUM: 180,   ***REMOVED*** Semi-annual
-            RiskLevel.HIGH: 90,      ***REMOVED*** Quarterly
-            RiskLevel.CRITICAL: 30   ***REMOVED*** Monthly
+            RiskLevel.LOW: 365,      # Annual
+            RiskLevel.MEDIUM: 180,   # Semi-annual
+            RiskLevel.HIGH: 90,      # Quarterly
+            RiskLevel.CRITICAL: 30   # Monthly
         }
 
     def assess_asset_risk(self, asset_id: str, tenant_id: str, assessor: str = "system") -> RiskAssessment:
@@ -115,30 +115,30 @@ class ISMSRiskAssessment:
         """
         logger.info(f"Starting risk assessment for asset {asset_id} (tenant: {tenant_id})")
 
-        ***REMOVED*** Get asset details
+        # Get asset details
         asset = self._get_asset_details(asset_id, tenant_id)
         if not asset:
             raise ValueError(f"Asset {asset_id} not found")
 
-        ***REMOVED*** Identify relevant threats and vulnerabilities
+        # Identify relevant threats and vulnerabilities
         threats = self._identify_threats(asset)
         vulnerabilities = self._identify_vulnerabilities(asset)
 
-        ***REMOVED*** Calculate risk scores
+        # Calculate risk scores
         impact_score = self._calculate_impact(asset)
         likelihood_score = self._calculate_likelihood(threats, vulnerabilities)
 
         risk_score = impact_score * likelihood_score
         risk_level = self._classify_risk_level(risk_score)
 
-        ***REMOVED*** Determine mitigation requirements
-        mitigation_required = risk_score >= 10  ***REMOVED*** ISO 27001 threshold
+        # Determine mitigation requirements
+        mitigation_required = risk_score >= 10  # ISO 27001 threshold
         required_mitigations = self._get_mitigation_requirements(risk_score, risk_level)
 
-        ***REMOVED*** Calculate next assessment date
+        # Calculate next assessment date
         next_assessment_due = self._calculate_next_assessment(risk_level)
 
-        ***REMOVED*** Check compliance status
+        # Check compliance status
         compliance_status = self._check_compliance_status(asset)
 
         assessment = RiskAssessment(
@@ -157,7 +157,7 @@ class ISMSRiskAssessment:
             compliance_status=compliance_status
         )
 
-        ***REMOVED*** Store assessment result
+        # Store assessment result
         self._store_assessment(assessment, tenant_id)
 
         logger.info(f"Risk assessment completed for asset {asset_id}: Score {risk_score}, Level {risk_level.value}")
@@ -165,8 +165,8 @@ class ISMSRiskAssessment:
 
     def _get_asset_details(self, asset_id: str, tenant_id: str) -> Optional[Asset]:
         """Get asset details from database"""
-        ***REMOVED*** This would query the actual asset database
-        ***REMOVED*** For now, return mock data based on asset type
+        # This would query the actual asset database
+        # For now, return mock data based on asset type
         asset_types = {
             "db": AssetType.DATABASE,
             "api": AssetType.API_ENDPOINT,
@@ -176,7 +176,7 @@ class ISMSRiskAssessment:
             "app": AssetType.APPLICATION
         }
 
-        asset_type = AssetType.APPLICATION  ***REMOVED*** Default
+        asset_type = AssetType.APPLICATION  # Default
         for prefix, atype in asset_types.items():
             if asset_id.startswith(prefix):
                 asset_type = atype
@@ -230,7 +230,7 @@ class ISMSRiskAssessment:
             Threat("T005", "Cyber Attack", "technical", 3, "Malware, DDoS, or other attacks")
         ]
 
-        ***REMOVED*** Filter threats based on asset type
+        # Filter threats based on asset type
         relevant_threats = []
         for threat in base_threats:
             if self._is_threat_relevant(threat, asset):
@@ -262,7 +262,7 @@ class ISMSRiskAssessment:
             Vulnerability("V005", "Physical Security", 2, "Inadequate physical access controls", [])
         ]
 
-        ***REMOVED*** Filter vulnerabilities based on asset type
+        # Filter vulnerabilities based on asset type
         relevant_vulnerabilities = []
         for vuln in base_vulnerabilities:
             if self._is_vulnerability_relevant(vuln, asset):
@@ -289,7 +289,7 @@ class ISMSRiskAssessment:
         """Calculate impact score based on asset value and classification"""
         base_impact = asset.value
 
-        ***REMOVED*** Adjust based on classification
+        # Adjust based on classification
         classification_multiplier = {
             "public": 1.0,
             "internal": 1.5,
@@ -298,24 +298,24 @@ class ISMSRiskAssessment:
         }
 
         multiplier = classification_multiplier.get(asset.classification, 1.0)
-        impact_score = min(int(base_impact * multiplier), 5)  ***REMOVED*** Cap at 5
+        impact_score = min(int(base_impact * multiplier), 5)  # Cap at 5
 
         return impact_score
 
     def _calculate_likelihood(self, threats: List[Threat], vulnerabilities: List[Vulnerability]) -> int:
         """Calculate likelihood score based on threats and vulnerabilities"""
         if not threats:
-            return 1  ***REMOVED*** Minimum likelihood
+            return 1  # Minimum likelihood
 
-        ***REMOVED*** Average threat likelihood
+        # Average threat likelihood
         avg_threat_likelihood = sum(t.likelihood for t in threats) / len(threats)
 
-        ***REMOVED*** Factor in vulnerabilities
+        # Factor in vulnerabilities
         vuln_severity = max((v.severity for v in vulnerabilities), default=1)
-        vuln_factor = vuln_severity / 5.0  ***REMOVED*** Normalize to 0-1
+        vuln_factor = vuln_severity / 5.0  # Normalize to 0-1
 
         likelihood_score = int(avg_threat_likelihood * (1 + vuln_factor))
-        return min(likelihood_score, 5)  ***REMOVED*** Cap at 5
+        return min(likelihood_score, 5)  # Cap at 5
 
     def _classify_risk_level(self, score: int) -> RiskLevel:
         """Classify risk level according to ISO 27001"""
@@ -358,7 +358,7 @@ class ISMSRiskAssessment:
                 "Regular risk monitoring",
                 "Staff training on new controls"
             ])
-        else:  ***REMOVED*** LOW
+        else:  # LOW
             requirements.extend([
                 "Document risk acceptance",
                 "Monitor for changes",
@@ -375,24 +375,24 @@ class ISMSRiskAssessment:
 
     def _check_compliance_status(self, asset: Asset) -> Dict[str, Any]:
         """Check compliance status for the asset"""
-        ***REMOVED*** This would check against various compliance frameworks
+        # This would check against various compliance frameworks
         return {
-            "iso27001_compliant": True,  ***REMOVED*** Assume compliant for now
+            "iso27001_compliant": True,  # Assume compliant for now
             "gdpr_compliant": asset.classification in ["public", "internal"],
             "sox_compliant": asset.type != AssetType.FINANCIAL_DATA or True,
             "last_compliance_check": datetime.utcnow(),
-            "compliance_score": 95  ***REMOVED*** Percentage
+            "compliance_score": 95  # Percentage
         }
 
     def _store_assessment(self, assessment: RiskAssessment, tenant_id: str):
         """Store risk assessment in database"""
-        ***REMOVED*** This would persist the assessment result
-        ***REMOVED*** For now, just log it
+        # This would persist the assessment result
+        # For now, just log it
         logger.info(f"Stored risk assessment for asset {assessment.asset_id}: {assessment.risk_score}")
 
     def get_assessment_history(self, asset_id: str, tenant_id: str, limit: int = 10) -> List[RiskAssessment]:
         """Get assessment history for an asset"""
-        ***REMOVED*** This would query the database for historical assessments
+        # This would query the database for historical assessments
         return []
 
     def get_risk_dashboard(self, tenant_id: str) -> Dict[str, Any]:

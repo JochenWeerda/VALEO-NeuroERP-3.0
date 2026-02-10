@@ -119,7 +119,7 @@ def guard_psm_expertise_required(payload: dict) -> tuple[bool, str]:
     user = payload.get("user_info", {})
     has_expertise = user.get("psm_sachkunde_gueltig", False)
 
-    ***REMOVED*** Prüfe ob PSM im Warenkorb sind
+    # Prüfe ob PSM im Warenkorb sind
     lines = payload.get("lines", [])
     has_psm = any(line.get("article_type") == "PSM" for line in lines)
 

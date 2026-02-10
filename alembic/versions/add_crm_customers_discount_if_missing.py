@@ -1,4 +1,4 @@
-﻿"""Add discount column to crm_core_customers if present (Rabatt-Vorbelegung)
+"""Add discount column to crm_core_customers if present (Rabatt-Vorbelegung)
 
 Revision ID: add_crm_discount
 Revises: 2012a7987e7f
@@ -17,8 +17,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** The crm-core service owns this table in some deployments. In the monolith
-    ***REMOVED*** DB it may not exist on a fresh install, so this migration must be safe.
+    # The crm-core service owns this table in some deployments. In the monolith
+    # DB it may not exist on a fresh install, so this migration must be safe.
     bind = op.get_bind()
     exists = bind.execute(sa.text("SELECT to_regclass(:name)"), {"name": "public.crm_core_customers"}).scalar()
     if not exists:

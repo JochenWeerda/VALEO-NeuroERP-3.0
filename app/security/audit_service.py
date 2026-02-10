@@ -58,10 +58,10 @@ class ISMSAuditService:
         audit_entry = self._create_audit_entry(event_data)
         audit_entry.integrity_hash = self._create_integrity_hash(audit_entry)
 
-        ***REMOVED*** Store in secure audit database
+        # Store in secure audit database
         self._store_audit_entry(audit_entry)
 
-        ***REMOVED*** Real-time alerting for critical events
+        # Real-time alerting for critical events
         if self._is_critical_event(audit_entry):
             self._trigger_security_alert(audit_entry)
 
@@ -87,13 +87,13 @@ class ISMSAuditService:
             session_id=event_data.get('session_id'),
             compliance_flags=self._check_compliance_flags(event_data),
             risk_score=self._assess_event_risk(event_data),
-            integrity_hash="",  ***REMOVED*** Will be set later
+            integrity_hash="",  # Will be set later
             previous_hash=self.last_hash
         )
 
     def _create_integrity_hash(self, entry: AuditEntry) -> str:
         """Create cryptographic hash for audit trail integrity"""
-        ***REMOVED*** Create content string for hashing
+        # Create content string for hashing
         content_parts = [
             entry.previous_hash,
             entry.id,
@@ -110,11 +110,11 @@ class ISMSAuditService:
 
         content = "|".join(content_parts)
 
-        ***REMOVED*** Use SHA-256 for integrity
+        # Use SHA-256 for integrity
         if self.crypto and hasattr(self.crypto, 'create_hash'):
             return self.crypto.create_hash(content)
         else:
-            ***REMOVED*** Fallback to hashlib
+            # Fallback to hashlib
             return hashlib.sha256(content.encode('utf-8')).hexdigest()
 
     def _check_compliance_flags(self, event_data: Dict[str, Any]) -> List[str]:
@@ -124,7 +124,7 @@ class ISMSAuditService:
         action = event_data.get('action', '')
         resource_type = event_data.get('resource_type', '')
 
-        ***REMOVED*** GDPR compliance checks
+        # GDPR compliance checks
         if action in ['access_personal_data', 'export_data', 'modify_user_data']:
             flags.append('GDPR_PROCESSING')
             if not event_data.get('consent_verified', False):
@@ -133,13 +133,13 @@ class ISMSAuditService:
         if resource_type in ['User', 'Customer', 'PersonalData']:
             flags.append('GDPR_PERSONAL_DATA')
 
-        ***REMOVED*** SOX compliance for financial data
+        # SOX compliance for financial data
         if resource_type in ['FinancialRecord', 'JournalEntry', 'Account']:
             flags.append('SOX_FINANCIAL_DATA')
             if action in ['modify', 'delete', 'create']:
                 flags.append('SOX_CHANGE_CONTROL')
 
-        ***REMOVED*** ISO 27001 access control
+        # ISO 27001 access control
         if action == 'unauthorized_access':
             flags.append('ISO27001_ACCESS_VIOLATION')
 
@@ -149,7 +149,7 @@ class ISMSAuditService:
         if event_data.get('unusual_location', False):
             flags.append('ISO27001_UNUSUAL_LOCATION')
 
-        ***REMOVED*** PCI DSS for payment data
+        # PCI DSS for payment data
         if resource_type in ['Payment', 'CreditCard', 'BankAccount']:
             flags.append('PCI_DSS_PAYMENT_DATA')
 
@@ -159,7 +159,7 @@ class ISMSAuditService:
         """Assess risk level of security event (0-10 scale)"""
         risk_score = 0
 
-        ***REMOVED*** Base risk by event type
+        # Base risk by event type
         risk_matrix = {
             'login_success': 1,
             'login_failure': 3,
@@ -182,7 +182,7 @@ class ISMSAuditService:
         event_type = event_data.get('event_type', 'unknown')
         risk_score += risk_matrix.get(event_type, 2)
 
-        ***REMOVED*** Additional risk factors
+        # Additional risk factors
         if event_data.get('ip_address') and self._is_suspicious_ip(event_data['ip_address']):
             risk_score += 3
 
@@ -198,13 +198,13 @@ class ISMSAuditService:
         if event_data.get('admin_privileges', False):
             risk_score += 1
 
-        ***REMOVED*** Cap at 10
+        # Cap at 10
         return min(risk_score, 10)
 
     def _is_suspicious_ip(self, ip_address: str) -> bool:
         """Check if IP address is suspicious"""
-        ***REMOVED*** This would check against known malicious IP lists
-        ***REMOVED*** For now, return False (not suspicious)
+        # This would check against known malicious IP lists
+        # For now, return False (not suspicious)
         return False
 
     def _is_critical_event(self, audit_entry: AuditEntry) -> bool:
@@ -240,28 +240,28 @@ class ISMSAuditService:
             }
         }
 
-        ***REMOVED*** Send to security team, create incident ticket, etc.
+        # Send to security team, create incident ticket, etc.
         self._send_security_alert(alert_data)
         logger.warning(f"Security alert triggered for event {audit_entry.id}")
 
     def _store_audit_entry(self, entry: AuditEntry):
         """Store audit entry in tamper-proof database"""
-        ***REMOVED*** In production, this would use a secure, tamper-proof database
-        ***REMOVED*** For now, store in memory and log
+        # In production, this would use a secure, tamper-proof database
+        # For now, store in memory and log
         self.audit_trail.append(entry)
         self.last_hash = entry.integrity_hash
 
-        ***REMOVED*** Log to file for persistence
+        # Log to file for persistence
         logger.info(f"AUDIT: {entry.id}|{entry.timestamp}|{entry.event_type}|{entry.user_id}|{entry.action}")
 
     def _get_last_audit_hash(self) -> str:
         """Get the last audit hash for chain integrity"""
-        ***REMOVED*** In production, this would query the database
+        # In production, this would query the database
         return "genesis" if not self.audit_trail else self.audit_trail[-1].integrity_hash
 
     def _send_security_alert(self, alert_data: Dict[str, Any]):
         """Send security alert to appropriate channels"""
-        ***REMOVED*** This would integrate with alerting systems (email, SMS, Slack, etc.)
+        # This would integrate with alerting systems (email, SMS, Slack, etc.)
         logger.critical(f"SECURITY ALERT: {alert_data['description']}")
 
     def verify_audit_integrity(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> Dict[str, Any]:
@@ -291,12 +291,12 @@ class ISMSAuditService:
 
     def _get_audit_entries_in_range(self, start_date: Optional[datetime], end_date: Optional[datetime]) -> List[AuditEntry]:
         """Get audit entries in date range"""
-        ***REMOVED*** In production, this would query the database
+        # In production, this would query the database
         return self.audit_trail
 
     def _get_hash_at_date(self, date: datetime) -> str:
         """Get audit hash at specific date"""
-        ***REMOVED*** This would find the last hash before the given date
+        # This would find the last hash before the given date
         return "genesis"
 
     def get_audit_report(self, tenant_id: str, start_date: datetime, end_date: datetime,
@@ -320,7 +320,7 @@ class ISMSAuditService:
     def _get_filtered_audit_entries(self, tenant_id: str, start_date: datetime,
                                    end_date: datetime, filters: Optional[Dict[str, Any]]) -> List[AuditEntry]:
         """Get filtered audit entries"""
-        ***REMOVED*** Apply filters and return matching entries
+        # Apply filters and return matching entries
         filtered_entries = [
             entry for entry in self.audit_trail
             if entry.tenant_id == tenant_id and
@@ -385,7 +385,7 @@ class ISMSAuditService:
 
     def _calculate_risk_trend(self, entries: List[AuditEntry], days: int) -> List[Dict[str, Any]]:
         """Calculate risk trend over time"""
-        ***REMOVED*** Group by day and calculate average risk score
+        # Group by day and calculate average risk score
         daily_risks = {}
         for entry in entries:
             day = datetime.fromisoformat(entry.timestamp).date()

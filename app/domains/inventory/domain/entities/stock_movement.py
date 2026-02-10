@@ -16,7 +16,7 @@ class StockMovement:
     id: str
     article_id: str
     warehouse_id: str
-    movement_type: str  ***REMOVED*** 'in', 'out', 'transfer', 'adjustment'
+    movement_type: str  # 'in', 'out', 'transfer', 'adjustment'
     quantity: Decimal
     unit_cost: Optional[Decimal]
     reference_number: Optional[str]

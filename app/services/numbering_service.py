@@ -81,7 +81,7 @@ class NumberingService:
         self, base: dict[str, NumberSeries]
     ) -> dict[str, NumberSeries]:
         """Wendet JSON-Overrides aus ENV an"""
-        ***REMOVED*** NUMBERING_OVERRIDES='{"invoice":{"prefix":"RE-","start":1000,"width":6}}'
+        # NUMBERING_OVERRIDES='{"invoice":{"prefix":"RE-","start":1000,"width":6}}'
         overrides = os.environ.get("NUMBERING_OVERRIDES")
         if overrides:
             try:
@@ -108,7 +108,7 @@ class NumberingService:
         else:
             raw = json.loads(self.path.read_text())
             self._series = {k: NumberSeries(**v) for k, v in raw.items()}
-            ***REMOVED*** Apply runtime overrides ohne Counter zu verlieren
+            # Apply runtime overrides ohne Counter zu verlieren
             self._series = self._apply_overrides(self._series)
 
     def _save(self) -> None:
@@ -140,7 +140,7 @@ class NumberingService:
         return f"{s.prefix}{v:0{s.width}d}"
 
 
-***REMOVED*** Singleton factory
+# Singleton factory
 _numbering_singleton: NumberingService | None = None
 
 

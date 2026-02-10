@@ -29,13 +29,13 @@ class VectorStoreService:
         """
         self.persist_directory = persist_directory
         
-        ***REMOVED*** Initialize ChromaDB
+        # Initialize ChromaDB
         self.client = chromadb.Client(Settings(
             persist_directory=persist_directory,
             anonymized_telemetry=False
         ))
         
-        ***REMOVED*** Initialize embedding model (German-optimized)
+        # Initialize embedding model (German-optimized)
         self.embedding_model = SentenceTransformer(model_name)
         
         logger.info(f"Vector store initialized (model: {model_name})")
@@ -62,10 +62,10 @@ class VectorStoreService:
         """
         collection = self.get_or_create_collection(collection_name)
         
-        ***REMOVED*** Generate embeddings
+        # Generate embeddings
         embeddings = self.embedding_model.encode(documents).tolist()
         
-        ***REMOVED*** Add to collection
+        # Add to collection
         collection.add(
             documents=documents,
             embeddings=embeddings,
@@ -96,10 +96,10 @@ class VectorStoreService:
         """
         collection = self.get_or_create_collection(collection_name)
         
-        ***REMOVED*** Generate query embedding
+        # Generate query embedding
         query_embedding = self.embedding_model.encode([query])[0].tolist()
         
-        ***REMOVED*** Search
+        # Search
         results = collection.query(
             query_embeddings=[query_embedding],
             n_results=n_results,
@@ -142,7 +142,7 @@ class VectorStoreService:
         logger.info(f"Reset collection {collection_name}")
 
 
-***REMOVED*** Global instance
+# Global instance
 _vector_store: Optional[VectorStoreService] = None
 
 

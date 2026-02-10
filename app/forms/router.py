@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/mcp/form-specs", tags=["forms"])
 
-***REMOVED*** Flow-Matrix: (fromType, toType) -> transform_fn
+# Flow-Matrix: (fromType, toType) -> transform_fn
 def order_to_delivery(payload: Dict[str, Any]) -> Dict[str, Any]:
     """Transformiert Auftrag zu Lieferung"""
     return {
@@ -53,7 +53,7 @@ FLOW: Dict[tuple[str, str], Any] = {
     ("sales_delivery", "sales_invoice"): delivery_to_invoice,
 }
 
-***REMOVED*** Form-Specs (In echt: aus DB/Datei laden)
+# Form-Specs (In echt: aus DB/Datei laden)
 SCHEMAS: Dict[str, Dict[str, Any]] = {
     "sales_order": {
         "id": "sales_order",
@@ -308,7 +308,7 @@ async def create_follow_up(req: FollowRequest) -> dict:
                 content={"ok": False, "error": f"flow not defined: {flow_key}"},
             )
 
-        ***REMOVED*** Transformation durchführen
+        # Transformation durchführen
         out = transform_fn(req.payload)
 
         logger.info(
@@ -321,7 +321,7 @@ async def create_follow_up(req: FollowRequest) -> dict:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-***REMOVED*** --- Lookup-Endpoints (Autocomplete) ---
+# --- Lookup-Endpoints (Autocomplete) ---
 
 
 @router.get("/customers/search")
@@ -331,7 +331,7 @@ async def search_customers(q: str = "", tenant_id: str = "system") -> dict:
         customer_repo = container.resolve(CustomerRepository)
         customers = await customer_repo.get_all(tenant_id, search=q, limit=10)
 
-        ***REMOVED*** Format for autocomplete
+        # Format for autocomplete
         results = [
             {
                 "id": c.customer_number or str(c.id),
@@ -354,7 +354,7 @@ async def search_articles(q: str = "", tenant_id: str = "system") -> dict:
         article_repo = container.resolve(ArticleRepository)
         articles = await article_repo.get_all(tenant_id, search=q, limit=10)
 
-        ***REMOVED*** Format for autocomplete
+        # Format for autocomplete
         results = [
             {
                 "id": a.article_number or str(a.id),

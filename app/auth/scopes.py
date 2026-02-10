@@ -5,34 +5,34 @@ Scope-basierte Zugriffskontrolle für alle Endpoints
 
 from typing import Dict, List
 
-***REMOVED*** Scope-Definitionen
+# Scope-Definitionen
 SCOPES = {
-    ***REMOVED*** Sales
+    # Sales
     "sales:read": "Verkaufsbelege lesen",
     "sales:write": "Verkaufsbelege erstellen/bearbeiten",
     "sales:approve": "Verkaufsbelege freigeben",
     "sales:post": "Verkaufsbelege buchen",
     
-    ***REMOVED*** Purchase
+    # Purchase
     "purchase:read": "Einkaufsbelege lesen",
     "purchase:write": "Einkaufsbelege erstellen/bearbeiten",
     "purchase:approve": "Einkaufsbelege freigeben",
     "purchase:post": "Einkaufsbelege buchen",
     
-    ***REMOVED*** Documents
+    # Documents
     "docs:export": "Dokumente exportieren (CSV/XLSX)",
     "docs:print": "Dokumente drucken",
     "docs:archive": "Archiv verwalten",
     
-    ***REMOVED*** Policy
+    # Policy
     "policy:read": "Policies lesen",
     "policy:write": "Policies erstellen/bearbeiten/löschen",
     
-    ***REMOVED*** Admin
+    # Admin
     "admin:all": "Vollzugriff (Admin)",
 }
 
-***REMOVED*** Rollen → Scopes Mapping
+# Rollen → Scopes Mapping
 ROLE_SCOPES: Dict[str, List[str]] = {
     "admin": [
         "admin:all",
@@ -70,7 +70,7 @@ def get_scopes_for_roles(roles: List[str]) -> List[str]:
 
 def has_scope(user_scopes: List[str], required_scope: str) -> bool:
     """Prüft ob User einen Scope hat"""
-    ***REMOVED*** admin:all gibt alle Rechte
+    # admin:all gibt alle Rechte
     if "admin:all" in user_scopes:
         return True
     return required_scope in user_scopes

@@ -28,7 +28,7 @@ class OutboxEvent(Base):
     id = Column(String, primary_key=True)
     event_type = Column(String(200), nullable=False)
     aggregate_id = Column(String(50), nullable=False)
-    payload = Column(Text, nullable=False)  ***REMOVED*** JSON
+    payload = Column(Text, nullable=False)  # JSON
     timestamp = Column(DateTime, nullable=False, default=datetime.utcnow)
     published = Column(Boolean, default=False)
     published_at = Column(DateTime, nullable=True)
@@ -61,7 +61,7 @@ class OutboxPublisher:
         )
         
         self.db.add(outbox_event)
-        ***REMOVED*** Committed with main transaction
+        # Committed with main transaction
         
         logger.debug(f"Event stored in outbox: {event.__class__.__name__}")
     
@@ -72,7 +72,7 @@ class OutboxPublisher:
         """
         pending = (
             self.db.query(OutboxEvent)
-            .filter(OutboxEvent.published == False)  ***REMOVED*** noqa: E712
+            .filter(OutboxEvent.published == False)  # noqa: E712
             .order_by(OutboxEvent.timestamp)
             .limit(limit)
             .all()
@@ -82,15 +82,15 @@ class OutboxPublisher:
         
         for outbox_event in pending:
             try:
-                ***REMOVED*** Deserialize and publish
+                # Deserialize and publish
                 payload = json.loads(outbox_event.payload)
                 
-                ***REMOVED*** Recreate event object (simplified - just log for now)
+                # Recreate event object (simplified - just log for now)
                 await self.event_publisher.publish(
                     type(outbox_event.event_type, (DomainEvent,), payload)
                 )
                 
-                ***REMOVED*** Mark as published
+                # Mark as published
                 outbox_event.published = True
                 outbox_event.published_at = datetime.utcnow()
                 published_count += 1
@@ -102,7 +102,7 @@ class OutboxPublisher:
                 )
                 outbox_event.retry_count += 1
                 
-                ***REMOVED*** Give up after 3 retries
+                # Give up after 3 retries
                 if outbox_event.retry_count >= 3:
                     outbox_event.published = True
                     logger.error(f"Gave up on event {outbox_event.id} after 3 retries")
@@ -121,7 +121,7 @@ class OutboxPublisher:
         deleted = (
             self.db.query(OutboxEvent)
             .filter(
-                OutboxEvent.published == True,  ***REMOVED*** noqa: E712
+                OutboxEvent.published == True,  # noqa: E712
                 OutboxEvent.published_at < cutoff
             )
             .delete()

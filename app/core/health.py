@@ -22,7 +22,7 @@ async def check_postgresql() -> tuple[bool, str]:
 async def check_sse_hub() -> tuple[bool, str]:
     """Check SSE Hub status"""
     try:
-        ***REMOVED*** Check if hub is responsive
+        # Check if hub is responsive
         total_connections = sum(
             sse_hub.get_connection_count(ch) 
             for ch in ["workflow", "sales", "inventory", "policy"]
@@ -39,15 +39,15 @@ async def readiness_check() -> Dict[str, Any]:
     """
     checks = {}
     
-    ***REMOVED*** PostgreSQL
+    # PostgreSQL
     pg_ok, pg_msg = await check_postgresql()
     checks["postgresql"] = {"healthy": pg_ok, "message": pg_msg}
     
-    ***REMOVED*** SSE Hub
+    # SSE Hub
     sse_ok, sse_msg = await check_sse_hub()
     checks["sse_hub"] = {"healthy": sse_ok, "message": sse_msg}
     
-    ***REMOVED*** Overall status
+    # Overall status
     all_healthy = all(c["healthy"] for c in checks.values())
     
     return {

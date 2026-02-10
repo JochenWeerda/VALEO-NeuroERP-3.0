@@ -20,9 +20,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/einkauf", tags=["Einkauf"])
 
 
-***REMOVED*** ============================================================================
-***REMOVED*** LIEFERANTEN
-***REMOVED*** ============================================================================
+# ============================================================================
+# LIEFERANTEN
+# ============================================================================
 
 @router.get("/lieferanten", response_model=dict)
 async def get_lieferanten(
@@ -78,7 +78,7 @@ async def create_lieferant(
 ):
     """Erstellt neuen Lieferanten"""
     try:
-        ***REMOVED*** Prüfe ob Lieferantennummer bereits existiert
+        # Prüfe ob Lieferantennummer bereits existiert
         check_query = "SELECT id FROM einkauf_lieferanten WHERE lieferantennummer = :nummer"
         existing = db.execute(text(check_query), {"nummer": lieferant.lieferantennummer}).fetchone()
         
@@ -88,7 +88,7 @@ async def create_lieferant(
                 detail=f"Lieferantennummer {lieferant.lieferantennummer} existiert bereits"
             )
         
-        ***REMOVED*** Neuen Lieferanten einfügen
+        # Neuen Lieferanten einfügen
         insert_query = """
             INSERT INTO einkauf_lieferanten (
                 lieferantennummer, firmenname, ansprechpartner, email, telefon,
@@ -122,20 +122,20 @@ async def update_lieferant(
 ):
     """Aktualisiert Lieferanten"""
     try:
-        ***REMOVED*** Prüfe ob Lieferant existiert
+        # Prüfe ob Lieferant existiert
         check_query = "SELECT id FROM einkauf_lieferanten WHERE id = :id"
         existing = db.execute(text(check_query), {"id": lieferant_id}).fetchone()
         
         if not existing:
             raise HTTPException(status_code=404, detail="Lieferant nicht gefunden")
         
-        ***REMOVED*** Nur gesetzte Felder aktualisieren
+        # Nur gesetzte Felder aktualisieren
         update_data = {k: v for k, v in lieferant.dict().items() if v is not None}
         
         if not update_data:
             raise HTTPException(status_code=400, detail="Keine Daten zum Aktualisieren")
         
-        ***REMOVED*** UPDATE Query bauen
+        # UPDATE Query bauen
         set_clause = ", ".join([f"{k} = :{k}" for k in update_data.keys()])
         update_query = f"UPDATE einkauf_lieferanten SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :id"
         
@@ -156,14 +156,14 @@ async def update_lieferant(
 async def delete_lieferant(lieferant_id: int, db: Session = Depends(get_db)):
     """Löscht Lieferanten"""
     try:
-        ***REMOVED*** Prüfe ob Lieferant existiert
+        # Prüfe ob Lieferant existiert
         check_query = "SELECT id FROM einkauf_lieferanten WHERE id = :id"
         existing = db.execute(text(check_query), {"id": lieferant_id}).fetchone()
         
         if not existing:
             raise HTTPException(status_code=404, detail="Lieferant nicht gefunden")
         
-        ***REMOVED*** Lösche Lieferanten
+        # Lösche Lieferanten
         delete_query = "DELETE FROM einkauf_lieferanten WHERE id = :id"
         db.execute(text(delete_query), {"id": lieferant_id})
         db.commit()
@@ -177,9 +177,9 @@ async def delete_lieferant(lieferant_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Fehler beim Löschen: {str(e)}")
 
 
-***REMOVED*** ============================================================================
-***REMOVED*** BESTELLUNGEN
-***REMOVED*** ============================================================================
+# ============================================================================
+# BESTELLUNGEN
+# ============================================================================
 
 @router.get("/bestellungen", response_model=dict)
 async def get_bestellungen(
@@ -244,7 +244,7 @@ async def create_bestellung(
 ):
     """Erstellt neue Bestellung"""
     try:
-        ***REMOVED*** Prüfe ob Bestellnummer bereits existiert
+        # Prüfe ob Bestellnummer bereits existiert
         check_query = "SELECT id FROM einkauf_bestellungen WHERE bestellnummer = :nummer"
         existing = db.execute(text(check_query), {"nummer": bestellung.bestellnummer}).fetchone()
         
@@ -254,7 +254,7 @@ async def create_bestellung(
                 detail=f"Bestellnummer {bestellung.bestellnummer} existiert bereits"
             )
         
-        ***REMOVED*** Neue Bestellung einfügen
+        # Neue Bestellung einfügen
         insert_query = """
             INSERT INTO einkauf_bestellungen (
                 bestellnummer, lieferant_id, bestelldatum, gewuenschtes_lieferdatum,
@@ -286,20 +286,20 @@ async def update_bestellung(
 ):
     """Aktualisiert Bestellung"""
     try:
-        ***REMOVED*** Prüfe ob Bestellung existiert
+        # Prüfe ob Bestellung existiert
         check_query = "SELECT id FROM einkauf_bestellungen WHERE id = :id"
         existing = db.execute(text(check_query), {"id": bestellung_id}).fetchone()
         
         if not existing:
             raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
         
-        ***REMOVED*** Nur gesetzte Felder aktualisieren
+        # Nur gesetzte Felder aktualisieren
         update_data = {k: v for k, v in bestellung.dict().items() if v is not None}
         
         if not update_data:
             raise HTTPException(status_code=400, detail="Keine Daten zum Aktualisieren")
         
-        ***REMOVED*** UPDATE Query bauen
+        # UPDATE Query bauen
         set_clause = ", ".join([f"{k} = :{k}" for k in update_data.keys()])
         update_query = f"UPDATE einkauf_bestellungen SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :id"
         
@@ -320,14 +320,14 @@ async def update_bestellung(
 async def delete_bestellung(bestellung_id: int, db: Session = Depends(get_db)):
     """Löscht Bestellung"""
     try:
-        ***REMOVED*** Prüfe ob Bestellung existiert
+        # Prüfe ob Bestellung existiert
         check_query = "SELECT id FROM einkauf_bestellungen WHERE id = :id"
         existing = db.execute(text(check_query), {"id": bestellung_id}).fetchone()
         
         if not existing:
             raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
         
-        ***REMOVED*** Lösche Bestellung
+        # Lösche Bestellung
         delete_query = "DELETE FROM einkauf_bestellungen WHERE id = :id"
         db.execute(text(delete_query), {"id": bestellung_id})
         db.commit()
@@ -341,9 +341,9 @@ async def delete_bestellung(bestellung_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Fehler beim Löschen: {str(e)}")
 
 
-***REMOVED*** ============================================================================
-***REMOVED*** ANFRAGEN / BEDARFSMELDUNGEN (Requisitions) - PROC-REQ-01
-***REMOVED*** ============================================================================
+# ============================================================================
+# ANFRAGEN / BEDARFSMELDUNGEN (Requisitions) - PROC-REQ-01
+# ============================================================================
 
 @router.get("/anfragen", response_model=dict)
 async def get_anfragen(
@@ -391,7 +391,7 @@ async def get_anfrage(anfrage_id: str, db: Session = Depends(get_db)):
 
         anfrage = dict(row._mapping)
 
-        ***REMOVED*** Positionen laden
+        # Positionen laden
         pos_rows = db.execute(
             text("SELECT * FROM einkauf_anfragen_positionen WHERE anfrage_id = :id"),
             {"id": anfrage["id"]},
@@ -447,7 +447,7 @@ async def create_anfrage(
             },
         )
 
-        ***REMOVED*** Positionen anlegen
+        # Positionen anlegen
         if anfrage.positionen:
             for pos in anfrage.positionen:
                 pos_id = str(uuid.uuid4())
@@ -527,9 +527,9 @@ async def delete_anfrage(anfrage_id: str, db: Session = Depends(get_db)):
             raise HTTPException(status_code=404, detail="Anfrage nicht gefunden")
 
         real_id = existing[0]
-        ***REMOVED*** Positionen loeschen
+        # Positionen loeschen
         db.execute(text("DELETE FROM einkauf_anfragen_positionen WHERE anfrage_id = :id"), {"id": real_id})
-        ***REMOVED*** Anfrage loeschen
+        # Anfrage loeschen
         db.execute(text("DELETE FROM einkauf_anfragen WHERE id = :id"), {"id": real_id})
         db.commit()
         return {"message": "Anfrage erfolgreich geloescht"}
@@ -567,9 +567,9 @@ async def send_anfrage(anfrage_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Fehler beim Freigeben: {str(e)}")
 
 
-***REMOVED*** ============================================================================
-***REMOVED*** RECHNUNGSEINGAENGE (Invoice Receipts) - PROC-IV-02
-***REMOVED*** ============================================================================
+# ============================================================================
+# RECHNUNGSEINGAENGE (Invoice Receipts) - PROC-IV-02
+# ============================================================================
 
 @router.get("/rechnungseingaenge", response_model=dict)
 async def get_rechnungseingaenge(
@@ -617,7 +617,7 @@ async def get_rechnungseingang(rechnung_id: str, db: Session = Depends(get_db)):
 
         rechnung = dict(row._mapping)
 
-        ***REMOVED*** Positionen laden
+        # Positionen laden
         pos_rows = db.execute(
             text("SELECT * FROM einkauf_rechnungseingang_positionen WHERE rechnungseingang_id = :id"),
             {"id": rechnung["id"]},
@@ -672,7 +672,7 @@ async def create_rechnungseingang(
             },
         )
 
-        ***REMOVED*** Positionen anlegen
+        # Positionen anlegen
         if rechnung.positionen:
             for pos in rechnung.positionen:
                 pos_id = str(uuid.uuid4())
@@ -726,7 +726,7 @@ async def update_rechnungseingang(
 
         real_id = existing[0]
 
-        ***REMOVED*** Map camelCase to snake_case for DB columns
+        # Map camelCase to snake_case for DB columns
         field_mapping = {
             "lieferantId": "lieferant_id",
             "lieferantName": "lieferant_name",

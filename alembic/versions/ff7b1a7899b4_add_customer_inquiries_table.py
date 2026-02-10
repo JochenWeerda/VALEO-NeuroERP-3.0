@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = 'ff7b1a7899b4'
 down_revision: Union[str, None] = 'eca81651f8ba'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -20,7 +20,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Create customer_inquiries table
+    # Create customer_inquiries table
     op.create_table('customer_inquiries',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -51,5 +51,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    ***REMOVED*** Drop customer_inquiries table
+    # Drop customer_inquiries table
     op.drop_table('customer_inquiries', schema='domain_crm')
