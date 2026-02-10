@@ -366,3 +366,26 @@ from .agrar_models import (
     Sachkunde,
     Biostimulanz
 )
+
+# Import L3-Connect gap closure models
+from .l3c_models import (
+    InventoryCountLine,
+    WeighingTicket,
+    WeighingTicketLine,
+    WarehouseTransfer,
+    WarehouseTransferLine,
+    StockCorrection,
+    StockCorrectionLine,
+    BinLocation,
+    PreparationList,
+    PreparationListLine,
+    PickList,
+    PickListLine,
+    ShippingUnit,
+    WebhookRegistration,
+    ArticleBatch,
+    InternalMessage,
+    MasterDataEntry,
+    Dispatcher,
+    ArticleSelection,
+)
