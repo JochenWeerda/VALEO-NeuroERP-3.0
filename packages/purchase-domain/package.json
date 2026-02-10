@@ -31,10 +31,6 @@
     "ts-jest": "^29.1.0",
     "typescript": "^5.1.0"
   },
-  "peerDependencies": {
-    "@valeo-neuroerp/shared": "workspace:*",
-    "@valeo-neuroerp/utilities": "workspace:*"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/valeo-neuroerp/valeo-neuroerp-3.0.git",
