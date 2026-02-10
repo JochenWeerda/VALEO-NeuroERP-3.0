@@ -41,6 +41,7 @@ jobs:
           mkdir -p /tmp/gitleaks-src
           git archive --format=tar HEAD | tar -x -C /tmp/gitleaks-src
 
+          set +e
           docker run --rm \
             -v "/tmp/gitleaks-src:/repo" \
             -w /repo \
@@ -54,6 +55,14 @@ jobs:
             --report-format json \
             --report-path gitleaks-report.json \
             --no-banner
+          ec=$?
+          set -e
+
+          if [ "$ec" -ne 0 ]; then
+            echo "Gitleaks report (first 200 lines):"
+            head -n 200 gitleaks-report.json || true
+          fi
+          exit "$ec"
 
   backend:
     name: Backend (pytest + Postgres)
