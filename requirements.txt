@@ -1,44 +1,44 @@
-***REMOVED*** VALEO-NeuroERP-3.0 FastAPI Application Requirements
-***REMOVED*** Adapted from VALEO-NeuroERP-2.0 backend requirements for clean architecture
+# VALEO-NeuroERP-3.0 FastAPI Application Requirements
+# Adapted from VALEO-NeuroERP-2.0 backend requirements for clean architecture
 
-***REMOVED*** Core FastAPI and async support
+# Core FastAPI and async support
 fastapi==0.115.14
 uvicorn[standard]==0.24.0
 starlette==0.46.2
 python-multipart==0.0.9
 
-***REMOVED*** Database and ORM
+# Database and ORM
 SQLAlchemy==2.0.41
 alembic==1.13.1
 aiosqlite==0.21.0
 asyncpg==0.30.0
 psycopg2-binary==2.9.10
 
-***REMOVED*** Pydantic for data validation
+# Pydantic for data validation
 pydantic==2.11.7
 pydantic-settings==2.10.1
 pydantic_core==2.33.2
 email-validator==2.2.0
 
-***REMOVED*** Authentication and security
+# Authentication and security
 python-jose==3.3.0
 PyJWT==2.10.1
 passlib==1.7.4
 bcrypt==4.1.2
 
-***REMOVED*** HTTP client for external APIs
+# HTTP client for external APIs
 httpx==0.28.1
 aiohttp==3.12.13
 requests==2.32.3
 
-***REMOVED*** Logging and monitoring
+# Logging and monitoring
 python-json-logger==2.0.7
 structlog==24.4.0
 prometheus-client==0.19.0
 prometheus-fastapi-instrumentator==7.0.0
 psutil==6.1.1
 
-***REMOVED*** Development and testing
+# Development and testing
 pytest==8.1.1
 pytest-asyncio==0.23.5
 coverage==7.9.2
@@ -49,12 +49,12 @@ mypy==1.16.1
 apscheduler==3.10.4
 nats-py==2.6.0
 
-***REMOVED*** Code quality and utilities
+# Code quality and utilities
 click==8.2.1
 colorama==0.4.6
 GitPython==3.1.44
 
-***REMOVED*** Data processing
+# Data processing
 pandas==2.3.0
 numpy==2.3.1
 pyarrow==20.0.0
@@ -63,16 +63,16 @@ reportlab==4.2.5
 beautifulsoup4==4.12.3
 PyYAML==6.0.1
 
-***REMOVED*** Rate limiting
+# Rate limiting
 slowapi==0.1.9
 
-***REMOVED*** Configuration
+# Configuration
 python-decouple==3.8
 python-dotenv>=1.0.0,<2.0.0
 
-***REMOVED*** Redis (for caching, not AI)
+# Redis (for caching, not AI)
 redis==6.2.0
 
-***REMOVED*** Documentation
+# Documentation
 Markdown==3.8.2
 Pygments==2.19.2
