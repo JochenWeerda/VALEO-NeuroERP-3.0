@@ -28,7 +28,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          # Gitleaks runs with --no-git, so we don't need history, and we avoid
+          # persisting credentials into .git/config (which can trigger false positives).
+          fetch-depth: 1
+          persist-credentials: false
 
       - name: Gitleaks (with baseline)
         run: |

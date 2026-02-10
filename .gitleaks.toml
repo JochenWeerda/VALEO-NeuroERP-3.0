@@ -11,6 +11,7 @@ description = "Allowlist for known non-secret test strings and generated artifac
 regexTarget = "match"
 
 paths = [
+  '''^\\.git/''',
   '''^docs/''',
   '''^gap/''',
   '''^memory/''',
