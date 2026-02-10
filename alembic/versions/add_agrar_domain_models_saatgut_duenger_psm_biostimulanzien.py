@@ -11,7 +11,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = 'add_agrar_mod'
 down_revision: Union[str, None] = 'add_inv_ent'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -19,10 +19,10 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Create domain_agrar schema
+    # Create domain_agrar schema
     op.execute("CREATE SCHEMA IF NOT EXISTS domain_agrar")
 
-    ***REMOVED*** Create Saatgut table
+    # Create Saatgut table
     op.create_table('agrar_saatgut',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('artikelnummer', sa.String(length=50), nullable=False),
@@ -55,7 +55,7 @@ def upgrade() -> None:
         schema='domain_agrar'
     )
 
-    ***REMOVED*** Create SaatgutLizenz table
+    # Create SaatgutLizenz table
     op.create_table('agrar_saatgut_lizenzen',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('saatgut_id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -73,7 +73,7 @@ def upgrade() -> None:
         schema='domain_agrar'
     )
 
-    ***REMOVED*** Create Duenger table
+    # Create Duenger table
     op.create_table('agrar_duenger',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('artikelnummer', sa.String(length=50), nullable=False),
@@ -109,7 +109,7 @@ def upgrade() -> None:
         schema='domain_agrar'
     )
 
-    ***REMOVED*** Create DuengerMischung table
+    # Create DuengerMischung table
     op.create_table('agrar_duenger_mischungen',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('name', sa.String(length=200), nullable=False),
@@ -131,7 +131,7 @@ def upgrade() -> None:
         schema='domain_agrar'
     )
 
-    ***REMOVED*** Create PSM table
+    # Create PSM table
     op.create_table('agrar_psm',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('artikelnummer', sa.String(length=50), nullable=False),
@@ -167,7 +167,7 @@ def upgrade() -> None:
         schema='domain_agrar'
     )
 
-    ***REMOVED*** Create Sachkunde table
+    # Create Sachkunde table
     op.create_table('agrar_sachkunde',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('person_id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -185,7 +185,7 @@ def upgrade() -> None:
         schema='domain_agrar'
     )
 
-    ***REMOVED*** Create Biostimulanz table
+    # Create Biostimulanz table
     op.create_table('agrar_biostimulanzien',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('artikelnummer', sa.String(length=50), nullable=False),
@@ -213,7 +213,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    ***REMOVED*** Drop tables in reverse order
+    # Drop tables in reverse order
     op.drop_table('agrar_biostimulanzien', schema='domain_agrar')
     op.drop_table('agrar_sachkunde', schema='domain_agrar')
     op.drop_table('agrar_psm', schema='domain_agrar')
@@ -222,5 +222,5 @@ def downgrade() -> None:
     op.drop_table('agrar_saatgut_lizenzen', schema='domain_agrar')
     op.drop_table('agrar_saatgut', schema='domain_agrar')
 
-    ***REMOVED*** Drop schema
+    # Drop schema
     op.execute("DROP SCHEMA IF EXISTS domain_agrar CASCADE")

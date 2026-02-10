@@ -23,7 +23,7 @@ class BalanceSheetItem(BaseModel):
     """Balance sheet item"""
     account_number: str
     account_name: str
-    account_type: str  ***REMOVED*** ASSET, LIABILITY, EQUITY
+    account_type: str  # ASSET, LIABILITY, EQUITY
     balance: Decimal
     parent_account: Optional[str] = None
     level: int = 0
@@ -46,7 +46,7 @@ class ProfitLossItem(BaseModel):
     """Profit & Loss statement item"""
     account_number: str
     account_name: str
-    account_type: str  ***REMOVED*** REVENUE, EXPENSE
+    account_type: str  # REVENUE, EXPENSE
     amount: Decimal
     parent_account: Optional[str] = None
     level: int = 0
@@ -93,13 +93,13 @@ async def get_balance_sheet(
     """
     try:
         if not as_of_date:
-            ***REMOVED*** Default to end of period
+            # Default to end of period
             year, month = period.split('-')
             from calendar import monthrange
             last_day = monthrange(int(year), int(month))[1]
             as_of_date = date(int(year), int(month), last_day)
         
-        ***REMOVED*** Get all accounts with balances
+        # Get all accounts with balances
         accounts_query = text("""
             SELECT 
                 coa.account_number,
@@ -136,7 +136,7 @@ async def get_balance_sheet(
             total_debit = Decimal(str(row[4])) if row[4] else Decimal("0.00")
             total_credit = Decimal(str(row[5])) if row[5] else Decimal("0.00")
             
-            ***REMOVED*** Calculate balance based on account type
+            # Calculate balance based on account type
             if account_type == 'ASSET':
                 balance = total_debit - total_credit
             elif account_type in ['LIABILITY', 'EQUITY']:
@@ -144,7 +144,7 @@ async def get_balance_sheet(
             else:
                 balance = Decimal("0.00")
             
-            ***REMOVED*** Skip zero balances
+            # Skip zero balances
             if abs(balance) < Decimal("0.01"):
                 continue
             
@@ -196,7 +196,7 @@ async def get_profit_loss(
     Get profit & loss statement for a period.
     """
     try:
-        ***REMOVED*** Get revenue accounts (typically 4xxx, 5xxx, 6xxx, 7xxx, 8xxx)
+        # Get revenue accounts (typically 4xxx, 5xxx, 6xxx, 7xxx, 8xxx)
         revenue_query = text("""
             SELECT 
                 coa.account_number,
@@ -227,7 +227,7 @@ async def get_profit_loss(
         for row in revenue_rows:
             total_credit = Decimal(str(row[3])) if row[3] else Decimal("0.00")
             total_debit = Decimal(str(row[4])) if row[4] else Decimal("0.00")
-            amount = total_credit - total_debit  ***REMOVED*** Revenue is credit - debit
+            amount = total_credit - total_debit  # Revenue is credit - debit
             
             if abs(amount) >= Decimal("0.01"):
                 revenue.append(ProfitLossItem(
@@ -238,7 +238,7 @@ async def get_profit_loss(
                     level=0
                 ))
         
-        ***REMOVED*** Get expense accounts (typically 5xxx, 6xxx, 7xxx, 8xxx)
+        # Get expense accounts (typically 5xxx, 6xxx, 7xxx, 8xxx)
         expense_query = text("""
             SELECT 
                 coa.account_number,
@@ -270,7 +270,7 @@ async def get_profit_loss(
         for row in expense_rows:
             total_debit = Decimal(str(row[3])) if row[3] else Decimal("0.00")
             total_credit = Decimal(str(row[4])) if row[4] else Decimal("0.00")
-            amount = total_debit - total_credit  ***REMOVED*** Expenses are debit - credit
+            amount = total_debit - total_credit  # Expenses are debit - credit
             
             if abs(amount) >= Decimal("0.01"):
                 expenses.append(ProfitLossItem(
@@ -313,10 +313,10 @@ async def get_bwa(
         year_int = int(year)
         month_int = int(month)
         
-        ***REMOVED*** Get current period data
+        # Get current period data
         current_period_data = await get_profit_loss(period, tenant_id, db)
         
-        ***REMOVED*** Get previous period
+        # Get previous period
         if month_int == 1:
             prev_period = f"{year_int - 1}-12"
         else:
@@ -324,13 +324,13 @@ async def get_bwa(
         
         previous_period_data = await get_profit_loss(prev_period, tenant_id, db)
         
-        ***REMOVED*** Get year-to-date data
+        # Get year-to-date data
         ytd_period = f"{year_int}-12"
         ytd_data = await get_profit_loss(ytd_period, tenant_id, db)
         
         items = []
         
-        ***REMOVED*** Revenue positions
+        # Revenue positions
         items.append(BWAItem(
             position="1",
             description="Umsatzerlöse",
@@ -340,7 +340,7 @@ async def get_bwa(
             percentage=Decimal("100.00")
         ))
         
-        ***REMOVED*** Material costs
+        # Material costs
         material_expenses = sum(item.amount for item in current_period_data.expenses 
                                if item.account_number.startswith('5'))
         items.append(BWAItem(
@@ -355,7 +355,7 @@ async def get_bwa(
                        if current_period_data.total_revenue > 0 else Decimal("0.00")
         ))
         
-        ***REMOVED*** Personnel costs
+        # Personnel costs
         personnel_expenses = sum(item.amount for item in current_period_data.expenses 
                                if item.account_number.startswith('6'))
         items.append(BWAItem(
@@ -370,7 +370,7 @@ async def get_bwa(
                        if current_period_data.total_revenue > 0 else Decimal("0.00")
         ))
         
-        ***REMOVED*** Other expenses
+        # Other expenses
         other_expenses = sum(item.amount for item in current_period_data.expenses 
                            if not item.account_number.startswith('5') and 
                               not item.account_number.startswith('6'))
@@ -435,8 +435,8 @@ async def export_report(
         else:
             raise HTTPException(status_code=400, detail=f"Unknown report type: {report_type}")
         
-        ***REMOVED*** For now, return JSON (PDF/Excel generation would require additional libraries)
-        ***REMOVED*** In production, you would use libraries like reportlab (PDF) or openpyxl (Excel)
+        # For now, return JSON (PDF/Excel generation would require additional libraries)
+        # In production, you would use libraries like reportlab (PDF) or openpyxl (Excel)
         return {
             "report_type": report_type,
             "period": period,

@@ -23,9 +23,9 @@ class CamelModel(BaseModel):
     )
 
 
-***REMOVED*** ============================================================================
-***REMOVED*** LIEFERANTEN
-***REMOVED*** ============================================================================
+# ============================================================================
+# LIEFERANTEN
+# ============================================================================
 
 class LieferantBase(BaseModel):
     lieferantennummer: str
@@ -71,9 +71,9 @@ class Lieferant(LieferantBase):
         from_attributes = True
 
 
-***REMOVED*** ============================================================================
-***REMOVED*** BESTELLUNGEN
-***REMOVED*** ============================================================================
+# ============================================================================
+# BESTELLUNGEN
+# ============================================================================
 
 class BestellungBase(BaseModel):
     bestellnummer: str
@@ -110,9 +110,9 @@ class Bestellung(BestellungBase):
         from_attributes = True
 
 
-***REMOVED*** ============================================================================
-***REMOVED*** WARENEINGANG (Goods Receipt) - PROC-GR-01
-***REMOVED*** ============================================================================
+# ============================================================================
+# WARENEINGANG (Goods Receipt) - PROC-GR-01
+# ============================================================================
 
 class GoodsReceiptItemCreate(CamelModel):
     purchase_order_item_id: Optional[str] = None
@@ -122,7 +122,7 @@ class GoodsReceiptItemCreate(CamelModel):
     received_quantity: Decimal = Decimal("0")
     accepted_quantity: Decimal = Decimal("0")
     rejected_quantity: Decimal = Decimal("0")
-    condition: str = "PERFECT"  ***REMOVED*** PERFECT, GOOD, DAMAGED, DEFECTIVE
+    condition: str = "PERFECT"  # PERFECT, GOOD, DAMAGED, DEFECTIVE
 
 
 class GoodsReceiptItemResponse(GoodsReceiptItemCreate):
@@ -134,13 +134,13 @@ class GoodsReceiptItemResponse(GoodsReceiptItemCreate):
 
 
 class GoodsReceiptCreate(CamelModel):
-    purchase_order_id: Optional[str] = None  ***REMOVED*** Can be passed via URL path
+    purchase_order_id: Optional[str] = None  # Can be passed via URL path
     delivery_note_number: Optional[str] = None
     received_date: date
     received_by: str
     received_location: str
     items: List[GoodsReceiptItemCreate] = []
-    quality_inspection_status: str = "PENDING"  ***REMOVED*** PENDING, PASSED, FAILED, CONDITIONAL
+    quality_inspection_status: str = "PENDING"  # PENDING, PASSED, FAILED, CONDITIONAL
     inspection_notes: Optional[str] = None
     damage_report: Optional[str] = None
 
@@ -162,13 +162,13 @@ class GoodsReceiptResponse(CamelModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True, alias_generator=_to_camel)
 
 
-***REMOVED*** ============================================================================
-***REMOVED*** BEDARFSMELDUNG / ANFRAGE (Requisition) - PROC-REQ-01
-***REMOVED*** ============================================================================
+# ============================================================================
+# BEDARFSMELDUNG / ANFRAGE (Requisition) - PROC-REQ-01
+# ============================================================================
 
 class AnfragePositionCreate(BaseModel):
     article_id: Optional[str] = None
-    artikel: Optional[str] = None  ***REMOVED*** Freitext Artikelname
+    artikel: Optional[str] = None  # Freitext Artikelname
     quantity: Decimal
     unit: str = "Stueck"
     due_date: Optional[date] = None
@@ -186,16 +186,16 @@ class AnfragePositionResponse(AnfragePositionCreate):
 
 class AnfrageBase(BaseModel):
     anfrageNummer: Optional[str] = None
-    typ: str = "BANF"  ***REMOVED*** BANF (Bedarfsanforderung), ANF (Anfrage)
+    typ: str = "BANF"  # BANF (Bedarfsanforderung), ANF (Anfrage)
     anforderer: str
     abteilung: Optional[str] = None
     datum: Optional[date] = None
-    prioritaet: str = "normal"  ***REMOVED*** niedrig, normal, hoch, dringend
-    status: str = "ENTWURF"  ***REMOVED*** ENTWURF, FREIGEGEBEN, ANGEBOTSPHASE, BESTELLT, ABGELEHNT
+    prioritaet: str = "normal"  # niedrig, normal, hoch, dringend
+    status: str = "ENTWURF"  # ENTWURF, FREIGEGEBEN, ANGEBOTSPHASE, BESTELLT, ABGELEHNT
     begruendung: Optional[str] = None
     kostenstelle: Optional[str] = None
     projekt_id: Optional[str] = None
-    artikel: Optional[str] = None  ***REMOVED*** Legacy single-article field
+    artikel: Optional[str] = None  # Legacy single-article field
     menge: Optional[Decimal] = None
     einheit: Optional[str] = None
     budget: Optional[Decimal] = None
@@ -233,9 +233,9 @@ class AnfrageResponse(AnfrageBase):
         from_attributes = True
 
 
-***REMOVED*** ============================================================================
-***REMOVED*** RECHNUNGSEINGANG (Invoice Receipt) - PROC-IV-02
-***REMOVED*** ============================================================================
+# ============================================================================
+# RECHNUNGSEINGANG (Invoice Receipt) - PROC-IV-02
+# ============================================================================
 
 class RechnungseingangPositionCreate(BaseModel):
     artikelId: Optional[str] = None
@@ -266,7 +266,7 @@ class RechnungseingangBase(BaseModel):
     mwstBetrag: Optional[Decimal] = None
     bruttoBetrag: Optional[Decimal] = None
     waehrung: str = "EUR"
-    status: str = "OFFEN"  ***REMOVED*** OFFEN, GEPRUEFT, FREIGEGEBEN, BEZAHLT, STORNIERT
+    status: str = "OFFEN"  # OFFEN, GEPRUEFT, FREIGEGEBEN, BEZAHLT, STORNIERT
     zahlungsreferenz: Optional[str] = None
     notizen: Optional[str] = None
     abgleichErgebnis: Optional[dict] = None
@@ -305,9 +305,9 @@ class RechnungseingangResponse(RechnungseingangBase):
         from_attributes = True
 
 
-***REMOVED*** ============================================================================
-***REMOVED*** 2/3-WEGE-ABGLEICH (PO-GR-IV Matching) - PROC-IV-02
-***REMOVED*** ============================================================================
+# ============================================================================
+# 2/3-WEGE-ABGLEICH (PO-GR-IV Matching) - PROC-IV-02
+# ============================================================================
 
 class MatchItemResult(CamelModel):
     purchase_order_item_id: str
@@ -331,8 +331,8 @@ class MatchRequest(CamelModel):
     invoice_id: str
     purchase_order_id: str
     goods_receipt_id: Optional[str] = None
-    tolerance_quantity: Decimal = Decimal("2.0")  ***REMOVED*** Prozent
-    tolerance_price: Decimal = Decimal("1.0")  ***REMOVED*** Prozent
+    tolerance_quantity: Decimal = Decimal("2.0")  # Prozent
+    tolerance_price: Decimal = Decimal("1.0")  # Prozent
 
 
 class MatchResponse(CamelModel):
@@ -340,11 +340,11 @@ class MatchResponse(CamelModel):
     purchase_order_id: str
     receipt_id: Optional[str] = None
     invoice_id: str
-    match_type: str  ***REMOVED*** two_way, three_way
-    overall_status: str  ***REMOVED*** matched, partial_match, exceptions, no_match
-    quantity_match: str  ***REMOVED*** matched, over_invoice, under_invoice, no_receipt
-    price_match: str  ***REMOVED*** matched, price_variance, no_match
-    quality_match: str  ***REMOVED*** matched, quality_issues, no_receipt
+    match_type: str  # two_way, three_way
+    overall_status: str  # matched, partial_match, exceptions, no_match
+    quantity_match: str  # matched, over_invoice, under_invoice, no_receipt
+    price_match: str  # matched, price_variance, no_match
+    quality_match: str  # matched, quality_issues, no_receipt
     item_matches: List[MatchItemResult]
     total_variance: Decimal
     variance_percentage: Decimal

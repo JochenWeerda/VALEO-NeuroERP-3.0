@@ -39,10 +39,10 @@ async def verify_document(
         Verification result with document metadata
     """
     try:
-        ***REMOVED*** Get DocumentRepository from container
+        # Get DocumentRepository from container
         doc_repo = container.resolve(DocumentRepository)
 
-        ***REMOVED*** Fetch document from database
+        # Fetch document from database
         doc_header = doc_repo.get_by_number(domain, number)
         if not doc_header:
             return {
@@ -54,11 +54,11 @@ async def verify_document(
                 "message": "Document not found"
             }
 
-        ***REMOVED*** Convert to dict for hash calculation
+        # Convert to dict for hash calculation
         doc_dict = doc_repo.to_dict(doc_header)
 
-        ***REMOVED*** Calculate hash from document content
-        ***REMOVED*** Use document data as content for hash calculation
+        # Calculate hash from document content
+        # Use document data as content for hash calculation
         import json
         content = json.dumps(doc_dict, sort_keys=True)
         expected_hash = calculate_hash(domain, number, content)
@@ -96,10 +96,10 @@ async def verify_document_simple(
         Document existence and basic metadata
     """
     try:
-        ***REMOVED*** Get DocumentRepository from container
+        # Get DocumentRepository from container
         doc_repo = container.resolve(DocumentRepository)
 
-        ***REMOVED*** Check if document exists
+        # Check if document exists
         doc_header = doc_repo.get_by_number(domain, number)
 
         if doc_header:

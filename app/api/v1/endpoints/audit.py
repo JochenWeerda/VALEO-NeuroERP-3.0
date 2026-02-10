@@ -139,19 +139,19 @@ async def get_audit_stats(
     
     total = base_query.count()
     
-    ***REMOVED*** Actions breakdown
+    # Actions breakdown
     actions = db.query(
         AuditLog.action,
         func.count(AuditLog.id).label('count')
     ).group_by(AuditLog.action).all()
     
-    ***REMOVED*** Entity types breakdown
+    # Entity types breakdown
     entities = db.query(
         AuditLog.entity_type,
         func.count(AuditLog.id).label('count')
     ).group_by(AuditLog.entity_type).all()
     
-    ***REMOVED*** Top users
+    # Top users
     top_users = db.query(
         AuditLog.user_email,
         func.count(AuditLog.id).label('count')

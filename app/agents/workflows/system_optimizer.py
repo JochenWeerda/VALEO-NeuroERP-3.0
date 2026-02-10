@@ -14,7 +14,7 @@ from langgraph.graph import StateGraph, END
 logger = logging.getLogger(__name__)
 
 
-***REMOVED*** State Definition for LangGraph
+# State Definition for LangGraph
 class SystemOptimizerState(TypedDict):
     """State for system optimization workflow."""
     messages: Annotated[List[BaseMessage], lambda x, y: x + y]
@@ -39,7 +39,7 @@ class SystemOptimizerAgent:
     
     def __init__(self):
         self.running = False
-        self.check_interval = 30  ***REMOVED*** seconds
+        self.check_interval = 30  # seconds
         self.optimization_history: List[Dict[str, Any]] = []
     
     async def start(self):
@@ -62,20 +62,20 @@ class SystemOptimizerAgent:
     
     async def _check_and_optimize(self):
         """Main optimization loop using LangGraph workflow."""
-        ***REMOVED*** Fetch metrics from our API
+        # Fetch metrics from our API
         import httpx
 
         try:
             async with httpx.AsyncClient() as client:
-                ***REMOVED*** Get system metrics
+                # Get system metrics
                 system_response = await client.get("http://localhost:8000/api/v1/metrics/system")
                 system_metrics = system_response.json()
 
-                ***REMOVED*** Get optimization signals
+                # Get optimization signals
                 signals_response = await client.get("http://localhost:8000/api/v1/metrics/optimization-signals")
                 signals = signals_response.json()
 
-                ***REMOVED*** Run LangGraph optimization workflow
+                # Run LangGraph optimization workflow
                 if signals.get("signal_count", 0) > 0:
                     await self._run_optimization_workflow(system_metrics, signals["signals"])
 
@@ -100,7 +100,7 @@ class SystemOptimizerAgent:
         try:
             result = await workflow.ainvoke(initial_state, config)
 
-            ***REMOVED*** Record actions taken
+            # Record actions taken
             for action in result.get("actions_taken", []):
                 self.optimization_history.append({
                     "timestamp": datetime.utcnow().isoformat(),
@@ -119,17 +119,17 @@ class SystemOptimizerAgent:
         logger.warning("⚠️ Critical memory usage detected - clearing caches")
         
         try:
-            ***REMOVED*** Clear Vector Store cache (if applicable)
+            # Clear Vector Store cache (if applicable)
             from app.infrastructure.rag.vector_store import get_vector_store
             vector_store = get_vector_store()
-            ***REMOVED*** TODO: Implement cache clearing
+            # TODO: Implement cache clearing
             
             logger.info("✅ Caches cleared successfully")
             
-            ***REMOVED*** Publish event for monitoring
+            # Publish event for monitoring
             from app.domains.shared.events import get_event_publisher
             event_publisher = get_event_publisher()
-            ***REMOVED*** TODO: Create SystemOptimizationEvent
+            # TODO: Create SystemOptimizationEvent
             
         except Exception as e:
             logger.error(f"Failed to clear caches: {e}")
@@ -139,38 +139,38 @@ class SystemOptimizerAgent:
         resource = signal.get("resource")
         logger.info(f"📈 Scale-up signal received for {resource}")
         
-        ***REMOVED*** In a cloud environment, this would trigger auto-scaling
-        ***REMOVED*** For now, just log and alert
+        # In a cloud environment, this would trigger auto-scaling
+        # For now, just log and alert
         logger.warning(f"Manual intervention recommended: {signal.get('action')}")
         
-        ***REMOVED*** TODO: Integrate with K8s HPA or cloud auto-scaling APIs
+        # TODO: Integrate with K8s HPA or cloud auto-scaling APIs
     
     async def _handle_scale_down(self, signal: Dict[str, Any]):
         """Handle scale-down signal."""
         resource = signal.get("resource")
         logger.info(f"📉 Scale-down opportunity detected for {resource}")
         
-        ***REMOVED*** Log for cost optimization
+        # Log for cost optimization
         logger.info(f"Cost optimization opportunity: {signal.get('action')}")
     
     async def _handle_connection_pool(self, signal: Dict[str, Any]):
         """Handle connection pool exhaustion."""
         logger.warning("⚠️ Database connection pool near capacity")
         
-        ***REMOVED*** Recommendation: Increase pool size or investigate slow queries
+        # Recommendation: Increase pool size or investigate slow queries
         logger.info("Action: Investigating slow queries and increasing pool size")
         
-        ***REMOVED*** TODO: Implement automatic pool size adjustment
-        ***REMOVED*** TODO: Trigger slow query analysis
+        # TODO: Implement automatic pool size adjustment
+        # TODO: Trigger slow query analysis
 
 
-***REMOVED*** LangGraph Workflow Nodes
+# LangGraph Workflow Nodes
 async def analyze_system_metrics(state: SystemOptimizerState) -> Dict[str, Any]:
     """Analyze system metrics using AI."""
     metrics = state["system_metrics"]
     signals = state["optimization_signals"]
 
-    ***REMOVED*** Prepare data for AI analysis
+    # Prepare data for AI analysis
     metrics_summary = f"""
 System Metrics:
 - CPU Usage: {metrics.get('cpu_percent', 'N/A')}%
@@ -181,11 +181,11 @@ System Metrics:
 Optimization Signals: {len(signals)} detected
 """
 
-    for signal in signals[:3]:  ***REMOVED*** Limit to first 3 for context
+    for signal in signals[:3]:  # Limit to first 3 for context
         metrics_summary += f"- {signal.get('type', 'unknown')}: {signal.get('severity', 'unknown')} severity\n"
 
     try:
-        ***REMOVED*** Import here to avoid circular imports
+        # Import here to avoid circular imports
         from services.ai.app.services.openai_service import analyze_text
 
         ai_analysis = await analyze_text(
@@ -213,12 +213,12 @@ async def generate_optimization_plan(state: SystemOptimizerState) -> Dict[str, A
     recommendations = ai_analysis.get("recommendations", [])
     actions_taken = []
 
-    ***REMOVED*** Process each signal with AI-enhanced logic
+    # Process each signal with AI-enhanced logic
     for signal in signals:
         signal_type = signal.get("type")
         severity = signal.get("severity", "low")
 
-        ***REMOVED*** AI-enhanced decision making
+        # AI-enhanced decision making
         if signal_type == "memory_critical":
             action = await _handle_memory_critical_with_ai(signal, ai_analysis)
         elif signal_type == "scale_up":
@@ -244,7 +244,7 @@ async def generate_optimization_plan(state: SystemOptimizerState) -> Dict[str, A
 
 async def _handle_memory_critical_with_ai(signal: Dict[str, Any], ai_analysis: Dict[str, Any]) -> Dict[str, Any]:
     """Handle memory critical with AI insights."""
-    ***REMOVED*** AI can suggest more nuanced actions based on analysis
+    # AI can suggest more nuanced actions based on analysis
     insights = ai_analysis.get("insights", [])
     memory_related_insights = [i for i in insights if "memory" in i.lower() or "cache" in i.lower()]
 
@@ -293,16 +293,16 @@ def build_system_optimizer_workflow():
     """Build the system optimizer workflow using LangGraph."""
     workflow = StateGraph(SystemOptimizerState)
 
-    ***REMOVED*** Add nodes
+    # Add nodes
     workflow.add_node("analyze_metrics", analyze_system_metrics)
     workflow.add_node("generate_plan", generate_optimization_plan)
 
-    ***REMOVED*** Set entry point and edges
+    # Set entry point and edges
     workflow.set_entry_point("analyze_metrics")
     workflow.add_edge("analyze_metrics", "generate_plan")
     workflow.add_edge("generate_plan", END)
 
-    ***REMOVED*** Compile with checkpointer
+    # Compile with checkpointer
     from langgraph.checkpoint.sqlite import SqliteSaver
     checkpointer = SqliteSaver.from_conn_string("data/system_optimizer.db")
 
@@ -315,7 +315,7 @@ def build_system_optimizer_workflow():
         return self.optimization_history[-limit:]
 
 
-***REMOVED*** Global instance
+# Global instance
 _optimizer_agent: SystemOptimizerAgent | None = None
 
 

@@ -23,32 +23,32 @@ class Role(str, Enum):
 
 class Permission(str, Enum):
     """System permissions"""
-    ***REMOVED*** Admin permissions
+    # Admin permissions
     MANAGE_USERS = "manage_users"
     MANAGE_ROLES = "manage_roles"
     MANAGE_SYSTEM = "manage_system"
     VIEW_AUDIT_LOGS = "view_audit_logs"
     
-    ***REMOVED*** Finance permissions
+    # Finance permissions
     VIEW_FINANCE = "view_finance"
     CREATE_FINANCE = "create_finance"
     APPROVE_PAYMENTS = "approve_payments"
     EXPORT_FINANCE = "export_finance"
     
-    ***REMOVED*** Inventory permissions
+    # Inventory permissions
     VIEW_INVENTORY = "view_inventory"
     CREATE_INVENTORY = "create_inventory"
     ADJUST_STOCK = "adjust_stock"
     
-    ***REMOVED*** CRM permissions
+    # CRM permissions
     VIEW_CUSTOMERS = "view_customers"
     CREATE_CUSTOMERS = "create_customers"
     MANAGE_LEADS = "manage_leads"
 
 
-***REMOVED*** Role -> Permissions mapping
+# Role -> Permissions mapping
 ROLE_PERMISSIONS: dict[Role, List[Permission]] = {
-    Role.ADMIN: [p for p in Permission],  ***REMOVED*** All permissions
+    Role.ADMIN: [p for p in Permission],  # All permissions
     
     Role.USER: [
         Permission.VIEW_INVENTORY,
@@ -91,21 +91,21 @@ def get_user_roles(request: Request) -> List[str]:
     
     claims = request.state.token_claims
     
-    ***REMOVED*** Dev token
+    # Dev token
     if claims.get('token_type') == 'dev':
-        return [Role.ADMIN]  ***REMOVED*** Dev token has admin access
+        return [Role.ADMIN]  # Dev token has admin access
     
-    ***REMOVED*** OIDC token - extract roles from claims
+    # OIDC token - extract roles from claims
     roles = claims.get('roles', [])
     if isinstance(roles, str):
         roles = [roles]
     
-    ***REMOVED*** Also check realm_access (Keycloak format)
+    # Also check realm_access (Keycloak format)
     realm_access = claims.get('realm_access', {})
     if 'roles' in realm_access:
         roles.extend(realm_access['roles'])
     
-    return list(set(roles))  ***REMOVED*** Deduplicate
+    return list(set(roles))  # Deduplicate
 
 
 def get_user_permissions(request: Request) -> List[Permission]:
@@ -178,11 +178,11 @@ def get_tenant_id(request: Request) -> Optional[str]:
     
     claims = request.state.token_claims
     
-    ***REMOVED*** Dev token
+    # Dev token
     if claims.get('token_type') == 'dev':
         return 'system'
     
-    ***REMOVED*** OIDC token
+    # OIDC token
     return claims.get('tenant_id') or claims.get('tid')
 
 

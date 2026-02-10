@@ -28,12 +28,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Branding-Konfiguration aus ENV
+# Branding-Konfiguration aus ENV
 COMPANY_NAME = os.environ.get("PDF_COMPANY_NAME", "VALEO NeuroERP")
 COMPANY_ADDRESS = os.environ.get("PDF_COMPANY_ADDRESS", "Musterstraße 1, 12345 Musterstadt")
 COMPANY_PHONE = os.environ.get("PDF_COMPANY_PHONE", "+49 123 456789")
 COMPANY_EMAIL = os.environ.get("PDF_COMPANY_EMAIL", "info@valeo-neuroerp.de")
-COMPANY_LOGO = os.environ.get("PDF_COMPANY_LOGO", "")  ***REMOVED*** Pfad zu Logo-Datei
+COMPANY_LOGO = os.environ.get("PDF_COMPANY_LOGO", "")  # Pfad zu Logo-Datei
 
 
 class PDFGenerator:
@@ -56,7 +56,7 @@ class PDFGenerator:
         """
         try:
             import httpx
-            ***REMOVED*** Synchroner Request für Status
+            # Synchroner Request für Status
             with httpx.Client(timeout=1.0) as client:
                 response = client.get(f"http://localhost:8000/api/workflow/{domain}/{number}")
                 if response.status_code == 200:
@@ -81,7 +81,7 @@ class PDFGenerator:
                 name="Header",
                 parent=self.styles["Heading1"],
                 fontSize=18,
-                textColor=colors.HexColor("***REMOVED***1e40af"),
+                textColor=colors.HexColor("#1e40af"),
             )
         )
         self.styles.add(
@@ -104,7 +104,7 @@ class PDFGenerator:
 
     def _add_header(self, story: List, doc_type: str, doc_number: str):
         """Fügt Header mit Logo und Firmeninfo hinzu"""
-        ***REMOVED*** Logo (falls vorhanden)
+        # Logo (falls vorhanden)
         if COMPANY_LOGO and Path(COMPANY_LOGO).exists():
             try:
                 logo = Image(COMPANY_LOGO, width=40 * mm, height=20 * mm)
@@ -113,7 +113,7 @@ class PDFGenerator:
             except Exception as e:
                 logger.warning(f"Failed to load logo: {e}")
 
-        ***REMOVED*** Firmeninfo
+        # Firmeninfo
         story.append(
             Paragraph(f"<b>{COMPANY_NAME}</b>", self.styles["CompanyInfo"])
         )
@@ -126,7 +126,7 @@ class PDFGenerator:
         )
         story.append(Spacer(1, 10 * mm))
 
-        ***REMOVED*** Dokumenten-Titel
+        # Dokumenten-Titel
         title_map = {
             "sales_order": "Verkaufsauftrag",
             "sales_delivery": "Lieferschein",
@@ -181,11 +181,11 @@ class PDFGenerator:
         doc = SimpleDocTemplate(output_path, pagesize=A4)
         story = []
 
-        ***REMOVED*** Header mit Logo & Firmeninfo
+        # Header mit Logo & Firmeninfo
         doc_number = payload.get("number", "N/A")
         self._add_header(story, doc_type, doc_number)
 
-        ***REMOVED*** Beleg-Daten
+        # Beleg-Daten
         fields_to_show = [
             ("date", "Datum"),
             ("customerId", "Kunde"),
@@ -203,7 +203,7 @@ class PDFGenerator:
 
         story.append(Spacer(1, 10 * mm))
 
-        ***REMOVED*** Positionen-Tabelle
+        # Positionen-Tabelle
         lines = payload.get("lines", [])
         if lines:
             table_data = [["Artikel", "Menge", "Preis", "Summe"]]
@@ -217,7 +217,7 @@ class PDFGenerator:
                     [article, str(qty), f"{price:.2f} €", f"{total:.2f} €"]
                 )
 
-            ***REMOVED*** Gesamtsumme
+            # Gesamtsumme
             grand_total = sum(l.get("qty", 0) * l.get("price", 0) for l in lines)
             table_data.append(["", "", "<b>Gesamt:</b>", f"<b>{grand_total:.2f} €</b>"])
 
@@ -225,7 +225,7 @@ class PDFGenerator:
             table.setStyle(
                 TableStyle(
                     [
-                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("***REMOVED***1e40af")),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1e40af")),
                         ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
                         ("ALIGN", (1, 0), (-1, -1), "RIGHT"),
                         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
@@ -239,19 +239,19 @@ class PDFGenerator:
             )
             story.append(table)
 
-        ***REMOVED*** QR-Code mit Belegnummer
+        # QR-Code mit Belegnummer
         story.append(Spacer(1, 10 * mm))
         self._add_qr_code(story, doc_number)
 
-        ***REMOVED*** Fußzeile
+        # Fußzeile
         self._add_footer(story, status)
 
-        ***REMOVED*** PDF bauen
+        # PDF bauen
         doc.build(story)
         logger.info(f"Generated PDF: {output_path}")
         return output_path
 
 
-***REMOVED*** Global Generator Instance
+# Global Generator Instance
 generator = PDFGenerator()
 

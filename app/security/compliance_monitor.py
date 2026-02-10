@@ -137,13 +137,13 @@ class ISO27001ComplianceMonitor:
                     'iso_control': check_config['iso_control']
                 }
 
-        ***REMOVED*** Ensure compliance score doesn't go below 0
+        # Ensure compliance score doesn't go below 0
         results['compliance_score'] = max(0, results['compliance_score'])
 
-        ***REMOVED*** Calculate duration
+        # Calculate duration
         results['last_check_duration'] = (datetime.utcnow() - start_time).total_seconds()
 
-        ***REMOVED*** Send alerts for critical issues
+        # Send alerts for critical issues
         if results['critical_issues'] and self.alert_service:
             self.alert_service.send_critical_alert({
                 'type': 'compliance_violation',
@@ -157,8 +157,8 @@ class ISO27001ComplianceMonitor:
 
     def _check_password_policy(self, tenant_id: str) -> Dict[str, Any]:
         """Check password policy compliance"""
-        ***REMOVED*** In production, query user database for password policy violations
-        non_compliant = 0  ***REMOVED*** Mock: assume no violations
+        # In production, query user database for password policy violations
+        non_compliant = 0  # Mock: assume no violations
 
         return {
             'status': 'PASSED' if non_compliant == 0 else 'FAILED',
@@ -171,10 +171,10 @@ class ISO27001ComplianceMonitor:
 
     def _check_access_reviews(self, tenant_id: str) -> Dict[str, Any]:
         """Check if access rights reviews are up to date"""
-        ***REMOVED*** Check for users whose access hasn't been reviewed recently (90 days)
+        # Check for users whose access hasn't been reviewed recently (90 days)
         ninety_days_ago = datetime.utcnow() - timedelta(days=90)
 
-        ***REMOVED*** Mock: assume some reviews are overdue
+        # Mock: assume some reviews are overdue
         overdue_reviews = 2
 
         status = 'WARNING' if overdue_reviews > 0 else 'PASSED'
@@ -190,13 +190,13 @@ class ISO27001ComplianceMonitor:
 
     def _check_encryption_compliance(self, tenant_id: str) -> Dict[str, Any]:
         """Check data encryption compliance"""
-        ***REMOVED*** Check for unencrypted sensitive data
+        # Check for unencrypted sensitive data
         sensitive_tables = ['customer_data', 'financial_records', 'personal_data']
         unencrypted_records = 0
 
-        ***REMOVED*** Mock checks - in production, query database for encryption status
+        # Mock checks - in production, query database for encryption status
         for table in sensitive_tables:
-            ***REMOVED*** This would be a more complex query in practice
+            # This would be a more complex query in practice
             count = self._check_unencrypted_data(table, tenant_id)
             unencrypted_records += count
 
@@ -211,7 +211,7 @@ class ISO27001ComplianceMonitor:
 
     def _check_audit_log_integrity(self, tenant_id: str) -> Dict[str, Any]:
         """Check audit log integrity"""
-        ***REMOVED*** Verify hash chain integrity
+        # Verify hash chain integrity
         integrity_breaches = self._verify_audit_log_integrity(tenant_id)
 
         return {
@@ -227,17 +227,17 @@ class ISO27001ComplianceMonitor:
         """Check GDPR compliance"""
         issues = []
 
-        ***REMOVED*** Check consent records
+        # Check consent records
         missing_consents = self._check_missing_consents(tenant_id)
         if missing_consents > 0:
             issues.append(f"{missing_consents} users missing consent records")
 
-        ***REMOVED*** Check data retention compliance
+        # Check data retention compliance
         expired_data = self._check_expired_data(tenant_id)
         if expired_data > 0:
             issues.append(f"{expired_data} records exceed retention period")
 
-        ***REMOVED*** Check data portability requests
+        # Check data portability requests
         pending_requests = self._check_pending_portability_requests(tenant_id)
         if pending_requests > 0:
             issues.append(f"{pending_requests} data portability requests pending")
@@ -253,7 +253,7 @@ class ISO27001ComplianceMonitor:
 
     def _check_backup_compliance(self, tenant_id: str) -> Dict[str, Any]:
         """Check backup and recovery compliance"""
-        ***REMOVED*** Check backup success rate, test recovery procedures, etc.
+        # Check backup success rate, test recovery procedures, etc.
         last_backup = self._get_last_backup_date(tenant_id)
         backup_age_days = (datetime.utcnow() - last_backup).days
 
@@ -261,11 +261,11 @@ class ISO27001ComplianceMonitor:
         if backup_age_days > 1:
             issues.append(f"Last backup is {backup_age_days} days old")
 
-        ***REMOVED*** Check if backups are encrypted
+        # Check if backups are encrypted
         if not self._are_backups_encrypted(tenant_id):
             issues.append("Backups are not encrypted")
 
-        ***REMOVED*** Check recovery test status
+        # Check recovery test status
         if not self._was_recovery_tested_recently(tenant_id):
             issues.append("Recovery test not performed recently")
 
@@ -280,10 +280,10 @@ class ISO27001ComplianceMonitor:
 
     def _check_incident_response(self, tenant_id: str) -> Dict[str, Any]:
         """Check incident response readiness"""
-        ***REMOVED*** Check if incident response plan exists and is up to date
-        plan_exists = True  ***REMOVED*** Mock
-        plan_updated_recently = True  ***REMOVED*** Mock
-        team_trained = True  ***REMOVED*** Mock
+        # Check if incident response plan exists and is up to date
+        plan_exists = True  # Mock
+        plan_updated_recently = True  # Mock
+        team_trained = True  # Mock
 
         issues = []
         if not plan_exists:
@@ -304,10 +304,10 @@ class ISO27001ComplianceMonitor:
 
     def _check_physical_security(self, tenant_id: str) -> Dict[str, Any]:
         """Check physical security compliance"""
-        ***REMOVED*** Check physical access controls, server room security, etc.
+        # Check physical access controls, server room security, etc.
         issues = []
 
-        ***REMOVED*** Mock checks - in production, verify physical security measures
+        # Mock checks - in production, verify physical security measures
         if not self._has_access_control(tenant_id):
             issues.append("Physical access control not implemented")
 
@@ -323,54 +323,54 @@ class ISO27001ComplianceMonitor:
             'severity': 'MEDIUM'
         }
 
-    ***REMOVED*** Helper methods for compliance checks
+    # Helper methods for compliance checks
     def _check_unencrypted_data(self, table: str, tenant_id: str) -> int:
         """Check for unencrypted data in table"""
-        ***REMOVED*** In production, query database for encryption status
-        return 0  ***REMOVED*** Mock: assume all encrypted
+        # In production, query database for encryption status
+        return 0  # Mock: assume all encrypted
 
     def _verify_audit_log_integrity(self, tenant_id: str) -> List[Dict[str, Any]]:
         """Verify audit log integrity"""
-        ***REMOVED*** In production, check hash chains
-        return []  ***REMOVED*** Mock: assume integrity maintained
+        # In production, check hash chains
+        return []  # Mock: assume integrity maintained
 
     def _check_missing_consents(self, tenant_id: str) -> int:
         """Check for missing GDPR consents"""
-        ***REMOVED*** In production, query consent database
-        return 0  ***REMOVED*** Mock: assume all consents present
+        # In production, query consent database
+        return 0  # Mock: assume all consents present
 
     def _check_expired_data(self, tenant_id: str) -> int:
         """Check for data exceeding retention period"""
-        ***REMOVED*** In production, query data retention logs
-        return 0  ***REMOVED*** Mock: assume no expired data
+        # In production, query data retention logs
+        return 0  # Mock: assume no expired data
 
     def _check_pending_portability_requests(self, tenant_id: str) -> int:
         """Check for pending data portability requests"""
-        ***REMOVED*** In production, query GDPR request queue
-        return 0  ***REMOVED*** Mock: assume no pending requests
+        # In production, query GDPR request queue
+        return 0  # Mock: assume no pending requests
 
     def _get_last_backup_date(self, tenant_id: str) -> datetime:
         """Get last backup date"""
-        ***REMOVED*** In production, query backup logs
-        return datetime.utcnow() - timedelta(hours=12)  ***REMOVED*** Mock: 12 hours ago
+        # In production, query backup logs
+        return datetime.utcnow() - timedelta(hours=12)  # Mock: 12 hours ago
 
     def _are_backups_encrypted(self, tenant_id: str) -> bool:
         """Check if backups are encrypted"""
-        ***REMOVED*** In production, verify backup encryption
-        return True  ***REMOVED*** Mock: assume encrypted
+        # In production, verify backup encryption
+        return True  # Mock: assume encrypted
 
     def _was_recovery_tested_recently(self, tenant_id: str) -> bool:
         """Check if recovery was tested recently"""
-        ***REMOVED*** In production, check recovery test logs
-        return True  ***REMOVED*** Mock: assume tested
+        # In production, check recovery test logs
+        return True  # Mock: assume tested
 
     def _has_access_control(self, tenant_id: str) -> bool:
         """Check physical access control"""
-        return True  ***REMOVED*** Mock
+        return True  # Mock
 
     def _has_server_room_security(self, tenant_id: str) -> bool:
         """Check server room security"""
-        return True  ***REMOVED*** Mock
+        return True  # Mock
 
     def generate_compliance_report(self, tenant_id: str, start_date: datetime = None,
                                  end_date: datetime = None) -> Dict[str, Any]:
@@ -474,8 +474,8 @@ class ISO27001ComplianceMonitor:
 
     def _get_compliance_trend(self, tenant_id: str) -> List[Dict[str, Any]]:
         """Get compliance score trend over time"""
-        ***REMOVED*** In production, query historical compliance data
-        ***REMOVED*** Mock trend data
+        # In production, query historical compliance data
+        # Mock trend data
         return [
             {'date': (datetime.utcnow() - timedelta(days=6)).date(), 'score': 85},
             {'date': (datetime.utcnow() - timedelta(days=5)).date(), 'score': 87},

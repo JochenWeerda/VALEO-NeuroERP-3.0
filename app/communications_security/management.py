@@ -104,12 +104,12 @@ class EncryptionKey:
     name: str
     algorithm: EncryptionAlgorithm
     key_size: int
-    purpose: str  ***REMOVED*** encryption, signing, key_exchange
+    purpose: str  # encryption, signing, key_exchange
     owner: str
     expiry_date: datetime
-    rotation_schedule: str  ***REMOVED*** monthly, quarterly, annually
-    status: str = "active"  ***REMOVED*** active, expired, revoked
-    key_material: Optional[str] = None  ***REMOVED*** Not stored in production
+    rotation_schedule: str  # monthly, quarterly, annually
+    status: str = "active"  # active, expired, revoked
+    key_material: Optional[str] = None  # Not stored in production
     fingerprint: str = ""
     created_at: datetime = field(default_factory=datetime.utcnow)
     last_rotated: Optional[datetime] = None
@@ -128,8 +128,8 @@ class SecureChannel:
     data_classification: DataClassification
     transfer_method: TransferMethod
     security_controls: List[SecurityControl] = field(default_factory=list)
-    bandwidth_limit: Optional[int] = None  ***REMOVED*** Mbps
-    session_timeout: int = 3600  ***REMOVED*** seconds
+    bandwidth_limit: Optional[int] = None  # Mbps
+    session_timeout: int = 3600  # seconds
     monitoring_enabled: bool = True
     is_active: bool = True
     created_at: datetime = field(default_factory=datetime.utcnow)
@@ -169,7 +169,7 @@ class NetworkTraffic:
     bytes_received: int
     packets_sent: int
     packets_received: int
-    session_duration: int  ***REMOVED*** seconds
+    session_duration: int  # seconds
     application: str
     user_id: Optional[str] = None
     anomaly_detected: bool = False
@@ -183,7 +183,7 @@ class SecurityGateway:
     """Security gateway configuration"""
     id: str
     name: str
-    gateway_type: str  ***REMOVED*** firewall, proxy, vpn, load_balancer
+    gateway_type: str  # firewall, proxy, vpn, load_balancer
     ip_address: str
     ports: List[int] = field(default_factory=list)
     security_policies: List[Dict[str, Any]] = field(default_factory=list)
@@ -200,7 +200,7 @@ class SecurityGateway:
 class CommunicationsAudit:
     """Communications security audit"""
     id: str
-    audit_type: str  ***REMOVED*** network, encryption, transfer, compliance
+    audit_type: str  # network, encryption, transfer, compliance
     scope: str
     start_date: datetime
     end_date: Optional[datetime] = None
@@ -208,7 +208,7 @@ class CommunicationsAudit:
     recommendations: List[str] = field(default_factory=list)
     compliance_score: float = 0.0
     auditor: str = ""
-    status: str = "in_progress"  ***REMOVED*** in_progress, completed, failed
+    status: str = "in_progress"  # in_progress, completed, failed
 
 
 @dataclass
@@ -237,7 +237,7 @@ class ISO27001CommunicationsSecurity:
         self.network_monitor = network_monitor
         self.encryption_svc = encryption_service
 
-        ***REMOVED*** Communications security components
+        # Communications security components
         self.network_segments: Dict[str, NetworkSegment] = {}
         self.encryption_keys: Dict[str, EncryptionKey] = {}
         self.secure_channels: Dict[str, SecureChannel] = {}
@@ -246,10 +246,10 @@ class ISO27001CommunicationsSecurity:
         self.security_gateways: Dict[str, SecurityGateway] = {}
         self.communications_audits: List[CommunicationsAudit] = {}
 
-        ***REMOVED*** Security configuration
+        # Security configuration
         self.security_config = self._initialize_security_config()
 
-        ***REMOVED*** Default network segments
+        # Default network segments
         self._initialize_default_networks()
 
     def _initialize_security_config(self) -> Dict[str, Any]:
@@ -260,14 +260,14 @@ class ISO27001CommunicationsSecurity:
                 'zero_trust_enabled': True,
                 'micro_segmentation': True,
                 'traffic_encryption': 'tls_1_3',
-                'monitoring_interval': 60,  ***REMOVED*** seconds
+                'monitoring_interval': 60,  # seconds
                 'anomaly_detection': True
             },
             'encryption_policy': {
                 'minimum_algorithm': 'aes_256',
-                'key_rotation_period': 365,  ***REMOVED*** days
+                'key_rotation_period': 365,  # days
                 'perfect_forward_secrecy': True,
-                'quantum_resistant': False,  ***REMOVED*** Future requirement
+                'quantum_resistant': False,  # Future requirement
                 'certificate_validation': 'strict'
             },
             'data_transfer': {
@@ -275,7 +275,7 @@ class ISO27001CommunicationsSecurity:
                 'encryption_mandatory': True,
                 'integrity_checking': True,
                 'audit_logging': True,
-                'size_limits': {'confidential': 100 * 1024 * 1024, 'restricted': 10 * 1024 * 1024}  ***REMOVED*** bytes
+                'size_limits': {'confidential': 100 * 1024 * 1024, 'restricted': 10 * 1024 * 1024}  # bytes
             },
             'remote_access': {
                 'vpn_required': True,
@@ -363,7 +363,7 @@ class ISO27001CommunicationsSecurity:
 
         self.network_segments[segment_id] = segment
 
-        ***REMOVED*** Validate network security
+        # Validate network security
         self._validate_network_security(segment)
 
         logger.info(f"Network segment created: {segment.name} ({segment.network_type.value})")
@@ -373,7 +373,7 @@ class ISO27001CommunicationsSecurity:
         """Validate network segment security configuration"""
         issues = []
 
-        ***REMOVED*** Check security controls based on network type
+        # Check security controls based on network type
         if segment.network_type in [NetworkType.CRITICAL, NetworkType.SECURE]:
             required_controls = [SecurityControl.FIREWALL, SecurityControl.ENCRYPTION, SecurityControl.ACCESS_CONTROL]
             missing_controls = [control for control in required_controls if control not in segment.security_controls]
@@ -394,7 +394,7 @@ class ISO27001CommunicationsSecurity:
         """
         key_id = str(uuid.uuid4())
 
-        ***REMOVED*** Calculate expiry based on rotation schedule
+        # Calculate expiry based on rotation schedule
         rotation_days = {
             'monthly': 30,
             'quarterly': 90,
@@ -417,7 +417,7 @@ class ISO27001CommunicationsSecurity:
 
         self.encryption_keys[key_id] = key
 
-        ***REMOVED*** Schedule key rotation
+        # Schedule key rotation
         self._schedule_key_rotation(key_id)
 
         logger.info(f"Encryption key generated: {key.name} ({key.algorithm.value})")
@@ -432,7 +432,7 @@ class ISO27001CommunicationsSecurity:
             'annually': 365
         }.get(key.rotation_schedule, 365)
 
-        ***REMOVED*** In production, this would create a scheduled task
+        # In production, this would create a scheduled task
         logger.info(f"Key rotation scheduled for {key.name} in {rotation_days} days")
 
     def establish_secure_channel(self, channel_data: Dict[str, Any]) -> str:
@@ -459,7 +459,7 @@ class ISO27001CommunicationsSecurity:
 
         self.secure_channels[channel_id] = channel
 
-        ***REMOVED*** Validate channel security
+        # Validate channel security
         self._validate_channel_security(channel)
 
         logger.info(f"Secure channel established: {channel.name} ({channel.protocol.value})")
@@ -469,17 +469,17 @@ class ISO27001CommunicationsSecurity:
         """Validate secure channel configuration"""
         issues = []
 
-        ***REMOVED*** Check protocol security
+        # Check protocol security
         if channel.protocol == ProtocolSecurity.PLAIN:
             if channel.data_classification in [DataClassification.CONFIDENTIAL, DataClassification.RESTRICTED]:
                 issues.append("Plain protocols not allowed for sensitive data")
 
-        ***REMOVED*** Check encryption strength
+        # Check encryption strength
         if channel.data_classification in [DataClassification.RESTRICTED, DataClassification.HIGHLY_RESTRICTED]:
             if channel.encryption not in [EncryptionAlgorithm.AES_256, EncryptionAlgorithm.RSA_4096]:
                 issues.append("Insufficient encryption for highly sensitive data")
 
-        ***REMOVED*** Check security controls
+        # Check security controls
         required_controls = [SecurityControl.ENCRYPTION, SecurityControl.INTEGRITY_CHECK]
         if channel.data_classification in [DataClassification.CONFIDENTIAL, DataClassification.RESTRICTED]:
             required_controls.append(SecurityControl.NON_REPUDIATION)
@@ -514,7 +514,7 @@ class ISO27001CommunicationsSecurity:
 
         self.data_transfers.append(transfer)
 
-        ***REMOVED*** Validate transfer compliance
+        # Validate transfer compliance
         self._validate_transfer_compliance(transfer)
 
         logger.info(f"Data transfer initiated: {transfer.transfer_method.value} ({transfer.data_size_bytes} bytes)")
@@ -524,17 +524,17 @@ class ISO27001CommunicationsSecurity:
         """Validate data transfer compliance"""
         issues = []
 
-        ***REMOVED*** Check size limits
+        # Check size limits
         size_limits = self.security_config['data_transfer']['size_limits']
         max_size = size_limits.get(transfer.data_classification.value)
         if max_size and transfer.data_size_bytes > max_size:
             issues.append(f"Data size exceeds limit for {transfer.data_classification.value} classification")
 
-        ***REMOVED*** Check encryption requirements
+        # Check encryption requirements
         if not transfer.encryption_used and transfer.data_classification != DataClassification.PUBLIC:
             issues.append("Encryption required for non-public data")
 
-        ***REMOVED*** Check authorization
+        # Check authorization
         if not transfer.authorized_by:
             issues.append("Transfer authorization required")
 
@@ -559,7 +559,7 @@ class ISO27001CommunicationsSecurity:
         transfer.error_message = completion_data.get('error_message', '')
         transfer.compliance_verified = completion_data.get('compliance_verified', False)
 
-        ***REMOVED*** Calculate transfer duration
+        # Calculate transfer duration
         if transfer.transfer_end and transfer.transfer_start:
             duration = transfer.transfer_end - transfer.transfer_start
             logger.info(f"Data transfer completed: {transfer_id} in {duration}")
@@ -596,7 +596,7 @@ class ISO27001CommunicationsSecurity:
 
         self.network_traffic.append(traffic)
 
-        ***REMOVED*** Check for anomalies
+        # Check for anomalies
         if traffic.anomaly_detected:
             self._handle_traffic_anomaly(traffic)
 
@@ -607,9 +607,9 @@ class ISO27001CommunicationsSecurity:
         logger.warning(f"Network traffic anomaly detected: {traffic.source_ip} -> {traffic.destination_ip} "
                       f"(Score: {traffic.anomaly_score})")
 
-        ***REMOVED*** In production, this would trigger automated responses
+        # In production, this would trigger automated responses
         if traffic.anomaly_score > 0.8:
-            ***REMOVED*** High anomaly - potential security incident
+            # High anomaly - potential security incident
             logger.error(f"High anomaly score detected - potential security incident")
 
     def configure_security_gateway(self, gateway_data: Dict[str, Any]) -> str:
@@ -654,7 +654,7 @@ class ISO27001CommunicationsSecurity:
 
         self.communications_audits.append(audit)
 
-        ***REMOVED*** Execute audit based on type
+        # Execute audit based on type
         if audit.audit_type == 'network':
             findings = self._audit_network_security()
         elif audit.audit_type == 'encryption':
@@ -678,7 +678,7 @@ class ISO27001CommunicationsSecurity:
         findings = []
 
         for segment in self.network_segments.values():
-            ***REMOVED*** Check firewall rules
+            # Check firewall rules
             if not segment.firewall_rules:
                 findings.append({
                     'severity': 'high',
@@ -687,7 +687,7 @@ class ISO27001CommunicationsSecurity:
                     'impact': 'Unauthorized network access possible'
                 })
 
-            ***REMOVED*** Check security controls
+            # Check security controls
             if segment.network_type == NetworkType.CRITICAL:
                 required_controls = [SecurityControl.FIREWALL, SecurityControl.ENCRYPTION]
                 missing = [c for c in required_controls if c not in segment.security_controls]
@@ -705,7 +705,7 @@ class ISO27001CommunicationsSecurity:
         """Audit encryption compliance"""
         findings = []
 
-        ***REMOVED*** Check key expiry
+        # Check key expiry
         expired_keys = [k for k in self.encryption_keys.values()
                        if k.expiry_date < datetime.utcnow() and k.status == 'active']
         if expired_keys:
@@ -716,7 +716,7 @@ class ISO27001CommunicationsSecurity:
                 'impact': 'Data protection compromised'
             })
 
-        ***REMOVED*** Check algorithm strength
+        # Check algorithm strength
         weak_algorithms = [k for k in self.encryption_keys.values()
                           if k.algorithm in [EncryptionAlgorithm.AES_128, EncryptionAlgorithm.RSA_2048]]
         if weak_algorithms:
@@ -733,7 +733,7 @@ class ISO27001CommunicationsSecurity:
         """Audit data transfer compliance"""
         findings = []
 
-        ***REMOVED*** Check unencrypted transfers
+        # Check unencrypted transfers
         unencrypted_transfers = [t for t in self.data_transfers
                                if not t.encryption_used and t.data_classification != DataClassification.PUBLIC]
         if unencrypted_transfers:
@@ -744,9 +744,9 @@ class ISO27001CommunicationsSecurity:
                 'impact': 'Data confidentiality compromised'
             })
 
-        ***REMOVED*** Check failed transfers
+        # Check failed transfers
         failed_transfers = [t for t in self.data_transfers if not t.success]
-        if len(failed_transfers) > len(self.data_transfers) * 0.1:  ***REMOVED*** More than 10% failure rate
+        if len(failed_transfers) > len(self.data_transfers) * 0.1:  # More than 10% failure rate
             findings.append({
                 'severity': 'medium',
                 'category': 'data_transfer',
@@ -788,22 +788,22 @@ class ISO27001CommunicationsSecurity:
         if not findings:
             return 100.0
 
-        ***REMOVED*** Weight findings by severity
+        # Weight findings by severity
         weights = {'critical': 10, 'high': 5, 'medium': 2, 'low': 1}
         total_weight = sum(weights.get(f['severity'], 1) for f in findings)
-        max_possible_weight = 50  ***REMOVED*** Arbitrary maximum
+        max_possible_weight = 50  # Arbitrary maximum
 
         score = max(0, 100 - (total_weight / max_possible_weight * 100))
         return round(score, 1)
 
     def get_communications_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Generate comprehensive communications security dashboard"""
-        ***REMOVED*** Get network status
+        # Get network status
         network_status = {}
         for segment_id, segment in self.network_segments.items():
-            ***REMOVED*** Calculate segment health (simplified)
+            # Calculate segment health (simplified)
             control_count = len(segment.security_controls)
-            health_score = min(100, control_count * 20)  ***REMOVED*** 20 points per control
+            health_score = min(100, control_count * 20)  # 20 points per control
 
             network_status[segment_id] = {
                 'name': segment.name,
@@ -813,7 +813,7 @@ class ISO27001CommunicationsSecurity:
                 'security_controls': len(segment.security_controls)
             }
 
-        ***REMOVED*** Get encryption status
+        # Get encryption status
         encryption_status = {
             'total_keys': len(self.encryption_keys),
             'active_keys': len([k for k in self.encryption_keys.values() if k.status == 'active']),
@@ -825,7 +825,7 @@ class ISO27001CommunicationsSecurity:
             alg = key.algorithm.value
             encryption_status['algorithms'][alg] = encryption_status['algorithms'].get(alg, 0) + 1
 
-        ***REMOVED*** Get transfer metrics
+        # Get transfer metrics
         recent_transfers = [t for t in self.data_transfers
                            if (datetime.utcnow() - t.transfer_start).days <= 7]
 
@@ -836,7 +836,7 @@ class ISO27001CommunicationsSecurity:
             'average_size_mb': round(sum(t.data_size_bytes for t in recent_transfers) / len(recent_transfers) / (1024*1024), 1) if recent_transfers else 0
         }
 
-        ***REMOVED*** Get security events
+        # Get security events
         recent_traffic = [t for t in self.network_traffic
                          if (datetime.utcnow() - t.timestamp).hours <= 24]
 
@@ -847,10 +847,10 @@ class ISO27001CommunicationsSecurity:
             'top_applications': self._get_top_applications(recent_traffic)
         }
 
-        ***REMOVED*** Get compliance status
+        # Get compliance status
         compliance_status = self._calculate_overall_compliance()
 
-        ***REMOVED*** Generate recommendations
+        # Generate recommendations
         recommendations = self._generate_dashboard_recommendations(
             network_status, encryption_status, security_events
         )
@@ -892,7 +892,7 @@ class ISO27001CommunicationsSecurity:
 
     def _calculate_overall_compliance(self) -> Dict[str, Any]:
         """Calculate overall communications compliance"""
-        ***REMOVED*** Simplified compliance calculation
+        # Simplified compliance calculation
         network_compliant = len([s for s in self.network_segments.values() if len(s.security_controls) >= 3])
         network_score = (network_compliant / len(self.network_segments)) * 100 if self.network_segments else 100
 
@@ -918,17 +918,17 @@ class ISO27001CommunicationsSecurity:
         """Generate dashboard recommendations"""
         recommendations = []
 
-        ***REMOVED*** Network recommendations
+        # Network recommendations
         low_health_segments = [sid for sid, status in network.items() if status['health_score'] < 60]
         if low_health_segments:
             recommendations.append(f"Improve security controls for network segments: {low_health_segments}")
 
-        ***REMOVED*** Encryption recommendations
+        # Encryption recommendations
         if encryption['expired_keys'] > 0:
             recommendations.append(f"Rotate {encryption['expired_keys']} expired encryption keys")
 
-        ***REMOVED*** Security recommendations
-        if security['anomalies_detected'] > security['total_traffic'] * 0.05:  ***REMOVED*** More than 5%
+        # Security recommendations
+        if security['anomalies_detected'] > security['total_traffic'] * 0.05:  # More than 5%
             recommendations.append("Review anomaly detection thresholds and investigate high anomaly rate")
 
         if not recommendations:
@@ -976,15 +976,15 @@ class ISO27001CommunicationsSecurity:
         for segment in segments:
             score = 100
 
-            ***REMOVED*** Check security controls
+            # Check security controls
             if not segment.security_controls:
                 score -= 50
 
-            ***REMOVED*** Check firewall rules
+            # Check firewall rules
             if not segment.firewall_rules:
                 score -= 20
 
-            ***REMOVED*** Check monitoring
+            # Check monitoring
             if not segment.monitoring_enabled:
                 score -= 10
 
@@ -994,7 +994,7 @@ class ISO27001CommunicationsSecurity:
 
     def _check_information_transfer_compliance(self) -> float:
         """Check information transfer compliance"""
-        transfers = self.data_transfers[-100:]  ***REMOVED*** Last 100 transfers
+        transfers = self.data_transfers[-100:]  # Last 100 transfers
 
         if not transfers:
             return 100.0
@@ -1003,15 +1003,15 @@ class ISO27001CommunicationsSecurity:
         for transfer in transfers:
             score = 100
 
-            ***REMOVED*** Check encryption
+            # Check encryption
             if not transfer.encryption_used and transfer.data_classification != DataClassification.PUBLIC:
                 score -= 30
 
-            ***REMOVED*** Check integrity
+            # Check integrity
             if not transfer.integrity_verified:
                 score -= 20
 
-            ***REMOVED*** Check authorization
+            # Check authorization
             if not transfer.authorized_by:
                 score -= 25
 
@@ -1024,22 +1024,22 @@ class ISO27001CommunicationsSecurity:
         keys = list(self.encryption_keys.values())
 
         if not keys:
-            return 50.0  ***REMOVED*** Some compliance but no keys
+            return 50.0  # Some compliance but no keys
 
         compliant_keys = 0
         for key in keys:
             score = 100
 
-            ***REMOVED*** Check expiry
+            # Check expiry
             if key.expiry_date < datetime.utcnow():
                 score -= 40
 
-            ***REMOVED*** Check algorithm strength
+            # Check algorithm strength
             if key.algorithm in [EncryptionAlgorithm.AES_128, EncryptionAlgorithm.RSA_2048]:
                 score -= 20
 
-            ***REMOVED*** Check rotation
-            if key.last_rotated and (datetime.utcnow() - key.last_rotated).days > 400:  ***REMOVED*** Over a year
+            # Check rotation
+            if key.last_rotated and (datetime.utcnow() - key.last_rotated).days > 400:  # Over a year
                 score -= 15
 
             compliant_keys += max(score, 0)

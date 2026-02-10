@@ -20,7 +20,7 @@ def get_tenant_id(x_tenant: Optional[str] = Header(None)) -> str:
     return x_tenant or "default"
 
 
-***REMOVED*** --- ZAHLUNGSLÄUFE KREDITOREN ---
+# --- ZAHLUNGSLÄUFE KREDITOREN ---
 
 @router.post("/zahlungslauf-kreditoren", response_model=schemas.Zahlungslauf, status_code=201)
 async def create_zahlungslauf(
@@ -91,7 +91,7 @@ async def update_zahlungslauf(
     if not db_zahlungslauf:
         raise HTTPException(status_code=404, detail="Zahlungslauf not found")
 
-    ***REMOVED*** Update fields
+    # Update fields
     for field, value in zahlungslauf_update.model_dump(exclude_unset=True).items():
         setattr(db_zahlungslauf, field, value)
 
@@ -136,7 +136,7 @@ async def preview_zahlungslauf(
     if not zahlungslauf:
         raise HTTPException(status_code=404, detail="Zahlungslauf not found")
 
-    ***REMOVED*** Mock SEPA XML Preview
+    # Mock SEPA XML Preview
     sepa_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
     <CstmrCdtTrfInitn>
@@ -202,7 +202,7 @@ async def export_zahlungslauf(
     if not zahlungslauf:
         raise HTTPException(status_code=404, detail="Zahlungslauf not found")
 
-    ***REMOVED*** Mock SEPA XML Export
+    # Mock SEPA XML Export
     sepa_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
     <!-- Vollständiges SEPA XML würde hier generiert -->
@@ -245,7 +245,7 @@ async def approve_zahlungslauf(
 
     db_zahlungslauf.status = "freigegeben"
     db_zahlungslauf.freigegeben_am = datetime.utcnow()
-    ***REMOVED*** In real app: db_zahlungslauf.freigegeben_durch = current_user.id
+    # In real app: db_zahlungslauf.freigegeben_durch = current_user.id
     db_zahlungslauf.updated_at = datetime.utcnow()
 
     db.commit()

@@ -20,16 +20,16 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/workflow", tags=["workflow"])
 
-***REMOVED*** In-memory stores (DEPRECATED - wird durch PostgreSQL ersetzt)
-_STATE: dict[tuple[str, str], str] = {}      ***REMOVED*** (domain,number) -> state
+# In-memory stores (DEPRECATED - wird durch PostgreSQL ersetzt)
+_STATE: dict[tuple[str, str], str] = {}      # (domain,number) -> state
 _AUDIT: dict[tuple[str, str], list] = {}
 
-***REMOVED*** PostgreSQL-Repository (wird schrittweise aktiviert)
+# PostgreSQL-Repository (wird schrittweise aktiviert)
 async def get_workflow_repo(db: AsyncSession = get_db()) -> WorkflowRepository:
     """FastAPI Dependency für WorkflowRepository"""
     return WorkflowRepository(db)
 
-***REMOVED*** Export für andere Module
+# Export für andere Module
 __all__ = ["_STATE"]
 
 
@@ -75,7 +75,7 @@ async def do_transition(
     try:
         cur = _STATE.get((domain, number), "draft")
 
-        ***REMOVED*** Guards werden in workflow.next() geprüft
+        # Guards werden in workflow.next() geprüft
         ok, nxt, msg = workflow.next(domain, cur, action, payload)
         if not ok:
             raise HTTPException(400, detail=msg)
@@ -88,10 +88,10 @@ async def do_transition(
             "action": action
         })
 
-        ***REMOVED*** Prometheus Metric
+        # Prometheus Metric
         workflow_transitions_total.labels(domain=domain, action=action, status=nxt).inc()
 
-        ***REMOVED*** SSE Broadcast
+        # SSE Broadcast
         import asyncio
         asyncio.create_task(sse_hub.broadcast("workflow", {
             "id": f"workflow-{domain}-{number}-{int(time.time())}",
@@ -130,7 +130,7 @@ async def audit(domain: Literal["sales", "purchase"], number: str):
     try:
         items = _AUDIT.get((domain, number), [])
 
-        ***REMOVED*** SSE Broadcast für Audit-Abruf
+        # SSE Broadcast für Audit-Abruf
         import asyncio
         asyncio.create_task(sse_hub.broadcast("workflow", {
             "id": f"audit-{domain}-{number}-{int(time.time())}",
@@ -162,10 +162,10 @@ async def replay_events(channel: str, since: float = 0.0):
         Events seit dem angegebenen Zeitpunkt
     """
     try:
-        ***REMOVED*** Sammle alle relevanten Events seit dem Timestamp
+        # Sammle alle relevanten Events seit dem Timestamp
         events = []
 
-        ***REMOVED*** Durchsuche alle Workflow-States und deren Audit-Trails
+        # Durchsuche alle Workflow-States und deren Audit-Trails
         for (domain, number), audit_trail in _AUDIT.items():
             for entry in audit_trail:
                 if entry["ts"] >= since:
@@ -182,7 +182,7 @@ async def replay_events(channel: str, since: float = 0.0):
                         "toState": entry["to"],
                     })
 
-        ***REMOVED*** Sortiere nach Timestamp
+        # Sortiere nach Timestamp
         events.sort(key=lambda x: x["ts"])
 
         return {"ok": True, "events": events, "count": len(events)}

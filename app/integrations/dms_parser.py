@@ -17,9 +17,9 @@ class DMSParser:
     Extrahiert: Rechnungsnummer, Lieferant, Datum, Betrag, Positionen
     """
     
-    ***REMOVED*** Regex-Patterns für deutsche Belege
+    # Regex-Patterns für deutsche Belege
     PATTERNS = {
-        ***REMOVED*** Rechnungsnummer
+        # Rechnungsnummer
         "invoice_number": [
             r"Rechnungsnr\.?\s*:?\s*([A-Z0-9\-]+)",
             r"Rechnung\s+Nr\.?\s*:?\s*([A-Z0-9\-]+)",
@@ -27,20 +27,20 @@ class DMSParser:
             r"R-Nr\.?\s*:?\s*([A-Z0-9\-]+)",
         ],
         
-        ***REMOVED*** Datum
+        # Datum
         "date": [
             r"Datum\s*:?\s*(\d{1,2}\.\d{1,2}\.\d{2,4})",
             r"Date\s*:?\s*(\d{1,2}\.\d{1,2}\.\d{2,4})",
             r"(\d{1,2}\.\d{1,2}\.\d{4})",
         ],
         
-        ***REMOVED*** Lieferant
+        # Lieferant
         "supplier": [
             r"(?:Lieferant|Absender|Von)\s*:?\s*([^\n]+)",
             r"^([A-ZÄÖÜ][a-zäöüß]+(?:\s+[A-ZÄÖÜ][a-zäöüß]+){1,3})\s+GmbH",
         ],
         
-        ***REMOVED*** Gesamtbetrag
+        # Gesamtbetrag
         "total": [
             r"Gesamtbetrag\s*:?\s*€?\s*([0-9.,]+)",
             r"Summe\s*:?\s*€?\s*([0-9.,]+)",
@@ -48,14 +48,14 @@ class DMSParser:
             r"Endbetrag\s*:?\s*€?\s*([0-9.,]+)",
         ],
         
-        ***REMOVED*** MwSt-Betrag
+        # MwSt-Betrag
         "tax": [
             r"MwSt\.?\s*(?:19%|7%)?\s*:?\s*€?\s*([0-9.,]+)",
             r"VAT\s*(?:19%|7%)?\s*:?\s*€?\s*([0-9.,]+)",
             r"Umsatzsteuer\s*:?\s*€?\s*([0-9.,]+)",
         ],
         
-        ***REMOVED*** Lieferanten-ID
+        # Lieferanten-ID
         "supplier_id": [
             r"Lieferantennr\.?\s*:?\s*([A-Z0-9\-]+)",
             r"Kreditor\s*:?\s*([A-Z0-9\-]+)",
@@ -75,7 +75,7 @@ class DMSParser:
         result = {
             "confidence": 0.0,
             "fields": {},
-            "raw_text": ocr_text[:500],  ***REMOVED*** Erste 500 Zeichen
+            "raw_text": ocr_text[:500],  # Erste 500 Zeichen
         }
         
         matches = 0
@@ -90,12 +90,12 @@ class DMSParser:
                     value = match.group(1).strip()
                     result["fields"][field] = self._clean_value(field, value)
                     matches += 1
-                    break  ***REMOVED*** Erste Match gewinnt
+                    break  # Erste Match gewinnt
         
-        ***REMOVED*** Confidence-Score
+        # Confidence-Score
         result["confidence"] = matches / len(self.PATTERNS) if self.PATTERNS else 0.0
         
-        ***REMOVED*** Post-Processing
+        # Post-Processing
         result["fields"] = self._post_process(result["fields"])
         
         logger.info(f"Parsed OCR: {matches} fields, confidence: {result['confidence']:.2f}")
@@ -106,11 +106,11 @@ class DMSParser:
         """Bereinigt extrahierte Werte"""
         value = value.strip()
         
-        ***REMOVED*** Datum normalisieren
+        # Datum normalisieren
         if field == "date":
             value = self._normalize_date(value)
         
-        ***REMOVED*** Betrag normalisieren (deutsch → float)
+        # Betrag normalisieren (deutsch → float)
         elif field in ("total", "tax"):
             value = value.replace(".", "").replace(",", ".")
             try:
@@ -123,12 +123,12 @@ class DMSParser:
     def _normalize_date(self, date_str: str) -> str:
         """Normalisiert Datum zu ISO-Format"""
         try:
-            ***REMOVED*** DD.MM.YYYY → YYYY-MM-DD
+            # DD.MM.YYYY → YYYY-MM-DD
             if re.match(r"\d{1,2}\.\d{1,2}\.\d{4}", date_str):
                 parts = date_str.split(".")
                 return f"{parts[2]}-{parts[1]:0>2}-{parts[0]:0>2}"
             
-            ***REMOVED*** DD.MM.YY → YYYY-MM-DD
+            # DD.MM.YY → YYYY-MM-DD
             elif re.match(r"\d{1,2}\.\d{1,2}\.\d{2}", date_str):
                 parts = date_str.split(".")
                 year = f"20{parts[2]}" if int(parts[2]) < 50 else f"19{parts[2]}"
@@ -141,13 +141,13 @@ class DMSParser:
     def _post_process(self, fields: Dict[str, str]) -> Dict[str, str]:
         """Post-Processing: Validierung, Defaults"""
         
-        ***REMOVED*** Datum-Fallback
+        # Datum-Fallback
         if "date" not in fields or not fields["date"]:
             fields["date"] = datetime.now().strftime("%Y-%m-%d")
         
-        ***REMOVED*** Domain-Detection
+        # Domain-Detection
         if "invoice_number" in fields and "domain" not in fields:
-            ***REMOVED*** Heuristik: Lieferantenrechnung oder Kundenrechnung?
+            # Heuristik: Lieferantenrechnung oder Kundenrechnung?
             if "supplier" in fields or "supplier_id" in fields:
                 fields["domain"] = "purchase"
             else:
@@ -156,6 +156,6 @@ class DMSParser:
         return fields
 
 
-***REMOVED*** Singleton
+# Singleton
 parser = DMSParser()
 

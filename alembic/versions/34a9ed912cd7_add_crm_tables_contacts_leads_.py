@@ -11,7 +11,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = '34a9ed912cd7'
 down_revision: Union[str, None] = '519e0d90cd66'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -19,7 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** CRM Contacts
+    # CRM Contacts
     op.create_table(
         'crm_contacts',
         sa.Column('id', sa.String(36), primary_key=True),
@@ -38,7 +38,7 @@ def upgrade() -> None:
         sa.Column('tenant_id', sa.String(36), nullable=False, index=True)
     )
     
-    ***REMOVED*** CRM Leads
+    # CRM Leads
     op.create_table(
         'crm_leads',
         sa.Column('id', sa.String(36), primary_key=True),
@@ -58,7 +58,7 @@ def upgrade() -> None:
         sa.Column('tenant_id', sa.String(36), nullable=False, index=True)
     )
     
-    ***REMOVED*** CRM Activities
+    # CRM Activities
     op.create_table(
         'crm_activities',
         sa.Column('id', sa.String(36), primary_key=True),
@@ -73,7 +73,7 @@ def upgrade() -> None:
         sa.Column('tenant_id', sa.String(36), nullable=False, index=True)
     )
     
-    ***REMOVED*** CRM Betriebsprofile
+    # CRM Betriebsprofile
     op.create_table(
         'crm_betriebsprofile',
         sa.Column('id', sa.String(36), primary_key=True),

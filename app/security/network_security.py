@@ -50,8 +50,8 @@ class NetworkAsset:
     ip_address: str
     mac_address: Optional[str]
     network_zone: NetworkZone
-    asset_type: str  ***REMOVED*** server, workstation, network_device, etc.
-    criticality: str  ***REMOVED*** low, medium, high, critical
+    asset_type: str  # server, workstation, network_device, etc.
+    criticality: str  # low, medium, high, critical
     services: List[str] = field(default_factory=list)
     open_ports: List[int] = field(default_factory=list)
     last_seen: datetime = field(default_factory=datetime.utcnow)
@@ -69,7 +69,7 @@ class FirewallRule:
     destination_ip: str
     protocol: str
     port: Optional[int]
-    action: str  ***REMOVED*** allow, deny, log
+    action: str  # allow, deny, log
     direction: TrafficDirection
     enabled: bool = True
     priority: int = 100
@@ -120,18 +120,18 @@ class ISO27001NetworkSecurity:
         self.ids = ids_service
         self.vpn = vpn_service
 
-        ***REMOVED*** Network asset tracking
+        # Network asset tracking
         self.network_assets: Dict[str, NetworkAsset] = {}
 
-        ***REMOVED*** Security policies
+        # Security policies
         self.firewall_rules: Dict[str, FirewallRule] = {}
         self.network_policies = self._initialize_network_policies()
 
-        ***REMOVED*** Monitoring
+        # Monitoring
         self.network_events: List[NetworkEvent] = []
         self.vpn_connections: Dict[str, VPNConnection] = {}
 
-        ***REMOVED*** Compliance thresholds
+        # Compliance thresholds
         self.compliance_thresholds = {
             'max_open_ports': 10,
             'max_unencrypted_connections': 0,
@@ -189,7 +189,7 @@ class ISO27001NetworkSecurity:
 
         self.network_assets[asset_id] = asset
 
-        ***REMOVED*** Perform initial security assessment
+        # Perform initial security assessment
         self._assess_asset_security(asset)
 
         logger.info(f"Network asset registered: {asset.hostname} ({asset.ip_address}) in {asset.network_zone.value}")
@@ -199,21 +199,21 @@ class ISO27001NetworkSecurity:
         """Perform security assessment of network asset"""
         issues = []
 
-        ***REMOVED*** Check for excessive open ports
+        # Check for excessive open ports
         if len(asset.open_ports) > self.compliance_thresholds['max_open_ports']:
             issues.append(f"Too many open ports: {len(asset.open_ports)}")
 
-        ***REMOVED*** Check for sensitive services on wrong zones
+        # Check for sensitive services on wrong zones
         sensitive_services = ['database', 'domain_controller', 'file_server']
         if asset.network_zone == NetworkZone.DMZ and any(s in asset.services for s in sensitive_services):
             issues.append("Sensitive services exposed in DMZ")
 
-        ***REMOVED*** Check for unencrypted services
-        unencrypted_ports = [80, 21, 23, 25, 110, 143]  ***REMOVED*** HTTP, FTP, Telnet, SMTP, POP3, IMAP
+        # Check for unencrypted services
+        unencrypted_ports = [80, 21, 23, 25, 110, 143]  # HTTP, FTP, Telnet, SMTP, POP3, IMAP
         if any(port in unencrypted_ports for port in asset.open_ports):
             issues.append("Unencrypted services detected")
 
-        ***REMOVED*** Update compliance status
+        # Update compliance status
         asset.compliance_status = "compliant" if not issues else "non_compliant"
 
         if issues:
@@ -241,13 +241,13 @@ class ISO27001NetworkSecurity:
             description=rule_data.get('description', '')
         )
 
-        ***REMOVED*** Validate rule against security policies
+        # Validate rule against security policies
         if not self._validate_firewall_rule(rule):
             raise ValueError("Firewall rule violates security policy")
 
         self.firewall_rules[rule_id] = rule
 
-        ***REMOVED*** Apply rule if firewall service available
+        # Apply rule if firewall service available
         if self.firewall:
             self.firewall.apply_rule(rule)
 
@@ -258,17 +258,17 @@ class ISO27001NetworkSecurity:
         """Validate firewall rule against security policies"""
         policies = self.network_policies['zone_segmentation']
 
-        ***REMOVED*** Check zone segmentation rules
+        # Check zone segmentation rules
         if rule.source_zone == NetworkZone.INTERNET and rule.destination_zone == NetworkZone.INTERNAL:
             if policies['internet_to_internal'] == 'deny_all':
                 return rule.action == 'deny'
 
         if rule.source_zone == NetworkZone.INTERNAL and rule.destination_zone == NetworkZone.SENSITIVE:
             if policies['internal_to_sensitive'] == 'allow_business_only':
-                ***REMOVED*** Additional business logic validation would go here
+                # Additional business logic validation would go here
                 return True
 
-        ***REMOVED*** Check for dangerous rules
+        # Check for dangerous rules
         if rule.action == 'allow' and rule.protocol in ['all', '*']:
             logger.warning(f"Potentially dangerous allow-all rule: {rule.name}")
             return False
@@ -280,7 +280,7 @@ class ISO27001NetworkSecurity:
         Monitor network traffic for security events
         Returns event ID if security event detected
         """
-        ***REMOVED*** Analyze traffic patterns
+        # Analyze traffic patterns
         anomalies = self._detect_traffic_anomalies(traffic_data)
 
         if anomalies:
@@ -299,24 +299,24 @@ class ISO27001NetworkSecurity:
         protocol = traffic_data.get('protocol')
         port = traffic_data.get('destination_port')
 
-        ***REMOVED*** Check for suspicious source IPs
+        # Check for suspicious source IPs
         if self._is_suspicious_ip(source_ip):
             anomalies.append(f"suspicious_source_ip: {source_ip}")
 
-        ***REMOVED*** Check for port scanning
+        # Check for port scanning
         if self._detects_port_scan(traffic_data):
             anomalies.append("port_scan_detected")
 
-        ***REMOVED*** Check for unusual protocols
+        # Check for unusual protocols
         forbidden_protocols = self.network_policies['encryption_policy']['forbid_protocols']
         if protocol in forbidden_protocols:
             anomalies.append(f"forbidden_protocol: {protocol}")
 
-        ***REMOVED*** Check for traffic to sensitive ports from wrong zones
-        if port in [3389, 5900] and not self._is_management_traffic_allowed(source_ip):  ***REMOVED*** RDP, VNC
+        # Check for traffic to sensitive ports from wrong zones
+        if port in [3389, 5900] and not self._is_management_traffic_allowed(source_ip):  # RDP, VNC
             anomalies.append(f"unauthorized_remote_access: port {port}")
 
-        ***REMOVED*** Check for data exfiltration patterns
+        # Check for data exfiltration patterns
         if self._detects_data_exfiltration(traffic_data):
             anomalies.append("potential_data_exfiltration")
 
@@ -327,13 +327,13 @@ class ISO27001NetworkSecurity:
         try:
             ip = ipaddress.ip_address(ip_address)
 
-            ***REMOVED*** Check for private IPs in public context
+            # Check for private IPs in public context
             if ip.is_private and not self._is_trusted_private_ip(ip_address):
                 return True
 
-            ***REMOVED*** Check for known malicious ranges (simplified)
+            # Check for known malicious ranges (simplified)
             suspicious_ranges = [
-                ipaddress.ip_network('10.0.0.0/8'),  ***REMOVED*** RFC 1918 but often malicious
+                ipaddress.ip_network('10.0.0.0/8'),  # RFC 1918 but often malicious
             ]
 
             for net in suspicious_ranges:
@@ -341,29 +341,29 @@ class ISO27001NetworkSecurity:
                     return True
 
         except ValueError:
-            return True  ***REMOVED*** Invalid IP format
+            return True  # Invalid IP format
 
         return False
 
     def _is_trusted_private_ip(self, ip_address: str) -> bool:
         """Check if private IP is trusted"""
-        ***REMOVED*** In production, this would check against known trusted IP ranges
-        return True  ***REMOVED*** Simplified
+        # In production, this would check against known trusted IP ranges
+        return True  # Simplified
 
     def _detects_port_scan(self, traffic_data: Dict[str, Any]) -> bool:
         """Detect port scanning activity"""
-        ***REMOVED*** Simplified port scan detection
-        ***REMOVED*** In production, this would analyze traffic patterns over time
+        # Simplified port scan detection
+        # In production, this would analyze traffic patterns over time
         ports = traffic_data.get('ports_scanned', [])
         return len(ports) > 10
 
     def _is_management_traffic_allowed(self, source_ip: str) -> bool:
         """Check if management traffic is allowed from source IP"""
-        ***REMOVED*** Check against management access policy
+        # Check against management access policy
         management_policy = self.network_policies['zone_segmentation']['management_access']
         if management_policy == 'restricted_ip_only':
-            ***REMOVED*** In production, check against allowed management IPs
-            return False  ***REMOVED*** Simplified - deny by default
+            # In production, check against allowed management IPs
+            return False  # Simplified - deny by default
 
         return True
 
@@ -371,7 +371,7 @@ class ISO27001NetworkSecurity:
         """Detect potential data exfiltration"""
         bytes_sent = traffic_data.get('bytes_sent', 0)
         unusual_time = traffic_data.get('unusual_time', False)
-        large_transfer = bytes_sent > 100 * 1024 * 1024  ***REMOVED*** 100MB
+        large_transfer = bytes_sent > 100 * 1024 * 1024  # 100MB
 
         return large_transfer and unusual_time
 
@@ -379,7 +379,7 @@ class ISO27001NetworkSecurity:
         """Create a security event"""
         event_id = str(uuid.uuid4())
 
-        ***REMOVED*** Determine severity based on anomalies
+        # Determine severity based on anomalies
         severity = 'LOW'
         if any('data_exfiltration' in a or 'unauthorized' in a for a in anomalies):
             severity = 'HIGH'
@@ -411,7 +411,7 @@ class ISO27001NetworkSecurity:
 
     def _respond_to_security_event(self, event_id: str, anomalies: List[str]):
         """Respond to detected security events"""
-        ***REMOVED*** Implement automated responses based on anomaly type
+        # Implement automated responses based on anomaly type
         responses = []
 
         for anomaly in anomalies:
@@ -447,21 +447,21 @@ class ISO27001NetworkSecurity:
 
         self.vpn_connections[connection_id] = connection
 
-        ***REMOVED*** Validate connection security
+        # Validate connection security
         if not self._validate_vpn_security(connection):
             logger.warning(f"VPN connection security validation failed: {connection_id}")
-            ***REMOVED*** In production, this might terminate the connection
+            # In production, this might terminate the connection
 
         logger.info(f"VPN connection established: {connection.user_id} from {connection.client_ip}")
         return connection_id
 
     def _validate_vpn_security(self, connection: VPNConnection) -> bool:
         """Validate VPN connection security"""
-        ***REMOVED*** Check protocol strength
+        # Check protocol strength
         if connection.protocol not in [SecurityProtocol.IPSEC, SecurityProtocol.TLS_1_3]:
             return False
 
-        ***REMOVED*** Check client IP (should be from trusted ranges)
+        # Check client IP (should be from trusted ranges)
         if self._is_suspicious_ip(connection.client_ip):
             return False
 
@@ -477,22 +477,22 @@ class ISO27001NetworkSecurity:
         connection.bytes_sent += activity_data.get('bytes_sent', 0)
         connection.bytes_received += activity_data.get('bytes_received', 0)
 
-        ***REMOVED*** Check for suspicious activity
+        # Check for suspicious activity
         if self._detects_vpn_anomaly(connection, activity_data):
             self._handle_vpn_anomaly(connection, activity_data)
 
     def _detects_vpn_anomaly(self, connection: VPNConnection, activity_data: Dict[str, Any]) -> bool:
         """Detect anomalies in VPN connection"""
-        ***REMOVED*** Check for unusual data transfer patterns
+        # Check for unusual data transfer patterns
         bytes_per_minute = activity_data.get('bytes_per_minute', 0)
-        if bytes_per_minute > 50 * 1024 * 1024:  ***REMOVED*** 50MB/min
+        if bytes_per_minute > 50 * 1024 * 1024:  # 50MB/min
             return True
 
-        ***REMOVED*** Check for connection from unusual location
+        # Check for connection from unusual location
         if activity_data.get('unusual_location', False):
             return True
 
-        ***REMOVED*** Check for multiple failed authentications
+        # Check for multiple failed authentications
         failed_attempts = activity_data.get('failed_attempts', 0)
         if failed_attempts > 3:
             return True
@@ -503,34 +503,34 @@ class ISO27001NetworkSecurity:
         """Handle detected VPN anomalies"""
         logger.warning(f"VPN anomaly detected for connection {connection.id}: {activity_data}")
 
-        ***REMOVED*** Implement graduated response
+        # Implement graduated response
         anomaly_type = activity_data.get('anomaly_type', 'unknown')
 
         if anomaly_type == 'high_bandwidth':
-            ***REMOVED*** Temporary throttling
+            # Temporary throttling
             pass
         elif anomaly_type == 'unusual_location':
-            ***REMOVED*** Require additional authentication
+            # Require additional authentication
             pass
         elif anomaly_type == 'failed_attempts':
-            ***REMOVED*** Temporary connection block
+            # Temporary connection block
             connection.status = 'blocked'
 
     def get_network_security_status(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Get comprehensive network security status"""
-        ***REMOVED*** Filter assets by tenant
+        # Filter assets by tenant
         tenant_assets = [a for a in self.network_assets.values() if a.tenant_id == tenant_id]
 
-        ***REMOVED*** Calculate compliance metrics
+        # Calculate compliance metrics
         compliant_assets = sum(1 for a in tenant_assets if a.compliance_status == 'compliant')
         total_assets = len(tenant_assets)
         compliance_rate = (compliant_assets / total_assets * 100) if total_assets > 0 else 0
 
-        ***REMOVED*** Recent security events
+        # Recent security events
         recent_events = [e for e in self.network_events[-50:] if e.tenant_id == tenant_id]
         critical_events = [e for e in recent_events if e.severity == 'HIGH']
 
-        ***REMOVED*** Active VPN connections
+        # Active VPN connections
         active_vpn = [c for c in self.vpn_connections.values()
                      if c.status == 'active' and c.tenant_id == tenant_id]
 
@@ -562,23 +562,23 @@ class ISO27001NetworkSecurity:
         """Calculate overall network risk score (0-100)"""
         risk_score = 0
 
-        ***REMOVED*** Asset compliance factor
+        # Asset compliance factor
         non_compliant = sum(1 for a in assets if a.compliance_status != 'compliant')
         risk_score += min(non_compliant * 5, 30)
 
-        ***REMOVED*** Security events factor
+        # Security events factor
         critical_events = sum(1 for e in events if e.severity == 'HIGH')
         risk_score += min(critical_events * 10, 40)
 
-        ***REMOVED*** Firewall coverage factor
+        # Firewall coverage factor
         enabled_rules = sum(1 for r in self.firewall_rules.values() if r.enabled)
-        if enabled_rules < 10:  ***REMOVED*** Arbitrary minimum
+        if enabled_rules < 10:  # Arbitrary minimum
             risk_score += 20
 
-        ***REMOVED*** VPN security factor
+        # VPN security factor
         active_vpn = sum(1 for c in self.vpn_connections.values() if c.status == 'active')
         if active_vpn > 0:
-            risk_score -= 10  ***REMOVED*** VPN reduces risk
+            risk_score -= 10  # VPN reduces risk
 
         return max(0, min(risk_score, 100))
 
@@ -586,19 +586,19 @@ class ISO27001NetworkSecurity:
         """Check ISO 27001 network security compliance"""
         issues = []
 
-        ***REMOVED*** Check zone segmentation
+        # Check zone segmentation
         segmentation_issues = self._check_zone_segmentation()
         issues.extend(segmentation_issues)
 
-        ***REMOVED*** Check encryption compliance
+        # Check encryption compliance
         encryption_issues = self._check_encryption_compliance()
         issues.extend(encryption_issues)
 
-        ***REMOVED*** Check monitoring coverage
+        # Check monitoring coverage
         monitoring_issues = self._check_monitoring_coverage()
         issues.extend(monitoring_issues)
 
-        ***REMOVED*** Check firewall configuration
+        # Check firewall configuration
         firewall_issues = self._check_firewall_configuration()
         issues.extend(firewall_issues)
 
@@ -618,19 +618,19 @@ class ISO27001NetworkSecurity:
         """Check network zone segmentation compliance"""
         issues = []
 
-        ***REMOVED*** Check for assets in wrong zones
+        # Check for assets in wrong zones
         for asset in self.network_assets.values():
             if asset.network_zone == NetworkZone.INTERNET:
                 if asset.asset_type in ['database', 'application_server']:
                     issues.append(f"Critical asset {asset.hostname} exposed in internet zone")
 
-        ***REMOVED*** Check firewall rules for proper segmentation
+        # Check firewall rules for proper segmentation
         internet_to_internal = [
             r for r in self.firewall_rules.values()
             if r.source_zone == NetworkZone.INTERNET and r.destination_zone == NetworkZone.INTERNAL
         ]
 
-        if len(internet_to_internal) > 5:  ***REMOVED*** Too many exceptions
+        if len(internet_to_internal) > 5:  # Too many exceptions
             issues.append("Too many internet-to-internal firewall exceptions")
 
         return issues
@@ -639,15 +639,15 @@ class ISO27001NetworkSecurity:
         """Check encryption compliance"""
         issues = []
 
-        ***REMOVED*** Check for unencrypted services
+        # Check for unencrypted services
         for asset in self.network_assets.values():
-            unencrypted_ports = [80, 21, 23, 25, 110, 143]  ***REMOVED*** HTTP, FTP, Telnet, SMTP, POP3, IMAP
+            unencrypted_ports = [80, 21, 23, 25, 110, 143]  # HTTP, FTP, Telnet, SMTP, POP3, IMAP
             exposed_unencrypted = [p for p in asset.open_ports if p in unencrypted_ports]
 
             if exposed_unencrypted:
                 issues.append(f"Asset {asset.hostname} has unencrypted services on ports {exposed_unencrypted}")
 
-        ***REMOVED*** Check VPN encryption strength
+        # Check VPN encryption strength
         weak_vpn = [
             c for c in self.vpn_connections.values()
             if c.protocol not in [SecurityProtocol.IPSEC, SecurityProtocol.TLS_1_3]
@@ -662,13 +662,13 @@ class ISO27001NetworkSecurity:
         """Check monitoring coverage"""
         issues = []
 
-        ***REMOVED*** Check for unmonitored assets
+        # Check for unmonitored assets
         monitored_zones = set()
-        for event in self.network_events[-100:]:  ***REMOVED*** Last 100 events
-            ***REMOVED*** This is simplified - in production, check actual monitoring coverage
+        for event in self.network_events[-100:]:  # Last 100 events
+            # This is simplified - in production, check actual monitoring coverage
             pass
 
-        ***REMOVED*** Check IDS coverage
+        # Check IDS coverage
         if not self.ids:
             issues.append("Intrusion Detection System not configured")
 
@@ -678,7 +678,7 @@ class ISO27001NetworkSecurity:
         """Check firewall configuration compliance"""
         issues = []
 
-        ***REMOVED*** Check for default allow rules
+        # Check for default allow rules
         allow_all_rules = [
             r for r in self.firewall_rules.values()
             if r.action == 'allow' and r.protocol in ['all', '*']
@@ -687,9 +687,9 @@ class ISO27001NetworkSecurity:
         if allow_all_rules:
             issues.append(f"{len(allow_all_rules)} dangerous allow-all firewall rules found")
 
-        ***REMOVED*** Check for disabled critical rules
+        # Check for disabled critical rules
         disabled_rules = [r for r in self.firewall_rules.values() if not r.enabled]
-        if len(disabled_rules) > len(self.firewall_rules) * 0.1:  ***REMOVED*** More than 10% disabled
+        if len(disabled_rules) > len(self.firewall_rules) * 0.1:  # More than 10% disabled
             issues.append("Too many firewall rules disabled")
 
         return issues

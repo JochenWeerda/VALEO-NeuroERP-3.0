@@ -34,7 +34,7 @@ async def create_user(
     try:
         user_repo = container.resolve(UserRepository)
 
-        ***REMOVED*** Check if username or email already exists
+        # Check if username or email already exists
         existing_by_username = await user_repo.get_by_username(user_data.username, user_data.tenant_id)
         if existing_by_username:
             raise HTTPException(status_code=400, detail="Username already exists")
@@ -64,8 +64,8 @@ async def get_current_user(
     try:
         user_repo = container.resolve(UserRepository)
 
-        ***REMOVED*** Get user by ID (sub from OIDC token)
-        user = await user_repo.get_by_id(oidc_user["sub"], "system")  ***REMOVED*** TODO: Extract tenant from token
+        # Get user by ID (sub from OIDC token)
+        user = await user_repo.get_by_id(oidc_user["sub"], "system")  # TODO: Extract tenant from token
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
@@ -90,7 +90,7 @@ async def get_user(
     try:
         user_repo = container.resolve(UserRepository)
 
-        ***REMOVED*** Extract tenant from OIDC claims (assuming tenant is in custom claims)
+        # Extract tenant from OIDC claims (assuming tenant is in custom claims)
         tenant_id = oidc_user.get("raw", {}).get("tenant_id", "system")
 
         user = await user_repo.get_by_id(user_id, tenant_id)
@@ -119,7 +119,7 @@ async def list_users(
     try:
         user_repo = container.resolve(UserRepository)
 
-        ***REMOVED*** Use provided tenant_id or extract from authenticated user
+        # Use provided tenant_id or extract from authenticated user
         effective_tenant_id = tenant_id or oidc_user.get("raw", {}).get("tenant_id", "system")
 
         users = await user_repo.get_all(effective_tenant_id, skip, limit)
@@ -153,10 +153,10 @@ async def update_user(
     try:
         user_repo = container.resolve(UserRepository)
 
-        ***REMOVED*** Extract tenant from OIDC claims
+        # Extract tenant from OIDC claims
         tenant_id = oidc_user.get("raw", {}).get("tenant_id", "system")
 
-        ***REMOVED*** Check for email conflicts if email is being updated
+        # Check for email conflicts if email is being updated
         if user_data.email:
             existing = await user_repo.get_by_email(user_data.email, tenant_id)
             if existing and existing.id != user_id:
@@ -186,7 +186,7 @@ async def delete_user(
     try:
         user_repo = container.resolve(UserRepository)
 
-        ***REMOVED*** Extract tenant from OIDC claims
+        # Extract tenant from OIDC claims
         tenant_id = oidc_user.get("raw", {}).get("tenant_id", "system")
 
         success = await user_repo.delete(user_id, tenant_id)
@@ -213,7 +213,7 @@ async def login(
         "message": "OIDC Authentication Required",
         "info": "This system uses OpenID Connect (OIDC) for authentication. Please use the OIDC provider login flow.",
         "oidc_provider": "Keycloak",
-        "login_url": "/auth/login",  ***REMOVED*** Placeholder - actual URL would be configured
+        "login_url": "/auth/login",  # Placeholder - actual URL would be configured
         "status": "redirect_required"
     }
 
@@ -235,6 +235,6 @@ async def change_password(
         "info": "Password changes must be performed through the OIDC provider (Keycloak) interface.",
         "user_id": oidc_user["sub"],
         "oidc_provider": "Keycloak",
-        "change_url": "/auth/account",  ***REMOVED*** Placeholder - actual URL would be configured
+        "change_url": "/auth/account",  # Placeholder - actual URL would be configured
         "status": "external_action_required"
     }

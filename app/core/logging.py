@@ -10,7 +10,7 @@ from typing import Any
 from datetime import datetime
 from contextvars import ContextVar
 
-***REMOVED*** Context variable for correlation ID
+# Context variable for correlation ID
 correlation_id_var: ContextVar[str] = ContextVar('correlation_id', default='')
 
 
@@ -31,12 +31,12 @@ class JSONFormatter(logging.Formatter):
             "line": record.lineno,
         }
         
-        ***REMOVED*** Add correlation ID if present
+        # Add correlation ID if present
         correlation_id = correlation_id_var.get()
         if correlation_id:
             log_data["correlation_id"] = correlation_id
         
-        ***REMOVED*** Add extra fields from record
+        # Add extra fields from record
         if hasattr(record, 'event_id'):
             log_data["event_id"] = record.event_id
         if hasattr(record, 'aggregate_id'):
@@ -44,7 +44,7 @@ class JSONFormatter(logging.Formatter):
         if hasattr(record, 'user_id'):
             log_data["user_id"] = record.user_id
         
-        ***REMOVED*** Add exception info if present
+        # Add exception info if present
         if record.exc_info:
             log_data["exception"] = self.formatException(record.exc_info)
         
@@ -56,14 +56,14 @@ class PIIRedactionFilter(logging.Filter):
     Filter to redact PII from log messages
     """
     
-    ***REMOVED*** Patterns to redact
+    # Patterns to redact
     PATTERNS = [
         (re.compile(r'token["\']?\s*[:=]\s*["\']?([^"\'}\s,]+)', re.IGNORECASE), 'token=***'),
         (re.compile(r'password["\']?\s*[:=]\s*["\']?([^"\'}\s,]+)', re.IGNORECASE), 'password=***'),
         (re.compile(r'secret["\']?\s*[:=]\s*["\']?([^"\'}\s,]+)', re.IGNORECASE), 'secret=***'),
         (re.compile(r'api[_-]?key["\']?\s*[:=]\s*["\']?([^"\'}\s,]+)', re.IGNORECASE), 'api_key=***'),
         (re.compile(r'bearer\s+([a-zA-Z0-9_\-\.]+)', re.IGNORECASE), 'Bearer ***'),
-        ***REMOVED*** Email-Adressen teilweise redaktieren
+        # Email-Adressen teilweise redaktieren
         (re.compile(r'([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})'), r'***@\2'),
     ]
     
@@ -73,7 +73,7 @@ class PIIRedactionFilter(logging.Filter):
             for pattern, replacement in self.PATTERNS:
                 record.msg = pattern.sub(replacement, record.msg)
         
-        ***REMOVED*** Also redact args if present
+        # Also redact args if present
         if record.args:
             record.args = tuple(
                 self._redact_value(arg) for arg in record.args
@@ -106,20 +106,20 @@ def setup_logging(json_format: bool = True):
     Args:
         json_format: If True, use structured JSON logging. If False, use traditional format.
     """
-    ***REMOVED*** Root logger
+    # Root logger
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
     
-    ***REMOVED*** Console handler
+    # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
     
-    ***REMOVED*** Formatter
+    # Formatter
     if json_format:
-        ***REMOVED*** Structured JSON logging
+        # Structured JSON logging
         formatter = JSONFormatter()
     else:
-        ***REMOVED*** Traditional logging
+        # Traditional logging
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             datefmt='%Y-%m-%dT%H:%M:%S'
@@ -127,13 +127,13 @@ def setup_logging(json_format: bool = True):
     
     console_handler.setFormatter(formatter)
     
-    ***REMOVED*** Add PII redaction filter
+    # Add PII redaction filter
     console_handler.addFilter(PIIRedactionFilter())
     
-    ***REMOVED*** Add handler to root logger
+    # Add handler to root logger
     root_logger.addHandler(console_handler)
     
-    ***REMOVED*** Suppress noisy loggers
+    # Suppress noisy loggers
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)

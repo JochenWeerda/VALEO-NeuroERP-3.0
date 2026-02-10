@@ -40,7 +40,7 @@ class ActivityStatus(str, Enum):
     cancelled = "cancelled"
 
 
-***REMOVED*** --- Contact Schemas ---
+# --- Contact Schemas ---
 
 class ContactBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
@@ -81,7 +81,7 @@ class Contact(ContactBase):
         from_attributes = True
 
 
-***REMOVED*** --- Lead Schemas ---
+# --- Lead Schemas ---
 
 class LeadBase(BaseModel):
     company: str = Field(..., min_length=1, max_length=255)
@@ -124,7 +124,7 @@ class Lead(LeadBase):
         from_attributes = True
 
 
-***REMOVED*** --- Activity Schemas ---
+# --- Activity Schemas ---
 
 class ActivityBase(BaseModel):
     contact_id: Optional[str] = None
@@ -157,7 +157,7 @@ class Activity(ActivityBase):
         from_attributes = True
 
 
-***REMOVED*** --- BetriebsProfil Schemas ---
+# --- BetriebsProfil Schemas ---
 
 class BetriebsProfilBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)

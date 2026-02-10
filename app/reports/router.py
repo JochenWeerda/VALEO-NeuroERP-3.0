@@ -11,13 +11,13 @@ import logging
 
 from .services import ReportsService
 from .models import ReportResponse, ReportMetadata
-from ..documents.router_helpers import _DB  ***REMOVED*** Import the shared DB store
+from ..documents.router_helpers import _DB  # Import the shared DB store
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/reports", tags=["reports"])
 
-***REMOVED*** Initialize service with shared DB
+# Initialize service with shared DB
 reports_service = ReportsService(_DB)
 
 
@@ -180,7 +180,7 @@ async def export_report(
     Export report data in various formats
     """
     try:
-        ***REMOVED*** Get the report data
+        # Get the report data
         if report_type == "sales-performance":
             report = reports_service.get_sales_performance_report(start_date, end_date)
         elif report_type == "customer-analytics":
@@ -195,7 +195,7 @@ async def export_report(
             raise HTTPException(status_code=400, detail=f"Unknown report type: {report_type}")
 
         if format == "csv":
-            ***REMOVED*** Simple CSV conversion (in production, use proper CSV library)
+            # Simple CSV conversion (in production, use proper CSV library)
             data = report.model_dump()
             csv_content = f"Report Type: {report_type}\n"
             csv_content += f"Generated: {ReportMetadata().generatedAt}\n\n"
@@ -216,7 +216,7 @@ async def export_report(
                 "filename": f"{report_type}_report.csv"
             }
 
-        ***REMOVED*** Default JSON response
+        # Default JSON response
         return ReportResponse(
             metadata=ReportMetadata(
                 reportType=report_type,

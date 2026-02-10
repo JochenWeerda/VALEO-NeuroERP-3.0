@@ -16,27 +16,27 @@ class Zahlungslauf(Base):
     id = Column(String, primary_key=True, index=True)
     tenant_id = Column(String, index=True)
 
-    ***REMOVED*** Grunddaten
+    # Grunddaten
     lauf_nummer = Column(String, unique=True, index=True)
-    ausfuehrungs_datum = Column(String)  ***REMOVED*** ISO date string
+    ausfuehrungs_datum = Column(String)  # ISO date string
     gesamt_betrag = Column(Float)
     anzahl_zahlungen = Column(Integer)
-    status = Column(String)  ***REMOVED*** entwurf, freigegeben, ausgefuehrt, storniert
+    status = Column(String)  # entwurf, freigegeben, ausgefuehrt, storniert
 
-    ***REMOVED*** Freigabe/Ausführung
+    # Freigabe/Ausführung
     freigegeben_am = Column(DateTime, nullable=True)
     freigegeben_durch = Column(String, nullable=True)
     ausgefuehrt_am = Column(DateTime, nullable=True)
 
-    ***REMOVED*** SEPA-Auftraggeber
+    # SEPA-Auftraggeber
     auftraggeber_name = Column(String)
     auftraggeber_iban = Column(String)
     auftraggeber_bic = Column(String)
 
-    ***REMOVED*** Zahlungen (als JSON gespeichert)
-    zahlungen = Column(JSON)  ***REMOVED*** Array of payment objects
+    # Zahlungen (als JSON gespeichert)
+    zahlungen = Column(JSON)  # Array of payment objects
 
-    ***REMOVED*** Meta
+    # Meta
     notizen = Column(Text, nullable=True)
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
@@ -49,26 +49,26 @@ class OffenerPosten(Base):
     id = Column(String(36), primary_key=True)
     tenant_id = Column(String(36), nullable=False, index=True)
 
-    ***REMOVED*** Beleg-Info
+    # Beleg-Info
     rechnungsnr = Column(String(50), nullable=False, index=True)
     datum = Column(Date, nullable=False)
     faelligkeit = Column(Date, nullable=False)
     betrag = Column(Numeric(10, 2), nullable=False)
     offen = Column(Numeric(10, 2), nullable=False)
 
-    ***REMOVED*** Partner-Info
+    # Partner-Info
     kunde_id = Column(String(36), nullable=True)
     kunde_name = Column(String(100), nullable=True)
     lieferant_id = Column(String(36), nullable=True)
     lieferant_name = Column(String(100), nullable=True)
 
-    ***REMOVED*** Mahnung/Skonto
+    # Mahnung/Skonto
     skonto_prozent = Column(Numeric(5, 2), nullable=True)
     skonto_bis = Column(Date, nullable=True)
     mahn_stufe = Column(Integer, default=0)
     zahlbar = Column(Boolean, default=True)
 
-    ***REMOVED*** Meta
+    # Meta
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
 
@@ -80,16 +80,16 @@ class Buchung(Base):
     id = Column(String(36), primary_key=True)
     tenant_id = Column(String(36), nullable=False, index=True)
 
-    ***REMOVED*** Beleg-Info
+    # Beleg-Info
     belegnr = Column(String(50), nullable=False, index=True)
     datum = Column(Date, nullable=False)
     soll_konto = Column(String(10), nullable=False)
     haben_konto = Column(String(10), nullable=False)
     betrag = Column(Numeric(10, 2), nullable=False)
     text = Column(String(200), nullable=False)
-    belegart = Column(String(10), nullable=False)  ***REMOVED*** ER, EB, ZE, etc.
+    belegart = Column(String(10), nullable=False)  # ER, EB, ZE, etc.
 
-    ***REMOVED*** Meta
+    # Meta
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
 
@@ -101,14 +101,14 @@ class Konto(Base):
     id = Column(String(36), primary_key=True)
     tenant_id = Column(String(36), nullable=False, index=True)
 
-    ***REMOVED*** Konto-Info
+    # Konto-Info
     kontonummer = Column(String(10), nullable=False, unique=True, index=True)
     bezeichnung = Column(String(100), nullable=False)
-    kontoart = Column(String(50), nullable=False)  ***REMOVED*** Aktiv, Passiv, Aufwand, Ertrag
-    typ = Column(String(20), nullable=False)  ***REMOVED*** aktiv, passiv, aufwand, ertrag
+    kontoart = Column(String(50), nullable=False)  # Aktiv, Passiv, Aufwand, Ertrag
+    typ = Column(String(20), nullable=False)  # aktiv, passiv, aufwand, ertrag
     saldo = Column(Numeric(10, 2), default=0)
 
-    ***REMOVED*** Meta
+    # Meta
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
 
@@ -120,16 +120,16 @@ class Anlage(Base):
     id = Column(String(36), primary_key=True)
     tenant_id = Column(String(36), nullable=False, index=True)
 
-    ***REMOVED*** Anlage-Info
+    # Anlage-Info
     anlagennr = Column(String(20), nullable=False, unique=True, index=True)
     bezeichnung = Column(String(200), nullable=False)
     anschaffung = Column(Date, nullable=False)
     anschaffungswert = Column(Numeric(10, 2), nullable=False)
-    nutzungsdauer = Column(Integer, nullable=False)  ***REMOVED*** Jahre
-    afa_satz = Column(Numeric(5, 2), nullable=False)  ***REMOVED*** Prozent
+    nutzungsdauer = Column(Integer, nullable=False)  # Jahre
+    afa_satz = Column(Numeric(5, 2), nullable=False)  # Prozent
     kumulierte_afa = Column(Numeric(10, 2), default=0)
     buchwert = Column(Numeric(10, 2), nullable=False)
 
-    ***REMOVED*** Meta
+    # Meta
     created_at = Column(DateTime)
     updated_at = Column(DateTime)

@@ -11,7 +11,7 @@ from pydantic import Field, validator
 from .base import BaseSchema, TimestampMixin, SoftDeleteMixin
 
 
-***REMOVED*** Saatgut Schemas
+# Saatgut Schemas
 class SaatgutBase(BaseSchema):
     """Base Saatgut schema"""
     artikelnummer: str = Field(..., min_length=1, max_length=50, description="Unique article number")
@@ -24,18 +24,18 @@ class SaatgutBase(BaseSchema):
     eu_zulassung: bool = Field(default=False, description="EU approval")
     ablauf_zulassung: Optional[datetime] = Field(None, description="Approval expiry date")
 
-    ***REMOVED*** Agronomische Daten
+    # Agronomische Daten
     tkm: Optional[Decimal] = Field(None, ge=0, description="Thousand grain mass")
     keimfaehigkeit: Optional[Decimal] = Field(None, ge=0, le=100, description="Germination capacity %")
     aussaatstaerke: Optional[Decimal] = Field(None, ge=0, description="Sowing strength kg/ha")
 
-    ***REMOVED*** Preise und Konditionen
+    # Preise und Konditionen
     ek_preis: Optional[Decimal] = Field(None, ge=0, description="Purchase price")
     vk_preis: Optional[Decimal] = Field(None, ge=0, description="Sales price")
     waehrung: str = Field(default="EUR", max_length=3, description="Currency")
     mindestabnahme: Optional[Decimal] = Field(None, ge=0, description="Minimum order quantity")
 
-    ***REMOVED*** Lager
+    # Lager
     lagerbestand: Decimal = Field(default=0, ge=0, description="Stock quantity")
     reserviert: Decimal = Field(default=0, ge=0, description="Reserved quantity")
     verfuegbar: Decimal = Field(default=0, ge=0, description="Available quantity")
@@ -100,7 +100,7 @@ class SaatgutLizenz(SaatgutLizenzBase, TimestampMixin):
     bezahlt_am: Optional[datetime] = Field(None, description="Payment date")
 
 
-***REMOVED*** Dünger Schemas
+# Dünger Schemas
 class DuengerBase(BaseSchema):
     """Base Dünger schema"""
     artikelnummer: str = Field(..., min_length=1, max_length=50, description="Unique article number")
@@ -108,30 +108,30 @@ class DuengerBase(BaseSchema):
     typ: str = Field(..., min_length=1, max_length=50, description="Type (Mineraldünger, Organisch, etc.)")
     hersteller: Optional[str] = Field(None, max_length=100, description="Manufacturer")
 
-    ***REMOVED*** Inhaltsstoffe (NPK)
+    # Inhaltsstoffe (NPK)
     n_gehalt: Optional[Decimal] = Field(None, ge=0, le=100, description="Nitrogen content %")
     p_gehalt: Optional[Decimal] = Field(None, ge=0, le=100, description="Phosphorus content %")
     k_gehalt: Optional[Decimal] = Field(None, ge=0, le=100, description="Potassium content %")
     s_gehalt: Optional[Decimal] = Field(None, ge=0, le=100, description="Sulfur content %")
     mg_gehalt: Optional[Decimal] = Field(None, ge=0, le=100, description="Magnesium content %")
 
-    ***REMOVED*** Zulassungen
+    # Zulassungen
     dmv_nummer: Optional[str] = Field(None, max_length=50, description="DüMV number")
     eu_zulassung: Optional[str] = Field(None, max_length=50, description="EU approval")
     ablauf_zulassung: Optional[datetime] = Field(None, description="Approval expiry")
 
-    ***REMOVED*** Sicherheit
+    # Sicherheit
     gefahrstoff_klasse: Optional[str] = Field(None, max_length=10, description="Hazard class")
     wassergefaehrdend: bool = Field(default=False, description="Water hazardous")
     lagerklasse: Optional[str] = Field(None, max_length=10, description="Storage class")
 
-    ***REMOVED*** Anwendung
+    # Anwendung
     kultur_typ: Optional[str] = Field(None, max_length=100, description="Crop type")
     dosierung_min: Optional[Decimal] = Field(None, ge=0, description="Min dosage kg/ha")
     dosierung_max: Optional[Decimal] = Field(None, ge=0, description="Max dosage kg/ha")
     zeitpunkt: Optional[str] = Field(None, max_length=100, description="Application time")
 
-    ***REMOVED*** Preise und Lager
+    # Preise und Lager
     ek_preis: Optional[Decimal] = Field(None, ge=0, description="Purchase price")
     vk_preis: Optional[Decimal] = Field(None, ge=0, description="Sales price")
     waehrung: str = Field(default="EUR", max_length=3, description="Currency")
@@ -213,7 +213,7 @@ class DuengerMischung(DuengerMischungBase, TimestampMixin):
     freigegeben_durch: Optional[str] = Field(None, description="Approved by")
 
 
-***REMOVED*** PSM Schemas
+# PSM Schemas
 class PSMBase(BaseSchema):
     """Base PSM schema"""
     artikelnummer: str = Field(..., min_length=1, max_length=50, description="Unique article number")
@@ -221,35 +221,35 @@ class PSMBase(BaseSchema):
     wirkstoff: str = Field(..., min_length=1, max_length=100, description="Active ingredient")
     mittel_typ: str = Field(..., min_length=1, max_length=50, description="Product type")
 
-    ***REMOVED*** Zulassung
+    # Zulassung
     bvl_nummer: str = Field(..., min_length=1, max_length=50, description="BVL number")
     zulassung_ablauf: datetime = Field(..., description="Approval expiry")
     eu_zulassung: bool = Field(default=False, description="EU approval")
 
-    ***REMOVED*** Anwendung
+    # Anwendung
     kulturen: List[str] = Field(default_factory=list, description="Applicable crops")
     indikationen: List[str] = Field(default_factory=list, description="Indications")
     dosierung_min: Optional[Decimal] = Field(None, ge=0, description="Min dosage")
     dosierung_max: Optional[Decimal] = Field(None, ge=0, description="Max dosage")
     wartezeit: Optional[int] = Field(None, ge=0, description="Waiting period days")
 
-    ***REMOVED*** Sicherheit und Auflagen
+    # Sicherheit und Auflagen
     bienenschutz: bool = Field(default=False, description="Bee protection")
     wasserschutz_gebiet: bool = Field(default=False, description="Water protection area")
     abstand_wohngebaeude: Optional[int] = Field(None, ge=0, description="Distance to buildings m")
     abstand_gewaesser: Optional[int] = Field(None, ge=0, description="Distance to water m")
     auflagen: List[str] = Field(default_factory=list, description="Restrictions")
 
-    ***REMOVED*** Erklärung des Landwirts (für Ausgangsstoffe für Explosivstoffe)
+    # Erklärung des Landwirts (für Ausgangsstoffe für Explosivstoffe)
     ausgangsstoff_explosivstoffe: bool = Field(default=False, description="Contains explosive precursors")
     erklaerung_landwirt_erforderlich: bool = Field(default=False, description="Farmer's declaration required")
     erklaerung_landwirt_status: Optional[str] = Field(None, max_length=20, description="Declaration status")
 
-    ***REMOVED*** Resistenz-Management
+    # Resistenz-Management
     wirkstoff_gruppe: Optional[str] = Field(None, max_length=50, description="Active ingredient group")
     rotations_empfehlung: Optional[str] = Field(None, description="Rotation recommendation")
 
-    ***REMOVED*** Preise und Lager
+    # Preise und Lager
     ek_preis: Optional[Decimal] = Field(None, ge=0, description="Purchase price")
     vk_preis: Optional[Decimal] = Field(None, ge=0, description="Sales price")
     waehrung: str = Field(default="EUR", max_length=3, description="Currency")
@@ -321,7 +321,7 @@ class Sachkunde(SachkundeBase, TimestampMixin):
     erinnerung_versendet: bool = Field(default=False, description="Reminder sent")
 
 
-***REMOVED*** Biostimulanzien Schemas
+# Biostimulanzien Schemas
 class BiostimulanzBase(BaseSchema):
     """Base Biostimulanz schema"""
     artikelnummer: str = Field(..., min_length=1, max_length=50, description="Unique article number")
@@ -329,16 +329,16 @@ class BiostimulanzBase(BaseSchema):
     typ: str = Field(..., min_length=1, max_length=50, description="Type")
     hersteller: Optional[str] = Field(None, max_length=100, description="Manufacturer")
 
-    ***REMOVED*** Spezifische Eigenschaften
+    # Spezifische Eigenschaften
     zusammensetzung: Dict[str, Any] = Field(default_factory=dict, description="Composition")
     anwendungsbereich: List[str] = Field(default_factory=list, description="Application areas")
     dosierung: Optional[str] = Field(None, max_length=100, description="Dosage")
 
-    ***REMOVED*** Zulassungen
+    # Zulassungen
     eu_zulassung: Optional[str] = Field(None, max_length=50, description="EU approval")
     ablauf_zulassung: Optional[datetime] = Field(None, description="Approval expiry")
 
-    ***REMOVED*** Preise und Lager
+    # Preise und Lager
     ek_preis: Optional[Decimal] = Field(None, ge=0, description="Purchase price")
     vk_preis: Optional[Decimal] = Field(None, ge=0, description="Sales price")
     waehrung: str = Field(default="EUR", max_length=3, description="Currency")

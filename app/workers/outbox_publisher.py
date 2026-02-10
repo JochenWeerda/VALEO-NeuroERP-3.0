@@ -58,7 +58,7 @@ class OutboxPublisherWorker:
             db.close()
 
 
-***REMOVED*** Global worker instance
+# Global worker instance
 _outbox_worker: Optional[OutboxPublisherWorker] = None
 
 

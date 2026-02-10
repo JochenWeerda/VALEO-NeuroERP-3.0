@@ -22,8 +22,8 @@ class AccountingPeriod(BaseModel):
     """Accounting period model."""
     id: Optional[str] = None
     tenant_id: str
-    period: str  ***REMOVED*** YYYY-MM format
-    status: str  ***REMOVED*** OPEN, CLOSED, ADJUSTING
+    period: str  # YYYY-MM format
+    status: str  # OPEN, CLOSED, ADJUSTING
     start_date: date
     end_date: date
     closed_at: Optional[datetime] = None
@@ -37,7 +37,7 @@ class AccountingPeriod(BaseModel):
 class PeriodCreate(BaseModel):
     """Create accounting period."""
     tenant_id: str
-    period: str  ***REMOVED*** YYYY-MM format
+    period: str  # YYYY-MM format
     start_date: date
     end_date: date
     status: str = "OPEN"
@@ -56,14 +56,14 @@ async def create_period(
 ):
     """Create a new accounting period."""
     try:
-        ***REMOVED*** Validate period format (YYYY-MM)
+        # Validate period format (YYYY-MM)
         if len(period_data.period) != 7 or period_data.period[4] != '-':
             raise HTTPException(
                 status_code=400,
                 detail="Period must be in YYYY-MM format"
             )
 
-        ***REMOVED*** Check if period already exists
+        # Check if period already exists
         existing = db.execute(
             text("""
                 SELECT id FROM finance_accounting_periods
@@ -78,14 +78,14 @@ async def create_period(
                 detail=f"Period {period_data.period} already exists for tenant {period_data.tenant_id}"
             )
 
-        ***REMOVED*** Validate dates
+        # Validate dates
         if period_data.start_date >= period_data.end_date:
             raise HTTPException(
                 status_code=400,
                 detail="Start date must be before end date"
             )
 
-        ***REMOVED*** Insert period
+        # Insert period
         period_id = str(datetime.now().timestamp())
         db.execute(
             text("""
@@ -104,7 +104,7 @@ async def create_period(
         )
         db.commit()
 
-        ***REMOVED*** Fetch created period
+        # Fetch created period
         result = db.execute(
             text("""
                 SELECT id, tenant_id, period, status, start_date, end_date,
@@ -234,7 +234,7 @@ async def update_period(
 ):
     """Update an accounting period (e.g., close it)."""
     try:
-        ***REMOVED*** Get existing period
+        # Get existing period
         existing = db.execute(
             text("""
                 SELECT id, tenant_id, period, status, start_date, end_date,
@@ -248,7 +248,7 @@ async def update_period(
         if not existing:
             raise HTTPException(status_code=404, detail="Period not found")
 
-        ***REMOVED*** Update status
+        # Update status
         update_query = "UPDATE finance_accounting_periods SET"
         params = {"id": period_id}
         updates = []
@@ -262,7 +262,7 @@ async def update_period(
             updates.append(" status = :status")
             params["status"] = period_update.status
 
-            ***REMOVED*** If closing, set closed_at and closed_by
+            # If closing, set closed_at and closed_by
             if period_update.status == "CLOSED":
                 updates.append(" closed_at = NOW()")
                 if period_update.closed_by:
@@ -276,7 +276,7 @@ async def update_period(
         db.execute(text(update_query), params)
         db.commit()
 
-        ***REMOVED*** Fetch updated period
+        # Fetch updated period
         result = db.execute(
             text("""
                 SELECT id, tenant_id, period, status, start_date, end_date,
@@ -324,7 +324,7 @@ async def check_period_status(
         ).fetchone()
 
         if not result:
-            ***REMOVED*** Period doesn't exist, assume it's open (create on first booking)
+            # Period doesn't exist, assume it's open (create on first booking)
             return {
                 "period": period,
                 "status": "OPEN",

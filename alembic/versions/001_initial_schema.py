@@ -1,5 +1,5 @@
-***REMOVED*** VALEO-NeuroERP Initial Schema Migration
-***REMOVED*** This migration creates the complete database schema for clean architecture
+# VALEO-NeuroERP Initial Schema Migration
+# This migration creates the complete database schema for clean architecture
 
 """initial_schema
 
@@ -13,7 +13,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision = '001'
 down_revision = None
 branch_labels = None
@@ -21,14 +21,14 @@ depends_on = None
 
 
 def upgrade():
-    ***REMOVED*** Create schemas
+    # Create schemas
     op.execute("CREATE SCHEMA IF NOT EXISTS domain_crm")
     op.execute("CREATE SCHEMA IF NOT EXISTS domain_erp")
     op.execute("CREATE SCHEMA IF NOT EXISTS domain_inventory")
     op.execute("CREATE SCHEMA IF NOT EXISTS domain_shared")
     op.execute("CREATE SCHEMA IF NOT EXISTS infrastructure")
 
-    ***REMOVED*** Create shared tables
+    # Create shared tables
     op.create_table('tenants',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('name', sa.String(length=255), nullable=False),
@@ -62,7 +62,7 @@ def upgrade():
         schema='domain_shared'
     )
 
-    ***REMOVED*** Create CRM tables
+    # Create CRM tables
     op.create_table('customers',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
@@ -109,7 +109,7 @@ def upgrade():
         schema='domain_crm'
     )
 
-    ***REMOVED*** Create ERP tables
+    # Create ERP tables
     op.create_table('chart_of_accounts',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
@@ -222,7 +222,7 @@ def upgrade():
         schema='domain_erp'
     )
 
-    ***REMOVED*** Create Inventory tables
+    # Create Inventory tables
     op.create_table('warehouses',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
@@ -295,7 +295,7 @@ def upgrade():
         schema='domain_inventory'
     )
 
-    ***REMOVED*** Create Infrastructure tables
+    # Create Infrastructure tables
     op.create_table('event_store',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('aggregate_id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -358,7 +358,7 @@ def upgrade():
         schema='infrastructure'
     )
 
-    ***REMOVED*** Create indexes
+    # Create indexes
     op.create_index('idx_customers_tenant', 'customers', ['tenant_id'], schema='domain_crm')
     op.create_index('idx_customers_number', 'customers', ['customer_number'], schema='domain_crm')
     op.create_index('idx_leads_customer', 'leads', ['customer_id'], schema='domain_crm')
@@ -382,7 +382,7 @@ def upgrade():
     op.create_index('idx_audit_log_timestamp', 'audit_log', ['timestamp'], schema='infrastructure')
     op.create_index('idx_audit_log_user', 'audit_log', ['user_id'], schema='infrastructure')
 
-    ***REMOVED*** Create functions and triggers
+    # Create functions and triggers
     op.execute("""
     CREATE OR REPLACE FUNCTION update_updated_at_column()
     RETURNS TRIGGER AS $$
@@ -393,7 +393,7 @@ def upgrade():
     $$ LANGUAGE plpgsql;
     """)
 
-    ***REMOVED*** Apply triggers
+    # Apply triggers
     op.execute("CREATE TRIGGER update_customers_updated_at BEFORE UPDATE ON domain_crm.customers FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();")
     op.execute("CREATE TRIGGER update_leads_updated_at BEFORE UPDATE ON domain_crm.leads FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();")
     op.execute("CREATE TRIGGER update_journal_entries_updated_at BEFORE UPDATE ON domain_erp.journal_entries FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();")
@@ -405,7 +405,7 @@ def upgrade():
 
 
 def downgrade():
-    ***REMOVED*** Drop triggers
+    # Drop triggers
     op.execute("DROP TRIGGER IF EXISTS update_customers_updated_at ON domain_crm.customers;")
     op.execute("DROP TRIGGER IF EXISTS update_leads_updated_at ON domain_crm.leads;")
     op.execute("DROP TRIGGER IF EXISTS update_journal_entries_updated_at ON domain_erp.journal_entries;")
@@ -415,10 +415,10 @@ def downgrade():
     op.execute("DROP TRIGGER IF EXISTS update_warehouses_updated_at ON domain_inventory.warehouses;")
     op.execute("DROP TRIGGER IF EXISTS update_outbox_updated_at ON infrastructure.outbox;")
 
-    ***REMOVED*** Drop functions
+    # Drop functions
     op.execute("DROP FUNCTION IF EXISTS update_updated_at_column();")
 
-    ***REMOVED*** Drop indexes
+    # Drop indexes
     op.drop_index('idx_audit_log_user', schema='infrastructure')
     op.drop_index('idx_audit_log_timestamp', schema='infrastructure')
     op.drop_index('idx_outbox_status', schema='infrastructure')
@@ -439,7 +439,7 @@ def downgrade():
     op.drop_index('idx_customers_number', schema='domain_crm')
     op.drop_index('idx_customers_tenant', schema='domain_crm')
 
-    ***REMOVED*** Drop tables
+    # Drop tables
     op.drop_table('policy_rules')
     op.drop_table('audit_log', schema='infrastructure')
     op.drop_table('outbox', schema='infrastructure')
@@ -459,7 +459,7 @@ def downgrade():
     op.drop_table('users', schema='domain_shared')
     op.drop_table('tenants', schema='domain_shared')
 
-    ***REMOVED*** Drop schemas
+    # Drop schemas
     op.execute("DROP SCHEMA IF EXISTS infrastructure CASCADE;")
     op.execute("DROP SCHEMA IF EXISTS domain_inventory CASCADE;")
     op.execute("DROP SCHEMA IF EXISTS domain_erp CASCADE;")

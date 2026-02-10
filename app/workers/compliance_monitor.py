@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class ComplianceMonitorWorker:
     """Background worker for automated compliance monitoring."""
     
-    def __init__(self, interval_seconds: int = 3600):  ***REMOVED*** Every hour
+    def __init__(self, interval_seconds: int = 3600):  # Every hour
         self.interval = interval_seconds
         self.running = False
         self.last_check: Optional[datetime] = None
@@ -54,9 +54,9 @@ class ComplianceMonitorWorker:
         try:
             from app.infrastructure.models import Customer, Article
             
-            ***REMOVED*** Check all customers
+            # Check all customers
             customers = db.query(Customer).filter(
-                Customer.is_active == True  ***REMOVED*** noqa: E712
+                Customer.is_active == True  # noqa: E712
             ).limit(100).all()
             
             customer_violations = []
@@ -69,14 +69,14 @@ class ComplianceMonitorWorker:
                         "name": customer.company_name,
                         "psm_sachkundenachweis": (
                             customer.tax_id is not None
-                        ),  ***REMOVED*** Simplified check
+                        ),  # Simplified check
                     }
                 )
                 
                 if result["violations"]:
                     customer_violations.extend(result["violations"])
             
-            ***REMOVED*** Check high-risk articles
+            # Check high-risk articles
             articles = db.query(Article).filter(
                 Article.category.in_(["Düngemittel", "Pflanzenschutz"])
             ).limit(100).all()
@@ -90,7 +90,7 @@ class ComplianceMonitorWorker:
                     entity_data={
                         "name": article.name,
                         "category": article.category,
-                        "explosivstoff_konform": True  ***REMOVED*** TODO: Real check
+                        "explosivstoff_konform": True  # TODO: Real check
                     }
                 )
                 
@@ -107,7 +107,7 @@ class ComplianceMonitorWorker:
                 logger.warning(
                     f"⚠️ Compliance check found {total_violations} violations"
                 )
-                ***REMOVED*** TODO: Send alerts via Event-Bus
+                # TODO: Send alerts via Event-Bus
             else:
                 logger.info("✅ All compliance checks passed")
         
@@ -115,7 +115,7 @@ class ComplianceMonitorWorker:
             db.close()
 
 
-***REMOVED*** Global worker instance
+# Global worker instance
 _compliance_worker: Optional[ComplianceMonitorWorker] = None
 
 

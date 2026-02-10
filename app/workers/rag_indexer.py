@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class RAGIndexerWorker:
     """Background worker to keep vector store synchronized."""
     
-    def __init__(self, interval_seconds: int = 300):  ***REMOVED*** 5 minutes
+    def __init__(self, interval_seconds: int = 300):  # 5 minutes
         self.interval = interval_seconds
         self.running = False
         self.last_sync: Optional[datetime] = None
@@ -54,14 +54,14 @@ class RAGIndexerWorker:
         try:
             indexer = get_indexer()
             
-            ***REMOVED*** Index all tenants (in production: only updated since last_sync)
-            tenant_id = "system"  ***REMOVED*** TODO: Multi-tenant support
+            # Index all tenants (in production: only updated since last_sync)
+            tenant_id = "system"  # TODO: Multi-tenant support
             
-            ***REMOVED*** Index articles
+            # Index articles
             article_count = await indexer.index_articles(db, tenant_id)
             logger.info(f"Indexed {article_count} articles")
             
-            ***REMOVED*** Index customers
+            # Index customers
             customer_count = await indexer.index_customers(db, tenant_id)
             logger.info(f"Indexed {customer_count} customers")
             
@@ -76,7 +76,7 @@ class RAGIndexerWorker:
             db.close()
 
 
-***REMOVED*** Global worker instance
+# Global worker instance
 _rag_worker: Optional[RAGIndexerWorker] = None
 
 

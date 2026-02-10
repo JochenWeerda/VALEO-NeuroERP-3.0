@@ -43,7 +43,7 @@ class ViesService:
             ViesResult with validation details
         """
         try:
-            ***REMOVED*** Extract country code from VAT number if not provided
+            # Extract country code from VAT number if not provided
             if not country_code:
                 if len(vat_number) < 2:
                     return ViesResult(
@@ -55,12 +55,12 @@ class ViesService:
                 country_code = vat_number[:2].upper()
                 vat_number = vat_number[2:]
 
-            ***REMOVED*** Clean VAT number (remove spaces, dashes, etc.)
+            # Clean VAT number (remove spaces, dashes, etc.)
             vat_number = "".join(c for c in vat_number if c.isalnum())
 
             logger.info(f"Validating VAT: {country_code}{vat_number}")
 
-            ***REMOVED*** Call VIES API
+            # Call VIES API
             url = self.VIES_URL.format(country_code=country_code, vat_number=vat_number)
             response = await self.client.get(url)
 
@@ -106,7 +106,7 @@ class ViesService:
         await self.client.aclose()
 
 
-***REMOVED*** Global service instance
+# Global service instance
 vies_service = ViesService()
 
 

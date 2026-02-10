@@ -26,7 +26,7 @@ class Kunde(Base):
     email = Column(String(100))
     homepage = Column(String(200))
     
-    ***REMOVED*** Rechnung/Kontoauszug
+    # Rechnung/Kontoauszug
     kontonutzung_rechnung = Column(Boolean, default=False)
     kontoauszug_gewuenscht = Column(Boolean, default=False)
     saldo_druck_rechnung = Column(Boolean, default=False)
@@ -44,7 +44,7 @@ class Kunde(Base):
     selbstabrechner_verkauf_zukauf = Column(String(50))
     kunden_zusatz = Column(Text)
     
-    ***REMOVED*** Preise / Rabatte
+    # Preise / Rabatte
     direktes_konto = Column(Boolean, default=False)
     rabatt_verrechnung = Column(String(20))
     selbstabholer_rabatt = Column(DECIMAL(5, 2), default=0)
@@ -54,7 +54,7 @@ class Kunde(Base):
     gueltig_ab = Column(Date)
     gueltig_bis = Column(Date)
     
-    ***REMOVED*** Bank / Zahlungsverkehr
+    # Bank / Zahlungsverkehr
     zahlungsbedingungen_tage = Column(Integer)
     skonto = Column(DECIMAL(5, 2), default=0)
     netto_kasse = Column(Boolean, default=False)
@@ -73,11 +73,11 @@ class Kunde(Base):
     saldo_letzte_zinsabrechnung = Column(DECIMAL(12, 2), default=0)
     verrechnung_automatisch = Column(Boolean, default=False)
     
-    ***REMOVED*** Wegbeschreibung
+    # Wegbeschreibung
     lade_information = Column(Text)
     allgemeine_angaben = Column(Text)
     
-    ***REMOVED*** Sonstiges
+    # Sonstiges
     nachkalkulation = Column(Boolean, default=False)
     formular_id = Column(Integer, ForeignKey("formulare.id"))
     offene_posten_nicht_aufrufen = Column(Boolean, default=False)
@@ -89,11 +89,11 @@ class Kunde(Base):
     schwellenwert = Column(DECIMAL(12, 2), default=0)
     webshop_kunde = Column(Boolean, default=False)
     
-    ***REMOVED*** Selektionen
+    # Selektionen
     selektion_schluessel = Column(String(50))
     selektion_berechnung = Column(Text)
     
-    ***REMOVED*** Schnittstelle
+    # Schnittstelle
     tankkarte_ean_code = Column(String(50))
     kundenkarten_kennzeichen = Column(String(50))
     edifact_invoic = Column(Boolean, default=False)
@@ -103,12 +103,12 @@ class Kunde(Base):
     webshop_kunden_nr = Column(String(50))
     webshop_bezeichnung = Column(String(200))
     
-    ***REMOVED*** Metadaten
+    # Metadaten
     erstellt_am = Column(DateTime)
     geaendert_am = Column(DateTime)
     geloescht = Column(Boolean, default=False)
     
-    ***REMOVED*** Relations
+    # Relations
     ansprechpartner = relationship("KundenAnsprechpartner", back_populates="kunde", cascade="all, delete-orphan")
     profil = relationship("KundenProfil", back_populates="kunde", uselist=False, cascade="all, delete-orphan")
     versand = relationship("KundenVersand", back_populates="kunde", uselist=False, cascade="all, delete-orphan")

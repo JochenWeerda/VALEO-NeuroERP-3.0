@@ -60,7 +60,7 @@ async def get_next_number(
         Scope: docs:write, sales:write, oder purchase:write
     """
     try:
-        ***REMOVED*** Auto-Jahr wenn yearly_reset aktiv
+        # Auto-Jahr wenn yearly_reset aktiv
         year = req.year
         if year is None:
             import os
@@ -100,7 +100,7 @@ async def get_numbering_status(
         Scope: docs:read, sales:read, oder purchase:read
     """
     try:
-        ***REMOVED*** Auto-Jahr wenn yearly_reset aktiv
+        # Auto-Jahr wenn yearly_reset aktiv
         if year is None:
             import os
             yearly_reset = os.environ.get("NUMBERING_YEARLY_RESET", "false").lower() == "true"
@@ -110,7 +110,7 @@ async def get_numbering_status(
         next_num = await numbering.peek(domain, tenant_id, year)
         prefix = numbering._get_prefix(domain, tenant_id, year)
         
-        ***REMOVED*** Extract counter from next_num
+        # Extract counter from next_num
         counter_str = next_num.replace(prefix, "")
         counter = int(counter_str) - 1 if counter_str.isdigit() else 0
         
@@ -187,7 +187,7 @@ async def init_year(
         initialized = 0
         
         for domain in domains:
-            ***REMOVED*** Peek initialisiert automatisch wenn nicht vorhanden
+            # Peek initialisiert automatisch wenn nicht vorhanden
             await numbering.peek(domain, "default", year)
             initialized += 1
         

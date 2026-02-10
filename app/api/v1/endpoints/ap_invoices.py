@@ -11,14 +11,14 @@ from decimal import Decimal
 import logging
 
 from app.core.database import get_db
-from app.documents.models import SalesInvoice  ***REMOVED*** Reusing model structure for now
+from app.documents.models import SalesInvoice  # Reusing model structure for now
 from app.documents.router_helpers import get_repository, save_to_store, get_from_store, list_from_store, delete_from_store
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ap/invoices", tags=["finance", "ap", "invoices"])
 
 
-***REMOVED*** Helper to calculate totals (same as AR invoices)
+# Helper to calculate totals (same as AR invoices)
 def calculate_invoice_totals(invoice: SalesInvoice) -> SalesInvoice:
     """Berechnet Summen für Eingangsrechnung."""
     subtotal_net = 0.0
@@ -39,11 +39,11 @@ async def create_ap_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) ->
     logger.info(f"Creating AP invoice: {doc.number}")
     try:
         repo = get_repository(db)
-        doc.date = datetime.now().isoformat()[:10]  ***REMOVED*** Set current date
-        doc.dueDate = (datetime.now() + timedelta(days=30)).isoformat()[:10]  ***REMOVED*** Default 30 days due
-        doc.status = "ENTWURF"  ***REMOVED*** Initial status
+        doc.date = datetime.now().isoformat()[:10]  # Set current date
+        doc.dueDate = (datetime.now() + timedelta(days=30)).isoformat()[:10]  # Default 30 days due
+        doc.status = "ENTWURF"  # Initial status
 
-        doc = calculate_invoice_totals(doc)  ***REMOVED*** Calculate totals
+        doc = calculate_invoice_totals(doc)  # Calculate totals
 
         result = save_to_store("ap_invoice", doc.number, doc.model_dump(), repo)
         return {"status": "ok", "message": "AP Invoice created", "data": result}
@@ -72,8 +72,8 @@ async def update_ap_invoice(invoice_id: str, doc: SalesInvoice, db: Session = De
     if not existing_invoice:
         raise HTTPException(status_code=404, detail="AP Invoice not found")
 
-    doc.number = invoice_id  ***REMOVED*** Ensure number matches ID
-    doc = calculate_invoice_totals(doc)  ***REMOVED*** Recalculate totals
+    doc.number = invoice_id  # Ensure number matches ID
+    doc = calculate_invoice_totals(doc)  # Recalculate totals
 
     result = save_to_store("ap_invoice", doc.number, doc.model_dump(), repo)
     return {"status": "ok", "message": "AP Invoice updated", "data": result}
@@ -97,7 +97,7 @@ async def list_ap_invoices(
     for inv in all_invoices:
         match = True
         if query and not (query.lower() in inv.get("number", "").lower() or
-                         query.lower() in inv.get("customerId", "").lower() or  ***REMOVED*** customerId = supplier_id for AP
+                         query.lower() in inv.get("customerId", "").lower() or  # customerId = supplier_id for AP
                          query.lower() in inv.get("notes", "").lower()):
             match = False
         if status and inv.get("status", "").lower() != status.lower():
@@ -134,7 +134,7 @@ async def approve_ap_invoice(
     if not invoice:
         raise HTTPException(status_code=404, detail="AP Invoice not found")
 
-    ***REMOVED*** Update status to approved
+    # Update status to approved
     invoice["status"] = "FREIGEGEBEN"
     invoice["approvedBy"] = approved_by
     invoice["approvedAt"] = datetime.now().isoformat()
@@ -156,7 +156,7 @@ async def post_ap_invoice(
     if not invoice:
         raise HTTPException(status_code=404, detail="AP Invoice not found")
 
-    ***REMOVED*** Check approval status via workflow API
+    # Check approval status via workflow API
     try:
         from app.api.v1.endpoints.ap_approval_workflow import get_approval_status
         approval_status = await get_approval_status(invoice_id, tenant_id=invoice.get("tenantId", "system"), db=db)
@@ -167,24 +167,24 @@ async def post_ap_invoice(
                 detail=f"Invoice must be approved before posting. Current status: {approval_status.status}, Required: {approval_status.required_approvals}, Current: {approval_status.current_approvals}"
             )
     except ImportError:
-        ***REMOVED*** Fallback to simple status check if workflow API not available
+        # Fallback to simple status check if workflow API not available
         if invoice.get("status") != "FREIGEGEBEN":
             raise HTTPException(
                 status_code=400,
                 detail="Invoice must be approved before posting"
             )
 
-    ***REMOVED*** Update status to posted
+    # Update status to posted
     invoice["status"] = "VERBUCHT"
     invoice["postedBy"] = posted_by
     invoice["postedAt"] = datetime.now().isoformat()
 
-    ***REMOVED*** Create GL journal entry
+    # Create GL journal entry
     try:
         from app.api.v1.schemas.finance import JournalEntryCreate, JournalEntryLine
         from sqlalchemy import text
         
-        ***REMOVED*** Extract invoice data
+        # Extract invoice data
         invoice_date = invoice.get("date", datetime.now().isoformat()[:10])
         invoice_number = invoice.get("number", invoice_id)
         total_gross = float(invoice.get("totalGross", 0))
@@ -192,22 +192,22 @@ async def post_ap_invoice(
         total_tax = float(invoice.get("totalTax", 0))
         tenant_id = invoice.get("tenantId", "system")
         
-        ***REMOVED*** Determine period from invoice date
-        period = invoice_date[:7]  ***REMOVED*** YYYY-MM format
+        # Determine period from invoice date
+        period = invoice_date[:7]  # YYYY-MM format
         
-        ***REMOVED*** Create journal entry lines
+        # Create journal entry lines
         from app.api.v1.schemas.finance import JournalEntryLine
         
         journal_lines = [
             JournalEntryLine(
-                account_id=invoice.get("supplierAccountId", "3300"),  ***REMOVED*** Kreditorenkonto
+                account_id=invoice.get("supplierAccountId", "3300"),  # Kreditorenkonto
                 debit_amount=Decimal(str(total_gross)),
                 credit_amount=Decimal("0.00"),
                 line_number=1,
                 description=f"Eingangsrechnung {invoice_number}"
             ),
             JournalEntryLine(
-                account_id=invoice.get("expenseAccountId", "6000"),  ***REMOVED*** Aufwandskonto
+                account_id=invoice.get("expenseAccountId", "6000"),  # Aufwandskonto
                 debit_amount=Decimal("0.00"),
                 credit_amount=Decimal(str(subtotal_net)),
                 line_number=2,
@@ -215,11 +215,11 @@ async def post_ap_invoice(
             )
         ]
         
-        ***REMOVED*** Add tax line if tax > 0
+        # Add tax line if tax > 0
         if total_tax > 0:
             journal_lines.append(
                 JournalEntryLine(
-                    account_id="1576",  ***REMOVED*** Vorsteuer
+                    account_id="1576",  # Vorsteuer
                     debit_amount=Decimal("0.00"),
                     credit_amount=Decimal(str(total_tax)),
                     line_number=3,
@@ -227,7 +227,7 @@ async def post_ap_invoice(
                 )
             )
         
-        ***REMOVED*** Create journal entry
+        # Create journal entry
         journal_entry_data = JournalEntryCreate(
             date=invoice_date,
             period=period,
@@ -238,29 +238,29 @@ async def post_ap_invoice(
             tenant_id=tenant_id
         )
         
-        ***REMOVED*** Create journal entry directly via repository
+        # Create journal entry directly via repository
         from app.infrastructure.repositories import JournalEntryRepository
         from app.core.dependency_container import container
         
         entry_repo = container.resolve(JournalEntryRepository)
         
-        ***REMOVED*** Convert to dict for repository
+        # Convert to dict for repository
         entry_dict = journal_entry_data.model_dump()
         entry_dict['total_debit'] = total_gross
         entry_dict['total_credit'] = subtotal_net + total_tax
         
         journal_entry = await entry_repo.create(entry_dict, tenant_id)
         
-        ***REMOVED*** Store journal entry ID in invoice
+        # Store journal entry ID in invoice
         invoice["journalEntryId"] = str(journal_entry.id) if hasattr(journal_entry, 'id') else str(journal_entry.get('id', ''))
         logger.info(f"Created GL journal entry {invoice.get('journalEntryId')} for AP invoice {invoice_id}")
         
     except Exception as e:
         logger.error(f"Could not create GL journal entry: {e}", exc_info=True)
-        ***REMOVED*** Continue without GL entry - invoice is still posted
+        # Continue without GL entry - invoice is still posted
         invoice["journalEntryError"] = str(e)
 
-    ***REMOVED*** Create open item (OP) for AP invoice
+    # Create open item (OP) for AP invoice
     try:
         op_insert = text("""
             INSERT INTO offene_posten
@@ -279,7 +279,7 @@ async def post_ap_invoice(
             "faelligkeit": invoice.get("dueDate", (datetime.now() + timedelta(days=30)).isoformat()[:10]),
             "betrag": invoice.get("totalGross", 0),
             "offen": invoice.get("totalGross", 0),
-            "kunde_id": invoice.get("supplierId", ""),  ***REMOVED*** supplierId = creditor for AP
+            "kunde_id": invoice.get("supplierId", ""),  # supplierId = creditor for AP
             "kunde_name": invoice.get("supplierName", ""),
             "zahlbar": True
         })
@@ -289,7 +289,7 @@ async def post_ap_invoice(
     except Exception as e:
         logger.warning(f"Could not create open item (table may not exist): {e}")
         db.rollback()
-        ***REMOVED*** Continue without OP for now
+        # Continue without OP for now
 
     result = save_to_store("ap_invoice", invoice_id, invoice, repo)
     return {"status": "ok", "message": "AP Invoice posted", "data": result}

@@ -45,7 +45,7 @@ class ChecklistTemplateCreate(BaseModel):
 class ChecklistItemStatus(BaseModel):
     """Status of a checklist item"""
     item_code: str
-    status: str  ***REMOVED*** pending, in_progress, completed, failed, skipped
+    status: str  # pending, in_progress, completed, failed, skipped
     completed_by: Optional[str] = None
     completed_at: Optional[datetime] = None
     validation_result: Optional[Dict[str, Any]] = None
@@ -66,7 +66,7 @@ class ClosingChecklistResponse(BaseModel):
     period: str
     closing_type: str
     template_id: Optional[str]
-    status: str  ***REMOVED*** draft, in_progress, completed, blocked
+    status: str  # draft, in_progress, completed, blocked
     progress_percentage: float
     total_items: int
     completed_items: int
@@ -137,7 +137,7 @@ async def list_checklist_templates(
         
     except Exception as e:
         logger.error(f"Error listing checklist templates: {e}")
-        ***REMOVED*** Return default templates if table doesn't exist
+        # Return default templates if table doesn't exist
         return [
             {
                 "id": "1",
@@ -378,7 +378,7 @@ async def create_closing_checklist(
     try:
         checklist_id = str(uuid.uuid4())
         
-        ***REMOVED*** Get template if provided
+        # Get template if provided
         items = []
         template_id = None
         
@@ -398,7 +398,7 @@ async def create_closing_checklist(
                 import json
                 items = json.loads(template_row[1]) if template_row[1] else []
         
-        ***REMOVED*** If no template, use default items based on closing type
+        # If no template, use default items based on closing type
         if not items:
             if checklist.closing_type == "yearly":
                 items = [
@@ -463,7 +463,7 @@ async def create_closing_checklist(
                         "status": "pending"
                     }
                 ]
-            else:  ***REMOVED*** monthly or quarterly
+            else:  # monthly or quarterly
                 items = [
                     {
                         "item_code": "GL-001",
@@ -517,7 +517,7 @@ async def create_closing_checklist(
                     }
                 ]
         
-        ***REMOVED*** Initialize all items with pending status
+        # Initialize all items with pending status
         for item in items:
             if "status" not in item:
                 item["status"] = "pending"
@@ -652,10 +652,10 @@ async def complete_checklist_item(
     Complete a checklist item.
     """
     try:
-        ***REMOVED*** Get checklist
+        # Get checklist
         checklist = await get_closing_checklist(checklist_id, tenant_id, db)
         
-        ***REMOVED*** Find item
+        # Find item
         item_found = False
         updated_items = []
         
@@ -672,12 +672,12 @@ async def complete_checklist_item(
         if not item_found:
             raise HTTPException(status_code=404, detail="Checklist item not found")
         
-        ***REMOVED*** Recalculate progress
+        # Recalculate progress
         completed_items = sum(1 for item in updated_items if item.get("status") == "completed")
         completed_required = sum(1 for item in updated_items if item.get("status") == "completed" and item.get("required", True))
         progress = (completed_items / checklist.total_items * 100) if checklist.total_items > 0 else 0.0
         
-        ***REMOVED*** Update status
+        # Update status
         new_status = "in_progress"
         if completed_required >= checklist.required_items:
             new_status = "completed"
@@ -738,20 +738,20 @@ async def validate_checklist_items(
         
         for item in checklist.items:
             if item.get("validation_type") == "automatic" and item.get("validation_query"):
-                ***REMOVED*** Execute validation query
+                # Execute validation query
                 try:
                     validation_query = item["validation_query"]
-                    ***REMOVED*** Replace :period placeholder
+                    # Replace :period placeholder
                     validation_query = validation_query.replace(":period", f"'{checklist.period}'")
                     
                     result = db.execute(text(validation_query)).fetchone()
                     
-                    ***REMOVED*** Determine if validation passed (assumes query returns count or boolean)
+                    # Determine if validation passed (assumes query returns count or boolean)
                     validation_passed = False
                     if result:
                         value = result[0] if isinstance(result, tuple) else result
                         if isinstance(value, (int, float)):
-                            ***REMOVED*** If count is 0, validation passed (no issues found)
+                            # If count is 0, validation passed (no issues found)
                             validation_passed = (value == 0)
                         elif isinstance(value, bool):
                             validation_passed = value
@@ -762,7 +762,7 @@ async def validate_checklist_items(
                         "validated_at": datetime.now().isoformat()
                     }
                     
-                    ***REMOVED*** Auto-update status if validation passed
+                    # Auto-update status if validation passed
                     if validation_passed and item.get("status") == "pending":
                         item["status"] = "completed"
                         item["completed_at"] = datetime.now().isoformat()
@@ -788,12 +788,12 @@ async def validate_checklist_items(
             
             updated_items.append(item)
         
-        ***REMOVED*** Recalculate progress
+        # Recalculate progress
         completed_items = sum(1 for item in updated_items if item.get("status") == "completed")
         completed_required = sum(1 for item in updated_items if item.get("status") == "completed" and item.get("required", True))
         progress = (completed_items / checklist.total_items * 100) if checklist.total_items > 0 else 0.0
         
-        ***REMOVED*** Update status
+        # Update status
         new_status = "in_progress"
         if completed_required >= checklist.required_items:
             new_status = "completed"

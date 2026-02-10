@@ -32,7 +32,7 @@ async def create_tenant(
     """
     try:
         tenant_repo = container.resolve(TenantRepository)
-        tenant = await tenant_repo.create(tenant_data.model_dump(), tenant_data.name)  ***REMOVED*** Use tenant name as tenant_id for simplicity
+        tenant = await tenant_repo.create(tenant_data.model_dump(), tenant_data.name)  # Use tenant name as tenant_id for simplicity
         return Tenant.model_validate(tenant)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to create tenant: {str(e)}")
@@ -74,8 +74,8 @@ async def list_tenants(
     try:
         tenant_repo = container.resolve(TenantRepository)
 
-        ***REMOVED*** For listing all tenants, we use a dummy tenant_id since this is a system-wide operation
-        ***REMOVED*** In a real implementation, this would require admin privileges
+        # For listing all tenants, we use a dummy tenant_id since this is a system-wide operation
+        # In a real implementation, this would require admin privileges
         tenants = await tenant_repo.get_all("system", skip, limit)
         total = await tenant_repo.count("system")
 

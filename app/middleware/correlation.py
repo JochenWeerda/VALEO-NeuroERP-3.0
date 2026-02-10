@@ -18,19 +18,19 @@ class CorrelationMiddleware(BaseHTTPMiddleware):
     """Middleware to generate and track correlation IDs."""
     
     async def dispatch(self, request: Request, call_next):
-        ***REMOVED*** Get correlation ID from header or generate new one
+        # Get correlation ID from header or generate new one
         correlation_id = request.headers.get(CORRELATION_ID_HEADER)
         
         if not correlation_id:
             correlation_id = str(uuid.uuid4())
         
-        ***REMOVED*** Set in context
+        # Set in context
         set_correlation_id(correlation_id)
         
-        ***REMOVED*** Process request
+        # Process request
         response = await call_next(request)
         
-        ***REMOVED*** Add correlation ID to response headers
+        # Add correlation ID to response headers
         response.headers[CORRELATION_ID_HEADER] = correlation_id
         
         return response

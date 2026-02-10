@@ -32,10 +32,10 @@ class SchedulerService:
 
         logger.info("Starting scheduler service...")
 
-        ***REMOVED*** Register scheduled jobs
+        # Register scheduled jobs
         self._register_jobs()
 
-        ***REMOVED*** Start scheduler in background thread
+        # Start scheduler in background thread
         self.running = True
         self.thread = threading.Thread(target=self._run_scheduler, daemon=True)
         self.thread.start()
@@ -58,22 +58,22 @@ class SchedulerService:
     def _register_jobs(self):
         """Register all scheduled jobs"""
 
-        ***REMOVED*** Daily reports - every day at 20:00 (8 PM)
+        # Daily reports - every day at 20:00 (8 PM)
         schedule.every().day.at("20:00").do(self._execute_daily_reports_job).tag('daily-reports')
 
-        ***REMOVED*** Weekly reports - every Monday at 08:00
+        # Weekly reports - every Monday at 08:00
         schedule.every().monday.at("08:00").do(self._execute_weekly_reports_job).tag('weekly-reports')
 
-        ***REMOVED*** Monthly reports - first day of month at 09:00
+        # Monthly reports - first day of month at 09:00
         schedule.every().month.at("09:00").do(self._execute_monthly_reports_job).tag('monthly-reports')
 
-        ***REMOVED*** Data cleanup - every Sunday at 02:00
+        # Data cleanup - every Sunday at 02:00
         schedule.every().sunday.at("02:00").do(self._execute_cleanup_job).tag('cleanup')
 
-        ***REMOVED*** Price monitoring - every 4 hours
+        # Price monitoring - every 4 hours
         schedule.every(4).hours.do(self._execute_price_monitoring_job).tag('price-monitoring')
 
-        ***REMOVED*** Compliance checks - every day at 06:00
+        # Compliance checks - every day at 06:00
         schedule.every().day.at("06:00").do(self._execute_compliance_checks_job).tag('compliance')
 
         logger.info("Registered scheduled jobs")
@@ -83,10 +83,10 @@ class SchedulerService:
         while self.running:
             try:
                 schedule.run_pending()
-                time_module.sleep(60)  ***REMOVED*** Check every minute
+                time_module.sleep(60)  # Check every minute
             except Exception as e:
                 logger.error(f"Error in scheduler loop: {e}")
-                time_module.sleep(60)  ***REMOVED*** Wait before retrying
+                time_module.sleep(60)  # Wait before retrying
 
     def _execute_daily_reports_job(self):
         """Execute daily reports job"""
@@ -106,7 +106,7 @@ class SchedulerService:
         """Execute weekly reports job"""
         try:
             logger.info("Executing weekly reports job...")
-            ***REMOVED*** TODO: Implement weekly report generation
+            # TODO: Implement weekly report generation
             logger.info("Weekly reports job completed (placeholder)")
 
         except Exception as e:
@@ -116,7 +116,7 @@ class SchedulerService:
         """Execute monthly reports job"""
         try:
             logger.info("Executing monthly reports job...")
-            ***REMOVED*** TODO: Implement monthly report generation
+            # TODO: Implement monthly report generation
             logger.info("Monthly reports job completed (placeholder)")
 
         except Exception as e:
@@ -126,7 +126,7 @@ class SchedulerService:
         """Execute data cleanup job"""
         try:
             logger.info("Executing cleanup job...")
-            ***REMOVED*** TODO: Implement data cleanup (old logs, temp files, etc.)
+            # TODO: Implement data cleanup (old logs, temp files, etc.)
             logger.info("Cleanup job completed (placeholder)")
 
         except Exception as e:
@@ -136,7 +136,7 @@ class SchedulerService:
         """Execute price monitoring job"""
         try:
             logger.info("Executing price monitoring job...")
-            ***REMOVED*** TODO: Implement price monitoring
+            # TODO: Implement price monitoring
             logger.info("Price monitoring job completed (placeholder)")
 
         except Exception as e:
@@ -146,7 +146,7 @@ class SchedulerService:
         """Execute compliance checks job"""
         try:
             logger.info("Executing compliance checks job...")
-            ***REMOVED*** TODO: Implement compliance checks (certificates, licenses, etc.)
+            # TODO: Implement compliance checks (certificates, licenses, etc.)
             logger.info("Compliance checks job completed (placeholder)")
 
         except Exception as e:
@@ -199,7 +199,7 @@ class SchedulerService:
             }
 
 
-***REMOVED*** Global scheduler instance
+# Global scheduler instance
 scheduler = SchedulerService()
 
 
@@ -223,13 +223,13 @@ def execute_job_immediately(job_tag: str):
     return scheduler.execute_job_now(job_tag)
 
 
-***REMOVED*** For testing
+# For testing
 if __name__ == "__main__":
-    ***REMOVED*** Start scheduler
+    # Start scheduler
     start_scheduler()
 
     try:
-        ***REMOVED*** Keep running for testing
+        # Keep running for testing
         while True:
             time_module.sleep(60)
             status = get_scheduler_status()

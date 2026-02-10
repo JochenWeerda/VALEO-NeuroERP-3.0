@@ -60,7 +60,7 @@ class CompetitorMonitor:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         })
 
-        ***REMOVED*** Agricultural B2B shop configurations
+        # Agricultural B2B shop configurations
         self.shops = {
             'baywa': {
                 'name': 'BayWa',
@@ -112,7 +112,7 @@ class CompetitorMonitor:
             }
         }
 
-        ***REMOVED*** Price history storage
+        # Price history storage
         self.price_history_file = Path("data/price_history.json")
         self.price_history_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -126,13 +126,13 @@ class CompetitorMonitor:
                 continue
 
             try:
-                ***REMOVED*** Use Google Custom Search API or similar for discovery
+                # Use Google Custom Search API or similar for discovery
                 search_urls = await self._google_custom_search(
                     f"site:{shop_config['base_url']} {query} {category}",
                     max_results=max_results // len(self.shops)
                 )
 
-                ***REMOVED*** Filter and validate URLs
+                # Filter and validate URLs
                 for url in search_urls:
                     if self._is_product_url(url, shop_config):
                         product_urls.append(url)
@@ -143,26 +143,26 @@ class CompetitorMonitor:
                 logger.warning(f"Failed to search {shop_key}: {e}")
                 continue
 
-        return list(set(product_urls))  ***REMOVED*** Remove duplicates
+        return list(set(product_urls))  # Remove duplicates
 
     async def scrape_product_data(self, product_url: str) -> Optional[CompetitorPrice]:
         """Scrape product data using structured approach (JSON-LD first, then HTML)"""
         try:
-            ***REMOVED*** Determine shop from URL
+            # Determine shop from URL
             shop_config = self._get_shop_config(product_url)
             if not shop_config:
                 return None
 
-            ***REMOVED*** Fetch page
+            # Fetch page
             response = self.session.get(product_url, timeout=10)
             response.raise_for_status()
 
-            ***REMOVED*** Try JSON-LD/schema.org first
+            # Try JSON-LD/schema.org first
             product_data = self._extract_json_ld(response.text)
             if product_data:
                 return self._parse_json_ld_product(product_data, product_url, shop_config)
 
-            ***REMOVED*** Fallback to HTML parsing
+            # Fallback to HTML parsing
             return self._parse_html_product(response.text, product_url, shop_config)
 
         except Exception as e:
@@ -173,7 +173,7 @@ class CompetitorMonitor:
         """Extract JSON-LD structured data from HTML"""
         import json
 
-        ***REMOVED*** Find JSON-LD scripts
+        # Find JSON-LD scripts
         json_ld_pattern = r'<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>'
         matches = re.findall(json_ld_pattern, html, re.DOTALL | re.IGNORECASE)
 
@@ -194,7 +194,7 @@ class CompetitorMonitor:
     def _parse_json_ld_product(self, data: Dict[str, Any], url: str,
                              shop_config: Dict) -> CompetitorPrice:
         """Parse product data from JSON-LD"""
-        ***REMOVED*** Extract price
+        # Extract price
         price = None
         currency = 'EUR'
 
@@ -213,7 +213,7 @@ class CompetitorMonitor:
                     except (ValueError, TypeError):
                         continue
 
-        ***REMOVED*** Extract images
+        # Extract images
         images = []
         image_urls = data.get('image', [])
         if isinstance(image_urls, str):
@@ -247,7 +247,7 @@ class CompetitorMonitor:
 
         soup = BeautifulSoup(html, 'html.parser')
 
-        ***REMOVED*** Extract product name
+        # Extract product name
         name_selectors = shop_config['selectors']['name'].split(', ')
         product_name = None
         for selector in name_selectors:
@@ -256,7 +256,7 @@ class CompetitorMonitor:
                 product_name = element.get_text().strip()
                 break
 
-        ***REMOVED*** Extract price
+        # Extract price
         price_selectors = shop_config['selectors']['price'].split(', ')
         price = None
         currency = 'EUR'
@@ -265,7 +265,7 @@ class CompetitorMonitor:
             element = soup.select_one(selector.strip())
             if element:
                 price_text = element.get_text().strip()
-                ***REMOVED*** Parse price (e.g., "29,99 €" or "29.99 EUR")
+                # Parse price (e.g., "29,99 €" or "29.99 EUR")
                 price_match = re.search(r'(\d+[.,]\d+)', price_text)
                 if price_match:
                     price_str = price_match.group(1).replace(',', '.')
@@ -275,7 +275,7 @@ class CompetitorMonitor:
                     except ValueError:
                         continue
 
-        ***REMOVED*** Extract images
+        # Extract images
         images = []
         image_selectors = shop_config['selectors']['image'].split(', ')
 
@@ -284,7 +284,7 @@ class CompetitorMonitor:
             for img in img_elements:
                 img_url = img.get('src') or img.get('data-src')
                 if img_url:
-                    ***REMOVED*** Make URL absolute
+                    # Make URL absolute
                     img_url = urljoin(url, img_url)
                     images.append(ProductImage(
                         url=img_url,
@@ -311,10 +311,10 @@ class CompetitorMonitor:
     def _calculate_image_hash(self, image_url: str) -> str:
         """Calculate perceptual hash for image deduplication"""
         try:
-            ***REMOVED*** Try to download and hash the actual image
+            # Try to download and hash the actual image
             response = self.session.get(image_url, timeout=5, stream=True)
             if response.status_code == 200:
-                ***REMOVED*** Use imagehash for perceptual hashing if available
+                # Use imagehash for perceptual hashing if available
                 try:
                     import imagehash
                     from PIL import Image
@@ -322,25 +322,25 @@ class CompetitorMonitor:
 
                     image_data = io.BytesIO(response.content)
                     img = Image.open(image_data)
-                    ***REMOVED*** Calculate perceptual hash
+                    # Calculate perceptual hash
                     phash = imagehash.phash(img)
                     return str(phash)
                 except ImportError:
-                    ***REMOVED*** Fallback to content hash
+                    # Fallback to content hash
                     return hashlib.md5(response.content).hexdigest()[:16]
                 except Exception:
-                    ***REMOVED*** Fallback to URL hash
+                    # Fallback to URL hash
                     return hashlib.md5(image_url.encode()).hexdigest()[:16]
             else:
                 return hashlib.md5(image_url.encode()).hexdigest()[:16]
         except Exception:
-            ***REMOVED*** Fallback to URL hash
+            # Fallback to URL hash
             return hashlib.md5(image_url.encode()).hexdigest()[:16]
 
     async def _google_custom_search(self, query: str, max_results: int = 10) -> List[str]:
         """Use Google Custom Search API for product discovery"""
-        ***REMOVED*** Placeholder - would need actual Google Custom Search API key
-        ***REMOVED*** For now, return mock results
+        # Placeholder - would need actual Google Custom Search API key
+        # For now, return mock results
         return [
             f"https://example-shop.com/product/{i}"
             for i in range(min(max_results, 5))
@@ -386,7 +386,7 @@ class CompetitorMonitor:
 
     def _is_product_url(self, url: str, shop_config: Dict) -> bool:
         """Check if URL is likely a product page"""
-        ***REMOVED*** Basic heuristics for product URLs
+        # Basic heuristics for product URLs
         product_indicators = [
             '/product/', '/artikel/', '/item/',
             '/p/', '/produkt/', '/mittel/'
@@ -403,7 +403,7 @@ class CompetitorMonitor:
                 with open(self.price_history_file, 'r') as f:
                     history = json.load(f)
 
-            ***REMOVED*** Add new entries
+            # Add new entries
             for price in prices:
                 history.append({
                     'shop_name': price.shop_name,
@@ -422,7 +422,7 @@ class CompetitorMonitor:
                     ]
                 })
 
-            ***REMOVED*** Keep only last 24 months of data
+            # Keep only last 24 months of data
             cutoff_date = datetime.now() - timedelta(days=730)
             history = [
                 entry for entry in history
@@ -448,7 +448,7 @@ class CompetitorMonitor:
                 history = json.load(f)
 
             alerts = []
-            ***REMOVED*** Group by product URL
+            # Group by product URL
             product_groups = {}
             for entry in history:
                 url = entry['product_url']
@@ -460,7 +460,7 @@ class CompetitorMonitor:
                 if len(entries) < 2:
                     continue
 
-                ***REMOVED*** Sort by date
+                # Sort by date
                 entries.sort(key=lambda x: x.get('scraped_at', ''), reverse=True)
                 latest = entries[0]
                 previous = entries[1]
@@ -487,5 +487,5 @@ class CompetitorMonitor:
             return []
 
 
-***REMOVED*** Global competitor monitor instance
+# Global competitor monitor instance
 competitor_monitor = CompetitorMonitor()

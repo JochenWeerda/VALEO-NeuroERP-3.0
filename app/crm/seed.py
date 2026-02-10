@@ -11,7 +11,7 @@ from . import models
 def seed_crm_data(db: Session, tenant_id: str = "default"):
     """Seed CRM tables with realistic data"""
     
-    ***REMOVED*** 10+ Contacts (Kunden & Lieferanten)
+    # 10+ Contacts (Kunden & Lieferanten)
     contacts_data = [
         {
             "id": str(uuid.uuid4()),
@@ -187,7 +187,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
         contact = models.Contact(**contact_data)
         db.add(contact)
     
-    ***REMOVED*** 10+ Leads
+    # 10+ Leads
     leads_data = [
         {
             "id": str(uuid.uuid4()),
@@ -270,8 +270,8 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
         lead = models.Lead(**lead_data)
         db.add(lead)
     
-    ***REMOVED*** 10+ Activities
-    ***REMOVED*** (Aktivitäten für die ersten 3 Contacts)
+    # 10+ Activities
+    # (Aktivitäten für die ersten 3 Contacts)
     contact_ids = [c["id"] for c in contacts_data]
     
     activities_data = [
@@ -336,7 +336,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
         activity = models.Activity(**activity_data)
         db.add(activity)
     
-    ***REMOVED*** 5+ Betriebsprofile
+    # 5+ Betriebsprofile
     betriebsprofile_data = [
         {
             "id": str(uuid.uuid4()),

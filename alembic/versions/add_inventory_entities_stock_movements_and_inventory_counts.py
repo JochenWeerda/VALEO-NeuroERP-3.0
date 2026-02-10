@@ -11,7 +11,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = 'add_inv_ent'
 down_revision: Union[str, None] = '1368e3f15650'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -19,7 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Create stock movements table
+    # Create stock movements table
     op.create_table('inventory_stock_movements',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('article_id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -41,7 +41,7 @@ def upgrade() -> None:
         schema='domain_inventory'
     )
 
-    ***REMOVED*** Create inventory counts table
+    # Create inventory counts table
     op.create_table('inventory_counts',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('warehouse_id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -65,6 +65,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    ***REMOVED*** Drop tables in reverse order
+    # Drop tables in reverse order
     op.drop_table('inventory_counts', schema='domain_inventory')
     op.drop_table('inventory_stock_movements', schema='domain_inventory')

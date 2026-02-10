@@ -42,9 +42,9 @@ class PriceSource(str, Enum):
     PROMO = "PROMO"
 
 
-***REMOVED*** ============================================
-***REMOVED*** Produkt-Schemas für Shop-Kacheln
-***REMOVED*** ============================================
+# ============================================
+# Produkt-Schemas für Shop-Kacheln
+# ============================================
 
 class LastOrderInfo(BaseModel):
     """Information zur letzten Bestellung eines Artikels"""
@@ -87,27 +87,27 @@ class PortalProduct(BaseModel):
     beschreibung: Optional[str] = None
     einheit: str
     
-    ***REMOVED*** Preise
+    # Preise
     listenpreis: Decimal = Field(..., alias="preis")
     aktionspreis: Optional[Decimal] = Field(None, alias="rabattPreis")
     
-    ***REMOVED*** Verfügbarkeit
+    # Verfügbarkeit
     verfuegbar: bool
     bestand: Decimal
     
-    ***REMOVED*** Zertifikate
+    # Zertifikate
     zertifikate: List[str] = []
     
-    ***REMOVED*** Letzte Bestellung (für "Erneut bestellen")
+    # Letzte Bestellung (für "Erneut bestellen")
     letzte_bestellung: Optional[LastOrderInfo] = Field(None, alias="letzteBestellung")
     
-    ***REMOVED*** Kontrakt-Informationen
+    # Kontrakt-Informationen
     contract_status: ContractStatus = Field(ContractStatus.NONE, alias="contractStatus")
     contract_price: Optional[Decimal] = Field(None, alias="contractPrice")
     contract_total_qty: Optional[Decimal] = Field(None, alias="contractTotalQty")
     contract_remaining_qty: Optional[Decimal] = Field(None, alias="contractRemainingQty")
     
-    ***REMOVED*** Vorkauf-Informationen
+    # Vorkauf-Informationen
     is_pre_purchase: bool = Field(False, alias="isPrePurchase")
     pre_purchase_price: Optional[Decimal] = Field(None, alias="prePurchasePrice")
     pre_purchase_total_qty: Optional[Decimal] = Field(None, alias="prePurchaseTotalQty")
@@ -124,13 +124,13 @@ class PortalProductList(BaseModel):
     total: int
     page: int = 1
     size: int = 50
-    has_contracts: int = 0  ***REMOVED*** Anzahl Produkte mit aktivem Kontrakt
-    has_pre_purchases: int = 0  ***REMOVED*** Anzahl Produkte mit Vorkauf-Guthaben
+    has_contracts: int = 0  # Anzahl Produkte mit aktivem Kontrakt
+    has_pre_purchases: int = 0  # Anzahl Produkte mit Vorkauf-Guthaben
 
 
-***REMOVED*** ============================================
-***REMOVED*** Warenkorb-Schemas
-***REMOVED*** ============================================
+# ============================================
+# Warenkorb-Schemas
+# ============================================
 
 class CartItem(BaseModel):
     """Warenkorb-Position"""
@@ -140,16 +140,16 @@ class CartItem(BaseModel):
     menge: Decimal
     einheit: str
     
-    ***REMOVED*** Preisinformationen
+    # Preisinformationen
     unit_price: Decimal
     total_price: Decimal
     price_source: PriceSource
     
-    ***REMOVED*** Bei Vorkauf: Aufschlüsselung
+    # Bei Vorkauf: Aufschlüsselung
     quantity_from_credit: Decimal = Decimal("0")
     quantity_at_list_price: Decimal = Decimal("0")
-    credit_amount: Decimal = Decimal("0")  ***REMOVED*** Wert aus Guthaben
-    list_amount: Decimal = Decimal("0")  ***REMOVED*** Wert zum Listenpreis
+    credit_amount: Decimal = Decimal("0")  # Wert aus Guthaben
+    list_amount: Decimal = Decimal("0")  # Wert zum Listenpreis
 
 
 class CartSummary(BaseModel):
@@ -157,20 +157,20 @@ class CartSummary(BaseModel):
     items: List[CartItem]
     item_count: int
     total_net: Decimal
-    credit_used: Decimal = Decimal("0")  ***REMOVED*** Aus Vorkauf-Guthaben
-    to_pay: Decimal = Decimal("0")  ***REMOVED*** Tatsächlich zu zahlen
+    credit_used: Decimal = Decimal("0")  # Aus Vorkauf-Guthaben
+    to_pay: Decimal = Decimal("0")  # Tatsächlich zu zahlen
 
 
-***REMOVED*** ============================================
-***REMOVED*** Bestellung-Schemas
-***REMOVED*** ============================================
+# ============================================
+# Bestellung-Schemas
+# ============================================
 
 class OrderItemCreate(BaseModel):
     """Bestellposition erstellen"""
     article_id: str
     quantity: Decimal
     
-    ***REMOVED*** Optional: Explizite Preisquelle (sonst automatisch beste Option)
+    # Optional: Explizite Preisquelle (sonst automatisch beste Option)
     preferred_price_source: Optional[PriceSource] = None
 
 
@@ -227,7 +227,7 @@ class OrderListItem(BaseModel):
     status: OrderStatus
     item_count: int
     total_net: Decimal
-    main_article: str  ***REMOVED*** Erstes/Haupt-Artikel der Bestellung
+    main_article: str  # Erstes/Haupt-Artikel der Bestellung
 
 
 class OrderList(BaseModel):
@@ -238,9 +238,9 @@ class OrderList(BaseModel):
     size: int = 20
 
 
-***REMOVED*** ============================================
-***REMOVED*** Anfrage-Schemas
-***REMOVED*** ============================================
+# ============================================
+# Anfrage-Schemas
+# ============================================
 
 class InquiryCreate(BaseModel):
     """Anfrage erstellen"""

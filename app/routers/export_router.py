@@ -45,23 +45,23 @@ async def export_documents(
         Export-Datei
     """
     try:
-        ***REMOVED*** Get DocumentRepository from container
+        # Get DocumentRepository from container
         doc_repo = container.resolve(DocumentRepository)
 
-        ***REMOVED*** Get all documents for the domain (TODO: Add date filtering to repository)
-        ***REMOVED*** For now, get all and filter in memory
+        # Get all documents for the domain (TODO: Add date filtering to repository)
+        # For now, get all and filter in memory
         from datetime import datetime
         docs = []
 
-        ***REMOVED*** This is a simplified approach - in production, add date filtering to repository
-        ***REMOVED*** For now, we'll get a reasonable number of recent documents
-        all_docs = doc_repo.list_by_type(domain, limit=1000)  ***REMOVED*** Get recent documents
+        # This is a simplified approach - in production, add date filtering to repository
+        # For now, we'll get a reasonable number of recent documents
+        all_docs = doc_repo.list_by_type(domain, limit=1000)  # Get recent documents
 
-        ***REMOVED*** Filter by date if provided
+        # Filter by date if provided
         for doc_header in all_docs:
             doc_dict = doc_repo.to_dict(doc_header)
 
-            ***REMOVED*** Date filtering
+            # Date filtering
             if from_date or to_date:
                 doc_date = doc_dict.get("date")
                 if doc_date:
@@ -76,11 +76,11 @@ async def export_documents(
                             if doc_date_obj > to_date_obj:
                                 continue
                     except (ValueError, TypeError):
-                        pass  ***REMOVED*** Skip date filtering if date parsing fails
+                        pass  # Skip date filtering if date parsing fails
 
             docs.append(doc_dict)
 
-        ***REMOVED*** Flatten für Export
+        # Flatten für Export
         rows = []
         for doc in docs:
             lines = doc.get("lines", [])
@@ -95,7 +95,7 @@ async def export_documents(
             }
             rows.append(row)
 
-        ***REMOVED*** Export
+        # Export
         temp_dir = Path("data/temp")
         temp_dir.mkdir(parents=True, exist_ok=True)
         output_path = temp_dir / f"export_{domain}.{fmt}"
@@ -109,10 +109,10 @@ async def export_documents(
             df.to_csv(output_path, index=False)
             media_type = "text/csv"
 
-        ***REMOVED*** Audit-Logging für Export
+        # Audit-Logging für Export
         logger.info(f"User {user.get('sub', 'unknown')} exported {len(rows)} {domain} documents as {fmt}")
 
-        ***REMOVED*** SSE Broadcast für Export-Audit
+        # SSE Broadcast für Export-Audit
         import asyncio
         asyncio.create_task(sse_hub.broadcast("audit", {
             "id": f"export-{domain}-{int(time.time())}",

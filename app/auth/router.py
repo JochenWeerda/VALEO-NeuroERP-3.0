@@ -17,7 +17,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 class LoginBody(BaseModel):
     """Login-Request Body"""
     username: str
-    role: str = "manager"  ***REMOVED*** manager | admin | operator
+    role: str = "manager"  # manager | admin | operator
 
 
 class LoginResponse(BaseModel):
@@ -42,14 +42,14 @@ async def demo_login(body: LoginBody) -> LoginResponse:
     Returns:
         LoginResponse mit access_token
     """
-    ***REMOVED*** Validiere Rolle
+    # Validiere Rolle
     valid_roles = ["admin", "manager", "operator"]
     if body.role not in valid_roles:
         raise HTTPException(
             status_code=400, detail=f"Invalid role. Must be one of: {valid_roles}"
         )
 
-    ***REMOVED*** Erstelle Token
+    # Erstelle Token
     token = create_access_token(sub=body.username, roles=[body.role])
 
     logger.warning(
@@ -76,7 +76,7 @@ async def demo_multi_role_login(username: str, roles: list[str]) -> LoginRespons
     Returns:
         LoginResponse mit access_token
     """
-    ***REMOVED*** Erstelle Token mit mehreren Rollen
+    # Erstelle Token mit mehreren Rollen
     token = create_access_token(sub=username, roles=roles)
 
     logger.warning(

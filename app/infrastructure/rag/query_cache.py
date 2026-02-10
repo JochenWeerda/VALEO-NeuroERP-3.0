@@ -33,7 +33,7 @@ class RAGQueryCache:
     In production: Use Redis for distributed caching.
     """
     
-    def __init__(self, default_ttl: int = 300):  ***REMOVED*** 5 minutes
+    def __init__(self, default_ttl: int = 300):  # 5 minutes
         self.cache: Dict[str, CachedResult] = {}
         self.default_ttl = default_ttl
         self.hits = 0
@@ -110,14 +110,14 @@ class RAGQueryCache:
         Returns count of invalidated entries.
         """
         if collection is None:
-            ***REMOVED*** Clear all
+            # Clear all
             count = len(self.cache)
             self.cache.clear()
             logger.info(f"Invalidated entire RAG cache ({count} entries)")
             return count
         
-        ***REMOVED*** Invalidate by collection
-        ***REMOVED*** (Simple implementation: clear all for now)
+        # Invalidate by collection
+        # (Simple implementation: clear all for now)
         count = len(self.cache)
         self.cache.clear()
         logger.info(
@@ -158,7 +158,7 @@ class RAGQueryCache:
         }
 
 
-***REMOVED*** Global instance
+# Global instance
 _query_cache: Optional[RAGQueryCache] = None
 
 

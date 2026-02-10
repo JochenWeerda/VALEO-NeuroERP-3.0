@@ -21,24 +21,24 @@ def require_inventory_access(
     Require inventory access permissions.
     Checks if user has inventory-related roles or permissions.
     """
-    ***REMOVED*** Get user claims from request state
+    # Get user claims from request state
     claims = getattr(request.state, 'token_claims', {})
 
-    ***REMOVED*** For development token, allow all access
+    # For development token, allow all access
     if claims.get('token_type') == 'dev':
         return token
 
-    ***REMOVED*** Extract user ID from JWT claims
+    # Extract user ID from JWT claims
     user_id = claims.get('sub') or claims.get('user_id')
     if not user_id:
         raise HTTPException(status_code=401, detail="User ID not found in token")
 
-    ***REMOVED*** Check user permissions in database
+    # Check user permissions in database
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
     if not user or not user.is_active:
         raise HTTPException(status_code=403, detail="User not found or inactive")
 
-    ***REMOVED*** Check roles - allow if user has inventory, admin, or manager roles
+    # Check roles - allow if user has inventory, admin, or manager roles
     user_roles = user.roles or "[]"
     try:
         roles = json.loads(user_roles) if isinstance(user_roles, str) else user_roles
@@ -50,7 +50,7 @@ def require_inventory_access(
                 detail="Insufficient permissions for inventory access"
             )
     except (json.JSONDecodeError, TypeError):
-        ***REMOVED*** If roles parsing fails, deny access for security
+        # If roles parsing fails, deny access for security
         raise HTTPException(status_code=403, detail="Invalid user roles configuration")
 
     return token
@@ -65,24 +65,24 @@ def require_inventory_admin(
     Require inventory admin permissions.
     Only allows users with admin or inventory_manager roles.
     """
-    ***REMOVED*** Get user claims from request state
+    # Get user claims from request state
     claims = getattr(request.state, 'token_claims', {})
 
-    ***REMOVED*** For development token, allow all access
+    # For development token, allow all access
     if claims.get('token_type') == 'dev':
         return token
 
-    ***REMOVED*** Extract user ID from JWT claims
+    # Extract user ID from JWT claims
     user_id = claims.get('sub') or claims.get('user_id')
     if not user_id:
         raise HTTPException(status_code=401, detail="User ID not found in token")
 
-    ***REMOVED*** Check user permissions in database
+    # Check user permissions in database
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
     if not user or not user.is_active:
         raise HTTPException(status_code=403, detail="User not found or inactive")
 
-    ***REMOVED*** Check for admin roles
+    # Check for admin roles
     user_roles = user.roles or "[]"
     try:
         roles = json.loads(user_roles) if isinstance(user_roles, str) else user_roles
@@ -108,11 +108,11 @@ def get_current_tenant_id(
     """
     claims = getattr(request.state, 'token_claims', {})
 
-    ***REMOVED*** For development token, return default tenant
+    # For development token, return default tenant
     if claims.get('token_type') == 'dev':
         return "system"
 
-    ***REMOVED*** Extract tenant ID from JWT claims
+    # Extract tenant ID from JWT claims
     tenant_id = claims.get('tenant_id')
     if not tenant_id:
         raise HTTPException(status_code=400, detail="Tenant ID not found in token")
@@ -130,7 +130,7 @@ def require_tenant_access(
     """
     claims = getattr(request.state, 'token_claims', {})
 
-    ***REMOVED*** For development token, allow all tenant access
+    # For development token, allow all tenant access
     if claims.get('token_type') == 'dev':
         return tenant_id
 

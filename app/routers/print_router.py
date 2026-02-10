@@ -36,35 +36,35 @@ async def print_document(domain: str, doc_id: str) -> FileResponse:
         PDF-Datei als FileResponse
     """
     try:
-        ***REMOVED*** Get DocumentRepository from container
+        # Get DocumentRepository from container
         doc_repo = container.resolve(DocumentRepository)
 
-        ***REMOVED*** Beleg aus DB holen - try to find by ID first, then by number if needed
+        # Beleg aus DB holen - try to find by ID first, then by number if needed
         doc_header = doc_repo.get_by_id(doc_id)
         if not doc_header:
-            ***REMOVED*** Try to find by number if ID lookup fails
+            # Try to find by number if ID lookup fails
             doc_header = doc_repo.get_by_number(domain, doc_id)
 
         if not doc_header:
             raise HTTPException(status_code=404, detail="Document not found")
 
-        ***REMOVED*** Convert DocumentHeader to dict format expected by PDF service
+        # Convert DocumentHeader to dict format expected by PDF service
         doc = doc_repo.to_dict(doc_header)
 
-        ***REMOVED*** Workflow-Status holen
+        # Workflow-Status holen
         workflow_status = _STATE.get((domain, doc_id), "draft")
 
-        ***REMOVED*** PDF generieren
+        # PDF generieren
         temp_dir = Path("data/temp")
         temp_dir.mkdir(parents=True, exist_ok=True)
         pdf_path = temp_dir / f"{doc_id}.pdf"
 
         generator.render_document(domain, doc, str(pdf_path), workflow_status)
 
-        ***REMOVED*** Archivieren
+        # Archivieren
         archive.archive(domain, doc_id, str(pdf_path), user="system")
 
-        ***REMOVED*** Optional: Upload to Mayan-DMS (falls konfiguriert)
+        # Optional: Upload to Mayan-DMS (falls konfiguriert)
         if is_dms_configured():
             try:
                 metadata = {

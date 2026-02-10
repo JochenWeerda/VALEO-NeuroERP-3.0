@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api/dms", tags=["dms"])
 
 class WebhookPayload(BaseModel):
     """Mayan-Webhook-Payload"""
-    event: str  ***REMOVED*** e.g. "document.created"
+    event: str  # e.g. "document.created"
     document_id: int
     document_type: Optional[str] = None
     user: Optional[str] = None
@@ -36,7 +36,7 @@ class InboxDocument(BaseModel):
     status: str = "pending"
 
 
-***REMOVED*** In-Memory Inbox (TODO: durch DB ersetzen)
+# In-Memory Inbox (TODO: durch DB ersetzen)
 _INBOX: Dict[str, InboxDocument] = {}
 
 
@@ -59,7 +59,7 @@ async def handle_webhook(payload: WebhookPayload):
     try:
         logger.info(f"Received DMS webhook: {payload.event} for document {payload.document_id}")
         
-        ***REMOVED*** Nur auf document.created reagieren
+        # Nur auf document.created reagieren
         if payload.event == "document.created" or payload.event == "document.ocr.finished":
             await _process_incoming_document(payload.document_id)
         
@@ -83,9 +83,9 @@ async def _process_incoming_document(document_id: int):
         return
     
     try:
-        ***REMOVED*** Hole OCR-Text aus Mayan
+        # Hole OCR-Text aus Mayan
         with get_client() as client:
-            ***REMOVED*** Get document versions
+            # Get document versions
             response = client.get(f"/api/documents/documents/{document_id}/versions/")
             response.raise_for_status()
             versions = response.json()["results"]
@@ -96,22 +96,22 @@ async def _process_incoming_document(document_id: int):
             
             version_id = versions[0]["id"]
             
-            ***REMOVED*** Get OCR content
+            # Get OCR content
             ocr_response = client.get(
                 f"/api/documents/documents/{document_id}/versions/{version_id}/ocr_content/"
             )
             ocr_response.raise_for_status()
             ocr_text = ocr_response.text
         
-        ***REMOVED*** Parse OCR-Text
+        # Parse OCR-Text
         parse_result = parser.parse(ocr_text)
         
-        ***REMOVED*** Erstelle Inbox-Eintrag
+        # Erstelle Inbox-Eintrag
         inbox_doc = InboxDocument(
             id=f"INBOX-{document_id}",
             dms_document_id=document_id,
             dms_url=f"http://localhost:8010/documents/{document_id}/",
-            ocr_text=ocr_text[:1000],  ***REMOVED*** Erste 1000 Zeichen
+            ocr_text=ocr_text[:1000],  # Erste 1000 Zeichen
             parsed_fields=parse_result["fields"],
             confidence=parse_result["confidence"],
             status="pending"
@@ -190,16 +190,16 @@ async def create_from_inbox(inbox_id: str, overrides: Dict[str, Any] = Body(...)
         
         inbox_doc = _INBOX[inbox_id]
         
-        ***REMOVED*** Merge parsed_fields + overrides
+        # Merge parsed_fields + overrides
         fields = {**inbox_doc.parsed_fields, **overrides}
         
-        ***REMOVED*** Erstelle Beleg (TODO: Integration mit document_repository)
-        ***REMOVED*** Für jetzt: Mock-Response
+        # Erstelle Beleg (TODO: Integration mit document_repository)
+        # Für jetzt: Mock-Response
         beleg_number = fields.get("invoice_number", "UNKNOWN")
         
         logger.info(f"Created document from inbox: {inbox_id} → {beleg_number}")
         
-        ***REMOVED*** Markiere als verarbeitet
+        # Markiere als verarbeitet
         inbox_doc.status = "processed"
         
         return {

@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy import text
 
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = 'procurement_p0_001'
 down_revision: Union[str, None] = '2012a7987e7f'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -20,9 +20,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** ================================================================
-    ***REMOVED*** Versioning + Audit columns on einkauf_bestellungen (PROC-PO-02)
-    ***REMOVED*** ================================================================
+    # ================================================================
+    # Versioning + Audit columns on einkauf_bestellungen (PROC-PO-02)
+    # ================================================================
     conn = op.get_bind()
     po_exists = conn.execute(text("SELECT to_regclass('public.einkauf_bestellungen')")).scalar()
     if po_exists:
@@ -30,9 +30,9 @@ def upgrade() -> None:
             batch_op.add_column(sa.Column("version", sa.Integer(), server_default="1", nullable=False))
             batch_op.add_column(sa.Column("audit_log_id", sa.String(36), nullable=True))
 
-    ***REMOVED*** ================================================================
-    ***REMOVED*** Wareneingang (Goods Receipt) - PROC-GR-01
-    ***REMOVED*** ================================================================
+    # ================================================================
+    # Wareneingang (Goods Receipt) - PROC-GR-01
+    # ================================================================
     op.create_table('einkauf_wareneingaenge',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('purchase_order_id', sa.String(36), nullable=False),
@@ -68,9 +68,9 @@ def upgrade() -> None:
     )
     op.create_index('ix_einkauf_we_pos_gr_id', 'einkauf_wareneingang_positionen', ['wareneingang_id'])
 
-    ***REMOVED*** ================================================================
-    ***REMOVED*** Anfragen / Bedarfsmeldungen (Requisitions) - PROC-REQ-01
-    ***REMOVED*** ================================================================
+    # ================================================================
+    # Anfragen / Bedarfsmeldungen (Requisitions) - PROC-REQ-01
+    # ================================================================
     op.create_table('einkauf_anfragen',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('anfrage_nummer', sa.String(100), nullable=False),
@@ -112,9 +112,9 @@ def upgrade() -> None:
     )
     op.create_index('ix_einkauf_anfragen_pos_req_id', 'einkauf_anfragen_positionen', ['anfrage_id'])
 
-    ***REMOVED*** ================================================================
-    ***REMOVED*** Rechnungseingaenge (Invoice Receipts) - PROC-IV-02
-    ***REMOVED*** ================================================================
+    # ================================================================
+    # Rechnungseingaenge (Invoice Receipts) - PROC-IV-02
+    # ================================================================
     op.create_table('einkauf_rechnungseingaenge',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('rechnungs_nummer', sa.String(100), nullable=False),
@@ -157,21 +157,21 @@ def upgrade() -> None:
     )
     op.create_index('ix_einkauf_re_pos_re_id', 'einkauf_rechnungseingang_positionen', ['rechnungseingang_id'])
 
-    ***REMOVED*** ================================================================
-    ***REMOVED*** Abgleich-Ergebnisse (Match Results) - PROC-IV-02
-    ***REMOVED*** ================================================================
+    # ================================================================
+    # Abgleich-Ergebnisse (Match Results) - PROC-IV-02
+    # ================================================================
     op.create_table('einkauf_abgleich_ergebnisse',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('invoice_id', sa.String(36), nullable=False),
         sa.Column('purchase_order_id', sa.String(36), nullable=False),
         sa.Column('goods_receipt_id', sa.String(36), nullable=True),
-        sa.Column('match_type', sa.String(20), nullable=False),  ***REMOVED*** two_way, three_way
-        sa.Column('overall_status', sa.String(50), nullable=False),  ***REMOVED*** matched, partial_match, exceptions, no_match
+        sa.Column('match_type', sa.String(20), nullable=False),  # two_way, three_way
+        sa.Column('overall_status', sa.String(50), nullable=False),  # matched, partial_match, exceptions, no_match
         sa.Column('total_variance', sa.Numeric(15, 2), server_default='0', nullable=False),
         sa.Column('variance_percentage', sa.Numeric(8, 4), server_default='0', nullable=False),
         sa.Column('exceptions_count', sa.Integer(), server_default='0', nullable=False),
         sa.Column('auto_approval_eligible', sa.Boolean(), server_default='false', nullable=False),
-        sa.Column('match_details', sa.JSON(), nullable=True),  ***REMOVED*** Full item-level match details
+        sa.Column('match_details', sa.JSON(), nullable=True),  # Full item-level match details
         sa.Column('created_by', sa.String(100), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.PrimaryKeyConstraint('id'),

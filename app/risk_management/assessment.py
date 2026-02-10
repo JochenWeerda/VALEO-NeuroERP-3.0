@@ -52,11 +52,11 @@ class RiskStatus(Enum):
 
 class RiskTreatment(Enum):
     """Risk treatment options"""
-    MODIFY = "modify"  ***REMOVED*** Reduce likelihood or impact
-    AVOID = "avoid"    ***REMOVED*** Eliminate the risk
-    TRANSFER = "transfer"  ***REMOVED*** Transfer to third party
-    ACCEPT = "accept"  ***REMOVED*** Accept the risk
-    SHARE = "share"    ***REMOVED*** Share with other parties
+    MODIFY = "modify"  # Reduce likelihood or impact
+    AVOID = "avoid"    # Eliminate the risk
+    TRANSFER = "transfer"  # Transfer to third party
+    ACCEPT = "accept"  # Accept the risk
+    SHARE = "share"    # Share with other parties
 
 
 class RiskSource(Enum):
@@ -80,8 +80,8 @@ class RiskAssessment:
     source: RiskSource
     likelihood: RiskLevel
     impact: RiskLevel
-    risk_score: int  ***REMOVED*** Calculated from likelihood * impact
-    risk_level: RiskLevel  ***REMOVED*** Overall risk level
+    risk_score: int  # Calculated from likelihood * impact
+    risk_level: RiskLevel  # Overall risk level
     affected_assets: List[str]
     threat_agents: List[str]
     vulnerabilities: List[str]
@@ -154,7 +154,7 @@ class RiskAppetite:
     id: str
     category: RiskCategory
     max_acceptable_risk: RiskLevel
-    risk_tolerance_threshold: int  ***REMOVED*** Risk score threshold
+    risk_tolerance_threshold: int  # Risk score threshold
     treatment_required_threshold: int
     senior_management_approval_threshold: int
     automatic_treatment_threshold: int
@@ -170,8 +170,8 @@ class RiskHeatmap:
     generated_at: datetime
     period_start: datetime
     period_end: datetime
-    risk_distribution: Dict[str, int] = field(default_factory=dict)  ***REMOVED*** Risk level -> count
-    category_distribution: Dict[str, int] = field(default_factory=dict)  ***REMOVED*** Category -> count
+    risk_distribution: Dict[str, int] = field(default_factory=dict)  # Risk level -> count
+    category_distribution: Dict[str, int] = field(default_factory=dict)  # Category -> count
     top_risks: List[Dict[str, Any]] = field(default_factory=list)
     emerging_trends: List[str] = field(default_factory=list)
     recommendations: List[str] = field(default_factory=list)
@@ -188,7 +188,7 @@ class ISO27001RiskManagement:
         self.assets = asset_service
         self.threats = threat_service
 
-        ***REMOVED*** Risk management components
+        # Risk management components
         self.risk_assessments: Dict[str, RiskAssessment] = {}
         self.risk_treatments: Dict[str, RiskTreatmentPlan] = {}
         self.risk_register: Dict[str, RiskRegister] = {}
@@ -196,13 +196,13 @@ class ISO27001RiskManagement:
         self.risk_appetite: Dict[str, RiskAppetite] = {}
         self.risk_heatmaps: List[RiskHeatmap] = {}
 
-        ***REMOVED*** Risk assessment configuration
+        # Risk assessment configuration
         self.risk_config = self._initialize_risk_config()
 
-        ***REMOVED*** Risk scoring matrix
+        # Risk scoring matrix
         self.risk_matrix = self._initialize_risk_matrix()
 
-        ***REMOVED*** Default risk appetite
+        # Default risk appetite
         self._initialize_default_risk_appetite()
 
     def _initialize_risk_config(self) -> Dict[str, Any]:
@@ -214,17 +214,17 @@ class ISO27001RiskManagement:
                 'standard_assets': 'biannual'
             },
             'review_cycles': {
-                'risk_register': 30,  ***REMOVED*** days
-                'treatment_plans': 90,  ***REMOVED*** days
-                'risk_appetite': 180   ***REMOVED*** days
+                'risk_register': 30,  # days
+                'treatment_plans': 90,  # days
+                'risk_appetite': 180   # days
             },
             'escalation_thresholds': {
-                'immediate_attention': 15,  ***REMOVED*** risk score
+                'immediate_attention': 15,  # risk score
                 'management_review': 12,
                 'board_notification': 20
             },
             'monitoring_intervals': {
-                'high_risk': 30,   ***REMOVED*** days
+                'high_risk': 30,   # days
                 'medium_risk': 60,
                 'low_risk': 90
             }
@@ -234,7 +234,7 @@ class ISO27001RiskManagement:
         """Initialize risk scoring matrix"""
         matrix = {}
 
-        ***REMOVED*** Define risk scores (1-25 scale)
+        # Define risk scores (1-25 scale)
         scores = {
             (RiskLevel.VERY_LOW, RiskLevel.VERY_LOW): {'score': 1, 'level': RiskLevel.VERY_LOW},
             (RiskLevel.VERY_LOW, RiskLevel.LOW): {'score': 2, 'level': RiskLevel.VERY_LOW},
@@ -302,7 +302,7 @@ class ISO27001RiskManagement:
         """
         risk_id = str(uuid.uuid4())
 
-        ***REMOVED*** Calculate risk score
+        # Calculate risk score
         likelihood = RiskLevel[risk_data['likelihood'].upper()]
         impact = RiskLevel[risk_data['impact'].upper()]
 
@@ -331,10 +331,10 @@ class ISO27001RiskManagement:
 
         self.risk_assessments[risk_id] = risk
 
-        ***REMOVED*** Create risk register entry
+        # Create risk register entry
         self._create_risk_register_entry(risk)
 
-        ***REMOVED*** Check if treatment is required
+        # Check if treatment is required
         self._evaluate_risk_treatment_requirement(risk)
 
         logger.info(f"Risk assessed: {risk.title} (Score: {risk.risk_score}, Level: {risk.risk_level.value})")
@@ -359,7 +359,7 @@ class ISO27001RiskManagement:
 
         if appetite:
             if risk.risk_score >= appetite.treatment_required_threshold:
-                ***REMOVED*** Auto-create treatment plan for high-risk items
+                # Auto-create treatment plan for high-risk items
                 if risk.risk_score >= appetite.automatic_treatment_threshold:
                     self._create_automatic_treatment_plan(risk)
                 else:
@@ -420,7 +420,7 @@ class ISO27001RiskManagement:
 
         self.risk_treatments[plan_id] = plan
 
-        ***REMOVED*** Update risk status
+        # Update risk status
         if plan.risk_id in self.risk_assessments:
             risk = self.risk_assessments[plan.risk_id]
             risk.status = RiskStatus.TREATED
@@ -435,7 +435,7 @@ class ISO27001RiskManagement:
         """
         monitoring_id = str(uuid.uuid4())
 
-        ***REMOVED*** Get current risk register entry
+        # Get current risk register entry
         register_entry = None
         for entry in self.risk_register.values():
             if entry.risk_assessment_id == risk_id:
@@ -445,7 +445,7 @@ class ISO27001RiskManagement:
         if not register_entry:
             raise ValueError(f"Risk register entry not found for risk: {risk_id}")
 
-        ***REMOVED*** Check for status changes
+        # Check for status changes
         status_changed = False
         new_likelihood = monitoring_data.get('new_likelihood')
         new_impact = monitoring_data.get('new_impact')
@@ -457,13 +457,13 @@ class ISO27001RiskManagement:
             if new_impact:
                 register_entry.residual_impact = RiskLevel[new_impact.upper()]
 
-            ***REMOVED*** Recalculate residual risk score
+            # Recalculate residual risk score
             if register_entry.residual_likelihood and register_entry.residual_impact:
                 matrix_key = (register_entry.residual_likelihood, register_entry.residual_impact)
                 residual_calc = self.risk_matrix.get(matrix_key, {'score': register_entry.current_risk_score})
                 register_entry.residual_risk_score = residual_calc['score']
 
-        ***REMOVED*** Create monitoring record
+        # Create monitoring record
         monitoring = RiskMonitoring(
             id=monitoring_id,
             risk_id=risk_id,
@@ -479,7 +479,7 @@ class ISO27001RiskManagement:
 
         self.risk_monitoring.append(monitoring)
 
-        ***REMOVED*** Update register entry
+        # Update register entry
         register_entry.last_updated = datetime.utcnow()
         register_entry.updated_by = monitoring.monitored_by
 
@@ -496,21 +496,21 @@ class ISO27001RiskManagement:
         period_end = datetime.utcnow()
         period_start = period_end - timedelta(days=period_days)
 
-        ***REMOVED*** Analyze risk distribution
+        # Analyze risk distribution
         risk_distribution = {}
         category_distribution = {}
         top_risks = []
 
         for risk in self.risk_assessments.values():
-            ***REMOVED*** Risk level distribution
+            # Risk level distribution
             level_key = risk.risk_level.value
             risk_distribution[level_key] = risk_distribution.get(level_key, 0) + 1
 
-            ***REMOVED*** Category distribution
+            # Category distribution
             category_key = risk.category.value
             category_distribution[category_key] = category_distribution.get(category_key, 0) + 1
 
-            ***REMOVED*** Top risks (by score)
+            # Top risks (by score)
             top_risks.append({
                 'id': risk.id,
                 'title': risk.title,
@@ -519,11 +519,11 @@ class ISO27001RiskManagement:
                 'category': risk.category.value
             })
 
-        ***REMOVED*** Sort top risks
+        # Sort top risks
         top_risks.sort(key=lambda x: x['score'], reverse=True)
-        top_risks = top_risks[:10]  ***REMOVED*** Top 10
+        top_risks = top_risks[:10]  # Top 10
 
-        ***REMOVED*** Generate recommendations
+        # Generate recommendations
         recommendations = self._generate_heatmap_recommendations(risk_distribution, category_distribution)
 
         heatmap = RiskHeatmap(
@@ -547,17 +547,17 @@ class ISO27001RiskManagement:
         """Generate heatmap recommendations"""
         recommendations = []
 
-        ***REMOVED*** Check for high concentration of high-risk items
+        # Check for high concentration of high-risk items
         high_risk_count = risk_dist.get('high', 0) + risk_dist.get('very_high', 0)
-        if high_risk_count > len(self.risk_assessments) * 0.2:  ***REMOVED*** More than 20%
+        if high_risk_count > len(self.risk_assessments) * 0.2:  # More than 20%
             recommendations.append("High concentration of high-risk items detected - prioritize treatment plans")
 
-        ***REMOVED*** Check for category concentrations
+        # Check for category concentrations
         max_category = max(category_dist.items(), key=lambda x: x[1])
-        if max_category[1] > len(self.risk_assessments) * 0.3:  ***REMOVED*** More than 30% in one category
+        if max_category[1] > len(self.risk_assessments) * 0.3:  # More than 30% in one category
             recommendations.append(f"Risk concentration in {max_category[0]} category - review category-specific controls")
 
-        ***REMOVED*** General recommendations
+        # General recommendations
         recommendations.extend([
             "Regular risk assessments should be conducted quarterly",
             "Ensure risk treatment plans are implemented within defined timelines",
@@ -568,24 +568,24 @@ class ISO27001RiskManagement:
 
     def get_risk_management_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Generate comprehensive risk management dashboard"""
-        ***REMOVED*** Get current risk statistics
+        # Get current risk statistics
         total_risks = len(self.risk_assessments)
         assessed_risks = len([r for r in self.risk_assessments.values() if r.status != RiskStatus.IDENTIFIED])
         treated_risks = len([r for r in self.risk_assessments.values() if r.status in [RiskStatus.TREATED, RiskStatus.MITIGATED]])
 
-        ***REMOVED*** Risk distribution by level
+        # Risk distribution by level
         risk_by_level = {}
         for risk in self.risk_assessments.values():
             level = risk.risk_level.value
             risk_by_level[level] = risk_by_level.get(level, 0) + 1
 
-        ***REMOVED*** Risk distribution by category
+        # Risk distribution by category
         risk_by_category = {}
         for risk in self.risk_assessments.values():
             category = risk.category.value
             risk_by_category[category] = risk_by_category.get(category, 0) + 1
 
-        ***REMOVED*** Treatment plan status
+        # Treatment plan status
         treatment_stats = {
             'total_plans': len(self.risk_treatments),
             'completed_plans': len([p for p in self.risk_treatments.values() if p.status == 'completed']),
@@ -593,10 +593,10 @@ class ISO27001RiskManagement:
                                 if p.target_completion_date < datetime.utcnow() and p.status != 'completed'])
         }
 
-        ***REMOVED*** Recent monitoring activities
-        recent_monitoring = [m for m in self.risk_monitoring[-20:]]  ***REMOVED*** Last 20 monitoring records
+        # Recent monitoring activities
+        recent_monitoring = [m for m in self.risk_monitoring[-20:]]  # Last 20 monitoring records
 
-        ***REMOVED*** Active alerts (high-risk items requiring attention)
+        # Active alerts (high-risk items requiring attention)
         active_alerts = []
         for risk in self.risk_assessments.values():
             appetite = self.risk_appetite.get(f"{risk.category.value}_appetite")
@@ -624,7 +624,7 @@ class ISO27001RiskManagement:
                 'by_category': risk_by_category
             },
             'treatment_statistics': treatment_stats,
-            'active_alerts': active_alerts[:10],  ***REMOVED*** Top 10 alerts
+            'active_alerts': active_alerts[:10],  # Top 10 alerts
             'recent_monitoring': [
                 {
                     'risk_id': m.risk_id,
@@ -659,7 +659,7 @@ class ISO27001RiskManagement:
         """Get upcoming risk reviews"""
         upcoming_reviews = []
 
-        ***REMOVED*** Check risk register review dates
+        # Check risk register review dates
         for register in self.risk_register.values():
             if register.next_review_date > datetime.utcnow() and register.next_review_date < datetime.utcnow() + timedelta(days=30):
                 upcoming_reviews.append({
@@ -669,7 +669,7 @@ class ISO27001RiskManagement:
                     'days_until_due': (register.next_review_date - datetime.utcnow()).days
                 })
 
-        ***REMOVED*** Check treatment plan reviews
+        # Check treatment plan reviews
         for plan in self.risk_treatments.values():
             if plan.target_completion_date > datetime.utcnow() and plan.target_completion_date < datetime.utcnow() + timedelta(days=30):
                 upcoming_reviews.append({
@@ -685,7 +685,7 @@ class ISO27001RiskManagement:
         """Check ISO 27001 risk management compliance"""
         assessments = list(self.risk_assessments.values())
         treatments = list(self.risk_treatments.values())
-        monitoring_records = self.risk_monitoring[-50:]  ***REMOVED*** Last 50 monitoring records
+        monitoring_records = self.risk_monitoring[-50:]  # Last 50 monitoring records
 
         compliance_status = self._assess_risk_management_compliance(assessments, treatments, monitoring_records)
 
@@ -706,27 +706,27 @@ class ISO27001RiskManagement:
         """Assess ISO 27001 risk management compliance"""
         issues = []
 
-        ***REMOVED*** Check risk assessment coverage
-        if len(assessments) < 10:  ***REMOVED*** Arbitrary minimum
+        # Check risk assessment coverage
+        if len(assessments) < 10:  # Arbitrary minimum
             issues.append("Insufficient number of risk assessments conducted")
 
-        ***REMOVED*** Check assessment completeness
+        # Check assessment completeness
         incomplete_assessments = len([a for a in assessments if not a.assessed_at])
         if incomplete_assessments > 0:
             issues.append(f"{incomplete_assessments} risk assessments are incomplete")
 
-        ***REMOVED*** Check treatment plan coverage
+        # Check treatment plan coverage
         high_risk_assessments = [a for a in assessments if a.risk_level in [RiskLevel.HIGH, RiskLevel.VERY_HIGH]]
         treated_high_risks = len([t for t in treatments if any(a.id == t.risk_id for a in high_risk_assessments)])
-        if treated_high_risks < len(high_risk_assessments) * 0.8:  ***REMOVED*** Less than 80% treated
+        if treated_high_risks < len(high_risk_assessments) * 0.8:  # Less than 80% treated
             issues.append("Insufficient treatment plans for high-risk items")
 
-        ***REMOVED*** Check monitoring frequency
+        # Check monitoring frequency
         recent_monitoring = len([m for m in monitoring if (datetime.utcnow() - m.monitoring_date).days <= 90])
-        if recent_monitoring < len(assessments) * 0.5:  ***REMOVED*** Less than 50% monitored in last 90 days
+        if recent_monitoring < len(assessments) * 0.5:  # Less than 50% monitored in last 90 days
             issues.append("Risk monitoring frequency is insufficient")
 
-        ***REMOVED*** Check risk appetite definition
+        # Check risk appetite definition
         if len(self.risk_appetite) < len(RiskCategory):
             issues.append("Risk appetite not defined for all risk categories")
 

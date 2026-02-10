@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 OWASP ASVS Compliance Check
 Minimal automated check for ASVS Level 2 controls
@@ -8,7 +8,7 @@ import sys
 import requests
 from typing import Dict, Callable
 
-***REMOVED*** Target URL (override via env)
+# Target URL (override via env)
 import os
 TARGET = os.environ.get("ASVS_TARGET", "http://localhost:8000/health")
 
@@ -38,7 +38,7 @@ def check_frame_options(value: str) -> bool:
     return value.upper() in ["DENY", "SAMEORIGIN"]
 
 
-***REMOVED*** ASVS Controls Map
+# ASVS Controls Map
 CHECKS: Dict[str, Callable[[str], bool]] = {
     "Strict-Transport-Security": check_hsts,
     "Content-Security-Policy": check_csp,
@@ -75,7 +75,7 @@ def main():
         
         passed.append(header_name)
 
-    ***REMOVED*** Results
+    # Results
     print(f"\n✅ Passed: {len(passed)}/{len(CHECKS)}")
     for h in passed:
         print(f"  ✓ {h}")

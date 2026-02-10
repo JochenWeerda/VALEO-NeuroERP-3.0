@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 VALEO-NeuroERP FastAPI Application
 Main entry point for the ERP system API
@@ -20,42 +20,42 @@ from app.api.v1.api import api_router
 from app.api.v1.endpoints import policies as policies_v1
 from app.core.logging import setup_logging
 from app.core.security import require_bearer_token
-from app.core.container_config import configure_container  ***REMOVED*** Import container configuration
+from app.core.container_config import configure_container  # Import container configuration
 
-***REMOVED*** Logger muss vor der Verwendung definiert werden
+# Logger muss vor der Verwendung definiert werden
 logger = logging.getLogger(__name__)
 
-from app.policy.router import router as policy_router  ***REMOVED*** Policy Manager
-from app.auth.router import router as auth_router  ***REMOVED*** Authentication
-from app.documents.router import router as documents_router  ***REMOVED*** Documents & Flows
-from app.forms.router import router as forms_router  ***REMOVED*** Form Specs
-from app.lookup.router import router as lookup_router  ***REMOVED*** Lookup/Autocomplete
-from app.routers.print_router import router as print_router  ***REMOVED*** Print & Archive
-from app.routers.export_router import router as export_router  ***REMOVED*** Export CSV/XLSX
-from app.routers.workflow_router import router as workflow_router  ***REMOVED*** Workflow & Approval
-from app.routers.sse_router import router as sse_router  ***REMOVED*** SSE Streams
-from app.routers.verify_router import router as verify_router  ***REMOVED*** Document Verification
-from app.routers.gdpr_router import router as gdpr_router  ***REMOVED*** GDPR Compliance
-from app.routers.numbering_router import router as numbering_router  ***REMOVED*** Numbering Service
-from app.routers.admin_dms_router import router as admin_dms_router  ***REMOVED*** Admin DMS Integration
-from app.routers.dms_webhook_router import router as dms_webhook_router  ***REMOVED*** DMS Webhooks & Inbox
-from app.routers.fibu_router import router as fibu_router  ***REMOVED*** Finanzbuchhaltung (130 Masken)
+from app.policy.router import router as policy_router  # Policy Manager
+from app.auth.router import router as auth_router  # Authentication
+from app.documents.router import router as documents_router  # Documents & Flows
+from app.forms.router import router as forms_router  # Form Specs
+from app.lookup.router import router as lookup_router  # Lookup/Autocomplete
+from app.routers.print_router import router as print_router  # Print & Archive
+from app.routers.export_router import router as export_router  # Export CSV/XLSX
+from app.routers.workflow_router import router as workflow_router  # Workflow & Approval
+from app.routers.sse_router import router as sse_router  # SSE Streams
+from app.routers.verify_router import router as verify_router  # Document Verification
+from app.routers.gdpr_router import router as gdpr_router  # GDPR Compliance
+from app.routers.numbering_router import router as numbering_router  # Numbering Service
+from app.routers.admin_dms_router import router as admin_dms_router  # Admin DMS Integration
+from app.routers.dms_webhook_router import router as dms_webhook_router  # DMS Webhooks & Inbox
+from app.routers.fibu_router import router as fibu_router  # Finanzbuchhaltung (130 Masken)
 
-***REMOVED*** Import domain-specific routers with error handling
+# Import domain-specific routers with error handling
 try:
-    from app.crm.router import router as crm_router  ***REMOVED*** CRM
+    from app.crm.router import router as crm_router  # CRM
 except ImportError:
     crm_router = None
     logger.warning("CRM router not available")
 
 try:
-    from app.finance.router import router as finance_router  ***REMOVED*** Finance (DATEV, SEPA)
+    from app.finance.router import router as finance_router  # Finance (DATEV, SEPA)
 except ImportError:
     finance_router = None
     logger.warning("Finance router not available")
 
 try:
-    from app.einkauf.router import router as einkauf_router  ***REMOVED*** Einkauf/Beschaffung
+    from app.einkauf.router import router as einkauf_router  # Einkauf/Beschaffung
 except ImportError:
     einkauf_router = None
     logger.warning("Einkauf router not available")
@@ -68,16 +68,16 @@ except ImportError:
 
 from prometheus_client import make_asgi_app
 
-***REMOVED*** Setup logging
+# Setup logging
 setup_logging()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan context manager"""
-    ***REMOVED*** Startup
+    # Startup
     logger.info("Starting VALEO-NeuroERP API server...")
 
-    ***REMOVED*** Configure dependency injection container
+    # Configure dependency injection container
     try:
         configure_container()
         logger.info("Dependency injection container configured successfully")
@@ -85,7 +85,7 @@ async def lifespan(app: FastAPI):
         logger.error(f"Failed to configure dependency container: {e}")
         raise
 
-    ***REMOVED*** Create database tables
+    # Create database tables
     try:
         create_tables()
         logger.info("Database tables initialized successfully")
@@ -95,10 +95,10 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    ***REMOVED*** Shutdown
+    # Shutdown
     logger.info("Shutting down VALEO-NeuroERP API server...")
 
-***REMOVED*** Create FastAPI application
+# Create FastAPI application
 app = FastAPI(
     title="VALEO-NeuroERP API",
     description="Enterprise Resource Planning System with Clean Architecture",
@@ -109,7 +109,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-***REMOVED*** Set up CORS (open in debug, permissive fallback otherwise to avoid local dev blocks)
+# Set up CORS (open in debug, permissive fallback otherwise to avoid local dev blocks)
 cors_kwargs = dict(
     allow_credentials=True,
     allow_methods=["*"],
@@ -127,28 +127,28 @@ else:
 
 app.add_middleware(CORSMiddleware, **cors_kwargs)
 
-***REMOVED*** Add trusted host middleware
+# Add trusted host middleware
 if not settings.DEBUG:
     app.add_middleware(
         TrustedHostMiddleware,
         allowed_hosts=settings.ALLOWED_HOSTS,
     )
 
-***REMOVED*** Add Prometheus metrics middleware
+# Add Prometheus metrics middleware
 from app.middleware.metrics import PrometheusMiddleware
 app.add_middleware(PrometheusMiddleware)
 
-***REMOVED*** Add Correlation ID middleware
+# Add Correlation ID middleware
 from app.middleware.correlation import CorrelationMiddleware
 app.add_middleware(CorrelationMiddleware)
 
-***REMOVED*** Authentication middleware
+# Authentication middleware
 @app.middleware("http")
 async def enforce_bearer_token(request: Request, call_next):
     """
     Enforce bearer-token authentication for protected API routes.
     """
-    ***REMOVED*** Handle OPTIONS requests (CORS preflight) - skip auth and add CORS headers
+    # Handle OPTIONS requests (CORS preflight) - skip auth and add CORS headers
     if request.method == "OPTIONS":
         response = JSONResponse(status_code=200, content={})
         origin = request.headers.get("origin")
@@ -162,9 +162,9 @@ async def enforce_bearer_token(request: Request, call_next):
     try:
         await require_bearer_token(request)
     except HTTPException as exc:
-        ***REMOVED*** Return error response with CORS headers
+        # Return error response with CORS headers
         response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
-        ***REMOVED*** Add CORS headers manually for error responses
+        # Add CORS headers manually for error responses
         origin = request.headers.get("origin")
         if origin and origin in [str(o) for o in settings.BACKEND_CORS_ORIGINS]:
             response.headers["Access-Control-Allow-Origin"] = origin
@@ -174,13 +174,13 @@ async def enforce_bearer_token(request: Request, call_next):
         return response
     return await call_next(request)
 
-***REMOVED*** Request logging middleware
+# Request logging middleware
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     """Log all HTTP requests"""
     start_time = time.time()
 
-    ***REMOVED*** Log request
+    # Log request
     logger.info(f"{request.method} {request.url} - {request.client.host if request.client else 'unknown'}")
 
     try:
@@ -206,7 +206,7 @@ async def log_requests(request: Request, call_next):
         )
         raise
 
-***REMOVED*** Global exception handler
+# Global exception handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Global exception handler for unhandled errors"""
@@ -216,7 +216,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": "Internal server error", "type": "internal_error"}
     )
 
-***REMOVED*** Health check endpoint (liveness)
+# Health check endpoint (liveness)
 @app.get("/healthz")
 async def health_check():
     """Liveness probe - basic health check"""
@@ -227,7 +227,7 @@ async def health_check():
         "timestamp": time.time()
     }
 
-***REMOVED*** Readiness check endpoint
+# Readiness check endpoint
 @app.get("/readyz")
 async def readiness_check():
     """Readiness probe - checks dependencies"""
@@ -242,7 +242,7 @@ async def readiness_check():
     
     return result
 
-***REMOVED*** Root endpoint
+# Root endpoint
 @app.get("/")
 async def root():
     """Root endpoint with API information"""
@@ -254,29 +254,29 @@ async def root():
         "api_v1": settings.API_V1_STR
     }
 
-***REMOVED*** Include API routers
+# Include API routers
 app.include_router(api_router, prefix=settings.API_V1_STR)
 app.include_router(policies_v1.router, prefix='/api/mcp')
 
-***REMOVED*** Include Domain routers (Phase 1 - Service-Kernel)
-***REMOVED*** CRM
+# Include Domain routers (Phase 1 - Service-Kernel)
+# CRM
 if crm_router:
     app.include_router(crm_router, prefix="/api/v1", tags=["CRM"])
 
-***REMOVED*** Finance (DATEV, SEPA)
+# Finance (DATEV, SEPA)
 if finance_router:
     app.include_router(finance_router, tags=["Finance"])
 
-***REMOVED*** Einkauf/Beschaffung (mounted at both /einkauf and /api/einkauf for compatibility)
+# Einkauf/Beschaffung (mounted at both /einkauf and /api/einkauf for compatibility)
 if einkauf_router:
     app.include_router(einkauf_router, tags=["Einkauf"])
     app.include_router(einkauf_router, prefix="/api", tags=["Einkauf"])
 
-***REMOVED*** Purchase Workflow (Wareneingang, Abgleich, PO-Storno)
+# Purchase Workflow (Wareneingang, Abgleich, PO-Storno)
 if purchase_workflow_router:
     app.include_router(purchase_workflow_router, prefix="/api/purchase-workflow", tags=["Procurement", "Workflow"])
 
-***REMOVED*** Legacy domain routers
+# Legacy domain routers
 try:
     from app.domains.inventory.api import router as inventory_router
     app.include_router(inventory_router, prefix="/api/v1/inventory", tags=["Inventory"])
@@ -289,7 +289,7 @@ try:
 except ImportError:
     logger.warning("Agrar router not available")
 
-***REMOVED*** Lightweight stubs for missing MCP/stream endpoints to avoid frontend 404s during development
+# Lightweight stubs for missing MCP/stream endpoints to avoid frontend 404s during development
 @app.post("/api/mcp/analytics/kpis")
 async def mcp_kpis_stub():
     return {"ok": True, "data": []}
@@ -309,76 +309,76 @@ async def mcp_copilot_forecast_stub():
 async def stream_workflow_stub():
     return {"status": "ok", "events": []}
 
-***REMOVED*** Mount Prometheus metrics endpoint
+# Mount Prometheus metrics endpoint
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
 
-***REMOVED*** Include Agents API (Phase 3 - Agentik) - TEMPORARILY DISABLED for CRM testing
-***REMOVED*** from app.api.v1.endpoints.agents import router as agents_router
-***REMOVED*** app.include_router(agents_router, prefix="/api/v1/agents", tags=["Agents"])
+# Include Agents API (Phase 3 - Agentik) - TEMPORARILY DISABLED for CRM testing
+# from app.api.v1.endpoints.agents import router as agents_router
+# app.include_router(agents_router, prefix="/api/v1/agents", tags=["Agents"])
 
-***REMOVED*** Include Health & System Metrics API (Phase 4 - Observability for AI)
+# Include Health & System Metrics API (Phase 4 - Observability for AI)
 from app.api.v1.endpoints.health import router as health_router
 from app.api.v1.endpoints.system_metrics import router as system_metrics_router
 app.include_router(health_router, tags=["Health"])
 app.include_router(system_metrics_router, prefix="/api/v1/metrics", tags=["System Metrics"])
 
-***REMOVED*** Include Audit API (Compliance)
+# Include Audit API (Compliance)
 from app.api.v1.endpoints.audit import router as audit_router
 app.include_router(audit_router, prefix="/api/v1/audit", tags=["Audit"])
 
-***REMOVED*** Include GDPR API (Compliance)
+# Include GDPR API (Compliance)
 from app.api.v1.endpoints.gdpr import router as gdpr_router
 app.include_router(gdpr_router, prefix="/api/v1/gdpr", tags=["GDPR"])
 
-***REMOVED*** Include RAG API (Phase 3 - Semantic Search) - TEMPORARILY DISABLED for CRM testing
-***REMOVED*** from app.api.v1.endpoints.rag import router as rag_router
-***REMOVED*** app.include_router(rag_router, prefix="/api/v1/rag", tags=["RAG"])
+# Include RAG API (Phase 3 - Semantic Search) - TEMPORARILY DISABLED for CRM testing
+# from app.api.v1.endpoints.rag import router as rag_router
+# app.include_router(rag_router, prefix="/api/v1/rag", tags=["RAG"])
 
-***REMOVED*** Include WebSocket API (Phase 3 - Realtime)
+# Include WebSocket API (Phase 3 - Realtime)
 from app.api.v1.endpoints.websocket import router as websocket_router
 app.include_router(websocket_router, prefix="/api/v1", tags=["WebSocket"])
 
-***REMOVED*** Include Authentication Router (⚠️ NUR FÜR ENTWICKLUNG!)
+# Include Authentication Router (⚠️ NUR FÜR ENTWICKLUNG!)
 app.include_router(auth_router)
 
-***REMOVED*** Include Policy Manager (direkt, ohne prefix - hat eigenen prefix)
+# Include Policy Manager (direkt, ohne prefix - hat eigenen prefix)
 app.include_router(policy_router)
 
-***REMOVED*** Include Documents & Forms (Phase O - Belegfluss)
+# Include Documents & Forms (Phase O - Belegfluss)
 app.include_router(documents_router)
 app.include_router(forms_router)
 app.include_router(lookup_router)
 
-***REMOVED*** Include Print & Export (Phase P - Dokumenten-Druck)
+# Include Print & Export (Phase P - Dokumenten-Druck)
 app.include_router(print_router)
 app.include_router(export_router)
 
-***REMOVED*** Include Workflow & Approval (Phase Q - Workflow-Management)
+# Include Workflow & Approval (Phase Q - Workflow-Management)
 app.include_router(workflow_router)
 
-***REMOVED*** Include SSE Streams (Phase P - Realtime Events)
+# Include SSE Streams (Phase P - Realtime Events)
 app.include_router(sse_router)
 
-***REMOVED*** Include Document Verification (Phase Q - Document Integrity)
+# Include Document Verification (Phase Q - Document Integrity)
 app.include_router(verify_router)
 
-***REMOVED*** Include GDPR Compliance
+# Include GDPR Compliance
 app.include_router(gdpr_router)
 
-***REMOVED*** Include Numbering Service (PostgreSQL)
+# Include Numbering Service (PostgreSQL)
 app.include_router(numbering_router)
 
-***REMOVED*** Include Admin DMS Integration
+# Include Admin DMS Integration
 app.include_router(admin_dms_router)
 
-***REMOVED*** Include DMS Webhooks & Inbox
+# Include DMS Webhooks & Inbox
 app.include_router(dms_webhook_router)
 
-***REMOVED*** Include Finanzbuchhaltung (130 Masken Integration)
+# Include Finanzbuchhaltung (130 Masken Integration)
 app.include_router(fibu_router)
 
-***REMOVED*** Mount Prometheus metrics endpoint
+# Mount Prometheus metrics endpoint
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
 

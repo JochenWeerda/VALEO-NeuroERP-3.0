@@ -20,7 +20,7 @@ class Customer:
     address: Optional[str]
     tax_id: Optional[str]
     credit_limit: Optional[float]
-    payment_terms: int  ***REMOVED*** Days
+    payment_terms: int  # Days
     is_active: bool
     tenant_id: str
     created_at: datetime

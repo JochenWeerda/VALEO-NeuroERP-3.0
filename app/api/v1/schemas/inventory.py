@@ -11,7 +11,7 @@ from decimal import Decimal
 from .base import BaseSchema, TimestampMixin, SoftDeleteMixin
 
 
-***REMOVED*** Article/Product Schemas
+# Article/Product Schemas
 class ArticleBase(BaseSchema):
     """Base article schema"""
     article_number: str = Field(..., min_length=1, max_length=50, description="Unique article number")
@@ -65,7 +65,7 @@ class Article(ArticleBase, TimestampMixin, SoftDeleteMixin):
     available_stock: Decimal = Field(default=0, ge=0, description="Available stock quantity")
 
 
-***REMOVED*** Warehouse Schemas
+# Warehouse Schemas
 class WarehouseBase(BaseSchema):
     """Base warehouse schema"""
     warehouse_code: str = Field(..., min_length=1, max_length=20, description="Unique warehouse code")
@@ -108,7 +108,7 @@ class Warehouse(WarehouseBase, TimestampMixin, SoftDeleteMixin):
     used_capacity: Decimal = Field(default=0, ge=0, description="Used storage capacity")
 
 
-***REMOVED*** Stock Movement Schemas
+# Stock Movement Schemas
 class StockMovementBase(BaseSchema):
     """Base stock movement schema"""
     article_id: str = Field(..., description="Article ID")
@@ -134,7 +134,7 @@ class StockMovement(StockMovementBase, TimestampMixin):
     total_cost: Optional[Decimal] = Field(None, ge=0, description="Total movement cost")
 
 
-***REMOVED*** Inventory Count Schemas
+# Inventory Count Schemas
 class InventoryCountBase(BaseSchema):
     """Base inventory count schema"""
     warehouse_id: str = Field(..., description="Warehouse ID")

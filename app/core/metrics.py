@@ -4,28 +4,28 @@ Prometheus Metrics
 
 from prometheus_client import Counter, Histogram, Gauge
 
-***REMOVED*** Workflow-Metriken
+# Workflow-Metriken
 workflow_transitions_total = Counter(
     'workflow_transitions_total',
     'Total workflow transitions',
     ['domain', 'action', 'status']
 )
 
-***REMOVED*** Document-Metriken
+# Document-Metriken
 document_print_duration_seconds = Histogram(
     'document_print_duration_seconds',
     'PDF generation duration',
     ['domain']
 )
 
-***REMOVED*** SSE-Metriken
+# SSE-Metriken
 sse_connections_active = Gauge(
     'sse_connections_active',
     'Active SSE connections',
     ['channel']
 )
 
-***REMOVED*** API-Metriken
+# API-Metriken
 api_requests_total = Counter(
     'api_requests_total',
     'Total API requests',

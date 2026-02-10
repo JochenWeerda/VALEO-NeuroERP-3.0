@@ -22,25 +22,25 @@ class Zahlung(BaseModel):
 
 class ZahlungslaufBase(BaseModel):
     lauf_nummer: str
-    ausfuehrungs_datum: str  ***REMOVED*** ISO date string
+    ausfuehrungs_datum: str  # ISO date string
     gesamt_betrag: float = Field(ge=0)
     anzahl_zahlungen: int = Field(ge=0)
     status: str = Field(pattern="^(entwurf|freigegeben|ausgefuehrt|storniert)$")
 
-    ***REMOVED*** Freigabe/Ausführung
+    # Freigabe/Ausführung
     freigegeben_am: Optional[str] = None
     freigegeben_durch: Optional[str] = None
     ausgefuehrt_am: Optional[str] = None
 
-    ***REMOVED*** SEPA-Auftraggeber
+    # SEPA-Auftraggeber
     auftraggeber_name: str
     auftraggeber_iban: str = Field(pattern=r"^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$")
     auftraggeber_bic: str
 
-    ***REMOVED*** Zahlungen
+    # Zahlungen
     zahlungen: List[Zahlung] = Field(min_length=1)
 
-    ***REMOVED*** Meta
+    # Meta
     notizen: Optional[str] = None
 
 

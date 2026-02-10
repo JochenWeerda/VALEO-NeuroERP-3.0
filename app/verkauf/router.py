@@ -89,7 +89,7 @@ async def get_kundenstamm_full(kunden_nr: str, db: Session = Depends(get_db)):
 @router.post("/kunden", response_model=schemas.KundeResponse)
 async def create_kunde(kunde_data: schemas.KundeCreate, db: Session = Depends(get_db)):
     """Neuen Kunden erstellen"""
-    ***REMOVED*** Prüfe ob Kunde bereits existiert
+    # Prüfe ob Kunde bereits existiert
     existing = db.query(models.Kunde).filter(
         models.Kunde.kunden_nr == kunde_data.kunden_nr
     ).first()
@@ -97,7 +97,7 @@ async def create_kunde(kunde_data: schemas.KundeCreate, db: Session = Depends(ge
     if existing:
         raise HTTPException(status_code=400, detail="Kunde existiert bereits")
     
-    ***REMOVED*** Erstelle neuen Kunden
+    # Erstelle neuen Kunden
     kunde = models.Kunde(**kunde_data.model_dump())
     db.add(kunde)
     db.commit()
@@ -121,7 +121,7 @@ async def update_kunde(
     if not kunde:
         raise HTTPException(status_code=404, detail="Kunde nicht gefunden")
     
-    ***REMOVED*** Update Felder
+    # Update Felder
     for field, value in kunde_data.model_dump(exclude_unset=True).items():
         setattr(kunde, field, value)
     
@@ -148,7 +148,7 @@ async def delete_kunde(kunden_nr: str, db: Session = Depends(get_db)):
     return {"message": "Kunde gelöscht"}
 
 
-***REMOVED*** Untertabellen-Routes
+# Untertabellen-Routes
 
 @router.get("/kunden/{kunden_nr}/ansprechpartner", response_model=List[schemas.KundenAnsprechpartnerResponse])
 async def list_ansprechpartner(kunden_nr: str, db: Session = Depends(get_db)):

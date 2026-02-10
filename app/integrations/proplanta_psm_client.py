@@ -11,10 +11,10 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Config-Pfad
+# Config-Pfad
 CONFIG_PATH = Path("data/config/proplanta_psm.json")
 
-***REMOVED*** Lade Config (falls vorhanden)
+# Lade Config (falls vorhanden)
 _cfg = {}
 if CONFIG_PATH.exists():
     try:
@@ -22,7 +22,7 @@ if CONFIG_PATH.exists():
     except Exception as e:
         logger.warning(f"Failed to load Proplanta PSM config: {e}")
 
-***REMOVED*** PSM-Connection (ENV-Override möglich)
+# PSM-Connection (ENV-Override möglich)
 PROPLANTA_PSM_URL = _cfg.get("url") or "https://psm.proplanta.de/list"
 PROPLANTA_USERNAME = _cfg.get("username") or ""
 PROPLANTA_PASSWORD = _cfg.get("password") or ""
@@ -73,7 +73,7 @@ class ProplantaPSMClient:
 
     def __init__(self):
         self.mcp_server_name = "proplanta-psm-scraper"
-        self._cache = {}  ***REMOVED*** Simple cache für PSM Daten
+        self._cache = {}  # Simple cache für PSM Daten
         self._last_sync = None
 
     def _call_mcp_tool(self, tool_name: str, args: Dict[str, Any]) -> Dict[str, Any]:
@@ -81,8 +81,8 @@ class ProplantaPSMClient:
         Ruft MCP Tool auf (wird durch MCP Framework ersetzt)
         Diese Methode dient als Platzhalter für die eigentliche MCP Integration
         """
-        ***REMOVED*** TODO: Implement actual MCP tool calling
-        ***REMOVED*** For now, return mock data for testing
+        # TODO: Implement actual MCP tool calling
+        # For now, return mock data for testing
         logger.warning("MCP tool calling not implemented yet - using mock data")
 
         if tool_name == "scrape_psm_list":
@@ -175,19 +175,19 @@ class ProplantaPSMClient:
         try:
             logger.info("Starting PSM data synchronization")
 
-            ***REMOVED*** Call MCP tool to scrape PSM list
+            # Call MCP tool to scrape PSM list
             result = self._call_mcp_tool("scrape_psm_list", {
                 "url": PROPLANTA_PSM_URL,
                 "username": PROPLANTA_USERNAME,
                 "password": PROPLANTA_PASSWORD
             })
 
-            ***REMOVED*** Parse response
+            # Parse response
             psm_items = []
             for content in result.get("content", []):
                 if content.get("type") == "text" and "PSM items" in content.get("text", ""):
                     try:
-                        ***REMOVED*** Extract JSON data from response
+                        # Extract JSON data from response
                         json_start = content["text"].find("[")
                         json_end = content["text"].rfind("]") + 1
                         if json_start >= 0 and json_end > json_start:
@@ -199,7 +199,7 @@ class ProplantaPSMClient:
                     except json.JSONDecodeError as e:
                         logger.error(f"Failed to parse PSM data: {e}")
 
-            ***REMOVED*** Cache the data
+            # Cache the data
             self._cache = {item.id: item for item in psm_items}
             self._last_sync = datetime.now()
 
@@ -222,19 +222,19 @@ class ProplantaPSMClient:
             Liste der gefundenen PSM Daten
         """
         try:
-            ***REMOVED*** Call MCP tool to search PSM data
+            # Call MCP tool to search PSM data
             result = self._call_mcp_tool("search_psm", {
                 "query": query,
                 "url": PROPLANTA_PSM_URL,
                 "limit": limit
             })
 
-            ***REMOVED*** Parse response
+            # Parse response
             psm_items = []
             for content in result.get("content", []):
                 if content.get("type") == "text" and "PSM items matching" in content.get("text", ""):
                     try:
-                        ***REMOVED*** Extract JSON data from response
+                        # Extract JSON data from response
                         json_start = content["text"].find("[")
                         json_end = content["text"].rfind("]") + 1
                         if json_start >= 0 and json_end > json_start:
@@ -263,21 +263,21 @@ class ProplantaPSMClient:
             PSM Daten oder None wenn nicht gefunden
         """
         try:
-            ***REMOVED*** Check cache first
+            # Check cache first
             if psm_id in self._cache:
                 return self._cache[psm_id]
 
-            ***REMOVED*** Call MCP tool to get PSM details
+            # Call MCP tool to get PSM details
             result = self._call_mcp_tool("get_psm_details", {
                 "id": psm_id,
                 "url": PROPLANTA_PSM_URL
             })
 
-            ***REMOVED*** Parse response
+            # Parse response
             for content in result.get("content", []):
                 if content.get("type") == "text" and "PSM Details" in content.get("text", ""):
                     try:
-                        ***REMOVED*** Extract JSON data from response
+                        # Extract JSON data from response
                         json_start = content["text"].find("{")
                         json_end = content["text"].rfind("}") + 1
                         if json_start >= 0 and json_end > json_start:
@@ -285,7 +285,7 @@ class ProplantaPSMClient:
                             item_data = json.loads(json_data)
 
                             psm_item = PSMData(item_data)
-                            ***REMOVED*** Cache the result
+                            # Cache the result
                             self._cache[psm_id] = psm_item
                             return psm_item
                     except json.JSONDecodeError as e:
@@ -325,7 +325,7 @@ class ProplantaPSMClient:
         return [psm for psm in self._cache.values() if psm.is_expired()]
 
 
-***REMOVED*** Global client instance
+# Global client instance
 psm_client = ProplantaPSMClient()
 
 
@@ -376,4 +376,4 @@ def is_configured() -> bool:
     Returns:
         True wenn PSM-Config vorhanden
     """
-    return bool(PROPLANTA_PSM_URL and (PROPLANTA_USERNAME or True))  ***REMOVED*** Username optional für öffentliche Daten
+    return bool(PROPLANTA_PSM_URL and (PROPLANTA_USERNAME or True))  # Username optional für öffentliche Daten

@@ -26,20 +26,20 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, repo) ->
     FIBU-AR-02: Erzeugt GL-Buchung und OP für Rechnung
     """
     try:
-        tenant_id = "default"  ***REMOVED*** TODO: Get from context
-        period = invoice.date[:7]  ***REMOVED*** YYYY-MM format
+        tenant_id = "default"  # TODO: Get from context
+        period = invoice.date[:7]  # YYYY-MM format
         
-        ***REMOVED*** 1. Erzeuge GL-Journal Entry (Debitoren Soll, Erlöse Haben, USt Haben)
-        ***REMOVED*** Soll: Debitoren (Forderungen) = totalGross
-        ***REMOVED*** Haben: Erlöse = subtotalNet
-        ***REMOVED*** Haben: USt = totalTax
+        # 1. Erzeuge GL-Journal Entry (Debitoren Soll, Erlöse Haben, USt Haben)
+        # Soll: Debitoren (Forderungen) = totalGross
+        # Haben: Erlöse = subtotalNet
+        # Haben: USt = totalTax
         
-        ***REMOVED*** Standard-Konten (in Production aus Konfiguration)
-        debtor_account = "1200"  ***REMOVED*** Forderungen aus Lieferungen und Leistungen
-        revenue_account = "8000"  ***REMOVED*** Erlöse
-        vat_account = "1776"  ***REMOVED*** USt 19%
+        # Standard-Konten (in Production aus Konfiguration)
+        debtor_account = "1200"  # Forderungen aus Lieferungen und Leistungen
+        revenue_account = "8000"  # Erlöse
+        vat_account = "1776"  # USt 19%
         
-        ***REMOVED*** Journal Entry erstellen
+        # Journal Entry erstellen
         journal_entry_id = f"JE-{invoice.number}"
         journal_entry = {
             "id": journal_entry_id,
@@ -72,17 +72,17 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, repo) ->
             ]
         }
         
-        ***REMOVED*** Speichere Journal Entry (vereinfacht - in Production über Repository)
+        # Speichere Journal Entry (vereinfacht - in Production über Repository)
         save_to_store("journal_entry", journal_entry_id, journal_entry, repo)
         
-        ***REMOVED*** 2. Erzeuge Open Item (OP) für Debitoren
+        # 2. Erzeuge Open Item (OP) für Debitoren
         op_id = f"OP-{invoice.number}"
         open_item = {
             "id": op_id,
             "tenant_id": tenant_id,
             "document_number": invoice.number,
             "customer_id": invoice.customerId,
-            "customer_name": invoice.customerId,  ***REMOVED*** TODO: Get from customer service
+            "customer_name": invoice.customerId,  # TODO: Get from customer service
             "amount": invoice.totalGross,
             "open_amount": invoice.totalGross,
             "currency": "EUR",
@@ -91,15 +91,15 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, repo) ->
             "created_at": datetime.now().isoformat()
         }
         
-        ***REMOVED*** Speichere OP (vereinfacht - in Production über Repository)
+        # Speichere OP (vereinfacht - in Production über Repository)
         save_to_store("open_item", op_id, open_item, repo)
         
         logger.info(f"Created GL booking and OP for invoice {invoice.number}")
         
     except Exception as e:
         logger.error(f"Error creating GL booking/OP for invoice {invoice.number}: {e}")
-        ***REMOVED*** Don't fail invoice creation if GL/OP creation fails
-        ***REMOVED*** In production, use transaction rollback
+        # Don't fail invoice creation if GL/OP creation fails
+        # In production, use transaction rollback
 
 
 @router.post("", response_model=dict)
@@ -120,7 +120,7 @@ async def create_invoice(
     try:
         repo = get_repository(db)
         
-        ***REMOVED*** Berechne Beträge falls nicht gesetzt
+        # Berechne Beträge falls nicht gesetzt
         if invoice.subtotalNet == 0.0 and invoice.lines:
             invoice.subtotalNet = sum(
                 line.qty * (line.price or 0.0) for line in invoice.lines
@@ -135,9 +135,9 @@ async def create_invoice(
         if invoice.totalGross == 0.0:
             invoice.totalGross = invoice.subtotalNet + invoice.totalTax
         
-        ***REMOVED*** Berechne Fälligkeitsdatum basierend auf Zahlungsbedingungen
+        # Berechne Fälligkeitsdatum basierend auf Zahlungsbedingungen
         if not invoice.dueDate:
-            payment_days = 30  ***REMOVED*** Default: 30 Tage netto
+            payment_days = 30  # Default: 30 Tage netto
             if invoice.paymentTerms.startswith("net"):
                 try:
                     payment_days = int(invoice.paymentTerms.replace("net", ""))
@@ -148,11 +148,11 @@ async def create_invoice(
             due_date = invoice_date + timedelta(days=payment_days)
             invoice.dueDate = due_date.strftime("%Y-%m-%d")
         
-        ***REMOVED*** Speichere Rechnung
+        # Speichere Rechnung
         doc_data = invoice.model_dump()
         result = save_to_store("sales_invoice", invoice.number, doc_data, repo)
         
-        ***REMOVED*** FIBU-AR-02: Wenn Rechnung verbucht wird (status != ENTWURF), erzeuge GL-Buchung + OP
+        # FIBU-AR-02: Wenn Rechnung verbucht wird (status != ENTWURF), erzeuge GL-Buchung + OP
         if invoice.status != "ENTWURF":
             await _create_gl_booking_and_op(db, invoice, repo)
         
@@ -224,12 +224,12 @@ async def update_invoice(
     try:
         repo = get_repository(db)
         
-        ***REMOVED*** Prüfe ob Rechnung existiert
+        # Prüfe ob Rechnung existiert
         existing = get_from_store("sales_invoice", invoice_number, repo)
         if not existing:
             raise HTTPException(status_code=404, detail=f"Invoice {invoice_number} not found")
         
-        ***REMOVED*** Berechne Beträge falls nicht gesetzt
+        # Berechne Beträge falls nicht gesetzt
         if invoice.subtotalNet == 0.0 and invoice.lines:
             invoice.subtotalNet = sum(
                 line.qty * (line.price or 0.0) for line in invoice.lines
@@ -244,11 +244,11 @@ async def update_invoice(
         if invoice.totalGross == 0.0:
             invoice.totalGross = invoice.subtotalNet + invoice.totalTax
         
-        ***REMOVED*** Speichere aktualisierte Rechnung
+        # Speichere aktualisierte Rechnung
         doc_data = invoice.model_dump()
         result = save_to_store("sales_invoice", invoice_number, doc_data, repo)
         
-        ***REMOVED*** FIBU-AR-02: Wenn Rechnung jetzt verbucht wird (status != ENTWURF), erzeuge GL-Buchung + OP
+        # FIBU-AR-02: Wenn Rechnung jetzt verbucht wird (status != ENTWURF), erzeuge GL-Buchung + OP
         old_status = existing.get("status", "ENTWURF")
         if old_status == "ENTWURF" and invoice.status != "ENTWURF":
             await _create_gl_booking_and_op(db, invoice, repo)
@@ -294,17 +294,17 @@ async def list_invoices(
         repo = get_repository(db)
         all_invoices = list_from_store("sales_invoice", repo)
         
-        ***REMOVED*** Filter anwenden
+        # Filter anwenden
         filtered = all_invoices
         if status:
             filtered = [inv for inv in filtered if inv.get("status") == status]
         if customer_id:
             filtered = [inv for inv in filtered if inv.get("customerId") == customer_id]
         
-        ***REMOVED*** Sortiere nach Datum (neueste zuerst)
+        # Sortiere nach Datum (neueste zuerst)
         filtered.sort(key=lambda x: x.get("date", ""), reverse=True)
         
-        ***REMOVED*** Pagination
+        # Pagination
         total = len(filtered)
         paginated = filtered[skip:skip + limit]
         

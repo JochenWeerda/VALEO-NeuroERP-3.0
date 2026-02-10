@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 http_bearer = HTTPBearer(auto_error=False)
 
 _JWKS_CACHE: Dict[str, Any] = {"url": None, "keys": None, "expires_at": 0.0}
-_JWKS_CACHE_TTL = 60 * 60  ***REMOVED*** 1 hour
+_JWKS_CACHE_TTL = 60 * 60  # 1 hour
 
 
 async def require_bearer_token(
@@ -134,7 +134,7 @@ def _get_jwks(jwks_url: str, *, force_refresh: bool = False) -> List[Dict[str, A
         and _JWKS_CACHE.get("keys") is not None
         and time.time() < expires_at
     ):
-        return _JWKS_CACHE["keys"]  ***REMOVED*** type: ignore[return-value]
+        return _JWKS_CACHE["keys"]  # type: ignore[return-value]
 
     try:
         response = httpx.get(jwks_url, timeout=5.0)
@@ -155,7 +155,7 @@ def _get_jwks(jwks_url: str, *, force_refresh: bool = False) -> List[Dict[str, A
             "expires_at": time.time() + _JWKS_CACHE_TTL,
         }
     )
-    return keys  ***REMOVED*** type: ignore[return-value]
+    return keys  # type: ignore[return-value]
 
 
 def _find_jwk(keys: List[Dict[str, Any]], kid: Optional[str]) -> Optional[Dict[str, Any]]:
@@ -163,7 +163,7 @@ def _find_jwk(keys: List[Dict[str, Any]], kid: Optional[str]) -> Optional[Dict[s
         for key in keys:
             if key.get("kid") == kid:
                 return key
-    ***REMOVED*** fallback: return first key if only one available
+    # fallback: return first key if only one available
     return keys[0] if len(keys) == 1 else None
 
 
@@ -178,12 +178,12 @@ def _is_path_exempt(path: str) -> bool:
     normalized = path.rstrip("/")
     
     for exempt_path in settings.API_AUTH_EXEMPT_PATHS:
-        ***REMOVED*** Prefix-Match für Pfade mit / am Ende
+        # Prefix-Match für Pfade mit / am Ende
         if exempt_path.endswith("/"):
             prefix = exempt_path.rstrip("/")
             if normalized.startswith(prefix):
                 return True
-        ***REMOVED*** Exakter Match
+        # Exakter Match
         elif normalized == exempt_path.rstrip("/"):
             return True
     

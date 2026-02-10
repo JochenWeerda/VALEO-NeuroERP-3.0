@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = '7f8529f27eb0'
 down_revision: Union[str, None] = 'a489a6a4a212'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -20,7 +20,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Create activities table
+    # Create activities table
     op.create_table(
         'activities',
         sa.Column('id', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
@@ -40,7 +40,7 @@ def upgrade() -> None:
         schema='domain_crm'
     )
 
-    ***REMOVED*** Create farm_profiles table
+    # Create farm_profiles table
     op.create_table(
         'farm_profiles',
         sa.Column('id', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),

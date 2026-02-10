@@ -42,10 +42,10 @@ class CommunicationChannel(Enum):
 
 class CommunicationPriority(Enum):
     """Communication priority levels"""
-    CRITICAL = "critical"  ***REMOVED*** Immediate, < 15 minutes
-    HIGH = "high"         ***REMOVED*** Urgent, < 1 hour
-    MEDIUM = "medium"     ***REMOVED*** Important, < 4 hours
-    LOW = "low"          ***REMOVED*** Routine, < 24 hours
+    CRITICAL = "critical"  # Immediate, < 15 minutes
+    HIGH = "high"         # Urgent, < 1 hour
+    MEDIUM = "medium"     # Important, < 4 hours
+    LOW = "low"          # Routine, < 24 hours
 
 
 class StakeholderGroup(Enum):
@@ -86,7 +86,7 @@ class StakeholderContact:
     id: str
     stakeholder_group: StakeholderGroup
     name: str
-    contact_info: Dict[str, Any]  ***REMOVED*** email, phone, address, etc.
+    contact_info: Dict[str, Any]  # email, phone, address, etc.
     priority_level: CommunicationPriority
     language_preference: str = "de"
     special_instructions: str = ""
@@ -158,20 +158,20 @@ class ISO22301CrisisCommunicationPlan:
         self.notifications = notification_service
         self.templates = template_engine
 
-        ***REMOVED*** Communication management
+        # Communication management
         self.communication_templates: Dict[str, CommunicationTemplate] = {}
         self.stakeholder_contacts: Dict[str, StakeholderContact] = {}
         self.communication_logs: List[CommunicationLog] = {}
         self.media_responses: List[MediaResponse] = {}
         self.regulatory_reports: List[RegulatoryReporting] = {}
 
-        ***REMOVED*** Communication configuration
+        # Communication configuration
         self.communication_config = self._initialize_communication_config()
 
-        ***REMOVED*** Stakeholder database
+        # Stakeholder database
         self.stakeholder_db = self._initialize_stakeholder_database()
 
-        ***REMOVED*** Regulatory requirements
+        # Regulatory requirements
         self.regulatory_requirements = self._initialize_regulatory_requirements()
 
     def _initialize_communication_config(self) -> Dict[str, Any]:
@@ -336,16 +336,16 @@ class ISO22301CrisisCommunicationPlan:
         crisis_type = crisis_details.get('crisis_type', 'general')
         severity = crisis_details.get('severity', 'medium')
 
-        ***REMOVED*** Determine communication strategy
+        # Determine communication strategy
         communication_strategy = self._determine_communication_strategy(crisis_type, severity)
 
-        ***REMOVED*** Generate communication plan
+        # Generate communication plan
         communication_plan = self._generate_communication_plan(incident_id, crisis_details, communication_strategy)
 
-        ***REMOVED*** Execute immediate communications
+        # Execute immediate communications
         immediate_communications = self._execute_immediate_communications(incident_id, communication_plan)
 
-        ***REMOVED*** Schedule follow-up communications
+        # Schedule follow-up communications
         scheduled_communications = self._schedule_follow_up_communications(incident_id, communication_plan)
 
         logger.critical(f"Crisis communication initiated for incident {incident_id}: {len(immediate_communications)} immediate, {len(scheduled_communications)} scheduled")
@@ -373,7 +373,7 @@ class ISO22301CrisisCommunicationPlan:
             }
         }
 
-        ***REMOVED*** Adjust strategy based on crisis type
+        # Adjust strategy based on crisis type
         if crisis_type == 'data_breach':
             strategy.update({
                 'communication_priority': CommunicationPriority.CRITICAL,
@@ -415,7 +415,7 @@ class ISO22301CrisisCommunicationPlan:
             'contingency_plans': []
         }
 
-        ***REMOVED*** Define communication sequence
+        # Define communication sequence
         plan['communication_sequence'] = [
             {
                 'phase': 'immediate',
@@ -443,7 +443,7 @@ class ISO22301CrisisCommunicationPlan:
             }
         ]
 
-        ***REMOVED*** Define stakeholder segments
+        # Define stakeholder segments
         plan['stakeholder_segments'] = [
             {
                 'group': 'internal',
@@ -505,7 +505,7 @@ class ISO22301CrisisCommunicationPlan:
         """Execute immediate crisis communications"""
         immediate_comms = []
 
-        ***REMOVED*** Internal team notification
+        # Internal team notification
         internal_comm = self._send_communication(
             incident_id=incident_id,
             communication_type=CommunicationType.INTERNAL_STAFF,
@@ -518,7 +518,7 @@ class ISO22301CrisisCommunicationPlan:
         )
         immediate_comms.append(internal_comm)
 
-        ***REMOVED*** Executive notification
+        # Executive notification
         executive_comm = self._send_communication(
             incident_id=incident_id,
             communication_type=CommunicationType.INTERNAL_STAFF,
@@ -537,7 +537,7 @@ class ISO22301CrisisCommunicationPlan:
         """Schedule follow-up communications"""
         scheduled_comms = []
 
-        ***REMOVED*** Schedule regulatory reporting
+        # Schedule regulatory reporting
         regulatory_deadlines = self._identify_regulatory_requirements(plan)
         for requirement in regulatory_deadlines:
             scheduled_comm = {
@@ -549,7 +549,7 @@ class ISO22301CrisisCommunicationPlan:
             }
             scheduled_comms.append(scheduled_comm)
 
-        ***REMOVED*** Schedule customer communication
+        # Schedule customer communication
         customer_comm = {
             'incident_id': incident_id,
             'type': 'customer_notification',
@@ -568,8 +568,8 @@ class ISO22301CrisisCommunicationPlan:
         """Send a communication and log it"""
         comm_id = str(uuid.uuid4())
 
-        ***REMOVED*** In production, this would actually send the communication
-        ***REMOVED*** For now, simulate sending
+        # In production, this would actually send the communication
+        # For now, simulate sending
 
         communication = CommunicationLog(
             id=comm_id,
@@ -658,7 +658,7 @@ class ISO22301CrisisCommunicationPlan:
         crisis_type = crisis_details.get('crisis_type', '')
 
         if 'data_breach' in crisis_type or 'cyber' in crisis_type:
-            ***REMOVED*** GDPR requirements
+            # GDPR requirements
             requirements.append({
                 'authority': 'Data Protection Authority',
                 'requirement': 'Data Breach Notification',
@@ -666,7 +666,7 @@ class ISO22301CrisisCommunicationPlan:
                 'jurisdiction': 'EU/Germany'
             })
 
-            ***REMOVED*** BSI requirements
+            # BSI requirements
             requirements.append({
                 'authority': 'BSI (Federal Office for Information Security)',
                 'requirement': 'Cyber Incident Reporting',
@@ -702,7 +702,7 @@ class ISO22301CrisisCommunicationPlan:
 
         self.media_responses.append(inquiry)
 
-        ***REMOVED*** Generate and send response
+        # Generate and send response
         response_content = self._generate_media_response(inquiry)
         inquiry.response_content = response_content
         inquiry.response_sent = datetime.utcnow()
@@ -765,7 +765,7 @@ class ISO22301CrisisCommunicationPlan:
 
     def get_communication_status(self, incident_id: str = None, tenant_id: str = "system") -> Dict[str, Any]:
         """Get comprehensive communication status"""
-        ***REMOVED*** Filter data by incident or tenant
+        # Filter data by incident or tenant
         if incident_id:
             relevant_logs = [log for log in self.communication_logs.values() if log.incident_id == incident_id]
             relevant_media = [resp for resp in self.media_responses if resp.incident_id == incident_id]
@@ -775,7 +775,7 @@ class ISO22301CrisisCommunicationPlan:
             relevant_media = self.media_responses
             relevant_reports = self.regulatory_reports
 
-        ***REMOVED*** Calculate metrics
+        # Calculate metrics
         communication_stats = self._calculate_communication_statistics(relevant_logs)
         media_stats = self._calculate_media_statistics(relevant_media)
         regulatory_stats = self._calculate_regulatory_statistics(relevant_reports)
@@ -800,7 +800,7 @@ class ISO22301CrisisCommunicationPlan:
         total = len(logs)
         successful = len([log for log in logs if log.delivery_status == 'sent'])
 
-        ***REMOVED*** Breakdown by type and stakeholder
+        # Breakdown by type and stakeholder
         by_type = {}
         by_stakeholder = {}
 
@@ -825,7 +825,7 @@ class ISO22301CrisisCommunicationPlan:
         response_times = []
         for log in logs:
             if hasattr(log, 'response_received') and log.response_received:
-                response_time = (log.response_received - log.sent_at).total_seconds() / 3600  ***REMOVED*** hours
+                response_time = (log.response_received - log.sent_at).total_seconds() / 3600  # hours
                 response_times.append(response_time)
 
         return sum(response_times) / len(response_times) if response_times else 0
@@ -838,7 +838,7 @@ class ISO22301CrisisCommunicationPlan:
         total = len(responses)
         responded = len([resp for resp in responses if resp.response_sent])
 
-        ***REMOVED*** Breakdown by media outlet
+        # Breakdown by media outlet
         by_outlet = {}
         for resp in responses:
             outlet = resp.media_outlet
@@ -860,7 +860,7 @@ class ISO22301CrisisCommunicationPlan:
         response_times = []
         for resp in responses:
             if resp.response_sent:
-                response_time = (resp.response_sent - resp.inquiry_received).total_seconds() / 3600  ***REMOVED*** hours
+                response_time = (resp.response_sent - resp.inquiry_received).total_seconds() / 3600  # hours
                 response_times.append(response_time)
 
         return sum(response_times) / len(response_times) if response_times else 0
@@ -898,17 +898,17 @@ class ISO22301CrisisCommunicationPlan:
         if not logs:
             return {'effectiveness_score': 0, 'issues': ['No communication data available']}
 
-        ***REMOVED*** Check response rates
+        # Check response rates
         response_rate = len([log for log in logs if log.response_count > 0]) / len(logs)
-        if response_rate < 0.3:  ***REMOVED*** Less than 30% response rate
+        if response_rate < 0.3:  # Less than 30% response rate
             effectiveness_score -= 20
 
-        ***REMOVED*** Check delivery success
+        # Check delivery success
         delivery_rate = len([log for log in logs if log.delivery_status == 'sent']) / len(logs)
-        if delivery_rate < 0.95:  ***REMOVED*** Less than 95% delivery success
+        if delivery_rate < 0.95:  # Less than 95% delivery success
             effectiveness_score -= 15
 
-        ***REMOVED*** Check timeliness (simplified)
+        # Check timeliness (simplified)
         timely_communications = len([log for log in logs if self._check_timeliness(log)])
         timeliness_rate = timely_communications / len(logs)
         if timeliness_rate < 0.8:
@@ -933,7 +933,7 @@ class ISO22301CrisisCommunicationPlan:
 
     def _check_timeliness(self, log: CommunicationLog) -> bool:
         """Check if communication was sent in timely manner"""
-        ***REMOVED*** Simplified timeliness check based on priority
+        # Simplified timeliness check based on priority
         sla = self.communication_config['response_time_sla'].get(log.priority.value, timedelta(hours=24))
         time_taken = datetime.utcnow() - log.sent_at
 
@@ -981,21 +981,21 @@ class ISO22301CrisisCommunicationPlan:
         """Assess ISO 22301 communication compliance"""
         issues = []
 
-        ***REMOVED*** Check template coverage
+        # Check template coverage
         if len(templates) < 5:
             issues.append("Insufficient communication templates for different crisis types")
 
-        ***REMOVED*** Check stakeholder contact completeness
+        # Check stakeholder contact completeness
         required_groups = set(StakeholderGroup)
         available_groups = set(c.stakeholder_group for c in contacts)
         missing_groups = required_groups - available_groups
         if missing_groups:
             issues.append(f"Missing stakeholder contacts for: {', '.join(g.value for g in missing_groups)}")
 
-        ***REMOVED*** Check communication logs for completeness
+        # Check communication logs for completeness
         if logs:
             approval_rate = len([log for log in logs if log.approval_obtained]) / len(logs)
-            if approval_rate < 0.9:  ***REMOVED*** Less than 90% approval rate
+            if approval_rate < 0.9:  # Less than 90% approval rate
                 issues.append("Inadequate communication approval processes")
 
         compliance_score = max(0, 100 - (len(issues) * 10))

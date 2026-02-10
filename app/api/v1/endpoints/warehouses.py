@@ -28,7 +28,7 @@ async def list_warehouses(
     """Return a paginated list of warehouses."""
     effective_tenant = tenant_id or DEFAULT_TENANT
 
-    query = db.query(WarehouseModel).filter(WarehouseModel.is_active == True)  ***REMOVED*** noqa: E712
+    query = db.query(WarehouseModel).filter(WarehouseModel.is_active == True)  # noqa: E712
     query = query.filter(WarehouseModel.tenant_id == effective_tenant)
 
     if search:

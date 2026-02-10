@@ -36,11 +36,11 @@ class IncidentStatus(Enum):
 
 class RecoveryStrategy(Enum):
     """Business continuity recovery strategies"""
-    HOT_SITE = "hot_site"  ***REMOVED*** Immediate failover
-    WARM_SITE = "warm_site"  ***REMOVED*** Quick recovery
-    COLD_SITE = "cold_site"  ***REMOVED*** Basic infrastructure
-    CLOUD_RECOVERY = "cloud_recovery"  ***REMOVED*** Cloud-based recovery
-    MANUAL_RECOVERY = "manual_recovery"  ***REMOVED*** Manual processes
+    HOT_SITE = "hot_site"  # Immediate failover
+    WARM_SITE = "warm_site"  # Quick recovery
+    COLD_SITE = "cold_site"  # Basic infrastructure
+    CLOUD_RECOVERY = "cloud_recovery"  # Cloud-based recovery
+    MANUAL_RECOVERY = "manual_recovery"  # Manual processes
 
 
 class BusinessImpact(Enum):
@@ -58,8 +58,8 @@ class BusinessImpactAnalysis:
     process_id: str
     process_name: str
     criticality: str
-    rto: int  ***REMOVED*** Recovery Time Objective in hours
-    rpo: int  ***REMOVED*** Recovery Point Objective in hours
+    rto: int  # Recovery Time Objective in hours
+    rpo: int  # Recovery Point Objective in hours
     financial_impact_per_hour: float
     operational_impact: str
     dependencies: List[str] = field(default_factory=list)
@@ -98,8 +98,8 @@ class IncidentRecord:
     detection_time: datetime
     response_start: Optional[datetime] = None
     resolution_time: Optional[datetime] = None
-    recovery_time: Optional[int] = None  ***REMOVED*** minutes
-    data_loss: Optional[int] = None  ***REMOVED*** minutes of data
+    recovery_time: Optional[int] = None  # minutes
+    data_loss: Optional[int] = None  # minutes of data
     financial_impact: float = 0.0
     lessons_learned: str = ""
     root_cause: str = ""
@@ -114,7 +114,7 @@ class RecoveryTest:
     scope: str
     objectives: List[str]
     schedule: datetime
-    duration: int  ***REMOVED*** minutes
+    duration: int  # minutes
     participants: List[str]
     success_criteria: List[str]
     status: str = "planned"
@@ -134,30 +134,30 @@ class ISO22301BusinessContinuity:
         self.incident_response = incident_response_service
         self.backup = backup_service
 
-        ***REMOVED*** Business impact analysis
+        # Business impact analysis
         self.impact_analyses: Dict[str, BusinessImpactAnalysis] = {}
 
-        ***REMOVED*** Continuity plans
+        # Continuity plans
         self.continuity_plans: Dict[str, ContinuityPlan] = {}
 
-        ***REMOVED*** Incident records
+        # Incident records
         self.incident_records: List[IncidentRecord] = []
 
-        ***REMOVED*** Recovery tests
+        # Recovery tests
         self.recovery_tests: List[RecoveryTest] = []
 
-        ***REMOVED*** Recovery objectives
+        # Recovery objectives
         self.recovery_objectives = self._initialize_recovery_objectives()
 
-        ***REMOVED*** Communication templates
+        # Communication templates
         self.communication_templates = self._initialize_communication_templates()
 
     def _initialize_recovery_objectives(self) -> Dict[str, Dict[str, Any]]:
         """Initialize recovery objectives for different business functions"""
         return {
             'customer_service': {
-                'rto': 4,  ***REMOVED*** 4 hours
-                'rpo': 1,  ***REMOVED*** 1 hour
+                'rto': 4,  # 4 hours
+                'rpo': 1,  # 1 hour
                 'priority': 'high'
             },
             'order_processing': {
@@ -209,7 +209,7 @@ class ISO22301BusinessContinuity:
         """
         analysis_id = str(uuid.uuid4())
 
-        ***REMOVED*** Get recovery objectives for this process type
+        # Get recovery objectives for this process type
         process_type = process_data.get('process_type', 'general')
         objectives = self.recovery_objectives.get(process_type, {
             'rto': 24,
@@ -240,7 +240,7 @@ class ISO22301BusinessContinuity:
         """
         plan_id = str(uuid.uuid4())
 
-        ***REMOVED*** Set review schedule (annual)
+        # Set review schedule (annual)
         next_review = datetime.utcnow() + timedelta(days=365)
 
         plan = ContinuityPlan(
@@ -281,10 +281,10 @@ class ISO22301BusinessContinuity:
 
         self.incident_records.append(incident)
 
-        ***REMOVED*** Trigger immediate response actions
+        # Trigger immediate response actions
         self._trigger_incident_response(incident)
 
-        ***REMOVED*** Notify stakeholders
+        # Notify stakeholders
         self._notify_incident_stakeholders(incident)
 
         logger.warning(f"Business continuity incident activated: {incident.title}")
@@ -294,7 +294,7 @@ class ISO22301BusinessContinuity:
         """Trigger automated incident response actions"""
         response_actions = []
 
-        ***REMOVED*** Assess impact and determine response strategy
+        # Assess impact and determine response strategy
         if incident.severity == IncidentSeverity.CRITICAL:
             response_actions.extend([
                 "Activate crisis management team",
@@ -315,7 +315,7 @@ class ISO22301BusinessContinuity:
                 "Monitor for escalation"
             ])
 
-        ***REMOVED*** Update incident status
+        # Update incident status
         incident.status = IncidentStatus.ASSESSING
         incident.response_start = datetime.utcnow()
 
@@ -333,7 +333,7 @@ class ISO22301BusinessContinuity:
             'timestamp': incident.detection_time.isoformat()
         }
 
-        ***REMOVED*** In production, this would send notifications via email, SMS, etc.
+        # In production, this would send notifications via email, SMS, etc.
         logger.warning(f"Incident notification sent for: {incident.title}")
 
     def update_incident_status(self, incident_id: str, status_update: Dict[str, Any]) -> bool:
@@ -349,7 +349,7 @@ class ISO22301BusinessContinuity:
 
         incident.status = new_status
 
-        ***REMOVED*** Update timestamps based on status
+        # Update timestamps based on status
         if new_status == IncidentStatus.CONTAINING and not incident.response_start:
             incident.response_start = datetime.utcnow()
         elif new_status == IncidentStatus.RESOLVED:
@@ -357,15 +357,15 @@ class ISO22301BusinessContinuity:
             if incident.response_start:
                 incident.recovery_time = int((incident.resolution_time - incident.response_start).total_seconds() / 60)
 
-        ***REMOVED*** Update other fields
+        # Update other fields
         for key, value in status_update.items():
             if key != 'status' and hasattr(incident, key):
                 setattr(incident, key, value)
 
-        ***REMOVED*** Log status change
+        # Log status change
         logger.info(f"Incident {incident_id} status changed: {old_status.value} -> {new_status.value}")
 
-        ***REMOVED*** Check if incident is resolved and trigger post-incident activities
+        # Check if incident is resolved and trigger post-incident activities
         if new_status == IncidentStatus.RESOLVED:
             self._perform_post_incident_review(incident)
 
@@ -380,7 +380,7 @@ class ISO22301BusinessContinuity:
 
     def _perform_post_incident_review(self, incident: IncidentRecord):
         """Perform post-incident review and lessons learned"""
-        ***REMOVED*** Calculate incident metrics
+        # Calculate incident metrics
         if incident.response_start and incident.resolution_time:
             response_time = (incident.response_start - incident.detection_time).total_seconds() / 60
             recovery_time = (incident.resolution_time - incident.response_start).total_seconds() / 60
@@ -388,8 +388,8 @@ class ISO22301BusinessContinuity:
             logger.info(f"Incident {incident.id} metrics: Detection->Response: {response_time:.1f}min, "
                        f"Response->Recovery: {recovery_time:.1f}min")
 
-        ***REMOVED*** Schedule lessons learned meeting
-        ***REMOVED*** In production, this would create calendar events and follow-up tasks
+        # Schedule lessons learned meeting
+        # In production, this would create calendar events and follow-up tasks
 
         logger.info(f"Post-incident review scheduled for incident {incident.id}")
 
@@ -429,7 +429,7 @@ class ISO22301BusinessContinuity:
         test.issues_found = test_results.get('issues_found', [])
         test.recommendations = test_results.get('recommendations', [])
 
-        ***REMOVED*** Update continuity plans based on test results
+        # Update continuity plans based on test results
         self._update_plans_from_test_results(test)
 
         logger.info(f"Recovery test executed: {test.test_type} - Status: {test.status}")
@@ -445,33 +445,33 @@ class ISO22301BusinessContinuity:
     def _update_plans_from_test_results(self, test: RecoveryTest):
         """Update continuity plans based on test results"""
         if test.status != 'passed':
-            ***REMOVED*** Identify plans that need updating
+            # Identify plans that need updating
             affected_plans = []
             for plan in self.continuity_plans.values():
                 if test.scope.lower() in plan.scope.lower():
                     affected_plans.append(plan)
 
             for plan in affected_plans:
-                ***REMOVED*** Add test results to plan improvement actions
+                # Add test results to plan improvement actions
                 logger.info(f"Continuity plan {plan.name} flagged for review based on test results")
 
     def calculate_business_continuity_metrics(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Calculate business continuity performance metrics"""
-        ***REMOVED*** Filter incidents by tenant
+        # Filter incidents by tenant
         tenant_incidents = [i for i in self.incident_records if i.id.startswith(tenant_id)]
 
-        ***REMOVED*** Calculate metrics
+        # Calculate metrics
         total_incidents = len(tenant_incidents)
         resolved_incidents = len([i for i in tenant_incidents if i.status == IncidentStatus.RESOLVED])
 
-        ***REMOVED*** Recovery time metrics
+        # Recovery time metrics
         recovery_times = [i.recovery_time for i in tenant_incidents if i.recovery_time]
         avg_recovery_time = sum(recovery_times) / len(recovery_times) if recovery_times else 0
 
-        ***REMOVED*** Financial impact
+        # Financial impact
         total_financial_impact = sum(i.financial_impact for i in tenant_incidents)
 
-        ***REMOVED*** Test coverage
+        # Test coverage
         total_tests = len(self.recovery_tests)
         passed_tests = len([t for t in self.recovery_tests if t.status == 'passed'])
         test_success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
@@ -501,23 +501,23 @@ class ISO22301BusinessContinuity:
         """Assess overall business continuity readiness"""
         readiness_score = 100
 
-        ***REMOVED*** Check plan coverage
+        # Check plan coverage
         active_plans = len([p for p in self.continuity_plans.values() if p.status == 'approved'])
-        if active_plans < 3:  ***REMOVED*** Arbitrary minimum
+        if active_plans < 3:  # Arbitrary minimum
             readiness_score -= 20
 
-        ***REMOVED*** Check impact analysis coverage
+        # Check impact analysis coverage
         impact_analyses = len(self.impact_analyses)
-        if impact_analyses < 5:  ***REMOVED*** Arbitrary minimum
+        if impact_analyses < 5:  # Arbitrary minimum
             readiness_score -= 15
 
-        ***REMOVED*** Check test frequency
+        # Check test frequency
         recent_tests = len([t for t in self.recovery_tests
                            if (datetime.utcnow() - t.schedule).days <= 90])
         if recent_tests < 2:
             readiness_score -= 10
 
-        ***REMOVED*** Check incident response capability
+        # Check incident response capability
         unresolved_incidents = len([i for i in self.incident_records
                                    if i.status not in [IncidentStatus.RESOLVED, IncidentStatus.CLOSED]])
         if unresolved_incidents > 2:
@@ -538,20 +538,20 @@ class ISO22301BusinessContinuity:
         """Generate comprehensive business continuity report"""
         metrics = self.calculate_business_continuity_metrics(tenant_id)
 
-        ***REMOVED*** Get recent incidents
+        # Get recent incidents
         recent_incidents = sorted(
             [i for i in self.incident_records if i.id.startswith(tenant_id)],
             key=lambda x: x.detection_time,
             reverse=True
         )[:10]
 
-        ***REMOVED*** Get upcoming tests
+        # Get upcoming tests
         upcoming_tests = sorted(
             [t for t in self.recovery_tests if t.schedule > datetime.utcnow()],
             key=lambda x: x.schedule
         )[:5]
 
-        ***REMOVED*** Get plan status
+        # Get plan status
         plan_status = {}
         for plan in self.continuity_plans.values():
             plan_status[plan.name] = {
@@ -642,32 +642,32 @@ class ISO22301BusinessContinuity:
         compliance_score = 0
         requirements = []
 
-        ***REMOVED*** Context and interested parties (Clause 4)
+        # Context and interested parties (Clause 4)
         if len(self.continuity_plans) > 0:
             compliance_score += 15
             requirements.append("4.1-4.4 Understanding organization and context - COMPLIANT")
         else:
             requirements.append("4.1-4.4 Understanding organization and context - NON_COMPLIANT")
 
-        ***REMOVED*** Leadership (Clause 5)
+        # Leadership (Clause 5)
         if any(p.status == 'approved' for p in self.continuity_plans.values()):
             compliance_score += 15
             requirements.append("5.1-5.3 Leadership and commitment - COMPLIANT")
         else:
             requirements.append("5.1-5.3 Leadership and commitment - PARTIALLY_COMPLIANT")
 
-        ***REMOVED*** Planning (Clause 6)
+        # Planning (Clause 6)
         if len(self.impact_analyses) > 0:
             compliance_score += 15
             requirements.append("6.1-6.5 Planning - COMPLIANT")
         else:
             requirements.append("6.1-6.5 Planning - NON_COMPLIANT")
 
-        ***REMOVED*** Support (Clause 7)
-        compliance_score += 10  ***REMOVED*** Assumed based on system capabilities
+        # Support (Clause 7)
+        compliance_score += 10  # Assumed based on system capabilities
         requirements.append("7.1-7.5 Support - COMPLIANT")
 
-        ***REMOVED*** Operation (Clause 8)
+        # Operation (Clause 8)
         incident_handling = metrics['incident_metrics']['resolution_rate']
         if incident_handling >= 80:
             compliance_score += 20
@@ -676,7 +676,7 @@ class ISO22301BusinessContinuity:
             compliance_score += 10
             requirements.append("8.1-8.4 Operation - PARTIALLY_COMPLIANT")
 
-        ***REMOVED*** Performance evaluation (Clause 9)
+        # Performance evaluation (Clause 9)
         test_success = metrics.get('test_metrics', {}).get('success_rate', 0)
         if test_success >= 80:
             compliance_score += 15
@@ -685,8 +685,8 @@ class ISO22301BusinessContinuity:
             compliance_score += 7
             requirements.append("9.1-9.3 Performance evaluation - PARTIALLY_COMPLIANT")
 
-        ***REMOVED*** Improvement (Clause 10)
-        compliance_score += 10  ***REMOVED*** Assumed based on continuous improvement capabilities
+        # Improvement (Clause 10)
+        compliance_score += 10  # Assumed based on continuous improvement capabilities
         requirements.append("10.1-10.3 Improvement - COMPLIANT")
 
         overall_status = 'COMPLIANT' if compliance_score >= 80 else 'PARTIALLY_COMPLIANT' if compliance_score >= 60 else 'NON_COMPLIANT'

@@ -52,13 +52,13 @@ async def trigger_bestellvorschlag(request: WorkflowTriggerRequest):
     logger.info(f"Triggering Bestellvorschlag workflow (tenant: {request.tenant_id})")
     
     try:
-        ***REMOVED*** Invoke LangGraph workflow (pauses at approval checkpoint)
+        # Invoke LangGraph workflow (pauses at approval checkpoint)
         result = await invoke_bestellvorschlag(request.tenant_id, correlation_id)
         
         return WorkflowTriggerResponse(
             workflow_id=correlation_id,
             correlation_id=correlation_id,
-            status="pending_approval",  ***REMOVED*** Always pauses at checkpoint
+            status="pending_approval",  # Always pauses at checkpoint
             started_at=datetime.utcnow().isoformat()
         )
     

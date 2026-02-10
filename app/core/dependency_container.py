@@ -76,15 +76,15 @@ class DependencyContainer:
         Raises:
             ValueError: If interface is not registered
         """
-        ***REMOVED*** Check scoped instances first
+        # Check scoped instances first
         if scope and scope in self._scoped_instances and interface in self._scoped_instances[scope]:
             return self._scoped_instances[scope][interface]
 
-        ***REMOVED*** Check singletons
+        # Check singletons
         if interface in self._singletons:
             return self._singletons[interface]
 
-        ***REMOVED*** Check registered services
+        # Check registered services
         if interface in self._services:
             impl_class = self._services[interface]
             instance = impl_class()
@@ -92,7 +92,7 @@ class DependencyContainer:
             logger.debug(f"Created singleton instance of {impl_class.__name__}")
             return instance
 
-        ***REMOVED*** Check factories
+        # Check factories
         if interface in self._factories:
             factory = self._factories[interface]
             instance = factory()
@@ -133,7 +133,7 @@ class DependencyContainer:
         try:
             yield self
         finally:
-            ***REMOVED*** Clean up scoped instances
+            # Clean up scoped instances
             if scope in self._scoped_instances:
                 del self._scoped_instances[scope]
                 logger.debug(f"Cleaned up scope: {scope}")
@@ -147,7 +147,7 @@ class DependencyContainer:
         logger.debug("Dependency container cleared")
 
 
-***REMOVED*** Global container instance
+# Global container instance
 container = DependencyContainer()
 
 

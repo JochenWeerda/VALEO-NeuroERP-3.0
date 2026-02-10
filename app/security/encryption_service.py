@@ -32,7 +32,7 @@ class ISO27001EncryptionService:
         self.key_rotation_days = 90
         self.backend = default_backend()
 
-        ***REMOVED*** Master key for key derivation (in production, this would be in HSM)
+        # Master key for key derivation (in production, this would be in HSM)
         self._master_key = self._generate_master_key()
 
     def encrypt_sensitive_data(self, data: str, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -43,32 +43,32 @@ class ISO27001EncryptionService:
         if not isinstance(data, str):
             raise ValueError("Data must be string")
 
-        ***REMOVED*** Determine encryption context
+        # Determine encryption context
         data_classification = context.get('classification', 'internal')
         tenant_id = context.get('tenant_id', 'system')
         purpose = context.get('purpose', 'general')
 
-        ***REMOVED*** Get appropriate encryption key
+        # Get appropriate encryption key
         key_id = self._get_encryption_key(data_classification, tenant_id, purpose)
 
-        ***REMOVED*** Generate random IV for GCM
-        iv = os.urandom(12)  ***REMOVED*** 96 bits for GCM
+        # Generate random IV for GCM
+        iv = os.urandom(12)  # 96 bits for GCM
 
-        ***REMOVED*** Get the actual key
+        # Get the actual key
         key = self._get_key_material(key_id)
 
-        ***REMOVED*** Encrypt data
+        # Encrypt data
         cipher = Cipher(algorithms.AES(key), modes.GCM(iv), backend=self.backend)
         encryptor = cipher.encryptor()
 
-        ***REMOVED*** Convert string to bytes
+        # Convert string to bytes
         data_bytes = data.encode('utf-8')
 
-        ***REMOVED*** Encrypt
+        # Encrypt
         ciphertext = encryptor.update(data_bytes) + encryptor.finalize()
         auth_tag = encryptor.tag
 
-        ***REMOVED*** Create encrypted package
+        # Create encrypted package
         encrypted_package = {
             'encrypted_data': base64.b64encode(ciphertext).decode('utf-8'),
             'key_id': key_id,
@@ -89,34 +89,34 @@ class ISO27001EncryptionService:
         """
         Decrypt sensitive data with access control verification
         """
-        ***REMOVED*** Verify access permissions
+        # Verify access permissions
         if not self._verify_access_permissions(encrypted_package, context):
             raise SecurityException("Access denied to encrypted data")
 
-        ***REMOVED*** Check key validity
+        # Check key validity
         if self._is_key_expired(encrypted_package['key_id']):
             raise SecurityException("Encryption key has expired")
 
-        ***REMOVED*** Get decryption key
+        # Get decryption key
         key = self._get_key_material(encrypted_package['key_id'])
 
-        ***REMOVED*** Decode encrypted data
+        # Decode encrypted data
         ciphertext = base64.b64decode(encrypted_package['encrypted_data'])
         auth_tag = base64.b64decode(encrypted_package['auth_tag'])
         iv = base64.b64decode(encrypted_package['iv'])
 
-        ***REMOVED*** Verify integrity
+        # Verify integrity
         expected_hash = self._calculate_integrity_hash(ciphertext, auth_tag, iv)
         if expected_hash != encrypted_package.get('integrity_hash'):
             raise SecurityException("Data integrity check failed")
 
-        ***REMOVED*** Decrypt data
+        # Decrypt data
         cipher = Cipher(algorithms.AES(key), modes.GCM(iv, auth_tag), backend=self.backend)
         decryptor = cipher.decryptor()
 
         plaintext = decryptor.update(ciphertext) + decryptor.finalize()
 
-        ***REMOVED*** Convert back to string
+        # Convert back to string
         decrypted_data = plaintext.decode('utf-8')
 
         logger.info(f"Data decrypted with key {encrypted_package['key_id']}")
@@ -124,21 +124,21 @@ class ISO27001EncryptionService:
 
     def _get_encryption_key(self, classification: str, tenant_id: str, purpose: str) -> str:
         """Get appropriate encryption key based on context"""
-        ***REMOVED*** Create key identifier based on classification hierarchy
+        # Create key identifier based on classification hierarchy
         if classification == 'restricted':
-            ***REMOVED*** Highest security - dedicated key per tenant
+            # Highest security - dedicated key per tenant
             key_id = f"restricted-{tenant_id}-{purpose}"
         elif classification == 'confidential':
-            ***REMOVED*** High security - shared tenant key
+            # High security - shared tenant key
             key_id = f"confidential-{tenant_id}"
         elif classification == 'internal':
-            ***REMOVED*** Medium security - shared key for internal data
+            # Medium security - shared key for internal data
             key_id = f"internal-{tenant_id}"
         else:
-            ***REMOVED*** Public/low sensitivity - general key
+            # Public/low sensitivity - general key
             key_id = "public-general"
 
-        ***REMOVED*** Ensure key exists
+        # Ensure key exists
         if not self._key_exists(key_id):
             self._create_key(key_id, classification)
 
@@ -146,8 +146,8 @@ class ISO27001EncryptionService:
 
     def _get_key_material(self, key_id: str) -> bytes:
         """Get the actual key material for encryption/decryption"""
-        ***REMOVED*** In production, this would retrieve from HSM or secure key store
-        ***REMOVED*** For now, derive key from master key
+        # In production, this would retrieve from HSM or secure key store
+        # For now, derive key from master key
 
         if not hasattr(self, '_key_cache'):
             self._key_cache = {}
@@ -155,11 +155,11 @@ class ISO27001EncryptionService:
         if key_id in self._key_cache:
             return self._key_cache[key_id]
 
-        ***REMOVED*** Derive key using PBKDF2
+        # Derive key using PBKDF2
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
-            length=32,  ***REMOVED*** 256 bits
-            salt=self._master_key[:16],  ***REMOVED*** Use first 16 bytes as salt
+            length=32,  # 256 bits
+            salt=self._master_key[:16],  # Use first 16 bytes as salt
             iterations=100000,
             backend=self.backend
         )
@@ -171,8 +171,8 @@ class ISO27001EncryptionService:
 
     def _generate_master_key(self) -> bytes:
         """Generate or retrieve master key"""
-        ***REMOVED*** In production, this would be stored in HSM
-        ***REMOVED*** For development, generate a consistent key
+        # In production, this would be stored in HSM
+        # For development, generate a consistent key
         seed = "VALEO-NeuroERP-ISO27001-Master-Key-2025"
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
@@ -185,12 +185,12 @@ class ISO27001EncryptionService:
 
     def _key_exists(self, key_id: str) -> bool:
         """Check if key exists"""
-        ***REMOVED*** In production, check key store
-        return True  ***REMOVED*** Assume exists for now
+        # In production, check key store
+        return True  # Assume exists for now
 
     def _create_key(self, key_id: str, classification: str):
         """Create new encryption key"""
-        ***REMOVED*** In production, create key in HSM with proper metadata
+        # In production, create key in HSM with proper metadata
         logger.info(f"Created encryption key: {key_id} (classification: {classification})")
 
     def _verify_access_permissions(self, encrypted_package: Dict[str, Any], context: Dict[str, Any]) -> bool:
@@ -200,16 +200,16 @@ class ISO27001EncryptionService:
         data_classification = encrypted_package.get('classification')
         tenant_id = encrypted_package.get('tenant_id')
 
-        ***REMOVED*** Check tenant access
+        # Check tenant access
         if tenant_id != context.get('tenant_id') and user_role not in ['admin', 'auditor']:
             return False
 
-        ***REMOVED*** Implement role-based access control for encrypted data
+        # Implement role-based access control for encrypted data
         access_matrix = {
             'public': ['user', 'admin', 'auditor', 'system'],
             'internal': ['user', 'admin', 'auditor', 'system'],
             'confidential': ['admin', 'auditor', 'system'],
-            'restricted': ['admin', 'auditor']  ***REMOVED*** Highest security
+            'restricted': ['admin', 'auditor']  # Highest security
         }
 
         allowed_roles = access_matrix.get(data_classification, [])
@@ -217,8 +217,8 @@ class ISO27001EncryptionService:
 
     def _is_key_expired(self, key_id: str) -> bool:
         """Check if encryption key has expired"""
-        ***REMOVED*** In production, check key metadata
-        ***REMOVED*** For now, assume keys don't expire in development
+        # In production, check key metadata
+        # For now, assume keys don't expire in development
         return False
 
     def _calculate_integrity_hash(self, ciphertext: bytes, auth_tag: bytes, iv: bytes) -> str:
@@ -235,26 +235,26 @@ class ISO27001EncryptionService:
         rotated_keys = []
         errors = []
 
-        ***REMOVED*** Find keys older than rotation period
+        # Find keys older than rotation period
         expired_keys = self._get_expired_keys()
 
         for key_metadata in expired_keys:
             try:
                 old_key_id = key_metadata['key_id']
 
-                ***REMOVED*** Create new key
+                # Create new key
                 new_key_id = f"{old_key_id}-v{key_metadata['version'] + 1}"
                 self._create_key(new_key_id, key_metadata['classification'])
 
-                ***REMOVED*** Update key references (this would be complex in production)
-                ***REMOVED*** For now, just log the rotation
+                # Update key references (this would be complex in production)
+                # For now, just log the rotation
                 rotated_keys.append({
                     'old_key': old_key_id,
                     'new_key': new_key_id,
                     'rotated_at': datetime.utcnow().isoformat()
                 })
 
-                ***REMOVED*** Log security event
+                # Log security event
                 self._log_key_rotation(old_key_id, new_key_id)
 
             except Exception as e:
@@ -273,8 +273,8 @@ class ISO27001EncryptionService:
 
     def _get_expired_keys(self) -> list:
         """Get list of expired keys"""
-        ***REMOVED*** In production, query key store for expired keys
-        ***REMOVED*** For now, return empty list
+        # In production, query key store for expired keys
+        # For now, return empty list
         return []
 
     def _log_key_rotation(self, old_key: str, new_key: str):
@@ -296,17 +296,17 @@ class ISO27001EncryptionService:
 
     def _get_active_key_count(self, tenant_id: str) -> int:
         """Get count of active keys for tenant"""
-        ***REMOVED*** In production, query key store
-        return 5  ***REMOVED*** Mock value
+        # In production, query key store
+        return 5  # Mock value
 
     def _get_expired_key_count(self, tenant_id: str) -> int:
         """Get count of expired keys for tenant"""
-        ***REMOVED*** In production, query key store
-        return 0  ***REMOVED*** Mock value
+        # In production, query key store
+        return 0  # Mock value
 
     def _get_last_rotation_date(self, tenant_id: str) -> str:
         """Get last key rotation date"""
-        ***REMOVED*** In production, query audit logs
+        # In production, query audit logs
         return (datetime.utcnow() - timedelta(days=30)).isoformat()
 
     def encrypt_file(self, file_path: str, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -315,10 +315,10 @@ class ISO27001EncryptionService:
             with open(file_path, 'rb') as f:
                 file_data = f.read()
 
-            ***REMOVED*** Convert to base64 for string encryption
+            # Convert to base64 for string encryption
             file_b64 = base64.b64encode(file_data).decode('utf-8')
 
-            ***REMOVED*** Encrypt as string
+            # Encrypt as string
             encrypted_package = self.encrypt_sensitive_data(file_b64, context)
             encrypted_package['file_path'] = file_path
             encrypted_package['original_size'] = len(file_data)
@@ -332,13 +332,13 @@ class ISO27001EncryptionService:
     def decrypt_file(self, encrypted_package: Dict[str, Any], output_path: str, context: Dict[str, Any]) -> str:
         """Decrypt file to output path"""
         try:
-            ***REMOVED*** Decrypt the base64 string
+            # Decrypt the base64 string
             file_b64 = self.decrypt_sensitive_data(encrypted_package, context)
 
-            ***REMOVED*** Convert back to bytes
+            # Convert back to bytes
             file_data = base64.b64decode(file_b64)
 
-            ***REMOVED*** Write to output file
+            # Write to output file
             with open(output_path, 'wb') as f:
                 f.write(file_data)
 
@@ -355,7 +355,7 @@ class SecurityException(Exception):
     pass
 
 
-***REMOVED*** Convenience functions
+# Convenience functions
 def encrypt_data(data: str, classification: str = 'internal', tenant_id: str = 'system') -> Dict[str, Any]:
     """Convenience function for data encryption"""
     service = ISO27001EncryptionService()

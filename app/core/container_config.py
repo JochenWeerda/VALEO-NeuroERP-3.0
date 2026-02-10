@@ -48,7 +48,7 @@ def configure_container():
     This function sets up the entire service layer for clean architecture.
     """
 
-    ***REMOVED*** Database session factory
+    # Database session factory
     def get_db_session_factory():
         """Factory for database sessions with improved error handling."""
         try:
@@ -62,7 +62,7 @@ def configure_container():
 
     container.register_factory(type(SessionLocal()), get_db_session_factory)
 
-    ***REMOVED*** Register repository implementations
+    # Register repository implementations
     def create_tenant_repository():
         return TenantRepositoryImpl(SessionLocal())
 
@@ -99,7 +99,7 @@ def configure_container():
     def create_document_repository():
         return DocumentRepository(SessionLocal())
 
-    ***REMOVED*** Register repositories
+    # Register repositories
     container.register_factory(TenantRepository, create_tenant_repository)
     container.register_factory(UserRepository, create_user_repository)
     container.register_factory(CustomerRepository, create_customer_repository)
@@ -113,7 +113,7 @@ def configure_container():
     container.register_factory(JournalEntryRepository, create_journal_entry_repository)
     container.register_factory(DocumentRepository, create_document_repository)
 
-    ***REMOVED*** Finance repositories
+    # Finance repositories
     def create_offener_posten_repository():
         return OffenerPostenRepository(SessionLocal())
 
@@ -131,12 +131,12 @@ def configure_container():
     container.register_factory(KontoRepository, create_konto_repository)
     container.register_factory(AnlageRepository, create_anlage_repository)
 
-    ***REMOVED*** Infrastructure Services (Singletons)
-    ***REMOVED*** These would be implemented as concrete classes in the infrastructure layer
+    # Infrastructure Services (Singletons)
+    # These would be implemented as concrete classes in the infrastructure layer
 
-    ***REMOVED*** Domain Services
-    ***REMOVED*** These will be registered when we implement the concrete service classes
-    ***REMOVED*** For now, we'll register placeholder implementations
+    # Domain Services
+    # These will be registered when we implement the concrete service classes
+    # For now, we'll register placeholder implementations
 
     class PlaceholderTenantService(TenantService):
         async def get_by_id(self, id: str, tenant_id: str):
@@ -187,7 +187,7 @@ def configure_container():
             logger.warning("PlaceholderUserService.change_password called")
             return False
 
-    ***REMOVED*** Register production services (replacing placeholders)
+    # Register production services (replacing placeholders)
     def create_tenant_service():
         return ProductionTenantService(SessionLocal)
 
@@ -201,8 +201,8 @@ def configure_container():
     container.register_factory(UserService, create_user_service)
     container.register_factory(CustomerService, create_customer_service)
 
-    ***REMOVED*** Register other services as placeholders for now
-    ***REMOVED*** These will be replaced with actual implementations as we build them
+    # Register other services as placeholders for now
+    # These will be replaced with actual implementations as we build them
 
     class PlaceholderService:
         async def get_by_id(self, id: str, tenant_id: str):
@@ -224,7 +224,7 @@ def configure_container():
             logger.warning(f"PlaceholderService.exists called for {self.__class__.__name__}")
             return False
 
-    ***REMOVED*** Create placeholder classes for each service
+    # Create placeholder classes for each service
     PlaceholderCustomerService = type('PlaceholderCustomerService', (PlaceholderService, CustomerService), {})
     PlaceholderLeadService = type('PlaceholderLeadService', (PlaceholderService, LeadService), {})
     PlaceholderContactService = type('PlaceholderContactService', (PlaceholderService, ContactService), {})
@@ -235,9 +235,9 @@ def configure_container():
     PlaceholderAccountService = type('PlaceholderAccountService', (PlaceholderService, AccountService), {})
     PlaceholderJournalEntryService = type('PlaceholderJournalEntryService', (PlaceholderService, JournalEntryService), {})
 
-    ***REMOVED*** Register all placeholder services
-    ***REMOVED*** CustomerService now uses ProductionCustomerService (already registered above)
-    ***REMOVED*** container.register(CustomerService, PlaceholderCustomerService)  ***REMOVED*** Replaced with ProductionCustomerService
+    # Register all placeholder services
+    # CustomerService now uses ProductionCustomerService (already registered above)
+    # container.register(CustomerService, PlaceholderCustomerService)  # Replaced with ProductionCustomerService
     container.register(LeadService, PlaceholderLeadService)
     container.register(ContactService, PlaceholderContactService)
     container.register(ArticleService, PlaceholderArticleService)
@@ -247,7 +247,7 @@ def configure_container():
     container.register(AccountService, PlaceholderAccountService)
     container.register(JournalEntryService, PlaceholderJournalEntryService)
 
-    ***REMOVED*** Infrastructure services (email, notifications, audit)
+    # Infrastructure services (email, notifications, audit)
     class PlaceholderEmailService(EmailService):
         async def send_email(self, to: str, subject: str, body: str, html=None):
             logger.warning("PlaceholderEmailService.send_email called")
@@ -272,7 +272,7 @@ def configure_container():
             logger.warning("PlaceholderAuditService.get_audit_log called")
             return []
 
-    ***REMOVED*** Register enhanced production services for infrastructure
+    # Register enhanced production services for infrastructure
     container.register(EmailService, ProductionEmailService)
     container.register(NotificationService, ProductionNotificationService)
     container.register(AuditService, ProductionAuditService)
@@ -280,5 +280,5 @@ def configure_container():
     logger.info("Dependency injection container configured with all services")
 
 
-***REMOVED*** Initialize container on import
+# Initialize container on import
 configure_container()
