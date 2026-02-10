@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { inventoryService, type EpcisEvent } from '../../../lib/services/inventory-service'
-import { Button } from '../../../components/ui/Button'
+import { Button } from '../../../components/ui/button'
 
 function formatDate(iso?: string | null) {
   if (!iso) return ''
