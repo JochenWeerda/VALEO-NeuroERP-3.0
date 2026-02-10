@@ -206,6 +206,7 @@ temp/
 ***REMOVED*** Security & Secrets
 ***REMOVED*** ===================================
 gitleaks-report.json
+.filter-repo-replace.txt
 ***REMOVED*** SSL Certificates
 *.pem
 *.key
