@@ -186,8 +186,8 @@ jobs:
       - name: Deploy to staging environment
         run: |
           echo "Deploying to staging environment"
-          ***REMOVED*** Add your deployment commands here
-          ***REMOVED*** Example: kubectl apply -f k8s/staging/
+          # Add your deployment commands here
+          # Example: kubectl apply -f k8s/staging/
 
   deploy-production:
     name: Deploy to Production
@@ -203,8 +203,8 @@ jobs:
       - name: Deploy to production environment
         run: |
           echo "Deploying to production environment"
-          ***REMOVED*** Add your deployment commands here
-          ***REMOVED*** Example: kubectl apply -f k8s/production/
+          # Add your deployment commands here
+          # Example: kubectl apply -f k8s/production/
 
   quality-gate:
     name: Quality Gate
@@ -267,8 +267,8 @@ jobs:
       - name: Run integration tests
         run: |
           echo "Running integration tests against staging"
-          ***REMOVED*** Add integration test commands here
-          ***REMOVED*** Example: npm run test:integration -- --env=staging
+          # Add integration test commands here
+          # Example: npm run test:integration -- --env=staging
 
   ai-model-update:
     name: AI Model Update
@@ -283,5 +283,5 @@ jobs:
       - name: Update AI models
         run: |
           echo "Updating AI models in production"
-          ***REMOVED*** Add AI model update commands here
-          ***REMOVED*** Example: python scripts/update-models.py
+          # Add AI model update commands here
+          # Example: python scripts/update-models.py

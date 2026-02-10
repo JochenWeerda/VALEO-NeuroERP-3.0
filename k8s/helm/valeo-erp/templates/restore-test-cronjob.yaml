@@ -1,4 +1,6 @@
-{{- if .Values.backup.restoreTest.enabled }}
+{{- $backup := .Values.backup | default dict -}}
+{{- $restoreTest := $backup.restoreTest | default dict -}}
+{{- if ($restoreTest.enabled | default false) }}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -6,7 +8,7 @@ metadata:
   labels:
     {{- include "valeo-erp.labels" . | nindent 4 }}
 spec:
-  schedule: {{ .Values.backup.restoreTest.schedule | quote }}
+  schedule: {{ ($restoreTest.schedule | default "0 3 * * *") | quote }}
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
   concurrencyPolicy: Forbid
@@ -33,7 +35,7 @@ spec:
                 echo "🧪 VALEO-NeuroERP Backup-Restore-Test"
                 echo "======================================"
                 
-                ***REMOVED*** Find latest backup
+                # Find latest backup
                 LATEST_BACKUP=$(ls -t /backups/daily/*.sql.gz 2>/dev/null | head -n1)
                 
                 if [ -z "$LATEST_BACKUP" ]; then
@@ -43,7 +45,7 @@ spec:
                 
                 echo "📦 Latest backup: ${LATEST_BACKUP}"
                 
-                ***REMOVED*** Create test database
+                # Create test database
                 echo "🔧 Creating test database..."
                 psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d postgres \
                   -c "DROP DATABASE IF EXISTS ${TEST_DB_NAME};" >/dev/null 2>&1 || true
@@ -51,7 +53,7 @@ spec:
                 psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d postgres \
                   -c "CREATE DATABASE ${TEST_DB_NAME} OWNER ${DB_USER};"
                 
-                ***REMOVED*** Restore
+                # Restore
                 echo "🔄 Restoring backup..."
                 START_TIME=$(date +%s)
                 
@@ -62,7 +64,7 @@ spec:
                 
                 echo "✅ Restore completed in ${DURATION}s"
                 
-                ***REMOVED*** Verify
+                # Verify
                 echo "🔍 Verifying restore..."
                 TABLE_COUNT=$(psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d ${TEST_DB_NAME} \
                   -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public';")
@@ -74,7 +76,7 @@ spec:
                 
                 echo "✅ Tables verified: ${TABLE_COUNT}"
                 
-                ***REMOVED*** Cleanup
+                # Cleanup
                 echo "🧹 Cleaning up..."
                 psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d postgres \
                   -c "DROP DATABASE ${TEST_DB_NAME};" >/dev/null 2>&1
@@ -88,10 +90,10 @@ spec:
                 echo "RTO: < 4 hours (OK)"
                 echo ""
                 
-                ***REMOVED*** Send notification (optional)
-                {{- if .Values.backup.restoreTest.notify }}
+                # Send notification (optional)
+                {{- if ($restoreTest.notify | default false) }}
                 echo "Sending notification..."
-                curl -X POST {{ .Values.backup.restoreTest.webhookUrl | quote }} \
+                curl -X POST {{ ($restoreTest.webhookUrl | default "") | quote }} \
                   -H "Content-Type: application/json" \
                   -d "{\"text\":\"✅ Backup-Restore-Test PASSED (${DURATION}s, ${TABLE_COUNT} tables)\"}" || true
                 {{- end }}

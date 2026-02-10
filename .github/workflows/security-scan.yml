@@ -2,10 +2,14 @@ name: Security Scan
 
 on:
   schedule:
-    - cron: '0 2 * * 1'  ***REMOVED*** Weekly on Monday at 2 AM
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
   workflow_dispatch:
   push:
     branches: [ main ]
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
   owasp-zap-full-scan:
@@ -70,10 +74,10 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
-          exit-code: '1'  ***REMOVED*** Fail on high/critical
+          exit-code: '1'  # Fail on high/critical
       
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
@@ -96,7 +100,7 @@ jobs:
           severity-cutoff: high
       
       - name: Upload Grype results
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
@@ -189,9 +193,9 @@ jobs:
       
       - name: Generate summary
         run: |
-          echo "***REMOVED*** Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "# Security Scan Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "***REMOVED******REMOVED*** Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "## Scan Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           if [ "${{ needs.owasp-zap-full-scan.result }}" == "success" ]; then

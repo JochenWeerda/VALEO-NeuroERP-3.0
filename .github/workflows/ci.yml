@@ -96,12 +96,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
       
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
+
+      # `actions/setup-node`'s pnpm caching requires `pnpm` to already be available on PATH.
+      - name: Setup Node.js (pnpm cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -155,7 +162,7 @@ jobs:
         working-directory: services/workflow
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio
+          pip install pytest pytest-asyncio pytest-cov
 
       - name: Static analysis
         working-directory: services/workflow
@@ -187,7 +194,7 @@ jobs:
         working-directory: services/compliance/infrastat
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio
+          pip install pytest pytest-asyncio pytest-cov
 
       - name: Run InfraStat tests
         env:
@@ -212,7 +219,7 @@ jobs:
         working-directory: services/compliance/zoll
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio
+          pip install pytest pytest-asyncio pytest-cov
 
       - name: Run Zoll tests
         env:
@@ -252,6 +259,9 @@ jobs:
   security-scan:
     name: Security Scanning
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     
     steps:
       - uses: actions/checkout@v4
@@ -265,9 +275,27 @@ jobs:
           output: 'trivy-results.sarif'
       
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
+
+      - name: Set up Python (for ZAP target)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install backend dependencies (for ZAP target)
+        run: pip install -r requirements.txt
+
+      - name: Start application (for ZAP target)
+        run: |
+          uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 10
+
+      - name: Wait for app to be ready (for ZAP target)
+        run: |
+          timeout 30 bash -c 'until curl -f http://localhost:8000/healthz; do sleep 2; done'
       
       - name: OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.10.0
@@ -292,7 +320,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r services/compliance/infrastat/requirements.txt
-          pip install pytest pytest-asyncio
+          pip install pytest pytest-asyncio pytest-cov
 
       - name: Start integration stack
         run: docker compose -f docker-compose.integration.yml up -d --build
@@ -321,9 +349,10 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies (finance + shared)
+        working-directory: services/finance
         run: |
-          pip install -r services/finance/requirements.txt
-          pip install pytest pytest-asyncio
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
       - name: Run GoBD tests
         env:
           PYTHONPATH: packages/finance-shared/src
@@ -365,7 +394,7 @@ jobs:
         working-directory: services/inventory
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio
+          pip install pytest pytest-asyncio pytest-cov
 
       - name: Run EPCIS API tests
         env:
@@ -393,7 +422,7 @@ jobs:
       - name: Install ts-node
         run: npm i -g ts-node typescript
       - name: Run Audit E2E smoke
-        run: node -r ts-node/register domains/finance/tests/e2e/audit-e2e.ts
+        run: ts-node domains/finance/tests/e2e/audit-e2e.ts
   staging-dry-run:
     name: Staging Dry-Run (Helm Lint & Template)
     runs-on: ubuntu-latest
@@ -403,6 +432,9 @@ jobs:
         uses: azure/setup-helm@v4
         with:
           version: v3.13.3
+      - name: Helm Dependency Build
+        run: |
+          helm dependency build k8s/helm/valeo-erp
       - name: Helm Lint
         run: |
           helm lint k8s/helm/valeo-erp
@@ -438,6 +470,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write
     
     steps:
       - uses: actions/checkout@v4
@@ -480,7 +513,7 @@ jobs:
           output: 'trivy-image-results.sarif'
       
       - name: Upload Trivy image results
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-image-results.sarif'
 

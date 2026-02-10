@@ -2,14 +2,14 @@ name: Compliance Checks
 
 on:
   schedule:
-    ***REMOVED*** Weekly on Monday at 6:00 AM
+    # Weekly on Monday at 6:00 AM
     - cron: '0 6 * * 1'
-  workflow_dispatch:  ***REMOVED*** Manual trigger
+  workflow_dispatch:  # Manual trigger
   push:
     branches: [main]
     paths:
       - 'tests/compliance/**'
-      - 'app.api.v1.endpoints.gdpr.py'
+      - 'app/api/v1/endpoints/gdpr.py'
       - 'docs/compliance/**'
 
 jobs:
@@ -130,13 +130,13 @@ jobs:
       
       - name: Generate Report
         run: |
-          echo "***REMOVED*** Compliance Test Report" > compliance-report.md
+          echo "# Compliance Test Report" > compliance-report.md
           echo "**Date:** $(date)" >> compliance-report.md
           echo "" >> compliance-report.md
-          echo "***REMOVED******REMOVED*** GDPR Tests" >> compliance-report.md
+          echo "## GDPR Tests" >> compliance-report.md
           cat test-results/gdpr-test-results/pytest-report.xml || echo "No GDPR results"
           echo "" >> compliance-report.md
-          echo "***REMOVED******REMOVED*** GoBD Tests" >> compliance-report.md
+          echo "## GoBD Tests" >> compliance-report.md
           cat test-results/gobd-test-results/pytest-report.xml || echo "No GoBD results"
       
       - name: Upload Report

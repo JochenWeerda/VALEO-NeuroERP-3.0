@@ -190,7 +190,14 @@ test-results/
 coverage/
 .nyc_output/
 playwright-report/
+playwright-tests/artifacts/
 *.spec.js.snap
+
+# Generated reports/artifacts (should not be committed)
+evidence/
+lint-results.json
+FINAL-LINT-STATUS-REPORT.md
+coverage.xml
 
 ***REMOVED*** ===================================
 ***REMOVED*** Temporary Files
@@ -206,7 +213,6 @@ temp/
 ***REMOVED*** Security & Secrets
 ***REMOVED*** ===================================
 gitleaks-report.json
-.filter-repo-replace.txt
 ***REMOVED*** SSL Certificates
 *.pem
 *.key

@@ -1,17 +1,37 @@
+# Gitleaks configuration for VALEO-NeuroERP-3.0
+# Goal: prevent accidental secret commits (API keys, passwords, private keys).
+
 title = "VALEO-NeuroERP gitleaks config"
 
 [extend]
 useDefault = true
 
 [allowlist]
+description = "Allowlist for known non-secret test strings and generated artifacts."
+regexTarget = "match"
+
 paths = [
   '''^docs/''',
+  '''^gap/''',
   '''^memory/''',
+  '''^memory-bank/''',
+  '''^de_modules/''',
   '''^htmlcov/''',
   '''^coverage\.xml$''',
   '''^lint-output\.txt$''',
+  '''^playwright-report/''',
+  '''^playwright-tests/artifacts/''',
+  '''^evidence/''',
+  '''^FINAL-LINT-STATUS-REPORT\.md$''',
+  '''^lint-results\.json$''',
 ]
 
 regexes = [
+  # Dummy dev token used in tests
   '''dev-token''',
+  # Document templates are identifiers, not secrets.
+  '''templateKey:\s*'purchase_order_v1_de''' ,
+  '''templateKey\"\s*:\s*\"purchase_order_v1_de\"''',
+  # Keycloak local service URL contains a host:port and can look like credentials to generic detectors.
+  '''jdbc:postgresql://postgres-keycloak:5432/keycloak''',
 ]

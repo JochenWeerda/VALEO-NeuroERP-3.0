@@ -11,7 +11,7 @@ on:
     paths:
       - 'domains/inventory/**'
   schedule:
-    ***REMOVED*** Run full pipeline daily at 2 AM UTC
+    # Run full pipeline daily at 2 AM UTC
     - cron: '0 2 * * *'
 
 env:
@@ -22,7 +22,7 @@ env:
   SONAR_ORGANIZATION: 'valero-neuroerp'
 
 jobs:
-  ***REMOVED*** ===== QUALITY GATES =====
+  # ===== QUALITY GATES =====
   quality-gate:
     name: Quality Gate
     runs-on: ubuntu-latest
@@ -120,11 +120,14 @@ jobs:
         with:
           args: './domains/inventory/src'
 
-  ***REMOVED*** ===== SECURITY SCANNING =====
+  # ===== SECURITY SCANNING =====
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
     needs: quality-gate
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
       - name: Checkout code
@@ -166,11 +169,11 @@ jobs:
           args: --file=Dockerfile --sarif-file-output=snyk.sarif
 
       - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
 
-  ***REMOVED*** ===== PERFORMANCE TESTING =====
+  # ===== PERFORMANCE TESTING =====
   performance-test:
     name: Performance Testing
     runs-on: ubuntu-latest
@@ -228,21 +231,21 @@ jobs:
 
       - name: Performance assertions
         run: |
-          ***REMOVED*** Check if response time is within acceptable range
+          # Check if response time is within acceptable range
           AVG_RESPONSE=$(jq '.metrics.http_req_duration.avg' k6-results.json)
           if (( $(echo "$AVG_RESPONSE > 500" | bc -l) )); then
             echo "Average response time too high: ${AVG_RESPONSE}ms"
             exit 1
           fi
 
-          ***REMOVED*** Check error rate
+          # Check error rate
           ERROR_RATE=$(jq '.metrics.http_req_failed.rate' k6-results.json)
           if (( $(echo "$ERROR_RATE > 0.05" | bc -l) )); then
             echo "Error rate too high: ${ERROR_RATE}"
             exit 1
           fi
 
-  ***REMOVED*** ===== BUILD & TEST =====
+  # ===== BUILD & TEST =====
   build-and-test:
     name: Build and Test
     runs-on: ubuntu-latest
@@ -311,7 +314,7 @@ jobs:
         run: |
           docker run --rm ${{ env.IMAGE_NAME }}:test npm run health-check
 
-  ***REMOVED*** ===== DEPLOYMENT =====
+  # ===== DEPLOYMENT =====
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
@@ -354,10 +357,10 @@ jobs:
 
       - name: Run smoke tests
         run: |
-          ***REMOVED*** Wait for deployment
+          # Wait for deployment
           kubectl wait --for=condition=available --timeout=300s deployment/inventory-domain -n staging
 
-          ***REMOVED*** Run smoke tests
+          # Run smoke tests
           npm run test:smoke -- --env=staging
 
       - name: Rollback on failure
@@ -403,34 +406,34 @@ jobs:
         run: |
           aws eks update-kubeconfig --region eu-central-1 --name valero-production
 
-          ***REMOVED*** Blue-green deployment
+          # Blue-green deployment
           kubectl apply -f k8s/production/inventory-deployment-green.yaml
           kubectl apply -f k8s/production/inventory-service-green.yaml
 
-          ***REMOVED*** Wait for green deployment
+          # Wait for green deployment
           kubectl wait --for=condition=available --timeout=600s deployment/inventory-domain-green -n production
 
-          ***REMOVED*** Run comprehensive tests
+          # Run comprehensive tests
           npm run test:e2e -- --env=production
 
-          ***REMOVED*** Switch traffic to green
+          # Switch traffic to green
           kubectl apply -f k8s/production/inventory-service-blue-green.yaml
 
-          ***REMOVED*** Monitor for 5 minutes
+          # Monitor for 5 minutes
           sleep 300
 
-          ***REMOVED*** If successful, remove blue deployment
+          # If successful, remove blue deployment
           kubectl delete deployment/inventory-domain-blue -n production
 
       - name: Rollback on failure
         if: failure()
         run: |
-          ***REMOVED*** Switch traffic back to blue
+          # Switch traffic back to blue
           kubectl apply -f k8s/production/inventory-service-blue.yaml
-          ***REMOVED*** Remove failed green deployment
+          # Remove failed green deployment
           kubectl delete deployment/inventory-domain-green -n production
 
-  ***REMOVED*** ===== POST-DEPLOYMENT =====
+  # ===== POST-DEPLOYMENT =====
   post-deployment:
     name: Post-Deployment Validation
     runs-on: ubuntu-latest
@@ -450,18 +453,18 @@ jobs:
 
       - name: Run post-deployment tests
         run: |
-          ***REMOVED*** Synthetic monitoring
+          # Synthetic monitoring
           npm run test:synthetic
 
-          ***REMOVED*** API contract tests
+          # API contract tests
           npm run test:contract
 
-          ***REMOVED*** Performance regression tests
+          # Performance regression tests
           npm run test:performance-regression
 
       - name: Update deployment status
         run: |
-          ***REMOVED*** Update deployment status in monitoring system
+          # Update deployment status in monitoring system
           curl -X POST ${{ secrets.MONITORING_WEBHOOK }} \
             -H "Content-Type: application/json" \
             -d '{
@@ -472,7 +475,7 @@ jobs:
               "timestamp": "'$(date -Iseconds)'"
             }'
 
-  ***REMOVED*** ===== FINAL QUALITY GATE =====
+  # ===== FINAL QUALITY GATE =====
   final-quality-gate:
     name: Final Quality Gate
     runs-on: ubuntu-latest
@@ -482,7 +485,7 @@ jobs:
     steps:
       - name: Final quality assessment
         run: |
-          ***REMOVED*** Check all quality metrics
+          # Check all quality metrics
           if [[ "${{ needs.quality-gate.result }}" != "success" ]]; then
             echo "❌ Quality gate failed"
             exit 1
@@ -513,31 +516,31 @@ jobs:
       - name: Create deployment report
         run: |
           cat > deployment-report.md << EOF
-          ***REMOVED*** VALEO NeuroERP Inventory Domain Deployment Report
+          # VALEO NeuroERP Inventory Domain Deployment Report
 
-          ***REMOVED******REMOVED*** Deployment Details
+          ## Deployment Details
           - **Commit**: ${{ github.sha }}
           - **Branch**: ${{ github.ref }}
           - **Environment**: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
           - **Timestamp**: $(date -Iseconds)
 
-          ***REMOVED******REMOVED*** Quality Metrics
+          ## Quality Metrics
           - **Quality Gate**: ${{ needs.quality-gate.outputs.quality-score }}
           - **Test Coverage**: ${{ needs.quality-gate.outputs.coverage }}%
           - **Security Score**: ${{ needs.quality-gate.outputs.security-score }}/10
 
-          ***REMOVED******REMOVED*** Test Results
+          ## Test Results
           - **Unit Tests**: ${{ needs.quality-gate.result }}
           - **Integration Tests**: ${{ needs.quality-gate.result }}
           - **Performance Tests**: ${{ needs.performance-test.result }}
           - **Security Tests**: ${{ needs.security-scan.result }}
 
-          ***REMOVED******REMOVED*** Deployment Status
+          ## Deployment Status
           - **Build**: ${{ needs.build-and-test.result }}
           - **Deploy**: ${{ job.status }}
           - **Post-Deployment**: ${{ needs.post-deployment.result }}
 
-          ***REMOVED******REMOVED*** Rollback Information
+          ## Rollback Information
           - **Rollback Available**: Yes
           - **Previous Version**: ${{ github.event.before }}
           - **Rollback Command**: kubectl rollout undo deployment/inventory-domain
@@ -552,7 +555,7 @@ jobs:
       - name: Notify stakeholders
         if: github.ref == 'refs/heads/main'
         run: |
-          ***REMOVED*** Send notification to stakeholders
+          # Send notification to stakeholders
           curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
             -H "Content-Type: application/json" \
             -d '{

@@ -1,4 +1,6 @@
-{{- if .Values.backup.enabled }}
+{{- $backup := .Values.backup | default dict -}}
+{{- $s3 := $backup.s3 | default dict -}}
+{{- if ($backup.enabled | default false) }}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -6,7 +8,7 @@ metadata:
   labels:
     {{- include "valeo-erp.labels" . | nindent 4 }}
 spec:
-  schedule: {{ .Values.backup.schedule | quote }}
+  schedule: {{ ($backup.schedule | default "0 2 * * *") | quote }}
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
   concurrencyPolicy: Forbid
@@ -40,22 +42,22 @@ spec:
                 
                 echo "Backup completed: /backups/daily/${BACKUP_FILE}"
                 
-                ***REMOVED*** Monthly backup (on 1st)
+                # Monthly backup (on 1st)
                 if [ "$(date +%d)" = "01" ]; then
                   cp /backups/daily/${BACKUP_FILE} /backups/monthly/${BACKUP_FILE}
                   echo "Monthly backup created"
                 fi
                 
-                ***REMOVED*** Cleanup old backups
+                # Cleanup old backups
                 find /backups/daily -name "*.sql.gz" -mtime +${RETENTION_DAYS} -delete
                 find /backups/monthly -name "*.sql.gz" -mtime +$((RETENTION_MONTHS * 30)) -delete
                 
                 echo "Backup retention applied"
                 
-                ***REMOVED*** Optional: Upload to S3/Azure
-                {{- if .Values.backup.s3.enabled }}
+                # Optional: Upload to S3
+                {{- if ($s3.enabled | default false) }}
                 aws s3 cp /backups/daily/${BACKUP_FILE} \
-                  s3://{{ .Values.backup.s3.bucket }}/backups/postgresql/${BACKUP_FILE}
+                  s3://{{ $s3.bucket }}/backups/postgresql/${BACKUP_FILE}
                 echo "Uploaded to S3"
                 {{- end }}
             
@@ -74,9 +76,9 @@ spec:
                     name: {{ .Values.postgresql.existingSecret }}
                     key: password
               - name: RETENTION_DAYS
-                value: {{ .Values.backup.retentionDays | quote }}
+                value: {{ ($backup.retentionDays | default "14") | quote }}
               - name: RETENTION_MONTHS
-                value: {{ .Values.backup.retentionMonths | quote }}
+                value: {{ ($backup.retentionMonths | default "6") | quote }}
             
             volumeMounts:
               - name: backup-storage
