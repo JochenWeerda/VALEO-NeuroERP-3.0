@@ -60,7 +60,7 @@ jobs:
 
           if [ "$ec" -ne 0 ]; then
             echo "Gitleaks report (first 200 lines):"
-            head -n 200 gitleaks-report.json || true
+            head -n 200 /tmp/gitleaks-src/gitleaks-report.json || true
           fi
           exit "$ec"
 
