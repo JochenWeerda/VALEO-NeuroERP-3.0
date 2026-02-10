@@ -35,8 +35,14 @@ jobs:
 
       - name: Gitleaks (with baseline)
         run: |
+          # Use `git archive` to scan a working-tree snapshot without `.git/`.
+          # This avoids false positives from temporary auth headers written by actions/checkout.
+          rm -rf /tmp/gitleaks-src
+          mkdir -p /tmp/gitleaks-src
+          git archive --format=tar HEAD | tar -x -C /tmp/gitleaks-src
+
           docker run --rm \
-            -v "$PWD:/repo" \
+            -v "/tmp/gitleaks-src:/repo" \
             -w /repo \
             ghcr.io/gitleaks/gitleaks:latest \
             detect \
