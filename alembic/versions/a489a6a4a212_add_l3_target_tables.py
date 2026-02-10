@@ -23,6 +23,10 @@ def upgrade() -> None:
     ***REMOVED*** Create l3_staging schema for raw import
     op.execute("CREATE SCHEMA IF NOT EXISTS l3_staging")
 
+    ***REMOVED*** Ensure target schemas exist on a fresh DB.
+    for schema in ("domain_finance", "domain_crm", "domain_hr", "domain_mfg", "domain_inventory"):
+        op.execute(f"CREATE SCHEMA IF NOT EXISTS {schema}")
+
     ***REMOVED*** Domain Finance tables
     op.create_table('period_closure',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),

@@ -61,6 +61,12 @@ de_modules/
 ckage-lock.json
 ckage.json
 mory-bank/
+memory-bank/
+.backups/
+nul
+
+***REMOVED*** Miscreated nested workspace folder (should never be committed)
+C*workspaces*VALEO-NeuroERP-3.0/
 
 ***REMOVED*** PNPM
 .pnpm-store/
@@ -102,6 +108,7 @@ build/
 
 ***REMOVED*** Alembic
 alembic.ini.local
+alembic/versions_wip/
 
 ***REMOVED*** ===================================
 ***REMOVED*** Docker
@@ -198,6 +205,7 @@ temp/
 ***REMOVED*** ===================================
 ***REMOVED*** Security & Secrets
 ***REMOVED*** ===================================
+gitleaks-report.json
 ***REMOVED*** SSL Certificates
 *.pem
 *.key

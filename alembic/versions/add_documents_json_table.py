@@ -32,17 +32,19 @@ def upgrade() -> None:
         sa.Index('idx_documents_created', 'created_at'),
     )
     
-    ***REMOVED*** Create index on JSONB data for faster queries
-    op.execute("""
-        CREATE INDEX idx_documents_data_status ON documents USING GIN ((data->>'status'));
-        CREATE INDEX idx_documents_data_customer ON documents USING GIN ((data->>'customerId'));
-        CREATE INDEX idx_documents_data_supplier ON documents USING GIN ((data->>'supplierId'));
-    """)
+    ***REMOVED*** Index strategy:
+    ***REMOVED*** - GIN on JSONB column for containment queries (`data @> ...`)
+    ***REMOVED*** - btree expression indexes for equality filters on extracted text fields
+    op.execute("CREATE INDEX idx_documents_data_gin ON documents USING GIN (data);")
+    op.execute("CREATE INDEX idx_documents_data_status ON documents ((data->>'status'));")
+    op.execute("CREATE INDEX idx_documents_data_customer ON documents ((data->>'customerId'));")
+    op.execute("CREATE INDEX idx_documents_data_supplier ON documents ((data->>'supplierId'));")
 
 
 def downgrade() -> None:
     op.drop_index('idx_documents_data_supplier', table_name='documents')
     op.drop_index('idx_documents_data_customer', table_name='documents')
     op.drop_index('idx_documents_data_status', table_name='documents')
+    op.drop_index('idx_documents_data_gin', table_name='documents')
     op.drop_table('documents')
 

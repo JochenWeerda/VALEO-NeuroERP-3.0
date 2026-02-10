@@ -60,6 +60,12 @@ except ImportError:
     einkauf_router = None
     logger.warning("Einkauf router not available")
 
+try:
+    from app.api.v1.endpoints.purchase_workflow import router as purchase_workflow_router
+except ImportError:
+    purchase_workflow_router = None
+    logger.warning("Purchase workflow router not available")
+
 from prometheus_client import make_asgi_app
 
 ***REMOVED*** Setup logging
@@ -261,9 +267,14 @@ if crm_router:
 if finance_router:
     app.include_router(finance_router, tags=["Finance"])
 
-***REMOVED*** Einkauf/Beschaffung
+***REMOVED*** Einkauf/Beschaffung (mounted at both /einkauf and /api/einkauf for compatibility)
 if einkauf_router:
     app.include_router(einkauf_router, tags=["Einkauf"])
+    app.include_router(einkauf_router, prefix="/api", tags=["Einkauf"])
+
+***REMOVED*** Purchase Workflow (Wareneingang, Abgleich, PO-Storno)
+if purchase_workflow_router:
+    app.include_router(purchase_workflow_router, prefix="/api/purchase-workflow", tags=["Procurement", "Workflow"])
 
 ***REMOVED*** Legacy domain routers
 try:
