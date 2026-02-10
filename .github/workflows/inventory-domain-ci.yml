@@ -284,13 +284,14 @@ jobs:
 
       - name: Run full test suite
         run: |
+          # Generate a random key at runtime (avoid committing key-like material).
+          export ENCRYPTION_KEY="$(python - <<'PY'\nimport secrets\nprint(secrets.token_hex(32))\nPY\n)"
           cd domains/inventory
           npm run test:ci
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/inventory_test
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: test-jwt-secret
-          ENCRYPTION_KEY: test-encryption-key-32-chars
 
       - name: Build application
         run: |
