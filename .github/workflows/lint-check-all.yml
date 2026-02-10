@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ main, develop ]
   schedule:
-    ***REMOVED*** Run daily at 6 AM UTC to catch regressions
+    # Run daily at 6 AM UTC to catch regressions
     - cron: '0 6 * * *'
 
 env:
@@ -38,13 +38,13 @@ jobs:
 
       - name: Generate lint report
         run: |
-          echo "***REMOVED******REMOVED*** Lint Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "## Lint Check Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Domain | Status | Errors | Warnings |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|--------|--------|----------|" >> $GITHUB_STEP_SUMMARY
 
-          ***REMOVED*** Parse the output and create a summary table
-          ***REMOVED*** This would need to be enhanced to parse the actual output
+          # Parse the output and create a summary table
+          # This would need to be enhanced to parse the actual output
 
       - name: Upload lint results
         uses: actions/upload-artifact@v4

@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    ***REMOVED*** CRM Service
+    # CRM Service
     - match: Host(`api.valeo-erp.com`) && PathPrefix(`/api/v1/crm`)
       kind: Rule
       services:
@@ -17,7 +17,7 @@ spec:
         - name: rate-limit
         - name: auth-check
     
-    ***REMOVED*** Inventory Service
+    # Inventory Service
     - match: Host(`api.valeo-erp.com`) && PathPrefix(`/api/v1/inventory`)
       kind: Rule
       services:
@@ -27,7 +27,7 @@ spec:
         - name: rate-limit
         - name: auth-check
     
-    ***REMOVED*** Finance Service
+    # Finance Service
     - match: Host(`api.valeo-erp.com`) && PathPrefix(`/api/v1`)
       kind: Rule
       services:

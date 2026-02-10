@@ -28,25 +28,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # Quality gate should be fast/deterministic. Full-history secret scan
-          # is handled in a separate scheduled workflow.
-          fetch-depth: 1
+          fetch-depth: 0
 
-      - name: Gitleaks (working tree)
+      - name: Gitleaks (with baseline)
         run: |
           docker run --rm \
             -v "$PWD:/repo" \
             -w /repo \
             ghcr.io/gitleaks/gitleaks:latest \
             detect \
+            --no-git \
             --source . \
             --config .gitleaks.toml \
-            --no-git \
+            --baseline-path .gitleaks-baseline.json \
             --redact \
             --report-format json \
             --report-path gitleaks-report.json \
-            --max-target-megabytes 10 \
-            --timeout 600 \
             --no-banner
 
   backend:

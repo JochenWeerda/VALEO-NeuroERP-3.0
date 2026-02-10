@@ -25,12 +25,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
       
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 9
+
+      # `actions/setup-node`'s pnpm caching requires `pnpm` to already be on PATH.
+      - name: Setup Node.js (pnpm cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -94,12 +101,12 @@ jobs:
       
       - name: Generate Summary
         run: |
-          echo "***REMOVED******REMOVED*** UAT Smoke Tests Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## UAT Smoke Tests Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Run ID:** ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
           echo "**Build:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "***REMOVED******REMOVED******REMOVED*** Results by Domain" >> $GITHUB_STEP_SUMMARY
+          echo "### Results by Domain" >> $GITHUB_STEP_SUMMARY
           echo "- Sales: ${{ needs.smoke-tests.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Agrar: ${{ needs.smoke-tests.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- CRM: ${{ needs.smoke-tests.result }}" >> $GITHUB_STEP_SUMMARY
