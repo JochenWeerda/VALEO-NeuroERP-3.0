@@ -19,6 +19,7 @@
     "@types/node": "^20.0.0",
     "fastify": "^4.24.0",
     "crypto": "^1.0.1",
+    "nats": "^2.29.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

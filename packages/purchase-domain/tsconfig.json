@@ -1,8 +1,17 @@
 {
-  "extends": "../../tsconfig.build.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
+    "target": "ES2021",
+    "module": "CommonJS",
+    "moduleResolution": "Node10",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "useUnknownInCatchVariables": false,
+    "skipLibCheck": true,
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],
@@ -10,13 +19,6 @@
     },
     "exactOptionalPropertyTypes": false
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules", 
-    "dist",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }
