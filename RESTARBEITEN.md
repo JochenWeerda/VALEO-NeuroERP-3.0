@@ -366,3 +366,4 @@ Alle veralteten Status-Reports, redundanten Phasen-Dokumente, doppelte CRM-Dokum
 ## 2026-02-11 Frontend Mock-to-API Fortschritt (laufend)
 - Betrieb/Compliance: Banken, Disposition, Chargen, Cross-Compliance, QS, Saatgut-Nachbau, Sachkunde, VVVO, Zulassungen auf `lib/api/betrieb` Hooks umgestellt.
 - Portal/POS/Agrar: Portal-Listen (Anfragen, Bestellungen, Dokumente, Rechnungen, Vertraege, Zertifikate, Dashboard) und POS-/Agrar-Listen weiter auf Query/Hooks migriert.
+- Operations Batch 2: Wartung, Transporte, Verladung, Tankstelle, Dokumente, Projekte, Labor-Liste, Zertifikate-Liste auf `lib/api/betrieb` Hooks migriert.
