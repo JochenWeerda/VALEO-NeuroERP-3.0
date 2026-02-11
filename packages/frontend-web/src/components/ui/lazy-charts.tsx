@@ -8,14 +8,14 @@
  * import { LazyLineChart, LazyBarChart, LazyPieChart } from '@/components/ui/lazy-charts'
  */
 
-import { lazy, Suspense, ComponentType } from 'react'
+import { lazy, Suspense, type ComponentProps, type ComponentType } from 'react'
 import type {
-  LineChartProps,
-  BarChartProps,
-  PieChartProps,
-  AreaChartProps,
-  ComposedChartProps,
-  ResponsiveContainerProps,
+  AreaChart,
+  BarChart,
+  ComposedChart,
+  LineChart,
+  PieChart,
+  ResponsiveContainer,
 } from 'recharts'
 
 // Lazy imports für recharts Komponenten
@@ -42,6 +42,13 @@ const ComposedChartLazy = lazy(() =>
 const ResponsiveContainerLazy = lazy(() =>
   import('recharts').then((module) => ({ default: module.ResponsiveContainer }))
 )
+
+type LineChartProps = ComponentProps<typeof LineChart>
+type BarChartProps = ComponentProps<typeof BarChart>
+type PieChartProps = ComponentProps<typeof PieChart>
+type AreaChartProps = ComponentProps<typeof AreaChart>
+type ComposedChartProps = ComponentProps<typeof ComposedChart>
+type ResponsiveContainerProps = ComponentProps<typeof ResponsiveContainer>
 
 // Chart Loading Skeleton
 function ChartSkeleton(): JSX.Element {
