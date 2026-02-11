@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useEinzelfutter, type Einzelfutter } from '@/lib/api/futter'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -38,6 +39,17 @@ const mockFutter: Futter[] = [
 export default function EinzelfutterListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: apiFutter = [] } = useEinzelfutter()
+  const futter: Futter[] = apiFutter.length > 0
+    ? apiFutter.map((f: Einzelfutter) => ({
+      id: f.id,
+      artikel: f.name,
+      art: f.kategorie,
+      protein: f.rohprotein,
+      gvoStatus: 'GVO-Status n/a',
+      verfuegbar: f.bestand,
+    }))
+    : mockFutter
 
   const columns = [
     {
@@ -102,7 +114,7 @@ export default function EinzelfutterListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockFutter} columns={columns} />
+          <DataTable data={futter} columns={columns} />
         </CardContent>
       </Card>
     </div>
