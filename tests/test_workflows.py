@@ -6,6 +6,8 @@ import pytest
 from decimal import Decimal
 from datetime import datetime, timedelta
 
+pytest.importorskip("langchain_core")
+
 from app.agents.workflows.bestellvorschlag import build_bestellvorschlag_workflow
 from app.agents.workflows.skonto_optimizer import optimize_skonto
 from app.agents.workflows.compliance_copilot import check_compliance
