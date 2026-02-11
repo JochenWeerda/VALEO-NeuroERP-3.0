@@ -154,6 +154,7 @@ export default function PortalBestellungen() {
       <div>
         <h1 className="text-2xl font-bold">Meine Bestellungen</h1>
         <p className="text-muted-foreground">Übersicht aller Ihrer Bestellungen</p>
+        <p className="text-xs text-muted-foreground">B2B-Portal: Preise netto, zzgl. gesetzl. MwSt. (USt-Ausweis auf Rechnung).</p>
       </div>
 
       {/* KPIs */}
@@ -249,7 +250,7 @@ export default function PortalBestellungen() {
                   <TableHead>Bestellnummer</TableHead>
                   <TableHead>Datum</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Betrag</TableHead>
+                  <TableHead className="text-right">Betrag (netto)</TableHead>
                   <TableHead>Aktionen</TableHead>
                 </TableRow>
               </TableHeader>
@@ -368,7 +369,7 @@ export default function PortalBestellungen() {
 
                 {/* Gesamtbetrag */}
                 <div className="flex justify-between border-t pt-4 text-lg font-semibold">
-                  <span>Gesamtbetrag (netto)</span>
+                  <span>Gesamtbetrag (netto, zzgl. MwSt.)</span>
                   <span>€ {selectedBestellung.gesamtbetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
                 </div>
 

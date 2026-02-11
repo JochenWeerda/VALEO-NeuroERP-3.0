@@ -170,7 +170,8 @@ export default function RabattePage(): JSX.Element {
           <strong>Prozent:</strong> 15% auf Saatgut • <strong>Absolut:</strong> 5 € ab 50 € • 
           <strong>Mengenrabatt:</strong> 20% ab 10 Stück • <strong>Kundengruppe:</strong> Gold 10%
         </p>
-        <p className="mt-1 text-xs">Rabatte werden im POS automatisch angewendet wenn Bedingungen erfüllt sind</p>
+        <p className="mt-1 text-xs">Rabatte werden im POS automatisch angewendet wenn Bedingungen erfüllt sind.</p>
+        <p className="mt-1 text-xs font-medium">Alle Endverbraucherpreise an der Kasse werden inkl. gesetzl. MwSt. ausgewiesen.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

@@ -178,6 +178,7 @@ export default function PortalRechnungen() {
       <div>
         <h1 className="text-2xl font-bold">Rechnungen</h1>
         <p className="text-muted-foreground">Übersicht aller Ihrer Rechnungen</p>
+        <p className="text-xs text-muted-foreground">B2B-Portal: USt wird rechtskonform je Rechnung als Netto + MwSt + Brutto ausgewiesen.</p>
       </div>
 
       {/* Warnung bei überfälligen Rechnungen */}
