@@ -378,3 +378,5 @@ Alle veralteten Status-Reports, redundanten Phasen-Dokumente, doppelte CRM-Dokum
 - Management Batch 10: Executive Dashboard von page-lokaler Query/Mock-Generierung auf `useManagementDashboard` umgestellt (Adapter auf bestehende KPI-/Alert-/Trend-UI).
 - Futter Batch 11: Futtermittel-Statistikseite auf `useFutterStatistik` umgestellt; KPI-/Chart-Daten werden zentral aus Hook-Daten abgeleitet.
 - Futtermittel Batch 12: Einzelfuttermittel-Liste, Mischfuttermittel-Liste und Charge-Verfolgung von lokalen `createApiClient`-Fetches auf `lib/api/futter` Hooks umgestellt.
+
+- Einkauf Batch 13: Anfragen, Angebote, Anlieferavis, Auftragsbestaetigungen und Rechnungseingaenge auf lib/api/einkauf Hooks migriert (createApiClient/useEffect entfernt, UI-Adapter beibehalten).
