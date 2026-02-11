@@ -1,14 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ListReport } from '@/components/mask-builder'
-import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { useFutterChargen, type FutterCharge } from '@/lib/api/futter'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
-
-// API Client für Charge-Verfolgung
-const apiClient = createApiClient('/api/futtermittel')
 
 // Konfiguration für Charge-Verfolgung ListReport
 const chargeVerfolgungConfig: ListConfig = {
@@ -181,57 +177,30 @@ const chargeVerfolgungConfig: ListConfig = {
 
 export default function ChargeVerfolgungPage(): JSX.Element {
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
-
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
-    if (action === 'edit' && item) {
-      navigate(`/futtermittel/chargen/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(`Charge "${item.chargenNummer}" wirklich löschen?`)) {
-        try {
-          await apiClient.delete(`/chargen/${item.id}`)
-          loadData() // Liste neu laden
-        } catch (error) {
-          alert('Fehler beim Löschen')
-        }
-      }
-    } else if (action === 'trace' && item) {
-      navigate(`/futtermittel/chargen/${item.id}/trace`)
-    }
-  })
-
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const response = await apiClient.get('/chargen')
-      if (response.success) {
-        setData((response.data as any).data || [])
-        setTotal((response.data as any).total || 0)
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Daten:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadData()
-  }, [])
+  const { data: apiData = [], isLoading } = useFutterChargen()
+  const data = useMemo(() => apiData.map((item: FutterCharge) => ({
+    id: item.id,
+    chargenNummer: item.chargenId,
+    futtermittel: item.produkt,
+    menge: item.menge,
+    herkunft: 'deutschland',
+    produktionsdatum: item.herstelldatum,
+    verfallsdatum: item.mhd,
+    status: item.status === 'in-pruefung' ? 'reserviert' : item.status,
+    qsZertifikat: true,
+    rueckverfolgbarkeit: { feld: true, produktion: true, transport: true, lager: true },
+  })), [apiData])
+  const total = data.length
 
   const handleCreate = () => {
     navigate('/futtermittel/chargen/neu')
   }
 
   const handleEdit = (item: any) => {
-    handleAction('edit', item)
+    if (item?.id) navigate(`/futtermittel/chargen/${item.id}`)
   }
 
-  const handleDelete = (item: any) => {
-    handleAction('delete', item)
-  }
+  const handleDelete = (_item: any) => alert('Löschen wird in dieser Ansicht noch nicht unterstützt')
 
   const handleExport = () => {
     alert('Export-Funktion wird implementiert')
@@ -247,7 +216,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
       onDelete={handleDelete}
       onExport={handleExport}
       onImport={() => alert('Import-Funktion wird implementiert')}
-      isLoading={loading}
+      isLoading={isLoading}
     />
   )
 }

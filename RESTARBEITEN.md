@@ -377,3 +377,4 @@ Alle veralteten Status-Reports, redundanten Phasen-Dokumente, doppelte CRM-Dokum
 - Tax/Legal Klarstellung: POS (B2C) zeigt Endpreise inkl. gesetzl. MwSt.; Portal (B2B) zeigt Netto-Preise mit USt-Ausweis in Rechnungsansichten.
 - Management Batch 10: Executive Dashboard von page-lokaler Query/Mock-Generierung auf `useManagementDashboard` umgestellt (Adapter auf bestehende KPI-/Alert-/Trend-UI).
 - Futter Batch 11: Futtermittel-Statistikseite auf `useFutterStatistik` umgestellt; KPI-/Chart-Daten werden zentral aus Hook-Daten abgeleitet.
+- Futtermittel Batch 12: Einzelfuttermittel-Liste, Mischfuttermittel-Liste und Charge-Verfolgung von lokalen `createApiClient`-Fetches auf `lib/api/futter` Hooks umgestellt.

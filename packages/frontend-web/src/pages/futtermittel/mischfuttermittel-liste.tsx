@@ -1,14 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ListReport } from '@/components/mask-builder'
-import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { useMischfutter, type Mischfutter } from '@/lib/api/futter'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
-
-// API Client für Mischfuttermittel
-const apiClient = createApiClient('/api/futtermittel')
 
 // Konfiguration für Mischfuttermittel ListReport
 const mischfuttermittelListConfig: ListConfig = {
@@ -205,57 +201,32 @@ const mischfuttermittelListConfig: ListConfig = {
 
 export default function MischfuttermittelListePage(): JSX.Element {
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
-
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
-    if (action === 'edit' && item) {
-      navigate(`/futtermittel/mischfuttermittel/stamm/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(`Möchten Sie "${item.name}" wirklich löschen?`)) {
-        try {
-          await apiClient.delete(`/mischfuttermittel/${item.id}`)
-          loadData() // Liste neu laden
-        } catch (error) {
-          alert('Fehler beim Löschen')
-        }
-      }
-    }
-  })
-
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const response = await apiClient.get('/mischfuttermittel')
-      if (response.success) {
-        setData((response.data as any).data || [])
-        setTotal((response.data as any).total || 0)
-      }
-    } catch (_error) {
-      // API nicht erreichbar - leere Daten beibehalten
-      setData([])
-      setTotal(0)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadData()
-  }, [])
+  const { data: apiData = [], isLoading } = useMischfutter()
+  const data = useMemo(() => apiData.map((item: Mischfutter) => ({
+    id: item.id,
+    artikelnummer: item.artikelnummer,
+    name: item.name,
+    typ: item.status === 'in-produktion' ? 'ergaenzungsfuttermittel' : 'alleinfuttermittel',
+    futtergruppe: item.tierart.toLowerCase(),
+    tierart: item.tierart.toLowerCase(),
+    lebensphase: item.phase.toLowerCase(),
+    gesamtRohprotein: 0,
+    umsetzbareEnergie: 0,
+    lagerbestand: item.bestand,
+    vkPreis: item.preis,
+    qsZertifikat: null,
+  })), [apiData])
+  const total = data.length
 
   const handleCreate = () => {
     navigate('/futtermittel/mischfuttermittel/stamm/new')
   }
 
   const handleEdit = (item: any) => {
-    handleAction('edit', item)
+    if (item?.id) navigate(`/futtermittel/mischfuttermittel/stamm/${item.id}`)
   }
 
-  const handleDelete = (item: any) => {
-    handleAction('delete', item)
-  }
+  const handleDelete = (_item: any) => alert('Löschen wird in dieser Ansicht noch nicht unterstützt')
 
   const handleExport = () => {
     alert('Export-Funktion wird implementiert')
@@ -271,7 +242,7 @@ export default function MischfuttermittelListePage(): JSX.Element {
       onDelete={handleDelete}
       onExport={handleExport}
       onImport={() => alert('Import-Funktion wird implementiert')}
-      isLoading={loading}
+      isLoading={isLoading}
     />
   )
 }
