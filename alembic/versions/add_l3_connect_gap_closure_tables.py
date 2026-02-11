@@ -22,7 +22,7 @@ def upgrade() -> None:
     op.execute("CREATE SCHEMA IF NOT EXISTS domain_inventory")
     op.execute("CREATE SCHEMA IF NOT EXISTS domain_shared")
 
-    # ── Inventory Count Lines ────────────────────────────────────
+    # â”€â”€ Inventory Count Lines â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'inventory_count_lines',
         sa.Column('id', sa.String(), primary_key=True),
@@ -40,7 +40,7 @@ def upgrade() -> None:
         schema='domain_inventory',
     )
 
-    # ── Weighing Tickets ─────────────────────────────────────────
+    # â”€â”€ Weighing Tickets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'weighing_tickets',
         sa.Column('id', sa.String(), primary_key=True),
@@ -54,7 +54,7 @@ def upgrade() -> None:
         sa.Column('status', sa.String(20), server_default='open'),
         sa.Column('direction', sa.String(10), server_default='in'),
         sa.Column('reference_doc', sa.String(100), nullable=True),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column('updated_at', sa.DateTime(timezone=True)),
         schema='domain_inventory',
@@ -64,24 +64,24 @@ def upgrade() -> None:
         'weighing_ticket_lines',
         sa.Column('id', sa.String(), primary_key=True),
         sa.Column('ticket_id', sa.String(), sa.ForeignKey('domain_inventory.weighing_tickets.id'), nullable=False),
-        sa.Column('article_id', sa.String(), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
+        sa.Column('article_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
         sa.Column('quantity', sa.DECIMAL(12, 3), nullable=False),
         sa.Column('unit', sa.String(10), server_default='kg'),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         schema='domain_inventory',
     )
 
-    # ── Warehouse Transfers ──────────────────────────────────────
+    # â”€â”€ Warehouse Transfers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'warehouse_transfers',
         sa.Column('id', sa.String(), primary_key=True),
         sa.Column('transfer_number', sa.String(50), nullable=False),
-        sa.Column('from_warehouse_id', sa.String(), sa.ForeignKey('domain_inventory.warehouses.id'), nullable=False),
-        sa.Column('to_warehouse_id', sa.String(), sa.ForeignKey('domain_inventory.warehouses.id'), nullable=False),
+        sa.Column('from_warehouse_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_inventory.warehouses.id'), nullable=False),
+        sa.Column('to_warehouse_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_inventory.warehouses.id'), nullable=False),
         sa.Column('status', sa.String(20), server_default='draft'),
         sa.Column('notes', sa.Text(), nullable=True),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column('updated_at', sa.DateTime(timezone=True)),
         schema='domain_inventory',
@@ -91,24 +91,24 @@ def upgrade() -> None:
         'warehouse_transfer_lines',
         sa.Column('id', sa.String(), primary_key=True),
         sa.Column('transfer_id', sa.String(), sa.ForeignKey('domain_inventory.warehouse_transfers.id'), nullable=False),
-        sa.Column('article_id', sa.String(), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
+        sa.Column('article_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
         sa.Column('quantity', sa.DECIMAL(12, 3), nullable=False),
         sa.Column('batch_number', sa.String(50), nullable=True),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         schema='domain_inventory',
     )
 
-    # ── Stock Corrections ────────────────────────────────────────
+    # â”€â”€ Stock Corrections â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'stock_corrections',
         sa.Column('id', sa.String(), primary_key=True),
         sa.Column('correction_number', sa.String(50), nullable=False),
-        sa.Column('warehouse_id', sa.String(), sa.ForeignKey('domain_inventory.warehouses.id'), nullable=False),
+        sa.Column('warehouse_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_inventory.warehouses.id'), nullable=False),
         sa.Column('reason', sa.String(100), nullable=True),
         sa.Column('status', sa.String(20), server_default='draft'),
         sa.Column('notes', sa.Text(), nullable=True),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column('updated_at', sa.DateTime(timezone=True)),
         schema='domain_inventory',
@@ -118,40 +118,40 @@ def upgrade() -> None:
         'stock_correction_lines',
         sa.Column('id', sa.String(), primary_key=True),
         sa.Column('correction_id', sa.String(), sa.ForeignKey('domain_inventory.stock_corrections.id'), nullable=False),
-        sa.Column('article_id', sa.String(), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
+        sa.Column('article_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
         sa.Column('old_quantity', sa.DECIMAL(12, 3), nullable=False),
         sa.Column('new_quantity', sa.DECIMAL(12, 3), nullable=False),
         sa.Column('difference', sa.DECIMAL(12, 3), nullable=False),
         sa.Column('batch_number', sa.String(50), nullable=True),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         schema='domain_inventory',
     )
 
-    # ── Bin Locations ────────────────────────────────────────────
+    # â”€â”€ Bin Locations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'bin_locations',
         sa.Column('id', sa.String(), primary_key=True),
         sa.Column('code', sa.String(50), nullable=False),
-        sa.Column('warehouse_id', sa.String(), sa.ForeignKey('domain_inventory.warehouses.id'), nullable=False),
+        sa.Column('warehouse_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_inventory.warehouses.id'), nullable=False),
         sa.Column('zone', sa.String(20), nullable=True),
         sa.Column('rack', sa.String(20), nullable=True),
         sa.Column('shelf', sa.String(20), nullable=True),
         sa.Column('is_active', sa.Boolean(), server_default='true'),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         schema='domain_inventory',
     )
 
-    # ── Preparation Lists ────────────────────────────────────────
+    # â”€â”€ Preparation Lists â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'preparation_lists',
         sa.Column('id', sa.String(), primary_key=True),
         sa.Column('list_number', sa.String(50), nullable=False),
         sa.Column('status', sa.String(20), server_default='open'),
         sa.Column('notes', sa.Text(), nullable=True),
-        sa.Column('warehouse_id', sa.String(), sa.ForeignKey('domain_inventory.warehouses.id'), nullable=True),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('warehouse_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_inventory.warehouses.id'), nullable=True),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column('updated_at', sa.DateTime(timezone=True)),
         schema='domain_inventory',
@@ -161,16 +161,16 @@ def upgrade() -> None:
         'preparation_list_lines',
         sa.Column('id', sa.String(), primary_key=True),
         sa.Column('list_id', sa.String(), sa.ForeignKey('domain_inventory.preparation_lists.id'), nullable=False),
-        sa.Column('article_id', sa.String(), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
+        sa.Column('article_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
         sa.Column('required_qty', sa.DECIMAL(12, 3), nullable=False),
         sa.Column('picked_qty', sa.DECIMAL(12, 3), server_default='0'),
         sa.Column('bin_location_id', sa.String(), nullable=True),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         schema='domain_inventory',
     )
 
-    # ── Pick Lists ───────────────────────────────────────────────
+    # â”€â”€ Pick Lists â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'pick_lists',
         sa.Column('id', sa.String(), primary_key=True),
@@ -179,7 +179,7 @@ def upgrade() -> None:
         sa.Column('tour_id', sa.String(), nullable=True),
         sa.Column('order_id', sa.String(), nullable=True),
         sa.Column('notes', sa.Text(), nullable=True),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column('updated_at', sa.DateTime(timezone=True)),
         schema='domain_inventory',
@@ -189,17 +189,17 @@ def upgrade() -> None:
         'pick_list_lines',
         sa.Column('id', sa.String(), primary_key=True),
         sa.Column('pick_list_id', sa.String(), sa.ForeignKey('domain_inventory.pick_lists.id'), nullable=False),
-        sa.Column('article_id', sa.String(), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
+        sa.Column('article_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
         sa.Column('required_qty', sa.DECIMAL(12, 3), nullable=False),
         sa.Column('picked_qty', sa.DECIMAL(12, 3), server_default='0'),
         sa.Column('bin_location_id', sa.String(), nullable=True),
         sa.Column('batch_number', sa.String(50), nullable=True),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         schema='domain_inventory',
     )
 
-    # ── Shipping Units (NVE/SSCC) ────────────────────────────────
+    # â”€â”€ Shipping Units (NVE/SSCC) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'shipping_units',
         sa.Column('id', sa.String(), primary_key=True),
@@ -209,13 +209,13 @@ def upgrade() -> None:
         sa.Column('delivery_note_id', sa.String(), nullable=True),
         sa.Column('weight', sa.DECIMAL(12, 3), nullable=True),
         sa.Column('contents', postgresql.JSONB(), nullable=True),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column('updated_at', sa.DateTime(timezone=True)),
         schema='domain_inventory',
     )
 
-    # ── Webhook Registrations ────────────────────────────────────
+    # â”€â”€ Webhook Registrations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'webhook_registrations',
         sa.Column('id', sa.String(), primary_key=True),
@@ -223,41 +223,41 @@ def upgrade() -> None:
         sa.Column('event_area', sa.String(50), nullable=False),
         sa.Column('secret', sa.String(200), nullable=True),
         sa.Column('is_active', sa.Boolean(), server_default='true'),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column('updated_at', sa.DateTime(timezone=True)),
         schema='domain_shared',
     )
 
-    # ── Article Batches ──────────────────────────────────────────
+    # â”€â”€ Article Batches â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'article_batches',
         sa.Column('id', sa.String(), primary_key=True),
-        sa.Column('article_id', sa.String(), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
+        sa.Column('article_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
         sa.Column('batch_number', sa.String(50), nullable=False),
-        sa.Column('warehouse_id', sa.String(), sa.ForeignKey('domain_inventory.warehouses.id'), nullable=False),
+        sa.Column('warehouse_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_inventory.warehouses.id'), nullable=False),
         sa.Column('quantity', sa.DECIMAL(12, 3), server_default='0'),
         sa.Column('expiry_date', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         schema='domain_inventory',
     )
 
-    # ── Internal Messages ────────────────────────────────────────
+    # â”€â”€ Internal Messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'internal_messages',
         sa.Column('id', sa.String(), primary_key=True),
-        sa.Column('sender_id', sa.String(), sa.ForeignKey('domain_shared.users.id'), nullable=False),
-        sa.Column('recipient_id', sa.String(), sa.ForeignKey('domain_shared.users.id'), nullable=False),
+        sa.Column('sender_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.users.id'), nullable=False),
+        sa.Column('recipient_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.users.id'), nullable=False),
         sa.Column('subject', sa.String(200), nullable=False),
         sa.Column('body', sa.Text(), nullable=True),
         sa.Column('is_read', sa.Boolean(), server_default='false'),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         schema='domain_shared',
     )
 
-    # ── Master Data Entries ──────────────────────────────────────
+    # â”€â”€ Master Data Entries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'master_data_entries',
         sa.Column('id', sa.String(), primary_key=True),
@@ -267,13 +267,13 @@ def upgrade() -> None:
         sa.Column('extra', postgresql.JSONB(), nullable=True),
         sa.Column('sort_order', sa.Integer(), server_default='0'),
         sa.Column('is_active', sa.Boolean(), server_default='true'),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column('updated_at', sa.DateTime(timezone=True)),
         schema='domain_shared',
     )
 
-    # ── Dispatchers ──────────────────────────────────────────────
+    # â”€â”€ Dispatchers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'dispatchers',
         sa.Column('id', sa.String(), primary_key=True),
@@ -282,25 +282,25 @@ def upgrade() -> None:
         sa.Column('email', sa.String(100), nullable=True),
         sa.Column('phone', sa.String(30), nullable=True),
         sa.Column('is_active', sa.Boolean(), server_default='true'),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column('updated_at', sa.DateTime(timezone=True)),
         schema='domain_shared',
     )
 
-    # ── Article Selections ───────────────────────────────────────
+    # â”€â”€ Article Selections â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_table(
         'article_selections',
         sa.Column('id', sa.String(), primary_key=True),
-        sa.Column('article_id', sa.String(), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
+        sa.Column('article_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_inventory.articles.id'), nullable=False),
         sa.Column('selection_code', sa.String(50), nullable=False),
         sa.Column('label', sa.String(200), nullable=True),
-        sa.Column('tenant_id', sa.String(), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('domain_shared.tenants.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         schema='domain_inventory',
     )
 
-    # ── Performance Indices ──────────────────────────────────────
+    # â”€â”€ Performance Indices â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     op.create_index('ix_weighing_tickets_tenant', 'weighing_tickets', ['tenant_id'], schema='domain_inventory')
     op.create_index('ix_warehouse_transfers_tenant', 'warehouse_transfers', ['tenant_id'], schema='domain_inventory')
     op.create_index('ix_stock_corrections_tenant', 'stock_corrections', ['tenant_id'], schema='domain_inventory')
