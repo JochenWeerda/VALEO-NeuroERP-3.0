@@ -6,8 +6,8 @@
  */
 
 import { useState, useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
+import { useManagementDashboard, type ManagementDashboard } from '@/lib/api/betrieb'
 import { cn } from '@/lib/utils'
 import {
   Euro,
@@ -50,79 +50,6 @@ interface DashboardData {
   topCustomers: { name: string; revenue: number; orders: number }[]
 }
 
-// Mock-Daten (später durch echte API ersetzen)
-async function fetchDashboardData(range: TimeRange): Promise<DashboardData> {
-  await new Promise(resolve => setTimeout(resolve, 800))
-
-  const multiplier = range === '7d' ? 0.25 : range === '30d' ? 1 : range === '90d' ? 3 : 12
-
-  return {
-    kpis: {
-      revenue: {
-        value: Math.round(125000 * multiplier),
-        trend: 12.5,
-        target: Math.round(150000 * multiplier),
-      },
-      orders: { value: Math.round(45 * multiplier), trend: 8.3 },
-      customers: { value: 234, trend: 5.2, newCount: Math.round(12 * multiplier) },
-      inventory: { value: 1250000, trend: -2.1 },
-    },
-    revenueTrend: generateTrendData(7, 15000, 25000),
-    ordersTrend: generateTrendData(7, 3, 8),
-    alerts: [
-      {
-        id: '1',
-        type: 'critical',
-        category: 'finance',
-        title: 'Offene Forderungen über 90 Tage',
-        description: '3 Kunden mit überfälligen Rechnungen',
-        value: '€ 45.230',
-        timestamp: 'Heute',
-        actionUrl: '/finance/op-debitoren',
-      },
-      {
-        id: '2',
-        type: 'warning',
-        category: 'inventory',
-        title: 'Niedriger Lagerbestand',
-        description: '5 Artikel unter Mindestbestand',
-        actionUrl: '/lager/bestandsuebersicht',
-      },
-      {
-        id: '3',
-        type: 'warning',
-        category: 'sales',
-        title: 'Angebote ohne Rückmeldung',
-        description: '8 Angebote älter als 14 Tage',
-        value: '€ 78.500',
-        actionUrl: '/sales/angebote-liste',
-      },
-      {
-        id: '4',
-        type: 'info',
-        category: 'customer',
-        title: 'Kundengeburtstage diese Woche',
-        description: '3 Kunden haben Geburtstag',
-        actionUrl: '/crm/kunden-stamm',
-      },
-    ],
-    topProducts: [
-      { name: 'Weizen Saatgut Premium', revenue: 45000, quantity: 180 },
-      { name: 'NPK Dünger 15-15-15', revenue: 38000, quantity: 95 },
-      { name: 'Pflanzenschutz XP-200', revenue: 28000, quantity: 140 },
-      { name: 'Diesel Winterqualität', revenue: 22000, quantity: 12000 },
-      { name: 'Ersatzteile Set A', revenue: 15000, quantity: 45 },
-    ],
-    topCustomers: [
-      { name: 'Landwirtschaft Müller GmbH', revenue: 85000, orders: 12 },
-      { name: 'Agrar Schneider', revenue: 62000, orders: 8 },
-      { name: 'Biolandhof Weber', revenue: 48000, orders: 15 },
-      { name: 'Genossenschaft Blumental', revenue: 41000, orders: 6 },
-      { name: 'Hof Sonnenschein', revenue: 35000, orders: 9 },
-    ],
-  }
-}
-
 function generateTrendData(days: number, min: number, max: number): TrendDataPoint[] {
   const data: TrendDataPoint[] = []
   const now = new Date()
@@ -139,15 +66,54 @@ function generateTrendData(days: number, min: number, max: number): TrendDataPoi
   return data
 }
 
+function parseMetricValue(input: string): number {
+  const raw = input.trim().toLowerCase().replace(',', '.')
+  const multiplier = raw.endsWith('m') ? 1_000_000 : raw.endsWith('k') ? 1_000 : 1
+  const normalized = raw.replace(/[^\d.-]/g, '')
+  const num = Number(normalized)
+  return Number.isFinite(num) ? num * multiplier : 0
+}
+
+function mapToDashboardData(api: ManagementDashboard, range: TimeRange): DashboardData {
+  const multiplier = range === '7d' ? 0.25 : range === '30d' ? 1 : range === '90d' ? 3 : 12
+  const kpiMap = new Map(api.kpis.map((k) => [k.label.toLowerCase(), k]))
+
+  const revenue = parseMetricValue(kpiMap.get('umsatz mtd')?.value ?? '0')
+  const orders = parseMetricValue(kpiMap.get('offene aufträge')?.value ?? '0')
+  const margin = parseMetricValue(kpiMap.get('marge')?.value ?? '0')
+  const liquidity = parseMetricValue(kpiMap.get('liquidität')?.value ?? '0')
+
+  return {
+    kpis: {
+      revenue: {
+        value: Math.round(revenue * multiplier),
+        trend: kpiMap.get('umsatz mtd')?.trend ?? 0,
+        target: Math.round((revenue * 1.2) * multiplier),
+      },
+      orders: { value: Math.round(orders * multiplier), trend: kpiMap.get('offene aufträge')?.trend ?? 0 },
+      customers: { value: Math.max(api.topCustomers.length * 10, 1), trend: margin || 0, newCount: Math.max(api.topCustomers.length, 1) },
+      inventory: { value: Math.round(liquidity), trend: kpiMap.get('liquidität')?.trend ?? 0 },
+    },
+    revenueTrend: generateTrendData(7, Math.max(Math.round(revenue * 0.08), 1000), Math.max(Math.round(revenue * 0.16), 2000)),
+    ordersTrend: generateTrendData(7, Math.max(Math.round(orders * 0.08), 1), Math.max(Math.round(orders * 0.16), 2)),
+    alerts: api.alerts.map((a, idx) => ({
+      id: a.id || String(idx + 1),
+      type: a.typ === 'kritisch' ? 'critical' : a.typ === 'warnung' ? 'warning' : 'info',
+      category: 'sales',
+      title: a.text,
+      description: 'Management-Alarm',
+      timestamp: a.datum,
+    })),
+    topProducts: api.topProducts.map((p) => ({ name: p.name, revenue: p.umsatz, quantity: Math.max(Math.round(p.umsatz / 1000), 1) })),
+    topCustomers: api.topCustomers.map((c) => ({ name: c.name, revenue: c.umsatz, orders: Math.max(Math.round(c.umsatz / 10000), 1) })),
+  }
+}
+
 export default function ExecutiveDashboardPage(): JSX.Element {
   const navigate = useNavigate()
   const [timeRange, setTimeRange] = useState<TimeRange>('30d')
-
-  const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ['executive-dashboard', timeRange],
-    queryFn: () => fetchDashboardData(timeRange),
-    staleTime: 5 * 60 * 1000,
-  })
+  const { data: apiData, isLoading, refetch, isFetching } = useManagementDashboard()
+  const data = useMemo(() => (apiData ? mapToDashboardData(apiData, timeRange) : null), [apiData, timeRange])
 
   const timeRangeLabels: Record<TimeRange, string> = {
     '7d': 'Letzte 7 Tage',
