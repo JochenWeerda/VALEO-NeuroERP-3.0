@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { apiClient } from '@/lib/api-client'
+import { useTSEJournal, type TSEEintrag } from '@/lib/api/pos'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -62,21 +61,21 @@ const mockTSETransaktionen: TSETransaction[] = [
 export default function TSEJournalPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: tseTransaktionen = mockTSETransaktionen } = useQuery({
-    queryKey: ['pos', 'tse-journal', 'page'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<TSETransaction[]>('/api/v1/pos/tse-journal')
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          return response.data
-        }
-      } catch {
-        // Fallback handled below
-      }
-      return mockTSETransaktionen
-    },
-    staleTime: 30 * 1000,
-  })
+  const { data: apiTse = [] } = useTSEJournal()
+  const tseTransaktionen: TSETransaction[] = apiTse.length > 0
+    ? apiTse.map((t: TSEEintrag) => ({
+      id: t.id,
+      datum: t.zeitstempel,
+      bonnummer: t.transaktionsNr,
+      tseTransactionNumber: Number(t.transaktionsNr.replace(/\D/g, '')) || 0,
+      tseSignature: t.signatur,
+      betrag: t.betrag,
+      zahlungsart: 'bar',
+      fibuStatus: t.status === 'ok' ? 'gebucht' : 'offen',
+      fibuDatum: t.status === 'ok' ? t.zeitstempel.slice(0, 10) : undefined,
+      fibuBelegnr: t.status === 'ok' ? t.transaktionsNr : undefined,
+    }))
+    : mockTSETransaktionen
 
   const columns = [
     {

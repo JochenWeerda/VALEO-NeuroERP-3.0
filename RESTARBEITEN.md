@@ -372,3 +372,4 @@ Alle veralteten Status-Reports, redundanten Phasen-Dokumente, doppelte CRM-Dokum
 - Portal Batch 5: Portal-Dashboard, Anfragen, Bestellungen, Vertraege und Zertifikate auf `lib/api/portal` Hooks umgestellt (inkl. UI-kompatibler Datenadaption).
 - Portal Batch 6: Portal-Rechnungen und Portal-Dokumente auf `lib/api/portal` Hooks migriert (Legacy-Ansichten via Adapter auf bestehende UI-Typen abgebildet).
 - Portal Batch 7: Portal-Feldbuch und Portal-Naehrstoffbilanzen auf `lib/api/portal` Hooks umgestellt (Schlag-/Bilanz-Mapping auf bestehende Detail-UI).
+- POS Batch 8: Gift Cards, Rabatte, Suspended Sales und TSE-Journal auf `lib/api/pos` Hooks umgestellt (seitenkompatible Typadapter fuer bestehende Tabellenansichten).
