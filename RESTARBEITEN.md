@@ -375,3 +375,4 @@ Alle veralteten Status-Reports, redundanten Phasen-Dokumente, doppelte CRM-Dokum
 - POS Batch 8: Gift Cards, Rabatte, Suspended Sales und TSE-Journal auf `lib/api/pos` Hooks umgestellt (seitenkompatible Typadapter fuer bestehende Tabellenansichten).
 - Futter Batch 9: Futter-Einzel- und Futter-Misch-Listen von lokalen Mock-Arrays auf `lib/api/futter` Hooks (`useEinzelfutter`, `useMischfutter`) migriert.
 - Tax/Legal Klarstellung: POS (B2C) zeigt Endpreise inkl. gesetzl. MwSt.; Portal (B2B) zeigt Netto-Preise mit USt-Ausweis in Rechnungsansichten.
+- Management Batch 10: Executive Dashboard von page-lokaler Query/Mock-Generierung auf `useManagementDashboard` umgestellt (Adapter auf bestehende KPI-/Alert-/Trend-UI).
