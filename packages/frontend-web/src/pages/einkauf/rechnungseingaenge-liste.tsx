@@ -1,19 +1,14 @@
-import { useState, useEffect } from 'react'
+﻿import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
-import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
+import { useRechnungseingaenge, type Rechnungseingang } from '@/lib/api/einkauf'
 
-// API Client für Rechnungseingänge
-const apiClient = createApiClient('/api/einkauf')
-
-// Konfiguration für Rechnungseingänge ListReport (wird in Komponente mit i18n erstellt)
 const createRechnungseingaengeConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
@@ -58,21 +53,21 @@ const createRechnungseingaengeConfig = (t: any, entityTypeLabel: string): ListCo
       render: (value) => {
         const statusLabel = getStatusLabel(t, value as string, value as string)
         const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
-          'ERFASST': 'secondary',
-          'GEPRUEFT': 'default',
-          'FREIGEGEBEN': 'outline',
-          'VERBUCHT': 'outline',
-          'BEZAHLT': 'outline'
+          ERFASST: 'secondary',
+          GEPRUEFT: 'default',
+          FREIGEGEBEN: 'outline',
+          VERBUCHT: 'outline',
+          BEZAHLT: 'outline'
         }
         return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
       key: 'bruttoBetrag',
-      label: t('crud.fields.grossAmount') + ' (€)',
+      label: `${t('crud.fields.grossAmount')} (EUR)`,
       labelKey: 'crud.fields.grossAmount',
       sortable: true,
-      render: (value) => `${formatNumber(value, 2)} €`
+      render: (value) => `${formatNumber(value, 2)} EUR`
     },
     {
       key: 'rechnungsDatum',
@@ -116,7 +111,7 @@ const createRechnungseingaengeConfig = (t: any, entityTypeLabel: string): ListCo
       label: t('crud.actions.review'),
       labelKey: 'crud.actions.review',
       type: 'secondary',
-      onClick: () => console.log('Prüfen clicked')
+      onClick: () => console.log('Pruefen clicked')
     },
     {
       key: 'freigeben',
@@ -152,60 +147,32 @@ const createRechnungseingaengeConfig = (t: any, entityTypeLabel: string): ListCo
 export default function RechnungseingaengeListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const { data: apiData = [], isLoading } = useRechnungseingaenge()
+  const data = useMemo(() => apiData.map((item: Rechnungseingang) => ({
+    ...item,
+    bestellung: { nummer: item.bestellung },
+    wareneingang: { nummer: item.wareneingang },
+  })), [apiData])
+  const total = data.length
   const entityType = 'invoiceReceipt'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Rechnungseingang')
   const rechnungseingaengeConfig = createRechnungseingaengeConfig(t, entityTypeLabel)
-
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
-    if (action === 'edit' && item) {
-      navigate(`/einkauf/rechnungseingaenge/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
-        try {
-          await apiClient.delete(`/rechnungseingaenge/${item.id}`)
-          loadData() // Liste neu laden
-        } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.deleteError', { entityType: entityTypeLabel })
-          })
-        }
-      }
-    }
-  })
-
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const response = await apiClient.get('/rechnungseingaenge')
-      if (response.success) {
-        setData((response.data as any).data || [])
-        setTotal((response.data as any).total || 0)
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Daten:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadData()
-  }, [])
 
   const handleCreate = () => {
     navigate('/einkauf/rechnungseingang/neu')
   }
 
   const handleEdit = (item: any) => {
-    handleAction('edit', item)
+    if (item?.id) {
+      navigate(`/einkauf/rechnungseingaenge/${item.id}`)
+    }
   }
 
-  const handleDelete = (item: any) => {
-    handleAction('delete', item)
+  const handleDelete = (_item: any) => {
+    toast({
+      title: t('crud.messages.importInfo'),
+      description: 'Loeschen wird in dieser Ansicht noch nicht unterstuetzt.',
+    })
   }
 
   const handleExport = () => {
@@ -230,7 +197,7 @@ export default function RechnungseingaengeListePage(): JSX.Element {
         title: t('crud.messages.exportSuccess'),
         description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
       })
-    } catch (error) {
+    } catch {
       toast({
         variant: 'destructive',
         title: t('crud.messages.exportError'),
@@ -254,7 +221,7 @@ export default function RechnungseingaengeListePage(): JSX.Element {
           description: t('crud.messages.importComingSoon'),
         })
       }}
-      isLoading={loading}
+      isLoading={isLoading}
     />
   )
 }

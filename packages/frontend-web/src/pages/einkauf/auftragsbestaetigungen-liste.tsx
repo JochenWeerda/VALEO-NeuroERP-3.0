@@ -1,19 +1,14 @@
-import { useState, useEffect } from 'react'
+﻿import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
-import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
+import { useAuftragsbestaetigungen, type Auftragsbestaetigung } from '@/lib/api/einkauf'
 
-// API Client für Auftragsbestätigungen
-const apiClient = createApiClient('/api/einkauf')
-
-// Konfiguration für Auftragsbestätigungen ListReport (wird in Komponente mit i18n erstellt)
 const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
@@ -51,9 +46,9 @@ const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): Li
       render: (value) => {
         const statusLabel = getStatusLabel(t, value as string, value as string)
         const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
-          'OFFEN': 'secondary',
-          'GEPRUEFT': 'default',
-          'BESTAETIGT': 'outline'
+          OFFEN: 'secondary',
+          GEPRUEFT: 'default',
+          BESTAETIGT: 'outline'
         }
         return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
       }
@@ -91,14 +86,14 @@ const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): Li
       label: t('crud.actions.review'),
       labelKey: 'crud.actions.review',
       type: 'secondary',
-      onClick: () => console.log('Prüfen clicked')
+      onClick: () => console.log('Pruefen clicked')
     },
     {
       key: 'bestaetigen',
       label: t('crud.actions.confirm'),
       labelKey: 'crud.actions.confirm',
       type: 'primary',
-      onClick: () => console.log('Bestätigen clicked')
+      onClick: () => console.log('Bestaetigen clicked')
     }
   ],
   defaultSort: { field: 'createdAt', direction: 'desc' },
@@ -120,60 +115,31 @@ const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): Li
 export default function AuftragsbestaetigungenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const { data: apiData = [], isLoading } = useAuftragsbestaetigungen()
+  const data = useMemo(() => apiData.map((item: Auftragsbestaetigung) => ({
+    ...item,
+    bestellung: { nummer: item.bestellung },
+  })), [apiData])
+  const total = data.length
   const entityType = 'orderConfirmation'
-  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Auftragsbestätigung')
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Auftragsbestaetigung')
   const auftragsbestaetigungenConfig = createAuftragsbestaetigungenConfig(t, entityTypeLabel)
-
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
-    if (action === 'edit' && item) {
-      navigate(`/einkauf/auftragsbestaetigungen/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
-        try {
-          await apiClient.delete(`/auftragsbestaetigungen/${item.id}`)
-          loadData() // Liste neu laden
-        } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.deleteError', { entityType: entityTypeLabel })
-          })
-        }
-      }
-    }
-  })
-
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const response = await apiClient.get('/auftragsbestaetigungen')
-      if (response.success) {
-        setData((response.data as any).data || [])
-        setTotal((response.data as any).total || 0)
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Daten:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadData()
-  }, [])
 
   const handleCreate = () => {
     navigate('/einkauf/auftragsbestaetigung/neu')
   }
 
   const handleEdit = (item: any) => {
-    handleAction('edit', item)
+    if (item?.id) {
+      navigate(`/einkauf/auftragsbestaetigungen/${item.id}`)
+    }
   }
 
-  const handleDelete = (item: any) => {
-    handleAction('delete', item)
+  const handleDelete = (_item: any) => {
+    toast({
+      title: t('crud.messages.importInfo'),
+      description: 'Loeschen wird in dieser Ansicht noch nicht unterstuetzt.',
+    })
   }
 
   const handleExport = () => {
@@ -198,7 +164,7 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
         title: t('crud.messages.exportSuccess'),
         description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
       })
-    } catch (error) {
+    } catch {
       toast({
         variant: 'destructive',
         title: t('crud.messages.exportError'),
@@ -222,7 +188,7 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
           description: t('crud.messages.importComingSoon'),
         })
       }}
-      isLoading={loading}
+      isLoading={isLoading}
     />
   )
 }
