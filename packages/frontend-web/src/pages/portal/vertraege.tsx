@@ -5,8 +5,7 @@
  */
 
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '@/lib/api-client'
+import { usePortalVertraege } from '@/lib/api/portal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -132,21 +131,23 @@ export default function PortalVertraege() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedVertrag, setSelectedVertrag] = useState<Vertrag | null>(null)
 
-  const { data: vertraege = mockVertraege, isLoading } = useQuery({
-    queryKey: ['portal', 'vertraege', 'page'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<Vertrag[]>('/api/v1/portal/vertraege')
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          return response.data
-        }
-      } catch {
-        // Fallback handled below
-      }
-      return mockVertraege
-    },
-    staleTime: 5 * 60 * 1000,
-  })
+  const { data: portalVertraege = [], isLoading } = usePortalVertraege()
+  const vertraege: Vertrag[] = portalVertraege.length > 0
+    ? portalVertraege.map((v) => ({
+      id: v.nummer || v.id,
+      bezeichnung: `${v.typ} ${v.nummer}`,
+      typ: 'rahmenvertrag',
+      produkt: v.partner,
+      startdatum: '',
+      enddatum: v.laufzeitBis,
+      status: v.status === 'beendet' ? 'abgelaufen' : v.status,
+      gesamtmenge: 100,
+      gelieferteMenge: 0,
+      einheit: 'Stk',
+      preis: 0,
+      dokument: `${v.nummer}.pdf`,
+    }))
+    : mockVertraege
 
   const filteredVertraege = vertraege.filter((v) =>
     v.bezeichnung.toLowerCase().includes(searchTerm.toLowerCase()) ||
