@@ -5,67 +5,23 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, CreditCard, Plus, Search, TrendingDown } from 'lucide-react'
-
-type Kreditlinie = {
-  id: string
-  kunde: string
-  kundennr: string
-  limit: number
-  ausgenutzt: number
-  verfuegbar: number
-  bonitaet: 'A' | 'B' | 'C' | 'D'
-  zahlungsziel: number
-  offenePosten: number
-  ueberfaellig: number
-  status: 'aktiv' | 'gesperrt' | 'ueberzogen'
-}
-
-const mockKreditlinien: Kreditlinie[] = [
-  {
-    id: '1',
-    kunde: 'Agrar Schmidt GmbH',
-    kundennr: 'K-10023',
-    limit: 200000,
-    ausgenutzt: 145000,
-    verfuegbar: 55000,
-    bonitaet: 'A',
-    zahlungsziel: 30,
-    offenePosten: 145000,
-    ueberfaellig: 0,
-    status: 'aktiv',
-  },
-  {
-    id: '2',
-    kunde: 'Landwirtschaft Müller',
-    kundennr: 'K-10045',
-    limit: 150000,
-    ausgenutzt: 148000,
-    verfuegbar: 2000,
-    bonitaet: 'B',
-    zahlungsziel: 21,
-    offenePosten: 148000,
-    ueberfaellig: 12000,
-    status: 'ueberzogen',
-  },
-  {
-    id: '3',
-    kunde: 'Hofgut Weber',
-    kundennr: 'K-10067',
-    limit: 100000,
-    ausgenutzt: 35000,
-    verfuegbar: 65000,
-    bonitaet: 'A',
-    zahlungsziel: 14,
-    offenePosten: 35000,
-    ueberfaellig: 0,
-    status: 'aktiv',
-  },
-]
+import { useKreditlinien, type Kreditlinie } from '@/lib/api/fibu'
 
 export default function KreditlinienPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: items, isLoading } = useKreditlinien()
+
+  if (isLoading) return (
+    <div className="p-3 md:p-6 space-y-4">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>
+  )
+
+  const list = items ?? []
 
   const columns = [
     {
@@ -144,13 +100,13 @@ export default function KreditlinienPage(): JSX.Element {
     },
   ]
 
-  const ueberzogen = mockKreditlinien.filter((k) => k.status === 'ueberzogen').length
-  const gesamtLimit = mockKreditlinien.reduce((sum, k) => sum + k.limit, 0)
-  const gesamtAusgenutzt = mockKreditlinien.reduce((sum, k) => sum + k.ausgenutzt, 0)
-  const gesamtVerfuegbar = mockKreditlinien.reduce((sum, k) => sum + k.verfuegbar, 0)
+  const ueberzogen = list.filter((k) => k.status === 'ueberzogen').length
+  const gesamtLimit = list.reduce((sum, k) => sum + k.limit, 0)
+  const gesamtAusgenutzt = list.reduce((sum, k) => sum + k.ausgenutzt, 0)
+  const gesamtVerfuegbar = list.reduce((sum, k) => sum + k.verfuegbar, 0)
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <CreditCard className="h-10 w-10 text-primary" />
@@ -193,7 +149,7 @@ export default function KreditlinienPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Kreditlinien Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockKreditlinien.length}</span>
+            <span className="text-2xl font-bold">{list.length}</span>
           </CardContent>
         </Card>
 
@@ -243,7 +199,7 @@ export default function KreditlinienPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockKreditlinien} columns={columns} />
+          <DataTable data={list} columns={columns} />
         </CardContent>
       </Card>
     </div>

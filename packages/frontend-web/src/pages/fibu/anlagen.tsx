@@ -5,61 +5,55 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Building2, FileDown, Plus, Search } from 'lucide-react'
-
-type Anlage = {
-  id: string
-  anlagennr: string
-  bezeichnung: string
-  anschaffung: string
-  anschaffungswert: number
-  nutzungsdauer: number
-  afaSatz: number
-  kumulierteAfa: number
-  buchwert: number
-}
-
-const mockAnlagen: Anlage[] = [
-  { id: '1', anlagennr: 'ANL-001', bezeichnung: 'Mähdrescher Claas Lexion 770', anschaffung: '2022-04-15', anschaffungswert: 420000, nutzungsdauer: 10, afaSatz: 10, kumulierteAfa: 126000, buchwert: 294000 },
-  { id: '2', anlagennr: 'ANL-012', bezeichnung: 'Traktor John Deere 6210R', anschaffung: '2020-06-20', anschaffungswert: 185000, nutzungsdauer: 12, afaSatz: 8.33, kumulierteAfa: 92500, buchwert: 92500 },
-  { id: '3', anlagennr: 'ANL-024', bezeichnung: 'Lagerhalle (Neubau)', anschaffung: '2018-09-10', anschaffungswert: 850000, nutzungsdauer: 33, afaSatz: 3.03, kumulierteAfa: 180000, buchwert: 670000 },
-]
+import { useAnlagenMock, type AnlageMock } from '@/lib/api/fibu'
 
 export default function AnlagenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: items, isLoading } = useAnlagenMock()
+
+  if (isLoading) return (
+    <div className="p-3 md:p-6 space-y-4">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>
+  )
+
+  const list = items ?? []
 
   const columns = [
     {
       key: 'anlagennr' as const,
       label: 'Anlagen-Nr',
-      render: (a: Anlage) => (
+      render: (a: AnlageMock) => (
         <button onClick={() => navigate(`/fibu/anlage/${a.id}`)} className="font-medium text-blue-600 hover:underline font-mono">
           {a.anlagennr}
         </button>
       ),
     },
-    { key: 'bezeichnung' as const, label: 'Bezeichnung', render: (a: Anlage) => <span className="font-semibold">{a.bezeichnung}</span> },
-    { key: 'anschaffung' as const, label: 'Anschaffung', render: (a: Anlage) => new Date(a.anschaffung).toLocaleDateString('de-DE') },
+    { key: 'bezeichnung' as const, label: 'Bezeichnung', render: (a: AnlageMock) => <span className="font-semibold">{a.bezeichnung}</span> },
+    { key: 'anschaffung' as const, label: 'Anschaffung', render: (a: AnlageMock) => new Date(a.anschaffung).toLocaleDateString('de-DE') },
     {
       key: 'anschaffungswert' as const,
       label: 'AK',
-      render: (a: Anlage) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(a.anschaffungswert),
+      render: (a: AnlageMock) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(a.anschaffungswert),
     },
     {
       key: 'afaSatz' as const,
       label: 'AfA',
-      render: (a: Anlage) => <Badge variant="outline">{a.afaSatz}%</Badge>,
+      render: (a: AnlageMock) => <Badge variant="outline">{a.afaSatz}%</Badge>,
     },
     {
       key: 'kumulierteAfa' as const,
       label: 'Kum. AfA',
-      render: (a: Anlage) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(a.kumulierteAfa),
+      render: (a: AnlageMock) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(a.kumulierteAfa),
     },
     {
       key: 'buchwert' as const,
       label: 'Buchwert',
-      render: (a: Anlage) => (
+      render: (a: AnlageMock) => (
         <span className="font-bold">
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(a.buchwert)}
         </span>
@@ -67,12 +61,12 @@ export default function AnlagenPage(): JSX.Element {
     },
   ]
 
-  const gesamtAK = mockAnlagen.reduce((sum, a) => sum + a.anschaffungswert, 0)
-  const gesamtBuchwert = mockAnlagen.reduce((sum, a) => sum + a.buchwert, 0)
-  const gesamtAfa = mockAnlagen.reduce((sum, a) => sum + a.kumulierteAfa, 0)
+  const gesamtAK = list.reduce((sum, a) => sum + a.anschaffungswert, 0)
+  const gesamtBuchwert = list.reduce((sum, a) => sum + a.buchwert, 0)
+  const gesamtAfa = list.reduce((sum, a) => sum + a.kumulierteAfa, 0)
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Anlagenbuchhaltung</h1>
@@ -92,7 +86,7 @@ export default function AnlagenPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockAnlagen.length}</span>
+              <span className="text-2xl font-bold">{list.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -151,7 +145,7 @@ export default function AnlagenPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockAnlagen} columns={columns} />
+          <DataTable data={list} columns={columns} />
         </CardContent>
       </Card>
     </div>

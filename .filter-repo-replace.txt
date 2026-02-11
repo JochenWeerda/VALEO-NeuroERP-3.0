@@ -1,0 +1,12 @@
+valeo_dev_2024!==>REDACTED_PASSWORD
+keycloak_dev_password==>REDACTED_PASSWORD
+abc123def456==>REDACTED_TOKEN
+eyJhbGciOiJIUzI1NiIs==>REDACTED_JWT_PREFIX
+
+app/api/v1/endpoints/==>app.api.v1.endpoints.
+
+API-Import==>Schnittstellen-Import
+
+Backend API:==>Backend Modul:
+
+Backend APIs==>Backend Schnittstellen

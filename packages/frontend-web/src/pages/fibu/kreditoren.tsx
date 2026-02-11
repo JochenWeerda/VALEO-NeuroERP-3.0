@@ -5,51 +5,43 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { BackButton } from '@/components/BackButton'
 import { AlertCircle, Euro, FileDown, Search } from 'lucide-react'
-
-type OffenerPosten = {
-  id: string
-  rechnungsnr: string
-  lieferant: string
-  lieferantennr: string
-  datum: string
-  faelligkeit: string
-  betrag: number
-  offen: number
-  skonto: number
-  skontoBis: string
-  zahlbar: boolean
-}
-
-const mockKreditoren: OffenerPosten[] = [
-  { id: '1', rechnungsnr: 'LI-2025-4523', lieferant: 'Saatgut Nord GmbH', lieferantennr: 'L-20001', datum: '2025-10-05', faelligkeit: '2025-11-05', betrag: 18500, offen: 18500, skonto: 2, skontoBis: '2025-10-15', zahlbar: true },
-  { id: '2', rechnungsnr: 'LI-2025-4498', lieferant: 'Düngemittel AG', lieferantennr: 'L-20012', datum: '2025-09-28', faelligkeit: '2025-10-28', betrag: 12300, offen: 12300, skonto: 3, skontoBis: '2025-10-08', zahlbar: false },
-  { id: '3', rechnungsnr: 'LI-2025-4556', lieferant: 'Technik Service', lieferantennr: 'L-20034', datum: '2025-10-10', faelligkeit: '2025-11-10', betrag: 8750, offen: 8750, skonto: 2, skontoBis: '2025-10-20', zahlbar: true },
-]
+import { useKreditorenMock, type KreditOPMock } from '@/lib/api/fibu'
 
 export default function KreditorenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: items, isLoading } = useKreditorenMock()
+
+  if (isLoading) return (
+    <div className="p-3 md:p-6 space-y-4">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>
+  )
+
+  const list = items ?? []
 
   const columns = [
     {
       key: 'rechnungsnr' as const,
       label: 'Rechnung',
-      render: (op: OffenerPosten) => <span className="font-mono font-bold">{op.rechnungsnr}</span>,
+      render: (op: KreditOPMock) => <span className="font-mono font-bold">{op.rechnungsnr}</span>,
     },
     { key: 'lieferant' as const, label: 'Lieferant' },
-    { key: 'lieferantennr' as const, label: 'Lief-Nr', render: (op: OffenerPosten) => <span className="font-mono text-sm">{op.lieferantennr}</span> },
-    { key: 'datum' as const, label: 'Re-Datum', render: (op: OffenerPosten) => new Date(op.datum).toLocaleDateString('de-DE') },
+    { key: 'lieferantennr' as const, label: 'Lief-Nr', render: (op: KreditOPMock) => <span className="font-mono text-sm">{op.lieferantennr}</span> },
+    { key: 'datum' as const, label: 'Re-Datum', render: (op: KreditOPMock) => new Date(op.datum).toLocaleDateString('de-DE') },
     {
       key: 'faelligkeit' as const,
       label: 'Fälligkeit',
-      render: (op: OffenerPosten) => new Date(op.faelligkeit).toLocaleDateString('de-DE'),
+      render: (op: KreditOPMock) => new Date(op.faelligkeit).toLocaleDateString('de-DE'),
     },
     {
       key: 'offen' as const,
       label: 'Offen',
-      render: (op: OffenerPosten) => (
+      render: (op: KreditOPMock) => (
         <span className="font-bold">
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(op.offen)}
         </span>
@@ -58,7 +50,7 @@ export default function KreditorenPage(): JSX.Element {
     {
       key: 'skonto' as const,
       label: 'Skonto',
-      render: (op: OffenerPosten) => {
+      render: (op: KreditOPMock) => {
         const bis = new Date(op.skontoBis)
         const verfuegbar = bis >= new Date()
         return verfuegbar ? (
@@ -74,7 +66,7 @@ export default function KreditorenPage(): JSX.Element {
     {
       key: 'zahlbar' as const,
       label: 'Status',
-      render: (op: OffenerPosten) => (
+      render: (op: KreditOPMock) => (
         <Badge variant={op.zahlbar ? 'outline' : 'secondary'}>
           {op.zahlbar ? 'Zahlbar' : 'Geprüft'}
         </Badge>
@@ -82,12 +74,12 @@ export default function KreditorenPage(): JSX.Element {
     },
   ]
 
-  const gesamtOffen = mockKreditoren.reduce((sum, op) => sum + op.offen, 0)
-  const zahlbar = mockKreditoren.filter((op) => op.zahlbar).length
-  const skontoVerfuegbar = mockKreditoren.filter((op) => new Date(op.skontoBis) >= new Date()).length
+  const gesamtOffen = list.reduce((sum, op) => sum + op.offen, 0)
+  const zahlbar = list.filter((op) => op.zahlbar).length
+  const skontoVerfuegbar = list.filter((op) => new Date(op.skontoBis) >= new Date()).length
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Kreditorenbuchhaltung</h1>
@@ -113,7 +105,7 @@ export default function KreditorenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Offene Posten</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockKreditoren.length}</span>
+            <span className="text-2xl font-bold">{list.length}</span>
           </CardContent>
         </Card>
 
@@ -171,7 +163,7 @@ export default function KreditorenPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockKreditoren} columns={columns} />
+          <DataTable data={list} columns={columns} />
         </CardContent>
       </Card>
     </div>

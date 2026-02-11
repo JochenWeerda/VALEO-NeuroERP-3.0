@@ -5,49 +5,42 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { BackButton } from '@/components/BackButton'
 import { AlertTriangle, Euro, FileDown, Search } from 'lucide-react'
-
-type OffenerPosten = {
-  id: string
-  rechnungsnr: string
-  kunde: string
-  kundennr: string
-  datum: string
-  faelligkeit: string
-  betrag: number
-  offen: number
-  ueberfaellig: boolean
-  mahnStufe: number
-}
-
-const mockDebitoren: OffenerPosten[] = [
-  { id: '1', rechnungsnr: 'RE-2025-0123', kunde: 'Agrar Schmidt GmbH', kundennr: 'K-10001', datum: '2025-09-15', faelligkeit: '2025-10-15', betrag: 12500, offen: 12500, ueberfaellig: false, mahnStufe: 0 },
-  { id: '2', rechnungsnr: 'RE-2025-0098', kunde: 'Landwirtschaft Müller', kundennr: 'K-10023', datum: '2025-08-20', faelligkeit: '2025-09-20', betrag: 8750, offen: 8750, ueberfaellig: true, mahnStufe: 1 },
-  { id: '3', rechnungsnr: 'RE-2025-0145', kunde: 'Hofgut Weber', kundennr: 'K-10045', datum: '2025-10-01', faelligkeit: '2025-11-01', betrag: 15200, offen: 15200, ueberfaellig: false, mahnStufe: 0 },
-]
+import { useDebitorenMock, type DebitOPMock } from '@/lib/api/fibu'
 
 export default function DebitorenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: items, isLoading } = useDebitorenMock()
+
+  if (isLoading) return (
+    <div className="p-3 md:p-6 space-y-4">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>
+  )
+
+  const list = items ?? []
 
   const columns = [
     {
       key: 'rechnungsnr' as const,
       label: 'Rechnung',
-      render: (op: OffenerPosten) => (
+      render: (op: DebitOPMock) => (
         <button onClick={() => navigate(`/sales/invoice/${op.id}`)} className="font-medium text-blue-600 hover:underline font-mono">
           {op.rechnungsnr}
         </button>
       ),
     },
     { key: 'kunde' as const, label: 'Kunde' },
-    { key: 'kundennr' as const, label: 'Kd-Nr', render: (op: OffenerPosten) => <span className="font-mono text-sm">{op.kundennr}</span> },
-    { key: 'datum' as const, label: 'Re-Datum', render: (op: OffenerPosten) => new Date(op.datum).toLocaleDateString('de-DE') },
+    { key: 'kundennr' as const, label: 'Kd-Nr', render: (op: DebitOPMock) => <span className="font-mono text-sm">{op.kundennr}</span> },
+    { key: 'datum' as const, label: 'Re-Datum', render: (op: DebitOPMock) => new Date(op.datum).toLocaleDateString('de-DE') },
     {
       key: 'faelligkeit' as const,
       label: 'Fälligkeit',
-      render: (op: OffenerPosten) => {
+      render: (op: DebitOPMock) => {
         const faellig = new Date(op.faelligkeit)
         const ueberfaellig = faellig < new Date()
         return (
@@ -60,12 +53,12 @@ export default function DebitorenPage(): JSX.Element {
     {
       key: 'betrag' as const,
       label: 'Betrag',
-      render: (op: OffenerPosten) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(op.betrag),
+      render: (op: DebitOPMock) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(op.betrag),
     },
     {
       key: 'offen' as const,
       label: 'Offen',
-      render: (op: OffenerPosten) => (
+      render: (op: DebitOPMock) => (
         <span className="font-bold">
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(op.offen)}
         </span>
@@ -74,7 +67,7 @@ export default function DebitorenPage(): JSX.Element {
     {
       key: 'mahnStufe' as const,
       label: 'Status',
-      render: (op: OffenerPosten) => {
+      render: (op: DebitOPMock) => {
         if (op.mahnStufe > 0) {
           return <Badge variant="destructive">Mahnstufe {op.mahnStufe}</Badge>
         }
@@ -86,12 +79,12 @@ export default function DebitorenPage(): JSX.Element {
     },
   ]
 
-  const gesamtOffen = mockDebitoren.reduce((sum, op) => sum + op.offen, 0)
-  const ueberfaellig = mockDebitoren.filter((op) => op.ueberfaellig).length
-  const mahnungen = mockDebitoren.filter((op) => op.mahnStufe > 0).length
+  const gesamtOffen = list.reduce((sum, op) => sum + op.offen, 0)
+  const ueberfaellig = list.filter((op) => op.ueberfaellig).length
+  const mahnungen = list.filter((op) => op.mahnStufe > 0).length
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Debitorenbuchhaltung</h1>
@@ -117,7 +110,7 @@ export default function DebitorenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Offene Posten</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockDebitoren.length}</span>
+            <span className="text-2xl font-bold">{list.length}</span>
           </CardContent>
         </Card>
 
@@ -174,7 +167,7 @@ export default function DebitorenPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockDebitoren} columns={columns} />
+          <DataTable data={list} columns={columns} />
         </CardContent>
       </Card>
     </div>

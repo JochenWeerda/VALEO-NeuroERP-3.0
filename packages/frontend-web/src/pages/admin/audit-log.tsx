@@ -1,28 +1,25 @@
 import { useState } from 'react'
+import { useAuditLog, type AuditEntry } from '@/lib/api/admin'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { FileDown, FileText, Search } from 'lucide-react'
 
-type AuditEntry = {
-  id: string
-  zeitstempel: string
-  benutzer: string
-  aktion: string
-  objekt: string
-  status: 'erfolg' | 'fehler'
-}
-
-const mockAudit: AuditEntry[] = [
-  { id: '1', zeitstempel: '2025-10-11 14:32:15', benutzer: 'admin@valeo.de', aktion: 'Benutzer erstellt', objekt: 'User#42', status: 'erfolg' },
-  { id: '2', zeitstempel: '2025-10-11 14:28:03', benutzer: 'sales@valeo.de', aktion: 'Auftrag angelegt', objekt: 'Order#SA-2025-042', status: 'erfolg' },
-  { id: '3', zeitstempel: '2025-10-11 14:15:41', benutzer: 'admin@valeo.de', aktion: 'Login fehlgeschlagen', objekt: 'Auth', status: 'fehler' },
-]
-
 export default function AuditLogPage(): JSX.Element {
+  const { data: items, isLoading } = useAuditLog()
   const [searchTerm, setSearchTerm] = useState('')
+
+  if (isLoading) return (
+    <div className="p-3 md:p-6 space-y-4">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>
+  )
+
+  const list = items ?? []
 
   const columns = [
     {
@@ -45,7 +42,7 @@ export default function AuditLogPage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Audit-Log</h1>
@@ -61,7 +58,7 @@ export default function AuditLogPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockAudit.length}</span>
+              <span className="text-2xl font-bold">{list.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -71,7 +68,7 @@ export default function AuditLogPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Erfolgreiche Aktionen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockAudit.filter((a) => a.status === 'erfolg').length}</span>
+            <span className="text-2xl font-bold text-green-600">{list.filter((a) => a.status === 'erfolg').length}</span>
           </CardContent>
         </Card>
 
@@ -80,7 +77,7 @@ export default function AuditLogPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Fehler</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{mockAudit.filter((a) => a.status === 'fehler').length}</span>
+            <span className="text-2xl font-bold text-red-600">{list.filter((a) => a.status === 'fehler').length}</span>
           </CardContent>
         </Card>
       </div>
@@ -105,10 +102,9 @@ export default function AuditLogPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockAudit} columns={columns} />
+          <DataTable data={list} columns={columns} />
         </CardContent>
       </Card>
     </div>
   )
 }
-
