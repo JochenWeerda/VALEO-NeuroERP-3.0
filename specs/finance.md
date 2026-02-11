@@ -1,10 +1,10 @@
-***REMOVED*** Test Plan - Finance Module
+# Test Plan - Finance Module
 
 **Erstellt:** 2025-11-24  
 **Basis:** UI-Explorer Handoff `ui-explorer-finance-2025-11-24T08-51-19.344194.md`  
 **Status:** Draft
 
-***REMOVED******REMOVED*** Test Scope
+## Test Scope
 
 Basierend auf der UI-Exploration wurden folgende Flows identifiziert:
 
@@ -12,16 +12,16 @@ Basierend auf der UI-Exploration wurden folgende Flows identifiziert:
 2. **Invoices List View**
 3. **Create Invoice Form**
 
-***REMOVED******REMOVED*** Test Objectives
+## Test Objectives
 
 - ✅ Verifizieren, dass Finance-Modul erreichbar ist
 - ✅ Verifizieren, dass Invoices-Liste korrekt angezeigt wird
 - ✅ Verifizieren, dass Create Invoice Formular funktioniert
 - ✅ Verifizieren, dass Navigation zwischen Bereichen funktioniert
 
-***REMOVED******REMOVED*** Test Cases
+## Test Cases
 
-***REMOVED******REMOVED******REMOVED*** TC-FIN-001: Finance Module Navigation
+### TC-FIN-001: Finance Module Navigation
 
 **Priority:** High  
 **Type:** Navigation Test
@@ -45,7 +45,7 @@ Basierend auf der UI-Exploration wurden folgende Flows identifiziert:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** TC-FIN-002: Invoices List View
+### TC-FIN-002: Invoices List View
 
 **Priority:** High  
 **Type:** List View Test
@@ -72,7 +72,7 @@ Basierend auf der UI-Exploration wurden folgende Flows identifiziert:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** TC-FIN-003: Create Invoice Form
+### TC-FIN-003: Create Invoice Form
 
 **Priority:** High  
 **Type:** Form Test
@@ -101,7 +101,7 @@ Basierend auf der UI-Exploration wurden folgende Flows identifiziert:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** TC-FIN-004: Dashboard Navigation
+### TC-FIN-004: Dashboard Navigation
 
 **Priority:** Medium  
 **Type:** Navigation Test
@@ -125,28 +125,28 @@ Basierend auf der UI-Exploration wurden folgende Flows identifiziert:
 
 ---
 
-***REMOVED******REMOVED*** Test Data Requirements
+## Test Data Requirements
 
 - Keine speziellen Test-Daten erforderlich (Login nicht aktiviert)
 - Falls Invoices vorhanden sein sollen, müssen diese vorher erstellt werden
 
-***REMOVED******REMOVED*** Test Environment
+## Test Environment
 
 - **Base URL:** `http://localhost:3000`
 - **Browser:** Chromium (Playwright)
 - **Viewport:** 1920x1080
 - **Login:** Nicht erforderlich (nicht aktiviert)
 
-***REMOVED******REMOVED*** Test Execution Strategy
+## Test Execution Strategy
 
-***REMOVED******REMOVED******REMOVED*** Smoke Tests (Quick Check)
+### Smoke Tests (Quick Check)
 - TC-FIN-001: Finance Module Navigation
 - TC-FIN-002: Invoices List View
 
-***REMOVED******REMOVED******REMOVED*** Full Tests
+### Full Tests
 - Alle Test Cases (TC-FIN-001 bis TC-FIN-004)
 
-***REMOVED******REMOVED*** Known Issues / Findings
+## Known Issues / Findings
 
 1. **Routing-Inkonsistenz:**
    - Finance-Modul URL zeigt `http://localhost:3000/crm/betriebsprofile` (sollte Finance sein)
@@ -162,7 +162,7 @@ Basierend auf der UI-Exploration wurden folgende Flows identifiziert:
    - Exploration versuchte Payments zu finden, aber kein Screenshot erstellt
    - **Action:** Payments-Bereich explizit testen
 
-***REMOVED******REMOVED*** Acceptance Criteria
+## Acceptance Criteria
 
 - [ ] Alle Test Cases können erfolgreich ausgeführt werden
 - [ ] Navigation funktioniert korrekt
@@ -170,15 +170,16 @@ Basierend auf der UI-Exploration wurden folgende Flows identifiziert:
 - [ ] Create Invoice Formular ist vollständig funktionsfähig
 - [ ] Routing-Inkonsistenzen sind behoben
 
-***REMOVED******REMOVED*** Next Steps
+## Next Steps
 
 1. **Test-Generator:** Erstelle Playwright-Tests basierend auf diesem Plan
 2. **Test-Healer:** Führe Tests aus und behebe flaky/failing Tests
 3. **Feature-Engineer:** Behebe identifizierte Issues (Routing, Formular)
 
-***REMOVED******REMOVED*** References
+## References
 
 - Handoff-Notiz: `swarm/handoffs/ui-explorer-finance-2025-11-24T08-51-19.344194.md`
 - JSON Summary: `evidence/screenshots/finance/finance_mission_2025-11-24T08-51-19.344194.json`
 - Screenshots: `evidence/screenshots/finance/`
+
 

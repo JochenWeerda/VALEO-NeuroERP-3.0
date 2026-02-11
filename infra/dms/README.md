@@ -1,20 +1,20 @@
-***REMOVED*** Mayan-DMS Infrastructure für VALEO-NeuroERP
+# Mayan-DMS Infrastructure für VALEO-NeuroERP
 
 **Ein-Befehl-Setup** für Mayan-DMS als eigener Docker-Stack mit VALEO-NeuroERP-Preset.
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Quick-Start
+## 🚀 Quick-Start
 
-***REMOVED******REMOVED******REMOVED*** 1. Konfiguration vorbereiten
+### 1. Konfiguration vorbereiten
 
 ```bash
 cd infra/dms
 
-***REMOVED*** .env erstellen
+# .env erstellen
 cp env.example .env
 
-***REMOVED*** Pfade anpassen (optional)
+# Pfade anpassen (optional)
 vim .env
 ```
 
@@ -23,7 +23,7 @@ vim .env
 - `DMS_HTTP_PORT` - Port für Mayan-UI (default: 8010)
 - `DMS_BOOTSTRAP_TOKEN` - Wird später eingetragen
 
-***REMOVED******REMOVED******REMOVED*** 2. Mayan starten
+### 2. Mayan starten
 
 ```bash
 docker compose -f docker-compose.mayan.yml up -d
@@ -37,14 +37,14 @@ docker compose -f docker-compose.mayan.yml up -d
 
 **Warte bis bereit:**
 ```bash
-***REMOVED*** Health-Check
+# Health-Check
 docker compose -f docker-compose.mayan.yml ps
 
-***REMOVED*** Logs anschauen
+# Logs anschauen
 docker compose -f docker-compose.mayan.yml logs -f mayan
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. API-Token erstellen (einmalig)
+### 3. API-Token erstellen (einmalig)
 
 1. **Browser öffnen:** http://localhost:8010
 2. **Login:** 
@@ -58,16 +58,16 @@ docker compose -f docker-compose.mayan.yml logs -f mayan
 5. **In .env eintragen:**
    ```bash
    vim .env
-   ***REMOVED*** DMS_BOOTSTRAP_TOKEN=REDACTED_TOKEN789...
+   # DMS_BOOTSTRAP_TOKEN=REDACTED_TOKEN789...
    ```
 
-***REMOVED******REMOVED******REMOVED*** 4. Bootstrap ausführen
+### 4. Bootstrap ausführen
 
 ```bash
-***REMOVED*** Ausführbar machen (Linux/Mac)
+# Ausführbar machen (Linux/Mac)
 chmod +x bin/*.sh
 
-***REMOVED*** Bootstrap ausführen
+# Bootstrap ausführen
 bin/bootstrap.sh
 ```
 
@@ -112,10 +112,10 @@ Summary:
 🎉 Mayan is ready for VALEO-NeuroERP integration!
 ```
 
-***REMOVED******REMOVED******REMOVED*** 5. Idempotenz testen
+### 5. Idempotenz testen
 
 ```bash
-***REMOVED*** Nochmal ausführen → sollte nichts mehr erstellen
+# Nochmal ausführen → sollte nichts mehr erstellen
 bin/bootstrap.sh
 ```
 
@@ -131,9 +131,9 @@ Metadata type already exists: number
 
 ---
 
-***REMOVED******REMOVED*** 🔧 Konfiguration
+## 🔧 Konfiguration
 
-***REMOVED******REMOVED******REMOVED*** .env-Variablen
+### .env-Variablen
 
 | Variable | Default | Beschreibung |
 |----------|---------|--------------|
@@ -148,7 +148,7 @@ Metadata type already exists: number
 | POSTGRES_PASSWORD | mayan | PostgreSQL-Passwort |
 | POSTGRES_DB | mayan | PostgreSQL-Datenbank |
 
-***REMOVED******REMOVED******REMOVED*** bootstrap.json
+### bootstrap.json
 
 **Document Types (7):**
 - sales_order
@@ -174,61 +174,61 @@ Metadata type already exists: number
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Management
+## 🔄 Management
 
-***REMOVED******REMOVED******REMOVED*** Mayan stoppen
+### Mayan stoppen
 ```bash
 docker compose -f docker-compose.mayan.yml down
 ```
 
-***REMOVED******REMOVED******REMOVED*** Mayan neustarten
+### Mayan neustarten
 ```bash
 docker compose -f docker-compose.mayan.yml restart
 ```
 
-***REMOVED******REMOVED******REMOVED*** Logs anschauen
+### Logs anschauen
 ```bash
 docker compose -f docker-compose.mayan.yml logs -f mayan
 ```
 
-***REMOVED******REMOVED******REMOVED*** Mayan aktualisieren
+### Mayan aktualisieren
 ```bash
 docker compose -f docker-compose.mayan.yml pull
 docker compose -f docker-compose.mayan.yml up -d
 ```
 
-***REMOVED******REMOVED******REMOVED*** Backup erstellen
+### Backup erstellen
 ```bash
-***REMOVED*** PostgreSQL-Backup
+# PostgreSQL-Backup
 docker exec mayan-postgres pg_dump -U mayan mayan > backup_mayan_$(date +%Y%m%d).sql
 
-***REMOVED*** Media-Backup
+# Media-Backup
 tar czf backup_media_$(date +%Y%m%d).tar.gz data/mayan/media
 ```
 
 ---
 
-***REMOVED******REMOVED*** 🔗 ERP-Integration
+## 🔗 ERP-Integration
 
-***REMOVED******REMOVED******REMOVED*** ENV-Variable für ERP-Backend
+### ENV-Variable für ERP-Backend
 
 ```bash
-***REMOVED*** In VALEO-NeuroERP .env
+# In VALEO-NeuroERP .env
 export DMS_BASE=http://localhost:8010
 export DMS_TOKEN=REDACTED_TOKEN...
 ```
 
-***REMOVED******REMOVED******REMOVED*** Auto-Upload nach PDF-Generierung
+### Auto-Upload nach PDF-Generierung
 
 **Bereits implementiert in:** `app/routers/print_router.py`
 
 ```python
-***REMOVED*** Nach PDF-Generierung
+# Nach PDF-Generierung
 if is_dms_configured():
     upload_document(domain, doc_id, str(pdf_path), metadata)
 ```
 
-***REMOVED******REMOVED******REMOVED*** Admin-UI Integration
+### Admin-UI Integration
 
 **Bereits implementiert:** `packages/frontend-web/src/pages/admin/setup/dms-integration.tsx`
 
@@ -240,20 +240,20 @@ if is_dms_configured():
 
 ---
 
-***REMOVED******REMOVED*** 🧪 Testing
+## 🧪 Testing
 
-***REMOVED******REMOVED******REMOVED*** 1. Mayan erreichbar?
+### 1. Mayan erreichbar?
 ```bash
 curl http://localhost:8010/api/
-***REMOVED*** Expected: {"detail": "Authentication credentials were not provided."}
+# Expected: {"detail": "Authentication credentials were not provided."}
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Bootstrap erfolgreich?
+### 2. Bootstrap erfolgreich?
 ```bash
-cat data/mayan/postgres/.initialized  ***REMOVED*** Sollte existieren
+cat data/mayan/postgres/.initialized  # Sollte existieren
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Document Types vorhanden?
+### 3. Document Types vorhanden?
 ```bash
 curl -H "Authorization: Token $DMS_BOOTSTRAP_TOKEN" \
   http://localhost:8010/api/document_types/document_types/ | jq '.results[].label'
@@ -267,47 +267,47 @@ curl -H "Authorization: Token $DMS_BOOTSTRAP_TOKEN" \
 ...
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. PDF-Upload testen
+### 4. PDF-Upload testen
 ```bash
-***REMOVED*** Via VALEO-ERP API
+# Via VALEO-ERP API
 curl http://localhost:8000/api/documents/sales_order/SO-00001/print \
   -H "Authorization: Bearer $TOKEN"
 
-***REMOVED*** Im Mayan-UI prüfen
+# Im Mayan-UI prüfen
 open http://localhost:8010
-***REMOVED*** → Dokumente → SO-00001 sollte sichtbar sein
+# → Dokumente → SO-00001 sollte sichtbar sein
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📁 Verzeichnis-Struktur
+## 📁 Verzeichnis-Struktur
 
 ```
 infra/dms/
-├── env.example              ***REMOVED*** Template für .env
-├── .env                     ***REMOVED*** Deine Config (nicht in Git!)
-├── docker-compose.mayan.yml ***REMOVED*** Docker-Stack
+├── env.example              # Template für .env
+├── .env                     # Deine Config (nicht in Git!)
+├── docker-compose.mayan.yml # Docker-Stack
 ├── config/
-│   └── bootstrap.json       ***REMOVED*** VALEO-Preset
+│   └── bootstrap.json       # VALEO-Preset
 ├── bin/
-│   ├── wait-for-http.sh     ***REMOVED*** Health-Check-Helper
-│   └── bootstrap.sh         ***REMOVED*** Bootstrap-Script
-└── data/                    ***REMOVED*** Wird automatisch erstellt
+│   ├── wait-for-http.sh     # Health-Check-Helper
+│   └── bootstrap.sh         # Bootstrap-Script
+└── data/                    # Wird automatisch erstellt
     └── mayan/
-        ├── media/           ***REMOVED*** Dokumente
-        ├── settings/        ***REMOVED*** Mayan-Settings
-        └── postgres/        ***REMOVED*** PostgreSQL-Daten
+        ├── media/           # Dokumente
+        ├── settings/        # Mayan-Settings
+        └── postgres/        # PostgreSQL-Daten
 ```
 
 ---
 
-***REMOVED******REMOVED*** 🔒 Security
+## 🔒 Security
 
-***REMOVED******REMOVED******REMOVED*** Production-Empfehlungen
+### Production-Empfehlungen
 
 1. **Passwörter ändern:**
    ```bash
-   ***REMOVED*** In .env
+   # In .env
    POSTGRES_PASSWORD=<starkes-passwort>
    REDIS_PASSWORD=<starkes-passwort>
    ```
@@ -328,9 +328,9 @@ infra/dms/
 
 ---
 
-***REMOVED******REMOVED*** 🆘 Troubleshooting
+## 🆘 Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: Bootstrap schlägt fehl mit "Authentication failed"
+### Problem: Bootstrap schlägt fehl mit "Authentication failed"
 
 **Ursache:** DMS_BOOTSTRAP_TOKEN falsch oder abgelaufen
 
@@ -339,20 +339,20 @@ infra/dms/
 2. In .env eintragen
 3. Bootstrap nochmal ausführen
 
-***REMOVED******REMOVED******REMOVED*** Problem: "curl: (7) Failed to connect"
+### Problem: "curl: (7) Failed to connect"
 
 **Ursache:** Mayan noch nicht bereit
 
 **Lösung:**
 ```bash
-***REMOVED*** Logs prüfen
+# Logs prüfen
 docker compose -f docker-compose.mayan.yml logs mayan
 
-***REMOVED*** Warte länger
+# Warte länger
 bin/wait-for-http.sh http://localhost:8010/api/ 180
 ```
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Permission denied" bei bootstrap.sh
+### Problem: "Permission denied" bei bootstrap.sh
 
 **Ursache:** Script nicht ausführbar
 
@@ -361,57 +361,57 @@ bin/wait-for-http.sh http://localhost:8010/api/ 180
 chmod +x bin/*.sh
 ```
 
-***REMOVED******REMOVED******REMOVED*** Problem: Dokumente nicht im DMS sichtbar
+### Problem: Dokumente nicht im DMS sichtbar
 
 **Ursache:** Auto-Upload fehlgeschlagen oder DMS_TOKEN nicht gesetzt
 
 **Lösung:**
 ```bash
-***REMOVED*** ENV prüfen
+# ENV prüfen
 echo $DMS_TOKEN
 
-***REMOVED*** Backend-Logs prüfen
+# Backend-Logs prüfen
 tail -f logs/valeo-erp.log | grep DMS
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📊 Warum diese Struktur?
+## 📊 Warum diese Struktur?
 
-***REMOVED******REMOVED******REMOVED*** ✅ Trennung der Zuständigkeiten
+### ✅ Trennung der Zuständigkeiten
 - **Mayan:** Eigener Stack (Updates, OCR-Worker, DB-Backups)
 - **ERP:** Nur leichter Adapter (REST-API)
 
-***REMOVED******REMOVED******REMOVED*** ✅ Reproduzierbar
+### ✅ Reproduzierbar
 - Volle Einrichtung per `bootstrap.json`
 - Änderungen versionierbar in Git
 - Idempotent (mehrfach ausführbar)
 
-***REMOVED******REMOVED******REMOVED*** ✅ Portabel
+### ✅ Portabel
 - **Lokal:** Docker-Compose
 - **Production:** Helm-Chart (analog zu VALEO-ERP)
 - Scripts bleiben gleich
 
-***REMOVED******REMOVED******REMOVED*** ✅ Sicher
+### ✅ Sicher
 - Token nie in Config gespeichert
 - ENV-basierte Konfiguration
 - Admin-only Zugriff
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Next Steps
+## 🔄 Next Steps
 
-***REMOVED******REMOVED******REMOVED*** Für Production:
+### Für Production:
 
 1. **Helm-Chart erstellen:**
    ```bash
-   ***REMOVED*** Analog zu k8s/helm/valeo-erp
+   # Analog zu k8s/helm/valeo-erp
    k8s/helm/mayan-dms/
    ```
 
 2. **Backups automatisieren:**
    ```bash
-   ***REMOVED*** Cronjob für PostgreSQL-Backup
+   # Cronjob für PostgreSQL-Backup
    0 2 * * * docker exec mayan-postgres pg_dump ...
    ```
 
@@ -423,4 +423,5 @@ tail -f logs/valeo-erp.log | grep DMS
 ---
 
 **🎉 Ein-Befehl-Setup für Mayan-DMS! 🚀**
+
 

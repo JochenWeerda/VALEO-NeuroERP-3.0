@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Generiert Seed-Daten für Kundenstamm-Tabellen
 """
@@ -6,7 +6,7 @@ Generiert Seed-Daten für Kundenstamm-Tabellen
 import random
 from datetime import datetime, timedelta
 
-***REMOVED*** Fiktive Firmennamen für Testdaten
+# Fiktive Firmennamen für Testdaten
 COMPANY_NAMES = [
     "Bauernhof Müller GmbH",
     "Agrar-Genossenschaft Süd e.V.",
@@ -54,7 +54,7 @@ def generate_kunden_sql(n=10):
         street = random.choice(STREETS)
         street_nr = random.randint(1, 99)
         
-        ***REMOVED*** Berechne Werte vorher (außerhalb des f-strings)
+        # Berechne Werte vorher (außerhalb des f-strings)
         tel = f'+49 441 12{random.randint(1000, 9999)}'
         fax = f'+49 441 12{random.randint(1000, 9999)}'
         email_domain = name.lower().replace(" ", "").replace(".", "").replace("gmbh", "").replace("kg", "").replace("e.k.", "").replace("e.v.", "").replace("ag", "")
@@ -144,7 +144,7 @@ def generate_kunden_ansprechpartner_sql(n=10):
     
     for i in range(1, n + 1):
         kunden_nr = f"K{i:05d}"
-        ***REMOVED*** Jeder Kunde hat 1-3 Ansprechpartner
+        # Jeder Kunde hat 1-3 Ansprechpartner
         for j in range(random.randint(1, 3)):
             vorname = random.choice(vornamen)
             nachname = random.choice(nachnamen)
@@ -182,7 +182,7 @@ def generate_sql():
 
 """
     
-    ***REMOVED*** Haupttabellen
+    # Haupttabellen
     sql += generate_kunden_sql(10)
     sql += generate_kunden_profil_sql(10)
     sql += generate_kunden_ansprechpartner_sql(10)
@@ -206,3 +206,4 @@ if __name__ == "__main__":
     print(f"      Get-Content {output_file} | docker exec -i valeo-staging-postgres psql -U valeo_staging -d valeo_neuro_erp_staging")
     print(f"   2. Frontend-Seiten erstellen")
     print(f"   3. API-Endpoints implementieren")
+

@@ -1,4 +1,4 @@
-***REMOVED*** Loki Configuration für VALEO-NeuroERP
+# Loki Configuration für VALEO-NeuroERP
 
 auth_enabled: false
 
@@ -52,8 +52,9 @@ chunk_store_config:
 
 table_manager:
   retention_deletes_enabled: true
-  retention_period: 720h  ***REMOVED*** 30 Tage
+  retention_period: 720h  # 30 Tage
 
 ruler:
   alertmanager_url: http://alertmanager:9093
+
 

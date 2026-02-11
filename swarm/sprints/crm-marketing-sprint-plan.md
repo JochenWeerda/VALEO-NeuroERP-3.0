@@ -1,10 +1,10 @@
-***REMOVED*** CRM & Marketing Sprint Plan
+# CRM & Marketing Sprint Plan
 
 **Projekt:** CRM & Marketing Implementation  
 **Sprint-Länge:** 2 Wochen  
 **Start:** 2025-01-27
 
-***REMOVED******REMOVED*** Sprint-Übersicht
+## Sprint-Übersicht
 
 | Sprint | Wochen | Phase | Fokus | Owner |
 |---|---|---|---|---|
@@ -16,11 +16,11 @@
 
 ---
 
-***REMOVED******REMOVED*** Sprint 1-2: Opportunities / Deals (Weeks 1-4)
+## Sprint 1-2: Opportunities / Deals (Weeks 1-4)
 
 **Mission:** `swarm/missions/crm-opportunities-phase1.md`
 
-***REMOVED******REMOVED******REMOVED*** Sprint 1 (Week 1-2): Backend & Datenmodell
+### Sprint 1 (Week 1-2): Backend & Datenmodell
 
 **Ziel:** Backend-Service, Datenmodell, API-Endpoints
 
@@ -37,7 +37,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Sprint 2 (Week 3-4): Frontend & UI
+### Sprint 2 (Week 3-4): Frontend & UI
 
 **Ziel:** Frontend-Komponenten, UI, Integration
 
@@ -56,11 +56,11 @@
 
 ---
 
-***REMOVED******REMOVED*** Sprint 3-4: Consent, DSGVO, Segmente (Weeks 5-8)
+## Sprint 3-4: Consent, DSGVO, Segmente (Weeks 5-8)
 
 **Mission:** `swarm/missions/crm-marketing-implementation.md` → Phase 1.2-1.4
 
-***REMOVED******REMOVED******REMOVED*** Sprint 3 (Week 5-6): Consent & DSGVO
+### Sprint 3 (Week 5-6): Consent & DSGVO
 
 **Ziel:** Consent-Management, DSGVO-Funktionen
 
@@ -73,7 +73,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Sprint 4 (Week 7-8): Segmente
+### Sprint 4 (Week 7-8): Segmente
 
 **Ziel:** Segment-Management, Regel-Engine
 
@@ -86,11 +86,11 @@
 
 ---
 
-***REMOVED******REMOVED*** Sprint 5-6: Erweiterungen (Weeks 9-12)
+## Sprint 5-6: Erweiterungen (Weeks 9-12)
 
 **Mission:** `swarm/missions/crm-marketing-implementation.md` → Phase 2
 
-***REMOVED******REMOVED******REMOVED*** Sprint 5 (Week 9-10): Reports & Kampagnen
+### Sprint 5 (Week 9-10): Reports & Kampagnen
 
 **Ziel:** Reports erweitern, Kampagnen erweitern
 
@@ -103,7 +103,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Sprint 6 (Week 11-12): Accounts & Timeline
+### Sprint 6 (Week 11-12): Accounts & Timeline
 
 **Ziel:** Accounts erweitern, Timeline-View
 
@@ -116,11 +116,11 @@
 
 ---
 
-***REMOVED******REMOVED*** Sprint 7-8: SOLL-Gaps (Weeks 13-16)
+## Sprint 7-8: SOLL-Gaps (Weeks 13-16)
 
 **Mission:** `swarm/missions/crm-marketing-implementation.md` → Phase 3
 
-***REMOVED******REMOVED******REMOVED*** Sprint 7 (Week 13-14): Lead-Routing & Forecasting
+### Sprint 7 (Week 13-14): Lead-Routing & Forecasting
 
 **Ziel:** Lead-Routing, Forecasting
 
@@ -132,7 +132,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Sprint 8 (Week 15-16): Journeys
+### Sprint 8 (Week 15-16): Journeys
 
 **Ziel:** Nurture / Journeys
 
@@ -144,11 +144,11 @@
 
 ---
 
-***REMOVED******REMOVED*** Sprint 9-10: KANN-Gaps (Weeks 17-20)
+## Sprint 9-10: KANN-Gaps (Weeks 17-20)
 
 **Mission:** `swarm/missions/crm-marketing-implementation.md` → Phase 4
 
-***REMOVED******REMOVED******REMOVED*** Sprint 9 (Week 17-18): Events & Social
+### Sprint 9 (Week 17-18): Events & Social
 
 **Ziel:** Event-Marketing, Social-Tracking
 
@@ -160,7 +160,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Sprint 10 (Week 19-20): Connectoren
+### Sprint 10 (Week 19-20): Connectoren
 
 **Ziel:** Dritttools-Integration
 
@@ -171,41 +171,41 @@
 
 ---
 
-***REMOVED******REMOVED*** Sprint-Ceremonies
+## Sprint-Ceremonies
 
-***REMOVED******REMOVED******REMOVED*** Daily Standup
+### Daily Standup
 - **Zeit:** 09:00 Uhr
 - **Dauer:** 15 Minuten
 - **Format:** Was gestern? Was heute? Blockers?
 - **Template:** Siehe `swarm/missions/crm-opportunities-phase1.md` → Daily Standup Template
 
-***REMOVED******REMOVED******REMOVED*** Sprint Planning
+### Sprint Planning
 - **Zeit:** Montag, 10:00 Uhr (Sprint-Start)
 - **Dauer:** 2 Stunden
 - **Format:** Tasks aus Mission-Datei planen, Story Points schätzen
 
-***REMOVED******REMOVED******REMOVED*** Sprint Review
+### Sprint Review
 - **Zeit:** Freitag, 14:00 Uhr (Sprint-Ende)
 - **Dauer:** 1 Stunde
 - **Format:** Demo, Feedback, Next Steps
 - **Template:** Siehe `swarm/missions/crm-opportunities-phase1.md` → Review & Retro Template
 
-***REMOVED******REMOVED******REMOVED*** Sprint Retrospective
+### Sprint Retrospective
 - **Zeit:** Freitag, 15:00 Uhr (nach Review)
 - **Dauer:** 1 Stunde
 - **Format:** Was lief gut? Was kann verbessert werden? Action Items
 
 ---
 
-***REMOVED******REMOVED*** Tracking
+## Tracking
 
-***REMOVED******REMOVED******REMOVED*** Tools
+### Tools
 - **Mission-Tracking:** `swarm/missions/*.md`
 - **Daily Standups:** `swarm/standups/YYYY-MM-DD.md`
 - **Sprint-Reviews:** `swarm/reviews/sprint-X.md`
 - **Sprint-Retros:** `swarm/retros/sprint-X.md`
 
-***REMOVED******REMOVED******REMOVED*** Metrics
+### Metrics
 - **Velocity:** Story Points pro Sprint
 - **Burndown:** Offene Tasks pro Tag
 - **Test-Coverage:** > 80%
@@ -215,4 +215,5 @@
 
 **Letzte Aktualisierung:** 2025-01-27  
 **Nächste Sprint-Planning:** Sprint 1 Start
+
 

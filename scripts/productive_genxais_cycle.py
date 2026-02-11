@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 Produktiver GENXAIS v2.0 Zyklus
@@ -22,7 +22,7 @@ import importlib.util
 import shutil
 from typing import Dict, Any, List, Optional, Union
 
-***REMOVED*** Logging konfigurieren
+# Logging konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -45,20 +45,20 @@ class GenxaisProductiveRunner:
         self.output_dir = Path("output")
         self.output_dir.mkdir(parents=True, exist_ok=True)
         
-        ***REMOVED*** Extrahiere Phasen und Pipelines
+        # Extrahiere Phasen und Pipelines
         self.phases = self.config.get("phases", ["VAN", "PLAN", "CREATE", "IMPLEMENTATION", "REFLEKTION"])
         self.current_phase = self.phases[0]
         self.pipelines = self.config.get("pipelines", [])
         
-        ***REMOVED*** LangGraph-Integration
+        # LangGraph-Integration
         self.use_langgraph = self.config.get("use_langgraph", False)
         self.langgraph_controller = None
         
-        ***REMOVED*** RAG-Integration
+        # RAG-Integration
         self.use_rag = self.config.get("use_rag", False)
         self.rag_client = None
         
-        ***REMOVED*** Ausgabedokumente
+        # Ausgabedokumente
         self.artifacts = self.config.get("artifacts", {}).get("track", [])
         
     def load_config(self) -> Dict[str, Any]:
@@ -76,7 +76,7 @@ class GenxaisProductiveRunner:
         """Initialisiert die externen Integrationen (LangGraph, RAG)"""
         if self.use_langgraph:
             try:
-                ***REMOVED*** Dynamisch die LangGraph-Integration laden
+                # Dynamisch die LangGraph-Integration laden
                 spec = importlib.util.find_spec("linkup_mcp.langgraph_integration")
                 if spec:
                     langgraph_module = importlib.util.module_from_spec(spec)
@@ -93,7 +93,7 @@ class GenxaisProductiveRunner:
         
         if self.use_rag:
             try:
-                ***REMOVED*** RAG-Client initialisieren
+                # RAG-Client initialisieren
                 from linkup_mcp.rag_client import RAGClient
                 self.rag_client = RAGClient(self.config.get("rag_config", {}))
                 await self.rag_client.initialize()
@@ -104,10 +104,10 @@ class GenxaisProductiveRunner:
     
     async def update_dashboard_data(self, phase: Optional[str] = None, progress: Optional[int] = None) -> None:
         """Aktualisiert die Dashboard-Daten"""
-        ***REMOVED*** Phasendaten
+        # Phasendaten
         phase_data_path = self.data_dir / "phase_data.json"
         
-        ***REMOVED*** Lade bestehende Daten oder erstelle neue
+        # Lade bestehende Daten oder erstelle neue
         if phase_data_path.exists():
             with open(phase_data_path, 'r', encoding='utf-8') as file:
                 phase_data = json.load(file)
@@ -124,12 +124,12 @@ class GenxaisProductiveRunner:
                 "last_updated": datetime.now().isoformat()
             }
         
-        ***REMOVED*** Aktualisiere die Daten
+        # Aktualisiere die Daten
         if phase:
             self.current_phase = phase
             phase_data["current_phase"] = phase
             
-            ***REMOVED*** Aktualisiere den Status aller Phasen
+            # Aktualisiere den Status aller Phasen
             for p in self.phases:
                 if p == phase:
                     phase_data["status"][p]["status"] = "Aktiv"
@@ -144,21 +144,21 @@ class GenxaisProductiveRunner:
         
         phase_data["last_updated"] = datetime.now().isoformat()
         
-        ***REMOVED*** Speichere die aktualisierten Daten
+        # Speichere die aktualisierten Daten
         with open(phase_data_path, 'w', encoding='utf-8') as file:
             json.dump(phase_data, file, ensure_ascii=False, indent=2)
         
-        ***REMOVED*** Pipeline-Daten aktualisieren
+        # Pipeline-Daten aktualisieren
         await self.update_pipeline_data()
         
-        ***REMOVED*** Artefakt-Daten aktualisieren
+        # Artefakt-Daten aktualisieren
         await self.update_artifact_data()
     
     async def update_pipeline_data(self) -> None:
         """Aktualisiert die Pipeline-Daten"""
         pipeline_data_path = self.data_dir / "pipeline_data.json"
         
-        ***REMOVED*** Lade bestehende Daten oder erstelle neue
+        # Lade bestehende Daten oder erstelle neue
         if pipeline_data_path.exists():
             with open(pipeline_data_path, 'r', encoding='utf-8') as file:
                 pipeline_data = json.load(file)
@@ -178,20 +178,20 @@ class GenxaisProductiveRunner:
                 "last_updated": datetime.now().isoformat()
             }
         
-        ***REMOVED*** Aktualisiere die Pipeline-Daten basierend auf dem tatsächlichen Status
+        # Aktualisiere die Pipeline-Daten basierend auf dem tatsächlichen Status
         for i, pipeline in enumerate(self.pipelines):
             pipeline_name = pipeline.get("name", f"Pipeline {i+1}")
             if pipeline_name in pipeline_data["status"]:
-                ***REMOVED*** Aktualisiere den Status basierend auf der aktuellen Phase
+                # Aktualisiere den Status basierend auf der aktuellen Phase
                 phase_index = self.phases.index(self.current_phase)
                 pipeline_status = pipeline_data["status"][pipeline_name]
                 
-                ***REMOVED*** Berechne den Fortschritt basierend auf den abgeschlossenen Aufgaben
+                # Berechne den Fortschritt basierend auf den abgeschlossenen Aufgaben
                 completed_tasks = pipeline.get("completed_tasks", 0)
                 total_tasks = max(1, len(pipeline.get("tasks", [])))
                 progress = min(100, int((completed_tasks / total_tasks) * 100))
                 
-                ***REMOVED*** Aktualisiere den Status
+                # Aktualisiere den Status
                 if progress == 100:
                     pipeline_status["status"] = "Abgeschlossen"
                 else:
@@ -199,7 +199,7 @@ class GenxaisProductiveRunner:
                 
                 pipeline_status["progress"] = progress
                 
-                ***REMOVED*** Aktualisiere die Laufzeit
+                # Aktualisiere die Laufzeit
                 start_time = pipeline.get("start_time")
                 if start_time:
                     current_time = datetime.now()
@@ -211,14 +211,14 @@ class GenxaisProductiveRunner:
                     minutes = (runtime.seconds % 3600) // 60
                     pipeline_status["runtime"] = f"{hours}h {minutes}m"
                 
-                ***REMOVED*** Aktualisiere die letzte Aufgabe
+                # Aktualisiere die letzte Aufgabe
                 last_task = pipeline.get("last_task")
                 if last_task:
                     pipeline_status["last_task"] = last_task
         
         pipeline_data["last_updated"] = datetime.now().isoformat()
         
-        ***REMOVED*** Speichere die aktualisierten Daten
+        # Speichere die aktualisierten Daten
         with open(pipeline_data_path, 'w', encoding='utf-8') as file:
             json.dump(pipeline_data, file, ensure_ascii=False, indent=2)
     
@@ -226,7 +226,7 @@ class GenxaisProductiveRunner:
         """Aktualisiert die Artefakt-Daten"""
         artifact_data_path = self.data_dir / "artifact_data.json"
         
-        ***REMOVED*** Lade bestehende Daten oder erstelle neue
+        # Lade bestehende Daten oder erstelle neue
         if artifact_data_path.exists():
             with open(artifact_data_path, 'r', encoding='utf-8') as file:
                 artifact_data = json.load(file)
@@ -242,7 +242,7 @@ class GenxaisProductiveRunner:
                 "last_updated": datetime.now().isoformat()
             }
         
-        ***REMOVED*** Überprüfe, ob neue Artefakte erstellt wurden
+        # Überprüfe, ob neue Artefakte erstellt wurden
         for artifact in self.artifacts:
             artifact_path = self.output_dir / artifact
             if artifact_path.exists():
@@ -251,7 +251,7 @@ class GenxaisProductiveRunner:
         
         artifact_data["last_updated"] = datetime.now().isoformat()
         
-        ***REMOVED*** Speichere die aktualisierten Daten
+        # Speichere die aktualisierten Daten
         with open(artifact_data_path, 'w', encoding='utf-8') as file:
             json.dump(artifact_data, file, ensure_ascii=False, indent=2)
     
@@ -292,11 +292,11 @@ class GenxaisProductiveRunner:
             return {"status": "failed", "message": "Zieldatei oder Code-Inhalt fehlt"}
         
         try:
-            ***REMOVED*** Stelle sicher, dass das Zielverzeichnis existiert
+            # Stelle sicher, dass das Zielverzeichnis existiert
             target_path = Path(target_file)
             target_path.parent.mkdir(parents=True, exist_ok=True)
             
-            ***REMOVED*** Schreibe den Code in die Zieldatei
+            # Schreibe den Code in die Zieldatei
             with open(target_path, 'w', encoding='utf-8') as file:
                 file.write(code_content)
             
@@ -319,11 +319,11 @@ class GenxaisProductiveRunner:
             return {"status": "failed", "message": "Zieldatei oder Inhalt fehlt"}
         
         try:
-            ***REMOVED*** Stelle sicher, dass das Zielverzeichnis existiert
+            # Stelle sicher, dass das Zielverzeichnis existiert
             target_path = Path(target_file)
             target_path.parent.mkdir(parents=True, exist_ok=True)
             
-            ***REMOVED*** Schreibe den Inhalt in die Zieldatei
+            # Schreibe den Inhalt in die Zieldatei
             with open(target_path, 'w', encoding='utf-8') as file:
                 file.write(content)
             
@@ -345,7 +345,7 @@ class GenxaisProductiveRunner:
             return {"status": "failed", "message": "Befehl fehlt"}
         
         try:
-            ***REMOVED*** Führe den Befehl aus
+            # Führe den Befehl aus
             process = await asyncio.create_subprocess_shell(
                 command,
                 stdout=asyncio.subprocess.PIPE,
@@ -384,11 +384,11 @@ class GenxaisProductiveRunner:
             return {"status": "failed", "message": "Zieldatei oder Inhalt fehlt"}
         
         try:
-            ***REMOVED*** Stelle sicher, dass das Zielverzeichnis existiert
+            # Stelle sicher, dass das Zielverzeichnis existiert
             target_path = self.output_dir / target_file
             target_path.parent.mkdir(parents=True, exist_ok=True)
             
-            ***REMOVED*** Schreibe den Inhalt in die Zieldatei
+            # Schreibe den Inhalt in die Zieldatei
             with open(target_path, 'w', encoding='utf-8') as file:
                 file.write(content)
             
@@ -412,22 +412,22 @@ class GenxaisProductiveRunner:
             return {"status": "failed", "message": "Analysetyp oder Ziel fehlt"}
         
         try:
-            ***REMOVED*** Führe die Analyse aus
+            # Führe die Analyse aus
             result = {"type": analysis_type, "target": target, "timestamp": datetime.now().isoformat()}
             
             if analysis_type == "code_quality":
-                ***REMOVED*** Hier könnte ein Code-Qualitätscheck durchgeführt werden
+                # Hier könnte ein Code-Qualitätscheck durchgeführt werden
                 result["quality_score"] = 85
                 result["issues"] = []
             elif analysis_type == "dependency":
-                ***REMOVED*** Hier könnte eine Abhängigkeitsanalyse durchgeführt werden
+                # Hier könnte eine Abhängigkeitsanalyse durchgeführt werden
                 result["dependencies"] = []
             elif analysis_type == "performance":
-                ***REMOVED*** Hier könnte eine Performance-Analyse durchgeführt werden
+                # Hier könnte eine Performance-Analyse durchgeführt werden
                 result["performance_score"] = 90
                 result["bottlenecks"] = []
             
-            ***REMOVED*** Speichere die Analyseergebnisse
+            # Speichere die Analyseergebnisse
             if output_file:
                 output_path = self.output_dir / output_file
                 output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -450,30 +450,30 @@ class GenxaisProductiveRunner:
         pipeline_name = pipeline.get("name", "Unbenannte Pipeline")
         logger.info(f"Starte Pipeline: {pipeline_name}")
         
-        ***REMOVED*** Setze Startzeit
+        # Setze Startzeit
         pipeline["start_time"] = datetime.now().isoformat()
         pipeline["completed_tasks"] = 0
         
         results = []
         
-        ***REMOVED*** Führe alle Aufgaben der Pipeline aus
+        # Führe alle Aufgaben der Pipeline aus
         for task in pipeline.get("tasks", []):
             pipeline["last_task"] = task.get("name", "Unbenannte Aufgabe")
             
-            ***REMOVED*** Aktualisiere das Dashboard
+            # Aktualisiere das Dashboard
             await self.update_pipeline_data()
             
-            ***REMOVED*** Führe die Aufgabe aus
+            # Führe die Aufgabe aus
             task_result = await self.execute_task(task)
             results.append(task_result)
             
             if task_result["status"] == "success":
                 pipeline["completed_tasks"] += 1
             
-            ***REMOVED*** Aktualisiere das Dashboard nach jeder Aufgabe
+            # Aktualisiere das Dashboard nach jeder Aufgabe
             await self.update_pipeline_data()
         
-        ***REMOVED*** Setze Endzeit
+        # Setze Endzeit
         pipeline["end_time"] = datetime.now().isoformat()
         
         logger.info(f"Pipeline abgeschlossen: {pipeline_name}")
@@ -484,7 +484,7 @@ class GenxaisProductiveRunner:
         logger.info(f"Starte Phase: {phase}")
         await self.update_dashboard_data(phase=phase, progress=0)
         
-        ***REMOVED*** Starte die LangGraph-Phase, falls aktiviert
+        # Starte die LangGraph-Phase, falls aktiviert
         if self.use_langgraph and self.langgraph_controller:
             try:
                 await self.langgraph_controller.start_phase(phase)
@@ -494,24 +494,24 @@ class GenxaisProductiveRunner:
         results = []
         total_pipelines = len(self.pipelines)
         
-        ***REMOVED*** Führe alle Pipelines der Phase aus
+        # Führe alle Pipelines der Phase aus
         for i, pipeline in enumerate(self.pipelines):
-            ***REMOVED*** Berechne den Fortschritt
+            # Berechne den Fortschritt
             progress = int((i / total_pipelines) * 100)
             await self.update_dashboard_data(progress=progress)
             
-            ***REMOVED*** Führe die Pipeline aus
+            # Führe die Pipeline aus
             pipeline_result = await self.execute_pipeline(pipeline)
             results.append(pipeline_result)
             
-            ***REMOVED*** Aktualisiere den Fortschritt nach jeder Pipeline
+            # Aktualisiere den Fortschritt nach jeder Pipeline
             progress = int(((i + 1) / total_pipelines) * 100)
             await self.update_dashboard_data(progress=progress)
         
-        ***REMOVED*** Abschluss der Phase
+        # Abschluss der Phase
         await self.update_dashboard_data(progress=100)
         
-        ***REMOVED*** Beende die LangGraph-Phase, falls aktiviert
+        # Beende die LangGraph-Phase, falls aktiviert
         if self.use_langgraph and self.langgraph_controller:
             try:
                 await self.langgraph_controller.complete_phase(phase)
@@ -525,31 +525,31 @@ class GenxaisProductiveRunner:
         """Generiert ein Handover-Dokument"""
         handover_path = self.output_dir / "handover.md"
         
-        ***REMOVED*** Sammle Informationen für das Handover
-        handover_content = f"""***REMOVED*** GENXAIS Zyklus Handover
+        # Sammle Informationen für das Handover
+        handover_content = f"""# GENXAIS Zyklus Handover
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 GENXAIS Zyklus v{self.config.get('version', '2.0')} wurde am {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} abgeschlossen.
 
-***REMOVED******REMOVED*** Durchgeführte Phasen
+## Durchgeführte Phasen
 """
         
         for phase in self.phases:
             handover_content += f"- {phase}\n"
         
-        handover_content += "\n***REMOVED******REMOVED*** Pipelines und Ergebnisse\n"
+        handover_content += "\n## Pipelines und Ergebnisse\n"
         
         for i, pipeline in enumerate(self.pipelines):
             pipeline_name = pipeline.get("name", f"Pipeline {i+1}")
-            handover_content += f"\n***REMOVED******REMOVED******REMOVED*** {pipeline_name}\n\n"
+            handover_content += f"\n### {pipeline_name}\n\n"
             
             for task in pipeline.get("tasks", []):
                 task_name = task.get("name", "Unbenannte Aufgabe")
                 task_type = task.get("type", "unknown")
                 handover_content += f"- {task_name} (Typ: {task_type})\n"
         
-        handover_content += "\n***REMOVED******REMOVED*** Erstellte Artefakte\n\n"
+        handover_content += "\n## Erstellte Artefakte\n\n"
         
         for artifact in self.artifacts:
             artifact_path = self.output_dir / artifact
@@ -558,12 +558,12 @@ GENXAIS Zyklus v{self.config.get('version', '2.0')} wurde am {datetime.now().str
             else:
                 handover_content += f"- {artifact} (nicht erstellt)\n"
         
-        handover_content += "\n***REMOVED******REMOVED*** Nächste Schritte\n\n"
+        handover_content += "\n## Nächste Schritte\n\n"
         handover_content += "- Überprüfung der erstellten Artefakte\n"
         handover_content += "- Integration der Änderungen in das Hauptprojekt\n"
         handover_content += "- Planung des nächsten GENXAIS-Zyklus\n"
         
-        ***REMOVED*** Speichere das Handover-Dokument
+        # Speichere das Handover-Dokument
         try:
             with open(handover_path, 'w', encoding='utf-8') as file:
                 file.write(handover_content)
@@ -582,20 +582,20 @@ GENXAIS Zyklus v{self.config.get('version', '2.0')} wurde am {datetime.now().str
         """Generiert eine Projektübersicht mit offenen Aufgaben"""
         overview_path = self.output_dir / "project_overview.md"
         
-        ***REMOVED*** Sammle Informationen über das Projekt
+        # Sammle Informationen über das Projekt
         try:
-            ***REMOVED*** Verzeichnisstruktur analysieren
+            # Verzeichnisstruktur analysieren
             project_structure = []
             for root, dirs, files in os.walk('.', topdown=True):
-                ***REMOVED*** Ignoriere versteckte Verzeichnisse und venv
+                # Ignoriere versteckte Verzeichnisse und venv
                 dirs[:] = [d for d in dirs if not d.startswith('.') and d != 'venv']
                 
                 level = root.count(os.sep)
                 indent = ' ' * 4 * level
-                if level <= 2:  ***REMOVED*** Begrenze die Tiefe für Übersichtlichkeit
+                if level <= 2:  # Begrenze die Tiefe für Übersichtlichkeit
                     project_structure.append(f"{indent}- {os.path.basename(root)}/")
                     
-                    ***REMOVED*** Füge Dateien hinzu, aber begrenze die Anzahl
+                    # Füge Dateien hinzu, aber begrenze die Anzahl
                     if level == 2:
                         file_count = len(files)
                         if file_count > 0:
@@ -605,10 +605,10 @@ GENXAIS Zyklus v{self.config.get('version', '2.0')} wurde am {datetime.now().str
                             else:
                                 project_structure.append(f"{indent}    - [{file_count} Dateien]")
             
-            ***REMOVED*** Offene Aufgaben identifizieren
+            # Offene Aufgaben identifizieren
             open_tasks = []
             
-            ***REMOVED*** Suche nach TODO-Kommentaren in Python-Dateien
+            # Suche nach TODO-Kommentaren in Python-Dateien
             for root, _, files in os.walk('.'):
                 for file in files:
                     if file.endswith('.py'):
@@ -623,10 +623,10 @@ GENXAIS Zyklus v{self.config.get('version', '2.0')} wurde am {datetime.now().str
                                             'text': line.strip()
                                         })
                         except Exception:
-                            ***REMOVED*** Ignoriere Fehler beim Lesen von Dateien
+                            # Ignoriere Fehler beim Lesen von Dateien
                             pass
             
-            ***REMOVED*** Suche nach offenen Issues in GitHub-ähnlichen Dateien
+            # Suche nach offenen Issues in GitHub-ähnlichen Dateien
             issue_files = ['issues.md', 'ISSUES.md', 'todo.md', 'TODO.md']
             for issue_file in issue_files:
                 if os.path.exists(issue_file):
@@ -641,29 +641,29 @@ GENXAIS Zyklus v{self.config.get('version', '2.0')} wurde am {datetime.now().str
                     except Exception:
                         pass
             
-            ***REMOVED*** Erstelle die Projektübersicht
-            overview_content = f"""***REMOVED*** VALEO-NeuroERP Projektübersicht
+            # Erstelle die Projektübersicht
+            overview_content = f"""# VALEO-NeuroERP Projektübersicht
 
-***REMOVED******REMOVED*** Generiert am {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+## Generiert am {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
-***REMOVED******REMOVED*** Projektstruktur (Hauptkomponenten)
+## Projektstruktur (Hauptkomponenten)
 
 ```
-{''.join(project_structure[:50])}  ***REMOVED*** Begrenze die Ausgabe für Übersichtlichkeit
+{''.join(project_structure[:50])}  # Begrenze die Ausgabe für Übersichtlichkeit
 ```
 
-***REMOVED******REMOVED*** Offene Aufgaben
+## Offene Aufgaben
 
 """
             if open_tasks:
-                for task in open_tasks[:20]:  ***REMOVED*** Begrenze die Anzahl der angezeigten Aufgaben
+                for task in open_tasks[:20]:  # Begrenze die Anzahl der angezeigten Aufgaben
                     overview_content += f"- **{task['file']}:{task['line']}**: {task['text']}\n"
             else:
                 overview_content += "Keine offenen Aufgaben gefunden.\n"
             
-            ***REMOVED*** Füge Empfehlungen für die Projektfertigstellung hinzu
+            # Füge Empfehlungen für die Projektfertigstellung hinzu
             overview_content += """
-***REMOVED******REMOVED*** Empfehlungen zur Projektfertigstellung
+## Empfehlungen zur Projektfertigstellung
 
 1. **Dokumentation vervollständigen**
    - Stellen Sie sicher, dass alle Module und Funktionen dokumentiert sind
@@ -686,7 +686,7 @@ GENXAIS Zyklus v{self.config.get('version', '2.0')} wurde am {datetime.now().str
    - Implementieren Sie Continuous Integration/Continuous Deployment
 """
             
-            ***REMOVED*** Speichere die Projektübersicht
+            # Speichere die Projektübersicht
             with open(overview_path, 'w', encoding='utf-8') as file:
                 file.write(overview_content)
             
@@ -704,28 +704,28 @@ GENXAIS Zyklus v{self.config.get('version', '2.0')} wurde am {datetime.now().str
         """Führt den gesamten GENXAIS-Zyklus aus"""
         logger.info("Starte produktiven GENXAIS-Zyklus")
         
-        ***REMOVED*** Initialisiere Integrationen
+        # Initialisiere Integrationen
         await self.initialize_integrations()
         
-        ***REMOVED*** Generiere Projektübersicht als ersten Schritt
+        # Generiere Projektübersicht als ersten Schritt
         overview_result = await self.generate_project_overview()
         
         results = {"project_overview": overview_result}
         
-        ***REMOVED*** Durchlaufe alle Phasen
+        # Durchlaufe alle Phasen
         for phase in self.phases:
             if phase not in results:
                 results[phase] = []
             
-            ***REMOVED*** Führe die Phase aus
+            # Führe die Phase aus
             phase_results = await self.execute_phase(phase)
             results[phase].extend(phase_results)
         
-        ***REMOVED*** Generiere das Handover-Dokument
+        # Generiere das Handover-Dokument
         handover_result = await self.generate_handover_document()
         results["handover"] = handover_result
         
-        ***REMOVED*** Generiere die Projektabschlussanalyse
+        # Generiere die Projektabschlussanalyse
         completion_result = await self.generate_completion_analysis()
         results["completion_analysis"] = completion_result
         
@@ -737,7 +737,7 @@ GENXAIS Zyklus v{self.config.get('version', '2.0')} wurde am {datetime.now().str
         analysis_path = self.output_dir / "completion_analysis.md"
         
         try:
-            ***REMOVED*** Sammle Informationen über den aktuellen Projektstatus
+            # Sammle Informationen über den aktuellen Projektstatus
             completion_stats = {
                 "total_files": 0,
                 "python_files": 0,
@@ -749,9 +749,9 @@ GENXAIS Zyklus v{self.config.get('version', '2.0')} wurde am {datetime.now().str
                 "critical_components": []
             }
             
-            ***REMOVED*** Zähle Dateien nach Typ
+            # Zähle Dateien nach Typ
             for root, _, files in os.walk('.'):
-                ***REMOVED*** Ignoriere versteckte Verzeichnisse und venv
+                # Ignoriere versteckte Verzeichnisse und venv
                 if '/.' in root or '\\.' in root or '/venv' in root or '\\venv' in root:
                     continue
                     
@@ -767,11 +767,11 @@ GENXAIS Zyklus v{self.config.get('version', '2.0')} wurde am {datetime.now().str
                     elif file.endswith(('.md', '.rst', '.txt')):
                         completion_stats["doc_files"] += 1
             
-            ***REMOVED*** Berechne geschätzte Testabdeckung
+            # Berechne geschätzte Testabdeckung
             if completion_stats["python_files"] > 0:
                 completion_stats["test_coverage"] = min(100, int((completion_stats["test_files"] / completion_stats["python_files"]) * 100))
             
-            ***REMOVED*** Identifiziere kritische Komponenten
+            # Identifiziere kritische Komponenten
             critical_dirs = ['backend', 'frontend', 'api', 'core', 'models', 'services']
             for critical_dir in critical_dirs:
                 if os.path.exists(critical_dir) and os.path.isdir(critical_dir):
@@ -781,15 +781,15 @@ GENXAIS Zyklus v{self.config.get('version', '2.0')} wurde am {datetime.now().str
                         "files": component_files
                     })
             
-            ***REMOVED*** Schätze den Gesamtfortschritt
+            # Schätze den Gesamtfortschritt
             overall_progress = min(100, max(0, 100 - (completion_stats.get("open_issues", 0) * 2)))
             
-            ***REMOVED*** Erstelle die Abschlussanalyse
-            analysis_content = f"""***REMOVED*** VALEO-NeuroERP Projektabschlussanalyse
+            # Erstelle die Abschlussanalyse
+            analysis_content = f"""# VALEO-NeuroERP Projektabschlussanalyse
 
-***REMOVED******REMOVED*** Generiert am {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+## Generiert am {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
-***REMOVED******REMOVED*** Projektstatus
+## Projektstatus
 
 - **Gesamtfortschritt**: {overall_progress}%
 - **Dateien insgesamt**: {completion_stats["total_files"]}
@@ -799,54 +799,54 @@ GENXAIS Zyklus v{self.config.get('version', '2.0')} wurde am {datetime.now().str
 - **Test-Dateien**: {completion_stats["test_files"]}
 - **Geschätzte Testabdeckung**: {completion_stats["test_coverage"]}%
 
-***REMOVED******REMOVED*** Kritische Komponenten
+## Kritische Komponenten
 
 """
             for component in completion_stats["critical_components"]:
                 analysis_content += f"- **{component['name']}**: {component['files']} Dateien\n"
             
-            ***REMOVED*** Füge Abschlussplan hinzu
+            # Füge Abschlussplan hinzu
             analysis_content += """
-***REMOVED******REMOVED*** Abschlussplan
+## Abschlussplan
 
 Um das Projekt zügig zu einem Ende zu bringen, empfehlen wir den folgenden Abschlussplan:
 
-***REMOVED******REMOVED******REMOVED*** 1. Funktionale Vollständigkeit (1-2 Wochen)
+### 1. Funktionale Vollständigkeit (1-2 Wochen)
 
 - [ ] Überprüfung aller kritischen Komponenten auf Vollständigkeit
 - [ ] Implementierung fehlender Kernfunktionalitäten
 - [ ] Abschluss aller offenen API-Endpunkte
 - [ ] Vervollständigung der Frontend-Komponenten
 
-***REMOVED******REMOVED******REMOVED*** 2. Qualitätssicherung (1 Woche)
+### 2. Qualitätssicherung (1 Woche)
 
 - [ ] Erhöhung der Testabdeckung auf mindestens 80%
 - [ ] Durchführung von End-to-End-Tests für kritische Workflows
 - [ ] Code-Review und Refactoring problematischer Bereiche
 - [ ] Performance-Optimierung
 
-***REMOVED******REMOVED******REMOVED*** 3. Dokumentation (3-5 Tage)
+### 3. Dokumentation (3-5 Tage)
 
 - [ ] Vervollständigung der API-Dokumentation
 - [ ] Erstellung einer umfassenden Benutzeranleitung
 - [ ] Dokumentation der Systemarchitektur
 - [ ] Erstellung von Installations- und Deployment-Anleitungen
 
-***REMOVED******REMOVED******REMOVED*** 4. Deployment-Vorbereitung (2-3 Tage)
+### 4. Deployment-Vorbereitung (2-3 Tage)
 
 - [ ] Finalisierung der Docker-Container und Kubernetes-Konfigurationen
 - [ ] Einrichtung der CI/CD-Pipeline
 - [ ] Vorbereitung der Produktionsumgebung
 - [ ] Erstellung von Backup- und Wiederherstellungsprozeduren
 
-***REMOVED******REMOVED******REMOVED*** 5. Abnahme und Übergabe (1 Woche)
+### 5. Abnahme und Übergabe (1 Woche)
 
 - [ ] Durchführung von Benutzerakzeptanztests
 - [ ] Behebung letzter Fehler und Probleme
 - [ ] Übergabe der Dokumentation und des Quellcodes
 - [ ] Schulung der Administratoren und Endbenutzer
 
-***REMOVED******REMOVED*** Empfehlungen für die sofortige Umsetzung
+## Empfehlungen für die sofortige Umsetzung
 
 1. **Priorisierung der kritischen Komponenten**: Konzentrieren Sie sich auf die Fertigstellung der Kernfunktionalitäten.
 2. **Feature Freeze**: Implementieren Sie keine neuen Funktionen mehr, sondern konzentrieren Sie sich auf die Stabilisierung.
@@ -857,7 +857,7 @@ Um das Projekt zügig zu einem Ende zu bringen, empfehlen wir den folgenden Absc
 Mit diesem Abschlussplan kann das VALEO-NeuroERP-Projekt innerhalb von 3-4 Wochen erfolgreich abgeschlossen werden.
 """
             
-            ***REMOVED*** Speichere die Abschlussanalyse
+            # Speichere die Abschlussanalyse
             with open(analysis_path, 'w', encoding='utf-8') as file:
                 file.write(analysis_content)
             
@@ -877,11 +877,11 @@ async def main():
     parser.add_argument("--config", required=True, help="Pfad zur Zyklus-Konfiguration")
     args = parser.parse_args()
     
-    ***REMOVED*** Erstelle und starte den produktiven Zyklus-Runner
+    # Erstelle und starte den produktiven Zyklus-Runner
     runner = GenxaisProductiveRunner(args.config)
     results = await runner.run_cycle()
     
-    ***REMOVED*** Zeige eine Zusammenfassung der Ergebnisse
+    # Zeige eine Zusammenfassung der Ergebnisse
     print("\n=== GENXAIS Zyklus Ergebnisse ===\n")
     
     for phase, phase_results in results.items():
@@ -899,3 +899,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+

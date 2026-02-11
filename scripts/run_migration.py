@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 🧠 VALEO NeuroERP - Database Migration Script
 ============================================
@@ -11,7 +11,7 @@ import sys
 import psycopg2
 from pathlib import Path
 
-***REMOVED*** Projekt-Root hinzufügen
+# Projekt-Root hinzufügen
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
@@ -21,7 +21,7 @@ def run_migration():
     print("🧠 VALEO NeuroERP - Database Migration")
     print("=" * 50)
     
-    ***REMOVED*** Migration-Script lesen
+    # Migration-Script lesen
     migration_file = project_root / "database" / "neuroflow_migration.sql"
     
     if not migration_file.exists():
@@ -37,7 +37,7 @@ def run_migration():
         print(f"❌ Fehler beim Lesen der Migration: {e}")
         return False
     
-    ***REMOVED*** Datenbankverbindung herstellen
+    # Datenbankverbindung herstellen
     print("🔌 Verbinde zur Datenbank...")
     
     try:
@@ -55,13 +55,13 @@ def run_migration():
         print("💡 Stelle sicher, dass PostgreSQL läuft und die Zugangsdaten korrekt sind")
         return False
     
-    ***REMOVED*** Migration ausführen
+    # Migration ausführen
     print("🚀 Führe Migration aus...")
     
     try:
         cursor = conn.cursor()
         
-        ***REMOVED*** SQL-Statements aufteilen (bei ;)
+        # SQL-Statements aufteilen (bei ;)
         statements = migration_sql.split(';')
         
         for i, statement in enumerate(statements, 1):
@@ -76,7 +76,7 @@ def run_migration():
                 print(f"✅ Statement {i} erfolgreich")
             except Exception as e:
                 print(f"⚠️ Statement {i} mit Warnung: {e}")
-                ***REMOVED*** Bei Fehlern trotzdem weitermachen (z.B. bei IF NOT EXISTS)
+                # Bei Fehlern trotzdem weitermachen (z.B. bei IF NOT EXISTS)
         
         cursor.close()
         print("🎉 Migration erfolgreich abgeschlossen!")
@@ -105,7 +105,7 @@ def verify_migration():
         )
         cursor = conn.cursor()
         
-        ***REMOVED*** Prüfe neue Schemas
+        # Prüfe neue Schemas
         cursor.execute("""
             SELECT schema_name 
             FROM information_schema.schemata 
@@ -114,7 +114,7 @@ def verify_migration():
         schemas = cursor.fetchall()
         print(f"✅ Neue Schemas gefunden: {[s[0] for s in schemas]}")
         
-        ***REMOVED*** Prüfe neue Tabellen
+        # Prüfe neue Tabellen
         cursor.execute("""
             SELECT table_schema, table_name 
             FROM information_schema.tables 
@@ -123,7 +123,7 @@ def verify_migration():
         tables = cursor.fetchall()
         print(f"✅ Neue Tabellen gefunden: {[f'{t[0]}.{t[1]}' for t in tables]}")
         
-        ***REMOVED*** Prüfe neue Felder in bestehenden Tabellen
+        # Prüfe neue Felder in bestehenden Tabellen
         cursor.execute("""
             SELECT column_name, table_name 
             FROM information_schema.columns 
@@ -148,9 +148,9 @@ if __name__ == "__main__":
     print("🚀 Starte VALEO NeuroERP Database Migration")
     print("=" * 60)
     
-    ***REMOVED*** Migration ausführen
+    # Migration ausführen
     if run_migration():
-        ***REMOVED*** Verifikation
+        # Verifikation
         verify_migration()
         
         print("\n🎉 Migration erfolgreich abgeschlossen!")

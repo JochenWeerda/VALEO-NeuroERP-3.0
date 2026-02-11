@@ -1,44 +1,44 @@
-***REMOVED*** 🎯 L3 Migration Toolkit für VALEO-NeuroERP
+# 🎯 L3 Migration Toolkit für VALEO-NeuroERP
 
 **Automatische Screenshot-Erfassung von L3-Masken via Apache Guacamole**
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Quick Start (5 Minuten)
+## 🚀 Quick Start (5 Minuten)
 
 ```powershell
-***REMOVED*** 1. Verzeichnis
+# 1. Verzeichnis
 cd C:\Users\Jochen\VALEO-NeuroERP-3.0\l3-migration-toolkit
 
-***REMOVED*** 2. .env erstellen
+# 2. .env erstellen
 Copy-Item .env.example .env
-***REMOVED*** → PASSWÖRTER ANPASSEN!
+# → PASSWÖRTER ANPASSEN!
 
-***REMOVED*** 3. Container starten
+# 3. Container starten
 docker compose up -d
 
-***REMOVED*** 4. Warten
+# 4. Warten
 Start-Sleep -Seconds 30
 
-***REMOVED*** 5. DB initialisieren (EINMALIG!)
+# 5. DB initialisieren (EINMALIG!)
 docker exec -i l3-guacamole /opt/guacamole/bin/initdb.sh --postgres | docker exec -i l3-postgres psql -U guacamole_user -d guacamole_db
 
-***REMOVED*** 6. Guacamole neu starten
+# 6. Guacamole neu starten
 docker restart l3-guacamole
 
-***REMOVED*** 7. Browser öffnen
+# 7. Browser öffnen
 Start-Process "http://localhost:8090/guacamole"
-***REMOVED*** Login: guacadmin / guacadmin
-***REMOVED*** → PASSWORT SOFORT ÄNDERN!
+# Login: guacadmin / guacadmin
+# → PASSWORT SOFORT ÄNDERN!
 
-***REMOVED*** 8. RDP-Verbindung anlegen (siehe SETUP.md)
+# 8. RDP-Verbindung anlegen (siehe SETUP.md)
 
-***REMOVED*** 9. Playwright installieren
+# 9. Playwright installieren
 cd playwright-snap
 npm install
 npm run install:pw
 
-***REMOVED*** 10. Test-Screenshot
+# 10. Test-Screenshot
 npm run snap
 ```
 
@@ -46,31 +46,31 @@ npm run snap
 
 ---
 
-***REMOVED******REMOVED*** 📁 Verzeichnisstruktur
+## 📁 Verzeichnisstruktur
 
 ```
-l3-migration-toolkit/          ***REMOVED*** Isoliertes Verzeichnis
-├── docker-compose.yml         ***REMOVED*** Guacamole Stack (IP: 172.25.0.0/24)
-├── .env.example               ***REMOVED*** Umgebungsvariablen-Template
-├── README.md                  ***REMOVED*** Diese Datei
-├── SETUP.md                   ***REMOVED*** Detaillierte Anleitung
-├── BEWERTUNG-GUACAMOLE-ANSATZ.md  ***REMOVED*** Technische Bewertung
-├── run-screenshot.ps1         ***REMOVED*** PowerShell-Runner für Task Scheduler
-├── playwright-snap/           ***REMOVED*** Screenshot-Automation
+l3-migration-toolkit/          # Isoliertes Verzeichnis
+├── docker-compose.yml         # Guacamole Stack (IP: 172.25.0.0/24)
+├── .env.example               # Umgebungsvariablen-Template
+├── README.md                  # Diese Datei
+├── SETUP.md                   # Detaillierte Anleitung
+├── BEWERTUNG-GUACAMOLE-ANSATZ.md  # Technische Bewertung
+├── run-screenshot.ps1         # PowerShell-Runner für Task Scheduler
+├── playwright-snap/           # Screenshot-Automation
 │   ├── package.json
-│   ├── snap-single.js        ***REMOVED*** Einzelner Screenshot
+│   ├── snap-single.js        # Einzelner Screenshot
 │   └── (weitere Tools folgen)
-├── screenshots/               ***REMOVED*** Screenshot-Output
+├── screenshots/               # Screenshot-Output
 │   ├── stammdaten/
 │   ├── verkauf/
 │   ├── einkauf/
 │   └── fibu/
-└── shared/                    ***REMOVED*** Datenaustausch mit Webtop
+└── shared/                    # Datenaustausch mit Webtop
 ```
 
 ---
 
-***REMOVED******REMOVED*** 🌐 Netzwerk-Isolation
+## 🌐 Netzwerk-Isolation
 
 **Eigener IP-Bereich:** `172.25.0.0/24`
 
@@ -90,30 +90,30 @@ l3-migration-toolkit/          ***REMOVED*** Isoliertes Verzeichnis
 
 ---
 
-***REMOVED******REMOVED*** 📸 Screenshot-Automation
+## 📸 Screenshot-Automation
 
-***REMOVED******REMOVED******REMOVED*** Manueller Screenshot
+### Manueller Screenshot
 
 ```powershell
 cd playwright-snap
 
-***REMOVED*** Umgebungsvariablen setzen
+# Umgebungsvariablen setzen
 $env:GUAC_URL = "http://localhost:8090/guacamole"
 $env:GUAC_USER = "guacadmin"
 $env:GUAC_PASS = "DEIN_NEUES_PASSWORT"
 $env:OUT_DIR = "../screenshots"
 $env:WAIT_SECONDS = "10"
 
-***REMOVED*** Screenshot erstellen
+# Screenshot erstellen
 npm run snap
 ```
 
 **Output:** `screenshots/l3_2025-10-16T21-30-00.png` + `.json`
 
-***REMOVED******REMOVED******REMOVED*** Automatische Screenshots (Task Scheduler)
+### Automatische Screenshots (Task Scheduler)
 
 ```powershell
-***REMOVED*** Task anlegen
+# Task anlegen
 $Action = New-ScheduledTaskAction `
   -Execute "powershell.exe" `
   -Argument "-ExecutionPolicy Bypass -File C:\Users\Jochen\VALEO-NeuroERP-3.0\l3-migration-toolkit\run-screenshot.ps1"
@@ -136,9 +136,9 @@ Register-ScheduledTask `
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Workflow für Masken-Migration
+## 🎯 Workflow für Masken-Migration
 
-***REMOVED******REMOVED******REMOVED*** 1. Screenshots sammeln (2 Wochen)
+### 1. Screenshots sammeln (2 Wochen)
 
 ```
 Woche 1-2:
@@ -149,7 +149,7 @@ Woche 1-2:
 Erwartung: 80-120 Screenshots
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Screenshots analysieren (1 Woche)
+### 2. Screenshots analysieren (1 Woche)
 
 ```
 - Felder auflisten (Excel-Tabelle)
@@ -158,7 +158,7 @@ Erwartung: 80-120 Screenshots
 - Feldmapping erstellen (L3→VALEO)
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. VALEO-Masken bauen (3-4 Wochen)
+### 3. VALEO-Masken bauen (3-4 Wochen)
 
 ```typescript
 // Pro L3-Maske → 1 VALEO ObjectPage-Config
@@ -169,7 +169,7 @@ const l3_mask_config = {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. Import & Test (1 Woche)
+### 4. Import & Test (1 Woche)
 
 ```
 - L3-Daten importieren
@@ -182,7 +182,7 @@ const l3_mask_config = {
 
 ---
 
-***REMOVED******REMOVED*** 📊 Erwartetes Ergebnis
+## 📊 Erwartetes Ergebnis
 
 Nach 2 Wochen Screenshot-Phase:
 
@@ -220,9 +220,9 @@ GESAMT: 80-120 Screenshots
 
 ---
 
-***REMOVED******REMOVED*** 🎨 Von L3 zu VALEO (Beispiel)
+## 🎨 Von L3 zu VALEO (Beispiel)
 
-***REMOVED******REMOVED******REMOVED*** L3-Maske: Kundenstamm
+### L3-Maske: Kundenstamm
 
 **Screenshot zeigt:**
 ```
@@ -238,7 +238,7 @@ Felder (3 Spalten):
 Buttons: [Speichern] [Löschen] [Drucken]
 ```
 
-***REMOVED******REMOVED******REMOVED*** VALEO-Äquivalent
+### VALEO-Äquivalent
 
 ```typescript
 // packages/frontend-web/src/pages/crm/kunde-stamm.tsx
@@ -289,7 +289,7 @@ const kundeStammConfig = {
 
 ---
 
-***REMOVED******REMOVED*** 📞 Support & Troubleshooting
+## 📞 Support & Troubleshooting
 
 **Logs ansehen:**
 ```powershell
@@ -305,14 +305,14 @@ docker compose restart
 ```powershell
 docker compose down -v
 docker compose up -d
-***REMOVED*** DB-Init wiederholen
+# DB-Init wiederholen
 ```
 
 **Weitere Hilfe:** Siehe `SETUP.md` (Troubleshooting-Sektion)
 
 ---
 
-***REMOVED******REMOVED*** ✨ Zusatz-Features (Coming Soon)
+## ✨ Zusatz-Features (Coming Soon)
 
 - [ ] **OCR-Integration** (Tesseract.js) - Automatische Feldextraktion
 - [ ] **Batch-Screenshots** - Alle Masken in einem Durchlauf
@@ -325,4 +325,5 @@ docker compose up -d
 **Status: READY TO USE** 🎉  
 **Isoliertes Netzwerk:** 172.25.0.0/24 ✅  
 **Keine Konflikte mit VALEO-NeuroERP:** ✅
+
 

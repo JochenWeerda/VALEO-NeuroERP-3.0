@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Vergleicht modernes VALEO Mask Builder JSON mit unserem Schema
 und erstellt eine konsolidierte Version
@@ -11,14 +11,14 @@ print("=" * 80)
 print("VERGLEICH: Modernes VALEO Mask Builder vs. Unser Schema")
 print("=" * 80)
 
-***REMOVED*** Lade beide Schemas
+# Lade beide Schemas
 with open('mask-builder-valeo-modern.json', 'r', encoding='utf-8') as f:
     modern_schema = json.load(f)
 
 with open('schemas/mask-builder/kundenstamm_complete.json', 'r', encoding='utf-8') as f:
     our_schema = json.load(f)
 
-***REMOVED*** Extrahiere Felder
+# Extrahiere Felder
 modern_fields = set()
 for view in modern_schema.get('views', []):
     for section in view.get('sections', []):
@@ -27,7 +27,7 @@ for view in modern_schema.get('views', []):
             if bind:
                 modern_fields.add(bind)
 
-***REMOVED*** Extrahiere aus unserem Schema
+# Extrahiere aus unserem Schema
 our_fields = set()
 for field in our_schema.get('form', {}).get('fields', []):
     field_id = field.get('id', '')
@@ -43,13 +43,13 @@ print(f"\n📊 Unser Schema:")
 print(f"   Felder: {len(our_fields)}")
 print(f"   Tabs: {len(our_schema.get('form', {}).get('tabs', []))}")
 
-***REMOVED*** Vergleich
+# Vergleich
 print(f"\n🔍 VERGLEICH:")
 print(f"   Gemeinsame Felder: {len(modern_fields & our_fields)}")
 print(f"   Nur modern: {len(modern_fields - our_fields)}")
 print(f"   Nur unser: {len(our_fields - modern_fields)}")
 
-***REMOVED*** Best Practice aus beiden kombinieren
+# Best Practice aus beiden kombinieren
 consolidated = {
     "version": "3.1.0",
     "name": "kundenstamm",
@@ -80,7 +80,7 @@ print(f"   Ergänzt um ALLE L3-Felder aus unserem Schema")
 print(f"   Behält moderne Komponenten (BadgeSelect, TagList, etc.)")
 print(f"   Nutzt Grid-Layout für bessere UX")
 
-***REMOVED*** Speichere Vergleichsdokumentation
+# Speichere Vergleichsdokumentation
 comparison = {
     "modern_fields": list(modern_fields),
     "our_fields": list(our_fields),
@@ -93,4 +93,5 @@ with open('schemas/mask-builder/comparison-report.json', 'w', encoding='utf-8') 
     json.dump(comparison, f, ensure_ascii=False, indent=2)
 
 print(f"\n📄 Vergleichs-Report: schemas/mask-builder/comparison-report.json")
+
 

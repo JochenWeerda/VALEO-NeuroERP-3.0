@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 GENXAIS v1.3/v1.4 Zyklus-Starter mit Prompt-Initialisierung
@@ -20,7 +20,7 @@ from pathlib import Path
 import threading
 import signal
 
-***REMOVED*** Logging konfigurieren
+# Logging konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -41,7 +41,7 @@ class GenxaisPromptRunner:
         self.data_dir = Path("data/dashboard")
         self.data_dir.mkdir(parents=True, exist_ok=True)
         
-        ***REMOVED*** Extrahiere Phasen aus dem Prompt
+        # Extrahiere Phasen aus dem Prompt
         self.phases = self.extract_phases()
         self.current_phase = self.phases[0]
         
@@ -64,7 +64,7 @@ class GenxaisPromptRunner:
     
     def generate_cycle_config(self):
         """Generiert die Zyklus-Konfiguration aus dem Prompt"""
-        ***REMOVED*** Extrahiere Versioning-Informationen
+        # Extrahiere Versioning-Informationen
         versioning = {}
         if isinstance(self.prompt_config, dict) and "versioning" in self.prompt_config:
             versioning = self.prompt_config["versioning"]
@@ -87,7 +87,7 @@ class GenxaisPromptRunner:
                 previous_version = f"v{previous_version}"
             current_version = previous_version
             
-            ***REMOVED*** Extrahiere die Versionsnummer und erhöhe sie
+            # Extrahiere die Versionsnummer und erhöhe sie
             if previous_version.startswith("v"):
                 version_parts = previous_version[1:].split(".")
                 if len(version_parts) > 1:
@@ -96,14 +96,14 @@ class GenxaisPromptRunner:
                     minor += 1
                     next_version = f"v{major}.{minor}"
         
-        ***REMOVED*** Extrahiere Kontext-Informationen
+        # Extrahiere Kontext-Informationen
         context = {}
         if isinstance(self.prompt_config, dict):
             for key in ["orchestrator", "memory", "graph_knowledge", "database", "ui"]:
                 if key in self.prompt_config:
                     context[key] = self.prompt_config[key]
         
-        ***REMOVED*** Extrahiere Monitoring-Informationen
+        # Extrahiere Monitoring-Informationen
         monitoring = {
             "enabled": True,
             "streamlit_dashboard": True,
@@ -124,17 +124,17 @@ class GenxaisPromptRunner:
                 if "prometheus" in monitoring_config and monitoring_config["prometheus"] == "enabled":
                     monitoring["prometheus_enabled"] = True
         
-        ***REMOVED*** Extrahiere Pipelines-Informationen
+        # Extrahiere Pipelines-Informationen
         pipelines = []
         if isinstance(self.prompt_config, dict) and "pipelines" in self.prompt_config:
             pipelines = self.prompt_config["pipelines"]
         
-        ***REMOVED*** Extrahiere Ausgabe-Dokumente
+        # Extrahiere Ausgabe-Dokumente
         output_documents = []
         if isinstance(self.prompt_config, dict) and "output_documents" in self.prompt_config:
             output_documents = self.prompt_config["output_documents"]
         
-        ***REMOVED*** Extrahiere Abschlussaktionen
+        # Extrahiere Abschlussaktionen
         completion_actions = []
         if isinstance(self.prompt_config, dict):
             if "post_actions" in self.prompt_config:
@@ -142,7 +142,7 @@ class GenxaisPromptRunner:
             elif "actions" in self.prompt_config:
                 completion_actions = self.prompt_config["actions"]
         
-        ***REMOVED*** Generiere die Zyklus-Konfiguration
+        # Generiere die Zyklus-Konfiguration
         cycle_config = {
             "name": f"GENXAIS Cycle {next_version} – Full Automation",
             "version": next_version.replace('v', ''),
@@ -189,7 +189,7 @@ class GenxaisPromptRunner:
             if "agents" in pipeline:
                 all_agents.extend(pipeline["agents"])
         
-        ***REMOVED*** Entferne Duplikate und formatiere den GraphNavigator-Agenten
+        # Entferne Duplikate und formatiere den GraphNavigator-Agenten
         unique_agents = list(set(all_agents))
         if "GraphitiAgent" in unique_agents:
             unique_agents.remove("GraphitiAgent")
@@ -204,7 +204,7 @@ class GenxaisPromptRunner:
             if "goals" in pipeline:
                 all_goals.extend(pipeline["goals"])
         
-        ***REMOVED*** Wähle die wichtigsten Ziele aus (maximal 5)
+        # Wähle die wichtigsten Ziele aus (maximal 5)
         if len(all_goals) > 5:
             return all_goals[:5]
         return all_goals
@@ -213,14 +213,14 @@ class GenxaisPromptRunner:
         """Speichert die generierte Zyklus-Konfiguration"""
         cycle_config = self.generate_cycle_config()
         
-        ***REMOVED*** Bestimme den Dateinamen basierend auf der Version
+        # Bestimme den Dateinamen basierend auf der Version
         version = cycle_config["version"]
         config_path = Path("tasks") / f"genxais_cycle_v{version}_from_prompt.yaml"
         
-        ***REMOVED*** Stelle sicher, dass das Verzeichnis existiert
+        # Stelle sicher, dass das Verzeichnis existiert
         config_path.parent.mkdir(parents=True, exist_ok=True)
         
-        ***REMOVED*** Speichere die Konfiguration
+        # Speichere die Konfiguration
         with open(config_path, 'w', encoding='utf-8') as file:
             yaml.dump(cycle_config, file, default_flow_style=False, sort_keys=False)
         
@@ -229,7 +229,7 @@ class GenxaisPromptRunner:
     
     def initialize_dashboard_data(self):
         """Initialisiert die Dashboard-Daten basierend auf dem Prompt"""
-        ***REMOVED*** Phasendaten
+        # Phasendaten
         phase_data = {
             "phases": self.phases,
             "current_phase": self.current_phase,
@@ -242,7 +242,7 @@ class GenxaisPromptRunner:
             "last_updated": datetime.datetime.now().isoformat()
         }
         
-        ***REMOVED*** Pipeline-Daten
+        # Pipeline-Daten
         pipelines = []
         if isinstance(self.prompt_config, dict) and "pipelines" in self.prompt_config:
             pipelines = [pipeline.get("name", f"Pipeline {i+1}") for i, pipeline in enumerate(self.prompt_config["pipelines"])]
@@ -261,7 +261,7 @@ class GenxaisPromptRunner:
             "last_updated": datetime.datetime.now().isoformat()
         }
         
-        ***REMOVED*** Artefakt-Daten
+        # Artefakt-Daten
         artifacts = []
         if isinstance(self.prompt_config, dict) and "output_documents" in self.prompt_config:
             artifacts = self.prompt_config["output_documents"]
@@ -277,7 +277,7 @@ class GenxaisPromptRunner:
             "last_updated": datetime.datetime.now().isoformat()
         }
         
-        ***REMOVED*** Graphiti-Daten
+        # Graphiti-Daten
         graphiti_data = {
             "nodes": [
                 {"id": "start", "label": "Start", "type": "entry", "status": "completed"},
@@ -305,7 +305,7 @@ class GenxaisPromptRunner:
             "last_updated": datetime.datetime.now().isoformat()
         }
         
-        ***REMOVED*** Speichere die Daten
+        # Speichere die Daten
         phase_data_path = self.data_dir / "phase_data.json"
         pipeline_data_path = self.data_dir / "pipeline_data.json"
         artifact_data_path = self.data_dir / "artifact_data.json"
@@ -325,33 +325,33 @@ class GenxaisPromptRunner:
     def start_dashboard(self):
         """Startet das Streamlit-Dashboard"""
         try:
-            ***REMOVED*** Prüfe, ob wir unter Windows oder Linux laufen
-            if os.name == 'nt':  ***REMOVED*** Windows
+            # Prüfe, ob wir unter Windows oder Linux laufen
+            if os.name == 'nt':  # Windows
                 cmd = ["start", "powershell", "-ArgumentList", 
                        "-NoExit", "-Command", "python -m streamlit run scripts/init_dashboard.py"]
                 subprocess.Popen(" ".join(cmd), shell=True)
-            else:  ***REMOVED*** Linux/Mac
+            else:  # Linux/Mac
                 cmd = ["python", "-m", "streamlit", "run", "scripts/init_dashboard.py"]
                 subprocess.Popen(cmd, start_new_session=True)
             
             logger.info("Streamlit-Dashboard gestartet")
-            ***REMOVED*** Kurz warten, damit das Dashboard Zeit hat zu starten
+            # Kurz warten, damit das Dashboard Zeit hat zu starten
             time.sleep(2)
         except Exception as e:
             logger.error(f"Fehler beim Starten des Dashboards: {e}")
     
     def start_cycle(self):
         """Startet den GENXAIS-Zyklus"""
-        ***REMOVED*** Generiere und speichere die Zyklus-Konfiguration
+        # Generiere und speichere die Zyklus-Konfiguration
         config_path = self.save_cycle_config()
         
-        ***REMOVED*** Initialisiere die Dashboard-Daten
+        # Initialisiere die Dashboard-Daten
         self.initialize_dashboard_data()
         
-        ***REMOVED*** Starte das Dashboard
+        # Starte das Dashboard
         self.start_dashboard()
         
-        ***REMOVED*** Starte den Zyklus
+        # Starte den Zyklus
         try:
             logger.info(f"Starte GENXAIS-Zyklus mit Konfiguration aus {config_path}")
             cmd = ["python", "launch_cycle.py", "--config", str(config_path)]

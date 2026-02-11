@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 🧠 VALEO NeuroERP - Simple Database Migration
 ============================================
@@ -14,11 +14,11 @@ def wait_for_postgres():
     """Wartet auf PostgreSQL-Verfügbarkeit"""
     print("⏳ Warte auf PostgreSQL...")
     
-    for attempt in range(30):  ***REMOVED*** 30 Versuche
+    for attempt in range(30):  # 30 Versuche
         try:
             conn = psycopg2.connect(
                 host='localhost',
-                database='postgres',  ***REMOVED*** Standard-DB
+                database='postgres',  # Standard-DB
                 user='valeo_user',
                 password='valeo_password',
                 port=5432
@@ -38,7 +38,7 @@ def create_database():
     print("🗄️ Erstelle Datenbank...")
     
     try:
-        ***REMOVED*** Verbinde zur Standard-DB
+        # Verbinde zur Standard-DB
         conn = psycopg2.connect(
             host='localhost',
             database='postgres',
@@ -49,7 +49,7 @@ def create_database():
         conn.autocommit = True
         cursor = conn.cursor()
         
-        ***REMOVED*** Prüfe ob Datenbank existiert
+        # Prüfe ob Datenbank existiert
         cursor.execute("SELECT 1 FROM pg_database WHERE datname = 'valeo_neuroerp'")
         exists = cursor.fetchone()
         
@@ -82,11 +82,11 @@ def run_migration():
         conn.autocommit = True
         cursor = conn.cursor()
         
-        ***REMOVED*** 1. Chargen-Schema erstellen
+        # 1. Chargen-Schema erstellen
         print("📦 Erstelle Chargen-Schema...")
         cursor.execute("CREATE SCHEMA IF NOT EXISTS chargen")
         
-        ***REMOVED*** 2. Chargen-Tabelle erstellen
+        # 2. Chargen-Tabelle erstellen
         print("📋 Erstelle Chargen-Tabelle...")
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS chargen.chargen (
@@ -122,11 +122,11 @@ def run_migration():
             )
         """)
         
-        ***REMOVED*** 3. Einkauf-Schema erstellen falls nicht vorhanden
+        # 3. Einkauf-Schema erstellen falls nicht vorhanden
         print("🛒 Erstelle Einkauf-Schema...")
         cursor.execute("CREATE SCHEMA IF NOT EXISTS einkauf")
         
-        ***REMOVED*** 4. Lieferanten-Tabelle erstellen falls nicht vorhanden
+        # 4. Lieferanten-Tabelle erstellen falls nicht vorhanden
         print("👥 Erstelle Lieferanten-Tabelle...")
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS einkauf.lieferanten (
@@ -166,11 +166,11 @@ def run_migration():
             )
         """)
         
-        ***REMOVED*** 5. CRM-Schema erstellen falls nicht vorhanden
+        # 5. CRM-Schema erstellen falls nicht vorhanden
         print("👤 Erstelle CRM-Schema...")
         cursor.execute("CREATE SCHEMA IF NOT EXISTS crm")
         
-        ***REMOVED*** 6. Kunden-Tabelle erstellen falls nicht vorhanden
+        # 6. Kunden-Tabelle erstellen falls nicht vorhanden
         print("👥 Erstelle Kunden-Tabelle...")
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS crm.kunden (
@@ -190,11 +190,11 @@ def run_migration():
             )
         """)
         
-        ***REMOVED*** 7. Produktion-Schema erstellen falls nicht vorhanden
+        # 7. Produktion-Schema erstellen falls nicht vorhanden
         print("🏭 Erstelle Produktion-Schema...")
         cursor.execute("CREATE SCHEMA IF NOT EXISTS produktion")
         
-        ***REMOVED*** 8. Artikel-Tabelle erstellen falls nicht vorhanden
+        # 8. Artikel-Tabelle erstellen falls nicht vorhanden
         print("📦 Erstelle Artikel-Tabelle...")
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS produktion.artikel (
@@ -211,11 +211,11 @@ def run_migration():
             )
         """)
         
-        ***REMOVED*** 9. Personal-Schema erstellen falls nicht vorhanden
+        # 9. Personal-Schema erstellen falls nicht vorhanden
         print("👨‍💼 Erstelle Personal-Schema...")
         cursor.execute("CREATE SCHEMA IF NOT EXISTS personal")
         
-        ***REMOVED*** 10. Mitarbeiter-Tabelle erstellen falls nicht vorhanden
+        # 10. Mitarbeiter-Tabelle erstellen falls nicht vorhanden
         print("👥 Erstelle Mitarbeiter-Tabelle...")
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS personal.mitarbeiter (
@@ -233,7 +233,7 @@ def run_migration():
             )
         """)
         
-        ***REMOVED*** 11. Indizes erstellen
+        # 11. Indizes erstellen
         print("🔍 Erstelle Indizes...")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_chargen_charge_nr ON chargen.chargen(charge_nr)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_chargen_artikel_nr ON chargen.chargen(artikel_nr)")
@@ -267,7 +267,7 @@ def verify_migration():
         )
         cursor = conn.cursor()
         
-        ***REMOVED*** Prüfe Schemas
+        # Prüfe Schemas
         cursor.execute("""
             SELECT schema_name 
             FROM information_schema.schemata 
@@ -276,7 +276,7 @@ def verify_migration():
         schemas = cursor.fetchall()
         print(f"✅ Schemas gefunden: {[s[0] for s in schemas]}")
         
-        ***REMOVED*** Prüfe Tabellen
+        # Prüfe Tabellen
         cursor.execute("""
             SELECT table_schema, table_name 
             FROM information_schema.tables 
@@ -299,17 +299,17 @@ if __name__ == "__main__":
     print("🧠 VALEO NeuroERP - Simple Database Migration")
     print("=" * 60)
     
-    ***REMOVED*** Warte auf PostgreSQL
+    # Warte auf PostgreSQL
     if not wait_for_postgres():
         exit(1)
     
-    ***REMOVED*** Erstelle Datenbank
+    # Erstelle Datenbank
     if not create_database():
         exit(1)
     
-    ***REMOVED*** Führe Migration aus
+    # Führe Migration aus
     if run_migration():
-        ***REMOVED*** Verifikation
+        # Verifikation
         verify_migration()
         
         print("\n🎉 Migration erfolgreich abgeschlossen!")

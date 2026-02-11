@@ -1,10 +1,10 @@
-ï»¿***REMOVED*** Environment Setup
+# Environment Setup
 
-***REMOVED******REMOVED*** Datenbank: PostgreSQL (erforderlich)
+## Datenbank: PostgreSQL (erforderlich)
 
-VALEO-NeuroERP nutzt ausschlieÃŸlich **PostgreSQL**. SQLite wird nicht unterstÃ¼tzt.
+VALEO-NeuroERP nutzt ausschließlich **PostgreSQL**. SQLite wird nicht unterstützt.
 
-***REMOVED******REMOVED******REMOVED*** Umgebungsvariable setzen
+### Umgebungsvariable setzen
 
 Erstellen Sie eine `.env` Datei im Projektverzeichnis:
 
@@ -12,30 +12,31 @@ Erstellen Sie eine `.env` Datei im Projektverzeichnis:
 DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/valeo_neuro_erp
 ```
 
-***REMOVED******REMOVED******REMOVED*** PostgreSQL via Docker
+### PostgreSQL via Docker
 
 ```powershell
-***REMOVED*** Docker-Compose starten
+# Docker-Compose starten
 docker-compose up -d postgres
 
-***REMOVED*** Environment Variable setzen (oder in .env)
+# Environment Variable setzen (oder in .env)
 $env:DATABASE_URL = "postgresql://USER:PASSWORD@localhost:5432/valeo_neuro_erp"
 
-***REMOVED*** Migrationen ausfÃ¼hren
+# Migrationen ausführen
 python scripts/run_migrations.py
 
-***REMOVED*** Server starten
+# Server starten
 python main.py
 ```
 
-***REMOVED******REMOVED******REMOVED*** Migrationen
+### Migrationen
 
 ```powershell
 python scripts/run_migrations.py
 ```
 
-***REMOVED******REMOVED*** Server neu starten
+## Server neu starten
 
 ```powershell
 python main.py
 ```
+

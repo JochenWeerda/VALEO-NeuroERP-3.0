@@ -1,22 +1,22 @@
-***REMOVED*** UAT Test Suite - Implementierung abgeschlossen ✅
+# UAT Test Suite - Implementierung abgeschlossen ✅
 
 **Datum:** 2025-10-16  
 **Status:** Implementiert & bereit für UAT-Start
 
 ---
 
-***REMOVED******REMOVED*** Implementierte Artefakte
+## Implementierte Artefakte
 
-***REMOVED******REMOVED******REMOVED*** 1. Playwright Test-Infrastruktur
+### 1. Playwright Test-Infrastruktur
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Konfiguration
+#### Konfiguration
 - ✅ **playwright.config.ts** erweitert
   - Multi-Project-Setup: `smoke`, `full`, `fallback-verification`
   - HAR-Capture, Video, Screenshots automatisch aktiviert
   - Retry-Strategie für flaky Tests (2× in CI)
   - Reporter: HTML, JSON, List
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Test-Helpers (3 Dateien)
+#### Test-Helpers (3 Dateien)
 - ✅ **playwright-tests/helpers/fallbackDetector.ts**
   - Console-Listener für `FB:LEVEL=1/2/3` Meldungen
   - DOM-Inspektion für Button-Handler
@@ -33,7 +33,7 @@
   - `BugReporter`: JSON-Export der Bug-List
   - `ArtifactCollector`: HAR/Screenshot/Console-Aggregation
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Fixtures
+#### Fixtures
 - ✅ **playwright-tests/fixtures/testSetup.ts**
   - Auto-Login für 3 Rollen
   - Tenant-Isolation (`QA-UAT-01`)
@@ -41,7 +41,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2. Console-Logging (3-Ebenen-Fallback)
+### 2. Console-Logging (3-Ebenen-Fallback)
 
 - ✅ **GlobalButtonHandler.tsx** erweitert
   - Export-Button: `FB:LEVEL=3 PAGE=... ACTION=export`
@@ -57,9 +57,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 3. Automatisierte Test-Specs (12 Dateien)
+### 3. Automatisierte Test-Specs (12 Dateien)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Sales Domain (2 Specs)
+#### Sales Domain (2 Specs)
 - ✅ `playwright-tests/specs/sales/angebote-smoke.spec.ts`
   - Liste lädt, Export, Drucken, Navigation zu Neu
   - Fallback-Level-Verifikation
@@ -68,7 +68,7 @@
   - Order, Delivery, Invoice-Editoren laden
   - BelegFlowPanel-Buttons vorhanden
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Agrar Domain (3 Specs)
+#### Agrar Domain (3 Specs)
 - ✅ `playwright-tests/specs/agrar/psm-smoke.spec.ts`
   - PSM-Liste CRUD, Export, Sachkunde-Register
 
@@ -78,37 +78,37 @@
 - ✅ `playwright-tests/specs/agrar/duenger-smoke.spec.ts`
   - Dünger-Liste, Stamm, Bedarfsrechner
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** CRM Domain (2 Specs)
+#### CRM Domain (2 Specs)
 - ✅ `playwright-tests/specs/crm/kontakte-smoke.spec.ts`
   - Kontakte CRUD, Export, Drucken
 
 - ✅ `playwright-tests/specs/crm/leads-smoke.spec.ts`
   - Leads-Liste, Lead-Detail
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Finance Domain (2 Specs)
+#### Finance Domain (2 Specs)
 - ✅ `playwright-tests/specs/finance/buchungsjournal-smoke.spec.ts`
   - Buchungsjournal, DATEV-Export (Mock)
 
 - ✅ `playwright-tests/specs/finance/debitoren-smoke.spec.ts`
   - Debitoren, OP-Verwaltung, Offene Posten
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Inventory Domain (2 Specs)
+#### Inventory Domain (2 Specs)
 - ✅ `playwright-tests/specs/inventory/artikel-smoke.spec.ts`
   - Artikel-Liste, Export, Fallback-Level
 
 - ✅ `playwright-tests/specs/inventory/lager-smoke.spec.ts`
   - Lagerbewegungen, Lagerbestand, Inventory-Route
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Fallback-Verifikation (1 Spec)
+#### Fallback-Verifikation (1 Spec)
 - ✅ `playwright-tests/specs/fallback-verification.spec.ts`
   - Sales, CRM, Agrar Export/Print-Fallback-Level-Tests
   - Automatische Coverage-Matrix-Befüllung
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 4. Manuelle Test-Dokumentation (9 Dateien)
+### 4. Manuelle Test-Dokumentation (9 Dateien)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Testplan & Übersicht
+#### Testplan & Übersicht
 - ✅ **docs/uat/TESTPLAN.md**
   - Scope, Ziele, Rollen, Testdaten-Strategie
   - Testablauf (A-F), Fehlererfassung, Abnahmekriterien
@@ -125,7 +125,7 @@
   - 30-Min-Check pro Domain (5 Domains)
   - Checklisten für Quick-Win-Tests
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Domain-Checklisten (5 Dateien)
+#### Domain-Checklisten (5 Dateien)
 - ✅ **docs/uat/checklisten/SALES.md**
   - Angebote-Liste, Angebot erstellen, Order/Delivery/Invoice-Editoren
   - CRUD, Workflow, Print/Export, Navigation, Fallback, RBAC
@@ -146,14 +146,14 @@
   - Artikel, Lagerbewegungen, Lagerbestand, Inventur
   - Charge-Rückverfolgung, FIFO/FEFO (Mock)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Backend-Status
+#### Backend-Status
 - ✅ **docs/uat/BACKEND-STATUS.yml**
   - Mapping: real, partial, mock pro Domain
   - Test-Strategie für verschiedene Availability-Level
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 5. CI/CD Integration (2 Workflows)
+### 5. CI/CD Integration (2 Workflows)
 
 - ✅ **.github/workflows/e2e-smoke.yml**
   - Trigger: Push auf `develop`/`main`, PRs, manuell
@@ -169,7 +169,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 6. NPM Scripts (package.json)
+### 6. NPM Scripts (package.json)
 
 - ✅ `test:e2e:smoke`: Smoke-Tests (schnell)
 - ✅ `test:e2e:full`: Full UAT
@@ -178,9 +178,9 @@
 
 ---
 
-***REMOVED******REMOVED*** Datei-Übersicht (35 Dateien)
+## Datei-Übersicht (35 Dateien)
 
-***REMOVED******REMOVED******REMOVED*** Neu erstellt (32)
+### Neu erstellt (32)
 1. `playwright.config.ts` (erweitert)
 2. `playwright-tests/helpers/fallbackDetector.ts`
 3. `playwright-tests/helpers/api.ts`
@@ -212,44 +212,44 @@
 29. `.github/workflows/e2e-full.yml`
 30. `docs/uat/UAT-IMPLEMENTATION-COMPLETE.md` (diese Datei)
 
-***REMOVED******REMOVED******REMOVED*** Modifiziert (3)
+### Modifiziert (3)
 - `packages/frontend-web/src/components/GlobalButtonHandler.tsx`
 - `packages/frontend-web/src/hooks/useListActions.ts`
 - `package.json`
 
 ---
 
-***REMOVED******REMOVED*** Nutzung
+## Nutzung
 
-***REMOVED******REMOVED******REMOVED*** Lokal ausführen
+### Lokal ausführen
 
 ```bash
-***REMOVED*** 1. Environment-Datei vorbereiten
+# 1. Environment-Datei vorbereiten
 cp .env.example .env
-***REMOVED*** Ergänze:
-***REMOVED*** VALEO_TENANT=QA-UAT-01
-***REMOVED*** VALEO_BASE_URL=http://localhost:3000
+# Ergänze:
+# VALEO_TENANT=QA-UAT-01
+# VALEO_BASE_URL=http://localhost:3000
 
-***REMOVED*** 2. Smoke-Tests ausführen
+# 2. Smoke-Tests ausführen
 pnpm test:e2e:smoke
 
-***REMOVED*** 3. Fallback-Verifikation
+# 3. Fallback-Verifikation
 pnpm test:e2e:fallback
 
-***REMOVED*** 4. Full UAT (alle Tests)
+# 4. Full UAT (alle Tests)
 pnpm test:e2e:full
 
-***REMOVED*** 5. Report anzeigen
+# 5. Report anzeigen
 pnpm test:e2e:report
 ```
 
-***REMOVED******REMOVED******REMOVED*** In CI/CD
+### In CI/CD
 
 - **Push/PR:** Smoke-Tests laufen automatisch (Matrix: 5 Domains parallel)
 - **Nightly:** Full UAT + Fallback-Verifikation
 - **Manuell:** Workflows über GitHub Actions UI triggern
 
-***REMOVED******REMOVED******REMOVED*** Manuelle Tests
+### Manuelle Tests
 
 1. Checklisten verwenden: `docs/uat/checklisten/<DOMAIN>.md`
 2. Fehler in `docs/uat/BUGLIST.json` eintragen (Schema beachten)
@@ -257,26 +257,26 @@ pnpm test:e2e:report
 
 ---
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
-***REMOVED******REMOVED******REMOVED*** Sofort
+### Sofort
 1. ✅ **Tests lokal ausführen** (Smoke-Run)
 2. ✅ **Artefakte prüfen** (HAR, Screenshots, Console-Logs)
 3. ✅ **Coverage-Matrix validieren** (Mind. 33 Seiten grün)
 
-***REMOVED******REMOVED******REMOVED*** Kurzfristig (1-2 Wochen)
+### Kurzfristig (1-2 Wochen)
 4. **Erweitere Specs** auf weitere Domains (Einkauf, Fibu, Lager, POS, etc.)
 5. **Seed-Daten** implementieren (`/api/test/seed/<domain>`)
 6. **Backend-Mocks** für partial-Domains vervollständigen
 
-***REMOVED******REMOVED******REMOVED*** Mittelfristig (1 Monat)
+### Mittelfristig (1 Monat)
 7. **Full Coverage** auf alle 188 Seiten ausweiten
 8. **Performance-Tests** integrieren (Latenz-Metriken)
 9. **RBAC-Tests** für alle 3 Rollen pro Seite
 
 ---
 
-***REMOVED******REMOVED*** Exit-Kriterien (UAT-Abnahme)
+## Exit-Kriterien (UAT-Abnahme)
 
 - ✅ **0× S1** (Blocker) offen
 - ✅ **0× S2** (Hoch) offen
@@ -287,7 +287,7 @@ pnpm test:e2e:report
 
 ---
 
-***REMOVED******REMOVED*** Kontakt
+## Kontakt
 
 **Test-Leitung:** QA-Team  
 **Dev-Team:** VALEO-NeuroERP Core  
@@ -296,4 +296,5 @@ pnpm test:e2e:report
 ---
 
 **Status:** 🎯 **Bereit für UAT-Start** | Alle Infrastruktur & Dokumentation vorhanden
+
 

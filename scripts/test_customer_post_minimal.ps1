@@ -1,15 +1,15 @@
 Write-Host "=== Minimal Customer POST Test ==="
 
-***REMOVED*** Token abrufen
+# Token abrufen
 $tok = Invoke-RestMethod -Method POST -Uri "http://localhost:8000/token" -ContentType "application/x-www-form-urlencoded" -Body "username=admin&password=admin"
 $hdr = @{ Authorization = "Bearer $($tok.access_token)" }
 Write-Host "Token erhalten"
 
-***REMOVED*** Zunächst alle Kunden auflisten
+# Zunächst alle Kunden auflisten
 $customers = Invoke-RestMethod -Method GET -Uri "http://localhost:8000/api/customers" -Headers $hdr
 Write-Host "Aktuelle Kunden: $($customers.Count)"
 
-***REMOVED*** Minimal Customer JSON (nur Required-Felder)
+# Minimal Customer JSON (nur Required-Felder)
 $minimalCustomer = @'
 {
   "id": "minimal-001",
@@ -55,3 +55,4 @@ try {
 }
 
 Write-Host "Test abgeschlossen"
+

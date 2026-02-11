@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 
 import asyncio
 import logging
@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 import subprocess
 from core.config import settings
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -36,33 +36,33 @@ class DatabaseBackup:
     async def create_backup(self):
         """Erstellt ein Backup der Datenbank."""
         try:
-            ***REMOVED*** Backup-Verzeichnis erstellen
+            # Backup-Verzeichnis erstellen
             backup_path = Path(self.backup_dir)
             backup_path.mkdir(parents=True, exist_ok=True)
             
-            ***REMOVED*** Zeitstempel für Backup-Datei
+            # Zeitstempel für Backup-Datei
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             
-            ***REMOVED*** Collections auflisten
+            # Collections auflisten
             collections = await self.db.list_collection_names()
             
             for collection in collections:
-                ***REMOVED*** Backup-Datei für Collection
+                # Backup-Datei für Collection
                 backup_file = backup_path / f"{collection}_{timestamp}.json"
                 
-                ***REMOVED*** Dokumente aus Collection exportieren
+                # Dokumente aus Collection exportieren
                 cursor = self.db[collection].find({})
                 documents = await cursor.to_list(length=None)
                 
-                ***REMOVED*** In JSON-Datei speichern
+                # In JSON-Datei speichern
                 with open(backup_file, 'w') as f:
                     for doc in documents:
-                        doc['_id'] = str(doc['_id'])  ***REMOVED*** ObjectId zu String konvertieren
+                        doc['_id'] = str(doc['_id'])  # ObjectId zu String konvertieren
                         f.write(f"{doc}\n")
                 
                 logger.info(f"Backup erstellt für Collection {collection}: {backup_file}")
             
-            ***REMOVED*** Alte Backups bereinigen
+            # Alte Backups bereinigen
             await self.cleanup_old_backups()
             
             logger.info("Backup erfolgreich abgeschlossen")
@@ -78,7 +78,7 @@ class DatabaseBackup:
             cutoff_date = datetime.now() - timedelta(days=self.retention_days)
             
             for backup_file in backup_path.glob("*.json"):
-                ***REMOVED*** Zeitstempel aus Dateinamen extrahieren
+                # Zeitstempel aus Dateinamen extrahieren
                 try:
                     file_date_str = backup_file.stem.split("_")[-2]
                     file_date = datetime.strptime(file_date_str, "%Y%m%d")
@@ -114,7 +114,7 @@ class DatabaseBackup:
                     logger.error(f"Backup-Datei ist leer: {backup_file}")
                     return False
                 
-                ***REMOVED*** Stichprobenartige Überprüfung der JSON-Struktur
+                # Stichprobenartige Überprüfung der JSON-Struktur
                 with open(backup_file, 'r') as f:
                     first_line = f.readline().strip()
                     if not first_line.startswith("{") or not first_line.endswith("}"):

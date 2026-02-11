@@ -1,12 +1,12 @@
-***REMOVED*** GAP-Pipeline API-Integration
+# GAP-Pipeline API-Integration
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Die GAP-Pipeline kann über Backend-API-Endpoints ausgeführt werden, die vom Frontend aufgerufen werden können.
 
-***REMOVED******REMOVED*** API-Endpoints
+## API-Endpoints
 
-***REMOVED******REMOVED******REMOVED*** 1. Komplette Pipeline ausführen
+### 1. Komplette Pipeline ausführen
 
 **POST** `/api/v1/gap/pipeline/run-year`
 
@@ -35,7 +35,7 @@ Führt die komplette GAP-Pipeline für ein Jahr aus:
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Nur Import ausführen
+### 2. Nur Import ausführen
 
 **POST** `/api/v1/gap/pipeline/import`
 
@@ -50,7 +50,7 @@ Führt nur den GAP-Import aus.
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Einzelne Pipeline-Schritte
+### 3. Einzelne Pipeline-Schritte
 
 **POST** `/api/v1/gap/pipeline/{command}?year=2024`
 
@@ -60,7 +60,7 @@ Verfügbare Commands:
 - `snapshot`: Erstellt customer_potential_snapshot
 - `hydrate-customers`: Aktualisiert customer analytics-Felder
 
-***REMOVED******REMOVED******REMOVED*** 4. Pipeline-Status prüfen
+### 4. Pipeline-Status prüfen
 
 **GET** `/api/v1/gap/pipeline/status?year=2024`
 
@@ -81,9 +81,9 @@ Gibt zurück:
 }
 ```
 
-***REMOVED******REMOVED*** Frontend-Integration
+## Frontend-Integration
 
-***REMOVED******REMOVED******REMOVED*** Beispiel: React-Komponente
+### Beispiel: React-Komponente
 
 ```typescript
 import { useState } from 'react'
@@ -141,7 +141,7 @@ export function GapPipelineControl() {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Beispiel: API-Client
+### Beispiel: API-Client
 
 ```typescript
 // packages/frontend-web/src/api/gap.ts
@@ -185,7 +185,7 @@ export async function getGapPipelineStatus(
 }
 ```
 
-***REMOVED******REMOVED*** Hinweise
+## Hinweise
 
 1. **Hintergrund-Ausführung**: Alle Pipeline-Commands werden im Hintergrund ausgeführt, um Blocking zu vermeiden.
 
@@ -197,25 +197,26 @@ export async function getGapPipelineStatus(
 
 5. **Monitoring**: Für Produktivbetrieb sollte ein Job-Queue-System (z.B. Celery) verwendet werden, um besseres Monitoring und Retry-Mechanismen zu ermöglichen.
 
-***REMOVED******REMOVED*** Testweise Ausführung im Container
+## Testweise Ausführung im Container
 
 Für Fehlereingrenzung kann die Pipeline auch direkt im Container ausgeführt werden:
 
 ```bash
-***REMOVED*** CSV in Container kopieren
+# CSV in Container kopieren
 docker cp data/gap/impdata2024.csv valeo-neuro-erp-postgres:/tmp/
 
-***REMOVED*** Pipeline im Container ausführen (wenn Node.js verfügbar)
+# Pipeline im Container ausführen (wenn Node.js verfügbar)
 docker exec -e DATABASE_URL="postgresql://valeo_dev:valeo_dev_2024@localhost:5432/valeo_neuro_erp" \
   valeo-neuro-erp-postgres \
   sh -c "cd /tmp && node gap-cli.js run-year --year 2024 --csv-path /tmp/impdata2024.csv"
 ```
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. ✅ Backend-API-Endpoints erstellt
 2. ⏳ Frontend-Komponente für Pipeline-Steuerung
 3. ⏳ CSV-Upload-Funktionalität
 4. ⏳ Job-Queue-Integration (Celery/RQ)
 5. ⏳ Logging und Monitoring
+
 

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Analysiert die Measure Codes in den Ostfriesland-Daten
 um Flächenprämien von anderen Zahlungen zu unterscheiden
@@ -17,7 +17,7 @@ def analyze_measure_codes():
     print("Ziel: Flächenprämien von anderen Zahlungen trennen")
     print()
     
-    ***REMOVED*** Container für Analyse
+    # Container für Analyse
     measure_stats = defaultdict(lambda: {
         "count": 0,
         "total_amount": 0.0,
@@ -29,7 +29,7 @@ def analyze_measure_codes():
     total_leads = 0
     total_amount = 0.0
     
-    ***REMOVED*** Korrekte Header
+    # Korrekte Header
     amount_header = "EU-Betrag (EGFL und ELER) und kofinanzierter Betrag insgesamt für diesen Begünstigten*"
     name_header = "Name des Begünstigten/Rechtsträgers/Verdands"
     measure_header = "Code der Maßnahme/der Interventionskategorie/des Sektors gemäß Anhang IX "
@@ -40,10 +40,10 @@ def analyze_measure_codes():
         with open(csv_path, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')
             
-            ***REMOVED*** Header-Mapping prüfen
+            # Header-Mapping prüfen
             headers = reader.fieldnames
             
-            ***REMOVED*** Finde korrekte Header (mit möglichen Encoding-Problemen)
+            # Finde korrekte Header (mit möglichen Encoding-Problemen)
             for header in headers:
                 if 'EU-Betrag' in header and 'EGFL' in header and 'ELER' in header:
                     amount_header = header
@@ -61,19 +61,19 @@ def analyze_measure_codes():
             for row_num, row in enumerate(reader, 1):
                 plz = row.get('PLZ', '').strip()
                 
-                ***REMOVED*** Nur PLZ 26400-26999 (Ostfriesland)
+                # Nur PLZ 26400-26999 (Ostfriesland)
                 if plz and len(plz) >= 5:
                     try:
                         plz_num = int(plz)
                         if 26400 <= plz_num <= 26999:
                             total_leads += 1
                             
-                            ***REMOVED*** Daten extrahieren
+                            # Daten extrahieren
                             name = row.get(name_header, '').strip()
                             city = row.get('Gemeinde', '').strip()
                             measure_code = row.get(measure_header, '').strip()
                             
-                            ***REMOVED*** GAP-Betrag
+                            # GAP-Betrag
                             gap_amount = 0.0
                             amount_field = row.get(amount_header, '').strip()
                             if amount_field:
@@ -83,7 +83,7 @@ def analyze_measure_codes():
                                 except ValueError:
                                     pass
                             
-                            ***REMOVED*** Measure Code Statistik
+                            # Measure Code Statistik
                             if not measure_code:
                                 measure_code = "LEER/UNBEKANNT"
                             
@@ -91,7 +91,7 @@ def analyze_measure_codes():
                             measure_stats[measure_code]["total_amount"] += gap_amount
                             measure_stats[measure_code]["plz_distribution"][plz] += 1
                             
-                            ***REMOVED*** Sample Lead speichern (max 3 pro Measure Code)
+                            # Sample Lead speichern (max 3 pro Measure Code)
                             if len(measure_stats[measure_code]["leads"]) < 3:
                                 measure_stats[measure_code]["leads"].append({
                                     "name": name[:40],
@@ -110,12 +110,12 @@ def analyze_measure_codes():
         print(f"FEHLER: {e}")
         return
     
-    ***REMOVED*** Durchschnitte berechnen
+    # Durchschnitte berechnen
     for code, stats in measure_stats.items():
         if stats["count"] > 0:
             stats["avg_amount"] = stats["total_amount"] / stats["count"]
     
-    ***REMOVED*** Ergebnisse ausgeben
+    # Ergebnisse ausgeben
     print()
     print("MEASURE CODES ANALYSE - OSTFRIESLAND (PLZ 26400-26999)")
     print("=" * 70)
@@ -124,7 +124,7 @@ def analyze_measure_codes():
     print(f"Verschiedene Measure Codes: {len(measure_stats)}")
     print()
     
-    ***REMOVED*** Nach Häufigkeit sortieren
+    # Nach Häufigkeit sortieren
     sorted_by_count = sorted(measure_stats.items(), key=lambda x: x[1]["count"], reverse=True)
     
     print("TOP MEASURE CODES NACH HÄUFIGKEIT:")
@@ -132,29 +132,29 @@ def analyze_measure_codes():
     for i, (code, stats) in enumerate(sorted_by_count[:20], 1):
         print(f"{i:2d}. Code '{code}': {stats['count']:,} Leads | {stats['total_amount']:,.0f} EUR | Ø {stats['avg_amount']:,.0f} EUR")
         
-        ***REMOVED*** Beispiel-Lead zeigen
+        # Beispiel-Lead zeigen
         if stats["leads"]:
             example = stats["leads"][0]
             print(f"    Beispiel: {example['name']} | PLZ {example['plz']} | {example['amount']:,.0f} EUR")
         
-        ***REMOVED*** PLZ-Verteilung (Top 3)
+        # PLZ-Verteilung (Top 3)
         top_plz = sorted(stats["plz_distribution"].items(), key=lambda x: x[1], reverse=True)[:3]
         plz_str = ", ".join([f"PLZ {plz}({count})" for plz, count in top_plz])
         print(f"    Top PLZ: {plz_str}")
         print()
     
-    ***REMOVED*** Nach Durchschnittsbetrag sortieren
+    # Nach Durchschnittsbetrag sortieren
     print("TOP MEASURE CODES NACH DURCHSCHNITTSBETRAG:")
     print("-" * 50)
     sorted_by_avg = sorted(measure_stats.items(), key=lambda x: x[1]["avg_amount"], reverse=True)
     
     for i, (code, stats) in enumerate(sorted_by_avg[:15], 1):
-        if stats["count"] >= 10:  ***REMOVED*** Mindestens 10 Leads für aussagekräftige Durchschnitte
+        if stats["count"] >= 10:  # Mindestens 10 Leads für aussagekräftige Durchschnitte
             print(f"{i:2d}. Code '{code}': Ø {stats['avg_amount']:,.0f} EUR | {stats['count']:,} Leads | {stats['total_amount']:,.0f} EUR total")
     
     print()
     
-    ***REMOVED*** Leere/Unbekannte Codes analysieren
+    # Leere/Unbekannte Codes analysieren
     if "LEER/UNBEKANNT" in measure_stats:
         empty_stats = measure_stats["LEER/UNBEKANNT"]
         print("ANALYSE LEERER MEASURE CODES:")
@@ -164,7 +164,7 @@ def analyze_measure_codes():
         print(f"Durchschnittsbetrag: {empty_stats['avg_amount']:,.2f} EUR")
         print()
     
-    ***REMOVED*** JSON speichern
+    # JSON speichern
     result_data = {
         "timestamp": "2024-11-20",
         "total_leads": total_leads,
@@ -191,4 +191,5 @@ def analyze_measure_codes():
 
 if __name__ == "__main__":
     analyze_measure_codes()
+
 

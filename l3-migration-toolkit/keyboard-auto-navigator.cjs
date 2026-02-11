@@ -16,7 +16,7 @@ const path = require('path');
 
 // Konfiguration
 const CONFIG = {
-  guacamoleUrl: 'http://localhost:8090/guacamole/***REMOVED***/client/MQBjAHBvc3RncmVzcWw',
+  guacamoleUrl: 'http://localhost:8090/guacamole/#/client/MQBjAHBvc3RncmVzcWw',
   outputDir: path.join(__dirname, '..', 'screenshots', 'l3-masks-auto'),
   waitAfterKey: 300,      // Warte nach Tastendruck
   waitAfterMenu: 1500,    // Warte nach Menü-Öffnung
@@ -252,4 +252,5 @@ if (require.main === module) {
 }
 
 module.exports = { navigateViKeyboard, captureAllMasksKeyboard };
+
 

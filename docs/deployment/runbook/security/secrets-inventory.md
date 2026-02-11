@@ -1,22 +1,22 @@
-***REMOVED*** Secrets-Handling für Inventory: SealedSecrets & ExternalSecrets
+# Secrets-Handling für Inventory: SealedSecrets & ExternalSecrets
 
 Dieses Runbook beschreibt, wie Eskalations- und Betriebs-Secrets (z. B. `INVENTORY_TEAMS_WEBHOOK_URL`) sicher verwaltet werden.
 
-***REMOVED******REMOVED*** Optionen
+## Optionen
 
 - SealedSecrets (Bitnami): Verschlüsselte Secrets im Git.
 - ExternalSecrets (ESO): Synchronisiert Secrets aus externen Providern (AWS/GCP/Azure/HashiCorp Vault).
 
-***REMOVED******REMOVED*** 1) SealedSecrets
+## 1) SealedSecrets
 
-***REMOVED******REMOVED******REMOVED*** Schritt 1: Secret lokal erstellen
+### Schritt 1: Secret lokal erstellen
 ```bash
 kubectl -n <ns> create secret generic inventory-teams-webhook \
   --from-literal=url='https://outlook.office.com/webhook/...' \
   --dry-run=client -o yaml > inventory-teams-webhook.yaml
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 2: Versiegeln
+### Schritt 2: Versiegeln
 ```bash
 kubeseal -n <ns> -o yaml < inventory-teams-webhook.yaml > inventory-teams-webhook.sealed.yaml
 ```
@@ -26,7 +26,7 @@ Committe die `*.sealed.yaml` Datei ins Repository und deploye sie:
 kubectl apply -f inventory-teams-webhook.sealed.yaml -n <ns>
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 3: Helm-Values referenzieren
+### Schritt 3: Helm-Values referenzieren
 ```yaml
 inventory:
   secretRefs:
@@ -35,11 +35,11 @@ inventory:
       key: url
 ```
 
-***REMOVED******REMOVED*** 2) ExternalSecrets (ESO)
+## 2) ExternalSecrets (ESO)
 
 Voraussetzung: ExternalSecrets Operator im Cluster.
 
-***REMOVED******REMOVED******REMOVED*** Schritt 1: SecretStore konfigurieren
+### Schritt 1: SecretStore konfigurieren
 ```yaml
 apiVersion: external-secrets.io/v1beta1
 kind: SecretStore
@@ -58,7 +58,7 @@ spec:
           key: token
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 2: ExternalSecret anlegen
+### Schritt 2: ExternalSecret anlegen
 ```yaml
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
@@ -80,7 +80,7 @@ spec:
         property: url
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 3: Helm-Values referenzieren
+### Schritt 3: Helm-Values referenzieren
 Gleich wie bei SealedSecrets:
 ```yaml
 inventory:
@@ -90,7 +90,7 @@ inventory:
       key: url
 ```
 
-***REMOVED******REMOVED*** 3) Smoke-Test
+## 3) Smoke-Test
 
 1. Secret vorhanden?
 ```bash
@@ -105,14 +105,15 @@ kubectl -n <ns> exec -it deploy/valeo-erp-inventory -- printenv | grep INVENTORY
 kubectl -n <ns> logs deploy/valeo-erp-inventory -f | grep \"Ops-Notify\"
 ```
 
-***REMOVED******REMOVED*** 4) Rotation
+## 4) Rotation
 
 - SealedSecrets: neues Secret erzeugen und neu versiegeln → apply.
 - ExternalSecrets: Wert im externen Store anpassen; ESO synchronisiert automatisch.
 
-***REMOVED******REMOVED*** 5) Sicherheitshinweise
+## 5) Sicherheitshinweise
 
 - Keine Secret-Werte im Klartext in Git-Commits.
 - Least-Privilege für Vault/Cloud Provider.
 - Rotation-Playbooks dokumentieren (90-Tage Zyklus empfohlen).
+
 

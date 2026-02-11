@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import csv
 import os
@@ -18,13 +18,13 @@ def analyze_filtered_csv():
     print("=== ANALYSE DER VORGEFILTERTEN PLZ 26XXX CSV (FIXED) ===")
     print(f"Datei: {csv_path}")
     
-    ***REMOVED*** Flächenprämien Codes (basierend auf PDF)
+    # Flächenprämien Codes (basierend auf PDF)
     FLAECHENPRAEMIEN_CODES = ['I.1', 'I.2', 'I.3', 'I.4', 'I.6', 'V.1']
     
     try:
-        ***REMOVED*** CSV mit korrektem Quoting lesen
+        # CSV mit korrektem Quoting lesen
         with open(csv_path, 'r', encoding='windows-1252') as file:
-            ***REMOVED*** Automatische Delimiter-Erkennung mit csv.Sniffer
+            # Automatische Delimiter-Erkennung mit csv.Sniffer
             sample = file.read(2048)
             file.seek(0)
             
@@ -34,16 +34,16 @@ def analyze_filtered_csv():
             
             reader = csv.reader(file, delimiter=delimiter, quotechar='"')
             
-            ***REMOVED*** Erste Zeile als Header lesen
+            # Erste Zeile als Header lesen
             headers = next(reader)
             print(f"Anzahl Spalten: {len(headers)}")
             
-            ***REMOVED*** Header anzeigen
+            # Header anzeigen
             print(f"\nErste 10 Header:")
             for i, header in enumerate(headers[:10]):
                 print(f"  {i+1}: '{header}'")
             
-            ***REMOVED*** Header-Mapping erstellen (flexibel für Variationen)
+            # Header-Mapping erstellen (flexibel für Variationen)
             header_map = {}
             for i, header in enumerate(headers):
                 header_clean = header.strip()
@@ -68,7 +68,7 @@ def analyze_filtered_csv():
                 print("WARNUNG: Nicht alle wichtigen Spalten gefunden!")
                 return
             
-            ***REMOVED*** Daten analysieren
+            # Daten analysieren
             leads_data = defaultdict(lambda: {
                 'name': '', 
                 'plz': '',
@@ -84,20 +84,20 @@ def analyze_filtered_csv():
             
             for row in reader:
                 if len(row) < len(headers):
-                    continue  ***REMOVED*** Überspringe unvollständige Zeilen
+                    continue  # Überspringe unvollständige Zeilen
                 
                 total_rows += 1
                 
-                ***REMOVED*** Daten extrahieren
+                # Daten extrahieren
                 name = row[header_map['name']].strip() if 'name' in header_map else ''
                 plz = row[header_map['plz']].strip() if 'plz' in header_map else ''
                 city = row[header_map['city']].strip() if 'city' in header_map else ''
                 measure_code = row[header_map['measure_code']].strip() if 'measure_code' in header_map else ''
                 
-                ***REMOVED*** GAP Betrag
+                # GAP Betrag
                 amount_str = row[header_map['total_amount']].strip() if 'total_amount' in header_map else '0'
                 try:
-                    ***REMOVED*** Deutsche Zahlenformate handhaben (Komma als Dezimaltrennzeichen)
+                    # Deutsche Zahlenformate handhaben (Komma als Dezimaltrennzeichen)
                     amount_str = amount_str.replace(',', '.')
                     gap_amount = float(amount_str) if amount_str else 0.0
                 except ValueError:
@@ -112,13 +112,13 @@ def analyze_filtered_csv():
                     leads_data[lead_key]['measure_codes'].add(measure_code)
                     leads_data[lead_key]['payments_count'] += 1
                 
-                ***REMOVED*** Flächenprämien prüfen
+                # Flächenprämien prüfen
                 if measure_code in FLAECHENPRAEMIEN_CODES:
                     flaechenpraemien_rows += 1
                     if name and plz:
                         leads_data[lead_key]['total_flaechenpraemien'] += gap_amount
                 
-                ***REMOVED*** Debug: erste 3 Zeilen anzeigen
+                # Debug: erste 3 Zeilen anzeigen
                 if total_rows <= 3:
                     print(f"\nZeile {total_rows}: Name='{name}', PLZ='{plz}', Maßnahme='{measure_code}', Betrag={gap_amount}")
             
@@ -127,7 +127,7 @@ def analyze_filtered_csv():
             print(f"Flächenprämien-Zeilen: {flaechenpraemien_rows}")
             print(f"Einzigartige Betriebe: {len(leads_data)}")
             
-            ***REMOVED*** Flächenprämien-Statistiken
+            # Flächenprämien-Statistiken
             qualified_farms = 0
             large_farms = 0
             total_flaechenpraemien = 0.0
@@ -140,9 +140,9 @@ def analyze_filtered_csv():
                     qualified_farms += 1
                     total_flaechenpraemien += lead_data['total_flaechenpraemien']
                     
-                    ***REMOVED*** Geschätzte Betriebsgröße (300 EUR/ha Flächenprämie)
+                    # Geschätzte Betriebsgröße (300 EUR/ha Flächenprämie)
                     estimated_ha = lead_data['total_flaechenpraemien'] / 300
-                    if estimated_ha >= 100:  ***REMOVED*** Großbetrieb
+                    if estimated_ha >= 100:  # Großbetrieb
                         large_farms += 1
             
             print(f"\nFLÄCHENPRÄMIEN ANALYSE:")
@@ -155,7 +155,7 @@ def analyze_filtered_csv():
                 print(f"Durchschnitt Flächenprämien: {total_flaechenpraemien/qualified_farms:,.2f} EUR")
                 print(f"Durchschnitt geschätzte Betriebsgröße: {(total_flaechenpraemien/qualified_farms)/300:.1f} ha")
             
-            ***REMOVED*** Top 10 Betriebe mit höchsten Flächenprämien
+            # Top 10 Betriebe mit höchsten Flächenprämien
             print(f"\nTOP 10 BETRIEBE (Flächenprämien):")
             sorted_leads = sorted(
                 [(k, v) for k, v in leads_data.items() if v['total_flaechenpraemien'] > 0],
@@ -168,7 +168,7 @@ def analyze_filtered_csv():
                 print(f"  {i+1}. {lead_data['name'][:30]}... (PLZ {lead_data['plz']})")
                 print(f"      Flächenprämien: {lead_data['total_flaechenpraemien']:,.0f} EUR (~{estimated_ha:.0f} ha)")
             
-            ***REMOVED*** PLZ-Statistiken
+            # PLZ-Statistiken
             plz_stats = defaultdict(lambda: {'count': 0, 'flaechenpraemien': 0.0})
             for lead_data in leads_data.values():
                 if lead_data['total_flaechenpraemien'] > 0:
@@ -188,4 +188,5 @@ def analyze_filtered_csv():
 
 if __name__ == "__main__":
     analyze_filtered_csv()
+
 

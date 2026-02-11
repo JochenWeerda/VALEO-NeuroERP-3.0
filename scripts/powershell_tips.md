@@ -1,23 +1,23 @@
-***REMOVED*** PowerShell-Tipps für Frontend-Entwicklung
+# PowerShell-Tipps für Frontend-Entwicklung
 
-***REMOVED******REMOVED*** Befehlsausführung
+## Befehlsausführung
 
-***REMOVED******REMOVED******REMOVED*** Befehlsverkettung
+### Befehlsverkettung
 
 PowerShell verwendet `;` statt `&&` zur Verkettung von Befehlen:
 
 ```powershell
-***REMOVED*** Richtig:
+# Richtig:
 cd frontend; npm start
 
-***REMOVED*** Falsch:
+# Falsch:
 cd frontend && npm start
 ```
 
-***REMOVED******REMOVED******REMOVED*** Fehlerbehandlung
+### Fehlerbehandlung
 
 ```powershell
-***REMOVED*** Prüfen, ob ein Befehl erfolgreich war
+# Prüfen, ob ein Befehl erfolgreich war
 cd frontend
 if ($?) {
     echo "Verzeichniswechsel erfolgreich"
@@ -25,7 +25,7 @@ if ($?) {
     echo "Fehler beim Verzeichniswechsel"
 }
 
-***REMOVED*** Fehler abfangen
+# Fehler abfangen
 try {
     npm start
 } catch {
@@ -33,18 +33,18 @@ try {
 }
 ```
 
-***REMOVED******REMOVED*** Portbelegung prüfen
+## Portbelegung prüfen
 
 ```powershell
-***REMOVED*** Alle belegten Ports anzeigen
+# Alle belegten Ports anzeigen
 Get-NetTCPConnection -State Listen | 
     Sort-Object -Property LocalPort | 
     Format-Table LocalPort, OwningProcess, State
 
-***REMOVED*** Prozess identifizieren
+# Prozess identifizieren
 Get-Process -Id <PID>
 
-***REMOVED*** Prüfen, ob ein bestimmter Port verfügbar ist
+# Prüfen, ob ein bestimmter Port verfügbar ist
 $port = 5173
 $inUse = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
 if ($inUse) {
@@ -54,33 +54,33 @@ if ($inUse) {
 }
 ```
 
-***REMOVED******REMOVED*** Umgebungsvariablen
+## Umgebungsvariablen
 
 ```powershell
-***REMOVED*** Temporär für die aktuelle Sitzung setzen
+# Temporär für die aktuelle Sitzung setzen
 $env:PORT = 5000
 npm start
 
-***REMOVED*** Mehrere Variablen setzen
+# Mehrere Variablen setzen
 $env:PORT = 5000
 $env:NODE_ENV = "development"
 ```
 
-***REMOVED******REMOVED*** Frontend-Entwicklung
+## Frontend-Entwicklung
 
-***REMOVED******REMOVED******REMOVED*** Skripte nutzen
+### Skripte nutzen
 
 ```powershell
-***REMOVED*** VAN-Modus Validator ausführen
+# VAN-Modus Validator ausführen
 ./scripts/van-frontend-validator.ps1
 
-***REMOVED*** Frontend starten
+# Frontend starten
 ./scripts/start_frontend.ps1
 ```
 
-***REMOVED******REMOVED******REMOVED*** Typische Fehler und Lösungen
+### Typische Fehler und Lösungen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** JSX-Syntax-Fehler
+#### JSX-Syntax-Fehler
 - **Problem**: "The JSX syntax extension is not currently enabled"
 - **Lösung**: vite.config.js aktualisieren:
   ```javascript
@@ -91,32 +91,32 @@ $env:NODE_ENV = "development"
   }
   ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Missing Script: "start"
+#### Missing Script: "start"
 - **Problem**: npm findet das start-Skript nicht
 - **Lösung**: Sicherstellen, dass man im richtigen Verzeichnis ist und package.json die Skripte enthält:
   ```powershell
   cd frontend
-  ***REMOVED*** Skripte in package.json anzeigen:
+  # Skripte in package.json anzeigen:
   (Get-Content package.json -Raw | ConvertFrom-Json).scripts
   ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** TypeScript-Fehler
+#### TypeScript-Fehler
 - **Problem**: "Cannot find module 'typescript'"
 - **Lösung**: TypeScript installieren:
   ```powershell
   npm install typescript --save-dev
   ```
 
-***REMOVED******REMOVED******REMOVED*** Notfalloptionen
+### Notfalloptionen
 
 Bei hartnäckigen Problemen:
 
 ```powershell
-***REMOVED*** Einfachen HTTP-Server starten
+# Einfachen HTTP-Server starten
 cd frontend
 npx http-server -p 8080 .
 
-***REMOVED*** Vite direkt starten mit JSX-Loader-Konfiguration
+# Vite direkt starten mit JSX-Loader-Konfiguration
 cd frontend
 npx vite --port 5000
 ``` 

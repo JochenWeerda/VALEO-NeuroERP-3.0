@@ -1,6 +1,6 @@
-***REMOVED***!/bin/bash
-***REMOVED*** VALEO-NeuroERP 3.0 - Staging-Deployment-Script
-***REMOVED*** Automatisiertes Deployment zu Staging-Environment
+#!/bin/bash
+# VALEO-NeuroERP 3.0 - Staging-Deployment-Script
+# Automatisiertes Deployment zu Staging-Environment
 
 set -e
 
@@ -8,19 +8,19 @@ echo "🚀 VALEO-NeuroERP 3.0 - Staging-Deployment"
 echo "=========================================="
 echo ""
 
-***REMOVED*** Configuration
+# Configuration
 NAMESPACE="${NAMESPACE:-staging}"
 VERSION="${VERSION:-3.0.0-staging}"
 REGISTRY="${REGISTRY:-ghcr.io/valeo}"
 HELM_RELEASE="valeo-erp-staging"
 
-***REMOVED*** Colors
+# Colors
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
-NC='\033[0m' ***REMOVED*** No Color
+NC='\033[0m' # No Color
 
-***REMOVED*** Helper Functions
+# Helper Functions
 log_info() {
   echo -e "${GREEN}✅ $1${NC}"
 }
@@ -33,14 +33,14 @@ log_error() {
   echo -e "${RED}❌ $1${NC}"
 }
 
-***REMOVED*** Step 1: Build Docker-Images
+# Step 1: Build Docker-Images
 echo -e "${YELLOW}📦 Step 1: Building Docker-Images...${NC}"
 
-***REMOVED*** Backend
+# Backend
 docker build -t ${REGISTRY}/valeo-erp-backend:${VERSION} -f Dockerfile .
 log_info "Backend-Image built"
 
-***REMOVED*** Frontend (falls vorhanden)
+# Frontend (falls vorhanden)
 if [ -f "packages/frontend-web/Dockerfile.frontend" ]; then
   cd packages/frontend-web
   docker build -t ${REGISTRY}/valeo-erp-frontend:${VERSION} -f Dockerfile.frontend .
@@ -48,7 +48,7 @@ if [ -f "packages/frontend-web/Dockerfile.frontend" ]; then
   log_info "Frontend-Image built"
 fi
 
-***REMOVED*** Step 2: Push to Registry
+# Step 2: Push to Registry
 echo ""
 echo -e "${YELLOW}📤 Step 2: Pushing Images to Registry...${NC}"
 
@@ -60,7 +60,7 @@ if [ -f "packages/frontend-web/Dockerfile.frontend" ]; then
   log_info "Frontend-Image pushed"
 fi
 
-***REMOVED*** Step 3: Create Namespace
+# Step 3: Create Namespace
 echo ""
 echo -e "${YELLOW}🏗️  Step 3: Creating Namespace...${NC}"
 
@@ -68,7 +68,7 @@ kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -
 kubectl label namespace ${NAMESPACE} environment=staging --overwrite
 log_info "Namespace created/updated: ${NAMESPACE}"
 
-***REMOVED*** Step 4: PostgreSQL-Setup
+# Step 4: PostgreSQL-Setup
 echo ""
 echo -e "${YELLOW}🗄️  Step 4: PostgreSQL-Setup...${NC}"
 
@@ -88,11 +88,11 @@ else
   log_info "PostgreSQL already exists"
 fi
 
-***REMOVED*** Wait for PostgreSQL
+# Wait for PostgreSQL
 kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=postgresql -n ${NAMESPACE} --timeout=300s
 log_info "PostgreSQL ready"
 
-***REMOVED*** Step 5: Create Secrets
+# Step 5: Create Secrets
 echo ""
 echo -e "${YELLOW}🔐 Step 5: Creating Secrets...${NC}"
 
@@ -103,11 +103,11 @@ kubectl create secret generic valeo-erp-db-secret \
 
 log_info "Secrets created"
 
-***REMOVED*** Step 6: Database-Migrations
+# Step 6: Database-Migrations
 echo ""
 echo -e "${YELLOW}🔄 Step 6: Running Database-Migrations...${NC}"
 
-***REMOVED*** Via Job
+# Via Job
 kubectl apply -f - <<EOF
 apiVersion: batch/v1
 kind: Job
@@ -131,11 +131,11 @@ spec:
   backoffLimit: 3
 EOF
 
-***REMOVED*** Wait for Job
+# Wait for Job
 kubectl wait --for=condition=complete job -l job-name=valeo-erp-migrations* -n ${NAMESPACE} --timeout=300s
 log_info "Migrations completed"
 
-***REMOVED*** Step 7: Helm-Deployment
+# Step 7: Helm-Deployment
 echo ""
 echo -e "${YELLOW}🚀 Step 7: Deploying VALEO-ERP...${NC}"
 
@@ -152,11 +152,11 @@ helm upgrade --install ${HELM_RELEASE} ./k8s/helm/valeo-erp \
 
 log_info "VALEO-ERP deployed"
 
-***REMOVED*** Step 8: Verify Deployment
+# Step 8: Verify Deployment
 echo ""
 echo -e "${YELLOW}🔍 Step 8: Verifying Deployment...${NC}"
 
-***REMOVED*** Check Pods
+# Check Pods
 POD_COUNT=$(kubectl get pods -n ${NAMESPACE} -l app.kubernetes.io/name=valeo-erp -o json | jq '.items | length')
 READY_COUNT=$(kubectl get pods -n ${NAMESPACE} -l app.kubernetes.io/name=valeo-erp -o json | jq '[.items[] | select(.status.phase=="Running")] | length')
 
@@ -169,11 +169,11 @@ fi
 
 log_info "Pods ready"
 
-***REMOVED*** Health-Check
+# Health-Check
 echo ""
 echo -e "${YELLOW}🏥 Health-Checks...${NC}"
 
-sleep 10  ***REMOVED*** Give pods time to start
+sleep 10  # Give pods time to start
 
 if curl -f https://staging.erp.valeo.example.com/healthz >/dev/null 2>&1; then
   log_info "Liveness-Probe OK"
@@ -187,7 +187,7 @@ else
   log_warn "Readiness-Probe failed (might need more time)"
 fi
 
-***REMOVED*** Step 9: Summary
+# Step 9: Summary
 echo ""
 echo "=========================================="
 echo -e "${GREEN}✅ Staging-Deployment Complete${NC}"
@@ -204,5 +204,6 @@ echo "3. Start UAT with test-users"
 echo "4. Monitor: https://staging.erp.valeo.example.com/metrics"
 echo ""
 echo -e "${GREEN}🎉 Ready for UAT!${NC}"
+
 
 

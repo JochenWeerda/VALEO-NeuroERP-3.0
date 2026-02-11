@@ -1,4 +1,4 @@
-***REMOVED*** ISO 27001 Gap Analysis - VALEO NeuroERP 3.0
+# ISO 27001 Gap Analysis - VALEO NeuroERP 3.0
 
 **Standard:** ISO/IEC 27001:2022  
 **Status:** 🟡 In Progress (58% Complete)  
@@ -7,11 +7,11 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **ANNEX A CONTROLS**
+## 📋 **ANNEX A CONTROLS**
 
-***REMOVED******REMOVED******REMOVED*** A.5: ORGANIZATIONAL CONTROLS
+### A.5: ORGANIZATIONAL CONTROLS
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.5.1 Information Security Policies
+#### A.5.1 Information Security Policies
 - [x] **Security-Policy** dokumentiert
   - Datei: `SECURITY.md`
   - Incident-Response-Plan ✅
@@ -25,7 +25,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.5.2 Information Security Roles
+#### A.5.2 Information Security Roles
 - [x] **CISO/Security-Officer** definiert
 - [x] **On-Call-Rotation** dokumentiert
 - [ ] **Security-Champions** in jedem Team
@@ -35,9 +35,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** A.8: ASSET MANAGEMENT
+### A.8: ASSET MANAGEMENT
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.8.1 Asset Inventory
+#### A.8.1 Asset Inventory
 - [ ] **IT-Asset-Register**
   - Server, Databases, Services
   - Third-Party-Dependencies
@@ -52,9 +52,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** A.9: ACCESS CONTROL
+### A.9: ACCESS CONTROL
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.9.1 Access Control Policy
+#### A.9.1 Access Control Policy
 - [x] **RBAC** implementiert
   - 6 Rollen definiert
   - 12 Permissions
@@ -71,7 +71,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.9.2 User Access Management
+#### A.9.2 User Access Management
 - [x] **User-Provisioning/Deprovisioning**
   - Via Keycloak
   - Auto-Deactivation bei Austritt
@@ -89,9 +89,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** A.10: CRYPTOGRAPHY
+### A.10: CRYPTOGRAPHY
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.10.1 Cryptographic Controls
+#### A.10.1 Cryptographic Controls
 - [x] **Encryption-in-Transit**
   - TLS 1.3 ✅
   - mTLS in Service-Mesh (Istio) ✅
@@ -110,9 +110,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** A.12: OPERATIONS SECURITY
+### A.12: OPERATIONS SECURITY
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.12.1 Operational Procedures
+#### A.12.1 Operational Procedures
 - [x] **Change-Management**
   - Git-Workflow (PR-Reviews)
   - CI/CD-Pipeline ✅
@@ -129,7 +129,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.12.2 Protection from Malware
+#### A.12.2 Protection from Malware
 - [x] **Container-Scanning**
   - Trivy ✅
   - Grype ✅
@@ -147,7 +147,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.12.3 Backup
+#### A.12.3 Backup
 - [x] **Daily-Backups** (PostgreSQL)
 - [ ] **Off-Site-Backups**
 - [ ] **Backup-Testing** (monthly)
@@ -158,9 +158,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** A.13: COMMUNICATIONS SECURITY
+### A.13: COMMUNICATIONS SECURITY
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.13.1 Network Security
+#### A.13.1 Network Security
 - [x] **Network-Segmentation**
   - Kubernetes-Namespaces ✅
   - Network-Policies ⏳
@@ -176,9 +176,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** A.14: SYSTEM ACQUISITION, DEVELOPMENT & MAINTENANCE
+### A.14: SYSTEM ACQUISITION, DEVELOPMENT & MAINTENANCE
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.14.1 Security in Development
+#### A.14.1 Security in Development
 - [x] **Secure-Coding-Guidelines**
   - ESLint Security-Rules ✅
   - Bandit (Python) ✅
@@ -195,7 +195,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.14.2 Security in Support Processes
+#### A.14.2 Security in Support Processes
 - [x] **Patch-Management**
   - Dependabot ✅
   - Monthly-Updates
@@ -209,9 +209,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** A.16: INCIDENT MANAGEMENT
+### A.16: INCIDENT MANAGEMENT
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.16.1 Incident Response
+#### A.16.1 Incident Response
 - [x] **Incident-Response-Plan**
   - Datei: `SECURITY.md` ✅
   - Runbooks: `docs/operations/on-call-schedule.md` ✅
@@ -229,9 +229,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** A.17: BUSINESS CONTINUITY
+### A.17: BUSINESS CONTINUITY
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.17.1 Business Continuity Management
+#### A.17.1 Business Continuity Management
 - [ ] **Business-Impact-Analysis** (BIA)
   - Kritische Prozesse identifizieren
   - RTO/RPO definieren
@@ -249,9 +249,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** A.18: COMPLIANCE
+### A.18: COMPLIANCE
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** A.18.1 Compliance with Legal Requirements
+#### A.18.1 Compliance with Legal Requirements
 - [x] **GDPR:** 46% (in progress)
 - [x] **GoBD:** 92% (mostly compliant)
 - [ ] **Branchenspezifisch:**
@@ -263,7 +263,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 📊 **ISO 27001 COMPLIANCE-SCORE**
+## 📊 **ISO 27001 COMPLIANCE-SCORE**
 
 | Annex A Control | Status | Score | Priority |
 |-----------------|--------|-------|----------|
@@ -286,19 +286,19 @@
 
 ---
 
-***REMOVED******REMOVED*** 🚀 **ROADMAP ZUR ZERTIFIZIERUNG**
+## 🚀 **ROADMAP ZUR ZERTIFIZIERUNG**
 
-***REMOVED******REMOVED******REMOVED*** Monat 1:
+### Monat 1:
 - ✅ Encryption-at-Rest implementieren
 - ✅ WAF einrichten
 - ✅ Asset-Register erstellen
 
-***REMOVED******REMOVED******REMOVED*** Monat 2:
+### Monat 2:
 - ✅ Business-Continuity-Plan erstellen
 - ✅ Disaster-Recovery-Tests durchführen
 - ✅ Vulnerability-Management-Process
 
-***REMOVED******REMOVED******REMOVED*** Monat 3:
+### Monat 3:
 - ✅ Externe Audit (ISO 27001 Assessor)
 - ✅ Gap-Remediation
 - ✅ Zertifizierungs-Audit
@@ -307,7 +307,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 📞 **ISO 27001 CONTACT**
+## 📞 **ISO 27001 CONTACT**
 
 **Information-Security-Officer:**
 - Name: [CISO]
@@ -316,4 +316,5 @@
 **External-Auditor:**
 - Company: [Zertifizierungsstelle]
 - Contact: [Auditor-Name]
+
 

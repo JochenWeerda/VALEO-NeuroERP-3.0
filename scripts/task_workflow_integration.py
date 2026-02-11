@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Integration zwischen Tasks und langgraph-Workflow.
 Verbindet die Task-Verwaltung mit dem APM-Framework.
@@ -13,14 +13,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 
-***REMOVED*** Pfad zum Projektverzeichnis hinzufügen
+# Pfad zum Projektverzeichnis hinzufügen
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from backend.apm_framework.apm_workflow import APMWorkflow
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 from linkup_mcp.langgraph_integration import LangGraphIntegration, AgentType
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -56,8 +56,8 @@ class TaskWorkflowIntegration:
         for line in content.split("\n"):
             line = line.strip()
             
-            ***REMOVED*** Agent-Sektion erkennen
-            if line.startswith("***REMOVED******REMOVED*** "):
+            # Agent-Sektion erkennen
+            if line.startswith("## "):
                 agent = line[3:].split(" ")[0]
                 if agent in tasks_by_agent:
                     current_agent = agent
@@ -65,15 +65,15 @@ class TaskWorkflowIntegration:
                     current_task = None
                 continue
             
-            ***REMOVED*** Priorität erkennen
-            if line.startswith("***REMOVED******REMOVED******REMOVED*** "):
+            # Priorität erkennen
+            if line.startswith("### "):
                 if "hoch" in line.lower():
                     current_priority = "high"
                 else:
                     current_priority = "normal"
                 continue
             
-            ***REMOVED*** Task erkennen
+            # Task erkennen
             if line.startswith("- [ ]") and current_agent and current_priority:
                 task_title = line[5:].strip()
                 current_task = {
@@ -85,7 +85,7 @@ class TaskWorkflowIntegration:
                 tasks_by_agent[current_agent][current_priority].append(current_task)
                 continue
             
-            ***REMOVED*** Task-Details erkennen
+            # Task-Details erkennen
             if current_task and line.startswith("  - "):
                 detail = line[4:].strip()
                 if "Kontext:" in detail:
@@ -103,7 +103,7 @@ class TaskWorkflowIntegration:
         """Aktualisiert den Workflow-Status basierend auf den Tasks."""
         tasks = self._parse_tasks()
         
-        ***REMOVED*** Aktuelle Phase bestimmen
+        # Aktuelle Phase bestimmen
         current_phase = None
         max_tasks = 0
         
@@ -113,7 +113,7 @@ class TaskWorkflowIntegration:
                 max_tasks = total_tasks
                 current_phase = agent
         
-        ***REMOVED*** Workflow-Status aktualisieren
+        # Workflow-Status aktualisieren
         workflow_state = {
             "current_phase": current_phase,
             "last_update": datetime.now().isoformat(),
@@ -127,7 +127,7 @@ class TaskWorkflowIntegration:
             }
         }
         
-        ***REMOVED*** Status in MongoDB speichern
+        # Status in MongoDB speichern
         connector = APMMongoDBConnector(self.mongodb_uri, self.db_name)
         await connector.connect()
         await connector.insert_one("workflow_states", workflow_state)
@@ -143,10 +143,10 @@ class TaskWorkflowIntegration:
         if agent not in tasks:
             return []
         
-        ***REMOVED*** Zuerst Hochprioritäts-Tasks
+        # Zuerst Hochprioritäts-Tasks
         next_tasks = tasks[agent]["high"]
         
-        ***REMOVED*** Wenn keine Hochprioritäts-Tasks, dann normale Priorität
+        # Wenn keine Hochprioritäts-Tasks, dann normale Priorität
         if not next_tasks:
             next_tasks = tasks[agent]["normal"]
         
@@ -160,14 +160,14 @@ class TaskWorkflowIntegration:
             logger.info(f"Keine Tasks für Agent {agent_type.value}")
             return
         
-        ***REMOVED*** Workflow-Kontext erstellen
+        # Workflow-Kontext erstellen
         context = {
             "agent_type": agent_type.value,
             "tasks": tasks,
             "timestamp": datetime.now().isoformat()
         }
         
-        ***REMOVED*** Workflow ausführen
+        # Workflow ausführen
         try:
             result = await self.langgraph.run_workflow(
                 workflow_id=f"{agent_type.value}_workflow",
@@ -175,7 +175,7 @@ class TaskWorkflowIntegration:
                 start_agent=agent_type
             )
             
-            ***REMOVED*** Ergebnis in MongoDB speichern
+            # Ergebnis in MongoDB speichern
             connector = APMMongoDBConnector(self.mongodb_uri, self.db_name)
             await connector.connect()
             await connector.insert_one(
@@ -199,22 +199,22 @@ async def main():
     try:
         integration = TaskWorkflowIntegration()
         
-        ***REMOVED*** MongoDB-Verbindung testen
+        # MongoDB-Verbindung testen
         connector = APMMongoDBConnector(integration.mongodb_uri, integration.db_name)
         if not await connector.connect():
             logger.error("Keine Verbindung zu MongoDB möglich")
             return
         
-        ***REMOVED*** Collections erstellen
+        # Collections erstellen
         collections = ["workflow_states", "task_history", "agent_results"]
         for collection in collections:
             await connector.create_collection(collection)
         
-        ***REMOVED*** Workflow-Status aktualisieren
+        # Workflow-Status aktualisieren
         state = await integration.update_workflow_state()
         logger.info(f"Aktueller Workflow-Status: {json.dumps(state, indent=2)}")
         
-        ***REMOVED*** Test mit VAN-Agent
+        # Test mit VAN-Agent
         van_result = await integration.run_agent_workflow(AgentType.VAN)
         if van_result:
             logger.info(f"VAN-Workflow Ergebnis: {json.dumps(van_result, indent=2)}")

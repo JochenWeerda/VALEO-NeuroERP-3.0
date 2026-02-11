@@ -1,4 +1,4 @@
-***REMOVED*** VALEO NeuroERP – Rollenbasierte UI Roadmap
+# VALEO NeuroERP – Rollenbasierte UI Roadmap
 
 **Erstellt:** 2026-02-06
 **Verantwortlich:** Claude Code (Opus 4.5)
@@ -6,7 +6,7 @@
 
 ---
 
-***REMOVED******REMOVED*** Ziel
+## Ziel
 
 Transformation der VALEO ERP-Oberfläche zu einer **rollenbasierten, mobile-first Experience** für verschiedene Benutzergruppen:
 
@@ -18,21 +18,21 @@ Transformation der VALEO ERP-Oberfläche zu einer **rollenbasierten, mobile-firs
 
 ---
 
-***REMOVED******REMOVED*** Aktuelle Arbeit (Claude Code)
+## Aktuelle Arbeit (Claude Code)
 
-***REMOVED******REMOVED******REMOVED*** Phase 1: Portal für Landwirte (Priorität 1)
+### Phase 1: Portal für Landwirte (Priorität 1)
 
 **Betroffene Dateien:**
 ```
 packages/frontend-web/src/
-├── pages/portal/           ***REMOVED*** Alle Portal-Seiten
-│   ├── index.tsx          ***REMOVED*** Dashboard
-│   ├── shop.tsx           ***REMOVED*** Bestellungen
-│   ├── bestellungen.tsx   ***REMOVED*** Bestellhistorie
+├── pages/portal/           # Alle Portal-Seiten
+│   ├── index.tsx          # Dashboard
+│   ├── shop.tsx           # Bestellungen
+│   ├── bestellungen.tsx   # Bestellhistorie
 │   └── ...
-├── components/portal/      ***REMOVED*** NEU: Portal-spezifische Komponenten
-├── hooks/useOfflineSync.ts ***REMOVED*** NEU: Offline-Sync Hook
-└── lib/service-worker.ts   ***REMOVED*** Erweitern für Offline-Bestellungen
+├── components/portal/      # NEU: Portal-spezifische Komponenten
+├── hooks/useOfflineSync.ts # NEU: Offline-Sync Hook
+└── lib/service-worker.ts   # Erweitern für Offline-Bestellungen
 ```
 
 **Tasks:**
@@ -42,21 +42,21 @@ packages/frontend-web/src/
 4. Quick-Reorder Cards
 5. Big Touch Targets (48px minimum)
 
-***REMOVED******REMOVED******REMOVED*** Phase 2: Warehouse Terminal (Priorität 2) ✅
+### Phase 2: Warehouse Terminal (Priorität 2) ✅
 
 **Implementierte Dateien:**
 ```
 packages/frontend-web/src/
-├── pages/lager/terminal.tsx           ***REMOVED*** Warehouse Terminal Hauptseite
+├── pages/lager/terminal.tsx           # Warehouse Terminal Hauptseite
 ├── components/warehouse/
-│   ├── index.ts                       ***REMOVED*** Export aller Warehouse-Komponenten
-│   ├── WarehouseLayout.tsx            ***REMOVED*** Layout mit High-Contrast Theme
-│   ├── ScannerInput.tsx               ***REMOVED*** Touch-optimiertes Scanner-Input
-│   ├── ScanResult.tsx                 ***REMOVED*** Artikel-Info nach Scan
-│   └── QuickActionGrid.tsx            ***REMOVED*** Große Aktions-Buttons
-├── themes/warehouse-theme.ts          ***REMOVED*** High-Contrast Theme (Schwarz/Gelb)
-├── hooks/useBarcodeScan.ts            ***REMOVED*** Keyboard & Kamera Scanner
-└── hooks/useWarehouseTheme.ts         ***REMOVED*** Theme-Verwaltung
+│   ├── index.ts                       # Export aller Warehouse-Komponenten
+│   ├── WarehouseLayout.tsx            # Layout mit High-Contrast Theme
+│   ├── ScannerInput.tsx               # Touch-optimiertes Scanner-Input
+│   ├── ScanResult.tsx                 # Artikel-Info nach Scan
+│   └── QuickActionGrid.tsx            # Große Aktions-Buttons
+├── themes/warehouse-theme.ts          # High-Contrast Theme (Schwarz/Gelb)
+├── hooks/useBarcodeScan.ts            # Keyboard & Kamera Scanner
+└── hooks/useWarehouseTheme.ts         # Theme-Verwaltung
 ```
 
 **Features:**
@@ -67,16 +67,16 @@ packages/frontend-web/src/
 - EAN-13, EAN-8, Code 128, Code 39, QR-Code Unterstützung
 - Akustisches Feedback bei Scan
 
-***REMOVED******REMOVED******REMOVED*** Phase 3: Field Service App (Priorität 3) ✅
+### Phase 3: Field Service App (Priorität 3) ✅
 
 **Implementierte Dateien:**
 ```
 packages/frontend-web/src/
 ├── components/field-service/
-│   ├── index.ts                       ***REMOVED*** Export aller Field-Service-Komponenten
-│   ├── LocationCard.tsx               ***REMOVED*** Kundenstandort mit Navigation
-│   └── TourList.tsx                   ***REMOVED*** Tagestour mit Sortierung
-└── hooks/useGeolocation.ts            ***REMOVED*** GPS-Integration
+│   ├── index.ts                       # Export aller Field-Service-Komponenten
+│   ├── LocationCard.tsx               # Kundenstandort mit Navigation
+│   └── TourList.tsx                   # Tagestour mit Sortierung
+└── hooks/useGeolocation.ts            # GPS-Integration
 ```
 
 **Features:**
@@ -86,17 +86,17 @@ packages/frontend-web/src/
 - TanStack Query für Daten-Management
 - Metro Design für Tablet-Optimierung
 
-***REMOVED******REMOVED******REMOVED*** Phase 4: Innendienst / Power-User (Priorität 4) ✅
+### Phase 4: Innendienst / Power-User (Priorität 4) ✅
 
 **Implementierte Dateien:**
 ```
 packages/frontend-web/src/
 ├── components/innendienst/
-│   ├── index.ts                       ***REMOVED*** Export aller Innendienst-Komponenten
-│   ├── CommandPalette.tsx             ***REMOVED*** Ctrl+K Command Palette
-│   ├── QuickSearch.tsx                ***REMOVED*** Globale Schnellsuche (Ctrl+/)
-│   └── KeyboardShortcutsHelp.tsx      ***REMOVED*** Shift+? Shortcuts-Übersicht
-└── hooks/useGlobalShortcuts.ts        ***REMOVED*** Bestehendes Shortcut-System
+│   ├── index.ts                       # Export aller Innendienst-Komponenten
+│   ├── CommandPalette.tsx             # Ctrl+K Command Palette
+│   ├── QuickSearch.tsx                # Globale Schnellsuche (Ctrl+/)
+│   └── KeyboardShortcutsHelp.tsx      # Shift+? Shortcuts-Übersicht
+└── hooks/useGlobalShortcuts.ts        # Bestehendes Shortcut-System
 ```
 
 **Features:**
@@ -107,18 +107,18 @@ packages/frontend-web/src/
 - TanStack Query für Echtzeit-Suchergebnisse
 - Letzte Suchen im LocalStorage
 
-***REMOVED******REMOVED******REMOVED*** Phase 5: Management / Executive Dashboard (Priorität 5) ✅
+### Phase 5: Management / Executive Dashboard (Priorität 5) ✅
 
 **Implementierte Dateien:**
 ```
 packages/frontend-web/src/
 ├── pages/management/
-│   └── executive-dashboard.tsx        ***REMOVED*** Hauptseite Executive Dashboard
+│   └── executive-dashboard.tsx        # Hauptseite Executive Dashboard
 ├── components/management/
-│   ├── index.ts                       ***REMOVED*** Export aller Management-Komponenten
-│   ├── KPICard.tsx                    ***REMOVED*** KPI-Karten mit Trends & Sparklines
-│   ├── AlertWidget.tsx                ***REMOVED*** Handlungsbedarf-Warnungen
-│   └── TrendChart.tsx                 ***REMOVED*** Trend-Diagramme
+│   ├── index.ts                       # Export aller Management-Komponenten
+│   ├── KPICard.tsx                    # KPI-Karten mit Trends & Sparklines
+│   ├── AlertWidget.tsx                # Handlungsbedarf-Warnungen
+│   └── TrendChart.tsx                 # Trend-Diagramme
 ```
 
 **Features:**
@@ -132,7 +132,7 @@ packages/frontend-web/src/
 
 ---
 
-***REMOVED******REMOVED*** Abgrenzung zu anderen Arbeiten
+## Abgrenzung zu anderen Arbeiten
 
 **Claude Code arbeitet an:**
 - `packages/frontend-web/src/pages/portal/*`
@@ -152,7 +152,7 @@ packages/frontend-web/src/
 
 ---
 
-***REMOVED******REMOVED*** Timeline
+## Timeline
 
 | Phase | Dauer | Status |
 |-------|-------|--------|
@@ -167,31 +167,31 @@ packages/frontend-web/src/
 
 ---
 
-***REMOVED******REMOVED*** Technische Entscheidungen
+## Technische Entscheidungen
 
-***REMOVED******REMOVED******REMOVED*** Offline-First
+### Offline-First
 - Service Worker mit Workbox (bereits via vite-plugin-pwa)
 - IndexedDB für Offline-Queue (Bestellungen)
 - Background Sync API für automatisches Senden
 
-***REMOVED******REMOVED******REMOVED*** Voice Integration
+### Voice Integration
 - Web Speech API (SpeechRecognition)
 - Fallback: Manuelle Eingabe
 - Kommandos: "Bestelle [Menge] [Artikel]", "Suche [Begriff]"
 
-***REMOVED******REMOVED******REMOVED*** Touch-Optimierung
+### Touch-Optimierung
 - Minimum 48x48px Touch Targets (WCAG 2.1)
 - Swipe-Gesten für häufige Aktionen
 - Haptic Feedback wo verfügbar
 
-***REMOVED******REMOVED******REMOVED*** Warehouse Terminal
+### Warehouse Terminal
 - High-Contrast Theme mit CSS Custom Properties
 - Barcode-Scanner via Keyboard-Emulation (schnelle Tastenfolge = Scanner)
 - BarcodeDetector API für Kamera-Scan (Chrome)
 - EAN/UPC Prüfziffern-Validierung
 - Akustisches Feedback via Web Audio API
 
-***REMOVED******REMOVED******REMOVED*** Field Service (GPS)
+### Field Service (GPS)
 - Geolocation API mit High-Accuracy Mode
 - Haversine-Formel für Distanzberechnung
 - Native Navigation via Deep Links (Google Maps / Apple Maps)
@@ -200,37 +200,37 @@ packages/frontend-web/src/
 
 ---
 
-***REMOVED******REMOVED*** Erstellte Komponenten (Übersicht)
+## Erstellte Komponenten (Übersicht)
 
-***REMOVED******REMOVED******REMOVED*** Portal (Landwirt)
+### Portal (Landwirt)
 - `OfflineIndicator` - Online/Offline Status Banner
 - `QuickReorderCards` - 1-Tap Nachbestellung
 - `PendingOrdersBanner` - Offline-Bestellungen Sync-Status
 - `VoiceOrderButton` - Sprachbestellung mit Parser
 
-***REMOVED******REMOVED******REMOVED*** Warehouse (Lagerist)
+### Warehouse (Lagerist)
 - `WarehouseLayout` - Layout mit Theme & Navigation
 - `ScannerInput` - Touch-optimiertes Barcode-Input
 - `ScanResult` - Artikel-Info nach Scan
 - `QuickActionGrid` - Große Aktions-Buttons
 
-***REMOVED******REMOVED******REMOVED*** Field Service (Außendienst)
+### Field Service (Außendienst)
 - `LocationCard` - Kundenstandort mit Navigation
 - `TourList` - Sortierte Tagestour
 
-***REMOVED******REMOVED******REMOVED*** Innendienst (Power-User)
+### Innendienst (Power-User)
 - `CommandPalette` - Ctrl+K Schnellzugriff
 - `QuickSearch` - Globale Suche mit Recent
 - `KeyboardShortcutsHelp` - Shift+? Hilfe-Overlay
 
-***REMOVED******REMOVED******REMOVED*** Management (Executive)
+### Management (Executive)
 - `KPICard` + `KPIGrid` - Kennzahlen mit Trends
 - `AlertWidget` + `AlertSummary` - Handlungsbedarf
 - `TrendChart` + `TrendIndicator` - Zeitreihen-Visualisierung
 
 ---
 
-***REMOVED******REMOVED*** Status: ABGESCHLOSSEN ✅
+## Status: ABGESCHLOSSEN ✅
 
 Alle 5 Benutzerrollen sind implementiert:
 1. ✅ Landwirt (Portal) - Mobile, Offline, Voice
@@ -242,3 +242,4 @@ Alle 5 Benutzerrollen sind implementiert:
 ---
 
 *Letzte Aktualisierung: 2026-02-06 durch Claude Code*
+

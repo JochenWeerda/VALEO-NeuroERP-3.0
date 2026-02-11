@@ -1,4 +1,4 @@
-***REMOVED*** Sprint 4 Progress - Zwischenstand
+# Sprint 4 Progress - Zwischenstand
 
 **Datum:** 2025-01-30  
 **Sprint:** 4  
@@ -6,9 +6,9 @@
 
 ---
 
-***REMOVED******REMOVED*** ✅ Abgeschlossene Tasks
+## ✅ Abgeschlossene Tasks
 
-***REMOVED******REMOVED******REMOVED*** PROC-RFQ-01: RFQ vervollständigen
+### PROC-RFQ-01: RFQ vervollständigen
 - ✅ **Status:** Abgeschlossen
 - ✅ RFQ-Versand an Lieferanten implementiert
 - ✅ RFQ-Status-Workflow vervollständigt
@@ -21,9 +21,9 @@
 
 ---
 
-***REMOVED******REMOVED*** ⏳ In Arbeit / Geplant
+## ⏳ In Arbeit / Geplant
 
-***REMOVED******REMOVED******REMOVED*** PROC-SUP-02: Lieferantenbewertung
+### PROC-SUP-02: Lieferantenbewertung
 - ✅ Analyse abgeschlossen
 - ⏳ Bewertungs-UI erstellen (begonnen, nicht abgeschlossen)
 - ⏳ Kriterien-System implementieren
@@ -31,7 +31,7 @@
 - ⏳ Sperr-/Freigabelogik basierend auf Score
 - ⏳ i18n vollständig integrieren
 
-***REMOVED******REMOVED******REMOVED*** PROC-REP-01: Standardreports Einkauf
+### PROC-REP-01: Standardreports Einkauf
 - ⏳ Report-Infrastructure prüfen
 - ⏳ Offene Bestellungen-Report erstellen
 - ⏳ Spend-Analyse-Report erstellen
@@ -40,7 +40,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 📝 Nächste Schritte (wenn fortgesetzt)
+## 📝 Nächste Schritte (wenn fortgesetzt)
 
 1. PROC-SUP-02: Bewertungs-UI im "qs" Tab vervollständigen
 2. PROC-REP-01: Einfache Reports erstellen
@@ -50,4 +50,5 @@
 ---
 
 **Status:** ⏸️ **GESTOPPT - BEREIT FÜR FORTSETZUNG**
+
 

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Überprüft die Vollständigkeit der MongoDB-Datenbank und erstellt eine Zusammenfassung.
 """
@@ -9,7 +9,7 @@ import datetime
 import pymongo
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -20,7 +20,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("CheckMongoDBCompleteness")
 
-***REMOVED*** MongoDB-Konfiguration
+# MongoDB-Konfiguration
 MONGODB_CONNECTION_STRING = "mongodb://localhost:27017/"
 MONGODB_DATABASE_NAME = "valeo_neuroerp"
 
@@ -37,7 +37,7 @@ def check_mongodb_connection():
             MONGODB_CONNECTION_STRING,
             serverSelectionTimeoutMS=5000
         )
-        ***REMOVED*** Verbindung testen
+        # Verbindung testen
         client.admin.command('ping')
         logger.info("Verbindung zu MongoDB erfolgreich hergestellt.")
         client.close()
@@ -56,14 +56,14 @@ def check_collections():
     logger.info("Überprüfe MongoDB-Sammlungen...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         
-        ***REMOVED*** Alle Sammlungen abrufen
+        # Alle Sammlungen abrufen
         collections = db.list_collection_names()
         
-        ***REMOVED*** Erwartete Sammlungen
+        # Erwartete Sammlungen
         expected_collections = [
             "project_structure",
             "tasks",
@@ -86,22 +86,22 @@ def check_collections():
             "backup_cursor"
         ]
         
-        ***REMOVED*** Überprüfen, ob alle erwarteten Sammlungen vorhanden sind
+        # Überprüfen, ob alle erwarteten Sammlungen vorhanden sind
         missing_collections = [collection for collection in expected_collections if collection not in collections]
         
-        ***REMOVED*** Anzahl der Dokumente in jeder Sammlung zählen
+        # Anzahl der Dokumente in jeder Sammlung zählen
         collection_counts = {}
         for collection in collections:
             count = db[collection].count_documents({})
             collection_counts[collection] = count
         
-        ***REMOVED*** Größe jeder Sammlung berechnen
+        # Größe jeder Sammlung berechnen
         collection_sizes = {}
         for collection in collections:
             size = db.command("collStats", collection)["size"]
             collection_sizes[collection] = size
         
-        ***REMOVED*** Ergebnis zusammenstellen
+        # Ergebnis zusammenstellen
         result = {
             "collections": collections,
             "expected_collections": expected_collections,
@@ -127,20 +127,20 @@ def check_indexes():
     logger.info("Überprüfe MongoDB-Indizes...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         
-        ***REMOVED*** Alle Sammlungen abrufen
+        # Alle Sammlungen abrufen
         collections = db.list_collection_names()
         
-        ***REMOVED*** Indizes für jede Sammlung abrufen
+        # Indizes für jede Sammlung abrufen
         indexes = {}
         for collection in collections:
             index_info = db[collection].index_information()
             indexes[collection] = list(index_info.keys())
         
-        ***REMOVED*** Ergebnis zusammenstellen
+        # Ergebnis zusammenstellen
         result = {
             "indexes": indexes,
             "timestamp": datetime.datetime.now()
@@ -166,18 +166,18 @@ def save_summary(collections_info, indexes_info):
     logger.info("Speichere Zusammenfassung der MongoDB-Datenbank...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         
-        ***REMOVED*** Zusammenfassung erstellen
+        # Zusammenfassung erstellen
         summary = {
             "collections_info": collections_info,
             "indexes_info": indexes_info,
             "timestamp": datetime.datetime.now()
         }
         
-        ***REMOVED*** Zusammenfassung speichern
+        # Zusammenfassung speichern
         db.mongodb_summary.delete_many({})
         db.mongodb_summary.insert_one(summary)
         
@@ -200,14 +200,14 @@ def print_summary(collections_info, indexes_info):
     print("MongoDB-Datenbank-Zusammenfassung".center(80))
     print("=" * 80)
     
-    ***REMOVED*** Sammlungen ausgeben
+    # Sammlungen ausgeben
     print("\nSammlungen:")
     for collection in sorted(collections_info["collections"]):
         count = collections_info["collection_counts"][collection]
         size = collections_info["collection_sizes"][collection]
         print(f"  {collection}: {count} Dokumente, {size / 1024:.2f} KB")
     
-    ***REMOVED*** Fehlende Sammlungen ausgeben
+    # Fehlende Sammlungen ausgeben
     if collections_info["missing_collections"]:
         print("\nFehlende Sammlungen:")
         for collection in collections_info["missing_collections"]:
@@ -215,14 +215,14 @@ def print_summary(collections_info, indexes_info):
     else:
         print("\nAlle erwarteten Sammlungen sind vorhanden.")
     
-    ***REMOVED*** Indizes ausgeben
+    # Indizes ausgeben
     print("\nIndizes:")
     for collection, indexes in sorted(indexes_info["indexes"].items()):
         print(f"  {collection}: {len(indexes)} Indizes")
         for index in indexes:
             print(f"    - {index}")
     
-    ***REMOVED*** Gesamtstatistik ausgeben
+    # Gesamtstatistik ausgeben
     total_documents = sum(collections_info["collection_counts"].values())
     total_size = sum(collections_info["collection_sizes"].values())
     print("\nGesamtstatistik:")
@@ -236,29 +236,29 @@ def main():
     """
     Hauptfunktion für die Überprüfung der Vollständigkeit der MongoDB-Datenbank.
     """
-    ***REMOVED*** MongoDB-Verbindung prüfen
+    # MongoDB-Verbindung prüfen
     if not check_mongodb_connection():
         logger.error("Konnte keine Verbindung zur MongoDB herstellen.")
         return 1
     
-    ***REMOVED*** Sammlungen überprüfen
+    # Sammlungen überprüfen
     collections_info = check_collections()
     if collections_info is None:
         logger.error("Konnte MongoDB-Sammlungen nicht überprüfen.")
         return 1
     
-    ***REMOVED*** Indizes überprüfen
+    # Indizes überprüfen
     indexes_info = check_indexes()
     if indexes_info is None:
         logger.error("Konnte MongoDB-Indizes nicht überprüfen.")
         return 1
     
-    ***REMOVED*** Zusammenfassung speichern
+    # Zusammenfassung speichern
     if not save_summary(collections_info, indexes_info):
         logger.error("Konnte Zusammenfassung der MongoDB-Datenbank nicht speichern.")
         return 1
     
-    ***REMOVED*** Zusammenfassung ausgeben
+    # Zusammenfassung ausgeben
     print_summary(collections_info, indexes_info)
     
     logger.info("Überprüfung der Vollständigkeit der MongoDB-Datenbank erfolgreich abgeschlossen.")

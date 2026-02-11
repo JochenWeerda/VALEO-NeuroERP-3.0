@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Dynamischer L3-Navigator mit prozentualen Koordinaten
 
@@ -19,7 +19,7 @@ class DynamicNavigator:
             csv_path: Pfad zur GUI-Map CSV
         """
         if csv_path is None:
-            ***REMOVED*** Suche CSV im aktuellen Verzeichnis
+            # Suche CSV im aktuellen Verzeichnis
             local_csv = Path(__file__).parent / "l3_gui_map.csv"
             if local_csv.exists():
                 csv_path = str(local_csv)
@@ -120,12 +120,12 @@ class DynamicNavigator:
         return list(self.gui_map.keys())
 
 
-***REMOVED*** L3-Masken Navigation mit prozentualen Koordinaten
+# L3-Masken Navigation mit prozentualen Koordinaten
 L3_MASKS_DYNAMIC = [
     {
         "id": "kundenstamm",
         "name": "Kundenstamm",
-        "clicks": ["Kunden"],  ***REMOVED*** Element-Namen aus CSV
+        "clicks": ["Kunden"],  # Element-Namen aus CSV
         "wait": 3
     },
     {
@@ -191,7 +191,7 @@ def main():
         print("\n✅ Kopieren Sie diesen Code in browser_evaluate()")
     
     else:
-        ***REMOVED*** Beispiel: Koordinaten für 1920x1024 Canvas
+        # Beispiel: Koordinaten für 1920x1024 Canvas
         print("📊 Beispiel-Koordinaten für 1920×1024 Canvas:\n")
         for elem_name in ['Kunden', 'ERFASSUNG', 'LAGER']:
             if elem_name in nav.gui_map:
@@ -201,4 +201,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 

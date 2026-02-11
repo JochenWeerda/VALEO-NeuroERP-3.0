@@ -11,13 +11,13 @@ function Write-Ok($msg) { Write-Host "[OK]   $msg" -ForegroundColor Green }
 function Write-Warn($msg) { Write-Host "[WARN] $msg" -ForegroundColor Yellow }
 function Write-Err($msg) { Write-Host "[ERR]  $msg" -ForegroundColor Red }
 
-***REMOVED*** Repo-Root setzen
+# Repo-Root setzen
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot = Resolve-Path (Join-Path $ScriptDir '..')
 Set-Location $RepoRoot
 Write-Info "RepoRoot: $RepoRoot"
 
-***REMOVED*** Optional: requirements.txt erzeugen aus venv
+# Optional: requirements.txt erzeugen aus venv
 $venvActivate = Join-Path $RepoRoot 'venv\Scripts\Activate.ps1'
 $reqPath = Join-Path $RepoRoot 'backend\requirements.txt'
 if (Test-Path $venvActivate) {
@@ -42,20 +42,20 @@ if (Test-Path $venvActivate) {
   }
 }
 
-***REMOVED*** Optional: Builder-Cache leeren
+# Optional: Builder-Cache leeren
 if ($Prune) {
   Write-Info 'Leere Docker Builder Cache (docker builder prune -af)'
   try { docker builder prune -af } catch { Write-Warn $_ }
 }
 
-***REMOVED*** Docker Compose Down und Konflikt-Container räumen
+# Docker Compose Down und Konflikt-Container räumen
 Write-Info 'Stoppe und entferne bestehende Compose-Services (inkl. Volumes)'
 try { docker compose down -v } catch { Write-Warn $_ }
 foreach ($c in @('valeo-neuroerp-backend','valeo-neuroerp-frontend','valeo-neuroerp-postgres','valeo-neuroerp-redis','valeo-neuroerp-nginx','valeo-neuroerp-prometheus','valeo-neuroerp-grafana')) {
   try { docker rm -f $c 2>$null | Out-Null } catch { }
 }
 
-***REMOVED*** Build
+# Build
 if ($UseCache) {
   Write-Info 'Baue Docker-Images (mit Cache)'
   docker compose build
@@ -74,16 +74,16 @@ if ($LASTEXITCODE -ne 0) {
   }
 }
 
-***REMOVED*** Up
+# Up
 Write-Info 'Starte Services im Hintergrund'
  docker compose up -d
 if ($LASTEXITCODE -ne 0) { Write-Err 'docker compose up -d fehlgeschlagen'; exit 1 }
 
-***REMOVED*** Übersicht
+# Übersicht
 Write-Info 'Laufende Container:'
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
-***REMOVED*** Health Checks
+# Health Checks
 function Wait-Http($url, $timeoutSec = 60) {
   $stopAt = (Get-Date).AddSeconds($timeoutSec)
   while ((Get-Date) -lt $stopAt) {
@@ -109,3 +109,4 @@ if (Wait-Http 'http://localhost:3000' 60) {
 }
 
 Write-Ok 'Rebuild/Restart abgeschlossen.'
+

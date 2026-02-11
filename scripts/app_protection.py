@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 App-Schutz für VALEO-NeuroERP
@@ -21,7 +21,7 @@ import subprocess
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Set, Tuple
 
-***REMOVED*** Importiere den ErrorHandler
+# Importiere den ErrorHandler
 try:
     from error_handler import error_handler, handle_exception
 except ImportError:
@@ -32,14 +32,14 @@ except ImportError:
         print("ErrorHandler konnte nicht importiert werden. Stelle sicher, dass error_handler.py existiert.")
         sys.exit(1)
 
-***REMOVED*** Konfiguration
+# Konfiguration
 PROTECTION_CONFIG = "config/app_protection.yaml"
 LOCK_FILE = "config/app.lock"
-INTEGRITY_CHECK_INTERVAL = 60  ***REMOVED*** Sekunden
-AUTO_BACKUP_INTERVAL = 3600  ***REMOVED*** Sekunden (1 Stunde)
+INTEGRITY_CHECK_INTERVAL = 60  # Sekunden
+AUTO_BACKUP_INTERVAL = 3600  # Sekunden (1 Stunde)
 MAX_RECOVERY_ATTEMPTS = 3
 
-***REMOVED*** Logging konfigurieren
+# Logging konfigurieren
 LOG_DIR = "logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 logging.basicConfig(
@@ -64,7 +64,7 @@ class AppProtection:
         self.running = False
         self.lock_acquired = False
         
-        ***REMOVED*** Threads
+        # Threads
         self.integrity_thread = None
         self.backup_thread = None
     
@@ -107,14 +107,14 @@ class AppProtection:
                 with open(PROTECTION_CONFIG, "r") as f:
                     config = yaml.safe_load(f)
                 
-                ***REMOVED*** Fehlende Konfigurationsoptionen mit Standardwerten ergänzen
+                # Fehlende Konfigurationsoptionen mit Standardwerten ergänzen
                 for key, value in default_config.items():
                     if key not in config:
                         config[key] = value
                 
                 return config
             else:
-                ***REMOVED*** Konfigurationsdatei erstellen, falls sie nicht existiert
+                # Konfigurationsdatei erstellen, falls sie nicht existiert
                 os.makedirs(os.path.dirname(PROTECTION_CONFIG), exist_ok=True)
                 with open(PROTECTION_CONFIG, "w") as f:
                     yaml.dump(default_config, f)
@@ -137,26 +137,26 @@ class AppProtection:
         """Versucht, die App-Sperre zu erwerben."""
         try:
             if os.path.exists(LOCK_FILE):
-                ***REMOVED*** Prüfen, ob die Sperre noch gültig ist
+                # Prüfen, ob die Sperre noch gültig ist
                 with open(LOCK_FILE, "r") as f:
                     lock_data = json.load(f)
                 
                 pid = lock_data.get("pid")
                 timestamp = lock_data.get("timestamp", 0)
                 
-                ***REMOVED*** Prüfen, ob der Prozess noch läuft
+                # Prüfen, ob der Prozess noch läuft
                 if pid and self._is_process_running(pid):
                     logger.warning(f"App-Sperre wird bereits von Prozess {pid} gehalten")
                     return False
                 
-                ***REMOVED*** Prüfen, ob die Sperre abgelaufen ist (älter als 1 Stunde)
+                # Prüfen, ob die Sperre abgelaufen ist (älter als 1 Stunde)
                 if time.time() - timestamp > 3600:
                     logger.warning("App-Sperre ist abgelaufen und wird übernommen")
                 else:
                     logger.warning(f"App-Sperre wird von einem anderen Prozess gehalten (PID: {pid})")
                     return False
             
-            ***REMOVED*** Sperre erwerben
+            # Sperre erwerben
             with open(LOCK_FILE, "w") as f:
                 json.dump({
                     "pid": os.getpid(),
@@ -192,11 +192,11 @@ class AppProtection:
     def _is_process_running(self, pid: int) -> bool:
         """Prüft, ob ein Prozess mit der angegebenen PID läuft."""
         try:
-            ***REMOVED*** Windows
+            # Windows
             if os.name == "nt":
                 output = subprocess.check_output(["tasklist", "/FI", f"PID eq {pid}"])
                 return str(pid) in output.decode()
-            ***REMOVED*** Unix
+            # Unix
             else:
                 os.kill(pid, 0)
                 return True
@@ -217,7 +217,7 @@ class AppProtection:
         """Initialisiert den App-Schutz."""
         logger.info("Initialisiere App-Schutz...")
         
-        ***REMOVED*** Geschützte Dateien registrieren
+        # Geschützte Dateien registrieren
         for file_path in self.config["protected_files"]:
             if os.path.exists(file_path):
                 self.protected_files.add(file_path)
@@ -226,11 +226,11 @@ class AppProtection:
             else:
                 logger.warning(f"Geschützte Datei {file_path} existiert nicht")
         
-        ***REMOVED*** Dateien auch beim ErrorHandler registrieren
+        # Dateien auch beim ErrorHandler registrieren
         for file_path in self.protected_files:
             error_handler.file_monitor.add_protected_file(file_path)
         
-        ***REMOVED*** Initiales Backup erstellen
+        # Initiales Backup erstellen
         self.create_backup("initial_protection_backup")
         
         logger.info(f"{len(self.protected_files)} Dateien werden geschützt")
@@ -248,7 +248,7 @@ class AppProtection:
         self.running = True
         logger.info("App-Schutz gestartet")
         
-        ***REMOVED*** Threads starten
+        # Threads starten
         self.integrity_thread = threading.Thread(target=self._integrity_check_loop, daemon=True)
         self.integrity_thread.start()
         
@@ -263,14 +263,14 @@ class AppProtection:
         self.running = False
         logger.info("App-Schutz wird gestoppt...")
         
-        ***REMOVED*** Auf Threads warten
+        # Auf Threads warten
         if self.integrity_thread and self.integrity_thread.is_alive():
             self.integrity_thread.join(timeout=5)
         
         if self.backup_thread and self.backup_thread.is_alive():
             self.backup_thread.join(timeout=5)
         
-        ***REMOVED*** Sperre freigeben
+        # Sperre freigeben
         self.release_lock()
         
         logger.info("App-Schutz gestoppt")
@@ -292,13 +292,13 @@ class AppProtection:
                     elif self.config["notify_on_changes"]:
                         logger.error(f"Zu viele Wiederherstellungsversuche ({self.recovery_attempts}). Automatische Wiederherstellung deaktiviert.")
                 else:
-                    ***REMOVED*** Zurücksetzen der Wiederherstellungsversuche, wenn keine Änderungen gefunden wurden
+                    # Zurücksetzen der Wiederherstellungsversuche, wenn keine Änderungen gefunden wurden
                     self.recovery_attempts = 0
             
             except Exception as e:
                 logger.error(f"Fehler bei der Integritätsprüfung: {str(e)}")
             
-            ***REMOVED*** Warten bis zur nächsten Prüfung
+            # Warten bis zur nächsten Prüfung
             for _ in range(int(self.config["integrity_check_interval"] / 0.1)):
                 if not self.running:
                     break
@@ -310,7 +310,7 @@ class AppProtection:
         
         while self.running:
             try:
-                ***REMOVED*** Prüfen, ob ein Backup fällig ist
+                # Prüfen, ob ein Backup fällig ist
                 if time.time() - self.last_backup > self.config["auto_backup_interval"]:
                     self.create_backup(f"auto_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
                     self.last_backup = time.time()
@@ -318,7 +318,7 @@ class AppProtection:
             except Exception as e:
                 logger.error(f"Fehler beim automatischen Backup: {str(e)}")
             
-            ***REMOVED*** Warten bis zum nächsten Backup
+            # Warten bis zum nächsten Backup
             for _ in range(int(self.config["auto_backup_interval"] / 10)):
                 if not self.running:
                     break
@@ -348,11 +348,11 @@ class AppProtection:
         
         for file_path in self.protected_files:
             if os.path.exists(file_path):
-                ***REMOVED*** Zielverzeichnis erstellen
+                # Zielverzeichnis erstellen
                 target_dir = os.path.join(backup_dir, os.path.dirname(file_path))
                 os.makedirs(target_dir, exist_ok=True)
                 
-                ***REMOVED*** Datei kopieren
+                # Datei kopieren
                 target_path = os.path.join(backup_dir, file_path)
                 shutil.copy2(file_path, target_path)
                 logger.info(f"Datei {file_path} gesichert nach {target_path}")
@@ -360,7 +360,7 @@ class AppProtection:
         logger.info(f"Backup erstellt: {backup_dir}")
         self.last_backup = time.time()
         
-        ***REMOVED*** Alte Backups aufräumen
+        # Alte Backups aufräumen
         self._cleanup_old_backups()
         
         return backup_dir
@@ -379,10 +379,10 @@ class AppProtection:
         if len(backups) <= max_backups:
             return
         
-        ***REMOVED*** Sortiere Backups nach Erstellungsdatum
+        # Sortiere Backups nach Erstellungsdatum
         backups.sort(key=lambda x: os.path.getctime(os.path.join(backup_dir, x)))
         
-        ***REMOVED*** Entferne die ältesten Backups
+        # Entferne die ältesten Backups
         for old_backup in backups[:-max_backups]:
             try:
                 shutil.rmtree(os.path.join(backup_dir, old_backup))
@@ -398,7 +398,7 @@ class AppProtection:
             logger.error(f"Backup-Verzeichnis {backup_dir} existiert nicht")
             return False
         
-        ***REMOVED*** Neuestes Backup finden
+        # Neuestes Backup finden
         backups = [d for d in os.listdir(backup_dir) 
                   if os.path.isdir(os.path.join(backup_dir, d)) and not d.startswith(".")]
         
@@ -406,7 +406,7 @@ class AppProtection:
             logger.error("Keine Backups gefunden")
             return False
         
-        ***REMOVED*** Sortiere Backups nach Erstellungsdatum (neueste zuerst)
+        # Sortiere Backups nach Erstellungsdatum (neueste zuerst)
         backups.sort(key=lambda x: os.path.getctime(os.path.join(backup_dir, x)), reverse=True)
         latest_backup = backups[0]
         
@@ -422,15 +422,15 @@ class AppProtection:
                 continue
             
             try:
-                ***REMOVED*** Zielverzeichnis erstellen
+                # Zielverzeichnis erstellen
                 target_dir = os.path.dirname(file_path)
                 os.makedirs(target_dir, exist_ok=True)
                 
-                ***REMOVED*** Datei kopieren
+                # Datei kopieren
                 shutil.copy2(backup_file, file_path)
                 logger.info(f"Datei {file_path} wiederhergestellt")
                 
-                ***REMOVED*** Hash aktualisieren
+                # Hash aktualisieren
                 self.file_hashes[file_path] = self.calculate_hash(file_path)
             
             except Exception as e:
@@ -448,10 +448,10 @@ class AppProtection:
         self.protected_files.add(file_path)
         self.file_hashes[file_path] = self.calculate_hash(file_path)
         
-        ***REMOVED*** Auch beim ErrorHandler registrieren
+        # Auch beim ErrorHandler registrieren
         error_handler.file_monitor.add_protected_file(file_path)
         
-        ***REMOVED*** Konfiguration aktualisieren
+        # Konfiguration aktualisieren
         if file_path not in self.config["protected_files"]:
             self.config["protected_files"].append(file_path)
             self.save_config()
@@ -465,7 +465,7 @@ class AppProtection:
             if file_path in self.file_hashes:
                 del self.file_hashes[file_path]
             
-            ***REMOVED*** Konfiguration aktualisieren
+            # Konfiguration aktualisieren
             if file_path in self.config["protected_files"]:
                 self.config["protected_files"].remove(file_path)
                 self.save_config()
@@ -483,7 +483,7 @@ class AppProtection:
             "config": self.config
         }
 
-***REMOVED*** Singleton-Instanz
+# Singleton-Instanz
 app_protection = AppProtection()
 
 @handle_exception
@@ -535,7 +535,7 @@ def get_status():
     return app_protection.get_status()
 
 if __name__ == "__main__":
-    ***REMOVED*** Kommandozeilenargumente verarbeiten
+    # Kommandozeilenargumente verarbeiten
     import argparse
     
     parser = argparse.ArgumentParser(description="App-Schutz für VALEO-NeuroERP")

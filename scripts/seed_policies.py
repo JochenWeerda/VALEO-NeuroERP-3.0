@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Seed-Script für Policy-Datenbank
 Befüllt die SQLite-Datenbank mit Standard-Policies
@@ -9,7 +9,7 @@ Ausführen: python scripts/seed_policies.py
 import sys
 from pathlib import Path
 
-***REMOVED*** Add project root to path
+# Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.policy import PolicyStore, Rule
@@ -68,4 +68,5 @@ def seed_policies():
 
 if __name__ == "__main__":
     seed_policies()
+
 

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Interaktive Demo für den VAN-Modus des APM-Frameworks.
 Ermöglicht die Eingabe von Antworten auf Klärungsfragen.
@@ -10,23 +10,23 @@ import asyncio
 import logging
 from pathlib import Path
 
-***REMOVED*** Pfad zum Projektverzeichnis hinzufügen
+# Pfad zum Projektverzeichnis hinzufügen
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from backend.apm_framework.apm_workflow import APMWorkflow
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 from backend.apm_framework.models import ClarificationItem
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Interaktiver RAG-Service für Demo
+# Interaktiver RAG-Service für Demo
 class InteractiveRAGService:
     async def query(self, prompt, agent_type=None):
         logger.info(f"RAG-Abfrage für {agent_type}: {prompt[:50]}...")
         
-        ***REMOVED*** Simulierte Antworten basierend auf dem Prompt-Inhalt
+        # Simulierte Antworten basierend auf dem Prompt-Inhalt
         if "Klärungsfragen" in prompt:
             return """
             1. Welche spezifischen Transaktionstypen müssen unterstützt werden?
@@ -37,28 +37,28 @@ class InteractiveRAGService:
             """
         elif "Analysiere folgende Anforderung" in prompt:
             return """
-            ***REMOVED*** Analyse der Transaktionsverarbeitung
+            # Analyse der Transaktionsverarbeitung
             
-            ***REMOVED******REMOVED*** Funktionale Anforderungen
+            ## Funktionale Anforderungen
             - Verarbeitung verschiedener Transaktionstypen (Eingang, Ausgang, Transfer)
             - Aktualisierung des Lagerbestands in Echtzeit
             - Vollständiges Audit-Logging für Compliance
             - Batch-Verarbeitung für Effizienz
             - Rollback-Mechanismus für Fehlerbehandlung
             
-            ***REMOVED******REMOVED*** Nicht-funktionale Anforderungen
+            ## Nicht-funktionale Anforderungen
             - Performance: 500ms Antwortzeit pro Transaktion
             - Skalierbarkeit: 10.000 Transaktionen/Stunde
             - Effizienz: Minimale Datenbankzugriffe
             - Konsistenz: Transaktionssicherheit bei Parallelzugriffen
             
-            ***REMOVED******REMOVED*** Systemgrenzen und Schnittstellen
+            ## Systemgrenzen und Schnittstellen
             - Integration mit PostgreSQL-Datenbank
             - Kompatibilität mit SQLAlchemy ORM
             - Speicherbegrenzung: 512MB pro Worker
             - Einhaltung des bestehenden Datenmodells
             
-            ***REMOVED******REMOVED*** Herausforderungen
+            ## Herausforderungen
             - Balance zwischen Batch-Größe und Speicherverbrauch
             - Fehlerbehandlung bei teilweise fehlgeschlagenen Batches
             - Optimierung der Datenbankzugriffe ohne Kompromisse bei der Datenintegrität
@@ -87,10 +87,10 @@ class InteractiveVANMode:
     async def run(self, requirement_text):
         """Führt den interaktiven VAN-Modus aus."""
         try:
-            ***REMOVED*** APM-Workflow initialisieren
+            # APM-Workflow initialisieren
             self.workflow = APMWorkflow(mongodb_uri=self.mongodb_uri, db_name=self.db_name)
             
-            ***REMOVED*** Eigenen RAG-Service mit interaktiver Benutzereingabe erstellen
+            # Eigenen RAG-Service mit interaktiver Benutzereingabe erstellen
             class CustomRAGService(InteractiveRAGService):
                 async def query(self, prompt, agent_type=None):
                     result = await super().query(prompt, agent_type)
@@ -99,20 +99,20 @@ class InteractiveVANMode:
             rag_service = CustomRAGService()
             self.workflow.set_rag_service(rag_service)
             
-            ***REMOVED*** Original VAN-Mode ausführen, aber get_answer_from_user überschreiben
+            # Original VAN-Mode ausführen, aber get_answer_from_user überschreiben
             original_get_answer = self.workflow.van_mode.get_answer_from_user
             self.workflow.van_mode.get_answer_from_user = self.get_answer_from_user
             
             logger.info("Starte interaktiven VAN-Mode")
             
-            ***REMOVED*** VAN-Mode ausführen
+            # VAN-Mode ausführen
             van_result = await self.workflow.run_van_mode(requirement_text)
             
-            ***REMOVED*** Ergebnis ausgeben
+            # Ergebnis ausgeben
             logger.info(f"VAN-Mode abgeschlossen mit ID: {van_result.get('id')}")
             logger.info(f"Analyse: {van_result.get('analysis')[:200]}...")
             
-            ***REMOVED*** Klärungsfragen und Antworten anzeigen
+            # Klärungsfragen und Antworten anzeigen
             clarifications = self.workflow.mongodb.find_many(
                 "clarifications",
                 {"project_id": self.workflow.project_id}
@@ -127,7 +127,7 @@ class InteractiveVANMode:
                 print(f"   Antwort: {clarification.get('answer')}")
                 print("-"*80)
             
-            ***REMOVED*** Verbindung schließen
+            # Verbindung schließen
             self.workflow.close()
             
             logger.info("Interaktiver VAN-Mode erfolgreich abgeschlossen")
@@ -143,12 +143,12 @@ class InteractiveVANMode:
 async def main():
     """Hauptfunktion zum Testen des interaktiven VAN-Modus"""
     try:
-        ***REMOVED*** Anforderungstext aus Datei lesen
+        # Anforderungstext aus Datei lesen
         requirement_file = Path(__file__).resolve().parent.parent / "data" / "transaktionsverarbeitung.txt"
         with open(requirement_file, "r", encoding="utf-8") as f:
             requirement_text = f.read()
         
-        ***REMOVED*** Interaktiven VAN-Modus starten
+        # Interaktiven VAN-Modus starten
         interactive_van = InteractiveVANMode()
         await interactive_van.run(requirement_text)
         

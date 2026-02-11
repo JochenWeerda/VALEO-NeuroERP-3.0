@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Analysiere die gefilterte PLZ 26XXX CSV mit verschiedenen Encodings
 """
@@ -11,7 +11,7 @@ from collections import defaultdict
 def try_different_encodings():
     csv_path = r"C:\Users\Jochen\Downloads\impdata2024_PLZ_26XXX.csv"
     
-    ***REMOVED*** Verschiedene Encodings ausprobieren
+    # Verschiedene Encodings ausprobieren
     encodings_to_try = [
         'utf-8-sig',
         'utf-8', 
@@ -32,14 +32,14 @@ def try_different_encodings():
                 reader = csv.DictReader(f, delimiter=';')
                 headers = reader.fieldnames
                 
-                ***REMOVED*** Erste Zeile lesen
+                # Erste Zeile lesen
                 first_row = next(reader)
                 
                 print(f"  ✓ ERFOLG mit {encoding}")
                 print(f"  Headers: {len(headers)} Spalten")
                 print(f"  Erste Zeile PLZ: {first_row.get('PLZ', 'N/A')}")
                 
-                ***REMOVED*** Teste deutsche Umlaute
+                # Teste deutsche Umlaute
                 for header in headers:
                     if 'begünstigten' in header.lower() or 'maßnahme' in header.lower():
                         print(f"  Umlaut-Test OK: {header[:50]}...")
@@ -59,7 +59,7 @@ def analyze_with_correct_encoding():
     csv_path = r"C:\Users\Jochen\Downloads\impdata2024_PLZ_26XXX.csv"
     output_file = "filtered_ostfriesland_analysis.json"
     
-    ***REMOVED*** Korrektes Encoding finden
+    # Korrektes Encoding finden
     correct_encoding = try_different_encodings()
     if not correct_encoding:
         return
@@ -68,7 +68,7 @@ def analyze_with_correct_encoding():
     print("HAUPTANALYSE DER GEFILTERTEN DATEN")
     print("=" * 50)
     
-    ***REMOVED*** Flächenprämien-Codes
+    # Flächenprämien-Codes
     area_premium_codes = {
         'I.1': 'Basis-Direktzahlung',
         'I.2': 'Umverteilungsz. für Nachhaltigkeit', 
@@ -78,14 +78,14 @@ def analyze_with_correct_encoding():
         'V.1': 'Agrarumwelt-Klimamaßnahmen',
     }
     
-    ***REMOVED*** Statistiken
+    # Statistiken
     total_rows = 0
     total_amount = 0.0
     area_premium_amount = 0.0
     area_premium_count = 0
     plz_distribution = defaultdict(int)
     
-    ***REMOVED*** Lead-Container
+    # Lead-Container
     farms = defaultdict(lambda: {
         "name": "",
         "plz": "",
@@ -103,7 +103,7 @@ def analyze_with_correct_encoding():
             headers = reader.fieldnames
             print(f"CSV Headers: {len(headers)} Spalten")
             
-            ***REMOVED*** Header-Mapping
+            # Header-Mapping
             amount_header = None
             name_header = None
             measure_header = None
@@ -133,7 +133,7 @@ def analyze_with_correct_encoding():
             for row_num, row in enumerate(reader, 1):
                 total_rows += 1
                 
-                ***REMOVED*** Daten extrahieren
+                # Daten extrahieren
                 plz = row.get('PLZ', '').strip()
                 name = row.get(name_header, '').strip()
                 city = row.get('Gemeinde', '').strip()
@@ -142,7 +142,7 @@ def analyze_with_correct_encoding():
                 if not measure_code:
                     measure_code = "LEER"
                 
-                ***REMOVED*** Betrag
+                # Betrag
                 gap_amount = 0.0
                 amount_field = row.get(amount_header, '').strip()
                 if amount_field:
@@ -152,11 +152,11 @@ def analyze_with_correct_encoding():
                     except ValueError:
                         pass
                 
-                ***REMOVED*** PLZ-Verteilung
+                # PLZ-Verteilung
                 if plz:
                     plz_distribution[plz] += 1
                 
-                ***REMOVED*** Farm-Aggregation
+                # Farm-Aggregation
                 farm_key = f"{name}_{plz}"
                 farm = farms[farm_key]
                 
@@ -165,7 +165,7 @@ def analyze_with_correct_encoding():
                     farm["plz"] = plz
                     farm["city"] = city
                 
-                ***REMOVED*** Nur Flächenprämien
+                # Nur Flächenprämien
                 if measure_code in area_premium_codes:
                     area_premium_count += 1
                     area_premium_amount += gap_amount
@@ -179,7 +179,7 @@ def analyze_with_correct_encoding():
         print(f"FEHLER bei Hauptanalyse: {e}")
         return
     
-    ***REMOVED*** Betriebsgrößen-Bewertung
+    # Betriebsgrößen-Bewertung
     for farm in farms.values():
         if farm["total_area_premiums"] > 0:
             farm["estimated_hectares"] = farm["total_area_premiums"] / 300
@@ -195,7 +195,7 @@ def analyze_with_correct_encoding():
             else:
                 farm["lead_score"] = 2
     
-    ***REMOVED*** Ergebnisse
+    # Ergebnisse
     print()
     print("ERGEBNISSE - GEFILTERTE OSTFRIESLAND-DATEN")
     print("=" * 60)
@@ -207,14 +207,14 @@ def analyze_with_correct_encoding():
     print(f"Verschiedene PLZ: {len(plz_distribution)}")
     print()
     
-    ***REMOVED*** Top PLZ
+    # Top PLZ
     print("TOP PLZ-BEREICHE:")
     print("-" * 25)
     sorted_plz = sorted(plz_distribution.items(), key=lambda x: x[1], reverse=True)
     for i, (plz, count) in enumerate(sorted_plz[:10], 1):
         print(f"{i:2d}. PLZ {plz}: {count:,} Zahlungen")
     
-    ***REMOVED*** Top Leads
+    # Top Leads
     area_farms = [f for f in farms.values() if f["total_area_premiums"] > 0]
     sorted_farms = sorted(area_farms, key=lambda x: x["total_area_premiums"], reverse=True)
     
@@ -228,7 +228,7 @@ def analyze_with_correct_encoding():
         print(f"    Geschätzt: {farm['estimated_hectares']:,.0f} ha | Score: {farm['lead_score']}/10")
         print()
     
-    ***REMOVED*** JSON Export
+    # JSON Export
     result_data = {
         "timestamp": datetime.now().isoformat(),
         "encoding_used": correct_encoding,
@@ -256,4 +256,5 @@ def analyze_with_correct_encoding():
 
 if __name__ == "__main__":
     analyze_with_correct_encoding()
+
 

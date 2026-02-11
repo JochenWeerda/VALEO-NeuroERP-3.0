@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Aktiviert den REFLECT-ARCHIVE-Mode und befüllt die MongoDB mit Daten aus dem AI_driven_ERP-Verzeichnis.
 """
@@ -10,10 +10,10 @@ import logging
 import subprocess
 from pathlib import Path
 
-***REMOVED*** Füge das Projektverzeichnis zum Pfad hinzu
+# Füge das Projektverzeichnis zum Pfad hinzu
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-***REMOVED*** Importiere die benötigten Module
+# Importiere die benötigten Module
 try:
     from backend.apm_framework.reflect_archive_data_loader import ReflectArchiveDataLoader
     from backend.mongodb_restart_manager import MongoDBRestartManager
@@ -21,7 +21,7 @@ except ImportError as e:
     print(f"Fehler beim Importieren der benötigten Module: {e}")
     sys.exit(1)
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -41,20 +41,20 @@ def check_mongodb_status():
     """
     logger.info("Überprüfe MongoDB-Status...")
     
-    ***REMOVED*** MongoDB Restart Manager initialisieren
+    # MongoDB Restart Manager initialisieren
     restart_manager = MongoDBRestartManager(
         connection_string="mongodb://localhost:27017/",
         max_retries=3,
         retry_delay=5
     )
     
-    ***REMOVED*** Verbindung prüfen
+    # Verbindung prüfen
     if restart_manager.connect():
         logger.info("MongoDB läuft bereits.")
         restart_manager.close()
         return True
     
-    ***REMOVED*** Versuche MongoDB zu starten
+    # Versuche MongoDB zu starten
     logger.info("MongoDB läuft nicht. Versuche zu starten...")
     if restart_manager.restart_mongodb_service():
         logger.info("MongoDB erfolgreich gestartet.")
@@ -74,13 +74,13 @@ def activate_reflect_archive_mode():
     logger.info("Aktiviere REFLECT-ARCHIVE-Mode...")
     
     try:
-        ***REMOVED*** Pfad zur current_mode.txt
+        # Pfad zur current_mode.txt
         mode_file_path = Path("memory-bank") / "current_mode.txt"
         
-        ***REMOVED*** Verzeichnis erstellen, falls es nicht existiert
+        # Verzeichnis erstellen, falls es nicht existiert
         mode_file_path.parent.mkdir(exist_ok=True)
         
-        ***REMOVED*** Mode in Datei schreiben
+        # Mode in Datei schreiben
         with open(mode_file_path, "w", encoding="utf-8") as f:
             f.write("REFLECT-ARCHIVE")
         
@@ -102,14 +102,14 @@ def load_data_to_mongodb(source_dir):
     """
     logger.info(f"Lade Daten aus {source_dir} in die MongoDB...")
     
-    ***REMOVED*** ReflectArchiveDataLoader initialisieren
+    # ReflectArchiveDataLoader initialisieren
     data_loader = ReflectArchiveDataLoader(
         connection_string="mongodb://localhost:27017/",
         database_name="valeo_neuroerp",
         source_dir=source_dir
     )
     
-    ***REMOVED*** Daten laden
+    # Daten laden
     success = data_loader.load_data()
     
     if success:
@@ -129,36 +129,36 @@ def create_reflection_document():
     logger.info("Erstelle Reflexionsdokument...")
     
     try:
-        ***REMOVED*** Pfad zum Reflexionsdokument
+        # Pfad zum Reflexionsdokument
         reflection_file_path = Path("memory-bank") / "reflection" / f"reflection_ai_driven_erp.md"
         
-        ***REMOVED*** Verzeichnis erstellen, falls es nicht existiert
+        # Verzeichnis erstellen, falls es nicht existiert
         reflection_file_path.parent.mkdir(exist_ok=True)
         
-        ***REMOVED*** Inhalt des Reflexionsdokuments
-        content = """***REMOVED*** Reflexion: AI_driven_ERP-Projekt
+        # Inhalt des Reflexionsdokuments
+        content = """# Reflexion: AI_driven_ERP-Projekt
 
-***REMOVED******REMOVED*** Projektübersicht
+## Projektübersicht
 Das AI_driven_ERP-Projekt ist ein KI-gestütztes ERP-System mit Fokus auf Stammdatenpflege. Es orientiert sich am Design und der Funktionalität von ORB-FMS, einem gemeinnützigen Farm-Management-System.
 
-***REMOVED******REMOVED*** Hauptkomponenten
+## Hauptkomponenten
 - Backend: FastAPI-basiertes Backend mit Mikroservice-Architektur
 - Frontend: React-basiertes Frontend im ORB-FMS-Design
 - Datenmodelle: Optimierte Modelle für Partner, Artikel, Lager und Finanzen
 
-***REMOVED******REMOVED*** Erkenntnisse
+## Erkenntnisse
 - Die Projektstruktur folgt einer klaren Trennung von Backend und Frontend
 - Das Backend nutzt FastAPI für eine performante API-Entwicklung
 - Das Frontend basiert auf React und implementiert verschiedene Themes
 - Es gibt eine umfangreiche Aufgabenliste mit verschiedenen Komplexitätsstufen
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 1. Vervollständigung der Dashboard-Implementierung für VALERO Enterprise Suite
 2. Entwicklung der Modelle für die Geschäftslogik
 3. Integration der Module mit bestehenden Odoo-Funktionen
 4. Testen der Module unter realen Bedingungen
 
-***REMOVED******REMOVED*** Archivierte Artefakte
+## Archivierte Artefakte
 - Projektstruktur
 - Code-Dateien
 - Dokumentation
@@ -168,11 +168,11 @@ Das AI_driven_ERP-Projekt ist ein KI-gestütztes ERP-System mit Fokus auf Stammd
 Datum: {datetime}
 """
         
-        ***REMOVED*** Datum einfügen
+        # Datum einfügen
         import datetime
         content = content.replace("{datetime}", datetime.datetime.now().strftime("%d.%m.%Y %H:%M"))
         
-        ***REMOVED*** Dokument schreiben
+        # Dokument schreiben
         with open(reflection_file_path, "w", encoding="utf-8") as f:
             f.write(content)
         
@@ -194,22 +194,22 @@ def main():
     
     args = parser.parse_args()
     
-    ***REMOVED*** MongoDB-Status prüfen
+    # MongoDB-Status prüfen
     if not check_mongodb_status():
         logger.error("MongoDB ist nicht verfügbar. Bitte starten Sie MongoDB und versuchen Sie es erneut.")
         sys.exit(1)
     
-    ***REMOVED*** REFLECT-ARCHIVE-Mode aktivieren
+    # REFLECT-ARCHIVE-Mode aktivieren
     if not activate_reflect_archive_mode():
         logger.error("Konnte REFLECT-ARCHIVE-Mode nicht aktivieren.")
         sys.exit(1)
     
-    ***REMOVED*** Daten in MongoDB laden
+    # Daten in MongoDB laden
     if not load_data_to_mongodb(args.source_dir):
         logger.error("Konnte Daten nicht in MongoDB laden.")
         sys.exit(1)
     
-    ***REMOVED*** Reflexionsdokument erstellen
+    # Reflexionsdokument erstellen
     if not create_reflection_document():
         logger.error("Konnte Reflexionsdokument nicht erstellen.")
         sys.exit(1)

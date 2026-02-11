@@ -14,11 +14,11 @@ BASE_URL = os.environ.get("NEUROERP_URL", "http://localhost:3000")
 OUT_DIR = Path("evidence/screenshots")
 HANDOFF_DIR = Path("swarm/handoffs")
 
-***REMOVED*** Stelle sicher, dass die Verzeichnisse existieren
+# Stelle sicher, dass die Verzeichnisse existieren
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 HANDOFF_DIR.mkdir(parents=True, exist_ok=True)
 
-***REMOVED*** Finance-spezifische Screenshots
+# Finance-spezifische Screenshots
 FINANCE_DIR = OUT_DIR / "finance"
 FINANCE_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -46,27 +46,27 @@ async def explore_finance():
     screenshots = []
     
     async with async_playwright() as p:
-        ***REMOVED*** Browser starten (headless=False für Sichtbarkeit, persist browser)
+        # Browser starten (headless=False für Sichtbarkeit, persist browser)
         browser = await p.chromium.launch(
             headless=False, 
             slow_mo=500,
-            args=['--start-maximized']  ***REMOVED*** Browser maximiert starten
+            args=['--start-maximized']  # Browser maximiert starten
         )
         context = await browser.new_context(
             viewport={"width": 1920, "height": 1080},
             locale="de-DE",
-            no_viewport=True  ***REMOVED*** Browser-Fenster nicht auf Viewport-Größe beschränken
+            no_viewport=True  # Browser-Fenster nicht auf Viewport-Größe beschränken
         )
         page = await context.new_page()
         
-        ***REMOVED*** Browser-Fenster bleibt offen
+        # Browser-Fenster bleibt offen
         print("\n" + "="*60)
         print("[INFO] Browser-Fenster wurde geoeffnet")
         print("[INFO] Login ist nicht aktiviert - starte direkt mit Exploration")
         print("="*60)
         
         try:
-            ***REMOVED*** 1. Navigiere zur Startseite
+            # 1. Navigiere zur Startseite
             print("[*] Navigiere zu:", BASE_URL)
             await page.goto(BASE_URL, wait_until="networkidle")
             await asyncio.sleep(2)
@@ -75,18 +75,18 @@ async def explore_finance():
             screenshots.append(screenshot)
             print(f"  [OK] Screenshot: {screenshot['filename']}")
             
-            ***REMOVED*** 2. Prüfe ob Login-Seite (aber Login ist nicht aktiviert)
+            # 2. Prüfe ob Login-Seite (aber Login ist nicht aktiviert)
             current_url = page.url
             page_title = await page.title()
             
             if "login" in current_url.lower() or "anmelden" in page_title.lower():
                 print("  [INFO] Login-Seite erkannt, aber Login ist nicht aktiviert")
                 print("  [INFO] Ueberspringe Login und navigiere direkt zum Dashboard...")
-                ***REMOVED*** Versuche direkt zum Dashboard zu navigieren
+                # Versuche direkt zum Dashboard zu navigieren
                 await page.goto(f"{BASE_URL}/dashboard", wait_until="networkidle")
                 await asyncio.sleep(2)
             
-            ***REMOVED*** 3. Warte auf Dashboard/Home
+            # 3. Warte auf Dashboard/Home
             print("\n[*] Warte auf Seite zu laden...")
             await asyncio.sleep(2)
             
@@ -94,10 +94,10 @@ async def explore_finance():
             screenshots.append(screenshot)
             print(f"  [OK] Screenshot: {screenshot['filename']}")
             
-            ***REMOVED*** 4. Navigiere zu Finance-Modul
+            # 4. Navigiere zu Finance-Modul
             print("\n[*] Suche Finance-Modul...")
             
-            ***REMOVED*** Versuche verschiedene Navigation-Methoden
+            # Versuche verschiedene Navigation-Methoden
             finance_selectors = [
                 'a:has-text("Finance")',
                 'a:has-text("Finanzen")',
@@ -130,7 +130,7 @@ async def explore_finance():
             screenshots.append(screenshot)
             print(f"  [OK] Screenshot: {screenshot['filename']}")
             
-            ***REMOVED*** 5. Suche Invoices/Rechnungen
+            # 5. Suche Invoices/Rechnungen
             print("\n[*] Suche Invoices/Rechnungen...")
             
             invoice_selectors = [
@@ -164,7 +164,7 @@ async def explore_finance():
             screenshots.append(screenshot)
             print(f"  [OK] Screenshot: {screenshot['filename']}")
             
-            ***REMOVED*** 6. Versuche neue Rechnung zu erstellen
+            # 6. Versuche neue Rechnung zu erstellen
             print("\n[*] Suche 'Neue Rechnung' Button...")
             
             create_selectors = [
@@ -196,10 +196,10 @@ async def explore_finance():
                 screenshots.append(screenshot)
                 print(f"  [OK] Screenshot: {screenshot['filename']}")
                 
-                ***REMOVED*** Analysiere Formular-Felder
+                # Analysiere Formular-Felder
                 form_fields = await page.locator('input, select, textarea').all()
                 field_info = []
-                for field in form_fields[:10]:  ***REMOVED*** Erste 10 Felder
+                for field in form_fields[:10]:  # Erste 10 Felder
                     try:
                         label = await field.get_attribute("placeholder") or await field.get_attribute("name") or "Unbekannt"
                         field_type = await field.get_attribute("type") or "text"
@@ -220,10 +220,10 @@ async def explore_finance():
                     "severity": "high"
                 })
             
-            ***REMOVED*** 7. Weitere Finance-Bereiche explorieren
+            # 7. Weitere Finance-Bereiche explorieren
             print("\n[*] Exploriere weitere Finance-Bereiche...")
             
-            ***REMOVED*** Versuche zu Payments zu navigieren
+            # Versuche zu Payments zu navigieren
             payment_selectors = [
                 'a:has-text("Payment")',
                 'a:has-text("Zahlung")',
@@ -244,7 +244,7 @@ async def explore_finance():
                 except:
                     continue
             
-            ***REMOVED*** Zusammenfassung
+            # Zusammenfassung
             print("\n" + "="*60)
             print("[OK] Exploration abgeschlossen!")
             print(f"  Screenshots: {len(screenshots)}")
@@ -261,7 +261,7 @@ async def explore_finance():
             raise
         
         finally:
-            ***REMOVED*** Browser bleibt offen für manuelle Inspektion
+            # Browser bleibt offen für manuelle Inspektion
             print("\n" + "="*60)
             print("[INFO] Mission abgeschlossen")
             print("[INFO] Browser bleibt noch 10 Sekunden offen für Inspektion")
@@ -270,7 +270,7 @@ async def explore_finance():
             await browser.close()
             print("[OK] Browser geschlossen")
     
-    ***REMOVED*** JSON Summary erstellen
+    # JSON Summary erstellen
     ts = datetime.datetime.utcnow().isoformat().replace(":", "-")
     summary = {
         "mission": "Finance Module Exploration",
@@ -290,16 +290,16 @@ async def explore_finance():
     with open(summary_file, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)
     
-    ***REMOVED*** Handoff-Note erstellen
+    # Handoff-Note erstellen
     handoff_file = HANDOFF_DIR / f"ui-explorer-finance-{ts}.md"
     with open(handoff_file, "w", encoding="utf-8") as f:
-        f.write(f"""***REMOVED*** UI Explorer Handoff - Finance Module
+        f.write(f"""# UI Explorer Handoff - Finance Module
 
 **Date:** {datetime.datetime.utcnow().isoformat()}
 **Explored URL:** {BASE_URL}
 **Status:** [OK] Complete
 
-***REMOVED******REMOVED*** Mission Summary
+## Mission Summary
 
 - **Module:** Finance
 - **Flows Explored:**
@@ -308,7 +308,7 @@ async def explore_finance():
   - Create Invoice (attempted)
   - Payments (attempted)
 
-***REMOVED******REMOVED*** Screenshots
+## Screenshots
 
 Total: {len(screenshots)} screenshots
 
@@ -319,7 +319,7 @@ Total: {len(screenshots)} screenshots
             f.write(f"   - URL: {ss['url']}\n")
             f.write(f"   - Timestamp: {ss['timestamp']}\n\n")
         
-        f.write(f"""***REMOVED******REMOVED*** Findings
+        f.write(f"""## Findings
 
 Total: {len(findings)} findings
 
@@ -334,13 +334,13 @@ Total: {len(findings)} findings
                 f.write(f"   - Message: {finding['message']}\n")
             f.write("\n")
         
-        f.write(f"""***REMOVED******REMOVED*** Evidence
+        f.write(f"""## Evidence
 
 - JSON Summary: `{summary_file}`
 - Screenshots Directory: `{FINANCE_DIR}/`
 - All Screenshots: {', '.join([ss['filename'] for ss in screenshots])}
 
-***REMOVED******REMOVED*** Next Steps
+## Next Steps
 
 - [ ] Test-Planner: Create test plan from this handoff
 - [ ] GAP-Analyst: Map capabilities to ERP reference taxonomy
@@ -362,4 +362,5 @@ if __name__ == "__main__":
     asyncio.run(explore_finance())
     
     print("\n[OK] Mission Complete!")
+
 

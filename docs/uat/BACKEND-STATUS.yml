@@ -1,5 +1,5 @@
-***REMOVED*** Backend-Verfügbarkeit pro Domain
-***REMOVED*** Status: real (vollständig), partial (teilweise), mock (Frontend-Only)
+# Backend-Verfügbarkeit pro Domain
+# Status: real (vollständig), partial (teilweise), mock (Frontend-Only)
 
 domains:
   sales:
@@ -43,8 +43,9 @@ domains:
       - /api/inventory/stock
     note: "Artikel & Lagerbewegungen vollständig"
 
-***REMOVED*** Test-Strategie
-***REMOVED*** - real: Voller CRUD-Test, Validierung, Persistenz
-***REMOVED*** - partial: Nur real-Endpoints testen, Mock skippen oder als "Schaufenster" markieren
-***REMOVED*** - mock: UI-Tests nur, keine Backend-Calls erwarten
+# Test-Strategie
+# - real: Voller CRUD-Test, Validierung, Persistenz
+# - partial: Nur real-Endpoints testen, Mock skippen oder als "Schaufenster" markieren
+# - mock: UI-Tests nur, keine Backend-Calls erwarten
+
 

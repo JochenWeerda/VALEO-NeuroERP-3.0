@@ -1,10 +1,10 @@
-***REMOVED*** CRM & Marketing Implementation Mission
+# CRM & Marketing Implementation Mission
 
 **Status:** 📋 Geplant  
 **Priorität:** 🔴 Hoch  
 **Basiert auf:** GAP-Analyse `gap/gaps-crm-marketing.md`
 
-***REMOVED******REMOVED*** Mission Overview
+## Mission Overview
 
 Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GAP-Analyse.
 
@@ -13,9 +13,9 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 - GAP-Matrix: `gap/matrix-crm-marketing.csv`
 - Detaillierte GAPs: `gap/gaps-crm-marketing.md`
 
-***REMOVED******REMOVED*** Phase 1: Kritische MUSS-Gaps (Weeks 1-8)
+## Phase 1: Kritische MUSS-Gaps (Weeks 1-8)
 
-***REMOVED******REMOVED******REMOVED*** 1.1 Opportunities / Deals (Sales Pipeline)
+### 1.1 Opportunities / Deals (Sales Pipeline)
 **Capability:** CRM-OPP-01  
 **Prioritäts-Score:** 25.0  
 **Lösungstyp:** C (New Module)  
@@ -43,7 +43,7 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 1.2 Consent-Management (DSGVO)
+### 1.2 Consent-Management (DSGVO)
 **Capability:** CRM-CNS-01  
 **Prioritäts-Score:** 25.0  
 **Lösungstyp:** C (New Module)  
@@ -71,7 +71,7 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 1.3 DSGVO-Funktionen
+### 1.3 DSGVO-Funktionen
 **Capability:** CRM-CNS-02  
 **Prioritäts-Score:** 25.0  
 **Lösungstyp:** C (New Module)  
@@ -101,7 +101,7 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 1.4 Segmente & Zielgruppen
+### 1.4 Segmente & Zielgruppen
 **Capability:** MKT-SEG-01  
 **Prioritäts-Score:** 10.0  
 **Lösungstyp:** C (New Module)  
@@ -130,9 +130,9 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED*** Phase 2: Erweiterungen bestehender Funktionen (Weeks 9-12)
+## Phase 2: Erweiterungen bestehender Funktionen (Weeks 9-12)
 
-***REMOVED******REMOVED******REMOVED*** 2.1 Reports erweitern
+### 2.1 Reports erweitern
 **Capability:** CRM-REP-01  
 **Prioritäts-Score:** 6.25  
 **Lösungstyp:** B (Integration/Extension)  
@@ -157,7 +157,7 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2.2 Kampagnen erweitern
+### 2.2 Kampagnen erweitern
 **Capability:** MKT-CAM-01  
 **Prioritäts-Score:** 5.0  
 **Lösungstyp:** B (Integration/Extension)  
@@ -180,7 +180,7 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2.3 Accounts erweitern
+### 2.3 Accounts erweitern
 **Capability:** CRM-ACC-01  
 **Prioritäts-Score:** 4.17  
 **Lösungstyp:** B (Integration/Extension)  
@@ -202,7 +202,7 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2.4 Timeline-View
+### 2.4 Timeline-View
 **Capability:** CRM-360-01  
 **Prioritäts-Score:** 3.75  
 **Lösungstyp:** B (Integration/Extension)  
@@ -225,9 +225,9 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED*** Phase 3: SOLL-Gaps (Weeks 13-16)
+## Phase 3: SOLL-Gaps (Weeks 13-16)
 
-***REMOVED******REMOVED******REMOVED*** 3.1 Lead-Routing / Zuweisung
+### 3.1 Lead-Routing / Zuweisung
 **Capability:** CRM-LED-03  
 **Prioritäts-Score:** 7.5  
 **Lösungstyp:** C (New Module)  
@@ -243,7 +243,7 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 3.2 Forecasting
+### 3.2 Forecasting
 **Capability:** CRM-OPP-03  
 **Prioritäts-Score:** TBD  
 **Lösungstyp:** C (New Module)  
@@ -258,7 +258,7 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 3.3 Nurture / Journeys
+### 3.3 Nurture / Journeys
 **Capability:** MKT-AUT-01  
 **Prioritäts-Score:** TBD  
 **Lösungstyp:** C (New Module)  
@@ -273,21 +273,21 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED*** Phase 4: KANN-Gaps (Weeks 17-20)
+## Phase 4: KANN-Gaps (Weeks 17-20)
 
-***REMOVED******REMOVED******REMOVED*** 4.1 Event-/Webinar-Marketing
+### 4.1 Event-/Webinar-Marketing
 **Capability:** MKT-EVT-01  
 **Lösungstyp:** C (New Module)  
 **Owner:** Marketing-Team  
 **Aufwand:** 2 Wochen
 
-***REMOVED******REMOVED******REMOVED*** 4.2 Social/Ads Tracking
+### 4.2 Social/Ads Tracking
 **Capability:** MKT-SOC-01  
 **Lösungstyp:** C (New Module)  
 **Owner:** Marketing-Team  
 **Aufwand:** 1-2 Wochen
 
-***REMOVED******REMOVED******REMOVED*** 4.3 Dritttools/Connectoren
+### 4.3 Dritttools/Connectoren
 **Capability:** CRM-INT-03  
 **Lösungstyp:** C (New Module)  
 **Owner:** Dev-Team  
@@ -295,7 +295,7 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED*** Abhängigkeiten
+## Abhängigkeiten
 
 **Kritische Abhängigkeiten:**
 - Phase 1.1 (Opportunities) → Phase 2.1 (Reports), Phase 2.4 (Timeline)
@@ -310,7 +310,7 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED*** Success Metrics
+## Success Metrics
 
 **Functional Completeness:**
 - 80% der MUSS-Capabilities implementiert
@@ -329,7 +329,7 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED*** Risiken & Mitigation
+## Risiken & Mitigation
 
 **Technische Risiken:**
 - Komplexität der Regel-Engine für Segmente → Prototyp früh testen
@@ -342,7 +342,7 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 ---
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. **Mission starten:** Phase 1.1 (Opportunities) beginnt
 2. **Sprints planen:** 2-Wochen-Sprints pro Phase
@@ -353,4 +353,5 @@ Implementierung der kritischen CRM & Marketing Capabilities basierend auf der GA
 
 **Letzte Aktualisierung:** 2025-01-27  
 **Nächste Review:** Nach Phase 1 Abschluss
+
 

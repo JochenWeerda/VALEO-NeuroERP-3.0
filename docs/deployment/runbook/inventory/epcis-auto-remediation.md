@@ -1,8 +1,8 @@
-***REMOVED*** EPCIS Event Pipeline – Auto-Remediation & Eskalation (Inventory)
+# EPCIS Event Pipeline – Auto-Remediation & Eskalation (Inventory)
 
-***REMOVED******REMOVED*** 1. Konfiguration
+## 1. Konfiguration
 
-***REMOVED******REMOVED******REMOVED*** Helm Values (values-inventory.yaml)
+### Helm Values (values-inventory.yaml)
 ```yaml
 inventory:
   enabled: true
@@ -10,25 +10,25 @@ inventory:
     repository: ghcr.io/valeo-neuroerp/inventory
     tag: latest
   env:
-    ***REMOVED*** Auto-Remediation
+    # Auto-Remediation
     EPCIS_MAX_RETRIES: "3"
     EPCIS_RETRY_BACKOFF_BASE: "2"
-    ***REMOVED*** Eskalation (optional)
+    # Eskalation (optional)
     TEAMS_WEBHOOK_URL: "https://outlook.office.com/webhook/..."
     ESCALATION_EMAIL: "compliance-oncall@valeo.com"
   secretRefs: []
 ```
 
-***REMOVED******REMOVED******REMOVED*** Secrets (optional)
+### Secrets (optional)
 ```bash
 kubectl create secret generic inventory-teams-webhook \
   -n <namespace> \
   --from-literal=url='<TEAMS_WEBHOOK_URL>'
 ```
 
-***REMOVED******REMOVED*** 2. Auto-Remediation Playbooks
+## 2. Auto-Remediation Playbooks
 
-***REMOVED******REMOVED******REMOVED*** EPCIS Event Processing Failures
+### EPCIS Event Processing Failures
 - Symptom: `inventory_epcis_event_failures_total` > 0
 - Quelle: API `POST /api/v1/inventory/epcis/events` oder Subscriber
 
@@ -45,7 +45,7 @@ Aktionen (automatisiert):
    - Keine Retries
    - Sofortige Eskalation
 
-***REMOVED******REMOVED******REMOVED*** Eskalationsmatrix
+### Eskalationsmatrix
 | Fehlertyp            | Retries | Auto-Remediation | Eskalation       |
 |----------------------|---------|------------------|------------------|
 | NATS Error           | 3       | ✓                | Nach 3 Fehlern   |
@@ -53,9 +53,9 @@ Aktionen (automatisiert):
 | Validation           | 0       | ✗                | Sofort           |
 | Unknown              | 1       | ✗                | Nach 1 Fehler    |
 
-***REMOVED******REMOVED*** 3. Teams/E-Mail Eskalation
+## 3. Teams/E-Mail Eskalation
 
-***REMOVED******REMOVED******REMOVED*** Teams Webhook Format (Adaptive Card)
+### Teams Webhook Format (Adaptive Card)
 ```json
 {
   "type": "message",
@@ -79,12 +79,12 @@ Aktionen (automatisiert):
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** E-Mail (Fallback)
+### E-Mail (Fallback)
 - Empfänger: `ESCALATION_EMAIL`
 - Betreff: `[CRITICAL] EPCIS Event Processing Failure - {event_id}`
 - Inhalt: Event-Details, Fehler, Retry-History, nächste Schritte
 
-***REMOVED******REMOVED*** 4. Monitoring & Alerts
+## 4. Monitoring & Alerts
 
 Prometheus Alerts (Beispiele):
 ```yaml
@@ -111,7 +111,7 @@ Metriken:
 - `inventory_epcis_event_processing_duration_seconds`
 - `inventory_epcis_retry_attempts_total` (optional erweitern)
 
-***REMOVED******REMOVED*** 5. Manuelle Intervention (Runbook)
+## 5. Manuelle Intervention (Runbook)
 
 1) Event-Status prüfen (Datenbank):
 ```bash
@@ -134,7 +134,7 @@ curl -X POST http://inventory-service:5400/api/v1/inventory/epcis/events \
   -d '{\"event_type\":\"ObjectEvent\",\"biz_step\":\"receiving\",\"epc_list\":[\"urn:epc:id:sgtin:test.001.1\"]}'
 ```
 
-***REMOVED******REMOVED*** 6. Rollback
+## 6. Rollback
 
 1) Auto-Remediation deaktivieren
 ```yaml
@@ -151,4 +151,5 @@ env:
 3) Manuelle Verarbeitung
 - Events zwischenpuffern und nach Problembehebung batchweise verarbeiten
 *** End Patch***}>>();
+
 

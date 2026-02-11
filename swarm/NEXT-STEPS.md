@@ -1,12 +1,12 @@
-***REMOVED*** Nächste Schritte - Swarm System
+# Nächste Schritte - Swarm System
 
-***REMOVED******REMOVED*** ✅ Setup abgeschlossen
+## ✅ Setup abgeschlossen
 
 Alle Komponenten sind konfiguriert und einsatzbereit!
 
-***REMOVED******REMOVED*** 🚀 Schritt-für-Schritt Anleitung
+## 🚀 Schritt-für-Schritt Anleitung
 
-***REMOVED******REMOVED******REMOVED*** Schritt 1: Umgebungsvariablen ✅
+### Schritt 1: Umgebungsvariablen ✅
 
 Die Datei `.env.swarm` wurde erstellt mit:
 - `NEUROERP_URL=http://localhost:3000`
@@ -16,32 +16,32 @@ Die Datei `.env.swarm` wurde erstellt mit:
 **Falls du andere Credentials benötigst**, bearbeite `.env.swarm` oder setze ENV-Variablen:
 
 ```powershell
-***REMOVED*** PowerShell
+# PowerShell
 $env:NEUROERP_URL="http://localhost:3000"
 $env:NEUROERP_USER="admin"
 $env:NEUROERP_PASS="admin123"
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 2: Frontend prüfen/starten
+### Schritt 2: Frontend prüfen/starten
 
 **Option A: Bestehendes Frontend nutzen (empfohlen)**
 
 Wenn das Frontend bereits auf `localhost:3000` läuft:
 
 ```powershell
-***REMOVED*** Prüfe Health-Endpoint
+# Prüfe Health-Endpoint
 curl http://localhost:3000/health
-***REMOVED*** oder
+# oder
 curl http://localhost:3000/health.html
 ```
 
 **Option B: Neues Frontend für Swarm starten**
 
 ```powershell
-***REMOVED*** Starte Frontend im Swarm-Netzwerk (Port 3001)
+# Starte Frontend im Swarm-Netzwerk (Port 3001)
 docker compose -f docker-compose.swarm.yml up neuroerp-frontend -d
 
-***REMOVED*** Warte auf Ready
+# Warte auf Ready
 docker compose -f docker-compose.swarm.yml logs -f neuroerp-frontend
 ```
 
@@ -50,15 +50,15 @@ docker compose -f docker-compose.swarm.yml logs -f neuroerp-frontend
 $env:NEUROERP_URL="http://localhost:3001"
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 3: Erste Mission starten - UI-Explorer
+### Schritt 3: Erste Mission starten - UI-Explorer
 
 **Mit Docker (empfohlen):**
 
 ```powershell
-***REMOVED*** UI-Explorer starten (wartet automatisch auf Frontend)
+# UI-Explorer starten (wartet automatisch auf Frontend)
 docker compose -f docker-compose.swarm.yml up neuroerp-ui-explorer
 
-***REMOVED*** Oder im Hintergrund:
+# Oder im Hintergrund:
 docker compose -f docker-compose.swarm.yml up -d neuroerp-ui-explorer
 docker compose -f docker-compose.swarm.yml logs -f neuroerp-ui-explorer
 ```
@@ -66,10 +66,10 @@ docker compose -f docker-compose.swarm.yml logs -f neuroerp-ui-explorer
 **Lokal (ohne Docker):**
 
 ```powershell
-***REMOVED*** Python-Dependencies installieren
+# Python-Dependencies installieren
 pip install -r swarm/requirements.ui-explorer.txt
 
-***REMOVED*** UI-Explorer ausführen
+# UI-Explorer ausführen
 python swarm/ui_explorer.py
 ```
 
@@ -77,15 +77,15 @@ python swarm/ui_explorer.py
 - 📸 Screenshots in `evidence/screenshots/finance_flow_*.json`
 - 📝 Handoff-Notizen in `swarm/handoffs/ui-explorer-finance-*.md`
 
-***REMOVED******REMOVED******REMOVED*** Schritt 4: Tests generieren und ausführen
+### Schritt 4: Tests generieren und ausführen
 
 **Playwright Tests (Seed-Test):**
 
 ```powershell
-***REMOVED*** Tests mit Swarm-Config ausführen
+# Tests mit Swarm-Config ausführen
 npx playwright test --config=playwright.swarm.config.ts
 
-***REMOVED*** Oder mit Docker:
+# Oder mit Docker:
 docker compose -f docker-compose.swarm.yml up neuroerp-tests
 ```
 
@@ -108,7 +108,7 @@ docker compose -f docker-compose.swarm.yml up neuroerp-tests
 3. **Tests ausführen und heilen**:
    ```powershell
    npx playwright test --config=playwright.swarm.config.ts
-   ***REMOVED*** Healer repariert automatisch flaky/failing tests
+   # Healer repariert automatisch flaky/failing tests
    ```
 
 **Erwartete Outputs:**
@@ -116,18 +116,18 @@ docker compose -f docker-compose.swarm.yml up neuroerp-tests
 - 📹 HTML-Reports in `evidence/traces/html-report/`
 - 🎬 Videos/Traces bei Fehlern in `evidence/traces/`
 
-***REMOVED******REMOVED******REMOVED*** Schritt 5: GAP-Analyse durchführen
+### Schritt 5: GAP-Analyse durchführen
 
 **1. Evidence sammeln:**
 
 ```powershell
-***REMOVED*** Prüfe Screenshots
+# Prüfe Screenshots
 ls evidence/screenshots/
 
-***REMOVED*** Prüfe Handoff-Notizen
+# Prüfe Handoff-Notizen
 ls swarm/handoffs/
 
-***REMOVED*** Prüfe Test-Traces
+# Prüfe Test-Traces
 ls evidence/traces/
 ```
 
@@ -156,7 +156,7 @@ Fülle gap/matrix.csv nach Capability-Modell aus gap/capability-model.md.
 Markiere Unsicherheiten mit ?.
 ```
 
-***REMOVED******REMOVED*** 📋 Checkliste
+## 📋 Checkliste
 
 - [ ] `.env.swarm` erstellt/bearbeitet
 - [ ] Frontend läuft und Health-Endpoint funktioniert
@@ -168,80 +168,81 @@ Markiere Unsicherheiten mit ?.
 - [ ] `gap/matrix.csv` ausgefüllt
 - [ ] `gap/gaps.md` mit priorisierten Lücken erstellt
 
-***REMOVED******REMOVED*** 🎯 Beispiel-Workflow
+## 🎯 Beispiel-Workflow
 
 ```powershell
-***REMOVED*** 1. Starte Swarm-System
+# 1. Starte Swarm-System
 .\swarm\start-swarm.ps1
 
-***REMOVED*** 2. UI-Explorer ausführen (Finance)
+# 2. UI-Explorer ausführen (Finance)
 docker compose -f docker-compose.swarm.yml up neuroerp-ui-explorer
 
-***REMOVED*** 3. Prüfe Outputs
+# 3. Prüfe Outputs
 ls evidence/screenshots/
 ls swarm/handoffs/
 
-***REMOVED*** 4. Tests generieren (im Cursor-Chat)
-***REMOVED*** "Nutze Playwright planner agent für /swarm/handoffs/ui-explorer-finance-*.md"
+# 4. Tests generieren (im Cursor-Chat)
+# "Nutze Playwright planner agent für /swarm/handoffs/ui-explorer-finance-*.md"
 
-***REMOVED*** 5. Tests ausführen
+# 5. Tests ausführen
 npx playwright test --config=playwright.swarm.config.ts
 
-***REMOVED*** 6. GAP-Analyse (im Cursor-Chat)
-***REMOVED*** "Fülle gap/matrix.csv basierend auf Evidence aus"
+# 6. GAP-Analyse (im Cursor-Chat)
+# "Fülle gap/matrix.csv basierend auf Evidence aus"
 ```
 
-***REMOVED******REMOVED*** 🆘 Troubleshooting
+## 🆘 Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Frontend nicht erreichbar
+### Frontend nicht erreichbar
 
 ```powershell
-***REMOVED*** Prüfe ob Frontend läuft
+# Prüfe ob Frontend läuft
 curl http://localhost:3000/health
 
-***REMOVED*** Prüfe Docker-Logs
+# Prüfe Docker-Logs
 docker compose -f docker-compose.swarm.yml logs neuroerp-frontend
 
-***REMOVED*** Prüfe ob Port belegt ist
+# Prüfe ob Port belegt ist
 netstat -ano | findstr :3000
 ```
 
-***REMOVED******REMOVED******REMOVED*** UI-Explorer Fehler
+### UI-Explorer Fehler
 
 ```powershell
-***REMOVED*** Prüfe Python-Dependencies
+# Prüfe Python-Dependencies
 pip list | Select-String browser-use
 
-***REMOVED*** Prüfe ENV-Variablen
+# Prüfe ENV-Variablen
 $env:NEUROERP_URL
 $env:NEUROERP_USER
 $env:NEUROERP_PASS
 
-***REMOVED*** Prüfe Docker-Logs
+# Prüfe Docker-Logs
 docker compose -f docker-compose.swarm.yml logs neuroerp-ui-explorer
 ```
 
-***REMOVED******REMOVED******REMOVED*** Tests schlagen fehl
+### Tests schlagen fehl
 
 ```powershell
-***REMOVED*** Prüfe Traces
+# Prüfe Traces
 ls evidence/traces/
 
-***REMOVED*** Prüfe Screenshots
+# Prüfe Screenshots
 ls evidence/screenshots/
 
-***REMOVED*** Tests mit Debug-Output
+# Tests mit Debug-Output
 npx playwright test --config=playwright.swarm.config.ts --debug
 ```
 
-***REMOVED******REMOVED*** 📚 Weitere Ressourcen
+## 📚 Weitere Ressourcen
 
 - **Quickstart**: `swarm/QUICKSTART.md`
 - **README**: `swarm/README.md`
 - **Setup-Status**: `SWARM-SETUP-COMPLETE.md`
 - **Start-Script**: `swarm/start-swarm.ps1`
 
-***REMOVED******REMOVED*** ✨ Ready to Go!
+## ✨ Ready to Go!
 
 Das System ist vollständig konfiguriert und einsatzbereit. Starte mit Schritt 1 und arbeite dich durch die Checkliste!
+
 

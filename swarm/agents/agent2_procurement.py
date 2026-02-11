@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Agent-2: Procurement & Supply Chain
 Implementiert 28 Procurement Capabilities
@@ -21,19 +21,19 @@ class Agent2Procurement:
         self.handoffs_path = self.swarm_path / "handoffs"
         self.gap_path = self.base_path / "gap"
         
-        ***REMOVED*** Capabilities (28 total)
+        # Capabilities (28 total)
         self.capabilities = {
             "P0": [
-                "PROC-GR-01",  ***REMOVED*** Wareneingang
-                "PROC-IV-02",  ***REMOVED*** 2/3-Wege-Abgleich
-                "PROC-PO-02",  ***REMOVED*** PO-Änderungen & Storno
-                "PROC-REQ-01"  ***REMOVED*** Bedarfsmeldung vervollständigen
+                "PROC-GR-01",  # Wareneingang
+                "PROC-IV-02",  # 2/3-Wege-Abgleich
+                "PROC-PO-02",  # PO-Änderungen & Storno
+                "PROC-REQ-01"  # Bedarfsmeldung vervollständigen
             ],
             "P1": [
-                "PROC-SUP-01",  ***REMOVED*** Lieferantenstamm
-                "PROC-PO-01",   ***REMOVED*** Bestellung erstellen
-                "PROC-IV-01",   ***REMOVED*** Eingangsrechnung
-                "PROC-PAY-01"   ***REMOVED*** Zahlungsläufe
+                "PROC-SUP-01",  # Lieferantenstamm
+                "PROC-PO-01",   # Bestellung erstellen
+                "PROC-IV-01",   # Eingangsrechnung
+                "PROC-PAY-01"   # Zahlungsläufe
             ],
             "P2": [
                 "PROC-SUP-02", "PROC-SUP-03",
@@ -64,7 +64,7 @@ class Agent2Procurement:
         print(f"[AGENT-2] Capabilities: 28")
         print(f"[AGENT-2] Status: {self.status}")
         
-        ***REMOVED*** Status-Update erstellen
+        # Status-Update erstellen
         self.create_status_update()
         
     def create_status_update(self):
@@ -72,33 +72,33 @@ class Agent2Procurement:
         timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
         status_path = self.status_path / f"agent2-procurement-{timestamp}.md"
         
-        content = f"""***REMOVED*** Agent-2 (Procurement) Status Update
+        content = f"""# Agent-2 (Procurement) Status Update
 
 **Datum:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Sprint:** {self.current_sprint}
 **Phase:** {self.current_phase}
 **Status:** {self.status}
 
-***REMOVED******REMOVED*** Capabilities in Progress
+## Capabilities in Progress
 
-***REMOVED******REMOVED******REMOVED*** P0 - Kritisch (4)
+### P0 - Kritisch (4)
 - PROC-GR-01: Wareneingang
 - PROC-IV-02: 2/3-Wege-Abgleich
 - PROC-PO-02: PO-Änderungen & Storno
 - PROC-REQ-01: Bedarfsmeldung vervollständigen
 
-***REMOVED******REMOVED*** Aktuelle Tasks
+## Aktuelle Tasks
 
-***REMOVED******REMOVED******REMOVED*** Sprint 5-7: Procurement P0
+### Sprint 5-7: Procurement P0
 - [ ] PROC-GR-01: Wareneingang (3-4 Wochen)
 - [ ] PROC-IV-02: 2/3-Wege-Abgleich (2-3 Wochen)
 - [ ] PROC-PO-02: PO-Änderungen & Storno (2 Wochen)
 
-***REMOVED******REMOVED*** Blockaden
+## Blockaden
 
 Keine Blockaden.
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 - Agent-4: Abgleich-Engine
 - Agent-4: Change-Log/Versionierung
@@ -106,7 +106,7 @@ Keine Blockaden.
 - PO-System (vorhanden)
 - Inventory-System (vorhanden)
 
-***REMOVED******REMOVED*** Next Steps
+## Next Steps
 
 1. Wareneingang implementieren
 2. 2/3-Wege-Abgleich implementieren
@@ -122,29 +122,29 @@ Keine Blockaden.
         timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
         handoff_path = self.handoffs_path / f"agent2-procurement-{capability_id}-{timestamp}.md"
         
-        content = f"""***REMOVED*** Agent-2 Handoff: {capability_id}
+        content = f"""# Agent-2 Handoff: {capability_id}
 
 **Datum:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Capability:** {capability_id}
 **Status:** {status}
 
-***REMOVED******REMOVED*** Was wurde implementiert?
+## Was wurde implementiert?
 
 {notes}
 
-***REMOVED******REMOVED*** Was ist noch zu tun?
+## Was ist noch zu tun?
 
 TBD
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 TBD
 
-***REMOVED******REMOVED*** Acceptance Criteria
+## Acceptance Criteria
 
 TBD
 
-***REMOVED******REMOVED*** Test-Status
+## Test-Status
 
 TBD
 """
@@ -160,4 +160,5 @@ if __name__ == "__main__":
         agent.start()
     else:
         print("Usage: python agent2_procurement.py --start")
+
 

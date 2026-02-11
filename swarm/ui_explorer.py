@@ -15,7 +15,7 @@ BASE_URL = os.environ.get("NEUROERP_URL", "http://localhost:3000")
 OUT_DIR = Path("evidence/screenshots")
 HANDOFF_DIR = Path("swarm/handoffs")
 
-***REMOVED*** Stelle sicher, dass die Verzeichnisse existieren
+# Stelle sicher, dass die Verzeichnisse existieren
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 HANDOFF_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -23,9 +23,9 @@ HANDOFF_DIR.mkdir(parents=True, exist_ok=True)
 @sandbox(persist=True)
 async def explore(browser: Browser):
     """Exploriert das NeuroERP Frontend und sammelt Screenshots/Flows"""
-    llm = ChatBrowserUse(model="gpt-4o-mini")  ***REMOVED*** Kann angepasst werden
+    llm = ChatBrowserUse(model="gpt-4o-mini")  # Kann angepasst werden
     
-    ***REMOVED*** Mission: Finance Module explorieren
+    # Mission: Finance Module explorieren
     task = f"""
     Go to {BASE_URL}.
     Log in with test credentials from environment variables.
@@ -38,38 +38,38 @@ async def explore(browser: Browser):
     agent = Agent(task=task, browser=browser, llm=llm)
     result = await agent.run()
 
-    ***REMOVED*** Timestamp für eindeutige Dateinamen
+    # Timestamp für eindeutige Dateinamen
     ts = datetime.datetime.utcnow().isoformat().replace(":", "-")
     
-    ***REMOVED*** JSON Summary speichern
+    # JSON Summary speichern
     summary_file = OUT_DIR / f"finance_flow_{ts}.json"
     with open(summary_file, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
     
-    ***REMOVED*** Handoff-Note erstellen
+    # Handoff-Note erstellen
     handoff_file = HANDOFF_DIR / f"ui-explorer-finance-{ts}.md"
     with open(handoff_file, "w", encoding="utf-8") as f:
-        f.write(f"""***REMOVED*** UI Explorer Handoff - Finance Module
+        f.write(f"""# UI Explorer Handoff - Finance Module
 
 **Date:** {datetime.datetime.utcnow().isoformat()}
 **Explored URL:** {BASE_URL}
 
-***REMOVED******REMOVED*** Flow Summary
+## Flow Summary
 - Module: Finance
 - Flow: Invoices -> Create Invoice
 - Screenshot IDs: See {summary_file.name}
 
-***REMOVED******REMOVED*** Findings
+## Findings
 - [ ] Document any missing fields
 - [ ] Document unclear steps
 - [ ] Document validation issues
 - [ ] Document any errors encountered
 
-***REMOVED******REMOVED*** Evidence
+## Evidence
 - JSON Summary: `{summary_file}`
 - Screenshots: `{OUT_DIR}/`
 
-***REMOVED******REMOVED*** Next Steps
+## Next Steps
 - Test-Planner: Create test plan from this handoff
 - GAP-Analyst: Map capabilities to ERP reference taxonomy
 """)
@@ -80,4 +80,5 @@ async def explore(browser: Browser):
 
 if __name__ == "__main__":
     asyncio.run(explore())
+
 

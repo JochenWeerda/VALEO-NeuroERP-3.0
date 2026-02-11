@@ -1,10 +1,10 @@
-***REMOVED*** PowerShell Script zum Starten des Swarm-Systems
-***REMOVED*** Usage: .\swarm\start-swarm.ps1
+# PowerShell Script zum Starten des Swarm-Systems
+# Usage: .\swarm\start-swarm.ps1
 
 Write-Host "🚀 Valero NeuroERP - Swarm System Start" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Prüfe ob Docker läuft
+# Prüfe ob Docker läuft
 Write-Host "📋 Prüfe Docker..." -ForegroundColor Yellow
 try {
     docker ps | Out-Null
@@ -14,7 +14,7 @@ try {
     exit 1
 }
 
-***REMOVED*** Prüfe ob .env.swarm existiert
+# Prüfe ob .env.swarm existiert
 if (-not (Test-Path ".env.swarm")) {
     Write-Host "⚠️  .env.swarm nicht gefunden. Erstelle Standard-Datei..." -ForegroundColor Yellow
     @"
@@ -25,10 +25,10 @@ NEUROERP_PASS=admin123
     Write-Host "✅ .env.swarm erstellt" -ForegroundColor Green
 }
 
-***REMOVED*** Lade .env.swarm
+# Lade .env.swarm
 Write-Host "📝 Lade Umgebungsvariablen aus .env.swarm..." -ForegroundColor Yellow
 Get-Content ".env.swarm" | ForEach-Object {
-    if ($_ -match '^([^***REMOVED***][^=]+)=(.*)$') {
+    if ($_ -match '^([^#][^=]+)=(.*)$') {
         $key = $matches[1].Trim()
         $value = $matches[2].Trim()
         [Environment]::SetEnvironmentVariable($key, $value, "Process")
@@ -36,7 +36,7 @@ Get-Content ".env.swarm" | ForEach-Object {
     }
 }
 
-***REMOVED*** Prüfe ob Frontend bereits läuft
+# Prüfe ob Frontend bereits läuft
 $frontendUrl = $env:NEUROERP_URL
 if (-not $frontendUrl) {
     $frontendUrl = "http://localhost:3000"
@@ -55,7 +55,7 @@ try {
     $useExistingFrontend = $false
 }
 
-***REMOVED*** Starte Services
+# Starte Services
 Write-Host ""
 Write-Host "🐳 Starte Docker Compose Services..." -ForegroundColor Cyan
 
@@ -72,7 +72,7 @@ Write-Host ""
 Write-Host "⏳ Warte auf Services..." -ForegroundColor Yellow
 Start-Sleep -Seconds 10
 
-***REMOVED*** Zeige Status
+# Zeige Status
 Write-Host ""
 Write-Host "📊 Service-Status:" -ForegroundColor Cyan
 docker compose -f docker-compose.swarm.yml ps
@@ -93,4 +93,5 @@ Write-Host "  1. Prüfe Logs: docker compose -f docker-compose.swarm.yml logs -f
 Write-Host "  2. UI-Explorer Output: evidence/screenshots/" -ForegroundColor White
 Write-Host "  3. Test-Results: evidence/traces/" -ForegroundColor White
 Write-Host ""
+
 

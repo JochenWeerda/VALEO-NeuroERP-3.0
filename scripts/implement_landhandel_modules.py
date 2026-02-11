@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 IMPLEMENTATION-Phase: Landhandel-Module für VALEO-NeuroERP v2.0
 Dieses Skript führt die notwendigen Schritte zur Implementierung der Landhandel-Module durch.
@@ -11,7 +11,7 @@ import json
 import shutil
 from datetime import datetime
 
-***REMOVED*** Konfiguration
+# Konfiguration
 IMPLEMENTATION_LOG = "implementation_landhandel.log"
 DB_MIGRATION_DIR = "alembic/versions"
 FRONTEND_BUILD_DIR = "frontend/build"
@@ -45,13 +45,13 @@ def create_database_migration():
     """Erstellt eine Datenbankmigration für die Landhandel-Module"""
     log_message("Erstelle Datenbankmigration für Landhandel-Module")
     
-    ***REMOVED*** Alembic-Revision erstellen
+    # Alembic-Revision erstellen
     migration_message = "Landhandel-Module hinzugefügt"
     success = run_command(f"alembic revision --autogenerate -m \"{migration_message}\"", 
                          "Alembic-Revision erstellen")
     
     if success:
-        ***REMOVED*** Migration anwenden
+        # Migration anwenden
         success = run_command("alembic upgrade head", "Migration anwenden")
     
     return success
@@ -60,21 +60,21 @@ def integrate_api_endpoints():
     """Integriert die Landhandel-API-Endpunkte in die Hauptanwendung"""
     log_message("Integriere Landhandel-API-Endpunkte")
     
-    ***REMOVED*** Prüfen, ob die API-Datei bereits existiert
+    # Prüfen, ob die API-Datei bereits existiert
     if not os.path.exists("backend/api/v1/landhandel.py"):
         log_message("API-Datei nicht gefunden: backend/api/v1/landhandel.py", level="ERROR")
         return False
     
-    ***REMOVED*** API-Router in die Hauptanwendung einbinden
+    # API-Router in die Hauptanwendung einbinden
     try:
-        ***REMOVED*** Prüfen, ob der Router bereits eingebunden ist
+        # Prüfen, ob der Router bereits eingebunden ist
         with open("backend/api/v1/__init__.py", "r", encoding="utf-8") as f:
             content = f.read()
         
         if "from .landhandel import router as landhandel_router" not in content:
-            ***REMOVED*** Router importieren
+            # Router importieren
             with open("backend/api/v1/__init__.py", "a", encoding="utf-8") as f:
-                f.write("\n***REMOVED*** Landhandel-Router\n")
+                f.write("\n# Landhandel-Router\n")
                 f.write("from .landhandel import router as landhandel_router\n")
                 f.write("api_router.include_router(landhandel_router, prefix=\"/landhandel\", tags=[\"landhandel\"])\n")
             
@@ -91,19 +91,19 @@ def build_frontend():
     """Baut die Frontend-Anwendung mit den Landhandel-Komponenten"""
     log_message("Baue Frontend-Anwendung")
     
-    ***REMOVED*** In das Frontend-Verzeichnis wechseln
+    # In das Frontend-Verzeichnis wechseln
     os.chdir("frontend")
     
-    ***REMOVED*** Abhängigkeiten installieren
+    # Abhängigkeiten installieren
     success = run_command("npm install", "NPM-Abhängigkeiten installieren")
     if not success:
         os.chdir("..")
         return False
     
-    ***REMOVED*** Anwendung bauen
+    # Anwendung bauen
     success = run_command("npm run build", "Frontend-Anwendung bauen")
     
-    ***REMOVED*** Zurück zum Hauptverzeichnis wechseln
+    # Zurück zum Hauptverzeichnis wechseln
     os.chdir("..")
     
     return success
@@ -112,16 +112,16 @@ def setup_redis_caching():
     """Konfiguriert Redis-Caching für die Landhandel-API"""
     log_message("Konfiguriere Redis-Caching")
     
-    ***REMOVED*** Redis-Konfiguration erstellen
+    # Redis-Konfiguration erstellen
     redis_config = {
         "host": "localhost",
         "port": 6379,
         "db": 0,
         "prefix": "landhandel:",
-        "ttl": 3600  ***REMOVED*** 1 Stunde
+        "ttl": 3600  # 1 Stunde
     }
     
-    ***REMOVED*** Konfiguration speichern
+    # Konfiguration speichern
     try:
         with open("config/redis_config.json", "w", encoding="utf-8") as f:
             json.dump(redis_config, f, indent=2)
@@ -136,9 +136,9 @@ def create_test_data():
     """Erstellt Testdaten für die Landhandel-Module"""
     log_message("Erstelle Testdaten für Landhandel-Module")
     
-    ***REMOVED*** Testdaten-Skript erstellen
+    # Testdaten-Skript erstellen
     test_data_script = """
-***REMOVED*** -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 \"\"\"
 Testdaten für Landhandel-Module
 \"\"\"
@@ -151,7 +151,7 @@ def create_test_data():
     \"\"\"Erstellt Testdaten für die Landhandel-Module\"\"\"
     db = next(get_db())
     
-    ***REMOVED*** Hersteller erstellen
+    # Hersteller erstellen
     hersteller = [
         models.Hersteller(name="AgrarTech GmbH", anschrift="Industriestr. 45, 70565 Stuttgart", 
                          kontakt_email="info@agrartech.de", kontakt_telefon="0711-12345678"),
@@ -166,7 +166,7 @@ def create_test_data():
     
     db.commit()
     
-    ***REMOVED*** Lager erstellen
+    # Lager erstellen
     lager = [
         models.Lager(name="Hauptlager", standort="Betriebsgelände Nord", kapazitaet=500.0,
                     temperatur_min=5.0, temperatur_max=25.0),
@@ -180,7 +180,7 @@ def create_test_data():
     
     db.commit()
     
-    ***REMOVED*** Saatgut erstellen
+    # Saatgut erstellen
     saatgut = [
         models.Saatgut(artikelnummer="S-1001", name="Winterweizen Premium", beschreibung="Hochertragssorte",
                       hersteller_id=1, einheit="kg", preis_netto=3.45, typ=models.SaatgutTyp.GETREIDE,
@@ -201,7 +201,7 @@ def create_test_data():
     
     db.commit()
     
-    ***REMOVED*** Düngemittel erstellen
+    # Düngemittel erstellen
     duengemittel = [
         models.Duengemittel(artikelnummer="D-3001", name="NPK 15-15-15", beschreibung="Universaldünger",
                            hersteller_id=3, einheit="kg", preis_netto=0.85, typ=models.DuengerTyp.MINERALISCH,
@@ -216,7 +216,7 @@ def create_test_data():
     
     db.commit()
     
-    ***REMOVED*** Pflanzenschutzmittel erstellen
+    # Pflanzenschutzmittel erstellen
     pflanzenschutzmittel = [
         models.Pflanzenschutzmittel(artikelnummer="P-4001", name="Unkraut-Ex", beschreibung="Breitbandherbizid",
                                   hersteller_id=3, einheit="l", preis_netto=24.95, typ=models.PflanzenschutzTyp.HERBIZID,
@@ -233,7 +233,7 @@ def create_test_data():
     
     db.commit()
     
-    ***REMOVED*** Bestände erstellen
+    # Bestände erstellen
     bestaende = [
         models.Bestand(produkt_id=1, lager_id=1, menge=2500.0, mindestbestand=500.0,
                       chargennummer="CH-2023-001", haltbar_bis=datetime.now() + timedelta(days=365)),
@@ -256,7 +256,7 @@ def create_test_data():
     
     db.commit()
     
-    ***REMOVED*** Bestandsbewegungen erstellen
+    # Bestandsbewegungen erstellen
     bewegungen = [
         models.BestandsBewegung(produkt_id=1, lager_id=1, typ=models.BestandsBewegungsTyp.EINGANG,
                                menge=2500.0, chargennummer="CH-2023-001", beleg_nr="WE-2023-001",
@@ -274,7 +274,7 @@ def create_test_data():
     
     db.commit()
     
-    ***REMOVED*** Saisonale Planung erstellen
+    # Saisonale Planung erstellen
     planung = models.SaisonalePlanung(
         name="Frühjahrsbestellung 2024",
         jahr=2024,
@@ -287,7 +287,7 @@ def create_test_data():
     db.add(planung)
     db.commit()
     
-    ***REMOVED*** Planungsdetails erstellen
+    # Planungsdetails erstellen
     details = [
         models.SaisonalePlanungDetail(planung_id=planung.id, produkt_id=2, geplante_menge=1500.0),
         models.SaisonalePlanungDetail(planung_id=planung.id, produkt_id=3, geplante_menge=100.0),
@@ -306,11 +306,11 @@ if __name__ == "__main__":
 """
     
     try:
-        ***REMOVED*** Testdaten-Skript speichern
+        # Testdaten-Skript speichern
         with open("backend/db/init_landhandel_data.py", "w", encoding="utf-8") as f:
             f.write(test_data_script)
         
-        ***REMOVED*** Testdaten-Skript ausführen
+        # Testdaten-Skript ausführen
         success = run_command("python -m backend.db.init_landhandel_data", "Testdaten erstellen")
         return success
     except Exception as e:
@@ -321,15 +321,15 @@ def create_implementation_report():
     """Erstellt einen Implementierungsbericht"""
     log_message("Erstelle Implementierungsbericht")
     
-    report = f"""***REMOVED*** IMPLEMENTATION-Phase: Landhandel-Module für VALEO-NeuroERP v2.0
+    report = f"""# IMPLEMENTATION-Phase: Landhandel-Module für VALEO-NeuroERP v2.0
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Die IMPLEMENTATION-Phase für die Landhandel-Module des VALEO-NeuroERP v2.0 Systems wurde erfolgreich abgeschlossen. Diese Module sind nun vollständig in das System integriert und einsatzbereit.
 
-***REMOVED******REMOVED*** Implementierte Komponenten
+## Implementierte Komponenten
 
-***REMOVED******REMOVED******REMOVED*** Datenmodelle
+### Datenmodelle
 - **Produkt**: Basisklasse für alle Produkttypen
 - **Saatgut**: Spezialisierte Produktklasse für Saatgut
 - **Düngemittel**: Spezialisierte Produktklasse für Düngemittel
@@ -338,21 +338,21 @@ Die IMPLEMENTATION-Phase für die Landhandel-Module des VALEO-NeuroERP v2.0 Syst
 - **BestandsBewegung**: Protokollierung von Bestandsbewegungen
 - **SaisonalePlanung**: Verwaltung von saisonalen Planungen
 
-***REMOVED******REMOVED******REMOVED*** API-Endpunkte
+### API-Endpunkte
 - Vollständige CRUD-Operationen für alle Landhandel-Entitäten
 - Filteroptionen für komplexe Abfragen
 - Validierung durch Pydantic-Schemas
 
-***REMOVED******REMOVED******REMOVED*** Frontend-Komponenten
+### Frontend-Komponenten
 - **BestandsUebersicht**: Tabellarische Darstellung der Bestände
 - Responsive Design für verschiedene Bildschirmgrößen
 - Material-UI für moderne Benutzeroberfläche
 
-***REMOVED******REMOVED******REMOVED*** Optimierungen
+### Optimierungen
 - Redis-Caching für verbesserte Performance
 - Testdaten für Entwicklung und Demonstration
 
-***REMOVED******REMOVED*** Durchgeführte Schritte
+## Durchgeführte Schritte
 
 1. Datenbankmigration für die Landhandel-Modelle erstellt und angewendet
 2. API-Endpunkte in die Hauptanwendung integriert
@@ -360,7 +360,7 @@ Die IMPLEMENTATION-Phase für die Landhandel-Module des VALEO-NeuroERP v2.0 Syst
 4. Redis-Caching für die API konfiguriert
 5. Testdaten für die Demonstration erstellt
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 In der REFLEKTION-Phase werden folgende Punkte behandelt:
 
@@ -374,7 +374,7 @@ Erstellt am: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 """
     
     try:
-        ***REMOVED*** Implementierungsbericht speichern
+        # Implementierungsbericht speichern
         with open("output/implementation_result.md", "w", encoding="utf-8") as f:
             f.write(report)
         
@@ -389,20 +389,20 @@ def fix_streamlit_dashboard():
     log_message("Behebe UTF-8-Encoding-Problem im Streamlit-Dashboard")
     
     try:
-        ***REMOVED*** Prüfen, ob die Dashboard-Datei existiert
+        # Prüfen, ob die Dashboard-Datei existiert
         if not os.path.exists("scripts/genxais_dashboard_v2.py"):
             log_message("Dashboard-Datei nicht gefunden: scripts/genxais_dashboard_v2.py", level="ERROR")
             return False
         
-        ***REMOVED*** Datei mit korrektem Encoding neu erstellen
+        # Datei mit korrektem Encoding neu erstellen
         with open("scripts/genxais_dashboard_v2.py", "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
         
-        ***REMOVED*** Sicherstellen, dass die Encoding-Deklaration vorhanden ist
-        if not content.startswith("***REMOVED*** -*- coding: utf-8 -*-"):
-            content = "***REMOVED*** -*- coding: utf-8 -*-\n" + content
+        # Sicherstellen, dass die Encoding-Deklaration vorhanden ist
+        if not content.startswith("# -*- coding: utf-8 -*-"):
+            content = "# -*- coding: utf-8 -*-\n" + content
         
-        ***REMOVED*** Datei mit korrektem Encoding speichern
+        # Datei mit korrektem Encoding speichern
         with open("scripts/genxais_dashboard_v2.py", "w", encoding="utf-8") as f:
             f.write(content)
         
@@ -416,29 +416,29 @@ def main():
     """Hauptfunktion zur Durchführung der IMPLEMENTATION-Phase"""
     log_message("Starte IMPLEMENTATION-Phase für Landhandel-Module")
     
-    ***REMOVED*** Logdatei initialisieren
+    # Logdatei initialisieren
     with open(IMPLEMENTATION_LOG, "w", encoding="utf-8") as log_file:
         log_file.write(f"IMPLEMENTATION-Phase gestartet: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
     
-    ***REMOVED*** UTF-8-Encoding-Problem im Dashboard beheben
+    # UTF-8-Encoding-Problem im Dashboard beheben
     fix_streamlit_dashboard()
     
-    ***REMOVED*** Datenbankmigration erstellen
+    # Datenbankmigration erstellen
     create_database_migration()
     
-    ***REMOVED*** API-Endpunkte integrieren
+    # API-Endpunkte integrieren
     integrate_api_endpoints()
     
-    ***REMOVED*** Redis-Caching einrichten
+    # Redis-Caching einrichten
     setup_redis_caching()
     
-    ***REMOVED*** Testdaten erstellen
+    # Testdaten erstellen
     create_test_data()
     
-    ***REMOVED*** Frontend bauen
+    # Frontend bauen
     build_frontend()
     
-    ***REMOVED*** Implementierungsbericht erstellen
+    # Implementierungsbericht erstellen
     create_implementation_report()
     
     log_message("IMPLEMENTATION-Phase für Landhandel-Module abgeschlossen")

@@ -1,11 +1,11 @@
-***REMOVED*** GAP-Analyse FiBU - Identifizierte Lücken
+# GAP-Analyse FiBU - Identifizierte Lücken
 
 **Datum:** 2025-11-24  
 **Basis:** FiBU Capability Model v1.0 + Finance Module Exploration  
 **Status:** Complete  
 **Priorität:** MUSS/SOLL/KANN basierend auf Lastenheft
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 **Gesamt:** 33 Capabilities analysiert
 - **Yes (Vollständig):** 1 (3%)
@@ -26,9 +26,9 @@
   - Partial: 0
   - No: 5
 
-***REMOVED******REMOVED*** P0 - Kritisch (MUSS, Priorität 1)
+## P0 - Kritisch (MUSS, Priorität 1)
 
-***REMOVED******REMOVED******REMOVED*** FIBU-AR-03: Zahlungseingänge & Matching
+### FIBU-AR-03: Zahlungseingänge & Matching
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Kein Payment-Match-UI gefunden, keine Bankimport-Funktionalität. OP-Status kann nicht korrekt verwaltet werden.
@@ -38,7 +38,7 @@
 - **Vergleich:** SAP/Odoo haben vollständige Payment-Matching-Funktionalität
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-AP-02: Eingangsrechnungen
+### FIBU-AP-02: Eingangsrechnungen
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Eingangsrechnungen-Seite/API gefunden. Kreditoren können keine Rechnungen erfassen.
@@ -48,7 +48,7 @@
 - **Vergleich:** SAP/Odoo haben vollständige AP-Invoice-Funktionalität
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-GL-05: Periodensteuerung
+### FIBU-GL-05: Periodensteuerung
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Perioden-Admin-Screen gefunden, keine Sperrlogik. Buchungen in gesperrter Periode werden nicht blockiert.
@@ -58,7 +58,7 @@
 - **Vergleich:** SAP/Odoo haben vollständige Periodensteuerung
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-COMP-01: GoBD / Audit Trail
+### FIBU-COMP-01: GoBD / Audit Trail
 - **Status:** Partial
 - **Typ:** B (Integration/Adapter)
 - **Beschreibung:** GoBDAuditTrail in services/finance vorhanden, aber Audit-View/Historie/Logs-UI fehlt. Jede Änderung ist nicht mit User+Zeit protokolliert sichtbar.
@@ -70,9 +70,9 @@
 
 ---
 
-***REMOVED******REMOVED*** P1 - Hoch (MUSS, Priorität 2)
+## P1 - Hoch (MUSS, Priorität 2)
 
-***REMOVED******REMOVED******REMOVED*** FIBU-GL-01: Kontenplan & Kontenstamm
+### FIBU-GL-01: Kontenplan & Kontenstamm
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** Kontenplan-Seite vorhanden (chart-of-accounts.tsx), aber Hierarchie/Hierarchieauswertung unklar. Konto kann möglicherweise angelegt werden, aber Hierarchieauswertung in Reports nicht sichtbar.
@@ -82,7 +82,7 @@
 - **Vergleich:** Odoo-ähnlich
 - **Owner:** Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-GL-02: Belegprinzip & Nummernkreise
+### FIBU-GL-02: Belegprinzip & Nummernkreise
 - **Status:** Partial
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Nummernkreise in documents/router.py vorhanden, aber Belegprinzip/Storno-Dialog unklar. Belege sind möglicherweise nicht revisionssicher referenziert.
@@ -92,7 +92,7 @@
 - **Vergleich:** Basic
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-AR-01: Debitorenstamm
+### FIBU-AR-01: Debitorenstamm
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** debitoren-liste.tsx vorhanden, aber Stammdaten/Adressen/USt-ID/Kreditlimit unklar. Pflichtfelder + Dublettencheck möglicherweise nicht vollständig.
@@ -102,7 +102,7 @@
 - **Vergleich:** Basic
 - **Owner:** Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-AR-02: Ausgangsrechnungen
+### FIBU-AR-02: Ausgangsrechnungen
 - **Status:** Partial
 - **Typ:** B (Integration/Adapter)
 - **Beschreibung:** Invoices-Liste und Create Invoice vorhanden, API finance_invoices.py erstellt, aber GL-Buchung/OP-Erzeugung unklar. Rechnung erzeugt möglicherweise keine GL-Buchung + OP.
@@ -112,7 +112,7 @@
 - **Vergleich:** Odoo-ähnlich
 - **Owner:** Backend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-AR-05: OP-Verwaltung & Ausgleich
+### FIBU-AR-05: OP-Verwaltung & Ausgleich
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** op-debitoren.tsx vorhanden, aber Ausgleich/Verrechnung/Audit-Trail unklar. Vollständiger Audit Trail pro Ausgleich möglicherweise nicht vorhanden.
@@ -122,7 +122,7 @@
 - **Vergleich:** Basic
 - **Owner:** Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-AP-01: Kreditorenstamm
+### FIBU-AP-01: Kreditorenstamm
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** kreditoren-stamm.tsx vorhanden, aber Stammdaten/Bankdaten/IBAN-Validierung unklar. Bankdaten möglicherweise nicht validierbar (IBAN).
@@ -132,7 +132,7 @@
 - **Vergleich:** Basic
 - **Owner:** Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-AP-05: OP-Verwaltung & Ausgleich
+### FIBU-AP-05: OP-Verwaltung & Ausgleich
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine OP-Liste für Kreditoren gefunden. Kreditoren-OPs können nicht verwaltet werden.
@@ -142,7 +142,7 @@
 - **Vergleich:** SAP/Odoo haben OP-Verwaltung für beide Seiten
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-BNK-01: Bankkontenstamm
+### FIBU-BNK-01: Bankkontenstamm
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** Bankkonten in database/schema.sql vorhanden, aber Bankstamm-UI unklar. Bankkonto möglicherweise nicht mit Gegenkonto verknüpft.
@@ -152,7 +152,7 @@
 - **Vergleich:** Basic
 - **Owner:** Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-BNK-02: Kontoauszugsimport
+### FIBU-BNK-02: Kontoauszugsimport
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** bank-abgleich.tsx vorhanden, aber CAMT/MT940/CSV-Import unklar. Importfehler pro Zeile möglicherweise nicht sichtbar.
@@ -162,7 +162,7 @@
 - **Vergleich:** Basic
 - **Owner:** Frontend + Backend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-BNK-04: Bankabstimmung
+### FIBU-BNK-04: Bankabstimmung
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** bank-abgleich.tsx vorhanden, aber Saldoabgleich/Differenzliste unklar. Differenzen erzeugen möglicherweise keinen Buchungsvorschlag.
@@ -172,7 +172,7 @@
 - **Vergleich:** Basic
 - **Owner:** Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-TAX-01: Steuerschlüssel-System
+### FIBU-TAX-01: Steuerschlüssel-System
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** steuerschluessel.tsx vorhanden, aber Steuerarten/Sätze/Länderlogik/Reverse-Charge unklar. Steuer bestimmt möglicherweise nicht korrekte Konten + Meldelogik.
@@ -182,7 +182,7 @@
 - **Vergleich:** Basic
 - **Owner:** Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-CLS-02: Nebenbuch-Abstimmung
+### FIBU-CLS-02: Nebenbuch-Abstimmung
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Reconciliation-Reports gefunden. AR/AP/FA/Bank ↔ GL Abgleich nicht möglich. Differenzen sind nicht drilldown-fähig.
@@ -192,7 +192,7 @@
 - **Vergleich:** SAP/Odoo haben vollständige Nebenbuch-Abstimmung
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-REP-01: Standardreports
+### FIBU-REP-01: Standardreports
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** Dashboard vorhanden, aber Bilanz/GuV/BWA/Saldenliste/Journal/OP-Listen unklar. Export (PDF/Excel) möglicherweise nicht verfügbar.
@@ -204,9 +204,9 @@
 
 ---
 
-***REMOVED******REMOVED*** P2 - Mittel (SOLL, Priorität 3)
+## P2 - Mittel (SOLL, Priorität 3)
 
-***REMOVED******REMOVED******REMOVED*** FIBU-GL-04: Sammel-/Massenbuchungen
+### FIBU-GL-04: Sammel-/Massenbuchungen
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Kein Import-Screen für CSV/Excel/API gefunden. Import zeigt keine Fehler pro Zeile nachvollziehbar.
@@ -216,7 +216,7 @@
 - **Vergleich:** SAP/Odoo haben vollständige Import-Funktionalität
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-AR-04: Mahnwesen / Dunning
+### FIBU-AR-04: Mahnwesen / Dunning
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** mahnwesen.tsx und dunning-editor.tsx vorhanden, aber Mahnstufen/Gebühren/Sperrlogik unklar. Mahnstufen laufen möglicherweise nicht regelbasiert.
@@ -226,7 +226,7 @@
 - **Vergleich:** Basic
 - **Owner:** Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-AP-03: Prüf-/Freigabeworkflow
+### FIBU-AP-03: Prüf-/Freigabeworkflow
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Kein Workflow-Setup/UI gefunden. 2/3/4-Augen je Betrag/Warengruppe nicht möglich. Ohne Freigabe kein Zahlungsstatus „freigegeben".
@@ -236,7 +236,7 @@
 - **Vergleich:** SAP/Odoo haben vollständige Workflow-Funktionalität
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-AP-04: Zahlungsläufe / SEPA
+### FIBU-AP-04: Zahlungsläufe / SEPA
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** zahlungslauf-kreditoren.tsx vorhanden, aber SEPA XML Export/Status/Rückläufer unklar. Lauf erzeugt möglicherweise keinen OP-Ausgleich bei Erfolg.
@@ -246,7 +246,7 @@
 - **Vergleich:** Basic
 - **Owner:** Frontend + Backend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-BNK-03: Automatisches Matching
+### FIBU-BNK-03: Automatisches Matching
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Match-UI/regelbasiertes Matching gefunden. Regelbasiertes OP-Matching nicht möglich. Trefferquote nicht nachvollziehbar, manuell nicht übersteuerbar.
@@ -256,7 +256,7 @@
 - **Vergleich:** SAP/Odoo haben vollständige Matching-Funktionalität
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-TAX-02: USt-Voranmeldung / ZM / OSS
+### FIBU-TAX-02: USt-Voranmeldung / ZM / OSS
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** ustva.tsx vorhanden, aber Export Behördenformat (ELSTER) unklar. Summen stimmen möglicherweise nicht mit GL überein.
@@ -266,7 +266,7 @@
 - **Vergleich:** Basic
 - **Owner:** Frontend + Backend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-CLS-01: Abschlusschecklisten
+### FIBU-CLS-01: Abschlusschecklisten
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Closing-Checklist gefunden. Aufgaben je Periode/Status/Verantwortliche nicht verfügbar. Checklist steuert Abschlussprozess nicht.
@@ -276,7 +276,7 @@
 - **Vergleich:** SAP/Odoo haben vollständige Checklist-Funktionalität
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-CLS-03: Abgrenzungen / Rückstellungen
+### FIBU-CLS-03: Abgrenzungen / Rückstellungen
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Kein Accruals-Flow gefunden. Periodisierung/Wiederkehrbuchungen nicht möglich. Automatischer Lauf nicht möglich.
@@ -286,7 +286,7 @@
 - **Vergleich:** SAP/Odoo haben vollständige Accruals-Funktionalität
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-REP-02: Drilldown & Analyse
+### FIBU-REP-02: Drilldown & Analyse
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Kein Drilldown-Trace gefunden. Bericht → Konto → Beleg → Position → Ursprung nicht möglich. 3-Klick-Regel bis Beleg nicht erfüllt.
@@ -298,9 +298,9 @@
 
 ---
 
-***REMOVED******REMOVED*** P3 - Niedrig (SOLL, Priorität 3-4)
+## P3 - Niedrig (SOLL, Priorität 3-4)
 
-***REMOVED******REMOVED******REMOVED*** FIBU-GL-06: Fremdwährung & Wechselkurse
+### FIBU-GL-06: Fremdwährung & Wechselkurse
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Währungssetup/FX-Buchung gefunden. Kursarten (ECB, manuell, Vertragskurs) nicht verfügbar. Kursdifferenzen werden nicht automatisch gebucht.
@@ -310,7 +310,7 @@
 - **Vergleich:** SAP/Odoo haben vollständige FX-Funktionalität
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-GL-07: Automatische Buchungsschemata
+### FIBU-GL-07: Automatische Buchungsschemata
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Schema-Setup/Auto-Post gefunden. Steuerbuchungen/Skonto/Rundungen/Umlagen nicht automatisch. Regelbasierte Kontierung nicht möglich.
@@ -320,7 +320,7 @@
 - **Vergleich:** SAP/Odoo haben vollständige Schema-Funktionalität
 - **Owner:** Backend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-TAX-03: E-Rechnung (ZUGFeRD/XRechnung)
+### FIBU-TAX-03: E-Rechnung (ZUGFeRD/XRechnung)
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine E-Invoice-UI/Import/Export gefunden. Import/Export/Validierung nicht möglich. Validierungsfehler werden nicht angezeigt.
@@ -332,9 +332,9 @@
 
 ---
 
-***REMOVED******REMOVED*** P4 - Optional (KANN, Priorität 4-5)
+## P4 - Optional (KANN, Priorität 4-5)
 
-***REMOVED******REMOVED******REMOVED*** FIBU-GL-08: Kostenrechnung-Integrationspunkte
+### FIBU-GL-08: Kostenrechnung-Integrationspunkte
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Dimensionen (Kostenstellen/Kostenträger) gefunden. Kontierung mit Dimension nicht möglich. Dimensionen sind nicht filter-/summierbar.
@@ -344,7 +344,7 @@
 - **Vergleich:** SAP/Odoo haben vollständige CO-Integration
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-FA-01 bis FIBU-FA-05: Anlagenbuchhaltung
+### FIBU-FA-01 bis FIBU-FA-05: Anlagenbuchhaltung
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Alle FA-Funktionalitäten fehlen (Anlageklassen, Zugänge, Abschreibungslauf, Abgänge, Anlagenspiegel).
@@ -354,7 +354,7 @@
 - **Vergleich:** SAP/Odoo haben vollständige FA-Funktionalität
 - **Owner:** Backend + Frontend
 
-***REMOVED******REMOVED******REMOVED*** FIBU-IC-01 bis FIBU-IC-02: Intercompany
+### FIBU-IC-01 bis FIBU-IC-02: Intercompany
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Alle IC-Funktionalitäten fehlen (IC-Partner, Konten, Verrechnung, Eliminierung).
@@ -366,22 +366,22 @@
 
 ---
 
-***REMOVED******REMOVED*** Zusammenfassung nach Lösungstyp
+## Zusammenfassung nach Lösungstyp
 
-***REMOVED******REMOVED******REMOVED*** Typ A (Konfig/Verdrahtung): 0 GAPs
+### Typ A (Konfig/Verdrahtung): 0 GAPs
 - Keine reinen Konfigurations-GAPs identifiziert
 
-***REMOVED******REMOVED******REMOVED*** Typ B (Integration/Adapter): 2 GAPs
+### Typ B (Integration/Adapter): 2 GAPs
 - FIBU-AR-02: Ausgangsrechnungen (GL-Buchung/OP-Erzeugung)
 - FIBU-COMP-01: GoBD / Audit Trail (UI fehlt)
 
-***REMOVED******REMOVED******REMOVED*** Typ C (Neues Feature/Modul): 21 GAPs
+### Typ C (Neues Feature/Modul): 21 GAPs
 - Die meisten fehlenden Features erfordern neue Module
 
-***REMOVED******REMOVED******REMOVED*** Typ D (UX/Edge-Case/Reifegrad): 10 GAPs
+### Typ D (UX/Edge-Case/Reifegrad): 10 GAPs
 - Viele vorhandene Seiten benötigen Funktionalitäts-Erweiterungen
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. **P0-GAPs beheben (Priorität 1):**
    - FIBU-AR-03: Zahlungseingänge & Matching
@@ -400,10 +400,11 @@
 4. **P3/P4-GAPs (Optional):**
    - Nach Bedarf und Ressourcen
 
-***REMOVED******REMOVED*** Referenzen
+## Referenzen
 
 - FiBU Capability Model: User-Query (Lastenheft)
 - Handoff-Notiz: `swarm/handoffs/ui-explorer-finance-2025-11-24T08-51-19.344194.md`
 - JSON Summary: `evidence/screenshots/finance/finance_mission_2025-11-24T08-51-19.344194.json`
 - Screenshots: `evidence/screenshots/finance/`
 - Matrix: `gap/matrix.csv`
+

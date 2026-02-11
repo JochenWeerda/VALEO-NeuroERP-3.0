@@ -1,4 +1,4 @@
-ï»¿***REMOVED*** -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import asyncio
 import logging
 import sys
@@ -6,12 +6,12 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-***REMOVED*** FÃ¼ge das Hauptverzeichnis zum Python-Pfad hinzu
+# Füge das Hauptverzeichnis zum Python-Pfad hinzu
 sys.path.append(str(Path(__file__).parent.parent))
 
 from linkup_mcp.development_pipeline_manager import DevelopmentPipelineManager
 
-***REMOVED*** Logging konfigurieren
+# Logging konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -20,20 +20,20 @@ logger = logging.getLogger(__name__)
 
 async def main():
     try:
-        ***REMOVED*** Pipeline Manager initialisieren
+        # Pipeline Manager initialisieren
         manager = DevelopmentPipelineManager(
             config_path="config/development_pipelines.json"
         )
         
-        ***REMOVED*** MongoDB-Collections initialisieren
+        # MongoDB-Collections initialisieren
         await manager.initialize()
         
         logger.info("Starte Ausfuehrung der Entwicklungspipelines...")
         
-        ***REMOVED*** Alle Pipelines ausfÃ¼hren
+        # Alle Pipelines ausführen
         results = await manager.execute_all_pipelines()
         
-        ***REMOVED*** Ergebnisse ausgeben
+        # Ergebnisse ausgeben
         logger.info("Ausfuehrung abgeschlossen. Ergebnisse:")
         for pipeline_name, result in results.items():
             status = result["status"]
@@ -58,3 +58,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+

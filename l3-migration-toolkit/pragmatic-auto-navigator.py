@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Pragmatischer Auto-Navigator für L3 (OHNE Moondream)
 
@@ -18,10 +18,10 @@ from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 
 
-***REMOVED*** L3-UI Koordinaten (basierend auf 896px breitem Canvas)
-***REMOVED*** Ermittelt aus vorherigem Screenshot-Analyse
+# L3-UI Koordinaten (basierend auf 896px breitem Canvas)
+# Ermittelt aus vorherigem Screenshot-Analyse
 L3_UI_COORDINATES = {
-    ***REMOVED*** Top-Menü (Y ≈ 75)
+    # Top-Menü (Y ≈ 75)
     "DATEI": (80, 75),
     "FAVORITEN": (180, 75),
     "ALLGEMEIN": (280, 75),
@@ -31,7 +31,7 @@ L3_UI_COORDINATES = {
     "PRODUKTION": (680, 75),
     "AUSWERTUNGEN": (780, 75),
     
-    ***REMOVED*** Favoriten-Icons (Y ≈ 125)
+    # Favoriten-Icons (Y ≈ 125)
     "Kunden-Artikel-Icon": (200, 125),
     "Verkauf-Lieferschein-Icon": (320, 125),
     "Artikel-Stamm-Icon": (440, 125),
@@ -39,11 +39,11 @@ L3_UI_COORDINATES = {
     "CRM-Dashboard-Icon": (680, 125),
 }
 
-***REMOVED*** L3-Masken Navigation-Map
+# L3-Masken Navigation-Map
 L3_NAVIGATION = {
     "artikelstamm": {
         "name": "Artikelstamm",
-        "clicks": [("Artikel-Stamm-Icon", 3)],  ***REMOVED*** (target, wait_seconds)
+        "clicks": [("Artikel-Stamm-Icon", 3)],  # (target, wait_seconds)
         "verify_text": "ARTIKEL-STAMMDATEN"
     },
     "kundenstamm": {
@@ -58,7 +58,7 @@ L3_NAVIGATION = {
     },
     "rechnung": {
         "name": "Rechnung",
-        "clicks": [("ABRECHNUNG", 1), (200, 150, 2)],  ***REMOVED*** Menü + Submenu
+        "clicks": [("ABRECHNUNG", 1), (200, 150, 2)],  # Menü + Submenu
         "verify_text": "RECHNUNG"
     },
     "auftrag": {
@@ -86,7 +86,7 @@ class PragmaticAutoNavigator:
         self.screenshot_dir = Path(screenshot_dir)
         self.screenshot_dir.mkdir(parents=True, exist_ok=True)
         self.navigation_log = []
-        self.canvas_offset = (72, 0)  ***REMOVED*** Guacamole Canvas Offset
+        self.canvas_offset = (72, 0)  # Guacamole Canvas Offset
     
     def get_absolute_coordinates(self, x: int, y: int) -> Tuple[int, int]:
         """Konvertiert Canvas-relative Koordinaten zu absoluten Koordinaten"""
@@ -120,10 +120,10 @@ class PragmaticAutoNavigator:
         clicks_performed = 0
         
         try:
-            ***REMOVED*** Führe Klick-Sequenz aus
+            # Führe Klick-Sequenz aus
             for idx, click_info in enumerate(config['clicks'], 1):
                 if isinstance(click_info[0], str):
-                    ***REMOVED*** Named coordinate
+                    # Named coordinate
                     target = click_info[0]
                     wait = click_info[1]
                     
@@ -136,12 +136,12 @@ class PragmaticAutoNavigator:
                     
                     print(f"   [{idx}] Klicke '{target}' bei ({abs_x}, {abs_y})")
                 else:
-                    ***REMOVED*** Direct coordinates
+                    # Direct coordinates
                     x, y, wait = click_info
                     abs_x, abs_y = self.get_absolute_coordinates(x, y)
                     print(f"   [{idx}] Klicke bei ({abs_x}, {abs_y})")
                 
-                ***REMOVED*** Log Click
+                # Log Click
                 self.navigation_log.append({
                     'mask': mask_name,
                     'step': idx,
@@ -149,23 +149,23 @@ class PragmaticAutoNavigator:
                     'timestamp': datetime.now().isoformat()
                 })
                 
-                ***REMOVED*** HINWEIS: Actual Click wird via Playwright Browser MCP durchgeführt
-                ***REMOVED*** Placeholder für Integration:
-                ***REMOVED*** await page.evaluate(f'''
-                ***REMOVED***     const canvas = document.querySelector('canvas');
-                ***REMOVED***     const evt = new MouseEvent('click', {{
-                ***REMOVED***         clientX: {abs_x}, clientY: {abs_y},
-                ***REMOVED***         bubbles: true
-                ***REMOVED***     }});
-                ***REMOVED***     canvas.dispatchEvent(evt);
-                ***REMOVED*** ''')
+                # HINWEIS: Actual Click wird via Playwright Browser MCP durchgeführt
+                # Placeholder für Integration:
+                # await page.evaluate(f'''
+                #     const canvas = document.querySelector('canvas');
+                #     const evt = new MouseEvent('click', {{
+                #         clientX: {abs_x}, clientY: {abs_y},
+                #         bubbles: true
+                #     }});
+                #     canvas.dispatchEvent(evt);
+                # ''')
                 
                 clicks_performed += 1
                 
                 print(f"       ⏳ Warte {wait}s...")
                 time.sleep(wait)
             
-            ***REMOVED*** Screenshot der geöffneten Maske
+            # Screenshot der geöffneten Maske
             screenshot_name = f"{mask_id}_final.png"
             screenshot_path = self.screenshot_dir / screenshot_name
             
@@ -204,7 +204,7 @@ class PragmaticAutoNavigator:
             else:
                 print(f"   ❌ Fehlgeschlagen: {result.get('mask_name', mask_id)}")
             
-            ***REMOVED*** Pause zwischen Masken
+            # Pause zwischen Masken
             time.sleep(1)
         
         successful = [r for r in results if r['success']]
@@ -308,4 +308,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 

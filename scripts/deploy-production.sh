@@ -1,24 +1,24 @@
-***REMOVED***!/bin/bash
+#!/bin/bash
 
-***REMOVED*** VALEO NeuroERP 3.0 Production Deployment Script
-***REMOVED*** This script handles the complete deployment process for production
+# VALEO NeuroERP 3.0 Production Deployment Script
+# This script handles the complete deployment process for production
 
-set -e  ***REMOVED*** Exit on any error
+set -e  # Exit on any error
 
-***REMOVED*** Configuration
+# Configuration
 APP_NAME="valeoneuroerp-3.0"
 DOCKER_IMAGE="valeoneuroerp-3.0:latest"
 COMPOSE_FILE="docker-compose.production.yml"
 ENV_FILE=".env.production"
 
-***REMOVED*** Colors for output
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' ***REMOVED*** No Color
+NC='\033[0m' # No Color
 
-***REMOVED*** Logging functions
+# Logging functions
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -35,29 +35,29 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-***REMOVED*** Check prerequisites
+# Check prerequisites
 check_prerequisites() {
     log_info "Checking prerequisites..."
     
-    ***REMOVED*** Check if Docker is installed
+    # Check if Docker is installed
     if ! command -v docker &> /dev/null; then
         log_error "Docker is not installed. Please install Docker first."
         exit 1
     fi
     
-    ***REMOVED*** Check if Docker Compose is installed
+    # Check if Docker Compose is installed
     if ! command -v docker-compose &> /dev/null; then
         log_error "Docker Compose is not installed. Please install Docker Compose first."
         exit 1
     fi
     
-    ***REMOVED*** Check if Node.js is installed
+    # Check if Node.js is installed
     if ! command -v node &> /dev/null; then
         log_error "Node.js is not installed. Please install Node.js first."
         exit 1
     fi
     
-    ***REMOVED*** Check if npm is installed
+    # Check if npm is installed
     if ! command -v npm &> /dev/null; then
         log_error "npm is not installed. Please install npm first."
         exit 1
@@ -66,40 +66,40 @@ check_prerequisites() {
     log_success "All prerequisites are met!"
 }
 
-***REMOVED*** Create production environment file
+# Create production environment file
 create_env_file() {
     log_info "Creating production environment file..."
     
     if [ ! -f "$ENV_FILE" ]; then
         cat > "$ENV_FILE" << EOF
-***REMOVED*** VALEO NeuroERP 3.0 Production Environment
+# VALEO NeuroERP 3.0 Production Environment
 NODE_ENV=production
 PORT=3000
 
-***REMOVED*** Database Configuration
+# Database Configuration
 DB_HOST=valeoneuroerp-db
 DB_PORT=5432
 DB_NAME=valeoneuroerp
 DB_USER=valeoneuroerp
 DB_PASSWORD=your_secure_password_here
 
-***REMOVED*** Redis Configuration
+# Redis Configuration
 REDIS_HOST=valeoneuroerp-redis
 REDIS_PORT=6379
 
-***REMOVED*** Monitoring Configuration
+# Monitoring Configuration
 GRAFANA_PASSWORD=your_grafana_password_here
 PROMETHEUS_RETENTION=200h
 
-***REMOVED*** Security Configuration
+# Security Configuration
 JWT_SECRET=your_jwt_secret_here
 ENCRYPTION_KEY=your_encryption_key_here
 
-***REMOVED*** Logging Configuration
+# Logging Configuration
 LOG_LEVEL=info
 LOG_FORMAT=json
 
-***REMOVED*** Performance Configuration
+# Performance Configuration
 MAX_CONNECTIONS=100
 REQUEST_TIMEOUT=30000
 KEEP_ALIVE_TIMEOUT=5000
@@ -111,107 +111,107 @@ EOF
     fi
 }
 
-***REMOVED*** Run quality gates
+# Run quality gates
 run_quality_gates() {
     log_info "Running quality gates..."
     
-    ***REMOVED*** Install dependencies
+    # Install dependencies
     log_info "Installing dependencies..."
     npm ci
     
-    ***REMOVED*** Run type check
+    # Run type check
     log_info "Running TypeScript type check..."
     npm run type-check
     
-    ***REMOVED*** Run linting
+    # Run linting
     log_info "Running ESLint..."
     npm run lint
     
-    ***REMOVED*** Run smoke tests
+    # Run smoke tests
     log_info "Running smoke tests..."
     npm run test:smoke
     
     log_success "All quality gates passed!"
 }
 
-***REMOVED*** Build production image
+# Build production image
 build_production_image() {
     log_info "Building production Docker image..."
     
-    ***REMOVED*** Create Dockerfile if it doesn't exist
+    # Create Dockerfile if it doesn't exist
     if [ ! -f "Dockerfile" ]; then
         cat > Dockerfile << EOF
 FROM node:18-alpine
 
 WORKDIR /app
 
-***REMOVED*** Copy package files
+# Copy package files
 COPY package*.json ./
 
-***REMOVED*** Install dependencies
+# Install dependencies
 RUN npm ci --only=production
 
-***REMOVED*** Copy source code
+# Copy source code
 COPY . .
 
-***REMOVED*** Build the application
+# Build the application
 RUN npm run build
 
-***REMOVED*** Expose ports
+# Expose ports
 EXPOSE 3000 3001 3002 3003 3004
 
-***REMOVED*** Health check
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \\
     CMD curl -f http://localhost:3000/health || exit 1
 
-***REMOVED*** Start the application
+# Start the application
 CMD ["npm", "start"]
 EOF
         log_success "Dockerfile created"
     fi
     
-    ***REMOVED*** Build the image
+    # Build the image
     docker build -t "$DOCKER_IMAGE" .
     
     log_success "Production Docker image built: $DOCKER_IMAGE"
 }
 
-***REMOVED*** Deploy to production
+# Deploy to production
 deploy_production() {
     log_info "Deploying to production..."
     
-    ***REMOVED*** Stop existing containers
+    # Stop existing containers
     log_info "Stopping existing containers..."
     docker-compose -f "$COMPOSE_FILE" down --remove-orphans
     
-    ***REMOVED*** Pull latest images
+    # Pull latest images
     log_info "Pulling latest images..."
     docker-compose -f "$COMPOSE_FILE" pull
     
-    ***REMOVED*** Start services
+    # Start services
     log_info "Starting production services..."
     docker-compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d
     
-    ***REMOVED*** Wait for services to be ready
+    # Wait for services to be ready
     log_info "Waiting for services to be ready..."
     sleep 30
     
-    ***REMOVED*** Check service health
+    # Check service health
     log_info "Checking service health..."
     docker-compose -f "$COMPOSE_FILE" ps
     
     log_success "Production deployment completed!"
 }
 
-***REMOVED*** Run post-deployment tests
+# Run post-deployment tests
 run_post_deployment_tests() {
     log_info "Running post-deployment tests..."
     
-    ***REMOVED*** Wait for application to be ready
+    # Wait for application to be ready
     log_info "Waiting for application to be ready..."
     sleep 60
     
-    ***REMOVED*** Test main application endpoint
+    # Test main application endpoint
     log_info "Testing main application endpoint..."
     if curl -f http://localhost:3000/health; then
         log_success "Main application is responding"
@@ -220,7 +220,7 @@ run_post_deployment_tests() {
         exit 1
     fi
     
-    ***REMOVED*** Test domain endpoints
+    # Test domain endpoints
     log_info "Testing domain endpoints..."
     for port in 3001 3002 3003 3004; do
         if curl -f "http://localhost:$port/health"; then
@@ -230,7 +230,7 @@ run_post_deployment_tests() {
         fi
     done
     
-    ***REMOVED*** Test monitoring endpoints
+    # Test monitoring endpoints
     log_info "Testing monitoring endpoints..."
     if curl -f http://localhost:9090/-/healthy; then
         log_success "Prometheus is responding"
@@ -247,16 +247,16 @@ run_post_deployment_tests() {
     log_success "Post-deployment tests completed!"
 }
 
-***REMOVED*** Show deployment status
+# Show deployment status
 show_deployment_status() {
     log_info "Deployment Status:"
     echo "=================="
     
-    ***REMOVED*** Show running containers
+    # Show running containers
     log_info "Running containers:"
     docker-compose -f "$COMPOSE_FILE" ps
     
-    ***REMOVED*** Show service URLs
+    # Show service URLs
     log_info "Service URLs:"
     echo "  Main Application: http://localhost:3000"
     echo "  CRM Domain: http://localhost:3001"
@@ -266,12 +266,12 @@ show_deployment_status() {
     echo "  Prometheus: http://localhost:9090"
     echo "  Grafana: http://localhost:3001"
     
-    ***REMOVED*** Show logs
+    # Show logs
     log_info "Recent logs:"
     docker-compose -f "$COMPOSE_FILE" logs --tail=20
 }
 
-***REMOVED*** Main deployment function
+# Main deployment function
 main() {
     log_info "Starting VALEO NeuroERP 3.0 Production Deployment..."
     echo "=================================================="
@@ -289,5 +289,6 @@ main() {
     log_info "Check the service URLs above to access the application."
 }
 
-***REMOVED*** Run main function
+# Run main function
 main "$@"
+

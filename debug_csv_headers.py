@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Debug CSV Headers um den korrekten GAP-Betrag-Header zu finden
 """
@@ -38,7 +38,7 @@ def debug_csv_headers():
             print("ERSTE DATENZEILE MIT BETRAEGEN:")
             print("-" * 40)
             
-            ***REMOVED*** Erste Zeile lesen
+            # Erste Zeile lesen
             first_row = next(reader)
             
             for i, header in betrag_headers:
@@ -50,4 +50,5 @@ def debug_csv_headers():
 
 if __name__ == "__main__":
     debug_csv_headers()
+
 

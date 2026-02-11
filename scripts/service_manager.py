@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 VALEO-NeuroERP Service Manager
 Zentrale Verwaltung aller Services mit Port-Management und Auto-Cleanup
@@ -178,7 +178,7 @@ class ServiceManager:
         print("\nStartup-Reihenfolge:")
         
         for phase, services in self.services['startup_order'].items():
-            ***REMOVED*** Nur required services starten
+            # Nur required services starten
             phase_services = [s for s in services if s in required_services]
             if phase_services:
                 print(f"\n🔹 Phase {phase}: {', '.join(phase_services)}")
@@ -194,11 +194,11 @@ class ServiceManager:
                     
                     print(f"\n   {service_name} (Port {port}):")
                     
-                    ***REMOVED*** Port cleanup
+                    # Port cleanup
                     if not self.kill_process_on_port(port, service_name):
                         print(f"   ⚠️  Warnung: Port-Cleanup fehlgeschlagen")
                     
-                    ***REMOVED*** Docker-Service
+                    # Docker-Service
                     if service_type == "docker":
                         container = service_config['container']
                         status = self.check_docker_container(container)
@@ -213,12 +213,12 @@ class ServiceManager:
                             print(f"   ❌ Container existiert nicht - muss mit docker-compose erstellt werden")
                             print(f"      docker-compose -f docker-compose.production.yml up -d {service_key}")
                     
-                    ***REMOVED*** Node/Python-Service (wird separat gestartet)
+                    # Node/Python-Service (wird separat gestartet)
                     elif service_type in ["node", "python"]:
                         print(f"   ℹ️  Manueller Start erforderlich:")
                         print(f"      {service_config['command']}")
                 
-                ***REMOVED*** Warte zwischen Phasen
+                # Warte zwischen Phasen
                 if int(phase) < len(self.services['startup_order']):
                     wait_time = 5
                     print(f"\n   ⏳ Warte {wait_time}s vor nächster Phase...")
@@ -245,7 +245,7 @@ class ServiceManager:
                 results[service_key] = status in ["HEALTHY", "RUNNING"]
                 print(f"   {status}")
             else:
-                ***REMOVED*** HTTP Health-Check
+                # HTTP Health-Check
                 try:
                     import requests
                     response = requests.get(health_cmd, timeout=5)
@@ -303,7 +303,7 @@ def main():
         print("=" * 80)
         manager.cleanup_all_ports()
         
-        ***REMOVED*** Stoppe auch alle Docker-Container
+        # Stoppe auch alle Docker-Container
         for service_key, service_config in manager.services['services'].items():
             if service_config['type'] == "docker":
                 container = service_config['container']
@@ -329,4 +329,5 @@ if __name__ == "__main__":
         import traceback
         traceback.print_exc()
         sys.exit(1)
+
 

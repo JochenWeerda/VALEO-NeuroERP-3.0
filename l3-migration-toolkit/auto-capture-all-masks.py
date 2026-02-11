@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Automatisierte L3-Masken-Erfassung
 
@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
-***REMOVED*** Import der Pipeline-Module
+# Import der Pipeline-Module
 try:
     from analyze_mask_fields import L3MaskAnalyzer
     ANALYZER_AVAILABLE = True
@@ -28,7 +28,7 @@ except ImportError:
     print("⚠️  analyze_mask_fields.py nicht gefunden")
 
 
-***REMOVED*** Liste aller zu erfassenden L3-Masken
+# Liste aller zu erfassenden L3-Masken
 L3_MASKS = [
     {"id": "artikelstamm", "name": "Artikelstamm", "priority": 5, "category": "Stammdaten"},
     {"id": "kundenstamm", "name": "Kundenstamm", "priority": 5, "category": "Stammdaten"},
@@ -56,7 +56,7 @@ class AutoCaptureOrchestrator:
         self.screenshot_dir = Path("screenshots/l3-masks")
         self.analyzer = L3MaskAnalyzer() if ANALYZER_AVAILABLE else None
         
-        ***REMOVED*** Erstelle Output-Verzeichnisse
+        # Erstelle Output-Verzeichnisse
         (self.output_dir / "mask-builder").mkdir(parents=True, exist_ok=True)
         (self.output_dir / "sql").mkdir(parents=True, exist_ok=True)
         (self.output_dir / "mappings").mkdir(parents=True, exist_ok=True)
@@ -79,7 +79,7 @@ class AutoCaptureOrchestrator:
         print("   3. Screenshot wird automatisch erstellt")
         print("   4. OCR + LLM-Analyse + Schema-Export")
         print()
-        print("🌐 Browser-URL: http://localhost:8090/guacamole/***REMOVED***/client/MQBjAHBvc3RncmVzcWw")
+        print("🌐 Browser-URL: http://localhost:8090/guacamole/#/client/MQBjAHBvc3RncmVzcWw")
         print()
         
         for idx, mask in enumerate(L3_MASKS, 1):
@@ -89,14 +89,14 @@ class AutoCaptureOrchestrator:
             print(f"Kategorie: {mask['category']} | Priorität: {'⭐' * mask['priority']}")
             print()
             
-            ***REMOVED*** Warte auf Benutzer-Bestätigung
+            # Warte auf Benutzer-Bestätigung
             user_input = input(f"➡️  Bitte öffnen Sie '{mask['name']}' in L3, dann drücken Sie Enter (oder 's' zum Überspringen): ").strip().lower()
             
             if user_input == 's':
                 print(f"⏭️  Übersprungen: {mask['name']}")
                 continue
             
-            ***REMOVED*** Erfasse Maske
+            # Erfasse Maske
             result = self.capture_mask(mask)
             
             if result:
@@ -105,7 +105,7 @@ class AutoCaptureOrchestrator:
             else:
                 print(f"❌ Fehler bei: {mask['name']}")
         
-        ***REMOVED*** Abschlussbericht
+        # Abschlussbericht
         self.generate_report()
     
     def capture_mask(self, mask: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -119,7 +119,7 @@ class AutoCaptureOrchestrator:
         mask_name = mask['name']
         
         try:
-            ***REMOVED*** 1. Screenshot (über Playwright Browser MCP)
+            # 1. Screenshot (über Playwright Browser MCP)
             print(f"   📸 Erstelle Screenshot...")
             screenshot_path = self.take_screenshot(mask_id)
             
@@ -129,7 +129,7 @@ class AutoCaptureOrchestrator:
             
             print(f"   ✅ Screenshot: {screenshot_path}")
             
-            ***REMOVED*** 2. OCR + Analyse (falls verfügbar)
+            # 2. OCR + Analyse (falls verfügbar)
             if self.analyzer:
                 print(f"   🔍 OCR-Analyse läuft...")
                 schema = self.analyzer.generate_from_ocr(screenshot_path, mask_name)
@@ -141,14 +141,14 @@ class AutoCaptureOrchestrator:
                 print(f"   ⚠️  Analyzer nicht verfügbar")
                 schema = self.create_placeholder_schema(mask)
             
-            ***REMOVED*** 3. Export JSON
+            # 3. Export JSON
             json_path = self.output_dir / "mask-builder" / f"{mask_id}.json"
             with open(json_path, 'w', encoding='utf-8') as f:
                 json.dump(schema, f, indent=2, ensure_ascii=False)
             
             print(f"   ✅ JSON exportiert: {json_path}")
             
-            ***REMOVED*** 4. Export SQL
+            # 4. Export SQL
             sql_path = self.output_dir / "sql" / f"{mask_id}.sql"
             if self.analyzer:
                 self.analyzer.export_to_sql(mask, str(sql_path))
@@ -173,14 +173,14 @@ class AutoCaptureOrchestrator:
         Erstellt Screenshot via Playwright Browser MCP
         
         HINWEIS: Playwright MCP muss bereits im Browser laufen!
-        URL: http://localhost:8090/guacamole/***REMOVED***/client/MQBjAHBvc3RncmVzcWw
+        URL: http://localhost:8090/guacamole/#/client/MQBjAHBvc3RncmVzcWw
         
         Returns:
             Pfad zum Screenshot oder None
         """
-        ***REMOVED*** Da wir keine direkte MCP-Integration haben, nutzen wir:
-        ***REMOVED*** Option A: Manuelle Screenshots (Windows + Shift + S)
-        ***REMOVED*** Option B: Playwright über externe Tool-Integration
+        # Da wir keine direkte MCP-Integration haben, nutzen wir:
+        # Option A: Manuelle Screenshots (Windows + Shift + S)
+        # Option B: Playwright über externe Tool-Integration
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         screenshot_filename = f"{mask_id}_{timestamp}.png"
@@ -192,11 +192,11 @@ class AutoCaptureOrchestrator:
         user_input = input(f"   Drücken Sie Enter, wenn Screenshot gespeichert (oder 'paste' für temp): ").strip().lower()
         
         if user_input == 'paste':
-            ***REMOVED*** Placeholder: Screenshot aus Clipboard
+            # Placeholder: Screenshot aus Clipboard
             print(f"   ⚠️  Clipboard-Import noch nicht implementiert")
             return None
         
-        ***REMOVED*** Prüfe ob Datei existiert
+        # Prüfe ob Datei existiert
         if screenshot_path.exists():
             return str(screenshot_path)
         
@@ -239,7 +239,7 @@ class AutoCaptureOrchestrator:
         print(f"✅ Erfolgreich erfasst: {len(successful)}/{len(L3_MASKS)} Masken")
         print()
         
-        ***REMOVED*** Speichere Index
+        # Speichere Index
         index_path = self.output_dir / "mappings" / "migration-index.json"
         with open(index_path, 'w', encoding='utf-8') as f:
             json.dump({
@@ -281,4 +281,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 

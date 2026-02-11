@@ -1,9 +1,9 @@
-***REMOVED*** ===================================
-***REMOVED*** VALEO NeuroERP - Staging Deployment Script (PowerShell)
-***REMOVED*** ===================================
-***REMOVED*** Version: 3.0.0
-***REMOVED*** Purpose: Deploy staging environment on Windows/Docker Desktop
-***REMOVED*** Usage: .\scripts\staging-deploy.ps1 [-Clean] [-SkipBuild] [-SkipTests]
+# ===================================
+# VALEO NeuroERP - Staging Deployment Script (PowerShell)
+# ===================================
+# Version: 3.0.0
+# Purpose: Deploy staging environment on Windows/Docker Desktop
+# Usage: .\scripts\staging-deploy.ps1 [-Clean] [-SkipBuild] [-SkipTests]
 
 param(
     [switch]$Clean = $false,
@@ -12,9 +12,9 @@ param(
     [switch]$Help = $false
 )
 
-***REMOVED*** ===================================
-***REMOVED*** Configuration
-***REMOVED*** ===================================
+# ===================================
+# Configuration
+# ===================================
 
 $ErrorActionPreference = "Stop"
 $ComposeFile = "docker-compose.staging.yml"
@@ -22,9 +22,9 @@ $EnvFile = "env.example.staging"
 $LogDir = "logs\staging"
 $BackupDir = "backups\staging"
 
-***REMOVED*** ===================================
-***REMOVED*** Helper Functions
-***REMOVED*** ===================================
+# ===================================
+# Helper Functions
+# ===================================
 
 function Write-ColorOutput {
     param(
@@ -69,10 +69,10 @@ OPTIONS:
     -Help           Show this help message
 
 EXAMPLES:
-    .\scripts\staging-deploy.ps1                    ***REMOVED*** Normal deployment
-    .\scripts\staging-deploy.ps1 -Clean             ***REMOVED*** Clean deployment
-    .\scripts\staging-deploy.ps1 -SkipBuild         ***REMOVED*** Deploy without rebuilding
-    .\scripts\staging-deploy.ps1 -SkipTests         ***REMOVED*** Deploy without tests
+    .\scripts\staging-deploy.ps1                    # Normal deployment
+    .\scripts\staging-deploy.ps1 -Clean             # Clean deployment
+    .\scripts\staging-deploy.ps1 -SkipBuild         # Deploy without rebuilding
+    .\scripts\staging-deploy.ps1 -SkipTests         # Deploy without tests
 
 "@
 }
@@ -185,7 +185,7 @@ function Wait-ForServices {
                 }
             }
             catch {
-                ***REMOVED*** Keep waiting
+                # Keep waiting
             }
             
             if (-not $ready) {
@@ -244,7 +244,7 @@ function Invoke-SmokeTests {
     $smokeTestScript = "scripts\smoke-tests-staging.sh"
     
     if (Test-Path $smokeTestScript) {
-        ***REMOVED*** Try to run with Git Bash if available
+        # Try to run with Git Bash if available
         $gitBash = "C:\Program Files\Git\bin\bash.exe"
         
         if (Test-Path $gitBash) {
@@ -294,9 +294,9 @@ function Show-Logs {
     docker-compose -f $ComposeFile logs --tail=$Lines
 }
 
-***REMOVED*** ===================================
-***REMOVED*** Main Deployment Flow
-***REMOVED*** ===================================
+# ===================================
+# Main Deployment Flow
+# ===================================
 
 function Main {
     $startTime = Get-Date
@@ -310,13 +310,13 @@ function Main {
 
 "@ "Cyan"
 
-    ***REMOVED*** Show help if requested
+    # Show help if requested
     if ($Help) {
         Show-Help
         exit 0
     }
     
-    ***REMOVED*** Pre-flight checks
+    # Pre-flight checks
     Write-Step "Pre-flight checks..."
     
     if (-not (Test-DockerRunning)) {
@@ -329,10 +329,10 @@ function Main {
     Test-EnvFile
     Write-Success "Environment file found"
     
-    ***REMOVED*** Create necessary directories
+    # Create necessary directories
     New-Directories
     
-    ***REMOVED*** Clean deployment if requested
+    # Clean deployment if requested
     if ($Clean) {
         Remove-Stack
     }
@@ -340,10 +340,10 @@ function Main {
         Stop-Stack
     }
     
-    ***REMOVED*** Create backup before deployment
+    # Create backup before deployment
     Create-Backup
     
-    ***REMOVED*** Build images unless skipped
+    # Build images unless skipped
     if (-not $SkipBuild) {
         Build-Images
     }
@@ -351,28 +351,28 @@ function Main {
         Write-Warning "Skipping image build (using existing images)"
     }
     
-    ***REMOVED*** Start the stack
+    # Start the stack
     Start-Stack
     
-    ***REMOVED*** Wait for services
+    # Wait for services
     Wait-ForServices
     
-    ***REMOVED*** Run database migrations
+    # Run database migrations
     Invoke-DatabaseMigration
     
-    ***REMOVED*** Show status
+    # Show status
     Show-ContainerStatus
     
-    ***REMOVED*** Run smoke tests unless skipped
+    # Run smoke tests unless skipped
     if (-not $SkipTests) {
-        Start-Sleep -Seconds 10  ***REMOVED*** Give services a bit more time
+        Start-Sleep -Seconds 10  # Give services a bit more time
         Invoke-SmokeTests
     }
     else {
         Write-Warning "Skipping smoke tests"
     }
     
-    ***REMOVED*** Success!
+    # Success!
     $duration = (Get-Date) - $startTime
     
     Write-ColorOutput @"
@@ -391,9 +391,9 @@ function Main {
     Write-ColorOutput "🎉 Happy Testing!" "Green"
 }
 
-***REMOVED*** ===================================
-***REMOVED*** Error Handling
-***REMOVED*** ===================================
+# ===================================
+# Error Handling
+# ===================================
 
 trap {
     Write-ErrorMsg "Deployment failed!"
@@ -413,9 +413,10 @@ trap {
     exit 1
 }
 
-***REMOVED*** ===================================
-***REMOVED*** Run Main
-***REMOVED*** ===================================
+# ===================================
+# Run Main
+# ===================================
 
 Main
+
 

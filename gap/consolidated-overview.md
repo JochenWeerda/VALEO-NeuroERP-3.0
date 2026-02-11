@@ -1,4 +1,4 @@
-***REMOVED*** GAP-Analyse Konsolidierte Übersicht
+# GAP-Analyse Konsolidierte Übersicht
 
 **Datum:** 2025-01-27  
 **Status:** In Progress  
@@ -6,7 +6,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 📊 Domain-Übersicht
+## 📊 Domain-Übersicht
 
 | Domain | Capabilities | Status | Maturity | Priorität |
 |--------|--------------|--------|----------|-----------|
@@ -20,26 +20,26 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Kritische Gaps (P0) - Top 10
+## 🎯 Kritische Gaps (P0) - Top 10
 
-***REMOVED******REMOVED******REMOVED*** Finance/FiBU (4 kritische Gaps)
+### Finance/FiBU (4 kritische Gaps)
 1. **FIBU-AR-03:** Zahlungseingänge & Matching
 2. **FIBU-AP-02:** Eingangsrechnungen
 3. **FIBU-GL-05:** Periodensteuerung
 4. **FIBU-COMP-01:** GoBD / Audit Trail UI
 
-***REMOVED******REMOVED******REMOVED*** Procurement (4 kritische Gaps)
+### Procurement (4 kritische Gaps)
 1. **PROC-GR-01:** Wareneingang
 2. **PROC-IV-02:** 2/3-Wege-Abgleich
 3. **PROC-PO-02:** PO-Änderungen & Storno
 4. **PROC-REQ-01:** Bedarfsmeldung vervollständigen
 
-***REMOVED******REMOVED******REMOVED*** Sales (Top kritische Gaps)
+### Sales (Top kritische Gaps)
 - Siehe `gaps-sales.md` für detaillierte Priorisierung
 
 ---
 
-***REMOVED******REMOVED*** 📈 Maturity-Vergleich
+## 📈 Maturity-Vergleich
 
 | Domain | VALEO | SAP | Oracle | Odoo | Gap |
 |--------|-------|-----|--------|------|-----|
@@ -53,9 +53,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Implementierungs-Roadmap
+## 🚀 Implementierungs-Roadmap
 
-***REMOVED******REMOVED******REMOVED*** Phase 1: Kritische Gaps (P0) - 12-16 Wochen
+### Phase 1: Kritische Gaps (P0) - 12-16 Wochen
 
 **Finance (4 Gaps):**
 - FIBU-AR-03: Zahlungseingänge & Matching (2-3 Wochen)
@@ -72,13 +72,13 @@
 **Sales (Top Gaps):**
 - Siehe `gaps-sales.md` für detaillierte Planung
 
-***REMOVED******REMOVED******REMOVED*** Phase 2: Wichtige Gaps (P1) - 10-14 Wochen
+### Phase 2: Wichtige Gaps (P1) - 10-14 Wochen
 
 **Finance:** 7 Capabilities  
 **Procurement:** 4 Capabilities  
 **Sales:** Top Prioritäten
 
-***REMOVED******REMOVED******REMOVED*** Phase 3: Nice-to-Have (P2-P3) - 30-40 Wochen
+### Phase 3: Nice-to-Have (P2-P3) - 30-40 Wochen
 
 **Finance:** 18 Capabilities  
 **Procurement:** 12 Capabilities  
@@ -87,30 +87,30 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 Status pro Domain
+## 📋 Status pro Domain
 
-***REMOVED******REMOVED******REMOVED*** ✅ Finance/FiBU - Vollständig analysiert
+### ✅ Finance/FiBU - Vollständig analysiert
 - **Dokument:** `gaps.md`
 - **Matrix:** `matrix.csv` (Zeilen 2-39)
 - **Capabilities:** 33
 - **Kritische Gaps:** 4
 - **Maturity:** 48%
 
-***REMOVED******REMOVED******REMOVED*** ✅ Procurement/Einkauf - Vollständig analysiert
+### ✅ Procurement/Einkauf - Vollständig analysiert
 - **Dokument:** `procurement-gaps.md`
 - **Matrix:** `matrix.csv` (Zeilen 40-68)
 - **Capabilities:** 28
 - **Kritische Gaps:** 4
 - **Maturity:** 35%
 
-***REMOVED******REMOVED******REMOVED*** ✅ Sales/Order-to-Cash - Vollständig analysiert
+### ✅ Sales/Order-to-Cash - Vollständig analysiert
 - **Dokument:** `gaps-sales.md`
 - **Matrix:** `matrix-sales.csv`
 - **Capabilities:** 31
 - **Priorisierung:** Score-basiert (siehe Dokument)
 - **Maturity:** ~40% (geschätzt)
 
-***REMOVED******REMOVED******REMOVED*** ✅ CRM & Marketing - Vollständig analysiert
+### ✅ CRM & Marketing - Vollständig analysiert
 - **Dokument:** `gaps-crm-marketing.md`
 - **Matrix:** `matrix-crm-marketing.csv`
 - **Capabilities:** 32
@@ -119,7 +119,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 🔍 Nächste Schritte
+## 🔍 Nächste Schritte
 
 1. ✅ Finance GAP-Analyse abgeschlossen
 2. ✅ Procurement GAP-Analyse abgeschlossen
@@ -132,53 +132,53 @@
 
 ---
 
-***REMOVED******REMOVED*** 📚 Dokumentationsstruktur
+## 📚 Dokumentationsstruktur
 
 ```
 gap/
-├── README.md                          ***REMOVED*** Diese Übersicht
-├── consolidated-overview.md           ***REMOVED*** Konsolidierte Übersicht (dieses Dokument)
+├── README.md                          # Diese Übersicht
+├── consolidated-overview.md           # Konsolidierte Übersicht (dieses Dokument)
 │
-├── capability-model.md                ***REMOVED*** Allgemeines Capability Model
-├── procurement-capability-model.md    ***REMOVED*** Procurement Capability Model
-├── capability-model-sales.md          ***REMOVED*** Sales Capability Model
-├── capability-model-crm-marketing.md ***REMOVED*** CRM/Marketing Capability Model
+├── capability-model.md                # Allgemeines Capability Model
+├── procurement-capability-model.md    # Procurement Capability Model
+├── capability-model-sales.md          # Sales Capability Model
+├── capability-model-crm-marketing.md # CRM/Marketing Capability Model
 │
-├── gaps.md                            ***REMOVED*** Finance GAP-Analyse
-├── procurement-gaps.md                ***REMOVED*** Procurement GAP-Analyse
-├── gaps-sales.md                      ***REMOVED*** Sales GAP-Analyse
-├── gaps-crm-marketing.md              ***REMOVED*** CRM/Marketing GAP-Analyse
+├── gaps.md                            # Finance GAP-Analyse
+├── procurement-gaps.md                # Procurement GAP-Analyse
+├── gaps-sales.md                      # Sales GAP-Analyse
+├── gaps-crm-marketing.md              # CRM/Marketing GAP-Analyse
 │
-├── matrix.csv                         ***REMOVED*** Finance + Procurement Matrix
-├── matrix-sales.csv                   ***REMOVED*** Sales Matrix
-└── matrix-crm-marketing.csv           ***REMOVED*** CRM/Marketing Matrix
+├── matrix.csv                         # Finance + Procurement Matrix
+├── matrix-sales.csv                   # Sales Matrix
+└── matrix-crm-marketing.csv           # CRM/Marketing Matrix
 ```
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Priorisierungs-Methodik
+## 🎯 Priorisierungs-Methodik
 
-***REMOVED******REMOVED******REMOVED*** Finance & Procurement
+### Finance & Procurement
 - **Priorität 1-5:** Basierend auf MUSS/SOLL/KANN und Business Impact
 - **P0:** Kritisch (MUSS, Priorität 1)
 - **P1:** Hoch (MUSS, Priorität 2)
 - **P2:** Mittel (SOLL, Priorität 3)
 - **P3:** Niedrig (KANN, Priorität 4-5)
 
-***REMOVED******REMOVED******REMOVED*** Sales
+### Sales
 - **Score-basiert:** PS = (BI × PF × RC) / IA
 - **BI:** Business Impact (1-5)
 - **PF:** Pflichtgrad (MUSS=5, SOLL=3, KANN=1)
 - **RC:** Risk/Compliance (1-5)
 - **IA:** Implementierungsaufwand (1-5)
 
-***REMOVED******REMOVED******REMOVED*** CRM/Marketing
+### CRM/Marketing
 - **Score-basiert:** PS = (BI × PF × RC) / IA
 - Siehe `gaps-crm-marketing.md` für Details
 
 ---
 
-***REMOVED******REMOVED*** 📊 Zusammenfassung
+## 📊 Zusammenfassung
 
 **Gesamt Capabilities analysiert:** 124  
 **Domains analysiert:** 4 (Finance, Procurement, Sales, CRM/Marketing)  
@@ -199,4 +199,5 @@ gap/
 ---
 
 **Letzte Aktualisierung:** 2025-01-27
+
 

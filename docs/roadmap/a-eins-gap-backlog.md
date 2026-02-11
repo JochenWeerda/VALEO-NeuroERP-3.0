@@ -1,10 +1,10 @@
-***REMOVED*** a.eins Gap-Backlog für VALEO NeuroERP 3.0
+# a.eins Gap-Backlog für VALEO NeuroERP 3.0
 
-***REMOVED******REMOVED*** Kontext
+## Kontext
 
 Ausgehend von der Analyse der aktuellen Kernprozesse und den Zielbildern soll diese Roadmap die fehlenden Fähigkeiten gegenüber a.eins priorisiert abbilden. Kategorien: **Must-Have** (zeitkritisch/Compliance), **High Priority**, **Mid Priority**, **Low Priority**.
 
-***REMOVED******REMOVED*** Must-Have (Sofortige Umsetzung)
+## Must-Have (Sofortige Umsetzung)
 
 - InfraStat/Intrastat Meldewesen inklusive Zolltarifierung und automatischer Datenaggregation aus Warenwirtschaft.
 - Zoll- & Exportkontrolle (Sanktionslisten, Ausfuhrgenehmigungen, Präferenzkalkulation).
@@ -14,7 +14,7 @@ Ausgehend von der Analyse der aktuellen Kernprozesse und den Zielbildern soll di
 - Lieferketten-Tracking (Status, ETA, Abweichungsalarme) gekoppelt an Event-Engine.
 - Compliance-konformes Archiv & Audit Trail (inkl. revisionssichere Dokumentenablage).
 
-***REMOVED******REMOVED*** High Priority (Kurzfristig)
+## High Priority (Kurzfristig)
 
 - Fertigungsleitstand mit Kapazitäts- und Feinplanung (mehrstufige Stücklisten, Arbeitspläne).
 - KI-gestützte Bedarfs- und Absatzprognosen (Sales & Operations Planning).
@@ -24,7 +24,7 @@ Ausgehend von der Analyse der aktuellen Kernprozesse und den Zielbildern soll di
 - EDI/Schnittstellen-Hub für Lieferanten, Kunden und Behörden.
 - Dynamische Genehmigungsworkflows und Policy-as-Code (Approval-as-a-Service).
 
-***REMOVED******REMOVED*** Mid Priority (Mittelfristig)
+## Mid Priority (Mittelfristig)
 
 - Qualitätsmanagement (CAPA, 8D-Reports, Prüfpläne, SPC-Dashboards).
 - Dokumentenmanagement mit E-Akten, OCR/Tagging und RAG-gestützter Suche.
@@ -32,24 +32,25 @@ Ausgehend von der Analyse der aktuellen Kernprozesse und den Zielbildern soll di
 - Partner-/Reseller-Portal inkl. Indirektvertrieb-Abrechnung.
 - Produktionsnahe IoT-Integration für Maschinenzustände und Predictive Maintenance.
 
-***REMOVED******REMOVED*** Low Priority (Langfristig)
+## Low Priority (Langfristig)
 
 - Schulungs- & Zertifizierungsmodul mit Kompetenztracking.
 - Integrierte Collaboration-Features (Shared Workspaces, Kommentierung im Kontext).
 - Gamifizierte KPI-Dashboards für Vertrieb und Service.
 - Nachhaltigkeitsreporting (CO₂-Bilanz, ESG-Kennzahlen) als optionales Modul.
 
-***REMOVED******REMOVED*** Abhängigkeiten & Sequenzierung
+## Abhängigkeiten & Sequenzierung
 
 1. Compliance & Finanzkern (Must-Haves) als Voraussetzung für Abnahme durch Behörden und Audits.
 2. Erweiterte Produktions- und Servicefunktionen (High Priority) zur funktionalen Parität mit a.eins.
 3. Ergänzende Prozesse (Mid Priority) zur Optimierung von Qualität und Zusammenarbeit.
 4. Differenzierende Mehrwerte (Low Priority) zur UX- und Marktpositionierung.
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 - Detailliertes Delivery-Backlog im Produktmanagement-Tool aufsetzen.
 - Ressourcen & Squad-Zuschnitt entlang der Streams (Finance/Compliance, Supply Chain, Service, Plattform).
 - KPIs pro Feature-Cluster definieren (z. B. First-Time-Fix-Rate, Cash Conversion Cycle, On-Time Delivery).
 - Abgleich mit bestehenden Releases und Integrationen planen, um Abhängigkeiten zu minimieren.
+
 

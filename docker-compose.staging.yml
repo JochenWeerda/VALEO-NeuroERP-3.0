@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  ***REMOVED*** PostgreSQL Database (Staging)
+  # PostgreSQL Database (Staging)
   postgres-staging:
     image: postgres:15-alpine
     container_name: valeo-staging-postgres
@@ -26,7 +26,7 @@ services:
       retries: 5
       start_period: 30s
 
-  ***REMOVED*** Redis Cache (Staging)
+  # Redis Cache (Staging)
   redis-staging:
     image: redis:7-alpine
     container_name: valeo-staging-redis
@@ -45,7 +45,7 @@ services:
       retries: 5
     command: redis-server /etc/redis/redis.conf --appendonly yes
 
-  ***REMOVED*** Keycloak Identity Provider (Staging)
+  # Keycloak Identity Provider (Staging)
   keycloak-staging:
     image: quay.io/keycloak/keycloak:23.0
     container_name: valeo-staging-keycloak
@@ -83,7 +83,7 @@ services:
       start_period: 90s
     command: start-dev --import-realm
 
-  ***REMOVED*** Backend API (Staging)
+  # Backend API (Staging)
   backend-staging:
     image: python:3.11-slim
     container_name: valeo-staging-backend
@@ -92,33 +92,33 @@ services:
     command: >
       sh -c "apt-get update -qq && apt-get install -y -qq curl libpq-dev && pip install --quiet -r requirements.txt && pip install --quiet email-validator && python main.py"
     environment:
-      ***REMOVED*** Application
+      # Application
       APP_ENV: staging
       DEBUG: "false"
       LOG_LEVEL: INFO
       
-      ***REMOVED*** Database
+      # Database
       DATABASE_URL: postgresql://valeo_staging:${POSTGRES_PASSWORD:-valeo_staging_2024!}@postgres-staging:5432/valeo_neuro_erp_staging
       
-      ***REMOVED*** Redis
+      # Redis
       REDIS_URL: redis://redis-staging:6379/0
       
-      ***REMOVED*** OIDC/Auth
+      # OIDC/Auth
       OIDC_DISCOVERY_URL: http://keycloak-staging:8080/realms/valeo-staging/.well-known/openid-configuration
       OIDC_CLIENT_ID: valeo-erp-staging
       OIDC_ISSUER: http://localhost:8180/realms/valeo-staging
       JWT_ALGORITHM: RS256
       JWT_AUDIENCE: valeo-erp-staging
       
-      ***REMOVED*** Security
+      # Security
       CORS_ORIGINS: http://localhost:3001,http://localhost:4001
       DEMO_MODE: "false"
       
-      ***REMOVED*** Features
+      # Features
       POLICY_ENGINE_ENABLED: "true"
       AUDIT_LOGGING_ENABLED: "true"
       
-      ***REMOVED*** Server
+      # Server
       HOST: 0.0.0.0
       PORT: 8000
     ports:
@@ -143,7 +143,7 @@ services:
       retries: 3
       start_period: 40s
 
-  ***REMOVED*** BFF (Backend for Frontend) - Staging
+  # BFF (Backend for Frontend) - Staging
   bff-staging:
     image: node:20
     container_name: valeo-staging-bff
@@ -176,7 +176,7 @@ services:
       retries: 3
       start_period: 60s
 
-  ***REMOVED*** Frontend (Staging)
+  # Frontend (Staging)
   frontend-staging:
     image: node:20
     container_name: valeo-staging-frontend
@@ -211,7 +211,7 @@ services:
       retries: 3
       start_period: 60s
 
-  ***REMOVED*** pgAdmin (Staging)
+  # pgAdmin (Staging)
   pgadmin-staging:
     image: dpage/pgadmin4:8
     container_name: valeo-staging-pgadmin
@@ -231,7 +231,7 @@ services:
     volumes:
       - pgadmin_staging_data:/var/lib/pgadmin
 
-  ***REMOVED*** Redis Commander (Staging)
+  # Redis Commander (Staging)
   redis-commander-staging:
     image: rediscommander/redis-commander:latest
     container_name: valeo-staging-redis-commander
@@ -264,4 +264,5 @@ networks:
     ipam:
       config:
         - subnet: 172.21.0.0/16
+
 

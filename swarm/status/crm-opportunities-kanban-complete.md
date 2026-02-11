@@ -1,20 +1,20 @@
-***REMOVED*** Pipeline-Kanban - Abgeschlossen
+# Pipeline-Kanban - Abgeschlossen
 
 **Datum:** 2025-01-27  
 **Sprint:** Sprint 1 (Week 1-2)  
 **Mission:** Phase 1.1 - Opportunities / Deals
 
-***REMOVED******REMOVED*** ✅ Abgeschlossen
+## ✅ Abgeschlossen
 
-***REMOVED******REMOVED******REMOVED*** Pipeline-Kanban (`opportunities-kanban.tsx`)
+### Pipeline-Kanban (`opportunities-kanban.tsx`)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Hauptkomponente
+#### 1. Hauptkomponente
 - ✅ Kanban-Board mit horizontalem Scroll
 - ✅ Drag & Drop zwischen Stages
 - ✅ Optimistic Updates mit Rollback bei Fehler
 - ✅ API-Integration für Stage-Updates
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2. Features
+#### 2. Features
 - ✅ **Stage-Spalten**:
   - Automatische Gruppierung nach Stages
   - Sortierung nach Stage-Order
@@ -46,7 +46,7 @@
   - Create-Button
   - Back-Button
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3. Drag & Drop
+#### 3. Drag & Drop
 - ✅ Drag Start: Opportunity wird markiert
 - ✅ Drag Over: Drop-Zone wird aktiviert
 - ✅ Drop: Stage wird aktualisiert via API
@@ -54,7 +54,7 @@
 - ✅ Optimistic Update mit Rollback bei Fehler
 - ✅ Toast-Notifications für Erfolg/Fehler
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4. i18n-Integration
+#### 4. i18n-Integration
 - ✅ Alle Labels übersetzt
 - ✅ Neue Übersetzungen hinzugefügt:
   - `crud.kanban.pipeline`
@@ -68,12 +68,12 @@
   - `crud.messages.stageChanged`
   - `crud.actions.refresh`
 
-***REMOVED******REMOVED*** 📋 Nächste Schritte
+## 📋 Nächste Schritte
 
 1. **Forecast-Report** (Visualisierungen)
 2. **Tests** (Unit, Integration, E2E)
 
-***REMOVED******REMOVED*** 📊 Fortschritt
+## 📊 Fortschritt
 
 **Sprint 1 (Frontend):**
 - ✅ 100% - Opportunities-Liste
@@ -89,4 +89,5 @@
 ---
 
 **Nächster Update:** Nach Forecast-Report
+
 

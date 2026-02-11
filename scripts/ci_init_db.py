@@ -1,4 +1,4 @@
-﻿"""
+"""
 Fallback-only DB bootstrap (create_all).
 
 This script exists as an emergency escape hatch, not as the default DB init path.
@@ -38,13 +38,13 @@ def main() -> None:
             "or set VALEO_ALLOW_CREATE_ALL=1 to override."
         )
 
-    ***REMOVED*** Register models on Base metadata.
-    ***REMOVED*** Import side effects are intentional here.
-    import app.infrastructure.models  ***REMOVED*** noqa: F401
+    # Register models on Base metadata.
+    # Import side effects are intentional here.
+    import app.infrastructure.models  # noqa: F401
 
     schemas = sorted({t.schema for t in Base.metadata.tables.values() if t.schema})
 
-    ***REMOVED*** Ensure schemas exist before creating tables inside them.
+    # Ensure schemas exist before creating tables inside them.
     with engine.begin() as conn:
         for schema in schemas:
             conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{schema}"'))
@@ -55,3 +55,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

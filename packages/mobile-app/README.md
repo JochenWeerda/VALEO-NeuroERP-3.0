@@ -1,8 +1,8 @@
-***REMOVED*** VALEO CRM Mobile App
+# VALEO CRM Mobile App
 
 React Native mobile application for CRM access on iOS and Android devices.
 
-***REMOVED******REMOVED*** Features
+## Features
 
 - **Offline-First**: Full CRM functionality works offline with sync
 - **Push Notifications**: Real-time alerts for leads, tasks, and opportunities
@@ -16,7 +16,7 @@ React Native mobile application for CRM access on iOS and Android devices.
 - **Task Management**: Create and manage sales activities and follow-ups
 - **Calendar Integration**: Sync with device calendar for appointments
 
-***REMOVED******REMOVED*** Tech Stack
+## Tech Stack
 
 - **React Native**: Cross-platform mobile development
 - **Expo**: Development platform and build service
@@ -29,64 +29,64 @@ React Native mobile application for CRM access on iOS and Android devices.
 - **React Native Maps**: Location services
 - **Expo Notifications**: Push notification handling
 
-***REMOVED******REMOVED*** Project Structure
+## Project Structure
 
 ```
 packages/mobile-app/
-├── assets/                 ***REMOVED*** Images, fonts, and other assets
-├── components/             ***REMOVED*** Reusable UI components
-│   ├── common/            ***REMOVED*** Shared components (Button, Input, etc.)
-│   ├── crm/               ***REMOVED*** CRM-specific components
-│   └── navigation/        ***REMOVED*** Navigation components
-├── screens/                ***REMOVED*** Screen components
-│   ├── auth/              ***REMOVED*** Authentication screens
-│   ├── dashboard/         ***REMOVED*** Dashboard and home screens
-│   ├── customers/         ***REMOVED*** Customer management screens
-│   ├── leads/             ***REMOVED*** Lead management screens
-│   ├── tasks/             ***REMOVED*** Task and activity screens
-│   └── settings/          ***REMOVED*** Settings and configuration
-├── services/               ***REMOVED*** API services and utilities
-│   ├── api/               ***REMOVED*** API client and endpoints
-│   ├── auth/              ***REMOVED*** Authentication services
-│   ├── storage/           ***REMOVED*** Local storage utilities
-│   └── sync/              ***REMOVED*** Data synchronization
-├── store/                  ***REMOVED*** Redux store configuration
-├── utils/                  ***REMOVED*** Utility functions
-├── constants/              ***REMOVED*** App constants and configuration
-├── hooks/                  ***REMOVED*** Custom React hooks
-├── types/                  ***REMOVED*** TypeScript type definitions
-└── App.tsx                 ***REMOVED*** Main app component
+├── assets/                 # Images, fonts, and other assets
+├── components/             # Reusable UI components
+│   ├── common/            # Shared components (Button, Input, etc.)
+│   ├── crm/               # CRM-specific components
+│   └── navigation/        # Navigation components
+├── screens/                # Screen components
+│   ├── auth/              # Authentication screens
+│   ├── dashboard/         # Dashboard and home screens
+│   ├── customers/         # Customer management screens
+│   ├── leads/             # Lead management screens
+│   ├── tasks/             # Task and activity screens
+│   └── settings/          # Settings and configuration
+├── services/               # API services and utilities
+│   ├── api/               # API client and endpoints
+│   ├── auth/              # Authentication services
+│   ├── storage/           # Local storage utilities
+│   └── sync/              # Data synchronization
+├── store/                  # Redux store configuration
+├── utils/                  # Utility functions
+├── constants/              # App constants and configuration
+├── hooks/                  # Custom React hooks
+├── types/                  # TypeScript type definitions
+└── App.tsx                 # Main app component
 ```
 
-***REMOVED******REMOVED*** Development Setup
+## Development Setup
 
-***REMOVED******REMOVED******REMOVED*** Prerequisites
+### Prerequisites
 
 - Node.js 18+
 - npm or yarn
 - Expo CLI
 - iOS Simulator (macOS) or Android Emulator/Device
 
-***REMOVED******REMOVED******REMOVED*** Installation
+### Installation
 
 ```bash
-***REMOVED*** Install dependencies
+# Install dependencies
 npm install
 
-***REMOVED*** Install Expo CLI globally
+# Install Expo CLI globally
 npm install -g @expo/cli
 
-***REMOVED*** Start development server
+# Start development server
 npm start
 
-***REMOVED*** Run on iOS simulator
+# Run on iOS simulator
 npm run ios
 
-***REMOVED*** Run on Android emulator
+# Run on Android emulator
 npm run android
 ```
 
-***REMOVED******REMOVED******REMOVED*** Environment Configuration
+### Environment Configuration
 
 Create `.env` file in the mobile-app directory:
 
@@ -97,37 +97,37 @@ TENANT_ID=00000000-0000-0000-0000-000000000001
 APP_ENV=development
 ```
 
-***REMOVED******REMOVED*** Key Features Implementation
+## Key Features Implementation
 
-***REMOVED******REMOVED******REMOVED*** Offline-First Architecture
+### Offline-First Architecture
 
 - **Local Storage**: SQLite-based local database for offline data
 - **Sync Engine**: Background synchronization with conflict resolution
 - **Queue System**: Offline action queuing with retry logic
 - **Data Versioning**: Optimistic updates with server reconciliation
 
-***REMOVED******REMOVED******REMOVED*** Authentication & Security
+### Authentication & Security
 
 - **JWT Tokens**: Secure token storage and refresh
 - **Biometric Auth**: Device biometric authentication
 - **Certificate Pinning**: SSL certificate validation
 - **Data Encryption**: Sensitive data encryption at rest
 
-***REMOVED******REMOVED******REMOVED*** Real-time Updates
+### Real-time Updates
 
 - **WebSocket Connection**: Real-time data synchronization
 - **Push Notifications**: Firebase/APNs integration
 - **Background Sync**: Periodic data refresh
 - **Live Updates**: Real-time dashboard updates
 
-***REMOVED******REMOVED******REMOVED*** Performance Optimization
+### Performance Optimization
 
 - **Code Splitting**: Lazy loading of screens and components
 - **Image Optimization**: Progressive image loading and caching
 - **List Virtualization**: Efficient rendering of large lists
 - **Memory Management**: Automatic cleanup and optimization
 
-***REMOVED******REMOVED*** API Integration
+## API Integration
 
 The mobile app integrates with all CRM microservices:
 
@@ -138,46 +138,46 @@ The mobile app integrates with all CRM microservices:
 - **crm-ai**: Lead scoring and recommendations
 - **crm-multichannel**: Social media and external integrations
 
-***REMOVED******REMOVED*** Build & Deployment
+## Build & Deployment
 
-***REMOVED******REMOVED******REMOVED*** Development Builds
+### Development Builds
 
 ```bash
-***REMOVED*** Build for development
+# Build for development
 expo build:ios
 expo build:android
 ```
 
-***REMOVED******REMOVED******REMOVED*** Production Builds
+### Production Builds
 
 ```bash
-***REMOVED*** Build for production
+# Build for production
 expo build:ios --type archive
 expo build:android --type app-bundle
 ```
 
-***REMOVED******REMOVED******REMOVED*** OTA Updates
+### OTA Updates
 
 ```bash
-***REMOVED*** Publish OTA update
+# Publish OTA update
 expo publish
 ```
 
-***REMOVED******REMOVED*** Testing
+## Testing
 
 ```bash
-***REMOVED*** Run unit tests
+# Run unit tests
 npm test
 
-***REMOVED*** Run integration tests
+# Run integration tests
 npm run test:e2e
 
-***REMOVED*** Run on device for testing
+# Run on device for testing
 npm run ios:device
 npm run android:device
 ```
 
-***REMOVED******REMOVED*** Contributing
+## Contributing
 
 1. Follow React Native and Expo best practices
 2. Use TypeScript for all new code
@@ -185,7 +185,7 @@ npm run android:device
 4. Follow the established project structure
 5. Use conventional commits for PRs
 
-***REMOVED******REMOVED*** Security Considerations
+## Security Considerations
 
 - **Data Encryption**: All sensitive data encrypted at rest
 - **Network Security**: HTTPS-only communication with certificate pinning

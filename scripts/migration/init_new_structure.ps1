@@ -1,10 +1,10 @@
-***REMOVED*** PowerShell-Skript zur Initialisierung der neuen Projektstruktur
+# PowerShell-Skript zur Initialisierung der neuen Projektstruktur
 $ErrorActionPreference = "Stop"
 
-***REMOVED*** Basis-Verzeichnis definieren
+# Basis-Verzeichnis definieren
 $BASE_DIR = "C:\Users\Jochen\VALEO-NeuroERP-2.0"
 
-***REMOVED*** Funktion zum Erstellen von Verzeichnissen
+# Funktion zum Erstellen von Verzeichnissen
 function Create-ProjectStructure {
     param (
         [string]$basePath,
@@ -14,30 +14,30 @@ function Create-ProjectStructure {
     foreach ($key in $structure.Keys) {
         $path = Join-Path $basePath $key
         
-        ***REMOVED*** Verzeichnis erstellen
+        # Verzeichnis erstellen
         New-Item -Path $path -ItemType Directory -Force | Out-Null
         Write-Host "Erstellt: $path"
         
-        ***REMOVED*** Wenn es Unterverzeichnisse gibt, rekursiv erstellen
+        # Wenn es Unterverzeichnisse gibt, rekursiv erstellen
         if ($structure[$key] -is [hashtable]) {
             Create-ProjectStructure -basePath $path -structure $structure[$key]
         }
         
-        ***REMOVED*** README.md für jedes Hauptverzeichnis erstellen
-        if ($key -notmatch "^\.") {  ***REMOVED*** Keine README für versteckte Verzeichnisse
+        # README.md für jedes Hauptverzeichnis erstellen
+        if ($key -notmatch "^\.") {  # Keine README für versteckte Verzeichnisse
             $readmePath = Join-Path $path "README.md"
             $readmeContent = @"
-***REMOVED*** $key
+# $key
 
-***REMOVED******REMOVED*** Beschreibung
+## Beschreibung
 $(if ($structure[$key] -is [string]) { $structure[$key] } else { "Dieses Verzeichnis enthält..." })
 
-***REMOVED******REMOVED*** Struktur
+## Struktur
 $(if ($structure[$key] -is [hashtable]) {
     $structure[$key].Keys | ForEach-Object { "- $_" } | Out-String
 })
 
-***REMOVED******REMOVED*** Verwendung
+## Verwendung
 Beschreiben Sie hier, wie dieses Modul verwendet wird...
 "@
             Set-Content -Path $readmePath -Value $readmeContent -Encoding UTF8
@@ -46,7 +46,7 @@ Beschreiben Sie hier, wie dieses Modul verwendet wird...
     }
 }
 
-***REMOVED*** Projektstruktur definieren
+# Projektstruktur definieren
 $PROJECT_STRUCTURE = @{
     '.cursor' = @{
         'rules' = "Cursor-spezifische Regeln"
@@ -174,9 +174,9 @@ $PROJECT_STRUCTURE = @{
     }
 }
 
-***REMOVED*** Hauptfunktion
+# Hauptfunktion
 function Initialize-Project {
-    ***REMOVED*** Prüfen, ob das Basis-Verzeichnis existiert
+    # Prüfen, ob das Basis-Verzeichnis existiert
     if (Test-Path $BASE_DIR) {
         Write-Host "WARNUNG: Verzeichnis existiert bereits: $BASE_DIR"
         $confirmation = Read-Host "Möchten Sie fortfahren? (j/n)"
@@ -186,20 +186,20 @@ function Initialize-Project {
         }
     }
     
-    ***REMOVED*** Basis-Verzeichnis erstellen
+    # Basis-Verzeichnis erstellen
     New-Item -Path $BASE_DIR -ItemType Directory -Force | Out-Null
     Write-Host "Projekt-Verzeichnis erstellt: $BASE_DIR"
     
-    ***REMOVED*** Projektstruktur erstellen
+    # Projektstruktur erstellen
     Create-ProjectStructure -basePath $BASE_DIR -structure $PROJECT_STRUCTURE
     
-    ***REMOVED*** Git initialisieren
+    # Git initialisieren
     Set-Location $BASE_DIR
     git init
     
-    ***REMOVED*** .gitignore erstellen
+    # .gitignore erstellen
     $gitignore = @"
-***REMOVED*** Python
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -221,101 +221,101 @@ wheels/
 .installed.cfg
 *.egg
 
-***REMOVED*** Node
+# Node
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-***REMOVED*** IDEs
+# IDEs
 .idea/
 .vscode/
 *.swp
 *.swo
 
-***REMOVED*** Environments
+# Environments
 .env
 .venv
 env/
 venv/
 ENV/
 
-***REMOVED*** Logs
+# Logs
 logs/
 *.log
 
-***REMOVED*** Database
+# Database
 *.sqlite3
 *.db
 
-***REMOVED*** Build
+# Build
 build/
 dist/
 
-***REMOVED*** Coverage
+# Coverage
 .coverage
 coverage/
 
-***REMOVED*** Cache
+# Cache
 .cache/
 .pytest_cache/
 
-***REMOVED*** Local development
+# Local development
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-***REMOVED*** Docker
+# Docker
 .docker/
 
-***REMOVED*** Kubernetes
+# Kubernetes
 .kube/
 
-***REMOVED*** Terraform
+# Terraform
 .terraform/
 *.tfstate
 *.tfstate.*
 *.tfvars
 
-***REMOVED*** RAG
+# RAG
 data/rag_index/
 "@
     Set-Content -Path (Join-Path $BASE_DIR ".gitignore") -Value $gitignore -Encoding UTF8
     
-    ***REMOVED*** requirements.txt erstellen
+    # requirements.txt erstellen
     $requirements = @"
-***REMOVED*** Core
+# Core
 fastapi==0.68.1
 uvicorn==0.15.0
 pydantic==1.8.2
 python-dotenv==0.19.0
 
-***REMOVED*** Database
+# Database
 motor==2.5.1
 odmantic==0.3.5
 beanie==1.11.0
 
-***REMOVED*** RAG
+# RAG
 langchain==0.0.184
 chromadb==0.3.21
 sentence-transformers==2.2.2
 
-***REMOVED*** Graph
+# Graph
 networkx==2.6.3
 graphviz==0.17
 
-***REMOVED*** Monitoring
+# Monitoring
 prometheus-client==0.11.0
 opentelemetry-api==1.11.1
 opentelemetry-sdk==1.11.1
 
-***REMOVED*** Testing
+# Testing
 pytest==6.2.5
 pytest-asyncio==0.15.1
 pytest-cov==2.12.1
 
-***REMOVED*** Utils
+# Utils
 python-jose==3.3.0
 passlib==1.7.4
 python-multipart==0.0.5
@@ -323,7 +323,7 @@ aiofiles==0.7.0
 "@
     Set-Content -Path (Join-Path $BASE_DIR "requirements.txt") -Value $requirements -Encoding UTF8
     
-    ***REMOVED*** package.json für Web-App erstellen
+    # package.json für Web-App erstellen
     $packageJson = @"
 {
   "name": "valeo-neuroerp-web",
@@ -367,5 +367,5 @@ aiofiles==0.7.0
     Write-Host "4. Entwicklungsumgebung einrichten"
 }
 
-***REMOVED*** Skript ausführen
+# Skript ausführen
 Initialize-Project 

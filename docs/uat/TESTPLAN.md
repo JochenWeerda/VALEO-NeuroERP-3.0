@@ -1,6 +1,6 @@
-***REMOVED*** VALEO-NeuroERP - UAT Testplan
+# VALEO-NeuroERP - UAT Testplan
 
-***REMOVED******REMOVED*** Überblick
+## Überblick
 
 **Ziel:** Vollständiger User Acceptance Test (UAT) der VALEO-NeuroERP Suite zur Verifikation der Production Readiness.
 
@@ -12,16 +12,16 @@
 
 ---
 
-***REMOVED******REMOVED*** Testumfang
+## Testumfang
 
-***REMOVED******REMOVED******REMOVED*** Funktional
+### Funktional
 - **CRUD-Operationen:** Create, Read, Update, Delete (4-10 Datensätze je Maske)
 - **Workflow/Status:** Erlaubte Statusübergänge, unzulässige Aktionen blockiert
 - **Print/Export:** PDF-Render, CSV/XLS/DATEV/SEPA/Label-Export
 - **Navigation:** Tabs vor/zurück, Breadcrumb, Dirty-Guard
 - **Validierung:** Zod-Fehler, Blocker vs. Warnung
 
-***REMOVED******REMOVED******REMOVED*** Technisch
+### Technisch
 - **3-Ebenen-Fallback:**
   - Level 1: Seitenspezifischer onClick-Handler
   - Level 2: useListActions-Hook
@@ -30,7 +30,7 @@
 - **Stabilität:** Keine Crashes, keine 500er, Timeout < 2s (P95)
 - **Logs:** Console, Network (HAR), Backend-Logs
 
-***REMOVED******REMOVED******REMOVED*** PoC-Domains (Initial)
+### PoC-Domains (Initial)
 1. **Sales:** Angebote, Order, Delivery, Invoice
 2. **Agrar/PSM:** PSM-Liste, Saatgut, Dünger
 3. **CRM:** Kontakte, Leads, Aktivitäten
@@ -39,21 +39,21 @@
 
 ---
 
-***REMOVED******REMOVED*** Testdaten & Umgebung
+## Testdaten & Umgebung
 
-***REMOVED******REMOVED******REMOVED*** Test-Mandant
+### Test-Mandant
 - **Tenant-ID:** `QA-UAT-01`
 - **Datenbank:** Eigene SQLite/PostgreSQL-Instanz (isoliert)
 - **Seed-Daten:** 4-10 Datensätze pro Domain (automatisch via API)
 
-***REMOVED******REMOVED******REMOVED*** Test-Rollen
+### Test-Rollen
 | Rolle        | E-Mail                   | Rechte                          |
 |--------------|--------------------------|----------------------------------|
 | admin        | admin@example.com        | Alle Rechte, alle Domains       |
 | power-user   | power@example.com        | Domänen-spezifisch write        |
 | readonly     | readonly@example.com     | View + Export only              |
 
-***REMOVED******REMOVED******REMOVED*** Randfälle (pro Maske)
+### Randfälle (pro Maske)
 - Fehlende Pflichtfelder
 - Doppelte Schlüssel (z. B. Artikelnummer)
 - Über-/Unter-Mengen
@@ -63,9 +63,9 @@
 
 ---
 
-***REMOVED******REMOVED*** Testablauf
+## Testablauf
 
-***REMOVED******REMOVED******REMOVED*** A) Sichtprüfung & Fallback-Verifikation
+### A) Sichtprüfung & Fallback-Verifikation
 1. **Button-Wirkung:** Click wirkt genau einmal (keine Doppel-Auslösung)
 2. **Fallback-Kette:**
    - Seitenskript vorhanden? → Level 1 (Console: `FB:LEVEL=1`)
@@ -73,33 +73,33 @@
    - Sonst GlobalButtonHandler → Level 3 (`FB:LEVEL=3`)
 3. **Toasts/Bestätigungen:** Konsistent, korrekte Texte
 
-***REMOVED******REMOVED******REMOVED*** B) CRUD & Validierung
+### B) CRUD & Validierung
 4. **Create:** 4–10 neue Datensätze (Happy Path + Randfälle)
 5. **Read/List:** Filter, Suche, Paging; leere & große Listen
 6. **Update:** Pflichtfelder, Optimistic Locking (2. Fenster)
 7. **Delete/Restore:** Bestätigung, Soft-Delete, Audit-Log
 8. **Validierung:** Zod-Fehler sichtbar, Blocker vs. Warnung
 
-***REMOVED******REMOVED******REMOVED*** C) Workflow/Status
+### C) Workflow/Status
 9. **Statuspfade:** Erlaubte Übergänge ok, unzulässige blockiert (klarer Fehlertext)
 
-***REMOVED******REMOVED******REMOVED*** D) Druck/Export
+### D) Druck/Export
 10. **Print:** PDF korrekt, Nummernkreis, Journal-Eintrag
 11. **Export:** CSV/XLS/EDI/SEPA/DATEV/Label – Datei ok, Download, Encoding
 
-***REMOVED******REMOVED******REMOVED*** E) Navigation/UX
+### E) Navigation/UX
 12. **Tabs vor/zurück:** State-Erhalt, Dirty-Guard greift
 13. **Breadcrumb/Zurück:** Keine Loops, keine 404
 14. **A11y-Basics:** Fokus, Tastatur, ARIA-Label
 
-***REMOVED******REMOVED******REMOVED*** F) RBAC/Permissions
+### F) RBAC/Permissions
 15. **readonly:** Keine Schreibaktionen (403 + Toast)
 16. **power-user:** Nur erlaubte Domains schreibbar
 17. **admin:** Alles sichtbar & ausführbar
 
 ---
 
-***REMOVED******REMOVED*** Fehlererfassung
+## Fehlererfassung
 
 **Pflicht-Schema (JSON):**
 
@@ -128,7 +128,7 @@
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schweregrade
+### Schweregrade
 - **S1 Blocker:** Crash, Data-Loss, 500/Backend down, Workflows gestoppt
 - **S2 Hoch:** Kernfunktion fehlerhaft (Speichern/Print/Export)
 - **S3 Mittel:** Fehllogik, falsche Meldung, UI-Glitches mit Workaround
@@ -136,7 +136,7 @@
 
 ---
 
-***REMOVED******REMOVED*** Abnahmekriterien (Exit-Criteria)
+## Abnahmekriterien (Exit-Criteria)
 
 - **0× S1** (Blocker) offen
 - **0× S2** (Hoch) offen
@@ -147,7 +147,7 @@
 
 ---
 
-***REMOVED******REMOVED*** Abschluss-Artefakte
+## Abschluss-Artefakte
 
 1. **UAT-Summary:** `docs/uat/UAT-SUMMARY.md` (KPI, Tests gesamt, grün/rot, nach Domain)
 2. **Bug-List:** `docs/uat/BUGLIST.json` (alle Fehler, normiert)
@@ -157,31 +157,31 @@
 
 ---
 
-***REMOVED******REMOVED*** Ausführung
+## Ausführung
 
-***REMOVED******REMOVED******REMOVED*** Automatisiert (Playwright)
+### Automatisiert (Playwright)
 ```bash
-***REMOVED*** Smoke-Tests (schnell)
+# Smoke-Tests (schnell)
 pnpm test:e2e:smoke
 
-***REMOVED*** Full UAT
+# Full UAT
 pnpm test:e2e:full
 
-***REMOVED*** Fallback-Verifikation
+# Fallback-Verifikation
 pnpm test:e2e:fallback
 
-***REMOVED*** Report anzeigen
+# Report anzeigen
 pnpm test:e2e:report
 ```
 
-***REMOVED******REMOVED******REMOVED*** Manuell
+### Manuell
 1. Checklisten verwenden: `docs/uat/checklisten/<DOMAIN>.md`
 2. Fehler in `BUGLIST.json` eintragen
 3. Coverage-Matrix aktualisieren
 
 ---
 
-***REMOVED******REMOVED*** Kontakt & Review
+## Kontakt & Review
 
 **Test-Leitung:** QA-Team  
 **Review-Zyklus:** Täglich (während UAT-Phase)  
@@ -190,4 +190,5 @@ pnpm test:e2e:report
 ---
 
 **Status:** ✅ Bereit für UAT-Start
+
 

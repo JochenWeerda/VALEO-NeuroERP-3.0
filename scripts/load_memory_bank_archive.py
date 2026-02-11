@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Lädt alle wichtigen Informationen aus der memory-bank und dem Archiv in die MongoDB.
 """
@@ -12,7 +12,7 @@ from pathlib import Path
 import pymongo
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -23,7 +23,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("LoadMemoryBankArchive")
 
-***REMOVED*** MongoDB-Konfiguration
+# MongoDB-Konfiguration
 MONGODB_CONNECTION_STRING = "mongodb://localhost:27017/"
 MONGODB_DATABASE_NAME = "valeo_neuroerp"
 
@@ -40,7 +40,7 @@ def check_mongodb_connection():
             MONGODB_CONNECTION_STRING,
             serverSelectionTimeoutMS=5000
         )
-        ***REMOVED*** Verbindung testen
+        # Verbindung testen
         client.admin.command('ping')
         logger.info("Verbindung zu MongoDB erfolgreich hergestellt.")
         client.close()
@@ -59,44 +59,44 @@ def load_archive_documents():
     logger.info("Lade Archiv-Dokumente in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["archive_documents"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** Archiv-Verzeichnis
+        # Archiv-Verzeichnis
         archive_dir = Path("memory-bank") / "archive"
         
         if not archive_dir.exists():
             logger.warning(f"Archiv-Verzeichnis {archive_dir} existiert nicht.")
             return False
         
-        ***REMOVED*** Alle Markdown-Dateien im Archiv-Verzeichnis laden
+        # Alle Markdown-Dateien im Archiv-Verzeichnis laden
         for archive_file in archive_dir.glob("*.md"):
             try:
-                ***REMOVED*** Binärmodus zum Erkennen von Null-Bytes
+                # Binärmodus zum Erkennen von Null-Bytes
                 with open(archive_file, 'rb') as f:
                     content_bytes = f.read()
                 
-                ***REMOVED*** Prüfen auf Null-Bytes
+                # Prüfen auf Null-Bytes
                 if b'\x00' in content_bytes:
                     logger.warning(f"Datei {archive_file} enthält Null-Bytes und wird übersprungen.")
                     continue
                 
-                ***REMOVED*** In Text umwandeln
+                # In Text umwandeln
                 try:
                     content = content_bytes.decode('utf-8')
                 except UnicodeDecodeError:
                     logger.warning(f"Datei {archive_file} konnte nicht als UTF-8 dekodiert werden, versuche latin-1.")
                     content = content_bytes.decode('latin-1')
                 
-                ***REMOVED*** Metadaten extrahieren
+                # Metadaten extrahieren
                 metadata = extract_markdown_metadata(content)
                 
-                ***REMOVED*** In MongoDB speichern
+                # In MongoDB speichern
                 collection.insert_one({
                     "filename": archive_file.name,
                     "path": str(archive_file),
@@ -127,44 +127,44 @@ def load_creative_documents():
     logger.info("Lade Creative-Dokumente in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["creative_documents"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** Creative-Verzeichnis
+        # Creative-Verzeichnis
         creative_dir = Path("memory-bank") / "creative"
         
         if not creative_dir.exists():
             logger.warning(f"Creative-Verzeichnis {creative_dir} existiert nicht.")
             return False
         
-        ***REMOVED*** Alle Markdown-Dateien im Creative-Verzeichnis laden
+        # Alle Markdown-Dateien im Creative-Verzeichnis laden
         for creative_file in creative_dir.glob("*.md"):
             try:
-                ***REMOVED*** Binärmodus zum Erkennen von Null-Bytes
+                # Binärmodus zum Erkennen von Null-Bytes
                 with open(creative_file, 'rb') as f:
                     content_bytes = f.read()
                 
-                ***REMOVED*** Prüfen auf Null-Bytes
+                # Prüfen auf Null-Bytes
                 if b'\x00' in content_bytes:
                     logger.warning(f"Datei {creative_file} enthält Null-Bytes und wird übersprungen.")
                     continue
                 
-                ***REMOVED*** In Text umwandeln
+                # In Text umwandeln
                 try:
                     content = content_bytes.decode('utf-8')
                 except UnicodeDecodeError:
                     logger.warning(f"Datei {creative_file} konnte nicht als UTF-8 dekodiert werden, versuche latin-1.")
                     content = content_bytes.decode('latin-1')
                 
-                ***REMOVED*** Metadaten extrahieren
+                # Metadaten extrahieren
                 metadata = extract_markdown_metadata(content)
                 
-                ***REMOVED*** In MongoDB speichern
+                # In MongoDB speichern
                 collection.insert_one({
                     "filename": creative_file.name,
                     "path": str(creative_file),
@@ -195,44 +195,44 @@ def load_reflection_documents():
     logger.info("Lade Reflection-Dokumente in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["reflection_documents"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** Reflection-Verzeichnis
+        # Reflection-Verzeichnis
         reflection_dir = Path("memory-bank") / "reflection"
         
         if not reflection_dir.exists():
             logger.warning(f"Reflection-Verzeichnis {reflection_dir} existiert nicht.")
             return False
         
-        ***REMOVED*** Alle Markdown-Dateien im Reflection-Verzeichnis laden
+        # Alle Markdown-Dateien im Reflection-Verzeichnis laden
         for reflection_file in reflection_dir.glob("*.md"):
             try:
-                ***REMOVED*** Binärmodus zum Erkennen von Null-Bytes
+                # Binärmodus zum Erkennen von Null-Bytes
                 with open(reflection_file, 'rb') as f:
                     content_bytes = f.read()
                 
-                ***REMOVED*** Prüfen auf Null-Bytes
+                # Prüfen auf Null-Bytes
                 if b'\x00' in content_bytes:
                     logger.warning(f"Datei {reflection_file} enthält Null-Bytes und wird übersprungen.")
                     continue
                 
-                ***REMOVED*** In Text umwandeln
+                # In Text umwandeln
                 try:
                     content = content_bytes.decode('utf-8')
                 except UnicodeDecodeError:
                     logger.warning(f"Datei {reflection_file} konnte nicht als UTF-8 dekodiert werden, versuche latin-1.")
                     content = content_bytes.decode('latin-1')
                 
-                ***REMOVED*** Metadaten extrahieren
+                # Metadaten extrahieren
                 metadata = extract_markdown_metadata(content)
                 
-                ***REMOVED*** In MongoDB speichern
+                # In MongoDB speichern
                 collection.insert_one({
                     "filename": reflection_file.name,
                     "path": str(reflection_file),
@@ -263,44 +263,44 @@ def load_memory_bank_root_documents():
     logger.info("Lade Dokumente aus dem memory-bank-Wurzelverzeichnis in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["memory_bank_documents"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** memory-bank-Verzeichnis
+        # memory-bank-Verzeichnis
         memory_bank_dir = Path("memory-bank")
         
         if not memory_bank_dir.exists():
             logger.warning(f"memory-bank-Verzeichnis {memory_bank_dir} existiert nicht.")
             return False
         
-        ***REMOVED*** Alle Markdown-Dateien im memory-bank-Verzeichnis laden
+        # Alle Markdown-Dateien im memory-bank-Verzeichnis laden
         for md_file in memory_bank_dir.glob("*.md"):
             try:
-                ***REMOVED*** Binärmodus zum Erkennen von Null-Bytes
+                # Binärmodus zum Erkennen von Null-Bytes
                 with open(md_file, 'rb') as f:
                     content_bytes = f.read()
                 
-                ***REMOVED*** Prüfen auf Null-Bytes
+                # Prüfen auf Null-Bytes
                 if b'\x00' in content_bytes:
                     logger.warning(f"Datei {md_file} enthält Null-Bytes und wird übersprungen.")
                     continue
                 
-                ***REMOVED*** In Text umwandeln
+                # In Text umwandeln
                 try:
                     content = content_bytes.decode('utf-8')
                 except UnicodeDecodeError:
                     logger.warning(f"Datei {md_file} konnte nicht als UTF-8 dekodiert werden, versuche latin-1.")
                     content = content_bytes.decode('latin-1')
                 
-                ***REMOVED*** Metadaten extrahieren
+                # Metadaten extrahieren
                 metadata = extract_markdown_metadata(content)
                 
-                ***REMOVED*** In MongoDB speichern
+                # In MongoDB speichern
                 collection.insert_one({
                     "filename": md_file.name,
                     "path": str(md_file),
@@ -331,25 +331,25 @@ def load_json_data():
     logger.info("Lade JSON-Dateien aus der memory-bank in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["json_data"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** memory-bank-Verzeichnis
+        # memory-bank-Verzeichnis
         memory_bank_dir = Path("memory-bank")
         
         if not memory_bank_dir.exists():
             logger.warning(f"memory-bank-Verzeichnis {memory_bank_dir} existiert nicht.")
             return False
         
-        ***REMOVED*** Alle JSON-Dateien in der memory-bank laden
+        # Alle JSON-Dateien in der memory-bank laden
         for json_file in memory_bank_dir.glob("**/*.json"):
             try:
-                ***REMOVED*** Datei lesen
+                # Datei lesen
                 with open(json_file, 'r', encoding='utf-8') as f:
                     try:
                         data = json.load(f)
@@ -357,7 +357,7 @@ def load_json_data():
                         logger.warning(f"Datei {json_file} ist kein gültiges JSON und wird übersprungen.")
                         continue
                 
-                ***REMOVED*** In MongoDB speichern
+                # In MongoDB speichern
                 collection.insert_one({
                     "filename": json_file.name,
                     "path": str(json_file),
@@ -395,21 +395,21 @@ def extract_markdown_metadata(content):
         "summary": None
     }
     
-    ***REMOVED*** Titel extrahieren (erste Überschrift)
+    # Titel extrahieren (erste Überschrift)
     lines = content.split('\n')
     for line in lines:
-        if line.startswith('***REMOVED*** '):
-            metadata["title"] = line.strip('***REMOVED*** ').strip()
+        if line.startswith('# '):
+            metadata["title"] = line.strip('# ').strip()
             break
     
-    ***REMOVED*** Datum extrahieren (falls vorhanden)
+    # Datum extrahieren (falls vorhanden)
     for line in lines:
         if line.lower().startswith('datum:') or line.lower().startswith('date:'):
             parts = line.split(':', 1)
             if len(parts) > 1:
                 date_str = parts[1].strip()
                 try:
-                    ***REMOVED*** Versuche, das Datum zu parsen
+                    # Versuche, das Datum zu parsen
                     date_obj = datetime.datetime.strptime(date_str, "%d.%m.%Y")
                     metadata["date"] = date_obj
                 except ValueError:
@@ -420,7 +420,7 @@ def extract_markdown_metadata(content):
                         metadata["date"] = date_str
             break
     
-    ***REMOVED*** Tags extrahieren (falls vorhanden)
+    # Tags extrahieren (falls vorhanden)
     for line in lines:
         if line.lower().startswith('tags:'):
             parts = line.split(':', 1)
@@ -429,7 +429,7 @@ def extract_markdown_metadata(content):
                 metadata["tags"] = [tag.strip() for tag in tags_str.split(',')]
             break
     
-    ***REMOVED*** Kategorien extrahieren (falls vorhanden)
+    # Kategorien extrahieren (falls vorhanden)
     for line in lines:
         if line.lower().startswith('kategorien:') or line.lower().startswith('categories:'):
             parts = line.split(':', 1)
@@ -438,11 +438,11 @@ def extract_markdown_metadata(content):
                 metadata["categories"] = [cat.strip() for cat in categories_str.split(',')]
             break
     
-    ***REMOVED*** Zusammenfassung extrahieren (erster Absatz nach dem Titel)
+    # Zusammenfassung extrahieren (erster Absatz nach dem Titel)
     summary = ""
     in_summary = False
     for line in lines:
-        if line.startswith('***REMOVED*** '):
+        if line.startswith('# '):
             in_summary = True
             continue
         if in_summary and line.strip():
@@ -465,35 +465,35 @@ def create_indexes():
     logger.info("Erstelle Indizes in MongoDB-Sammlungen...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         
-        ***REMOVED*** Indizes für archive_documents
+        # Indizes für archive_documents
         db.archive_documents.create_index("filename")
         db.archive_documents.create_index("metadata.title")
         db.archive_documents.create_index("metadata.tags")
         db.archive_documents.create_index([("content", pymongo.TEXT)])
         
-        ***REMOVED*** Indizes für creative_documents
+        # Indizes für creative_documents
         db.creative_documents.create_index("filename")
         db.creative_documents.create_index("metadata.title")
         db.creative_documents.create_index("metadata.tags")
         db.creative_documents.create_index([("content", pymongo.TEXT)])
         
-        ***REMOVED*** Indizes für reflection_documents
+        # Indizes für reflection_documents
         db.reflection_documents.create_index("filename")
         db.reflection_documents.create_index("metadata.title")
         db.reflection_documents.create_index("metadata.tags")
         db.reflection_documents.create_index([("content", pymongo.TEXT)])
         
-        ***REMOVED*** Indizes für memory_bank_documents
+        # Indizes für memory_bank_documents
         db.memory_bank_documents.create_index("filename")
         db.memory_bank_documents.create_index("metadata.title")
         db.memory_bank_documents.create_index("metadata.tags")
         db.memory_bank_documents.create_index([("content", pymongo.TEXT)])
         
-        ***REMOVED*** Indizes für json_data
+        # Indizes für json_data
         db.json_data.create_index("filename")
         
         logger.info("Indizes erfolgreich erstellt.")
@@ -507,12 +507,12 @@ def main():
     """
     Hauptfunktion für das Laden aller wichtigen Informationen aus der memory-bank und dem Archiv in die MongoDB.
     """
-    ***REMOVED*** MongoDB-Verbindung prüfen
+    # MongoDB-Verbindung prüfen
     if not check_mongodb_connection():
         logger.error("Konnte keine Verbindung zur MongoDB herstellen.")
         return 1
     
-    ***REMOVED*** Daten laden
+    # Daten laden
     success = True
     
     if not load_archive_documents():
@@ -535,7 +535,7 @@ def main():
         logger.error("Konnte JSON-Dateien nicht laden.")
         success = False
     
-    ***REMOVED*** Indizes erstellen
+    # Indizes erstellen
     if not create_indexes():
         logger.error("Konnte Indizes nicht erstellen.")
         success = False

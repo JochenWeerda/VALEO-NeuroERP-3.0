@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Skript zum Erstellen der langgraph_integration.py Datei.
 """
@@ -7,11 +7,11 @@ import os
 import codecs
 from pathlib import Path
 
-***REMOVED*** Pfad zur Datei
+# Pfad zur Datei
 file_path = Path(__file__).resolve().parent.parent / "linkup_mcp" / "langgraph_integration.py"
 
-***REMOVED*** Code für die Datei
-code = '''***REMOVED***!/usr/bin/env python3
+# Code für die Datei
+code = '''#!/usr/bin/env python3
 """
 LangGraph-Integration für das VALEO-NeuroERP Multi-Agent-Framework.
 """
@@ -27,17 +27,17 @@ from datetime import datetime
 from langchain.agents import Tool
 from langchain.schema import AgentAction, AgentFinish
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class AgentType(str, Enum):
     """Enum für die verschiedenen Agentenrollen im Framework."""
-    VAN = "van"  ***REMOVED*** Validator-Analyzer
-    PLAN = "plan"  ***REMOVED*** Planner
-    CREATE = "create"  ***REMOVED*** Creator
-    IMPLEMENT = "implement"  ***REMOVED*** Implementer
-    REVIEW = "review"  ***REMOVED*** Reviewer
+    VAN = "van"  # Validator-Analyzer
+    PLAN = "plan"  # Planner
+    CREATE = "create"  # Creator
+    IMPLEMENT = "implement"  # Implementer
+    REVIEW = "review"  # Reviewer
 
 class LangGraphIntegration:
     """
@@ -55,7 +55,7 @@ class LangGraphIntegration:
         self.workflows = {}
         self.workflow_states = {}
         
-        ***REMOVED*** Standard-Tools laden
+        # Standard-Tools laden
         self.tools = self._load_default_tools()
         
         logger.info("LangGraph-Integration initialisiert")
@@ -185,7 +185,7 @@ class LangGraphIntegration:
             Das Ergebnis des Workflows.
         """
         try:
-            ***REMOVED*** Workflow-Zustand initialisieren
+            # Workflow-Zustand initialisieren
             state = {
                 "workflow_id": workflow_id,
                 "current_agent": start_agent,
@@ -197,15 +197,15 @@ class LangGraphIntegration:
             
             self.workflow_states[workflow_id] = state
             
-            ***REMOVED*** Tools für den aktuellen Agenten abrufen
+            # Tools für den aktuellen Agenten abrufen
             agent_tools = self.tools.get(start_agent, [])
             
-            ***REMOVED*** Workflow ausführen
+            # Workflow ausführen
             for tool in agent_tools:
                 result = await tool.arun(input_data)
                 state["results"][tool.name] = result
             
-            ***REMOVED*** Workflow abschließen
+            # Workflow abschließen
             state["status"] = "completed"
             state["end_time"] = datetime.now().isoformat()
             
@@ -220,6 +220,6 @@ class LangGraphIntegration:
             raise
 '''
 
-***REMOVED*** Datei erstellen
+# Datei erstellen
 with codecs.open(file_path, 'w', 'utf-8') as f:
     f.write(code)

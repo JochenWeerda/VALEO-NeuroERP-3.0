@@ -10,22 +10,22 @@ from agents.task_handlers import (
 
 async def main():
     """Führt die Verbesserungs-Pipeline aus"""
-    ***REMOVED*** Projektroot
+    # Projektroot
     root = Path(__file__).parent.parent
     
-    ***REMOVED*** Erstelle Orchestrator
+    # Erstelle Orchestrator
     orchestrator = PipelineOrchestrator()
     
-    ***REMOVED*** Initialisiere Pipeline
+    # Initialisiere Pipeline
     await orchestrator.setup_pipeline()
     
     print("=== Starte Verbesserungs-Pipeline ===\n")
     
-    ***REMOVED*** Phase 1: Analyse
+    # Phase 1: Analyse
     print("Phase 1: Analyse")
     orchestrator.current_phase = "ANALYZE"
     
-    ***REMOVED*** Analysiere Abhängigkeiten
+    # Analysiere Abhängigkeiten
     resolver = CircularDependencyResolver(str(root))
     resolver.analyze_dependencies()
     cycles = resolver.cycles
@@ -34,7 +34,7 @@ async def main():
     for cycle in cycles:
         print(f"  {' -> '.join(cycle)} -> {cycle[0]}")
         
-    ***REMOVED*** Analysiere Kopplung
+    # Analysiere Kopplung
     reducer = CouplingReducer(str(root))
     reducer.analyze_coupling()
     
@@ -42,20 +42,20 @@ async def main():
     for module in reducer.high_coupling:
         print(f"  {module}: {len(reducer.modules[module])} Abhängigkeiten")
         
-    ***REMOVED*** Analysiere Imports
+    # Analysiere Imports
     optimizer = ImportOptimizer(str(root))
     optimizer.analyze_imports()
     
-    ***REMOVED*** Phase 2: Implementierung
+    # Phase 2: Implementierung
     print("\nPhase 2: Implementierung")
     orchestrator.current_phase = "IMPLEMENT"
     
-    ***REMOVED*** Starte Pipeline
+    # Starte Pipeline
     await orchestrator.execute_pipeline()
     
     print("\n=== Pipeline abgeschlossen ===")
     
-    ***REMOVED*** Zeige Ergebnisse
+    # Zeige Ergebnisse
     completed = sum(1 for node in orchestrator.graph.nodes 
                    if orchestrator.graph.nodes[node]["status"] == "completed")
     failed = sum(1 for node in orchestrator.graph.nodes
@@ -65,7 +65,7 @@ async def main():
     print(f"  Abgeschlossene Tasks: {completed}")
     print(f"  Fehlgeschlagene Tasks: {failed}")
     
-    ***REMOVED*** Speichere Handover-Dokumente
+    # Speichere Handover-Dokumente
     print("\nHandover-Dokumente:")
     for task, handover in orchestrator.handovers.items():
         print(f"  {task}: {handover['timestamp']}")

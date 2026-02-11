@@ -1,4 +1,4 @@
-***REMOVED*** -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import streamlit as st
 import os
 import json
@@ -7,7 +7,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import glob
 
-***REMOVED*** Konfiguration
+# Konfiguration
 st.set_page_config(
     page_title="GENXAIS v2.0 Dashboard",
     page_icon="🌱",
@@ -15,11 +15,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-***REMOVED*** Titel und Beschreibung
+# Titel und Beschreibung
 st.title("🌱 VALEO-NeuroERP v2.0 für Landhandel")
 st.markdown("**GENXAIS v2.0 Monitoring Dashboard**")
 
-***REMOVED*** Seitenleiste
+# Seitenleiste
 with st.sidebar:
     st.header("Navigation")
     page = st.radio(
@@ -38,7 +38,7 @@ with st.sidebar:
     start_date = st.date_input("Startdatum", datetime.now().date())
     end_date = st.date_input("Enddatum", datetime.now().date())
 
-***REMOVED*** Hilfsfunktionen
+# Hilfsfunktionen
 def load_phase_results():
     """Lädt die Ergebnisse der Phasen aus den Dateien"""
     phases = ["van", "plan", "create", "implementation", "reflektion"]
@@ -56,8 +56,8 @@ def load_phase_results():
 
 def load_tasks():
     """Lädt die Aufgaben aus der YAML-Konfiguration"""
-    ***REMOVED*** In einer echten Anwendung würde hier die YAML-Datei geparst werden
-    ***REMOVED*** Hier verwenden wir Beispieldaten
+    # In einer echten Anwendung würde hier die YAML-Datei geparst werden
+    # Hier verwenden wir Beispieldaten
     tasks = [
         {"name": "Landhandel-API-Endpunkte erstellen", "pipeline": "API", "status": "completed"},
         {"name": "KI-Endpunkte für Preisgestaltung", "pipeline": "API", "status": "in_progress"},
@@ -77,12 +77,12 @@ def load_tasks():
     ]
     return tasks
 
-***REMOVED*** Seiten
+# Seiten
 def show_overview():
     """Zeigt die Übersichtsseite an"""
     st.header("📊 Übersicht")
     
-    ***REMOVED*** Fortschrittsbalken
+    # Fortschrittsbalken
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Abgeschlossene Phasen", "4/5", "+1")
@@ -91,7 +91,7 @@ def show_overview():
     with col3:
         st.metric("Testabdeckung", "85%", "+10%")
     
-    ***REMOVED*** Grafik: Aufgaben nach Pipeline
+    # Grafik: Aufgaben nach Pipeline
     st.subheader("Aufgaben nach Pipeline")
     tasks = load_tasks()
     pipeline_counts = {}
@@ -108,7 +108,7 @@ def show_overview():
     ax.set_title("Aufgaben nach Pipeline")
     st.pyplot(fig)
     
-    ***REMOVED*** Neueste Aktivitäten
+    # Neueste Aktivitäten
     st.subheader("Neueste Aktivitäten")
     activities = [
         {"time": "2025-07-04 10:30:00", "description": "IMPLEMENTATION-Phase abgeschlossen"},
@@ -134,18 +134,18 @@ def show_phase_status():
         "REFLEKTION": "In Vorbereitung"
     }
     
-    ***REMOVED*** Phasen-Fortschritt
+    # Phasen-Fortschritt
     for phase in phases:
         st.subheader(f"{phase}-Phase")
         progress = 1.0 if phase_status[phase] == "Abgeschlossen" else 0.0
         st.progress(progress)
         st.write(f"Status: {phase_status[phase]}")
     
-    ***REMOVED*** Phasen-Ergebnisse
+    # Phasen-Ergebnisse
     st.subheader("Phasen-Ergebnisse")
     phase_results = load_phase_results()
     selected_phase = st.selectbox("Wähle eine Phase", list(phase_results.keys()))
-    st.markdown(phase_results[selected_phase][:500] + "...")  ***REMOVED*** Zeige nur die ersten 500 Zeichen
+    st.markdown(phase_results[selected_phase][:500] + "...")  # Zeige nur die ersten 500 Zeichen
     
     if st.button("Vollständiges Ergebnis anzeigen"):
         st.markdown(phase_results[selected_phase])
@@ -165,17 +165,17 @@ def show_pipelines():
         {"name": "Sicherheits-Pipeline", "status": "Geplant", "progress": 0.0}
     ]
     
-    ***REMOVED*** Filtere Pipelines
+    # Filtere Pipelines
     filtered_pipelines = [p for p in pipelines if p["name"].split("-")[0] in pipeline_filter]
     
-    ***REMOVED*** Pipeline-Status
+    # Pipeline-Status
     for pipeline in filtered_pipelines:
         st.subheader(pipeline["name"])
         st.progress(pipeline["progress"])
         st.write(f"Status: {pipeline['status']}")
         st.write(f"Fortschritt: {int(pipeline['progress'] * 100)}%")
     
-    ***REMOVED*** Pipeline-Metriken
+    # Pipeline-Metriken
     st.subheader("Pipeline-Metriken")
     metrics = {
         "API-Pipeline": {"Endpunkte": 25, "Tests": 18, "Dokumentation": 15},
@@ -195,15 +195,15 @@ def show_tasks():
     
     tasks = load_tasks()
     
-    ***REMOVED*** Filtere Aufgaben
+    # Filtere Aufgaben
     filtered_tasks = [t for t in tasks if t["pipeline"] in pipeline_filter]
     
-    ***REMOVED*** Aufgabenliste
+    # Aufgabenliste
     st.subheader("Aufgabenliste")
     tasks_df = pd.DataFrame(filtered_tasks)
     st.dataframe(tasks_df)
     
-    ***REMOVED*** Aufgaben nach Status
+    # Aufgaben nach Status
     st.subheader("Aufgaben nach Status")
     status_counts = {"pending": 0, "in_progress": 0, "completed": 0}
     for task in filtered_tasks:
@@ -218,7 +218,7 @@ def show_documents():
     """Zeigt die Dokumente an"""
     st.header("📄 Dokumente")
     
-    ***REMOVED*** Dokumentenliste
+    # Dokumentenliste
     st.subheader("Generierte Dokumente")
     documents = [
         {"name": "VAN-Ergebnis", "path": "output/van_result.md", "date": "2025-07-03"},
@@ -232,7 +232,7 @@ def show_documents():
     docs_df = pd.DataFrame(documents)
     st.dataframe(docs_df)
     
-    ***REMOVED*** Dokumentenvorschau
+    # Dokumentenvorschau
     st.subheader("Dokumentenvorschau")
     selected_doc = st.selectbox("Wähle ein Dokument", [d["name"] for d in documents if d["date"] != "In Vorbereitung"])
     selected_path = next((d["path"] for d in documents if d["name"] == selected_doc), None)
@@ -240,7 +240,7 @@ def show_documents():
     if selected_path and os.path.exists(selected_path):
         with open(selected_path, "r", encoding="utf-8") as f:
             content = f.read()
-            st.markdown(content[:500] + "...")  ***REMOVED*** Zeige nur die ersten 500 Zeichen
+            st.markdown(content[:500] + "...")  # Zeige nur die ersten 500 Zeichen
             
             if st.button("Vollständiges Dokument anzeigen"):
                 st.markdown(content)
@@ -249,11 +249,11 @@ def show_landhandel():
     """Zeigt die Landhandel-Module an"""
     st.header("🌾 Landhandel-Module")
     
-    ***REMOVED*** Übersicht
+    # Übersicht
     st.subheader("Übersicht der implementierten Module")
     
-    ***REMOVED*** Datenmodelle
-    st.markdown("***REMOVED******REMOVED******REMOVED*** Datenmodelle")
+    # Datenmodelle
+    st.markdown("### Datenmodelle")
     datenmodelle = {
         "Produkt": "Basisklasse für alle Produkttypen",
         "Saatgut": "Spezialisierte Produktklasse für Saatgut",
@@ -267,8 +267,8 @@ def show_landhandel():
     for model, description in datenmodelle.items():
         st.write(f"**{model}**: {description}")
     
-    ***REMOVED*** API-Endpunkte
-    st.markdown("***REMOVED******REMOVED******REMOVED*** API-Endpunkte")
+    # API-Endpunkte
+    st.markdown("### API-Endpunkte")
     api_endpoints = [
         {"Endpunkt": "/api/v1/saatgut", "Methode": "GET", "Beschreibung": "Liste aller Saatgut-Produkte"},
         {"Endpunkt": "/api/v1/saatgut", "Methode": "POST", "Beschreibung": "Neues Saatgut-Produkt anlegen"},
@@ -283,12 +283,12 @@ def show_landhandel():
     api_df = pd.DataFrame(api_endpoints)
     st.dataframe(api_df)
     
-    ***REMOVED*** Frontend-Komponenten
-    st.markdown("***REMOVED******REMOVED******REMOVED*** Frontend-Komponenten")
+    # Frontend-Komponenten
+    st.markdown("### Frontend-Komponenten")
     st.write("**BestandsUebersicht**: Tabellarische Darstellung der Bestände mit Sortier- und Filterfunktionen")
     
-    ***REMOVED*** Beispiel-Bestandsdaten
-    st.markdown("***REMOVED******REMOVED******REMOVED*** Beispiel-Bestandsdaten")
+    # Beispiel-Bestandsdaten
+    st.markdown("### Beispiel-Bestandsdaten")
     bestand_data = [
         {"Produkt": "Winterweizen Premium", "Artikelnummer": "S-1001", "Lager": "Hauptlager", "Menge": 2500.0, "Mindestbestand": 500.0, "Status": "OK"},
         {"Produkt": "Sommergerste Standard", "Artikelnummer": "S-1002", "Lager": "Hauptlager", "Menge": 1800.0, "Mindestbestand": 400.0, "Status": "OK"},
@@ -302,8 +302,8 @@ def show_landhandel():
     bestand_df = pd.DataFrame(bestand_data)
     st.dataframe(bestand_df)
     
-    ***REMOVED*** Grafik: Bestand nach Produkttyp
-    st.markdown("***REMOVED******REMOVED******REMOVED*** Bestand nach Produkttyp")
+    # Grafik: Bestand nach Produkttyp
+    st.markdown("### Bestand nach Produkttyp")
     produkt_typen = ["Saatgut", "Düngemittel", "Pflanzenschutzmittel"]
     mengen = [4450.0, 8000.0, 430.0]
     
@@ -313,7 +313,7 @@ def show_landhandel():
     ax.set_title("Bestand nach Produkttyp")
     st.pyplot(fig)
 
-***REMOVED*** Hauptfunktion
+# Hauptfunktion
 def main():
     """Hauptfunktion"""
     if page == "Übersicht":
@@ -331,3 +331,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -1,47 +1,47 @@
-***REMOVED*** 🛡️ VALEO-NeuroERP Security Policy & Incident Response
+# 🛡️ VALEO-NeuroERP Security Policy & Incident Response
 
-***REMOVED******REMOVED*** 📋 Security Overview
+## 📋 Security Overview
 
 This document outlines the security measures, incident response procedures, and compliance controls for VALEO-NeuroERP.
 
 ---
 
-***REMOVED******REMOVED*** 🔒 Security Measures
+## 🔒 Security Measures
 
-***REMOVED******REMOVED******REMOVED*** Authentication & Authorization
+### Authentication & Authorization
 - **Method:** OIDC (OAuth2/OpenID Connect)
 - **Providers:** Azure AD, Auth0, Keycloak
 - **Token Type:** JWT with JWKS auto-rotation
 - **RBAC:** Role-Based Access Control (admin, manager, operator)
 - **Scopes:** Fine-grained permission control
 
-***REMOVED******REMOVED******REMOVED*** Transport Security
+### Transport Security
 - **TLS:** 1.2+ only
 - **HSTS:** Enabled with preload
 - **Certificate Pinning:** Recommended for production
 
-***REMOVED******REMOVED******REMOVED*** Application Security
+### Application Security
 - **CSP:** Content Security Policy enabled
 - **Headers:** X-Frame-Options, X-Content-Type-Options, Referrer-Policy
 - **Rate Limiting:** Enabled via SlowAPI
 - **Input Validation:** Pydantic v2 strict validation
 
-***REMOVED******REMOVED******REMOVED*** Data Security
+### Data Security
 - **Encryption at Rest:** SQLite with OS-level encryption
 - **Encryption in Transit:** TLS 1.2+
 - **Backup Encryption:** Recommended for production
 - **PII Handling:** Minimal logging, no sensitive data in logs
 
-***REMOVED******REMOVED******REMOVED*** Monitoring & Auditing
+### Monitoring & Auditing
 - **Structured Logging:** JSON format with correlation IDs
 - **Audit Trail:** All policy changes logged with user info
 - **Security Dashboard:** `/security/summary` endpoint
 
 ---
 
-***REMOVED******REMOVED*** 🚨 Incident Response Playbook
+## 🚨 Incident Response Playbook
 
-***REMOVED******REMOVED******REMOVED*** Phase 1: Detection
+### Phase 1: Detection
 
 **Triggers:**
 - GitHub Security Alerts
@@ -60,7 +60,7 @@ This document outlines the security measures, incident response procedures, and 
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Phase 2: Triage
+### Phase 2: Triage
 
 **Severity Classification:**
 
@@ -81,39 +81,39 @@ This document outlines the security measures, incident response procedures, and 
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Phase 3: Containment
+### Phase 3: Containment
 
 **Immediate Actions:**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Compromised Token/Account
+#### Compromised Token/Account
 ```bash
-***REMOVED*** Revoke token in OIDC provider
-***REMOVED*** Azure AD example:
+# Revoke token in OIDC provider
+# Azure AD example:
 az ad app credential delete --id <APP_ID> --key-id <KEY_ID>
 
-***REMOVED*** Rotate JWT secret
+# Rotate JWT secret
 gh workflow run rotate-secrets.yml -f rotate_jwt=true
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Compromised Service
+#### Compromised Service
 ```bash
-***REMOVED*** Kubernetes: Cordon node
+# Kubernetes: Cordon node
 kubectl cordon <node-name>
 
-***REMOVED*** Scale down affected pods
+# Scale down affected pods
 kubectl scale deployment <deployment> --replicas=0
 
-***REMOVED*** Docker: Stop container
+# Docker: Stop container
 docker stop <container-id>
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Database Compromise
+#### Database Compromise
 ```bash
-***REMOVED*** Revoke compromised user
-***REMOVED*** Change DB password
+# Revoke compromised user
+# Change DB password
 gh workflow run rotate-secrets.yml -f rotate_db=true
 
-***REMOVED*** Restore from backup
+# Restore from backup
 curl -X POST http://localhost:8000/api/mcp/policy/restore \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
   -d '{"file": "data/backups/policies-YYYY-MM-DD.db"}'
@@ -123,30 +123,30 @@ curl -X POST http://localhost:8000/api/mcp/policy/restore \
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Phase 4: Eradicate
+### Phase 4: Eradicate
 
 **Secret Rotation:**
 ```bash
-***REMOVED*** Automated via GitHub Actions
+# Automated via GitHub Actions
 gh workflow run rotate-secrets.yml
 
-***REMOVED*** Manual rotation
+# Manual rotation
 export NEW_JWT_SECRET=$(openssl rand -hex 32)
 gh secret set JWT_SECRET --body "$NEW_JWT_SECRET"
 
-***REMOVED*** Restart services
+# Restart services
 kubectl rollout restart deployment/valeo-api
 ```
 
 **Vulnerability Patching:**
 ```bash
-***REMOVED*** Update dependencies
+# Update dependencies
 pip install --upgrade -r requirements.txt
 
-***REMOVED*** Run security scan
+# Run security scan
 python app/security/asvs_check.py
 
-***REMOVED*** Deploy patch
+# Deploy patch
 git commit -m "security: patch CVE-XXXX-YYYY"
 git push origin main
 ```
@@ -155,22 +155,22 @@ git push origin main
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Phase 5: Recovery
+### Phase 5: Recovery
 
 **Service Restoration:**
 ```bash
-***REMOVED*** Verify backups integrity
+# Verify backups integrity
 python scripts/verify_backup.py data/backups/latest.db
 
-***REMOVED*** Restore from signed backup
+# Restore from signed backup
 curl -X POST /api/mcp/policy/restore \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"file": "data/backups/policies-verified.db"}'
 
-***REMOVED*** Health check
+# Health check
 curl http://localhost:8000/health
 
-***REMOVED*** Gradual rollout
+# Gradual rollout
 kubectl set image deployment/valeo-api api=valeo:v2.0.1
 kubectl rollout status deployment/valeo-api
 ```
@@ -186,7 +186,7 @@ kubectl rollout status deployment/valeo-api
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Phase 6: Lessons Learned
+### Phase 6: Lessons Learned
 
 **Post-Mortem (within 72h):**
 
@@ -199,33 +199,33 @@ kubectl rollout status deployment/valeo-api
 
 **Template:**
 ```markdown
-***REMOVED******REMOVED*** Incident Post-Mortem: [INCIDENT-ID]
+## Incident Post-Mortem: [INCIDENT-ID]
 
 **Date:** YYYY-MM-DD
 **Severity:** Critical/High/Medium/Low
 **Duration:** Xh Ym
 
-***REMOVED******REMOVED******REMOVED*** Timeline
+### Timeline
 - HH:MM - Detection
 - HH:MM - Triage
 - HH:MM - Containment
 - HH:MM - Resolution
 
-***REMOVED******REMOVED******REMOVED*** Root Cause
+### Root Cause
 [Description]
 
-***REMOVED******REMOVED******REMOVED*** Impact
+### Impact
 - Users affected: X
 - Data exposed: Yes/No
 - Downtime: Xh
 
-***REMOVED******REMOVED******REMOVED*** What Went Well
+### What Went Well
 - [Item]
 
-***REMOVED******REMOVED******REMOVED*** What Went Wrong
+### What Went Wrong
 - [Item]
 
-***REMOVED******REMOVED******REMOVED*** Action Items
+### Action Items
 - [ ] [Action 1] - Owner: X - Due: YYYY-MM-DD
 - [ ] [Action 2] - Owner: Y - Due: YYYY-MM-DD
 ```
@@ -234,9 +234,9 @@ kubectl rollout status deployment/valeo-api
 
 ---
 
-***REMOVED******REMOVED*** 🔧 Security Tools & Automation
+## 🔧 Security Tools & Automation
 
-***REMOVED******REMOVED******REMOVED*** CI/CD Security Scans
+### CI/CD Security Scans
 
 | Tool | Purpose | Frequency | Severity Threshold |
 |------|---------|-----------|-------------------|
@@ -246,24 +246,24 @@ kubectl rollout status deployment/valeo-api
 | **Bandit** | Python SAST | Every push | Medium+ |
 | **Safety** | Dependency check | Every push | High+ |
 
-***REMOVED******REMOVED******REMOVED*** Automated Workflows
+### Automated Workflows
 
 ```bash
-***REMOVED*** Weekly ZAP scan
+# Weekly ZAP scan
 .github/workflows/zap-scan.yml
 
-***REMOVED*** Security scanning (push/PR)
+# Security scanning (push/PR)
 .github/workflows/security-scan.yml
 
-***REMOVED*** Monthly secret rotation
+# Monthly secret rotation
 .github/workflows/rotate-secrets.yml
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📊 Compliance & Standards
+## 📊 Compliance & Standards
 
-***REMOVED******REMOVED******REMOVED*** OWASP ASVS Level 2
+### OWASP ASVS Level 2
 - ✅ Authentication controls
 - ✅ Session management
 - ✅ Access control
@@ -272,30 +272,30 @@ kubectl rollout status deployment/valeo-api
 - ✅ Error handling
 - ✅ Logging & monitoring
 
-***REMOVED******REMOVED******REMOVED*** Security Headers (ASVS Check)
+### Security Headers (ASVS Check)
 ```bash
 python app/security/asvs_check.py
 ```
 
 ---
 
-***REMOVED******REMOVED*** 🔐 Secret Management
+## 🔐 Secret Management
 
-***REMOVED******REMOVED******REMOVED*** Secrets Inventory
+### Secrets Inventory
 - `JWT_SECRET` - JWT signing key (rotated monthly)
 - `OIDC_CLIENT_ID` - OIDC client identifier
 - `OIDC_CLIENT_SECRET` - OIDC client secret
 - `DB_PASSWORD` - Database password
 - `POLICY_DB` - Policy database path
 
-***REMOVED******REMOVED******REMOVED*** Rotation Schedule
+### Rotation Schedule
 - **JWT_SECRET:** Monthly (automated)
 - **OIDC Secrets:** Per provider policy
 - **DB_PASSWORD:** Quarterly (manual)
 
 ---
 
-***REMOVED******REMOVED*** 📞 Security Contacts
+## 📞 Security Contacts
 
 | Role | Contact | Escalation |
 |------|---------|------------|
@@ -305,21 +305,21 @@ python app/security/asvs_check.py
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Security Roadmap
+## 🚀 Security Roadmap
 
-***REMOVED******REMOVED******REMOVED*** Q1 2025
+### Q1 2025
 - [x] OIDC integration
 - [x] RBAC implementation
 - [x] Automated security scanning
 - [x] Incident response playbook
 
-***REMOVED******REMOVED******REMOVED*** Q2 2025
+### Q2 2025
 - [ ] SOC 2 Type II certification
 - [ ] Penetration testing (external)
 - [ ] Bug bounty program
 - [ ] Security training for team
 
-***REMOVED******REMOVED******REMOVED*** Q3 2025
+### Q3 2025
 - [ ] ISO 27001 certification
 - [ ] GDPR compliance audit
 - [ ] Advanced threat detection
@@ -327,7 +327,7 @@ python app/security/asvs_check.py
 
 ---
 
-***REMOVED******REMOVED*** 📝 Reporting Security Issues
+## 📝 Reporting Security Issues
 
 **DO NOT** open public GitHub issues for security vulnerabilities!
 
@@ -343,9 +343,9 @@ python app/security/asvs_check.py
 
 ---
 
-***REMOVED******REMOVED*** ✅ Security Checklist (Production)
+## ✅ Security Checklist (Production)
 
-***REMOVED******REMOVED******REMOVED*** Pre-Deployment
+### Pre-Deployment
 - [ ] All security scans passing
 - [ ] Secrets rotated
 - [ ] HTTPS enforced
@@ -355,7 +355,7 @@ python app/security/asvs_check.py
 - [ ] Audit logging enabled
 - [ ] Backup strategy tested
 
-***REMOVED******REMOVED******REMOVED*** Post-Deployment
+### Post-Deployment
 - [ ] Health checks passing
 - [ ] Security dashboard accessible
 - [ ] Monitoring alerts configured
@@ -367,4 +367,5 @@ python app/security/asvs_check.py
 **Last Updated:** 2025-10-09
 **Version:** 1.0
 **Owner:** Security Team
+
 

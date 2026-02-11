@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Demo für den IMPLEMENTATION-Modus des APM-Frameworks.
 Zeigt die vollständige Implementierung basierend auf den Code-Artefakten.
@@ -12,28 +12,28 @@ from pathlib import Path
 from bson import ObjectId
 from datetime import datetime
 
-***REMOVED*** Pfad zum Projektverzeichnis hinzufügen
+# Pfad zum Projektverzeichnis hinzufügen
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from backend.apm_framework.apm_workflow import APMWorkflow
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 from backend.apm_framework.rag_service import RAGService
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-***REMOVED*** RAG-Service für Tests
+# RAG-Service für Tests
 class DummyRAGService:
     async def query(self, prompt, agent_type=None):
         logger.info(f"RAG-Abfrage für {agent_type}: {prompt[:50]}...")
         
-        ***REMOVED*** Simulierte Antworten basierend auf dem Prompt-Inhalt
+        # Simulierte Antworten basierend auf dem Prompt-Inhalt
         if "Implementierungsplan" in prompt:
             return """
-            ***REMOVED*** Implementierungsplan für Transaktionsverarbeitung
+            # Implementierungsplan für Transaktionsverarbeitung
             
-            ***REMOVED******REMOVED*** Verzeichnisstruktur
+            ## Verzeichnisstruktur
             ```
             transaction_processing/
             ├── __init__.py
@@ -60,7 +60,7 @@ class DummyRAGService:
                 └── test_audit_logger.py
             ```
             
-            ***REMOVED******REMOVED*** Implementierungsschritte
+            ## Implementierungsschritte
             1. Basisklassen für Transaktionen implementieren
             2. Chunk-Manager für die Verarbeitung entwickeln
             3. Savepoint-Funktionalität integrieren
@@ -70,7 +70,7 @@ class DummyRAGService:
             7. Integrationstests für den Gesamtprozess erstellen
             8. Performance-Tests durchführen
             
-            ***REMOVED******REMOVED*** Abhängigkeiten
+            ## Abhängigkeiten
             - sqlalchemy>=2.0.0
             - psycopg2-binary>=2.9.5
             - asyncio>=3.4.3
@@ -81,7 +81,7 @@ class DummyRAGService:
         elif "Datenbankanbindung" in prompt:
             return """
             ```python
-            ***REMOVED*** db_connector.py
+            # db_connector.py
             import logging
             from typing import Dict, List, Any, Optional
             from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float, DateTime
@@ -116,7 +116,7 @@ class DummyRAGService:
                 def health_check(self) -> bool:
                     """Führt einen Gesundheitscheck der Datenbankverbindung durch."""
                     try:
-                        ***REMOVED*** Einfache Abfrage zur Überprüfung der Verbindung
+                        # Einfache Abfrage zur Überprüfung der Verbindung
                         with self.engine.connect() as conn:
                             conn.execute("SELECT 1")
                         return True
@@ -128,7 +128,7 @@ class DummyRAGService:
         elif "Implementierung der Transaktionsverarbeitung" in prompt:
             return """
             ```python                                                                                                                                                           
-             ***REMOVED*** transaction_repository.py
+             # transaction_repository.py
              import logging
              from typing import List, Dict, Any, Optional
              from sqlalchemy.orm import Session
@@ -181,10 +181,10 @@ class DummyRAGService:
                      failed = 0
                      
                      try:
-                         ***REMOVED*** Optimistisches Locking durch Versionsüberprüfung
+                         # Optimistisches Locking durch Versionsüberprüfung
                          for transaction in transactions:
                              try:
-                                 ***REMOVED*** Versionsüberprüfung
+                                 # Versionsüberprüfung
                                  if transaction.id:
                                      db_version = self.session.query(Transaction).filter_by(
                                          id=transaction.id).first()
@@ -193,7 +193,7 @@ class DummyRAGService:
                                          failed += 1
                                          continue
                                  
-                                 ***REMOVED*** Version inkrementieren
+                                 # Version inkrementieren
                                  transaction.version += 1
                                  transaction.updated_at = datetime.now()
                                  
@@ -279,7 +279,7 @@ class DummyRAGService:
         elif "Unit-Tests" in prompt:
             return """
             ```python
-            ***REMOVED*** test_transaction.py
+            # test_transaction.py
             import pytest
             import asyncio
             from datetime import datetime
@@ -333,7 +333,7 @@ class DummyRAGService:
             @pytest.mark.asyncio
             async def test_chunk_processing(chunk_manager, sample_transaction):
                 """Testet die Chunk-basierte Verarbeitung von Transaktionen."""
-                ***REMOVED*** Erstelle 12 Transaktionen
+                # Erstelle 12 Transaktionen
                 transactions = [sample_transaction]
                 for i in range(11):
                     tx = Transaction(
@@ -349,9 +349,9 @@ class DummyRAGService:
                     )
                     transactions.append(tx)
                 
-                ***REMOVED*** Verarbeite in Chunks
+                # Verarbeite in Chunks
                 chunks = chunk_manager.split_into_chunks(transactions)
-                assert len(chunks) == 3  ***REMOVED*** 12 Transaktionen / 5 pro Chunk = 3 Chunks
+                assert len(chunks) == 3  # 12 Transaktionen / 5 pro Chunk = 3 Chunks
                 assert len(chunks[0]) == 5
                 assert len(chunks[1]) == 5
                 assert len(chunks[2]) == 2
@@ -359,21 +359,21 @@ class DummyRAGService:
             @pytest.mark.asyncio
             async def test_audit_logging(audit_logger, sample_transaction):
                 """Testet das asynchrone Audit-Logging."""
-                ***REMOVED*** Starte den Logger
+                # Starte den Logger
                 await audit_logger.start()
                 
-                ***REMOVED*** Protokolliere eine Transaktion
+                # Protokolliere eine Transaktion
                 await audit_logger.log(sample_transaction, "CREATED")
                 
-                ***REMOVED*** Warte kurz, damit der asynchrone Logger Zeit hat
+                # Warte kurz, damit der asynchrone Logger Zeit hat
                 await asyncio.sleep(0.1)
                 
-                ***REMOVED*** Prüfe, ob die Transaktion protokolliert wurde
+                # Prüfe, ob die Transaktion protokolliert wurde
                 logs = await audit_logger.get_logs()
                 assert len(logs) >= 1
                 assert any(log["transaction_id"] == sample_transaction.id for log in logs)
                 
-                ***REMOVED*** Stoppe den Logger
+                # Stoppe den Logger
                 await audit_logger.stop()
             ```
             """
@@ -383,20 +383,20 @@ class DummyRAGService:
 async def run_implementation_demo():
     """Führt die Demo für den IMPLEMENTATION-Modus aus."""
     try:
-        ***REMOVED*** MongoDB-Verbindung initialisieren
+        # MongoDB-Verbindung initialisieren
         mongodb_uri = "mongodb://localhost:27017/"
         db_name = "valeo_neuroerp"
         
         mongodb = APMMongoDBConnector(mongodb_uri, db_name)
         await mongodb.connect()
         
-        ***REMOVED*** Projekt-ID generieren
+        # Projekt-ID generieren
         project_id = ObjectId()
         
-        ***REMOVED*** APM-Workflow initialisieren
+        # APM-Workflow initialisieren
         workflow = APMWorkflow(mongodb, str(project_id))
         
-        ***REMOVED*** RAG-Service setzen
+        # RAG-Service setzen
         rag_service = DummyRAGService()
         workflow.set_rag_service(rag_service)
         
@@ -406,7 +406,7 @@ async def run_implementation_demo():
         print("Diese Demo zeigt die vollständige Implementierung basierend auf den Code-Artefakten.")
         print("="*80)
         
-        ***REMOVED*** CREATE-Ergebnis simulieren
+        # CREATE-Ergebnis simulieren
         create_result_id = ObjectId()
         create_result = {
             "_id": create_result_id,
@@ -516,7 +516,7 @@ async def run_implementation_demo():
             "status": "completed"
         }
         
-        ***REMOVED*** CREATE-Ergebnis in der Datenbank speichern
+        # CREATE-Ergebnis in der Datenbank speichern
         await mongodb.insert_one("create_results", create_result)
         
         print(f"\nCREATE-Ergebnis simuliert mit ID: {create_result_id}")
@@ -527,17 +527,17 @@ async def run_implementation_demo():
             print(f"Pfad: {artifact['path']}")
             print(f"Beschreibung: {artifact['description']}")
         
-        ***REMOVED*** IMPLEMENTATION-Mode ausführen
+        # IMPLEMENTATION-Mode ausführen
         implementation_result = await workflow.run_implementation_mode(str(create_result_id))
         
         print(f"\nIMPLEMENTATION-Mode abgeschlossen mit ID: {implementation_result.get('id')}")
         
-        ***REMOVED*** Implementierungsplan ausgeben
+        # Implementierungsplan ausgeben
         implementation_plan = implementation_result.get('implementation_plan', {})
         print(f"\nImplementierungsplan: {implementation_plan.get('name')}")
         print(f"Beschreibung: {implementation_plan.get('description')}")
         
-        ***REMOVED*** Dateien ausgeben
+        # Dateien ausgeben
         files = implementation_result.get('files', [])
         print(f"\nAnzahl der implementierten Dateien: {len(files)}")
         
@@ -546,7 +546,7 @@ async def run_implementation_demo():
             print(f"Typ: {file.get('type')}")
             print(f"Größe: {len(file.get('content', ''))} Zeichen")
         
-        ***REMOVED*** Tests ausgeben
+        # Tests ausgeben
         tests = implementation_result.get('tests', [])
         print(f"\nAnzahl der implementierten Tests: {len(tests)}")
         
@@ -555,7 +555,7 @@ async def run_implementation_demo():
             print(f"Beschreibung: {test.get('description')}")
             print(f"Status: {test.get('status')}")
         
-        ***REMOVED*** Verbindung schließen
+        # Verbindung schließen
         workflow.close()
         
         print("\n" + "="*80)
@@ -572,3 +572,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+

@@ -1,4 +1,4 @@
-***REMOVED*** 🧩 VALEO NeuroERP 3.0 - Soll-Ist-Analyse & Handlungsplan
+# 🧩 VALEO NeuroERP 3.0 - Soll-Ist-Analyse & Handlungsplan
 
 **Datum:** 2025-10-12  
 **Version:** 3.0.0  
@@ -7,11 +7,11 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **EXECUTIVE SUMMARY**
+## 📋 **EXECUTIVE SUMMARY**
 
 **VALEO NeuroERP 3.0** ist ein ambitioniertes Projekt mit einer **visionären Architektur** und **umfassenden Implementierung**. Das System hat in 12 Monaten **massive Fortschritte** gemacht - von einer Konzeptidee zu einem **production-ready ERP-System mit AI-Integration**.
 
-***REMOVED******REMOVED******REMOVED*** **Kernerkenntnisse:**
+### **Kernerkenntnisse:**
 
 ✅ **Stärken:**
 - **Architektur-Excellence:** 5 Principles Architecture vollständig implementiert
@@ -29,18 +29,18 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 **TEIL 1: ANSPRUCH (SOLL-ZUSTAND)**
+## 🎯 **TEIL 1: ANSPRUCH (SOLL-ZUSTAND)**
 
-***REMOVED******REMOVED******REMOVED*** **1.1 Vision & Leitbild**
+### **1.1 Vision & Leitbild**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **VALEO-Akronym:**
+#### **VALEO-Akronym:**
 - **V**alidate - Daten, Prozesse und Entscheidungen prüfen
 - **A**nalyze - Strukturen, Ereignisse und Nutzerinteraktionen verstehen
 - **L**earn - aus Mustern lernen, Modelle anpassen
 - **E**ngineer / **E**volve - neue Strukturen erzeugen, Prozesse verbessern
 - **O**ptimize - Systemleistung, UX und Wirtschaftlichkeit maximieren
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **NeuroERP-Konzept:**
+#### **NeuroERP-Konzept:**
 > **"Ein ERP-System, das lernt, sich anpasst und den Nutzer kognitiv entlastet"**
 
 **Kernprinzipien:**
@@ -50,9 +50,9 @@
 4. **Erklärbar:** Transparente AI-Entscheidungen, nachvollziehbare Prozesse
 5. **Auditierbar:** Lückenlose Audit-Trails für alle Geschäftsvorfälle
 
-***REMOVED******REMOVED******REMOVED*** **1.2 Funktionale Soll-Architektur**
+### **1.2 Funktionale Soll-Architektur**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Architektur-Modell:**
+#### **Architektur-Modell:**
 - **MSOA (Microservice-Oriented Architecture):**
   - 19 isolierte Domain-Services
   - Event-Driven Communication (NATS/Kafka)
@@ -72,16 +72,16 @@
   - Module Federation (dynamisches Laden)
   - Lifecycle Management (Memory-Leak-Prevention)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Domain-Struktur (SOLL):**
+#### **Domain-Struktur (SOLL):**
 19 vollständig isolierte Domain-Services:
 1. Procurement, 2. Inventory, 3. Logistics, 4. Finance, 5. CRM
 6. Sales, 7. HR, 8. Production, 9. Contracts, 10. Quality
 11. Analytics, 12. Regulatory, 13. Document, 14. Notifications, 15. Pricing
 16. Scheduler, 17. Audit, 18. Weighing, 19. Shared
 
-***REMOVED******REMOVED******REMOVED*** **1.3 Technologische Zielvorgaben**
+### **1.3 Technologische Zielvorgaben**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Backend:**
+#### **Backend:**
 - **Language:** Node.js/TypeScript (Microservices) + Python/FastAPI (AI/ML)
 - **Database:** PostgreSQL 15+ mit Multi-Schema
 - **ORM:** Drizzle (TypeScript), SQLAlchemy (Python)
@@ -90,7 +90,7 @@
 - **Auth:** OIDC/OAuth2 (Keycloak, Azure AD, Auth0)
 - **Observability:** Prometheus, Grafana, Loki, OpenTelemetry
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Frontend:**
+#### **Frontend:**
 - **Framework:** React 18 + TypeScript
 - **Build:** Vite + pnpm Workspaces
 - **UI:** Shadcn UI (SAP Fiori Patterns)
@@ -98,61 +98,61 @@
 - **Realtime:** SSE + WebSockets
 - **Multimodal:** Touch-optimiert, Voice-ready, Keyboard-First
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **AI/ML:**
+#### **AI/ML:**
 - **LangGraph:** Workflow-Orchestration (Bestellvorschlag, Skonto, Compliance)
 - **RAG:** Vector-Store (Chroma) für semantische Suche
 - **MCP:** Model Context Protocol für AI-Grounding
 - **LLM:** OpenAI/Azure OpenAI/Llama
 
-***REMOVED******REMOVED******REMOVED*** **1.4 UX/UI-Vision**
+### **1.4 UX/UI-Vision**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Multimodale Bedienung:**
+#### **Multimodale Bedienung:**
 1. **Maus/Keyboard:** SAP Fiori Patterns (ListReport, ObjectPage, Wizard)
 2. **Touch:** Touch-optimierter POS, Tablet-Workflows
 3. **Sprache:** "Ask VALEO" Copilot (SAP Joule-Adaption)
 4. **Workflow:** AI-gesteuerte Prozessführung
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Cognitive Load Reduction:**
+#### **Cognitive Load Reduction:**
 - **Smart Defaults:** AI lernt Nutzerpräferenzen
 - **Context-Aware Suggestions:** Basierend auf aktueller Seite/Workflow
 - **Autocomplete:** Überall (Kunden, Artikel, Konten)
 - **Inline-Validierung:** Sofort-Feedback, keine Überraschungen
 - **Quick-Actions:** 1-Klick für häufige Aufgaben
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Explainability:**
+#### **Explainability:**
 - **Policy-Erklärungen:** Warum wurde ein Alert ausgelöst?
 - **AI-Transparency:** Wie kam der Agent zu dieser Empfehlung?
 - **Workflow-Nachvollziehbarkeit:** Wer hat wann was gemacht?
 
-***REMOVED******REMOVED******REMOVED*** **1.5 System-Philosophie**
+### **1.5 System-Philosophie**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Selbstvalidierend:**
+#### **Selbstvalidierend:**
 - Real-time Compliance-Checks (PSM, ENNI, TRACES)
 - Inline-Policy-Validierung (Preis < EK → Warnung)
 - Auto-Audit-Logging bei allen Änderungen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Lernfähig:**
+#### **Lernfähig:**
 - RAG-Indexierung lernt aus Dokumenten
 - Bestellvorschlag-Agent lernt aus History
 - Skonto-Optimizer verbessert sich über Zeit
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Erklärbar:**
+#### **Erklärbar:**
 - Policy-Decisions mit Grund
 - AI-Recommendations mit Confidence-Score
 - Audit-Trail für alle Aktionen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Auditierbar:**
+#### **Auditierbar:**
 - Extended Audit-Log (user_id, action, entity, changes, IP, correlation_id)
 - Compliance-Dashboard (92% Score)
 - GDPR & GoBD konform
 
 ---
 
-***REMOVED******REMOVED*** 📊 **TEIL 2: IST-ZUSTAND**
+## 📊 **TEIL 2: IST-ZUSTAND**
 
-***REMOVED******REMOVED******REMOVED*** **2.1 Module & Domains (IST)**
+### **2.1 Module & Domains (IST)**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Backend-Domains (Python/FastAPI):**
+#### **Backend-Domains (Python/FastAPI):**
 ```
 app/domains/
 ├── crm/          ✅ Entities, APIs (customers, leads)
@@ -166,7 +166,7 @@ app/domains/
 - ⚠️ 16 Domains fehlen noch als eigenständige Services
 - ✅ Clean Architecture (Domain/Application/Infrastructure) implementiert
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Frontend-Packages (TypeScript/Node.js):**
+#### **Frontend-Packages (TypeScript/Node.js):**
 ```
 packages/
 ├── analytics-domain/     ✅ BI, KPI-Tracking
@@ -187,9 +187,9 @@ packages/
 - ✅ 5 Principles Architecture vollständig umgesetzt
 - ⚠️ Packages sind noch nicht als echte Microservices deployed
 
-***REMOVED******REMOVED******REMOVED*** **2.2 AI/ML-Integration (IST)**
+### **2.2 AI/ML-Integration (IST)**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **LangGraph-Workflows:**
+#### **LangGraph-Workflows:**
 1. ✅ **Bestellvorschlag** (app/agents/workflows/bestellvorschlag.py)
 2. ✅ **Skonto-Optimizer** (app/agents/workflows/skonto_optimizer.py)
 3. ✅ **Compliance-Copilot** (app/agents/workflows/compliance_copilot.py)
@@ -201,14 +201,14 @@ packages/
 - ✅ LangGraph-Integration funktional
 - ⚠️ Noch keine Skill-Registry (SAP Joule-Pattern)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **RAG-System:**
+#### **RAG-System:**
 - ✅ Vector-Store (Chroma) eingerichtet
 - ✅ Indexer für Articles & Customers
 - ✅ Query-Cache mit Stats
 - ✅ Auto-Indexing-Worker (5 Min Interval)
 - ⏳ Semantic-Search-UI fehlt noch im Frontend
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **MCP-Integration:**
+#### **MCP-Integration:**
 - ✅ Konzept dokumentiert (SAP-JOULE-ADAPTATION-VALEO.md)
 - ✅ JouleActionBar.tsx (Floating Button)
 - ✅ AskValeo.tsx (Dialog)
@@ -216,9 +216,9 @@ packages/
 - ❌ MCP-Server noch nicht produktiv
 - ❌ @modelcontext/browser-adapter noch nicht integriert
 
-***REMOVED******REMOVED******REMOVED*** **2.3 UI/UX-Ist-Zustand**
+### **2.3 UI/UX-Ist-Zustand**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Frontend-Masken:**
+#### **Frontend-Masken:**
 - **Anzahl:** 181 TSX-Pages implementiert
 - **Patterns:** SAP Fiori (ListReport, ObjectPage, Wizard, Editor)
 - **Komponenten:** Shadcn UI (DataTable, Badge, Button, Card, Dialog, etc.)
@@ -227,7 +227,7 @@ packages/
 - **Voice:** Nicht implementiert
 - **Accessibility:** Basis-Support (keine ARIA, keine Screen-Reader-Optimization)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Multimodale Bedienung (IST):**
+#### **Multimodale Bedienung (IST):**
 | Modus | Status | Umsetzung |
 |-------|--------|-----------|
 | **Maus/Keyboard** | ✅ Vollständig | 181 Pages mit klassischer Navigation |
@@ -235,16 +235,16 @@ packages/
 | **Sprache** | ⏳ Vorbereitet | Ask VALEO Dialog vorhanden, kein Speech-API |
 | **Workflow-Befehle** | ❌ Fehlt | Kein Cmd+K / Ctrl+K Command-Palette |
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Cognitive Load Reduction (IST):**
+#### **Cognitive Load Reduction (IST):**
 - ✅ **Smart Defaults:** In FormBuilder implementiert (Auto-Fill bei Lookup)
 - ✅ **Autocomplete:** Command/Popover für Kunden & Artikel
 - ✅ **Inline-Validierung:** Policy-Engine mit warn/block
 - ⚠️ **Context-Awareness:** Begrenzt (keine AI-Suggestions basierend auf Workflow)
 - ❌ **Lernende Defaults:** Nicht implementiert (keine User-Präferenz-Speicherung)
 
-***REMOVED******REMOVED******REMOVED*** **2.4 Qualitäts-Kennzahlen (IST)**
+### **2.4 Qualitäts-Kennzahlen (IST)**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Code-Qualität:**
+#### **Code-Qualität:**
 ```
 Frontend:
 - TypeScript-Fehler: 0 ✅
@@ -257,28 +257,28 @@ Backend:
 - Test-Coverage: ~12% ⚠️ (pytest)
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Architektur-Konformität:**
+#### **Architektur-Konformität:**
 - **DDD:** ✅ 100% (Clean Architecture in Python-Domains)
 - **5 Principles:** ✅ 100% (in TypeScript-Packages)
 - **Event-Driven:** ⚠️ 60% (Events definiert, aber In-Memory-Publisher)
 - **MSOA:** ⚠️ 40% (Domains strukturiert, aber keine echten Microservices)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Sicherheit:**
+#### **Sicherheit:**
 - **OIDC/RBAC:** ✅ Implementiert (Keycloak-ready)
 - **Audit-Logging:** ✅ Extended (IP, User-Agent, Correlation-ID)
 - **Security-Scans:** ✅ 6 Tools in CI/CD
 - **Secrets-Management:** ⚠️ Nur Environment-Variables
 
-***REMOVED******REMOVED******REMOVED*** **2.5 Infrastructure (IST)**
+### **2.5 Infrastructure (IST)**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Deployment:**
+#### **Deployment:**
 - ✅ **Docker-Compose:** Dev + Production-Stacks
 - ✅ **Kubernetes:** Manifests + HPA + Helm-Charts
 - ✅ **CI/CD:** GitHub Actions mit Frontend-Tests
 - ✅ **Monitoring:** Prometheus + Grafana + Loki
 - ⚠️ **Service-Mesh:** Nicht implementiert (Istio geplant)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Data-Layer:**
+#### **Data-Layer:**
 - ✅ **PostgreSQL:** Multi-Schema (domain_shared, domain_crm, domain_inventory, domain_erp)
 - ✅ **Redis:** Für Caching & Saga-State
 - ✅ **Vector-DB:** Chroma für RAG
@@ -287,9 +287,9 @@ Backend:
 
 ---
 
-***REMOVED******REMOVED*** 📊 **TEIL 3: SOLL ↔ IST VERGLEICH**
+## 📊 **TEIL 3: SOLL ↔ IST VERGLEICH**
 
-***REMOVED******REMOVED******REMOVED*** **3.1 Architektur**
+### **3.1 Architektur**
 
 | Aspekt | Soll | Ist | Abweichung |
 |--------|------|-----|------------|
@@ -301,7 +301,7 @@ Backend:
 
 **Bewertung:** **65% Umsetzung** - Architektur-Prinzipien perfekt, aber Microservice-Isolation fehlt
 
-***REMOVED******REMOVED******REMOVED*** **3.2 Backend (Domains, Events, APIs)**
+### **3.2 Backend (Domains, Events, APIs)**
 
 | Aspekt | Soll | Ist | Abweichung |
 |--------|------|-----|------------|
@@ -314,7 +314,7 @@ Backend:
 
 **Bewertung:** **55% Umsetzung** - Fundament stark, aber Event-Bus & GraphQL fehlen
 
-***REMOVED******REMOVED******REMOVED*** **3.3 Frontend / UI-UX**
+### **3.3 Frontend / UI-UX**
 
 | Aspekt | Soll | Ist | Abweichung |
 |--------|------|-----|------------|
@@ -329,7 +329,7 @@ Backend:
 
 **Bewertung:** **48% Umsetzung** - Desktop-UI perfekt, aber Multimodal & AI-UX fehlen
 
-***REMOVED******REMOVED******REMOVED*** **3.4 KI-Integration (LangGraph, RAG, MCP)**
+### **3.4 KI-Integration (LangGraph, RAG, MCP)**
 
 | Aspekt | Soll | Ist | Abweichung |
 |--------|------|-----|------------|
@@ -343,7 +343,7 @@ Backend:
 
 **Bewertung:** **36% Umsetzung** - Infrastruktur da, aber LLM-Integration & MCP fehlen
 
-***REMOVED******REMOVED******REMOVED*** **3.5 Datenmodell / API**
+### **3.5 Datenmodell / API**
 
 | Aspekt | Soll | Ist | Abweichung |
 |--------|------|-----|------------|
@@ -355,7 +355,7 @@ Backend:
 
 **Bewertung:** **46% Umsetzung** - REST solid, aber GraphQL & Multi-Schema fehlen
 
-***REMOVED******REMOVED******REMOVED*** **3.6 Prozessintelligenz (Agenten, Auto-Optimization)**
+### **3.6 Prozessintelligenz (Agenten, Auto-Optimization)**
 
 | Aspekt | Soll | Ist | Abweichung |
 |--------|------|-----|------------|
@@ -368,7 +368,7 @@ Backend:
 
 **Bewertung:** **23% Umsetzung** - Basis-Agenten da, aber echte Intelligenz fehlt
 
-***REMOVED******REMOVED******REMOVED*** **3.7 Sicherheit (OIDC, RBAC, Audit, GDPR)**
+### **3.7 Sicherheit (OIDC, RBAC, Audit, GDPR)**
 
 | Aspekt | Soll | Ist | Abweichung |
 |--------|------|-----|------------|
@@ -382,7 +382,7 @@ Backend:
 
 **Bewertung:** **63% Umsetzung** - Auth/Audit excellent, aber Data-Privacy & Encryption fehlen
 
-***REMOVED******REMOVED******REMOVED*** **3.8 DevOps (CI/CD, Monitoring, Deployment)**
+### **3.8 DevOps (CI/CD, Monitoring, Deployment)**
 
 | Aspekt | Soll | Ist | Abweichung |
 |--------|------|-----|------------|
@@ -399,23 +399,23 @@ Backend:
 
 ---
 
-***REMOVED******REMOVED*** 🔴 **TEIL 4: GAP-ANALYSE & PRIORITÄTEN**
+## 🔴 **TEIL 4: GAP-ANALYSE & PRIORITÄTEN**
 
-***REMOVED******REMOVED******REMOVED*** **4.1 Kritische Lücken (BLOCKER)**
+### **4.1 Kritische Lücken (BLOCKER)**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **1. MCP-Server nicht produktiv** 🔴 **CRITICAL**
+#### **1. MCP-Server nicht produktiv** 🔴 **CRITICAL**
 - **Impact:** Ask VALEO Copilot kann nicht mit LLM kommunizieren
 - **Severity:** HIGH - Kern-Feature der NeuroERP-Vision
 - **Aufwand:** 1-2 Wochen
 - **Dependencies:** @modelcontext/server, gRPC-Proxy, LLM-API-Keys
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **2. Microservice-Isolation fehlt** 🔴 **CRITICAL**
+#### **2. Microservice-Isolation fehlt** 🔴 **CRITICAL**
 - **Impact:** Alle Domains laufen im selben Process (Monolith)
 - **Severity:** HIGH - MSOA-Vision nicht erfüllt
 - **Aufwand:** 4-6 Wochen
 - **Dependencies:** Service-Mesh, API-Gateway, Inter-Service-Communication
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **3. Multimodale UX unvollständig** 🟡 **MAJOR**
+#### **3. Multimodale UX unvollständig** 🟡 **MAJOR**
 - **Impact:** Nur 10% der Pages sind touch-optimiert, keine Voice
 - **Severity:** MEDIUM - UX-Vision nur teilweise erfüllt
 - **Aufwand:** 3-4 Wochen
@@ -423,9 +423,9 @@ Backend:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** **4.2 Quick Wins (2-4 Wochen)**
+### **4.2 Quick Wins (2-4 Wochen)**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **1. Command-Palette (Cmd+K)** ⭐ **HIGH-VALUE**
+#### **1. Command-Palette (Cmd+K)** ⭐ **HIGH-VALUE**
 ```typescript
 // Schnelle Umsetzung mit cmdk
 import { CommandDialog } from '@/components/ui/command'
@@ -440,9 +440,9 @@ Aufwand: 3-5 Tage
 Impact: Massive UX-Verbesserung
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **2. MCP-Server Minimal-Setup** ⭐ **HIGH-VALUE**
+#### **2. MCP-Server Minimal-Setup** ⭐ **HIGH-VALUE**
 ```bash
-***REMOVED*** Quick-Win: OpenAI direkt (ohne MCP)
+# Quick-Win: OpenAI direkt (ohne MCP)
 - Ask VALEO → OpenAI API
 - Context aus current-page
 - 5 Skills initial
@@ -451,7 +451,7 @@ Aufwand: 5-7 Tage
 Impact: Ask VALEO wird funktional
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **3. Semantic-Search-UI** ⭐ **MEDIUM-VALUE**
+#### **3. Semantic-Search-UI** ⭐ **MEDIUM-VALUE**
 ```typescript
 // RAG bereits da, nur Frontend fehlt
 <SemanticSearch
@@ -463,9 +463,9 @@ Aufwand: 2-3 Tage
 Impact: Nutzer finden Daten schneller
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **4. Test-Coverage erhöhen** ⭐ **MEDIUM-VALUE**
+#### **4. Test-Coverage erhöhen** ⭐ **MEDIUM-VALUE**
 ```bash
-***REMOVED*** Ziel: 60% Coverage (von 5-12% aktuell)
+# Ziel: 60% Coverage (von 5-12% aktuell)
 - Frontend: Vitest für Komponenten
 - Backend: pytest für Domain-Logic
 - E2E: Playwright erweitern
@@ -476,9 +476,9 @@ Impact: Höhere Code-Qualität
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** **4.3 Strategische Empfehlungen (1-6 Monate)**
+### **4.3 Strategische Empfehlungen (1-6 Monate)**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Phase 1 (Monat 1-2): AI-First UX**
+#### **Phase 1 (Monat 1-2): AI-First UX**
 **Ziel:** NeuroERP-Prinzipien vollständig umsetzen
 
 1. **MCP-Server produktiv** (2 Wochen)
@@ -512,7 +512,7 @@ Impact: Höhere Code-Qualität
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Phase 2 (Monat 3-4): Microservice-Isolation**
+#### **Phase 2 (Monat 3-4): Microservice-Isolation**
 **Ziel:** Echte MSOA statt Monolith
 
 1. **API-Gateway** (2 Wochen)
@@ -541,7 +541,7 @@ Impact: Höhere Code-Qualität
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Phase 3 (Monat 5-6): Advanced AI & UX**
+#### **Phase 3 (Monat 5-6): Advanced AI & UX**
 **Ziel:** Volle NeuroERP-Intelligenz
 
 1. **Predictive-Analytics** (3 Wochen)
@@ -569,11 +569,11 @@ Impact: Höhere Code-Qualität
 
 ---
 
-***REMOVED******REMOVED*** 🎯 **TEIL 5: HANDLUNGSPLAN & ROADMAP**
+## 🎯 **TEIL 5: HANDLUNGSPLAN & ROADMAP**
 
-***REMOVED******REMOVED******REMOVED*** **5.1 Priorisierte Roadmap**
+### **5.1 Priorisierte Roadmap**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **🚀 Phase 1: Quick Wins (0-4 Wochen)**
+#### **🚀 Phase 1: Quick Wins (0-4 Wochen)**
 ```
 Woche 1-2:
 ✅ Command-Palette (cmdk)
@@ -591,7 +591,7 @@ Exit-Criteria:
 - Test-Coverage >40%
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **📈 Phase 2: Strategic (1-3 Monate)**
+#### **📈 Phase 2: Strategic (1-3 Monate)**
 ```
 Monat 1:
 ✅ API-Gateway (Kong)
@@ -614,7 +614,7 @@ Exit-Criteria:
 - System lernt selbständig
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **🎯 Phase 3: Excellence (3-6 Monate)**
+#### **🎯 Phase 3: Excellence (3-6 Monate)**
 ```
 Monat 4-5:
 ✅ Alle 19 Domains als Services
@@ -634,9 +634,9 @@ Exit-Criteria:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** **5.2 Architektur-Refactoring-Vorschläge**
+### **5.2 Architektur-Refactoring-Vorschläge**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **1. Microservice-Extraction-Strategy**
+#### **1. Microservice-Extraction-Strategy**
 ```
 Priorität 1 (Monat 1):
 - CRM-Service (eigene DB, NATS-Events)
@@ -651,7 +651,7 @@ Priorität 3 (Monat 3):
 - Remaining 13 Domains
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **2. Event-Bus-Migration**
+#### **2. Event-Bus-Migration**
 ```
 Step 1: Outbox-Publisher aktivieren
 Step 2: NATS-Publisher als Primary
@@ -660,7 +660,7 @@ Step 4: Saga-Workflows implementieren
 Step 5: Event-Sourcing für kritische Domains
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **3. Frontend-Architektur-Evolution**
+#### **3. Frontend-Architektur-Evolution**
 ```
 Option A: Behalten (Monolith-Frontend)
 + Einfacher zu entwickeln
@@ -674,9 +674,9 @@ Option B: Micro-Frontends (empfohlen)
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** **5.3 UI/UX-Redesign-Empfehlungen**
+### **5.3 UI/UX-Redesign-Empfehlungen**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **1. Command-Palette-Integration**
+#### **1. Command-Palette-Integration**
 ```typescript
 // Überall verfügbar via Cmd+K
 <CommandPalette>
@@ -691,7 +691,7 @@ Option B: Micro-Frontends (empfohlen)
 </CommandPalette>
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **2. Touch-Optimization-Strategy**
+#### **2. Touch-Optimization-Strategy**
 ```
 Priorität 1: POS & Warehouse (bereits ✅)
 Priorität 2: Verkaufs-Workflows (Angebot, Auftrag, Rechnung)
@@ -701,7 +701,7 @@ Priorität 4: Admin-Bereiche
 Ziel: 100% der User-facing Pages touch-fähig
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **3. Voice-Integration-Roadmap**
+#### **3. Voice-Integration-Roadmap**
 ```
 Phase 1: Web Speech API (Chrome/Edge)
 - "VALEO, zeige mir Kunden"
@@ -720,9 +720,9 @@ Phase 3: Proactive-Assistance
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** **5.4 MCP/KI-Integrations-Strategie**
+### **5.4 MCP/KI-Integrations-Strategie**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Roadmap:**
+#### **Roadmap:**
 
 **Stufe 1: Basic-MCP (Wochen 1-2)**
 ```typescript
@@ -743,13 +743,13 @@ Aufwand: 1 Woche
 
 **Stufe 2: MCP-Server-Setup (Wochen 3-4)**
 ```bash
-***REMOVED*** @modelcontext/server installieren
+# @modelcontext/server installieren
 pnpm add @modelcontext/server
 
-***REMOVED*** MCP-Server starten
+# MCP-Server starten
 mcp-server --config mcp.config.json
 
-***REMOVED*** Skills registrieren
+# Skills registrieren
 registerSkill("search-customer", searchCustomerImpl)
 registerSkill("get-article-price", getArticlePriceImpl)
 ...
@@ -775,9 +775,9 @@ Aufwand: 4 Wochen
 
 ---
 
-***REMOVED******REMOVED*** 📊 **TEIL 6: GESAMTBEWERTUNG**
+## 📊 **TEIL 6: GESAMTBEWERTUNG**
 
-***REMOVED******REMOVED******REMOVED*** **6.1 Gesamt-Reifegrad**
+### **6.1 Gesamt-Reifegrad**
 
 | Kategorie | Soll | Ist | Reifegrad | Trend |
 |-----------|------|-----|-----------|-------|
@@ -799,7 +799,7 @@ Aufwand: 4 Wochen
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** **6.2 NeuroERP-Prinzipien-Check**
+### **6.2 NeuroERP-Prinzipien-Check**
 
 | Prinzip | Soll | Ist | Status |
 |---------|------|-----|--------|
@@ -813,11 +813,11 @@ Aufwand: 4 Wochen
 
 ---
 
-***REMOVED******REMOVED*** 🚀 **TEIL 7: KONKRETE HANDLUNGSEMPFEHLUNGEN**
+## 🚀 **TEIL 7: KONKRETE HANDLUNGSEMPFEHLUNGEN**
 
-***REMOVED******REMOVED******REMOVED*** **7.1 Sofort-Maßnahmen (diese Woche)**
+### **7.1 Sofort-Maßnahmen (diese Woche)**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Maßnahme 1: Command-Palette implementieren**
+#### **Maßnahme 1: Command-Palette implementieren**
 ```bash
 Schritte:
 1. pnpm add cmdk
@@ -830,7 +830,7 @@ Aufwand: 1 Tag
 Impact: ⭐⭐⭐⭐⭐
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Maßnahme 2: OpenAI direkt in Ask VALEO**
+#### **Maßnahme 2: OpenAI direkt in Ask VALEO**
 ```bash
 Schritte:
 1. pnpm add openai
@@ -843,7 +843,7 @@ Aufwand: 2-3 Tage
 Impact: ⭐⭐⭐⭐⭐
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Maßnahme 3: Semantic-Search-UI**
+#### **Maßnahme 3: Semantic-Search-UI**
 ```bash
 Schritte:
 1. SemanticSearchDialog.tsx erstellen
@@ -857,45 +857,45 @@ Impact: ⭐⭐⭐⭐
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** **7.2 Mittelfristig (nächste 4 Wochen)**
+### **7.2 Mittelfristig (nächste 4 Wochen)**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Woche 1:**
+#### **Woche 1:**
 - ✅ Command-Palette
 - ✅ Ask VALEO mit OpenAI
 - ✅ Semantic-Search-UI
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Woche 2:**
+#### **Woche 2:**
 - ✅ Speech-to-Text (Web Speech API)
 - ✅ Context-Aware-Suggestions
 - ✅ Multi-Turn-Conversations
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Woche 3:**
+#### **Woche 3:**
 - ✅ Lernende Defaults (User-Präferenzen speichern)
 - ✅ Auto-Pre-Fill basierend auf History
 - ✅ Pattern-Recognition
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Woche 4:**
+#### **Woche 4:**
 - ✅ Test-Coverage auf 40%
 - ✅ Touch-Optimization für Top-20-Pages
 - ✅ MCP-Server vorbereiten
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** **7.3 Langfristig (3-6 Monate)**
+### **7.3 Langfristig (3-6 Monate)**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Monat 2-3: Microservice-Migration**
+#### **Monat 2-3: Microservice-Migration**
 - API-Gateway (Kong)
 - Service-Extraction (CRM, Inventory, Finance)
 - Service-Mesh (Istio)
 - Distributed-Tracing
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Monat 4-5: Advanced-AI**
+#### **Monat 4-5: Advanced-AI**
 - Predictive-Analytics
 - Self-Learning-System
 - Auto-Rule-Generation
 - Advanced-RAG (Multi-Modal)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **Monat 6: Excellence**
+#### **Monat 6: Excellence**
 - Alle 19 Services isoliert
 - Full-Multimodal-UX
 - WCAG 2.1 AAA
@@ -903,9 +903,9 @@ Impact: ⭐⭐⭐⭐
 
 ---
 
-***REMOVED******REMOVED*** 📈 **TEIL 8: SUCCESS-METRICS**
+## 📈 **TEIL 8: SUCCESS-METRICS**
 
-***REMOVED******REMOVED******REMOVED*** **8.1 KPIs für die nächsten 3 Monate**
+### **8.1 KPIs für die nächsten 3 Monate**
 
 | Metric | Aktuell | Ziel (3 Monate) |
 |--------|---------|-----------------|
@@ -922,21 +922,21 @@ Impact: ⭐⭐⭐⭐
 
 ---
 
-***REMOVED******REMOVED*** 🎉 **TEIL 9: FAZIT**
+## 🎉 **TEIL 9: FAZIT**
 
-***REMOVED******REMOVED******REMOVED*** **9.1 Stärken:**
+### **9.1 Stärken:**
 1. ✅ **Architektur-Exzellenz:** 5 Principles sind Weltklasse
 2. ✅ **Umfang:** 181 Frontend-Pages, 22 Domains strukturiert
 3. ✅ **Production-Ready:** K8s, OIDC, Monitoring funktionieren
 4. ✅ **Security:** 6 Scanner, ASVS Level 2, OIDC/RBAC
 
-***REMOVED******REMOVED******REMOVED*** **9.2 Schwächen:**
+### **9.2 Schwächen:**
 1. ⚠️ **Microservices:** Noch Monolith (trotz Domain-Struktur)
 2. ⚠️ **AI-Integration:** Infrastruktur da, aber kein LLM live
 3. ⚠️ **Multimodal-UX:** Touch/Voice nur rudimentär
 4. ⚠️ **Test-Coverage:** 5-12% ist zu wenig
 
-***REMOVED******REMOVED******REMOVED*** **9.3 Empfehlung:**
+### **9.3 Empfehlung:**
 
 **Das Projekt hat ein exzellentes Fundament!** Die Architektur ist durchdacht, die Implementierung ist sauber, aber:
 
@@ -952,4 +952,5 @@ Impact: ⭐⭐⭐⭐
 ---
 
 **Report-Ende** | **Analysiert am 2025-10-12** | **Commit: 66a00302**
+
 

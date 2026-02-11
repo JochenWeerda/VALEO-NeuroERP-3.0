@@ -1,16 +1,16 @@
-***REMOVED*** Redis-Installation und Konfiguration für Windows
-***REMOVED***
-***REMOVED*** Dieses Skript lädt Redis für Windows herunter, extrahiert und konfiguriert es
-***REMOVED*** mit optimaler Persistenz- und Leistungskonfiguration.
-***REMOVED***
-***REMOVED*** Verwendung: .\install_redis.ps1 [-RedisPort <Port>] [-ConfigOnly]
+# Redis-Installation und Konfiguration für Windows
+#
+# Dieses Skript lädt Redis für Windows herunter, extrahiert und konfiguriert es
+# mit optimaler Persistenz- und Leistungskonfiguration.
+#
+# Verwendung: .\install_redis.ps1 [-RedisPort <Port>] [-ConfigOnly]
 
 param (
     [int]$RedisPort = 6379,
     [switch]$ConfigOnly
 )
 
-***REMOVED*** Konfiguration
+# Konfiguration
 $WORKSPACE_ROOT = "C:\AI_driven_ERP\AI_driven_ERP"
 $REDIS_DIR = Join-Path $WORKSPACE_ROOT "redis"
 $DOWNLOADS_DIR = Join-Path $WORKSPACE_ROOT "downloads"
@@ -18,11 +18,11 @@ $LOGS_DIR = Join-Path $WORKSPACE_ROOT "logs"
 $REDIS_CONFIG = Join-Path $REDIS_DIR "redis.conf"
 $REDIS_DATA_DIR = Join-Path $REDIS_DIR "data"
 
-***REMOVED*** URL für Redis für Windows
+# URL für Redis für Windows
 $REDIS_URL = "https://github.com/microsoftarchive/redis/releases/download/win-3.2.100/Redis-x64-3.2.100.zip"
 $REDIS_ZIP = Join-Path $DOWNLOADS_DIR "redis.zip"
 
-***REMOVED*** Funktion zum Schreiben von farbigen Nachrichten
+# Funktion zum Schreiben von farbigen Nachrichten
 function Write-ColorMessage {
     param (
         [string]$Message,
@@ -32,7 +32,7 @@ function Write-ColorMessage {
     Write-Host $Message -ForegroundColor $ForegroundColor
 }
 
-***REMOVED*** Erstelle Verzeichnisse, falls sie nicht existieren
+# Erstelle Verzeichnisse, falls sie nicht existieren
 function Create-DirectoryIfNotExists {
     param (
         [string]$Path,
@@ -45,7 +45,7 @@ function Create-DirectoryIfNotExists {
     }
 }
 
-***REMOVED*** Lade Redis herunter, falls erforderlich
+# Lade Redis herunter, falls erforderlich
 function Download-Redis {
     if ($ConfigOnly) {
         if (-not (Test-Path $REDIS_DIR)) {
@@ -73,7 +73,7 @@ function Download-Redis {
             Write-ColorMessage "Redis-ZIP bereits heruntergeladen" -ForegroundColor Yellow
         }
         
-        ***REMOVED*** Extrahiere Redis
+        # Extrahiere Redis
         Write-ColorMessage "Extrahiere Redis..." -ForegroundColor Cyan
         try {
             if (Test-Path $REDIS_DIR) {
@@ -92,40 +92,40 @@ function Download-Redis {
     return $true
 }
 
-***REMOVED*** Erstelle optimierte Redis-Konfiguration
+# Erstelle optimierte Redis-Konfiguration
 function Create-RedisConfig {
     Create-DirectoryIfNotExists -Path $REDIS_DATA_DIR -Description "Redis-Daten"
     
     Write-ColorMessage "Erstelle optimierte Redis-Konfiguration..." -ForegroundColor Cyan
     
     $config = @"
-***REMOVED*** Redis-Konfiguration für ERP-System
-***REMOVED*** Optimiert für Persistenz und Leistung
+# Redis-Konfiguration für ERP-System
+# Optimiert für Persistenz und Leistung
 
-***REMOVED*** Netzwerk
+# Netzwerk
 bind 127.0.0.1
 port $RedisPort
 timeout 0
 tcp-keepalive 300
 
-***REMOVED*** Allgemein
+# Allgemein
 daemonize no
 pidfile redis_$RedisPort.pid
 loglevel notice
 logfile "$LOGS_DIR\redis.log"
 
-***REMOVED*** Persistenz
+# Persistenz
 dir "$REDIS_DATA_DIR"
 dbfilename dump.rdb
 
-***REMOVED*** RDB-Persistenz (regelmäßige Snapshots)
+# RDB-Persistenz (regelmäßige Snapshots)
 save 900 1
 save 300 10
 save 60 10000
 rdbcompression yes
 rdbchecksum yes
 
-***REMOVED*** AOF-Persistenz (Operation-Log, höhere Datensicherheit)
+# AOF-Persistenz (Operation-Log, höhere Datensicherheit)
 appendonly yes
 appendfilename "appendonly.aof"
 appendfsync everysec
@@ -133,12 +133,12 @@ no-appendfsync-on-rewrite no
 auto-aof-rewrite-percentage 100
 auto-aof-rewrite-min-size 64mb
 
-***REMOVED*** Speicher-Management
+# Speicher-Management
 maxmemory 1gb
 maxmemory-policy volatile-lru
 maxmemory-samples 5
 
-***REMOVED*** Leistungsoptimierungen
+# Leistungsoptimierungen
 activerehashing yes
 "@
     
@@ -152,16 +152,16 @@ activerehashing yes
     }
 }
 
-***REMOVED*** Erstelle Redis-Startskript
+# Erstelle Redis-Startskript
 function Create-RedisStartScript {
     $startScript = Join-Path $REDIS_DIR "start_redis.ps1"
     
     $scriptContent = @"
-***REMOVED*** Start-Redis.ps1
-***REMOVED***
-***REMOVED*** Dieses Skript startet Redis mit optimierter Konfiguration.
-***REMOVED***
-***REMOVED*** Verwendung: .\start_redis.ps1
+# Start-Redis.ps1
+#
+# Dieses Skript startet Redis mit optimierter Konfiguration.
+#
+# Verwendung: .\start_redis.ps1
 
 Set-Location "`$PSScriptRoot"
 Write-Host "Starte Redis..." -ForegroundColor Cyan
@@ -179,7 +179,7 @@ Write-Host "Redis gestartet auf Port $RedisPort" -ForegroundColor Green
     }
 }
 
-***REMOVED*** Teste die Redis-Installation
+# Teste die Redis-Installation
 function Test-Redis {
     $redisCliPath = Join-Path $REDIS_DIR "redis-cli.exe"
     
@@ -190,34 +190,34 @@ function Test-Redis {
     
     Write-ColorMessage "Teste Redis-Verbindung..." -ForegroundColor Cyan
     
-    ***REMOVED*** Prüfe, ob Redis bereits läuft
+    # Prüfe, ob Redis bereits läuft
     $testResult = $null
     try {
-        ***REMOVED*** Verwende PowerShell für den Test statt redis-cli
+        # Verwende PowerShell für den Test statt redis-cli
         $tcpClient = New-Object System.Net.Sockets.TcpClient
         $tcpClient.Connect("127.0.0.1", $RedisPort)
         $tcpClient.Close()
         Write-ColorMessage "Redis läuft bereits auf Port $RedisPort" -ForegroundColor Yellow
     } catch {
-        ***REMOVED*** Redis läuft nicht, starte es
+        # Redis läuft nicht, starte es
         Write-ColorMessage "Redis ist nicht aktiv, starte Redis..." -ForegroundColor Cyan
         
         try {
             $redisServerPath = Join-Path $REDIS_DIR "redis-server.exe"
             $redisConfigPath = Join-Path $REDIS_DIR "redis.conf"
             
-            ***REMOVED*** Starte Redis im Hintergrund
+            # Starte Redis im Hintergrund
             $process = Start-Process -FilePath $redisServerPath -ArgumentList $redisConfigPath -PassThru -WindowStyle Minimized
             Start-Sleep -Seconds 2
             
-            ***REMOVED*** Teste die Verbindung erneut
+            # Teste die Verbindung erneut
             $tcpClient = New-Object System.Net.Sockets.TcpClient
             $tcpClient.Connect("127.0.0.1", $RedisPort)
             $tcpClient.Close()
             
             Write-ColorMessage "Redis erfolgreich gestartet und getestet" -ForegroundColor Green
             
-            ***REMOVED*** Beende Redis wieder für den Test
+            # Beende Redis wieder für den Test
             Stop-Process -Id $process.Id -Force
             Write-ColorMessage "Redis-Testinstanz beendet" -ForegroundColor Yellow
         } catch {
@@ -229,32 +229,32 @@ function Test-Redis {
     return $true
 }
 
-***REMOVED*** Hauptprogramm
+# Hauptprogramm
 function Main {
     Write-ColorMessage "===== Redis-Installation und Konfiguration =====" -ForegroundColor Cyan
     
-    ***REMOVED*** Erstelle Log-Verzeichnis
+    # Erstelle Log-Verzeichnis
     Create-DirectoryIfNotExists -Path $LOGS_DIR -Description "Logs"
     
-    ***REMOVED*** Lade Redis herunter und extrahiere es
+    # Lade Redis herunter und extrahiere es
     if (-not (Download-Redis)) {
         Write-ColorMessage "Installation abgebrochen aufgrund von Fehlern" -ForegroundColor Red
         return
     }
     
-    ***REMOVED*** Erstelle optimierte Redis-Konfiguration
+    # Erstelle optimierte Redis-Konfiguration
     if (-not (Create-RedisConfig)) {
         Write-ColorMessage "Konfiguration abgebrochen aufgrund von Fehlern" -ForegroundColor Red
         return
     }
     
-    ***REMOVED*** Erstelle Redis-Startskript
+    # Erstelle Redis-Startskript
     if (-not (Create-RedisStartScript)) {
         Write-ColorMessage "Erstellung des Startskripts fehlgeschlagen" -ForegroundColor Red
         return
     }
     
-    ***REMOVED*** Teste die Redis-Installation
+    # Teste die Redis-Installation
     if (-not (Test-Redis)) {
         Write-ColorMessage "Redis-Test fehlgeschlagen, aber Installation wurde abgeschlossen" -ForegroundColor Yellow
     }
@@ -273,5 +273,5 @@ function Main {
     Write-ColorMessage "  .\start_redis.ps1" -ForegroundColor White
 }
 
-***REMOVED*** Starte das Hauptprogramm
+# Starte das Hauptprogramm
 Main 

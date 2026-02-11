@@ -188,7 +188,7 @@ export class RabbitMQEventBus implements EventBus {
     const queueResult = await this.channel?.assertQueue('', { exclusive: true });
 
     // Bind to all finance domain events
-    await this.channel?.bindQueue(queueResult?.queue || '', 'finance-domain-events', 'finance.domain.***REMOVED***');
+    await this.channel?.bindQueue(queueResult?.queue || '', 'finance-domain-events', 'finance.domain.#');
 
     // Consume messages
     await this.channel?.consume(queueResult?.queue || '', async (msg: any) => {

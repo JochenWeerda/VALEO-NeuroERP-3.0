@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Demo für den PLAN-Modus des APM-Frameworks.
 Verwendet die Ergebnisse des VAN-Modus als Eingabe.
@@ -11,22 +11,22 @@ import logging
 from pathlib import Path
 from bson import ObjectId
 
-***REMOVED*** Pfad zum Projektverzeichnis hinzufügen
+# Pfad zum Projektverzeichnis hinzufügen
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from backend.apm_framework.apm_workflow import APMWorkflow
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-***REMOVED*** RAG-Service für Tests
+# RAG-Service für Tests
 class DummyRAGService:
     async def query(self, prompt, agent_type=None):
         logger.info(f"RAG-Abfrage für {agent_type}: {prompt[:50]}...")
         
-        ***REMOVED*** Simulierte Antworten basierend auf dem Prompt-Inhalt
+        # Simulierte Antworten basierend auf dem Prompt-Inhalt
         if "Projektplan" in prompt:
             return """
             Name: Optimierung der Transaktionsverarbeitung
@@ -154,12 +154,12 @@ class DummyRAGService:
 async def main():
     """Hauptfunktion zum Testen des PLAN-Modus"""
     try:
-        ***REMOVED*** MongoDB-Verbindung initialisieren
+        # MongoDB-Verbindung initialisieren
         mongodb_uri = "mongodb://localhost:27017/"
         db_name = "valeo_neuroerp"
         mongodb = APMMongoDBConnector(connection_string=mongodb_uri, db_name=db_name)
         
-        ***REMOVED*** Die neueste VAN-Analyse finden
+        # Die neueste VAN-Analyse finden
         van_analyses = mongodb.find_many(
             "van_analysis",
             {},
@@ -174,33 +174,33 @@ async def main():
         van_analysis_id = str(van_analyses[0].get("_id"))
         logger.info(f"Verwende VAN-Analyse mit ID: {van_analysis_id}")
         
-        ***REMOVED*** APM-Workflow initialisieren
+        # APM-Workflow initialisieren
         workflow = APMWorkflow(mongodb_uri=mongodb_uri, db_name=db_name)
         
-        ***REMOVED*** RAG-Service setzen
+        # RAG-Service setzen
         rag_service = DummyRAGService()
         workflow.set_rag_service(rag_service)
         
         logger.info("Starte PLAN-Mode mit der ausgewählten VAN-Analyse")
         
-        ***REMOVED*** PLAN-Mode ausführen
+        # PLAN-Mode ausführen
         plan_result = await workflow.run_plan_mode(van_analysis_id)
         
-        ***REMOVED*** Ergebnis ausgeben
+        # Ergebnis ausgeben
         logger.info(f"PLAN-Mode abgeschlossen mit ID: {plan_result.get('id')}")
         
-        ***REMOVED*** Projektplan ausgeben
+        # Projektplan ausgeben
         plan_data = plan_result.get('plan', {})
         logger.info(f"Projektplan: {plan_data.get('name')}")
         logger.info(f"Beschreibung: {plan_data.get('description')}")
         logger.info(f"Anzahl der Meilensteine: {len(plan_data.get('milestones', []))}")
         
-        ***REMOVED*** Lösungsdesign ausgeben
+        # Lösungsdesign ausgeben
         design_data = plan_result.get('design', {})
         logger.info(f"Lösungsdesign: {design_data.get('description')[:100]}...")
         logger.info(f"Anzahl der Designentscheidungen: {len(design_data.get('design_decisions', []))}")
         
-        ***REMOVED*** Aufgaben ausgeben
+        # Aufgaben ausgeben
         tasks = plan_result.get('tasks', [])
         logger.info(f"Anzahl der Aufgaben: {len(tasks)}")
         
@@ -245,7 +245,7 @@ async def main():
             if task.get('dependencies'):
                 print(f"   Abhängigkeiten: {', '.join(task.get('dependencies'))}")
         
-        ***REMOVED*** Verbindung schließen
+        # Verbindung schließen
         workflow.close()
         
         logger.info("PLAN-Mode-Test erfolgreich abgeschlossen")
@@ -263,3 +263,4 @@ if __name__ == "__main__":
     print("="*80 + "\n")
     
     asyncio.run(main())
+

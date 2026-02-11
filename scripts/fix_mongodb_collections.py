@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Korrigiert die fehlenden Sammlungen in der MongoDB, indem es Aliase für die vorhandenen Sammlungen erstellt.
 """
@@ -9,7 +9,7 @@ import datetime
 import pymongo
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -20,7 +20,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("FixMongoDBCollections")
 
-***REMOVED*** MongoDB-Konfiguration
+# MongoDB-Konfiguration
 MONGODB_CONNECTION_STRING = "mongodb://localhost:27017/"
 MONGODB_DATABASE_NAME = "valeo_neuroerp"
 
@@ -37,7 +37,7 @@ def check_mongodb_connection():
             MONGODB_CONNECTION_STRING,
             serverSelectionTimeoutMS=5000
         )
-        ***REMOVED*** Verbindung testen
+        # Verbindung testen
         client.admin.command('ping')
         logger.info("Verbindung zu MongoDB erfolgreich hergestellt.")
         client.close()
@@ -56,11 +56,11 @@ def create_collection_aliases():
     logger.info("Erstelle Aliase für fehlende Sammlungen...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         
-        ***REMOVED*** Aliase für fehlende Sammlungen erstellen
+        # Aliase für fehlende Sammlungen erstellen
         aliases = [
             {"source": "archive_documents", "target": "archive"},
             {"source": "creative_documents", "target": "creative"},
@@ -73,17 +73,17 @@ def create_collection_aliases():
             source = alias["source"]
             target = alias["target"]
             
-            ***REMOVED*** Prüfen, ob die Quellsammlung existiert
+            # Prüfen, ob die Quellsammlung existiert
             if source not in db.list_collection_names():
                 logger.warning(f"Quellsammlung {source} existiert nicht.")
                 continue
             
-            ***REMOVED*** Prüfen, ob die Zielsammlung bereits existiert
+            # Prüfen, ob die Zielsammlung bereits existiert
             if target in db.list_collection_names():
                 logger.warning(f"Zielsammlung {target} existiert bereits.")
                 continue
             
-            ***REMOVED*** Alle Dokumente aus der Quellsammlung kopieren
+            # Alle Dokumente aus der Quellsammlung kopieren
             documents = list(db[source].find())
             if documents:
                 db[target].insert_many(documents)
@@ -91,7 +91,7 @@ def create_collection_aliases():
             else:
                 logger.warning(f"Quellsammlung {source} enthält keine Dokumente.")
         
-        ***REMOVED*** Indizes für die neuen Sammlungen erstellen
+        # Indizes für die neuen Sammlungen erstellen
         create_indexes_for_aliases(db, aliases)
         
         client.close()
@@ -115,13 +115,13 @@ def create_indexes_for_aliases(db, aliases):
             source = alias["source"]
             target = alias["target"]
             
-            ***REMOVED*** Indizes aus der Quellsammlung abrufen
+            # Indizes aus der Quellsammlung abrufen
             index_info = db[source].index_information()
             
-            ***REMOVED*** Indizes in der Zielsammlung erstellen (außer _id_)
+            # Indizes in der Zielsammlung erstellen (außer _id_)
             for index_name, index_spec in index_info.items():
                 if index_name != "_id_":
-                    ***REMOVED*** Schlüssel und Optionen extrahieren
+                    # Schlüssel und Optionen extrahieren
                     keys = [(k, v) for k, v in index_spec["key"].items()]
                     options = {}
                     if "unique" in index_spec:
@@ -133,7 +133,7 @@ def create_indexes_for_aliases(db, aliases):
                     if "partialFilterExpression" in index_spec:
                         options["partialFilterExpression"] = index_spec["partialFilterExpression"]
                     
-                    ***REMOVED*** Index erstellen
+                    # Index erstellen
                     db[target].create_index(keys, **options)
                     logger.info(f"Index {index_name} für Sammlung {target} erstellt.")
     except Exception as e:
@@ -149,14 +149,14 @@ def check_collections():
     logger.info("Überprüfe MongoDB-Sammlungen nach der Korrektur...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         
-        ***REMOVED*** Alle Sammlungen abrufen
+        # Alle Sammlungen abrufen
         collections = db.list_collection_names()
         
-        ***REMOVED*** Erwartete Sammlungen
+        # Erwartete Sammlungen
         expected_collections = [
             "project_structure",
             "tasks",
@@ -179,16 +179,16 @@ def check_collections():
             "backup_cursor"
         ]
         
-        ***REMOVED*** Überprüfen, ob alle erwarteten Sammlungen vorhanden sind
+        # Überprüfen, ob alle erwarteten Sammlungen vorhanden sind
         missing_collections = [collection for collection in expected_collections if collection not in collections]
         
-        ***REMOVED*** Anzahl der Dokumente in jeder Sammlung zählen
+        # Anzahl der Dokumente in jeder Sammlung zählen
         collection_counts = {}
         for collection in collections:
             count = db[collection].count_documents({})
             collection_counts[collection] = count
         
-        ***REMOVED*** Ergebnis zusammenstellen
+        # Ergebnis zusammenstellen
         result = {
             "collections": collections,
             "expected_collections": expected_collections,
@@ -213,13 +213,13 @@ def print_summary(collections_info):
     print("MongoDB-Sammlungen nach der Korrektur".center(80))
     print("=" * 80)
     
-    ***REMOVED*** Sammlungen ausgeben
+    # Sammlungen ausgeben
     print("\nSammlungen:")
     for collection in sorted(collections_info["collections"]):
         count = collections_info["collection_counts"][collection]
         print(f"  {collection}: {count} Dokumente")
     
-    ***REMOVED*** Fehlende Sammlungen ausgeben
+    # Fehlende Sammlungen ausgeben
     if collections_info["missing_collections"]:
         print("\nFehlende Sammlungen:")
         for collection in collections_info["missing_collections"]:
@@ -233,23 +233,23 @@ def main():
     """
     Hauptfunktion für die Korrektur der fehlenden Sammlungen in der MongoDB.
     """
-    ***REMOVED*** MongoDB-Verbindung prüfen
+    # MongoDB-Verbindung prüfen
     if not check_mongodb_connection():
         logger.error("Konnte keine Verbindung zur MongoDB herstellen.")
         return 1
     
-    ***REMOVED*** Aliase für fehlende Sammlungen erstellen
+    # Aliase für fehlende Sammlungen erstellen
     if not create_collection_aliases():
         logger.error("Konnte Aliase für fehlende Sammlungen nicht erstellen.")
         return 1
     
-    ***REMOVED*** Sammlungen überprüfen
+    # Sammlungen überprüfen
     collections_info = check_collections()
     if collections_info is None:
         logger.error("Konnte MongoDB-Sammlungen nicht überprüfen.")
         return 1
     
-    ***REMOVED*** Zusammenfassung ausgeben
+    # Zusammenfassung ausgeben
     print_summary(collections_info)
     
     logger.info("Korrektur der fehlenden Sammlungen in der MongoDB erfolgreich abgeschlossen.")

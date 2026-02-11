@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env node
+#!/usr/bin/env node
 
 /**
  * VALEO-NeuroERP-3.0 Main Application Entry Point

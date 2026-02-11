@@ -1,12 +1,12 @@
-***REMOVED*** Agent-1 Handoff: Eingangsrechnungen vervollständigen
+# Agent-1 Handoff: Eingangsrechnungen vervollständigen
 
 **Datum:** 2025-01-27  
 **Capability:** FIBU-AP-02 - Eingangsrechnungen  
 **Status:** ✅ GL-Buchung/OP-Erzeugung implementiert
 
-***REMOVED******REMOVED*** Was wurde implementiert?
+## Was wurde implementiert?
 
-***REMOVED******REMOVED******REMOVED*** Backend-API: `app.api.v1.endpoints.ap_invoices.py`
+### Backend-API: `app.api.v1.endpoints.ap_invoices.py`
 
 **Erweiterung: `POST /api/v1/finance/ap/invoices/{invoice_id}/post`**
 
@@ -34,9 +34,9 @@ Haben: Vorsteuerkonto (1576)      = MwSt-Betrag
 - Fälligkeit: Rechnungsdatum + 30 Tage (default)
 - Kunde: Supplier (Kreditor)
 
-***REMOVED******REMOVED*** Was ist noch zu tun?
+## Was ist noch zu tun?
 
-***REMOVED******REMOVED******REMOVED*** Vervollständigung:
+### Vervollständigung:
 - [ ] GL Journal Entry vollständig implementieren (aktuell nur Logging)
   - Integration mit `journal_entries.py` API
   - Perioden-Validierung
@@ -45,19 +45,19 @@ Haben: Vorsteuerkonto (1576)      = MwSt-Betrag
 - [ ] Workflow-Integration (Freigabe vor Buchung)
 - [ ] Audit-Trail für Buchungen
 
-***REMOVED******REMOVED******REMOVED*** Optional Enhancements:
+### Optional Enhancements:
 - [ ] Multi-Currency Support
 - [ ] Skonto-Berechnung
 - [ ] Zahlungsbedingungen (Netto 30, 2% Skonto, etc.)
 - [ ] Rechnungsprüfung (3-Wege-Abgleich)
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 - ✅ Database Tables: `offene_posten` (muss existieren)
 - ⏳ Journal Entries API: `journal_entries.py` (muss integriert werden)
 - ⏳ Chart of Accounts: Konten müssen existieren
 
-***REMOVED******REMOVED*** Acceptance Criteria
+## Acceptance Criteria
 
 ✅ **Erfüllt:**
 - OP wird erstellt beim Posten
@@ -67,13 +67,13 @@ Haben: Vorsteuerkonto (1576)      = MwSt-Betrag
 ⏳ **In Progress:**
 - GL Journal Entry wird erstellt (vorbereitet, muss noch integriert werden)
 
-***REMOVED******REMOVED*** Test-Status
+## Test-Status
 
 - ✅ Unit Tests: OP-Erzeugung
 - ⏳ Integration Tests: GL-Buchung
 - ⏳ E2E Tests: Rechnungs-Workflow
 
-***REMOVED******REMOVED*** Integration mit Agent-4
+## Integration mit Agent-4
 
 **Benötigt:**
 - ⏳ Journal Service Integration (von Agent-4 oder selbst implementieren)
@@ -87,4 +87,5 @@ Haben: Vorsteuerkonto (1576)      = MwSt-Betrag
 ---
 
 **Status:** ✅ OP-Erzeugung Ready, GL-Buchung in Progress
+
 

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Überprüft, ob das Handover-Dokument in MongoDB gespeichert wurde.
 """
@@ -10,28 +10,28 @@ from pathlib import Path
 from datetime import datetime
 from pprint import pprint
 
-***REMOVED*** Pfad zum Projektverzeichnis hinzufügen
+# Pfad zum Projektverzeichnis hinzufügen
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def main():
     """Hauptfunktion zum Überprüfen des Handover-Dokuments in MongoDB."""
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         mongodb_connector = APMMongoDBConnector("mongodb://localhost:27017/", "valeo_neuroerp")
         
-        ***REMOVED*** Alle Projekte anzeigen
+        # Alle Projekte anzeigen
         projects = mongodb_connector.find_many("projects", {})
         logger.info(f"Gefundene Projekte: {len(projects)}")
         for project in projects:
             logger.info(f"Projekt: {project['_id']} - {project.get('name', 'Unbenannt')}")
         
-        ***REMOVED*** Alle Handover-Dokumente abrufen, unabhängig vom Projekt
+        # Alle Handover-Dokumente abrufen, unabhängig vom Projekt
         handovers = mongodb_connector.find_many("handovers", {})
         
         if not handovers:
@@ -40,7 +40,7 @@ def main():
         
         logger.info(f"{len(handovers)} Handover-Dokumente gefunden")
         
-        ***REMOVED*** Alle Handover-Dokumente anzeigen
+        # Alle Handover-Dokumente anzeigen
         for i, handover in enumerate(handovers, 1):
             logger.info(f"Handover {i} (ID: {handover['_id']}):")
             logger.info(f"  Zeitstempel: {handover['timestamp']}")
@@ -51,7 +51,7 @@ def main():
             logger.info(f"  Zusammenfassung: {summary[:100]}..." if len(summary) > 100 else summary)
             logger.info("---")
         
-        ***REMOVED*** Verbindung schließen
+        # Verbindung schließen
         mongodb_connector.close()
         logger.info("MongoDB-Verbindung geschlossen")
         

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 🔍 SCHNELLE SUCHE NACH ALLEN PLZ 26xxx in GAP-CSV
 """
@@ -12,7 +12,7 @@ def find_all_26xxx():
     print("🔍 SUCHE ALLE PLZ 26xxx in GAP-CSV")
     print("="*50)
     
-    results = {}  ***REMOVED*** PLZ -> [Liste von Einträgen]
+    results = {}  # PLZ -> [Liste von Einträgen]
     total_rows = 0
     found_count = 0
     
@@ -25,14 +25,14 @@ def find_all_26xxx():
                 
                 plz = row.get('PLZ', '').strip()
                 
-                ***REMOVED*** Suche nach PLZ 26xxx
+                # Suche nach PLZ 26xxx
                 if plz.startswith('26'):
                     found_count += 1
                     
                     if plz not in results:
                         results[plz] = []
                     
-                    ***REMOVED*** Maximal 3 Beispiele pro PLZ speichern
+                    # Maximal 3 Beispiele pro PLZ speichern
                     if len(results[plz]) < 3:
                         name = row.get('Name des Begünstigten/Rechtsträgers/Verdands', '').strip()
                         city = row.get('Gemeinde', '').strip()
@@ -43,11 +43,11 @@ def find_all_26xxx():
                             'city': city
                         })
                     
-                    ***REMOVED*** Sofortige Ausgabe für neue PLZ
+                    # Sofortige Ausgabe für neue PLZ
                     if len(results[plz]) == 1:
                         print(f"🎯 PLZ {plz} gefunden! Zeile {row_num} | {city}")
                 
-                ***REMOVED*** Progress alle 250.000 Zeilen
+                # Progress alle 250.000 Zeilen
                 if row_num % 250000 == 0:
                     print(f"📊 Zeile {row_num:,}: {len(results)} verschiedene PLZ 26xxx")
     
@@ -55,7 +55,7 @@ def find_all_26xxx():
         print(f"❌ Fehler: {e}")
         return
     
-    ***REMOVED*** Ergebnisse ausgeben
+    # Ergebnisse ausgeben
     print()
     print("📋 FINALE ERGEBNISSE:")
     print("="*50)
@@ -72,7 +72,7 @@ def find_all_26xxx():
             for entry in entries:
                 print(f"   Zeile {entry['row']}: {entry['name']} | {entry['city']}")
         
-        ***REMOVED*** Ostfriesische Orte hervorheben
+        # Ostfriesische Orte hervorheben
         ostfriesische_orte = ['dornum', 'wittmund', 'emden', 'aurich', 'norden', 'leer', 'moormerland', 'ihlow', 'krummhörn']
         print()
         print("🌊 OSTFRIESISCHE TREFFER:")
@@ -88,4 +88,5 @@ def find_all_26xxx():
 
 if __name__ == "__main__":
     find_all_26xxx()
+
 

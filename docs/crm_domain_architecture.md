@@ -1,6 +1,6 @@
-***REMOVED*** VALEO NeuroERP – CRM Domain Architecture (AI-First)
+# VALEO NeuroERP – CRM Domain Architecture (AI-First)
 
-***REMOVED******REMOVED*** 1. Guiding Goals
+## 1. Guiding Goals
 - **360° customer view** shared with Sales, Inventory, Logistics, Finance, DMS.
 - **Three CRM perspectives** in one bounded context: Operational, Analytical, Interactive.
 - **AI-first** by default (LLM tooling, RAG, predictive models).
@@ -8,7 +8,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 2. Interaction & Channels Layer
+## 2. Interaction & Channels Layer
 - Omni-channel ingestion via UI, email, CTI, social, partner APIs.
 - Every inbound/outbound touchpoint is normalised into an `InteractionEvent`.
 - REST endpoints (to be implemented in `crm-interaction`) expose:
@@ -19,9 +19,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 3. CRM Front-End Skeleton (Operational CRM)
+## 3. CRM Front-End Skeleton (Operational CRM)
 
-***REMOVED******REMOVED******REMOVED*** 3.1 Routes
+### 3.1 Routes
 | Route | Workspace | Notes |
 |-------|-----------|-------|
 | `/crm/customers/:id/overview` | Customer 360° | Embeds master data, interactions, AI panels. |
@@ -30,7 +30,7 @@
 | `/crm/marketing/campaigns` | Marketing | Campaign list, journeys, segmentation entry. |
 | `/crm/service/tickets` | Service | Ticket queue, SLA indicators, knowledge base lookup. |
 
-***REMOVED******REMOVED******REMOVED*** 3.2 Customer 360° Composition
+### 3.2 Customer 360° Composition
 - **Header**: display name, tier, lifecycle stage, risk/churn score badges, key KPIs.
 - **Left column**: master data (addresses, legal entities, linked contacts, consent flags).
 - **Center**: unified timeline (interactions, documents, orders, tickets); filter chips by channel/type.
@@ -49,7 +49,7 @@ type Customer360State = {
 
 ---
 
-***REMOVED******REMOVED*** 4. CRM Core Services (Back-End)
+## 4. CRM Core Services (Back-End)
 
 | Service | Responsibilities | Key Aggregates | Domain Events |
 |---------|------------------|----------------|---------------|
@@ -77,7 +77,7 @@ Canonical customer reference schema shared via `customer_reference.schema.json`.
 
 ---
 
-***REMOVED******REMOVED*** 5. Data & Analytics Layer
+## 5. Data & Analytics Layer
 - Streams all CRM/ERP events into warehouse.
 - Minimal shared tables:
   - `dim_customer(customer_id, type, industry, lifecycle_stage, risk_score, lead_score, churn_score, region, master_owner, created_at, updated_at)`
@@ -88,7 +88,7 @@ Canonical customer reference schema shared via `customer_reference.schema.json`.
 
 ---
 
-***REMOVED******REMOVED*** 6. AI-First Services
+## 6. AI-First Services
 - Central AI APIs (`ai-crm`) (see detailed contracts in `docs/api/*.json`):
   - `POST /ai/crm/compose-email`
   - `POST /ai/crm/summarize-thread`
@@ -106,7 +106,7 @@ Canonical customer reference schema shared via `customer_reference.schema.json`.
 
 ---
 
-***REMOVED******REMOVED*** 7. Integration With Other Domains
+## 7. Integration With Other Domains
 - Subscribe to ERP/Finance/Inventory events:
   - `order.created`, `order.fulfilled`, `invoice.posted`, `payment.overdue`, `delivery.shipped`, `inventory.shortage.detected`, `contract.renewal.due`.
 - `crm-sync` maps them into CRM projections (example: `CustomerOrderHistoryProjection` storing last 20 orders, amounts, statuses for UI timeline).
@@ -114,7 +114,7 @@ Canonical customer reference schema shared via `customer_reference.schema.json`.
 
 ---
 
-***REMOVED******REMOVED*** 8. Deliverables Linked
+## 8. Deliverables Linked
 - `docs/crm_reuse_inventory.md` – existing modules reuse strategy.
 - `docs/crm_ui_mapping.md` – mapping of current UI masks to new CRM views.
 - `docs/schemas/interaction_event.schema.json`, `docs/schemas/customer_reference.schema.json`.
@@ -124,7 +124,8 @@ Canonical customer reference schema shared via `customer_reference.schema.json`.
 
 ---
 
-***REMOVED******REMOVED*** 9. Next Steps
+## 9. Next Steps
 1. Implement adapters in `crm-sync` for current ERP events.
 2. Flesh out domain models for `crm-core` and `crm-sales`.
 3. Incrementally migrate existing UI masks into the new route layout described above.
+

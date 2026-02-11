@@ -79,7 +79,7 @@ const Arrow = ({ from, to, label = "", curved = false }: any) => {
           <path d="M0,0 L8,4 L0,8 Z" />
         </marker>
       </defs>
-      <path d={path} fill="none" stroke="currentColor" strokeWidth="1.5" markerEnd="url(***REMOVED***arrow)" />
+      <path d={path} fill="none" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#arrow)" />
       {label && (
         <foreignObject x={mid.x - 50} y={mid.y - 10} width="100" height="20">
           <div className="text-[10px] text-center bg-white/80 rounded-full border px-1">
@@ -226,3 +226,4 @@ export default function ArchitectureDiagram() {
     </div>
   );
 }
+

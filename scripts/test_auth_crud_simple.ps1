@@ -1,6 +1,6 @@
 Write-Host "=== VALEO NeuroERP API Test ==="
 
-***REMOVED*** User registrieren
+# User registrieren
 $regBody = '{"username":"admin","password":"admin","email":"admin@valeo.local"}'
 try {
     $regResult = Invoke-RestMethod -Method POST -Uri "http://localhost:8000/api/v1/auth/register" -ContentType "application/json" -Body $regBody
@@ -9,7 +9,7 @@ try {
     Write-Host "User-Registrierung (wahrscheinlich bereits vorhanden): $($_.Exception.Message)"
 }
 
-***REMOVED*** Token abrufen
+# Token abrufen
 try {
     $tok = Invoke-RestMethod -Method POST -Uri "http://localhost:8000/token" -ContentType "application/x-www-form-urlencoded" -Body "username=admin&password=admin"
     Write-Host "Token erhalten"
@@ -19,7 +19,7 @@ try {
     exit 1
 }
 
-***REMOVED*** GET /api/customers
+# GET /api/customers
 try {
     $customers = Invoke-RestMethod -Method GET -Uri "http://localhost:8000/api/customers?limit=5" -Headers $hdr
     Write-Host "Customers abgerufen: $($customers.Count) Eintraege"
@@ -28,3 +28,4 @@ try {
 }
 
 Write-Host "Test abgeschlossen"
+

@@ -1,11 +1,11 @@
 Write-Host "=== Customer CRUD Test (Corrected) ==="
 
-***REMOVED*** Token abrufen
+# Token abrufen
 $tok = Invoke-RestMethod -Method POST -Uri "http://localhost:8000/token" -ContentType "application/x-www-form-urlencoded" -Body "username=admin&password=admin"
 $hdr = @{ Authorization = "Bearer $($tok.access_token)" }
 Write-Host "Token erhalten"
 
-***REMOVED*** Korrigierter Customer JSON (alle Required-Felder + korrektes Address-Objekt)
+# Korrigierter Customer JSON (alle Required-Felder + korrektes Address-Objekt)
 $custBody = @'
 {
   "id": "test-001",
@@ -54,11 +54,11 @@ try {
     $createdCustomer = Invoke-RestMethod -Method POST -Uri "http://localhost:8000/api/customers" -ContentType "application/json" -Body $custBody -Headers $hdr
     Write-Host "Kunde erstellt: $($createdCustomer.name) (ID: $($createdCustomer.id))"
     
-    ***REMOVED*** Kunde abrufen
+    # Kunde abrufen
     $fetchedCustomer = Invoke-RestMethod -Method GET -Uri "http://localhost:8000/api/customers/$($createdCustomer.id)" -Headers $hdr
     Write-Host "Kunde abgerufen: $($fetchedCustomer.name)"
     
-    ***REMOVED*** Alle Kunden auflisten
+    # Alle Kunden auflisten
     $allCustomers = Invoke-RestMethod -Method GET -Uri "http://localhost:8000/api/customers" -Headers $hdr
     Write-Host "Gesamt Kunden: $($allCustomers.Count)"
     
@@ -73,3 +73,4 @@ try {
 }
 
 Write-Host "Customer CRUD Test abgeschlossen"
+

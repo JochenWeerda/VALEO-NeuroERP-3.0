@@ -14,7 +14,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import MongoClient
 import yaml
 
-***REMOVED*** Logging einrichten
+# Logging einrichten
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -33,11 +33,11 @@ class DataMigrator:
         self.old_mongo = AsyncIOMotorClient(self.config["old_mongodb_uri"])
         self.new_mongo = AsyncIOMotorClient(self.config["new_mongodb_uri"])
         
-        ***REMOVED*** Verzeichnisse
+        # Verzeichnisse
         self.old_base = self.config["old_base_dir"]
         self.new_base = self.config["new_base_dir"]
         
-        ***REMOVED*** Status
+        # Status
         self.migration_status = {
             "started_at": datetime.now().isoformat(),
             "steps": [],
@@ -61,11 +61,11 @@ class DataMigrator:
             for collection in self.config["mongodb_collections"]:
                 logger.info(f"Migriere Collection: {collection}")
                 
-                ***REMOVED*** Daten aus alter DB lesen
+                # Daten aus alter DB lesen
                 old_data = await self.old_mongo[self.config["old_db_name"]][collection].find().to_list(None)
                 
                 if old_data:
-                    ***REMOVED*** Daten in neue DB schreiben
+                    # Daten in neue DB schreiben
                     await self.new_mongo[self.config["new_db_name"]][collection].insert_many(old_data)
                 
                 self.migration_status["steps"].append({
@@ -93,10 +93,10 @@ class DataMigrator:
             new_index_path = os.path.join(self.new_base, "data_integration/rag/index")
             
             if os.path.exists(old_index_path):
-                ***REMOVED*** Verzeichnis erstellen
+                # Verzeichnis erstellen
                 os.makedirs(new_index_path, exist_ok=True)
                 
-                ***REMOVED*** Index kopieren
+                # Index kopieren
                 for item in os.listdir(old_index_path):
                     src = os.path.join(old_index_path, item)
                     dst = os.path.join(new_index_path, item)
@@ -130,19 +130,19 @@ class DataMigrator:
             new_graph_path = os.path.join(self.new_base, "data_integration/langgraph/data")
             
             if os.path.exists(old_graph_path):
-                ***REMOVED*** Verzeichnis erstellen
+                # Verzeichnis erstellen
                 os.makedirs(new_graph_path, exist_ok=True)
                 
-                ***REMOVED*** Daten kopieren und transformieren
+                # Daten kopieren und transformieren
                 for filename in os.listdir(old_graph_path):
                     if filename.endswith('.json'):
                         with open(os.path.join(old_graph_path, filename), 'r') as f:
                             data = json.load(f)
                         
-                        ***REMOVED*** Daten transformieren
+                        # Daten transformieren
                         transformed_data = self._transform_graph_data(data)
                         
-                        ***REMOVED*** Speichern
+                        # Speichern
                         with open(os.path.join(new_graph_path, filename), 'w') as f:
                             json.dump(transformed_data, f, indent=2)
                 
@@ -190,10 +190,10 @@ class DataMigrator:
             new_mcp_path = os.path.join(self.new_base, "mcp/data")
             
             if os.path.exists(old_mcp_path):
-                ***REMOVED*** Verzeichnis erstellen
+                # Verzeichnis erstellen
                 os.makedirs(new_mcp_path, exist_ok=True)
                 
-                ***REMOVED*** Daten kopieren und aktualisieren
+                # Daten kopieren und aktualisieren
                 for root, _, files in os.walk(old_mcp_path):
                     for file in files:
                         if file.endswith(('.json', '.yaml')):
@@ -201,10 +201,10 @@ class DataMigrator:
                             rel_path = os.path.relpath(src_path, old_mcp_path)
                             dst_path = os.path.join(new_mcp_path, rel_path)
                             
-                            ***REMOVED*** Verzeichnis erstellen
+                            # Verzeichnis erstellen
                             os.makedirs(os.path.dirname(dst_path), exist_ok=True)
                             
-                            ***REMOVED*** Daten aktualisieren
+                            # Daten aktualisieren
                             if file.endswith('.json'):
                                 with open(src_path, 'r') as f:
                                     data = json.load(f)
@@ -269,19 +269,19 @@ class DataMigrator:
         logger.info("Starte Datenmigration")
         
         try:
-            ***REMOVED*** MongoDB
+            # MongoDB
             await self.migrate_mongodb()
             
-            ***REMOVED*** RAG Index
+            # RAG Index
             await self.migrate_rag_index()
             
-            ***REMOVED*** LangGraph
+            # LangGraph
             await self.migrate_langgraph_data()
             
-            ***REMOVED*** MCP
+            # MCP
             await self.migrate_mcp_data()
             
-            ***REMOVED*** Status speichern
+            # Status speichern
             self.save_migration_status()
             
             logger.info("Migration erfolgreich abgeschlossen")

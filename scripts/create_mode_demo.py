@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Demo für den CREATE-Modus des APM-Frameworks.
 Generiert Code-Artefakte basierend auf dem Lösungsdesign.
@@ -12,23 +12,23 @@ from pathlib import Path
 from bson import ObjectId
 from datetime import datetime
 
-***REMOVED*** Pfad zum Projektverzeichnis hinzufügen
+# Pfad zum Projektverzeichnis hinzufügen
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from backend.apm_framework.apm_workflow import APMWorkflow
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 from backend.apm_framework.rag_service import RAGService
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-***REMOVED*** RAG-Service für Tests
+# RAG-Service für Tests
 class DummyRAGService:
     async def query(self, prompt, agent_type=None):
         logger.info(f"RAG-Abfrage für {agent_type}: {prompt[:50]}...")
         
-        ***REMOVED*** Simulierte Antworten basierend auf dem Prompt-Inhalt
+        # Simulierte Antworten basierend auf dem Prompt-Inhalt
         if "Transaction" in prompt:
             return """
             ```python
@@ -123,7 +123,7 @@ class DummyRAGService:
                     logger.info(f"ChunkManager initialisiert mit Chunk-Größe {chunk_size}")
                 
                 def split_into_chunks(self, transactions: List[Transaction]) -> List[List[Transaction]]:
-                    ***REMOVED*** Teilt eine Liste von Transaktionen in Chunks auf.
+                    # Teilt eine Liste von Transaktionen in Chunks auf.
                     chunks = [transactions[i:i + self.chunk_size] for i in range(0, len(transactions), self.chunk_size)]
                     logger.info(f"{len(transactions)} Transaktionen in {len(chunks)} Chunks aufgeteilt")
                     return chunks
@@ -132,28 +132,28 @@ class DummyRAGService:
                                          chunks: List[List[Transaction]], 
                                          processor_func: Callable[[List[Transaction]], Awaitable[Dict[str, Any]]],
                                          save_point_interval: int = 1) -> List[Dict[str, Any]]:
-                    ***REMOVED*** Verarbeitet Chunks von Transaktionen mit Savepoints.
+                    # Verarbeitet Chunks von Transaktionen mit Savepoints.
                     results = []
                     savepoint_counter = 0
                     
                     for i, chunk in enumerate(chunks):
                         try:
-                            ***REMOVED*** Savepoint erstellen, falls erforderlich
+                            # Savepoint erstellen, falls erforderlich
                             if savepoint_counter == 0:
                                 logger.info(f"Savepoint erstellt vor Chunk {i+1}/{len(chunks)}")
-                                ***REMOVED*** Hier würde in der realen Implementierung ein Savepoint erstellt werden
+                                # Hier würde in der realen Implementierung ein Savepoint erstellt werden
                             
-                            ***REMOVED*** Chunk verarbeiten
+                            # Chunk verarbeiten
                             logger.info(f"Verarbeite Chunk {i+1}/{len(chunks)} mit {len(chunk)} Transaktionen")
                             chunk_result = await processor_func(chunk)
                             results.append(chunk_result)
                             
-                            ***REMOVED*** Savepoint-Zähler aktualisieren
+                            # Savepoint-Zähler aktualisieren
                             savepoint_counter = (savepoint_counter + 1) % save_point_interval
                             
                         except Exception as e:
                             logger.error(f"Fehler bei der Verarbeitung von Chunk {i+1}: {str(e)}")
-                            ***REMOVED*** Hier würde in der realen Implementierung ein Rollback zum letzten Savepoint erfolgen
+                            # Hier würde in der realen Implementierung ein Rollback zum letzten Savepoint erfolgen
                             raise
                     
                     return results
@@ -181,7 +181,7 @@ class DummyRAGService:
                     logger.info(f"AsyncAuditLogger initialisiert mit max_queue_size={max_queue_size}, batch_size={batch_size}")
                 
                 async def start(self) -> None:
-                    ***REMOVED*** Startet den asynchronen Logger.
+                    # Startet den asynchronen Logger.
                     if self.running:
                         logger.warning("AsyncAuditLogger läuft bereits")
                         return
@@ -191,7 +191,7 @@ class DummyRAGService:
                     logger.info("AsyncAuditLogger gestartet")
                 
                 async def stop(self) -> None:
-                    ***REMOVED*** Stoppt den asynchronen Logger.
+                    # Stoppt den asynchronen Logger.
                     if not self.running:
                         logger.warning("AsyncAuditLogger läuft nicht")
                         return
@@ -202,7 +202,7 @@ class DummyRAGService:
                     logger.info("AsyncAuditLogger gestoppt")
                 
                 async def log(self, transaction: Transaction, action: str, details: Optional[Dict[str, Any]] = None) -> None:
-                    ***REMOVED*** Protokolliert eine Transaktion.
+                    # Protokolliert eine Transaktion.
                     log_entry = {
                         "timestamp": datetime.now(),
                         "transaction_id": transaction.id,
@@ -218,47 +218,47 @@ class DummyRAGService:
                         logger.error("Audit-Log-Queue ist voll, Eintrag wird verworfen")
                 
                 async def _worker(self) -> None:
-                    ***REMOVED*** Worker-Funktion für die asynchrone Verarbeitung der Log-Einträge.
+                    # Worker-Funktion für die asynchrone Verarbeitung der Log-Einträge.
                     batch = []
                     
                     while self.running or not self.queue.empty():
                         try:
-                            ***REMOVED*** Warte auf einen Log-Eintrag mit Timeout
+                            # Warte auf einen Log-Eintrag mit Timeout
                             try:
                                 log_entry = await asyncio.wait_for(self.queue.get(), timeout=1.0)
                                 batch.append(log_entry)
                                 self.queue.task_done()
                             except asyncio.TimeoutError:
-                                ***REMOVED*** Timeout, aber möglicherweise noch Einträge im Batch
+                                # Timeout, aber möglicherweise noch Einträge im Batch
                                 pass
                             
-                            ***REMOVED*** Batch verarbeiten, wenn voll oder wenn nicht mehr laufend und keine weiteren Einträge
+                            # Batch verarbeiten, wenn voll oder wenn nicht mehr laufend und keine weiteren Einträge
                             if len(batch) >= self.batch_size or (not self.running and batch and self.queue.empty()):
                                 await self._process_batch(batch)
                                 batch = []
                                 
                         except Exception as e:
                             logger.error(f"Fehler im Audit-Log-Worker: {str(e)}")
-                            ***REMOVED*** Batch trotz Fehler verarbeiten
+                            # Batch trotz Fehler verarbeiten
                             if batch:
                                 await self._process_batch(batch)
                                 batch = []
                 
                 async def _process_batch(self, batch: List[Dict[str, Any]]) -> None:
-                    ***REMOVED*** Verarbeitet einen Batch von Log-Einträgen.
+                    # Verarbeitet einen Batch von Log-Einträgen.
                     if not batch:
                         return
                     
                     try:
-                        ***REMOVED*** Hier würden die Log-Einträge in der realen Implementierung in eine Datenbank geschrieben
-                        ***REMOVED*** Für diese Demo werden sie einfach im Speicher gehalten
+                        # Hier würden die Log-Einträge in der realen Implementierung in eine Datenbank geschrieben
+                        # Für diese Demo werden sie einfach im Speicher gehalten
                         self.logs.extend(batch)
                         logger.info(f"Batch mit {len(batch)} Log-Einträgen verarbeitet")
                     except Exception as e:
                         logger.error(f"Fehler bei der Verarbeitung des Log-Batches: {str(e)}")
                 
                 async def get_logs(self) -> List[Dict[str, Any]]:
-                    ***REMOVED*** Gibt alle protokollierten Einträge zurück.
+                    # Gibt alle protokollierten Einträge zurück.
                     return self.logs
             ```
             """
@@ -268,20 +268,20 @@ class DummyRAGService:
 async def run_create_demo():
     """Führt die Demo für den CREATE-Modus aus."""
     try:
-        ***REMOVED*** MongoDB-Verbindung initialisieren
+        # MongoDB-Verbindung initialisieren
         mongodb_uri = "mongodb://localhost:27017/"
         db_name = "valeo_neuroerp"
         
         mongodb = APMMongoDBConnector(mongodb_uri, db_name)
         await mongodb.connect()
         
-        ***REMOVED*** Projekt-ID generieren
+        # Projekt-ID generieren
         project_id = ObjectId()
         
-        ***REMOVED*** APM-Workflow initialisieren
+        # APM-Workflow initialisieren
         workflow = APMWorkflow(mongodb, str(project_id))
         
-        ***REMOVED*** RAG-Service setzen
+        # RAG-Service setzen
         rag_service = DummyRAGService()
         workflow.set_rag_service(rag_service)
         
@@ -291,7 +291,7 @@ async def run_create_demo():
         print("Diese Demo zeigt die Generierung von Code-Artefakten basierend auf dem Lösungsdesign.")
         print("="*80)
         
-        ***REMOVED*** PLAN-Ergebnis simulieren
+        # PLAN-Ergebnis simulieren
         plan_result_id = ObjectId()
         plan_result = {
             "_id": plan_result_id,
@@ -360,7 +360,7 @@ async def run_create_demo():
             "status": "completed"
         }
         
-        ***REMOVED*** PLAN-Ergebnis in der Datenbank speichern
+        # PLAN-Ergebnis in der Datenbank speichern
         await mongodb.insert_one("plan_results", plan_result)
         
         print(f"\nPLAN-Ergebnis simuliert mit ID: {plan_result_id}")
@@ -368,12 +368,12 @@ async def run_create_demo():
         print(f"Lösungsdesign: {plan_result['solution_design']['overview']}")
         print(f"Anzahl der Aufgaben: {len(plan_result['tasks'])}")
         
-        ***REMOVED*** CREATE-Mode ausführen
+        # CREATE-Mode ausführen
         create_result = await workflow.run_create_mode(str(plan_result_id))
         
         print(f"\nCREATE-Mode abgeschlossen mit ID: {create_result.get('id')}")
         
-        ***REMOVED*** Code-Artefakte ausgeben
+        # Code-Artefakte ausgeben
         artifacts = create_result.get('artifacts', [])
         print(f"\nAnzahl der Code-Artefakte: {len(artifacts)}")
         
@@ -386,7 +386,7 @@ async def run_create_demo():
             code = artifact.get('content', '')
             print(code[:200] + "..." if len(code) > 200 else code)
         
-        ***REMOVED*** Verbindung schließen
+        # Verbindung schließen
         workflow.close()
         
         print("\n" + "="*80)
@@ -403,3 +403,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+

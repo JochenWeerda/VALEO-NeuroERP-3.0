@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  ***REMOVED*** PostgreSQL Database für Mayan
+  # PostgreSQL Database für Mayan
   postgres:
     image: postgres:15-alpine
     container_name: mayan-postgres
@@ -19,7 +19,7 @@ services:
     networks:
       - mayan-network
 
-  ***REMOVED*** Redis Cache für Mayan
+  # Redis Cache für Mayan
   redis:
     image: redis:7-alpine
     container_name: mayan-redis
@@ -32,7 +32,7 @@ services:
     networks:
       - mayan-network
 
-  ***REMOVED*** Mayan-DMS Hauptanwendung
+  # Mayan-DMS Hauptanwendung
   mayan:
     image: mayanedms/mayanedms:latest
     container_name: mayan-edms
@@ -67,7 +67,7 @@ services:
       - mayan-network
     restart: unless-stopped
 
-  ***REMOVED*** Mayan Celery Worker (für OCR, Background-Tasks)
+  # Mayan Celery Worker (für OCR, Background-Tasks)
   mayan-worker:
     image: mayanedms/mayanedms:latest
     container_name: mayan-worker
@@ -103,4 +103,5 @@ volumes:
   postgres_data:
   media_data:
   settings_data:
+
 

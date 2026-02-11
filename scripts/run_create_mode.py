@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Führt den CREATE-Modus autonom aus und erstellt Ergebnisse für den IMPLEMENTATION-Modus.
 """
@@ -9,14 +9,14 @@ import asyncio
 import logging
 from datetime import datetime
 
-***REMOVED*** Pfad zum Projekt-Root hinzufügen
+# Pfad zum Projekt-Root hinzufügen
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 from backend.apm_framework.apm_workflow import APMWorkflow, APMMode
 from backend.apm_framework.rag_service import RAGService
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -33,10 +33,10 @@ async def check_rag_service(mongodb, project_id):
         bool: True, wenn der RAG-Service läuft, False sonst
     """
     try:
-        ***REMOVED*** RAG-Service initialisieren
+        # RAG-Service initialisieren
         rag_service = RAGService(mongodb, project_id)
         
-        ***REMOVED*** Testabfrage durchführen
+        # Testabfrage durchführen
         result = await rag_service.rag_query("Test RAG-Service")
         
         if result and "response" in result:
@@ -55,7 +55,7 @@ async def run_create_mode():
     Führt den CREATE-Modus autonom aus.
     """
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         mongodb_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
         mongodb_db = os.getenv("MONGODB_DB", "valeo_neuroerp")
         
@@ -63,10 +63,10 @@ async def run_create_mode():
         mongodb = APMMongoDBConnector(mongodb_uri, mongodb_db)
         await mongodb.connect()
         
-        ***REMOVED*** Projekt-ID festlegen
+        # Projekt-ID festlegen
         project_id = os.getenv("PROJECT_ID", "valeo_neuroerp_project")
         
-        ***REMOVED*** RAG-Service überprüfen
+        # RAG-Service überprüfen
         logger.info("Überprüfe RAG-Service...")
         rag_service_running = await check_rag_service(mongodb, project_id)
         
@@ -76,25 +76,25 @@ async def run_create_mode():
             print("Der CREATE-Modus benötigt den RAG-Service für die Codegenerierung und Testfallerstellung.")
             print("Führen Sie 'python -m backend.apm_framework.rag_service_server' aus, um den RAG-Service zu starten.\n")
             
-            ***REMOVED*** Frage, ob fortgefahren werden soll
+            # Frage, ob fortgefahren werden soll
             response = input("Möchten Sie trotzdem fortfahren? (j/n): ")
             if response.lower() != "j":
                 logger.info("Abbruch durch Benutzer")
                 print("\nAusführung des CREATE-Modus abgebrochen.")
                 return
         
-        ***REMOVED*** APM-Workflow initialisieren
+        # APM-Workflow initialisieren
         workflow = APMWorkflow(mongodb, project_id)
         
-        ***REMOVED*** RAG-Service initialisieren und setzen
+        # RAG-Service initialisieren und setzen
         rag_service = RAGService(mongodb, project_id)
         workflow.set_rag_service(rag_service)
         
-        ***REMOVED*** Aktuellen Modus abrufen
+        # Aktuellen Modus abrufen
         current_mode = await workflow.get_current_mode()
         logger.info(f"Aktueller Modus: {current_mode.value if current_mode else 'Nicht gesetzt'}")
         
-        ***REMOVED*** Zu CREATE-Modus wechseln, falls noch nicht aktiv
+        # Zu CREATE-Modus wechseln, falls noch nicht aktiv
         if current_mode != APMMode.CREATE:
             success = await workflow.switch_mode(APMMode.CREATE)
             if success:
@@ -104,7 +104,7 @@ async def run_create_mode():
                 print("\nFehler: CREATE-Modus konnte nicht aktiviert werden.")
                 return
         
-        ***REMOVED*** Neuesten Projektplan mit Lösungsdesign-ID abrufen
+        # Neuesten Projektplan mit Lösungsdesign-ID abrufen
         project_plans = await mongodb.find_many("project_plans", 
                                               {"project_id": project_id, "solution_design_id": {"$ne": None}}, 
                                               sort_field="updated_at", sort_order=-1, limit=1)
@@ -119,7 +119,7 @@ async def run_create_mode():
             print(f"Führe CREATE-Modus mit PLAN-ID {plan_id} aus...")
             print("=" * 80 + "\n")
             
-            ***REMOVED*** CREATE-Modus ausführen
+            # CREATE-Modus ausführen
             try:
                 start_time = datetime.now()
                 result = await workflow.create_mode.run(plan_id)
@@ -129,7 +129,7 @@ async def run_create_mode():
                 result_id = result.get("id")
                 logger.info(f"CREATE-Modus erfolgreich ausgeführt. Ergebnis-ID: {result_id}")
                 
-                ***REMOVED*** Aktuelle Modus-Informationen in memory-bank/current_mode.txt speichern
+                # Aktuelle Modus-Informationen in memory-bank/current_mode.txt speichern
                 mode_info = f"""CREATE-Modus ausgeführt am {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 Projekt-ID: {project_id}
 PLAN-Ergebnis-ID: {plan_id}
@@ -149,10 +149,10 @@ Der CREATE-Modus hat folgende Artefakte erstellt:
                 
                 logger.info("Modus-Informationen in memory-bank/current_mode.txt gespeichert")
                 
-                ***REMOVED*** Handover-Dokument erstellen
-                handover_info = f"""***REMOVED*** CREATE-Modus Handover
+                # Handover-Dokument erstellen
+                handover_info = f"""# CREATE-Modus Handover
 
-***REMOVED******REMOVED*** Aktueller Status
+## Aktueller Status
 - **Modus**: CREATE
 - **Projekt-ID**: {project_id}
 - **PLAN-Ergebnis-ID**: {plan_id}
@@ -160,7 +160,7 @@ Der CREATE-Modus hat folgende Artefakte erstellt:
 - **Datum**: {datetime.now().strftime('%Y-%m-%d')}
 - **Ausführungsdauer**: {duration:.2f} Sekunden
 
-***REMOVED******REMOVED*** Erstellte Artefakte
+## Erstellte Artefakte
 1. **Code-Artefakte**: {len(result.get("code_artifacts", []))} erstellt
    - Sprachen: {", ".join(set([artifact.get("language", "Unbekannt") for artifact in result.get("code_artifacts", [])]))}
    - Typen: {", ".join(set([artifact.get("type", "Unbekannt") for artifact in result.get("code_artifacts", [])]))}
@@ -174,20 +174,20 @@ Der CREATE-Modus hat folgende Artefakte erstellt:
 4. **Testfälle**: {len(result.get("test_cases", []))} erstellt
    - Typen: {", ".join(set([test.get("type", "Unbekannt") for test in result.get("test_cases", [])]))}
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 1. **Zum IMPLEMENTATION-Modus wechseln**: Mit dem Befehl `python scripts/activate_implementation_mode.py` zum IMPLEMENTATION-Modus wechseln.
 2. **Code-Artefakte implementieren**: Die generierten Code-Artefakte in das Projekt integrieren.
 3. **Ressourcen bereitstellen**: Die identifizierten Ressourcen für die Implementierung bereitstellen.
 4. **Tests ausführen**: Die generierten Testfälle ausführen und die Qualität sicherstellen.
 
-***REMOVED******REMOVED*** Technische Details
+## Technische Details
 - Die Ergebnisse des CREATE-Modus sind in der MongoDB in der Collection `create_results` gespeichert.
 - Die generierten Code-Artefakte sind in der Collection `code_artifacts` gespeichert.
 - Die generierten Ressourcenanforderungen sind in der Collection `resource_requirements` gespeichert.
 - Die angewendeten Entwurfsmuster sind in der Collection `design_patterns` gespeichert.
 - Die generierten Testfälle sind in der Collection `test_cases` gespeichert.
 
-***REMOVED******REMOVED*** Hinweise
+## Hinweise
 - Der CREATE-Modus hat erfolgreich alle Artefakte für den IMPLEMENTATION-Modus erstellt.
 - Die generierten Code-Artefakte sollten überprüft und bei Bedarf angepasst werden.
 - Der RAG-Service sollte weiterhin laufen, um den IMPLEMENTATION-Modus zu unterstützen.
@@ -227,11 +227,11 @@ Der CREATE-Modus hat folgende Artefakte erstellt:
         print(f"\nFehler: {str(e)}")
     
     finally:
-        ***REMOVED*** MongoDB-Verbindung trennen
+        # MongoDB-Verbindung trennen
         if 'mongodb' in locals():
             await mongodb.disconnect()
 
 
 if __name__ == "__main__":
-    ***REMOVED*** Asynchrone Funktion ausführen
+    # Asynchrone Funktion ausführen
     asyncio.run(run_create_mode()) 

@@ -2,12 +2,12 @@ from pymongo import MongoClient
 import datetime
 
 def store_structure():
-    ***REMOVED*** MongoDB Verbindung
+    # MongoDB Verbindung
     client = MongoClient('mongodb://localhost:27017/')
     db = client['valeo_neurodb']
     collection = db['system_structure']
     
-    ***REMOVED*** Struktur-Dokument
+    # Struktur-Dokument
     structure = {
         "version": "1.04",
         "timestamp": datetime.datetime.now(),
@@ -123,7 +123,7 @@ def store_structure():
         }
     }
     
-    ***REMOVED*** Speichern in MongoDB
+    # Speichern in MongoDB
     collection.insert_one(structure)
     
     print("Struktur erfolgreich in MongoDB gespeichert")

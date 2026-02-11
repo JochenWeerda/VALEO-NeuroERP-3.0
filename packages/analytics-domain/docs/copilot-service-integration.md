@@ -1,10 +1,10 @@
-***REMOVED*** Analytics Copilot Service - Integration Guide
+# Analytics Copilot Service - Integration Guide
 
-***REMOVED******REMOVED*** Phase F - Backend MCP-Copilot-Service
+## Phase F - Backend MCP-Copilot-Service
 
 Dieser Guide beschreibt die Integration des Analytics Copilot Service in das VALEO NeuroERP Backend.
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Der Analytics Copilot Service ist ein LLM-agnostischer Backend-Service, der:
 - KPIs und Trends analysiert
@@ -13,7 +13,7 @@ Der Analytics Copilot Service ist ein LLM-agnostischer Backend-Service, der:
 - Vollständig typisiert ist (TypeScript + Zod)
 - Production-ready mit Error-Handling
 
-***REMOVED******REMOVED*** Architektur
+## Architektur
 
 ```
 ┌──────────────────────────────┐
@@ -31,9 +31,9 @@ Der Analytics Copilot Service ist ein LLM-agnostischer Backend-Service, der:
 └──────────────────────────────┘
 ```
 
-***REMOVED******REMOVED*** Installation
+## Installation
 
-***REMOVED******REMOVED******REMOVED*** 1. Dependencies prüfen
+### 1. Dependencies prüfen
 
 Der Service benötigt folgende Dependencies (sollten bereits installiert sein):
 
@@ -46,47 +46,47 @@ Der Service benötigt folgende Dependencies (sollten bereits installiert sein):
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Umgebungsvariablen konfigurieren
+### 2. Umgebungsvariablen konfigurieren
 
 Erstelle eine `.env` Datei im `analytics-domain` Package:
 
 ```bash
-***REMOVED*** LLM API Configuration
+# LLM API Configuration
 LLM_API_URL=https://api.openai.com/v1/chat/completions
 LLM_API_KEY=your-api-key-here
 LLM_MODEL=gpt-4o-mini
 
-***REMOVED*** Server Configuration
+# Server Configuration
 PORT=7070
 NODE_ENV=development
 ```
 
-***REMOVED******REMOVED******REMOVED*** Alternative LLM-Provider
+### Alternative LLM-Provider
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** OpenRouter
+#### OpenRouter
 ```bash
 LLM_API_URL=https://openrouter.ai/api/v1/chat/completions
 LLM_API_KEY=your-openrouter-key
 LLM_MODEL=anthropic/claude-3-sonnet
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Ollama (Local)
+#### Ollama (Local)
 ```bash
 LLM_API_URL=http://localhost:11434/v1/chat/completions
 LLM_API_KEY=ollama
 LLM_MODEL=llama2
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Azure OpenAI
+#### Azure OpenAI
 ```bash
 LLM_API_URL=https://your-resource.openai.azure.com/openai/deployments/your-deployment/chat/completions?api-version=2023-05-15
 LLM_API_KEY=your-azure-key
 LLM_MODEL=gpt-4
 ```
 
-***REMOVED******REMOVED*** Integration
+## Integration
 
-***REMOVED******REMOVED******REMOVED*** Option 1: In bestehenden MCP-Server integrieren
+### Option 1: In bestehenden MCP-Server integrieren
 
 ```typescript
 // src/index.ts oder src/server.ts
@@ -120,7 +120,7 @@ server.listen(port, () => {
 })
 ```
 
-***REMOVED******REMOVED******REMOVED*** Option 2: Standalone-Service
+### Option 2: Standalone-Service
 
 ```typescript
 // src/services/copilot-standalone.ts
@@ -135,9 +135,9 @@ cd packages/analytics-domain
 node dist/services/copilot-standalone.js
 ```
 
-***REMOVED******REMOVED*** API Endpoints
+## API Endpoints
 
-***REMOVED******REMOVED******REMOVED*** POST /mcp/copilot/analyze
+### POST /mcp/copilot/analyze
 
 Analysiert KPIs und Trends und generiert Insights.
 
@@ -195,7 +195,7 @@ Analysiert KPIs und Trends und generiert Insights.
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** GET /mcp/copilot/health
+### GET /mcp/copilot/health
 
 Health-Check Endpoint.
 
@@ -208,7 +208,7 @@ Health-Check Endpoint.
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** WebSocket: ws://localhost:7070/mcp/copilot/ws
+### WebSocket: ws://localhost:7070/mcp/copilot/ws
 
 Empfängt Realtime-Updates wenn neue Insights generiert werden.
 
@@ -226,9 +226,9 @@ Empfängt Realtime-Updates wenn neue Insights generiert werden.
 }
 ```
 
-***REMOVED******REMOVED*** Frontend-Integration
+## Frontend-Integration
 
-***REMOVED******REMOVED******REMOVED*** 1. Hook aktualisieren (`useCopilotInsight.ts`)
+### 1. Hook aktualisieren (`useCopilotInsight.ts`)
 
 ```typescript
 import { useEffect, useState } from "react"
@@ -270,7 +270,7 @@ export function useCopilotInsight() {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. WebSocket-Integration
+### 2. WebSocket-Integration
 
 ```typescript
 // In useMcpRealtime.ts oder separater Hook
@@ -289,9 +289,9 @@ useEffect(() => {
 }, [])
 ```
 
-***REMOVED******REMOVED*** TypeScript Types
+## TypeScript Types
 
-***REMOVED******REMOVED******REMOVED*** Service Types
+### Service Types
 
 ```typescript
 import type { Insight } from "./analytics-copilot-service"
@@ -320,9 +320,9 @@ type Insight = {
 }
 ```
 
-***REMOVED******REMOVED*** Testing
+## Testing
 
-***REMOVED******REMOVED******REMOVED*** Unit Tests
+### Unit Tests
 
 ```typescript
 import { describe, it, expect, vi } from "vitest"
@@ -347,14 +347,14 @@ describe("Analytics Copilot Service", () => {
 })
 ```
 
-***REMOVED******REMOVED******REMOVED*** Integration Tests
+### Integration Tests
 
 ```bash
-***REMOVED*** Terminal 1: Start Service
+# Terminal 1: Start Service
 cd packages/analytics-domain
 npm run dev
 
-***REMOVED*** Terminal 2: Test Request
+# Terminal 2: Test Request
 curl -X POST http://localhost:7070/mcp/copilot/analyze \
   -H "Content-Type: application/json" \
   -d '{
@@ -363,9 +363,9 @@ curl -X POST http://localhost:7070/mcp/copilot/analyze \
   }'
 ```
 
-***REMOVED******REMOVED*** Monitoring & Logging
+## Monitoring & Logging
 
-***REMOVED******REMOVED******REMOVED*** Empfohlene Logging-Integration
+### Empfohlene Logging-Integration
 
 ```typescript
 import winston from "winston"
@@ -384,7 +384,7 @@ logger.info("LLM API call", { model: llmModel, promptLength: prompt.length })
 logger.error("LLM API error", { error: errorMessage })
 ```
 
-***REMOVED******REMOVED******REMOVED*** Metrics (Optional)
+### Metrics (Optional)
 
 ```typescript
 import { Counter, Histogram } from "prom-client"
@@ -400,15 +400,15 @@ const llmLatency = new Histogram({
 })
 ```
 
-***REMOVED******REMOVED*** Security
+## Security
 
-***REMOVED******REMOVED******REMOVED*** API-Key Sicherheit
+### API-Key Sicherheit
 
 - ✅ Niemals API-Keys in Code committen
 - ✅ Verwende `.env` Dateien (in `.gitignore`)
 - ✅ In Production: Verwende Secret-Management (AWS Secrets Manager, Azure Key Vault)
 
-***REMOVED******REMOVED******REMOVED*** Rate-Limiting (Empfohlen)
+### Rate-Limiting (Empfohlen)
 
 ```typescript
 import rateLimit from "express-rate-limit"
@@ -421,23 +421,23 @@ const limiter = rateLimit({
 app.use("/analyze", limiter)
 ```
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: "LLM API returned status 401"
+### Problem: "LLM API returned status 401"
 **Lösung:** API-Key prüfen in `.env`
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Cannot find module 'node-fetch'"
+### Problem: "Cannot find module 'node-fetch'"
 **Lösung:** `npm install node-fetch@3`
 
-***REMOVED******REMOVED******REMOVED*** Problem: WebSocket verbindet nicht
+### Problem: WebSocket verbindet nicht
 **Lösung:** Prüfe ob `server.on("upgrade")` korrekt konfiguriert ist
 
-***REMOVED******REMOVED******REMOVED*** Problem: JSON-Parsing schlägt fehl
+### Problem: JSON-Parsing schlägt fehl
 **Lösung:** LLM-Antwort prüfen, evtl. `response_format` anpassen
 
-***REMOVED******REMOVED*** Code-Qualität
+## Code-Qualität
 
-***REMOVED******REMOVED******REMOVED*** ✅ Memory-Bank Compliance
+### ✅ Memory-Bank Compliance
 
 - TypeScript Strict Mode
 - Explizite Return Types
@@ -447,7 +447,7 @@ app.use("/analyze", limiter)
 - Error-Handling mit try-catch
 - WebSocket-State-Checks
 
-***REMOVED******REMOVED******REMOVED*** ✅ Production-Ready Features
+### ✅ Production-Ready Features
 
 - Health-Check Endpoint
 - Error-Handler Middleware
@@ -456,9 +456,9 @@ app.use("/analyze", limiter)
 - WebSocket Broadcast
 - Environment-Variable Configuration
 
-***REMOVED******REMOVED*** Deployment
+## Deployment
 
-***REMOVED******REMOVED******REMOVED*** Docker
+### Docker
 
 ```dockerfile
 FROM node:18-alpine
@@ -471,7 +471,7 @@ EXPOSE 7070
 CMD ["node", "dist/services/copilot-standalone.js"]
 ```
 
-***REMOVED******REMOVED******REMOVED*** Environment Variables (Production)
+### Environment Variables (Production)
 
 ```bash
 LLM_API_URL=https://api.openai.com/v1/chat/completions
@@ -481,7 +481,7 @@ PORT=7070
 NODE_ENV=production
 ```
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 **Phase F - Backend MCP-Copilot-Service** stellt bereit:
 
@@ -495,3 +495,4 @@ NODE_ENV=production
 - ✅ Memory-Bank konform
 
 **Status:** Production Ready 🚀
+

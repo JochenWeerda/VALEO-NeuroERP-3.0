@@ -1,20 +1,20 @@
-***REMOVED*** Deployment-Skript für das APM Multi-Agenten-System
+# Deployment-Skript für das APM Multi-Agenten-System
 param(
     [string]$Namespace = "valeo-neuroerp",
     [string]$MongoDBUri,
     [switch]$SkipConfirmation
 )
 
-***REMOVED*** Funktion zum Überprüfen der Voraussetzungen
+# Funktion zum Überprüfen der Voraussetzungen
 function Test-Prerequisites {
     Write-Host "Überprüfe Voraussetzungen..." -ForegroundColor Yellow
     
-    ***REMOVED*** Kubectl überprüfen
+    # Kubectl überprüfen
     if (!(Get-Command kubectl -ErrorAction SilentlyContinue)) {
         throw "kubectl nicht gefunden. Bitte installieren Sie kubectl."
     }
     
-    ***REMOVED*** Kubernetes-Verbindung testen
+    # Kubernetes-Verbindung testen
     try {
         kubectl version --short
     } catch {
@@ -24,7 +24,7 @@ function Test-Prerequisites {
     Write-Host "✓ Voraussetzungen erfüllt" -ForegroundColor Green
 }
 
-***REMOVED*** Funktion zum Erstellen des Namespaces
+# Funktion zum Erstellen des Namespaces
 function New-Namespace {
     Write-Host "Erstelle Namespace $Namespace..." -ForegroundColor Yellow
     
@@ -33,7 +33,7 @@ function New-Namespace {
     Write-Host "✓ Namespace erstellt/aktualisiert" -ForegroundColor Green
 }
 
-***REMOVED*** Funktion zum Erstellen der MongoDB-Credentials
+# Funktion zum Erstellen der MongoDB-Credentials
 function New-MongoDBSecret {
     Write-Host "Erstelle MongoDB-Credentials..." -ForegroundColor Yellow
     
@@ -57,33 +57,33 @@ data:
     Write-Host "✓ MongoDB-Credentials erstellt" -ForegroundColor Green
 }
 
-***REMOVED*** Funktion zum Anwenden der Sicherheitskonfigurationen
+# Funktion zum Anwenden der Sicherheitskonfigurationen
 function Apply-SecurityConfigs {
     Write-Host "Wende Sicherheitskonfigurationen an..." -ForegroundColor Yellow
     
-    ***REMOVED*** RBAC
+    # RBAC
     kubectl apply -f kubernetes-manifests/apm-agents/rbac.yaml
     
-    ***REMOVED*** Network Policies
+    # Network Policies
     kubectl apply -f kubernetes-manifests/apm-agents/network-policy.yaml
     
-    ***REMOVED*** Pod Security Policy
+    # Pod Security Policy
     kubectl apply -f kubernetes-manifests/apm-agents/pod-security-policy.yaml
     
     Write-Host "✓ Sicherheitskonfigurationen angewendet" -ForegroundColor Green
 }
 
-***REMOVED*** Funktion zum Überprüfen der Sicherheitskonfigurationen
+# Funktion zum Überprüfen der Sicherheitskonfigurationen
 function Test-SecurityConfigs {
     Write-Host "Überprüfe Sicherheitskonfigurationen..." -ForegroundColor Yellow
     
-    ***REMOVED*** RBAC überprüfen
+    # RBAC überprüfen
     $serviceAccount = kubectl get serviceaccount apm-multi-agent -n $Namespace -o jsonpath='{.metadata.name}' 2>$null
     if ($serviceAccount -ne "apm-multi-agent") {
         throw "ServiceAccount nicht gefunden"
     }
     
-    ***REMOVED*** Network Policy überprüfen
+    # Network Policy überprüfen
     $networkPolicy = kubectl get networkpolicy apm-multi-agent-network-policy -n $Namespace -o jsonpath='{.metadata.name}' 2>$null
     if ($networkPolicy -ne "apm-multi-agent-network-policy") {
         throw "NetworkPolicy nicht gefunden"
@@ -92,23 +92,23 @@ function Test-SecurityConfigs {
     Write-Host "✓ Sicherheitskonfigurationen erfolgreich überprüft" -ForegroundColor Green
 }
 
-***REMOVED*** Funktion zum Anwenden der Kubernetes-Manifeste
+# Funktion zum Anwenden der Kubernetes-Manifeste
 function Apply-Manifests {
     Write-Host "Wende Kubernetes-Manifeste an..." -ForegroundColor Yellow
     
-    ***REMOVED*** Deployment und Service
+    # Deployment und Service
     kubectl apply -f kubernetes-manifests/apm-agents/deployment.yaml
     kubectl apply -f kubernetes-manifests/apm-agents/service.yaml
     kubectl apply -f kubernetes-manifests/apm-agents/pdb.yaml
     
-    ***REMOVED*** Monitoring
+    # Monitoring
     kubectl apply -f kubernetes-manifests/monitoring/servicemonitor.yaml
     kubectl apply -f kubernetes-manifests/monitoring/prometheus-rules.yaml
     
     Write-Host "✓ Kubernetes-Manifeste angewendet" -ForegroundColor Green
 }
 
-***REMOVED*** Funktion zum Überprüfen des Deployments
+# Funktion zum Überprüfen des Deployments
 function Test-Deployment {
     Write-Host "Überprüfe Deployment-Status..." -ForegroundColor Yellow
     
@@ -137,7 +137,7 @@ function Test-Deployment {
     }
 }
 
-***REMOVED*** Hauptausführung
+# Hauptausführung
 try {
     if (-not $SkipConfirmation) {
         $confirm = Read-Host "Möchten Sie das APM Multi-Agenten-System in Namespace '$Namespace' deployen? (j/n)"

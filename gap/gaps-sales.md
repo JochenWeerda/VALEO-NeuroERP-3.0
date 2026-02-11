@@ -1,4 +1,4 @@
-***REMOVED*** GAP-Liste Verkauf (Order-to-Cash) – Valero NeuroERP
+# GAP-Liste Verkauf (Order-to-Cash) – Valero NeuroERP
 
 Stand: 2025-11-24
 
@@ -20,9 +20,9 @@ Referenz:
 
 ---
 
-***REMOVED******REMOVED*** 1) Priorisierungslogik
+## 1) Priorisierungslogik
 
-***REMOVED******REMOVED******REMOVED*** 1.1 Bewertungsdimensionen (1–5)
+### 1.1 Bewertungsdimensionen (1–5)
 
 **A) Business Impact (BI)**  
 
@@ -56,7 +56,7 @@ KANN = 1
 
 5 = groß (Neues Modul / tiefe Logik / viele Abhängigkeiten)
 
-***REMOVED******REMOVED******REMOVED*** 1.2 Score-Formel
+### 1.2 Score-Formel
 
 **Prioritäts-Score (PS) = (BI × PF × RC) / IA**
 
@@ -68,9 +68,9 @@ KANN = 1
 
 ---
 
-***REMOVED******REMOVED*** 2) Zusammenfassung
+## 2) Zusammenfassung
 
-***REMOVED******REMOVED******REMOVED*** 2.1 TOP-Gaps nach Score
+### 2.1 TOP-Gaps nach Score
 
 | Rank | Capability_ID | Gap-Titel | Status | PS | Lösungstyp | Owner |
 |---|---|---|---|---:|---|---|
@@ -85,7 +85,7 @@ KANN = 1
 | 9 | SALES-BIL-01 | Rechnungsstellung | Partial | 10.0 | C | Frontend |
 | 10 | SALES-PAY-01 | Zahlungseingänge & Ausgleich | No | 10.0 | C |  |
 
-***REMOVED******REMOVED******REMOVED*** 2.2 Abdeckung (Snapshot)
+### 2.2 Abdeckung (Snapshot)
 
 - Yes: 0  
 
@@ -97,7 +97,7 @@ KANN = 1
 
 ---
 
-***REMOVED******REMOVED*** 3) GAP-Details (Solution-Cards)
+## 3) GAP-Details (Solution-Cards)
 
 > Jede Card ist ein umsetzbares Ticket-Paket.  
 
@@ -105,7 +105,7 @@ KANN = 1
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-002 — Kunden-/Kontaktstamm (Sales-Sicht)
+### CARD SALES-002 — Kunden-/Kontaktstamm (Sales-Sicht)
 
 **Capability_ID(s):** SALES-CRM-02  
 
@@ -175,7 +175,7 @@ KANN = 1
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-006 — Produktkatalog Verkauf
+### CARD SALES-006 — Produktkatalog Verkauf
 
 **Capability_ID(s):** SALES-PRD-01  
 
@@ -245,7 +245,7 @@ KANN = 1
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-007 — Preislisten & Preisfindung
+### CARD SALES-007 — Preislisten & Preisfindung
 
 **Capability_ID(s):** SALES-PRC-01  
 
@@ -315,7 +315,7 @@ KANN = 1
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-009 — Steuern im Verkauf
+### CARD SALES-009 — Steuern im Verkauf
 
 **Capability_ID(s):** SALES-PRC-03  
 
@@ -385,7 +385,7 @@ KANN = 1
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-010 — Angebotsmanagement
+### CARD SALES-010 — Angebotsmanagement
 
 **Capability_ID(s):** SALES-QTN-01  
 
@@ -455,7 +455,7 @@ Angebotsliste und Create-Formular vorhanden, aber vollständige Funktionalität 
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-013 — Auftragserfassung (Sales Order)
+### CARD SALES-013 — Auftragserfassung (Sales Order)
 
 **Capability_ID(s):** SALES-ORD-01  
 
@@ -525,7 +525,7 @@ Orders-Liste und Create-Formular vorhanden, aber vollständige Funktionalität (
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-014 — Auftragsänderung & Storno
+### CARD SALES-014 — Auftragsänderung & Storno
 
 **Capability_ID(s):** SALES-ORD-02  
 
@@ -595,7 +595,7 @@ Orders-Liste und Create-Formular vorhanden, aber vollständige Funktionalität (
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-015 — Lieferabwicklung
+### CARD SALES-015 — Lieferabwicklung
 
 **Capability_ID(s):** SALES-DLV-01  
 
@@ -665,7 +665,7 @@ Deliveries-Liste vorhanden, aber vollständige Funktionalität (Teil-/Restliefer
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-018 — Rechnungsstellung
+### CARD SALES-018 — Rechnungsstellung
 
 **Capability_ID(s):** SALES-BIL-01  
 
@@ -735,7 +735,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-021 — Zahlungseingänge & Ausgleich
+### CARD SALES-021 — Zahlungseingänge & Ausgleich
 
 **Capability_ID(s):** SALES-PAY-01  
 
@@ -805,7 +805,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-024 — Standard-Reports
+### CARD SALES-024 — Standard-Reports
 
 **Capability_ID(s):** SALES-REP-01  
 
@@ -875,7 +875,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-027 — Rollenmodell Sales
+### CARD SALES-027 — Rollenmodell Sales
 
 **Capability_ID(s):** SALES-AUTH-01  
 
@@ -945,7 +945,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-029 — API / Import / Export
+### CARD SALES-029 — API / Import / Export
 
 **Capability_ID(s):** SALES-INT-01  
 
@@ -1015,7 +1015,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-001 — Lead-Erfassung & Quellen
+### CARD SALES-001 — Lead-Erfassung & Quellen
 
 **Capability_ID(s):** SALES-CRM-01  
 
@@ -1085,7 +1085,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-003 — Opportunities / Pipeline
+### CARD SALES-003 — Opportunities / Pipeline
 
 **Capability_ID(s):** SALES-CRM-03  
 
@@ -1155,7 +1155,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-004 — Aktivitäten & Aufgaben
+### CARD SALES-004 — Aktivitäten & Aufgaben
 
 **Capability_ID(s):** SALES-CRM-04  
 
@@ -1225,7 +1225,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-008 — Rabatte/Gutschriften/Bonifikationen
+### CARD SALES-008 — Rabatte/Gutschriften/Bonifikationen
 
 **Capability_ID(s):** SALES-PRC-02  
 
@@ -1295,7 +1295,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-011 — Angebotsdokumente
+### CARD SALES-011 — Angebotsdokumente
 
 **Capability_ID(s):** SALES-QTN-02  
 
@@ -1365,7 +1365,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-016 — Versandarten & Tracking
+### CARD SALES-016 — Versandarten & Tracking
 
 **Capability_ID(s):** SALES-DLV-02  
 
@@ -1435,7 +1435,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-019 — E-Rechnung & Formate
+### CARD SALES-019 — E-Rechnung & Formate
 
 **Capability_ID(s):** SALES-BIL-02  
 
@@ -1505,7 +1505,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-020 — Forderungsmanagement / Mahnung
+### CARD SALES-020 — Forderungsmanagement / Mahnung
 
 **Capability_ID(s):** SALES-COL-01  
 
@@ -1575,7 +1575,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-022 — Retourenprozess (RMA)
+### CARD SALES-022 — Retourenprozess (RMA)
 
 **Capability_ID(s):** SALES-RMA-01  
 
@@ -1645,7 +1645,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-023 — Reklamation & Ersatz
+### CARD SALES-023 — Reklamation & Ersatz
 
 **Capability_ID(s):** SALES-RMA-02  
 
@@ -1715,7 +1715,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-025 — Drilldown & Belegkette
+### CARD SALES-025 — Drilldown & Belegkette
 
 **Capability_ID(s):** SALES-REP-02  
 
@@ -1785,7 +1785,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-028 — Freigabeworkflows
+### CARD SALES-028 — Freigabeworkflows
 
 **Capability_ID(s):** SALES-AUTH-02  
 
@@ -1855,7 +1855,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-005 — Forecasting & Ziele
+### CARD SALES-005 — Forecasting & Ziele
 
 **Capability_ID(s):** SALES-CRM-05  
 
@@ -1925,7 +1925,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-012 — Angebotsvergleich & Verhandlungsstatus
+### CARD SALES-012 — Angebotsvergleich & Verhandlungsstatus
 
 **Capability_ID(s):** SALES-QTN-03  
 
@@ -1995,7 +1995,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-017 — Dropship / Direktversand
+### CARD SALES-017 — Dropship / Direktversand
 
 **Capability_ID(s):** SALES-DLV-03  
 
@@ -2065,7 +2065,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-026 — Sales Analytics / KPI
+### CARD SALES-026 — Sales Analytics / KPI
 
 **Capability_ID(s):** SALES-REP-03  
 
@@ -2135,7 +2135,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-030 — EDI / B2B Integration
+### CARD SALES-030 — EDI / B2B Integration
 
 **Capability_ID(s):** SALES-INT-02  
 
@@ -2205,7 +2205,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD SALES-031 — Shop / POS / Marktplätze
+### CARD SALES-031 — Shop / POS / Marktplätze
 
 **Capability_ID(s):** SALES-INT-03  
 
@@ -2275,7 +2275,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED*** 4) Nächste Schritte
+## 4) Nächste Schritte
 
 1. UI-Explorer durch Verkaufsmodule jagen (Lead → Quote → Order → Delivery → Invoice → Payment).  
 
@@ -2287,7 +2287,7 @@ Invoices-Liste vorhanden, aber vollständige Funktionalität (Rechnungserstellun
 
 ---
 
-***REMOVED******REMOVED*** 5) Agent-Loop Integration
+## 5) Agent-Loop Integration
 
 **ROLE: Feature-Engineer**
 
@@ -2322,4 +2322,5 @@ Output:
 - Update matrix-sales.csv (Status -> Yes)
 
 - Notiz /swarm/handoffs/feature-sales-top1.md
+
 

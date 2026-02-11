@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Zeigt die mit OpenAI erstellte Zusammenfassung des Handover-Dokuments an.
 """
@@ -10,22 +10,22 @@ from pathlib import Path
 from datetime import datetime
 from bson import ObjectId
 
-***REMOVED*** Pfad zum Projektverzeichnis hinzufügen
+# Pfad zum Projektverzeichnis hinzufügen
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def main():
     """Hauptfunktion zum Anzeigen der OpenAI-Zusammenfassung des Handover-Dokuments."""
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         mongodb_connector = APMMongoDBConnector("mongodb://localhost:27017/", "valeo_neuroerp")
         
-        ***REMOVED*** Neuestes Handover-Dokument abrufen
+        # Neuestes Handover-Dokument abrufen
         handovers = mongodb_connector.find_many("handovers", {}, sort=[("timestamp", -1)], limit=1)
         
         if not handovers:
@@ -34,7 +34,7 @@ def main():
         
         handover = handovers[0]
         
-        ***REMOVED*** Metadaten ausgeben
+        # Metadaten ausgeben
         print("\n" + "="*50)
         print(f"Handover-Dokument (ID: {handover['_id']})")
         print(f"Zeitstempel: {handover['timestamp']}")
@@ -43,14 +43,14 @@ def main():
         print(f"Projekt-ID: {handover.get('project_id', 'Nicht zugeordnet')}")
         print("="*50 + "\n")
         
-        ***REMOVED*** Zusammenfassung ausgeben
+        # Zusammenfassung ausgeben
         print("OPENAI-ZUSAMMENFASSUNG:")
         print("-"*50)
         summary = handover.get('summary', 'Keine Zusammenfassung verfügbar')
         print(summary)
         print("-"*50 + "\n")
         
-        ***REMOVED*** Verbindung schließen
+        # Verbindung schließen
         mongodb_connector.close()
         print("MongoDB-Verbindung geschlossen")
         

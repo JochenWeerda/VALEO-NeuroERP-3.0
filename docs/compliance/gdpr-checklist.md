@@ -1,4 +1,4 @@
-***REMOVED*** GDPR Compliance Checklist - VALEO NeuroERP 3.0
+# GDPR Compliance Checklist - VALEO NeuroERP 3.0
 
 **Status:** 🟡 In Progress  
 **Target:** ✅ Full GDPR Compliance  
@@ -6,9 +6,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **ARTIKEL 13-14: INFORMATIONSPFLICHTEN**
+## 📋 **ARTIKEL 13-14: INFORMATIONSPFLICHTEN**
 
-***REMOVED******REMOVED******REMOVED*** Transparenz & Information
+### Transparenz & Information
 
 - [x] **Privacy-Policy** dokumentiert
   - Datei: `docs/legal/privacy-policy.md`
@@ -24,9 +24,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **ARTIKEL 15: RECHT AUF AUSKUNFT**
+## 📋 **ARTIKEL 15: RECHT AUF AUSKUNFT**
 
-***REMOVED******REMOVED******REMOVED*** Right-to-Access
+### Right-to-Access
 
 - [ ] **API-Endpoint:** `/api/v1/gdpr/data-export/{user_id}`
   - Exportiert alle User-Daten als JSON/PDF
@@ -46,9 +46,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **ARTIKEL 17: RECHT AUF LÖSCHUNG**
+## 📋 **ARTIKEL 17: RECHT AUF LÖSCHUNG**
 
-***REMOVED******REMOVED******REMOVED*** Right-to-Delete
+### Right-to-Delete
 
 - [ ] **API-Endpoint:** `/api/v1/gdpr/delete-user/{user_id}`
   - Löscht alle persönlichen Daten
@@ -71,9 +71,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **ARTIKEL 20: RECHT AUF DATENÜBERTRAGBARKEIT**
+## 📋 **ARTIKEL 20: RECHT AUF DATENÜBERTRAGBARKEIT**
 
-***REMOVED******REMOVED******REMOVED*** Data-Portability
+### Data-Portability
 
 - [ ] **Export-Format:** JSON, CSV, XML
   - Strukturierte, maschinenlesbare Daten
@@ -91,9 +91,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **ARTIKEL 25: DATENSCHUTZ DURCH TECHNIKGESTALTUNG**
+## 📋 **ARTIKEL 25: DATENSCHUTZ DURCH TECHNIKGESTALTUNG**
 
-***REMOVED******REMOVED******REMOVED*** Privacy-by-Design
+### Privacy-by-Design
 
 - [x] **Encryption-in-Transit:** TLS 1.3
   - Alle API-Calls verschlüsselt
@@ -119,9 +119,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **ARTIKEL 30: VERZEICHNIS VON VERARBEITUNGSTÄTIGKEITEN**
+## 📋 **ARTIKEL 30: VERZEICHNIS VON VERARBEITUNGSTÄTIGKEITEN**
 
-***REMOVED******REMOVED******REMOVED*** Processing-Activities-Record
+### Processing-Activities-Record
 
 - [ ] **Datei:** `docs/compliance/processing-activities-record.md`
   - Welche Daten werden verarbeitet?
@@ -136,9 +136,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **ARTIKEL 32: SICHERHEIT DER VERARBEITUNG**
+## 📋 **ARTIKEL 32: SICHERHEIT DER VERARBEITUNG**
 
-***REMOVED******REMOVED******REMOVED*** Technical & Organizational Measures
+### Technical & Organizational Measures
 
 - [x] **Pseudonymisierung & Verschlüsselung**
   - TLS ✅, At-Rest ⏳
@@ -162,9 +162,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **ARTIKEL 33-34: MELDEPFLICHTEN**
+## 📋 **ARTIKEL 33-34: MELDEPFLICHTEN**
 
-***REMOVED******REMOVED******REMOVED*** Data-Breach-Notification
+### Data-Breach-Notification
 
 - [ ] **Incident-Response-Plan**
   - Datei: `SECURITY.md` erweitern
@@ -184,9 +184,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **ARTIKEL 35: DATENSCHUTZ-FOLGENABSCHÄTZUNG**
+## 📋 **ARTIKEL 35: DATENSCHUTZ-FOLGENABSCHÄTZUNG**
 
-***REMOVED******REMOVED******REMOVED*** Data-Protection-Impact-Assessment (DPIA)
+### Data-Protection-Impact-Assessment (DPIA)
 
 - [ ] **DPIA-Dokument** erstellen
   - Datei: `docs/compliance/dpia.md`
@@ -203,45 +203,45 @@
 
 ---
 
-***REMOVED******REMOVED*** ✅ **GDPR-UMSETZUNGS-ROADMAP**
+## ✅ **GDPR-UMSETZUNGS-ROADMAP**
 
-***REMOVED******REMOVED******REMOVED*** Phase 1 (Woche 1-2): Quick Wins
+### Phase 1 (Woche 1-2): Quick Wins
 - ✅ Right-to-Access API
 - ✅ Right-to-Delete API
 - ✅ Data-Portability-Export
 
-***REMOVED******REMOVED******REMOVED*** Phase 2 (Woche 3-4): Security
+### Phase 2 (Woche 3-4): Security
 - ✅ Encryption-at-Rest (PostgreSQL TDE)
 - ✅ Point-in-Time-Recovery
 - ✅ Penetration-Tests
 
-***REMOVED******REMOVED******REMOVED*** Phase 3 (Woche 5-6): Documentation
+### Phase 3 (Woche 5-6): Documentation
 - ✅ Processing-Activities-Record
 - ✅ DPIA-Dokument
 - ✅ Data-Breach-Notification-Workflow
 
 ---
 
-***REMOVED******REMOVED*** 🧪 **AUTOMATED TESTS**
+## 🧪 **AUTOMATED TESTS**
 
-***REMOVED******REMOVED******REMOVED*** Test-Suite: `tests/compliance/test_gdpr.py`
+### Test-Suite: `tests/compliance/test_gdpr.py`
 
 ```python
 def test_right_to_access():
-    ***REMOVED*** User kann eigene Daten exportieren
+    # User kann eigene Daten exportieren
     response = client.get(f"/api/v1/gdpr/data-export/{user_id}")
     assert response.status_code == 200
     assert "personal_data" in response.json()
 
 def test_right_to_delete():
-    ***REMOVED*** User kann gelöscht werden
+    # User kann gelöscht werden
     response = client.delete(f"/api/v1/gdpr/delete-user/{user_id}")
     assert response.status_code == 204
-    ***REMOVED*** Verify deletion
+    # Verify deletion
     assert db.query(User).filter(User.id == user_id).first() is None
 
 def test_data_portability():
-    ***REMOVED*** Export ist maschinenlesbar
+    # Export ist maschinenlesbar
     response = client.get(f"/api/v1/gdpr/export-portable/{user_id}")
     assert response.headers["Content-Type"] == "application/json"
     data = response.json()
@@ -251,7 +251,7 @@ def test_data_portability():
 
 ---
 
-***REMOVED******REMOVED*** 📊 **COMPLIANCE-SCORE**
+## 📊 **COMPLIANCE-SCORE**
 
 | Anforderung | Status | Score |
 |-------------|--------|-------|
@@ -270,7 +270,7 @@ def test_data_portability():
 
 ---
 
-***REMOVED******REMOVED*** 📞 **GDPR-CONTACT**
+## 📞 **GDPR-CONTACT**
 
 **Data-Protection-Officer:**
 - Name: [To be assigned]
@@ -279,4 +279,5 @@ def test_data_portability():
 
 **Supervisory-Authority:**
 - Landesbeauftragter für Datenschutz (je nach Bundesland)
+
 

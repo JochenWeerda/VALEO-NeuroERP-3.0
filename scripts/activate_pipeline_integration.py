@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Skript zur Aktivierung und Konfiguration der Pipeline-Integration für VALEO-NeuroERP.
 
@@ -13,7 +13,7 @@ import os
 import sys
 from typing import Dict, Any, List, Optional
 
-***REMOVED*** Füge das Hauptverzeichnis zum Pythonpfad hinzu
+# Füge das Hauptverzeichnis zum Pythonpfad hinzu
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', 'apm_pipeline_integration.json')
@@ -120,12 +120,12 @@ def main() -> None:
     
     subparsers = parser.add_subparsers(dest='command', help='Befehle')
     
-    ***REMOVED*** Aktivieren/Deaktivieren
+    # Aktivieren/Deaktivieren
     activate_parser = subparsers.add_parser('activate', help='Aktiviert oder deaktiviert die Pipeline-Integration')
     activate_parser.add_argument('--enable', action='store_true', help='Aktiviert die Pipeline-Integration')
     activate_parser.add_argument('--disable', action='store_true', help='Deaktiviert die Pipeline-Integration')
     
-    ***REMOVED*** Pipeline konfigurieren
+    # Pipeline konfigurieren
     configure_parser = subparsers.add_parser('configure', help='Konfiguriert eine Pipeline')
     configure_parser.add_argument('--pipeline', required=True, help='Die ID der Pipeline')
     configure_parser.add_argument('--enable', action='store_true', help='Aktiviert die Pipeline')
@@ -133,7 +133,7 @@ def main() -> None:
     configure_parser.add_argument('--integration-points', nargs='+', help='Die Integrationspunkte der Pipeline')
     configure_parser.add_argument('--priority', choices=['high', 'medium', 'low'], help='Die Priorität der Pipeline')
     
-    ***REMOVED*** Status anzeigen
+    # Status anzeigen
     status_parser = subparsers.add_parser('status', help='Zeigt den aktuellen Status der Pipeline-Integration an')
     
     args = parser.parse_args()
@@ -170,3 +170,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 🔍 VOLLSTÄNDIGE OSTFRIESLAND-SUCHE PLZ 26400-26999
 Findet ALLE potentiellen Leads im gewünschten Ostfriesland-Bereich
@@ -42,7 +42,7 @@ def find_ostfriesland_complete():
         with open(csv_path, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')
             
-            ***REMOVED*** Header validieren
+            # Header validieren
             headers = reader.fieldnames
             required_headers = ['PLZ', 'Name des Begünstigten/Rechtsträgers/Verdands', 'Gemeinde']
             
@@ -51,7 +51,7 @@ def find_ostfriesland_complete():
             missing_headers = [h for h in required_headers if h not in headers]
             if missing_headers:
                 print(f"⚠️ Fehlende Header: {missing_headers}")
-                ***REMOVED*** Versuche alternativen Header-Namen
+                # Versuche alternativen Header-Namen
                 alt_name_header = None
                 for header in headers:
                     if 'begünstigten' in header.lower() and 'rechtsträgers' in header.lower():
@@ -76,18 +76,18 @@ def find_ostfriesland_complete():
                 
                 plz = row.get('PLZ', '').strip()
                 
-                ***REMOVED*** Prüfe PLZ-Bereich 26400-26999
+                # Prüfe PLZ-Bereich 26400-26999
                 if plz and len(plz) >= 5:
                     try:
                         plz_num = int(plz)
                         if 26400 <= plz_num <= 26999:
                             results["statistics"]["leads_found"] += 1
                             
-                            ***REMOVED*** Extrahiere alle relevanten Daten
+                            # Extrahiere alle relevanten Daten
                             name = row.get(name_header, '').strip()
                             city = row.get('Gemeinde', '').strip()
                             
-                            ***REMOVED*** GAP-Betrag extrahieren
+                            # GAP-Betrag extrahieren
                             gap_amount = 0.0
                             amount_field = row.get('EU-Betrag (EGFL und ELER) und kofinanzierter Betrag insgesamt für diesen Begünstigten*', '').strip()
                             if amount_field:
@@ -97,7 +97,7 @@ def find_ostfriesland_complete():
                                 except:
                                     pass
                             
-                            ***REMOVED*** Lead-Objekt erstellen
+                            # Lead-Objekt erstellen
                             lead = {
                                 "row_number": row_num,
                                 "plz": plz,
@@ -108,7 +108,7 @@ def find_ostfriesland_complete():
                                 "year": row.get('Haushaltsjahr', '').strip()
                             }
                             
-                            ***REMOVED*** Nach PLZ gruppieren
+                            # Nach PLZ gruppieren
                             if plz not in results["leads_by_plz"]:
                                 results["leads_by_plz"][plz] = []
                                 results["statistics"]["unique_plz_found"] += 1
@@ -116,14 +116,14 @@ def find_ostfriesland_complete():
                             results["leads_by_plz"][plz].append(lead)
                             results["all_leads"].append(lead)
                             
-                            ***REMOVED*** Erste Treffer sofort ausgeben
+                            # Erste Treffer sofort ausgeben
                             if results["statistics"]["leads_found"] <= 10:
-                                print(f"🎯 LEAD ***REMOVED***{results['statistics']['leads_found']}: PLZ {plz} - {name[:40]}... | {city} | {gap_amount:,.2f} EUR")
+                                print(f"🎯 LEAD #{results['statistics']['leads_found']}: PLZ {plz} - {name[:40]}... | {city} | {gap_amount:,.2f} EUR")
                     
                     except ValueError:
-                        continue  ***REMOVED*** PLZ ist nicht numerisch
+                        continue  # PLZ ist nicht numerisch
                 
-                ***REMOVED*** Progress alle 200.000 Zeilen
+                # Progress alle 200.000 Zeilen
                 if row_num % 200000 == 0:
                     print(f"📊 Zeile {row_num:,}: {results['statistics']['leads_found']} Leads gefunden")
     
@@ -133,7 +133,7 @@ def find_ostfriesland_complete():
         traceback.print_exc()
         return
     
-    ***REMOVED*** PLZ-Zusammenfassung erstellen
+    # PLZ-Zusammenfassung erstellen
     for plz, leads in results["leads_by_plz"].items():
         total_amount = sum(lead["gap_amount_eur"] for lead in leads)
         unique_names = len(set(lead["name"] for lead in leads))
@@ -147,11 +147,11 @@ def find_ostfriesland_complete():
             "top_leads": sorted(leads, key=lambda x: x["gap_amount_eur"], reverse=True)[:3]
         }
     
-    ***REMOVED*** Ergebnisse in Datei speichern
+    # Ergebnisse in Datei speichern
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     
-    ***REMOVED*** Finale Ausgabe
+    # Finale Ausgabe
     print()
     print("📋 FINALE OSTFRIESLAND-ANALYSE")
     print("=" * 60)
@@ -166,7 +166,7 @@ def find_ostfriesland_complete():
         sorted_plz = sorted(results["plz_summary"].items(), 
                            key=lambda x: x[1]["lead_count"], reverse=True)
         
-        for plz, summary in sorted_plz[:10]:  ***REMOVED*** Top 10 PLZ
+        for plz, summary in sorted_plz[:10]:  # Top 10 PLZ
             cities_str = ", ".join(summary["cities"][:3])
             if len(summary["cities"]) > 3:
                 cities_str += f" (+{len(summary['cities'])-3} weitere)"
@@ -174,7 +174,7 @@ def find_ostfriesland_complete():
             print(f"📍 PLZ {plz}: {summary['lead_count']} Leads | {summary['total_gap_amount']:,.0f} EUR")
             print(f"   🏘️ Orte: {cities_str}")
             
-            ***REMOVED*** Top Lead pro PLZ zeigen
+            # Top Lead pro PLZ zeigen
             if summary["top_leads"]:
                 top_lead = summary["top_leads"][0]
                 print(f"   🌟 Top Lead: {top_lead['name'][:30]}... ({top_lead['gap_amount_eur']:,.0f} EUR)")
@@ -196,4 +196,5 @@ def find_ostfriesland_complete():
 
 if __name__ == "__main__":
     find_ostfriesland_complete()
+
 

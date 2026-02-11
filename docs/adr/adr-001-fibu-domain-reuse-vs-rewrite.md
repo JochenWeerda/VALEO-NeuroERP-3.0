@@ -1,15 +1,15 @@
-***REMOVED*** ADR-001: FiBu-Domain – Reuse vs. Rewrite
+# ADR-001: FiBu-Domain – Reuse vs. Rewrite
 
-***REMOVED******REMOVED*** Status
+## Status
 Accepted – 2025-11-14
 
-***REMOVED******REMOVED*** Kontext
+## Kontext
 - Die bestehende FiBu-Domain existiert fast ausschließlich als Node/TypeScript-Clean-Architecture (`packages/finance-domain` / `domains/finance`) mit umfangreichen Services (Ledger, AP/AR, Tax, AI, OCR).
 - Der Python-Microservice `services/finance` ist lediglich ein nicht lauffähiger Stub.
 - Zielbild laut `docs/specs/fibu_architektur_spezifikation.md`: GoBD-konforme Microservices (`fibu-core`, `fibu-master-data`, …) auf Basis FastAPI/SQLAlchemy/Event Sourcing.
 - GoBD-Tests & Compliance-Hooks sollen in der Python-Landschaft verankert werden (gemeinsame Auth, Monitoring, Deployment Pipelines).
 
-***REMOVED******REMOVED*** Entscheidung
+## Entscheidung
 1. **Business-Logik (Modelle, Regeln, Events) aus der TypeScript-Domain wird konzeptionell wiederverwendet**, jedoch nicht 1:1 betrieben. Stattdessen:
    - Portierung kritischer Domänen (Ledger, Journal, Accounting Periods, AP/AR) nach Python.
    - Use-Case- und Event-Definitionen dienen als Referenz für Tests und Middleware-Verträge.
@@ -19,7 +19,7 @@ Accepted – 2025-11-14
 3. **Neue produktive Services entstehen ausschließlich in Python** (FastAPI, SQLAlchemy, Celery/Scheduler), damit Logging, Auth, Observability und GoBD-Kontrollen homogen betrieben werden können.
 4. **Middleware/Anti-Corruption-Layer** nutzt `packages/shared/contracts/src/finance-schemas.ts` und neue Pydantic-Schemas als gemeinsame Wahrheit für Events.
 
-***REMOVED******REMOVED*** Konsequenzen
+## Konsequenzen
 - **Pro**:
   - Einheitlicher Technologie-Stack für Backend (Python) → einfachere GoBD-Prüfungen, einheitliche Pipelines.
   - Domänenwissen geht nicht verloren: vorhandene TypeScript-Tests/Modelle dienen als Blaupause für neue Implementierungen.
@@ -30,4 +30,5 @@ Accepted – 2025-11-14
 - **Folgen für spätere Phasen**:
   - Phase 2 (fibu-core) und Phase 4/6 (AR/AP/OP) verwenden die Portierungsstrategie als Leitplanke.
   - Middleware muss die neuen Event-Schemata publizieren, auch wenn alte Domains noch legacy Events senden.
+
 

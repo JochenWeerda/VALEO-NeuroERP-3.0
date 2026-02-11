@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginVertical: 16,
     borderWidth: 1,
-    borderColor: '***REMOVED***e0e0e0',
+    borderColor: '#e0e0e0',
     borderRadius: 8,
   },
   backButton: {

@@ -1,17 +1,17 @@
-***REMOVED*** L3-Masken Navigations-Koordinaten
+# L3-Masken Navigations-Koordinaten
 
 Dokumentation der Klick-Koordinaten für die automatische Screenshot-Erfassung der L3-Masken über Guacamole RDP.
 
-***REMOVED******REMOVED*** 🎯 Methodik
+## 🎯 Methodik
 
 Da RDP-Inhalte als `<canvas>` gerendert werden, müssen wir mit **Pixel-Koordinaten** arbeiten:
 - **Viewport:** 1920×1080 (Standard)
 - **Basis:** Top-Left Corner (0,0)
 - **Koordinaten:** Relativ zum Canvas
 
-***REMOVED******REMOVED*** 📍 Haupt-Menü Koordinaten
+## 📍 Haupt-Menü Koordinaten
 
-***REMOVED******REMOVED******REMOVED*** Top-Menü-Leiste (Y ≈ 60-90)
+### Top-Menü-Leiste (Y ≈ 60-90)
 
 | Menü | X-Position | Y-Position | Beschreibung |
 |------|-----------|-----------|--------------|
@@ -26,7 +26,7 @@ Da RDP-Inhalte als `<canvas>` gerendert werden, müssen wir mit **Pixel-Koordina
 | SCHNITTSTELLE | 880 | 75 | Import/Export |
 | FENSTER | 980 | 75 | Fenster-Verwaltung |
 
-***REMOVED******REMOVED******REMOVED*** Favoriten-Icons (Y ≈ 110-140)
+### Favoriten-Icons (Y ≈ 110-140)
 
 | Icon | X-Position | Y-Position | Beschreibung |
 |------|-----------|-----------|--------------|
@@ -37,97 +37,97 @@ Da RDP-Inhalte als `<canvas>` gerendert werden, müssen wir mit **Pixel-Koordina
 | CRM Dashboard | 680 | 125 | CRM-Übersicht |
 | Abfrage-Center | 800 | 125 | Suchfunktion |
 
-***REMOVED******REMOVED*** 📋 Masken-Inventar mit Navigation
+## 📋 Masken-Inventar mit Navigation
 
-***REMOVED******REMOVED******REMOVED*** 1. Artikel-Stamm
+### 1. Artikel-Stamm
 - **Navigation:** Favoriten-Icon (X:440, Y:125)
 - **Alternative:** ERFASSUNG → Artikel
 - **Wichtigkeit:** ⭐⭐⭐⭐⭐
 - **Felder:** Artikel-Nr, Bezeichnung, EAN, Preis, Kostenstelle, Lager, etc.
 
-***REMOVED******REMOVED******REMOVED*** 2. Kunden-Artikel
+### 2. Kunden-Artikel
 - **Navigation:** Favoriten-Icon (X:200, Y:125)
 - **Alternative:** ERFASSUNG → Kunden
 - **Wichtigkeit:** ⭐⭐⭐⭐⭐
 - **Felder:** Kunden-Nr, Name, Anschrift, Konditionen, etc.
 
-***REMOVED******REMOVED******REMOVED*** 3. Verkauf-Lieferschein
+### 3. Verkauf-Lieferschein
 - **Navigation:** Favoriten-Icon (X:320, Y:125)
 - **Alternative:** ERFASSUNG → Lieferschein
 - **Wichtigkeit:** ⭐⭐⭐⭐⭐
 - **Felder:** LS-Nr, Datum, Kunde, Positionen, Summe, etc.
 
-***REMOVED******REMOVED******REMOVED*** 4. Rechnung
+### 4. Rechnung
 - **Navigation:** ABRECHNUNG (X:480, Y:75) → Rechnung
 - **Wichtigkeit:** ⭐⭐⭐⭐⭐
 - **Felder:** RE-Nr, Datum, Kunde, Positionen, USt, Summe, etc.
 
-***REMOVED******REMOVED******REMOVED*** 5. Auftrag
+### 5. Auftrag
 - **Navigation:** ERFASSUNG (X:380, Y:75) → Auftrag
 - **Wichtigkeit:** ⭐⭐⭐⭐
 - **Felder:** Auftrags-Nr, Datum, Kunde, Positionen, Status, etc.
 
-***REMOVED******REMOVED******REMOVED*** 6. Bestellung
+### 6. Bestellung
 - **Navigation:** ERFASSUNG (X:380, Y:75) → Bestellung
 - **Wichtigkeit:** ⭐⭐⭐⭐
 - **Felder:** Best-Nr, Lieferant, Positionen, Liefertermin, etc.
 
-***REMOVED******REMOVED******REMOVED*** 7. Lager-Bestand
+### 7. Lager-Bestand
 - **Navigation:** LAGER (X:580, Y:75) → Bestand
 - **Wichtigkeit:** ⭐⭐⭐⭐
 - **Felder:** Artikel, Lager, Menge, Reserviert, Verfügbar, etc.
 
-***REMOVED******REMOVED******REMOVED*** 8. PSM-Abgabe (Pflanzenschutz)
+### 8. PSM-Abgabe (Pflanzenschutz)
 - **Navigation:** ERFASSUNG (X:380, Y:75) → PSM oder ALLGEMEIN → Agrar
 - **Wichtigkeit:** ⭐⭐⭐⭐⭐ (BRANCHENKRITISCH)
 - **Felder:** PSM-Nr, Kunde, Menge, Sachkunde-Nachweis, etc.
 
-***REMOVED******REMOVED******REMOVED*** 9. CRM-Dashboard
+### 9. CRM-Dashboard
 - **Navigation:** Favoriten-Icon (X:680, Y:125)
 - **Alternative:** ALLGEMEIN → CRM
 - **Wichtigkeit:** ⭐⭐⭐
 - **Felder:** Kontakte, Leads, Aktivitäten, etc.
 
-***REMOVED******REMOVED******REMOVED*** 10. Kunden-Kontoauszug
+### 10. Kunden-Kontoauszug
 - **Navigation:** AUSWERTUNGEN (X:780, Y:75) → Debitoren
 - **Wichtigkeit:** ⭐⭐⭐⭐
 - **Felder:** Offene Posten, Zahlungen, Mahnungen, etc.
 
-***REMOVED******REMOVED*** 🎬 Screenshot-Sequenz
+## 🎬 Screenshot-Sequenz
 
-***REMOVED******REMOVED******REMOVED*** Phase 1: Favoriten (Schnellzugriff)
+### Phase 1: Favoriten (Schnellzugriff)
 1. `00_l3-startseite.png` - Kalender (Startseite)
 2. `01_artikel-stamm.png` - Klick auf Artikel-Stamm Icon
 3. `02_kunden-artikel.png` - Klick auf Kunden-Artikel Icon
 4. `03_verkauf-lieferschein.png` - Klick auf Verkauf-Lieferschein Icon
 
-***REMOVED******REMOVED******REMOVED*** Phase 2: ERFASSUNG-Menü
+### Phase 2: ERFASSUNG-Menü
 5. `04_auftrag.png` - ERFASSUNG → Auftrag
 6. `05_bestellung.png` - ERFASSUNG → Bestellung
 7. `06_psm-abgabe.png` - ERFASSUNG → PSM (falls vorhanden)
 
-***REMOVED******REMOVED******REMOVED*** Phase 3: ABRECHNUNG-Menü
+### Phase 3: ABRECHNUNG-Menü
 8. `07_rechnung.png` - ABRECHNUNG → Rechnung
 9. `08_gutschrift.png` - ABRECHNUNG → Gutschrift (falls vorhanden)
 
-***REMOVED******REMOVED******REMOVED*** Phase 4: LAGER-Menü
+### Phase 4: LAGER-Menü
 10. `09_lager-bestand.png` - LAGER → Bestand
 11. `10_inventur.png` - LAGER → Inventur (falls vorhanden)
 
-***REMOVED******REMOVED******REMOVED*** Phase 5: AUSWERTUNGEN-Menü
+### Phase 5: AUSWERTUNGEN-Menü
 12. `11_kunden-kontoauszug.png` - AUSWERTUNGEN → Debitoren
 13. `12_umsatz-statistik.png` - AUSWERTUNGEN → Umsatz
 
-***REMOVED******REMOVED*** 📊 Koordinaten-Kalibrierung
+## 📊 Koordinaten-Kalibrierung
 
 **Wichtig:** Diese Koordinaten sind **Schätzwerte** basierend auf typischen UI-Layouts. 
 
-***REMOVED******REMOVED******REMOVED*** Kalibrierungs-Schritte:
+### Kalibrierungs-Schritte:
 1. **Manueller Test:** Erste Screenshots mit geschätzten Koordinaten
 2. **Anpassung:** Koordinaten basierend auf tatsächlicher Menü-Position korrigieren
 3. **Validierung:** Automatisches Skript mit finalen Koordinaten ausführen
 
-***REMOVED******REMOVED******REMOVED*** Tool zur Koordinaten-Ermittlung:
+### Tool zur Koordinaten-Ermittlung:
 ```javascript
 // In Browser-Console (bei laufender RDP-Session):
 document.querySelector('canvas').addEventListener('click', (e) => {
@@ -138,7 +138,7 @@ document.querySelector('canvas').addEventListener('click', (e) => {
 });
 ```
 
-***REMOVED******REMOVED*** 🔄 Nächste Schritte
+## 🔄 Nächste Schritte
 
 - [ ] Manuelle Koordinaten-Kalibrierung durchführen
 - [ ] Screenshots aller 12+ Hauptmasken erstellen
@@ -150,4 +150,5 @@ document.querySelector('canvas').addEventListener('click', (e) => {
 
 **Status:** 🟡 In Arbeit - Koordinaten werden während manueller Navigation ermittelt
 **Letzte Aktualisierung:** {{ TIMESTAMP }}
+
 

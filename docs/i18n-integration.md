@@ -1,14 +1,14 @@
-***REMOVED*** i18n-Integration Dokumentation
+# i18n-Integration Dokumentation
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Diese Dokumentation beschreibt die vollständige Integration von i18n (Internationalisierung) in das CRUD-Framework basierend auf Odoo 19.0 deutschen Übersetzungen. Alle CRUD-Komponenten und Frontend-Seiten wurden auf i18n umgestellt, um eine konsistente und wartbare Übersetzungsstruktur zu gewährleisten.
 
-***REMOVED******REMOVED*** Änderungsübersicht
+## Änderungsübersicht
 
-***REMOVED******REMOVED******REMOVED*** 1. Übersetzungsdateien
+### 1. Übersetzungsdateien
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** `packages/frontend-web/src/i18n/locales/de/translation.json`
+#### `packages/frontend-web/src/i18n/locales/de/translation.json`
 **Status:** Erweitert
 
 Vollständige deutsche Übersetzungen für alle CRUD-Operationen:
@@ -23,9 +23,9 @@ Vollständige deutsche Übersetzungen für alle CRUD-Operationen:
 - **`crud.list`** - Listen-Ansicht Texte
 - **`crud.detail`** - Detail-Ansicht Texte
 
-***REMOVED******REMOVED******REMOVED*** 2. CRUD-Komponenten (i18n-Integration)
+### 2. CRUD-Komponenten (i18n-Integration)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** `packages/frontend-web/src/features/crud/components/CrudDeleteDialog.tsx`
+#### `packages/frontend-web/src/features/crud/components/CrudDeleteDialog.tsx`
 **Status:** Umgestellt auf i18n
 
 **Änderungen:**
@@ -47,7 +47,7 @@ Vollständige deutsche Übersetzungen für alle CRUD-Operationen:
 - `crud.dialogs.delete.errorRequired`
 - `crud.dialogs.delete.errorMinLength`
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** `packages/frontend-web/src/features/crud/components/CrudCancelDialog.tsx`
+#### `packages/frontend-web/src/features/crud/components/CrudCancelDialog.tsx`
 **Status:** Umgestellt auf i18n
 
 **Änderungen:**
@@ -69,7 +69,7 @@ Vollständige deutsche Übersetzungen für alle CRUD-Operationen:
 - `crud.dialogs.cancel.errorRequired`
 - `crud.dialogs.cancel.errorMinLength`
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** `packages/frontend-web/src/features/crud/components/CrudAuditTrailPanel.tsx`
+#### `packages/frontend-web/src/features/crud/components/CrudAuditTrailPanel.tsx`
 **Status:** Umgestellt auf i18n
 
 **Änderungen:**
@@ -88,7 +88,7 @@ Vollständige deutsche Übersetzungen für alle CRUD-Operationen:
 - `crud.audit.reason`
 - `crud.audit.actions.*` (create, update, delete, cancel, amend, restore)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** `packages/frontend-web/src/features/crud/components/CrudPrintButton.tsx`
+#### `packages/frontend-web/src/features/crud/components/CrudPrintButton.tsx`
 **Status:** Umgestellt auf i18n
 
 **Änderungen:**
@@ -103,9 +103,9 @@ Vollständige deutsche Übersetzungen für alle CRUD-Operationen:
 - `crud.print.errorPDF`
 - `crud.print.errorExcel`
 
-***REMOVED******REMOVED******REMOVED*** 3. i18n Helper-Funktionen
+### 3. i18n Helper-Funktionen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** `packages/frontend-web/src/features/crud/utils/i18n-helpers.ts`
+#### `packages/frontend-web/src/features/crud/utils/i18n-helpers.ts`
 **Status:** Neu erstellt
 
 **Funktionen:**
@@ -148,14 +148,14 @@ Vollständige deutsche Übersetzungen für alle CRUD-Operationen:
    - Extrahiert Entity-Typ-Schlüssel aus Entity-Objekten
    - Unterstützt verschiedene Entity-Strukturen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** `packages/frontend-web/src/features/crud/utils/index.ts`
+#### `packages/frontend-web/src/features/crud/utils/index.ts`
 **Status:** Neu erstellt
 
 Exportiert alle i18n Helper-Funktionen für einfachen Import.
 
-***REMOVED******REMOVED******REMOVED*** 4. Frontend-Seiten (i18n-Integration)
+### 4. Frontend-Seiten (i18n-Integration)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** `packages/frontend-web/src/pages/agribusiness/farmers.tsx`
+#### `packages/frontend-web/src/pages/agribusiness/farmers.tsx`
 **Status:** Vollständig auf i18n umgestellt
 
 **Änderungen:**
@@ -183,7 +183,7 @@ const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Farmer');
 <h2>{entityTypeLabel}</h2>
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** `packages/frontend-web/src/pages/agribusiness/field-service-tasks.tsx`
+#### `packages/frontend-web/src/pages/agribusiness/field-service-tasks.tsx`
 **Status:** Vollständig auf i18n umgestellt
 
 **Änderungen:**
@@ -191,7 +191,7 @@ const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Farmer');
 - Status-Labels über `getStatusLabel()` übersetzt
 - Entity-Typ: `fieldServiceTask`
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** `packages/frontend-web/src/pages/contracts-v2.tsx`
+#### `packages/frontend-web/src/pages/contracts-v2.tsx`
 **Status:** Vollständig auf i18n umgestellt
 
 **Änderungen:**
@@ -200,9 +200,9 @@ const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Farmer');
 - Entity-Typ: `contract`
 - Amendment-spezifische Übersetzungen verwendet
 
-***REMOVED******REMOVED*** Verwendungsbeispiele
+## Verwendungsbeispiele
 
-***REMOVED******REMOVED******REMOVED*** 1. Neue CRUD-Komponente erstellen
+### 1. Neue CRUD-Komponente erstellen
 
 ```typescript
 import React from 'react';
@@ -224,7 +224,7 @@ export function MyCrudComponent({ entityType }: Props) {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Neue Frontend-Seite erstellen
+### 2. Neue Frontend-Seite erstellen
 
 ```typescript
 import React, { useState } from 'react';
@@ -263,7 +263,7 @@ export default function MyEntityPage() {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Neue Übersetzungen hinzufügen
+### 3. Neue Übersetzungen hinzufügen
 
 In `packages/frontend-web/src/i18n/locales/de/translation.json`:
 
@@ -283,7 +283,7 @@ In `packages/frontend-web/src/i18n/locales/de/translation.json`:
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. Entity-spezifische Übersetzungen
+### 4. Entity-spezifische Übersetzungen
 
 Für Entity-spezifische Übersetzungen können Sie den Entity-Namen im Schlüssel verwenden:
 
@@ -310,9 +310,9 @@ t('crud.dialogs.delete.title', { entityType: entityTypeLabel })
 t('crud.dialogs.delete.description', { entityName: 'Mein Farmer' })
 ```
 
-***REMOVED******REMOVED*** Best Practices
+## Best Practices
 
-***REMOVED******REMOVED******REMOVED*** 1. Entity-Typ-Namen
+### 1. Entity-Typ-Namen
 - **Immer** `getEntityTypeLabel()` verwenden statt hardcoded Strings
 - Entity-Typ-Schlüssel in `crud.entities.*` definieren
 - Fallback-Wert als dritten Parameter angeben
@@ -325,7 +325,7 @@ const entityTypeLabel = getEntityTypeLabel(t, 'farmer', 'Farmer');
 const entityTypeLabel = 'Farmer';
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Feld-Labels
+### 2. Feld-Labels
 - **Immer** `t('crud.fields.*')` verwenden
 - Neue Felder in `crud.fields.*` definieren
 - Bei fehlender Übersetzung `getFieldLabel()` verwenden
@@ -338,7 +338,7 @@ const entityTypeLabel = 'Farmer';
 <TableHead>{getFieldLabel(t, 'customField', 'Custom Field')}</TableHead>
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Aktionen
+### 3. Aktionen
 - **Immer** `t('crud.actions.*')` verwenden
 - Konsistente Aktion-Namen verwenden (create, update, delete, cancel, etc.)
 
@@ -349,7 +349,7 @@ const entityTypeLabel = 'Farmer';
 <Button>{t('crud.actions.delete')}</Button>
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. Status-Labels
+### 4. Status-Labels
 - **Immer** `getStatusLabel()` verwenden
 - Status-Werte in `status.*` definieren
 
@@ -358,7 +358,7 @@ const entityTypeLabel = 'Farmer';
 <Badge>{getStatusLabel(t, status, status)}</Badge>
 ```
 
-***REMOVED******REMOVED******REMOVED*** 5. Nachrichten
+### 5. Nachrichten
 - **Immer** `getSuccessMessage()` / `getErrorMessage()` verwenden
 - Entity-Typ automatisch übersetzen lassen
 
@@ -371,7 +371,7 @@ const errorMsg = getErrorMessage(t, 'delete', 'contract');
 // => "Fehler beim Löschen von Vertrag"
 ```
 
-***REMOVED******REMOVED******REMOVED*** 6. Dialoge
+### 6. Dialoge
 - **Immer** Entity-Typ als übersetzten Wert übergeben
 - Template-Variablen korrekt verwenden
 
@@ -384,30 +384,30 @@ const errorMsg = getErrorMessage(t, 'delete', 'contract');
 />
 ```
 
-***REMOVED******REMOVED*** Übersetzungsstruktur
+## Übersetzungsstruktur
 
-***REMOVED******REMOVED******REMOVED*** Hierarchie
+### Hierarchie
 
 ```
 translation.json
-├── common.*              ***REMOVED*** Allgemeine Übersetzungen
-├── status.*              ***REMOVED*** Status-Werte
-└── crud.*                ***REMOVED*** CRUD-spezifische Übersetzungen
-    ├── actions.*         ***REMOVED*** Aktionen
-    ├── dialogs.*         ***REMOVED*** Dialog-Texte
-    │   ├── delete.*      ***REMOVED*** Delete-Dialog
-    │   ├── cancel.*      ***REMOVED*** Cancel-Dialog
-    │   └── amend.*       ***REMOVED*** Amendment-Dialog
-    ├── fields.*          ***REMOVED*** Feld-Labels
-    ├── messages.*        ***REMOVED*** Nachrichten
-    ├── audit.*           ***REMOVED*** Audit-Trail
-    ├── print.*           ***REMOVED*** Druck/Export
-    ├── entities.*        ***REMOVED*** Entity-Typ-Namen
-    ├── list.*            ***REMOVED*** Listen-Ansicht
-    └── detail.*          ***REMOVED*** Detail-Ansicht
+├── common.*              # Allgemeine Übersetzungen
+├── status.*              # Status-Werte
+└── crud.*                # CRUD-spezifische Übersetzungen
+    ├── actions.*         # Aktionen
+    ├── dialogs.*         # Dialog-Texte
+    │   ├── delete.*      # Delete-Dialog
+    │   ├── cancel.*      # Cancel-Dialog
+    │   └── amend.*       # Amendment-Dialog
+    ├── fields.*          # Feld-Labels
+    ├── messages.*        # Nachrichten
+    ├── audit.*           # Audit-Trail
+    ├── print.*           # Druck/Export
+    ├── entities.*        # Entity-Typ-Namen
+    ├── list.*            # Listen-Ansicht
+    └── detail.*          # Detail-Ansicht
 ```
 
-***REMOVED******REMOVED******REMOVED*** Template-Variablen
+### Template-Variablen
 
 Viele Übersetzungen unterstützen Template-Variablen:
 
@@ -433,9 +433,9 @@ Viele Übersetzungen unterstützen Template-Variablen:
 }
 ```
 
-***REMOVED******REMOVED*** Erweiterungen
+## Erweiterungen
 
-***REMOVED******REMOVED******REMOVED*** Neue Entity-Typen hinzufügen
+### Neue Entity-Typen hinzufügen
 
 1. Übersetzung in `translation.json` hinzufügen:
 ```json
@@ -454,7 +454,7 @@ const entityType = 'newEntity';
 const entityTypeLabel = getEntityTypeLabel(t, entityType, 'New Entity');
 ```
 
-***REMOVED******REMOVED******REMOVED*** Neue Dialoge erstellen
+### Neue Dialoge erstellen
 
 1. Übersetzungen in `translation.json` hinzufügen:
 ```json
@@ -487,7 +487,7 @@ const entityTypeLabel = getEntityTypeLabel(t, entityType);
 </Dialog>
 ```
 
-***REMOVED******REMOVED******REMOVED*** Neue Felder hinzufügen
+### Neue Felder hinzufügen
 
 1. Übersetzung in `translation.json` hinzufügen:
 ```json
@@ -505,22 +505,22 @@ const entityTypeLabel = getEntityTypeLabel(t, entityType);
 <TableHead>{t('crud.fields.myNewField')}</TableHead>
 ```
 
-***REMOVED******REMOVED*** Migration bestehender Komponenten
+## Migration bestehender Komponenten
 
-***REMOVED******REMOVED******REMOVED*** Schritt 1: Imports hinzufügen
+### Schritt 1: Imports hinzufügen
 ```typescript
 import { useTranslation } from 'react-i18next';
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers';
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 2: Hook initialisieren
+### Schritt 2: Hook initialisieren
 ```typescript
 const { t } = useTranslation();
 const entityType = 'myEntity';
 const entityTypeLabel = getEntityTypeLabel(t, entityType, 'My Entity');
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 3: Texte ersetzen
+### Schritt 3: Texte ersetzen
 ```typescript
 // Vorher
 <h2>Farmer</h2>
@@ -531,34 +531,34 @@ const entityTypeLabel = getEntityTypeLabel(t, entityType, 'My Entity');
 <Button>{t('crud.actions.delete')}</Button>
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 4: Übersetzungen hinzufügen
+### Schritt 4: Übersetzungen hinzufügen
 Alle verwendeten Übersetzungsschlüssel in `translation.json` definieren.
 
-***REMOVED******REMOVED*** Fehlerbehebung
+## Fehlerbehebung
 
-***REMOVED******REMOVED******REMOVED*** Übersetzung wird nicht angezeigt
+### Übersetzung wird nicht angezeigt
 1. Prüfen, ob der Schlüssel in `translation.json` existiert
 2. Prüfen, ob der Namespace korrekt ist (`crud.*`)
 3. Prüfen, ob Template-Variablen korrekt übergeben werden
 
-***REMOVED******REMOVED******REMOVED*** Entity-Typ wird nicht übersetzt
+### Entity-Typ wird nicht übersetzt
 1. Prüfen, ob Entity-Typ in `crud.entities.*` definiert ist
 2. Fallback-Wert als dritten Parameter angeben
 3. Prüfen, ob `getEntityTypeLabel()` verwendet wird
 
-***REMOVED******REMOVED******REMOVED*** Status wird nicht übersetzt
+### Status wird nicht übersetzt
 1. Prüfen, ob Status in `status.*` definiert ist
 2. `getStatusLabel()` verwenden statt direktem `t()` Aufruf
 
-***REMOVED******REMOVED*** Referenzen
+## Referenzen
 
 - **Odoo 19.0 Essentials (Deutsch):** https://github.com/odoo/documentation/blob/19.0/locale/de/LC_MESSAGES/essentials.po
 - **i18next Dokumentation:** https://www.i18next.com/
 - **React i18next:** https://react.i18next.com/
 
-***REMOVED******REMOVED*** Dateien-Übersicht
+## Dateien-Übersicht
 
-***REMOVED******REMOVED******REMOVED*** Geänderte Dateien
+### Geänderte Dateien
 - `packages/frontend-web/src/i18n/locales/de/translation.json`
 - `packages/frontend-web/src/features/crud/components/CrudDeleteDialog.tsx`
 - `packages/frontend-web/src/features/crud/components/CrudCancelDialog.tsx`
@@ -568,12 +568,12 @@ Alle verwendeten Übersetzungsschlüssel in `translation.json` definieren.
 - `packages/frontend-web/src/pages/agribusiness/field-service-tasks.tsx`
 - `packages/frontend-web/src/pages/contracts-v2.tsx`
 
-***REMOVED******REMOVED******REMOVED*** Neue Dateien
+### Neue Dateien
 - `packages/frontend-web/src/features/crud/utils/i18n-helpers.ts`
 - `packages/frontend-web/src/features/crud/utils/index.ts`
 - `docs/i18n-integration.md` (diese Datei)
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. **Weitere Sprachen hinzufügen:** Englisch, Französisch, etc.
 2. **Weitere Entity-Typen:** Neue Entities automatisch übersetzen
@@ -586,4 +586,5 @@ Alle verwendeten Übersetzungsschlüssel in `translation.json` definieren.
 **Erstellt:** 2025-01-20  
 **Version:** 1.0  
 **Autor:** AI Assistant
+
 

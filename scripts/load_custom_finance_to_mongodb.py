@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Lädt die Daten aus dem custom_finance-Verzeichnis in die MongoDB.
 """
@@ -11,7 +11,7 @@ from pathlib import Path
 import pymongo
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -22,7 +22,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("LoadCustomFinanceToMongoDB")
 
-***REMOVED*** MongoDB-Konfiguration
+# MongoDB-Konfiguration
 MONGODB_CONNECTION_STRING = "mongodb://localhost:27017/"
 MONGODB_DATABASE_NAME = "valeo_neuroerp"
 
@@ -39,7 +39,7 @@ def check_mongodb_connection():
             MONGODB_CONNECTION_STRING,
             serverSelectionTimeoutMS=5000
         )
-        ***REMOVED*** Verbindung testen
+        # Verbindung testen
         client.admin.command('ping')
         logger.info("Verbindung zu MongoDB erfolgreich hergestellt.")
         client.close()
@@ -58,44 +58,44 @@ def load_custom_finance_files():
     logger.info("Lade Custom Finance-Dateien in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["custom_finance"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** custom_finance-Verzeichnis
+        # custom_finance-Verzeichnis
         custom_finance_dir = Path("custom_finance")
         
         if not custom_finance_dir.exists():
             logger.warning(f"custom_finance-Verzeichnis {custom_finance_dir} existiert nicht.")
             return False
         
-        ***REMOVED*** Alle Python-Dateien im custom_finance-Verzeichnis und seinen Unterverzeichnissen laden
+        # Alle Python-Dateien im custom_finance-Verzeichnis und seinen Unterverzeichnissen laden
         for file_path in custom_finance_dir.glob("**/*.py"):
             try:
-                ***REMOVED*** Binärmodus zum Erkennen von Null-Bytes
+                # Binärmodus zum Erkennen von Null-Bytes
                 with open(file_path, 'rb') as f:
                     content_bytes = f.read()
                 
-                ***REMOVED*** Prüfen auf Null-Bytes
+                # Prüfen auf Null-Bytes
                 if b'\x00' in content_bytes:
                     logger.warning(f"Datei {file_path} enthält Null-Bytes und wird übersprungen.")
                     continue
                 
-                ***REMOVED*** In Text umwandeln
+                # In Text umwandeln
                 try:
                     content = content_bytes.decode('utf-8')
                 except UnicodeDecodeError:
                     logger.warning(f"Datei {file_path} konnte nicht als UTF-8 dekodiert werden, versuche latin-1.")
                     content = content_bytes.decode('latin-1')
                 
-                ***REMOVED*** Kategorie bestimmen
+                # Kategorie bestimmen
                 category = determine_category(file_path)
                 
-                ***REMOVED*** In MongoDB speichern
+                # In MongoDB speichern
                 collection.insert_one({
                     "filename": file_path.name,
                     "path": str(file_path),
@@ -128,44 +128,44 @@ def load_custom_finance_xml():
     logger.info("Lade Custom Finance XML-Dateien in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["custom_finance_xml"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** custom_finance-Verzeichnis
+        # custom_finance-Verzeichnis
         custom_finance_dir = Path("custom_finance")
         
         if not custom_finance_dir.exists():
             logger.warning(f"custom_finance-Verzeichnis {custom_finance_dir} existiert nicht.")
             return False
         
-        ***REMOVED*** Alle XML-Dateien im custom_finance-Verzeichnis und seinen Unterverzeichnissen laden
+        # Alle XML-Dateien im custom_finance-Verzeichnis und seinen Unterverzeichnissen laden
         for file_path in custom_finance_dir.glob("**/*.xml"):
             try:
-                ***REMOVED*** Binärmodus zum Erkennen von Null-Bytes
+                # Binärmodus zum Erkennen von Null-Bytes
                 with open(file_path, 'rb') as f:
                     content_bytes = f.read()
                 
-                ***REMOVED*** Prüfen auf Null-Bytes
+                # Prüfen auf Null-Bytes
                 if b'\x00' in content_bytes:
                     logger.warning(f"Datei {file_path} enthält Null-Bytes und wird übersprungen.")
                     continue
                 
-                ***REMOVED*** In Text umwandeln
+                # In Text umwandeln
                 try:
                     content = content_bytes.decode('utf-8')
                 except UnicodeDecodeError:
                     logger.warning(f"Datei {file_path} konnte nicht als UTF-8 dekodiert werden, versuche latin-1.")
                     content = content_bytes.decode('latin-1')
                 
-                ***REMOVED*** Kategorie bestimmen
+                # Kategorie bestimmen
                 category = determine_category(file_path)
                 
-                ***REMOVED*** In MongoDB speichern
+                # In MongoDB speichern
                 collection.insert_one({
                     "filename": file_path.name,
                     "path": str(file_path),
@@ -198,44 +198,44 @@ def load_backup_cursor_files():
     logger.info("Lade Backup Cursor-Dateien in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["backup_cursor"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** backup-cursor-Verzeichnis
+        # backup-cursor-Verzeichnis
         backup_cursor_dir = Path("backup-cursor")
         
         if not backup_cursor_dir.exists():
             logger.warning(f"backup-cursor-Verzeichnis {backup_cursor_dir} existiert nicht.")
             return False
         
-        ***REMOVED*** Alle Dateien im backup-cursor-Verzeichnis laden
+        # Alle Dateien im backup-cursor-Verzeichnis laden
         for file_path in backup_cursor_dir.glob("*.*"):
             try:
-                ***REMOVED*** Binärmodus zum Erkennen von Null-Bytes
+                # Binärmodus zum Erkennen von Null-Bytes
                 with open(file_path, 'rb') as f:
                     content_bytes = f.read()
                 
-                ***REMOVED*** Prüfen auf Null-Bytes
+                # Prüfen auf Null-Bytes
                 if b'\x00' in content_bytes:
                     logger.warning(f"Datei {file_path} enthält Null-Bytes und wird übersprungen.")
                     continue
                 
-                ***REMOVED*** In Text umwandeln
+                # In Text umwandeln
                 try:
                     content = content_bytes.decode('utf-8')
                 except UnicodeDecodeError:
                     logger.warning(f"Datei {file_path} konnte nicht als UTF-8 dekodiert werden, versuche latin-1.")
                     content = content_bytes.decode('latin-1')
                 
-                ***REMOVED*** Dateityp bestimmen
+                # Dateityp bestimmen
                 file_type = determine_file_type(file_path)
                 
-                ***REMOVED*** In MongoDB speichern
+                # In MongoDB speichern
                 collection.insert_one({
                     "filename": file_path.name,
                     "path": str(file_path),
@@ -324,21 +324,21 @@ def create_indexes():
     logger.info("Erstelle Indizes in MongoDB-Sammlungen...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         
-        ***REMOVED*** Indizes für custom_finance
+        # Indizes für custom_finance
         db.custom_finance.create_index("filename")
         db.custom_finance.create_index("category")
         db.custom_finance.create_index([("content", pymongo.TEXT)])
         
-        ***REMOVED*** Indizes für custom_finance_xml
+        # Indizes für custom_finance_xml
         db.custom_finance_xml.create_index("filename")
         db.custom_finance_xml.create_index("category")
         db.custom_finance_xml.create_index([("content", pymongo.TEXT)])
         
-        ***REMOVED*** Indizes für backup_cursor
+        # Indizes für backup_cursor
         db.backup_cursor.create_index("filename")
         db.backup_cursor.create_index("file_type")
         db.backup_cursor.create_index([("content", pymongo.TEXT)])
@@ -354,27 +354,27 @@ def main():
     """
     Hauptfunktion für das Laden der Daten aus dem custom_finance-Verzeichnis in die MongoDB.
     """
-    ***REMOVED*** MongoDB-Verbindung prüfen
+    # MongoDB-Verbindung prüfen
     if not check_mongodb_connection():
         logger.error("Konnte keine Verbindung zur MongoDB herstellen.")
         return 1
     
-    ***REMOVED*** Custom Finance-Dateien laden
+    # Custom Finance-Dateien laden
     if not load_custom_finance_files():
         logger.error("Konnte Custom Finance-Dateien nicht laden.")
         return 1
     
-    ***REMOVED*** Custom Finance XML-Dateien laden
+    # Custom Finance XML-Dateien laden
     if not load_custom_finance_xml():
         logger.error("Konnte Custom Finance XML-Dateien nicht laden.")
         return 1
     
-    ***REMOVED*** Backup Cursor-Dateien laden
+    # Backup Cursor-Dateien laden
     if not load_backup_cursor_files():
         logger.error("Konnte Backup Cursor-Dateien nicht laden.")
         return 1
     
-    ***REMOVED*** Indizes erstellen
+    # Indizes erstellen
     if not create_indexes():
         logger.error("Konnte Indizes nicht erstellen.")
         return 1

@@ -1,15 +1,15 @@
-***REMOVED*** GitHub-Setup.ps1
-***REMOVED***
-***REMOVED*** Dieses Skript enthält Anweisungen zum Einrichten eines GitHub-Repositories 
-***REMOVED*** und zum Pushen des ERP-Systems zu GitHub.
-***REMOVED***
-***REMOVED*** Verwendung: .\github_setup.ps1
+# GitHub-Setup.ps1
+#
+# Dieses Skript enthält Anweisungen zum Einrichten eines GitHub-Repositories 
+# und zum Pushen des ERP-Systems zu GitHub.
+#
+# Verwendung: .\github_setup.ps1
 
 Write-Host "GitHub-Setup für das ERP-System" -ForegroundColor Cyan
 Write-Host "=============================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Überprüfen, ob Git installiert ist
+# Überprüfen, ob Git installiert ist
 try {
     $gitVersion = git --version
     Write-Host "Git gefunden: $gitVersion" -ForegroundColor Green

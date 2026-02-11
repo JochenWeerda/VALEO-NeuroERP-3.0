@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Test script for Proplanta PSM Integration
 Tests the MCP server and ERP integration
@@ -10,27 +10,27 @@ import time
 import logging
 from pathlib import Path
 
-***REMOVED*** Configure logging
+# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Configuration
-ERP_BASE_URL = "http://localhost:8000"  ***REMOVED*** Adjust as needed
+# Configuration
+ERP_BASE_URL = "http://localhost:8000"  # Adjust as needed
 MCP_CONFIG_PATH = Path("c:/Users/Jochen/AppData/Roaming/Kilo-Code/MCP/proplanta-psm-scraper/package.json")
-DEV_TOKEN = "dev-token"  ***REMOVED*** Development token for testing
+DEV_TOKEN = "dev-token"  # Development token for testing
 HEADERS = {"Authorization": f"Bearer {DEV_TOKEN}"}
 
 def test_mcp_server():
     """Test MCP server configuration and basic functionality"""
     logger.info("Testing MCP server configuration...")
 
-    ***REMOVED*** Check if MCP server directory exists
+    # Check if MCP server directory exists
     mcp_dir = Path("c:/Users/Jochen/AppData/Roaming/Kilo-Code/MCP/proplanta-psm-scraper")
     if not mcp_dir.exists():
         logger.error(f"MCP server directory not found at {mcp_dir}")
         return False
 
-    ***REMOVED*** Check if package.json exists
+    # Check if package.json exists
     if not MCP_CONFIG_PATH.exists():
         logger.error(f"MCP package.json not found at {MCP_CONFIG_PATH}")
         return False
@@ -39,7 +39,7 @@ def test_mcp_server():
         with open(MCP_CONFIG_PATH, 'r') as f:
             package_data = json.load(f)
 
-        ***REMOVED*** Check if it's a valid Node.js package
+        # Check if it's a valid Node.js package
         if not package_data.get('name') == 'proplanta-psm-scraper':
             logger.error("Invalid MCP server package")
             return False
@@ -114,7 +114,7 @@ def test_psm_search():
     logger.info("Testing PSM search functionality...")
 
     try:
-        ***REMOVED*** Test search endpoint
+        # Test search endpoint
         url = f"{ERP_BASE_URL}/api/v1/agrar/psm/proplanta/search"
         params = {"q": "glyphosate", "limit": 5}
 
@@ -161,10 +161,10 @@ def main():
             logger.error(f"✗ {test_name} FAILED with exception: {e}")
             results.append((test_name, False))
 
-        ***REMOVED*** Small delay between tests
+        # Small delay between tests
         time.sleep(1)
 
-    ***REMOVED*** Summary
+    # Summary
     logger.info("\n" + "=" * 50)
     logger.info("TEST SUMMARY")
 

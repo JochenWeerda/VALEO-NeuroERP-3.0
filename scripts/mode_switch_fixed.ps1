@@ -1,5 +1,5 @@
-ï»¿***REMOVED*** Mode Switch Script fÃ¼r VALEO-NeuroERP
-***REMOVED*** Dieses Skript ermÃ¶glicht das Wechseln zwischen verschiedenen Modi (VAN, PLAN, CREATIVE, IMPLEMENT, REFLECT, ARCHIVE)
+# Mode Switch Script für VALEO-NeuroERP
+# Dieses Skript ermöglicht das Wechseln zwischen verschiedenen Modi (VAN, PLAN, CREATIVE, IMPLEMENT, REFLECT, ARCHIVE)
 
 param(
     [Parameter(Mandatory=$false)]
@@ -9,7 +9,7 @@ param(
     [switch]$Help
 )
 
-***REMOVED*** Farbdefinitionen fÃ¼r die Ausgabe
+# Farbdefinitionen für die Ausgabe
 $colorVAN = "Cyan"
 $colorPLAN = "Yellow"
 $colorCREATIVE = "Magenta"
@@ -19,7 +19,7 @@ $colorARCHIVE = "DarkGray"
 $colorError = "Red"
 $colorSuccess = "Green"
 
-***REMOVED*** Pfade zu den Regeldateien
+# Pfade zu den Regeldateien
 $rulesPath = ".cursor/rules"
 $vanRulesPath = "$rulesPath/van_mode_rules.json"
 $planRulesPath = "$rulesPath/plan_mode_rules.json"
@@ -27,7 +27,7 @@ $creativeRulesPath = "$rulesPath/creative_mode_rules.json"
 $implementRulesPath = "$rulesPath/implement_mode_rules.json"
 $reflectArchiveRulesPath = "$rulesPath/reflect_archive_rules.json"
 
-***REMOVED*** Pfade zu den Memory-Bank-Verzeichnissen
+# Pfade zu den Memory-Bank-Verzeichnissen
 $memoryBankPath = "memory-bank"
 $validationPath = "$memoryBankPath/validation"
 $planningPath = "$memoryBankPath/planning"
@@ -37,24 +37,24 @@ $archivePath = "$memoryBankPath/archive"
 $handoverPath = "$memoryBankPath/handover"
 $activeContextPath = "$memoryBankPath/activeContext.md"
 
-***REMOVED*** Funktion zum Anzeigen der Hilfe
+# Funktion zum Anzeigen der Hilfe
 function Show-Help {
-    Write-Host "Mode Switch Script fÃ¼r VALEO-NeuroERP" -ForegroundColor White
+    Write-Host "Mode Switch Script für VALEO-NeuroERP" -ForegroundColor White
     Write-Host "Verwendung: .\mode_switch.ps1 -Mode <Modus>" -ForegroundColor White
     Write-Host ""
-    Write-Host "VerfÃ¼gbare Modi:" -ForegroundColor White
+    Write-Host "Verfügbare Modi:" -ForegroundColor White
     Write-Host "  VAN       - Validieren und Analysieren" -ForegroundColor $colorVAN
     Write-Host "  PLAN      - Planen der Implementierung" -ForegroundColor $colorPLAN
-    Write-Host "  CREATIVE  - Kreative Phase fÃ¼r Design-Entscheidungen" -ForegroundColor $colorCREATIVE
-    Write-Host "  IMPLEMENT - Implementierung gemÃ¤ÃŸ Plan" -ForegroundColor $colorIMPLEMENT
-    Write-Host "  REFLECT   - Reflexion Ã¼ber die Implementierung" -ForegroundColor $colorREFLECT
+    Write-Host "  CREATIVE  - Kreative Phase für Design-Entscheidungen" -ForegroundColor $colorCREATIVE
+    Write-Host "  IMPLEMENT - Implementierung gemäß Plan" -ForegroundColor $colorIMPLEMENT
+    Write-Host "  REFLECT   - Reflexion über die Implementierung" -ForegroundColor $colorREFLECT
     Write-Host "  ARCHIVE   - Archivierung der abgeschlossenen Aufgabe" -ForegroundColor $colorARCHIVE
     Write-Host ""
     Write-Host "Beispiel: .\mode_switch.ps1 -Mode VAN" -ForegroundColor White
     Write-Host ""
 }
 
-***REMOVED*** Funktion zur ÃœberprÃ¼fung, ob die Regeldateien existieren
+# Funktion zur Überprüfung, ob die Regeldateien existieren
 function Test-RulesExist {
     $allRulesExist = $true
 
@@ -86,7 +86,7 @@ function Test-RulesExist {
     return $allRulesExist
 }
 
-***REMOVED*** Funktion zur ÃœberprÃ¼fung, ob die Memory-Bank-Verzeichnisse existieren
+# Funktion zur Überprüfung, ob die Memory-Bank-Verzeichnisse existieren
 function Test-MemoryBankExists {
     $allDirectoriesExist = $true
 
@@ -133,7 +133,7 @@ function Test-MemoryBankExists {
     return $allDirectoriesExist
 }
 
-***REMOVED*** Funktion zum Erstellen eines Handover-Dokuments
+# Funktion zum Erstellen eines Handover-Dokuments
 function New-HandoverDocument {
     param(
         [string]$FromMode,
@@ -146,24 +146,24 @@ function New-HandoverDocument {
     $timestamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
     $historyHandover = "$handoverHistory/handover_${FromMode}_to_${ToMode}_$timestamp.md"
 
-    ***REMOVED*** Erstelle das Handover-Verzeichnis fÃ¼r die Historie, falls es nicht existiert
+    # Erstelle das Handover-Verzeichnis für die Historie, falls es nicht existiert
     if (-not (Test-Path $handoverHistory)) {
         New-Item -ItemType Directory -Path $handoverHistory -Force | Out-Null
     }
 
-    ***REMOVED*** Kopiere das letzte Handover in die Historie, falls es existiert
+    # Kopiere das letzte Handover in die Historie, falls es existiert
     if (Test-Path $lastHandover) {
         Copy-Item $lastHandover $historyHandover
     }
 
-    ***REMOVED*** Erstelle ein neues Handover-Dokument basierend auf der Vorlage
+    # Erstelle ein neues Handover-Dokument basierend auf der Vorlage
     if (Test-Path $handoverTemplate) {
         $content = Get-Content $handoverTemplate -Raw
         $content = $content -replace "\[Datum\]", (Get-Date -Format "dd.MM.yyyy")
         $content = $content -replace "\[Aktuelle Aufgabe\]", "Moduswechsel von $FromMode zu $ToMode"
         $content = $content -replace "\[Aktuelle Modus\]", $ToMode
-        $content = $content -replace "\[Ãœbergeben von\]", "Mode Switch Script"
-        $content = $content -replace "\[Ãœbergeben an\]", "NÃ¤chster Agent"
+        $content = $content -replace "\[Übergeben von\]", "Mode Switch Script"
+        $content = $content -replace "\[Übergeben an\]", "Nächster Agent"
         $content = $content -replace "\[Datum und Uhrzeit\]", (Get-Date -Format "dd.MM.yyyy, HH:mm")
         
         $content | Out-File $lastHandover -Encoding utf8
@@ -173,7 +173,7 @@ function New-HandoverDocument {
     }
 }
 
-***REMOVED*** Funktion zum Aktualisieren des aktiven Kontexts
+# Funktion zum Aktualisieren des aktiven Kontexts
 function Update-ActiveContext {
     param(
         [string]$Mode
@@ -183,8 +183,8 @@ function Update-ActiveContext {
         $content = Get-Content $activeContextPath -Raw
         $timestamp = Get-Date -Format "dd.MM.yyyy HH:mm"
         
-        ***REMOVED*** FÃ¼ge den Moduswechsel am Ende der Datei hinzu
-        $newContent = $content + "`n`n***REMOVED******REMOVED*** Moduswechsel zu $Mode`n`nDatum: $timestamp`n`nDer Modus wurde zu $Mode gewechselt. Alle Aktionen sollten nun gemÃ¤ÃŸ den Regeln des $Mode-Modus durchgefÃ¼hrt werden."
+        # Füge den Moduswechsel am Ende der Datei hinzu
+        $newContent = $content + "`n`n## Moduswechsel zu $Mode`n`nDatum: $timestamp`n`nDer Modus wurde zu $Mode gewechselt. Alle Aktionen sollten nun gemäß den Regeln des $Mode-Modus durchgeführt werden."
         
         $newContent | Out-File $activeContextPath -Encoding utf8
         Write-Host "Aktiver Kontext aktualisiert in $activeContextPath" -ForegroundColor $colorSuccess
@@ -193,13 +193,13 @@ function Update-ActiveContext {
     }
 }
 
-***REMOVED*** Hauptfunktion zum Wechseln des Modus
+# Hauptfunktion zum Wechseln des Modus
 function Switch-Mode {
     param(
         [string]$Mode
     )
 
-    ***REMOVED*** ÃœberprÃ¼fe, ob die Regeldateien und Memory-Bank-Verzeichnisse existieren
+    # Überprüfe, ob die Regeldateien und Memory-Bank-Verzeichnisse existieren
     $rulesExist = Test-RulesExist
     $memoryBankExists = Test-MemoryBankExists
 
@@ -208,13 +208,13 @@ function Switch-Mode {
         return
     }
 
-    ***REMOVED*** Bestimme den aktuellen Modus (falls mÃ¶glich)
+    # Bestimme den aktuellen Modus (falls möglich)
     $currentMode = "UNKNOWN"
     if (Test-Path "$memoryBankPath/current_mode.txt") {
         $currentMode = Get-Content "$memoryBankPath/current_mode.txt"
     }
 
-    ***REMOVED*** Wechsle den Modus basierend auf der Eingabe
+    # Wechsle den Modus basierend auf der Eingabe
     switch ($Mode.ToUpper()) {
         "VAN" {
             Write-Host "Wechsle zum VAN-Modus (Validieren und Analysieren)" -ForegroundColor $colorVAN
@@ -222,10 +222,10 @@ function Switch-Mode {
             New-HandoverDocument -FromMode $currentMode -ToMode "VAN"
             Update-ActiveContext -Mode "VAN"
             
-            ***REMOVED*** Hier kÃ¶nnten weitere Aktionen fÃ¼r den VAN-Modus hinzugefÃ¼gt werden
-            ***REMOVED*** z.B. AusfÃ¼hren von Validierungsskripten
+            # Hier könnten weitere Aktionen für den VAN-Modus hinzugefügt werden
+            # z.B. Ausführen von Validierungsskripten
             
-            Write-Host "VAN-Modus aktiviert. Validiere und analysiere das System gemÃ¤ÃŸ den VAN-Modus-Regeln." -ForegroundColor $colorVAN
+            Write-Host "VAN-Modus aktiviert. Validiere und analysiere das System gemäß den VAN-Modus-Regeln." -ForegroundColor $colorVAN
         }
         "PLAN" {
             Write-Host "Wechsle zum PLAN-Modus" -ForegroundColor $colorPLAN
@@ -233,7 +233,7 @@ function Switch-Mode {
             New-HandoverDocument -FromMode $currentMode -ToMode "PLAN"
             Update-ActiveContext -Mode "PLAN"
             
-            Write-Host "PLAN-Modus aktiviert. Erstelle einen strukturierten Implementierungsplan gemÃ¤ÃŸ den PLAN-Modus-Regeln." -ForegroundColor $colorPLAN
+            Write-Host "PLAN-Modus aktiviert. Erstelle einen strukturierten Implementierungsplan gemäß den PLAN-Modus-Regeln." -ForegroundColor $colorPLAN
         }
         "CREATIVE" {
             Write-Host "Wechsle zum CREATIVE-Modus" -ForegroundColor $colorCREATIVE
@@ -241,7 +241,7 @@ function Switch-Mode {
             New-HandoverDocument -FromMode $currentMode -ToMode "CREATIVE"
             Update-ActiveContext -Mode "CREATIVE"
             
-            Write-Host "CREATIVE-Modus aktiviert. Generiere und bewerte multiple Design-Optionen gemÃ¤ÃŸ den CREATIVE-Modus-Regeln." -ForegroundColor $colorCREATIVE
+            Write-Host "CREATIVE-Modus aktiviert. Generiere und bewerte multiple Design-Optionen gemäß den CREATIVE-Modus-Regeln." -ForegroundColor $colorCREATIVE
         }
         "IMPLEMENT" {
             Write-Host "Wechsle zum IMPLEMENT-Modus" -ForegroundColor $colorIMPLEMENT
@@ -249,7 +249,7 @@ function Switch-Mode {
             New-HandoverDocument -FromMode $currentMode -ToMode "IMPLEMENT"
             Update-ActiveContext -Mode "IMPLEMENT"
             
-            Write-Host "IMPLEMENT-Modus aktiviert. Implementiere Ã„nderungen gemÃ¤ÃŸ dem Plan und den IMPLEMENT-Modus-Regeln." -ForegroundColor $colorIMPLEMENT
+            Write-Host "IMPLEMENT-Modus aktiviert. Implementiere Änderungen gemäß dem Plan und den IMPLEMENT-Modus-Regeln." -ForegroundColor $colorIMPLEMENT
         }
         "REFLECT" {
             Write-Host "Wechsle zum REFLECT-Modus" -ForegroundColor $colorREFLECT
@@ -257,7 +257,7 @@ function Switch-Mode {
             New-HandoverDocument -FromMode $currentMode -ToMode "REFLECT"
             Update-ActiveContext -Mode "REFLECT"
             
-            Write-Host "REFLECT-Modus aktiviert. Reflektiere Ã¼ber die Implementierung gemÃ¤ÃŸ den REFLECT-ARCHIVE-Modus-Regeln." -ForegroundColor $colorREFLECT
+            Write-Host "REFLECT-Modus aktiviert. Reflektiere über die Implementierung gemäß den REFLECT-ARCHIVE-Modus-Regeln." -ForegroundColor $colorREFLECT
         }
         "ARCHIVE" {
             Write-Host "Wechsle zum ARCHIVE-Modus" -ForegroundColor $colorARCHIVE
@@ -265,22 +265,22 @@ function Switch-Mode {
             New-HandoverDocument -FromMode $currentMode -ToMode "ARCHIVE"
             Update-ActiveContext -Mode "ARCHIVE"
             
-            Write-Host "ARCHIVE-Modus aktiviert. Archiviere die abgeschlossene Aufgabe gemÃ¤ÃŸ den REFLECT-ARCHIVE-Modus-Regeln." -ForegroundColor $colorARCHIVE
+            Write-Host "ARCHIVE-Modus aktiviert. Archiviere die abgeschlossene Aufgabe gemäß den REFLECT-ARCHIVE-Modus-Regeln." -ForegroundColor $colorARCHIVE
         }
         default {
-            Write-Host "Fehler: UngÃ¼ltiger Modus '$Mode'" -ForegroundColor $colorError
-            Write-Host "GÃ¼ltige Modi sind: VAN, PLAN, CREATIVE, IMPLEMENT, REFLECT, ARCHIVE" -ForegroundColor $colorError
+            Write-Host "Fehler: Ungültiger Modus '$Mode'" -ForegroundColor $colorError
+            Write-Host "Gültige Modi sind: VAN, PLAN, CREATIVE, IMPLEMENT, REFLECT, ARCHIVE" -ForegroundColor $colorError
             Show-Help
             return
         }
     }
 }
 
-***REMOVED*** Hauptlogik des Skripts
+# Hauptlogik des Skripts
 if ($Help) {
     Show-Help
 } elseif ($Mode -eq "") {
-    ***REMOVED*** Wenn kein Modus angegeben wurde, zeige den aktuellen Modus an
+    # Wenn kein Modus angegeben wurde, zeige den aktuellen Modus an
     if (Test-Path "$memoryBankPath/current_mode.txt") {
         $currentMode = Get-Content "$memoryBankPath/current_mode.txt"
         Write-Host "Aktueller Modus: $currentMode" -ForegroundColor White
@@ -289,6 +289,7 @@ if ($Help) {
     }
     Show-Help
 } else {
-    ***REMOVED*** Wechsle zum angegebenen Modus
+    # Wechsle zum angegebenen Modus
     Switch-Mode -Mode $Mode
 } 
+

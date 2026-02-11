@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Test-Skript für die Task-Workflow-Integration mit MongoDB.
 """
@@ -11,14 +11,14 @@ import logging
 from pathlib import Path
 from datetime import datetime, timedelta
 
-***REMOVED*** Pfad zum Projektverzeichnis hinzufügen
+# Pfad zum Projektverzeichnis hinzufügen
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from scripts.task_workflow_integration import TaskWorkflowIntegration
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 from linkup_mcp.langgraph_integration import AgentType
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -38,10 +38,10 @@ class TaskWorkflowTester:
     async def setup_test_db(self):
         """Richtet die Test-Datenbank ein."""
         try:
-            ***REMOVED*** Verbindung herstellen
+            # Verbindung herstellen
             await self.connector.connect()
             
-            ***REMOVED*** Collections erstellen
+            # Collections erstellen
             collections = ["workflow_states", "task_history", "agent_results"]
             for collection in collections:
                 await self.connector.create_collection(collection)
@@ -55,12 +55,12 @@ class TaskWorkflowTester:
     async def cleanup_test_db(self):
         """Räumt die Test-Datenbank auf."""
         try:
-            ***REMOVED*** Collections löschen
+            # Collections löschen
             collections = ["workflow_states", "task_history", "agent_results"]
             for collection in collections:
                 await self.connector.drop_collection(collection)
             
-            ***REMOVED*** Verbindung trennen
+            # Verbindung trennen
             await self.connector.disconnect()
             
             logger.info("Test-Datenbank erfolgreich aufgeräumt")
@@ -72,11 +72,11 @@ class TaskWorkflowTester:
     async def test_workflow_state_updates(self):
         """Testet die Workflow-Status-Aktualisierungen."""
         try:
-            ***REMOVED*** Initialen Status speichern
+            # Initialen Status speichern
             initial_state = await self.integration.update_workflow_state()
             logger.info("Initialer Workflow-Status gespeichert")
             
-            ***REMOVED*** Status abrufen und vergleichen
+            # Status abrufen und vergleichen
             stored_state = await self.connector.find_one(
                 "workflow_states",
                 {"current_phase": initial_state["current_phase"]}
@@ -94,11 +94,11 @@ class TaskWorkflowTester:
     async def test_agent_workflow(self, agent_type: AgentType):
         """Testet den Workflow eines spezifischen Agenten."""
         try:
-            ***REMOVED*** Workflow ausführen
+            # Workflow ausführen
             result = await self.integration.run_agent_workflow(agent_type)
             
             if result:
-                ***REMOVED*** Ergebnis in MongoDB speichern
+                # Ergebnis in MongoDB speichern
                 await self.connector.insert_one(
                     "agent_results",
                     {
@@ -120,7 +120,7 @@ class TaskWorkflowTester:
     async def test_task_history(self):
         """Testet die Task-Historie-Funktionalität."""
         try:
-            ***REMOVED*** Beispiel-Task-Historie erstellen
+            # Beispiel-Task-Historie erstellen
             task_history = {
                 "task_id": "test_task_001",
                 "title": "Performance-Analyse durchführen",
@@ -131,10 +131,10 @@ class TaskWorkflowTester:
                 "result": "Performance-Analyse erfolgreich durchgeführt"
             }
             
-            ***REMOVED*** In MongoDB speichern
+            # In MongoDB speichern
             await self.connector.insert_one("task_history", task_history)
             
-            ***REMOVED*** Abrufen und vergleichen
+            # Abrufen und vergleichen
             stored_task = await self.connector.find_one(
                 "task_history",
                 {"task_id": task_history["task_id"]}
@@ -154,11 +154,11 @@ async def main():
     try:
         tester = TaskWorkflowTester()
         
-        ***REMOVED*** Test-Datenbank einrichten
+        # Test-Datenbank einrichten
         if not await tester.setup_test_db():
             return
         
-        ***REMOVED*** Tests ausführen
+        # Tests ausführen
         tests = [
             ("Workflow-Status-Updates", tester.test_workflow_state_updates()),
             ("VAN-Agent-Workflow", tester.test_agent_workflow(AgentType.VAN)),
@@ -172,7 +172,7 @@ async def main():
             else:
                 logger.error(f"✗ {test_name} fehlgeschlagen")
         
-        ***REMOVED*** Aufräumen
+        # Aufräumen
         await tester.cleanup_test_db()
         
     except Exception as e:

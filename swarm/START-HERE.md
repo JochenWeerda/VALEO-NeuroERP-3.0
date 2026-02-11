@@ -1,11 +1,11 @@
-***REMOVED*** 🚀 Swarm System - Start Here
+# 🚀 Swarm System - Start Here
 
-***REMOVED******REMOVED*** Schnellstart (3 Schritte)
+## Schnellstart (3 Schritte)
 
-***REMOVED******REMOVED******REMOVED*** 1️⃣ Umgebungsvariablen setzen
+### 1️⃣ Umgebungsvariablen setzen
 
 ```powershell
-***REMOVED*** PowerShell (Windows)
+# PowerShell (Windows)
 .\swarm\start-swarm.ps1
 ```
 
@@ -18,40 +18,40 @@ Das Script:
 **Oder manuell:**
 
 ```powershell
-***REMOVED*** .env.swarm erstellen/bearbeiten
+# .env.swarm erstellen/bearbeiten
 $env:NEUROERP_URL="http://localhost:3000"
 $env:NEUROERP_USER="admin"
 $env:NEUROERP_PASS="admin123"
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2️⃣ Frontend prüfen/starten
+### 2️⃣ Frontend prüfen/starten
 
 **Option A: Bestehendes Frontend nutzen (wenn bereits auf localhost:3000 läuft)**
 
 ```powershell
-***REMOVED*** Prüfe Health-Endpoint
+# Prüfe Health-Endpoint
 curl http://localhost:3000/health
 ```
 
 **Option B: Neues Frontend für Swarm starten**
 
 ```powershell
-***REMOVED*** Starte Frontend im Swarm-Netzwerk
+# Starte Frontend im Swarm-Netzwerk
 docker compose -f docker-compose.swarm.yml up neuroerp-frontend -d
 
-***REMOVED*** Warte auf Ready
+# Warte auf Ready
 docker compose -f docker-compose.swarm.yml logs -f neuroerp-frontend
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3️⃣ Erste Mission starten
+### 3️⃣ Erste Mission starten
 
 **UI-Explorer (Finance Module explorieren):**
 
 ```powershell
-***REMOVED*** Mit Docker
+# Mit Docker
 docker compose -f docker-compose.swarm.yml up neuroerp-ui-explorer
 
-***REMOVED*** Oder lokal
+# Oder lokal
 python swarm/ui_explorer.py
 ```
 
@@ -59,21 +59,22 @@ python swarm/ui_explorer.py
 - 📸 Screenshots: `evidence/screenshots/`
 - 📝 Handoff: `swarm/handoffs/ui-explorer-finance-*.md`
 
-***REMOVED******REMOVED*** 📋 Nächste Schritte
+## 📋 Nächste Schritte
 
 1. **Tests generieren** aus Handoff-Notizen
 2. **GAP-Analyse** durchführen
 3. **Lücken schließen** basierend auf Analyse
 
-***REMOVED******REMOVED*** 📚 Dokumentation
+## 📚 Dokumentation
 
 - **Quickstart**: `swarm/QUICKSTART.md`
 - **README**: `swarm/README.md`
 - **Setup-Status**: `SWARM-SETUP-COMPLETE.md`
 
-***REMOVED******REMOVED*** 🆘 Hilfe
+## 🆘 Hilfe
 
 - **Troubleshooting**: Siehe `swarm/QUICKSTART.md`
 - **Logs anzeigen**: `docker compose -f docker-compose.swarm.yml logs -f`
 - **Services stoppen**: `docker compose -f docker-compose.swarm.yml down`
+
 

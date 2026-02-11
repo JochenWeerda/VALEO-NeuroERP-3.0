@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Aktualisiert die solution_design_id im Projektplan.
 """
@@ -10,12 +10,12 @@ import logging
 from datetime import datetime
 from bson import ObjectId
 
-***REMOVED*** Pfad zum Projekt-Root hinzufügen
+# Pfad zum Projekt-Root hinzufügen
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ async def update_project_plan():
     Aktualisiert die solution_design_id im Projektplan.
     """
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         mongodb_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
         mongodb_db = os.getenv("MONGODB_DB", "valeo_neuroerp")
         
@@ -33,10 +33,10 @@ async def update_project_plan():
         mongodb = APMMongoDBConnector(mongodb_uri, mongodb_db)
         await mongodb.connect()
         
-        ***REMOVED*** Projekt-ID festlegen
+        # Projekt-ID festlegen
         project_id = os.getenv("PROJECT_ID", "valeo_neuroerp_project")
         
-        ***REMOVED*** Neuestes PLAN-Ergebnis und Lösungsdesign abrufen
+        # Neuestes PLAN-Ergebnis und Lösungsdesign abrufen
         plan_results = await mongodb.find_many("plan_results", {"project_id": project_id}, 
                                               sort_field="timestamp", sort_order=-1, limit=1)
         
@@ -52,7 +52,7 @@ async def update_project_plan():
         logger.info(f"PLAN-Ergebnis gefunden: {plan_result_id}")
         logger.info(f"Design-ID: {design_id}")
         
-        ***REMOVED*** Projektplan abrufen
+        # Projektplan abrufen
         project_plans = await mongodb.find_many("project_plans", {"project_id": project_id}, 
                                                sort_field="timestamp", sort_order=-1, limit=1)
         
@@ -66,7 +66,7 @@ async def update_project_plan():
         
         logger.info(f"Projektplan gefunden: {project_plan_id}")
         
-        ***REMOVED*** Projektplan aktualisieren
+        # Projektplan aktualisieren
         update_dict = {
             "$set": {
                 "solution_design_id": design_id,
@@ -92,11 +92,11 @@ async def update_project_plan():
         print(f"\nFehler: {str(e)}")
     
     finally:
-        ***REMOVED*** MongoDB-Verbindung trennen
+        # MongoDB-Verbindung trennen
         if 'mongodb' in locals():
             await mongodb.disconnect()
 
 
 if __name__ == "__main__":
-    ***REMOVED*** Asynchrone Funktion ausführen
+    # Asynchrone Funktion ausführen
     asyncio.run(update_project_plan()) 

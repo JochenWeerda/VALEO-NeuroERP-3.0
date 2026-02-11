@@ -99,10 +99,10 @@ export class PDFServiceImpl implements PDFService {
     html += `
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: ***REMOVED***333; }
+        h1 { color: #333; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background-color: ***REMOVED***f2f2f2; padding: 8px; text-align: left; border: 1px solid ***REMOVED***ddd; }
-        td { padding: 8px; border: 1px solid ***REMOVED***ddd; }
+        th { background-color: #f2f2f2; padding: 8px; text-align: left; border: 1px solid #ddd; }
+        td { padding: 8px; border: 1px solid #ddd; }
       </style>
     </head><body>`;
 
@@ -139,7 +139,7 @@ export class PDFServiceImpl implements PDFService {
       '<': '&lt;',
       '>': '&gt;',
       '"': '&quot;',
-      "'": '&***REMOVED***039;',
+      "'": '&#039;',
     };
     return text.replace(/[&<>"']/g, (m) => map[m]);
   }
@@ -147,4 +147,5 @@ export class PDFServiceImpl implements PDFService {
 
 // Export singleton instance
 export const pdfService = new PDFServiceImpl();
+
 

@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Pipeline-Integration für VALEO-NeuroERP
 
@@ -13,13 +13,13 @@ import sys
 from typing import Dict, Any, List
 import argparse
 
-***REMOVED*** Füge das Hauptverzeichnis zum Pythonpfad hinzu
+# Füge das Hauptverzeichnis zum Pythonpfad hinzu
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from core.config import get_settings
 from core.apm_phases import APMPhase, PhaseManager
 
-***REMOVED*** Konfiguriere Logging
+# Konfiguriere Logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -56,7 +56,7 @@ def create_apm_integration_config(output_path: str) -> None:
     pipeline_config = load_pipeline_config()
     pipelines = pipeline_config.get("pipelines", {})
     
-    ***REMOVED*** Erstelle die APM-Integration-Konfiguration
+    # Erstelle die APM-Integration-Konfiguration
     apm_integration = {
         "pipeline_mode": {
             "enabled": True,
@@ -93,7 +93,7 @@ def create_apm_integration_config(output_path: str) -> None:
         "pipelines": {}
     }
     
-    ***REMOVED*** Füge die Pipelines zur Konfiguration hinzu
+    # Füge die Pipelines zur Konfiguration hinzu
     for name, pipeline in pipelines.items():
         apm_integration["pipelines"][name] = {
             "name": pipeline.get("name"),
@@ -103,15 +103,15 @@ def create_apm_integration_config(output_path: str) -> None:
             "enabled": pipeline.get("enabled", True),
             "priority": pipeline.get("priority", 0),
             "integration_points": {
-                "van": pipeline.get("priority", 0) == 1,  ***REMOVED*** Nur die erste Pipeline wird nach VAN ausgeführt
-                "plan": True,  ***REMOVED*** Alle Pipelines werden nach PLAN ausgeführt
-                "create": pipeline.get("priority", 0) in [3, 4, 5],  ***REMOVED*** Nur bestimmte Pipelines werden nach CREATE ausgeführt
-                "implement": pipeline.get("priority", 0) in [2, 3],  ***REMOVED*** Nur bestimmte Pipelines werden nach IMPLEMENT ausgeführt
-                "reflect": True  ***REMOVED*** Alle Pipelines werden nach REFLECT ausgeführt
+                "van": pipeline.get("priority", 0) == 1,  # Nur die erste Pipeline wird nach VAN ausgeführt
+                "plan": True,  # Alle Pipelines werden nach PLAN ausgeführt
+                "create": pipeline.get("priority", 0) in [3, 4, 5],  # Nur bestimmte Pipelines werden nach CREATE ausgeführt
+                "implement": pipeline.get("priority", 0) in [2, 3],  # Nur bestimmte Pipelines werden nach IMPLEMENT ausgeführt
+                "reflect": True  # Alle Pipelines werden nach REFLECT ausgeführt
             }
         }
     
-    ***REMOVED*** Speichere die Konfiguration
+    # Speichere die Konfiguration
     try:
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(apm_integration, f, indent=2, ensure_ascii=False)
@@ -126,7 +126,7 @@ def create_apm_integration_module(output_path: str) -> None:
     Args:
         output_path: Der Pfad, an dem das Modul gespeichert werden soll
     """
-    module_content = """***REMOVED*** -*- coding: utf-8 -*-
+    module_content = """# -*- coding: utf-8 -*-
 \"\"\"
 APM-Pipeline-Integration für VALEO-NeuroERP
 
@@ -187,12 +187,12 @@ class APMPipelineIntegration:
         Returns:
             Der Pipeline-Kontext
         \"\"\"
-        ***REMOVED*** Initialisiere gemeinsame Tools
+        # Initialisiere gemeinsame Tools
         network_simulator = NetworkSimulator()
         sync_analyzer = SynchronizationAnalyzer()
         data_consistency_validator = DataConsistencyValidator()
         
-        ***REMOVED*** Initialisiere den gemeinsamen Kontext
+        # Initialisiere den gemeinsamen Kontext
         return PipelineContext({
             "network_simulator": network_simulator,
             "sync_analyzer": sync_analyzer,
@@ -221,13 +221,13 @@ class APMPipelineIntegration:
         if not self.is_pipeline_mode_enabled():
             return {"status": "skipped", "reason": "Pipeline-Modus ist deaktiviert"}
         
-        ***REMOVED*** Setze die Phase
+        # Setze die Phase
         self.phase_manager.set_phase(APMPhase.PIPELINE)
         
-        ***REMOVED*** Führe nur die Pipelines aus, die für die VAN-Phase konfiguriert sind
+        # Führe nur die Pipelines aus, die für die VAN-Phase konfiguriert sind
         pipelines_to_run = self._get_pipelines_for_phase("van")
         
-        ***REMOVED*** Führe die Pipelines aus
+        # Führe die Pipelines aus
         return self._run_pipelines(pipelines_to_run)
     
     def post_plan_phase(self, plan_result: Dict[str, Any]) -> Dict[str, Any]:
@@ -243,13 +243,13 @@ class APMPipelineIntegration:
         if not self.is_pipeline_mode_enabled():
             return {"status": "skipped", "reason": "Pipeline-Modus ist deaktiviert"}
         
-        ***REMOVED*** Setze die Phase
+        # Setze die Phase
         self.phase_manager.set_phase(APMPhase.PIPELINE)
         
-        ***REMOVED*** Führe nur die Pipelines aus, die für die PLAN-Phase konfiguriert sind
+        # Führe nur die Pipelines aus, die für die PLAN-Phase konfiguriert sind
         pipelines_to_run = self._get_pipelines_for_phase("plan")
         
-        ***REMOVED*** Führe die Pipelines aus
+        # Führe die Pipelines aus
         return self._run_pipelines(pipelines_to_run)
     
     def post_create_phase(self, create_result: Dict[str, Any]) -> Dict[str, Any]:
@@ -265,13 +265,13 @@ class APMPipelineIntegration:
         if not self.is_pipeline_mode_enabled():
             return {"status": "skipped", "reason": "Pipeline-Modus ist deaktiviert"}
         
-        ***REMOVED*** Setze die Phase
+        # Setze die Phase
         self.phase_manager.set_phase(APMPhase.PIPELINE)
         
-        ***REMOVED*** Führe nur die Pipelines aus, die für die CREATE-Phase konfiguriert sind
+        # Führe nur die Pipelines aus, die für die CREATE-Phase konfiguriert sind
         pipelines_to_run = self._get_pipelines_for_phase("create")
         
-        ***REMOVED*** Führe die Pipelines aus
+        # Führe die Pipelines aus
         return self._run_pipelines(pipelines_to_run)
     
     def post_implement_phase(self, implement_result: Dict[str, Any]) -> Dict[str, Any]:
@@ -287,13 +287,13 @@ class APMPipelineIntegration:
         if not self.is_pipeline_mode_enabled():
             return {"status": "skipped", "reason": "Pipeline-Modus ist deaktiviert"}
         
-        ***REMOVED*** Setze die Phase
+        # Setze die Phase
         self.phase_manager.set_phase(APMPhase.PIPELINE)
         
-        ***REMOVED*** Führe nur die Pipelines aus, die für die IMPLEMENT-Phase konfiguriert sind
+        # Führe nur die Pipelines aus, die für die IMPLEMENT-Phase konfiguriert sind
         pipelines_to_run = self._get_pipelines_for_phase("implement")
         
-        ***REMOVED*** Führe die Pipelines aus
+        # Führe die Pipelines aus
         return self._run_pipelines(pipelines_to_run)
     
     def post_reflect_phase(self, reflect_result: Dict[str, Any]) -> Dict[str, Any]:
@@ -309,13 +309,13 @@ class APMPipelineIntegration:
         if not self.is_pipeline_mode_enabled():
             return {"status": "skipped", "reason": "Pipeline-Modus ist deaktiviert"}
         
-        ***REMOVED*** Setze die Phase
+        # Setze die Phase
         self.phase_manager.set_phase(APMPhase.PIPELINE)
         
-        ***REMOVED*** Führe nur die Pipelines aus, die für die REFLECT-Phase konfiguriert sind
+        # Führe nur die Pipelines aus, die für die REFLECT-Phase konfiguriert sind
         pipelines_to_run = self._get_pipelines_for_phase("reflect")
         
-        ***REMOVED*** Führe die Pipelines aus
+        # Führe die Pipelines aus
         return self._run_pipelines(pipelines_to_run)
     
     def _get_pipelines_for_phase(self, phase: str) -> List[Dict[str, Any]]:
@@ -335,7 +335,7 @@ class APMPipelineIntegration:
                 pipeline.get("integration_points", {}).get(phase, False)):
                 pipelines.append(pipeline)
         
-        ***REMOVED*** Sortiere nach Priorität
+        # Sortiere nach Priorität
         return sorted(pipelines, key=lambda p: p.get("priority", 0))
     
     def _run_pipelines(self, pipelines: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -348,8 +348,8 @@ class APMPipelineIntegration:
         Returns:
             Das Ergebnis der Pipeline-Ausführung
         \"\"\"
-        ***REMOVED*** Hier würde die tatsächliche Ausführung der Pipelines stattfinden
-        ***REMOVED*** Da dies nur ein Vorbereitungsskript ist, geben wir eine Nachricht zurück
+        # Hier würde die tatsächliche Ausführung der Pipelines stattfinden
+        # Da dies nur ein Vorbereitungsskript ist, geben wir eine Nachricht zurück
         
         pipeline_names = [p.get("name") for p in pipelines]
         
@@ -362,7 +362,7 @@ class APMPipelineIntegration:
         }
 """
     
-    ***REMOVED*** Speichere das Modul
+    # Speichere das Modul
     try:
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(module_content)
@@ -374,7 +374,7 @@ def main():
     """
     Hauptfunktion zur Vorbereitung der Pipeline-Integration.
     """
-    ***REMOVED*** Parse Kommandozeilenargumente
+    # Parse Kommandozeilenargumente
     parser = argparse.ArgumentParser(description="Bereitet die Integration der Pipelines mit dem APM-Framework vor")
     parser.add_argument("--config-output", default="config/apm_pipeline_integration.json",
                        help="Pfad für die Ausgabe der Konfigurationsdatei")
@@ -385,13 +385,13 @@ def main():
     logger.info("Starte Vorbereitung der Pipeline-Integration")
     
     try:
-        ***REMOVED*** Erstelle das logs-Verzeichnis, falls es nicht existiert
+        # Erstelle das logs-Verzeichnis, falls es nicht existiert
         os.makedirs('logs', exist_ok=True)
         
-        ***REMOVED*** Erstelle die Konfigurationsdatei
+        # Erstelle die Konfigurationsdatei
         create_apm_integration_config(args.config_output)
         
-        ***REMOVED*** Erstelle das Python-Modul
+        # Erstelle das Python-Modul
         create_apm_integration_module(args.module_output)
         
         logger.info("Pipeline-Integration vorbereitet")
@@ -410,3 +410,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

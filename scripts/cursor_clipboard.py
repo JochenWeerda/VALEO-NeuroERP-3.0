@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 Cursor.ai Prompt in die Zwischenablage kopieren
@@ -12,7 +12,7 @@ import json
 import pyperclip
 import subprocess
 
-***REMOVED*** Konfiguration
+# Konfiguration
 PROMPT_FILE = "data/cursor_prompts/latest_prompt.json"
 CURSOR_PATH = "C:\\Program Files\\Cursor\\Cursor.exe"
 
@@ -56,7 +56,7 @@ def main():
     """Hauptfunktion"""
     print("Cursor.ai Prompt in die Zwischenablage kopieren")
     
-    ***REMOVED*** Prompt aus Datei lesen
+    # Prompt aus Datei lesen
     prompt = read_prompt()
     if not prompt:
         print("Kein Prompt gefunden.")
@@ -64,11 +64,11 @@ def main():
     
     print(f"Prompt gefunden: {prompt[:50]}...")
     
-    ***REMOVED*** Prompt in die Zwischenablage kopieren
+    # Prompt in die Zwischenablage kopieren
     if not copy_to_clipboard(prompt):
         return
     
-    ***REMOVED*** Cursor.ai starten
+    # Cursor.ai starten
     start_cursor()
     
     print("Der Prompt wurde in die Zwischenablage kopiert.")

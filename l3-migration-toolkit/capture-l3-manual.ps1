@@ -1,17 +1,17 @@
-***REMOVED*** L3-Masken Manueller Screenshot-Workflow
-***REMOVED*** =========================================
-***REMOVED*** 
-***REMOVED*** Dieses Skript öffnet den Browser mit der L3-RDP-Verbindung
-***REMOVED*** und erlaubt Ihnen, manuell durch L3 zu navigieren.
-***REMOVED*** 
-***REMOVED*** Nach jeder Navigation geben Sie den Masken-Namen ein,
-***REMOVED*** und das Skript erstellt automatisch einen Screenshot.
+# L3-Masken Manueller Screenshot-Workflow
+# =========================================
+# 
+# Dieses Skript öffnet den Browser mit der L3-RDP-Verbindung
+# und erlaubt Ihnen, manuell durch L3 zu navigieren.
+# 
+# Nach jeder Navigation geben Sie den Masken-Namen ein,
+# und das Skript erstellt automatisch einen Screenshot.
 
 param(
     [string]$OutputDir = "screenshots\l3-masks"
 )
 
-***REMOVED*** Farben für bessere Lesbarkeit
+# Farben für bessere Lesbarkeit
 function Write-ColorOutput {
     param(
         [string]$Message,
@@ -20,17 +20,17 @@ function Write-ColorOutput {
     Write-Host $Message -ForegroundColor $Color
 }
 
-***REMOVED*** Erstelle Output-Verzeichnis
+# Erstelle Output-Verzeichnis
 if (!(Test-Path $OutputDir)) {
     New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
     Write-ColorOutput "✅ Verzeichnis erstellt: $OutputDir" "Green"
 }
 
-***REMOVED*** Zähler für Screenshots
+# Zähler für Screenshots
 $script:Counter = 1
 $script:CapturedMasks = @()
 
-***REMOVED*** Funktion: Screenshot erstellen
+# Funktion: Screenshot erstellen
 function Capture-Screenshot {
     param([string]$MaskName)
     
@@ -38,7 +38,7 @@ function Capture-Screenshot {
     $filename = "$($script:Counter.ToString('00'))_$($MaskName -replace '[^a-zA-Z0-9-]', '-').png"
     $filepath = Join-Path $OutputDir $filename
     
-    ***REMOVED*** Rufe Playwright-Screenshot auf (über Node.js)
+    # Rufe Playwright-Screenshot auf (über Node.js)
     $nodeScript = @"
 const { chromium } = require('playwright');
 (async () => {
@@ -61,12 +61,12 @@ const { chromium } = require('playwright');
 })();
 "@
     
-    ***REMOVED*** Temporäre Node.js-Datei
+    # Temporäre Node.js-Datei
     $tempScript = Join-Path $env:TEMP "capture-l3-temp.js"
     $nodeScript | Out-File -FilePath $tempScript -Encoding UTF8
     
     try {
-        ***REMOVED*** Führe Node-Skript aus
+        # Führe Node-Skript aus
         $result = node $tempScript 2>&1
         
         if ($LASTEXITCODE -eq 0) {
@@ -90,7 +90,7 @@ const { chromium } = require('playwright');
     }
 }
 
-***REMOVED*** Hauptprogramm
+# Hauptprogramm
 Write-ColorOutput "
 ╔══════════════════════════════════════════════════════════╗
 ║   L3-Masken Manueller Screenshot-Workflow                ║
@@ -107,15 +107,15 @@ Write-ColorOutput "   5. Geben Sie 'exit' ein zum Beenden`n" "White"
 Write-ColorOutput "🚀 Starte Browser..." "Cyan"
 Start-Sleep -Seconds 2
 
-***REMOVED*** Öffne Browser mit L3-RDP (bereits geöffnet in Ihrem Fall)
+# Öffne Browser mit L3-RDP (bereits geöffnet in Ihrem Fall)
 Write-ColorOutput "
 ✅ Browser sollte bereits geöffnet sein auf:
-   http://localhost:8090/guacamole/***REMOVED***/client/MQBjAHBvc3RncmVzcWw
+   http://localhost:8090/guacamole/#/client/MQBjAHBvc3RncmVzcWw
 " "Green"
 
 Write-ColorOutput "Bereit für Screenshots!`n" "Green"
 
-***REMOVED*** Hauptschleife
+# Hauptschleife
 while ($true) {
     Write-Host ""
     $maskName = Read-Host "📸 Maske-Name (oder 'exit')"
@@ -132,12 +132,12 @@ while ($true) {
     
     Write-ColorOutput "   📸 Erstelle Screenshot: $maskName" "Cyan"
     
-    ***REMOVED*** Alternative: Verwende Playwright MCP direkt (falls verfügbar)
-    ***REMOVED*** Für jetzt: Manueller Screenshot über Browser
+    # Alternative: Verwende Playwright MCP direkt (falls verfügbar)
+    # Für jetzt: Manueller Screenshot über Browser
     Write-ColorOutput "   ⚠️  Bitte erstellen Sie manuell einen Screenshot (Windows + Shift + S)" "Yellow"
     Write-ColorOutput "   ℹ️  Speichern Sie ihn als: $OutputDir\$($script:Counter.ToString('00'))_$($maskName -replace '[^a-zA-Z0-9-]', '-').png" "Gray"
     
-    ***REMOVED*** Registriere Maske
+    # Registriere Maske
     $script:CapturedMasks += @{
         id = $script:Counter
         name = $maskName
@@ -149,7 +149,7 @@ while ($true) {
     Write-ColorOutput "   ✅ Maske registriert!" "Green"
 }
 
-***REMOVED*** Speichere Index
+# Speichere Index
 $indexPath = Join-Path $OutputDir "index.json"
 $indexData = @{
     generatedAt = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
@@ -162,11 +162,12 @@ $indexData | Out-File -FilePath $indexPath -Encoding UTF8
 Write-ColorOutput "`n✅ Index gespeichert: index.json" "Green"
 Write-ColorOutput "🎉 $($script:CapturedMasks.Count) Masken registriert!`n" "Cyan"
 
-***REMOVED*** Zeige Zusammenfassung
+# Zeige Zusammenfassung
 Write-ColorOutput "📋 Erfasste Masken:" "Yellow"
 $script:CapturedMasks | ForEach-Object {
     Write-ColorOutput "   $($_.id). $($_.name) ($($_.filename))" "White"
 }
 
 Write-ColorOutput "`n✨ Fertig!" "Green"
+
 

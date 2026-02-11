@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 GENXAIS v1.3 Dashboard Daten-Aktualisierung
@@ -15,7 +15,7 @@ import random
 import logging
 from pathlib import Path
 
-***REMOVED*** Logging konfigurieren
+# Logging konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -26,13 +26,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger("dashboard_refresh")
 
-***REMOVED*** Pfade definieren
+# Pfade definieren
 SCRIPT_DIR = Path(__file__).parent
 ROOT_DIR = SCRIPT_DIR.parent
 DATA_DIR = ROOT_DIR / "data"
 DASHBOARD_DATA_DIR = DATA_DIR / "dashboard"
 
-***REMOVED*** Stellen Sie sicher, dass die Verzeichnisse existieren
+# Stellen Sie sicher, dass die Verzeichnisse existieren
 DASHBOARD_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 class DashboardDataRefresher:
@@ -55,7 +55,7 @@ class DashboardDataRefresher:
             return config
         except Exception as e:
             logger.error(f"Fehler beim Laden der Konfiguration: {e}")
-            ***REMOVED*** Fallback-Konfiguration
+            # Fallback-Konfiguration
             return {
                 "name": "GENXAIS Cycle v1.3",
                 "version": "1.3",
@@ -72,7 +72,7 @@ class DashboardDataRefresher:
             except Exception as e:
                 logger.error(f"Fehler beim Laden der Phasendaten: {e}")
         
-        ***REMOVED*** Standarddaten erstellen
+        # Standarddaten erstellen
         phases = self.config.get("phases", ["VAN", "PLAN", "CREATE", "IMPLEMENTATION", "REFLEKTION"])
         phase_data = {
             "phases": phases,
@@ -98,7 +98,7 @@ class DashboardDataRefresher:
             except Exception as e:
                 logger.error(f"Fehler beim Laden der Pipeline-Daten: {e}")
         
-        ***REMOVED*** Standarddaten erstellen
+        # Standarddaten erstellen
         pipeline_count = self.config.get("pipeline", {}).get("pipelines", 5)
         pipeline_data = {
             "pipelines": [f"Pipeline {i+1}" for i in range(pipeline_count)],
@@ -123,7 +123,7 @@ class DashboardDataRefresher:
             except Exception as e:
                 logger.error(f"Fehler beim Laden der Artefakt-Daten: {e}")
         
-        ***REMOVED*** Standarddaten erstellen
+        # Standarddaten erstellen
         artifacts = self.config.get("artifacts", {}).get("track", [
             "review_summary.md",
             "plan_overview.md",
@@ -166,14 +166,14 @@ class DashboardDataRefresher:
         current_phase = self.phase_data["current_phase"]
         phases = self.phase_data["phases"]
         
-        ***REMOVED*** Aktuelle Phase aktualisieren
+        # Aktuelle Phase aktualisieren
         if current_phase == "PLAN":
-            ***REMOVED*** Fortschritt der aktuellen Phase erhöhen
+            # Fortschritt der aktuellen Phase erhöhen
             current_progress = self.phase_data["status"][current_phase]["progress"]
             new_progress = min(current_progress + random.randint(1, 5), 100)
             self.phase_data["status"][current_phase]["progress"] = new_progress
             
-            ***REMOVED*** Wenn Phase abgeschlossen ist, zur nächsten Phase wechseln
+            # Wenn Phase abgeschlossen ist, zur nächsten Phase wechseln
             if new_progress >= 100:
                 current_index = phases.index(current_phase)
                 if current_index < len(phases) - 1:
@@ -185,7 +185,7 @@ class DashboardDataRefresher:
         
         self.phase_data["last_updated"] = datetime.datetime.now().isoformat()
         
-        ***REMOVED*** Daten speichern
+        # Daten speichern
         phase_data_path = DASHBOARD_DATA_DIR / "phase_data.json"
         with open(phase_data_path, 'w', encoding='utf-8') as file:
             json.dump(self.phase_data, file, ensure_ascii=False, indent=2)
@@ -195,12 +195,12 @@ class DashboardDataRefresher:
     def update_pipeline_data(self):
         """Aktualisiert die Pipeline-Daten"""
         for pipeline in self.pipeline_data["pipelines"]:
-            ***REMOVED*** Fortschritt aktualisieren
+            # Fortschritt aktualisieren
             current_progress = self.pipeline_data["status"][pipeline]["progress"]
             new_progress = min(current_progress + random.randint(0, 3), 100)
             self.pipeline_data["status"][pipeline]["progress"] = new_progress
             
-            ***REMOVED*** Laufzeit aktualisieren
+            # Laufzeit aktualisieren
             runtime = self.pipeline_data["status"][pipeline]["runtime"]
             hours, minutes = runtime.split("h ")
             minutes = minutes.replace("m", "")
@@ -209,13 +209,13 @@ class DashboardDataRefresher:
             new_minutes = total_minutes % 60
             self.pipeline_data["status"][pipeline]["runtime"] = f"{new_hours}h {new_minutes}m"
             
-            ***REMOVED*** Status aktualisieren
+            # Status aktualisieren
             if new_progress >= 100:
                 self.pipeline_data["status"][pipeline]["status"] = "Abgeschlossen"
         
         self.pipeline_data["last_updated"] = datetime.datetime.now().isoformat()
         
-        ***REMOVED*** Daten speichern
+        # Daten speichern
         pipeline_data_path = DASHBOARD_DATA_DIR / "pipeline_data.json"
         with open(pipeline_data_path, 'w', encoding='utf-8') as file:
             json.dump(self.pipeline_data, file, ensure_ascii=False, indent=2)
@@ -226,7 +226,7 @@ class DashboardDataRefresher:
         """Aktualisiert die Artefakt-Daten"""
         current_phase = self.phase_data["current_phase"]
         
-        ***REMOVED*** Artefakte basierend auf der aktuellen Phase aktualisieren
+        # Artefakte basierend auf der aktuellen Phase aktualisieren
         if current_phase == "PLAN":
             self.artifact_data["status"]["plan_overview.md"]["status"] = "In Bearbeitung"
             self.artifact_data["status"]["plan_overview.md"]["last_updated"] = datetime.datetime.now().isoformat()
@@ -237,7 +237,7 @@ class DashboardDataRefresher:
         
         self.artifact_data["last_updated"] = datetime.datetime.now().isoformat()
         
-        ***REMOVED*** Daten speichern
+        # Daten speichern
         artifact_data_path = DASHBOARD_DATA_DIR / "artifact_data.json"
         with open(artifact_data_path, 'w', encoding='utf-8') as file:
             json.dump(self.artifact_data, file, ensure_ascii=False, indent=2)

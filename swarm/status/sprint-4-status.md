@@ -1,4 +1,4 @@
-***REMOVED*** Sprint 4 Status
+# Sprint 4 Status
 
 **Datum:** 2025-01-30  
 **Phase:** P2 - Mittlere Priorität (Procurement)  
@@ -6,43 +6,43 @@
 
 ---
 
-***REMOVED******REMOVED*** Agenten-Aufgaben
+## Agenten-Aufgaben
 
-***REMOVED******REMOVED******REMOVED*** Agent-1 (Finance)
+### Agent-1 (Finance)
 - Status: ✅ Support für Agent-2 (optional)
 - Tasks: Support für Agent-2 (optional)
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 (Procurement) - AKTIV
+### Agent-2 (Procurement) - AKTIV
 - Status: 📋 Geplant
 - Tasks:
   - ⏳ PROC-SUP-02: Lieferantenbewertung
   - ⏳ PROC-RFQ-01: RFQ vervollständigen
   - ⏳ PROC-REP-01: Standardreports Einkauf
 
-***REMOVED******REMOVED******REMOVED*** Agent-3 (Sales/CRM)
+### Agent-3 (Sales/CRM)
 - Status: Geplant (Phase 2)
 - Tasks: TBD
 
-***REMOVED******REMOVED******REMOVED*** Agent-4 (Infrastructure)
+### Agent-4 (Infrastructure)
 - Status: ⏳ Support für Agent-2
 - Tasks:
   - ⏳ Report-Infrastructure prüfen (für PROC-REP-01)
 
 ---
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 - Agent-2 → Agent-4: PROC-REP-01 nutzt möglicherweise Report-Infrastructure
 
 ---
 
-***REMOVED******REMOVED*** Blockaden
+## Blockaden
 
 Keine Blockaden.
 
 ---
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. Agent-2: Bestehende Frontend-Seiten analysieren
 2. Agent-2: Backend-API Integration prüfen
@@ -52,4 +52,5 @@ Keine Blockaden.
 ---
 
 **Sprint 4 Status:** 📋 **GEPLANT - BEREIT FÜR START**
+
 

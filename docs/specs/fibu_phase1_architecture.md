@@ -1,25 +1,25 @@
-***REMOVED*** FiBu Phase 1 – Zielarchitektur & Foundations
+# FiBu Phase 1 – Zielarchitektur & Foundations
 > **Status**: In Umsetzung  
 > **Datum**: 2025-11-14  
 > **Referenz**: `docs/specs/fibu_architektur_spezifikation.md`, `docs/adr/adr-001-fibu-domain-reuse-vs-rewrite.md`, `docs/adr/adr-002-fibu-frontend-api-layer.md`
 
-***REMOVED******REMOVED*** 1. Microservice-Zerlegung
+## 1. Microservice-Zerlegung
 
-***REMOVED******REMOVED******REMOVED*** Core Services
+### Core Services
 - **fibu-core**: PRIMANOTA, Verbuchung, Periodeninfo
 - **fibu-master-data**: Kontenrahmen, Debitoren/Kreditoren, Konstanten
 - **fibu-gateway**: Anti-Corruption-Layer & API-Gateway
 
-***REMOVED******REMOVED******REMOVED*** Shared Libraries
+### Shared Libraries
 - **fibu-shared**: GoBD-Compliance, Hash-Chains, Event-Schema
 - **fibu-auth**: Rollenbasierte AuthZ (FiBu-Rollenmodell)
 - **fibu-events**: Standardisierte Event-Definitionen
 
-***REMOVED******REMOVED*** 2. Event-Schema & Kommunikation
+## 2. Event-Schema & Kommunikation
 
-***REMOVED******REMOVED******REMOVED*** FiBu-Events (NATS)
+### FiBu-Events (NATS)
 ```yaml
-***REMOVED*** Buchungs-Events
+# Buchungs-Events
 fibu.booking.created:
   booking_id: uuid
   account_id: string
@@ -27,13 +27,13 @@ fibu.booking.created:
   period: string
   document_id: uuid
 
-***REMOVED*** Stammdaten-Events
+# Stammdaten-Events
 fibu.master_data.account.updated:
   account_id: string
   account_number: string
   account_name: string
 
-***REMOVED*** OP-Events
+# OP-Events
 fibu.op.created:
   op_id: uuid
   customer_id: string
@@ -41,14 +41,14 @@ fibu.op.created:
   due_date: date
 ```
 
-***REMOVED******REMOVED******REMOVED*** Anti-Corruption-Layer
+### Anti-Corruption-Layer
 - **Sales → FiBu**: `sales.invoice.created` → `fibu.booking.create`
 - **Inventory → FiBu**: `inventory.stock.changed` → `fibu.booking.adjust`
 - **Workflow → FiBu**: `workflow.approval.granted` → `fibu.booking.approve`
 
-***REMOVED******REMOVED*** 3. API-Spezifikation
+## 3. API-Spezifikation
 
-***REMOVED******REMOVED******REMOVED*** fibu-gateway Endpoints
+### fibu-gateway Endpoints
 ```yaml
 POST /api/v1/bookings
   - Transformiert externe Events
@@ -64,22 +64,22 @@ POST /api/v1/documents
   - Verknüpfung mit Buchungen
 ```
 
-***REMOVED******REMOVED*** 4. GoBD-Compliance Framework
+## 4. GoBD-Compliance Framework
 
-***REMOVED******REMOVED******REMOVED*** Audit-Trail
+### Audit-Trail
 - Write-Ahead-Logging für alle Buchungen
 - Hash-Chains über Perioden
 - Unveränderliche Speicherung
 
-***REMOVED******REMOVED******REMOVED*** Rollenmodell
+### Rollenmodell
 - **Sachbearbeiter**: Erfassung, keine Freigabe
 - **Freigeber**: Buchungen > X EUR freigeben
 - **Steuerberater**: Lesend, Reports
 - **Admin**: Konfiguration, Stornos
 
-***REMOVED******REMOVED*** 5. Infrastructure as Code
+## 5. Infrastructure as Code
 
-***REMOVED******REMOVED******REMOVED*** Docker Compose (Development)
+### Docker Compose (Development)
 ```yaml
 services:
   fibu-core:
@@ -97,8 +97,9 @@ services:
       - nats
 ```
 
-***REMOVED******REMOVED******REMOVED*** Helm Charts (Production)
+### Helm Charts (Production)
 - Separate Charts pro Service
 - ConfigMaps für Event-Schemas
 - Secrets für DB/Auth
+
 

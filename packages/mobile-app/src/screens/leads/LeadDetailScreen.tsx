@@ -36,20 +36,20 @@ export default function LeadDetailScreen() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'qualified': return '***REMOVED***4CAF50';
-      case 'contacted': return '***REMOVED***2196F3';
-      case 'new': return '***REMOVED***FF9800';
-      case 'lost': return '***REMOVED***F44336';
-      default: return '***REMOVED***9E9E9E';
+      case 'qualified': return '#4CAF50';
+      case 'contacted': return '#2196F3';
+      case 'new': return '#FF9800';
+      case 'lost': return '#F44336';
+      default: return '#9E9E9E';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return '***REMOVED***F44336';
-      case 'medium': return '***REMOVED***FF9800';
-      case 'low': return '***REMOVED***4CAF50';
-      default: return '***REMOVED***9E9E9E';
+      case 'high': return '#F44336';
+      case 'medium': return '#FF9800';
+      case 'low': return '#4CAF50';
+      default: return '#9E9E9E';
     }
   };
 
@@ -169,7 +169,7 @@ export default function LeadDetailScreen() {
         <Button
           mode="contained"
           onPress={() => {/* TODO: Implement convert to customer */}}
-          style={[styles.button, { backgroundColor: '***REMOVED***4CAF50' }]}
+          style={[styles.button, { backgroundColor: '#4CAF50' }]}
         >
           Convert to Customer
         </Button>
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   value: {
     fontWeight: 'bold',
-    color: '***REMOVED***4CAF50',
+    color: '#4CAF50',
   },
   notesContainer: {
     marginTop: 8,

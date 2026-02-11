@@ -1,12 +1,12 @@
-***REMOVED*** L3 Migration Toolkit - Setup-Anleitung
+# L3 Migration Toolkit - Setup-Anleitung
 
 **Zweck:** Automatische Screenshots & Analyse von L3-Masken für VALEO-NeuroERP Migration
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Isoliertes Setup
+## 🎯 Isoliertes Setup
 
-***REMOVED******REMOVED******REMOVED*** Netzwerk
+### Netzwerk
 
 **IP-Bereich:** `172.25.0.0/24` (komplett isoliert von VALEO-NeuroERP)
 
@@ -26,30 +26,30 @@
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Quick Start
+## 🚀 Quick Start
 
-***REMOVED******REMOVED******REMOVED*** Schritt 1: Voraussetzungen prüfen
+### Schritt 1: Voraussetzungen prüfen
 
 ```powershell
-***REMOVED*** Docker Desktop läuft?
+# Docker Desktop läuft?
 docker version
 
-***REMOVED*** Remotedesktop aktiv?
-***REMOVED*** Einstellungen → System → Remotedesktop → Aktiviert
+# Remotedesktop aktiv?
+# Einstellungen → System → Remotedesktop → Aktiviert
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 2: .env-Datei erstellen
+### Schritt 2: .env-Datei erstellen
 
 ```powershell
-***REMOVED*** Im Verzeichnis l3-migration-toolkit/
+# Im Verzeichnis l3-migration-toolkit/
 Copy-Item .env.example .env
 
-***REMOVED*** .env bearbeiten:
-***REMOVED*** - POSTGRES_PASSWORD setzen
-***REMOVED*** - L3_RDP_PASSWORD mit deinem Windows-Passwort
+# .env bearbeiten:
+# - POSTGRES_PASSWORD setzen
+# - L3_RDP_PASSWORD mit deinem Windows-Passwort
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 3: Container starten
+### Schritt 3: Container starten
 
 ```powershell
 cd C:\Users\Jochen\VALEO-NeuroERP-3.0\l3-migration-toolkit
@@ -59,13 +59,13 @@ docker compose up -d
 
 **Warte ~30 Sekunden** für vollständigen Start.
 
-***REMOVED******REMOVED******REMOVED*** Schritt 4: Guacamole DB initialisieren (EINMALIG!)
+### Schritt 4: Guacamole DB initialisieren (EINMALIG!)
 
 ```powershell
 docker exec -i l3-guacamole /opt/guacamole/bin/initdb.sh --postgres | docker exec -i l3-postgres psql -U guacamole_user -d guacamole_db
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 5: Guacamole neu starten
+### Schritt 5: Guacamole neu starten
 
 ```powershell
 docker restart l3-guacamole
@@ -75,22 +75,22 @@ docker restart l3-guacamole
 
 ---
 
-***REMOVED******REMOVED*** 🔐 Guacamole einrichten
+## 🔐 Guacamole einrichten
 
-***REMOVED******REMOVED******REMOVED*** Login
+### Login
 
 **URL:** http://localhost:8090/guacamole  
 **User:** `guacadmin`  
 **Pass:** `guacadmin` (⚠️ **SOFORT ÄNDERN!**)
 
-***REMOVED******REMOVED******REMOVED*** Passwort ändern
+### Passwort ändern
 
 1. Oben rechts: **guacadmin** → **Settings**
 2. **Preferences** → **Change Password**
 3. Neues sicheres Passwort setzen
 4. Speichern
 
-***REMOVED******REMOVED******REMOVED*** RDP-Verbindung zu Windows (L3) anlegen
+### RDP-Verbindung zu Windows (L3) anlegen
 
 1. **Settings** → **Connections** → **New Connection**
 2. **Name:** `L3-Windows-RDP`
@@ -108,7 +108,7 @@ docker restart l3-guacamole
    - ✅ Disable full window drag
 6. **Speichern**
 
-***REMOVED******REMOVED******REMOVED*** Alternative: VNC-Verbindung (empfohlen bei Session-Problemen)
+### Alternative: VNC-Verbindung (empfohlen bei Session-Problemen)
 
 **Falls RDP schwarzen Bildschirm zeigt:**
 
@@ -127,21 +127,21 @@ docker restart l3-guacamole
 
 ---
 
-***REMOVED******REMOVED*** 📸 Screenshot-Automation einrichten
+## 📸 Screenshot-Automation einrichten
 
-***REMOVED******REMOVED******REMOVED*** Installation
+### Installation
 
 ```powershell
 cd C:\Users\Jochen\VALEO-NeuroERP-3.0\l3-migration-toolkit\playwright-snap
 
-***REMOVED*** Dependencies installieren
+# Dependencies installieren
 npm install
 
-***REMOVED*** Playwright Browser installieren
+# Playwright Browser installieren
 npm run install:pw
 ```
 
-***REMOVED******REMOVED******REMOVED*** Konfiguration
+### Konfiguration
 
 **Umgebungsvariablen setzen:**
 
@@ -154,7 +154,7 @@ $env:OUT_DIR = "C:/Users/Jochen/VALEO-NeuroERP-3.0/l3-migration-toolkit/screensh
 $env:WAIT_SECONDS = "10"
 ```
 
-***REMOVED******REMOVED******REMOVED*** Test-Screenshot
+### Test-Screenshot
 
 ```powershell
 npm run snap
@@ -164,30 +164,30 @@ npm run snap
 
 ---
 
-***REMOVED******REMOVED*** ⏰ Automatische Screenshots (Task Scheduler)
+## ⏰ Automatische Screenshots (Task Scheduler)
 
-***REMOVED******REMOVED******REMOVED*** PowerShell-Script erstellen
+### PowerShell-Script erstellen
 
 **Datei:** `l3-migration-toolkit/run-screenshot.ps1`
 
 ```powershell
-***REMOVED***!/usr/bin/env pwsh
-***REMOVED*** L3 Screenshot Automation
+#!/usr/bin/env pwsh
+# L3 Screenshot Automation
 
 $ErrorActionPreference = "Stop"
 
-***REMOVED*** Wechsle ins Playwright-Verzeichnis
+# Wechsle ins Playwright-Verzeichnis
 Set-Location "C:\Users\Jochen\VALEO-NeuroERP-3.0\l3-migration-toolkit\playwright-snap"
 
-***REMOVED*** Umgebungsvariablen
+# Umgebungsvariablen
 $env:GUAC_URL = "http://localhost:8090/guacamole"
 $env:GUAC_USER = "guacadmin"
-$env:GUAC_PASS = "DEIN_PASSWORT_HIER"  ***REMOVED*** ⚠️ ANPASSEN!
+$env:GUAC_PASS = "DEIN_PASSWORT_HIER"  # ⚠️ ANPASSEN!
 $env:CONNECTION_NAME = "L3-Windows-RDP"
 $env:OUT_DIR = "C:/Users/Jochen/VALEO-NeuroERP-3.0/l3-migration-toolkit/screenshots"
 $env:WAIT_SECONDS = "10"
 
-***REMOVED*** Screenshot erstellen
+# Screenshot erstellen
 try {
     npm run snap
     Write-Host "✅ Screenshot erfolgreich" -ForegroundColor Green
@@ -197,10 +197,10 @@ try {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Task Scheduler einrichten
+### Task Scheduler einrichten
 
 ```powershell
-***REMOVED*** Task anlegen (alle 5 Minuten)
+# Task anlegen (alle 5 Minuten)
 $Action = New-ScheduledTaskAction `
   -Execute "powershell.exe" `
   -Argument "-ExecutionPolicy Bypass -File C:\Users\Jochen\VALEO-NeuroERP-3.0\l3-migration-toolkit\run-screenshot.ps1"
@@ -222,33 +222,33 @@ Register-ScheduledTask `
 Write-Host "✅ Task Scheduler eingerichtet: Alle 5 Minuten" -ForegroundColor Green
 ```
 
-***REMOVED******REMOVED******REMOVED*** Task verwalten
+### Task verwalten
 
 ```powershell
-***REMOVED*** Status prüfen
+# Status prüfen
 Get-ScheduledTask -TaskName "L3-Screenshot-Automation"
 
-***REMOVED*** Manuell ausführen
+# Manuell ausführen
 Start-ScheduledTask -TaskName "L3-Screenshot-Automation"
 
-***REMOVED*** Deaktivieren
+# Deaktivieren
 Disable-ScheduledTask -TaskName "L3-Screenshot-Automation"
 
-***REMOVED*** Löschen
+# Löschen
 Unregister-ScheduledTask -TaskName "L3-Screenshot-Automation" -Confirm:$false
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📊 Screenshots analysieren
+## 📊 Screenshots analysieren
 
-***REMOVED******REMOVED******REMOVED*** Metadaten ansehen
+### Metadaten ansehen
 
 ```powershell
 Get-ChildItem C:\Users\Jochen\VALEO-NeuroERP-3.0\l3-migration-toolkit\screenshots\*.json | Get-Content | ConvertFrom-Json
 ```
 
-***REMOVED******REMOVED******REMOVED*** Statistik
+### Statistik
 
 ```powershell
 $screenshots = Get-ChildItem C:\Users\Jochen\VALEO-NeuroERP-3.0\l3-migration-toolkit\screenshots\*.png
@@ -262,16 +262,16 @@ Write-Host "   Neuester: $($screenshots | Sort-Object LastWriteTime -Descending 
 
 ---
 
-***REMOVED******REMOVED*** 🔧 Troubleshooting
+## 🔧 Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Keine Verbindung gefunden"
+### Problem: "Keine Verbindung gefunden"
 
 **Lösung:** Prüfe in Guacamole Web-UI, ob Verbindung angelegt ist:
 1. Login: http://localhost:8090/guacamole
 2. Settings → Connections
 3. Falls leer: RDP/VNC-Connection anlegen (siehe oben)
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Schwarzer Bildschirm" bei RDP
+### Problem: "Schwarzer Bildschirm" bei RDP
 
 **Ursache:** Windows erlaubt nur eine aktive RDP-Session.
 
@@ -279,11 +279,11 @@ Write-Host "   Neuester: $($screenshots | Sort-Object LastWriteTime -Descending 
 
 **Lösung 2:** Windows-Session trennen (nicht abmelden):
 ```powershell
-***REMOVED*** In RDP-Session
+# In RDP-Session
 tsdiscon
 ```
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Canvas nicht gefunden"
+### Problem: "Canvas nicht gefunden"
 
 **Lösung:** Wartezeit erhöhen:
 ```powershell
@@ -291,30 +291,30 @@ $env:WAIT_SECONDS = "15"
 npm run snap
 ```
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Docker-Container läuft nicht"
+### Problem: "Docker-Container läuft nicht"
 
 ```powershell
-***REMOVED*** Status prüfen
+# Status prüfen
 docker compose ps
 
-***REMOVED*** Logs ansehen
+# Logs ansehen
 docker compose logs l3-guacamole
 
-***REMOVED*** Neu starten
+# Neu starten
 docker compose restart
 ```
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Workflow für L3-Masken-Analyse
+## 🎯 Workflow für L3-Masken-Analyse
 
-***REMOVED******REMOVED******REMOVED*** 1. L3 starten & Maske öffnen
+### 1. L3 starten & Maske öffnen
 
 1. L3-Software auf Windows starten
 2. Gewünschte Maske öffnen (z.B. Kundenstamm)
 3. Maske vollständig laden lassen
 
-***REMOVED******REMOVED******REMOVED*** 2. Screenshot erstellen
+### 2. Screenshot erstellen
 
 **Manuell:**
 ```powershell
@@ -324,19 +324,19 @@ npm run snap
 
 **Automatisch:** Task Scheduler macht alle 5 Min einen Screenshot
 
-***REMOVED******REMOVED******REMOVED*** 3. Screenshots organisieren
+### 3. Screenshots organisieren
 
 ```powershell
-***REMOVED*** Umbenennen nach Masken-Name
+# Umbenennen nach Masken-Name
 Move-Item screenshots/l3_2025-10-16....png screenshots/L3_Kundenstamm_001.png
 
-***REMOVED*** Ordner-Struktur
+# Ordner-Struktur
 mkdir screenshots/stammdaten
 mkdir screenshots/verkauf
 mkdir screenshots/einkauf
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. Feldanalyse (manuell oder mit OCR)
+### 4. Feldanalyse (manuell oder mit OCR)
 
 Für jede Maske dokumentieren:
 - Feldnamen (Labels)
@@ -345,7 +345,7 @@ Für jede Maske dokumentieren:
 - Validierungen
 - Buttons & Aktionen
 
-***REMOVED******REMOVED******REMOVED*** 5. VALEO-Maske nachbauen
+### 5. VALEO-Maske nachbauen
 
 **ObjectPage-Konfiguration erstellen:**
 
@@ -371,29 +371,29 @@ const kundenStammConfig = {
 
 ---
 
-***REMOVED******REMOVED*** 📁 Verzeichnisstruktur
+## 📁 Verzeichnisstruktur
 
 ```
 l3-migration-toolkit/
-├── docker-compose.yml          ***REMOVED*** Guacamole Stack
-├── .env.example                ***REMOVED*** Umgebungsvariablen
-├── SETUP.md                    ***REMOVED*** Diese Anleitung
-├── run-screenshot.ps1          ***REMOVED*** PowerShell Runner
+├── docker-compose.yml          # Guacamole Stack
+├── .env.example                # Umgebungsvariablen
+├── SETUP.md                    # Diese Anleitung
+├── run-screenshot.ps1          # PowerShell Runner
 ├── playwright-snap/
 │   ├── package.json
-│   ├── snap-single.js         ***REMOVED*** Einzelner Screenshot
+│   ├── snap-single.js         # Einzelner Screenshot
 │   └── (weitere Tools)
-├── screenshots/               ***REMOVED*** Output
+├── screenshots/               # Output
 │   ├── stammdaten/
 │   ├── verkauf/
 │   ├── einkauf/
 │   └── fibu/
-└── shared/                    ***REMOVED*** Datenaustausch mit Webtop
+└── shared/                    # Datenaustausch mit Webtop
 ```
 
 ---
 
-***REMOVED******REMOVED*** 🎨 Webtop verwenden (Optional)
+## 🎨 Webtop verwenden (Optional)
 
 **URL:** http://localhost:3010
 
@@ -409,7 +409,7 @@ l3-migration-toolkit/
 
 ---
 
-***REMOVED******REMOVED*** 📊 Erwartetes Ergebnis
+## 📊 Erwartetes Ergebnis
 
 Nach Setup sollten Sie:
 
@@ -424,18 +424,18 @@ Nach Setup sollten Sie:
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Migration-Workflow
+## 🎯 Migration-Workflow
 
-***REMOVED******REMOVED******REMOVED*** Phase 1: Masken dokumentieren (1-2 Wochen)
+### Phase 1: Masken dokumentieren (1-2 Wochen)
 
 ```powershell
-***REMOVED*** L3 starten
-***REMOVED*** Jede Maske öffnen
-***REMOVED*** Screenshot machen (automatisch alle 5 Min)
-***REMOVED*** → ~50-100 Screenshots erwarten
+# L3 starten
+# Jede Maske öffnen
+# Screenshot machen (automatisch alle 5 Min)
+# → ~50-100 Screenshots erwarten
 ```
 
-***REMOVED******REMOVED******REMOVED*** Phase 2: Feldmapping erstellen (1 Woche)
+### Phase 2: Feldmapping erstellen (1 Woche)
 
 Für jede L3-Maske:
 - Screenshot öffnen
@@ -443,14 +443,14 @@ Für jede L3-Maske:
 - Zu PostgreSQL-Spalten mappen
 - VALEO-ObjectPage-Config schreiben
 
-***REMOVED******REMOVED******REMOVED*** Phase 3: VALEO-Masken bauen (2-3 Wochen)
+### Phase 3: VALEO-Masken bauen (2-3 Wochen)
 
 - ObjectPage-Komponenten erstellen
 - Validierungen übernehmen
 - Workflows nachbauen
 - Tests durchführen
 
-***REMOVED******REMOVED******REMOVED*** Phase 4: Datenimport (1 Woche)
+### Phase 4: Datenimport (1 Woche)
 
 - L3-Daten als CSV exportieren
 - Import-Scripts ausführen
@@ -461,7 +461,7 @@ Für jede L3-Maske:
 
 ---
 
-***REMOVED******REMOVED*** 📞 Support
+## 📞 Support
 
 **Guacamole-Logs:**
 ```powershell
@@ -483,12 +483,12 @@ docker compose restart
 ```powershell
 docker compose down -v
 docker compose up -d
-***REMOVED*** DB-Init wiederholen (siehe Schritt 4)
+# DB-Init wiederholen (siehe Schritt 4)
 ```
 
 ---
 
-***REMOVED******REMOVED*** ✨ Nächste Schritte
+## ✨ Nächste Schritte
 
 1. ✅ Dieses Setup durchführen
 2. ✅ Erste L3-Maske im Browser öffnen
@@ -501,4 +501,5 @@ docker compose up -d
 ---
 
 **Status: READY TO DEPLOY** 🚀
+
 

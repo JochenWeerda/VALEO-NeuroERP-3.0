@@ -1,107 +1,108 @@
-***REMOVED*** UAT Checkliste: Finance Domain
+# UAT Checkliste: Finance Domain
 
-***REMOVED******REMOVED*** Buchungsjournal (`/finance/bookings/new`)
+## Buchungsjournal (`/finance/bookings/new`)
 
-***REMOVED******REMOVED******REMOVED*** Sichtprüfung
+### Sichtprüfung
 - [ ] Formular: Datum, Konto, Soll, Haben, Text
 - [ ] Buttons: Speichern, Abbrechen
 
-***REMOVED******REMOVED******REMOVED*** CRUD - Create
+### CRUD - Create
 - [ ] Fülle Felder: Datum, Konto (Lookup), Soll, Haben, Text
 - [ ] Speichern → Erfolgsmeldung
 - [ ] Buchung in Journal-Liste sichtbar (falls vorhanden)
 
-***REMOVED******REMOVED******REMOVED*** Validierung
+### Validierung
 - [ ] Soll + Haben müssen ausgeglichen sein
 - [ ] Fehler bei Ungleichgewicht → Toast/Fehlermeldung
 
-***REMOVED******REMOVED******REMOVED*** DATEV-Export (Mock)
+### DATEV-Export (Mock)
 - [ ] Button "DATEV-Export" sichtbar (oder in Menü)
 - [ ] Click → CSV-Download (DATEV-Format-Mock)
 - [ ] Dateiname: `datev-export-YYYY-MM-DD.csv`
 
 ---
 
-***REMOVED******REMOVED*** Debitoren (`/fibu/debitoren`)
+## Debitoren (`/fibu/debitoren`)
 
-***REMOVED******REMOVED******REMOVED*** Sichtprüfung
+### Sichtprüfung
 - [ ] Tabelle: Debitor-Nr., Name, Saldo, Überfällig
 - [ ] Buttons: Neu, Export
 
-***REMOVED******REMOVED******REMOVED*** CRUD
+### CRUD
 - [ ] Neu → Debitor-Formular
 - [ ] Felder: Nummer, Name, Adresse, Kreditlimit
 - [ ] Speichern funktioniert
 
-***REMOVED******REMOVED******REMOVED*** OP-Verwaltung
+### OP-Verwaltung
 - [ ] Navigation zu `/fibu/op-verwaltung`
 - [ ] Tabelle: Rechnungsnr., Debitor, Betrag, Fälligkeit, Status
 - [ ] Filter nach Überfällig
 
-***REMOVED******REMOVED******REMOVED*** Zahlungseingang
+### Zahlungseingang
 - [ ] Button "Zahlung erfassen"
 - [ ] Formular: Rechnung, Betrag, Datum
 - [ ] Speichern → OP-Status = Bezahlt
 
 ---
 
-***REMOVED******REMOVED*** Offene Posten (`/fibu/offene-posten`)
+## Offene Posten (`/fibu/offene-posten`)
 
-***REMOVED******REMOVED******REMOVED*** Sichtprüfung
+### Sichtprüfung
 - [ ] Tabelle: Rechnungsnr., Kunde, Betrag, Fälligkeit, Tage überfällig
 - [ ] Filter: Überfällig, Alle
 
-***REMOVED******REMOVED******REMOVED*** Export
+### Export
 - [ ] Export → CSV mit allen OPs
 - [ ] Spalten: Nummer, Kunde, Betrag, Fälligkeit, Status
 
 ---
 
-***REMOVED******REMOVED*** Zahlungsläufe (`/fibu/zahlungslaeufe`)
+## Zahlungsläufe (`/fibu/zahlungslaeufe`)
 
-***REMOVED******REMOVED******REMOVED*** Sichtprüfung
+### Sichtprüfung
 - [ ] Tabelle: Lauf-Nr., Datum, Anzahl Zahlungen, Summe
 - [ ] Buttons: Neu, Export
 
-***REMOVED******REMOVED******REMOVED*** CRUD
+### CRUD
 - [ ] Neu → Zahlungsvorschlag generieren
 - [ ] Liste offener OPs mit Fälligkeit heute/gestern
 - [ ] Auswahl → SEPA-Datei generieren
 
-***REMOVED******REMOVED******REMOVED*** SEPA-Export (Mock)
+### SEPA-Export (Mock)
 - [ ] Button "SEPA-XML generieren"
 - [ ] Download: `sepa-YYYY-MM-DD.xml`
 - [ ] Format: SEPA pain.001 (Mock)
 
 ---
 
-***REMOVED******REMOVED*** Kreditoren (`/fibu/kreditoren`)
+## Kreditoren (`/fibu/kreditoren`)
 
-***REMOVED******REMOVED******REMOVED*** Sichtprüfung
+### Sichtprüfung
 - [ ] Tabelle: Kreditor-Nr., Name, Saldo
 - [ ] Buttons: Neu, Export
 
-***REMOVED******REMOVED******REMOVED*** CRUD
+### CRUD
 - [ ] Neu → Kreditor-Formular
 - [ ] Speichern funktioniert
 
 ---
 
-***REMOVED******REMOVED*** Hauptbuch (`/fibu/hauptbuch`)
+## Hauptbuch (`/fibu/hauptbuch`)
 
-***REMOVED******REMOVED******REMOVED*** Sichtprüfung
+### Sichtprüfung
 - [ ] Tabelle: Konto-Nr., Bezeichnung, Soll, Haben, Saldo
 - [ ] Export → CSV
 
 ---
 
-***REMOVED******REMOVED*** Kontenplan (`/fibu/kontenplan`)
+## Kontenplan (`/fibu/kontenplan`)
 
-***REMOVED******REMOVED******REMOVED*** Sichtprüfung
+### Sichtprüfung
 - [ ] Tabelle: Konto, Bezeichnung, Typ (Aktiv/Passiv/GuV)
 - [ ] CRUD funktioniert
 
 ---
 
 **Ergebnis:** ✅ Alle Checks bestanden | ❌ Fehler in Ticket `UAT-XXXX`
+
 

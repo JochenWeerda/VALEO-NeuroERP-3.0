@@ -1,11 +1,11 @@
-***REMOVED*** SALES-CRM-02: Feld-Integration abgeschlossen
+# SALES-CRM-02: Feld-Integration abgeschlossen
 
-***REMOVED******REMOVED*** Datum: 2025-01-24
+## Datum: 2025-01-24
 
-***REMOVED******REMOVED*** Problem
+## Problem
 6 neue Sales-Felder wurden hinzugefügt, aber es existieren bereits 250+ definierte Kundenstammdatenfelder. Doppelstrukturen mussten vermieden werden.
 
-***REMOVED******REMOVED*** Analyse-Ergebnis
+## Analyse-Ergebnis
 **4 von 6 Feldern existieren bereits:**
 - `kundensegment` → `analytics.segment` (Frontend) + `customer_segment` (Backend)
 - `branche` → `profile.industry_code` (Frontend) + `industry` (Backend)
@@ -16,9 +16,9 @@
 - `preisgruppe` → `sales.price_group` (NEU)
 - `steuerkategorie` → `tax.category` (NEU)
 
-***REMOVED******REMOVED*** Durchgeführte Änderungen
+## Durchgeführte Änderungen
 
-***REMOVED******REMOVED******REMOVED*** 1. Frontend (`kunden-stamm.tsx`)
+### 1. Frontend (`kunden-stamm.tsx`)
 
 **Zod-Schema angepasst:**
 - ❌ Entfernt: `kundensegment`, `branche`, `region`, `kundenpreisliste`
@@ -32,18 +32,18 @@
 **Kommentare hinzugefügt:**
 - Dokumentation, welche bestehenden Felder verwendet werden sollen
 
-***REMOVED******REMOVED******REMOVED*** 2. Backend (`app/domains/crm/models.py`)
+### 2. Backend (`app/domains/crm/models.py`)
 
 **Nur neue Felder hinzugefügt:**
 ```python
-price_group = Column(String(50))  ***REMOVED*** NEU: sales.price_group
-tax_category = Column(String(50))  ***REMOVED*** NEU: tax.category
+price_group = Column(String(50))  # NEU: sales.price_group
+tax_category = Column(String(50))  # NEU: tax.category
 ```
 
 **Kommentare hinzugefügt:**
 - Dokumentation, welche bestehenden Felder über Mapping verwendet werden
 
-***REMOVED******REMOVED******REMOVED*** 3. API-Schemas (`app/api/v1/schemas/crm.py`)
+### 3. API-Schemas (`app/api/v1/schemas/crm.py`)
 
 **Neue Felder in allen Schemas hinzugefügt:**
 - `CustomerBase`: `price_group`, `tax_category`
@@ -51,7 +51,7 @@ tax_category = Column(String(50))  ***REMOVED*** NEU: tax.category
 - `CustomerUpdate`: `price_group`, `tax_category`
 - `Customer`: `price_group`, `tax_category`
 
-***REMOVED******REMOVED******REMOVED*** 4. Migration (`migrations/sql/crm/003_add_sales_fields_to_customers.sql`)
+### 4. Migration (`migrations/sql/crm/003_add_sales_fields_to_customers.sql`)
 
 **Erstellt:**
 - Migration für `domain_crm.crm_customers` Tabelle
@@ -59,7 +59,7 @@ tax_category = Column(String(50))  ***REMOVED*** NEU: tax.category
 - Indizes erstellt
 - Kommentare hinzugefügt
 
-***REMOVED******REMOVED*** Mapping-Tabelle
+## Mapping-Tabelle
 
 | Frontend (kunden-stamm.tsx) | Bestehendes Feld | Tab | Status |
 |------------------------------|------------------|-----|--------|
@@ -70,7 +70,7 @@ tax_category = Column(String(50))  ***REMOVED*** NEU: tax.category
 | `preisgruppe` | `sales.price_group` | konditionen | ✅ NEU hinzugefügt |
 | `steuerkategorie` | `tax.category` | steuern | ✅ NEU hinzugefügt |
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. **Mapping-Logik implementieren:**
    - API-Endpoint erweitern, um bestehende Felder zu mappen
@@ -84,6 +84,7 @@ tax_category = Column(String(50))  ***REMOVED*** NEU: tax.category
    - Feld-Mapping-Tabelle in README
    - Entscheidungsgrundlage dokumentieren
 
-***REMOVED******REMOVED*** Status
+## Status
 ✅ **Abgeschlossen**: Doppelstrukturen vermieden, nur neue Felder hinzugefügt
+
 

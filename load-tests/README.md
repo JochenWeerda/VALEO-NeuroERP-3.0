@@ -1,17 +1,17 @@
-***REMOVED*** Load Tests
+# Load Tests
 
-***REMOVED******REMOVED*** Prerequisites
+## Prerequisites
 
 Install k6:
 
 ```bash
-***REMOVED*** Windows (Chocolatey)
+# Windows (Chocolatey)
 choco install k6
 
-***REMOVED*** macOS (Homebrew)
+# macOS (Homebrew)
 brew install k6
 
-***REMOVED*** Linux
+# Linux
 sudo gpg -k
 sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
 echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
@@ -19,34 +19,34 @@ sudo apt-get update
 sudo apt-get install k6
 ```
 
-***REMOVED******REMOVED*** Running Tests
+## Running Tests
 
-***REMOVED******REMOVED******REMOVED*** API Load Test
+### API Load Test
 
 ```bash
-***REMOVED*** Run against localhost
+# Run against localhost
 k6 run load-tests/api-load-test.js
 
-***REMOVED*** Run against staging
+# Run against staging
 k6 run --env BASE_URL=https://staging.erp.valeo.example.com load-tests/api-load-test.js
 
-***REMOVED*** Run with custom token
+# Run with custom token
 k6 run --env API_TOKEN=your-token-here load-tests/api-load-test.js
 ```
 
-***REMOVED******REMOVED******REMOVED*** SSE Load Test
+### SSE Load Test
 
 ```bash
-***REMOVED*** Run against localhost
+# Run against localhost
 k6 run load-tests/sse-load-test.js
 
-***REMOVED*** Run against staging
+# Run against staging
 k6 run --env BASE_URL=https://staging.erp.valeo.example.com load-tests/sse-load-test.js
 ```
 
-***REMOVED******REMOVED*** Test Scenarios
+## Test Scenarios
 
-***REMOVED******REMOVED******REMOVED*** API Load Test
+### API Load Test
 
 - **Duration:** 10 minutes
 - **Users:** Ramps from 0 → 10 → 50 → 0
@@ -62,7 +62,7 @@ k6 run --env BASE_URL=https://staging.erp.valeo.example.com load-tests/sse-load-
 3. Get single order
 4. Workflow transition
 
-***REMOVED******REMOVED******REMOVED*** SSE Load Test
+### SSE Load Test
 
 - **Duration:** 10.5 minutes
 - **Connections:** Ramps from 0 → 100 → 500 → 1000 → 0
@@ -76,9 +76,9 @@ k6 run --env BASE_URL=https://staging.erp.valeo.example.com load-tests/sse-load-
 3. Verify message format
 4. Maintain connection for 5 minutes
 
-***REMOVED******REMOVED*** Interpreting Results
+## Interpreting Results
 
-***REMOVED******REMOVED******REMOVED*** Good Results
+### Good Results
 
 ```
 ✓ http_req_duration..............: avg=250ms  min=50ms  med=200ms  max=800ms  p(90)=400ms p(95)=450ms
@@ -89,7 +89,7 @@ k6 run --env BASE_URL=https://staging.erp.valeo.example.com load-tests/sse-load-
 ✓ sse_errors.....................: 0.20%
 ```
 
-***REMOVED******REMOVED******REMOVED*** Bad Results (Needs Investigation)
+### Bad Results (Needs Investigation)
 
 ```
 ✗ http_req_duration..............: avg=1200ms  p(95)=2500ms  ← TOO SLOW
@@ -97,7 +97,7 @@ k6 run --env BASE_URL=https://staging.erp.valeo.example.com load-tests/sse-load-
 ✗ sse_errors.....................: 5.00%  ← TOO HIGH
 ```
 
-***REMOVED******REMOVED*** CI/CD Integration
+## CI/CD Integration
 
 Add to `.github/workflows/load-test.yml`:
 
@@ -106,7 +106,7 @@ name: Load Tests
 
 on:
   schedule:
-    - cron: '0 2 * * 0'  ***REMOVED*** Weekly on Sunday at 2 AM
+    - cron: '0 2 * * 0'  # Weekly on Sunday at 2 AM
   workflow_dispatch:
 
 jobs:
@@ -132,9 +132,9 @@ jobs:
           k6 run --env BASE_URL=https://staging.erp.valeo.example.com load-tests/sse-load-test.js
 ```
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** High Latency
+### High Latency
 
 **Symptoms:** P95 > 500ms
 
@@ -149,7 +149,7 @@ jobs:
 3. Add caching
 4. Optimize queries
 
-***REMOVED******REMOVED******REMOVED*** High Error Rate
+### High Error Rate
 
 **Symptoms:** Errors > 5%
 
@@ -164,7 +164,7 @@ jobs:
 3. Fix application bugs
 4. Adjust rate limits
 
-***REMOVED******REMOVED******REMOVED*** SSE Connection Failures
+### SSE Connection Failures
 
 **Symptoms:** SSE errors > 1%
 
@@ -178,4 +178,5 @@ jobs:
 2. Check pod health
 3. Verify network policies
 4. Implement reconnection logic
+
 

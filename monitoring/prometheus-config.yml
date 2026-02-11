@@ -1,6 +1,6 @@
-***REMOVED*** VALEO-NeuroERP-3.0 Prometheus Configuration
-***REMOVED*** Week 4: Monitoring & Observability Setup
-***REMOVED*** Optimized for ERP applications monitoring
+# VALEO-NeuroERP-3.0 Prometheus Configuration
+# Week 4: Monitoring & Observability Setup
+# Optimized for ERP applications monitoring
 
 global:
   scrape_interval: 15s
@@ -10,9 +10,9 @@ global:
     app: 'NeuroERP-v3'
     version: '3.0'
 
-***REMOVED*** Prometheus scraping configuration for VALEO NeuroERP
+# Prometheus scraping configuration for VALEO NeuroERP
 scrape_configs:
-  ***REMOVED*** Backend API monitoring
+  # Backend API monitoring
   - job_name: 'valeo-backend'
     static_configs:
       - targets: ['localhost:3000']
@@ -20,35 +20,36 @@ scrape_configs:
     scrape_interval: 5s
     honor_labels: true
 
-  ***REMOVED*** Frontend application monitoring  
+  # Frontend application monitoring  
   - job_name: 'valeo-frontend'
     static_configs:
       - targets: ['localhost:3001']
     metrics_path: '/metrics'
 
-  ***REMOVED*** Database performance monitoring
+  # Database performance monitoring
   - job_name: 'valeo-database'
     static_configs:
       - targets: ['localhost:5432']
     metrics_path: '/metrics'
 
-  ***REMOVED*** Domain services monitoring
+  # Domain services monitoring
   - job_name: 'valeo-domains'
     static_configs:
       - targets: 
-          - 'localhost:3010'  ***REMOVED*** CRM domain
-          - 'localhost:3011'  ***REMOVED*** Finance domain
-          - 'localhost:3012'  ***REMOVED*** Inventory domain
-          - 'localhost:3013'  ***REMOVED*** Analytics domain
+          - 'localhost:3010'  # CRM domain
+          - 'localhost:3011'  # Finance domain
+          - 'localhost:3012'  # Inventory domain
+          - 'localhost:3013'  # Analytics domain
     scrape_interval: 10s
 
-  ***REMOVED*** Clean Architecture infrastructure
+  # Clean Architecture infrastructure
   - job_name: 'valeo-infrastructure'
     static_configs:
       - targets:
-          - 'localhost:3020'  ***REMOVED*** Application services
-          - 'localhost:3021'  ***REMOVED*** Domain repositories
-          - 'localhost:3022'  ***REMOVED*** Event bus
-          - 'localhost:3023'  ***REMOVED*** External services
+          - 'localhost:3020'  # Application services
+          - 'localhost:3021'  # Domain repositories
+          - 'localhost:3022'  # Event bus
+          - 'localhost:3023'  # External services
     scrape_interval: 30s
+
 

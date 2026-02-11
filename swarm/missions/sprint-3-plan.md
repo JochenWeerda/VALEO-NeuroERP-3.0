@@ -1,4 +1,4 @@
-***REMOVED*** Sprint 3 Plan
+# Sprint 3 Plan
 
 **Datum:** 2025-01-30  
 **Sprint:** 3  
@@ -8,19 +8,19 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Sprint-Übersicht
+## 🎯 Sprint-Übersicht
 
-***REMOVED******REMOVED******REMOVED*** Ziel
+### Ziel
 Implementierung der 4 wichtigsten Procurement Capabilities (P1) für Sprint 3.
 
-***REMOVED******REMOVED******REMOVED*** Priorität
+### Priorität
 P1 - Hoch (MUSS, Priorität 2)
 
 ---
 
-***REMOVED******REMOVED*** 📋 Geplante Tasks
+## 📋 Geplante Tasks
 
-***REMOVED******REMOVED******REMOVED*** Task 1: PROC-SUP-01 - Lieferantenstamm vervollständigen
+### Task 1: PROC-SUP-01 - Lieferantenstamm vervollständigen
 **Status:** ⚠️ Teilweise vorhanden  
 **Priorität:** P1 (MUSS, Priorität 2)
 
@@ -52,7 +52,7 @@ P1 - Hoch (MUSS, Priorität 2)
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Task 2: PROC-PO-01 - Bestellung erstellen vervollständigen
+### Task 2: PROC-PO-01 - Bestellung erstellen vervollständigen
 **Status:** ⚠️ Teilweise vorhanden  
 **Priorität:** P1 (MUSS, Priorität 1)
 
@@ -83,7 +83,7 @@ P1 - Hoch (MUSS, Priorität 2)
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Task 3: PROC-IV-01 - Eingangsrechnung vervollständigen
+### Task 3: PROC-IV-01 - Eingangsrechnung vervollständigen
 **Status:** ⚠️ Teilweise vorhanden  
 **Priorität:** P1 (MUSS, Priorität 1)
 
@@ -116,7 +116,7 @@ P1 - Hoch (MUSS, Priorität 2)
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Task 4: PROC-PAY-01 - Zahlungsläufe vervollständigen
+### Task 4: PROC-PAY-01 - Zahlungsläufe vervollständigen
 **Status:** ⚠️ Teilweise vorhanden  
 **Priorität:** P1 (MUSS, Priorität 1)
 
@@ -145,39 +145,39 @@ P1 - Hoch (MUSS, Priorität 2)
 
 ---
 
-***REMOVED******REMOVED*** 📊 Sprint-Planung
+## 📊 Sprint-Planung
 
-***REMOVED******REMOVED******REMOVED*** Woche 1
+### Woche 1
 - **Tag 1-2:** PROC-SUP-01 (Lieferantenstamm)
 - **Tag 3-4:** PROC-PO-01 (Bestellung erstellen)
 - **Tag 5:** Review & Integration
 
-***REMOVED******REMOVED******REMOVED*** Woche 2
+### Woche 2
 - **Tag 1-3:** PROC-IV-01 (Eingangsrechnung)
 - **Tag 4-5:** PROC-PAY-01 (Zahlungsläufe)
 
-***REMOVED******REMOVED******REMOVED*** Woche 3 (Puffer)
+### Woche 3 (Puffer)
 - Integration-Tests
 - Bug-Fixes
 - Dokumentation
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Dependencies
+## 🔄 Dependencies
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 → Agent-1
+### Agent-2 → Agent-1
 - PROC-IV-01 nutzt GL Integration (bereits vorhanden)
 - PROC-PAY-01 nutzt Payment-Matching (bereits vorhanden)
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 → Agent-4
+### Agent-2 → Agent-4
 - Keine neuen Dependencies
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 → Agent-3
+### Agent-2 → Agent-3
 - Keine Dependencies
 
 ---
 
-***REMOVED******REMOVED*** ✅ Definition of Done
+## ✅ Definition of Done
 
 - [ ] Alle 4 P1 Capabilities implementiert
 - [ ] i18n vollständig integriert
@@ -189,7 +189,7 @@ P1 - Hoch (MUSS, Priorität 2)
 
 ---
 
-***REMOVED******REMOVED*** 📝 Pre-Implementation Checklist
+## 📝 Pre-Implementation Checklist
 
 Vor Code-Erstellung:
 - [ ] Bestehende Frontend-Seiten analysieren
@@ -201,4 +201,5 @@ Vor Code-Erstellung:
 ---
 
 **Status:** 📋 **SPRINT 3 GEPLANT - BEREIT FÜR START**
+
 

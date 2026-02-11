@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 Cursor.ai Automatische Prompt-Übergabe
@@ -20,11 +20,11 @@ import subprocess
 import pyautogui
 import sys
 
-***REMOVED*** Konfiguration
+# Konfiguration
 PROMPT_FILE = "data/cursor_prompts/latest_prompt.json"
 CURSOR_PATH = "C:\\Program Files\\Cursor\\Cursor.exe"
-WAIT_TIME_AFTER_START = 3  ***REMOVED*** Sekunden zu warten nach dem Start von Cursor.ai
-WAIT_TIME_AFTER_HOTKEY = 1  ***REMOVED*** Sekunden zu warten nach dem Drücken von Alt+C
+WAIT_TIME_AFTER_START = 3  # Sekunden zu warten nach dem Start von Cursor.ai
+WAIT_TIME_AFTER_HOTKEY = 1  # Sekunden zu warten nach dem Drücken von Alt+C
 
 def read_prompt():
     """Liest den Prompt aus der Datei."""
@@ -51,7 +51,7 @@ def copy_to_clipboard(text):
 def is_cursor_running():
     """Überprüft, ob Cursor.ai läuft."""
     try:
-        ***REMOVED*** Windows-Befehl zum Überprüfen, ob ein Prozess läuft
+        # Windows-Befehl zum Überprüfen, ob ein Prozess läuft
         result = subprocess.run(["tasklist", "/FI", "IMAGENAME eq Cursor.exe"], 
                               capture_output=True, text=True)
         return "Cursor.exe" in result.stdout
@@ -77,15 +77,15 @@ def start_cursor():
             return False
     else:
         print("Cursor.ai läuft bereits.")
-        ***REMOVED*** Bringe Cursor.ai in den Vordergrund
+        # Bringe Cursor.ai in den Vordergrund
         try:
-            ***REMOVED*** Finde das Cursor.ai-Fenster
+            # Finde das Cursor.ai-Fenster
             windows = pyautogui.getWindowsWithTitle("Cursor")
             if windows:
                 cursor_window = windows[0]
                 cursor_window.activate()
                 print("Cursor.ai in den Vordergrund gebracht.")
-                time.sleep(1)  ***REMOVED*** Kurz warten, bis das Fenster im Vordergrund ist
+                time.sleep(1)  # Kurz warten, bis das Fenster im Vordergrund ist
             else:
                 print("Cursor.ai-Fenster konnte nicht gefunden werden.")
         except Exception as e:
@@ -95,11 +95,11 @@ def start_cursor():
 def open_chat_window():
     """Öffnet das Chat-Fenster in Cursor.ai mit Alt+C."""
     try:
-        ***REMOVED*** Alt+C ist die Tastenkombination für das Chat-Fenster in Cursor.ai
+        # Alt+C ist die Tastenkombination für das Chat-Fenster in Cursor.ai
         pyautogui.hotkey('alt', 'c')
         print("Chat-Fenster geöffnet (Alt+C).")
         
-        ***REMOVED*** Kurz warten, bis das Chat-Fenster geöffnet ist
+        # Kurz warten, bis das Chat-Fenster geöffnet ist
         print(f"Warte {WAIT_TIME_AFTER_HOTKEY} Sekunden, bis das Chat-Fenster geöffnet ist...")
         time.sleep(WAIT_TIME_AFTER_HOTKEY)
         return True
@@ -110,14 +110,14 @@ def open_chat_window():
 def paste_and_send():
     """Fügt den Text aus der Zwischenablage ein und sendet ihn."""
     try:
-        ***REMOVED*** Einfügen mit Strg+V
+        # Einfügen mit Strg+V
         pyautogui.hotkey('ctrl', 'v')
         print("Text eingefügt (Strg+V).")
         
-        ***REMOVED*** Kurz warten
+        # Kurz warten
         time.sleep(0.5)
         
-        ***REMOVED*** Enter drücken, um den Prompt zu senden
+        # Enter drücken, um den Prompt zu senden
         pyautogui.press('enter')
         print("Enter gedrückt, Prompt gesendet.")
         return True
@@ -129,7 +129,7 @@ def main():
     """Hauptfunktion"""
     print("Cursor.ai Automatische Prompt-Übergabe gestartet.")
     
-    ***REMOVED*** Prompt aus Datei lesen
+    # Prompt aus Datei lesen
     prompt = read_prompt()
     if not prompt:
         print("Kein Prompt gefunden.")
@@ -137,21 +137,21 @@ def main():
     
     print(f"Prompt gefunden: {prompt[:50]}...")
     
-    ***REMOVED*** Prompt in die Zwischenablage kopieren
+    # Prompt in die Zwischenablage kopieren
     if not copy_to_clipboard(prompt):
         return
     
-    ***REMOVED*** Cursor.ai starten oder in den Vordergrund bringen
+    # Cursor.ai starten oder in den Vordergrund bringen
     if not start_cursor():
         print("Cursor.ai konnte nicht gestartet werden.")
         return
     
-    ***REMOVED*** Chat-Fenster öffnen
+    # Chat-Fenster öffnen
     if not open_chat_window():
         print("Chat-Fenster konnte nicht geöffnet werden.")
         return
     
-    ***REMOVED*** Prompt einfügen und senden
+    # Prompt einfügen und senden
     if not paste_and_send():
         print("Prompt konnte nicht eingefügt und gesendet werden.")
         return
@@ -160,7 +160,7 @@ def main():
     print("Der Prompt wurde an Cursor.ai übergeben.")
 
 if __name__ == "__main__":
-    ***REMOVED*** Sicherheitsabfrage, da das Skript die Kontrolle über die Tastatur übernimmt
+    # Sicherheitsabfrage, da das Skript die Kontrolle über die Tastatur übernimmt
     if len(sys.argv) > 1 and sys.argv[1] == "--force":
         main()
     else:

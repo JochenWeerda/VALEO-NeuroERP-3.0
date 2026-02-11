@@ -1,10 +1,10 @@
-***REMOVED*** VALEO NeuroERP User Guide
+# VALEO NeuroERP User Guide
 
-***REMOVED******REMOVED*** Belegfluss (Document Flow)
+## Belegfluss (Document Flow)
 
-***REMOVED******REMOVED******REMOVED*** 1. Verkaufsprozess
+### 1. Verkaufsprozess
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1.1 Auftrag erstellen
+#### 1.1 Auftrag erstellen
 
 **Navigation**: Sales → New Order
 
@@ -29,7 +29,7 @@
 - `F2`: Neuer Artikel hinzufügen
 - `Tab`: Nächstes Feld
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1.2 Auftrag freigeben
+#### 1.2 Auftrag freigeben
 
 **Automatische Prüfungen**:
 - ✅ Gesamtbetrag > 0€
@@ -52,7 +52,7 @@
    - Status wechselt zu "Approved" → "Posted"
    - Folgebelege können erstellt werden
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1.3 Lieferschein erstellen
+#### 1.3 Lieferschein erstellen
 
 **Aus Auftrag ableiten**:
 1. Auftrag öffnen
@@ -65,7 +65,7 @@
 - Sales → New Delivery
 - Manuelle Dateneingabe
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1.4 Rechnung erstellen
+#### 1.4 Rechnung erstellen
 
 **Aus Lieferschein ableiten**:
 1. Lieferschein öffnen
@@ -74,9 +74,9 @@
 4. Buchungsdatum setzen
 5. Speichern und freigeben
 
-***REMOVED******REMOVED******REMOVED*** 2. Einkaufsprozess
+### 2. Einkaufsprozess
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2.1 Bestellung erstellen
+#### 2.1 Bestellung erstellen
 
 **Navigation**: Purchasing → New Order
 
@@ -94,7 +94,7 @@
    - Policy-Check für Bestellwert
    - Controller-Freigabe bei hohen Beträgen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2.2 Wareneingang buchen
+#### 2.2 Wareneingang buchen
 
 **Navigation**: Inventory → Goods Receipt
 
@@ -112,9 +112,9 @@
    - Automatische Lagerstands-Aktualisierung
    - Reservierungen für Verkauf freigeben
 
-***REMOVED******REMOVED******REMOVED*** 3. Freigabe-Workflow (Approval Process)
+### 3. Freigabe-Workflow (Approval Process)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3.1 Status-Übersicht
+#### 3.1 Status-Übersicht
 
 ```
 Entwurf → Eingereicht → Freigegeben → Gebucht
@@ -129,7 +129,7 @@ Entwurf → Eingereicht → Freigegeben → Gebucht
 - **Gebucht**: Endstatus, keine Änderungen mehr möglich
 - **Abgelehnt**: Zurückgewiesen, kann überarbeitet werden
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3.2 Benachrichtigungen
+#### 3.2 Benachrichtigungen
 
 **Realtime-Updates**:
 - 🔔 Toast-Benachrichtigungen bei Status-Änderungen
@@ -141,7 +141,7 @@ Entwurf → Eingereicht → Freigegeben → Gebucht
 - Genehmigungen/Ablehnungen
 - Eskalationen bei Zeitüberschreitungen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3.3 Rollen und Berechtigungen
+#### 3.3 Rollen und Berechtigungen
 
 **Vertriebsmitarbeiter (Sales)**:
 - ✅ Aufträge erstellen und bearbeiten
@@ -160,9 +160,9 @@ Entwurf → Eingereicht → Freigegeben → Gebucht
 - ✅ Backup und Restore
 - ✅ Benutzerverwaltung
 
-***REMOVED******REMOVED******REMOVED*** 4. Druck und Archiv (Print & Archive)
+### 4. Druck und Archiv (Print & Archive)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4.1 Dokumente drucken
+#### 4.1 Dokumente drucken
 
 **PDF-Generierung**:
 1. **Beleg öffnen**
@@ -183,7 +183,7 @@ Entwurf → Eingereicht → Freigegeben → Gebucht
 - Druckvorschau im Browser
 - Automatische Archivierung
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4.2 Archiv-Funktionen
+#### 4.2 Archiv-Funktionen
 
 **Dokumenten-Historie**:
 - Alle Versionen eines Belegs
@@ -200,7 +200,7 @@ Entwurf → Eingereicht → Freigegeben → Gebucht
 - Nach Datum filtern
 - Nach Bearbeiter filtern
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4.3 Beleg-Verifikation
+#### 4.3 Beleg-Verifikation
 
 **QR-Code Verifikation**:
 1. **QR-Code scannen**
@@ -217,9 +217,9 @@ Entwurf → Eingereicht → Freigegeben → Gebucht
    - Detaillierte Informationen
    - Zeitstempel der Prüfung
 
-***REMOVED******REMOVED******REMOVED*** 5. Benutzeroberfläche (User Interface)
+### 5. Benutzeroberfläche (User Interface)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 5.1 Navigation
+#### 5.1 Navigation
 
 **Hauptmenü**:
 - **Dashboard**: Übersicht und KPIs
@@ -233,7 +233,7 @@ Entwurf → Eingereicht → Freigegeben → Gebucht
 - Letzte Belege
 - Favoriten
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 5.2 Formulare und Eingabe
+#### 5.2 Formulare und Eingabe
 
 **Intelligente Formulare**:
 - **Auto-Lookup**: Automatische Vervollständigung
@@ -246,7 +246,7 @@ Entwurf → Eingereicht → Freigegeben → Gebucht
 - `F1`: Hilfe
 - `Esc`: Abbrechen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 5.3 Echtzeit-Features
+#### 5.3 Echtzeit-Features
 
 **Live-Updates**:
 - Status-Änderungen ohne Neuladen
@@ -258,9 +258,9 @@ Entwurf → Eingereicht → Freigegeben → Gebucht
 - Automatische Synchronisation bei Wiederherstellung
 - Konfliktlösung bei parallelen Änderungen
 
-***REMOVED******REMOVED******REMOVED*** 6. Berichte und Analysen (Reports & Analytics)
+### 6. Berichte und Analysen (Reports & Analytics)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 6.1 Standard-Berichte
+#### 6.1 Standard-Berichte
 
 **Verkaufsberichte**:
 - Umsatz nach Kunde/Artikel/Zeitraum
@@ -277,7 +277,7 @@ Entwurf → Eingereicht → Freigegeben → Gebucht
 - Ablehnungsgründe
 - Prozess-Effizienz
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 6.2 Dashboard
+#### 6.2 Dashboard
 
 **KPI-Anzeige**:
 - Monatlicher Umsatz
@@ -290,9 +290,9 @@ Entwurf → Eingereicht → Freigegeben → Gebucht
 - Laufende Workflows
 - System-Status
 
-***REMOVED******REMOVED******REMOVED*** 7. Fehlerbehebung (Troubleshooting)
+### 7. Fehlerbehebung (Troubleshooting)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 7.1 Häufige Probleme
+#### 7.1 Häufige Probleme
 
 **"Beleg kann nicht gespeichert werden"**
 ```
@@ -333,7 +333,7 @@ Lösung:
 - Administrator informieren bei Dauerhaftigkeit
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 7.2 Support kontaktieren
+#### 7.2 Support kontaktieren
 
 **Bei technischen Problemen**:
 - Support-Ticket erstellen
@@ -345,9 +345,9 @@ Lösung:
 - Prozessverantwortlichen kontaktieren
 - Schulungsunterlagen konsultieren
 
-***REMOVED******REMOVED******REMOVED*** 8. Best Practices
+### 8. Best Practices
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 8.1 Dateneingabe
+#### 8.1 Dateneingabe
 
 **Qualität vor Quantität**:
 - Alle Felder sorgfältig ausfüllen
@@ -359,7 +359,7 @@ Lösung:
 - Standardisierte Adressen
 - Vollständige Kontaktdaten
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 8.2 Workflow-Management
+#### 8.2 Workflow-Management
 
 **Zeitnahe Bearbeitung**:
 - Aufträge zeitnah freigeben
@@ -371,7 +371,7 @@ Lösung:
 - Unklarheiten klären
 - Vollständigkeit sicherstellen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 8.3 Sicherheit
+#### 8.3 Sicherheit
 
 **Passwort-Management**:
 - Starke Passwörter verwenden
@@ -383,7 +383,7 @@ Lösung:
 - Vertrauliche Informationen schützen
 - Bei Unsicherheiten nachfragen
 
-***REMOVED******REMOVED******REMOVED*** 9. Tastenkürzel-Referenz
+### 9. Tastenkürzel-Referenz
 
 | Aktion | Windows/Linux | Mac |
 |--------|---------------|-----|
@@ -396,7 +396,7 @@ Lösung:
 | Vorheriges Feld | Shift+Tab | Shift+Tab |
 | Globale Suche | Strg+K | Cmd+K |
 
-***REMOVED******REMOVED******REMOVED*** 10. Glossar
+### 10. Glossar
 
 **Belegfluss**: Der Prozess von der Belegerstellung bis zur Buchung
 **Workflow**: Genehmigungsprozess mit Statusübergängen
