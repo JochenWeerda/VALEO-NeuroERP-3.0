@@ -78,6 +78,7 @@ async def register_inventory_workflow() -> None:
                 logger.debug("Workflow-Definition inventory_inbound_flow existiert bereits")
             else:
                 response.raise_for_status()
-        except httpx.HTTPError as exc:  ***REMOVED*** noqa: BLE001
+        except httpx.HTTPError as exc:  # noqa: BLE001
             logger.warning("Registrierung der Inventory-Workflow-Definition fehlgeschlagen: %s", exc)
+
 

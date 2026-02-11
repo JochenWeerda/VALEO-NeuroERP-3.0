@@ -71,7 +71,8 @@ async def upsert_approval_rule(
             "required_role": payload.required_role,
         }
         return build_response(data, source="fibu-gateway")
-    except Exception as exc:  ***REMOVED*** noqa: BLE001
+    except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)) from exc
+
 
 

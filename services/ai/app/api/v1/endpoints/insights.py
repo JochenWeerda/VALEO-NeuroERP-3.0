@@ -49,7 +49,7 @@ async def generate_insights(request: InsightsRequest) -> InsightsResponse:
     
     insights = []
     
-    ***REMOVED*** Mock insights based on domain
+    # Mock insights based on domain
     if request.domain == "sales":
         insights.append(Insight(
             title="Umsatzrückgang bei Top-Kunde",
@@ -140,4 +140,5 @@ async def get_forecast(
             ]
         }
     }
+
 

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 VALEO-NeuroERP AI Service
 Microservice for AI/ML functionality including RAG, Agents, and Assistants
@@ -13,7 +13,12 @@ from prometheus_client import make_asgi_app
 from app.api.v1.api import api_router
 from app.config import settings
 
-***REMOVED*** Setup logging
+try:
+    from auth_shared import AuthMiddleware
+except ImportError:
+    AuthMiddleware = None  # type: ignore[assignment,misc]
+
+# Setup logging
 logging.basicConfig(
     level=logging.INFO,
     format='{"timestamp": "%(asctime)s", "level": "%(levelname)s", "logger": "%(name)s", "message": "%(message)s"}'
@@ -25,7 +30,7 @@ async def lifespan(app: FastAPI):
     """Application lifespan context manager"""
     logger.info("Starting VALEO-NeuroERP AI Service...")
     
-    ***REMOVED*** Initialize Vector Store
+    # Initialize Vector Store
     try:
         from app.services.vector_store import initialize_vector_store
         await initialize_vector_store()
@@ -37,7 +42,7 @@ async def lifespan(app: FastAPI):
     
     logger.info("Shutting down VALEO-NeuroERP AI Service...")
 
-***REMOVED*** Create FastAPI application
+# Create FastAPI application
 app = FastAPI(
     title="VALEO-NeuroERP AI Service",
     description="AI/ML Microservice for ERP Intelligence",
@@ -48,7 +53,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-***REMOVED*** CORS Configuration
+# CORS Configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
@@ -57,14 +62,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-***REMOVED*** Include API routes
+# Auth middleware
+if AuthMiddleware is not None:
+    app.add_middleware(AuthMiddleware)
+    logger.info("Auth middleware enabled")
+
+# Include API routes
 app.include_router(api_router, prefix="/api/v1")
 
-***REMOVED*** Prometheus metrics
+# Prometheus metrics
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
 
-***REMOVED*** Health check
+# Health check
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
@@ -82,4 +92,3 @@ if __name__ == "__main__":
         port=settings.PORT,
         reload=settings.DEBUG
     )
-

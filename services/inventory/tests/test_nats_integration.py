@@ -36,18 +36,18 @@ async def _count_epcis(session: AsyncSession) -> int:
 
 
 async def test_epcis_created_from_nats_events():
-    ***REMOVED*** DB url is provided by CI services (postgres)
+    # DB url is provided by CI services (postgres)
     await _init_db()
     session_factory = get_session_factory()
 
-    ***REMOVED*** Start bus + subscribers
+    # Start bus + subscribers
     nats_url = os.environ.get("INVENTORY_EVENT_BUS_URL", "nats://localhost:4222")
     bus = EventBus(url=nats_url, subject_prefix="inventory")
     await bus.connect()
     subs = InventoryEventSubscribers(bus, session_factory)
     await subs.start()
 
-    ***REMOVED*** Publish sample purchase receipt (receiving)
+    # Publish sample purchase receipt (receiving)
     nc = NATS()
     await nc.connect(nats_url)
     await _publish(
@@ -60,7 +60,7 @@ async def test_epcis_created_from_nats_events():
             "lines": [{"sku": "SKU-IT-NATS", "quantity": 1}],
         },
     )
-    ***REMOVED*** Publish sample sales shipment (shipping)
+    # Publish sample sales shipment (shipping)
     await _publish(
         nc,
         "sales.shipment.confirmed",
@@ -71,11 +71,12 @@ async def test_epcis_created_from_nats_events():
             "lines": [{"sku": "SKU-IT-NATS", "quantity": 1, "lotNumber": "SKU-IT-NATS"}],
         },
     )
-    await asyncio.sleep(0.5)  ***REMOVED*** allow subscriber to process
+    await asyncio.sleep(0.5)  # allow subscriber to process
 
     async with session_factory() as session:
         assert (await _count_epcis(session)) >= 1
 
     await nc.drain()
     await bus.close()
+
 

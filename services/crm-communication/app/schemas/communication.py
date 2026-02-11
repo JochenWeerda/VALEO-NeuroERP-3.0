@@ -34,7 +34,7 @@ class EmailCreate(EmailBase):
 
 class EmailSend(EmailCreate):
     """Schema for sending emails."""
-    attachments: Optional[List[dict]] = None  ***REMOVED*** File attachments
+    attachments: Optional[List[dict]] = None  # File attachments
 
 
 class Email(EmailBase):

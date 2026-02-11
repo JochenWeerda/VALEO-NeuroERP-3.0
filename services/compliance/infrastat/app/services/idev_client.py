@@ -64,10 +64,10 @@ class IdevClient:
 
         client = await self._ensure_client()
         try:
-            ***REMOVED*** 1) Login-Seite laden (Session-Cookie)
-            await client.get("/***REMOVED***/login")
+            # 1) Login-Seite laden (Session-Cookie)
+            await client.get("/#/login")
 
-            ***REMOVED*** 2) Authentifizierung durchführen (API Endpoint laut IDEV-Doku)
+            # 2) Authentifizierung durchführen (API Endpoint laut IDEV-Doku)
             response = await client.post(
                 "/api/login",
                 json={"username": self._username, "password": self._password},
@@ -101,4 +101,6 @@ class IdevClient:
             await self._client.aclose()
             self._client = None
             self._session_initialized = False
+
+
 

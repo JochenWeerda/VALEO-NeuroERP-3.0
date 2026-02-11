@@ -62,7 +62,7 @@ async def ingest_batch(
     duration = time.perf_counter() - start_ts
     result = result.model_copy(update={"duration_seconds": duration})
 
-    ***REMOVED*** Trigger async Folgeprozesse (z. B. Validierungen, Aggregationen)
+    # Trigger async Folgeprozesse (z. B. Validierungen, Aggregationen)
     background_tasks.add_task(_start_validation_pipeline, batch.id, tenant_id)
 
     if result.ingested_lines == 0:
@@ -76,5 +76,6 @@ async def ingest_batch(
 
 async def _start_validation_pipeline(batch_id: Any, tenant_id: str) -> None:
     logger.info("Starte asynchrone Validierung für Batch %s (%s)", batch_id, tenant_id)
-    await asyncio.sleep(0)  ***REMOVED*** Platzhalter für zukünftige async Tasks
+    await asyncio.sleep(0)  # Platzhalter für zukünftige async Tasks
+
 

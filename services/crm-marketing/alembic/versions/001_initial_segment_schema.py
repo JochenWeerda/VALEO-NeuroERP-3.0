@@ -11,7 +11,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = '001_initial_segment'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
@@ -19,7 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Create segments table
+    # Create segments table
     op.create_table(
         'crm_marketing_segments',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
@@ -38,7 +38,7 @@ def upgrade() -> None:
     )
     op.create_index('ix_crm_marketing_segments_tenant_id', 'crm_marketing_segments', ['tenant_id'])
 
-    ***REMOVED*** Create segment_rules table
+    # Create segment_rules table
     op.create_table(
         'crm_marketing_segment_rules',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
@@ -56,7 +56,7 @@ def upgrade() -> None:
     )
     op.create_index('ix_crm_marketing_segment_rules_segment_id', 'crm_marketing_segment_rules', ['segment_id'])
 
-    ***REMOVED*** Create segment_members table
+    # Create segment_members table
     op.create_table(
         'crm_marketing_segment_members',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
@@ -71,7 +71,7 @@ def upgrade() -> None:
     op.create_index('ix_crm_marketing_segment_members_segment_id', 'crm_marketing_segment_members', ['segment_id'])
     op.create_index('ix_crm_marketing_segment_members_contact_id', 'crm_marketing_segment_members', ['contact_id'])
 
-    ***REMOVED*** Create segment_performance table
+    # Create segment_performance table
     op.create_table(
         'crm_marketing_segment_performance',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
@@ -104,9 +104,10 @@ def downgrade() -> None:
     op.drop_index('ix_crm_marketing_segments_tenant_id', table_name='crm_marketing_segments')
     op.drop_table('crm_marketing_segments')
     
-    ***REMOVED*** Drop enums
+    # Drop enums
     sa.Enum(name='segmenttype').drop(op.get_bind(), checkfirst=True)
     sa.Enum(name='segmentstatus').drop(op.get_bind(), checkfirst=True)
     sa.Enum(name='ruleoperator').drop(op.get_bind(), checkfirst=True)
     sa.Enum(name='logicaloperator').drop(op.get_bind(), checkfirst=True)
+
 

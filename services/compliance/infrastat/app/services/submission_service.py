@@ -158,7 +158,7 @@ class SubmissionService:
             try:
                 response = await self._idev_client.upload(payload, submission_id=str(submission_id))
                 return response
-            except Exception as exc:  ***REMOVED*** noqa: BLE001
+            except Exception as exc:  # noqa: BLE001
                 logger.error("IDEV Submission Versuch %s fehlgeschlagen: %s", attempt, exc, exc_info=True)
                 last_error = {"status": "error", "success": False, "message": str(exc)}
                 if attempt < attempts:
@@ -166,4 +166,5 @@ class SubmissionService:
 
         assert last_error is not None
         return last_error
+
 

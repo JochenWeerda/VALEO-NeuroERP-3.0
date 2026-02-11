@@ -70,7 +70,7 @@ class CampaignTemplateBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
     type: str = Field(..., description="email, sms, push")
-    subject: Optional[str] = None  ***REMOVED*** For email
+    subject: Optional[str] = None  # For email
     body_html: Optional[str] = None
     body_text: Optional[str] = None
     variables: Optional[dict] = None
@@ -188,3 +188,4 @@ class CampaignScheduleRequest(BaseModel):
 class CampaignTestRequest(BaseModel):
     """Request to send a test campaign."""
     recipient_email: str = Field(..., description="Email address for test send")
+

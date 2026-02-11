@@ -49,7 +49,7 @@ class EventBus:
         async def _callback(msg):
             try:
                 payload = json.loads(msg.data.decode("utf-8"))
-            except json.JSONDecodeError as exc:  ***REMOVED*** noqa: BLE001
+            except json.JSONDecodeError as exc:  # noqa: BLE001
                 logger.warning("Ungültige Event-Payload auf %s: %s", msg.subject, exc)
                 return
             await handler(payload)
@@ -64,7 +64,7 @@ class EventBus:
             return
         try:
             await self._client.unsubscribe(sid)
-        except Exception as exc:  ***REMOVED*** noqa: BLE001
+        except Exception as exc:  # noqa: BLE001
             logger.debug("Konnte Subscription %s nicht aufheben: %s", sid, exc)
         if sid in self._subscriptions:
             self._subscriptions.remove(sid)
@@ -77,4 +77,5 @@ class EventBus:
             await self._client.close()
             logger.info("Inventory EventBus Verbindung geschlossen")
             self._client = None
+
 

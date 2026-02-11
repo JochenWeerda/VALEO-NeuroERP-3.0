@@ -45,8 +45,9 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
             REQUEST_COUNTER.labels(**labels).inc()
             REQUEST_LATENCY.labels(**labels).observe(perf_counter() - start)
 
-            ***REMOVED*** Attach correlation id for scraping convenience
+            # Attach correlation id for scraping convenience
             correlation_id = get_correlation_id()
             if response is not None and correlation_id:
                 response.headers.setdefault("X-Correlation-ID", correlation_id)
+
 

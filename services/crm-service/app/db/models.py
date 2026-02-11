@@ -45,7 +45,7 @@ class SLAStatus(str, Enum):
     EXPIRED = "expired"
 
 
-enum_values = lambda enum_cls: [member.value for member in enum_cls]  ***REMOVED*** noqa: E731
+enum_values = lambda enum_cls: [member.value for member in enum_cls]  # noqa: E731
 
 
 class Case(Base):
@@ -106,7 +106,7 @@ class Case(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    ***REMOVED*** Relationships
+    # Relationships
     sla: Mapped["SLA | None"] = relationship("SLA")
     category: Mapped["Category | None"] = relationship("Category")
     history: Mapped[list["CaseHistory"]] = relationship(back_populates="case", cascade="all, delete-orphan")
@@ -118,7 +118,7 @@ class CaseHistory(Base):
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     case_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("crm_service_cases.id"), nullable=False)
 
-    action: Mapped[str] = mapped_column(String(64), nullable=False)  ***REMOVED*** created, updated, assigned, resolved, etc.
+    action: Mapped[str] = mapped_column(String(64), nullable=False)  # created, updated, assigned, resolved, etc.
     old_value: Mapped[str | None] = mapped_column(Text)
     new_value: Mapped[str | None] = mapped_column(Text)
     field_name: Mapped[str | None] = mapped_column(String(64))
@@ -148,8 +148,8 @@ class SLA(Base):
         nullable=False,
     )
 
-    response_time_hours: Mapped[int] = mapped_column(Integer, default=24)  ***REMOVED*** Hours to first response
-    resolution_time_hours: Mapped[int] = mapped_column(Integer, default=168)  ***REMOVED*** Hours to resolution (7 days)
+    response_time_hours: Mapped[int] = mapped_column(Integer, default=24)  # Hours to first response
+    resolution_time_hours: Mapped[int] = mapped_column(Integer, default=168)  # Hours to resolution (7 days)
 
     is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
@@ -171,7 +171,7 @@ class Category(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    ***REMOVED*** Self-referencing relationship for subcategories
+    # Self-referencing relationship for subcategories
     parent: Mapped["Category | None"] = relationship("Category", remote_side=[id])
     subcategories: Mapped[list["Category"]] = relationship("Category", back_populates="parent")
 
@@ -187,7 +187,7 @@ class KnowledgeArticle(Base):
     summary: Mapped[str | None] = mapped_column(String(500))
 
     category_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("crm_service_categories.id"))
-    tags: Mapped[str | None] = mapped_column(String(500))  ***REMOVED*** Comma-separated tags
+    tags: Mapped[str | None] = mapped_column(String(500))  # Comma-separated tags
 
     is_published: Mapped[bool] = mapped_column(default=False)
     is_featured: Mapped[bool] = mapped_column(default=False)

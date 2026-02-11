@@ -45,7 +45,7 @@ async def semantic_search(request: RAGRequest) -> RAGResponse:
     - Best Practices
     """
     
-    ***REMOVED*** Mock implementation - später mit ChromaDB + OpenAI
+    # Mock implementation - später mit ChromaDB + OpenAI
     mock_sources = [
         SearchResult(
             content="SKR03 ist der Standard-Kontenrahmen für kleine und mittlere Unternehmen in Deutschland. Er wird besonders in der Landwirtschaft eingesetzt.",
@@ -61,11 +61,11 @@ async def semantic_search(request: RAGRequest) -> RAGResponse:
         )
     ]
     
-    ***REMOVED*** Filter by domain if specified
+    # Filter by domain if specified
     if request.domain:
         mock_sources = [s for s in mock_sources if s.metadata.get("domain") == request.domain]
     
-    ***REMOVED*** Generate answer (mock)
+    # Generate answer (mock)
     answer = None
     if request.include_answer and mock_sources:
         answer = f"Basierend auf {len(mock_sources)} Quellen: {mock_sources[0].content[:100]}..."
@@ -86,7 +86,7 @@ async def index_document(
     """
     Indexiert Dokument in Vector Store für spätere Suche
     """
-    ***REMOVED*** Mock - später mit ChromaDB
+    # Mock - später mit ChromaDB
     return {
         "status": "indexed",
         "source": source,
@@ -99,4 +99,5 @@ async def index_document(
 async def remove_from_index(source: str) -> dict:
     """Entfernt Dokument aus Vector Store"""
     return {"status": "removed", "source": source}
+
 

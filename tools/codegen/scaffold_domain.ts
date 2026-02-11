@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env ts-node
+#!/usr/bin/env ts-node
 /**
  * Orchestrator to scaffold a domain slice (entity -> repository -> service -> controller -> bootstrap -> tests).
  */
@@ -140,3 +140,4 @@ function main(): void {
 }
 
 main();
+

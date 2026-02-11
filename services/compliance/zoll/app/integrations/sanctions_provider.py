@@ -119,7 +119,7 @@ class SanctionsProvider:
                 response = await client.get(url)
                 response.raise_for_status()
                 data = response.text
-        except httpx.HTTPError as exc:  ***REMOVED*** noqa: BLE001
+        except httpx.HTTPError as exc:  # noqa: BLE001
             logger.warning("Konnte Sanktionsdaten von %s nicht aktualisieren: %s", source_label, exc)
             return None
         reader = csv.DictReader(io.StringIO(data))
@@ -153,3 +153,4 @@ class SanctionsProvider:
             ", ".join(failed_sources) or "unbekannt",
             next_interval,
         )
+

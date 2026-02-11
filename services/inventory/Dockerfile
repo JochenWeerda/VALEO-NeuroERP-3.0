@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-***REMOVED*** Installiere postgresql-client für pg_isready
+# Installiere postgresql-client für pg_isready
 RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
@@ -15,10 +15,10 @@ COPY main.py ./main.py
 COPY alembic.ini ./alembic.ini
 COPY alembic/ ./alembic/
 
-***REMOVED*** Optional: set PYTHONPATH so Alembic env can import app.*
+# Optional: set PYTHONPATH so Alembic env can import app.*
 ENV PYTHONPATH=/app
 
-***REMOVED*** Entrypoint runs migrations before starting API
+# Entrypoint runs migrations before starting API
 COPY --chown=root:root docker-entrypoint.sh /entrypoint.sh
 RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
@@ -29,4 +29,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5400"]
+
 

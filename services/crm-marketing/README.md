@@ -1,8 +1,8 @@
-***REMOVED*** CRM Marketing Service
+# CRM Marketing Service
 
 Marketing automation service for segments, campaigns, and target groups.
 
-***REMOVED******REMOVED*** Responsibilities
+## Responsibilities
 
 - Manage marketing segments (dynamic and static)
 - Segment rule engine
@@ -10,7 +10,7 @@ Marketing automation service for segments, campaigns, and target groups.
 - Campaign management (future)
 - Target group management
 
-***REMOVED******REMOVED*** API Endpoints
+## API Endpoints
 
 - `POST /api/v1/segments` - Create segment
 - `GET /api/v1/segments` - List segments with filters
@@ -27,10 +27,11 @@ Marketing automation service for segments, campaigns, and target groups.
 - `GET /api/v1/segments/{id}/performance` - Get performance data
 - `GET /api/v1/segments/{id}/export` - Export segment
 
-***REMOVED******REMOVED*** Events
+## Events
 
 - `crm.segment.created`
 - `crm.segment.updated`
 - `crm.segment.member_added`
 - `crm.segment.member_removed`
 - `crm.segment.calculated`
+

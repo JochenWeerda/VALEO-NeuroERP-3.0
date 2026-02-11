@@ -7,26 +7,26 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-***REMOVED*** Import your models' Base
+# Import your models' Base
 from app.db.models import Base
 
-***REMOVED*** this is the Alembic Config object, which provides
-***REMOVED*** access to the values within the .ini file in use.
+# this is the Alembic Config object, which provides
+# access to the values within the .ini file in use.
 config = context.config
 
-***REMOVED*** Interpret the config file for Python logging.
-***REMOVED*** This line sets up loggers basically.
+# Interpret the config file for Python logging.
+# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-***REMOVED*** add your model's MetaData object here
-***REMOVED*** for 'autogenerate' support
+# add your model's MetaData object here
+# for 'autogenerate' support
 target_metadata = Base.metadata
 
-***REMOVED*** other values from the config, defined by the needs of env.py,
-***REMOVED*** can be acquired:
-***REMOVED*** my_important_option = config.get_main_option("my_important_option")
-***REMOVED*** ... etc.
+# other values from the config, defined by the needs of env.py,
+# can be acquired:
+# my_important_option = config.get_main_option("my_important_option")
+# ... etc.
 
 
 def run_migrations_offline() -> None:
@@ -85,4 +85,5 @@ else:
     import asyncio
 
     asyncio.run(run_migrations_online())
+
 

@@ -1,8 +1,8 @@
-***REMOVED*** CRM Analytics
+# CRM Analytics
 
 Microservice providing advanced analytics, reporting dashboards, and business intelligence for the CRM system.
 
-***REMOVED******REMOVED*** Features
+## Features
 
 - **Real-time Dashboards**: Interactive dashboards with KPIs and metrics
 - **Advanced Reporting**: Custom reports with filtering and export capabilities
@@ -11,7 +11,7 @@ Microservice providing advanced analytics, reporting dashboards, and business in
 - **Performance Metrics**: SLA compliance, conversion rates, customer satisfaction
 - **Historical Trends**: Time-series analysis and forecasting
 
-***REMOVED******REMOVED*** API Endpoints
+## API Endpoints
 
 - `GET /api/v1/analytics/dashboard` - Main dashboard data
 - `GET /api/v1/analytics/reports/{type}` - Predefined reports
@@ -20,7 +20,7 @@ Microservice providing advanced analytics, reporting dashboards, and business in
 - `GET /api/v1/analytics/predictive/{model}` - Predictive analytics results
 - `POST /api/v1/analytics/export` - Data export functionality
 
-***REMOVED******REMOVED*** Database Tables
+## Database Tables
 
 - `crm_analytics_dashboards` - Dashboard configurations
 - `crm_analytics_reports` - Report definitions and results
@@ -28,9 +28,10 @@ Microservice providing advanced analytics, reporting dashboards, and business in
 - `crm_analytics_predictions` - Predictive model results
 - `crm_analytics_exports` - Export job tracking
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 - PostgreSQL for analytics data storage
 - Redis for caching dashboard data
 - Integration with all CRM services for data aggregation
 - Optional: Data warehouse for large-scale analytics
+

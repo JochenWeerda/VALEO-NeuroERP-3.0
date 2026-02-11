@@ -18,7 +18,7 @@ class SegmentBase(BaseModel):
 class SegmentCreate(SegmentBase):
     """Schema for creating a segment."""
     tenant_id: str
-    rules: Optional[dict] = None  ***REMOVED*** JSON structure for rules
+    rules: Optional[dict] = None  # JSON structure for rules
 
 
 class SegmentUpdate(BaseModel):
@@ -126,4 +126,5 @@ class SegmentExportRequest(BaseModel):
     """Request to export a segment."""
     format: str = Field(default="csv", description="csv, json")
     include_fields: Optional[list[str]] = Field(None, description="Fields to include in export")
+
 

@@ -17,6 +17,11 @@ from app.integration.event_bus import EventBus
 from app.schemas.workflow import EventPayload
 from app.storage.repository import WorkflowRepository
 
+try:
+    from auth_shared import AuthMiddleware
+except ImportError:
+    AuthMiddleware = None  # type: ignore[assignment,misc]
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -51,7 +56,7 @@ async def lifespan(_: FastAPI):
     if event_bus:
         try:
             await event_bus.connect(_handle_event)
-        except Exception as exc:  ***REMOVED*** noqa: BLE001
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Event-Bus konnte nicht verbunden werden: %s", exc)
             event_bus = None
 
@@ -80,6 +85,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Auth middleware
+if AuthMiddleware is not None:
+    app.add_middleware(AuthMiddleware)
+    logger.info("Auth middleware enabled")
+
 app.include_router(api_router, prefix="/api/v1")
 
 if settings.METRICS_ENABLED:
@@ -101,5 +111,3 @@ if __name__ == "__main__":
         port=settings.PORT,
         reload=settings.DEBUG,
     )
-
-

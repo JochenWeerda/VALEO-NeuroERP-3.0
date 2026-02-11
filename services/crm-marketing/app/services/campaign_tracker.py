@@ -24,7 +24,7 @@ class CampaignTracker:
         user_agent: str | None = None,
     ):
         """Track email open."""
-        ***REMOVED*** Check if already tracked
+        # Check if already tracked
         existing = await self.db.scalar(
             select(CampaignEvent).where(
                 and_(
@@ -36,9 +36,9 @@ class CampaignTracker:
         )
         
         if existing:
-            return  ***REMOVED*** Already tracked
+            return  # Already tracked
         
-        ***REMOVED*** Create event
+        # Create event
         event = CampaignEvent(
             campaign_id=campaign_id,
             recipient_id=recipient_id,
@@ -52,7 +52,7 @@ class CampaignTracker:
         self.db.add(event)
         await self.db.commit()
         
-        ***REMOVED*** Publish event
+        # Publish event
         event_publisher = get_event_publisher()
         await event_publisher.publish_campaign_event(
             campaign_id=campaign_id,
@@ -69,7 +69,7 @@ class CampaignTracker:
         user_agent: str | None = None,
     ):
         """Track link click."""
-        ***REMOVED*** Create event
+        # Create event
         event = CampaignEvent(
             campaign_id=campaign_id,
             recipient_id=recipient_id,
@@ -84,7 +84,7 @@ class CampaignTracker:
         self.db.add(event)
         await self.db.commit()
         
-        ***REMOVED*** Publish event
+        # Publish event
         event_publisher = get_event_publisher()
         await event_publisher.publish_campaign_event(
             campaign_id=campaign_id,
@@ -101,7 +101,7 @@ class CampaignTracker:
         details: Dict[str, Any] | None = None,
     ):
         """Track conversion."""
-        ***REMOVED*** Create event
+        # Create event
         event = CampaignEvent(
             campaign_id=campaign_id,
             recipient_id=recipient_id,
@@ -116,7 +116,7 @@ class CampaignTracker:
         self.db.add(event)
         await self.db.commit()
         
-        ***REMOVED*** Publish event
+        # Publish event
         event_publisher = get_event_publisher()
         await event_publisher.publish_campaign_event(
             campaign_id=campaign_id,
@@ -136,7 +136,7 @@ class CampaignTracker:
             recipient.status = RecipientStatus.BOUNCED
             recipient.bounce_reason = bounce_reason
         
-        ***REMOVED*** Create event
+        # Create event
         event = CampaignEvent(
             campaign_id=campaign_id,
             recipient_id=recipient_id,
@@ -149,7 +149,7 @@ class CampaignTracker:
         self.db.add(event)
         await self.db.commit()
         
-        ***REMOVED*** Publish event
+        # Publish event
         event_publisher = get_event_publisher()
         await event_publisher.publish_campaign_event(
             campaign_id=campaign_id,
@@ -163,7 +163,7 @@ class CampaignTracker:
         recipient_id: UUID,
     ):
         """Track unsubscribe."""
-        ***REMOVED*** Create event
+        # Create event
         event = CampaignEvent(
             campaign_id=campaign_id,
             recipient_id=recipient_id,
@@ -173,11 +173,12 @@ class CampaignTracker:
         self.db.add(event)
         await self.db.commit()
         
-        ***REMOVED*** Publish event
+        # Publish event
         event_publisher = get_event_publisher()
         await event_publisher.publish_campaign_event(
             campaign_id=campaign_id,
             event_type="unsubscribed",
             recipient_id=recipient_id,
         )
+
 

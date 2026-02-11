@@ -24,7 +24,7 @@ depends_on = None
 
 def upgrade() -> None:
     """Create CRM Multi-Channel tables."""
-    ***REMOVED*** Create enums
+    # Create enums
     op.execute("CREATE TYPE crm_multichannel_channel_type AS ENUM ('facebook', 'twitter', 'linkedin', 'instagram', 'website', 'email', 'sms', 'whatsapp', 'telegram', 'shopify', 'woocommerce', 'stripe', 'erp')")
     op.execute("CREATE TYPE crm_multichannel_channel_status AS ENUM ('active', 'inactive', 'error', 'pending')")
     op.execute("CREATE TYPE crm_multichannel_message_direction AS ENUM ('inbound', 'outbound')")
@@ -32,7 +32,7 @@ def upgrade() -> None:
     op.execute("CREATE TYPE crm_multichannel_conversation_status AS ENUM ('open', 'closed', 'pending', 'escalated')")
     op.execute("CREATE TYPE crm_multichannel_form_field_type AS ENUM ('text', 'email', 'phone', 'number', 'date', 'select', 'multiselect', 'checkbox', 'radio', 'textarea', 'file')")
 
-    ***REMOVED*** Channels table
+    # Channels table
     op.create_table(
         "crm_multichannel_channels",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -54,7 +54,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Conversations table
+    # Conversations table
     op.create_table(
         "crm_multichannel_conversations",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -82,7 +82,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Messages table
+    # Messages table
     op.create_table(
         "crm_multichannel_messages",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -104,7 +104,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     )
 
-    ***REMOVED*** Web Forms table
+    # Web Forms table
     op.create_table(
         "crm_multichannel_webforms",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -129,7 +129,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Form Submissions table
+    # Form Submissions table
     op.create_table(
         "crm_multichannel_submissions",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -147,7 +147,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     )
 
-    ***REMOVED*** Integrations table
+    # Integrations table
     op.create_table(
         "crm_multichannel_integrations",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -171,7 +171,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Seed initial data
+    # Seed initial data
     _seed_initial_data()
 
 
@@ -194,5 +194,5 @@ def downgrade() -> None:
 
 def _seed_initial_data():
     """Seed initial demo multi-channel data."""
-    ***REMOVED*** This will be populated when the service starts and finds existing data
+    # This will be populated when the service starts and finds existing data
     pass

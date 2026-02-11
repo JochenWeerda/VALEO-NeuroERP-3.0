@@ -46,7 +46,7 @@ async def create_gdpr_request(
     request: Request = None,
 ):
     """Create a new GDPR request."""
-    ***REMOVED*** Create request record
+    # Create request record
     gdpr_request = GDPRRequest(
         tenant_id=request_data.tenant_id,
         request_type=GDPRRequestType(request_data.request_type),
@@ -55,14 +55,14 @@ async def create_gdpr_request(
         requested_by=request_data.requested_by,
         is_self_request=request_data.is_self_request,
         notes=request_data.notes,
-        created_by=request_data.requested_by,  ***REMOVED*** TODO: Get from auth context
+        created_by=request_data.requested_by,  # TODO: Get from auth context
     )
     
     db.add(gdpr_request)
     await db.commit()
     await db.refresh(gdpr_request)
     
-    ***REMOVED*** Create history entry
+    # Create history entry
     history = GDPRRequestHistory(
         request_id=gdpr_request.id,
         action=GDPRRequestHistoryAction.CREATED,
@@ -73,14 +73,14 @@ async def create_gdpr_request(
     db.add(history)
     await db.commit()
     
-    ***REMOVED*** Generate verification token if email verification
+    # Generate verification token if email verification
     if request_data.is_self_request:
         verification_token = uuid4()
         gdpr_request.verification_token = verification_token
         await db.commit()
-        ***REMOVED*** TODO: Send verification email
+        # TODO: Send verification email
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_gdpr_request_created(
         request_id=gdpr_request.id,
@@ -141,7 +141,7 @@ async def update_gdpr_request(
     
     old_status = gdpr_request.status
     
-    ***REMOVED*** Update fields
+    # Update fields
     if request_data.status:
         gdpr_request.status = GDPRRequestStatus(request_data.status)
         now = datetime.utcnow()
@@ -156,7 +156,7 @@ async def update_gdpr_request(
     gdpr_request.updated_by = changed_by or "system"
     gdpr_request.updated_at = datetime.utcnow()
     
-    ***REMOVED*** Create history entry if status changed
+    # Create history entry if status changed
     if old_status != gdpr_request.status:
         history = GDPRRequestHistory(
             request_id=gdpr_request.id,
@@ -185,19 +185,19 @@ async def verify_gdpr_request(
     if not gdpr_request:
         raise HTTPException(status_code=404, detail="GDPR request not found")
     
-    ***REMOVED*** Check verification token if email verification
+    # Check verification token if email verification
     if verify_data.verification_method == "email" and verify_data.verification_token:
         if gdpr_request.verification_token != verify_data.verification_token:
             raise HTTPException(status_code=400, detail="Invalid verification token")
     
-    ***REMOVED*** Update verification
+    # Update verification
     gdpr_request.verified_at = datetime.utcnow()
     gdpr_request.verification_method = VerificationMethod(verify_data.verification_method)
     gdpr_request.status = GDPRRequestStatus.IN_PROGRESS
     gdpr_request.updated_by = changed_by or "system"
     gdpr_request.updated_at = datetime.utcnow()
     
-    ***REMOVED*** Create history entry
+    # Create history entry
     history = GDPRRequestHistory(
         request_id=gdpr_request.id,
         action=GDPRRequestHistoryAction.VERIFIED,
@@ -210,7 +210,7 @@ async def verify_gdpr_request(
     await db.commit()
     await db.refresh(gdpr_request)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_gdpr_request_verified(
         request_id=gdpr_request.id,
@@ -236,20 +236,20 @@ async def export_gdpr_data(
     if gdpr_request.status != GDPRRequestStatus.IN_PROGRESS:
         raise HTTPException(status_code=400, detail="Request must be verified and in progress")
     
-    ***REMOVED*** TODO: Collect data from all CRM modules
-    ***REMOVED*** This is a placeholder - actual implementation would query all services
+    # TODO: Collect data from all CRM modules
+    # This is a placeholder - actual implementation would query all services
     export_data_dict = {
         "contact_id": str(gdpr_request.contact_id),
         "exported_at": datetime.utcnow().isoformat(),
         "data_areas": export_data.data_areas,
-        "contacts": [],  ***REMOVED*** TODO: Fetch from crm-core
-        "opportunities": [],  ***REMOVED*** TODO: Fetch from crm-sales
-        "activities": [],  ***REMOVED*** TODO: Fetch from crm-sales
-        "consents": [],  ***REMOVED*** TODO: Fetch from crm-consent
-        "campaigns": [],  ***REMOVED*** TODO: Fetch from crm-marketing
+        "contacts": [],  # TODO: Fetch from crm-core
+        "opportunities": [],  # TODO: Fetch from crm-sales
+        "activities": [],  # TODO: Fetch from crm-sales
+        "consents": [],  # TODO: Fetch from crm-consent
+        "campaigns": [],  # TODO: Fetch from crm-marketing
     }
     
-    ***REMOVED*** Generate export file
+    # Generate export file
     export_dir = Path(settings.EXPORT_STORAGE_PATH)
     export_dir.mkdir(parents=True, exist_ok=True)
     
@@ -261,7 +261,7 @@ async def export_gdpr_data(
             json.dump(export_data_dict, f, indent=2, ensure_ascii=False)
     elif export_data.format == "csv":
         file_path = export_dir / f"{file_name}.csv"
-        ***REMOVED*** TODO: Convert to CSV format
+        # TODO: Convert to CSV format
         with open(file_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(["Contact ID", "Exported At", "Data Areas"])
@@ -269,7 +269,7 @@ async def export_gdpr_data(
     else:
         raise HTTPException(status_code=400, detail=f"Unsupported format: {export_data.format}")
     
-    ***REMOVED*** Update request
+    # Update request
     gdpr_request.response_data = export_data_dict
     gdpr_request.response_file_path = str(file_path)
     gdpr_request.response_file_format = export_data.format
@@ -278,7 +278,7 @@ async def export_gdpr_data(
     gdpr_request.updated_by = changed_by or "system"
     gdpr_request.updated_at = datetime.utcnow()
     
-    ***REMOVED*** Create history entry
+    # Create history entry
     history = GDPRRequestHistory(
         request_id=gdpr_request.id,
         action=GDPRRequestHistoryAction.DATA_EXPORTED,
@@ -291,7 +291,7 @@ async def export_gdpr_data(
     await db.commit()
     await db.refresh(gdpr_request)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_gdpr_request_exported(
         request_id=gdpr_request.id,
@@ -320,9 +320,9 @@ async def delete_gdpr_data(
     if gdpr_request.status != GDPRRequestStatus.IN_PROGRESS:
         raise HTTPException(status_code=400, detail="Request must be verified and in progress")
     
-    ***REMOVED*** TODO: Implement actual deletion/anonymization logic
-    ***REMOVED*** This would call anonymization services for all modules
-    ***REMOVED*** For now, we just mark as completed
+    # TODO: Implement actual deletion/anonymization logic
+    # This would call anonymization services for all modules
+    # For now, we just mark as completed
     
     gdpr_request.status = GDPRRequestStatus.COMPLETED
     gdpr_request.completed_at = datetime.utcnow()
@@ -330,7 +330,7 @@ async def delete_gdpr_data(
     gdpr_request.updated_by = changed_by or "system"
     gdpr_request.updated_at = datetime.utcnow()
     
-    ***REMOVED*** Create history entry
+    # Create history entry
     history = GDPRRequestHistory(
         request_id=gdpr_request.id,
         action=GDPRRequestHistoryAction.DATA_DELETED,
@@ -344,7 +344,7 @@ async def delete_gdpr_data(
     await db.commit()
     await db.refresh(gdpr_request)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_gdpr_request_deleted(
         request_id=gdpr_request.id,
@@ -374,7 +374,7 @@ async def reject_gdpr_request(
     gdpr_request.updated_by = changed_by or "system"
     gdpr_request.updated_at = datetime.utcnow()
     
-    ***REMOVED*** Create history entry
+    # Create history entry
     history = GDPRRequestHistory(
         request_id=gdpr_request.id,
         action=GDPRRequestHistoryAction.REJECTED,
@@ -388,7 +388,7 @@ async def reject_gdpr_request(
     await db.commit()
     await db.refresh(gdpr_request)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_gdpr_request_rejected(
         request_id=gdpr_request.id,
@@ -472,4 +472,5 @@ async def check_gdpr_request(
         status=gdpr_request.status.value,
         request_type=gdpr_request.request_type.value,
     )
+
 

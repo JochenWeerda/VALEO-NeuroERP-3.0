@@ -20,7 +20,7 @@ class ConsentBase(BaseModel):
 class ConsentCreate(ConsentBase):
     """Schema for creating a consent."""
     tenant_id: str
-    ***REMOVED*** Double opt-in will be handled automatically
+    # Double opt-in will be handled automatically
     pass
 
 
@@ -71,7 +71,7 @@ class ConsentCheckRequest(BaseModel):
     """Request to check consent."""
     contact_id: UUID
     channel: str
-    consent_type: str | None = None  ***REMOVED*** If None, checks for any consent type
+    consent_type: str | None = None  # If None, checks for any consent type
 
 
 class ConsentCheckResponse(BaseModel):
@@ -82,4 +82,5 @@ class ConsentCheckResponse(BaseModel):
     granted_at: datetime | None = None
     expires_at: datetime | None = None
     is_expired: bool = False
+
 

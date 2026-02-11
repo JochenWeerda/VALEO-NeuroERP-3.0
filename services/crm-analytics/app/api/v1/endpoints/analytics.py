@@ -21,10 +21,10 @@ async def get_dashboard_data(
     db: AsyncSession = get_db
 ):
     """Get dashboard data with metrics and charts."""
-    ***REMOVED*** For now, return mock data - in production this would aggregate from all CRM services
+    # For now, return mock data - in production this would aggregate from all CRM services
     effective_tenant_id = tenant_id or "00000000-0000-0000-0000-000000000001"
 
-    ***REMOVED*** Mock dashboard data
+    # Mock dashboard data
     dashboard_data = {
         "dashboard": {
             "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -89,7 +89,7 @@ async def get_dashboard_data(
                 "labels": ["Resolved", "Pending", "Escalated"],
                 "datasets": [{
                     "data": [85, 12, 3],
-                    "backgroundColor": ["***REMOVED***10B981", "***REMOVED***F59E0B", "***REMOVED***EF4444"]
+                    "backgroundColor": ["#10B981", "#F59E0B", "#EF4444"]
                 }]
             }
         },
@@ -110,7 +110,7 @@ async def get_report_data(
     """Get predefined report data."""
     effective_tenant_id = tenant_id or "00000000-0000-0000-0000-000000000001"
 
-    ***REMOVED*** Mock report data based on type
+    # Mock report data based on type
     report_configs = {
         "sales_performance": {
             "name": "Sales Performance Report",
@@ -181,7 +181,7 @@ async def generate_custom_report(
     db: AsyncSession = get_db
 ):
     """Generate a custom report based on configuration."""
-    ***REMOVED*** Mock custom report generation
+    # Mock custom report generation
     custom_data = {
         "report": {
             "id": "550e8400-e29b-41d4-a716-446655440099",
@@ -213,7 +213,7 @@ async def get_metric_value(
     """Get current value for a specific metric."""
     effective_tenant_id = tenant_id or "00000000-0000-0000-0000-000000000001"
 
-    ***REMOVED*** Mock metric data
+    # Mock metric data
     mock_metrics = {
         "total_customers": {
             "id": "550e8400-e29b-41d4-a716-446655440010",
@@ -269,7 +269,7 @@ async def get_predictive_insights(
     """Get predictive analytics results."""
     effective_tenant_id = tenant_id or "00000000-0000-0000-0000-000000000001"
 
-    ***REMOVED*** Mock predictive data
+    # Mock predictive data
     if model_type == "lead_scoring":
         predictions = [
             {

@@ -24,13 +24,13 @@ depends_on = None
 
 def upgrade() -> None:
     """Create CRM Analytics tables."""
-    ***REMOVED*** Create enums
+    # Create enums
     op.execute("CREATE TYPE crm_analytics_dashboard_type AS ENUM ('executive', 'sales', 'service', 'marketing', 'custom')")
     op.execute("CREATE TYPE crm_analytics_report_type AS ENUM ('sales_performance', 'customer_satisfaction', 'case_management', 'lead_conversion', 'revenue_analysis', 'custom')")
     op.execute("CREATE TYPE crm_analytics_metric_type AS ENUM ('count', 'sum', 'average', 'percentage', 'trend')")
     op.execute("CREATE TYPE crm_analytics_notification_type AS ENUM ('email', 'in_app', 'sms', 'webhook')")
 
-    ***REMOVED*** Dashboards table
+    # Dashboards table
     op.create_table(
         "crm_analytics_dashboards",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -48,7 +48,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Reports table
+    # Reports table
     op.create_table(
         "crm_analytics_reports",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -70,7 +70,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Metrics table
+    # Metrics table
     op.create_table(
         "crm_analytics_metrics",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -91,7 +91,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Predictions table
+    # Predictions table
     op.create_table(
         "crm_analytics_predictions",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -108,7 +108,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     )
 
-    ***REMOVED*** Exports table
+    # Exports table
     op.create_table(
         "crm_analytics_exports",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -126,7 +126,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Seed initial data
+    # Seed initial data
     _seed_initial_data()
 
 
@@ -146,5 +146,5 @@ def downgrade() -> None:
 
 def _seed_initial_data():
     """Seed initial demo analytics data."""
-    ***REMOVED*** This will be populated when the service starts and finds existing data
+    # This will be populated when the service starts and finds existing data
     pass

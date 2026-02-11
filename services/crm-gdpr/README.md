@@ -1,8 +1,8 @@
-***REMOVED*** CRM GDPR Service
+# CRM GDPR Service
 
 GDPR (DSGVO) compliance service for data access, deletion, portability, and objection requests.
 
-***REMOVED******REMOVED*** Responsibilities
+## Responsibilities
 
 - Manage GDPR requests (access, deletion, portability, objection)
 - Generate data exports (Art. 20 DSGVO)
@@ -11,7 +11,7 @@ GDPR (DSGVO) compliance service for data access, deletion, portability, and obje
 - Identity verification
 - Complete audit trail
 
-***REMOVED******REMOVED*** API Endpoints
+## API Endpoints
 
 - `POST /api/v1/gdpr/requests` - Create GDPR request
 - `GET /api/v1/gdpr/requests` - List requests with filters
@@ -25,7 +25,7 @@ GDPR (DSGVO) compliance service for data access, deletion, portability, and obje
 - `GET /api/v1/gdpr/requests/{id}/download` - Download export file
 - `POST /api/v1/gdpr/check` - Check if request exists for contact
 
-***REMOVED******REMOVED*** Events
+## Events
 
 - `crm.gdpr.request.created`
 - `crm.gdpr.request.verified`
@@ -33,10 +33,11 @@ GDPR (DSGVO) compliance service for data access, deletion, portability, and obje
 - `crm.gdpr.request.deleted`
 - `crm.gdpr.request.rejected`
 
-***REMOVED******REMOVED*** GDPR Articles
+## GDPR Articles
 
 - **Art. 15**: Right of access
 - **Art. 17**: Right to erasure (deletion)
 - **Art. 20**: Right to data portability
 - **Art. 21**: Right to object
+
 

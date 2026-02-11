@@ -38,7 +38,7 @@ class DashboardType(str, Enum):
     CUSTOM = "custom"
 
 
-enum_values = lambda enum_cls: [member.value for member in enum_cls]  ***REMOVED*** noqa: E731
+enum_values = lambda enum_cls: [member.value for member in enum_cls]  # noqa: E731
 
 
 class Dashboard(Base):
@@ -58,8 +58,8 @@ class Dashboard(Base):
         nullable=False,
     )
 
-    config: Mapped[dict] = mapped_column(JSON, nullable=False)  ***REMOVED*** Dashboard layout and widgets
-    filters: Mapped[dict] = mapped_column(JSON, nullable=False)  ***REMOVED*** Default filters
+    config: Mapped[dict] = mapped_column(JSON, nullable=False)  # Dashboard layout and widgets
+    filters: Mapped[dict] = mapped_column(JSON, nullable=False)  # Default filters
 
     is_active: Mapped[bool] = mapped_column(default=True)
     is_default: Mapped[bool] = mapped_column(default=False)
@@ -88,11 +88,11 @@ class Report(Base):
         nullable=False,
     )
 
-    config: Mapped[dict] = mapped_column(JSON, nullable=False)  ***REMOVED*** Report configuration
-    filters: Mapped[dict] = mapped_column(JSON, nullable=False)  ***REMOVED*** Report filters
-    results: Mapped[dict | None] = mapped_column(JSON)  ***REMOVED*** Cached results
+    config: Mapped[dict] = mapped_column(JSON, nullable=False)  # Report configuration
+    filters: Mapped[dict] = mapped_column(JSON, nullable=False)  # Report filters
+    results: Mapped[dict | None] = mapped_column(JSON)  # Cached results
 
-    schedule: Mapped[str | None] = mapped_column(String(128))  ***REMOVED*** Cron schedule for automated reports
+    schedule: Mapped[str | None] = mapped_column(String(128))  # Cron schedule for automated reports
     last_run: Mapped[datetime | None] = mapped_column(DateTime)
     next_run: Mapped[datetime | None] = mapped_column(DateTime)
 
@@ -123,16 +123,16 @@ class Metric(Base):
         nullable=False,
     )
 
-    entity: Mapped[str] = mapped_column(String(64), nullable=False)  ***REMOVED*** customers, leads, cases, etc.
-    field: Mapped[str] = mapped_column(String(64), nullable=False)  ***REMOVED*** Field to aggregate
-    aggregation: Mapped[str] = mapped_column(String(32), nullable=False)  ***REMOVED*** sum, count, avg, etc.
+    entity: Mapped[str] = mapped_column(String(64), nullable=False)  # customers, leads, cases, etc.
+    field: Mapped[str] = mapped_column(String(64), nullable=False)  # Field to aggregate
+    aggregation: Mapped[str] = mapped_column(String(32), nullable=False)  # sum, count, avg, etc.
 
-    filters: Mapped[dict] = mapped_column(JSON, nullable=False)  ***REMOVED*** Metric filters
-    value: Mapped[float | None] = mapped_column(Float)  ***REMOVED*** Cached current value
-    trend: Mapped[float | None] = mapped_column(Float)  ***REMOVED*** Trend percentage
+    filters: Mapped[dict] = mapped_column(JSON, nullable=False)  # Metric filters
+    value: Mapped[float | None] = mapped_column(Float)  # Cached current value
+    trend: Mapped[float | None] = mapped_column(Float)  # Trend percentage
 
     last_calculated: Mapped[datetime | None] = mapped_column(DateTime)
-    calculation_interval: Mapped[int] = mapped_column(Integer, default=300)  ***REMOVED*** Seconds
+    calculation_interval: Mapped[int] = mapped_column(Integer, default=300)  # Seconds
 
     is_active: Mapped[bool] = mapped_column(default=True)
 
@@ -146,13 +146,13 @@ class Prediction(Base):
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), nullable=False)
 
-    model_type: Mapped[str] = mapped_column(String(64), nullable=False)  ***REMOVED*** lead_scoring, churn_prediction, etc.
-    entity_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)  ***REMOVED*** Customer, lead, etc. ID
-    entity_type: Mapped[str] = mapped_column(String(64), nullable=False)  ***REMOVED*** customer, lead, case, etc.
+    model_type: Mapped[str] = mapped_column(String(64), nullable=False)  # lead_scoring, churn_prediction, etc.
+    entity_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)  # Customer, lead, etc. ID
+    entity_type: Mapped[str] = mapped_column(String(64), nullable=False)  # customer, lead, case, etc.
 
-    score: Mapped[float] = mapped_column(Float, nullable=False)  ***REMOVED*** Prediction score 0-1
-    confidence: Mapped[float] = mapped_column(Float, nullable=False)  ***REMOVED*** Model confidence 0-1
-    features: Mapped[dict] = mapped_column(JSON, nullable=False)  ***REMOVED*** Input features used
+    score: Mapped[float] = mapped_column(Float, nullable=False)  # Prediction score 0-1
+    confidence: Mapped[float] = mapped_column(Float, nullable=False)  # Model confidence 0-1
+    features: Mapped[dict] = mapped_column(JSON, nullable=False)  # Input features used
 
     prediction_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     valid_until: Mapped[datetime | None] = mapped_column(DateTime)
@@ -169,10 +169,10 @@ class Export(Base):
     tenant_id: Mapped[str] = mapped_column(String(64), nullable=False)
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    format: Mapped[str] = mapped_column(String(16), nullable=False)  ***REMOVED*** csv, excel, pdf
-    config: Mapped[dict] = mapped_column(JSON, nullable=False)  ***REMOVED*** Export configuration
+    format: Mapped[str] = mapped_column(String(16), nullable=False)  # csv, excel, pdf
+    config: Mapped[dict] = mapped_column(JSON, nullable=False)  # Export configuration
 
-    status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")  ***REMOVED*** pending, processing, completed, failed
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")  # pending, processing, completed, failed
     file_path: Mapped[str | None] = mapped_column(String(500))
     file_size: Mapped[int | None] = mapped_column(Integer)
 

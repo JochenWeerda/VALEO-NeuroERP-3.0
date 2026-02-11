@@ -35,7 +35,7 @@ async def list_leads(
     if search:
         like = f"%{search.strip()}%"
         filters.append(
-            sa.or_(  ***REMOVED*** type: ignore[attr-defined]
+            sa.or_(  # type: ignore[attr-defined]
                 Lead.company_name.ilike(like),
                 Lead.contact_person.ilike(like),
                 Lead.email.ilike(like),
@@ -128,3 +128,4 @@ async def delete_lead(lead_id: UUID, session: AsyncSession = Depends(get_session
         raise HTTPException(status_code=404, detail="Lead not found")
     await session.delete(lead)
     await session.commit()
+

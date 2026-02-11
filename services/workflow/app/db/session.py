@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from app.config import settings
 
 
-***REMOVED*** SQLAlchemy Engine & SessionFactory
+# SQLAlchemy Engine & SessionFactory
 engine = create_engine(
     settings.DATABASE_URL,
     pool_pre_ping=True,
@@ -30,5 +30,7 @@ def get_session():
         yield db
     finally:
         db.close()
+
+
 
 
