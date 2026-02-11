@@ -6,8 +6,16 @@
 
 import { randomUUID } from 'crypto';
 import { DeliveryNote, DeliveryNoteStatus } from '../entities/delivery-note';
-import { ISMSAuditLogger } from '../../../shared/security/isms-audit-logger';
-import { CryptoService } from '../../../shared/security/crypto-service';
+
+export interface ISMSAuditLogger {
+  logSecureEvent(event: string, payload: Record<string, unknown>, tenantId: string, userId?: string): Promise<void>;
+  logSecurityIncident(event: string, payload: Record<string, unknown>, tenantId: string, userId?: string): Promise<void>;
+}
+
+export interface CryptoService {
+  encrypt(data: string): Promise<string>;
+  decrypt(data: string): Promise<string>;
+}
 
 export interface DeliveryPlan {
   id: string;
@@ -217,6 +225,10 @@ export class DeliveryTrackingService {
     this.cryptoService = cryptoService;
   }
 
+  private toErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+  }
+
   /**
    * Creates a comprehensive delivery plan from an order
    * Analyzes items, address, and requirements for optimal routing
@@ -268,7 +280,7 @@ export class DeliveryTrackingService {
     } catch (error) {
       await this.auditLogger.logSecurityIncident('DELIVERY_PLAN_CREATION_FAILED', {
         orderId,
-        error: error.message
+        error: this.toErrorMessage(error)
       }, tenantId, userId);
       throw error;
     }
@@ -323,7 +335,7 @@ export class DeliveryTrackingService {
     } catch (error) {
       await this.auditLogger.logSecurityIncident('DELIVERY_SCHEDULING_FAILED', {
         planId,
-        error: error.message
+        error: this.toErrorMessage(error)
       }, tenantId, userId);
       throw error;
     }
@@ -374,7 +386,7 @@ export class DeliveryTrackingService {
     } catch (error) {
       await this.auditLogger.logSecurityIncident('DELIVERY_TRACKING_FAILED', {
         deliveryId,
-        error: error.message
+        error: this.toErrorMessage(error)
       }, tenantId);
       throw error;
     }
@@ -411,8 +423,9 @@ export class DeliveryTrackingService {
       
       // Process customer feedback if available
       if (deliveryData.customerFeedback) {
-        confirmation.customerFeedback = deliveryData.customerFeedback;
-        await this.processCustomerFeedback(confirmation.customerFeedback, tenantId);
+        const feedback = deliveryData.customerFeedback as CustomerFeedback;
+        confirmation.customerFeedback = feedback;
+        await this.processCustomerFeedback(feedback, tenantId);
       }
 
       await this.auditLogger.logSecureEvent('DELIVERY_CONFIRMED', {
@@ -429,7 +442,7 @@ export class DeliveryTrackingService {
     } catch (error) {
       await this.auditLogger.logSecurityIncident('DELIVERY_CONFIRMATION_FAILED', {
         deliveryId,
-        error: error.message
+        error: this.toErrorMessage(error)
       }, tenantId, userId);
       throw error;
     }
@@ -518,7 +531,7 @@ export class DeliveryTrackingService {
   }
 
   private async getCarrierName(carrierId: string): Promise<string> {
-    const carrierMap = {
+    const carrierMap: Record<string, string> = {
       'DHL_001': 'DHL Express',
       'UPS_001': 'UPS Standard',
       'FEDEX_001': 'FedEx Ground',

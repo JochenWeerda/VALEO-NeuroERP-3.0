@@ -45,7 +45,7 @@ jobs:
           echo "VALEO_BASE_URL=http://localhost:3000" >> .env
       
       - name: Build Application
-        run: pnpm build
+        run: pnpm --filter @valero-neuroerp/frontend-web build
       
       - name: Start Backend (Background)
         run: |

@@ -4,6 +4,7 @@
  */
 
 import { SeasonalPricingRule, Season, getSeasonFromDate, isDateInMonthRange } from '../entities/seasonal-pricing-rule';
+import { randomUUID } from 'crypto';
 
 export interface SeasonalPricingServiceDependencies {
   // Repository would be injected here in production
@@ -191,7 +192,10 @@ export class SeasonalPricingService {
     applicableRules.sort((a, b) => b.priority - a.priority);
 
     // Return highest priority rule
-    return applicableRules.length > 0 ? applicableRules[0] : null;
+    if (applicableRules.length === 0) {
+      return null;
+    }
+    return applicableRules[0]!;
   }
 
   /**
@@ -200,14 +204,15 @@ export class SeasonalPricingService {
   async createSeasonalPricingRule(
     rule: Omit<SeasonalPricingRule, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<SeasonalPricingRule> {
+    const id = randomUUID();
     const newRule: SeasonalPricingRule = {
       ...rule,
-      id: crypto.randomUUID(),
+      id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
-    this.rules.set(newRule.id, newRule);
+    this.rules.set(id, newRule);
     return newRule;
   }
 
