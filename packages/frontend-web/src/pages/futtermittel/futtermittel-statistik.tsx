@@ -1,10 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { OverviewPage } from '@/components/mask-builder'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { useFutterStatistik, type FutterStatistik } from '@/lib/api/futter'
 import { OverviewConfig, OverviewCard, OverviewChart } from '@/components/mask-builder/types'
-
-// API Client für Statistiken
-const apiClient = createApiClient('/api/futtermittel')
 
 // Mock-Daten für KPIs
 const mockKPIs: OverviewCard[] = [
@@ -91,34 +88,60 @@ const statistikConfig: OverviewConfig = {
 }
 
 export default function FuttermittelStatistikPage(): JSX.Element {
-  const [kpiData, setKpiData] = useState<OverviewCard[]>(mockKPIs)
-  const [chartData, setChartData] = useState<OverviewChart[]>(mockChartData)
-  const [loading, setLoading] = useState(false)
+  const { data, isLoading } = useFutterStatistik()
 
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const response = await apiClient.get('/statistics')
-
-      if (response.success) {
-        setKpiData((response.data as any).kpis || mockKPIs)
-        setChartData((response.data as any).charts || mockChartData)
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Statistiken:', error)
-      // Bei Fehler bleiben Mock-Daten erhalten
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadData()
-
-    // Automatische Aktualisierung alle 5 Minuten
-    const interval = setInterval(loadData, 300000)
-    return () => clearInterval(interval)
-  }, [])
+  const { kpiData, chartData } = useMemo(() => {
+    if (!data) return { kpiData: mockKPIs, chartData: mockChartData }
+    const stats = data as FutterStatistik
+    const cards: OverviewCard[] = [
+      {
+        title: 'Gesamtproduktion',
+        value: `${stats.gesamtProduktion.toLocaleString('de-DE')} t`,
+        change: { value: 0, type: 'increase', period: 'aktuell' },
+        icon: '📦',
+        color: 'blue',
+      },
+      {
+        title: 'Gesamtabsatz',
+        value: `${stats.gesamtAbsatz.toLocaleString('de-DE')} t`,
+        change: { value: 0, type: 'increase', period: 'aktuell' },
+        icon: '📉',
+        color: 'orange',
+      },
+      {
+        title: 'Ø Preis',
+        value: `${stats.durchschnittsPreis.toLocaleString('de-DE')} €/t`,
+        change: { value: 0, type: 'increase', period: 'aktuell' },
+        icon: '💶',
+        color: 'green',
+      },
+      {
+        title: 'Top-Produkte',
+        value: `${stats.topProdukte.length}`,
+        change: { value: 0, type: 'increase', period: 'aktuell' },
+        icon: '🏆',
+        color: 'red',
+      },
+    ]
+    const charts: OverviewChart[] = [
+      {
+        title: 'Top-Produkte nach Menge',
+        type: 'bar',
+        data: stats.topProdukte.map((p) => p.menge),
+      },
+      {
+        title: 'Produktion vs. Absatz',
+        type: 'pie',
+        data: [stats.gesamtProduktion, stats.gesamtAbsatz],
+      },
+      {
+        title: 'Top-Produkte (Umsatzindikator)',
+        type: 'line',
+        data: stats.topProdukte.map((p) => p.menge * stats.durchschnittsPreis),
+      },
+    ]
+    return { kpiData: cards, chartData: charts }
+  }, [data])
 
   // Aktualisierte Konfiguration mit echten Daten
   const currentConfig: OverviewConfig = {
@@ -130,7 +153,7 @@ export default function FuttermittelStatistikPage(): JSX.Element {
   return (
     <OverviewPage
       config={currentConfig}
-      isLoading={loading}
+      isLoading={isLoading}
     />
   )
 }

@@ -376,3 +376,4 @@ Alle veralteten Status-Reports, redundanten Phasen-Dokumente, doppelte CRM-Dokum
 - Futter Batch 9: Futter-Einzel- und Futter-Misch-Listen von lokalen Mock-Arrays auf `lib/api/futter` Hooks (`useEinzelfutter`, `useMischfutter`) migriert.
 - Tax/Legal Klarstellung: POS (B2C) zeigt Endpreise inkl. gesetzl. MwSt.; Portal (B2B) zeigt Netto-Preise mit USt-Ausweis in Rechnungsansichten.
 - Management Batch 10: Executive Dashboard von page-lokaler Query/Mock-Generierung auf `useManagementDashboard` umgestellt (Adapter auf bestehende KPI-/Alert-/Trend-UI).
+- Futter Batch 11: Futtermittel-Statistikseite auf `useFutterStatistik` umgestellt; KPI-/Chart-Daten werden zentral aus Hook-Daten abgeleitet.
