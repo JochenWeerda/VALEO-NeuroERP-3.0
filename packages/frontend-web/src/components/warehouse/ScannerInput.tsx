@@ -157,7 +157,7 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
               <input
                 ref={(node) => {
                   // Beide Refs zuweisen
-                  ;(inputRef as React.MutableRefObject<HTMLInputElement | null>).current = node
+                  (inputRef as React.MutableRefObject<HTMLInputElement | null>).current = node
                   if (typeof ref === 'function') {
                     ref(node)
                   } else if (ref) {
