@@ -20,6 +20,24 @@ export enum PurchaseOrderItemType {
   SERVICE = 'SERVICE'
 }
 
+/** ICC Incoterms 2020 */
+export type Incoterm =
+  | 'EXW'  // Ex Works
+  | 'FCA'  // Free Carrier
+  | 'CPT'  // Carriage Paid To
+  | 'CIP'  // Carriage & Insurance Paid To
+  | 'DAP'  // Delivered At Place
+  | 'DPU'  // Delivered at Place Unloaded
+  | 'DDP'  // Delivered Duty Paid
+  | 'FAS'  // Free Alongside Ship
+  | 'FOB'  // Free On Board
+  | 'CFR'  // Cost and Freight
+  | 'CIF'  // Cost, Insurance & Freight
+
+export const INCOTERM_VALUES: Incoterm[] = [
+  'EXW', 'FCA', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP', 'FAS', 'FOB', 'CFR', 'CIF'
+]
+
 export class PurchaseOrderItem {
   public readonly id: string;
   public readonly purchaseOrderId: string;
@@ -110,6 +128,9 @@ export interface CreatePurchaseOrderInput {
   paymentTerms?: string;
   currency?: string;
   taxRate?: number;
+  incoterms?: Incoterm;
+  deliveryTerms?: string;
+  externalReference?: string;
   shippingAddress?: {
     street: string;
     postalCode: string;
@@ -127,6 +148,9 @@ export interface UpdatePurchaseOrderInput {
   paymentTerms?: string;
   currency?: string;
   taxRate?: number;
+  incoterms?: Incoterm;
+  deliveryTerms?: string;
+  externalReference?: string;
   shippingAddress?: {
     street: string;
     postalCode: string;
@@ -161,6 +185,9 @@ export class PurchaseOrder {
     city: string;
     country: string;
   } | undefined;
+  public readonly incoterms: Incoterm | undefined;
+  public readonly deliveryTerms: string | undefined;
+  public readonly externalReference: string | undefined;
   public readonly notes: string | undefined;
   public readonly createdBy: string;
   public readonly createdAt: Date;
@@ -193,6 +220,9 @@ export class PurchaseOrder {
         city: string;
         country: string;
       } | undefined;
+      incoterms?: Incoterm | undefined;
+      deliveryTerms?: string | undefined;
+      externalReference?: string | undefined;
       notes?: string | undefined;
       status?: PurchaseOrderStatus;
       version?: number;
@@ -219,6 +249,9 @@ export class PurchaseOrder {
     this.items = items;
     this.taxRate = options.taxRate || 19.0; // Default German VAT
     this.shippingAddress = options.shippingAddress;
+    this.incoterms = options.incoterms;
+    this.deliveryTerms = options.deliveryTerms;
+    this.externalReference = options.externalReference;
     this.createdBy = createdBy;
     this.createdAt = options.createdAt || new Date();
     this.updatedAt = options.updatedAt || new Date();
@@ -248,6 +281,49 @@ export class PurchaseOrder {
 
   private calculateSubtotal(): number {
     return this.items.reduce((sum, item) => sum + item.totalAmount, 0);
+  }
+
+  /** Creates a clone with overridden options (DRY helper for immutable transitions) */
+  private cloneWith(overrides: Partial<{
+    items: PurchaseOrderItem[];
+    status: PurchaseOrderStatus;
+    version: number;
+    approvedAt: Date | undefined;
+    approvedBy: string | undefined;
+    orderedAt: Date | undefined;
+    orderedBy: string | undefined;
+    notes: string | undefined;
+  }> = {}): PurchaseOrder {
+    return new PurchaseOrder(
+      this.supplierId,
+      this.subject,
+      this.description,
+      this.deliveryDate,
+      overrides.items ?? this.items,
+      this.createdBy,
+      {
+        id: this.id,
+        purchaseOrderNumber: this.purchaseOrderNumber,
+        contactPerson: this.contactPerson,
+        paymentTerms: this.paymentTerms,
+        currency: this.currency,
+        taxRate: this.taxRate,
+        shippingAddress: this.shippingAddress,
+        incoterms: this.incoterms,
+        deliveryTerms: this.deliveryTerms,
+        externalReference: this.externalReference,
+        notes: overrides.notes !== undefined ? overrides.notes : this.notes,
+        status: overrides.status ?? this.status,
+        version: overrides.version ?? this.version + 1,
+        approvedAt: overrides.approvedAt !== undefined ? overrides.approvedAt : this.approvedAt,
+        approvedBy: overrides.approvedBy !== undefined ? overrides.approvedBy : this.approvedBy,
+        orderedAt: overrides.orderedAt !== undefined ? overrides.orderedAt : this.orderedAt,
+        orderedBy: overrides.orderedBy !== undefined ? overrides.orderedBy : this.orderedBy,
+        createdAt: this.createdAt,
+        updatedAt: new Date(),
+        orderDate: this.orderDate,
+      }
+    );
   }
 
   public addItem(item: PurchaseOrderItem): PurchaseOrder {
@@ -571,6 +647,9 @@ export class PurchaseOrder {
       taxAmount: this.taxAmount,
       totalAmount: this.totalAmount,
       shippingAddress: this.shippingAddress,
+      incoterms: this.incoterms,
+      deliveryTerms: this.deliveryTerms,
+      externalReference: this.externalReference,
       notes: this.notes,
       createdBy: this.createdBy,
       createdAt: this.createdAt.toISOString(),

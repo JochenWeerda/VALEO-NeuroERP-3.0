@@ -77,10 +77,11 @@ class FiBuAccessPolicy:
         for rule in self._config.rules:
             if rule.matches(amount, normalized_currency):
                 return not self._has_role(rule.required_role)
-        ***REMOVED*** Keine spezifische Regel getroffen: Sachbearbeiter darf frei entscheiden?
+        # Keine spezifische Regel getroffen: Sachbearbeiter darf frei entscheiden?
         return FiBuPermission.JOURNAL_APPROVE not in self._permissions and amount > Decimal("0")
 
     def _has_role(self, role: FiBuRole) -> bool:
         return role in self._assignment.roles
+
 
 

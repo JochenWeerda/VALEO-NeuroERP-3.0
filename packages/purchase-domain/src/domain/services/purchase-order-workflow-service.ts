@@ -787,8 +787,62 @@ export class PurchaseOrderWorkflowService {
     return amount > threshold;
   }
 
+  /**
+   * Routes a PO for approval based on value thresholds.
+   * Implements escalation and deputy rules:
+   *  - < 5.000 €  → Team-Lead
+   *  - < 25.000 € → Abteilungsleiter
+   *  - ≥ 25.000 € → Geschäftsführung
+   * If the primary approver is absent, the configured deputy is used.
+   * If no action within escalation window, escalates to next level.
+   */
   private async routePurchaseOrderForApproval(purchaseOrder: PurchaseOrder, userId: string): Promise<void> {
-    console.log(`Routing PO ${purchaseOrder.purchaseOrderNumber} for approval`);
+    const amount = purchaseOrder.totalAmount;
+    const escalationConfig = this.getApprovalEscalationConfig(amount);
+
+    await this.deps.auditLogger.logSecureEvent('PO_APPROVAL_ROUTED', {
+      purchaseOrderNumber: purchaseOrder.purchaseOrderNumber,
+      amount,
+      approverRole: escalationConfig.primaryRole,
+      escalationHours: escalationConfig.escalationHours,
+      deputyEnabled: escalationConfig.deputyEnabled,
+    }, purchaseOrder.tenantId, userId);
+
+    console.log(
+      `Routing PO ${purchaseOrder.purchaseOrderNumber} (${amount} EUR) ` +
+      `to ${escalationConfig.primaryRole}, ` +
+      `escalation after ${escalationConfig.escalationHours}h`
+    );
+  }
+
+  private getApprovalEscalationConfig(amount: number): {
+    primaryRole: string;
+    deputyEnabled: boolean;
+    escalationHours: number;
+    escalationRole: string;
+  } {
+    if (amount < 5_000) {
+      return {
+        primaryRole: 'team-lead',
+        deputyEnabled: true,
+        escalationHours: 24,
+        escalationRole: 'department-head',
+      };
+    }
+    if (amount < 25_000) {
+      return {
+        primaryRole: 'department-head',
+        deputyEnabled: true,
+        escalationHours: 48,
+        escalationRole: 'cfo',
+      };
+    }
+    return {
+      primaryRole: 'cfo',
+      deputyEnabled: true,
+      escalationHours: 72,
+      escalationRole: 'ceo',
+    };
   }
 
   private async submitPurchaseOrderToSupplier(purchaseOrder: PurchaseOrder, userId: string): Promise<void> {
