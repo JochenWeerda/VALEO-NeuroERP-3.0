@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSorten, type Sorte } from '@/lib/api/agrar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,24 +8,22 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, Plus, Search } from 'lucide-react'
 
-type Sorte = {
-  id: string
-  name: string
-  art: string
-  zuechter: string
-  zulassung: string
-  eigenschaft: string[]
-  status: 'aktiv' | 'auslaufend'
-}
-
 const mockSorten: Sorte[] = [
   { id: '1', name: 'Asano', art: 'Weizen', zuechter: 'KWS', zulassung: '2020', eigenschaft: ['Winterhart', 'Ertragsstark'], status: 'aktiv' },
-  { id: '2', name: 'Elixer', art: 'Weizen', zuechter: 'Saaten-Union', zulassung: '2019', eigenschaft: ['Frühreife', 'Standfest'], status: 'aktiv' },
+  { id: '2', name: 'Elixer', art: 'Weizen', zuechter: 'Saaten-Union', zulassung: '2019', eigenschaft: ['Fruehreife', 'Standfest'], status: 'aktiv' },
 ]
 
 export default function SortenregisterPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: sorten = mockSorten } = useSorten()
+
+  const filteredData = useMemo(
+    () => sorten.filter((s) =>
+      [s.name, s.art, s.zuechter].some((v) => v.toLowerCase().includes(searchTerm.toLowerCase()))
+    ),
+    [sorten, searchTerm]
+  )
 
   const columns = [
     {
@@ -37,7 +36,7 @@ export default function SortenregisterPage(): JSX.Element {
       ),
     },
     { key: 'art' as const, label: 'Art' },
-    { key: 'zuechter' as const, label: 'Züchter' },
+    { key: 'zuechter' as const, label: 'Zuechter' },
     { key: 'zulassung' as const, label: 'Zulassung' },
     {
       key: 'eigenschaft' as const,
@@ -95,7 +94,7 @@ export default function SortenregisterPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockSorten} columns={columns} />
+          <DataTable data={filteredData} columns={columns} />
         </CardContent>
       </Card>
     </div>
