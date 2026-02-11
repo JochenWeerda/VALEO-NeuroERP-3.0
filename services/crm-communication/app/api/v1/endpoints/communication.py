@@ -23,15 +23,15 @@ async def send_email(
     db: AsyncSession = get_db
 ):
     """Send an email with optional template and attachments."""
-    ***REMOVED*** For now, create the email record - actual sending would be handled by background task
+    # For now, create the email record - actual sending would be handled by background task
     email = EmailModel(**email_data.model_dump())
     db.add(email)
     await db.commit()
     await db.refresh(email)
 
-    ***REMOVED*** TODO: Queue email for sending via SMTP
-    ***REMOVED*** TODO: Process attachments
-    ***REMOVED*** TODO: Apply template if specified
+    # TODO: Queue email for sending via SMTP
+    # TODO: Process attachments
+    # TODO: Apply template if specified
 
     return Email.model_validate(email)
 
@@ -215,7 +215,7 @@ async def send_campaign(
     if campaign.status != "scheduled":
         raise HTTPException(status_code=400, detail="Campaign must be scheduled to send")
 
-    ***REMOVED*** TODO: Queue campaign for sending
+    # TODO: Queue campaign for sending
     campaign.status = "running"
     await db.commit()
 
@@ -228,7 +228,7 @@ async def get_communication_analytics(
     period: str = Query("last_30_days", description="Time period for analytics")
 ):
     """Get communication analytics and metrics."""
-    ***REMOVED*** Mock analytics data - in production this would aggregate from the database
+    # Mock analytics data - in production this would aggregate from the database
     analytics = {
         "total_emails": 1250,
         "sent_emails": 1200,
@@ -253,6 +253,6 @@ async def email_webhook(
     webhook_data: dict
 ):
     """Webhook endpoint for receiving inbound emails."""
-    ***REMOVED*** TODO: Process inbound email webhooks from email service provider
-    ***REMOVED*** This would handle bounces, opens, clicks, and new inbound emails
+    # TODO: Process inbound email webhooks from email service provider
+    # This would handle bounces, opens, clicks, and new inbound emails
     return {"status": "received", "processed": True}

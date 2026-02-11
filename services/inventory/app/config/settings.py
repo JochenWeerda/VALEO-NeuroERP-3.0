@@ -25,23 +25,23 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    ***REMOVED*** Server
+    # Server
     HOST: str = "0.0.0.0"
     PORT: int = 5400
     DEBUG: bool = False
 
-    ***REMOVED*** CORS
+    # CORS
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
         "http://localhost:3000",
         "http://localhost:8000",
         "http://backend:8000",
     ]
 
-    ***REMOVED*** Betriebsprofile
+    # Betriebsprofile
     GLOBAL_OPERATION_MODE: OperationMode = OperationMode.TEST
     MODULE_MODE_OVERRIDES: Dict[str, OperationMode] = Field(default_factory=dict)
 
-    ***REMOVED*** Datenbank
+    # Datenbank
     DATABASE_URL: PostgresDsn = PostgresDsn.build(
         scheme="postgresql+asyncpg",
         username="valeo_inventory",
@@ -52,27 +52,27 @@ class Settings(BaseSettings):
     )
     DB_ECHO: bool = False
 
-    ***REMOVED*** EventBus
+    # EventBus
     EVENT_BUS_ENABLED: bool | None = None
     EVENT_BUS_URL: str = "nats://nats:4222"
     EVENT_BUS_SUBJECT_PREFIX: str = "inventory"
 
     DEFAULT_TENANT: str = "default"
 
-    ***REMOVED*** Workflow-Service
+    # Workflow-Service
     WORKFLOW_SERVICE_URL: AnyHttpUrl = "http://workflow:8000"
     WORKFLOW_REGISTRATION_TIMEOUT: float = 10.0
 
-    ***REMOVED*** Ops Notifications (optional)
+    # Ops Notifications (optional)
     TEAMS_WEBHOOK_URL: str | None = None
     ESCALATION_EMAIL: str | None = None
 
-    ***REMOVED*** Schutz & Resilienz
+    # Schutz & Resilienz
     RATE_LIMIT_PER_MINUTE: int = 600
     NATS_FAILURE_THRESHOLD: int = 5
     NATS_CIRCUIT_BREAKER_OPEN_SECONDS: int = 60
 
-    ***REMOVED*** DSGVO / Retention für EPCIS
+    # DSGVO / Retention für EPCIS
     EPCIS_RETENTION_DAYS: int = 365
     EPCIS_ANONYMIZE_KEYS: List[str] = Field(
         default_factory=lambda: ["userName", "email", "phone", "address", "personalId"]
@@ -129,3 +129,4 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
+

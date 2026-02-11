@@ -24,7 +24,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 
-from bs4 import BeautifulSoup  ***REMOVED*** type: ignore[import]
+from bs4 import BeautifulSoup  # type: ignore[import]
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -56,7 +56,7 @@ def extract_mapping(xhtml_path: Path) -> Dict[str, List[str]]:
     mapping: Dict[str, List[str]] = defaultdict(list)
 
     rows = table.find_all("tr")
-    for row in rows[1:]:  ***REMOVED*** Skip header row
+    for row in rows[1:]:  # Skip header row
         cells = row.find_all("td")
         if len(cells) < 2:
             continue
@@ -90,3 +90,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

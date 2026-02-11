@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/dms", tags=["DMS"])
 
 
-***REMOVED*** ==================== Health ====================
+# ==================== Health ====================
 
 @router.get("/health", response_model=HealthResponse)
 async def health_check():
@@ -29,11 +29,11 @@ async def health_check():
     return HealthResponse(
         status="healthy" if paperless_ok else "degraded",
         paperless_connected=paperless_ok,
-        database_connected=True,  ***REMOVED*** TODO: DB-Check
+        database_connected=True,  # TODO: DB-Check
     )
 
 
-***REMOVED*** ==================== Documents ====================
+# ==================== Documents ====================
 
 @router.post("/documents", response_model=UploadResponse)
 async def upload_document(
@@ -140,7 +140,7 @@ async def download_document(
     try:
         content = await document_service.download_document(document_id, x_tenant_id)
         
-        ***REMOVED*** Content-Type bestimmen (vereinfacht)
+        # Content-Type bestimmen (vereinfacht)
         return Response(
             content=content,
             media_type="application/octet-stream",
@@ -209,7 +209,7 @@ async def delete_document(
         raise HTTPException(status_code=500, detail=f"Löschen fehlgeschlagen: {str(e)}")
 
 
-***REMOVED*** ==================== Inbox ====================
+# ==================== Inbox ====================
 
 @router.get("/inbox", response_model=DocumentListResponse)
 async def get_inbox(
@@ -233,7 +233,7 @@ async def get_inbox(
         raise HTTPException(status_code=500, detail=f"Inbox-Abruf fehlgeschlagen: {str(e)}")
 
 
-***REMOVED*** ==================== Search ====================
+# ==================== Search ====================
 
 @router.get("/search", response_model=DocumentListResponse)
 async def search_documents(
@@ -257,4 +257,5 @@ async def search_documents(
     except Exception as e:
         logger.error(f"Search failed: {e}")
         raise HTTPException(status_code=500, detail=f"Suche fehlgeschlagen: {str(e)}")
+
 

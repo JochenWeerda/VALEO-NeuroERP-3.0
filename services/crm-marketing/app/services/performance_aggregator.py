@@ -24,7 +24,7 @@ class PerformanceAggregator:
         if not segment:
             return
         
-        ***REMOVED*** Count active members
+        # Count active members
         member_count = await self.db.scalar(
             select(func.count(SegmentMember.id)).where(
                 and_(
@@ -34,7 +34,7 @@ class PerformanceAggregator:
             )
         )
         
-        ***REMOVED*** Check if performance record already exists
+        # Check if performance record already exists
         existing_stmt = select(SegmentPerformance).where(
             and_(
                 SegmentPerformance.segment_id == segment_id,
@@ -54,9 +54,9 @@ class PerformanceAggregator:
                 period_type="daily",
                 member_count=member_count or 0,
                 active_members=member_count or 0,
-                campaign_count=0,  ***REMOVED*** TODO: Get from campaigns service
-                conversion_rate=None,  ***REMOVED*** TODO: Calculate from campaign data
-                revenue=None  ***REMOVED*** TODO: Calculate from revenue data
+                campaign_count=0,  # TODO: Get from campaigns service
+                conversion_rate=None,  # TODO: Calculate from campaign data
+                revenue=None  # TODO: Calculate from revenue data
             )
             self.db.add(performance)
         
@@ -73,7 +73,7 @@ class PerformanceAggregator:
         if not segment:
             return
         
-        ***REMOVED*** Get daily aggregations for the week
+        # Get daily aggregations for the week
         week_end = week_start + timedelta(days=7)
         daily_stmt = select(SegmentPerformance).where(
             and_(
@@ -89,7 +89,7 @@ class PerformanceAggregator:
         if not daily_performances:
             return
         
-        ***REMOVED*** Aggregate
+        # Aggregate
         total_members = sum(p.member_count for p in daily_performances)
         avg_members = total_members / len(daily_performances) if daily_performances else 0
         total_active = sum(p.active_members for p in daily_performances)
@@ -97,13 +97,13 @@ class PerformanceAggregator:
         total_campaigns = sum(p.campaign_count for p in daily_performances)
         total_revenue = sum(p.revenue or 0 for p in daily_performances)
         
-        ***REMOVED*** Calculate conversion rate (if available)
+        # Calculate conversion rate (if available)
         conversion_rate = None
         if total_campaigns > 0:
-            ***REMOVED*** TODO: Get actual conversions from campaigns service
+            # TODO: Get actual conversions from campaigns service
             pass
         
-        ***REMOVED*** Check if weekly record already exists
+        # Check if weekly record already exists
         existing_stmt = select(SegmentPerformance).where(
             and_(
                 SegmentPerformance.segment_id == segment_id,
@@ -144,7 +144,7 @@ class PerformanceAggregator:
         if not segment:
             return
         
-        ***REMOVED*** Get daily aggregations for the month
+        # Get daily aggregations for the month
         if month_start.month == 12:
             month_end = month_start.replace(year=month_start.year + 1, month=1)
         else:
@@ -164,7 +164,7 @@ class PerformanceAggregator:
         if not daily_performances:
             return
         
-        ***REMOVED*** Aggregate
+        # Aggregate
         total_members = sum(p.member_count for p in daily_performances)
         avg_members = total_members / len(daily_performances) if daily_performances else 0
         total_active = sum(p.active_members for p in daily_performances)
@@ -172,13 +172,13 @@ class PerformanceAggregator:
         total_campaigns = sum(p.campaign_count for p in daily_performances)
         total_revenue = sum(p.revenue or 0 for p in daily_performances)
         
-        ***REMOVED*** Calculate conversion rate (if available)
+        # Calculate conversion rate (if available)
         conversion_rate = None
         if total_campaigns > 0:
-            ***REMOVED*** TODO: Get actual conversions from campaigns service
+            # TODO: Get actual conversions from campaigns service
             pass
         
-        ***REMOVED*** Check if monthly record already exists
+        # Check if monthly record already exists
         existing_stmt = select(SegmentPerformance).where(
             and_(
                 SegmentPerformance.segment_id == segment_id,
@@ -208,4 +208,5 @@ class PerformanceAggregator:
             self.db.add(performance)
         
         await self.db.commit()
+
 

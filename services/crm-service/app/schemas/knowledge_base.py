@@ -10,10 +10,10 @@ from pydantic import BaseModel, Field
 class KnowledgeArticleBase(BaseModel):
     """Base knowledge article schema."""
     title: str = Field(..., max_length=255)
-    content: str = Field(...)  ***REMOVED*** Rich text content
+    content: str = Field(...)  # Rich text content
     summary: Optional[str] = Field(None, max_length=500)
     category_id: Optional[UUID] = None
-    tags: Optional[str] = Field(None, max_length=500)  ***REMOVED*** Comma-separated
+    tags: Optional[str] = Field(None, max_length=500)  # Comma-separated
     is_published: bool = False
     is_featured: bool = False
 

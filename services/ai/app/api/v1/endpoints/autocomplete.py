@@ -51,10 +51,10 @@ async def get_autocomplete_suggestions(request: AutocompleteRequest) -> Autocomp
     start_time = time.time()
 
     try:
-        ***REMOVED*** Import here to avoid circular imports
+        # Import here to avoid circular imports
         from app.services.openai_service import suggest_autocomplete
 
-        ***REMOVED*** Get suggestions from OpenAI service
+        # Get suggestions from OpenAI service
         raw_suggestions = await suggest_autocomplete(
             query=request.query,
             context=request.context,
@@ -62,12 +62,12 @@ async def get_autocomplete_suggestions(request: AutocompleteRequest) -> Autocomp
             max_suggestions=request.max_suggestions
         )
 
-        ***REMOVED*** Format suggestions
+        # Format suggestions
         suggestions = []
         for i, suggestion in enumerate(raw_suggestions):
             suggestions.append(AutocompleteSuggestion(
                 text=suggestion,
-                confidence=max(0.1, 1.0 - (i * 0.1)),  ***REMOVED*** Decreasing confidence
+                confidence=max(0.1, 1.0 - (i * 0.1)),  # Decreasing confidence
                 category=request.domain,
                 metadata={
                     "position": i,
@@ -87,12 +87,12 @@ async def get_autocomplete_suggestions(request: AutocompleteRequest) -> Autocomp
         )
 
     except Exception as e:
-        ***REMOVED*** Fallback to basic suggestions if AI fails
+        # Fallback to basic suggestions if AI fails
         import logging
         logger = logging.getLogger(__name__)
         logger.error(f"Autocomplete failed: {e}")
 
-        ***REMOVED*** Provide basic fallback suggestions based on domain
+        # Provide basic fallback suggestions based on domain
         fallback_suggestions = _get_fallback_suggestions(
             request.query, request.domain, request.max_suggestions
         )
@@ -112,7 +112,7 @@ def _get_fallback_suggestions(query: str, domain: str, max_suggestions: int) -> 
     """Provide fallback suggestions when AI is unavailable."""
     suggestions = []
 
-    ***REMOVED*** Domain-specific fallback suggestions
+    # Domain-specific fallback suggestions
     domain_suggestions = {
         "procurement": [
             "Weizen Premium Qualität",
@@ -146,11 +146,11 @@ def _get_fallback_suggestions(query: str, domain: str, max_suggestions: int) -> 
 
     base_suggestions = domain_suggestions.get(domain, domain_suggestions["general"])
 
-    ***REMOVED*** Filter suggestions that start with query (case-insensitive)
+    # Filter suggestions that start with query (case-insensitive)
     query_lower = query.lower()
     filtered = [s for s in base_suggestions if s.lower().startswith(query_lower)]
 
-    ***REMOVED*** If no matches, return general suggestions
+    # If no matches, return general suggestions
     if not filtered:
         filtered = base_suggestions[:max_suggestions]
 

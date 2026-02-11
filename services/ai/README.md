@@ -1,16 +1,16 @@
-***REMOVED*** VALEO-NeuroERP AI Service
+# VALEO-NeuroERP AI Service
 
 Microservice für AI/ML-Funktionalität im ERP-System.
 
-***REMOVED******REMOVED*** Architektur
+## Architektur
 
 **Hybrid REST + MCP**:
 - **REST API** (Port 5000): Synchrone AI-Funktionen für 181 Masken
 - **MCP Server** (Port 5001): Komplexe Agent-Workflows mit Tools & Prompts
 
-***REMOVED******REMOVED*** Features
+## Features
 
-***REMOVED******REMOVED******REMOVED*** 1. Assistants API (`/api/v1/assistants`)
+### 1. Assistants API (`/api/v1/assistants`)
 AI-Unterstützung für alle 181 ERP-Masken:
 - **Autocomplete**: Intelligente Vorschläge basierend auf Kontext
 - **Validation**: Business-Logic-Validierung in Echtzeit
@@ -30,7 +30,7 @@ curl -X POST http://localhost:5000/api/v1/assistants/autocomplete \
   }'
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Classification API (`/api/v1/classify`)
+### 2. Classification API (`/api/v1/classify`)
 Dokumenten-Klassifizierung:
 - Rechnungen (mit Extraktion: Betrag, Lieferant, Datum)
 - Lieferscheine
@@ -44,7 +44,7 @@ curl -X POST http://localhost:5000/api/v1/classify/document \
   -F "file=@rechnung.pdf"
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. RAG API (`/api/v1/rag`)
+### 3. RAG API (`/api/v1/rag`)
 Semantic Search über ERP-Wissensbasis:
 - Dokumentation durchsuchen
 - Policies finden
@@ -63,7 +63,7 @@ curl -X POST http://localhost:5000/api/v1/rag/search \
   }'
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. Agents API (`/api/v1/agents`)
+### 4. Agents API (`/api/v1/agents`)
 Multi-Step-Workflows mit LangGraph:
 - **procurement_advisor**: Bestellvorschläge aus Lager + Feldbuch
 - **compliance_checker**: EUDR & Cross-Compliance Prüfung
@@ -83,7 +83,7 @@ curl -X POST http://localhost:5000/api/v1/agents/run \
   }'
 ```
 
-***REMOVED******REMOVED******REMOVED*** 5. Insights API (`/api/v1/insights`)
+### 5. Insights API (`/api/v1/insights`)
 Business Intelligence & Prognosen:
 - Umsatztrends
 - Risiko-Erkennung
@@ -102,7 +102,7 @@ curl -X POST http://localhost:5000/api/v1/insights/generate \
   }'
 ```
 
-***REMOVED******REMOVED******REMOVED*** 6. MCP Endpoints (`/api/v1/mcp`)
+### 6. MCP Endpoints (`/api/v1/mcp`)
 Model Context Protocol für AI-Agents:
 - **Tools**: Funktionen die AI aufrufen kann (DB-Query, Dokument-Suche, Order-Creation)
 - **Resources**: Daten für Kontext (Policies, Templates)
@@ -110,10 +110,10 @@ Model Context Protocol für AI-Agents:
 
 **Tools**:
 ```bash
-***REMOVED*** Liste Tools
+# Liste Tools
 curl http://localhost:5000/api/v1/mcp/tools
 
-***REMOVED*** Tool aufrufen
+# Tool aufrufen
 curl -X POST http://localhost:5000/api/v1/mcp/tools/call \
   -H "Content-Type: application/json" \
   -d '{
@@ -127,19 +127,19 @@ curl -X POST http://localhost:5000/api/v1/mcp/tools/call \
 
 **Resources**:
 ```bash
-***REMOVED*** Liste Resources
+# Liste Resources
 curl http://localhost:5000/api/v1/mcp/resources
 
-***REMOVED*** Resource abrufen
+# Resource abrufen
 curl http://localhost:5000/api/v1/mcp/resources/policies/procurement
 ```
 
 **Prompts**:
 ```bash
-***REMOVED*** Liste Prompts
+# Liste Prompts
 curl http://localhost:5000/api/v1/mcp/prompts
 
-***REMOVED*** Prompt rendern
+# Prompt rendern
 curl -X POST http://localhost:5000/api/v1/mcp/prompts/render \
   -H "Content-Type: application/json" \
   -d '{
@@ -152,7 +152,7 @@ curl -X POST http://localhost:5000/api/v1/mcp/prompts/render \
   }'
 ```
 
-***REMOVED******REMOVED*** Unterstützte Masken (181 gesamt)
+## Unterstützte Masken (181 gesamt)
 
 | Domain | Masken | Beispiele |
 |--------|--------|-----------|
@@ -163,58 +163,58 @@ curl -X POST http://localhost:5000/api/v1/mcp/prompts/render \
 | **Lager** | 8 | inventory_stock, inventory_movement, inventory_count |
 | **Agrar** | 12 | field_book, seed, fertilizer, pesticide, harvest |
 
-***REMOVED******REMOVED*** Development
+## Development
 
-***REMOVED******REMOVED******REMOVED*** Lokaler Start
+### Lokaler Start
 ```bash
 cd services/ai
 python -m venv venv
-source venv/bin/activate  ***REMOVED*** Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python main.py
 ```
 
-***REMOVED******REMOVED******REMOVED*** Docker
+### Docker
 ```bash
-***REMOVED*** Build
+# Build
 docker-compose build ai
 
-***REMOVED*** Start
+# Start
 docker-compose up -d ai
 
-***REMOVED*** Logs
+# Logs
 docker-compose logs -f ai
 ```
 
-***REMOVED******REMOVED*** API-Dokumentation
+## API-Dokumentation
 
 - **Swagger UI**: http://localhost:5000/docs
 - **ReDoc**: http://localhost:5000/redoc
 - **OpenAPI**: http://localhost:5000/api/openapi.json
 - **Health**: http://localhost:5000/health
 
-***REMOVED******REMOVED*** Konfiguration
+## Konfiguration
 
 Über Umgebungsvariablen (`.env`):
 ```env
-***REMOVED*** OpenAI
+# OpenAI
 OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-4o-mini
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 
-***REMOVED*** Vector Store
+# Vector Store
 CHROMA_PERSIST_DIR=/app/data/chroma
 CHROMA_COLLECTION_NAME=valeo_erp_knowledge
 
-***REMOVED*** Backend Communication
+# Backend Communication
 BACKEND_API_URL=http://backend:8000/api/v1
 API_DEV_TOKEN=dev-token
 
-***REMOVED*** Database (Read-Only)
+# Database (Read-Only)
 DATABASE_URL=postgresql://valeo_dev:REDACTED_PASSWORD@postgres:5432/valeo_neuro_erp
 ```
 
-***REMOVED******REMOVED*** Integration mit Backend
+## Integration mit Backend
 
 Backend kann AI-Service aufrufen:
 ```python
@@ -235,10 +235,10 @@ async def get_autocomplete(mask_id: str, field: str, query: str):
         return response.json()
 ```
 
-***REMOVED******REMOVED*** Vector Store Management
+## Vector Store Management
 
 ```bash
-***REMOVED*** Dokument indexieren
+# Dokument indexieren
 curl -X POST http://localhost:5000/api/v1/rag/index/document \
   -H "Content-Type: application/json" \
   -d '{
@@ -250,21 +250,22 @@ curl -X POST http://localhost:5000/api/v1/rag/index/document \
     }
   }'
 
-***REMOVED*** Dokument entfernen
+# Dokument entfernen
 curl -X DELETE http://localhost:5000/api/v1/rag/index/docs/finance/skr03.md
 ```
 
-***REMOVED******REMOVED*** Monitoring
+## Monitoring
 
 - **Prometheus Metrics**: http://localhost:5000/metrics
 - **Health Check**: http://localhost:5000/health
 
-***REMOVED******REMOVED*** Next Steps
+## Next Steps
 
 1. ✅ **Service läuft** (Mock-Implementierung)
 2. 🔄 **OpenAI Integration** - Echte LLM-Calls
 3. 🔄 **ChromaDB Integration** - Vector Store aktivieren
 4. 🔄 **LangGraph Workflows** - Komplexe Agents
 5. 🔄 **Training Data** - 181 Masken mit Beispielen
+
 
 

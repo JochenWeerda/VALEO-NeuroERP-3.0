@@ -25,11 +25,11 @@ async def score_lead(
     db: AsyncSession = get_db
 ):
     """Calculate lead scoring using ML models."""
-    ***REMOVED*** Mock lead scoring - in production this would use trained ML models
-    score = 0.85  ***REMOVED*** High-quality lead
+    # Mock lead scoring - in production this would use trained ML models
+    score = 0.85  # High-quality lead
     confidence = 0.92
 
-    ***REMOVED*** Determine grade based on score
+    # Determine grade based on score
     if score >= 0.9:
         grade = "A"
     elif score >= 0.8:
@@ -73,8 +73,8 @@ async def predict_churn(
     db: AsyncSession = get_db
 ):
     """Predict customer churn probability."""
-    ***REMOVED*** Mock churn prediction
-    churn_probability = 0.15  ***REMOVED*** Low churn risk
+    # Mock churn prediction
+    churn_probability = 0.15  # Low churn risk
     confidence = 0.88
 
     if churn_probability >= 0.8:
@@ -118,7 +118,7 @@ async def predict_clv(
     db: AsyncSession = get_db
 ):
     """Predict customer lifetime value."""
-    ***REMOVED*** Mock CLV prediction
+    # Mock CLV prediction
     predicted_clv = 125000.0
     confidence_interval_lower = 95000.0
     confidence_interval_upper = 155000.0
@@ -156,7 +156,7 @@ async def recommend_next_action(
     db: AsyncSession = get_db
 ):
     """Recommend next best action for customer/lead engagement."""
-    ***REMOVED*** Determine entity info
+    # Determine entity info
     if request.customer_id:
         entity_id = request.customer_id
         entity_type = "customer"
@@ -166,7 +166,7 @@ async def recommend_next_action(
     else:
         raise HTTPException(status_code=400, detail="Either customer_id or lead_id must be provided")
 
-    ***REMOVED*** Mock recommendation logic
+    # Mock recommendation logic
     recommended_action = "schedule_follow_up_call"
     confidence = 0.89
     expected_value = 2500.0
@@ -197,7 +197,7 @@ async def analyze_email(
     db: AsyncSession = get_db
 ):
     """Analyze email content for sentiment, intent, and routing."""
-    ***REMOVED*** Mock email analysis
+    # Mock email analysis
     sentiment = "neutral"
     sentiment_score = 0.1
     intent = "inquiry"
@@ -243,7 +243,7 @@ async def classify_case(
     db: AsyncSession = get_db
 ):
     """Automatically classify support cases for routing."""
-    ***REMOVED*** Mock case classification
+    # Mock case classification
     predicted_category = "Technical Support"
     confidence = 0.91
     subcategories = ["Software Installation", "Configuration Issues"]
@@ -277,7 +277,7 @@ async def list_models(
     db: AsyncSession = get_db
 ):
     """List available AI models."""
-    ***REMOVED*** Mock model list
+    # Mock model list
     models = [
         {
             "id": "550e8400-e29b-41d4-a716-446655440001",
@@ -326,13 +326,13 @@ async def list_models(
         }
     ]
 
-    ***REMOVED*** Apply filters
+    # Apply filters
     if model_type:
         models = [m for m in models if m["type"] == model_type]
     if status:
         models = [m for m in models if m["status"] == status]
 
-    ***REMOVED*** Apply pagination
+    # Apply pagination
     total = len(models)
     models = models[skip:skip + limit]
 
@@ -345,7 +345,7 @@ async def submit_feedback(
     db: AsyncSession = get_db
 ):
     """Submit feedback on AI predictions for model improvement."""
-    ***REMOVED*** In production, this would store feedback for model retraining
+    # In production, this would store feedback for model retraining
     return {"message": "Feedback submitted successfully", "feedback_id": "fb-12345"}
 
 
@@ -355,7 +355,7 @@ async def batch_predict(
     db: AsyncSession = get_db
 ):
     """Perform batch predictions for multiple entities."""
-    ***REMOVED*** Mock batch prediction results
+    # Mock batch prediction results
     predictions = []
     for entity_id in request.entity_ids:
         if request.prediction_type == "lead_scoring":
@@ -389,7 +389,7 @@ async def train_model(
     db: AsyncSession = get_db
 ):
     """Initiate model training job."""
-    ***REMOVED*** In production, this would queue a training job
+    # In production, this would queue a training job
     return ModelTrainingResponse(
         model_id="model-12345",
         training_job_id="train-67890",

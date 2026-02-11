@@ -10,7 +10,7 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Global OpenAI client
+# Global OpenAI client
 _openai_client: Optional[AsyncOpenAI] = None
 
 
@@ -110,12 +110,12 @@ Format your response as JSON with the following structure:
             temperature=0.3
         )
 
-        ***REMOVED*** Try to parse JSON response
+        # Try to parse JSON response
         import json
         result = json.loads(response)
         return result
     except json.JSONDecodeError:
-        ***REMOVED*** Fallback if JSON parsing fails
+        # Fallback if JSON parsing fails
         return {
             "insights": [response],
             "recommendations": [],

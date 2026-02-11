@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env ts-node
+#!/usr/bin/env ts-node
 /**
  * Test generator scaffolds integration tests for Postgres repositories.
  */

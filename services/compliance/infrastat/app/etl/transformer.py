@@ -43,7 +43,7 @@ class InfrastatTransformer:
                     delivery_terms=str(record.get("delivery_terms", "DAP")) if record.get("delivery_terms") else None,
                     line_data={k: v for k, v in record.items() if k not in self._excluded_keys()},
                 )
-            except (TypeError, ValueError, KeyError) as exc:  ***REMOVED*** noqa: PERF203
+            except (TypeError, ValueError, KeyError) as exc:  # noqa: PERF203
                 warnings.append(f"Datensatz {seq} übersprungen: {exc}")
                 seq += 1
                 continue
@@ -80,4 +80,5 @@ class InfrastatTransformer:
             "transport_mode",
             "delivery_terms",
         }
+
 

@@ -24,7 +24,7 @@ depends_on = None
 
 def upgrade() -> None:
     """Create CRM Service tables."""
-    ***REMOVED*** Create enums
+    # Create enums
     enum_statements = [
         ("crm_service_case_status", "('new', 'assigned', 'in_progress', 'pending_customer', 'resolved', 'closed', 'escalated')"),
         ("crm_service_case_priority", "('low', 'medium', 'high', 'urgent')"),
@@ -44,7 +44,7 @@ def upgrade() -> None:
             """
         )
 
-    ***REMOVED*** SLAs table
+    # SLAs table
     op.create_table(
         "crm_service_slas",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -59,7 +59,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Categories table (self-referencing for subcategories)
+    # Categories table (self-referencing for subcategories)
     op.create_table(
         "crm_service_categories",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -73,7 +73,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Cases table
+    # Cases table
     op.create_table(
         "crm_service_cases",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -99,7 +99,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Case history table
+    # Case history table
     op.create_table(
         "crm_service_case_history",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -113,7 +113,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     )
 
-    ***REMOVED*** Knowledge articles table
+    # Knowledge articles table
     op.create_table(
         "crm_service_knowledge_articles",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -135,7 +135,7 @@ def upgrade() -> None:
         sa.Column("published_at", sa.DateTime),
     )
 
-    ***REMOVED*** Seed initial data
+    # Seed initial data
     _seed_initial_data()
 
 
@@ -155,5 +155,6 @@ def downgrade() -> None:
 
 def _seed_initial_data():
     """Seed initial demo data."""
-    ***REMOVED*** This will be populated when the service starts and finds existing customers
+    # This will be populated when the service starts and finds existing customers
     pass
+

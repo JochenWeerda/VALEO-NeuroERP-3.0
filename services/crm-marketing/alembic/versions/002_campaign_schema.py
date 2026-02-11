@@ -11,7 +11,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = '002_campaign'
 down_revision: Union[str, None] = '001_initial_segment'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -19,7 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Create campaign_templates table
+    # Create campaign_templates table
     op.create_table(
         'crm_marketing_campaign_templates',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
@@ -38,7 +38,7 @@ def upgrade() -> None:
     )
     op.create_index('ix_crm_marketing_campaign_templates_tenant_id', 'crm_marketing_campaign_templates', ['tenant_id'])
 
-    ***REMOVED*** Create campaigns table
+    # Create campaigns table
     op.create_table(
         'crm_marketing_campaigns',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
@@ -67,7 +67,7 @@ def upgrade() -> None:
     op.create_index('ix_crm_marketing_campaigns_segment_id', 'crm_marketing_campaigns', ['segment_id'])
     op.create_index('ix_crm_marketing_campaigns_template_id', 'crm_marketing_campaigns', ['template_id'])
 
-    ***REMOVED*** Create campaign_recipients table
+    # Create campaign_recipients table
     op.create_table(
         'crm_marketing_campaign_recipients',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
@@ -85,7 +85,7 @@ def upgrade() -> None:
     op.create_index('ix_crm_marketing_campaign_recipients_contact_id', 'crm_marketing_campaign_recipients', ['contact_id'])
     op.create_index('ix_crm_marketing_campaign_recipients_email', 'crm_marketing_campaign_recipients', ['email'])
 
-    ***REMOVED*** Create campaign_events table
+    # Create campaign_events table
     op.create_table(
         'crm_marketing_campaign_events',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
@@ -102,7 +102,7 @@ def upgrade() -> None:
     op.create_index('ix_crm_marketing_campaign_events_recipient_id', 'crm_marketing_campaign_events', ['recipient_id'])
     op.create_index('ix_crm_marketing_campaign_events_timestamp', 'crm_marketing_campaign_events', ['timestamp'])
 
-    ***REMOVED*** Create campaign_ab_tests table
+    # Create campaign_ab_tests table
     op.create_table(
         'crm_marketing_campaign_ab_tests',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
@@ -141,9 +141,10 @@ def downgrade() -> None:
     op.drop_index('ix_crm_marketing_campaign_templates_tenant_id', table_name='crm_marketing_campaign_templates')
     op.drop_table('crm_marketing_campaign_templates')
     
-    ***REMOVED*** Drop enums
+    # Drop enums
     sa.Enum(name='campaigntype').drop(op.get_bind(), checkfirst=True)
     sa.Enum(name='campaignstatus').drop(op.get_bind(), checkfirst=True)
     sa.Enum(name='recipientstatus').drop(op.get_bind(), checkfirst=True)
     sa.Enum(name='campaigneventtype').drop(op.get_bind(), checkfirst=True)
+
 

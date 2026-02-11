@@ -57,7 +57,7 @@ def parse_tables(sql: str) -> Iterable[TableDescriptor]:
             index += 1
             continue
 
-        ***REMOVED*** join following lines until closing );
+        # join following lines until closing );
         buffer: List[str] = []
         while index < len(lines):
             buffer.append(lines[index])

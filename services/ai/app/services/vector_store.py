@@ -8,7 +8,7 @@ from typing import List, Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Lazy imports to avoid startup failures
+# Lazy imports to avoid startup failures
 _vector_store = None
 
 
@@ -72,7 +72,7 @@ async def search_similar(
             {
                 "content": doc,
                 "metadata": meta,
-                "score": 1.0 - distance  ***REMOVED*** Convert distance to similarity score
+                "score": 1.0 - distance  # Convert distance to similarity score
             }
             for doc, meta, distance in zip(
                 results["documents"][0],
@@ -111,4 +111,5 @@ async def add_document(
     except Exception as e:
         logger.error(f"Failed to add document: {e}")
         raise
+
 

@@ -8,26 +8,26 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-***REMOVED*** Import your models here
+# Import your models here
 from app.db.models import Base
 
-***REMOVED*** this is the Alembic Config object, which provides
-***REMOVED*** access to the values within the .ini file in use.
+# this is the Alembic Config object, which provides
+# access to the values within the .ini file in use.
 config = context.config
 
-***REMOVED*** Allow DATABASE_URL env overrides (docker compose, CI, etc.)
-import os  ***REMOVED*** noqa: E402
+# Allow DATABASE_URL env overrides (docker compose, CI, etc.)
+import os  # noqa: E402
 database_url = os.environ.get("DATABASE_URL")
 if database_url:
     config.set_main_option("sqlalchemy.url", database_url)
 
-***REMOVED*** Interpret the config file for Python logging.
-***REMOVED*** This line sets up loggers basically.
+# Interpret the config file for Python logging.
+# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-***REMOVED*** add your model's MetaData object here
-***REMOVED*** for 'autogenerate' support
+# add your model's MetaData object here
+# for 'autogenerate' support
 target_metadata = Base.metadata
 
 
@@ -80,3 +80,4 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
+

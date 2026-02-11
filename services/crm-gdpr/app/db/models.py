@@ -15,26 +15,26 @@ class Base(DeclarativeBase):
 
 class GDPRRequestType(str, Enum):
     """Types of GDPR requests."""
-    ACCESS = "access"  ***REMOVED*** Art. 15 - Right of access
-    DELETION = "deletion"  ***REMOVED*** Art. 17 - Right to erasure
-    PORTABILITY = "portability"  ***REMOVED*** Art. 20 - Right to data portability
-    OBJECTION = "objection"  ***REMOVED*** Art. 21 - Right to object
+    ACCESS = "access"  # Art. 15 - Right of access
+    DELETION = "deletion"  # Art. 17 - Right to erasure
+    PORTABILITY = "portability"  # Art. 20 - Right to data portability
+    OBJECTION = "objection"  # Art. 21 - Right to object
 
 
 class GDPRRequestStatus(str, Enum):
     """Status of GDPR request."""
-    PENDING = "pending"  ***REMOVED*** Awaiting verification
-    IN_PROGRESS = "in_progress"  ***REMOVED*** Being processed
-    COMPLETED = "completed"  ***REMOVED*** Successfully completed
-    REJECTED = "rejected"  ***REMOVED*** Rejected (with reason)
-    CANCELLED = "cancelled"  ***REMOVED*** Cancelled by requester
+    PENDING = "pending"  # Awaiting verification
+    IN_PROGRESS = "in_progress"  # Being processed
+    COMPLETED = "completed"  # Successfully completed
+    REJECTED = "rejected"  # Rejected (with reason)
+    CANCELLED = "cancelled"  # Cancelled by requester
 
 
 class VerificationMethod(str, Enum):
     """Methods for identity verification."""
-    EMAIL = "email"  ***REMOVED*** Email verification
-    ID_CARD = "id_card"  ***REMOVED*** ID card upload
-    MANUAL = "manual"  ***REMOVED*** Manual verification by officer
+    EMAIL = "email"  # Email verification
+    ID_CARD = "id_card"  # ID card upload
+    MANUAL = "manual"  # Manual verification by officer
     OTHER = "other"
 
 
@@ -56,45 +56,45 @@ class GDPRRequest(Base):
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     
-    ***REMOVED*** Request details
+    # Request details
     request_type: Mapped[GDPRRequestType] = mapped_column(SQLEnum(GDPRRequestType), nullable=False)
     contact_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
     
-    ***REMOVED*** Status
+    # Status
     status: Mapped[GDPRRequestStatus] = mapped_column(SQLEnum(GDPRRequestStatus), nullable=False, default=GDPRRequestStatus.PENDING)
     
-    ***REMOVED*** Timestamps
+    # Timestamps
     requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     rejected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     
-    ***REMOVED*** Requester
-    requested_by: Mapped[str] = mapped_column(String(255), nullable=False)  ***REMOVED*** User ID or contact email
-    is_self_request: Mapped[bool] = mapped_column(Boolean, default=True)  ***REMOVED*** Requested by data subject themselves
+    # Requester
+    requested_by: Mapped[str] = mapped_column(String(255), nullable=False)  # User ID or contact email
+    is_self_request: Mapped[bool] = mapped_column(Boolean, default=True)  # Requested by data subject themselves
     
-    ***REMOVED*** Verification
+    # Verification
     verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     verification_method: Mapped[VerificationMethod | None] = mapped_column(SQLEnum(VerificationMethod))
     verification_token: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), unique=True, index=True)
     
-    ***REMOVED*** Response data
-    response_data: Mapped[dict | None] = mapped_column(JSONB)  ***REMOVED*** Exported data (JSON)
-    response_file_path: Mapped[str | None] = mapped_column(String(512))  ***REMOVED*** Path to export file
-    response_file_format: Mapped[str | None] = mapped_column(String(10))  ***REMOVED*** json, csv, pdf
+    # Response data
+    response_data: Mapped[dict | None] = mapped_column(JSONB)  # Exported data (JSON)
+    response_file_path: Mapped[str | None] = mapped_column(String(512))  # Path to export file
+    response_file_format: Mapped[str | None] = mapped_column(String(10))  # json, csv, pdf
     
-    ***REMOVED*** Rejection
+    # Rejection
     rejection_reason: Mapped[str | None] = mapped_column(Text)
     
-    ***REMOVED*** Notes
-    notes: Mapped[str | None] = mapped_column(Text)  ***REMOVED*** Internal notes
+    # Notes
+    notes: Mapped[str | None] = mapped_column(Text)  # Internal notes
     
-    ***REMOVED*** Audit
+    # Audit
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
     created_by: Mapped[str | None] = mapped_column(String(255))
     updated_by: Mapped[str | None] = mapped_column(String(255))
     
-    ***REMOVED*** Relationships
+    # Relationships
     history: Mapped[list["GDPRRequestHistory"]] = relationship(
         "GDPRRequestHistory",
         back_populates="request",
@@ -110,18 +110,19 @@ class GDPRRequestHistory(Base):
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     request_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("crm_gdpr_requests.id", ondelete="CASCADE"), nullable=False, index=True)
     
-    ***REMOVED*** Change details
+    # Change details
     action: Mapped[GDPRRequestHistoryAction] = mapped_column(SQLEnum(GDPRRequestHistoryAction), nullable=False)
     old_status: Mapped[GDPRRequestStatus | None] = mapped_column(SQLEnum(GDPRRequestStatus))
     new_status: Mapped[GDPRRequestStatus | None] = mapped_column(SQLEnum(GDPRRequestStatus))
     
-    ***REMOVED*** Notes
+    # Notes
     notes: Mapped[str | None] = mapped_column(Text)
     
-    ***REMOVED*** Metadata
+    # Metadata
     changed_by: Mapped[str] = mapped_column(String(255), nullable=False)
     changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
     
-    ***REMOVED*** Relationships
+    # Relationships
     request: Mapped["GDPRRequest"] = relationship("GDPRRequest", back_populates="history")
+
 

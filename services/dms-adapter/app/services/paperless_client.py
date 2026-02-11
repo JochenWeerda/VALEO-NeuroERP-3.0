@@ -34,7 +34,7 @@ class PaperlessClient:
             timeout=self.timeout
         )
     
-    ***REMOVED*** ==================== Documents ====================
+    # ==================== Documents ====================
     
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     async def list_documents(
@@ -133,7 +133,7 @@ class PaperlessClient:
             response.raise_for_status()
             return response.content
     
-    ***REMOVED*** ==================== Tags ====================
+    # ==================== Tags ====================
     
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     async def list_tags(self) -> Dict[str, Any]:
@@ -164,11 +164,11 @@ class PaperlessClient:
             if tag["name"] == name:
                 return tag["id"]
         
-        ***REMOVED*** Tag existiert nicht, erstellen
+        # Tag existiert nicht, erstellen
         new_tag = await self.create_tag(name)
         return new_tag["id"]
     
-    ***REMOVED*** ==================== Search ====================
+    # ==================== Search ====================
     
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     async def search(self, query: str, page: int = 1, page_size: int = 25) -> Dict[str, Any]:
@@ -184,13 +184,13 @@ class PaperlessClient:
             response.raise_for_status()
             return response.json()
     
-    ***REMOVED*** ==================== Health ====================
+    # ==================== Health ====================
     
     async def health_check(self) -> bool:
         """Prüfe ob Paperless erreichbar ist und API-Token gültig ist"""
         try:
             async with self._get_client() as client:
-                ***REMOVED*** Verwende /documents/ Endpoint - gibt 200 bei gültigem Token
+                # Verwende /documents/ Endpoint - gibt 200 bei gültigem Token
                 response = await client.get("/documents/", params={"page_size": 1})
                 return response.status_code == 200
         except Exception as e:
@@ -198,6 +198,7 @@ class PaperlessClient:
             return False
 
 
-***REMOVED*** Singleton-Instanz
+# Singleton-Instanz
 paperless_client = PaperlessClient()
+
 

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env ts-node
+#!/usr/bin/env ts-node
 /**
  * Repository generator to scaffold Postgres repositories based on schema metadata.
  *

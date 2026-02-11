@@ -1,4 +1,4 @@
-***REMOVED*** CRM Migration Toolkit (Working Scripts Reference)
+# CRM Migration Toolkit (Working Scripts Reference)
 
 This collection lists the scripts that proved reliable during the CRM domain migration. Use the same commands as blueprints when migrating additional domains.
 
@@ -11,7 +11,7 @@ This collection lists the scripts that proved reliable during the CRM domain mig
 | Repository Generator | `tools/codegen/repository_generator.ts` | Produces repository interface + Postgres implementation skeletons aligned with shared pool helper. | Node 18+, `ts-node`, existing entity definitions | `ts-node tools/codegen/repository_generator.ts crm Customer` |
 | Test Generator | `tools/codegen/test_generator.ts` | Emits baseline unit/integration tests for entities, services, repositories, controllers. | Node 18+, `ts-node`, Jest configured in workspace | `ts-node tools/codegen/test_generator.ts crm repository CustomerRepository` |
 
-***REMOVED******REMOVED*** Usage Notes
+## Usage Notes
 
 - **ts-node availability:** Already installed in the workspace; invoke scripts with `ts-node ...` as shown above.
 - **Shared Postgres helper:** All generated repositories rely on `packages/utilities/src/postgres.ts`. Ensure pools are disposed using `disposePools()` in tests.
@@ -19,7 +19,7 @@ This collection lists the scripts that proved reliable during the CRM domain mig
 - **Idempotent seeds:** Structure seed SQL with `ON CONFLICT DO NOTHING` to make repeated runs safe.
 - **CRM env vars:** Export `CRM_DATABASE_URL` before running repositories or integration tests. Compose already injects this value when using the provided docker setup.
 
-***REMOVED******REMOVED*** Suggested Automation Flow
+## Suggested Automation Flow
 
 1. Run `legacy_inventory.py` targeting the legacy module to collect the candidate files and dependencies.
 2. Use the CSV/JSON output to populate the migration tracking table in the memory bank.
@@ -28,7 +28,7 @@ This collection lists the scripts that proved reliable during the CRM domain mig
 5. Apply the SQL migrations via `run_sql_migration.ts` and seed reference data.
 6. Execute the generated Jest integration suites to verify connectivity against the Postgres containers.
 
-***REMOVED******REMOVED*** Known Limitations
+## Known Limitations
 
 - Generators currently rely on inline parameter lists; large schemas benefit from JSON descriptors (capture in `schema-registry.json` before invoking).
 - `domain_bootstrap_generator.ts` assumes controller filenames follow `{domain}-api-controller.ts`; adjust generated path imports when domains differ.
@@ -36,3 +36,4 @@ This collection lists the scripts that proved reliable during the CRM domain mig
 - `legacy_inventory.py` filters by substring; for complex include/exclude logic feed it a pre-built file list via Python piping.
 
 Update this file whenever a script gains new flags or when additional helpers graduate from experimental to production-ready.
+

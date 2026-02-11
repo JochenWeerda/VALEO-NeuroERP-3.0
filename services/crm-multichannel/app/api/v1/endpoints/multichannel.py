@@ -25,13 +25,13 @@ async def handle_webhook(
     request: Request
 ):
     """Handle incoming webhooks from social media platforms."""
-    ***REMOVED*** Verify webhook signature if provided
+    # Verify webhook signature if provided
     if payload.signature:
-        ***REMOVED*** TODO: Implement webhook signature verification
+        # TODO: Implement webhook signature verification
         pass
 
-    ***REMOVED*** Process webhook based on platform and event type
-    ***REMOVED*** This would route to appropriate handlers for Facebook, Twitter, etc.
+    # Process webhook based on platform and event type
+    # This would route to appropriate handlers for Facebook, Twitter, etc.
 
     return {"status": "received", "platform": platform, "event": payload.event_type}
 
@@ -48,7 +48,7 @@ async def list_conversations(
     db: AsyncSession = get_db
 ):
     """List omnichannel conversations with filtering."""
-    ***REMOVED*** Mock conversations data
+    # Mock conversations data
     conversations = [
         {
             "id": "550e8400-e29b-41d4-a716-446655440001",
@@ -97,7 +97,7 @@ async def get_conversation(
     db: AsyncSession = get_db
 ):
     """Get a specific conversation by ID."""
-    ***REMOVED*** Mock conversation data
+    # Mock conversation data
     conversation = {
         "id": str(conversation_id),
         "tenant_id": "00000000-0000-0000-0000-000000000001",
@@ -135,7 +135,7 @@ async def get_conversation_messages(
     db: AsyncSession = get_db
 ):
     """Get messages for a specific conversation."""
-    ***REMOVED*** Mock messages data
+    # Mock messages data
     messages = [
         {
             "id": "550e8400-e29b-41d4-a716-446655440030",
@@ -197,7 +197,7 @@ async def send_message(
     db: AsyncSession = get_db
 ):
     """Send a message across any connected channel."""
-    ***REMOVED*** Mock message sending
+    # Mock message sending
     return SendMessageResponse(
         message_id="550e8400-e29b-41d4-a716-446655440032",
         external_id="ext_msg_123",
@@ -215,7 +215,7 @@ async def list_forms(
     db: AsyncSession = get_db
 ):
     """List available web forms."""
-    ***REMOVED*** Mock forms data
+    # Mock forms data
     forms = [
         {
             "id": "550e8400-e29b-41d4-a716-446655440040",
@@ -265,7 +265,7 @@ async def create_form(
     db: AsyncSession = get_db
 ):
     """Create a new web form."""
-    ***REMOVED*** Mock form creation
+    # Mock form creation
     form = {
         "id": "550e8400-e29b-41d4-a716-446655440041",
         **form_data.model_dump(),
@@ -291,7 +291,7 @@ async def submit_form(
     db: AsyncSession = get_db
 ):
     """Submit a web form."""
-    ***REMOVED*** Mock form submission processing
+    # Mock form submission processing
     submission = {
         "id": "550e8400-e29b-41d4-a716-446655440042",
         "tenant_id": submission_data.tenant_id,
@@ -317,7 +317,7 @@ async def list_integrations(
     db: AsyncSession = get_db
 ):
     """List external system integrations."""
-    ***REMOVED*** Mock integrations data
+    # Mock integrations data
     integrations = [
         {
             "id": "550e8400-e29b-41d4-a716-446655440050",
@@ -362,7 +362,7 @@ async def trigger_sync(
     db: AsyncSession = get_db
 ):
     """Trigger data synchronization with external systems."""
-    ***REMOVED*** Mock sync trigger
+    # Mock sync trigger
     return {
         "sync_job_id": "sync_12345",
         "integration_id": str(integration_id),
@@ -378,7 +378,7 @@ async def get_channel_analytics(
     period: str = Query("last_30_days", description="Time period for analytics")
 ):
     """Get analytics for a specific channel."""
-    ***REMOVED*** Mock channel analytics
+    # Mock channel analytics
     analytics = {
         "channel_id": str(channel_id),
         "channel_type": "facebook",
@@ -398,7 +398,7 @@ async def get_omnichannel_analytics(
     period: str = Query("last_30_days", description="Time period for analytics")
 ):
     """Get omnichannel analytics overview."""
-    ***REMOVED*** Mock omnichannel analytics
+    # Mock omnichannel analytics
     analytics = {
         "total_conversations": 1250,
         "active_conversations": 89,

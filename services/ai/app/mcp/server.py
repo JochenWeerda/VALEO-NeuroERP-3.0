@@ -60,7 +60,7 @@ class MCPServer:
     def _register_built_in_tools(self):
         """Register built-in tools"""
         
-        ***REMOVED*** Tool: Query Database
+        # Tool: Query Database
         self.tools.append(MCPTool(
             name="query_database",
             description="Query the ERP database for information",
@@ -71,7 +71,7 @@ class MCPServer:
             handler=self._handle_database_query
         ))
         
-        ***REMOVED*** Tool: Search Documents
+        # Tool: Search Documents
         self.tools.append(MCPTool(
             name="search_documents",
             description="Search through indexed documents",
@@ -82,7 +82,7 @@ class MCPServer:
             handler=self._handle_document_search
         ))
         
-        ***REMOVED*** Tool: Create Order
+        # Tool: Create Order
         self.tools.append(MCPTool(
             name="create_procurement_order",
             description="Create a procurement order based on analysis",
@@ -150,11 +150,11 @@ Gib konkrete Warnungen oder OK zurück.""",
             variables=["doc_type", "content"]
         ))
     
-    ***REMOVED*** Tool Handlers
+    # Tool Handlers
     async def _handle_database_query(self, **params) -> Dict[str, Any]:
         """Handle database query tool"""
         logger.info(f"Database query: {params}")
-        ***REMOVED*** Mock - später echte DB-Abfrage
+        # Mock - später echte DB-Abfrage
         return {"results": [], "count": 0}
     
     async def _handle_document_search(self, **params) -> Dict[str, Any]:
@@ -167,7 +167,7 @@ Gib konkrete Warnungen oder OK zurück.""",
         logger.info(f"Create order: {params}")
         return {"order_id": "PO-2025-001", "status": "created"}
     
-    ***REMOVED*** Resource Providers
+    # Resource Providers
     async def _get_procurement_policies(self) -> str:
         """Get procurement policies"""
         return '{"policies": []}'
@@ -176,7 +176,7 @@ Gib konkrete Warnungen oder OK zurück.""",
         """Get invoice templates"""
         return "Invoice template..."
     
-    ***REMOVED*** Public API
+    # Public API
     def list_tools(self) -> List[Dict[str, Any]]:
         """List all available tools"""
         return [
@@ -233,6 +233,7 @@ Gib konkrete Warnungen oder OK zurück.""",
         return prompt.template.format(**variables)
 
 
-***REMOVED*** Global MCP server instance
+# Global MCP server instance
 mcp_server = MCPServer()
+
 

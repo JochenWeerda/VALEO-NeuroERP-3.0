@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env ts-node
+#!/usr/bin/env ts-node
 /**
  * Minimal SQL migration runner used during CRM migration.
  * Accepts either a single --file or a --dir containing *.sql files.

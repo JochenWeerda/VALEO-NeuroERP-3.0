@@ -34,7 +34,7 @@ async def classify_document(
     - Feldbuch-Einträge
     """
     
-    ***REMOVED*** Mock implementation
+    # Mock implementation
     filename = file.filename.lower() if file.filename else ""
     
     if "rechnung" in filename or "invoice" in filename:
@@ -85,7 +85,7 @@ async def classify_text(
     """
     text_lower = text.lower()
     
-    ***REMOVED*** Einfache Keyword-Klassifizierung (später: LLM)
+    # Einfache Keyword-Klassifizierung (später: LLM)
     if any(word in text_lower for word in ["bestellung", "order", "bestell"]):
         return ClassificationResult(
             document_type="purchase_order",
@@ -107,4 +107,5 @@ async def classify_text(
             extracted_data={},
             suggested_actions=[]
         )
+
 

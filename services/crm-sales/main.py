@@ -16,16 +16,16 @@ app = FastAPI(
     version="1.0.0",
 )
 
-***REMOVED*** CORS middleware
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  ***REMOVED*** Configure appropriately for production
+    allow_origins=["*"],  # Configure appropriately for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-***REMOVED*** Include API routes
+# Include API routes
 app.include_router(api_router, prefix="/api/v1")
 
 
@@ -42,3 +42,4 @@ if __name__ == "__main__":
         port=5700,
         reload=True,
     )
+

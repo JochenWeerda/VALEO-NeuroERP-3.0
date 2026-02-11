@@ -45,7 +45,7 @@ class CampaignStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-enum_values = lambda enum_cls: [member.value for member in enum_cls]  ***REMOVED*** noqa: E731
+enum_values = lambda enum_cls: [member.value for member in enum_cls]  # noqa: E731
 
 
 class Email(Base):
@@ -54,8 +54,8 @@ class Email(Base):
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), nullable=False)
 
-    message_id: Mapped[str] = mapped_column(String(255), unique=True)  ***REMOVED*** Email Message-ID header
-    thread_id: Mapped[str] = mapped_column(String(255), index=True)  ***REMOVED*** Conversation thread
+    message_id: Mapped[str] = mapped_column(String(255), unique=True)  # Email Message-ID header
+    thread_id: Mapped[str] = mapped_column(String(255), index=True)  # Conversation thread
 
     direction: Mapped[EmailDirection] = mapped_column(
         SQLEnum(
@@ -67,7 +67,7 @@ class Email(Base):
     )
 
     from_address: Mapped[str] = mapped_column(String(255), nullable=False)
-    to_addresses: Mapped[list[str]] = mapped_column(JSON, nullable=False)  ***REMOVED*** List of recipients
+    to_addresses: Mapped[list[str]] = mapped_column(JSON, nullable=False)  # List of recipients
     cc_addresses: Mapped[list[str] | None] = mapped_column(JSON)
     bcc_addresses: Mapped[list[str] | None] = mapped_column(JSON)
 
@@ -85,23 +85,23 @@ class Email(Base):
         nullable=False,
     )
 
-    ***REMOVED*** CRM Context
+    # CRM Context
     customer_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), index=True)
     lead_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), index=True)
     case_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), index=True)
     opportunity_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), index=True)
 
-    ***REMOVED*** Template and Campaign
+    # Template and Campaign
     template_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("crm_communication_templates.id"))
     campaign_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("crm_communication_campaigns.id"))
 
-    ***REMOVED*** Tracking
+    # Tracking
     sent_at: Mapped[datetime | None] = mapped_column(DateTime)
     delivered_at: Mapped[datetime | None] = mapped_column(DateTime)
     opened_at: Mapped[datetime | None] = mapped_column(DateTime)
     clicked_at: Mapped[datetime | None] = mapped_column(DateTime)
 
-    ***REMOVED*** Metadata
+    # Metadata
     priority: Mapped[str] = mapped_column(String(16), default="normal")
     tags: Mapped[list[str]] = mapped_column(JSON, default=list)
     metadata: Mapped[dict] = mapped_column(JSON, default=dict)
@@ -112,7 +112,7 @@ class Email(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    ***REMOVED*** Relationships
+    # Relationships
     template: Mapped["Template"] = relationship("Template", back_populates="emails")
     campaign: Mapped["Campaign"] = relationship("Campaign", back_populates="emails")
     attachments: Mapped[list["Attachment"]] = relationship("Attachment", back_populates="email", cascade="all, delete-orphan")
@@ -139,8 +139,8 @@ class Template(Base):
     subject_template: Mapped[str | None] = mapped_column(String(500))
     body_template: Mapped[str] = mapped_column(Text, nullable=False)
 
-    variables: Mapped[dict] = mapped_column(JSON, default=dict)  ***REMOVED*** Available merge variables
-    sample_data: Mapped[dict] = mapped_column(JSON, default=dict)  ***REMOVED*** Sample data for preview
+    variables: Mapped[dict] = mapped_column(JSON, default=dict)  # Available merge variables
+    sample_data: Mapped[dict] = mapped_column(JSON, default=dict)  # Sample data for preview
 
     is_active: Mapped[bool] = mapped_column(default=True)
     is_default: Mapped[bool] = mapped_column(default=False)
@@ -178,16 +178,16 @@ class Campaign(Base):
         nullable=False,
     )
 
-    ***REMOVED*** Targeting
-    target_filters: Mapped[dict] = mapped_column(JSON, default=dict)  ***REMOVED*** Filters for target audience
+    # Targeting
+    target_filters: Mapped[dict] = mapped_column(JSON, default=dict)  # Filters for target audience
     target_count: Mapped[int | None] = mapped_column(Integer)
 
-    ***REMOVED*** Scheduling
+    # Scheduling
     scheduled_at: Mapped[datetime | None] = mapped_column(DateTime)
     started_at: Mapped[datetime | None] = mapped_column(DateTime)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime)
 
-    ***REMOVED*** Results
+    # Results
     sent_count: Mapped[int] = mapped_column(Integer, default=0)
     delivered_count: Mapped[int] = mapped_column(Integer, default=0)
     opened_count: Mapped[int] = mapped_column(Integer, default=0)
@@ -215,12 +215,12 @@ class Attachment(Base):
     content_type: Mapped[str] = mapped_column(String(100), nullable=False)
     size: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    ***REMOVED*** File content stored as binary
+    # File content stored as binary
     content: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
 
-    ***REMOVED*** Metadata
-    inline: Mapped[bool] = mapped_column(default=False)  ***REMOVED*** Inline vs attachment
-    content_id: Mapped[str | None] = mapped_column(String(255))  ***REMOVED*** For inline images
+    # Metadata
+    inline: Mapped[bool] = mapped_column(default=False)  # Inline vs attachment
+    content_id: Mapped[str | None] = mapped_column(String(255))  # For inline images
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
@@ -236,13 +236,13 @@ class Automation(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
 
-    trigger_conditions: Mapped[dict] = mapped_column(JSON, nullable=False)  ***REMOVED*** When to trigger
-    actions: Mapped[list[dict]] = mapped_column(JSON, nullable=False)  ***REMOVED*** What to do
+    trigger_conditions: Mapped[dict] = mapped_column(JSON, nullable=False)  # When to trigger
+    actions: Mapped[list[dict]] = mapped_column(JSON, nullable=False)  # What to do
 
     is_active: Mapped[bool] = mapped_column(default=True)
     priority: Mapped[int] = mapped_column(Integer, default=0)
 
-    ***REMOVED*** Statistics
+    # Statistics
     trigger_count: Mapped[int] = mapped_column(Integer, default=0)
     success_count: Mapped[int] = mapped_column(Integer, default=0)
     failure_count: Mapped[int] = mapped_column(Integer, default=0)

@@ -51,19 +51,19 @@ async def create_segment(
         type=SegmentType(segment_data.type),
         status=SegmentStatus(segment_data.status),
         rules=segment_data.rules,
-        created_by="system",  ***REMOVED*** TODO: Get from auth context
+        created_by="system",  # TODO: Get from auth context
     )
     
     db.add(segment)
     await db.commit()
     await db.refresh(segment)
     
-    ***REMOVED*** If dynamic segment, calculate members
+    # If dynamic segment, calculate members
     if segment.type == SegmentType.DYNAMIC:
         calculator = SegmentCalculator(db)
         await calculator.calculate_segment(segment.id)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_segment_created(
         segment_id=segment.id,
@@ -117,7 +117,7 @@ async def update_segment(
     if not segment:
         raise HTTPException(status_code=404, detail="Segment not found")
     
-    ***REMOVED*** Update fields
+    # Update fields
     if segment_data.name:
         segment.name = segment_data.name
     if segment_data.description is not None:
@@ -127,18 +127,18 @@ async def update_segment(
     if segment_data.rules is not None:
         segment.rules = segment_data.rules
     
-    segment.updated_by = "system"  ***REMOVED*** TODO: Get from auth context
+    segment.updated_by = "system"  # TODO: Get from auth context
     segment.updated_at = datetime.utcnow()
     
     await db.commit()
     await db.refresh(segment)
     
-    ***REMOVED*** If dynamic segment and rules changed, recalculate
+    # If dynamic segment and rules changed, recalculate
     if segment.type == SegmentType.DYNAMIC and segment_data.rules is not None:
         calculator = SegmentCalculator(db)
         await calculator.calculate_segment(segment.id)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_segment_updated(
         segment_id=segment.id,
@@ -161,7 +161,7 @@ async def delete_segment(
     await db.delete(segment)
     await db.commit()
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_segment_deleted(
         segment_id=segment_id,
@@ -190,7 +190,7 @@ async def calculate_segment(
     
     await db.refresh(segment)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_segment_calculated(
         segment_id=segment.id,
@@ -218,7 +218,7 @@ async def list_segment_members(
         .where(
             and_(
                 SegmentMember.segment_id == segment_id,
-                SegmentMember.removed_at.is_(None)  ***REMOVED*** Only active members
+                SegmentMember.removed_at.is_(None)  # Only active members
             )
         )
         .offset(skip)
@@ -244,7 +244,7 @@ async def add_segment_member(
     if segment.type == SegmentType.DYNAMIC:
         raise HTTPException(status_code=400, detail="Cannot manually add members to dynamic segments")
     
-    ***REMOVED*** Check if member already exists
+    # Check if member already exists
     existing = await db.execute(
         select(SegmentMember).where(
             and_(
@@ -265,7 +265,7 @@ async def add_segment_member(
     
     db.add(member)
     
-    ***REMOVED*** Update member count
+    # Update member count
     segment.member_count = await db.scalar(
         select(func.count(SegmentMember.id)).where(
             and_(
@@ -278,7 +278,7 @@ async def add_segment_member(
     await db.commit()
     await db.refresh(member)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_segment_member_added(
         segment_id=segment_id,
@@ -303,9 +303,9 @@ async def remove_segment_member(
         raise HTTPException(status_code=400, detail="Member already removed")
     
     member.removed_at = datetime.utcnow()
-    member.removed_by = "system"  ***REMOVED*** TODO: Get from auth context
+    member.removed_by = "system"  # TODO: Get from auth context
     
-    ***REMOVED*** Update member count
+    # Update member count
     segment = await db.get(Segment, segment_id)
     if segment:
         segment.member_count = await db.scalar(
@@ -319,7 +319,7 @@ async def remove_segment_member(
     
     await db.commit()
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_segment_member_removed(
         segment_id=segment_id,
@@ -357,4 +357,5 @@ async def get_segment_performance(
     
     result = await db.execute(stmt)
     return result.scalars().all()
+
 

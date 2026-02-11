@@ -11,7 +11,7 @@ import logging
 from app.config import get_settings
 from app.api.routes import router
 
-***REMOVED*** Logging konfigurieren
+# Logging konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -20,15 +20,15 @@ logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
-***REMOVED*** FastAPI App erstellen
+# FastAPI App erstellen
 app = FastAPI(
     title="DMS-Adapter",
     description="""
-    ***REMOVED******REMOVED*** DMS-Adapter für NeuroERP
+    ## DMS-Adapter für NeuroERP
     
     Dieser Service verbindet NeuroERP mit Paperless-ngx als Document Management System (DMS).
     
-    ***REMOVED******REMOVED******REMOVED*** Hauptfunktionen
+    ### Hauptfunktionen
     
     - **Upload**: Dokumente hochladen und mit Geschäftsobjekten verknüpfen
     - **Liste**: Dokumente nach Geschäftsobjekt filtern
@@ -36,11 +36,11 @@ app = FastAPI(
     - **Inbox**: Unzugeordnete Dokumente verwalten
     - **Suche**: Volltextsuche in allen Dokumenten
     
-    ***REMOVED******REMOVED******REMOVED*** Authentifizierung
+    ### Authentifizierung
     
     Alle Requests müssen den Header `X-Tenant-ID` enthalten für Mandantentrennung.
     
-    ***REMOVED******REMOVED******REMOVED*** Tag-Konvention in Paperless-ngx
+    ### Tag-Konvention in Paperless-ngx
     
     - `TENANT:{tenant_id}` - Mandantenzuordnung
     - `OBJ:{type}` - Geschäftsobjekt-Typ (INVOICE, ORDER, etc.)
@@ -52,16 +52,16 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-***REMOVED*** CORS konfigurieren
+# CORS konfigurieren
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  ***REMOVED*** In Produktion einschränken!
+    allow_origins=["*"],  # In Produktion einschränken!
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-***REMOVED*** Router einbinden
+# Router einbinden
 app.include_router(router)
 
 
@@ -88,4 +88,5 @@ async def root():
         "docs": "/docs",
         "health": "/api/dms/health",
     }
+
 

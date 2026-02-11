@@ -9,28 +9,28 @@ from pydantic import BaseModel, Field
 
 router = APIRouter()
 
-***REMOVED*** Domain-Mapping für alle 181 Masken
+# Domain-Mapping für alle 181 Masken
 MASK_DOMAINS = {
-    ***REMOVED*** Verkauf (15 Masken)
+    # Verkauf (15 Masken)
     "sales_order": "sales",
     "sales_delivery": "sales",
     "sales_invoice": "sales",
     "sales_quote": "sales",
     "sales_dashboard": "sales",
     
-    ***REMOVED*** CRM (4 Masken)
+    # CRM (4 Masken)
     "crm_contacts": "crm",
     "crm_leads": "crm",
     "crm_activities": "crm",
     "crm_farm_profiles": "crm",
     
-    ***REMOVED*** Einkauf (12 Masken)
+    # Einkauf (12 Masken)
     "procurement_order": "procurement",
     "procurement_request": "procurement",
     "procurement_supplier": "procurement",
     "procurement_goods_receipt": "procurement",
     
-    ***REMOVED*** Finanzbuchhaltung (130 Masken - SKR03/04 komplett)
+    # Finanzbuchhaltung (130 Masken - SKR03/04 komplett)
     "finance_general_ledger": "finance",
     "finance_account": "finance",
     "finance_journal": "finance",
@@ -40,19 +40,19 @@ MASK_DOMAINS = {
     "finance_pnl": "finance",
     "finance_bwa": "finance",
     
-    ***REMOVED*** Lager (8 Masken)
+    # Lager (8 Masken)
     "inventory_stock": "inventory",
     "inventory_movement": "inventory",
     "inventory_count": "inventory",
     
-    ***REMOVED*** Agrar (12 Masken)
+    # Agrar (12 Masken)
     "agrar_field_book": "agrar",
     "agrar_seed": "agrar",
     "agrar_fertilizer": "agrar",
     "agrar_pesticide": "agrar",
     "agrar_harvest": "agrar",
     
-    ***REMOVED*** Weitere Domains folgen...
+    # Weitere Domains folgen...
 }
 
 
@@ -82,18 +82,18 @@ async def autocomplete_field(request: AssistantRequest) -> AssistantResponse:
     """
     domain = MASK_DOMAINS.get(request.mask_id, "unknown")
     
-    ***REMOVED*** Mock implementation - wird später durch LLM ersetzt
+    # Mock implementation - wird später durch LLM ersetzt
     suggestions = []
     
     if request.field == "customer" and request.query:
-        ***REMOVED*** Beispiel-Suggestions für Kunden-Autocomplete
+        # Beispiel-Suggestions für Kunden-Autocomplete
         suggestions = [
             f"{request.query}enmeier GmbH",
             f"Bio-Hof {request.query}",
             f"Landwirtschaft {request.query} & Söhne"
         ]
     elif request.field == "article" and request.query:
-        ***REMOVED*** Beispiel-Suggestions für Artikel-Autocomplete
+        # Beispiel-Suggestions für Artikel-Autocomplete
         suggestions = [
             f"{request.query} A (Bio, 25kg Sack)",
             f"{request.query} Standard (konv., 50kg)",
@@ -101,7 +101,7 @@ async def autocomplete_field(request: AssistantRequest) -> AssistantResponse:
         ]
     
     return AssistantResponse(
-        suggestions=suggestions[:5],  ***REMOVED*** Top 5
+        suggestions=suggestions[:5],  # Top 5
         explanation=f"Autocomplete for {request.field} in {domain} domain",
         confidence=0.85,
         metadata={"domain": domain, "mask": request.mask_id}
@@ -117,17 +117,17 @@ async def validate_form(request: AssistantRequest) -> AssistantResponse:
     """
     domain = MASK_DOMAINS.get(request.mask_id, "unknown")
     
-    ***REMOVED*** Mock validation logic
+    # Mock validation logic
     warnings = []
     
-    ***REMOVED*** Beispiel: Preisvalidierung
+    # Beispiel: Preisvalidierung
     if "price" in request.context and "cost" in request.context:
         price = request.context.get("price", 0)
         cost = request.context.get("cost", 0)
         if price < cost:
             warnings.append(f"⚠️ Verkaufspreis ({price}€) liegt unter Einkaufspreis ({cost}€)")
     
-    ***REMOVED*** Beispiel: Mengenvalidierung
+    # Beispiel: Mengenvalidierung
     if "quantity" in request.context:
         qty = request.context.get("quantity", 0)
         if qty < 0:
@@ -154,7 +154,7 @@ async def suggest_next_action(request: AssistantRequest) -> AssistantResponse:
     
     suggestions = []
     
-    ***REMOVED*** Domain-spezifische Suggestions
+    # Domain-spezifische Suggestions
     if request.mask_id == "sales_order" and request.context.get("status") == "confirmed":
         suggestions = [
             "📦 Lieferung erstellen",
@@ -183,7 +183,7 @@ async def explain_field(request: AssistantRequest) -> AssistantResponse:
     
     Beispiel: "Was ist SKR03?" → "SKR03 ist der Standard-Kontenrahmen..."
     """
-    ***REMOVED*** Mock explanations - wird später durch LLM + RAG ersetzt
+    # Mock explanations - wird später durch LLM + RAG ersetzt
     explanations = {
         "skr03": "SKR03 ist der Standard-Kontenrahmen für die Landwirtschaft. Er enthält spezielle Konten für landwirtschaftliche Betriebe.",
         "feldbuch": "Das Feldbuch dokumentiert alle Anbaumaßnahmen nach EU-Vorgaben. Es ist Pflicht für Cross-Compliance.",
@@ -216,4 +216,5 @@ async def list_supported_masks():
         },
         "masks": list(MASK_DOMAINS.keys())
     }
+
 

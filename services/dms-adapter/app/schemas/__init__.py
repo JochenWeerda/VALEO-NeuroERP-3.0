@@ -1,4 +1,4 @@
-***REMOVED*** DMS-Adapter Schemas Package
+# DMS-Adapter Schemas Package
 from app.schemas.document import (
     DocumentBase,
     DocumentCreate,
@@ -20,4 +20,5 @@ __all__ = [
     "SearchRequest",
     "HealthResponse",
 ]
+
 

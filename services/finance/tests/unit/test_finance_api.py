@@ -62,7 +62,7 @@ def test_create_journal_entry_and_list():
         "userId": "tester",
     }
 
-    ***REMOVED*** ensure accounts exist to grab actual id
+    # ensure accounts exist to grab actual id
     accounts = client.get("/api/v1/chart-of-accounts").json()["items"]
     payload["account_id"] = accounts[0]["id"]
 
@@ -75,4 +75,5 @@ def test_create_journal_entry_and_list():
     listing = client.get("/api/v1/journal-entries")
     assert listing.status_code == 200
     assert listing.json()["items"]
+
 

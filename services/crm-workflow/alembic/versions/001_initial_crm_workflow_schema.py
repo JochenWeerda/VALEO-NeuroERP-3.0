@@ -24,14 +24,14 @@ depends_on = None
 
 def upgrade() -> None:
     """Create CRM Workflow tables."""
-    ***REMOVED*** Create enums
+    # Create enums
     op.execute("CREATE TYPE crm_workflow_status AS ENUM ('active', 'inactive', 'draft')")
     op.execute("CREATE TYPE crm_workflow_trigger_type AS ENUM ('event', 'schedule', 'manual')")
     op.execute("CREATE TYPE crm_workflow_action_type AS ENUM ('notification', 'update_record', 'create_task', 'escalate', 'webhook')")
     op.execute("CREATE TYPE crm_workflow_notification_type AS ENUM ('email', 'in_app', 'sms', 'webhook')")
     op.execute("CREATE TYPE crm_workflow_execution_status AS ENUM ('pending', 'running', 'completed', 'failed', 'cancelled')")
 
-    ***REMOVED*** Workflows table
+    # Workflows table
     op.create_table(
         "crm_workflow_workflows",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -48,7 +48,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Triggers table
+    # Triggers table
     op.create_table(
         "crm_workflow_triggers",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -65,7 +65,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     )
 
-    ***REMOVED*** Workflow executions table
+    # Workflow executions table
     op.create_table(
         "crm_workflow_executions",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -79,7 +79,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     )
 
-    ***REMOVED*** Notifications table
+    # Notifications table
     op.create_table(
         "crm_workflow_notifications",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -95,7 +95,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     )
 
-    ***REMOVED*** Seed initial data
+    # Seed initial data
     _seed_initial_data()
 
 
@@ -115,5 +115,5 @@ def downgrade() -> None:
 
 def _seed_initial_data():
     """Seed initial demo workflows."""
-    ***REMOVED*** This will be populated when the service starts and finds existing workflows
+    # This will be populated when the service starts and finds existing workflows
     pass
