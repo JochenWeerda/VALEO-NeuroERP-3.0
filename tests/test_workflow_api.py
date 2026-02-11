@@ -35,13 +35,13 @@ class TestWorkflowAPI:
 
     def test_approve_transition(self):
         """Test: Approve-Transition (pending → approved)"""
-        ***REMOVED*** Setup: Erst submit
+        # Setup: Erst submit
         client.post("/api/workflow/sales/SO-00003/transition", json={
             "action": "submit",
             "lines": [{"qty": 10, "price": 60, "cost": 50}]
         })
 
-        ***REMOVED*** Approve
+        # Approve
         payload = {
             "action": "approve",
             "lines": [{"qty": 10, "price": 60, "cost": 50}],
@@ -55,13 +55,13 @@ class TestWorkflowAPI:
 
     def test_reject_transition(self):
         """Test: Reject-Transition (pending → rejected)"""
-        ***REMOVED*** Setup: Erst submit
+        # Setup: Erst submit
         client.post("/api/workflow/sales/SO-00004/transition", json={
             "action": "submit",
             "lines": [{"qty": 10, "price": 50}]
         })
 
-        ***REMOVED*** Reject
+        # Reject
         payload = {
             "action": "reject",
             "reason": "Price too low"
@@ -74,7 +74,7 @@ class TestWorkflowAPI:
 
     def test_post_transition(self):
         """Test: Post-Transition (approved → posted)"""
-        ***REMOVED*** Setup: Submit & Approve
+        # Setup: Submit & Approve
         client.post("/api/workflow/sales/SO-00005/transition", json={
             "action": "submit",
             "lines": [{"qty": 10, "price": 60, "cost": 50}]
@@ -85,7 +85,7 @@ class TestWorkflowAPI:
             "total": 600
         })
 
-        ***REMOVED*** Post
+        # Post
         payload = {
             "action": "post",
             "total": 600,
@@ -99,7 +99,7 @@ class TestWorkflowAPI:
 
     def test_invalid_transition_returns_400(self):
         """Test: Ungültige Transition gibt 400 zurück"""
-        ***REMOVED*** Versuche approve ohne vorheriges submit
+        # Versuche approve ohne vorheriges submit
         payload = {
             "action": "approve",
             "lines": []
@@ -109,7 +109,7 @@ class TestWorkflowAPI:
 
     def test_guard_total_positive_blocks_post(self):
         """Test: Guard blockt Buchung mit Total = 0"""
-        ***REMOVED*** Setup: Submit & Approve
+        # Setup: Submit & Approve
         client.post("/api/workflow/sales/SO-00007/transition", json={
             "action": "submit",
             "lines": [{"qty": 10, "price": 60, "cost": 50}]
@@ -120,7 +120,7 @@ class TestWorkflowAPI:
             "total": 600
         })
 
-        ***REMOVED*** Post mit Total = 0
+        # Post mit Total = 0
         payload = {
             "action": "post",
             "total": 0,
@@ -131,13 +131,13 @@ class TestWorkflowAPI:
 
     def test_guard_price_below_cost_blocks_approve(self):
         """Test: Guard blockt Freigabe wenn Preis < Kosten"""
-        ***REMOVED*** Setup: Submit
+        # Setup: Submit
         client.post("/api/workflow/sales/SO-00008/transition", json={
             "action": "submit",
             "lines": [{"qty": 10, "price": 40, "cost": 50}]
         })
 
-        ***REMOVED*** Approve mit Preis < Kosten
+        # Approve mit Preis < Kosten
         payload = {
             "action": "approve",
             "lines": [{"article": "SKU-001", "qty": 10, "price": 40, "cost": 50}]
@@ -149,7 +149,7 @@ class TestWorkflowAPI:
         """Test: Audit-Trail zeichnet alle Transitions auf"""
         doc_number = "SO-00009"
 
-        ***REMOVED*** Perform transitions
+        # Perform transitions
         client.post(f"/api/workflow/sales/{doc_number}/transition", json={
             "action": "submit",
             "lines": [{"qty": 10, "price": 60, "cost": 50}]
@@ -160,19 +160,19 @@ class TestWorkflowAPI:
             "total": 600
         })
 
-        ***REMOVED*** Get audit trail
+        # Get audit trail
         response = client.get(f"/api/workflow/sales/{doc_number}/audit")
         assert response.status_code == 200
         data = response.json()
         assert data["ok"] is True
         assert len(data["items"]) == 2
         
-        ***REMOVED*** Verify first transition
+        # Verify first transition
         assert data["items"][0]["from"] == "draft"
         assert data["items"][0]["to"] == "pending"
         assert data["items"][0]["action"] == "submit"
         
-        ***REMOVED*** Verify second transition
+        # Verify second transition
         assert data["items"][1]["from"] == "pending"
         assert data["items"][1]["to"] == "approved"
         assert data["items"][1]["action"] == "approve"
@@ -194,7 +194,7 @@ class TestWorkflowAPI:
         """Test: Purchase-Workflow via API"""
         doc_number = "PO-00001"
 
-        ***REMOVED*** Draft → Pending
+        # Draft → Pending
         response = client.post(f"/api/workflow/purchase/{doc_number}/transition", json={
             "action": "submit",
             "lines": []
@@ -202,7 +202,7 @@ class TestWorkflowAPI:
         assert response.status_code == 200
         assert response.json()["state"] == "pending"
 
-        ***REMOVED*** Pending → Approved
+        # Pending → Approved
         response = client.post(f"/api/workflow/purchase/{doc_number}/transition", json={
             "action": "approve",
             "lines": [],
@@ -211,7 +211,7 @@ class TestWorkflowAPI:
         assert response.status_code == 200
         assert response.json()["state"] == "approved"
 
-        ***REMOVED*** Approved → Posted
+        # Approved → Posted
         response = client.post(f"/api/workflow/purchase/{doc_number}/transition", json={
             "action": "post",
             "total": 500,
@@ -226,13 +226,13 @@ class TestWorkflowReplay:
 
     def test_replay_returns_events(self):
         """Test: Replay-Endpoint gibt Events zurück"""
-        ***REMOVED*** Create some workflow events
+        # Create some workflow events
         client.post("/api/workflow/sales/SO-00011/transition", json={
             "action": "submit",
             "lines": []
         })
 
-        ***REMOVED*** Replay
+        # Replay
         response = client.get("/api/workflow/replay/workflow?since=0")
         assert response.status_code == 200
         data = response.json()
@@ -245,18 +245,18 @@ class TestWorkflowReplay:
         import time
         now = time.time()
 
-        ***REMOVED*** Create event
+        # Create event
         client.post("/api/workflow/sales/SO-00012/transition", json={
             "action": "submit",
             "lines": []
         })
 
-        ***REMOVED*** Replay seit now (sollte Event enthalten)
+        # Replay seit now (sollte Event enthalten)
         response = client.get(f"/api/workflow/replay/workflow?since={now}")
         data = response.json()
         assert len(data["events"]) > 0
 
-        ***REMOVED*** Replay seit Zukunft (sollte leer sein)
+        # Replay seit Zukunft (sollte leer sein)
         response = client.get(f"/api/workflow/replay/workflow?since={now + 1000}")
         data = response.json()
         assert len(data["events"]) == 0

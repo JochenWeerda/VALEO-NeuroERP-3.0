@@ -137,15 +137,15 @@ class TestWorkflowTransitions:
             "total": 600
         }
 
-        ***REMOVED*** Draft → Pending
+        # Draft → Pending
         ok, state, _ = workflow.next("sales", "draft", "submit", payload)
         assert ok and state == "pending"
 
-        ***REMOVED*** Pending → Approved
+        # Pending → Approved
         ok, state, _ = workflow.next("sales", state, "approve", payload)
         assert ok and state == "approved"
 
-        ***REMOVED*** Approved → Posted
+        # Approved → Posted
         ok, state, _ = workflow.next("sales", state, "post", payload)
         assert ok and state == "posted"
 
@@ -153,11 +153,11 @@ class TestWorkflowTransitions:
         """Test: Rejection-Workflow (Draft → Pending → Rejected)"""
         payload = {"lines": [{"qty": 10, "price": 50}]}
 
-        ***REMOVED*** Draft → Pending
+        # Draft → Pending
         ok, state, _ = workflow.next("sales", "draft", "submit", payload)
         assert ok and state == "pending"
 
-        ***REMOVED*** Pending → Rejected
+        # Pending → Rejected
         ok, state, _ = workflow.next("sales", state, "reject", {"reason": "Test"})
         assert ok and state == "rejected"
 
@@ -165,15 +165,15 @@ class TestWorkflowTransitions:
         """Test: Purchase-Workflow funktioniert analog zu Sales"""
         payload = {"total": 500, "lines": [{"qty": 10, "price": 50, "cost": 30}]}
 
-        ***REMOVED*** Draft → Pending
+        # Draft → Pending
         ok, state, _ = workflow.next("purchase", "draft", "submit", payload)
         assert ok and state == "pending"
 
-        ***REMOVED*** Pending → Approved
+        # Pending → Approved
         ok, state, _ = workflow.next("purchase", state, "approve", payload)
         assert ok and state == "approved"
 
-        ***REMOVED*** Approved → Posted
+        # Approved → Posted
         ok, state, _ = workflow.next("purchase", state, "post", payload)
         assert ok and state == "posted"
 
@@ -214,7 +214,7 @@ class TestWorkflowGuards:
         from app.services.workflow_guards import guard_price_not_below_cost
         payload = {"lines": [{"article": "TEST", "price": 60}]}
         ok, reason = guard_price_not_below_cost(payload)
-        assert ok is True  ***REMOVED*** Kein cost → kein Check
+        assert ok is True  # Kein cost → kein Check
 
     def test_guard_handles_empty_lines(self):
         """Test: Guard funktioniert mit leeren lines"""
