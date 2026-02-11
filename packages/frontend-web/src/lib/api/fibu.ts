@@ -382,33 +382,33 @@ const fallbackZahlungsvorschlaege: Zahlungsvorschlag[] = [
 // ── Extended Hooks with Fallback ──────────────────────────────────────
 
 export function useAnlagenMock() {
-  return useQuery({ queryKey: [...fibuKeys.anlagen(), 'mock'], queryFn: async () => { try { const r = await apiClient.get<AnlageMock[]>('/api/fibu/anlagen'); if (r.data?.length) return r.data } catch {} return fallbackAnlagenMock }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: [...fibuKeys.anlagen(), 'mock'], queryFn: async () => { try { const r = await apiClient.get<AnlageMock[]>('/api/fibu/anlagen'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackAnlagenMock }, staleTime: 5 * 60 * 1000 })
 }
 
 export function useDebitorenMock() {
-  return useQuery({ queryKey: [...fibuKeys.debitoren(), 'mock'], queryFn: async () => { try { const r = await apiClient.get<DebitOPMock[]>('/api/fibu/debitoren'); if (r.data?.length) return r.data } catch {} return fallbackDebitMock }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: [...fibuKeys.debitoren(), 'mock'], queryFn: async () => { try { const r = await apiClient.get<DebitOPMock[]>('/api/fibu/debitoren'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackDebitMock }, staleTime: 2 * 60 * 1000 })
 }
 
 export function useKreditorenMock() {
-  return useQuery({ queryKey: [...fibuKeys.kreditoren(), 'mock'], queryFn: async () => { try { const r = await apiClient.get<KreditOPMock[]>('/api/fibu/kreditoren'); if (r.data?.length) return r.data } catch {} return fallbackKreditMock }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: [...fibuKeys.kreditoren(), 'mock'], queryFn: async () => { try { const r = await apiClient.get<KreditOPMock[]>('/api/fibu/kreditoren'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackKreditMock }, staleTime: 2 * 60 * 1000 })
 }
 
 export function useHauptbuch() {
-  return useQuery({ queryKey: [...fibuKeys.buchungen(), 'hauptbuch'], queryFn: async () => { try { const r = await apiClient.get<HauptbuchBuchung[]>('/api/fibu/hauptbuch'); if (r.data?.length) return r.data } catch {} return fallbackHauptbuch }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: [...fibuKeys.buchungen(), 'hauptbuch'], queryFn: async () => { try { const r = await apiClient.get<HauptbuchBuchung[]>('/api/fibu/hauptbuch'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackHauptbuch }, staleTime: 2 * 60 * 1000 })
 }
 
 export function useKreditlinien() {
-  return useQuery({ queryKey: [...fibuKeys.all, 'kreditlinien'], queryFn: async () => { try { const r = await apiClient.get<Kreditlinie[]>('/api/fibu/kreditlinien'); if (r.data?.length) return r.data } catch {} return fallbackKreditlinien }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: [...fibuKeys.all, 'kreditlinien'], queryFn: async () => { try { const r = await apiClient.get<Kreditlinie[]>('/api/fibu/kreditlinien'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackKreditlinien }, staleTime: 2 * 60 * 1000 })
 }
 
 export function useSicherheiten() {
-  return useQuery({ queryKey: [...fibuKeys.all, 'sicherheiten'], queryFn: async () => { try { const r = await apiClient.get<Sicherheit[]>('/api/fibu/sicherheiten'); if (r.data?.length) return r.data } catch {} return fallbackSicherheiten }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: [...fibuKeys.all, 'sicherheiten'], queryFn: async () => { try { const r = await apiClient.get<Sicherheit[]>('/api/fibu/sicherheiten'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackSicherheiten }, staleTime: 5 * 60 * 1000 })
 }
 
 export function useVerbindlichkeiten() {
-  return useQuery({ queryKey: [...fibuKeys.all, 'verbindlichkeiten'], queryFn: async () => { try { const r = await apiClient.get<Verbindlichkeit[]>('/api/fibu/verbindlichkeiten'); if (r.data?.length) return r.data } catch {} return fallbackVerbindlichkeiten }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: [...fibuKeys.all, 'verbindlichkeiten'], queryFn: async () => { try { const r = await apiClient.get<Verbindlichkeit[]>('/api/fibu/verbindlichkeiten'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackVerbindlichkeiten }, staleTime: 2 * 60 * 1000 })
 }
 
 export function useZahlungsvorschlaege() {
-  return useQuery({ queryKey: [...fibuKeys.all, 'zahlungsvorschlaege'], queryFn: async () => { try { const r = await apiClient.get<Zahlungsvorschlag[]>('/api/fibu/zahlungsvorschlaege'); if (r.data?.length) return r.data } catch {} return fallbackZahlungsvorschlaege }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: [...fibuKeys.all, 'zahlungsvorschlaege'], queryFn: async () => { try { const r = await apiClient.get<Zahlungsvorschlag[]>('/api/fibu/zahlungsvorschlaege'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackZahlungsvorschlaege }, staleTime: 2 * 60 * 1000 })
 }

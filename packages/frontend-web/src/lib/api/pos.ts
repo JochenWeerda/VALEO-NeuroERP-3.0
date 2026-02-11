@@ -60,21 +60,21 @@ const fallbackTSE: TSEEintrag[] = [
 // ── Hooks ──────────────────────────────────────────────────────────────
 
 export function useGiftCards() {
-  return useQuery({ queryKey: ['pos', 'gift-cards'], queryFn: async () => { try { const r = await apiClient.get<GiftCard[]>('/api/v1/pos/gift-cards'); if (r.data?.length) return r.data } catch {} return fallbackGiftCards }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: ['pos', 'gift-cards'], queryFn: async () => { try { const r = await apiClient.get<GiftCard[]>('/api/v1/pos/gift-cards'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackGiftCards }, staleTime: 2 * 60 * 1000 })
 }
 
 export function useRabatte() {
-  return useQuery({ queryKey: ['pos', 'rabatte'], queryFn: async () => { try { const r = await apiClient.get<Rabatt[]>('/api/v1/pos/rabatte'); if (r.data?.length) return r.data } catch {} return fallbackRabatte }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: ['pos', 'rabatte'], queryFn: async () => { try { const r = await apiClient.get<Rabatt[]>('/api/v1/pos/rabatte'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackRabatte }, staleTime: 5 * 60 * 1000 })
 }
 
 export function useSuspendedSales() {
-  return useQuery({ queryKey: ['pos', 'suspended'], queryFn: async () => { try { const r = await apiClient.get<SuspendedSale[]>('/api/v1/pos/suspended-sales'); if (r.data?.length) return r.data } catch {} return fallbackSuspended }, staleTime: 30 * 1000 })
+  return useQuery({ queryKey: ['pos', 'suspended'], queryFn: async () => { try { const r = await apiClient.get<SuspendedSale[]>('/api/v1/pos/suspended-sales'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackSuspended }, staleTime: 30 * 1000 })
 }
 
 export function useTagesabschluss() {
-  return useQuery({ queryKey: ['pos', 'tagesabschluss'], queryFn: async () => { try { const r = await apiClient.get<Tagesabschluss>('/api/v1/pos/tagesabschluss'); if (r.data?.datum) return r.data } catch {} return fallbackTagesabschluss }, staleTime: 60 * 1000 })
+  return useQuery({ queryKey: ['pos', 'tagesabschluss'], queryFn: async () => { try { const r = await apiClient.get<Tagesabschluss>('/api/v1/pos/tagesabschluss'); if (r.data?.datum) return r.data } catch { /* fallback to mock data */ } return fallbackTagesabschluss }, staleTime: 60 * 1000 })
 }
 
 export function useTSEJournal() {
-  return useQuery({ queryKey: ['pos', 'tse-journal'], queryFn: async () => { try { const r = await apiClient.get<TSEEintrag[]>('/api/v1/pos/tse-journal'); if (r.data?.length) return r.data } catch {} return fallbackTSE }, staleTime: 30 * 1000 })
+  return useQuery({ queryKey: ['pos', 'tse-journal'], queryFn: async () => { try { const r = await apiClient.get<TSEEintrag[]>('/api/v1/pos/tse-journal'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackTSE }, staleTime: 30 * 1000 })
 }

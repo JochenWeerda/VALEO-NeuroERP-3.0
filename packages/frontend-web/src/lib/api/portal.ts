@@ -133,37 +133,37 @@ export function usePortalDashboard() {
 }
 
 export function usePortalAnfragen() {
-  return useQuery({ queryKey: ['portal', 'anfragen'], queryFn: async () => { try { const r = await apiClient.get<PortalAnfrage[]>('/api/v1/portal/anfragen'); if (r.data?.length) return r.data } catch {} return fallbackAnfragen }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: ['portal', 'anfragen'], queryFn: async () => { try { const r = await apiClient.get<PortalAnfrage[]>('/api/v1/portal/anfragen'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackAnfragen }, staleTime: 2 * 60 * 1000 })
 }
 
 export function usePortalBestellungen() {
-  return useQuery({ queryKey: ['portal', 'bestellungen'], queryFn: async () => { try { const r = await apiClient.get<PortalBestellung[]>('/api/v1/portal/bestellungen'); if (r.data?.length) return r.data } catch {} return fallbackBestellungen }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: ['portal', 'bestellungen'], queryFn: async () => { try { const r = await apiClient.get<PortalBestellung[]>('/api/v1/portal/bestellungen'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackBestellungen }, staleTime: 2 * 60 * 1000 })
 }
 
 export function usePortalDokumente() {
-  return useQuery({ queryKey: ['portal', 'dokumente'], queryFn: async () => { try { const r = await apiClient.get<PortalDokument[]>('/api/v1/portal/dokumente'); if (r.data?.length) return r.data } catch {} return fallbackDokumente }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: ['portal', 'dokumente'], queryFn: async () => { try { const r = await apiClient.get<PortalDokument[]>('/api/v1/portal/dokumente'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackDokumente }, staleTime: 2 * 60 * 1000 })
 }
 
 export function usePortalFeldbuch() {
-  return useQuery({ queryKey: ['portal', 'feldbuch'], queryFn: async () => { try { const r = await apiClient.get<PortalFeldbuch[]>('/api/v1/portal/feldbuch'); if (r.data?.length) return r.data } catch {} return fallbackFeldbuch }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: ['portal', 'feldbuch'], queryFn: async () => { try { const r = await apiClient.get<PortalFeldbuch[]>('/api/v1/portal/feldbuch'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackFeldbuch }, staleTime: 5 * 60 * 1000 })
 }
 
 export function usePortalNaehrstoffbilanzen() {
-  return useQuery({ queryKey: ['portal', 'bilanzen'], queryFn: async () => { try { const r = await apiClient.get<PortalNaehrstoffbilanz[]>('/api/v1/portal/naehrstoffbilanzen'); if (r.data?.length) return r.data } catch {} return fallbackBilanzen }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: ['portal', 'bilanzen'], queryFn: async () => { try { const r = await apiClient.get<PortalNaehrstoffbilanz[]>('/api/v1/portal/naehrstoffbilanzen'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackBilanzen }, staleTime: 5 * 60 * 1000 })
 }
 
 export function usePortalRechnungen() {
-  return useQuery({ queryKey: ['portal', 'rechnungen'], queryFn: async () => { try { const r = await apiClient.get<PortalRechnung[]>('/api/v1/portal/rechnungen'); if (r.data?.length) return r.data } catch {} return fallbackRechnungen }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: ['portal', 'rechnungen'], queryFn: async () => { try { const r = await apiClient.get<PortalRechnung[]>('/api/v1/portal/rechnungen'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackRechnungen }, staleTime: 2 * 60 * 1000 })
 }
 
 export function usePortalShop() {
-  return useQuery({ queryKey: ['portal', 'shop'], queryFn: async () => { try { const r = await apiClient.get<PortalShopProdukt[]>('/api/v1/portal/shop'); if (r.data?.length) return r.data } catch {} return fallbackShop }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: ['portal', 'shop'], queryFn: async () => { try { const r = await apiClient.get<PortalShopProdukt[]>('/api/v1/portal/shop'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackShop }, staleTime: 5 * 60 * 1000 })
 }
 
 export function usePortalVertraege() {
-  return useQuery({ queryKey: ['portal', 'vertraege'], queryFn: async () => { try { const r = await apiClient.get<PortalVertrag[]>('/api/v1/portal/vertraege'); if (r.data?.length) return r.data } catch {} return fallbackVertraege }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: ['portal', 'vertraege'], queryFn: async () => { try { const r = await apiClient.get<PortalVertrag[]>('/api/v1/portal/vertraege'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackVertraege }, staleTime: 5 * 60 * 1000 })
 }
 
 export function usePortalZertifikate() {
-  return useQuery({ queryKey: ['portal', 'zertifikate'], queryFn: async () => { try { const r = await apiClient.get<PortalZertifikat[]>('/api/v1/portal/zertifikate'); if (r.data?.length) return r.data } catch {} return fallbackZertifikate }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: ['portal', 'zertifikate'], queryFn: async () => { try { const r = await apiClient.get<PortalZertifikat[]>('/api/v1/portal/zertifikate'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackZertifikate }, staleTime: 5 * 60 * 1000 })
 }
