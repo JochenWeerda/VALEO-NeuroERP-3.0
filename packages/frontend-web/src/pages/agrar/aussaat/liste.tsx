@@ -1,5 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAussaaten, type Aussaat } from '@/lib/api/agrar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,25 +8,15 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Calendar, FileDown, Plus, Search } from 'lucide-react'
 
-type Aussaat = {
-  id: string
-  schlag: string
-  kultur: string
-  sorte: string
-  datum: string
-  flaeche: number
-  saatmenge: number
-  status: 'geplant' | 'ausgesaet'
-}
-
 const mockAussaaten: Aussaat[] = [
   { id: '1', schlag: 'Nordfeld 1', kultur: 'Weizen', sorte: 'Asano', datum: '2025-10-15', flaeche: 12.5, saatmenge: 2250, status: 'geplant' },
-  { id: '2', schlag: 'Südacker', kultur: 'Gerste', sorte: 'KWS Morris', datum: '2025-10-20', flaeche: 8.3, saatmenge: 1494, status: 'geplant' },
+  { id: '2', schlag: 'SÃ¼dacker', kultur: 'Gerste', sorte: 'KWS Morris', datum: '2025-10-20', flaeche: 8.3, saatmenge: 1494, status: 'geplant' },
 ]
 
 export default function AussaatListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: aussaaten = mockAussaaten } = useAussaaten()
 
   const columns = [
     {
@@ -44,20 +35,20 @@ export default function AussaatListePage(): JSX.Element {
       label: 'Aussaat-Datum',
       render: (a: Aussaat) => new Date(a.datum).toLocaleDateString('de-DE'),
     },
-    { key: 'flaeche' as const, label: 'Fläche (ha)', render: (a: Aussaat) => `${a.flaeche} ha` },
+    { key: 'flaeche' as const, label: 'FlÃ¤che (ha)', render: (a: Aussaat) => `${a.flaeche} ha` },
     { key: 'saatmenge' as const, label: 'Saatgut (kg)' },
     {
       key: 'status' as const,
       label: 'Status',
       render: (a: Aussaat) => (
         <Badge variant={a.status === 'ausgesaet' ? 'outline' : 'default'}>
-          {a.status === 'geplant' ? 'Geplant' : 'Ausgesät'}
+          {a.status === 'geplant' ? 'Geplant' : 'AusgesÃ¤t'}
         </Badge>
       ),
     },
   ]
 
-  const gesamtFlaeche = mockAussaaten.reduce((sum, a) => sum + a.flaeche, 0)
+  const gesamtFlaeche = aussaaten.reduce((sum, a) => sum + a.flaeche, 0)
 
   return (
     <div className="space-y-4 p-6">
@@ -75,19 +66,19 @@ export default function AussaatListePage(): JSX.Element {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Schläge Gesamt</CardTitle>
+            <CardTitle className="text-sm font-medium">SchlÃ¤ge Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockAussaaten.length}</span>
+              <span className="text-2xl font-bold">{aussaaten.length}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Gesamtfläche</CardTitle>
+            <CardTitle className="text-sm font-medium">GesamtflÃ¤che</CardTitle>
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold">{gesamtFlaeche.toFixed(1)} ha</span>
@@ -99,7 +90,7 @@ export default function AussaatListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Geplant</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockAussaaten.filter((a) => a.status === 'geplant').length}</span>
+            <span className="text-2xl font-bold">{aussaaten.filter((a) => a.status === 'geplant').length}</span>
           </CardContent>
         </Card>
       </div>
@@ -124,9 +115,11 @@ export default function AussaatListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockAussaaten} columns={columns} />
+          <DataTable data={aussaaten} columns={columns} />
         </CardContent>
       </Card>
     </div>
   )
 }
+
+

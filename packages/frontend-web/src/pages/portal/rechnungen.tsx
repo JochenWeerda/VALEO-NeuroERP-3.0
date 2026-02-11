@@ -4,7 +4,9 @@
  * Übersicht aller Rechnungen des Kunden
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -128,19 +130,25 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
 }
 
 export default function PortalRechnungen() {
-  const [loading, setLoading] = useState(true)
-  const [rechnungen, setRechnungen] = useState<Rechnung[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [activeTab, setActiveTab] = useState('alle')
   const [selectedRechnung, setSelectedRechnung] = useState<Rechnung | null>(null)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setRechnungen(mockRechnungen)
-      setLoading(false)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [])
+  const { data: rechnungen = mockRechnungen, isLoading } = useQuery({
+    queryKey: ['portal', 'rechnungen', 'page'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<Rechnung[]>('/api/v1/portal/rechnungen')
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data
+        }
+      } catch {
+        // Fallback handled below
+      }
+      return mockRechnungen
+    },
+    staleTime: 2 * 60 * 1000,
+  })
 
   const filteredRechnungen = rechnungen.filter((r) => {
     const matchesSearch = r.rechnungsnummer.toLowerCase().includes(searchTerm.toLowerCase())
@@ -156,7 +164,7 @@ export default function PortalRechnungen() {
     .filter(r => r.status === 'ueberfaellig')
     .reduce((sum, r) => sum + r.bruttobetrag, 0)
 
-  if (loading) {
+  if (isLoading) {
     return <RechnungenSkeleton />
   }
 

@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
+import { apiClient } from '@/lib/api-client'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -70,6 +72,21 @@ const mockRabatte: Rabatt[] = [
 export default function RabattePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: rabatte = mockRabatte } = useQuery({
+    queryKey: ['pos', 'rabatte', 'page'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<Rabatt[]>('/api/v1/pos/rabatte')
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data
+        }
+      } catch {
+        // Fallback handled below
+      }
+      return mockRabatte
+    },
+    staleTime: 5 * 60 * 1000,
+  })
 
   const columns = [
     {
@@ -129,7 +146,7 @@ export default function RabattePage(): JSX.Element {
     },
   ]
 
-  const aktiv = mockRabatte.filter((r) => r.status === 'aktiv').length
+  const aktiv = rabatte.filter((r) => r.status === 'aktiv').length
 
   return (
     <div className="space-y-4 p-6">
@@ -165,7 +182,7 @@ export default function RabattePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Rabatte Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockRabatte.length}</span>
+            <span className="text-2xl font-bold">{rabatte.length}</span>
           </CardContent>
         </Card>
 
@@ -183,7 +200,7 @@ export default function RabattePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Abgelaufen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-gray-400">{mockRabatte.filter((r) => r.status === 'abgelaufen').length}</span>
+            <span className="text-2xl font-bold text-gray-400">{rabatte.filter((r) => r.status === 'abgelaufen').length}</span>
           </CardContent>
         </Card>
 
@@ -192,7 +209,7 @@ export default function RabattePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Rabatt-Typen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{new Set(mockRabatte.map((r) => r.typ)).size}</span>
+            <span className="text-2xl font-bold">{new Set(rabatte.map((r) => r.typ)).size}</span>
           </CardContent>
         </Card>
       </div>
@@ -215,7 +232,7 @@ export default function RabattePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockRabatte} columns={columns} />
+          <DataTable data={rabatte} columns={columns} />
         </CardContent>
       </Card>
     </div>

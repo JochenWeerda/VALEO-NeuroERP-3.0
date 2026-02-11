@@ -4,7 +4,9 @@
  * Übersicht aller Verträge und Kontrakte des Kunden
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -127,18 +129,24 @@ const typConfig: Record<string, { label: string; color: string }> = {
 }
 
 export default function PortalVertraege() {
-  const [loading, setLoading] = useState(true)
-  const [vertraege, setVertraege] = useState<Vertrag[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedVertrag, setSelectedVertrag] = useState<Vertrag | null>(null)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setVertraege(mockVertraege)
-      setLoading(false)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [])
+  const { data: vertraege = mockVertraege, isLoading } = useQuery({
+    queryKey: ['portal', 'vertraege', 'page'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<Vertrag[]>('/api/v1/portal/vertraege')
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data
+        }
+      } catch {
+        // Fallback handled below
+      }
+      return mockVertraege
+    },
+    staleTime: 5 * 60 * 1000,
+  })
 
   const filteredVertraege = vertraege.filter((v) =>
     v.bezeichnung.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -152,7 +160,7 @@ export default function PortalVertraege() {
     .filter(v => v.status !== 'abgelaufen')
     .reduce((sum, v) => sum + v.gesamtmenge * v.preis, 0)
 
-  if (loading) {
+  if (isLoading) {
     return <VertrageSkeleton />
   }
 

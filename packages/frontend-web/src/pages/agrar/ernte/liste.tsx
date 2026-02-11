@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useErnten } from '@/lib/api/agrar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -26,6 +27,7 @@ const mockErnten: Ernte[] = [
 export default function ErnteListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: ernten = mockErnten } = useErnten()
 
   const columns = [
     {
@@ -56,7 +58,7 @@ export default function ErnteListePage(): JSX.Element {
     },
   ]
 
-  const gesamtMenge = mockErnten.reduce((sum, e) => sum + e.menge, 0)
+  const gesamtMenge = ernten.reduce((sum, e) => sum + e.menge, 0)
 
   return (
     <div className="space-y-4 p-6">
@@ -79,7 +81,7 @@ export default function ErnteListePage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockErnten.length}</span>
+              <span className="text-2xl font-bold">{ernten.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -98,7 +100,7 @@ export default function ErnteListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Abgeschlossen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockErnten.filter((e) => e.status === 'abgeschlossen').length}</span>
+            <span className="text-2xl font-bold text-green-600">{ernten.filter((e) => e.status === 'abgeschlossen').length}</span>
           </CardContent>
         </Card>
 
@@ -107,7 +109,7 @@ export default function ErnteListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Geplant</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockErnten.filter((e) => e.status === 'geplant').length}</span>
+            <span className="text-2xl font-bold">{ernten.filter((e) => e.status === 'geplant').length}</span>
           </CardContent>
         </Card>
       </div>
@@ -132,7 +134,7 @@ export default function ErnteListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockErnten} columns={columns} />
+          <DataTable data={ernten} columns={columns} />
         </CardContent>
       </Card>
     </div>

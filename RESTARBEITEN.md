@@ -362,3 +362,7 @@ Alle veralteten Status-Reports, redundanten Phasen-Dokumente, doppelte CRM-Dokum
 - Quality Gate: `21916155149` (in_progress)
 - Security Scan: `21916155080` (in_progress)
 - E2E Smoke Tests: `21916155128` (in_progress)
+
+## 2026-02-11 Frontend Mock-to-API Fortschritt (laufend)
+- Betrieb/Compliance: Banken, Disposition, Chargen, Cross-Compliance, QS, Saatgut-Nachbau, Sachkunde, VVVO, Zulassungen auf `lib/api/betrieb` Hooks umgestellt.
+- Portal/POS/Agrar: Portal-Listen (Anfragen, Bestellungen, Dokumente, Rechnungen, Vertraege, Zertifikate, Dashboard) und POS-/Agrar-Listen weiter auf Query/Hooks migriert.

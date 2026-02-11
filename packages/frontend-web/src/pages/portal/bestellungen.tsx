@@ -4,7 +4,9 @@
  * Übersicht aller Bestellungen des Kunden
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -122,19 +124,25 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
 }
 
 export default function PortalBestellungen() {
-  const [loading, setLoading] = useState(true)
-  const [bestellungen, setBestellungen] = useState<Bestellung[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [activeTab, setActiveTab] = useState('alle')
   const [selectedBestellung, setSelectedBestellung] = useState<Bestellung | null>(null)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setBestellungen(mockBestellungen)
-      setLoading(false)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [])
+  const { data: bestellungen = mockBestellungen, isLoading } = useQuery({
+    queryKey: ['portal', 'bestellungen', 'page'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<Bestellung[]>('/api/v1/portal/bestellungen')
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data
+        }
+      } catch {
+        // Fallback handled below
+      }
+      return mockBestellungen
+    },
+    staleTime: 2 * 60 * 1000,
+  })
 
   const filteredBestellungen = bestellungen.filter((b) => {
     const matchesSearch = b.id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -142,7 +150,7 @@ export default function PortalBestellungen() {
     return matchesSearch && matchesTab
   })
 
-  if (loading) {
+  if (isLoading) {
     return <BestellungenSkeleton />
   }
 

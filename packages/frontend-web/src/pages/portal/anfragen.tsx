@@ -4,7 +4,9 @@
  * Übersicht aller Kundenanfragen (Angebotsanfragen, Bestellanfragen, etc.)
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -129,8 +131,6 @@ const typConfig: Record<string, { label: string; icon: React.ReactNode; color: s
 }
 
 export default function PortalAnfragen() {
-  const [loading, setLoading] = useState(true)
-  const [anfragen, setAnfragen] = useState<Anfrage[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [activeTab, setActiveTab] = useState('alle')
   const [selectedAnfrage, setSelectedAnfrage] = useState<Anfrage | null>(null)
@@ -140,13 +140,21 @@ export default function PortalAnfragen() {
   const [neueAnfrageNachricht, setNeueAnfrageNachricht] = useState('')
   const [submitSuccess, setSubmitSuccess] = useState(false)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setAnfragen(mockAnfragen)
-      setLoading(false)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [])
+  const { data: anfragen = mockAnfragen, isLoading } = useQuery({
+    queryKey: ['portal', 'anfragen', 'page'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<Anfrage[]>('/api/v1/portal/anfragen')
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data
+        }
+      } catch {
+        // Fallback handled below
+      }
+      return mockAnfragen
+    },
+    staleTime: 2 * 60 * 1000,
+  })
 
   const filteredAnfragen = anfragen.filter((a) => {
     const matchesSearch = a.betreff.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -167,7 +175,7 @@ export default function PortalAnfragen() {
     }, 2000)
   }
 
-  if (loading) {
+  if (isLoading) {
     return <AnfragenSkeleton />
   }
 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useKulturen } from '@/lib/api/agrar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -26,6 +27,7 @@ const mockKulturen: Kultur[] = [
 export default function KulturpflanzenListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: kulturen = mockKulturen } = useKulturen()
 
   const columns = [
     {
@@ -52,7 +54,7 @@ export default function KulturpflanzenListePage(): JSX.Element {
     },
   ]
 
-  const gesamtFlaeche = mockKulturen.reduce((sum, k) => sum + k.flaeche, 0)
+  const gesamtFlaeche = kulturen.reduce((sum, k) => sum + k.flaeche, 0)
 
   return (
     <div className="space-y-4 p-6">
@@ -75,7 +77,7 @@ export default function KulturpflanzenListePage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Sprout className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold">{mockKulturen.length}</span>
+              <span className="text-2xl font-bold">{kulturen.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -95,7 +97,7 @@ export default function KulturpflanzenListePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold text-green-600">
-              {(mockKulturen.reduce((sum, k) => sum + k.deckungsbeitrag, 0) / mockKulturen.length).toFixed(0)} € / ha
+              {(kulturen.reduce((sum, k) => sum + k.deckungsbeitrag, 0) / Math.max(kulturen.length, 1)).toFixed(0)} € / ha
             </span>
           </CardContent>
         </Card>
@@ -121,7 +123,7 @@ export default function KulturpflanzenListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockKulturen} columns={columns} />
+          <DataTable data={kulturen} columns={columns} />
         </CardContent>
       </Card>
     </div>

@@ -1,21 +1,12 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useChargen, type Charge } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { AlertTriangle, FileDown, Package, Search } from 'lucide-react'
-
-type Charge = {
-  id: string
-  chargenId: string
-  artikel: string
-  menge: number
-  lagerort: string
-  eingang: string
-  status: 'freigegeben' | 'gesperrt' | 'in-pruefung'
-}
 
 const mockChargen: Charge[] = [
   { id: '1', chargenId: '251011-WEI-001', artikel: 'Weizen Premium', menge: 25.0, lagerort: 'Silo 1', eingang: '2025-10-11', status: 'freigegeben' },
@@ -26,8 +17,9 @@ const mockChargen: Charge[] = [
 export default function ChargenListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: chargen = mockChargen } = useChargen()
 
-  const inPruefung = mockChargen.filter((c) => c.status === 'in-pruefung').length
+  const inPruefung = chargen.filter((c) => c.status === 'in-pruefung').length
 
   const columns = [
     {
@@ -52,7 +44,7 @@ export default function ChargenListePage(): JSX.Element {
       label: 'Status',
       render: (c: Charge) => (
         <Badge variant={c.status === 'freigegeben' ? 'outline' : c.status === 'gesperrt' ? 'destructive' : 'secondary'}>
-          {c.status === 'freigegeben' ? '✓ Freigegeben' : c.status === 'gesperrt' ? '✗ Gesperrt' : '⏳ In Prüfung'}
+          {c.status === 'freigegeben' ? 'Freigegeben' : c.status === 'gesperrt' ? 'Gesperrt' : 'In Pruefung'}
         </Badge>
       ),
     },
@@ -73,7 +65,7 @@ export default function ChargenListePage(): JSX.Element {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-orange-900">
               <AlertTriangle className="h-5 w-5" />
-              <span className="font-semibold">{inPruefung} Charge(n) in Qualitätsprüfung</span>
+              <span className="font-semibold">{inPruefung} Charge(n) in Qualitaetspruefung</span>
             </div>
           </CardContent>
         </Card>
@@ -87,7 +79,7 @@ export default function ChargenListePage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Package className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockChargen.length}</span>
+              <span className="text-2xl font-bold">{chargen.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -97,13 +89,13 @@ export default function ChargenListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Freigegeben</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockChargen.filter((c) => c.status === 'freigegeben').length}</span>
+            <span className="text-2xl font-bold text-green-600">{chargen.filter((c) => c.status === 'freigegeben').length}</span>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">In Prüfung</CardTitle>
+            <CardTitle className="text-sm font-medium">In Pruefung</CardTitle>
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold text-orange-600">{inPruefung}</span>
@@ -131,9 +123,11 @@ export default function ChargenListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockChargen} columns={columns} />
+          <DataTable data={chargen} columns={columns} />
         </CardContent>
       </Card>
     </div>
   )
 }
+
+

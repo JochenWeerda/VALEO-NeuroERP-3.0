@@ -5,7 +5,9 @@
  * Nährstoffbilanzen, Analysen, Deklarationen etc.
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -91,19 +93,25 @@ const formatIcons: Record<string, React.ReactNode> = {
 }
 
 export default function PortalDokumente() {
-  const [loading, setLoading] = useState(true)
-  const [dokumente, setDokumente] = useState<Dokument[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [activeTab, setActiveTab] = useState('alle')
   const [selectedJahr, setSelectedJahr] = useState<string>('alle')
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDokumente(mockDokumente)
-      setLoading(false)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [])
+  const { data: dokumente = mockDokumente, isLoading } = useQuery({
+    queryKey: ['portal', 'dokumente', 'page'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<Dokument[]>('/api/v1/portal/dokumente')
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data
+        }
+      } catch {
+        // Fallback handled below
+      }
+      return mockDokumente
+    },
+    staleTime: 2 * 60 * 1000,
+  })
 
   const filteredDokumente = dokumente.filter((d) => {
     const matchesSearch = d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -115,7 +123,7 @@ export default function PortalDokumente() {
 
   const availableYears = [...new Set(dokumente.filter(d => d.jahr).map(d => d.jahr))].sort((a, b) => (b || 0) - (a || 0))
 
-  if (loading) {
+  if (isLoading) {
     return <DokumenteSkeleton />
   }
 
