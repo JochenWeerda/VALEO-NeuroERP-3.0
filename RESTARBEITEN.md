@@ -374,3 +374,4 @@ Alle veralteten Status-Reports, redundanten Phasen-Dokumente, doppelte CRM-Dokum
 - Portal Batch 7: Portal-Feldbuch und Portal-Naehrstoffbilanzen auf `lib/api/portal` Hooks umgestellt (Schlag-/Bilanz-Mapping auf bestehende Detail-UI).
 - POS Batch 8: Gift Cards, Rabatte, Suspended Sales und TSE-Journal auf `lib/api/pos` Hooks umgestellt (seitenkompatible Typadapter fuer bestehende Tabellenansichten).
 - Futter Batch 9: Futter-Einzel- und Futter-Misch-Listen von lokalen Mock-Arrays auf `lib/api/futter` Hooks (`useEinzelfutter`, `useMischfutter`) migriert.
+- Tax/Legal Klarstellung: POS (B2C) zeigt Endpreise inkl. gesetzl. MwSt.; Portal (B2B) zeigt Netto-Preise mit USt-Ausweis in Rechnungsansichten.

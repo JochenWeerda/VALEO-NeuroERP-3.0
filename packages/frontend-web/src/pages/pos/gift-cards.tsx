@@ -181,6 +181,7 @@ export default function GiftCardsPage(): JSX.Element {
         <p className="mt-1">
           Im POS-Terminal scannen → Automatische Einlösung • Restguthaben bleibt auf Karte • Gültigkeit: 3 Jahre ab Ausstellung
         </p>
+        <p className="mt-1 text-xs font-medium">Ausweis an der Ladenkasse als B2C-Endpreis inkl. gesetzl. MwSt.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

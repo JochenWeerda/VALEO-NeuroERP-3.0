@@ -175,6 +175,7 @@ export default function TSEJournalPage(): JSX.Element {
           Alle Kassentransaktionen mit zertifizierter TSE signiert • Unveränderbar • 10 Jahre Aufbewahrungspflicht •
           DSFinV-K Export für DATEV/Finanzamt
         </p>
+        <p className="mt-1 text-xs font-medium">POS-Umsätze werden als B2C-Endpreise inkl. gesetzl. MwSt. protokolliert.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

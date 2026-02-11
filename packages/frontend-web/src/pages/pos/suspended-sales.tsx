@@ -178,7 +178,7 @@ export default function SuspendedSalesPage(): JSX.Element {
                       <span className="font-semibold">{sale.itemCount} Stück</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold">Gesamt</span>
+                      <span className="font-semibold">Gesamt (inkl. MwSt.)</span>
                       <span className="text-xl font-bold text-primary">
                         {sale.total.toFixed(2)} €
                       </span>
