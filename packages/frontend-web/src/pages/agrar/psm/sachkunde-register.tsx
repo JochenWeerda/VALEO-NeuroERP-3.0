@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -6,25 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { AlertTriangle, Award, FileDown, Plus, Search, CheckCircle, XCircle } from 'lucide-react'
-
-type PSMSachkundeNachweis = {
-  id: string
-  kunde: string
-  kundennr: string
-  nachweisNr: string
-  ausstellungsdatum: string
-  gueltigBis: string
-  ausstellendeStelle: string
-  status: 'gueltig' | 'ablaufend' | 'abgelaufen'
-  complianceStatus: 'compliant' | 'warning' | 'non-compliant'
-  letztePruefung: string
-  pruefer: string
-}
+import { usePSMSachkundeRegister, type PSMSachkundeNachweis } from '@/lib/api/agrar'
 
 const mockPSMSachkunde: PSMSachkundeNachweis[] = [
   {
     id: '1',
-    kunde: 'Landwirtschaft Müller',
+    kunde: 'Landwirtschaft Mueller',
     kundennr: 'K-10023',
     nachweisNr: 'SK-PSM-2022-4567',
     ausstellungsdatum: '2022-03-15',
@@ -32,8 +19,6 @@ const mockPSMSachkunde: PSMSachkundeNachweis[] = [
     ausstellendeStelle: 'LWK Niedersachsen',
     status: 'ablaufend',
     complianceStatus: 'warning',
-    letztePruefung: '2024-09-15',
-    pruefer: 'Dr. Schmidt'
   },
   {
     id: '2',
@@ -45,36 +30,34 @@ const mockPSMSachkunde: PSMSachkundeNachweis[] = [
     ausstellendeStelle: 'LWK Niedersachsen',
     status: 'gueltig',
     complianceStatus: 'compliant',
-    letztePruefung: '2024-10-01',
-    pruefer: 'Dr. Müller'
-  },
-  {
-    id: '3',
-    kunde: 'Agrar GmbH Schmidt',
-    kundennr: 'K-10067',
-    nachweisNr: 'SK-PSM-2021-2345',
-    ausstellungsdatum: '2021-11-10',
-    gueltigBis: '2024-11-10',
-    ausstellendeStelle: 'LWK Niedersachsen',
-    status: 'abgelaufen',
-    complianceStatus: 'non-compliant',
-    letztePruefung: '2024-08-20',
-    pruefer: 'Dr. Wagner'
   },
 ]
 
 export default function PSMSachkundeRegisterPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: nachweise = mockPSMSachkunde } = usePSMSachkundeRegister()
 
-  const ablaufend = mockPSMSachkunde.filter((s) => {
-    const ablauf = new Date(s.gueltigBis)
+  const ablaufend = useMemo(() => {
     const warnung = new Date()
-    warnung.setMonth(warnung.getMonth() + 3) // 3 Monate Vorlauf
-    return ablauf <= warnung && ablauf >= new Date()
-  }).length
+    warnung.setMonth(warnung.getMonth() + 3)
+    return nachweise.filter((s) => {
+      const ablauf = new Date(s.gueltigBis)
+      return ablauf <= warnung && ablauf >= new Date()
+    }).length
+  }, [nachweise])
 
-  const nonCompliant = mockPSMSachkunde.filter((s) => s.complianceStatus === 'non-compliant').length
+  const nonCompliant = useMemo(
+    () => nachweise.filter((s) => s.complianceStatus === 'non-compliant').length,
+    [nachweise]
+  )
+
+  const filteredData = useMemo(
+    () => nachweise.filter((item) =>
+      [item.kunde, item.nachweisNr, item.kundennr].some((v) => v.toLowerCase().includes(searchTerm.toLowerCase()))
+    ),
+    [nachweise, searchTerm]
+  )
 
   const columns = [
     {
@@ -93,12 +76,12 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
     { key: 'nachweisNr' as const, label: 'Nachweis-Nr', render: (s: PSMSachkundeNachweis) => <span className="font-mono">{s.nachweisNr}</span> },
     {
       key: 'gueltigBis' as const,
-      label: 'Gültig bis',
+      label: 'Gueltig bis',
       render: (s: PSMSachkundeNachweis) => {
         const ablauf = new Date(s.gueltigBis)
-        const ablaufend = ablauf <= new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+        const isAblaufend = ablauf <= new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
         return (
-          <span className={ablaufend ? 'font-semibold text-orange-600' : ''}>
+          <span className={isAblaufend ? 'font-semibold text-orange-600' : ''}>
             {ablauf.toLocaleDateString('de-DE')}
           </span>
         )
@@ -110,7 +93,7 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
       label: 'Status',
       render: (s: PSMSachkundeNachweis) => (
         <Badge variant={s.status === 'gueltig' ? 'outline' : s.status === 'ablaufend' ? 'secondary' : 'destructive'}>
-          {s.status === 'gueltig' ? 'Gültig' : s.status === 'ablaufend' ? 'Läuft ab' : 'Abgelaufen'}
+          {s.status === 'gueltig' ? 'Gueltig' : s.status === 'ablaufend' ? 'Laeuft ab' : 'Abgelaufen'}
         </Badge>
       ),
     },
@@ -118,15 +101,16 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
       key: 'complianceStatus' as const,
       label: 'Compliance',
       render: (s: PSMSachkundeNachweis) => {
+        const status = s.complianceStatus ?? 'warning'
         const statusConfig = {
           compliant: { icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', text: 'Compliant' },
           warning: { icon: AlertTriangle, color: 'text-orange-600', bg: 'bg-orange-50', text: 'Warnung' },
-          'non-compliant': { icon: XCircle, color: 'text-red-600', bg: 'bg-red-50', text: 'Nicht compliant' }
-        }
-        const config = statusConfig[s.complianceStatus]
+          'non-compliant': { icon: XCircle, color: 'text-red-600', bg: 'bg-red-50', text: 'Nicht compliant' },
+        } as const
+        const config = statusConfig[status as keyof typeof statusConfig] ?? statusConfig.warning
         const Icon = config.icon
         return (
-          <div className={`flex items-center gap-2 px-2 py-1 rounded ${config.bg}`}>
+          <div className={`flex items-center gap-2 rounded px-2 py-1 ${config.bg}`}>
             <Icon className={`h-4 w-4 ${config.color}`} />
             <span className={`text-sm font-medium ${config.color}`}>{config.text}</span>
           </div>
@@ -137,29 +121,19 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
       key: 'actions' as const,
       label: 'Aktionen',
       render: (s: PSMSachkundeNachweis) => (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate(`/agrar/psm/sachkunde/${s.id}/edit`)}
-        >
+        <Button variant="outline" size="sm" onClick={() => navigate(`/agrar/psm/sachkunde/${s.id}/edit`)}>
           Bearbeiten
         </Button>
       ),
     },
   ]
 
-  const filteredData = mockPSMSachkunde.filter((item) =>
-    item.kunde.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.nachweisNr.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.kundennr.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
   return (
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">PSM-Sachkunde-Register</h1>
-          <p className="text-muted-foreground">Sachkundenachweise für PSM-Vertrieb (§ 9 PflSchG)</p>
+          <p className="text-muted-foreground">Sachkundenachweise fuer PSM-Vertrieb (Paragraf 9 PflSchG)</p>
         </div>
         <Button onClick={() => navigate('/agrar/psm/sachkunde/neu')} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -174,7 +148,7 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2 text-orange-900">
                   <AlertTriangle className="h-5 w-5" />
-                  <span className="font-semibold">{ablaufend} Nachweis(e) läuft/laufen in den nächsten 3 Monaten ab!</span>
+                  <span className="font-semibold">{ablaufend} Nachweis(e) laufen in den naechsten 3 Monaten ab.</span>
                 </div>
               </CardContent>
             </Card>
@@ -184,7 +158,7 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2 text-red-900">
                   <XCircle className="h-5 w-5" />
-                  <span className="font-semibold">{nonCompliant} Nachweis(e) nicht compliant!</span>
+                  <span className="font-semibold">{nonCompliant} Nachweis(e) nicht compliant.</span>
                 </div>
               </CardContent>
             </Card>
@@ -197,62 +171,34 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
           <Award className="h-4 w-4" />
           <p className="font-semibold">Verkaufsvoraussetzung PSM</p>
         </div>
-        <p className="mt-1">
-          Sachkundenachweis Pflicht für Anwender • Gültigkeit: 3 Jahre • Bei PSM-Vertrieb prüfen!
-        </p>
+        <p className="mt-1">Sachkundenachweis Pflicht fuer Anwender. Gueltigkeit: 3 Jahre. Vor Vertrieb pruefen.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Nachweise Gesamt</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">{mockPSMSachkunde.length}</span>
-          </CardContent>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Nachweise Gesamt</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{nachweise.length}</span></CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Gültig</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockPSMSachkunde.filter((s) => s.status === 'gueltig').length}</span>
-          </CardContent>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gueltig</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold text-green-600">{nachweise.filter((s) => s.status === 'gueltig').length}</span></CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Läuft ab (3 Mon.)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{ablaufend}</span>
-          </CardContent>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Laeuft ab (3 Mon.)</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold text-orange-600">{ablaufend}</span></CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Abgelaufen</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-red-600">{mockPSMSachkunde.filter((s) => s.status === 'abgelaufen').length}</span>
-          </CardContent>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abgelaufen</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold text-red-600">{nachweise.filter((s) => s.status === 'abgelaufen').length}</span></CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Nicht Compliant</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-red-600">{nonCompliant}</span>
-          </CardContent>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Nicht Compliant</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold text-red-600">{nonCompliant}</span></CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Suche & Filter</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle>Suche und Filter</CardTitle></CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <div className="relative flex-1">

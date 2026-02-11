@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMarketingKampagnen, type Kampagne } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,25 +8,22 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, Megaphone, Plus, Search } from 'lucide-react'
 
-type Kampagne = {
-  id: string
-  name: string
-  typ: 'E-Mail' | 'Social Media' | 'Print'
-  zielgruppe: string
-  startdatum: string
-  enddatum: string
-  budget: number
-  status: 'geplant' | 'aktiv' | 'abgeschlossen'
-}
-
 const mockKampagnen: Kampagne[] = [
   { id: '1', name: 'Herbst-Aktion Weizen', typ: 'E-Mail', zielgruppe: 'Landwirte', startdatum: '2025-10-01', enddatum: '2025-10-31', budget: 2500, status: 'aktiv' },
-  { id: '2', name: 'Saatgut-Frühjahr 2026', typ: 'Print', zielgruppe: 'Alle Kunden', startdatum: '2025-11-01', enddatum: '2025-12-31', budget: 5000, status: 'geplant' },
+  { id: '2', name: 'Saatgut-Fruehjahr 2026', typ: 'Print', zielgruppe: 'Alle Kunden', startdatum: '2025-11-01', enddatum: '2025-12-31', budget: 5000, status: 'geplant' },
 ]
 
 export default function KampagnenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: kampagnen = mockKampagnen } = useMarketingKampagnen()
+
+  const filteredData = useMemo(
+    () => kampagnen.filter((k) =>
+      [k.name, k.typ, k.zielgruppe].some((v) => v.toLowerCase().includes(searchTerm.toLowerCase()))
+    ),
+    [kampagnen, searchTerm]
+  )
 
   const columns = [
     {
@@ -58,7 +56,7 @@ export default function KampagnenPage(): JSX.Element {
       label: 'Status',
       render: (k: Kampagne) => (
         <Badge variant={k.status === 'aktiv' ? 'default' : k.status === 'geplant' ? 'outline' : 'secondary'}>
-          {k.status === 'aktiv' ? 'Aktiv' : k.status === 'geplant' ? 'Geplant' : 'Abgeschlossen'}
+          {k.status === 'aktiv' ? 'Aktiv' : k.status === 'geplant' ? 'Geplant' : 'Beendet'}
         </Badge>
       ),
     },
@@ -69,7 +67,7 @@ export default function KampagnenPage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Marketing-Kampagnen</h1>
-          <p className="text-muted-foreground">Übersicht</p>
+          <p className="text-muted-foreground">Uebersicht</p>
         </div>
         <Button onClick={() => navigate('/marketing/kampagne/neu')} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -85,7 +83,7 @@ export default function KampagnenPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Megaphone className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockKampagnen.length}</span>
+              <span className="text-2xl font-bold">{kampagnen.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -95,7 +93,7 @@ export default function KampagnenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Aktiv</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockKampagnen.filter((k) => k.status === 'aktiv').length}</span>
+            <span className="text-2xl font-bold text-green-600">{kampagnen.filter((k) => k.status === 'aktiv').length}</span>
           </CardContent>
         </Card>
 
@@ -104,7 +102,7 @@ export default function KampagnenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Geplant</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockKampagnen.filter((k) => k.status === 'geplant').length}</span>
+            <span className="text-2xl font-bold">{kampagnen.filter((k) => k.status === 'geplant').length}</span>
           </CardContent>
         </Card>
       </div>
@@ -129,7 +127,7 @@ export default function KampagnenPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockKampagnen} columns={columns} />
+          <DataTable data={filteredData} columns={columns} />
         </CardContent>
       </Card>
     </div>
