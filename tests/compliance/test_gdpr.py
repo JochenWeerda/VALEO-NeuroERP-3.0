@@ -27,31 +27,31 @@ def db():
 
 def test_right_to_access_api_exists():
     """Test that Right-to-Access API endpoint exists."""
-    ***REMOVED*** TODO: Implement endpoint first
+    # TODO: Implement endpoint first
     response = client.get("/api/v1/gdpr/data-export/test-user-id")
-    ***REMOVED*** Should return 200 when implemented
+    # Should return 200 when implemented
     assert response.status_code in [200, 404, 501]
 
 
 def test_right_to_delete_api_exists():
     """Test that Right-to-Delete API endpoint exists."""
-    ***REMOVED*** TODO: Implement endpoint first
+    # TODO: Implement endpoint first
     response = client.delete("/api/v1/gdpr/delete-user/test-user-id")
-    ***REMOVED*** Should return 204 when implemented
+    # Should return 204 when implemented
     assert response.status_code in [204, 404, 501]
 
 
 def test_data_portability_api_exists():
     """Test that Data-Portability API endpoint exists."""
-    ***REMOVED*** TODO: Implement endpoint first
+    # TODO: Implement endpoint first
     response = client.get("/api/v1/gdpr/export-portable/test-user-id")
-    ***REMOVED*** Should return 200 when implemented
+    # Should return 200 when implemented
     assert response.status_code in [200, 404, 501]
 
 
 def test_audit_log_contains_required_fields(db: Session):
     """Test that audit log contains all GDPR-required fields."""
-    ***REMOVED*** Create test audit log
+    # Create test audit log
     from uuid import uuid4
     from datetime import datetime
     
@@ -72,7 +72,7 @@ def test_audit_log_contains_required_fields(db: Session):
     db.add(log)
     db.commit()
     
-    ***REMOVED*** Verify all fields present
+    # Verify all fields present
     assert log.user_id is not None
     assert log.timestamp is not None
     assert log.changes is not None
@@ -81,15 +81,15 @@ def test_audit_log_contains_required_fields(db: Session):
 
 def test_personal_data_is_encrypted():
     """Test that sensitive personal data is encrypted."""
-    ***REMOVED*** TODO: Implement encryption-at-rest first
-    ***REMOVED*** Then verify with: SELECT * FROM pg_encryption_status
-    pass  ***REMOVED*** Placeholder
+    # TODO: Implement encryption-at-rest first
+    # Then verify with: SELECT * FROM pg_encryption_status
+    pass  # Placeholder
 
 
 def test_data_retention_policy_enforced():
     """Test that data older than retention-period is deleted."""
-    ***REMOVED*** TODO: Implement retention-policy worker first
-    pass  ***REMOVED*** Placeholder
+    # TODO: Implement retention-policy worker first
+    pass  # Placeholder
 
 
 @pytest.mark.skip(reason="Endpoint not yet implemented")
@@ -100,7 +100,7 @@ def test_gdpr_data_export_complete():
     assert response.status_code == 200
     data = response.json()
     
-    ***REMOVED*** Should include all personal data
+    # Should include all personal data
     assert "personal_data" in data
     assert "transactions" in data
     assert "audit_logs" in data
@@ -110,19 +110,19 @@ def test_gdpr_data_export_complete():
 @pytest.mark.skip(reason="Endpoint not yet implemented")
 def test_gdpr_right_to_delete():
     """Test that user can be deleted with cascade."""
-    ***REMOVED*** Create test user
+    # Create test user
     user_id = "test-delete-user"
     
-    ***REMOVED*** Delete user
+    # Delete user
     response = client.delete(f"/api/v1/gdpr/delete-user/{user_id}")
     assert response.status_code == 204
     
-    ***REMOVED*** Verify deletion
+    # Verify deletion
     db = SessionLocal()
     user = db.query(User).filter(User.id == user_id).first()
     assert user is None
     
-    ***REMOVED*** Verify cascade: Related data should be anonymized
+    # Verify cascade: Related data should be anonymized
     customers = db.query(Customer).filter(
         Customer.created_by == user_id
     ).all()

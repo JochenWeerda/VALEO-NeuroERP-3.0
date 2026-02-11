@@ -34,7 +34,7 @@ async def test_compliance_copilot_customer():
         entity_id="CUST-001",
         entity_data={
             "name": "Test GmbH",
-            "psm_sachkundenachweis": False  ***REMOVED*** Missing!
+            "psm_sachkundenachweis": False  # Missing!
         }
     )
     
@@ -42,7 +42,7 @@ async def test_compliance_copilot_customer():
     assert "risk_score" in result
     assert "recommendations" in result
     
-    ***REMOVED*** Should have violation for missing PSM-Nachweis
+    # Should have violation for missing PSM-Nachweis
     assert len(result["violations"]) > 0
     assert result["risk_score"] > 0
 
@@ -55,7 +55,7 @@ async def test_compliance_copilot_no_violations():
         entity_id="CUST-002",
         entity_data={
             "name": "Compliant GmbH",
-            "psm_sachkundenachweis": True  ***REMOVED*** OK!
+            "psm_sachkundenachweis": True  # OK!
         }
     )
     
@@ -68,6 +68,6 @@ def test_bestellvorschlag_workflow_build():
     workflow = build_bestellvorschlag_workflow()
     
     assert workflow is not None
-    ***REMOVED*** Workflow compiled successfully
+    # Workflow compiled successfully
     assert callable(workflow)
 

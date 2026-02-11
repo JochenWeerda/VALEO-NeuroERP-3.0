@@ -25,7 +25,7 @@ def test_audit_log_is_immutable(db: Session):
     """Test that audit log cannot be modified (Unveränderbarkeit)."""
     from uuid import uuid4
     
-    ***REMOVED*** Create audit log entry
+    # Create audit log entry
     log = AuditLog(
         id=str(uuid4()),
         timestamp=datetime.utcnow(),
@@ -42,18 +42,18 @@ def test_audit_log_is_immutable(db: Session):
     db.commit()
     original_id = log.id
     
-    ***REMOVED*** Try to modify (should be prevented by DB-triggers in production)
+    # Try to modify (should be prevented by DB-triggers in production)
     try:
         log.changes = {"name": "Modified"}
         db.commit()
-        ***REMOVED*** If this succeeds, we need DB-level protection
+        # If this succeeds, we need DB-level protection
         pytest.fail("Audit log was modified - needs DB-level immutability!")
     except Exception:
-        ***REMOVED*** Expected: Cannot modify
+        # Expected: Cannot modify
         db.rollback()
         pass
     
-    ***REMOVED*** Verify original is unchanged
+    # Verify original is unchanged
     db.refresh(log)
     assert log.changes == {"name": "Original"}
 
@@ -75,18 +75,18 @@ def test_journal_entry_has_all_required_fields(db: Session):
     db.add(entry)
     db.commit()
     
-    ***REMOVED*** Required fields for GoBD
-    assert entry.entry_number is not None  ***REMOVED*** Belegnummer
-    assert entry.entry_date is not None    ***REMOVED*** Belegdatum
-    assert entry.posting_date is not None  ***REMOVED*** Buchungsdatum
-    assert entry.description is not None   ***REMOVED*** Buchungstext
+    # Required fields for GoBD
+    assert entry.entry_number is not None  # Belegnummer
+    assert entry.entry_date is not None    # Belegdatum
+    assert entry.posting_date is not None  # Buchungsdatum
+    assert entry.description is not None   # Buchungstext
 
 
 def test_booking_date_within_10_days_of_document_date():
     """Test that posting_date ≤ entry_date + 10 days (Zeitnähe)."""
     db = SessionLocal()
     
-    ***REMOVED*** Query all journal entries
+    # Query all journal entries
     entries = db.query(JournalEntry).all()
     
     for entry in entries:
@@ -102,8 +102,8 @@ def test_booking_date_within_10_days_of_document_date():
 
 def test_no_gaps_in_document_numbers():
     """Test that there are no gaps in document numbers (Vollständigkeit)."""
-    ***REMOVED*** Simplified test - in production: check all document types
-    ***REMOVED*** This is a placeholder
+    # Simplified test - in production: check all document types
+    # This is a placeholder
     pass
 
 
@@ -111,7 +111,7 @@ def test_all_transactions_have_audit_trail():
     """Test that all transactions are logged (Nachvollziehbarkeit)."""
     db = SessionLocal()
     
-    ***REMOVED*** Every JournalEntry should have corresponding AuditLog
+    # Every JournalEntry should have corresponding AuditLog
     entries = db.query(JournalEntry).limit(10).all()
     
     for entry in entries:
@@ -120,7 +120,7 @@ def test_all_transactions_have_audit_trail():
             AuditLog.entity_id == entry.id
         ).all()
         
-        ***REMOVED*** Should have at least "create" event
+        # Should have at least "create" event
         assert len(audit_logs) > 0, (
             f"No audit log for journal entry {entry.entry_number}"
         )
@@ -135,14 +135,14 @@ def test_datev_export_format_valid():
     
     client = TestClient(app)
     
-    ***REMOVED*** Call DATEV export endpoint
+    # Call DATEV export endpoint
     response = client.get("/api/v1/fibu/export/datev")
     
     if response.status_code == 200:
-        ***REMOVED*** Should be CSV format
+        # Should be CSV format
         assert response.headers["Content-Type"] == "text/csv"
         
-        ***REMOVED*** Should have required columns
+        # Should have required columns
         content = response.text
         assert "Konto" in content
         assert "Gegenkonto" in content
