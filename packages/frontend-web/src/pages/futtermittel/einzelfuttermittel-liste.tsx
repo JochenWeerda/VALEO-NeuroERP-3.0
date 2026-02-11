@@ -1,14 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ListReport } from '@/components/mask-builder'
-import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { useEinzelfutter, type Einzelfutter } from '@/lib/api/futter'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
-
-// API Client für Futtermittel
-const apiClient = createApiClient('/api/futtermittel')
 
 // Konfiguration für die ListReport
 const futtermittelListConfig: ListConfig = {
@@ -142,58 +138,30 @@ const futtermittelListConfig: ListConfig = {
 
 export default function EinzelfuttermittelListePage(): JSX.Element {
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
-
-  // Framework Hooks verwenden
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
-    if (action === 'edit' && item) {
-      navigate(`/futtermittel/einzelfuttermittel/stamm/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(`Möchten Sie "${item.name}" wirklich löschen?`)) {
-        try {
-          await apiClient.delete(`/einzelfuttermittel/${item.id}`)
-          loadData() // Liste neu laden
-        } catch (error) {
-          alert('Fehler beim Löschen')
-        }
-      }
-    }
-  })
-
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const response = await apiClient.get('/einzelfuttermittel')
-      if (response.success) {
-        setData((response.data as any).data || [])
-        setTotal((response.data as any).total || 0)
-      }
-    } catch (_error) {
-      // API nicht erreichbar - leere Daten beibehalten
-      setData([])
-      setTotal(0)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadData()
-  }, [])
+  const { data: apiData = [], isLoading } = useEinzelfutter()
+  const data = useMemo(() => apiData.map((item: Einzelfutter) => ({
+    id: item.id,
+    artikelnummer: item.artikelnummer,
+    name: item.name,
+    typ: item.kategorie,
+    hersteller: '-',
+    rohprotein: item.rohprotein,
+    lagerbestand: item.bestand,
+    vkPreis: item.preis,
+    euKennzeichnung: false,
+    qsZertifikat: null,
+  })), [apiData])
+  const total = data.length
 
   const handleCreate = () => {
     navigate('/futtermittel/einzelfuttermittel/stamm/new')
   }
 
   const handleEdit = (item: any) => {
-    handleAction('edit', item)
+    if (item?.id) navigate(`/futtermittel/einzelfuttermittel/stamm/${item.id}`)
   }
 
-  const handleDelete = (item: any) => {
-    handleAction('delete', item)
-  }
+  const handleDelete = (_item: any) => alert('Löschen wird in dieser Ansicht noch nicht unterstützt')
 
   const handleExport = () => {
     // Export-Logik hier implementieren
@@ -215,7 +183,7 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
       onDelete={handleDelete}
       onExport={handleExport}
       onImport={handleImport}
-      isLoading={loading}
+      isLoading={isLoading}
     />
   )
 }
