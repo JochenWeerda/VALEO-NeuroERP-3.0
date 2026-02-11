@@ -521,7 +521,7 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (secrets.KUBECONFIG != '' || secrets.KUBE_CONFIG != '')
     
     steps:
       - uses: actions/checkout@v4
@@ -549,7 +549,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: deploy-staging
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (secrets.KUBECONFIG != '' || secrets.KUBE_CONFIG != '')
     environment: production
     
     steps:

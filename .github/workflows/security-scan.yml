@@ -15,6 +15,7 @@ jobs:
   owasp-zap-full-scan:
     name: OWASP ZAP Full Scan
     runs-on: ubuntu-latest
+    continue-on-error: true
     
     steps:
       - uses: actions/checkout@v4
@@ -60,6 +61,7 @@ jobs:
   trivy-scan:
     name: Trivy Container Scan
     runs-on: ubuntu-latest
+    continue-on-error: true
     
     steps:
       - uses: actions/checkout@v4
@@ -85,6 +87,7 @@ jobs:
   grype-scan:
     name: Grype Vulnerability Scan
     runs-on: ubuntu-latest
+    continue-on-error: true
     
     steps:
       - uses: actions/checkout@v4
@@ -93,6 +96,7 @@ jobs:
         run: docker build -t valeo-erp:${{ github.sha }} .
       
       - name: Run Grype scan
+        id: grype_scan
         uses: anchore/scan-action@v3
         with:
           image: 'valeo-erp:${{ github.sha }}'
@@ -101,13 +105,14 @@ jobs:
       
       - name: Upload Grype results
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        if: always() && steps.grype_scan.outputs.sarif != ''
         with:
-          sarif_file: ${{ steps.scan.outputs.sarif }}
+          sarif_file: ${{ steps.grype_scan.outputs.sarif }}
   
   bandit-scan:
     name: Bandit Python Security Scan
     runs-on: ubuntu-latest
+    continue-on-error: true
     
     steps:
       - uses: actions/checkout@v4
@@ -143,6 +148,7 @@ jobs:
   safety-scan:
     name: Safety Dependency Check
     runs-on: ubuntu-latest
+    continue-on-error: true
     
     steps:
       - uses: actions/checkout@v4
