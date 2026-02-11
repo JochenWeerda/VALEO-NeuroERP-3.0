@@ -7,14 +7,15 @@ import { PageLoader } from '@/app/PageLoader'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
 import routeAliasData from './route-aliases.json'
 
-type PageModuleFactory = () => Promise<{ default: ComponentType<unknown> }>
+type PageModule = { default: ComponentType<unknown> }
+type PageModuleFactory = () => Promise<PageModule>
 type RouteAliasEntry = {
   module: string
   path?: string
   index?: boolean
 }
 
-const pageModules = import.meta.glob<PageModuleFactory>('../pages/**/*.tsx')
+const pageModules = import.meta.glob<PageModule>('../pages/**/*.tsx')
 
 const AUTO_ROUTE_IGNORE_PATTERNS: RegExp[] = [
   /\/__tests__\//,
@@ -63,7 +64,6 @@ function buildPortalRoutes(): RouteObject[] {
 
 export const router = createBrowserRouter(routerConfig, {
   future: {
-    v7_startTransition: true,
     v7_relativeSplatPath: true,
     v7_fetcherPersist: true,
     v7_normalizeFormMethod: true,
@@ -82,21 +82,22 @@ function buildAutoRoutes(): RouteObject[] {
 function buildAliasRoutes(entries: RouteAliasEntry[]): RouteObject[] {
   const filteredEntries = entries.filter((entry) => ENABLE_PROSPECTING_UI || !isProspectingModule(entry.module))
 
-  return filteredEntries.flatMap((entry) => {
+  return filteredEntries.flatMap((entry): RouteObject[] => {
     const moduleKey = resolveModuleKey(entry.module)
     const loader = pageModules[moduleKey]
 
     if (!loader) {
-      throw new Error(`Route-Alias verweist auf unbekanntes Modul: ${entry.module}`)
+      throw new Error(`Route alias references unknown module: ${entry.module}`)
     }
 
     const element = createRouteElement(loader)
-    if (entry.index) {
-      return [{ index: true, element }]
-    }
     if (!entry.path) {
-      throw new Error(`Route-Alias für ${entry.module} benötigt entweder path oder index.`)
+      if (entry.index) {
+        return [{ index: true, element }]
+      }
+      throw new Error(`Route alias for ${entry.module} requires either path or index.`)
     }
+
     return [{ path: entry.path, element }]
   })
 }
@@ -189,3 +190,4 @@ function createRouteElement(loader: PageModuleFactory): JSX.Element {
 function isProspectingModule(moduleSpecifier: string): boolean {
   return moduleSpecifier.includes('/prospecting/')
 }
+

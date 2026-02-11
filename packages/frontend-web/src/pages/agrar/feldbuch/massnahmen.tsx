@@ -369,7 +369,7 @@ export default function MassnahmenPage(): JSX.Element {
           ) : (
             <AlertTriangle className="h-4 w-4 text-amber-600" />
           )}
-          {m.exportiert && <FileText className="h-4 w-4 text-blue-600" title="Exportiert" />}
+          {m.exportiert && <FileText className="h-4 w-4 text-blue-600" aria-label="Exportiert" />}
         </div>
       )
     }
