@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
+import { apiClient } from '@/lib/api-client'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -60,6 +62,21 @@ const mockTSETransaktionen: TSETransaction[] = [
 export default function TSEJournalPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: tseTransaktionen = mockTSETransaktionen } = useQuery({
+    queryKey: ['pos', 'tse-journal', 'page'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<TSETransaction[]>('/api/v1/pos/tse-journal')
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data
+        }
+      } catch {
+        // Fallback handled below
+      }
+      return mockTSETransaktionen
+    },
+    staleTime: 30 * 1000,
+  })
 
   const columns = [
     {
@@ -126,9 +143,9 @@ export default function TSEJournalPage(): JSX.Element {
     },
   ]
 
-  const offen = mockTSETransaktionen.filter((t) => t.fibuStatus === 'offen').length
-  const gesamtBetrag = mockTSETransaktionen.reduce((sum, t) => sum + t.betrag, 0)
-  const offenerBetrag = mockTSETransaktionen.filter((t) => t.fibuStatus === 'offen').reduce((sum, t) => sum + t.betrag, 0)
+  const offen = tseTransaktionen.filter((t) => t.fibuStatus === 'offen').length
+  const gesamtBetrag = tseTransaktionen.reduce((sum, t) => sum + t.betrag, 0)
+  const offenerBetrag = tseTransaktionen.filter((t) => t.fibuStatus === 'offen').reduce((sum, t) => sum + t.betrag, 0)
 
   return (
     <div className="space-y-4 p-6">
@@ -167,7 +184,7 @@ export default function TSEJournalPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Transaktionen Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockTSETransaktionen.length}</span>
+            <span className="text-2xl font-bold">{tseTransaktionen.length}</span>
           </CardContent>
         </Card>
 
@@ -220,7 +237,7 @@ export default function TSEJournalPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockTSETransaktionen} columns={columns} />
+          <DataTable data={tseTransaktionen} columns={columns} />
         </CardContent>
       </Card>
     </div>

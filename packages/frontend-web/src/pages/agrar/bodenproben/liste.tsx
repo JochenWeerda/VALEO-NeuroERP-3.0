@@ -1,5 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useBodenproben, type Bodenprobe } from '@/lib/api/agrar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,26 +8,15 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Beaker, FileDown, Plus, Search } from 'lucide-react'
 
-type Bodenprobe = {
-  id: string
-  schlag: string
-  datum: string
-  labor: string
-  n: number
-  p: number
-  k: number
-  ph: number
-  status: 'offen' | 'analysiert'
-}
-
 const mockProben: Bodenprobe[] = [
   { id: '1', schlag: 'Nordfeld 1', datum: '2025-09-15', labor: 'Labor Nord', n: 12.5, p: 18.2, k: 25.8, ph: 6.8, status: 'analysiert' },
-  { id: '2', schlag: 'Südacker', datum: '2025-10-05', labor: 'Labor Süd', n: 0, p: 0, k: 0, ph: 0, status: 'offen' },
+  { id: '2', schlag: 'SÃ¼dacker', datum: '2025-10-05', labor: 'Labor SÃ¼d', n: 0, p: 0, k: 0, ph: 0, status: 'beauftragt' },
 ]
 
 export default function BodenprobenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: proben = mockProben } = useBodenproben()
 
   const columns = [
     {
@@ -52,8 +42,8 @@ export default function BodenprobenPage(): JSX.Element {
       key: 'status' as const,
       label: 'Status',
       render: (b: Bodenprobe) => (
-        <Badge variant={b.status === 'analysiert' ? 'outline' : 'default'}>
-          {b.status === 'offen' ? 'Offen' : 'Analysiert'}
+        <Badge variant={b.status === 'analysiert' || b.status === 'abgeschlossen' ? 'outline' : 'default'}>
+          {b.status === 'beauftragt' ? 'Beauftragt' : b.status === 'analysiert' ? 'Analysiert' : 'Abgeschlossen'}
         </Badge>
       ),
     },
@@ -64,7 +54,7 @@ export default function BodenprobenPage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Bodenproben</h1>
-          <p className="text-muted-foreground">Nährstoff-Analysen</p>
+          <p className="text-muted-foreground">NÃ¤hrstoff-Analysen</p>
         </div>
         <Button onClick={() => navigate('/agrar/bodenprobe/neu')} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -80,7 +70,7 @@ export default function BodenprobenPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Beaker className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockProben.length}</span>
+              <span className="text-2xl font-bold">{proben.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -90,7 +80,7 @@ export default function BodenprobenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Analysiert</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockProben.filter((p) => p.status === 'analysiert').length}</span>
+            <span className="text-2xl font-bold text-green-600">{proben.filter((p) => p.status === 'analysiert').length}</span>
           </CardContent>
         </Card>
 
@@ -99,7 +89,7 @@ export default function BodenprobenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Offen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockProben.filter((p) => p.status === 'offen').length}</span>
+            <span className="text-2xl font-bold">{proben.filter((p) => p.status === 'beauftragt').length}</span>
           </CardContent>
         </Card>
       </div>
@@ -124,9 +114,12 @@ export default function BodenprobenPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockProben} columns={columns} />
+          <DataTable data={proben} columns={columns} />
         </CardContent>
       </Card>
     </div>
   )
 }
+
+
+

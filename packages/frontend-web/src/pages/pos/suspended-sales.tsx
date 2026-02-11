@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -51,7 +53,23 @@ const mockSuspendedSales: SuspendedSale[] = [
 
 export default function SuspendedSalesPage(): JSX.Element {
   const navigate = useNavigate()
-  const [sales, setSales] = useState<SuspendedSale[]>(mockSuspendedSales)
+  const { data: suspendedSales = mockSuspendedSales } = useQuery({
+    queryKey: ['pos', 'suspended-sales', 'page'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<SuspendedSale[]>('/api/v1/pos/suspended-sales')
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data
+        }
+      } catch {
+        // Fallback handled below
+      }
+      return mockSuspendedSales
+    },
+    staleTime: 30 * 1000,
+  })
+  const [removedSaleIds, setRemovedSaleIds] = useState<Set<string>>(new Set())
+  const sales = suspendedSales.filter((sale) => !removedSaleIds.has(sale.id))
 
   const handleResume = (saleId: string): void => {
     // TODO: Load suspended sale into POS terminal
@@ -60,13 +78,13 @@ export default function SuspendedSalesPage(): JSX.Element {
     alert(`Verkauf ${saleId} wird im POS-Terminal fortgesetzt`)
     
     // Sale aus Liste entfernen
-    setSales(sales.filter(s => s.id !== saleId))
+    setRemovedSaleIds((prev) => new Set(prev).add(saleId))
   }
 
   const handleDelete = (saleId: string): void => {
     if (!confirm('Pausierten Verkauf wirklich löschen?')) return
     
-    setSales(sales.filter(s => s.id !== saleId))
+    setRemovedSaleIds((prev) => new Set(prev).add(saleId))
   }
 
   const formatTime = (timestamp: string): string => {

@@ -1,33 +1,24 @@
-import { useState } from 'react'
+﻿import { useCrossCompliance, type ComplianceItem } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { AlertTriangle, CheckCircle, ClipboardCheck } from 'lucide-react'
 
-type ComplianceItem = {
-  id: string
-  bereich: string
-  anforderung: string
-  erfuellt: boolean
-  nachweis: string
-  frist: string
-}
-
 const mockCompliance: ComplianceItem[] = [
-  { id: '1', bereich: 'Gewässerschutz', anforderung: 'Gewässerrandstreifen 5m', erfuellt: true, nachweis: 'Feldprotokoll 2025', frist: '2025-12-31' },
-  { id: '2', bereich: 'Tierschutz', anforderung: 'Stallgröße mind. 6qm/GV', erfuellt: true, nachweis: 'Stallplan', frist: '2025-12-31' },
-  { id: '3', bereich: 'Düngeverordnung', anforderung: 'Nährstoffbilanz', erfuellt: false, nachweis: 'Ausstehend', frist: '2025-11-15' },
+  { id: '1', bereich: 'Gewaesserschutz', anforderung: 'Gewaesserrandstreifen 5m', erfuellt: true, nachweis: 'Feldprotokoll 2025', frist: '2025-12-31' },
+  { id: '2', bereich: 'Tierschutz', anforderung: 'Stallgroesse mind. 6qm/GV', erfuellt: true, nachweis: 'Stallplan', frist: '2025-12-31' },
+  { id: '3', bereich: 'Duengeverordnung', anforderung: 'Naehrstoffbilanz', erfuellt: false, nachweis: 'Ausstehend', frist: '2025-11-15' },
 ]
 
 export default function CrossCompliancePage(): JSX.Element {
-  const [_searchTerm, _setSearchTerm] = useState('')
+  const { data: compliance = mockCompliance } = useCrossCompliance()
 
   const columns = [
     { key: 'bereich' as const, label: 'Bereich', render: (c: ComplianceItem) => <Badge variant="outline">{c.bereich}</Badge> },
     { key: 'anforderung' as const, label: 'Anforderung' },
     {
       key: 'erfuellt' as const,
-      label: 'Erfüllt',
+      label: 'Erfuellt',
       render: (c: ComplianceItem) => (
         c.erfuellt ? (
           <CheckCircle className="h-5 w-5 text-green-600" />
@@ -44,14 +35,14 @@ export default function CrossCompliancePage(): JSX.Element {
     },
   ]
 
-  const erfuellt = mockCompliance.filter((c) => c.erfuellt).length
-  const offen = mockCompliance.filter((c) => !c.erfuellt).length
+  const erfuellt = compliance.filter((c) => c.erfuellt).length
+  const offen = compliance.filter((c) => !c.erfuellt).length
 
   return (
     <div className="space-y-4 p-6">
       <div>
         <h1 className="text-3xl font-bold">Cross-Compliance</h1>
-        <p className="text-muted-foreground">Förder-Voraussetzungen</p>
+        <p className="text-muted-foreground">Foerder-Voraussetzungen</p>
       </div>
 
       {offen > 0 && (
@@ -59,7 +50,7 @@ export default function CrossCompliancePage(): JSX.Element {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-red-900">
               <AlertTriangle className="h-5 w-5" />
-              <span className="font-semibold">{offen} Anforderung(en) NICHT erfüllt!</span>
+              <span className="font-semibold">{offen} Anforderung(en) NICHT erfuellt!</span>
             </div>
           </CardContent>
         </Card>
@@ -73,14 +64,14 @@ export default function CrossCompliancePage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <ClipboardCheck className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockCompliance.length}</span>
+              <span className="text-2xl font-bold">{compliance.length}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Erfüllt</CardTitle>
+            <CardTitle className="text-sm font-medium">Erfuellt</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -102,9 +93,11 @@ export default function CrossCompliancePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockCompliance} columns={columns} />
+          <DataTable data={compliance} columns={columns} />
         </CardContent>
       </Card>
     </div>
   )
 }
+
+

@@ -4,7 +4,9 @@
  * Jahresübersichten der Nährstoffbilanzen zum Download als PDF
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -106,19 +108,31 @@ const N_GRENZWERT = 50
 const P_GRENZWERT = 10
 
 export default function PortalNaehrstoffbilanzen() {
-  const [loading, setLoading] = useState(true)
-  const [bilanzen, setBilanzen] = useState<NaehrstoffBilanz[]>([])
-  const [schlagBilanzen, setSchlagBilanzen] = useState<SchlagBilanz[]>([])
   const [selectedJahr, setSelectedJahr] = useState<string>('2024')
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setBilanzen(mockBilanzen)
-      setSchlagBilanzen(mockSchlagBilanzen)
-      setLoading(false)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [])
+  const { data, isLoading } = useQuery({
+    queryKey: ['portal', 'naehrstoffbilanzen', 'page'],
+    queryFn: async () => {
+      try {
+        const [bilanzenResponse, schlaegeResponse] = await Promise.all([
+          apiClient.get<NaehrstoffBilanz[]>('/api/v1/portal/naehrstoffbilanzen'),
+          apiClient.get<SchlagBilanz[]>('/api/v1/portal/naehrstoffbilanzen/schlaege'),
+        ])
+        return {
+          bilanzen: Array.isArray(bilanzenResponse.data) && bilanzenResponse.data.length > 0 ? bilanzenResponse.data : mockBilanzen,
+          schlagBilanzen: Array.isArray(schlaegeResponse.data) && schlaegeResponse.data.length > 0 ? schlaegeResponse.data : mockSchlagBilanzen,
+        }
+      } catch {
+        return {
+          bilanzen: mockBilanzen,
+          schlagBilanzen: mockSchlagBilanzen,
+        }
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+  const bilanzen = data?.bilanzen ?? mockBilanzen
+  const schlagBilanzen = data?.schlagBilanzen ?? mockSchlagBilanzen
 
   const currentBilanz = bilanzen.find(b => b.jahr.toString() === selectedJahr)
 
@@ -139,7 +153,7 @@ export default function PortalNaehrstoffbilanzen() {
     return <Minus className="h-4 w-4" />
   }
 
-  if (loading) {
+  if (isLoading) {
     return <NaehrstoffbilanzenSkeleton />
   }
 

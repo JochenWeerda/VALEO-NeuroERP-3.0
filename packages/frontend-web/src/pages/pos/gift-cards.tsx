@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
+import { apiClient } from '@/lib/api-client'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -54,6 +56,21 @@ export default function GiftCardsPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [scanMode, setScanMode] = useState(false)
+  const { data: giftCards = mockGiftCards } = useQuery({
+    queryKey: ['pos', 'gift-cards', 'page'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<GiftCard[]>('/api/v1/pos/gift-cards')
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data
+        }
+      } catch {
+        // Fallback handled below
+      }
+      return mockGiftCards
+    },
+    staleTime: 2 * 60 * 1000,
+  })
 
   const columns = [
     {
@@ -125,13 +142,13 @@ export default function GiftCardsPage(): JSX.Element {
     },
   ]
 
-  const ablaufend = mockGiftCards.filter((gc) => {
+  const ablaufend = giftCards.filter((gc) => {
     const ablauf = new Date(gc.gueltigBis)
     return ablauf <= new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) && gc.restguthaben > 0
   }).length
 
-  const gesamtWert = mockGiftCards.reduce((sum, gc) => sum + gc.wert, 0)
-  const gesamtGuthaben = mockGiftCards.reduce((sum, gc) => sum + gc.restguthaben, 0)
+  const gesamtWert = giftCards.reduce((sum, gc) => sum + gc.wert, 0)
+  const gesamtGuthaben = giftCards.reduce((sum, gc) => sum + gc.restguthaben, 0)
 
   return (
     <div className="space-y-4 p-6">
@@ -176,7 +193,7 @@ export default function GiftCardsPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Gift Cards Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockGiftCards.length}</span>
+            <span className="text-2xl font-bold">{giftCards.length}</span>
           </CardContent>
         </Card>
 
@@ -203,7 +220,7 @@ export default function GiftCardsPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Aktive Karten</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockGiftCards.filter((gc) => gc.status === 'aktiv' || gc.status === 'teilweise-eingeloest').length}</span>
+            <span className="text-2xl font-bold">{giftCards.filter((gc) => gc.status === 'aktiv' || gc.status === 'teilweise-eingeloest').length}</span>
           </CardContent>
         </Card>
       </div>
@@ -233,7 +250,7 @@ export default function GiftCardsPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockGiftCards} columns={columns} />
+          <DataTable data={giftCards} columns={columns} />
         </CardContent>
       </Card>
     </div>

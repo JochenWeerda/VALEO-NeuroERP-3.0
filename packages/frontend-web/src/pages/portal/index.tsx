@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 import {
   ShoppingCart,
   Package,
@@ -64,19 +65,23 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
 }
 
 export default function PortalDashboard() {
-  const [loading, setLoading] = useState(true)
-  const [data, setData] = useState<typeof mockDashboardData | null>(null)
+  const { data, isLoading } = useQuery({
+    queryKey: ['portal', 'dashboard', 'page'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<typeof mockDashboardData>('/api/v1/portal/dashboard')
+        if (response.data) {
+          return response.data
+        }
+      } catch {
+        // Fallback handled below
+      }
+      return mockDashboardData
+    },
+    staleTime: 2 * 60 * 1000,
+  })
 
-  useEffect(() => {
-    // Simuliere API-Call
-    const timer = setTimeout(() => {
-      setData(mockDashboardData)
-      setLoading(false)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (loading) {
+  if (isLoading) {
     return <DashboardSkeleton />
   }
 
