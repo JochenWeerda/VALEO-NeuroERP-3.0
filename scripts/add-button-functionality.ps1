@@ -1,4 +1,4 @@
-***REMOVED*** PowerShell-Skript zum Hinzuf.gen von Export/Drucken-Funktionalität zu allen Listen-Seiten
+# PowerShell-Skript zum Hinzuf.gen von Export/Drucken-Funktionalität zu allen Listen-Seiten
 
 $pages = @(
     "packages/frontend-web/src/pages/crm/kontakte-liste.tsx",
@@ -30,10 +30,10 @@ foreach ($page in $pages) {
     if (Test-Path $page) {
         $content = Get-Content $page -Raw
         
-        ***REMOVED*** Prüfe ob useListActions bereits importiert ist
+        # Prüfe ob useListActions bereits importiert ist
         if ($content -notmatch "useListActions") {
             Write-Host "✅ Aktualisiere: $page"
-            ***REMOVED*** Hier würde die automatische Änderung erfolgen
+            # Hier würde die automatische Änderung erfolgen
         } else {
             Write-Host "⏭️  Überspringe (bereits aktualisiert): $page"
         }
@@ -44,4 +44,5 @@ foreach ($page in $pages) {
 
 Write-Host ""
 Write-Host "✅ Skript abgeschlossen!"
+
 

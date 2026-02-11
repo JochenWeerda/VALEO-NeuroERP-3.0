@@ -1,4 +1,4 @@
-***REMOVED*** Implementierungs-Roadmap - VALEO NeuroERP GAP-Schließung
+# Implementierungs-Roadmap - VALEO NeuroERP GAP-Schließung
 
 **Datum:** 2025-01-27  
 **Status:** Planung  
@@ -6,7 +6,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 📊 Executive Summary
+## 📊 Executive Summary
 
 **Gesamt Capabilities:** 124 analysiert  
 **Kritische Gaps (P0):** 12-15 Capabilities  
@@ -15,11 +15,11 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Phase 1: Kritische Gaps (P0) - 12-16 Wochen
+## 🎯 Phase 1: Kritische Gaps (P0) - 12-16 Wochen
 
-***REMOVED******REMOVED******REMOVED*** Sprint 1-2: Finance - Zahlungseingänge & Matching (4-6 Wochen)
+### Sprint 1-2: Finance - Zahlungseingänge & Matching (4-6 Wochen)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 1.1: Payment-Match-UI (2-3 Wochen)
+#### Task 1.1: Payment-Match-UI (2-3 Wochen)
 - **Capability:** FIBU-AR-03
 - **Owner:** Frontend + Backend
 - **Tasks:**
@@ -36,7 +36,7 @@
   - OP-Status wird korrekt aktualisiert
   - Audit-Trail vorhanden
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 1.2: Eingangsrechnungen vervollständigen (2-3 Wochen)
+#### Task 1.2: Eingangsrechnungen vervollständigen (2-3 Wochen)
 - **Capability:** FIBU-AP-02
 - **Owner:** Backend + Frontend
 - **Tasks:**
@@ -52,9 +52,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Sprint 3-4: Finance - Periodensteuerung & Audit Trail (3-4 Wochen)
+### Sprint 3-4: Finance - Periodensteuerung & Audit Trail (3-4 Wochen)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 2.1: Periodensteuerung (2 Wochen)
+#### Task 2.1: Periodensteuerung (2 Wochen)
 - **Capability:** FIBU-GL-05
 - **Owner:** Backend + Frontend
 - **Tasks:**
@@ -69,7 +69,7 @@
   - Buchungen in gesperrter Periode werden blockiert
   - GoBD-Compliance gewährleistet
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 2.2: GoBD / Audit Trail UI (1-2 Wochen)
+#### Task 2.2: GoBD / Audit Trail UI (1-2 Wochen)
 - **Capability:** FIBU-COMP-01
 - **Owner:** Frontend
 - **Tasks:**
@@ -85,9 +85,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Sprint 5-7: Procurement - Wareneingang & Abgleich (7-9 Wochen)
+### Sprint 5-7: Procurement - Wareneingang & Abgleich (7-9 Wochen)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 3.1: Wareneingang (3-4 Wochen)
+#### Task 3.1: Wareneingang (3-4 Wochen)
 - **Capability:** PROC-GR-01
 - **Owner:** Backend + Frontend
 - **Tasks:**
@@ -104,7 +104,7 @@
   - Lagerbewegung wird erzeugt
   - Backorder wird verwaltet
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 3.2: 2/3-Wege-Abgleich (2-3 Wochen)
+#### Task 3.2: 2/3-Wege-Abgleich (2-3 Wochen)
 - **Capability:** PROC-IV-02
 - **Owner:** Backend + Frontend
 - **Tasks:**
@@ -120,7 +120,7 @@
   - Abweichungen werden blockiert
   - Begründung ist erforderlich
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 3.3: PO-Änderungen & Storno (2 Wochen)
+#### Task 3.3: PO-Änderungen & Storno (2 Wochen)
 - **Capability:** PROC-PO-02
 - **Owner:** Backend + Frontend
 - **Tasks:**
@@ -136,9 +136,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Sprint 8: Procurement - Bedarfsmeldung vervollständigen (1 Woche)
+### Sprint 8: Procurement - Bedarfsmeldung vervollständigen (1 Woche)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 4.1: Bedarfsmeldung Workflow (1 Woche)
+#### Task 4.1: Bedarfsmeldung Workflow (1 Woche)
 - **Capability:** PROC-REQ-01
 - **Owner:** Frontend + Backend
 - **Tasks:**
@@ -152,11 +152,11 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Phase 2: Wichtige Gaps (P1) - 10-14 Wochen
+## 🎯 Phase 2: Wichtige Gaps (P1) - 10-14 Wochen
 
-***REMOVED******REMOVED******REMOVED*** Sprint 9-10: Finance - Wichtige Gaps (4-6 Wochen)
+### Sprint 9-10: Finance - Wichtige Gaps (4-6 Wochen)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 5.1: Debitorenstamm vervollständigen (1 Woche)
+#### Task 5.1: Debitorenstamm vervollständigen (1 Woche)
 - **Capability:** FIBU-AR-01
 - **Owner:** Frontend
 - **Tasks:**
@@ -164,14 +164,14 @@
   - [ ] Adressen, USt-ID, Kreditlimit ergänzen
   - [ ] Dublettencheck implementieren
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 5.2: Kreditorenstamm vervollständigen (1 Woche)
+#### Task 5.2: Kreditorenstamm vervollständigen (1 Woche)
 - **Capability:** FIBU-AP-01
 - **Owner:** Frontend
 - **Tasks:**
   - [ ] Stammdaten-Vollständigkeit prüfen
   - [ ] Bankdaten, IBAN-Validierung ergänzen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 5.3: Zahlungsläufe SEPA vervollständigen (1-2 Wochen)
+#### Task 5.3: Zahlungsläufe SEPA vervollständigen (1-2 Wochen)
 - **Capability:** FIBU-AP-04, PROC-PAY-01
 - **Owner:** Backend + Frontend
 - **Tasks:**
@@ -179,7 +179,7 @@
   - [ ] Status-Verwaltung
   - [ ] Rückläufer-Verarbeitung
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 5.4: OP-Verwaltung vervollständigen (1-2 Wochen)
+#### Task 5.4: OP-Verwaltung vervollständigen (1-2 Wochen)
 - **Capability:** FIBU-AR-05, FIBU-AP-05
 - **Owner:** Backend + Frontend
 - **Tasks:**
@@ -189,9 +189,9 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Sprint 11-12: Procurement - Wichtige Gaps (4-6 Wochen)
+### Sprint 11-12: Procurement - Wichtige Gaps (4-6 Wochen)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 6.1: Lieferantenstamm vervollständigen (1 Woche)
+#### Task 6.1: Lieferantenstamm vervollständigen (1 Woche)
 - **Capability:** PROC-SUP-01
 - **Owner:** Frontend
 - **Tasks:**
@@ -199,14 +199,14 @@
   - [ ] Lieferantengruppen, Klassifikationen
   - [ ] Sperren/Archivieren
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 6.2: Bestellung vervollständigen (1 Woche)
+#### Task 6.2: Bestellung vervollständigen (1 Woche)
 - **Capability:** PROC-PO-01
 - **Owner:** Frontend
 - **Tasks:**
   - [ ] Incoterms ergänzen
   - [ ] Referenzierung zu Bedarf/RFQ/Vertrag
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 6.3: Eingangsrechnung Import (2-3 Wochen)
+#### Task 6.3: Eingangsrechnung Import (2-3 Wochen)
 - **Capability:** PROC-IV-01
 - **Owner:** Backend + Frontend
 - **Tasks:**
@@ -215,7 +215,7 @@
   - [ ] Schnittstellen-Import
   - [ ] Steuer, Kontierung automatisch
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 6.4: Bedarfsgenehmigung vervollständigen (1 Woche)
+#### Task 6.4: Bedarfsgenehmigung vervollständigen (1 Woche)
 - **Capability:** PROC-REQ-02
 - **Owner:** Backend
 - **Tasks:**
@@ -224,9 +224,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Phase 3: Nice-to-Have (P2-P3) - 30-40 Wochen
+## 🎯 Phase 3: Nice-to-Have (P2-P3) - 30-40 Wochen
 
-***REMOVED******REMOVED******REMOVED*** Finance Nice-to-Have (18 Capabilities)
+### Finance Nice-to-Have (18 Capabilities)
 - Sammel-/Massenbuchungen
 - Fremdwährung & Wechselkurse
 - Automatische Buchungsschemata
@@ -244,7 +244,7 @@
 - Intercompany
 - etc.
 
-***REMOVED******REMOVED******REMOVED*** Procurement Nice-to-Have (12 Capabilities)
+### Procurement Nice-to-Have (12 Capabilities)
 - Lieferantenbewertung
 - Compliance / Dokumente
 - Katalog / Guided Buying
@@ -262,27 +262,27 @@
 
 ---
 
-***REMOVED******REMOVED*** 📅 Sprint-Planung
+## 📅 Sprint-Planung
 
-***REMOVED******REMOVED******REMOVED*** Q1 2025 (Wochen 1-12)
+### Q1 2025 (Wochen 1-12)
 - **Sprint 1-4:** Finance kritische Gaps (Zahlungseingänge, Eingangsrechnungen, Periodensteuerung, Audit Trail)
 - **Sprint 5-7:** Procurement kritische Gaps (Wareneingang, Abgleich, PO-Änderungen)
 
-***REMOVED******REMOVED******REMOVED*** Q2 2025 (Wochen 13-24)
+### Q2 2025 (Wochen 13-24)
 - **Sprint 8:** Procurement Bedarfsmeldung
 - **Sprint 9-12:** Finance wichtige Gaps
 - **Sprint 13-16:** Procurement wichtige Gaps
 
-***REMOVED******REMOVED******REMOVED*** Q3-Q4 2025 (Wochen 25-52)
+### Q3-Q4 2025 (Wochen 25-52)
 - **Sprint 17-52:** Nice-to-Have Features
 - **Sales & CRM Gaps** (wenn priorisiert)
 - **Weitere Domains** (Inventory, Production, Quality, etc.)
 
 ---
 
-***REMOVED******REMOVED*** 👥 Team-Zuordnung
+## 👥 Team-Zuordnung
 
-***REMOVED******REMOVED******REMOVED*** Frontend-Team
+### Frontend-Team
 - Payment-Match-UI
 - Audit-Trail-UI
 - Wareneingang-UI
@@ -290,7 +290,7 @@
 - Stammdaten-Vervollständigung
 - Perioden-Verwaltung
 
-***REMOVED******REMOVED******REMOVED*** Backend-Team
+### Backend-Team
 - Payment-Match-Engine
 - Bankimport
 - Perioden-Sperrlogik
@@ -299,7 +299,7 @@
 - PO-Change-Management
 - SEPA-Export
 
-***REMOVED******REMOVED******REMOVED*** Full-Stack-Team
+### Full-Stack-Team
 - Eingangsrechnungen
 - Workflow-Integration
 - Invoice-Import (PDF/OCR)
@@ -307,21 +307,21 @@
 
 ---
 
-***REMOVED******REMOVED*** 📊 Erfolgs-Metriken
+## 📊 Erfolgs-Metriken
 
-***REMOVED******REMOVED******REMOVED*** Phase 1 (P0)
+### Phase 1 (P0)
 - **Ziel:** 12-15 kritische Gaps geschlossen
 - **Maturity Finance:** 48% → 65%
 - **Maturity Procurement:** 35% → 60%
 - **Gesamt Maturity:** 38% → 50%
 
-***REMOVED******REMOVED******REMOVED*** Phase 2 (P1)
+### Phase 2 (P1)
 - **Ziel:** 15-20 wichtige Gaps geschlossen
 - **Maturity Finance:** 65% → 75%
 - **Maturity Procurement:** 60% → 70%
 - **Gesamt Maturity:** 50% → 65%
 
-***REMOVED******REMOVED******REMOVED*** Phase 3 (P2-P3)
+### Phase 3 (P2-P3)
 - **Ziel:** Nice-to-Have Features
 - **Maturity Finance:** 75% → 85%
 - **Maturity Procurement:** 70% → 80%
@@ -329,23 +329,23 @@
 
 ---
 
-***REMOVED******REMOVED*** 🚨 Risiken & Mitigation
+## 🚨 Risiken & Mitigation
 
-***REMOVED******REMOVED******REMOVED*** Risiko 1: Abhängigkeiten zwischen Domains
+### Risiko 1: Abhängigkeiten zwischen Domains
 - **Mitigation:** Klare Dependency-Map, frühe Integration-Tests
 
-***REMOVED******REMOVED******REMOVED*** Risiko 2: Workflow-System unvollständig
+### Risiko 2: Workflow-System unvollständig
 - **Mitigation:** Workflow-System zuerst vervollständigen
 
-***REMOVED******REMOVED******REMOVED*** Risiko 3: Inventory-System Integration
+### Risiko 3: Inventory-System Integration
 - **Mitigation:** Inventory-API früh definieren, Mock-Implementierung
 
-***REMOVED******REMOVED******REMOVED*** Risiko 4: Scope Creep
+### Risiko 4: Scope Creep
 - **Mitigation:** Strikte Priorisierung, Change-Request-Prozess
 
 ---
 
-***REMOVED******REMOVED*** 📝 Nächste Schritte
+## 📝 Nächste Schritte
 
 1. ✅ Roadmap erstellt
 2. ⏳ Mit Stakeholdern abstimmen
@@ -357,4 +357,5 @@
 ---
 
 **Letzte Aktualisierung:** 2025-01-27
+
 

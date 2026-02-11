@@ -1,10 +1,10 @@
-***REMOVED*** @valero-neuroerp/regulatory-domain
+# @valero-neuroerp/regulatory-domain
 
 **Regulatory Compliance & Labels Domain** für VALEO-NeuroERP 3.0
 
 Zentrale Verwaltung von Compliance-Regeln, Zertifikaten, Labels und rechtlichen Nachweisen in der Agrar-/Futtermittel-Wertschöpfungskette.
 
-***REMOVED******REMOVED*** 📋 Überblick
+## 📋 Überblick
 
 Die Regulatory-Domain ist verantwortlich für:
 
@@ -15,9 +15,9 @@ Die Regulatory-Domain ist verantwortlich für:
 - **Dokumentationspflichten** - Rückverfolgbarkeit gem. VO (EG) 178/2002 & 183/2005
 - **Labels & Compliance-Cases** - Bewertung, Vergabe, Widerruf
 
-***REMOVED******REMOVED*** 🏗️ Domänenmodell
+## 🏗️ Domänenmodell
 
-***REMOVED******REMOVED******REMOVED*** 1. Regulatory Policies
+### 1. Regulatory Policies
 Definition von Compliance-Regelwerken (VLOG, QS, RED II, etc.)
 
 **Beispiel VLOG-Policy:**
@@ -26,7 +26,7 @@ Definition von Compliance-Regelwerken (VLOG, QS, RED II, etc.)
 - Reinigungsprotokolle
 - GVO-Monitoring (mind. 1 Probe pro Charge)
 
-***REMOVED******REMOVED******REMOVED*** 2. Labels
+### 2. Labels
 Zertifikate/Qualitätssiegel für Batches, Contracts, Sites
 
 **Verfügbare Labels:**
@@ -35,40 +35,40 @@ Zertifikate/Qualitätssiegel für Batches, Contracts, Sites
 - `REDII_COMPLIANT` - RED II THG-konform
 - `GMP_PLUS`, `NON_GMO`, `ORGANIC_EU`, `ISCC`, `RTRS`, `RSPO`
 
-***REMOVED******REMOVED******REMOVED*** 3. Evidence (Nachweise)
+### 3. Evidence (Nachweise)
 Compliance-Dokumente: Zertifikate, Labor-Reports, Lieferanten-Erklärungen, Wiegescheine
 
-***REMOVED******REMOVED******REMOVED*** 4. PSM Product References
+### 4. PSM Product References
 Pflanzenschutzmittel-Datenbank (gecacht von BVL)
 
-***REMOVED******REMOVED******REMOVED*** 5. GHG Pathways
+### 5. GHG Pathways
 THG-Emissionspfade für Biokraftstoffe (RED II Default/Actual)
 
-***REMOVED******REMOVED******REMOVED*** 6. Compliance Cases
+### 6. Compliance Cases
 Verstöße, Audit-Findings, fehlende Dokumentation
 
-***REMOVED******REMOVED*** 🚀 Quick Start
+## 🚀 Quick Start
 
 ```bash
-***REMOVED*** Installation
+# Installation
 npm install
 
-***REMOVED*** Environment-Variablen
+# Environment-Variablen
 cp .env.example .env
 
-***REMOVED*** Datenbank-Migrationen
+# Datenbank-Migrationen
 npm run migrate:up
 
-***REMOVED*** Entwicklungsserver
+# Entwicklungsserver
 npm run dev
 ```
 
-***REMOVED******REMOVED*** 📡 API-Endpunkte
+## 📡 API-Endpunkte
 
-***REMOVED******REMOVED******REMOVED*** Base URL
+### Base URL
 `http://localhost:3008/regulatory/api/v1`
 
-***REMOVED******REMOVED******REMOVED*** Labels & Evaluation
+### Labels & Evaluation
 
 ```
 POST /labels/evaluate       - Label-Eligibility prüfen (Kern-Feature!)
@@ -77,21 +77,21 @@ GET  /labels/:id            - Label abrufen
 POST /labels/:id/revoke     - Label widerrufen
 ```
 
-***REMOVED******REMOVED******REMOVED*** PSM (Pflanzenschutzmittel)
+### PSM (Pflanzenschutzmittel)
 
 ```
 POST /psm/check             - PSM gegen BVL prüfen
 GET  /psm/search            - PSM in BVL suchen
 ```
 
-***REMOVED******REMOVED******REMOVED*** GHG (Treibhausgase)
+### GHG (Treibhausgase)
 
 ```
 POST /ghg/calc              - THG-Emissionen berechnen (RED II)
 GET  /ghg/pathways          - GHG-Pfade auflisten
 ```
 
-***REMOVED******REMOVED******REMOVED*** KTBL (Landwirtschafts-Emissionen)
+### KTBL (Landwirtschafts-Emissionen)
 
 ```
 GET  /ktbl/status                    - KTBL-Service-Status
@@ -99,7 +99,7 @@ GET  /ktbl/crop-emissions/:crop      - Emissionsparameter abrufen
 POST /ktbl/calculate                 - Berechnung mit Farm-Daten
 ```
 
-***REMOVED******REMOVED******REMOVED*** Health
+### Health
 
 ```
 GET  /health                - Server-Status
@@ -107,9 +107,9 @@ GET  /ready                 - Bereitschaft
 GET  /live                  - Liveness
 ```
 
-***REMOVED******REMOVED*** 💡 Beispiele
+## 💡 Beispiele
 
-***REMOVED******REMOVED******REMOVED*** 1. VLOG-Label prüfen
+### 1. VLOG-Label prüfen
 
 ```bash
 POST /regulatory/api/v1/labels/evaluate
@@ -128,7 +128,7 @@ x-tenant-id: 123e4567-e89b-12d3-a456-426614174000
   }
 }
 
-***REMOVED*** Response:
+# Response:
 {
   "eligible": false,
   "status": "Conditional",
@@ -142,7 +142,7 @@ x-tenant-id: 123e4567-e89b-12d3-a456-426614174000
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. PSM-Compliance prüfen
+### 2. PSM-Compliance prüfen
 
 ```bash
 POST /regulatory/api/v1/psm/check
@@ -161,7 +161,7 @@ x-tenant-id: 123e4567-e89b-12d3-a456-426614174000
   "batchId": "batch-uuid-123"
 }
 
-***REMOVED*** Response:
+# Response:
 {
   "compliant": true,
   "items": [
@@ -179,7 +179,7 @@ x-tenant-id: 123e4567-e89b-12d3-a456-426614174000
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. THG-Berechnung (RED II)
+### 3. THG-Berechnung (RED II)
 
 ```bash
 POST /regulatory/api/v1/ghg/calc
@@ -192,7 +192,7 @@ x-tenant-id: 123e4567-e89b-12d3-a456-426614174000
   "originRegion": "DE-Hamburg"
 }
 
-***REMOVED*** Response:
+# Response:
 {
   "id": "pathway-uuid",
   "commodity": "RAPE_OIL",
@@ -211,92 +211,92 @@ x-tenant-id: 123e4567-e89b-12d3-a456-426614174000
 }
 ```
 
-***REMOVED******REMOVED*** 🔗 Integration mit anderen Domains
+## 🔗 Integration mit anderen Domains
 
-***REMOVED******REMOVED******REMOVED*** Production Domain
+### Production Domain
 - Prüft Label-Eligibility vor Batch-Freigabe
 - Sperrt Batches bei Compliance-Verstößen
 
-***REMOVED******REMOVED******REMOVED*** Contracts Domain
+### Contracts Domain
 - Vertragsklauseln für Labels/Standards
 - Claims bei Label-Revocation
 
-***REMOVED******REMOVED******REMOVED*** Quality Domain
+### Quality Domain
 - Labor-Ergebnisse als Evidence
 - NCs können Compliance-Cases auslösen
 
-***REMOVED******REMOVED******REMOVED*** Weighing Domain
+### Weighing Domain
 - Wiegescheine als Traceability-Evidence
 
-***REMOVED******REMOVED*** 🔔 Domain-Events
+## 🔔 Domain-Events
 
-***REMOVED******REMOVED******REMOVED*** Label Events
+### Label Events
 - `regulatory.label.eligible`
 - `regulatory.label.ineligible`
 - `regulatory.label.conditional`
 - `regulatory.label.revoked`
 
-***REMOVED******REMOVED******REMOVED*** PSM Events
+### PSM Events
 - `regulatory.psm.checked`
 - `regulatory.psm.violation`
 
-***REMOVED******REMOVED******REMOVED*** GHG Events
+### GHG Events
 - `regulatory.ghg.pathway.created`
 - `regulatory.ghg.compliance.passed|failed`
 
-***REMOVED******REMOVED******REMOVED*** Policy Events
+### Policy Events
 - `regulatory.policy.created`
 - `regulatory.policy.updated`
 
-***REMOVED******REMOVED******REMOVED*** Compliance Events
+### Compliance Events
 - `regulatory.case.opened`
 - `regulatory.case.resolved`
 
-***REMOVED******REMOVED*** 📚 Rechtliche Grundlagen
+## 📚 Rechtliche Grundlagen
 
-***REMOVED******REMOVED******REMOVED*** VLOG "Ohne Gentechnik"
+### VLOG "Ohne Gentechnik"
 - Standard: [ohnegentechnik.org](https://ohnegentechnik.org)
 - Rechtsbasis: EGGenTDurchfG (Gentechnik-Durchführungsgesetz)
 
-***REMOVED******REMOVED******REMOVED*** QS Futtermittelmonitoring
+### QS Futtermittelmonitoring
 - Leitfaden 01/2025: [q-s.de](https://www.q-s.de)
 
-***REMOVED******REMOVED******REMOVED*** EU-Rückverfolgbarkeit
+### EU-Rückverfolgbarkeit
 - VO (EG) 178/2002 - Lebensmittelrecht
 - VO (EG) 183/2005 - Futtermittelhygiene
 
-***REMOVED******REMOVED******REMOVED*** BVL PSM-Datenbank
+### BVL PSM-Datenbank
 - [apps2.bvl.bund.de/psm](https://apps2.bvl.bund.de/psm/jsp)
 
-***REMOVED******REMOVED******REMOVED*** RED II (THG-Werte)
+### RED II (THG-Werte)
 - [JRC Biofuels Database](https://joint-research-centre.ec.europa.eu)
 - Annex V & VI Default-Werte
 
-***REMOVED******REMOVED******REMOVED*** KTBL BEK (THG-Landwirtschaft)
+### KTBL BEK (THG-Landwirtschaft)
 - [KTBL BEK-Parameter](https://www.ktbl.de/webanwendungen/bek-parameter)
 - Status: Aktuell offline, Fallback-Daten aktiv
 - Kontakt: ktbl@ktbl.de
 
-***REMOVED******REMOVED*** 🧪 Testing
+## 🧪 Testing
 
 ```bash
-***REMOVED*** Unit-Tests
+# Unit-Tests
 npm run test
 
-***REMOVED*** E2E-Tests
+# E2E-Tests
 npm run test:e2e
 
-***REMOVED*** Coverage
+# Coverage
 npm run test:coverage
 ```
 
-***REMOVED******REMOVED*** 🐳 Docker
+## 🐳 Docker
 
 ```bash
-***REMOVED*** Build
+# Build
 docker build -t valero-regulatory-domain:latest .
 
-***REMOVED*** Run
+# Run
 docker run -d \
   --name regulatory-domain \
   -p 3008:3008 \
@@ -305,15 +305,15 @@ docker run -d \
   valero-regulatory-domain:latest
 ```
 
-***REMOVED******REMOVED*** 🔐 Security & Permissions
+## 🔐 Security & Permissions
 
-***REMOVED******REMOVED******REMOVED*** Required Headers
+### Required Headers
 ```http
 Authorization: Bearer <JWT>
 x-tenant-id: <UUID>
 ```
 
-***REMOVED******REMOVED******REMOVED*** Permissions
+### Permissions
 - `regulatory:policy:manage`
 - `regulatory:label:evaluate`
 - `regulatory:label:issue`
@@ -321,14 +321,14 @@ x-tenant-id: <UUID>
 - `regulatory:evidence:upload`
 - `regulatory:compliance:audit`
 
-***REMOVED******REMOVED*** 📊 Observability
+## 📊 Observability
 
 - **OpenTelemetry** - Distributed Tracing
 - **Pino** - Strukturierte Logs
 - **Prometheus** - Metriken (via OTel)
 - **Health Checks** - `/health`, `/ready`, `/live`
 
-***REMOVED******REMOVED*** 📝 Lizenz
+## 📝 Lizenz
 
 Proprietary - VALEO GmbH
 
@@ -337,3 +337,4 @@ Proprietary - VALEO GmbH
 **Status:** ✅ Production-Ready  
 **Version:** 0.1.0  
 **Port:** 3008
+

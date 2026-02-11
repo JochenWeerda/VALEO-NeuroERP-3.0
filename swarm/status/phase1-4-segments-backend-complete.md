@@ -1,25 +1,25 @@
-***REMOVED*** Phase 1.4 - Segmente & Zielgruppen Backend - Abgeschlossen
+# Phase 1.4 - Segmente & Zielgruppen Backend - Abgeschlossen
 
 **Datum:** 2025-01-27  
 **Status:** ✅ Backend Complete  
 **Capability:** MKT-SEG-01
 
-***REMOVED******REMOVED*** ✅ Abgeschlossen
+## ✅ Abgeschlossen
 
-***REMOVED******REMOVED******REMOVED*** Backend-Service (`services/crm-marketing/`)
+### Backend-Service (`services/crm-marketing/`)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Projektstruktur ✅
+#### 1. Projektstruktur ✅
 - ✅ `main.py` - FastAPI App (Port 5703)
 - ✅ `requirements.txt` - Dependencies
 - ✅ `Dockerfile` - Container-Konfiguration
 - ✅ `README.md` - Dokumentation
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2. Configuration ✅
+#### 2. Configuration ✅
 - ✅ `app/config/settings.py` - Settings mit Pydantic
 - ✅ Segment Calculation Config (Batch Size, Timeout)
 - ✅ Performance Aggregation Config
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3. Database Models ✅
+#### 3. Database Models ✅
 - ✅ `Segment` Model:
   - Type (dynamic, static, hybrid)
   - Status (active, inactive, archived)
@@ -42,14 +42,14 @@
   - Campaign count, conversion rate
   - Revenue (optional)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4. Pydantic Schemas ✅
+#### 4. Pydantic Schemas ✅
 - ✅ `SegmentBase`, `SegmentCreate`, `SegmentUpdate`, `Segment`
 - ✅ `SegmentRuleBase`, `SegmentRuleCreate`, `SegmentRuleUpdate`, `SegmentRule`
 - ✅ `SegmentMemberBase`, `SegmentMemberCreate`, `SegmentMember`
 - ✅ `SegmentPerformance`
 - ✅ `SegmentCalculateRequest`, `SegmentExportRequest`
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 5. API Endpoints ✅
+#### 5. API Endpoints ✅
 - ✅ `POST /segments` - Create segment
 - ✅ `GET /segments` - List mit Filtern
 - ✅ `GET /segments/{id}` - Detail
@@ -61,11 +61,11 @@
 - ✅ `DELETE /segments/{id}/members/{member_id}` - Remove member
 - ✅ `GET /segments/{id}/performance` - Performance data
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 6. Services ✅
+#### 6. Services ✅
 - ✅ `SegmentCalculator` - Placeholder für Rule-Engine
 - ✅ `EventPublisher` - Events für Segment-Aktionen
 
-***REMOVED******REMOVED*** 📋 Nächste Schritte
+## 📋 Nächste Schritte
 
 1. **Alembic Migration** erstellen
 2. **Rule-Engine** vollständig implementieren
@@ -78,4 +78,5 @@
 ---
 
 **Backend-Grundstruktur ist fertig! Bereit für Frontend-Implementierung.**
+
 

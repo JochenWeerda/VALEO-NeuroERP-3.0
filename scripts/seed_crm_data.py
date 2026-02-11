@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Seed CRM test data directly into database
 Creates sample contacts, leads, activities, and farm profiles
@@ -161,15 +161,15 @@ def main():
     db = SessionLocal()
     
     try:
-        ***REMOVED*** Seed data
+        # Seed data
         seed_activities(db)
         seed_farm_profiles(db)
         
-        ***REMOVED*** Commit
+        # Commit
         db.commit()
         print("\n✅ All test data seeded successfully!")
         
-        ***REMOVED*** Summary
+        # Summary
         print("\n" + "=" * 60)
         print("📊 Summary")
         print("=" * 60)
@@ -194,4 +194,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

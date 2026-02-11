@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 Einfacher GENXAIS v1.9 LangGraph Zyklus
@@ -14,12 +14,12 @@ import datetime
 from pathlib import Path
 import openai
 
-***REMOVED*** Pfade konfigurieren
+# Pfade konfigurieren
 BASE_DIR = Path(__file__).resolve().parent.parent
 OUTPUT_DIR = BASE_DIR / "output"
 PROMPTS_DIR = BASE_DIR / "prompts"
 
-***REMOVED*** API-Schlüssel laden
+# API-Schlüssel laden
 API_KEYS_PATH = BASE_DIR / "config" / "api_keys.local.json"
 
 def load_api_keys():
@@ -40,7 +40,7 @@ def load_api_keys():
         print(f"[FEHLER] Fehler beim Laden der API-Schlüssel: {str(e)}")
         return {}
 
-***REMOVED*** API-Schlüssel laden und in Umgebungsvariablen setzen
+# API-Schlüssel laden und in Umgebungsvariablen setzen
 api_keys = load_api_keys()
 if "openai" in api_keys:
     os.environ["OPENAI_API_KEY"] = api_keys["openai"]
@@ -229,24 +229,24 @@ def create_handover(phases_results):
     
     try:
         with open(handover_path, "w", encoding="utf-8") as f:
-            f.write(f"""***REMOVED*** GENXAIS Zyklus Handover
+            f.write(f"""# GENXAIS Zyklus Handover
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 GENXAIS Zyklus v1.9 wurde am {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} abgeschlossen.
 
-***REMOVED******REMOVED*** Durchgeführte Phasen
+## Durchgeführte Phasen
 - VAN
 - PLAN
 - CREATE
 - IMPLEMENTATION
 - REFLEKTION
 
-***REMOVED******REMOVED*** Reflektionsergebnisse
+## Reflektionsergebnisse
 
 {phases_results.get("REFLEKTION", "Keine Reflektionsergebnisse verfügbar.")}
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 1. Überprüfung der erstellten Artefakte
 2. Integration der Änderungen in das Hauptprojekt
 3. Planung des nächsten GENXAIS-Zyklus (v2.0)
@@ -267,41 +267,41 @@ def main():
     print(f"Projektverzeichnis: {BASE_DIR}")
     print("-" * 80)
     
-    ***REMOVED*** Prüfe, ob der API-Schlüssel vorhanden ist
+    # Prüfe, ob der API-Schlüssel vorhanden ist
     if not os.environ.get("OPENAI_API_KEY"):
         print("[FEHLER] Kein OpenAI-API-Schlüssel gefunden.")
         print("Bitte stelle sicher, dass die Datei config/api_keys.local.json existiert und einen gültigen API-Schlüssel enthält.")
         return 1
     
-    ***REMOVED*** Führe die Phasen aus
+    # Führe die Phasen aus
     phases_results = {}
     
-    ***REMOVED*** VAN-Phase
+    # VAN-Phase
     van_result = run_van_phase()
     save_result("VAN", van_result)
     phases_results["VAN"] = van_result
     
-    ***REMOVED*** PLAN-Phase
+    # PLAN-Phase
     plan_result = run_plan_phase(van_result)
     save_result("PLAN", plan_result)
     phases_results["PLAN"] = plan_result
     
-    ***REMOVED*** CREATE-Phase
+    # CREATE-Phase
     create_result = run_create_phase(plan_result)
     save_result("CREATE", create_result)
     phases_results["CREATE"] = create_result
     
-    ***REMOVED*** IMPLEMENTATION-Phase
+    # IMPLEMENTATION-Phase
     implementation_result = run_implementation_phase(create_result)
     save_result("IMPLEMENTATION", implementation_result)
     phases_results["IMPLEMENTATION"] = implementation_result
     
-    ***REMOVED*** REFLEKTION-Phase
+    # REFLEKTION-Phase
     reflektion_result = run_reflektion_phase(implementation_result)
     save_result("REFLEKTION", reflektion_result)
     phases_results["REFLEKTION"] = reflektion_result
     
-    ***REMOVED*** Erstelle Handover-Dokument
+    # Erstelle Handover-Dokument
     create_handover(phases_results)
     
     print("-" * 80)

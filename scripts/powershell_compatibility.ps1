@@ -1,10 +1,10 @@
-***REMOVED*** ===================================================
-***REMOVED*** PowerShell-Kompatibilitätsfunktionen
-***REMOVED*** ===================================================
-***REMOVED*** Hilfsfunktionen für bessere PowerShell-Kompatibilität
-***REMOVED*** ===================================================
+# ===================================================
+# PowerShell-Kompatibilitätsfunktionen
+# ===================================================
+# Hilfsfunktionen für bessere PowerShell-Kompatibilität
+# ===================================================
 
-***REMOVED*** Farbige Ausgabe-Funktionen für bessere Lesbarkeit
+# Farbige Ausgabe-Funktionen für bessere Lesbarkeit
 function Write-ColorOutput {
     param (
         [string]$Text,
@@ -33,7 +33,7 @@ function Write-Info {
     Write-ColorOutput $Text "Cyan"
 }
 
-***REMOVED*** PowerShell-kompatible Befehlsverkettung (anstelle von &&)
+# PowerShell-kompatible Befehlsverkettung (anstelle von &&)
 function Invoke-CommandSequence {
     param (
         [Parameter(Mandatory=$true)]
@@ -56,7 +56,7 @@ function Invoke-CommandSequence {
     return $true
 }
 
-***REMOVED*** Überprüfe, ob ein Port verfügbar ist
+# Überprüfe, ob ein Port verfügbar ist
 function Test-PortAvailable {
     param (
         [Parameter(Mandatory=$true)]
@@ -70,12 +70,12 @@ function Test-PortAvailable {
         }
         return $true
     } catch {
-        ***REMOVED*** Wenn ein Fehler auftritt, gehen wir davon aus, dass der Port verfügbar ist
+        # Wenn ein Fehler auftritt, gehen wir davon aus, dass der Port verfügbar ist
         return $true
     }
 }
 
-***REMOVED*** Finde einen freien Port
+# Finde einen freien Port
 function Find-FreePort {
     param (
         [int]$StartPort = 3000,
@@ -92,7 +92,7 @@ function Find-FreePort {
     return $null
 }
 
-***REMOVED*** Wechsle ins Frontend-Verzeichnis und überprüfe die Existenz
+# Wechsle ins Frontend-Verzeichnis und überprüfe die Existenz
 function Set-FrontendDirectory {
     param (
         [string]$RootDir = (Get-Location).Path
@@ -117,7 +117,7 @@ function Set-FrontendDirectory {
     return $true
 }
 
-***REMOVED*** Überprüfe, ob ein Prozess an einem bestimmten Port läuft und beende ihn bei Bedarf
+# Überprüfe, ob ein Prozess an einem bestimmten Port läuft und beende ihn bei Bedarf
 function Stop-ProcessOnPort {
     param (
         [Parameter(Mandatory=$true)]
@@ -154,7 +154,7 @@ function Stop-ProcessOnPort {
     return $true
 }
 
-***REMOVED*** Überprüfen, ob die JSX-Konfiguration korrekt ist
+# Überprüfen, ob die JSX-Konfiguration korrekt ist
 function Test-JSXConfiguration {
     param (
         [string]$ViteConfigPath
@@ -177,7 +177,7 @@ function Test-JSXConfiguration {
     return $true
 }
 
-***REMOVED*** Automatisch die JSX-Konfiguration korrigieren
+# Automatisch die JSX-Konfiguration korrigieren
 function Set-JSXConfiguration {
     param (
         [string]$ViteConfigPath
@@ -194,14 +194,14 @@ function Set-JSXConfiguration {
     if (-not $hasJsxConfig) {
         Write-Warning "JSX-Konfiguration wird zu vite.config.js hinzugefügt"
         
-        ***REMOVED*** Prüfen, ob eine esbuild-Konfiguration bereits existiert
+        # Prüfen, ob eine esbuild-Konfiguration bereits existiert
         $hasEsbuildConfig = $configContent -match "esbuild\s*:"
         
         if ($hasEsbuildConfig) {
-            ***REMOVED*** Füge die JSX-Loader-Konfiguration zur bestehenden esbuild-Konfiguration hinzu
+            # Füge die JSX-Loader-Konfiguration zur bestehenden esbuild-Konfiguration hinzu
             $configContent = $configContent -replace "(esbuild\s*:\s*\{)", "`$1`n    loader: { '.js': 'jsx' },"
         } else {
-            ***REMOVED*** Füge eine neue esbuild-Konfiguration hinzu
+            # Füge eine neue esbuild-Konfiguration hinzu
             $configContent = $configContent -replace "(defineConfig\s*\(\s*\{)", "`$1`n  esbuild: {`n    loader: { '.js': 'jsx' }`n  },"
         }
         
@@ -214,7 +214,7 @@ function Set-JSXConfiguration {
     return $true
 }
 
-***REMOVED*** Verzeichniswechsel-Funktion mit Fehlerbehandlung
+# Verzeichniswechsel-Funktion mit Fehlerbehandlung
 function Set-WorkingDirectory {
     param (
         [string]$Path
@@ -228,7 +228,7 @@ function Set-WorkingDirectory {
     }
 }
 
-***REMOVED*** Umgebungsvariablen-Management
+# Umgebungsvariablen-Management
 function Set-EnvVar {
     param (
         [string]$Name,

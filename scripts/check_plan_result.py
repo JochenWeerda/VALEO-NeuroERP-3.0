@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Überprüft das PLAN-Ergebnis in der MongoDB.
 """
@@ -11,12 +11,12 @@ import json
 from datetime import datetime
 from bson import ObjectId
 
-***REMOVED*** Pfad zum Projekt-Root hinzufügen
+# Pfad zum Projekt-Root hinzufügen
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ async def check_plan_result():
     Überprüft das PLAN-Ergebnis in der MongoDB.
     """
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         mongodb_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
         mongodb_db = os.getenv("MONGODB_DB", "valeo_neuroerp")
         
@@ -45,10 +45,10 @@ async def check_plan_result():
         mongodb = APMMongoDBConnector(mongodb_uri, mongodb_db)
         await mongodb.connect()
         
-        ***REMOVED*** Projekt-ID festlegen
+        # Projekt-ID festlegen
         project_id = os.getenv("PROJECT_ID", "valeo_neuroerp_project")
         
-        ***REMOVED*** Alle PLAN-Ergebnisse abrufen
+        # Alle PLAN-Ergebnisse abrufen
         plan_results = await mongodb.find_many("plan_results", {"project_id": project_id})
         
         if plan_results:
@@ -66,7 +66,7 @@ async def check_plan_result():
                 print(f"Nächste Schritte: {plan_result.get('next_steps')}")
                 print(f"Timestamp: {plan_result.get('timestamp')}")
                 
-                ***REMOVED*** Lösungsdesign abrufen
+                # Lösungsdesign abrufen
                 design_id = plan_result.get("design_id")
                 if design_id:
                     design = await mongodb.find_one("solution_designs", {"_id": design_id})
@@ -81,7 +81,7 @@ async def check_plan_result():
         else:
             print("\nKeine PLAN-Ergebnisse gefunden.")
         
-        ***REMOVED*** Alle Projektpläne abrufen
+        # Alle Projektpläne abrufen
         project_plans = await mongodb.find_many("project_plans", {"project_id": project_id})
         
         if project_plans:
@@ -97,7 +97,7 @@ async def check_plan_result():
                 print(f"VAN-Analyse-ID: {plan.get('van_analysis_id')}")
                 print(f"Timestamp: {plan.get('timestamp')}")
                 
-                ***REMOVED*** Meilensteine anzeigen
+                # Meilensteine anzeigen
                 milestones = plan.get("milestones", [])
                 if milestones:
                     print(f"\nMeilensteine: {len(milestones)}")
@@ -108,7 +108,7 @@ async def check_plan_result():
         else:
             print("\nKeine Projektpläne gefunden.")
         
-        ***REMOVED*** Alle Lösungsdesigns abrufen
+        # Alle Lösungsdesigns abrufen
         solution_designs = await mongodb.find_many("solution_designs", {"project_id": project_id})
         
         if solution_designs:
@@ -124,7 +124,7 @@ async def check_plan_result():
                 print(f"Requirement-ID: {design.get('requirement_id')}")
                 print(f"Timestamp: {design.get('timestamp')}")
                 
-                ***REMOVED*** Komponenten anzeigen
+                # Komponenten anzeigen
                 components = design.get("components", [])
                 if components:
                     print(f"\nKomponenten: {len(components)}")
@@ -140,11 +140,11 @@ async def check_plan_result():
         print(f"\nFehler: {str(e)}")
     
     finally:
-        ***REMOVED*** MongoDB-Verbindung trennen
+        # MongoDB-Verbindung trennen
         if 'mongodb' in locals():
             await mongodb.disconnect()
 
 
 if __name__ == "__main__":
-    ***REMOVED*** Asynchrone Funktion ausführen
+    # Asynchrone Funktion ausführen
     asyncio.run(check_plan_result()) 

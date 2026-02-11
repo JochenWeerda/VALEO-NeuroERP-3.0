@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Automatischer L3-Navigator
 
@@ -25,7 +25,7 @@ class L3AutoNavigator:
     
     def __init__(
         self, 
-        browser_url: str = "http://localhost:8090/guacamole/***REMOVED***/client/MQBjAHBvc3RncmVzcWw",
+        browser_url: str = "http://localhost:8090/guacamole/#/client/MQBjAHBvc3RncmVzcWw",
         screenshot_dir: str = "screenshots/l3-masks"
     ):
         """
@@ -56,8 +56,8 @@ class L3AutoNavigator:
         """
         screenshot_path = self.screenshot_dir / filename
         
-        ***REMOVED*** Placeholder für Playwright MCP Integration
-        ***REMOVED*** In der Praxis wird dies über mcp_cursor-playwright_browser_take_screenshot aufgerufen
+        # Placeholder für Playwright MCP Integration
+        # In der Praxis wird dies über mcp_cursor-playwright_browser_take_screenshot aufgerufen
         print(f"   📸 Screenshot: {filename}")
         
         return str(screenshot_path)
@@ -74,18 +74,18 @@ class L3AutoNavigator:
         """
         print(f"   🖱️  Klicke auf '{element_name}' bei ({x}, {y})")
         
-        ***REMOVED*** Placeholder für Playwright MCP
-        ***REMOVED*** In der Praxis:
-        ***REMOVED*** await page.evaluate(f'''
-        ***REMOVED***     const canvas = document.querySelector('canvas');
-        ***REMOVED***     const rect = canvas.getBoundingClientRect();
-        ***REMOVED***     const clickEvent = new MouseEvent('click', {{
-        ***REMOVED***         clientX: rect.left + {x},
-        ***REMOVED***         clientY: rect.top + {y},
-        ***REMOVED***         bubbles: true
-        ***REMOVED***     }});
-        ***REMOVED***     canvas.dispatchEvent(clickEvent);
-        ***REMOVED*** ''')
+        # Placeholder für Playwright MCP
+        # In der Praxis:
+        # await page.evaluate(f'''
+        #     const canvas = document.querySelector('canvas');
+        #     const rect = canvas.getBoundingClientRect();
+        #     const clickEvent = new MouseEvent('click', {{
+        #         clientX: rect.left + {x},
+        #         clientY: rect.top + {y},
+        #         bubbles: true
+        #     }});
+        #     canvas.dispatchEvent(clickEvent);
+        # ''')
         
         self.navigation_log.append({
             'action': 'click',
@@ -121,20 +121,20 @@ class L3AutoNavigator:
         print(f"   Pfad: {' → '.join(navigation_path)}")
         
         try:
-            ***REMOVED*** Schritt 1: Initial Screenshot
+            # Schritt 1: Initial Screenshot
             initial_screenshot = self.take_screenshot(f"nav_{mask_name}_00_start.png")
             time.sleep(1)
             
-            ***REMOVED*** Schritt 2: Durch Navigation-Pfad klicken
+            # Schritt 2: Durch Navigation-Pfad klicken
             for idx, step in enumerate(navigation_path, 1):
                 print(f"\n   [{idx}/{len(navigation_path)}] Suche: {step}")
                 
-                ***REMOVED*** Screenshot des aktuellen Zustands
+                # Screenshot des aktuellen Zustands
                 current_screenshot = self.take_screenshot(
                     f"nav_{mask_name}_{str(idx).zfill(2)}_{step.replace(' ', '_')}.png"
                 )
                 
-                ***REMOVED*** Moondream: Finde UI-Element
+                # Moondream: Finde UI-Element
                 result = self.moondream.find_menu_item(current_screenshot, step)
                 
                 if not result['found'] or not result['coordinates']:
@@ -150,16 +150,16 @@ class L3AutoNavigator:
                 x, y = result['coordinates']
                 print(f"   ✅ Gefunden bei ({x}, {y}) - Confidence: {result['confidence']:.0%}")
                 
-                ***REMOVED*** Klicke auf Element
+                # Klicke auf Element
                 self.click_at_coordinates(x, y, step)
                 
-                ***REMOVED*** Warte auf Seitenladezeit
+                # Warte auf Seitenladezeit
                 time.sleep(2)
             
-            ***REMOVED*** Schritt 3: Final Screenshot der geöffneten Maske
+            # Schritt 3: Final Screenshot der geöffneten Maske
             final_screenshot = self.take_screenshot(f"{mask_name.lower()}_final.png")
             
-            ***REMOVED*** Schritt 4: Verifiziere dass Maske geladen ist
+            # Schritt 4: Verifiziere dass Maske geladen ist
             verified = self.moondream.verify_page_loaded(final_screenshot, mask_name)
             
             if verified:
@@ -205,11 +205,11 @@ class L3AutoNavigator:
         print(f"   Icon: {icon_description}")
         
         try:
-            ***REMOVED*** Screenshot
+            # Screenshot
             screenshot = self.take_screenshot(f"nav_{mask_name}_icon.png")
             time.sleep(1)
             
-            ***REMOVED*** Moondream: Finde Icon
+            # Moondream: Finde Icon
             result = self.moondream.find_icon_by_description(screenshot, icon_description)
             
             if not result['found'] or not result['coordinates']:
@@ -219,11 +219,11 @@ class L3AutoNavigator:
             x, y = result['coordinates']
             print(f"   ✅ Icon gefunden bei ({x}, {y})")
             
-            ***REMOVED*** Klicke auf Icon
+            # Klicke auf Icon
             self.click_at_coordinates(x, y, mask_name)
             time.sleep(2)
             
-            ***REMOVED*** Final Screenshot
+            # Final Screenshot
             final_screenshot = self.take_screenshot(f"{mask_name.lower()}_final.png")
             
             return {
@@ -244,7 +244,7 @@ class L3AutoNavigator:
         print(f"📄 Navigation-Log gespeichert: {output_path}")
 
 
-***REMOVED*** L3-Masken Navigation-Mapping
+# L3-Masken Navigation-Mapping
 L3_NAVIGATION_MAP = {
     "artikelstamm": {
         "name": "Artikelstamm",
@@ -335,10 +335,11 @@ def main():
         if 'error' in result:
             print(f"   Fehler: {result['error']}")
     
-    ***REMOVED*** Speichere Log
+    # Speichere Log
     nav.save_navigation_log(f"navigation_{args.mask_id}.json")
 
 
 if __name__ == '__main__':
     main()
+
 

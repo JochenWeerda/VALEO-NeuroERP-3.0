@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Seed-Script: ALLE Domains mit realistischen Testdaten
 Führt Alembic-Migrations aus und füllt DB
@@ -7,7 +7,7 @@ Führt Alembic-Migrations aus und füllt DB
 import sys
 import os
 
-***REMOVED*** Add project root to path
+# Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy.orm import Session
@@ -20,7 +20,7 @@ def main():
     print("🌱 VALEO-NeuroERP - Seed-Script für ALLE Domains")
     print("=" * 60)
     
-    ***REMOVED*** 1. Create tables
+    # 1. Create tables
     print("\n1️⃣ Erstelle Tabellen...")
     try:
         CRMBase.metadata.create_all(bind=engine)
@@ -28,26 +28,26 @@ def main():
     except Exception as e:
         print(f"⚠️ Tabellen-Erstellung: {e}")
     
-    ***REMOVED*** 2. Seed data
+    # 2. Seed data
     print("\n2️⃣ Fülle Datenbank mit Seed-Daten...")
     db: Session = SessionLocal()
     
     try:
-        ***REMOVED*** CRM
+        # CRM
         print("\n📋 CRM-Domain:")
         seed_crm_data(db, tenant_id="default")
         
-        ***REMOVED*** TODO: Agrar
-        ***REMOVED*** print("\n🌾 Agrar-Domain:")
-        ***REMOVED*** seed_agrar_data(db, tenant_id="default")
+        # TODO: Agrar
+        # print("\n🌾 Agrar-Domain:")
+        # seed_agrar_data(db, tenant_id="default")
         
-        ***REMOVED*** TODO: Finance
-        ***REMOVED*** print("\n💰 Finance-Domain:")
-        ***REMOVED*** seed_finance_data(db, tenant_id="default")
+        # TODO: Finance
+        # print("\n💰 Finance-Domain:")
+        # seed_finance_data(db, tenant_id="default")
         
-        ***REMOVED*** TODO: Einkauf
-        ***REMOVED*** print("\n📦 Einkauf-Domain:")
-        ***REMOVED*** seed_einkauf_data(db, tenant_id="default")
+        # TODO: Einkauf
+        # print("\n📦 Einkauf-Domain:")
+        # seed_einkauf_data(db, tenant_id="default")
         
         print("\n✅ Alle Seed-Daten erfolgreich eingefügt!")
         
@@ -66,4 +66,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 GAP-Analyse Generator für Sales/Order-to-Cash
 
@@ -20,7 +20,7 @@ from datetime import datetime
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 
-***REMOVED*** Pfade
+# Pfade
 ROOT = Path(__file__).parent.parent
 EVIDENCE_DIR = ROOT / "evidence" / "screenshots" / "sales"
 HANDOFFS_DIR = ROOT / "swarm" / "handoffs"
@@ -163,7 +163,7 @@ class GapAnalyzer:
         
         total = len(self.gaps)
         
-        md = f"""***REMOVED*** GAP-Liste Verkauf (Order-to-Cash) – Valero NeuroERP
+        md = f"""# GAP-Liste Verkauf (Order-to-Cash) – Valero NeuroERP
 
 Stand: {today}
 
@@ -185,9 +185,9 @@ Referenz:
 
 ---
 
-***REMOVED******REMOVED*** 1) Priorisierungslogik
+## 1) Priorisierungslogik
 
-***REMOVED******REMOVED******REMOVED*** 1.1 Bewertungsdimensionen (1–5)
+### 1.1 Bewertungsdimensionen (1–5)
 
 **A) Business Impact (BI)**  
 
@@ -221,7 +221,7 @@ KANN = 1
 
 5 = groß (Neues Modul / tiefe Logik / viele Abhängigkeiten)
 
-***REMOVED******REMOVED******REMOVED*** 1.2 Score-Formel
+### 1.2 Score-Formel
 
 **Prioritäts-Score (PS) = (BI × PF × RC) / IA**
 
@@ -233,9 +233,9 @@ KANN = 1
 
 ---
 
-***REMOVED******REMOVED*** 2) Zusammenfassung
+## 2) Zusammenfassung
 
-***REMOVED******REMOVED******REMOVED*** 2.1 TOP-Gaps nach Score
+### 2.1 TOP-Gaps nach Score
 
 | Rank | Capability_ID | Gap-Titel | Status | PS | Lösungstyp | Owner |
 |---|---|---|---|---:|---|---|
@@ -245,7 +245,7 @@ KANN = 1
             md += f"| {i} | {', '.join(gap.capability_ids)} | {gap.gap_title} | {gap.status} | {gap.score:.1f} | {gap.solution_type} | {gap.owner} |\n"
         
         md += f"""
-***REMOVED******REMOVED******REMOVED*** 2.2 Abdeckung (Snapshot)
+### 2.2 Abdeckung (Snapshot)
 
 - Yes: {status_counts['Yes']}  
 
@@ -257,7 +257,7 @@ KANN = 1
 
 ---
 
-***REMOVED******REMOVED*** 3) GAP-Details (Solution-Cards)
+## 3) GAP-Details (Solution-Cards)
 
 > Jede Card ist ein umsetzbares Ticket-Paket.  
 
@@ -274,7 +274,7 @@ KANN = 1
             acceptance_str = '\n  - '.join(gap.acceptance_criteria) if gap.acceptance_criteria else "*Zu definieren*"
             deps_str = ', '.join(gap.dependencies) if gap.dependencies else "*keine*"
             
-            md += f"""***REMOVED******REMOVED******REMOVED*** CARD {gap.card_id} — {gap.gap_title}
+            md += f"""### CARD {gap.card_id} — {gap.gap_title}
 
 **Capability_ID(s):** {', '.join(gap.capability_ids)}  
 
@@ -346,7 +346,7 @@ KANN = 1
 
 """
         
-        md += """***REMOVED******REMOVED*** 4) Nächste Schritte
+        md += """## 4) Nächste Schritte
 
 1. UI-Explorer durch Verkaufsmodule jagen (Lead → Quote → Order → Delivery → Invoice → Payment).  
 
@@ -358,7 +358,7 @@ KANN = 1
 
 ---
 
-***REMOVED******REMOVED*** 5) Agent-Loop Integration
+## 5) Agent-Loop Integration
 
 **ROLE: Feature-Engineer**
 
@@ -426,4 +426,5 @@ Output:
 if __name__ == "__main__":
     analyzer = GapAnalyzer()
     analyzer.run()
+
 

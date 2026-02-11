@@ -1,4 +1,4 @@
-***REMOVED*** Admin-User erstellen
+# Admin-User erstellen
 $body = @{
     username = "admin"
     password = "admin"
@@ -18,3 +18,4 @@ try {
     Write-Host "Fehler beim Erstellen des Admin-Users:"
     Write-Host $_.Exception.Message
 }
+

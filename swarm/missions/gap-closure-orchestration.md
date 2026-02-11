@@ -1,4 +1,4 @@
-***REMOVED*** GAP-Schließung Orchestrierung - Option 3 (Vollständige Implementierung)
+# GAP-Schließung Orchestrierung - Option 3 (Vollständige Implementierung)
 
 **Datum:** 2025-01-27  
 **Status:** 🚀 Aktiv  
@@ -8,7 +8,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Mission Overview
+## 🎯 Mission Overview
 
 **Ziel:** Alle 124 analysierten Capabilities implementieren und GAPs schließen  
 **Maturity-Ziel:** 38% → 80% (nahe an Odoo Enterprise)  
@@ -16,9 +16,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 👥 Agenten-Team
+## 👥 Agenten-Team
 
-***REMOVED******REMOVED******REMOVED*** 🎼 Orchestrator-Agent (Agent-0)
+### 🎼 Orchestrator-Agent (Agent-0)
 **Rolle:** Prozess-Überwachung, Koordination, Qualitätssicherung  
 **Verantwortlichkeiten:**
 - ✅ Fortlaufende Prozess-Überwachung
@@ -36,7 +36,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 💰 Agent-1: Finance & Accounting
+### 💰 Agent-1: Finance & Accounting
 **Rolle:** Finance/FiBU Domain GAP-Schließung  
 **Verantwortlichkeiten:**
 - ✅ 33 Finance Capabilities implementieren
@@ -64,7 +64,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 🛒 Agent-2: Procurement & Supply Chain
+### 🛒 Agent-2: Procurement & Supply Chain
 **Rolle:** Procurement/Einkauf Domain GAP-Schließung  
 **Verantwortlichkeiten:**
 - ✅ 28 Procurement Capabilities implementieren
@@ -94,7 +94,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 📊 Agent-3: Sales & CRM
+### 📊 Agent-3: Sales & CRM
 **Rolle:** Sales/Order-to-Cash + CRM/Marketing GAP-Schließung  
 **Verantwortlichkeiten:**
 - ✅ 31 Sales Capabilities implementieren
@@ -116,7 +116,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 🔧 Agent-4: Infrastructure & Integration
+### 🔧 Agent-4: Infrastructure & Integration
 **Rolle:** Cross-Domain Features, Integrationen, Infrastructure  
 **Verantwortlichkeiten:**
 - ✅ Cross-Domain Features (Workflows, RBAC, Reporting)
@@ -142,11 +142,11 @@
 
 ---
 
-***REMOVED******REMOVED*** 📅 Sprint-Planung (Parallele Arbeit)
+## 📅 Sprint-Planung (Parallele Arbeit)
 
-***REMOVED******REMOVED******REMOVED*** Sprint 1-4: Phase 1 - Kritische Gaps (P0) - 12-16 Wochen
+### Sprint 1-4: Phase 1 - Kritische Gaps (P0) - 12-16 Wochen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Sprint 1-2 (Woche 1-4): Finance P0
+#### Sprint 1-2 (Woche 1-4): Finance P0
 **Agent-1 (Finance):**
 - FIBU-AR-03: Zahlungseingänge & Matching (2-3 Wochen)
 - FIBU-AP-02: Eingangsrechnungen (2-3 Wochen)
@@ -160,7 +160,7 @@
 - Dependency-Management
 - Code-Reviews
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Sprint 3-4 (Woche 5-8): Finance P0 + Procurement P0 Start
+#### Sprint 3-4 (Woche 5-8): Finance P0 + Procurement P0 Start
 **Agent-1 (Finance):**
 - FIBU-GL-05: Periodensteuerung (2 Wochen)
 - FIBU-COMP-01: Audit Trail UI (1-2 Wochen)
@@ -176,7 +176,7 @@
 - Koordination alle Agenten
 - Integration-Tests planen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Sprint 5-7 (Woche 9-15): Procurement P0
+#### Sprint 5-7 (Woche 9-15): Procurement P0
 **Agent-2 (Procurement):**
 - PROC-GR-01: Wareneingang (3-4 Wochen)
 - PROC-IV-02: 2/3-Wege-Abgleich (2-3 Wochen)
@@ -190,7 +190,7 @@
 - Koordination Agent-2 ↔ Agent-4
 - Integration mit Inventory-System
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Sprint 8 (Woche 16): Procurement P0 Finalisierung
+#### Sprint 8 (Woche 16): Procurement P0 Finalisierung
 **Agent-2 (Procurement):**
 - PROC-REQ-01: Bedarfsmeldung vervollständigen (1 Woche)
 
@@ -200,7 +200,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Sprint 9-16: Phase 2 - Wichtige Gaps (P1) - 10-14 Wochen
+### Sprint 9-16: Phase 2 - Wichtige Gaps (P1) - 10-14 Wochen
 
 **Parallele Arbeit:**
 - **Agent-1:** Finance P1 (7 Capabilities)
@@ -215,7 +215,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Sprint 17-52: Phase 3 - Nice-to-Have (P2-P3) - 30-40 Wochen
+### Sprint 17-52: Phase 3 - Nice-to-Have (P2-P3) - 30-40 Wochen
 
 **Parallele Arbeit:**
 - **Agent-1:** Finance P2-P3 (18 Capabilities)
@@ -230,9 +230,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Koordinations-Mechanismen
+## 🔄 Koordinations-Mechanismen
 
-***REMOVED******REMOVED******REMOVED*** 1. Tägliche Standups
+### 1. Tägliche Standups
 **Format:** `/swarm/standups/YYYY-MM-DD.md`
 **Teilnehmer:** Alle 5 Agenten
 **Inhalt:**
@@ -241,7 +241,7 @@
 - Gibt es Blockaden?
 - Dependencies zu anderen Agenten?
 
-***REMOVED******REMOVED******REMOVED*** 2. Handoffs
+### 2. Handoffs
 **Format:** `/swarm/handoffs/agentX-{domain}-{timestamp}.md`
 **Trigger:**
 - Feature abgeschlossen
@@ -256,7 +256,7 @@
 - Acceptance Criteria
 - Test-Status
 
-***REMOVED******REMOVED******REMOVED*** 3. Status-Updates
+### 3. Status-Updates
 **Format:** `/swarm/status/agentX-{domain}-{timestamp}.md`
 **Frequenz:** Täglich
 **Inhalt:**
@@ -266,7 +266,7 @@
 - Blockaden
 - Next Steps
 
-***REMOVED******REMOVED******REMOVED*** 4. Code-Reviews
+### 4. Code-Reviews
 **Format:** `/swarm/reviews/orchestrator-{timestamp}.md`
 **Trigger:**
 - Feature abgeschlossen
@@ -282,9 +282,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📊 Monitoring & Tracking
+## 📊 Monitoring & Tracking
 
-***REMOVED******REMOVED******REMOVED*** Orchestrator Dashboard
+### Orchestrator Dashboard
 **Datei:** `/swarm/status/orchestrator-dashboard.md`
 **Inhalt:**
 - Gesamt-Fortschritt (124 Capabilities)
@@ -294,7 +294,7 @@
 - Dependencies
 - Quality-Metriken
 
-***REMOVED******REMOVED******REMOVED*** Capability-Tracking
+### Capability-Tracking
 **Datei:** `/gap/matrix.csv` (wird kontinuierlich aktualisiert)
 **Spalten:**
 - Status: Yes/Partial/No
@@ -304,23 +304,23 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Success Criteria
+## 🎯 Success Criteria
 
-***REMOVED******REMOVED******REMOVED*** Phase 1 (P0) - Sprint 1-8
+### Phase 1 (P0) - Sprint 1-8
 - ✅ 8 kritische Gaps geschlossen
 - ✅ Maturity: 38% → 50%
 - ✅ Alle P0 Capabilities: Status = Yes
 - ✅ Code Coverage: >80%
 - ✅ Integration-Tests: Bestanden
 
-***REMOVED******REMOVED******REMOVED*** Phase 2 (P1) - Sprint 9-16
+### Phase 2 (P1) - Sprint 9-16
 - ✅ 15-20 wichtige Gaps geschlossen
 - ✅ Maturity: 50% → 65%
 - ✅ Alle P1 Capabilities: Status = Yes oder Partial
 - ✅ Performance: <2s Response-Time
 - ✅ User-Tests: Bestanden
 
-***REMOVED******REMOVED******REMOVED*** Phase 3 (P2-P3) - Sprint 17-52
+### Phase 3 (P2-P3) - Sprint 17-52
 - ✅ Nice-to-Have Features implementiert
 - ✅ Maturity: 65% → 80%
 - ✅ Alle P2-P3 Capabilities: Status = Yes oder Partial
@@ -329,39 +329,39 @@
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Start-Prozedur
+## 🚀 Start-Prozedur
 
-***REMOVED******REMOVED******REMOVED*** 1. Orchestrator initialisiert
+### 1. Orchestrator initialisiert
 ```bash
-***REMOVED*** Orchestrator startet
+# Orchestrator startet
 cd swarm
 python orchestrator.py --init
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Agenten starten
+### 2. Agenten starten
 ```bash
-***REMOVED*** Agent-1 (Finance)
+# Agent-1 (Finance)
 python agent1_finance.py --start
 
-***REMOVED*** Agent-2 (Procurement)
+# Agent-2 (Procurement)
 python agent2_procurement.py --start
 
-***REMOVED*** Agent-3 (Sales/CRM)
+# Agent-3 (Sales/CRM)
 python agent3_sales_crm.py --start
 
-***REMOVED*** Agent-4 (Infrastructure)
+# Agent-4 (Infrastructure)
 python agent4_infrastructure.py --start
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Erster Sprint starten
+### 3. Erster Sprint starten
 ```bash
-***REMOVED*** Orchestrator startet Sprint 1
+# Orchestrator startet Sprint 1
 python orchestrator.py --sprint-start 1
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📝 Nächste Schritte
+## 📝 Nächste Schritte
 
 1. ✅ Orchestrierung definiert
 2. ⏳ Agent-Scripts erstellen
@@ -376,8 +376,9 @@ python orchestrator.py --sprint-start 1
 
 ---
 
-***REMOVED******REMOVED*** 📚 Weitere Dokumente
+## 📚 Weitere Dokumente
 
 - **[agent-assignments.md](./agent-assignments.md)** - Detaillierte Capability-Zuordnung
 - **[orchestrator.py](../orchestrator.py)** - Orchestrator-Script
+
 

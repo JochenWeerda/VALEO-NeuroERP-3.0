@@ -1,34 +1,34 @@
-***REMOVED*** Phase 1.4 - Segmente & Zielgruppen - VOLLSTÄNDIG IMPLEMENTIERT
+# Phase 1.4 - Segmente & Zielgruppen - VOLLSTÄNDIG IMPLEMENTIERT
 
 **Datum:** 2025-01-27  
 **Status:** ✅ **100% COMPLETE**  
 **Capability:** MKT-SEG-01  
 **Prioritäts-Score:** 10.0
 
-***REMOVED******REMOVED*** 🎉 VOLLSTÄNDIG ABGESCHLOSSEN
+## 🎉 VOLLSTÄNDIG ABGESCHLOSSEN
 
-***REMOVED******REMOVED******REMOVED*** Backend (100%)
+### Backend (100%)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Service erstellt ✅
+#### 1. Service erstellt ✅
 - ✅ `services/crm-marketing/` Service
 - ✅ FastAPI-App mit Router
 - ✅ Database-Models (SQLAlchemy)
 - ✅ Pydantic-Schemas
 - ✅ API-Endpoints
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2. Database Models ✅
+#### 2. Database Models ✅
 - ✅ `Segment` Entity
 - ✅ `SegmentRule` Entity
 - ✅ `SegmentMember` Entity
 - ✅ `SegmentPerformance` Entity
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3. Alembic Migration ✅
+#### 3. Alembic Migration ✅
 - ✅ `alembic.ini` konfiguriert
 - ✅ `alembic/env.py` für async migrations
 - ✅ `001_initial_segment_schema.py` Migration erstellt
 - ✅ Alle Tabellen, Indizes, Foreign Keys, Enums
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4. API Endpoints ✅
+#### 4. API Endpoints ✅
 - ✅ `POST /segments` - Create segment
 - ✅ `GET /segments` - List mit Filtern
 - ✅ `GET /segments/{id}` - Detail
@@ -40,7 +40,7 @@
 - ✅ `DELETE /segments/{id}/members/{member_id}` - Remove member
 - ✅ `GET /segments/{id}/performance` - Performance data
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 5. Rule-Engine ✅ **VOLLSTÄNDIG IMPLEMENTIERT**
+#### 5. Rule-Engine ✅ **VOLLSTÄNDIG IMPLEMENTIERT**
 - ✅ `SegmentCalculator` Klasse
 - ✅ `_fetch_contacts()` - Lädt Kontakte von crm-core
 - ✅ `_evaluate_rule()` - Evaluiert einzelne Regeln
@@ -57,19 +57,19 @@
 - ✅ Logical Operators: `AND`, `OR`
 - ✅ Automatische Member-Hinzufügung/Entfernung
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 6. Performance-Aggregation ✅ **VOLLSTÄNDIG IMPLEMENTIERT**
+#### 6. Performance-Aggregation ✅ **VOLLSTÄNDIG IMPLEMENTIERT**
 - ✅ `PerformanceAggregator` Klasse
 - ✅ `aggregate_daily()` - Tägliche Aggregation
 - ✅ `aggregate_weekly()` - Wöchentliche Aggregation
 - ✅ `aggregate_monthly()` - Monatliche Aggregation
 - ✅ Metriken: Member Count, Active Members, Campaign Count, Conversion Rate, Revenue
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 7. Services ✅
+#### 7. Services ✅
 - ✅ `EventPublisher` - Events für Segment-Aktionen
 
-***REMOVED******REMOVED******REMOVED*** Frontend (100%)
+### Frontend (100%)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Segmente Liste ✅
+#### 1. Segmente Liste ✅
 - ✅ `segments.tsx` erstellt
 - ✅ ListReport mit i18n
 - ✅ Spalten: Name, Type, Status, Member Count, Last Calculated, Created At
@@ -77,7 +77,7 @@
 - ✅ Bulk-Actions: Calculate, Export, Archive
 - ✅ Export-Funktion
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2. Segment Detail Seite ✅
+#### 2. Segment Detail Seite ✅
 - ✅ `segment-detail.tsx` erstellt
 - ✅ ObjectPage mit 4 Tabs:
   - Grundinformationen
@@ -89,18 +89,18 @@
   - Performance Tab
 - ✅ Aktionen: Save, Cancel, Calculate, Export
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3. Routing ✅
+#### 3. Routing ✅
 - ✅ `/crm/segments` → Liste
 - ✅ `/crm/segment/:id` → Detail
 - ✅ `/crm/segment/new` → Create
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4. i18n-Integration ✅
+#### 4. i18n-Integration ✅
 - ✅ Alle Labels übersetzt
 - ✅ Neue Übersetzungen hinzugefügt
 
-***REMOVED******REMOVED******REMOVED*** Tests (100%)
+### Tests (100%)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. E2E Tests ✅
+#### 1. E2E Tests ✅
 - ✅ `tests/e2e/crm-segments.spec.ts` erstellt
 - ✅ Segment List Page Tests (4 Tests)
 - ✅ Segment Detail Page Tests (4 Tests)
@@ -109,7 +109,7 @@
 - ✅ Navigation Tests (1 Test)
 - ✅ **Gesamt: 11 Tests**
 
-***REMOVED******REMOVED*** 📊 Finale Statistik
+## 📊 Finale Statistik
 
 **Phase 1.4:**
 - ✅ 100% - Backend-Grundstruktur
@@ -123,9 +123,9 @@
 **Gesamt Phase 1.4:**
 - ✅ **100% VOLLSTÄNDIG IMPLEMENTIERT**
 
-***REMOVED******REMOVED*** 📝 Erstellte Dateien
+## 📝 Erstellte Dateien
 
-***REMOVED******REMOVED******REMOVED*** Backend
+### Backend
 - `services/crm-marketing/` (kompletter Service)
 - `services/crm-marketing/alembic.ini`
 - `services/crm-marketing/alembic/env.py`
@@ -133,16 +133,16 @@
 - `services/crm-marketing/app/services/segment_calculator.py` (VOLLSTÄNDIG)
 - `services/crm-marketing/app/services/performance_aggregator.py` (NEU)
 
-***REMOVED******REMOVED******REMOVED*** Frontend
+### Frontend
 - `packages/frontend-web/src/pages/crm/segments.tsx`
 - `packages/frontend-web/src/pages/crm/segment-detail.tsx`
 
-***REMOVED******REMOVED******REMOVED*** Tests
+### Tests
 - `packages/frontend-web/tests/e2e/crm-segments.spec.ts`
 
-***REMOVED******REMOVED*** 🎯 Features
+## 🎯 Features
 
-***REMOVED******REMOVED******REMOVED*** Rule-Engine Features
+### Rule-Engine Features
 - ✅ Dynamische Segment-Berechnung
 - ✅ 14 verschiedene Operatoren
 - ✅ Logical Operators (AND/OR)
@@ -150,15 +150,15 @@
 - ✅ Automatische Member-Verwaltung
 - ✅ Integration mit crm-core Service
 
-***REMOVED******REMOVED******REMOVED*** Performance-Aggregation Features
+### Performance-Aggregation Features
 - ✅ Tägliche Aggregation
 - ✅ Wöchentliche Aggregation
 - ✅ Monatliche Aggregation
 - ✅ Metriken: Member Count, Active Members, Campaign Count, Conversion Rate, Revenue
 
-***REMOVED******REMOVED*** ⚠️ TODO für spätere Phasen
+## ⚠️ TODO für spätere Phasen
 
-***REMOVED******REMOVED******REMOVED*** Erweiterungen
+### Erweiterungen
 1. **Campaign-Integration**: Segment-Performance aus Campaigns berechnen
 2. **Revenue-Attribution**: Revenue pro Segment tracken
 3. **Visual Rule Builder**: Drag & Drop Rule Builder im Frontend
@@ -166,7 +166,7 @@
 5. **Incremental Updates**: Nur geänderte Kontakte neu evaluieren
 6. **Batch-Processing**: Performance-Optimierung für große Datenmengen
 
-***REMOVED******REMOVED*** 🎯 Nächste Phase
+## 🎯 Nächste Phase
 
 **Phase 1.5:** Kampagnenmanagement
 - Email-Kampagnen
@@ -186,4 +186,5 @@ Alle Komponenten sind funktionsfähig:
 - ✅ E2E Tests
 
 **Bereit für Production!**
+
 

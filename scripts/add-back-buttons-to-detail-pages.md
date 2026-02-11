@@ -1,19 +1,19 @@
-***REMOVED*** Back-Button Audit für Detail-Seiten
+# Back-Button Audit für Detail-Seiten
 
 **Datum:** 2025-10-16  
 **Ziel:** Alle Detail-Seiten mit Zurück-Navigation ausstatten
 
 ---
 
-***REMOVED******REMOVED*** Status-Übersicht
+## Status-Übersicht
 
-***REMOVED******REMOVED******REMOVED*** ✅ Bereits vorhanden
+### ✅ Bereits vorhanden
 - `crm/kontakt-detail.tsx` - Hat bereits Zurück-Button
 
-***REMOVED******REMOVED******REMOVED*** ✅ Neu hinzugefügt
+### ✅ Neu hinzugefügt
 - `fibu/debitoren.tsx` - Zurück zur OP-Verwaltung
 
-***REMOVED******REMOVED******REMOVED*** 🔧 Zu prüfen/ergänzen
+### 🔧 Zu prüfen/ergänzen
 - `crm/lead-detail.tsx`
 - `crm/aktivitaet-detail.tsx`
 - `crm/betriebsprofil-detail.tsx`
@@ -33,14 +33,14 @@
 
 ---
 
-***REMOVED******REMOVED*** Pattern: Zurück-Button hinzufügen
+## Pattern: Zurück-Button hinzufügen
 
-***REMOVED******REMOVED******REMOVED*** Import
+### Import
 ```typescript
 import { BackButton } from '@/components/BackButton'
 ```
 
-***REMOVED******REMOVED******REMOVED*** Verwendung (mit expliziter Route)
+### Verwendung (mit expliziter Route)
 ```typescript
 <div className="flex items-center justify-between">
   <div>
@@ -51,7 +51,7 @@ import { BackButton } from '@/components/BackButton'
 </div>
 ```
 
-***REMOVED******REMOVED******REMOVED*** Verwendung (History-basiert)
+### Verwendung (History-basiert)
 ```typescript
 <div className="flex items-center justify-between">
   <div>
@@ -63,7 +63,7 @@ import { BackButton } from '@/components/BackButton'
 
 ---
 
-***REMOVED******REMOVED*** Navigation-Mapping (Parent-Routes)
+## Navigation-Mapping (Parent-Routes)
 
 | Detail-Seite | Parent-Route | Button-Label |
 |-------------|--------------|--------------|
@@ -82,7 +82,7 @@ import { BackButton } from '@/components/BackButton'
 
 ---
 
-***REMOVED******REMOVED*** Alternative: History-Fallback
+## Alternative: History-Fallback
 
 Wenn die Parent-Route unklar ist (z. B. bei Multi-Entry-Point-Seiten):
 
@@ -92,21 +92,21 @@ Wenn die Parent-Route unklar ist (z. B. bei Multi-Entry-Point-Seiten):
 
 ---
 
-***REMOVED******REMOVED*** UI-Guideline
+## UI-Guideline
 
-***REMOVED******REMOVED******REMOVED*** Desktop (≥768px)
+### Desktop (≥768px)
 - **Position:** Oben rechts (neben Titel)
 - **Variante:** `outline`
 - **Größe:** `default`
 - **Icon:** ArrowLeft + Label
 
-***REMOVED******REMOVED******REMOVED*** Mobile (<768px)
+### Mobile (<768px)
 - **Position:** Oben links (über Titel)
 - **Variante:** `ghost`
 - **Größe:** `icon`
 - **Nur Icon:** ArrowLeft (ohne Label)
 
-***REMOVED******REMOVED******REMOVED*** Responsive Beispiel
+### Responsive Beispiel
 ```typescript
 <div className="flex flex-col md:flex-row md:items-center md:justify-between">
   <div className="order-2 md:order-1">
@@ -121,7 +121,7 @@ Wenn die Parent-Route unklar ist (z. B. bei Multi-Entry-Point-Seiten):
 
 ---
 
-***REMOVED******REMOVED*** Testing
+## Testing
 
 Für jede hinzugefügte Seite:
 
@@ -129,4 +129,5 @@ Für jede hinzugefügte Seite:
 2. ✅ Click navigiert zur korrekten Parent-Route
 3. ✅ Keine Loops (Zurück → Zurück → Zurück funktioniert)
 4. ✅ Mobile: Icon-only, Desktop: Icon + Label (falls responsive)
+
 

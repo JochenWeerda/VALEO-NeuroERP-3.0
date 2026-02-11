@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Integriert neue Masken in die App-Struktur
 - Sidebar-Navigation
@@ -13,11 +13,11 @@ print("=" * 80)
 print("INTEGRATION: Masken in App-Struktur")
 print("=" * 80)
 
-***REMOVED*** Lade Kundenstamm-Schema
+# Lade Kundenstamm-Schema
 with open('mask-builder-framework/kundenstamm-complete-framework.json', 'r', encoding='utf-8') as f:
     kundenstamm_schema = json.load(f)
 
-***REMOVED*** Lade Untertabellen-Mappings
+# Lade Untertabellen-Mappings
 with open('schemas/mappings/subtable-mappings.json', 'r', encoding='utf-8') as f:
     subtable_mappings = json.load(f)
 
@@ -25,13 +25,13 @@ print("\n📊 Schemas geladen:")
 print(f"   Kundenstamm: {len(kundenstamm_schema['views'])} Views")
 print(f"   Untertabellen: {len(subtable_mappings)} Tabellen")
 
-***REMOVED*** Generiere Sidebar-Navigation Einträge
+# Generiere Sidebar-Navigation Einträge
 sidebar_items = []
 for view in kundenstamm_schema['views']:
     view_id = view['id']
     view_label = view.get('label', view_id)
     
-    ***REMOVED*** Icon basierend auf View-ID
+    # Icon basierend auf View-ID
     icon_map = {
         'overview': 'LayoutDashboard',
         'master': 'IdCard',
@@ -70,7 +70,7 @@ for view in kundenstamm_schema['views']:
 
 print(f"\n📋 Sidebar-Items generiert: {len(sidebar_items)}")
 
-***REMOVED*** Generiere Backend-Routes
+# Generiere Backend-Routes
 backend_routes = []
 for view in kundenstamm_schema['views']:
     view_id = view['id']
@@ -85,7 +85,7 @@ for view in kundenstamm_schema['views']:
 
 print(f"\n🔗 Backend-Routes generiert: {len(backend_routes)}")
 
-***REMOVED*** Speichere Integration-Config
+# Speichere Integration-Config
 integration_config = {
     'sidebar_items': sidebar_items,
     'backend_routes': backend_routes,
@@ -106,4 +106,5 @@ print(f"\n📊 Statistiken:")
 print(f"   Sidebar-Items: {len(sidebar_items)}")
 print(f"   Backend-Routes: {len(backend_routes)}")
 print(f"   SQL-Tabellen: {len(integration_config['sql_tables'])}")
+
 

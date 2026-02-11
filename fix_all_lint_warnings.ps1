@@ -1,13 +1,13 @@
-***REMOVED*** PowerShell script to fix ALL remaining lint warnings in inventory-domain
+# PowerShell script to fix ALL remaining lint warnings in inventory-domain
 
-***REMOVED*** Fix unused vars by adding _ prefix
+# Fix unused vars by adding _ prefix
 Get-ChildItem -Path "packages/inventory-domain/src" -Recurse -Filter "*.ts" | ForEach-Object {
     $content = Get-Content $_.FullName -Raw
 
-    ***REMOVED*** Fix unused vars in mock functions
+    # Fix unused vars in mock functions
     $content = $content -replace '\bprivate async (getOrderLines|getAvailableInventory|getOrderDetails|calculateBatchPriority|getPickerPerformance|calculatePickerPerformance|getActiveTasksInZone|getCompletedTasksInZone|updatePickerPerformance|getQuarantineAnalytics|getItemSupplier|getItemCategory|calculateItemValue|restockItem|scrapItem|createRepairOrder|returnToSupplier|donateItem|releaseFromQuarantine|destroyQuarantinedItem|returnQuarantinedToSupplier|transferQuarantinedItem|donateQuarantinedItem|getAsnDetails|getSkuDetails|getAllSkus|getCurrentSkuLocation|updateSkuLocation|calculateDistanceReduction|calculateThroughputIncrease|getHighValueItems|getHistoricalData|generateForecastWithAI|calculateForecastAccuracy|generateRecommendations|detectInventoryAnomalies|detectQualityAnomalies|detectPerformanceAnomalies|detectDemandAnomalies|getOrderLines|getAvailableInventory|getOrderDetails|calculateBatchPriority|getItemSupplier|getItemCategory|calculateItemValue|restockItem|scrapItem|createRepairOrder|returnToSupplier|donateItem|getAsnDetails|getSkuDetails|getAllSkus|getCurrentSkuLocation|updateSkuLocation|calculateDistanceReduction|calculateThroughputIncrease|getHighValueItems|getHistoricalData|generateForecastWithAI|calculateForecastAccuracy|generateRecommendations|detectInventoryAnomalies|detectQualityAnomalies|detectPerformanceAnomalies|detectDemandAnomalies)\(([^)]+)\)', 'private async $1(_$2)'
 
-    ***REMOVED*** Fix specific parameter patterns
+    # Fix specific parameter patterns
     $content = $content -replace '\(orderId: string\)', '(_orderId: string)'
     $content = $content -replace '\(sku: string\)', '(_sku: string)'
     $content = $content -replace '\(orders: string\[\]\)', '(_orders: string[])'
@@ -24,13 +24,13 @@ Get-ChildItem -Path "packages/inventory-domain/src" -Recurse -Filter "*.ts" | Fo
     $content = $content -replace '\(item: ReceivedReturnItem\)', '(_item: ReceivedReturnItem)'
     $content = $content -replace '\(quarantine: QuarantineRecord\)', '(_quarantine: QuarantineRecord)'
 
-    ***REMOVED*** Fix any types to unknown
+    # Fix any types to unknown
     $content = $content -replace ': any\b', ': unknown'
     $content = $content -replace '<any>', '<unknown>'
     $content = $content -replace 'any\[]', 'unknown[]'
     $content = $content -replace 'Record<string, any>', 'Record<string, unknown>'
 
-    ***REMOVED*** Add constants for magic numbers
+    # Add constants for magic numbers
     if ($content -notmatch "const MOCK_") {
         $constants = @"
 // Mock data constants
@@ -167,7 +167,7 @@ const MOCK_EXPIRED_PRIORITY = -1;
         $content = $newContent
     }
 
-    ***REMOVED*** Replace magic numbers with constants
+    # Replace magic numbers with constants
     $replacements = @(
         @("1000", "MOCK_TOTAL_LOCATIONS"),
         @("850", "MOCK_UTILIZED_LOCATIONS"),
@@ -286,16 +286,16 @@ const MOCK_EXPIRED_PRIORITY = -1;
         $pattern = "\b" + $replacement[0] + "\b"
         $replacementValue = $replacement[1]
 
-        ***REMOVED*** Be careful not to replace in comments or strings
+        # Be careful not to replace in comments or strings
         $content = $content -replace $pattern, $replacementValue
     }
 
-    ***REMOVED*** Fix strict boolean expressions
+    # Fix strict boolean expressions
     $content = $content -replace 'if \((.*?)\) \{', 'if ($1 != null) {'
     $content = $content -replace 'if \((.*?) === undefined\) \{', 'if ($1 == null) {'
     $content = $content -replace 'if \((.*?) !== undefined\) \{', 'if ($1 != null) {'
 
-    ***REMOVED*** Write back to file
+    # Write back to file
     Set-Content -Path $_.FullName -Value $content -Encoding UTF8
 }
 

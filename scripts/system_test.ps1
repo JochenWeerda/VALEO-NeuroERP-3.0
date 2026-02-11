@@ -1,21 +1,21 @@
-***REMOVED*** System-Test.ps1
-***REMOVED***
-***REMOVED*** Dieses Skript führt automatisierte Tests für alle Komponenten des ERP-Systems durch:
-***REMOVED*** - Überprüft Redis-Verfügbarkeit
-***REMOVED*** - Testet Celery-Worker-Konnektivität
-***REMOVED*** - Überprüft API-Endpunkte
-***REMOVED*** - Testet Datenbankverbindungen
-***REMOVED*** - Validiert Module und Klassen
-***REMOVED***
-***REMOVED*** Verwendung: .\system_test.ps1 [-Verbose]
-***REMOVED*** Parameter:
-***REMOVED***   -Verbose    : Zeigt detaillierte Testinformationen
+# System-Test.ps1
+#
+# Dieses Skript führt automatisierte Tests für alle Komponenten des ERP-Systems durch:
+# - Überprüft Redis-Verfügbarkeit
+# - Testet Celery-Worker-Konnektivität
+# - Überprüft API-Endpunkte
+# - Testet Datenbankverbindungen
+# - Validiert Module und Klassen
+#
+# Verwendung: .\system_test.ps1 [-Verbose]
+# Parameter:
+#   -Verbose    : Zeigt detaillierte Testinformationen
 
 param (
     [switch]$Verbose
 )
 
-***REMOVED*** Konfiguration
+# Konfiguration
 $WORKSPACE_ROOT = "C:\AI_driven_ERP\AI_driven_ERP"
 $LOG_DIR = Join-Path $WORKSPACE_ROOT "logs"
 $TEST_LOG = Join-Path $LOG_DIR "system_test_$(Get-Date -Format 'yyyy-MM-dd_HH-mm').log"
@@ -23,7 +23,7 @@ $REDIS_PORT = 6379
 $API_PORT = 8003
 $FLOWER_PORT = 5555
 
-***REMOVED*** Farbdefinitionen
+# Farbdefinitionen
 $Colors = @{
     "Success" = "Green"
     "Warning" = "Yellow"
@@ -32,12 +32,12 @@ $Colors = @{
     "Detail" = "Gray"
 }
 
-***REMOVED*** Stelle sicher, dass Log-Verzeichnis existiert
+# Stelle sicher, dass Log-Verzeichnis existiert
 if (-not (Test-Path $LOG_DIR)) {
     New-Item -ItemType Directory -Path $LOG_DIR -Force | Out-Null
 }
 
-***REMOVED*** Funktion für einheitliches Logging
+# Funktion für einheitliches Logging
 function Write-TestLog {
     param (
         [string]$Message,
@@ -56,7 +56,7 @@ function Write-TestLog {
     }
 }
 
-***REMOVED*** Testfunktion für Redis
+# Testfunktion für Redis
 function Test-Redis {
     Write-TestLog "Teste Redis-Server..." -Level "Info"
     
@@ -83,12 +83,12 @@ function Test-Redis {
     return $false
 }
 
-***REMOVED*** Testfunktion für API-Server
+# Testfunktion für API-Server
 function Test-APIServer {
     Write-TestLog "Teste API-Server..." -Level "Info"
     
     try {
-        ***REMOVED*** Prüfe, ob Port aktiv ist
+        # Prüfe, ob Port aktiv ist
         $tcpConnection = Get-NetTCPConnection -LocalPort $API_PORT -ErrorAction SilentlyContinue
         
         if (-not $tcpConnection) {
@@ -96,7 +96,7 @@ function Test-APIServer {
             return $false
         }
         
-        ***REMOVED*** Teste API-Endpunkte
+        # Teste API-Endpunkte
         $endpoints = @(
             @{Uri = "http://localhost:$API_PORT/health"; Name = "Gesundheitscheck"},
             @{Uri = "http://localhost:$API_PORT/api/stats"; Name = "Statistiken"},
@@ -125,7 +125,7 @@ function Test-APIServer {
             }
         }
         
-        ***REMOVED*** Erstelle und teste einen Task
+        # Erstelle und teste einen Task
         try {
             $body = @{
                 task_type = "report"
@@ -140,7 +140,7 @@ function Test-APIServer {
                 $taskResult = $response.Content | ConvertFrom-Json
                 Write-TestLog "Task-Erstellung erfolgreich (Task-ID: $($taskResult.task_id))" -Level "Success"
                 
-                ***REMOVED*** Prüfe den Task-Status
+                # Prüfe den Task-Status
                 Start-Sleep -Seconds 2
                 $statusResponse = Invoke-WebRequest -Uri "http://localhost:$API_PORT/api/tasks/$($taskResult.task_id)" -UseBasicParsing
                 $taskStatus = $statusResponse.Content | ConvertFrom-Json
@@ -166,7 +166,7 @@ function Test-APIServer {
     }
 }
 
-***REMOVED*** Testfunktion für Python-Module
+# Testfunktion für Python-Module
 function Test-PythonModules {
     Write-TestLog "Teste Python-Module und Klassen..." -Level "Info"
     
@@ -175,7 +175,7 @@ import sys
 import importlib
 from pathlib import Path
 
-***REMOVED*** Zu testende Module und Klassen
+# Zu testende Module und Klassen
 modules_to_test = [
     "backend.api.batch_processing",
     "backend.api.performance",
@@ -196,10 +196,10 @@ classes_to_test = {
     "backend.db.performance_monitor": ["DBPerformanceMiddleware"]
 }
 
-***REMOVED*** SQLAlchemy JSONB Test
+# SQLAlchemy JSONB Test
 def test_sqlalchemy_jsonb():
     try:
-        ***REMOVED*** Versuche, JSONB aus backend.db zu importieren
+        # Versuche, JSONB aus backend.db zu importieren
         from backend.db import JSONB
         print("[SUCCESS] SQLAlchemy JSONB-Patch wurde erfolgreich angewendet")
         return True
@@ -207,7 +207,7 @@ def test_sqlalchemy_jsonb():
         print(f"[ERROR] SQLAlchemy JSONB-Patch nicht verfügbar: {str(e)}")
         return False
 
-***REMOVED*** Teste Module
+# Teste Module
 def test_modules():
     success_count = 0
     total_count = len(modules_to_test)
@@ -222,7 +222,7 @@ def test_modules():
     
     return success_count, total_count
 
-***REMOVED*** Teste Klassen
+# Teste Klassen
 def test_classes():
     success_count = 0
     total_count = sum(len(classes) for classes in classes_to_test.values())
@@ -240,33 +240,33 @@ def test_classes():
                     print(f"[ERROR] Klasse {module_name}.{class_name} nicht gefunden: {str(e)}")
         except ImportError as e:
             print(f"[ERROR] Modul {module_name} konnte nicht importiert werden: {str(e)}")
-            ***REMOVED*** Zähle alle Klassen in diesem Modul als fehlgeschlagen
+            # Zähle alle Klassen in diesem Modul als fehlgeschlagen
             pass
     
     return success_count, total_count
 
-***REMOVED*** Führe Tests aus
+# Führe Tests aus
 if __name__ == "__main__":
     print("=== Python-Modul- und Klassentests ===")
     
-    ***REMOVED*** Teste JSONB
+    # Teste JSONB
     jsonb_success = test_sqlalchemy_jsonb()
     
-    ***REMOVED*** Teste Module
+    # Teste Module
     module_success, module_total = test_modules()
     print(f"Module: {module_success}/{module_total} erfolgreich")
     
-    ***REMOVED*** Teste Klassen
+    # Teste Klassen
     class_success, class_total = test_classes()
     print(f"Klassen: {class_success}/{class_total} erfolgreich")
     
-    ***REMOVED*** Gesamtergebnis
+    # Gesamtergebnis
     total_success = module_success + class_success + (1 if jsonb_success else 0)
     total_tests = module_total + class_total + 1
     
     print(f"=== Gesamtergebnis: {total_success}/{total_tests} Tests erfolgreich ===")
     
-    ***REMOVED*** Setze Exit-Code basierend auf Testergebnissen
+    # Setze Exit-Code basierend auf Testergebnissen
     if total_success == total_tests:
         print("[SUCCESS] Alle Tests bestanden")
         sys.exit(0)
@@ -275,16 +275,16 @@ if __name__ == "__main__":
         sys.exit(1)
 "@
     
-    ***REMOVED*** Speichere das Testskript temporär
+    # Speichere das Testskript temporär
     $tempScriptPath = Join-Path $WORKSPACE_ROOT "temp_module_test.py"
     $testScript | Out-File -FilePath $tempScriptPath -Encoding utf8
     
     try {
-        ***REMOVED*** Führe das Testskript aus
+        # Führe das Testskript aus
         Write-TestLog "Führe Python-Modul-Tests aus..." -Level "Info"
         $results = & python $tempScriptPath
         
-        ***REMOVED*** Analysiere Ergebnisse
+        # Analysiere Ergebnisse
         $successCount = 0
         $errorCount = 0
         
@@ -302,7 +302,7 @@ if __name__ == "__main__":
             }
         }
         
-        ***REMOVED*** Überprüfe Gesamtergebnis
+        # Überprüfe Gesamtergebnis
         $exitCode = $LASTEXITCODE
         if ($exitCode -eq 0) {
             Write-TestLog "Alle Python-Modul-Tests erfolgreich" -Level "Success"
@@ -315,18 +315,18 @@ if __name__ == "__main__":
         Write-TestLog "Fehler bei der Ausführung des Python-Modultests: $($_.Exception.Message)" -Level "Error"
         return $false
     } finally {
-        ***REMOVED*** Entferne das temporäre Skript
+        # Entferne das temporäre Skript
         if (Test-Path $tempScriptPath) {
             Remove-Item -Path $tempScriptPath -Force
         }
     }
 }
 
-***REMOVED*** Testfunktion für Celery
+# Testfunktion für Celery
 function Test-Celery {
     Write-TestLog "Teste Celery und Flower..." -Level "Info"
     
-    ***REMOVED*** Prüfe Flower
+    # Prüfe Flower
     try {
         $tcpConnection = Get-NetTCPConnection -LocalPort $FLOWER_PORT -ErrorAction SilentlyContinue
         
@@ -337,7 +337,7 @@ function Test-Celery {
             if ($process) {
                 Write-TestLog "Celery-Flower läuft (PID: $processId, Prozess: $($process.ProcessName))" -Level "Success"
                 
-                ***REMOVED*** Teste Flower-API
+                # Teste Flower-API
                 try {
                     $response = Invoke-WebRequest -Uri "http://localhost:$FLOWER_PORT/api/workers" -UseBasicParsing
                     
@@ -348,7 +348,7 @@ function Test-Celery {
                             Write-TestLog "Verfügbare Worker: $($response.Content)" -Level "Detail"
                         }
                         
-                        ***REMOVED*** Prüfe, ob Worker verfügbar sind
+                        # Prüfe, ob Worker verfügbar sind
                         $workers = $response.Content | ConvertFrom-Json
                         
                         if ($workers.PSObject.Properties.Count -gt 0) {
@@ -376,30 +376,30 @@ function Test-Celery {
     return $false
 }
 
-***REMOVED*** Führe alle Tests aus
+# Führe alle Tests aus
 function Run-AllTests {
     Write-TestLog "=== ERP-System-Test gestartet $(Get-Date) ===" -Level "Info"
     
     $allTestsPassed = $true
     $results = @{}
     
-    ***REMOVED*** Test 1: Redis
+    # Test 1: Redis
     $results["Redis"] = Test-Redis
     $allTestsPassed = $allTestsPassed -and $results["Redis"]
     
-    ***REMOVED*** Test 2: API-Server
+    # Test 2: API-Server
     $results["APIServer"] = Test-APIServer
     $allTestsPassed = $allTestsPassed -and $results["APIServer"]
     
-    ***REMOVED*** Test 3: Python-Module
+    # Test 3: Python-Module
     $results["PythonModules"] = Test-PythonModules
     $allTestsPassed = $allTestsPassed -and $results["PythonModules"]
     
-    ***REMOVED*** Test 4: Celery
+    # Test 4: Celery
     $results["Celery"] = Test-Celery
     $allTestsPassed = $allTestsPassed -and $results["Celery"]
     
-    ***REMOVED*** Zusammenfassung
+    # Zusammenfassung
     Write-TestLog "`n=== Testergebnisse ===" -Level "Info"
     
     foreach ($test in $results.Keys) {
@@ -419,7 +419,7 @@ function Run-AllTests {
     return $allTestsPassed
 }
 
-***REMOVED*** Hauptausführung
+# Hauptausführung
 if ($Verbose) {
     Write-TestLog "Ausführlicher Modus aktiviert" -Level "Info"
 }
@@ -427,5 +427,5 @@ if ($Verbose) {
 Set-Location $WORKSPACE_ROOT
 $testResult = Run-AllTests
 
-***REMOVED*** Setze Exit-Code basierend auf Testergebnis
+# Setze Exit-Code basierend auf Testergebnis
 exit [int](-not $testResult) 

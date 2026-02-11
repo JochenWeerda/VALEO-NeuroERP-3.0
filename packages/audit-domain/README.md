@@ -1,8 +1,8 @@
-***REMOVED*** @valero-neuroerp/audit-domain
+# @valero-neuroerp/audit-domain
 
 **Revisionssichere Protokollierung** für VALEO-NeuroERP 3.0
 
-***REMOVED******REMOVED*** 📋 Features
+## 📋 Features
 
 - ✅ **Hash-Chain** (SHA-256, unveränderbar)
 - ✅ **Append-Only** (keine Updates/Deletes)
@@ -11,20 +11,20 @@
 - ✅ **GoBD/HGB/ISO-konform**
 - ✅ **Export** (CSV, PDF, JSON)
 
-***REMOVED******REMOVED*** 🚫 Abgrenzung
+## 🚫 Abgrenzung
 
 ❌ Keine Geschäftslogik  
 ❌ Nur Logging & Audit!
 
-***REMOVED******REMOVED*** 🚀 Quick Start
+## 🚀 Quick Start
 
 ```bash
 npm install
 npm run migrate:gen
-npm run dev  ***REMOVED*** Port 3090
+npm run dev  # Port 3090
 ```
 
-***REMOVED******REMOVED*** 📡 API
+## 📡 API
 
 ```
 POST /audit/api/v1/events              - Event loggen
@@ -33,7 +33,7 @@ GET  /audit/api/v1/events/:id          - Event abrufen
 GET  /audit/api/v1/integrity/check     - Hash-Chain prüfen
 ```
 
-***REMOVED******REMOVED*** 💡 Beispiel
+## 💡 Beispiel
 
 ```json
 POST /audit/api/v1/events
@@ -46,7 +46,7 @@ POST /audit/api/v1/events
 }
 ```
 
-***REMOVED******REMOVED*** 🔗 Integration
+## 🔗 Integration
 
 **Konsumiert Events von:**
 - sales-domain
@@ -58,6 +58,7 @@ POST /audit/api/v1/events
 - pricing-domain
 - ... allen Domains!
 
-***REMOVED******REMOVED*** 📊 Port: 3090
+## 📊 Port: 3090
 
 **Status:** ✅ Production-Ready
+

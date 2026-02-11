@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 GENXAIS v2.0 Starter
@@ -16,7 +16,7 @@ import logging
 import subprocess
 from pathlib import Path
 
-***REMOVED*** Pfade konfigurieren
+# Pfade konfigurieren
 BASE_DIR = Path(__file__).resolve().parent.parent
 TASKS_DIR = BASE_DIR / "tasks"
 OUTPUT_DIR = BASE_DIR / "output"
@@ -24,7 +24,7 @@ CONFIG_DIR = BASE_DIR / "config"
 PROMPTS_DIR = BASE_DIR / "prompts"
 SCRIPTS_DIR = BASE_DIR / "scripts"
 
-***REMOVED*** Logging konfigurieren
+# Logging konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -42,31 +42,31 @@ def check_prerequisites():
     Returns:
         bool: True, wenn alle Voraussetzungen erfüllt sind, sonst False
     """
-    ***REMOVED*** Überprüfe, ob die Konfigurationsdatei existiert
+    # Überprüfe, ob die Konfigurationsdatei existiert
     config_path = TASKS_DIR / "genxais_cycle_v2.0.yaml"
     if not config_path.exists():
         logger.error(f"Konfigurationsdatei nicht gefunden: {config_path}")
         return False
     
-    ***REMOVED*** Überprüfe, ob der Prompt existiert
+    # Überprüfe, ob der Prompt existiert
     prompt_path = PROMPTS_DIR / "genxais_prompt_v2.0.md"
     if not prompt_path.exists():
         logger.error(f"Prompt-Datei nicht gefunden: {prompt_path}")
         return False
     
-    ***REMOVED*** Überprüfe, ob das LangGraph-Skript existiert
+    # Überprüfe, ob das LangGraph-Skript existiert
     langgraph_path = SCRIPTS_DIR / "start_langgraph_cycle.py"
     if not langgraph_path.exists():
         logger.error(f"LangGraph-Skript nicht gefunden: {langgraph_path}")
         return False
     
-    ***REMOVED*** Überprüfe, ob das Dashboard-Skript existiert
+    # Überprüfe, ob das Dashboard-Skript existiert
     dashboard_path = SCRIPTS_DIR / "streamlit_dashboard.py"
     if not dashboard_path.exists():
         logger.error(f"Dashboard-Skript nicht gefunden: {dashboard_path}")
         return False
     
-    ***REMOVED*** Überprüfe, ob die API-Schlüssel vorhanden sind
+    # Überprüfe, ob die API-Schlüssel vorhanden sind
     api_keys_path = CONFIG_DIR / "api_keys.local.json"
     if not api_keys_path.exists():
         logger.error(f"API-Schlüssel-Datei nicht gefunden: {api_keys_path}")
@@ -80,7 +80,7 @@ def update_dashboard_config():
     """
     config_path = OUTPUT_DIR / "dashboard_config.json"
     
-    ***REMOVED*** Standardkonfiguration
+    # Standardkonfiguration
     config = {
         "version": "v2.0",
         "phase": "VAN",
@@ -89,7 +89,7 @@ def update_dashboard_config():
         "title": "GENXAIS v2.0 VALEO-NeuroERP für Landhandel"
     }
     
-    ***REMOVED*** Speichere die Konfiguration
+    # Speichere die Konfiguration
     try:
         OUTPUT_DIR.mkdir(exist_ok=True)
         with open(config_path, "w", encoding="utf-8") as f:
@@ -106,7 +106,7 @@ def start_dashboard():
         subprocess.Popen: Der Prozess des Dashboards
     """
     try:
-        ***REMOVED*** Starte das Dashboard im Hintergrund
+        # Starte das Dashboard im Hintergrund
         dashboard_process = subprocess.Popen(
             ["streamlit", "run", str(SCRIPTS_DIR / "streamlit_dashboard.py"), "--server.port=8502"],
             stdout=subprocess.PIPE,
@@ -126,21 +126,21 @@ def start_langgraph_cycle():
         int: Der Exit-Code des LangGraph-Zyklus
     """
     try:
-        ***REMOVED*** Kopiere den Prompt in die Umgebungsvariable
+        # Kopiere den Prompt in die Umgebungsvariable
         with open(PROMPTS_DIR / "genxais_prompt_v2.0.md", "r", encoding="utf-8") as f:
             os.environ["GENXAIS_PROMPT"] = f.read()
         
-        ***REMOVED*** Setze die Version in der Umgebungsvariable
+        # Setze die Version in der Umgebungsvariable
         os.environ["GENXAIS_VERSION"] = "2.0"
         
-        ***REMOVED*** Starte den LangGraph-Zyklus
+        # Starte den LangGraph-Zyklus
         result = subprocess.run(
             ["python", str(SCRIPTS_DIR / "start_langgraph_cycle.py")],
             capture_output=True,
             text=True
         )
         
-        ***REMOVED*** Logge die Ausgabe
+        # Logge die Ausgabe
         logger.info(f"LangGraph-Zyklus abgeschlossen mit Exit-Code {result.returncode}")
         if result.stdout:
             logger.info(f"Ausgabe: {result.stdout}")
@@ -163,18 +163,18 @@ def main():
     print(f"Projektverzeichnis: {BASE_DIR}")
     print("-" * 80)
     
-    ***REMOVED*** Überprüfe die Voraussetzungen
+    # Überprüfe die Voraussetzungen
     if not check_prerequisites():
         logger.error("Voraussetzungen nicht erfüllt. Beende Programm.")
         sys.exit(1)
     
-    ***REMOVED*** Aktualisiere die Dashboard-Konfiguration
+    # Aktualisiere die Dashboard-Konfiguration
     update_dashboard_config()
     
-    ***REMOVED*** Starte das Dashboard
+    # Starte das Dashboard
     dashboard_process = start_dashboard()
     
-    ***REMOVED*** Starte den LangGraph-Zyklus
+    # Starte den LangGraph-Zyklus
     exit_code = start_langgraph_cycle()
     
     print("-" * 80)
@@ -185,10 +185,10 @@ def main():
     print(f"Endzeit: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 80)
     
-    ***REMOVED*** Warte auf Benutzer-Eingabe, um das Dashboard zu beenden
+    # Warte auf Benutzer-Eingabe, um das Dashboard zu beenden
     input("Drücken Sie Enter, um das Dashboard zu beenden...")
     
-    ***REMOVED*** Beende das Dashboard
+    # Beende das Dashboard
     if dashboard_process:
         dashboard_process.terminate()
 

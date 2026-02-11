@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 GENXAIS-Prompt-Generator für VALEO-NeuroERP
@@ -18,7 +18,7 @@ import glob
 import re
 import time
 
-***REMOVED*** Pfade konfigurieren
+# Pfade konfigurieren
 CONFIG_PATH = "config/version.yaml"
 PIPELINE_STATUS_PATH = "data/pipeline_status.json"
 HANDOVER_PATH = "data/handover"
@@ -33,10 +33,10 @@ def load_version():
                 version_config = yaml.safe_load(f)
                 return version_config.get("current_version", "1.8.1")
         else:
-            return "1.8.1"  ***REMOVED*** Fallback
+            return "1.8.1"  # Fallback
     except Exception as e:
         st.error(f"Fehler beim Laden der Version: {str(e)}")
-        return "1.8.1"  ***REMOVED*** Fallback
+        return "1.8.1"  # Fallback
 
 def load_pipeline_status():
     """Lädt den aktuellen Pipeline-Status."""
@@ -82,15 +82,15 @@ def load_memory_entries(category="reflection", limit=5):
         entries = []
         
         if memory_files:
-            ***REMOVED*** Sortiere nach Erstellungsdatum (neueste zuerst)
+            # Sortiere nach Erstellungsdatum (neueste zuerst)
             sorted_files = sorted(memory_files, key=os.path.getctime, reverse=True)
             
             for file_path in sorted_files[:limit]:
                 with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
-                    ***REMOVED*** Extrahiere Titel aus Markdown
+                    # Extrahiere Titel aus Markdown
                     title = os.path.basename(file_path)
-                    match = re.search(r'^***REMOVED***\s+(.+)$', content, re.MULTILINE)
+                    match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
                     if match:
                         title = match.group(1)
                     
@@ -125,49 +125,49 @@ def generate_prompt(config):
     """Generiert einen Initialisierungsprompt basierend auf der Konfiguration."""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    ***REMOVED*** Informationsquellen formatieren
+    # Informationsquellen formatieren
     info_sources = "\n".join([f"- ✅ {q}" for q in config["infoquellen"]])
     
-    ***REMOVED*** Startbefehl generieren
+    # Startbefehl generieren
     info_params = ",".join([q.split()[0].lower() for q in config["infoquellen"]])
     debug_flag = "--debug" if config.get("debug_modus", False) else ""
     
     command = f"python -m streamlit run launch_cycle.py --phase {config['startphase']} --pipelines {config['anzahl_pipelines']} --load_info {info_params} {debug_flag} --timeout {config['timeout']}"
     
-    ***REMOVED*** Zusätzliche Informationen sammeln
+    # Zusätzliche Informationen sammeln
     additional_info = ""
     
-    ***REMOVED*** Handover einbeziehen
+    # Handover einbeziehen
     if "Letztes Handover" in config["infoquellen"]:
         handover = load_handover(config["startphase"])
         if handover:
             excerpt = handover[:300] + "..." if len(handover) > 300 else handover
-            additional_info += f"\n\n***REMOVED******REMOVED*** 📝 Letztes Handover (Auszug):\n```markdown\n{excerpt}\n```"
+            additional_info += f"\n\n## 📝 Letztes Handover (Auszug):\n```markdown\n{excerpt}\n```"
     
-    ***REMOVED*** Memory-Bank einbeziehen
+    # Memory-Bank einbeziehen
     if "Memory Bank" in config["infoquellen"]:
         memories = load_memory_entries()
         if memories:
-            additional_info += "\n\n***REMOVED******REMOVED*** 🧠 Letzte Memory-Einträge:\n"
+            additional_info += "\n\n## 🧠 Letzte Memory-Einträge:\n"
             for i, memory in enumerate(memories[:3]):
-                additional_info += f"***REMOVED******REMOVED******REMOVED*** {memory['title']}\n"
+                additional_info += f"### {memory['title']}\n"
                 additional_info += f"*{memory['date']}*\n"
                 additional_info += f"```\n{memory['content']}\n```\n"
     
-    ***REMOVED*** Tasks einbeziehen
+    # Tasks einbeziehen
     if "Tasks.yaml" in config["infoquellen"]:
         tasks = load_tasks()
         if tasks:
-            additional_info += "\n\n***REMOVED******REMOVED*** ✅ Aktuelle Tasks:\n"
+            additional_info += "\n\n## ✅ Aktuelle Tasks:\n"
             try:
                 for i, task in enumerate(tasks.get("tasks", [])[:5]):
                     additional_info += f"- **{task.get('name', 'Unbenannt')}**: {task.get('description', 'Keine Beschreibung')}\n"
             except:
                 additional_info += "- Fehler beim Parsen der Tasks\n"
     
-    ***REMOVED*** Prompt zusammenbauen
+    # Prompt zusammenbauen
     prompt = f"""
-***REMOVED*** 🔁 GENXAIS Initialisierungsprompt für VALEO – Die NeuroERP
+# 🔁 GENXAIS Initialisierungsprompt für VALEO – Die NeuroERP
 
 **📅 Zeitstempel:** {timestamp}  
 **📂 Projektpfad:** `{config['pfad']}`  
@@ -176,18 +176,18 @@ def generate_prompt(config):
 
 ---
 
-***REMOVED******REMOVED*** 📡 Eingebundene Informationsquellen:
+## 📡 Eingebundene Informationsquellen:
 {info_sources}
 
 ---
 
-***REMOVED******REMOVED*** 🔍 Ziel der Initialisierung:
+## 🔍 Ziel der Initialisierung:
 Einleitung der neuen Runde im GENXAIS-Zyklus für die Weiterentwicklung von VALEO – Die NeuroERP v{config['version']}.  
 Konfiguration erfolgt auf Basis aktueller Datenlage aus den obigen Quellen.  
 
 ---
 
-***REMOVED******REMOVED*** 🧠 Aufgaben:
+## 🧠 Aufgaben:
 - Automatisches Auslesen und Zusammenführen von:
   - `tasks.yaml` & `todos.md` aus dem Projektverzeichnis
   - Memory-Einträgen der vorherigen Reflexionsphase
@@ -197,7 +197,7 @@ Konfiguration erfolgt auf Basis aktueller Datenlage aus den obigen Quellen.
 
 ---
 
-***REMOVED******REMOVED*** ⚙️ Startbefehl zur Initialisierung:
+## ⚙️ Startbefehl zur Initialisierung:
 
 ```bash
 {command}
@@ -205,7 +205,7 @@ Konfiguration erfolgt auf Basis aktueller Datenlage aus den obigen Quellen.
 
 ---
 
-***REMOVED******REMOVED*** 📊 Systemstatus:
+## 📊 Systemstatus:
 - Aktuelle Phase: {config['current_phase']}
 - Fortschritt: {config['progress']}%
 - Version: {config['version']}
@@ -216,29 +216,29 @@ Konfiguration erfolgt auf Basis aktueller Datenlage aus den obigen Quellen.
 
 def main():
     """Hauptfunktion für die Streamlit-App."""
-    ***REMOVED*** Seitenkonfiguration
+    # Seitenkonfiguration
     st.set_page_config(
         page_title="VALEO - GENXAIS-Zyklus",
         page_icon="🧠",
         layout="wide"
     )
 
-    ***REMOVED*** Titel
+    # Titel
     st.title("🧠 VALEO – Initialisierungsprompt Generator (GENXAIS-Zyklus)")
 
-    ***REMOVED*** Version und Pipeline-Status laden
+    # Version und Pipeline-Status laden
     current_version = load_version()
     pipeline_status = load_pipeline_status()
     current_phase = pipeline_status.get("phase", "VAN")
     progress = pipeline_status.get("progress", 0)
 
-    ***REMOVED*** Sidebar für Konfiguration
+    # Sidebar für Konfiguration
     with st.sidebar:
         st.header("⚙️ Konfiguration")
         st.info(f"VALEO-NeuroERP v{current_version}")
         st.progress(progress/100, text=f"Phase: {current_phase} ({progress}%)")
         
-        ***REMOVED*** Letztes Update
+        # Letztes Update
         last_update = pipeline_status.get("last_update", "Unbekannt")
         if last_update != "Unbekannt":
             try:
@@ -247,37 +247,37 @@ def main():
             except:
                 st.caption(f"Letztes Update: {last_update}")
         
-        ***REMOVED*** Aktive Pipelines
+        # Aktive Pipelines
         active_pipelines = pipeline_status.get("active_pipelines", [])
         if active_pipelines:
             st.subheader("Aktive Pipelines")
             for pipeline in active_pipelines:
                 st.caption(f"• {pipeline}")
 
-    ***REMOVED*** Hauptbereich
+    # Hauptbereich
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        ***REMOVED*** Eingaben vom Nutzer
+        # Eingaben vom Nutzer
         pfad = st.text_input("📂 Projektpfad", "C:/Users/Jochen/VALEO-NeuroERP-1.01")
         modus = st.selectbox("⚙️ Betriebsmodus", ["Multi-Pipeline", "Single-Pipeline"], index=0)
         startphase = st.selectbox("🚀 Startphase", ["VAN", "PLAN", "CREATE", "IMPLEMENT", "VERIFY", "REFLECT"], index=0)
 
-        ***REMOVED*** Infoquellen Auswahl
+        # Infoquellen Auswahl
         infoquellen = st.multiselect(
             "📡 Informationsquellen einbeziehen:",
             ["Memory Bank", "Tasks.yaml", "ToDos.md", "RAG-Server", "LangGraph", "Letztes Handover"],
             default=["Memory Bank", "Tasks.yaml", "Letztes Handover"]
         )
 
-        ***REMOVED*** Erweiterte Optionen
+        # Erweiterte Optionen
         with st.expander("🔧 Erweiterte Optionen"):
             anzahl_pipelines = st.slider("Anzahl der Pipelines", 1, 10, 5)
             timeout = st.number_input("Timeout (Sekunden)", 60, 3600, 600)
             debug_modus = st.checkbox("Debug-Modus aktivieren", False)
             speichern = st.checkbox("Prompt automatisch speichern", True)
             
-            ***REMOVED*** Memory-Bank Kategorien
+            # Memory-Bank Kategorien
             if "Memory Bank" in infoquellen:
                 memory_categories = st.multiselect(
                     "Memory-Bank Kategorien",
@@ -285,12 +285,12 @@ def main():
                     default=["reflection"]
                 )
             
-            ***REMOVED*** RAG-Server Einstellungen
+            # RAG-Server Einstellungen
             if "RAG-Server" in infoquellen:
                 rag_endpoint = st.text_input("RAG-Server Endpoint", "http://localhost:8000/query")
                 rag_token = st.text_input("RAG-Server API-Token", "", type="password")
 
-    ***REMOVED*** Konfiguration zusammenstellen
+    # Konfiguration zusammenstellen
     config = {
         "pfad": pfad,
         "modus": modus,
@@ -305,21 +305,21 @@ def main():
         "progress": progress
     }
     
-    ***REMOVED*** Button zur Generierung
+    # Button zur Generierung
     if st.button("🧾 Initialisierungsprompt erstellen"):
         with st.spinner("Generiere Prompt..."):
-            ***REMOVED*** Kurze Verzögerung für bessere UX
+            # Kurze Verzögerung für bessere UX
             time.sleep(0.5)
             
-            ***REMOVED*** Prompt generieren
+            # Prompt generieren
             prompt = generate_prompt(config)
             
-            ***REMOVED*** Prompt anzeigen
+            # Prompt anzeigen
             with col2:
                 st.subheader("Generierter Prompt")
                 st.code(prompt, language="markdown")
                 
-                ***REMOVED*** Download-Button
+                # Download-Button
                 st.download_button(
                     label="📥 Prompt herunterladen",
                     data=prompt,
@@ -327,13 +327,13 @@ def main():
                     mime="text/markdown"
                 )
                 
-                ***REMOVED*** Speichern-Option
+                # Speichern-Option
                 if speichern:
                     saved_path = save_prompt(prompt)
                     if saved_path:
                         st.success(f"Prompt gespeichert unter: {saved_path}")
 
-    ***REMOVED*** Fußzeile
+    # Fußzeile
     st.markdown("---")
     st.markdown("*VALEO-NeuroERP GENXAIS-Framework* | Entwickelt mit Streamlit und Python")
 

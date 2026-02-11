@@ -11,7 +11,7 @@ const path = require('path');
 const readline = require('readline');
 
 const CONFIG = {
-  guacamoleUrl: 'http://localhost:8090/guacamole/***REMOVED***/client/MQBjAHBvc3RncmVzcWw',
+  guacamoleUrl: 'http://localhost:8090/guacamole/#/client/MQBjAHBvc3RncmVzcWw',
   outputDir: path.join(__dirname, '../screenshots/l3-masks'),
 };
 
@@ -141,4 +141,5 @@ if (require.main === module) {
 }
 
 module.exports = { interactiveCapture };
+
 

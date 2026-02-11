@@ -1,4 +1,4 @@
-***REMOVED*** CRM & Marketing Capability Model (Referenz für GAP-Analyse)
+# CRM & Marketing Capability Model (Referenz für GAP-Analyse)
 
 Version: 1.0
 
@@ -24,9 +24,9 @@ Evidence:
 
 - API/Events (falls vorhanden)
 
-***REMOVED******REMOVED*** 1. Stammdaten & 360° Customer View
+## 1. Stammdaten & 360° Customer View
 
-***REMOVED******REMOVED******REMOVED*** CRM-ACC-01 Accounts / Firmenstamm
+### CRM-ACC-01 Accounts / Firmenstamm
 
 Priorität: MUSS  
 
@@ -42,7 +42,7 @@ Akzeptanz:
 
 - Dublettencheck + Änderungsprotokoll
 
-***REMOVED******REMOVED******REMOVED*** CRM-CON-01 Kontakte / Personenstamm
+### CRM-CON-01 Kontakte / Personenstamm
 
 Priorität: MUSS  
 
@@ -58,7 +58,7 @@ Akzeptanz:
 
 - Opt-in/Opt-out sauber dokumentiert
 
-***REMOVED******REMOVED******REMOVED*** CRM-REL-01 Beziehungen & Hierarchien
+### CRM-REL-01 Beziehungen & Hierarchien
 
 Priorität: SOLL  
 
@@ -72,7 +72,7 @@ Akzeptanz:
 
 - Hierarchie in Reports nutzbar
 
-***REMOVED******REMOVED******REMOVED*** CRM-360-01 Customer Timeline / Aktivitätenhistorie
+### CRM-360-01 Customer Timeline / Aktivitätenhistorie
 
 Priorität: SOLL  
 
@@ -86,9 +86,9 @@ Akzeptanz:
 
 - Filterbar nach Typ/Datum/Owner
 
-***REMOVED******REMOVED*** 2. Lead Management (Campaign/Lead-to-Opportunity)
+## 2. Lead Management (Campaign/Lead-to-Opportunity)
 
-***REMOVED******REMOVED******REMOVED*** CRM-LED-01 Lead-Erfassung & Quellen
+### CRM-LED-01 Lead-Erfassung & Quellen
 
 Priorität: MUSS  
 
@@ -104,7 +104,7 @@ Akzeptanz:
 
 - Quelle/Kampagne nachvollziehbar
 
-***REMOVED******REMOVED******REMOVED*** CRM-LED-02 Lead-Qualifizierung & Scoring
+### CRM-LED-02 Lead-Qualifizierung & Scoring
 
 Priorität: SOLL  
 
@@ -120,7 +120,7 @@ Akzeptanz:
 
 - Score beeinflusst Priorisierung
 
-***REMOVED******REMOVED******REMOVED*** CRM-LED-03 Lead-Routing / Zuweisung
+### CRM-LED-03 Lead-Routing / Zuweisung
 
 Priorität: SOLL  
 
@@ -136,7 +136,7 @@ Akzeptanz:
 
 - Leads landen automatisch im richtigen Team
 
-***REMOVED******REMOVED******REMOVED*** CRM-LED-04 Dedupe & Merge
+### CRM-LED-04 Dedupe & Merge
 
 Priorität: SOLL  
 
@@ -150,9 +150,9 @@ Akzeptanz:
 
 - Merge behält Historie/Audit
 
-***REMOVED******REMOVED*** 3. Opportunity & Pipeline
+## 3. Opportunity & Pipeline
 
-***REMOVED******REMOVED******REMOVED*** CRM-OPP-01 Opportunities / Deals
+### CRM-OPP-01 Opportunities / Deals
 
 Priorität: MUSS  
 
@@ -168,7 +168,7 @@ Akzeptanz:
 
 - Pipeline aggregierbar
 
-***REMOVED******REMOVED******REMOVED*** CRM-OPP-02 Stage-/Process-Templates
+### CRM-OPP-02 Stage-/Process-Templates
 
 Priorität: SOLL  
 
@@ -184,7 +184,7 @@ Akzeptanz:
 
 - Validierung schützt Prozessqualität
 
-***REMOVED******REMOVED******REMOVED*** CRM-OPP-03 Forecasting
+### CRM-OPP-03 Forecasting
 
 Priorität: SOLL/KANN je Unternehmen  
 
@@ -198,7 +198,7 @@ Akzeptanz:
 
 - Export und periodische Snapshots
 
-***REMOVED******REMOVED******REMOVED*** CRM-OPP-04 Angebots-/Auftragsbezug
+### CRM-OPP-04 Angebots-/Auftragsbezug
 
 Priorität: SOLL  
 
@@ -212,9 +212,9 @@ Akzeptanz:
 
 - Belegkette drilldown-fähig
 
-***REMOVED******REMOVED*** 4. Aktivitäten & Aufgaben
+## 4. Aktivitäten & Aufgaben
 
-***REMOVED******REMOVED******REMOVED*** CRM-ACT-01 Aufgaben, Calls, Meetings
+### CRM-ACT-01 Aufgaben, Calls, Meetings
 
 Priorität: MUSS  
 
@@ -228,7 +228,7 @@ Akzeptanz:
 
 - Aktivitäten sind Account/Lead/Deal zugeordnet
 
-***REMOVED******REMOVED******REMOVED*** CRM-ACT-02 Kalender-/Email-Integration
+### CRM-ACT-02 Kalender-/Email-Integration
 
 Priorität: SOLL  
 
@@ -242,7 +242,7 @@ Akzeptanz:
 
 - Emails erscheinen in Timeline
 
-***REMOVED******REMOVED******REMOVED*** CRM-ACT-03 Vorlagen / Sequenzen
+### CRM-ACT-03 Vorlagen / Sequenzen
 
 Priorität: KANN/SOLL  
 
@@ -256,9 +256,9 @@ Akzeptanz:
 
 - Sequenzen sind messbar
 
-***REMOVED******REMOVED*** 5. Marketing Automation (Campaign-to-Lead)
+## 5. Marketing Automation (Campaign-to-Lead)
 
-***REMOVED******REMOVED******REMOVED*** MKT-CAM-01 Kampagnenmanagement
+### MKT-CAM-01 Kampagnenmanagement
 
 Priorität: MUSS  
 
@@ -274,7 +274,7 @@ Akzeptanz:
 
 - KPIs pro Kampagne berechenbar
 
-***REMOVED******REMOVED******REMOVED*** MKT-SEG-01 Segmente & Zielgruppen
+### MKT-SEG-01 Segmente & Zielgruppen
 
 Priorität: MUSS  
 
@@ -290,7 +290,7 @@ Akzeptanz:
 
 - Segmente aktualisieren sich automatisch
 
-***REMOVED******REMOVED******REMOVED*** MKT-AUT-01 Nurture / Journeys
+### MKT-AUT-01 Nurture / Journeys
 
 Priorität: SOLL  
 
@@ -304,7 +304,7 @@ Akzeptanz:
 
 - Abbruch-/Fallback-Logik
 
-***REMOVED******REMOVED******REMOVED*** MKT-EML-01 Email-Marketing
+### MKT-EML-01 Email-Marketing
 
 Priorität: MUSS  
 
@@ -320,7 +320,7 @@ Akzeptanz:
 
 - Zustell-/Opt-out-Events werden geloggt
 
-***REMOVED******REMOVED******REMOVED*** MKT-LND-01 Landingpages & Forms
+### MKT-LND-01 Landingpages & Forms
 
 Priorität: SOLL  
 
@@ -334,7 +334,7 @@ Akzeptanz:
 
 - Form erzeugt Lead + Quelle
 
-***REMOVED******REMOVED******REMOVED*** MKT-EVT-01 Event-/Webinar-Marketing
+### MKT-EVT-01 Event-/Webinar-Marketing
 
 Priorität: KANN/SOLL  
 
@@ -348,7 +348,7 @@ Akzeptanz:
 
 - Teilnehmer → Leads/Kontakte
 
-***REMOVED******REMOVED******REMOVED*** MKT-SOC-01 Social/Ads Tracking
+### MKT-SOC-01 Social/Ads Tracking
 
 Priorität: KANN  
 
@@ -362,9 +362,9 @@ Akzeptanz:
 
 - Attribution nachvollziehbar
 
-***REMOVED******REMOVED*** 6. Consent, Datenschutz & Compliance
+## 6. Consent, Datenschutz & Compliance
 
-***REMOVED******REMOVED******REMOVED*** CRM-CNS-01 Opt-in/Opt-out & Consent Log
+### CRM-CNS-01 Opt-in/Opt-out & Consent Log
 
 Priorität: MUSS  
 
@@ -380,7 +380,7 @@ Akzeptanz:
 
 - Jede Kommunikation prüft Consent
 
-***REMOVED******REMOVED******REMOVED*** CRM-CNS-02 DSGVO-Funktionen
+### CRM-CNS-02 DSGVO-Funktionen
 
 Priorität: MUSS  
 
@@ -394,9 +394,9 @@ Akzeptanz:
 
 - Requests workflowfähig & protokolliert
 
-***REMOVED******REMOVED*** 7. Reporting & Analytics
+## 7. Reporting & Analytics
 
-***REMOVED******REMOVED******REMOVED*** CRM-REP-01 Standard-CRM-Reports
+### CRM-REP-01 Standard-CRM-Reports
 
 Priorität: MUSS  
 
@@ -410,7 +410,7 @@ Akzeptanz:
 
 - Filter, Export
 
-***REMOVED******REMOVED******REMOVED*** CRM-REP-02 Marketing-KPIs
+### CRM-REP-02 Marketing-KPIs
 
 Priorität: SOLL  
 
@@ -424,7 +424,7 @@ Akzeptanz:
 
 - KPIs pro Kampagne/Segment
 
-***REMOVED******REMOVED******REMOVED*** CRM-REP-03 Drilldown Beleg-/Aktivitätskette
+### CRM-REP-03 Drilldown Beleg-/Aktivitätskette
 
 Priorität: SOLL  
 
@@ -438,9 +438,9 @@ Akzeptanz:
 
 - Kette ist lückenlos
 
-***REMOVED******REMOVED*** 8. Rollen, Berechtigungen, Workflows
+## 8. Rollen, Berechtigungen, Workflows
 
-***REMOVED******REMOVED******REMOVED*** CRM-AUTH-01 Rollenmodell CRM/MKT
+### CRM-AUTH-01 Rollenmodell CRM/MKT
 
 Priorität: MUSS  
 
@@ -456,7 +456,7 @@ Akzeptanz:
 
 - RBAC greift in UI + API
 
-***REMOVED******REMOVED******REMOVED*** CRM-AUTH-02 Workflow-Engines
+### CRM-AUTH-02 Workflow-Engines
 
 Priorität: SOLL  
 
@@ -472,9 +472,9 @@ Akzeptanz:
 
 - Regeln konfigurierbar
 
-***REMOVED******REMOVED*** 9. Integrationen & Datenflüsse
+## 9. Integrationen & Datenflüsse
 
-***REMOVED******REMOVED******REMOVED*** CRM-INT-01 API / Import / Export
+### CRM-INT-01 API / Import / Export
 
 Priorität: MUSS  
 
@@ -490,7 +490,7 @@ Akzeptanz:
 
 - Sync ohne Datenverlust
 
-***REMOVED******REMOVED******REMOVED*** CRM-INT-02 Tracking/Event Bus
+### CRM-INT-02 Tracking/Event Bus
 
 Priorität: SOLL  
 
@@ -504,7 +504,7 @@ Akzeptanz:
 
 - Events sind auswertbar
 
-***REMOVED******REMOVED******REMOVED*** CRM-INT-03 Dritttools (Ads, Email, Kalender)
+### CRM-INT-03 Dritttools (Ads, Email, Kalender)
 
 Priorität: KANN/SOLL  
 
@@ -517,4 +517,5 @@ Evidence: Connector-UI
 Akzeptanz:
 
 - Status + Fehlerhandling sichtbar
+
 

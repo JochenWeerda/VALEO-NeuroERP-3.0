@@ -14,7 +14,7 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime
 from tabulate import tabulate
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -53,11 +53,11 @@ class QueryProfiler:
             
             end_time = time.time()
             
-            ***REMOVED*** Gesamt-Antwortzeit
+            # Gesamt-Antwortzeit
             duration = end_time - start_time
             total_duration += duration
             
-            ***REMOVED*** Profiling-Daten aus Header extrahieren
+            # Profiling-Daten aus Header extrahieren
             profiling_data = {}
             if "X-Profiling-Data" in response.headers:
                 try:
@@ -69,7 +69,7 @@ class QueryProfiler:
             
             logger.debug(f"Iteration {i+1}/{iterations}: {duration:.3f}s, {profiling_data.get('db_queries', 'N/A')} Abfragen")
         
-        ***REMOVED*** Ergebnisse berechnen
+        # Ergebnisse berechnen
         avg_duration = total_duration / iterations
         avg_query_count = sum(query_counts) / len(query_counts) if query_counts else 0
         avg_query_time = sum(query_times) / len(query_times) if query_times else 0
@@ -94,16 +94,16 @@ class QueryProfiler:
         if not self.results:
             return {"message": "Keine Ergebnisse zur Analyse vorhanden"}
         
-        ***REMOVED*** Nach Antwortzeit sortieren (absteigend)
+        # Nach Antwortzeit sortieren (absteigend)
         sorted_results = sorted(self.results, key=lambda r: r["avg_duration"], reverse=True)
         
-        ***REMOVED*** Problematische Endpunkte identifizieren
+        # Problematische Endpunkte identifizieren
         problematic_endpoints = []
         
         for result in sorted_results:
             issues = []
             
-            ***REMOVED*** Zu viele Abfragen?
+            # Zu viele Abfragen?
             if result["avg_query_count"] > 3:
                 issues.append({
                     "type": "high_query_count",
@@ -111,7 +111,7 @@ class QueryProfiler:
                     "suggestion": "Abfragen zusammenfassen oder Batch-Verarbeitung verwenden"
                 })
             
-            ***REMOVED*** Hoher Anteil der Datenbankzeit an der Gesamtzeit?
+            # Hoher Anteil der Datenbankzeit an der Gesamtzeit?
             if result["query_time_percent"] > 70:
                 issues.append({
                     "type": "high_db_time_ratio",
@@ -119,7 +119,7 @@ class QueryProfiler:
                     "suggestion": "Indexierung prüfen, Abfragen optimieren oder Caching einsetzen"
                 })
             
-            ***REMOVED*** Lange Antwortzeit?
+            # Lange Antwortzeit?
             if result["avg_duration"] > 0.5:
                 issues.append({
                     "type": "high_response_time",
@@ -140,7 +140,7 @@ class QueryProfiler:
                     "issues": issues
                 })
         
-        ***REMOVED*** Gesamtanalyse
+        # Gesamtanalyse
         total_avg_duration = sum(r["avg_duration"] for r in self.results) / len(self.results)
         total_avg_query_count = sum(r["avg_query_count"] for r in self.results) / len(self.results)
         
@@ -221,7 +221,7 @@ def main():
     
     args = parser.parse_args()
     
-    ***REMOVED*** Standard-Endpunkte, wenn keine angegeben wurden
+    # Standard-Endpunkte, wenn keine angegeben wurden
     if not args.endpoints:
         args.endpoints = [
             "/api/v1/artikel",
@@ -230,21 +230,21 @@ def main():
             "/api/v1/charge/1"
         ]
     
-    ***REMOVED*** Profiler initialisieren
+    # Profiler initialisieren
     profiler = QueryProfiler(args.url)
     
-    ***REMOVED*** Endpunkte profilieren
+    # Endpunkte profilieren
     for endpoint in args.endpoints:
         profiler.profile_endpoint(endpoint, iterations=args.iterations)
     
-    ***REMOVED*** Ergebnisse ausgeben
+    # Ergebnisse ausgeben
     profiler.print_results()
     
-    ***REMOVED*** Ergebnisse analysieren
+    # Ergebnisse analysieren
     analysis = profiler.analyze_results()
     profiler.print_analysis(analysis)
     
-    ***REMOVED*** Ergebnisse in Datei speichern
+    # Ergebnisse in Datei speichern
     if args.output:
         with open(args.output, "w") as f:
             json.dump({

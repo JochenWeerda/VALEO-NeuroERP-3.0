@@ -19,7 +19,7 @@ def open_in_libreoffice(file_path: str) -> int:
 
     soffice = os.environ.get('SOFFICE_PATH', 'soffice')
 
-    ***REMOVED*** Zuordnung nach Endung
+    # Zuordnung nach Endung
     ext = p.suffix.lower()
     args = [soffice]
     if ext in ('.csv', '.tsv', '.xlsx', '.ods'):
@@ -43,3 +43,4 @@ if __name__ == '__main__':
         print(__doc__)
         sys.exit(1)
     sys.exit(open_in_libreoffice(sys.argv[1]))
+

@@ -1,17 +1,17 @@
-***REMOVED*** VALEO-NeuroERP Observability Stack
+# VALEO-NeuroERP Observability Stack
 
 **Prometheus + Grafana + Loki + AlertManager**
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Quick-Start
+## 🚀 Quick-Start
 
-***REMOVED******REMOVED******REMOVED*** 1. Observability-Stack starten
+### 1. Observability-Stack starten
 
 ```bash
 cd monitoring
 
-***REMOVED*** Docker-Compose starten
+# Docker-Compose starten
 docker compose -f docker-compose.observability.yml up -d
 ```
 
@@ -22,7 +22,7 @@ docker compose -f docker-compose.observability.yml up -d
 - **Promtail** - Log-Shipping
 - **AlertManager** (Port 9093) - Alert-Routing
 
-***REMOVED******REMOVED******REMOVED*** 2. Services öffnen
+### 2. Services öffnen
 
 **Grafana:**
 ```
@@ -42,9 +42,9 @@ URL: http://localhost:9093
 
 ---
 
-***REMOVED******REMOVED*** 📊 Dashboards
+## 📊 Dashboards
 
-***REMOVED******REMOVED******REMOVED*** Vorinstallierte Dashboards
+### Vorinstallierte Dashboards
 
 1. **VALEO-ERP Overview**
    - API Request Rate
@@ -56,11 +56,11 @@ URL: http://localhost:9093
 
 **Import:**
 ```bash
-***REMOVED*** Dashboard ist bereits in grafana/dashboards/valeo-erp.json
-***REMOVED*** Wird automatisch beim Start geladen
+# Dashboard ist bereits in grafana/dashboards/valeo-erp.json
+# Wird automatisch beim Start geladen
 ```
 
-***REMOVED******REMOVED******REMOVED*** Custom-Dashboards erstellen
+### Custom-Dashboards erstellen
 
 1. Grafana öffnen (http://localhost:3000)
 2. Dashboard → New Dashboard
@@ -70,9 +70,9 @@ URL: http://localhost:9093
 
 ---
 
-***REMOVED******REMOVED*** 🔔 Alerts
+## 🔔 Alerts
 
-***REMOVED******REMOVED******REMOVED*** Vorkonfigurierte Alerts
+### Vorkonfigurierte Alerts
 
 | Alert | Threshold | Severity | Action |
 |-------|-----------|----------|--------|
@@ -83,7 +83,7 @@ URL: http://localhost:9093
 | AuthFailuresHigh | > 5/sec | Critical | Security-Team |
 | MemoryUsageHigh | > 90% | Warning | Slack |
 
-***REMOVED******REMOVED******REMOVED*** Alert-Konfiguration
+### Alert-Konfiguration
 
 **Datei:** `prometheus/alerts.yml`
 
@@ -95,7 +95,7 @@ URL: http://localhost:9093
     summary: "High error rate detected"
 ```
 
-***REMOVED******REMOVED******REMOVED*** AlertManager-Konfiguration
+### AlertManager-Konfiguration
 
 **Datei:** `alertmanager/config.yml`
 
@@ -107,20 +107,20 @@ URL: http://localhost:9093
 
 **Konfiguration:**
 ```yaml
-***REMOVED*** ENV-Variablen setzen
+# ENV-Variablen setzen
 export SMTP_PASSWORD=...
 export PAGERDUTY_SERVICE_KEY=...
 export SLACK_WEBHOOK_URL=...
 
-***REMOVED*** AlertManager neustarten
+# AlertManager neustarten
 docker compose -f docker-compose.observability.yml restart alertmanager
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📝 Logs (Loki)
+## 📝 Logs (Loki)
 
-***REMOVED******REMOVED******REMOVED*** Log-Queries in Grafana
+### Log-Queries in Grafana
 
 1. Grafana → Explore
 2. Datasource: Loki
@@ -146,7 +146,7 @@ docker compose -f docker-compose.observability.yml restart alertmanager
 sum by (pod) (rate({namespace="production"}[5m]))
 ```
 
-***REMOVED******REMOVED******REMOVED*** Log-Retention
+### Log-Retention
 
 - **Default:** 30 Tage
 - **Konfiguration:** `loki/loki-config.yaml`
@@ -154,9 +154,9 @@ sum by (pod) (rate({namespace="production"}[5m]))
 
 ---
 
-***REMOVED******REMOVED*** 🔧 Configuration
+## 🔧 Configuration
 
-***REMOVED******REMOVED******REMOVED*** Prometheus-Targets
+### Prometheus-Targets
 
 **Datei:** `prometheus/prometheus.yml`
 
@@ -173,7 +173,7 @@ sum by (pod) (rate({namespace="production"}[5m]))
     - targets: ['host.docker.internal:8010']
 ```
 
-***REMOVED******REMOVED******REMOVED*** Grafana-Datasources
+### Grafana-Datasources
 
 **Automatisch konfiguriert:**
 - Prometheus (http://prometheus:9090)
@@ -186,27 +186,27 @@ sum by (pod) (rate({namespace="production"}[5m]))
 
 ---
 
-***REMOVED******REMOVED*** 📈 Metrics
+## 📈 Metrics
 
-***REMOVED******REMOVED******REMOVED*** VALEO-ERP Custom-Metrics
+### VALEO-ERP Custom-Metrics
 
 **Verfügbar:**
 ```
-***REMOVED*** Workflow
+# Workflow
 workflow_transitions_total{domain, action, status}
 
-***REMOVED*** Documents
+# Documents
 document_print_duration_seconds{domain}
 
-***REMOVED*** SSE
+# SSE
 sse_connections_active{channel}
 
-***REMOVED*** API
+# API
 api_requests_total{method, endpoint, status}
 api_request_duration_seconds{method, endpoint}
 ```
 
-***REMOVED******REMOVED******REMOVED*** Prometheus-Queries (Beispiele)
+### Prometheus-Queries (Beispiele)
 
 **Request Rate:**
 ```promql
@@ -235,50 +235,50 @@ sum by (action) (rate(workflow_transitions_total[5m]))
 
 ---
 
-***REMOVED******REMOVED*** 🧪 Testing
+## 🧪 Testing
 
-***REMOVED******REMOVED******REMOVED*** 1. Prometheus erreichbar?
+### 1. Prometheus erreichbar?
 
 ```bash
 curl http://localhost:9090/api/v1/targets
-***REMOVED*** Expected: {"status":"success", "data":{"activeTargets":[...]}}
+# Expected: {"status":"success", "data":{"activeTargets":[...]}}
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Grafana erreichbar?
+### 2. Grafana erreichbar?
 
 ```bash
 curl http://localhost:3000/api/health
-***REMOVED*** Expected: {"database":"ok","version":"..."}
+# Expected: {"database":"ok","version":"..."}
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Loki erreichbar?
+### 3. Loki erreichbar?
 
 ```bash
 curl http://localhost:3100/ready
-***REMOVED*** Expected: ready
+# Expected: ready
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. Metrics werden gesammelt?
+### 4. Metrics werden gesammelt?
 
 ```bash
 curl http://localhost:9090/api/v1/query?query=up
-***REMOVED*** Expected: {"status":"success","data":{"result":[...]}}
+# Expected: {"status":"success","data":{"result":[...]}}
 ```
 
-***REMOVED******REMOVED******REMOVED*** 5. Logs werden gesammelt?
+### 5. Logs werden gesammelt?
 
 ```bash
 curl -G http://localhost:3100/loki/api/v1/query \
   --data-urlencode 'query={job="docker"}' \
   --data-urlencode 'limit=10'
-***REMOVED*** Expected: {"status":"success","data":{"result":[...]}}
+# Expected: {"status":"success","data":{"result":[...]}}
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📊 Monitoring-Best-Practices
+## 📊 Monitoring-Best-Practices
 
-***REMOVED******REMOVED******REMOVED*** 1. Dashboard-Organisation
+### 1. Dashboard-Organisation
 
 **Erstelle Dashboards für:**
 - ✅ API-Overview (Request-Rate, Errors, Latency)
@@ -287,7 +287,7 @@ curl -G http://localhost:3100/loki/api/v1/query \
 - ✅ System-Health (CPU, Memory, Disk)
 - ✅ Security (Auth-Failures, Rate-Limiting)
 
-***REMOVED******REMOVED******REMOVED*** 2. Alert-Routing
+### 2. Alert-Routing
 
 **Critical Alerts:**
 - ErrorRateHigh → PagerDuty (24/7)
@@ -295,14 +295,14 @@ curl -G http://localhost:3100/loki/api/v1/query \
 - AuthFailuresHigh → Security-Team
 
 **Warning Alerts:**
-- LatencyHigh → Slack (***REMOVED***alerts)
-- MemoryUsageHigh → Slack (***REMOVED***alerts)
+- LatencyHigh → Slack (#alerts)
+- MemoryUsageHigh → Slack (#alerts)
 
-***REMOVED******REMOVED******REMOVED*** 3. Log-Correlation
+### 3. Log-Correlation
 
 **Verwende Correlation-IDs:**
 ```python
-***REMOVED*** In FastAPI-Middleware
+# In FastAPI-Middleware
 request_id = str(uuid.uuid4())
 logger.info(f"Request started", extra={"request_id": request_id})
 ```
@@ -314,64 +314,64 @@ logger.info(f"Request started", extra={"request_id": request_id})
 
 ---
 
-***REMOVED******REMOVED*** 🆘 Troubleshooting
+## 🆘 Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: Prometheus kann VALEO-ERP nicht erreichen
+### Problem: Prometheus kann VALEO-ERP nicht erreichen
 
 **Lösung:**
 ```bash
-***REMOVED*** Check /metrics endpoint
+# Check /metrics endpoint
 curl http://localhost:8000/metrics
 
-***REMOVED*** Check Prometheus targets
+# Check Prometheus targets
 curl http://localhost:9090/api/v1/targets
 ```
 
-***REMOVED******REMOVED******REMOVED*** Problem: Keine Logs in Loki
+### Problem: Keine Logs in Loki
 
 **Lösung:**
 ```bash
-***REMOVED*** Check Promtail
+# Check Promtail
 docker compose -f docker-compose.observability.yml logs promtail
 
-***REMOVED*** Check Loki
+# Check Loki
 curl http://localhost:3100/ready
 ```
 
-***REMOVED******REMOVED******REMOVED*** Problem: Alerts funktionieren nicht
+### Problem: Alerts funktionieren nicht
 
 **Lösung:**
 ```bash
-***REMOVED*** Check AlertManager
+# Check AlertManager
 curl http://localhost:9093/api/v1/status
 
-***REMOVED*** Test Alert senden
+# Test Alert senden
 curl -X POST http://localhost:9093/api/v1/alerts \
   -d '[{"labels":{"alertname":"TestAlert","severity":"warning"}}]'
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📞 Production-Deployment
+## 📞 Production-Deployment
 
-***REMOVED******REMOVED******REMOVED*** Kubernetes (via Helm)
+### Kubernetes (via Helm)
 
 ```bash
-***REMOVED*** Install Prometheus-Operator
+# Install Prometheus-Operator
 helm install prometheus-operator prometheus-community/kube-prometheus-stack \
   --namespace monitoring \
   --create-namespace
 
-***REMOVED*** Install Loki-Stack
+# Install Loki-Stack
 helm install loki grafana/loki-stack \
   --namespace monitoring \
   --set grafana.enabled=true
 ```
 
-***REMOVED******REMOVED******REMOVED*** Values.yaml anpassen
+### Values.yaml anpassen
 
 ```yaml
-***REMOVED*** k8s/helm/valeo-erp/values.yaml
+# k8s/helm/valeo-erp/values.yaml
 podAnnotations:
   prometheus.io/scrape: "true"
   prometheus.io/port: "8000"
@@ -380,7 +380,7 @@ podAnnotations:
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Next Steps
+## 🎯 Next Steps
 
 1. ✅ **Stack starten:** `docker compose up -d`
 2. ✅ **Grafana öffnen:** http://localhost:3000
@@ -392,4 +392,5 @@ podAnnotations:
 ---
 
 **🎉 Observability-Stack Ready! 📊🔔**
+
 

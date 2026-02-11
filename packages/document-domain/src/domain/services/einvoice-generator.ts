@@ -43,7 +43,7 @@ export async function generateXRechnung(data: InvoiceData): Promise<string> {
 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
          xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
          xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
-  <cbc:CustomizationID>urn:cen.eu:en16931:2017***REMOVED***compliant***REMOVED***urn:xeinkauf.de:kosit:xrechnung_3.0</cbc:CustomizationID>
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0</cbc:CustomizationID>
   <cbc:ID>${escapeXml(data.invoiceNumber)}</cbc:ID>
   <cbc:IssueDate>${data.invoiceDate}</cbc:IssueDate>
   <cbc:DueDate>${data.dueDate}</cbc:DueDate>
@@ -138,3 +138,4 @@ export async function generateZUGFeRD(data: InvoiceData, pdfBuffer: Buffer): Pro
 
   return pdfBuffer;
 }
+

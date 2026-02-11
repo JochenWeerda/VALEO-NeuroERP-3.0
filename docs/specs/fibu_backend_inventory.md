@@ -1,4 +1,4 @@
-***REMOVED*** FiBu Backend Code Inventory
+# FiBu Backend Code Inventory
 
 Stand: aktuelle Codebasis `VALEO-NeuroERP-3.0`
 
@@ -6,7 +6,7 @@ Ziel dieser Übersicht ist es, alle vorhandenen Backend-Bausteine mit FiBu-Bezug
 
 ---
 
-***REMOVED******REMOVED*** 1. Node/TypeScript Finance Domain (dupliziert in `packages/finance-domain` & `domains/finance`)
+## 1. Node/TypeScript Finance Domain (dupliziert in `packages/finance-domain` & `domains/finance`)
 
 | Aspekt | Details |
 | --- | --- |
@@ -19,7 +19,7 @@ Ziel dieser Übersicht ist es, alle vorhandenen Backend-Bausteine mit FiBu-Bezug
 | Reuse-Potenzial | **Hoch** für Domänenlogik, Event-Modelle und Tests – jedoch NodeJS. Für Python-Microservices müssten Portierung/Wrapper bedacht werden. Eventuelle Konsolidierung (nur ein Source-Verzeichnis behalten) nötig. |
 | Risiken | Doppelte Codebasis (`packages/` vs. `domains/`), keine direkte Integration in Python-Service-Landschaft, heterogener Stack. |
 
-***REMOVED******REMOVED*** 2. Python Microservice Stub `services/finance`
+## 2. Python Microservice Stub `services/finance`
 
 | Aspekt | Details |
 | --- | --- |
@@ -28,21 +28,21 @@ Ziel dieser Übersicht ist es, alle vorhandenen Backend-Bausteine mit FiBu-Bezug
 | Status | Nicht lauffähig. Dockerfile erwartet `requirements.txt` und `app/`-Ordner, die nicht vorhanden sind. |
 | Reuse-Potenzial | Nur als Template für Logging/Middleware-Setup; ansonsten vollständiger Neuaufbau nötig. |
 
-***REMOVED******REMOVED*** 3. Zentrale Python-Schemas & Contracts
+## 3. Zentrale Python-Schemas & Contracts
 
 | Pfad | Beschreibung |
 | --- | --- |
 | `app/api/v1/schemas/finance.py` | Umfangreiche Pydantic-Schemas für Konten, Journal Entries, Reporting, OPs. Kann direkt in künftigen FastAPI-Services verwendet werden. Prüfen auf Konsistenz mit `packages/shared/contracts`. |
 | `packages/shared/contracts/src/finance-schemas.ts` | Zod-basierte Contracts (Accounts, JournalEntry, Invoice, Payment, Budget, Reporting, TaxRecord). Grundlage für Frontend/Events; wichtig für Anti-Corruption-Layer. |
 
-***REMOVED******REMOVED*** 4. Frontend & API Clients
+## 4. Frontend & API Clients
 
 | Pfad | Beschreibung |
 | --- | --- |
 | `packages/frontend-web/src/lib/services/finance-service.ts` | Axios-Service mit Endpunkten (`/api/v1/chart-of-accounts`, `/journal-entries`, Posting etc.). Erwartet ein funktionsfähiges Finance-Backend mit REST-API. |
 | Weitere UI-Komponenten | (Belegmasken/Views) müssen in Phase 0 noch detailliert inventarisiert werden (separater Task *fibu-code-inventory-frontend*). |
 
-***REMOVED******REMOVED*** 5. CI/CD & Observability Assets
+## 5. CI/CD & Observability Assets
 
 | Pfad | Beschreibung |
 | --- | --- |
@@ -50,7 +50,7 @@ Ziel dieser Übersicht ist es, alle vorhandenen Backend-Bausteine mit FiBu-Bezug
 | `monitoring/grafana/dashboards/finance-domain-dashboard.json` | Dashboard für Finance KPIs. |
 | `docs/uAT/checklisten/FINANCE.md` etc. | Dokumentation/Checklisten mit FiBu-Bezug. |
 
-***REMOVED******REMOVED*** 6. Identifizierte Gaps & Hinweise zur Wiederverwendung
+## 6. Identifizierte Gaps & Hinweise zur Wiederverwendung
 
 1. **Technologiebruch**: Domänenlogik (Node/TS) vs. Zielarchitektur (Python/FastAPI). Optionen:
    - a) Portieren kritischer Services (`ledger`, `journal`, `period`) nach Python.
@@ -63,11 +63,12 @@ Ziel dieser Übersicht ist es, alle vorhandenen Backend-Bausteine mit FiBu-Bezug
 
 ---
 
-***REMOVED******REMOVED*** 7. Nächste Schritte (Input für Phase 0 & 1)
+## 7. Nächste Schritte (Input für Phase 0 & 1)
 
 - Konsolidieren, welche Teile von `packages/finance-domain` übernommen/portiert werden (Ledger-Modelle, Eventdefinitionen, Services).
 - Entfernen oder archivieren der doppelten `domains/finance`-Struktur, um Missverständnisse zu vermeiden.
 - Festlegen, ob `packages/shared/contracts/src/finance-schemas.ts` als „Single Source of Truth“ für Events/API dienen soll und wie Pydantic-Schemas synchron gehalten werden.
 - Dokumentieren, welche externen Dependencies (Kafka, OCR, AI) in der neuen Architektur tatsächlich benötigt werden (siehe README Versprechen vs. real implementierte Repos).
 - `services/finance` komplett neu aufsetzen (neue Package-Struktur, Settings, DB-Migrations). Stubs sollten entfernt werden, sobald neuer Service existiert.
+
 

@@ -1,11 +1,11 @@
-***REMOVED*** ===================================================
-***REMOVED*** VAN-Modus Backend-Validator
-***REMOVED*** ===================================================
-***REMOVED*** Dieses Skript prüft die Backend-Entwicklungsumgebung
-***REMOVED*** auf Compliance mit den definierten VAN-Modus-Standards
-***REMOVED*** ===================================================
+# ===================================================
+# VAN-Modus Backend-Validator
+# ===================================================
+# Dieses Skript prüft die Backend-Entwicklungsumgebung
+# auf Compliance mit den definierten VAN-Modus-Standards
+# ===================================================
 
-***REMOVED*** Farbige Ausgabe-Funktionen für bessere Lesbarkeit
+# Farbige Ausgabe-Funktionen für bessere Lesbarkeit
 function Write-ColorOutput {
     param (
         [string]$Text,
@@ -34,19 +34,19 @@ function Write-Info {
     Write-ColorOutput $Text "Cyan"
 }
 
-***REMOVED*** Definiere Pfade
+# Definiere Pfade
 $rootDir = Join-Path $PSScriptRoot ".."
 $backendDir = Join-Path $rootDir "backend"
 $requirementsPath = Join-Path $backendDir "requirements.txt"
 
-***REMOVED*** Banner ausgeben
+# Banner ausgeben
 Write-Host ""
 Write-Host " ======================================================" -ForegroundColor Cyan
 Write-Host "  VAN-Modus Backend-Validator - VALEO NeuroERP" -ForegroundColor Cyan
 Write-Host " ======================================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Zusammenfassung der Prüfungen
+# Zusammenfassung der Prüfungen
 $totalChecks = 0
 $passedChecks = 0
 $failedChecks = 0
@@ -75,7 +75,7 @@ function Register-Check {
     }
 }
 
-***REMOVED*** 1. Python-Version prüfen
+# 1. Python-Version prüfen
 Write-Info "1. Prüfe Python-Version..."
 
 try {
@@ -93,10 +93,10 @@ try {
     Write-Info "Bitte installieren Sie Python von python.org"
 }
 
-***REMOVED*** 2. Backend-Verzeichnisstruktur prüfen
+# 2. Backend-Verzeichnisstruktur prüfen
 Write-Info "2. Prüfe Backend-Verzeichnisstruktur..."
 
-***REMOVED*** Prüfe Backend-Hauptverzeichnis
+# Prüfe Backend-Hauptverzeichnis
 $backendDirExists = Test-Path $backendDir
 Register-Check -Result $backendDirExists -Name "Backend-Verzeichnis existiert"
 
@@ -106,7 +106,7 @@ if (-not $backendDirExists) {
     Register-Check -Result $true -Name "Backend-Verzeichnis erstellt" -Corrected $true
 }
 
-***REMOVED*** Prüfe requirements.txt
+# Prüfe requirements.txt
 $requirementsExists = Test-Path $requirementsPath
 Register-Check -Result $requirementsExists -Name "Backend requirements.txt existiert"
 
@@ -129,7 +129,7 @@ redis==4.5.4
     Register-Check -Result $true -Name "requirements.txt erstellt" -Corrected $true
 }
 
-***REMOVED*** Ausgabe der Zusammenfassung
+# Ausgabe der Zusammenfassung
 Write-Host ""
 Write-Host "VAN-Modus Backend-Validierung abgeschlossen" -ForegroundColor Cyan
 Write-Host "----------------------------------------" -ForegroundColor Cyan

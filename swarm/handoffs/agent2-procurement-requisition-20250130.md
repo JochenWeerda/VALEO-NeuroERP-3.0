@@ -1,4 +1,4 @@
-***REMOVED*** Agent-2: PROC-REQ-01 - Bedarfsmeldung vervollständigt
+# Agent-2: PROC-REQ-01 - Bedarfsmeldung vervollständigt
 
 **Datum:** 2025-01-30  
 **Sprint:** 2  
@@ -7,9 +7,9 @@
 
 ---
 
-***REMOVED******REMOVED*** ✅ Implementierung abgeschlossen
+## ✅ Implementierung abgeschlossen
 
-***REMOVED******REMOVED******REMOVED*** Erweiterte Datei
+### Erweiterte Datei
 - ✅ `packages/frontend-web/src/pages/einkauf/anfrage-stamm.tsx`
   - Status-Workflow vervollständigt
   - Freigabe-Funktionalität implementiert
@@ -18,7 +18,7 @@
   - Status-Transition-Validierung
   - i18n vollständig integriert (Deutsch)
 
-***REMOVED******REMOVED******REMOVED*** Features implementiert
+### Features implementiert
 
 1. **Status-Workflow vervollständigt**
    - ✅ Status-Enum erweitert: `ENTWURF`, `FREIGEGEBEN`, `ANGEBOTSPHASE`, `BESTELLT`, `ABGELEHNT`
@@ -54,7 +54,7 @@
    - ✅ Icons für bessere UX (CheckCircle, XCircle, ShoppingCart)
    - ✅ Loading-States während API-Calls
 
-***REMOVED******REMOVED******REMOVED*** i18n-Übersetzungen hinzugefügt
+### i18n-Übersetzungen hinzugefügt
 
 ```json
 {
@@ -72,22 +72,22 @@
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Nächste Schritte
+## 🔄 Nächste Schritte
 
-***REMOVED******REMOVED******REMOVED*** Sprint 2 abgeschlossen
+### Sprint 2 abgeschlossen
 - ✅ PROC-GR-01: Wareneingang Frontend
 - ✅ PROC-IV-02: 2/3-Wege-Abgleich Frontend-UI
 - ✅ PROC-PO-02: PO-Änderungen & Storno
 - ✅ PROC-REQ-01: Bedarfsmeldung vervollständigt
 
-***REMOVED******REMOVED******REMOVED*** Optional (nicht in Sprint 2)
+### Optional (nicht in Sprint 2)
 - ⏳ Bestellung-Erstellen mit Requisition-Integration
 - ⏳ Bulk-Actions in Liste (Freigeben, Ablehnen)
 - ⏳ Workflow-Engine Integration (für komplexere Genehmigungslogik)
 
 ---
 
-***REMOVED******REMOVED*** ✅ Keine Doppelstrukturen
+## ✅ Keine Doppelstrukturen
 
 **Bestätigt:**
 - ✅ Frontend-Seite existiert bereits (`anfrage-stamm.tsx`) - ERWEITERT
@@ -98,4 +98,5 @@
 ---
 
 **Status:** ✅ **PROC-REQ-01 ABGESCHLOSSEN - Status-Workflow funktioniert vollständig**
+
 

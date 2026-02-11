@@ -1,10 +1,10 @@
-***REMOVED*** Production Authentication Setup - VALEO-NeuroERP
+# Production Authentication Setup - VALEO-NeuroERP
 
 **Status:** ✅ **VOLLSTÄNDIG IMPLEMENTIERT**
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Übersicht
+## 🎯 Übersicht
 
 Vollständige Production-Authentication mit:
 - ✅ OIDC/OAuth2-Flow
@@ -15,9 +15,9 @@ Vollständige Production-Authentication mit:
 
 ---
 
-***REMOVED******REMOVED*** ✅ Implementierte Komponenten
+## ✅ Implementierte Komponenten
 
-***REMOVED******REMOVED******REMOVED*** 1. Authentication Library
+### 1. Authentication Library
 
 **Datei:** `packages/frontend-web/src/lib/auth.ts`
 
@@ -47,7 +47,7 @@ class AuthService {
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2. React-Hook
+### 2. React-Hook
 
 **Datei:** `packages/frontend-web/src/hooks/useAuth.ts`
 
@@ -74,7 +74,7 @@ function MyComponent() {
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 3. Protected Routes
+### 3. Protected Routes
 
 **Datei:** `packages/frontend-web/src/components/auth/ProtectedRoute.tsx`
 
@@ -104,7 +104,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 4. Login-Page (OIDC)
+### 4. Login-Page (OIDC)
 
 **Datei:** `packages/frontend-web/src/pages/auth/Login.tsx`
 
@@ -117,7 +117,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 5. Callback-Page
+### 5. Callback-Page
 
 **Datei:** `packages/frontend-web/src/pages/auth/Callback.tsx`
 
@@ -130,7 +130,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 6. API-Client mit Auto-Refresh
+### 6. API-Client mit Auto-Refresh
 
 **Datei:** `packages/frontend-web/src/lib/api-client.ts`
 
@@ -153,66 +153,66 @@ const result = await apiClient.post('/api/workflow/sales/SO-00001/transition', {
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 7. Environment-Config
+### 7. Environment-Config
 
 **Datei:** `packages/frontend-web/env.example`
 
 **Required Variables:**
 ```bash
-***REMOVED*** OIDC-Provider (Keycloak, Azure AD, etc.)
+# OIDC-Provider (Keycloak, Azure AD, etc.)
 VITE_OIDC_DISCOVERY_URL=https://keycloak.example.com/realms/valeo/.well-known/openid-configuration
 VITE_OIDC_CLIENT_ID=valeo-erp-frontend
 VITE_OIDC_REDIRECT_URI=http://localhost:3000/callback
 
-***REMOVED*** Feature Flags
-VITE_DEMO_MODE=false  ***REMOVED*** ⚠️ MUST be false in production!
+# Feature Flags
+VITE_DEMO_MODE=false  # ⚠️ MUST be false in production!
 ```
 
 ---
 
-***REMOVED******REMOVED*** 🔒 Security-Features
+## 🔒 Security-Features
 
-***REMOVED******REMOVED******REMOVED*** ✅ CSRF-Protection
+### ✅ CSRF-Protection
 - State-Parameter (32 random chars)
 - Nonce-Parameter (32 random chars)
 - Validation im Callback
 
-***REMOVED******REMOVED******REMOVED*** ✅ Token-Security
+### ✅ Token-Security
 - localStorage (XSS-geschützt via CSP)
 - HttpOnly-Cookies (optional, für Refresh-Token)
 - Automatic Expiry-Check
 - Automatic Refresh
 
-***REMOVED******REMOVED******REMOVED*** ✅ Route-Protection
+### ✅ Route-Protection
 - ProtectedRoute-Component
 - Scope-Checks
 - Role-Checks
 - Automatic Redirect
 
-***REMOVED******REMOVED******REMOVED*** ✅ API-Security
+### ✅ API-Security
 - Bearer-Token in jedem Request
 - 401-Handling mit Refresh
 - Automatic Logout bei Failure
 
 ---
 
-***REMOVED******REMOVED*** 🗑️ Demo-Endpoints entfernen
+## 🗑️ Demo-Endpoints entfernen
 
-***REMOVED******REMOVED******REMOVED*** ⚠️ WICHTIG: Demo-Login deaktivieren
+### ⚠️ WICHTIG: Demo-Login deaktivieren
 
 **Datei:** `app/auth/router.py` (Backend)
 
 **Für Production:**
 ```python
-***REMOVED*** ⚠️ DEMO-LOGIN NUR FÜR ENTWICKLUNG!
-***REMOVED*** In Production: Diesen Router NICHT mounten!
+# ⚠️ DEMO-LOGIN NUR FÜR ENTWICKLUNG!
+# In Production: Diesen Router NICHT mounten!
 
-***REMOVED*** main.py (Production)
+# main.py (Production)
 if os.getenv("DEMO_MODE") != "true":
-    ***REMOVED*** NICHT: app.include_router(auth_router)
+    # NICHT: app.include_router(auth_router)
     pass
 else:
-    app.include_router(auth_router)  ***REMOVED*** Nur in Development
+    app.include_router(auth_router)  # Nur in Development
 ```
 
 **Frontend:**
@@ -227,9 +227,9 @@ if (isDemoMode) {
 
 ---
 
-***REMOVED******REMOVED*** 📋 OIDC-Provider Setup
+## 📋 OIDC-Provider Setup
 
-***REMOVED******REMOVED******REMOVED*** Option 1: Keycloak (Open-Source)
+### Option 1: Keycloak (Open-Source)
 
 **1. Keycloak installieren:**
 ```bash
@@ -271,7 +271,7 @@ VITE_OIDC_REDIRECT_URI=http://localhost:3000/callback
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Option 2: Azure AD (Enterprise)
+### Option 2: Azure AD (Enterprise)
 
 **1. App-Registration:**
 - Azure Portal → Azure AD → App Registrations
@@ -297,7 +297,7 @@ VITE_OIDC_REDIRECT_URI=http://localhost:3000/callback
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Option 3: Auth0 (SaaS)
+### Option 3: Auth0 (SaaS)
 
 **1. Application erstellen:**
 - Auth0 Dashboard → Applications → Create
@@ -322,7 +322,7 @@ VITE_OIDC_REDIRECT_URI=http://localhost:3000/callback
 
 ---
 
-***REMOVED******REMOVED*** 🔧 Frontend-Router-Integration
+## 🔧 Frontend-Router-Integration
 
 **Datei:** `packages/frontend-web/src/main.tsx` (Beispiel)
 
@@ -373,30 +373,30 @@ function App() {
 
 ---
 
-***REMOVED******REMOVED*** 🧪 Testing
+## 🧪 Testing
 
-***REMOVED******REMOVED******REMOVED*** 1. OIDC-Flow testen
+### 1. OIDC-Flow testen
 
 ```bash
-***REMOVED*** 1. Frontend starten
+# 1. Frontend starten
 cd packages/frontend-web
 cp env.example .env
-***REMOVED*** → OIDC-Variablen konfigurieren
+# → OIDC-Variablen konfigurieren
 npm run dev
 
-***REMOVED*** 2. Browser öffnen
+# 2. Browser öffnen
 open http://localhost:3000
 
-***REMOVED*** 3. Wird redirected zu /login
-***REMOVED*** 4. Klick "Mit SSO anmelden"
-***REMOVED*** 5. Redirect zu OIDC-Provider
-***REMOVED*** 6. Login beim Provider
-***REMOVED*** 7. Redirect zurück zu /callback
-***REMOVED*** 8. Redirect zu /dashboard
-***REMOVED*** 9. ✅ Authenticated!
+# 3. Wird redirected zu /login
+# 4. Klick "Mit SSO anmelden"
+# 5. Redirect zu OIDC-Provider
+# 6. Login beim Provider
+# 7. Redirect zurück zu /callback
+# 8. Redirect zu /dashboard
+# 9. ✅ Authenticated!
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Token-Refresh testen
+### 2. Token-Refresh testen
 
 ```typescript
 // Im Browser-Console
@@ -408,19 +408,19 @@ localStorage.getItem('refresh_token') // Refresh-Token vorhanden
 // → Neuer Token in localStorage
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Scope-Protection testen
+### 3. Scope-Protection testen
 
 ```bash
-***REMOVED*** User ohne sales:write Scope
-***REMOVED*** → /sales öffnen
-***REMOVED*** → 403-Seite: "Zugriff verweigert"
+# User ohne sales:write Scope
+# → /sales öffnen
+# → 403-Seite: "Zugriff verweigert"
 ```
 
 ---
 
-***REMOVED******REMOVED*** ⚠️ Production-Checklist
+## ⚠️ Production-Checklist
 
-***REMOVED******REMOVED******REMOVED*** Vor Production-Deployment:
+### Vor Production-Deployment:
 
 - [ ] **OIDC-Provider konfiguriert** (Keycloak/Azure AD)
 - [ ] **Client-ID registriert**
@@ -435,9 +435,9 @@ localStorage.getItem('refresh_token') // Refresh-Token vorhanden
 
 ---
 
-***REMOVED******REMOVED*** 🔒 Security-Best-Practices
+## 🔒 Security-Best-Practices
 
-***REMOVED******REMOVED******REMOVED*** 1. Token-Storage
+### 1. Token-Storage
 
 **Aktuell:** localStorage (Standard für SPAs)
 
@@ -455,7 +455,7 @@ document.cookie = `refresh_token=${refreshToken}; HttpOnly; Secure; SameSite=Str
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2. CSP-Header setzen
+### 2. CSP-Header setzen
 
 **Nginx-Config:**
 ```nginx
@@ -471,7 +471,7 @@ annotations:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 3. Token-Expiry
+### 3. Token-Expiry
 
 **Access-Token:** 15 Minuten (OIDC-Provider-Default)  
 **Refresh-Token:** 7 Tage (OIDC-Provider-Default)
@@ -487,7 +487,7 @@ if (response.status === 401) {
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 4. Logout
+### 4. Logout
 
 **Simple-Logout:**
 ```typescript
@@ -507,44 +507,44 @@ window.location.href = `${end_session_endpoint}?` +
 
 ---
 
-***REMOVED******REMOVED*** 📊 Scope-Mapping (Backend ↔ Frontend)
+## 📊 Scope-Mapping (Backend ↔ Frontend)
 
-***REMOVED******REMOVED******REMOVED*** Backend-Scopes
+### Backend-Scopes
 
 **Definiert in:** `app/auth/scopes.py`
 
 ```python
 SCOPES = [
-    ***REMOVED*** Sales
-    "sales:read",    ***REMOVED*** Liste, Details anzeigen
-    "sales:write",   ***REMOVED*** Erstellen, Bearbeiten
-    "sales:approve", ***REMOVED*** Freigeben
-    "sales:post",    ***REMOVED*** Buchen
+    # Sales
+    "sales:read",    # Liste, Details anzeigen
+    "sales:write",   # Erstellen, Bearbeiten
+    "sales:approve", # Freigeben
+    "sales:post",    # Buchen
     
-    ***REMOVED*** Purchase
+    # Purchase
     "purchase:read",
     "purchase:write",
     "purchase:approve",
     
-    ***REMOVED*** Documents
-    "docs:export",   ***REMOVED*** CSV/XLSX-Export
-    "docs:print",    ***REMOVED*** PDF-Druck
-    "docs:archive",  ***REMOVED*** Archiv-Zugriff
+    # Documents
+    "docs:export",   # CSV/XLSX-Export
+    "docs:print",    # PDF-Druck
+    "docs:archive",  # Archiv-Zugriff
     
-    ***REMOVED*** Policy
+    # Policy
     "policy:read",
     "policy:write",
     
-    ***REMOVED*** GDPR
-    "gdpr:erase",    ***REMOVED*** User-Daten löschen
-    "gdpr:export",   ***REMOVED*** User-Daten exportieren
+    # GDPR
+    "gdpr:erase",    # User-Daten löschen
+    "gdpr:export",   # User-Daten exportieren
     
-    ***REMOVED*** Admin
-    "admin:all",     ***REMOVED*** Alle Rechte
+    # Admin
+    "admin:all",     # Alle Rechte
 ]
 ```
 
-***REMOVED******REMOVED******REMOVED*** Frontend-Usage
+### Frontend-Usage
 
 ```typescript
 import { useAuth } from '@/hooks/useAuth'
@@ -572,23 +572,23 @@ function SalesOrderEditor() {
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Deployment
+## 🚀 Deployment
 
-***REMOVED******REMOVED******REMOVED*** Development
+### Development
 
 ```bash
-***REMOVED*** .env
-VITE_DEMO_MODE=true  ***REMOVED*** ⚠️ Nur für Development!
+# .env
+VITE_DEMO_MODE=true  # ⚠️ Nur für Development!
 VITE_OIDC_DISCOVERY_URL=http://localhost:8080/realms/valeo/.well-known/openid-configuration
 VITE_OIDC_CLIENT_ID=valeo-erp-frontend
 VITE_OIDC_REDIRECT_URI=http://localhost:3000/callback
 ```
 
-***REMOVED******REMOVED******REMOVED*** Production
+### Production
 
 ```bash
-***REMOVED*** .env.production
-VITE_DEMO_MODE=false  ***REMOVED*** ✅ DEMO aus!
+# .env.production
+VITE_DEMO_MODE=false  # ✅ DEMO aus!
 VITE_OIDC_DISCOVERY_URL=https://auth.valeo.example.com/realms/valeo/.well-known/openid-configuration
 VITE_OIDC_CLIENT_ID=valeo-erp-frontend
 VITE_OIDC_REDIRECT_URI=https://erp.valeo.example.com/callback
@@ -601,61 +601,61 @@ npm run build -- --mode production
 
 ---
 
-***REMOVED******REMOVED*** 🔧 Backend-Hardening
+## 🔧 Backend-Hardening
 
-***REMOVED******REMOVED******REMOVED*** Demo-Endpoints entfernen
+### Demo-Endpoints entfernen
 
 **Datei:** `main.py`
 
 ```python
-***REMOVED*** ⚠️ DEMO-LOGIN NUR FÜR ENTWICKLUNG!
-***REMOVED*** app/auth/router.py enthält Demo-Login-Endpoints
+# ⚠️ DEMO-LOGIN NUR FÜR ENTWICKLUNG!
+# app/auth/router.py enthält Demo-Login-Endpoints
 
-***REMOVED*** Development
+# Development
 if os.getenv("DEMO_MODE") == "true":
     from app.auth.router import router as auth_router
     app.include_router(auth_router)
     logger.warning("⚠️ DEMO_MODE active - NOT FOR PRODUCTION!")
 
-***REMOVED*** Production
+# Production
 else:
     logger.info("✅ DEMO_MODE disabled - Production auth only")
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📊 Migration von Demo zu Production
+## 📊 Migration von Demo zu Production
 
-***REMOVED******REMOVED******REMOVED*** Schritt 1: OIDC-Provider setup
+### Schritt 1: OIDC-Provider setup
 - [ ] Keycloak/Azure AD konfiguriert
 - [ ] Client registriert
 - [ ] Scopes definiert
 - [ ] Test-User angelegt
 
-***REMOVED******REMOVED******REMOVED*** Schritt 2: ENV-Variablen
+### Schritt 2: ENV-Variablen
 - [ ] VITE_OIDC_DISCOVERY_URL gesetzt
 - [ ] VITE_OIDC_CLIENT_ID gesetzt
 - [ ] VITE_DEMO_MODE=false gesetzt
 
-***REMOVED******REMOVED******REMOVED*** Schritt 3: Backend
+### Schritt 3: Backend
 - [ ] DEMO_MODE=false in Backend-ENV
 - [ ] Demo-Router nicht gemountet
 - [ ] OIDC-Validation aktiv
 
-***REMOVED******REMOVED******REMOVED*** Schritt 4: Testing
+### Schritt 4: Testing
 - [ ] OIDC-Login funktioniert
 - [ ] Token-Refresh funktioniert
 - [ ] Scope-Protection funktioniert
 - [ ] Logout funktioniert
 
-***REMOVED******REMOVED******REMOVED*** Schritt 5: Deploy
+### Schritt 5: Deploy
 - [ ] Frontend-Build (production-mode)
 - [ ] Backend-Deploy (DEMO_MODE=false)
 - [ ] Verify: Keine Demo-Endpoints erreichbar
 
 ---
 
-***REMOVED******REMOVED*** ✅ Implementierungs-Status
+## ✅ Implementierungs-Status
 
 | Feature | Status | Datei |
 |---------|--------|-------|
@@ -672,7 +672,7 @@ else:
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Next Steps
+## 🎯 Next Steps
 
 1. ✅ **OIDC-Provider auswählen** (Keycloak/Azure AD)
 2. ✅ **Provider konfigurieren** (Client, Scopes, Users)
@@ -683,7 +683,7 @@ else:
 
 ---
 
-***REMOVED******REMOVED*** 🧪 Staging-Environment
+## 🧪 Staging-Environment
 
 Für vollständiges Staging-Setup mit Docker Desktop (Windows):
 
@@ -691,15 +691,15 @@ Für vollständiges Staging-Setup mit Docker Desktop (Windows):
 
 **Quick-Start:**
 ```powershell
-***REMOVED*** 1. Staging-Umgebung deployen
+# 1. Staging-Umgebung deployen
 .\scripts\staging-deploy.ps1
 
-***REMOVED*** 2. Smoke-Tests ausführen
+# 2. Smoke-Tests ausführen
 .\scripts\smoke-tests-staging.sh
 
-***REMOVED*** 3. Browser öffnen
-***REMOVED*** Frontend: http://localhost:3001
-***REMOVED*** Login: test-admin / Test123!
+# 3. Browser öffnen
+# Frontend: http://localhost:3001
+# Login: test-admin / Test123!
 ```
 
 **Features:**
@@ -712,4 +712,5 @@ Für vollständiges Staging-Setup mit Docker Desktop (Windows):
 ---
 
 **🔒 Production-Authentication: READY! 🚀**
+
 

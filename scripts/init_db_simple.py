@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Einfaches DB-Initialisierungs-Skript
 Erstellt nur die Tabellen ohne FastAPI-Context
@@ -7,7 +7,7 @@ Erstellt nur die Tabellen ohne FastAPI-Context
 import sys
 from pathlib import Path
 
-***REMOVED*** Füge Projekt-Root zu sys.path hinzu
+# Füge Projekt-Root zu sys.path hinzu
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
@@ -16,7 +16,7 @@ def init_database():
     print("PostgreSQL Datenbank-Initialisierung")
     print("=" * 80)
     
-    ***REMOVED*** Schritt 1: DB-Verbindung testen
+    # Schritt 1: DB-Verbindung testen
     print("\n1. Teste PostgreSQL-Verbindung...")
     try:
         from app.core.database import engine
@@ -27,7 +27,7 @@ def init_database():
         print(f"   ❌ Verbindungsfehler: {e}")
         return False
     
-    ***REMOVED*** Schritt 2: Schemas prüfen
+    # Schritt 2: Schemas prüfen
     print("\n2. Prüfe Schemas...")
     try:
         with engine.connect() as conn:
@@ -46,14 +46,14 @@ def init_database():
         print(f"   ❌ Schema-Fehler: {e}")
         return False
     
-    ***REMOVED*** Schritt 3: Tabellen erstellen
+    # Schritt 3: Tabellen erstellen
     print("\n3. Erstelle Tabellen...")
     try:
         from app.core.database import Base
         Base.metadata.create_all(bind=engine)
         print(f"   ✅ Tabellen erstellt")
         
-        ***REMOVED*** Zähle erstellte Tabellen
+        # Zähle erstellte Tabellen
         with engine.connect() as conn:
             result = conn.execute("""
                 SELECT schemaname, tablename 
@@ -79,4 +79,5 @@ def init_database():
 if __name__ == "__main__":
     success = init_database()
     sys.exit(0 if success else 1)
+
 

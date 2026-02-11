@@ -1,12 +1,12 @@
-***REMOVED*** Produkt- & Sprintplanung: a.eins-Parität
+# Produkt- & Sprintplanung: a.eins-Parität
 
-***REMOVED******REMOVED*** Vision & Ziele
+## Vision & Ziele
 
 - **Kurzfristig**: Compliance- und Infrastruktur-Lücken schließen (InfraStat, Zoll, Workflow-Core, RAG-Basis).
 - **Mittelfristig**: Funktionsparität in Fertigung, Service, Beschaffung herstellen.
 - **Langfristig**: Differenzierende KI-Erlebnisse und Automatisierungen ausbauen.
 
-***REMOVED******REMOVED*** Agenten-Teamstruktur
+## Agenten-Teamstruktur
 
 | Agent | Fokus | Hauptaufgaben | Schnittstellen |
 |-------|-------|---------------|----------------|
@@ -20,7 +20,7 @@
 
 > Jeder Agent umfasst ein cross-funktionales Squad (Dev, QA, Domain SME) und arbeitet teilautonom nach festgelegten Guardrails.
 
-***REMOVED******REMOVED*** Programm-Inkremente
+## Programm-Inkremente
 
 1. **PI-1 "Compliance Foundation" (6 Wochen)**
    - Deliverables: InfraStat-MVP, Zoll-Screening, Workflow-Core (Phase 1), RAG-Ingestion-MVP.
@@ -32,7 +32,7 @@
    - Deliverables: KI-Forecasts, Predictive Maintenance, Closed-Loop Feedback, Gamifizierte Dashboards.
    - Agenten: Analytics, Service, Supply-Chain, Orchestrator.
 
-***REMOVED******REMOVED*** Sprint Cadence (2 Wochen)
+## Sprint Cadence (2 Wochen)
 
 | Sprint | Schwerpunkt | Hauptstories | Definition of Done |
 |--------|-------------|--------------|--------------------|
@@ -42,7 +42,7 @@
 | SP-4 | RAG-Runtime | RAG-Gateway API, IDE Plugin Alpha | Feedback von Dev-Teams |
 | SP-5+ | Domain-Spezifika | Fertigung, Service, Lieferantenportal | KPI-Abdeckung, UAT bestanden |
 
-***REMOVED******REMOVED*** Backlog-Struktur
+## Backlog-Struktur
 
 - **Epic E1 – Workflow Core** (`backend/workflow/`)
   - Story W1: Event Schema Standardisierung
@@ -61,25 +61,26 @@
   - Story D2: Service SLA Automation
   - Story D3: Supplier Scorecards
 
-***REMOVED******REMOVED*** Governance & Rituale
+## Governance & Rituale
 
 - **Weekly Sync**: Agenten führen Fortschrittsberichte (KPIs, Blocker) in `docs/roadmap/status/` fort.
 - **PI Planning**: Remote-Workshop mit allen Agenten, Abgleich Abhängigkeiten.
 - **Design Authority Board**: Prüft Einhaltung der Design Guidelines und KI-Governance.
 - **Retro & Learning Loop**: Jede vierte Woche; Erkenntnisse wandern in `knowledge-base/`.
 
-***REMOVED******REMOVED*** Risiken & Mitigation
+## Risiken & Mitigation
 
 - **Regulatorische Deadline** → Frühe Abstimmung mit Behörden, Puffer in SP-2.
 - **KI-Bias & Explainability** → Testharness, Monitoring, Compliance-Agent sign-off.
 - **Ressourcenknappheit** → Cross-Training, Agenten können Stories übernehmen (Swarming).
 - **Technische Schulden** → Technischer Budget-Track pro Sprint, Priorisierung über Orchestrator-Agent.
 
-***REMOVED******REMOVED*** KPIs
+## KPIs
 
 - Time-to-Compliance (InfraStat, Zoll).
 - Workflow-Durchsatz & Fehlerrate.
 - RAG-Nutzung & Relevanzscore.
 - Sprint Predictability (Commit vs. Done).
 - Stakeholder-Zufriedenheit (NPS).
+
 

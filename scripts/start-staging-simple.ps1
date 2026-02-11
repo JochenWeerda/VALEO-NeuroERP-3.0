@@ -1,5 +1,5 @@
-***REMOVED*** VALEO NeuroERP - Einfaches Staging-Start-Script
-***REMOVED*** Startet Infrastruktur in Docker + Backend/Frontend nativ
+# VALEO NeuroERP - Einfaches Staging-Start-Script
+# Startet Infrastruktur in Docker + Backend/Frontend nativ
 
 $ErrorActionPreference = "Stop"
 
@@ -9,7 +9,7 @@ Write-Host "  VALEO NeuroERP - Staging (Einfach)" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Schritt 1: Infrastruktur starten
+# Schritt 1: Infrastruktur starten
 Write-Host "Schritt 1: Starte Infrastruktur (Docker)..." -ForegroundColor Yellow
 Write-Host "   - PostgreSQL" -ForegroundColor White
 Write-Host "   - Redis" -ForegroundColor White
@@ -21,11 +21,11 @@ docker-compose -f docker-compose.staging-infra.yml up -d
 Write-Host "Infrastruktur gestartet!" -ForegroundColor Green
 Write-Host ""
 
-***REMOVED*** Schritt 2: Warten auf Keycloak
+# Schritt 2: Warten auf Keycloak
 Write-Host "Warte auf Keycloak (~60 Sekunden)..." -ForegroundColor Yellow
 Start-Sleep -Seconds 60
 
-***REMOVED*** Schritt 3: Anleitung
+# Schritt 3: Anleitung
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Green
 Write-Host "  INFRASTRUKTUR LAEUFT!" -ForegroundColor Green
@@ -60,3 +60,4 @@ Write-Host ""
 
 Write-Host "Tipp: Oeffne 2 separate PowerShell-Fenster" -ForegroundColor Cyan
 Write-Host ""
+

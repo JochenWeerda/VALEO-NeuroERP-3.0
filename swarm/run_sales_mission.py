@@ -14,11 +14,11 @@ BASE_URL = os.environ.get("NEUROERP_URL", "http://localhost:3000")
 OUT_DIR = Path("evidence/screenshots")
 HANDOFF_DIR = Path("swarm/handoffs")
 
-***REMOVED*** Stelle sicher, dass die Verzeichnisse existieren
+# Stelle sicher, dass die Verzeichnisse existieren
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 HANDOFF_DIR.mkdir(parents=True, exist_ok=True)
 
-***REMOVED*** Sales-spezifische Screenshots
+# Sales-spezifische Screenshots
 SALES_DIR = OUT_DIR / "sales"
 SALES_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -65,7 +65,7 @@ async def explore_sales():
         print("="*60)
         
         try:
-            ***REMOVED*** 1. Navigiere zur Startseite
+            # 1. Navigiere zur Startseite
             print("[*] Navigiere zu:", BASE_URL)
             await page.goto(BASE_URL, wait_until="networkidle")
             await asyncio.sleep(2)
@@ -74,7 +74,7 @@ async def explore_sales():
             screenshots.append(screenshot)
             print(f"  [OK] Screenshot: {screenshot['filename']}")
             
-            ***REMOVED*** 2. Warte auf Dashboard/Home
+            # 2. Warte auf Dashboard/Home
             print("\n[*] Warte auf Seite zu laden...")
             await asyncio.sleep(2)
             
@@ -82,7 +82,7 @@ async def explore_sales():
             screenshots.append(screenshot)
             print(f"  [OK] Screenshot: {screenshot['filename']}")
             
-            ***REMOVED*** 3. Navigiere zu Sales-Modul
+            # 3. Navigiere zu Sales-Modul
             print("\n[*] Suche Sales-Modul...")
             
             sales_selectors = [
@@ -118,7 +118,7 @@ async def explore_sales():
             print(f"  [OK] Screenshot: {screenshot['filename']}")
             flows.append({"flow_id": "SALES-NAV-01", "description": "Sales Module Navigation"})
             
-            ***REMOVED*** 4. FLOW 1: Offers/Angebote
+            # 4. FLOW 1: Offers/Angebote
             print("\n[*] FLOW 1: Exploriere Offers/Angebote...")
             
             offer_selectors = [
@@ -154,7 +154,7 @@ async def explore_sales():
             print(f"  [OK] Screenshot: {screenshot['filename']}")
             flows.append({"flow_id": "SALES-QTN-01", "description": "Offers List View"})
             
-            ***REMOVED*** Versuche neues Angebot zu erstellen
+            # Versuche neues Angebot zu erstellen
             print("\n[*] Suche 'Neues Angebot' Button...")
             
             create_selectors = [
@@ -187,7 +187,7 @@ async def explore_sales():
                 print(f"  [OK] Screenshot: {screenshot['filename']}")
                 flows.append({"flow_id": "SALES-QTN-02", "description": "Create Offer Form"})
                 
-                ***REMOVED*** Analysiere Formular-Felder
+                # Analysiere Formular-Felder
                 form_fields = await page.locator('input, select, textarea').all()
                 field_info = []
                 for field in form_fields[:15]:
@@ -213,10 +213,10 @@ async def explore_sales():
                     "severity": "high"
                 })
             
-            ***REMOVED*** 5. FLOW 2: Orders/Aufträge
+            # 5. FLOW 2: Orders/Aufträge
             print("\n[*] FLOW 2: Exploriere Orders/Aufträge...")
             
-            ***REMOVED*** Zurück zur Sales-Übersicht
+            # Zurück zur Sales-Übersicht
             await page.goto(f"{BASE_URL}/sales", wait_until="networkidle")
             await asyncio.sleep(2)
             
@@ -252,7 +252,7 @@ async def explore_sales():
             print(f"  [OK] Screenshot: {screenshot['filename']}")
             flows.append({"flow_id": "SALES-ORD-01", "description": "Orders List View"})
             
-            ***REMOVED*** Versuche neuen Auftrag zu erstellen
+            # Versuche neuen Auftrag zu erstellen
             create_found = False
             for selector in create_selectors:
                 try:
@@ -279,7 +279,7 @@ async def explore_sales():
                     "severity": "high"
                 })
             
-            ***REMOVED*** 6. FLOW 3: Deliveries/Lieferungen
+            # 6. FLOW 3: Deliveries/Lieferungen
             print("\n[*] FLOW 3: Exploriere Deliveries/Lieferungen...")
             
             await page.goto(f"{BASE_URL}/sales", wait_until="networkidle")
@@ -317,7 +317,7 @@ async def explore_sales():
             print(f"  [OK] Screenshot: {screenshot['filename']}")
             flows.append({"flow_id": "SALES-DLV-01", "description": "Deliveries List View"})
             
-            ***REMOVED*** 7. FLOW 4: Invoices/Rechnungen
+            # 7. FLOW 4: Invoices/Rechnungen
             print("\n[*] FLOW 4: Exploriere Invoices/Rechnungen...")
             
             await page.goto(f"{BASE_URL}/sales", wait_until="networkidle")
@@ -355,7 +355,7 @@ async def explore_sales():
             print(f"  [OK] Screenshot: {screenshot['filename']}")
             flows.append({"flow_id": "SALES-BIL-01", "description": "Invoices List View"})
             
-            ***REMOVED*** Zusammenfassung
+            # Zusammenfassung
             print("\n" + "="*60)
             print("[OK] Exploration abgeschlossen!")
             print(f"  Screenshots: {len(screenshots)}")
@@ -381,7 +381,7 @@ async def explore_sales():
             await browser.close()
             print("[OK] Browser geschlossen")
     
-    ***REMOVED*** JSON Summary erstellen
+    # JSON Summary erstellen
     ts = datetime.datetime.utcnow().isoformat().replace(":", "-")
     summary = {
         "mission": "Sales Module Exploration",
@@ -404,16 +404,16 @@ async def explore_sales():
     with open(summary_file, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)
     
-    ***REMOVED*** Handoff-Note erstellen
+    # Handoff-Note erstellen
     handoff_file = HANDOFF_DIR / f"ui-explorer-sales-{ts}.md"
     with open(handoff_file, "w", encoding="utf-8") as f:
-        f.write(f"""***REMOVED*** UI Explorer Handoff - Sales Module
+        f.write(f"""# UI Explorer Handoff - Sales Module
 
 **Date:** {datetime.datetime.utcnow().isoformat()}
 **Explored URL:** {BASE_URL}
 **Status:** [OK] Complete
 
-***REMOVED******REMOVED*** Mission Summary
+## Mission Summary
 
 - **Module:** Sales / Order-to-Cash
 - **Flows Explored:**
@@ -423,7 +423,7 @@ async def explore_sales():
   - Deliveries List (SALES-DLV-01)
   - Invoices List (SALES-BIL-01)
 
-***REMOVED******REMOVED*** Screenshots
+## Screenshots
 
 Total: {len(screenshots)} screenshots
 
@@ -434,7 +434,7 @@ Total: {len(screenshots)} screenshots
             f.write(f"   - URL: {ss['url']}\n")
             f.write(f"   - Timestamp: {ss['timestamp']}\n\n")
         
-        f.write(f"""***REMOVED******REMOVED*** Flows
+        f.write(f"""## Flows
 
 Total: {len(flows)} flows
 
@@ -443,7 +443,7 @@ Total: {len(flows)} flows
             f.write(f"{i}. **{flow['flow_id']}** - {flow['description']}\n")
         
         f.write(f"""
-***REMOVED******REMOVED*** Findings
+## Findings
 
 Total: {len(findings)} findings
 
@@ -460,13 +460,13 @@ Total: {len(findings)} findings
                 f.write(f"   - Message: {finding['message']}\n")
             f.write("\n")
         
-        f.write(f"""***REMOVED******REMOVED*** Evidence
+        f.write(f"""## Evidence
 
 - JSON Summary: `{summary_file}`
 - Screenshots Directory: `{SALES_DIR}/`
 - All Screenshots: {', '.join([ss['filename'] for ss in screenshots])}
 
-***REMOVED******REMOVED*** Capabilities Mapped
+## Capabilities Mapped
 
 """)
         capabilities = list(set([f.get("capability") for f in findings if f.get("capability")]))
@@ -474,7 +474,7 @@ Total: {len(findings)} findings
             f.write(f"- {cap}\n")
         
         f.write(f"""
-***REMOVED******REMOVED*** Next Steps
+## Next Steps
 
 - [ ] GAP-Analyst: Update matrix-sales.csv with evidence IDs
 - [ ] Test-Planner: Create test plan from this handoff
@@ -497,4 +497,5 @@ if __name__ == "__main__":
     asyncio.run(explore_sales())
     
     print("\n[OK] Mission Complete!")
+
 

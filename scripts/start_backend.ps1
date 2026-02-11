@@ -1,12 +1,12 @@
 $ErrorActionPreference = "Stop"
 
-***REMOVED*** Projektverzeichnis bestimmen
+# Projektverzeichnis bestimmen
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $backendPath = Join-Path $projectRoot "backend"
 
 Write-Host "Starting backend server from $backendPath"
 
-***REMOVED*** In das Backend-Verzeichnis wechseln
+# In das Backend-Verzeichnis wechseln
 try {
     Push-Location $backendPath
 } catch {
@@ -14,11 +14,11 @@ try {
     exit 1
 }
 
-***REMOVED*** Python-Umgebungsvariablen setzen
+# Python-Umgebungsvariablen setzen
 $env:PYTHONPATH = $backendPath
 $env:PYTHONDONTWRITEBYTECODE = 1
 
-***REMOVED*** Server mit spezifischen Einstellungen starten
+# Server mit spezifischen Einstellungen starten
 try {
     Write-Host "Starting uvicorn server..."
     uvicorn main:app --reload --host 0.0.0.0 --port 8000

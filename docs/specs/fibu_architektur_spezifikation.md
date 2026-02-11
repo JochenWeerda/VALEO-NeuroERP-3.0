@@ -1,11 +1,11 @@
-***REMOVED*** FiBu-Domain – Architekturmodell für VALEO-NeuroERP
+# FiBu-Domain – Architekturmodell für VALEO-NeuroERP
 
 > Referenzmodell abgeleitet aus der bestehenden FiBu-Übersichtsgrafik.  
 > Ziel: Strukturvorlage für die Domänenmodellierung und Microservice-Zerlegung in VALEO-NeuroERP.
 
 ---
 
-***REMOVED******REMOVED*** 1. Überblick
+## 1. Überblick
 
 Die FiBu-Domain wird als eigenständiger Bereich modelliert, der alle Funktionen der
 Finanzbuchhaltung, Debitoren-/Kreditorenverwaltung, Auswertungen, Schnittstellen und gesetzlichen Meldungen abdeckt.
@@ -27,7 +27,7 @@ generiert.
 
 ---
 
-***REMOVED******REMOVED*** 2. Domänenübersicht (Top-Level)
+## 2. Domänenübersicht (Top-Level)
 
 - **Stammdaten & Konstanten**
 - **Belegfluss & PRIMANOTA (FiBu-Core)**
@@ -41,9 +41,9 @@ generiert.
 
 ---
 
-***REMOVED******REMOVED*** 3. Stammdaten & Konstanten
+## 3. Stammdaten & Konstanten
 
-***REMOVED******REMOVED******REMOVED*** 3.1 Stammdaten
+### 3.1 Stammdaten
 
 Verantwortlich für alle grundlegenden FiBu-Stammdatensätze:
 
@@ -63,7 +63,7 @@ Verantwortlich für alle grundlegenden FiBu-Stammdatensätze:
   - Debitoren-/Kreditorenprozesse
   - Reporting & Auswertungen
 
-***REMOVED******REMOVED******REMOVED*** 3.2 Konstanten
+### 3.2 Konstanten
 
 Parametrisierung der FiBu:
 
@@ -80,9 +80,9 @@ Parametrisierung der FiBu:
 
 ---
 
-***REMOVED******REMOVED*** 4. Belegfluss & PRIMANOTA (FiBu-Core)
+## 4. Belegfluss & PRIMANOTA (FiBu-Core)
 
-***REMOVED******REMOVED******REMOVED*** 4.1 Belegfluss
+### 4.1 Belegfluss
 
 **Eingangsmappe**
 
@@ -97,7 +97,7 @@ Parametrisierung der FiBu:
   - Sonstigen Buchungsbelegen
 - Validierung gegen Stammdaten & Konstanten
 
-***REMOVED******REMOVED******REMOVED*** 4.2 PRIMANOTA (Buchungsengine)
+### 4.2 PRIMANOTA (Buchungsengine)
 
 Zentrales Modul der FiBu-Domain.
 
@@ -125,7 +125,7 @@ Zentrales Modul der FiBu-Domain.
 
 ---
 
-***REMOVED******REMOVED*** 5. Periodische Prozesse & Nebenbuchhaltungen
+## 5. Periodische Prozesse & Nebenbuchhaltungen
 
 Aus der Grafik (rechter oberer Block):
 
@@ -148,9 +148,9 @@ Aus der Grafik (rechter oberer Block):
 
 ---
 
-***REMOVED******REMOVED*** 6. Import-/Export-Schnittstellen & Warenwirtschaft
+## 6. Import-/Export-Schnittstellen & Warenwirtschaft
 
-***REMOVED******REMOVED******REMOVED*** 6.1 Importschnittstellen
+### 6.1 Importschnittstellen
 
 **Diverse Importschnittstellen:**
 
@@ -168,7 +168,7 @@ Aus der Grafik (rechter oberer Block):
 - Mapping auf interne Konten, Kostenstellen, Steuerkennzeichen
 - Validierung und Übergabe an PRIMANOTA
 
-***REMOVED******REMOVED******REMOVED*** 6.2 Fibu-Übergang aus der Warenwirtschaft
+### 6.2 Fibu-Übergang aus der Warenwirtschaft
 
 - Übernahme von:
   - Rechnungen
@@ -176,7 +176,7 @@ Aus der Grafik (rechter oberer Block):
   - Lager-/Bewertungsinformationen (sofern relevant)
 - Transformation in FiBu-Buchungssätze
 
-***REMOVED******REMOVED******REMOVED*** 6.3 Exportschnittstellen
+### 6.3 Exportschnittstellen
 
 **Diverse Exportschnittstellen:**
 
@@ -194,7 +194,7 @@ Aus der Grafik (rechter oberer Block):
 
 ---
 
-***REMOVED******REMOVED*** 7. Auswertungen & Reporting
+## 7. Auswertungen & Reporting
 
 Module direkt an PRIMANOTA angebunden:
 
@@ -207,7 +207,7 @@ Module direkt an PRIMANOTA angebunden:
 - **Zinswesen**
 - **Wechselbuchhaltung**
 
-***REMOVED******REMOVED******REMOVED*** 7.1 Finanzberichte
+### 7.1 Finanzberichte
 
 - Summen- und Saldenlisten (SuSa)
 - BWA (Betriebswirtschaftliche Auswertung)
@@ -215,13 +215,13 @@ Module direkt an PRIMANOTA angebunden:
 - GuV
 - ggf. IFRS-Bilanz
 
-***REMOVED******REMOVED******REMOVED*** 7.2 Kontenbezogene Auswertungen
+### 7.2 Kontenbezogene Auswertungen
 
 - Kontenblätter
 - Kontoauszüge
 - Druckfunktionen gemäß Konstanten (Druckpositionen, Layouts)
 
-***REMOVED******REMOVED******REMOVED*** 7.3 Kennzahlen & Analysen
+### 7.3 Kennzahlen & Analysen
 
 - Kennzahlenanalyse (z. B. Liquidität, Debitorenlaufzeiten, Verbindlichkeitsstruktur)
 - Anbindung an Kostenrechnung
@@ -229,7 +229,7 @@ Module direkt an PRIMANOTA angebunden:
 
 ---
 
-***REMOVED******REMOVED*** 8. Debitorenmanagement (Accounts Receivable)
+## 8. Debitorenmanagement (Accounts Receivable)
 
 Top-Level Modul: **Debitoren**
 
@@ -258,7 +258,7 @@ Diese Funktionen greifen auf:
 
 ---
 
-***REMOVED******REMOVED*** 9. OP-Verwaltung (Offene Posten)
+## 9. OP-Verwaltung (Offene Posten)
 
 Direkt an PRIMANOTA angebundenes Modul:
 
@@ -280,7 +280,7 @@ Unterfunktionen:
 
 ---
 
-***REMOVED******REMOVED*** 10. Kreditorenmanagement (Accounts Payable)
+## 10. Kreditorenmanagement (Accounts Payable)
 
 Top-Level Modul: **Kreditoren**
 
@@ -304,7 +304,7 @@ Diese Funktionen greifen auf:
 
 ---
 
-***REMOVED******REMOVED*** 11. Steuern & Behördenmeldungen
+## 11. Steuern & Behördenmeldungen
 
 Modul: **UStVA / ELSTER**
 
@@ -317,7 +317,7 @@ Modul: **UStVA / ELSTER**
 
 ---
 
-***REMOVED******REMOVED*** 12. Beispielhafte Microservice-/Bounded-Context-Zerlegung
+## 12. Beispielhafte Microservice-/Bounded-Context-Zerlegung
 
 > Vorschlag für VALEO-NeuroERP (FiBu-Domäne):
 
@@ -344,7 +344,7 @@ Modul: **UStVA / ELSTER**
 
 ---
 
-***REMOVED******REMOVED*** 13. Mermaid-Kontextdiagramm (vereinfacht)
+## 13. Mermaid-Kontextdiagramm (vereinfacht)
 
 ```mermaid
 flowchart TD
@@ -421,3 +421,4 @@ flowchart TD
   P3 --> AP
 
   Reporting --> R4
+

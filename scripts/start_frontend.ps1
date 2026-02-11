@@ -1,17 +1,17 @@
-***REMOVED*** ===================================================
-***REMOVED*** Frontend-Starter Skript
-***REMOVED*** ===================================================
-***REMOVED*** Startet den Frontend-Entwicklungsserver mit 
-***REMOVED*** verbesserter PowerShell-Kompatibilität
-***REMOVED*** ===================================================
+# ===================================================
+# Frontend-Starter Skript
+# ===================================================
+# Startet den Frontend-Entwicklungsserver mit 
+# verbesserter PowerShell-Kompatibilität
+# ===================================================
 
-***REMOVED*** Lade Hilfsfunktionen
+# Lade Hilfsfunktionen
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 . "$scriptPath\powershell_compatibility.ps1"
 
 $ErrorActionPreference = "Stop"
 
-***REMOVED*** Projektverzeichnis bestimmen
+# Projektverzeichnis bestimmen
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $frontendPath = Join-Path $projectRoot "frontend"
 
@@ -23,7 +23,7 @@ Write-Host @"
 
 Write-Host "Arbeitsverzeichnis: $frontendPath"
 
-***REMOVED*** In das Frontend-Verzeichnis wechseln
+# In das Frontend-Verzeichnis wechseln
 try {
     Push-Location $frontendPath
 } catch {
@@ -31,20 +31,20 @@ try {
     exit 1
 }
 
-***REMOVED*** Node-Version prüfen
+# Node-Version prüfen
 $nodeVersion = node -v
 Write-Host "Verwende Node Version: $nodeVersion"
 $npmVersion = npm -v
 Write-Host "Verwende npm Version: $npmVersion"
 
-***REMOVED*** Vite Config prüfen und korrigieren
+# Vite Config prüfen und korrigieren
 $viteConfigPath = Join-Path $frontendPath "vite.config.js"
 if (!(Test-Path $viteConfigPath)) {
     Write-Warning "vite.config.js nicht gefunden. Wird erstellt..."
     Copy-Item (Join-Path $PSScriptRoot "templates" "vite.config.template.js") $viteConfigPath
 }
 
-***REMOVED*** JSX-Konfiguration prüfen
+# JSX-Konfiguration prüfen
 $viteContent = Get-Content $viteConfigPath -Raw
 if ($viteContent -notmatch "jsxFactory") {
     Write-Warning "JSX-Konfiguration in vite.config.js fehlt oder ist fehlerhaft. Wird korrigiert..."
@@ -62,13 +62,13 @@ plugins: [
     Write-Host "JSX-Konfiguration wurde zu vite.config.js hinzugefügt"
 }
 
-***REMOVED*** Node-Module installieren falls nötig
+# Node-Module installieren falls nötig
 if (!(Test-Path "node_modules")) {
     Write-Host "Node-Module werden installiert..."
     npm install --silent
 }
 
-***REMOVED*** Vite-Dev-Server starten
+# Vite-Dev-Server starten
 try {
     Write-Host "Starte Vite-Dev-Server..."
     npm run dev -- --port 5173 --host 0.0.0.0
@@ -88,13 +88,13 @@ Write-Host ""
 Write-Host "Starting frontend server from $frontendPath"
 Set-Location $frontendPath
 
-***REMOVED*** Installiere Dependencies falls nötig
+# Installiere Dependencies falls nötig
 if (-not (Test-Path "node_modules")) {
     Write-Host "Installing dependencies..."
     npm install --silent
 }
 
-***REMOVED*** Ports prüfen und freigeben
+# Ports prüfen und freigeben
 $ports = @(3000..3010)
 foreach ($port in $ports) {
     $process = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
@@ -104,7 +104,7 @@ foreach ($port in $ports) {
     }
 }
 
-***REMOVED*** Development Server mit spezifischem Port starten
+# Development Server mit spezifischem Port starten
 $env:PORT = 3000
 try {
     npm run dev

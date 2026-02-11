@@ -1,11 +1,11 @@
-***REMOVED*** Start Orchestration für GAP-Schließung
-***REMOVED*** Option 3: Vollständige Implementierung mit 4 parallelen Agenten
+# Start Orchestration für GAP-Schließung
+# Option 3: Vollständige Implementierung mit 4 parallelen Agenten
 
 Write-Host "🎼 VALEO NeuroERP - GAP-Schließung Orchestrierung" -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Prüfe Python
+# Prüfe Python
 Write-Host "🔍 Prüfe Python..." -ForegroundColor Yellow
 try {
     $pythonVersion = python --version
@@ -15,7 +15,7 @@ try {
     exit 1
 }
 
-***REMOVED*** Prüfe Verzeichnisse
+# Prüfe Verzeichnisse
 Write-Host "🔍 Prüfe Verzeichnisse..." -ForegroundColor Yellow
 $swarmPath = "swarm"
 $statusPath = "$swarmPath\status"
@@ -32,7 +32,7 @@ if (-not (Test-Path $handoffsPath)) {
 }
 Write-Host "✅ Verzeichnisse vorhanden" -ForegroundColor Green
 
-***REMOVED*** Initialisiere Orchestrator
+# Initialisiere Orchestrator
 Write-Host ""
 Write-Host "🎼 Initialisiere Orchestrator..." -ForegroundColor Yellow
 python swarm\orchestrator.py --init
@@ -45,7 +45,7 @@ Write-Host ""
 Write-Host "✅ Orchestrator initialisiert" -ForegroundColor Green
 Write-Host ""
 
-***REMOVED*** Zeige nächste Schritte
+# Zeige nächste Schritte
 Write-Host "📋 Nächste Schritte:" -ForegroundColor Cyan
 Write-Host "1. Sprint 1 starten: python swarm\orchestrator.py --sprint-start 1" -ForegroundColor White
 Write-Host "2. Agenten starten (siehe swarm\missions\gap-closure-orchestration.md)" -ForegroundColor White
@@ -56,4 +56,5 @@ Write-Host "- Orchestrierung: swarm\missions\gap-closure-orchestration.md" -Fore
 Write-Host "- Agent-Zuordnung: swarm\missions\agent-assignments.md" -ForegroundColor White
 Write-Host "- Dashboard: swarm\status\orchestrator-dashboard.md" -ForegroundColor White
 Write-Host ""
+
 

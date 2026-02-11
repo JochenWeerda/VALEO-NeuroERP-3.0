@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Erstellt Tabellen direkt mit SQLAlchemy
 Läuft im Docker-Netzwerk oder nutzt existierende Connection
@@ -12,7 +12,7 @@ sys.path.insert(0, str(project_root))
 from sqlalchemy import create_engine, text
 from app.infrastructure.models import Base
 
-***REMOVED*** Verwende die korrekte DB-URL
+# Verwende die korrekte DB-URL
 DATABASE_URL = "postgresql://valeo_dev:REDACTED_PASSWORD@localhost:5432/valeo_neuro_erp"
 
 print("=" * 80)
@@ -53,4 +53,5 @@ except Exception as e:
     import traceback
     traceback.print_exc()
     sys.exit(1)
+
 

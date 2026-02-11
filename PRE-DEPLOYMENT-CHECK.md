@@ -1,4 +1,4 @@
-***REMOVED*** Pre-Deployment-Check für VALEO-NeuroERP 3.0
+# Pre-Deployment-Check für VALEO-NeuroERP 3.0
 
 **Datum:** 2025-10-09  
 **Version:** 3.0.0  
@@ -6,9 +6,9 @@
 
 ---
 
-***REMOVED******REMOVED*** ✅ Phase 1: Code & Build
+## ✅ Phase 1: Code & Build
 
-***REMOVED******REMOVED******REMOVED*** 1.1 Code-Qualität
+### 1.1 Code-Qualität
 - [x] **Alle Tests passing**
   - Unit-Tests: ✅
   - E2E-Tests: ✅ 30+ Playwright-Tests
@@ -27,7 +27,7 @@
   - Safety: ✅ Dependency-Check
   - Grype: ✅ Vulnerability-Scan
 
-***REMOVED******REMOVED******REMOVED*** 1.2 Build-Artefakte
+### 1.2 Build-Artefakte
 - [x] **Docker-Image**
   - Multi-stage Build: ✅
   - Non-root User: ✅
@@ -42,11 +42,11 @@
 
 ---
 
-***REMOVED******REMOVED*** ✅ Phase 2: Database & Migrations
+## ✅ Phase 2: Database & Migrations
 
-***REMOVED******REMOVED******REMOVED*** 2.1 PostgreSQL-Setup
+### 2.1 PostgreSQL-Setup
 ```bash
-***REMOVED*** Prüfe PostgreSQL-Verbindung
+# Prüfe PostgreSQL-Verbindung
 psql -h $DB_HOST -U $DB_USER -d valeo_erp -c "SELECT 1;"
 ```
 - [ ] PostgreSQL läuft (Version ≥ 14)
@@ -54,12 +54,12 @@ psql -h $DB_HOST -U $DB_USER -d valeo_erp -c "SELECT 1;"
 - [ ] Database `valeo_erp` erstellt
 - [ ] User `valeo` hat Rechte
 
-***REMOVED******REMOVED******REMOVED*** 2.2 Migrations
+### 2.2 Migrations
 ```bash
-***REMOVED*** Alembic-Migration durchführen
+# Alembic-Migration durchführen
 alembic upgrade head
 
-***REMOVED*** Verify tables
+# Verify tables
 psql -h $DB_HOST -U $DB_USER -d valeo_erp -c "\dt"
 ```
 - [ ] 4 Migrations angewendet:
@@ -68,9 +68,9 @@ psql -h $DB_HOST -U $DB_USER -d valeo_erp -c "\dt"
   - [ ] 003_add_archive_table
   - [ ] 004_add_numbering_table
 
-***REMOVED******REMOVED******REMOVED*** 2.3 Rollback-Test
+### 2.3 Rollback-Test
 ```bash
-***REMOVED*** Test Rollback auf Staging
+# Test Rollback auf Staging
 alembic downgrade -1
 alembic upgrade +1
 ```
@@ -79,9 +79,9 @@ alembic upgrade +1
 
 ---
 
-***REMOVED******REMOVED*** ✅ Phase 3: Infrastructure & Secrets
+## ✅ Phase 3: Infrastructure & Secrets
 
-***REMOVED******REMOVED******REMOVED*** 3.1 Kubernetes-Namespace
+### 3.1 Kubernetes-Namespace
 ```bash
 kubectl create namespace production
 kubectl label namespace production env=production
@@ -90,7 +90,7 @@ kubectl label namespace production env=production
 - [ ] Resource-Quotas gesetzt
 - [ ] Network-Policies angewendet
 
-***REMOVED******REMOVED******REMOVED*** 3.2 Secrets
+### 3.2 Secrets
 ```bash
 kubectl create secret generic valeo-erp-secrets \
   --from-literal=database-url=postgresql://... \
@@ -101,7 +101,7 @@ kubectl create secret generic valeo-erp-secrets \
 - [ ] OIDC-Secrets
 - [ ] API-Keys (falls benötigt)
 
-***REMOVED******REMOVED******REMOVED*** 3.3 ConfigMaps
+### 3.3 ConfigMaps
 ```bash
 kubectl create configmap valeo-erp-config \
   --from-literal=oidc-discovery-url=https://... \
@@ -114,20 +114,20 @@ kubectl create configmap valeo-erp-config \
 
 ---
 
-***REMOVED******REMOVED*** ✅ Phase 4: Observability
+## ✅ Phase 4: Observability
 
-***REMOVED******REMOVED******REMOVED*** 4.1 Prometheus
+### 4.1 Prometheus
 ```bash
-***REMOVED*** Verify Prometheus scraping
+# Verify Prometheus scraping
 curl http://localhost:9090/api/v1/targets
 ```
 - [ ] Prometheus installiert
 - [ ] ServiceMonitor konfiguriert
 - [ ] Scraping aktiv
 
-***REMOVED******REMOVED******REMOVED*** 4.2 Grafana
+### 4.2 Grafana
 ```bash
-***REMOVED*** Import Dashboard
+# Import Dashboard
 curl -X POST http://localhost:3000/api/dashboards/db \
   -H "Content-Type: application/json" \
   -d @monitoring/grafana/dashboards/valeo-erp.json
@@ -136,9 +136,9 @@ curl -X POST http://localhost:3000/api/dashboards/db \
 - [ ] Dashboard importiert
 - [ ] Datasource konfiguriert
 
-***REMOVED******REMOVED******REMOVED*** 4.3 Alerts
+### 4.3 Alerts
 ```bash
-***REMOVED*** Verify Alert-Manager
+# Verify Alert-Manager
 curl http://localhost:9093/api/v1/status
 ```
 - [ ] Alert-Manager konfiguriert
@@ -147,11 +147,11 @@ curl http://localhost:9093/api/v1/status
 
 ---
 
-***REMOVED******REMOVED*** ✅ Phase 5: Backups & DR
+## ✅ Phase 5: Backups & DR
 
-***REMOVED******REMOVED******REMOVED*** 5.1 Backup-Konfiguration
+### 5.1 Backup-Konfiguration
 ```bash
-***REMOVED*** Test Backup-Script
+# Test Backup-Script
 ./scripts/backup-db.sh
 ls -lh /backups/postgresql/daily/
 ```
@@ -160,9 +160,9 @@ ls -lh /backups/postgresql/daily/
 - [ ] Retention-Policy aktiv (30d/12m)
 - [ ] S3/Azure-Sync (optional)
 
-***REMOVED******REMOVED******REMOVED*** 5.2 Restore-Test
+### 5.2 Restore-Test
 ```bash
-***REMOVED*** Test auf Staging
+# Test auf Staging
 ./scripts/restore-db.sh /backups/postgresql/daily/latest.sql.gz
 ```
 - [ ] Restore auf Staging erfolgreich
@@ -172,33 +172,33 @@ ls -lh /backups/postgresql/daily/
 
 ---
 
-***REMOVED******REMOVED*** ✅ Phase 6: Security & Compliance
+## ✅ Phase 6: Security & Compliance
 
-***REMOVED******REMOVED******REMOVED*** 6.1 RBAC
+### 6.1 RBAC
 ```bash
-***REMOVED*** Test Scope-Guards
+# Test Scope-Guards
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/api/export/sales
-***REMOVED*** Should return 403 without docs:export scope
+# Should return 403 without docs:export scope
 ```
 - [x] Scopes definiert
 - [x] Guards implementiert
 - [ ] 403-Tests für alle geschützten Endpoints
 
-***REMOVED******REMOVED******REMOVED*** 6.2 Rate-Limiting
+### 6.2 Rate-Limiting
 ```bash
-***REMOVED*** Test Rate-Limit
+# Test Rate-Limit
 for i in {1..150}; do curl http://localhost:8000/api/documents/sales; done
-***REMOVED*** Should return 429 after 100 requests
+# Should return 429 after 100 requests
 ```
 - [x] SlowAPI konfiguriert
 - [ ] Rate-Limits aktiv (100/min)
 - [ ] Export-Limits aktiv (10/min)
 
-***REMOVED******REMOVED******REMOVED*** 6.3 GDPR
+### 6.3 GDPR
 ```bash
-***REMOVED*** Test PII-Redaction
+# Test PII-Redaction
 grep -i "password" /var/log/valeo-erp/*.log
-***REMOVED*** Should find "password=***"
+# Should find "password=***"
 ```
 - [x] PII-Redaction aktiv
 - [x] GDPR-Endpoints vorhanden
@@ -206,9 +206,9 @@ grep -i "password" /var/log/valeo-erp/*.log
 
 ---
 
-***REMOVED******REMOVED*** ✅ Phase 7: Staging-Deployment
+## ✅ Phase 7: Staging-Deployment
 
-***REMOVED******REMOVED******REMOVED*** 7.1 Deploy to Staging
+### 7.1 Deploy to Staging
 ```bash
 helm upgrade --install valeo-erp-staging ./k8s/helm/valeo-erp \
   --namespace staging \
@@ -221,23 +221,23 @@ helm upgrade --install valeo-erp-staging ./k8s/helm/valeo-erp \
 - [ ] /healthz returns 200
 - [ ] /readyz returns 200
 
-***REMOVED******REMOVED******REMOVED*** 7.2 Smoke-Tests
+### 7.2 Smoke-Tests
 ```bash
-***REMOVED*** Login-Test
+# Login-Test
 curl -X POST http://staging.erp.valeo.example.com/api/auth/login \
   -d '{"username":"test","password":"test"}'
 
-***REMOVED*** Create Document
+# Create Document
 curl -X POST http://staging.erp.valeo.example.com/api/documents/sales \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"customer":"Test","lines":[]}'
 
-***REMOVED*** Workflow Transition
+# Workflow Transition
 curl -X POST http://staging.erp.valeo.example.com/api/workflow/sales/SO-00001/transition \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"action":"submit"}'
 
-***REMOVED*** SSE Connection
+# SSE Connection
 curl -N http://staging.erp.valeo.example.com/api/stream/workflow
 ```
 - [ ] Login funktioniert
@@ -247,9 +247,9 @@ curl -N http://staging.erp.valeo.example.com/api/stream/workflow
 - [ ] PDF-Druck funktioniert
 - [ ] Export funktioniert
 
-***REMOVED******REMOVED******REMOVED*** 7.3 Performance-Tests
+### 7.3 Performance-Tests
 ```bash
-***REMOVED*** Run Load-Tests auf Staging
+# Run Load-Tests auf Staging
 k6 run --env BASE_URL=http://staging.erp.valeo.example.com load-tests/api-load-test.js
 k6 run --env BASE_URL=http://staging.erp.valeo.example.com load-tests/sse-load-test.js
 ```
@@ -260,9 +260,9 @@ k6 run --env BASE_URL=http://staging.erp.valeo.example.com load-tests/sse-load-t
 
 ---
 
-***REMOVED******REMOVED*** ✅ Phase 8: Production-Deployment
+## ✅ Phase 8: Production-Deployment
 
-***REMOVED******REMOVED******REMOVED*** 8.1 Pre-Production-Checklist
+### 8.1 Pre-Production-Checklist
 - [ ] **Stakeholder-Approval:** Business Owner unterschrieben
 - [ ] **Security-Officer-Approval:** Security-Scan approved
 - [ ] **DPO-Approval:** GDPR-Compliance approved
@@ -270,9 +270,9 @@ k6 run --env BASE_URL=http://staging.erp.valeo.example.com load-tests/sse-load-t
 - [ ] **On-Call-Team:** Briefed und bereit
 - [ ] **Rollback-Plan:** Dokumentiert und getestet
 
-***REMOVED******REMOVED******REMOVED*** 8.2 Deploy to Production
+### 8.2 Deploy to Production
 ```bash
-***REMOVED*** Blue-Green-Deployment
+# Blue-Green-Deployment
 helm upgrade --install valeo-erp-production ./k8s/helm/valeo-erp \
   --namespace production \
   --set image.tag=$VERSION \
@@ -281,7 +281,7 @@ helm upgrade --install valeo-erp-production ./k8s/helm/valeo-erp \
   --set resources.limits.memory=2Gi \
   --wait
 
-***REMOVED*** Verify Deployment
+# Verify Deployment
 kubectl get pods -n production
 kubectl rollout status deployment/valeo-erp -n production
 ```
@@ -290,16 +290,16 @@ kubectl rollout status deployment/valeo-erp -n production
 - [ ] Zero-Downtime-Deployment
 - [ ] Old version still running (Blue)
 
-***REMOVED******REMOVED******REMOVED*** 8.3 Health-Checks
+### 8.3 Health-Checks
 ```bash
-***REMOVED*** Health-Checks auf Production
+# Health-Checks auf Production
 curl https://erp.valeo.example.com/healthz
 curl https://erp.valeo.example.com/readyz
 
-***REMOVED*** Verify Metrics
+# Verify Metrics
 curl https://erp.valeo.example.com/metrics | grep valeo
 
-***REMOVED*** Verify SSE
+# Verify SSE
 curl -N https://erp.valeo.example.com/api/stream/workflow
 ```
 - [ ] /healthz: 200 OK
@@ -307,13 +307,13 @@ curl -N https://erp.valeo.example.com/api/stream/workflow
 - [ ] /metrics: Prometheus-Format
 - [ ] SSE-Connections funktionieren
 
-***REMOVED******REMOVED******REMOVED*** 8.4 Cutover (Blue → Green)
+### 8.4 Cutover (Blue → Green)
 ```bash
-***REMOVED*** Wenn Green OK → Cutover Traffic
+# Wenn Green OK → Cutover Traffic
 kubectl patch service valeo-erp -n production \
   -p '{"spec":{"selector":{"version":"green"}}}'
 
-***REMOVED*** Monitor für 15 Minuten
+# Monitor für 15 Minuten
 watch kubectl get pods -n production
 ```
 - [ ] Traffic auf Green
@@ -321,9 +321,9 @@ watch kubectl get pods -n production
 - [ ] Metrics normal
 - [ ] SSE-Reconnections erfolgreich
 
-***REMOVED******REMOVED******REMOVED*** 8.5 Cleanup Blue
+### 8.5 Cleanup Blue
 ```bash
-***REMOVED*** Nach 1 Stunde → Blue entfernen
+# Nach 1 Stunde → Blue entfernen
 kubectl delete deployment valeo-erp-blue -n production
 ```
 - [ ] Blue-Deployment entfernt
@@ -331,14 +331,14 @@ kubectl delete deployment valeo-erp-blue -n production
 
 ---
 
-***REMOVED******REMOVED*** ✅ Phase 9: Post-Deployment
+## ✅ Phase 9: Post-Deployment
 
-***REMOVED******REMOVED******REMOVED*** 9.1 Monitoring (First 24h)
+### 9.1 Monitoring (First 24h)
 ```bash
-***REMOVED*** Watch Metrics
+# Watch Metrics
 watch -n 5 "curl -s https://erp.valeo.example.com/metrics | grep -E '(error|latency|connections)'"
 
-***REMOVED*** Watch Logs
+# Watch Logs
 kubectl logs -f -n production -l app=valeo-erp --tail=100
 ```
 - [ ] Error-Rate < 1%
@@ -347,13 +347,13 @@ kubectl logs -f -n production -l app=valeo-erp --tail=100
 - [ ] Memory-Usage stabil
 - [ ] No Memory-Leaks
 
-***REMOVED******REMOVED******REMOVED*** 9.2 User-Acceptance-Testing (UAT)
+### 9.2 User-Acceptance-Testing (UAT)
 - [ ] Business-Owner testet
 - [ ] Key-Users testen
 - [ ] Critical Workflows funktionieren
 - [ ] Feedback dokumentiert
 
-***REMOVED******REMOVED******REMOVED*** 9.3 Documentation-Handover
+### 9.3 Documentation-Handover
 - [ ] Operator-Runbooks übergeben
 - [ ] Admin-Guides übergeben
 - [ ] User-Guides übergeben
@@ -361,33 +361,33 @@ kubectl logs -f -n production -l app=valeo-erp --tail=100
 
 ---
 
-***REMOVED******REMOVED*** 🚨 Rollback-Plan
+## 🚨 Rollback-Plan
 
-***REMOVED******REMOVED******REMOVED*** When to Rollback
+### When to Rollback
 - Error-Rate > 5%
 - P95-Latency > 2000ms
 - Critical Bug entdeckt
 - Data-Loss festgestellt
 
-***REMOVED******REMOVED******REMOVED*** How to Rollback
+### How to Rollback
 ```bash
-***REMOVED*** Helm Rollback
+# Helm Rollback
 helm rollback valeo-erp-production -n production
 
-***REMOVED*** Verify
+# Verify
 kubectl get pods -n production
 curl https://erp.valeo.example.com/healthz
 
-***REMOVED*** Database Rollback (falls nötig)
+# Database Rollback (falls nötig)
 alembic downgrade -1
 
-***REMOVED*** Or Restore from Backup
+# Or Restore from Backup
 ./scripts/restore-db.sh /backups/postgresql/daily/pre_deployment.sql.gz
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📞 Emergency Contacts
+## 📞 Emergency Contacts
 
 **On-Call Primary:** [PagerDuty]  
 **On-Call Secondary:** [Team Lead]  
@@ -398,7 +398,7 @@ alembic downgrade -1
 
 ---
 
-***REMOVED******REMOVED*** ✅ Sign-Off
+## ✅ Sign-Off
 
 **Pre-Deployment Check completed by:** _______________  
 **Date:** _______________
@@ -412,4 +412,5 @@ alembic downgrade -1
 ---
 
 **🚀 GO-LIVE APPROVED 🚀**
+
 

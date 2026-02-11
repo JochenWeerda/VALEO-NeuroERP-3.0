@@ -1,6 +1,6 @@
-***REMOVED*** CRM UI Mapping & Transition Plan
+# CRM UI Mapping & Transition Plan
 
-***REMOVED******REMOVED*** Existing Screens (packages/frontend-web)
+## Existing Screens (packages/frontend-web)
 
 | route/component | source file | data source | current usage | proposed action |
 |-----------------|-------------|-------------|---------------|-----------------|
@@ -12,7 +12,7 @@
 | `/sales/angebote-liste` | `packages/frontend-web/src/pages/sales/angebote-liste.tsx` | BFF (mock) | Quote list | **Keep-as-is** initially, show inside Opportunity drill-down. |
 | `/service/tickets` (legacy) | `packages/frontend-web/src/pages/service/tickets.tsx` | placeholder data | Ticket table | **Redesign** within `/crm/service/tickets` workspace (queues + SLA). |
 
-***REMOVED******REMOVED*** Mask Builder & Field Reuse
+## Mask Builder & Field Reuse
 - Reuse existing `CustomerForm` field configs (company name, address, VAT, payment terms) by exporting definitions into a shared `crmFields.ts`.
 - Contacts: reuse validation logic for email/phone from current forms.
 - New masks required:
@@ -21,7 +21,7 @@
   - **Opportunity card** (stage, value, probability, owner).
   - **Ticket SLA widget**.
 
-***REMOVED******REMOVED*** Routing Sketch
+## Routing Sketch
 ```
 /crm
   /customers
@@ -39,3 +39,4 @@
 ```
 - The shell (sidebar, breadcrumbs) stays identical to existing VALEO layout. New breadcrumb entries added.
 - Legacy masks embedded via slots within new pages until fully replaced.
+

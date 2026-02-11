@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Vereinfachte Version des Skripts zum Aktivieren des REFLECT-ARCHIVE-Mode und Befüllen der MongoDB.
 """
@@ -13,7 +13,7 @@ from pathlib import Path
 import pymongo
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -24,7 +24,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("SimpleActivateReflectArchive")
 
-***REMOVED*** MongoDB-Konfiguration
+# MongoDB-Konfiguration
 MONGODB_CONNECTION_STRING = "mongodb://localhost:27017/"
 MONGODB_DATABASE_NAME = "valeo_neuroerp"
 SOURCE_DIR = "C:/AI_driven_ERP"
@@ -42,7 +42,7 @@ def check_mongodb_connection():
             MONGODB_CONNECTION_STRING,
             serverSelectionTimeoutMS=5000
         )
-        ***REMOVED*** Verbindung testen
+        # Verbindung testen
         client.admin.command('ping')
         logger.info("Verbindung zu MongoDB erfolgreich hergestellt.")
         client.close()
@@ -61,13 +61,13 @@ def activate_reflect_archive_mode():
     logger.info("Aktiviere REFLECT-ARCHIVE-Mode...")
     
     try:
-        ***REMOVED*** Pfad zur current_mode.txt
+        # Pfad zur current_mode.txt
         mode_file_path = Path("memory-bank") / "current_mode.txt"
         
-        ***REMOVED*** Verzeichnis erstellen, falls es nicht existiert
+        # Verzeichnis erstellen, falls es nicht existiert
         mode_file_path.parent.mkdir(exist_ok=True)
         
-        ***REMOVED*** Mode in Datei schreiben
+        # Mode in Datei schreiben
         with open(mode_file_path, "w", encoding="utf-8") as f:
             f.write("REFLECT-ARCHIVE")
         
@@ -87,36 +87,36 @@ def create_reflection_document():
     logger.info("Erstelle Reflexionsdokument...")
     
     try:
-        ***REMOVED*** Pfad zum Reflexionsdokument
+        # Pfad zum Reflexionsdokument
         reflection_file_path = Path("memory-bank") / "reflection" / f"reflection_ai_driven_erp.md"
         
-        ***REMOVED*** Verzeichnis erstellen, falls es nicht existiert
+        # Verzeichnis erstellen, falls es nicht existiert
         reflection_file_path.parent.mkdir(exist_ok=True)
         
-        ***REMOVED*** Inhalt des Reflexionsdokuments
-        content = """***REMOVED*** Reflexion: AI_driven_ERP-Projekt
+        # Inhalt des Reflexionsdokuments
+        content = """# Reflexion: AI_driven_ERP-Projekt
 
-***REMOVED******REMOVED*** Projektübersicht
+## Projektübersicht
 Das AI_driven_ERP-Projekt ist ein KI-gestütztes ERP-System mit Fokus auf Stammdatenpflege. Es orientiert sich am Design und der Funktionalität von ORB-FMS, einem gemeinnützigen Farm-Management-System.
 
-***REMOVED******REMOVED*** Hauptkomponenten
+## Hauptkomponenten
 - Backend: FastAPI-basiertes Backend mit Mikroservice-Architektur
 - Frontend: React-basiertes Frontend im ORB-FMS-Design
 - Datenmodelle: Optimierte Modelle für Partner, Artikel, Lager und Finanzen
 
-***REMOVED******REMOVED*** Erkenntnisse
+## Erkenntnisse
 - Die Projektstruktur folgt einer klaren Trennung von Backend und Frontend
 - Das Backend nutzt FastAPI für eine performante API-Entwicklung
 - Das Frontend basiert auf React und implementiert verschiedene Themes
 - Es gibt eine umfangreiche Aufgabenliste mit verschiedenen Komplexitätsstufen
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 1. Vervollständigung der Dashboard-Implementierung für VALERO Enterprise Suite
 2. Entwicklung der Modelle für die Geschäftslogik
 3. Integration der Module mit bestehenden Odoo-Funktionen
 4. Testen der Module unter realen Bedingungen
 
-***REMOVED******REMOVED*** Archivierte Artefakte
+## Archivierte Artefakte
 - Projektstruktur
 - Code-Dateien
 - Dokumentation
@@ -126,10 +126,10 @@ Das AI_driven_ERP-Projekt ist ein KI-gestütztes ERP-System mit Fokus auf Stammd
 Datum: {datetime}
 """
         
-        ***REMOVED*** Datum einfügen
+        # Datum einfügen
         content = content.replace("{datetime}", datetime.datetime.now().strftime("%d.%m.%Y %H:%M"))
         
-        ***REMOVED*** Dokument schreiben
+        # Dokument schreiben
         with open(reflection_file_path, "w", encoding="utf-8") as f:
             f.write(content)
         
@@ -149,15 +149,15 @@ def load_project_structure():
     logger.info("Lade Projektstruktur in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["project_structure"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** Verzeichnisstruktur scannen
+        # Verzeichnisstruktur scannen
         source_dir = Path(SOURCE_DIR)
         structure = {
             "name": source_dir.name,
@@ -166,7 +166,7 @@ def load_project_structure():
             "children": []
         }
         
-        ***REMOVED*** Nur die obersten Verzeichnisse scannen
+        # Nur die obersten Verzeichnisse scannen
         for item in source_dir.iterdir():
             if item.is_dir():
                 if not item.name.startswith('.') and not item.name == 'node_modules' and not item.name == 'venv':
@@ -185,7 +185,7 @@ def load_project_structure():
                     "size": item.stat().st_size
                 })
         
-        ***REMOVED*** In MongoDB speichern
+        # In MongoDB speichern
         collection.insert_one({
             "timestamp": datetime.datetime.now(),
             "structure": structure
@@ -208,15 +208,15 @@ def load_tasks():
     logger.info("Lade Aufgaben in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["tasks"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** Aufgabendateien suchen
+        # Aufgabendateien suchen
         source_dir = Path(SOURCE_DIR)
         tasks_files = [
             source_dir / "memory-bank" / "tasks.md",
@@ -226,23 +226,23 @@ def load_tasks():
         for task_file in tasks_files:
             if task_file.exists():
                 try:
-                    ***REMOVED*** Binärmodus zum Erkennen von Null-Bytes
+                    # Binärmodus zum Erkennen von Null-Bytes
                     with open(task_file, 'rb') as f:
                         content_bytes = f.read()
                     
-                    ***REMOVED*** Prüfen auf Null-Bytes
+                    # Prüfen auf Null-Bytes
                     if b'\x00' in content_bytes:
                         logger.warning(f"Datei {task_file} enthält Null-Bytes und wird übersprungen.")
                         continue
                     
-                    ***REMOVED*** In Text umwandeln
+                    # In Text umwandeln
                     try:
                         content = content_bytes.decode('utf-8')
                     except UnicodeDecodeError:
                         logger.warning(f"Datei {task_file} konnte nicht als UTF-8 dekodiert werden, versuche latin-1.")
                         content = content_bytes.decode('latin-1')
                     
-                    ***REMOVED*** In MongoDB speichern
+                    # In MongoDB speichern
                     collection.insert_one({
                         "filename": task_file.name,
                         "path": str(task_file),
@@ -272,15 +272,15 @@ def load_context():
     logger.info("Lade Kontext in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["context"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** Kontextdateien suchen
+        # Kontextdateien suchen
         source_dir = Path(SOURCE_DIR)
         context_files = [
             source_dir / "memory-bank" / "activeContext.md",
@@ -290,23 +290,23 @@ def load_context():
         for context_file in context_files:
             if context_file.exists():
                 try:
-                    ***REMOVED*** Binärmodus zum Erkennen von Null-Bytes
+                    # Binärmodus zum Erkennen von Null-Bytes
                     with open(context_file, 'rb') as f:
                         content_bytes = f.read()
                     
-                    ***REMOVED*** Prüfen auf Null-Bytes
+                    # Prüfen auf Null-Bytes
                     if b'\x00' in content_bytes:
                         logger.warning(f"Datei {context_file} enthält Null-Bytes und wird übersprungen.")
                         continue
                     
-                    ***REMOVED*** In Text umwandeln
+                    # In Text umwandeln
                     try:
                         content = content_bytes.decode('utf-8')
                     except UnicodeDecodeError:
                         logger.warning(f"Datei {context_file} konnte nicht als UTF-8 dekodiert werden, versuche latin-1.")
                         content = content_bytes.decode('latin-1')
                     
-                    ***REMOVED*** In MongoDB speichern
+                    # In MongoDB speichern
                     collection.insert_one({
                         "filename": context_file.name,
                         "path": str(context_file),
@@ -336,37 +336,37 @@ def load_readme():
     logger.info("Lade README.md in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["documentation"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** README.md suchen
+        # README.md suchen
         source_dir = Path(SOURCE_DIR)
         readme_file = source_dir / "README.md"
         
         if readme_file.exists():
             try:
-                ***REMOVED*** Binärmodus zum Erkennen von Null-Bytes
+                # Binärmodus zum Erkennen von Null-Bytes
                 with open(readme_file, 'rb') as f:
                     content_bytes = f.read()
                 
-                ***REMOVED*** Prüfen auf Null-Bytes
+                # Prüfen auf Null-Bytes
                 if b'\x00' in content_bytes:
                     logger.warning(f"Datei {readme_file} enthält Null-Bytes und wird übersprungen.")
                     return False
                 
-                ***REMOVED*** In Text umwandeln
+                # In Text umwandeln
                 try:
                     content = content_bytes.decode('utf-8')
                 except UnicodeDecodeError:
                     logger.warning(f"Datei {readme_file} konnte nicht als UTF-8 dekodiert werden, versuche latin-1.")
                     content = content_bytes.decode('latin-1')
                 
-                ***REMOVED*** In MongoDB speichern
+                # In MongoDB speichern
                 collection.insert_one({
                     "filename": readme_file.name,
                     "path": str(readme_file),
@@ -394,22 +394,22 @@ def main():
     """
     Hauptfunktion für die Aktivierung des REFLECT-ARCHIVE-Mode und das Befüllen der MongoDB.
     """
-    ***REMOVED*** MongoDB-Verbindung prüfen
+    # MongoDB-Verbindung prüfen
     if not check_mongodb_connection():
         logger.error("Konnte keine Verbindung zur MongoDB herstellen.")
         return 1
     
-    ***REMOVED*** REFLECT-ARCHIVE-Mode aktivieren
+    # REFLECT-ARCHIVE-Mode aktivieren
     if not activate_reflect_archive_mode():
         logger.error("Konnte REFLECT-ARCHIVE-Mode nicht aktivieren.")
         return 1
     
-    ***REMOVED*** Reflexionsdokument erstellen
+    # Reflexionsdokument erstellen
     if not create_reflection_document():
         logger.error("Konnte Reflexionsdokument nicht erstellen.")
         return 1
     
-    ***REMOVED*** Daten in MongoDB laden
+    # Daten in MongoDB laden
     success = True
     
     if not load_project_structure():

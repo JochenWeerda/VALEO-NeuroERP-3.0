@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 VALEO-NeuroERP - Zentrales Streamlit-Dashboard (Backup)
@@ -20,9 +20,9 @@ from pathlib import Path
 import requests
 import pandas as pd
 
-***REMOVED*** Konfiguration
+# Konfiguration
 CONFIG_PATH = "config/version.yaml"
 PIPELINE_STATUS_PATH = "data/pipeline_status.json"
 
-***REMOVED*** Hier folgt der Rest des ursprünglichen Dashboards
-***REMOVED*** Dies ist nur eine Backup-Datei 
+# Hier folgt der Rest des ursprünglichen Dashboards
+# Dies ist nur eine Backup-Datei 

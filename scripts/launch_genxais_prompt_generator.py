@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 Startskript für den GENXAIS-Prompt-Generator
@@ -16,7 +16,7 @@ def main():
     """Startet den GENXAIS-Prompt-Generator."""
     print("🧠 Starte GENXAIS-Prompt-Generator...")
     
-    ***REMOVED*** Prüfe, ob Streamlit installiert ist
+    # Prüfe, ob Streamlit installiert ist
     try:
         import streamlit
         print("✅ Streamlit ist installiert.")
@@ -25,19 +25,19 @@ def main():
         subprocess.run([sys.executable, "-m", "pip", "install", "streamlit"], check=True)
         print("✅ Streamlit wurde installiert.")
     
-    ***REMOVED*** Prüfe, ob die Generator-Datei existiert
+    # Prüfe, ob die Generator-Datei existiert
     generator_path = os.path.join("scripts", "genxais_prompt_generator.py")
     if not os.path.exists(generator_path):
         print(f"❌ Generator-Datei nicht gefunden: {generator_path}")
         sys.exit(1)
     
-    ***REMOVED*** Starte die Streamlit-App
+    # Starte die Streamlit-App
     print("🚀 Starte Streamlit-App...")
     
-    ***REMOVED*** Streamlit-Port konfigurieren
+    # Streamlit-Port konfigurieren
     port = 8501
     
-    ***REMOVED*** Starte die App
+    # Starte die App
     try:
         process = subprocess.Popen(
             [sys.executable, "-m", "streamlit", "run", generator_path, "--server.port", str(port)],
@@ -46,23 +46,23 @@ def main():
             text=True
         )
         
-        ***REMOVED*** Warte kurz, um zu sehen, ob die App startet
+        # Warte kurz, um zu sehen, ob die App startet
         time.sleep(2)
         
         if process.poll() is not None:
-            ***REMOVED*** Prozess wurde beendet
+            # Prozess wurde beendet
             stdout, stderr = process.communicate()
             print(f"❌ Fehler beim Starten der App:\n{stderr}")
             sys.exit(1)
         
-        ***REMOVED*** Öffne Browser
+        # Öffne Browser
         import webbrowser
         webbrowser.open(f"http://localhost:{port}")
         
         print(f"✅ GENXAIS-Prompt-Generator läuft auf http://localhost:{port}")
         print("Drücke Strg+C, um die App zu beenden.")
         
-        ***REMOVED*** Warte auf Benutzerabbruch
+        # Warte auf Benutzerabbruch
         process.wait()
     
     except KeyboardInterrupt:

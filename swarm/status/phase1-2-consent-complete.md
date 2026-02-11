@@ -1,22 +1,22 @@
-***REMOVED*** Phase 1.2 - Consent-Management - VOLLSTÄNDIG ABGESCHLOSSEN
+# Phase 1.2 - Consent-Management - VOLLSTÄNDIG ABGESCHLOSSEN
 
 **Datum:** 2025-01-27  
 **Status:** ✅ Complete  
 **Capability:** CRM-CNS-01  
 **Prioritäts-Score:** 25.0
 
-***REMOVED******REMOVED*** 🎉 VOLLSTÄNDIG ABGESCHLOSSEN
+## 🎉 VOLLSTÄNDIG ABGESCHLOSSEN
 
-***REMOVED******REMOVED******REMOVED*** Backend (100%)
+### Backend (100%)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Service erstellt ✅
+#### 1. Service erstellt ✅
 - ✅ `services/crm-consent/` Service
 - ✅ FastAPI-App mit Router
 - ✅ Database-Models (SQLAlchemy)
 - ✅ Pydantic-Schemas
 - ✅ Alembic-Migrationen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2. Database Models ✅
+#### 2. Database Models ✅
 - ✅ `Consent` Entity:
   - Contact reference
   - Channel (email, sms, phone, postal)
@@ -34,7 +34,7 @@
   - Reason (optional)
   - Metadata
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3. API Endpoints ✅
+#### 3. API Endpoints ✅
 - ✅ `POST /consents` - Create (mit Double-Opt-In Token)
 - ✅ `GET /consents` - List mit Filtern
 - ✅ `GET /consents/{id}` - Detail
@@ -46,7 +46,7 @@
 - ✅ `GET /consents/{id}/history` - Consent-Historie
 - ✅ `POST /consents/check` - Consent-Prüfung (für Kommunikation)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4. Events ✅
+#### 4. Events ✅
 - ✅ EventPublisher Service
 - ✅ Events integriert:
   - `crm.consent.created`
@@ -54,14 +54,14 @@
   - `crm.consent.revoked`
   - `crm.consent.updated`
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 5. Migration ✅
+#### 5. Migration ✅
 - ✅ `001_initial_consent_schema.py` erstellt
 - ✅ Tabellen: `crm_consent_consents`, `crm_consent_history`
 - ✅ Indizes für Performance
 
-***REMOVED******REMOVED******REMOVED*** Frontend (100%)
+### Frontend (100%)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Consent-Management Liste ✅
+#### 1. Consent-Management Liste ✅
 - ✅ `consent-management.tsx` erstellt
 - ✅ ListReport mit i18n
 - ✅ Spalten: Contact, Channel, Consent Type, Status, Granted At, Confirmed At, Source
@@ -69,7 +69,7 @@
 - ✅ Bulk-Actions: Revoke, Export
 - ✅ Export-Funktion
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2. Consent-Detail Seite ✅
+#### 2. Consent-Detail Seite ✅
 - ✅ `consent-detail.tsx` erstellt
 - ✅ ObjectPage mit 2 Tabs:
   - Grundinformationen
@@ -77,27 +77,27 @@
 - ✅ History-Tab (Sidebar)
 - ✅ Aktionen: Save, Cancel, Revoke, Resend Confirmation
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3. Public Bestätigungsseite ✅
+#### 3. Public Bestätigungsseite ✅
 - ✅ `consent-confirm.tsx` erstellt
 - ✅ Token-Validierung
 - ✅ Success/Error-Messages
 - ✅ Public-Seite (kein Login erforderlich)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4. Integration in Customer ✅
+#### 4. Integration in Customer ✅
 - ✅ Consents-Tab in `kunden-stamm.tsx`
 - ✅ Consents-Liste für Customer
 - ✅ Quick-Action: Create Consent
 - ✅ Navigation zu Consent-Detail
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 5. Routing ✅
+#### 5. Routing ✅
 - ✅ `/crm/consents` → Liste
 - ✅ `/crm/consent/:id` → Detail
 - ✅ `/crm/consent/new` → Create
 - ✅ `/crm/consent/confirm` → Public Bestätigung
 
-***REMOVED******REMOVED******REMOVED*** Tests (100%)
+### Tests (100%)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. E2E Tests ✅
+#### 1. E2E Tests ✅
 - ✅ `crm-consent.spec.ts` erstellt
 - ✅ 12 Tests implementiert:
   - Consent-Management Liste (4 Tests)
@@ -105,7 +105,7 @@
   - Double-Opt-In (1 Test)
   - Integration in Customer (2 Tests)
 
-***REMOVED******REMOVED******REMOVED*** i18n-Integration ✅
+### i18n-Integration ✅
 - ✅ Alle Labels übersetzt
 - ✅ Neue Übersetzungen hinzugefügt:
   - `crud.channels.*` (4 Channels)
@@ -118,7 +118,7 @@
   - `status.granted`, `denied`, `revoked`
   - `crud.consent.confirmationTitle`
 
-***REMOVED******REMOVED*** 📊 Finale Statistik
+## 📊 Finale Statistik
 
 **Phase 1.2:**
 - ✅ 100% - Backend
@@ -129,22 +129,22 @@
 **Gesamt Phase 1.2:**
 - ✅ **100% VOLLSTÄNDIG ABGESCHLOSSEN**
 
-***REMOVED******REMOVED*** 📝 Erstellte Dateien
+## 📝 Erstellte Dateien
 
-***REMOVED******REMOVED******REMOVED*** Backend
+### Backend
 - `services/crm-consent/` (kompletter Service)
 - Models, Schemas, API-Endpoints, Events, Migration
 
-***REMOVED******REMOVED******REMOVED*** Frontend
+### Frontend
 - `packages/frontend-web/src/pages/crm/consent-management.tsx`
 - `packages/frontend-web/src/pages/crm/consent-detail.tsx`
 - `packages/frontend-web/src/pages/crm/consent-confirm.tsx`
 - `packages/frontend-web/src/pages/crm/kunden-stamm.tsx` (erweitert)
 
-***REMOVED******REMOVED******REMOVED*** Tests
+### Tests
 - `packages/frontend-web/tests/e2e/crm-consent.spec.ts`
 
-***REMOVED******REMOVED*** 🎯 Nächste Phase
+## 🎯 Nächste Phase
 
 **Phase 1.3:** DSGVO-Funktionen
 - Auskunftsanfragen
@@ -155,4 +155,5 @@
 ---
 
 **Status:** ✅ **PHASE 1.2 ERFOLGREICH ABGESCHLOSSEN!**
+
 

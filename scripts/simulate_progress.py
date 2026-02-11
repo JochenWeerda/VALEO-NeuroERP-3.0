@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 GENXAIS Fortschritts-Simulator
@@ -13,7 +13,7 @@ import argparse
 import datetime
 from pathlib import Path
 
-***REMOVED*** Konstanten
+# Konstanten
 DATA_DIR = Path("data/dashboard")
 PHASES_FILE = DATA_DIR / "phases.json"
 PIPELINES_FILE = DATA_DIR / "pipelines.json"
@@ -34,19 +34,19 @@ def update_phase_progress(version, phase_name, progress):
         with open(PHASES_FILE, 'r', encoding='utf-8') as f:
             phases_data = json.load(f)
         
-        ***REMOVED*** Überprüfe, ob die Version übereinstimmt
+        # Überprüfe, ob die Version übereinstimmt
         if phases_data.get("version") != version:
             print(f"Fehler: Version in {PHASES_FILE} ({phases_data.get('version')}) stimmt nicht mit der angegebenen Version ({version}) überein.")
             return False
         
-        ***REMOVED*** Aktualisiere den Fortschritt der angegebenen Phase
+        # Aktualisiere den Fortschritt der angegebenen Phase
         phase_found = False
         for phase in phases_data.get("phases", []):
             if phase.get("name") == phase_name:
                 phase["progress"] = normalize_progress(progress)
                 phase_found = True
                 
-                ***REMOVED*** Aktualisiere den Status basierend auf dem Fortschritt
+                # Aktualisiere den Status basierend auf dem Fortschritt
                 if progress < 5:
                     phase["status"] = "pending"
                 elif progress < 100:
@@ -60,10 +60,10 @@ def update_phase_progress(version, phase_name, progress):
             print(f"Fehler: Phase {phase_name} nicht gefunden.")
             return False
         
-        ***REMOVED*** Aktualisiere den Zeitstempel
+        # Aktualisiere den Zeitstempel
         phases_data["last_updated"] = datetime.datetime.now().isoformat()
         
-        ***REMOVED*** Speichere die aktualisierten Daten
+        # Speichere die aktualisierten Daten
         with open(PHASES_FILE, 'w', encoding='utf-8') as f:
             json.dump(phases_data, f, indent=2, ensure_ascii=False)
         
@@ -84,19 +84,19 @@ def update_pipeline_progress(version, pipeline_id, progress):
         with open(PIPELINES_FILE, 'r', encoding='utf-8') as f:
             pipelines_data = json.load(f)
         
-        ***REMOVED*** Überprüfe, ob die Version übereinstimmt
+        # Überprüfe, ob die Version übereinstimmt
         if pipelines_data.get("version") != version:
             print(f"Fehler: Version in {PIPELINES_FILE} ({pipelines_data.get('version')}) stimmt nicht mit der angegebenen Version ({version}) überein.")
             return False
         
-        ***REMOVED*** Aktualisiere den Fortschritt der angegebenen Pipeline
+        # Aktualisiere den Fortschritt der angegebenen Pipeline
         pipeline_found = False
         for pipeline in pipelines_data.get("pipelines", []):
             if pipeline.get("id") == pipeline_id:
                 pipeline["progress"] = normalize_progress(progress)
                 pipeline_found = True
                 
-                ***REMOVED*** Aktualisiere den Status basierend auf dem Fortschritt
+                # Aktualisiere den Status basierend auf dem Fortschritt
                 if progress < 5:
                     pipeline["status"] = "planning"
                 elif progress < 20:
@@ -114,10 +114,10 @@ def update_pipeline_progress(version, pipeline_id, progress):
             print(f"Fehler: Pipeline {pipeline_id} nicht gefunden.")
             return False
         
-        ***REMOVED*** Aktualisiere den Zeitstempel
+        # Aktualisiere den Zeitstempel
         pipelines_data["last_updated"] = datetime.datetime.now().isoformat()
         
-        ***REMOVED*** Speichere die aktualisierten Daten
+        # Speichere die aktualisierten Daten
         with open(PIPELINES_FILE, 'w', encoding='utf-8') as f:
             json.dump(pipelines_data, f, indent=2, ensure_ascii=False)
         
@@ -140,7 +140,7 @@ def update_decision_map(version, node_id, status):
         with open(decision_map_file, 'r', encoding='utf-8') as f:
             decision_map = json.load(f)
         
-        ***REMOVED*** Aktualisiere den Status des angegebenen Knotens
+        # Aktualisiere den Status des angegebenen Knotens
         node_found = False
         for node in decision_map.get("nodes", []):
             if node.get("id") == node_id:
@@ -152,7 +152,7 @@ def update_decision_map(version, node_id, status):
             print(f"Fehler: Knoten {node_id} nicht gefunden.")
             return False
         
-        ***REMOVED*** Speichere die aktualisierten Daten
+        # Speichere die aktualisierten Daten
         with open(decision_map_file, 'w', encoding='utf-8') as f:
             json.dump(decision_map, f, indent=2, ensure_ascii=False)
         
@@ -173,12 +173,12 @@ def update_task_progress(version, phase_name, task_index, progress):
         with open(PHASES_FILE, 'r', encoding='utf-8') as f:
             phases_data = json.load(f)
         
-        ***REMOVED*** Überprüfe, ob die Version übereinstimmt
+        # Überprüfe, ob die Version übereinstimmt
         if phases_data.get("version") != version:
             print(f"Fehler: Version in {PHASES_FILE} ({phases_data.get('version')}) stimmt nicht mit der angegebenen Version ({version}) überein.")
             return False
         
-        ***REMOVED*** Aktualisiere den Fortschritt der angegebenen Aufgabe
+        # Aktualisiere den Fortschritt der angegebenen Aufgabe
         phase_found = False
         task_found = False
         for phase in phases_data.get("phases", []):
@@ -189,7 +189,7 @@ def update_task_progress(version, phase_name, task_index, progress):
                     tasks[task_index]["progress"] = normalize_progress(progress)
                     task_found = True
                     
-                    ***REMOVED*** Aktualisiere den Status basierend auf dem Fortschritt
+                    # Aktualisiere den Status basierend auf dem Fortschritt
                     if progress < 5:
                         tasks[task_index]["status"] = "pending"
                     elif progress < 100:
@@ -197,7 +197,7 @@ def update_task_progress(version, phase_name, task_index, progress):
                     else:
                         tasks[task_index]["status"] = "completed"
                     
-                    ***REMOVED*** Berechne den Durchschnittsfortschritt der Phase
+                    # Berechne den Durchschnittsfortschritt der Phase
                     total_progress = sum(task.get("progress", 0) for task in tasks)
                     phase["progress"] = normalize_progress(total_progress / len(tasks))
                     
@@ -211,10 +211,10 @@ def update_task_progress(version, phase_name, task_index, progress):
             print(f"Fehler: Aufgabe mit Index {task_index} in Phase {phase_name} nicht gefunden.")
             return False
         
-        ***REMOVED*** Aktualisiere den Zeitstempel
+        # Aktualisiere den Zeitstempel
         phases_data["last_updated"] = datetime.datetime.now().isoformat()
         
-        ***REMOVED*** Speichere die aktualisierten Daten
+        # Speichere die aktualisierten Daten
         with open(PHASES_FILE, 'w', encoding='utf-8') as f:
             json.dump(phases_data, f, indent=2, ensure_ascii=False)
         
@@ -235,12 +235,12 @@ def update_goal_progress(version, pipeline_id, goal_index, progress):
         with open(PIPELINES_FILE, 'r', encoding='utf-8') as f:
             pipelines_data = json.load(f)
         
-        ***REMOVED*** Überprüfe, ob die Version übereinstimmt
+        # Überprüfe, ob die Version übereinstimmt
         if pipelines_data.get("version") != version:
             print(f"Fehler: Version in {PIPELINES_FILE} ({pipelines_data.get('version')}) stimmt nicht mit der angegebenen Version ({version}) überein.")
             return False
         
-        ***REMOVED*** Aktualisiere den Fortschritt des angegebenen Ziels
+        # Aktualisiere den Fortschritt des angegebenen Ziels
         pipeline_found = False
         goal_found = False
         for pipeline in pipelines_data.get("pipelines", []):
@@ -251,7 +251,7 @@ def update_goal_progress(version, pipeline_id, goal_index, progress):
                     goals[goal_index]["progress"] = normalize_progress(progress)
                     goal_found = True
                     
-                    ***REMOVED*** Aktualisiere den Status basierend auf dem Fortschritt
+                    # Aktualisiere den Status basierend auf dem Fortschritt
                     if progress < 5:
                         goals[goal_index]["status"] = "pending"
                     elif progress < 100:
@@ -259,7 +259,7 @@ def update_goal_progress(version, pipeline_id, goal_index, progress):
                     else:
                         goals[goal_index]["status"] = "completed"
                     
-                    ***REMOVED*** Berechne den Durchschnittsfortschritt der Pipeline
+                    # Berechne den Durchschnittsfortschritt der Pipeline
                     total_progress = sum(goal.get("progress", 0) for goal in goals)
                     pipeline["progress"] = normalize_progress(total_progress / len(goals))
                     
@@ -273,10 +273,10 @@ def update_goal_progress(version, pipeline_id, goal_index, progress):
             print(f"Fehler: Ziel mit Index {goal_index} in Pipeline {pipeline_id} nicht gefunden.")
             return False
         
-        ***REMOVED*** Aktualisiere den Zeitstempel
+        # Aktualisiere den Zeitstempel
         pipelines_data["last_updated"] = datetime.datetime.now().isoformat()
         
-        ***REMOVED*** Speichere die aktualisierten Daten
+        # Speichere die aktualisierten Daten
         with open(PIPELINES_FILE, 'w', encoding='utf-8') as f:
             json.dump(pipelines_data, f, indent=2, ensure_ascii=False)
         
@@ -301,7 +301,7 @@ def main():
     
     args = parser.parse_args()
     
-    ***REMOVED*** Überprüfe, ob die erforderlichen Verzeichnisse existieren
+    # Überprüfe, ob die erforderlichen Verzeichnisse existieren
     if not os.path.exists(DATA_DIR):
         print(f"Fehler: Verzeichnis {DATA_DIR} nicht gefunden.")
         return 1
@@ -310,7 +310,7 @@ def main():
         print(f"Fehler: Verzeichnis {GRAPHITI_DIR} nicht gefunden.")
         return 1
     
-    ***REMOVED*** Führe die entsprechende Aktion basierend auf den Argumenten aus
+    # Führe die entsprechende Aktion basierend auf den Argumenten aus
     if args.phase and args.progress is not None:
         if args.task is not None:
             update_task_progress(args.version, args.phase, args.task, args.progress)

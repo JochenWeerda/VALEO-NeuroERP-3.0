@@ -1,4 +1,4 @@
-***REMOVED*** GAP-Analyse: Agriculture Management
+# GAP-Analyse: Agriculture Management
 
 **Domain:** Agrar / Landwirtschaft
 **Referenz:** Odoo Agriculture Management Module
@@ -7,9 +7,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 Übersicht
+## 📋 Übersicht
 
-***REMOVED******REMOVED******REMOVED*** Odoo Agriculture Management Features (Referenz)
+### Odoo Agriculture Management Features (Referenz)
 
 | Feature | Beschreibung | Priorität |
 |---------|-------------|-----------|
@@ -28,9 +28,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Spezifische Anforderungen VALEO NeuroERP
+## 🎯 Spezifische Anforderungen VALEO NeuroERP
 
-***REMOVED******REMOVED******REMOVED*** Kernmodul: Ackerschlagkartei (Feldbuch)
+### Kernmodul: Ackerschlagkartei (Feldbuch)
 
 **Anforderung:** Multi-Tenant Ackerschlagkartei für Dienstleister
 
@@ -40,9 +40,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📊 GAP-Matrix
+## 📊 GAP-Matrix
 
-***REMOVED******REMOVED******REMOVED*** AGR-FLD: Feldverwaltung
+### AGR-FLD: Feldverwaltung
 
 | ID | Capability | Subcapability | Status | Gap-Beschreibung | Lösungstyp | Priorität |
 |----|-----------|---------------|--------|------------------|------------|-----------|
@@ -52,7 +52,7 @@
 | AGR-FLD-04 | Feldkarten | GIS-Visualisierung | Partial | Basis Kartendarstellung vorhanden | Type C | P1 |
 | AGR-FLD-05 | Feldgrenzen | Polygon-Erfassung | No | Keine Polygon-Erfassung möglich | Type C | P2 |
 
-***REMOVED******REMOVED******REMOVED*** AGR-OPS: Feldoperationen
+### AGR-OPS: Feldoperationen
 
 | ID | Capability | Subcapability | Status | Gap-Beschreibung | Lösungstyp | Priorität |
 |----|-----------|---------------|--------|------------------|------------|-----------|
@@ -62,7 +62,7 @@
 | AGR-OPS-04 | Feldkalender | Planung/Terminierung | No | Kein Planungskalender vorhanden | Type C | P1 |
 | AGR-OPS-05 | GPS-Tracking | Maschinen-Position | No | Keine GPS-Integration | Type B | P3 |
 
-***REMOVED******REMOVED******REMOVED*** AGR-INV: Betriebsmittelverwaltung
+### AGR-INV: Betriebsmittelverwaltung
 
 | ID | Capability | Subcapability | Status | Gap-Beschreibung | Lösungstyp | Priorität |
 |----|-----------|---------------|--------|------------------|------------|-----------|
@@ -71,7 +71,7 @@
 | AGR-INV-03 | Saatgut | Sortenregister | Partial | Basis vorhanden | Type A | P2 |
 | AGR-INV-04 | Automatische Nachbestellung | Mindestbestand-Warnung | No | Keine automatische Nachbestellung | Type B | P2 |
 
-***REMOVED******REMOVED******REMOVED*** AGR-COM: Compliance & Berichterstattung
+### AGR-COM: Compliance & Berichterstattung
 
 | ID | Capability | Subcapability | Status | Gap-Beschreibung | Lösungstyp | Priorität |
 |----|-----------|---------------|--------|------------------|------------|-----------|
@@ -83,38 +83,38 @@
 
 ---
 
-***REMOVED******REMOVED*** 🏗️ Implementierungsplan
+## 🏗️ Implementierungsplan
 
-***REMOVED******REMOVED******REMOVED*** Phase 1: Mandantenfähige Ackerschlagkartei (P0) - 4-6 Wochen
+### Phase 1: Mandantenfähige Ackerschlagkartei (P0) - 4-6 Wochen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1.1 Backend: Multi-Tenant Datenmodell
+#### 1.1 Backend: Multi-Tenant Datenmodell
 - [ ] Tenant-Erweiterung für Agrar-Entitäten (Schläge, Maßnahmen)
 - [ ] Kunden-Schlag-Zuordnung
 - [ ] Dienstleister-Maßnahmen-Dokumentation
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1.2 Frontend: Mandantenauswahl
+#### 1.2 Frontend: Mandantenauswahl
 - [ ] Kundenauswahl-Komponente in Schlagkartei
 - [ ] Filterung nach Kunden-Tenant
 - [ ] Maßnahmen-Zuordnung zu Kunden
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1.3 Feldblockfinder-Integration
+#### 1.3 Feldblockfinder-Integration
 - [ ] iframe-Komponente für Feldblockfinder
 - [ ] URL-Konfiguration pro Bundesland
 - [ ] Schlag-Übernahme aus Feldblockfinder
 
-***REMOVED******REMOVED******REMOVED*** Phase 2: Compliance-Module (P0-P1) - 3-4 Wochen
+### Phase 2: Compliance-Module (P0-P1) - 3-4 Wochen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2.1 Düngebilanz
+#### 2.1 Düngebilanz
 - [ ] Stoffstrombilanz-Berechnung
 - [ ] Nährstoffvergleich
 - [ ] Export (PDF/CSV)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2.2 PSM-Dokumentation
+#### 2.2 PSM-Dokumentation
 - [ ] Spritztagebuch gemäß PflSchG
 - [ ] Anwenderschutz-Dokumentation
 - [ ] Auflagenprüfung
 
-***REMOVED******REMOVED******REMOVED*** Phase 3: Erweiterte Features (P1-P2) - 4-6 Wochen
+### Phase 3: Erweiterte Features (P1-P2) - 4-6 Wochen
 
 - [ ] Feldkalender mit Planung
 - [ ] GIS-Integration erweitern
@@ -123,9 +123,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 🔗 Feldblockfinder-Integration
+## 🔗 Feldblockfinder-Integration
 
-***REMOVED******REMOVED******REMOVED*** Verfügbare Feldblockfinder nach Bundesland
+### Verfügbare Feldblockfinder nach Bundesland
 
 | Bundesland | URL | Hinweise |
 |------------|-----|----------|
@@ -134,7 +134,7 @@
 | Schleswig-Holstein | https://www.schleswig-holstein.de/DE/landesregierung/ministerien-behoerden/LLUR/Aufgaben/Boden/feldblockfinder.html | - |
 | NRW | https://www.landwirtschaftskammer.de/foerderung/flaechenidentifizierung/ | - |
 
-***REMOVED******REMOVED******REMOVED*** iframe-Integration
+### iframe-Integration
 
 ```tsx
 // Komponente: FeldblockfinderIntegration.tsx
@@ -150,7 +150,7 @@ const FELDBLOCKFINDER_URLS: Record<string, string> = {
 };
 ```
 
-***REMOVED******REMOVED******REMOVED*** Hinweise zur Integration
+### Hinweise zur Integration
 
 1. **Cross-Origin-Policy:** Einige Feldblockfinder blockieren iframe-Einbettung
 2. **Alternative:** Link in neuem Tab öffnen + manuelle Datenübernahme
@@ -158,7 +158,7 @@ const FELDBLOCKFINDER_URLS: Record<string, string> = {
 
 ---
 
-***REMOVED******REMOVED*** 📈 Status-Zusammenfassung
+## 📈 Status-Zusammenfassung
 
 | Domain | Gesamt | Yes | Partial | No |
 |--------|--------|-----|---------|-----|
@@ -170,7 +170,7 @@ const FELDBLOCKFINDER_URLS: Record<string, string> = {
 
 ---
 
-***REMOVED******REMOVED*** 📝 Nächste Schritte
+## 📝 Nächste Schritte
 
 1. ✅ Gap-Analyse erstellt
 2. ✅ Frontend: Mandantenauswahl in Schlagkartei implementiert
@@ -184,23 +184,23 @@ const FELDBLOCKFINDER_URLS: Record<string, string> = {
 
 ---
 
-***REMOVED******REMOVED*** ✅ Implementierte Features (2025-11-27)
+## ✅ Implementierte Features (2025-11-27)
 
-***REMOVED******REMOVED******REMOVED*** Mandantenfähige Ackerschlagkartei
+### Mandantenfähige Ackerschlagkartei
 - **Datei:** `packages/frontend-web/src/pages/agrar/feldbuch/schlagkartei.tsx`
 - Multi-Tenant Kundenauswahl
 - Filterung nach Kunde, Status, Kultur
 - KPI-Dashboard mit Skeleton-Loading
 - Tabs: Liste, Karte, Kulturübersicht
 
-***REMOVED******REMOVED******REMOVED*** Feldblockfinder-Integration
+### Feldblockfinder-Integration
 - **Datei:** `packages/frontend-web/src/components/agrar/FeldblockfinderIntegration.tsx`
 - Bundesland-Auswahl für alle 16 Bundesländer
 - Fallback auf externen Link wenn iframe blockiert
 - Manuelle Schlagdaten-Eingabe
 - Dialog-Integration in Schlagkartei
 
-***REMOVED******REMOVED******REMOVED*** Maßnahmen-Dokumentation / Spritztagebuch
+### Maßnahmen-Dokumentation / Spritztagebuch
 - **Datei:** `packages/frontend-web/src/pages/agrar/feldbuch/massnahmen.tsx`
 - Multi-Tenant Kundenzuordnung
 - Spritztagebuch-Tab gemäß § 11 PflSchG
@@ -208,24 +208,24 @@ const FELDBLOCKFINDER_URLS: Record<string, string> = {
 - Wetterdaten (Wind, Temperatur)
 - Anwender/Geräte-Zuordnung
 
-***REMOVED******REMOVED******REMOVED*** Futtermittel-Navigation
+### Futtermittel-Navigation
 - Vollständiges Untermenü für Futtermittel
 - Einzelfuttermittel, Mischfuttermittel
 - Wareneingang, Qualitätskontrolle, Statistik
 
 ---
 
-***REMOVED******REMOVED*** 🛒 Kundenportal (Implementiert 2025-11-28)
+## 🛒 Kundenportal (Implementiert 2025-11-28)
 
-***REMOVED******REMOVED******REMOVED*** Übersicht
+### Übersicht
 Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
 
 **Route:** `/portal/*`
 **Layout:** `CustomerPortalLayout.tsx` (separates, mobil-optimiertes Layout)
 
-***REMOVED******REMOVED******REMOVED*** Implementierte Module
+### Implementierte Module
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Portal Dashboard (`/portal`)
+#### 1. Portal Dashboard (`/portal`)
 - **Datei:** `packages/frontend-web/src/pages/portal/index.tsx`
 - Willkommens-Header mit Kundendaten
 - KPI-Übersicht (offene Bestellungen, Verträge, Rechnungen, Dokumente)
@@ -233,7 +233,7 @@ Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
 - Neue Dokumente zum Download
 - Schnellzugriff-Karten für häufige Funktionen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2. E-Shop (`/portal/shop`)
+#### 2. E-Shop (`/portal/shop`)
 - **Datei:** `packages/frontend-web/src/pages/portal/shop.tsx`
 - Produktkatalog mit Kategorien (Saatgut, Dünger, PSM, Futtermittel)
 - Suchfunktion und Filterung
@@ -242,7 +242,7 @@ Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
 - Anfrage-Dialog für individuelle Angebote
 - Produktkarten mit Zertifikats-Badges
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3. Meine Bestellungen (`/portal/bestellungen`)
+#### 3. Meine Bestellungen (`/portal/bestellungen`)
 - **Datei:** `packages/frontend-web/src/pages/portal/bestellungen.tsx`
 - Bestellübersicht mit Status-Filter
 - Detailansicht mit Positionen
@@ -250,14 +250,14 @@ Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
 - Rechnungs-Download
 - KPIs: Offene, Unterwegs, Abgeschlossen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4. Anfragen (`/portal/anfragen`)
+#### 4. Anfragen (`/portal/anfragen`)
 - **Datei:** `packages/frontend-web/src/pages/portal/anfragen.tsx`
 - Angebotsanfragen, Bestellanfragen, Dienstleistungen
 - Status-Tracking (Offen → In Bearbeitung → Beantwortet → Abgeschlossen)
 - Dialog zum Erstellen neuer Anfragen
 - Antwort-Anzeige vom VALEO-Team
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 5. Verträge & Kontrakte (`/portal/vertraege`)
+#### 5. Verträge & Kontrakte (`/portal/vertraege`)
 - **Datei:** `packages/frontend-web/src/pages/portal/vertraege.tsx`
 - Rahmenverträge, Lieferverträge, Preiskontrakte
 - Vertragserfüllung mit Fortschrittsbalken
@@ -265,7 +265,7 @@ Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
 - Vertragsvolumen und Preise
 - PDF-Download
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 6. Rechnungen (`/portal/rechnungen`)
+#### 6. Rechnungen (`/portal/rechnungen`)
 - **Datei:** `packages/frontend-web/src/pages/portal/rechnungen.tsx`
 - Offene und bezahlte Rechnungen
 - Überfälligkeits-Warnung
@@ -273,21 +273,21 @@ Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
 - Brutto/Netto/MwSt-Aufschlüsselung
 - PDF-Download
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 7. Dokumente (`/portal/dokumente`)
+#### 7. Dokumente (`/portal/dokumente`)
 - **Datei:** `packages/frontend-web/src/pages/portal/dokumente.tsx`
 - Kategorien: Nährstoffbilanzen, Analysen, Deklarationen, Rechnungen, Lieferscheine
 - Jahresfilter
 - Schnellzugriff nach Dokumenttyp
 - PDF/CSV/XLSX Download
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 8. Zertifikate (`/portal/zertifikate`)
+#### 8. Zertifikate (`/portal/zertifikate`)
 - **Datei:** `packages/frontend-web/src/pages/portal/zertifikate.tsx`
 - GMP+, VLOG, QS, Bio, ISO, GLOBALG.A.P., AMA
 - Gültigkeitsstatus mit Auslauf-Warnung
 - Aussteller und Beschreibung
 - PDF-Download
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 9. Ackerschlagkartei (`/portal/feldbuch`)
+#### 9. Ackerschlagkartei (`/portal/feldbuch`)
 - **Datei:** `packages/frontend-web/src/pages/portal/feldbuch.tsx`
 - Schlagübersicht mit FLIK-Nummern
 - Maßnahmen-Dokumentation (Düngung, PSM, Aussaat, Ernte)
@@ -295,7 +295,7 @@ Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
 - CSV-Import für Datenübernahme
 - VALEO-Dienstleistungen markiert
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 10. Nährstoffbilanzen (`/portal/naehrstoffbilanzen`)
+#### 10. Nährstoffbilanzen (`/portal/naehrstoffbilanzen`)
 - **Datei:** `packages/frontend-web/src/pages/portal/naehrstoffbilanzen.tsx`
 - Stoffstrombilanz gemäß DüV
 - N-, P-, K-Salden mit Grenzwertprüfung
@@ -305,7 +305,7 @@ Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
 - Historische Bilanzen
 - PDF-Download
 
-***REMOVED******REMOVED******REMOVED*** Technische Features
+### Technische Features
 - **Responsives Design:** Optimiert für Mobile/Tablet
 - **Bottom Navigation:** Touch-freundliche Navigation auf mobilen Geräten
 - **Skeleton Loading:** Platzhalter während Datenladung
@@ -315,4 +315,5 @@ Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
 ---
 
 **Letzte Aktualisierung:** 2025-11-28
+
 

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Aktiviert den IMPLEMENTATION-Modus im APM-Framework des VALEO-NeuroERP-Systems.
 Wechselt zum IMPLEMENTATION-Modus und führt die notwendigen Initialisierungen durch.
@@ -13,14 +13,14 @@ from pymongo import MongoClient
 from pathlib import Path
 import json
 
-***REMOVED*** Pfad zum Projekt-Root hinzufügen
+# Pfad zum Projekt-Root hinzufügen
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 from backend.apm_framework.apm_workflow import APMWorkflow, APMMode
 from backend.apm_framework.rag_service import RAGService
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class ImplementationMode:
     async def activate(self):
         """Aktiviert den IMPLEMENTATION-Modus und dokumentiert die Implementierung"""
         try:
-            ***REMOVED*** Implementierte Komponenten dokumentieren
+            # Implementierte Komponenten dokumentieren
             impl_doc = {
                 "type": "implementation",
                 "date": datetime.now(),
@@ -65,7 +65,7 @@ class ImplementationMode:
             result = self.impl_collection.insert_one(impl_doc)
             logger.info(f"Implementierung in MongoDB gespeichert. Document ID: {result.inserted_id}")
             
-            ***REMOVED*** Status aktualisieren
+            # Status aktualisieren
             self.impl_collection.update_many(
                 {"_id": {"$ne": result.inserted_id}},
                 {"$set": {"status": "archived"}}
@@ -90,10 +90,10 @@ async def check_rag_service(mongodb, project_id):
         bool: True, wenn der RAG-Service läuft, False sonst
     """
     try:
-        ***REMOVED*** RAG-Service initialisieren
+        # RAG-Service initialisieren
         rag_service = RAGService(mongodb, project_id)
         
-        ***REMOVED*** Testabfrage durchführen
+        # Testabfrage durchführen
         result = await rag_service.rag_query("Test RAG-Service")
         
         if result and "response" in result:
@@ -112,7 +112,7 @@ async def activate_implementation_mode():
     Aktiviert den IMPLEMENTATION-Modus im APM-Framework.
     """
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         mongodb_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
         mongodb_db = os.getenv("MONGODB_DB", "valeo_neuroerp")
         
@@ -120,10 +120,10 @@ async def activate_implementation_mode():
         mongodb = APMMongoDBConnector(mongodb_uri, mongodb_db)
         await mongodb.connect()
         
-        ***REMOVED*** Projekt-ID festlegen (kann auch aus der Umgebung oder als Parameter übergeben werden)
+        # Projekt-ID festlegen (kann auch aus der Umgebung oder als Parameter übergeben werden)
         project_id = os.getenv("PROJECT_ID", "valeo_neuroerp_project")
         
-        ***REMOVED*** RAG-Service überprüfen
+        # RAG-Service überprüfen
         logger.info("Überprüfe RAG-Service...")
         rag_service_running = await check_rag_service(mongodb, project_id)
         
@@ -133,31 +133,31 @@ async def activate_implementation_mode():
             print("Der IMPLEMENTATION-Modus benötigt den RAG-Service für die Implementierungsunterstützung.")
             print("Führen Sie 'python scripts/check_rag_service.py' aus, um den RAG-Service zu starten.\n")
             
-            ***REMOVED*** Frage, ob fortgefahren werden soll
+            # Frage, ob fortgefahren werden soll
             response = input("Möchten Sie trotzdem fortfahren? (j/n): ")
             if response.lower() != "j":
                 logger.info("Abbruch durch Benutzer")
                 print("\nAktivierung des IMPLEMENTATION-Modus abgebrochen.")
                 return
         
-        ***REMOVED*** APM-Workflow initialisieren
+        # APM-Workflow initialisieren
         workflow = APMWorkflow(mongodb, project_id)
         
-        ***REMOVED*** RAG-Service initialisieren und setzen
+        # RAG-Service initialisieren und setzen
         rag_service = RAGService(mongodb, project_id)
         workflow.set_rag_service(rag_service)
         
-        ***REMOVED*** Aktuellen Modus abrufen
+        # Aktuellen Modus abrufen
         current_mode = await workflow.get_current_mode()
         logger.info(f"Aktueller Modus: {current_mode.value if current_mode else 'Nicht gesetzt'}")
         
-        ***REMOVED*** Zu IMPLEMENTATION-Modus wechseln
+        # Zu IMPLEMENTATION-Modus wechseln
         success = await workflow.switch_mode(APMMode.IMPLEMENTATION)
         
         if success:
             logger.info("IMPLEMENTATION-Modus erfolgreich aktiviert")
             
-            ***REMOVED*** Überprüfen, ob ein CREATE-Ergebnis vorhanden ist
+            # Überprüfen, ob ein CREATE-Ergebnis vorhanden ist
             create_results = await mongodb.find_many("create_results", {"project_id": project_id}, limit=1)
             
             if create_results:
@@ -165,7 +165,7 @@ async def activate_implementation_mode():
                 create_id = last_create_result.get("_id")
                 logger.info(f"Letztes CREATE-Ergebnis gefunden: {create_id}")
                 
-                ***REMOVED*** Aktuelle Modus-Informationen in memory-bank/current_mode.txt speichern
+                # Aktuelle Modus-Informationen in memory-bank/current_mode.txt speichern
                 mode_info = f"""IMPLEMENTATION-Modus aktiviert am {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 Projekt-ID: {project_id}
 CREATE-Ergebnis-ID: {create_id}
@@ -183,26 +183,26 @@ Der IMPLEMENTATION-Modus konzentriert sich auf:
                 
                 logger.info("Modus-Informationen in memory-bank/current_mode.txt gespeichert")
                 
-                ***REMOVED*** Handover-Dokument erstellen
-                handover_info = f"""***REMOVED*** IMPLEMENTATION-Modus Handover
+                # Handover-Dokument erstellen
+                handover_info = f"""# IMPLEMENTATION-Modus Handover
 
-***REMOVED******REMOVED*** Aktueller Status
+## Aktueller Status
 - **Modus**: IMPLEMENTATION
 - **Projekt-ID**: {project_id}
 - **CREATE-Ergebnis-ID**: {create_id}
 - **Datum**: {datetime.now().strftime('%Y-%m-%d')}
 
-***REMOVED******REMOVED*** Abgeschlossene Aufgaben
+## Abgeschlossene Aufgaben
 1. **CREATE-Modus abgeschlossen**: Code-Artefakte, Ressourcenanforderungen, Entwurfsmuster und Testfälle wurden generiert.
 2. **IMPLEMENTATION-Modus aktiviert**: Bereit für die Implementierung der generierten Code-Artefakte.
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 1. **Code-Artefakte implementieren**: Die generierten Code-Artefakte in das Projekt integrieren.
 2. **Konfiguration und Deployment**: Die Anwendung konfigurieren und deployen.
 3. **CI/CD einrichten**: Continuous Integration und Continuous Deployment einrichten.
 4. **Tests ausführen**: Die generierten Testfälle ausführen und die Qualität sicherstellen.
 
-***REMOVED******REMOVED*** Technische Details
+## Technische Details
 - Die CREATE-Ergebnisse sind in der MongoDB in der Collection `create_results` gespeichert.
 - Die generierten Code-Artefakte sind in der Collection `code_artifacts` gespeichert.
 - Die generierten Ressourcenanforderungen sind in der Collection `resource_requirements` gespeichert.
@@ -233,7 +233,7 @@ Der IMPLEMENTATION-Modus konzentriert sich auf:
                 print("Der IMPLEMENTATION-Modus benötigt ein CREATE-Ergebnis als Grundlage.")
                 print("Führen Sie zuerst den CREATE-Modus aus: python scripts/activate_create_mode.py")
                 
-                ***REMOVED*** Aktuelle Modus-Informationen trotzdem in memory-bank/current_mode.txt speichern
+                # Aktuelle Modus-Informationen trotzdem in memory-bank/current_mode.txt speichern
                 mode_info = f"""IMPLEMENTATION-Modus aktiviert am {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 Projekt-ID: {project_id}
 Status: Kein CREATE-Ergebnis gefunden
@@ -260,7 +260,7 @@ Hinweis: Es wurde kein CREATE-Ergebnis gefunden. Der IMPLEMENTATION-Modus benöt
         print(f"\nFehler: {str(e)}")
     
     finally:
-        ***REMOVED*** MongoDB-Verbindung trennen
+        # MongoDB-Verbindung trennen
         if 'mongodb' in locals():
             await mongodb.disconnect()
 

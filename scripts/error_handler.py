@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 Fehlerbehandlung für VALEO-NeuroERP
@@ -19,15 +19,15 @@ import shutil
 from datetime import datetime
 from typing import Dict, List, Any, Callable, Optional, Tuple, Union
 
-***REMOVED*** Konfiguration
+# Konfiguration
 LOG_DIR = "logs"
 BACKUP_DIR = "backups"
 CONFIG_DIR = "config"
 MAX_BACKUPS = 5
-ERROR_THRESHOLD = 3  ***REMOVED*** Anzahl der Fehler, bevor eine Wiederherstellung ausgelöst wird
-ERROR_WINDOW = 300  ***REMOVED*** Zeitfenster für Fehler in Sekunden (5 Minuten)
+ERROR_THRESHOLD = 3  # Anzahl der Fehler, bevor eine Wiederherstellung ausgelöst wird
+ERROR_WINDOW = 300  # Zeitfenster für Fehler in Sekunden (5 Minuten)
 
-***REMOVED*** Logging konfigurieren
+# Logging konfigurieren
 os.makedirs(LOG_DIR, exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
@@ -43,19 +43,19 @@ class ErrorStats:
     """Klasse zur Verfolgung von Fehlerstatistiken."""
     
     def __init__(self):
-        self.errors = []  ***REMOVED*** Liste von (timestamp, error_type, error_message)
-        self.error_counts = {}  ***REMOVED*** Fehlertyp -> Anzahl
-        self.last_recovery = 0  ***REMOVED*** Zeitstempel der letzten Wiederherstellung
+        self.errors = []  # Liste von (timestamp, error_type, error_message)
+        self.error_counts = {}  # Fehlertyp -> Anzahl
+        self.last_recovery = 0  # Zeitstempel der letzten Wiederherstellung
     
     def add_error(self, error_type: str, error_message: str) -> None:
         """Fügt einen Fehler zu den Statistiken hinzu."""
         now = time.time()
         self.errors.append((now, error_type, error_message))
         
-        ***REMOVED*** Alte Fehler entfernen
+        # Alte Fehler entfernen
         self.errors = [(t, et, em) for t, et, em in self.errors if now - t < ERROR_WINDOW]
         
-        ***REMOVED*** Fehleranzahl aktualisieren
+        # Fehleranzahl aktualisieren
         if error_type not in self.error_counts:
             self.error_counts[error_type] = 0
         self.error_counts[error_type] += 1
@@ -64,10 +64,10 @@ class ErrorStats:
         """Prüft, ob eine Wiederherstellung ausgelöst werden sollte."""
         now = time.time()
         
-        ***REMOVED*** Zu viele Fehler in kurzer Zeit?
+        # Zu viele Fehler in kurzer Zeit?
         recent_errors = [(t, et, em) for t, et, em in self.errors if now - t < ERROR_WINDOW]
         if len(recent_errors) >= ERROR_THRESHOLD:
-            ***REMOVED*** Nicht zu oft wiederherstellen
+            # Nicht zu oft wiederherstellen
             if now - self.last_recovery > ERROR_WINDOW:
                 self.last_recovery = now
                 return True
@@ -156,16 +156,16 @@ class BackupManager:
         
         for file_path in file_paths:
             if os.path.exists(file_path):
-                ***REMOVED*** Zielverzeichnis erstellen
+                # Zielverzeichnis erstellen
                 target_dir = os.path.join(backup_path, os.path.dirname(file_path))
                 os.makedirs(target_dir, exist_ok=True)
                 
-                ***REMOVED*** Datei kopieren
+                # Datei kopieren
                 target_path = os.path.join(backup_path, file_path)
                 shutil.copy2(file_path, target_path)
                 logger.info(f"Datei {file_path} gesichert nach {target_path}")
         
-        ***REMOVED*** Alte Backups entfernen
+        # Alte Backups entfernen
         self._cleanup_old_backups()
         
         return backup_path
@@ -179,22 +179,22 @@ class BackupManager:
         
         success = True
         
-        ***REMOVED*** Alle Dateien im Backup wiederherstellen
+        # Alle Dateien im Backup wiederherstellen
         for root, _, files in os.walk(backup_path):
             for file in files:
                 backup_file = os.path.join(root, file)
                 rel_path = os.path.relpath(backup_file, backup_path)
                 
-                ***REMOVED*** Prüfen, ob die Datei wiederhergestellt werden soll
+                # Prüfen, ob die Datei wiederhergestellt werden soll
                 if file_paths and rel_path not in file_paths:
                     continue
                 
                 try:
-                    ***REMOVED*** Zielverzeichnis erstellen
+                    # Zielverzeichnis erstellen
                     target_dir = os.path.dirname(rel_path)
                     os.makedirs(target_dir, exist_ok=True)
                     
-                    ***REMOVED*** Datei kopieren
+                    # Datei kopieren
                     shutil.copy2(backup_file, rel_path)
                     logger.info(f"Datei {rel_path} wiederhergestellt")
                 except Exception as e:
@@ -217,10 +217,10 @@ class BackupManager:
         if len(backups) <= MAX_BACKUPS:
             return
         
-        ***REMOVED*** Sortiere Backups nach Erstellungsdatum
+        # Sortiere Backups nach Erstellungsdatum
         backups.sort(key=lambda x: os.path.getctime(os.path.join(self.backup_dir, x)))
         
-        ***REMOVED*** Entferne die ältesten Backups
+        # Entferne die ältesten Backups
         for old_backup in backups[:-MAX_BACKUPS]:
             try:
                 shutil.rmtree(os.path.join(self.backup_dir, old_backup))
@@ -236,7 +236,7 @@ class ErrorHandler:
         self.file_monitor = FileIntegrityMonitor()
         self.backup_manager = BackupManager()
         
-        ***REMOVED*** Standardmäßig zu schützende Dateien
+        # Standardmäßig zu schützende Dateien
         self.critical_files = [
             "scripts/streamlit_app_mcp_integration.py",
             "scripts/cursor_prompt_integration.py",
@@ -246,7 +246,7 @@ class ErrorHandler:
             "start_app.bat"
         ]
         
-        ***REMOVED*** Fehlerbehandlungsstrategien
+        # Fehlerbehandlungsstrategien
         self.error_strategies = {
             "FileNotFoundError": self._handle_file_not_found,
             "PermissionError": self._handle_permission_error,
@@ -263,21 +263,21 @@ class ErrorHandler:
             "default": self._handle_default_error
         }
         
-        ***REMOVED*** Initialisieren
+        # Initialisieren
         self._initialize()
     
     def _initialize(self) -> None:
         """Initialisiert den ErrorHandler."""
-        ***REMOVED*** Verzeichnisse erstellen
+        # Verzeichnisse erstellen
         os.makedirs(LOG_DIR, exist_ok=True)
         os.makedirs(BACKUP_DIR, exist_ok=True)
         os.makedirs(CONFIG_DIR, exist_ok=True)
         
-        ***REMOVED*** Kritische Dateien schützen
+        # Kritische Dateien schützen
         for file_path in self.critical_files:
             self.file_monitor.add_protected_file(file_path)
         
-        ***REMOVED*** Initiales Backup erstellen
+        # Initiales Backup erstellen
         self.backup_manager.create_backup(self.critical_files, "initial_backup")
         
         logger.info("ErrorHandler initialisiert")
@@ -291,24 +291,24 @@ class ErrorHandler:
         error_message = str(error)
         error_traceback = traceback.format_exc()
         
-        ***REMOVED*** Fehler protokollieren
+        # Fehler protokollieren
         logger.error(f"Fehler aufgetreten: {error_type} - {error_message}")
         logger.error(f"Traceback: {error_traceback}")
         
-        ***REMOVED*** Fehlerstatistik aktualisieren
+        # Fehlerstatistik aktualisieren
         self.error_stats.add_error(error_type, error_message)
         
-        ***REMOVED*** Dateien auf Integrität prüfen
+        # Dateien auf Integrität prüfen
         modified_files = self.file_monitor.check_file_integrity()
         if modified_files:
             logger.warning(f"Modifizierte Dateien gefunden: {modified_files}")
             self._handle_file_integrity_error(modified_files, context)
         
-        ***REMOVED*** Fehlerbehandlungsstrategie auswählen und ausführen
+        # Fehlerbehandlungsstrategie auswählen und ausführen
         strategy = self.error_strategies.get(error_type, self.error_strategies["default"])
         result = strategy(error, context)
         
-        ***REMOVED*** Prüfen, ob eine Wiederherstellung notwendig ist
+        # Prüfen, ob eine Wiederherstellung notwendig ist
         if self.error_stats.should_recover():
             self._perform_recovery()
         
@@ -318,28 +318,28 @@ class ErrorHandler:
         """Führt eine Wiederherstellung durch."""
         logger.info("Führe Wiederherstellung durch...")
         
-        ***REMOVED*** Neuestes Backup finden
+        # Neuestes Backup finden
         backups = self.backup_manager.list_backups()
         if not backups:
             logger.error("Keine Backups gefunden für die Wiederherstellung")
             return
         
-        ***REMOVED*** Neuestes Backup wiederherstellen
+        # Neuestes Backup wiederherstellen
         latest_backup = max(backups, key=lambda x: os.path.getctime(os.path.join(BACKUP_DIR, x)))
         logger.info(f"Stelle Backup {latest_backup} wieder her")
         
-        ***REMOVED*** Modifizierte Dateien wiederherstellen
+        # Modifizierte Dateien wiederherstellen
         modified_files = self.file_monitor.check_file_integrity()
         if modified_files:
             success = self.backup_manager.restore_backup(latest_backup, modified_files)
             if success:
                 logger.info("Wiederherstellung erfolgreich")
                 
-                ***REMOVED*** Hashes aktualisieren
+                # Hashes aktualisieren
                 for file_path in modified_files:
                     self.file_monitor.update_hash(file_path)
                 
-                ***REMOVED*** Fehlerstatistik zurücksetzen
+                # Fehlerstatistik zurücksetzen
                 self.error_stats.clear()
             else:
                 logger.error("Wiederherstellung fehlgeschlagen")
@@ -349,11 +349,11 @@ class ErrorHandler:
         file_path = getattr(error, "filename", "Unbekannte Datei")
         logger.info(f"Datei nicht gefunden: {file_path}")
         
-        ***REMOVED*** Prüfen, ob es sich um eine kritische Datei handelt
+        # Prüfen, ob es sich um eine kritische Datei handelt
         if any(file_path.endswith(critical) for critical in self.critical_files):
             logger.warning(f"Kritische Datei nicht gefunden: {file_path}")
             
-            ***REMOVED*** Versuche, die Datei aus dem Backup wiederherzustellen
+            # Versuche, die Datei aus dem Backup wiederherzustellen
             backups = self.backup_manager.list_backups()
             if backups:
                 latest_backup = max(backups, key=lambda x: os.path.getctime(os.path.join(BACKUP_DIR, x)))
@@ -460,7 +460,7 @@ class ErrorHandler:
     
     def _handle_file_integrity_error(self, modified_files: List[str], context: Dict[str, Any]) -> Dict[str, Any]:
         """Behandelt Fehler bei der Dateiintegrität."""
-        ***REMOVED*** Backup erstellen
+        # Backup erstellen
         backup_path = self.backup_manager.create_backup(self.critical_files)
         
         return {
@@ -479,7 +479,7 @@ class ErrorHandler:
             "recovery_action": "Keine spezifische Wiederherstellungsaktion verfügbar."
         }
 
-***REMOVED*** Singleton-Instanz
+# Singleton-Instanz
 error_handler = ErrorHandler()
 
 def handle_exception(func: Callable) -> Callable:
@@ -496,7 +496,7 @@ def handle_exception(func: Callable) -> Callable:
             result = error_handler.handle_error(e, context)
             logger.info(f"Fehlerbehandlung abgeschlossen: {result}")
             
-            ***REMOVED*** Re-raise the exception if needed
+            # Re-raise the exception if needed
             if "raise_exception" in result and result["raise_exception"]:
                 raise
             
@@ -533,21 +533,21 @@ def get_error_stats() -> Dict[str, Any]:
     }
 
 if __name__ == "__main__":
-    ***REMOVED*** Test der Funktionalität
+    # Test der Funktionalität
     logger.info("Teste ErrorHandler...")
     
-    ***REMOVED*** Test: Datei nicht gefunden
+    # Test: Datei nicht gefunden
     try:
         with open("nicht_existierende_datei.txt", "r") as f:
             content = f.read()
     except Exception as e:
         error_handler.handle_error(e)
     
-    ***REMOVED*** Test: Backup erstellen
+    # Test: Backup erstellen
     backup_path = create_backup()
     logger.info(f"Backup erstellt: {backup_path}")
     
-    ***REMOVED*** Test: Backups auflisten
+    # Test: Backups auflisten
     backups = list_backups()
     logger.info(f"Verfügbare Backups: {backups}")
     

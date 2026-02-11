@@ -24,7 +24,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict
 
-import yaml  ***REMOVED*** type: ignore[import]
+import yaml  # type: ignore[import]
 from sqlalchemy import Table
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -103,18 +103,18 @@ def import_table(
     rows: Any,
     dry_run: bool,
 ) -> None:
-    ***REMOVED*** Placeholder: In a full implementation we would resolve the target table/columns based on the
-    ***REMOVED*** mapping, apply transformations and perform INSERT/UPDATE statements.
-    ***REMOVED*** For now we just emit statistics to help with manual verification.
+    # Placeholder: In a full implementation we would resolve the target table/columns based on the
+    # mapping, apply transformations and perform INSERT/UPDATE statements.
+    # For now we just emit statistics to help with manual verification.
     target_columns = [spec.get("target", "<missing target>") for spec in mapping.values()]
     print(f"Table {table_name}: {len(rows)} rows -> targets {target_columns}")
 
     if dry_run:
         return
 
-    ***REMOVED*** Example pseudo-write:
+    # Example pseudo-write:
     try:
-        session.execute("SELECT 1")  ***REMOVED*** ensure connection works
+        session.execute("SELECT 1")  # ensure connection works
         session.commit()
     except SQLAlchemyError as exc:
         session.rollback()
@@ -165,3 +165,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

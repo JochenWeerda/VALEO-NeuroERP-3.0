@@ -1,8 +1,8 @@
-***REMOVED*** @valero-neuroerp/notifications-domain
+# @valero-neuroerp/notifications-domain
 
 **Multi-Channel Notification Platform** für VALEO-NeuroERP 3.0
 
-***REMOVED******REMOVED*** 📋 Features
+## 📋 Features
 
 - ✅ **Multi-Channel** (Email, SMS, WhatsApp, Push, Webhook)
 - ✅ **Template-System** (Handlebars mit Variablen)
@@ -11,27 +11,27 @@
 - ✅ **Zustellnachweise & Tracking**
 - ✅ **Event-Driven** (NATS Consumer)
 
-***REMOVED******REMOVED*** 🚫 Abgrenzung
+## 🚫 Abgrenzung
 
 ❌ Keine Geschäftslogik (Preise, Verträge, Lagerbestände)  
 ❌ Nur Nachrichtenversand!
 
-***REMOVED******REMOVED*** 🚀 Quick Start
+## 🚀 Quick Start
 
 ```bash
 npm install
 npm run migrate:gen
-npm run dev  ***REMOVED*** Port 3080
+npm run dev  # Port 3080
 ```
 
-***REMOVED******REMOVED*** 📡 API
+## 📡 API
 
 ```
 POST /notifications/api/v1/messages/send  - Nachricht senden
 GET  /notifications/api/v1/messages/:id   - Nachricht abrufen
 ```
 
-***REMOVED******REMOVED*** 💡 Beispiel
+## 💡 Beispiel
 
 ```json
 POST /notifications/api/v1/messages/send
@@ -49,13 +49,14 @@ POST /notifications/api/v1/messages/send
 }
 ```
 
-***REMOVED******REMOVED*** 🔗 Integration
+## 🔗 Integration
 
 - **Document Domain** → PDF-Anhänge
 - **Sales Domain** → Rechnungsversand
 - **Contracts Domain** → Vertragsbestätigungen
 - **Quality Domain** → Prüfergebnis-Alerts
 
-***REMOVED******REMOVED*** 📊 Port: 3080
+## 📊 Port: 3080
 
 **Status:** ✅ MVP Ready
+

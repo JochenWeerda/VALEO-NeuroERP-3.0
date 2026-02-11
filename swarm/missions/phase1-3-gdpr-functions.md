@@ -1,4 +1,4 @@
-***REMOVED*** Phase 1.3 - DSGVO-Funktionen
+# Phase 1.3 - DSGVO-Funktionen
 
 **Status:** 🚀 In Progress  
 **Priorität:** 🔴 Hoch  
@@ -8,7 +8,7 @@
 **Owner:** Compliance-Team  
 **Aufwand:** 2-3 Wochen
 
-***REMOVED******REMOVED*** Mission Overview
+## Mission Overview
 
 Implementierung eines vollständigen DSGVO-Compliance-Systems mit:
 - Auskunftsanfragen (Art. 15 DSGVO)
@@ -17,16 +17,16 @@ Implementierung eines vollständigen DSGVO-Compliance-Systems mit:
 - Widerspruchs-Verwaltung (Art. 21 DSGVO - Widerspruchsrecht)
 - Vollständige Protokollierung aller Requests
 
-***REMOVED******REMOVED*** Backend Tasks
+## Backend Tasks
 
-***REMOVED******REMOVED******REMOVED*** 1. Service erstellen: `services/crm-gdpr/`
+### 1. Service erstellen: `services/crm-gdpr/`
 - [ ] Projektstruktur anlegen
 - [ ] FastAPI-App mit Router
 - [ ] Database-Models (SQLAlchemy)
 - [ ] Pydantic-Schemas
 - [ ] Alembic-Migrationen
 
-***REMOVED******REMOVED******REMOVED*** 2. Database Models
+### 2. Database Models
 - [ ] `GDPRRequest` Entity:
   - `id`, `tenant_id`
   - `request_type` (access, deletion, portability, objection)
@@ -50,7 +50,7 @@ Implementierung eines vollständigen DSGVO-Compliance-Systems mit:
   - `changed_by`, `changed_at`
   - `notes` (optional)
 
-***REMOVED******REMOVED******REMOVED*** 3. API Endpoints
+### 3. API Endpoints
 - [ ] `POST /gdpr/requests` - Request erstellen
 - [ ] `GET /gdpr/requests` - Liste mit Filtern
 - [ ] `GET /gdpr/requests/{id}` - Detail
@@ -63,7 +63,7 @@ Implementierung eines vollständigen DSGVO-Compliance-Systems mit:
 - [ ] `GET /gdpr/requests/{id}/download` - Export-Datei herunterladen
 - [ ] `POST /gdpr/check` - Prüfen ob Request für Contact existiert
 
-***REMOVED******REMOVED******REMOVED*** 4. Business Logic
+### 4. Business Logic
 - [ ] **Datenexport (Art. 20)**:
   - Sammle alle Daten eines Kontakts aus allen CRM-Modulen
   - Formate: JSON, CSV, PDF
@@ -86,23 +86,23 @@ Implementierung eines vollständigen DSGVO-Compliance-Systems mit:
   - ID-Karte Upload (optional)
   - Manuelle Verifizierung durch Compliance-Officer
 
-***REMOVED******REMOVED******REMOVED*** 5. Events
+### 5. Events
 - [ ] `crm.gdpr.request.created`
 - [ ] `crm.gdpr.request.verified`
 - [ ] `crm.gdpr.request.exported`
 - [ ] `crm.gdpr.request.deleted`
 - [ ] `crm.gdpr.request.rejected`
 
-***REMOVED******REMOVED*** Frontend Tasks
+## Frontend Tasks
 
-***REMOVED******REMOVED******REMOVED*** 1. GDPR-Requests Liste
+### 1. GDPR-Requests Liste
 - [ ] `packages/frontend-web/src/pages/crm/gdpr-requests.tsx`
   - ListReport mit Filtern
   - Spalten: Contact, Request Type, Status, Requested At, Completed At
   - Bulk-Actions: Export, Mark as Completed
   - Export-Funktion
 
-***REMOVED******REMOVED******REMOVED*** 2. GDPR-Request Detail
+### 2. GDPR-Request Detail
 - [ ] `packages/frontend-web/src/pages/crm/gdpr-request-detail.tsx`
   - ObjectPage mit Tabs:
     - Grundinformationen
@@ -111,7 +111,7 @@ Implementierung eines vollständigen DSGVO-Compliance-Systems mit:
     - Historie
   - Aktionen: Verify, Generate Export, Delete Data, Reject, Download Export
 
-***REMOVED******REMOVED******REMOVED*** 3. GDPR-Export Wizard
+### 3. GDPR-Export Wizard
 - [ ] `packages/frontend-web/src/pages/crm/gdpr-export.tsx`
   - Wizard für Datenexport
   - Schritt 1: Contact auswählen
@@ -119,20 +119,20 @@ Implementierung eines vollständigen DSGVO-Compliance-Systems mit:
   - Schritt 3: Format wählen (JSON, CSV, PDF)
   - Schritt 4: Export generieren und Download
 
-***REMOVED******REMOVED******REMOVED*** 4. Public Request-Seite
+### 4. Public Request-Seite
 - [ ] `packages/frontend-web/src/pages/crm/gdpr-request-public.tsx`
   - Public-Seite für Betroffene
   - Request erstellen
   - Status prüfen
   - Export herunterladen
 
-***REMOVED******REMOVED******REMOVED*** 5. Integration in Contact/Customer
+### 5. Integration in Contact/Customer
 - [ ] Tab "DSGVO-Requests" in `kunden-stamm.tsx`
 - [ ] Quick-Actions: Request Access, Request Deletion, Object
 
-***REMOVED******REMOVED*** Integration Tasks
+## Integration Tasks
 
-***REMOVED******REMOVED******REMOVED*** 1. Datenexport aus allen Modulen
+### 1. Datenexport aus allen Modulen
 - [ ] CRM-Core: Contacts, Customers
 - [ ] CRM-Sales: Opportunities, Quotes, Activities
 - [ ] CRM-Marketing: Campaigns, Segments
@@ -140,29 +140,29 @@ Implementierung eines vollständigen DSGVO-Compliance-Systems mit:
 - [ ] Finance: Invoices, Payments
 - [ ] Purchase: Orders, Offers
 
-***REMOVED******REMOVED******REMOVED*** 2. Anonymisierungs-Logik
+### 2. Anonymisierungs-Logik
 - [ ] Anonymisierungs-Regeln pro Entity-Typ
 - [ ] Pseudonymisierung für Logs
 - [ ] Cascade-Anonymisierung
 
-***REMOVED******REMOVED******REMOVED*** 3. Email-Service Integration
+### 3. Email-Service Integration
 - [ ] Verifizierungs-Email
 - [ ] Export-Bereit-Email
 - [ ] Löschungs-Bestätigung
 
-***REMOVED******REMOVED*** Tests
+## Tests
 
-***REMOVED******REMOVED******REMOVED*** 1. Unit Tests
+### 1. Unit Tests
 - [ ] GDPR-Model Tests
 - [ ] Export-Logic Tests
 - [ ] Anonymisierungs-Logic Tests
 
-***REMOVED******REMOVED******REMOVED*** 2. Integration Tests
+### 2. Integration Tests
 - [ ] API-Endpoint Tests
 - [ ] Datenexport Tests
 - [ ] Anonymisierungs Tests
 
-***REMOVED******REMOVED******REMOVED*** 3. E2E Tests
+### 3. E2E Tests
 - [ ] `tests/e2e/crm-marketing/gdpr.spec.ts`
   - Request erstellen
   - Verifizierung
@@ -170,7 +170,7 @@ Implementierung eines vollständigen DSGVO-Compliance-Systems mit:
   - Datenlöschung
   - Widerspruch
 
-***REMOVED******REMOVED*** Definition of Done
+## Definition of Done
 
 - ✅ Auskunftsanfragen können verwaltet werden
 - ✅ Datenexport funktional (Art. 20 DSGVO)
@@ -183,7 +183,7 @@ Implementierung eines vollständigen DSGVO-Compliance-Systems mit:
 - ✅ Alle Tests grün
 - ✅ DSGVO-konform
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. Backend-Service erstellen
 2. Database-Models implementieren
@@ -202,4 +202,5 @@ Implementierung eines vollständigen DSGVO-Compliance-Systems mit:
 - DSGVO Art. 20: Recht auf Datenübertragbarkeit
 - DSGVO Art. 21: Widerspruchsrecht
 - GoBD-Konformität (Aufbewahrungspflichten)
+
 

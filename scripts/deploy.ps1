@@ -1,7 +1,7 @@
-***REMOVED*** VALEO-NeuroERP Deployment Script
+# VALEO-NeuroERP Deployment Script
 Write-Host "Starting VALEO-NeuroERP deployment..." -ForegroundColor Green
 
-***REMOVED*** Check Python version
+# Check Python version
 $pythonVersion = python --version
 if (-not $?) {
     Write-Host "Python not found. Please install Python 3.8 or higher." -ForegroundColor Red
@@ -9,7 +9,7 @@ if (-not $?) {
 }
 Write-Host "Using $pythonVersion" -ForegroundColor Green
 
-***REMOVED*** Create and activate virtual environment
+# Create and activate virtual environment
 Write-Host "Creating virtual environment..." -ForegroundColor Yellow
 python -m venv venv
 if (-not $?) {
@@ -17,7 +17,7 @@ if (-not $?) {
     exit 1
 }
 
-***REMOVED*** Activate virtual environment
+# Activate virtual environment
 Write-Host "Activating virtual environment..." -ForegroundColor Yellow
 .\venv\Scripts\Activate
 if (-not $?) {
@@ -25,7 +25,7 @@ if (-not $?) {
     exit 1
 }
 
-***REMOVED*** Install dependencies
+# Install dependencies
 Write-Host "Installing dependencies..." -ForegroundColor Yellow
 pip install -r requirements.txt
 if (-not $?) {
@@ -33,7 +33,7 @@ if (-not $?) {
     exit 1
 }
 
-***REMOVED*** Run database migrations
+# Run database migrations
 Write-Host "Running database migrations..." -ForegroundColor Yellow
 alembic upgrade head
 if (-not $?) {
@@ -41,10 +41,10 @@ if (-not $?) {
     exit 1
 }
 
-***REMOVED*** Start services
+# Start services
 Write-Host "Starting services..." -ForegroundColor Yellow
 
-***REMOVED*** Start Redis
+# Start Redis
 Write-Host "Starting Redis..." -ForegroundColor Yellow
 Start-Process redis-server -NoNewWindow
 if (-not $?) {
@@ -52,7 +52,7 @@ if (-not $?) {
     exit 1
 }
 
-***REMOVED*** Start MongoDB
+# Start MongoDB
 Write-Host "Starting MongoDB..." -ForegroundColor Yellow
 Start-Process mongod -NoNewWindow
 if (-not $?) {
@@ -60,7 +60,7 @@ if (-not $?) {
     exit 1
 }
 
-***REMOVED*** Start Prometheus
+# Start Prometheus
 Write-Host "Starting Prometheus..." -ForegroundColor Yellow
 Start-Process prometheus -NoNewWindow
 if (-not $?) {
@@ -68,7 +68,7 @@ if (-not $?) {
     exit 1
 }
 
-***REMOVED*** Start Grafana
+# Start Grafana
 Write-Host "Starting Grafana..." -ForegroundColor Yellow
 Start-Process grafana-server -NoNewWindow
 if (-not $?) {
@@ -76,7 +76,7 @@ if (-not $?) {
     exit 1
 }
 
-***REMOVED*** Start FastAPI server
+# Start FastAPI server
 Write-Host "Starting FastAPI server..." -ForegroundColor Yellow
 Start-Process uvicorn "backend.main:app --host 0.0.0.0 --port 8000" -NoNewWindow
 if (-not $?) {
@@ -84,7 +84,7 @@ if (-not $?) {
     exit 1
 }
 
-***REMOVED*** Start Celery worker
+# Start Celery worker
 Write-Host "Starting Celery worker..." -ForegroundColor Yellow
 Start-Process celery "worker -A backend.celery:app --loglevel=info" -NoNewWindow
 if (-not $?) {

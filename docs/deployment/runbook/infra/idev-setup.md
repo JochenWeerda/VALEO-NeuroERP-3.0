@@ -1,6 +1,6 @@
-***REMOVED*** InfraStat IDEV Produktiv-Setup
+# InfraStat IDEV Produktiv-Setup
 
-***REMOVED******REMOVED*** 1. Secrets erstellen
+## 1. Secrets erstellen
 ```bash
 kubectl create secret generic infrastat-idev \
   --from-literal=username='<IDEV_USER>' \
@@ -10,7 +10,7 @@ kubectl create secret generic infrastat-idev \
   -n <namespace>
 ```
 
-***REMOVED******REMOVED*** 2. Helm Overrides anwenden
+## 2. Helm Overrides anwenden
 - `docs/deployment/helm/infra/values-infrastat.yaml` anpassen (Image-Tag, Retry-Parameter).
 ```bash
 helm upgrade --install valeo-erp ./k8s/helm/valeo-erp \
@@ -20,16 +20,16 @@ helm upgrade --install valeo-erp ./k8s/helm/valeo-erp \
   --set alerts.infrastatEnabled=true
 ```
 
-***REMOVED******REMOVED*** 3. Workflow-Definition finalisieren
+## 3. Workflow-Definition finalisieren
 - Stelle sicher, dass alle Events (`intrastat.validation.*`, `intrastat.submission.*`) im Workflow-Service definiert sind.
 - Optional: Workflow-Definition in `services/compliance/infrastat/app/workflow/registration.py` ausrollen (`helm upgrade` löst Registrierung beim Start aus).
 
-***REMOVED******REMOVED*** 4. Alerts/Monitoring
+## 4. Alerts/Monitoring
 - Prometheus-ConfigMap (`prometheus-alerts.yaml`) aktivieren (`alerts.infrastatEnabled=true`).
 - Alertmanager-Routing für `component=infrastat` konfigurieren.
 - Smoke-Test: `kubectl port-forward svc/valeo-erp-infrastat 5200` → `curl /metrics` und Alerts mithilfe von `promtool test rules`. 
 
-***REMOVED******REMOVED*** 5. Smoke-Test (IDEV)
+## 5. Smoke-Test (IDEV)
 1. Port-Forward:
    ```bash
    kubectl -n <namespace> port-forward svc/valeo-app-infrastat 5200:5200
@@ -45,7 +45,7 @@ helm upgrade --install valeo-erp ./k8s/helm/valeo-erp \
    ```
 4. IDEV-Server prüfen (`Upload-Log` sollte neuen Datensatz zeigen).
 
-***REMOVED******REMOVED*** 6. Prometheus/Alertmanager Smoke-Test
+## 6. Prometheus/Alertmanager Smoke-Test
 - `kubectl port-forward svc/prometheus 9090` und Query `infrastat_submission_failure_ratio`.
 - `promtool test rules prometheus-alerts.yaml`.
 - Alertmanager-Routing prüfen (`component=infrastat` -> Compliance OnCall).

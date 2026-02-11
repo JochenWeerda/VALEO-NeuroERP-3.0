@@ -1,4 +1,4 @@
-***REMOVED*** Phase 1.5 - Kampagnenmanagement
+# Phase 1.5 - Kampagnenmanagement
 
 **Status:** 🚀 In Progress  
 **Priorität:** 🟡 Mittel  
@@ -8,7 +8,7 @@
 **Owner:** Marketing-Team  
 **Aufwand:** 3-4 Wochen
 
-***REMOVED******REMOVED*** Mission Overview
+## Mission Overview
 
 Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - Email-Kampagnen mit Templates
@@ -18,9 +18,9 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - Marketing-ROI Measurement
 - Campaign-Performance-Dashboard
 
-***REMOVED******REMOVED*** Backend Tasks
+## Backend Tasks
 
-***REMOVED******REMOVED******REMOVED*** 1. Service erweitern: `services/crm-marketing/`
+### 1. Service erweitern: `services/crm-marketing/`
 - [ ] Campaign-Models (SQLAlchemy)
 - [ ] Campaign-Templates
 - [ ] Campaign-Tracking
@@ -28,7 +28,7 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - [ ] Pydantic-Schemas
 - [ ] Alembic-Migrationen
 
-***REMOVED******REMOVED******REMOVED*** 2. Database Models
+### 2. Database Models
 - [ ] `Campaign` Entity:
   - `id`, `tenant_id`
   - `name`, `description`
@@ -87,7 +87,7 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
   - `open_rate`, `click_rate`, `conversion_rate`
   - `revenue`, `roi`
 
-***REMOVED******REMOVED******REMOVED*** 3. API Endpoints
+### 3. API Endpoints
 - [ ] `POST /campaigns` - Campaign erstellen
 - [ ] `GET /campaigns` - Liste mit Filtern
 - [ ] `GET /campaigns/{id}` - Detail
@@ -112,7 +112,7 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - [ ] `POST /campaigns/tracking/open` - Open-Tracking (public)
 - [ ] `POST /campaigns/tracking/click` - Click-Tracking (public)
 
-***REMOVED******REMOVED******REMOVED*** 4. Business Logic
+### 4. Business Logic
 - [ ] **Campaign-Scheduler**:
   - Scheduled Campaigns automatisch starten
   - Background-Job für Versand
@@ -138,7 +138,7 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
   - ROI-Berechnung
   - Conversion-Rate-Tracking
 
-***REMOVED******REMOVED******REMOVED*** 5. Events
+### 5. Events
 - [ ] `crm.campaign.created`
 - [ ] `crm.campaign.started`
 - [ ] `crm.campaign.completed`
@@ -147,16 +147,16 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - [ ] `crm.campaign.recipient.clicked`
 - [ ] `crm.campaign.recipient.converted`
 
-***REMOVED******REMOVED*** Frontend Tasks
+## Frontend Tasks
 
-***REMOVED******REMOVED******REMOVED*** 1. Campaigns Liste
+### 1. Campaigns Liste
 - [ ] `packages/frontend-web/src/pages/crm/campaigns.tsx`
   - ListReport mit Filtern
   - Spalten: Name, Type, Status, Segment, Sent, Open Rate, Click Rate, Conversion Rate, ROI
   - Bulk-Actions: Start, Pause, Cancel, Export
   - Export-Funktion
 
-***REMOVED******REMOVED******REMOVED*** 2. Campaign Detail
+### 2. Campaign Detail
 - [ ] `packages/frontend-web/src/pages/crm/campaign-detail.tsx`
   - ObjectPage mit Tabs:
     - Grundinformationen
@@ -169,21 +169,21 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
     - Events (Timeline)
   - Aktionen: Save, Schedule, Start, Pause, Cancel, Test Send
 
-***REMOVED******REMOVED******REMOVED*** 3. Campaign Template Manager
+### 3. Campaign Template Manager
 - [ ] `packages/frontend-web/src/pages/crm/campaign-templates.tsx`
   - Template-Liste
   - Template-Editor (WYSIWYG)
   - Variable-Editor
   - Preview
 
-***REMOVED******REMOVED******REMOVED*** 4. Campaign Performance Dashboard
+### 4. Campaign Performance Dashboard
 - [ ] `packages/frontend-web/src/pages/crm/campaign-performance.tsx`
   - Charts: Sent/Open/Click/Conversion Over Time
   - Charts: ROI Comparison
   - Charts: Segment Performance
   - Metriken: Total Sent, Open Rate, Click Rate, Conversion Rate, ROI
 
-***REMOVED******REMOVED******REMOVED*** 5. Campaign Builder (Wizard)
+### 5. Campaign Builder (Wizard)
 - [ ] `packages/frontend-web/src/pages/crm/campaign-builder.tsx`
   - Multi-Step Wizard:
     1. Campaign Type & Name
@@ -193,37 +193,37 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
     5. Schedule
     6. Review & Confirm
 
-***REMOVED******REMOVED*** Integration Tasks
+## Integration Tasks
 
-***REMOVED******REMOVED******REMOVED*** 1. Email-Service Integration
+### 1. Email-Service Integration
 - [ ] SMTP/Email-Service-Integration
 - [ ] Template-Rendering
 - [ ] Personalisierung
 - [ ] Bounce-Handling
 
-***REMOVED******REMOVED******REMOVED*** 2. Segment-Integration
+### 2. Segment-Integration
 - [ ] Segment-Auswahl in Campaign-Erstellung
 - [ ] Segment-Member-Liste für Campaign
 - [ ] Segment-Performance-Tracking
 
-***REMOVED******REMOVED******REMOVED*** 3. Tracking-Integration
+### 3. Tracking-Integration
 - [ ] Open-Tracking-Pixel
 - [ ] Click-Tracking-Links
 - [ ] Conversion-Tracking
 
-***REMOVED******REMOVED*** Tests
+## Tests
 
-***REMOVED******REMOVED******REMOVED*** 1. Unit Tests
+### 1. Unit Tests
 - [ ] Campaign-Model Tests
 - [ ] Template-Rendering Tests
 - [ ] A/B-Testing Logic Tests
 
-***REMOVED******REMOVED******REMOVED*** 2. Integration Tests
+### 2. Integration Tests
 - [ ] API-Endpoint Tests
 - [ ] Email-Sender Tests
 - [ ] Tracking Tests
 
-***REMOVED******REMOVED******REMOVED*** 3. E2E Tests
+### 3. E2E Tests
 - [ ] `tests/e2e/crm-marketing/campaigns.spec.ts`
   - Campaign erstellen
   - Campaign planen
@@ -232,7 +232,7 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
   - A/B-Testing
   - Performance anzeigen
 
-***REMOVED******REMOVED*** Definition of Done
+## Definition of Done
 
 - ✅ Email-Kampagnen können erstellt werden
 - ✅ Campaign-Templates funktional
@@ -243,7 +243,7 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - ✅ ROI-Berechnung funktional
 - ✅ Alle Tests grün
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. Campaign-Models implementieren
 2. Campaign-API-Endpoints implementieren
@@ -260,4 +260,5 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - Email-Marketing Best Practices
 - A/B-Testing Methodologie
 - Marketing-ROI Berechnung
+
 

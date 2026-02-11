@@ -1,11 +1,11 @@
-***REMOVED*** SLO-based Alert Rules for VALEO NeuroERP
-***REMOVED*** Integrated with monitoring/slo/service-level-objectives.yaml
+# SLO-based Alert Rules for VALEO NeuroERP
+# Integrated with monitoring/slo/service-level-objectives.yaml
 
 groups:
   - name: slo_violations
     interval: 30s
     rules:
-      ***REMOVED*** API Availability SLO
+      # API Availability SLO
       - alert: APIAvailabilitySLOViolation
         expr: avg_over_time(up{job="valeo-app"}[30d]) < 0.999
         for: 5m
@@ -16,7 +16,7 @@ groups:
           summary: "API Availability SLO violated"
           description: "API availability {{ $value | humanizePercentage }} is below 99.9% target"
 
-      ***REMOVED*** API Latency p95 SLO
+      # API Latency p95 SLO
       - alert: APILatencyP95SLOWarning
         expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 0.7
         for: 5m
@@ -37,7 +37,7 @@ groups:
           summary: "API Latency p95 SLO violated"
           description: "p95 latency {{ $value }}s exceeds 1000ms target"
 
-      ***REMOVED*** Error Rate SLO
+      # Error Rate SLO
       - alert: APIErrorRateSLOWarning
         expr: |
           sum(rate(http_requests_total{status=~"5.."}[5m])) /
@@ -65,7 +65,7 @@ groups:
   - name: business_slos
     interval: 1m
     rules:
-      ***REMOVED*** Workflow Success Rate
+      # Workflow Success Rate
       - alert: WorkflowSuccessRateLow
         expr: |
           sum(rate(workflow_transitions_total{status="completed"}[5m])) /
@@ -78,7 +78,7 @@ groups:
           summary: "Workflow success rate below target"
           description: "Only {{ $value | humanizePercentage }} of workflows completing successfully"
 
-      ***REMOVED*** Compliance Violations
+      # Compliance Violations
       - alert: ComplianceViolationRateHigh
         expr: |
           sum(rate(compliance_violations_total[1h])) /
@@ -94,7 +94,7 @@ groups:
   - name: infrastructure_health
     interval: 30s
     rules:
-      ***REMOVED*** Pod Restarts
+      # Pod Restarts
       - alert: PodRestartingTooOften
         expr: rate(kube_pod_container_status_restarts_total[15m]) > 0.1
         for: 5m
@@ -104,7 +104,7 @@ groups:
           summary: "Pod {{ $labels.pod }} restarting frequently"
           description: "Pod has restarted {{ $value }} times in the last 15 minutes"
 
-      ***REMOVED*** OOM Kills
+      # OOM Kills
       - alert: PodOOMKilled
         expr: |
           sum by (namespace, pod) (
@@ -116,7 +116,7 @@ groups:
           summary: "Pod {{ $labels.pod }} was OOM killed"
           description: "Pod ran out of memory and was terminated"
 
-      ***REMOVED*** Service-Mesh Health
+      # Service-Mesh Health
       - alert: IstioSidecarNotReady
         expr: |
           sum by (namespace, pod) (
@@ -127,4 +127,5 @@ groups:
           severity: warning
         annotations:
           summary: "Istio sidecar not ready in {{ $labels.pod }}"
+
 

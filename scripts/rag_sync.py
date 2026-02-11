@@ -10,7 +10,7 @@ import json
 import logging
 from pathlib import Path
 
-***REMOVED*** Logging-Konfiguration
+# Logging-Konfiguration
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
@@ -19,13 +19,13 @@ logger = logging.getLogger(__name__)
 
 class RAGSyncManager:
     def __init__(self):
-        ***REMOVED*** MongoDB Verbindung
+        # MongoDB Verbindung
         self.client = MongoClient('mongodb://localhost:27017/')
         self.db = self.client['valeo_neuroerp']
         self.rag_collection = self.db['rag_documents']
         self.file_status_collection = self.db['file_status']
         
-        ***REMOVED*** Verzeichnisse die überwacht werden sollen
+        # Verzeichnisse die überwacht werden sollen
         self.watched_directories = [
             'backend',
             'modules',
@@ -35,7 +35,7 @@ class RAGSyncManager:
             'scripts'
         ]
         
-        ***REMOVED*** Dateitypen die synchronisiert werden sollen
+        # Dateitypen die synchronisiert werden sollen
         self.watched_extensions = {
             '.py', '.js', '.ts', '.md', '.sql', '.yaml', '.yml', 
             '.json', '.txt', '.ini', '.conf'
@@ -61,11 +61,11 @@ class RAGSyncManager:
 
     def should_process_file(self, filepath: str) -> bool:
         """Prüft ob eine Datei verarbeitet werden soll."""
-        ***REMOVED*** Prüfe Dateiendung
+        # Prüfe Dateiendung
         if not any(filepath.endswith(ext) for ext in self.watched_extensions):
             return False
             
-        ***REMOVED*** Ignoriere bestimmte Verzeichnisse
+        # Ignoriere bestimmte Verzeichnisse
         ignore_dirs = {'.git', '__pycache__', 'node_modules', 'venv'}
         if any(ignore_dir in filepath for ignore_dir in ignore_dirs):
             return False
@@ -86,17 +86,17 @@ class RAGSyncManager:
         try:
             metadata = self.get_file_metadata(filepath)
             
-            ***REMOVED*** Prüfe ob die Datei bereits im System ist
+            # Prüfe ob die Datei bereits im System ist
             existing_doc = self.file_status_collection.find_one({'filepath': filepath})
             
             if existing_doc and existing_doc['hash'] == metadata['hash']:
                 logger.debug(f"Datei {filepath} unverändert, überspringe...")
                 return
                 
-            ***REMOVED*** Lese Dateiinhalt
+            # Lese Dateiinhalt
             content = self.get_file_content(filepath)
             
-            ***REMOVED*** Erstelle RAG-Dokument
+            # Erstelle RAG-Dokument
             rag_doc = {
                 'filepath': filepath,
                 'content': content,
@@ -109,10 +109,10 @@ class RAGSyncManager:
                 'created_at': datetime.now()
             }
             
-            ***REMOVED*** Speichere in MongoDB
+            # Speichere in MongoDB
             self.rag_collection.insert_one(rag_doc)
             
-            ***REMOVED*** Update File-Status
+            # Update File-Status
             self.file_status_collection.update_one(
                 {'filepath': filepath},
                 {'$set': metadata},
@@ -159,10 +159,10 @@ def main():
     try:
         rag_sync = RAGSyncManager()
         
-        ***REMOVED*** Führe Synchronisation durch
+        # Führe Synchronisation durch
         rag_sync.sync_all()
         
-        ***REMOVED*** Cleanup alte Dokumente
+        # Cleanup alte Dokumente
         rag_sync.cleanup_old_documents()
         
         logger.info("RAG-Synchronisation erfolgreich abgeschlossen")

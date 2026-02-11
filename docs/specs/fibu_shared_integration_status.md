@@ -1,6 +1,6 @@
-***REMOVED*** FiBu Shared Libraries – Integrationsstand (2025‑11‑14)
+# FiBu Shared Libraries – Integrationsstand (2025‑11‑14)
 
-***REMOVED******REMOVED*** 1. Aktuell umgesetzt
+## 1. Aktuell umgesetzt
 - `finance-shared` liefert wiederverwendbare Module für Auth/RBAC, Events sowie GoBD-Audit-Trails.
 - `fibu-gateway`
   - nutzt `FiBuAccessPolicy` in allen Routen (`chart_of_accounts`, `journal_entries`, `op_management`).
@@ -13,7 +13,7 @@
   - `JournalService` erstellt GoBD-Audit-Log + Booking-Events mit validierten UUIDs.
   - Unit-Tests für Journal-Service vorhanden.
 
-***REMOVED******REMOVED*** 2. Offene Maßnahmen
+## 2. Offene Maßnahmen
 1. **Event-Bus Hardening**
    - Kafka-Bridge für produktive Streams ergänzen.
    - Telemetrie & Alerting (Publish-Dauer, Fehlerrate) in Prometheus/Grafana aufnehmen.
@@ -30,16 +30,17 @@
    - Optional: Cache-Layer (Redis) + Change-Events (`approval.rule.updated`).
    - Data-Migrationsskript, um bestehende Mandanten in SQLite bzw. spätere zentrale Config-DB zu übernehmen.
 
-***REMOVED******REMOVED*** 3. Nächste Schritte & Empfehlungen
+## 3. Nächste Schritte & Empfehlungen
 - Priorität 1: Kafka-/Observability-Layer für Event-Publisher fertigstellen.
 - Priorität 2: Contract-Tests mit `fibu-core` implementieren, sobald APIs stehen.
 - Priorität 3: Approval-Rules-Admin-Flow (API, UI, Audit) etablieren.
 
-***REMOVED******REMOVED*** 4. Testing & Observability
+## 4. Testing & Observability
 - Bestehende pytest-Suites:
   - `packages/finance-shared/tests`
   - `services/finance/fibu-gateway/tests/unit`
   - `services/finance/fibu-core/tests`
 - Nach Bus-Integration: zusätzliche Integrationstests mit lokalem NATS/Kafka + Prometheus-Metriken für Publishing-Erfolg/Fehler.
+
 
 

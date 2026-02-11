@@ -1,13 +1,13 @@
 version: '3.8'
 
-***REMOVED*** ===================================
-***REMOVED*** Staging Infrastructure Only
-***REMOVED*** ===================================
-***REMOVED*** PostgreSQL, Redis, Keycloak
-***REMOVED*** Backend/Frontend starten nativ (siehe README)
+# ===================================
+# Staging Infrastructure Only
+# ===================================
+# PostgreSQL, Redis, Keycloak
+# Backend/Frontend starten nativ (siehe README)
 
 services:
-  ***REMOVED*** PostgreSQL Database (Staging)
+  # PostgreSQL Database (Staging)
   postgres-staging:
     image: postgres:15-alpine
     container_name: valeo-staging-postgres
@@ -30,7 +30,7 @@ services:
       retries: 5
       start_period: 30s
 
-  ***REMOVED*** Redis Cache (Staging)
+  # Redis Cache (Staging)
   redis-staging:
     image: redis:7-alpine
     container_name: valeo-staging-redis
@@ -48,7 +48,7 @@ services:
       retries: 5
     command: redis-server --appendonly yes
 
-  ***REMOVED*** Keycloak Identity Provider (Staging)
+  # Keycloak Identity Provider (Staging)
   keycloak-staging:
     image: quay.io/keycloak/keycloak:23.0
     container_name: valeo-staging-keycloak
@@ -86,7 +86,7 @@ services:
       start_period: 90s
     command: start-dev --import-realm
 
-  ***REMOVED*** pgAdmin (Staging)
+  # pgAdmin (Staging)
   pgadmin-staging:
     image: dpage/pgadmin4:8
     container_name: valeo-staging-pgadmin
@@ -106,7 +106,7 @@ services:
     volumes:
       - pgadmin_staging_data:/var/lib/pgadmin
 
-  ***REMOVED*** Redis Commander (Staging)
+  # Redis Commander (Staging)
   redis-commander-staging:
     image: rediscommander/redis-commander:latest
     container_name: valeo-staging-redis-commander
@@ -139,4 +139,5 @@ networks:
     ipam:
       config:
         - subnet: 172.21.0.0/16
+
 

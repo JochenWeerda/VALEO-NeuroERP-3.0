@@ -1,8 +1,8 @@
-***REMOVED*** VALEO NeuroERP 3.0 - Business Logic Architecture Revolution
+# VALEO NeuroERP 3.0 - Business Logic Architecture Revolution
 
-***REMOVED******REMOVED*** 🎯 **PROBLEM: Enterprise Business Logic Conflicts**
+## 🎯 **PROBLEM: Enterprise Business Logic Conflicts**
 
-***REMOVED******REMOVED******REMOVED*** **Root Cause Analysis:**
+### **Root Cause Analysis:**
 - **Rule Conflicts**: Verschiedene Domains haben widersprüchliche Regeln
 - **State Inconsistency**: Business Logic führt zu inkonsistenten Zuständen
 - **Validation Chaos**: Mehrere Validierungsregeln widersprechen sich
@@ -10,9 +10,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 🏗️ **FUNDAMENTALE LÖSUNG: Domain-Driven Business Logic Architecture**
+## 🏗️ **FUNDAMENTALE LÖSUNG: Domain-Driven Business Logic Architecture**
 
-***REMOVED******REMOVED******REMOVED*** **1. Business Rule Engine**
+### **1. Business Rule Engine**
 ```typescript
 // packages/business-rules/src/business-rule.ts
 export interface IBusinessRule<TContext> {
@@ -33,7 +33,7 @@ export abstract class BusinessRule<TContext> implements IBusinessRule<TContext> 
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** **2. Rule Registry & Conflict Detection**
+### **2. Rule Registry & Conflict Detection**
 ```typescript
 // packages/business-rules/src/rule-registry.ts
 import { IBusinessRule } from './business-rule';
@@ -91,7 +91,7 @@ export class ConflictDetector {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** **3. Business Logic Orchestrator**
+### **3. Business Logic Orchestrator**
 ```typescript
 // packages/business-rules/src/business-logic-orchestrator.ts
 import { RuleRegistry } from './rule-registry';
@@ -127,7 +127,7 @@ export class BusinessLogicOrchestrator {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** **4. Domain-Specific Business Rules Example**
+### **4. Domain-Specific Business Rules Example**
 ```typescript
 // domains/crm/src/rules/crm-rules.ts
 import { BusinessRule, IBusinessRule } from '@valeo-neuroerp-3.0/packages/business-rules/src/business-rule';
@@ -190,7 +190,7 @@ export function registerCrmRules(): void {
 
 ---
 
-***REMOVED******REMOVED*** 🎯 **BENEFITS DER BUSINESS LOGIC ARCHITECTURE:**
+## 🎯 **BENEFITS DER BUSINESS LOGIC ARCHITECTURE:**
 
 1. **Rule Centralization** - Alle Geschäftsregeln an einem Ort
 2. **Conflict Resolution** - Automatische Erkennung von Regelkonflikten
@@ -200,7 +200,7 @@ export function registerCrmRules(): void {
 
 ---
 
-***REMOVED******REMOVED*** 🚀 **IMPLEMENTATION STRATEGY:**
+## 🚀 **IMPLEMENTATION STRATEGY:**
 
 1. **Phase 1**: Business Rule Engine implementieren
 2. **Phase 2**: Rule Registry und Conflict Detection

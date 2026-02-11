@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 MongoDB Prompt Store und Cursor.ai AutoGUI Integration
@@ -22,13 +22,13 @@ from pathlib import Path
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, OperationFailure
 
-***REMOVED*** Konfiguration
+# Konfiguration
 PROMPT_FILE = "data/cursor_prompts/latest_prompt.json"
 CURSOR_PATH = "C:\\Program Files\\Cursor\\Cursor.exe"
-WAIT_TIME_AFTER_START = 3  ***REMOVED*** Sekunden zu warten nach dem Start von Cursor.ai
-WAIT_TIME_AFTER_HOTKEY = 1  ***REMOVED*** Sekunden zu warten nach dem Drücken von Alt+C
+WAIT_TIME_AFTER_START = 3  # Sekunden zu warten nach dem Start von Cursor.ai
+WAIT_TIME_AFTER_HOTKEY = 1  # Sekunden zu warten nach dem Drücken von Alt+C
 
-***REMOVED*** MongoDB-Konfiguration
+# MongoDB-Konfiguration
 MONGODB_URI = os.environ.get("MONGODB_URI", "mongodb://localhost:27017/")
 MONGODB_DB_NAME = os.environ.get("MONGODB_DB_NAME", "valeo_neuroerp")
 MONGODB_COLLECTION = "cursor_prompts"
@@ -39,7 +39,7 @@ def connect_to_mongodb():
         client = MongoClient(MONGODB_URI)
         db = client[MONGODB_DB_NAME]
         
-        ***REMOVED*** Verbindung testen
+        # Verbindung testen
         client.admin.command('ping')
         print(f"Verbindung zu MongoDB ({MONGODB_URI}, Datenbank: {MONGODB_DB_NAME}) hergestellt")
         
@@ -56,7 +56,7 @@ def store_prompt_in_mongodb(prompt_text):
         return False
     
     try:
-        ***REMOVED*** Prompt-Dokument erstellen
+        # Prompt-Dokument erstellen
         prompt_doc = {
             "prompt": prompt_text,
             "created_at": datetime.now(),
@@ -65,12 +65,12 @@ def store_prompt_in_mongodb(prompt_text):
             "status": "created"
         }
         
-        ***REMOVED*** In MongoDB einfügen
+        # In MongoDB einfügen
         result = db[MONGODB_COLLECTION].insert_one(prompt_doc)
         prompt_id = str(result.inserted_id)
         print(f"Prompt in MongoDB gespeichert mit ID: {prompt_id}")
         
-        ***REMOVED*** MongoDB-Verbindung schließen
+        # MongoDB-Verbindung schließen
         client.close()
         
         return prompt_id
@@ -88,11 +88,11 @@ def read_prompt_from_mongodb(prompt_id):
         return None
     
     try:
-        ***REMOVED*** Prompt aus MongoDB lesen
+        # Prompt aus MongoDB lesen
         from bson.objectid import ObjectId
         prompt_doc = db[MONGODB_COLLECTION].find_one({"_id": ObjectId(prompt_id)})
         
-        ***REMOVED*** MongoDB-Verbindung schließen
+        # MongoDB-Verbindung schließen
         client.close()
         
         if prompt_doc:
@@ -131,7 +131,7 @@ def copy_to_clipboard(text):
 def is_cursor_running():
     """Überprüft, ob Cursor.ai läuft."""
     try:
-        ***REMOVED*** Windows-Befehl zum Überprüfen, ob ein Prozess läuft
+        # Windows-Befehl zum Überprüfen, ob ein Prozess läuft
         result = subprocess.run(["tasklist", "/FI", "IMAGENAME eq Cursor.exe"], 
                               capture_output=True, text=True)
         return "Cursor.exe" in result.stdout
@@ -157,15 +157,15 @@ def start_cursor():
             return False
     else:
         print("Cursor.ai läuft bereits.")
-        ***REMOVED*** Bringe Cursor.ai in den Vordergrund
+        # Bringe Cursor.ai in den Vordergrund
         try:
-            ***REMOVED*** Finde das Cursor.ai-Fenster
+            # Finde das Cursor.ai-Fenster
             windows = pyautogui.getWindowsWithTitle("Cursor")
             if windows:
                 cursor_window = windows[0]
                 cursor_window.activate()
                 print("Cursor.ai in den Vordergrund gebracht.")
-                time.sleep(1)  ***REMOVED*** Kurz warten, bis das Fenster im Vordergrund ist
+                time.sleep(1)  # Kurz warten, bis das Fenster im Vordergrund ist
             else:
                 print("Cursor.ai-Fenster konnte nicht gefunden werden.")
         except Exception as e:
@@ -175,11 +175,11 @@ def start_cursor():
 def open_chat_window():
     """Öffnet das Chat-Fenster in Cursor.ai mit Alt+C."""
     try:
-        ***REMOVED*** Alt+C ist die Tastenkombination für das Chat-Fenster in Cursor.ai
+        # Alt+C ist die Tastenkombination für das Chat-Fenster in Cursor.ai
         pyautogui.hotkey('alt', 'c')
         print("Chat-Fenster geöffnet (Alt+C).")
         
-        ***REMOVED*** Kurz warten, bis das Chat-Fenster geöffnet ist
+        # Kurz warten, bis das Chat-Fenster geöffnet ist
         print(f"Warte {WAIT_TIME_AFTER_HOTKEY} Sekunden, bis das Chat-Fenster geöffnet ist...")
         time.sleep(WAIT_TIME_AFTER_HOTKEY)
         return True
@@ -190,14 +190,14 @@ def open_chat_window():
 def paste_and_send():
     """Fügt den Text aus der Zwischenablage ein und sendet ihn."""
     try:
-        ***REMOVED*** Einfügen mit Strg+V
+        # Einfügen mit Strg+V
         pyautogui.hotkey('ctrl', 'v')
         print("Text eingefügt (Strg+V).")
         
-        ***REMOVED*** Kurz warten
+        # Kurz warten
         time.sleep(0.5)
         
-        ***REMOVED*** Enter drücken, um den Prompt zu senden
+        # Enter drücken, um den Prompt zu senden
         pyautogui.press('enter')
         print("Enter gedrückt, Prompt gesendet.")
         return True
@@ -237,7 +237,7 @@ def main():
     """Hauptfunktion"""
     print("MongoDB Prompt Store und Cursor.ai AutoGUI Integration gestartet.")
     
-    ***REMOVED*** Prompt aus Datei lesen
+    # Prompt aus Datei lesen
     prompt = read_latest_prompt_from_file()
     if not prompt:
         print("Kein Prompt in der Datei gefunden.")
@@ -245,52 +245,52 @@ def main():
     
     print(f"Prompt gefunden: {prompt[:50]}...")
     
-    ***REMOVED*** Prompt in MongoDB speichern
+    # Prompt in MongoDB speichern
     prompt_id = store_prompt_in_mongodb(prompt)
     if not prompt_id:
         print("Prompt konnte nicht in MongoDB gespeichert werden.")
         return
     
-    ***REMOVED*** Prompt aus MongoDB lesen (zur Verifizierung)
+    # Prompt aus MongoDB lesen (zur Verifizierung)
     stored_prompt = read_prompt_from_mongodb(prompt_id)
     if not stored_prompt:
         print("Prompt konnte nicht aus MongoDB gelesen werden.")
         return
     
-    ***REMOVED*** Prompt in die Zwischenablage kopieren
+    # Prompt in die Zwischenablage kopieren
     if not copy_to_clipboard(stored_prompt):
         update_prompt_status_in_mongodb(prompt_id, "clipboard_error")
         return
     
-    ***REMOVED*** Status aktualisieren
+    # Status aktualisieren
     update_prompt_status_in_mongodb(prompt_id, "copied_to_clipboard")
     
-    ***REMOVED*** Cursor.ai starten oder in den Vordergrund bringen
+    # Cursor.ai starten oder in den Vordergrund bringen
     if not start_cursor():
         print("Cursor.ai konnte nicht gestartet werden.")
         update_prompt_status_in_mongodb(prompt_id, "cursor_start_error")
         return
     
-    ***REMOVED*** Chat-Fenster öffnen
+    # Chat-Fenster öffnen
     if not open_chat_window():
         print("Chat-Fenster konnte nicht geöffnet werden.")
         update_prompt_status_in_mongodb(prompt_id, "chat_window_error")
         return
     
-    ***REMOVED*** Prompt einfügen und senden
+    # Prompt einfügen und senden
     if not paste_and_send():
         print("Prompt konnte nicht eingefügt und gesendet werden.")
         update_prompt_status_in_mongodb(prompt_id, "paste_error")
         return
     
-    ***REMOVED*** Status aktualisieren
+    # Status aktualisieren
     update_prompt_status_in_mongodb(prompt_id, "sent_to_cursor")
     
     print("Automatisierung erfolgreich abgeschlossen!")
     print("Der Prompt wurde in MongoDB gespeichert und an Cursor.ai übergeben.")
 
 if __name__ == "__main__":
-    ***REMOVED*** Sicherheitsabfrage, da das Skript die Kontrolle über die Tastatur übernimmt
+    # Sicherheitsabfrage, da das Skript die Kontrolle über die Tastatur übernimmt
     if len(sys.argv) > 1 and sys.argv[1] == "--force":
         main()
     else:

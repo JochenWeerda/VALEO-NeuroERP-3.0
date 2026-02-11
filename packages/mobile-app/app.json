@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "***REMOVED***007AFF"
+      "backgroundColor": "#007AFF"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -29,7 +29,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "***REMOVED***007AFF"
+        "backgroundColor": "#007AFF"
       },
       "package": "com.valeo.crm.mobile",
       "versionCode": 1,
@@ -54,7 +54,7 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "***REMOVED***007AFF",
+          "color": "#007AFF",
           "defaultChannel": "default"
         }
       ],

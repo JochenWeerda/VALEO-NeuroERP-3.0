@@ -1,134 +1,134 @@
-﻿***REMOVED*** VALEO NeuroERP - Scripts
+# VALEO NeuroERP - Scripts
 
-Dieses Verzeichnis enthält Deployment-, Test- und Utility-Scripts für VALEO NeuroERP.
+Dieses Verzeichnis enth�lt Deployment-, Test- und Utility-Scripts f�r VALEO NeuroERP.
 
-***REMOVED******REMOVED*** 📁 Staging-Deployment
+## ?? Staging-Deployment
 
-***REMOVED******REMOVED******REMOVED*** Windows (PowerShell)
+### Windows (PowerShell)
 
 **Deployment-Script:** `staging-deploy.ps1`
 
 ```powershell
-***REMOVED*** Standard-Deployment
+# Standard-Deployment
 .\scripts\staging-deploy.ps1
 
-***REMOVED*** Clean-Deployment (alles neu)
+# Clean-Deployment (alles neu)
 .\scripts\staging-deploy.ps1 -Clean
 
-***REMOVED*** Ohne Image-Build (schneller, nutzt existierende Images)
+# Ohne Image-Build (schneller, nutzt existierende Images)
 .\scripts\staging-deploy.ps1 -SkipBuild
 
-***REMOVED*** Ohne Smoke-Tests
+# Ohne Smoke-Tests
 .\scripts\staging-deploy.ps1 -SkipTests
 
-***REMOVED*** Hilfe anzeigen
+# Hilfe anzeigen
 .\scripts\staging-deploy.ps1 -Help
 ```
 
 **Features:**
-- ✅ Automatisches Setup aller Services
-- ✅ Health-Checks für alle Container
-- ✅ Database-Migration
-- ✅ Pre-Deployment-Backup
-- ✅ Smoke-Tests
-- ✅ Detaillierte Fehlerbehandlung
+- ? Automatisches Setup aller Services
+- ? Health-Checks f�r alle Container
+- ? Database-Migration
+- ? Pre-Deployment-Backup
+- ? Smoke-Tests
+- ? Detaillierte Fehlerbehandlung
 
-***REMOVED******REMOVED******REMOVED*** Linux/macOS (Bash)
+### Linux/macOS (Bash)
 
 **Smoke-Tests:** `smoke-tests-staging.sh`
 
 ```bash
-***REMOVED*** Alle Tests ausführen
+# Alle Tests ausf�hren
 ./scripts/smoke-tests-staging.sh
 
-***REMOVED*** Nur Health-Checks
+# Nur Health-Checks
 ./scripts/smoke-tests-staging.sh health
 
-***REMOVED*** Nur Auth-Tests
+# Nur Auth-Tests
 ./scripts/smoke-tests-staging.sh auth
 
-***REMOVED*** Nur API-Tests
+# Nur API-Tests
 ./scripts/smoke-tests-staging.sh api
 ```
 
 **Features:**
-- ✅ 15+ automatisierte Tests
-- ✅ Health-Checks (PostgreSQL, Redis, Keycloak)
-- ✅ OIDC-Konfiguration-Tests
-- ✅ API-Endpoint-Tests
-- ✅ Container-Status-Checks
-- ✅ System-Resource-Checks
+- ? 15+ automatisierte Tests
+- ? Health-Checks (PostgreSQL, Redis, Keycloak)
+- ? OIDC-Konfiguration-Tests
+- ? API-Endpoint-Tests
+- ? Container-Status-Checks
+- ? System-Resource-Checks
 
-***REMOVED******REMOVED*** 🧪 Test-Kategorien
+## ?? Test-Kategorien
 
-***REMOVED******REMOVED******REMOVED*** Infrastructure Tests
+### Infrastructure Tests
 - PostgreSQL Health
 - Redis Health
 - Keycloak Health
 - Container Status
 
-***REMOVED******REMOVED******REMOVED*** Application Tests
+### Application Tests
 - Backend API Health
 - BFF Health
 - Frontend Health
 - API Documentation
 
-***REMOVED******REMOVED******REMOVED*** OIDC/Auth Tests
+### OIDC/Auth Tests
 - Realm Configuration
 - Discovery Document
 - JWKS Endpoint
 - Token Flow (optional)
 
-***REMOVED******REMOVED******REMOVED*** Data Layer Tests
+### Data Layer Tests
 - Database Tables
 - Redis Read/Write
 - Cache Operations
 
-***REMOVED******REMOVED******REMOVED*** API Integration Tests
+### API Integration Tests
 - CORS Headers
 - Health Endpoints
 - Customer API (optional)
 - Sales Order CRUD (optional)
 
-***REMOVED******REMOVED******REMOVED*** System Tests
+### System Tests
 - Disk Space
 - Memory Usage
 - Container Resources
 
-***REMOVED******REMOVED*** 📊 Test-Ausgabe
+## ?? Test-Ausgabe
 
 **Erfolgreiche Tests:**
 ```
-✅ PostgreSQL Health Check
-✅ Redis Health Check
-✅ Keycloak Health Check
+? PostgreSQL Health Check
+? Redis Health Check
+? Keycloak Health Check
 ...
-🎉 All Smoke Tests Passed!
+?? All Smoke Tests Passed!
 ```
 
 **Fehlgeschlagene Tests:**
 ```
-✅ PostgreSQL Health Check
-❌ Redis Health Check
-⚠️  Some Smoke Tests Failed!
+? PostgreSQL Health Check
+? Redis Health Check
+??  Some Smoke Tests Failed!
 ```
 
-***REMOVED******REMOVED*** 🔧 Weitere Scripts
+## ?? Weitere Scripts
 
-***REMOVED******REMOVED******REMOVED*** Database-Backup
+### Database-Backup
 
 ```powershell
-***REMOVED*** Manuelles Backup
+# Manuelles Backup
 docker exec valeo-staging-postgres pg_dump `
   -U valeo_staging `
   -Fc valeo_neuro_erp_staging `
   > backups/staging/manual-backup.dump
 ```
 
-***REMOVED******REMOVED******REMOVED*** Database-Restore
+### Database-Restore
 
 ```powershell
-***REMOVED*** Backup wiederherstellen
+# Backup wiederherstellen
 docker exec -i valeo-staging-postgres pg_restore `
   -U valeo_staging `
   -d valeo_neuro_erp_staging `
@@ -136,75 +136,75 @@ docker exec -i valeo-staging-postgres pg_restore `
   < backups/staging/manual-backup.dump
 ```
 
-***REMOVED******REMOVED******REMOVED*** Logs anzeigen
+### Logs anzeigen
 
 ```powershell
-***REMOVED*** Alle Services
+# Alle Services
 docker-compose -f docker-compose.staging.yml logs -f
 
-***REMOVED*** Einzelner Service
+# Einzelner Service
 docker-compose -f docker-compose.staging.yml logs -f backend-staging
 
-***REMOVED*** Letzte 100 Zeilen
+# Letzte 100 Zeilen
 docker-compose -f docker-compose.staging.yml logs --tail=100
 ```
 
-***REMOVED******REMOVED******REMOVED*** Container neu starten
+### Container neu starten
 
 ```powershell
-***REMOVED*** Alle Container
+# Alle Container
 docker-compose -f docker-compose.staging.yml restart
 
-***REMOVED*** Einzelner Container
+# Einzelner Container
 docker-compose -f docker-compose.staging.yml restart backend-staging
 ```
 
-***REMOVED******REMOVED*** 🐛 Troubleshooting
+## ?? Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Script-Ausführung blockiert (Windows)
+### Script-Ausf�hrung blockiert (Windows)
 
 ```powershell
-***REMOVED*** Execution-Policy temporär ändern
+# Execution-Policy tempor�r �ndern
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\scripts\staging-deploy.ps1
 ```
 
-***REMOVED******REMOVED******REMOVED*** Bash-Script nicht ausführbar (Linux/macOS)
+### Bash-Script nicht ausf�hrbar (Linux/macOS)
 
 ```bash
-***REMOVED*** Ausführbar machen
+# Ausf�hrbar machen
 chmod +x scripts/smoke-tests-staging.sh
 ./scripts/smoke-tests-staging.sh
 ```
 
-***REMOVED******REMOVED******REMOVED*** Docker-Fehler: "Cannot connect to Docker daemon"
+### Docker-Fehler: "Cannot connect to Docker daemon"
 
 ```powershell
-***REMOVED*** Docker Desktop starten (Windows)
-***REMOVED*** Oder Docker-Service starten (Linux)
+# Docker Desktop starten (Windows)
+# Oder Docker-Service starten (Linux)
 sudo systemctl start docker
 ```
 
-***REMOVED******REMOVED******REMOVED*** Port bereits belegt
+### Port bereits belegt
 
 ```powershell
-***REMOVED*** Prüfen welcher Prozess Port 3001 nutzt
+# Pr�fen welcher Prozess Port 3001 nutzt
 netstat -ano | findstr :3001
 
-***REMOVED*** Prozess beenden (Windows)
+# Prozess beenden (Windows)
 taskkill /PID <PID> /F
 ```
 
-***REMOVED******REMOVED*** 📚 Weitere Dokumentation
+## ?? Weitere Dokumentation
 
-- [STAGING-DEPLOYMENT.md](../STAGING-DEPLOYMENT.md) - Vollständige Staging-Anleitung
+- [STAGING-DEPLOYMENT.md](../STAGING-DEPLOYMENT.md) - Vollst�ndige Staging-Anleitung
 - [DEPLOYMENT-PLAN.md](../DEPLOYMENT-PLAN.md) - Production-Deployment
 - [PRODUCTION-AUTH-SETUP.md](../PRODUCTION-AUTH-SETUP.md) - Authentication-Setup
 
-***REMOVED******REMOVED*** 🆘 Support
+## ?? Support
 
 Bei Problemen:
-1. Logs prüfen: `docker-compose -f docker-compose.staging.yml logs`
+1. Logs pr�fen: `docker-compose -f docker-compose.staging.yml logs`
 2. Container-Status: `docker-compose -f docker-compose.staging.yml ps`
 3. Smoke-Tests: `.\scripts\smoke-tests-staging.sh`
 4. Dokumentation: [STAGING-DEPLOYMENT.md](../STAGING-DEPLOYMENT.md)
@@ -213,3 +213,4 @@ Bei Problemen:
 
 **Version:** 3.0.0  
 **Letzte Aktualisierung:** 2024-10-10
+

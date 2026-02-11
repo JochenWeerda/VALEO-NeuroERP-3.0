@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Analyse der vorgefilerten PLZ 26XXX-Daten ohne Header
 LibreOffice hat die CSV mit Kommas und ohne Header exportiert
@@ -19,7 +19,7 @@ def analyze_filtered_26xxx_no_headers():
     print(f"Datei: {csv_path}")
     print()
     
-    ***REMOVED*** Flächenprämien-Codes
+    # Flächenprämien-Codes
     area_premium_codes = {
         'I.1': 'Basis-Direktzahlung',
         'I.2': 'Umverteilungsz. für Nachhaltigkeit', 
@@ -35,7 +35,7 @@ def analyze_filtered_26xxx_no_headers():
         print(f"  {code}: {description}")
     print()
     
-    ***REMOVED*** Container
+    # Container
     farm_data = defaultdict(lambda: {
         "name": "",
         "plz": "",
@@ -58,9 +58,9 @@ def analyze_filtered_26xxx_no_headers():
     
     print("Analysiere erste Zeilen zur Struktur-Erkennung...")
     
-    ***REMOVED*** Struktur basierend auf Beispielzeile:
-    ***REMOVED*** 2024,"Dinklage-Hallecker, Gerlind",,,26121,"Oldenburg (Oldenburg), Stadt",DE,I.2,1,,,836.3,2710.31,,,,,,2710.31
-    ***REMOVED*** Index: 0=Jahr, 1=Name, 2-4=Leer/Gruppe, 5=PLZ, 6=Stadt, 7=Land, 8=Measure_Code, 9=Ziel, 10-11=Leer, 12=EGFL_Betrag, 13=Gesamt_Betrag, ... 19=Final_Betrag
+    # Struktur basierend auf Beispielzeile:
+    # 2024,"Dinklage-Hallecker, Gerlind",,,26121,"Oldenburg (Oldenburg), Stadt",DE,I.2,1,,,836.3,2710.31,,,,,,2710.31
+    # Index: 0=Jahr, 1=Name, 2-4=Leer/Gruppe, 5=PLZ, 6=Stadt, 7=Land, 8=Measure_Code, 9=Ziel, 10-11=Leer, 12=EGFL_Betrag, 13=Gesamt_Betrag, ... 19=Final_Betrag
     
     encodings_to_try = ['windows-1252', 'utf-8', 'iso-8859-1']
     
@@ -69,14 +69,14 @@ def analyze_filtered_26xxx_no_headers():
             print(f"Versuche Encoding: {encoding}")
             
             with open(csv_path, 'r', encoding=encoding) as f:
-                reader = csv.reader(f, delimiter=',')  ***REMOVED*** Komma als Delimiter!
+                reader = csv.reader(f, delimiter=',')  # Komma als Delimiter!
                 
                 print("Erste 3 Zeilen zur Struktur-Analyse:")
                 
                 for row_num, row in enumerate(reader, 1):
                     total_rows += 1
                     
-                    ***REMOVED*** Erste paar Zeilen zur Analyse ausgeben
+                    # Erste paar Zeilen zur Analyse ausgeben
                     if row_num <= 3:
                         print(f"Zeile {row_num}: {len(row)} Spalten")
                         for i, cell in enumerate(row):
@@ -84,20 +84,20 @@ def analyze_filtered_26xxx_no_headers():
                         print()
                     
                     if row_num > 3:
-                        ***REMOVED*** Normale Verarbeitung
-                        if len(row) >= 20:  ***REMOVED*** Mindestens 20 Spalten erwartet
+                        # Normale Verarbeitung
+                        if len(row) >= 20:  # Mindestens 20 Spalten erwartet
                             
-                            ***REMOVED*** Daten extrahieren (basierend auf erkannter Struktur)
+                            # Daten extrahieren (basierend auf erkannter Struktur)
                             try:
                                 year = row[0].strip()
-                                name = row[1].strip().replace('"', '')  ***REMOVED*** Anführungszeichen entfernen
+                                name = row[1].strip().replace('"', '')  # Anführungszeichen entfernen
                                 plz = row[5].strip()
-                                city = row[6].strip().replace('"', '')  ***REMOVED*** Anführungszeichen entfernen
+                                city = row[6].strip().replace('"', '')  # Anführungszeichen entfernen
                                 measure_code = row[8].strip()
                                 
-                                ***REMOVED*** Verschiedene Betrag-Spalten probieren
+                                # Verschiedene Betrag-Spalten probieren
                                 gap_amount = 0.0
-                                ***REMOVED*** Spalte 19 (Final), 13 (Gesamt), 12 (EGFL)
+                                # Spalte 19 (Final), 13 (Gesamt), 12 (EGFL)
                                 amount_candidates = [19, 13, 12]
                                 
                                 for col_idx in amount_candidates:
@@ -108,38 +108,38 @@ def analyze_filtered_26xxx_no_headers():
                                         except ValueError:
                                             continue
                                 
-                                ***REMOVED*** PLZ-Filter: nur 26xxx
+                                # PLZ-Filter: nur 26xxx
                                 if plz and plz.startswith('26') and len(plz) == 5:
                                     
-                                    ***REMOVED*** PLZ-Verteilung
+                                    # PLZ-Verteilung
                                     plz_distribution[plz] += 1
                                     
-                                    ***REMOVED*** Measure Code Stats
+                                    # Measure Code Stats
                                     if measure_code:
                                         measure_code_stats[measure_code]["count"] += 1
                                         measure_code_stats[measure_code]["amount"] += gap_amount
                                     
-                                    ***REMOVED*** Nur Flächenprämien
+                                    # Nur Flächenprämien
                                     if measure_code in area_premium_codes:
                                         area_premium_rows += 1
                                         total_amount += gap_amount
                                         
-                                        ***REMOVED*** Farm-Key
+                                        # Farm-Key
                                         farm_key = f"{name}_{plz}"
                                         farm = farm_data[farm_key]
                                         
-                                        ***REMOVED*** Basisdaten
+                                        # Basisdaten
                                         if not farm["name"]:
                                             farm["name"] = name[:60]
                                             farm["plz"] = plz
                                             farm["city"] = city
                                             farm["premium_breakdown"] = {}
                                         
-                                        ***REMOVED*** Aggregieren
+                                        # Aggregieren
                                         farm["total_area_premiums"] += gap_amount
                                         farm["payment_count"] += 1
                                         
-                                        ***REMOVED*** Premium-Breakdown
+                                        # Premium-Breakdown
                                         if measure_code not in farm["premium_breakdown"]:
                                             farm["premium_breakdown"][measure_code] = {
                                                 "description": area_premium_codes[measure_code],
@@ -150,7 +150,7 @@ def analyze_filtered_26xxx_no_headers():
                                         farm["premium_breakdown"][measure_code]["amount"] += gap_amount
                                         farm["premium_breakdown"][measure_code]["count"] += 1
                                         
-                                        ***REMOVED*** Erste Treffer zeigen
+                                        # Erste Treffer zeigen
                                         if area_premium_rows <= 15:
                                             print(f"Lead {area_premium_rows:2d}: {name[:25]}... | PLZ {plz} | {measure_code} | {gap_amount:,.0f} EUR")
                                     
@@ -161,7 +161,7 @@ def analyze_filtered_26xxx_no_headers():
                                 excluded_rows += 1
                                 continue
                     
-                    ***REMOVED*** Progress
+                    # Progress
                     if total_rows % 5000 == 0:
                         print(f"Verarbeitet: {total_rows:,} | PLZ 26XXX Flächenprämien: {area_premium_rows} | Ausgeschlossen: {excluded_rows}")
                 
@@ -178,10 +178,10 @@ def analyze_filtered_26xxx_no_headers():
             print(f"Fehler mit {encoding}: {e}")
             continue
     
-    ***REMOVED*** Betriebsgrößen-Kategorisierung
+    # Betriebsgrößen-Kategorisierung
     for farm_key, farm in farm_data.items():
         amount = farm["total_area_premiums"]
-        farm["estimated_hectares"] = amount / 300  ***REMOVED*** ~300 EUR/ha
+        farm["estimated_hectares"] = amount / 300  # ~300 EUR/ha
         
         if amount >= 200000:
             farm["farm_category"] = "Mega-Betrieb"
@@ -202,7 +202,7 @@ def analyze_filtered_26xxx_no_headers():
             farm["farm_category"] = "Kleinstbetrieb"
             farm["lead_score"] = 1
     
-    ***REMOVED*** Ergebnisse
+    # Ergebnisse
     print()
     print("FINALE PLZ 26XXX ANALYSE (LibreOffice Format)")
     print("=" * 55)
@@ -215,7 +215,7 @@ def analyze_filtered_26xxx_no_headers():
         print(f"Durchschnitt/Betrieb: {total_amount/len(farm_data):,.2f} EUR")
     print()
     
-    ***REMOVED*** Top PLZ
+    # Top PLZ
     if plz_distribution:
         print("TOP PLZ-VERTEILUNG:")
         print("-" * 22)
@@ -224,7 +224,7 @@ def analyze_filtered_26xxx_no_headers():
             print(f"PLZ {plz}: {count:,} Zahlungen")
         print()
     
-    ***REMOVED*** Top Measure Codes
+    # Top Measure Codes
     if measure_code_stats:
         print("MEASURE CODE VERTEILUNG:")
         print("-" * 28)
@@ -234,7 +234,7 @@ def analyze_filtered_26xxx_no_headers():
             print(f"{focus} {code}: {stats['count']:,} | {stats['amount']:,.0f} EUR")
         print()
     
-    ***REMOVED*** Top Leads
+    # Top Leads
     if farm_data:
         sorted_farms = sorted(farm_data.values(), key=lambda x: x["total_area_premiums"], reverse=True)
         
@@ -251,7 +251,7 @@ def analyze_filtered_26xxx_no_headers():
             print(f"    Codes: {codes}")
             print()
         
-        ***REMOVED*** Verteilung
+        # Verteilung
         category_stats = defaultdict(int)
         for farm in farm_data.values():
             category_stats[farm["farm_category"]] += 1
@@ -262,7 +262,7 @@ def analyze_filtered_26xxx_no_headers():
             pct = count / len(farm_data) * 100
             print(f"{category}: {count:,} ({pct:.1f}%)")
     
-    ***REMOVED*** Export
+    # Export
     result_data = {
         "source": "LibreOffice PLZ 26XXX CSV (no headers, comma-delimited)",
         "timestamp": datetime.now().isoformat(),
@@ -290,3 +290,4 @@ def analyze_filtered_26xxx_no_headers():
 
 if __name__ == "__main__":
     analyze_filtered_26xxx_no_headers()
+

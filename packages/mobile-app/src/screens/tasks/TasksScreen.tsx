@@ -52,20 +52,20 @@ export default function TasksScreen() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return '***REMOVED***4CAF50';
-      case 'in_progress': return '***REMOVED***2196F3';
-      case 'pending': return '***REMOVED***FF9800';
-      case 'cancelled': return '***REMOVED***F44336';
-      default: return '***REMOVED***9E9E9E';
+      case 'completed': return '#4CAF50';
+      case 'in_progress': return '#2196F3';
+      case 'pending': return '#FF9800';
+      case 'cancelled': return '#F44336';
+      default: return '#9E9E9E';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return '***REMOVED***F44336';
-      case 'medium': return '***REMOVED***FF9800';
-      case 'low': return '***REMOVED***4CAF50';
-      default: return '***REMOVED***9E9E9E';
+      case 'high': return '#F44336';
+      case 'medium': return '#FF9800';
+      case 'low': return '#4CAF50';
+      default: return '#9E9E9E';
     }
   };
 

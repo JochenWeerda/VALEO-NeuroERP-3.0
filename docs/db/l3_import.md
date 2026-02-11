@@ -1,8 +1,8 @@
-***REMOVED*** L3 → VALEO NeuroERP Import Pipeline
+# L3 → VALEO NeuroERP Import Pipeline
 
 Dieses Dokument beschreibt den vorgeschlagenen Prozess, um Daten aus dem bestehenden L3-System sicher und reproduzierbar in die neuen VALEO-NeuroERP-Schemas zu übernehmen.
 
-***REMOVED******REMOVED*** 1. Überblick
+## 1. Überblick
 
 1. **Rohdaten erfassen**: L3 liefert eine XHTML-Datei mit Tabellen/Spalten sowie die eigentlichen Daten (z. B. CSV/SQL-Dump).
 2. **Metadaten extrahieren**: Mit `tools/l3_import/extract_mapping.py` konvertieren wir die tabellarische Übersicht in ein maschinenlesbares JSON.
@@ -10,7 +10,7 @@ Dieses Dokument beschreibt den vorgeschlagenen Prozess, um Daten aus dem bestehe
 4. **Schema-Bootstrap**: `scripts/bootstrap_db.py` legt alle benötigten Schemas/Tabellen an (idempotent) und kann optional Seed-Daten einspielen. In Produktivumgebungen wird nur ausgeführt, wenn der Admin dies explizit bestätigt.
 5. **ETL ausführen**: `scripts/import_l3.py` liest den Mapping-Plan plus Rohdaten, überführt sie ins produktive Schema und protokolliert Abweichungen.
 
-***REMOVED******REMOVED*** 2. Metadaten extrahieren
+## 2. Metadaten extrahieren
 
 ```bash
 python tools/l3_import/extract_mapping.py \
@@ -20,7 +20,7 @@ python tools/l3_import/extract_mapping.py \
 
 > Hinweis: Die JSON-Datei enthält **nur** Quelltabellen/-spalten. Die Zuordnung zu VALEO-Strukturen wird im nächsten Schritt gepflegt.
 
-***REMOVED******REMOVED*** 3. Mapping pflegen
+## 3. Mapping pflegen
 
 - Kopiere `config/l3_mapping.template.yaml` zu `config/l3_mapping.yaml`.
 - Ergänze für jede L3-Spalte:
@@ -41,7 +41,7 @@ Der Validator prüft u. a. auf fehlende Targets, unbekannte Quellspalten sowie
 
 Die Mapping-Datei dient als „Single Source of Truth“ für Transformationslogik und erleichtert Reviews.
 
-***REMOVED******REMOVED*** 4. Datenbank-Bootstrap
+## 4. Datenbank-Bootstrap
 
 ```bash
 python scripts/bootstrap_db.py
@@ -53,7 +53,7 @@ python scripts/bootstrap_db.py
 
 > In Produktivsystemen **nie** ohne `--force` und explizite Bestätigung ausführen.
 
-***REMOVED******REMOVED*** 5. L3-Import
+## 5. L3-Import
 
 ```bash
 python scripts/import_l3.py \
@@ -66,7 +66,7 @@ python scripts/import_l3.py \
 - `--dry-run` validiert das Mapping, ohne Inserts/Updates auszuführen.
 - Ohne `--dry-run` führt der ETL die eigentlichen Transformationen + Inserts durch.
 
-***REMOVED******REMOVED*** 6. CI / QA
+## 6. CI / QA
 
 Für automatisierte Tests (z. B. Playwright-Masken) empfiehlt sich ein CI-Job:
 
@@ -75,16 +75,17 @@ Für automatisierte Tests (z. B. Playwright-Masken) empfiehlt sich ein CI-Job:
 3. L3-Staging-Daten importieren (`--dry-run` im PR, ohne `--dry-run` im Merge).
 4. Masken-Tests gegen die gefüllte DB ausführen.
 
-***REMOVED******REMOVED*** 7. Produktive Sicherheit
+## 7. Produktive Sicherheit
 
 - Produktivsysteme sollten nur via genehmigte Pipelines oder Admin-Skripte zurückgesetzt werden.
 - Vor jedem Import: automatisches Backup (z. B. `pg_dump`) erstellen.
 - Import-Script loggt alle Änderungen (Rows affected, Fehler). Bei Abweichungen -> Abbruch & manueller Review.
 
-***REMOVED******REMOVED*** 8. Offene Punkte
+## 8. Offene Punkte
 
 - Vollständige Mapping-Datei bearbeiten (derzeit nur Template).
 - Transformationsregeln (Enum-Konvertierung, Datumsumrechnung) feinjustieren.
 - Automatisierte Tests für kritische Masken erweitern.
 
 Sobald Mapping und ETL vollständig sind, können die 181 Masken mit echten Daten getestet werden – ohne Risiko, produktive Instanzen unbeabsichtigt zu überschreiben.
+

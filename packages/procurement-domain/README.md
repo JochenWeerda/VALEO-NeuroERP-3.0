@@ -1,10 +1,10 @@
-***REMOVED*** VALEO NeuroERP 3.0 - Procurement Domain
+# VALEO NeuroERP 3.0 - Procurement Domain
 
-***REMOVED******REMOVED*** 🤖 AI-Powered Source-to-Pay Excellence
+## 🤖 AI-Powered Source-to-Pay Excellence
 
 The Procurement Domain is a comprehensive, AI-driven procurement platform that transforms traditional purchasing processes into intelligent, automated workflows from supplier identification to payment processing.
 
-***REMOVED******REMOVED******REMOVED*** ✨ Key Features
+### ✨ Key Features
 
 - **🧠 AI-Powered Sourcing** - Intelligent supplier selection and negotiation
 - **📋 Automated P2P** - End-to-end requisition to payment processing
@@ -17,9 +17,9 @@ The Procurement Domain is a comprehensive, AI-driven procurement platform that t
 
 ---
 
-***REMOVED******REMOVED*** 🏗️ Architecture Overview
+## 🏗️ Architecture Overview
 
-***REMOVED******REMOVED******REMOVED*** **5 Principles Architecture Compliance**
+### **5 Principles Architecture Compliance**
 
 | Principle | Implementation | Status |
 |-----------|----------------|---------|
@@ -29,7 +29,7 @@ The Procurement Domain is a comprehensive, AI-driven procurement platform that t
 | **Module Federation Architecture** | Independent Domain Deployment | ✅ **Implemented** |
 | **Lifecycle Management Architecture** | Proper Resource Management | ✅ **Implemented** |
 
-***REMOVED******REMOVED******REMOVED*** **MSOA Implementation**
+### **MSOA Implementation**
 - **Database per Service** - Dedicated PostgreSQL instance
 - **Event-Driven Communication** - Kafka/NATS integration
 - **Independent Deployability** - Self-contained microservices
@@ -37,83 +37,83 @@ The Procurement Domain is a comprehensive, AI-driven procurement platform that t
 
 ---
 
-***REMOVED******REMOVED*** 📁 Project Structure
+## 📁 Project Structure
 
 ```
 domains/procurement/
 ├── src/
 │   ├── core/
-│   │   ├── domain-events/          ***REMOVED*** Domain events and schemas
-│   │   ├── entities/               ***REMOVED*** Core business entities
-│   │   │   ├── supplier.ts         ***REMOVED*** Supplier entity
-│   │   │   ├── requisition.ts      ***REMOVED*** Purchase requisition
-│   │   │   ├── purchase-order.ts   ***REMOVED*** Purchase order
-│   │   │   ├── receipt.ts          ***REMOVED*** Goods receipt
-│   │   │   ├── contract.ts         ***REMOVED*** Contract management
-│   │   │   └── catalog-item.ts     ***REMOVED*** Catalog items
-│   │   └── repositories/           ***REMOVED*** Repository interfaces
+│   │   ├── domain-events/          # Domain events and schemas
+│   │   ├── entities/               # Core business entities
+│   │   │   ├── supplier.ts         # Supplier entity
+│   │   │   ├── requisition.ts      # Purchase requisition
+│   │   │   ├── purchase-order.ts   # Purchase order
+│   │   │   ├── receipt.ts          # Goods receipt
+│   │   │   ├── contract.ts         # Contract management
+│   │   │   └── catalog-item.ts     # Catalog items
+│   │   └── repositories/           # Repository interfaces
 │   ├── application/
-│   │   ├── services/               ***REMOVED*** Application services
-│   │   │   ├── supplier-service.ts ***REMOVED*** Supplier management
-│   │   │   ├── sourcing-service.ts ***REMOVED*** AI-powered sourcing
-│   │   │   ├── catalog-service.ts  ***REMOVED*** Product catalog
-│   │   │   ├── requisition-service.ts ***REMOVED*** Requisition processing
-│   │   │   ├── po-service.ts       ***REMOVED*** Purchase order management
-│   │   │   ├── receiving-service.ts ***REMOVED*** Goods receipt & inspection
-│   │   │   ├── contract-service.ts ***REMOVED*** Contract lifecycle
-│   │   │   └── performance-service.ts ***REMOVED*** Analytics & intelligence
-│   │   ├── commands/               ***REMOVED*** Command objects
-│   │   ├── queries/                ***REMOVED*** Query objects
-│   │   └── event-handlers/         ***REMOVED*** Event handlers
+│   │   ├── services/               # Application services
+│   │   │   ├── supplier-service.ts # Supplier management
+│   │   │   ├── sourcing-service.ts # AI-powered sourcing
+│   │   │   ├── catalog-service.ts  # Product catalog
+│   │   │   ├── requisition-service.ts # Requisition processing
+│   │   │   ├── po-service.ts       # Purchase order management
+│   │   │   ├── receiving-service.ts # Goods receipt & inspection
+│   │   │   ├── contract-service.ts # Contract lifecycle
+│   │   │   └── performance-service.ts # Analytics & intelligence
+│   │   ├── commands/               # Command objects
+│   │   ├── queries/                # Query objects
+│   │   └── event-handlers/         # Event handlers
 │   ├── infrastructure/
-│   │   ├── repositories/           ***REMOVED*** Repository implementations
-│   │   ├── messaging/              ***REMOVED*** Event publishing
-│   │   ├── external-services/      ***REMOVED*** External integrations
-│   │   │   ├── supplier-apis.ts    ***REMOVED*** Supplier API integrations
-│   │   │   ├── catalog-feeds.ts    ***REMOVED*** Catalog data feeds
-│   │   │   └── market-intelligence.ts ***REMOVED*** Market data
-│   │   └── cache/                  ***REMOVED*** Caching layer
+│   │   ├── repositories/           # Repository implementations
+│   │   ├── messaging/              # Event publishing
+│   │   ├── external-services/      # External integrations
+│   │   │   ├── supplier-apis.ts    # Supplier API integrations
+│   │   │   ├── catalog-feeds.ts    # Catalog data feeds
+│   │   │   └── market-intelligence.ts # Market data
+│   │   └── cache/                  # Caching layer
 │   └── presentation/
-│       └── controllers/            ***REMOVED*** API controllers
+│       └── controllers/            # API controllers
 ├── tests/
-│   ├── unit/                       ***REMOVED*** Unit tests
-│   ├── integration/                ***REMOVED*** Integration tests
-│   └── e2e/                        ***REMOVED*** End-to-end tests
-├── migrations/sql/                 ***REMOVED*** Database migrations
-├── scripts/                        ***REMOVED*** Deployment and utility scripts
-├── package.json                    ***REMOVED*** Node.js package configuration
-├── tsconfig.json                   ***REMOVED*** TypeScript configuration
-├── Dockerfile                      ***REMOVED*** Container definition
-└── docker-compose.yml              ***REMOVED*** Local development setup
+│   ├── unit/                       # Unit tests
+│   ├── integration/                # Integration tests
+│   └── e2e/                        # End-to-end tests
+├── migrations/sql/                 # Database migrations
+├── scripts/                        # Deployment and utility scripts
+├── package.json                    # Node.js package configuration
+├── tsconfig.json                   # TypeScript configuration
+├── Dockerfile                      # Container definition
+└── docker-compose.yml              # Local development setup
 ```
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Quick Start
+## 🚀 Quick Start
 
-***REMOVED******REMOVED******REMOVED*** **Prerequisites**
+### **Prerequisites**
 - Node.js 18+
 - Docker & Docker Compose
 - PostgreSQL 15+
 - Kafka (optional, for event-driven features)
 
-***REMOVED******REMOVED******REMOVED*** **Installation**
+### **Installation**
 
 ```bash
-***REMOVED*** 1. Install dependencies
+# 1. Install dependencies
 npm install
 
-***REMOVED*** 2. Set up database
+# 2. Set up database
 docker-compose up -d procurement-postgres
 
-***REMOVED*** 3. Run migrations
+# 3. Run migrations
 npm run db:migrate
 
-***REMOVED*** 4. Start development server
+# 4. Start development server
 npm run dev
 ```
 
-***REMOVED******REMOVED******REMOVED*** **API Endpoints**
+### **API Endpoints**
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -128,37 +128,37 @@ npm run dev
 
 ---
 
-***REMOVED******REMOVED*** 🔧 Configuration
+## 🔧 Configuration
 
-***REMOVED******REMOVED******REMOVED*** **Environment Variables**
+### **Environment Variables**
 
 ```bash
-***REMOVED*** Database
+# Database
 DB_HOST=localhost
 DB_PORT=5436
 DB_NAME=neuroerp_procurement
 DB_USER=neuroerp
 DB_PASSWORD=your_password
 
-***REMOVED*** Messaging
+# Messaging
 MESSAGING_TYPE=KAFKA
 MESSAGING_URL=localhost:9092
 
-***REMOVED*** Server
+# Server
 PROCUREMENT_PORT=3002
 NODE_ENV=development
 
-***REMOVED*** External Services
+# External Services
 SUPPLIER_API_KEY=your_api_key
 CATALOG_FEED_URL=https://catalog.example.com
 OCR_SERVICE_URL=http://localhost:3003
 
-***REMOVED*** AI Services
+# AI Services
 AI_MODEL_PATH=./models/procurement-model.pkl
 SUPPLIER_SCORING_MODEL=./models/supplier-scoring.pkl
 ```
 
-***REMOVED******REMOVED******REMOVED*** **Database Setup**
+### **Database Setup**
 
 ```sql
 -- Connect to PostgreSQL
@@ -176,9 +176,9 @@ psql -h localhost -p 5436 -U neuroerp -d neuroerp_procurement
 
 ---
 
-***REMOVED******REMOVED*** 📖 Usage Examples
+## 📖 Usage Examples
 
-***REMOVED******REMOVED******REMOVED*** **Create a Purchase Requisition**
+### **Create a Purchase Requisition**
 
 ```typescript
 import { createRequisitionService } from './domains/procurement/src/application/services/requisition-service';
@@ -208,7 +208,7 @@ const requisitionId = await requisitionService.createRequisition({
 });
 ```
 
-***REMOVED******REMOVED******REMOVED*** **AI-Powered Supplier Sourcing**
+### **AI-Powered Supplier Sourcing**
 
 ```typescript
 import { createSourcingService } from './domains/procurement/src/application/services/sourcing-service';
@@ -242,7 +242,7 @@ const sourcingResult = await sourcingService.findOptimalSuppliers({
 console.log(sourcingResult.suppliers[0]); // Best supplier match
 ```
 
-***REMOVED******REMOVED******REMOVED*** **3-Way Match Invoice Processing**
+### **3-Way Match Invoice Processing**
 
 ```typescript
 import { createReceivingService } from './domains/procurement/src/application/services/receiving-service';
@@ -279,7 +279,7 @@ if (matchResult.autoApprovalEligible) {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** **Contract Lifecycle Management**
+### **Contract Lifecycle Management**
 
 ```typescript
 import { createContractService } from './domains/procurement/src/application/services/contract-service';
@@ -331,25 +331,25 @@ const contractId = await contractService.createContract({
 
 ---
 
-***REMOVED******REMOVED*** 🧪 Testing
+## 🧪 Testing
 
-***REMOVED******REMOVED******REMOVED*** **Run Test Suite**
+### **Run Test Suite**
 
 ```bash
-***REMOVED*** Unit tests
+# Unit tests
 npm run test
 
-***REMOVED*** Integration tests
+# Integration tests
 npm run test:integration
 
-***REMOVED*** E2E tests
+# E2E tests
 npm run test:e2e
 
-***REMOVED*** Coverage report
+# Coverage report
 npm run test:coverage
 ```
 
-***REMOVED******REMOVED******REMOVED*** **Test Categories**
+### **Test Categories**
 
 - **Unit Tests** - Individual service and entity testing
 - **Integration Tests** - Cross-service interaction testing
@@ -359,9 +359,9 @@ npm run test:coverage
 
 ---
 
-***REMOVED******REMOVED*** 🔍 Monitoring & Observability
+## 🔍 Monitoring & Observability
 
-***REMOVED******REMOVED******REMOVED*** **Key Metrics**
+### **Key Metrics**
 
 | Metric | Description | Target |
 |--------|-------------|---------|
@@ -371,7 +371,7 @@ npm run test:coverage
 | `procurement_contract_utilization` | Contract utilization rate | > 80% |
 | `procurement_spend_under_management` | Managed spend percentage | > 85% |
 
-***REMOVED******REMOVED******REMOVED*** **Dashboards**
+### **Dashboards**
 
 - **P2P Operations** - Process efficiency and cycle times
 - **Supplier Performance** - Scorecards and trend analysis
@@ -381,20 +381,20 @@ npm run test:coverage
 
 ---
 
-***REMOVED******REMOVED*** 🔒 Security & Compliance
+## 🔒 Security & Compliance
 
-***REMOVED******REMOVED******REMOVED*** **Multi-Tenant Isolation**
+### **Multi-Tenant Isolation**
 - Row Level Security (RLS) in PostgreSQL
 - Tenant-specific encryption keys
 - Audit trails for all procurement operations
 
-***REMOVED******REMOVED******REMOVED*** **Procurement Compliance**
+### **Procurement Compliance**
 - Public procurement regulations
 - Anti-corruption and bribery controls
 - Supplier diversity requirements
 - Environmental and social standards
 
-***REMOVED******REMOVED******REMOVED*** **Data Privacy**
+### **Data Privacy**
 - Supplier data protection
 - Contract confidentiality
 - Personal data handling
@@ -402,28 +402,28 @@ npm run test:coverage
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Deployment
+## 🚀 Deployment
 
-***REMOVED******REMOVED******REMOVED*** **Production Deployment**
+### **Production Deployment**
 
 ```bash
-***REMOVED*** Build and deploy
+# Build and deploy
 docker-compose -f docker-compose.yml up -d
 
-***REMOVED*** Check service health
+# Check service health
 curl http://localhost:3002/health
 
-***REMOVED*** View logs
+# View logs
 docker-compose logs -f procurement-service
 
-***REMOVED*** Scale service
+# Scale service
 docker-compose up -d --scale procurement-service=3
 ```
 
-***REMOVED******REMOVED******REMOVED*** **CI/CD Pipeline**
+### **CI/CD Pipeline**
 
 ```yaml
-***REMOVED*** .github/workflows/procurement-deploy.yml
+# .github/workflows/procurement-deploy.yml
 name: Deploy Procurement Domain
 on:
   push:
@@ -431,18 +431,18 @@ on:
 
 jobs:
   test:
-    ***REMOVED*** Test execution
+    # Test execution
   build:
-    ***REMOVED*** Docker image build
+    # Docker image build
   deploy:
-    ***REMOVED*** Kubernetes deployment
+    # Kubernetes deployment
 ```
 
 ---
 
-***REMOVED******REMOVED*** 🤝 Integration with Other Domains
+## 🤝 Integration with Other Domains
 
-***REMOVED******REMOVED******REMOVED*** **Finance Domain Integration**
+### **Finance Domain Integration**
 ```typescript
 // Events consumed
 procurement.invoice.matched
@@ -454,7 +454,7 @@ procurement.invoice.received
 procurement.supplier.payment.processed
 ```
 
-***REMOVED******REMOVED******REMOVED*** **ERP Domain Integration**
+### **ERP Domain Integration**
 ```typescript
 // Events consumed
 procurement.inventory.updated
@@ -465,7 +465,7 @@ procurement.purchase.requisition.created
 procurement.goods.receipt.posted
 ```
 
-***REMOVED******REMOVED******REMOVED*** **CRM Domain Integration**
+### **CRM Domain Integration**
 ```typescript
 // Events consumed
 procurement.supplier.contact.updated
@@ -478,56 +478,56 @@ procurement.contract.compliance.changed
 
 ---
 
-***REMOVED******REMOVED*** 🛠️ Development Workflow
+## 🛠️ Development Workflow
 
-***REMOVED******REMOVED******REMOVED*** **Code Generation**
+### **Code Generation**
 ```bash
-***REMOVED*** Generate domain entities
+# Generate domain entities
 npm run generate:entity -- --domain=procurement --entity=Supplier
 
-***REMOVED*** Generate repository
+# Generate repository
 npm run generate:repository -- --domain=procurement --entity=Supplier
 
-***REMOVED*** Generate tests
+# Generate tests
 npm run generate:tests -- --domain=procurement --service=SupplierService
 ```
 
-***REMOVED******REMOVED******REMOVED*** **Database Development**
+### **Database Development**
 ```bash
-***REMOVED*** Create migration
+# Create migration
 touch migrations/sql/procurement/002_add_indexes.sql
 
-***REMOVED*** Test migration
+# Test migration
 npm run db:test-migration -- --file=002_add_indexes.sql
 
-***REMOVED*** Deploy migration
+# Deploy migration
 npm run db:deploy-migration -- --file=002_add_indexes.sql
 ```
 
-***REMOVED******REMOVED******REMOVED*** **AI Model Development**
+### **AI Model Development**
 ```bash
-***REMOVED*** Train supplier scoring model
+# Train supplier scoring model
 npm run ai:train -- --model=supplier-scoring
 
-***REMOVED*** Evaluate sourcing model
+# Evaluate sourcing model
 npm run ai:evaluate -- --model=sourcing-optimizer
 
-***REMOVED*** Deploy recommendation engine
+# Deploy recommendation engine
 npm run ai:deploy -- --model=recommendations-engine
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📊 Performance Benchmarks
+## 📊 Performance Benchmarks
 
-***REMOVED******REMOVED******REMOVED*** **Current Performance**
+### **Current Performance**
 - **Requisition Creation:** < 200ms
 - **AI Supplier Matching:** < 3s
 - **3-Way Invoice Matching:** < 5s
 - **Contract Analysis:** < 1s
 - **Spend Report Generation:** < 10s
 
-***REMOVED******REMOVED******REMOVED*** **Scalability Targets**
+### **Scalability Targets**
 - **50,000+ requisitions/month**
 - **99.9% uptime**
 - **< 500ms API response time**
@@ -535,65 +535,65 @@ npm run ai:deploy -- --model=recommendations-engine
 
 ---
 
-***REMOVED******REMOVED*** 🆘 Troubleshooting
+## 🆘 Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** **Common Issues**
+### **Common Issues**
 
 **Database Connection Failed**
 ```bash
-***REMOVED*** Check PostgreSQL status
+# Check PostgreSQL status
 docker ps | grep postgres
 
-***REMOVED*** Check logs
+# Check logs
 docker logs valero-neuroerp-procurement-postgres
 
-***REMOVED*** Test connection
+# Test connection
 psql -h localhost -p 5436 -U neuroerp -d neuroerp_procurement
 ```
 
 **AI Recommendation Engine Failing**
 ```bash
-***REMOVED*** Check AI service health
+# Check AI service health
 curl http://localhost:3002/health
 
-***REMOVED*** Review AI model logs
+# Review AI model logs
 docker logs valero-neuroerp-procurement
 
-***REMOVED*** Check model files
+# Check model files
 ls -la models/
 ```
 
 **High Memory Usage**
 ```bash
-***REMOVED*** Check container resources
+# Check container resources
 docker stats valero-neuroerp-procurement
 
-***REMOVED*** Review caching configuration
-***REMOVED*** Check Redis connection if enabled
+# Review caching configuration
+# Check Redis connection if enabled
 ```
 
-***REMOVED******REMOVED******REMOVED*** **Support Contacts**
+### **Support Contacts**
 - **Development Team:** procurement-team@valero-neuroerp.com
 - **Architecture Lead:** architecture@valero-neuroerp.com
 - **DevOps Team:** devops@valero-neuroerp.com
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Roadmap
+## 🎯 Roadmap
 
-***REMOVED******REMOVED******REMOVED*** **Sprint 9 (Next Phase)**
+### **Sprint 9 (Next Phase)**
 - [ ] Advanced AI features implementation
 - [ ] Mobile procurement app
 - [ ] Supplier portal integration
 - [ ] Advanced analytics dashboard
 
-***REMOVED******REMOVED******REMOVED*** **Sprint 10 (Future)**
+### **Sprint 10 (Future)**
 - [ ] Blockchain-based contract management
 - [ ] IoT supplier monitoring
 - [ ] Predictive maintenance integration
 - [ ] Advanced ESG scoring
 
-***REMOVED******REMOVED******REMOVED*** **Sprint 11 (Innovation)**
+### **Sprint 11 (Innovation)**
 - [ ] AI-powered negotiation assistant
 - [ ] Dynamic pricing optimization
 - [ ] Supplier network analysis
@@ -601,7 +601,7 @@ docker stats valero-neuroerp-procurement
 
 ---
 
-***REMOVED******REMOVED*** 📚 Additional Resources
+## 📚 Additional Resources
 
 - **Architecture Documentation:** `memory-bank/5-Principles-Architecture-Model.md`
 - **Project Roadmap:** `memory-bank/VALEO-NeuroERP-3-0-Project-Roadmap.md`

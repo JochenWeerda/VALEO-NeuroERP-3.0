@@ -1,9 +1,9 @@
-***REMOVED*** PowerShell-Script zum Starten des GENXAIS v1.5 Dashboards
-***REMOVED*** Datei: scripts/streamlit_startup.ps1
+# PowerShell-Script zum Starten des GENXAIS v1.5 Dashboards
+# Datei: scripts/streamlit_startup.ps1
 
 Write-Host "Starte GENXAIS v1.5 Dashboard..." -ForegroundColor Cyan
 
-***REMOVED*** Prüfe, ob Streamlit installiert ist
+# Prüfe, ob Streamlit installiert ist
 try {
     $streamlitVersion = python -c "import streamlit; print(streamlit.__version__)" 2>$null
     if (-not $streamlitVersion) {
@@ -17,7 +17,7 @@ try {
     pip install streamlit altair pandas matplotlib networkx
 }
 
-***REMOVED*** Erstelle Datenverzeichnisse, falls sie nicht existieren
+# Erstelle Datenverzeichnisse, falls sie nicht existieren
 $dataDir = "data/dashboard"
 $graphitiDir = "data/dashboard/graphiti"
 
@@ -31,7 +31,7 @@ if (-not (Test-Path $graphitiDir)) {
     New-Item -ItemType Directory -Path $graphitiDir -Force | Out-Null
 }
 
-***REMOVED*** Starte das Dashboard
+# Starte das Dashboard
 Write-Host "Starte das Dashboard in einem neuen Fenster..." -ForegroundColor Green
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "python -m streamlit run scripts/enhanced_dashboard.py"
 

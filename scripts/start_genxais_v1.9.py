@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 GENXAIS v1.9 Starter
@@ -16,7 +16,7 @@ import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Union
 
-***REMOVED*** Pfade konfigurieren
+# Pfade konfigurieren
 BASE_DIR = Path(__file__).resolve().parent.parent
 TASKS_DIR = BASE_DIR / "tasks"
 OUTPUT_DIR = BASE_DIR / "output"
@@ -42,7 +42,7 @@ def load_config() -> Dict[str, Any]:
                 "start_time": datetime.datetime.now().isoformat()
             }
     
-    ***REMOVED*** Wenn keine Konfiguration existiert, erstelle eine neue
+    # Wenn keine Konfiguration existiert, erstelle eine neue
     config = {
         "version": "v1.9",
         "phase": "VAN",
@@ -73,7 +73,7 @@ def start_streamlit_dashboard() -> None:
     print("Starte Streamlit-Dashboard...")
     
     try:
-        ***REMOVED*** Starte das Dashboard im Hintergrund
+        # Starte das Dashboard im Hintergrund
         subprocess.Popen(
             ["streamlit", "run", "scripts/streamlit_dashboard.py", "--server.port=8502"],
             stdout=subprocess.PIPE,
@@ -92,7 +92,7 @@ def start_langgraph_cycle() -> None:
     print("Starte LangGraph-Zyklus...")
     
     try:
-        ***REMOVED*** Starte den LangGraph-Zyklus
+        # Starte den LangGraph-Zyklus
         subprocess.run(
             ["python", "scripts/start_langgraph_cycle.py"],
             check=True
@@ -113,16 +113,16 @@ def main() -> None:
     print(f"Projektverzeichnis: {BASE_DIR}")
     print("-" * 80)
     
-    ***REMOVED*** Lade die Konfiguration
+    # Lade die Konfiguration
     config = load_config()
     
-    ***REMOVED*** Starte das Streamlit-Dashboard
+    # Starte das Streamlit-Dashboard
     start_streamlit_dashboard()
     
-    ***REMOVED*** Warte kurz, damit das Dashboard starten kann
+    # Warte kurz, damit das Dashboard starten kann
     time.sleep(2)
     
-    ***REMOVED*** Starte den LangGraph-Zyklus
+    # Starte den LangGraph-Zyklus
     start_langgraph_cycle()
     
     print("-" * 80)

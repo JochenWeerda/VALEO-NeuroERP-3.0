@@ -1,4 +1,4 @@
-***REMOVED*** Phase 1.1: Opportunities / Deals (Sales Pipeline)
+# Phase 1.1: Opportunities / Deals (Sales Pipeline)
 
 **Status:** 🚀 In Progress  
 **Priorität:** 🔴 Kritisch  
@@ -6,7 +6,7 @@
 **Owner:** Sales-Team  
 **Capability:** CRM-OPP-01
 
-***REMOVED******REMOVED*** Mission Overview
+## Mission Overview
 
 Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilities und Forecast-Funktionalität.
 
@@ -14,11 +14,11 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 - GAP-Card: `gap/gaps-crm-marketing.md` → CARD CRM-MKT-001
 - Capability: `gap/capability-model-crm-marketing.md` → CRM-OPP-01
 
-***REMOVED******REMOVED*** Sprint 1: Backend & Datenmodell (Week 1-2)
+## Sprint 1: Backend & Datenmodell (Week 1-2)
 
-***REMOVED******REMOVED******REMOVED*** Backend Tasks
+### Backend Tasks
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 1.1.1: Service erstellen
+#### Task 1.1.1: Service erstellen
 - [ ] `services/crm-sales/` Verzeichnis anlegen
 - [ ] `services/crm-sales/README.md` erstellen
 - [ ] `services/crm-sales/app/main.py` erstellen (FastAPI)
@@ -35,7 +35,7 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 1.1.2: Datenmodell implementieren
+#### Task 1.1.2: Datenmodell implementieren
 - [ ] `Opportunity` Entity erstellen:
   - id, tenant_id, number, name
   - account_id, contact_id, owner_id
@@ -61,7 +61,7 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 1.1.3: API-Endpoints implementieren
+#### Task 1.1.3: API-Endpoints implementieren
 - [ ] `GET /api/v1/opportunities` - Liste mit Filter/Pagination
 - [ ] `GET /api/v1/opportunities/{id}` - Detail
 - [ ] `POST /api/v1/opportunities` - Erstellen
@@ -81,9 +81,9 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Integration Tasks
+### Integration Tasks
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 1.1.4: Events implementieren
+#### Task 1.1.4: Events implementieren
 - [ ] `crm.opportunity.created` Event
 - [ ] `crm.opportunity.updated` Event
 - [ ] `crm.opportunity.stage-changed` Event
@@ -99,11 +99,11 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 ---
 
-***REMOVED******REMOVED*** Sprint 2: Frontend & UI (Week 3-4)
+## Sprint 2: Frontend & UI (Week 3-4)
 
-***REMOVED******REMOVED******REMOVED*** Frontend Tasks
+### Frontend Tasks
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 1.2.1: Opportunities-Liste
+#### Task 1.2.1: Opportunities-Liste
 - [ ] `packages/frontend-web/src/pages/crm/opportunities-liste.tsx` erstellen
 - [ ] ListReport-Konfiguration mit i18n
 - [ ] Spalten: Number, Name, Account, Stage, Value, Probability, Close Date, Owner, Status
@@ -123,7 +123,7 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 1.2.2: Opportunity-Detail
+#### Task 1.2.2: Opportunity-Detail
 - [ ] `packages/frontend-web/src/pages/crm/opportunity-detail.tsx` erstellen
 - [ ] ObjectPage-Konfiguration mit i18n
 - [ ] Tabs: Grunddaten, Aktivitäten, Anhänge, Historie
@@ -142,7 +142,7 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 1.2.3: Pipeline-Kanban
+#### Task 1.2.3: Pipeline-Kanban
 - [ ] `packages/frontend-web/src/pages/crm/pipeline-kanban.tsx` erstellen
 - [ ] Kanban-Komponente (z.B. @dnd-kit)
 - [ ] Spalten pro Stage
@@ -162,7 +162,7 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 1.2.4: Forecast-Report
+#### Task 1.2.4: Forecast-Report
 - [ ] `packages/frontend-web/src/pages/crm/forecast-report.tsx` erstellen
 - [ ] Chart-Komponente (z.B. recharts)
 - [ ] Filter: Periode (Monat/Quartal), Owner, Team
@@ -180,9 +180,9 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Integration Tasks
+### Integration Tasks
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Task 1.2.5: Sales-Modul Integration
+#### Task 1.2.5: Sales-Modul Integration
 - [ ] Link Opportunity → Quote
 - [ ] Link Opportunity → Order
 - [ ] Belegkette-Visualisierung
@@ -197,9 +197,9 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 ---
 
-***REMOVED******REMOVED*** Testing
+## Testing
 
-***REMOVED******REMOVED******REMOVED*** Task 1.3.1: E2E Tests
+### Task 1.3.1: E2E Tests
 - [ ] `tests/e2e/crm-marketing/opportunities.spec.ts` erstellen
 - [ ] Test: Opportunity erstellen
 - [ ] Test: Opportunity bearbeiten
@@ -216,9 +216,9 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 ---
 
-***REMOVED******REMOVED*** Documentation
+## Documentation
 
-***REMOVED******REMOVED******REMOVED*** Task 1.4.1: Dokumentation
+### Task 1.4.1: Dokumentation
 - [ ] API-Dokumentation aktualisieren
 - [ ] User-Guide für Opportunities erstellen
 - [ ] Screenshots für Evidence
@@ -231,7 +231,7 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 ---
 
-***REMOVED******REMOVED*** Definition of Done (Gesamt)
+## Definition of Done (Gesamt)
 
 - ✅ Opportunities können erstellt, bearbeitet, gelöscht werden
 - ✅ Pipeline-Visualisierung zeigt Funnel mit Conversion-Rates
@@ -243,7 +243,7 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 ---
 
-***REMOVED******REMOVED*** Daily Standup Template
+## Daily Standup Template
 
 **Datum:** YYYY-MM-DD  
 **Sprint:** Sprint X, Day Y
@@ -262,7 +262,7 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 ---
 
-***REMOVED******REMOVED*** Review & Retro Template
+## Review & Retro Template
 
 **Sprint:** Sprint X  
 **Datum:** YYYY-MM-DD
@@ -288,4 +288,5 @@ Implementierung der Sales Pipeline mit Opportunities/Deals, Stages, Probabilitie
 
 **Letzte Aktualisierung:** 2025-01-27  
 **Nächste Review:** Nach Sprint 1
+
 

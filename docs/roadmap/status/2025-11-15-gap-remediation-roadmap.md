@@ -1,6 +1,6 @@
-***REMOVED*** Must-Have Gap Remediation Roadmap – 15.11.2025
+# Must-Have Gap Remediation Roadmap – 15.11.2025
 
-***REMOVED******REMOVED*** Zielbild
+## Zielbild
 
 Die in `docs/roadmap/status/2025-11-13-must-have-gap-audit.md` identifizierten Must-Haves werden sequenziell geschlossen, damit a.eins-Parität und Compliance erreicht werden. Die Reihenfolge folgt dem Prinzip „Compliance & Finanzkern zuerst“, anschließend Supply-Chain-Transparenz und finale Audit-Automatisierung.
 
@@ -13,7 +13,7 @@ Die in `docs/roadmap/status/2025-11-13-must-have-gap-audit.md` identifizierten M
 | 5           | Lieferkettentracking & Eventing           | Domain + UI vorhanden           | Persistenz/Event-Pipeline/Alerts                   |
 | 6           | Audit-Domain End-to-End CI                | Hash-Chain & Tests vorhanden    | CI-Workflow Workflow→Audit→Archiv                  |
 
-***REMOVED******REMOVED*** Vorgehen (Rolling Wave)
+## Vorgehen (Rolling Wave)
 
 1. **InfraStat Produktiv-Rollout (läuft)**  
    - Helm/Secrets/Alerts produktionsreif.  
@@ -42,9 +42,10 @@ Die in `docs/roadmap/status/2025-11-13-must-have-gap-audit.md` identifizierten M
    - End-to-End-Testfall im CI (`.github/workflows/ci.yml`).  
    - Ticket-Links: AUD-007.
 
-***REMOVED******REMOVED*** Reporting
+## Reporting
 
 - Fortschritt je Stream wird in `docs/roadmap/status/2025-11-13-must-have-gap-audit.md` ergänzt.  
 - Deployment-Artefakte (Helm Overrides, Runbooks) liegen unter `docs/deployment/**`.  
 - Jede abgeschlossene Stufe dokumentiert Smoke-/Integration-Tests (siehe Runbooks). 
+
 

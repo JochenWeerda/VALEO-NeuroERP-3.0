@@ -39,13 +39,13 @@ class APMManagerAgent:
         """Initialisiert den APM Manager"""
         self.logger.info("Initialisiere APM Manager...")
         
-        ***REMOVED*** Verzeichnisse erstellen
+        # Verzeichnisse erstellen
         self._create_directories()
         
-        ***REMOVED*** Memory Bank initialisieren
+        # Memory Bank initialisieren
         await self._initialize_memory_bank()
         
-        ***REMOVED*** Cursor Rules laden
+        # Cursor Rules laden
         self._load_cursor_rules()
         
         self.logger.info("APM Manager erfolgreich initialisiert")
@@ -71,11 +71,11 @@ class APMManagerAgent:
             section_path = self.memory_bank / section
             section_path.mkdir(exist_ok=True)
             
-            ***REMOVED*** Index-Datei erstellen
+            # Index-Datei erstellen
             index_file = section_path / "index.md"
             if not index_file.exists():
                 with open(index_file, "w", encoding="utf-8") as f:
-                    f.write(f"***REMOVED*** {section.title()} Index\n\n")
+                    f.write(f"# {section.title()} Index\n\n")
                     
     def _load_cursor_rules(self):
         """Lädt die Cursor Rules"""
@@ -90,7 +90,7 @@ class APMManagerAgent:
         self.current_phase = "van"
         self.logger.info("Starte VAN Phase...")
         
-        ***REMOVED*** Phase-Konfiguration laden
+        # Phase-Konfiguration laden
         phase_config = next(
             phase for phase in self.config["apm_framework"]["phases"]
             if phase["name"] == "van"
@@ -100,16 +100,16 @@ class APMManagerAgent:
             self.logger.warning("VAN Phase ist deaktiviert")
             return
             
-        ***REMOVED*** Systemanalyse durchführen
+        # Systemanalyse durchführen
         from linkup_mcp.apm_framework.van_mode_optimized import OptimizedVANMode
         
         van_mode = OptimizedVANMode()
         
         try:
-            ***REMOVED*** Systemanalyse starten
+            # Systemanalyse starten
             analysis_result = await van_mode.start({})
             
-            ***REMOVED*** Ergebnisse in Memory Bank speichern
+            # Ergebnisse in Memory Bank speichern
             analysis_path = self.memory_bank / "context/system_analysis.json"
             with open(analysis_path, "w", encoding="utf-8") as f:
                 json.dump(analysis_result, f, indent=2, ensure_ascii=False)
@@ -123,35 +123,35 @@ class APMManagerAgent:
             
     async def start_plan_phase(self, van_results: Dict[str, Any]):
         """Startet die PLAN Phase"""
-        ***REMOVED*** Implementierung folgt...
+        # Implementierung folgt...
         pass
         
     async def start_create_phase(self, plan_results: Dict[str, Any]):
         """Startet die CREATE Phase"""
-        ***REMOVED*** Implementierung folgt...
+        # Implementierung folgt...
         pass
         
     async def start_implement_phase(self, create_results: Dict[str, Any]):
         """Startet die IMPLEMENT Phase"""
-        ***REMOVED*** Implementierung folgt...
+        # Implementierung folgt...
         pass
         
     async def start_reflect_phase(self, implement_results: Dict[str, Any]):
         """Startet die REFLECT Phase"""
-        ***REMOVED*** Implementierung folgt...
+        # Implementierung folgt...
         pass
 
 async def main():
     """Hauptfunktion"""
     try:
-        ***REMOVED*** APM Manager initialisieren
+        # APM Manager initialisieren
         manager = APMManagerAgent()
         await manager.initialize()
         
-        ***REMOVED*** VAN Phase starten
+        # VAN Phase starten
         van_results = await manager.start_van_phase()
         
-        ***REMOVED*** Weitere Phasen folgen...
+        # Weitere Phasen folgen...
         
     except Exception as e:
         logging.error(f"Fehler im APM Manager: {str(e)}")

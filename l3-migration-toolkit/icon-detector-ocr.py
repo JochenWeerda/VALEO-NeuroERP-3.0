@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Icon-Detektor mit OCR + Computer Vision
 
@@ -28,14 +28,14 @@ class IconDetectorOCR:
         Returns:
             Liste von Elementen mit Koordinaten
         """
-        ***REMOVED*** Bild laden
+        # Bild laden
         img = Image.open(screenshot_path)
         img_cv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         width, height = img.size
         
         print(f"🔍 Analysiere Screenshot: {width}x{height}px")
         
-        ***REMOVED*** OCR mit Bounding Boxes
+        # OCR mit Bounding Boxes
         ocr_data = pytesseract.image_to_data(
             img,
             lang='eng',
@@ -44,7 +44,7 @@ class IconDetectorOCR:
         
         elements = []
         
-        ***REMOVED*** Extrahiere Text-Labels
+        # Extrahiere Text-Labels
         n_boxes = len(ocr_data['text'])
         for i in range(n_boxes):
             text = ocr_data['text'][i].strip()
@@ -58,18 +58,18 @@ class IconDetectorOCR:
             w = ocr_data['width'][i]
             h = ocr_data['height'][i]
             
-            ***REMOVED*** Berechne Zentrum
+            # Berechne Zentrum
             center_x = left + w // 2
             center_y = top + h // 2
             
-            ***REMOVED*** Prozentuale Koordinaten
+            # Prozentuale Koordinaten
             x_pct = (center_x / width) * 100
             y_pct = (center_y / height) * 100
             
-            ***REMOVED*** Klassifiziere Element-Typ
+            # Klassifiziere Element-Typ
             element_type = self._classify_element(text, top, height)
             
-            ***REMOVED*** Nur relevante Elemente (Tabs + Icons in oberen 20%)
+            # Nur relevante Elemente (Tabs + Icons in oberen 20%)
             if top < height * 0.2:
                 elements.append({
                     'name': text,
@@ -83,7 +83,7 @@ class IconDetectorOCR:
         
         print(f"✅ {len(elements)} Elemente erkannt")
         
-        ***REMOVED*** Sortiere nach Y-Position (oben → unten)
+        # Sortiere nach Y-Position (oben → unten)
         elements.sort(key=lambda e: (e['y_pct'], e['x_pct']))
         
         return elements
@@ -91,13 +91,13 @@ class IconDetectorOCR:
     def _classify_element(self, text: str, top: int, canvas_height: int) -> str:
         """Klassifiziert Element-Typ basierend auf Position und Text"""
         
-        ***REMOVED*** Top 10% = Tabs (Menü-Leiste)
+        # Top 10% = Tabs (Menü-Leiste)
         if top < canvas_height * 0.10:
-            ***REMOVED*** Großbuchstaben = Tab
+            # Großbuchstaben = Tab
             if text.isupper() and len(text) > 3:
                 return 'menu_tab'
         
-        ***REMOVED*** 10-15% = Ribbon Icons
+        # 10-15% = Ribbon Icons
         if top >= canvas_height * 0.08 and top < canvas_height * 0.15:
             return 'ribbon_icon'
         
@@ -142,7 +142,7 @@ class IconDetectorOCR:
             
             bbox = elem['bbox']
             
-            ***REMOVED*** Zeichne Bounding Box
+            # Zeichne Bounding Box
             color = (0, 255, 0) if elem['type'] == 'menu_tab' else (255, 0, 0)
             cv2.rectangle(
                 img,
@@ -152,7 +152,7 @@ class IconDetectorOCR:
                 2
             )
             
-            ***REMOVED*** Label
+            # Label
             label = f"{elem['name']} ({elem['x_pct']:.1f}%)"
             cv2.putText(
                 img,
@@ -183,10 +183,10 @@ def main():
     
     print("🚀 Starte Icon-Erkennung...\n")
     
-    ***REMOVED*** Erkenne Elemente
+    # Erkenne Elemente
     elements = detector.detect_all_clickable_elements(args.screenshot)
     
-    ***REMOVED*** Zeige Ergebnisse
+    # Zeige Ergebnisse
     print(f"\n📋 Erkannte Elemente:\n")
     for elem in elements:
         if elem['type'] in ['menu_tab', 'ribbon_icon']:
@@ -194,14 +194,14 @@ def main():
                   f"({elem['x_pct']:5.1f}%, {elem['y_pct']:5.1f}%) | "
                   f"Conf: {elem['confidence']}%")
     
-    ***REMOVED*** Export CSV
+    # Export CSV
     detector.generate_csv(elements, args.output_csv)
     
-    ***REMOVED*** Debug-Visualisierung
+    # Debug-Visualisierung
     if args.debug_image:
         detector.visualize_detections(args.screenshot, elements, args.debug_image)
     
-    ***REMOVED*** Export JSON
+    # Export JSON
     json_path = Path(args.output_csv).with_suffix('.json')
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(elements, f, indent=2, ensure_ascii=False)
@@ -212,4 +212,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 

@@ -1,13 +1,13 @@
-***REMOVED*** =====================================================
-***REMOVED*** VALEO NeuroERP - NeuroFlow Services Start Script
-***REMOVED*** =====================================================
-***REMOVED*** PowerShell Script für automatische Service-Verwaltung
-***REMOVED*** Erstellt: 2025-07-23
+# =====================================================
+# VALEO NeuroERP - NeuroFlow Services Start Script
+# =====================================================
+# PowerShell Script für automatische Service-Verwaltung
+# Erstellt: 2025-07-23
 
 Write-Host "🧠 VALEO NeuroERP - NeuroFlow Services Start Script" -ForegroundColor Cyan
 Write-Host "=====================================================" -ForegroundColor Cyan
 
-***REMOVED*** Funktion für Service-Status-Check
+# Funktion für Service-Status-Check
 function Test-ServiceHealth {
     param(
         [string]$ServiceName,
@@ -28,7 +28,7 @@ function Test-ServiceHealth {
     }
 }
 
-***REMOVED*** Funktion für Docker-Container-Status
+# Funktion für Docker-Container-Status
 function Test-DockerContainer {
     param(
         [string]$ContainerName
@@ -50,19 +50,19 @@ function Test-DockerContainer {
     }
 }
 
-***REMOVED*** Hauptverzeichnis setzen
+# Hauptverzeichnis setzen
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $ProjectRoot
 
 Write-Host "📁 Projektverzeichnis: $ProjectRoot" -ForegroundColor Yellow
 
-***REMOVED*** =====================================================
-***REMOVED*** 1. DOCKER SERVICES STARTEN
-***REMOVED*** =====================================================
+# =====================================================
+# 1. DOCKER SERVICES STARTEN
+# =====================================================
 
 Write-Host "`n🐳 Starte Docker Services..." -ForegroundColor Magenta
 
-***REMOVED*** PostgreSQL Container starten
+# PostgreSQL Container starten
 Write-Host "📊 Starte PostgreSQL..." -ForegroundColor Yellow
 try {
     docker run -d --name valeo-postgres `
@@ -76,7 +76,7 @@ try {
     Write-Host "⚠️ PostgreSQL bereits läuft oder Fehler beim Starten" -ForegroundColor Yellow
 }
 
-***REMOVED*** Redis Container starten
+# Redis Container starten
 Write-Host "🔴 Starte Redis..." -ForegroundColor Yellow
 try {
     docker run -d --name valeo-redis `
@@ -87,7 +87,7 @@ try {
     Write-Host "⚠️ Redis bereits läuft oder Fehler beim Starten" -ForegroundColor Yellow
 }
 
-***REMOVED*** n8n Container starten
+# n8n Container starten
 Write-Host "⚡ Starte n8n Workflow Automation..." -ForegroundColor Yellow
 try {
     docker run -d --name valeo-n8n `
@@ -109,74 +109,74 @@ try {
     Write-Host "⚠️ n8n bereits läuft oder Fehler beim Starten" -ForegroundColor Yellow
 }
 
-***REMOVED*** Warten für Container-Start
+# Warten für Container-Start
 Write-Host "⏳ Warte auf Container-Start..." -ForegroundColor Yellow
 Start-Sleep -Seconds 10
 
-***REMOVED*** =====================================================
-***REMOVED*** 2. BACKEND SERVICES STARTEN
-***REMOVED*** =====================================================
+# =====================================================
+# 2. BACKEND SERVICES STARTEN
+# =====================================================
 
 Write-Host "`n🔧 Starte Backend Services..." -ForegroundColor Magenta
 
-***REMOVED*** Autocomplete API starten
+# Autocomplete API starten
 Write-Host "🔍 Starte Autocomplete API (Port 8003)..." -ForegroundColor Yellow
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$ProjectRoot\backend'; python -m uvicorn api.autocomplete:app --host 0.0.0.0 --port 8003 --reload" -WindowStyle Minimized
 
-***REMOVED*** Charge Management API starten
+# Charge Management API starten
 Write-Host "📦 Starte Charge Management API (Port 8002)..." -ForegroundColor Yellow
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$ProjectRoot\backend'; python -m uvicorn api.charge_management:app --host 0.0.0.0 --port 8002 --reload" -WindowStyle Minimized
 
-***REMOVED*** Haupt-API starten (falls vorhanden)
+# Haupt-API starten (falls vorhanden)
 Write-Host "🌐 Starte Haupt-API (Port 8000)..." -ForegroundColor Yellow
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$ProjectRoot\backend'; python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload" -WindowStyle Minimized
 
-***REMOVED*** Warten für Backend-Start
+# Warten für Backend-Start
 Write-Host "⏳ Warte auf Backend-Start..." -ForegroundColor Yellow
 Start-Sleep -Seconds 15
 
-***REMOVED*** =====================================================
-***REMOVED*** 3. FRONTEND STARTEN
-***REMOVED*** =====================================================
+# =====================================================
+# 3. FRONTEND STARTEN
+# =====================================================
 
 Write-Host "`n🎨 Starte Frontend..." -ForegroundColor Magenta
 
 Write-Host "⚛️ Starte React Frontend (Port 3000)..." -ForegroundColor Yellow
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$ProjectRoot\frontend'; npm run dev" -WindowStyle Minimized
 
-***REMOVED*** Warten für Frontend-Start
+# Warten für Frontend-Start
 Write-Host "⏳ Warte auf Frontend-Start..." -ForegroundColor Yellow
 Start-Sleep -Seconds 20
 
-***REMOVED*** =====================================================
-***REMOVED*** 4. SERVICE HEALTH CHECKS
-***REMOVED*** =====================================================
+# =====================================================
+# 4. SERVICE HEALTH CHECKS
+# =====================================================
 
 Write-Host "`n🔍 Führe Service Health Checks durch..." -ForegroundColor Magenta
 
-***REMOVED*** Docker Container Status
+# Docker Container Status
 Write-Host "`n🐳 Docker Container Status:" -ForegroundColor Cyan
 Test-DockerContainer "valeo-postgres"
 Test-DockerContainer "valeo-redis"
 Test-DockerContainer "valeo-n8n"
 
-***REMOVED*** Backend API Status
+# Backend API Status
 Write-Host "`n🔧 Backend API Status:" -ForegroundColor Cyan
 Test-ServiceHealth "Autocomplete API" "http://localhost:8003/health" "8003"
 Test-ServiceHealth "Charge Management API" "http://localhost:8002/health" "8002"
 Test-ServiceHealth "Haupt-API" "http://localhost:8000/health" "8000"
 
-***REMOVED*** Frontend Status
+# Frontend Status
 Write-Host "`n🎨 Frontend Status:" -ForegroundColor Cyan
 Test-ServiceHealth "React Frontend" "http://localhost:3000" "3000"
 
-***REMOVED*** n8n Status
+# n8n Status
 Write-Host "`n⚡ n8n Workflow Status:" -ForegroundColor Cyan
 Test-ServiceHealth "n8n Workflow" "http://localhost:5678" "5678"
 
-***REMOVED*** =====================================================
-***REMOVED*** 5. ZUSAMMENFASSUNG
-***REMOVED*** =====================================================
+# =====================================================
+# 5. ZUSAMMENFASSUNG
+# =====================================================
 
 Write-Host "`n📊 NeuroFlow Services Zusammenfassung:" -ForegroundColor Magenta
 Write-Host "=====================================================" -ForegroundColor Magenta
@@ -197,7 +197,7 @@ Write-Host "• Scripts: $ProjectRoot\scripts" -ForegroundColor White
 Write-Host "`n✅ Alle NeuroFlow Services gestartet!" -ForegroundColor Green
 Write-Host "🚀 VALEO NeuroERP ist bereit für die Entwicklung!" -ForegroundColor Green
 
-***REMOVED*** Script beenden
+# Script beenden
 Write-Host "`n💡 Tipp: Verwende 'Get-Process | Where-Object {$_.ProcessName -eq 'python'}' um laufende Python-Prozesse zu sehen" -ForegroundColor Cyan
 Write-Host "💡 Tipp: Verwende 'docker ps' um laufende Container zu sehen" -ForegroundColor Cyan
 

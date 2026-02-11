@@ -1,12 +1,12 @@
-***REMOVED*** i18n Migration Guide für weitere Domains
+# i18n Migration Guide für weitere Domains
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Dieser Guide beschreibt, wie bestehende Frontend-Seiten auf i18n umgestellt werden können. Die Migration folgt einem konsistenten Pattern, das bereits für die Agribusiness- und Contracts-Domains implementiert wurde.
 
-***REMOVED******REMOVED*** Migration-Pattern
+## Migration-Pattern
 
-***REMOVED******REMOVED******REMOVED*** Schritt 1: Imports hinzufügen
+### Schritt 1: Imports hinzufügen
 
 ```typescript
 import { useTranslation } from 'react-i18next';
@@ -19,7 +19,7 @@ import {
 } from '@/features/crud/utils/i18n-helpers';
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 2: Hook initialisieren
+### Schritt 2: Hook initialisieren
 
 ```typescript
 export default function MyEntityPage(): JSX.Element {
@@ -31,9 +31,9 @@ export default function MyEntityPage(): JSX.Element {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 3: Hardcoded Texte ersetzen
+### Schritt 3: Hardcoded Texte ersetzen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Entity-Typ-Namen
+#### Entity-Typ-Namen
 ```typescript
 // ❌ Vorher
 <h1>Angebote</h1>
@@ -42,7 +42,7 @@ export default function MyEntityPage(): JSX.Element {
 <h1>{entityTypeLabel}</h1>
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Feld-Labels
+#### Feld-Labels
 ```typescript
 // ❌ Vorher
 <TableHead>Status</TableHead>
@@ -53,7 +53,7 @@ export default function MyEntityPage(): JSX.Element {
 <TableHead>{t('crud.fields.date')}</TableHead>
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Aktionen
+#### Aktionen
 ```typescript
 // ❌ Vorher
 <Button>Löschen</Button>
@@ -66,7 +66,7 @@ export default function MyEntityPage(): JSX.Element {
 <Button>{t('crud.actions.create')}</Button>
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Status-Labels
+#### Status-Labels
 ```typescript
 // ❌ Vorher
 const statusLabels = {
@@ -81,7 +81,7 @@ const statusLabels = {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Titel
+#### Titel
 ```typescript
 // ❌ Vorher
 <h1>Angebote Liste</h1>
@@ -92,7 +92,7 @@ const statusLabels = {
 <h2>{getDetailTitle(t, entityTypeLabel, angebot.nummer)}</h2>
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 4: Übersetzungen hinzufügen
+### Schritt 4: Übersetzungen hinzufügen
 
 In `packages/frontend-web/src/i18n/locales/de/translation.json`:
 
@@ -112,9 +112,9 @@ In `packages/frontend-web/src/i18n/locales/de/translation.json`:
 }
 ```
 
-***REMOVED******REMOVED*** Domain-spezifische Migration
+## Domain-spezifische Migration
 
-***REMOVED******REMOVED******REMOVED*** Sales Domain
+### Sales Domain
 
 **Bereits migriert:**
 - ✅ `pages/sales/angebote-liste.tsx`
@@ -136,7 +136,7 @@ In `packages/frontend-web/src/i18n/locales/de/translation.json`:
 - `delivery` → "Lieferung"
 - `creditNote` → "Gutschrift"
 
-***REMOVED******REMOVED******REMOVED*** CRM Domain
+### CRM Domain
 
 **Noch zu migrieren:**
 - `pages/crm/kunden-liste.tsx`
@@ -157,7 +157,7 @@ In `packages/frontend-web/src/i18n/locales/de/translation.json`:
 - `account` → "Konto"
 - `activity` → "Aktivität"
 
-***REMOVED******REMOVED******REMOVED*** Finance Domain
+### Finance Domain
 
 **Noch zu migrieren:**
 - `pages/finance/debitoren-liste.tsx`
@@ -178,7 +178,7 @@ In `packages/frontend-web/src/i18n/locales/de/translation.json`:
 - `dunning` → "Mahnung"
 - `bankReconciliation` → "Bankabgleich"
 
-***REMOVED******REMOVED******REMOVED*** Purchase/Einkauf Domain
+### Purchase/Einkauf Domain
 
 **Noch zu migrieren:**
 - `pages/einkauf/bestellungen-liste.tsx`
@@ -200,7 +200,7 @@ In `packages/frontend-web/src/i18n/locales/de/translation.json`:
 - `invoiceReceipt` → "Rechnungseingang"
 - `orderConfirmation` → "Auftragsbestätigung"
 
-***REMOVED******REMOVED******REMOVED*** Inventory Domain
+### Inventory Domain
 
 **Noch zu migrieren:**
 - `pages/inventory/epcis/index.tsx`
@@ -214,7 +214,7 @@ In `packages/frontend-web/src/i18n/locales/de/translation.json`:
 - `product` → "Produkt"
 - `stock` → "Bestand"
 
-***REMOVED******REMOVED*** Checkliste für Migration
+## Checkliste für Migration
 
 - [ ] Imports hinzugefügt (`useTranslation`, Helper-Funktionen)
 - [ ] Hook initialisiert (`const { t } = useTranslation()`)
@@ -229,9 +229,9 @@ In `packages/frontend-web/src/i18n/locales/de/translation.json`:
 - [ ] Linter-Fehler behoben
 - [ ] Komponente getestet
 
-***REMOVED******REMOVED*** Häufige Fehler
+## Häufige Fehler
 
-***REMOVED******REMOVED******REMOVED*** 1. Entity-Typ nicht übersetzt
+### 1. Entity-Typ nicht übersetzt
 ```typescript
 // ❌ Falsch
 <CrudDeleteDialog entityType="Farmer" />
@@ -240,7 +240,7 @@ In `packages/frontend-web/src/i18n/locales/de/translation.json`:
 <CrudDeleteDialog entityType={entityTypeLabel} />
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Status nicht übersetzt
+### 2. Status nicht übersetzt
 ```typescript
 // ❌ Falsch
 <Badge>{status}</Badge>
@@ -249,7 +249,7 @@ In `packages/frontend-web/src/i18n/locales/de/translation.json`:
 <Badge>{getStatusLabel(t, status, status)}</Badge>
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Fehlende Übersetzung
+### 3. Fehlende Übersetzung
 ```typescript
 // ❌ Falsch - Übersetzung fehlt in translation.json
 t('crud.fields.myNewField')
@@ -265,24 +265,25 @@ t('crud.fields.myNewField')
 }
 ```
 
-***REMOVED******REMOVED*** Automatisierung
+## Automatisierung
 
 Für große Migrationen können Sie ein Skript verwenden, um häufig verwendete Patterns zu finden:
 
 ```bash
-***REMOVED*** Finde alle hardcoded deutschen Texte
+# Finde alle hardcoded deutschen Texte
 grep -r "Löschen\|Bearbeiten\|Erstellen\|Status\|Datum\|Name" packages/frontend-web/src/pages/
 ```
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. **Priorisierung:** Wichtige Domains zuerst (Sales, CRM, Finance)
 2. **Schrittweise Migration:** Eine Domain nach der anderen
 3. **Testing:** Nach jeder Migration testen
 4. **Dokumentation:** Migrierte Seiten dokumentieren
 
-***REMOVED******REMOVED*** Referenzen
+## Referenzen
 
 - [i18n Integration Dokumentation](./i18n-integration.md)
 - [i18n Quick Reference](./i18n-quick-reference.md)
+
 

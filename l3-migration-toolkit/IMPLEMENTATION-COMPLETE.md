@@ -1,15 +1,15 @@
-***REMOVED*** L3 OCR Migration Pipeline - Implementation Complete ✅
+# L3 OCR Migration Pipeline - Implementation Complete ✅
 
 **Datum:** 2025-01-17  
 **Status:** Implementierung abgeschlossen, bereit für Tesseract-Installation
 
-***REMOVED******REMOVED*** 🎯 Ziel erreicht
+## 🎯 Ziel erreicht
 
 **Automatische Extraktion aller L3-Masken → Mask Builder JSON-Schemas**
 
-***REMOVED******REMOVED*** ✅ Implementierte Module
+## ✅ Implementierte Module
 
-***REMOVED******REMOVED******REMOVED*** 1. OCR-Pipeline (`ocr-pipeline.py`)
+### 1. OCR-Pipeline (`ocr-pipeline.py`)
 - **Funktion:** Screenshot → OCR → Strukturierte Felder
 - **Features:**
   - Preprocessing (Graustufen, Kontrast, CLAHE, Bilateral Filter, Adaptive Thresholding)
@@ -19,7 +19,7 @@
   - Confidence-Filtering (60% Threshold)
 - **Status:** ✅ Fertig, wartet auf Tesseract-Installation
 
-***REMOVED******REMOVED******REMOVED*** 2. LLM-Feldanalyse (`llm-field-analyzer.py`)
+### 2. LLM-Feldanalyse (`llm-field-analyzer.py`)
 - **Funktion:** OCR-Rohdaten → LLM → Strukturierte Felddefinition
 - **Features:**
   - Intelligente Typzuordnung (12+ Feldtypen)
@@ -30,7 +30,7 @@
 - **Status:** ✅ Fertig, LLM-API-Integration als Placeholder
 - **TODO:** OpenAI/Anthropic API einbinden
 
-***REMOVED******REMOVED******REMOVED*** 3. Schema-Generator (`analyze-mask-fields.py`)
+### 3. Schema-Generator (`analyze-mask-fields.py`)
 - **Funktion:** Strukturierte Felder → Mask Builder JSON + SQL
 - **Features:**
   - `generate_from_ocr()` - Vollautomatische Pipeline-Integration
@@ -40,7 +40,7 @@
   - `export_to_sql()` - PostgreSQL CREATE TABLE
 - **Status:** ✅ Fertig, erweitert mit OCR-Integration
 
-***REMOVED******REMOVED******REMOVED*** 4. Batch-Automation (`auto-capture-all-masks.py`)
+### 4. Batch-Automation (`auto-capture-all-masks.py`)
 - **Funktion:** Orchestrierung - 15+ Masken automatisch erfassen
 - **Features:**
   - Interaktiver Workflow (Benutzer navigiert, Script verarbeitet)
@@ -51,26 +51,26 @@
   - Abschlussbericht
 - **Status:** ✅ Fertig
 
-***REMOVED******REMOVED*** 📦 Deliverables
+## 📦 Deliverables
 
-***REMOVED******REMOVED******REMOVED*** Python-Module (4)
+### Python-Module (4)
 - [x] `ocr-pipeline.py` (398 Zeilen)
 - [x] `llm-field-analyzer.py` (246 Zeilen)
 - [x] `analyze-mask-fields.py` (erweitert, +141 Zeilen)
 - [x] `auto-capture-all-masks.py` (334 Zeilen)
 
-***REMOVED******REMOVED******REMOVED*** Dokumentation (4)
+### Dokumentation (4)
 - [x] `PIPELINE-README.md` - Vollständige Anleitung
 - [x] `SETUP-TESSERACT.md` - Tesseract-Installation
 - [x] `COMPLETE-SETUP.md` - Schnellstart-Guide
 - [x] `IMPLEMENTATION-COMPLETE.md` - Dieser Report
 
-***REMOVED******REMOVED******REMOVED*** Konfiguration
+### Konfiguration
 - [x] `L3_MASKS` Array mit 15 Masken (Priorität, Kategorie)
 - [x] Integration mit `scripts/l3_import_mapping.json`
 - [x] Output-Verzeichnisse: `schemas/mask-builder/`, `schemas/sql/`, `schemas/mappings/`
 
-***REMOVED******REMOVED*** 🔗 Pipeline-Architektur
+## 🔗 Pipeline-Architektur
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -109,9 +109,9 @@ OUTPUT: JSON + SQL + Index
   └── schemas/mappings/migration-index.json
 ```
 
-***REMOVED******REMOVED*** 📊 Zu erfassende L3-Masken (15)
+## 📊 Zu erfassende L3-Masken (15)
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐⭐⭐ KRITISCH (8)
+### ⭐⭐⭐⭐⭐ KRITISCH (8)
 - [x] Artikelstamm (Screenshot vorhanden)
 - [ ] Kundenstamm
 - [ ] Lieferschein
@@ -121,38 +121,38 @@ OUTPUT: JSON + SQL + Index
 - [ ] Lager-Bestand
 - [ ] PSM-Abgabe (Agrar-kritisch!)
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐⭐ WICHTIG (4)
+### ⭐⭐⭐⭐ WICHTIG (4)
 - [ ] Lieferantenstamm
 - [ ] Angebot
 - [ ] Wareneingang
 - [ ] Kunden-Kontoauszug
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐ NICE-TO-HAVE (3)
+### ⭐⭐⭐ NICE-TO-HAVE (3)
 - [ ] Inventur
 - [ ] Saatgut
 - [ ] Dünger
 
-***REMOVED******REMOVED*** 🚀 Nächste Schritte
+## 🚀 Nächste Schritte
 
-***REMOVED******REMOVED******REMOVED*** Schritt 1: Tesseract installieren (einmalig)
+### Schritt 1: Tesseract installieren (einmalig)
 
 ```powershell
-***REMOVED*** Option A: UB Mannheim Installer
-***REMOVED*** Download: https://github.com/UB-Mannheim/tesseract/wiki
-***REMOVED*** WICHTIG: German Language Pack auswählen!
+# Option A: UB Mannheim Installer
+# Download: https://github.com/UB-Mannheim/tesseract/wiki
+# WICHTIG: German Language Pack auswählen!
 
-***REMOVED*** Option B: Chocolatey (als Admin)
+# Option B: Chocolatey (als Admin)
 choco install tesseract --params "/Languages:deu+eng"
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 2: Verifikation
+### Schritt 2: Verifikation
 
 ```powershell
 tesseract --version
 python -c "import pytesseract; print('✅ OK')"
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 3: Test mit Artikelstamm
+### Schritt 3: Test mit Artikelstamm
 
 ```powershell
 cd l3-migration-toolkit
@@ -165,7 +165,7 @@ python ocr-pipeline.py screenshots/l3-masks/artikelstamm.png --debug
 - Durchschn. Confidence: 85%+
 - Output: `artikelstamm.ocr.json`
 
-***REMOVED******REMOVED******REMOVED*** Schritt 4: Vollautomatische Erfassung
+### Schritt 4: Vollautomatische Erfassung
 
 ```powershell
 python auto-capture-all-masks.py
@@ -181,7 +181,7 @@ python auto-capture-all-masks.py
 
 **Gesamtzeit:** ca. 30-45 Min für alle 15 Masken
 
-***REMOVED******REMOVED*** 🎓 Technologie-Stack
+## 🎓 Technologie-Stack
 
 | Komponente | Technologie | Version | Status |
 |------------|-------------|---------|--------|
@@ -194,7 +194,7 @@ python auto-capture-all-masks.py
 | Browser | Guacamole RDP | - | ✅ Läuft (Port 8090) |
 | Output | JSON + SQL | - | ✅ Schemas generiert |
 
-***REMOVED******REMOVED*** 📈 Erfolgsmetriken
+## 📈 Erfolgsmetriken
 
 | Metrik | Ziel | Status |
 |--------|------|--------|
@@ -204,9 +204,9 @@ python auto-capture-all-masks.py
 | Mask Builder kompatibel | 100% | ✅ Format implementiert |
 | SQL ausführbar | 100% | ✅ PostgreSQL-kompatibel |
 
-***REMOVED******REMOVED*** 🔧 Integration mit VALEO-NeuroERP
+## 🔧 Integration mit VALEO-NeuroERP
 
-***REMOVED******REMOVED******REMOVED*** Existierende Infrastruktur genutzt:
+### Existierende Infrastruktur genutzt:
 
 1. **L3-Import-Mapping** (`scripts/l3_import_mapping.json`)
    - ARTIKEL → artikelstamm
@@ -221,7 +221,7 @@ python auto-capture-all-masks.py
    - JSON-Format kompatibel
    - Automatische Frontend-Generierung
 
-***REMOVED******REMOVED******REMOVED*** Neue Komponenten:
+### Neue Komponenten:
 
 4. **OCR-Pipeline** (neu)
    - Automatische Feldextraktion
@@ -236,21 +236,21 @@ python auto-capture-all-masks.py
    - UI-Hints
    - Vollständige Validierungen
 
-***REMOVED******REMOVED*** 🐛 Bekannte Limitationen & TODOs
+## 🐛 Bekannte Limitationen & TODOs
 
-***REMOVED******REMOVED******REMOVED*** Limitationen:
+### Limitationen:
 - ❗ Tesseract muss manuell installiert werden (Admin-Rechte erforderlich)
 - ❗ LLM-API-Integration ist Placeholder (OpenAI/Anthropic Key erforderlich)
 - ⚠️  Screenshot-Erfassung semi-manuell (Windows + Shift + S)
 
-***REMOVED******REMOVED******REMOVED*** TODOs:
+### TODOs:
 - [ ] Tesseract installieren (einmalig, Benutzer-Aktion)
 - [ ] LLM-API-Key konfigurieren (OpenAI oder Anthropic)
 - [ ] Erste 5 Masken erfassen & OCR-Parameter optimieren
 - [ ] Playwright-MCP Screenshot-Automation (falls gewünscht)
 - [ ] Mask Builder Import-Funktion implementieren (Frontend)
 
-***REMOVED******REMOVED*** 📚 Dokumentation
+## 📚 Dokumentation
 
 Alle Dateien in `l3-migration-toolkit/`:
 
@@ -267,7 +267,7 @@ Python-Module:
 - `analyze-mask-fields.py` - Schema-Generator
 - `auto-capture-all-masks.py` - Batch-Automation (Hauptprogramm)
 
-***REMOVED******REMOVED*** 🎉 Fazit
+## 🎉 Fazit
 
 **✅ Pipeline vollständig implementiert!**
 
@@ -288,13 +288,14 @@ Python-Module:
 
 **Nächster Schritt:**
 ```powershell
-***REMOVED*** 1. Tesseract installieren (siehe COMPLETE-SETUP.md)
-***REMOVED*** 2. Testen mit:
+# 1. Tesseract installieren (siehe COMPLETE-SETUP.md)
+# 2. Testen mit:
 python ocr-pipeline.py screenshots/l3-masks/artikelstamm.png
 
-***REMOVED*** 3. Batch-Erfassung starten:
+# 3. Batch-Erfassung starten:
 python auto-capture-all-masks.py
 ```
 
 **Zeitaufwand gesamt:** ~1 Stunde (Installation 5min + Erfassung 45min)
+
 

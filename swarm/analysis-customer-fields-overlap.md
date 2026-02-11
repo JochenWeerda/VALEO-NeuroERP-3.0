@@ -1,11 +1,11 @@
-***REMOVED*** Analyse: Kundenstamm-Felder - Überlappung mit bestehender Struktur
+# Analyse: Kundenstamm-Felder - Überlappung mit bestehender Struktur
 
-***REMOVED******REMOVED*** Problem
+## Problem
 Es existieren bereits über 250 definierte Kundenstammdatenfelder. Die neu hinzugefügten Sales-Felder könnten Doppelstrukturen erzeugen.
 
-***REMOVED******REMOVED*** Bestehende Strukturen
+## Bestehende Strukturen
 
-***REMOVED******REMOVED******REMOVED*** 1. Feld-Registry: `packages/frontend-web/src/config/l3-customer-field-registry.ts`
+### 1. Feld-Registry: `packages/frontend-web/src/config/l3-customer-field-registry.ts`
 - **250+ Felder** definiert
 - Strukturiert nach Tabs und Sections
 - Beispiele:
@@ -14,7 +14,7 @@ Es existieren bereits über 250 definierte Kundenstammdatenfelder. Die neu hinzu
   - `profile.industry_code` - Branche (mit Schlüssel)
   - `analytics.segment` - Segment (im Potential-Tab)
 
-***REMOVED******REMOVED******REMOVED*** 2. Mask-Builder Config: `packages/frontend-web/src/config/mask-builder-customer.json`
+### 2. Mask-Builder Config: `packages/frontend-web/src/config/mask-builder-customer.json`
 - Vollständige UI-Konfiguration
 - Tabs: masterdata, address, system, tax, quality_compliance, finance, bank, marketing, cooperative, output, interfaces, potential, contacts
 - **Bereits vorhanden:**
@@ -22,13 +22,13 @@ Es existieren bereits über 250 definierte Kundenstammdatenfelder. Die neu hinzu
   - `customer.sales_rep` (Zeile 181) - VB (Außendienst)
   - `profile.industry_code` (Zeile 1046) - Branche (mit Schlüssel)
 
-***REMOVED******REMOVED******REMOVED*** 3. Andere Configs
+### 3. Andere Configs
 - `mask-builder-valeo-modern.json`: `customer.price_list_id` (Zeile 702) - Preisliste
 - `customer_reference.schema.json`: `industry`, `region` bereits vorhanden
 
-***REMOVED******REMOVED*** Neu hinzugefügte Felder (SALES-CRM-02)
+## Neu hinzugefügte Felder (SALES-CRM-02)
 
-***REMOVED******REMOVED******REMOVED*** In `kunden-stamm.tsx` hinzugefügt:
+### In `kunden-stamm.tsx` hinzugefügt:
 1. `preisgruppe` → **Mögliche Überlappung:** `customer.group` oder `finance.global.price_determination_mode`
 2. `kundenpreisliste` → **Mögliche Überlappung:** `customer.price_list_id` (in valeo-modern.json)
 3. `steuerkategorie` → **Neu** (sollte in `tax` Tab)
@@ -36,19 +36,19 @@ Es existieren bereits über 250 definierte Kundenstammdatenfelder. Die neu hinzu
 5. `branche` → **Überlappung:** `profile.industry_code` existiert bereits!
 6. `region` → **Überlappung:** `region` existiert bereits in customer_reference.schema.json
 
-***REMOVED******REMOVED*** Empfehlung
+## Empfehlung
 
-***REMOVED******REMOVED******REMOVED*** Felder, die bereits existieren (verwenden statt neu erstellen):
+### Felder, die bereits existieren (verwenden statt neu erstellen):
 1. ✅ **Segment:** `analytics.segment` statt `kundensegment`
 2. ✅ **Branche:** `profile.industry_code` statt `branche`
 3. ✅ **Region:** `region` (bereits in Schema)
 4. ✅ **Preisliste:** `customer.price_list_id` statt `kundenpreisliste`
 
-***REMOVED******REMOVED******REMOVED*** Felder, die neu sind (korrekt hinzufügen):
+### Felder, die neu sind (korrekt hinzufügen):
 1. ✅ **Preisgruppe:** `sales.price_group` - NEU, sollte in `sales` Tab
 2. ✅ **Steuerkategorie:** `tax.category` - NEU, sollte in `tax` Tab
 
-***REMOVED******REMOVED******REMOVED*** Integration in bestehende Struktur
+### Integration in bestehende Struktur
 
 **Option A: Bestehende Felder verwenden**
 - `analytics.segment` für Kundensegment
@@ -60,7 +60,7 @@ Es existieren bereits über 250 definierte Kundenstammdatenfelder. Die neu hinzu
 - `sales.price_group` → Neuer Tab "Sales" oder Section in "finance"
 - `tax.category` → Tab "tax", Section "tax_flags"
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. ✅ Prüfen, welche Felder bereits im Backend existieren
 2. ✅ Mapping erstellen: Neue Felder → Bestehende Felder
@@ -68,10 +68,11 @@ Es existieren bereits über 250 definierte Kundenstammdatenfelder. Die neu hinzu
 4. ✅ Nur wirklich neue Felder hinzufügen
 5. ✅ Integration in `mask-builder-customer.json` statt direkter Tab-Erstellung
 
-***REMOVED******REMOVED*** Konkrete Aktion
+## Konkrete Aktion
 
 **Statt neue Felder in `kunden-stamm.tsx` zu erstellen:**
 - Bestehende Feld-Struktur aus `mask-builder-customer.json` verwenden
 - Neue Felder in die JSON-Config integrieren
 - Oder: Bestehende Felder verwenden, wenn sie existieren
+
 

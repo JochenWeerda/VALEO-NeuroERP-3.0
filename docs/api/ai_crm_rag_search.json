@@ -25,7 +25,7 @@
             "id": "doc-123",
             "type": "ticket",
             "score": 0.82,
-            "title": "Ticket ***REMOVED***789 - Delivery delay",
+            "title": "Ticket #789 - Delivery delay",
             "snippet": "Customer reported delayed pallet...",
             "metadata": {
               "channel": "email",
@@ -44,3 +44,4 @@
     }
   }
 }
+

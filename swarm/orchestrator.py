@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Orchestrator-Agent für GAP-Schließung
 Überwacht und koordiniert 4 parallele Agenten
@@ -20,7 +20,7 @@ class Orchestrator:
         self.handoffs_path = self.base_path / "swarm" / "handoffs"
         self.gap_path = self.base_path / "gap"
         
-        ***REMOVED*** Agenten-Status
+        # Agenten-Status
         self.agents = {
             "agent1": {"name": "Finance", "status": "idle", "capabilities": 33},
             "agent2": {"name": "Procurement", "status": "idle", "capabilities": 28},
@@ -28,9 +28,9 @@ class Orchestrator:
             "agent4": {"name": "Infrastructure", "status": "idle", "capabilities": "cross-domain"}
         }
         
-        ***REMOVED*** Sprint-Status
+        # Sprint-Status
         self.current_sprint = 0
-        self.sprint_phase = "P0"  ***REMOVED*** P0, P1, P2-P3
+        self.sprint_phase = "P0"  # P0, P1, P2-P3
         
     def init(self):
         """Initialisiert Orchestrator"""
@@ -38,24 +38,24 @@ class Orchestrator:
         print(f"[ORCHESTRATOR] Base Path: {self.base_path}")
         print(f"[ORCHESTRATOR] Swarm Path: {self.swarm_path}")
         
-        ***REMOVED*** Verzeichnisse erstellen
+        # Verzeichnisse erstellen
         self.status_path.mkdir(parents=True, exist_ok=True)
         self.handoffs_path.mkdir(parents=True, exist_ok=True)
         
-        ***REMOVED*** Dashboard erstellen
+        # Dashboard erstellen
         self.create_dashboard()
         
     def create_dashboard(self):
         """Erstellt Orchestrator-Dashboard"""
         dashboard_path = self.status_path / "orchestrator-dashboard.md"
         
-        content = f"""***REMOVED*** Orchestrator Dashboard
+        content = f"""# Orchestrator Dashboard
 
 **Datum:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Sprint:** {self.current_sprint}
 **Phase:** {self.sprint_phase}
 
-***REMOVED******REMOVED*** Agenten-Status
+## Agenten-Status
 
 | Agent | Domain | Status | Capabilities | Progress |
 |-------|--------|--------|--------------|----------|
@@ -64,7 +64,7 @@ class Orchestrator:
 | Agent-3 | Sales/CRM | {self.agents['agent3']['status']} | 63 | 0% |
 | Agent-4 | Infrastructure | {self.agents['agent4']['status']} | Cross-Domain | 0% |
 
-***REMOVED******REMOVED*** Gesamt-Fortschritt
+## Gesamt-Fortschritt
 
 - **Capabilities gesamt:** 124
 - **Capabilities abgeschlossen:** 0
@@ -72,15 +72,15 @@ class Orchestrator:
 - **Capabilities geplant:** 124
 - **Progress:** 0%
 
-***REMOVED******REMOVED*** Blockaden
+## Blockaden
 
 Keine Blockaden.
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 Keine aktiven Dependencies.
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. Sprint 1 starten
 2. Agenten initialisieren
@@ -95,7 +95,7 @@ Keine aktiven Dependencies.
         self.current_sprint = sprint_number
         print(f"[ORCHESTRATOR] Sprint {sprint_number} gestartet")
         
-        ***REMOVED*** Sprint-Plan basierend auf Nummer
+        # Sprint-Plan basierend auf Nummer
         if sprint_number <= 8:
             self.sprint_phase = "P0"
         elif sprint_number <= 16:
@@ -103,45 +103,45 @@ Keine aktiven Dependencies.
         else:
             self.sprint_phase = "P2-P3"
             
-        ***REMOVED*** Sprint-Status erstellen
+        # Sprint-Status erstellen
         self.create_sprint_status(sprint_number)
         
     def create_sprint_status(self, sprint_number: int):
         """Erstellt Sprint-Status"""
         status_path = self.status_path / f"sprint-{sprint_number}-status.md"
         
-        content = f"""***REMOVED*** Sprint {sprint_number} Status
+        content = f"""# Sprint {sprint_number} Status
 
 **Datum:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Phase:** {self.sprint_phase}
 
-***REMOVED******REMOVED*** Agenten-Aufgaben
+## Agenten-Aufgaben
 
-***REMOVED******REMOVED******REMOVED*** Agent-1 (Finance)
+### Agent-1 (Finance)
 - Status: Geplant
 - Tasks: TBD
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 (Procurement)
+### Agent-2 (Procurement)
 - Status: Geplant
 - Tasks: TBD
 
-***REMOVED******REMOVED******REMOVED*** Agent-3 (Sales/CRM)
+### Agent-3 (Sales/CRM)
 - Status: Geplant
 - Tasks: TBD
 
-***REMOVED******REMOVED******REMOVED*** Agent-4 (Infrastructure)
+### Agent-4 (Infrastructure)
 - Status: Geplant
 - Tasks: TBD
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 Keine Dependencies.
 
-***REMOVED******REMOVED*** Blockaden
+## Blockaden
 
 Keine Blockaden.
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. Tasks zuweisen
 2. Agenten starten
@@ -161,38 +161,38 @@ Keine Blockaden.
             
     def check_dependencies(self):
         """Prüft Dependencies zwischen Agenten"""
-        ***REMOVED*** TODO: Dependency-Check implementieren
+        # TODO: Dependency-Check implementieren
         print("[ORCHESTRATOR] Dependencies gepruft")
         
     def resolve_conflicts(self):
         """Löst Konflikte zwischen Agenten"""
-        ***REMOVED*** TODO: Conflict-Resolution implementieren
+        # TODO: Conflict-Resolution implementieren
         print("[ORCHESTRATOR] Konflikte gepruft")
         
     def generate_report(self):
         """Generiert Status-Report"""
         report_path = self.status_path / f"orchestrator-report-{datetime.now().strftime('%Y%m%d')}.md"
         
-        content = f"""***REMOVED*** Orchestrator Report
+        content = f"""# Orchestrator Report
 
 **Datum:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Sprint:** {self.current_sprint}
 **Phase:** {self.sprint_phase}
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 - **Aktiver Sprint:** {self.current_sprint}
 - **Phase:** {self.sprint_phase}
 - **Agenten aktiv:** {sum(1 for a in self.agents.values() if a['status'] != 'idle')}
 
-***REMOVED******REMOVED*** Agenten-Status
+## Agenten-Status
 
 """
         for agent_id, agent_data in self.agents.items():
             content += f"- **{agent_id} ({agent_data['name']}):** {agent_data['status']}\n"
             
         content += """
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. Daily Standup
 2. Dependency-Check
@@ -226,4 +226,5 @@ if __name__ == "__main__":
         print("  --init              Initialisiert Orchestrator")
         print("  --sprint-start N    Startet Sprint N")
         print("  --report            Generiert Status-Report")
+
 

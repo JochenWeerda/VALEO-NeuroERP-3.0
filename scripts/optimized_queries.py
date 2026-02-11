@@ -13,14 +13,14 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, Session
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("optimized_queries")
 
-***REMOVED*** SQLAlchemy-Basis erstellen
+# SQLAlchemy-Basis erstellen
 Base = declarative_base()
 
-***REMOVED*** Modellklassen definieren
+# Modellklassen definieren
 class Artikel(Base):
     """Artikelmodell mit optimierten Indizes"""
     __tablename__ = "artikel"
@@ -31,10 +31,10 @@ class Artikel(Base):
     price = Column(Float, nullable=False)
     category = Column(String(50))
     
-    ***REMOVED*** Beziehungen
+    # Beziehungen
     chargen = relationship("Charge", back_populates="artikel")
     
-    ***REMOVED*** Indizes für optimierte Abfragen
+    # Indizes für optimierte Abfragen
     __table_args__ = (
         Index('idx_artikel_name', name),
         Index('idx_artikel_kategorie', category),
@@ -51,12 +51,12 @@ class Charge(Base):
     id = Column(Integer, primary_key=True)
     charge_number = Column(String(20), unique=True, nullable=False)
     artikel_id = Column(Integer, ForeignKey("artikel.id"), nullable=False)
-    production_date = Column(String(10), nullable=False)  ***REMOVED*** Format: YYYY-MM-DD
+    production_date = Column(String(10), nullable=False)  # Format: YYYY-MM-DD
     
-    ***REMOVED*** Beziehungen
+    # Beziehungen
     artikel = relationship("Artikel", back_populates="chargen")
     
-    ***REMOVED*** Indizes für optimierte Abfragen
+    # Indizes für optimierte Abfragen
     __table_args__ = (
         Index('idx_charge_artikel_id', artikel_id),
         Index('idx_charge_prod_datum', production_date),
@@ -66,10 +66,10 @@ class Charge(Base):
         return f"<Charge(id={self.id}, charge_number='{self.charge_number}')>"
 
 
-***REMOVED*** Verbindung zur Datenbank herstellen
+# Verbindung zur Datenbank herstellen
 def get_db_session() -> Session:
     """Erstellt eine Datenbankverbindung und gibt die Session zurück"""
-    ***REMOVED*** In-Memory SQLite-Datenbank für Beispielzwecke
+    # In-Memory SQLite-Datenbank für Beispielzwecke
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -78,7 +78,7 @@ def get_db_session() -> Session:
 
 def seed_demo_data(db: Session):
     """Füllt die Datenbank mit Demo-Daten"""
-    ***REMOVED*** Artikel erstellen
+    # Artikel erstellen
     articles = [
         Artikel(id=1, name="Weizenschrot", code="WS-001", price=12.99, category="Getreide"),
         Artikel(id=2, name="Gerstenflocken", code="GF-002", price=10.50, category="Getreide"),
@@ -88,7 +88,7 @@ def seed_demo_data(db: Session):
     ]
     db.add_all(articles)
     
-    ***REMOVED*** Chargen erstellen
+    # Chargen erstellen
     charges = [
         Charge(id=1, artikel_id=1, charge_number="CH-001-2024", production_date="2024-01-15"),
         Charge(id=2, artikel_id=2, charge_number="CH-002-2024", production_date="2024-01-20"),
@@ -106,18 +106,18 @@ def seed_demo_data(db: Session):
     db.commit()
 
 
-***REMOVED*** Originale (ineffiziente) Implementierungen
+# Originale (ineffiziente) Implementierungen
 def get_articles_original(db: Session, category: Optional[str] = None) -> List[Artikel]:
     """Originale ineffiziente Implementierung der Artikel-Abfrage"""
     start_time = time.time()
     
-    ***REMOVED*** Alle Artikel abrufen und dann filtern
+    # Alle Artikel abrufen und dann filtern
     articles = db.query(Artikel).all()
     
     if category:
         articles = [a for a in articles if a.category == category]
     
-    ***REMOVED*** Ineffiziente Sortierung in Python
+    # Ineffiziente Sortierung in Python
     articles = sorted(articles, key=lambda a: a.name)
     
     duration = time.time() - start_time
@@ -130,7 +130,7 @@ def get_charges_original(db: Session, artikel_id: Optional[int] = None) -> List[
     """Originale ineffiziente Implementierung der Chargen-Abfrage mit N+1-Problem"""
     start_time = time.time()
     
-    ***REMOVED*** Alle Chargen abrufen
+    # Alle Chargen abrufen
     charges = db.query(Charge).all()
     result = []
     
@@ -138,7 +138,7 @@ def get_charges_original(db: Session, artikel_id: Optional[int] = None) -> List[
         if artikel_id and charge.artikel_id != artikel_id:
             continue
             
-        ***REMOVED*** N+1-Problem: Separate Abfrage für jeden Artikel
+        # N+1-Problem: Separate Abfrage für jeden Artikel
         artikel = db.query(Artikel).filter(Artikel.id == charge.artikel_id).first()
         
         charge_data = {
@@ -156,7 +156,7 @@ def get_charges_original(db: Session, artikel_id: Optional[int] = None) -> List[
     return result
 
 
-***REMOVED*** Optimierte Implementierungen
+# Optimierte Implementierungen
 def get_articles_optimized(
     db: Session, 
     category: Optional[str] = None,
@@ -166,17 +166,17 @@ def get_articles_optimized(
     """Optimierte Implementierung der Artikel-Abfrage mit Filterung und Paginierung in der Datenbank"""
     start_time = time.time()
     
-    ***REMOVED*** Basisabfrage mit effizienter Datenbankfilterung und -sortierung
+    # Basisabfrage mit effizienter Datenbankfilterung und -sortierung
     query = db.query(Artikel)
     
-    ***REMOVED*** Filterung anwenden
+    # Filterung anwenden
     if category:
         query = query.filter(Artikel.category == category)
     
-    ***REMOVED*** Sortierung in der Datenbank durchführen
+    # Sortierung in der Datenbank durchführen
     query = query.order_by(Artikel.name)
     
-    ***REMOVED*** Paginierung in der Datenbank durchführen
+    # Paginierung in der Datenbank durchführen
     total = query.count()
     articles = query.offset((page - 1) * page_size).limit(page_size).all()
     
@@ -196,30 +196,30 @@ def get_charges_optimized(db: Session, artikel_id: Optional[int] = None) -> List
     """Optimierte Implementierung der Chargen-Abfrage mit Batch-Abruf statt N+1-Abfragen"""
     start_time = time.time()
     
-    ***REMOVED*** Basisabfrage
+    # Basisabfrage
     query = db.query(Charge)
     
-    ***REMOVED*** Filterung anwenden
+    # Filterung anwenden
     if artikel_id:
         query = query.filter(Charge.artikel_id == artikel_id)
     
-    ***REMOVED*** Alle benötigten Chargen auf einmal abrufen
+    # Alle benötigten Chargen auf einmal abrufen
     charges = query.all()
     
-    ***REMOVED*** Wenn keine Chargen gefunden wurden, leere Liste zurückgeben
+    # Wenn keine Chargen gefunden wurden, leere Liste zurückgeben
     if not charges:
         return []
     
-    ***REMOVED*** Alle benötigten Artikel-IDs sammeln
+    # Alle benötigten Artikel-IDs sammeln
     artikel_ids = {charge.artikel_id for charge in charges}
     
-    ***REMOVED*** Batch-Abruf aller benötigten Artikel
+    # Batch-Abruf aller benötigten Artikel
     artikel_dict = {
         artikel.id: artikel 
         for artikel in db.query(Artikel).filter(Artikel.id.in_(artikel_ids))
     }
     
-    ***REMOVED*** Ergebnisse zusammenstellen
+    # Ergebnisse zusammenstellen
     result = []
     for charge in charges:
         artikel = artikel_dict.get(charge.artikel_id)
@@ -242,7 +242,7 @@ def get_charge_details_optimized(db: Session, charge_id: int) -> Dict:
     """Optimierte Implementierung der Chargen-Details-Abfrage mit JOIN statt N+1-Abfragen"""
     start_time = time.time()
     
-    ***REMOVED*** JOIN-Operation für effiziente Abfrage
+    # JOIN-Operation für effiziente Abfrage
     result = db.query(
         Charge, 
         Artikel.name.label("artikel_name"),
@@ -277,16 +277,16 @@ def batch_processing_example(db: Session, artikel_ids: List[int], batch_size: in
     """Beispiel für Batch-Processing bei großen Datensätzen"""
     start_time = time.time()
     
-    ***REMOVED*** Verarbeitung in Batches
+    # Verarbeitung in Batches
     for i in range(0, len(artikel_ids), batch_size):
         batch = artikel_ids[i:i+batch_size]
         
-        ***REMOVED*** Batch-Abfrage für effiziente Verarbeitung
+        # Batch-Abfrage für effiziente Verarbeitung
         artikel_batch = db.query(Artikel).filter(Artikel.id.in_(batch)).all()
         
-        ***REMOVED*** Verarbeitung des Batches
+        # Verarbeitung des Batches
         for artikel in artikel_batch:
-            ***REMOVED*** Hier können beliebige Operationen auf dem Artikel durchgeführt werden
+            # Hier können beliebige Operationen auf dem Artikel durchgeführt werden
             logger.debug(f"Verarbeite Artikel: {artikel.name}")
     
     duration = time.time() - start_time
@@ -297,13 +297,13 @@ def run_benchmark():
     """Führt einen Benchmark der optimierten vs. originalen Abfragen durch"""
     logger.info("Starte Benchmark...")
     
-    ***REMOVED*** Datenbankverbindung herstellen
+    # Datenbankverbindung herstellen
     db = get_db_session()
     
-    ***REMOVED*** Demo-Daten erstellen
+    # Demo-Daten erstellen
     seed_demo_data(db)
     
-    ***REMOVED*** Benchmark: Artikel abrufen
+    # Benchmark: Artikel abrufen
     logger.info("\n=== Benchmark: Artikel abrufen ===")
     articles_original = get_articles_original(db, category="Getreide")
     logger.info(f"Original: {len(articles_original)} Artikel gefunden")
@@ -311,7 +311,7 @@ def run_benchmark():
     articles_optimized = get_articles_optimized(db, category="Getreide")
     logger.info(f"Optimiert: {articles_optimized['total']} Artikel gefunden, {len(articles_optimized['items'])} angezeigt")
     
-    ***REMOVED*** Benchmark: Chargen abrufen
+    # Benchmark: Chargen abrufen
     logger.info("\n=== Benchmark: Chargen abrufen ===")
     charges_original = get_charges_original(db)
     logger.info(f"Original: {len(charges_original)} Chargen gefunden")
@@ -319,17 +319,17 @@ def run_benchmark():
     charges_optimized = get_charges_optimized(db)
     logger.info(f"Optimiert: {len(charges_optimized)} Chargen gefunden")
     
-    ***REMOVED*** Benchmark: Chargendetails abrufen
+    # Benchmark: Chargendetails abrufen
     logger.info("\n=== Benchmark: Chargendetails abrufen ===")
-    ***REMOVED*** Original (simuliert durch get_charges_original mit Filterung)
+    # Original (simuliert durch get_charges_original mit Filterung)
     charge_original = next((c for c in get_charges_original(db) if c["id"] == 1), None)
     
-    ***REMOVED*** Optimiert
+    # Optimiert
     charge_optimized = get_charge_details_optimized(db, 1)
     
-    ***REMOVED*** Benchmark: Batch-Processing
+    # Benchmark: Batch-Processing
     logger.info("\n=== Benchmark: Batch-Processing ===")
-    artikel_ids = list(range(1, 6))  ***REMOVED*** In der Praxis wären dies viel mehr IDs
+    artikel_ids = list(range(1, 6))  # In der Praxis wären dies viel mehr IDs
     batch_processing_example(db, artikel_ids)
     
     logger.info("\nBenchmark abgeschlossen.")

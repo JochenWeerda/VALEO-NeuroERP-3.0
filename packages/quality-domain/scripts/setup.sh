@@ -1,7 +1,7 @@
-***REMOVED***!/bin/bash
+#!/bin/bash
 
-***REMOVED*** Quality Domain Setup Script
-***REMOVED*** Automatisiert die Einrichtung der Entwicklungsumgebung
+# Quality Domain Setup Script
+# Automatisiert die Einrichtung der Entwicklungsumgebung
 
 set -e
 
@@ -9,7 +9,7 @@ echo "🚀 Quality Domain Setup"
 echo "======================="
 echo ""
 
-***REMOVED*** 1. Check Node.js version
+# 1. Check Node.js version
 echo "📋 Checking Node.js version..."
 NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
 if [ "$NODE_VERSION" -lt 20 ]; then
@@ -19,53 +19,53 @@ fi
 echo "✅ Node.js $(node --version)"
 echo ""
 
-***REMOVED*** 2. Install dependencies
+# 2. Install dependencies
 echo "📦 Installing dependencies..."
 npm install
 echo "✅ Dependencies installed"
 echo ""
 
-***REMOVED*** 3. Create .env file if not exists
+# 3. Create .env file if not exists
 if [ ! -f .env ]; then
     echo "📝 Creating .env file..."
     cat > .env << EOF
-***REMOVED*** Server
+# Server
 PORT=3007
 NODE_ENV=development
 API_BASE_URL=http://localhost:3007
 
-***REMOVED*** Database
+# Database
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/quality_db
 POSTGRES_URL=postgres://postgres:postgres@localhost:5432/quality_db
 
-***REMOVED*** JWT/Auth (Development - replace in production!)
+# JWT/Auth (Development - replace in production!)
 JWT_SECRET=dev-secret-change-in-production
 JWKS_URI=
 JWT_ISSUER=
 JWT_AUDIENCE=valeo-neuroerp
 
-***REMOVED*** NATS (Event Bus)
+# NATS (Event Bus)
 NATS_URL=nats://localhost:4222
 NATS_CLUSTER_ID=valeo-cluster
 NATS_CLIENT_ID=quality-domain
 
-***REMOVED*** Redis (Cache)
+# Redis (Cache)
 REDIS_URL=redis://localhost:6379
 REDIS_PASSWORD=
 REDIS_DB=0
 
-***REMOVED*** OpenTelemetry
+# OpenTelemetry
 OTEL_ENABLED=false
 OTEL_SERVICE_NAME=quality-domain
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 OTEL_TRACES_SAMPLER=parentbased_traceidratio
 OTEL_TRACES_SAMPLER_ARG=1.0
 
-***REMOVED*** Logging
+# Logging
 LOG_LEVEL=info
 LOG_PRETTY=true
 
-***REMOVED*** Integration URLs
+# Integration URLs
 PRODUCTION_DOMAIN_URL=http://localhost:3004
 CONTRACTS_DOMAIN_URL=http://localhost:3005
 INVENTORY_DOMAIN_URL=http://localhost:3006
@@ -77,12 +77,12 @@ else
 fi
 echo ""
 
-***REMOVED*** 4. Check PostgreSQL
+# 4. Check PostgreSQL
 echo "🗄️  Checking PostgreSQL..."
 if command -v psql &> /dev/null; then
     echo "✅ PostgreSQL is installed"
     
-    ***REMOVED*** Try to connect to database
+    # Try to connect to database
     if psql -h localhost -U postgres -lqt | cut -d \| -f 1 | grep -qw quality_db 2>/dev/null; then
         echo "✅ Database 'quality_db' exists"
     else
@@ -95,7 +95,7 @@ else
 fi
 echo ""
 
-***REMOVED*** 5. Check NATS (optional)
+# 5. Check NATS (optional)
 echo "📡 Checking NATS..."
 if nc -z localhost 4222 2>/dev/null; then
     echo "✅ NATS is running on port 4222"
@@ -105,13 +105,13 @@ else
 fi
 echo ""
 
-***REMOVED*** 6. Build
+# 6. Build
 echo "🔨 Building project..."
 npm run build
 echo "✅ Build complete"
 echo ""
 
-***REMOVED*** 7. Run migrations (if database is available)
+# 7. Run migrations (if database is available)
 echo "🗄️  Running database migrations..."
 if npm run migrate:up 2>/dev/null; then
     echo "✅ Migrations applied"
@@ -120,7 +120,7 @@ else
 fi
 echo ""
 
-***REMOVED*** 8. Run tests
+# 8. Run tests
 echo "🧪 Running tests..."
 npm test
 echo "✅ Tests passed"
@@ -136,3 +136,4 @@ echo "  2. Visit API docs:            http://localhost:3007/documentation"
 echo "  3. Check health:              curl http://localhost:3007/health"
 echo ""
 echo "Happy coding! 🎉"
+

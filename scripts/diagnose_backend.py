@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Backend-Diagnose-Skript für VALEO-NeuroERP
 Prüft alle Imports und Dependencies
@@ -8,7 +8,7 @@ import sys
 import traceback
 from pathlib import Path
 
-***REMOVED*** Füge Projekt-Root zu sys.path hinzu
+# Füge Projekt-Root zu sys.path hinzu
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
@@ -17,7 +17,7 @@ def diagnose():
     print("VALEO-NeuroERP Backend Diagnose")
     print("=" * 80)
     
-    ***REMOVED*** Test 1: Core Imports
+    # Test 1: Core Imports
     print("\n1. Testing Core Imports...")
     try:
         import fastapi
@@ -40,7 +40,7 @@ def diagnose():
         print(f"   ❌ sqlalchemy: {e}")
         return False
     
-    ***REMOVED*** Test 2: App Core
+    # Test 2: App Core
     print("\n2. Testing App Core Modules...")
     try:
         from app.core.config import settings
@@ -58,7 +58,7 @@ def diagnose():
         traceback.print_exc()
         return False
     
-    ***REMOVED*** Test 3: API Router
+    # Test 3: API Router
     print("\n3. Testing API Router...")
     try:
         from app.api.v1.api import api_router
@@ -68,7 +68,7 @@ def diagnose():
         traceback.print_exc()
         return False
     
-    ***REMOVED*** Test 4: Optional AI/ML Imports
+    # Test 4: Optional AI/ML Imports
     print("\n4. Testing Optional AI/ML Modules...")
     try:
         import langgraph
@@ -94,7 +94,7 @@ def diagnose():
     except Exception as e:
         print(f"   ⚠️  nats: {e} (optional)")
     
-    ***REMOVED*** Test 5: Main App
+    # Test 5: Main App
     print("\n5. Testing Main App Import...")
     try:
         from main import app
@@ -113,4 +113,5 @@ def diagnose():
 if __name__ == "__main__":
     success = diagnose()
     sys.exit(0 if success else 1)
+
 

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Script zur Aktivierung des VAN-Modus
 """
@@ -10,7 +10,7 @@ from pathlib import Path
 import json
 import sys
 
-***REMOVED*** Logging-Konfiguration
+# Logging-Konfiguration
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -26,7 +26,7 @@ class VANMode:
     async def activate(self):
         """Aktiviert den VAN-Modus"""
         try:
-            ***REMOVED*** Aktuelle VAN-Analyse laden
+            # Aktuelle VAN-Analyse laden
             van_analysis_path = Path('memory-bank/van/optimization_analysis_2025-07-04.md')
             if not van_analysis_path.exists():
                 raise FileNotFoundError(f"VAN-Analyse nicht gefunden: {van_analysis_path}")
@@ -34,7 +34,7 @@ class VANMode:
             with open(van_analysis_path, 'r', encoding='utf-8') as f:
                 analysis_content = f.read()
             
-            ***REMOVED*** Analyse in MongoDB speichern
+            # Analyse in MongoDB speichern
             van_doc = {
                 'date': datetime.now(),
                 'type': 'system_optimization',
@@ -46,15 +46,15 @@ class VANMode:
                 }
             }
             
-            ***REMOVED*** Speichere in MongoDB
+            # Speichere in MongoDB
             result = self.van_collection.insert_one(van_doc)
             logger.info(f"VAN-Analyse in MongoDB gespeichert (ID: {result.inserted_id})")
             
-            ***REMOVED*** Aktualisiere den Modus-Status
+            # Aktualisiere den Modus-Status
             with open('memory-bank/current_mode.txt', 'w') as f:
                 f.write('VAN')
             
-            ***REMOVED*** Erstelle Index für schnellere Abfragen
+            # Erstelle Index für schnellere Abfragen
             self.van_collection.create_index('date')
             
             logger.info("VAN-Modus erfolgreich aktiviert")

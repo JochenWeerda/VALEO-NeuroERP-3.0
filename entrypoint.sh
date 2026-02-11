@@ -1,15 +1,15 @@
-***REMOVED***!/usr/bin/env bash
+#!/usr/bin/env bash
 set -e
 
 echo "🔄 Warte auf PostgreSQL..."
 
-***REMOVED*** Warte auf DB (mit psycopg2 - SYNC)
+# Warte auf DB (mit psycopg2 - SYNC)
 python - <<'PY'
 import psycopg2
 import os
 import time
 
-***REMOVED*** DATABASE_URL parsen: postgresql://user:pass@host:port/db
+# DATABASE_URL parsen: postgresql://user:pass@host:port/db
 db_url = os.environ.get("DATABASE_URL", "postgresql://postgres:postgres@db:5432/valeo")
 db_url = db_url.replace("postgresql://", "")
 
@@ -51,4 +51,5 @@ fi
 
 echo "🚀 Starte Backend..."
 exec uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
 

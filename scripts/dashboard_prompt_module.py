@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 GENXAIS Dashboard Prompt Module
@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional, Union
 import logging
 
-***REMOVED*** Logging konfigurieren
+# Logging konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -34,7 +34,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Pfade konfigurieren
+# Pfade konfigurieren
 BASE_DIR = Path(__file__).resolve().parent.parent
 TASKS_DIR = BASE_DIR / "tasks"
 OUTPUT_DIR = BASE_DIR / "output"
@@ -48,7 +48,7 @@ RAG_TOKEN_PATH = "config/rag/api_token.json"
 DASHBOARD_CONFIG_PATH = OUTPUT_DIR / "dashboard_config.json"
 PROMPTS_DIR = BASE_DIR / "prompts"
 
-***REMOVED*** Standardkonfiguration
+# Standardkonfiguration
 DEFAULT_CONFIG = {
     "version": "v1.9",
     "phase": "VAN",
@@ -71,7 +71,7 @@ def load_config() -> Dict[str, Any]:
             logger.error(f"Fehler beim Laden der Konfiguration: {str(e)}")
             return DEFAULT_CONFIG
     
-    ***REMOVED*** Wenn keine Konfiguration existiert, erstelle eine neue
+    # Wenn keine Konfiguration existiert, erstelle eine neue
     save_config(DEFAULT_CONFIG)
     return DEFAULT_CONFIG
 
@@ -102,10 +102,10 @@ def load_version():
                 version_config = yaml.safe_load(f)
                 return version_config.get("current_version", "1.8.1")
         else:
-            return "1.8.1"  ***REMOVED*** Fallback
+            return "1.8.1"  # Fallback
     except Exception as e:
         st.error(f"Fehler beim Laden der Version: {str(e)}")
-        return "1.8.1"  ***REMOVED*** Fallback
+        return "1.8.1"  # Fallback
 
 def load_pipeline_status():
     """Lädt den aktuellen Pipeline-Status."""
@@ -151,15 +151,15 @@ def load_memory_entries(category="reflection", limit=5):
         entries = []
         
         if memory_files:
-            ***REMOVED*** Sortiere nach Erstellungsdatum (neueste zuerst)
+            # Sortiere nach Erstellungsdatum (neueste zuerst)
             sorted_files = sorted(memory_files, key=os.path.getctime, reverse=True)
             
             for file_path in sorted_files[:limit]:
                 with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
-                    ***REMOVED*** Extrahiere Titel aus Markdown
+                    # Extrahiere Titel aus Markdown
                     title = os.path.basename(file_path)
-                    match = re.search(r'^***REMOVED***\s+(.+)$', content, re.MULTILINE)
+                    match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
                     if match:
                         title = match.group(1)
                     
@@ -195,7 +195,7 @@ def save_prompt_to_file(prompt):
     try:
         os.makedirs("data/cursor_prompts", exist_ok=True)
         
-        ***REMOVED*** Prompt-Daten erstellen
+        # Prompt-Daten erstellen
         prompt_data = {
             "prompt": prompt,
             "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -205,7 +205,7 @@ def save_prompt_to_file(prompt):
             "version": load_version()
         }
         
-        ***REMOVED*** Prompt in JSON-Datei speichern
+        # Prompt in JSON-Datei speichern
         with open("data/cursor_prompts/latest_prompt.json", "w", encoding="utf-8") as file:
             json.dump(prompt_data, file, indent=2)
         
@@ -281,29 +281,29 @@ def query_rag_server(query, endpoint="http://localhost:8000/api/query", token=No
 def start_rag_server():
     """Startet den RAG-Server."""
     try:
-        ***REMOVED*** Prüfe, ob der RAG-Server bereits läuft
+        # Prüfe, ob der RAG-Server bereits läuft
         status, _ = check_rag_server_status()
         if status:
             return True, "RAG-Server läuft bereits."
         
-        ***REMOVED*** Starte den RAG-Server
+        # Starte den RAG-Server
         process = subprocess.Popen(
             [sys.executable, "scripts/start_rag_server.py"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            creationflags=subprocess.CREATE_NEW_CONSOLE  ***REMOVED*** Öffne ein neues Konsolenfenster
+            creationflags=subprocess.CREATE_NEW_CONSOLE  # Öffne ein neues Konsolenfenster
         )
         
-        ***REMOVED*** Warte kurz, damit der Prozess starten kann
+        # Warte kurz, damit der Prozess starten kann
         time.sleep(2)
         
-        ***REMOVED*** Prüfe, ob der Server gestartet wurde
+        # Prüfe, ob der Server gestartet wurde
         status, _ = check_rag_server_status()
         if status:
             return True, "RAG-Server erfolgreich gestartet."
         else:
-            ***REMOVED*** Fehlerausgabe lesen
+            # Fehlerausgabe lesen
             stdout, stderr = process.communicate(timeout=1)
             if stderr:
                 return False, f"Fehler beim Starten des RAG-Servers: {stderr}"
@@ -316,105 +316,105 @@ def generate_prompt(config):
     """Generiert einen Initialisierungsprompt basierend auf der Konfiguration."""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    ***REMOVED*** Informationsquellen formatieren
+    # Informationsquellen formatieren
     info_sources = "\n".join([f"- ✅ {q}" for q in config["infoquellen"]])
     
-    ***REMOVED*** Startbefehl generieren
+    # Startbefehl generieren
     info_params = ",".join([q.split()[0].lower() for q in config["infoquellen"]])
     debug_flag = "--debug" if config.get("debug_modus", False) else ""
     
     command = f"python -m streamlit run launch_cycle.py --phase {config['startphase']} --pipelines {config['anzahl_pipelines']} --load_info {info_params} {debug_flag} --timeout {config['timeout']}"
     
-    ***REMOVED*** Zusätzliche Informationen sammeln
+    # Zusätzliche Informationen sammeln
     additional_info = ""
     
-    ***REMOVED*** Handover einbeziehen
+    # Handover einbeziehen
     if "Letztes Handover" in config["infoquellen"]:
         handover = load_handover(config["startphase"])
         if handover:
             excerpt = handover[:300] + "..." if len(handover) > 300 else handover
-            additional_info += f"\n\n***REMOVED******REMOVED*** 📝 Letztes Handover (Auszug):\n```markdown\n{excerpt}\n```"
+            additional_info += f"\n\n## 📝 Letztes Handover (Auszug):\n```markdown\n{excerpt}\n```"
     
-    ***REMOVED*** Memory-Bank einbeziehen
+    # Memory-Bank einbeziehen
     if "Memory Bank" in config["infoquellen"]:
         memories = load_memory_entries()
         if memories:
-            additional_info += "\n\n***REMOVED******REMOVED*** 🧠 Letzte Memory-Einträge:\n"
+            additional_info += "\n\n## 🧠 Letzte Memory-Einträge:\n"
             for i, memory in enumerate(memories[:3]):
-                additional_info += f"***REMOVED******REMOVED******REMOVED*** {memory['title']}\n"
+                additional_info += f"### {memory['title']}\n"
                 additional_info += f"*{memory['date']}*\n"
                 additional_info += f"```\n{memory['content']}\n```\n"
     
-    ***REMOVED*** Tasks einbeziehen
+    # Tasks einbeziehen
     if "Tasks.yaml" in config["infoquellen"]:
         tasks = load_tasks()
         if tasks:
-            additional_info += "\n\n***REMOVED******REMOVED*** ✅ Aktuelle Tasks:\n"
+            additional_info += "\n\n## ✅ Aktuelle Tasks:\n"
             try:
                 for i, task in enumerate(tasks.get("tasks", [])[:5]):
                     additional_info += f"- **{task.get('name', 'Unbenannt')}**: {task.get('description', 'Keine Beschreibung')}\n"
             except:
                 additional_info += "- Fehler beim Parsen der Tasks\n"
     
-    ***REMOVED*** RAG-Server einbeziehen
+    # RAG-Server einbeziehen
     if "RAG-Server" in config["infoquellen"]:
         rag_token = config.get("rag_token", "")
         if rag_token:
-            ***REMOVED*** Abfrage an den RAG-Server senden
+            # Abfrage an den RAG-Server senden
             success, result = query_rag_server("Gib mir eine Zusammenfassung der aktuellen Projektlage", token=rag_token)
             if success:
-                additional_info += "\n\n***REMOVED******REMOVED*** 🔍 RAG-Server Antwort:\n"
+                additional_info += "\n\n## 🔍 RAG-Server Antwort:\n"
                 additional_info += f"```\n{result.get('response', 'Keine Antwort')}\n```\n"
             else:
-                additional_info += "\n\n***REMOVED******REMOVED*** 🔍 RAG-Server:\n"
+                additional_info += "\n\n## 🔍 RAG-Server:\n"
                 additional_info += f"Fehler bei der Abfrage des RAG-Servers: {result}\n"
         else:
-            additional_info += "\n\n***REMOVED******REMOVED*** 🔍 RAG-Server:\n"
+            additional_info += "\n\n## 🔍 RAG-Server:\n"
             additional_info += "Kein API-Token für den RAG-Server angegeben.\n"
     
-    ***REMOVED*** Aufgabentyp-spezifische Anweisungen
+    # Aufgabentyp-spezifische Anweisungen
     task_instructions = get_task_instructions(config.get("aufgabentyp", "Code-Generierung"))
     
-    ***REMOVED*** Prompt zusammenbauen - neues produktiveres Format
+    # Prompt zusammenbauen - neues produktiveres Format
     prompt = f"""
-***REMOVED*** VALEO-NeuroERP Entwicklungsaufgabe
+# VALEO-NeuroERP Entwicklungsaufgabe
 
-***REMOVED******REMOVED*** Kontext
+## Kontext
 - **Projekt:** VALEO-NeuroERP v{config['version']}
 - **Zeitstempel:** {timestamp}
 - **Modus:** {config['modus']}
 - **Phase:** {config['startphase']}
 - **Aufgabentyp:** {config.get('aufgabentyp', 'Code-Generierung')}
 
-***REMOVED******REMOVED*** Aufgabenstellung
+## Aufgabenstellung
 {config.get('aufgabenbeschreibung', 'Implementiere eine neue Komponente für das VALEO-NeuroERP-System.')}
 
-***REMOVED******REMOVED*** Spezifische Anweisungen
+## Spezifische Anweisungen
 {task_instructions}
 
-***REMOVED******REMOVED*** Erwartete Ergebnisse
+## Erwartete Ergebnisse
 1. **Funktionierender Code:** Generiere lauffähigen Code, der direkt in das Projekt integriert werden kann
 2. **Dokumentation:** Erstelle präzise Dokumentation für alle implementierten Funktionen
 3. **Tests:** Entwickle passende Tests für die neuen Komponenten
 4. **Integration:** Stelle sicher, dass deine Implementierung mit dem bestehenden System kompatibel ist
 
-***REMOVED******REMOVED*** Projektinformationen
+## Projektinformationen
 {additional_info}
 
-***REMOVED******REMOVED*** Technische Anforderungen
+## Technische Anforderungen
 - Halte dich an die bestehenden Coding-Standards des Projekts
 - Implementiere fehlertoleranten Code mit angemessener Ausnahmebehandlung
 - Achte auf Performance und Skalierbarkeit
 - Berücksichtige Sicherheitsaspekte
 
-***REMOVED******REMOVED*** Lieferergebnisse
+## Lieferergebnisse
 Bitte liefere folgende Artefakte:
 1. Vollständigen Quellcode mit Kommentaren
 2. Installationsanweisungen (falls erforderlich)
 3. Dokumentation der API/Schnittstellen
 4. Testfälle und erwartete Ergebnisse
 
-***REMOVED******REMOVED*** Hinweise zur Ausführung
+## Hinweise zur Ausführung
 ```bash
 {command}
 ```
@@ -496,23 +496,23 @@ def get_task_instructions(task_type):
 
 def render_prompt_generator():
     """Rendert den Prompt-Generator im Dashboard."""
-    ***REMOVED*** Version und Pipeline-Status laden
+    # Version und Pipeline-Status laden
     current_version = load_version()
     pipeline_status = load_pipeline_status()
     current_phase = pipeline_status.get("phase", "VAN")
     progress = pipeline_status.get("progress", 0)
 
-    ***REMOVED*** Hauptbereich
+    # Hauptbereich
     st.header("🧠 Prompt-Generator")
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        ***REMOVED*** Eingaben vom Nutzer
+        # Eingaben vom Nutzer
         pfad = st.text_input("📂 Projektpfad", "C:/Users/Jochen/VALEO-NeuroERP-1.01")
         modus = st.selectbox("⚙️ Betriebsmodus", ["Multi-Pipeline", "Single-Pipeline"], index=0)
         startphase = st.selectbox("🚀 Startphase", ["VAN", "PLAN", "CREATE", "IMPLEMENT", "VERIFY", "REFLECT"], index=0)
 
-        ***REMOVED*** Aufgabentyp auswählen
+        # Aufgabentyp auswählen
         aufgabentyp = st.selectbox(
             "🎯 Aufgabentyp",
             [
@@ -529,28 +529,28 @@ def render_prompt_generator():
             index=0
         )
         
-        ***REMOVED*** Spezifische Aufgabenbeschreibung
+        # Spezifische Aufgabenbeschreibung
         aufgabenbeschreibung = st.text_area(
             "📝 Konkrete Aufgabenbeschreibung",
             "Implementiere eine neue Komponente für...",
             height=100
         )
 
-        ***REMOVED*** Infoquellen Auswahl
+        # Infoquellen Auswahl
         infoquellen = st.multiselect(
             "📡 Informationsquellen einbeziehen:",
             ["Memory Bank", "Tasks.yaml", "ToDos.md", "RAG-Server", "LangGraph", "Letztes Handover"],
             default=["Memory Bank", "Tasks.yaml", "Letztes Handover"]
         )
 
-        ***REMOVED*** Erweiterte Optionen
+        # Erweiterte Optionen
         with st.expander("🔧 Erweiterte Optionen"):
             anzahl_pipelines = st.slider("Anzahl der Pipelines", 1, 10, 5)
             timeout = st.number_input("Timeout (Sekunden)", 60, 3600, 600)
             debug_modus = st.checkbox("Debug-Modus aktivieren", False)
             speichern = st.checkbox("Prompt automatisch speichern", True)
             
-            ***REMOVED*** Memory-Bank Kategorien
+            # Memory-Bank Kategorien
             if "Memory Bank" in infoquellen:
                 memory_categories = st.multiselect(
                     "Memory-Bank Kategorien",
@@ -558,9 +558,9 @@ def render_prompt_generator():
                     default=["reflection"]
                 )
             
-            ***REMOVED*** RAG-Server Einstellungen
+            # RAG-Server Einstellungen
             if "RAG-Server" in infoquellen:
-                ***REMOVED*** RAG-Server Status prüfen
+                # RAG-Server Status prüfen
                 rag_status, rag_info = check_rag_server_status()
                 
                 if rag_status:
@@ -568,7 +568,7 @@ def render_prompt_generator():
                 else:
                     st.error(f"❌ RAG-Server ist nicht erreichbar: {rag_info}")
                     
-                    ***REMOVED*** Button zum Starten des RAG-Servers
+                    # Button zum Starten des RAG-Servers
                     if st.button("RAG-Server starten"):
                         with st.spinner("Starte RAG-Server..."):
                             success, message = start_rag_server()
@@ -577,10 +577,10 @@ def render_prompt_generator():
                             else:
                                 st.error(message)
                 
-                ***REMOVED*** RAG-Server Endpoint
+                # RAG-Server Endpoint
                 rag_endpoint = st.text_input("RAG-Server Endpoint", "http://localhost:8000/api/query")
                 
-                ***REMOVED*** RAG-Server API-Token
+                # RAG-Server API-Token
                 default_token = get_rag_api_token()
                 rag_token = st.text_input(
                     "RAG-Server API-Token", 
@@ -593,7 +593,7 @@ def render_prompt_generator():
                     rag_token = default_token
                     st.info(f"API-Token aus Konfigurationsdatei geladen: {rag_token[:5]}...")
 
-    ***REMOVED*** Konfiguration zusammenstellen
+    # Konfiguration zusammenstellen
     config = {
         "pfad": pfad,
         "modus": modus,
@@ -610,26 +610,26 @@ def render_prompt_generator():
         "progress": progress
     }
     
-    ***REMOVED*** RAG-Server-Konfiguration hinzufügen, falls ausgewählt
+    # RAG-Server-Konfiguration hinzufügen, falls ausgewählt
     if "RAG-Server" in infoquellen:
         config["rag_endpoint"] = rag_endpoint
         config["rag_token"] = rag_token
     
-    ***REMOVED*** Button zur Generierung
+    # Button zur Generierung
     if st.button("🧾 Initialisierungsprompt erstellen"):
         with st.spinner("Generiere Prompt..."):
-            ***REMOVED*** Kurze Verzögerung für bessere UX
+            # Kurze Verzögerung für bessere UX
             time.sleep(0.5)
             
-            ***REMOVED*** Prompt generieren
+            # Prompt generieren
             prompt = generate_prompt(config)
             
-            ***REMOVED*** Prompt anzeigen
+            # Prompt anzeigen
             with col2:
                 st.subheader("Generierter Prompt")
                 st.code(prompt, language="markdown")
                 
-                ***REMOVED*** Download-Button
+                # Download-Button
                 st.download_button(
                     label="📥 Prompt herunterladen",
                     data=prompt,
@@ -637,35 +637,35 @@ def render_prompt_generator():
                     mime="text/markdown"
                 )
                 
-                ***REMOVED*** Speichern-Option
+                # Speichern-Option
                 if speichern:
                     saved_path = save_prompt(prompt)
                     if saved_path:
                         st.success(f"Prompt gespeichert unter: {saved_path}")
                     
-                    ***REMOVED*** Speichere für Cursor-Integration
+                    # Speichere für Cursor-Integration
                     save_prompt_to_file(prompt)
 
-    ***REMOVED*** Aktions-Buttons
+    # Aktions-Buttons
     st.subheader("Aktionen")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        ***REMOVED*** Button 1: Prompt in Zwischenablage kopieren
+        # Button 1: Prompt in Zwischenablage kopieren
         if st.button("Prompt in Zwischenablage kopieren", key="send_to_clipboard"):
             with st.spinner("Kopiere Prompt in die Zwischenablage..."):
                 try:
-                    ***REMOVED*** Starte das cursor_clipboard.py-Skript als separaten Prozess
+                    # Starte das cursor_clipboard.py-Skript als separaten Prozess
                     process = subprocess.Popen(
                         [sys.executable, "scripts/cursor_clipboard.py"],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE,
                         text=True,
-                        creationflags=subprocess.CREATE_NEW_CONSOLE  ***REMOVED*** Öffne ein neues Konsolenfenster
+                        creationflags=subprocess.CREATE_NEW_CONSOLE  # Öffne ein neues Konsolenfenster
                     )
                     
-                    ***REMOVED*** Warte kurz, damit der Prozess starten kann
+                    # Warte kurz, damit der Prozess starten kann
                     time.sleep(1)
                     
                     st.success("Skript zur Kopie des Prompts in die Zwischenablage gestartet!")
@@ -675,20 +675,20 @@ def render_prompt_generator():
                     st.error(f"Fehler beim Starten des Skripts: {str(e)}")
     
     with col2:
-        ***REMOVED*** Button 2: Prompt automatisch an Cursor.ai senden
+        # Button 2: Prompt automatisch an Cursor.ai senden
         if st.button("Prompt automatisch an Cursor.ai senden", key="auto_send_to_cursor"):
             with st.spinner("Sende Prompt automatisch an Cursor.ai..."):
                 try:
-                    ***REMOVED*** Starte das cursor_auto_paste.py-Skript als separaten Prozess
+                    # Starte das cursor_auto_paste.py-Skript als separaten Prozess
                     process = subprocess.Popen(
                         [sys.executable, "scripts/cursor_auto_paste.py", "--force"],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE,
                         text=True,
-                        creationflags=subprocess.CREATE_NEW_CONSOLE  ***REMOVED*** Öffne ein neues Konsolenfenster
+                        creationflags=subprocess.CREATE_NEW_CONSOLE  # Öffne ein neues Konsolenfenster
                     )
                     
-                    ***REMOVED*** Warte kurz, damit der Prozess starten kann
+                    # Warte kurz, damit der Prozess starten kann
                     time.sleep(1)
                     
                     st.success("Skript zur automatischen Übergabe des Prompts an Cursor.ai gestartet!")
@@ -697,21 +697,21 @@ def render_prompt_generator():
                 except Exception as e:
                     st.error(f"Fehler beim Starten des Skripts: {str(e)}")
     
-    ***REMOVED*** MongoDB-Integration
+    # MongoDB-Integration
     st.subheader("MongoDB-Integration")
     if st.button("Prompt in MongoDB speichern und an Cursor.ai senden", key="mongodb_auto_send"):
         with st.spinner("Speichere Prompt in MongoDB und sende an Cursor.ai..."):
             try:
-                ***REMOVED*** Starte das mongodb_prompt_store.py-Skript als separaten Prozess
+                # Starte das mongodb_prompt_store.py-Skript als separaten Prozess
                 process = subprocess.Popen(
                     [sys.executable, "scripts/mongodb_prompt_store.py", "--force"],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True,
-                    creationflags=subprocess.CREATE_NEW_CONSOLE  ***REMOVED*** Öffne ein neues Konsolenfenster
+                    creationflags=subprocess.CREATE_NEW_CONSOLE  # Öffne ein neues Konsolenfenster
                 )
                 
-                ***REMOVED*** Warte kurz, damit der Prozess starten kann
+                # Warte kurz, damit der Prozess starten kann
                 time.sleep(1)
                 
                 st.success("Skript zur Speicherung des Prompts in MongoDB und Übergabe an Cursor.ai gestartet!")
@@ -720,7 +720,7 @@ def render_prompt_generator():
             except Exception as e:
                 st.error(f"Fehler beim Starten des Skripts: {str(e)}")
     
-    ***REMOVED*** Aktueller Prompt
+    # Aktueller Prompt
     with st.expander("Aktueller Prompt"):
         current_prompt = get_current_prompt()
         if current_prompt:
@@ -733,7 +733,7 @@ def render_prompt_generator():
         else:
             st.info("Kein Prompt vorhanden.")
 
-***REMOVED*** Konfiguration laden
+# Konfiguration laden
 def load_config(version: str = "v1.9") -> Dict[str, Any]:
     """
     Lädt die Konfiguration für den angegebenen GENXAIS-Zyklus.
@@ -753,18 +753,18 @@ def load_config(version: str = "v1.9") -> Dict[str, Any]:
     
     try:
         with open(config_path, "r", encoding="utf-8") as f:
-            ***REMOVED*** Ignoriere YAML-Validierungsfehler und lade die Datei als einfachen Text
+            # Ignoriere YAML-Validierungsfehler und lade die Datei als einfachen Text
             content = f.read()
-            ***REMOVED*** Versuche zuerst mit PyYAML zu laden
+            # Versuche zuerst mit PyYAML zu laden
             try:
                 config = yaml.safe_load(content)
             except Exception as e:
                 print(f"YAML-Fehler: {str(e)}")
-                ***REMOVED*** Fallback: Manuelles Parsen
+                # Fallback: Manuelles Parsen
                 config = parse_yaml_manually(content)
     except Exception as e:
         print(f"Fehler beim Laden der Konfiguration: {str(e)}")
-        ***REMOVED*** Fallback-Konfiguration
+        # Fallback-Konfiguration
         config = {
             "name": f"GENXAIS Cycle {version}",
             "version": version.replace("v", ""),
@@ -787,7 +787,7 @@ def parse_yaml_manually(content: str) -> Dict[str, Any]:
     """
     config = {}
     
-    ***REMOVED*** Einfaches Parsen von Schlüssel-Wert-Paaren
+    # Einfaches Parsen von Schlüssel-Wert-Paaren
     lines = content.split("\n")
     current_section = None
     current_list = None
@@ -796,37 +796,37 @@ def parse_yaml_manually(content: str) -> Dict[str, Any]:
     for line in lines:
         line = line.rstrip()
         
-        ***REMOVED*** Kommentare überspringen
-        if line.strip().startswith("***REMOVED***") or not line.strip():
+        # Kommentare überspringen
+        if line.strip().startswith("#") or not line.strip():
             continue
         
-        ***REMOVED*** Einrückung zählen
+        # Einrückung zählen
         indent = len(line) - len(line.lstrip())
         
-        ***REMOVED*** Neue Sektion
+        # Neue Sektion
         if ":" in line and indent == 0:
             key, value = line.split(":", 1)
             key = key.strip()
             value = value.strip()
             
             if value:
-                ***REMOVED*** Einfacher Wert
+                # Einfacher Wert
                 config[key] = value
             else:
-                ***REMOVED*** Neue Sektion
+                # Neue Sektion
                 current_section = key
                 config[current_section] = {}
                 current_dict = config[current_section]
                 current_list = None
         
-        ***REMOVED*** Listeneintrag auf oberster Ebene
+        # Listeneintrag auf oberster Ebene
         elif line.strip().startswith("- ") and indent == 0:
             if current_section not in config:
                 config[current_section] = []
             
             config[current_section].append(line.strip()[2:])
         
-        ***REMOVED*** Listeneintrag in einer Sektion
+        # Listeneintrag in einer Sektion
         elif line.strip().startswith("- ") and indent == 2:
             if current_section not in config:
                 config[current_section] = []
@@ -837,7 +837,7 @@ def parse_yaml_manually(content: str) -> Dict[str, Any]:
             config[current_section].append(line.strip()[2:])
             current_list = config[current_section]
         
-        ***REMOVED*** Schlüssel-Wert-Paar in einer Sektion
+        # Schlüssel-Wert-Paar in einer Sektion
         elif ":" in line and indent == 2:
             key, value = line.split(":", 1)
             key = key.strip()
@@ -850,18 +850,18 @@ def parse_yaml_manually(content: str) -> Dict[str, Any]:
                 config[current_section] = {}
             
             if value:
-                ***REMOVED*** Einfacher Wert
+                # Einfacher Wert
                 config[current_section][key] = value
             else:
-                ***REMOVED*** Neue Untersektion
+                # Neue Untersektion
                 if key not in config[current_section]:
                     config[current_section][key] = {}
                 current_dict = config[current_section][key]
                 current_list = None
     
-    ***REMOVED*** Pipelines speziell behandeln
+    # Pipelines speziell behandeln
     if "pipelines" in config and isinstance(config["pipelines"], list):
-        ***REMOVED*** Versuche, die Pipelines aus dem Inhalt zu extrahieren
+        # Versuche, die Pipelines aus dem Inhalt zu extrahieren
         pipelines = []
         in_pipeline = False
         current_pipeline = None
@@ -898,7 +898,7 @@ def parse_yaml_manually(content: str) -> Dict[str, Any]:
     
     return config
 
-***REMOVED*** Handover-Daten laden
+# Handover-Daten laden
 def load_handover() -> Dict[str, Any]:
     """
     Lädt die Handover-Daten aus der letzten Ausführung.
@@ -913,7 +913,7 @@ def load_handover() -> Dict[str, Any]:
     with open(handover_path, "r", encoding="utf-8") as f:
         content = f.read()
     
-    ***REMOVED*** Parse Markdown zu strukturierten Daten
+    # Parse Markdown zu strukturierten Daten
     handover = {
         "title": "GENXAIS Zyklus Handover",
         "date": None,
@@ -923,7 +923,7 @@ def load_handover() -> Dict[str, Any]:
         "next_steps": []
     }
     
-    sections = content.split("***REMOVED******REMOVED*** ")
+    sections = content.split("## ")
     for section in sections:
         if not section.strip():
             continue
@@ -946,8 +946,8 @@ def load_handover() -> Dict[str, Any]:
         elif section_title == "Pipelines und Ergebnisse":
             current_pipeline = None
             for line in section_content:
-                if line.startswith("***REMOVED******REMOVED******REMOVED*** "):
-                    current_pipeline = line.strip("***REMOVED******REMOVED******REMOVED*** ")
+                if line.startswith("### "):
+                    current_pipeline = line.strip("### ")
                     handover["pipelines"][current_pipeline] = []
                 elif line.startswith("- ") and current_pipeline:
                     task = line.strip("- ")
@@ -964,7 +964,7 @@ def load_handover() -> Dict[str, Any]:
     
     return handover
 
-***REMOVED*** Aufgaben aus dem letzten Zyklus laden
+# Aufgaben aus dem letzten Zyklus laden
 def load_pending_tasks() -> Dict[str, List[Dict[str, str]]]:
     """
     Lädt die ausstehenden Aufgaben aus dem letzten Zyklus.
@@ -994,7 +994,7 @@ def load_pending_tasks() -> Dict[str, List[Dict[str, str]]]:
     
     return pending_tasks
 
-***REMOVED*** Fehlende Artefakte identifizieren
+# Fehlende Artefakte identifizieren
 def identify_missing_artifacts() -> List[str]:
     """
     Identifiziert fehlende Artefakte aus dem letzten Zyklus.
@@ -1011,7 +1011,7 @@ def identify_missing_artifacts() -> List[str]:
     
     return missing_artifacts
 
-***REMOVED*** Prompt für den nächsten Zyklus generieren
+# Prompt für den nächsten Zyklus generieren
 def generate_cycle_prompt(version: str = "v1.9") -> str:
     """
     Generiert ein Prompt für den nächsten GENXAIS-Zyklus.
@@ -1026,9 +1026,9 @@ def generate_cycle_prompt(version: str = "v1.9") -> str:
     pending_tasks = load_pending_tasks()
     missing_artifacts = identify_missing_artifacts()
     
-    prompt = f"""***REMOVED*** 🚀 GENXAIS {version} – Initialisierungsprompt zur Weiterentwicklung von VALEO – Die NeuroERP
+    prompt = f"""# 🚀 GENXAIS {version} – Initialisierungsprompt zur Weiterentwicklung von VALEO – Die NeuroERP
 Nutze langgraph-cycle-task, MCP RAG, MongoDB, memory-bank, todo, tasks
-***REMOVED******REMOVED*** 📁 Projektverzeichnis:
+## 📁 Projektverzeichnis:
 `{BASE_DIR}`  
 **Streamlit UI Port:** 8502  
 **Modus:** Multi-Pipeline  
@@ -1037,26 +1037,26 @@ Nutze langgraph-cycle-task, MCP RAG, MongoDB, memory-bank, todo, tasks
 
 ---
 
-***REMOVED******REMOVED*** 🧠 Vorbereitete Aufgaben aus letzter Reflektion:
+## 🧠 Vorbereitete Aufgaben aus letzter Reflektion:
 
 """
     
-    ***REMOVED*** Aufgaben nach Pipelines gruppieren
+    # Aufgaben nach Pipelines gruppieren
     for pipeline, tasks in pending_tasks.items():
-        prompt += f"***REMOVED******REMOVED******REMOVED*** {pipeline}:\n"
+        prompt += f"### {pipeline}:\n"
         for task in tasks:
             prompt += f"- [ ] {task['name']} (Typ: {task['type']})\n"
         prompt += "\n"
     
     prompt += """---
 
-***REMOVED******REMOVED*** 📦 Artefakte:
+## 📦 Artefakte:
 > 🔴 Alle geplanten Artefakte wurden im vorherigen Zyklus **nicht erstellt**.  
 Diese sind als "not_created" in der memorybank gekennzeichnet und werden im Prompt dynamisch referenziert.
 
 ---
 
-***REMOVED******REMOVED*** 🧭 Nächste Schritte:
+## 🧭 Nächste Schritte:
 - ✅ Prüfung und Erzeugung aller offenen Artefakte
 - ✅ Zusammenführen der Reflektion in `dashboard_prompt_module.py`
 - ✅ Integration in das Hauptprojekt
@@ -1064,7 +1064,7 @@ Diese sind als "not_created" in der memorybank gekennzeichnet und werden im Prom
 
 ---
 
-***REMOVED******REMOVED*** ⚙️ Automatisierter Start:
+## ⚙️ Automatisierter Start:
 
 ```bash
 python -m streamlit run scripts/streamlit_dashboard.py \\
@@ -1077,7 +1077,7 @@ python -m streamlit run scripts/streamlit_dashboard.py \\
     
     return prompt
 
-***REMOVED*** Dashboard-Status aktualisieren
+# Dashboard-Status aktualisieren
 def update_dashboard_status(status: Dict[str, Any]) -> None:
     """
     Aktualisiert den Status des Dashboards.
@@ -1087,21 +1087,21 @@ def update_dashboard_status(status: Dict[str, Any]) -> None:
     """
     status_path = OUTPUT_DIR / "dashboard_status.json"
     
-    ***REMOVED*** Bestehenden Status laden, falls vorhanden
+    # Bestehenden Status laden, falls vorhanden
     if status_path.exists():
         with open(status_path, "r", encoding="utf-8") as f:
             current_status = json.load(f)
         
-        ***REMOVED*** Status aktualisieren
+        # Status aktualisieren
         current_status.update(status)
     else:
         current_status = status
     
-    ***REMOVED*** Status speichern
+    # Status speichern
     with open(status_path, "w", encoding="utf-8") as f:
         json.dump(current_status, f, indent=2, ensure_ascii=False)
 
-***REMOVED*** Hauptfunktion zum Starten des Dashboards
+# Hauptfunktion zum Starten des Dashboards
 def initialize_dashboard(version: str = "v1.9", phase: str = "VAN") -> Dict[str, Any]:
     """
     Initialisiert das Dashboard für den angegebenen GENXAIS-Zyklus.
@@ -1118,7 +1118,7 @@ def initialize_dashboard(version: str = "v1.9", phase: str = "VAN") -> Dict[str,
     pending_tasks = load_pending_tasks()
     missing_artifacts = identify_missing_artifacts()
     
-    ***REMOVED*** Dashboard-Status aktualisieren
+    # Dashboard-Status aktualisieren
     status = {
         "version": version,
         "phase": phase,
@@ -1132,7 +1132,7 @@ def initialize_dashboard(version: str = "v1.9", phase: str = "VAN") -> Dict[str,
     
     update_dashboard_status(status)
     
-    ***REMOVED*** Prompt generieren
+    # Prompt generieren
     prompt = generate_cycle_prompt(version)
     prompt_path = OUTPUT_DIR / f"genxais_prompt_{version}.md"
     with open(prompt_path, "w", encoding="utf-8") as f:
@@ -1147,7 +1147,7 @@ def initialize_dashboard(version: str = "v1.9", phase: str = "VAN") -> Dict[str,
     }
 
 if __name__ == "__main__":
-    ***REMOVED*** Beim direkten Aufruf des Skripts
+    # Beim direkten Aufruf des Skripts
     if len(sys.argv) > 1:
         version = sys.argv[1]
     else:

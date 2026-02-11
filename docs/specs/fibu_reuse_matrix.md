@@ -1,4 +1,4 @@
-***REMOVED*** FiBu Reuse Matrix (Backend & Frontend)
+# FiBu Reuse Matrix (Backend & Frontend)
 
 Die folgende Matrix fasst den aktuellen Stand aller FiBu-relevanten Codeartefakte zusammen und bewertet sie anhand der Kriterien:
 
@@ -11,7 +11,7 @@ Bewertungsskala: **Reuse as is**, **Refactor & Reuse**, **Replace / Neu implemen
 
 ---
 
-***REMOVED******REMOVED*** Backend
+## Backend
 
 | Komponente | Bereich | Stack | Bewertung | Begründung / Maßnahmen |
 | --- | --- | --- | --- | --- |
@@ -24,7 +24,7 @@ Bewertungsskala: **Reuse as is**, **Refactor & Reuse**, **Replace / Neu implemen
 | `monitoring/grafana/dashboards/finance-domain-dashboard.json` | Observability | Grafana | **Refactor & Reuse** | Dashboard existiert; Metriknamen müssen an neue Services angepasst werden. |
 | `docs/specs/fibu_architektur_spezifikation.md` | Zielarchitektur | Markdown | **Reuse as is** | Dient als Referenz für alle Phasen. |
 
-***REMOVED******REMOVED*** Frontend
+## Frontend
 
 | Komponente | Bereich | Bewertung | Hinweise |
 | --- | --- | --- | --- |
@@ -35,7 +35,7 @@ Bewertungsskala: **Reuse as is**, **Refactor & Reuse**, **Replace / Neu implemen
 | `src/config/mask-builder-valeo-modern.json` + Mask Builder Komponenten | UX-Engine | **Reuse as is** | Generische Engine funktioniert. Muss ggf. Stabilitätsbugs beheben (ts-ignore). |
 | Navigation (Sidebar/Command Palette) | Menüführung | **Reuse as is** | Nur Berechtigungen/Feature Flags aktualisieren. |
 
-***REMOVED******REMOVED*** Cross-Cutting
+## Cross-Cutting
 
 | Thema | Bewertung | Maßnahmen |
 | --- | --- | --- |
@@ -46,9 +46,10 @@ Bewertungsskala: **Reuse as is**, **Refactor & Reuse**, **Replace / Neu implemen
 
 ---
 
-***REMOVED******REMOVED*** Fazit
+## Fazit
 
 - **Was wir behalten können:** Domänenlogik (TS), Pydantic/Zod-Schemas, vorhandene React-Views & Mask Builder, Dokumentation/READMEs.
 - **Was neu entsteht:** Python-Microservices (`fibu-core`, `fibu-master-data`, …) inkl. GoBD-Storage, Middleware/Adapter-Schicht, aktualisierter API-Client.
 - **Sofortige Schritte:** Konsolidierung der TypeScript-Domain (eine Quelle), Neuaufbau des Finance-Service, Definition verbindlicher Event-/API-Kontrakte, Frontend-API-Layer modularisieren.
+
 

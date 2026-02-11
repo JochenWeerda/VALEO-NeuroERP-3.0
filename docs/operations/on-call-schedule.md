@@ -1,44 +1,44 @@
-***REMOVED*** On-Call Schedule & Incident Response
+# On-Call Schedule & Incident Response
 
-***REMOVED******REMOVED*** 🚨 On-Call-Rotation
+## 🚨 On-Call-Rotation
 
-***REMOVED******REMOVED******REMOVED*** Primary On-Call (24/7)
+### Primary On-Call (24/7)
 - **Week 1:** DevOps Lead
 - **Week 2:** Backend Lead
 - **Week 3:** SRE Engineer 1
 - **Week 4:** SRE Engineer 2
 
-***REMOVED******REMOVED******REMOVED*** Secondary On-Call (Escalation)
+### Secondary On-Call (Escalation)
 - **Always:** CTO / Engineering Manager
 
-***REMOVED******REMOVED******REMOVED*** Business Hours Support (Mo-Fr 8-18 Uhr)
+### Business Hours Support (Mo-Fr 8-18 Uhr)
 - **CRM Issues:** CRM Team Lead
 - **Finance Issues:** Finance Team Lead
 - **Inventory Issues:** Inventory Team Lead
 
 ---
 
-***REMOVED******REMOVED*** 📞 Escalation-Policy
+## 📞 Escalation-Policy
 
-***REMOVED******REMOVED******REMOVED*** Level 1 (0-15 Min)
+### Level 1 (0-15 Min)
 1. Alert wird an Primary On-Call gesendet (PagerDuty)
 2. Primary acknowledged Alert innerhalb 5 Min
 3. Primary beginnt mit Investigation
 
-***REMOVED******REMOVED******REMOVED*** Level 2 (15-30 Min)
+### Level 2 (15-30 Min)
 1. Wenn nicht acknowledged → Secondary On-Call wird alarmiert
 2. Beide arbeiten gemeinsam an Resolution
 
-***REMOVED******REMOVED******REMOVED*** Level 3 (30+ Min)
+### Level 3 (30+ Min)
 1. Wenn nicht resolved → CTO/Engineering Manager wird informiert
 2. War-Room wird einberufen
 3. Status-Updates alle 15 Min
 
 ---
 
-***REMOVED******REMOVED*** 📋 Runbooks
+## 📋 Runbooks
 
-***REMOVED******REMOVED******REMOVED*** Runbook 1: High Error Rate (>1%)
+### Runbook 1: High Error Rate (>1%)
 **Alert:** `APIErrorRateSLOCritical`
 
 **Schritte:**
@@ -58,7 +58,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Runbook 2: Pod OOM-Killed
+### Runbook 2: Pod OOM-Killed
 **Alert:** `PodOOMKilled`
 
 **Schritte:**
@@ -78,7 +78,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Runbook 3: Database Connection-Pool-Exhaustion
+### Runbook 3: Database Connection-Pool-Exhaustion
 **Alert:** `ConnectionPoolExhaustion`
 
 **Schritte:**
@@ -101,7 +101,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Runbook 4: Compliance Violation Rate High
+### Runbook 4: Compliance Violation Rate High
 **Alert:** `ComplianceViolationRateHigh`
 
 **Schritte:**
@@ -120,7 +120,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 🔔 Alert-Severity-Guide
+## 🔔 Alert-Severity-Guide
 
 | Severity | Response-Time | Escalation | Example |
 |----------|---------------|------------|---------|
@@ -130,14 +130,14 @@
 
 ---
 
-***REMOVED******REMOVED*** 📞 Contact-Information
+## 📞 Contact-Information
 
-***REMOVED******REMOVED******REMOVED*** Primary Contacts
+### Primary Contacts
 - **On-Call Hotline:** +49-XXX-XXXXXXX
-- **Slack:** ***REMOVED***incidents
+- **Slack:** #incidents
 - **Email:** oncall@valeo-erp.com
 
-***REMOVED******REMOVED******REMOVED*** Team-Specific
+### Team-Specific
 - **CRM Team:** crm-team@valeo-erp.com
 - **Finance Team:** finance-team@valeo-erp.com
 - **SRE Team:** sre@valeo-erp.com
@@ -145,23 +145,23 @@
 
 ---
 
-***REMOVED******REMOVED*** 🛠️ Tools
+## 🛠️ Tools
 
-***REMOVED******REMOVED******REMOVED*** Monitoring
+### Monitoring
 - **Grafana:** https://monitoring.valeo-erp.com
 - **Prometheus:** https://prometheus.valeo-erp.com
 - **AlertManager:** https://alerts.valeo-erp.com
 
-***REMOVED******REMOVED******REMOVED*** Logging
+### Logging
 - **Loki:** Grafana → Explore → Loki
 - **Kubectl:** `kubectl logs -n valeo-erp <pod-name>`
 
-***REMOVED******REMOVED******REMOVED*** Tracing
+### Tracing
 - **Jaeger:** https://tracing.valeo-erp.com (when implemented)
 
 ---
 
-***REMOVED******REMOVED*** 📝 Post-Incident-Review
+## 📝 Post-Incident-Review
 
 Nach jedem P1/P2-Incident:
 1. **Incident-Report** erstellen (Template in `/docs/templates/incident-report.md`)
@@ -169,4 +169,5 @@ Nach jedem P1/P2-Incident:
 3. **Action-Items** definieren & tracken
 4. **Team-Meeting** (within 2 days)
 5. **Runbook** updaten (lessons learned)
+
 

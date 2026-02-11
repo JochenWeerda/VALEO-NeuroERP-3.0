@@ -1,17 +1,17 @@
-***REMOVED*** Feature Implementation Plan - Finance Invoice Form
+# Feature Implementation Plan - Finance Invoice Form
 
 **Erstellt:** 2025-11-24  
 **Basis:** GAP-FIN-002 (Create Invoice Formular unvollständig)  
 **Status:** Planned  
 **Priorität:** P0 (Kritisch)
 
-***REMOVED******REMOVED*** Problem
+## Problem
 
 Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funktionsfähig. Rechnungen können nicht erstellt werden.
 
-***REMOVED******REMOVED*** Anforderungen
+## Anforderungen
 
-***REMOVED******REMOVED******REMOVED*** Funktionale Anforderungen
+### Funktionale Anforderungen
 
 1. **Grundinformationen**
    - Rechnungsnummer (automatisch generiert)
@@ -45,7 +45,7 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
    - Abbrechen
    - Vorschau/PDF
 
-***REMOVED******REMOVED******REMOVED*** Technische Anforderungen
+### Technische Anforderungen
 
 1. **Frontend**
    - React-Komponente für Invoice-Formular
@@ -64,9 +64,9 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
    - Artikel-Daten aus Inventory-Modul
    - MwSt-Berechnung aus Steuer-Modul
 
-***REMOVED******REMOVED*** Implementierungsplan
+## Implementierungsplan
 
-***REMOVED******REMOVED******REMOVED*** Phase 1: Backend API (Priorität: Hoch)
+### Phase 1: Backend API (Priorität: Hoch)
 
 1. **Datenbank-Schema**
    - Tabelle `invoices`
@@ -84,7 +84,7 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
    - Betrags-Berechnung (Netto, MwSt, Brutto)
    - Validierung
 
-***REMOVED******REMOVED******REMOVED*** Phase 2: Frontend Formular (Priorität: Hoch)
+### Phase 2: Frontend Formular (Priorität: Hoch)
 
 1. **Komponenten**
    - `InvoiceForm.tsx` - Hauptformular
@@ -103,7 +103,7 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
    - Loading States
    - Success/Error Messages
 
-***REMOVED******REMOVED******REMOVED*** Phase 3: Integration (Priorität: Mittel)
+### Phase 3: Integration (Priorität: Mittel)
 
 1. **Kunden-Integration**
    - Kunden-Suche aus CRM
@@ -119,7 +119,7 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
    - MwSt-Sätze aus Steuer-Modul
    - MwSt-Berechnung
 
-***REMOVED******REMOVED******REMOVED*** Phase 4: Testing (Priorität: Hoch)
+### Phase 4: Testing (Priorität: Hoch)
 
 1. **Unit Tests**
    - Form-Validation
@@ -134,21 +134,21 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
 3. **E2E Tests**
    - Playwright-Tests basierend auf Test-Plan
 
-***REMOVED******REMOVED*** Vergleich mit Referenz-Systemen
+## Vergleich mit Referenz-Systemen
 
-***REMOVED******REMOVED******REMOVED*** SAP
+### SAP
 - Vollständiges Invoice-Formular mit allen Feldern
 - Auto-Berechnung von Beträgen
 - Integration mit Kunden, Artikeln, Steuern
 - Workflow (Entwurf → Gebucht)
 
-***REMOVED******REMOVED******REMOVED*** Odoo
+### Odoo
 - Einfacheres Formular, aber vollständig
 - Auto-Berechnung
 - Integration mit anderen Modulen
 - Direktes Buchen möglich
 
-***REMOVED******REMOVED*** Akzeptanzkriterien
+## Akzeptanzkriterien
 
 - [ ] Formular zeigt alle notwendigen Felder
 - [ ] Rechnung kann erstellt werden
@@ -161,7 +161,7 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
 - [ ] Integration mit Kunden funktioniert
 - [ ] Integration mit Artikeln funktioniert
 
-***REMOVED******REMOVED*** Geschätzter Aufwand
+## Geschätzter Aufwand
 
 - **Backend Modul:** 2-3 Tage
 - **Frontend Formular:** 3-4 Tage
@@ -169,16 +169,17 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
 - **Testing:** 2-3 Tage
 - **Gesamt:** 9-13 Tage
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. **Backend-Entwickler:** Beginne mit Datenbank-Schema und API-Endpoints
 2. **Frontend-Entwickler:** Beginne mit Formular-Komponenten
 3. **Tester:** Erstelle Test-Cases basierend auf diesem Plan
 
-***REMOVED******REMOVED*** Referenzen
+## Referenzen
 
 - GAP-Analyse: `gap/gaps.md` (GAP-FIN-002)
 - Test-Plan: `specs/finance.md` (TC-FIN-003)
 - Handoff-Notiz: `swarm/handoffs/ui-explorer-finance-2025-11-24T08-51-19.344194.md`
 - Screenshot: `evidence/screenshots/finance/20251124_095108_05_create_invoice_form.png`
+
 

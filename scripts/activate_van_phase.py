@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Skript zum Aktivieren der VAN-Phase für das VALEO-NeuroERP-System.
 """
@@ -8,10 +8,10 @@ import sys
 import logging
 from datetime import datetime
 
-***REMOVED*** Pfad zum Projektverzeichnis hinzufügen
+# Pfad zum Projektverzeichnis hinzufügen
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -19,21 +19,21 @@ def create_validation_report():
     """
     Erstellt einen Validierungsbericht für das Berichtsmodul.
     """
-    ***REMOVED*** Pfad zum Validierungsbericht
+    # Pfad zum Validierungsbericht
     report_path = os.path.join("memory-bank", "validation", "reports-validation-report.md")
     
-    ***REMOVED*** Überprüfe, ob der Bericht bereits existiert
+    # Überprüfe, ob der Bericht bereits existiert
     if os.path.exists(report_path):
         logger.info(f"Validierungsbericht existiert bereits: {report_path}")
         return report_path
     
-    ***REMOVED*** Erstelle das Verzeichnis, falls es nicht existiert
+    # Erstelle das Verzeichnis, falls es nicht existiert
     os.makedirs(os.path.dirname(report_path), exist_ok=True)
     
-    ***REMOVED*** Inhalt des Validierungsberichts
-    report_content = """***REMOVED*** Validierungsbericht: Berichtsmodul für VALEO-NeuroERP
+    # Inhalt des Validierungsberichts
+    report_content = """# Validierungsbericht: Berichtsmodul für VALEO-NeuroERP
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Dieser Bericht validiert die Implementierung des Berichtsmoduls für das VALEO-NeuroERP-System. Das Modul ermöglicht die Erstellung, Generierung, Verteilung und Planung von Berichten in verschiedenen Formaten.
 
@@ -41,7 +41,7 @@ Dieser Bericht validiert die Implementierung des Berichtsmoduls für das VALEO-N
 **Validierungsumfang:** Berichtsmodul-Implementierung  
 **Status:** Implementiert, bereit für Tests
 
-***REMOVED******REMOVED*** Architektur und Komponenten
+## Architektur und Komponenten
 
 Die Implementierung folgt einer klaren Schichtenarchitektur:
 
@@ -66,9 +66,9 @@ Die Implementierung folgt einer klaren Schichtenarchitektur:
    - OpenPyXL für Excel-Exporte
    - Matplotlib, Seaborn und Plotly für Visualisierungen
 
-***REMOVED******REMOVED*** Validierungsergebnisse
+## Validierungsergebnisse
 
-***REMOVED******REMOVED******REMOVED*** Stärken
+### Stärken
 
 1. **Umfassende Funktionalität**
    - Unterstützt verschiedene Berichtsformate (PDF, Excel, Visualisierungen)
@@ -90,7 +90,7 @@ Die Implementierung folgt einer klaren Schichtenarchitektur:
    - Anpassbare Berichtsvorlagen
    - Flexible Datenquellen
 
-***REMOVED******REMOVED******REMOVED*** Verbesserungspotenzial
+### Verbesserungspotenzial
 
 1. **Datenbankintegration**
    - Alembic-Migrationen funktionieren nicht korrekt (Abhängigkeitsprobleme)
@@ -108,7 +108,7 @@ Die Implementierung folgt einer klaren Schichtenarchitektur:
    - Umfassende Testabdeckung erforderlich
    - Integrationstests für die E-Mail-Funktionalität
 
-***REMOVED******REMOVED*** Empfehlungen
+## Empfehlungen
 
 1. **Kurzfristig**
    - Alembic-Migrationsprobleme beheben
@@ -125,14 +125,14 @@ Die Implementierung folgt einer klaren Schichtenarchitektur:
    - Erweiterte Datenanalysefunktionen
    - KI-gestützte Berichtsempfehlungen
 
-***REMOVED******REMOVED*** Fazit
+## Fazit
 
 Das implementierte Berichtsmodul bietet eine solide Grundlage für die Berichterstattung im VALEO-NeuroERP-System. Es erfüllt die grundlegenden Anforderungen für die Erstellung, Generierung, Verteilung und Planung von Berichten. Mit den empfohlenen Verbesserungen kann es zu einem leistungsstarken und benutzerfreundlichen Berichtssystem ausgebaut werden.
 
 Die Integration echter Datenbankabfragen anstelle von Demo-Daten ist ein wichtiger Fortschritt, der die Qualität und Relevanz der generierten Berichte erheblich verbessert. Die Implementierung der E-Mail-Verteilung und der geplanten Berichte ermöglicht eine effiziente Automatisierung der Berichtsprozesse.
 """
     
-    ***REMOVED*** Schreibe den Bericht in die Datei
+    # Schreibe den Bericht in die Datei
     with open(report_path, "w", encoding="utf-8") as f:
         f.write(report_content)
     
@@ -143,21 +143,21 @@ def create_architecture_diagram():
     """
     Erstellt ein Architekturdiagramm für das Berichtsmodul.
     """
-    ***REMOVED*** Pfad zum Architekturdiagramm
+    # Pfad zum Architekturdiagramm
     diagram_path = os.path.join("memory-bank", "visual-maps", "reports-architecture.md")
     
-    ***REMOVED*** Überprüfe, ob das Diagramm bereits existiert
+    # Überprüfe, ob das Diagramm bereits existiert
     if os.path.exists(diagram_path):
         logger.info(f"Architekturdiagramm existiert bereits: {diagram_path}")
         return diagram_path
     
-    ***REMOVED*** Erstelle das Verzeichnis, falls es nicht existiert
+    # Erstelle das Verzeichnis, falls es nicht existiert
     os.makedirs(os.path.dirname(diagram_path), exist_ok=True)
     
-    ***REMOVED*** Inhalt des Architekturdiagramms
-    diagram_content = """***REMOVED*** Architekturdiagramm: Berichtsmodul
+    # Inhalt des Architekturdiagramms
+    diagram_content = """# Architekturdiagramm: Berichtsmodul
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 ```mermaid
 graph TD
@@ -224,7 +224,7 @@ graph TD
     ReportSchedule --> DB
 ```
 
-***REMOVED******REMOVED*** Datenfluss
+## Datenfluss
 
 ```mermaid
 sequenceDiagram
@@ -262,7 +262,7 @@ sequenceDiagram
     API-->>User: Status "sent"
 ```
 
-***REMOVED******REMOVED*** Komponentenbeziehungen
+## Komponentenbeziehungen
 
 ```mermaid
 graph LR
@@ -291,7 +291,7 @@ graph LR
 ```
 """
     
-    ***REMOVED*** Schreibe das Diagramm in die Datei
+    # Schreibe das Diagramm in die Datei
     with open(diagram_path, "w", encoding="utf-8") as f:
         f.write(diagram_content)
     
@@ -302,21 +302,21 @@ def create_clarification_questions():
     """
     Erstellt Klärungsfragen für das Berichtsmodul.
     """
-    ***REMOVED*** Pfad zur Klärungsfragen-Datei
+    # Pfad zur Klärungsfragen-Datei
     questions_path = os.path.join("memory-bank", "van", "reports-clarification-questions.md")
     
-    ***REMOVED*** Überprüfe, ob die Datei bereits existiert
+    # Überprüfe, ob die Datei bereits existiert
     if os.path.exists(questions_path):
         logger.info(f"Klärungsfragen existieren bereits: {questions_path}")
         return questions_path
     
-    ***REMOVED*** Erstelle das Verzeichnis, falls es nicht existiert
+    # Erstelle das Verzeichnis, falls es nicht existiert
     os.makedirs(os.path.dirname(questions_path), exist_ok=True)
     
-    ***REMOVED*** Inhalt der Klärungsfragen
-    questions_content = """***REMOVED*** Klärungsfragen: Berichtsmodul
+    # Inhalt der Klärungsfragen
+    questions_content = """# Klärungsfragen: Berichtsmodul
 
-***REMOVED******REMOVED*** Funktionalität
+## Funktionalität
 
 1. **Welche spezifischen Berichtstypen müssen unterstützt werden?**
    - Finanzberichte, Projektstatusberichte, Inventarberichte, etc.
@@ -330,7 +330,7 @@ def create_clarification_questions():
    - Werden nur Standarddiagramme benötigt oder auch komplexe, interaktive Visualisierungen?
    - Gibt es spezielle Anforderungen an die Barrierefreiheit der Visualisierungen?
 
-***REMOVED******REMOVED*** Integration
+## Integration
 
 4. **Wie soll die Integration mit externen Systemen erfolgen?**
    - Welche externen Datenquellen müssen angebunden werden?
@@ -340,7 +340,7 @@ def create_clarification_questions():
    - Werden spezielle E-Mail-Templates benötigt?
    - Gibt es Anforderungen an die Sicherheit der E-Mail-Verteilung (Verschlüsselung, etc.)?
 
-***REMOVED******REMOVED*** Performance
+## Performance
 
 6. **Welche Performance-Anforderungen gibt es für die Berichtsgenerierung?**
    - Wie groß können die Datenmengen werden?
@@ -350,7 +350,7 @@ def create_clarification_questions():
    - Sollen Benutzer über den Fortschritt informiert werden?
    - Gibt es Prioritäten für verschiedene Berichtstypen?
 
-***REMOVED******REMOVED*** Sicherheit und Berechtigungen
+## Sicherheit und Berechtigungen
 
 8. **Welche Berechtigungskonzepte sind für Berichte erforderlich?**
    - Wer darf welche Berichte erstellen, ansehen, verteilen?
@@ -360,14 +360,14 @@ def create_clarification_questions():
    - Müssen Berichtszugriffe protokolliert werden?
    - Gibt es regulatorische Anforderungen an die Aufbewahrung von Berichten?
 
-***REMOVED******REMOVED*** Zukunftsfähigkeit
+## Zukunftsfähigkeit
 
 10. **Welche Erweiterungen sind für die Zukunft geplant?**
     - Sind weitere Berichtsformate geplant?
     - Gibt es Pläne für KI-gestützte Berichtsanalysen oder -empfehlungen?
 """
     
-    ***REMOVED*** Schreibe die Klärungsfragen in die Datei
+    # Schreibe die Klärungsfragen in die Datei
     with open(questions_path, "w", encoding="utf-8") as f:
         f.write(questions_content)
     
@@ -381,13 +381,13 @@ def main():
     logger.info("Starte VAN-Phase für das Berichtsmodul")
     
     try:
-        ***REMOVED*** Erstelle den Validierungsbericht
+        # Erstelle den Validierungsbericht
         validation_report = create_validation_report()
         
-        ***REMOVED*** Erstelle das Architekturdiagramm
+        # Erstelle das Architekturdiagramm
         architecture_diagram = create_architecture_diagram()
         
-        ***REMOVED*** Erstelle die Klärungsfragen
+        # Erstelle die Klärungsfragen
         clarification_questions = create_clarification_questions()
         
         logger.info("VAN-Phase erfolgreich abgeschlossen")
@@ -395,7 +395,7 @@ def main():
         logger.info(f"Architekturdiagramm: {architecture_diagram}")
         logger.info(f"Klärungsfragen: {clarification_questions}")
         
-        ***REMOVED*** Aktualisiere die current_mode.txt-Datei
+        # Aktualisiere die current_mode.txt-Datei
         mode_file = os.path.join("memory-bank", "current_mode.txt")
         with open(mode_file, "w", encoding="utf-8") as f:
             f.write("VAN")

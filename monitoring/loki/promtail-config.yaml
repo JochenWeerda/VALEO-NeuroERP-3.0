@@ -1,5 +1,5 @@
-***REMOVED*** Promtail Configuration für VALEO-NeuroERP
-***REMOVED*** Sendet Logs zu Loki (zentrales Log-Aggregation)
+# Promtail Configuration für VALEO-NeuroERP
+# Sendet Logs zu Loki (zentrales Log-Aggregation)
 
 server:
   http_listen_port: 9080
@@ -12,31 +12,31 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-  ***REMOVED*** Kubernetes Pod Logs
+  # Kubernetes Pod Logs
   - job_name: kubernetes-pods
     kubernetes_sd_configs:
       - role: pod
     
     relabel_configs:
-      ***REMOVED*** Nur VALEO-ERP Pods
+      # Nur VALEO-ERP Pods
       - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
         regex: valeo-erp
         action: keep
       
-      ***REMOVED*** Namespace
+      # Namespace
       - source_labels: [__meta_kubernetes_namespace]
         target_label: namespace
       
-      ***REMOVED*** Pod-Name
+      # Pod-Name
       - source_labels: [__meta_kubernetes_pod_name]
         target_label: pod
       
-      ***REMOVED*** Container-Name
+      # Container-Name
       - source_labels: [__meta_kubernetes_pod_container_name]
         target_label: container
     
     pipeline_stages:
-      ***REMOVED*** Parse JSON-Logs
+      # Parse JSON-Logs
       - json:
           expressions:
             time: time
@@ -44,21 +44,21 @@ scrape_configs:
             name: name
             message: message
       
-      ***REMOVED*** Labels extrahieren
+      # Labels extrahieren
       - labels:
           level:
           name:
       
-      ***REMOVED*** Timestamp
+      # Timestamp
       - timestamp:
           source: time
           format: RFC3339
       
-      ***REMOVED*** Output
+      # Output
       - output:
           source: message
 
-  ***REMOVED*** Docker Container Logs (für Development)
+  # Docker Container Logs (für Development)
   - job_name: docker
     static_configs:
       - targets:
@@ -78,4 +78,5 @@ scrape_configs:
       
       - output:
           source: log
+
 

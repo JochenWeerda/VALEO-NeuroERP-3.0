@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env node
+#!/usr/bin/env node
 /**
  * Storybook + Accessibility Setup Script
  * VALEO-NeuroERP 3.0
@@ -162,4 +162,5 @@ log('   1. Erste Story erstellen: src/components/ui/button.stories.tsx');
 log('   2. MCP-Metadaten hinzufügen');
 log('   3. Accessibility prüfen');
 log('');
+
 

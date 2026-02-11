@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 GENXAIS v1.9 LangGraph Zyklus (Produktiv)
@@ -16,7 +16,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Union, TypedDict, Literal
 
-***REMOVED*** Logging konfigurieren
+# Logging konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -27,7 +27,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("GENXAIS")
 
-***REMOVED*** Versuche die erforderlichen Pakete zu importieren
+# Versuche die erforderlichen Pakete zu importieren
 try:
     from langchain_openai import ChatOpenAI
     from langchain_core.prompts import ChatPromptTemplate
@@ -40,7 +40,7 @@ except ImportError as e:
     logger.error("pip install langchain-openai langgraph langchain-core langchain-community")
     sys.exit(1)
 
-***REMOVED*** Pfade konfigurieren
+# Pfade konfigurieren
 BASE_DIR = Path(__file__).resolve().parent.parent
 TASKS_DIR = BASE_DIR / "tasks"
 OUTPUT_DIR = BASE_DIR / "output"
@@ -49,10 +49,10 @@ CONFIG_DIR = BASE_DIR / "config"
 CONFIG_PATH = OUTPUT_DIR / "dashboard_config.json"
 PROMPTS_DIR = BASE_DIR / "prompts"
 
-***REMOVED*** Stellen sicher, dass die Verzeichnisse existieren
+# Stellen sicher, dass die Verzeichnisse existieren
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-***REMOVED*** API-Schlüssel laden
+# API-Schlüssel laden
 API_KEYS_PATH = CONFIG_DIR / "api_keys.local.json"
 
 def load_api_keys() -> Dict[str, str]:
@@ -99,12 +99,12 @@ def load_or_create_prompt() -> str:
     Returns:
         Der Prompt als String
     """
-    ***REMOVED*** Prüfe, ob der Prompt in der Umgebungsvariable vorhanden ist
+    # Prüfe, ob der Prompt in der Umgebungsvariable vorhanden ist
     env_prompt = os.environ.get("GENXAIS_PROMPT")
     if env_prompt:
         return env_prompt
     
-    ***REMOVED*** Bestimme die Version aus der Umgebungsvariable oder verwende 1.9 als Standard
+    # Bestimme die Version aus der Umgebungsvariable oder verwende 1.9 als Standard
     version = os.environ.get("GENXAIS_VERSION", "1.9")
     
     prompt_path = PROMPTS_DIR / f"genxais_prompt_v{version}.md"
@@ -115,22 +115,22 @@ def load_or_create_prompt() -> str:
         except Exception as e:
             logger.error(f"Fehler beim Laden des Prompts: {str(e)}")
     
-    ***REMOVED*** Erstelle einen neuen Prompt
-    prompt = f"""***REMOVED*** 🚀 GENXAIS v{version} – Produktiver Entwicklungszyklus für VALEO-NeuroERP
+    # Erstelle einen neuen Prompt
+    prompt = f"""# 🚀 GENXAIS v{version} – Produktiver Entwicklungszyklus für VALEO-NeuroERP
 
-***REMOVED******REMOVED*** 📋 Projektübersicht
+## 📋 Projektübersicht
 - **Projektverzeichnis:** {BASE_DIR}
 - **Streamlit UI Port:** 8502
 - **Modus:** Multi-Pipeline (7 Pipelines)
 - **Startphase:** VAN
 - **Letztes Handover:** `output/handover.md`
 
-***REMOVED******REMOVED*** 🔄 Aktueller Zyklus
+## 🔄 Aktueller Zyklus
 - **Version:** {version}
 - **Start:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 - **Ziel:** Produktive Implementierung aller Pipelines
 
-***REMOVED******REMOVED*** 📊 Pipelines
+## 📊 Pipelines
 1. API-Pipeline
 2. Frontend-Pipeline
 3. Backend-Pipeline
@@ -139,11 +139,11 @@ def load_or_create_prompt() -> str:
 6. DevOps-Pipeline
 7. Sicherheits-Pipeline
 
-***REMOVED******REMOVED*** 📝 Aufgaben
+## 📝 Aufgaben
 Siehe `tasks/genxais_cycle_v{version}.yaml` für detaillierte Aufgabenliste.
 """
     
-    ***REMOVED*** Speichere den Prompt
+    # Speichere den Prompt
     try:
         PROMPTS_DIR.mkdir(exist_ok=True)
         with open(prompt_path, "w", encoding="utf-8") as f:
@@ -177,14 +177,14 @@ def create_handover_document(results: Dict[str, str]) -> None:
         results: Dict mit den Ergebnissen der Phasen
     """
     try:
-        ***REMOVED*** Erstelle das Handover-Dokument
-        handover = f"""***REMOVED*** GENXAIS Zyklus Handover
+        # Erstelle das Handover-Dokument
+        handover = f"""# GENXAIS Zyklus Handover
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 GENXAIS Zyklus v1.9 wurde am {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} abgeschlossen.
 
-***REMOVED******REMOVED*** Durchgeführte Phasen
+## Durchgeführte Phasen
 """
         
         for phase in ["VAN", "PLAN", "CREATE", "IMPLEMENTATION", "REFLEKTION"]:
@@ -192,17 +192,17 @@ GENXAIS Zyklus v1.9 wurde am {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%
                 handover += f"- {phase}\n"
         
         handover += f"""
-***REMOVED******REMOVED*** Reflektionsergebnisse
+## Reflektionsergebnisse
 
 {results.get("reflektion", "Keine Reflektionsergebnisse verfügbar.")}
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 1. Überprüfung der erstellten Artefakte
 2. Integration der Änderungen in das Hauptprojekt
 3. Planung des nächsten GENXAIS-Zyklus (v2.0)
 """
         
-        ***REMOVED*** Speichere das Handover-Dokument
+        # Speichere das Handover-Dokument
         with open(OUTPUT_DIR / "handover.md", "w", encoding="utf-8") as f:
             f.write(handover)
         
@@ -210,7 +210,7 @@ GENXAIS Zyklus v1.9 wurde am {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%
     except Exception as e:
         logger.error(f"Fehler beim Erstellen des Handover-Dokuments: {str(e)}")
 
-***REMOVED*** Typen für den State
+# Typen für den State
 class Phase(TypedDict):
     phase: Literal["VAN", "PLAN", "CREATE", "IMPLEMENTATION", "REFLEKTION"]
     messages: List[Dict[str, str]]
@@ -221,7 +221,7 @@ class Phase(TypedDict):
     error: Optional[str]
     results: Dict[str, str]
 
-***REMOVED*** VAN-Phase
+# VAN-Phase
 def van_phase(state: Phase) -> Dict[str, Any]:
     """
     Führt die VAN-Phase aus.
@@ -234,10 +234,10 @@ def van_phase(state: Phase) -> Dict[str, Any]:
     """
     logger.info("Führe VAN-Phase aus...")
     
-    ***REMOVED*** Lade den Prompt
+    # Lade den Prompt
     prompt_content = load_or_create_prompt()
     
-    ***REMOVED*** Erstelle die Chain für die VAN-Phase
+    # Erstelle die Chain für die VAN-Phase
     van_prompt = ChatPromptTemplate.from_messages([
         ("system", "Du bist ein leistungsstarker KI-Agent im GENXAIS-Framework, der die VAN-Phase (Vision, Analyse, Navigation) durchführt. Deine Aufgabe ist es, den aktuellen Zustand des Projekts zu analysieren, Verbesserungspotentiale zu identifizieren und einen Plan für die nächsten Schritte zu erstellen."),
         ("human", "{prompt}")
@@ -245,14 +245,14 @@ def van_phase(state: Phase) -> Dict[str, Any]:
     
     van_chain = van_prompt | llm | StrOutputParser()
     
-    ***REMOVED*** Führe die Chain aus
+    # Führe die Chain aus
     try:
         result = van_chain.invoke({"prompt": prompt_content})
         
-        ***REMOVED*** Speichere das Ergebnis
+        # Speichere das Ergebnis
         save_result("van", result)
         
-        ***REMOVED*** Aktualisiere den Zustand
+        # Aktualisiere den Zustand
         return {
             "messages": [{"role": "assistant", "content": result}],
             "phase": "PLAN",
@@ -269,7 +269,7 @@ def van_phase(state: Phase) -> Dict[str, Any]:
             "results": state["results"]
         }
 
-***REMOVED*** PLAN-Phase
+# PLAN-Phase
 def plan_phase(state: Phase) -> Dict[str, Any]:
     """
     Führt die PLAN-Phase aus.
@@ -282,10 +282,10 @@ def plan_phase(state: Phase) -> Dict[str, Any]:
     """
     logger.info("Führe PLAN-Phase aus...")
     
-    ***REMOVED*** Extrahiere die Nachrichten aus dem Zustand
+    # Extrahiere die Nachrichten aus dem Zustand
     messages = state["messages"]
     
-    ***REMOVED*** Erstelle die Chain für die PLAN-Phase
+    # Erstelle die Chain für die PLAN-Phase
     plan_prompt = ChatPromptTemplate.from_messages([
         ("system", "Du bist ein leistungsstarker KI-Agent im GENXAIS-Framework, der die PLAN-Phase durchführt. Deine Aufgabe ist es, basierend auf der Analyse aus der VAN-Phase einen detaillierten Plan für die Implementierung zu erstellen. Berücksichtige dabei die identifizierten Verbesserungspotentiale und priorisiere die Aufgaben."),
         ("human", "Hier ist die Analyse aus der VAN-Phase:\n\n{van_result}\n\nErstelle einen detaillierten Plan für die Implementierung der identifizierten Verbesserungspotentiale.")
@@ -293,14 +293,14 @@ def plan_phase(state: Phase) -> Dict[str, Any]:
     
     plan_chain = plan_prompt | llm | StrOutputParser()
     
-    ***REMOVED*** Führe die Chain aus
+    # Führe die Chain aus
     try:
         result = plan_chain.invoke({"van_result": messages[0]["content"]})
         
-        ***REMOVED*** Speichere das Ergebnis
+        # Speichere das Ergebnis
         save_result("plan", result)
         
-        ***REMOVED*** Aktualisiere den Zustand
+        # Aktualisiere den Zustand
         return {
             "messages": state["messages"] + [{"role": "assistant", "content": result}],
             "phase": "CREATE",
@@ -317,7 +317,7 @@ def plan_phase(state: Phase) -> Dict[str, Any]:
             "results": state["results"]
         }
 
-***REMOVED*** CREATE-Phase
+# CREATE-Phase
 def create_phase(state: Phase) -> Dict[str, Any]:
     """
     Führt die CREATE-Phase aus.
@@ -330,10 +330,10 @@ def create_phase(state: Phase) -> Dict[str, Any]:
     """
     logger.info("Führe CREATE-Phase aus...")
     
-    ***REMOVED*** Extrahiere die Nachrichten aus dem Zustand
+    # Extrahiere die Nachrichten aus dem Zustand
     messages = state["messages"]
     
-    ***REMOVED*** Erstelle die Chain für die CREATE-Phase
+    # Erstelle die Chain für die CREATE-Phase
     create_prompt = ChatPromptTemplate.from_messages([
         ("system", "Du bist ein leistungsstarker KI-Agent im GENXAIS-Framework, der die CREATE-Phase durchführt. Deine Aufgabe ist es, basierend auf dem Plan aus der PLAN-Phase konkrete Implementierungen zu entwickeln. Erstelle Prototypen, entwickle neue Funktionen und implementiere neue Technologien."),
         ("human", "Hier ist der Plan aus der PLAN-Phase:\n\n{plan_result}\n\nEntwickle konkrete Implementierungen für die geplanten Funktionen.")
@@ -341,14 +341,14 @@ def create_phase(state: Phase) -> Dict[str, Any]:
     
     create_chain = create_prompt | llm | StrOutputParser()
     
-    ***REMOVED*** Führe die Chain aus
+    # Führe die Chain aus
     try:
         result = create_chain.invoke({"plan_result": messages[1]["content"]})
         
-        ***REMOVED*** Speichere das Ergebnis
+        # Speichere das Ergebnis
         save_result("create", result)
         
-        ***REMOVED*** Aktualisiere den Zustand
+        # Aktualisiere den Zustand
         return {
             "messages": state["messages"] + [{"role": "assistant", "content": result}],
             "phase": "IMPLEMENTATION",
@@ -365,7 +365,7 @@ def create_phase(state: Phase) -> Dict[str, Any]:
             "results": state["results"]
         }
 
-***REMOVED*** IMPLEMENTATION-Phase
+# IMPLEMENTATION-Phase
 def implementation_phase(state: Phase) -> Dict[str, Any]:
     """
     Führt die IMPLEMENTATION-Phase aus.
@@ -378,10 +378,10 @@ def implementation_phase(state: Phase) -> Dict[str, Any]:
     """
     logger.info("Führe IMPLEMENTATION-Phase aus...")
     
-    ***REMOVED*** Extrahiere die Nachrichten aus dem Zustand
+    # Extrahiere die Nachrichten aus dem Zustand
     messages = state["messages"]
     
-    ***REMOVED*** Erstelle die Chain für die IMPLEMENTATION-Phase
+    # Erstelle die Chain für die IMPLEMENTATION-Phase
     implementation_prompt = ChatPromptTemplate.from_messages([
         ("system", "Du bist ein leistungsstarker KI-Agent im GENXAIS-Framework, der die IMPLEMENTATION-Phase durchführt. Deine Aufgabe ist es, die entwickelten Funktionen vollständig zu implementieren, in das bestehende System zu integrieren und Tests durchzuführen."),
         ("human", "Hier sind die entwickelten Funktionen aus der CREATE-Phase:\n\n{create_result}\n\nImplementiere diese Funktionen vollständig und integriere sie in das bestehende System.")
@@ -389,14 +389,14 @@ def implementation_phase(state: Phase) -> Dict[str, Any]:
     
     implementation_chain = implementation_prompt | llm | StrOutputParser()
     
-    ***REMOVED*** Führe die Chain aus
+    # Führe die Chain aus
     try:
         result = implementation_chain.invoke({"create_result": messages[2]["content"]})
         
-        ***REMOVED*** Speichere das Ergebnis
+        # Speichere das Ergebnis
         save_result("implementation", result)
         
-        ***REMOVED*** Aktualisiere den Zustand
+        # Aktualisiere den Zustand
         return {
             "messages": state["messages"] + [{"role": "assistant", "content": result}],
             "phase": "REFLEKTION",
@@ -413,7 +413,7 @@ def implementation_phase(state: Phase) -> Dict[str, Any]:
             "results": state["results"]
         }
 
-***REMOVED*** REFLEKTION-Phase
+# REFLEKTION-Phase
 def reflektion_phase(state: Phase) -> Dict[str, Any]:
     """
     Führt die REFLEKTION-Phase aus.
@@ -426,10 +426,10 @@ def reflektion_phase(state: Phase) -> Dict[str, Any]:
     """
     logger.info("Führe REFLEKTION-Phase aus...")
     
-    ***REMOVED*** Extrahiere die Nachrichten aus dem Zustand
+    # Extrahiere die Nachrichten aus dem Zustand
     messages = state["messages"]
     
-    ***REMOVED*** Erstelle die Chain für die REFLEKTION-Phase
+    # Erstelle die Chain für die REFLEKTION-Phase
     reflektion_prompt = ChatPromptTemplate.from_messages([
         ("system", "Du bist ein leistungsstarker KI-Agent im GENXAIS-Framework, der die REFLEKTION-Phase durchführt. Deine Aufgabe ist es, den Projekterfolg zu bewerten, Verbesserungspotentiale zu identifizieren und den nächsten Zyklus zu planen."),
         ("human", "Hier ist die Implementierung aus der IMPLEMENTATION-Phase:\n\n{implementation_result}\n\nBewerte den Projekterfolg, identifiziere Verbesserungspotentiale und plane den nächsten Zyklus.")
@@ -437,17 +437,17 @@ def reflektion_phase(state: Phase) -> Dict[str, Any]:
     
     reflektion_chain = reflektion_prompt | llm | StrOutputParser()
     
-    ***REMOVED*** Führe die Chain aus
+    # Führe die Chain aus
     try:
         result = reflektion_chain.invoke({"implementation_result": messages[3]["content"]})
         
-        ***REMOVED*** Speichere das Ergebnis
+        # Speichere das Ergebnis
         save_result("reflektion", result)
         
-        ***REMOVED*** Aktualisiere den Zustand
+        # Aktualisiere den Zustand
         updated_results = {**state["results"], "reflektion": result}
         
-        ***REMOVED*** Erstelle das Handover-Dokument
+        # Erstelle das Handover-Dokument
         create_handover_document(updated_results)
         
         return {
@@ -466,7 +466,7 @@ def reflektion_phase(state: Phase) -> Dict[str, Any]:
             "results": state["results"]
         }
 
-***REMOVED*** Router für die Phasen
+# Router für die Phasen
 def router(state: Phase) -> str:
     """
     Routet den Zustand zur nächsten Phase.
@@ -503,7 +503,7 @@ def main() -> None:
     print(f"Projektverzeichnis: {BASE_DIR}")
     print("-" * 80)
     
-    ***REMOVED*** API-Schlüssel laden und in Umgebungsvariablen setzen
+    # API-Schlüssel laden und in Umgebungsvariablen setzen
     api_keys = load_api_keys()
     if "openai" in api_keys:
         os.environ["OPENAI_API_KEY"] = api_keys["openai"]
@@ -511,28 +511,28 @@ def main() -> None:
         logger.error("Kein OpenAI API-Schlüssel gefunden.")
         sys.exit(1)
     
-    ***REMOVED*** LLM initialisieren
+    # LLM initialisieren
     global llm
     llm = ChatOpenAI(
         model="gpt-4o",
         temperature=0.2
     )
     
-    ***REMOVED*** Erstelle den Graphen
+    # Erstelle den Graphen
     logger.info("Starte LangGraph-Zyklus...")
     
     try:
-        ***REMOVED*** Definiere den Workflow
+        # Definiere den Workflow
         workflow = StateGraph(Phase)
         
-        ***REMOVED*** Füge die Knoten hinzu
+        # Füge die Knoten hinzu
         workflow.add_node("van", van_phase)
         workflow.add_node("plan", plan_phase)
         workflow.add_node("create", create_phase)
         workflow.add_node("implementation", implementation_phase)
         workflow.add_node("reflektion", reflektion_phase)
         
-        ***REMOVED*** Definiere den Startknoten und die Kanten
+        # Definiere den Startknoten und die Kanten
         workflow.set_entry_point("van")
         workflow.add_edge("van", "plan")
         workflow.add_edge("plan", "create")
@@ -540,10 +540,10 @@ def main() -> None:
         workflow.add_edge("implementation", "reflektion")
         workflow.add_edge("reflektion", END)
         
-        ***REMOVED*** Kompiliere den Graphen
+        # Kompiliere den Graphen
         app = workflow.compile()
         
-        ***REMOVED*** Führe den Graphen aus
+        # Führe den Graphen aus
         for event in app.stream({
             "phase": "VAN",
             "messages": [],
@@ -554,7 +554,7 @@ def main() -> None:
             "error": None,
             "results": {}
         }):
-            ***REMOVED*** Hier könnten wir den Fortschritt anzeigen
+            # Hier könnten wir den Fortschritt anzeigen
             pass
     except Exception as e:
         logger.error(f"Fehler beim Ausführen des LangGraph-Zyklus: {str(e)}")

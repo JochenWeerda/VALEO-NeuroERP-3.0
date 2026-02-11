@@ -1,12 +1,12 @@
-ï»¿***REMOVED*** CRM Domain (VALEO NeuroERP 3.0)
+# CRM Domain (VALEO NeuroERP 3.0)
 
 The CRM domain exposes a production-ready customer management service layer wired against the legacy FastAPI backend. Key components:
 
-- `src/infrastructure/repositories/rest-customer-repository.ts` â€“ talks to the 2.0 CRM service via authenticated HTTP calls (`CRM_SERVICE_URL`, `CRM_SERVICE_TOKEN`).
-- `src/bootstrap.ts` â€“ registers the REST repository by default; the in-memory adapter is available only for unit/integration tests.
-- `tests/` â€“ Node test suites executed through `npm run test:crm` (compiles with `tsc` and runs `node --test`).
+- `src/infrastructure/repositories/rest-customer-repository.ts` – talks to the 2.0 CRM service via authenticated HTTP calls (`CRM_SERVICE_URL`, `CRM_SERVICE_TOKEN`).
+- `src/bootstrap.ts` – registers the REST repository by default; the in-memory adapter is available only for unit/integration tests.
+- `tests/` – Node test suites executed through `npm run test:crm` (compiles with `tsc` and runs `node --test`).
 
-***REMOVED******REMOVED*** Environment
+## Environment
 
 | Variable | Description | Default |
 | --- | --- | --- |
@@ -15,3 +15,4 @@ The CRM domain exposes a production-ready customer management service layer wire
 | `CRM_SERVICE_TOKEN` | Bearer token used for authenticated requests. | _none (requests sent without auth)_ |
 
 The repository mirrors the response models returned by the FastAPI service and maps them to the new branded domain types, making the migration path deterministic.
+

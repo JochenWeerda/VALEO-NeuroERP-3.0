@@ -1,47 +1,47 @@
-***REMOVED*** ===================================================
-***REMOVED*** Frontend-Setup Skript
-***REMOVED*** ===================================================
-***REMOVED*** Automatisiertes Setup der Frontend-Entwicklungsumgebung
-***REMOVED*** für das Folkerts Landhandel ERP-System
-***REMOVED*** ===================================================
+# ===================================================
+# Frontend-Setup Skript
+# ===================================================
+# Automatisiertes Setup der Frontend-Entwicklungsumgebung
+# für das Folkerts Landhandel ERP-System
+# ===================================================
 
-***REMOVED*** Lade Hilfsfunktionen
+# Lade Hilfsfunktionen
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 . "$scriptPath\powershell_compatibility.ps1"
 
-***REMOVED*** Banner anzeigen
+# Banner anzeigen
 Write-Host ""
 Write-Host " =====================================================" -ForegroundColor Cyan
 Write-Host "  Frontend-Setup - Folkerts Landhandel ERP" -ForegroundColor Cyan
 Write-Host " =====================================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Pfade definieren
+# Pfade definieren
 $rootDir = Split-Path -Parent $scriptPath
 $frontendDir = Join-Path $rootDir "frontend"
 $packageJsonPath = Join-Path $frontendDir "package.json"
 $viteConfigPath = Join-Path $frontendDir "vite.config.js"
 $rootPackageJsonPath = Join-Path $rootDir "package.json"
 
-***REMOVED*** Überprüfe, ob das Frontend-Verzeichnis existiert
+# Überprüfe, ob das Frontend-Verzeichnis existiert
 if (-not (Test-Path $frontendDir)) {
     Write-Warning "Frontend-Verzeichnis nicht gefunden. Erstelle es..."
     New-Item -ItemType Directory -Path $frontendDir | Out-Null
     Write-Success "Frontend-Verzeichnis erstellt: $frontendDir"
 }
 
-***REMOVED*** Ins Frontend-Verzeichnis wechseln
+# Ins Frontend-Verzeichnis wechseln
 Set-Location $frontendDir
 Write-Info "Arbeitsverzeichnis: $frontendDir"
 
-***REMOVED*** Überprüfe, ob package.json existiert
+# Überprüfe, ob package.json existiert
 if (-not (Test-Path $packageJsonPath)) {
     Write-Warning "package.json nicht gefunden. Initialisiere npm-Projekt..."
     Invoke-Expression "npm init -y"
     Write-Success "npm-Projekt initialisiert"
 }
 
-***REMOVED*** Überprüfe und installiere notwendige Abhängigkeiten
+# Überprüfe und installiere notwendige Abhängigkeiten
 Write-Info "Überprüfe Frontend-Abhängigkeiten..."
 
 $dependencies = @(
@@ -57,11 +57,11 @@ $devDependencies = @(
     "@vitejs/plugin-react"
 )
 
-***REMOVED*** Prüfe, ob Abhängigkeiten installiert sind
+# Prüfe, ob Abhängigkeiten installiert sind
 $packageJson = Get-Content -Path $packageJsonPath -Raw | ConvertFrom-Json
 $needsInstall = $false
 
-***REMOVED*** Erstelle Abhängigkeitsobjekte, falls sie nicht existieren
+# Erstelle Abhängigkeitsobjekte, falls sie nicht existieren
 if (-not $packageJson.dependencies) {
     $packageJson | Add-Member -MemberType NoteProperty -Name "dependencies" -Value (New-Object PSObject)
 }
@@ -70,7 +70,7 @@ if (-not $packageJson.devDependencies) {
     $packageJson | Add-Member -MemberType NoteProperty -Name "devDependencies" -Value (New-Object PSObject)
 }
 
-***REMOVED*** Überprüfe und markiere fehlende Abhängigkeiten
+# Überprüfe und markiere fehlende Abhängigkeiten
 foreach ($dep in $dependencies) {
     if (-not $packageJson.dependencies.$dep) {
         Write-Warning "Abhängigkeit fehlt: $dep"
@@ -85,7 +85,7 @@ foreach ($dep in $devDependencies) {
     }
 }
 
-***REMOVED*** Installiere fehlende Abhängigkeiten
+# Installiere fehlende Abhängigkeiten
 if ($needsInstall) {
     Write-Info "Installiere fehlende Abhängigkeiten..."
     Invoke-Expression "npm install $($dependencies -join ' ')"
@@ -95,7 +95,7 @@ if ($needsInstall) {
     Write-Success "Alle Abhängigkeiten sind bereits installiert"
 }
 
-***REMOVED*** Überprüfe und erstelle Skripte in package.json
+# Überprüfe und erstelle Skripte in package.json
 Write-Info "Überprüfe npm-Skripte..."
 
 $requiredScripts = @{
@@ -107,12 +107,12 @@ $requiredScripts = @{
 
 $scriptsUpdated = $false
 
-***REMOVED*** Erstelle scripts-Objekt, falls es nicht existiert
+# Erstelle scripts-Objekt, falls es nicht existiert
 if (-not $packageJson.scripts) {
     $packageJson | Add-Member -MemberType NoteProperty -Name "scripts" -Value (New-Object PSObject)
 }
 
-***REMOVED*** Überprüfe und aktualisiere Skripte
+# Überprüfe und aktualisiere Skripte
 foreach ($scriptName in $requiredScripts.Keys) {
     if (-not $packageJson.scripts.$scriptName -or $packageJson.scripts.$scriptName -ne $requiredScripts[$scriptName]) {
         $packageJson.scripts | Add-Member -MemberType NoteProperty -Name $scriptName -Value $requiredScripts[$scriptName] -Force
@@ -120,7 +120,7 @@ foreach ($scriptName in $requiredScripts.Keys) {
     }
 }
 
-***REMOVED*** Speichere aktualisierte package.json
+# Speichere aktualisierte package.json
 if ($scriptsUpdated) {
     $packageJson | ConvertTo-Json -Depth 10 | Set-Content -Path $packageJsonPath
     Write-Success "npm-Skripte aktualisiert"
@@ -128,7 +128,7 @@ if ($scriptsUpdated) {
     Write-Success "Alle npm-Skripte sind korrekt konfiguriert"
 }
 
-***REMOVED*** Erstelle oder aktualisiere vite.config.js
+# Erstelle oder aktualisiere vite.config.js
 if (-not (Test-Path $viteConfigPath)) {
     Write-Warning "vite.config.js nicht gefunden. Erstelle Standard-Konfiguration..."
     
@@ -153,11 +153,11 @@ export default defineConfig({
     Set-Content -Path $viteConfigPath -Value $viteConfig
     Write-Success "vite.config.js erstellt mit JSX-Unterstützung"
 } else {
-    ***REMOVED*** Überprüfe und aktualisiere JSX-Konfiguration
+    # Überprüfe und aktualisiere JSX-Konfiguration
     Set-JSXConfiguration -ViteConfigPath $viteConfigPath
 }
 
-***REMOVED*** Erstelle Root-Package.json, falls sie nicht existiert
+# Erstelle Root-Package.json, falls sie nicht existiert
 if (-not (Test-Path $rootPackageJsonPath)) {
     Write-Info "Erstelle Root-Package.json als Proxy..."
     
@@ -193,7 +193,7 @@ if (-not (Test-Path $rootPackageJsonPath)) {
     Write-Success "Root-Package.json erstellt als Proxy für Frontend-Befehle"
 }
 
-***REMOVED*** Erstelle eine einfache index.html und index.js, falls sie nicht existieren
+# Erstelle eine einfache index.html und index.js, falls sie nicht existieren
 $indexHtmlPath = Join-Path $frontendDir "index.html"
 $srcDir = Join-Path $frontendDir "src"
 $indexJsPath = Join-Path $srcDir "index.js"
@@ -254,7 +254,7 @@ root.render(
     Write-Success "index.js erstellt"
 }
 
-***REMOVED*** Erfolgsmeldung anzeigen
+# Erfolgsmeldung anzeigen
 Write-Host ""
 Write-Host " =====================================================" -ForegroundColor Cyan
 Write-Host "  Frontend-Setup abgeschlossen!" -ForegroundColor Cyan

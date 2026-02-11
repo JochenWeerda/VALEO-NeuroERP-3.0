@@ -1,4 +1,4 @@
-***REMOVED*** GoBD-Konformität Checklist - VALEO NeuroERP 3.0
+# GoBD-Konformität Checklist - VALEO NeuroERP 3.0
 
 **Status:** 🟢 Mostly Compliant  
 **Target:** ✅ Full GoBD Compliance  
@@ -6,9 +6,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **GRUNDSÄTZE ORDNUNGSMÄSSIGER BUCHFÜHRUNG**
+## 📋 **GRUNDSÄTZE ORDNUNGSMÄSSIGER BUCHFÜHRUNG**
 
-***REMOVED******REMOVED******REMOVED*** 1. Nachvollziehbarkeit
+### 1. Nachvollziehbarkeit
 
 - [x] **Audit-Trail** für alle Transaktionen
   - Datei: `app/infrastructure/models/__init__.py` (AuditLog)
@@ -27,7 +27,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2. Vollständigkeit
+### 2. Vollständigkeit
 
 - [x] **Alle Geschäftsvorfälle** erfasst
   - Verkauf: Angebot → Auftrag → Lieferung → Rechnung
@@ -46,7 +46,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 3. Richtigkeit
+### 3. Richtigkeit
 
 - [x] **Inline-Validierung**
   - Policy-Engine prüft Plausibilität
@@ -65,7 +65,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 4. Zeitgerechte Buchungen
+### 4. Zeitgerechte Buchungen
 
 - [x] **Real-Time-Logging**
   - Jede Transaktion sofort geloggt
@@ -83,7 +83,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 5. Ordnung
+### 5. Ordnung
 
 - [x] **Systematische Ablage**
   - Belege nach Typ & Datum sortiert
@@ -101,7 +101,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 6. Unveränderbarkeit
+### 6. Unveränderbarkeit
 
 - [x] **Audit-Log ist immutable**
   - Keine DELETE/UPDATE erlaubt
@@ -119,9 +119,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **TECHNISCHE ANFORDERUNGEN**
+## 📋 **TECHNISCHE ANFORDERUNGEN**
 
-***REMOVED******REMOVED******REMOVED*** Datensicherheit
+### Datensicherheit
 
 - [x] **Zugriffskontrolle**
   - RBAC mit 6 Rollen ✅
@@ -137,7 +137,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Archivierung
+### Archivierung
 
 - [x] **10-Jahres-Aufbewahrung**
   - Für Handelsbücher
@@ -156,7 +156,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Verfahrensdokumentation
+### Verfahrensdokumentation
 
 - [ ] **GoBD-Verfahrensdokumentation**
   - Datei: `docs/compliance/gobd-verfahrensdokumentation.md`
@@ -174,9 +174,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 **DATEV-EXPORT**
+## 📋 **DATEV-EXPORT**
 
-***REMOVED******REMOVED******REMOVED*** Schnittstelle
+### Schnittstelle
 
 - [x] **DATEV-CSV-Export**
   - Datei: `app.api.v1.endpoints.fibu.py` (export_datev)
@@ -195,25 +195,25 @@
 
 ---
 
-***REMOVED******REMOVED*** 🧪 **AUTOMATED TESTS**
+## 🧪 **AUTOMATED TESTS**
 
-***REMOVED******REMOVED******REMOVED*** Test-Suite: `tests/compliance/test_gobd.py`
+### Test-Suite: `tests/compliance/test_gobd.py`
 
 ```python
 def test_audit_log_immutable():
-    ***REMOVED*** Audit-Log kann nicht geändert werden
+    # Audit-Log kann nicht geändert werden
     log_entry = create_audit_log()
     with pytest.raises(Exception):
         db.query(AuditLog).filter(id=log_entry.id).update({...})
 
 def test_belegnummern_lueckenlos():
-    ***REMOVED*** Keine Lücken in Belegnummern
+    # Keine Lücken in Belegnummern
     invoices = db.query(Invoice).order_by(Invoice.number).all()
     numbers = [int(inv.number.split('-')[1]) for inv in invoices]
     assert numbers == list(range(1, len(numbers) + 1))
 
 def test_timestamp_plausibility():
-    ***REMOVED*** Buchungsdatum ≤ Belegdatum + 10 Tage
+    # Buchungsdatum ≤ Belegdatum + 10 Tage
     entries = db.query(JournalEntry).all()
     for entry in entries:
         delta = (entry.posting_date - entry.entry_date).days
@@ -222,7 +222,7 @@ def test_timestamp_plausibility():
 
 ---
 
-***REMOVED******REMOVED*** 📊 **GOBD-COMPLIANCE-SCORE**
+## 📊 **GOBD-COMPLIANCE-SCORE**
 
 | Grundsatz | Status | Score |
 |-----------|--------|-------|
@@ -238,7 +238,7 @@ def test_timestamp_plausibility():
 
 ---
 
-***REMOVED******REMOVED*** 📞 **GOBD-CONTACT**
+## 📞 **GOBD-CONTACT**
 
 **Tax-Consultant:**
 - Name: [Steuerberater]
@@ -248,4 +248,5 @@ def test_timestamp_plausibility():
 - Verfahrensdokumentation bereithalten
 - DATEV-Exporte verfügbar
 - Audit-Trail jederzeit abrufbar
+
 

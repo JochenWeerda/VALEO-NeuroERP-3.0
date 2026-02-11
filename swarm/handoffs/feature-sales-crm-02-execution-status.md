@@ -1,10 +1,10 @@
-***REMOVED*** SALES-CRM-02: Ausführungsstatus
+# SALES-CRM-02: Ausführungsstatus
 
-***REMOVED******REMOVED*** Datum: 2025-01-24
+## Datum: 2025-01-24
 
-***REMOVED******REMOVED*** Status: ⚠️ Teilweise ausgeführt
+## Status: ⚠️ Teilweise ausgeführt
 
-***REMOVED******REMOVED******REMOVED*** Migration
+### Migration
 
 **Status:** ⚠️ Nicht ausgeführt (psql nicht verfügbar)
 
@@ -16,18 +16,18 @@
 
 1. **PostgreSQL Client installieren:**
    ```powershell
-   ***REMOVED*** Mit Chocolatey
+   # Mit Chocolatey
    choco install postgresql
 
-   ***REMOVED*** Oder Download von: https://www.postgresql.org/download/windows/
+   # Oder Download von: https://www.postgresql.org/download/windows/
    ```
 
 2. **Docker verwenden (falls PostgreSQL-Container läuft):**
    ```powershell
-   ***REMOVED*** Finde PostgreSQL-Container
+   # Finde PostgreSQL-Container
    docker ps | Select-String postgres
 
-   ***REMOVED*** Führe Migration aus
+   # Führe Migration aus
    docker exec -i <container-name> psql -U postgres -d valeo_neuroerp < migrations\sql\crm\003_add_sales_fields_to_customers.sql
    ```
 
@@ -40,7 +40,7 @@
    - Manche Projekte führen Migrationen beim Start automatisch aus
    - Prüfe Backend-Logs beim Start
 
-***REMOVED******REMOVED******REMOVED*** Tests
+### Tests
 
 **Status:** ⚠️ Bereit, aber nicht ausgeführt
 
@@ -51,14 +51,14 @@
 
 **Ausführung (wenn Frontend läuft):**
 ```powershell
-***REMOVED*** Nur Sales-CRM-02 Tests
+# Nur Sales-CRM-02 Tests
 npx playwright test tests\e2e\sales\customer-master-sales-fields.spec.ts
 
-***REMOVED*** Mit UI (interaktiv)
+# Mit UI (interaktiv)
 npx playwright test tests\e2e\sales\customer-master-sales-fields.spec.ts --ui
 ```
 
-***REMOVED******REMOVED******REMOVED*** Was wurde erfolgreich erledigt
+### Was wurde erfolgreich erledigt
 
 ✅ **Code-Implementierung:**
 - Backend-Model erweitert
@@ -78,17 +78,17 @@ npx playwright test tests\e2e\sales\customer-master-sales-fields.spec.ts --ui
 - PowerShell-Migrations-Skript erstellt und korrigiert
 - Bash-Migrations-Skript erstellt
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
-***REMOVED******REMOVED******REMOVED*** Sofort (wenn Datenbank verfügbar)
+### Sofort (wenn Datenbank verfügbar)
 
 1. **PostgreSQL Client installieren oder Docker verwenden**
 2. **Migration ausführen:**
    ```powershell
-   ***REMOVED*** Mit psql (nach Installation)
+   # Mit psql (nach Installation)
    psql -h localhost -p 5432 -U postgres -d valeo_neuroerp -f migrations\sql\crm\003_add_sales_fields_to_customers.sql
 
-   ***REMOVED*** Oder mit Docker
+   # Oder mit Docker
    docker exec -i <postgres-container> psql -U postgres -d valeo_neuroerp < migrations\sql\crm\003_add_sales_fields_to_customers.sql
    ```
 
@@ -101,7 +101,7 @@ npx playwright test tests\e2e\sales\customer-master-sales-fields.spec.ts --ui
      AND column_name IN ('price_group', 'tax_category');
    ```
 
-***REMOVED******REMOVED******REMOVED*** Später (wenn Frontend läuft)
+### Später (wenn Frontend läuft)
 
 1. **Frontend starten:**
    ```powershell
@@ -119,7 +119,7 @@ npx playwright test tests\e2e\sales\customer-master-sales-fields.spec.ts --ui
    - Prüfe "konditionen" Tab → `preisgruppe`
    - Prüfe "steuern" Tab → `steuerkategorie`
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 **Implementierung:** ✅ 100% abgeschlossen  
 **Migration:** ⚠️ Bereit, wartet auf psql/Docker  
@@ -132,4 +132,5 @@ npx playwright test tests\e2e\sales\customer-master-sales-fields.spec.ts --ui
 
 **Erstellt:** 2025-01-24  
 **Status:** ✅ Code-Implementierung abgeschlossen, ⚠️ Ausführung wartet auf Umgebung
+
 

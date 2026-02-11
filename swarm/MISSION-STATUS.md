@@ -1,10 +1,10 @@
-***REMOVED*** Finance Mission - Status
+# Finance Mission - Status
 
 **Datum:** 2025-11-24  
 **Status:** In Progress  
 **Mission:** Finance Module Exploration
 
-***REMOVED******REMOVED*** Was wurde durchgeführt
+## Was wurde durchgeführt
 
 1. ✅ **Mission-Script erstellt**: `swarm/run_finance_mission.py`
    - Playwright-basierte Exploration (statt browser-use wegen SSO-Login)
@@ -15,25 +15,25 @@
 
 3. ✅ **Mission gestartet**: Läuft im Hintergrund
 
-***REMOVED******REMOVED*** Aktueller Stand
+## Aktueller Stand
 
 - **Screenshots erstellt**: 1 (Homepage/Login)
   - `evidence/screenshots/finance/20251124_094028_01_homepage.png`
 
 - **Handoff-Notizen**: Noch nicht erstellt (Mission läuft noch)
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 Die Mission wartet möglicherweise auf **manuellen Login**, da das Frontend SSO verwendet.
 
-***REMOVED******REMOVED******REMOVED*** Option 1: Mission manuell fortsetzen
+### Option 1: Mission manuell fortsetzen
 
 1. Öffne den Browser-Fenster, das von Playwright geöffnet wurde
 2. Führe den SSO-Login manuell durch
 3. Drücke Enter im Terminal, wenn du eingeloggt bist
 4. Die Mission setzt automatisch fort
 
-***REMOVED******REMOVED******REMOVED*** Option 2: Mission neu starten (mit bereits eingeloggtem Browser)
+### Option 2: Mission neu starten (mit bereits eingeloggtem Browser)
 
 Falls du bereits eingeloggt bist, kannst du die Mission neu starten:
 
@@ -42,11 +42,11 @@ $env:NEUROERP_URL="http://localhost:3000"
 python swarm/run_finance_mission.py
 ```
 
-***REMOVED******REMOVED******REMOVED*** Option 3: Mission anpassen für automatischen Login
+### Option 3: Mission anpassen für automatischen Login
 
 Falls ein Demo-Login-Endpoint verfügbar ist, kann das Script angepasst werden, um automatisch einzuloggen.
 
-***REMOVED******REMOVED*** Erwartete Outputs
+## Erwartete Outputs
 
 Nach erfolgreicher Mission:
 
@@ -69,9 +69,9 @@ Nach erfolgreicher Mission:
   - Findings
   - Next Steps für Test-Planner und GAP-Analyst
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Mission hängt beim Login
+### Mission hängt beim Login
 
 **Problem**: Script wartet auf manuellen Login
 
@@ -80,39 +80,40 @@ Nach erfolgreicher Mission:
 2. Führe Login durch
 3. Drücke Enter im Terminal
 
-***REMOVED******REMOVED******REMOVED*** Keine Screenshots erstellt
+### Keine Screenshots erstellt
 
 **Problem**: Mission wurde nicht gestartet oder fehlgeschlagen
 
 **Lösung**:
 ```powershell
-***REMOVED*** Prüfe ob Python-Prozess läuft
+# Prüfe ob Python-Prozess läuft
 Get-Process python
 
-***REMOVED*** Starte Mission neu
+# Starte Mission neu
 python swarm/run_finance_mission.py
 ```
 
-***REMOVED******REMOVED******REMOVED*** Browser öffnet sich nicht
+### Browser öffnet sich nicht
 
 **Problem**: Playwright kann Browser nicht starten
 
 **Lösung**:
 ```powershell
-***REMOVED*** Installiere Browser erneut
+# Installiere Browser erneut
 playwright install chromium
 ```
 
-***REMOVED******REMOVED*** Mission-Status prüfen
+## Mission-Status prüfen
 
 ```powershell
-***REMOVED*** Screenshots prüfen
+# Screenshots prüfen
 Get-ChildItem evidence\screenshots\finance
 
-***REMOVED*** Handoff-Notizen prüfen
+# Handoff-Notizen prüfen
 Get-ChildItem swarm\handoffs
 
-***REMOVED*** Python-Prozess prüfen
+# Python-Prozess prüfen
 Get-Process python
 ```
+
 

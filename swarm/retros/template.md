@@ -1,15 +1,15 @@
-***REMOVED*** Sprint Retrospective - Template
+# Sprint Retrospective - Template
 
 **Sprint:** Sprint X  
 **Datum:** YYYY-MM-DD  
 **Dauer:** 1 Stunde  
 **Teilnehmer:** [Liste]
 
-***REMOVED******REMOVED*** Format: Start-Stop-Continue
+## Format: Start-Stop-Continue
 
 ---
 
-***REMOVED******REMOVED*** 🟢 Start (Was sollten wir anfangen?)
+## 🟢 Start (Was sollten wir anfangen?)
 
 - [ ] [Idea 1] - Vorgeschlagen von: [Name]
 - [ ] [Idea 2] - Vorgeschlagen von: [Name]
@@ -22,7 +22,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 🛑 Stop (Was sollten wir stoppen?)
+## 🛑 Stop (Was sollten wir stoppen?)
 
 - [ ] [Problem 1] - Vorgeschlagen von: [Name]
 - [ ] [Problem 2] - Vorgeschlagen von: [Name]
@@ -35,7 +35,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Continue (Was sollten wir weitermachen?)
+## 🔄 Continue (Was sollten wir weitermachen?)
 
 - [ ] [Practice 1] - Vorgeschlagen von: [Name]
 - [ ] [Practice 2] - Vorgeschlagen von: [Name]
@@ -48,7 +48,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 📊 Sprint-Metrics
+## 📊 Sprint-Metrics
 
 **Velocity:** X Story Points  
 **Test-Coverage:** X%  
@@ -65,7 +65,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Action Items
+## 🎯 Action Items
 
 - [ ] Action 1 - Owner: [Name] - Due: [Datum] - Priority: High/Medium/Low
 - [ ] Action 2 - Owner: [Name] - Due: [Datum] - Priority: High/Medium/Low
@@ -73,7 +73,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 📝 Notes
+## 📝 Notes
 
 **Wichtige Erkenntnisse:**
 - [Erkenntnis 1]
@@ -86,4 +86,5 @@
 ---
 
 **Nächste Retro:** Sprint X+1, YYYY-MM-DD, 15:00 Uhr
+
 

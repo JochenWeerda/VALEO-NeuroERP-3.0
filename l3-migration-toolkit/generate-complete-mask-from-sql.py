@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Generate a complete mask-builder JSON (L3 layout) from the SQL schema definition.
 
@@ -39,7 +39,7 @@ def load_sql_tables(sql_path: Path) -> Dict[str, str]:
     if not spec or not spec.loader:
         raise RuntimeError(f"Unable to load SQL module from {sql_path}")
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)  ***REMOVED*** type: ignore[attr-defined]
+    spec.loader.exec_module(module)  # type: ignore[attr-defined]
     if not hasattr(module, "SQL_TABLES"):
         raise RuntimeError("SQL module does not expose SQL_TABLES.")
     return getattr(module, "SQL_TABLES")
@@ -173,3 +173,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

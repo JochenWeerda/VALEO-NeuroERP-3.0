@@ -9,13 +9,13 @@ import asyncio
 import logging
 from pathlib import Path
 
-***REMOVED*** Lokales Repo-Verzeichnis priorisieren
+# Lokales Repo-Verzeichnis priorisieren
 repo_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(repo_root))
 
 from backend.apm_framework.llm_service import LLMService, LLMProvider
 
-***REMOVED*** Logging konfigurieren
+# Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -23,15 +23,15 @@ logger = logging.getLogger(__name__)
 async def test_ollama_connection():
     """Testet die Verbindung zu Ollama."""
     try:
-        ***REMOVED*** Ollama-Service initialisieren
+        # Ollama-Service initialisieren
         llm_service = LLMService(LLMProvider.OLLAMA)
         logger.info("Ollama-Service initialisiert")
         
-        ***REMOVED*** Verfügbare Modelle prüfen
+        # Verfügbare Modelle prüfen
         base_url = llm_service.base_url
         logger.info(f"Ollama Base-URL: {base_url}")
         
-        ***REMOVED*** Test-Anforderung
+        # Test-Anforderung
         test_requirement = "Als Disponent möchte ich eingehende Bestellungen automatisch prüfen lassen."
         
         logger.info("Teste Anforderungsanalyse mit Ollama...")
@@ -44,7 +44,7 @@ async def test_ollama_connection():
         print("\n=== Ollama-Analyse ===")
         print(analysis)
         
-        ***REMOVED*** Teste Klärungsfragen
+        # Teste Klärungsfragen
         logger.info("Teste Generierung von Klärungsfragen...")
         questions = await llm_service.generate_clarification_questions(
             analysis,
@@ -71,7 +71,7 @@ async def test_ollama_models():
         base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
         
         async with aiohttp.ClientSession() as session:
-            ***REMOVED*** Verfügbare Modelle abrufen
+            # Verfügbare Modelle abrufen
             async with session.get(f"{base_url}/api/tags") as response:
                 if response.status == 200:
                     models_data = await response.json()
@@ -100,18 +100,18 @@ async def test_ollama_van_mode():
         from backend.apm_framework.mongodb_connector import APMMongoDBConnector
         from backend.apm_framework.van_mode import VANMode
         
-        ***REMOVED*** MongoDB-Connector (Mock für Test)
+        # MongoDB-Connector (Mock für Test)
         mongo_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
         mongo_db = os.getenv("MONGODB_DB", "valeo_neuroerp")
         
         connector = APMMongoDBConnector(mongo_uri, mongo_db)
         
-        ***REMOVED*** VAN-Modus mit Ollama initialisieren
+        # VAN-Modus mit Ollama initialisieren
         van_mode = VANMode(connector, "test-ollama", "ollama")
         
         logger.info("VAN-Modus mit Ollama initialisiert")
         
-        ***REMOVED*** Test-Anforderung
+        # Test-Anforderung
         test_requirement = """
         Als Disponent im VALEO NeuroERP möchte ich, dass eingehende Kundenbestellungen 
         automatisch auf Vollständigkeit und Plausibilität geprüft werden. 
@@ -140,7 +140,7 @@ async def main():
     print("🚀 Ollama-Integration Test für VALEO NeuroERP VAN-Modus")
     print("=" * 60)
     
-    ***REMOVED*** Umgebungsvariablen setzen
+    # Umgebungsvariablen setzen
     os.environ.setdefault("OLLAMA_BASE_URL", "http://localhost:11434")
     os.environ.setdefault("OLLAMA_MODEL", "llama3.2:3b")
     
@@ -149,22 +149,22 @@ async def main():
     print(f"   Standard-Modell: {os.getenv('OLLAMA_MODEL')}")
     print()
     
-    ***REMOVED*** Test 1: Ollama-Verbindung
+    # Test 1: Ollama-Verbindung
     print("📡 Test 1: Ollama-Verbindung")
     connection_ok = await test_ollama_connection()
     print()
     
-    ***REMOVED*** Test 2: Verfügbare Modelle
+    # Test 2: Verfügbare Modelle
     print("📦 Test 2: Verfügbare Modelle")
     models = await test_ollama_models()
     print()
     
-    ***REMOVED*** Test 3: VAN-Modus Integration
+    # Test 3: VAN-Modus Integration
     print("🧠 Test 3: VAN-Modus mit Ollama")
     van_ok = await test_ollama_van_mode()
     print()
     
-    ***REMOVED*** Zusammenfassung
+    # Zusammenfassung
     print("📊 Test-Zusammenfassung")
     print("=" * 30)
     print(f"✅ Ollama-Verbindung: {'OK' if connection_ok else 'FEHLER'}")
@@ -186,3 +186,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+

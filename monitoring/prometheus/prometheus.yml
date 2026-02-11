@@ -1,4 +1,4 @@
-***REMOVED*** Prometheus Configuration für VALEO-NeuroERP
+# Prometheus Configuration für VALEO-NeuroERP
 
 global:
   scrape_interval: 15s
@@ -7,20 +7,20 @@ global:
     cluster: 'valeo-erp'
     environment: 'production'
 
-***REMOVED*** AlertManager Configuration
+# AlertManager Configuration
 alerting:
   alertmanagers:
     - static_configs:
         - targets:
             - alertmanager:9093
 
-***REMOVED*** Load Alert Rules
+# Load Alert Rules
 rule_files:
   - 'alerts.yml'
 
-***REMOVED*** Scrape Configurations
+# Scrape Configurations
 scrape_configs:
-  ***REMOVED*** VALEO-ERP API
+  # VALEO-ERP API
   - job_name: 'valeo-erp'
     static_configs:
       - targets: ['host.docker.internal:8000']
@@ -28,61 +28,62 @@ scrape_configs:
     scrape_interval: 10s
     scrape_timeout: 5s
 
-  ***REMOVED*** Prometheus selbst
+  # Prometheus selbst
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
 
-  ***REMOVED*** AlertManager
+  # AlertManager
   - job_name: 'alertmanager'
     static_configs:
       - targets: ['alertmanager:9093']
 
-  ***REMOVED*** Grafana
+  # Grafana
   - job_name: 'grafana'
     static_configs:
       - targets: ['grafana:3000']
 
-  ***REMOVED*** PostgreSQL (falls Exporter vorhanden)
+  # PostgreSQL (falls Exporter vorhanden)
   - job_name: 'postgresql'
     static_configs:
       - targets: ['postgres-exporter:9187']
-    ***REMOVED*** Optional: Postgres-Exporter als separater Container
+    # Optional: Postgres-Exporter als separater Container
 
-  ***REMOVED*** Node-Exporter (für Host-Metriken)
+  # Node-Exporter (für Host-Metriken)
   - job_name: 'node-exporter'
     static_configs:
       - targets: ['node-exporter:9100']
-    ***REMOVED*** Optional: Node-Exporter für CPU/Memory/Disk
+    # Optional: Node-Exporter für CPU/Memory/Disk
 
-  ***REMOVED*** Kubernetes-Pods (für Production)
+  # Kubernetes-Pods (für Production)
   - job_name: 'kubernetes-pods'
     kubernetes_sd_configs:
       - role: pod
     
     relabel_configs:
-      ***REMOVED*** Nur Pods mit prometheus.io/scrape annotation
+      # Nur Pods mit prometheus.io/scrape annotation
       - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
         action: keep
         regex: true
       
-      ***REMOVED*** Port aus annotation
+      # Port aus annotation
       - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
         action: replace
         target_label: __address__
         regex: ([^:]+)(?::\d+)?;(\d+)
         replacement: $1:$2
       
-      ***REMOVED*** Path aus annotation
+      # Path aus annotation
       - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
         action: replace
         target_label: __metrics_path__
         regex: (.+)
       
-      ***REMOVED*** Labels
+      # Labels
       - source_labels: [__meta_kubernetes_namespace]
         target_label: namespace
       
       - source_labels: [__meta_kubernetes_pod_name]
         target_label: pod
+
 

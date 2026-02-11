@@ -1,16 +1,16 @@
-***REMOVED*** VALEO NeuroERP 3.0 - HR Domain
+# VALEO NeuroERP 3.0 - HR Domain
 
 Human Resources Domain für Mitarbeiterverwaltung, Rollen & Berechtigungen, Zeiterfassung, Abwesenheiten/Urlaub, Schichtplanung und Payroll-Vorbereitung.
 
-***REMOVED******REMOVED*** 🏗️ Architektur
+## 🏗️ Architektur
 
-***REMOVED******REMOVED******REMOVED*** Domain-Driven Design (DDD) + Microservices
+### Domain-Driven Design (DDD) + Microservices
 - **Domain Layer**: Geschäftslogik und Entitäten
 - **Application Layer**: Use Cases und Services
 - **Infrastructure Layer**: Repository-Implementierungen, Database, Messaging
 - **Presentation Layer**: REST API mit Fastify
 
-***REMOVED******REMOVED******REMOVED*** Technologie-Stack
+### Technologie-Stack
 - **Runtime**: Node.js 20+ mit TypeScript
 - **Framework**: Fastify mit OpenAPI/Swagger
 - **Database**: PostgreSQL mit Drizzle ORM
@@ -18,9 +18,9 @@ Human Resources Domain für Mitarbeiterverwaltung, Rollen & Berechtigungen, Zeit
 - **Messaging**: NATS/Kafka (Event-Driven Architecture)
 - **Observability**: OpenTelemetry, Pino Logging
 
-***REMOVED******REMOVED*** 📦 Domänenmodell
+## 📦 Domänenmodell
 
-***REMOVED******REMOVED******REMOVED*** Entities (Aggregate Roots)
+### Entities (Aggregate Roots)
 - **Employee**: Mitarbeiter mit Personaldaten, Kontakt, Organisation
 - **Role**: HR-spezifische Rollen (separat von Systemrollen)
 - **TimeEntry**: Zeiterfassung mit Validierung und Genehmigungsworkflow
@@ -28,17 +28,17 @@ Human Resources Domain für Mitarbeiterverwaltung, Rollen & Berechtigungen, Zeit
 - **LeaveRequest**: Urlaubs-/Abwesenheitsanträge
 - **PayrollRun**: Payroll-Vorbereitung und Export (keine FiBu-Buchungen)
 
-***REMOVED******REMOVED******REMOVED*** Wichtige Invarianten
+### Wichtige Invarianten
 - TimeEntry.end > start, breakMinutes >= 0
 - Überlappungsprüfung für Shift-Zuweisungen und TimeEntry
 - LeaveRequest blockiert Arbeitszeit; Genehmigungspfad
 - PayrollRun.status=Locked → keine Änderungen an TimeEntries
 
-***REMOVED******REMOVED*** 🌐 API-Endpunkte
+## 🌐 API-Endpunkte
 
-***REMOVED******REMOVED******REMOVED*** Base URL: `/hr/api/v1`
+### Base URL: `/hr/api/v1`
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Employees
+#### Employees
 - `POST /employees` - Mitarbeiter erstellen
 - `GET /employees/:id` - Mitarbeiter abrufen
 - `GET /employees` - Mitarbeiter auflisten (mit Filterung/Pagination)
@@ -48,7 +48,7 @@ Human Resources Domain für Mitarbeiterverwaltung, Rollen & Berechtigungen, Zeit
 - `POST /employees/:id/deactivate` - Mitarbeiter deaktivieren
 - `POST /employees/:id/reactivate` - Mitarbeiter reaktivieren
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Time Entries
+#### Time Entries
 - `POST /time-entries` - Zeiteintrag erstellen
 - `GET /time-entries/:id` - Zeiteintrag abrufen
 - `GET /time-entries` - Zeiteinträge auflisten
@@ -58,20 +58,20 @@ Human Resources Domain für Mitarbeiterverwaltung, Rollen & Berechtigungen, Zeit
 - `GET /employees/:employeeId/time-entries` - Mitarbeiter-Zeiteinträge
 - `GET /time-entries/pending` - Ausstehende Genehmigungen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Health & Monitoring
+#### Health & Monitoring
 - `GET /health` - Health Check
 - `GET /ready` - Readiness Check (DB-Verbindung)
 - `GET /live` - Liveness Check
 - `GET /docs` - OpenAPI Dokumentation
 
-***REMOVED******REMOVED*** 🔐 Sicherheit & Berechtigung
+## 🔐 Sicherheit & Berechtigung
 
-***REMOVED******REMOVED******REMOVED*** Authentication
+### Authentication
 - JWT-Token mit JWKS-Validierung
 - Mandantenfähigkeit über `x-tenant-id` Header
 - Token-Expiration und Refresh-Handling
 
-***REMOVED******REMOVED******REMOVED*** Authorization (RBAC/ABAC)
+### Authorization (RBAC/ABAC)
 - **HR-spezifische Permissions**:
   - `hr:employee:read|write|delete`
   - `hr:time:read|write|approve`
@@ -80,66 +80,66 @@ Human Resources Domain für Mitarbeiterverwaltung, Rollen & Berechtigungen, Zeit
   - `hr:payroll:read|write|export`
   - `hr:role:read|write`
 
-***REMOVED******REMOVED******REMOVED*** DSGVO-Compliance
+### DSGVO-Compliance
 - Datenminimierung: Sensible Felder nur bei Bedarf
 - Audit-Trail: createdBy/updatedBy, Change-Logs
 - Right to be forgotten: Soft-Delete + Anonymisierung
 - Export/Deletion APIs
 
-***REMOVED******REMOVED*** 🚀 Entwicklung
+## 🚀 Entwicklung
 
-***REMOVED******REMOVED******REMOVED*** Voraussetzungen
+### Voraussetzungen
 - Node.js 20+
 - PostgreSQL 14+
 - pnpm (empfohlen)
 
-***REMOVED******REMOVED******REMOVED*** Installation
+### Installation
 ```bash
-***REMOVED*** Dependencies installieren
+# Dependencies installieren
 pnpm install
 
-***REMOVED*** Environment konfigurieren
+# Environment konfigurieren
 cp env.example .env
-***REMOVED*** .env bearbeiten mit lokalen Werten
+# .env bearbeiten mit lokalen Werten
 
-***REMOVED*** Database Setup
-pnpm run migrate:gen  ***REMOVED*** Generiere Migrations
-pnpm run migrate:up   ***REMOVED*** Führe Migrations aus
+# Database Setup
+pnpm run migrate:gen  # Generiere Migrations
+pnpm run migrate:up   # Führe Migrations aus
 ```
 
-***REMOVED******REMOVED******REMOVED*** Entwicklung
+### Entwicklung
 ```bash
-***REMOVED*** Development Server
+# Development Server
 pnpm run dev
 
-***REMOVED*** Build
+# Build
 pnpm run build
 
-***REMOVED*** Tests
+# Tests
 pnpm run test
 pnpm run test:watch
 pnpm run test:coverage
 
-***REMOVED*** Linting
+# Linting
 pnpm run lint
 pnpm run lint:fix
 ```
 
-***REMOVED******REMOVED******REMOVED*** Docker
+### Docker
 ```bash
-***REMOVED*** Build Image
+# Build Image
 docker build -t valeo-neuroerp-hr-domain .
 
-***REMOVED*** Run Container
+# Run Container
 docker run -p 3030:3030 \
   -e POSTGRES_URL=postgres://user:pass@host:5432/hr_domain \
   -e JWKS_URL=https://auth.example.com/.well-known/jwks.json \
   valeo-neuroerp-hr-domain
 ```
 
-***REMOVED******REMOVED*** 📊 Domain Events
+## 📊 Domain Events
 
-***REMOVED******REMOVED******REMOVED*** Event-Driven Architecture
+### Event-Driven Architecture
 Alle wichtigen Business-Events werden publiziert:
 
 - `hr.employee.created|updated|deactivated|reactivated`
@@ -149,66 +149,66 @@ Alle wichtigen Business-Events werden publiziert:
 - `hr.shift.created|assigned|unassigned`
 - `hr.payroll.prepared|locked|exported`
 
-***REMOVED******REMOVED******REMOVED*** Event-Consumer (Finance-Domain)
+### Event-Consumer (Finance-Domain)
 Finance-Domain hört insbesondere auf:
 - `hr.payroll.exported` - Payroll-Daten für FiBu-Integration
 - Enthält Summen je Mitarbeiter/Periode + Referenzen
 - **Keine doppelte Steuer-/Kontenlogik in HR**
 
-***REMOVED******REMOVED*** 🔌 Abgrenzung zu anderen Domains
+## 🔌 Abgrenzung zu anderen Domains
 
-***REMOVED******REMOVED******REMOVED*** Finance-Domain
+### Finance-Domain
 - Finance erstellt Buchungssätze, Zahlläufe, Kontenabgleiche
 - HR liefert Payroll-Export-Daten via Events
 - **Keine doppelte Steuer-/Kontenlogik in HR**
 
-***REMOVED******REMOVED******REMOVED*** CRM-Domain
+### CRM-Domain
 - Personendaten der Mitarbeiter nicht in CRM pflegen
 - HR ist authoritative für Mitarbeiterdaten
 - CRM kann via BFF "Mitarbeiterkontakt" anzeigen
 
-***REMOVED******REMOVED******REMOVED*** Auth/Shared
+### Auth/Shared
 - Systemweite Rollen/Permissions aus `@valero-neuroerp/auth`
 - HR-Role dient fachlicher HR-Rollenvergabe
 - Duplikate vermeiden, Mappings vorsehen
 
-***REMOVED******REMOVED*** 🧪 Testing
+## 🧪 Testing
 
-***REMOVED******REMOVED******REMOVED*** Unit Tests
+### Unit Tests
 - Domain-Entitäten und Business Logic
 - Repository-Implementierungen
 - Service-Layer Use Cases
 
-***REMOVED******REMOVED******REMOVED*** Integration Tests
+### Integration Tests
 - API-Endpunkte mit Supertest
 - Database-Integration mit Test-Container
 - Event-Publishing und -Consumption
 
-***REMOVED******REMOVED******REMOVED*** Contract Tests
+### Contract Tests
 - Zod-Schemas für Type Safety
 - OpenAPI-Schema Snapshots
 - Event-Schema Validation
 
-***REMOVED******REMOVED*** 📈 Observability
+## 📈 Observability
 
-***REMOVED******REMOVED******REMOVED*** Logging
+### Logging
 - Strukturierte Logs mit Pino
 - Request-ID für Tracing
 - Sensible Daten maskiert
 
-***REMOVED******REMOVED******REMOVED*** Metrics
+### Metrics
 - OpenTelemetry Integration
 - Custom HR-Metrics (Employee Count, Time Tracking Stats)
 - Performance-Monitoring
 
-***REMOVED******REMOVED******REMOVED*** Health Checks
+### Health Checks
 - `/health` - Service Status
 - `/ready` - Database + Dependencies
 - `/live` - Basic Liveness
 
-***REMOVED******REMOVED*** 🚀 Deployment
+## 🚀 Deployment
 
-***REMOVED******REMOVED******REMOVED*** Production Checklist
+### Production Checklist
 - [ ] Environment Variables konfiguriert
 - [ ] Database Migrations ausgeführt
 - [ ] JWKS-URL korrekt gesetzt
@@ -217,19 +217,19 @@ Finance-Domain hört insbesondere auf:
 - [ ] OpenAPI-Dokumentation verfügbar
 - [ ] Monitoring/Alerting konfiguriert
 
-***REMOVED******REMOVED******REMOVED*** Scaling Considerations
+### Scaling Considerations
 - Horizontal Scaling mit Load Balancer
 - Database Connection Pooling
 - Event-Queue Partitioning nach Tenant
 - Redis für Session/Cache (optional)
 
-***REMOVED******REMOVED*** 📚 API-Dokumentation
+## 📚 API-Dokumentation
 
 Nach dem Start verfügbar unter:
 - **Swagger UI**: http://localhost:3030/docs
 - **OpenAPI JSON**: http://localhost:3030/docs/json
 
-***REMOVED******REMOVED*** 🤝 Contributing
+## 🤝 Contributing
 
 1. Feature Branch erstellen
 2. Tests schreiben/aktualisieren
@@ -237,8 +237,9 @@ Nach dem Start verfügbar unter:
 4. CI/CD Pipeline durchlaufen lassen
 5. Merge nach Main Branch
 
-***REMOVED******REMOVED*** 📄 License
+## 📄 License
 
 Proprietary - VALEO NeuroERP 3.0
+
 
 

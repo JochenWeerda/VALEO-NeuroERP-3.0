@@ -1,4 +1,4 @@
-***REMOVED*** Phase 1.5 - Kampagnenmanagement
+# Phase 1.5 - Kampagnenmanagement
 
 **Status:** 🚀 In Progress  
 **Priorität:** 🟡 Mittel  
@@ -8,7 +8,7 @@
 **Owner:** Marketing-Team  
 **Aufwand:** 3-4 Wochen
 
-***REMOVED******REMOVED*** Mission Overview
+## Mission Overview
 
 Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - Email-Kampagnen mit Templates
@@ -18,9 +18,9 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - Marketing-ROI Measurement
 - Campaign-Performance-Dashboard
 
-***REMOVED******REMOVED*** Backend Tasks
+## Backend Tasks
 
-***REMOVED******REMOVED******REMOVED*** 1. Service erweitern: `services/crm-marketing/`
+### 1. Service erweitern: `services/crm-marketing/`
 - [ ] Campaign-Models (SQLAlchemy)
 - [ ] Campaign-Template-Models
 - [ ] Campaign-Recipient-Models
@@ -28,7 +28,7 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - [ ] Pydantic-Schemas
 - [ ] Alembic-Migrationen
 
-***REMOVED******REMOVED******REMOVED*** 2. Database Models
+### 2. Database Models
 - [ ] `Campaign` Entity:
   - `id`, `tenant_id`
   - `name`, `description`
@@ -77,7 +77,7 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
   - `recipient_count`
   - `open_rate`, `click_rate`, `conversion_rate`
 
-***REMOVED******REMOVED******REMOVED*** 3. API Endpoints
+### 3. API Endpoints
 - [ ] `POST /campaigns` - Campaign erstellen
 - [ ] `GET /campaigns` - Liste mit Filtern
 - [ ] `GET /campaigns/{id}` - Detail
@@ -98,7 +98,7 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - [ ] `PUT /campaigns/templates/{id}` - Template aktualisieren
 - [ ] `DELETE /campaigns/templates/{id}` - Template löschen
 
-***REMOVED******REMOVED******REMOVED*** 4. Business Logic
+### 4. Business Logic
 - [ ] **Campaign-Scheduler**:
   - Scheduled Campaigns automatisch starten
   - Background-Job für Versand
@@ -126,7 +126,7 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
   - Revenue-Attribution
   - ROI-Berechnung
 
-***REMOVED******REMOVED******REMOVED*** 5. Events
+### 5. Events
 - [ ] `crm.campaign.created`
 - [ ] `crm.campaign.started`
 - [ ] `crm.campaign.completed`
@@ -135,16 +135,16 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - [ ] `crm.campaign.email.clicked`
 - [ ] `crm.campaign.converted`
 
-***REMOVED******REMOVED*** Frontend Tasks
+## Frontend Tasks
 
-***REMOVED******REMOVED******REMOVED*** 1. Campaigns Liste
+### 1. Campaigns Liste
 - [ ] `packages/frontend-web/src/pages/crm/campaigns.tsx`
   - ListReport mit Filtern
   - Spalten: Name, Type, Status, Segment, Recipients, Open Rate, Click Rate, Created
   - Bulk-Actions: Start, Pause, Cancel, Delete
   - Export-Funktion
 
-***REMOVED******REMOVED******REMOVED*** 2. Campaign Detail
+### 2. Campaign Detail
 - [ ] `packages/frontend-web/src/pages/crm/campaign-detail.tsx`
   - ObjectPage mit Tabs:
     - Grundinformationen
@@ -154,14 +154,14 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
     - Performance (Charts & Metriken)
   - Aktionen: Save, Schedule, Start, Pause, Resume, Cancel, Test Send
 
-***REMOVED******REMOVED******REMOVED*** 3. Campaign Template Editor
+### 3. Campaign Template Editor
 - [ ] `packages/frontend-web/src/pages/crm/campaign-template-editor.tsx`
   - WYSIWYG-Editor für Email-Templates
   - Variable-Insertion
   - Preview-Funktion
   - Template-Vorlagen
 
-***REMOVED******REMOVED******REMOVED*** 4. Campaign Performance Dashboard
+### 4. Campaign Performance Dashboard
 - [ ] `packages/frontend-web/src/pages/crm/campaign-performance.tsx`
   - Charts: Open Rate Over Time
   - Charts: Click Rate Over Time
@@ -169,7 +169,7 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
   - Charts: Revenue Attribution
   - Metriken: Total Sent, Delivered, Opened, Clicked, Converted, Revenue, ROI
 
-***REMOVED******REMOVED******REMOVED*** 5. Campaign Builder (Wizard)
+### 5. Campaign Builder (Wizard)
 - [ ] `packages/frontend-web/src/pages/crm/campaign-builder.tsx`
   - Multi-Step Wizard:
     1. Campaign-Typ & Name
@@ -179,40 +179,40 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
     5. Schedule
     6. Review & Start
 
-***REMOVED******REMOVED*** Integration Tasks
+## Integration Tasks
 
-***REMOVED******REMOVED******REMOVED*** 1. Email-Service Integration
+### 1. Email-Service Integration
 - [ ] SMTP-Konfiguration
 - [ ] SendGrid/Mailgun/etc. Integration
 - [ ] Template-Rendering
 - [ ] Personalisierung
 
-***REMOVED******REMOVED******REMOVED*** 2. Segment-Integration
+### 2. Segment-Integration
 - [ ] Segment-Auswahl in Campaign-Erstellung
 - [ ] Segment-Member → Campaign-Recipients
 - [ ] Segment-Performance → Campaign-Performance
 
-***REMOVED******REMOVED******REMOVED*** 3. Tracking-Integration
+### 3. Tracking-Integration
 - [ ] Tracking-Pixel für Opens
 - [ ] Link-Wrapping für Clicks
 - [ ] Conversion-Tracking
 - [ ] Event-Publishing
 
-***REMOVED******REMOVED*** Tests
+## Tests
 
-***REMOVED******REMOVED******REMOVED*** 1. Unit Tests
+### 1. Unit Tests
 - [ ] Campaign-Model Tests
 - [ ] Template-Rendering Tests
 - [ ] Event-Tracking Tests
 - [ ] A/B-Test-Logic Tests
 
-***REMOVED******REMOVED******REMOVED*** 2. Integration Tests
+### 2. Integration Tests
 - [ ] API-Endpoint Tests
 - [ ] Email-Sender Tests
 - [ ] Event-Tracking Tests
 - [ ] Performance-Aggregation Tests
 
-***REMOVED******REMOVED******REMOVED*** 3. E2E Tests
+### 3. E2E Tests
 - [ ] `tests/e2e/crm-marketing/campaigns.spec.ts`
   - Campaign erstellen
   - Template erstellen
@@ -221,7 +221,7 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
   - Performance anzeigen
   - A/B-Test konfigurieren
 
-***REMOVED******REMOVED*** Definition of Done
+## Definition of Done
 
 - ✅ Email-Kampagnen können erstellt werden
 - ✅ Templates können verwaltet werden
@@ -232,7 +232,7 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - ✅ ROI-Berechnung funktional
 - ✅ Alle Tests grün
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. Campaign-Models implementieren
 2. Campaign-API-Endpoints implementieren
@@ -249,4 +249,5 @@ Implementierung eines vollständigen Kampagnenmanagement-Systems mit:
 - Email-Marketing Best Practices
 - A/B-Testing Methoden
 - Campaign-Performance-Metriken
+
 

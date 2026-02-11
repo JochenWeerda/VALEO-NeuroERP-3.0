@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 GENXAIS Enhanced Streamlit Dashboard
@@ -16,11 +16,11 @@ from pathlib import Path
 import pandas as pd
 import altair as alt
 
-***REMOVED*** Importiere die Versionskonfiguration
+# Importiere die Versionskonfiguration
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.genxais_version import get_version, get_previous_version
 
-***REMOVED*** Konfiguration
+# Konfiguration
 st.set_page_config(
     page_title="GENXAIS Dashboard",
     page_icon="🧠",
@@ -28,7 +28,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-***REMOVED*** Pfade
+# Pfade
 DATA_DIR = Path("data/dashboard")
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 PHASES_PATH = DATA_DIR / "phases.json"
@@ -37,31 +37,31 @@ GRAPHITI_DIR = DATA_DIR / "graphiti"
 GRAPHITI_DIR.mkdir(parents=True, exist_ok=True)
 DECISION_MAP_FILE_TEMPLATE = "decision_map_{}.json"
 
-***REMOVED*** Daten laden
-@st.cache_data(ttl=10)  ***REMOVED*** Kürzerer TTL für häufigere Aktualisierungen
+# Daten laden
+@st.cache_data(ttl=10)  # Kürzerer TTL für häufigere Aktualisierungen
 def load_data(version=None):
     """Lädt die Daten für das Dashboard"""
     if version is None:
-        ***REMOVED*** Lade Version direkt aus der JSON-Datei
+        # Lade Version direkt aus der JSON-Datei
         try:
             with open("config/genxais_version.json", "r", encoding="utf-8") as f:
                 version_data = json.load(f)
                 version = version_data.get("current", "v1.8")
-                ***REMOVED*** Debug-Ausgabe für die geladene Version
+                # Debug-Ausgabe für die geladene Version
                 print(f"Geladene Version aus genxais_version.json: {version}")
         except Exception as e:
             st.error(f"Fehler beim Laden der Version: {e}")
-            version = "v1.8"  ***REMOVED*** Fallback
+            version = "v1.8"  # Fallback
     
-    ***REMOVED*** Pfade mit Version
+    # Pfade mit Version
     decision_map_path = GRAPHITI_DIR / DECISION_MAP_FILE_TEMPLATE.format(version)
     
-    ***REMOVED*** Lade Phasen-Daten
+    # Lade Phasen-Daten
     if PHASES_PATH.exists():
         try:
             with open(PHASES_PATH, 'r', encoding='utf-8') as f:
                 phases = json.load(f)
-                ***REMOVED*** Stelle sicher, dass die aktuelle Version verwendet wird
+                # Stelle sicher, dass die aktuelle Version verwendet wird
                 phases["version"] = version
         except Exception as e:
             st.error(f"Fehler beim Laden der Phasen-Daten: {e}")
@@ -69,12 +69,12 @@ def load_data(version=None):
     else:
         phases = {"version": version, "phases": [], "current_phase": "Keine Phase aktiv"}
     
-    ***REMOVED*** Lade Pipeline-Daten
+    # Lade Pipeline-Daten
     if PIPELINES_PATH.exists():
         try:
             with open(PIPELINES_PATH, 'r', encoding='utf-8') as f:
                 pipelines = json.load(f)
-                ***REMOVED*** Stelle sicher, dass die aktuelle Version verwendet wird
+                # Stelle sicher, dass die aktuelle Version verwendet wird
                 pipelines["version"] = version
         except Exception as e:
             st.error(f"Fehler beim Laden der Pipeline-Daten: {e}")
@@ -82,12 +82,12 @@ def load_data(version=None):
     else:
         pipelines = {"version": version, "pipelines": []}
     
-    ***REMOVED*** Lade Graphiti-Daten
+    # Lade Graphiti-Daten
     if decision_map_path.exists():
         try:
             with open(decision_map_path, 'r', encoding='utf-8') as f:
                 graphiti = json.load(f)
-                ***REMOVED*** Stelle sicher, dass die aktuelle Version verwendet wird
+                # Stelle sicher, dass die aktuelle Version verwendet wird
                 graphiti["version"] = version
         except Exception as e:
             st.error(f"Fehler beim Laden der Graphiti-Daten: {e}")
@@ -95,7 +95,7 @@ def load_data(version=None):
     else:
         graphiti = {"version": version, "dot_source": "digraph G { A -> B }"}
     
-    ***REMOVED*** Normalisiere Fortschrittswerte
+    # Normalisiere Fortschrittswerte
     normalize_progress_values(phases)
     normalize_progress_values(pipelines)
     
@@ -119,7 +119,7 @@ def normalize_progress_values(data):
                 if "progress" in goal:
                     goal["progress"] = min(100, max(0, goal.get("progress", 0)))
 
-***REMOVED*** Hilfsfunktionen
+# Hilfsfunktionen
 def format_timestamp(timestamp):
     """Formatiert einen Zeitstempel"""
     if timestamp:
@@ -133,38 +133,38 @@ def format_timestamp(timestamp):
 def get_status_color(status):
     """Gibt die Farbe für einen Status zurück"""
     status_colors = {
-        "active": "***REMOVED***1E88E5",     ***REMOVED*** Blau
-        "completed": "***REMOVED***4CAF50",  ***REMOVED*** Grün
-        "pending": "***REMOVED***9E9E9E",    ***REMOVED*** Grau
-        "planning": "***REMOVED***FFC107",   ***REMOVED*** Gelb
-        "error": "***REMOVED***F44336"       ***REMOVED*** Rot
+        "active": "#1E88E5",     # Blau
+        "completed": "#4CAF50",  # Grün
+        "pending": "#9E9E9E",    # Grau
+        "planning": "#FFC107",   # Gelb
+        "error": "#F44336"       # Rot
     }
-    return status_colors.get(status.lower(), "***REMOVED***9E9E9E")
+    return status_colors.get(status.lower(), "#9E9E9E")
 
 def create_phase_progress_chart(phases_data):
     """Erstellt ein Fortschrittsdiagramm für die Phasen"""
-    ***REMOVED*** Daten für das Diagramm vorbereiten
+    # Daten für das Diagramm vorbereiten
     chart_data = []
     for phase in phases_data.get("phases", []):
         chart_data.append({
             "phase": phase.get("name", ""),
-            "progress": min(100, max(0, phase.get("progress", 0))),  ***REMOVED*** Normalisiere Werte
+            "progress": min(100, max(0, phase.get("progress", 0))),  # Normalisiere Werte
             "status": phase.get("status", "pending")
         })
     
-    ***REMOVED*** Dataframe erstellen
+    # Dataframe erstellen
     df = pd.DataFrame(chart_data)
     if df.empty:
         return None
     
-    ***REMOVED*** Chart erstellen
+    # Chart erstellen
     chart = alt.Chart(df).mark_bar().encode(
         x=alt.X('progress:Q', scale=alt.Scale(domain=[0, 100]), title='Fortschritt (%)'),
         y=alt.Y('phase:N', title='Phase', sort=None),
         color=alt.Color('status:N', 
                       scale=alt.Scale(
                           domain=['active', 'completed', 'pending', 'planning', 'error'],
-                          range=['***REMOVED***1E88E5', '***REMOVED***4CAF50', '***REMOVED***9E9E9E', '***REMOVED***FFC107', '***REMOVED***F44336']
+                          range=['#1E88E5', '#4CAF50', '#9E9E9E', '#FFC107', '#F44336']
                       ),
                       title='Status'),
         tooltip=['phase:N', 'progress:Q', 'status:N']
@@ -178,32 +178,32 @@ def create_phase_progress_chart(phases_data):
 
 def create_pipeline_progress_chart(pipelines_data):
     """Erstellt ein Fortschrittsdiagramm für die Pipelines"""
-    ***REMOVED*** Daten für das Diagramm vorbereiten
+    # Daten für das Diagramm vorbereiten
     chart_data = []
     for pipeline in pipelines_data.get("pipelines", []):
         chart_data.append({
             "pipeline": pipeline.get("name", ""),
-            "progress": float(min(100, max(0, pipeline.get("progress", 0)))),  ***REMOVED*** Normalisiere Werte und konvertiere zu float
+            "progress": float(min(100, max(0, pipeline.get("progress", 0)))),  # Normalisiere Werte und konvertiere zu float
             "status": pipeline.get("status", "pending"),
             "runtime": pipeline.get("runtime", "0h 0m")
         })
     
-    ***REMOVED*** Dataframe erstellen
+    # Dataframe erstellen
     df = pd.DataFrame(chart_data)
     if df.empty:
         return None
     
-    ***REMOVED*** Debug-Ausgabe für Entwicklungszwecke
-    ***REMOVED*** print(f"Pipeline DataFrame: {df}")
+    # Debug-Ausgabe für Entwicklungszwecke
+    # print(f"Pipeline DataFrame: {df}")
     
-    ***REMOVED*** Chart erstellen
+    # Chart erstellen
     chart = alt.Chart(df).mark_bar().encode(
         x=alt.X('progress:Q', scale=alt.Scale(domain=[0, 100]), title='Fortschritt (%)'),
         y=alt.Y('pipeline:N', title='Pipeline', sort=None),
         color=alt.Color('status:N', 
                       scale=alt.Scale(
                           domain=['active', 'running', 'setup', 'finalizing', 'completed', 'pending', 'planning', 'error'],
-                          range=['***REMOVED***1E88E5', '***REMOVED***1E88E5', '***REMOVED***42A5F5', '***REMOVED***64B5F6', '***REMOVED***4CAF50', '***REMOVED***9E9E9E', '***REMOVED***FFC107', '***REMOVED***F44336']
+                          range=['#1E88E5', '#1E88E5', '#42A5F5', '#64B5F6', '#4CAF50', '#9E9E9E', '#FFC107', '#F44336']
                       ),
                       title='Status'),
         tooltip=['pipeline:N', 'progress:Q', 'status:N', 'runtime:N']
@@ -215,36 +215,36 @@ def create_pipeline_progress_chart(pipelines_data):
     
     return chart
 
-***REMOVED*** Dashboard-Layout
+# Dashboard-Layout
 def main():
     """Hauptfunktion für das Dashboard"""
-    ***REMOVED*** Version auswählen
+    # Version auswählen
     st.sidebar.title("GENXAIS Dashboard")
     current_version = get_version()
     previous_version = get_previous_version()
     
-    ***REMOVED*** Versionswahl
+    # Versionswahl
     versions = [current_version, previous_version]
     selected_version = st.sidebar.selectbox("Version auswählen", versions, index=0)
     
-    ***REMOVED*** Daten laden
+    # Daten laden
     phases, pipelines, graphiti = load_data(selected_version)
     
-    ***REMOVED*** Titel
+    # Titel
     st.title(f"🔁 GENXAIS Zyklus – VALERO {selected_version}")
     st.markdown("Statusanzeige aller Phasen, Pipelines und Entscheidungspfade via Graphiti")
     
-    ***REMOVED*** Sidebar
+    # Sidebar
     st.sidebar.title("Navigation")
     page = st.sidebar.radio("Seite auswählen", ["Übersicht", "Phasen", "Pipelines", "Graphiti", "Einstellungen"])
     
-    ***REMOVED*** Auto-Refresh
+    # Auto-Refresh
     auto_refresh = st.sidebar.checkbox("Auto-Refresh", value=True)
     refresh_interval = st.sidebar.slider("Refresh-Intervall (Sekunden)", 5, 60, 30)
     
-    ***REMOVED*** Übersichtsseite
+    # Übersichtsseite
     if page == "Übersicht":
-        ***REMOVED*** Status-Karten
+        # Status-Karten
         col1, col2, col3 = st.columns(3)
         
         with col1:
@@ -261,46 +261,46 @@ def main():
             version = phases.get("version", selected_version)
             st.info(f"GENXAIS Version: **{version}**")
         
-        ***REMOVED*** Fortschrittsdiagramme
+        # Fortschrittsdiagramme
         col1, col2 = st.columns(2)
         
         with col1:
-            ***REMOVED*** Phasen-Fortschritt
+            # Phasen-Fortschritt
             phase_chart = create_phase_progress_chart(phases)
             if phase_chart:
                 st.altair_chart(phase_chart, use_container_width=True)
         
         with col2:
-            ***REMOVED*** Pipeline-Fortschritt
+            # Pipeline-Fortschritt
             pipeline_chart = create_pipeline_progress_chart(pipelines)
             if pipeline_chart:
                 st.altair_chart(pipeline_chart, use_container_width=True)
         
-        ***REMOVED*** Graphiti Decision Map
+        # Graphiti Decision Map
         st.subheader("🧠 Graphiti – Decision Map")
         st.graphviz_chart(graphiti.get("dot_source", "digraph G { A -> B }"))
         
-        ***REMOVED*** Letzte Aktualisierung
+        # Letzte Aktualisierung
         st.markdown("---")
         last_updated_phases = format_timestamp(phases.get("last_updated", None))
         last_updated_pipelines = format_timestamp(pipelines.get("last_updated", None))
         st.caption(f"Letzte Aktualisierung: Phasen: {last_updated_phases}, Pipelines: {last_updated_pipelines}")
     
-    ***REMOVED*** Phasen-Seite
+    # Phasen-Seite
     elif page == "Phasen":
         st.header(f"GENXAIS {selected_version} Phasen")
         
-        ***REMOVED*** Phasen-Fortschritt
+        # Phasen-Fortschritt
         phase_chart = create_phase_progress_chart(phases)
         if phase_chart:
             st.altair_chart(phase_chart, use_container_width=True)
         
-        ***REMOVED*** Phasen-Details
+        # Phasen-Details
         st.subheader("Phasen-Details")
         for phase in phases.get("phases", []):
             phase_name = phase.get("name", "Unbekannte Phase")
             phase_status = phase.get("status", "pending")
-            phase_progress = min(100, max(0, phase.get("progress", 0)))  ***REMOVED*** Normalisiere Wert
+            phase_progress = min(100, max(0, phase.get("progress", 0)))  # Normalisiere Wert
             
             with st.expander(f"{phase_name} ({phase_status.capitalize()})"):
                 col1, col2 = st.columns(2)
@@ -309,17 +309,17 @@ def main():
                 with col2:
                     st.metric("Status", phase_status.capitalize())
                 
-                ***REMOVED*** Fortschrittsbalken
+                # Fortschrittsbalken
                 progress_value = float(phase_progress) / 100.0
-                progress_value = min(1.0, max(0.0, progress_value))  ***REMOVED*** Sicherstellen, dass der Wert zwischen 0 und 1 liegt
+                progress_value = min(1.0, max(0.0, progress_value))  # Sicherstellen, dass der Wert zwischen 0 und 1 liegt
                 st.progress(progress_value)
                 
-                ***REMOVED*** Tasks
+                # Tasks
                 st.subheader("Tasks")
                 for task in phase.get("tasks", []):
                     task_name = task.get("name", "Unbekannte Task")
                     task_status = task.get("status", "pending")
-                    task_progress = min(100, max(0, task.get("progress", 0)))  ***REMOVED*** Normalisiere Wert
+                    task_progress = min(100, max(0, task.get("progress", 0)))  # Normalisiere Wert
                     
                     col1, col2, col3 = st.columns([3, 1, 1])
                     with col1:
@@ -329,26 +329,26 @@ def main():
                     with col3:
                         st.write(f"{task_progress}%")
         
-        ***REMOVED*** Letzte Aktualisierung
+        # Letzte Aktualisierung
         st.markdown("---")
         last_updated = format_timestamp(phases.get("last_updated", None))
         st.caption(f"Letzte Aktualisierung: {last_updated}")
     
-    ***REMOVED*** Pipelines-Seite
+    # Pipelines-Seite
     elif page == "Pipelines":
         st.header(f"GENXAIS {selected_version} Pipelines")
         
-        ***REMOVED*** Pipeline-Fortschritt
+        # Pipeline-Fortschritt
         pipeline_chart = create_pipeline_progress_chart(pipelines)
         if pipeline_chart:
             st.altair_chart(pipeline_chart, use_container_width=True)
         
-        ***REMOVED*** Pipeline-Details
+        # Pipeline-Details
         st.subheader("Pipeline-Details")
         for pipeline in pipelines.get("pipelines", []):
             pipeline_name = pipeline.get("name", "Unbekannte Pipeline")
             pipeline_status = pipeline.get("status", "pending")
-            pipeline_progress = min(100, max(0, pipeline.get("progress", 0)))  ***REMOVED*** Normalisiere Wert
+            pipeline_progress = min(100, max(0, pipeline.get("progress", 0)))  # Normalisiere Wert
             pipeline_runtime = pipeline.get("runtime", "0h 0m")
             
             with st.expander(f"{pipeline_name} ({pipeline_status.capitalize()})"):
@@ -360,21 +360,21 @@ def main():
                 with col3:
                     st.metric("Laufzeit", pipeline_runtime)
                 
-                ***REMOVED*** Fortschrittsbalken
+                # Fortschrittsbalken
                 progress_value = float(pipeline_progress) / 100.0
-                progress_value = min(1.0, max(0.0, progress_value))  ***REMOVED*** Sicherstellen, dass der Wert zwischen 0 und 1 liegt
+                progress_value = min(1.0, max(0.0, progress_value))  # Sicherstellen, dass der Wert zwischen 0 und 1 liegt
                 st.progress(progress_value)
                 
-                ***REMOVED*** Agenten
+                # Agenten
                 st.subheader("Agenten")
                 st.write(", ".join(pipeline.get("agents", [])))
                 
-                ***REMOVED*** Ziele
+                # Ziele
                 st.subheader("Ziele")
                 for goal in pipeline.get("goals", []):
                     goal_name = goal.get("name", "Unbekanntes Ziel")
                     goal_status = goal.get("status", "pending")
-                    goal_progress = min(100, max(0, goal.get("progress", 0)))  ***REMOVED*** Normalisiere Wert
+                    goal_progress = min(100, max(0, goal.get("progress", 0)))  # Normalisiere Wert
                     
                     col1, col2, col3 = st.columns([3, 1, 1])
                     with col1:
@@ -384,20 +384,20 @@ def main():
                     with col3:
                         st.write(f"{goal_progress}%")
         
-        ***REMOVED*** Letzte Aktualisierung
+        # Letzte Aktualisierung
         st.markdown("---")
         last_updated = format_timestamp(pipelines.get("last_updated", None))
         st.caption(f"Letzte Aktualisierung: {last_updated}")
     
-    ***REMOVED*** Graphiti-Seite
+    # Graphiti-Seite
     elif page == "Graphiti":
         st.header(f"GENXAIS {selected_version} Graphiti Decision Map")
         
-        ***REMOVED*** Decision Map
+        # Decision Map
         st.subheader("Decision Map")
         st.graphviz_chart(graphiti.get("dot_source", "digraph G { A -> B }"))
         
-        ***REMOVED*** Knoten- und Kantendetails
+        # Knoten- und Kantendetails
         col1, col2 = st.columns(2)
         
         with col1:
@@ -412,39 +412,39 @@ def main():
             if not edges_df.empty:
                 st.dataframe(edges_df, use_container_width=True)
         
-        ***REMOVED*** Letzte Aktualisierung
+        # Letzte Aktualisierung
         st.markdown("---")
         last_updated = format_timestamp(graphiti.get("last_updated", None))
         st.caption(f"Letzte Aktualisierung: {last_updated}")
     
-    ***REMOVED*** Einstellungen-Seite
+    # Einstellungen-Seite
     elif page == "Einstellungen":
         st.header("Dashboard-Einstellungen")
         
-        ***REMOVED*** Allgemeine Einstellungen
+        # Allgemeine Einstellungen
         st.subheader("Allgemeine Einstellungen")
         st.write("Auto-Refresh Intervall: ", refresh_interval, " Sekunden")
         
-        ***REMOVED*** Daten-Verzeichnisse
+        # Daten-Verzeichnisse
         st.subheader("Daten-Verzeichnisse")
         st.write("Hauptverzeichnis: ", DATA_DIR)
         st.write("Phasen-Datei: ", PHASES_PATH)
         st.write("Pipelines-Datei: ", PIPELINES_PATH)
         st.write("Graphiti-Verzeichnis: ", GRAPHITI_DIR)
         
-        ***REMOVED*** Version
+        # Version
         st.subheader("Version")
         st.write("Aktuelle GENXAIS Version: ", current_version)
         st.write("Vorherige GENXAIS Version: ", previous_version)
         st.write("Ausgewählte Version: ", selected_version)
         st.write("Dashboard Version: 1.1.0")
         
-        ***REMOVED*** Daten neu laden
+        # Daten neu laden
         if st.button("Daten neu laden"):
             st.cache_data.clear()
             st.rerun()
     
-    ***REMOVED*** Auto-Refresh
+    # Auto-Refresh
     if auto_refresh:
         time.sleep(refresh_interval)
         st.rerun()

@@ -1,12 +1,12 @@
-***REMOVED*** Druck & Archiv
+# Druck & Archiv
 
-***REMOVED******REMOVED*** Überblick
+## Überblick
 
 VALEO-NeuroERP bietet PDF-Druck und automatische Archivierung für alle Belege.
 
-***REMOVED******REMOVED*** Einzeldruck
+## Einzeldruck
 
-***REMOVED******REMOVED******REMOVED*** Beleg drucken
+### Beleg drucken
 
 **1. Beleg öffnen:**
 ```
@@ -24,7 +24,7 @@ Navigation → Sales → Orders → SO-00001
 → Dateiname: SO-00001_2025-10-09.pdf
 ```
 
-***REMOVED******REMOVED******REMOVED*** Druck-Optionen
+### Druck-Optionen
 
 **Sprache wählen:**
 ```
@@ -43,9 +43,9 @@ Navigation → Sales → Orders → SO-00001
 → Scannen zum Verifizieren
 ```
 
-***REMOVED******REMOVED*** Batch-Druck (Mehrere Belege)
+## Batch-Druck (Mehrere Belege)
 
-***REMOVED******REMOVED******REMOVED*** 1. Belege auswählen
+### 1. Belege auswählen
 
 ```
 Navigation → Sales → Orders
@@ -55,7 +55,7 @@ Navigation → Sales → Orders
 → [x] SO-00003
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Batch-Druck starten
+### 2. Batch-Druck starten
 
 ```
 [Print Selected] Button
@@ -63,7 +63,7 @@ Navigation → Sales → Orders
 → [Confirm]
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. ZIP-Download
+### 3. ZIP-Download
 
 ```
 → Download startet: sales_orders_2025-10-09.zip
@@ -73,9 +73,9 @@ Navigation → Sales → Orders
    - SO-00003_2025-10-09.pdf
 ```
 
-***REMOVED******REMOVED*** Archiv
+## Archiv
 
-***REMOVED******REMOVED******REMOVED*** Automatische Archivierung
+### Automatische Archivierung
 
 Alle gedruckten Belege werden automatisch archiviert:
 
@@ -83,7 +83,7 @@ Alle gedruckten Belege werden automatisch archiviert:
 - **Aufbewahrung:** 10 Jahre (gesetzlich)
 - **Unveränderlich:** PDFs sind signiert und können nicht geändert werden
 
-***REMOVED******REMOVED******REMOVED*** Archiv durchsuchen
+### Archiv durchsuchen
 
 ```
 Navigation → Documents → Archive
@@ -96,14 +96,14 @@ Filter:
 [Search]
 ```
 
-***REMOVED******REMOVED******REMOVED*** Archiv-PDF herunterladen
+### Archiv-PDF herunterladen
 
 ```
 Archiv-Liste → Beleg auswählen → [Download]
 → Original-PDF wird heruntergeladen
 ```
 
-***REMOVED******REMOVED******REMOVED*** Archiv-Historie
+### Archiv-Historie
 
 ```
 Beleg öffnen → Tab "Archive"
@@ -112,9 +112,9 @@ Beleg öffnen → Tab "Archive"
    - 08.10.2025 10:15 - Anna Schmidt - SHA256: def456...
 ```
 
-***REMOVED******REMOVED*** QR-Code-Verifikation
+## QR-Code-Verifikation
 
-***REMOVED******REMOVED******REMOVED*** QR-Code scannen
+### QR-Code scannen
 
 **1. PDF öffnen:**
 ```
@@ -137,7 +137,7 @@ Status: Posted
 SHA256: REDACTED_TOKEN...
 ```
 
-***REMOVED******REMOVED******REMOVED*** Manuell verifizieren
+### Manuell verifizieren
 
 ```
 Browser öffnen:
@@ -146,9 +146,9 @@ https://erp.valeo.example.com/verify/sales/SO-00001/REDACTED_TOKEN
 → Verifikations-Ergebnis wird angezeigt
 ```
 
-***REMOVED******REMOVED*** E-Mail-Versand
+## E-Mail-Versand
 
-***REMOVED******REMOVED******REMOVED*** Beleg per E-Mail versenden
+### Beleg per E-Mail versenden
 
 **1. Beleg öffnen:**
 ```
@@ -179,9 +179,9 @@ Nachricht: (optional, Vorlage wird verwendet)
 ✅ E-Mail erfolgreich versendet
 ```
 
-***REMOVED******REMOVED*** Druck-Historie
+## Druck-Historie
 
-***REMOVED******REMOVED******REMOVED*** Wer hat wann gedruckt?
+### Wer hat wann gedruckt?
 
 ```
 Beleg öffnen → Tab "History"
@@ -191,7 +191,7 @@ Beleg öffnen → Tab "History"
    - 08.10.2025 10:15 - Anna Schmidt - Gedruckt (PDF)
 ```
 
-***REMOVED******REMOVED*** Berechtigungen
+## Berechtigungen
 
 | Rolle | Drucken | Batch-Druck | Archiv-Zugriff | E-Mail |
 |-------|---------|-------------|----------------|--------|
@@ -200,9 +200,9 @@ Beleg öffnen → Tab "History"
 | Accountant | ✅ | ✅ | ✅ (alle) | ✅ |
 | Admin | ✅ | ✅ | ✅ (alle) | ✅ |
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: PDF-Download startet nicht
+### Problem: PDF-Download startet nicht
 
 **Ursache:** Browser blockiert Download
 
@@ -211,7 +211,7 @@ Beleg öffnen → Tab "History"
 2. Browser-Einstellungen prüfen
 3. Rechtsklick → "Link speichern unter..."
 
-***REMOVED******REMOVED******REMOVED*** Problem: QR-Code nicht lesbar
+### Problem: QR-Code nicht lesbar
 
 **Ursache:** Zu klein gedruckt oder schlechte Qualität
 
@@ -220,7 +220,7 @@ Beleg öffnen → Tab "History"
 2. QR-Code vergrößern (Admin-Einstellung)
 3. Manuell verifizieren (siehe oben)
 
-***REMOVED******REMOVED******REMOVED*** Problem: E-Mail kommt nicht an
+### Problem: E-Mail kommt nicht an
 
 **Ursache:** Spam-Filter oder falsche E-Mail-Adresse
 
@@ -229,29 +229,29 @@ Beleg öffnen → Tab "History"
 2. Spam-Ordner prüfen
 3. IT-Admin kontaktieren (SMTP-Konfiguration)
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Archive not found"
+### Problem: "Archive not found"
 
 **Ursache:** Beleg wurde noch nie gedruckt
 
 **Lösung:** Beleg einmal drucken, dann ist er im Archiv
 
-***REMOVED******REMOVED*** Tipps & Tricks
+## Tipps & Tricks
 
-***REMOVED******REMOVED******REMOVED*** Schnelldruck mit Tastatur
+### Schnelldruck mit Tastatur
 
 ```
 Beleg öffnen → Strg+P (Windows) / Cmd+P (Mac)
 → PDF-Druck wird gestartet
 ```
 
-***REMOVED******REMOVED******REMOVED*** Standardsprache ändern
+### Standardsprache ändern
 
 ```
 Profil → Einstellungen → Sprache → [Deutsch ▼]
 → Alle PDFs werden in dieser Sprache gedruckt
 ```
 
-***REMOVED******REMOVED******REMOVED*** Batch-Druck mit Filter
+### Batch-Druck mit Filter
 
 ```
 Orders-Liste → Filter: Status = "Approved"
@@ -260,7 +260,8 @@ Orders-Liste → Filter: Status = "Approved"
 → Alle freigegebenen Aufträge werden gedruckt
 ```
 
-***REMOVED******REMOVED*** Support
+## Support
 
 Bei Fragen: support@valeo-erp.com
+
 
