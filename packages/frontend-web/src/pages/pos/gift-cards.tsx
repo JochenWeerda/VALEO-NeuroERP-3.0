@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { apiClient } from '@/lib/api-client'
+import { useGiftCards, type GiftCard as ApiGiftCard } from '@/lib/api/pos'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -56,21 +55,18 @@ export default function GiftCardsPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [scanMode, setScanMode] = useState(false)
-  const { data: giftCards = mockGiftCards } = useQuery({
-    queryKey: ['pos', 'gift-cards', 'page'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<GiftCard[]>('/api/v1/pos/gift-cards')
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          return response.data
-        }
-      } catch {
-        // Fallback handled below
-      }
-      return mockGiftCards
-    },
-    staleTime: 2 * 60 * 1000,
-  })
+  const { data: apiGiftCards = [] } = useGiftCards()
+  const giftCards: GiftCard[] = apiGiftCards.length > 0
+    ? apiGiftCards.map((gc: ApiGiftCard) => ({
+      id: gc.id,
+      cardNumber: gc.nummer,
+      wert: gc.betrag,
+      restguthaben: gc.restbetrag,
+      gueltigBis: gc.gueltigBis,
+      ausgestelltAm: gc.ausgestellt,
+      status: gc.status === 'eingeloest' ? 'eingeloest' : gc.status,
+    }))
+    : mockGiftCards
 
   const columns = [
     {

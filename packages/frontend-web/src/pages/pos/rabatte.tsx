@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { apiClient } from '@/lib/api-client'
+import { useRabatte, type Rabatt as ApiRabatt } from '@/lib/api/pos'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -72,21 +71,19 @@ const mockRabatte: Rabatt[] = [
 export default function RabattePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: rabatte = mockRabatte } = useQuery({
-    queryKey: ['pos', 'rabatte', 'page'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<Rabatt[]>('/api/v1/pos/rabatte')
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          return response.data
-        }
-      } catch {
-        // Fallback handled below
-      }
-      return mockRabatte
-    },
-    staleTime: 5 * 60 * 1000,
-  })
+  const { data: apiRabatte = [] } = useRabatte()
+  const rabatte: Rabatt[] = apiRabatte.length > 0
+    ? apiRabatte.map((r: ApiRabatt) => ({
+      id: r.id,
+      name: r.name,
+      typ: r.typ === 'betrag' ? 'absolut' : 'prozent',
+      wert: r.wert,
+      bedingung: r.bedingung,
+      gueltigVon: r.gueltigVon,
+      gueltigBis: r.gueltigBis,
+      status: r.status === 'inaktiv' ? 'inaktiv' : 'aktiv',
+    }))
+    : mockRabatte
 
   const columns = [
     {

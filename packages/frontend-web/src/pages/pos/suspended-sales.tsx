@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { apiClient } from '@/lib/api-client'
+import { useSuspendedSales, type SuspendedSale as ApiSuspendedSale } from '@/lib/api/pos'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -53,21 +52,17 @@ const mockSuspendedSales: SuspendedSale[] = [
 
 export default function SuspendedSalesPage(): JSX.Element {
   const navigate = useNavigate()
-  const { data: suspendedSales = mockSuspendedSales } = useQuery({
-    queryKey: ['pos', 'suspended-sales', 'page'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<SuspendedSale[]>('/api/v1/pos/suspended-sales')
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          return response.data
-        }
-      } catch {
-        // Fallback handled below
-      }
-      return mockSuspendedSales
-    },
-    staleTime: 30 * 1000,
-  })
+  const { data: apiSuspendedSales = [] } = useSuspendedSales()
+  const suspendedSales: SuspendedSale[] = apiSuspendedSales.length > 0
+    ? apiSuspendedSales.map((sale: ApiSuspendedSale) => ({
+      id: sale.id,
+      timestamp: sale.zeitpunkt,
+      cart: [{ artikelnr: sale.id, bezeichnung: sale.grund, ean: '', preis: sale.betrag, menge: Math.max(sale.positionen, 1) }],
+      customerName: sale.kassierer,
+      total: sale.betrag,
+      itemCount: sale.positionen,
+    }))
+    : mockSuspendedSales
   const [removedSaleIds, setRemovedSaleIds] = useState<Set<string>>(new Set())
   const sales = suspendedSales.filter((sale) => !removedSaleIds.has(sale.id))
 
