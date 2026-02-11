@@ -34,7 +34,7 @@ export default function FrachtbriefePage(): JSX.Element {
       render: (f: Frachtbrief) => (
         <div className="text-sm">
           <div>{f.absender}</div>
-          <div className="text-muted-foreground">-> {f.empfaenger}</div>
+          <div className="text-muted-foreground">{'->'} {f.empfaenger}</div>
         </div>
       ),
     },
