@@ -185,7 +185,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
   }, [forecastData, t])
 
   // Colors for charts
-  const COLORS = ['***REMOVED***0088FE', '***REMOVED***00C49F', '***REMOVED***FFBB28', '***REMOVED***FF8042', '***REMOVED***8884d8', '***REMOVED***82ca9d', '***REMOVED***ffc658', '***REMOVED***ff7300']
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7300']
 
   const handleExport = () => {
     try {
@@ -411,7 +411,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
                   <Line 
                     type="monotone" 
                     dataKey="total_expected_revenue" 
-                    stroke="***REMOVED***0088FE" 
+                    stroke="#0088FE" 
                     strokeWidth={2}
                     name={t('crud.fields.expectedRevenue')}
                   />
@@ -430,7 +430,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
                   <Legend />
                   <Bar 
                     dataKey="total_expected_revenue" 
-                    fill="***REMOVED***0088FE"
+                    fill="#0088FE"
                     name={t('crud.fields.expectedRevenue')}
                   />
                 </BarChart>
@@ -461,7 +461,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
                   <Line 
                     type="monotone" 
                     dataKey="total_amount" 
-                    stroke="***REMOVED***00C49F" 
+                    stroke="#00C49F" 
                     strokeWidth={2}
                     name={t('crud.fields.totalAmount')}
                   />
@@ -480,7 +480,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
                   <Legend />
                   <Bar 
                     dataKey="total_amount" 
-                    fill="***REMOVED***00C49F"
+                    fill="#00C49F"
                     name={t('crud.fields.totalAmount')}
                   />
                 </BarChart>
@@ -504,7 +504,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
                   labelLine={false}
                   label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                   outerRadius={80}
-                  fill="***REMOVED***8884d8"
+                  fill="#8884d8"
                   dataKey="value"
                 >
                   {stageDistributionData.map((entry, index) => (
@@ -535,7 +535,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
                 <Legend />
                 <Bar 
                   dataKey="count" 
-                  fill="***REMOVED***FFBB28"
+                  fill="#FFBB28"
                   name={t('crud.forecast.opportunityCount')}
                 />
               </BarChart>
@@ -617,5 +617,6 @@ export default function OpportunitiesForecastPage(): JSX.Element {
     </div>
   )
 }
+
 
 

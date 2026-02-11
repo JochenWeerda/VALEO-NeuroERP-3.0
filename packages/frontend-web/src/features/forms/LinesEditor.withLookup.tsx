@@ -1,4 +1,4 @@
-﻿import { Fragment } from 'react'
+import { Fragment } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ArticleLookupItem, InlineArticleLookup } from '@/features/forms/fields/inline-lookup'
@@ -104,7 +104,7 @@ export function LinesEditorWithLookup<ColumnName extends string>({
 
   return (
     <div className="grid gap-2" style={{ gridTemplateColumns: `40px repeat(${columns.length}, 1fr) 80px` }}>
-      <div className="font-medium">***REMOVED***</div>
+      <div className="font-medium">#</div>
       {columns.map((column) => (
         <div key={column.name} className="font-medium">
           {column.label}
@@ -132,3 +132,4 @@ export function LinesEditorWithLookup<ColumnName extends string>({
     </div>
   )
 }
+

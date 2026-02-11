@@ -28,9 +28,9 @@ export const SignatureCanvas = forwardRef<SignatureCanvasRef, SignatureCanvasPro
       width = 400,
       height = 200,
       className,
-      strokeColor = '***REMOVED***000000',
+      strokeColor = '#000000',
       strokeWidth = 2,
-      backgroundColor = '***REMOVED***ffffff',
+      backgroundColor = '#ffffff',
       disabled = false,
       onChange,
       onEnd,
@@ -248,3 +248,4 @@ export const SignatureCanvas = forwardRef<SignatureCanvasRef, SignatureCanvasPro
     )
   }
 )
+

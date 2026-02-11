@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertCircle, Euro, FileDown, Search } from 'lucide-react'
+import { AlertCircle, Euro, FileDown, Loader2, Search } from 'lucide-react'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { apiClient } from '@/lib/api-client'
 
 type OffenerPosten = {
   id: string
@@ -22,7 +24,7 @@ type OffenerPosten = {
   status: 'faellig' | 'ueberfaellig' | 'mahnung1' | 'mahnung2' | 'mahnung3' | 'inkasso'
 }
 
-const mockOffenePosten: OffenerPosten[] = [
+const fallbackOffenePosten: OffenerPosten[] = [
   {
     id: '1',
     rechnungsNr: 'RE-2025-0001',
@@ -73,6 +75,44 @@ const mockOffenePosten: OffenerPosten[] = [
   },
 ]
 
+interface OpenItemAPI {
+  id: string
+  document_number: string
+  customer_id: string
+  customer_name: string
+  amount: number
+  currency: string
+  due_date: string
+  status: string
+}
+
+function deriveStatus(dueDate: string): { tageUeberfaellig: number; mahnstufe: 0 | 1 | 2 | 3; status: OffenerPosten['status'] } {
+  const due = new Date(dueDate)
+  const today = new Date()
+  const diff = Math.floor((today.getTime() - due.getTime()) / (1000 * 60 * 60 * 24))
+  if (diff <= 0) return { tageUeberfaellig: 0, mahnstufe: 0, status: 'faellig' }
+  if (diff <= 14) return { tageUeberfaellig: diff, mahnstufe: 1, status: 'mahnung1' }
+  if (diff <= 30) return { tageUeberfaellig: diff, mahnstufe: 2, status: 'mahnung2' }
+  if (diff <= 60) return { tageUeberfaellig: diff, mahnstufe: 3, status: 'mahnung3' }
+  return { tageUeberfaellig: diff, mahnstufe: 3, status: 'inkasso' }
+}
+
+function mapApiItem(item: OpenItemAPI): OffenerPosten {
+  const { tageUeberfaellig, mahnstufe, status } = deriveStatus(item.due_date)
+  return {
+    id: item.id,
+    rechnungsNr: item.document_number,
+    kunde: item.customer_name,
+    rechnungsDatum: item.due_date, // approximate
+    faelligAm: item.due_date,
+    betrag: item.amount,
+    offen: item.amount,
+    tageUeberfaellig,
+    mahnstufe,
+    status,
+  }
+}
+
 const statusVariantMap: Record<
   OffenerPosten['status'],
   'default' | 'outline' | 'secondary' | 'destructive'
@@ -88,10 +128,27 @@ const statusVariantMap: Record<
 
 export default function OffenePostenPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<OffenerPosten['status'] | 'alle'>('alle')
 
-  const filteredPosten = mockOffenePosten.filter((posten) => {
+  const { data: allePosten = fallbackOffenePosten, isLoading } = useQuery({
+    queryKey: ['fibu', 'open-items'],
+    queryFn: async () => {
+      try {
+        const res = await apiClient.get<{ items: OpenItemAPI[] }>('/api/v1/open-items')
+        if (res.data?.items?.length) {
+          return res.data.items.map(mapApiItem)
+        }
+      } catch {
+        // API not available – use fallback
+      }
+      return fallbackOffenePosten
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+
+  const filteredPosten = allePosten.filter((posten) => {
     const matchesSearch =
       posten.rechnungsNr.toLowerCase().includes(searchTerm.toLowerCase()) ||
       posten.kunde.toLowerCase().includes(searchTerm.toLowerCase())
@@ -266,10 +323,19 @@ export default function OffenePostenPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={filteredPosten} columns={columns} />
-          <div className="mt-4 text-sm text-muted-foreground">
-            {filteredPosten.length} von {mockOffenePosten.length} offene(n) Posten angezeigt
-          </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">Lade offene Posten...</span>
+            </div>
+          ) : (
+            <>
+              <DataTable data={filteredPosten} columns={columns} />
+              <div className="mt-4 text-sm text-muted-foreground">
+                {filteredPosten.length} von {allePosten.length} offene(n) Posten angezeigt
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

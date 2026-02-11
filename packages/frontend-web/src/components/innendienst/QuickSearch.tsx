@@ -64,7 +64,7 @@ async function searchAll(query: string): Promise<SearchResult[]> {
     results.push({
       id: 'o1',
       type: 'order',
-      title: `Auftrag ***REMOVED***${query}`,
+      title: `Auftrag #${query}`,
       subtitle: 'Landwirtschaft Müller GmbH',
       meta: '15.01.2026',
       url: `/sales/auftraege-liste/${query}`,
@@ -370,3 +370,4 @@ function SearchResultItem({
     </button>
   )
 }
+

@@ -93,7 +93,7 @@ export default function LagerbestandReportPage(): JSX.Element {
                 <div>
                   <div className="font-semibold">{artikel.name}</div>
                   <div className="text-sm text-muted-foreground">{artikel.menge} t</div>
-                  <Badge variant="outline" className="mt-1">***REMOVED***{i + 1}</Badge>
+                  <Badge variant="outline" className="mt-1">#{i + 1}</Badge>
                 </div>
                 <div className="text-right">
                   <div className="text-xl font-bold">
@@ -112,3 +112,4 @@ export default function LagerbestandReportPage(): JSX.Element {
     </div>
   )
 }
+

@@ -256,7 +256,7 @@ function LinesEditor({
           gridTemplateColumns: `40px repeat(${columns.length}, 1fr) 80px`,
         }}
       >
-        <div className="text-xs opacity-70">***REMOVED***</div>
+        <div className="text-xs opacity-70">#</div>
         {columns.map(
           (c): JSX.Element => (
             <div key={c.name} className="text-xs opacity-70">
@@ -310,4 +310,5 @@ function LinesEditor({
     </div>
   )
 }
+
 

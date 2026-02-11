@@ -1,8 +1,8 @@
-***REMOVED*** VALEO Mask Builder Framework
+# VALEO Mask Builder Framework
 
 Das VALEO Mask Builder Framework ist ein wiederverwendbares System zur schnellen Erstellung von ERP-Masken mit einheitlichem Look & Feel.
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Das Framework besteht aus wiederverwendbaren Komponenten für verschiedene Masken-Typen:
 
@@ -12,31 +12,31 @@ Das Framework besteht aus wiederverwendbaren Komponenten für verschiedene Maske
 - **Worklist**: Aufgabenlisten mit Status-Tracking
 - **OverviewPage**: Dashboards mit KPIs und Charts
 
-***REMOVED******REMOVED*** Architektur
+## Architektur
 
 ```
 packages/frontend-web/src/components/mask-builder/
-├── index.ts              ***REMOVED*** Haupt-Export
-├── types.ts              ***REMOVED*** TypeScript-Definitionen
-├── ObjectPage.tsx        ***REMOVED*** ObjectPage-Komponente
-├── ListReport.tsx        ***REMOVED*** ListReport-Komponente
-├── Wizard.tsx            ***REMOVED*** Wizard-Komponente
-├── Worklist.tsx          ***REMOVED*** Worklist-Komponente
-├── OverviewPage.tsx      ***REMOVED*** OverviewPage-Komponente
-├── hooks/                ***REMOVED*** Wiederverwendbare Hooks
-│   ├── useMaskData.ts    ***REMOVED*** Daten-Management
-│   ├── useMaskValidation.ts ***REMOVED*** Validierung
-│   └── useMaskActions.ts ***REMOVED*** Aktionen
-├── utils/                ***REMOVED*** Hilfsfunktionen
-│   ├── formatting.ts     ***REMOVED*** Formatierung
-│   ├── validation.ts     ***REMOVED*** Validierung
-│   └── api.ts            ***REMOVED*** API-Client
-└── README.md             ***REMOVED*** Dokumentation
+├── index.ts              # Haupt-Export
+├── types.ts              # TypeScript-Definitionen
+├── ObjectPage.tsx        # ObjectPage-Komponente
+├── ListReport.tsx        # ListReport-Komponente
+├── Wizard.tsx            # Wizard-Komponente
+├── Worklist.tsx          # Worklist-Komponente
+├── OverviewPage.tsx      # OverviewPage-Komponente
+├── hooks/                # Wiederverwendbare Hooks
+│   ├── useMaskData.ts    # Daten-Management
+│   ├── useMaskValidation.ts # Validierung
+│   └── useMaskActions.ts # Aktionen
+├── utils/                # Hilfsfunktionen
+│   ├── formatting.ts     # Formatierung
+│   ├── validation.ts     # Validierung
+│   └── api.ts            # API-Client
+└── README.md             # Dokumentation
 ```
 
-***REMOVED******REMOVED*** Verwendung
+## Verwendung
 
-***REMOVED******REMOVED******REMOVED*** 1. ObjectPage Beispiel
+### 1. ObjectPage Beispiel
 
 ```tsx
 import { ObjectPage } from '@/components/mask-builder'
@@ -75,7 +75,7 @@ function PSMStammPage() {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. ListReport Beispiel
+### 2. ListReport Beispiel
 
 ```tsx
 import { ListReport } from '@/components/mask-builder'
@@ -112,7 +112,7 @@ function PSMListPage() {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Wizard Beispiel
+### 3. Wizard Beispiel
 
 ```tsx
 import { Wizard } from '@/components/mask-builder'
@@ -150,34 +150,34 @@ function PSMBeratungWizard() {
 }
 ```
 
-***REMOVED******REMOVED*** Features
+## Features
 
-***REMOVED******REMOVED******REMOVED*** ✅ Automatische Validierung
+### ✅ Automatische Validierung
 - Zod-Schema-Integration
 - Echtzeit-Validierung
 - Feld-spezifische Fehlermeldungen
 
-***REMOVED******REMOVED******REMOVED*** ✅ Responsive Design
+### ✅ Responsive Design
 - Mobile-first Ansatz
 - Adaptive Layouts
 - Touch-optimierte Steuerelemente
 
-***REMOVED******REMOVED******REMOVED*** ✅ Accessibility
+### ✅ Accessibility
 - ARIA-Labels
 - Keyboard-Navigation
 - Screen-Reader-Unterstützung
 
-***REMOVED******REMOVED******REMOVED*** ✅ Performance
+### ✅ Performance
 - Lazy Loading
 - Optimistische Updates
 - Caching
 
-***REMOVED******REMOVED******REMOVED*** ✅ Erweiterbarkeit
+### ✅ Erweiterbarkeit
 - Plugin-System
 - Custom Field Types
 - Theme-Unterstützung
 
-***REMOVED******REMOVED*** Konfiguration
+## Konfiguration
 
 Jede Maske wird über eine Konfigurationsdatei definiert:
 
@@ -196,7 +196,7 @@ interface MaskConfig {
 }
 ```
 
-***REMOVED******REMOVED*** Best Practices
+## Best Practices
 
 1. **Konfiguration vor Code**: Definiere Masken deklarativ über Konfiguration
 2. **Einheitliche Patterns**: Verwende immer die gleichen Feldtypen und Layouts
@@ -204,7 +204,7 @@ interface MaskConfig {
 4. **Mobile-first**: Optimiere für mobile Geräte
 5. **Performance**: Verwende Pagination und Lazy Loading für große Datenmengen
 
-***REMOVED******REMOVED*** Erweiterungen
+## Erweiterungen
 
 Das Framework kann durch Plugins erweitert werden:
 
@@ -213,7 +213,7 @@ Das Framework kann durch Plugins erweitert werden:
 - **Integrationen**: Verbindung mit externen APIs (DMS, Maps, etc.)
 - **Themes**: Verschiedene Farbschemata und Styles
 
-***REMOVED******REMOVED*** Migration
+## Migration
 
 Bestehende Masken können schrittweise migriert werden:
 
@@ -222,7 +222,7 @@ Bestehende Masken können schrittweise migriert werden:
 3. Teste Funktionalität nach jeder Migration
 4. Entferne alten Code nach erfolgreicher Migration
 
-***REMOVED******REMOVED*** Support
+## Support
 
 Bei Fragen oder Problemen:
 - Dokumentation: `/docs/mask-builder/`

@@ -5,59 +5,75 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
-import { Building2, FileDown, Plus, Search } from 'lucide-react'
-
-type Lieferant = {
-  id: string
-  name: string
-  typ: string
-  ort: string
-  bewertung: number
-  status: 'aktiv' | 'gesperrt'
-}
-
-const mockLieferanten: Lieferant[] = [
-  { id: '1', name: 'Saatgut AG', typ: 'Saatgut', ort: 'Südhausen', bewertung: 4.5, status: 'aktiv' },
-  { id: '2', name: 'Dünger GmbH', typ: 'Düngemittel', ort: 'Nordhausen', bewertung: 4.2, status: 'aktiv' },
-  { id: '3', name: 'Technik GmbH', typ: 'Landtechnik', ort: 'Osthausen', bewertung: 3.8, status: 'aktiv' },
-]
+import { Skeleton } from '@/components/ui/skeleton'
+import { Building2, FileDown, Loader2, Plus, Search } from 'lucide-react'
+import { useSuppliers, type Supplier } from '@/lib/api/crm'
 
 export default function LieferantenListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
 
+  const { data, isLoading } = useSuppliers({
+    search: searchTerm || undefined,
+  })
+
+  const lieferanten = data?.items ?? []
+
   const columns = [
     {
       key: 'name' as const,
       label: 'Lieferant',
-      render: (l: Lieferant) => (
-        <button onClick={() => navigate(`/einkauf/lieferant/${l.id}`)} className="font-medium text-blue-600 hover:underline">
+      render: (l: Supplier) => (
+        <button
+          onClick={() => navigate(`/einkauf/lieferant/${l.id}`)}
+          className="font-medium text-blue-600 hover:underline"
+        >
           {l.name}
         </button>
       ),
     },
-    { key: 'typ' as const, label: 'Typ', render: (l: Lieferant) => <Badge variant="outline">{l.typ}</Badge> },
-    { key: 'ort' as const, label: 'Ort' },
     {
-      key: 'bewertung' as const,
-      label: 'Bewertung',
-      render: (l: Lieferant) => (
-        <div className="flex items-center gap-1">
-          <span className="font-bold">{l.bewertung}</span>
-          <span className="text-sm text-muted-foreground">/ 5</span>
-        </div>
+      key: 'supplier_number' as const,
+      label: 'Lieferantennr.',
+      render: (l: Supplier) => (
+        <span className="font-mono text-sm">{l.supplier_number || '–'}</span>
       ),
     },
     {
-      key: 'status' as const,
+      key: 'type' as const,
+      label: 'Typ',
+      render: (l: Supplier) => l.type ? <Badge variant="outline">{l.type}</Badge> : '–',
+    },
+    { key: 'city' as const, label: 'Ort', render: (l: Supplier) => l.city || '–' },
+    {
+      key: 'rating' as const,
+      label: 'Bewertung',
+      render: (l: Supplier) =>
+        l.rating ? (
+          <div className="flex items-center gap-1">
+            <span className="font-bold">{l.rating.toFixed(1)}</span>
+            <span className="text-sm text-muted-foreground">/ 5</span>
+          </div>
+        ) : (
+          '–'
+        ),
+    },
+    {
+      key: 'is_active' as const,
       label: 'Status',
-      render: (l: Lieferant) => (
-        <Badge variant={l.status === 'aktiv' ? 'outline' : 'destructive'}>
-          {l.status === 'aktiv' ? 'Aktiv' : 'Gesperrt'}
+      render: (l: Supplier) => (
+        <Badge variant={l.is_active ? 'outline' : 'destructive'}>
+          {l.is_active ? 'Aktiv' : 'Gesperrt'}
         </Badge>
       ),
     },
   ]
+
+  const aktiveLieferanten = lieferanten.filter((l) => l.is_active)
+  const avgRating =
+    lieferanten.length > 0
+      ? lieferanten.reduce((sum, l) => sum + (l.rating || 0), 0) / lieferanten.length
+      : 0
 
   return (
     <div className="space-y-4 p-6">
@@ -80,7 +96,11 @@ export default function LieferantenListePage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockLieferanten.length}</span>
+              {isLoading ? (
+                <Skeleton className="h-8 w-12" />
+              ) : (
+                <span className="text-2xl font-bold">{data?.total ?? lieferanten.length}</span>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -90,7 +110,11 @@ export default function LieferantenListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Aktiv</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockLieferanten.filter((l) => l.status === 'aktiv').length}</span>
+            {isLoading ? (
+              <Skeleton className="h-8 w-12" />
+            ) : (
+              <span className="text-2xl font-bold text-green-600">{aktiveLieferanten.length}</span>
+            )}
           </CardContent>
         </Card>
 
@@ -99,9 +123,11 @@ export default function LieferantenListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Ø Bewertung</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">
-              {(mockLieferanten.reduce((sum, l) => sum + l.bewertung, 0) / mockLieferanten.length).toFixed(1)} / 5
-            </span>
+            {isLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <span className="text-2xl font-bold">{avgRating.toFixed(1)} / 5</span>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -114,7 +140,12 @@ export default function LieferantenListePage(): JSX.Element {
           <div className="flex gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input
+                placeholder="Suche nach Name, Typ, Ort..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
             <Button variant="outline" className="gap-2">
               <FileDown className="h-4 w-4" />
@@ -126,7 +157,13 @@ export default function LieferantenListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockLieferanten} columns={columns} />
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <DataTable data={lieferanten} columns={columns} />
+          )}
         </CardContent>
       </Card>
     </div>

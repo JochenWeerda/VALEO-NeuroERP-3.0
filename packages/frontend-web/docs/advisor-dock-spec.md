@@ -1,10 +1,10 @@
-***REMOVED*** Copilot Advisor Dock - Specification
+# Copilot Advisor Dock - Specification
 
-***REMOVED******REMOVED*** Phase G - Interaktives Chat-Fenster
+## Phase G - Interaktives Chat-Fenster
 
 Diese Spezifikation beschreibt das Copilot Advisor Dock, ein persistentes Chat-Interface für Live-Interaktion mit dem KI-Copiloten.
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Das Advisor Dock ist ein animiertes Chat-Panel am rechten Bildschirmrand, das:
 - Jederzeit ein- und ausblendbar ist
@@ -13,7 +13,7 @@ Das Advisor Dock ist ein animiertes Chat-Panel am rechten Bildschirmrand, das:
 - Framer Motion Animationen nutzt
 - Im VALEO-Design-System gestylt ist
 
-***REMOVED******REMOVED*** Architektur
+## Architektur
 
 ```
 ┌─────────────────────────────────┐
@@ -47,9 +47,9 @@ Das Advisor Dock ist ein animiertes Chat-Panel am rechten Bildschirmrand, das:
 └─────────────────────────────────┘
 ```
 
-***REMOVED******REMOVED*** Komponenten
+## Komponenten
 
-***REMOVED******REMOVED******REMOVED*** 1. `useCopilotChat.ts` - Custom Hook
+### 1. `useCopilotChat.ts` - Custom Hook
 
 **Zweck:** Verwaltet Chat-State und Backend-Kommunikation
 
@@ -79,7 +79,7 @@ const [loading, setLoading] = useState<boolean>(false)
 - Error-Handling mit Fallback-Messages
 - Loading-State während API-Call
 
-***REMOVED******REMOVED******REMOVED*** 2. `AdvisorDock.tsx` - UI Komponente
+### 2. `AdvisorDock.tsx` - UI Komponente
 
 **Zweck:** Interaktives Chat-Interface mit Animation
 
@@ -102,9 +102,9 @@ const [loading, setLoading] = useState<boolean>(false)
 - Keyboard-Navigation
 - Focus-Management
 
-***REMOVED******REMOVED*** Backend-Integration
+## Backend-Integration
 
-***REMOVED******REMOVED******REMOVED*** Chat-Endpoint
+### Chat-Endpoint
 
 **URL:** `POST /mcp/copilot/chat`
 
@@ -135,7 +135,7 @@ const [loading, setLoading] = useState<boolean>(false)
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Backend-Implementierung
+### Backend-Implementierung
 
 ```typescript
 app.post("/chat", async (req, res, next) => {
@@ -158,9 +158,9 @@ app.post("/chat", async (req, res, next) => {
 })
 ```
 
-***REMOVED******REMOVED*** Integration
+## Integration
 
-***REMOVED******REMOVED******REMOVED*** In DashboardLayout
+### In DashboardLayout
 
 ```typescript
 import { AdvisorDock } from "@/features/copilot/AdvisorDock"
@@ -178,9 +178,9 @@ export default function AppLayout() {
 }
 ```
 
-***REMOVED******REMOVED*** Styling
+## Styling
 
-***REMOVED******REMOVED******REMOVED*** Design-System
+### Design-System
 
 **Colors:**
 - Button: `bg-emerald-600 hover:bg-emerald-700`
@@ -201,9 +201,9 @@ export default function AppLayout() {
 - Direction: Slide from right (x: 384 → 0)
 - Exit: Slide to right (x: 0 → 384)
 
-***REMOVED******REMOVED*** User Experience
+## User Experience
 
-***REMOVED******REMOVED******REMOVED*** Interaction Flow
+### Interaction Flow
 
 1. **Open Chat:**
    - Click 💬 button
@@ -222,7 +222,7 @@ export default function AppLayout() {
    - Panel slides out to right
    - Chat history preserved
 
-***REMOVED******REMOVED******REMOVED*** Empty State
+### Empty State
 
 ```
 ┌─────────────────────────────────┐
@@ -237,7 +237,7 @@ export default function AppLayout() {
 └─────────────────────────────────┘
 ```
 
-***REMOVED******REMOVED******REMOVED*** With Messages
+### With Messages
 
 ```
 ┌─────────────────────────────────┐
@@ -256,9 +256,9 @@ export default function AppLayout() {
 └─────────────────────────────────┘
 ```
 
-***REMOVED******REMOVED*** Code-Qualität
+## Code-Qualität
 
-***REMOVED******REMOVED******REMOVED*** ✅ Memory-Bank Compliance
+### ✅ Memory-Bank Compliance
 
 - **TypeScript Strict Mode:** Alle Typen explizit
 - **Keine Magic Numbers:** Alle als Konstanten
@@ -267,16 +267,16 @@ export default function AppLayout() {
 - **Error-Handling:** Try-catch mit Fallbacks
 - **Accessibility:** ARIA-Labels vorhanden
 
-***REMOVED******REMOVED******REMOVED*** ✅ Lint Status
+### ✅ Lint Status
 
 - 0 Errors
 - 0 Warnings
 - Import-Sortierung korrekt
 - Alle Event-Handler typisiert
 
-***REMOVED******REMOVED*** Testing
+## Testing
 
-***REMOVED******REMOVED******REMOVED*** Unit Tests (Vorschlag)
+### Unit Tests (Vorschlag)
 
 ```typescript
 describe('useCopilotChat', () => {
@@ -329,77 +329,77 @@ describe('AdvisorDock', () => {
 })
 ```
 
-***REMOVED******REMOVED******REMOVED*** Integration Test
+### Integration Test
 
 ```bash
-***REMOVED*** Terminal 1: Start Backend
+# Terminal 1: Start Backend
 cd packages/analytics-domain
 LLM_API_KEY=your-key npm run dev
 
-***REMOVED*** Terminal 2: Start Frontend
+# Terminal 2: Start Frontend
 cd packages/frontend-web
 npm run dev
 
-***REMOVED*** Browser: http://localhost:5173
-***REMOVED*** 1. Click 💬 button
-***REMOVED*** 2. Type: "Wie entwickelt sich der Umsatz?"
-***REMOVED*** 3. Verify response appears
+# Browser: http://localhost:5173
+# 1. Click 💬 button
+# 2. Type: "Wie entwickelt sich der Umsatz?"
+# 3. Verify response appears
 ```
 
-***REMOVED******REMOVED*** Performance
+## Performance
 
-***REMOVED******REMOVED******REMOVED*** Optimizations
+### Optimizations
 
 - **Lazy Loading:** Panel nur gerendert wenn `open === true`
 - **AnimatePresence:** Smooth exit animations
 - **Memoization:** Event-Handler mit useCallback (optional)
 - **Debouncing:** Input-Validierung (optional)
 
-***REMOVED******REMOVED******REMOVED*** Bundle Size
+### Bundle Size
 
 - **Framer Motion:** ~50KB (already included)
 - **Component:** ~5KB
 - **Total Impact:** Minimal
 
-***REMOVED******REMOVED*** Security
+## Security
 
-***REMOVED******REMOVED******REMOVED*** Input Validation
+### Input Validation
 
 - ✅ Backend validiert Message-Länge
 - ✅ Frontend disabled während loading
 - ✅ Trim whitespace vor send
 - ✅ Error-Handling für API-Failures
 
-***REMOVED******REMOVED******REMOVED*** API-Key Protection
+### API-Key Protection
 
 - ✅ API-Key nur im Backend
 - ✅ Keine Secrets im Frontend
 - ✅ Environment-Variables für Config
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: Panel öffnet nicht
+### Problem: Panel öffnet nicht
 **Lösung:** Prüfe z-index Konflikte mit anderen Elementen
 
-***REMOVED******REMOVED******REMOVED*** Problem: Messages erscheinen nicht
+### Problem: Messages erscheinen nicht
 **Lösung:** Prüfe Backend-Endpoint `/mcp/copilot/chat`
 
-***REMOVED******REMOVED******REMOVED*** Problem: Animation ruckelt
+### Problem: Animation ruckelt
 **Lösung:** Reduziere `ANIMATION_STIFFNESS` auf 60-70
 
-***REMOVED******REMOVED******REMOVED*** Problem: Input disabled
+### Problem: Input disabled
 **Lösung:** Prüfe `loading` State, evtl. stuck nach Error
 
-***REMOVED******REMOVED*** Erweiterungsmöglichkeiten
+## Erweiterungsmöglichkeiten
 
-***REMOVED******REMOVED******REMOVED*** Phase H - Predictive Forecasting
+### Phase H - Predictive Forecasting
 
 - Automatische Anomalie-Erkennung
 - Trend-Prognosen
 - Proaktive Benachrichtigungen
 - Visuelle Markierungen im Dashboard
 
-***REMOVED******REMOVED******REMOVED*** Weitere Features
+### Weitere Features
 
 1. **Markdown-Support**
    - Rich-Text Antworten
@@ -422,7 +422,7 @@ npm run dev
    - i18n Support
    - Automatische Spracherkennung
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 **Phase G - Copilot Advisor Dock** bietet:
 
@@ -436,3 +436,4 @@ npm run dev
 - ✅ Production-Ready
 
 **Status:** Production Ready 🚀
+

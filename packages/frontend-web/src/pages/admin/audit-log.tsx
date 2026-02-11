@@ -16,8 +16,8 @@ type AuditEntry = {
 }
 
 const mockAudit: AuditEntry[] = [
-  { id: '1', zeitstempel: '2025-10-11 14:32:15', benutzer: 'admin@valeo.de', aktion: 'Benutzer erstellt', objekt: 'User***REMOVED***42', status: 'erfolg' },
-  { id: '2', zeitstempel: '2025-10-11 14:28:03', benutzer: 'sales@valeo.de', aktion: 'Auftrag angelegt', objekt: 'Order***REMOVED***SA-2025-042', status: 'erfolg' },
+  { id: '1', zeitstempel: '2025-10-11 14:32:15', benutzer: 'admin@valeo.de', aktion: 'Benutzer erstellt', objekt: 'User#42', status: 'erfolg' },
+  { id: '2', zeitstempel: '2025-10-11 14:28:03', benutzer: 'sales@valeo.de', aktion: 'Auftrag angelegt', objekt: 'Order#SA-2025-042', status: 'erfolg' },
   { id: '3', zeitstempel: '2025-10-11 14:15:41', benutzer: 'admin@valeo.de', aktion: 'Login fehlgeschlagen', objekt: 'Auth', status: 'fehler' },
 ]
 
@@ -111,3 +111,4 @@ export default function AuditLogPage(): JSX.Element {
     </div>
   )
 }
+

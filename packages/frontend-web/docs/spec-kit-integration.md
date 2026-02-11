@@ -1,12 +1,12 @@
-***REMOVED*** Spec Kit Integration Guide - VALEO NeuroERP Frontend
+# Spec Kit Integration Guide - VALEO NeuroERP Frontend
 
-***REMOVED******REMOVED*** Overview
+## Overview
 
 This document outlines the integration of Spec Kit into the VALEO NeuroERP frontend development workflow. Spec Kit serves as an automated Design System Mirror, ensuring consistency and quality across all UI components.
 
-***REMOVED******REMOVED*** Architecture Integration
+## Architecture Integration
 
-***REMOVED******REMOVED******REMOVED*** VALEO NeuroERP Context
+### VALEO NeuroERP Context
 ```
 VALEO NeuroERP 3.0
 ├── Business Logic Layer (Business Rules Engine)
@@ -18,9 +18,9 @@ VALEO NeuroERP 3.0
 └── Spec Kit (Design System Mirror)
 ```
 
-***REMOVED******REMOVED******REMOVED*** GENXAIS Framework Integration (https://github.com/JochenWeerda/GENXAIS-Framework)
+### GENXAIS Framework Integration (https://github.com/JochenWeerda/GENXAIS-Framework)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** VAN Phase: Vision Analysis & Specification Generation
+#### VAN Phase: Vision Analysis & Specification Generation
 ```
 Input: Business requirements, user stories, feature vision
 Spec Kit Role: Transform vision into concrete UI specifications
@@ -32,7 +32,7 @@ Process:
 Output: Complete component specification suite ready for planning
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** PLAN Phase: Specification-Driven Task Generation
+#### PLAN Phase: Specification-Driven Task Generation
 ```
 Input: Component specifications + business requirements
 Spec Kit Role: Automated task breakdown with spec validation
@@ -44,7 +44,7 @@ Process:
 Output: Detailed development roadmap with spec compliance validation
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** CREATE Phase: Context-Aware Code Generation
+#### CREATE Phase: Context-Aware Code Generation
 ```
 Input: Task specification + component specs + GENXAIS context
 Spec Kit Role: Primary implementation context and validation
@@ -57,7 +57,7 @@ Process:
 Output: Spec-compliant, production-ready components with full test coverage
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** IMPLEMENT Phase: Integration & Quality Validation
+#### IMPLEMENT Phase: Integration & Quality Validation
 ```
 Input: Generated components + integration requirements
 Spec Kit Role: Continuous validation against specifications
@@ -70,7 +70,7 @@ Process:
 Output: Fully tested, spec-compliant component integrations
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** REFLECT Phase: Continuous Quality Assurance & Evolution
+#### REFLECT Phase: Continuous Quality Assurance & Evolution
 ```
 Input: Deployed components + usage analytics + user feedback
 Spec Kit Role: Learning and continuous improvement
@@ -83,48 +83,48 @@ Process:
 Output: Improved specifications + quality metrics + evolution insights
 ```
 
-***REMOVED******REMOVED*** Installation & Setup
+## Installation & Setup
 
-***REMOVED******REMOVED******REMOVED*** 1. Install Spec Kit
+### 1. Install Spec Kit
 ```bash
 cd packages/frontend-web
 pnpm add -D @cursor/spec-kit
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Configuration
+### 2. Configuration
 The `spec-kit.config.json` file contains VALEO-specific settings:
 - Design system integration (Tailwind + shadcn/ui)
 - Component scanning patterns
 - Quality gates (accessibility, performance)
 - GENXAIS workflow integration
 
-***REMOVED******REMOVED******REMOVED*** 3. Directory Structure
+### 3. Directory Structure
 ```
 packages/frontend-web/
-├── specs/                          ***REMOVED*** Generated specifications
-│   ├── components/ui/             ***REMOVED*** Base UI components
-│   ├── features/inventory/        ***REMOVED*** Feature-specific specs
-│   └── README.md                  ***REMOVED*** Spec documentation
+├── specs/                          # Generated specifications
+│   ├── components/ui/             # Base UI components
+│   ├── features/inventory/        # Feature-specific specs
+│   └── README.md                  # Spec documentation
 ├── .cursor/
-│   └── spec-kit-agent-prompt.md   ***REMOVED*** Agent integration guide
-├── spec-kit.config.json           ***REMOVED*** Configuration
+│   └── spec-kit-agent-prompt.md   # Agent integration guide
+├── spec-kit.config.json           # Configuration
 └── docs/
-    └── spec-kit-integration.md    ***REMOVED*** This document
+    └── spec-kit-integration.md    # This document
 ```
 
-***REMOVED******REMOVED*** Workflow Examples
+## Workflow Examples
 
-***REMOVED******REMOVED******REMOVED*** Example 1: New Feature Development
+### Example 1: New Feature Development
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Step 1: Generate Initial Specs
+#### Step 1: Generate Initial Specs
 ```bash
-***REMOVED*** Generate specs for new inventory management feature
+# Generate specs for new inventory management feature
 pnpm specs:generate --feature inventory/slotting
 
-***REMOVED*** Output: specs/features/inventory/slotting.spec.json
+# Output: specs/features/inventory/slotting.spec.json
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Step 2: Plan Implementation Tasks
+#### Step 2: Plan Implementation Tasks
 ```json
 // specs/features/inventory/slotting.spec.json
 {
@@ -144,7 +144,7 @@ pnpm specs:generate --feature inventory/slotting
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Step 3: Implement with Spec Context
+#### Step 3: Implement with Spec Context
 ```typescript
 // Developer agent uses spec as context
 // Implementation must match spec requirements
@@ -160,30 +160,30 @@ interface SlotGridProps {
 // Component implementation follows spec contracts
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Step 4: Validate Implementation
+#### Step 4: Validate Implementation
 ```bash
-***REMOVED*** Validate against design system
+# Validate against design system
 pnpm specs:validate --component SlotGrid
 
-***REMOVED*** Check accessibility compliance
+# Check accessibility compliance
 pnpm specs:validate --accessibility --component SlotGrid
 
-***REMOVED*** Performance validation
+# Performance validation
 pnpm specs:validate --performance --component SlotGrid
 ```
 
-***REMOVED******REMOVED******REMOVED*** Example 2: Component Evolution
+### Example 2: Component Evolution
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Step 1: Detect Changes
+#### Step 1: Detect Changes
 ```bash
-***REMOVED*** Spec Kit detects component changes
+# Spec Kit detects component changes
 pnpm specs:generate --component Button --force
 
-***REMOVED*** Compares with existing spec
-***REMOVED*** Identifies breaking changes
+# Compares with existing spec
+# Identifies breaking changes
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Step 2: Update Specifications
+#### Step 2: Update Specifications
 ```json
 // Updated spec with new features
 {
@@ -199,18 +199,18 @@ pnpm specs:generate --component Button --force
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Step 3: Migration Tasks
+#### Step 3: Migration Tasks
 ```bash
-***REMOVED*** Generate migration guide
+# Generate migration guide
 pnpm specs:docs --migration Button
 
-***REMOVED*** Update dependent components
+# Update dependent components
 pnpm specs:validate --dependencies Button
 ```
 
-***REMOVED******REMOVED*** Quality Assurance Integration
+## Quality Assurance Integration
 
-***REMOVED******REMOVED******REMOVED*** Accessibility Compliance
+### Accessibility Compliance
 ```json
 {
   "validation": {
@@ -224,7 +224,7 @@ pnpm specs:validate --dependencies Button
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Performance Monitoring
+### Performance Monitoring
 ```json
 {
   "validation": {
@@ -240,7 +240,7 @@ pnpm specs:validate --dependencies Button
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Design System Adherence
+### Design System Adherence
 ```json
 {
   "validation": {
@@ -256,9 +256,9 @@ pnpm specs:validate --dependencies Button
 }
 ```
 
-***REMOVED******REMOVED*** Agent Integration Patterns
+## Agent Integration Patterns
 
-***REMOVED******REMOVED******REMOVED*** Planner Agent Integration
+### Planner Agent Integration
 ```
 Context: "Implement inventory slotting feature"
 Spec Kit: Generate comprehensive specs
@@ -270,7 +270,7 @@ Example:
   Requirements: Props interface, variants, accessibility
 ```
 
-***REMOVED******REMOVED******REMOVED*** Developer Agent Integration
+### Developer Agent Integration
 ```
 Context: Component spec + implementation task
 Spec Kit: Validate code against spec
@@ -282,7 +282,7 @@ Example:
 - Output: shadcn/ui compatible Button component
 ```
 
-***REMOVED******REMOVED******REMOVED*** Quality Agent Integration
+### Quality Agent Integration
 ```
 Context: Implemented component
 Spec Kit: Comprehensive validation
@@ -294,11 +294,11 @@ Example:
 - Design: Token usage validation
 ```
 
-***REMOVED******REMOVED*** CI/CD Integration
+## CI/CD Integration
 
-***REMOVED******REMOVED******REMOVED*** Automated Validation Pipeline
+### Automated Validation Pipeline
 ```yaml
-***REMOVED*** .github/workflows/spec-validation.yml
+# .github/workflows/spec-validation.yml
 name: Spec Kit Validation
 on: [pull_request]
 
@@ -318,9 +318,9 @@ jobs:
         run: pnpm specs:validate --performance
 ```
 
-***REMOVED******REMOVED******REMOVED*** Spec Generation Pipeline
+### Spec Generation Pipeline
 ```yaml
-***REMOVED*** .github/workflows/spec-generation.yml
+# .github/workflows/spec-generation.yml
 name: Spec Kit Generation
 on:
   push:
@@ -341,11 +341,11 @@ jobs:
           commit_message: "chore: update component specifications"
 ```
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Common Issues
+### Common Issues
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Spec Generation Fails
+#### Spec Generation Fails
 ```
 Problem: Component parsing error
 Solution:
@@ -354,7 +354,7 @@ Solution:
 3. Review import statements
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Validation Errors
+#### Validation Errors
 ```
 Problem: Design system violations
 Solution:
@@ -363,7 +363,7 @@ Solution:
 3. Update design system if needed
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Accessibility Failures
+#### Accessibility Failures
 ```
 Problem: Missing ARIA attributes
 Solution:
@@ -372,7 +372,7 @@ Solution:
 3. Test with screen readers
 ```
 
-***REMOVED******REMOVED******REMOVED*** Performance Issues
+### Performance Issues
 ```
 Problem: Bundle size exceeded
 Solution:
@@ -381,71 +381,71 @@ Solution:
 3. Review spec requirements vs. implementation
 ```
 
-***REMOVED******REMOVED*** Best Practices
+## Best Practices
 
-***REMOVED******REMOVED******REMOVED*** For Component Authors
+### For Component Authors
 1. **Write specs first**: Define component contract before implementation
 2. **Use design tokens**: Reference approved design system tokens
 3. **Include accessibility**: Design for accessibility from the start
 4. **Document variants**: Cover all component states and variants
 
-***REMOVED******REMOVED******REMOVED*** For Spec Kit Users
+### For Spec Kit Users
 1. **Regular validation**: Run specs validation in development
 2. **Keep specs updated**: Regenerate specs when components change
 3. **Review breaking changes**: Assess impact of spec updates
 4. **Use in code reviews**: Reference specs in PR descriptions
 
-***REMOVED******REMOVED******REMOVED*** For Team Leads
+### For Team Leads
 1. **Establish standards**: Define spec quality requirements
 2. **Monitor compliance**: Track spec validation in CI/CD
 3. **Review updates**: Approve spec changes that affect contracts
 4. **Train team**: Ensure all developers understand spec workflow
 
-***REMOVED******REMOVED*** Future Enhancements
+## Future Enhancements
 
-***REMOVED******REMOVED******REMOVED*** Planned Features
+### Planned Features
 - **Visual regression testing** integration
 - **Component usage analytics**
 - **Automated migration guides**
 - **Spec versioning and diffing**
 - **Cross-platform spec sharing** (web/mobile)
 
-***REMOVED******REMOVED******REMOVED*** Integration Opportunities
+### Integration Opportunities
 - **Storybook** auto-generation from specs
 - **Figma** sync for design handoff
 - **Testing library** spec-driven test generation
 - **Documentation** automated component docs
 
-***REMOVED******REMOVED*** Support & Resources
+## Support & Resources
 
-***REMOVED******REMOVED******REMOVED*** Documentation
+### Documentation
 - [Spec Kit Official Docs](https://github.com/github/spec-kit)
 - [VALEO Design System Guidelines](./design-system.md)
 - [Component Development Guide](./component-development.md)
 
-***REMOVED******REMOVED******REMOVED*** Tools & Commands
+### Tools & Commands
 ```bash
-***REMOVED*** Generate all specs
+# Generate all specs
 pnpm specs:generate
 
-***REMOVED*** Validate everything
+# Validate everything
 pnpm specs:validate
 
-***REMOVED*** Generate documentation
+# Generate documentation
 pnpm specs:docs
 
-***REMOVED*** View in Cursor
+# View in Cursor
 Cmd+K → Spec Kit → View Component Specs
 ```
 
-***REMOVED******REMOVED******REMOVED*** Contact
+### Contact
 - **Spec Kit Issues**: Create issue in VALEO NeuroERP repository
 - **Design System**: Contact design team
 - **GENXAIS Integration**: Contact AI team
 
 ---
 
-***REMOVED******REMOVED*** Quick Start Checklist
+## Quick Start Checklist
 
 - [ ] Install Spec Kit: `pnpm add -D @cursor/spec-kit`
 - [ ] Configure `spec-kit.config.json`

@@ -1,17 +1,13 @@
-import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
-
-// API Client für Bestellungen
-const apiClient = createApiClient('/api/einkauf')
+import { usePurchaseOrders, useApprovePurchaseOrder, useCancelPurchaseOrder, INCOTERM_OPTIONS } from '@/lib/api/purchase-orders'
 
 // Konfiguration für Bestellungen ListReport (wird in Komponente mit i18n erstellt)
 const createBestellungenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
@@ -22,14 +18,14 @@ const createBestellungenConfig = (t: any, entityTypeLabel: string): ListConfig =
   type: 'list-report',
   columns: [
     {
-      key: 'nummer',
+      key: 'purchaseOrderNumber',
       label: t('crud.fields.orderNumber'),
       labelKey: 'crud.fields.orderNumber',
       sortable: true,
       render: (value) => <code className="text-sm font-mono">{value}</code>
     },
     {
-      key: 'lieferant',
+      key: 'subject',
       label: t('crud.entities.supplier'),
       labelKey: 'crud.entities.supplier',
       sortable: true,
@@ -46,34 +42,46 @@ const createBestellungenConfig = (t: any, entityTypeLabel: string): ListConfig =
         const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
           'ENTWURF': 'secondary',
           'FREIGEGEBEN': 'default',
+          'BESTELLT': 'default',
           'TEILGELIEFERT': 'secondary',
-          'VOLLGELIEFERT': 'outline',
+          'GELIEFERT': 'outline',
           'STORNIERT': 'destructive'
         }
         return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
-      key: 'liefertermin',
+      key: 'incoterms',
+      label: 'Incoterms',
+      labelKey: 'crud.fields.incoterms',
+      sortable: true,
+      render: (value) => {
+        if (!value) return <span className="text-muted-foreground">–</span>
+        const option = INCOTERM_OPTIONS.find(o => o.value === value)
+        return <span title={option?.label}>{value as string}</span>
+      }
+    },
+    {
+      key: 'deliveryDate',
       label: t('crud.fields.deliveryDate'),
       labelKey: 'crud.fields.deliveryDate',
       sortable: true,
       render: (value) => formatDate(value)
     },
     {
-      key: 'gesamtbetrag',
+      key: 'totalAmount',
       label: t('crud.fields.totalAmount'),
       labelKey: 'crud.fields.totalAmount',
       sortable: true,
       render: (value) => `${formatNumber(value, 2)} €`
     },
     {
-      key: 'createdAt',
-      label: t('crud.fields.createdAt'),
-      labelKey: 'crud.fields.createdAt',
+      key: 'externalReference',
+      label: 'Ext. Referenz',
+      labelKey: 'crud.fields.externalReference',
       sortable: true,
-      render: (value) => formatDate(value)
-    }
+      render: (value) => value ? <span className="text-xs font-mono">{value as string}</span> : <span className="text-muted-foreground">–</span>
+    },
   ],
   filters: [
     {
@@ -84,13 +92,14 @@ const createBestellungenConfig = (t: any, entityTypeLabel: string): ListConfig =
       options: [
         { value: 'ENTWURF', label: t('status.draft'), labelKey: 'status.draft' },
         { value: 'FREIGEGEBEN', label: t('status.approved'), labelKey: 'status.approved' },
+        { value: 'BESTELLT', label: 'Bestellt', labelKey: 'status.ordered' },
         { value: 'TEILGELIEFERT', label: t('status.partial'), labelKey: 'status.partial' },
-        { value: 'VOLLGELIEFERT', label: t('crud.fields.fullyDelivered'), labelKey: 'crud.fields.fullyDelivered' },
+        { value: 'GELIEFERT', label: 'Geliefert', labelKey: 'status.delivered' },
         { value: 'STORNIERT', label: t('status.cancelled'), labelKey: 'status.cancelled' }
       ]
     },
     {
-      name: 'lieferant',
+      name: 'search',
       label: t('crud.entities.supplier'),
       labelKey: 'crud.entities.supplier',
       type: 'text'
@@ -109,7 +118,7 @@ const createBestellungenConfig = (t: any, entityTypeLabel: string): ListConfig =
       label: t('crud.actions.cancel'),
       labelKey: 'crud.actions.cancel',
       type: 'danger',
-      onClick: () => { /* Storno-Funktion - noch nicht implementiert */ }
+      onClick: () => { /* Storno über handleAction gesteuert */ }
     },
     {
       key: 'drucken',
@@ -122,13 +131,13 @@ const createBestellungenConfig = (t: any, entityTypeLabel: string): ListConfig =
   defaultSort: { field: 'createdAt', direction: 'desc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/einkauf/bestellungen',
+    baseUrl: '/api/v1/purchase-orders',
     endpoints: {
-      list: '/api/einkauf/bestellungen',
-      get: '/api/einkauf/bestellungen/{id}',
-      create: '/api/einkauf/bestellungen',
-      update: '/api/einkauf/bestellungen/{id}',
-      delete: '/api/einkauf/bestellungen/{id}'
+      list: '/api/v1/purchase-orders',
+      get: '/api/v1/purchase-orders/{id}',
+      create: '/api/v1/purchase-orders',
+      update: '/api/v1/purchase-orders/{id}',
+      delete: '/api/v1/purchase-orders/{id}'
     }
   },
   permissions: ['einkauf.read', 'einkauf.write'],
@@ -138,75 +147,38 @@ const createBestellungenConfig = (t: any, entityTypeLabel: string): ListConfig =
 export default function BestellungenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
   const entityType = 'purchaseOrder'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bestellung')
   const bestellungenConfig = createBestellungenConfig(t, entityTypeLabel)
 
+  const { data: orders, isLoading } = usePurchaseOrders()
+  const approveMutation = useApprovePurchaseOrder()
+  const cancelMutation = useCancelPurchaseOrder()
+
+  const data = orders ?? []
+
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
       navigate(`/einkauf/bestellungen/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
-        try {
-          await apiClient.delete(`/bestellungen/${item.id}`)
-          loadData() // Liste neu laden
-        } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.deleteError', { entityType: entityTypeLabel })
-          })
-        }
-      }
     } else if (action === 'freigeben' && item) {
       try {
-        await apiClient.post(`/bestellungen/${item.id}/freigeben`)
-        loadData()
-      } catch (error) {
-        toast({
-          variant: 'destructive',
-          title: t('crud.messages.updateError', { entityType: entityTypeLabel })
-        })
+        await approveMutation.mutateAsync(item.id)
+        toast({ title: 'Bestellung freigegeben' })
+      } catch {
+        toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }) })
+      }
+    } else if (action === 'stornieren' && item) {
+      const reason = prompt('Stornierungsgrund:')
+      if (reason) {
+        try {
+          await cancelMutation.mutateAsync({ id: item.id, reason })
+          toast({ title: 'Bestellung storniert' })
+        } catch {
+          toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }) })
+        }
       }
     }
   })
-
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      // Versuche zuerst MCP-API, dann Fallback auf alte API
-      try {
-        const response = await fetch('/api/mcp/documents/purchase_order?skip=0&limit=100')
-        if (response.ok) {
-          const result = await response.json()
-          if (result.ok && result.data) {
-            setData(result.data)
-            setTotal(result.total || result.data.length)
-            return
-          }
-        }
-      } catch (_mcpError) {
-        // MCP-API nicht verfügbar - stille Fallback-Nutzung
-      }
-      
-      // Fallback auf alte API
-      const response = await apiClient.get('/bestellungen')
-      if (response.success) {
-        setData((response.data as any).data || [])
-        setTotal((response.data as any).total || 0)
-      }
-    } catch (_error) {
-      // API nicht erreichbar - stille Fehlerbehandlung
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadData()
-  }, [])
 
   const handleCreate = () => {
     navigate('/einkauf/bestellung-anlegen')
@@ -216,26 +188,18 @@ export default function BestellungenListePage(): JSX.Element {
     handleAction('edit', item)
   }
 
-  const handleDelete = (item: any) => {
-    handleAction('delete', item)
-  }
-
   const handleExport = () => {
     try {
-      // Create CSV content
-      const csvHeader = `${t('crud.fields.orderNumber')};${t('crud.entities.supplier')};${t('crud.fields.status')};${t('crud.fields.deliveryDate')};${t('crud.fields.totalAmount')};${t('crud.fields.createdAt')}\n`
-      const csvContent = data.map((bestellung: any) =>
-        `"${bestellung.nummer}";"${bestellung.lieferant}";"${bestellung.status}";"${bestellung.liefertermin}";"${bestellung.gesamtbetrag}";"${bestellung.createdAt}"`
+      const csvHeader = `Bestellnr.;Betreff;Status;Incoterms;Liefertermin;Gesamtbetrag;Ext. Referenz\n`
+      const csvContent = data.map((po) =>
+        `"${po.purchaseOrderNumber}";"${po.subject}";"${po.status}";"${po.incoterms ?? ''}";"${po.deliveryDate}";"${po.totalAmount}";"${po.externalReference ?? ''}"`
       ).join('\n')
 
-      const csv = csvHeader + csvContent
-
-      // Create and download file
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const blob = new Blob([csvHeader + csvContent], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
       link.setAttribute('href', url)
-      link.setAttribute('download', `${t('crud.entities.purchaseOrder')}-${new Date().toISOString().split('T')[0]}.csv`)
+      link.setAttribute('download', `Bestellungen-${new Date().toISOString().split('T')[0]}.csv`)
       link.style.visibility = 'hidden'
       document.body.appendChild(link)
       link.click()
@@ -245,12 +209,8 @@ export default function BestellungenListePage(): JSX.Element {
         title: t('crud.messages.exportSuccess'),
         description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
       })
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: t('crud.messages.exportError'),
-        description: t('crud.messages.exportFailed'),
-      })
+    } catch {
+      toast({ variant: 'destructive', title: t('crud.messages.exportError') })
     }
   }
 
@@ -258,10 +218,9 @@ export default function BestellungenListePage(): JSX.Element {
     <ListReport
       config={bestellungenConfig}
       data={data}
-      total={total}
+      total={data.length}
       onCreate={handleCreate}
       onEdit={handleEdit}
-      onDelete={handleDelete}
       onExport={handleExport}
       onImport={() => {
         toast({
@@ -269,7 +228,7 @@ export default function BestellungenListePage(): JSX.Element {
           description: t('crud.messages.importComingSoon'),
         })
       }}
-      isLoading={loading}
+      isLoading={isLoading}
     />
   )
 }

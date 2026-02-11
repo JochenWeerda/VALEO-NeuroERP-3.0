@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SignatureCanvas, type SignatureCanvasRef } from '@/components/ui/signature-canvas'
 import { Clock, Plus, Save, Truck } from 'lucide-react'
+import { toast } from '@/hooks/use-toast'
+import { useSaveStundenzettel } from '@/lib/api/personal'
 
 type Tour = {
   id: string
@@ -29,6 +31,7 @@ type Stundenzettel = {
 export default function StundenzettelPage(): JSX.Element {
   const navigate = useNavigate()
   const signatureRef = useRef<SignatureCanvasRef>(null)
+  const saveMutation = useSaveStundenzettel()
 
   const [zettel, setZettel] = useState<Stundenzettel>({
     datum: new Date().toISOString().split('T')[0],
@@ -90,25 +93,24 @@ export default function StundenzettelPage(): JSX.Element {
     })
   }
 
-  function handleSave(): void {
-    // Get signature as data URL
+  async function handleSave(): Promise<void> {
     const signatureData = signatureRef.current?.toDataURL() || undefined
     const isEmpty = signatureRef.current?.isEmpty() ?? true
 
     if (isEmpty) {
-      alert('Bitte unterschreiben Sie den Stundenzettel.')
+      toast({ variant: 'destructive', title: 'Bitte unterschreiben Sie den Stundenzettel.' })
       return
     }
 
-    const dataToSave = {
-      ...zettel,
-      unterschrift: signatureData,
-    }
+    const dataToSave = { ...zettel, unterschrift: signatureData }
 
-    // TODO: Send to API
-    console.log('Saving Stundenzettel:', dataToSave)
-    alert('Stundenzettel gespeichert!')
-    navigate('/personal/stundenzettel-liste')
+    try {
+      await saveMutation.mutateAsync(dataToSave)
+      toast({ title: 'Stundenzettel gespeichert' })
+      navigate('/personal/stundenzettel-liste')
+    } catch {
+      toast({ variant: 'destructive', title: 'Fehler beim Speichern' })
+    }
   }
 
   return (
@@ -275,7 +277,7 @@ export default function StundenzettelPage(): JSX.Element {
             ref={signatureRef}
             width={500}
             height={150}
-            strokeColor="***REMOVED***1e293b"
+            strokeColor="#1e293b"
             strokeWidth={2}
             onChange={(empty) => {
               if (!empty) {
@@ -291,11 +293,12 @@ export default function StundenzettelPage(): JSX.Element {
         <Button variant="outline" onClick={() => navigate('/personal/stundenzettel-liste')}>
           Abbrechen
         </Button>
-        <Button className="gap-2" onClick={handleSave}>
+        <Button className="gap-2" onClick={handleSave} disabled={saveMutation.isPending}>
           <Save className="h-4 w-4" />
-          Speichern
+          {saveMutation.isPending ? 'Speichern...' : 'Speichern'}
         </Button>
       </div>
     </div>
   )
 }
+

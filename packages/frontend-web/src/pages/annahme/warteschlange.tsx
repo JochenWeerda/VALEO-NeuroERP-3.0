@@ -1,31 +1,18 @@
-import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Clock, Truck } from 'lucide-react'
+import { useWarteschlange } from '@/lib/api/inventory'
+import type { LKWEintrag } from '@/lib/api/inventory'
 
-type LKWEintrag = {
-  id: string
-  position: number
-  kennzeichen: string
-  lieferant: string
-  artikel: string
-  ankunft: string
-  wartezeit: number
-  status: 'wartend' | 'in-bearbeitung' | 'abgeschlossen'
-}
-
-const mockWarteschlange: LKWEintrag[] = [
-  { id: '1', position: 1, kennzeichen: 'AB-CD 1234', lieferant: 'Landwirt Schmidt', artikel: 'Weizen', ankunft: '08:30', wartezeit: 15, status: 'in-bearbeitung' },
-  { id: '2', position: 2, kennzeichen: 'EF-GH 5678', lieferant: 'Müller Agrar', artikel: 'Raps', ankunft: '08:45', wartezeit: 30, status: 'wartend' },
-]
-
-export default function WarteschlangePagePage(): JSX.Element {
-  const [_searchTerm, _setSearchTerm] = useState('')
+export default function WarteschlangePage(): JSX.Element {
+  const { data, isLoading } = useWarteschlange()
+  const warteschlange = data?.items ?? []
 
   const columns = [
-    { key: 'position' as const, label: '***REMOVED***', render: (l: LKWEintrag) => <span className="text-lg font-bold">***REMOVED***{l.position}</span> },
+    { key: 'position' as const, label: '#', render: (l: LKWEintrag) => <span className="text-lg font-bold">#{l.position}</span> },
     {
       key: 'kennzeichen' as const,
       label: 'Kennzeichen',
@@ -68,6 +55,28 @@ export default function WarteschlangePagePage(): JSX.Element {
     },
   ]
 
+  const wartend = warteschlange.filter(l => l.status === 'wartend').length
+  const inBearbeitung = warteschlange.filter(l => l.status === 'in-bearbeitung').length
+  const abgeschlossen = warteschlange.filter(l => l.status === 'abgeschlossen').length
+  const avgWartezeit = warteschlange.length > 0
+    ? Math.round(warteschlange.reduce((sum, l) => sum + l.wartezeit, 0) / warteschlange.length)
+    : 0
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-6">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-56" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 w-full" />)}
+        </div>
+        <Skeleton className="h-48 w-full" />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
@@ -85,7 +94,7 @@ export default function WarteschlangePagePage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Truck className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockWarteschlange.filter((l) => l.status === 'wartend').length}</span>
+              <span className="text-2xl font-bold">{wartend}</span>
             </div>
           </CardContent>
         </Card>
@@ -95,18 +104,18 @@ export default function WarteschlangePagePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{mockWarteschlange.filter((l) => l.status === 'in-bearbeitung').length}</span>
+            <span className="text-2xl font-bold text-orange-600">{inBearbeitung}</span>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Ø Wartezeit</CardTitle>
+            <CardTitle className="text-sm font-medium">Avg. Wartezeit</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              <span className="text-2xl font-bold">22 min</span>
+              <span className="text-2xl font-bold">{avgWartezeit} min</span>
             </div>
           </CardContent>
         </Card>
@@ -116,14 +125,14 @@ export default function WarteschlangePagePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Heute abgefertigt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockWarteschlange.filter((l) => l.status === 'abgeschlossen').length}</span>
+            <span className="text-2xl font-bold text-green-600">{abgeschlossen}</span>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockWarteschlange} columns={columns} />
+          <DataTable data={warteschlange} columns={columns} />
         </CardContent>
       </Card>
     </div>
