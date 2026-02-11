@@ -6,8 +6,7 @@
  */
 
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '@/lib/api-client'
+import { usePortalDokumente } from '@/lib/api/portal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -97,21 +96,23 @@ export default function PortalDokumente() {
   const [activeTab, setActiveTab] = useState('alle')
   const [selectedJahr, setSelectedJahr] = useState<string>('alle')
 
-  const { data: dokumente = mockDokumente, isLoading } = useQuery({
-    queryKey: ['portal', 'dokumente', 'page'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<Dokument[]>('/api/v1/portal/dokumente')
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          return response.data
-        }
-      } catch {
-        // Fallback handled below
+  const { data: portalDokumente = [], isLoading } = usePortalDokumente()
+  const dokumente: Dokument[] = portalDokumente.length > 0
+    ? portalDokumente.map((d) => {
+      const ext = d.typ.toLowerCase()
+      const dateiformat: Dokument['dateiformat'] = ext === 'csv' || ext === 'xlsx' ? ext : 'pdf'
+      return {
+        id: d.id,
+        name: d.name,
+        typ: 'sonstiges',
+        kategorie: d.kategorie,
+        datum: d.datum,
+        dateigroesse: `${d.groesse} KB`,
+        dateiformat,
+        jahr: Number(d.datum.slice(0, 4)),
       }
-      return mockDokumente
-    },
-    staleTime: 2 * 60 * 1000,
-  })
+    })
+    : mockDokumente
 
   const filteredDokumente = dokumente.filter((d) => {
     const matchesSearch = d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
