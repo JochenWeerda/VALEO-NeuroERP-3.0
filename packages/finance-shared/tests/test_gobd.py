@@ -12,7 +12,8 @@ def test_audit_trail_hash_chain():
     )
     trail.append_entry(entry)
 
-    ***REMOVED*** Sollte keine Ausnahme werfen
+    # Sollte keine Ausnahme werfen
     trail.verify_chain()
+
 
 

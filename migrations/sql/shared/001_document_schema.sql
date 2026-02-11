@@ -1,4 +1,4 @@
-﻿-- =====================================================
+-- =====================================================
 -- VALEO NeuroERP - Dokumentenverwaltung Schema
 -- =====================================================
 
@@ -15,7 +15,7 @@ CREATE TABLE dokumente.dokumentenkategorien (
     kategorie_name VARCHAR(100) NOT NULL,
     beschreibung TEXT,
     ueberkategorie_id UUID REFERENCES dokumente.dokumentenkategorien(id),
-    farbe VARCHAR(7) DEFAULT '***REMOVED***1976d2',
+    farbe VARCHAR(7) DEFAULT '#1976d2',
     icon VARCHAR(50),
     aktiv BOOLEAN DEFAULT true,
     erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -60,7 +60,7 @@ CREATE TABLE dokumente.dokument_tags (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tag_name VARCHAR(100) NOT NULL,
     beschreibung TEXT,
-    farbe VARCHAR(7) DEFAULT '***REMOVED***666666',
+    farbe VARCHAR(7) DEFAULT '#666666',
     aktiv BOOLEAN DEFAULT true,
     erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -127,7 +127,7 @@ CREATE TABLE dokumente.workflow_schritte (
     schritt_reihenfolge INTEGER NOT NULL,
     rolle_id UUID REFERENCES personal.rollen(id),
     mitarbeiter_id UUID REFERENCES personal.mitarbeiter(id),
-    aktion VARCHAR(50) NOT NULL, -- 'FREIGEBEN', 'GENEHMIGEN', 'PRÃœFEN', 'UNTERZEICHNEN'
+    aktion VARCHAR(50) NOT NULL, -- 'FREIGEBEN', 'GENEHMIGEN', 'PRÜFEN', 'UNTERZEICHNEN'
     ist_optional BOOLEAN DEFAULT false,
     zeitlimit_tage INTEGER,
     erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -152,7 +152,7 @@ CREATE TABLE dokumente.workflow_schritt_instanzen (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     workflow_instanz_id UUID NOT NULL REFERENCES dokumente.workflow_instanzen(id) ON DELETE CASCADE,
     workflow_schritt_id UUID NOT NULL REFERENCES dokumente.workflow_schritte(id),
-    status VARCHAR(50) DEFAULT 'AUSSTEHEND', -- 'AUSSTEHEND', 'IN_BEARBEITUNG', 'ABGESCHLOSSEN', 'ÃœBERSPRUNGEN'
+    status VARCHAR(50) DEFAULT 'AUSSTEHEND', -- 'AUSSTEHEND', 'IN_BEARBEITUNG', 'ABGESCHLOSSEN', 'ÜBERSPRUNGEN'
     zugewiesen_an UUID REFERENCES personal.mitarbeiter(id),
     gestartet_am TIMESTAMP,
     abgeschlossen_am TIMESTAMP,
@@ -171,7 +171,7 @@ CREATE TABLE dokumente.dokumentberechtigungen (
     dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id) ON DELETE CASCADE,
     mitarbeiter_id UUID REFERENCES personal.mitarbeiter(id),
     rolle_id UUID REFERENCES personal.rollen(id),
-    berechtigung_typ VARCHAR(50) NOT NULL, -- 'LESEN', 'BEARBEITEN', 'FREIGEBEN', 'LÃ–SCHEN', 'ADMIN'
+    berechtigung_typ VARCHAR(50) NOT NULL, -- 'LESEN', 'BEARBEITEN', 'FREIGEBEN', 'LÖSCHEN', 'ADMIN'
     erteilt_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),
     erteilt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     gueltig_bis DATE,
@@ -205,10 +205,10 @@ CREATE TABLE dokumente.archivierungsregeln (
     archivierung_nach_tagen INTEGER NOT NULL,
     loeschung_nach_tagen INTEGER,
     gesetzliche_frist_jahre INTEGER NOT NULL, -- Gesetzliche Aufbewahrungsfrist in Jahren
-    gesetzliche_grundlage VARCHAR(200), -- z.B. "Â§ 147 AO", "Â§ 257 HGB"
+    gesetzliche_grundlage VARCHAR(200), -- z.B. "§ 147 AO", "§ 257 HGB"
     bereinigung_typ VARCHAR(50) DEFAULT 'ARCHIVIEREN', -- 'ARCHIVIEREN', 'EXPORTIEREN', 'LOESCHEN'
     export_format VARCHAR(50), -- 'PDF', 'ZIP', 'TAR.GZ'
-    export_ziel VARCHAR(500), -- Pfad fÃ¼r Export
+    export_ziel VARCHAR(500), -- Pfad für Export
     aktiv BOOLEAN DEFAULT true,
     erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -232,7 +232,7 @@ CREATE TABLE dokumente.archivierte_dokumente (
     erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- BereinigungsauftrÃ¤ge
+-- Bereinigungsaufträge
 CREATE TABLE dokumente.bereinigungsauftraege (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     auftrag_nr VARCHAR(20) UNIQUE NOT NULL,
@@ -315,7 +315,7 @@ CREATE INDEX idx_dokumentzugriffe_mitarbeiter ON dokumente.dokumentzugriffe(mita
 CREATE INDEX idx_dokumentzugriffe_datum ON dokumente.dokumentzugriffe(erstellt_am);
 
 -- =====================================================
--- INDEXE FÃœR ARCHIVIERUNG UND BEREINIGUNG
+-- INDEXE FÜR ARCHIVIERUNG UND BEREINIGUNG
 -- =====================================================
 
 CREATE INDEX idx_archivierte_dokumente_bereinigung_am ON dokumente.archivierte_dokumente(bereinigung_am);
@@ -333,7 +333,7 @@ CREATE INDEX idx_bereinigungsprotokoll_datum ON dokumente.bereinigungsprotokoll(
 -- TRIGGERS
 -- =====================================================
 
--- Trigger-Funktion fÃ¼r automatische Timestamp-Updates
+-- Trigger-Funktion für automatische Timestamp-Updates
 CREATE OR REPLACE FUNCTION dokumente.update_geaendert_am()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -342,7 +342,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Triggers fÃ¼r alle Tabellen
+-- Triggers für alle Tabellen
 CREATE TRIGGER trigger_dokumentenkategorien_update_geaendert_am
     BEFORE UPDATE ON dokumente.dokumentenkategorien
     FOR EACH ROW EXECUTE FUNCTION dokumente.update_geaendert_am();
@@ -423,7 +423,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger fÃ¼r automatische Dokumentnummer-Generierung
+-- Trigger für automatische Dokumentnummer-Generierung
 CREATE TRIGGER trigger_generate_dokumentnummer
     BEFORE INSERT ON dokumente.dokumente
     FOR EACH ROW EXECUTE FUNCTION dokumente.generate_dokumentnummer();
@@ -516,7 +516,7 @@ $$ LANGUAGE plpgsql;
 -- VIEWS
 -- =====================================================
 
--- DokumentÃ¼bersicht
+-- Dokumentübersicht
 CREATE VIEW dokumente.dokument_uebersicht AS
 SELECT 
     d.id,
@@ -545,7 +545,7 @@ LEFT JOIN dokumente.dokumentzugriffe dz ON dz.dokument_id = d.id
 GROUP BY d.id, d.dokument_nr, d.titel, d.beschreibung, dk.kategorie_name, d.dokument_typ, 
          d.status, d.version, m.vorname, m.nachname, f.vorname, f.nachname, d.erstellt_am, d.freigegeben_am, d.dateigroesse;
 
--- Workflow-Ãœbersicht
+-- Workflow-Übersicht
 CREATE VIEW dokumente.workflow_uebersicht AS
 SELECT 
     wi.id,
@@ -583,10 +583,10 @@ LEFT JOIN dokumente.dokumentzugriffe dz ON dz.dokument_id = d.id
 GROUP BY d.id, d.dokument_nr, d.titel, dk.kategorie_name;
 
 -- =====================================================
--- FUNKTIONEN FÃœR ARCHIVIERUNG UND BEREINIGUNG
+-- FUNKTIONEN FÜR ARCHIVIERUNG UND BEREINIGUNG
 -- =====================================================
 
--- Automatische Auftragsnummer-Generierung fÃ¼r BereinigungsauftrÃ¤ge
+-- Automatische Auftragsnummer-Generierung für Bereinigungsaufträge
 CREATE OR REPLACE FUNCTION dokumente.generate_bereinigungsauftragnummer()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -610,12 +610,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger fÃ¼r automatische Auftragsnummer-Generierung
+-- Trigger für automatische Auftragsnummer-Generierung
 CREATE TRIGGER trigger_generate_bereinigungsauftragnummer
     BEFORE INSERT ON dokumente.bereinigungsauftraege
     FOR EACH ROW EXECUTE FUNCTION dokumente.generate_bereinigungsauftragnummer();
 
--- Funktion zur Identifikation von Dokumenten fÃ¼r Bereinigung
+-- Funktion zur Identifikation von Dokumenten für Bereinigung
 CREATE OR REPLACE FUNCTION dokumente.identifiziere_bereinigungsbedarf(
     p_regel_id UUID DEFAULT NULL
 )
@@ -732,7 +732,7 @@ BEGIN
         END;
     END LOOP;
     
-    -- Auftrag abschlieÃŸen
+    -- Auftrag abschließen
     UPDATE dokumente.bereinigungsauftraege 
     SET status = 'ABGESCHLOSSEN', 
         ausgefuehrt_am = CURRENT_TIMESTAMP,
@@ -743,7 +743,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Funktion zur endgÃ¼ltigen LÃ¶schung nach Ablauf der gesetzlichen Frist
+-- Funktion zur endgültigen Löschung nach Ablauf der gesetzlichen Frist
 CREATE OR REPLACE FUNCTION dokumente.endgueltige_loeschung(
     p_ausgefuehrt_von UUID DEFAULT NULL
 )
@@ -765,14 +765,14 @@ BEGIN
     )
     RETURNING id INTO v_auftrag_id;
     
-    -- Archivierte Dokumente lÃ¶schen, deren gesetzliche Frist abgelaufen ist
+    -- Archivierte Dokumente löschen, deren gesetzliche Frist abgelaufen ist
     FOR v_archiviertes_dokument IN 
         SELECT * FROM dokumente.archivierte_dokumente 
         WHERE gesetzliche_frist_bis < CURRENT_DATE
         AND bereinigung_status = 'ARCHIVIERT'
     LOOP
         BEGIN
-            -- Status auf "GELÃ–SCHT" setzen
+            -- Status auf "GELÖSCHT" setzen
             UPDATE dokumente.archivierte_dokumente 
             SET bereinigung_status = 'LOESCHT',
                 bereinigung_am = CURRENT_DATE
@@ -799,7 +799,7 @@ BEGIN
         END;
     END LOOP;
     
-    -- Auftrag abschlieÃŸen
+    -- Auftrag abschließen
     UPDATE dokumente.bereinigungsauftraege 
     SET status = 'ABGESCHLOSSEN', 
         ausgefuehrt_am = CURRENT_TIMESTAMP,
@@ -835,10 +835,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- =====================================================
--- VIEWS FÃœR ARCHIVIERUNG UND BEREINIGUNG
+-- VIEWS FÜR ARCHIVIERUNG UND BEREINIGUNG
 -- =====================================================
 
--- BereinigungsÃ¼bersicht
+-- Bereinigungsübersicht
 CREATE VIEW dokumente.bereinigungs_uebersicht AS
 SELECT 
     ba.id,
@@ -881,7 +881,7 @@ ORDER BY ad.gesetzliche_frist_bis;
 -- ERWEITERTE SICHERHEIT UND COMPLIANCE
 -- =====================================================
 
--- VerschlÃ¼sselung fÃ¼r sensible Dokumente
+-- Verschlüsselung für sensible Dokumente
 CREATE TABLE dokumente.dokument_verschluesselung (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id) ON DELETE CASCADE,
@@ -908,7 +908,7 @@ CREATE TABLE dokumente.datenschutz_einstellungen (
     geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Audit-Trail fÃ¼r Compliance (GoBD-konform)
+-- Audit-Trail für Compliance (GoBD-konform)
 CREATE TABLE dokumente.audit_trail (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id),
@@ -919,7 +919,7 @@ CREATE TABLE dokumente.audit_trail (
     user_agent TEXT,
     session_id VARCHAR(100),
     zeitstempel TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    hash_wert VARCHAR(64), -- SHA256-Hash fÃ¼r IntegritÃ¤tsprÃ¼fung
+    hash_wert VARCHAR(64), -- SHA256-Hash für Integritätsprüfung
     vorheriger_hash VARCHAR(64),
     erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -959,7 +959,7 @@ CREATE TABLE dokumente.dokument_berechtigungen_erweitert (
 -- ERWEITERTE WORKFLOW-AUTOMATISIERUNG
 -- =====================================================
 
--- Workflow-Templates fÃ¼r verschiedene Dokumenttypen
+-- Workflow-Templates für verschiedene Dokumenttypen
 CREATE TABLE dokumente.workflow_templates (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     template_name VARCHAR(100) NOT NULL,
@@ -968,7 +968,7 @@ CREATE TABLE dokumente.workflow_templates (
     kategorie_id UUID REFERENCES dokumente.dokumentenkategorien(id),
     workflow_steps JSONB NOT NULL, -- Array von Workflow-Schritten
     automatische_ausloesung BOOLEAN DEFAULT false,
-    ausloesung_bedingung JSONB, -- Bedingungen fÃ¼r automatische AuslÃ¶sung
+    ausloesung_bedingung JSONB, -- Bedingungen für automatische Auslösung
     benachrichtigungen JSONB, -- E-Mail/SMS-Benachrichtigungen
     aktiv BOOLEAN DEFAULT true,
     erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -1000,14 +1000,14 @@ CREATE TABLE dokumente.such_index (
     dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id) ON DELETE CASCADE,
     volltext_inhalt TEXT, -- Extrahierter Text aus Dokumenten
     metadaten JSONB, -- Strukturierte Metadaten
-    schluesselwoerter TEXT[], -- Array von SchlÃ¼sselwÃ¶rtern
+    schluesselwoerter TEXT[], -- Array von Schlüsselwörtern
     kategorien TEXT[], -- Array von Kategorien
     tags TEXT[], -- Array von Tags
     erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Suchhistorie fÃ¼r Benutzer
+-- Suchhistorie für Benutzer
 CREATE TABLE dokumente.suchhistorie (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     benutzer_id UUID NOT NULL REFERENCES personal.mitarbeiter(id),
@@ -1030,7 +1030,7 @@ CREATE TABLE dokumente.versionshistorie_erweitert (
     version VARCHAR(20) NOT NULL,
     aenderung_typ VARCHAR(50) NOT NULL, -- 'ERSTELLT', 'AKTUALISIERT', 'GELOESCHT', 'WIDERHERGESTELLT', 'FREIGEGEBEN'
     aenderungsbeschreibung TEXT,
-    aenderungen JSONB, -- Detaillierte Ã„nderungen
+    aenderungen JSONB, -- Detaillierte Änderungen
     datei_hash VARCHAR(64) NOT NULL, -- SHA256-Hash der Datei
     vorheriger_hash VARCHAR(64),
     erstellt_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),
@@ -1039,7 +1039,7 @@ CREATE TABLE dokumente.versionshistorie_erweitert (
     archiviert BOOLEAN DEFAULT false
 );
 
--- Digitale Signaturen fÃ¼r Revisionssicherheit
+-- Digitale Signaturen für Revisionssicherheit
 CREATE TABLE dokumente.digitale_signaturen (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id),
@@ -1090,7 +1090,7 @@ CREATE TABLE dokumente.system_integrationen (
 -- PERFORMANCE UND SKALIERBARKEIT
 -- =====================================================
 
--- Cache fÃ¼r hÃ¤ufig abgerufene Dokumente
+-- Cache für häufig abgerufene Dokumente
 CREATE TABLE dokumente.dokument_cache (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     dokument_id UUID NOT NULL REFERENCES dokumente.dokumente(id),
@@ -1114,7 +1114,7 @@ CREATE TABLE dokumente.performance_metriken (
 );
 
 -- =====================================================
--- INDEXE FÃœR ERWEITERTE FEATURES
+-- INDEXE FÜR ERWEITERTE FEATURES
 -- =====================================================
 
 -- Volltext-Suche Index
@@ -1156,10 +1156,10 @@ CREATE INDEX idx_performance_metriken_typ ON dokumente.performance_metriken(metr
 CREATE INDEX idx_performance_metriken_zeitstempel ON dokumente.performance_metriken(erstellt_am);
 
 -- =====================================================
--- TRIGGERS FÃœR ERWEITERTE FEATURES
+-- TRIGGERS FÜR ERWEITERTE FEATURES
 -- =====================================================
 
--- Trigger fÃ¼r automatische Audit-Trail-EintrÃ¤ge
+-- Trigger für automatische Audit-Trail-Einträge
 CREATE OR REPLACE FUNCTION dokumente.audit_trail_trigger()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -1202,16 +1202,16 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger fÃ¼r Dokumente
+-- Trigger für Dokumente
 CREATE TRIGGER trigger_dokument_audit_trail
     AFTER INSERT OR UPDATE OR DELETE ON dokumente.dokumente
     FOR EACH ROW EXECUTE FUNCTION dokumente.audit_trail_trigger();
 
--- Trigger fÃ¼r automatische Benachrichtigungen
+-- Trigger für automatische Benachrichtigungen
 CREATE OR REPLACE FUNCTION dokumente.benachrichtigung_trigger()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Benachrichtigung bei Workflow-Status-Ã„nderung
+    -- Benachrichtigung bei Workflow-Status-Änderung
     IF TG_OP = 'UPDATE' AND OLD.status != NEW.status THEN
         INSERT INTO dokumente.benachrichtigungen (
             workflow_instanz_id, benachrichtigung_typ, empfaenger_id, 
@@ -1221,8 +1221,8 @@ BEGIN
             NEW.id,
             'SYSTEM',
             wsi.zugewiesen_an,
-            'Workflow-Status geÃ¤ndert: ' || NEW.status,
-            'Der Workflow fÃ¼r Dokument ' || d.dokument_nr || ' hat den Status ' || NEW.status || ' erhalten.'
+            'Workflow-Status geändert: ' || NEW.status,
+            'Der Workflow für Dokument ' || d.dokument_nr || ' hat den Status ' || NEW.status || ' erhalten.'
         FROM dokumente.workflow_schritt_instanzen wsi
         JOIN dokumente.dokumente d ON d.id = NEW.dokument_id
         WHERE wsi.workflow_instanz_id = NEW.id 
@@ -1234,16 +1234,16 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger fÃ¼r Workflow-Instanzen
+-- Trigger für Workflow-Instanzen
 CREATE TRIGGER trigger_workflow_benachrichtigung
     AFTER UPDATE ON dokumente.workflow_instanzen
     FOR EACH ROW EXECUTE FUNCTION dokumente.benachrichtigung_trigger();
 
 -- =====================================================
--- FUNKTIONEN FÃœR ERWEITERTE FEATURES
+-- FUNKTIONEN FÜR ERWEITERTE FEATURES
 -- =====================================================
 
--- Funktion fÃ¼r Volltext-Suche
+-- Funktion für Volltext-Suche
 CREATE OR REPLACE FUNCTION dokumente.volltext_suche(
     p_suchtext TEXT,
     p_kategorie_id UUID DEFAULT NULL,
@@ -1284,7 +1284,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Funktion fÃ¼r DSGVO-Compliance (Recht auf Vergessenwerden)
+-- Funktion für DSGVO-Compliance (Recht auf Vergessenwerden)
 CREATE OR REPLACE FUNCTION dokumente.dsgvo_loeschung(
     p_benutzer_id UUID,
     p_ausgefuehrt_von UUID DEFAULT NULL
@@ -1305,7 +1305,7 @@ BEGIN
         AND d.erstellt_von = p_benutzer_id
     LOOP
         BEGIN
-            -- Dokument als gelÃ¶scht markieren (soft delete)
+            -- Dokument als gelöscht markieren (soft delete)
             UPDATE dokumente.dokumente 
             SET status = 'GELOESCHT',
                 geaendert_am = CURRENT_TIMESTAMP
@@ -1331,7 +1331,7 @@ BEGIN
             
         EXCEPTION WHEN OTHERS THEN
             -- Fehler protokollieren
-            RAISE NOTICE 'Fehler beim LÃ¶schen von Dokument %: %', v_dokument.dokument_nr, SQLERRM;
+            RAISE NOTICE 'Fehler beim Löschen von Dokument %: %', v_dokument.dokument_nr, SQLERRM;
         END;
     END LOOP;
     
@@ -1339,7 +1339,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Funktion fÃ¼r Performance-Monitoring
+-- Funktion für Performance-Monitoring
 CREATE OR REPLACE FUNCTION dokumente.performance_metrik_speichern(
     p_metrik_typ VARCHAR(50),
     p_wert DECIMAL(10,3),
@@ -1369,10 +1369,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- =====================================================
--- VIEWS FÃœR ERWEITERTE FEATURES
+-- VIEWS FÜR ERWEITERTE FEATURES
 -- =====================================================
 
--- Compliance-Ãœbersicht
+-- Compliance-Übersicht
 CREATE VIEW dokumente.compliance_uebersicht AS
 SELECT 
     d.id,
@@ -1396,7 +1396,7 @@ GROUP BY d.id, d.dokument_nr, d.titel, dk.kategorie_name, ds.personenbezogene_da
          ds.datenschutz_kategorie, ds.aufbewahrungsfrist_jahre, ds.automatische_loeschung, 
          ds.loeschung_am, m.vorname, m.nachname;
 
--- Sicherheits-Ãœbersicht
+-- Sicherheits-Übersicht
 CREATE VIEW dokumente.sicherheit_uebersicht AS
 SELECT 
     d.id,
@@ -1418,7 +1418,7 @@ LEFT JOIN dokumente.audit_trail at ON at.dokument_id = d.id
 GROUP BY d.id, d.dokument_nr, d.titel, dk.kategorie_name, dv.verschluesselungs_typ, 
          dv.entschluesselung_erforderlich, d.status;
 
--- Performance-Ãœbersicht
+-- Performance-Übersicht
 CREATE VIEW dokumente.performance_uebersicht AS
 SELECT 
     metrik_typ,
@@ -1434,7 +1434,7 @@ GROUP BY metrik_typ, DATE_TRUNC('hour', erstellt_am)
 ORDER BY stunde DESC, metrik_typ;
 
 -- =====================================================
--- BEISPIELDATEN FÃœR ERWEITERTE FEATURES
+-- BEISPIELDATEN FÜR ERWEITERTE FEATURES
 -- =====================================================
 
 -- Dokument-Rollen
@@ -1443,37 +1443,37 @@ INSERT INTO dokumente.dokument_rollen (rolle_name, beschreibung, berechtigungen,
 ('Bearbeiter', 'Lesen und Bearbeiten von Dokumenten', '{"lesen": true, "bearbeiten": true, "loeschen": false, "freigeben": false}', 2),
 ('Freigeber', 'Lesen, Bearbeiten und Freigeben von Dokumenten', '{"lesen": true, "bearbeiten": true, "loeschen": false, "freigeben": true}', 3),
 ('Administrator', 'Vollzugriff auf Dokumente', '{"lesen": true, "bearbeiten": true, "loeschen": true, "freigeben": true}', 4),
-('Datenschutzbeauftragter', 'Spezielle Rechte fÃ¼r DSGVO-Compliance', '{"lesen": true, "bearbeiten": false, "loeschen": true, "freigeben": false}', 5);
+('Datenschutzbeauftragter', 'Spezielle Rechte für DSGVO-Compliance', '{"lesen": true, "bearbeiten": false, "loeschen": true, "freigeben": false}', 5);
 
 -- Workflow-Templates
 INSERT INTO dokumente.workflow_templates (template_name, beschreibung, dokument_typ, workflow_steps, automatische_ausloesung, benachrichtigungen) VALUES
-('Standard-Freigabe', 'Standard-Freigabeprozess fÃ¼r alle Dokumente', 'ALL', 
- '[{"schritt": 1, "name": "Ersteller-PrÃ¼fung", "rolle": "Bearbeiter", "aktion": "PRÃœFEN", "zeitlimit": 2},
+('Standard-Freigabe', 'Standard-Freigabeprozess für alle Dokumente', 'ALL', 
+ '[{"schritt": 1, "name": "Ersteller-Prüfung", "rolle": "Bearbeiter", "aktion": "PRÜFEN", "zeitlimit": 2},
    {"schritt": 2, "name": "Abteilungsleiter-Freigabe", "rolle": "Freigeber", "aktion": "FREIGEBEN", "zeitlimit": 3}]',
  true,
  '{"email": true, "system": true}'),
-('QS-Freigabe', 'QualitÃ¤tssicherungs-Freigabeprozess', 'PDF',
- '[{"schritt": 1, "name": "QS-PrÃ¼fung", "rolle": "Bearbeiter", "aktion": "PRÃœFEN", "zeitlimit": 5},
+('QS-Freigabe', 'Qualitätssicherungs-Freigabeprozess', 'PDF',
+ '[{"schritt": 1, "name": "QS-Prüfung", "rolle": "Bearbeiter", "aktion": "PRÜFEN", "zeitlimit": 5},
    {"schritt": 2, "name": "QS-Leiter-Freigabe", "rolle": "Freigeber", "aktion": "FREIGEBEN", "zeitlimit": 3}]',
  true,
  '{"email": true, "system": true}');
 
--- Datenschutz-Einstellungen fÃ¼r bestehende Dokumente
+-- Datenschutz-Einstellungen für bestehende Dokumente
 INSERT INTO dokumente.datenschutz_einstellungen (dokument_id, personenbezogene_daten, datenschutz_kategorie, aufbewahrungsfrist_jahre, automatische_loeschung)
 SELECT 
     d.id,
     CASE 
-        WHEN dk.kategorie_name IN ('Personal', 'VertrÃ¤ge') THEN true
+        WHEN dk.kategorie_name IN ('Personal', 'Verträge') THEN true
         ELSE false
     END,
     CASE 
         WHEN dk.kategorie_name = 'Personal' THEN 'BESONDERS_SENSIBEL'
-        WHEN dk.kategorie_name = 'VertrÃ¤ge' THEN 'SENSIBEL'
+        WHEN dk.kategorie_name = 'Verträge' THEN 'SENSIBEL'
         ELSE 'NORMAL'
     END,
     CASE 
         WHEN dk.kategorie_name = 'Personal' THEN 6
-        WHEN dk.kategorie_name = 'VertrÃ¤ge' THEN 10
+        WHEN dk.kategorie_name = 'Verträge' THEN 10
         ELSE 5
     END,
     CASE 
@@ -1487,24 +1487,25 @@ WHERE NOT EXISTS (
 );
 
 -- =====================================================
--- KOMMENTARE FÃœR ERWEITERTE FEATURES
+-- KOMMENTARE FÜR ERWEITERTE FEATURES
 -- =====================================================
 
-COMMENT ON TABLE dokumente.dokument_verschluesselung IS 'VerschlÃ¼sselung fÃ¼r sensible Dokumente';
+COMMENT ON TABLE dokumente.dokument_verschluesselung IS 'Verschlüsselung für sensible Dokumente';
 COMMENT ON TABLE dokumente.datenschutz_einstellungen IS 'DSGVO-Compliance und Datenschutz-Einstellungen';
-COMMENT ON TABLE dokumente.audit_trail IS 'VollstÃ¤ndiger Audit-Trail fÃ¼r GoBD-Compliance';
-COMMENT ON TABLE dokumente.dokument_rollen IS 'Rollen-basierte Sicherheit fÃ¼r Dokumente';
-COMMENT ON TABLE dokumente.dokument_berechtigungen_erweitert IS 'Erweiterte Zugriffsrechte mit zeitlichen und IP-BeschrÃ¤nkungen';
-COMMENT ON TABLE dokumente.workflow_templates IS 'Workflow-Templates fÃ¼r Automatisierung';
-COMMENT ON TABLE dokumente.benachrichtigungen IS 'Automatische Benachrichtigungen fÃ¼r Workflows';
+COMMENT ON TABLE dokumente.audit_trail IS 'Vollständiger Audit-Trail für GoBD-Compliance';
+COMMENT ON TABLE dokumente.dokument_rollen IS 'Rollen-basierte Sicherheit für Dokumente';
+COMMENT ON TABLE dokumente.dokument_berechtigungen_erweitert IS 'Erweiterte Zugriffsrechte mit zeitlichen und IP-Beschränkungen';
+COMMENT ON TABLE dokumente.workflow_templates IS 'Workflow-Templates für Automatisierung';
+COMMENT ON TABLE dokumente.benachrichtigungen IS 'Automatische Benachrichtigungen für Workflows';
 COMMENT ON TABLE dokumente.such_index IS 'Volltext-Suche und Metadaten-Index';
 COMMENT ON TABLE dokumente.versionshistorie_erweitert IS 'Erweiterte Versionshistorie mit Hash-Validierung';
-COMMENT ON TABLE dokumente.digitale_signaturen IS 'Digitale Signaturen fÃ¼r Revisionssicherheit';
+COMMENT ON TABLE dokumente.digitale_signaturen IS 'Digitale Signaturen für Revisionssicherheit';
 COMMENT ON TABLE dokumente.api_zugriffe IS 'API-Zugriffe und Integration';
-COMMENT ON TABLE dokumente.performance_metriken IS 'Performance-Monitoring fÃ¼r Skalierbarkeit';
+COMMENT ON TABLE dokumente.performance_metriken IS 'Performance-Monitoring für Skalierbarkeit';
 
 COMMENT ON FUNCTION dokumente.volltext_suche IS 'Volltext-Suche mit Relevanz-Scoring';
 COMMENT ON FUNCTION dokumente.dsgvo_loeschung IS 'DSGVO-Compliance: Recht auf Vergessenwerden';
-COMMENT ON FUNCTION dokumente.performance_metrik_speichern IS 'Performance-Monitoring fÃ¼r Metriken';
+COMMENT ON FUNCTION dokumente.performance_metrik_speichern IS 'Performance-Monitoring für Metriken';
 
 COMMIT; 
+

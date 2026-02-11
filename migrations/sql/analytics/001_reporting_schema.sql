@@ -1,8 +1,8 @@
-﻿-- =====================================================
+-- =====================================================
 -- VALEO NeuroERP - Reporting & Analytics Schema
 -- =====================================================
 
--- Schema fÃ¼r Reporting und Analytics
+-- Schema für Reporting und Analytics
 CREATE SCHEMA IF NOT EXISTS reporting;
 
 -- =====================================================
@@ -33,7 +33,7 @@ CREATE TABLE reporting.berichtsvorlagen (
     bericht_typ VARCHAR(50) NOT NULL, -- 'TABELLE', 'DIAGRAMM', 'DASHBOARD', 'EXPORT'
     sql_query TEXT NOT NULL,
     parameter_definition JSONB, -- Definition der Parameter
-    standard_parameter JSONB, -- Standardwerte fÃ¼r Parameter
+    standard_parameter JSONB, -- Standardwerte für Parameter
     export_formate VARCHAR(100)[], -- ['PDF', 'EXCEL', 'CSV', 'JSON']
     refresh_intervall INTEGER, -- in Minuten, NULL = manuell
     letzter_refresh TIMESTAMP,
@@ -45,17 +45,17 @@ CREATE TABLE reporting.berichtsvorlagen (
     geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- BerichtsausfÃ¼hrungen
+-- Berichtsausführungen
 CREATE TABLE reporting.berichtsausfuehrungen (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     vorlagen_id UUID NOT NULL REFERENCES reporting.berichtsvorlagen(id),
     ausfuehrungs_name VARCHAR(200),
-    parameter_werte JSONB, -- TatsÃ¤chliche Parameterwerte
+    parameter_werte JSONB, -- Tatsächliche Parameterwerte
     ausfuehrungs_status VARCHAR(50) NOT NULL, -- 'GESTARTET', 'LAEUFT', 'ABGESCHLOSSEN', 'FEHLER'
     start_zeit TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ende_zeit TIMESTAMP,
     dauer_sekunden INTEGER,
-    ergebnis_anzahl INTEGER, -- Anzahl der DatensÃ¤tze
+    ergebnis_anzahl INTEGER, -- Anzahl der Datensätze
     fehlermeldung TEXT,
     erstellt_von UUID NOT NULL REFERENCES personal.mitarbeiter(id),
     erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -108,7 +108,7 @@ CREATE TABLE reporting.kpi_definitionen (
     kpi_name VARCHAR(200) NOT NULL,
     beschreibung TEXT,
     kategorie VARCHAR(100), -- 'FINANZEN', 'PRODUKTION', 'VERKAUF', 'LAGER', etc.
-    berechnungs_formel TEXT NOT NULL, -- SQL-Formel fÃ¼r KPI-Berechnung
+    berechnungs_formel TEXT NOT NULL, -- SQL-Formel für KPI-Berechnung
     einheit VARCHAR(50), -- 'EUR', 'STUECK', 'PROZENT', etc.
     ziel_wert DECIMAL(15,2),
     warnung_unter DECIMAL(15,2),
@@ -129,7 +129,7 @@ CREATE TABLE reporting.kpi_werte (
     kpi_id UUID NOT NULL REFERENCES reporting.kpi_definitionen(id),
     wert DECIMAL(15,2) NOT NULL,
     zeitstempel TIMESTAMP NOT NULL,
-    kontext JSONB, -- ZusÃ¤tzliche Kontext-Informationen
+    kontext JSONB, -- Zusätzliche Kontext-Informationen
     erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -181,11 +181,11 @@ CREATE TABLE reporting.berichtsversendung (
     beschreibung TEXT,
     berichtsvorlage_id UUID NOT NULL REFERENCES reporting.berichtsvorlagen(id),
     versand_typ VARCHAR(50) NOT NULL, -- 'EMAIL', 'SYSTEM', 'API'
-    empfaenger_definition JSONB NOT NULL, -- EmpfÃ¤nger-Konfiguration
+    empfaenger_definition JSONB NOT NULL, -- Empfänger-Konfiguration
     parameter_werte JSONB,
     export_format VARCHAR(20) DEFAULT 'PDF',
     zeitplan_typ VARCHAR(50) NOT NULL, -- 'EINMAL', 'TAEGLICH', 'WOECHENTLICH', 'MONATLICH'
-    zeitplan_konfiguration JSONB, -- Cron-Ã¤hnliche Konfiguration
+    zeitplan_konfiguration JSONB, -- Cron-ähnliche Konfiguration
     naechste_ausfuehrung TIMESTAMP,
     letzte_ausfuehrung TIMESTAMP,
     aktiv BOOLEAN DEFAULT true,
@@ -292,7 +292,7 @@ CREATE INDEX idx_berichtsvorlagen_typ ON reporting.berichtsvorlagen(bericht_typ)
 CREATE INDEX idx_berichtsvorlagen_aktiv ON reporting.berichtsvorlagen(aktiv);
 CREATE INDEX idx_berichtsvorlagen_refresh ON reporting.berichtsvorlagen(naechster_refresh);
 
--- BerichtsausfÃ¼hrungen Indexe
+-- Berichtsausführungen Indexe
 CREATE INDEX idx_berichtsausfuehrungen_vorlage ON reporting.berichtsausfuehrungen(vorlagen_id);
 CREATE INDEX idx_berichtsausfuehrungen_status ON reporting.berichtsausfuehrungen(ausfuehrungs_status);
 CREATE INDEX idx_berichtsausfuehrungen_zeit ON reporting.berichtsausfuehrungen(start_zeit);
@@ -324,10 +324,10 @@ CREATE INDEX idx_performance_metriken_typ ON reporting.performance_metriken(metr
 CREATE INDEX idx_performance_metriken_zeit ON reporting.performance_metriken(erstellt_am);
 
 -- =====================================================
--- TRIGGER FÃœR AUTOMATISCHE TIMESTAMP-UPDATES
+-- TRIGGER FÜR AUTOMATISCHE TIMESTAMP-UPDATES
 -- =====================================================
 
--- Trigger-Funktion fÃ¼r geaendert_am Updates
+-- Trigger-Funktion für geaendert_am Updates
 CREATE OR REPLACE FUNCTION reporting.update_geaendert_am()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -336,7 +336,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger fÃ¼r alle Tabellen mit geaendert_am
+-- Trigger für alle Tabellen mit geaendert_am
 CREATE TRIGGER trigger_berichtskategorien_update_geaendert_am
     BEFORE UPDATE ON reporting.berichtskategorien
     FOR EACH ROW EXECUTE FUNCTION reporting.update_geaendert_am();
@@ -378,7 +378,7 @@ CREATE TRIGGER trigger_benutzer_berichtseinstellungen_update_geaendert_am
     FOR EACH ROW EXECUTE FUNCTION reporting.update_geaendert_am();
 
 -- =====================================================
--- FUNKTIONEN FÃœR BERICHTSGENERIERUNG
+-- FUNKTIONEN FÜR BERICHTSGENERIERUNG
 -- =====================================================
 
 -- Funktion zur KPI-Berechnung
@@ -399,7 +399,7 @@ BEGIN
         RAISE EXCEPTION 'KPI mit ID % nicht gefunden oder inaktiv', p_kpi_id;
     END IF;
     
-    -- Formel ausfÃ¼hren
+    -- Formel ausführen
     EXECUTE 'SELECT (' || v_formel || ')::DECIMAL(15,2)' INTO v_ergebnis;
     
     -- Ergebnis in KPI-Werte-Tabelle speichern
@@ -415,7 +415,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Funktion zur BerichtsausfÃ¼hrung
+-- Funktion zur Berichtsausführung
 CREATE OR REPLACE FUNCTION reporting.fuehre_bericht_aus(
     p_vorlagen_id UUID,
     p_parameter_werte JSONB DEFAULT '{}',
@@ -429,7 +429,7 @@ DECLARE
     v_ende_zeit TIMESTAMP;
     v_ergebnis_anzahl INTEGER;
 BEGIN
-    -- BerichtsausfÃ¼hrung starten
+    -- Berichtsausführung starten
     INSERT INTO reporting.berichtsausfuehrungen (
         vorlagen_id, 
         ausfuehrungs_name,
@@ -439,7 +439,7 @@ BEGIN
         erstellt_von
     ) VALUES (
         p_vorlagen_id,
-        'BerichtsausfÃ¼hrung ' || CURRENT_TIMESTAMP,
+        'Berichtsausführung ' || CURRENT_TIMESTAMP,
         p_parameter_werte,
         'GESTARTET',
         CURRENT_TIMESTAMP,
@@ -460,7 +460,7 @@ BEGIN
         RETURN v_ausfuehrung_id;
     END IF;
     
-    -- Status auf "LÃ„UFT" setzen
+    -- Status auf "LÄUFT" setzen
     UPDATE reporting.berichtsausfuehrungen
     SET ausfuehrungs_status = 'LAEUFT'
     WHERE id = v_ausfuehrung_id;
@@ -468,13 +468,13 @@ BEGIN
     v_start_zeit := CURRENT_TIMESTAMP;
     
     BEGIN
-        -- Query ausfÃ¼hren (hier wÃ¼rde die tatsÃ¤chliche AusfÃ¼hrung erfolgen)
-        -- FÃ¼r Demo-Zwecke simulieren wir eine erfolgreiche AusfÃ¼hrung
+        -- Query ausführen (hier würde die tatsächliche Ausführung erfolgen)
+        -- Für Demo-Zwecke simulieren wir eine erfolgreiche Ausführung
         v_ergebnis_anzahl := 100; -- Simulierte Anzahl
         
         v_ende_zeit := CURRENT_TIMESTAMP;
         
-        -- Erfolgreich abschlieÃŸen
+        -- Erfolgreich abschließen
         UPDATE reporting.berichtsausfuehrungen
         SET ausfuehrungs_status = 'ABGESCHLOSSEN',
             ende_zeit = v_ende_zeit,
@@ -522,10 +522,10 @@ BEGIN
         0  -- Simulierte fehlgeschlagene Versendungen
     ) RETURNING id INTO v_historie_id;
     
-    -- Letzte AusfÃ¼hrung aktualisieren
+    -- Letzte Ausführung aktualisieren
     UPDATE reporting.berichtsversendung
     SET letzte_ausfuehrung = CURRENT_TIMESTAMP,
-        naechste_ausfuehrung = CURRENT_TIMESTAMP + INTERVAL '1 day' -- Beispiel fÃ¼r tÃ¤gliche Versendung
+        naechste_ausfuehrung = CURRENT_TIMESTAMP + INTERVAL '1 day' -- Beispiel für tägliche Versendung
     WHERE id = p_versendung_id;
     
     RETURN v_historie_id;
@@ -533,10 +533,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- =====================================================
--- VIEWS FÃœR DASHBOARDS UND ÃœBERSICHTEN
+-- VIEWS FÜR DASHBOARDS UND ÜBERSICHTEN
 -- =====================================================
 
--- Dashboard-Ãœbersicht
+-- Dashboard-Übersicht
 CREATE VIEW reporting.dashboard_uebersicht AS
 SELECT 
     d.id,
@@ -554,7 +554,7 @@ LEFT JOIN reporting.dashboard_widgets w ON d.id = w.dashboard_id AND w.aktiv = t
 LEFT JOIN personal.mitarbeiter m ON d.erstellt_von = m.id
 GROUP BY d.id, d.dashboard_name, d.beschreibung, d.standard_dashboard, d.aktiv, d.erstellt_von, m.vorname, m.nachname, d.erstellt_am, d.geaendert_am;
 
--- KPI-Ãœbersicht
+-- KPI-Übersicht
 CREATE VIEW reporting.kpi_uebersicht AS
 SELECT 
     k.id,
@@ -583,7 +583,7 @@ LEFT JOIN LATERAL (
 LEFT JOIN personal.mitarbeiter m ON k.erstellt_von = m.id
 WHERE k.aktiv = true;
 
--- Berichtsversendung-Ãœbersicht
+-- Berichtsversendung-Übersicht
 CREATE VIEW reporting.versendung_uebersicht AS
 SELECT 
     bv.id,
@@ -601,7 +601,7 @@ SELECT
 FROM reporting.berichtsversendung bv
 LEFT JOIN personal.mitarbeiter m ON bv.erstellt_von = m.id;
 
--- Performance-Ãœbersicht
+-- Performance-Übersicht
 CREATE VIEW reporting.performance_uebersicht AS
 SELECT 
     pm.metrik_typ,
@@ -611,7 +611,7 @@ SELECT
     MAX(pm.dauer_ms) as max_dauer_ms,
     MIN(pm.dauer_ms) as min_dauer_ms,
     COUNT(*) as anzahl_ausfuehrungen,
-    AVG(pm.datensatz_anzahl) as durchschnitt_datensÃ¤tze,
+    AVG(pm.datensatz_anzahl) as durchschnitt_datensätze,
     COUNT(CASE WHEN pm.cache_hit = true THEN 1 END) as cache_hits,
     COUNT(CASE WHEN pm.cache_hit = false THEN 1 END) as cache_misses
 FROM reporting.performance_metriken pm
@@ -625,14 +625,14 @@ GROUP BY pm.metrik_typ, pm.berichtsvorlage_id, bv.vorlagen_name;
 
 -- Berichtskategorien
 INSERT INTO reporting.berichtskategorien (kategorie_name, beschreibung, icon_name, farbe, sortierung) VALUES
-('Finanzen', 'Finanzberichte und Kennzahlen', 'account_balance', '***REMOVED***1976d2', 1),
-('Produktion', 'Produktionsberichte und -statistiken', 'factory', '***REMOVED***388e3c', 2),
-('Verkauf', 'Verkaufsberichte und -analysen', 'trending_up', '***REMOVED***f57c00', 3),
-('Lager', 'Lagerberichte und Bestandsanalysen', 'inventory', '***REMOVED***7b1fa2', 4),
-('Personal', 'Personalberichte und -statistiken', 'people', '***REMOVED***d32f2f', 5),
-('QualitÃ¤t', 'QualitÃ¤tsberichte und -analysen', 'verified', '***REMOVED***388e3c', 6),
-('Projekte', 'Projektberichte und -fortschritte', 'assignment', '***REMOVED***1976d2', 7),
-('Dokumente', 'Dokumentenberichte und -statistiken', 'description', '***REMOVED***616161', 8);
+('Finanzen', 'Finanzberichte und Kennzahlen', 'account_balance', '#1976d2', 1),
+('Produktion', 'Produktionsberichte und -statistiken', 'factory', '#388e3c', 2),
+('Verkauf', 'Verkaufsberichte und -analysen', 'trending_up', '#f57c00', 3),
+('Lager', 'Lagerberichte und Bestandsanalysen', 'inventory', '#7b1fa2', 4),
+('Personal', 'Personalberichte und -statistiken', 'people', '#d32f2f', 5),
+('Qualität', 'Qualitätsberichte und -analysen', 'verified', '#388e3c', 6),
+('Projekte', 'Projektberichte und -fortschritte', 'assignment', '#1976d2', 7),
+('Dokumente', 'Dokumentenberichte und -statistiken', 'description', '#616161', 8);
 
 -- Standard-Dashboard
 INSERT INTO reporting.dashboards (dashboard_name, beschreibung, layout_definition, standard_dashboard, erstellt_von) VALUES
@@ -646,9 +646,9 @@ INSERT INTO reporting.kpi_definitionen (kpi_name, beschreibung, kategorie, berec
 '(SELECT COALESCE(SUM(betrag), 0) FROM finance.buchungen WHERE buchungstyp = ''ERLOES'' AND erstellt_am >= DATE_TRUNC(''month'', CURRENT_DATE))', 
 'EUR', 100000, 'AUFWAERTS', (SELECT id FROM personal.mitarbeiter LIMIT 1)),
 
-('ProduktionsauftrÃ¤ge (Offen)', 'Anzahl offener ProduktionsauftrÃ¤ge', 'Produktion',
+('Produktionsaufträge (Offen)', 'Anzahl offener Produktionsaufträge', 'Produktion',
 '(SELECT COUNT(*) FROM produktion.produktionsauftraege WHERE status = ''OFFEN'')',
-'StÃ¼ck', 50, 'ABWAERTS', (SELECT id FROM personal.mitarbeiter LIMIT 1)),
+'Stück', 50, 'ABWAERTS', (SELECT id FROM personal.mitarbeiter LIMIT 1)),
 
 ('Lagerbestand (Wert)', 'Gesamtwert des Lagerbestands', 'Lager',
 '(SELECT COALESCE(SUM(bestand * einstandspreis), 0) FROM lager.artikel_bestand ab JOIN lager.artikel a ON ab.artikel_id = a.id)',
@@ -666,13 +666,13 @@ INSERT INTO reporting.berichtsvorlagen (vorlagen_name, beschreibung, kategorie_i
 'SELECT datum, summe, kategorie FROM finance.umsatz_monatlich WHERE monat = $1',
 ARRAY['PDF', 'EXCEL'], (SELECT id FROM personal.mitarbeiter LIMIT 1)),
 
-('ProduktionsauftrÃ¤ge (Status)', 'Ãœbersicht aller ProduktionsauftrÃ¤ge nach Status',
+('Produktionsaufträge (Status)', 'Übersicht aller Produktionsaufträge nach Status',
 (SELECT id FROM reporting.berichtskategorien WHERE kategorie_name = 'Produktion'),
 'TABELLE',
 'SELECT auftragsnummer, produkt_name, status, start_datum, end_datum FROM produktion.produktionsauftraege ORDER BY erstellt_am DESC',
 ARRAY['PDF', 'EXCEL', 'CSV'], (SELECT id FROM personal.mitarbeiter LIMIT 1)),
 
-('Lagerbestand (Detailliert)', 'Detaillierte LagerbestandsÃ¼bersicht',
+('Lagerbestand (Detailliert)', 'Detaillierte Lagerbestandsübersicht',
 (SELECT id FROM reporting.berichtskategorien WHERE kategorie_name = 'Lager'),
 'TABELLE',
 'SELECT artikel_name, lagerort, bestand, einstandspreis, gesamt_wert FROM lager.bestand_uebersicht ORDER BY gesamt_wert DESC',
@@ -682,17 +682,18 @@ ARRAY['PDF', 'EXCEL'], (SELECT id FROM personal.mitarbeiter LIMIT 1));
 -- KOMMENTARE
 -- =====================================================
 
-COMMENT ON SCHEMA reporting IS 'Reporting und Analytics Schema fÃ¼r VALEO NeuroERP';
-COMMENT ON TABLE reporting.berichtskategorien IS 'Kategorien fÃ¼r Berichte und Dashboards';
-COMMENT ON TABLE reporting.berichtsvorlagen IS 'Vorlagen fÃ¼r Berichte mit SQL-Queries und Parametern';
-COMMENT ON TABLE reporting.berichtsausfuehrungen IS 'AusfÃ¼hrungen von Berichten mit Ergebnissen';
+COMMENT ON SCHEMA reporting IS 'Reporting und Analytics Schema für VALEO NeuroERP';
+COMMENT ON TABLE reporting.berichtskategorien IS 'Kategorien für Berichte und Dashboards';
+COMMENT ON TABLE reporting.berichtsvorlagen IS 'Vorlagen für Berichte mit SQL-Queries und Parametern';
+COMMENT ON TABLE reporting.berichtsausfuehrungen IS 'Ausführungen von Berichten mit Ergebnissen';
 COMMENT ON TABLE reporting.dashboards IS 'Dashboard-Definitionen mit Layout';
 COMMENT ON TABLE reporting.dashboard_widgets IS 'Widgets innerhalb von Dashboards';
-COMMENT ON TABLE reporting.kpi_definitionen IS 'Definitionen fÃ¼r Key Performance Indicators';
+COMMENT ON TABLE reporting.kpi_definitionen IS 'Definitionen für Key Performance Indicators';
 COMMENT ON TABLE reporting.kpi_werte IS 'Historische KPI-Werte';
-COMMENT ON TABLE reporting.export_jobs IS 'Export-Jobs fÃ¼r Berichte';
+COMMENT ON TABLE reporting.export_jobs IS 'Export-Jobs für Berichte';
 COMMENT ON TABLE reporting.berichtsversendung IS 'Automatische Berichtsversendung';
 COMMENT ON TABLE reporting.versendung_historie IS 'Historie der Berichtsversendungen';
 COMMENT ON TABLE reporting.drill_down_definitionen IS 'Drill-Down-Definitionen zwischen Berichten';
-COMMENT ON TABLE reporting.berichts_cache IS 'Cache fÃ¼r Berichtsergebnisse';
-COMMENT ON TABLE reporting.performance_metriken IS 'Performance-Metriken fÃ¼r Berichte'; 
+COMMENT ON TABLE reporting.berichts_cache IS 'Cache für Berichtsergebnisse';
+COMMENT ON TABLE reporting.performance_metriken IS 'Performance-Metriken für Berichte'; 
+

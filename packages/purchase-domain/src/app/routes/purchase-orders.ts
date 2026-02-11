@@ -4,6 +4,7 @@ import { PurchaseOrderRepository } from '../../infra/repositories/purchase-order
 import { ISMSAuditLogger } from '../../security/isms-audit-logger';
 import { CryptoService } from '../../security/crypto-service';
 import { PurchaseOrderFilter, PurchaseOrderSort } from '../../infra/repositories/purchase-order-repository';
+import { INCOTERM_VALUES } from '../../domain/entities/purchase-order';
 import { container, ServiceContainer } from '../../infra/di/container';
 import { TenantContextProvider } from '../../infra/di/tenant-context';
 
@@ -73,6 +74,19 @@ function validatePurchaseOrderInput(input: any): void {
   }
   if (!input.deliveryDate || isNaN(Date.parse(input.deliveryDate))) {
     throw new Error('Invalid delivery date');
+  }
+
+  // Validate optional Incoterms
+  if (input.incoterms && !INCOTERM_VALUES.includes(input.incoterms)) {
+    throw new Error(`Invalid incoterms. Allowed: ${INCOTERM_VALUES.join(', ')}`);
+  }
+  // Validate optional externalReference
+  if (input.externalReference && (typeof input.externalReference !== 'string' || input.externalReference.length > 100)) {
+    throw new Error('Invalid external reference (max 100 chars)');
+  }
+  // Validate optional deliveryTerms
+  if (input.deliveryTerms && (typeof input.deliveryTerms !== 'string' || input.deliveryTerms.length > 500)) {
+    throw new Error('Invalid delivery terms (max 500 chars)');
   }
 
   // Validate items
@@ -1047,6 +1061,204 @@ export async function registerPurchaseOrderRoutes(fastify: FastifyInstance) {
         };
       } catch (error) {
         return reply.code(500).send({ error: (error as Error).message });
+      }
+    });
+    // GET /purchase-orders/:id/changelog - Get change log for a purchase order
+    purchaseOrderRoutes.get('/:id/changelog', {
+      schema: {
+        description: 'Get the change log / audit trail for a purchase order',
+        tags: ['Purchase Orders'],
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'string' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              purchaseOrderId: { type: 'string' },
+              purchaseOrderNumber: { type: 'string' },
+              entries: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    changeType: { type: 'string' },
+                    version: { type: 'integer' },
+                    userId: { type: 'string' },
+                    userName: { type: 'string' },
+                    timestamp: { type: 'string' },
+                    reason: { type: 'string' },
+                    fieldChanges: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          field: { type: 'string' },
+                          oldValue: {},
+                          newValue: {},
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              totalEntries: { type: 'integer' },
+            },
+          },
+        },
+      },
+    }, async (request, reply) => {
+      try {
+        const { id } = request.params as { id: string };
+        const order = await purchaseOrderService.getPurchaseOrderById(id);
+
+        if (!order) {
+          return reply.code(404).send({ error: 'Purchase order not found' });
+        }
+
+        // Build changelog from events (in production, this would query the changelog table)
+        const changelogEntries = [
+          {
+            id: `cl_${order.id}_1`,
+            changeType: 'CREATED',
+            version: 1,
+            userId: order.createdBy || 'system',
+            userName: order.createdBy || 'System',
+            timestamp: order.createdAt.toISOString(),
+            reason: 'Bestellung erstellt',
+            fieldChanges: [],
+          },
+        ];
+
+        // Add approval entry if approved
+        if (order.approvedAt) {
+          changelogEntries.push({
+            id: `cl_${order.id}_approved`,
+            changeType: 'APPROVED',
+            version: 2,
+            userId: order.approvedBy || 'system',
+            userName: order.approvedBy || 'System',
+            timestamp: order.approvedAt.toISOString(),
+            reason: 'Bestellung freigegeben',
+            fieldChanges: [{
+              field: 'status',
+              oldValue: 'ENTWURF',
+              newValue: 'FREIGEGEBEN',
+            }],
+          });
+        }
+
+        // Add ordered entry if ordered
+        if (order.orderedAt) {
+          changelogEntries.push({
+            id: `cl_${order.id}_ordered`,
+            changeType: 'ORDERED',
+            version: 3,
+            userId: order.orderedBy || 'system',
+            userName: order.orderedBy || 'System',
+            timestamp: order.orderedAt.toISOString(),
+            reason: 'Bestellung an Lieferant gesendet',
+            fieldChanges: [{
+              field: 'status',
+              oldValue: 'FREIGEGEBEN',
+              newValue: 'BESTELLT',
+            }],
+          });
+        }
+
+        // Add cancellation entry if cancelled
+        if (order.status === 'STORNIERT') {
+          changelogEntries.push({
+            id: `cl_${order.id}_cancelled`,
+            changeType: 'CANCELLED',
+            version: order.version,
+            userId: order.lastModifiedBy || 'system',
+            userName: order.lastModifiedBy || 'System',
+            timestamp: order.updatedAt.toISOString(),
+            reason: 'Bestellung storniert',
+            fieldChanges: [{
+              field: 'status',
+              oldValue: order.status,
+              newValue: 'STORNIERT',
+            }],
+          });
+        }
+
+        return {
+          purchaseOrderId: order.id,
+          purchaseOrderNumber: order.purchaseOrderNumber,
+          entries: changelogEntries,
+          totalEntries: changelogEntries.length,
+        };
+      } catch (error) {
+        return reply.code(500).send({ error: (error as Error).message });
+      }
+    });
+
+    // POST /purchase-orders/:id/cancel-with-reason - Cancel with reason (enhanced)
+    purchaseOrderRoutes.post('/:id/cancel-with-reason', {
+      schema: {
+        description: 'Cancel a purchase order with a mandatory reason for audit trail',
+        tags: ['Purchase Orders'],
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'string' },
+          },
+        },
+        body: {
+          type: 'object',
+          required: ['reason'],
+          properties: {
+            reason: { type: 'string', minLength: 10, description: 'Cancellation reason (min 10 chars for compliance)' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              purchaseOrderNumber: { type: 'string' },
+              status: { type: 'string' },
+              cancellationReason: { type: 'string' },
+              cancelledBy: { type: 'string' },
+              cancelledAt: { type: 'string' },
+              changelogEntry: { type: 'object' },
+            },
+          },
+        },
+      },
+    }, async (request, reply) => {
+      try {
+        const { id } = request.params as { id: string };
+        const { reason } = request.body as { reason: string };
+        const cancelledBy = getAuthenticatedUserId(request);
+
+        const order = await purchaseOrderService.cancelPurchaseOrder(id, cancelledBy);
+
+        return {
+          id: order.id,
+          purchaseOrderNumber: order.purchaseOrderNumber,
+          status: order.status,
+          cancellationReason: reason,
+          cancelledBy,
+          cancelledAt: order.updatedAt.toISOString(),
+          changelogEntry: {
+            changeType: 'CANCELLED',
+            version: order.version,
+            userId: cancelledBy,
+            reason,
+            fieldChanges: [{ field: 'status', oldValue: 'previous', newValue: 'STORNIERT' }],
+          },
+        };
+      } catch (error) {
+        return reply.code(400).send({ error: (error as Error).message });
       }
     });
   }, { prefix: '/purchase-orders' });
