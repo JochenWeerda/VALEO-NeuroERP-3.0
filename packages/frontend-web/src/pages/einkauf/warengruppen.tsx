@@ -5,26 +5,23 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { FileDown, Layers, Plus, Search } from 'lucide-react'
-
-type Warengruppe = {
-  id: string
-  name: string
-  kategorie: string
-  artikel: number
-  umsatz: number
-}
-
-const mockWarengruppen: Warengruppe[] = [
-  { id: '1', name: 'Getreide', kategorie: 'Agrar', artikel: 15, umsatz: 450000 },
-  { id: '2', name: 'Saatgut', kategorie: 'Agrar', artikel: 25, umsatz: 280000 },
-  { id: '3', name: 'Düngemittel', kategorie: 'Betriebsmittel', artikel: 18, umsatz: 320000 },
-  { id: '4', name: 'Futtermittel', kategorie: 'Futter', artikel: 32, umsatz: 380000 },
-]
+import { useWarengruppen, type Warengruppe } from '@/lib/api/einkauf'
 
 export default function WarengruppenPage(): JSX.Element {
   const navigate = useNavigate()
+  const { data: items, isLoading } = useWarengruppen()
   const [searchTerm, setSearchTerm] = useState('')
+
+  if (isLoading) return (
+    <div className="p-3 md:p-6 space-y-4">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>
+  )
+
+  const list = items ?? []
 
   const columns = [
     {
@@ -45,10 +42,10 @@ export default function WarengruppenPage(): JSX.Element {
     },
   ]
 
-  const gesamtUmsatz = mockWarengruppen.reduce((sum, w) => sum + w.umsatz, 0)
+  const gesamtUmsatz = list.reduce((sum, w) => sum + w.umsatz, 0)
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Warengruppen</h1>
@@ -68,7 +65,7 @@ export default function WarengruppenPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Layers className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockWarengruppen.length}</span>
+              <span className="text-2xl font-bold">{list.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -78,7 +75,7 @@ export default function WarengruppenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Artikel Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockWarengruppen.reduce((sum, w) => sum + w.artikel, 0)}</span>
+            <span className="text-2xl font-bold">{list.reduce((sum, w) => sum + w.artikel, 0)}</span>
           </CardContent>
         </Card>
 
@@ -114,7 +111,7 @@ export default function WarengruppenPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockWarengruppen} columns={columns} />
+          <DataTable data={list} columns={columns} />
         </CardContent>
       </Card>
     </div>

@@ -4,40 +4,36 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { BookOpen, FileDown, Search } from 'lucide-react'
-
-type Buchung = {
-  id: string
-  datum: string
-  belegnummer: string
-  konto: string
-  text: string
-  soll: number
-  haben: number
-}
-
-const mockBuchungen: Buchung[] = [
-  { id: '1', datum: '2025-10-11', belegnummer: 'RE-2025-042', konto: '8400', text: 'Warenverkauf Weizen', soll: 0, haben: 5500 },
-  { id: '2', datum: '2025-10-11', belegnummer: 'RE-2025-042', konto: '1200', text: 'Forderung aus LuL', soll: 6545, haben: 0 },
-  { id: '3', datum: '2025-10-10', belegnummer: 'ER-2025-015', konto: '3400', text: 'Wareneinkauf Saatgut', soll: 12000, haben: 0 },
-]
+import { useHauptbuch, type HauptbuchBuchung } from '@/lib/api/fibu'
 
 export default function HauptbuchPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: items, isLoading } = useHauptbuch()
+
+  if (isLoading) return (
+    <div className="p-3 md:p-6 space-y-4">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>
+  )
+
+  const list = items ?? []
 
   const columns = [
     {
       key: 'datum' as const,
       label: 'Datum',
-      render: (b: Buchung) => new Date(b.datum).toLocaleDateString('de-DE'),
+      render: (b: HauptbuchBuchung) => new Date(b.datum).toLocaleDateString('de-DE'),
     },
-    { key: 'belegnummer' as const, label: 'Beleg', render: (b: Buchung) => <span className="font-mono">{b.belegnummer}</span> },
-    { key: 'konto' as const, label: 'Konto', render: (b: Buchung) => <Badge variant="outline">{b.konto}</Badge> },
+    { key: 'belegnummer' as const, label: 'Beleg', render: (b: HauptbuchBuchung) => <span className="font-mono">{b.belegnummer}</span> },
+    { key: 'konto' as const, label: 'Konto', render: (b: HauptbuchBuchung) => <Badge variant="outline">{b.konto}</Badge> },
     { key: 'text' as const, label: 'Buchungstext' },
     {
       key: 'soll' as const,
       label: 'Soll',
-      render: (b: Buchung) => (
+      render: (b: HauptbuchBuchung) => (
         <span className="font-semibold">
           {b.soll > 0 ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(b.soll) : '-'}
         </span>
@@ -46,7 +42,7 @@ export default function HauptbuchPage(): JSX.Element {
     {
       key: 'haben' as const,
       label: 'Haben',
-      render: (b: Buchung) => (
+      render: (b: HauptbuchBuchung) => (
         <span className="font-semibold">
           {b.haben > 0 ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(b.haben) : '-'}
         </span>
@@ -55,12 +51,12 @@ export default function HauptbuchPage(): JSX.Element {
   ]
 
   const summen = {
-    soll: mockBuchungen.reduce((sum, b) => sum + b.soll, 0),
-    haben: mockBuchungen.reduce((sum, b) => sum + b.haben, 0),
+    soll: list.reduce((sum, b) => sum + b.soll, 0),
+    haben: list.reduce((sum, b) => sum + b.haben, 0),
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Hauptbuch</h1>
@@ -76,7 +72,7 @@ export default function HauptbuchPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockBuchungen.length}</span>
+              <span className="text-2xl font-bold">{list.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -124,7 +120,7 @@ export default function HauptbuchPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockBuchungen} columns={columns} />
+          <DataTable data={list} columns={columns} />
           <div className="mt-6 flex justify-between border-t pt-4 font-bold">
             <span>Summen:</span>
             <div className="flex gap-12">

@@ -5,66 +5,23 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, FileText, Plus, Search, Shield } from 'lucide-react'
-
-type Sicherheit = {
-  id: string
-  typ: 'abtretung' | 'sicherungseigentum' | 'buergschaft' | 'pfandrecht'
-  kunde: string
-  kundennr: string
-  gegenstand: string
-  wert: number
-  datumErstellung: string
-  gueltigBis?: string
-  status: 'aktiv' | 'abgelaufen' | 'freigegeben'
-  kreditlinie: number
-  ausgenutzt: number
-}
-
-const mockSicherheiten: Sicherheit[] = [
-  {
-    id: '1',
-    typ: 'abtretung',
-    kunde: 'Agrar Schmidt GmbH',
-    kundennr: 'K-10023',
-    gegenstand: 'Forderungsabtretung Ernteerlöse 2025',
-    wert: 150000,
-    datumErstellung: '2025-01-15',
-    gueltigBis: '2025-12-31',
-    status: 'aktiv',
-    kreditlinie: 200000,
-    ausgenutzt: 85000,
-  },
-  {
-    id: '2',
-    typ: 'sicherungseigentum',
-    kunde: 'Landwirtschaft Müller',
-    kundennr: '10045',
-    gegenstand: 'Sicherungsübereignung Mähdrescher Claas Lexion 780',
-    wert: 450000,
-    datumErstellung: '2024-06-20',
-    status: 'aktiv',
-    kreditlinie: 250000,
-    ausgenutzt: 120000,
-  },
-  {
-    id: '3',
-    typ: 'buergschaft',
-    kunde: 'Hofgut Weber',
-    kundennr: 'K-10067',
-    gegenstand: 'Bürgschaft Volksbank Rotenburg',
-    wert: 100000,
-    datumErstellung: '2024-03-10',
-    gueltigBis: '2026-03-10',
-    status: 'aktiv',
-    kreditlinie: 100000,
-    ausgenutzt: 45000,
-  },
-]
+import { useSicherheiten, type Sicherheit } from '@/lib/api/fibu'
 
 export default function SicherheitenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: items, isLoading } = useSicherheiten()
+
+  if (isLoading) return (
+    <div className="p-3 md:p-6 space-y-4">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>
+  )
+
+  const list = items ?? []
 
   const columns = [
     {
@@ -130,13 +87,13 @@ export default function SicherheitenPage(): JSX.Element {
     },
   ]
 
-  const gesamtwert = mockSicherheiten.reduce((sum, s) => sum + s.wert, 0)
-  const gesamtKreditlinie = mockSicherheiten.reduce((sum, s) => sum + s.kreditlinie, 0)
-  const gesamtAusgenutzt = mockSicherheiten.reduce((sum, s) => sum + s.ausgenutzt, 0)
-  const auslastung = (gesamtAusgenutzt / gesamtKreditlinie) * 100
+  const gesamtwert = list.reduce((sum, s) => sum + s.wert, 0)
+  const gesamtKreditlinie = list.reduce((sum, s) => sum + s.kreditlinie, 0)
+  const gesamtAusgenutzt = list.reduce((sum, s) => sum + s.ausgenutzt, 0)
+  const auslastung = gesamtKreditlinie > 0 ? (gesamtAusgenutzt / gesamtKreditlinie) * 100 : 0
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Shield className="h-10 w-10 text-primary" />
@@ -179,7 +136,7 @@ export default function SicherheitenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Sicherheiten Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockSicherheiten.length}</span>
+            <span className="text-2xl font-bold">{list.length}</span>
           </CardContent>
         </Card>
 
@@ -233,7 +190,7 @@ export default function SicherheitenPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockSicherheiten} columns={columns} />
+          <DataTable data={list} columns={columns} />
         </CardContent>
       </Card>
     </div>
