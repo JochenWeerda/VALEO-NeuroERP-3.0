@@ -5,8 +5,7 @@
  */
 
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '@/lib/api-client'
+import { usePortalRechnungen } from '@/lib/api/portal'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -134,21 +133,26 @@ export default function PortalRechnungen() {
   const [activeTab, setActiveTab] = useState('alle')
   const [selectedRechnung, setSelectedRechnung] = useState<Rechnung | null>(null)
 
-  const { data: rechnungen = mockRechnungen, isLoading } = useQuery({
-    queryKey: ['portal', 'rechnungen', 'page'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<Rechnung[]>('/api/v1/portal/rechnungen')
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          return response.data
-        }
-      } catch {
-        // Fallback handled below
+  const { data: portalRechnungen = [], isLoading } = usePortalRechnungen()
+  const rechnungen: Rechnung[] = portalRechnungen.length > 0
+    ? portalRechnungen.map((r) => {
+      const brutto = r.betrag
+      const netto = Number((brutto / 1.19).toFixed(2))
+      const mwst = Number((brutto - netto).toFixed(2))
+      return {
+        id: r.id,
+        rechnungsnummer: r.nummer,
+        datum: r.datum,
+        faelligkeitsdatum: r.datum,
+        status: r.status,
+        nettobetrag: netto,
+        mwst,
+        bruttobetrag: brutto,
+        bezahltBetrag: r.status === 'bezahlt' ? brutto : 0,
+        dokument: `${r.nummer}.pdf`,
       }
-      return mockRechnungen
-    },
-    staleTime: 2 * 60 * 1000,
-  })
+    })
+    : mockRechnungen
 
   const filteredRechnungen = rechnungen.filter((r) => {
     const matchesSearch = r.rechnungsnummer.toLowerCase().includes(searchTerm.toLowerCase())
