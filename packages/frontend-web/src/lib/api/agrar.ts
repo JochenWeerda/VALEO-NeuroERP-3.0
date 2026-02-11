@@ -353,49 +353,49 @@ export const agrarExtraKeys = {
 // ── Extended Hooks ────────────────────────────────────────────────────
 
 export function useAussaaten() {
-  return useQuery({ queryKey: agrarExtraKeys.aussaaten(), queryFn: async () => { try { const r = await apiClient.get<Aussaat[]>('/api/v1/agrar/aussaaten'); if (r.data?.length) return r.data } catch {} return fallbackAussaaten }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: agrarExtraKeys.aussaaten(), queryFn: async () => { try { const r = await apiClient.get<Aussaat[]>('/api/v1/agrar/aussaaten'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackAussaaten }, staleTime: 2 * 60 * 1000 })
 }
 
 export function useBodenproben() {
-  return useQuery({ queryKey: agrarExtraKeys.bodenproben(), queryFn: async () => { try { const r = await apiClient.get<Bodenprobe[]>('/api/v1/agrar/bodenproben'); if (r.data?.length) return r.data } catch {} return fallbackBodenproben }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: agrarExtraKeys.bodenproben(), queryFn: async () => { try { const r = await apiClient.get<Bodenprobe[]>('/api/v1/agrar/bodenproben'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackBodenproben }, staleTime: 5 * 60 * 1000 })
 }
 
 export function useDuengerKomponenten() {
-  return useQuery({ queryKey: agrarExtraKeys.mischungen(), queryFn: async () => { try { const r = await apiClient.get<DuengerKomponente[]>('/api/v1/agrar/duenger/komponenten'); if (r.data?.length) return r.data } catch {} return fallbackKomponenten }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: agrarExtraKeys.mischungen(), queryFn: async () => { try { const r = await apiClient.get<DuengerKomponente[]>('/api/v1/agrar/duenger/komponenten'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackKomponenten }, staleTime: 5 * 60 * 1000 })
 }
 
 export function useErnten() {
-  return useQuery({ queryKey: agrarExtraKeys.ernten(), queryFn: async () => { try { const r = await apiClient.get<Ernte[]>('/api/v1/agrar/ernten'); if (r.data?.length) return r.data } catch {} return fallbackErnten }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: agrarExtraKeys.ernten(), queryFn: async () => { try { const r = await apiClient.get<Ernte[]>('/api/v1/agrar/ernten'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackErnten }, staleTime: 2 * 60 * 1000 })
 }
 
 export function useMassnahmen() {
-  return useQuery({ queryKey: agrarExtraKeys.massnahmen(), queryFn: async () => { try { const r = await apiClient.get<Massnahme[]>('/api/v1/agrar/massnahmen'); if (r.data?.length) return r.data } catch {} return fallbackMassnahmen }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: agrarExtraKeys.massnahmen(), queryFn: async () => { try { const r = await apiClient.get<Massnahme[]>('/api/v1/agrar/massnahmen'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackMassnahmen }, staleTime: 2 * 60 * 1000 })
 }
 
 export function useKulturen() {
-  return useQuery({ queryKey: agrarExtraKeys.kulturen(), queryFn: async () => { try { const r = await apiClient.get<Kultur[]>('/api/v1/agrar/kulturpflanzen'); if (r.data?.length) return r.data } catch {} return fallbackKulturen }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: agrarExtraKeys.kulturen(), queryFn: async () => { try { const r = await apiClient.get<Kultur[]>('/api/v1/agrar/kulturpflanzen'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackKulturen }, staleTime: 5 * 60 * 1000 })
 }
 
 export function usePSMAuflagen() {
-  return useQuery({ queryKey: agrarExtraKeys.auflagen(), queryFn: async () => { try { const r = await apiClient.get<PSMAuflage[]>('/api/v1/agrar/psm/auflagen'); if (r.data?.length) return r.data } catch {} return fallbackAuflagen }, staleTime: 2 * 60 * 1000 })
+  return useQuery({ queryKey: agrarExtraKeys.auflagen(), queryFn: async () => { try { const r = await apiClient.get<PSMAuflage[]>('/api/v1/agrar/psm/auflagen'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackAuflagen }, staleTime: 2 * 60 * 1000 })
 }
 
 export function useSchadbilder() {
-  return useQuery({ queryKey: agrarExtraKeys.schadbilder(), queryFn: async () => { try { const r = await apiClient.get<Schadbild[]>('/api/v1/agrar/psm/schadbilder'); if (r.data?.length) return r.data } catch {} return fallbackSchadbilder }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: agrarExtraKeys.schadbilder(), queryFn: async () => { try { const r = await apiClient.get<Schadbild[]>('/api/v1/agrar/psm/schadbilder'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackSchadbilder }, staleTime: 5 * 60 * 1000 })
 }
 
 export function useWirkstoffGruppen() {
-  return useQuery({ queryKey: agrarExtraKeys.resistenz(), queryFn: async () => { try { const r = await apiClient.get<WirkstoffGruppe[]>('/api/v1/agrar/psm/resistenz'); if (r.data?.length) return r.data } catch {} return fallbackResistenz }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: agrarExtraKeys.resistenz(), queryFn: async () => { try { const r = await apiClient.get<WirkstoffGruppe[]>('/api/v1/agrar/psm/resistenz'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackResistenz }, staleTime: 5 * 60 * 1000 })
 }
 
 export function usePSMSachkundeRegister() {
-  return useQuery({ queryKey: agrarExtraKeys.sachkundeRegister(), queryFn: async () => { try { const r = await apiClient.get<PSMSachkundeNachweis[]>('/api/v1/agrar/psm/sachkunde'); if (r.data?.length) return r.data } catch {} return fallbackSachkunde }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: agrarExtraKeys.sachkundeRegister(), queryFn: async () => { try { const r = await apiClient.get<PSMSachkundeNachweis[]>('/api/v1/agrar/psm/sachkunde'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackSachkunde }, staleTime: 5 * 60 * 1000 })
 }
 
 export function useWasserschutzZonen() {
-  return useQuery({ queryKey: agrarExtraKeys.wasserschutz(), queryFn: async () => { try { const r = await apiClient.get<WasserschutzZone[]>('/api/v1/agrar/psm/wasserschutz'); if (r.data?.length) return r.data } catch {} return fallbackWasserschutz }, staleTime: 10 * 60 * 1000 })
+  return useQuery({ queryKey: agrarExtraKeys.wasserschutz(), queryFn: async () => { try { const r = await apiClient.get<WasserschutzZone[]>('/api/v1/agrar/psm/wasserschutz'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackWasserschutz }, staleTime: 10 * 60 * 1000 })
 }
 
 export function useSorten() {
-  return useQuery({ queryKey: agrarExtraKeys.sorten(), queryFn: async () => { try { const r = await apiClient.get<Sorte[]>('/api/v1/agrar/saatgut/sorten'); if (r.data?.length) return r.data } catch {} return fallbackSorten }, staleTime: 5 * 60 * 1000 })
+  return useQuery({ queryKey: agrarExtraKeys.sorten(), queryFn: async () => { try { const r = await apiClient.get<Sorte[]>('/api/v1/agrar/saatgut/sorten'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackSorten }, staleTime: 5 * 60 * 1000 })
 }
