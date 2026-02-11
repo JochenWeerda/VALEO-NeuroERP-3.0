@@ -340,3 +340,25 @@ Alle veralteten Status-Reports, redundanten Phasen-Dokumente, doppelte CRM-Dokum
 ### Kurznotiz zu den letzten Fixes
 - `ci.yml`: Job-Conditions fuer Deploy auf `vars.ENABLE_DEPLOY == 'true'` umgestellt (Workflow-Parserfehler behoben).
 - `security-scan.yml`: Bandit-Textscan auf non-blocking gesetzt (`|| true`), sodass Security-Reporting advisory bleibt.
+
+## 2026-02-11 Hardening & Repo-Hygiene (Abschluss)
+
+### Stand
+- `develop`, `origin/develop` und `origin/main` sind aktuell auf `d203c00e`.
+- Release-Tag gesetzt und gepusht: `release-2026-02-11-ci-green` (Referenz auf `803b0042`).
+
+### Neu eingefuehrte Guardrails
+- Lokaler Commit-Guard: `.husky/pre-commit` blockiert verbotene Artefaktpfade bereits vor dem Commit.
+- Zentrales Script: `scripts/guard-forbidden-paths.cjs`.
+- CI-Guard: neuer Job `Path Guard (forbidden artifacts)` in `.github/workflows/quality-gate.yml`.
+- Ergaenzte NPM-Skripte: `guard:paths:staged`, `guard:paths:range`.
+
+### Lokal bereinigte Altlasten
+- Entfernt: verschachtelter Fehlordner `C\workspaces\VALEO-NeuroERP-3.0`, `de_modules`, `mory-bank`, `.pytest_cache`, `__pycache__`, `htmlcov`, `test-results`, `.pnpm-store`, `node_modules`.
+- Git-Worktrees unter `VALEO-NeuroERP-3.0._worktrees` wurden aus Git entfernt; verbleibende Restordner sind keine aktiven Worktrees mehr.
+
+### Laufende Verifikation (Commit `d203c00e`)
+- CI/CD Pipeline: `21916155146` (in_progress)
+- Quality Gate: `21916155149` (in_progress)
+- Security Scan: `21916155080` (in_progress)
+- E2E Smoke Tests: `21916155128` (in_progress)
