@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMischfutter, type Mischfutter as ApiMischfutter } from '@/lib/api/futter'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
@@ -22,6 +23,16 @@ const mockMischfutter: Mischfutter[] = [
 export default function MischfutterListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: apiMischfutter = [] } = useMischfutter()
+  const mischfutter: Mischfutter[] = apiMischfutter.length > 0
+    ? apiMischfutter.map((m: ApiMischfutter) => ({
+      id: m.id,
+      typ: m.name,
+      tierart: m.tierart,
+      protein: 0,
+      verfuegbar: m.bestand,
+    }))
+    : mockMischfutter
 
   const columns = [
     {
@@ -71,7 +82,7 @@ export default function MischfutterListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockMischfutter} columns={columns} />
+          <DataTable data={mischfutter} columns={columns} />
         </CardContent>
       </Card>
     </div>
