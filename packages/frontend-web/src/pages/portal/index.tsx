@@ -9,8 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '@/lib/api-client'
+import { usePortalDashboard, type PortalDashboard } from '@/lib/api/portal'
 import {
   ShoppingCart,
   Package,
@@ -64,33 +63,50 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
   'abgeschlossen': { label: 'Abgeschlossen', color: 'bg-emerald-100 text-emerald-800', icon: <CheckCircle2 className="h-3 w-3" /> },
 }
 
-export default function PortalDashboard() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['portal', 'dashboard', 'page'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<typeof mockDashboardData>('/api/v1/portal/dashboard')
-        if (response.data) {
-          return response.data
-        }
-      } catch {
-        // Fallback handled below
-      }
-      return mockDashboardData
+function mapPortalDashboard(data: PortalDashboard): typeof mockDashboardData {
+  const pickNumber = (label: string, fallback = 0) => {
+    const raw = data.kpis.find((k) => k.label.toLowerCase() === label.toLowerCase())?.value
+    if (!raw) return fallback
+    const normalized = raw.replace(',', '.').replace(/[^\d.-]/g, '')
+    const num = Number(normalized)
+    return Number.isFinite(num) ? num : fallback
+  }
+
+  return {
+    kunde: {
+      name: 'Portal-Kunde',
+      kundennummer: 'PORTAL',
     },
-    staleTime: 2 * 60 * 1000,
-  })
+    kpis: {
+      offeneBestellungen: pickNumber('Offene Bestellungen', data.letzteBestellungen.length),
+      laufendeVertraege: pickNumber('Vertragsstatus', 1),
+      offeneRechnungen: pickNumber('Offene Rechnungen', 0),
+      offenerBetrag: pickNumber('Letzte Rechnung', 0),
+      verfuegbareDokumente: pickNumber('Neue Dokumente', data.neueDokumente.length),
+    },
+    letzteBestellungen: data.letzteBestellungen.map((b) => ({
+      id: b.nummer || b.id,
+      datum: b.datum,
+      status: b.status === 'geliefert' ? 'abgeschlossen' : b.status === 'bestellt' ? 'in_bearbeitung' : b.status,
+      betrag: b.betrag,
+      artikel: 'Portal-Bestellung',
+    })),
+    neueDokumente: data.neueDokumente.map((d, idx) => ({
+      id: idx + 1,
+      name: d.name,
+      typ: d.typ,
+      datum: d.datum,
+    })),
+    naechsteTermine: [],
+  }
+}
+
+export default function PortalDashboard() {
+  const { data: portalData, isLoading } = usePortalDashboard()
+  const data = portalData ? mapPortalDashboard(portalData) : mockDashboardData
 
   if (isLoading) {
     return <DashboardSkeleton />
-  }
-
-  if (!data) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-muted-foreground">Keine Daten verfügbar</p>
-      </div>
-    )
   }
 
   return (
@@ -394,4 +410,5 @@ function DashboardSkeleton() {
     </div>
   )
 }
+
 

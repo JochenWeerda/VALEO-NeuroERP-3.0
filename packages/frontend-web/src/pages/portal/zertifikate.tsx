@@ -5,8 +5,7 @@
  */
 
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '@/lib/api-client'
+import { usePortalZertifikate } from '@/lib/api/portal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -154,21 +153,20 @@ const typColors: Record<string, string> = {
 export default function PortalZertifikate() {
   const [searchTerm, setSearchTerm] = useState('')
 
-  const { data: zertifikate = mockZertifikate, isLoading } = useQuery({
-    queryKey: ['portal', 'zertifikate', 'page'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<Zertifikat[]>('/api/v1/portal/zertifikate')
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          return response.data
-        }
-      } catch {
-        // Fallback handled below
-      }
-      return mockZertifikate
-    },
-    staleTime: 5 * 60 * 1000,
-  })
+  const { data: portalZertifikate = [], isLoading } = usePortalZertifikate()
+  const zertifikate: Zertifikat[] = portalZertifikate.length > 0
+    ? portalZertifikate.map((z) => ({
+      id: z.id,
+      name: z.art,
+      typ: z.art,
+      aussteller: 'VALEO',
+      gueltigVon: '',
+      gueltigBis: z.gueltigBis,
+      status: z.status === 'ablaufend' ? 'auslaufend' : z.status,
+      beschreibung: `Zertifikat ${z.nummer}`,
+      dokument: `${z.nummer}.pdf`,
+    }))
+    : mockZertifikate
 
   const filteredZertifikate = zertifikate.filter((z) =>
     z.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

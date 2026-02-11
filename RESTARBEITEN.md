@@ -369,3 +369,4 @@ Alle veralteten Status-Reports, redundanten Phasen-Dokumente, doppelte CRM-Dokum
 - Operations Batch 2: Wartung, Transporte, Verladung, Tankstelle, Dokumente, Projekte, Labor-Liste, Zertifikate-Liste auf `lib/api/betrieb` Hooks migriert.
 - Operations Batch 3: Workflow-Regeln/Monitoring, Service-Anfragen, Schaeden, Versicherungen, Waagen/Wiegungen, Rahmenvertraege, Fuhrpark, Benachrichtigungen auf `lib/api/betrieb` Hooks migriert.
 - Operations Batch 4: Foerderung, Labor-Proben, Marketing-Kampagnen, ENNI-Meldungen, PSM-Sachkunde-Register und Saatgut-Sortenregister auf `lib/api/betrieb` bzw. `lib/api/agrar` Hooks migriert.
+- Portal Batch 5: Portal-Dashboard, Anfragen, Bestellungen, Vertraege und Zertifikate auf `lib/api/portal` Hooks umgestellt (inkl. UI-kompatibler Datenadaption).

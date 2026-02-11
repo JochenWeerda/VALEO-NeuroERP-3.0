@@ -5,8 +5,7 @@
  */
 
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '@/lib/api-client'
+import { usePortalAnfragen } from '@/lib/api/portal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -140,21 +139,17 @@ export default function PortalAnfragen() {
   const [neueAnfrageNachricht, setNeueAnfrageNachricht] = useState('')
   const [submitSuccess, setSubmitSuccess] = useState(false)
 
-  const { data: anfragen = mockAnfragen, isLoading } = useQuery({
-    queryKey: ['portal', 'anfragen', 'page'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<Anfrage[]>('/api/v1/portal/anfragen')
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          return response.data
-        }
-      } catch {
-        // Fallback handled below
-      }
-      return mockAnfragen
-    },
-    staleTime: 2 * 60 * 1000,
-  })
+  const { data: portalAnfragen = [], isLoading } = usePortalAnfragen()
+  const anfragen: Anfrage[] = portalAnfragen.length > 0
+    ? portalAnfragen.map((a) => ({
+      id: a.nummer || a.id,
+      datum: a.datum,
+      typ: 'sonstiges',
+      betreff: a.betreff,
+      nachricht: 'Anfrage aus Kundenportal',
+      status: a.status === 'geschlossen' ? 'abgeschlossen' : a.status,
+    }))
+    : mockAnfragen
 
   const filteredAnfragen = anfragen.filter((a) => {
     const matchesSearch = a.betreff.toLowerCase().includes(searchTerm.toLowerCase()) ||

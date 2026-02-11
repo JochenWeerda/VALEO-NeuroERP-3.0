@@ -5,8 +5,7 @@
  */
 
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '@/lib/api-client'
+import { usePortalBestellungen } from '@/lib/api/portal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -128,21 +127,16 @@ export default function PortalBestellungen() {
   const [activeTab, setActiveTab] = useState('alle')
   const [selectedBestellung, setSelectedBestellung] = useState<Bestellung | null>(null)
 
-  const { data: bestellungen = mockBestellungen, isLoading } = useQuery({
-    queryKey: ['portal', 'bestellungen', 'page'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<Bestellung[]>('/api/v1/portal/bestellungen')
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          return response.data
-        }
-      } catch {
-        // Fallback handled below
-      }
-      return mockBestellungen
-    },
-    staleTime: 2 * 60 * 1000,
-  })
+  const { data: portalBestellungen = [], isLoading } = usePortalBestellungen()
+  const bestellungen: Bestellung[] = portalBestellungen.length > 0
+    ? portalBestellungen.map((b) => ({
+      id: b.nummer || b.id,
+      datum: b.datum,
+      status: b.status === 'bestellt' ? 'in_bearbeitung' : b.status === 'geliefert' ? 'abgeschlossen' : b.status,
+      gesamtbetrag: b.betrag,
+      positionen: [{ artikelnummer: b.id, name: b.artikel, menge: b.menge, einheit: 'Stk', einzelpreis: b.betrag / Math.max(b.menge, 1), gesamtpreis: b.betrag }],
+    }))
+    : mockBestellungen
 
   const filteredBestellungen = bestellungen.filter((b) => {
     const matchesSearch = b.id.toLowerCase().includes(searchTerm.toLowerCase())
