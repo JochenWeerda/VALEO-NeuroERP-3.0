@@ -140,7 +140,7 @@ function ListWidget({ widget }: { widget: WidgetLayout }) {
     'list-tasks': {
       title: 'Offene Aufgaben',
       items: [
-        { label: 'Angebot ***REMOVED***1234 prüfen', value: 'Heute', status: 'warning' },
+        { label: 'Angebot #1234 prüfen', value: 'Heute', status: 'warning' },
         { label: 'Lieferung bestätigen', value: '2 Std.', status: 'success' },
         { label: 'Reklamation bearbeiten', value: 'Überfällig', status: 'error' },
         { label: 'Bestellung freigeben', value: 'Morgen', status: 'success' },
@@ -149,7 +149,7 @@ function ListWidget({ widget }: { widget: WidgetLayout }) {
     'list-alerts': {
       title: 'Wichtige Hinweise',
       items: [
-        { label: 'Lagerbestand niedrig: Artikel ***REMOVED***A123', value: '15 Stk.', status: 'warning' },
+        { label: 'Lagerbestand niedrig: Artikel #A123', value: '15 Stk.', status: 'warning' },
         { label: 'Zahlung überfällig: Kunde XY', value: '€ 2.500', status: 'error' },
         { label: 'Neuer Großauftrag eingegangen', value: '€ 45.000', status: 'success' },
       ],
@@ -228,3 +228,4 @@ export function getWidgetComponent(type: string) {
   const definition = widgetRegistry.find((w) => w.type === type)
   return definition?.component || KPIWidget
 }
+

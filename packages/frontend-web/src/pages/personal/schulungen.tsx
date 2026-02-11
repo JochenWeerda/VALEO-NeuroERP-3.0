@@ -1,78 +1,37 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, Award, FileDown, Plus, Search } from 'lucide-react'
-
-type Schulung = {
-  id: string
-  mitarbeiter: string
-  personalnr: string
-  thema: string
-  typ: 'PSM' | 'Gefahrstoffe' | 'Gabelstapler' | 'Erste Hilfe' | 'Brandschutz' | 'Arbeitssicherheit'
-  datum: string
-  dauer: number
-  schulungsleiter: string
-  zertifikatNr?: string
-  gueltigBis?: string
-  status: 'gueltig' | 'ablaufend' | 'abgelaufen'
-}
-
-const mockSchulungen: Schulung[] = [
-  {
-    id: '1',
-    mitarbeiter: 'Hans Müller',
-    personalnr: 'P-001',
-    thema: 'PSM-Sachkunde Fortbildung',
-    typ: 'PSM',
-    datum: '2024-03-15',
-    dauer: 8,
-    schulungsleiter: 'LWK Niedersachsen',
-    zertifikatNr: 'SK-NDS-2024-123',
-    gueltigBis: '2027-03-15',
-    status: 'gueltig',
-  },
-  {
-    id: '2',
-    mitarbeiter: 'Maria Schmidt',
-    personalnr: 'P-002',
-    thema: 'Gabelstapler-Führerschein',
-    typ: 'Gabelstapler',
-    datum: '2023-01-20',
-    dauer: 16,
-    schulungsleiter: 'TÜV Nord',
-    zertifikatNr: 'TÜV-GS-2023-456',
-    gueltigBis: '2028-01-20',
-    status: 'gueltig',
-  },
-  {
-    id: '3',
-    mitarbeiter: 'Thomas Weber',
-    personalnr: 'P-003',
-    thema: 'Erste Hilfe Grundkurs',
-    typ: 'Erste Hilfe',
-    datum: '2023-06-10',
-    dauer: 8,
-    schulungsleiter: 'DRK Rotenburg',
-    gueltigBis: '2025-06-10',
-    status: 'ablaufend',
-  },
-]
+import { useSchulungen, type Schulung } from '@/lib/api/personal'
 
 export default function SchulungenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: schulungen, isLoading } = useSchulungen()
+  const list = useMemo(() => schulungen ?? [], [schulungen])
 
-  const ablaufend = mockSchulungen.filter((s) => {
-    if (!s.gueltigBis) return false
-    const ablauf = new Date(s.gueltigBis)
-    const warnung = new Date()
-    warnung.setMonth(warnung.getMonth() + 2) // 2 Monate Vorlauf
-    return ablauf <= warnung && ablauf >= new Date()
-  }).length
+  const ablaufend = useMemo(() =>
+    list.filter((s) => {
+      if (!s.gueltigBis) return false
+      const ablauf = new Date(s.gueltigBis)
+      const warnung = new Date()
+      warnung.setMonth(warnung.getMonth() + 2)
+      return ablauf <= warnung && ablauf >= new Date()
+    }).length
+  , [list])
+
+  const filtered = useMemo(() => {
+    if (!searchTerm) return list
+    const s = searchTerm.toLowerCase()
+    return list.filter(sch =>
+      sch.mitarbeiter.toLowerCase().includes(s) || sch.thema.toLowerCase().includes(s)
+    )
+  }, [list, searchTerm])
 
   const columns = [
     {
@@ -103,9 +62,9 @@ export default function SchulungenPage(): JSX.Element {
       render: (s: Schulung) => {
         if (!s.gueltigBis) return <span className="text-muted-foreground">–</span>
         const ablauf = new Date(s.gueltigBis)
-        const ablaufend = ablauf <= new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)
+        const isExpiring = ablauf <= new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)
         return (
-          <span className={ablaufend ? 'font-semibold text-orange-600' : ''}>
+          <span className={isExpiring ? 'font-semibold text-orange-600' : ''}>
             {ablauf.toLocaleDateString('de-DE')}
           </span>
         )
@@ -122,8 +81,20 @@ export default function SchulungenPage(): JSX.Element {
     },
   ]
 
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-3 md:p-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24" />)}
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Award className="h-10 w-10 text-primary" />
@@ -166,7 +137,7 @@ export default function SchulungenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Schulungen Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockSchulungen.length}</span>
+            <span className="text-2xl font-bold">{list.length}</span>
           </CardContent>
         </Card>
 
@@ -175,7 +146,7 @@ export default function SchulungenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Gültig</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockSchulungen.filter((s) => s.status === 'gueltig').length}</span>
+            <span className="text-2xl font-bold text-green-600">{list.filter((s) => s.status === 'gueltig').length}</span>
           </CardContent>
         </Card>
 
@@ -193,7 +164,7 @@ export default function SchulungenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Abgelaufen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{mockSchulungen.filter((s) => s.status === 'abgelaufen').length}</span>
+            <span className="text-2xl font-bold text-red-600">{list.filter((s) => s.status === 'abgelaufen').length}</span>
           </CardContent>
         </Card>
       </div>
@@ -220,7 +191,7 @@ export default function SchulungenPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockSchulungen} columns={columns} />
+          <DataTable data={filtered} columns={columns} />
         </CardContent>
       </Card>
     </div>

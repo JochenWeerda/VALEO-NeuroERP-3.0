@@ -1,6 +1,6 @@
-***REMOVED*** VALEO NeuroERP - Keyboard Shortcuts
+# VALEO NeuroERP - Keyboard Shortcuts
 
-***REMOVED******REMOVED*** Globale Shortcuts
+## Globale Shortcuts
 
 | Shortcut | Aktion | Beschreibung |
 |----------|--------|--------------|
@@ -8,7 +8,7 @@
 | `Ctrl+B` / `Cmd+B` | Sidebar ein-/ausklappen | Navigation ein-/ausblenden |
 | `/` | Command Palette öffnen | Alternative Taste für Command Palette |
 
-***REMOVED******REMOVED*** Navigation
+## Navigation
 
 | Shortcut | Aktion | Beschreibung |
 |----------|--------|--------------|
@@ -19,7 +19,7 @@
 | `Alt+5` | Finanzen | Finanzbuchhaltung öffnen |
 | `Alt+6` | Lager | Lager & Logistik öffnen |
 
-***REMOVED******REMOVED*** Datenverwaltung
+## Datenverwaltung
 
 | Shortcut | Aktion | Beschreibung |
 |----------|--------|--------------|
@@ -30,7 +30,7 @@
 | `Ctrl+F` | Suchen | Suchfeld fokussieren |
 | `Ctrl+Enter` | Bestätigen | Formular absenden |
 
-***REMOVED******REMOVED*** Tabellen & Listen
+## Tabellen & Listen
 
 | Shortcut | Aktion | Beschreibung |
 |----------|--------|--------------|
@@ -40,7 +40,7 @@
 | `Ctrl+A` | Alle auswählen | Alle Zeilen markieren |
 | `Delete` | Löschen | Markierte Elemente löschen |
 
-***REMOVED******REMOVED*** CRM-spezifische Shortcuts
+## CRM-spezifische Shortcuts
 
 | Shortcut | Aktion | Beschreibung |
 |----------|--------|--------------|
@@ -49,7 +49,7 @@
 | `Ctrl+M` | Meeting planen | Neues Meeting planen |
 | `F2` | Schnellbearbeitung | Inline-Bearbeitung aktivieren |
 
-***REMOVED******REMOVED*** Finanzbuchhaltung
+## Finanzbuchhaltung
 
 | Shortcut | Aktion | Beschreibung |
 |----------|--------|--------------|
@@ -58,7 +58,7 @@
 | `Ctrl+P` | Drucken | Beleg drucken |
 | `Ctrl+Shift+P` | PDF exportieren | Als PDF exportieren |
 
-***REMOVED******REMOVED*** Berichte & Export
+## Berichte & Export
 
 | Shortcut | Aktion | Beschreibung |
 |----------|--------|--------------|
@@ -66,7 +66,7 @@
 | `Ctrl+P` | Drucken | Aktuelle Ansicht drucken |
 | `Ctrl+Shift+E` | Erweiterter Export | Export mit Optionen |
 
-***REMOVED******REMOVED*** Barrierefreiheit
+## Barrierefreiheit
 
 | Shortcut | Aktion | Beschreibung |
 |----------|--------|--------------|
@@ -75,7 +75,7 @@
 | `Enter` | Aktivieren | Button oder Link aktivieren |
 | `Space` | Umschalten | Checkbox oder Toggle aktivieren |
 
-***REMOVED******REMOVED*** Mobile-App Shortcuts (iOS/Android)
+## Mobile-App Shortcuts (iOS/Android)
 
 | Shortcut | Aktion | Beschreibung |
 |----------|--------|--------------|
@@ -83,7 +83,7 @@
 | `3x Tap` | Entwicklermodus | Dreifach-Tap für Debug-Info |
 | `Long Press` | Kontextmenü | Langes Drücken für Optionen |
 
-***REMOVED******REMOVED*** Anpassbare Shortcuts
+## Anpassbare Shortcuts
 
 Benutzer können Shortcuts in den Einstellungen anpassen:
 
@@ -91,14 +91,14 @@ Benutzer können Shortcuts in den Einstellungen anpassen:
 2. **Shortcut auswählen** und **neue Tastenkombination** eingeben
 3. **Konflikte** werden automatisch erkannt und gemeldet
 
-***REMOVED******REMOVED*** Shortcut-Konventionen
+## Shortcut-Konventionen
 
 - `Ctrl` = Windows/Linux, `Cmd` = macOS
 - `Alt` = Windows/Linux, `Option` = macOS
 - Funktionstasten (`F1-F12`) sind plattformübergreifend
 - Shortcuts sind kontextsensitiv (verschiedene Aktionen in verschiedenen Bereichen)
 
-***REMOVED******REMOVED*** Hilfe & Support
+## Hilfe & Support
 
 - **F1** oder **Ctrl+?**: Hilfe öffnen
 - **Shift+F1**: Kontextbezogene Hilfe

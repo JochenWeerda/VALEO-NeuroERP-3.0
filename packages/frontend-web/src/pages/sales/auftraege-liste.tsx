@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -14,48 +14,9 @@ import { useToast } from '@/hooks/use-toast'
 import { useListActions } from '@/hooks/useListActions'
 import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
 import { saveDocument } from '@/lib/document-api'
+import { useAuftraege, type Auftrag, type AuftragStatus } from '@/lib/api/sales'
 
-type Auftrag = {
-  id: string
-  nummer: string
-  datum: string
-  kunde: string
-  betrag: number
-  status: 'offen' | 'teilgeliefert' | 'geliefert' | 'fakturiert' | 'storniert'
-  liefertermin: string
-}
-
-const mockAuftraege: Auftrag[] = [
-  {
-    id: '1',
-    nummer: 'SO-2025-0001',
-    datum: '2025-10-08',
-    kunde: 'Landhandel Nord GmbH',
-    betrag: 12500.0,
-    status: 'teilgeliefert',
-    liefertermin: '2025-10-15',
-  },
-  {
-    id: '2',
-    nummer: 'SO-2025-0002',
-    datum: '2025-10-09',
-    kunde: 'Agrar-Zentrum Süd',
-    betrag: 8750.5,
-    status: 'geliefert',
-    liefertermin: '2025-10-12',
-  },
-  {
-    id: '3',
-    nummer: 'SO-2025-0003',
-    datum: '2025-10-10',
-    kunde: 'Müller Landwirtschaft',
-    betrag: 5200.0,
-    status: 'offen',
-    liefertermin: '2025-10-20',
-  },
-]
-
-const statusVariantMap: Record<Auftrag['status'], 'default' | 'outline' | 'secondary' | 'destructive'> = {
+const statusVariantMap: Record<AuftragStatus, 'default' | 'outline' | 'secondary' | 'destructive'> = {
   offen: 'default',
   teilgeliefert: 'secondary',
   geliefert: 'outline',
@@ -71,48 +32,11 @@ export default function AuftraegeListePage(): JSX.Element {
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Verkaufsauftrag')
   const pageTitle = getListTitle(t, entityTypeLabel)
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<Auftrag['status'] | 'alle'>('alle')
-  const [auftraege, setAuftraege] = useState<Auftrag[]>([])
-  const [loading, setLoading] = useState(true)
+  const [statusFilter, setStatusFilter] = useState<AuftragStatus | 'alle'>('alle')
   const [showImport, setShowImport] = useState(false)
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
 
-
-  // Lade Daten von API
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true)
-      try {
-        const response = await fetch('/api/mcp/documents/sales_order?skip=0&limit=100')
-        if (response.ok) {
-          const result = await response.json()
-          if (result.ok && result.data) {
-            // Transformiere API-Daten
-            const transformed = result.data.map((doc: any) => ({
-              id: doc.number,
-              nummer: doc.number,
-              datum: doc.date,
-              kunde: doc.customerId || '',
-              betrag: 0, // Wird aus lines berechnet
-              status: (doc.status?.toLowerCase() || 'offen') as Auftrag['status'],
-              liefertermin: doc.deliveryDate || '',
-            }))
-            setAuftraege(transformed.length > 0 ? transformed : mockAuftraege)
-          } else {
-            setAuftraege(mockAuftraege)
-          }
-        } else {
-          setAuftraege(mockAuftraege)
-        }
-      } catch (error) {
-        console.error('Fehler beim Laden der Aufträge:', error)
-        setAuftraege(mockAuftraege)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadData()
-  }, [])
+  const { data: auftraege = [], isLoading: loading } = useAuftraege()
 
   // Filter-Konfiguration für AdvancedFilters
   const filterConfig: FilterConfig[] = [
@@ -330,7 +254,7 @@ export default function AuftraegeListePage(): JSX.Element {
         <CardContent className="pt-6">
           <DataTable data={filteredAuftraege} columns={columns} />
           <div className="mt-4 text-sm text-muted-foreground">
-            {t('crud.list.showing', { count: filteredAuftraege.length, total: mockAuftraege.length, entityType: entityTypeLabel })}
+            {t('crud.list.showing', { count: filteredAuftraege.length, total: auftraege.length, entityType: entityTypeLabel })}
           </div>
         </CardContent>
       </Card>

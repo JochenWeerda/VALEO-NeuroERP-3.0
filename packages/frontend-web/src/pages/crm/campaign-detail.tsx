@@ -394,10 +394,10 @@ function CampaignPerformanceTab({ campaignId }: { campaignId: string }) {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="sent" stroke="***REMOVED***8884d8" name={t('crud.fields.sentCount')} />
-                <Line type="monotone" dataKey="opened" stroke="***REMOVED***82ca9d" name={t('crud.fields.openCount')} />
-                <Line type="monotone" dataKey="clicked" stroke="***REMOVED***ffc658" name={t('crud.fields.clickCount')} />
-                <Line type="monotone" dataKey="converted" stroke="***REMOVED***ff7300" name={t('crud.fields.conversionCount')} />
+                <Line type="monotone" dataKey="sent" stroke="#8884d8" name={t('crud.fields.sentCount')} />
+                <Line type="monotone" dataKey="opened" stroke="#82ca9d" name={t('crud.fields.openCount')} />
+                <Line type="monotone" dataKey="clicked" stroke="#ffc658" name={t('crud.fields.clickCount')} />
+                <Line type="monotone" dataKey="converted" stroke="#ff7300" name={t('crud.fields.conversionCount')} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -697,3 +697,4 @@ export default function CampaignDetailPage(): JSX.Element {
     </div>
   )
 }
+

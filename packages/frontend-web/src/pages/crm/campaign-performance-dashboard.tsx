@@ -17,7 +17,7 @@ import { DataTable } from '@/components/ui/data-table'
 // API Client
 const apiClient = createApiClient('/api/crm-marketing')
 
-const COLORS = ['***REMOVED***0088FE', '***REMOVED***00C49F', '***REMOVED***FFBB28', '***REMOVED***FF8042', '***REMOVED***8884d8', '***REMOVED***82ca9d']
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d']
 
 export default function CampaignPerformanceDashboardPage(): JSX.Element {
   const { t } = useTranslation()
@@ -306,10 +306,10 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="sent" stroke="***REMOVED***8884d8" name={t('crud.fields.sentCount')} />
-                  <Line type="monotone" dataKey="opened" stroke="***REMOVED***82ca9d" name={t('crud.fields.openCount')} />
-                  <Line type="monotone" dataKey="clicked" stroke="***REMOVED***ffc658" name={t('crud.fields.clickCount')} />
-                  <Line type="monotone" dataKey="converted" stroke="***REMOVED***ff7300" name={t('crud.fields.conversionCount')} />
+                  <Line type="monotone" dataKey="sent" stroke="#8884d8" name={t('crud.fields.sentCount')} />
+                  <Line type="monotone" dataKey="opened" stroke="#82ca9d" name={t('crud.fields.openCount')} />
+                  <Line type="monotone" dataKey="clicked" stroke="#ffc658" name={t('crud.fields.clickCount')} />
+                  <Line type="monotone" dataKey="converted" stroke="#ff7300" name={t('crud.fields.conversionCount')} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -340,10 +340,10 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="sent" fill="***REMOVED***8884d8" name={t('crud.fields.sentCount')} />
-                  <Bar dataKey="opened" fill="***REMOVED***82ca9d" name={t('crud.fields.openCount')} />
-                  <Bar dataKey="clicked" fill="***REMOVED***ffc658" name={t('crud.fields.clickCount')} />
-                  <Bar dataKey="converted" fill="***REMOVED***ff7300" name={t('crud.fields.conversionCount')} />
+                  <Bar dataKey="sent" fill="#8884d8" name={t('crud.fields.sentCount')} />
+                  <Bar dataKey="opened" fill="#82ca9d" name={t('crud.fields.openCount')} />
+                  <Bar dataKey="clicked" fill="#ffc658" name={t('crud.fields.clickCount')} />
+                  <Bar dataKey="converted" fill="#ff7300" name={t('crud.fields.conversionCount')} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -376,7 +376,7 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
                     labelLine={false}
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     outerRadius={80}
-                    fill="***REMOVED***8884d8"
+                    fill="#8884d8"
                     dataKey="value"
                   >
                     {typeChartData.map((entry, index) => (
@@ -509,4 +509,5 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
     </div>
   )
 }
+
 

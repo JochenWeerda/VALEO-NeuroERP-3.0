@@ -1,33 +1,18 @@
-import { useState } from 'react'
+import { useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Clock } from 'lucide-react'
-
-type ZeitEintrag = {
-  id: string
-  mitarbeiter: string
-  datum: string
-  kommen: string
-  gehen: string
-  stunden: number
-  typ: 'Arbeit' | 'Überstunden' | 'Urlaub'
-}
-
-const mockZeiten: ZeitEintrag[] = [
-  { id: '1', mitarbeiter: 'Max Schmidt', datum: '2025-10-11', kommen: '07:00', gehen: '16:30', stunden: 9.5, typ: 'Arbeit' },
-  { id: '2', mitarbeiter: 'Anna Müller', datum: '2025-10-11', kommen: '08:00', gehen: '17:00', stunden: 9.0, typ: 'Arbeit' },
-  { id: '3', mitarbeiter: 'Tom Weber', datum: '2025-10-11', kommen: '-', gehen: '-', stunden: 8.0, typ: 'Urlaub' },
-]
+import { useZeiterfassung, type ZeitEintrag } from '@/lib/api/personal'
 
 export default function ZeiterfassungPage(): JSX.Element {
-  const [_searchTerm, _setSearchTerm] = useState('')
+  const today = new Date().toISOString().split('T')[0]
+  const { data: zeiten, isLoading } = useZeiterfassung(today)
+  const list = useMemo(() => zeiten ?? [], [zeiten])
 
   const columns = [
-    {
-      key: 'mitarbeiter' as const,
-      label: 'Mitarbeiter',
-    },
+    { key: 'mitarbeiter' as const, label: 'Mitarbeiter' },
     {
       key: 'datum' as const,
       label: 'Datum',
@@ -59,10 +44,22 @@ export default function ZeiterfassungPage(): JSX.Element {
     },
   ]
 
-  const gesamtStunden = mockZeiten.reduce((sum, z) => sum + z.stunden, 0)
+  const gesamtStunden = list.reduce((sum, z) => sum + z.stunden, 0)
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-3 md:p-6">
+        <Skeleton className="h-10 w-48" />
+        <div className="grid gap-4 md:grid-cols-3">
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24" />)}
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div>
         <h1 className="text-3xl font-bold">Zeiterfassung</h1>
         <p className="text-muted-foreground">Arbeitszeitdokumentation</p>
@@ -76,7 +73,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockZeiten.filter((z) => z.typ === 'Arbeit').length}</span>
+              <span className="text-2xl font-bold">{list.filter((z) => z.typ === 'Arbeit').length}</span>
             </div>
           </CardContent>
         </Card>
@@ -95,14 +92,14 @@ export default function ZeiterfassungPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Urlaub</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockZeiten.filter((z) => z.typ === 'Urlaub').length}</span>
+            <span className="text-2xl font-bold">{list.filter((z) => z.typ === 'Urlaub').length}</span>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockZeiten} columns={columns} />
+          <DataTable data={list} columns={columns} />
           <div className="mt-6 flex justify-between border-t pt-4 font-bold">
             <span>Gesamt-Stunden Heute:</span>
             <span>{gesamtStunden.toFixed(1)} h</span>

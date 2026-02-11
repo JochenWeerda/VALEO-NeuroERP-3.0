@@ -110,7 +110,7 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
     },
     {
       key: 'prioritaet' as const,
-      label: '***REMOVED***',
+      label: '#',
       render: (vorschlag: Zahlungsvorschlag) => (
         <span className="text-sm font-semibold">{vorschlag.prioritaet}</span>
       ),
@@ -273,3 +273,4 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
     </div>
   )
 }
+

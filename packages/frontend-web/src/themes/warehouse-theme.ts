@@ -15,33 +15,33 @@ export const warehouseTheme = {
   // Farben (High Contrast - Schwarz/Gelb/Weiß)
   colors: {
     // Primärfarben
-    background: '***REMOVED***1a1a1a',        // Fast Schwarz
-    foreground: '***REMOVED***ffffff',        // Weiß
-    primary: '***REMOVED***fbbf24',           // Amber/Gelb - Haupt-Akzent
-    primaryForeground: '***REMOVED***000000', // Schwarz auf Gelb
+    background: '#1a1a1a',        // Fast Schwarz
+    foreground: '#ffffff',        // Weiß
+    primary: '#fbbf24',           // Amber/Gelb - Haupt-Akzent
+    primaryForeground: '#000000', // Schwarz auf Gelb
 
     // UI-Elemente
-    card: '***REMOVED***262626',              // Dunkelgrau
-    cardForeground: '***REMOVED***ffffff',
-    border: '***REMOVED***404040',            // Mittelgrau
-    input: '***REMOVED***333333',
-    inputForeground: '***REMOVED***ffffff',
+    card: '#262626',              // Dunkelgrau
+    cardForeground: '#ffffff',
+    border: '#404040',            // Mittelgrau
+    input: '#333333',
+    inputForeground: '#ffffff',
 
     // Semantische Farben (verstärkt)
-    success: '***REMOVED***22c55e',           // Grün
-    successForeground: '***REMOVED***000000',
-    warning: '***REMOVED***fbbf24',           // Gelb
-    warningForeground: '***REMOVED***000000',
-    error: '***REMOVED***ef4444',             // Rot
-    errorForeground: '***REMOVED***ffffff',
-    info: '***REMOVED***3b82f6',              // Blau
-    infoForeground: '***REMOVED***ffffff',
+    success: '#22c55e',           // Grün
+    successForeground: '#000000',
+    warning: '#fbbf24',           // Gelb
+    warningForeground: '#000000',
+    error: '#ef4444',             // Rot
+    errorForeground: '#ffffff',
+    info: '#3b82f6',              // Blau
+    infoForeground: '#ffffff',
 
     // Status-Farben für Lager
-    eingang: '***REMOVED***22c55e',           // Grün - Wareneingang
-    ausgang: '***REMOVED***f97316',           // Orange - Warenausgang
-    inventur: '***REMOVED***8b5cf6',          // Violett - Inventur
-    umlagerung: '***REMOVED***06b6d4',        // Cyan - Umlagerung
+    eingang: '#22c55e',           // Grün - Wareneingang
+    ausgang: '#f97316',           // Orange - Warenausgang
+    inventur: '#8b5cf6',          // Violett - Inventur
+    umlagerung: '#06b6d4',        // Cyan - Umlagerung
   },
 
   // Typografie (größer für Lesbarkeit)
@@ -183,3 +183,4 @@ export function applyWarehouseTheme(): void {
 export function removeWarehouseTheme(): void {
   document.documentElement.classList.remove('theme-warehouse')
 }
+

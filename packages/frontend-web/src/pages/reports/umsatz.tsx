@@ -91,7 +91,7 @@ export default function UmsatzReportPage(): JSX.Element {
                 <div key={i} className="flex justify-between rounded-lg border p-3">
                   <div>
                     <div className="font-semibold">{kunde.name}</div>
-                    <Badge variant="outline">***REMOVED***{i + 1}</Badge>
+                    <Badge variant="outline">#{i + 1}</Badge>
                   </div>
                   <div className="font-bold">
                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(kunde.umsatz)}
@@ -115,7 +115,7 @@ export default function UmsatzReportPage(): JSX.Element {
                 <div key={i} className="flex justify-between rounded-lg border p-3">
                   <div>
                     <div className="font-semibold">{artikel.name}</div>
-                    <Badge variant="outline">***REMOVED***{i + 1}</Badge>
+                    <Badge variant="outline">#{i + 1}</Badge>
                   </div>
                   <div className="font-bold">
                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(artikel.umsatz)}
@@ -129,3 +129,4 @@ export default function UmsatzReportPage(): JSX.Element {
     </div>
   )
 }
+

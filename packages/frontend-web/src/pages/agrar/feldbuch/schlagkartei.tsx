@@ -9,7 +9,7 @@
 
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+// useQuery is used via hooks from @/lib/api/agrar
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -65,102 +65,8 @@ type Schlag = {
   }
 }
 
-// Mock-Daten für Kunden (Landwirte/Tenants)
-const mockKunden: Kunde[] = [
-  { id: 'k1', name: 'Schmidt Landwirtschaft GbR', betriebsnummer: 'DE-NI-030012', bundesland: 'niedersachsen', schlagCount: 12, gesamtflaeche: 145.8 },
-  { id: 'k2', name: 'Müller Agrar KG', betriebsnummer: 'DE-NI-030045', bundesland: 'niedersachsen', schlagCount: 8, gesamtflaeche: 89.3 },
-  { id: 'k3', name: 'Bauer Hof Meier', betriebsnummer: 'DE-BY-094015', bundesland: 'bayern', schlagCount: 5, gesamtflaeche: 52.1 },
-  { id: 'all', name: 'Alle Kunden', betriebsnummer: '', bundesland: '', schlagCount: 25, gesamtflaeche: 287.2 },
-]
-
-// Mock-Daten für Schläge mit Kundenzuordnung
-const mockSchlaege: Schlag[] = [
-  { 
-    id: '1', 
-    name: 'Nordfeld 1', 
-    flik: 'DENILI0000012345',
-    flaeche: 12.5, 
-    kultur: 'Winterweizen', 
-    vorkultur: 'Winterraps',
-    kundeId: 'k1', 
-    kundeName: 'Schmidt Landwirtschaft GbR',
-    gemeinde: 'Nordhausen',
-    gemarkung: 'Nordheim',
-    bodenart: 'Lehm',
-    ackerzahl: 65,
-    status: 'aktiv',
-    letzteMassnahme: { datum: '2025-11-15', typ: 'Düngung' }
-  },
-  { 
-    id: '2', 
-    name: 'Südacker', 
-    flik: 'DENILI0000012346',
-    flaeche: 8.3, 
-    kultur: 'Winterraps', 
-    vorkultur: 'Winterweizen',
-    kundeId: 'k2', 
-    kundeName: 'Müller Agrar KG',
-    gemeinde: 'Südhausen',
-    gemarkung: 'Südfeld',
-    bodenart: 'Sandig-Lehm',
-    ackerzahl: 55,
-    status: 'aktiv',
-    letzteMassnahme: { datum: '2025-11-10', typ: 'PSM-Behandlung' }
-  },
-  { 
-    id: '3', 
-    name: 'Wiesengrund', 
-    flik: 'DENILI0000012347',
-    flaeche: 15.2, 
-    kultur: 'Silomais', 
-    vorkultur: 'Wintergerste',
-    kundeId: 'k1', 
-    kundeName: 'Schmidt Landwirtschaft GbR',
-    gemeinde: 'Nordhausen',
-    gemarkung: 'Wiesenau',
-    bodenart: 'Lehm-Ton',
-    ackerzahl: 70,
-    status: 'aktiv'
-  },
-  { 
-    id: '4', 
-    name: 'Bergacker', 
-    flik: 'DEBYLI0000098765',
-    flaeche: 10.5, 
-    kultur: 'Wintergerste', 
-    vorkultur: 'Kartoffeln',
-    kundeId: 'k3', 
-    kundeName: 'Bauer Hof Meier',
-    gemeinde: 'Bergdorf',
-    gemarkung: 'Am Berg',
-    bodenart: 'Sandig',
-    ackerzahl: 45,
-    status: 'aktiv'
-  },
-  { 
-    id: '5', 
-    name: 'Stilllegungsfläche', 
-    flaeche: 3.2, 
-    kultur: 'Brache', 
-    kundeId: 'k1', 
-    kundeName: 'Schmidt Landwirtschaft GbR',
-    gemeinde: 'Nordhausen',
-    status: 'stillgelegt'
-  },
-]
-
-// API-Funktionen (simuliert)
-async function fetchKunden(): Promise<Kunde[]> {
-  // Simuliere API-Aufruf
-  await new Promise(resolve => setTimeout(resolve, 500))
-  return mockKunden
-}
-
-async function fetchSchlaege(_kundeId?: string): Promise<Schlag[]> {
-  // Simuliere API-Aufruf
-  await new Promise(resolve => setTimeout(resolve, 700))
-  return mockSchlaege
-}
+// API hooks from centralized agrar module
+import { useAgrarKunden, useSchlaege } from '@/lib/api/agrar'
 
 // Skeleton-Komponente für Ladezustand
 function SchlagkarteiSkeleton() {
@@ -212,16 +118,10 @@ export default function SchlagkarteiPage(): JSX.Element {
   const [feldblockDialogOpen, setFeldblockDialogOpen] = useState(false)
   const [filterStatus, setFilterStatus] = useState<string>('alle')
 
-  // Daten laden mit React Query
-  const { data: kunden, isLoading: kundenLoading } = useQuery({
-    queryKey: ['kunden'],
-    queryFn: fetchKunden
-  })
+  // Daten laden mit API-Hooks
+  const { data: kunden, isLoading: kundenLoading } = useAgrarKunden()
 
-  const { data: schlaege, isLoading: schlaegeLoading } = useQuery({
-    queryKey: ['schlaege', selectedKundeId],
-    queryFn: () => fetchSchlaege(selectedKundeId)
-  })
+  const { data: schlaege, isLoading: schlaegeLoading } = useSchlaege(selectedKundeId)
 
   // Gefilterte Schläge
   const filteredSchlaege = useMemo(() => {

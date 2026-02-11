@@ -30,19 +30,19 @@ interface TrendChartProps {
 
 const colorMap = {
   primary: {
-    stroke: '***REMOVED***3b82f6',
+    stroke: '#3b82f6',
     fill: 'rgba(59, 130, 246, 0.1)',
   },
   success: {
-    stroke: '***REMOVED***10b981',
+    stroke: '#10b981',
     fill: 'rgba(16, 185, 129, 0.1)',
   },
   warning: {
-    stroke: '***REMOVED***f59e0b',
+    stroke: '#f59e0b',
     fill: 'rgba(245, 158, 11, 0.1)',
   },
   danger: {
-    stroke: '***REMOVED***ef4444',
+    stroke: '#ef4444',
     fill: 'rgba(239, 68, 68, 0.1)',
   },
 }
@@ -236,3 +236,4 @@ export function TrendIndicator({
     </span>
   )
 }
+

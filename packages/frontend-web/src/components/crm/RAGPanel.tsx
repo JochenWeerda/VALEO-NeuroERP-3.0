@@ -73,9 +73,9 @@ function generateMockContext(customerId: string, customerName?: string): Custome
       },
     ],
     recentActivity: [
-      { type: 'order', description: 'Bestellung ***REMOVED***12345 - €2.450', date: '2 Wochen' },
+      { type: 'order', description: 'Bestellung #12345 - €2.450', date: '2 Wochen' },
       { type: 'call', description: 'Telefongespräch mit Vertrieb', date: '3 Wochen' },
-      { type: 'email', description: 'Angebot ***REMOVED***A789 versendet', date: '1 Monat' },
+      { type: 'email', description: 'Angebot #A789 versendet', date: '1 Monat' },
     ],
     suggestedActions: [
       {
@@ -293,3 +293,4 @@ export function RAGPanel({ customerId, customerName, className }: RAGPanelProps)
     </Card>
   )
 }
+

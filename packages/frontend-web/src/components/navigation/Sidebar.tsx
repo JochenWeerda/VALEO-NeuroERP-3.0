@@ -17,6 +17,7 @@ import { resolveRoutePathFromModule } from '@/app/navigation/route-paths'
 interface SidebarProps {
   collapsed: boolean
   onToggle: () => void
+  onNavigate?: () => void
 }
 
 export const sidebarMCP = createMCPMetadata('Sidebar', 'navigation', {
@@ -36,7 +37,7 @@ export const sidebarMCP = createMCPMetadata('Sidebar', 'navigation', {
   },
 })
 
-export function Sidebar({ collapsed, onToggle }: SidebarProps): JSX.Element {
+export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.Element {
   const agrarEnabled = useFeature('agrar')
   const navItems: NavItem[] = NAV_SECTIONS
   const filteredNavItems = navItems.filter((item) => (item.featureKey === 'agrar' ? agrarEnabled : true))
@@ -91,6 +92,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps): JSX.Element {
                 <NavLink
                   key={item.id}
                   to={item.path}
+                  onClick={onNavigate}
                   className={({ isActive }) =>
                     cn(
                       'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
@@ -136,7 +138,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps): JSX.Element {
                       return (
                         <NavLink
                           key={child.id}
-                          to={child.path ?? '***REMOVED***'}
+                          to={child.path ?? '#'}
+                          onClick={onNavigate}
                           className={({ isActive }) =>
                             cn(
                               'flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',

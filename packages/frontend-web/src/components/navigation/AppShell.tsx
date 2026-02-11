@@ -35,9 +35,18 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
   const commandPaletteAvailable = enableCommandPalette && commandPaletteFeatureEnabled
   const [commandOpen, setCommandOpen] = useState<boolean>(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false)
 
   const handleToggleSidebar = useCallback((): void => {
     setSidebarCollapsed((collapsed) => !collapsed)
+  }, [])
+
+  const handleMobileMenuToggle = useCallback((): void => {
+    setMobileMenuOpen((open) => !open)
+  }, [])
+
+  const handleMobileMenuClose = useCallback((): void => {
+    setMobileMenuOpen(false)
   }, [])
 
   const handleCommandOpen = useCallback((): void => {
@@ -92,12 +101,32 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
       data-mcp-component="app-shell"
       data-mcp-version="1.0.0"
     >
-      <Sidebar collapsed={sidebarCollapsed} onToggle={handleToggleSidebar} />
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block">
+        <Sidebar collapsed={sidebarCollapsed} onToggle={handleToggleSidebar} />
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={handleMobileMenuClose}
+            aria-hidden="true"
+          />
+          {/* Sidebar Panel */}
+          <div className="fixed inset-y-0 left-0 z-50 w-72 animate-in slide-in-from-left duration-300">
+            <Sidebar collapsed={false} onToggle={handleMobileMenuClose} onNavigate={handleMobileMenuClose} />
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopBar
           onCommandOpen={handleCommandOpen}
           commandPaletteEnabled={commandPaletteAvailable}
+          onMobileMenuToggle={handleMobileMenuToggle}
         />
 
         <main className="flex-1 overflow-y-auto overflow-x-hidden" role="main" aria-label="Main content">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -14,48 +14,9 @@ import { AdvancedFilters, FilterConfig } from '@/components/list/AdvancedFilters
 import { CSVImport } from '@/components/list/CSVImport'
 import { useToast } from '@/hooks/use-toast'
 import { saveDocument } from '@/lib/document-api'
+import { useAngebote, type Angebot, type AngebotStatus } from '@/lib/api/sales'
 
-type Angebot = {
-  id: string
-  nummer: string
-  datum: string
-  kunde: string
-  betrag: number
-  status: 'offen' | 'angenommen' | 'abgelehnt' | 'abgelaufen'
-  gueltigBis: string
-}
-
-const mockAngebote: Angebot[] = [
-  {
-    id: '1',
-    nummer: 'ANG-2025-001',
-    datum: '2025-10-08',
-    kunde: 'Landhandel Nord GmbH',
-    betrag: 12500.0,
-    status: 'offen',
-    gueltigBis: '2025-11-07',
-  },
-  {
-    id: '2',
-    nummer: 'ANG-2025-002',
-    datum: '2025-10-09',
-    kunde: 'Agrar-Zentrum Süd',
-    betrag: 8750.5,
-    status: 'angenommen',
-    gueltigBis: '2025-11-08',
-  },
-  {
-    id: '3',
-    nummer: 'ANG-2025-003',
-    datum: '2025-10-10',
-    kunde: 'Müller Landwirtschaft',
-    betrag: 5200.0,
-    status: 'offen',
-    gueltigBis: '2025-11-09',
-  },
-]
-
-const statusVariantMap: Record<Angebot['status'], 'default' | 'outline' | 'secondary' | 'destructive'> = {
+const statusVariantMap: Record<AngebotStatus, 'default' | 'outline' | 'secondary' | 'destructive'> = {
   offen: 'default',
   angenommen: 'outline',
   abgelehnt: 'destructive',
@@ -67,51 +28,14 @@ export default function AngeboteListePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<Angebot['status'] | 'alle'>('alle')
-  const [angebote, setAngebote] = useState<Angebot[]>([])
-  const [loading, setLoading] = useState(true)
+  const [statusFilter, setStatusFilter] = useState<AngebotStatus | 'alle'>('alle')
   const [showImport, setShowImport] = useState(false)
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
 
   const entityType = 'offer'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Angebot')
 
-
-  // Lade Daten von API
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true)
-      try {
-        const response = await fetch('/api/mcp/documents/sales_offer?skip=0&limit=100')
-        if (response.ok) {
-          const result = await response.json()
-          if (result.ok && result.data) {
-            // Transformiere API-Daten in lokales Format
-            const transformed = result.data.map((doc: any) => ({
-              id: doc.number,
-              nummer: doc.number,
-              datum: doc.date,
-              kunde: doc.customerId || '',
-              betrag: doc.totalGross || 0,
-              status: (doc.status?.toLowerCase() || 'offen') as Angebot['status'],
-              gueltigBis: doc.validUntil || '',
-            }))
-            setAngebote(transformed.length > 0 ? transformed : mockAngebote)
-          } else {
-            setAngebote(mockAngebote)
-          }
-        } else {
-          setAngebote(mockAngebote)
-        }
-      } catch (error) {
-        console.error('Fehler beim Laden der Angebote:', error)
-        setAngebote(mockAngebote)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadData()
-  }, [])
+  const { data: angebote = [], isLoading: loading } = useAngebote()
 
   // Filter-Konfiguration für AdvancedFilters
   const filterConfig: FilterConfig[] = [
@@ -320,7 +244,7 @@ export default function AngeboteListePage(): JSX.Element {
         <CardContent className="pt-6">
           <DataTable data={filteredAngebote} columns={columns} />
           <div className="mt-4 text-sm text-muted-foreground">
-            {t('crud.list.showing', { count: filteredAngebote.length, total: mockAngebote.length, entityType: entityTypeLabel })}
+            {t('crud.list.showing', { count: filteredAngebote.length, total: angebote.length, entityType: entityTypeLabel })}
           </div>
         </CardContent>
       </Card>

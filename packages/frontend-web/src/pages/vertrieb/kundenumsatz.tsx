@@ -125,7 +125,7 @@ export default function KundenumsatzPage(): JSX.Element {
               <div key={i} className="flex items-center justify-between rounded-lg border p-4">
                 <div>
                   <div className="font-semibold">{kunde.name}</div>
-                  <Badge variant="outline" className="mt-1">***REMOVED***{i + 1}</Badge>
+                  <Badge variant="outline" className="mt-1">#{i + 1}</Badge>
                 </div>
                 <div className="text-right">
                   <div className="text-xl font-bold">
@@ -143,3 +143,4 @@ export default function KundenumsatzPage(): JSX.Element {
     </div>
   )
 }
+

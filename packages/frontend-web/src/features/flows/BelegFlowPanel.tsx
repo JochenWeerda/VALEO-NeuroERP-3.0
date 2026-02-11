@@ -35,7 +35,7 @@ export function BelegFlowPanel({
         <div>
           <div className="text-sm opacity-70">{t('crud.fields.document')}</div>
           <div className="font-medium">
-            {current.type} ***REMOVED***{current.number}
+            {current.type} #{current.number}
           </div>
           <div className="text-sm opacity-70">{t('crud.fields.status')}: {current.status}</div>
         </div>
@@ -58,4 +58,5 @@ export function BelegFlowPanel({
     </Card>
   )
 }
+
 

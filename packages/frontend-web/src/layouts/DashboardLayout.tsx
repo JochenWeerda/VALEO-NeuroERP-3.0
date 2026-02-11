@@ -6,6 +6,7 @@ import { CallWidget } from "@/components/cti/CallWidget"
 import { useFeature } from "@/hooks/useFeature"
 import { type McpRealtimeEvent, useMcpConnectionState, useMcpRealtime } from "@/lib/useMcpRealtime"
 import { GlobalButtonHandler } from "@/components/GlobalButtonHandler"
+import { Breadcrumbs } from "@/components/navigation/Breadcrumbs"
 
 export default function AppLayout(): JSX.Element {
   const commandPaletteEnabled = useFeature('commandPalette')
@@ -54,7 +55,8 @@ export default function AppLayout(): JSX.Element {
   return (
     <AppShell enableCommandPalette={commandPaletteEnabled}>
       <div className="flex h-full flex-col">
-        <div className="flex-1 overflow-y-auto bg-background p-6">
+        <Breadcrumbs />
+        <div className="flex-1 overflow-y-auto bg-background p-3 md:p-6">
           <Outlet />
         </div>
         {realtimeEnabled ? (
