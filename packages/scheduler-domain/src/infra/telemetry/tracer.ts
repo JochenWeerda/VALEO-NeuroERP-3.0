@@ -40,7 +40,7 @@ export class TracingService {
   ): Promise<T> {
     return this.tracer.startActiveSpan(name, {
       attributes: options.attributes,
-    }, async (span) => {
+    }, async (span: Span) => {
       try {
         const result = await fn(span);
         span.setStatus({ code: SpanStatusCode.OK });

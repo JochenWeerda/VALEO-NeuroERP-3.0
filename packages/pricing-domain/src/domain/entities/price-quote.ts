@@ -5,6 +5,7 @@ import { z } from 'zod';
  */
 export const PriceComponentTypeEnum = z.enum([
   'Base',        // Basis-Preis aus PriceList
+  'Seasonal',    // Saisonale Preisregel
   'Condition',   // Kondition (Rabatt/Aufschlag)
   'Dynamic',     // Dynamische Formel
   'Charge',      // Abgabe/Fee
