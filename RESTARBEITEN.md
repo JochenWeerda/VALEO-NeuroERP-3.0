@@ -371,3 +371,4 @@ Alle veralteten Status-Reports, redundanten Phasen-Dokumente, doppelte CRM-Dokum
 - Operations Batch 4: Foerderung, Labor-Proben, Marketing-Kampagnen, ENNI-Meldungen, PSM-Sachkunde-Register und Saatgut-Sortenregister auf `lib/api/betrieb` bzw. `lib/api/agrar` Hooks migriert.
 - Portal Batch 5: Portal-Dashboard, Anfragen, Bestellungen, Vertraege und Zertifikate auf `lib/api/portal` Hooks umgestellt (inkl. UI-kompatibler Datenadaption).
 - Portal Batch 6: Portal-Rechnungen und Portal-Dokumente auf `lib/api/portal` Hooks migriert (Legacy-Ansichten via Adapter auf bestehende UI-Typen abgebildet).
+- Portal Batch 7: Portal-Feldbuch und Portal-Naehrstoffbilanzen auf `lib/api/portal` Hooks umgestellt (Schlag-/Bilanz-Mapping auf bestehende Detail-UI).

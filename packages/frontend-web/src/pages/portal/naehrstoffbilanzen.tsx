@@ -5,8 +5,7 @@
  */
 
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '@/lib/api-client'
+import { usePortalNaehrstoffbilanzen } from '@/lib/api/portal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -109,30 +108,21 @@ const P_GRENZWERT = 10
 
 export default function PortalNaehrstoffbilanzen() {
   const [selectedJahr, setSelectedJahr] = useState<string>('2024')
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['portal', 'naehrstoffbilanzen', 'page'],
-    queryFn: async () => {
-      try {
-        const [bilanzenResponse, schlaegeResponse] = await Promise.all([
-          apiClient.get<NaehrstoffBilanz[]>('/api/v1/portal/naehrstoffbilanzen'),
-          apiClient.get<SchlagBilanz[]>('/api/v1/portal/naehrstoffbilanzen/schlaege'),
-        ])
-        return {
-          bilanzen: Array.isArray(bilanzenResponse.data) && bilanzenResponse.data.length > 0 ? bilanzenResponse.data : mockBilanzen,
-          schlagBilanzen: Array.isArray(schlaegeResponse.data) && schlaegeResponse.data.length > 0 ? schlaegeResponse.data : mockSchlagBilanzen,
-        }
-      } catch {
-        return {
-          bilanzen: mockBilanzen,
-          schlagBilanzen: mockSchlagBilanzen,
-        }
-      }
-    },
-    staleTime: 5 * 60 * 1000,
-  })
-  const bilanzen = data?.bilanzen ?? mockBilanzen
-  const schlagBilanzen = data?.schlagBilanzen ?? mockSchlagBilanzen
+  const { data: portalBilanzen = [], isLoading } = usePortalNaehrstoffbilanzen()
+  const bilanzen = mockBilanzen
+  const schlagBilanzen: SchlagBilanz[] = portalBilanzen.length > 0
+    ? portalBilanzen.map((b) => ({
+      schlag: b.schlag,
+      kultur: b.kultur,
+      flaeche: 0,
+      nZugang: 0,
+      nAbgang: 0,
+      nSaldo: b.n_saldo,
+      pZugang: 0,
+      pAbgang: 0,
+      pSaldo: b.p_saldo,
+    }))
+    : mockSchlagBilanzen
 
   const currentBilanz = bilanzen.find(b => b.jahr.toString() === selectedJahr)
 

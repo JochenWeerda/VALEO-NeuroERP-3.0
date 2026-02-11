@@ -4,7 +4,8 @@
  * Kunden können ihre Feldbu-Daten einsehen und CSV exportieren/importieren
  */
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
+import { usePortalFeldbuch } from '@/lib/api/portal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -105,9 +106,6 @@ const typConfig: Record<string, { label: string; icon: React.ReactNode; color: s
 }
 
 export default function PortalFeldbuch() {
-  const [loading, setLoading] = useState(true)
-  const [schlaege, setSchlaege] = useState<Schlag[]>([])
-  const [massnahmen, setMassnahmen] = useState<Massnahme[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [activeTab, setActiveTab] = useState('schlaege')
   const [selectedSchlag, setSelectedSchlag] = useState<string>('alle')
@@ -116,15 +114,31 @@ export default function PortalFeldbuch() {
   const [importSuccess, setImportSuccess] = useState(false)
   const [exportSuccess, setExportSuccess] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { data: portalFeldbuch = [], isLoading } = usePortalFeldbuch()
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSchlaege(mockSchlaege)
-      setMassnahmen(mockMassnahmen)
-      setLoading(false)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [])
+  const schlaege: Schlag[] = portalFeldbuch.length > 0
+    ? portalFeldbuch.map((s) => ({
+      id: s.id,
+      name: s.schlag,
+      flaeche: s.flaeche,
+      kultur: s.kultur,
+      flik: '',
+      gemeinde: '',
+      gemarkung: '',
+    }))
+    : mockSchlaege
+
+  const massnahmen: Massnahme[] = portalFeldbuch.length > 0
+    ? portalFeldbuch.map((s, idx) => ({
+      id: `pm-${idx}`,
+      schlagId: s.id,
+      schlagName: s.schlag,
+      datum: '',
+      typ: 'bodenbearbeitung',
+      bezeichnung: s.letzteMassnahme || 'Dokumentierte Massnahme',
+      bemerkung: s.naechsteMassnahme ? `Naechste: ${s.naechsteMassnahme}` : undefined,
+    }))
+    : mockMassnahmen
 
   const filteredSchlaege = schlaege.filter((s) =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -200,7 +214,7 @@ export default function PortalFeldbuch() {
     }
   }
 
-  if (loading) {
+  if (isLoading) {
     return <FeldbuchSkeleton />
   }
 
