@@ -16,6 +16,7 @@ from ....core.database import get_db
 from ....domains.shared.events import IntegrationEvent, get_event_publisher
 from ....infrastructure.eventbus.outbox import OutboxPublisher
 from ....infrastructure.models import AgrarContract, AgrarContractAllocation, WeighingTicket
+from modules.agrar.services.moisture_engine import MoistureEngineInput, calculate_billing_weight
 from .agrar_contracts import _compute_status
 from ..schemas.base import PaginatedResponse, BaseSchema
 
@@ -130,6 +131,35 @@ def _resolve_ticket_allocation_quantity(ticket: WeighingTicket, requested_quanti
     return quantity
 
 
+def _derive_billing_weight(
+    *,
+    net_weight: Optional[float],
+    billing_weight: Optional[float],
+    moisture_pct: Optional[float],
+    impurities_pct: Optional[float],
+    quality_data: Optional[dict[str, Any]],
+) -> Optional[float]:
+    if billing_weight is not None:
+        return billing_weight
+    if net_weight is None:
+        return None
+    if moisture_pct is None and impurities_pct is None:
+        return None
+
+    cfg = quality_data or {}
+    result = calculate_billing_weight(
+        MoistureEngineInput(
+            net_weight_kg=Decimal(str(net_weight)),
+            moisture_pct=Decimal(str(moisture_pct if moisture_pct is not None else 0)),
+            impurities_pct=Decimal(str(impurities_pct if impurities_pct is not None else 0)),
+            target_moisture_pct=Decimal(str(cfg.get("target_moisture_pct", 14.0))),
+            base_impurities_pct=Decimal(str(cfg.get("base_impurities_pct", 2.0))),
+            allow_bonus=bool(cfg.get("allow_bonus", False)),
+        )
+    )
+    return float(result.billing_weight_kg)
+
+
 @router.get("/", response_model=PaginatedResponse[WeighingTicketOut])
 async def list_weighing_tickets(
     tenant_id: Optional[str] = Query(None),
@@ -174,7 +204,13 @@ async def create_weighing_ticket(
         protein_pct=payload.protein_pct,
         impurities_pct=payload.impurities_pct,
         hl_weight=payload.hl_weight,
-        billing_weight=payload.billing_weight,
+        billing_weight=_derive_billing_weight(
+            net_weight=_validate_and_compute_weights(payload.gross_weight, payload.tare_weight, payload.net_weight),
+            billing_weight=payload.billing_weight,
+            moisture_pct=payload.moisture_pct,
+            impurities_pct=payload.impurities_pct,
+            quality_data=payload.quality_data,
+        ),
         quality_data=payload.quality_data,
         direction=payload.direction,
         reference_doc=payload.reference_doc,
@@ -201,6 +237,13 @@ async def update_weighing_ticket(
     tare_weight = data.get("tare_weight", ticket.tare_weight)
     net_weight = data.get("net_weight", ticket.net_weight)
     data["net_weight"] = _validate_and_compute_weights(gross_weight, tare_weight, net_weight)
+    data["billing_weight"] = _derive_billing_weight(
+        net_weight=data.get("net_weight"),
+        billing_weight=data.get("billing_weight", ticket.billing_weight),
+        moisture_pct=data.get("moisture_pct", ticket.moisture_pct),
+        impurities_pct=data.get("impurities_pct", ticket.impurities_pct),
+        quality_data=data.get("quality_data", ticket.quality_data),
+    )
 
     for field, val in data.items():
         setattr(ticket, field, val)
