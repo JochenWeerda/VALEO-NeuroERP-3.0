@@ -79,6 +79,7 @@ from app.api.v1.endpoints import (
     sustainability,
     compat,
     modules,
+    agrar_contracts,
 )
 
 # Import domain routers
@@ -366,6 +367,12 @@ api_router.include_router(
     psm_proplanta.router,
     prefix="/agrar/psm/proplanta",
     tags=["agrar", "psm", "proplanta", "integration"]
+)
+
+api_router.include_router(
+    agrar_contracts.router,
+    prefix="/agrar/contracts",
+    tags=["agrar", "contracts"]
 )
 
 # Kundenportal
