@@ -214,7 +214,7 @@
 ### Sprint 4 (04.04-17.04) Abrechnung + Physiklogik
 - [x] `AGRAR-SET-01` Self-Billing inkl. Abzüge | P0 | L | Backend
 - [x] `AGRAR-SET-02` Feuchte-/Schwund-Engine im Domain-Service | P0 | M | Backend
-- [ ] `AGRAR-SET-UI-01` Gutschrift-Ansicht inkl. Abzugsnachweis | P1 | M | Frontend
+- [x] `AGRAR-SET-UI-01` Gutschrift-Ansicht inkl. Abzugsnachweis | P1 | M | Frontend
 
 ### Sprint 5 (18.04-01.05) Compliance + Migration
 - [ ] `AGRAR-COMP-01` Gefahrstoff-/Nährstoff-Export | P0 | M | Backend

@@ -1,312 +1,385 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { ErrorState } from '@/components/ErrorState'
+import { apiClient } from '@/lib/api-client'
+import { useToast } from '@/hooks/use-toast'
 import { Calculator, FileText, Save, Truck } from 'lucide-react'
 
-type AbrechnungData = {
-  lieferscheinNr: string
-  lieferant: string
-  artikel: string
+type DeductionType = 'drying' | 'cleaning' | 'freight' | 'other'
+type DeductionMode = 'per_ton' | 'fixed'
+
+type SettlementDeduction = {
+  id: string
+  deduction_type: DeductionType
+  mode: DeductionMode
+  rate_per_ton_eur?: number | null
+  fixed_amount_eur?: number | null
+  basis_quantity_tons?: number | null
+  amount_eur: number
+  note?: string | null
+}
+
+type Settlement = {
+  id: string
+  settlement_number: string
+  supplier_id: string
+  article_id?: string | null
+  gross_quantity_kg: number
+  billing_quantity_kg: number
+  unit_price_eur_per_ton: number
+  gross_amount_eur: number
+  total_deductions_eur: number
+  net_amount_eur: number
+  status: 'draft' | 'posted' | 'cancelled'
+  posted_journal_ref?: string | null
+  deductions: SettlementDeduction[]
+}
+
+type BillingPreview = {
+  net_weight_kg: number
+  billing_weight_kg: number
+  deduction_kg: number
+  moisture_factor: number
+  impurities_factor: number
+}
+
+type SettlementPreview = {
+  gross_quantity_kg: number
+  billing_quantity_kg: number
+  gross_amount_eur: number
+  total_deductions_eur: number
+  net_amount_eur: number
+}
+
+type FormState = {
+  settlementNumber: string
+  supplierId: string
+  articleId: string
   bruttoGewicht: number
   taraGewicht: number
-  nettoGewicht: number
-  basisPreis: number
   feuchtigkeit: number
-  protein: number
   verunreinigung: number
-  abzuegeFeuchtigkeit: number
-  abzuegeProtein: number
-  abzuegeVerunreinigung: number
-  endpreis: number
-  gesamtbetrag: number
+  basisPreis: number
+  dryingRate: number
+  cleaningRate: number
+  freightFixed: number
+}
+
+const initialForm: FormState = {
+  settlementNumber: '',
+  supplierId: '',
+  articleId: 'WEIZEN',
+  bruttoGewicht: 26500,
+  taraGewicht: 1500,
+  feuchtigkeit: 16.5,
+  verunreinigung: 1.8,
+  basisPreis: 220,
+  dryingRate: 2,
+  cleaningRate: 4,
+  freightFixed: 0,
+}
+
+function money(value: number): string {
+  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value)
 }
 
 export default function AnnahmeAbrechnungPage(): JSX.Element {
   const navigate = useNavigate()
-  const [abrechnung, setAbrechnung] = useState<AbrechnungData>({
-    lieferscheinNr: 'LS-2025-0042',
-    lieferant: 'Landwirt Schmidt',
-    artikel: 'Weizen',
-    bruttoGewicht: 26500,
-    taraGewicht: 1500,
-    nettoGewicht: 25000,
-    basisPreis: 220.0,
-    feuchtigkeit: 16.5,
-    protein: 12.2,
-    verunreinigung: 1.8,
-    abzuegeFeuchtigkeit: 5.0,
-    abzuegeProtein: 0,
-    abzuegeVerunreinigung: 8.0,
-    endpreis: 0,
-    gesamtbetrag: 0,
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const [form, setForm] = useState<FormState>(initialForm)
+
+  const nettoGewicht = useMemo(() => Math.max(0, form.bruttoGewicht - form.taraGewicht), [form.bruttoGewicht, form.taraGewicht])
+
+  const deductions = useMemo(() => {
+    const items: Array<{
+      deduction_type: DeductionType
+      mode: DeductionMode
+      rate_per_ton_eur?: number
+      fixed_amount_eur?: number
+      note?: string
+    }> = []
+
+    if (form.feuchtigkeit > 14) {
+      items.push({
+        deduction_type: 'drying',
+        mode: 'per_ton',
+        rate_per_ton_eur: form.dryingRate,
+        note: `Moisture ${form.feuchtigkeit.toFixed(1)}%`,
+      })
+    }
+    if (form.verunreinigung > 2) {
+      items.push({
+        deduction_type: 'cleaning',
+        mode: 'per_ton',
+        rate_per_ton_eur: form.cleaningRate,
+        note: `Impurities ${form.verunreinigung.toFixed(1)}%`,
+      })
+    }
+    if (form.freightFixed > 0) {
+      items.push({
+        deduction_type: 'freight',
+        mode: 'fixed',
+        fixed_amount_eur: form.freightFixed,
+      })
+    }
+    return items
+  }, [form.feuchtigkeit, form.verunreinigung, form.dryingRate, form.cleaningRate, form.freightFixed])
+
+  const { data: settlements, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['agrar', 'settlements'],
+    queryFn: async () => (await apiClient.get<Settlement[]>('/api/v1/agrar/settlements')).data,
+    staleTime: 60 * 1000,
   })
 
-  function updateField<K extends keyof AbrechnungData>(key: K, value: AbrechnungData[K]): void {
-    const updated = { ...abrechnung, [key]: value }
+  const billingPreview = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        net_weight_kg: nettoGewicht,
+        moisture_pct: form.feuchtigkeit,
+        impurities_pct: form.verunreinigung,
+        target_moisture_pct: 14,
+        base_impurities_pct: 2,
+        allow_bonus: false,
+      }
+      return (await apiClient.post<BillingPreview>('/api/v1/agrar/settlements/billing-weight/preview', payload)).data
+    },
+  })
 
-    // Auto-Berechnung
-    if (key === 'bruttoGewicht' || key === 'taraGewicht') {
-      updated.nettoGewicht = updated.bruttoGewicht - updated.taraGewicht
+  const settlementPreview = useMutation({
+    mutationFn: async (billingWeightKg: number) => {
+      const payload = {
+        settlement_number: form.settlementNumber || undefined,
+        supplier_id: form.supplierId,
+        article_id: form.articleId,
+        gross_quantity_kg: nettoGewicht,
+        billing_quantity_kg: billingWeightKg,
+        unit_price_eur_per_ton: form.basisPreis,
+        deductions,
+      }
+      return (await apiClient.post<SettlementPreview>('/api/v1/agrar/settlements/preview', payload)).data
+    },
+  })
+
+  const createSettlement = useMutation({
+    mutationFn: async (billingWeightKg: number) => {
+      const payload = {
+        settlement_number: form.settlementNumber || undefined,
+        supplier_id: form.supplierId,
+        article_id: form.articleId,
+        gross_quantity_kg: nettoGewicht,
+        billing_quantity_kg: billingWeightKg,
+        unit_price_eur_per_ton: form.basisPreis,
+        deductions,
+        note: 'Created from annahme/abrechnung UI',
+      }
+      return (await apiClient.post<Settlement>('/api/v1/agrar/settlements', payload)).data
+    },
+    onSuccess: () => {
+      toast({ title: 'Settlement erstellt', description: 'Self-billing Beleg wurde gespeichert.' })
+      void queryClient.invalidateQueries({ queryKey: ['agrar', 'settlements'] })
+    },
+    onError: (e: unknown) => {
+      const message = e instanceof Error ? e.message : 'Settlement konnte nicht erstellt werden'
+      toast({ title: 'Fehler', description: message, variant: 'destructive' })
+    },
+  })
+
+  const postSettlement = useMutation({
+    mutationFn: async (settlementId: string) => {
+      const payload = {
+        debit_account: '5000',
+        credit_account_supplier: '3300',
+        credit_account_deductions: '5490',
+      }
+      return (await apiClient.post(`/api/v1/agrar/settlements/${settlementId}/post-fibu`, payload)).data
+    },
+    onSuccess: () => {
+      toast({ title: 'Fibu-Buchung erstellt', description: 'Settlement wurde als Journal Entry verbucht.' })
+      void queryClient.invalidateQueries({ queryKey: ['agrar', 'settlements'] })
+    },
+    onError: (e: unknown) => {
+      const message = e instanceof Error ? e.message : 'Fibu-Posting fehlgeschlagen'
+      toast({ title: 'Fehler', description: message, variant: 'destructive' })
+    },
+  })
+
+  async function runPreview(): Promise<void> {
+    if (!form.supplierId.trim()) {
+      toast({ title: 'Lieferant fehlt', description: 'Bitte supplier_id eingeben.', variant: 'destructive' })
+      return
     }
-
-    // Qualitätsabzüge berechnen
-    if (updated.feuchtigkeit > 14) {
-      updated.abzuegeFeuchtigkeit = (updated.feuchtigkeit - 14) * 2
-    } else {
-      updated.abzuegeFeuchtigkeit = 0
-    }
-
-    if (updated.verunreinigung > 2) {
-      updated.abzuegeVerunreinigung = (updated.verunreinigung - 2) * 4
-    } else {
-      updated.abzuegeVerunreinigung = 0
-    }
-
-    // Endpreis berechnen
-    const gesamtAbzug = updated.abzuegeFeuchtigkeit + updated.abzuegeProtein + updated.abzuegeVerunreinigung
-    updated.endpreis = updated.basisPreis - gesamtAbzug
-    updated.gesamtbetrag = (updated.nettoGewicht / 1000) * updated.endpreis
-
-    setAbrechnung(updated)
+    const billing = await billingPreview.mutateAsync()
+    await settlementPreview.mutateAsync(billing.billing_weight_kg)
   }
 
-  async function handleSave(): Promise<void> {
-    console.log('Abrechnung speichern:', abrechnung)
-    navigate('/annahme/warteschlange')
+  async function saveSettlement(): Promise<void> {
+    if (!form.supplierId.trim()) {
+      toast({ title: 'Lieferant fehlt', description: 'Bitte supplier_id eingeben.', variant: 'destructive' })
+      return
+    }
+    const billing = billingPreview.data ?? (await billingPreview.mutateAsync())
+    await createSettlement.mutateAsync(billing.billing_weight_kg)
   }
 
-  const istInOrdnung = abrechnung.feuchtigkeit <= 14.5 && abrechnung.verunreinigung <= 2
+  const previewData = settlementPreview.data
+  const billingData = billingPreview.data
+  const qualityOk = form.feuchtigkeit <= 14.5 && form.verunreinigung <= 2
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Annahme-Abrechnung</h1>
-          <p className="text-muted-foreground">Lieferschein {abrechnung.lieferscheinNr}</p>
+          <p className="text-muted-foreground">Self-billing mit Abzugsnachweis und Fibu-Posting</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate('/annahme/warteschlange')}>
-            Abbrechen
+          <Button variant="outline" onClick={() => navigate('/annahme/warteschlange')}>Zurueck</Button>
+          <Button variant="outline" className="gap-2" onClick={() => { void runPreview() }} disabled={billingPreview.isPending || settlementPreview.isPending}>
+            <Calculator className="h-4 w-4" />
+            Vorschau
           </Button>
-          <Button onClick={handleSave} className="gap-2">
+          <Button onClick={() => { void saveSettlement() }} className="gap-2" disabled={createSettlement.isPending}>
             <Save className="h-4 w-4" />
-            Speichern & Beleg drucken
+            Settlement speichern
           </Button>
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Truck className="h-5 w-5" />
-              Lieferdaten
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          <CardHeader><CardTitle className="flex items-center gap-2"><Truck className="h-5 w-5" />Lieferdaten</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
             <div>
-              <Label>Lieferant</Label>
-              <div className="text-lg font-semibold">{abrechnung.lieferant}</div>
+              <Label htmlFor="supplierId">Supplier ID</Label>
+              <Input id="supplierId" value={form.supplierId} onChange={(e) => setForm((p) => ({ ...p, supplierId: e.target.value }))} placeholder="z.B. LW-10001" />
             </div>
             <div>
-              <Label>Artikel</Label>
-              <div className="text-lg font-semibold">{abrechnung.artikel}</div>
+              <Label htmlFor="settlementNumber">Settlement Nummer (optional)</Label>
+              <Input id="settlementNumber" value={form.settlementNumber} onChange={(e) => setForm((p) => ({ ...p, settlementNumber: e.target.value }))} />
             </div>
             <div>
-              <Label>Lieferschein-Nr.</Label>
-              <div className="font-medium">{abrechnung.lieferscheinNr}</div>
+              <Label htmlFor="articleId">Artikel</Label>
+              <Input id="articleId" value={form.articleId} onChange={(e) => setForm((p) => ({ ...p, articleId: e.target.value }))} />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Gewichte (kg)</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="bruttoGewicht">Brutto-Gewicht</Label>
-              <Input
-                id="bruttoGewicht"
-                type="number"
-                value={abrechnung.bruttoGewicht}
-                onChange={(e) => updateField('bruttoGewicht', Number(e.target.value))}
-                min="0"
-              />
-            </div>
-            <div>
-              <Label htmlFor="taraGewicht">Tara-Gewicht (LKW)</Label>
-              <Input
-                id="taraGewicht"
-                type="number"
-                value={abrechnung.taraGewicht}
-                onChange={(e) => updateField('taraGewicht', Number(e.target.value))}
-                min="0"
-              />
-            </div>
-            <div>
-              <Label>Netto-Gewicht (berechnet)</Label>
-              <div className="rounded-md bg-muted p-3 text-lg font-bold">
-                {abrechnung.nettoGewicht.toLocaleString('de-DE')} kg ={' '}
-                {(abrechnung.nettoGewicht / 1000).toFixed(2)} t
+          <CardHeader><CardTitle>Gewicht und Qualitaet</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="bruttoGewicht">Brutto (kg)</Label>
+                <Input id="bruttoGewicht" type="number" value={form.bruttoGewicht} onChange={(e) => setForm((p) => ({ ...p, bruttoGewicht: Number(e.target.value) }))} />
+              </div>
+              <div>
+                <Label htmlFor="taraGewicht">Tara (kg)</Label>
+                <Input id="taraGewicht" type="number" value={form.taraGewicht} onChange={(e) => setForm((p) => ({ ...p, taraGewicht: Number(e.target.value) }))} />
               </div>
             </div>
+            <div className="rounded-md bg-muted p-3 text-sm">Netto: <span className="font-semibold">{nettoGewicht.toLocaleString('de-DE')} kg</span></div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="feuchtigkeit">Feuchtigkeit (%)</Label>
+                <Input id="feuchtigkeit" type="number" step="0.1" value={form.feuchtigkeit} onChange={(e) => setForm((p) => ({ ...p, feuchtigkeit: Number(e.target.value) }))} />
+              </div>
+              <div>
+                <Label htmlFor="verunreinigung">Verunreinigung (%)</Label>
+                <Input id="verunreinigung" type="number" step="0.1" value={form.verunreinigung} onChange={(e) => setForm((p) => ({ ...p, verunreinigung: Number(e.target.value) }))} />
+              </div>
+            </div>
+            <Badge variant={qualityOk ? 'outline' : 'secondary'}>{qualityOk ? 'Qualitaet ok' : 'Abzuege erforderlich'}</Badge>
           </CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calculator className="h-5 w-5" />
-            Qualitätsparameter & Abzüge
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="feuchtigkeit">Feuchtigkeit (%)</Label>
-              <Input
-                id="feuchtigkeit"
-                type="number"
-                value={abrechnung.feuchtigkeit}
-                onChange={(e) => updateField('feuchtigkeit', Number(e.target.value))}
-                step="0.1"
-                min="0"
-                max="100"
-              />
-              <div className="text-sm text-muted-foreground">Soll: {'<'} 14%</div>
-              {abrechnung.feuchtigkeit > 14 && (
-                <div className="text-sm font-semibold text-orange-600">
-                  Abzug: {abrechnung.abzuegeFeuchtigkeit.toFixed(2)} €/t
-                </div>
-              )}
+        <CardHeader><CardTitle className="flex items-center gap-2"><FileText className="h-5 w-5" />Preis und Abzuege</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 md:grid-cols-4">
+            <div>
+              <Label htmlFor="basisPreis">Basispreis (EUR/t)</Label>
+              <Input id="basisPreis" type="number" step="0.01" value={form.basisPreis} onChange={(e) => setForm((p) => ({ ...p, basisPreis: Number(e.target.value) }))} />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="protein">Protein (%)</Label>
-              <Input
-                id="protein"
-                type="number"
-                value={abrechnung.protein}
-                onChange={(e) => updateField('protein', Number(e.target.value))}
-                step="0.1"
-                min="0"
-                max="100"
-              />
-              <div className="text-sm text-muted-foreground">Soll: {'>'} 12%</div>
+            <div>
+              <Label htmlFor="dryingRate">Trocknung (EUR/t)</Label>
+              <Input id="dryingRate" type="number" step="0.01" value={form.dryingRate} onChange={(e) => setForm((p) => ({ ...p, dryingRate: Number(e.target.value) }))} />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="verunreinigung">Verunreinigung (%)</Label>
-              <Input
-                id="verunreinigung"
-                type="number"
-                value={abrechnung.verunreinigung}
-                onChange={(e) => updateField('verunreinigung', Number(e.target.value))}
-                step="0.1"
-                min="0"
-                max="100"
-              />
-              <div className="text-sm text-muted-foreground">Soll: {'<'} 2%</div>
-              {abrechnung.verunreinigung > 2 && (
-                <div className="text-sm font-semibold text-orange-600">
-                  Abzug: {abrechnung.abzuegeVerunreinigung.toFixed(2)} €/t
-                </div>
-              )}
+            <div>
+              <Label htmlFor="cleaningRate">Reinigung (EUR/t)</Label>
+              <Input id="cleaningRate" type="number" step="0.01" value={form.cleaningRate} onChange={(e) => setForm((p) => ({ ...p, cleaningRate: Number(e.target.value) }))} />
+            </div>
+            <div>
+              <Label htmlFor="freightFixed">Fracht fix (EUR)</Label>
+              <Input id="freightFixed" type="number" step="0.01" value={form.freightFixed} onChange={(e) => setForm((p) => ({ ...p, freightFixed: Number(e.target.value) }))} />
             </div>
           </div>
+
+          {billingData && (
+            <div className="rounded border p-3 text-sm">
+              Abrechnungsgewicht: <span className="font-semibold">{billingData.billing_weight_kg.toLocaleString('de-DE')} kg</span>
+              {' | '}Abzug: <span className="font-semibold">{billingData.deduction_kg.toLocaleString('de-DE')} kg</span>
+            </div>
+          )}
+
+          {previewData && (
+            <div className="rounded border bg-muted/40 p-4">
+              <div className="flex justify-between"><span>Bruttobetrag</span><span className="font-semibold">{money(previewData.gross_amount_eur)}</span></div>
+              <div className="flex justify-between text-orange-700"><span>Abzuege gesamt</span><span className="font-semibold">{money(previewData.total_deductions_eur)}</span></div>
+              <div className="mt-2 flex justify-between border-t pt-2 text-lg"><span className="font-bold">Nettobetrag</span><span className="font-bold">{money(previewData.net_amount_eur)}</span></div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Preisberechnung
-          </CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle>Bestehende Settlements</CardTitle></CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="basisPreis">Basispreis (€/t)</Label>
-                <Input
-                  id="basisPreis"
-                  type="number"
-                  value={abrechnung.basisPreis}
-                  onChange={(e) => updateField('basisPreis', Number(e.target.value))}
-                  step="0.01"
-                  min="0"
-                />
-              </div>
-              <div>
-                <Label>Qualitätsstatus</Label>
-                <div className="mt-2">
-                  <Badge variant={istInOrdnung ? 'outline' : 'secondary'}>
-                    {istInOrdnung ? '✓ Qualität in Ordnung' : '⚠ Abzüge erforderlich'}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-lg border-2 border-dashed bg-muted/50 p-6">
-              <dl className="grid gap-3 text-lg">
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Basispreis:</dt>
-                  <dd className="font-semibold">
-                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
-                      abrechnung.basisPreis
-                    )}
-                    /t
-                  </dd>
-                </div>
-                {abrechnung.abzuegeFeuchtigkeit > 0 && (
-                  <div className="flex justify-between text-orange-600">
-                    <dt>- Abzug Feuchtigkeit:</dt>
-                    <dd className="font-semibold">
-                      {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
-                        abrechnung.abzuegeFeuchtigkeit
-                      )}
-                      /t
-                    </dd>
+          {isLoading && <div className="text-sm text-muted-foreground">Lade Settlements...</div>}
+          {isError && <ErrorState error={(error as Error) ?? new Error('Settlements konnten nicht geladen werden')} onRetry={() => { void refetch() }} />}
+          {!isLoading && !isError && (
+            <div className="space-y-3">
+              {(settlements ?? []).length === 0 && <div className="text-sm text-muted-foreground">Keine Settlements vorhanden.</div>}
+              {(settlements ?? []).map((s) => (
+                <div key={s.id} className="rounded border p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="font-semibold">{s.settlement_number}</div>
+                    <Badge variant={s.status === 'posted' ? 'outline' : 'secondary'}>{s.status}</Badge>
                   </div>
-                )}
-                {abrechnung.abzuegeVerunreinigung > 0 && (
-                  <div className="flex justify-between text-orange-600">
-                    <dt>- Abzug Verunreinigung:</dt>
-                    <dd className="font-semibold">
-                      {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
-                        abrechnung.abzuegeVerunreinigung
-                      )}
-                      /t
-                    </dd>
+                  <div className="mt-1 text-sm text-muted-foreground">
+                    Lieferant: {s.supplier_id} | Netto: {money(s.net_amount_eur)} | Abzuege: {money(s.total_deductions_eur)}
                   </div>
-                )}
-                <div className="flex justify-between border-t pt-3 text-xl">
-                  <dt className="font-bold">Endpreis:</dt>
-                  <dd className="font-bold text-green-600">
-                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
-                      abrechnung.endpreis
-                    )}
-                    /t
-                  </dd>
+                  {s.deductions.length > 0 && (
+                    <div className="mt-2 space-y-1 text-sm">
+                      {s.deductions.map((d) => (
+                        <div key={d.id} className="flex justify-between">
+                          <span>{d.deduction_type} ({d.mode})</span>
+                          <span className="font-semibold">{money(d.amount_eur)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {s.status === 'draft' && (
+                    <div className="mt-3">
+                      <Button size="sm" variant="outline" onClick={() => { void postSettlement.mutateAsync(s.id) }} disabled={postSettlement.isPending}>
+                        In Fibu buchen
+                      </Button>
+                    </div>
+                  )}
+                  {s.posted_journal_ref && (
+                    <div className="mt-2 text-xs text-muted-foreground">Journal: {s.posted_journal_ref}</div>
+                  )}
                 </div>
-                <div className="flex justify-between border-t pt-3 text-2xl">
-                  <dt className="font-bold">Gesamtbetrag:</dt>
-                  <dd className="font-bold">
-                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
-                      abrechnung.gesamtbetrag
-                    )}
-                  </dd>
-                </div>
-              </dl>
+              ))}
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>
