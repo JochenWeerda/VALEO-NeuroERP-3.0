@@ -3,7 +3,8 @@ Weighing tickets endpoints (l3c-wiegeschein)
 GET/POST/PUT for weighing tickets.
 """
 
-from typing import Optional
+from datetime import datetime
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -25,6 +26,14 @@ class WeighingTicketOut(BaseSchema):
     gross_weight: Optional[float] = None
     tare_weight: Optional[float] = None
     net_weight: Optional[float] = None
+    first_weighing_at: Optional[datetime] = None
+    second_weighing_at: Optional[datetime] = None
+    moisture_pct: Optional[float] = None
+    protein_pct: Optional[float] = None
+    impurities_pct: Optional[float] = None
+    hl_weight: Optional[float] = None
+    billing_weight: Optional[float] = None
+    quality_data: Optional[dict[str, Any]] = None
     status: str = "open"
     direction: str = "in"
     reference_doc: Optional[str] = None
@@ -37,6 +46,14 @@ class WeighingTicketCreate(BaseModel):
     gross_weight: Optional[float] = None
     tare_weight: Optional[float] = None
     net_weight: Optional[float] = None
+    first_weighing_at: Optional[datetime] = None
+    second_weighing_at: Optional[datetime] = None
+    moisture_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    protein_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    impurities_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    hl_weight: Optional[float] = Field(default=None, ge=0)
+    billing_weight: Optional[float] = Field(default=None, ge=0)
+    quality_data: Optional[dict[str, Any]] = None
     direction: str = "in"
     reference_doc: Optional[str] = None
 
@@ -45,8 +62,34 @@ class WeighingTicketUpdate(BaseModel):
     gross_weight: Optional[float] = None
     tare_weight: Optional[float] = None
     net_weight: Optional[float] = None
+    first_weighing_at: Optional[datetime] = None
+    second_weighing_at: Optional[datetime] = None
+    moisture_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    protein_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    impurities_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    hl_weight: Optional[float] = Field(default=None, ge=0)
+    billing_weight: Optional[float] = Field(default=None, ge=0)
+    quality_data: Optional[dict[str, Any]] = None
     status: Optional[str] = None
     vehicle_plate: Optional[str] = None
+
+
+def _validate_and_compute_weights(gross_weight: Optional[float], tare_weight: Optional[float], net_weight: Optional[float]) -> float | None:
+    if gross_weight is not None and gross_weight < 0:
+        raise HTTPException(status_code=400, detail="gross_weight must be >= 0")
+    if tare_weight is not None and tare_weight < 0:
+        raise HTTPException(status_code=400, detail="tare_weight must be >= 0")
+    if net_weight is not None and net_weight < 0:
+        raise HTTPException(status_code=400, detail="net_weight must be >= 0")
+
+    if gross_weight is not None and tare_weight is not None:
+        if gross_weight < tare_weight:
+            raise HTTPException(status_code=400, detail="gross_weight must be >= tare_weight")
+        computed = float(gross_weight - tare_weight)
+        if net_weight is not None and abs(float(net_weight) - computed) > 0.001:
+            raise HTTPException(status_code=400, detail="net_weight does not match gross_weight - tare_weight")
+        return computed
+    return net_weight
 
 
 @router.get("/", response_model=PaginatedResponse[WeighingTicketOut])
@@ -86,7 +129,15 @@ async def create_weighing_ticket(
         vehicle_plate=payload.vehicle_plate,
         gross_weight=payload.gross_weight,
         tare_weight=payload.tare_weight,
-        net_weight=payload.net_weight,
+        net_weight=_validate_and_compute_weights(payload.gross_weight, payload.tare_weight, payload.net_weight),
+        first_weighing_at=payload.first_weighing_at,
+        second_weighing_at=payload.second_weighing_at,
+        moisture_pct=payload.moisture_pct,
+        protein_pct=payload.protein_pct,
+        impurities_pct=payload.impurities_pct,
+        hl_weight=payload.hl_weight,
+        billing_weight=payload.billing_weight,
+        quality_data=payload.quality_data,
         direction=payload.direction,
         reference_doc=payload.reference_doc,
         tenant_id=tid,
@@ -107,7 +158,13 @@ async def update_weighing_ticket(
     ticket = db.query(WeighingTicket).filter(WeighingTicket.id == ticket_id).first()
     if not ticket:
         raise HTTPException(404, "Weighing ticket not found")
-    for field, val in payload.model_dump(exclude_unset=True).items():
+    data = payload.model_dump(exclude_unset=True)
+    gross_weight = data.get("gross_weight", ticket.gross_weight)
+    tare_weight = data.get("tare_weight", ticket.tare_weight)
+    net_weight = data.get("net_weight", ticket.net_weight)
+    data["net_weight"] = _validate_and_compute_weights(gross_weight, tare_weight, net_weight)
+
+    for field, val in data.items():
         setattr(ticket, field, val)
     db.commit()
     db.refresh(ticket)
