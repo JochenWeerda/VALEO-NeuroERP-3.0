@@ -1,7 +1,7 @@
 import pytest
 from fastapi import HTTPException
 
-from app.api.v1.endpoints.weighing_tickets import _validate_and_compute_weights
+from app.api.v1.endpoints.weighing_tickets import _derive_billing_weight, _validate_and_compute_weights
 
 
 def test_validate_and_compute_weights_success():
@@ -17,4 +17,16 @@ def test_validate_and_compute_weights_rejects_negative_values():
 def test_validate_and_compute_weights_rejects_inconsistent_net():
     with pytest.raises(HTTPException):
         _validate_and_compute_weights(100.0, 20.0, 70.0)
+
+
+def test_derive_billing_weight_from_moisture_engine():
+    billing = _derive_billing_weight(
+        net_weight=10000.0,
+        billing_weight=None,
+        moisture_pct=18.0,
+        impurities_pct=3.0,
+        quality_data={"target_moisture_pct": 14.0, "base_impurities_pct": 2.0},
+    )
+    assert billing is not None
+    assert billing < 10000.0
 
