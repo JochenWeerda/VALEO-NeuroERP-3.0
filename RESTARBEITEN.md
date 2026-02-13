@@ -134,9 +134,9 @@
 - Gutschrift endet in validen Buchungen inkl. Einzelabzügen.
 
 ### Woche 9 (13.04-17.04): EPIC AGRAR-SET-02 Schwund-/Feuchte-Engine
-- [ ] Story AGRAR-SET-02-01: Domain-Service für Feuchtekorrektur/Heine-Logik.
-- [ ] Story AGRAR-SET-02-02: Abrechnungsgewicht als explizites Feld führen.
-- [ ] Story AGRAR-SET-02-03: Testfälle für Grenzwerte und negative Pfade.
+- [x] Story AGRAR-SET-02-01: Domain-Service für Feuchtekorrektur/Heine-Logik.
+- [x] Story AGRAR-SET-02-02: Abrechnungsgewicht als explizites Feld führen.
+- [x] Story AGRAR-SET-02-03: Testfälle für Grenzwerte und negative Pfade.
 - Akzeptanzkriterien:
 - Formelpfad deterministisch, testabgedeckt, keine SQL- oder UI-Formellogik.
 
@@ -213,7 +213,7 @@
 
 ### Sprint 4 (04.04-17.04) Abrechnung + Physiklogik
 - [x] `AGRAR-SET-01` Self-Billing inkl. Abzüge | P0 | L | Backend
-- [ ] `AGRAR-SET-02` Feuchte-/Schwund-Engine im Domain-Service | P0 | M | Backend
+- [x] `AGRAR-SET-02` Feuchte-/Schwund-Engine im Domain-Service | P0 | M | Backend
 - [ ] `AGRAR-SET-UI-01` Gutschrift-Ansicht inkl. Abzugsnachweis | P1 | M | Frontend
 
 ### Sprint 5 (18.04-01.05) Compliance + Migration
