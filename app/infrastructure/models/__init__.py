@@ -373,6 +373,8 @@ from .l3c_models import (
     WeighingTicket,
     WeighingTicketLine,
     WeighingMeasurement,
+    AgrarContract,
+    AgrarContractAllocation,
     WarehouseTransfer,
     WarehouseTransferLine,
     StockCorrection,
