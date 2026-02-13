@@ -106,9 +106,9 @@
 - Persistente Wiegescheine mit Audit-Trail, API ohne Mock/Fallback.
 
 ### Woche 5 (16.03-20.03): EPIC AGRAR-CT-01 Kontrakte MVP
-- [ ] Story AGRAR-CT-01-01: Tabellen `contracts`, `contract_allocations`, `pricing_model`.
-- [ ] Story AGRAR-CT-01-02: Open-Quantity-Logik (Restmenge) implementieren.
-- [ ] Story AGRAR-CT-01-03: Kontrakt-CRUD + Statusmaschine (offen, teilgelöscht, erfüllt).
+- [x] Story AGRAR-CT-01-01: Tabellen `contracts`, `contract_allocations`, `pricing_model`.
+- [x] Story AGRAR-CT-01-02: Open-Quantity-Logik (Restmenge) implementieren.
+- [x] Story AGRAR-CT-01-03: Kontrakt-CRUD + Statusmaschine (offen, teilgelöscht, erfüllt).
 - Akzeptanzkriterien:
 - Restmenge wird korrekt geführt, invalides Überbuchen wird geblockt.
 
@@ -203,7 +203,7 @@
 
 ### Sprint 2 (28.02-20.03) Wiegeschein + Kontrakt-Basis
 - [x] `AGRAR-WG-01` Wiegeschein-Datenmodell + CRUD | P0 | L | Backend
-- [ ] `AGRAR-CT-01` Kontrakte + Restmengenlogik | P0 | L | Backend
+- [x] `AGRAR-CT-01` Kontrakte + Restmengenlogik | P0 | L | Backend
 - [ ] `AGRAR-WG-UI-01` Wiegeschein-Erfassung UI (ohne Mock) | P1 | M | Frontend
 
 ### Sprint 3 (21.03-03.04) Löschlogik + Silo/Partie

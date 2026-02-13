@@ -60,3 +60,4 @@ from . import sales_shipping_ext
 from . import master_data
 from . import compat
 from . import modules
+from . import agrar_contracts

@@ -93,6 +93,46 @@ class WeighingMeasurement(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
+class AgrarContract(Base):
+    """Agrar contract (buy/sell) with quantity tracking."""
+    __tablename__ = "agrar_contracts"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    contract_number = Column(String(50), nullable=False)
+    contract_type = Column(String(10), nullable=False)  # buy / sell
+    harvest_year = Column(Integer, nullable=False)
+    partner_id = Column(String(64), nullable=False)
+    article_id = Column(String(64), nullable=False)
+    pricing_model = Column(String(10), nullable=False)  # fixed / follow / pool
+    pool_group_id = Column(String(64), nullable=True)
+    fixed_price = Column(DECIMAL(12, 2), nullable=True)
+    currency = Column(String(3), nullable=False, default="EUR")
+    total_quantity_kg = Column(DECIMAL(12, 3), nullable=False)
+    remaining_quantity_kg = Column(DECIMAL(12, 3), nullable=False)
+    status = Column(String(20), nullable=False, default="open")  # open / partially_allocated / fulfilled / cancelled
+    valid_from = Column(DateTime(timezone=True), nullable=True)
+    valid_until = Column(DateTime(timezone=True), nullable=True)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class AgrarContractAllocation(Base):
+    """Allocation entries against an agrar contract."""
+    __tablename__ = "agrar_contract_allocations"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    contract_id = Column(String, ForeignKey("domain_inventory.agrar_contracts.id"), nullable=False)
+    ticket_id = Column(String, ForeignKey("domain_inventory.weighing_tickets.id"), nullable=True)
+    allocation_quantity_kg = Column(DECIMAL(12, 3), nullable=False)
+    allocated_at = Column(DateTime(timezone=True), server_default=func.now())
+    note = Column(Text, nullable=True)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 # ── Warehouse Transfers ──────────────────────────────────────────
 
 class WarehouseTransfer(Base):
