@@ -794,6 +794,15 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         mcp: { businessDomain: 'compliance', scope: 'compliance:read' },
       },
       {
+        id: 'export-pruefprotokoll',
+        label: 'Export-Protokoll',
+        icon: FileText,
+        module: '@/pages/compliance/export-pruefprotokoll',
+        path: '/compliance/export-pruefprotokoll',
+        keywords: ['export', 'gefahrstoff', 'naehrstoff', 'trace'],
+        mcp: { businessDomain: 'compliance', scope: 'compliance:read' },
+      },
+      {
         id: 'eudr',
         label: 'EUDR-Compliance',
         icon: Leaf,
