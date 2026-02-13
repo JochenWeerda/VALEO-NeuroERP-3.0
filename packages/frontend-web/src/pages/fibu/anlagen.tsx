@@ -7,12 +7,13 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Building2, FileDown, Plus, Search } from 'lucide-react'
-import { useAnlagenMock, type AnlageMock } from '@/lib/api/fibu'
+import { useAnlagenDetail, type AnlageDetail } from '@/lib/api/fibu'
+import { ErrorState } from '@/components/ErrorState'
 
 export default function AnlagenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: items, isLoading } = useAnlagenMock()
+  const { data: items, isLoading, isError, error, refetch } = useAnlagenDetail()
 
   if (isLoading) return (
     <div className="p-3 md:p-6 space-y-4">
@@ -21,39 +22,43 @@ export default function AnlagenPage(): JSX.Element {
     </div>
   )
 
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
   const list = items ?? []
 
   const columns = [
     {
       key: 'anlagennr' as const,
       label: 'Anlagen-Nr',
-      render: (a: AnlageMock) => (
+      render: (a: AnlageDetail) => (
         <button onClick={() => navigate(`/fibu/anlage/${a.id}`)} className="font-medium text-blue-600 hover:underline font-mono">
           {a.anlagennr}
         </button>
       ),
     },
-    { key: 'bezeichnung' as const, label: 'Bezeichnung', render: (a: AnlageMock) => <span className="font-semibold">{a.bezeichnung}</span> },
-    { key: 'anschaffung' as const, label: 'Anschaffung', render: (a: AnlageMock) => new Date(a.anschaffung).toLocaleDateString('de-DE') },
+    { key: 'bezeichnung' as const, label: 'Bezeichnung', render: (a: AnlageDetail) => <span className="font-semibold">{a.bezeichnung}</span> },
+    { key: 'anschaffung' as const, label: 'Anschaffung', render: (a: AnlageDetail) => new Date(a.anschaffung).toLocaleDateString('de-DE') },
     {
       key: 'anschaffungswert' as const,
       label: 'AK',
-      render: (a: AnlageMock) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(a.anschaffungswert),
+      render: (a: AnlageDetail) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(a.anschaffungswert),
     },
     {
       key: 'afaSatz' as const,
       label: 'AfA',
-      render: (a: AnlageMock) => <Badge variant="outline">{a.afaSatz}%</Badge>,
+      render: (a: AnlageDetail) => <Badge variant="outline">{a.afaSatz}%</Badge>,
     },
     {
       key: 'kumulierteAfa' as const,
       label: 'Kum. AfA',
-      render: (a: AnlageMock) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(a.kumulierteAfa),
+      render: (a: AnlageDetail) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(a.kumulierteAfa),
     },
     {
       key: 'buchwert' as const,
       label: 'Buchwert',
-      render: (a: AnlageMock) => (
+      render: (a: AnlageDetail) => (
         <span className="font-bold">
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(a.buchwert)}
         </span>

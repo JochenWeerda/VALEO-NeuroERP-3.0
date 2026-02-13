@@ -5,15 +5,15 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Bell, CheckCircle } from 'lucide-react'
-
-const mockBenachrichtigungen: Benachrichtigung[] = [
-  { id: '1', titel: 'Neue Bestellung eingegangen', nachricht: 'PO-2025-042 von Saatgut AG', typ: 'info', zeitstempel: '2025-10-11 14:32', gelesen: false },
-  { id: '2', titel: 'Qualitaetspruefung erforderlich', nachricht: 'Charge 251011-WEI-001', typ: 'warnung', zeitstempel: '2025-10-11 13:15', gelesen: false },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function BenachrichtigungenPage(): JSX.Element {
   const [_searchTerm, _setSearchTerm] = useState('')
-  const { data: benachrichtigungen = mockBenachrichtigungen } = useBenachrichtigungen()
+  const { data: benachrichtigungen = [], isError, error, refetch } = useBenachrichtigungen()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     { key: 'titel' as const, label: 'Titel', render: (b: Benachrichtigung) => <div><div className={`font-medium ${!b.gelesen ? 'font-bold' : ''}`}>{b.titel}</div><div className="text-sm text-muted-foreground">{b.nachricht}</div></div> },

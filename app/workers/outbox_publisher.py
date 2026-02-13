@@ -9,6 +9,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from ..core.database import SessionLocal
+from ..core.config import settings
 from ..infrastructure.eventbus.outbox import OutboxPublisher
 from ..domains.shared.events import get_event_publisher
 
@@ -66,7 +67,9 @@ def get_outbox_worker() -> OutboxPublisherWorker:
     """Get the global outbox worker instance."""
     global _outbox_worker
     if _outbox_worker is None:
-        _outbox_worker = OutboxPublisherWorker()
+        _outbox_worker = OutboxPublisherWorker(
+            interval_seconds=max(1, int(getattr(settings, "OUTBOX_WORKER_INTERVAL_SECONDS", 5)))
+        )
     return _outbox_worker
 
 

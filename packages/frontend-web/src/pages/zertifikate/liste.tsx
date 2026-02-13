@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useZertifikateListe, type Zertifikat } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -6,19 +6,46 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, Award, FileDown, Plus, Search } from 'lucide-react'
-
-const mockZertifikate: Zertifikat[] = [
-  { id: '1', art: 'Bio-Zertifikat', standard: 'EU-Bio-Verordnung', nummer: 'BIO-2024-1234', gueltigBis: '2026-03-31', audit: '2025-02-15', status: 'gueltig' },
-  { id: '2', art: 'QS-Zertifikat', standard: 'QS Qualitaet & Sicherheit', nummer: 'QS-2024-5678', gueltigBis: '2025-12-31', audit: '2025-11-01', status: 'gueltig' },
-]
 
 export default function ZertifikateListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: zertifikate = mockZertifikate } = useZertifikateListe()
+  const { data: zertifikate = [], isLoading } = useZertifikateListe()
 
-  const ablaufend = zertifikate.filter((z) => new Date(z.gueltigBis) < new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) && z.status === 'gueltig').length
+  const filteredZertifikate = useMemo(() => {
+    if (!searchTerm) return zertifikate
+    const term = searchTerm.toLowerCase()
+    return zertifikate.filter(z => 
+      z.art?.toLowerCase().includes(term) ||
+      z.standard?.toLowerCase().includes(term) ||
+      z.nummer?.toLowerCase().includes(term)
+    )
+  }, [zertifikate, searchTerm])
+
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32 mt-2" />
+          </div>
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+        </div>
+        <Card><CardContent className="pt-4"><Skeleton className="h-64 w-full" /></CardContent></Card>
+      </div>
+    )
+  }
+
+  const ablaufend = filteredZertifikate.filter((z) => new Date(z.gueltigBis) < new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) && z.status === 'gueltig').length
 
   const columns = [
     { key: 'art' as const, label: 'Zertifikat', render: (z: Zertifikat) => <button onClick={() => navigate(`/zertifikate/${z.id}`)} className="font-medium text-blue-600 hover:underline">{z.art}</button> },

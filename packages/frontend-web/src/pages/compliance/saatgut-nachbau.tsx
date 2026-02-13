@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, Plus, Search } from 'lucide-react'
-
-const mockNachbau: SaatgutNachbau[] = [
-  { id: '1', betrieb: 'Landwirtschaft Mueller', sorte: 'Weichweizen Eltan', kultur: 'Weichweizen', flaeche: 45.5, erntejahr: 2024, gebuehr: 682.5, status: 'bezahlt' },
-  { id: '2', betrieb: 'Hofgut Weber', sorte: 'Wintergerste KWS Orbit', kultur: 'Wintergerste', flaeche: 32.0, erntejahr: 2024, gebuehr: 480.0, status: 'offen' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function SaatgutNachbauPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: nachbau = mockNachbau } = useSaatgutNachbau()
+  const { data: nachbau = [], isError, error, refetch } = useSaatgutNachbau()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     {

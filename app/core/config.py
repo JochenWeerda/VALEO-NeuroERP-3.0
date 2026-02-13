@@ -79,6 +79,13 @@ class Settings(BaseSettings):
     ENABLE_TRACING: bool = False
     ENABLE_CACHE: bool = True
 
+    # Event Bus / Outbox
+    EVENT_BUS_ENABLED: bool = False
+    EVENT_BUS_PROVIDER: str = "memory"  # memory | nats
+    EVENT_BUS_NATS_URL: str = "nats://localhost:4222"
+    OUTBOX_WORKER_ENABLED: bool = True
+    OUTBOX_WORKER_INTERVAL_SECONDS: int = 5
+
     # Downstream CRM services
     CRM_CORE_BASE_URL: str = "http://localhost:5600"
     CRM_CORE_HTTP_TIMEOUT_SECONDS: float = 5.0

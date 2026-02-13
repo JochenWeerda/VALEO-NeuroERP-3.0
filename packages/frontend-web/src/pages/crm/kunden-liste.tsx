@@ -1,17 +1,13 @@
-import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
-import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { apiClient } from '@/lib/api-client'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
-
-// API Client für Kunden
-const apiClient = createApiClient('/api/crm')
 
 // Konfiguration für Kunden ListReport (wird in Komponente mit i18n erstellt)
 const createKundenListConfig = (t: any, entityTypeLabel: string): ListConfig => ({
@@ -224,65 +220,57 @@ const createKundenListConfig = (t: any, entityTypeLabel: string): ListConfig => 
 export default function KundenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const entityType = 'customer'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kunde')
   const kundenListConfig = createKundenListConfig(t, entityTypeLabel)
 
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
-    if (action === 'edit' && item) {
-      navigate(`/crm/kunden/stamm/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
-        try {
-          await apiClient.delete(`/kunden/${item.id}`)
-          loadData() // Liste neu laden
-        } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.deleteError', { entityType: entityTypeLabel })
-          })
+  const { data: queryData, isLoading } = useQuery({
+    queryKey: ['crm', 'kunden'],
+    queryFn: async () => {
+      try {
+        const r = await apiClient.get('/api/crm/kunden')
+        if (r.data) {
+          const raw = r.data as any
+          const items = raw.data || (Array.isArray(raw) ? raw : [])
+          const total = raw.total || items.length
+          return { items, total }
         }
-      }
-    }
+      } catch { /* API nicht erreichbar */ }
+      return { items: [], total: 0 }
+    },
+    staleTime: 2 * 60 * 1000,
   })
 
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const response = await apiClient.get('/kunden')
-      if (response.success) {
-        setData((response.data as any).data || [])
-        setTotal((response.data as any).total || 0)
-      }
-    } catch (_error) {
-      // API nicht erreichbar - stille Fehlerbehandlung
-    } finally {
-      setLoading(false)
-    }
-  }
+  const data = queryData?.items || []
+  const total = queryData?.total || 0
 
-  useEffect(() => {
-    loadData()
-  }, [])
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'kunden'] })
 
   const handleCreate = () => {
     navigate('/crm/kunden/stamm/new')
   }
 
   const handleEdit = (item: any) => {
-    handleAction('edit', item)
+    navigate(`/crm/kunden/stamm/${item.id}`)
   }
 
-  const handleDelete = (item: any) => {
-    handleAction('delete', item)
+  const handleDelete = async (item: any) => {
+    if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
+      try {
+        await apiClient.delete(`/api/crm/kunden/${item.id}`)
+        invalidate()
+      } catch {
+        toast({
+          variant: 'destructive',
+          title: t('crud.messages.deleteError', { entityType: entityTypeLabel })
+        })
+      }
+    }
   }
 
   const handleExport = () => {
     try {
-      // Create CSV content
       const csvHeader = `${t('crud.fields.company')};${t('crud.fields.city')};${t('crud.fields.phone')};${t('crud.fields.email')};${t('crud.fields.totalRevenue')};${t('crud.fields.status')}\n`
       const csvContent = data.map((customer: any) =>
         `"${customer.firma || `${customer.vorname} ${customer.nachname}`}";"${customer.plz} ${customer.ort}";"${customer.telefon || ''}";"${customer.email || ''}";"${customer.umsatzGesamt || 0}";"${t(`status.${customer.status || 'active'}`, { defaultValue: customer.status || 'aktiv' })}"`
@@ -290,7 +278,6 @@ export default function KundenListePage(): JSX.Element {
 
       const csv = csvHeader + csvContent
 
-      // Create and download file
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
@@ -305,7 +292,7 @@ export default function KundenListePage(): JSX.Element {
         title: t('crud.messages.exportSuccess'),
         description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
       })
-    } catch (error) {
+    } catch {
       toast({
         variant: 'destructive',
         title: t('crud.messages.exportError'),
@@ -324,7 +311,7 @@ export default function KundenListePage(): JSX.Element {
       onDelete={handleDelete}
       onExport={handleExport}
       onImport={() => alert(t('crud.messages.importFunctionInfo'))}
-      isLoading={loading}
+      isLoading={isLoading}
     />
   )
 }

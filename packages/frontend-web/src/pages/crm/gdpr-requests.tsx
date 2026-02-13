@@ -1,17 +1,14 @@
-import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
-import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel, getStatusLabel, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
-
-// API Client
-const apiClient = createApiClient('/api/crm-gdpr')
+import { ErrorState } from '@/components/ErrorState'
 
 // Konfiguration für GDPR-Requests ListReport
 const createGDPRRequestsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
@@ -161,25 +158,43 @@ const createGDPRRequestsConfig = (t: any, entityTypeLabel: string): ListConfig =
 export default function GDPRRequestsPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const entityType = 'gdprRequest'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'DSGVO-Anfrage')
   const gdprRequestsConfig = createGDPRRequestsConfig(t, entityTypeLabel)
 
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
+  const { data: queryData, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['crm', 'gdpr-requests'],
+    queryFn: async () => {
+      const r = await apiClient.get('/api/crm-gdpr/gdpr/requests')
+      const raw = r.data as any
+      const items = Array.isArray(raw) ? raw : (raw.data || [])
+      return { items, total: items.length }
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const data = queryData?.items || []
+  const total = queryData?.total || 0
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'gdpr-requests'] })
+
+  const handleAction = async (action: string, item: any) => {
     if (action === 'edit' && item) {
       navigate(`/crm/gdpr-request/${item.id}`)
     } else if (action === 'delete' && item) {
       if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {
-          await apiClient.delete(`/gdpr/requests/${item.id}`)
+          await apiClient.delete(`/api/crm-gdpr/gdpr/requests/${item.id}`)
           toast({
             title: getSuccessMessage(t, 'delete', entityType),
           })
-          loadData()
-        } catch (error) {
+          invalidate()
+        } catch {
           toast({
             variant: 'destructive',
             title: getErrorMessage(t, 'delete', entityType),
@@ -187,36 +202,7 @@ export default function GDPRRequestsPage(): JSX.Element {
         }
       }
     }
-  })
-
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const response = await apiClient.get('/gdpr/requests', {
-        params: {
-          tenant_id: '00000000-0000-0000-0000-000000000001' // TODO: Get from auth context
-        }
-      })
-      
-      if (response.success) {
-        const items = response.data || []
-        setData(items)
-        setTotal(items.length)
-      }
-    } catch {
-      // Silent error handling - toast notification already shown
-      toast({
-        variant: 'destructive',
-        title: t('crud.messages.loadError')
-      })
-    } finally {
-      setLoading(false)
-    }
   }
-
-  useEffect(() => {
-    loadData()
-  }, [])
 
   const handleCreate = () => {
     navigate('/crm/gdpr-request/new')
@@ -244,7 +230,7 @@ export default function GDPRRequestsPage(): JSX.Element {
         title: t('crud.messages.exportSuccess'),
         description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
       })
-    } catch (error) {
+    } catch {
       toast({
         variant: 'destructive',
         title: t('crud.messages.exportError'),
@@ -257,11 +243,10 @@ export default function GDPRRequestsPage(): JSX.Element {
       config={gdprRequestsConfig}
       data={data}
       total={total}
-      loading={loading}
+      loading={isLoading}
       onAction={handleAction}
       onCreate={handleCreate}
       onExport={handleExport}
     />
   )
 }
-

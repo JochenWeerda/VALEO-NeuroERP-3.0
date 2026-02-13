@@ -5,38 +5,30 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, Award, FileDown, Plus, Search, CheckCircle, XCircle } from 'lucide-react'
 import { usePSMSachkundeRegister, type PSMSachkundeNachweis } from '@/lib/api/agrar'
-
-const mockPSMSachkunde: PSMSachkundeNachweis[] = [
-  {
-    id: '1',
-    kunde: 'Landwirtschaft Mueller',
-    kundennr: 'K-10023',
-    nachweisNr: 'SK-PSM-2022-4567',
-    ausstellungsdatum: '2022-03-15',
-    gueltigBis: '2025-03-15',
-    ausstellendeStelle: 'LWK Niedersachsen',
-    status: 'ablaufend',
-    complianceStatus: 'warning',
-  },
-  {
-    id: '2',
-    kunde: 'Hofgut Weber',
-    kundennr: 'K-10045',
-    nachweisNr: 'SK-PSM-2023-8901',
-    ausstellungsdatum: '2023-06-20',
-    gueltigBis: '2026-06-20',
-    ausstellendeStelle: 'LWK Niedersachsen',
-    status: 'gueltig',
-    complianceStatus: 'compliant',
-  },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function PSMSachkundeRegisterPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: nachweise = mockPSMSachkunde } = usePSMSachkundeRegister()
+  const { data, isLoading, isError, error, refetch } = usePSMSachkundeRegister()
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const nachweise: PSMSachkundeNachweis[] = data ?? []
 
   const ablaufend = useMemo(() => {
     const warnung = new Date()

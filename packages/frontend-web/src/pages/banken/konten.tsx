@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBankkonten, type BankKonto } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -6,17 +6,49 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Building2, Euro, FileDown, Plus, Search } from 'lucide-react'
-
-const mockKonten: BankKonto[] = [
-  { id: '1', iban: 'DE89 3704 0044 0532 0130 00', bank: 'Commerzbank', kontoart: 'Girokonto', saldo: 285000, status: 'aktiv' },
-  { id: '2', iban: 'DE89 1234 5678 9012 3456 78', bank: 'Sparkasse', kontoart: 'Tagesgeld', saldo: 150000, status: 'aktiv' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function BankkontenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: konten = mockKonten } = useBankkonten()
+  const { data: konten = [], isLoading, isError, error, refetch } = useBankkonten()
+
+  const filteredKonten = useMemo(() => {
+    if (!searchTerm) return konten
+    const term = searchTerm.toLowerCase()
+    return konten.filter(k => 
+      k.bank?.toLowerCase().includes(term) ||
+      k.iban?.toLowerCase().includes(term) ||
+      k.kontoart?.toLowerCase().includes(term)
+    )
+  }, [konten, searchTerm])
+
+  const gesamtSaldo = filteredKonten.reduce((sum, k) => sum + (k.saldo || 0), 0)
+
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32 mt-2" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+        </div>
+        <Card><CardContent className="pt-4"><Skeleton className="h-64 w-full" /></CardContent></Card>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     {
@@ -49,8 +81,6 @@ export default function BankkontenPage(): JSX.Element {
       ),
     },
   ]
-
-  const gesamtSaldo = konten.reduce((sum, k) => sum + k.saldo, 0)
 
   return (
     <div className="space-y-4 p-6">
@@ -122,7 +152,7 @@ export default function BankkontenPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={konten} columns={columns} />
+          <DataTable data={filteredKonten} columns={columns} />
         </CardContent>
       </Card>
     </div>

@@ -6,15 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { AlertTriangle, FileDown, Search, ShieldCheck } from 'lucide-react'
-
-const mockZulassungen: Zulassung[] = [
-  { id: '1', produkt: 'Roundup PowerFlex', typ: 'PSM', nummer: '024567-00', behoerde: 'BVL', gueltigBis: '2026-12-31', status: 'aktiv' },
-  { id: '2', produkt: 'Weizen Sorte Asano', typ: 'Saatgut', nummer: 'BSA-2021-045', behoerde: 'BSA', gueltigBis: '2025-12-31', status: 'auslaufend' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function ZulassungenRegisterPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: zulassungen = mockZulassungen } = useZulassungenRegister()
+  const { data: zulassungen = [], isError, error, refetch } = useZulassungenRegister()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const auslaufend = zulassungen.filter((z) => z.status === 'auslaufend').length
 

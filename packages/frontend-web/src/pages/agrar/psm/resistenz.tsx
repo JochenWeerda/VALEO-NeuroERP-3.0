@@ -4,27 +4,20 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, BarChart3, RotateCcw, TrendingUp, Zap } from 'lucide-react'
-
-type WirkstoffGruppe = {
-  id: string
-  name: string
-  wirkstoffe: string[]
-  resistenzRisiko: 'niedrig' | 'mittel' | 'hoch'
-  letzteAnwendung: string
-  rotationsEmpfehlung: string
-}
+import { useWirkstoffGruppen } from '@/lib/api/agrar'
 
 type KulturHistorie = {
   kultur: string
   saison: string
   wirkstoffGruppen: string[]
-  resistenzEntwicklung: number // 0-100
+  resistenzEntwicklung: number
 }
 
 type ResistenzStrategie = {
   kultur: string
-  aktuelleRisiken: WirkstoffGruppe[]
+  aktuelleRisiken: { id: string; name: string; wirkstoffe: string[]; resistenzRisiko: string; letzteAnwendung: string; rotationsEmpfehlung: string }[]
   empfohleneRotation: string[]
   alternativeWirkstoffe: string[]
   monitoringEmpfehlungen: string[]
@@ -33,36 +26,12 @@ type ResistenzStrategie = {
 export default function PSMResistenzManagementPage(): JSX.Element {
   const navigate = useNavigate()
 
+  const { data: wirkstoffGruppen, isLoading } = useWirkstoffGruppen()
+
   const [selectedKultur, setSelectedKultur] = useState('weizen')
   const [selectedSaison, setSelectedSaison] = useState('2024/2025')
 
-  // Mock data
-  const wirkstoffGruppen: WirkstoffGruppe[] = [
-    {
-      id: '1',
-      name: 'Azole',
-      wirkstoffe: ['Tebuconazol', 'Prothioconazol', 'Epoxiconazol'],
-      resistenzRisiko: 'hoch',
-      letzteAnwendung: '2024-08-15',
-      rotationsEmpfehlung: '3 Jahre Pause empfohlen'
-    },
-    {
-      id: '2',
-      name: 'Strobilurine',
-      wirkstoffe: ['Azoxystrobin', 'Trifloxystrobin', 'Pyraclostrobin'],
-      resistenzRisiko: 'mittel',
-      letzteAnwendung: '2024-07-20',
-      rotationsEmpfehlung: '2 Jahre Pause empfohlen'
-    },
-    {
-      id: '3',
-      name: 'SDHI',
-      wirkstoffe: ['Bixafen', 'Fluxapyroxad', 'Penthiopyrad'],
-      resistenzRisiko: 'niedrig',
-      letzteAnwendung: '2023-09-10',
-      rotationsEmpfehlung: 'Keine Einschränkungen'
-    }
-  ]
+  const gruppen = wirkstoffGruppen ?? []
 
   const kulturHistorie: KulturHistorie[] = [
     {
@@ -86,8 +55,7 @@ export default function PSMResistenzManagementPage(): JSX.Element {
   ]
 
   const getResistenzStrategie = (kultur: string): ResistenzStrategie => {
-    // const historie = kulturHistorie.filter(h => h.kultur === kultur)
-    const aktuelleRisiken = wirkstoffGruppen.filter(g => g.resistenzRisiko === 'hoch' || g.resistenzRisiko === 'mittel')
+    const aktuelleRisiken = gruppen.filter(g => g.resistenzRisiko === 'hoch' || g.resistenzRisiko === 'mittel')
 
     return {
       kultur,
@@ -129,8 +97,20 @@ export default function PSMResistenzManagementPage(): JSX.Element {
     }
   }
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="h-10 w-1/2" />
+        <Skeleton className="h-4 w-1/3" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">PSM-Resistenz-Management</h1>
@@ -189,7 +169,7 @@ export default function PSMResistenzManagementPage(): JSX.Element {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {wirkstoffGruppen.map((gruppe) => (
+            {gruppen.map((gruppe) => (
               <div key={gruppe.id} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <div>

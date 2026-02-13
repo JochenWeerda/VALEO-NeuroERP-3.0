@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,9 +13,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
-import { PackageX, ArrowLeft, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { PackageX, ArrowLeft, AlertTriangle } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
+import { ErrorState } from '@/components/ErrorState'
+import { useEinkaufRetouren, useUpdateEinkaufRetoure } from '@/lib/api/einkauf'
 
 type GoodsReceiptItem = {
   id: string
@@ -70,7 +74,6 @@ export default function RetourenPage(): JSX.Element {
 
   const [loading, setLoading] = useState(false)
   const [goodsReceipt, setGoodsReceipt] = useState<GoodsReceipt | null>(null)
-  const [goodsReceipts, setGoodsReceipts] = useState<GoodsReceipt[]>([])
   const [selectedGrId, setSelectedGrId] = useState<string>(grId || '')
   const [returnDialogOpen, setReturnDialogOpen] = useState(false)
   const [returnData, setReturnData] = useState<ReturnData>({
@@ -82,94 +85,46 @@ export default function RetourenPage(): JSX.Element {
     creditMemoRequested: false,
   })
 
-  // Lade Wareneingänge
-  useEffect(() => {
-    loadGoodsReceipts()
-  }, [])
+  const { data: goodsReceipts = [], isLoading: grLoading, isError: grError, error: grErrorObj, refetch: refetchReceipts } = useQuery({
+    queryKey: ['einkauf', 'goods-receipts'],
+    queryFn: async () => (await apiClient.get<GoodsReceipt[]>('/api/v1/einkauf/goods-receipts')).data,
+    staleTime: 2 * 60 * 1000,
+  })
+
+  if (grError) {
+    return <ErrorState error={grErrorObj as Error} onRetry={() => { void refetchReceipts() }} />
+  }
+
+  const {
+    data: retouren = [],
+    isLoading: retourenLoading,
+    isError: retourenError,
+    error: retourenErrorObj,
+    refetch: refetchRetouren,
+  } = useEinkaufRetouren()
+  const updateRetoure = useUpdateEinkaufRetoure()
+
+  if (retourenError) {
+    return <ErrorState error={retourenErrorObj as Error} onRetry={() => { void refetchRetouren() }} />
+  }
 
   // Lade Wareneingang wenn ausgewählt
   useEffect(() => {
     if (selectedGrId) {
-      loadGoodsReceipt(selectedGrId)
-    }
-  }, [selectedGrId])
-
-  const loadGoodsReceipts = async () => {
-    try {
-      setLoading(true)
-      // Mock: In Produktion würde hier die API aufgerufen
-      const mockReceipts: GoodsReceipt[] = [
-        {
-          id: 'gr-001',
-          number: 'GR-2025-001',
-          purchaseOrderId: 'po-001',
-          purchaseOrderNumber: 'PO-2025-001',
-          supplierId: 'supplier-001',
-          supplierName: 'Lieferant A',
-          receivedDate: '2025-01-15',
-          status: 'RECEIVED',
-          items: [
-            {
-              id: 'gri-001',
-              goodsReceiptId: 'gr-001',
-              purchaseOrderItemId: 'poi-001',
-              productId: 'prod-001',
-              productName: 'Produkt A',
-              quantityReceived: 100,
-              quantityReturned: 0,
-              unit: 'Stk',
-              price: 10.50,
-              condition: 'GOOD',
-            },
-          ],
-        },
-      ]
-      setGoodsReceipts(mockReceipts)
-    } catch (error) {
-      console.error('Fehler beim Laden der Wareneingänge:', error)
-      toast({
-        variant: 'destructive',
-        title: t('crud.messages.loadError'),
-        description: t('crud.messages.loadErrorDescription'),
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const loadGoodsReceipt = async (id: string) => {
-    try {
-      setLoading(true)
-      // Mock: In Produktion würde hier die API aufgerufen
-      const mockReceipt = goodsReceipts.find(gr => gr.id === id)
-      if (mockReceipt) {
-        setGoodsReceipt(mockReceipt)
+      const receipt = goodsReceipts.find(gr => gr.id === selectedGrId)
+      if (receipt) {
+        setGoodsReceipt(receipt)
         setReturnData(prev => ({
           ...prev,
-          goodsReceiptId: id,
-          items: mockReceipt.items.map(item => ({
-            goodsReceiptItemId: item.id,
-            productId: item.productId,
-            productName: item.productName,
-            quantityReturned: 0,
-            unit: item.unit,
-            price: item.price,
-            reason: '',
-            creditMemoRequested: false,
+          goodsReceiptId: selectedGrId,
+          items: receipt.items.map(item => ({
+            goodsReceiptItemId: item.id, productId: item.productId, productName: item.productName,
+            quantityReturned: 0, unit: item.unit, price: item.price, reason: '', creditMemoRequested: false,
           })),
         }))
       }
-    } catch (error) {
-      console.error('Fehler beim Laden des Wareneingangs:', error)
-      toast({
-        variant: 'destructive',
-        title: t('crud.messages.loadError'),
-        description: t('crud.messages.loadErrorDescription'),
-      })
-    } finally {
-      setLoading(false)
     }
-  }
+  }, [selectedGrId, goodsReceipts])
 
   const handleCreateReturn = () => {
     if (!selectedGrId) {
@@ -184,11 +139,11 @@ export default function RetourenPage(): JSX.Element {
   }
 
   const handleSaveReturn = async () => {
-    if (!returnData.returnReason || returnData.returnReason.length < 10) {
+    if (!returnData.returnReason) {
       toast({
         variant: 'destructive',
         title: t('crud.messages.validationError'),
-        description: t('crud.messages.reasonMinLength'),
+        description: t('crud.tooltips.placeholders.selectReturnReason'),
       })
       return
     }
@@ -206,7 +161,7 @@ export default function RetourenPage(): JSX.Element {
     setLoading(true)
     try {
       // API-Call würde hier erfolgen
-      await apiClient.post('/api/einkauf/retouren', {
+      await apiClient.post('/api/v1/einkauf/retouren', {
         goodsReceiptId: returnData.goodsReceiptId,
         returnDate: returnData.returnDate,
         returnReason: returnData.returnReason,
@@ -229,11 +184,8 @@ export default function RetourenPage(): JSX.Element {
         creditMemoRequested: false,
       })
       
-      // Reload goods receipts
-      loadGoodsReceipts()
-      if (selectedGrId) {
-        loadGoodsReceipt(selectedGrId)
-      }
+      await refetchReceipts()
+      await refetchRetouren()
     } catch (error: any) {
       console.error('Fehler beim Erstellen der Retoure:', error)
       toast({
@@ -247,7 +199,10 @@ export default function RetourenPage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
+      {grLoading && (
+        <div className="space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-[200px] w-full" /></div>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{t('crud.entities.goodsReturn')}</h1>
@@ -360,6 +315,63 @@ export default function RetourenPage(): JSX.Element {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('crud.entities.goodsReturn')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {retourenLoading ? (
+            <div className="text-sm text-muted-foreground">{t('common.loading')}</div>
+          ) : retouren.length === 0 ? (
+            <div className="text-sm text-muted-foreground">{t('crud.messages.noData')}</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('crud.fields.number')}</TableHead>
+                  <TableHead>{t('crud.entities.supplier')}</TableHead>
+                  <TableHead>{t('crud.fields.reason')}</TableHead>
+                  <TableHead>{t('crud.fields.date')}</TableHead>
+                  <TableHead>{t('crud.fields.status')}</TableHead>
+                  <TableHead className="text-right">{t('crud.actions.update')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {retouren.map((retoure) => (
+                  <TableRow key={retoure.id}>
+                    <TableCell><code className="text-sm">{retoure.nummer}</code></TableCell>
+                    <TableCell>{retoure.lieferant || '-'}</TableCell>
+                    <TableCell>{retoure.grund || '-'}</TableCell>
+                    <TableCell>{retoure.datum ? formatDate(retoure.datum) : '-'}</TableCell>
+                    <TableCell>
+                      <Badge variant={retoure.status === 'abgeschlossen' ? 'default' : 'secondary'}>{retoure.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Select
+                        value={retoure.status}
+                        onValueChange={(status) => {
+                          void updateRetoure.mutateAsync({ id: retoure.id, status })
+                        }}
+                      >
+                        <SelectTrigger className="ml-auto w-[170px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="offen">offen</SelectItem>
+                          <SelectItem value="in_pruefung">in_pruefung</SelectItem>
+                          <SelectItem value="abgeschlossen">abgeschlossen</SelectItem>
+                          <SelectItem value="storniert">storniert</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Return Dialog */}
       <Dialog open={returnDialogOpen} onOpenChange={setReturnDialogOpen}>

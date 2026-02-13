@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Kundenportal Dashboard
  * 
- * Übersichtsseite für Kunden mit wichtigen KPIs und Schnellzugriffen
+ * Ãœbersichtsseite fÃ¼r Kunden mit wichtigen KPIs und Schnellzugriffen
  */
 
 import { Link } from 'react-router-dom'
@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { usePortalDashboard, type PortalDashboard } from '@/lib/api/portal'
+import { usePortalDashboard, type PortalDashboard as PortalDashboardApi } from '@/lib/api/portal'
+import { ErrorState } from '@/components/ErrorState'
 import {
   ShoppingCart,
   Package,
@@ -17,59 +18,57 @@ import {
   Receipt,
   Download,
   Leaf,
-  TrendingUp,
-  Calendar,
-  Bell,
-  ChevronRight,
+  TrendingUp,  ChevronRight,
   Clock,
-  CheckCircle2,
-  AlertCircle,
-  Euro,
-  Truck,
+  CheckCircle2,  Truck,
 } from 'lucide-react'
 
-// Mock-Daten - werden später durch echte API-Calls ersetzt
-const mockDashboardData = {
-  kunde: {
-    name: 'Musterhof GmbH',
-    kundennummer: 'K-2024-001',
-  },
-  kpis: {
-    offeneBestellungen: 3,
-    laufendeVertraege: 5,
-    offeneRechnungen: 2,
-    offenerBetrag: 4523.50,
-    verfuegbareDokumente: 12,
-  },
-  letzteBestellungen: [
-    { id: 'B-2024-0147', datum: '2024-11-25', status: 'in_bearbeitung', betrag: 1250.00, artikel: 'Winterweizen Saatgut' },
-    { id: 'B-2024-0142', datum: '2024-11-20', status: 'versendet', betrag: 890.00, artikel: 'NPK Dünger' },
-    { id: 'B-2024-0138', datum: '2024-11-15', status: 'abgeschlossen', betrag: 2100.00, artikel: 'Pflanzenschutzmittel' },
-  ],
-  neueDokumente: [
-    { id: 1, name: 'Nährstoffbilanz 2024.pdf', typ: 'naehrstoff', datum: '2024-11-20' },
-    { id: 2, name: 'GMP Zertifikat 2024.pdf', typ: 'zertifikat', datum: '2024-11-15' },
-    { id: 3, name: 'Rechnung R-2024-0567.pdf', typ: 'rechnung', datum: '2024-11-10' },
-  ],
-  naechsteTermine: [
-    { id: 1, titel: 'Düngerlieferung', datum: '2024-11-28', zeit: '08:00' },
-    { id: 2, titel: 'PSM-Beratung', datum: '2024-11-30', zeit: '10:00' },
-  ],
-}
 
+type PortalDashboardView = {
+  kunde: {
+    name: string
+    kundennummer: string
+  }
+  kpis: {
+    offeneBestellungen: number
+    laufendeVertraege: number
+    offeneRechnungen: number
+    offenerBetrag: number
+    verfuegbareDokumente: number
+  }
+  letzteBestellungen: Array<{
+    id: string
+    datum: string
+    status: string
+    betrag: number
+    artikel: string
+  }>
+  neueDokumente: Array<{
+    id: number
+    name: string
+    typ: string
+    datum: string
+  }>
+  naechsteTermine: Array<{
+    id: number
+    titel: string
+    datum: string
+    zeit: string
+  }>
+}
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   'in_bearbeitung': { label: 'In Bearbeitung', color: 'bg-amber-100 text-amber-800', icon: <Clock className="h-3 w-3" /> },
   'versendet': { label: 'Versendet', color: 'bg-blue-100 text-blue-800', icon: <Truck className="h-3 w-3" /> },
   'abgeschlossen': { label: 'Abgeschlossen', color: 'bg-emerald-100 text-emerald-800', icon: <CheckCircle2 className="h-3 w-3" /> },
 }
 
-function mapPortalDashboard(data: PortalDashboard): typeof mockDashboardData {
-  const pickNumber = (label: string, fallback = 0) => {
+function mapPortalDashboard(data: PortalDashboardApi): PortalDashboardView {
+  const pickNumber = (label: string) => {
     const raw = data.kpis.find((k) => k.label.toLowerCase() === label.toLowerCase())?.value
-    if (!raw) return fallback
+    if (!raw) return 0
     const normalized = raw.replace(',', '.').replace(/[^\d.-]/g, '')
     const num = Number(normalized)
-    return Number.isFinite(num) ? num : fallback
+    return Number.isFinite(num) ? num : 0
   }
 
   return {
@@ -78,11 +77,11 @@ function mapPortalDashboard(data: PortalDashboard): typeof mockDashboardData {
       kundennummer: 'PORTAL',
     },
     kpis: {
-      offeneBestellungen: pickNumber('Offene Bestellungen', data.letzteBestellungen.length),
-      laufendeVertraege: pickNumber('Vertragsstatus', 1),
-      offeneRechnungen: pickNumber('Offene Rechnungen', 0),
-      offenerBetrag: pickNumber('Letzte Rechnung', 0),
-      verfuegbareDokumente: pickNumber('Neue Dokumente', data.neueDokumente.length),
+      offeneBestellungen: pickNumber('Offene Bestellungen'),
+      laufendeVertraege: pickNumber('Vertragsstatus'),
+      offeneRechnungen: pickNumber('Offene Rechnungen'),
+      offenerBetrag: pickNumber('Letzte Rechnung'),
+      verfuegbareDokumente: pickNumber('Neue Dokumente'),
     },
     letzteBestellungen: data.letzteBestellungen.map((b) => ({
       id: b.nummer || b.id,
@@ -102,12 +101,21 @@ function mapPortalDashboard(data: PortalDashboard): typeof mockDashboardData {
 }
 
 export default function PortalDashboard() {
-  const { data: portalData, isLoading } = usePortalDashboard()
-  const data = portalData ? mapPortalDashboard(portalData) : mockDashboardData
+  const { data: portalData, isLoading, isError, error, refetch } = usePortalDashboard()
 
   if (isLoading) {
     return <DashboardSkeleton />
   }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  if (!portalData) {
+    return <ErrorState error={new Error('Keine Dashboard-Daten verfuegbar.')} onRetry={() => { void refetch() }} />
+  }
+
+  const data = mapPortalDashboard(portalData)
 
   return (
     <div className="space-y-6">
@@ -144,7 +152,7 @@ export default function PortalDashboard() {
           color="blue"
         />
         <KPICard
-          title="Laufende Verträge"
+          title="Laufende VertrÃ¤ge"
           value={data.kpis.laufendeVertraege}
           icon={<FileText className="h-5 w-5" />}
           link="/portal/vertraege"
@@ -155,7 +163,7 @@ export default function PortalDashboard() {
           value={data.kpis.offeneRechnungen}
           icon={<Receipt className="h-5 w-5" />}
           link="/portal/rechnungen"
-          suffix={`€ ${data.kpis.offenerBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`}
+          suffix={`â‚¬ ${data.kpis.offenerBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`}
           color="amber"
         />
         <KPICard
@@ -202,7 +210,7 @@ export default function PortalDashboard() {
                       <p className="text-sm text-muted-foreground">{bestellung.artikel}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">€ {bestellung.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</p>
+                      <p className="font-semibold">â‚¬ {bestellung.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</p>
                       <p className="text-xs text-muted-foreground">{bestellung.datum}</p>
                     </div>
                   </div>
@@ -217,7 +225,7 @@ export default function PortalDashboard() {
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
               <CardTitle className="text-lg">Neue Dokumente</CardTitle>
-              <CardDescription>Kürzlich bereitgestellt</CardDescription>
+              <CardDescription>KÃ¼rzlich bereitgestellt</CardDescription>
             </div>
             <Link to="/portal/dokumente">
               <Button variant="ghost" size="sm" className="gap-1">
@@ -255,7 +263,7 @@ export default function PortalDashboard() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Schnellzugriff</CardTitle>
-          <CardDescription>Häufig verwendete Funktionen</CardDescription>
+          <CardDescription>HÃ¤ufig verwendete Funktionen</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -267,8 +275,8 @@ export default function PortalDashboard() {
               color="emerald"
             />
             <QuickAccessCard
-              title="Nährstoffbilanzen"
-              description="Jahresübersichten"
+              title="NÃ¤hrstoffbilanzen"
+              description="JahresÃ¼bersichten"
               icon={<TrendingUp className="h-6 w-6" />}
               link="/portal/naehrstoffbilanzen"
               color="blue"
@@ -410,5 +418,7 @@ function DashboardSkeleton() {
     </div>
   )
 }
+
+
 
 

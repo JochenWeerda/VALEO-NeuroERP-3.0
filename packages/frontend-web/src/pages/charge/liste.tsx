@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useChargen, type Charge } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -6,20 +6,47 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, FileDown, Package, Search } from 'lucide-react'
-
-const mockChargen: Charge[] = [
-  { id: '1', chargenId: '251011-WEI-001', artikel: 'Weizen Premium', menge: 25.0, lagerort: 'Silo 1', eingang: '2025-10-11', status: 'freigegeben' },
-  { id: '2', chargenId: '251010-RAP-002', artikel: 'Raps', menge: 18.5, lagerort: 'Silo 2', eingang: '2025-10-10', status: 'freigegeben' },
-  { id: '3', chargenId: '251009-WEI-003', artikel: 'Weizen', menge: 22.0, lagerort: 'Silo 1', eingang: '2025-10-09', status: 'in-pruefung' },
-]
+import { toast } from '@/hooks/use-toast'
 
 export default function ChargenListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: chargen = mockChargen } = useChargen()
+  const { data: chargen = [], isLoading } = useChargen()
 
-  const inPruefung = chargen.filter((c) => c.status === 'in-pruefung').length
+  const filteredChargen = useMemo(() => {
+    if (!searchTerm) return chargen
+    const term = searchTerm.toLowerCase()
+    return chargen.filter(c => 
+      c.chargenId?.toLowerCase().includes(term) ||
+      c.artikel?.toLowerCase().includes(term) ||
+      c.lagerort?.toLowerCase().includes(term)
+    )
+  }, [chargen, searchTerm])
+
+  const inPruefung = filteredChargen.filter((c) => c.status === 'in-pruefung').length
+
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32 mt-2" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1,2,3,4].map(i => (
+            <Card key={i}><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          ))}
+        </div>
+        <Card><CardContent className="pt-4"><Skeleton className="h-64 w-full" /></CardContent></Card>
+      </div>
+    )
+  }
 
   const columns = [
     {

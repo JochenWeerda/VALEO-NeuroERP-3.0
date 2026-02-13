@@ -6,12 +6,13 @@
  */
 
 import { useState } from 'react'
-import { usePortalDokumente } from '@/lib/api/portal'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { usePortalDokumente, usePortalLieferscheinCompliance } from '@/lib/api/portal'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Select,
@@ -27,15 +28,12 @@ import {
   FileSpreadsheet,
   File,
   Calendar,
-  Filter,
   FolderOpen,
   BarChart3,
-  Award,
   Beaker,
   ScrollText,
-  Wheat,
-  ChevronRight,
-  Eye,
+  AlertTriangle,
+  ShieldCheck,
 } from 'lucide-react'
 
 interface Dokument {
@@ -50,30 +48,17 @@ interface Dokument {
   produkt?: string
 }
 
-const mockDokumente: Dokument[] = [
-  // Nährstoffbilanzen
-  { id: '1', name: 'Nährstoffbilanz 2024', typ: 'naehrstoff', kategorie: 'Jahresübersicht', datum: '2024-11-20', dateigroesse: '245 KB', dateiformat: 'pdf', jahr: 2024 },
-  { id: '2', name: 'Nährstoffbilanz 2023', typ: 'naehrstoff', kategorie: 'Jahresübersicht', datum: '2024-01-15', dateigroesse: '238 KB', dateiformat: 'pdf', jahr: 2023 },
-  { id: '3', name: 'Stoffstrombilanz 2024', typ: 'naehrstoff', kategorie: 'Stoffstrom', datum: '2024-11-15', dateigroesse: '312 KB', dateiformat: 'pdf', jahr: 2024 },
-  
-  // Analysen
-  { id: '4', name: 'Bodenprobe Schlag 1 - Herbst 2024', typ: 'analyse', kategorie: 'Bodenanalyse', datum: '2024-10-20', dateigroesse: '156 KB', dateiformat: 'pdf', produkt: 'Winterweizen' },
-  { id: '5', name: 'Futtermittelanalyse MLF 18%', typ: 'analyse', kategorie: 'Futtermittel', datum: '2024-09-15', dateigroesse: '189 KB', dateiformat: 'pdf', produkt: 'Milchleistungsfutter' },
-  { id: '6', name: 'Silageanalyse Grassilage 2024', typ: 'analyse', kategorie: 'Futtermittel', datum: '2024-08-01', dateigroesse: '142 KB', dateiformat: 'pdf' },
-  
-  // Deklarationen
-  { id: '7', name: 'Produktdeklaration NPK 15-15-15', typ: 'deklaration', kategorie: 'Düngemittel', datum: '2024-01-01', dateigroesse: '98 KB', dateiformat: 'pdf', produkt: 'NPK 15-15-15' },
-  { id: '8', name: 'Sicherheitsdatenblatt Glyphosat 360', typ: 'deklaration', kategorie: 'Pflanzenschutz', datum: '2024-01-01', dateigroesse: '425 KB', dateiformat: 'pdf', produkt: 'Glyphosat 360' },
-  { id: '9', name: 'Futtermittel-Deklaration MLF 18%', typ: 'deklaration', kategorie: 'Futtermittel', datum: '2024-06-01', dateigroesse: '112 KB', dateiformat: 'pdf', produkt: 'Milchleistungsfutter' },
-  
-  // Rechnungen
-  { id: '10', name: 'Rechnung R-2024-0567', typ: 'rechnung', kategorie: 'Rechnung', datum: '2024-11-15', dateigroesse: '78 KB', dateiformat: 'pdf' },
-  { id: '11', name: 'Rechnung R-2024-0542', typ: 'rechnung', kategorie: 'Rechnung', datum: '2024-11-01', dateigroesse: '82 KB', dateiformat: 'pdf' },
-  
-  // Lieferscheine
-  { id: '12', name: 'Lieferschein LS-2024-1234', typ: 'lieferschein', kategorie: 'Lieferschein', datum: '2024-11-20', dateigroesse: '45 KB', dateiformat: 'pdf' },
-  { id: '13', name: 'Lieferschein LS-2024-1198', typ: 'lieferschein', kategorie: 'Lieferschein', datum: '2024-11-10', dateigroesse: '42 KB', dateiformat: 'pdf' },
-]
+function inferDokumentTyp(name: string, kategorie: string): Dokument['typ'] {
+  const x = `${name} ${kategorie}`.toLowerCase()
+  if (x.includes('naehrstoff')) return 'naehrstoff'
+  if (x.includes('analyse')) return 'analyse'
+  if (x.includes('deklaration')) return 'deklaration'
+  if (x.includes('rechnung')) return 'rechnung'
+  if (x.includes('vertrag')) return 'vertrag'
+  if (x.includes('lieferschein') || x.includes('delivery') || x.includes(' dl-') || x.includes(' ls-')) return 'lieferschein'
+  return 'sonstiges'
+}
+
 
 const typConfig: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   'naehrstoff': { label: 'Nährstoffbilanz', icon: <BarChart3 className="h-4 w-4" />, color: 'bg-emerald-100 text-emerald-800' },
@@ -96,23 +81,22 @@ export default function PortalDokumente() {
   const [activeTab, setActiveTab] = useState('alle')
   const [selectedJahr, setSelectedJahr] = useState<string>('alle')
 
-  const { data: portalDokumente = [], isLoading } = usePortalDokumente()
-  const dokumente: Dokument[] = portalDokumente.length > 0
-    ? portalDokumente.map((d) => {
-      const ext = d.typ.toLowerCase()
-      const dateiformat: Dokument['dateiformat'] = ext === 'csv' || ext === 'xlsx' ? ext : 'pdf'
-      return {
-        id: d.id,
-        name: d.name,
-        typ: 'sonstiges',
-        kategorie: d.kategorie,
-        datum: d.datum,
-        dateigroesse: `${d.groesse} KB`,
-        dateiformat,
-        jahr: Number(d.datum.slice(0, 4)),
-      }
-    })
-    : mockDokumente
+  const { data: portalDokumente = [], isLoading, isError, error, refetch } = usePortalDokumente()
+  const { data: psmLieferscheine = [], isError: isPsmDocsError, error: psmDocsError } = usePortalLieferscheinCompliance()
+  const dokumente: Dokument[] = portalDokumente.map((d) => {
+    const ext = d.typ.toLowerCase()
+    const dateiformat: Dokument['dateiformat'] = ext === 'csv' || ext === 'xlsx' ? ext : 'pdf'
+    return {
+      id: d.id,
+      name: d.name,
+      typ: inferDokumentTyp(d.name, d.kategorie),
+      kategorie: d.kategorie,
+      datum: d.datum,
+      dateigroesse: `${d.groesse} KB`,
+      dateiformat,
+      jahr: Number(d.datum.slice(0, 4)),
+    }
+  })
 
   const filteredDokumente = dokumente.filter((d) => {
     const matchesSearch = d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -126,6 +110,10 @@ export default function PortalDokumente() {
 
   if (isLoading) {
     return <DokumenteSkeleton />
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
   return (
@@ -285,6 +273,56 @@ export default function PortalDokumente() {
           )}
         </TabsContent>
       </Tabs>
+
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold">PSM-Lieferschein Nachweise</h3>
+            <Badge variant="secondary">{psmLieferscheine.length} Belege</Badge>
+          </div>
+          {isPsmDocsError && (
+            <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              {(psmDocsError as Error)?.message || 'PSM-Lieferscheine konnten nicht geladen werden.'}
+            </div>
+          )}
+          {psmLieferscheine.slice(0, 10).map((ls) => {
+            const compliance = ls.psmCompliance
+            const missing = compliance?.missingMandatoryFields ?? []
+            const hinweise = compliance?.hinweise ?? []
+            const ok = Boolean(compliance?.compliant)
+            return (
+              <div key={ls.number} className="rounded-lg border p-3 space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="font-medium">{ls.number}</div>
+                  <Badge className={ok ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}>
+                    {ok ? <ShieldCheck className="mr-1 h-3 w-3" /> : <AlertTriangle className="mr-1 h-3 w-3" />}
+                    {ok ? 'Konform' : 'Pruefen'}
+                  </Badge>
+                </div>
+                <div className="grid gap-2 text-sm sm:grid-cols-4">
+                  <div>N: <span className="font-medium">{Number(ls.totalNutrientNKg ?? 0).toFixed(3)} kg</span></div>
+                  <div>P2O5: <span className="font-medium">{Number(ls.totalNutrientP2o5Kg ?? 0).toFixed(3)} kg</span></div>
+                  <div>CO2e: <span className="font-medium">{Number(ls.totalCo2eKg ?? 0).toFixed(3)} kg</span></div>
+                  <div>ADR: <span className="font-medium">{Number(compliance?.adrPunkte ?? 0).toFixed(1)}</span></div>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Lieferant: {ls.supplierName || '-'} • Sachkunde: {compliance?.sachkundeStatus || '-'} • SDB: {compliance?.sdsMitgeliefert || '-'}
+                </div>
+                {missing.length > 0 && (
+                  <div className="text-xs text-red-600">
+                    Fehlende Pflichtangaben: {missing.join(' | ')}
+                  </div>
+                )}
+                {hinweise.length > 0 && (
+                  <div className="text-xs text-amber-700">
+                    Hinweise: {hinweise.join(' | ')}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </CardContent>
+      </Card>
     </div>
   )
 }

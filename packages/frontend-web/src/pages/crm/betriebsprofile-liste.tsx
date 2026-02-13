@@ -118,7 +118,7 @@ export default function BetriebsprofileListePage(): JSX.Element {
 
   if (error) {
     return (
-      <div className="space-y-4 p-6">
+      <div className="space-y-4 p-3 md:p-6">
         <div className="flex items-center gap-2">
           <Tractor className="h-8 w-8 text-green-600" />
           <h1 className="text-3xl font-bold">{getListTitle(t, entityTypeLabel)}</h1>
@@ -135,7 +135,7 @@ export default function BetriebsprofileListePage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">

@@ -58,3 +58,4 @@ from . import messages
 from . import dms_images
 from . import sales_shipping_ext
 from . import master_data
+from . import compat

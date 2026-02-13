@@ -8,12 +8,13 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BackButton } from '@/components/BackButton'
 import { AlertCircle, Euro, FileDown, Search } from 'lucide-react'
-import { useKreditorenMock, type KreditOPMock } from '@/lib/api/fibu'
+import { useKreditorenOP, type KreditOP } from '@/lib/api/fibu'
+import { ErrorState } from '@/components/ErrorState'
 
 export default function KreditorenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: items, isLoading } = useKreditorenMock()
+  const { data: items, isLoading, isError, error, refetch } = useKreditorenOP()
 
   if (isLoading) return (
     <div className="p-3 md:p-6 space-y-4">
@@ -22,26 +23,30 @@ export default function KreditorenPage(): JSX.Element {
     </div>
   )
 
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
   const list = items ?? []
 
   const columns = [
     {
       key: 'rechnungsnr' as const,
       label: 'Rechnung',
-      render: (op: KreditOPMock) => <span className="font-mono font-bold">{op.rechnungsnr}</span>,
+      render: (op: KreditOP) => <span className="font-mono font-bold">{op.rechnungsnr}</span>,
     },
     { key: 'lieferant' as const, label: 'Lieferant' },
-    { key: 'lieferantennr' as const, label: 'Lief-Nr', render: (op: KreditOPMock) => <span className="font-mono text-sm">{op.lieferantennr}</span> },
-    { key: 'datum' as const, label: 'Re-Datum', render: (op: KreditOPMock) => new Date(op.datum).toLocaleDateString('de-DE') },
+    { key: 'lieferantennr' as const, label: 'Lief-Nr', render: (op: KreditOP) => <span className="font-mono text-sm">{op.lieferantennr}</span> },
+    { key: 'datum' as const, label: 'Re-Datum', render: (op: KreditOP) => new Date(op.datum).toLocaleDateString('de-DE') },
     {
       key: 'faelligkeit' as const,
       label: 'Fälligkeit',
-      render: (op: KreditOPMock) => new Date(op.faelligkeit).toLocaleDateString('de-DE'),
+      render: (op: KreditOP) => new Date(op.faelligkeit).toLocaleDateString('de-DE'),
     },
     {
       key: 'offen' as const,
       label: 'Offen',
-      render: (op: KreditOPMock) => (
+      render: (op: KreditOP) => (
         <span className="font-bold">
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(op.offen)}
         </span>
@@ -50,7 +55,7 @@ export default function KreditorenPage(): JSX.Element {
     {
       key: 'skonto' as const,
       label: 'Skonto',
-      render: (op: KreditOPMock) => {
+      render: (op: KreditOP) => {
         const bis = new Date(op.skontoBis)
         const verfuegbar = bis >= new Date()
         return verfuegbar ? (
@@ -66,7 +71,7 @@ export default function KreditorenPage(): JSX.Element {
     {
       key: 'zahlbar' as const,
       label: 'Status',
-      render: (op: KreditOPMock) => (
+      render: (op: KreditOP) => (
         <Badge variant={op.zahlbar ? 'outline' : 'secondary'}>
           {op.zahlbar ? 'Zahlbar' : 'Geprüft'}
         </Badge>

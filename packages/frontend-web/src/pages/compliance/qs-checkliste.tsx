@@ -3,15 +3,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { AlertTriangle, CheckCircle, ClipboardCheck } from 'lucide-react'
-
-const mockQS: QSItem[] = [
-  { id: '1', bereich: 'Wareneingangskontrolle', pruefpunkt: 'Lieferschein-Pruefung', erfuellt: true, bemerkung: 'Vollstaendig', geprueftAm: '2025-10-11' },
-  { id: '2', bereich: 'Wareneingangskontrolle', pruefpunkt: 'Qualitaetspruefung', erfuellt: true, bemerkung: 'Alle Parameter OK', geprueftAm: '2025-10-11' },
-  { id: '3', bereich: 'Hygiene', pruefpunkt: 'Reinigung Annahme', erfuellt: false, bemerkung: 'Ausstehend', geprueftAm: '' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function QSChecklistePage(): JSX.Element {
-  const { data: qs = mockQS } = useQSCheckliste()
+  const { data: qs = [], isError, error, refetch } = useQSCheckliste()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     { key: 'bereich' as const, label: 'Bereich' },

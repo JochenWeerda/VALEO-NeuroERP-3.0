@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAussaaten, type Aussaat } from '@/lib/api/agrar'
 import { Badge } from '@/components/ui/badge'
@@ -6,17 +6,29 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
 import { Calendar, FileDown, Plus, Search } from 'lucide-react'
-
-const mockAussaaten: Aussaat[] = [
-  { id: '1', schlag: 'Nordfeld 1', kultur: 'Weizen', sorte: 'Asano', datum: '2025-10-15', flaeche: 12.5, saatmenge: 2250, status: 'geplant' },
-  { id: '2', schlag: 'SÃ¼dacker', kultur: 'Gerste', sorte: 'KWS Morris', datum: '2025-10-20', flaeche: 8.3, saatmenge: 1494, status: 'geplant' },
-]
 
 export default function AussaatListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: aussaaten = mockAussaaten } = useAussaaten()
+  const { data, isLoading, isError, error, refetch } = useAussaaten()
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const aussaaten: Aussaat[] = data ?? []
 
   const columns = [
     {
@@ -35,14 +47,14 @@ export default function AussaatListePage(): JSX.Element {
       label: 'Aussaat-Datum',
       render: (a: Aussaat) => new Date(a.datum).toLocaleDateString('de-DE'),
     },
-    { key: 'flaeche' as const, label: 'FlÃ¤che (ha)', render: (a: Aussaat) => `${a.flaeche} ha` },
+    { key: 'flaeche' as const, label: 'Flaeche (ha)', render: (a: Aussaat) => `${a.flaeche} ha` },
     { key: 'saatmenge' as const, label: 'Saatgut (kg)' },
     {
       key: 'status' as const,
       label: 'Status',
       render: (a: Aussaat) => (
         <Badge variant={a.status === 'ausgesaet' ? 'outline' : 'default'}>
-          {a.status === 'geplant' ? 'Geplant' : 'AusgesÃ¤t'}
+          {a.status === 'geplant' ? 'Geplant' : 'Ausgesaet'}
         </Badge>
       ),
     },
@@ -66,7 +78,7 @@ export default function AussaatListePage(): JSX.Element {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">SchlÃ¤ge Gesamt</CardTitle>
+            <CardTitle className="text-sm font-medium">Schlaege Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -78,7 +90,7 @@ export default function AussaatListePage(): JSX.Element {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">GesamtflÃ¤che</CardTitle>
+            <CardTitle className="text-sm font-medium">Gesamtflaeche</CardTitle>
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold">{gesamtFlaeche.toFixed(1)} ha</span>
@@ -121,5 +133,3 @@ export default function AussaatListePage(): JSX.Element {
     </div>
   )
 }
-
-

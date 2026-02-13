@@ -293,7 +293,7 @@ export function useDATEVExport() {
   })
 }
 
-// ── Extended Types for Pages with Fallback ─────────────────────────────
+// ── Extended Types ──────────────────────────────────────────────────────
 
 export type Kreditlinie = {
   id: string; kunde: string; kundennr: string; limit: number; ausgenutzt: number; verfuegbar: number
@@ -318,97 +318,111 @@ export type Zahlungsvorschlag = {
   skonto: number; skontoBis: string; vorschlag: 'skonto' | 'faellig' | 'spaeter'; prioritaet: number
 }
 
-export type DebitOPMock = {
-  id: string; rechnungsnr: string; kunde: string; kundennr: string; datum: string; faelligkeit: string
-  betrag: number; offen: number; ueberfaellig: boolean; mahnStufe: number
-}
-
-export type KreditOPMock = {
-  id: string; rechnungsnr: string; lieferant: string; lieferantennr: string; datum: string; faelligkeit: string
-  betrag: number; offen: number; skonto: number; skontoBis: string; zahlbar: boolean
-}
-
 export type HauptbuchBuchung = {
   id: string; datum: string; belegnummer: string; konto: string; text: string; soll: number; haben: number
 }
 
-export type AnlageMock = {
+export type AnlageDetail = {
   id: string; anlagennr: string; bezeichnung: string; anschaffung: string; anschaffungswert: number
   nutzungsdauer: number; afaSatz: number; kumulierteAfa: number; buchwert: number
 }
 
-// ── Extended Fallback Data ────────────────────────────────────────────
-
-const fallbackAnlagenMock: AnlageMock[] = [
-  { id: '1', anlagennr: 'ANL-001', bezeichnung: 'Mähdrescher Claas Lexion 770', anschaffung: '2022-04-15', anschaffungswert: 420000, nutzungsdauer: 10, afaSatz: 10, kumulierteAfa: 126000, buchwert: 294000 },
-  { id: '2', anlagennr: 'ANL-002', bezeichnung: 'Lagerhalle B', anschaffung: '2018-06-01', anschaffungswert: 680000, nutzungsdauer: 25, afaSatz: 4, kumulierteAfa: 217600, buchwert: 462400 },
-]
-
-const fallbackDebitMock: DebitOPMock[] = [
-  { id: '1', rechnungsnr: 'RE-2026-0123', kunde: 'Agrar Schmidt GmbH', kundennr: 'K-10001', datum: '2026-01-15', faelligkeit: '2026-02-15', betrag: 12500, offen: 12500, ueberfaellig: false, mahnStufe: 0 },
-  { id: '2', rechnungsnr: 'RE-2025-0891', kunde: 'Landhandel Nord', kundennr: 'K-10005', datum: '2025-11-20', faelligkeit: '2025-12-20', betrag: 8500, offen: 8500, ueberfaellig: true, mahnStufe: 2 },
-]
-
-const fallbackKreditMock: KreditOPMock[] = [
-  { id: '1', rechnungsnr: 'LI-2026-4523', lieferant: 'Saatgut Nord GmbH', lieferantennr: 'L-20001', datum: '2026-02-05', faelligkeit: '2026-03-05', betrag: 18500, offen: 18500, skonto: 2, skontoBis: '2026-02-15', zahlbar: true },
-  { id: '2', rechnungsnr: 'LI-2026-4524', lieferant: 'Dünger GmbH', lieferantennr: 'L-20002', datum: '2026-01-28', faelligkeit: '2026-02-28', betrag: 24000, offen: 24000, skonto: 3, skontoBis: '2026-02-07', zahlbar: true },
-]
-
-const fallbackHauptbuch: HauptbuchBuchung[] = [
-  { id: '1', datum: '2026-02-10', belegnummer: 'RE-2026-042', konto: '8400', text: 'Warenverkauf Weizen', soll: 0, haben: 5500 },
-  { id: '2', datum: '2026-02-10', belegnummer: 'RE-2026-043', konto: '4400', text: 'Wareneinkauf Saatgut', soll: 3200, haben: 0 },
-  { id: '3', datum: '2026-02-09', belegnummer: 'BA-2026-015', konto: '1200', text: 'Banküberweisung', soll: 0, haben: 8500 },
-]
-
-const fallbackKreditlinien: Kreditlinie[] = [
-  { id: '1', kunde: 'Agrar Schmidt GmbH', kundennr: 'K-10023', limit: 200000, ausgenutzt: 145000, verfuegbar: 55000, bonitaet: 'A', zahlungsziel: 30, offenePosten: 145000, ueberfaellig: 0, status: 'aktiv' },
-  { id: '2', kunde: 'Landhandel Nord', kundennr: 'K-10005', limit: 100000, ausgenutzt: 95000, verfuegbar: 5000, bonitaet: 'B', zahlungsziel: 14, offenePosten: 95000, ueberfaellig: 8500, status: 'ueberzogen' },
-]
-
-const fallbackSicherheiten: Sicherheit[] = [
-  { id: '1', typ: 'abtretung', kunde: 'Agrar Schmidt GmbH', kundennr: 'K-10023', gegenstand: 'Forderungsabtretung Ernteerlöse 2026', wert: 150000, datumErstellung: '2026-01-15', gueltigBis: '2026-12-31', status: 'aktiv', kreditlinie: 200000, ausgenutzt: 85000 },
-]
-
-const fallbackVerbindlichkeiten: Verbindlichkeit[] = [
-  { id: '1', rechnungsNr: 'ER-2026-0001', lieferant: 'Saatgut AG', rechnungsDatum: '2026-02-08', faelligAm: '2026-03-07', betrag: 25000, offen: 25000, status: 'skontofaehig' },
-  { id: '2', rechnungsNr: 'ER-2026-0002', lieferant: 'Dünger GmbH', rechnungsDatum: '2026-01-20', faelligAm: '2026-02-20', betrag: 18500, offen: 12000, status: 'teilbezahlt' },
-]
-
-const fallbackZahlungsvorschlaege: Zahlungsvorschlag[] = [
-  { id: '1', rechnungsNr: 'ER-2026-0001', lieferant: 'Saatgut AG', betrag: 25000, faelligAm: '2026-03-07', skonto: 2, skontoBis: '2026-02-18', vorschlag: 'skonto', prioritaet: 1 },
-  { id: '2', rechnungsNr: 'ER-2026-0002', lieferant: 'Dünger GmbH', betrag: 12000, faelligAm: '2026-02-20', skonto: 0, skontoBis: '', vorschlag: 'faellig', prioritaet: 2 },
-]
-
-// ── Extended Hooks with Fallback ──────────────────────────────────────
-
-export function useAnlagenMock() {
-  return useQuery({ queryKey: [...fibuKeys.anlagen(), 'mock'], queryFn: async () => { try { const r = await apiClient.get<AnlageMock[]>('/api/fibu/anlagen'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackAnlagenMock }, staleTime: 5 * 60 * 1000 })
+export type DebitOP = {
+  id: string; rechnungsnr: string; kunde: string; kundennr: string; datum: string; faelligkeit: string
+  betrag: number; offen: number; ueberfaellig: boolean; mahnStufe: number
 }
 
-export function useDebitorenMock() {
-  return useQuery({ queryKey: [...fibuKeys.debitoren(), 'mock'], queryFn: async () => { try { const r = await apiClient.get<DebitOPMock[]>('/api/fibu/debitoren'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackDebitMock }, staleTime: 2 * 60 * 1000 })
+export type KreditOP = {
+  id: string; rechnungsnr: string; lieferant: string; lieferantennr: string; datum: string; faelligkeit: string
+  betrag: number; offen: number; skonto: number; skontoBis: string; zahlbar: boolean
 }
 
-export function useKreditorenMock() {
-  return useQuery({ queryKey: [...fibuKeys.kreditoren(), 'mock'], queryFn: async () => { try { const r = await apiClient.get<KreditOPMock[]>('/api/fibu/kreditoren'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackKreditMock }, staleTime: 2 * 60 * 1000 })
+// ── Extended Hooks ──────────────────────────────────────────────────────
+
+export function useAnlagenDetail() {
+  return useQuery({
+    queryKey: [...fibuKeys.anlagen(), 'detail'],
+    queryFn: async () => {
+      const response = await apiClient.get<AnlageDetail[]>('/api/fibu/anlagen/detail')
+      return response.data
+    },
+    staleTime: 5 * 60 * 1000,
+  })
 }
 
-export function useHauptbuch() {
-  return useQuery({ queryKey: [...fibuKeys.buchungen(), 'hauptbuch'], queryFn: async () => { try { const r = await apiClient.get<HauptbuchBuchung[]>('/api/fibu/hauptbuch'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackHauptbuch }, staleTime: 2 * 60 * 1000 })
+export function useDebitorenOP() {
+  return useQuery({
+    queryKey: [...fibuKeys.debitoren(), 'op'],
+    queryFn: async () => {
+      const response = await apiClient.get<DebitOP[]>('/api/fibu/debitoren/op')
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+export function useKreditorenOP() {
+  return useQuery({
+    queryKey: [...fibuKeys.kreditoren(), 'op'],
+    queryFn: async () => {
+      const response = await apiClient.get<KreditOP[]>('/api/fibu/kreditoren/op')
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+export function useHauptbuchBuchungen() {
+  return useQuery({
+    queryKey: [...fibuKeys.buchungen(), 'hauptbuch'],
+    queryFn: async () => {
+      const response = await apiClient.get<HauptbuchBuchung[]>('/api/fibu/hauptbuch')
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
 }
 
 export function useKreditlinien() {
-  return useQuery({ queryKey: [...fibuKeys.all, 'kreditlinien'], queryFn: async () => { try { const r = await apiClient.get<Kreditlinie[]>('/api/fibu/kreditlinien'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackKreditlinien }, staleTime: 2 * 60 * 1000 })
+  return useQuery({
+    queryKey: [...fibuKeys.all, 'kreditlinien'],
+    queryFn: async () => {
+      const response = await apiClient.get<Kreditlinie[]>('/api/fibu/kreditlinien')
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
 }
 
 export function useSicherheiten() {
-  return useQuery({ queryKey: [...fibuKeys.all, 'sicherheiten'], queryFn: async () => { try { const r = await apiClient.get<Sicherheit[]>('/api/fibu/sicherheiten'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackSicherheiten }, staleTime: 5 * 60 * 1000 })
+  return useQuery({
+    queryKey: [...fibuKeys.all, 'sicherheiten'],
+    queryFn: async () => {
+      const response = await apiClient.get<Sicherheit[]>('/api/fibu/sicherheiten')
+      return response.data
+    },
+    staleTime: 5 * 60 * 1000,
+  })
 }
 
 export function useVerbindlichkeiten() {
-  return useQuery({ queryKey: [...fibuKeys.all, 'verbindlichkeiten'], queryFn: async () => { try { const r = await apiClient.get<Verbindlichkeit[]>('/api/fibu/verbindlichkeiten'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackVerbindlichkeiten }, staleTime: 2 * 60 * 1000 })
+  return useQuery({
+    queryKey: [...fibuKeys.all, 'verbindlichkeiten'],
+    queryFn: async () => {
+      const response = await apiClient.get<Verbindlichkeit[]>('/api/fibu/verbindlichkeiten')
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
 }
 
 export function useZahlungsvorschlaege() {
-  return useQuery({ queryKey: [...fibuKeys.all, 'zahlungsvorschlaege'], queryFn: async () => { try { const r = await apiClient.get<Zahlungsvorschlag[]>('/api/fibu/zahlungsvorschlaege'); if (r.data?.length) return r.data } catch { /* fallback to mock data */ } return fallbackZahlungsvorschlaege }, staleTime: 2 * 60 * 1000 })
+  return useQuery({
+    queryKey: [...fibuKeys.all, 'zahlungsvorschlaege'],
+    queryFn: async () => {
+      const response = await apiClient.get<Zahlungsvorschlag[]>('/api/fibu/zahlungsvorschlaege')
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
 }

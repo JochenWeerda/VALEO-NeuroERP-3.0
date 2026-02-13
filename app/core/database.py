@@ -51,7 +51,14 @@ def create_tables():
             logger.info("CRM models imported")
         except Exception as e:
             logger.warning(f"CRM models import failed: {e}")
-        
+
+        # Ensure outbox table is part of metadata
+        try:
+            from app.infrastructure.eventbus import outbox as outbox_models  # noqa: F401
+            logger.info("Outbox models imported")
+        except Exception as e:
+            logger.warning(f"Outbox models import failed: {e}")
+
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created successfully")
     except Exception as e:

@@ -25,6 +25,7 @@ class NATSEventPublisher(IEventPublisher):
         self.nats_url = nats_url
         self.enabled = enabled
         self._client: Optional[any] = None
+        self._connected: bool = False
         
         if enabled:
             logger.info(f"NATS Publisher initialized (URL: {nats_url})")
@@ -91,6 +92,7 @@ class NATSEventPublisher(IEventPublisher):
     async def connect(self) -> None:
         """Connect to NATS server."""
         if not self.enabled:
+            self._connected = False
             return
         
         try:
@@ -98,9 +100,11 @@ class NATSEventPublisher(IEventPublisher):
             # from nats.aio.client import Client as NATS
             # self._client = NATS()
             # await self._client.connect(self.nats_url)
+            self._connected = True
             logger.info("NATS connection established")
         except Exception as e:
             logger.error(f"Failed to connect to NATS: {e}")
+            self._connected = False
             self.enabled = False
     
     async def disconnect(self) -> None:
@@ -109,4 +113,9 @@ class NATSEventPublisher(IEventPublisher):
             # TODO: Actual disconnect
             # await self._client.close()
             logger.info("NATS connection closed")
+        self._connected = False
+
+
+# Global publisher instance for health checks and lightweight wiring.
+nats_publisher = NATSEventPublisher()
 

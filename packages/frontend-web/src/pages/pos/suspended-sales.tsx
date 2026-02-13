@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Play, Trash2, Clock, User, ShoppingCart } from 'lucide-react'
+import { ErrorState } from '@/components/ErrorState'
 
 type CartItem = {
   artikelnr: string
@@ -25,44 +26,21 @@ type SuspendedSale = {
   itemCount: number
 }
 
-// Mock-Daten (später: API)
-const mockSuspendedSales: SuspendedSale[] = [
-  {
-    id: 'SUSP-001',
-    timestamp: '2025-10-11T14:23:00',
-    cart: [
-      { artikelnr: 'A-001', bezeichnung: 'Blumenerde 20L', ean: '4012345678901', preis: 12.99, menge: 2, image: '🌱' },
-      { artikelnr: 'A-003', bezeichnung: 'Rasendünger 5kg', ean: '4012345678903', preis: 24.99, menge: 1, image: '🌿' },
-    ],
-    customerId: 'K-12345',
-    customerName: 'Agrar Schmidt GmbH',
-    total: 50.97,
-    itemCount: 3,
-  },
-  {
-    id: 'SUSP-002',
-    timestamp: '2025-10-11T15:45:00',
-    cart: [
-      { artikelnr: 'A-005', bezeichnung: 'Blumentopf 30cm', ean: '4012345678905', preis: 8.99, menge: 5, image: '🪴' },
-    ],
-    total: 44.95,
-    itemCount: 5,
-  },
-]
-
 export default function SuspendedSalesPage(): JSX.Element {
   const navigate = useNavigate()
-  const { data: apiSuspendedSales = [] } = useSuspendedSales()
-  const suspendedSales: SuspendedSale[] = apiSuspendedSales.length > 0
-    ? apiSuspendedSales.map((sale: ApiSuspendedSale) => ({
-      id: sale.id,
-      timestamp: sale.zeitpunkt,
-      cart: [{ artikelnr: sale.id, bezeichnung: sale.grund, ean: '', preis: sale.betrag, menge: Math.max(sale.positionen, 1) }],
-      customerName: sale.kassierer,
-      total: sale.betrag,
-      itemCount: sale.positionen,
-    }))
-    : mockSuspendedSales
+  const { data: apiSuspendedSales = [], isError, error, refetch } = useSuspendedSales()
+  const suspendedSales: SuspendedSale[] = apiSuspendedSales.map((sale: ApiSuspendedSale) => ({
+    id: sale.id,
+    timestamp: sale.zeitpunkt,
+    cart: [{ artikelnr: sale.id, bezeichnung: sale.grund, ean: '', preis: sale.betrag, menge: Math.max(sale.positionen, 1) }],
+    customerName: sale.kassierer,
+    total: sale.betrag,
+    itemCount: sale.positionen,
+  }))
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
   const [removedSaleIds, setRemovedSaleIds] = useState<Set<string>>(new Set())
   const sales = suspendedSales.filter((sale) => !removedSaleIds.has(sale.id))
 

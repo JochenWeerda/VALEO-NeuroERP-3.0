@@ -8,20 +8,7 @@ import { useInventoryDashboard } from '@/lib/api/dashboard'
 import { useMhdItems, useRennerItems, usePennerItems } from '@/lib/api/inventory'
 import { useNavigate } from 'react-router-dom'
 
-// Fallback für Top-Artikel (wenn keine API-Daten)
-const fallbackTopArticles = [
-  { name: 'Weizen Saatgut Premium', quantity: 2500, value: 45000 },
-  { name: 'Dünger NPK 15-15-15', quantity: 1800, value: 36000 },
-  { name: 'Pflanzenschutzmittel A', quantity: 500, value: 25000 },
-  { name: 'Diesel Winterqualität', quantity: 3000, value: 18000 },
-  { name: 'Ersatzteile Mähdrescher', quantity: 45, value: 15500 },
-]
 
-// PSM-Fristen Fallback
-const fallbackPsmItems = [
-  { name: 'Glyphosat-Produkt A', abverkaufsfrist: '2026-03-31', quantity: 200 },
-  { name: 'Insektizid Altbestand', abverkaufsfrist: '2026-06-30', quantity: 75 },
-]
 
 export default function BestandsuebersichtPage(): JSX.Element {
   const { data: bestand, isLoading } = useInventoryDashboard()
@@ -70,10 +57,8 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-blue-600">
-                  {hasData ? bestand.totalArticles : '1.247'}
-                </span>
-                {!hasData && <Badge variant="secondary" className="text-xs">Demo</Badge>}
-              </div>
+                  {hasData ? bestand.totalArticles : 0}
+                </span>              </div>
             )}
           </CardContent>
         </Card>
@@ -94,9 +79,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                   {hasData 
                     ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(bestand.totalValue)
                     : '€ 2.450.000'}
-                </span>
-                {!hasData && <Badge variant="secondary" className="text-xs">Demo</Badge>}
-              </div>
+                </span>              </div>
             )}
           </CardContent>
         </Card>
@@ -114,10 +97,8 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-purple-600">
-                  {hasData ? bestand.lowStockCount : '48'}
-                </span>
-                {!hasData && <Badge variant="secondary" className="text-xs">Demo</Badge>}
-              </div>
+                  {hasData ? bestand.lowStockCount : 0}
+                </span>              </div>
             )}
           </CardContent>
         </Card>
@@ -136,9 +117,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-orange-600">
                   {hasData ? `${bestand.totalArticles} Tage` : '32 Tage'}
-                </span>
-                {!hasData && <Badge variant="secondary" className="text-xs">Demo</Badge>}
-              </div>
+                </span>              </div>
             )}
           </CardContent>
         </Card>
@@ -159,7 +138,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-red-600">
-                  {hasData ? bestand.lowStockCount : '12'}
+                  {hasData ? bestand.lowStockCount : 0}
                 </span>
                 <span className="text-sm text-red-600">Artikel unter Mindestbestand</span>
               </div>
@@ -179,7 +158,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-yellow-600">
-                  {hasData ? Math.round(bestand.lowStockCount * 1.5) : '28'}
+                  {hasData ? Math.round(bestand.lowStockCount * 1.5) : 0}
                 </span>
                 <span className="text-sm text-yellow-600">Artikel in 7 Tagen kritisch</span>
               </div>
@@ -199,7 +178,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-green-600">
-                  {hasData ? bestand.totalArticles - bestand.lowStockCount : '1.207'}
+                  {hasData ? bestand.totalArticles - bestand.lowStockCount : 0}
                 </span>
                 <span className="text-sm text-green-600">Artikel im Sollbereich</span>
               </div>
@@ -239,7 +218,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl font-bold text-orange-600">
-                    {hasData ? 3 : (mhdItems ?? []).length}
+                    {(mhdItems ?? []).length}
                   </span>
                   <span className="text-sm text-orange-600">Artikel mit MHD in den nächsten 90 Tagen</span>
                 </div>
@@ -253,9 +232,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                       </Badge>
                     </div>
                   </div>
-                ))}
-                {!hasData && <Badge variant="secondary" className="mt-2">Beispieldaten</Badge>}
-              </div>
+                ))}              </div>
             )}
           </CardContent>
         </Card>
@@ -289,11 +266,11 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl font-bold text-red-600">
-                    {hasData ? 2 : fallbackPsmItems.length}
+                    {0}
                   </span>
                   <span className="text-sm text-red-600">PSM mit endender Abverkaufsfrist</span>
                 </div>
-                {fallbackPsmItems.map((item, i) => (
+                {[].map((item, i) => (
                   <div key={i} className="flex items-center justify-between rounded border border-red-200 p-2 bg-white/50 text-sm">
                     <span className="font-medium truncate max-w-[200px]">{item.name}</span>
                     <div className="flex items-center gap-2">
@@ -303,9 +280,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                       </Badge>
                     </div>
                   </div>
-                ))}
-                {!hasData && <Badge variant="secondary" className="mt-2">Beispieldaten</Badge>}
-              </div>
+                ))}              </div>
             )}
           </CardContent>
         </Card>
@@ -352,9 +327,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                       <Badge className="bg-green-600">{item.trend}</Badge>
                     </div>
                   </div>
-                ))}
-                {!hasData && <Badge variant="secondary" className="mt-2">Beispieldaten</Badge>}
-              </div>
+                ))}              </div>
             )}
           </CardContent>
         </Card>
@@ -398,9 +371,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                       <Badge variant="secondary" className="text-red-600">{item.trend}</Badge>
                     </div>
                   </div>
-                ))}
-                {!hasData && <Badge variant="secondary" className="mt-2">Beispieldaten</Badge>}
-              </div>
+                ))}              </div>
             )}
           </CardContent>
         </Card>
@@ -411,9 +382,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
-            Top-Artikel nach Wert
-            {!hasData && <Badge variant="secondary" className="ml-2">Beispieldaten</Badge>}
-          </CardTitle>
+            Top-Artikel nach Wert          </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -433,7 +402,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
             </div>
           ) : (
             <div className="space-y-3">
-              {(hasData ? bestand.topArticles : fallbackTopArticles).map((artikel, i) => (
+              {(hasData ? bestand.topArticles : []).map((artikel, i) => (
                 <div key={i} className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors">
                   <div>
                     <div className="font-semibold">{artikel.name}</div>
@@ -479,4 +448,6 @@ export default function BestandsuebersichtPage(): JSX.Element {
     </div>
   )
 }
+
+
 

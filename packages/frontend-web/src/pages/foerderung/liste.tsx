@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useFoerderAntraege, type Antrag } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -6,17 +6,44 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { FileDown, FileText, Plus, Search } from 'lucide-react'
-
-const mockAntraege: Antrag[] = [
-  { id: '1', nummer: 'FA-2025-001', programm: 'Greening', antragsdatum: '2025-03-15', flaeche: 250, betrag: 21250, status: 'bewilligt' },
-  { id: '2', nummer: 'FA-2025-002', programm: 'Biodiversitaet', antragsdatum: '2025-06-01', flaeche: 15.8, betrag: 18960, status: 'eingereicht' },
-]
 
 export default function FoerderantraegeListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: antraege = mockAntraege } = useFoerderAntraege()
+  const { data: antraege = [], isLoading } = useFoerderAntraege()
+
+  const filteredAntraege = useMemo(() => {
+    if (!searchTerm) return antraege
+    const term = searchTerm.toLowerCase()
+    return antraege.filter(a => 
+      a.nummer?.toLowerCase().includes(term) ||
+      a.programm?.toLowerCase().includes(term)
+    )
+  }, [antraege, searchTerm])
+
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32 mt-2" />
+          </div>
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+        </div>
+        <Card><CardContent className="pt-4"><Skeleton className="h-64 w-full" /></CardContent></Card>
+      </div>
+    )
+  }
 
   const columns = [
     { key: 'nummer' as const, label: 'Antragsnummer', render: (a: Antrag) => <button onClick={() => navigate(`/foerderung/antrag/${a.id}`)} className="font-medium text-blue-600 hover:underline">{a.nummer}</button> },

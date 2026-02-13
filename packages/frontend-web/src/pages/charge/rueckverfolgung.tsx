@@ -81,7 +81,7 @@ export default function RueckverfolgungPage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
       <div>
         <h1 className="text-3xl font-bold">Chargen-Rückverfolgung</h1>
         <p className="text-muted-foreground">Lieferketten-Transparenz</p>

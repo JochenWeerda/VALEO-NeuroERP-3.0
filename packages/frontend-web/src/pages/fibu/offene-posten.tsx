@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Euro, FileDown, Loader2, Search } from 'lucide-react'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { apiClient } from '@/lib/api-client'
+import { ErrorState } from '@/components/ErrorState'
 
 type OffenerPosten = {
   id: string
@@ -23,57 +24,6 @@ type OffenerPosten = {
   mahnstufe: 0 | 1 | 2 | 3
   status: 'faellig' | 'ueberfaellig' | 'mahnung1' | 'mahnung2' | 'mahnung3' | 'inkasso'
 }
-
-const fallbackOffenePosten: OffenerPosten[] = [
-  {
-    id: '1',
-    rechnungsNr: 'RE-2025-0001',
-    kunde: 'Landhandel Nord GmbH',
-    rechnungsDatum: '2025-10-11',
-    faelligAm: '2025-11-10',
-    betrag: 12500.0,
-    offen: 12500.0,
-    tageUeberfaellig: 0,
-    mahnstufe: 0,
-    status: 'faellig',
-  },
-  {
-    id: '2',
-    rechnungsNr: 'RE-2025-0003',
-    kunde: 'Müller Landwirtschaft',
-    rechnungsDatum: '2025-09-15',
-    faelligAm: '2025-10-15',
-    betrag: 5200.0,
-    offen: 5200.0,
-    tageUeberfaellig: 26,
-    mahnstufe: 2,
-    status: 'mahnung2',
-  },
-  {
-    id: '3',
-    rechnungsNr: 'RE-2024-0890',
-    kunde: 'Schmidt Agrar KG',
-    rechnungsDatum: '2024-08-20',
-    faelligAm: '2024-09-19',
-    betrag: 8900.0,
-    offen: 8900.0,
-    tageUeberfaellig: 52,
-    mahnstufe: 3,
-    status: 'inkasso',
-  },
-  {
-    id: '4',
-    rechnungsNr: 'RE-2025-0010',
-    kunde: 'Agrar-Genossenschaft West',
-    rechnungsDatum: '2025-10-01',
-    faelligAm: '2025-10-31',
-    betrag: 15600.0,
-    offen: 15600.0,
-    tageUeberfaellig: 0,
-    mahnstufe: 0,
-    status: 'faellig',
-  },
-]
 
 interface OpenItemAPI {
   id: string
@@ -132,21 +82,21 @@ export default function OffenePostenPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<OffenerPosten['status'] | 'alle'>('alle')
 
-  const { data: allePosten = fallbackOffenePosten, isLoading } = useQuery({
+  const { data: allePosten = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['fibu', 'open-items'],
     queryFn: async () => {
-      try {
-        const res = await apiClient.get<{ items: OpenItemAPI[] }>('/api/v1/open-items')
-        if (res.data?.items?.length) {
-          return res.data.items.map(mapApiItem)
-        }
-      } catch {
-        // API not available – use fallback
+      const res = await apiClient.get<{ items: OpenItemAPI[] }>('/api/v1/open-items')
+      if (!res.data?.items) {
+        throw new Error('Ungültige Antwort für offene Posten')
       }
-      return fallbackOffenePosten
+      return res.data.items.map(mapApiItem)
     },
     staleTime: 2 * 60 * 1000,
   })
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const filteredPosten = allePosten.filter((posten) => {
     const matchesSearch =

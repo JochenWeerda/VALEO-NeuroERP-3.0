@@ -13,6 +13,10 @@ from contextvars import ContextVar
 # Context variable for correlation ID
 correlation_id_var: ContextVar[str] = ContextVar('correlation_id', default='')
 
+# Backward-compatible module logger for imports like:
+# `from app.core.logging import logger`
+logger = logging.getLogger(__name__)
+
 
 class JSONFormatter(logging.Formatter):
     """

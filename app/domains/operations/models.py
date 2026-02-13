@@ -1,0 +1,619 @@
+"""
+Operations Domain Models - Waage und Fuhrpark
+Models für Waagen, Wiegungen, Fahrzeuge und Fahrer
+"""
+
+from sqlalchemy import Column, String, Integer, Float, DateTime, Text, ForeignKey, DECIMAL, Enum, Boolean
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+import uuid
+import enum
+
+from ...core.database import Base
+
+
+class WaageStatus(str, enum.Enum):
+    """Waage Status Enum"""
+    AKTIV = "aktiv"
+    INAKTIV = "inaktiv"
+    WARTUNG = "wartung"
+    DEFEKT = "defekt"
+
+
+class FahrzeugStatus(str, enum.Enum):
+    """Fahrzeug Status Enum"""
+    VERFUEGBAR = "verfuegbar"
+    UNTERWEGS = "unterwegs"
+    WARTUNG = "wartung"
+    AUSSCHIECHEN = "ausgeschieden"
+
+
+class FahrerStatus(str, enum.Enum):
+    """Fahrer Status Enum"""
+    VERFUEGBAR = "verfuegbar"
+    UNTERWEGS = "unterwegs"
+    PAUSE = "pause"
+    URLAUB = "urlaub"
+    KRANK = "krank"
+
+
+class Waage(Base):
+    """
+    Waage Model für Waagen-Management
+    """
+    __tablename__ = "ops_waagen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"W-{str(uuid.uuid4())[:8].upper()}")
+    
+    # Stammdaten
+    standort = Column(String(100), nullable=False)
+    typ = Column(String(50), nullable=False)  # z.B. "LKW-Waage", "Palette-Waage"
+    max_kapazitaet = Column(Float, nullable=False)  # in Tonnen
+    
+    # Eichung
+    letzte_eichung = Column(DateTime(timezone=True))
+    naechste_eichung = Column(DateTime(timezone=True))
+    
+    # Status
+    status = Column(String(20), default=WaageStatus.AKTIV.value)
+    
+    # Metadaten
+    hersteller = Column(String(100))
+    seriennummer = Column(String(50))
+    installiert_am = Column(DateTime(timezone=True))
+    
+    # Audit
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100))
+    updated_by = Column(String(100))
+    
+    # Relationships
+    weighings = relationship("Wiegung", back_populates="waage", cascade="all, delete-orphan")
+
+
+class Wiegung(Base):
+    """
+    Wiegung Model für Waagen-Wiegungen
+    """
+    __tablename__ = "ops_wiegungen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"WG-{str(uuid.uuid4())[:8].upper()}")
+    
+    # Fahrzeugdaten
+    kennzeichen = Column(String(20), nullable=False)
+    fahrer_name = Column(String(100))
+    
+    # Wägedaten
+    artikel = Column(String(100), nullable=False)
+    brutto = Column(Float, nullable=False)
+    tara = Column(Float, nullable=False)
+    netto = Column(Float, nullable=False)  # berechnet: brutto - tara
+    
+    # Referenzen
+    chargennummer = Column(String(50))
+    lieferant = Column(String(100))
+    kunde = Column(String(100))
+    
+    # Zeitstempel
+    zeitstempel = Column(DateTime(timezone=True), nullable=False)
+    
+    # Waage Reference
+    waage_id = Column(String, ForeignKey("domain_ops.ops_waagen.id", ondelete="SET NULL"))
+    
+    # Audit
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(100))
+    
+    # Relationships
+    waage = relationship("Waage", back_populates="weighings")
+
+
+class Fahrzeug(Base):
+    """
+    Fahrzeug Model für Fuhrpark-Management
+    """
+    __tablename__ = "ops_fahrzeuge"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"F-{str(uuid.uuid4())[:8].upper()}")
+    
+    # Stammdaten
+    kennzeichen = Column(String(20), nullable=False, unique=True)
+    typ = Column(String(50), nullable=False)  # z.B. "LKW 7,5t", "Transporter"
+    marke = Column(String(50))
+    modell = Column(String(50))
+    baujahr = Column(Integer)
+    
+    # Kilometer
+    kilometerstand = Column(Float, default=0)
+    
+    # Versicherung
+    versicherung = Column(String(100))
+    naechste_pruefung = Column(DateTime(timezone=True))  # TÜV, ASU
+    
+    # Inspektion
+    naechste_inspektion = Column(DateTime(timezone=True))
+    letzte_inspektion = Column(DateTime(timezone=True))
+    
+    # Status
+    status = Column(String(20), default=FahrzeugStatus.VERFUEGBAR.value)
+    
+    # Tank
+    tank_groesse = Column(Float)  # in Liter
+    aktueller_tank = Column(Float, default=0)
+    
+    # Zulassung
+    zulassungsdatum = Column(DateTime(timezone=True))
+    abmeldedatum = Column(DateTime(timezone=True))
+    
+    # Audit
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100))
+    updated_by = Column(String(100))
+    
+    # Relationships
+    fahrer = relationship("Fahrer", back_populates="fahrzeug", foreign_keys="Fahrer.aktuelles_fahrzeug_id")
+    tours = relationship("FahrzeugTour", back_populates="fahrzeug", cascade="all, delete-orphan")
+
+
+class Fahrer(Base):
+    """
+    Fahrer Model für Fuhrpark
+    """
+    __tablename__ = "ops_fahrer"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"DR-{str(uuid.uuid4())[:8].upper()}")
+    
+    # Stammdaten
+    personalnummer = Column(String(20), unique=True)
+    name = Column(String(100), nullable=False)
+    vorname = Column(String(100))
+    geburtsdatum = Column(DateTime(timezone=True))
+    
+    # Kontakt
+    telefon = Column(String(50))
+    email = Column(String(200))
+    
+    # Führerschein
+    fuehrerschein = Column(String(10), nullable=False)  # B, C, CE, etc.
+    fuehrerschein_gueltig_bis = Column(DateTime(timezone=True))
+    
+    # ADR-Bescheinigung
+    adr_bescheinigung = Column(Boolean, default=False)
+    adr_gueltig_bis = Column(DateTime(timezone=True))
+    
+    # Status
+    status = Column(String(20), default=FahrerStatus.VERFUEGBAR.value)
+    
+    # Aktuelles Fahrzeug
+    aktuelles_fahrzeug_id = Column(String, ForeignKey("domain_ops.ops_fahrzeuge.id", ondelete="SET NULL"))
+    
+    # Statistik
+    touren_heute = Column(Integer, default=0)
+    touren_woche = Column(Integer, default=0)
+    kilometer_heute = Column(Float, default=0)
+    
+    # Verfügbarkeit
+    verfuegbar_ab = Column(DateTime(timezone=True))
+    
+    # Audit
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100))
+    updated_by = Column(String(100))
+    
+    # Relationships
+    fahrzeug = relationship("Fahrzeug", back_populates="fahrer")
+    tours = relationship("FahrzeugTour", back_populates="fahrer", cascade="all, delete-orphan")
+
+
+class FahrzeugTour(Base):
+    """
+    Fahrzeug Tour/Planung
+    """
+    __tablename__ = "ops_fahrzeug_touren"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"TOUR-{str(uuid.uuid4())[:8].upper()}")
+    
+    # Referenzen
+    fahrzeug_id = Column(String, ForeignKey("domain_ops.ops_fahrzeuge.id", ondelete="CASCADE"))
+    fahrer_id = Column(String, ForeignKey("domain_ops.ops_fahrer.id", ondelete="SET NULL"))
+    
+    # Tourdaten
+    tour_nummer = Column(String(50))
+    start_zeit = Column(DateTime(timezone=True), nullable=False)
+    ende_zeit = Column(DateTime(timezone=True))
+    
+    # Route
+    start_adresse = Column(Text)
+    ziel_adresse = Column(Text)
+    kilometer = Column(Float, default=0)
+    
+    # Status
+    status = Column(String(20), default="geplant")  # geplant, aktiv, abgeschlossen, storniert
+    
+    # Ladung
+    artikel = Column(String(100))
+    menge = Column(Float)
+    
+    # Audit
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(100))
+    
+    # Relationships
+    fahrzeug = relationship("Fahrzeug", back_populates="tours")
+    fahrer = relationship("Fahrer", back_populates="tours")
+
+
+# ── DOKUMENTE MODELS ──────────────────────────────────────────────────────
+
+class DokumentStatus(str, enum.Enum):
+    """Dokument Status Enum"""
+    AKTIV = "aktiv"
+    GELOESCHT = "geloescht"
+    ARCHIVIERT = "archiviert"
+
+
+class DokumentKategorie(str, enum.Enum):
+    """Dokument Kategorie Enum"""
+    LIEFERSCHEINE = "Lieferscheine"
+    RECHNUNGEN = "Rechnungen"
+    QUALITAET = "Qualität"
+    VERTRAG = "Verträge"
+    ZERTIFIKATE = "Zertifikate"
+    SONSTIGE = "Sonstige"
+
+
+class Dokument(Base):
+    """
+    Dokument Model für Dokumentenverwaltung
+    """
+    __tablename__ = "ops_dokumente"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"DOC-{str(uuid.uuid4())[:8].upper()}")
+    
+    # Stammdaten
+    name = Column(String(255), nullable=False)
+    typ = Column(String(20), nullable=False)  # PDF, Excel, Word, etc.
+    kategorie = Column(String(100), nullable=False)
+    
+    # Datei-Informationen
+    groesse = Column(Integer, default=0)  # in KB
+    speicherpfad = Column(String(500))  # Pfad im Dateisystem oder S3
+    mime_type = Column(String(100))
+    
+    # Metadaten
+    beschreibung = Column(Text)
+    schlagwoerter = Column(String(500))  # Komma-getrennt
+    version = Column(Integer, default=1)
+    
+    # Referenzen
+    referenz_typ = Column(String(50))  # z.B. "Bestellung", "Kunde", "Artikel"
+    referenz_id = Column(String(100))
+    
+    # Status
+    status = Column(String(20), default=DokumentStatus.AKTIV.value)
+    
+    # Audit
+    hochgeladen_am = Column(DateTime(timezone=True), server_default=func.now())
+    hochgeladen_von = Column(String(100))
+    geloescht_am = Column(DateTime(timezone=True))
+    geloescht_von = Column(String(100))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100))
+    updated_by = Column(String(100))
+
+
+class DokumentVersion(Base):
+    """
+    Dokument Version Model für Versionierung
+    """
+    __tablename__ = "ops_dokument_versionen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"VER-{str(uuid.uuid4())[:8].upper()}")
+    
+    # Referenz
+    dokument_id = Column(String, ForeignKey("domain_ops.ops_dokumente.id", ondelete="CASCADE"))
+    
+    # Versionsdaten
+    version = Column(Integer, nullable=False)
+    name = Column(String(255), nullable=False)
+    groesse = Column(Integer, default=0)
+    speicherpfad = Column(String(500))
+    
+    # Änderungen
+    aenderungsbemerkung = Column(Text)
+    
+    # Audit
+    erstellt_am = Column(DateTime(timezone=True), server_default=func.now())
+    erstellt_von = Column(String(100))
+    
+    # Relationships
+    dokument = relationship("Dokument", backref="versionen")
+
+
+class ChargeStatus(str, enum.Enum):
+    ERFASST = "erfasst"
+    FREIGEGEBEN = "freigegeben"
+    IN_PRUEFUNG = "in-pruefung"
+    GESPERRT = "gesperrt"
+
+
+class Charge(Base):
+    """
+    Charge/Lot model for lot tracking and release workflows.
+    """
+    __tablename__ = "ops_chargen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"CH-{str(uuid.uuid4())[:8].upper()}")
+    chargen_id = Column(String(50), nullable=False, unique=True)
+    artikel = Column(String(100), nullable=False)
+    artikel_id = Column(String(100), nullable=False)
+    menge = Column(Float, nullable=False)
+    lagerort = Column(String(100), nullable=False)
+    eingang = Column(DateTime(timezone=True), nullable=False)
+    status = Column(String(20), default=ChargeStatus.ERFASST.value)
+    qualitaetsstatus = Column(String(30), default=ChargeStatus.IN_PRUEFUNG.value)
+    freigabe_datum = Column(DateTime(timezone=True))
+    herkunft = Column(String(255))
+    bemerkungen = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100))
+    updated_by = Column(String(100))
+
+
+class BankKonto(Base):
+    """
+    Bank account model for operational finance views.
+    """
+    __tablename__ = "ops_bankkonten"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"BK-{str(uuid.uuid4())[:8].upper()}")
+    iban = Column(String(50), nullable=False, unique=True)
+    bic = Column(String(20), nullable=False)
+    bank = Column(String(255), nullable=False)
+    kontoart = Column(String(100), nullable=False)
+    saldo = Column(DECIMAL(14, 2), default=0)
+    waehrung = Column(String(10), default="EUR")
+    status = Column(String(20), default="aktiv")
+    ist_aktiv = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100))
+    updated_by = Column(String(100))
+
+
+class Rahmenvertrag(Base):
+    """
+    Framework contract model used by contract management pages.
+    """
+    __tablename__ = "ops_rahmenvertraege"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"RV-{str(uuid.uuid4())[:8].upper()}")
+    nummer = Column(String(50), nullable=False, unique=True)
+    partner = Column(String(255), nullable=False)
+    partner_id = Column(String(100), nullable=False)
+    typ = Column(String(50), nullable=False)
+    artikel = Column(String(100), nullable=False)
+    artikel_id = Column(String(100), nullable=False)
+    menge = Column(Float, nullable=False)
+    restmenge = Column(Float, nullable=False)
+    preis = Column(DECIMAL(14, 2), nullable=False)
+    laufzeit_bis = Column(DateTime(timezone=True), nullable=False)
+    status = Column(String(30), default="aktiv")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100))
+    updated_by = Column(String(100))
+
+
+class ComplianceEintrag(Base):
+    __tablename__ = "ops_compliance_items"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"CMP-{str(uuid.uuid4())[:8].upper()}")
+    bereich = Column(String(120), nullable=False)
+    anforderung = Column(String(255), nullable=False)
+    erfuellt = Column(Boolean, default=False)
+    nachweis = Column(String(255), default="")
+    frist = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class ENNIMeldung(Base):
+    __tablename__ = "ops_enni_meldungen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"ENNI-{str(uuid.uuid4())[:8].upper()}")
+    typ = Column(String(20), nullable=False)
+    betrieb = Column(String(255), nullable=False)
+    vvvo = Column(String(50), nullable=False)
+    datum = Column(DateTime(timezone=True), nullable=False)
+    status = Column(String(30), default="entwurf")
+    naehrstoff_n = Column(Float, default=0)
+    naehrstoff_p = Column(Float, default=0)
+    naehrstoff_k = Column(Float, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class QSCheckEintrag(Base):
+    __tablename__ = "ops_qs_checks"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"QS-{str(uuid.uuid4())[:8].upper()}")
+    bereich = Column(String(120), nullable=False)
+    pruefpunkt = Column(String(255), nullable=False)
+    erfuellt = Column(Boolean, default=False)
+    bemerkung = Column(String(500), default="")
+    geprueft_am = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class ZulassungRegister(Base):
+    __tablename__ = "ops_zulassungen_register"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"ZUL-{str(uuid.uuid4())[:8].upper()}")
+    produkt = Column(String(255), nullable=False)
+    typ = Column(String(50), nullable=False)
+    nummer = Column(String(80), nullable=False)
+    behoerde = Column(String(120), nullable=False)
+    gueltig_bis = Column(DateTime(timezone=True), nullable=True)
+    status = Column(String(30), default="aktiv")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class SachkundeEintrag(Base):
+    __tablename__ = "ops_sachkunde_register"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"SACH-{str(uuid.uuid4())[:8].upper()}")
+    kunde = Column(String(255), nullable=False)
+    kundennr = Column(String(80), nullable=False)
+    nachweis_nr = Column(String(120), nullable=False)
+    ausstellungsdatum = Column(DateTime(timezone=True), nullable=True)
+    gueltig_bis = Column(DateTime(timezone=True), nullable=True)
+    ausstellende_stelle = Column(String(255), nullable=True)
+    status = Column(String(30), default="gueltig")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class SaatgutNachbauEintrag(Base):
+    __tablename__ = "ops_saatgut_nachbau"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"NACH-{str(uuid.uuid4())[:8].upper()}")
+    betrieb = Column(String(255), nullable=False)
+    sorte = Column(String(120), nullable=False)
+    kultur = Column(String(120), nullable=False)
+    flaeche = Column(Float, default=0)
+    erntejahr = Column(Integer, nullable=False)
+    gebuehr = Column(DECIMAL(14, 2), default=0)
+    status = Column(String(30), default="offen")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class VVVOEintrag(Base):
+    __tablename__ = "ops_vvvo_register"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"VVVO-{str(uuid.uuid4())[:8].upper()}")
+    betriebsname = Column(String(255), nullable=False)
+    vvvo = Column(String(50), nullable=False)
+    bundesland = Column(String(80), nullable=True)
+    tierart = Column(String(120), nullable=True)
+    status = Column(String(30), default="aktiv")
+    letzte_aktualisierung = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class DispositionPosition(Base):
+    __tablename__ = "ops_disposition"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"DIS-{str(uuid.uuid4())[:8].upper()}")
+    artikel = Column(String(255), nullable=False)
+    artikel_id = Column(String(100), nullable=False)
+    bestand = Column(Float, default=0)
+    mindestbestand = Column(Float, default=0)
+    bedarf = Column(Float, default=0)
+    empfehlung = Column(String(255), default="")
+    prioritaet = Column(String(20), default="niedrig")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class FoerderAntrag(Base):
+    __tablename__ = "ops_foerderantraege"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"FA-{str(uuid.uuid4())[:8].upper()}")
+    nummer = Column(String(80), nullable=False)
+    programm = Column(String(120), nullable=False)
+    antragsdatum = Column(DateTime(timezone=True), nullable=True)
+    flaeche = Column(Float, default=0)
+    betrag = Column(DECIMAL(14, 2), default=0)
+    status = Column(String(30), default="entwurf")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class LaborProbe(Base):
+    __tablename__ = "ops_labor_proben"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"LB-{str(uuid.uuid4())[:8].upper()}")
+    probennummer = Column(String(80), nullable=False)
+    typ = Column(String(80), nullable=False)
+    artikel = Column(String(255), nullable=False)
+    datum = Column(DateTime(timezone=True), nullable=True)
+    labor = Column(String(255), nullable=False)
+    status = Column(String(30), default="ausstehend")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class LaborAuftragEntry(Base):
+    __tablename__ = "ops_labor_auftraege"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"LA-{str(uuid.uuid4())[:8].upper()}")
+    chargen_id = Column(String(80), nullable=False)
+    labor = Column(String(255), nullable=False)
+    analysen = Column(Integer, default=0)
+    auftragsdatum = Column(DateTime(timezone=True), nullable=True)
+    status = Column(String(30), default="offen")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class MarketingKampagneEntry(Base):
+    __tablename__ = "ops_marketing_kampagnen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"MK-{str(uuid.uuid4())[:8].upper()}")
+    name = Column(String(255), nullable=False)
+    typ = Column(String(80), nullable=False)
+    zielgruppe = Column(String(120), nullable=True)
+    startdatum = Column(DateTime(timezone=True), nullable=True)
+    enddatum = Column(DateTime(timezone=True), nullable=True)
+    budget = Column(DECIMAL(14, 2), default=0)
+    status = Column(String(30), default="geplant")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class ZertifikatEintrag(Base):
+    __tablename__ = "ops_zertifikate"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"ZERT-{str(uuid.uuid4())[:8].upper()}")
+    art = Column(String(120), nullable=False)
+    standard = Column(String(120), nullable=False)
+    nummer = Column(String(120), nullable=False)
+    gueltig_bis = Column(DateTime(timezone=True), nullable=True)
+    audit = Column(DateTime(timezone=True), nullable=True)
+    status = Column(String(30), default="gueltig")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

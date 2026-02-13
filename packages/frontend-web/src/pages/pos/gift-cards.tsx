@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { AlertTriangle, Gift, Plus, Scan } from 'lucide-react'
+import { ErrorState } from '@/components/ErrorState'
 
 type GiftCard = {
   id: string
@@ -19,54 +20,24 @@ type GiftCard = {
   status: 'aktiv' | 'teilweise-eingeloest' | 'eingeloest' | 'abgelaufen'
 }
 
-const mockGiftCards: GiftCard[] = [
-  {
-    id: '1',
-    cardNumber: 'GC-2025-001234',
-    wert: 50.00,
-    restguthaben: 50.00,
-    gueltigBis: '2027-10-11',
-    ausgestelltAm: '2025-10-11',
-    kunde: 'Maria Schmidt',
-    status: 'aktiv',
-  },
-  {
-    id: '2',
-    cardNumber: 'GC-2025-001235',
-    wert: 100.00,
-    restguthaben: 35.50,
-    gueltigBis: '2027-09-20',
-    ausgestelltAm: '2025-09-20',
-    kunde: 'Thomas Weber',
-    status: 'teilweise-eingeloest',
-  },
-  {
-    id: '3',
-    cardNumber: 'GC-2024-000987',
-    wert: 25.00,
-    restguthaben: 0,
-    gueltigBis: '2026-12-25',
-    ausgestelltAm: '2024-12-25',
-    status: 'eingeloest',
-  },
-]
-
 export default function GiftCardsPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [scanMode, setScanMode] = useState(false)
-  const { data: apiGiftCards = [] } = useGiftCards()
-  const giftCards: GiftCard[] = apiGiftCards.length > 0
-    ? apiGiftCards.map((gc: ApiGiftCard) => ({
-      id: gc.id,
-      cardNumber: gc.nummer,
-      wert: gc.betrag,
-      restguthaben: gc.restbetrag,
-      gueltigBis: gc.gueltigBis,
-      ausgestelltAm: gc.ausgestellt,
-      status: gc.status === 'eingeloest' ? 'eingeloest' : gc.status,
-    }))
-    : mockGiftCards
+  const { data: apiGiftCards = [], isError, error, refetch } = useGiftCards()
+  const giftCards: GiftCard[] = apiGiftCards.map((gc: ApiGiftCard) => ({
+    id: gc.id,
+    cardNumber: gc.nummer,
+    wert: gc.betrag,
+    restguthaben: gc.restbetrag,
+    gueltigBis: gc.gueltigBis,
+    ausgestelltAm: gc.ausgestellt,
+    status: gc.status === 'eingeloest' ? 'eingeloest' : gc.status,
+  }))
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     {

@@ -102,9 +102,9 @@ export function useCustomers(filters?: { search?: string; is_active?: boolean })
       const params = new URLSearchParams()
       if (filters?.search) params.append('search', filters.search)
       if (filters?.is_active !== undefined) params.append('is_active', String(filters.is_active))
-      
+
       const response = await apiClient.get<PaginatedResponse<Customer>>(
-        `/api/v1/crm/customers?${String(params)}`
+        `/api/v1/crm/customers?${String(params)}`,
       )
       return response.data
     },
@@ -124,7 +124,7 @@ export function useCustomer(id: string) {
 
 export function useCreateCustomer() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (data: CustomerCreate) => {
       const response = await apiClient.post<Customer>('/api/v1/crm/customers', data)
@@ -138,7 +138,7 @@ export function useCreateCustomer() {
 
 export function useUpdateCustomer() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: CustomerUpdate }) => {
       const response = await apiClient.put<Customer>(`/api/v1/crm/customers/${id}`, data)
@@ -153,7 +153,7 @@ export function useUpdateCustomer() {
 
 export function useDeleteCustomer() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (id: string) => {
       await apiClient.delete(`/api/v1/crm/customers/${id}`)
@@ -172,10 +172,8 @@ export function useLeads(filters?: { search?: string; status?: string }) {
       const params = new URLSearchParams()
       if (filters?.search) params.append('search', filters.search)
       if (filters?.status) params.append('status', filters.status)
-      
-      const response = await apiClient.get<PaginatedResponse<Lead>>(
-        `/api/v1/crm/leads?${String(params)}`
-      )
+
+      const response = await apiClient.get<PaginatedResponse<Lead>>(`/api/v1/crm/leads?${String(params)}`)
       return response.data
     },
   })
@@ -194,7 +192,7 @@ export function useLead(id: string) {
 
 export function useCreateLead() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (data: LeadCreate) => {
       const response = await apiClient.post<Lead>('/api/v1/crm/leads', data)
@@ -208,7 +206,7 @@ export function useCreateLead() {
 
 export function useUpdateLead() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: LeadUpdate }) => {
       const response = await apiClient.put<Lead>(`/api/v1/crm/leads/${id}`, data)
@@ -223,7 +221,7 @@ export function useUpdateLead() {
 
 export function useDeleteLead() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (id: string) => {
       await apiClient.delete(`/api/v1/crm/leads/${id}`)
@@ -234,7 +232,7 @@ export function useDeleteLead() {
   })
 }
 
-// ── Dashboard ──────────────────────────────────────────────────────────
+// Dashboard
 
 export type CRMDashboardKPI = {
   title: string
@@ -250,38 +248,21 @@ export type CRMDashboardChart = {
   data: number[]
 }
 
-const fallbackKPIs: CRMDashboardKPI[] = [
-  { title: 'Aktive Kunden', value: '1.247', change: { value: 8.3, type: 'increase', period: 'vs. letztes Jahr' }, icon: '👥', color: 'blue' },
-  { title: 'Neue Kunden', value: '89', change: { value: 12.5, type: 'increase', period: 'vs. letzter Monat' }, icon: '🆕', color: 'green' },
-  { title: 'Gesamtumsatz', value: '€2,4M', change: { value: 15.7, type: 'increase', period: 'vs. letztes Jahr' }, icon: '💰', color: 'green' },
-  { title: 'Offene Angebote', value: '€487K', change: { value: 5.2, type: 'decrease', period: 'vs. letzter Monat' }, icon: '📋', color: 'orange' },
-  { title: 'Kundenbindung', value: '94,2%', change: { value: 2.1, type: 'increase', period: 'vs. letztes Jahr' }, icon: '🤝', color: 'blue' },
-  { title: 'Durchschnittlicher Bestellwert', value: '€1.847', change: { value: 8.9, type: 'increase', period: 'vs. letztes Jahr' }, icon: '📊', color: 'green' },
-]
-
-const fallbackCharts: CRMDashboardChart[] = [
-  { title: 'Umsatzentwicklung', type: 'line', data: [185000, 192000, 198000, 215000, 228000, 242000, 238000, 256000, 271000, 289000, 295000, 312000] },
-  { title: 'Kunden nach Region', type: 'pie', data: [32, 28, 18, 12, 6, 4] },
-  { title: 'Top 10 Kunden', type: 'bar', data: [125000, 98000, 87500, 76200, 68900, 65400, 58900, 52100, 49800, 45600] },
-  { title: 'Angebots-Conversion', type: 'pie', data: [68, 22, 10] },
-]
-
 export function useCRMDashboard() {
   return useQuery({
     queryKey: [...crmKeys.all, 'dashboard'],
     queryFn: async () => {
-      try {
-        const response = await apiClient.get<{ kpis: CRMDashboardKPI[]; charts: CRMDashboardChart[] }>('/api/v1/crm/dashboard')
-        if (response.data?.kpis) return response.data
-      } catch { /* fallback */ }
-      return { kpis: fallbackKPIs, charts: fallbackCharts }
+      const response = await apiClient.get<{ kpis: CRMDashboardKPI[]; charts: CRMDashboardChart[] }>(
+        '/api/v1/crm/dashboard',
+      )
+      return response.data
     },
     staleTime: 5 * 60 * 1000,
     refetchInterval: 5 * 60 * 1000,
   })
 }
 
-// ── Suppliers (Lieferanten) ─────────────────────────────────────────────
+// Suppliers (Lieferanten)
 
 export type Supplier = {
   id: string
@@ -304,48 +285,18 @@ export type SupplierListResponse = {
   total: number
 }
 
-const fallbackSuppliers: Supplier[] = [
-  { id: '1', name: 'Saatgut AG', supplier_number: 'LF-001', type: 'Saatgut', city: 'Südhausen', rating: 4.5, is_active: true },
-  { id: '2', name: 'Dünger GmbH', supplier_number: 'LF-002', type: 'Düngemittel', city: 'Nordhausen', rating: 4.2, is_active: true },
-  { id: '3', name: 'Technik GmbH', supplier_number: 'LF-003', type: 'Landtechnik', city: 'Osthausen', rating: 3.8, is_active: true },
-  { id: '4', name: 'BioFeed KG', supplier_number: 'LF-004', type: 'Futtermittel', city: 'Westhausen', rating: 4.0, is_active: true },
-  { id: '5', name: 'AgroChem AG', supplier_number: 'LF-005', type: 'Pflanzenschutz', city: 'Mittelhausen', rating: 3.5, is_active: false },
-]
-
 export function useSuppliers(params?: { search?: string; is_active?: boolean }) {
   return useQuery({
     queryKey: [...crmKeys.all, 'suppliers', params],
     queryFn: async () => {
-      try {
-        const response = await apiClient.get<SupplierListResponse>('/api/v1/crm/suppliers', {
-          params: {
-            search: params?.search,
-            is_active: params?.is_active,
-          },
-        })
-        if (response.data?.items?.length) {
-          return response.data
-        }
-      } catch {
-        // API not available – use fallback
-      }
-      // Filter fallback data
-      let items = [...fallbackSuppliers]
-      if (params?.search) {
-        const s = params.search.toLowerCase()
-        items = items.filter(
-          (sup) =>
-            sup.name.toLowerCase().includes(s) ||
-            sup.type?.toLowerCase().includes(s) ||
-            sup.city?.toLowerCase().includes(s),
-        )
-      }
-      if (params?.is_active !== undefined) {
-        items = items.filter((sup) => sup.is_active === params.is_active)
-      }
-      return { items, total: items.length } as SupplierListResponse
+      const response = await apiClient.get<SupplierListResponse>('/api/v1/crm/suppliers', {
+        params: {
+          search: params?.search,
+          is_active: params?.is_active,
+        },
+      })
+      return response.data
     },
     staleTime: 2 * 60 * 1000,
   })
 }
-

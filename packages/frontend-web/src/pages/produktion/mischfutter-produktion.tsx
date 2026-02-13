@@ -142,7 +142,7 @@ export default function MischfutterProduktionPage(): JSX.Element {
   ]
 
   return (
-    <div className="p-6">
+    <div className="p-3 md:p-6">
       <Wizard
         title="Mischfutter-Produktion"
         steps={steps}

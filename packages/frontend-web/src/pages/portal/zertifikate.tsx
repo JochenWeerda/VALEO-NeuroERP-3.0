@@ -12,18 +12,15 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { ErrorState } from '@/components/ErrorState'
 import {
   Search,
   Download,
   Award,
-  Shield,
   CheckCircle2,
   AlertCircle,
   Calendar,
   Clock,
-  ExternalLink,
-  FileCheck,
-  Leaf,
 } from 'lucide-react'
 
 interface Zertifikat {
@@ -39,85 +36,6 @@ interface Zertifikat {
   logo?: string
 }
 
-const mockZertifikate: Zertifikat[] = [
-  {
-    id: '1',
-    name: 'GMP+ B3 Zertifikat',
-    typ: 'GMP+',
-    aussteller: 'TÜV SÜD',
-    gueltigVon: '2024-01-15',
-    gueltigBis: '2027-01-14',
-    status: 'gueltig',
-    beschreibung: 'Qualitätssicherung für Handel und Lagerung von Futtermitteln',
-    dokument: 'gmp-b3-2024.pdf',
-  },
-  {
-    id: '2',
-    name: 'VLOG Zertifikat',
-    typ: 'VLOG',
-    aussteller: 'Verband Lebensmittel ohne Gentechnik',
-    gueltigVon: '2024-03-01',
-    gueltigBis: '2025-02-28',
-    status: 'gueltig',
-    beschreibung: 'Ohne Gentechnik - Futtermittel nach VLOG Standard',
-    dokument: 'vlog-2024.pdf',
-  },
-  {
-    id: '3',
-    name: 'QS-Zertifikat Futtermittel',
-    typ: 'QS',
-    aussteller: 'QS Qualität und Sicherheit GmbH',
-    gueltigVon: '2024-06-01',
-    gueltigBis: '2025-05-31',
-    status: 'gueltig',
-    beschreibung: 'QS-System Futtermittelwirtschaft',
-    dokument: 'qs-futtermittel-2024.pdf',
-  },
-  {
-    id: '4',
-    name: 'Bio-Zertifikat DE-ÖKO-006',
-    typ: 'Bio',
-    aussteller: 'ABCERT AG',
-    gueltigVon: '2024-01-01',
-    gueltigBis: '2024-12-31',
-    status: 'auslaufend',
-    beschreibung: 'Ökologischer Landbau nach EU-Öko-Verordnung',
-    dokument: 'bio-2024.pdf',
-  },
-  {
-    id: '5',
-    name: 'ISO 9001:2015',
-    typ: 'ISO',
-    aussteller: 'DQS GmbH',
-    gueltigVon: '2023-04-01',
-    gueltigBis: '2026-03-31',
-    status: 'gueltig',
-    beschreibung: 'Qualitätsmanagementsystem',
-    dokument: 'iso-9001-2023.pdf',
-  },
-  {
-    id: '6',
-    name: 'AMA Gütesiegel',
-    typ: 'AMA',
-    aussteller: 'Agrarmarkt Austria',
-    gueltigVon: '2023-08-01',
-    gueltigBis: '2024-07-31',
-    status: 'abgelaufen',
-    beschreibung: 'AMA-Gütesiegel für landwirtschaftliche Produkte',
-    dokument: 'ama-2023.pdf',
-  },
-  {
-    id: '7',
-    name: 'GLOBALG.A.P.',
-    typ: 'GLOBALG.A.P.',
-    aussteller: 'GLOBALG.A.P. c/o FoodPLUS GmbH',
-    gueltigVon: '2024-02-15',
-    gueltigBis: '2025-02-14',
-    status: 'gueltig',
-    beschreibung: 'Good Agricultural Practice - Primärproduktion',
-    dokument: 'globalgap-2024.pdf',
-  },
-]
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode; bgColor: string }> = {
   'gueltig': { 
@@ -153,20 +71,18 @@ const typColors: Record<string, string> = {
 export default function PortalZertifikate() {
   const [searchTerm, setSearchTerm] = useState('')
 
-  const { data: portalZertifikate = [], isLoading } = usePortalZertifikate()
-  const zertifikate: Zertifikat[] = portalZertifikate.length > 0
-    ? portalZertifikate.map((z) => ({
-      id: z.id,
-      name: z.art,
-      typ: z.art,
-      aussteller: 'VALEO',
-      gueltigVon: '',
-      gueltigBis: z.gueltigBis,
-      status: z.status === 'ablaufend' ? 'auslaufend' : z.status,
-      beschreibung: `Zertifikat ${z.nummer}`,
-      dokument: `${z.nummer}.pdf`,
-    }))
-    : mockZertifikate
+  const { data: portalZertifikate = [], isLoading, isError, error, refetch } = usePortalZertifikate()
+  const zertifikate: Zertifikat[] = portalZertifikate.map((z) => ({
+    id: z.id,
+    name: z.art,
+    typ: z.art,
+    aussteller: 'VALEO',
+    gueltigVon: '',
+    gueltigBis: z.gueltigBis,
+    status: z.status === 'ablaufend' ? 'auslaufend' : z.status,
+    beschreibung: `Zertifikat ${z.nummer}`,
+    dokument: `${z.nummer}.pdf`,
+  }))
 
   const filteredZertifikate = zertifikate.filter((z) =>
     z.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -176,10 +92,13 @@ export default function PortalZertifikate() {
 
   const gueltigeZertifikate = zertifikate.filter(z => z.status === 'gueltig').length
   const auslaufendeZertifikate = zertifikate.filter(z => z.status === 'auslaufend').length
-  const abgelaufeneZertifikate = zertifikate.filter(z => z.status === 'abgelaufen').length
 
   if (isLoading) {
     return <ZertifikateSkeleton />
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
   return (

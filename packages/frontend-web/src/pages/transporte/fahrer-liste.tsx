@@ -7,17 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, Plus, Search, Truck } from 'lucide-react'
-
-const mockFahrer: Fahrer[] = [
-  { id: '1', name: 'Max Schmidt', fuehrerschein: 'C', fahrzeug: 'LKW-01', status: 'unterwegs', tourenHeute: 2 },
-  { id: '2', name: 'Tom Mueller', fuehrerschein: 'C', fahrzeug: 'LKW-02', status: 'verfuegbar', tourenHeute: 1 },
-  { id: '3', name: 'Anna Weber', fuehrerschein: 'CE', fahrzeug: 'LKW-03', status: 'pause', tourenHeute: 3 },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function FahrerListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: fahrer = mockFahrer } = useFahrerListe()
+  const { data: fahrer = [], isError, error, refetch } = useFahrerListe()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     { key: 'name' as const, label: 'Name', render: (f: Fahrer) => <button onClick={() => navigate(`/transporte/fahrer/${f.id}`)} className="font-medium text-blue-600 hover:underline">{f.name}</button> },

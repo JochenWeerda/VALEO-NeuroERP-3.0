@@ -6,17 +6,29 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
 import { FileDown, Plus, Search } from 'lucide-react'
-
-const mockSorten: Sorte[] = [
-  { id: '1', name: 'Asano', art: 'Weizen', zuechter: 'KWS', zulassung: '2020', eigenschaft: ['Winterhart', 'Ertragsstark'], status: 'aktiv' },
-  { id: '2', name: 'Elixer', art: 'Weizen', zuechter: 'Saaten-Union', zulassung: '2019', eigenschaft: ['Fruehreife', 'Standfest'], status: 'aktiv' },
-]
 
 export default function SortenregisterPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: sorten = mockSorten } = useSorten()
+  const { data, isLoading, isError, error, refetch } = useSorten()
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const sorten: Sorte[] = data ?? []
 
   const filteredData = useMemo(
     () => sorten.filter((s) =>

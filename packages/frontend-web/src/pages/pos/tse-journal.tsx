@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { AlertTriangle, CheckCircle, FileDown, Search, XCircle } from 'lucide-react'
+import { ErrorState } from '@/components/ErrorState'
 
 type TSETransaction = {
   id: string
@@ -21,61 +22,26 @@ type TSETransaction = {
   fibuBelegnr?: string
 }
 
-const mockTSETransaktionen: TSETransaction[] = [
-  {
-    id: '1',
-    datum: '2025-10-11 09:15:23',
-    bonnummer: 'BON-2025-00123',
-    tseTransactionNumber: 7843,
-    tseSignature: 'TSE_SIG_1728640523',
-    betrag: 45.97,
-    zahlungsart: 'bar',
-    fibuStatus: 'gebucht',
-    fibuDatum: '2025-10-11',
-    fibuBelegnr: 'KA-2025-10-11',
-  },
-  {
-    id: '2',
-    datum: '2025-10-11 10:42:11',
-    bonnummer: 'BON-2025-00124',
-    tseTransactionNumber: 7844,
-    tseSignature: 'TSE_SIG_1728645731',
-    betrag: 128.50,
-    zahlungsart: 'ec',
-    fibuStatus: 'gebucht',
-    fibuDatum: '2025-10-11',
-    fibuBelegnr: 'KA-2025-10-11',
-  },
-  {
-    id: '3',
-    datum: '2025-10-11 14:20:45',
-    bonnummer: 'BON-2025-00125',
-    tseTransactionNumber: 7845,
-    tseSignature: 'TSE_SIG_1728659245',
-    betrag: 89.99,
-    zahlungsart: 'bar',
-    fibuStatus: 'offen',
-  },
-]
-
 export default function TSEJournalPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: apiTse = [] } = useTSEJournal()
-  const tseTransaktionen: TSETransaction[] = apiTse.length > 0
-    ? apiTse.map((t: TSEEintrag) => ({
-      id: t.id,
-      datum: t.zeitstempel,
-      bonnummer: t.transaktionsNr,
-      tseTransactionNumber: Number(t.transaktionsNr.replace(/\D/g, '')) || 0,
-      tseSignature: t.signatur,
-      betrag: t.betrag,
-      zahlungsart: 'bar',
-      fibuStatus: t.status === 'ok' ? 'gebucht' : 'offen',
-      fibuDatum: t.status === 'ok' ? t.zeitstempel.slice(0, 10) : undefined,
-      fibuBelegnr: t.status === 'ok' ? t.transaktionsNr : undefined,
-    }))
-    : mockTSETransaktionen
+  const { data: apiTse = [], isError, error, refetch } = useTSEJournal()
+  const tseTransaktionen: TSETransaction[] = apiTse.map((t: TSEEintrag) => ({
+    id: t.id,
+    datum: t.zeitstempel,
+    bonnummer: t.transaktionsNr,
+    tseTransactionNumber: Number(t.transaktionsNr.replace(/\D/g, '')) || 0,
+    tseSignature: t.signatur,
+    betrag: t.betrag,
+    zahlungsart: 'bar',
+    fibuStatus: t.status === 'ok' ? 'gebucht' : 'offen',
+    fibuDatum: t.status === 'ok' ? t.zeitstempel.slice(0, 10) : undefined,
+    fibuBelegnr: t.status === 'ok' ? t.transaktionsNr : undefined,
+  }))
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     {

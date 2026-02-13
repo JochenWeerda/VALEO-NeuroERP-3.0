@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FileDown, Loader2, Package, Plus, Search } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { ErrorState } from '@/components/ErrorState'
 
 type Artikel = {
   id: string
@@ -20,22 +21,14 @@ type Artikel = {
   status: 'aktiv' | 'auslaufend'
 }
 
-const fallbackArtikel: Artikel[] = [
-  { id: '1', artikelnr: '10001', bezeichnung: 'Weizen Premium', warengruppe: 'Getreide', vkPreis: 220.5, bestand: 450, status: 'aktiv' },
-  { id: '2', artikelnr: '20005', bezeichnung: 'Sojaschrot 44%', warengruppe: 'Futtermittel', vkPreis: 520.0, bestand: 280, status: 'aktiv' },
-  { id: '3', artikelnr: '30012', bezeichnung: 'NPK-Dünger 15-15-15', warengruppe: 'Düngemittel', vkPreis: 380.0, bestand: 220, status: 'aktiv' },
-  { id: '4', artikelnr: '10008', bezeichnung: 'Gerste Brau', warengruppe: 'Getreide', vkPreis: 195.0, bestand: 380, status: 'aktiv' },
-  { id: '5', artikelnr: '30025', bezeichnung: 'Kalkammonsalpeter', warengruppe: 'Düngemittel', vkPreis: 310.0, bestand: 150, status: 'auslaufend' },
-]
-
-function mapApiArticle(a: any): Artikel {
+function mapApiArticle(a: Record<string, unknown>): Artikel {
   return {
-    id: a.id,
-    artikelnr: a.article_number || a.sku || a.id?.substring(0, 5),
-    bezeichnung: a.name || a.description || '–',
-    warengruppe: a.category || a.product_group || 'Sonstige',
-    vkPreis: Number(a.price || a.sell_price || 0),
-    bestand: Number(a.stock_quantity || a.quantity || 0),
+    id: String(a.id ?? ''),
+    artikelnr: String(a.article_number ?? a.sku ?? String(a.id ?? '').substring(0, 5)),
+    bezeichnung: String(a.name ?? a.description ?? '-'),
+    warengruppe: String(a.category ?? a.product_group ?? 'Sonstige'),
+    vkPreis: Number(a.price ?? a.sell_price ?? 0),
+    bestand: Number(a.stock_quantity ?? a.quantity ?? 0),
     status: a.is_active === false ? 'auslaufend' : 'aktiv',
   }
 }
@@ -44,33 +37,23 @@ export default function ArtikelListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
 
-  const { data: artikel = fallbackArtikel, isLoading } = useQuery({
+  const { data: artikel = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['articles', searchTerm],
     queryFn: async () => {
-      try {
-        const res = await apiClient.get<{ items: any[]; total?: number }>('/api/v1/articles', {
-          params: { search: searchTerm || undefined },
-        })
-        if (res.data?.items?.length) {
-          return res.data.items.map(mapApiArticle)
-        }
-      } catch {
-        // API not available – use fallback
+      const res = await apiClient.get<{ items?: Record<string, unknown>[]; total?: number }>('/api/v1/articles', {
+        params: { search: searchTerm || undefined },
+      })
+      if (!Array.isArray(res.data?.items)) {
+        throw new Error('Ungueltige API-Antwort fuer Artikelliste')
       }
-      // Filter fallback
-      if (searchTerm) {
-        const s = searchTerm.toLowerCase()
-        return fallbackArtikel.filter(
-          (a) =>
-            a.bezeichnung.toLowerCase().includes(s) ||
-            a.artikelnr.includes(s) ||
-            a.warengruppe.toLowerCase().includes(s),
-        )
-      }
-      return fallbackArtikel
+      return res.data.items.map(mapApiArticle)
     },
     staleTime: 2 * 60 * 1000,
   })
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     {
