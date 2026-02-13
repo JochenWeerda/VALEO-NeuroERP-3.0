@@ -2,15 +2,41 @@
 Fuhrpark API Endpoints - SQLAlchemy Version
 """
 
-from typing import List, Optional
+from datetime import datetime
+from decimal import Decimal
+from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from sqlalchemy.inspection import inspect as sa_inspect
 
 from app.core.database import get_db
 from app.domains.operations.repository import FahrzeugRepository, FahrerRepository, FahrzeugTourRepository
 from app.domains.operations.models import Fahrzeug, Fahrer, FahrzeugTour
 
 router = APIRouter(prefix="/fuhrpark", tags=["Fuhrpark"])
+
+
+def _serialize_value(value: Any) -> Any:
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return float(value)
+    return value
+
+
+def _to_dict(model: Any) -> dict:
+    if model is None:
+        return {}
+    mapper = sa_inspect(model.__class__)
+    data = {}
+    for column in mapper.columns:
+        key = column.key
+        data[key] = _serialize_value(getattr(model, key))
+    return data
+
+
+def _to_list(models: List[Any]) -> List[dict]:
+    return [_to_dict(model) for model in models]
 
 
 # === FAHRZEUG ENDPOINTS ===
@@ -25,8 +51,8 @@ async def list_fahrzeuge(
     """List all Fahrzeuge with optional filtering"""
     repo = FahrzeugRepository(db)
     if status:
-        return repo.get_by_status(status)
-    return repo.get_all(skip=skip, limit=limit)
+        return _to_list(repo.get_by_status(status))
+    return _to_list(repo.get_all(skip=skip, limit=limit))
 
 
 @router.get("/fahrzeuge/{fahrzeug_id}", response_model=dict)
@@ -36,7 +62,7 @@ async def get_fahrzeug(fahrzeug_id: str, db: Session = Depends(get_db)):
     fahrzeug = repo.get_by_id(fahrzeug_id)
     if not fahrzeug:
         raise HTTPException(status_code=404, detail=f"Fahrzeug {fahrzeug_id} not found")
-    return fahrzeug
+    return _to_dict(fahrzeug)
 
 
 @router.post("/fahrzeuge", response_model=dict, status_code=201)
@@ -54,7 +80,7 @@ async def create_fahrzeug(
     
     try:
         fahrzeug = repo.create(fahrzeug_data)
-        return fahrzeug
+        return _to_dict(fahrzeug)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -70,7 +96,7 @@ async def update_fahrzeug(
     fahrzeug = repo.update(fahrzeug_id, fahrzeug_data)
     if not fahrzeug:
         raise HTTPException(status_code=404, detail=f"Fahrzeug {fahrzeug_id} not found")
-    return fahrzeug
+    return _to_dict(fahrzeug)
 
 
 @router.delete("/fahrzeuge/{fahrzeug_id}", status_code=204)
@@ -93,8 +119,8 @@ async def list_fahrer(
     """List all Fahrer with optional filtering"""
     repo = FahrerRepository(db)
     if status:
-        return repo.get_by_status(status)
-    return repo.get_all(skip=skip, limit=limit)
+        return _to_list(repo.get_by_status(status))
+    return _to_list(repo.get_all(skip=skip, limit=limit))
 
 
 @router.get("/fahrer/{fahrer_id}", response_model=dict)
@@ -104,7 +130,7 @@ async def get_fahrer(fahrer_id: str, db: Session = Depends(get_db)):
     fahrer = repo.get_by_id(fahrer_id)
     if not fahrer:
         raise HTTPException(status_code=404, detail=f"Fahrer {fahrer_id} not found")
-    return fahrer
+    return _to_dict(fahrer)
 
 
 @router.post("/fahrer", response_model=dict, status_code=201)
@@ -123,7 +149,7 @@ async def create_fahrer(
     
     try:
         fahrer = repo.create(fahrer_data)
-        return fahrer
+        return _to_dict(fahrer)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -139,7 +165,7 @@ async def update_fahrer(
     fahrer = repo.update(fahrer_id, fahrer_data)
     if not fahrer:
         raise HTTPException(status_code=404, detail=f"Fahrer {fahrer_id} not found")
-    return fahrer
+    return _to_dict(fahrer)
 
 
 @router.delete("/fahrer/{fahrer_id}", status_code=204)
@@ -164,10 +190,10 @@ async def list_touren(
     repo = FahrzeugTourRepository(db)
     
     if fahrzeug_id:
-        return repo.get_by_fahrzeug(fahrzeug_id)
+        return _to_list(repo.get_by_fahrzeug(fahrzeug_id))
     if fahrer_id:
-        return repo.get_by_fahrer(fahrer_id)
-    return repo.get_all(skip=skip, limit=limit)
+        return _to_list(repo.get_by_fahrer(fahrer_id))
+    return _to_list(repo.get_all(skip=skip, limit=limit))
 
 
 @router.get("/touren/{tour_id}", response_model=dict)
@@ -177,7 +203,7 @@ async def get_tour(tour_id: str, db: Session = Depends(get_db)):
     tour = repo.get_by_id(tour_id)
     if not tour:
         raise HTTPException(status_code=404, detail=f"Tour {tour_id} not found")
-    return tour
+    return _to_dict(tour)
 
 
 @router.post("/touren", response_model=dict, status_code=201)
@@ -189,7 +215,7 @@ async def create_tour(
     repo = FahrzeugTourRepository(db)
     try:
         tour = repo.create(tour_data)
-        return tour
+        return _to_dict(tour)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -205,7 +231,7 @@ async def update_tour(
     tour = repo.update(tour_id, tour_data)
     if not tour:
         raise HTTPException(status_code=404, detail=f"Tour {tour_id} not found")
-    return tour
+    return _to_dict(tour)
 
 
 @router.delete("/touren/{tour_id}", status_code=204)
