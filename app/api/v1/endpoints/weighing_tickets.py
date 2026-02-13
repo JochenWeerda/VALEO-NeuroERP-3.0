@@ -4,14 +4,19 @@ GET/POST/PUT for weighing tickets.
 """
 
 from datetime import datetime
+from decimal import Decimal
 from typing import Any, Optional
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from ....core.database import get_db
-from ....infrastructure.models import WeighingTicket
+from ....domains.shared.events import IntegrationEvent, get_event_publisher
+from ....infrastructure.eventbus.outbox import OutboxPublisher
+from ....infrastructure.models import AgrarContract, AgrarContractAllocation, WeighingTicket
+from .agrar_contracts import _compute_status
 from ..schemas.base import PaginatedResponse, BaseSchema
 
 router = APIRouter()
@@ -34,6 +39,9 @@ class WeighingTicketOut(BaseSchema):
     hl_weight: Optional[float] = None
     billing_weight: Optional[float] = None
     quality_data: Optional[dict[str, Any]] = None
+    contract_id: Optional[str] = None
+    allocated_quantity_kg: Optional[float] = None
+    allocation_status: Optional[str] = "unallocated"
     status: str = "open"
     direction: str = "in"
     reference_doc: Optional[str] = None
@@ -74,6 +82,21 @@ class WeighingTicketUpdate(BaseModel):
     vehicle_plate: Optional[str] = None
 
 
+class WeighingTicketContractAllocationRequest(BaseModel):
+    contract_id: str
+    allocation_quantity_kg: Optional[float] = Field(default=None, gt=0)
+    note: Optional[str] = None
+
+
+class WeighingTicketContractAllocationOut(BaseSchema):
+    ticket_id: str
+    contract_id: str
+    allocation_id: str
+    allocation_quantity_kg: float
+    contract_remaining_quantity_kg: float
+    contract_status: str
+
+
 def _validate_and_compute_weights(gross_weight: Optional[float], tare_weight: Optional[float], net_weight: Optional[float]) -> float | None:
     if gross_weight is not None and gross_weight < 0:
         raise HTTPException(status_code=400, detail="gross_weight must be >= 0")
@@ -90,6 +113,21 @@ def _validate_and_compute_weights(gross_weight: Optional[float], tare_weight: Op
             raise HTTPException(status_code=400, detail="net_weight does not match gross_weight - tare_weight")
         return computed
     return net_weight
+
+
+def _resolve_ticket_allocation_quantity(ticket: WeighingTicket, requested_quantity: Optional[float]) -> Decimal:
+    if requested_quantity is not None:
+        quantity = Decimal(str(requested_quantity))
+    elif ticket.billing_weight is not None:
+        quantity = Decimal(str(ticket.billing_weight))
+    elif ticket.net_weight is not None:
+        quantity = Decimal(str(ticket.net_weight))
+    else:
+        raise HTTPException(status_code=400, detail="Ticket has no allocatable quantity")
+
+    if quantity <= Decimal("0"):
+        raise HTTPException(status_code=400, detail="Allocation quantity must be > 0")
+    return quantity
 
 
 @router.get("/", response_model=PaginatedResponse[WeighingTicketOut])
@@ -169,3 +207,95 @@ async def update_weighing_ticket(
     db.commit()
     db.refresh(ticket)
     return WeighingTicketOut.model_validate(ticket)
+
+
+@router.post("/{ticket_id}/allocate-contract", response_model=WeighingTicketContractAllocationOut, status_code=201)
+async def allocate_ticket_to_contract(
+    ticket_id: str,
+    payload: WeighingTicketContractAllocationRequest,
+    db: Session = Depends(get_db),
+):
+    ticket = db.query(WeighingTicket).filter(WeighingTicket.id == ticket_id).first()
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Weighing ticket not found")
+    contract = db.query(AgrarContract).filter(AgrarContract.id == payload.contract_id).first()
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    if ticket.tenant_id != contract.tenant_id:
+        raise HTTPException(status_code=400, detail="Ticket and contract tenant mismatch")
+    if contract.status in {"cancelled", "fulfilled"}:
+        raise HTTPException(status_code=400, detail=f"Contract cannot be allocated in status {contract.status}")
+
+    allocation_quantity = _resolve_ticket_allocation_quantity(ticket, payload.allocation_quantity_kg)
+    remaining = Decimal(str(contract.remaining_quantity_kg))
+    if allocation_quantity > remaining:
+        raise HTTPException(status_code=400, detail="Allocation exceeds remaining contract quantity")
+
+    publisher = get_event_publisher()
+    outbox = OutboxPublisher(db, publisher)
+
+    try:
+        contract.remaining_quantity_kg = remaining - allocation_quantity
+        contract.status = _compute_status(
+            Decimal(str(contract.total_quantity_kg)),
+            Decimal(str(contract.remaining_quantity_kg)),
+            contract.status,
+        )
+
+        allocation = AgrarContractAllocation(
+            id=str(uuid.uuid4()),
+            contract_id=contract.id,
+            ticket_id=ticket.id,
+            allocation_quantity_kg=float(allocation_quantity),
+            note=payload.note,
+            tenant_id=ticket.tenant_id,
+        )
+        db.add(allocation)
+
+        ticket.contract_id = contract.id
+        ticket.allocated_quantity_kg = float(allocation_quantity)
+        ticket.allocation_status = "allocated"
+
+        now = datetime.utcnow()
+        event_payload = {
+            "ticket_id": ticket.id,
+            "contract_id": contract.id,
+            "allocation_id": allocation.id,
+            "allocation_quantity_kg": float(allocation_quantity),
+            "remaining_quantity_kg": float(contract.remaining_quantity_kg),
+        }
+
+        await outbox.store_event(
+            IntegrationEvent(
+                aggregate_id=ticket.id,
+                timestamp=now,
+                event_type="agrar.weighing_ticket.allocated",
+                payload=event_payload,
+            ),
+            tenant_id=ticket.tenant_id,
+        )
+        await outbox.store_event(
+            IntegrationEvent(
+                aggregate_id=contract.id,
+                timestamp=now,
+                event_type="agrar.contract.allocated",
+                payload=event_payload,
+            ),
+            tenant_id=ticket.tenant_id,
+        )
+
+        db.commit()
+        db.refresh(contract)
+        db.refresh(allocation)
+    except Exception:
+        db.rollback()
+        raise
+
+    return WeighingTicketContractAllocationOut(
+        ticket_id=ticket.id,
+        contract_id=contract.id,
+        allocation_id=allocation.id,
+        allocation_quantity_kg=float(allocation.allocation_quantity_kg),
+        contract_remaining_quantity_kg=float(contract.remaining_quantity_kg),
+        contract_status=contract.status,
+    )
