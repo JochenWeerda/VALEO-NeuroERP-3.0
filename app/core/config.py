@@ -96,6 +96,18 @@ class Settings(BaseSettings):
 
     # Multi-tenancy defaults
     DEFAULT_TENANT_ID: str = "00000000-0000-0000-0000-000000000001"
+    INSTALLED_MODULES: List[str] = ["core", "agrar"]
+
+    @field_validator("INSTALLED_MODULES", mode="before")
+    @classmethod
+    def assemble_installed_modules(
+        cls, v: Union[str, List[str]]
+    ) -> Union[List[str], str]:
+        if isinstance(v, str) and not v.startswith("["):
+            return [i.strip() for i in v.split(",") if i.strip()]
+        elif isinstance(v, (list, str)):
+            return v
+        raise ValueError(v)
 
     # External Services
     EMAIL_SMTP_SERVER: Optional[str] = None

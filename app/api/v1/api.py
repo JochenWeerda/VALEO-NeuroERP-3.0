@@ -78,6 +78,7 @@ from app.api.v1.endpoints import (
     tours,
     sustainability,
     compat,
+    modules,
 )
 
 # Import domain routers
@@ -100,6 +101,12 @@ api_router.include_router(
     health,
     prefix="/health",
     tags=["health"]
+)
+
+api_router.include_router(
+    modules.router,
+    prefix="/meta",
+    tags=["modules", "meta"]
 )
 
 api_router.include_router(
