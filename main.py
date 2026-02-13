@@ -26,6 +26,7 @@ from app.core.container_config import configure_container  # Import container co
 from app.core.tenant_context import reset_current_tenant_id, set_current_tenant_id
 from app.domains.shared.events import startup_event_publisher, shutdown_event_publisher
 from app.workers.outbox_publisher import start_outbox_worker, stop_outbox_worker
+from modules.bootstrap import initialize_module_registry
 
 # Logger muss vor der Verwendung definiert werden
 logger = logging.getLogger(__name__)
@@ -90,6 +91,13 @@ async def lifespan(app: FastAPI):
         logger.info("Dependency injection container configured successfully")
     except Exception as e:
         logger.error(f"Failed to configure dependency container: {e}")
+        raise
+
+    try:
+        initialize_module_registry()
+        logger.info("Module registry initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize module registry: {e}")
         raise
 
     # Create database tables

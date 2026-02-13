@@ -1,0 +1,4 @@
+"""
+Agrar vertical module package.
+"""
+
