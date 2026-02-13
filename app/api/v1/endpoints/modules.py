@@ -5,6 +5,8 @@ Runtime module visibility endpoints.
 from fastapi import APIRouter, HTTPException
 
 from app.core.module_registry import registry
+from modules.agrar.contracts.events_v1 import AGRAR_EVENT_CONTRACTS_V1
+from modules.agrar.contracts.hooks_v1 import agrar_hooks_as_dict
 from modules.bootstrap import initialize_module_registry
 
 router = APIRouter(tags=["modules"])
@@ -29,4 +31,17 @@ async def get_module(module_name: str):
         "description": module.description,
         "required_modules": module.required_modules,
         "enabled": registry.is_enabled(module.name),
+    }
+
+
+@router.get("/modules/agrar/contracts")
+async def get_agrar_contracts():
+    initialize_module_registry()
+    event_schemas = {
+        event_name: model.model_json_schema()
+        for event_name, model in AGRAR_EVENT_CONTRACTS_V1.items()
+    }
+    return {
+        "event_contracts": event_schemas,
+        "hook_contracts": agrar_hooks_as_dict(),
     }
