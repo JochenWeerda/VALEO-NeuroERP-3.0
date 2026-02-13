@@ -191,6 +191,95 @@ async def list_silos(
     ]
 
 
+@router.get("/silos/{silo_id}/details", response_model=dict)
+async def get_silo_details(
+    silo_id: str,
+    include_movements: bool = Query(True),
+    movement_limit: int = Query(25, ge=1, le=200),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    silo = (
+        db.query(Silo)
+        .filter(Silo.id == silo_id, Silo.tenant_id == tenant_id)
+        .first()
+    )
+    if not silo:
+        raise HTTPException(status_code=404, detail="Silo not found")
+
+    lots = (
+        db.query(SiloLot)
+        .filter(SiloLot.silo_id == silo_id, SiloLot.tenant_id == tenant_id)
+        .order_by(SiloLot.created_at.desc())
+        .all()
+    )
+    snapshot = _create_snapshot(db, silo_id, tenant_id)
+    db.commit()
+    db.refresh(snapshot)
+
+    lot_ids = [lot.id for lot in lots]
+    movement_items: list[dict[str, object]] = []
+    if include_movements and lot_ids:
+        movements = (
+            db.query(SiloLotMovement)
+            .filter(SiloLotMovement.silo_lot_id.in_(lot_ids), SiloLotMovement.tenant_id == tenant_id)
+            .order_by(SiloLotMovement.created_at.desc())
+            .limit(movement_limit)
+            .all()
+        )
+        movement_items = [
+            {
+                "id": m.id,
+                "silo_lot_id": m.silo_lot_id,
+                "movement_type": m.movement_type,
+                "quantity_tons": _to_float(m.quantity_tons),
+                "note": m.note,
+                "created_at": m.created_at.isoformat() if m.created_at else None,
+            }
+            for m in movements
+        ]
+
+    return {
+        "silo": {
+            "id": str(silo.id),
+            "silo_number": silo.silo_number,
+            "name": silo.name,
+            "article_id": silo.article_id,
+            "capacity_tons": _to_float(silo.capacity_tons),
+            "is_active": bool(silo.is_active),
+        },
+        "snapshot": {
+            "id": snapshot.id,
+            "silo_id": snapshot.silo_id,
+            "total_quantity_tons": _to_float(snapshot.total_quantity_tons),
+            "moisture_avg_pct": _to_float(snapshot.moisture_avg_pct) if snapshot.moisture_avg_pct is not None else None,
+            "protein_avg_pct": _to_float(snapshot.protein_avg_pct) if snapshot.protein_avg_pct is not None else None,
+            "impurities_avg_pct": _to_float(snapshot.impurities_avg_pct) if snapshot.impurities_avg_pct is not None else None,
+            "hl_weight_avg": _to_float(snapshot.hl_weight_avg) if snapshot.hl_weight_avg is not None else None,
+            "lot_count": int(snapshot.lot_count),
+            "created_at": snapshot.created_at.isoformat() if snapshot.created_at else None,
+        },
+        "lots": [
+            {
+                "id": lot.id,
+                "virtual_lot_number": lot.virtual_lot_number,
+                "source_ticket_id": lot.source_ticket_id,
+                "source_partner_id": lot.source_partner_id,
+                "article_id": lot.article_id,
+                "quantity_tons": _to_float(lot.quantity_tons),
+                "moisture_pct": _to_float(lot.moisture_pct) if lot.moisture_pct is not None else None,
+                "protein_pct": _to_float(lot.protein_pct) if lot.protein_pct is not None else None,
+                "impurities_pct": _to_float(lot.impurities_pct) if lot.impurities_pct is not None else None,
+                "hl_weight": _to_float(lot.hl_weight) if lot.hl_weight is not None else None,
+                "status": lot.status,
+                "created_at": lot.created_at.isoformat() if lot.created_at else None,
+            }
+            for lot in lots
+        ],
+        "movements": movement_items,
+    }
+
+
 @router.post("/silos", response_model=dict, status_code=201)
 async def create_silo(
     payload: SiloCreate,
