@@ -133,6 +133,9 @@ jobs:
       - name: Check migrations (single head)
         run: python scripts/check_alembic_single_head.py
 
+      - name: Check core contamination guardrail
+        run: python scripts/check_no_core_contamination.py
+
       - name: Migrate DB schema (Alembic)
         run: python scripts/init_db.py
 

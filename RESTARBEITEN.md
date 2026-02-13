@@ -78,9 +78,9 @@
 **Prinzip:** Core stabil halten, Agrar als vertikales Modul unter `modules/agrar`.
 
 ### Woche 1 (13.02-20.02): EPIC AGRAR-ARCH-01 Modulrahmen
-- [ ] Story AGRAR-ARCH-01-01: Verzeichnisstruktur `modules/agrar/*` anlegen.
-- [ ] Story AGRAR-ARCH-01-02: Domain Registry + `INSTALLED_MODULES` ergänzen.
-- [ ] Story AGRAR-ARCH-01-03: ADR "No Core Contamination" dokumentieren.
+- [x] Story AGRAR-ARCH-01-01: Verzeichnisstruktur `modules/agrar/*` anlegen.
+- [x] Story AGRAR-ARCH-01-02: Domain Registry + `INSTALLED_MODULES` ergänzen.
+- [x] Story AGRAR-ARCH-01-03: ADR "No Core Contamination" dokumentieren.
 - Akzeptanzkriterien:
 - Build grün, Module registrierbar, keine Fachlogik in `core/*`.
 
@@ -197,9 +197,9 @@
 - Akzeptanzkriterien: messbar, testbar, ohne "sollte"
 
 ### Sprint 1 (13.02-27.02) Architektur & Verträge
-- [ ] `AGRAR-ARCH-01` Modulrahmen aufsetzen | P0 | M | Fullstack
+- [x] `AGRAR-ARCH-01` Modulrahmen aufsetzen | P0 | M | Fullstack
 - [ ] `AGRAR-ARCH-02` Event-/Hook-Verträge versionieren | P0 | M | Backend
-- [ ] `AGRAR-ARCH-03` CI-Guardrails gegen Core-Kontamination | P0 | M | DevOps
+- [x] `AGRAR-ARCH-03` CI-Guardrails gegen Core-Kontamination | P0 | M | DevOps
 
 ### Sprint 2 (28.02-20.03) Wiegeschein + Kontrakt-Basis
 - [ ] `AGRAR-WG-01` Wiegeschein-Datenmodell + CRUD | P0 | L | Backend
