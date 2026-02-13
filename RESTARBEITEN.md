@@ -85,9 +85,9 @@
 - Build grün, Module registrierbar, keine Fachlogik in `core/*`.
 
 ### Woche 2 (21.02-27.02): EPIC AGRAR-ARCH-02 Event- und Hook-Verträge
-- [ ] Story AGRAR-ARCH-02-01: Event-Schemas definieren (`WeighingTicketCreated`, `ContractAllocated`, `SettlementIssued`).
-- [ ] Story AGRAR-ARCH-02-02: Hook-Punkte für Lager/Buchhaltung/Compliance definieren.
-- [ ] Story AGRAR-ARCH-02-03: Contract-Tests für Event-Payloads ergänzen.
+- [x] Story AGRAR-ARCH-02-01: Event-Schemas definieren (`WeighingTicketCreated`, `ContractAllocated`, `SettlementIssued`).
+- [x] Story AGRAR-ARCH-02-02: Hook-Punkte für Lager/Buchhaltung/Compliance definieren.
+- [x] Story AGRAR-ARCH-02-03: Contract-Tests für Event-Payloads ergänzen.
 - Akzeptanzkriterien:
 - Versionierte Event-Verträge liegen vor, Contract-Tests erfolgreich.
 
@@ -198,7 +198,7 @@
 
 ### Sprint 1 (13.02-27.02) Architektur & Verträge
 - [x] `AGRAR-ARCH-01` Modulrahmen aufsetzen | P0 | M | Fullstack
-- [ ] `AGRAR-ARCH-02` Event-/Hook-Verträge versionieren | P0 | M | Backend
+- [x] `AGRAR-ARCH-02` Event-/Hook-Verträge versionieren | P0 | M | Backend
 - [x] `AGRAR-ARCH-03` CI-Guardrails gegen Core-Kontamination | P0 | M | DevOps
 
 ### Sprint 2 (28.02-20.03) Wiegeschein + Kontrakt-Basis
