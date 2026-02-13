@@ -62,3 +62,4 @@ from . import compat
 from . import modules
 from . import agrar_contracts
 from . import silo
+from . import agrar_settlements

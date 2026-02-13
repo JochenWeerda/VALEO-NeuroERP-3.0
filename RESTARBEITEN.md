@@ -127,9 +127,9 @@
 - Silo-Füllung, Mischung und Qualitätsdurchschnitt reproduzierbar berechnet.
 
 ### Woche 8 (06.04-10.04): EPIC AGRAR-SET-01 Gutschriftverfahren
-- [ ] Story AGRAR-SET-01-01: Self-Billing Entität/Workflow implementieren.
-- [ ] Story AGRAR-SET-01-02: Abzugsarten (Trocknung, Reinigung, Fracht) regelbasiert.
-- [ ] Story AGRAR-SET-01-03: Buchungssätze in Fibu erzeugen.
+- [x] Story AGRAR-SET-01-01: Self-Billing Entität/Workflow implementieren.
+- [x] Story AGRAR-SET-01-02: Abzugsarten (Trocknung, Reinigung, Fracht) regelbasiert.
+- [x] Story AGRAR-SET-01-03: Buchungssätze in Fibu erzeugen.
 - Akzeptanzkriterien:
 - Gutschrift endet in validen Buchungen inkl. Einzelabzügen.
 
@@ -212,7 +212,7 @@
 - [x] `AGRAR-SILO-UI-01` Siloübersicht mit Qualitätssnapshot | P1 | M | Frontend
 
 ### Sprint 4 (04.04-17.04) Abrechnung + Physiklogik
-- [ ] `AGRAR-SET-01` Self-Billing inkl. Abzüge | P0 | L | Backend
+- [x] `AGRAR-SET-01` Self-Billing inkl. Abzüge | P0 | L | Backend
 - [ ] `AGRAR-SET-02` Feuchte-/Schwund-Engine im Domain-Service | P0 | M | Backend
 - [ ] `AGRAR-SET-UI-01` Gutschrift-Ansicht inkl. Abzugsnachweis | P1 | M | Frontend
 

@@ -136,6 +136,51 @@ class AgrarContractAllocation(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
+class AgrarSettlement(Base):
+    """Self-billing settlement header."""
+    __tablename__ = "agrar_settlements"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    settlement_number = Column(String(50), nullable=False)
+    contract_id = Column(String, ForeignKey("domain_inventory.agrar_contracts.id"), nullable=True)
+    ticket_id = Column(String, ForeignKey("domain_inventory.weighing_tickets.id"), nullable=True)
+    supplier_id = Column(String(64), nullable=False)
+    article_id = Column(String(64), nullable=True)
+    gross_quantity_kg = Column(DECIMAL(12, 3), nullable=False)
+    billing_quantity_kg = Column(DECIMAL(12, 3), nullable=False)
+    unit_price_eur_per_ton = Column(DECIMAL(12, 4), nullable=False)
+    gross_amount_eur = Column(DECIMAL(14, 2), nullable=False)
+    total_deductions_eur = Column(DECIMAL(14, 2), nullable=False, default=0)
+    net_amount_eur = Column(DECIMAL(14, 2), nullable=False)
+    currency = Column(String(3), nullable=False, default="EUR")
+    status = Column(String(20), nullable=False, default="draft")  # draft / posted / cancelled
+    posted_journal_ref = Column(String(80), nullable=True)
+    posted_at = Column(DateTime(timezone=True), nullable=True)
+    note = Column(Text, nullable=True)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class AgrarSettlementDeduction(Base):
+    """Settlement deduction lines (drying/cleaning/freight/etc)."""
+    __tablename__ = "agrar_settlement_deductions"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    settlement_id = Column(String, ForeignKey("domain_inventory.agrar_settlements.id"), nullable=False)
+    deduction_type = Column(String(30), nullable=False)  # drying / cleaning / freight / other
+    mode = Column(String(20), nullable=False)  # per_ton / fixed
+    rate_per_ton_eur = Column(DECIMAL(12, 4), nullable=True)
+    fixed_amount_eur = Column(DECIMAL(14, 2), nullable=True)
+    basis_quantity_tons = Column(DECIMAL(12, 3), nullable=True)
+    amount_eur = Column(DECIMAL(14, 2), nullable=False)
+    note = Column(Text, nullable=True)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 class Silo(Base):
     """Silo master data."""
     __tablename__ = "silos"

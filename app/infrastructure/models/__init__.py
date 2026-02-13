@@ -375,6 +375,8 @@ from .l3c_models import (
     WeighingMeasurement,
     AgrarContract,
     AgrarContractAllocation,
+    AgrarSettlement,
+    AgrarSettlementDeduction,
     Silo,
     SiloLot,
     SiloLotMovement,
