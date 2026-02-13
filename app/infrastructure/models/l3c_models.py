@@ -47,6 +47,14 @@ class WeighingTicket(Base):
     gross_weight = Column(DECIMAL(12, 3), nullable=True)
     tare_weight = Column(DECIMAL(12, 3), nullable=True)
     net_weight = Column(DECIMAL(12, 3), nullable=True)
+    first_weighing_at = Column(DateTime(timezone=True), nullable=True)
+    second_weighing_at = Column(DateTime(timezone=True), nullable=True)
+    moisture_pct = Column(DECIMAL(5, 2), nullable=True)
+    protein_pct = Column(DECIMAL(5, 2), nullable=True)
+    impurities_pct = Column(DECIMAL(5, 2), nullable=True)
+    hl_weight = Column(DECIMAL(6, 2), nullable=True)
+    billing_weight = Column(DECIMAL(12, 3), nullable=True)
+    quality_data = Column(JSONB, nullable=True)
     weighing_date = Column(DateTime(timezone=True), server_default=func.now())
     status = Column(String(20), default="open")
     direction = Column(String(10), default="in")  # in / out
@@ -66,6 +74,21 @@ class WeighingTicketLine(Base):
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=False)
     quantity = Column(DECIMAL(12, 3), nullable=False)
     unit = Column(String(10), default="kg")
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class WeighingMeasurement(Base):
+    """Wiegeschein quality measurement entries."""
+    __tablename__ = "weighing_measurements"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    ticket_id = Column(String, ForeignKey("domain_inventory.weighing_tickets.id"), nullable=False)
+    metric_key = Column(String(50), nullable=False)
+    metric_value = Column(DECIMAL(10, 3), nullable=False)
+    unit = Column(String(20), nullable=True)
+    measured_at = Column(DateTime(timezone=True), nullable=True)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
