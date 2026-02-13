@@ -42,6 +42,14 @@ class ContractAllocatedV1(BaseAgrarEventV1):
     pricing_model: Literal["fixed", "follow", "pool"]
 
 
+class WeighingTicketAllocatedV1(BaseAgrarEventV1):
+    event_type: Literal["agrar.weighing_ticket.allocated"] = "agrar.weighing_ticket.allocated"
+    contract_id: str
+    allocation_id: str
+    allocation_quantity_kg: float
+    remaining_quantity_kg: float
+
+
 class SettlementIssuedV1(BaseAgrarEventV1):
     event_type: Literal["agrar.settlement.issued"] = "agrar.settlement.issued"
     settlement_id: str
@@ -56,6 +64,7 @@ class SettlementIssuedV1(BaseAgrarEventV1):
 
 AGRAR_EVENT_CONTRACTS_V1 = {
     "agrar.weighing_ticket.created": WeighingTicketCreatedV1,
+    "agrar.weighing_ticket.allocated": WeighingTicketAllocatedV1,
     "agrar.contract.allocated": ContractAllocatedV1,
     "agrar.settlement.issued": SettlementIssuedV1,
 }

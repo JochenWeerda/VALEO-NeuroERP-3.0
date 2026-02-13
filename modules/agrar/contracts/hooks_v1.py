@@ -29,6 +29,14 @@ AGRAR_HOOK_CONTRACTS_V1: List[HookContractV1] = [
         description="Initial hook fired when a weighing ticket is finalized.",
     ),
     HookContractV1(
+        hook_name="agrar.weighing_ticket.allocated",
+        version=HOOK_CONTRACT_VERSION,
+        producer="modules.agrar.weighing",
+        consumers=["contracts", "settlement", "compliance"],
+        payload_schema_ref="modules/agrar/contracts/events_v1.py#WeighingTicketAllocatedV1",
+        description="Hook fired when a ticket is atomically allocated to a contract.",
+    ),
+    HookContractV1(
         hook_name="agrar.contract.allocated",
         version=HOOK_CONTRACT_VERSION,
         producer="modules.agrar.contracts",
