@@ -114,11 +114,13 @@ api_router.include_router(
 
 api_router.include_router(
     tenants,
+    prefix="/tenants",
     tags=["tenants"]
 )
 
 api_router.include_router(
     users,
+    prefix="/users",
     tags=["users"]
 )
 

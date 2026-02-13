@@ -2,15 +2,41 @@
 Waage API Endpoints - SQLAlchemy Version
 """
 
-from typing import List, Optional
+from datetime import datetime
+from decimal import Decimal
+from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from sqlalchemy.inspection import inspect as sa_inspect
 
 from app.core.database import get_db
 from app.domains.operations.repository import WaageRepository, WiegungRepository
 from app.domains.operations.models import Waage, Wiegung
 
 router = APIRouter(prefix="/waage", tags=["Waage"])
+
+
+def _serialize_value(value: Any) -> Any:
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return float(value)
+    return value
+
+
+def _to_dict(model: Any) -> dict:
+    if model is None:
+        return {}
+    mapper = sa_inspect(model.__class__)
+    data = {}
+    for column in mapper.columns:
+        key = column.key
+        data[key] = _serialize_value(getattr(model, key))
+    return data
+
+
+def _to_list(models: List[Any]) -> List[dict]:
+    return [_to_dict(model) for model in models]
 
 
 # === WAAGE ENDPOINTS ===
@@ -25,8 +51,8 @@ async def list_waagen(
     """List all Waagen with optional filtering"""
     repo = WaageRepository(db)
     if status:
-        return repo.get_by_status(status)
-    return repo.get_all(skip=skip, limit=limit)
+        return _to_list(repo.get_by_status(status))
+    return _to_list(repo.get_all(skip=skip, limit=limit))
 
 
 @router.get("/waagen/{waage_id}", response_model=dict)
@@ -36,7 +62,7 @@ async def get_waage(waage_id: str, db: Session = Depends(get_db)):
     waage = repo.get_by_id(waage_id)
     if not waage:
         raise HTTPException(status_code=404, detail=f"Waage {waage_id} not found")
-    return waage
+    return _to_dict(waage)
 
 
 @router.post("/waagen", response_model=dict, status_code=201)
@@ -48,7 +74,7 @@ async def create_waage(
     repo = WaageRepository(db)
     try:
         waage = repo.create(waage_data)
-        return waage
+        return _to_dict(waage)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -64,7 +90,7 @@ async def update_waage(
     waage = repo.update(waage_id, waage_data)
     if not waage:
         raise HTTPException(status_code=404, detail=f"Waage {waage_id} not found")
-    return waage
+    return _to_dict(waage)
 
 
 @router.delete("/waagen/{waage_id}", status_code=204)
@@ -89,10 +115,10 @@ async def list_wiegungen(
     repo = WiegungRepository(db)
     
     if waage_id:
-        return repo.get_by_waage(waage_id)
+        return _to_list(repo.get_by_waage(waage_id))
     if kennzeichen:
-        return repo.get_by_kennzeichen(kennzeichen)
-    return repo.get_all(skip=skip, limit=limit)
+        return _to_list(repo.get_by_kennzeichen(kennzeichen))
+    return _to_list(repo.get_all(skip=skip, limit=limit))
 
 
 @router.get("/wiegungen/{wiegung_id}", response_model=dict)
@@ -102,7 +128,7 @@ async def get_wiegung(wiegung_id: str, db: Session = Depends(get_db)):
     wiegung = repo.get_by_id(wiegung_id)
     if not wiegung:
         raise HTTPException(status_code=404, detail=f"Wiegung {wiegung_id} not found")
-    return wiegung
+    return _to_dict(wiegung)
 
 
 @router.post("/wiegungen", response_model=dict, status_code=201)
@@ -119,7 +145,7 @@ async def create_wiegung(
     
     try:
         wiegung = repo.create(wiegung_data)
-        return wiegung
+        return _to_dict(wiegung)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
