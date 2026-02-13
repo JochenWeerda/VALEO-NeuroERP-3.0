@@ -120,9 +120,9 @@
 - Buchungsfluss atomar, Event-Emission nachweisbar, Rollback sauber.
 
 ### Woche 7 (30.03-03.04): EPIC AGRAR-SILO-01 Partie/Silo-Basis
-- [ ] Story AGRAR-SILO-01-01: Tabellen `silo_lots`, `silo_quality_snapshot`, `lot_movements`.
-- [ ] Story AGRAR-SILO-01-02: Virtuelle Sammelpartie je Silo.
-- [ ] Story AGRAR-SILO-01-03: Qualitätsmittelwerte pro aktueller Füllung.
+- [x] Story AGRAR-SILO-01-01: Tabellen `silo_lots`, `silo_quality_snapshots`, `silo_lot_movements`.
+- [x] Story AGRAR-SILO-01-02: Virtuelle Sammelpartie je Silo.
+- [x] Story AGRAR-SILO-01-03: Qualitätsmittelwerte pro aktueller Füllung.
 - Akzeptanzkriterien:
 - Silo-Füllung, Mischung und Qualitätsdurchschnitt reproduzierbar berechnet.
 
@@ -208,7 +208,7 @@
 
 ### Sprint 3 (21.03-03.04) Löschlogik + Silo/Partie
 - [x] `AGRAR-WG-02` Wiegeschein -> Kontraktlöschung atomar | P0 | M | Backend
-- [ ] `AGRAR-SILO-01` Sammelpartie + Qualitätsmittelwerte | P0 | L | Backend
+- [x] `AGRAR-SILO-01` Sammelpartie + Qualitätsmittelwerte | P0 | L | Backend
 - [ ] `AGRAR-SILO-UI-01` Siloübersicht mit Qualitätssnapshot | P1 | M | Frontend
 
 ### Sprint 4 (04.04-17.04) Abrechnung + Physiklogik

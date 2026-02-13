@@ -136,6 +136,75 @@ class AgrarContractAllocation(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
+class Silo(Base):
+    """Silo master data."""
+    __tablename__ = "silos"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    silo_number = Column(String(50), nullable=False)
+    name = Column(String(120), nullable=True)
+    article_id = Column(String(64), nullable=True)
+    capacity_tons = Column(DECIMAL(12, 3), nullable=False)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class SiloLot(Base):
+    """Virtual lot entries inside silos."""
+    __tablename__ = "silo_lots"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    silo_id = Column(String, ForeignKey("domain_inventory.silos.id"), nullable=False)
+    virtual_lot_number = Column(String(64), nullable=False)
+    source_ticket_id = Column(String, ForeignKey("domain_inventory.weighing_tickets.id"), nullable=True)
+    source_partner_id = Column(String(64), nullable=True)
+    article_id = Column(String(64), nullable=True)
+    quantity_tons = Column(DECIMAL(12, 3), nullable=False)
+    moisture_pct = Column(DECIMAL(5, 2), nullable=True)
+    protein_pct = Column(DECIMAL(5, 2), nullable=True)
+    impurities_pct = Column(DECIMAL(5, 2), nullable=True)
+    hl_weight = Column(DECIMAL(6, 2), nullable=True)
+    status = Column(String(20), nullable=False, default="active")
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class SiloLotMovement(Base):
+    """Movement history for virtual lots."""
+    __tablename__ = "silo_lot_movements"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    silo_lot_id = Column(String, ForeignKey("domain_inventory.silo_lots.id"), nullable=False)
+    movement_type = Column(String(20), nullable=False)  # in, out, treatment
+    quantity_tons = Column(DECIMAL(12, 3), nullable=False)
+    note = Column(Text, nullable=True)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class SiloQualitySnapshot(Base):
+    """Weighted quality snapshot per silo."""
+    __tablename__ = "silo_quality_snapshots"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    silo_id = Column(String, ForeignKey("domain_inventory.silos.id"), nullable=False)
+    total_quantity_tons = Column(DECIMAL(12, 3), nullable=False, default=0)
+    moisture_avg_pct = Column(DECIMAL(5, 2), nullable=True)
+    protein_avg_pct = Column(DECIMAL(5, 2), nullable=True)
+    impurities_avg_pct = Column(DECIMAL(5, 2), nullable=True)
+    hl_weight_avg = Column(DECIMAL(6, 2), nullable=True)
+    lot_count = Column(Integer, nullable=False, default=0)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 # ── Warehouse Transfers ──────────────────────────────────────────
 
 class WarehouseTransfer(Base):
