@@ -1,0 +1,360 @@
+"""
+Silo capacity and virtual lot endpoints (AGRAR-SILO-01).
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+from decimal import Decimal
+from typing import Optional
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
+from app.core.tenant import get_tenant_id
+from app.infrastructure.models import Silo, SiloLot, SiloLotMovement, SiloQualitySnapshot
+
+router = APIRouter()
+
+
+def _to_float(value: Decimal | float | int | None) -> float:
+    if value is None:
+        return 0.0
+    return float(value)
+
+
+def _weighted_quality_snapshot(lots: list[SiloLot]) -> dict[str, Optional[float]]:
+    active = [lot for lot in lots if lot.status == "active" and _to_float(lot.quantity_tons) > 0]
+    if not active:
+        return {
+            "total_quantity_tons": 0.0,
+            "moisture_avg_pct": None,
+            "protein_avg_pct": None,
+            "impurities_avg_pct": None,
+            "hl_weight_avg": None,
+            "lot_count": 0,
+        }
+
+    total = sum(_to_float(lot.quantity_tons) for lot in active)
+
+    def _avg(field_name: str) -> Optional[float]:
+        weighted_sum = 0.0
+        weighted_total = 0.0
+        for lot in active:
+            metric = getattr(lot, field_name)
+            if metric is None:
+                continue
+            qty = _to_float(lot.quantity_tons)
+            weighted_sum += float(metric) * qty
+            weighted_total += qty
+        if weighted_total <= 0:
+            return None
+        return round(weighted_sum / weighted_total, 2)
+
+    return {
+        "total_quantity_tons": round(total, 3),
+        "moisture_avg_pct": _avg("moisture_pct"),
+        "protein_avg_pct": _avg("protein_pct"),
+        "impurities_avg_pct": _avg("impurities_pct"),
+        "hl_weight_avg": _avg("hl_weight"),
+        "lot_count": len(active),
+    }
+
+
+def _create_snapshot(db: Session, silo_id: str, tenant_id: str) -> SiloQualitySnapshot:
+    lots = (
+        db.query(SiloLot)
+        .filter(SiloLot.silo_id == silo_id, SiloLot.tenant_id == tenant_id)
+        .all()
+    )
+    snapshot_values = _weighted_quality_snapshot(lots)
+    snapshot = SiloQualitySnapshot(
+        id=str(uuid.uuid4()),
+        silo_id=silo_id,
+        total_quantity_tons=snapshot_values["total_quantity_tons"],
+        moisture_avg_pct=snapshot_values["moisture_avg_pct"],
+        protein_avg_pct=snapshot_values["protein_avg_pct"],
+        impurities_avg_pct=snapshot_values["impurities_avg_pct"],
+        hl_weight_avg=snapshot_values["hl_weight_avg"],
+        lot_count=snapshot_values["lot_count"],
+        tenant_id=tenant_id,
+    )
+    db.add(snapshot)
+    return snapshot
+
+
+class SiloCreate(BaseModel):
+    silo_number: str = Field(..., min_length=1, max_length=50)
+    name: Optional[str] = Field(default=None, max_length=120)
+    article_id: Optional[str] = Field(default=None, max_length=64)
+    capacity_tons: float = Field(..., gt=0)
+
+
+class SiloLotCreate(BaseModel):
+    virtual_lot_number: str = Field(..., min_length=1, max_length=64)
+    source_ticket_id: Optional[str] = Field(default=None, max_length=64)
+    source_partner_id: Optional[str] = Field(default=None, max_length=64)
+    article_id: Optional[str] = Field(default=None, max_length=64)
+    quantity_tons: float = Field(..., gt=0)
+    moisture_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    protein_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    impurities_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    hl_weight: Optional[float] = Field(default=None, ge=0)
+
+
+class SiloLotMovementCreate(BaseModel):
+    movement_type: str = Field(..., pattern="^(in|out|treatment)$")
+    quantity_tons: float = Field(..., gt=0)
+    note: Optional[str] = None
+
+
+@router.get("/kapazitaeten", response_model=dict)
+async def get_silo_capacities(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    silos = (
+        db.query(Silo)
+        .filter(Silo.tenant_id == tenant_id, Silo.is_active == True)  # noqa: E712
+        .order_by(Silo.silo_number.asc())
+        .all()
+    )
+
+    occupied_by_silo = {
+        str(row.silo_id): _to_float(row.occupied)
+        for row in (
+            db.query(
+                SiloLot.silo_id.label("silo_id"),
+                func.coalesce(func.sum(SiloLot.quantity_tons), 0).label("occupied"),
+            )
+            .filter(
+                SiloLot.tenant_id == tenant_id,
+                SiloLot.status == "active",
+            )
+            .group_by(SiloLot.silo_id)
+            .all()
+        )
+    }
+
+    total_capacity = sum(_to_float(silo.capacity_tons) for silo in silos)
+    total_occupied = sum(occupied_by_silo.get(str(silo.id), 0.0) for silo in silos)
+
+    silo_list: list[dict[str, object]] = []
+    for silo in silos:
+        occupied = occupied_by_silo.get(str(silo.id), 0.0)
+        capacity = _to_float(silo.capacity_tons)
+        percent = round((occupied / capacity * 100.0), 2) if capacity > 0 else 0.0
+        silo_list.append(
+            {
+                "id": str(silo.id),
+                "nummer": silo.silo_number,
+                "artikel": silo.article_id or "-",
+                "kapazitaet": round(capacity, 3),
+                "belegt": round(occupied, 3),
+                "prozent": percent,
+            }
+        )
+
+    return {
+        "gesamt": len(silos),
+        "kapazitaet": round(total_capacity, 3),
+        "belegt": round(total_occupied, 3),
+        "liste": silo_list,
+        "generated_at": datetime.utcnow().isoformat(),
+    }
+
+
+@router.get("/silos", response_model=list[dict])
+async def list_silos(
+    include_inactive: bool = Query(False),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    query = db.query(Silo).filter(Silo.tenant_id == tenant_id)
+    if not include_inactive:
+        query = query.filter(Silo.is_active == True)  # noqa: E712
+    silos = query.order_by(Silo.silo_number.asc()).all()
+    return [
+        {
+            "id": str(silo.id),
+            "silo_number": silo.silo_number,
+            "name": silo.name,
+            "article_id": silo.article_id,
+            "capacity_tons": _to_float(silo.capacity_tons),
+            "is_active": bool(silo.is_active),
+        }
+        for silo in silos
+    ]
+
+
+@router.post("/silos", response_model=dict, status_code=201)
+async def create_silo(
+    payload: SiloCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    existing = (
+        db.query(Silo)
+        .filter(Silo.tenant_id == tenant_id, Silo.silo_number == payload.silo_number)
+        .first()
+    )
+    if existing:
+        raise HTTPException(status_code=409, detail="Silo number already exists")
+
+    silo = Silo(
+        id=str(uuid.uuid4()),
+        silo_number=payload.silo_number,
+        name=payload.name,
+        article_id=payload.article_id,
+        capacity_tons=payload.capacity_tons,
+        tenant_id=tenant_id,
+        is_active=True,
+    )
+    db.add(silo)
+    db.commit()
+    db.refresh(silo)
+    return {
+        "id": str(silo.id),
+        "silo_number": silo.silo_number,
+        "name": silo.name,
+        "article_id": silo.article_id,
+        "capacity_tons": _to_float(silo.capacity_tons),
+        "is_active": bool(silo.is_active),
+    }
+
+
+@router.post("/silos/{silo_id}/lots", response_model=dict, status_code=201)
+async def create_silo_lot(
+    silo_id: str,
+    payload: SiloLotCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    silo = (
+        db.query(Silo)
+        .filter(Silo.id == silo_id, Silo.tenant_id == tenant_id, Silo.is_active == True)  # noqa: E712
+        .first()
+    )
+    if not silo:
+        raise HTTPException(status_code=404, detail="Silo not found")
+
+    lot = SiloLot(
+        id=str(uuid.uuid4()),
+        silo_id=str(silo.id),
+        virtual_lot_number=payload.virtual_lot_number,
+        source_ticket_id=payload.source_ticket_id,
+        source_partner_id=payload.source_partner_id,
+        article_id=payload.article_id or silo.article_id,
+        quantity_tons=payload.quantity_tons,
+        moisture_pct=payload.moisture_pct,
+        protein_pct=payload.protein_pct,
+        impurities_pct=payload.impurities_pct,
+        hl_weight=payload.hl_weight,
+        status="active",
+        tenant_id=tenant_id,
+    )
+    db.add(lot)
+    db.flush()
+
+    db.add(
+        SiloLotMovement(
+            id=str(uuid.uuid4()),
+            silo_lot_id=lot.id,
+            movement_type="in",
+            quantity_tons=payload.quantity_tons,
+            note="initial lot booking",
+            tenant_id=tenant_id,
+        )
+    )
+    snapshot = _create_snapshot(db, str(silo.id), tenant_id)
+    db.commit()
+    db.refresh(lot)
+    db.refresh(snapshot)
+
+    return {
+        "lot": {
+            "id": lot.id,
+            "silo_id": lot.silo_id,
+            "virtual_lot_number": lot.virtual_lot_number,
+            "quantity_tons": _to_float(lot.quantity_tons),
+            "status": lot.status,
+        },
+        "snapshot": {
+            "id": snapshot.id,
+            "silo_id": snapshot.silo_id,
+            "total_quantity_tons": _to_float(snapshot.total_quantity_tons),
+            "moisture_avg_pct": _to_float(snapshot.moisture_avg_pct) if snapshot.moisture_avg_pct is not None else None,
+            "protein_avg_pct": _to_float(snapshot.protein_avg_pct) if snapshot.protein_avg_pct is not None else None,
+            "impurities_avg_pct": _to_float(snapshot.impurities_avg_pct) if snapshot.impurities_avg_pct is not None else None,
+            "hl_weight_avg": _to_float(snapshot.hl_weight_avg) if snapshot.hl_weight_avg is not None else None,
+            "lot_count": int(snapshot.lot_count),
+        },
+    }
+
+
+@router.post("/silos/{silo_id}/lots/{lot_id}/movements", response_model=dict, status_code=201)
+async def create_silo_lot_movement(
+    silo_id: str,
+    lot_id: str,
+    payload: SiloLotMovementCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    lot = (
+        db.query(SiloLot)
+        .filter(SiloLot.id == lot_id, SiloLot.silo_id == silo_id, SiloLot.tenant_id == tenant_id)
+        .first()
+    )
+    if not lot:
+        raise HTTPException(status_code=404, detail="Silo lot not found")
+    if lot.status != "active":
+        raise HTTPException(status_code=400, detail="Silo lot is not active")
+
+    qty = Decimal(str(payload.quantity_tons))
+    if payload.movement_type == "out":
+        current_qty = Decimal(str(lot.quantity_tons))
+        if qty > current_qty:
+            raise HTTPException(status_code=400, detail="Movement exceeds lot quantity")
+        lot.quantity_tons = current_qty - qty
+        if Decimal(str(lot.quantity_tons)) <= Decimal("0"):
+            lot.status = "closed"
+    elif payload.movement_type == "in":
+        lot.quantity_tons = Decimal(str(lot.quantity_tons)) + qty
+
+    movement = SiloLotMovement(
+        id=str(uuid.uuid4()),
+        silo_lot_id=lot.id,
+        movement_type=payload.movement_type,
+        quantity_tons=payload.quantity_tons,
+        note=payload.note,
+        tenant_id=tenant_id,
+    )
+    db.add(movement)
+    snapshot = _create_snapshot(db, silo_id, tenant_id)
+    db.commit()
+    db.refresh(movement)
+    db.refresh(snapshot)
+
+    return {
+        "movement": {
+            "id": movement.id,
+            "silo_lot_id": movement.silo_lot_id,
+            "movement_type": movement.movement_type,
+            "quantity_tons": _to_float(movement.quantity_tons),
+            "note": movement.note,
+        },
+        "snapshot": {
+            "id": snapshot.id,
+            "silo_id": snapshot.silo_id,
+            "total_quantity_tons": _to_float(snapshot.total_quantity_tons),
+            "moisture_avg_pct": _to_float(snapshot.moisture_avg_pct) if snapshot.moisture_avg_pct is not None else None,
+            "protein_avg_pct": _to_float(snapshot.protein_avg_pct) if snapshot.protein_avg_pct is not None else None,
+            "impurities_avg_pct": _to_float(snapshot.impurities_avg_pct) if snapshot.impurities_avg_pct is not None else None,
+            "hl_weight_avg": _to_float(snapshot.hl_weight_avg) if snapshot.hl_weight_avg is not None else None,
+            "lot_count": int(snapshot.lot_count),
+        },
+    }
