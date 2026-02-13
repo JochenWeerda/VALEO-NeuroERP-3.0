@@ -17,6 +17,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.documents.router_helpers import get_repository, save_to_store
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
+from modules.agrar.services.moisture_engine import MoistureEngineInput, calculate_billing_weight
 
 router = APIRouter()
 
@@ -68,6 +69,15 @@ class SettlementPostRequest(BaseModel):
     credit_account_supplier: str = Field(default="3300", min_length=3, max_length=20)
     credit_account_deductions: str = Field(default="5490", min_length=3, max_length=20)
     posting_date: Optional[datetime] = None
+
+
+class BillingWeightPreviewRequest(BaseModel):
+    net_weight_kg: float = Field(..., gt=0)
+    moisture_pct: float = Field(..., ge=0, lt=100)
+    impurities_pct: float = Field(default=0.0, ge=0, lt=100)
+    target_moisture_pct: float = Field(default=14.0, ge=0, lt=100)
+    base_impurities_pct: float = Field(default=2.0, ge=0, lt=100)
+    allow_bonus: bool = False
 
 
 class DeductionOut(BaseModel):
@@ -162,6 +172,27 @@ def _to_out(settlement: AgrarSettlement, deductions: list[AgrarSettlementDeducti
             for d in deductions
         ],
     )
+
+
+@router.post("/billing-weight/preview", response_model=dict)
+async def preview_billing_weight(payload: BillingWeightPreviewRequest) -> dict:
+    result = calculate_billing_weight(
+        MoistureEngineInput(
+            net_weight_kg=Decimal(str(payload.net_weight_kg)),
+            moisture_pct=Decimal(str(payload.moisture_pct)),
+            impurities_pct=Decimal(str(payload.impurities_pct)),
+            target_moisture_pct=Decimal(str(payload.target_moisture_pct)),
+            base_impurities_pct=Decimal(str(payload.base_impurities_pct)),
+            allow_bonus=payload.allow_bonus,
+        )
+    )
+    return {
+        "net_weight_kg": float(result.net_weight_kg),
+        "billing_weight_kg": float(result.billing_weight_kg),
+        "deduction_kg": float(result.deduction_kg),
+        "moisture_factor": float(result.moisture_factor),
+        "impurities_factor": float(result.impurities_factor),
+    }
 
 
 @router.post("/preview", response_model=dict)
