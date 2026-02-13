@@ -3,8 +3,9 @@ VALEO-NeuroERP Configuration
 Centralized configuration management using Pydantic settings
 """
 
+import json
 import secrets
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 from pydantic import Field, field_validator, ValidationInfo
 from pydantic_settings import BaseSettings
 
@@ -97,6 +98,7 @@ class Settings(BaseSettings):
     # Multi-tenancy defaults
     DEFAULT_TENANT_ID: str = "00000000-0000-0000-0000-000000000001"
     INSTALLED_MODULES: List[str] = ["core", "agrar"]
+    TENANT_MODULE_FLAGS: dict[str, list[str]] = {}
 
     @field_validator("INSTALLED_MODULES", mode="before")
     @classmethod
@@ -108,6 +110,30 @@ class Settings(BaseSettings):
         elif isinstance(v, (list, str)):
             return v
         raise ValueError(v)
+
+    @field_validator("TENANT_MODULE_FLAGS", mode="before")
+    @classmethod
+    def assemble_tenant_module_flags(
+        cls, v: Any
+    ) -> dict[str, list[str]]:
+        if v is None or v == "":
+            return {}
+        if isinstance(v, dict):
+            return {
+                str(tenant_id): [str(module).strip() for module in modules if str(module).strip()]
+                for tenant_id, modules in v.items()
+                if isinstance(modules, list)
+            }
+        if isinstance(v, str):
+            parsed = json.loads(v)
+            if not isinstance(parsed, dict):
+                raise ValueError("TENANT_MODULE_FLAGS must be an object")
+            return {
+                str(tenant_id): [str(module).strip() for module in modules if str(module).strip()]
+                for tenant_id, modules in parsed.items()
+                if isinstance(modules, list)
+            }
+        raise ValueError("TENANT_MODULE_FLAGS must be dict or JSON object string")
 
     # External Services
     EMAIL_SMTP_SERVER: Optional[str] = None
