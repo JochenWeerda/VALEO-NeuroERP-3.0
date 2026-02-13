@@ -80,6 +80,7 @@ from app.api.v1.endpoints import (
     compat,
     modules,
     agrar_contracts,
+    silo,
 )
 
 # Import domain routers
@@ -373,6 +374,12 @@ api_router.include_router(
     agrar_contracts.router,
     prefix="/agrar/contracts",
     tags=["agrar", "contracts"]
+)
+
+api_router.include_router(
+    silo.router,
+    prefix="/silo",
+    tags=["agrar", "silo"]
 )
 
 # Kundenportal
