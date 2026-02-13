@@ -91,7 +91,7 @@ async def test_submission_success_triggers_events_and_retry() -> None:
     session = FakeAsyncSession()
     bus = DummyEventBus()
     idev_client = DummyIdevClient(fail_times=1)
-    service = SubmissionService(session, event_bus=bus, idev_client=idev_client)  ***REMOVED*** type: ignore[arg-type]
+    service = SubmissionService(session, event_bus=bus, idev_client=idev_client)  # type: ignore[arg-type]
 
     batch = _build_batch()
 
@@ -102,7 +102,7 @@ async def test_submission_success_triggers_events_and_retry() -> None:
     assert len(bus.events) == 2
     assert bus.events[0]["event_type"] == "intrastat.submission.started"
     assert bus.events[1]["event_type"] == "intrastat.submission.completed"
-    assert len(idev_client.upload_calls) == 2  ***REMOVED*** ein Retry
+    assert len(idev_client.upload_calls) == 2  # ein Retry
 
 
 @pytest.mark.asyncio
@@ -110,7 +110,7 @@ async def test_submission_dry_run_skips_events() -> None:
     session = FakeAsyncSession()
     bus = DummyEventBus()
     idev_client = DummyIdevClient()
-    service = SubmissionService(session, event_bus=bus, idev_client=idev_client)  ***REMOVED*** type: ignore[arg-type]
+    service = SubmissionService(session, event_bus=bus, idev_client=idev_client)  # type: ignore[arg-type]
 
     batch = _build_batch()
 
@@ -126,7 +126,7 @@ async def test_submission_failure_emits_failed_event() -> None:
     session = FakeAsyncSession()
     bus = DummyEventBus()
     idev_client = DummyFailingClient()
-    service = SubmissionService(session, event_bus=bus, idev_client=idev_client)  ***REMOVED*** type: ignore[arg-type]
+    service = SubmissionService(session, event_bus=bus, idev_client=idev_client)  # type: ignore[arg-type]
 
     batch = _build_batch()
 
@@ -135,3 +135,4 @@ async def test_submission_failure_emits_failed_event() -> None:
     assert response.success is False
     assert batch.status == models.DeclarationStatus.ERROR
     assert any(event["event_type"] == "intrastat.submission.failed" for event in bus.events)
+

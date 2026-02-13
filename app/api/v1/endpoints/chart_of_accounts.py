@@ -28,7 +28,7 @@ async def list_accounts(
     """Return a paginated list of chart-of-account entries."""
     effective_tenant = tenant_id or DEFAULT_TENANT
 
-    query = db.query(AccountModel).filter(AccountModel.is_active == True)  ***REMOVED*** noqa: E712
+    query = db.query(AccountModel).filter(AccountModel.is_active == True)  # noqa: E712
     query = query.filter(AccountModel.tenant_id == effective_tenant)
 
     if search:
@@ -66,7 +66,7 @@ async def get_account(account_id: str, db: Session = Depends(get_db)):
 @router.post("/", response_model=Account)
 async def create_account(account: AccountCreate, db: Session = Depends(get_db)):
     """Create a new account."""
-    ***REMOVED*** Check if account number already exists
+    # Check if account number already exists
     existing = db.query(AccountModel).filter(
         AccountModel.account_number == account.account_number,
         AccountModel.tenant_id == account.tenant_id
@@ -92,7 +92,7 @@ async def update_account(
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
 
-    ***REMOVED*** Check if updating to an existing account number
+    # Check if updating to an existing account number
     if account_update.account_name is not None:
         update_data = account_update.model_dump(exclude_unset=True)
         for field, value in update_data.items():
@@ -110,7 +110,7 @@ async def delete_account(account_id: str, db: Session = Depends(get_db)):
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
 
-    ***REMOVED*** Check if account has any journal entries
+    # Check if account has any journal entries
     if hasattr(account, 'journal_entry_lines') and account.journal_entry_lines:
         raise HTTPException(
             status_code=400,

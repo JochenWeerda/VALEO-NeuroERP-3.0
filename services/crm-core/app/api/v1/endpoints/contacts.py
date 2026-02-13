@@ -35,7 +35,7 @@ async def list_contacts(
     if search:
         like_pattern = f"%{search.strip()}%"
         filters.append(
-            sa.or_(  ***REMOVED*** type: ignore[attr-defined]
+            sa.or_(  # type: ignore[attr-defined]
                 Contact.first_name.ilike(like_pattern),
                 Contact.last_name.ilike(like_pattern),
                 Contact.email.ilike(like_pattern),
@@ -106,3 +106,4 @@ async def get_contact(contact_id: UUID, session: AsyncSession = Depends(get_sess
         raise HTTPException(status_code=404, detail="Contact not found")
     setattr(contact, "customer_name", contact.customer.display_name if contact.customer else None)
     return ContactRead.model_validate(contact)
+

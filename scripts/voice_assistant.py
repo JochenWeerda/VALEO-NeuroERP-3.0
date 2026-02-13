@@ -1,4 +1,4 @@
-***REMOVED*** -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import os
@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 
-***REMOVED*** Optional audio deps (fallback auf Textmodus)
+# Optional audio deps (fallback auf Textmodus)
 try:
     import sounddevice as sd
     import numpy as np
@@ -22,19 +22,19 @@ except Exception:
     np = None
 
 try:
-    import webrtcvad  ***REMOVED*** type: ignore
+    import webrtcvad  # type: ignore
 except Exception:
-    webrtcvad = None  ***REMOVED*** type: ignore
+    webrtcvad = None  # type: ignore
 
 try:
-    from faster_whisper import WhisperModel  ***REMOVED*** type: ignore
+    from faster_whisper import WhisperModel  # type: ignore
 except Exception:
-    WhisperModel = None  ***REMOVED*** type: ignore
+    WhisperModel = None  # type: ignore
 
 try:
-    import pyttsx3  ***REMOVED*** type: ignore
+    import pyttsx3  # type: ignore
 except Exception:
-    pyttsx3 = None  ***REMOVED*** type: ignore
+    pyttsx3 = None  # type: ignore
 
 import requests
 
@@ -47,7 +47,7 @@ class VoiceConfig:
     llm_model: str = os.getenv("LLM_MODEL", "gpt-oss-20b-small")
     stt_model: str = os.getenv("VOICE_STT_MODEL", "small")
     samplerate: int = int(os.getenv("VOICE_SR", "16000"))
-    vad_aggr: int = int(os.getenv("VOICE_VAD", "2"))  ***REMOVED*** 0-3
+    vad_aggr: int = int(os.getenv("VOICE_VAD", "2"))  # 0-3
     silence_ms: int = int(os.getenv("VOICE_SILENCE_MS", "800"))
     max_utt_ms: int = int(os.getenv("VOICE_MAX_UTT_MS", "15000"))
     language: str = os.getenv("VOICE_LANG", "de")
@@ -117,9 +117,9 @@ class OllamaChat:
         except Exception as e:
             return f"[LLM-Fehler] {e}"
 
-***REMOVED*** --------------------
-***REMOVED*** Intent Router & Skills
-***REMOVED*** --------------------
+# --------------------
+# Intent Router & Skills
+# --------------------
 
 class DeliveryNoteSkill:
     def maybe_handle(self, text: str) -> Optional[Dict[str, Any]]:
@@ -305,9 +305,9 @@ class RAGQuerySkill:
         try:
             import sys
             sys.path.insert(0, str(Path('.').resolve()))
-            from linkup_mcp.memory.rag_manager import RAGMemoryManager  ***REMOVED*** type: ignore
+            from linkup_mcp.memory.rag_manager import RAGMemoryManager  # type: ignore
             m = RAGMemoryManager()
-            m.build_index(["linkup_mcp"])  ***REMOVED*** gezielter Ordner
+            m.build_index(["linkup_mcp"])  # gezielter Ordner
             hits = m.query(q or "", top_k=5)
         except Exception:
             pass
@@ -345,9 +345,9 @@ class IntentRouter:
                 return res
         return None
 
-***REMOVED*** --------------------
-***REMOVED*** Recorder, Review & Main
-***REMOVED*** --------------------
+# --------------------
+# Recorder, Review & Main
+# --------------------
 
 def review_and_maybe_book(file_path: str, tts: LocalTTS) -> bool:
     try:
@@ -361,7 +361,7 @@ def review_and_maybe_book(file_path: str, tts: LocalTTS) -> bool:
         if ans == 'n':
             tts.speak("Abgebrochen. Entwurf wurde gespeichert.")
             return False
-        ***REMOVED*** buchen
+        # buchen
         data['status'] = 'gebucht'
         data['booked_at'] = time.strftime("%Y-%m-%d %H:%M:%S")
         p.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -379,7 +379,7 @@ class Recorder:
         self._stop = threading.Event()
         self._vad = webrtcvad.Vad(cfg.vad_aggr) if webrtcvad is not None else None
 
-    def _callback(self, indata, frames, time_info, status):  ***REMOVED*** type: ignore
+    def _callback(self, indata, frames, time_info, status):  # type: ignore
         if status:
             pass
         self._q.put(indata.copy())
@@ -576,3 +576,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

@@ -1,12 +1,12 @@
-***REMOVED*** ===================================================
-***REMOVED*** VAN-Modus Frontend-Validator
-***REMOVED*** ===================================================
-***REMOVED*** Dieses Skript prüft die Frontend-Entwicklungsumgebung
-***REMOVED*** auf Compliance mit den definierten VAN-Modus-Standards
-***REMOVED*** und korrigiert Probleme automatisch.
-***REMOVED*** ===================================================
+# ===================================================
+# VAN-Modus Frontend-Validator
+# ===================================================
+# Dieses Skript prüft die Frontend-Entwicklungsumgebung
+# auf Compliance mit den definierten VAN-Modus-Standards
+# und korrigiert Probleme automatisch.
+# ===================================================
 
-***REMOVED*** Farbige Ausgabe-Funktionen für bessere Lesbarkeit
+# Farbige Ausgabe-Funktionen für bessere Lesbarkeit
 function Write-ColorOutput {
     param (
         [string]$Text,
@@ -35,21 +35,21 @@ function Write-Info {
     Write-ColorOutput $Text "Cyan"
 }
 
-***REMOVED*** Definiere Pfade
+# Definiere Pfade
 $rootDir = Join-Path $PSScriptRoot ".."
 $frontendDir = Join-Path $rootDir "frontend"
 $packageJsonPath = Join-Path $frontendDir "package.json"
 $viteConfigPath = Join-Path $frontendDir "vite.config.js"
 $tsConfigPath = Join-Path $frontendDir "tsconfig.json"
 
-***REMOVED*** Banner ausgeben
+# Banner ausgeben
 Write-Host ""
 Write-Host " ======================================================" -ForegroundColor Cyan
 Write-Host "  VAN-Modus Frontend-Validator - VALEO NeuroERP" -ForegroundColor Cyan
 Write-Host " ======================================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Zusammenfassung der Prüfungen
+# Zusammenfassung der Prüfungen
 $totalChecks = 0
 $passedChecks = 0
 $failedChecks = 0
@@ -78,10 +78,10 @@ function Register-Check {
     }
 }
 
-***REMOVED*** 1. Verzeichnisstruktur-Validierung
+# 1. Verzeichnisstruktur-Validierung
 Write-Info "1. Prüfe Verzeichnisstruktur..."
 
-***REMOVED*** Prüfe ob Frontend-Verzeichnis existiert
+# Prüfe ob Frontend-Verzeichnis existiert
 $frontendDirExists = Test-Path $frontendDir
 Register-Check -Result $frontendDirExists -Name "Frontend-Verzeichnis existiert"
 
@@ -92,7 +92,7 @@ if (-not $frontendDirExists) {
     Register-Check -Result $true -Name "Frontend-Verzeichnis erstellt" -Corrected $true
 }
 
-***REMOVED*** Prüfe ob src-Verzeichnis existiert
+# Prüfe ob src-Verzeichnis existiert
 $srcDirPath = Join-Path $frontendDir "src"
 $srcDirExists = Test-Path $srcDirPath
 Register-Check -Result $srcDirExists -Name "src-Verzeichnis existiert"
@@ -103,10 +103,10 @@ if (-not $srcDirExists) {
     Register-Check -Result $true -Name "src-Verzeichnis erstellt" -Corrected $true
 }
 
-***REMOVED*** 2. Konfigurationsdateien-Prüfung
+# 2. Konfigurationsdateien-Prüfung
 Write-Info "2. Prüfe Konfigurationsdateien..."
 
-***REMOVED*** Prüfe package.json
+# Prüfe package.json
 $packageJsonExists = Test-Path $packageJsonPath
 Register-Check -Result $packageJsonExists -Name "package.json existiert"
 
@@ -155,7 +155,7 @@ if (-not $packageJsonExists) {
     $packageJsonContent | ConvertTo-Json -Depth 10 | Set-Content -Path $packageJsonPath -Encoding UTF8
     Register-Check -Result $true -Name "package.json erstellt" -Corrected $true
 } else {
-    ***REMOVED*** Prüfe, ob Skripte in package.json vorhanden sind
+    # Prüfe, ob Skripte in package.json vorhanden sind
     $packageJsonContent = Get-Content -Path $packageJsonPath -Raw | ConvertFrom-Json
     $hasStartScript = $packageJsonContent.scripts -and ($packageJsonContent.scripts.PSObject.Properties.Name -contains "start")
     Register-Check -Result $hasStartScript -Name "Start-Skript in package.json definiert"
@@ -181,7 +181,7 @@ if (-not $packageJsonExists) {
         Register-Check -Result $true -Name "Start-Skript hinzugefügt" -Corrected $true
     }
     
-    ***REMOVED*** Prüfe ob TypeScript als Abhängigkeit vorhanden ist
+    # Prüfe ob TypeScript als Abhängigkeit vorhanden ist
     $hasTypeScriptDep = $packageJsonContent.devDependencies -and ($packageJsonContent.devDependencies.PSObject.Properties.Name -contains "typescript")
     Register-Check -Result $hasTypeScriptDep -Name "TypeScript in package.json definiert"
     
@@ -201,7 +201,7 @@ if (-not $packageJsonExists) {
     }
 }
 
-***REMOVED*** Prüfe vite.config.js
+# Prüfe vite.config.js
 $viteConfigExists = Test-Path $viteConfigPath
 Register-Check -Result $viteConfigExists -Name "vite.config.js existiert"
 
@@ -252,7 +252,7 @@ export default defineConfig({
     
     Register-Check -Result $true -Name "vite.config.js erstellt" -Corrected $true
 } else {
-    ***REMOVED*** Prüfe, ob JSX-Konfiguration in vite.config.js vorhanden ist
+    # Prüfe, ob JSX-Konfiguration in vite.config.js vorhanden ist
     $viteConfigContent = Get-Content -Path $viteConfigPath -Raw
     $hasJsxConfig = $viteConfigContent -match "loader.*['""].js['""].*jsx"
     Register-Check -Result $hasJsxConfig -Name "JSX-Konfiguration in vite.config.js vorhanden"
@@ -260,7 +260,7 @@ export default defineConfig({
     if (-not $hasJsxConfig) {
         Write-Warning "JSX-Konfiguration fehlt in vite.config.js - Versuche automatische Korrektur"
         
-        ***REMOVED*** Versuche, die JSX-Konfiguration hinzuzufügen
+        # Versuche, die JSX-Konfiguration hinzuzufügen
         if ($viteConfigContent -match "export default defineConfig\(\{") {
             $newConfig = $viteConfigContent -replace "export default defineConfig\(\{", @"
 export default defineConfig({
@@ -286,7 +286,7 @@ export default defineConfig({
     }
 }
 
-***REMOVED*** Prüfe tsconfig.json
+# Prüfe tsconfig.json
 $tsConfigExists = Test-Path $tsConfigPath
 Register-Check -Result $tsConfigExists -Name "tsconfig.json existiert"
 
@@ -327,7 +327,7 @@ if (-not $tsConfigExists) {
     
     Register-Check -Result $true -Name "tsconfig.json erstellt" -Corrected $true
     
-    ***REMOVED*** Erstelle auch tsconfig.node.json wenn nicht vorhanden
+    # Erstelle auch tsconfig.node.json wenn nicht vorhanden
     $tsConfigNodePath = Join-Path $frontendDir "tsconfig.node.json"
     if (-not (Test-Path $tsConfigNodePath)) {
         @"
@@ -347,13 +347,13 @@ if (-not $tsConfigExists) {
     }
 }
 
-***REMOVED*** 3. Abhängigkeiten-Prüfung
+# 3. Abhängigkeiten-Prüfung
 Write-Info "3. Prüfe kritische Abhängigkeiten..."
 
-***REMOVED*** Wechsle in das Frontend-Verzeichnis
+# Wechsle in das Frontend-Verzeichnis
 Push-Location $frontendDir
 
-***REMOVED*** Prüfe, ob node_modules existiert
+# Prüfe, ob node_modules existiert
 $nodeModulesExists = Test-Path (Join-Path $frontendDir "node_modules")
 Register-Check -Result $nodeModulesExists -Name "node_modules Verzeichnis existiert"
 
@@ -362,7 +362,7 @@ if (-not $nodeModulesExists) {
     Write-Info "Versuche 'npm install' auszuführen..."
     
     try {
-        ***REMOVED*** Versuche, die Abhängigkeiten zu installieren
+        # Versuche, die Abhängigkeiten zu installieren
         npm install
         $installSuccess = $?
         Register-Check -Result $installSuccess -Name "Abhängigkeiten installiert" -Corrected $true
@@ -372,7 +372,7 @@ if (-not $nodeModulesExists) {
     }
 }
 
-***REMOVED*** Prüfe TypeScript
+# Prüfe TypeScript
 if ($nodeModulesExists) {
     $typescriptExists = Test-Path (Join-Path $frontendDir "node_modules/typescript")
     Register-Check -Result $typescriptExists -Name "TypeScript ist installiert"
@@ -381,7 +381,7 @@ if ($nodeModulesExists) {
         Write-Warning "TypeScript fehlt - Versuche TypeScript zu installieren..."
         
         try {
-            ***REMOVED*** Versuche, TypeScript zu installieren
+            # Versuche, TypeScript zu installieren
             npm install typescript --save-dev
             $installSuccess = $?
             Register-Check -Result $installSuccess -Name "TypeScript installiert" -Corrected $true
@@ -392,7 +392,7 @@ if ($nodeModulesExists) {
     }
 }
 
-***REMOVED*** 4. Portverfügbarkeit prüfen
+# 4. Portverfügbarkeit prüfen
 Write-Info "4. Prüfe Portverfügbarkeit..."
 
 $standardPorts = @(5173, 5174, 5000, 3000)
@@ -413,10 +413,10 @@ if ($availablePorts.Count -gt 0) {
     Write-Info "Alternative Ports (8080, 8081, 8082) können beim Start verwendet werden"
 }
 
-***REMOVED*** Wechsle zurück zum ursprünglichen Verzeichnis
+# Wechsle zurück zum ursprünglichen Verzeichnis
 Pop-Location
 
-***REMOVED*** Zusammenfassung
+# Zusammenfassung
 Write-Host ""
 Write-Host " ======================================================" -ForegroundColor Cyan
 Write-Host "  VAN-Modus Validierungsbericht" -ForegroundColor Cyan
@@ -428,7 +428,7 @@ Write-Host " Fehlgeschlagen:          $failedChecks" -ForegroundColor Red
 Write-Host " Automatisch korrigiert:  $correctedChecks" -ForegroundColor Yellow
 Write-Host ""
 
-***REMOVED*** Handlungsempfehlung
+# Handlungsempfehlung
 if ($failedChecks -eq 0) {
     Write-Success "Frontend-Umgebung entspricht den VAN-Modus-Standards."
     Write-Info "Zum Starten des Frontends folgende Befehle ausführen:"
@@ -454,7 +454,7 @@ if ($failedChecks -eq 0) {
     Write-Info "Dieses Skript wird automatisch alle erforderlichen Korrekturen vornehmen."
 }
 
-***REMOVED*** Bei Bedarf automatisch zum Frontend-Verzeichnis wechseln
+# Bei Bedarf automatisch zum Frontend-Verzeichnis wechseln
 if ($failedChecks -eq 0 -and $args -contains "-cd") {
     Write-Info "Wechsle zum Frontend-Verzeichnis..."
     Set-Location $frontendDir

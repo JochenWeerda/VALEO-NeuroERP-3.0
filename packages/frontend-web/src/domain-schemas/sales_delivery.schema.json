@@ -53,6 +53,41 @@
       "label": "Notizen",
       "type": "text",
       "required": false
+    },
+    {
+      "name": "supplierName",
+      "label": "Lieferant/Herkunft",
+      "type": "string",
+      "required": false,
+      "placeholder": "Lieferant laut Lieferschein"
+    },
+    {
+      "name": "sachkundeStatus",
+      "label": "Sachkunde geprueft",
+      "type": "select",
+      "required": false,
+      "options": [
+        { "value": "geprueft", "label": "Geprueft" },
+        { "value": "nicht_erforderlich", "label": "Nicht erforderlich" },
+        { "value": "offen", "label": "Offen" }
+      ]
+    },
+    {
+      "name": "sdsMitgeliefert",
+      "label": "SDB mitgeliefert",
+      "type": "select",
+      "required": false,
+      "options": [
+        { "value": "ja", "label": "Ja" },
+        { "value": "nicht_erforderlich", "label": "Nicht erforderlich" },
+        { "value": "offen", "label": "Offen" }
+      ]
+    },
+    {
+      "name": "adrPunkte",
+      "label": "ADR Punkte",
+      "type": "number",
+      "required": false
     }
   ],
   "lines": {
@@ -71,6 +106,42 @@
         "label": "Menge",
         "type": "number",
         "required": true
+      },
+      {
+        "name": "nutrientNKgPerUnit",
+        "label": "N kg/Einheit",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "nutrientP2o5KgPerUnit",
+        "label": "P2O5 kg/Einheit",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "co2eKgPerUnit",
+        "label": "CO2e kg/Einheit",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "bvlZulassungsnummer",
+        "label": "BVL Zulassungsnr.",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "sdsReference",
+        "label": "SDB Referenz",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "hazardHinweise",
+        "label": "Gefahrenhinweise",
+        "type": "text",
+        "required": false
       }
     ]
   }

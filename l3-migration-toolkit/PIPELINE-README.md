@@ -1,13 +1,13 @@
-***REMOVED*** L3 → VALEO-NeuroERP OCR-Migration Pipeline
+# L3 → VALEO-NeuroERP OCR-Migration Pipeline
 
 Automatisierte Extraktion und Migration aller L3-Masken zu strukturierten Tabellendefinitionen für den VALEO-NeuroERP Mask Builder.
 
-***REMOVED******REMOVED*** 🎯 Ziel
+## 🎯 Ziel
 
 **Input:** L3-Screenshots (Guacamole RDP)  
 **Output:** Mask Builder JSON-Schemas + SQL CREATE TABLE Statements
 
-***REMOVED******REMOVED*** 🏗️ Architektur
+## 🏗️ Architektur
 
 ```
 ┌─────────────────┐
@@ -40,23 +40,23 @@ Automatisierte Extraktion und Migration aller L3-Masken zu strukturierten Tabell
 └─────────────────┘
 ```
 
-***REMOVED******REMOVED*** 📦 Installation
+## 📦 Installation
 
-***REMOVED******REMOVED******REMOVED*** 1. Python-Dependencies
+### 1. Python-Dependencies
 
 ```bash
 pip install pytesseract pillow opencv-python
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Tesseract-OCR Binary
+### 2. Tesseract-OCR Binary
 
 **Windows:**
 ```powershell
-***REMOVED*** Als Administrator:
+# Als Administrator:
 choco install tesseract
 
-***REMOVED*** Oder manuell von:
-***REMOVED*** https://github.com/UB-Mannheim/tesseract/wiki
+# Oder manuell von:
+# https://github.com/UB-Mannheim/tesseract/wiki
 ```
 
 **Linux:**
@@ -64,16 +64,16 @@ choco install tesseract
 sudo apt-get install tesseract-ocr tesseract-ocr-deu
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Verifikation
+### 3. Verifikation
 
 ```bash
 python -c "import pytesseract; print('✅ pytesseract OK')"
 tesseract --version
 ```
 
-***REMOVED******REMOVED*** 🚀 Quick Start
+## 🚀 Quick Start
 
-***REMOVED******REMOVED******REMOVED*** Option A: Vollautomatisch (Batch-Modus)
+### Option A: Vollautomatisch (Batch-Modus)
 
 ```bash
 cd l3-migration-toolkit
@@ -94,23 +94,23 @@ python auto-capture-all-masks.py
 - `schemas/sql/*.sql` - SQL CREATE TABLE Statements
 - `screenshots/l3-masks/*.png` - Screenshots
 
-***REMOVED******REMOVED******REMOVED*** Option B: Einzelne Maske (manuell)
+### Option B: Einzelne Maske (manuell)
 
 ```bash
-***REMOVED*** 1. Screenshot erstellen (manuell)
-***REMOVED*** 2. OCR-Analyse
+# 1. Screenshot erstellen (manuell)
+# 2. OCR-Analyse
 python ocr-pipeline.py screenshots/l3-masks/artikelstamm.png --debug
 
-***REMOVED*** 3. LLM-Analyse
+# 3. LLM-Analyse
 python llm-field-analyzer.py artikelstamm.ocr.json --mask-name "Artikelstamm"
 
-***REMOVED*** 4. Schema-Generator
+# 4. Schema-Generator
 python analyze-mask-fields.py
 ```
 
-***REMOVED******REMOVED*** 📋 Zu erfassende Masken (15+)
+## 📋 Zu erfassende Masken (15+)
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐⭐⭐ KRITISCH
+### ⭐⭐⭐⭐⭐ KRITISCH
 - [x] Artikelstamm
 - [ ] Kundenstamm
 - [ ] Lieferschein
@@ -120,20 +120,20 @@ python analyze-mask-fields.py
 - [ ] Lager-Bestand
 - [ ] PSM-Abgabe (Agrar!)
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐⭐ WICHTIG
+### ⭐⭐⭐⭐ WICHTIG
 - [ ] Lieferantenstamm
 - [ ] Angebot
 - [ ] Wareneingang
 - [ ] Kunden-Kontoauszug
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐ NICE-TO-HAVE
+### ⭐⭐⭐ NICE-TO-HAVE
 - [ ] Inventur
 - [ ] Saatgut
 - [ ] Dünger
 
-***REMOVED******REMOVED*** 🔧 Module
+## 🔧 Module
 
-***REMOVED******REMOVED******REMOVED*** 1. `ocr-pipeline.py`
+### 1. `ocr-pipeline.py`
 
 **Funktion:** Screenshot → OCR → Strukturierte Felder
 
@@ -143,8 +143,8 @@ from ocr_pipeline import L3MaskOCR
 ocr = L3MaskOCR()
 results = ocr.extract_fields("artikelstamm.png")
 
-print(results['fields'])  ***REMOVED*** Liste erkannter Felder
-print(results['tabs'])    ***REMOVED*** Liste erkannter Tabs
+print(results['fields'])  # Liste erkannter Felder
+print(results['tabs'])    # Liste erkannter Tabs
 ```
 
 **Features:**
@@ -153,7 +153,7 @@ print(results['tabs'])    ***REMOVED*** Liste erkannter Tabs
 - Feldtyp-Erkennung (Lookup, Dropdown, Checkbox, etc.)
 - Tab-Extraktion
 
-***REMOVED******REMOVED******REMOVED*** 2. `llm-field-analyzer.py`
+### 2. `llm-field-analyzer.py`
 
 **Funktion:** OCR-Rohdaten → LLM → Strukturierte Felddefinition
 
@@ -174,7 +174,7 @@ analyzed = analyzer.analyze_ocr_with_llm(
 - L3 → VALEO Mapping-Integration
 - Relations-Erkennung (Foreign Keys)
 
-***REMOVED******REMOVED******REMOVED*** 3. `analyze-mask-fields.py`
+### 3. `analyze-mask-fields.py`
 
 **Funktion:** Structured Fields → Mask Builder JSON + SQL
 
@@ -210,7 +210,7 @@ analyzer.export_to_sql(schema, "schemas/sql/artikelstamm.sql")
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. `auto-capture-all-masks.py`
+### 4. `auto-capture-all-masks.py`
 
 **Funktion:** Orchestrierung - 15+ Masken automatisch erfassen
 
@@ -218,14 +218,14 @@ analyzer.export_to_sql(schema, "schemas/sql/artikelstamm.sql")
 python auto-capture-all-masks.py
 ```
 
-***REMOVED******REMOVED*** 📊 Erfolgsmetriken
+## 📊 Erfolgsmetriken
 
 - ✅ **100%** der L3-Masken gescreenshottet
 - ✅ **95%+** OCR-Genauigkeit (manuelles Review)
 - ✅ **Alle Schemas** importierbar in Mask Builder
 - ✅ **SQL-Statements** direkt ausführbar in PostgreSQL
 
-***REMOVED******REMOVED*** 🔗 Integration mit existierendem L3-Mapping
+## 🔗 Integration mit existierendem L3-Mapping
 
 Die Pipeline nutzt automatisch das existierende Mapping:
 
@@ -249,9 +249,9 @@ Die Pipeline nutzt automatisch das existierende Mapping:
 - Typkonvertierung
 - Relations-Ableitung
 
-***REMOVED******REMOVED*** 🐛 Troubleshooting
+## 🐛 Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: Tesseract nicht gefunden
+### Problem: Tesseract nicht gefunden
 
 ```
 FileNotFoundError: [WinError 2] The system cannot find the file specified
@@ -259,22 +259,22 @@ FileNotFoundError: [WinError 2] The system cannot find the file specified
 
 **Lösung:**
 ```python
-***REMOVED*** In ocr-pipeline.py:
+# In ocr-pipeline.py:
 ocr = L3MaskOCR(tesseract_path="C:/Program Files/Tesseract-OCR/tesseract.exe")
 ```
 
-***REMOVED******REMOVED******REMOVED*** Problem: Niedrige OCR-Genauigkeit
+### Problem: Niedrige OCR-Genauigkeit
 
 **Lösung:**
 1. Screenshot-Qualität erhöhen (höhere Auflösung)
 2. Debug-Modus aktivieren: `--debug`
 3. Preprocessing-Parameter anpassen (in `ocr-pipeline.py`)
 
-***REMOVED******REMOVED******REMOVED*** Problem: LLM-Integration fehlt
+### Problem: LLM-Integration fehlt
 
 **Lösung:**
 ```python
-***REMOVED*** In llm-field-analyzer.py, _call_llm():
+# In llm-field-analyzer.py, _call_llm():
 import openai
 
 response = openai.ChatCompletion.create(
@@ -283,40 +283,40 @@ response = openai.ChatCompletion.create(
 )
 ```
 
-***REMOVED******REMOVED*** 📚 Weiterführende Dokumentation
+## 📚 Weiterführende Dokumentation
 
 - [L3-Tabellenstruktur](../scripts/l3_tables_postgres.sql)
 - [L3-Import-Mapping](../scripts/l3_import_mapping.json)
 - [VALEO-NeuroERP Mask Builder](../docs/MASK-BUILDER-GUIDE.md)
 
-***REMOVED******REMOVED*** 🤝 Workflow-Beispiel
+## 🤝 Workflow-Beispiel
 
 ```bash
-***REMOVED*** Terminal 1: Browser öffnen
-http://localhost:8090/guacamole/***REMOVED***/client/MQBjAHBvc3RncmVzcWw
+# Terminal 1: Browser öffnen
+http://localhost:8090/guacamole/#/client/MQBjAHBvc3RncmVzcWw
 
-***REMOVED*** Terminal 2: Pipeline starten
+# Terminal 2: Pipeline starten
 cd l3-migration-toolkit
 python auto-capture-all-masks.py
 
-***REMOVED*** Schritt 1: Artikelstamm
-***REMOVED*** - In L3: ERFASSUNG → Artikel-Stamm öffnen
-***REMOVED*** - Enter drücken
-***REMOVED*** - Screenshot wird erstellt
-***REMOVED*** - OCR + LLM analysiert (30s)
-***REMOVED*** - JSON + SQL exportiert
+# Schritt 1: Artikelstamm
+# - In L3: ERFASSUNG → Artikel-Stamm öffnen
+# - Enter drücken
+# - Screenshot wird erstellt
+# - OCR + LLM analysiert (30s)
+# - JSON + SQL exportiert
 
-***REMOVED*** Schritt 2: Kundenstamm
-***REMOVED*** - In L3: ERFASSUNG → Kunden öffnen
-***REMOVED*** - Enter drücken
-***REMOVED*** ...
+# Schritt 2: Kundenstamm
+# - In L3: ERFASSUNG → Kunden öffnen
+# - Enter drücken
+# ...
 
-***REMOVED*** Nach 15+ Masken:
-***REMOVED*** ✅ schemas/mask-builder/ enthält alle JSONs
-***REMOVED*** ✅ schemas/sql/ enthält alle SQL-Statements
+# Nach 15+ Masken:
+# ✅ schemas/mask-builder/ enthält alle JSONs
+# ✅ schemas/sql/ enthält alle SQL-Statements
 ```
 
-***REMOVED******REMOVED*** 📈 Status
+## 📈 Status
 
 **Aktuell implementiert:**
 - [x] OCR-Pipeline mit Preprocessing
@@ -338,4 +338,5 @@ python auto-capture-all-masks.py
 ---
 
 **Bereit für die Migration! 🚀**
+
 

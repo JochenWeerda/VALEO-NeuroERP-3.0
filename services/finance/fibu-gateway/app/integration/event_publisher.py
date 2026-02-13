@@ -83,7 +83,7 @@ class FiBuEventPublisher:
             client = await self._ensure_connection()
             await client.publish(subject, json.dumps(payload).encode("utf-8"))
             logger.debug("Event auf NATS publiziert", extra={"subject": subject})
-        except Exception:  ***REMOVED*** noqa: BLE001
+        except Exception:  # noqa: BLE001
             logger.exception("Event-Publish fehlgeschlagen – fällt auf Logging zurück.")
             logger.info("FiBu-Event (Fallback-Logging)", extra={"event": payload, "subject": subject})
 
@@ -97,6 +97,7 @@ class FiBuEventPublisher:
             await client.connect(servers=[self._url], name="fibu-gateway")
             self._client = client
             return client
+
 
 
 

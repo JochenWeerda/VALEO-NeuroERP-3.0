@@ -24,12 +24,12 @@ depends_on = None
 
 def upgrade() -> None:
     """Create CRM AI tables."""
-    ***REMOVED*** Create enums
+    # Create enums
     op.execute("CREATE TYPE crm_ai_model_type AS ENUM ('lead_scoring', 'churn_prediction', 'clv_prediction', 'sentiment_analysis', 'intent_classification', 'recommendation')")
     op.execute("CREATE TYPE crm_ai_model_status AS ENUM ('training', 'ready', 'failed', 'deprecated')")
     op.execute("CREATE TYPE crm_ai_algorithm_type AS ENUM ('random_forest', 'gradient_boosting', 'neural_network', 'logistic_regression', 'svm', 'transformer')")
 
-    ***REMOVED*** AI Models table
+    # AI Models table
     op.create_table(
         "crm_ai_models",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -58,7 +58,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Predictions table
+    # Predictions table
     op.create_table(
         "crm_ai_predictions",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -81,7 +81,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     )
 
-    ***REMOVED*** Features table
+    # Features table
     op.create_table(
         "crm_ai_features",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -105,7 +105,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Experiments table
+    # Experiments table
     op.create_table(
         "crm_ai_experiments",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -131,7 +131,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Feedback table
+    # Feedback table
     op.create_table(
         "crm_ai_feedback",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -147,7 +147,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     )
 
-    ***REMOVED*** Seed initial data
+    # Seed initial data
     _seed_initial_data()
 
 
@@ -167,5 +167,5 @@ def downgrade() -> None:
 
 def _seed_initial_data():
     """Seed initial demo AI data."""
-    ***REMOVED*** This will be populated when the service starts and finds existing data
+    # This will be populated when the service starts and finds existing data
     pass

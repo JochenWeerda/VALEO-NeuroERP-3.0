@@ -13,7 +13,7 @@ from xml.dom import minidom
 class SEPAExporter:
     """SEPA XML Generator (pain.001.001.03 für Überweisungen)"""
     
-    ***REMOVED*** Namespaces
+    # Namespaces
     NAMESPACE = "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03"
     
     def __init__(self, initiator_name: str, initiator_iban: str, initiator_bic: str):
@@ -74,94 +74,94 @@ class SEPAExporter:
         if execution_date is None:
             execution_date = date.today()
         
-        ***REMOVED*** Root-Element
+        # Root-Element
         root = ET.Element("Document", xmlns=self.NAMESPACE)
         
-        ***REMOVED*** CstmrCdtTrfInitn (Customer Credit Transfer Initiation)
+        # CstmrCdtTrfInitn (Customer Credit Transfer Initiation)
         cct_initn = ET.SubElement(root, "CstmrCdtTrfInitn")
         
-        ***REMOVED*** Group Header
+        # Group Header
         grp_hdr = ET.SubElement(cct_initn, "GrpHdr")
         ET.SubElement(grp_hdr, "MsgId").text = message_id
         ET.SubElement(grp_hdr, "CreDtTm").text = datetime.now().isoformat()
         ET.SubElement(grp_hdr, "NbOfTxs").text = str(len(transactions))
         
-        ***REMOVED*** Summe berechnen
+        # Summe berechnen
         total_amount = sum(Decimal(str(t['amount'])) for t in transactions)
         ET.SubElement(grp_hdr, "CtrlSum").text = self._format_decimal(total_amount)
         
-        ***REMOVED*** Initiating Party
+        # Initiating Party
         initg_pty = ET.SubElement(grp_hdr, "InitgPty")
         ET.SubElement(initg_pty, "Nm").text = self.initiator_name
         
-        ***REMOVED*** Payment Information
+        # Payment Information
         pmt_inf = ET.SubElement(cct_initn, "PmtInf")
         pmt_inf_id = f"PMT-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
         ET.SubElement(pmt_inf, "PmtInfId").text = pmt_inf_id
-        ET.SubElement(pmt_inf, "PmtMtd").text = "TRF"  ***REMOVED*** Transfer
+        ET.SubElement(pmt_inf, "PmtMtd").text = "TRF"  # Transfer
         ET.SubElement(pmt_inf, "BtchBookg").text = "true"
         ET.SubElement(pmt_inf, "NbOfTxs").text = str(len(transactions))
         ET.SubElement(pmt_inf, "CtrlSum").text = self._format_decimal(total_amount)
         
-        ***REMOVED*** Payment Type Information
+        # Payment Type Information
         pmt_tp_inf = ET.SubElement(pmt_inf, "PmtTpInf")
         svc_lvl = ET.SubElement(pmt_tp_inf, "SvcLvl")
         ET.SubElement(svc_lvl, "Cd").text = "SEPA"
         
-        ***REMOVED*** Requested Execution Date
+        # Requested Execution Date
         ET.SubElement(pmt_inf, "ReqdExctnDt").text = execution_date.isoformat()
         
-        ***REMOVED*** Debtor (Auftraggeber)
+        # Debtor (Auftraggeber)
         dbtr = ET.SubElement(pmt_inf, "Dbtr")
         ET.SubElement(dbtr, "Nm").text = self.initiator_name
         
-        ***REMOVED*** Debtor Account
+        # Debtor Account
         dbtr_acct = ET.SubElement(pmt_inf, "DbtrAcct")
         dbtr_acct_id = ET.SubElement(dbtr_acct, "Id")
         ET.SubElement(dbtr_acct_id, "IBAN").text = self.initiator_iban
         
-        ***REMOVED*** Debtor Agent (Bank)
+        # Debtor Agent (Bank)
         dbtr_agt = ET.SubElement(pmt_inf, "DbtrAgt")
         fin_instn_id = ET.SubElement(dbtr_agt, "FinInstnId")
         ET.SubElement(fin_instn_id, "BIC").text = self.initiator_bic
         
-        ***REMOVED*** Charge Bearer
-        ET.SubElement(pmt_inf, "ChrgBr").text = "SLEV"  ***REMOVED*** Shared
+        # Charge Bearer
+        ET.SubElement(pmt_inf, "ChrgBr").text = "SLEV"  # Shared
         
-        ***REMOVED*** Credit Transfer Transaction Information (für jede Transaktion)
+        # Credit Transfer Transaction Information (für jede Transaktion)
         for idx, tx in enumerate(transactions, start=1):
             cdt_trf_tx_inf = ET.SubElement(pmt_inf, "CdtTrfTxInf")
             
-            ***REMOVED*** Payment ID
+            # Payment ID
             pmt_id = ET.SubElement(cdt_trf_tx_inf, "PmtId")
             end_to_end_id = tx.get('end_to_end_id', f"NOTPROVIDED-{idx}")
             ET.SubElement(pmt_id, "EndToEndId").text = end_to_end_id
             
-            ***REMOVED*** Amount
+            # Amount
             amt = ET.SubElement(cdt_trf_tx_inf, "Amt")
             instd_amt = ET.SubElement(amt, "InstdAmt", Ccy="EUR")
             instd_amt.text = self._format_decimal(Decimal(str(tx['amount'])))
             
-            ***REMOVED*** Creditor Agent (Empfänger-Bank) - optional bei SEPA
+            # Creditor Agent (Empfänger-Bank) - optional bei SEPA
             if tx.get('recipient_bic'):
                 cdtr_agt = ET.SubElement(cdt_trf_tx_inf, "CdtrAgt")
                 fin_instn = ET.SubElement(cdtr_agt, "FinInstnId")
                 ET.SubElement(fin_instn, "BIC").text = self._format_bic(tx['recipient_bic'])
             
-            ***REMOVED*** Creditor (Empfänger)
+            # Creditor (Empfänger)
             cdtr = ET.SubElement(cdt_trf_tx_inf, "Cdtr")
-            ET.SubElement(cdtr, "Nm").text = tx['recipient_name'][:70]  ***REMOVED*** Max 70 Zeichen
+            ET.SubElement(cdtr, "Nm").text = tx['recipient_name'][:70]  # Max 70 Zeichen
             
-            ***REMOVED*** Creditor Account
+            # Creditor Account
             cdtr_acct = ET.SubElement(cdt_trf_tx_inf, "CdtrAcct")
             cdtr_acct_id = ET.SubElement(cdtr_acct, "Id")
             ET.SubElement(cdtr_acct_id, "IBAN").text = self._format_iban(tx['recipient_iban'])
             
-            ***REMOVED*** Remittance Information (Verwendungszweck)
+            # Remittance Information (Verwendungszweck)
             rmt_inf = ET.SubElement(cdt_trf_tx_inf, "RmtInf")
-            ET.SubElement(rmt_inf, "Ustrd").text = tx['reference'][:140]  ***REMOVED*** Max 140 Zeichen
+            ET.SubElement(rmt_inf, "Ustrd").text = tx['reference'][:140]  # Max 140 Zeichen
         
-        ***REMOVED*** XML generieren
+        # XML generieren
         return self._prettify_xml(root)
     
     def save_to_file(self, xml_content: str, filename: str = None) -> str:
@@ -184,16 +184,16 @@ class SEPAExporter:
         return filename
 
 
-***REMOVED*** Beispiel-Verwendung
+# Beispiel-Verwendung
 if __name__ == "__main__":
-    ***REMOVED*** SEPA-Exporter initialisieren
+    # SEPA-Exporter initialisieren
     exporter = SEPAExporter(
         initiator_name="VALEO GmbH",
         initiator_iban="DE89370400440532013000",
         initiator_bic="COBADEFFXXX"
     )
     
-    ***REMOVED*** Test-Transaktionen
+    # Test-Transaktionen
     transactions = [
         {
             "recipient_name": "Müller Landhandel GmbH",
@@ -212,13 +212,13 @@ if __name__ == "__main__":
         }
     ]
     
-    ***REMOVED*** SEPA XML generieren
+    # SEPA XML generieren
     sepa_xml = exporter.create_credit_transfer(transactions)
     
     print("SEPA-XML generiert:")
     print(sepa_xml)
     
-    ***REMOVED*** Datei speichern
+    # Datei speichern
     filename = exporter.save_to_file(sepa_xml)
     print(f"\n✅ Exportiert nach: {filename}")
 

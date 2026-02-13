@@ -1,4 +1,4 @@
-***REMOVED******REMOVED******REMOVED*** 4. REST API (10 Endpunkte)
+### 4. REST API (10 Endpunkte)
 
 ```
 Labels (4):
@@ -28,7 +28,7 @@ Health (2):
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 8. KTBL-Integration (für THG-Landwirtschaft) 🆕
+### 8. KTBL-Integration (für THG-Landwirtschaft) 🆕
 
 ✅ **KTBL-API-Client** (`ktbl-api.ts`)
 - Integration vorbereitet für [KTBL BEK-Parameter](https://www.ktbl.de/webanwendungen/bek-parameter)
@@ -52,7 +52,7 @@ Health (2):
 
 ---
 
-***REMOVED******REMOVED*** 📊 Metriken (Final)
+## 📊 Metriken (Final)
 
 | Metrik | Wert |
 |--------|------|
@@ -69,14 +69,14 @@ Health (2):
 
 ---
 
-***REMOVED******REMOVED*** 🌐 Externe Datenquellen
+## 🌐 Externe Datenquellen
 
-***REMOVED******REMOVED******REMOVED*** BVL (Pflanzenschutzmittel)
+### BVL (Pflanzenschutzmittel)
 - ✅ Mock-Implementierung
 - ✅ 7-Tage-Cache
 - 🔄 Production: CSV-Import oder Scraping
 
-***REMOVED******REMOVED******REMOVED*** KTBL (Landwirtschafts-THG) 🆕
+### KTBL (Landwirtschafts-THG) 🆕
 - ✅ Fallback-Daten aktiv
 - ✅ Auto-Activation prepared
 - 🔄 Wartend auf KTBL-Webanwendung
@@ -84,9 +84,9 @@ Health (2):
 
 ---
 
-***REMOVED******REMOVED*** 💡 Use Cases (Updated)
+## 💡 Use Cases (Updated)
 
-***REMOVED******REMOVED******REMOVED*** Use Case 4: KTBL-basierte THG-Berechnung 🆕
+### Use Case 4: KTBL-basierte THG-Berechnung 🆕
 **Szenario:** Landwirt möchte Klimabilanz für Rapsanbau  
 **Flow:**
 1. POST `/ktbl/crop-emissions/Raps?region=DE21`
@@ -102,24 +102,24 @@ Health (2):
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Production-Readiness (Updated)
+## 🚀 Production-Readiness (Updated)
 
-***REMOVED******REMOVED******REMOVED*** Voraussetzungen
+### Voraussetzungen
 - [x] PostgreSQL ≥ 14
 - [x] NATS ≥ 2.8
 - [x] Node.js ≥ 20
 - [x] BVL-Integration (Mock oder CSV)
 - [x] KTBL-Fallback-Daten ✅
 
-***REMOVED******REMOVED******REMOVED*** External-Dependencies (in Zukunft)
+### External-Dependencies (in Zukunft)
 - [ ] KTBL BEK-Parameter (wartend auf Re-Launch)
 - [ ] BVL PSM-API (optional: CSV-Import)
 
 ---
 
-***REMOVED******REMOVED*** 🎓 Rechtliche Compliance (Updated)
+## 🎓 Rechtliche Compliance (Updated)
 
-***REMOVED******REMOVED******REMOVED*** Implementierte Standards:
+### Implementierte Standards:
 
 ✅ **VLOG** - EGGenTDurchfG  
 ✅ **QS** - Futtermittelmonitoring-Leitfaden 01/2025  
@@ -130,7 +130,7 @@ Health (2):
 
 ---
 
-***REMOVED******REMOVED*** 📚 Datenquellen
+## 📚 Datenquellen
 
 | Quelle | Zweck | Status | Integration |
 |--------|-------|--------|-------------|
@@ -147,3 +147,4 @@ Health (2):
 **Wartend auf:** KTBL BEK-Parameter-Webanwendung
 
 🎉 **Die regulatory-domain ist jetzt der zentrale Compliance-Hub für VALEO-NeuroERP - inkl. KTBL-Integration!**
+

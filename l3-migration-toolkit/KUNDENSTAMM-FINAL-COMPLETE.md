@@ -1,11 +1,11 @@
-***REMOVED*** ✅ Kundenstamm - VOLLSTÄNDIG FERTIG
+# ✅ Kundenstamm - VOLLSTÄNDIG FERTIG
 
 **Datum:** 2025-10-26  
 **Status:** ✅ PRODUCTION-READY
 
-***REMOVED******REMOVED*** 🎉 ERFOLG! Beide Artefakte erstellt
+## 🎉 ERFOLG! Beide Artefakte erstellt
 
-***REMOVED******REMOVED******REMOVED*** ✅ SQL-CREATE-Statements
+### ✅ SQL-CREATE-Statements
 **Datei:** `schemas/sql/kundenstamm_complete.sql`
 
 - **17 Tabellen** gesamt
@@ -18,7 +18,7 @@
 - **Triggers** für Auto-Update Zeitstempel
 - **Foreign Keys** mit CASCADE
 
-***REMOVED******REMOVED******REMOVED*** ✅ Mask Builder JSON
+### ✅ Mask Builder JSON
 **Datei:** `schemas/mask-builder/kundenstamm_complete.json`
 
 - **23 Tabs** für Frontend
@@ -27,7 +27,7 @@
 - **4 Relations** konfiguriert
 - **5 Actions** (Speichern, Löschen, Drucken, Exportieren, Duplizieren)
 
-***REMOVED******REMOVED*** 📊 Tabellen-Übersicht
+## 📊 Tabellen-Übersicht
 
 | ID | Tabelle | Felder | Mehrfach | Beschreibung |
 |----|---------|--------|----------|--------------|
@@ -51,7 +51,7 @@
 
 **Gesamt:** 17 Tabellen, ~200 Felder
 
-***REMOVED******REMOVED*** 🗂️ Frontend-Tabs (23 Tabs)
+## 🗂️ Frontend-Tabs (23 Tabs)
 
 1. **Allgemein** (mit Untertabelle)
 2. **Kundenanschrift**
@@ -77,31 +77,31 @@
 22. **CPD Konto** (mehrfach)
 23. **Menüstruktur** (nur Anzeige)
 
-***REMOVED******REMOVED*** 🚀 Implementierungs-Schritte
+## 🚀 Implementierungs-Schritte
 
-***REMOVED******REMOVED******REMOVED*** Schritt 1: SQL in PostgreSQL importieren
+### Schritt 1: SQL in PostgreSQL importieren
 ```bash
-***REMOVED*** Von Windows Host
+# Von Windows Host
 docker exec -i valeo-postgres psql -U valeo -d valeo_neuro_erp < schemas/sql/kundenstamm_complete.sql
 
-***REMOVED*** Oder direkt
+# Oder direkt
 psql -U valeo -d valeo_neuro_erp -f schemas/sql/kundenstamm_complete.sql
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 2: Mask Builder JSON importieren
+### Schritt 2: Mask Builder JSON importieren
 - Öffne VALEO-NeuroERP Admin Panel
 - Navigiere zu: **Mask Builder** → **Import**
 - Lade Datei: `schemas/mask-builder/kundenstamm_complete.json`
 - Überprüfe Tabs und Felder
 
-***REMOVED******REMOVED******REMOVED*** Schritt 3: Frontend-Komponenten generieren
+### Schritt 3: Frontend-Komponenten generieren
 - Mask Builder generiert automatisch React-Komponenten
 - Tabs werden als Sub-Components gerendert
 - Untertabellen als verschachtelte Tabellen angezeigt
 
-***REMOVED******REMOVED******REMOVED*** Schritt 4: Backend-API erweitern
+### Schritt 4: Backend-API erweitern
 ```python
-***REMOVED*** app/verkauf/router.py erweitern
+# app/verkauf/router.py erweitern
 
 @router.get("/kunden/{kunden_nr}/ansprechpartner")
 async def get_ansprechpartner(kunden_nr: str, db: Session = Depends(get_db)):
@@ -110,33 +110,33 @@ async def get_ansprechpartner(kunden_nr: str, db: Session = Depends(get_db)):
         KundenAnsprechpartner.kunden_nr == kunden_nr
     ).all()
 
-***REMOVED*** ... weitere Endpoints für Untertabellen
+# ... weitere Endpoints für Untertabellen
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 5: Migration von L3-Daten
+### Schritt 5: Migration von L3-Daten
 ```python
-***REMOVED*** scripts/migrate-l3-kunden.py
+# scripts/migrate-l3-kunden.py
 
-***REMOVED*** 1. Export aus L3-Datenbank
-***REMOVED*** 2. Transformiere Daten gemäß Mapping
-***REMOVED*** 3. Import in PostgreSQL-Tabellen
-***REMOVED*** 4. Validiere Relations
+# 1. Export aus L3-Datenbank
+# 2. Transformiere Daten gemäß Mapping
+# 3. Import in PostgreSQL-Tabellen
+# 4. Validiere Relations
 ```
 
-***REMOVED******REMOVED*** 📈 Daten-Migration Mapping
+## 📈 Daten-Migration Mapping
 
-***REMOVED******REMOVED******REMOVED*** L3 → VALEO Mapping
+### L3 → VALEO Mapping
 - **Quelle:** `schemas/mappings/l3-to-valeo-kundenstamm.json`
 - **Felder:** 20 Schlüsselfelder gemappt
 - **Transformationen:** uppercase, lowercase, trim, phone_format, iban
 
-***REMOVED******REMOVED******REMOVED*** Erwarteter Datenumfang
+### Erwarteter Datenumfang
 - **Kunden:** ~500-5000 Datensätze
 - **Ansprechpartner:** ~1000-10000 Datensätze (mehrfach)
 - **Rabatte:** ~2000-20000 Datensätze (mehrfach)
 - **Preise:** ~2000-20000 Datensätze (mehrfach)
 
-***REMOVED******REMOVED*** ✅ Qualitäts-Checklist
+## ✅ Qualitäts-Checklist
 
 - [x] SQL-Tabellen erstellt (17 Tabellen)
 - [x] Mask Builder JSON erstellt (23 Tabs)
@@ -148,16 +148,16 @@ async def get_ansprechpartner(kunden_nr: str, db: Session = Depends(get_db)):
 - [x] Seed-Daten vorbereitet
 - [x] Dokumentation vollständig
 
-***REMOVED******REMOVED*** 🎯 Performance-Optimierungen
+## 🎯 Performance-Optimierungen
 
-***REMOVED******REMOVED******REMOVED*** Indizes
+### Indizes
 - `idx_kunden_name1` - Suche nach Name
 - `idx_kunden_email` - Suche nach E-Mail
 - `idx_kunden_plz` - Suche nach PLZ
 - `idx_kunden_search` - Full-Text-Search (GIN)
 - `idx_kunden_ansprechpartner_kunden_nr` - JOINs
 
-***REMOVED******REMOVED******REMOVED*** Queries
+### Queries
 ```sql
 -- Optimaler Query mit JOINs
 SELECT 
@@ -171,7 +171,7 @@ WHERE k.geloescht = FALSE
 GROUP BY k.kunden_nr, kp.firmenname;
 ```
 
-***REMOVED******REMOVED*** 📝 Notizen
+## 📝 Notizen
 
 - ✅ Alle Felder aus L3 Screenshots extrahiert
 - ✅ ChatGPT-Analyse vollständig integriert
@@ -180,7 +180,7 @@ GROUP BY k.kunden_nr, kp.firmenname;
 - ✅ GDPR-konform (Datenschutz-Tabelle)
 - ✅ Migration-Ready
 
-***REMOVED******REMOVED*** 🎉 FERTIG!
+## 🎉 FERTIG!
 
 **Erstellt:** 2025-10-26  
 **Dauer:** ~30 Minuten (Schema-Analyse + Generierung)  
@@ -197,4 +197,5 @@ GROUP BY k.kunden_nr, kp.firmenname;
 - Auftrag
 - Bestellung
 - **PSM-Abgabe** (Agrar)
+
 

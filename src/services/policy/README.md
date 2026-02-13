@@ -1,24 +1,24 @@
-***REMOVED*** Policy Manager Backend
+# Policy Manager Backend
 
 Vollständige SQLite-basierte Backend-Implementation für das Policy-Framework.
 
-***REMOVED******REMOVED*** Architektur
+## Architektur
 
 - **`store-sqlite.ts`**: SQLite-Store mit CRUD + Backup/Restore
 - **`engine.ts`**: Policy-Entscheidungs-Engine (decide, resolveParams, withinWindow)
 - **`routes.ts`**: Express-Router mit allen Endpoints
 
-***REMOVED******REMOVED*** Installation
+## Installation
 
 ```bash
-***REMOVED*** Dependencies sind bereits installiert
+# Dependencies sind bereits installiert
 pnpm install
 ```
 
-***REMOVED******REMOVED*** Datenbank initialisieren
+## Datenbank initialisieren
 
 ```bash
-***REMOVED*** Seed mit Standard-Policies
+# Seed mit Standard-Policies
 pnpm run policy:seed
 ```
 
@@ -27,18 +27,18 @@ Dies erstellt `data/policies.db` mit 3 Standard-Regeln:
 - `inventory.auto.reorder`
 - `sales.notify.drop`
 
-***REMOVED******REMOVED*** MCP-Server starten
+## MCP-Server starten
 
 ```bash
-***REMOVED*** Development-Server
+# Development-Server
 pnpm run mcp:dev
 ```
 
 Server läuft auf: **http://localhost:7070**
 
-***REMOVED******REMOVED*** API-Endpoints
+## API-Endpoints
 
-***REMOVED******REMOVED******REMOVED*** GET `/api/mcp/policy/list`
+### GET `/api/mcp/policy/list`
 Listet alle Policies
 
 **Response:**
@@ -49,7 +49,7 @@ Listet alle Policies
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** POST `/api/mcp/policy/upsert`
+### POST `/api/mcp/policy/upsert`
 Erstellt oder aktualisiert Policies (einzeln oder bulk)
 
 **Request (einzeln):**
@@ -72,7 +72,7 @@ Erstellt oder aktualisiert Policies (einzeln oder bulk)
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** POST `/api/mcp/policy/delete`
+### POST `/api/mcp/policy/delete`
 Löscht eine Policy
 
 **Request:**
@@ -82,7 +82,7 @@ Löscht eine Policy
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** POST `/api/mcp/policy/test`
+### POST `/api/mcp/policy/test`
 Simulator - testet Policy-Entscheidung gegen Alert
 
 **Request:**
@@ -115,10 +115,10 @@ Simulator - testet Policy-Entscheidung gegen Alert
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** GET `/api/mcp/policy/export`
+### GET `/api/mcp/policy/export`
 Exportiert alle Policies als JSON-Download
 
-***REMOVED******REMOVED******REMOVED*** POST `/api/mcp/policy/restore`
+### POST `/api/mcp/policy/restore`
 Importiert Policies aus JSON (ACHTUNG: ersetzt alle bestehenden!)
 
 **Request:**
@@ -128,7 +128,7 @@ Importiert Policies aus JSON (ACHTUNG: ersetzt alle bestehenden!)
 }
 ```
 
-***REMOVED******REMOVED*** Integration in bestehenden Server
+## Integration in bestehenden Server
 
 Falls du bereits einen MCP-Server hast:
 
@@ -141,27 +141,27 @@ const policyStore = new PolicyStore('data/policies.db')
 app.use('/api/mcp/policy', createPolicyRouter(policyStore))
 ```
 
-***REMOVED******REMOVED*** Backup & Restore
+## Backup & Restore
 
-***REMOVED******REMOVED******REMOVED*** Manuelles Backup
+### Manuelles Backup
 ```bash
-***REMOVED*** SQLite-Datei kopieren
+# SQLite-Datei kopieren
 cp data/policies.db data/policies-backup-$(date +%Y%m%d).db
 ```
 
-***REMOVED******REMOVED******REMOVED*** Export via API
+### Export via API
 ```bash
 curl http://localhost:7070/api/mcp/policy/export > policies-backup.json
 ```
 
-***REMOVED******REMOVED******REMOVED*** Restore via API
+### Restore via API
 ```bash
 curl -X POST http://localhost:7070/api/mcp/policy/restore \
   -H "Content-Type: application/json" \
   -d '{"json": "..."}'
 ```
 
-***REMOVED******REMOVED*** Sicherheit
+## Sicherheit
 
 ⚠️ **Wichtig:**
 
@@ -170,7 +170,7 @@ curl -X POST http://localhost:7070/api/mcp/policy/restore \
 3. **Audit-Log**: Jede Policy-Änderung sollte geloggt werden
 4. **Rate-Limiting**: Import/Delete sollten rate-limited sein
 
-***REMOVED******REMOVED*** TypeScript Types
+## TypeScript Types
 
 Alle Types sind exportiert aus `store-sqlite.ts`:
 
@@ -178,16 +178,16 @@ Alle Types sind exportiert aus `store-sqlite.ts`:
 import type { Rule, Severity, Role, Window, When, Approval } from './services/policy/store-sqlite'
 ```
 
-***REMOVED******REMOVED*** Testing
+## Testing
 
 ```bash
-***REMOVED*** Health-Check
+# Health-Check
 curl http://localhost:7070/healthz
 
-***REMOVED*** Policy auflisten
+# Policy auflisten
 curl http://localhost:7070/api/mcp/policy/list
 
-***REMOVED*** Test-Simulator
+# Test-Simulator
 curl -X POST http://localhost:7070/api/mcp/policy/test \
   -H "Content-Type: application/json" \
   -d '{
@@ -202,22 +202,22 @@ curl -X POST http://localhost:7070/api/mcp/policy/test \
   }'
 ```
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Port bereits belegt
+### Port bereits belegt
 ```bash
-***REMOVED*** Anderen Port verwenden
+# Anderen Port verwenden
 PORT=8080 pnpm run mcp:dev
 ```
 
-***REMOVED******REMOVED******REMOVED*** Datenbank korrupt
+### Datenbank korrupt
 ```bash
-***REMOVED*** Neu initialisieren
+# Neu initialisieren
 rm data/policies.db
 pnpm run policy:seed
 ```
 
-***REMOVED******REMOVED******REMOVED*** CORS-Fehler
+### CORS-Fehler
 Der Server erlaubt standardmäßig alle Origins (`*`). Für Production sollte dies eingeschränkt werden:
 
 ```typescript
@@ -225,7 +225,7 @@ Der Server erlaubt standardmäßig alle Origins (`*`). Für Production sollte di
 res.header("Access-Control-Allow-Origin", "https://your-domain.com")
 ```
 
-***REMOVED******REMOVED*** Next Steps
+## Next Steps
 
 1. ✅ Backend implementiert
 2. ✅ Datenbank befüllt
@@ -234,4 +234,5 @@ res.header("Access-Control-Allow-Origin", "https://your-domain.com")
 5. Auth/RBAC hinzufügen
 6. Audit-Logging aktivieren
 7. Production-Deployment
+
 

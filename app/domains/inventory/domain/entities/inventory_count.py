@@ -16,7 +16,7 @@ class InventoryCount:
     warehouse_id: str
     count_date: datetime
     counted_by: str
-    status: str  ***REMOVED*** 'draft', 'completed', 'approved'
+    status: str  # 'draft', 'completed', 'approved'
     total_items: int
     discrepancies_found: int
     approved_by: Optional[str]

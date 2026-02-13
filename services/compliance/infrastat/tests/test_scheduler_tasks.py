@@ -33,7 +33,7 @@ class FakeAsyncSession:
         self._lookup = lookup
         self.flushed = False
 
-    async def execute(self, _stmt) -> FakeResult:  ***REMOVED*** pragma: no cover - behaviour controlled by lookup
+    async def execute(self, _stmt) -> FakeResult:  # pragma: no cover - behaviour controlled by lookup
         return FakeResult(self._lookup)
 
     async def flush(self) -> None:
@@ -53,7 +53,7 @@ async def test_trigger_workflow_for_ready_batches_publishes_event() -> None:
     session = FakeAsyncSession([batch])
     bus = DummyEventBus()
 
-    await trigger_workflow_for_ready_batches(session, bus)  ***REMOVED*** type: ignore[arg-type]
+    await trigger_workflow_for_ready_batches(session, bus)  # type: ignore[arg-type]
 
     assert bus.events and bus.events[0]["data"]["batch_id"] == str(batch.id)
 
@@ -74,3 +74,4 @@ async def test_ensure_periodic_batches_promotes_collecting_to_validating() -> No
 
     assert batch.status == models.DeclarationStatus.VALIDATING
     assert session.flushed is True
+

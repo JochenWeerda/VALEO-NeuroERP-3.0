@@ -1,10 +1,10 @@
-***REMOVED*** Predictive Forecasting & Anomaly Detection - Specification
+# Predictive Forecasting & Anomaly Detection - Specification
 
-***REMOVED******REMOVED*** Phase H - Intelligentes Frühwarnsystem
+## Phase H - Intelligentes Frühwarnsystem
 
 Diese Spezifikation beschreibt das Predictive Forecasting & Anomaly Detection System, das automatisch Trends prognostiziert und Anomalien erkennt.
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Das System bietet:
 - **Echtzeit-Prognosen** für Umsatz und Lager
@@ -13,7 +13,7 @@ Das System bietet:
 - **Realtime-Updates** via WebSocket
 - **Visuelle Warnungen** im Dashboard
 
-***REMOVED******REMOVED*** Architektur
+## Architektur
 
 ```
 ┌─────────────────────────────────────┐
@@ -44,9 +44,9 @@ Das System bietet:
 └─────────────────────────────────────┘
 ```
 
-***REMOVED******REMOVED*** Komponenten
+## Komponenten
 
-***REMOVED******REMOVED******REMOVED*** 1. Backend: Forecast-Endpoint
+### 1. Backend: Forecast-Endpoint
 
 **Pfad:** `POST /mcp/copilot/forecast`
 
@@ -114,7 +114,7 @@ Das System bietet:
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Frontend: useForecast Hook
+### 2. Frontend: useForecast Hook
 
 **Zweck:** Lädt Trenddaten und ruft Forecast-API auf
 
@@ -146,7 +146,7 @@ type Forecast = {
 - Loading-State während API-Call
 - Error-Handling ohne User-Benachrichtigung
 
-***REMOVED******REMOVED******REMOVED*** 3. Dashboard-Integration
+### 3. Dashboard-Integration
 
 **Visuelle Darstellung:**
 
@@ -175,9 +175,9 @@ type Forecast = {
   ↑ Roter Hintergrund (red-50)
 ```
 
-***REMOVED******REMOVED*** Algorithmus-Details
+## Algorithmus-Details
 
-***REMOVED******REMOVED******REMOVED*** Regressions-Vorhersage
+### Regressions-Vorhersage
 
 ```typescript
 // Letzte 3 Trends
@@ -194,7 +194,7 @@ const avgDelta = totalDelta / (recentTrends.length - 1)
 const nextSales = lastTrend.sales + avgDelta
 ```
 
-***REMOVED******REMOVED******REMOVED*** Anomalie-Erkennung
+### Anomalie-Erkennung
 
 ```typescript
 const ANOMALY_THRESHOLD = 0.15 // 15%
@@ -214,9 +214,9 @@ const anomaly = Math.abs(avgDelta) > ANOMALY_THRESHOLD * lastTrend.sales
 - Threshold: 4.200 €
 - Anomalie: Ja (5.000 > 4.200)
 
-***REMOVED******REMOVED*** Realtime-Updates
+## Realtime-Updates
 
-***REMOVED******REMOVED******REMOVED*** WebSocket Event
+### WebSocket Event
 
 **Event Type:** `analytics:forecast-updated`
 
@@ -243,9 +243,9 @@ useMcpRealtime("analytics", (evt) => {
 })
 ```
 
-***REMOVED******REMOVED*** Styling
+## Styling
 
-***REMOVED******REMOVED******REMOVED*** Color-Coding
+### Color-Coding
 
 **Normal (Kein Alarm):**
 - Background: `bg-emerald-50`
@@ -258,16 +258,16 @@ useMcpRealtime("analytics", (evt) => {
 - Badge: `text-red-600` mit ⚠️
 - Icon: Rotes Warnsymbol
 
-***REMOVED******REMOVED******REMOVED*** Animation
+### Animation
 
 - Framer Motion fade-in
 - Initial: `opacity: 0`
 - Animate: `opacity: 1`
 - Smooth transition
 
-***REMOVED******REMOVED*** Code-Qualität
+## Code-Qualität
 
-***REMOVED******REMOVED******REMOVED*** ✅ Memory-Bank Compliance
+### ✅ Memory-Bank Compliance
 
 **Backend:**
 - TypeScript Strict Mode
@@ -284,16 +284,16 @@ useMcpRealtime("analytics", (evt) => {
 - Explizite Boolean Checks
 - Array.length > 0 Checks
 
-***REMOVED******REMOVED******REMOVED*** ✅ Lint Status
+### ✅ Lint Status
 
 - 0 Errors (Frontend + Backend)
 - 0 Warnings
 - Import-Sortierung korrekt
 - Alle Event-Handler typisiert
 
-***REMOVED******REMOVED*** Testing
+## Testing
 
-***REMOVED******REMOVED******REMOVED*** Unit Tests (Backend)
+### Unit Tests (Backend)
 
 ```typescript
 describe('Forecast Endpoint', () => {
@@ -328,27 +328,27 @@ describe('Forecast Endpoint', () => {
 })
 ```
 
-***REMOVED******REMOVED******REMOVED*** Integration Test
+### Integration Test
 
 ```bash
-***REMOVED*** Terminal 1: Backend
+# Terminal 1: Backend
 cd packages/analytics-domain
 LLM_API_KEY=sk-... npm run dev
 
-***REMOVED*** Terminal 2: Frontend
+# Terminal 2: Frontend
 cd packages/frontend-web
 npm run dev
 
-***REMOVED*** Browser: http://localhost:5173
-***REMOVED*** 1. Navigate to Dashboard
-***REMOVED*** 2. Wait for charts to load
-***REMOVED*** 3. Verify "🔮 Prognose" box appears
-***REMOVED*** 4. Check color (green = normal, red = anomaly)
+# Browser: http://localhost:5173
+# 1. Navigate to Dashboard
+# 2. Wait for charts to load
+# 3. Verify "🔮 Prognose" box appears
+# 4. Check color (green = normal, red = anomaly)
 ```
 
-***REMOVED******REMOVED*** Erweiterungsmöglichkeiten
+## Erweiterungsmöglichkeiten
 
-***REMOVED******REMOVED******REMOVED*** 1. Erweiterte Algorithmen
+### 1. Erweiterte Algorithmen
 
 **Linear Regression:**
 ```typescript
@@ -367,7 +367,7 @@ function ema(data: number[], alpha: number): number[]
 - Saisonale Anpassungen
 - Multi-Variate Prognosen
 
-***REMOVED******REMOVED******REMOVED*** 2. Multi-Metric Forecasts
+### 2. Multi-Metric Forecasts
 
 Erweitere auf:
 - Umsatz-Prognose ✅
@@ -375,7 +375,7 @@ Erweitere auf:
 - Margen-Prognose
 - Bestellungen-Prognose
 
-***REMOVED******REMOVED******REMOVED*** 3. Confidence Intervals
+### 3. Confidence Intervals
 
 ```typescript
 type Forecast = {
@@ -386,7 +386,7 @@ type Forecast = {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. Historical Accuracy
+### 4. Historical Accuracy
 
 ```typescript
 type ForecastAccuracy = {
@@ -396,7 +396,7 @@ type ForecastAccuracy = {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 5. Alert-System
+### 5. Alert-System
 
 ```typescript
 type Alert = {
@@ -407,31 +407,31 @@ type Alert = {
 }
 ```
 
-***REMOVED******REMOVED*** Performance
+## Performance
 
-***REMOVED******REMOVED******REMOVED*** Optimizations
+### Optimizations
 
 - **Caching:** Forecast-Ergebnisse für 5 Minuten cachen
 - **Debouncing:** Nicht bei jedem Trend-Update neu berechnen
 - **Lazy Loading:** LLM-Analyse nur bei Anomalien
 - **Parallel Processing:** Mehrere Metriken gleichzeitig
 
-***REMOVED******REMOVED******REMOVED*** Response Times
+### Response Times
 
 - **Ohne LLM:** ~50ms (reine Berechnung)
 - **Mit LLM:** ~1-3s (API-Call)
 - **Cached:** ~10ms
 
-***REMOVED******REMOVED*** Security
+## Security
 
-***REMOVED******REMOVED******REMOVED*** Input Validation
+### Input Validation
 
 - ✅ Mindestens 3 Datenpunkte erforderlich
 - ✅ Array-Type-Checking
 - ✅ Undefined-Checks für alle Zugriffe
 - ✅ Error-Handling mit Fallbacks
 
-***REMOVED******REMOVED******REMOVED*** Rate-Limiting
+### Rate-Limiting
 
 ```typescript
 import rateLimit from "express-rate-limit"
@@ -444,9 +444,9 @@ const forecastLimiter = rateLimit({
 app.post("/forecast", forecastLimiter, handler)
 ```
 
-***REMOVED******REMOVED*** Monitoring
+## Monitoring
 
-***REMOVED******REMOVED******REMOVED*** Metrics
+### Metrics
 
 ```typescript
 // Prometheus-Metriken
@@ -466,7 +466,7 @@ const forecastAccuracy = new Gauge({
 })
 ```
 
-***REMOVED******REMOVED******REMOVED*** Logging
+### Logging
 
 ```typescript
 logger.info("Forecast generated", {
@@ -481,23 +481,23 @@ logger.warn("Anomaly detected", {
 })
 ```
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: Forecast erscheint nicht
+### Problem: Forecast erscheint nicht
 **Lösung:** Prüfe ob mindestens 3 Trenddaten vorhanden sind
 
-***REMOVED******REMOVED******REMOVED*** Problem: Immer Anomalie
+### Problem: Immer Anomalie
 **Lösung:** `ANOMALY_THRESHOLD` erhöhen (z.B. auf 0.20 = 20%)
 
-***REMOVED******REMOVED******REMOVED*** Problem: LLM-Faktoren leer
+### Problem: LLM-Faktoren leer
 **Lösung:** Prüfe `LLM_API_KEY` in `.env`, LLM ist optional
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Berechne Prognose …" hängt
+### Problem: "Berechne Prognose …" hängt
 **Lösung:** Prüfe Backend-Endpoint `/mcp/copilot/forecast`
 
-***REMOVED******REMOVED*** Code-Qualität
+## Code-Qualität
 
-***REMOVED******REMOVED******REMOVED*** ✅ Backend
+### ✅ Backend
 
 - TypeScript Strict Mode
 - Explizite Return Types
@@ -506,7 +506,7 @@ logger.warn("Anomaly detected", {
 - Undefined-Handling
 - Error-Handler Middleware
 
-***REMOVED******REMOVED******REMOVED*** ✅ Frontend
+### ✅ Frontend
 
 - TypeScript Strict Mode
 - Explizite Return Types
@@ -515,15 +515,15 @@ logger.warn("Anomaly detected", {
 - Loading-State Management
 - Conditional Rendering
 
-***REMOVED******REMOVED******REMOVED*** ✅ Lint Status
+### ✅ Lint Status
 
 - 0 Errors (Frontend + Backend)
 - 0 Warnings
 - Memory-Bank konform
 
-***REMOVED******REMOVED*** Features
+## Features
 
-***REMOVED******REMOVED******REMOVED*** ✅ Implementiert
+### ✅ Implementiert
 
 1. **Umsatz-Prognose**
    - Linear extrapoliert aus letzten 3 Trends
@@ -545,7 +545,7 @@ logger.warn("Anomaly detected", {
    - Toast-Benachrichtigung
    - Automatische UI-Aktualisierung
 
-***REMOVED******REMOVED******REMOVED*** 🚀 Phase I - Nächste Erweiterung
+### 🚀 Phase I - Nächste Erweiterung
 
 **KPI-Heatmap & Alert-System:**
 - Farbliche Hervorhebung von Hot Zones
@@ -554,7 +554,7 @@ logger.warn("Anomaly detected", {
 - Priorisierung nach Severity
 - Email/Push-Benachrichtigungen
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 **Phase H - Predictive Forecasting & Anomaly Detection** bietet:
 
@@ -568,3 +568,4 @@ logger.warn("Anomaly detected", {
 - ✅ 0 Lint-Errors/Warnings
 
 **Status:** Production Ready 🚀
+

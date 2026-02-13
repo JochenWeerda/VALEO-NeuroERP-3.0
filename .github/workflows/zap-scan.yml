@@ -1,8 +1,8 @@
 name: OWASP ZAP Security Scan
 on:
   schedule:
-    - cron: "0 2 * * 0"  ***REMOVED*** Weekly scan (Sunday 02:00 UTC)
-  workflow_dispatch:      ***REMOVED*** Manual trigger
+    - cron: "0 2 * * 0"  # Weekly scan (Sunday 02:00 UTC)
+  workflow_dispatch:      # Manual trigger
   pull_request:
     branches: [main]
 
@@ -46,7 +46,7 @@ jobs:
           target: "http://localhost:7070"
           rules_file_name: ".zap/rules.tsv"
           cmd_options: "-m 3 -j"
-          fail_action: false  ***REMOVED*** Don't fail build, just report
+          fail_action: false  # Don't fail build, just report
 
       - name: Upload ZAP report
         uses: actions/upload-artifact@v4
@@ -61,7 +61,7 @@ jobs:
       - name: Create ZAP summary
         if: always()
         run: |
-          echo "***REMOVED******REMOVED*** 🔒 OWASP ZAP Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔒 OWASP ZAP Scan Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Target:** http://localhost:7070" >> $GITHUB_STEP_SUMMARY
           echo "**Scan Date:** $(date -u)" >> $GITHUB_STEP_SUMMARY

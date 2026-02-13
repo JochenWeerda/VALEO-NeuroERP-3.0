@@ -38,11 +38,11 @@ class DailyReportWorker:
             if not self.service:
                 await self.initialize()
 
-            ***REMOVED*** Generate reports for yesterday
+            # Generate reports for yesterday
             reports = self.service.generate_daily_reports()
 
             if reports:
-                ***REMOVED*** Send reports
+                # Send reports
                 send_results = self.service.send_daily_reports(reports)
 
                 logger.info(f"Generated and sent {len(reports)} daily reports")
@@ -82,7 +82,7 @@ async def run_daily_reports():
         await worker.initialize()
         result = await worker.generate_daily_reports()
 
-        ***REMOVED*** Log results
+        # Log results
         if result['success']:
             logger.info(f"Daily reports completed successfully: {result}")
         else:
@@ -101,11 +101,11 @@ async def run_daily_reports():
         await worker.cleanup()
 
 
-***REMOVED*** Scheduled execution function (to be called by scheduler)
+# Scheduled execution function (to be called by scheduler)
 def execute_daily_reports():
     """Synchronous wrapper for scheduled execution"""
     try:
-        ***REMOVED*** Run in new event loop
+        # Run in new event loop
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         result = loop.run_until_complete(run_daily_reports())
@@ -122,6 +122,6 @@ def execute_daily_reports():
 
 
 if __name__ == "__main__":
-    ***REMOVED*** For testing
+    # For testing
     result = execute_daily_reports()
     print(f"Daily report execution result: {result}")

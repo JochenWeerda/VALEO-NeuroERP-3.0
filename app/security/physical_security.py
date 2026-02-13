@@ -49,12 +49,12 @@ class PhysicalAsset:
     """Physical asset representation"""
     id: str
     name: str
-    asset_type: str  ***REMOVED*** server, workstation, storage_device, etc.
+    asset_type: str  # server, workstation, storage_device, etc.
     location: str
     facility_zone: FacilityZone
     access_level: AccessLevel
-    criticality: str  ***REMOVED*** low, medium, high, critical
-    value: float  ***REMOVED*** monetary value
+    criticality: str  # low, medium, high, critical
+    value: float  # monetary value
     serial_number: Optional[str] = None
     purchase_date: Optional[datetime] = None
     last_inventory_check: Optional[datetime] = None
@@ -100,7 +100,7 @@ class EnvironmentalReading:
     id: str
     timestamp: datetime
     location: str
-    sensor_type: str  ***REMOVED*** temperature, humidity, smoke, water, etc.
+    sensor_type: str  # temperature, humidity, smoke, water, etc.
     value: float
     unit: str
     threshold_min: Optional[float] = None
@@ -119,23 +119,23 @@ class ISO27001PhysicalSecurity:
         self.access_control = access_control_service
         self.monitoring = monitoring_service
 
-        ***REMOVED*** Asset tracking
+        # Asset tracking
         self.physical_assets: Dict[str, PhysicalAsset] = {}
 
-        ***REMOVED*** Access control
+        # Access control
         self.access_permissions: Dict[str, Dict[str, Any]] = {}
         self.access_events: List[AccessEvent] = []
 
-        ***REMOVED*** Security incidents
+        # Security incidents
         self.security_incidents: List[SecurityIncident] = []
 
-        ***REMOVED*** Environmental monitoring
+        # Environmental monitoring
         self.environmental_readings: List[EnvironmentalReading] = []
 
-        ***REMOVED*** Security policies
+        # Security policies
         self.security_policies = self._initialize_security_policies()
 
-        ***REMOVED*** Access levels and requirements
+        # Access levels and requirements
         self.access_requirements = self._initialize_access_requirements()
 
     def _initialize_security_policies(self) -> Dict[str, Dict[str, Any]]:
@@ -143,7 +143,7 @@ class ISO27001PhysicalSecurity:
         return {
             'access_control': {
                 'least_privilege': True,
-                'dual_authorization': True,  ***REMOVED*** for critical areas
+                'dual_authorization': True,  # for critical areas
                 'time_based_access': True,
                 'visitor_management': True,
                 'access_logging': True
@@ -249,7 +249,7 @@ class ISO27001PhysicalSecurity:
 
         self.physical_assets[asset_id] = asset
 
-        ***REMOVED*** Perform initial security assessment
+        # Perform initial security assessment
         self._assess_asset_security(asset)
 
         logger.info(f"Physical asset registered: {asset.name} in {asset.facility_zone.value}")
@@ -257,18 +257,18 @@ class ISO27001PhysicalSecurity:
 
     def _assess_asset_security(self, asset: PhysicalAsset):
         """Assess security requirements for physical asset"""
-        ***REMOVED*** Check if asset is in appropriate zone for its access level
+        # Check if asset is in appropriate zone for its access level
         zone_requirements = self.access_requirements[asset.facility_zone]
 
         if asset.access_level.value > zone_requirements['access_level'].value:
             logger.warning(f"Asset {asset.name} has higher access level than zone {asset.facility_zone.value}")
 
-        ***REMOVED*** Check security features
+        # Check security features
         required_features = []
         if asset.criticality in ['high', 'critical']:
             required_features.extend(['tamper_evident', 'secure_mounting'])
 
-        if asset.value > 50000:  ***REMOVED*** High-value assets
+        if asset.value > 50000:  # High-value assets
             required_features.extend(['insurance_tracked', 'theft_protection'])
 
         missing_features = [f for f in required_features if f not in asset.security_features]
@@ -315,7 +315,7 @@ class ISO27001PhysicalSecurity:
         """
         location_details = location_details or {}
 
-        ***REMOVED*** Find active permissions for this person and zone
+        # Find active permissions for this person and zone
         active_permissions = [
             p for p in self.access_permissions.values()
             if p['person_id'] == person_id and
@@ -328,32 +328,32 @@ class ISO27001PhysicalSecurity:
             self._log_access_attempt(person_id, zone, access_method, False, "No active permission", location_details)
             return False, "Access denied: No active permission for this zone"
 
-        permission = active_permissions[0]  ***REMOVED*** Use first valid permission
+        permission = active_permissions[0]  # Use first valid permission
 
-        ***REMOVED*** Check time-based restrictions
+        # Check time-based restrictions
         if permission['restrictions']['time_based']:
             if not self._check_time_restrictions(person_id, zone):
                 self._log_access_attempt(person_id, zone, access_method, False, "Time restriction violation", location_details)
                 return False, "Access denied: Outside allowed hours"
 
-        ***REMOVED*** Check dual authorization for critical areas
+        # Check dual authorization for critical areas
         if permission['restrictions']['dual_auth_required']:
             if not self._check_dual_authorization(person_id, zone, location_details):
                 self._log_access_attempt(person_id, zone, access_method, False, "Dual authorization required", location_details)
                 return False, "Access denied: Dual authorization required"
 
-        ***REMOVED*** Check supervision requirements
+        # Check supervision requirements
         if permission['restrictions']['supervision_required']:
             if not self._check_supervision(person_id, zone, location_details):
                 self._log_access_attempt(person_id, zone, access_method, False, "Supervision required", location_details)
                 return False, "Access denied: Supervision required"
 
-        ***REMOVED*** Check access method compatibility
+        # Check access method compatibility
         if not self._validate_access_method(access_method, permission):
             self._log_access_attempt(person_id, zone, access_method, False, "Invalid access method", location_details)
             return False, "Access denied: Invalid access method for this permission"
 
-        ***REMOVED*** All checks passed
+        # All checks passed
         self._log_access_attempt(person_id, zone, access_method, True, "Access granted", location_details)
         return True, "Access granted"
 
@@ -361,18 +361,18 @@ class ISO27001PhysicalSecurity:
         """Check if access is within allowed time windows"""
         now = datetime.utcnow()
         current_hour = now.hour
-        current_day = now.weekday()  ***REMOVED*** 0=Monday, 6=Sunday
+        current_day = now.weekday()  # 0=Monday, 6=Sunday
 
-        ***REMOVED*** Define time restrictions based on zone
+        # Define time restrictions based on zone
         time_restrictions = {
             FacilityZone.SERVER_ROOM: {
-                'allowed_hours': range(8, 18),  ***REMOVED*** Business hours
-                'allowed_days': range(0, 5)  ***REMOVED*** Monday-Friday
+                'allowed_hours': range(8, 18),  # Business hours
+                'allowed_days': range(0, 5)  # Monday-Friday
             },
             FacilityZone.DATA_CENTER: {
                 'allowed_hours': range(8, 18),
                 'allowed_days': range(0, 5),
-                'maintenance_window': True  ***REMOVED*** Allow maintenance access
+                'maintenance_window': True  # Allow maintenance access
             },
             FacilityZone.SECURE_STORAGE: {
                 'allowed_hours': range(8, 18),
@@ -382,7 +382,7 @@ class ISO27001PhysicalSecurity:
 
         restrictions = time_restrictions.get(zone)
         if not restrictions:
-            return True  ***REMOVED*** No restrictions for this zone
+            return True  # No restrictions for this zone
 
         if current_hour not in restrictions['allowed_hours']:
             return False
@@ -394,8 +394,8 @@ class ISO27001PhysicalSecurity:
 
     def _check_dual_authorization(self, person_id: str, zone: FacilityZone, location_details: Dict[str, Any]) -> bool:
         """Check dual authorization requirements"""
-        ***REMOVED*** In production, this would check for secondary authorization
-        ***REMOVED*** For now, simulate based on context
+        # In production, this would check for secondary authorization
+        # For now, simulate based on context
         secondary_auth = location_details.get('secondary_authorization', False)
         return secondary_auth
 
@@ -406,11 +406,11 @@ class ISO27001PhysicalSecurity:
 
     def _validate_access_method(self, access_method: AccessMethod, permission: Dict[str, Any]) -> bool:
         """Validate access method compatibility"""
-        ***REMOVED*** Check if the access method is allowed for this permission
+        # Check if the access method is allowed for this permission
         allowed_methods = [AccessMethod.KEYCARD, AccessMethod.BIOMETRIC, AccessMethod.PIN_CODE]
 
         if permission['facility_zone'] in [FacilityZone.DATA_CENTER, FacilityZone.SECURE_STORAGE]:
-            allowed_methods.append(AccessMethod.KEY)  ***REMOVED*** Physical keys allowed for critical areas
+            allowed_methods.append(AccessMethod.KEY)  # Physical keys allowed for critical areas
 
         return access_method in allowed_methods
 
@@ -456,7 +456,7 @@ class ISO27001PhysicalSecurity:
 
         self.security_incidents.append(incident)
 
-        ***REMOVED*** Trigger immediate response
+        # Trigger immediate response
         self._trigger_incident_response(incident)
 
         logger.warning(f"Physical security incident reported: {incident.incident_type} at {incident.location}")
@@ -487,7 +487,7 @@ class ISO27001PhysicalSecurity:
 
         incident.response_actions = response_actions
 
-        ***REMOVED*** In production, this would trigger alerts and notifications
+        # In production, this would trigger alerts and notifications
         logger.critical(f"Incident response triggered for {incident.incident_type}")
 
     def record_environmental_reading(self, sensor_data: Dict[str, Any]) -> str:
@@ -508,7 +508,7 @@ class ISO27001PhysicalSecurity:
             threshold_max=sensor_data.get('threshold_max')
         )
 
-        ***REMOVED*** Check thresholds and trigger alerts
+        # Check thresholds and trigger alerts
         if reading.threshold_min and reading.value < reading.threshold_min:
             reading.alert_triggered = True
             self._trigger_environmental_alert(reading, "below_minimum")
@@ -527,7 +527,7 @@ class ISO27001PhysicalSecurity:
         """Trigger environmental monitoring alert"""
         alert_message = f"Environmental threshold violation: {reading.sensor_type} {alert_type} at {reading.location}"
 
-        ***REMOVED*** In production, this would trigger notifications and automated responses
+        # In production, this would trigger notifications and automated responses
         logger.warning(alert_message)
 
     def perform_inventory_check(self, asset_id: str, checked_by: str, location_verified: bool = True) -> bool:
@@ -541,25 +541,25 @@ class ISO27001PhysicalSecurity:
         asset = self.physical_assets[asset_id]
         asset.last_inventory_check = datetime.utcnow()
 
-        ***REMOVED*** In production, this would update inventory status and check for discrepancies
+        # In production, this would update inventory status and check for discrepancies
         logger.info(f"Inventory check performed for asset {asset.name} by {checked_by}")
 
         return True
 
     def get_physical_security_status(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Get comprehensive physical security status"""
-        ***REMOVED*** Filter data by tenant
+        # Filter data by tenant
         tenant_assets = [a for a in self.physical_assets.values() if a.tenant_id == tenant_id]
         tenant_events = [e for e in self.access_events if e.tenant_id == tenant_id]
         tenant_incidents = [i for i in self.security_incidents if i.tenant_id == tenant_id]
 
-        ***REMOVED*** Calculate metrics
+        # Calculate metrics
         asset_compliance = self._calculate_asset_compliance(tenant_assets)
         access_patterns = self._analyze_access_patterns(tenant_events)
         incident_summary = self._summarize_security_incidents(tenant_incidents)
         environmental_status = self._check_environmental_status()
 
-        ***REMOVED*** Calculate overall risk score
+        # Calculate overall risk score
         risk_score = self._calculate_physical_risk_score(tenant_assets, tenant_events, tenant_incidents)
 
         return {
@@ -582,10 +582,10 @@ class ISO27001PhysicalSecurity:
         overdue_inventory = 0
 
         for asset in assets:
-            ***REMOVED*** Check inventory compliance (quarterly checks)
+            # Check inventory compliance (quarterly checks)
             if asset.last_inventory_check:
                 days_since_check = (datetime.utcnow() - asset.last_inventory_check).days
-                if days_since_check > 90:  ***REMOVED*** 90 days = quarterly
+                if days_since_check > 90:  # 90 days = quarterly
                     overdue_inventory += 1
                 else:
                     compliant += 1
@@ -610,7 +610,7 @@ class ISO27001PhysicalSecurity:
         denied_events = sum(1 for e in events if not e.access_granted)
         denied_rate = (denied_events / total_events) * 100 if total_events > 0 else 0
 
-        ***REMOVED*** Analyze peak access hours
+        # Analyze peak access hours
         hour_counts = {}
         for event in events:
             hour = event.timestamp.hour
@@ -633,11 +633,11 @@ class ISO27001PhysicalSecurity:
         total_incidents = len(incidents)
         unresolved = sum(1 for i in incidents if not i.resolved_at)
 
-        ***REMOVED*** Calculate average resolution time
+        # Calculate average resolution time
         resolved_incidents = [i for i in incidents if i.resolved_at]
         if resolved_incidents:
             resolution_times = [
-                (i.resolved_at - i.timestamp).total_seconds() / 3600  ***REMOVED*** hours
+                (i.resolved_at - i.timestamp).total_seconds() / 3600  # hours
                 for i in resolved_incidents
             ]
             avg_resolution_time = sum(resolution_times) / len(resolution_times)
@@ -652,7 +652,7 @@ class ISO27001PhysicalSecurity:
 
     def _check_environmental_status(self) -> Dict[str, Any]:
         """Check environmental monitoring status"""
-        recent_readings = [r for r in self.environmental_readings[-100:]]  ***REMOVED*** Last 100 readings
+        recent_readings = [r for r in self.environmental_readings[-100:]]  # Last 100 readings
 
         if not recent_readings:
             return {'status': 'NO_DATA', 'alerts': 0, 'sensors_active': 0}
@@ -676,20 +676,20 @@ class ISO27001PhysicalSecurity:
         """Calculate overall physical security risk score (0-100)"""
         risk_score = 0
 
-        ***REMOVED*** Asset protection factor
+        # Asset protection factor
         unprotected_high_value = sum(1 for a in assets if a.criticality in ['high', 'critical'] and len(a.security_features) < 2)
         risk_score += min(unprotected_high_value * 10, 30)
 
-        ***REMOVED*** Access control factor
+        # Access control factor
         denied_rate = sum(1 for e in events if not e.access_granted) / len(events) if events else 0
-        if denied_rate > 0.1:  ***REMOVED*** More than 10% denied
+        if denied_rate > 0.1:  # More than 10% denied
             risk_score += 10
 
-        ***REMOVED*** Incident factor
+        # Incident factor
         unresolved_incidents = sum(1 for i in incidents if not i.resolved_at)
         risk_score += min(unresolved_incidents * 5, 20)
 
-        ***REMOVED*** Environmental factor
+        # Environmental factor
         recent_alerts = sum(1 for r in self.environmental_readings[-50:] if r.alert_triggered)
         risk_score += min(recent_alerts * 2, 20)
 
@@ -699,7 +699,7 @@ class ISO27001PhysicalSecurity:
         """Get active physical security alerts"""
         alerts = []
 
-        ***REMOVED*** Check for overdue inventory
+        # Check for overdue inventory
         overdue_assets = [
             a for a in self.physical_assets.values()
             if a.tenant_id == tenant_id and a.last_inventory_check and
@@ -715,7 +715,7 @@ class ISO27001PhysicalSecurity:
                 'days_overdue': (datetime.utcnow() - asset.last_inventory_check).days
             })
 
-        ***REMOVED*** Check for unresolved incidents
+        # Check for unresolved incidents
         unresolved_incidents = [
             i for i in self.security_incidents
             if i.tenant_id == tenant_id and not i.resolved_at
@@ -736,23 +736,23 @@ class ISO27001PhysicalSecurity:
         """Check ISO 27001 physical security compliance"""
         issues = []
 
-        ***REMOVED*** Check access control compliance
+        # Check access control compliance
         access_issues = self._check_access_control_compliance()
         issues.extend(access_issues)
 
-        ***REMOVED*** Check asset protection compliance
+        # Check asset protection compliance
         asset_issues = self._check_asset_protection_compliance()
         issues.extend(asset_issues)
 
-        ***REMOVED*** Check environmental security compliance
+        # Check environmental security compliance
         environmental_issues = self._check_environmental_security_compliance()
         issues.extend(environmental_issues)
 
-        ***REMOVED*** Check physical barriers compliance
+        # Check physical barriers compliance
         barrier_issues = self._check_physical_barriers_compliance()
         issues.extend(barrier_issues)
 
-        compliance_score = max(0, 100 - (len(issues) * 3))  ***REMOVED*** 3 points per issue
+        compliance_score = max(0, 100 - (len(issues) * 3))  # 3 points per issue
 
         return {
             'tenant_id': tenant_id,
@@ -768,16 +768,16 @@ class ISO27001PhysicalSecurity:
         """Check access control compliance"""
         issues = []
 
-        ***REMOVED*** Check for zones without proper access control
+        # Check for zones without proper access control
         for zone in FacilityZone:
             if zone == FacilityZone.EXTERNAL:
-                continue  ***REMOVED*** External areas don't need access control
+                continue  # External areas don't need access control
 
             zone_permissions = [p for p in self.access_permissions.values() if p['facility_zone'] == zone]
             if not zone_permissions:
                 issues.append(f"No access permissions defined for {zone.value}")
 
-        ***REMOVED*** Check for expired permissions
+        # Check for expired permissions
         expired_permissions = [
             p for p in self.access_permissions.values()
             if p['is_active'] and p['expires_at'] < datetime.utcnow()
@@ -792,12 +792,12 @@ class ISO27001PhysicalSecurity:
         """Check asset protection compliance"""
         issues = []
 
-        ***REMOVED*** Check for untagged assets
+        # Check for untagged assets
         untagged_assets = [a for a in self.physical_assets.values() if not a.serial_number]
         if untagged_assets:
             issues.append(f"{len(untagged_assets)} assets are not properly tagged")
 
-        ***REMOVED*** Check for overdue inventory
+        # Check for overdue inventory
         overdue_inventory = [
             a for a in self.physical_assets.values()
             if not a.last_inventory_check or (datetime.utcnow() - a.last_inventory_check).days > 90
@@ -812,7 +812,7 @@ class ISO27001PhysicalSecurity:
         """Check environmental security compliance"""
         issues = []
 
-        ***REMOVED*** Check for missing environmental monitoring
+        # Check for missing environmental monitoring
         monitored_locations = set(r.location for r in self.environmental_readings)
         asset_locations = set(a.location for a in self.physical_assets.values())
 
@@ -820,8 +820,8 @@ class ISO27001PhysicalSecurity:
         if unmonitored_locations:
             issues.append(f"{len(unmonitored_locations)} locations lack environmental monitoring")
 
-        ***REMOVED*** Check for recent alerts
-        recent_alerts = [r for r in self.environmental_readings[-24:] if r.alert_triggered]  ***REMOVED*** Last 24 hours
+        # Check for recent alerts
+        recent_alerts = [r for r in self.environmental_readings[-24:] if r.alert_triggered]  # Last 24 hours
         if recent_alerts:
             issues.append(f"{len(recent_alerts)} environmental alerts in the last 24 hours")
 
@@ -831,8 +831,8 @@ class ISO27001PhysicalSecurity:
         """Check physical barriers compliance"""
         issues = []
 
-        ***REMOVED*** This would check for physical security measures in production
-        ***REMOVED*** For now, return placeholder checks
+        # This would check for physical security measures in production
+        # For now, return placeholder checks
         issues.append("Physical barrier assessment requires on-site inspection")
 
         return issues

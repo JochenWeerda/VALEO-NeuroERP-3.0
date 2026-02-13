@@ -1,4 +1,4 @@
-﻿import { type ComponentType, type FormEvent, type ReactNode, type SVGProps, useState } from 'react'
+import { type ComponentType, type FormEvent, type ReactNode, type SVGProps, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { NavLink } from 'react-router-dom'
 import {
@@ -246,7 +246,7 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <a
-        href="***REMOVED***main-content"
+        href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:shadow-lg"
       >
         Zum Inhalt springen
@@ -386,3 +386,4 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
     </div>
   )
 }
+

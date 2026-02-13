@@ -14,7 +14,7 @@ const csv = require('csv-parse/sync');
 
 // Konfiguration
 const CONFIG = {
-  guacamoleUrl: 'http://localhost:8090/guacamole/***REMOVED***/client/MQBjAHBvc3RncmVzcWw',
+  guacamoleUrl: 'http://localhost:8090/guacamole/#/client/MQBjAHBvc3RncmVzcWw',
   csvPath: path.join(__dirname, 'l3_gui_map.csv'),
   outputDir: path.join(__dirname, 'screenshots/l3-masks-auto'),
   originalCanvasSize: { width: 1920, height: 1024 }, // Referenz-Größe aus CSV
@@ -220,4 +220,5 @@ if (require.main === module) {
 }
 
 module.exports = { clickGuacPct, navigateToMask, captureAllMasks };
+
 

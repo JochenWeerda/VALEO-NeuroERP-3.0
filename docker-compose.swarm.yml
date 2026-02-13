@@ -1,8 +1,8 @@
 version: "3.9"
 
 services:
-  ***REMOVED*** Frontend (kann auch das bestehende Frontend nutzen, wenn es bereits läuft)
-  ***REMOVED*** Option 1: Eigenes Frontend für Swarm (empfohlen für isolierte Tests)
+  # Frontend (kann auch das bestehende Frontend nutzen, wenn es bereits läuft)
+  # Option 1: Eigenes Frontend für Swarm (empfohlen für isolierte Tests)
   neuroerp-frontend:
     build:
       context: .
@@ -19,7 +19,7 @@ services:
       VITE_SSE_PROXY: http://localhost:5174
       VITE_BACKEND_PROXY: http://backend:8000
     ports:
-      - "3001:3000"  ***REMOVED*** Anderer Port, um Konflikte mit bestehendem Frontend zu vermeiden
+      - "3001:3000"  # Anderer Port, um Konflikte mit bestehendem Frontend zu vermeiden
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || wget -qO- http://localhost:3000/health.html || exit 1"]
       interval: 5s
@@ -32,7 +32,7 @@ services:
     networks:
       - swarm-network
 
-  ***REMOVED*** Playwright Tests
+  # Playwright Tests
   neuroerp-tests:
     image: mcr.microsoft.com/playwright:v1.56.1-noble
     container_name: valeo-neuro-erp-tests
@@ -51,7 +51,7 @@ services:
       - swarm-network
     command: ["npx", "playwright", "test"]
 
-  ***REMOVED*** UI Explorer (Browser-Use Agent)
+  # UI Explorer (Browser-Use Agent)
   neuroerp-ui-explorer:
     build:
       context: .
@@ -78,4 +78,5 @@ volumes:
 networks:
   swarm-network:
     driver: bridge
+
 

@@ -73,7 +73,7 @@ class FormFieldType(str, Enum):
     FILE = "file"
 
 
-enum_values = lambda enum_cls: [member.value for member in enum_cls]  ***REMOVED*** noqa: E731
+enum_values = lambda enum_cls: [member.value for member in enum_cls]  # noqa: E731
 
 
 class Channel(Base):
@@ -102,15 +102,15 @@ class Channel(Base):
         nullable=False,
     )
 
-    ***REMOVED*** Channel-specific configuration
-    config: Mapped[dict] = mapped_column(JSON, default=dict)  ***REMOVED*** API keys, webhook URLs, etc.
-    credentials: Mapped[dict] = mapped_column(JSON, default=dict)  ***REMOVED*** Encrypted credentials
+    # Channel-specific configuration
+    config: Mapped[dict] = mapped_column(JSON, default=dict)  # API keys, webhook URLs, etc.
+    credentials: Mapped[dict] = mapped_column(JSON, default=dict)  # Encrypted credentials
 
-    ***REMOVED*** Channel identifiers
-    external_id: Mapped[str | None] = mapped_column(String(255))  ***REMOVED*** Facebook Page ID, Twitter Handle, etc.
+    # Channel identifiers
+    external_id: Mapped[str | None] = mapped_column(String(255))  # Facebook Page ID, Twitter Handle, etc.
     webhook_url: Mapped[str | None] = mapped_column(String(500))
 
-    ***REMOVED*** Statistics
+    # Statistics
     messages_sent: Mapped[int] = mapped_column(Integer, default=0)
     messages_received: Mapped[int] = mapped_column(Integer, default=0)
     last_activity: Mapped[datetime | None] = mapped_column(DateTime)
@@ -134,16 +134,16 @@ class Conversation(Base):
 
     channel_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("crm_multichannel_channels.id"), nullable=False)
 
-    ***REMOVED*** External conversation identifiers
-    external_id: Mapped[str] = mapped_column(String(255), nullable=False)  ***REMOVED*** Facebook Conversation ID, etc.
-    thread_id: Mapped[str | None] = mapped_column(String(255))  ***REMOVED*** For threaded conversations
+    # External conversation identifiers
+    external_id: Mapped[str] = mapped_column(String(255), nullable=False)  # Facebook Conversation ID, etc.
+    thread_id: Mapped[str | None] = mapped_column(String(255))  # For threaded conversations
 
-    ***REMOVED*** Customer association
+    # Customer association
     customer_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True))
     contact_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True))
     lead_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True))
 
-    ***REMOVED*** Conversation metadata
+    # Conversation metadata
     subject: Mapped[str | None] = mapped_column(String(500))
     status: Mapped[ConversationStatus] = mapped_column(
         SQLEnum(
@@ -158,16 +158,16 @@ class Conversation(Base):
     priority: Mapped[str] = mapped_column(String(16), default="normal")
     tags: Mapped[list[str]] = mapped_column(JSON, default=list)
 
-    ***REMOVED*** Assignment
+    # Assignment
     assigned_to: Mapped[str | None] = mapped_column(String(64))
     assigned_at: Mapped[datetime | None] = mapped_column(DateTime)
 
-    ***REMOVED*** Timestamps
+    # Timestamps
     started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     last_message_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     closed_at: Mapped[datetime | None] = mapped_column(DateTime)
 
-    ***REMOVED*** Statistics
+    # Statistics
     message_count: Mapped[int] = mapped_column(Integer, default=0)
     customer_message_count: Mapped[int] = mapped_column(Integer, default=0)
     agent_message_count: Mapped[int] = mapped_column(Integer, default=0)
@@ -189,9 +189,9 @@ class Message(Base):
 
     conversation_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("crm_multichannel_conversations.id"), nullable=False)
 
-    ***REMOVED*** External message identifiers
+    # External message identifiers
     external_id: Mapped[str] = mapped_column(String(255), nullable=False)
-    external_parent_id: Mapped[str | None] = mapped_column(String(255))  ***REMOVED*** For replies
+    external_parent_id: Mapped[str | None] = mapped_column(String(255))  # For replies
 
     direction: Mapped[MessageDirection] = mapped_column(
         SQLEnum(
@@ -212,21 +212,21 @@ class Message(Base):
         nullable=False,
     )
 
-    ***REMOVED*** Message content
+    # Message content
     content: Mapped[str | None] = mapped_column(Text)
-    metadata: Mapped[dict] = mapped_column(JSON, default=dict)  ***REMOVED*** URLs, attachments, etc.
+    metadata: Mapped[dict] = mapped_column(JSON, default=dict)  # URLs, attachments, etc.
 
-    ***REMOVED*** Sender information
-    sender_id: Mapped[str | None] = mapped_column(String(255))  ***REMOVED*** External sender ID
+    # Sender information
+    sender_id: Mapped[str | None] = mapped_column(String(255))  # External sender ID
     sender_name: Mapped[str | None] = mapped_column(String(255))
-    sender_type: Mapped[str] = mapped_column(String(32), default="customer")  ***REMOVED*** customer, agent, system
+    sender_type: Mapped[str] = mapped_column(String(32), default="customer")  # customer, agent, system
 
-    ***REMOVED*** Processing status
+    # Processing status
     is_read: Mapped[bool] = mapped_column(default=False)
     delivered_at: Mapped[datetime | None] = mapped_column(DateTime)
     read_at: Mapped[datetime | None] = mapped_column(DateTime)
 
-    ***REMOVED*** Agent assignment
+    # Agent assignment
     handled_by: Mapped[str | None] = mapped_column(String(64))
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
@@ -243,21 +243,21 @@ class WebForm(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
 
-    ***REMOVED*** Form configuration
-    fields: Mapped[list[dict]] = mapped_column(JSON, nullable=False)  ***REMOVED*** Field definitions
-    settings: Mapped[dict] = mapped_column(JSON, default=dict)  ***REMOVED*** Form settings (theme, validation, etc.)
+    # Form configuration
+    fields: Mapped[list[dict]] = mapped_column(JSON, nullable=False)  # Field definitions
+    settings: Mapped[dict] = mapped_column(JSON, default=dict)  # Form settings (theme, validation, etc.)
 
-    ***REMOVED*** Publishing
-    slug: Mapped[str] = mapped_column(String(255), unique=True)  ***REMOVED*** URL slug
+    # Publishing
+    slug: Mapped[str] = mapped_column(String(255), unique=True)  # URL slug
     is_published: Mapped[bool] = mapped_column(default=False)
     published_at: Mapped[datetime | None] = mapped_column(DateTime)
 
-    ***REMOVED*** Integration
-    lead_source: Mapped[str | None] = mapped_column(String(64))  ***REMOVED*** Marketing campaign, etc.
+    # Integration
+    lead_source: Mapped[str | None] = mapped_column(String(64))  # Marketing campaign, etc.
     auto_create_lead: Mapped[bool] = mapped_column(default=True)
     notification_emails: Mapped[list[str]] = mapped_column(JSON, default=list)
 
-    ***REMOVED*** Statistics
+    # Statistics
     view_count: Mapped[int] = mapped_column(Integer, default=0)
     submission_count: Mapped[int] = mapped_column(Integer, default=0)
     conversion_rate: Mapped[float | None] = mapped_column(Float)
@@ -281,19 +281,19 @@ class FormSubmission(Base):
 
     form_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("crm_multichannel_webforms.id"), nullable=False)
 
-    ***REMOVED*** Submission data
-    data: Mapped[dict] = mapped_column(JSON, nullable=False)  ***REMOVED*** Form field values
-    metadata: Mapped[dict] = mapped_column(JSON, default=dict)  ***REMOVED*** IP, user agent, etc.
+    # Submission data
+    data: Mapped[dict] = mapped_column(JSON, nullable=False)  # Form field values
+    metadata: Mapped[dict] = mapped_column(JSON, default=dict)  # IP, user agent, etc.
 
-    ***REMOVED*** Lead creation
+    # Lead creation
     lead_created: Mapped[bool] = mapped_column(default=False)
     lead_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True))
 
-    ***REMOVED*** Processing
+    # Processing
     processed_at: Mapped[datetime | None] = mapped_column(DateTime)
     processing_status: Mapped[str] = mapped_column(String(32), default="pending")
 
-    ***REMOVED*** Source tracking
+    # Source tracking
     source_url: Mapped[str | None] = mapped_column(String(500))
     referrer: Mapped[str | None] = mapped_column(String(500))
     utm_parameters: Mapped[dict] = mapped_column(JSON, default=dict)
@@ -310,23 +310,23 @@ class Integration(Base):
     tenant_id: Mapped[str] = mapped_column(String(64), nullable=False)
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    type: Mapped[str] = mapped_column(String(64), nullable=False)  ***REMOVED*** shopify, woocommerce, stripe, erp
+    type: Mapped[str] = mapped_column(String(64), nullable=False)  # shopify, woocommerce, stripe, erp
 
-    ***REMOVED*** Connection configuration
-    config: Mapped[dict] = mapped_column(JSON, default=dict)  ***REMOVED*** API endpoints, credentials
-    credentials: Mapped[dict] = mapped_column(JSON, default=dict)  ***REMOVED*** Encrypted credentials
+    # Connection configuration
+    config: Mapped[dict] = mapped_column(JSON, default=dict)  # API endpoints, credentials
+    credentials: Mapped[dict] = mapped_column(JSON, default=dict)  # Encrypted credentials
 
-    ***REMOVED*** Status and health
-    status: Mapped[str] = mapped_column(String(32), default="disconnected")  ***REMOVED*** connected, disconnected, error
+    # Status and health
+    status: Mapped[str] = mapped_column(String(32), default="disconnected")  # connected, disconnected, error
     last_sync: Mapped[datetime | None] = mapped_column(DateTime)
     last_error: Mapped[str | None] = mapped_column(Text)
 
-    ***REMOVED*** Sync configuration
+    # Sync configuration
     sync_enabled: Mapped[bool] = mapped_column(default=True)
-    sync_frequency: Mapped[int] = mapped_column(Integer, default=3600)  ***REMOVED*** seconds
-    sync_entities: Mapped[list[str]] = mapped_column(JSON, default=list)  ***REMOVED*** customers, orders, products
+    sync_frequency: Mapped[int] = mapped_column(Integer, default=3600)  # seconds
+    sync_entities: Mapped[list[str]] = mapped_column(JSON, default=list)  # customers, orders, products
 
-    ***REMOVED*** Statistics
+    # Statistics
     records_synced: Mapped[int] = mapped_column(Integer, default=0)
     last_record_count: Mapped[int] = mapped_column(Integer, default=0)
 

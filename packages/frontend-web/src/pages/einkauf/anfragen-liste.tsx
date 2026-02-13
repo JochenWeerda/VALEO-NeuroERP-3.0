@@ -1,19 +1,15 @@
-import { useState, useEffect } from 'react'
+﻿import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
-import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
+import { useEinkaufAnfragen, type EinkaufAnfrage } from '@/lib/api/einkauf'
 
-// API Client für Anfragen
-const apiClient = createApiClient('/api/einkauf')
-
-// Konfiguration für Anfragen ListReport (wird in Komponente mit i18n erstellt)
+// Konfiguration fuer Anfragen ListReport (wird in Komponente mit i18n erstellt)
 const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
@@ -36,8 +32,8 @@ const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
       filterable: true,
       render: (value) => {
         const typLabels: Record<string, string> = {
-          'BANF': t('crud.fields.requisition'),
-          'ANF': t('crud.entities.purchaseRequest')
+          BANF: t('crud.fields.requisition'),
+          ANF: t('crud.entities.purchaseRequest')
         }
         return <Badge variant="outline">{typLabels[value] || value}</Badge>
       }
@@ -71,10 +67,10 @@ const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
       filterable: true,
       render: (value) => {
         const prioLabels: Record<string, { label: string; variant: 'secondary' | 'default' | 'destructive' }> = {
-          'niedrig': { label: t('crud.fields.priorityLow'), variant: 'secondary' },
-          'normal': { label: t('crud.fields.priorityNormal'), variant: 'default' },
-          'hoch': { label: t('crud.fields.priorityHigh'), variant: 'destructive' },
-          'dringend': { label: t('crud.fields.priorityUrgent'), variant: 'destructive' }
+          niedrig: { label: t('crud.fields.priorityLow'), variant: 'secondary' },
+          normal: { label: t('crud.fields.priorityNormal'), variant: 'default' },
+          hoch: { label: t('crud.fields.priorityHigh'), variant: 'destructive' },
+          dringend: { label: t('crud.fields.priorityUrgent'), variant: 'destructive' }
         }
         const prio = prioLabels[value] || { label: value, variant: 'secondary' as const }
         return <Badge variant={prio.variant}>{prio.label}</Badge>
@@ -89,9 +85,9 @@ const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
       render: (value) => {
         const statusLabel = getStatusLabel(t, value as string, value as string)
         const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
-          'ENTWURF': 'secondary',
-          'FREIGEGEBEN': 'default',
-          'ANGEBOTSPHASE': 'outline'
+          ENTWURF: 'secondary',
+          FREIGEGEBEN: 'default',
+          ANGEBOTSPHASE: 'outline'
         }
         return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
       }
@@ -183,60 +179,31 @@ const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
 export default function AnfragenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const { data: apiData = [], isLoading } = useEinkaufAnfragen()
+  const data = useMemo(
+    () => apiData.map((item: EinkaufAnfrage) => ({ ...item, einheit: 'Stk' })),
+    [apiData]
+  )
+  const total = data.length
   const entityType = 'purchaseRequest'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Anfrage')
   const anfragenConfig = createAnfragenConfig(t, entityTypeLabel)
-
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
-    if (action === 'edit' && item) {
-      navigate(`/einkauf/anfragen/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
-        try {
-          await apiClient.delete(`/anfragen/${item.id}`)
-          loadData() // Liste neu laden
-        } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.deleteError', { entityType: entityTypeLabel })
-          })
-        }
-      }
-    }
-  })
-
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const response = await apiClient.get('/anfragen')
-      if (response.success) {
-        setData((response.data as any).data || [])
-        setTotal((response.data as any).total || 0)
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Daten:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadData()
-  }, [])
 
   const handleCreate = () => {
     navigate('/einkauf/anfrage/neu')
   }
 
   const handleEdit = (item: any) => {
-    handleAction('edit', item)
+    if (item?.id) {
+      navigate(`/einkauf/anfragen/${item.id}`)
+    }
   }
 
-  const handleDelete = (item: any) => {
-    handleAction('delete', item)
+  const handleDelete = (_item: any) => {
+    toast({
+      title: t('crud.messages.importInfo'),
+      description: 'Loeschen wird in dieser Ansicht noch nicht unterstuetzt.',
+    })
   }
 
   const handleExport = () => {
@@ -261,7 +228,7 @@ export default function AnfragenListePage(): JSX.Element {
         title: t('crud.messages.exportSuccess'),
         description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
       })
-    } catch (error) {
+    } catch {
       toast({
         variant: 'destructive',
         title: t('crud.messages.exportError'),
@@ -285,7 +252,7 @@ export default function AnfragenListePage(): JSX.Element {
           description: t('crud.messages.importComingSoon'),
         })
       }}
-      isLoading={loading}
+      isLoading={isLoading}
     />
   )
 }

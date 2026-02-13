@@ -16,7 +16,7 @@ class SegmentCalculator:
     
     def __init__(self, db: AsyncSession):
         self.db = db
-        self.crm_core_url = "http://localhost:5700"  ***REMOVED*** TODO: Get from config
+        self.crm_core_url = "http://localhost:5700"  # TODO: Get from config
     
     async def _fetch_contacts(self, tenant_id: str) -> List[Dict[str, Any]]:
         """Fetch all contacts from crm-core service."""
@@ -119,7 +119,7 @@ class SegmentCalculator:
             elif rule.logical_operator == LogicalOperator.OR:
                 result = result or rule_result
             else:
-                ***REMOVED*** Default to AND if not specified
+                # Default to AND if not specified
                 result = result and rule_result
         
         return result
@@ -137,7 +137,7 @@ class SegmentCalculator:
         if not segment or segment.type != SegmentType.DYNAMIC:
             return
         
-        ***REMOVED*** Fetch rules
+        # Fetch rules
         rules_stmt = select(SegmentRule).where(
             SegmentRule.segment_id == segment_id
         ).order_by(SegmentRule.order)
@@ -145,7 +145,7 @@ class SegmentCalculator:
         rules = list(rules_result.scalars().all())
         
         if not rules:
-            ***REMOVED*** No rules, clear all members
+            # No rules, clear all members
             await self.db.execute(
                 delete(SegmentMember).where(
                     and_(
@@ -159,10 +159,10 @@ class SegmentCalculator:
             await self.db.commit()
             return
         
-        ***REMOVED*** Fetch contacts
+        # Fetch contacts
         contacts = await self._fetch_contacts(segment.tenant_id)
         
-        ***REMOVED*** Get existing members
+        # Get existing members
         existing_members_stmt = select(SegmentMember).where(
             and_(
                 SegmentMember.segment_id == segment_id,
@@ -172,7 +172,7 @@ class SegmentCalculator:
         existing_members_result = await self.db.execute(existing_members_stmt)
         existing_members = {str(member.contact_id): member for member in existing_members_result.scalars().all()}
         
-        ***REMOVED*** Evaluate rules for each contact
+        # Evaluate rules for each contact
         matching_contact_ids = []
         for contact in contacts:
             contact_id = contact.get('id')
@@ -182,7 +182,7 @@ class SegmentCalculator:
             if await self._evaluate_rules(rules, contact):
                 matching_contact_ids.append(UUID(contact_id))
         
-        ***REMOVED*** Add new members
+        # Add new members
         for contact_id in matching_contact_ids:
             contact_id_str = str(contact_id)
             if contact_id_str not in existing_members:
@@ -193,14 +193,15 @@ class SegmentCalculator:
                 )
                 self.db.add(member)
         
-        ***REMOVED*** Remove members that no longer match
+        # Remove members that no longer match
         for contact_id_str, member in existing_members.items():
             if UUID(contact_id_str) not in matching_contact_ids:
                 member.removed_at = datetime.utcnow()
                 member.removed_by = "system"
         
-        ***REMOVED*** Update segment
+        # Update segment
         segment.member_count = len(matching_contact_ids)
         segment.last_calculated_at = datetime.utcnow()
         
         await self.db.commit()
+

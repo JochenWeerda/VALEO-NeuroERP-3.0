@@ -1,42 +1,42 @@
-***REMOVED*** ⚠️ WICHTIG: Nur English Language Pack verwenden!
+# ⚠️ WICHTIG: Nur English Language Pack verwenden!
 
-***REMOVED******REMOVED*** 🎯 Erfahrungswert
+## 🎯 Erfahrungswert
 
 **Tesseract-OCR funktioniert mit `eng.traineddata` BESSER als mit `deu.traineddata`**
 
 Auch für **deutsche UI-Texte** in L3 liefert das englische Sprachmodell präzisere Ergebnisse!
 
-***REMOVED******REMOVED*** ✅ Korrekte Konfiguration
+## ✅ Korrekte Konfiguration
 
-***REMOVED******REMOVED******REMOVED*** Installation
+### Installation
 ```powershell
-***REMOVED*** UB Mannheim Installer:
-***REMOVED*** ✅ Nur "English" auswählen
-***REMOVED*** ❌ NICHT "German" auswählen
+# UB Mannheim Installer:
+# ✅ Nur "English" auswählen
+# ❌ NICHT "German" auswählen
 
-***REMOVED*** Chocolatey:
+# Chocolatey:
 choco install tesseract
-***REMOVED*** (English ist Standard)
+# (English ist Standard)
 ```
 
-***REMOVED******REMOVED******REMOVED*** OCR-Pipeline
+### OCR-Pipeline
 ```python
-***REMOVED*** In ocr-pipeline.py (bereits angepasst):
+# In ocr-pipeline.py (bereits angepasst):
 ocr_data = pytesseract.image_to_data(
     processed_img, 
-    lang='eng',  ***REMOVED*** ✅ NUR English!
+    lang='eng',  # ✅ NUR English!
     output_type=pytesseract.Output.DICT
 )
 ```
 
-***REMOVED******REMOVED*** 📊 Warum English besser funktioniert
+## 📊 Warum English besser funktioniert
 
 1. **Besseres Training:** `eng.traineddata` ist umfangreicher trainiert
 2. **UI-Texte:** Viele Software-UIs enthalten englische Begriffe
 3. **Feldnamen:** Gemischte Sprache (z.B. "Artikel-Nr.", "E-Mail", "ID")
 4. **Ziffern & Symbole:** Bessere Erkennung von Zahlen, Prozentzeichen, etc.
 
-***REMOVED******REMOVED*** 🔍 Beispiel-Vergleich
+## 🔍 Beispiel-Vergleich
 
 **L3-Feld:** "Artikel-Nr.:"
 
@@ -48,39 +48,39 @@ ocr_data = pytesseract.image_to_data(
 - `lang='eng'` → ✅ "Preis (€):" (90% Confidence)
 - `lang='deu'` → ⚠️ "Preis (C):" oder "Preis (E):" (65% Confidence)
 
-***REMOVED******REMOVED*** ✅ Best Practices
+## ✅ Best Practices
 
 1. **Nur English installieren** (spart Speicherplatz & Verarbeitungszeit)
 2. **Preprocessing optimieren** (wichtiger als Sprachmodell!)
 3. **Confidence-Threshold bei 60%** belassen (funktioniert gut mit `eng`)
 
-***REMOVED******REMOVED*** 🐛 Troubleshooting
+## 🐛 Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Falls Sie bereits German installiert haben:
+### Falls Sie bereits German installiert haben:
 
 ```powershell
-***REMOVED*** Nichts tun! English sollte auch vorhanden sein.
-***REMOVED*** Pipeline ist bereits auf 'eng' eingestellt.
+# Nichts tun! English sollte auch vorhanden sein.
+# Pipeline ist bereits auf 'eng' eingestellt.
 
-***REMOVED*** Prüfen:
+# Prüfen:
 dir "C:\Program Files\Tesseract-OCR\tessdata\"
 
-***REMOVED*** Sollte enthalten:
-***REMOVED*** - eng.traineddata ✅
-***REMOVED*** - deu.traineddata (optional, wird nicht verwendet)
+# Sollte enthalten:
+# - eng.traineddata ✅
+# - deu.traineddata (optional, wird nicht verwendet)
 ```
 
-***REMOVED******REMOVED******REMOVED*** Falls nur German vorhanden:
+### Falls nur German vorhanden:
 
 ```powershell
-***REMOVED*** Download eng.traineddata von GitHub:
-***REMOVED*** https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata
+# Download eng.traineddata von GitHub:
+# https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata
 
-***REMOVED*** Kopieren nach:
-***REMOVED*** C:\Program Files\Tesseract-OCR\tessdata\eng.traineddata
+# Kopieren nach:
+# C:\Program Files\Tesseract-OCR\tessdata\eng.traineddata
 ```
 
-***REMOVED******REMOVED*** 📈 Erwartete Verbesserung
+## 📈 Erwartete Verbesserung
 
 **Mit `lang='eng'`:**
 - Durchschnittliche Confidence: **85-95%**
@@ -97,4 +97,5 @@ dir "C:\Program Files\Tesseract-OCR\tessdata\"
 **Status:** ✅ Pipeline bereits auf `eng` konfiguriert (ocr-pipeline.py Zeile 97)
 
 **Keine Aktion erforderlich** - Installation mit English Pack genügt!
+
 

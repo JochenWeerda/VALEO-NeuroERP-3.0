@@ -20,7 +20,7 @@ from ..models import (
 )
 
 
-***REMOVED*** Shared Repositories
+# Shared Repositories
 class TenantRepositoryImpl(BaseRepositoryImpl[Tenant, dict, dict], TenantRepository):
     """Tenant repository implementation"""
     def __init__(self, session: Session):
@@ -53,7 +53,7 @@ class UserRepositoryImpl(BaseRepositoryImpl[User, dict, dict], UserRepository):
         ).first()
 
 
-***REMOVED*** CRM Repositories
+# CRM Repositories
 class CustomerRepositoryImpl(BaseRepositoryImpl[Customer, dict, dict], CustomerRepository):
     """Customer repository implementation"""
     def __init__(self, session: Session):
@@ -150,7 +150,7 @@ class ActivityRepositoryImpl(BaseRepositoryImpl[Activity, dict, dict], ContactRe
         """Get all activities with filtering"""
         query = self.session.query(Activity)
         
-        ***REMOVED*** Apply filters
+        # Apply filters
         if 'type' in kwargs and kwargs['type']:
             query = query.filter(Activity.type == kwargs['type'])
         if 'status' in kwargs and kwargs['status']:
@@ -179,7 +179,7 @@ class FarmProfileRepositoryImpl(BaseRepositoryImpl[FarmProfile, dict, dict], Con
         """Get all farm profiles with filtering"""
         query = self.session.query(FarmProfile)
         
-        ***REMOVED*** Apply search filter
+        # Apply search filter
         if 'search' in kwargs and kwargs['search']:
             search_term = f"%{kwargs['search']}%"
             query = query.filter(
@@ -205,7 +205,7 @@ class FarmProfileRepositoryImpl(BaseRepositoryImpl[FarmProfile, dict, dict], Con
 
 
 
-***REMOVED*** Inventory Repositories
+# Inventory Repositories
 class ArticleRepositoryImpl(BaseRepositoryImpl[Article, dict, dict], ArticleRepository):
     """Article repository implementation"""
     def __init__(self, session: Session):
@@ -254,7 +254,7 @@ class InventoryCountRepositoryImpl(BaseRepositoryImpl[InventoryCount, dict, dict
         super().__init__(session, InventoryCount)
 
 
-***REMOVED*** Finance Repositories
+# Finance Repositories
 class AccountRepositoryImpl(AccountRepository):
     """Account repository implementation"""
     def __init__(self, session: Session):

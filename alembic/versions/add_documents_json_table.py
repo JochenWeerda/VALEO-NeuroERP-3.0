@@ -11,15 +11,15 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = 'add_documents_json'
-down_revision: Union[str, None] = '59b4fa8420f2'  ***REMOVED*** Current head: Add CRM sub-service seed tables
+down_revision: Union[str, None] = '59b4fa8420f2'  # Current head: Add CRM sub-service seed tables
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Create documents table for JSON-based document storage
+    # Create documents table for JSON-based document storage
     op.create_table('documents',
         sa.Column('id', sa.String(36), primary_key=True),
         sa.Column('doc_type', sa.String(50), nullable=False),
@@ -32,17 +32,19 @@ def upgrade() -> None:
         sa.Index('idx_documents_created', 'created_at'),
     )
     
-    ***REMOVED*** Create index on JSONB data for faster queries
-    op.execute("""
-        CREATE INDEX idx_documents_data_status ON documents USING GIN ((data->>'status'));
-        CREATE INDEX idx_documents_data_customer ON documents USING GIN ((data->>'customerId'));
-        CREATE INDEX idx_documents_data_supplier ON documents USING GIN ((data->>'supplierId'));
-    """)
+    # Index strategy:
+    # - GIN on JSONB column for containment queries (`data @> ...`)
+    # - btree expression indexes for equality filters on extracted text fields
+    op.execute("CREATE INDEX idx_documents_data_gin ON documents USING GIN (data);")
+    op.execute("CREATE INDEX idx_documents_data_status ON documents ((data->>'status'));")
+    op.execute("CREATE INDEX idx_documents_data_customer ON documents ((data->>'customerId'));")
+    op.execute("CREATE INDEX idx_documents_data_supplier ON documents ((data->>'supplierId'));")
 
 
 def downgrade() -> None:
     op.drop_index('idx_documents_data_supplier', table_name='documents')
     op.drop_index('idx_documents_data_customer', table_name='documents')
     op.drop_index('idx_documents_data_status', table_name='documents')
+    op.drop_index('idx_documents_data_gin', table_name='documents')
     op.drop_table('documents')
 

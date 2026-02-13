@@ -7,23 +7,10 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, CheckCircle, FileText, Filter, Search, Shield, XCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-
-type Auflage = {
-  id: string
-  psm_id: string
-  psm_name: string
-  auflage_typ: 'NT' | 'NW' | 'B' | 'Sonstige'
-  beschreibung: string
-  prioritaet: 'hoch' | 'mittel' | 'niedrig'
-  status: 'offen' | 'in_bearbeitung' | 'erledigt' | 'ueberfaellig'
-  faellig_am: string
-  zugewiesen_an: string
-  erstellt_am: string
-  aktualisiert_am: string
-  compliance_status: 'compliant' | 'warning' | 'non-compliant'
-}
+import { usePSMAuflagen } from '@/lib/api/agrar'
 
 type AuflagenStatistik = {
   gesamt: number
@@ -38,82 +25,26 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
 
+  const { data: auflagenData, isLoading } = usePSMAuflagen()
+
   const [searchTerm, setSearchTerm] = useState('')
   const [filterTyp, setFilterTyp] = useState<string>('alle')
   const [filterStatus, setFilterStatus] = useState<string>('alle')
   const [filterPrioritaet, setFilterPrioritaet] = useState<string>('alle')
 
-  // Mock data
-  const auflagen: Auflage[] = [
-    {
-      id: '1',
-      psm_id: 'PSM-001',
-      psm_name: 'Roundup PowerFlex',
-      auflage_typ: 'NW',
-      beschreibung: 'Wasserschutz-Auflagen: Abstand zu Gewässern mind. 5m, keine Anwendung bei Wind > 3 Bft',
-      prioritaet: 'hoch',
-      status: 'offen',
-      faellig_am: '2024-11-15',
-      zugewiesen_an: 'Max Mustermann',
-      erstellt_am: '2024-10-01',
-      aktualisiert_am: '2024-10-15',
-      compliance_status: 'warning'
-    },
-    {
-      id: '2',
-      psm_id: 'PSM-002',
-      psm_name: 'Amistar Opti',
-      auflage_typ: 'B',
-      beschreibung: 'Bienenschutz-Auflagen: Keine Anwendung während Bienenflug (6-20 Uhr), Abstand zu Bienenvölkern 100m',
-      prioritaet: 'mittel',
-      status: 'in_bearbeitung',
-      faellig_am: '2024-11-20',
-      zugewiesen_an: 'Anna Schmidt',
-      erstellt_am: '2024-10-05',
-      aktualisiert_am: '2024-10-14',
-      compliance_status: 'compliant'
-    },
-    {
-      id: '3',
-      psm_id: 'PSM-003',
-      psm_name: 'Folicur',
-      auflage_typ: 'NT',
-      beschreibung: 'Anwendungsverbot in Naturschutzgebieten, Einhaltung von Abständen zu Oberflächengewässern',
-      prioritaet: 'hoch',
-      status: 'ueberfaellig',
-      faellig_am: '2024-10-10',
-      zugewiesen_an: 'Thomas Bauer',
-      erstellt_am: '2024-09-15',
-      aktualisiert_am: '2024-10-12',
-      compliance_status: 'non-compliant'
-    },
-    {
-      id: '4',
-      psm_id: 'PSM-004',
-      psm_name: 'Karate Zeon',
-      auflage_typ: 'NT',
-      beschreibung: 'Spezielle Lagerbedingungen für Insektizide, regelmäßige Schulungen für Anwender',
-      prioritaet: 'niedrig',
-      status: 'erledigt',
-      faellig_am: '2024-12-01',
-      zugewiesen_an: 'Lisa Wagner',
-      erstellt_am: '2024-09-20',
-      aktualisiert_am: '2024-10-08',
-      compliance_status: 'compliant'
-    }
-  ]
+  const auflagen = auflagenData ?? []
 
   const statistik: AuflagenStatistik = {
     gesamt: auflagen.length,
     offen: auflagen.filter(a => a.status === 'offen').length,
-    in_bearbeitung: auflagen.filter(a => a.status === 'in_bearbeitung').length,
-    erledigt: auflagen.filter(a => a.status === 'erledigt').length,
+    in_bearbeitung: auflagen.filter(a => a.status === 'erfuellt').length,
+    erledigt: auflagen.filter(a => a.status === 'erfuellt').length,
     ueberfaellig: auflagen.filter(a => a.status === 'ueberfaellig').length,
     nach_typ: {
       'NT': auflagen.filter(a => a.auflage_typ === 'NT').length,
       'NW': auflagen.filter(a => a.auflage_typ === 'NW').length,
       'B': auflagen.filter(a => a.auflage_typ === 'B').length,
-      'Sonstige': auflagen.filter(a => a.auflage_typ === 'Sonstige').length
+      'Sonstige': auflagen.filter(a => !['NT', 'NW', 'B'].includes(a.auflage_typ)).length
     }
   }
 
@@ -128,33 +59,32 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
   })
 
   const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      offen: { variant: 'secondary' as const, text: 'Offen' },
-      in_bearbeitung: { variant: 'default' as const, text: 'In Bearbeitung' },
-      erledigt: { variant: 'outline' as const, text: 'Erledigt' },
-      ueberfaellig: { variant: 'destructive' as const, text: 'Überfällig' }
+    const statusConfig: Record<string, { variant: 'secondary' | 'default' | 'outline' | 'destructive'; text: string }> = {
+      offen: { variant: 'secondary', text: 'Offen' },
+      erfuellt: { variant: 'outline', text: 'Erfüllt' },
+      ueberfaellig: { variant: 'destructive', text: 'Überfällig' }
     }
-    const config = statusConfig[status as keyof typeof statusConfig]
+    const config = statusConfig[status] || { variant: 'secondary' as const, text: status }
     return <Badge variant={config.variant}>{config.text}</Badge>
   }
 
   const getPrioritaetBadge = (prioritaet: string) => {
-    const prioritaetConfig = {
-      hoch: { variant: 'destructive' as const, text: 'Hoch' },
-      mittel: { variant: 'secondary' as const, text: 'Mittel' },
-      niedrig: { variant: 'outline' as const, text: 'Niedrig' }
+    const prioritaetConfig: Record<string, { variant: 'destructive' | 'secondary' | 'outline'; text: string }> = {
+      hoch: { variant: 'destructive', text: 'Hoch' },
+      mittel: { variant: 'secondary', text: 'Mittel' },
+      niedrig: { variant: 'outline', text: 'Niedrig' }
     }
-    const config = prioritaetConfig[prioritaet as keyof typeof prioritaetConfig]
+    const config = prioritaetConfig[prioritaet] || { variant: 'secondary' as const, text: prioritaet }
     return <Badge variant={config.variant}>{config.text}</Badge>
   }
 
   const getComplianceIcon = (status: string) => {
     switch (status) {
-      case 'compliant':
+      case 'ok':
         return <CheckCircle className="h-4 w-4 text-green-600" />
       case 'warning':
         return <AlertTriangle className="h-4 w-4 text-orange-600" />
-      case 'non-compliant':
+      case 'critical':
         return <XCircle className="h-4 w-4 text-red-600" />
       default:
         return null
@@ -165,7 +95,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
     {
       key: 'psm_name' as const,
       label: 'PSM',
-      render: (auflage: Auflage) => (
+      render: (auflage: typeof auflagen[0]) => (
         <button
           onClick={() => navigate(`/agrar/psm/stamm/${auflage.psm_id}`)}
           className="font-medium text-blue-600 hover:underline"
@@ -177,7 +107,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
     {
       key: 'auflage_typ' as const,
       label: 'Typ',
-      render: (auflage: Auflage) => (
+      render: (auflage: typeof auflagen[0]) => (
         <Badge variant="outline" className="font-mono">
           {auflage.auflage_typ}
         </Badge>
@@ -186,7 +116,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
     {
       key: 'beschreibung' as const,
       label: 'Auflage',
-      render: (auflage: Auflage) => (
+      render: (auflage: typeof auflagen[0]) => (
         <div className="max-w-xs truncate" title={auflage.beschreibung}>
           {auflage.beschreibung}
         </div>
@@ -195,20 +125,20 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
     {
       key: 'prioritaet' as const,
       label: 'Priorität',
-      render: (auflage: Auflage) => getPrioritaetBadge(auflage.prioritaet),
+      render: (auflage: typeof auflagen[0]) => getPrioritaetBadge(auflage.prioritaet),
     },
     {
       key: 'status' as const,
       label: 'Status',
-      render: (auflage: Auflage) => getStatusBadge(auflage.status),
+      render: (auflage: typeof auflagen[0]) => getStatusBadge(auflage.status),
     },
     {
       key: 'faellig_am' as const,
       label: 'Fällig am',
-      render: (auflage: Auflage) => {
+      render: (auflage: typeof auflagen[0]) => {
         const faellig = new Date(auflage.faellig_am)
         const heute = new Date()
-        const istUeberfaellig = faellig < heute && auflage.status !== 'erledigt'
+        const istUeberfaellig = faellig < heute && auflage.status !== 'erfuellt'
 
         return (
           <span className={istUeberfaellig ? 'font-semibold text-red-600' : ''}>
@@ -220,7 +150,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
     {
       key: 'compliance_status' as const,
       label: 'Compliance',
-      render: (auflage: Auflage) => (
+      render: (auflage: typeof auflagen[0]) => (
         <div className="flex items-center gap-2">
           {getComplianceIcon(auflage.compliance_status)}
           <span className="text-sm capitalize">{auflage.compliance_status}</span>
@@ -230,12 +160,12 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
     {
       key: 'zugewiesen_an' as const,
       label: 'Zugewiesen an',
-      render: (auflage: Auflage) => <span className="text-sm">{auflage.zugewiesen_an}</span>,
+      render: (auflage: typeof auflagen[0]) => <span className="text-sm">{auflage.zugewiesen_an}</span>,
     },
     {
       key: 'actions' as const,
       label: 'Aktionen',
-      render: (auflage: Auflage) => (
+      render: (auflage: typeof auflagen[0]) => (
         <div className="flex gap-1">
           <Button
             variant="outline"
@@ -244,12 +174,11 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
           >
             Bearbeiten
           </Button>
-          {auflage.status !== 'erledigt' && (
+          {auflage.status !== 'erfuellt' && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
-                // Mock status update
                 toast({
                   title: "Status aktualisiert",
                   description: `Auflage für ${auflage.psm_name} als erledigt markiert.`,
@@ -265,8 +194,21 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
     },
   ]
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="h-10 w-1/2" />
+        <Skeleton className="h-4 w-1/3" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-24 w-full" />)}
+        </div>
+        <Skeleton className="h-64 w-full" />
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">PSM-Auflagen-Manager</h1>
@@ -394,8 +336,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
                 <SelectContent>
                   <SelectItem value="alle">Alle Status</SelectItem>
                   <SelectItem value="offen">Offen</SelectItem>
-                  <SelectItem value="in_bearbeitung">In Bearbeitung</SelectItem>
-                  <SelectItem value="erledigt">Erledigt</SelectItem>
+                  <SelectItem value="erfuellt">Erfüllt</SelectItem>
                   <SelectItem value="ueberfaellig">Überfällig</SelectItem>
                 </SelectContent>
               </Select>

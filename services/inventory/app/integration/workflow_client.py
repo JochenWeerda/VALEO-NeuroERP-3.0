@@ -26,6 +26,7 @@ async def emit_workflow_event(event_type: str, tenant: str, payload: dict) -> No
         try:
             response = await client.post(url, json=body)
             response.raise_for_status()
-        except httpx.HTTPError as exc:  ***REMOVED*** noqa: BLE001
+        except httpx.HTTPError as exc:  # noqa: BLE001
             logger.debug("Workflow-Event konnte nicht zugestellt werden (%s): %s", event_type, exc)
+
 

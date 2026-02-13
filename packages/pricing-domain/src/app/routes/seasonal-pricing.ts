@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { SeasonalPricingService } from '../../domain/services/seasonal-pricing-service';
-import { CreateSeasonalPricingRule, UpdateSeasonalPricingRule, Season } from '../../domain/entities/seasonal-pricing-rule';
+import { CreateSeasonalPricingRule, Season, SeasonalPricingRule } from '../../domain/entities/seasonal-pricing-rule';
 
 // Initialize service
 const seasonalPricingService = new SeasonalPricingService({});
@@ -199,7 +199,7 @@ export async function registerSeasonalPricingRoutes(fastify: FastifyInstance) {
         const body = request.body as any;
         const updatedBy = getAuthenticatedUserId(request);
 
-        const updates: Partial<UpdateSeasonalPricingRule> = {};
+        const updates: Partial<Omit<SeasonalPricingRule, 'id' | 'tenantId' | 'createdAt' | 'createdBy'>> = {};
         if (body.name !== undefined) updates.name = body.name;
         if (body.description !== undefined) updates.description = body.description;
         if (body.code !== undefined) updates.code = body.code;

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Abhängigkeiten-Installationsskript für das ERP-System.
 
@@ -14,14 +14,14 @@ import platform
 import logging
 from typing import List, Dict, Tuple, Set, Optional
 
-***REMOVED*** Konfiguriere Logger
+# Konfiguriere Logger
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 )
 logger = logging.getLogger("python_deps_install")
 
-***REMOVED*** Pakete nach Kategorien
+# Pakete nach Kategorien
 PACKAGES = {
     "core": [
         "fastapi>=0.100.0",
@@ -121,7 +121,7 @@ def check_installed_packages(packages: List[str]) -> Tuple[bool, List[str], List
     missing = []
     
     for package in packages:
-        ***REMOVED*** Extrahiere den Paketnamen ohne Version
+        # Extrahiere den Paketnamen ohne Version
         package_name = package.split(">=")[0].split("==")[0].strip()
         
         try:
@@ -136,11 +136,11 @@ def main():
     """Hauptfunktion des Skripts."""
     logger.info("ERP-System Abhängigkeiten-Installationsskript")
     
-    ***REMOVED*** Überprüfe Python-Version
+    # Überprüfe Python-Version
     if not check_python_version():
         sys.exit(1)
     
-    ***REMOVED*** Aktualisiere pip
+    # Aktualisiere pip
     logger.info("Aktualisiere pip...")
     try:
         subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
@@ -148,7 +148,7 @@ def main():
     except subprocess.CalledProcessError:
         logger.warning("Fehler beim Aktualisieren von pip, fahre trotzdem fort")
     
-    ***REMOVED*** Installiere Pakete nach Kategorien
+    # Installiere Pakete nach Kategorien
     all_successful = True
     all_packages = []
     
@@ -162,7 +162,7 @@ def main():
         
         all_packages.extend(packages)
     
-    ***REMOVED*** Überprüfe die Installation
+    # Überprüfe die Installation
     logger.info("Überprüfe die Installation...")
     all_installed, installed, missing = check_installed_packages(all_packages)
     
@@ -171,7 +171,7 @@ def main():
     else:
         logger.warning(f"Einige Pakete konnten nicht importiert werden: {', '.join(missing)}")
     
-    ***REMOVED*** Ausgabe einer Zusammenfassung
+    # Ausgabe einer Zusammenfassung
     logger.info("\nZusammenfassung:")
     logger.info(f"Python-Version: {platform.python_version()}")
     logger.info(f"Betriebssystem: {platform.system()} {platform.release()}")
@@ -197,3 +197,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+

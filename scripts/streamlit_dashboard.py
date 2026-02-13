@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 GENXAIS Streamlit Dashboard
@@ -20,32 +20,32 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import glob
 
-***REMOVED*** Eigene Module importieren
+# Eigene Module importieren
 try:
-    ***REMOVED*** Verwende die vorhandenen Funktionen aus dem Dashboard-Modul
+    # Verwende die vorhandenen Funktionen aus dem Dashboard-Modul
     from dashboard_prompt_module import (
         load_version, load_pipeline_status, load_handover as load_handover_module,
         load_tasks as load_tasks_module, load_memory_entries, save_prompt,
         save_prompt_to_file, get_current_prompt, check_rag_server_status
     )
 except ImportError:
-    ***REMOVED*** Füge das scripts-Verzeichnis zum Pfad hinzu
+    # Füge das scripts-Verzeichnis zum Pfad hinzu
     sys.path.append(str(Path(__file__).resolve().parent))
-    ***REMOVED*** Verwende die vorhandenen Funktionen aus dem Dashboard-Modul
+    # Verwende die vorhandenen Funktionen aus dem Dashboard-Modul
     from dashboard_prompt_module import (
         load_version, load_pipeline_status, load_handover as load_handover_module,
         load_tasks as load_tasks_module, load_memory_entries, save_prompt,
         save_prompt_to_file, get_current_prompt, check_rag_server_status
     )
 
-***REMOVED*** Pfade konfigurieren
+# Pfade konfigurieren
 BASE_DIR = Path(__file__).resolve().parent.parent
 TASKS_DIR = BASE_DIR / "tasks"
 OUTPUT_DIR = BASE_DIR / "output"
 MEMORY_BANK_DIR = BASE_DIR / "memory-bank"
 CONFIG_PATH = OUTPUT_DIR / "dashboard_config.json"
 
-***REMOVED*** Streamlit-Konfiguration
+# Streamlit-Konfiguration
 st.set_page_config(
     page_title="GENXAIS v2.0 Dashboard",
     page_icon="🌱",
@@ -53,11 +53,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-***REMOVED*** Titel und Beschreibung
+# Titel und Beschreibung
 st.title("🌱 VALEO-NeuroERP v2.0 für Landhandel")
 st.markdown("**GENXAIS v2.0 Monitoring Dashboard**")
 
-***REMOVED*** Seitenleiste
+# Seitenleiste
 with st.sidebar:
     st.header("Navigation")
     page = st.radio(
@@ -76,17 +76,17 @@ with st.sidebar:
     start_date = st.date_input("Startdatum", datetime.datetime.now().date())
     end_date = st.date_input("Enddatum", datetime.datetime.now().date())
 
-***REMOVED*** Farbschema
+# Farbschema
 COLORS = {
-    "completed": "***REMOVED***28a745",  ***REMOVED*** Grün
-    "in_progress": "***REMOVED***ffc107",  ***REMOVED*** Gelb
-    "pending": "***REMOVED***dc3545",  ***REMOVED*** Rot
-    "background": "***REMOVED***f8f9fa",
-    "text": "***REMOVED***212529",
-    "accent": "***REMOVED***007bff"
+    "completed": "#28a745",  # Grün
+    "in_progress": "#ffc107",  # Gelb
+    "pending": "#dc3545",  # Rot
+    "background": "#f8f9fa",
+    "text": "#212529",
+    "accent": "#007bff"
 }
 
-***REMOVED*** Hilfsfunktionen für das Dashboard
+# Hilfsfunktionen für das Dashboard
 def load_config():
     """
     Lädt die Dashboard-Konfiguration.
@@ -107,7 +107,7 @@ def load_config():
                 "start_time": datetime.datetime.now().isoformat()
             }
     
-    ***REMOVED*** Wenn keine Konfiguration existiert, erstelle eine neue
+    # Wenn keine Konfiguration existiert, erstelle eine neue
     config = {
         "version": "v1.9",
         "phase": "VAN",
@@ -138,11 +138,11 @@ def load_tasks():
     Returns:
         Dict mit den Aufgaben
     """
-    ***REMOVED*** Verwende die vorhandene Funktion aus dem Dashboard-Modul
+    # Verwende die vorhandene Funktion aus dem Dashboard-Modul
     tasks_data = load_tasks_module()
     
     if not tasks_data:
-        ***REMOVED*** Fallback, wenn keine Aufgaben gefunden wurden
+        # Fallback, wenn keine Aufgaben gefunden wurden
         return {
             "pipelines": [],
             "tasks": [],
@@ -154,7 +154,7 @@ def load_tasks():
             }
         }
     
-    ***REMOVED*** Formatiere die Aufgaben für das Dashboard
+    # Formatiere die Aufgaben für das Dashboard
     result = {
         "pipelines": [],
         "tasks": [],
@@ -166,14 +166,14 @@ def load_tasks():
         }
     }
     
-    ***REMOVED*** Versuche, die Pipelines zu extrahieren
+    # Versuche, die Pipelines zu extrahieren
     pipelines = tasks_data.get("pipelines", [])
     
     for pipeline in pipelines:
         pipeline_name = pipeline.get("name", "Unbekannte Pipeline")
         pipeline_tasks = pipeline.get("tasks", [])
         
-        ***REMOVED*** Zähle die Aufgaben nach Status
+        # Zähle die Aufgaben nach Status
         completed = 0
         in_progress = 0
         pending = 0
@@ -197,7 +197,7 @@ def load_tasks():
         
         result["pipelines"].append(pipeline_data)
         
-        ***REMOVED*** Füge alle Aufgaben zur Gesamtliste hinzu
+        # Füge alle Aufgaben zur Gesamtliste hinzu
         for task in pipeline_tasks:
             task_data = {
                 "pipeline": pipeline_name,
@@ -208,7 +208,7 @@ def load_tasks():
             }
             result["tasks"].append(task_data)
             
-            ***REMOVED*** Aktualisiere Statusstatistiken
+            # Aktualisiere Statusstatistiken
             if task.get("status") == "completed":
                 result["status"]["completed"] += 1
             elif task.get("status") == "in_progress":
@@ -227,7 +227,7 @@ def load_reflections():
     Returns:
         Liste mit Reflektionen
     """
-    ***REMOVED*** Verwende die vorhandene Funktion aus dem Dashboard-Modul
+    # Verwende die vorhandene Funktion aus dem Dashboard-Modul
     return load_memory_entries(category="reflection", limit=10)
 
 def load_handover():
@@ -237,22 +237,22 @@ def load_handover():
     Returns:
         Dict mit Handover-Informationen
     """
-    ***REMOVED*** Verwende die vorhandene Funktion aus dem Dashboard-Modul, aber ohne Parameter
+    # Verwende die vorhandene Funktion aus dem Dashboard-Modul, aber ohne Parameter
     try:
-        ***REMOVED*** Versuche zuerst, die Funktion ohne Parameter aufzurufen
+        # Versuche zuerst, die Funktion ohne Parameter aufzurufen
         handover_content = load_handover_module()
     except TypeError:
         try:
-            ***REMOVED*** Wenn das nicht funktioniert, versuche es mit einem leeren String
+            # Wenn das nicht funktioniert, versuche es mit einem leeren String
             handover_content = load_handover_module("")
         except:
-            ***REMOVED*** Wenn auch das nicht funktioniert, setze handover_content auf None
+            # Wenn auch das nicht funktioniert, setze handover_content auf None
             handover_content = None
         
     if not handover_content:
         return {}
     
-    ***REMOVED*** Erstelle ein Handover-Objekt
+    # Erstelle ein Handover-Objekt
     return {
         "date": datetime.datetime.now().isoformat(),
         "summary": handover_content[:500] + "..." if len(handover_content) > 500 else handover_content,
@@ -271,7 +271,7 @@ def load_artifacts():
     
     try:
         for file_path in OUTPUT_DIR.glob("*.md"):
-            ***REMOVED*** Überspringe das Handover-Dokument
+            # Überspringe das Handover-Dokument
             if file_path.name == "handover.md":
                 continue
             
@@ -279,11 +279,11 @@ def load_artifacts():
                 with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
                 
-                ***REMOVED*** Extrahiere Metadaten aus dem Inhalt
+                # Extrahiere Metadaten aus dem Inhalt
                 title = file_path.stem
                 date = datetime.datetime.fromtimestamp(file_path.stat().st_mtime).isoformat()
                 
-                ***REMOVED*** Extrahiere die ersten 200 Zeichen als Zusammenfassung
+                # Extrahiere die ersten 200 Zeichen als Zusammenfassung
                 summary = content[:200] + "..." if len(content) > 200 else content
                 
                 artifacts.append({
@@ -297,7 +297,7 @@ def load_artifacts():
     except Exception as e:
         st.error(f"Fehler beim Durchsuchen des Output-Verzeichnisses: {str(e)}")
     
-    ***REMOVED*** Sortiere nach Datum (neueste zuerst)
+    # Sortiere nach Datum (neueste zuerst)
     artifacts.sort(key=lambda x: x["date"], reverse=True)
     
     return artifacts
@@ -315,7 +315,7 @@ def generate_dashboard_data():
     handover = load_handover()
     artifacts = load_artifacts()
     
-    ***REMOVED*** Aktualisiere die Konfiguration mit der aktuellen Zeit
+    # Aktualisiere die Konfiguration mit der aktuellen Zeit
     config["last_update"] = datetime.datetime.now().isoformat()
     save_config(config)
     
@@ -348,14 +348,14 @@ def update_task_status(pipeline_name, task_name, new_status):
         with open(tasks_file, "r", encoding="utf-8") as f:
             tasks_data = yaml.safe_load(f)
         
-        ***REMOVED*** Finde die Pipeline und die Aufgabe
+        # Finde die Pipeline und die Aufgabe
         for pipeline in tasks_data.get("pipelines", []):
             if pipeline.get("name") == pipeline_name:
                 for task in pipeline.get("tasks", []):
                     if task.get("name") == task_name:
                         task["status"] = new_status
                         
-                        ***REMOVED*** Speichere die aktualisierte Konfiguration
+                        # Speichere die aktualisierte Konfiguration
                         with open(tasks_file, "w", encoding="utf-8") as f:
                             yaml.dump(tasks_data, f, default_flow_style=False, sort_keys=False)
                         
@@ -378,26 +378,26 @@ def generate_prompt():
     tasks = load_tasks()
     handover = load_handover()
     
-    ***REMOVED*** Erstelle den Prompt
-    prompt = f"""***REMOVED*** 🚀 GENXAIS v{config['version']} – Initialisierungsprompt zur Weiterentwicklung von VALEO – Die NeuroERP
+    # Erstelle den Prompt
+    prompt = f"""# 🚀 GENXAIS v{config['version']} – Initialisierungsprompt zur Weiterentwicklung von VALEO – Die NeuroERP
 Nutze langgraph-cycle-task, MCP RAG, MongoDB, memory-bank, todo, tasks
-***REMOVED******REMOVED*** 📁 Projektverzeichnis:
+## 📁 Projektverzeichnis:
 `{BASE_DIR}`  
 **Streamlit UI Port:** 8502  
 **Modus:** Multi-Pipeline  
 **Startphase:** {config['phase']}  
 **Letztes Handover:** `output/handover.md`
 
-***REMOVED******REMOVED*** 📊 Aufgabenstatus
+## 📊 Aufgabenstatus
 - Abgeschlossen: {tasks.get('status', {}).get('completed', 0)}
 - In Bearbeitung: {tasks.get('status', {}).get('in_progress', 0)}
 - Ausstehend: {tasks.get('status', {}).get('pending', 0)}
 - Gesamt: {tasks.get('status', {}).get('total', 0)}
 
-***REMOVED******REMOVED*** 📝 Letzte Handover-Zusammenfassung
+## 📝 Letzte Handover-Zusammenfassung
 {handover.get('summary', 'Kein Handover-Dokument gefunden.')}
 
-***REMOVED******REMOVED*** 🔄 Nächste Schritte
+## 🔄 Nächste Schritte
 1. Führe die VAN-Phase durch, um den aktuellen Projektstatus zu analysieren
 2. Erstelle einen Plan für die Implementierung der ausstehenden Aufgaben
 3. Fokussiere auf die Verbesserung der Dokumentation und API-Spezifikation
@@ -405,7 +405,7 @@ Nutze langgraph-cycle-task, MCP RAG, MongoDB, memory-bank, todo, tasks
 5. Implementiere Sicherheitsmaßnahmen nach OWASP Top 10
 """
     
-    ***REMOVED*** Speichere den Prompt
+    # Speichere den Prompt
     prompt_path = OUTPUT_DIR / "genxais_prompt_v1.9.md"
     try:
         OUTPUT_DIR.mkdir(exist_ok=True)
@@ -458,7 +458,7 @@ def render_phase_status():
     config = load_config()
     current_phase = config.get('phase', 'VAN')
     
-    ***REMOVED*** Bestimme den Status jeder Phase
+    # Bestimme den Status jeder Phase
     phase_status = {}
     for phase in phases:
         if phase == current_phase:
@@ -468,7 +468,7 @@ def render_phase_status():
         else:
             phase_status[phase] = "pending"
     
-    ***REMOVED*** Zeige die Phasen als Fortschrittsbalken an
+    # Zeige die Phasen als Fortschrittsbalken an
     cols = st.columns(len(phases))
     for i, (phase, col) in enumerate(zip(phases, cols)):
         status = phase_status[phase]
@@ -477,7 +477,7 @@ def render_phase_status():
         with col:
             st.markdown(f"<h4 style='text-align: center;'>{phase}</h4>", unsafe_allow_html=True)
             
-            ***REMOVED*** Erstelle einen farbigen Balken basierend auf dem Status
+            # Erstelle einen farbigen Balken basierend auf dem Status
             if status == "completed":
                 st.progress(1.0)
                 st.markdown(f"<p style='text-align: center; color: {color};'>✅ Abgeschlossen</p>", unsafe_allow_html=True)
@@ -499,7 +499,7 @@ def render_pipeline_status():
         st.warning("Keine Pipeline-Daten verfügbar.")
         return
     
-    ***REMOVED*** Erstelle eine Tabelle mit den Pipeline-Daten
+    # Erstelle eine Tabelle mit den Pipeline-Daten
     pipeline_data = []
     for pipeline in pipelines:
         name = pipeline.get("name", "Unbekannte Pipeline")
@@ -508,7 +508,7 @@ def render_pipeline_status():
         in_progress = pipeline.get("in_progress", 0)
         pending = pipeline.get("pending", 0)
         
-        ***REMOVED*** Berechne den Fortschritt in Prozent
+        # Berechne den Fortschritt in Prozent
         progress = (completed / total) * 100 if total > 0 else 0
         
         pipeline_data.append({
@@ -520,10 +520,10 @@ def render_pipeline_status():
             "Fortschritt": f"{progress:.1f}%"
         })
     
-    ***REMOVED*** Zeige die Tabelle an
+    # Zeige die Tabelle an
     st.dataframe(pipeline_data)
     
-    ***REMOVED*** Zeige einen Gesamtfortschritt an
+    # Zeige einen Gesamtfortschritt an
     total_tasks = tasks_data.get("status", {}).get("total", 0)
     completed_tasks = tasks_data.get("status", {}).get("completed", 0)
     in_progress_tasks = tasks_data.get("status", {}).get("in_progress", 0)
@@ -555,14 +555,14 @@ def render_task_list():
         st.warning("Keine Aufgaben verfügbar.")
         return
     
-    ***REMOVED*** Filter für den Status
+    # Filter für den Status
     status_filter = st.selectbox(
         "Status filtern",
         ["Alle", "Abgeschlossen", "In Bearbeitung", "Ausstehend"],
         index=0
     )
     
-    ***REMOVED*** Filter für die Pipeline
+    # Filter für die Pipeline
     pipelines = [pipeline.get("name") for pipeline in tasks_data.get("pipelines", [])]
     pipeline_filter = st.selectbox(
         "Pipeline filtern",
@@ -570,7 +570,7 @@ def render_task_list():
         index=0
     )
     
-    ***REMOVED*** Filtere die Aufgaben
+    # Filtere die Aufgaben
     filtered_tasks = tasks
     if status_filter != "Alle":
         status_map = {
@@ -583,13 +583,13 @@ def render_task_list():
     if pipeline_filter != "Alle":
         filtered_tasks = [task for task in filtered_tasks if task.get("pipeline") == pipeline_filter]
     
-    ***REMOVED*** Zeige die gefilterten Aufgaben an
+    # Zeige die gefilterten Aufgaben an
     for task in filtered_tasks:
         with st.expander(f"{task.get('name')} ({task.get('pipeline')})"):
             st.markdown(f"**Typ:** {task.get('type', 'Unbekannt')}")
             st.markdown(f"**Details:** {task.get('details', '')}")
             
-            ***REMOVED*** Zeige den Status an und erlaube das Ändern
+            # Zeige den Status an und erlaube das Ändern
             status = task.get("status", "pending")
             status_map = {
                 "completed": "Abgeschlossen",
@@ -633,7 +633,7 @@ def render_reflections():
         st.warning("Keine Reflektionen verfügbar.")
         return
     
-    ***REMOVED*** Zeige die Reflektionen an
+    # Zeige die Reflektionen an
     for reflection in reflections:
         with st.expander(f"{reflection.get('title')} ({format_timestamp(reflection.get('date', ''))})"):
             st.markdown(reflection.get("content", ""))
@@ -648,7 +648,7 @@ def render_handover():
         st.warning("Kein Handover-Dokument verfügbar.")
         return
     
-    ***REMOVED*** Zeige das Handover-Dokument an
+    # Zeige das Handover-Dokument an
     st.markdown(f"**Datum:** {format_timestamp(handover.get('date', ''))}")
     
     with st.expander("Handover-Dokument anzeigen"):
@@ -664,19 +664,19 @@ def render_artifacts():
         st.warning("Keine Artefakte verfügbar.")
         return
     
-    ***REMOVED*** Zeige die Artefakte an
+    # Zeige die Artefakte an
     for artifact in artifacts:
         with st.expander(f"{artifact.get('title')} ({format_timestamp(artifact.get('date', ''))})"):
             st.markdown(artifact.get("summary", ""))
             
-            ***REMOVED*** Zeige einen Link zum vollständigen Artefakt an
+            # Zeige einen Link zum vollständigen Artefakt an
             st.markdown(f"[Vollständiges Artefakt anzeigen]({artifact.get('path')})")
 
 def render_sidebar():
     """Rendert die Seitenleiste."""
     st.sidebar.title("GENXAIS v1.9")
     
-    ***REMOVED*** Zeige die aktuelle Konfiguration an
+    # Zeige die aktuelle Konfiguration an
     config = load_config()
     st.sidebar.subheader("Konfiguration")
     st.sidebar.markdown(f"""
@@ -686,7 +686,7 @@ def render_sidebar():
     **Letzte Aktualisierung:** {format_timestamp(config.get('last_update', ''))}
     """)
     
-    ***REMOVED*** Zeige die Aufgabenstatistik an
+    # Zeige die Aufgabenstatistik an
     tasks_data = load_tasks()
     st.sidebar.subheader("Aufgabenstatistik")
     
@@ -702,7 +702,7 @@ def render_sidebar():
     **Ausstehend:** {pending_tasks}
     """)
     
-    ***REMOVED*** Zeige die Aktionen an
+    # Zeige die Aktionen an
     st.sidebar.subheader("Aktionen")
     
     if st.sidebar.button("Dashboard aktualisieren"):
@@ -715,7 +715,7 @@ def render_sidebar():
         with st.sidebar.expander("Prompt anzeigen"):
             st.code(prompt, language="markdown")
     
-    ***REMOVED*** Zeige die Navigation an
+    # Zeige die Navigation an
     st.sidebar.subheader("Navigation")
     
     if st.sidebar.button("Phasenstatus"):
@@ -738,17 +738,17 @@ def render_sidebar():
 
 def main():
     """Hauptfunktion des Dashboards."""
-    ***REMOVED*** Initialisiere die Session-State
+    # Initialisiere die Session-State
     if "section" not in st.session_state:
         st.session_state.section = "phase_status"
     
-    ***REMOVED*** Rendere die Seitenleiste
+    # Rendere die Seitenleiste
     render_sidebar()
     
-    ***REMOVED*** Rendere den Header
+    # Rendere den Header
     render_header()
     
-    ***REMOVED*** Rendere die ausgewählte Sektion
+    # Rendere die ausgewählte Sektion
     if st.session_state.section == "phase_status":
         render_phase_status()
     elif st.session_state.section == "pipeline_status":
@@ -762,7 +762,7 @@ def main():
     elif st.session_state.section == "artifacts":
         render_artifacts()
     
-    ***REMOVED*** Rendere alle Sektionen, wenn keine ausgewählt ist
+    # Rendere alle Sektionen, wenn keine ausgewählt ist
     else:
         render_phase_status()
         render_pipeline_status()
@@ -773,3 +773,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

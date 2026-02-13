@@ -1,22 +1,22 @@
-***REMOVED*** ===================================================
-***REMOVED*** Stapelverarbeitung für Chargenberichte
-***REMOVED*** ===================================================
-***REMOVED*** Ermöglicht die Generierung mehrerer Chargenberichte
-***REMOVED*** auf einmal über verschiedene Filter
-***REMOVED*** ===================================================
+# ===================================================
+# Stapelverarbeitung für Chargenberichte
+# ===================================================
+# Ermöglicht die Generierung mehrerer Chargenberichte
+# auf einmal über verschiedene Filter
+# ===================================================
 
-***REMOVED*** Lade Hilfsfunktionen
+# Lade Hilfsfunktionen
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 . "$scriptPath\powershell_compatibility.ps1"
 
-***REMOVED*** Banner anzeigen
+# Banner anzeigen
 Write-Host ""
 Write-Host " =====================================================" -ForegroundColor Cyan
 Write-Host "  Stapelverarbeitung für Chargenberichte" -ForegroundColor Cyan
 Write-Host " =====================================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Parameter definieren
+# Parameter definieren
 param (
     [string]$FilterTyp = "alle",
     [string]$FilterWert = "",
@@ -29,19 +29,19 @@ param (
     [switch]$Silent = $false
 )
 
-***REMOVED*** Pfade definieren
+# Pfade definieren
 $rootDir = Split-Path -Parent $scriptPath
 $reportGeneratorPath = Join-Path $scriptPath "automated_report_generator.ps1"
 $apiEndpoint = "http://localhost:8003/api/v1/chargen"
 $outputDir = if ($OutputPath) { $OutputPath } else { Join-Path $rootDir "reports" }
 
-***REMOVED*** Überprüfe, ob der Ausgabepfad existiert
+# Überprüfe, ob der Ausgabepfad existiert
 if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir | Out-Null
     Write-Success "Berichtsverzeichnis erstellt: $outputDir"
 }
 
-***REMOVED*** Verfügbare Filtertypen
+# Verfügbare Filtertypen
 $verfuegbareFilter = @(
     "alle", 
     "produkt", 
@@ -52,7 +52,7 @@ $verfuegbareFilter = @(
     "lieferant"
 )
 
-***REMOVED*** Funktionen
+# Funktionen
 function Get-ChargenListe {
     param (
         [string]$FilterTyp,
@@ -60,10 +60,10 @@ function Get-ChargenListe {
     )
     
     try {
-        ***REMOVED*** Basisendpunkt
+        # Basisendpunkt
         $endpoint = $apiEndpoint
         
-        ***REMOVED*** Filter hinzufügen, wenn angegeben
+        # Filter hinzufügen, wenn angegeben
         if ($FilterTyp -ne "alle" -and $FilterWert) {
             $queryParam = switch ($FilterTyp) {
                 "produkt" { "product=$FilterWert" }
@@ -98,7 +98,7 @@ function Generate-BatchReports {
         [int]$MaxChargen = 0
     )
     
-    ***REMOVED*** Wenn eine maximale Anzahl angegeben wurde, begrenze die Liste
+    # Wenn eine maximale Anzahl angegeben wurde, begrenze die Liste
     if ($MaxChargen -gt 0 -and $Chargen.Count -gt $MaxChargen) {
         $Chargen = $Chargen | Select-Object -First $MaxChargen
     }
@@ -112,7 +112,7 @@ function Generate-BatchReports {
             Write-Info "Generiere Bericht für Charge $($charge.id)..."
         }
         
-        ***REMOVED*** Erstelle die Argumentliste
+        # Erstelle die Argumentliste
         $args = "-ChargeId `"$($charge.id)`" -BerichtTyp `"$BerichtTyp`" -ExportFormat `"$ExportFormat`""
         
         if ($OutputPath) {
@@ -122,10 +122,10 @@ function Generate-BatchReports {
         $args += " -Silent"
         
         try {
-            ***REMOVED*** Führe den Berichtsgenerator aus
+            # Führe den Berichtsgenerator aus
             $output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $reportGeneratorPath $args
             
-            ***REMOVED*** Ermittle den Pfad des generierten Berichts
+            # Ermittle den Pfad des generierten Berichts
             $reportFileName = "Charge_$(if ($charge.chargenNummer) {$charge.chargenNummer} else {$charge.id})_$BerichtTyp.$ExportFormat"
             $reportPath = Join-Path $OutputPath $reportFileName
             
@@ -168,11 +168,11 @@ function Send-BatchReportEmail {
     }
     
     try {
-        ***REMOVED*** Erstelle das E-Mail-Objekt
+        # Erstelle das E-Mail-Objekt
         $outlook = New-Object -ComObject Outlook.Application
         $mail = $outlook.CreateItem(0)
         
-        ***REMOVED*** Setze die E-Mail-Eigenschaften
+        # Setze die E-Mail-Eigenschaften
         $mail.To = $Recipient
         $mail.Subject = "Stapelverarbeitung von Chargenberichten: $FilterInfo"
         
@@ -184,7 +184,7 @@ function Send-BatchReportEmail {
         
         $mail.Body = $body
         
-        ***REMOVED*** Füge die Berichte als Anhänge hinzu
+        # Füge die Berichte als Anhänge hinzu
         foreach ($reportPath in $ReportPaths) {
             if (Test-Path $reportPath) {
                 $mail.Attachments.Add($reportPath)
@@ -220,15 +220,15 @@ function Create-SummaryReport {
     <title>Zusammenfassung der Stapelverarbeitung</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; }
-        h1 { color: ***REMOVED***2c3e50; border-bottom: 1px solid ***REMOVED***eee; padding-bottom: 10px; }
-        h2 { color: ***REMOVED***3498db; margin-top: 30px; }
+        h1 { color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        h2 { color: #3498db; margin-top: 30px; }
         table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid ***REMOVED***ddd; }
-        th { background-color: ***REMOVED***f2f2f2; }
-        tr:hover { background-color: ***REMOVED***f5f5f5; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f5f5f5; }
         .success { color: green; }
         .error { color: red; }
-        .summary { background-color: ***REMOVED***f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .summary { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -301,24 +301,24 @@ function Create-SummaryReport {
     return $summaryPath
 }
 
-***REMOVED*** Hauptlogik
+# Hauptlogik
 if (-not $Silent) {
     Write-Info "Stapelverarbeitung von Chargenberichten gestartet"
 }
 
-***REMOVED*** Überprüfe, ob der Filtertyp gültig ist
+# Überprüfe, ob der Filtertyp gültig ist
 if (-not $verfuegbareFilter.Contains($FilterTyp.ToLower())) {
     Write-Error "Ungültiger Filtertyp: $FilterTyp. Verfügbar sind: $($verfuegbareFilter -join ', ')"
     exit 1
 }
 
-***REMOVED*** Überprüfe den Report Generator
+# Überprüfe den Report Generator
 if (-not (Test-Path $reportGeneratorPath)) {
     Write-Error "Berichtsgenerator nicht gefunden: $reportGeneratorPath"
     exit 1
 }
 
-***REMOVED*** Hole die Chargenliste
+# Hole die Chargenliste
 $chargen = Get-ChargenListe -FilterTyp $FilterTyp.ToLower() -FilterWert $FilterWert
 
 if ($chargen.Count -eq 0) {
@@ -334,7 +334,7 @@ if (-not $Silent) {
     }
 }
 
-***REMOVED*** Erstelle eine lesbare Filterbeschreibung
+# Erstelle eine lesbare Filterbeschreibung
 $filterInfo = switch ($FilterTyp.ToLower()) {
     "alle" { "Alle Chargen" }
     "produkt" { "Produkt: $FilterWert" }
@@ -346,7 +346,7 @@ $filterInfo = switch ($FilterTyp.ToLower()) {
     default { "Benutzerdefinierter Filter" }
 }
 
-***REMOVED*** Generiere die Berichte
+# Generiere die Berichte
 $results = Generate-BatchReports `
     -Chargen $chargen `
     -BerichtTyp $BerichtTyp.ToLower() `
@@ -354,16 +354,16 @@ $results = Generate-BatchReports `
     -OutputPath $outputDir `
     -MaxChargen $MaxChargen
 
-***REMOVED*** Erstelle einen Zusammenfassungsbericht
+# Erstelle einen Zusammenfassungsbericht
 $summaryPath = Create-SummaryReport `
     -Chargen $chargen `
     -Results $results `
     -FilterInfo $filterInfo `
     -OutputPath $outputDir
 
-***REMOVED*** Sende E-Mail, wenn gewünscht
+# Sende E-Mail, wenn gewünscht
 if ($EmailVersenden -and $EmailEmpfaenger) {
-    ***REMOVED*** Füge den Zusammenfassungsbericht zu den E-Mail-Anhängen hinzu
+    # Füge den Zusammenfassungsbericht zu den E-Mail-Anhängen hinzu
     $allReports = $results.berichte + @($summaryPath)
     
     Send-BatchReportEmail `
@@ -372,7 +372,7 @@ if ($EmailVersenden -and $EmailEmpfaenger) {
         -FilterInfo $filterInfo
 }
 
-***REMOVED*** Abschlussnachricht
+# Abschlussnachricht
 if (-not $Silent) {
     Write-Host ""
     Write-Success "Stapelverarbeitung abgeschlossen:"
@@ -380,7 +380,7 @@ if (-not $Silent) {
     Write-Host "  Fehlgeschlagen: $($results.fehlgeschlagen)" -ForegroundColor $(if ($results.fehlgeschlagen -gt 0) { "Red" } else { "Green" })
     Write-Host "  Zusammenfassung: $summaryPath" -ForegroundColor Cyan
     
-    ***REMOVED*** Öffne den Zusammenfassungsbericht
+    # Öffne den Zusammenfassungsbericht
     try {
         Invoke-Item $summaryPath
     }

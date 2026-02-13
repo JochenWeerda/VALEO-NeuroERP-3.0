@@ -56,7 +56,7 @@ async def require_authenticated_user(
         AuthenticationError: If token is invalid or expired
     """
     try:
-        ***REMOVED*** Decode JWT token
+        # Decode JWT token
         payload = jwt.decode(
             credentials.credentials,
             settings.SECRET_KEY,
@@ -71,7 +71,7 @@ async def require_authenticated_user(
             logger.warning("Token missing subject (user_id)")
             raise AuthenticationError("Invalid token: missing user identifier")
         
-        ***REMOVED*** Verify user exists in database
+        # Verify user exists in database
         user_repo = container.resolve(UserRepository)
         user = await user_repo.get_by_id(user_id, tenant_id)
         
@@ -79,7 +79,7 @@ async def require_authenticated_user(
             logger.warning(f"User not found in database: {user_id}")
             raise AuthenticationError("User not found")
         
-        ***REMOVED*** Check if user is active
+        # Check if user is active
         if not getattr(user, 'is_active', True):
             logger.warning(f"User account is inactive: {user_id}")
             raise AuthenticationError("User account is inactive")
@@ -139,11 +139,11 @@ async def require_any_role(allowed_roles: list):
     async def roles_checker(current_user: Dict[str, Any] = Depends(require_authenticated_user)) -> Dict[str, Any]:
         user_roles = current_user.get("roles", [])
         
-        ***REMOVED*** Admin role has access to everything
+        # Admin role has access to everything
         if "admin" in user_roles:
             return current_user
         
-        ***REMOVED*** Check if user has any of the required roles
+        # Check if user has any of the required roles
         if not any(role in user_roles for role in allowed_roles):
             logger.warning(
                 f"Access denied for user {current_user['user_id']}: "
@@ -169,7 +169,7 @@ async def require_scopes(required_scopes: list):
     async def scope_checker(current_user: Dict[str, Any] = Depends(require_authenticated_user)) -> Dict[str, Any]:
         user_scopes = current_user.get("scopes", [])
         
-        ***REMOVED*** Check if user has all required scopes
+        # Check if user has all required scopes
         if not all(scope in user_scopes for scope in required_scopes):
             logger.warning(
                 f"Access denied for user {current_user['user_id']}: "
@@ -203,5 +203,5 @@ async def optional_auth(
     try:
         return await require_authenticated_user(credentials, db)
     except AuthenticationError:
-        ***REMOVED*** For optional auth, we just return None on auth failure
+        # For optional auth, we just return None on auth failure
         return None

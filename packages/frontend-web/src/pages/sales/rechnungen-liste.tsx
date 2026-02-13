@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -14,55 +14,9 @@ import { useToast } from '@/hooks/use-toast'
 import { useListActions } from '@/hooks/useListActions'
 import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
 import { saveDocument } from '@/lib/document-api'
+import { useRechnungen, type Rechnung, type RechnungStatus } from '@/lib/api/sales'
 
-type Rechnung = {
-  id: string
-  nummer: string
-  datum: string
-  kunde: string
-  auftragsNr: string
-  betrag: number
-  faelligAm: string
-  status: 'offen' | 'teilbezahlt' | 'bezahlt' | 'ueberfaellig' | 'storniert'
-}
-
-const mockRechnungen: Rechnung[] = [
-  {
-    id: '1',
-    nummer: 'RE-2025-0001',
-    datum: '2025-10-11',
-    kunde: 'Landhandel Nord GmbH',
-    auftragsNr: 'SO-2025-0001',
-    betrag: 12500.0,
-    faelligAm: '2025-11-10',
-    status: 'offen',
-  },
-  {
-    id: '2',
-    nummer: 'RE-2025-0002',
-    datum: '2025-10-10',
-    kunde: 'Agrar-Zentrum Süd',
-    auftragsNr: 'SO-2025-0002',
-    betrag: 8750.5,
-    faelligAm: '2025-11-09',
-    status: 'bezahlt',
-  },
-  {
-    id: '3',
-    nummer: 'RE-2025-0003',
-    datum: '2025-09-15',
-    kunde: 'Müller Landwirtschaft',
-    auftragsNr: 'SO-2024-0890',
-    betrag: 5200.0,
-    faelligAm: '2025-10-15',
-    status: 'ueberfaellig',
-  },
-]
-
-const statusVariantMap: Record<
-  Rechnung['status'],
-  'default' | 'outline' | 'secondary' | 'destructive'
-> = {
+const statusVariantMap: Record<RechnungStatus, 'default' | 'outline' | 'secondary' | 'destructive'> = {
   offen: 'default',
   teilbezahlt: 'secondary',
   bezahlt: 'outline',
@@ -78,49 +32,11 @@ export default function RechnungenListePage(): JSX.Element {
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Rechnung')
   const pageTitle = getListTitle(t, entityTypeLabel)
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<Rechnung['status'] | 'alle'>('alle')
-  const [rechnungen, setRechnungen] = useState<Rechnung[]>([])
-  const [loading, setLoading] = useState(true)
+  const [statusFilter, setStatusFilter] = useState<RechnungStatus | 'alle'>('alle')
   const [showImport, setShowImport] = useState(false)
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
 
-
-  // Lade Daten von API
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true)
-      try {
-        const response = await fetch('/api/mcp/documents/sales_invoice?skip=0&limit=100')
-        if (response.ok) {
-          const result = await response.json()
-          if (result.ok && result.data) {
-            // Transformiere API-Daten
-            const transformed = result.data.map((doc: any) => ({
-              id: doc.number,
-              nummer: doc.number,
-              datum: doc.date,
-              kunde: doc.customerId || '',
-              auftragsNr: doc.sourceOrder || '',
-              betrag: doc.totalGross || 0,
-              faelligAm: doc.dueDate || '',
-              status: (doc.status?.toLowerCase() || 'offen') as Rechnung['status'],
-            }))
-            setRechnungen(transformed.length > 0 ? transformed : mockRechnungen)
-          } else {
-            setRechnungen(mockRechnungen)
-          }
-        } else {
-          setRechnungen(mockRechnungen)
-        }
-      } catch (error) {
-        console.error('Fehler beim Laden der Rechnungen:', error)
-        setRechnungen(mockRechnungen)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadData()
-  }, [])
+  const { data: rechnungen = [], isLoading: loading } = useRechnungen()
 
   // Filter-Konfiguration für AdvancedFilters
   const filterConfig: FilterConfig[] = [
@@ -355,7 +271,7 @@ export default function RechnungenListePage(): JSX.Element {
         <CardContent className="pt-6">
           <DataTable data={filteredRechnungen} columns={columns} />
           <div className="mt-4 text-sm text-muted-foreground">
-            {t('crud.list.showing', { count: filteredRechnungen.length, total: mockRechnungen.length, entityType: entityTypeLabel })}
+            {t('crud.list.showing', { count: filteredRechnungen.length, total: rechnungen.length, entityType: entityTypeLabel })}
           </div>
         </CardContent>
       </Card>

@@ -1,16 +1,14 @@
-import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
-import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
-import { ListConfig, Action } from '@/components/mask-builder/types'
-import { getEntityTypeLabel, getStatusLabel, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
+import { ListConfig } from '@/components/mask-builder/types'
+import { apiClient } from '@/lib/api-client'
+import { getEntityTypeLabel, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
-
-// API Client
-const apiClient = createApiClient('/api/crm-marketing')
+import { ErrorState } from '@/components/ErrorState'
 
 // Konfiguration für Campaign Templates ListReport
 const createTemplatesConfig = (t: any, entityTypeLabel: string, handleAction: (actionKey: string, data?: any) => Promise<void>): ListConfig => ({
@@ -159,11 +157,28 @@ const createTemplatesConfig = (t: any, entityTypeLabel: string, handleAction: (a
 export default function CampaignTemplatesPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const entityType = 'campaignTemplate'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kampagnen-Vorlage')
+
+  const { data: queryData, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['crm', 'campaign-templates'],
+    queryFn: async () => {
+      const r = await apiClient.get('/api/crm-marketing/campaigns/templates')
+      const items = Array.isArray(r.data) ? r.data : ((r.data as any).data || [])
+      return { items, total: items.length }
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const data = queryData?.items || []
+  const total = queryData?.total || 0
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'campaign-templates'] })
 
   const handleAction = async (action: string, item: any = null) => {
     if (action === 'create') {
@@ -173,12 +188,12 @@ export default function CampaignTemplatesPage(): JSX.Element {
     } else if (action === 'delete' && item) {
       if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {
-          await apiClient.delete(`/campaigns/templates/${item.id}`)
+          await apiClient.delete(`/api/crm-marketing/campaigns/templates/${item.id}`)
           toast({
             title: getSuccessMessage(t, 'delete', entityType),
           })
-          loadData()
-        } catch (error) {
+          invalidate()
+        } catch {
           toast({
             variant: 'destructive',
             title: getErrorMessage(t, 'delete', entityType),
@@ -187,14 +202,14 @@ export default function CampaignTemplatesPage(): JSX.Element {
       }
     } else if (action === 'duplicate' && item) {
       try {
-        const response = await apiClient.post(`/campaigns/templates/${item.id}/duplicate`)
-        if (response.success || response.id) {
+        const response = await apiClient.post(`/api/crm-marketing/campaigns/templates/${item.id}/duplicate`)
+        if (response.data) {
           toast({
             title: t('crud.messages.templateDuplicated'),
           })
-          loadData()
+          invalidate()
         }
-      } catch (error) {
+      } catch {
         toast({
           variant: 'destructive',
           title: t('crud.messages.templateDuplicateError'),
@@ -202,12 +217,12 @@ export default function CampaignTemplatesPage(): JSX.Element {
       }
     } else if (action === 'activate' && item) {
       try {
-        await apiClient.post(`/campaigns/templates/${item.id}/activate`)
+        await apiClient.post(`/api/crm-marketing/campaigns/templates/${item.id}/activate`)
         toast({
           title: t('crud.messages.templateActivated'),
         })
-        loadData()
-      } catch (error) {
+        invalidate()
+      } catch {
         toast({
           variant: 'destructive',
           title: t('crud.messages.templateActivateError'),
@@ -215,12 +230,12 @@ export default function CampaignTemplatesPage(): JSX.Element {
       }
     } else if (action === 'deactivate' && item) {
       try {
-        await apiClient.post(`/campaigns/templates/${item.id}/deactivate`)
+        await apiClient.post(`/api/crm-marketing/campaigns/templates/${item.id}/deactivate`)
         toast({
           title: t('crud.messages.templateDeactivated'),
         })
-        loadData()
-      } catch (error) {
+        invalidate()
+      } catch {
         toast({
           variant: 'destructive',
           title: t('crud.messages.templateDeactivateError'),
@@ -232,35 +247,6 @@ export default function CampaignTemplatesPage(): JSX.Element {
   }
 
   const templatesConfig = createTemplatesConfig(t, entityTypeLabel, handleAction)
-
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const response = await apiClient.get('/campaigns/templates', {
-        params: {
-          tenant_id: '00000000-0000-0000-0000-000000000001' // TODO: Get from auth context
-        }
-      })
-
-      if (response.success || Array.isArray(response)) {
-        const items = Array.isArray(response) ? response : (response.data || [])
-        setData(items)
-        setTotal(items.length)
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Templates:', error)
-      toast({
-        variant: 'destructive',
-        title: t('crud.messages.loadError')
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadData()
-  }, [])
 
   const handleCreate = () => {
     navigate('/crm/campaign-template/new')
@@ -288,7 +274,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
         title: t('crud.messages.exportSuccess'),
         description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
       })
-    } catch (error) {
+    } catch {
       toast({
         variant: 'destructive',
         title: t('crud.messages.exportError'),
@@ -301,10 +287,9 @@ export default function CampaignTemplatesPage(): JSX.Element {
       config={templatesConfig}
       data={data}
       total={total}
-      isLoading={loading}
+      isLoading={isLoading}
       onCreate={handleCreate}
       onExport={handleExport}
     />
   )
 }
-

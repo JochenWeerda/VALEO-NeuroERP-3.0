@@ -1,8 +1,8 @@
-***REMOVED***!/bin/bash
-***REMOVED*** ============================================================================
-***REMOVED*** VALEO-NeuroERP - MASTER MIGRATION SCRIPT
-***REMOVED*** Führt alle Alembic-Migrationen für alle CRM-Services aus
-***REMOVED*** ============================================================================
+#!/bin/bash
+# ============================================================================
+# VALEO-NeuroERP - MASTER MIGRATION SCRIPT
+# Führt alle Alembic-Migrationen für alle CRM-Services aus
+# ============================================================================
 
 set -e
 
@@ -10,7 +10,7 @@ echo "🗄️  VALEO-NeuroERP Database Migration Script"
 echo "============================================="
 echo ""
 
-***REMOVED*** Warte auf PostgreSQL
+# Warte auf PostgreSQL
 echo "⏳ Warte auf PostgreSQL..."
 until pg_isready -h ${POSTGRES_HOST:-postgres} -p ${POSTGRES_PORT:-5432} -U ${POSTGRES_USER:-valeo_dev} 2>/dev/null; do
   echo "   PostgreSQL ist noch nicht bereit..."
@@ -19,7 +19,7 @@ done
 echo "✅ PostgreSQL ist bereit!"
 echo ""
 
-***REMOVED*** Liste aller Services mit Alembic-Migrationen
+# Liste aller Services mit Alembic-Migrationen
 SERVICES=(
   "crm-core"
   "crm-sales"
@@ -35,12 +35,12 @@ SERVICES=(
   "inventory"
 )
 
-***REMOVED*** Zähler für Erfolge/Fehler
+# Zähler für Erfolge/Fehler
 SUCCESS_COUNT=0
 ERROR_COUNT=0
 SKIPPED_COUNT=0
 
-echo "📋 Starte Migrationen für ${***REMOVED***SERVICES[@]} Services..."
+echo "📋 Starte Migrationen für ${#SERVICES[@]} Services..."
 echo ""
 
 for SERVICE in "${SERVICES[@]}"; do
@@ -55,7 +55,7 @@ for SERVICE in "${SERVICES[@]}"; do
     
     cd "${SERVICE_PATH}"
     
-    ***REMOVED*** Prüfe aktuellen Migrations-Status
+    # Prüfe aktuellen Migrations-Status
     CURRENT=$(alembic current 2>/dev/null | grep -oP '\w+' | head -1 || echo "none")
     HEAD=$(alembic heads 2>/dev/null | grep -oP '\w+' | head -1 || echo "unknown")
     
@@ -96,4 +96,5 @@ else
   echo "🎉 Alle Migrationen abgeschlossen!"
   exit 0
 fi
+
 

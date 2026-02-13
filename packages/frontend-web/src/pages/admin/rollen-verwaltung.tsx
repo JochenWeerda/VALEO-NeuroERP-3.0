@@ -1,30 +1,27 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useRollen, type Rolle } from '@/lib/api/admin'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Plus, Search, Shield } from 'lucide-react'
-
-type Rolle = {
-  id: string
-  name: string
-  beschreibung: string
-  benutzer: number
-  rechte: number
-}
-
-const mockRollen: Rolle[] = [
-  { id: '1', name: 'Administrator', beschreibung: 'Vollzugriff', benutzer: 2, rechte: 150 },
-  { id: '2', name: 'Vertrieb', beschreibung: 'Verkaufsprozesse', benutzer: 8, rechte: 45 },
-  { id: '3', name: 'Einkauf', beschreibung: 'Beschaffung', benutzer: 5, rechte: 38 },
-  { id: '4', name: 'Lager', beschreibung: 'Lagerverwaltung', benutzer: 12, rechte: 25 },
-]
 
 export default function RollenVerwaltungPage(): JSX.Element {
   const navigate = useNavigate()
+  const { data: items, isLoading } = useRollen()
   const [searchTerm, setSearchTerm] = useState('')
+
+  if (isLoading) return (
+    <div className="p-3 md:p-6 space-y-4">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>
+  )
+
+  const list = items ?? []
 
   const columns = [
     {
@@ -42,7 +39,7 @@ export default function RollenVerwaltungPage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Rollen-Verwaltung</h1>
@@ -62,7 +59,7 @@ export default function RollenVerwaltungPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockRollen.length}</span>
+              <span className="text-2xl font-bold">{list.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -72,7 +69,7 @@ export default function RollenVerwaltungPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Benutzer Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockRollen.reduce((sum, r) => sum + r.benutzer, 0)}</span>
+            <span className="text-2xl font-bold">{list.reduce((sum, r) => sum + r.benutzer, 0)}</span>
           </CardContent>
         </Card>
       </div>
@@ -91,7 +88,7 @@ export default function RollenVerwaltungPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockRollen} columns={columns} />
+          <DataTable data={list} columns={columns} />
         </CardContent>
       </Card>
     </div>

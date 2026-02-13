@@ -1,8 +1,8 @@
-***REMOVED*** ====================================================
-***REMOVED*** Theme-Demo Starter Script für das AI-gesteuerte ERP-System
-***REMOVED*** ====================================================
+# ====================================================
+# Theme-Demo Starter Script für das AI-gesteuerte ERP-System
+# ====================================================
 
-***REMOVED*** Farbige Ausgabe-Funktionen
+# Farbige Ausgabe-Funktionen
 function Write-ColorText {
     param (
         [string]$Text,
@@ -32,14 +32,14 @@ function Write-Step {
 }
 
 function Check-Directory {
-    ***REMOVED*** Prüfen, ob wir uns im richtigen Verzeichnis befinden
+    # Prüfen, ob wir uns im richtigen Verzeichnis befinden
     $expectedPath = Join-Path (Get-Location) "frontend"
     if (-not (Test-Path $expectedPath -PathType Container)) {
         Write-ColorText "WARNUNG: Die Frontend-Verzeichnisstruktur wurde nicht gefunden." "Yellow"
         Write-ColorText "Dieses Skript sollte im Hauptverzeichnis des ERP-Systems ausgeführt werden." "Yellow"
         Write-ColorText "Aktuelles Verzeichnis: $(Get-Location)" "Yellow"
         
-        ***REMOVED*** Prüfen, ob wir uns im frontend-Verzeichnis befinden
+        # Prüfen, ob wir uns im frontend-Verzeichnis befinden
         if ((Get-Location).Path -match "\\frontend$") {
             Write-ColorText "Sie befinden sich bereits im frontend-Verzeichnis." "Yellow"
             return $true
@@ -62,21 +62,21 @@ function Start-FrontendInDirectory {
     Push-Location $Directory
     
     try {
-        ***REMOVED*** Prüfen, ob node_modules existiert
+        # Prüfen, ob node_modules existiert
         if (-not (Test-Path "node_modules" -PathType Container)) {
             Write-Step "INSTALL" "Installiere Abhängigkeiten..."
             npm install
         }
         
-        ***REMOVED*** Umgebungsvariable für den Port setzen
+        # Umgebungsvariable für den Port setzen
         $env:PORT = $Port
         
-        ***REMOVED*** Prüfen, ob der Port bereits verwendet wird
+        # Prüfen, ob der Port bereits verwendet wird
         $portInUse = $null
         try {
             $portInUse = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue
         } catch {
-            ***REMOVED*** Port ist wahrscheinlich frei
+            # Port ist wahrscheinlich frei
         }
         
         if ($portInUse) {
@@ -88,7 +88,7 @@ function Start-FrontendInDirectory {
             try {
                 $portInUse = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue
             } catch {
-                ***REMOVED*** Port ist wahrscheinlich frei
+                # Port ist wahrscheinlich frei
             }
             
             if ($portInUse) {
@@ -100,7 +100,7 @@ function Start-FrontendInDirectory {
         
         Write-Step "START" "Starte Theme-Demo auf Port $Port..."
         
-        ***REMOVED*** Starten des Entwicklungsservers
+        # Starten des Entwicklungsservers
         npm run dev -- --port $Port
     } catch {
         Write-ColorText "Fehler beim Starten des Frontends: $_" "Red"
@@ -109,7 +109,7 @@ function Start-FrontendInDirectory {
     }
 }
 
-***REMOVED*** Hauptfunktion
+# Hauptfunktion
 function Start-ThemeDemo {
     Write-Header "Theme-Demo Starter für das AI-gesteuerte ERP-System"
     
@@ -128,21 +128,21 @@ function Start-ThemeDemo {
     }
 }
 
-***REMOVED*** Theme-Demo Starter Skript
-***REMOVED*** Dieses Skript startet die Theme-Demo des AI-gesteuerten ERP-Systems
+# Theme-Demo Starter Skript
+# Dieses Skript startet die Theme-Demo des AI-gesteuerten ERP-Systems
 
-***REMOVED*** Farben für die Ausgabe
+# Farben für die Ausgabe
 $Green = [System.ConsoleColor]::Green
 $Cyan = [System.ConsoleColor]::Cyan
 $Yellow = [System.ConsoleColor]::Yellow
 $Red = [System.ConsoleColor]::Red
 
-***REMOVED*** Titel anzeigen
+# Titel anzeigen
 Write-Host "`n==================================" -ForegroundColor $Cyan
 Write-Host "   AI-ERP Theme Demo Starter" -ForegroundColor $Cyan
 Write-Host "==================================`n" -ForegroundColor $Cyan
 
-***REMOVED*** Prüfen, ob npm installiert ist
+# Prüfen, ob npm installiert ist
 Write-Host "Prüfe Umgebung..." -ForegroundColor $Yellow
 try {
     $npmVersion = npm -v
@@ -152,13 +152,13 @@ try {
     exit 1
 }
 
-***REMOVED*** Ins Projekt-Verzeichnis wechseln
+# Ins Projekt-Verzeichnis wechseln
 Write-Host "Wechsle ins Projekt-Verzeichnis..." -ForegroundColor $Yellow
 $projectRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location -Path $projectRoot
 Write-Host "✓ Arbeitsverzeichnis: $projectRoot" -ForegroundColor $Green
 
-***REMOVED*** Abhängigkeiten prüfen und installieren
+# Abhängigkeiten prüfen und installieren
 Write-Host "Prüfe Abhängigkeiten..." -ForegroundColor $Yellow
 if (!(Test-Path -Path "node_modules")) {
     Write-Host "node_modules nicht gefunden, installiere Abhängigkeiten..." -ForegroundColor $Yellow
@@ -172,9 +172,9 @@ if (!(Test-Path -Path "node_modules")) {
     Write-Host "✓ Abhängigkeiten bereits installiert" -ForegroundColor $Green
 }
 
-***REMOVED*** Umgebungsvariablen setzen für die Demo
+# Umgebungsvariablen setzen für die Demo
 Write-Host "Setze Umgebungsvariablen für die Theme-Demo..." -ForegroundColor $Yellow
 $env:REACT_APP_THEME_DEMO = "true"
 
-***REMOVED*** Starten der Hauptfunktion
+# Starten der Hauptfunktion
 Start-ThemeDemo 

@@ -1,11 +1,11 @@
-***REMOVED*** ===================================================
-***REMOVED*** Frontend-Umgebungstest für Folkerts Landhandel ERP
-***REMOVED*** ===================================================
-***REMOVED*** Dieses Skript testet die Frontend-Entwicklungsumgebung
-***REMOVED*** auf häufige Probleme und bietet Lösungen an
-***REMOVED*** ===================================================
+# ===================================================
+# Frontend-Umgebungstest für Folkerts Landhandel ERP
+# ===================================================
+# Dieses Skript testet die Frontend-Entwicklungsumgebung
+# auf häufige Probleme und bietet Lösungen an
+# ===================================================
 
-***REMOVED*** Farbige Ausgabe-Funktionen für bessere Lesbarkeit
+# Farbige Ausgabe-Funktionen für bessere Lesbarkeit
 function Write-ColorOutput {
     param (
         [string]$Text,
@@ -34,21 +34,21 @@ function Write-Info {
     Write-ColorOutput $Text "Cyan"
 }
 
-***REMOVED*** Definiere Pfade
+# Definiere Pfade
 $rootDir = Join-Path $PSScriptRoot ".."
 $frontendDir = Join-Path $rootDir "frontend"
 $packageJsonPath = Join-Path $frontendDir "package.json"
 $viteConfigPath = Join-Path $frontendDir "vite.config.js"
 $rootPackageJsonPath = Join-Path $rootDir "package.json"
 
-***REMOVED*** Banner ausgeben
+# Banner ausgeben
 Write-Host ""
 Write-Host " ======================================================" -ForegroundColor Cyan
 Write-Host "  Frontend-Umgebungstest - Folkerts Landhandel ERP" -ForegroundColor Cyan
 Write-Host " ======================================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Testbereich für Frontend-Startprobleme
+# Testbereich für Frontend-Startprobleme
 $testsFailed = 0
 $testsPassed = 0
 $testsTotal = 0
@@ -80,7 +80,7 @@ function Register-TestResult {
     }
 }
 
-***REMOVED*** Test 1: Verzeichnisstruktur
+# Test 1: Verzeichnisstruktur
 Write-Info "1. Teste Verzeichnisstruktur..."
 
 $frontendDirExists = Test-Path $frontendDir
@@ -93,7 +93,7 @@ if (-not $frontendDirExists) {
     Write-Host "  mkdir frontend" -ForegroundColor White
 }
 
-***REMOVED*** Test 2: Konfigurationsdateien
+# Test 2: Konfigurationsdateien
 Write-Info "2. Teste Konfigurationsdateien..."
 
 $packageJsonExists = Test-Path $packageJsonPath
@@ -102,7 +102,7 @@ Register-TestResult -Result $packageJsonExists -TestName "package.json existiert
     -SuccessMessage "package.json gefunden"
 
 if ($packageJsonExists) {
-    ***REMOVED*** Überprüfe ob start-Skript in package.json definiert ist
+    # Überprüfe ob start-Skript in package.json definiert ist
     $packageJsonContent = Get-Content -Path $packageJsonPath -Raw | ConvertFrom-Json
     $hasStartScript = $packageJsonContent.scripts -and ($packageJsonContent.scripts.PSObject.Properties.Name -contains "start")
     Register-TestResult -Result $hasStartScript -TestName "Start-Skript in package.json definiert" `
@@ -121,7 +121,7 @@ Register-TestResult -Result $viteConfigExists -TestName "vite.config.js existier
     -SuccessMessage "vite.config.js gefunden"
 
 if ($viteConfigExists) {
-    ***REMOVED*** Überprüfe ob JSX-Konfiguration in vite.config.js vorhanden ist
+    # Überprüfe ob JSX-Konfiguration in vite.config.js vorhanden ist
     $viteConfigContent = Get-Content -Path $viteConfigPath -Raw
     $hasJsxConfig = $viteConfigContent -match "loader.*['""].js['""].*jsx"
     Register-TestResult -Result $hasJsxConfig -TestName "JSX-Konfiguration in vite.config.js" `
@@ -140,7 +140,7 @@ if ($viteConfigExists) {
     }
 }
 
-***REMOVED*** Test 3: Root package.json für Proxy-Befehle
+# Test 3: Root package.json für Proxy-Befehle
 Write-Info "3. Teste Root-Verzeichnis-Konfiguration..."
 
 $rootPackageJsonExists = Test-Path $rootPackageJsonPath
@@ -149,7 +149,7 @@ Register-TestResult -Result $rootPackageJsonExists -TestName "package.json im Ro
     -SuccessMessage "package.json im Root-Verzeichnis gefunden"
 
 if ($rootPackageJsonExists) {
-    ***REMOVED*** Überprüfe ob Frontend-Skripte in Root package.json definiert sind
+    # Überprüfe ob Frontend-Skripte in Root package.json definiert sind
     $rootPackageJsonContent = Get-Content -Path $rootPackageJsonPath -Raw | ConvertFrom-Json
     $hasProxyScripts = $rootPackageJsonContent.scripts -and 
                       ($rootPackageJsonContent.scripts.PSObject.Properties.Name -contains "start" -or
@@ -167,10 +167,10 @@ if ($rootPackageJsonExists) {
     }
 }
 
-***REMOVED*** Test 4: PowerShell-Kompatibilität
+# Test 4: PowerShell-Kompatibilität
 Write-Info "4. Teste PowerShell-Kompatibilität..."
 
-***REMOVED*** Teste ob PowerShell-Version ausreichend ist
+# Teste ob PowerShell-Version ausreichend ist
 $psVersion = $PSVersionTable.PSVersion.Major
 $psVersionOk = $psVersion -ge 5
 Register-TestResult -Result $psVersionOk -TestName "PowerShell-Version kompatibel" `
@@ -181,7 +181,7 @@ if (-not $psVersionOk) {
     Write-Info "Lösung: Aktualisieren Sie PowerShell auf Version 5.1 oder höher."
 }
 
-***REMOVED*** Test 5: Portverfügbarkeit
+# Test 5: Portverfügbarkeit
 Write-Info "5. Teste Portverfügbarkeit..."
 
 $standardPorts = @(5173, 5174, 5000, 3000)
@@ -194,7 +194,7 @@ foreach ($port in $standardPorts) {
             $availablePorts += $port
         }
     } catch {
-        ***REMOVED*** Port konnte nicht überprüft werden, nehmen wir an er ist verfügbar
+        # Port konnte nicht überprüft werden, nehmen wir an er ist verfügbar
         $availablePorts += $port
     }
 }
@@ -209,10 +209,10 @@ if (-not $hasAvailablePort) {
     Write-Host "  npm start -- --port 8080" -ForegroundColor White
 }
 
-***REMOVED*** Test 6: Node.js und npm
+# Test 6: Node.js und npm
 Write-Info "6. Teste Node.js und npm..."
 
-***REMOVED*** Prüfe, ob npm verfügbar ist
+# Prüfe, ob npm verfügbar ist
 try {
     $npmVersion = npm --version
     $npmAvailable = $?
@@ -228,7 +228,7 @@ if (-not $npmAvailable) {
     Write-Info "Lösung: Installieren Sie Node.js und npm von https://nodejs.org/"
 }
 
-***REMOVED*** Zusammenfassung
+# Zusammenfassung
 Write-Host ""
 Write-Host " ======================================================" -ForegroundColor Cyan
 Write-Host "  Frontend-Umgebungstest - Zusammenfassung" -ForegroundColor Cyan
@@ -239,7 +239,7 @@ Write-Host " Bestanden:           $testsPassed" -ForegroundColor Green
 Write-Host " Fehlgeschlagen:      $testsFailed" -ForegroundColor Red
 Write-Host ""
 
-***REMOVED*** Empfehlungen
+# Empfehlungen
 if ($testsFailed -gt 0) {
     Write-Warning "Es wurden Probleme in der Frontend-Entwicklungsumgebung gefunden."
     Write-Info "Empfehlung: Führen Sie den VAN-Modus Validator aus, um Probleme automatisch zu beheben:"
@@ -257,7 +257,7 @@ if ($testsFailed -gt 0) {
     Write-Host "  ./scripts/start_frontend.ps1" -ForegroundColor White
 }
 
-***REMOVED*** Tipps für den Umgang mit PowerShell
+# Tipps für den Umgang mit PowerShell
 Write-Host ""
 Write-Info "Tipps für die Arbeit mit PowerShell:"
 Write-Host "  - Verwenden Sie ';' statt '&&' zur Verkettung von Befehlen" -ForegroundColor White

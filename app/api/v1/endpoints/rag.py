@@ -72,7 +72,7 @@ async def semantic_search(request: SearchRequest):
             where=request.filters
         )
         
-        ***REMOVED*** Format response
+        # Format response
         search_results = []
         for i, doc_id in enumerate(results["ids"]):
             search_results.append(SearchResult(

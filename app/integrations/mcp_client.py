@@ -21,19 +21,19 @@ class MCPClient:
         """Call an MCP tool via stdio"""
 
         try:
-            ***REMOVED*** Import the MCP server module
+            # Import the MCP server module
             import sys
             import subprocess
             from pathlib import Path
 
-            ***REMOVED*** Path to the MCP server executable
+            # Path to the MCP server executable
             server_path = Path("c:/Users/Jochen/AppData/Roaming/Kilo-Code/MCP/proplanta-psm-scraper/build/index.js")
 
             if not server_path.exists():
                 logger.error(f"MCP server executable not found: {server_path}")
                 return None
 
-            ***REMOVED*** Prepare the MCP call message
+            # Prepare the MCP call message
             call_message = {
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -44,7 +44,7 @@ class MCPClient:
                 }
             }
 
-            ***REMOVED*** Start the MCP server process
+            # Start the MCP server process
             process = subprocess.Popen(
                 ["node", str(server_path)],
                 stdin=subprocess.PIPE,
@@ -54,11 +54,11 @@ class MCPClient:
                 encoding='utf-8'
             )
 
-            ***REMOVED*** Send the call message
+            # Send the call message
             process.stdin.write(json.dumps(call_message) + "\n")
             process.stdin.flush()
 
-            ***REMOVED*** Read response
+            # Read response
             response_line = process.stdout.readline()
             if response_line:
                 try:
@@ -69,7 +69,7 @@ class MCPClient:
                     logger.error(f"Failed to parse MCP response: {e}")
                     return None
 
-            ***REMOVED*** Check for errors
+            # Check for errors
             error_output = process.stderr.read()
             if error_output:
                 logger.error(f"MCP server error: {error_output}")
@@ -82,7 +82,7 @@ class MCPClient:
             return None
 
 
-***REMOVED*** Global MCP client instance
+# Global MCP client instance
 mcp_client = MCPClient()
 
 

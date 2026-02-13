@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 from linkup_mcp.apm_framework.van_mode_optimized import OptimizedVANMode
 
-***REMOVED*** Logging Setup
+# Logging Setup
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -19,22 +19,22 @@ async def main():
     try:
         logger.info("Starte reale ERP-Systemanalyse...")
         
-        ***REMOVED*** VAN Mode initialisieren
+        # VAN Mode initialisieren
         van_mode = OptimizedVANMode()
         logger.info("VAN Mode initialisiert")
         
-        ***REMOVED*** Systemanalyse starten
+        # Systemanalyse starten
         analysis_result = await van_mode.start({})
         logger.info("Systemanalyse abgeschlossen")
         
-        ***REMOVED*** Vision Phase mit realen Daten
+        # Vision Phase mit realen Daten
         vision_result = await van_mode.process({
             "phase": "vision",
             "system_analysis": analysis_result["result"]
         })
         logger.info("Vision Phase abgeschlossen")
         
-        ***REMOVED*** Ergebnisse speichern
+        # Ergebnisse speichern
         output_dir = Path("analysis_results")
         output_dir.mkdir(exist_ok=True)
         
@@ -46,7 +46,7 @@ async def main():
             
         logger.info("Analyseergebnisse gespeichert in: %s", output_dir)
         
-        ***REMOVED*** Ergebnisse ausgeben
+        # Ergebnisse ausgeben
         print("\n=== Systemanalyse Ergebnisse ===")
         print(f"Komplexitätsscore: {vision_result['complexity_score']}")
         print("\nIdentifizierte Verbesserungspotenziale:")

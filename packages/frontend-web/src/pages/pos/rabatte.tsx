@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useRabatte, type Rabatt as ApiRabatt } from '@/lib/api/pos'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Percent, Plus, Search } from 'lucide-react'
+import { ErrorState } from '@/components/ErrorState'
 
 type Rabatt = {
   id: string
@@ -21,55 +23,24 @@ type Rabatt = {
   status: 'aktiv' | 'inaktiv' | 'abgelaufen'
 }
 
-const mockRabatte: Rabatt[] = [
-  {
-    id: '1',
-    name: 'Herbst-Aktion 2025',
-    typ: 'prozent',
-    wert: 15,
-    bedingung: 'Alle Saatgut-Artikel',
-    gueltigVon: '2025-10-01',
-    gueltigBis: '2025-10-31',
-    status: 'aktiv',
-  },
-  {
-    id: '2',
-    name: 'Treue-Rabatt Gold',
-    typ: 'prozent',
-    wert: 10,
-    bedingung: 'Kundengruppe: Gold',
-    gueltigVon: '2025-01-01',
-    gueltigBis: '2025-12-31',
-    kundengruppe: 'Gold',
-    status: 'aktiv',
-  },
-  {
-    id: '3',
-    name: 'Mengenrabatt Dünger',
-    typ: 'mengenrabatt',
-    wert: 20,
-    bedingung: 'Ab 10 Sack',
-    gueltigVon: '2025-01-01',
-    gueltigBis: '2025-12-31',
-    artikel: 'Dünger',
-    status: 'aktiv',
-  },
-  {
-    id: '4',
-    name: 'Sommer-Aktion',
-    typ: 'absolut',
-    wert: 5,
-    bedingung: 'Ab 50 € Bestellwert',
-    gueltigVon: '2025-06-01',
-    gueltigBis: '2025-08-31',
-    minBestellwert: 50,
-    status: 'abgelaufen',
-  },
-]
-
 export default function RabattePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: apiRabatte = [], isError, error, refetch } = useRabatte()
+  const rabatte: Rabatt[] = apiRabatte.map((r: ApiRabatt) => ({
+    id: r.id,
+    name: r.name,
+    typ: r.typ === 'betrag' ? 'absolut' : 'prozent',
+    wert: r.wert,
+    bedingung: r.bedingung,
+    gueltigVon: r.gueltigVon,
+    gueltigBis: r.gueltigBis,
+    status: r.status === 'inaktiv' ? 'inaktiv' : 'aktiv',
+  }))
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     {
@@ -129,7 +100,7 @@ export default function RabattePage(): JSX.Element {
     },
   ]
 
-  const aktiv = mockRabatte.filter((r) => r.status === 'aktiv').length
+  const aktiv = rabatte.filter((r) => r.status === 'aktiv').length
 
   return (
     <div className="space-y-4 p-6">
@@ -156,7 +127,8 @@ export default function RabattePage(): JSX.Element {
           <strong>Prozent:</strong> 15% auf Saatgut • <strong>Absolut:</strong> 5 € ab 50 € • 
           <strong>Mengenrabatt:</strong> 20% ab 10 Stück • <strong>Kundengruppe:</strong> Gold 10%
         </p>
-        <p className="mt-1 text-xs">Rabatte werden im POS automatisch angewendet wenn Bedingungen erfüllt sind</p>
+        <p className="mt-1 text-xs">Rabatte werden im POS automatisch angewendet wenn Bedingungen erfüllt sind.</p>
+        <p className="mt-1 text-xs font-medium">Alle Endverbraucherpreise an der Kasse werden inkl. gesetzl. MwSt. ausgewiesen.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -165,7 +137,7 @@ export default function RabattePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Rabatte Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockRabatte.length}</span>
+            <span className="text-2xl font-bold">{rabatte.length}</span>
           </CardContent>
         </Card>
 
@@ -183,7 +155,7 @@ export default function RabattePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Abgelaufen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-gray-400">{mockRabatte.filter((r) => r.status === 'abgelaufen').length}</span>
+            <span className="text-2xl font-bold text-gray-400">{rabatte.filter((r) => r.status === 'abgelaufen').length}</span>
           </CardContent>
         </Card>
 
@@ -192,7 +164,7 @@ export default function RabattePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Rabatt-Typen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{new Set(mockRabatte.map((r) => r.typ)).size}</span>
+            <span className="text-2xl font-bold">{new Set(rabatte.map((r) => r.typ)).size}</span>
           </CardContent>
         </Card>
       </div>
@@ -215,7 +187,7 @@ export default function RabattePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockRabatte} columns={columns} />
+          <DataTable data={rabatte} columns={columns} />
         </CardContent>
       </Card>
     </div>

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 L3-Masken Feldanalyse → Mask Builder Schema Generator
 
@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Dict, List, Any
 from datetime import datetime
 
-***REMOVED*** Feldtyp-Mapping L3 → VALEO-NeuroERP
+# Feldtyp-Mapping L3 → VALEO-NeuroERP
 FIELD_TYPE_MAPPING = {
     "text": "string",
     "number": "number",
@@ -24,7 +24,7 @@ FIELD_TYPE_MAPPING = {
     "checkbox": "boolean",
     "date": "date",
     "textarea": "text",
-    "lookup": "lookup",  ***REMOVED*** z.B. Artikel-Nr mit "..." Button
+    "lookup": "lookup",  # z.B. Artikel-Nr mit "..." Button
     "currency": "currency",
     "percentage": "percentage",
 }
@@ -68,14 +68,14 @@ class L3MaskAnalyzer:
         
         print(f"🔍 OCR-Analyse: {mask_name}")
         
-        ***REMOVED*** 1. OCR-Extraktion
+        # 1. OCR-Extraktion
         ocr = L3MaskOCR()
         ocr_results = ocr.extract_fields(screenshot_path)
         
         print(f"   ✅ {len(ocr_results['fields'])} Felder erkannt")
         print(f"   📑 {len(ocr_results['tabs'])} Tabs erkannt")
         
-        ***REMOVED*** 2. LLM-Analyse
+        # 2. LLM-Analyse
         analyzer = LLMFieldAnalyzer()
         structured_fields = analyzer.analyze_ocr_with_llm(
             ocr_results['raw_text'],
@@ -86,10 +86,10 @@ class L3MaskAnalyzer:
             }
         )
         
-        ***REMOVED*** 3. Schema-Generierung
+        # 3. Schema-Generierung
         schema = self.generate_mask_builder_schema(structured_fields)
         
-        ***REMOVED*** 4. Enrich mit VALEO-Relations
+        # 4. Enrich mit VALEO-Relations
         schema = self.enrich_with_valeo_relations(schema)
         
         return schema
@@ -101,8 +101,8 @@ class L3MaskAnalyzer:
         Analysiert existierende Datenbank-Struktur und fügt
         Foreign Keys, Display Fields, etc. hinzu
         """
-        ***REMOVED*** TODO: Query VALEO-DB für existierende Tabellen/Relations
-        ***REMOVED*** Für jetzt: Hardcoded Common Relations
+        # TODO: Query VALEO-DB für existierende Tabellen/Relations
+        # Für jetzt: Hardcoded Common Relations
         
         common_relations = {
             'artikel_gruppe_id': {
@@ -123,7 +123,7 @@ class L3MaskAnalyzer:
             }
         }
         
-        ***REMOVED*** Enrich Relations
+        # Enrich Relations
         if 'database' in schema and 'relations' not in schema['database']:
             schema['database']['relations'] = []
         
@@ -274,17 +274,17 @@ class L3MaskAnalyzer:
                 {
                     "id": "preise",
                     "label": "Preise",
-                    "fields": []  ***REMOVED*** TODO: Separate Screenshot benötigt
+                    "fields": []  # TODO: Separate Screenshot benötigt
                 },
                 {
                     "id": "rabatte",
                     "label": "Rabatte",
-                    "fields": []  ***REMOVED*** TODO
+                    "fields": []  # TODO
                 },
                 {
                     "id": "saatgut",
                     "label": "Saatgut",
-                    "fields": []  ***REMOVED*** TODO - AGRAR-SPEZIFISCH!
+                    "fields": []  # TODO - AGRAR-SPEZIFISCH!
                 },
             ],
             "relations": [
@@ -330,9 +330,9 @@ class L3MaskAnalyzer:
             }
         }
         
-        ***REMOVED*** Konvertiere Felder
+        # Konvertiere Felder
         for field in mask_data["fields"]:
-            ***REMOVED*** Form-Schema
+            # Form-Schema
             form_field = {
                 "name": field["id"],
                 "label": field["label"],
@@ -340,7 +340,7 @@ class L3MaskAnalyzer:
                 "required": field.get("required", False),
             }
             
-            ***REMOVED*** Optional: Validierung
+            # Optional: Validierung
             if "validation" in field:
                 form_field["validation"] = field["validation"]
             
@@ -355,7 +355,7 @@ class L3MaskAnalyzer:
             
             schema["form"]["fields"].append(form_field)
             
-            ***REMOVED*** Datenbank-Schema
+            # Datenbank-Schema
             db_column = {
                 "name": field["database_column"],
                 "type": self._get_db_type(field["type"]),
@@ -370,7 +370,7 @@ class L3MaskAnalyzer:
             
             schema["database"]["columns"].append(db_column)
         
-        ***REMOVED*** Relationen
+        # Relationen
         if "relations" in mask_data:
             schema["database"]["relations"] = mask_data["relations"]
         
@@ -384,7 +384,7 @@ class L3MaskAnalyzer:
             "number": "DECIMAL",
             "boolean": "BOOLEAN",
             "date": "DATE",
-            "lookup": "INTEGER",  ***REMOVED*** Foreign Key
+            "lookup": "INTEGER",  # Foreign Key
             "select": "VARCHAR",
             "currency": "DECIMAL",
             "percentage": "DECIMAL",
@@ -434,7 +434,7 @@ class L3MaskAnalyzer:
         sql_lines.append(");")
         sql_lines.append("")
         
-        ***REMOVED*** Indizes
+        # Indizes
         if mask_data.get("relations"):
             for rel in mask_data["relations"]:
                 fk = rel["foreign_key"]
@@ -458,18 +458,18 @@ def main():
     
     analyzer = L3MaskAnalyzer()
     
-    ***REMOVED*** Analysiere Artikelstamm (manuell aus Screenshot extrahiert)
+    # Analysiere Artikelstamm (manuell aus Screenshot extrahiert)
     print("📊 Analysiere: Artikelstamm")
     artikelstamm = analyzer.analyze_artikelstamm()
     
-    ***REMOVED*** Exportiere JSON Schema
+    # Exportiere JSON Schema
     print("\n📝 Generiere Mask Builder Schema...")
     analyzer.export_to_json(
         artikelstamm,
         "schemas/mask-builder/artikelstamm.json"
     )
     
-    ***REMOVED*** Exportiere SQL Schema
+    # Exportiere SQL Schema
     print("📝 Generiere SQL Schema...")
     analyzer.export_to_sql(
         artikelstamm,
@@ -487,4 +487,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

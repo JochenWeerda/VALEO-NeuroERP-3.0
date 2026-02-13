@@ -1,8 +1,8 @@
-***REMOVED*** CRM Service
+# CRM Service
 
 Microservice handling customer service management, support tickets, cases, SLAs, and knowledge base.
 
-***REMOVED******REMOVED*** Features
+## Features
 
 - **Support Cases/Tickets**: Customer support request tracking
 - **SLA Management**: Service level agreements and escalations
@@ -11,14 +11,14 @@ Microservice handling customer service management, support tickets, cases, SLAs,
 - **Case History**: Complete audit trail of all interactions
 - **Escalation Rules**: Automatic escalation based on time/priority
 
-***REMOVED******REMOVED*** API Endpoints
+## API Endpoints
 
 - `GET/POST/PUT/DELETE /api/v1/cases` - Case management
 - `GET/POST/PUT/DELETE /api/v1/knowledge-base` - Knowledge base articles
 - `POST /api/v1/cases/{id}/escalate` - Case escalation
 - `GET /api/v1/cases/metrics` - Service metrics and KPIs
 
-***REMOVED******REMOVED*** Database Tables
+## Database Tables
 
 - `crm_service_cases`
 - `crm_service_case_history`
@@ -26,8 +26,9 @@ Microservice handling customer service management, support tickets, cases, SLAs,
 - `crm_service_knowledge_articles`
 - `crm_service_categories`
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 - PostgreSQL for data persistence
 - Redis for caching (optional)
 - Event bus for integration with other services
+

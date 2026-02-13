@@ -4,12 +4,14 @@
  * Übersicht aller Bestellungen des Kunden
  */
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState } from 'react'
+import { usePortalBestellungen } from '@/lib/api/portal'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Dialog,
@@ -35,8 +37,6 @@ import {
   XCircle,
   Eye,
   Download,
-  FileText,
-  ChevronRight,
 } from 'lucide-react'
 
 interface BestellPosition {
@@ -59,60 +59,6 @@ interface Bestellung {
   rechnung?: string
 }
 
-const mockBestellungen: Bestellung[] = [
-  {
-    id: 'B-2024-0147',
-    datum: '2024-11-25',
-    status: 'in_bearbeitung',
-    gesamtbetrag: 1250.00,
-    positionen: [
-      { artikelnummer: 'SAA-WW-001', name: 'Winterweizen Premium', menge: 15, einheit: 'dt', einzelpreis: 65.00, gesamtpreis: 975.00 },
-      { artikelnummer: 'DUE-NPK-001', name: 'NPK 15-15-15', menge: 5, einheit: 'dt', einzelpreis: 39.90, gesamtpreis: 199.50 },
-    ],
-  },
-  {
-    id: 'B-2024-0142',
-    datum: '2024-11-20',
-    status: 'versendet',
-    gesamtbetrag: 890.00,
-    lieferdatum: '2024-11-28',
-    trackingnummer: 'DHL-123456789',
-    positionen: [
-      { artikelnummer: 'DUE-NPK-001', name: 'NPK 15-15-15', menge: 20, einheit: 'dt', einzelpreis: 39.90, gesamtpreis: 798.00 },
-    ],
-  },
-  {
-    id: 'B-2024-0138',
-    datum: '2024-11-15',
-    status: 'abgeschlossen',
-    gesamtbetrag: 2100.00,
-    rechnung: 'R-2024-0567',
-    positionen: [
-      { artikelnummer: 'PSM-GLY-001', name: 'Glyphosat 360', menge: 100, einheit: 'l', einzelpreis: 8.50, gesamtpreis: 850.00 },
-      { artikelnummer: 'PSM-OPU-001', name: 'Fungizid Opus Top', menge: 30, einheit: 'l', einzelpreis: 32.50, gesamtpreis: 975.00 },
-    ],
-  },
-  {
-    id: 'B-2024-0125',
-    datum: '2024-11-01',
-    status: 'abgeschlossen',
-    gesamtbetrag: 3500.00,
-    rechnung: 'R-2024-0542',
-    positionen: [
-      { artikelnummer: 'FUT-MLF-001', name: 'Milchleistungsfutter 18%', menge: 80, einheit: 'dt', einzelpreis: 38.00, gesamtpreis: 3040.00 },
-    ],
-  },
-  {
-    id: 'B-2024-0098',
-    datum: '2024-10-15',
-    status: 'storniert',
-    gesamtbetrag: 500.00,
-    positionen: [
-      { artikelnummer: 'SAA-WG-002', name: 'Wintergerste Hyvido', menge: 2, einheit: 'Einheit', einzelpreis: 185.00, gesamtpreis: 370.00 },
-    ],
-  },
-]
-
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   'offen': { label: 'Offen', color: 'bg-gray-100 text-gray-800', icon: <Clock className="h-4 w-4" /> },
   'in_bearbeitung': { label: 'In Bearbeitung', color: 'bg-amber-100 text-amber-800', icon: <Package className="h-4 w-4" /> },
@@ -122,19 +68,18 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
 }
 
 export default function PortalBestellungen() {
-  const [loading, setLoading] = useState(true)
-  const [bestellungen, setBestellungen] = useState<Bestellung[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [activeTab, setActiveTab] = useState('alle')
   const [selectedBestellung, setSelectedBestellung] = useState<Bestellung | null>(null)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setBestellungen(mockBestellungen)
-      setLoading(false)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [])
+  const { data: portalBestellungen = [], isLoading, isError, error, refetch } = usePortalBestellungen()
+  const bestellungen: Bestellung[] = portalBestellungen.map((b) => ({
+    id: b.nummer || b.id,
+    datum: b.datum,
+    status: b.status === 'bestellt' ? 'in_bearbeitung' : b.status === 'geliefert' ? 'abgeschlossen' : b.status,
+    gesamtbetrag: b.betrag,
+    positionen: [{ artikelnummer: b.id, name: b.artikel, menge: b.menge, einheit: 'Stk', einzelpreis: b.betrag / Math.max(b.menge, 1), gesamtpreis: b.betrag }],
+  }))
 
   const filteredBestellungen = bestellungen.filter((b) => {
     const matchesSearch = b.id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -142,8 +87,12 @@ export default function PortalBestellungen() {
     return matchesSearch && matchesTab
   })
 
-  if (loading) {
+  if (isLoading) {
     return <BestellungenSkeleton />
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
   return (
@@ -152,6 +101,7 @@ export default function PortalBestellungen() {
       <div>
         <h1 className="text-2xl font-bold">Meine Bestellungen</h1>
         <p className="text-muted-foreground">Übersicht aller Ihrer Bestellungen</p>
+        <p className="text-xs text-muted-foreground">B2B-Portal: Preise netto, zzgl. gesetzl. MwSt. (USt-Ausweis auf Rechnung).</p>
       </div>
 
       {/* KPIs */}
@@ -247,7 +197,7 @@ export default function PortalBestellungen() {
                   <TableHead>Bestellnummer</TableHead>
                   <TableHead>Datum</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Betrag</TableHead>
+                  <TableHead className="text-right">Betrag (netto)</TableHead>
                   <TableHead>Aktionen</TableHead>
                 </TableRow>
               </TableHeader>
@@ -366,7 +316,7 @@ export default function PortalBestellungen() {
 
                 {/* Gesamtbetrag */}
                 <div className="flex justify-between border-t pt-4 text-lg font-semibold">
-                  <span>Gesamtbetrag (netto)</span>
+                  <span>Gesamtbetrag (netto, zzgl. MwSt.)</span>
                   <span>€ {selectedBestellung.gesamtbetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
                 </div>
 

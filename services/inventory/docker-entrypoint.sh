@@ -1,9 +1,9 @@
-***REMOVED***!/usr/bin/env sh
+#!/usr/bin/env sh
 set -e
 
 echo "🚀 Inventory Service Starting..."
 
-***REMOVED*** Warte auf PostgreSQL
+# Warte auf PostgreSQL
 if [ -n "${INVENTORY_DATABASE_URL}" ]; then
   echo "⏳ Warte auf PostgreSQL..."
   for i in $(seq 1 30); do
@@ -15,7 +15,7 @@ if [ -n "${INVENTORY_DATABASE_URL}" ]; then
     sleep 2
   done
   
-  ***REMOVED*** Run Alembic migrations
+  # Run Alembic migrations
   echo "📦 Führe Datenbank-Migrationen aus..."
   if alembic -c /app/alembic.ini upgrade head 2>&1; then
     echo "✅ Migrationen erfolgreich!"
@@ -28,5 +28,6 @@ fi
 
 echo "🌐 Starte Server..."
 exec "$@"
+
 
 

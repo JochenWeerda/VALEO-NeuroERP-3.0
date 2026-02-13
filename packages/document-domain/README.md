@@ -1,10 +1,10 @@
-***REMOVED*** @valero-neuroerp/document-domain
+# @valero-neuroerp/document-domain
 
 **Document Platform** für VALEO-NeuroERP 3.0
 
 Templating, Rendering (HTML→PDF), Signierung, Archivierung, Distribution.
 
-***REMOVED******REMOVED*** 📋 Features
+## 📋 Features
 
 - ✅ **Templating** (Handlebars, mehrsprachig)
 - ✅ **Rendering** (HTML→PDF via Playwright)
@@ -13,7 +13,7 @@ Templating, Rendering (HTML→PDF), Signierung, Archivierung, Distribution.
 - ✅ **S3-Storage** (MinIO/AWS S3)
 - ✅ **Signed URLs** (zeitlich begrenzt)
 
-***REMOVED******REMOVED*** 🚫 Abgrenzung
+## 🚫 Abgrenzung
 
 | Was document-domain NICHT tut |
 |-------------------------------|
@@ -23,15 +23,15 @@ Templating, Rendering (HTML→PDF), Signierung, Archivierung, Distribution.
 
 **Nur:** Dokumente aus Payloads erzeugen!
 
-***REMOVED******REMOVED*** 🚀 Quick Start
+## 🚀 Quick Start
 
 ```bash
 npm install
 npm run migrate:up
-npm run dev  ***REMOVED*** Port 3070
+npm run dev  # Port 3070
 ```
 
-***REMOVED******REMOVED*** 📡 API (MVP)
+## 📡 API (MVP)
 
 ```
 POST /document/api/v1/documents            - Dokument erstellen
@@ -39,7 +39,7 @@ GET  /document/api/v1/documents/:id        - Metadaten
 GET  /document/api/v1/documents/:id/file   - Signed URL
 ```
 
-***REMOVED******REMOVED*** 💡 Beispiel
+## 💡 Beispiel
 
 ```json
 POST /document/api/v1/documents
@@ -58,13 +58,14 @@ POST /document/api/v1/documents
 }
 ```
 
-***REMOVED******REMOVED*** 🔗 Integration
+## 🔗 Integration
 
 - **Sales Domain** → Invoice, Credit-Note
 - **Weighing Domain** → Weighing-Ticket
 - **Contracts Domain** → Contract-PDF
 - **Quality Domain** → Certificates (CoA/CoC)
 
-***REMOVED******REMOVED*** 📊 Port: 3070
+## 📊 Port: 3070
 
 **Status:** ✅ MVP Ready
+

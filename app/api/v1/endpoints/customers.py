@@ -31,7 +31,7 @@ async def create_customer(customer_data: CustomerCreate) -> Customer:
     payload = _map_create_payload(customer_data)
     try:
         created = await crm_create_customer(payload)
-    except httpx.HTTPStatusError as exc:  ***REMOVED*** pragma: no cover - network errors handled uniformly
+    except httpx.HTTPStatusError as exc:  # pragma: no cover - network errors handled uniformly
         raise _to_http_exception(exc) from exc
     return _adapt_customer(created)
 
@@ -44,10 +44,10 @@ async def list_customers(
     search: Optional[str] = Query(None, description="Search in display name"),
 ) -> PaginatedResponse[Customer]:
     """List customers from crm-core with pagination."""
-    _ = tenant_id  ***REMOVED*** Multi-tenant routing handled in crm-core; keep parameter for compatibility.
+    _ = tenant_id  # Multi-tenant routing handled in crm-core; keep parameter for compatibility.
     try:
         core_customers, total = await crm_list_customers(skip=skip, limit=limit, search=search)
-    except httpx.HTTPStatusError as exc:  ***REMOVED*** pragma: no cover - network errors handled uniformly
+    except httpx.HTTPStatusError as exc:  # pragma: no cover - network errors handled uniformly
         raise _to_http_exception(exc) from exc
 
     items = [_adapt_customer(customer) for customer in core_customers]
@@ -142,7 +142,7 @@ def _map_create_payload(customer_data: CustomerCreate) -> dict[str, Optional[str
         "region": customer_data.city or customer_data.country,
         "notes": _compose_notes(customer_data),
     }
-    ***REMOVED*** Neue Sales-Felder hinzufügen (werden in domain_crm.crm_customers gespeichert)
+    # Neue Sales-Felder hinzufügen (werden in domain_crm.crm_customers gespeichert)
     if hasattr(customer_data, 'price_group') and customer_data.price_group:
         payload["price_group"] = customer_data.price_group
     if hasattr(customer_data, 'tax_category') and customer_data.tax_category:
@@ -158,7 +158,7 @@ def _map_update_payload(customer_data: CustomerUpdate) -> dict[str, Optional[str
         "phone": "phone",
         "industry": "industry",
         "city": "region",
-        ***REMOVED*** Neue Sales-Felder (SALES-CRM-02)
+        # Neue Sales-Felder (SALES-CRM-02)
         "price_group": "price_group",
         "tax_category": "tax_category",
     }

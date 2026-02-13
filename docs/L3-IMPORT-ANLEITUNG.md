@@ -1,12 +1,12 @@
-***REMOVED*** L3 Datenimport - Anleitung
+# L3 Datenimport - Anleitung
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Dieses Dokument beschreibt den Import von Daten aus dem L3-ERP-System in VALEO-NeuroERP.
 
-***REMOVED******REMOVED*** Generierte Dateien
+## Generierte Dateien
 
-***REMOVED******REMOVED******REMOVED*** 1. PostgreSQL-Tabellen
+### 1. PostgreSQL-Tabellen
 
 **Datei:** `scripts/l3_tables_postgres.sql`
 
@@ -18,14 +18,14 @@ Enthält CREATE TABLE Statements für:
 
 **Tabellen erstellen:**
 ```bash
-***REMOVED*** Im Docker-Container
+# Im Docker-Container
 Get-Content scripts/l3_tables_postgres.sql | docker exec -i valeo_db psql -U postgres -d valeo
 
-***REMOVED*** Oder lokal via psql
+# Oder lokal via psql
 psql -U postgres -d valeo -f scripts/l3_tables_postgres.sql
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Import-Mapping
+### 2. Import-Mapping
 
 **Datei:** `scripts/l3_import_mapping.json`
 
@@ -43,9 +43,9 @@ JSON-Mapping von L3-Spalten zu PostgreSQL-Spalten:
 }
 ```
 
-***REMOVED******REMOVED*** Import-Prozess
+## Import-Prozess
 
-***REMOVED******REMOVED******REMOVED*** Schritt 1: L3-Daten exportieren
+### Schritt 1: L3-Daten exportieren
 
 Aus L3:
 1. SQL Server Management Studio öffnen
@@ -56,22 +56,22 @@ Aus L3:
    ```
 3. Als CSV speichern
 
-***REMOVED******REMOVED******REMOVED*** Schritt 2: CSV nach PostgreSQL importieren
+### Schritt 2: CSV nach PostgreSQL importieren
 
 ```python
 import psycopg2
 import csv
 import json
 
-***REMOVED*** Mapping laden
+# Mapping laden
 with open('scripts/l3_import_mapping.json') as f:
     mapping = json.load(f)
 
-***REMOVED*** CSV importieren
+# CSV importieren
 conn = psycopg2.connect("postgresql://postgres:postgres@localhost:5432/valeo")
 cur = conn.cursor()
 
-***REMOVED*** Beispiel: ADRESSEN
+# Beispiel: ADRESSEN
 with open('l3_export/ADRESSEN.csv', 'r', encoding='utf-8') as f:
     reader = csv.DictReader(f)
     table_mapping = mapping['ADRESSEN']
@@ -91,7 +91,7 @@ with open('l3_export/ADRESSEN.csv', 'r', encoding='utf-8') as f:
 conn.commit()
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 3: Daten-Mapping zu VALEO-Tabellen
+### Schritt 3: Daten-Mapping zu VALEO-Tabellen
 
 Nach dem Import in `l3_*` Tabellen:
 
@@ -142,12 +142,12 @@ SELECT
 FROM l3_artikel;
 ```
 
-***REMOVED******REMOVED*** Automatischer Import (Python-Script)
+## Automatischer Import (Python-Script)
 
 **Datei erstellen:** `scripts/import_l3_data.py`
 
 ```python
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 VALEO-NeuroERP - L3 Datenimport
 """
@@ -197,14 +197,14 @@ def import_table(conn, l3_csv_path: str, table_name: str, mapping: dict):
     return count
 
 def main():
-    ***REMOVED*** Mapping laden
+    # Mapping laden
     with open('scripts/l3_import_mapping.json') as f:
         mapping = json.load(f)
     
-    ***REMOVED*** PostgreSQL verbinden
+    # PostgreSQL verbinden
     conn = psycopg2.connect("postgresql://postgres:postgres@localhost:5432/valeo")
     
-    ***REMOVED*** L3-Export-Verzeichnis
+    # L3-Export-Verzeichnis
     l3_export_dir = Path("l3_export")
     
     if not l3_export_dir.exists():
@@ -212,7 +212,7 @@ def main():
         print("   Bitte L3-Daten als CSV in 'l3_export/' ablegen")
         return
     
-    ***REMOVED*** Import durchführen
+    # Import durchführen
     total = 0
     for table in ['ADRESSEN', 'ARTIKEL', 'AUFTRAG', 'RECHNUNG']:
         csv_file = l3_export_dir / f"{table}.csv"
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     main()
 ```
 
-***REMOVED******REMOVED*** Fehlende L3-Tabellen
+## Fehlende L3-Tabellen
 
 Die folgenden Prioritäts-Tabellen wurden NICHT in der L3-Struktur gefunden:
 - `ANGEBOT` (→ evtl. in AUFTRAG enthalten?)
@@ -244,7 +244,7 @@ Die folgenden Prioritäts-Tabellen wurden NICHT in der L3-Struktur gefunden:
 
 **Hinweis:** Diese Tabellen könnten in L3 anders benannt sein oder in übergeordneten Tabellen enthalten sein.
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. ✅ L3-Tabellen in PostgreSQL erstellt
 2. ✅ Import-Mapping generiert
@@ -253,10 +253,11 @@ Die folgenden Prioritäts-Tabellen wurden NICHT in der L3-Struktur gefunden:
 5. ⏳ Daten-Transformation zu VALEO-Tabellen
 6. ⏳ Datenvalidierung
 
-***REMOVED******REMOVED*** Support
+## Support
 
 Bei Fragen zum L3-Import:
 - Analyzer-Script: `scripts/l3_table_analyzer.py`
 - Import-Script: `scripts/import_l3_data.py`
 - Mapping-Datei: `scripts/l3_import_mapping.json`
+
 

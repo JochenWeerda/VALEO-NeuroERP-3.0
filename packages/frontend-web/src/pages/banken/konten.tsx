@@ -1,46 +1,71 @@
-import { useState } from 'react'
+﻿import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useBankkonten, type BankKonto } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Building2, Euro, FileDown, Plus, Search } from 'lucide-react'
-
-type Konto = {
-  id: string
-  iban: string
-  bank: string
-  kontoart: string
-  saldo: number
-  status: 'aktiv' | 'inaktiv'
-}
-
-const mockKonten: Konto[] = [
-  { id: '1', iban: 'DE89 3704 0044 0532 0130 00', bank: 'Commerzbank', kontoart: 'Girokonto', saldo: 285000, status: 'aktiv' },
-  { id: '2', iban: 'DE89 1234 5678 9012 3456 78', bank: 'Sparkasse', kontoart: 'Tagesgeld', saldo: 150000, status: 'aktiv' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function BankkontenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: konten = [], isLoading, isError, error, refetch } = useBankkonten()
+
+  const filteredKonten = useMemo(() => {
+    if (!searchTerm) return konten
+    const term = searchTerm.toLowerCase()
+    return konten.filter(k => 
+      k.bank?.toLowerCase().includes(term) ||
+      k.iban?.toLowerCase().includes(term) ||
+      k.kontoart?.toLowerCase().includes(term)
+    )
+  }, [konten, searchTerm])
+
+  const gesamtSaldo = filteredKonten.reduce((sum, k) => sum + (k.saldo || 0), 0)
+
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32 mt-2" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+        </div>
+        <Card><CardContent className="pt-4"><Skeleton className="h-64 w-full" /></CardContent></Card>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     {
       key: 'bank' as const,
       label: 'Bank',
-      render: (k: Konto) => (
+      render: (k: BankKonto) => (
         <button onClick={() => navigate(`/banken/konto/${k.id}`)} className="font-medium text-blue-600 hover:underline">
           {k.bank}
         </button>
       ),
     },
-    { key: 'iban' as const, label: 'IBAN', render: (k: Konto) => <span className="font-mono text-sm">{k.iban}</span> },
-    { key: 'kontoart' as const, label: 'Kontoart', render: (k: Konto) => <Badge variant="outline">{k.kontoart}</Badge> },
+    { key: 'iban' as const, label: 'IBAN', render: (k: BankKonto) => <span className="font-mono text-sm">{k.iban}</span> },
+    { key: 'kontoart' as const, label: 'Kontoart', render: (k: BankKonto) => <Badge variant="outline">{k.kontoart}</Badge> },
     {
       key: 'saldo' as const,
       label: 'Saldo',
-      render: (k: Konto) => (
+      render: (k: BankKonto) => (
         <span className="font-bold">
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(k.saldo)}
         </span>
@@ -49,15 +74,13 @@ export default function BankkontenPage(): JSX.Element {
     {
       key: 'status' as const,
       label: 'Status',
-      render: (k: Konto) => (
+      render: (k: BankKonto) => (
         <Badge variant={k.status === 'aktiv' ? 'outline' : 'secondary'}>
           {k.status === 'aktiv' ? 'Aktiv' : 'Inaktiv'}
         </Badge>
       ),
     },
   ]
-
-  const gesamtSaldo = mockKonten.reduce((sum, k) => sum + k.saldo, 0)
 
   return (
     <div className="space-y-4 p-6">
@@ -80,7 +103,7 @@ export default function BankkontenPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockKonten.length}</span>
+              <span className="text-2xl font-bold">{konten.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -104,7 +127,7 @@ export default function BankkontenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Aktive Konten</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockKonten.filter((k) => k.status === 'aktiv').length}</span>
+            <span className="text-2xl font-bold">{konten.filter((k) => k.status === 'aktiv').length}</span>
           </CardContent>
         </Card>
       </div>
@@ -129,9 +152,11 @@ export default function BankkontenPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockKonten} columns={columns} />
+          <DataTable data={filteredKonten} columns={columns} />
         </CardContent>
       </Card>
     </div>
   )
 }
+
+

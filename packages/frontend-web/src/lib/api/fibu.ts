@@ -286,9 +286,143 @@ export function useDATEVExport() {
       const searchParams = new URLSearchParams({ typ: params.typ })
       if (params.datum_von) searchParams.append('datum_von', params.datum_von)
       if (params.datum_bis) searchParams.append('datum_bis', params.datum_bis)
-      
+
       const response = await apiClient.get(`/api/fibu/export/datev?${searchParams.toString()}`)
       return response.data
     },
+  })
+}
+
+// ── Extended Types ──────────────────────────────────────────────────────
+
+export type Kreditlinie = {
+  id: string; kunde: string; kundennr: string; limit: number; ausgenutzt: number; verfuegbar: number
+  bonitaet: 'A' | 'B' | 'C' | 'D'; zahlungsziel: number; offenePosten: number; ueberfaellig: number
+  status: 'aktiv' | 'gesperrt' | 'ueberzogen'
+}
+
+export type Sicherheit = {
+  id: string; typ: 'abtretung' | 'sicherungseigentum' | 'buergschaft' | 'pfandrecht'
+  kunde: string; kundennr: string; gegenstand: string; wert: number
+  datumErstellung: string; gueltigBis?: string; status: 'aktiv' | 'abgelaufen' | 'freigegeben'
+  kreditlinie: number; ausgenutzt: number
+}
+
+export type Verbindlichkeit = {
+  id: string; rechnungsNr: string; lieferant: string; rechnungsDatum: string; faelligAm: string
+  betrag: number; offen: number; status: 'offen' | 'teilbezahlt' | 'bezahlt' | 'skontofaehig'
+}
+
+export type Zahlungsvorschlag = {
+  id: string; rechnungsNr: string; lieferant: string; betrag: number; faelligAm: string
+  skonto: number; skontoBis: string; vorschlag: 'skonto' | 'faellig' | 'spaeter'; prioritaet: number
+}
+
+export type HauptbuchBuchung = {
+  id: string; datum: string; belegnummer: string; konto: string; text: string; soll: number; haben: number
+}
+
+export type AnlageDetail = {
+  id: string; anlagennr: string; bezeichnung: string; anschaffung: string; anschaffungswert: number
+  nutzungsdauer: number; afaSatz: number; kumulierteAfa: number; buchwert: number
+}
+
+export type DebitOP = {
+  id: string; rechnungsnr: string; kunde: string; kundennr: string; datum: string; faelligkeit: string
+  betrag: number; offen: number; ueberfaellig: boolean; mahnStufe: number
+}
+
+export type KreditOP = {
+  id: string; rechnungsnr: string; lieferant: string; lieferantennr: string; datum: string; faelligkeit: string
+  betrag: number; offen: number; skonto: number; skontoBis: string; zahlbar: boolean
+}
+
+// ── Extended Hooks ──────────────────────────────────────────────────────
+
+export function useAnlagenDetail() {
+  return useQuery({
+    queryKey: [...fibuKeys.anlagen(), 'detail'],
+    queryFn: async () => {
+      const response = await apiClient.get<AnlageDetail[]>('/api/fibu/anlagen/detail')
+      return response.data
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useDebitorenOP() {
+  return useQuery({
+    queryKey: [...fibuKeys.debitoren(), 'op'],
+    queryFn: async () => {
+      const response = await apiClient.get<DebitOP[]>('/api/fibu/debitoren/op')
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+export function useKreditorenOP() {
+  return useQuery({
+    queryKey: [...fibuKeys.kreditoren(), 'op'],
+    queryFn: async () => {
+      const response = await apiClient.get<KreditOP[]>('/api/fibu/kreditoren/op')
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+export function useHauptbuchBuchungen() {
+  return useQuery({
+    queryKey: [...fibuKeys.buchungen(), 'hauptbuch'],
+    queryFn: async () => {
+      const response = await apiClient.get<HauptbuchBuchung[]>('/api/fibu/hauptbuch')
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+export function useKreditlinien() {
+  return useQuery({
+    queryKey: [...fibuKeys.all, 'kreditlinien'],
+    queryFn: async () => {
+      const response = await apiClient.get<Kreditlinie[]>('/api/fibu/kreditlinien')
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+export function useSicherheiten() {
+  return useQuery({
+    queryKey: [...fibuKeys.all, 'sicherheiten'],
+    queryFn: async () => {
+      const response = await apiClient.get<Sicherheit[]>('/api/fibu/sicherheiten')
+      return response.data
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useVerbindlichkeiten() {
+  return useQuery({
+    queryKey: [...fibuKeys.all, 'verbindlichkeiten'],
+    queryFn: async () => {
+      const response = await apiClient.get<Verbindlichkeit[]>('/api/fibu/verbindlichkeiten')
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+export function useZahlungsvorschlaege() {
+  return useQuery({
+    queryKey: [...fibuKeys.all, 'zahlungsvorschlaege'],
+    queryFn: async () => {
+      const response = await apiClient.get<Zahlungsvorschlag[]>('/api/fibu/zahlungsvorschlaege')
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
   })
 }

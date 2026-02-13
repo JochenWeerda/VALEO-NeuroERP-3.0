@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Abhängigkeiten-Reparaturskript für das ERP-System.
 
@@ -19,23 +19,23 @@ import shutil
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional, Set
 
-***REMOVED*** Konfiguriere Logger
+# Konfiguriere Logger
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 )
 logger = logging.getLogger("fix_dependencies")
 
-***REMOVED*** Definiere Konstanten
+# Definiere Konstanten
 WORKSPACE_ROOT = Path(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 BACKEND_DIR = WORKSPACE_ROOT / "backend"
 MODELS_DIR = BACKEND_DIR / "models"
 API_DIR = BACKEND_DIR / "api"
 DB_DIR = BACKEND_DIR / "db"
 
-***REMOVED*** Minimale Versionen der erforderlichen Pakete
+# Minimale Versionen der erforderlichen Pakete
 REQUIRED_PACKAGES = {
-    "sqlalchemy": "2.0.0",  ***REMOVED*** SQLAlchemy 2.0+ für JSONB-Unterstützung
+    "sqlalchemy": "2.0.0",  # SQLAlchemy 2.0+ für JSONB-Unterstützung
     "fastapi": "0.100.0",
     "uvicorn": "0.22.0",
     "pydantic": "2.0.0",
@@ -44,13 +44,13 @@ REQUIRED_PACKAGES = {
     "flower": "2.0.0",
 }
 
-***REMOVED*** Fehlende Module und ihre Pfade
+# Fehlende Module und ihre Pfade
 MISSING_MODULES = {
     "backend.api.batch_processing": API_DIR / "batch_processing.py",
     "backend.api.performance": API_DIR / "performance.py",
 }
 
-***REMOVED*** Fehlende Klassen in Modulen
+# Fehlende Klassen in Modulen
 MISSING_CLASSES = {
     "backend.models.lager": ["LagerOrt"],
     "backend.models.partner": ["KundenGruppe"],
@@ -82,7 +82,7 @@ def check_package_versions() -> List[str]:
             elif hasattr(module, "VERSION"):
                 installed_version = module.VERSION
             else:
-                ***REMOVED*** Versuche, die Version mit importlib.metadata zu ermitteln (Python 3.8+)
+                # Versuche, die Version mit importlib.metadata zu ermitteln (Python 3.8+)
                 try:
                     import importlib.metadata
                     installed_version = importlib.metadata.version(package)
@@ -91,7 +91,7 @@ def check_package_versions() -> List[str]:
                     to_update.append(f"{package}>={min_version}")
                     continue
             
-            ***REMOVED*** Einfacher Versionsvergleich (nicht perfekt, aber für die meisten Fälle ausreichend)
+            # Einfacher Versionsvergleich (nicht perfekt, aber für die meisten Fälle ausreichend)
             installed_parts = installed_version.split(".")
             required_parts = min_version.split(".")
             
@@ -145,15 +145,15 @@ def create_missing_modules() -> bool:
         
         logger.info(f"Erstelle fehlendes Modul {module_path} in {file_path}")
         
-        ***REMOVED*** Stelle sicher, dass das Verzeichnis existiert
+        # Stelle sicher, dass das Verzeichnis existiert
         file_path.parent.mkdir(parents=True, exist_ok=True)
         
-        ***REMOVED*** Erstelle eine __init__.py, falls noch nicht vorhanden
+        # Erstelle eine __init__.py, falls noch nicht vorhanden
         init_file = file_path.parent / "__init__.py"
         if not init_file.exists():
             init_file.touch()
         
-        ***REMOVED*** Generiere den Modulinhalt basierend auf dem Modulnamen
+        # Generiere den Modulinhalt basierend auf dem Modulnamen
         content = ""
         
         if module_path == "backend.api.batch_processing":
@@ -170,47 +170,47 @@ from pydantic import BaseModel
 router = APIRouter(prefix="/api/batch", tags=["Batch Processing"])
 
 class BatchJob(BaseModel):
-    ***REMOVED*** Modell für einen Batch-Job.
+    # Modell für einen Batch-Job.
     id: Optional[str] = None
     name: str
     type: str
     parameters: Dict[str, Any] = {}
     status: str = "pending"
     
-***REMOVED*** In-Memory-Speicher für Batch-Jobs (temporär)
+# In-Memory-Speicher für Batch-Jobs (temporär)
 batch_jobs = {}
 
 @router.post("/jobs", response_model=BatchJob)
 async def create_batch_job(job: BatchJob, background_tasks: BackgroundTasks):
-    ***REMOVED*** Erstellt einen neuen Batch-Job.
+    # Erstellt einen neuen Batch-Job.
     import uuid
     job_id = str(uuid.uuid4())
     job.id = job_id
     batch_jobs[job_id] = job.dict()
     
-    ***REMOVED*** Simuliere asynchrone Verarbeitung
+    # Simuliere asynchrone Verarbeitung
     background_tasks.add_task(process_batch_job, job_id)
     
     return job
 
 @router.get("/jobs", response_model=List[BatchJob])
 async def get_batch_jobs():
-    ***REMOVED*** Gibt alle Batch-Jobs zurück.
+    # Gibt alle Batch-Jobs zurück.
     return list(batch_jobs.values())
 
 @router.get("/jobs/{job_id}", response_model=BatchJob)
 async def get_batch_job(job_id: str):
-    ***REMOVED*** Gibt einen bestimmten Batch-Job zurück.
+    # Gibt einen bestimmten Batch-Job zurück.
     if job_id not in batch_jobs:
         raise HTTPException(status_code=404, detail="Batch-Job nicht gefunden")
     return batch_jobs[job_id]
 
 async def process_batch_job(job_id: str):
-    ***REMOVED*** Verarbeitet einen Batch-Job im Hintergrund.
+    # Verarbeitet einen Batch-Job im Hintergrund.
     import asyncio
     import random
     
-    ***REMOVED*** Simuliere Verarbeitung
+    # Simuliere Verarbeitung
     batch_jobs[job_id]["status"] = "processing"
     await asyncio.sleep(random.randint(2, 5))
     batch_jobs[job_id]["status"] = "completed"
@@ -230,19 +230,19 @@ from datetime import datetime
 router = APIRouter(prefix="/api/performance", tags=["Performance"])
 
 class PerformanceMetric(BaseModel):
-    ***REMOVED*** Modell für eine Performance-Metrik.
+    # Modell für eine Performance-Metrik.
     id: Optional[str] = None
     name: str
     value: float
     timestamp: Optional[datetime] = None
     tags: Dict[str, str] = {}
     
-***REMOVED*** In-Memory-Speicher für Metriken (temporär)
+# In-Memory-Speicher für Metriken (temporär)
 performance_metrics = {}
 
 @router.post("/metrics", response_model=PerformanceMetric)
 async def create_metric(metric: PerformanceMetric):
-    ***REMOVED*** Speichert eine neue Performance-Metrik.
+    # Speichert eine neue Performance-Metrik.
     import uuid
     metric_id = str(uuid.uuid4())
     metric.id = metric_id
@@ -251,19 +251,19 @@ async def create_metric(metric: PerformanceMetric):
 
 @router.get("/metrics", response_model=List[PerformanceMetric])
 async def get_metrics():
-    ***REMOVED*** Gibt alle Performance-Metriken zurück.
+    # Gibt alle Performance-Metriken zurück.
     return list(performance_metrics.values())
 
 @router.get("/metrics/{metric_name}/history", response_model=List[PerformanceMetric])
 async def get_metric_history(metric_name: str, days: int = 7):
-    ***REMOVED*** Gibt den Verlauf einer bestimmten Metrik zurück.
-    ***REMOVED*** Simuliere historische Daten
+    # Gibt den Verlauf einer bestimmten Metrik zurück.
+    # Simuliere historische Daten
     result = []
     now = datetime.now()
     
     for i in range(days):
         timestamp = now - timedelta(days=i)
-        for hour in range(0, 24, 4):  ***REMOVED*** Alle 4 Stunden
+        for hour in range(0, 24, 4):  # Alle 4 Stunden
             metric = PerformanceMetric(
                 id=f"{metric_name}-{i}-{hour}",
                 name=metric_name,
@@ -277,7 +277,7 @@ async def get_metric_history(metric_name: str, days: int = 7):
 
 @router.get("/dashboard")
 async def get_performance_dashboard():
-    ***REMOVED*** Gibt Performance-Dashboard-Daten zurück.
+    # Gibt Performance-Dashboard-Daten zurück.
     return {
         "summary": {
             "api_response_time_avg": random.uniform(20, 100),
@@ -310,24 +310,24 @@ def create_missing_classes() -> bool:
     success = True
     
     for module_path, class_names in MISSING_CLASSES.items():
-        ***REMOVED*** Extrahiere den Dateipfad aus dem Modulpfad
+        # Extrahiere den Dateipfad aus dem Modulpfad
         parts = module_path.split(".")
         if parts[-1] == "__init__":
             file_path = WORKSPACE_ROOT.joinpath(*parts[:-1]) / "__init__.py"
         else:
             file_path = WORKSPACE_ROOT.joinpath(*parts[:-1]) / f"{parts[-1]}.py"
         
-        ***REMOVED*** Erstelle das Verzeichnis und die Datei, falls sie nicht existieren
+        # Erstelle das Verzeichnis und die Datei, falls sie nicht existieren
         if not file_path.exists():
             file_path.parent.mkdir(parents=True, exist_ok=True)
             
-            ***REMOVED*** Erstelle __init__.py in übergeordneten Verzeichnissen
+            # Erstelle __init__.py in übergeordneten Verzeichnissen
             for i in range(1, len(parts) - 1):
                 init_path = WORKSPACE_ROOT.joinpath(*parts[:i]) / "__init__.py"
                 if not init_path.exists():
                     init_path.touch()
             
-            ***REMOVED*** Wenn es sich um ein __init__.py handelt, erstelle die Verzeichnisstruktur
+            # Wenn es sich um ein __init__.py handelt, erstelle die Verzeichnisstruktur
             if parts[-1] == "__init__":
                 file_path.parent.mkdir(parents=True, exist_ok=True)
                 file_path.touch()
@@ -336,11 +336,11 @@ def create_missing_classes() -> bool:
                     f.write(f'"""\n{parts[-1]} module.\n"""\n\n')
         
         try:
-            ***REMOVED*** Lese die bestehende Datei
+            # Lese die bestehende Datei
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
             
-            ***REMOVED*** Füge fehlende Klassen hinzu
+            # Füge fehlende Klassen hinzu
             new_content = content
             
             for class_name in class_names:
@@ -350,7 +350,7 @@ def create_missing_classes() -> bool:
                     if module_path == "backend.models.lager":
                         class_def = f"""
 class {class_name}:
-    ***REMOVED*** Modell für einen Lagerort.
+    # Modell für einen Lagerort.
     
     def __init__(self, id=None, name=None, beschreibung=None, lager_typ=None):
         self.id = id
@@ -364,7 +364,7 @@ class {class_name}:
                     elif module_path == "backend.models.partner":
                         class_def = f"""
 class {class_name}:
-    ***REMOVED*** Modell für eine Kundengruppe.
+    # Modell für eine Kundengruppe.
     
     def __init__(self, id=None, name=None, beschreibung=None, rabatt=0.0):
         self.id = id
@@ -378,7 +378,7 @@ class {class_name}:
                     elif module_path == "backend.models.produktion":
                         class_def = f"""
 class {class_name}:
-    ***REMOVED*** Modell für einen Produktionsauftrag.
+    # Modell für einen Produktionsauftrag.
     
     def __init__(self, id=None, name=None, start_datum=None, end_datum=None, status="geplant"):
         self.id = id
@@ -393,7 +393,7 @@ class {class_name}:
                     elif module_path == "backend.models.user":
                         class_def = f"""
 class {class_name}:
-    ***REMOVED*** Modell für eine Benutzererlaubnis.
+    # Modell für eine Benutzererlaubnis.
     
     def __init__(self, id=None, name=None, beschreibung=None):
         self.id = id
@@ -406,7 +406,7 @@ class {class_name}:
                     elif module_path == "backend.models.notfall":
                         class_def = f"""
 class {class_name}:
-    ***REMOVED*** Modell für einen Notfallplan.
+    # Modell für einen Notfallplan.
     
     def __init__(self, id=None, name=None, beschreibung=None, prioritaet="mittel", aktiviert=False):
         self.id = id
@@ -429,50 +429,50 @@ import logging
 logger = logging.getLogger(__name__)
 
 class {class_name}(BaseHTTPMiddleware):
-    ***REMOVED*** Middleware zur Überwachung der Datenbankleistung.
+    # Middleware zur Überwachung der Datenbankleistung.
     
     async def dispatch(self, request: Request, call_next):
         start_time = time.time()
         
-        ***REMOVED*** Datenbankzugriffe vor der Anfrage zählen
+        # Datenbankzugriffe vor der Anfrage zählen
         db_queries_before = self.count_db_queries()
         
         response = await call_next(request)
         
-        ***REMOVED*** Datenbankzugriffe nach der Anfrage zählen
+        # Datenbankzugriffe nach der Anfrage zählen
         db_queries_after = self.count_db_queries()
         
-        ***REMOVED*** Leistungsmetriken berechnen
+        # Leistungsmetriken berechnen
         processing_time = time.time() - start_time
         db_queries = db_queries_after - db_queries_before
         
-        ***REMOVED*** Metriken protokollieren
+        # Metriken protokollieren
         logger.info(
             f"Anfrage: {{request.method}} {{request.url.path}} - "
             f"Verarbeitungszeit: {{processing_time:.4f}}s, "
             f"DB-Abfragen: {{db_queries}}"
         )
         
-        ***REMOVED*** Speichere Metriken in der Datenbank (simuliert)
+        # Speichere Metriken in der Datenbank (simuliert)
         self.store_metrics(request, processing_time, db_queries)
         
         return response
     
     def count_db_queries(self):
-        ***REMOVED*** Zählt die Anzahl der Datenbankabfragen (simuliert).
-        ***REMOVED*** In einer realen Implementierung würde dies die tatsächlichen DB-Abfragen zählen
-        ***REMOVED*** Hier geben wir einen simulierten Wert zurück
+        # Zählt die Anzahl der Datenbankabfragen (simuliert).
+        # In einer realen Implementierung würde dies die tatsächlichen DB-Abfragen zählen
+        # Hier geben wir einen simulierten Wert zurück
         return 0
     
     def store_metrics(self, request, processing_time, db_queries):
-        ***REMOVED*** Speichert die Leistungsmetriken (simuliert).
-        ***REMOVED*** In einer realen Implementierung würden die Metriken in einer Datenbank gespeichert
+        # Speichert die Leistungsmetriken (simuliert).
+        # In einer realen Implementierung würden die Metriken in einer Datenbank gespeichert
         pass
 """
                     else:
                         class_def = f"""
 class {class_name}:
-    ***REMOVED*** Automatisch generierte Klasse für {class_name}.
+    # Automatisch generierte Klasse für {class_name}.
     
     def __init__(self, id=None, name=None):
         self.id = id
@@ -484,7 +484,7 @@ class {class_name}:
                     
                     new_content += class_def
             
-            ***REMOVED*** Schreibe die aktualisierte Datei zurück, wenn Änderungen vorgenommen wurden
+            # Schreibe die aktualisierte Datei zurück, wenn Änderungen vorgenommen wurden
             if new_content != content:
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(new_content)
@@ -499,15 +499,15 @@ class {class_name}:
 def fix_sqlalchemy_jsonb() -> bool:
     """Behebt das Problem mit SQLAlchemy JSONB."""
     try:
-        ***REMOVED*** Prüfe SQLAlchemy-Version
+        # Prüfe SQLAlchemy-Version
         import sqlalchemy
         logger.info(f"SQLAlchemy-Version: {sqlalchemy.__version__}")
         
-        ***REMOVED*** SQLAlchemy 2.0+ hat JSONB in sqlalchemy.types
+        # SQLAlchemy 2.0+ hat JSONB in sqlalchemy.types
         major_version = int(sqlalchemy.__version__.split('.')[0])
         
         if major_version >= 2:
-            ***REMOVED*** Erstelle ein Patch-Modul
+            # Erstelle ein Patch-Modul
             patch_file = BACKEND_DIR / "db" / "sqlalchemy_patch.py"
             
             with open(patch_file, "w", encoding="utf-8") as f:
@@ -519,15 +519,15 @@ Dieses Modul bietet eine einheitliche Schnittstelle für JSONB in verschiedenen 
 
 from sqlalchemy.types import JSON
 
-***REMOVED*** Für Kompatibilität mit Code, der sqlalchemy.JSONB erwartet
-***REMOVED*** Verwende JSON-Typ von SQLAlchemy 2.0+ als Ersatz für JSONB
+# Für Kompatibilität mit Code, der sqlalchemy.JSONB erwartet
+# Verwende JSON-Typ von SQLAlchemy 2.0+ als Ersatz für JSONB
 JSONB = JSON
 
-***REMOVED*** Exportiere JSON explizit, da es auch in importierenden Modulen benötigt werden könnte
+# Exportiere JSON explizit, da es auch in importierenden Modulen benötigt werden könnte
 __all__ = ['JSONB', 'JSON']
 """)
             
-            ***REMOVED*** Aktualisiere __init__.py, um den Patch zu importieren
+            # Aktualisiere __init__.py, um den Patch zu importieren
             init_file = BACKEND_DIR / "db" / "__init__.py"
             
             if not init_file.exists():
@@ -539,13 +539,13 @@ Datenbankmodul.
 from .sqlalchemy_patch import JSONB, JSON
 """)
             else:
-                ***REMOVED*** Prüfe, ob der Import bereits vorhanden ist
+                # Prüfe, ob der Import bereits vorhanden ist
                 with open(init_file, "r", encoding="utf-8") as f:
                     content = f.read()
                 
                 if "from .sqlalchemy_patch import JSONB" not in content:
                     with open(init_file, "a", encoding="utf-8") as f:
-                        f.write("\n\n***REMOVED*** Importiere JSONB-Patch für SQLAlchemy 2.0+ Kompatibilität\nfrom .sqlalchemy_patch import JSONB, JSON\n")
+                        f.write("\n\n# Importiere JSONB-Patch für SQLAlchemy 2.0+ Kompatibilität\nfrom .sqlalchemy_patch import JSONB, JSON\n")
             
             logger.info("SQLAlchemy JSONB-Patch erfolgreich erstellt")
             return True
@@ -574,15 +574,15 @@ def main():
         if not update_packages(packages_to_update):
             logger.warning("Einige Pakete konnten nicht aktualisiert werden")
     
-    ***REMOVED*** SQLAlchemy JSONB-Problem beheben
+    # SQLAlchemy JSONB-Problem beheben
     if not fix_sqlalchemy_jsonb():
         logger.warning("SQLAlchemy JSONB-Problem konnte nicht behoben werden")
     
-    ***REMOVED*** Fehlende Module erstellen
+    # Fehlende Module erstellen
     if not create_missing_modules():
         logger.warning("Einige fehlende Module konnten nicht erstellt werden")
     
-    ***REMOVED*** Fehlende Klassen erstellen
+    # Fehlende Klassen erstellen
     if not create_missing_classes():
         logger.warning("Einige fehlende Klassen konnten nicht erstellt werden")
     

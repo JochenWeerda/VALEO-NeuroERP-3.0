@@ -59,18 +59,18 @@ class ProcessDocument:
     review_date: Optional[datetime] = None
     next_review_date: Optional[datetime] = None
 
-    ***REMOVED*** Metadata
+    # Metadata
     tags: List[str] = field(default_factory=list)
     related_processes: List[str] = field(default_factory=list)
     responsible_roles: List[str] = field(default_factory=list)
     required_training: List[str] = field(default_factory=list)
 
-    ***REMOVED*** Version control
+    # Version control
     previous_version: Optional[str] = None
     change_reason: str = ""
     approval_history: List[Dict[str, Any]] = field(default_factory=list)
 
-    ***REMOVED*** Timestamps
+    # Timestamps
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
 
@@ -83,13 +83,13 @@ class ProcessExecution:
     execution_id: str
     started_at: datetime
     completed_at: Optional[datetime] = None
-    status: str = "running"  ***REMOVED*** running, completed, failed, cancelled
+    status: str = "running"  # running, completed, failed, cancelled
     executed_by: str
     inputs: Dict[str, Any] = field(default_factory=dict)
     outputs: Dict[str, Any] = field(default_factory=dict)
     quality_checks: List[Dict[str, Any]] = field(default_factory=list)
     deviations: List[str] = field(default_factory=list)
-    duration: Optional[int] = None  ***REMOVED*** seconds
+    duration: Optional[int] = None  # seconds
 
 
 @dataclass
@@ -102,7 +102,7 @@ class QualityRecord:
     recorded_by: str
     recorded_at: datetime
     data: Dict[str, Any]
-    compliance_status: str = "compliant"  ***REMOVED*** compliant, non_compliant, not_applicable
+    compliance_status: str = "compliant"  # compliant, non_compliant, not_applicable
     notes: str = ""
     attachments: List[str] = field(default_factory=list)
 
@@ -113,12 +113,12 @@ class ProcessMetric:
     id: str
     process_id: str
     metric_name: str
-    metric_type: str  ***REMOVED*** count, percentage, duration, cost
+    metric_type: str  # count, percentage, duration, cost
     value: float
     target_value: Optional[float]
     recorded_at: datetime
     recorded_by: str
-    period: str = "daily"  ***REMOVED*** daily, weekly, monthly
+    period: str = "daily"  # daily, weekly, monthly
 
 
 class ISO9001ProcessDocumentation:
@@ -132,29 +132,29 @@ class ISO9001ProcessDocumentation:
         self.workflow = workflow_service
         self.audit = audit_service
 
-        ***REMOVED*** Process documentation
+        # Process documentation
         self.process_documents: Dict[str, ProcessDocument] = {}
 
-        ***REMOVED*** Process executions
+        # Process executions
         self.process_executions: List[ProcessExecution] = []
 
-        ***REMOVED*** Quality records
+        # Quality records
         self.quality_records: List[QualityRecord] = []
 
-        ***REMOVED*** Process metrics
+        # Process metrics
         self.process_metrics: List[ProcessMetric] = []
 
-        ***REMOVED*** Document templates
+        # Document templates
         self.document_templates = self._initialize_document_templates()
 
-        ***REMOVED*** Review cycles
+        # Review cycles
         self.review_cycles = {
-            DocumentType.POLICY: timedelta(days=365),  ***REMOVED*** Annual
-            DocumentType.PROCEDURE: timedelta(days=180),  ***REMOVED*** Semi-annual
-            DocumentType.WORK_INSTRUCTION: timedelta(days=90),  ***REMOVED*** Quarterly
+            DocumentType.POLICY: timedelta(days=365),  # Annual
+            DocumentType.PROCEDURE: timedelta(days=180),  # Semi-annual
+            DocumentType.WORK_INSTRUCTION: timedelta(days=90),  # Quarterly
             DocumentType.FORM: timedelta(days=180),
             DocumentType.TEMPLATE: timedelta(days=180),
-            DocumentType.RECORD: None  ***REMOVED*** Records don't have review cycles
+            DocumentType.RECORD: None  # Records don't have review cycles
         }
 
     def _initialize_document_templates(self) -> Dict[str, Dict[str, Any]]:
@@ -190,10 +190,10 @@ class ISO9001ProcessDocumentation:
         """
         document_id = str(uuid.uuid4())
 
-        ***REMOVED*** Validate required fields
+        # Validate required fields
         self._validate_document_data(document_data)
 
-        ***REMOVED*** Generate version number
+        # Generate version number
         version = self._generate_version_number(document_data)
 
         document = ProcessDocument(
@@ -211,13 +211,13 @@ class ISO9001ProcessDocumentation:
             required_training=document_data.get('required_training', [])
         )
 
-        ***REMOVED*** Set review date based on document type
+        # Set review date based on document type
         if self.review_cycles[document.document_type]:
             document.next_review_date = datetime.utcnow() + self.review_cycles[document.document_type]
 
         self.process_documents[document_id] = document
 
-        ***REMOVED*** Log document creation
+        # Log document creation
         if self.audit:
             self.audit.log_quality_event({
                 'event_type': 'document_created',
@@ -237,13 +237,13 @@ class ISO9001ProcessDocumentation:
             if field not in data:
                 raise ValueError(f"Required field missing: {field}")
 
-        ***REMOVED*** Validate document type
+        # Validate document type
         try:
             DocumentType[data['document_type'].upper()]
         except KeyError:
             raise ValueError(f"Invalid document type: {data['document_type']}")
 
-        ***REMOVED*** Validate process type
+        # Validate process type
         try:
             ProcessType[data['process_type'].upper()]
         except KeyError:
@@ -251,7 +251,7 @@ class ISO9001ProcessDocumentation:
 
     def _generate_version_number(self, data: Dict[str, Any]) -> str:
         """Generate version number for document"""
-        ***REMOVED*** Find existing documents with same title
+        # Find existing documents with same title
         existing_versions = [
             doc.version for doc in self.process_documents.values()
             if doc.title == data['title']
@@ -260,7 +260,7 @@ class ISO9001ProcessDocumentation:
         if not existing_versions:
             return "1.0"
 
-        ***REMOVED*** Parse existing versions and increment
+        # Parse existing versions and increment
         version_numbers = []
         for v in existing_versions:
             try:
@@ -285,19 +285,19 @@ class ISO9001ProcessDocumentation:
 
         document = self.process_documents[document_id]
 
-        ***REMOVED*** Create new version for significant changes
+        # Create new version for significant changes
         if 'content' in update_data or 'major_change' in update_data:
             new_document_id = self._create_new_version(document, update_data, updated_by)
             return new_document_id is not None
 
-        ***REMOVED*** Minor updates to existing document
+        # Minor updates to existing document
         for key, value in update_data.items():
             if hasattr(document, key):
                 setattr(document, key, value)
 
         document.updated_at = datetime.utcnow()
 
-        ***REMOVED*** Log update
+        # Log update
         if self.audit:
             self.audit.log_quality_event({
                 'event_type': 'document_updated',
@@ -311,11 +311,11 @@ class ISO9001ProcessDocumentation:
     def _create_new_version(self, document: ProcessDocument, update_data: Dict[str, Any],
                           updated_by: str) -> Optional[str]:
         """Create new version of document"""
-        ***REMOVED*** Increment version
+        # Increment version
         major, minor = map(int, document.version.split('.'))
         new_version = f"{major}.{minor + 1}"
 
-        ***REMOVED*** Create new document
+        # Create new document
         new_document_data = {
             'title': document.title,
             'document_type': document.document_type.value,
@@ -335,7 +335,7 @@ class ISO9001ProcessDocumentation:
             new_doc.previous_version = document.version
             new_doc.change_reason = update_data.get('change_reason', 'Content update')
 
-            ***REMOVED*** Update old document status
+            # Update old document status
             document.status = ProcessStatus.DEPRECATED
 
         return new_document_id
@@ -357,7 +357,7 @@ class ISO9001ProcessDocumentation:
         document.approved_by = approved_by
         document.effective_date = datetime.utcnow()
 
-        ***REMOVED*** Add approval to history
+        # Add approval to history
         approval_record = {
             'approved_by': approved_by,
             'approved_at': datetime.utcnow().isoformat(),
@@ -366,11 +366,11 @@ class ISO9001ProcessDocumentation:
         }
         document.approval_history.append(approval_record)
 
-        ***REMOVED*** Set next review date
+        # Set next review date
         if self.review_cycles[document.document_type]:
             document.next_review_date = datetime.utcnow() + self.review_cycles[document.document_type]
 
-        ***REMOVED*** Log approval
+        # Log approval
         if self.audit:
             self.audit.log_quality_event({
                 'event_type': 'document_approved',
@@ -397,7 +397,7 @@ class ISO9001ProcessDocumentation:
         document.status = ProcessStatus.REVIEW
         document.review_date = datetime.utcnow()
 
-        ***REMOVED*** Log submission
+        # Log submission
         if self.audit:
             self.audit.log_quality_event({
                 'event_type': 'document_submitted_review',
@@ -443,16 +443,16 @@ class ISO9001ProcessDocumentation:
         execution.outputs = results.get('outputs', {})
         execution.deviations = results.get('deviations', [])
 
-        ***REMOVED*** Calculate duration
+        # Calculate duration
         if execution.completed_at and execution.started_at:
             execution.duration = int((execution.completed_at - execution.started_at).total_seconds())
 
-        ***REMOVED*** Record quality checks
+        # Record quality checks
         quality_checks = results.get('quality_checks', [])
         for check in quality_checks:
             self.record_quality_check(execution.process_id, execution_id, check, execution.executed_by)
 
-        ***REMOVED*** Log completion
+        # Log completion
         if self.audit:
             self.audit.log_quality_event({
                 'event_type': 'process_execution_completed',
@@ -494,7 +494,7 @@ class ISO9001ProcessDocumentation:
 
         self.quality_records.append(record)
 
-        ***REMOVED*** Log non-compliant checks
+        # Log non-compliant checks
         if record.compliance_status == 'non_compliant':
             logger.warning(f"Quality check failed: {process_id} - {check_data.get('check_name', 'Unknown')}")
 
@@ -521,7 +521,7 @@ class ISO9001ProcessDocumentation:
 
         self.process_metrics.append(metric)
 
-        ***REMOVED*** Check against targets and alert if necessary
+        # Check against targets and alert if necessary
         if metric.target_value and not self._is_metric_within_target(metric):
             self._alert_metric_deviation(metric)
 
@@ -533,7 +533,7 @@ class ISO9001ProcessDocumentation:
         if not metric.target_value:
             return True
 
-        tolerance = 0.1  ***REMOVED*** 10% tolerance
+        tolerance = 0.1  # 10% tolerance
         min_acceptable = metric.target_value * (1 - tolerance)
         max_acceptable = metric.target_value * (1 + tolerance)
 
@@ -548,10 +548,10 @@ class ISO9001ProcessDocumentation:
 
     def get_process_documentation_status(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Get comprehensive process documentation status"""
-        ***REMOVED*** Filter documents by tenant
+        # Filter documents by tenant
         tenant_documents = [d for d in self.process_documents.values() if d.created_by == tenant_id]
 
-        ***REMOVED*** Calculate documentation metrics
+        # Calculate documentation metrics
         documentation_stats = self._calculate_documentation_stats(tenant_documents)
         process_coverage = self._assess_process_coverage(tenant_documents)
         compliance_status = self._check_documentation_compliance(tenant_documents)
@@ -576,11 +576,11 @@ class ISO9001ProcessDocumentation:
         by_status = {}
 
         for doc in documents:
-            ***REMOVED*** Count by type
+            # Count by type
             type_key = doc.document_type.value
             by_type[type_key] = by_type.get(type_key, 0) + 1
 
-            ***REMOVED*** Count by status
+            # Count by status
             status_key = doc.status.value
             by_status[status_key] = by_status.get(status_key, 0) + 1
 
@@ -593,7 +593,7 @@ class ISO9001ProcessDocumentation:
 
     def _assess_process_coverage(self, documents: List[ProcessDocument]) -> Dict[str, Any]:
         """Assess process coverage across different areas"""
-        ***REMOVED*** Define expected process areas
+        # Define expected process areas
         expected_processes = {
             'core': ['software_development', 'testing', 'deployment', 'maintenance'],
             'supporting': ['documentation', 'training', 'audit', 'compliance'],
@@ -628,16 +628,16 @@ class ISO9001ProcessDocumentation:
         """Check documentation compliance with ISO 9001 requirements"""
         issues = []
 
-        ***REMOVED*** Check for required document types
+        # Check for required document types
         required_types = [DocumentType.POLICY, DocumentType.PROCEDURE, DocumentType.WORK_INSTRUCTION]
         for req_type in required_types:
             type_docs = [d for d in documents if d.document_type == req_type and d.status in [ProcessStatus.APPROVED, ProcessStatus.ACTIVE]]
             if not type_docs:
                 issues.append(f"Missing {req_type.value} documents")
 
-        ***REMOVED*** Check for approved documents
+        # Check for approved documents
         draft_docs = [d for d in documents if d.status == ProcessStatus.DRAFT]
-        if len(draft_docs) > len(documents) * 0.2:  ***REMOVED*** More than 20% draft
+        if len(draft_docs) > len(documents) * 0.2:  # More than 20% draft
             issues.append("Too many documents in draft status")
 
         compliance_score = max(0, 100 - (len(issues) * 10))
@@ -672,28 +672,28 @@ class ISO9001ProcessDocumentation:
         """Calculate overall process documentation maturity score"""
         score = 0
 
-        ***REMOVED*** Documentation completeness (40%)
+        # Documentation completeness (40%)
         total_docs = doc_stats.get('total_documents', 0)
         active_docs = doc_stats.get('active_documents', 0)
         if total_docs > 0:
             score += (active_docs / total_docs) * 40
 
-        ***REMOVED*** Process coverage (30%)
+        # Process coverage (30%)
         score += process_coverage.get('overall_coverage', 0) * 0.3
 
-        ***REMOVED*** Compliance (30%)
+        # Compliance (30%)
         score += compliance.get('compliance_score', 0) * 0.3
 
         return round(score, 1)
 
     def get_process_performance_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Get process performance dashboard"""
-        ***REMOVED*** Filter data by tenant
+        # Filter data by tenant
         tenant_executions = [e for e in self.process_executions if e.executed_by == tenant_id]
         tenant_metrics = [m for m in self.process_metrics if m.recorded_by == tenant_id]
         tenant_records = [r for r in self.quality_records if r.recorded_by == tenant_id]
 
-        ***REMOVED*** Calculate performance metrics
+        # Calculate performance metrics
         execution_stats = self._calculate_execution_stats(tenant_executions)
         quality_stats = self._calculate_quality_stats(tenant_records)
         metric_trends = self._calculate_metric_trends(tenant_metrics)
@@ -754,9 +754,9 @@ class ISO9001ProcessDocumentation:
         """Calculate metric trends"""
         trends = {}
 
-        ***REMOVED*** Group by metric name
+        # Group by metric name
         metric_groups = {}
-        for metric in metrics[-100:]:  ***REMOVED*** Last 100 metrics
+        for metric in metrics[-100:]:  # Last 100 metrics
             name = metric.metric_name
             if name not in metric_groups:
                 metric_groups[name] = []
@@ -764,10 +764,10 @@ class ISO9001ProcessDocumentation:
 
         for name, metric_list in metric_groups.items():
             if len(metric_list) >= 2:
-                ***REMOVED*** Sort by date
+                # Sort by date
                 sorted_metrics = sorted(metric_list, key=lambda x: x.recorded_at)
 
-                ***REMOVED*** Calculate trend (simple linear trend)
+                # Calculate trend (simple linear trend)
                 values = [m.value for m in sorted_metrics]
                 if len(values) >= 2:
                     trend = (values[-1] - values[0]) / len(values)
@@ -780,7 +780,7 @@ class ISO9001ProcessDocumentation:
                 status = 'ON_TRACK'
                 if target:
                     deviation = abs(latest.value - target) / target
-                    if deviation > 0.1:  ***REMOVED*** 10% deviation
+                    if deviation > 0.1:  # 10% deviation
                         status = 'OFF_TRACK'
 
                 trends[name] = {
@@ -798,15 +798,15 @@ class ISO9001ProcessDocumentation:
         """Calculate overall process performance score"""
         score = 0
 
-        ***REMOVED*** Execution success (40%)
+        # Execution success (40%)
         success_rate = execution_stats.get('success_rate', 0)
         score += success_rate * 0.4
 
-        ***REMOVED*** Quality compliance (40%)
+        # Quality compliance (40%)
         compliance_rate = quality_stats.get('compliance_rate', 0)
         score += compliance_rate * 0.4
 
-        ***REMOVED*** Metric performance (20%)
+        # Metric performance (20%)
         on_track_metrics = sum(1 for t in metric_trends.values() if t['status'] == 'ON_TRACK')
         total_metrics = len(metric_trends)
         if total_metrics > 0:
@@ -838,7 +838,7 @@ class ISO9001ProcessDocumentation:
         compliance_score = 0
         requirements = []
 
-        ***REMOVED*** Documentation requirements (ISO 9001 clause 7.5)
+        # Documentation requirements (ISO 9001 clause 7.5)
         doc_compliance = doc_status.get('compliance_status', {})
         if doc_compliance.get('compliance_score', 0) >= 80:
             compliance_score += 30
@@ -846,7 +846,7 @@ class ISO9001ProcessDocumentation:
         else:
             requirements.append("Documented processes (7.5) - NON_COMPLIANT")
 
-        ***REMOVED*** Process performance (ISO 9001 clause 8.1)
+        # Process performance (ISO 9001 clause 8.1)
         perf_score = perf_status.get('performance_score', 0)
         if perf_score >= 80:
             compliance_score += 25
@@ -854,7 +854,7 @@ class ISO9001ProcessDocumentation:
         else:
             requirements.append("Process monitoring (8.1) - PARTIALLY_COMPLIANT")
 
-        ***REMOVED*** Quality records (ISO 9001 clause 8.3)
+        # Quality records (ISO 9001 clause 8.3)
         quality_compliance = perf_status.get('quality_stats', {}).get('compliance_rate', 0)
         if quality_compliance >= 90:
             compliance_score += 25
@@ -862,7 +862,7 @@ class ISO9001ProcessDocumentation:
         else:
             requirements.append("Quality records (8.3) - PARTIALLY_COMPLIANT")
 
-        ***REMOVED*** Continual improvement (ISO 9001 clause 10.3)
+        # Continual improvement (ISO 9001 clause 10.3)
         maturity_score = doc_status.get('overall_maturity_score', 0)
         if maturity_score >= 75:
             compliance_score += 20
@@ -883,24 +883,24 @@ class ISO9001ProcessDocumentation:
         """Generate recommendations for process documentation improvement"""
         recommendations = []
 
-        ***REMOVED*** Documentation coverage
+        # Documentation coverage
         coverage = doc_status.get('process_coverage', {}).get('overall_coverage', 0)
         if coverage < 80:
             recommendations.append("Increase process documentation coverage to at least 80%")
 
-        ***REMOVED*** Document approval status
+        # Document approval status
         doc_stats = doc_status.get('documentation_stats', {})
         draft_count = doc_stats.get('by_status', {}).get('draft', 0)
         total_docs = doc_stats.get('total_documents', 0)
         if total_docs > 0 and (draft_count / total_docs) > 0.2:
             recommendations.append("Reduce draft documents by approving and implementing documented processes")
 
-        ***REMOVED*** Review compliance
+        # Review compliance
         review_status = doc_status.get('review_status', {})
         if review_status.get('overdue_reviews', 0) > 0:
             recommendations.append("Conduct overdue document reviews within the next 30 days")
 
-        ***REMOVED*** Performance issues
+        # Performance issues
         perf_score = perf_status.get('performance_score', 0)
         if perf_score < 75:
             recommendations.append("Implement process performance monitoring and improvement measures")
@@ -914,7 +914,7 @@ class ISO9001ProcessDocumentation:
         """Identify specific action items for improvement"""
         action_items = []
 
-        ***REMOVED*** Missing document types
+        # Missing document types
         compliance = doc_status.get('compliance_status', {})
         issues = compliance.get('issues', [])
         for issue in issues:
@@ -926,7 +926,7 @@ class ISO9001ProcessDocumentation:
                     'due_date': (datetime.utcnow() + timedelta(days=30)).isoformat()
                 })
 
-        ***REMOVED*** Overdue reviews
+        # Overdue reviews
         review_status = doc_status.get('review_status', {})
         if review_status.get('overdue_reviews', 0) > 0:
             action_items.append({
@@ -936,7 +936,7 @@ class ISO9001ProcessDocumentation:
                 'due_date': (datetime.utcnow() + timedelta(days=14)).isoformat()
             })
 
-        ***REMOVED*** Performance improvements
+        # Performance improvements
         execution_stats = perf_status.get('execution_stats', {})
         success_rate = execution_stats.get('success_rate', 100)
         if success_rate < 95:

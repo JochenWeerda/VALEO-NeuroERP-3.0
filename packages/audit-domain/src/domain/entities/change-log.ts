@@ -43,16 +43,16 @@ export interface CreateChangeLogInput {
   entityType: string;
   entityId: string;
   action: ChangeActionType;
-  reason?: string;
-  oldValue?: Record<string, any>;
-  newValue?: Record<string, any>;
-  changedFields?: string[];
+  reason?: string | undefined;
+  oldValue?: Record<string, any> | undefined;
+  newValue?: Record<string, any> | undefined;
+  changedFields?: string[] | undefined;
   userId: string;
-  userName?: string;
-  userEmail?: string;
-  ipAddress?: string;
-  userAgent?: string;
-  metadata?: Record<string, any>;
+  userName?: string | undefined;
+  userEmail?: string | undefined;
+  ipAddress?: string | undefined;
+  userAgent?: string | undefined;
+  metadata?: Record<string, any> | undefined;
 }
 
 export class ChangeLogEntity {

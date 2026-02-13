@@ -44,21 +44,21 @@ export default function App() {
           name: 'Default',
           importance: Notifications.AndroidImportance.MAX,
           vibrationPattern: [0, 250, 250, 250],
-          lightColor: '***REMOVED***FF231F7C',
+          lightColor: '#FF231F7C',
         });
 
         await Notifications.setNotificationChannelAsync('leads', {
           name: 'New Leads',
           importance: Notifications.AndroidImportance.HIGH,
           vibrationPattern: [0, 250, 250, 250],
-          lightColor: '***REMOVED***00FF00',
+          lightColor: '#00FF00',
         });
 
         await Notifications.setNotificationChannelAsync('tasks', {
           name: 'Task Reminders',
           importance: Notifications.AndroidImportance.HIGH,
           vibrationPattern: [0, 250, 250, 250],
-          lightColor: '***REMOVED***0000FF',
+          lightColor: '#0000FF',
         });
 
       } catch (e) {

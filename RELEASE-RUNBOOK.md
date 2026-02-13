@@ -1,4 +1,4 @@
-***REMOVED*** 🚀 Release-Runbook – VALERO NeuroERP
+# 🚀 Release-Runbook – VALERO NeuroERP
 
 Standardabläufe für **Programm-Updates** (Patch, Minor, Major, Hotfix, Migrationen).
 
@@ -6,9 +6,9 @@ Standardabläufe für **Programm-Updates** (Patch, Minor, Major, Hotfix, Migrati
 
 ---
 
-***REMOVED******REMOVED*** 📦 Release-Typen
+## 📦 Release-Typen
 
-***REMOVED******REMOVED******REMOVED*** 1. Patch/Hotfix
+### 1. Patch/Hotfix
 
 **Zweck:** Fehlerkorrekturen, Security-Fixes, kleine UI-Fixes
 
@@ -26,7 +26,7 @@ Standardabläufe für **Programm-Updates** (Patch, Minor, Major, Hotfix, Migrati
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2. Minor Release
+### 2. Minor Release
 
 **Zweck:** Neue Features, backward-kompatibel
 
@@ -46,7 +46,7 @@ Standardabläufe für **Programm-Updates** (Patch, Minor, Major, Hotfix, Migrati
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 3. Major Release
+### 3. Major Release
 
 **Zweck:** Breaking Changes (API, Events, DB-Schema)
 
@@ -68,7 +68,7 @@ Standardabläufe für **Programm-Updates** (Patch, Minor, Major, Hotfix, Migrati
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 4. Migration Release
+### 4. Migration Release
 
 **Zweck:** Datenmigration (z.B. L3 → NeuroERP)
 
@@ -86,9 +86,9 @@ Standardabläufe für **Programm-Updates** (Patch, Minor, Major, Hotfix, Migrati
 
 ---
 
-***REMOVED******REMOVED*** 🛠️ Standardablauf (Scheduler + Audit)
+## 🛠️ Standardablauf (Scheduler + Audit)
 
-***REMOVED******REMOVED******REMOVED*** Phase 1: Vorbereitung
+### Phase 1: Vorbereitung
 
 **Verantwortlich:** Release Manager + DevOps
 
@@ -115,7 +115,7 @@ Standardabläufe für **Programm-Updates** (Patch, Minor, Major, Hotfix, Migrati
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Phase 2: Pre-Checks
+### Phase 2: Pre-Checks
 
 **Verantwortlich:** DevOps + QA
 
@@ -146,19 +146,19 @@ Standardabläufe für **Programm-Updates** (Patch, Minor, Major, Hotfix, Migrati
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Phase 3: Rollout
+### Phase 3: Rollout
 
 **Verantwortlich:** DevOps + Release Manager
 
 **Strategien:**
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **A) Rolling Update** (für Patches)
+#### **A) Rolling Update** (für Patches)
 ```bash
-***REMOVED*** Kubernetes Rolling Update
+# Kubernetes Rolling Update
 kubectl set image deployment/document-domain document=valero:1.2.4
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **B) Canary Deployment** (für Minor)
+#### **B) Canary Deployment** (für Minor)
 ```
 Phase 1: 10% Traffic (Tenant: Pilot-1)
   ↓ 15 Min Monitoring
@@ -167,7 +167,7 @@ Phase 2: 50% Traffic (Tenant: Pilot-1-5)
 Phase 3: 100% Traffic (alle Tenants)
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** **C) Blue/Green** (für Major)
+#### **C) Blue/Green** (für Major)
 ```
 Blue (alt): 100% Traffic
   ↓
@@ -181,10 +181,10 @@ Blue: Standby (15 Min), dann Shutdown
 **Monitoring während Rollout:**
 
 ```bash
-***REMOVED*** Analytics-Domain KPIs überwachen
+# Analytics-Domain KPIs überwachen
 GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 
-***REMOVED*** Alarm-Schwellwerte:
+# Alarm-Schwellwerte:
 - Error-Rate > 1% → Pause Rollout
 - p95-Latency > 500ms → Pause
 - Consumer Lag > 1000 → Pause
@@ -203,7 +203,7 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Phase 4: Post-Checks
+### Phase 4: Post-Checks
 
 **Verantwortlich:** QA + DevOps
 
@@ -211,7 +211,7 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 
 1. ✅ **Logs & KPIs überwachen** (30 Min)
    ```bash
-   ***REMOVED*** Analytics-Domain
+   # Analytics-Domain
    GET /analytics/api/v1/reports/release-comparison?before=1h&after=now
    ```
 
@@ -222,7 +222,7 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 
 3. ✅ **Integritätsprüfung**
    ```bash
-   ***REMOVED*** Audit-Domain
+   # Audit-Domain
    GET /audit/api/v1/integrity/check?from=<release-start>
    ```
 
@@ -238,7 +238,7 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Phase 5: Rollback (falls notwendig)
+### Phase 5: Rollback (falls notwendig)
 
 **Trigger:** Error-Rate > 2%, kritische Funktionen defekt, Integritätsverletzung
 
@@ -259,13 +259,13 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 
    **Blue/Green:**
    ```bash
-   ***REMOVED*** Switch zurück auf Blue
+   # Switch zurück auf Blue
    kubectl patch service document-domain -p '{"spec":{"selector":{"version":"blue"}}}'
    ```
 
    **Canary:**
    ```bash
-   ***REMOVED*** Traffic auf 0% setzen
+   # Traffic auf 0% setzen
    kubectl set weight canary-service 0
    ```
 
@@ -276,7 +276,7 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 
 4. ⚠️ **Feature Flags deaktivieren**
    ```bash
-   ***REMOVED*** Kill-Switch via Redis
+   # Kill-Switch via Redis
    redis-cli SET feature:new-pdf-renderer "false"
    ```
 
@@ -294,7 +294,7 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 
 ---
 
-***REMOVED******REMOVED*** 📑 Rollen & Verantwortung
+## 📑 Rollen & Verantwortung
 
 | Rolle | Verantwortung |
 |-------|---------------|
@@ -306,38 +306,38 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 
 ---
 
-***REMOVED******REMOVED*** 🔗 Integration mit Domains
+## 🔗 Integration mit Domains
 
-***REMOVED******REMOVED******REMOVED*** scheduler-domain
+### scheduler-domain
 - Automatisierte Rollouts
 - Canary-Wellen (10% → 50% → 100%)
 - Backfills nach DB-Migrationen
 
-***REMOVED******REMOVED******REMOVED*** document-domain
+### document-domain
 - Release Notes (PDF)
 - Migrationsleitfäden
 - Changelogs für Kunden
 
-***REMOVED******REMOVED******REMOVED*** notifications-domain
+### notifications-domain
 - Infos an Stakeholder
 - Wartungsfenster-Ankündigungen
 - On-Call-Alerts bei Problemen
 
-***REMOVED******REMOVED******REMOVED*** audit-domain
+### audit-domain
 - Revisionssichere Protokollierung
 - Freigaben (signiert)
 - KPI-Vergleiche
 
-***REMOVED******REMOVED******REMOVED*** analytics-domain
+### analytics-domain
 - KPI-Vergleich Vorher/Nachher
 - Error-Rate-Monitoring
 - Performance-Metriken
 
 ---
 
-***REMOVED******REMOVED*** ✅ Release-Checkliste
+## ✅ Release-Checkliste
 
-***REMOVED******REMOVED******REMOVED*** Vor dem Release
+### Vor dem Release
 
 - [ ] Changelog vollständig
 - [ ] Version korrekt (Git-Tag + Docker-Image)
@@ -348,7 +348,7 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 - [ ] Stakeholder informiert (24h vorher)
 - [ ] Audit: Release als Draft protokolliert
 
-***REMOVED******REMOVED******REMOVED*** Während des Rollouts
+### Während des Rollouts
 
 - [ ] Health-Checks laufen grün
 - [ ] Monitoring aktiv (Error-Rate, Latenz, Lag)
@@ -357,7 +357,7 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 - [ ] Notifications verschickt (Start, Fortschritt)
 - [ ] Audit: Jede Welle geloggt
 
-***REMOVED******REMOVED******REMOVED*** Nach dem Release
+### Nach dem Release
 
 - [ ] Smoke Tests durchgeführt
 - [ ] KPI-Vergleich analysiert
@@ -367,7 +367,7 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 - [ ] Audit: Release als Completed protokolliert
 - [ ] Retrospektive geplant
 
-***REMOVED******REMOVED******REMOVED*** Bei Rollback
+### Bei Rollback
 
 - [ ] Rollback-Grund dokumentiert
 - [ ] Down-Migrationen ausgeführt
@@ -379,7 +379,7 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 
 ---
 
-***REMOVED******REMOVED*** 📊 SLO-Schwellwerte für Rollout-Pause
+## 📊 SLO-Schwellwerte für Rollout-Pause
 
 | Metrik | Schwellwert | Aktion |
 |--------|-------------|--------|
@@ -391,9 +391,9 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 
 ---
 
-***REMOVED******REMOVED*** 🔄 DB-Migrations-Pattern
+## 🔄 DB-Migrations-Pattern
 
-***REMOVED******REMOVED******REMOVED*** Expand → Migrate → Contract
+### Expand → Migrate → Contract
 
 **Kompatible Änderungen (kein Downtime):**
 
@@ -420,9 +420,9 @@ COMMIT;
 
 ---
 
-***REMOVED******REMOVED*** 📡 Event-Sequenz
+## 📡 Event-Sequenz
 
-***REMOVED******REMOVED******REMOVED*** Erfolgreicher Rollout:
+### Erfolgreicher Rollout:
 ```
 1. scheduler.release.planned        (T-24h)
 2. notification.maintenance.scheduled (T-24h)
@@ -436,7 +436,7 @@ COMMIT;
 10. audit.release.logged            (T+90min)
 ```
 
-***REMOVED******REMOVED******REMOVED*** Rollback-Sequenz:
+### Rollback-Sequenz:
 ```
 1. scheduler.release.paused         (T+15min)
 2. notification.rollback.initiated  (T+15min)
@@ -447,15 +447,15 @@ COMMIT;
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Beispiel: Minor Release (document-domain 1.3.0)
+## 🎯 Beispiel: Minor Release (document-domain 1.3.0)
 
-***REMOVED******REMOVED******REMOVED*** Scope
+### Scope
 - Neue Funktion: Batch-Processing
 - API: `POST /documents/batch`
 - DB: Keine Schema-Änderungen
 - Events: Keine Breaking Changes
 
-***REMOVED******REMOVED******REMOVED*** Timeline
+### Timeline
 
 | Zeit | Phase | Aktion |
 |------|-------|--------|
@@ -469,7 +469,7 @@ COMMIT;
 | **T+60min** | Post-Checks | Smoke Tests ✅, KPI-Vergleich ✅ |
 | **T+90min** | Abschluss | Release Notes published, Audit completed |
 
-***REMOVED******REMOVED******REMOVED*** Audit-Trail
+### Audit-Trail
 ```json
 {
   "releaseId": "rel-2025-10-001",
@@ -494,9 +494,9 @@ COMMIT;
 
 ---
 
-***REMOVED******REMOVED*** 🚨 Incident-Handling
+## 🚨 Incident-Handling
 
-***REMOVED******REMOVED******REMOVED*** Schweregrade
+### Schweregrade
 
 | Grad | Beschreibung | Aktion |
 |------|--------------|--------|
@@ -505,7 +505,7 @@ COMMIT;
 | **P2** | Performance-Degradation | ⏸️ Pause, Analyse, weiter oder Rollback |
 | **P3** | Minor-Bug, Workaround verfügbar | ✅ Weiter, Hotfix später |
 
-***REMOVED******REMOVED******REMOVED*** Eskalationskette
+### Eskalationskette
 ```
 1. On-Call Engineer (sofort)
    ↓ (15 Min, keine Lösung)
@@ -516,15 +516,15 @@ COMMIT;
 
 ---
 
-***REMOVED******REMOVED*** 📖 Dokumentations-Artefakte
+## 📖 Dokumentations-Artefakte
 
-***REMOVED******REMOVED******REMOVED*** Vor Release
+### Vor Release
 - [ ] Release Notes (Markdown)
 - [ ] API-Changelog (OpenAPI Diff)
 - [ ] DB-Migrations-Plan
 - [ ] Rollback-Strategie
 
-***REMOVED******REMOVED******REMOVED*** Nach Release
+### Nach Release
 - [ ] Deployment-Report (PDF)
 - [ ] KPI-Vergleich (CSV/PDF)
 - [ ] Audit-Trail (signiert)
@@ -532,7 +532,7 @@ COMMIT;
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Success-Kriterien
+## 🎯 Success-Kriterien
 
 ✅ **Release erfolgreich, wenn:**
 - Alle Tests grün
@@ -547,3 +547,4 @@ COMMIT;
 **Version:** 1.0  
 **Wartung:** Bei jedem Major-Release aktualisieren  
 **Owner:** DevOps + Release Management
+

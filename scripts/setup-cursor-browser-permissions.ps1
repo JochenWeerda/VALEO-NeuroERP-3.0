@@ -1,10 +1,10 @@
-***REMOVED*** Setup Cursor Browser Permissions
-***REMOVED*** Automatisch "run this time only" Meldungen umgehen
+# Setup Cursor Browser Permissions
+# Automatisch "run this time only" Meldungen umgehen
 
 Write-Host "=== Cursor Browser Permissions Setup ===" -ForegroundColor Green
 Write-Host ""
 
-***REMOVED*** Finde Cursor Settings JSON
+# Finde Cursor Settings JSON
 $settingsPath = "$env:APPDATA\Cursor\User\settings.json"
 
 if (-not (Test-Path $settingsPath)) {
@@ -15,7 +15,7 @@ if (-not (Test-Path $settingsPath)) {
 
 Write-Host "Settings-Datei gefunden: $settingsPath" -ForegroundColor Green
 
-***REMOVED*** Lade aktuelle Settings
+# Lade aktuelle Settings
 try {
     $settingsContent = Get-Content $settingsPath -Raw -Encoding UTF8
     $settings = $settingsContent | ConvertFrom-Json
@@ -24,27 +24,27 @@ try {
     $settings = @{} | ConvertTo-Json | ConvertFrom-Json
 }
 
-***REMOVED*** Setze Browser-Berechtigungen
+# Setze Browser-Berechtigungen
 Write-Host "`nSetze Browser-Berechtigungen..." -ForegroundColor Yellow
 
-***REMOVED*** Erstelle Settings-Objekt falls nicht vorhanden
+# Erstelle Settings-Objekt falls nicht vorhanden
 if (-not $settings.PSObject.Properties['cursor']) {
     $settings | Add-Member -MemberType NoteProperty -Name 'cursor' -Value @{} -Force
 }
 
-***REMOVED*** Setze autoApprove
+# Setze autoApprove
 $settings.cursor | Add-Member -MemberType NoteProperty -Name 'mcp' -Value @{} -Force
 $settings.cursor.mcp | Add-Member -MemberType NoteProperty -Name 'browser' -Value @{} -Force
 $settings.cursor.mcp.browser | Add-Member -MemberType NoteProperty -Name 'autoApprove' -Value $true -Force
 
-***REMOVED*** Setze trustedDomains
+# Setze trustedDomains
 $settings.cursor.mcp.browser | Add-Member -MemberType NoteProperty -Name 'trustedDomains' -Value @(
     "localhost",
     "127.0.0.1",
     "*.valeo-neuro-erp.local"
 ) -Force
 
-***REMOVED*** Setze autoApproveActions
+# Setze autoApproveActions
 $settings.cursor.mcp.browser | Add-Member -MemberType NoteProperty -Name 'autoApproveActions' -Value @(
     "browser_navigate",
     "browser_snapshot",
@@ -59,7 +59,7 @@ $settings.cursor.mcp.browser | Add-Member -MemberType NoteProperty -Name 'autoAp
     "browser_press_key"
 ) -Force
 
-***REMOVED*** Speichere Settings
+# Speichere Settings
 try {
     $settings | ConvertTo-Json -Depth 10 | Set-Content $settingsPath -Encoding UTF8
     Write-Host "Settings erfolgreich gespeichert!" -ForegroundColor Green
@@ -79,3 +79,4 @@ Read-Host
 
 Write-Host "`nSetup abgeschlossen!" -ForegroundColor Green
 Write-Host "Bitte starte Cursor neu und teste die Browser-Aktionen." -ForegroundColor Cyan
+

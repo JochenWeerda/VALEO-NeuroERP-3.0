@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 GENXAIS Zyklus-Starter
@@ -15,11 +15,11 @@ import datetime
 import argparse
 from pathlib import Path
 
-***REMOVED*** Importiere die Versionskonfiguration
+# Importiere die Versionskonfiguration
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.genxais_version import get_version, get_previous_version, increment_version
 
-***REMOVED*** Konstanten
+# Konstanten
 DEFAULT_PROMPT_FILE = "prompts/launch_cycle_valero_{}.yaml"
 DATA_DIR = Path("data/dashboard")
 PHASES_FILE = DATA_DIR / "phases.json"
@@ -51,11 +51,11 @@ def initialize_dashboard_data(prompt_data, version=None):
     if version is None:
         version = get_version()
     
-    ***REMOVED*** Stelle sicher, dass die Verzeichnisse existieren
+    # Stelle sicher, dass die Verzeichnisse existieren
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     GRAPHITI_DIR.mkdir(parents=True, exist_ok=True)
     
-    ***REMOVED*** Initialisiere Phasen-Daten
+    # Initialisiere Phasen-Daten
     phases_data = {
         "version": version,
         "current_phase": "VAN",
@@ -63,17 +63,17 @@ def initialize_dashboard_data(prompt_data, version=None):
         "last_updated": datetime.datetime.now().isoformat()
     }
     
-    ***REMOVED*** Füge Phasen hinzu
+    # Füge Phasen hinzu
     default_phases = ["VAN", "PLAN", "CREATE", "IMPLEMENT", "REFLECT"]
     phases_from_prompt = prompt_data.get("phases", [])
     
-    ***REMOVED*** Wenn phases eine Liste von Strings ist, verwende diese direkt
+    # Wenn phases eine Liste von Strings ist, verwende diese direkt
     if phases_from_prompt and isinstance(phases_from_prompt[0], str):
         phase_names = phases_from_prompt
-    ***REMOVED*** Wenn phases eine Liste von Dictionaries ist, extrahiere die Namen
+    # Wenn phases eine Liste von Dictionaries ist, extrahiere die Namen
     elif phases_from_prompt and isinstance(phases_from_prompt[0], dict):
         phase_names = [phase.get("name", "") for phase in phases_from_prompt]
-    ***REMOVED*** Fallback zu Standardphasen
+    # Fallback zu Standardphasen
     else:
         phase_names = default_phases
     
@@ -88,7 +88,7 @@ def initialize_dashboard_data(prompt_data, version=None):
             "tasks": []
         }
         
-        ***REMOVED*** Füge Tasks hinzu, falls vorhanden
+        # Füge Tasks hinzu, falls vorhanden
         if isinstance(phases_from_prompt[0], dict):
             for phase in phases_from_prompt:
                 if phase.get("name") == phase_name:
@@ -102,18 +102,18 @@ def initialize_dashboard_data(prompt_data, version=None):
         
         phases_data["phases"].append(phase_data)
     
-    ***REMOVED*** Speichere Phasen-Daten
+    # Speichere Phasen-Daten
     with open(PHASES_FILE, 'w', encoding='utf-8') as f:
         json.dump(phases_data, f, indent=2, ensure_ascii=False)
     
-    ***REMOVED*** Initialisiere Pipeline-Daten
+    # Initialisiere Pipeline-Daten
     pipelines_data = {
         "version": version,
         "pipelines": [],
         "last_updated": datetime.datetime.now().isoformat()
     }
     
-    ***REMOVED*** Füge Pipelines hinzu
+    # Füge Pipelines hinzu
     for pipeline in prompt_data.get("pipelines", []):
         pipeline_id = pipeline.get("id", "")
         pipeline_name = pipeline.get("name", "")
@@ -130,7 +130,7 @@ def initialize_dashboard_data(prompt_data, version=None):
             "runtime": "0h 0m"
         }
         
-        ***REMOVED*** Füge Ziele hinzu
+        # Füge Ziele hinzu
         for goal in pipeline.get("goals", []):
             goal_data = {
                 "name": goal,
@@ -141,14 +141,14 @@ def initialize_dashboard_data(prompt_data, version=None):
         
         pipelines_data["pipelines"].append(pipeline_data)
     
-    ***REMOVED*** Speichere Pipeline-Daten
+    # Speichere Pipeline-Daten
     with open(PIPELINES_FILE, 'w', encoding='utf-8') as f:
         json.dump(pipelines_data, f, indent=2, ensure_ascii=False)
     
-    ***REMOVED*** Initialisiere Graphiti Decision Map
+    # Initialisiere Graphiti Decision Map
     decision_map_file = GRAPHITI_DIR / DECISION_MAP_FILE_TEMPLATE.format(version)
     
-    ***REMOVED*** Erstelle eine einfache Decision Map
+    # Erstelle eine einfache Decision Map
     next_version = get_next_version(version)
     decision_map = {
         "version": version,
@@ -229,7 +229,7 @@ def initialize_dashboard_data(prompt_data, version=None):
         "last_updated": datetime.datetime.now().isoformat()
     }
     
-    ***REMOVED*** Speichere Decision Map
+    # Speichere Decision Map
     with open(decision_map_file, 'w', encoding='utf-8') as f:
         json.dump(decision_map, f, indent=2, ensure_ascii=False)
 
@@ -241,7 +241,7 @@ def get_next_version(version):
         minor = int(version_parts[1])
         return f"{major}.{minor+1}"
     except Exception:
-        return "v1.6"  ***REMOVED*** Fallback
+        return "v1.6"  # Fallback
 
 def normalize_progress_values(data):
     """Normalisiert Fortschrittswerte auf den Bereich 0-100"""
@@ -265,7 +265,7 @@ def simulate_cycle_progress():
     """Simuliert den Fortschritt des GENXAIS-Zyklus"""
     print("Simuliere GENXAIS-Zyklus-Fortschritt...")
     
-    ***REMOVED*** Lade aktuelle Daten
+    # Lade aktuelle Daten
     try:
         with open(PHASES_FILE, 'r', encoding='utf-8') as f:
             phases_data = json.load(f)
@@ -282,20 +282,20 @@ def simulate_cycle_progress():
         print(f"Fehler beim Laden der Daten: {e}")
         return
     
-    ***REMOVED*** Simuliere Fortschritt für jede Phase
+    # Simuliere Fortschritt für jede Phase
     current_phase_index = 0
     for i, phase in enumerate(phases_data.get("phases", [])):
         if phase.get("status") == "active":
             current_phase_index = i
             break
     
-    ***REMOVED*** Simuliere Phasen-Fortschritt
-    for _ in range(5):  ***REMOVED*** 5 Simulationsschritte
-        ***REMOVED*** Aktualisiere aktuelle Phase
+    # Simuliere Phasen-Fortschritt
+    for _ in range(5):  # 5 Simulationsschritte
+        # Aktualisiere aktuelle Phase
         current_phase = phases_data["phases"][current_phase_index]
         current_phase["progress"] = min(100, current_phase["progress"] + 20)
         
-        ***REMOVED*** Aktualisiere Tasks
+        # Aktualisiere Tasks
         for task in current_phase.get("tasks", []):
             if task.get("status") == "pending":
                 task["status"] = "active"
@@ -307,19 +307,19 @@ def simulate_cycle_progress():
                     task["progress"] = 100
                     task["status"] = "completed"
         
-        ***REMOVED*** Prüfe, ob Phase abgeschlossen ist
+        # Prüfe, ob Phase abgeschlossen ist
         all_tasks_completed = all(task.get("status") == "completed" for task in current_phase.get("tasks", []))
         if all_tasks_completed:
             current_phase["status"] = "completed"
             current_phase["progress"] = 100
             
-            ***REMOVED*** Wechsle zur nächsten Phase
+            # Wechsle zur nächsten Phase
             if current_phase_index < len(phases_data["phases"]) - 1:
                 current_phase_index += 1
                 phases_data["phases"][current_phase_index]["status"] = "active"
                 phases_data["current_phase"] = phases_data["phases"][current_phase_index]["name"]
         
-        ***REMOVED*** Aktualisiere Pipelines
+        # Aktualisiere Pipelines
         for pipeline in pipelines_data.get("pipelines", []):
             if pipeline.get("status") == "planning":
                 pipeline["status"] = "active"
@@ -330,7 +330,7 @@ def simulate_cycle_progress():
                     pipeline["progress"] = 100
                     pipeline["status"] = "completed"
                 
-                ***REMOVED*** Aktualisiere Ziele
+                # Aktualisiere Ziele
                 for goal in pipeline.get("goals", []):
                     if goal.get("status") == "pending":
                         goal["status"] = "active"
@@ -342,7 +342,7 @@ def simulate_cycle_progress():
                             goal["progress"] = 100
                             goal["status"] = "completed"
                 
-                ***REMOVED*** Aktualisiere Laufzeit
+                # Aktualisiere Laufzeit
                 runtime = pipeline.get("runtime", "0h 0m")
                 hours, minutes = runtime.split("h ")
                 minutes = minutes.replace("m", "")
@@ -354,7 +354,7 @@ def simulate_cycle_progress():
                     minutes -= 60
                 pipeline["runtime"] = f"{hours}h {minutes}m"
         
-        ***REMOVED*** Aktualisiere Graphiti
+        # Aktualisiere Graphiti
         for node in graphiti_data.get("nodes", []):
             if node.get("id") == phases_data["current_phase"].lower():
                 node["status"] = "active"
@@ -372,7 +372,7 @@ def simulate_cycle_progress():
                 elif node.get("id") == "d4" and phase_progress.get("PLAN", 0) > 50:
                     node["status"] = "active"
         
-        ***REMOVED*** Aktualisiere DOT-Source
+        # Aktualisiere DOT-Source
         dot_source_lines = graphiti_data.get("dot_source", "").split("\n")
         updated_dot_source = []
         for line in dot_source_lines:
@@ -389,11 +389,11 @@ def simulate_cycle_progress():
             updated_dot_source.append(line)
         graphiti_data["dot_source"] = "\n".join(updated_dot_source)
         
-        ***REMOVED*** Normalisiere Fortschrittswerte
+        # Normalisiere Fortschrittswerte
         normalize_progress_values(phases_data)
         normalize_progress_values(pipelines_data)
         
-        ***REMOVED*** Speichere aktualisierte Daten
+        # Speichere aktualisierte Daten
         phases_data["last_updated"] = datetime.datetime.now().isoformat()
         pipelines_data["last_updated"] = datetime.datetime.now().isoformat()
         graphiti_data["last_updated"] = datetime.datetime.now().isoformat()
@@ -407,7 +407,7 @@ def simulate_cycle_progress():
         with open(decision_map_file, 'w', encoding='utf-8') as f:
             json.dump(graphiti_data, f, indent=2, ensure_ascii=False)
         
-        ***REMOVED*** Warte kurz
+        # Warte kurz
         print(f"Fortschritt: Phase {phases_data['current_phase']}, Fortschritt {current_phase['progress']}%")
         time.sleep(2)
 
@@ -419,7 +419,7 @@ def main():
     parser.add_argument("--simulate", action="store_true", help="Zyklus-Fortschritt simulieren")
     args = parser.parse_args()
     
-    ***REMOVED*** Version inkrementieren, falls gewünscht
+    # Version inkrementieren, falls gewünscht
     if args.increment:
         new_version = increment_version()
         print(f"Version inkrementiert auf {new_version}")
@@ -429,16 +429,16 @@ def main():
     
     print(f"Starte GENXAIS-Zyklus für Version {version}...")
     
-    ***REMOVED*** Lade Prompt
+    # Lade Prompt
     prompt_data = load_prompt(version)
     if prompt_data is None:
         print(f"Fehler: Konnte Prompt für Version {version} nicht laden.")
         return
     
-    ***REMOVED*** Initialisiere Dashboard-Daten
+    # Initialisiere Dashboard-Daten
     initialize_dashboard_data(prompt_data, version)
     
-    ***REMOVED*** Simuliere Zyklus-Fortschritt, falls gewünscht
+    # Simuliere Zyklus-Fortschritt, falls gewünscht
     if args.simulate:
         simulate_cycle_progress()
     

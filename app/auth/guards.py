@@ -40,12 +40,12 @@ def require_scopes(*required_scopes: str):
                 detail="Not authenticated"
             )
         
-        ***REMOVED*** Admin hat immer alle Rechte
+        # Admin hat immer alle Rechte
         user_scopes = user.get("scopes", [])
         if "admin:all" in user_scopes:
             return user
         
-        ***REMOVED*** Prüfe, ob User mindestens einen der erforderlichen Scopes hat
+        # Prüfe, ob User mindestens einen der erforderlichen Scopes hat
         has_required_scope = any(
             scope in user_scopes
             for scope in required_scopes
@@ -93,12 +93,12 @@ def require_all_scopes(*required_scopes: str):
                 detail="Not authenticated"
             )
         
-        ***REMOVED*** Admin hat immer alle Rechte
+        # Admin hat immer alle Rechte
         user_scopes = user.get("scopes", [])
         if "admin:all" in user_scopes:
             return user
         
-        ***REMOVED*** Prüfe, ob User ALLE erforderlichen Scopes hat
+        # Prüfe, ob User ALLE erforderlichen Scopes hat
         has_all_scopes = all(
             scope in user_scopes
             for scope in required_scopes
@@ -126,10 +126,10 @@ def optional_scopes(*required_scopes: str):
             user: Optional[dict] = Depends(optional_scopes("sales:read"))
         ):
             if user:
-                ***REMOVED*** Authenticated user mit Scope
+                # Authenticated user mit Scope
                 ...
             else:
-                ***REMOVED*** Public access
+                # Public access
                 ...
     
     Args:
@@ -146,12 +146,12 @@ def optional_scopes(*required_scopes: str):
         if not user:
             return None
         
-        ***REMOVED*** Admin hat immer alle Rechte
+        # Admin hat immer alle Rechte
         user_scopes = user.get("scopes", [])
         if "admin:all" in user_scopes:
             return user
         
-        ***REMOVED*** Prüfe Scopes
+        # Prüfe Scopes
         has_required_scope = any(
             scope in user_scopes
             for scope in required_scopes

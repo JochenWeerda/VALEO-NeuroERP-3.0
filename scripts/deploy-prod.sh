@@ -1,19 +1,19 @@
-***REMOVED***!/bin/bash
-***REMOVED*** VALEO NeuroERP - Produktions-Deployment-Skript
-***REMOVED*** =============================================
+#!/bin/bash
+# VALEO NeuroERP - Produktions-Deployment-Skript
+# =============================================
 
 set -e
 
 echo "🚀 VALEO NeuroERP - Produktions-Deployment"
 echo "=========================================="
 
-***REMOVED*** Farben für Output
+# Farben für Output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' ***REMOVED*** No Color
+NC='\033[0m' # No Color
 
-***REMOVED*** Funktionen
+# Funktionen
 log_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
 }
@@ -26,7 +26,7 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-***REMOVED*** Prüfe Umgebungsvariablen
+# Prüfe Umgebungsvariablen
 check_env() {
     log_info "Prüfe Umgebungsvariablen..."
     
@@ -36,10 +36,10 @@ check_env() {
         exit 1
     fi
     
-    ***REMOVED*** Lade Umgebungsvariablen
+    # Lade Umgebungsvariablen
     source .env.prod
     
-    ***REMOVED*** Prüfe kritische Variablen
+    # Prüfe kritische Variablen
     if [ -z "$POSTGRES_PASSWORD" ]; then
         log_error "POSTGRES_PASSWORD nicht gesetzt!"
         exit 1
@@ -53,21 +53,21 @@ check_env() {
     log_info "Umgebungsvariablen OK"
 }
 
-***REMOVED*** Backup erstellen
+# Backup erstellen
 create_backup() {
     log_info "Erstelle Backup..."
     
     BACKUP_DIR="./backups/$(date +%Y%m%d_%H%M%S)"
     mkdir -p "$BACKUP_DIR"
     
-    ***REMOVED*** Docker-Volumes sichern
+    # Docker-Volumes sichern
     docker run --rm -v valeo-neuroerp_postgres_data:/data -v "$(pwd)/$BACKUP_DIR":/backup alpine tar czf /backup/postgres_backup.tar.gz -C /data .
     docker run --rm -v valeo-neuroerp_redis_data:/data -v "$(pwd)/$BACKUP_DIR":/backup alpine tar czf /backup/redis_backup.tar.gz -C /data .
     
     log_info "Backup erstellt: $BACKUP_DIR"
 }
 
-***REMOVED*** Alte Container stoppen
+# Alte Container stoppen
 stop_old_containers() {
     log_info "Stoppe alte Container..."
     
@@ -75,14 +75,14 @@ stop_old_containers() {
     docker system prune -f
 }
 
-***REMOVED*** Neue Images bauen
+# Neue Images bauen
 build_images() {
     log_info "Baue Produktions-Images..."
     
     docker-compose -f docker-compose.prod.yml build --no-cache
 }
 
-***REMOVED*** Container starten
+# Container starten
 start_containers() {
     log_info "Starte Produktions-Container..."
     
@@ -92,11 +92,11 @@ start_containers() {
     sleep 30
 }
 
-***REMOVED*** Health Checks
+# Health Checks
 health_check() {
     log_info "Führe Health Checks durch..."
     
-    ***REMOVED*** Backend Health Check
+    # Backend Health Check
     if curl -f http://localhost:8000/health > /dev/null 2>&1; then
         log_info "✅ Backend ist gesund"
     else
@@ -104,7 +104,7 @@ health_check() {
         return 1
     fi
     
-    ***REMOVED*** Frontend Health Check
+    # Frontend Health Check
     if curl -f http://localhost:3000 > /dev/null 2>&1; then
         log_info "✅ Frontend ist gesund"
     else
@@ -112,7 +112,7 @@ health_check() {
         return 1
     fi
     
-    ***REMOVED*** Database Health Check
+    # Database Health Check
     if docker exec valeo-neuroerp-postgres-prod pg_isready -U valeo_user > /dev/null 2>&1; then
         log_info "✅ Database ist gesund"
     else
@@ -123,21 +123,21 @@ health_check() {
     log_info "Alle Health Checks erfolgreich!"
 }
 
-***REMOVED*** Monitoring einrichten
+# Monitoring einrichten
 setup_monitoring() {
     log_info "Richte Monitoring ein..."
     
-    ***REMOVED*** Warte auf Prometheus
+    # Warte auf Prometheus
     sleep 10
     
-    ***REMOVED*** Prüfe Prometheus
+    # Prüfe Prometheus
     if curl -f http://localhost:9090/-/healthy > /dev/null 2>&1; then
         log_info "✅ Prometheus läuft"
     else
         log_warn "⚠️ Prometheus nicht erreichbar"
     fi
     
-    ***REMOVED*** Prüfe Grafana
+    # Prüfe Grafana
     if curl -f http://localhost:3001/api/health > /dev/null 2>&1; then
         log_info "✅ Grafana läuft"
     else
@@ -145,15 +145,15 @@ setup_monitoring() {
     fi
 }
 
-***REMOVED*** Cleanup alte Backups
+# Cleanup alte Backups
 cleanup_old_backups() {
     log_info "Bereinige alte Backups..."
     
-    ***REMOVED*** Lösche Backups älter als 30 Tage
+    # Lösche Backups älter als 30 Tage
     find ./backups -name "*.tar.gz" -mtime +30 -delete 2>/dev/null || true
 }
 
-***REMOVED*** Hauptfunktion
+# Hauptfunktion
 main() {
     log_info "Starte Produktions-Deployment..."
     
@@ -180,5 +180,5 @@ main() {
     log_info "   - Stoppen: docker-compose -f docker-compose.prod.yml down"
 }
 
-***REMOVED*** Skript ausführen
+# Skript ausführen
 main "$@" 

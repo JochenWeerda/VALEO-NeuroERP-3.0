@@ -19,7 +19,7 @@ class PreferenceService:
     async def calculate(self, payload: PreferenceCalculationRequest) -> PreferenceCalculationResponse:
         originating_value, total_value = self._aggregate(payload)
         ratio = (originating_value / total_value * 100) if total_value else 0
-        qualifies = ratio >= 50  ***REMOVED*** Platzhalterregel
+        qualifies = ratio >= 50  # Platzhalterregel
         remarks = "qualifiziert" if qualifies else "keine Präferenz"
 
         record = models.PreferenceCalculation(
@@ -50,3 +50,4 @@ class PreferenceService:
         total = sum(component.value for component in payload.components)
         originating = sum(component.value for component in payload.components if component.originating)
         return originating, total
+

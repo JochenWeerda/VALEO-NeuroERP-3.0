@@ -1,4 +1,4 @@
-***REMOVED*** FiBu Frontend Code Inventory
+# FiBu Frontend Code Inventory
 
 Stand: aktuelle Codebasis `VALEO-NeuroERP-3.0`
 
@@ -6,7 +6,7 @@ Diese Übersicht dokumentiert alle identifizierten UI-Komponenten mit FiBu-Bezug
 
 ---
 
-***REMOVED******REMOVED*** 1. Navigation & Routing
+## 1. Navigation & Routing
 
 - `packages/frontend-web/src/app/routes.tsx`: Enthält Routing-Einträge für diverse FiBu-Seiten (`/finance/accounts`, `/finance/journal`, `/finance/op/debitoren`, …).
 - `packages/frontend-web/src/components/navigation/Sidebar.tsx` und `CommandPalette.tsx`: Referenzieren FiBu-Menüpunkte (Kontenplan, Kasse, OP-Listen, Mahnwesen, Zahlungsverkehr, UStVA).
@@ -15,7 +15,7 @@ Diese Übersicht dokumentiert alle identifizierten UI-Komponenten mit FiBu-Bezug
 
 ---
 
-***REMOVED******REMOVED*** 2. CRUD-/Listen-Ansichten (React Query + FinanceService)
+## 2. CRUD-/Listen-Ansichten (React Query + FinanceService)
 
 | Datei | Beschreibung | API-Abhängigkeit |
 | --- | --- | --- |
@@ -29,7 +29,7 @@ Diese Übersicht dokumentiert alle identifizierten UI-Komponenten mit FiBu-Bezug
 
 ---
 
-***REMOVED******REMOVED*** 3. Mask Builder / Formularbasierte Views
+## 3. Mask Builder / Formularbasierte Views
 
 | Datei | Fokus | Besonderheiten |
 | --- | --- | --- |
@@ -41,7 +41,7 @@ Diese Übersicht dokumentiert alle identifizierten UI-Komponenten mit FiBu-Bezug
 
 ---
 
-***REMOVED******REMOVED*** 4. OP-, AR-, AP-spezifische Seiten
+## 4. OP-, AR-, AP-spezifische Seiten
 
 - `op-debitoren.tsx`, `debitoren-liste.tsx`, `lastschriften-debitoren.tsx`, `mahnwesen.tsx`: Vollständige Debitoren-Workflows (OP-Historie, Mahnstufen, SEPA-Exports).
 - `kreditoren-stamm.tsx`, `zahlungslauf-kreditoren.tsx`: Kreditorenverwaltung + Zahlungsverkehr, inkl. Datenträgeraustausch UI.
@@ -51,7 +51,7 @@ Diese Übersicht dokumentiert alle identifizierten UI-Komponenten mit FiBu-Bezug
 
 ---
 
-***REMOVED******REMOVED*** 5. Finanz-Reporting & Dashboard-Elemente
+## 5. Finanz-Reporting & Dashboard-Elemente
 
 - `packages/frontend-web/src/pages/finance/kontenplan.tsx`: Visualisierung Kontenstrukturen.
 - `pages/finance/abschluss.tsx`, `ustva.tsx`: Reporting/Behördenmodule.
@@ -61,7 +61,7 @@ Diese Übersicht dokumentiert alle identifizierten UI-Komponenten mit FiBu-Bezug
 
 ---
 
-***REMOVED******REMOVED*** 6. API Client & Query Keys
+## 6. API Client & Query Keys
 
 - `src/lib/services/finance-service.ts`: zentrale REST-Client Implementierung (Accounts & Journal Entries). Muss erweitert/ersetzt werden, sobald Microservices in Phase 2+ existieren.
 - `src/lib/query.ts`: `queryKeys.finance` definiert Caching-Keys (z. B. `finance.chartOfAccounts`).
@@ -70,7 +70,7 @@ Diese Übersicht dokumentiert alle identifizierten UI-Komponenten mit FiBu-Bezug
 
 ---
 
-***REMOVED******REMOVED*** 7. UX-/Masken-Definitionen
+## 7. UX-/Masken-Definitionen
 
 - `src/config/mask-builder-valeo-modern.json`: Enthält Maskenkonfigurationen für FiBu-Objektseiten (z. B. Journal, OP-Listen, Belege).
 - `packages/frontend-web/src/components/mask-builder/*`: Generische Engine für Form-basierten Aufbau (Tabs, Validierung). Bereits FiBu-spezifische Felder (Belegart, Steuer, OP-Verlinkung) vorgesehen.
@@ -79,7 +79,7 @@ Diese Übersicht dokumentiert alle identifizierten UI-Komponenten mit FiBu-Bezug
 
 ---
 
-***REMOVED******REMOVED*** 8. Bewertung & Empfehlungen
+## 8. Bewertung & Empfehlungen
 
 | Bereich | Reuse-Empfehlung | Hinweise |
 | --- | --- | --- |
@@ -97,11 +97,12 @@ Diese Übersicht dokumentiert alle identifizierten UI-Komponenten mit FiBu-Bezug
 
 ---
 
-***REMOVED******REMOVED*** 9. Offene Fragen für Folge-Phasen
+## 9. Offene Fragen für Folge-Phasen
 
 - Müssen Masken auf neues Design-System (z. B. ShadCN/Mask Builder 2.0) gehoben werden?
 - Wie viele der existierenden Masken können wir als „Templates“ exportieren (Konfig statt hartem React-Code)?
 - Welche UIs benötigen Echtzeit-Updates (WebSockets/NATS) – z. B. OP-Listen bei Zahlungseingang?
 
 Diese Punkte fließen in Phase 0/1 Entscheidungen (Reuse-Matrix, Middleware-Mapping) ein.
+
 

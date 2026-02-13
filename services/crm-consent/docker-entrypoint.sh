@@ -1,10 +1,10 @@
-***REMOVED***!/bin/bash
-***REMOVED*** CRM-Consent Entrypoint - Führt Migrationen aus und startet den Server
+#!/bin/bash
+# CRM-Consent Entrypoint - Führt Migrationen aus und startet den Server
 set -e
 
 echo "🚀 CRM-Consent Service Starting..."
 
-***REMOVED*** Warte auf PostgreSQL
+# Warte auf PostgreSQL
 echo "⏳ Warte auf PostgreSQL..."
 for i in {1..30}; do
     if pg_isready -h postgres -p 5432 -U valeo_dev 2>/dev/null; then
@@ -15,7 +15,7 @@ for i in {1..30}; do
     sleep 2
 done
 
-***REMOVED*** Führe Alembic-Migrationen aus
+# Führe Alembic-Migrationen aus
 echo "📦 Führe Datenbank-Migrationen aus..."
 if alembic upgrade head 2>&1; then
     echo "✅ Migrationen erfolgreich!"
@@ -25,4 +25,5 @@ fi
 
 echo "🌐 Starte Server..."
 exec python main.py
+
 

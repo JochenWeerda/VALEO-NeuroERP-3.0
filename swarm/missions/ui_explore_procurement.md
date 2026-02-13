@@ -1,16 +1,16 @@
-***REMOVED*** Mission: UI Exploration - Procurement Module
+# Mission: UI Exploration - Procurement Module
 
 **ROLE:** UI-Explorer  
 **Target:** ${NEUROERP_URL}  
 **Status:** [ ] Not Started | [ ] In Progress | [ ] Complete
 
-***REMOVED******REMOVED*** Mission Brief
+## Mission Brief
 
 Explore the Procurement module of Valero NeuroERP and document all flows, screens, and findings.
 
-***REMOVED******REMOVED*** Exploration Tasks
+## Exploration Tasks
 
-***REMOVED******REMOVED******REMOVED*** 1. Procurement -> Purchase Orders -> Create PO
+### 1. Procurement -> Purchase Orders -> Create PO
 - [ ] Navigate to Procurement module
 - [ ] Open Purchase Orders list
 - [ ] Create new purchase order
@@ -20,27 +20,27 @@ Explore the Procurement module of Valero NeuroERP and document all flows, screen
 - [ ] Note any unclear steps
 - [ ] Note validation issues
 
-***REMOVED******REMOVED******REMOVED*** 2. Procurement -> Suppliers -> Manage Suppliers
+### 2. Procurement -> Suppliers -> Manage Suppliers
 - [ ] Navigate to Suppliers
 - [ ] Create/edit supplier
 - [ ] Document flow
 - [ ] Take screenshots
 - [ ] Note findings
 
-***REMOVED******REMOVED******REMOVED*** 3. Procurement -> Goods Receipt -> Post Receipt
+### 3. Procurement -> Goods Receipt -> Post Receipt
 - [ ] Navigate to Goods Receipt
 - [ ] Post goods receipt
 - [ ] Document flow
 - [ ] Take screenshots
 - [ ] Note findings
 
-***REMOVED******REMOVED*** Output Requirements
+## Output Requirements
 
 - Screenshots in `/evidence/screenshots/procurement/*`
 - Handoff summary `/swarm/handoffs/ui-explorer-procurement.md`
 - JSON summary with all findings
 
-***REMOVED******REMOVED*** Acceptance Criteria
+## Acceptance Criteria
 
 - [ ] All three flows explored
 - [ ] Screenshots for each step
@@ -48,10 +48,11 @@ Explore the Procurement module of Valero NeuroERP and document all flows, screen
 - [ ] JSON summary generated
 - [ ] All findings documented
 
-***REMOVED******REMOVED*** Definition of Done
+## Definition of Done
 
 - UI-Explorer has completed exploration
 - All screenshots saved
 - Handoff note created with findings
 - Ready for Test-Planner to create test plan
+
 

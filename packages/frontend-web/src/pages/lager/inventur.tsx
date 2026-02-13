@@ -4,26 +4,31 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { CheckCircle, ClipboardList, Search } from 'lucide-react'
-
-type InventurPosition = {
-  id: string
-  artikel: string
-  lagerort: string
-  sollBestand: number
-  istBestand: number
-  differenz: number
-  status: 'offen' | 'gezaehlt' | 'abgeschlossen'
-}
-
-const mockPositionen: InventurPosition[] = [
-  { id: '1', artikel: 'Weizen Premium', lagerort: 'Silo 1', sollBestand: 450, istBestand: 0, differenz: 0, status: 'offen' },
-  { id: '2', artikel: 'Sojaschrot 44%', lagerort: 'Halle A', sollBestand: 280, istBestand: 278, differenz: -2, status: 'gezaehlt' },
-]
+import { useToast } from '@/hooks/use-toast'
+import { useInventur, useCompleteInventurPositions } from '@/lib/api/inventory'
+import type { InventurPosition } from '@/lib/api/inventory'
 
 export default function InventurPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const { toast } = useToast()
+
+  const { data, isLoading } = useInventur({ search: searchTerm || undefined })
+  const completeMutation = useCompleteInventurPositions()
+  const positionen = data?.items ?? []
+
+  const handleComplete = async () => {
+    const ids = Array.from(selected)
+    try {
+      await completeMutation.mutateAsync(ids)
+      setSelected(new Set())
+      toast({ title: 'Abgeschlossen', description: `${ids.length} Position(en) abgeschlossen.` })
+    } catch {
+      toast({ title: 'Fehler', description: 'Positionen konnten nicht abgeschlossen werden.', variant: 'destructive' })
+    }
+  }
 
   const columns = [
     {
@@ -62,14 +67,32 @@ export default function InventurPage(): JSX.Element {
     },
   ]
 
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}
+        </div>
+        <Skeleton className="h-48 w-full" />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Inventur</h1>
-          <p className="text-muted-foreground">Stichtagsinventur 2025</p>
+          <p className="text-muted-foreground">Stichtagsinventur {new Date().getFullYear()}</p>
         </div>
-        <Button disabled={selected.size === 0}>
+        <Button disabled={selected.size === 0 || completeMutation.isPending} onClick={handleComplete}>
           <CheckCircle className="h-4 w-4 mr-2" />
           {selected.size} Position(en) abschließen
         </Button>
@@ -83,7 +106,7 @@ export default function InventurPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <ClipboardList className="h-5 w-5" />
-              <span className="text-2xl font-bold">{mockPositionen.length}</span>
+              <span className="text-2xl font-bold">{positionen.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -93,7 +116,7 @@ export default function InventurPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Offen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockPositionen.filter((p) => p.status === 'offen').length}</span>
+            <span className="text-2xl font-bold">{positionen.filter((p) => p.status === 'offen').length}</span>
           </CardContent>
         </Card>
 
@@ -102,7 +125,7 @@ export default function InventurPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Abgeschlossen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockPositionen.filter((p) => p.status === 'abgeschlossen').length}</span>
+            <span className="text-2xl font-bold text-green-600">{positionen.filter((p) => p.status === 'abgeschlossen').length}</span>
           </CardContent>
         </Card>
       </div>
@@ -121,7 +144,7 @@ export default function InventurPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockPositionen} columns={columns} />
+          <DataTable data={positionen} columns={columns} />
         </CardContent>
       </Card>
     </div>

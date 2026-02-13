@@ -9,7 +9,7 @@ spec:
   gateways:
     - valeo-gateway
   http:
-    ***REMOVED*** CRM Routes
+    # CRM Routes
     - match:
         - uri:
             prefix: /api/v1/crm
@@ -24,7 +24,7 @@ spec:
         retryOn: 5xx,reset,connect-failure
       timeout: 10s
     
-    ***REMOVED*** Inventory Routes  
+    # Inventory Routes  
     - match:
         - uri:
             prefix: /api/v1/inventory
@@ -38,7 +38,7 @@ spec:
         perTryTimeout: 2s
       timeout: 10s
     
-    ***REMOVED*** Finance Routes
+    # Finance Routes
     - match:
         - uri:
             prefix: /api/v1
@@ -52,7 +52,7 @@ spec:
             host: finance-service-canary
             port:
               number: 8003
-          weight: 10  ***REMOVED*** 10% canary traffic
+          weight: 10  # 10% canary traffic
       retries:
         attempts: 3
         perTryTimeout: 2s

@@ -1,10 +1,10 @@
 version: "3.8"
 
-***REMOVED*** Observability-Stack für VALEO-NeuroERP
-***REMOVED*** Prometheus + Grafana + Loki + Promtail
+# Observability-Stack für VALEO-NeuroERP
+# Prometheus + Grafana + Loki + Promtail
 
 services:
-  ***REMOVED*** Prometheus - Metrics Collection
+  # Prometheus - Metrics Collection
   prometheus:
     image: prom/prometheus:latest
     container_name: valeo-prometheus
@@ -24,7 +24,7 @@ services:
       - observability
     restart: unless-stopped
 
-  ***REMOVED*** AlertManager - Alert Routing
+  # AlertManager - Alert Routing
   alertmanager:
     image: prom/alertmanager:latest
     container_name: valeo-alertmanager
@@ -40,7 +40,7 @@ services:
       - observability
     restart: unless-stopped
 
-  ***REMOVED*** Grafana - Visualization
+  # Grafana - Visualization
   grafana:
     image: grafana/grafana:latest
     container_name: valeo-grafana
@@ -57,7 +57,7 @@ services:
       - observability
     restart: unless-stopped
 
-  ***REMOVED*** Loki - Log Aggregation
+  # Loki - Log Aggregation
   loki:
     image: grafana/loki:latest
     container_name: valeo-loki
@@ -71,7 +71,7 @@ services:
       - observability
     restart: unless-stopped
 
-  ***REMOVED*** Promtail - Log Shipper
+  # Promtail - Log Shipper
   promtail:
     image: grafana/promtail:latest
     container_name: valeo-promtail
@@ -93,4 +93,5 @@ volumes:
   alertmanager_data:
   grafana_data:
   loki_data:
+
 

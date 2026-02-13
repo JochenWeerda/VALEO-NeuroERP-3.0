@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Entfernt Null-Bytes aus Python-Dateien im gesamten Projekt.
 """
@@ -10,16 +10,16 @@ from pathlib import Path
 def fix_file(file_path):
     """Entfernt Null-Bytes aus einer Datei."""
     try:
-        ***REMOVED*** Datei im Binärmodus lesen
+        # Datei im Binärmodus lesen
         with open(file_path, 'rb') as file:
             content = file.read()
         
-        ***REMOVED*** Null-Bytes entfernen
+        # Null-Bytes entfernen
         cleaned_content = content.replace(b'\x00', b'')
         
-        ***REMOVED*** Prüfen, ob Änderungen vorgenommen wurden
+        # Prüfen, ob Änderungen vorgenommen wurden
         if content != cleaned_content:
-            ***REMOVED*** Datei im Binärmodus schreiben
+            # Datei im Binärmodus schreiben
             with open(file_path, 'wb') as file:
                 file.write(cleaned_content)
             print(f"Null-Bytes aus {file_path} entfernt.")
@@ -35,7 +35,7 @@ def process_directory(directory_path):
     """Verarbeitet alle Python-Dateien in einem Verzeichnis."""
     fixed_files = 0
     
-    ***REMOVED*** Alle Python-Dateien im Verzeichnis durchlaufen
+    # Alle Python-Dateien im Verzeichnis durchlaufen
     for root, _, files in os.walk(directory_path):
         for file in files:
             if file.endswith('.py'):
@@ -47,14 +47,14 @@ def process_directory(directory_path):
 
 def main():
     """Hauptfunktion."""
-    ***REMOVED*** Pfad zum Projektverzeichnis
+    # Pfad zum Projektverzeichnis
     project_path = Path(__file__).resolve().parent.parent
     
     if not project_path.exists():
         print(f"Verzeichnis nicht gefunden: {project_path}")
         sys.exit(1)
     
-    ***REMOVED*** Zu überprüfende Verzeichnisse
+    # Zu überprüfende Verzeichnisse
     directories = [
         project_path / "backend",
         project_path / "scripts",

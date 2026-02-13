@@ -1,4 +1,4 @@
-***REMOVED*** Phase 1.4 - Segmente & Zielgruppen
+# Phase 1.4 - Segmente & Zielgruppen
 
 **Status:** 🚀 In Progress  
 **Priorität:** 🟡 Mittel  
@@ -8,7 +8,7 @@
 **Owner:** Marketing-Team  
 **Aufwand:** 2-3 Wochen
 
-***REMOVED******REMOVED*** Mission Overview
+## Mission Overview
 
 Implementierung eines vollständigen Segmentierungs-Systems mit:
 - Regelbasierte Segmente (dynamisch)
@@ -17,16 +17,16 @@ Implementierung eines vollständigen Segmentierungs-Systems mit:
 - Segment-basierte Kampagnen-Zuweisung
 - Automatische Segment-Aktualisierung
 
-***REMOVED******REMOVED*** Backend Tasks
+## Backend Tasks
 
-***REMOVED******REMOVED******REMOVED*** 1. Service erstellen: `services/crm-marketing/`
+### 1. Service erstellen: `services/crm-marketing/`
 - [ ] Projektstruktur anlegen
 - [ ] FastAPI-App mit Router
 - [ ] Database-Models (SQLAlchemy)
 - [ ] Pydantic-Schemas
 - [ ] Alembic-Migrationen
 
-***REMOVED******REMOVED******REMOVED*** 2. Database Models
+### 2. Database Models
 - [ ] `Segment` Entity:
   - `id`, `tenant_id`
   - `name`, `description`
@@ -63,7 +63,7 @@ Implementierung eines vollständigen Segmentierungs-Systems mit:
   - `conversion_rate`
   - `revenue` (optional)
 
-***REMOVED******REMOVED******REMOVED*** 3. API Endpoints
+### 3. API Endpoints
 - [ ] `POST /segments` - Segment erstellen
 - [ ] `GET /segments` - Liste mit Filtern
 - [ ] `GET /segments/{id}` - Detail
@@ -79,7 +79,7 @@ Implementierung eines vollständigen Segmentierungs-Systems mit:
 - [ ] `GET /segments/{id}/performance` - Performance-Daten
 - [ ] `GET /segments/{id}/export` - Segment exportieren
 
-***REMOVED******REMOVED******REMOVED*** 4. Business Logic
+### 4. Business Logic
 - [ ] **Segment-Berechnung (dynamisch)**:
   - Regel-Engine: Evaluierung von Segment-Regeln
   - Query-Builder: Dynamische SQL-Queries basierend auf Regeln
@@ -97,23 +97,23 @@ Implementierung eines vollständigen Segmentierungs-Systems mit:
   - JSON-Export
   - API-Integration für externe Systeme
 
-***REMOVED******REMOVED******REMOVED*** 5. Events
+### 5. Events
 - [ ] `crm.segment.created`
 - [ ] `crm.segment.updated`
 - [ ] `crm.segment.member_added`
 - [ ] `crm.segment.member_removed`
 - [ ] `crm.segment.calculated`
 
-***REMOVED******REMOVED*** Frontend Tasks
+## Frontend Tasks
 
-***REMOVED******REMOVED******REMOVED*** 1. Segmente Liste
+### 1. Segmente Liste
 - [ ] `packages/frontend-web/src/pages/crm/segments.tsx`
   - ListReport mit Filtern
   - Spalten: Name, Type, Status, Member Count, Last Updated, Performance
   - Bulk-Actions: Calculate, Export, Archive
   - Export-Funktion
 
-***REMOVED******REMOVED******REMOVED*** 2. Segment Detail
+### 2. Segment Detail
 - [ ] `packages/frontend-web/src/pages/crm/segment-detail.tsx`
   - ObjectPage mit Tabs:
     - Grundinformationen
@@ -122,7 +122,7 @@ Implementierung eines vollständigen Segmentierungs-Systems mit:
     - Performance (Charts & Metriken)
   - Aktionen: Save, Calculate, Export, Archive
 
-***REMOVED******REMOVED******REMOVED*** 3. Segment Rule Builder
+### 3. Segment Rule Builder
 - [ ] `packages/frontend-web/src/components/crm/segment-rule-builder.tsx`
   - Visual Rule Builder
   - Drag & Drop für Regeln
@@ -132,48 +132,48 @@ Implementierung eines vollständigen Segmentierungs-Systems mit:
   - Logical Operators (AND/OR)
   - Preview: Anzahl der betroffenen Kontakte
 
-***REMOVED******REMOVED******REMOVED*** 4. Segment Performance Dashboard
+### 4. Segment Performance Dashboard
 - [ ] `packages/frontend-web/src/pages/crm/segment-performance.tsx`
   - Charts: Member Count Over Time
   - Charts: Conversion Rate
   - Charts: Campaign Performance
   - Metriken: Total Members, Active Members, Growth Rate
 
-***REMOVED******REMOVED******REMOVED*** 5. Integration in Campaigns
+### 5. Integration in Campaigns
 - [ ] Segment-Auswahl in Campaign-Erstellung
 - [ ] Segment-Filter in Campaign-Liste
 
-***REMOVED******REMOVED*** Integration Tasks
+## Integration Tasks
 
-***REMOVED******REMOVED******REMOVED*** 1. Segment-Berechnung aus CRM-Core
+### 1. Segment-Berechnung aus CRM-Core
 - [ ] Contact-Felder abfragen
 - [ ] Customer-Felder abfragen
 - [ ] Activity-Daten abfragen
 - [ ] Purchase-History abfragen
 
-***REMOVED******REMOVED******REMOVED*** 2. Segment-Performance aus Campaigns
+### 2. Segment-Performance aus Campaigns
 - [ ] Campaign-Erfolg pro Segment
 - [ ] Conversion-Rate pro Segment
 - [ ] Revenue-Attribution
 
-***REMOVED******REMOVED******REMOVED*** 3. Segment-Export für Marketing-Tools
+### 3. Segment-Export für Marketing-Tools
 - [ ] CSV-Format für Email-Marketing
 - [ ] JSON-Format für API-Integration
 - [ ] Custom-Format für spezifische Tools
 
-***REMOVED******REMOVED*** Tests
+## Tests
 
-***REMOVED******REMOVED******REMOVED*** 1. Unit Tests
+### 1. Unit Tests
 - [ ] Segment-Model Tests
 - [ ] Rule-Engine Tests
 - [ ] Query-Builder Tests
 
-***REMOVED******REMOVED******REMOVED*** 2. Integration Tests
+### 2. Integration Tests
 - [ ] API-Endpoint Tests
 - [ ] Segment-Berechnung Tests
 - [ ] Performance-Aggregation Tests
 
-***REMOVED******REMOVED******REMOVED*** 3. E2E Tests
+### 3. E2E Tests
 - [ ] `tests/e2e/crm-marketing/segments.spec.ts`
   - Segment erstellen (dynamisch)
   - Segment erstellen (statisch)
@@ -183,7 +183,7 @@ Implementierung eines vollständigen Segmentierungs-Systems mit:
   - Performance anzeigen
   - Segment exportieren
 
-***REMOVED******REMOVED*** Definition of Done
+## Definition of Done
 
 - ✅ Dynamische Segmente funktional (regelbasiert)
 - ✅ Statische Segmente funktional (manuell)
@@ -194,7 +194,7 @@ Implementierung eines vollständigen Segmentierungs-Systems mit:
 - ✅ Integration in Campaigns
 - ✅ Alle Tests grün
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. Backend-Service erstellen
 2. Database-Models implementieren
@@ -212,4 +212,5 @@ Implementierung eines vollständigen Segmentierungs-Systems mit:
 - Segmentierung in Marketing-Automation
 - Regel-Engine Patterns
 - Performance-Optimierung für große Datenmengen
+
 

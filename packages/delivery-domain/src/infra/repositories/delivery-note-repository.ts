@@ -6,14 +6,14 @@
 import { DeliveryNote, DeliveryNoteStatus } from '../../domain/entities/delivery-note';
 
 export interface DeliveryNoteFilter {
-  customerId?: string;
-  salesOfferId?: string;
-  status?: DeliveryNoteStatus;
-  deliveryDateFrom?: Date;
-  deliveryDateTo?: Date;
-  shipped?: boolean;
-  delivered?: boolean;
-  overdue?: boolean;
+  customerId?: string | undefined;
+  salesOfferId?: string | undefined;
+  status?: DeliveryNoteStatus | undefined;
+  deliveryDateFrom?: Date | undefined;
+  deliveryDateTo?: Date | undefined;
+  shipped?: boolean | undefined;
+  delivered?: boolean | undefined;
+  overdue?: boolean | undefined;
 }
 
 export interface DeliveryNoteSort {

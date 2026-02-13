@@ -11,7 +11,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = '001_initial_gdpr'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
@@ -19,25 +19,25 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Create gdpr_requests table
+    # Create gdpr_requests table
     op.create_table(
         'crm_gdpr_requests',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column('tenant_id', sa.String(64), nullable=False),
-        sa.Column('request_type', sa.String(20), nullable=False),  ***REMOVED*** access, deletion, portability, objection
+        sa.Column('request_type', sa.String(20), nullable=False),  # access, deletion, portability, objection
         sa.Column('contact_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('status', sa.String(20), nullable=False, server_default='pending'),  ***REMOVED*** pending, in_progress, completed, rejected, cancelled
+        sa.Column('status', sa.String(20), nullable=False, server_default='pending'),  # pending, in_progress, completed, rejected, cancelled
         sa.Column('requested_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
         sa.Column('completed_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('rejected_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('requested_by', sa.String(255), nullable=False),
         sa.Column('is_self_request', sa.Boolean, nullable=False, server_default='true'),
         sa.Column('verified_at', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('verification_method', sa.String(20), nullable=True),  ***REMOVED*** email, id_card, manual, other
+        sa.Column('verification_method', sa.String(20), nullable=True),  # email, id_card, manual, other
         sa.Column('verification_token', postgresql.UUID(as_uuid=True), nullable=True, unique=True),
         sa.Column('response_data', postgresql.JSONB, nullable=True),
         sa.Column('response_file_path', sa.String(512), nullable=True),
-        sa.Column('response_file_format', sa.String(10), nullable=True),  ***REMOVED*** json, csv, pdf
+        sa.Column('response_file_format', sa.String(10), nullable=True),  # json, csv, pdf
         sa.Column('rejection_reason', sa.Text, nullable=True),
         sa.Column('notes', sa.Text, nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
@@ -46,19 +46,19 @@ def upgrade() -> None:
         sa.Column('updated_by', sa.String(255), nullable=True),
     )
     
-    ***REMOVED*** Create indexes
+    # Create indexes
     op.create_index('idx_gdpr_request_tenant_id', 'crm_gdpr_requests', ['tenant_id'])
     op.create_index('idx_gdpr_request_contact_id', 'crm_gdpr_requests', ['contact_id'])
     op.create_index('idx_gdpr_request_status', 'crm_gdpr_requests', ['status'])
     op.create_index('idx_gdpr_request_type', 'crm_gdpr_requests', ['request_type'])
     op.create_index('idx_gdpr_request_verification_token', 'crm_gdpr_requests', ['verification_token'], unique=True)
     
-    ***REMOVED*** Create gdpr_request_history table
+    # Create gdpr_request_history table
     op.create_table(
         'crm_gdpr_request_history',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column('request_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('action', sa.String(20), nullable=False),  ***REMOVED*** created, status_changed, verified, data_exported, data_deleted, rejected, cancelled
+        sa.Column('action', sa.String(20), nullable=False),  # created, status_changed, verified, data_exported, data_deleted, rejected, cancelled
         sa.Column('old_status', sa.String(20), nullable=True),
         sa.Column('new_status', sa.String(20), nullable=True),
         sa.Column('notes', sa.Text, nullable=True),
@@ -67,7 +67,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['request_id'], ['crm_gdpr_requests.id'], ondelete='CASCADE'),
     )
     
-    ***REMOVED*** Create indexes for history
+    # Create indexes for history
     op.create_index('idx_gdpr_request_history_request_id', 'crm_gdpr_request_history', ['request_id'])
     op.create_index('idx_gdpr_request_history_changed_at', 'crm_gdpr_request_history', ['changed_at'])
 
@@ -75,4 +75,5 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_table('crm_gdpr_request_history')
     op.drop_table('crm_gdpr_requests')
+
 

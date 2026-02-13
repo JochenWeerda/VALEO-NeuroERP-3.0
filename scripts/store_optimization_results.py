@@ -4,12 +4,12 @@ Script zum Speichern der Optimierungsergebnisse in MongoDB
 from datetime import datetime
 from pymongo import MongoClient
 
-***REMOVED*** MongoDB Verbindung
+# MongoDB Verbindung
 client = MongoClient('mongodb://localhost:27017/')
 db = client['valeo_neuroerp']
 collection = db['optimization_results']
 
-***REMOVED*** Optimierungsergebnisse
+# Optimierungsergebnisse
 optimization_results = {
     "date": datetime(2025, 7, 4),
     "type": "system_optimization",
@@ -145,9 +145,9 @@ CREATE TABLE artikel (
     }
 }
 
-***REMOVED*** Speichere die Ergebnisse in MongoDB
+# Speichere die Ergebnisse in MongoDB
 result = collection.insert_one(optimization_results)
 print(f"Optimierungsergebnisse in MongoDB gespeichert. Document ID: {result.inserted_id}")
 
-***REMOVED*** Erstelle einen Index auf dem Datum für schnellere Abfragen
+# Erstelle einen Index auf dem Datum für schnellere Abfragen
 collection.create_index("date") 

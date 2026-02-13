@@ -224,7 +224,7 @@ def test_finance_currency_code_wrong_type(sample_raw_metadata):
         "RAW_FINANCE": {
             "CURRENCY_CODE": {
                 "target": "domain_finance.currency.currency_code",
-                "type": "integer",  ***REMOVED*** Wrong type
+                "type": "integer",  # Wrong type
                 "nullable": False,
                 "notes": "Test",
             }
@@ -244,7 +244,7 @@ def test_hr_person_id_requires_uuid_type(sample_raw_metadata):
         "RAW_HR": {
             "PERSON_ID": {
                 "target": "domain_hr.person.person_id",
-                "type": "text",  ***REMOVED*** Wrong type
+                "type": "text",  # Wrong type
                 "nullable": False,
                 "notes": "Test",
             }
@@ -265,7 +265,7 @@ def test_mfg_event_ts_nullable_expectation(sample_raw_metadata):
             "EVENT_TS": {
                 "target": "domain_mfg.production_event.event_ts",
                 "type": "datetime",
-                "nullable": True,  ***REMOVED*** Should be False
+                "nullable": True,  # Should be False
                 "notes": "Test",
             }
         }
@@ -286,14 +286,14 @@ def test_crm_email_optional_type(sample_raw_metadata):
                 "target": "domain_crm.contact.email",
                 "nullable": True,
                 "notes": "Test",
-                ***REMOVED*** No type specified, should be ok since require_type=False
+                # No type specified, should be ok since require_type=False
             }
         }
     }
     raw = sample_raw_metadata
 
     findings, _ = validate_entries(mapping, raw)
-    ***REMOVED*** Should not have error for missing type since require_type=False
+    # Should not have error for missing type since require_type=False
     assert not message_contains(
         collect_levels(findings, "ERROR"),
         "Type is required for this domain column but missing",
@@ -318,7 +318,7 @@ def test_duplicate_targets_error(sample_raw_metadata):
         },
         "RAW_CRM": {
             "EMAIL": {
-                "target": "domain_finance.currency.currency_code",  ***REMOVED*** Duplicate
+                "target": "domain_finance.currency.currency_code",  # Duplicate
                 "type": "text",
                 "nullable": True,
                 "notes": "Test",
@@ -341,7 +341,7 @@ def test_missing_target_error(sample_raw_metadata):
                 "type": "text",
                 "nullable": False,
                 "notes": "Test",
-                ***REMOVED*** Missing target
+                # Missing target
             }
         }
     }
@@ -358,7 +358,7 @@ def test_invalid_target_format(sample_raw_metadata):
     mapping = {
         "RAW_FINANCE": {
             "CURRENCY_CODE": {
-                "target": "domain_finance.currency_code",  ***REMOVED*** Missing third part
+                "target": "domain_finance.currency_code",  # Missing third part
                 "type": "text",
                 "nullable": False,
                 "notes": "Test",

@@ -1,8 +1,8 @@
-***REMOVED*** InfraStat Compliance Service
+# InfraStat Compliance Service
 
 Microservice zur automatisierten Erstellung und Validierung von Intrastat/InfraStat-Meldungen.
 
-***REMOVED******REMOVED*** Features
+## Features
 
 - ETL-Pipeline für Wareneingänge/-ausgänge mit Validierungen gegen TARIC- und Länderreferenzen (automatischer Statuswechsel `COLLECTING → VALIDATING → READY/ERROR`)
 - Persistenz in PostgreSQL (`infrastat_declaration_batches`, `infrastat_declaration_lines`, `infrastat_validation_errors`, `infrastat_submission_log`)
@@ -13,20 +13,20 @@ Microservice zur automatisierten Erstellung und Validierung von Intrastat/InfraS
 - IDEV-Client mit Session-Handling & Zertifikatsunterstützung (Upload-Events, `intrastat.submission.completed`)
 - Scheduler & EventBus (NATS) zur Integration mit Workflow-Sagas (`intrastat.batch.ready`)
 
-***REMOVED******REMOVED*** Lokal starten
+## Lokal starten
 
 ```bash
 uvicorn main:app --reload --port 5200
 ```
 
-***REMOVED******REMOVED*** Tests
+## Tests
 
 ```bash
-pytest services/compliance/infrastat/tests  ***REMOVED*** Unit- und Integrationstests (inkl. API & Metrics Smoke-Test)
-pytest services/compliance/infrastat/tests/integration  ***REMOVED*** benötigt docker-compose.integration.yml + workflow-mock (nur Testzweck)
+pytest services/compliance/infrastat/tests  # Unit- und Integrationstests (inkl. API & Metrics Smoke-Test)
+pytest services/compliance/infrastat/tests/integration  # benötigt docker-compose.integration.yml + workflow-mock (nur Testzweck)
 ```
 
-***REMOVED******REMOVED*** IDEV Produktivbetrieb
+## IDEV Produktivbetrieb
 
 - Setze folgende Umgebungsvariablen/Secrets:
   - `INFRASTAT_SUBMISSION_USERNAME`
@@ -36,9 +36,10 @@ pytest services/compliance/infrastat/tests/integration  ***REMOVED*** benötigt 
 - Passen Sie `SUBMISSION_RETRY_ATTEMPTS` und `SUBMISSION_RETRY_DELAY_SECONDS` in `config.py` an die SLA mit Destatis an.
 - Empfohlen: Prometheus-Alerting auf `infrastat_submission_failure_total` und `infrastat_validation_failure_total`.
 
-***REMOVED******REMOVED*** TODO
+## TODO
 
 - Export/Saga-Anbindung an Workflow-Service (REST-Saga-Definition & Retry-Pfade)
-- Automatisierte Einreichung (IDEV/ELSTER) inklusive Auth-Flow ([IDEV Hilfeportal](https://www-idev.destatis.de/idev/***REMOVED***/help))
+- Automatisierte Einreichung (IDEV/ELSTER) inklusive Auth-Flow ([IDEV Hilfeportal](https://www-idev.destatis.de/idev/#/help))
 - End-to-End-Tests und CI-Integration
+
 

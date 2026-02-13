@@ -38,7 +38,7 @@ class AlgorithmType(str, Enum):
     TRANSFORMER = "transformer"
 
 
-enum_values = lambda enum_cls: [member.value for member in enum_cls]  ***REMOVED*** noqa: E731
+enum_values = lambda enum_cls: [member.value for member in enum_cls]  # noqa: E731
 
 
 class AIModel(Base):
@@ -78,23 +78,23 @@ class AIModel(Base):
         nullable=False,
     )
 
-    ***REMOVED*** Model metadata
+    # Model metadata
     version: Mapped[str] = mapped_column(String(32), nullable=False)
     accuracy: Mapped[float | None] = mapped_column(Float)
     precision: Mapped[float | None] = mapped_column(Float)
     recall: Mapped[float | None] = mapped_column(Float)
     f1_score: Mapped[float | None] = mapped_column(Float)
 
-    ***REMOVED*** Training parameters
+    # Training parameters
     hyperparameters: Mapped[dict] = mapped_column(JSON, default=dict)
     feature_importance: Mapped[dict] = mapped_column(JSON, default=dict)
     training_data_info: Mapped[dict] = mapped_column(JSON, default=dict)
 
-    ***REMOVED*** Model storage
+    # Model storage
     model_path: Mapped[str | None] = mapped_column(String(500))
     model_size_bytes: Mapped[int | None] = mapped_column(Integer)
 
-    ***REMOVED*** Performance tracking
+    # Performance tracking
     last_used: Mapped[datetime | None] = mapped_column(DateTime)
     usage_count: Mapped[int] = mapped_column(Integer, default=0)
 
@@ -115,30 +115,30 @@ class Prediction(Base):
 
     model_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("crm_ai_models.id"), nullable=False)
 
-    ***REMOVED*** Prediction target
+    # Prediction target
     entity_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
-    entity_type: Mapped[str] = mapped_column(String(64), nullable=False)  ***REMOVED*** customer, lead, case, etc.
+    entity_type: Mapped[str] = mapped_column(String(64), nullable=False)  # customer, lead, case, etc.
 
-    ***REMOVED*** Prediction results
-    score: Mapped[float] = mapped_column(Float, nullable=False)  ***REMOVED*** 0-1 probability/confidence
-    prediction_class: Mapped[str | None] = mapped_column(String(64))  ***REMOVED*** categorical prediction
-    confidence: Mapped[float] = mapped_column(Float, nullable=False)  ***REMOVED*** 0-1 confidence level
+    # Prediction results
+    score: Mapped[float] = mapped_column(Float, nullable=False)  # 0-1 probability/confidence
+    prediction_class: Mapped[str | None] = mapped_column(String(64))  # categorical prediction
+    confidence: Mapped[float] = mapped_column(Float, nullable=False)  # 0-1 confidence level
 
-    ***REMOVED*** Input features used
+    # Input features used
     features: Mapped[dict] = mapped_column(JSON, nullable=False)
     feature_importance: Mapped[dict] = mapped_column(JSON, default=dict)
 
-    ***REMOVED*** Prediction metadata
+    # Prediction metadata
     model_version: Mapped[str] = mapped_column(String(32), nullable=False)
     prediction_type: Mapped[str] = mapped_column(String(64), nullable=False)
 
-    ***REMOVED*** Caching and performance
+    # Caching and performance
     cached_until: Mapped[datetime | None] = mapped_column(DateTime)
     computation_time_ms: Mapped[int | None] = mapped_column(Integer)
 
-    ***REMOVED*** Validation and feedback
-    actual_outcome: Mapped[str | None] = mapped_column(String(64))  ***REMOVED*** For supervised learning validation
-    feedback_score: Mapped[float | None] = mapped_column(Float)  ***REMOVED*** User feedback on prediction quality
+    # Validation and feedback
+    actual_outcome: Mapped[str | None] = mapped_column(String(64))  # For supervised learning validation
+    feedback_score: Mapped[float | None] = mapped_column(Float)  # User feedback on prediction quality
 
     is_active: Mapped[bool] = mapped_column(default=True)
 
@@ -156,24 +156,24 @@ class Feature(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
 
-    entity_type: Mapped[str] = mapped_column(String(64), nullable=False)  ***REMOVED*** customer, lead, case, etc.
-    data_type: Mapped[str] = mapped_column(String(32), nullable=False)  ***REMOVED*** numeric, categorical, text, boolean
+    entity_type: Mapped[str] = mapped_column(String(64), nullable=False)  # customer, lead, case, etc.
+    data_type: Mapped[str] = mapped_column(String(32), nullable=False)  # numeric, categorical, text, boolean
 
-    ***REMOVED*** Feature engineering
-    source_field: Mapped[str | None] = mapped_column(String(255))  ***REMOVED*** Original field name
-    transformation: Mapped[str | None] = mapped_column(String(64))  ***REMOVED*** log, sqrt, normalize, etc.
+    # Feature engineering
+    source_field: Mapped[str | None] = mapped_column(String(255))  # Original field name
+    transformation: Mapped[str | None] = mapped_column(String(64))  # log, sqrt, normalize, etc.
     parameters: Mapped[dict] = mapped_column(JSON, default=dict)
 
-    ***REMOVED*** Statistics for numeric features
+    # Statistics for numeric features
     min_value: Mapped[float | None] = mapped_column(Float)
     max_value: Mapped[float | None] = mapped_column(Float)
     mean_value: Mapped[float | None] = mapped_column(Float)
     std_deviation: Mapped[float | None] = mapped_column(Float)
 
-    ***REMOVED*** Categories for categorical features
+    # Categories for categorical features
     categories: Mapped[list[str]] = mapped_column(JSON, default=list)
 
-    ***REMOVED*** Usage tracking
+    # Usage tracking
     usage_count: Mapped[int] = mapped_column(Integer, default=0)
     last_used: Mapped[datetime | None] = mapped_column(DateTime)
 
@@ -201,21 +201,21 @@ class Experiment(Base):
         nullable=False,
     )
 
-    ***REMOVED*** Experiment variants
+    # Experiment variants
     control_variant: Mapped[dict] = mapped_column(JSON, nullable=False)
     test_variants: Mapped[list[dict]] = mapped_column(JSON, nullable=False)
 
-    ***REMOVED*** Experiment parameters
+    # Experiment parameters
     target_metric: Mapped[str] = mapped_column(String(64), nullable=False)
     minimum_sample_size: Mapped[int] = mapped_column(Integer, default=1000)
     confidence_level: Mapped[float] = mapped_column(Float, default=0.95)
 
-    ***REMOVED*** Status and results
-    status: Mapped[str] = mapped_column(String(32), nullable=False, default="running")  ***REMOVED*** running, completed, stopped
+    # Status and results
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="running")  # running, completed, stopped
     start_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     end_date: Mapped[datetime | None] = mapped_column(DateTime)
 
-    ***REMOVED*** Results
+    # Results
     winner_variant: Mapped[str | None] = mapped_column(String(64))
     statistical_significance: Mapped[float | None] = mapped_column(Float)
     effect_size: Mapped[float | None] = mapped_column(Float)
@@ -236,16 +236,16 @@ class Feedback(Base):
 
     prediction_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("crm_ai_predictions.id"), nullable=False)
 
-    ***REMOVED*** Feedback data
-    rating: Mapped[int] = mapped_column(Integer)  ***REMOVED*** 1-5 scale
+    # Feedback data
+    rating: Mapped[int] = mapped_column(Integer)  # 1-5 scale
     comments: Mapped[str | None] = mapped_column(Text)
-    feedback_type: Mapped[str] = mapped_column(String(32), nullable=False)  ***REMOVED*** accuracy, usefulness, relevance
+    feedback_type: Mapped[str] = mapped_column(String(32), nullable=False)  # accuracy, usefulness, relevance
 
-    ***REMOVED*** Context
+    # Context
     user_id: Mapped[str | None] = mapped_column(String(64))
     context_data: Mapped[dict] = mapped_column(JSON, default=dict)
 
-    ***REMOVED*** For model improvement
+    # For model improvement
     corrected_prediction: Mapped[str | None] = mapped_column(String(255))
     feature_adjustments: Mapped[dict] = mapped_column(JSON, default=dict)
 

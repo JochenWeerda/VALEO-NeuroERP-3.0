@@ -1,8 +1,8 @@
-***REMOVED*** Prospecting Setup Guide
+# Prospecting Setup Guide
 
 Die Prospecting-Kette (GAP → Snapshot → Customer-Analytics → UI) besteht aus mehreren Schritten. Diese Anleitung fasst alles zusammen, damit du die Pipeline lokal oder in einer Stage-Umgebung schnell aktivieren kannst.
 
-***REMOVED******REMOVED*** 1. Datenbank vorbereiten
+## 1. Datenbank vorbereiten
 
 1. **Analytics-Felder im Customer-Table**
 
@@ -20,7 +20,7 @@ Die Prospecting-Kette (GAP → Snapshot → Customer-Analytics → UI) besteht a
    psql $DATABASE_URL -f database/analytics-gap.sql
    ```
 
-***REMOVED******REMOVED*** 2. GAP-Pipeline ausführen
+## 2. GAP-Pipeline ausführen
 
 Die CLI befindet sich unter `scripts/gap-cli.ts`. Ein kompletter Jahreslauf (Import → Aggregation → Matching → Snapshot → Hydrate) sieht so aus:
 
@@ -32,7 +32,7 @@ pnpm ts-node scripts/gap-cli.ts run-year \
 
 Alternativ können die Schritte einzeln ausgeführt werden (`import`, `aggregate`, `match`, `snapshot`).
 
-***REMOVED******REMOVED*** 3. Customer Analytics hydratisieren
+## 3. Customer Analytics hydratisieren
 
 Zusätzlich zum TypeScript-Command gibt es eine SQL-basierte Version (`database/analytics-hydrate-customers.sql`). Beide Varianten nutzen denselben Filter:
 
@@ -51,7 +51,7 @@ oder direkt per SQL (falls notwendig):
 psql $DATABASE_URL -v year=2025 -f database/analytics-hydrate-customers.sql
 ```
 
-***REMOVED******REMOVED*** 4. Prospecting-UI aktivieren
+## 4. Prospecting-UI aktivieren
 
 1. `.env` (oder CI-Secret) um folgenden Eintrag ergänzen:
 
@@ -63,7 +63,7 @@ psql $DATABASE_URL -v year=2025 -f database/analytics-hydrate-customers.sql
 
    - Das Flag steuert sowohl den Tab „Potential & Leaddaten“ in der Kundenmaske als auch die Route `/prospecting/leads` (Lead Explorer) inklusive Navigationsmenü.
 
-***REMOVED******REMOVED*** 5. UI prüfen
+## 5. UI prüfen
 
 1. **Kundenmaske** öffnen → Tab „Potential & Leaddaten“:
    - Anzeigen: KPI-Karten, GAP-Herkunft, Produktpotenziale.
@@ -74,12 +74,12 @@ psql $DATABASE_URL -v year=2025 -f database/analytics-hydrate-customers.sql
    - Filter (Jahr, Segment, Potenzial, Quelle, „Nur neue Prospekte“) verändern.
    - Aktionen testen („Lead anlegen“, „Kunde öffnen“, „Aufgabe“ – aktuell mit TODO-Handlern).
 
-***REMOVED******REMOVED*** 6. Tests / Sanity-Checks
+## 6. Tests / Sanity-Checks
 
 - Es existiert ein kleiner Vitest (`packages/frontend-web/src/api/__tests__/prospecting.test.ts`), der sicherstellt, dass `fetchLeadCandidates` die Query-Parameter korrekt aufbaut.
 - Für E2E- oder UI-Tests (Playwright/Cypress) können die gleichen Routen verwendet werden; ggf. Dummy-GAP-Daten in `gap_payments` und `customer_potential_snapshot` einspielen.
 
-***REMOVED******REMOVED*** 7. Zusammenfassung
+## 7. Zusammenfassung
 
 1. `database/analytics-customer-fields.sql`
 2. `database/analytics-gap.sql`
@@ -89,3 +89,4 @@ psql $DATABASE_URL -v year=2025 -f database/analytics-hydrate-customers.sql
 6. UI prüfen (Kunden-Tab + Lead Explorer)
 
 Damit ist die Prospecting-Kette vollständig funktionsfähig.
+

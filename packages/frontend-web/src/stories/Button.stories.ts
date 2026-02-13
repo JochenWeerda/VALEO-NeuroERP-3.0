@@ -4,7 +4,7 @@ import { fn } from '@storybook/test';
 
 import { Button } from './Button';
 
-// More on how to set up stories at: https://storybook.js.org/docs/writing-stories***REMOVED***default-export
+// More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
   title: 'Example/Button',
   component: Button,
@@ -18,7 +18,7 @@ const meta = {
   argTypes: {
     backgroundColor: { control: 'color' },
   },
-  // Use `fn` to spy on the onClick arg, which will appear in the actions panel once invoked: https://storybook.js.org/docs/essentials/actions***REMOVED***action-args
+  // Use `fn` to spy on the onClick arg, which will appear in the actions panel once invoked: https://storybook.js.org/docs/essentials/actions#action-args
   args: { onClick: fn() },
 } satisfies Meta<typeof Button>;
 
@@ -52,3 +52,4 @@ export const Small: Story = {
     label: 'Button',
   },
 };
+

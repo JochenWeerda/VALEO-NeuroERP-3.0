@@ -1,14 +1,14 @@
-***REMOVED*** Add-Remaining-Files.ps1
-***REMOVED***
-***REMOVED*** Dieses Skript fügt die verbleibenden Dateien zum Git-Repository hinzu.
-***REMOVED***
-***REMOVED*** Verwendung: .\add_remaining_files.ps1
+# Add-Remaining-Files.ps1
+#
+# Dieses Skript fügt die verbleibenden Dateien zum Git-Repository hinzu.
+#
+# Verwendung: .\add_remaining_files.ps1
 
 Write-Host "Hinzufügen der verbleibenden Dateien zum Git-Repository" -ForegroundColor Cyan
 Write-Host "===================================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Backend-Dateien hinzufügen
+# Backend-Dateien hinzufügen
 Write-Host "Backend-Dateien werden hinzugefügt..." -ForegroundColor Yellow
 git add backend/tasks/__init__.py
 git add backend/tasks/celery_app.py
@@ -16,7 +16,7 @@ git add backend/tasks/reports.py
 git add backend/api/task_endpoints.py
 git add backend/demo_server.py
 
-***REMOVED*** Dokumente hinzufügen
+# Dokumente hinzufügen
 Write-Host "Dokumentation wird hinzugefügt..." -ForegroundColor Yellow
 git add memory-bank/VAN-Modus.md
 git add memory-bank/api_cache_migration_guide.md
@@ -30,7 +30,7 @@ git add memory-bank/phase3_*.md
 git add memory-bank/redis_cluster_setup.md
 git add memory-bank/server_integration_plan.md
 
-***REMOVED*** Optimierungen hinzufügen
+# Optimierungen hinzufügen
 Write-Host "Optimierungen werden hinzugefügt..." -ForegroundColor Yellow
 git add backend/enhanced_cache_manager.py
 git add backend/core/health.py
@@ -42,7 +42,7 @@ git add backend/db/db_optimization.py
 git add backend/db/materialized_views.py
 git add backend/monitoring/
 
-***REMOVED*** API-Komponenten hinzufügen
+# API-Komponenten hinzufügen
 Write-Host "API-Komponenten werden hinzugefügt..." -ForegroundColor Yellow
 git add backend/api/articles_api.py
 git add backend/api/batch_api.py
@@ -57,11 +57,11 @@ git add backend/api/quality_api.py
 git add backend/api/stock_charges_api.py
 git add backend/api/system_api.py
 
-***REMOVED*** Frontend-Komponenten hinzufügen
+# Frontend-Komponenten hinzufügen
 Write-Host "Frontend-Komponenten werden hinzugefügt..." -ForegroundColor Yellow
 git add frontend/src/components/inventory/ChargenBericht/
 
-***REMOVED*** Status anzeigen
+# Status anzeigen
 Write-Host "`nStatus des Repositories:" -ForegroundColor Cyan
 git status
 

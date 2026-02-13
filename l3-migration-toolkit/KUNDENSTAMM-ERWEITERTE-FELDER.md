@@ -1,13 +1,13 @@
-***REMOVED*** Kundenstamm - Erweiterte Felder aus Screenshots
+# Kundenstamm - Erweiterte Felder aus Screenshots
 
 **Datum:** 2025-10-26  
 **Status:** ✅ Zu ergänzen
 
-***REMOVED******REMOVED*** 📋 Neue Kategorien aus ChatGPT-Analyse
+## 📋 Neue Kategorien aus ChatGPT-Analyse
 
 Sie haben mir **weitere Felder** aus den L3-Kundenstamm-Screenshots übergeben. Diese müssen zum bestehenden Schema hinzugefügt werden.
 
-***REMOVED******REMOVED******REMOVED*** ✅ Bereits implementiert (aus bisheriger Analyse)
+### ✅ Bereits implementiert (aus bisheriger Analyse)
 - Kunden-Anschrift
 - Rechnung/Kontoauszug
 - Kundenrabatte
@@ -18,9 +18,9 @@ Sie haben mir **weitere Felder** aus den L3-Kundenstamm-Screenshots übergeben. 
 - Selektionen
 - Schnittstelle
 
-***REMOVED******REMOVED******REMOVED*** 🔄 Neu zu ergänzen
+### 🔄 Neu zu ergänzen
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 11. Kundenprofil
+#### 11. Kundenprofil
 ```
 - Firmenname
 - Gründung (Datum)
@@ -30,7 +30,7 @@ Sie haben mir **weitere Felder** aus den L3-Kundenstamm-Screenshots übergeben. 
 - Branche (mit Schlüssel)
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 12. Versandinformationen
+#### 12. Versandinformationen
 ```
 - Versandart Rechnung
 - Versandart Mahnung
@@ -41,7 +41,7 @@ Sie haben mir **weitere Felder** aus den L3-Kundenstamm-Screenshots übergeben. 
 - ZUGFeRD Auswahl
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 13. Lieferung/Zahlung – Zahlungsbedingungen
+#### 13. Lieferung/Zahlung – Zahlungsbedingungen
 ```
 - Liefer-Bedingung
 - Zahlungsbedingung
@@ -52,7 +52,7 @@ Sie haben mir **weitere Felder** aus den L3-Kundenstamm-Screenshots übergeben. 
 - Versand-Avis an Vertreter / Beauftragte
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 14. Datenschutz
+#### 14. Datenschutz
 ```
 - Bis (gültig bis)
 - Einwilligung
@@ -61,7 +61,7 @@ Sie haben mir **weitere Felder** aus den L3-Kundenstamm-Screenshots übergeben. 
 - Zusatzbemerkung
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 15. Genossenschaftsanteile
+#### 15. Genossenschaftsanteile
 ```
 - Geschäftsguthaben-Konto
 - Konto-Nr.
@@ -75,31 +75,31 @@ Sie haben mir **weitere Felder** aus den L3-Kundenstamm-Screenshots übergeben. 
 - Datum Eintritt
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 16. E-Mail-Verteiler
+#### 16. E-Mail-Verteiler
 ```
 - Verteiler-Name
 - Bezeichnung
 - E-Mail-Adresse
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 17. Langtext (Freitextbereich)
+#### 17. Langtext (Freitextbereich)
 ```
 - Kein explizites Feld, aber Textkomponente für ergänzende Informationen
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 18. Betriebsgemeinschaften
+#### 18. Betriebsgemeinschaften
 ```
 - Verb.-Nr. / Bezeichnung
 - Mitglieder der Gemeinschaft: Kunden-Nr. und -Name
 - Anteil (%)
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 21. Chef-Anweisung
+#### 21. Chef-Anweisung
 ```
 - Freitext-Feld oder Anweisungsfenster
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 22. Ansprechpartner (Untertabelle!)
+#### 22. Ansprechpartner (Untertabelle!)
 ```
 - Priorität
 - Name / Vorname
@@ -120,7 +120,7 @@ Sie haben mir **weitere Felder** aus den L3-Kundenstamm-Screenshots übergeben. 
 - Datenschutzbeauftragter
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 23. Kundenstammdaten – Erfassung
+#### 23. Kundenstammdaten – Erfassung
 ```
 Reiter: Kundenanschrift / Rechnungsanschrift
 - Name 1-3
@@ -149,7 +149,7 @@ Reiter: Allgemein
 - Info-Felder 4–6
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 24. Kundenerweiterung / Rechnung & Kontoauszug
+#### 24. Kundenerweiterung / Rechnung & Kontoauszug
 ```
 - Kunden-Gruppe
 - Kundentyp: Organ, Konzern-intern
@@ -166,7 +166,7 @@ Reiter: Allgemein
 - Umsatzsteuer-Optierer
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 25. CPD-Konto anlegen
+#### 25. CPD-Konto anlegen
 ```
 - Kunden-Nr.
 - Debitoren-Konto
@@ -187,15 +187,15 @@ Reiter: Allgemein
 - Zahlungsbedingungen (Skonto %, Tage, netto)
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 26. Menüstruktur (Hauptnavigation)
+#### 26. Menüstruktur (Hauptnavigation)
 ```
 Diese Felder gehören nicht direkt zur Kundenstamm-Maske,
 sondern zur Hauptnavigation/Layout
 ```
 
-***REMOVED******REMOVED*** 🎯 Empfehlung
+## 🎯 Empfehlung
 
-***REMOVED******REMOVED******REMOVED*** Option 1: Haupttabelle erweitern
+### Option 1: Haupttabelle erweitern
 Alle neuen Felder zur bestehenden `kunden`-Tabelle hinzufügen.
 
 **Vorteile:**
@@ -206,7 +206,7 @@ Alle neuen Felder zur bestehenden `kunden`-Tabelle hinzufügen.
 - Sehr große Tabelle (~150+ Spalten)
 - Performance-Probleme möglich
 
-***REMOVED******REMOVED******REMOVED*** Option 2: Separate Tabellen (Normalisierung)
+### Option 2: Separate Tabellen (Normalisierung)
 ```
 kunden (Haupttabelle)
 ├── kunden_profil (FK zu kunden.kunden_nr)
@@ -228,11 +228,11 @@ kunden (Haupttabelle)
 - Komplexere Abfragen (JOINs)
 - Mehr Tabellen
 
-***REMOVED******REMOVED*** 📊 Empfohlene Struktur
+## 📊 Empfohlene Struktur
 
 Ich empfehle **Option 2 (Normalisierung)** mit folgenden separaten Tabellen:
 
-***REMOVED******REMOVED******REMOVED*** 1. `kunden_profil`
+### 1. `kunden_profil`
 ```sql
 CREATE TABLE kunden_profil (
     kunden_nr VARCHAR(20) PRIMARY KEY REFERENCES kunden(kunden_nr),
@@ -246,7 +246,7 @@ CREATE TABLE kunden_profil (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. `kunden_ansprechpartner` ⭐ KRITISCH!
+### 2. `kunden_ansprechpartner` ⭐ KRITISCH!
 ```sql
 CREATE TABLE kunden_ansprechpartner (
     id SERIAL PRIMARY KEY,
@@ -279,7 +279,7 @@ CREATE TABLE kunden_ansprechpartner (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. `kunden_versand`
+### 3. `kunden_versand`
 ```sql
 CREATE TABLE kunden_versand (
     kunden_nr VARCHAR(20) PRIMARY KEY REFERENCES kunden(kunden_nr),
@@ -294,7 +294,7 @@ CREATE TABLE kunden_versand (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. `kunden_datenschutz`
+### 4. `kunden_datenschutz`
 ```sql
 CREATE TABLE kunden_datenschutz (
     kunden_nr VARCHAR(20) PRIMARY KEY REFERENCES kunden(kunden_nr),
@@ -306,7 +306,7 @@ CREATE TABLE kunden_datenschutz (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 5. `kunden_genossenschaft`
+### 5. `kunden_genossenschaft`
 ```sql
 CREATE TABLE kunden_genossenschaft (
     kunden_nr VARCHAR(20) PRIMARY KEY REFERENCES kunden(kunden_nr),
@@ -323,7 +323,7 @@ CREATE TABLE kunden_genossenschaft (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 6. `kunden_email_verteiler`
+### 6. `kunden_email_verteiler`
 ```sql
 CREATE TABLE kunden_email_verteiler (
     id SERIAL PRIMARY KEY,
@@ -334,7 +334,7 @@ CREATE TABLE kunden_email_verteiler (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 7. `kunden_betriebsgemeinschaften`
+### 7. `kunden_betriebsgemeinschaften`
 ```sql
 CREATE TABLE kunden_betriebsgemeinschaften (
     id SERIAL PRIMARY KEY,
@@ -345,7 +345,7 @@ CREATE TABLE kunden_betriebsgemeinschaften (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 8. `kunden_freitext`
+### 8. `kunden_freitext`
 ```sql
 CREATE TABLE kunden_freitext (
     kunden_nr VARCHAR(20) PRIMARY KEY REFERENCES kunden(kunden_nr),
@@ -355,21 +355,21 @@ CREATE TABLE kunden_freitext (
 );
 ```
 
-***REMOVED******REMOVED*** 📈 Gesamtübersicht
+## 📈 Gesamtübersicht
 
-***REMOVED******REMOVED******REMOVED*** Bestehende Felder
+### Bestehende Felder
 - **60 Felder** in Haupttabelle `kunden`
 - **10 Tabs** im Frontend
 
-***REMOVED******REMOVED******REMOVED*** Neue Felder
+### Neue Felder
 - **~50 Felder** in separaten Tabellen
 - **~8 neue Tabs** im Frontend
 
-***REMOVED******REMOVED******REMOVED*** Gesamt
+### Gesamt
 - **~110 Felder** insgesamt
 - **~18 Tabs** im Frontend
 
-***REMOVED******REMOVED*** 🚀 Nächste Schritte
+## 🚀 Nächste Schritte
 
 1. ✅ **Bestehendes Schema beibehalten** (`kunden`-Tabelle)
 2. ✅ **Separate Tabellen erstellen** für neue Felder
@@ -378,4 +378,5 @@ CREATE TABLE kunden_freitext (
 5. ✅ **Migration-Script erstellen**
 
 **Soll ich die vollständigen SQL-CREATE-Statements für alle neuen Tabellen erstellen?**
+
 

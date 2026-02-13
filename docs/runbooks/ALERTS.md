@@ -1,12 +1,12 @@
-***REMOVED*** Alert Handling Runbook
+# Alert Handling Runbook
 
-***REMOVED******REMOVED*** Überblick
+## Überblick
 
 Dieses Runbook beschreibt die Behandlung von Alerts für VALEO-NeuroERP.
 
-***REMOVED******REMOVED*** Alert-Kategorien
+## Alert-Kategorien
 
-***REMOVED******REMOVED******REMOVED*** 1. High Error Rate (> 5%)
+### 1. High Error Rate (> 5%)
 
 **Alert:** `ErrorRateHigh`
 
@@ -19,13 +19,13 @@ Dieses Runbook beschreibt die Behandlung von Alerts für VALEO-NeuroERP.
 
 **Diagnose:**
 ```bash
-***REMOVED*** Check error logs
+# Check error logs
 kubectl logs -n production -l app=valeo-erp --tail=100 | grep ERROR
 
-***REMOVED*** Check database connectivity
+# Check database connectivity
 kubectl exec -n production deploy/valeo-erp -- python -c "from app.core.database_pg import engine; engine.connect()"
 
-***REMOVED*** Check metrics
+# Check metrics
 curl https://erp.valeo.example.com/metrics | grep api_requests_total
 ```
 
@@ -39,7 +39,7 @@ curl https://erp.valeo.example.com/metrics | grep api_requests_total
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2. High Latency (P95 > 500ms)
+### 2. High Latency (P95 > 500ms)
 
 **Alert:** `LatencyHigh`
 
@@ -52,14 +52,14 @@ curl https://erp.valeo.example.com/metrics | grep api_requests_total
 
 **Diagnose:**
 ```bash
-***REMOVED*** Check resource usage
+# Check resource usage
 kubectl top pods -n production
 
-***REMOVED*** Check database slow queries
+# Check database slow queries
 psql -h $DB_HOST -U $DB_USER -d valeo_erp \
   -c "SELECT query, mean_exec_time FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 10;"
 
-***REMOVED*** Check HPA status
+# Check HPA status
 kubectl get hpa -n production
 ```
 
@@ -72,7 +72,7 @@ kubectl get hpa -n production
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 3. SSE Disconnections (> 10)
+### 3. SSE Disconnections (> 10)
 
 **Alert:** `SSEDisconnectsHigh`
 
@@ -85,13 +85,13 @@ kubectl get hpa -n production
 
 **Diagnose:**
 ```bash
-***REMOVED*** Check pod restarts
+# Check pod restarts
 kubectl get pods -n production -l app=valeo-erp
 
-***REMOVED*** Check SSE metrics
+# Check SSE metrics
 curl https://erp.valeo.example.com/metrics | grep sse_connections_active
 
-***REMOVED*** Check ingress logs
+# Check ingress logs
 kubectl logs -n ingress-nginx deploy/ingress-nginx-controller --tail=100
 ```
 
@@ -104,7 +104,7 @@ kubectl logs -n ingress-nginx deploy/ingress-nginx-controller --tail=100
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 4. Database Connection Failures
+### 4. Database Connection Failures
 
 **Alert:** `DatabaseDown`
 
@@ -117,13 +117,13 @@ kubectl logs -n ingress-nginx deploy/ingress-nginx-controller --tail=100
 
 **Diagnose:**
 ```bash
-***REMOVED*** Check PostgreSQL pod
+# Check PostgreSQL pod
 kubectl get pods -n production -l app=postgresql
 
-***REMOVED*** Check PostgreSQL logs
+# Check PostgreSQL logs
 kubectl logs -n production -l app=postgresql --tail=100
 
-***REMOVED*** Test connection
+# Test connection
 psql -h $DB_HOST -U $DB_USER -d valeo_erp -c "SELECT 1;"
 ```
 
@@ -137,7 +137,7 @@ psql -h $DB_HOST -U $DB_USER -d valeo_erp -c "SELECT 1;"
 
 ---
 
-***REMOVED******REMOVED*** Alert-Konfiguration (Prometheus)
+## Alert-Konfiguration (Prometheus)
 
 ```yaml
 groups:
@@ -179,15 +179,16 @@ groups:
           summary: "Database connection failed"
 ```
 
-***REMOVED******REMOVED*** On-Call-Rotation
+## On-Call-Rotation
 
 - **Primary:** Siehe PagerDuty-Schedule
 - **Secondary:** Team Lead
 - **Escalation:** CTO (nach 1 Stunde)
 
-***REMOVED******REMOVED*** Kontakte
+## Kontakte
 
 - **PagerDuty:** https://valeo.pagerduty.com
-- **Slack:** ***REMOVED***valeo-erp-alerts
+- **Slack:** #valeo-erp-alerts
 - **Email:** oncall@valeo-erp.com
+
 

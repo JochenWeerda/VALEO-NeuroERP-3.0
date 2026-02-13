@@ -1,15 +1,15 @@
-***REMOVED*** VALEO-NeuroERP Design System Guide
+# VALEO-NeuroERP Design System Guide
 
 **Version:** 3.1.0  
 **Datum:** 2025-10-26
 
-***REMOVED******REMOVED*** 🎨 Übersicht
+## 🎨 Übersicht
 
 Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-NeuroERP.
 
-***REMOVED******REMOVED*** 📐 Layout-Struktur
+## 📐 Layout-Struktur
 
-***REMOVED******REMOVED******REMOVED*** Frameset-Aufbau
+### Frameset-Aufbau
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -33,9 +33,9 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 └─────────────────────────────────────────────────────────┘
 ```
 
-***REMOVED******REMOVED*** 🧩 Komponenten
+## 🧩 Komponenten
 
-***REMOVED******REMOVED******REMOVED*** 1. Header
+### 1. Header
 ```json
 {
   "sticky": true,
@@ -50,11 +50,11 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 - Status Badges
 - Quick Actions (Speichern, Neu, etc.)
 
-***REMOVED******REMOVED******REMOVED*** 2. Navigation
+### 2. Navigation
 ```json
 {
   "width": "240px",
-  "background": "***REMOVED***f8f9fa",
+  "background": "#f8f9fa",
   "collapsible": true
 }
 ```
@@ -62,7 +62,7 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 **Mobile:** Bottom Navigation  
 **Desktop:** Side Navigation
 
-***REMOVED******REMOVED******REMOVED*** 3. Content Area
+### 3. Content Area
 ```json
 {
   "padding": "1.5rem",
@@ -76,11 +76,11 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 - Sections (Cards)
 - Fields (Grid)
 
-***REMOVED******REMOVED******REMOVED*** 4. Footer
+### 4. Footer
 ```json
 {
   "height": "48px",
-  "background": "***REMOVED***f8f9fa",
+  "background": "#f8f9fa",
   "showValidationErrors": true
 }
 ```
@@ -90,11 +90,11 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 - Validierungsfehler
 - Statistik
 
-***REMOVED******REMOVED*** 📦 Komponenten-Bibliothek
+## 📦 Komponenten-Bibliothek
 
-***REMOVED******REMOVED******REMOVED*** Input Components
+### Input Components
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Text
+#### Text
 ```json
 {
   "comp": "Text",
@@ -106,7 +106,7 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Email
+#### Email
 ```json
 {
   "comp": "Email",
@@ -116,7 +116,7 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Number
+#### Number
 ```json
 {
   "comp": "Number",
@@ -128,7 +128,7 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Select
+#### Select
 ```json
 {
   "comp": "Select",
@@ -139,7 +139,7 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** BadgeSelect
+#### BadgeSelect
 ```json
 {
   "comp": "BadgeSelect",
@@ -150,7 +150,7 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Date
+#### Date
 ```json
 {
   "comp": "Date",
@@ -160,7 +160,7 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Toggle
+#### Toggle
 ```json
 {
   "comp": "Toggle",
@@ -170,7 +170,7 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** TextArea
+#### TextArea
 ```json
 {
   "comp": "TextArea",
@@ -181,7 +181,7 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** RichText
+#### RichText
 ```json
 {
   "comp": "RichText",
@@ -191,9 +191,9 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Layout Components
+### Layout Components
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Card
+#### Card
 ```json
 {
   "comp": "Card",
@@ -203,7 +203,7 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Accordion
+#### Accordion
 ```json
 {
   "comp": "Accordion",
@@ -214,7 +214,7 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Grid
+#### Grid
 ```json
 {
   "comp": "Grid",
@@ -223,52 +223,52 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 }
 ```
 
-***REMOVED******REMOVED*** 🎨 Typography
+## 🎨 Typography
 
-***REMOVED******REMOVED******REMOVED*** Headings
+### Headings
 - H1: 2rem, Bold
 - H2: 1.5rem, Bold
 - H3: 1.25rem, Semibold
 - H4: 1rem, Semibold
 
-***REMOVED******REMOVED******REMOVED*** Body
+### Body
 - Base: 1rem, Regular
 - Small: 0.875rem, Regular
 - Tiny: 0.75rem, Regular
 
-***REMOVED******REMOVED******REMOVED*** Labels
+### Labels
 - Default: 0.875rem, Medium
 - Required: 0.875rem, Medium + *
 - Optional: 0.875rem, Medium + (optional)
 
-***REMOVED******REMOVED*** 🎨 Colors
+## 🎨 Colors
 
-***REMOVED******REMOVED******REMOVED*** Primary
-- Primary: ***REMOVED***2563eb
-- Primary Dark: ***REMOVED***1e40af
-- Primary Light: ***REMOVED***dbeafe
+### Primary
+- Primary: #2563eb
+- Primary Dark: #1e40af
+- Primary Light: #dbeafe
 
-***REMOVED******REMOVED******REMOVED*** Status
-- Success: ***REMOVED***10b981
-- Warning: ***REMOVED***f59e0b
-- Error: ***REMOVED***ef4444
-- Info: ***REMOVED***3b82f6
+### Status
+- Success: #10b981
+- Warning: #f59e0b
+- Error: #ef4444
+- Info: #3b82f6
 
-***REMOVED******REMOVED******REMOVED*** Grays
-- Gray 50: ***REMOVED***f9fafb
-- Gray 100: ***REMOVED***f3f4f6
-- Gray 200: ***REMOVED***e5e7eb
-- Gray 300: ***REMOVED***d1d5db
-- Gray 400: ***REMOVED***9ca3af
-- Gray 500: ***REMOVED***6b7280
-- Gray 600: ***REMOVED***4b5563
-- Gray 700: ***REMOVED***374151
-- Gray 800: ***REMOVED***1f2937
-- Gray 900: ***REMOVED***111827
+### Grays
+- Gray 50: #f9fafb
+- Gray 100: #f3f4f6
+- Gray 200: #e5e7eb
+- Gray 300: #d1d5db
+- Gray 400: #9ca3af
+- Gray 500: #6b7280
+- Gray 600: #4b5563
+- Gray 700: #374151
+- Gray 800: #1f2937
+- Gray 900: #111827
 
-***REMOVED******REMOVED*** 📐 Spacing
+## 📐 Spacing
 
-***REMOVED******REMOVED******REMOVED*** Scale
+### Scale
 - xs: 0.25rem (4px)
 - sm: 0.5rem (8px)
 - md: 1rem (16px)
@@ -276,107 +276,107 @@ Dieser Guide definiert das einheitliche Design System für alle Masken in VALEO-
 - xl: 2rem (32px)
 - 2xl: 3rem (48px)
 
-***REMOVED******REMOVED******REMOVED*** Usage
+### Usage
 - Field Gap: md (1rem)
 - Section Gap: lg (1.5rem)
 - Card Padding: md (1rem)
 - Page Padding: lg (1.5rem)
 
-***REMOVED******REMOVED*** 📱 Responsive Breakpoints
+## 📱 Responsive Breakpoints
 
-***REMOVED******REMOVED******REMOVED*** Mobile (<640px)
+### Mobile (<640px)
 - Columns: 1
 - Nav: Bottom
 - Accordions: Enabled
 - Sticky Footer: Enabled
 
-***REMOVED******REMOVED******REMOVED*** Tablet (<1024px)
+### Tablet (<1024px)
 - Columns: 2
 - Nav: Side
 - Accordions: Disabled
 - Sticky Footer: Enabled
 
-***REMOVED******REMOVED******REMOVED*** Desktop (≥1024px)
+### Desktop (≥1024px)
 - Columns: 3
 - Nav: Side
 - Accordions: Disabled
 - Sticky Footer: Disabled
 
-***REMOVED******REMOVED*** ♿ Accessibility
+## ♿ Accessibility
 
-***REMOVED******REMOVED******REMOVED*** ARIA Labels
+### ARIA Labels
 - Alle interaktiven Elemente haben ARIA-Labels
 - Screen-Reader-kompatibel
 - Fokus-Management
 
-***REMOVED******REMOVED******REMOVED*** Keyboard Navigation
+### Keyboard Navigation
 - Tab: Next Field
 - Shift+Tab: Previous Field
 - Enter: Submit/Action
 - Escape: Cancel/Close
 - Arrow Keys: Navigation
 
-***REMOVED******REMOVED******REMOVED*** Focus Styles
+### Focus Styles
 ```css
-outline: 2px solid ***REMOVED***2563eb;
+outline: 2px solid #2563eb;
 outline-offset: 2px;
 ```
 
-***REMOVED******REMOVED*** 🤖 AI-Features
+## 🤖 AI-Features
 
-***REMOVED******REMOVED******REMOVED*** Intent Bar
+### Intent Bar
 - Shortcut: ⌘K / Ctrl+K
 - Placeholder: "Befehl oder Frage eingeben..."
 - Actions: Kontextabhängig
 
-***REMOVED******REMOVED******REMOVED*** AI-Assist
+### AI-Assist
 - Autofill-Vorschläge
 - Contextual Help
 - Smart Validators
 
-***REMOVED******REMOVED******REMOVED*** RAG Panels
+### RAG Panels
 - Kontextinformationen
 - Verwandte Einträge
 - Aktionen vorschlagen
 
-***REMOVED******REMOVED*** 🚀 Performance
+## 🚀 Performance
 
-***REMOVED******REMOVED******REMOVED*** Virtual Lists
+### Virtual Lists
 - Für Listen > 100 Items
 - Lazy Loading
 - Smooth Scrolling
 
-***REMOVED******REMOVED******REMOVED*** Deferred Loading
+### Deferred Loading
 - Heavy Panels verzögert laden
 - Images lazy loaden
 - Charts on-demand laden
 
-***REMOVED******REMOVED******REMOVED*** Optimistic UI
+### Optimistic UI
 - Sofortiges Feedback
 - Background Sync
 - Error Recovery
 
-***REMOVED******REMOVED*** 📊 Validation
+## 📊 Validation
 
-***REMOVED******REMOVED******REMOVED*** Client-Side
+### Client-Side
 - Pattern Matching
 - Min/Max Checks
 - Required Checks
 - AI-Validierung
 
-***REMOVED******REMOVED******REMOVED*** Server-Side
+### Server-Side
 - Komplette Validierung
 - Duplicate Checks
 - Business Rules
 
-***REMOVED******REMOVED******REMOVED*** Error Display
+### Error Display
 - Inline Errors
 - Summary Footer
 - Toast Notifications
 
-***REMOVED******REMOVED*** 🎯 Best Practices
+## 🎯 Best Practices
 
-***REMOVED******REMOVED******REMOVED*** DO ✅
+### DO ✅
 - Verwende Standard-Komponenten
 - Befolge Spacing-Regeln
 - Nutze Grid-System
@@ -384,7 +384,7 @@ outline-offset: 2px;
 - Füge AI-Features hinzu
 - Teste auf Mobile
 
-***REMOVED******REMOVED******REMOVED*** DON'T ❌
+### DON'T ❌
 - Keine Custom Components ohne Genehmigung
 - Keine Hardcoded Werte
 - Keine Abweichungen vom Grid
@@ -396,4 +396,5 @@ outline-offset: 2px;
 **Version:** 3.1.0  
 **Status:** ✅ PRODUCTION-READY  
 **Gültig:** Bis 2026-01-26
+
 

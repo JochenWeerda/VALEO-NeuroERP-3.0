@@ -1,8 +1,8 @@
-***REMOVED*** @valero-neuroerp/quality-domain
+# @valero-neuroerp/quality-domain
 
 Qualitätsmanagement & Qualitätssicherung (QM/QS) Domain für VALEO-NeuroERP 3.0
 
-***REMOVED******REMOVED*** 📋 Überblick
+## 📋 Überblick
 
 Die Quality-Domain ist ein zentraler Baustein des ERP-Systems und verantwortlich für:
 
@@ -12,55 +12,55 @@ Die Quality-Domain ist ein zentraler Baustein des ERP-Systems und verantwortlich
 - **Abweichungen** (Non-Conformities): Dokumentation und Verfolgung von Qualitätsabweichungen
 - **CAPA** (Corrective & Preventive Actions): Korrektur- und Vorbeugungsmaßnahmen
 
-***REMOVED******REMOVED*** 🏗️ Architektur
+## 🏗️ Architektur
 
-***REMOVED******REMOVED******REMOVED*** Domain-Driven Design (DDD)
+### Domain-Driven Design (DDD)
 
 ```
 quality-domain/
 ├── src/
-│   ├── app/                      ***REMOVED*** Application Layer
-│   │   ├── server.ts             ***REMOVED*** Fastify Server
-│   │   ├── routes/               ***REMOVED*** REST API Routes
-│   │   └── middleware/           ***REMOVED*** Auth, Tenant, Logging, etc.
-│   ├── domain/                   ***REMOVED*** Domain Layer
-│   │   ├── entities/             ***REMOVED*** Domain Models (Zod Schemas)
-│   │   └── services/             ***REMOVED*** Business Logic / Use Cases
-│   ├── infra/                    ***REMOVED*** Infrastructure Layer
-│   │   ├── db/                   ***REMOVED*** Database (Drizzle + PostgreSQL)
-│   │   ├── messaging/            ***REMOVED*** Event Bus (NATS)
-│   │   ├── telemetry/            ***REMOVED*** OpenTelemetry
-│   │   └── security/             ***REMOVED*** JWT/Auth
-│   └── contracts/                ***REMOVED*** API Contracts
-└── tests/                        ***REMOVED*** Unit & E2E Tests
+│   ├── app/                      # Application Layer
+│   │   ├── server.ts             # Fastify Server
+│   │   ├── routes/               # REST API Routes
+│   │   └── middleware/           # Auth, Tenant, Logging, etc.
+│   ├── domain/                   # Domain Layer
+│   │   ├── entities/             # Domain Models (Zod Schemas)
+│   │   └── services/             # Business Logic / Use Cases
+│   ├── infra/                    # Infrastructure Layer
+│   │   ├── db/                   # Database (Drizzle + PostgreSQL)
+│   │   ├── messaging/            # Event Bus (NATS)
+│   │   ├── telemetry/            # OpenTelemetry
+│   │   └── security/             # JWT/Auth
+│   └── contracts/                # API Contracts
+└── tests/                        # Unit & E2E Tests
 ```
 
-***REMOVED******REMOVED*** 🚀 Quick Start
+## 🚀 Quick Start
 
-***REMOVED******REMOVED******REMOVED*** Voraussetzungen
+### Voraussetzungen
 
 - Node.js ≥ 20
 - PostgreSQL ≥ 14
 - NATS Server (optional, für Events)
 - Redis (optional, für Caching)
 
-***REMOVED******REMOVED******REMOVED*** Installation
+### Installation
 
 ```bash
-***REMOVED*** Dependencies installieren
+# Dependencies installieren
 npm install
 
-***REMOVED*** Environment-Variablen kopieren
+# Environment-Variablen kopieren
 cp .env.example .env
 
-***REMOVED*** Datenbank-Migrationen ausführen
+# Datenbank-Migrationen ausführen
 npm run migrate:up
 
-***REMOVED*** Entwicklungsserver starten
+# Entwicklungsserver starten
 npm run dev
 ```
 
-***REMOVED******REMOVED******REMOVED*** Environment-Variablen
+### Environment-Variablen
 
 Siehe `.env.example` für eine vollständige Liste. Wichtigste Variablen:
 
@@ -71,12 +71,12 @@ NATS_URL=nats://localhost:4222
 OTEL_ENABLED=true
 ```
 
-***REMOVED******REMOVED*** 📡 API-Endpunkte
+## 📡 API-Endpunkte
 
-***REMOVED******REMOVED******REMOVED*** Base URL
+### Base URL
 `http://localhost:3007/quality/api/v1`
 
-***REMOVED******REMOVED******REMOVED*** Quality Plans
+### Quality Plans
 
 - `POST /plans` - Prüfplan erstellen
 - `GET /plans` - Prüfpläne auflisten
@@ -84,7 +84,7 @@ OTEL_ENABLED=true
 - `PATCH /plans/:id` - Prüfplan aktualisieren
 - `POST /plans/:id/deactivate` - Prüfplan deaktivieren
 
-***REMOVED******REMOVED******REMOVED*** Samples
+### Samples
 
 - `POST /samples` - Probe erstellen
 - `GET /samples` - Proben auflisten
@@ -93,7 +93,7 @@ OTEL_ENABLED=true
 - `GET /samples/:id/results` - Ergebnisse abrufen
 - `POST /samples/:id/analyze` - Probe analysieren (Freigabe/Sperre)
 
-***REMOVED******REMOVED******REMOVED*** Non-Conformities
+### Non-Conformities
 
 - `POST /ncs` - Abweichung erfassen
 - `GET /ncs` - Abweichungen auflisten (pagination)
@@ -104,7 +104,7 @@ OTEL_ENABLED=true
 - `POST /ncs/:id/link-capa` - Mit CAPA verknüpfen
 - `GET /ncs/stats` - NC-Statistiken
 
-***REMOVED******REMOVED******REMOVED*** CAPA
+### CAPA
 
 - `POST /capas` - CAPA erstellen
 - `GET /capas` - CAPAs auflisten (pagination)
@@ -117,13 +117,13 @@ OTEL_ENABLED=true
 - `GET /capas/overdue` - Überfällige CAPAs
 - `GET /capas/stats` - CAPA-Statistiken
 
-***REMOVED******REMOVED******REMOVED*** Health Checks
+### Health Checks
 
 - `GET /health` - Server-Status
 - `GET /ready` - Bereitschaftsprüfung
 - `GET /live` - Liveness-Prüfung
 
-***REMOVED******REMOVED*** 📚 OpenAPI-Dokumentation
+## 📚 OpenAPI-Dokumentation
 
 Interaktive API-Dokumentation verfügbar unter:
 ```
@@ -135,16 +135,16 @@ OpenAPI JSON Schema:
 http://localhost:3007/quality/api/v1/openapi.json
 ```
 
-***REMOVED******REMOVED*** 🔐 Authentifizierung & Autorisierung
+## 🔐 Authentifizierung & Autorisierung
 
-***REMOVED******REMOVED******REMOVED*** Headers (erforderlich)
+### Headers (erforderlich)
 
 ```http
 Authorization: Bearer <JWT-Token>
 x-tenant-id: <UUID>
 ```
 
-***REMOVED******REMOVED******REMOVED*** Permissions
+### Permissions
 
 - `quality:plan:create` - Prüfpläne erstellen
 - `quality:plan:update` - Prüfpläne bearbeiten
@@ -155,27 +155,27 @@ x-tenant-id: <UUID>
 - `quality:capa:create` - CAPAs erstellen
 - `quality:capa:verify` - CAPAs verifizieren
 
-***REMOVED******REMOVED*** 🔔 Domain-Events
+## 🔔 Domain-Events
 
 Die Domain publiziert folgende Events über NATS:
 
-***REMOVED******REMOVED******REMOVED*** Quality Plan Events
+### Quality Plan Events
 - `quality.plan.created`
 - `quality.plan.updated`
 - `quality.plan.deactivated`
 
-***REMOVED******REMOVED******REMOVED*** Sample Events
+### Sample Events
 - `quality.sample.taken`
 - `quality.sample.result.added`
 - `quality.sample.analyzed`
 
-***REMOVED******REMOVED******REMOVED*** Quality Status Events
+### Quality Status Events
 - `quality.batch.released`
 - `quality.batch.quarantined`
 - `quality.batch.rejected`
 - `quality.issue.detected`
 
-***REMOVED******REMOVED******REMOVED*** NC & CAPA Events
+### NC & CAPA Events
 - `quality.nc.created`
 - `quality.nc.updated`
 - `quality.nc.closed`
@@ -183,52 +183,52 @@ Die Domain publiziert folgende Events über NATS:
 - `quality.capa.implemented`
 - `quality.capa.verified`
 
-***REMOVED******REMOVED*** 🔗 Integration mit anderen Domains
+## 🔗 Integration mit anderen Domains
 
-***REMOVED******REMOVED******REMOVED*** Production Domain
+### Production Domain
 - Empfängt Batch-Completion-Events
 - Sendet Quality-Status-Events zurück (Released/Rejected)
 - Rückstellproben-Verwaltung
 
-***REMOVED******REMOVED******REMOVED*** Contracts Domain
+### Contracts Domain
 - Qualitätsvereinbarungen in Verträgen
 - Claims bei Abweichungen
 - Spezifikationsprüfung bei Lieferungen
 
-***REMOVED******REMOVED******REMOVED*** Inventory Domain
+### Inventory Domain
 - Freigaben/Sperren wirken auf Lot-Verfügbarkeit
 - Quarantäne-Lagerung
 
-***REMOVED******REMOVED******REMOVED*** Analytics Domain
+### Analytics Domain
 - Pass/Fail-Raten je Commodity
 - NC-Quote je Lieferant
 - CAPA-Durchlaufzeiten
 - Prognosen zu Qualitätsrisiken
 
-***REMOVED******REMOVED*** 🧪 Testing
+## 🧪 Testing
 
 ```bash
-***REMOVED*** Unit-Tests
+# Unit-Tests
 npm run test
 
-***REMOVED*** Mit Coverage
+# Mit Coverage
 npm run test:coverage
 
-***REMOVED*** Watch-Mode
+# Watch-Mode
 npm run test:watch
 
-***REMOVED*** E2E-Tests (erfordert laufende DB)
+# E2E-Tests (erfordert laufende DB)
 npm run test:e2e
 ```
 
-***REMOVED******REMOVED*** 🐳 Docker
+## 🐳 Docker
 
-***REMOVED******REMOVED******REMOVED*** Build Image
+### Build Image
 ```bash
 docker build -t valero-quality-domain:latest .
 ```
 
-***REMOVED******REMOVED******REMOVED*** Run Container
+### Run Container
 ```bash
 docker run -d \
   --name quality-domain \
@@ -238,14 +238,14 @@ docker run -d \
   valero-quality-domain:latest
 ```
 
-***REMOVED******REMOVED******REMOVED*** Docker Compose
+### Docker Compose
 ```bash
 docker-compose up quality-domain
 ```
 
-***REMOVED******REMOVED*** 📊 Observability
+## 📊 Observability
 
-***REMOVED******REMOVED******REMOVED*** Logging
+### Logging
 Strukturierte Logs mit Pino:
 ```json
 {
@@ -261,20 +261,20 @@ Strukturierte Logs mit Pino:
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Metrics
+### Metrics
 - Request Count, Latency (Histogramme)
 - Sample-Analyse-Rate
 - NC-Erstellungsrate
 - CAPA-Abschlussrate
 
-***REMOVED******REMOVED******REMOVED*** Tracing
+### Tracing
 OpenTelemetry-Integration für Distributed Tracing.
 
-***REMOVED******REMOVED*** 🛠️ Entwicklung
+## 🛠️ Entwicklung
 
-***REMOVED******REMOVED******REMOVED*** Lokale Datenbank
+### Lokale Datenbank
 ```bash
-***REMOVED*** Postgres starten
+# Postgres starten
 docker run -d \
   --name quality-db \
   -e POSTGRES_PASSWORD=postgres \
@@ -283,29 +283,29 @@ docker run -d \
   postgres:16-alpine
 ```
 
-***REMOVED******REMOVED******REMOVED*** Migrationen
+### Migrationen
 
 ```bash
-***REMOVED*** Migration erstellen
+# Migration erstellen
 npm run migrate:gen
 
-***REMOVED*** Migration anwenden
+# Migration anwenden
 npm run migrate:up
 
-***REMOVED*** Drizzle Studio (DB-GUI)
+# Drizzle Studio (DB-GUI)
 npm run db:studio
 ```
 
-***REMOVED******REMOVED******REMOVED*** Linting & Formatting
+### Linting & Formatting
 
 ```bash
 npm run lint
 npm run format
 ```
 
-***REMOVED******REMOVED*** 📝 Beispiel: Qualitätsprüfung
+## 📝 Beispiel: Qualitätsprüfung
 
-***REMOVED******REMOVED******REMOVED*** 1. Prüfplan erstellen
+### 1. Prüfplan erstellen
 
 ```bash
 POST /quality/api/v1/plans
@@ -340,7 +340,7 @@ x-tenant-id: 123e4567-e89b-12d3-a456-426614174000
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Probe erfassen
+### 2. Probe erfassen
 
 ```bash
 POST /quality/api/v1/samples
@@ -360,7 +360,7 @@ x-tenant-id: 123e4567-e89b-12d3-a456-426614174000
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Laborergebnis hinzufügen
+### 3. Laborergebnis hinzufügen
 
 ```bash
 POST /quality/api/v1/samples/{sampleId}/results
@@ -383,33 +383,34 @@ x-tenant-id: 123e4567-e89b-12d3-a456-426614174000
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. Probe analysieren
+### 4. Probe analysieren
 
 ```bash
 POST /quality/api/v1/samples/{sampleId}/analyze
 Content-Type: application/json
 x-tenant-id: 123e4567-e89b-12d3-a456-426614174000
 
-***REMOVED*** Response:
+# Response:
 {
   "status": "Released",
   "allPass": true
 }
 ```
 
-***REMOVED******REMOVED*** 🤝 Beitragen
+## 🤝 Beitragen
 
 1. Feature-Branch erstellen
 2. Änderungen committen
 3. Tests hinzufügen/aktualisieren
 4. Pull Request erstellen
 
-***REMOVED******REMOVED*** 📄 Lizenz
+## 📄 Lizenz
 
 Proprietary - VALEO GmbH
 
-***REMOVED******REMOVED*** 📧 Kontakt
+## 📧 Kontakt
 
 VALEO NeuroERP Team
 - Dokumentation: `/docs/`
 - Issues: JIRA Quality-Domain Board
+

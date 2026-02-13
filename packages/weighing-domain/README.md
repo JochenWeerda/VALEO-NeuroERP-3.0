@@ -1,40 +1,40 @@
-***REMOVED*** Weighing Domain Service
+# Weighing Domain Service
 
 A comprehensive domain service for agricultural weighing operations in the VALEO NeuroERP system. This service handles automated weighing processes, traffic control, ANPR integration, and real-time analytics for agricultural trading operations.
 
-***REMOVED******REMOVED*** 🚀 Features
+## 🚀 Features
 
-***REMOVED******REMOVED******REMOVED*** Core Functionality
+### Core Functionality
 - **Automated Weighing Operations**: Complete ticket lifecycle management
 - **Multi-Modal Weighing**: Vehicle, container, silo, and manual weighing
 - **Real-Time Weight Calculation**: Automatic net weight computation with tolerance checking
 - **Quality Assurance**: Configurable tolerance limits and compliance validation
 
-***REMOVED******REMOVED******REMOVED*** Traffic Control & Logistics
+### Traffic Control & Logistics
 - **Gate Management**: Automated gate sequencing and priority handling
 - **Slot Scheduling**: Time-window based appointment system
 - **Traffic Flow Optimization**: Real-time queue management and bottleneck detection
 
-***REMOVED******REMOVED******REMOVED*** ANPR Integration
+### ANPR Integration
 - **Automatic Number Plate Recognition**: Camera integration with confidence scoring
 - **Vehicle Lookup**: Automatic contract and order matching
 - **Ticket Suggestions**: AI-powered ticket creation from license plate data
 
-***REMOVED******REMOVED******REMOVED*** Analytics & Reporting
+### Analytics & Reporting
 - **Real-Time KPIs**: Wait times, service efficiency, throughput metrics
 - **Volume Analytics**: Daily/weekly/monthly weighing statistics
 - **Performance Monitoring**: Gate utilization and operator efficiency
 - **Compliance Reporting**: Tolerance violations and quality metrics
 
-***REMOVED******REMOVED*** 🏗️ Architecture
+## 🏗️ Architecture
 
-***REMOVED******REMOVED******REMOVED*** Domain-Driven Design
+### Domain-Driven Design
 - **Entities**: WeighingTicket, Slot, ANPRRecord, WaitLog, AuditLog
 - **Services**: WeighingService, TrafficControlService, ANPRService
 - **Events**: Domain events for system integration
 - **Contracts**: Zod schemas for API validation
 
-***REMOVED******REMOVED******REMOVED*** Technology Stack
+### Technology Stack
 - **Runtime**: Node.js 20 with TypeScript
 - **Framework**: Fastify with OpenAPI/Swagger
 - **Database**: PostgreSQL with Drizzle ORM
@@ -42,60 +42,60 @@ A comprehensive domain service for agricultural weighing operations in the VALEO
 - **Security**: JWT with JWKS, tenant isolation, RBAC
 - **Observability**: OpenTelemetry tracing and structured logging
 
-***REMOVED******REMOVED*** 📋 API Reference
+## 📋 API Reference
 
-***REMOVED******REMOVED******REMOVED*** Base URL
+### Base URL
 ```
 http://localhost:3005/weighing/api/v1
 ```
 
-***REMOVED******REMOVED******REMOVED*** Core Endpoints
+### Core Endpoints
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Weighing Tickets
+#### Weighing Tickets
 ```http
-POST   /tickets              ***REMOVED*** Create weighing ticket
-GET    /tickets/:id          ***REMOVED*** Get ticket details
-GET    /tickets              ***REMOVED*** List tickets with filtering
-PATCH  /tickets/:id          ***REMOVED*** Update ticket
-DELETE /tickets/:id          ***REMOVED*** Delete draft ticket
+POST   /tickets              # Create weighing ticket
+GET    /tickets/:id          # Get ticket details
+GET    /tickets              # List tickets with filtering
+PATCH  /tickets/:id          # Update ticket
+DELETE /tickets/:id          # Delete draft ticket
 
-POST   /tickets/:id/weigh    ***REMOVED*** Record weight measurement
-POST   /tickets/:id/complete ***REMOVED*** Complete ticket
-POST   /tickets/:id/cancel   ***REMOVED*** Cancel ticket
+POST   /tickets/:id/weigh    # Record weight measurement
+POST   /tickets/:id/complete # Complete ticket
+POST   /tickets/:id/cancel   # Cancel ticket
 
-GET    /tickets/active       ***REMOVED*** Get active tickets
-GET    /tickets/completed-today ***REMOVED*** Get today's completions
+GET    /tickets/active       # Get active tickets
+GET    /tickets/completed-today # Get today's completions
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Traffic Control
+#### Traffic Control
 ```http
-POST   /slots                ***REMOVED*** Schedule time slot
-GET    /slots                ***REMOVED*** List slots
-PATCH  /slots/:id            ***REMOVED*** Update slot status
+POST   /slots                # Schedule time slot
+GET    /slots                # List slots
+PATCH  /slots/:id            # Update slot status
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** ANPR Operations
+#### ANPR Operations
 ```http
-POST   /anpr/records         ***REMOVED*** ANPR camera input
-GET    /anpr/records/:id     ***REMOVED*** Get ANPR record
-POST   /anpr/:id/assign      ***REMOVED*** Assign to ticket
+POST   /anpr/records         # ANPR camera input
+GET    /anpr/records/:id     # Get ANPR record
+POST   /anpr/:id/assign      # Assign to ticket
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** Analytics
+#### Analytics
 ```http
-GET    /analytics/volume     ***REMOVED*** Volume statistics
-GET    /analytics/performance ***REMOVED*** Performance KPIs
-GET    /analytics/wait-times ***REMOVED*** Wait time analysis
+GET    /analytics/volume     # Volume statistics
+GET    /analytics/performance # Performance KPIs
+GET    /analytics/wait-times # Wait time analysis
 ```
 
-***REMOVED******REMOVED*** 🚀 Quick Start
+## 🚀 Quick Start
 
-***REMOVED******REMOVED******REMOVED*** Prerequisites
+### Prerequisites
 - Node.js 20+
 - PostgreSQL 15+
 - NATS or Kafka (optional)
 
-***REMOVED******REMOVED******REMOVED*** Installation
+### Installation
 
 1. **Clone and install dependencies:**
 ```bash
@@ -106,7 +106,7 @@ npm install
 2. **Set up environment:**
 ```bash
 cp .env.example .env
-***REMOVED*** Edit .env with your configuration
+# Edit .env with your configuration
 ```
 
 3. **Set up database:**
@@ -121,21 +121,21 @@ npm run dev
 
 The API will be available at `http://localhost:3005` with documentation at `/documentation`.
 
-***REMOVED******REMOVED******REMOVED*** Docker Deployment
+### Docker Deployment
 
 ```bash
-***REMOVED*** Build image
+# Build image
 docker build -t weighing-domain .
 
-***REMOVED*** Run with PostgreSQL
+# Run with PostgreSQL
 docker run -p 3005:3005 \
   -e DATABASE_URL=postgresql://user:pass@host:5432/db \
   weighing-domain
 ```
 
-***REMOVED******REMOVED*** 🔧 Configuration
+## 🔧 Configuration
 
-***REMOVED******REMOVED******REMOVED*** Environment Variables
+### Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -145,7 +145,7 @@ docker run -p 3005:3005 \
 | `JWT_SECRET` | JWT signing secret | Required |
 | `LOG_LEVEL` | Logging level | `info` |
 
-***REMOVED******REMOVED******REMOVED*** Database Schema
+### Database Schema
 
 The service uses PostgreSQL with the following main tables:
 - `weighing_tickets` - Core weighing operations
@@ -154,26 +154,26 @@ The service uses PostgreSQL with the following main tables:
 - `wait_logs` - Traffic flow analytics
 - `audit_logs` - Compliance and audit trail
 
-***REMOVED******REMOVED*** 🧪 Testing
+## 🧪 Testing
 
-***REMOVED******REMOVED******REMOVED*** Unit Tests
+### Unit Tests
 ```bash
 npm run test
 ```
 
-***REMOVED******REMOVED******REMOVED*** Integration Tests
+### Integration Tests
 ```bash
 npm run test:e2e
 ```
 
-***REMOVED******REMOVED******REMOVED*** Coverage Report
+### Coverage Report
 ```bash
 npm run test:coverage
 ```
 
-***REMOVED******REMOVED*** 📊 Business Logic
+## 📊 Business Logic
 
-***REMOVED******REMOVED******REMOVED*** Weighing Process Flow
+### Weighing Process Flow
 1. **Ticket Creation**: Manual or ANPR-triggered
 2. **Gross Weight**: First weighing measurement
 3. **Tare Weight**: Second weighing measurement
@@ -181,70 +181,70 @@ npm run test:coverage
 5. **Tolerance Check**: Quality assurance validation
 6. **Completion**: Final status update
 
-***REMOVED******REMOVED******REMOVED*** Tolerance Validation
+### Tolerance Validation
 ```typescript
 const tolerance = (expectedWeight * tolerancePercent) / 100;
 const isWithinTolerance = Math.abs(netWeight - expectedWeight) <= tolerance;
 ```
 
-***REMOVED******REMOVED******REMOVED*** Ticket Numbering
+### Ticket Numbering
 Format: `{PREFIX}-{DATE}-{SEQUENCE}`
 Example: `WT-20241201-0001`
 
-***REMOVED******REMOVED*** 🔐 Security
+## 🔐 Security
 
-***REMOVED******REMOVED******REMOVED*** Authentication
+### Authentication
 - JWT tokens with JWKS validation
 - Role-based access control (RBAC)
 - Tenant isolation middleware
 
-***REMOVED******REMOVED******REMOVED*** Authorization
+### Authorization
 - Resource-level permissions
 - Operation-specific access control
 - Audit logging for all operations
 
-***REMOVED******REMOVED*** 📈 Monitoring & Observability
+## 📈 Monitoring & Observability
 
-***REMOVED******REMOVED******REMOVED*** Health Checks
+### Health Checks
 - `/health` - Basic health status
 - `/ready` - Database connectivity check
 - `/live` - Application liveness
 
-***REMOVED******REMOVED******REMOVED*** Metrics
+### Metrics
 - Request/response times
 - Error rates
 - Database query performance
 - Event publishing success rates
 
-***REMOVED******REMOVED******REMOVED*** Logging
+### Logging
 - Structured JSON logging
 - Request ID tracing
 - Error correlation
 - Performance monitoring
 
-***REMOVED******REMOVED*** 🔗 Integration Points
+## 🔗 Integration Points
 
-***REMOVED******REMOVED******REMOVED*** BFF Layer
+### BFF Layer
 - **bff-web**: Dashboard and management interface
 - **bff-mobile**: Gate scanner and status updates
 - **bff-back-office**: Reporting and analytics
 
-***REMOVED******REMOVED******REMOVED*** Other Domains
+### Other Domains
 - **Contracts**: Order and contract references
 - **Inventory**: Weight-based inventory updates
 - **Analytics**: KPI data aggregation
 - **Logistics**: Route planning integration
 
-***REMOVED******REMOVED*** 🐛 Troubleshooting
+## 🐛 Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Common Issues
+### Common Issues
 
 **Database Connection Failed**
 ```bash
-***REMOVED*** Check PostgreSQL status
+# Check PostgreSQL status
 pg_isready -h localhost -p 5432
 
-***REMOVED*** Verify connection string
+# Verify connection string
 psql $DATABASE_URL -c "SELECT 1"
 ```
 
@@ -258,50 +258,50 @@ psql $DATABASE_URL -c "SELECT 1"
 - Monitor gate utilization
 - Review traffic patterns
 
-***REMOVED******REMOVED*** 📚 Development
+## 📚 Development
 
-***REMOVED******REMOVED******REMOVED*** Project Structure
+### Project Structure
 ```
 packages/weighing-domain/
 ├── src/
-│   ├── app/                 ***REMOVED*** Fastify application
-│   │   ├── routes/         ***REMOVED*** API route handlers
-│   │   └── server.ts       ***REMOVED*** Main server file
-│   ├── domain/             ***REMOVED*** Domain logic
-│   │   ├── entities/       ***REMOVED*** Domain entities
-│   │   └── services/       ***REMOVED*** Domain services
-│   ├── infra/              ***REMOVED*** Infrastructure
-│   │   ├── db/            ***REMOVED*** Database schema & migrations
-│   │   ├── repo/          ***REMOVED*** Repository implementations
-│   │   └── messaging/     ***REMOVED*** Event publishing
-│   └── contracts/          ***REMOVED*** API contracts (Zod schemas)
-├── tests/                  ***REMOVED*** Test suites
-├── migrations/            ***REMOVED*** Database migrations
-└── Dockerfile             ***REMOVED*** Container definition
+│   ├── app/                 # Fastify application
+│   │   ├── routes/         # API route handlers
+│   │   └── server.ts       # Main server file
+│   ├── domain/             # Domain logic
+│   │   ├── entities/       # Domain entities
+│   │   └── services/       # Domain services
+│   ├── infra/              # Infrastructure
+│   │   ├── db/            # Database schema & migrations
+│   │   ├── repo/          # Repository implementations
+│   │   └── messaging/     # Event publishing
+│   └── contracts/          # API contracts (Zod schemas)
+├── tests/                  # Test suites
+├── migrations/            # Database migrations
+└── Dockerfile             # Container definition
 ```
 
-***REMOVED******REMOVED******REMOVED*** Development Commands
+### Development Commands
 ```bash
-***REMOVED*** Development
-npm run dev              ***REMOVED*** Start with hot reload
-npm run build           ***REMOVED*** TypeScript compilation
-npm start               ***REMOVED*** Production start
+# Development
+npm run dev              # Start with hot reload
+npm run build           # TypeScript compilation
+npm start               # Production start
 
-***REMOVED*** Database
-npm run migrate:gen     ***REMOVED*** Generate migrations
-npm run migrate:up      ***REMOVED*** Run migrations
-npm run db:studio       ***REMOVED*** Drizzle Studio
+# Database
+npm run migrate:gen     # Generate migrations
+npm run migrate:up      # Run migrations
+npm run db:studio       # Drizzle Studio
 
-***REMOVED*** Testing
-npm test                ***REMOVED*** Unit tests
-npm run test:e2e        ***REMOVED*** Integration tests
-npm run test:coverage   ***REMOVED*** Coverage report
+# Testing
+npm test                # Unit tests
+npm run test:e2e        # Integration tests
+npm run test:coverage   # Coverage report
 
-***REMOVED*** Code Quality
-npm run lint            ***REMOVED*** ESLint check
+# Code Quality
+npm run lint            # ESLint check
 ```
 
-***REMOVED******REMOVED*** 🤝 Contributing
+## 🤝 Contributing
 
 1. Follow the established code patterns
 2. Add tests for new functionality
@@ -309,11 +309,11 @@ npm run lint            ***REMOVED*** ESLint check
 4. Ensure type safety
 5. Follow commit message conventions
 
-***REMOVED******REMOVED*** 📄 License
+## 📄 License
 
 This project is part of the VALEO NeuroERP system. See the main project license for details.
 
-***REMOVED******REMOVED*** 🆘 Support
+## 🆘 Support
 
 For support and questions:
 - Check the API documentation at `/documentation`

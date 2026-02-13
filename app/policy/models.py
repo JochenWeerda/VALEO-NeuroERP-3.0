@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import Literal, List, Dict, Optional
 from pydantic import BaseModel, Field
 
-***REMOVED*** Type Aliases
+# Type Aliases
 Severity = Literal["ok", "warn", "crit"]
 Role = Literal["admin", "manager", "operator"]
 
@@ -71,7 +71,7 @@ class DecisionDeny(BaseModel):
     reason: str
 
 
-***REMOVED*** Union Type für Decision
+# Union Type für Decision
 Decision = DecisionAllow | DecisionDeny
 
 

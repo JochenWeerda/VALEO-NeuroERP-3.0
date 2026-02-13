@@ -25,7 +25,7 @@ async def run_parallel_tasks(config: Dict[str, Any], num_agents: int) -> List[Di
     for category in config["parallel_tasks"].values():
         all_tasks.extend(category["tasks"])
     
-    ***REMOVED*** Erstelle Task-Gruppen für parallele Ausführung
+    # Erstelle Task-Gruppen für parallele Ausführung
     task_groups = []
     for i in range(0, len(all_tasks), num_agents):
         group = all_tasks[i:i + num_agents]
@@ -33,17 +33,17 @@ async def run_parallel_tasks(config: Dict[str, Any], num_agents: int) -> List[Di
     
     results = []
     
-    ***REMOVED*** Führe Task-Gruppen nacheinander aus
+    # Führe Task-Gruppen nacheinander aus
     for group_idx, task_group in enumerate(task_groups):
         print(f"\nVerarbeite Task-Gruppe {group_idx + 1}/{len(task_groups)}...")
         
-        ***REMOVED*** Führe Tasks in der Gruppe parallel aus
+        # Führe Tasks in der Gruppe parallel aus
         tasks = []
         for task_idx, task in enumerate(task_group):
             agent_name = f"agent_{group_idx}_{task_idx}"
             tasks.append(run_task(task, agent_name))
         
-        ***REMOVED*** Warte auf Abschluss aller Tasks in der Gruppe
+        # Warte auf Abschluss aller Tasks in der Gruppe
         group_results = await asyncio.gather(*tasks)
         results.extend(group_results)
         
@@ -62,17 +62,17 @@ def main():
                       help="Ausführungsmodus (create oder implement)")
     args = parser.parse_args()
     
-    ***REMOVED*** Lade Konfiguration
+    # Lade Konfiguration
     with open(args.config, "r") as f:
         config = yaml.safe_load(f)
     
     print(f"\nStarte parallele Ausführung mit {args.agents} Agenten im {args.mode.upper()}-Modus...")
     
-    ***REMOVED*** Führe Tasks aus
+    # Führe Tasks aus
     loop = asyncio.get_event_loop()
     results = loop.run_until_complete(run_parallel_tasks(config, args.agents))
     
-    ***REMOVED*** Zeige Ergebnisse
+    # Zeige Ergebnisse
     print("\nAusführung abgeschlossen!")
     print("\nErgebnisse:")
     for result in results:

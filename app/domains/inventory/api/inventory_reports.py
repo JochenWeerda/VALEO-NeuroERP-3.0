@@ -67,7 +67,7 @@ async def get_replenishment_suggestions(
     service = ReplenishmentService(db)
     suggestions = service.get_replenishment_suggestions(effective_tenant, days_ahead)
 
-    ***REMOVED*** Group by priority
+    # Group by priority
     by_priority = {}
     for suggestion in suggestions:
         priority = suggestion["priority"]
@@ -120,7 +120,7 @@ async def get_purchase_order_suggestions(
         effective_tenant, supplier_filter
     )
 
-    ***REMOVED*** Calculate totals
+    # Calculate totals
     total_suggestions = sum(len(items) for items in suggestions_by_supplier.values())
     total_cost = sum(
         sum(item["estimated_cost"] or 0 for item in items if item["estimated_cost"])
@@ -198,7 +198,7 @@ async def get_stock_levels_report(
         reserved_stock = float(article.reserved_stock or 0)
         min_stock = float(article.min_stock or 0)
 
-        ***REMOVED*** Update summary
+        # Update summary
         report["stock_summary"]["total_current_stock"] += current_stock
         report["stock_summary"]["total_available_stock"] += available_stock
         report["stock_summary"]["total_reserved_stock"] += reserved_stock
@@ -208,7 +208,7 @@ async def get_stock_levels_report(
         elif current_stock < min_stock:
             report["stock_summary"]["low_stock_count"] += 1
 
-        ***REMOVED*** Update categories
+        # Update categories
         category = article.category or "Uncategorized"
         if category not in report["categories"]:
             report["categories"][category] = {
@@ -222,7 +222,7 @@ async def get_stock_levels_report(
         if article.sales_price:
             report["categories"][category]["total_value"] += current_stock * float(article.sales_price)
 
-        ***REMOVED*** Add article details
+        # Add article details
         report["articles"].append({
             "id": article.id,
             "article_number": article.article_number,

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Skript zum Laden der VALEO-NeuroERP Dokumentation in MongoDB.
 """
@@ -10,7 +10,7 @@ import re
 from pymongo import MongoClient
 from langchain_openai import OpenAIEmbeddings
 
-***REMOVED*** MongoDB Verbindung
+# MongoDB Verbindung
 MONGODB_URI = os.environ.get("MONGODB_URI", "mongodb://localhost:27017")
 DB_NAME = "valeo_neuroerp"
 COLLECTION_NAME = "documentation"
@@ -18,7 +18,7 @@ COLLECTION_NAME = "documentation"
 def create_indices(collection) -> None:
     """Erstellt die notwendigen Indizes in der Collection."""
     try:
-        ***REMOVED*** Textindex für Volltextsuche
+        # Textindex für Volltextsuche
         collection.create_index([
             ("content", "text"),
             ("sections.content", "text"),
@@ -26,7 +26,7 @@ def create_indices(collection) -> None:
             ("metadata.title", "text")
         ])
         
-        ***REMOVED*** Index für Zeitstempel
+        # Index für Zeitstempel
         collection.create_index("metadata.updated_at")
         
         print("Indizes erfolgreich erstellt.")
@@ -36,23 +36,23 @@ def create_indices(collection) -> None:
 def extract_sections(content: str) -> List[Dict[str, str]]:
     """Extrahiert Abschnitte aus dem Markdown-Inhalt mit Hierarchie-Tracking."""
     sections = []
-    section_stack = []  ***REMOVED*** Stack für verschachtelte Abschnitte
+    section_stack = []  # Stack für verschachtelte Abschnitte
     current_content = []
     lines = content.split("\n")
     
     for line in lines:
-        ***REMOVED*** Erkenne Überschriften
-        if line.startswith("***REMOVED***"):
-            ***REMOVED*** Verarbeite gesammelten Inhalt für aktuellen Abschnitt
+        # Erkenne Überschriften
+        if line.startswith("#"):
+            # Verarbeite gesammelten Inhalt für aktuellen Abschnitt
             if section_stack:
                 section_stack[-1]["content"] = "\n".join(current_content).strip()
                 current_content = []
             
-            ***REMOVED*** Bestimme Level der neuen Überschrift
-            level = len(re.match(r"^***REMOVED***+", line).group())
-            title = line.lstrip("***REMOVED***").strip()
+            # Bestimme Level der neuen Überschrift
+            level = len(re.match(r"^#+", line).group())
+            title = line.lstrip("#").strip()
             
-            ***REMOVED*** Erstelle neuen Abschnitt
+            # Erstelle neuen Abschnitt
             new_section = {
                 "title": title,
                 "content": "",
@@ -60,29 +60,29 @@ def extract_sections(content: str) -> List[Dict[str, str]]:
                 "parent": None
             }
             
-            ***REMOVED*** Aktualisiere Hierarchie
+            # Aktualisiere Hierarchie
             while section_stack and section_stack[-1]["level"] >= level:
                 completed_section = section_stack.pop()
-                if completed_section["content"].strip():  ***REMOVED*** Nur nicht-leere Abschnitte speichern
+                if completed_section["content"].strip():  # Nur nicht-leere Abschnitte speichern
                     sections.append(completed_section)
             
-            ***REMOVED*** Setze Parent-Referenz
+            # Setze Parent-Referenz
             if section_stack:
                 new_section["parent"] = section_stack[-1]["title"]
             
             section_stack.append(new_section)
         else:
-            ***REMOVED*** Füge Zeile zum aktuellen Inhalt hinzu
+            # Füge Zeile zum aktuellen Inhalt hinzu
             current_content.append(line)
     
-    ***REMOVED*** Verarbeite verbleibenden Inhalt
+    # Verarbeite verbleibenden Inhalt
     if section_stack:
         section_stack[-1]["content"] = "\n".join(current_content).strip()
     
-    ***REMOVED*** Füge verbleibende Abschnitte hinzu
+    # Füge verbleibende Abschnitte hinzu
     while section_stack:
         completed_section = section_stack.pop()
-        if completed_section["content"].strip():  ***REMOVED*** Nur nicht-leere Abschnitte speichern
+        if completed_section["content"].strip():  # Nur nicht-leere Abschnitte speichern
             sections.append(completed_section)
     
     return sections
@@ -93,16 +93,16 @@ def process_document(file_path: str, embeddings: OpenAIEmbeddings) -> Dict[str, 
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
         
-        ***REMOVED*** Extrahiere Metadaten
+        # Extrahiere Metadaten
         title = os.path.splitext(os.path.basename(file_path))[0]
         sections = extract_sections(content)
         
-        ***REMOVED*** Erstelle Embeddings für jeden Abschnitt
+        # Erstelle Embeddings für jeden Abschnitt
         for section in sections:
             section_text = f"{section['title']}\n{section['content']}"
             section["embedding"] = embeddings.embed_query(section_text)
         
-        ***REMOVED*** Erstelle Dokument
+        # Erstelle Dokument
         document = {
             "file_path": file_path,
             "content": content,
@@ -130,19 +130,19 @@ def find_markdown_files(root_dir: str) -> List[str]:
     return markdown_files
 
 def main():
-    ***REMOVED*** Initialisiere MongoDB und Embeddings
+    # Initialisiere MongoDB und Embeddings
     client = MongoClient(MONGODB_URI)
     db = client[DB_NAME]
     collection = db[COLLECTION_NAME]
     embeddings = OpenAIEmbeddings()
     
-    ***REMOVED*** Erstelle Indizes
+    # Erstelle Indizes
     create_indices(collection)
     
-    ***REMOVED*** Finde alle Markdown-Dateien
+    # Finde alle Markdown-Dateien
     doc_paths = find_markdown_files(".")
     
-    ***REMOVED*** Filtere unerwünschte Dateien aus
+    # Filtere unerwünschte Dateien aus
     excluded_dirs = {"venv", "node_modules", "__pycache__"}
     doc_paths = [
         path for path in doc_paths 
@@ -151,11 +151,11 @@ def main():
     
     print(f"Gefunden: {len(doc_paths)} Markdown-Dateien")
     
-    ***REMOVED*** Lösche bestehende Dokumente
+    # Lösche bestehende Dokumente
     collection.delete_many({})
     print("Bestehende Dokumente gelöscht.")
     
-    ***REMOVED*** Verarbeite jedes Dokument
+    # Verarbeite jedes Dokument
     for file_path in doc_paths:
         print(f"Verarbeite {file_path}...")
         document = process_document(file_path, embeddings)

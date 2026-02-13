@@ -15,9 +15,9 @@ if str(ROOT_DIR) not in sys.path:
 
 sys.modules.pop("app", None)
 
-from app.db import models  ***REMOVED*** noqa: E402
-from app.services.inventory_service import InventoryService  ***REMOVED*** noqa: E402
-from app.schemas import (  ***REMOVED*** noqa: E402
+from app.db import models  # noqa: E402
+from app.services.inventory_service import InventoryService  # noqa: E402
+from app.schemas import (  # noqa: E402
     LocationCreate,
     ReceiptCreate,
     StockMovementCreate,
@@ -131,3 +131,4 @@ async def test_stock_movement_api(session: AsyncSession):
     articles = await service.list_articles()
     assert len(articles) == 1
     assert articles[0].current_stock == 15
+

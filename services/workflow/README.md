@@ -1,8 +1,8 @@
-***REMOVED*** Workflow Service
+# Workflow Service
 
 Microservice für deklarative Workflows, Policies, Eventing und Saga-Orchestrierung innerhalb von VALEO NeuroERP 3.0.
 
-***REMOVED******REMOVED*** Features
+## Features
 
 - Registrierung und Versionierung von Workflow-Definitionen (persistiert in PostgreSQL).
 - Ausführung mit Hook-Punkten für Policies, Aktionen (inkl. `emit_event`) und KI-Empfehlungen.
@@ -10,7 +10,7 @@ Microservice für deklarative Workflows, Policies, Eventing und Saga-Orchestrier
 - Saga-Koordinator für Langläuferprozesse inkl. Kompensation.
 - Simulation von Workflows zur Validierung neuer Regeln.
 
-***REMOVED******REMOVED*** Endpunkte (Auszug)
+## Endpunkte (Auszug)
 
 - `POST /api/v1/workflows/definitions` – Neue Definition registrieren.
 - `POST /api/v1/workflows/instances` – Workflow-Instanz starten.
@@ -20,25 +20,26 @@ Microservice für deklarative Workflows, Policies, Eventing und Saga-Orchestrier
 - `POST /api/v1/sagas/definitions/{name}` – Saga registrieren.
 - `POST /api/v1/sagas/instances/{name}` – Saga starten.
 
-***REMOVED******REMOVED*** Quickstart
+## Quickstart
 
 ```bash
 cd services/workflow
 python -m venv .venv
-source .venv/bin/activate  ***REMOVED*** Windows: .venv\Scripts\activate
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload --port 5100
 ```
 
-***REMOVED******REMOVED******REMOVED*** Optionale Infrastruktur
+### Optionale Infrastruktur
 
 - PostgreSQL (Schema: `workflow_definitions`, `workflow_instances`)
 - NATS Event-Bus (`nats://nats:4222`, Subject: `workflow.*`)
 
-***REMOVED******REMOVED*** Ausblick
+## Ausblick
 
 - Erweiterung der Persistenz um Audit-Trails & Archivrechte.
 - Native Unterstützung weiterer Event-Broker (Kafka, Redis Streams).
 - RAG-gestützte Empfehlungen für neue Transitionen und Sagas.
+
 
 

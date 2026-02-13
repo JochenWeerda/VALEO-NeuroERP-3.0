@@ -163,7 +163,7 @@ async def list_tax_keys(
         
     except Exception as e:
         logger.error(f"Error listing tax keys: {e}")
-        ***REMOVED*** Return mock data if table doesn't exist
+        # Return mock data if table doesn't exist
         return [
             TaxKeyResponse(
                 id="1",
@@ -318,7 +318,7 @@ async def create_tax_key(
     Create a new tax key.
     """
     try:
-        ***REMOVED*** Check if code already exists
+        # Check if code already exists
         check_query = text("""
             SELECT id FROM domain_erp.tax_keys
             WHERE code = :code AND tenant_id = :tenant_id
@@ -332,7 +332,7 @@ async def create_tax_key(
         if existing:
             raise HTTPException(status_code=400, detail=f"Tax key with code {tax_key.code} already exists")
         
-        ***REMOVED*** Insert new tax key
+        # Insert new tax key
         import uuid
         tax_key_id = str(uuid.uuid4())
         
@@ -415,7 +415,7 @@ async def update_tax_key(
     Update an existing tax key.
     """
     try:
-        ***REMOVED*** Build update query dynamically
+        # Build update query dynamically
         update_fields = []
         params = {"tax_key_id": tax_key_id, "tenant_id": tenant_id}
         

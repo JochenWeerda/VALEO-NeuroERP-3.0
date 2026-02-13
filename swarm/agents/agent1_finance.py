@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Agent-1: Finance & Accounting
 Implementiert 33 Finance Capabilities
@@ -21,13 +21,13 @@ class Agent1Finance:
         self.handoffs_path = self.swarm_path / "handoffs"
         self.gap_path = self.base_path / "gap"
         
-        ***REMOVED*** Capabilities (33 total)
+        # Capabilities (33 total)
         self.capabilities = {
             "P0": [
-                "FIBU-AR-03",  ***REMOVED*** Zahlungseingänge & Matching
-                "FIBU-AP-02",  ***REMOVED*** Eingangsrechnungen
-                "FIBU-GL-05",  ***REMOVED*** Periodensteuerung
-                "FIBU-COMP-01"  ***REMOVED*** GoBD / Audit Trail UI
+                "FIBU-AR-03",  # Zahlungseingänge & Matching
+                "FIBU-AP-02",  # Eingangsrechnungen
+                "FIBU-GL-05",  # Periodensteuerung
+                "FIBU-COMP-01"  # GoBD / Audit Trail UI
             ],
             "P1": [
                 "FIBU-GL-01", "FIBU-GL-02",
@@ -60,7 +60,7 @@ class Agent1Finance:
         print(f"[AGENT-1] Capabilities: 33")
         print(f"[AGENT-1] Status: {self.status}")
         
-        ***REMOVED*** Status-Update erstellen
+        # Status-Update erstellen
         self.create_status_update()
         
     def create_status_update(self):
@@ -68,38 +68,38 @@ class Agent1Finance:
         timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
         status_path = self.status_path / f"agent1-finance-{timestamp}.md"
         
-        content = f"""***REMOVED*** Agent-1 (Finance) Status Update
+        content = f"""# Agent-1 (Finance) Status Update
 
 **Datum:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Sprint:** {self.current_sprint}
 **Phase:** {self.current_phase}
 **Status:** {self.status}
 
-***REMOVED******REMOVED*** Capabilities in Progress
+## Capabilities in Progress
 
-***REMOVED******REMOVED******REMOVED*** P0 - Kritisch (4)
+### P0 - Kritisch (4)
 - FIBU-AR-03: Zahlungseingänge & Matching
 - FIBU-AP-02: Eingangsrechnungen
 - FIBU-GL-05: Periodensteuerung
 - FIBU-COMP-01: GoBD / Audit Trail UI
 
-***REMOVED******REMOVED*** Aktuelle Tasks
+## Aktuelle Tasks
 
-***REMOVED******REMOVED******REMOVED*** Sprint 1-2: Finance P0
+### Sprint 1-2: Finance P0
 - [ ] FIBU-AR-03: Payment-Match-UI (2-3 Wochen)
 - [ ] FIBU-AP-02: Eingangsrechnungen vervollständigen (2-3 Wochen)
 
-***REMOVED******REMOVED*** Blockaden
+## Blockaden
 
 Keine Blockaden.
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 - Agent-4: Bankimport-Infrastructure
 - Agent-4: Payment-Match-Engine Basis
 - Agent-4: Audit-Trail-Infrastructure
 
-***REMOVED******REMOVED*** Next Steps
+## Next Steps
 
 1. Payment-Match-UI implementieren
 2. Eingangsrechnungen vervollständigen
@@ -114,29 +114,29 @@ Keine Blockaden.
         timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
         handoff_path = self.handoffs_path / f"agent1-finance-{capability_id}-{timestamp}.md"
         
-        content = f"""***REMOVED*** Agent-1 Handoff: {capability_id}
+        content = f"""# Agent-1 Handoff: {capability_id}
 
 **Datum:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Capability:** {capability_id}
 **Status:** {status}
 
-***REMOVED******REMOVED*** Was wurde implementiert?
+## Was wurde implementiert?
 
 {notes}
 
-***REMOVED******REMOVED*** Was ist noch zu tun?
+## Was ist noch zu tun?
 
 TBD
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 TBD
 
-***REMOVED******REMOVED*** Acceptance Criteria
+## Acceptance Criteria
 
 TBD
 
-***REMOVED******REMOVED*** Test-Status
+## Test-Status
 
 TBD
 """
@@ -152,4 +152,5 @@ if __name__ == "__main__":
         agent.start()
     else:
         print("Usage: python agent1_finance.py --start")
+
 

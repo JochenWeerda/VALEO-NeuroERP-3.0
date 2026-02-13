@@ -52,11 +52,11 @@ export default function LeadsScreen() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'qualified': return '***REMOVED***4CAF50';
-      case 'contacted': return '***REMOVED***2196F3';
-      case 'new': return '***REMOVED***FF9800';
-      case 'lost': return '***REMOVED***F44336';
-      default: return '***REMOVED***9E9E9E';
+      case 'qualified': return '#4CAF50';
+      case 'contacted': return '#2196F3';
+      case 'new': return '#FF9800';
+      case 'lost': return '#F44336';
+      default: return '#9E9E9E';
     }
   };
 

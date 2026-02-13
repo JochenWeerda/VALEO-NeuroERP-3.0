@@ -1,19 +1,53 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertTriangle, BarChart3, Euro, FileText, ShoppingCart } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { AlertTriangle, BarChart3, Euro, FileText, Loader2, ShoppingCart } from 'lucide-react'
+import { useProcurementDashboard } from '@/lib/api/dashboard'
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6 p-6">
+      <div>
+        <h1 className="text-3xl font-bold">Einkaufs-Dashboard</h1>
+        <p className="text-muted-foreground">Beschaffungs-Übersicht</p>
+      </div>
+      <div className="grid gap-4 md:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i}>
+            <CardHeader className="pb-2">
+              <Skeleton className="h-4 w-32" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-24" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-48" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-20 w-full" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
 
 export default function EinkaufDashboardPage(): JSX.Element {
-  const dashboard = {
-    bestellungenOffen: 8,
-    einkaufsvolumen: 175000,
-    lieferanten: 28,
-    offenePosten: 125000,
-    ueberfaellig: 3,
-    bestellungen: [
-      { nummer: 'PO-2025-042', lieferant: 'Saatgut AG', betrag: 25000, status: 'offen' },
-      { nummer: 'PO-2025-041', lieferant: 'Dünger GmbH', betrag: 18500, status: 'teilgeliefert' },
-      { nummer: 'PO-2025-040', lieferant: 'Technik GmbH', betrag: 8900, status: 'komplett' },
-    ],
+  const { data: dashboard, isLoading } = useProcurementDashboard()
+
+  if (isLoading) {
+    return <DashboardSkeleton />
+  }
+
+  if (!dashboard) {
+    return <DashboardSkeleton />
   }
 
   return (
@@ -68,7 +102,7 @@ export default function EinkaufDashboardPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <ShoppingCart className="h-5 w-5" />
-              <span className="text-2xl font-bold">{dashboard.lieferanten}</span>
+              <span className="text-2xl font-bold">{dashboard.lieferantenAktiv}</span>
             </div>
           </CardContent>
         </Card>

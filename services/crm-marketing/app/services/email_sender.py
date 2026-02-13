@@ -19,10 +19,10 @@ class EmailSender:
     
     def __init__(self, db: AsyncSession):
         self.db = db
-        self.smtp_host = "localhost"  ***REMOVED*** TODO: Get from config
+        self.smtp_host = "localhost"  # TODO: Get from config
         self.smtp_port = 587
-        self.smtp_user = None  ***REMOVED*** TODO: Get from config
-        self.smtp_password = None  ***REMOVED*** TODO: Get from config
+        self.smtp_user = None  # TODO: Get from config
+        self.smtp_password = None  # TODO: Get from config
     
     def _render_template(self, template: str, variables: Dict[str, Any]) -> str:
         """Render template with variables."""
@@ -40,8 +40,8 @@ class EmailSender:
         from_name: str | None = None,
     ) -> bool:
         """Send email via SMTP or email service."""
-        ***REMOVED*** TODO: Implement actual email sending
-        ***REMOVED*** For now, just log
+        # TODO: Implement actual email sending
+        # For now, just log
         logger.info(f"Sending email to {to_email}: {subject}")
         return True
     
@@ -53,7 +53,7 @@ class EmailSender:
         variant: str | None = None,
     ) -> bool:
         """Send email for a campaign recipient."""
-        ***REMOVED*** Get template
+        # Get template
         if not template:
             if campaign.template_id:
                 template = await self.db.get(CampaignTemplate, campaign.template_id)
@@ -61,33 +61,33 @@ class EmailSender:
                 logger.error(f"No template for campaign {campaign.id}")
                 return False
         
-        ***REMOVED*** Get subject and body
+        # Get subject and body
         subject = campaign.subject or template.subject_template or ""
         body = template.body_template
         
-        ***REMOVED*** Render template with variables
+        # Render template with variables
         variables = {
-            "contact_name": "Contact",  ***REMOVED*** TODO: Get from contact
+            "contact_name": "Contact",  # TODO: Get from contact
             "campaign_name": campaign.name,
-            "unsubscribe_url": f"https://example.com/unsubscribe?token={recipient.id}",  ***REMOVED*** TODO: Generate token
+            "unsubscribe_url": f"https://example.com/unsubscribe?token={recipient.id}",  # TODO: Generate token
         }
         
-        ***REMOVED*** If A/B-Test variant, use variant content
+        # If A/B-Test variant, use variant content
         if variant and campaign.settings and campaign.settings.get("ab_test_enabled"):
-            ***REMOVED*** TODO: Get variant content from CampaignABTest
+            # TODO: Get variant content from CampaignABTest
             pass
         
         subject = self._render_template(subject, variables)
         body = self._render_template(body, variables)
         
-        ***REMOVED*** Add tracking pixel for opens
+        # Add tracking pixel for opens
         tracking_pixel = f'<img src="https://example.com/track/open?campaign_id={campaign.id}&recipient_id={recipient.id}" width="1" height="1" style="display:none;" />'
         body = body.replace("</body>", f"{tracking_pixel}</body>")
         
-        ***REMOVED*** Wrap links for click tracking
-        ***REMOVED*** TODO: Implement link wrapping
+        # Wrap links for click tracking
+        # TODO: Implement link wrapping
         
-        ***REMOVED*** Send email
+        # Send email
         success = await self._send_email(
             to_email=recipient.email or "",
             subject=subject,
@@ -97,11 +97,11 @@ class EmailSender:
         )
         
         if success:
-            ***REMOVED*** Update recipient status
+            # Update recipient status
             recipient.status = RecipientStatus.SENT
             recipient.sent_at = datetime.utcnow()
             
-            ***REMOVED*** Create sent event
+            # Create sent event
             event = CampaignEvent(
                 campaign_id=campaign.id,
                 recipient_id=recipient.id,
@@ -123,7 +123,7 @@ class EmailSender:
         if not campaign or campaign.type != CampaignType.EMAIL:
             return
         
-        ***REMOVED*** Get pending recipients
+        # Get pending recipients
         from sqlalchemy import select, and_
         stmt = select(CampaignRecipient).where(
             and_(
@@ -135,16 +135,17 @@ class EmailSender:
         result = await self.db.execute(stmt)
         recipients = list(result.scalars().all())
         
-        ***REMOVED*** Get template
+        # Get template
         template = None
         if campaign.template_id:
             template = await self.db.get(CampaignTemplate, campaign.template_id)
         
-        ***REMOVED*** Send to each recipient
+        # Send to each recipient
         for recipient in recipients:
             await self.send_campaign_email(
                 campaign=campaign,
                 recipient=recipient,
                 template=template,
             )
+
 

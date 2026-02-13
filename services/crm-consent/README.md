@@ -1,8 +1,8 @@
-***REMOVED*** CRM Consent Service
+# CRM Consent Service
 
 GDPR-compliant consent management with double opt-in.
 
-***REMOVED******REMOVED*** Responsibilities
+## Responsibilities
 
 - Manage consent records for contacts/customers
 - Double opt-in flow with email confirmation
@@ -10,7 +10,7 @@ GDPR-compliant consent management with double opt-in.
 - Channel-specific opt-ins (Email, SMS, Phone, Postal)
 - Automatic consent checking before communication
 
-***REMOVED******REMOVED*** API Endpoints
+## API Endpoints
 
 - `POST /api/v1/consents` - Create consent (with double opt-in token)
 - `GET /api/v1/consents` - List consents with filters
@@ -23,10 +23,11 @@ GDPR-compliant consent management with double opt-in.
 - `GET /api/v1/consents/{id}/history` - Get consent history
 - `POST /api/v1/consents/check` - Check consent (for communication)
 
-***REMOVED******REMOVED*** Events
+## Events
 
 - `crm.consent.created`
 - `crm.consent.confirmed` (Double opt-in)
 - `crm.consent.revoked`
 - `crm.consent.updated`
+
 

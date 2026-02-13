@@ -16,11 +16,16 @@ from app.middleware.metrics import PrometheusMiddleware
 from app.middleware.correlation import CorrelationMiddleware
 from app.core.logging import setup_logging
 
-***REMOVED*** Setup logging
+try:
+    from auth_shared import AuthMiddleware
+except ImportError:
+    AuthMiddleware = None  # type: ignore[assignment,misc]
+
+# Setup logging
 setup_logging(json_format=True)
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Create FastAPI app
+# Create FastAPI app
 app = FastAPI(
     title="VALEO CRM Service",
     description="Customer Relationship Management Microservice",
@@ -29,27 +34,32 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-***REMOVED*** CORS
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  ***REMOVED*** In production: specific origins
+    allow_origins=["*"],  # In production: specific origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-***REMOVED*** Metrics & Correlation
+# Auth middleware
+if AuthMiddleware is not None:
+    app.add_middleware(AuthMiddleware)
+    logger.info("Auth middleware enabled")
+
+# Metrics & Correlation
 app.add_middleware(PrometheusMiddleware)
 app.add_middleware(CorrelationMiddleware)
 
-***REMOVED*** Include routers
+# Include routers
 app.include_router(crm_router, prefix="/api/v1/crm", tags=["CRM"])
 
-***REMOVED*** Mount Prometheus metrics
+# Mount Prometheus metrics
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
 
-***REMOVED*** Health checks
+# Health checks
 @app.get("/health")
 async def health():
     return {"service": "crm", "status": "healthy"}
@@ -62,15 +72,15 @@ async def ready(db: Session = Depends(get_db)):
     except Exception as e:
         return {"service": "crm", "status": "not_ready", "error": str(e)}
 
-***REMOVED*** Startup
+# Startup
 @app.on_event("startup")
 async def startup():
     logger.info("CRM Service starting...")
-    ***REMOVED*** Create tables if not exist
+    # Create tables if not exist
     Base.metadata.create_all(bind=engine)
     logger.info("CRM Service ready on port 8001")
 
-***REMOVED*** Shutdown
+# Shutdown
 @app.on_event("shutdown")
 async def shutdown():
     logger.info("CRM Service shutting down...")
@@ -78,4 +88,3 @@ async def shutdown():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
-

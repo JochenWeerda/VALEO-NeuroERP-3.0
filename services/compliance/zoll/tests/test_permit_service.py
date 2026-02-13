@@ -44,7 +44,7 @@ class FakeSession:
 @pytest.mark.asyncio
 async def test_permit_service_create_and_update():
     session = FakeSession()
-    service = PermitService(session)  ***REMOVED*** type: ignore[arg-type]
+    service = PermitService(session)  # type: ignore[arg-type]
 
     create_payload = ExportPermitCreate(
         tenant_id="tenant-a",
@@ -63,3 +63,4 @@ async def test_permit_service_create_and_update():
     update_payload = ExportPermitUpdate(status="approved")
     updated = await service.update_permit(created.id, update_payload)
     assert updated.status == "approved"
+

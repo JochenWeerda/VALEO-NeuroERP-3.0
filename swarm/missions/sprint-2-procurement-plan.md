@@ -1,4 +1,4 @@
-***REMOVED*** Sprint 2 - Procurement P0 Plan
+# Sprint 2 - Procurement P0 Plan
 
 **Datum:** 2025-01-27  
 **Sprint:** 2  
@@ -7,11 +7,11 @@
 
 ---
 
-***REMOVED******REMOVED*** 🔍 Pre-Implementation Audit
+## 🔍 Pre-Implementation Audit
 
-***REMOVED******REMOVED******REMOVED*** ✅ Vorhandene Funktionalität (NICHT neu erstellen)
+### ✅ Vorhandene Funktionalität (NICHT neu erstellen)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** PROC-GR-01: Wareneingang
+#### PROC-GR-01: Wareneingang
 
 **Backend - ✅ Vorhanden:**
 - `packages/purchase-domain/src/domain/services/purchase-order-workflow-service.ts`
@@ -42,7 +42,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** PROC-IV-02: 2/3-Wege-Abgleich
+#### PROC-IV-02: 2/3-Wege-Abgleich
 
 **Backend - ✅ Vorhanden:**
 - `packages/purchase-domain/src/domain/services/purchase-order-workflow-service.ts`
@@ -59,7 +59,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** PROC-PO-02: PO-Änderungen & Storno
+#### PROC-PO-02: PO-Änderungen & Storno
 
 **Backend - ⚠️ Teilweise vorhanden:**
 - `packages/procurement-domain/src/core/entities/purchase-order.ts`
@@ -81,7 +81,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** PROC-REQ-01: Bedarfsmeldung (Purchase Requisition)
+#### PROC-REQ-01: Bedarfsmeldung (Purchase Requisition)
 
 **Backend - ✅ Vorhanden:**
 - `packages/purchase-domain/src/app/routes/purchase-workflow.ts`
@@ -101,9 +101,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Sprint 2 Aufgaben
+## 🎯 Sprint 2 Aufgaben
 
-***REMOVED******REMOVED******REMOVED*** Task 1: PROC-GR-01 - Wareneingang Frontend erweitern
+### Task 1: PROC-GR-01 - Wareneingang Frontend erweitern
 
 **Status:** ⚠️ Frontend teilweise vorhanden, Backend vorhanden
 
@@ -120,7 +120,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Task 2: PROC-IV-02 - 2/3-Wege-Abgleich Frontend-UI
+### Task 2: PROC-IV-02 - 2/3-Wege-Abgleich Frontend-UI
 
 **Status:** ❌ Frontend fehlt, Backend vorhanden
 
@@ -138,7 +138,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Task 3: PROC-PO-02 - PO-Änderungen & Storno
+### Task 3: PROC-PO-02 - PO-Änderungen & Storno
 
 **Status:** ⚠️ Teilweise vorhanden
 
@@ -155,7 +155,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Task 4: PROC-REQ-01 - Bedarfsmeldung vervollständigen
+### Task 4: PROC-REQ-01 - Bedarfsmeldung vervollständigen
 
 **Status:** ✅ Frontend vorhanden, Backend vorhanden
 
@@ -171,27 +171,27 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 Implementierungs-Strategie
+## 📋 Implementierungs-Strategie
 
-***REMOVED******REMOVED******REMOVED*** Phase 1: Prüfung & Integration (Heute)
+### Phase 1: Prüfung & Integration (Heute)
 1. ✅ Bestehende Frontend-Seiten analysieren
 2. ✅ Backend-APIs prüfen
 3. ✅ Integration-Punkte identifizieren
 4. ✅ Doppelstrukturen vermeiden
 
-***REMOVED******REMOVED******REMOVED*** Phase 2: Erweiterung (Sprint 2)
+### Phase 2: Erweiterung (Sprint 2)
 1. ⚠️ Frontend erweitern (nicht neu erstellen)
 2. ⚠️ Backend-Integration vervollständigen
 3. ⚠️ Fehlende UI-Komponenten erstellen
 
-***REMOVED******REMOVED******REMOVED*** Phase 3: Vervollständigung (Sprint 2-3)
+### Phase 3: Vervollständigung (Sprint 2-3)
 1. ⚠️ Change-Log/Versionierung
 2. ⚠️ Storno-Funktionalität
 3. ⚠️ Audit-Trail Integration
 
 ---
 
-***REMOVED******REMOVED*** ✅ Keine Doppelstrukturen
+## ✅ Keine Doppelstrukturen
 
 **Bestätigt:**
 - ✅ Backend-APIs existieren bereits - NICHT neu erstellen
@@ -201,4 +201,5 @@
 ---
 
 **Status:** ✅ **AUDIT ABGESCHLOSSEN - BEREIT FÜR IMPLEMENTIERUNG**
+
 

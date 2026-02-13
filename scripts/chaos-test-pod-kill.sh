@@ -1,6 +1,6 @@
-***REMOVED***!/bin/bash
-***REMOVED*** Chaos Engineering: Pod-Kill-Test
-***REMOVED*** Simuliert zufällige Pod-Failures und verifiziert Self-Healing
+#!/bin/bash
+# Chaos Engineering: Pod-Kill-Test
+# Simuliert zufällige Pod-Failures und verifiziert Self-Healing
 
 set -e
 
@@ -15,14 +15,14 @@ echo "Iterations: $ITERATIONS"
 echo "Sleep between kills: ${SLEEP_BETWEEN}s"
 echo ""
 
-***REMOVED*** Function to check service health
+# Function to check service health
 check_health() {
     echo "Checking service health..."
     
-    ***REMOVED*** Get service URL (assuming port-forward or ingress)
+    # Get service URL (assuming port-forward or ingress)
     SERVICE_URL="${SERVICE_URL:-http://localhost:8000}"
     
-    ***REMOVED*** Health check
+    # Health check
     HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SERVICE_URL/healthz")
     
     if [ "$HEALTH_STATUS" = "200" ]; then
@@ -34,7 +34,7 @@ check_health() {
     fi
 }
 
-***REMOVED*** Function to check readiness
+# Function to check readiness
 check_readiness() {
     echo "Checking service readiness..."
     
@@ -50,17 +50,17 @@ check_readiness() {
     fi
 }
 
-***REMOVED*** Function to check SSE connections
+# Function to check SSE connections
 check_sse() {
     echo "Checking SSE connections..."
     
     SERVICE_URL="${SERVICE_URL:-http://localhost:8000}"
     
-    ***REMOVED*** Try to connect to SSE endpoint (timeout after 5s)
+    # Try to connect to SSE endpoint (timeout after 5s)
     timeout 5 curl -s -N "$SERVICE_URL/api/stream/workflow" > /dev/null 2>&1
     
     if [ $? -eq 0 ] || [ $? -eq 124 ]; then
-        ***REMOVED*** Exit 0 = success, 124 = timeout (expected for SSE)
+        # Exit 0 = success, 124 = timeout (expected for SSE)
         echo "✅ SSE connection: OK"
         return 0
     else
@@ -69,7 +69,7 @@ check_sse() {
     fi
 }
 
-***REMOVED*** Function to kill random pod
+# Function to kill random pod
 kill_random_pod() {
     echo "Finding random pod to kill..."
     
@@ -89,11 +89,11 @@ kill_random_pod() {
     return 0
 }
 
-***REMOVED*** Function to wait for recovery
+# Function to wait for recovery
 wait_for_recovery() {
     echo "⏳ Waiting for service to recover..."
     
-    MAX_WAIT=120  ***REMOVED*** 2 minutes
+    MAX_WAIT=120  # 2 minutes
     ELAPSED=0
     INTERVAL=5
     
@@ -103,7 +103,7 @@ wait_for_recovery() {
         
         echo "Checking recovery... (${ELAPSED}s / ${MAX_WAIT}s)"
         
-        ***REMOVED*** Check if new pod is running
+        # Check if new pod is running
         READY_PODS=$(kubectl get pods -n "$NAMESPACE" -l "$APP_LABEL" -o jsonpath='{.items[?(@.status.phase=="Running")].metadata.name}' | wc -w)
         
         echo "Ready pods: $READY_PODS"
@@ -111,10 +111,10 @@ wait_for_recovery() {
         if [ "$READY_PODS" -ge 1 ]; then
             echo "✅ Pod recovered!"
             
-            ***REMOVED*** Give it a few more seconds to fully start
+            # Give it a few more seconds to fully start
             sleep 10
             
-            ***REMOVED*** Verify health
+            # Verify health
             if check_health && check_readiness; then
                 echo "✅ Service fully recovered"
                 return 0
@@ -126,7 +126,7 @@ wait_for_recovery() {
     return 1
 }
 
-***REMOVED*** Main test loop
+# Main test loop
 FAILED_TESTS=0
 SUCCESSFUL_TESTS=0
 
@@ -136,26 +136,26 @@ for i in $(seq 1 "$ITERATIONS"); do
     echo "Iteration $i / $ITERATIONS"
     echo "=========================================="
     
-    ***REMOVED*** Check initial state
+    # Check initial state
     if ! check_health; then
         echo "⚠️  Service not healthy before test, skipping..."
         FAILED_TESTS=$((FAILED_TESTS + 1))
         continue
     fi
     
-    ***REMOVED*** Kill pod
+    # Kill pod
     if ! kill_random_pod; then
         echo "❌ Failed to kill pod"
         FAILED_TESTS=$((FAILED_TESTS + 1))
         continue
     fi
     
-    ***REMOVED*** Wait for recovery
+    # Wait for recovery
     if wait_for_recovery; then
         echo "✅ Test iteration $i: PASSED"
         SUCCESSFUL_TESTS=$((SUCCESSFUL_TESTS + 1))
         
-        ***REMOVED*** Check SSE reconnection
+        # Check SSE reconnection
         if check_sse; then
             echo "✅ SSE reconnection: PASSED"
         else
@@ -166,14 +166,14 @@ for i in $(seq 1 "$ITERATIONS"); do
         FAILED_TESTS=$((FAILED_TESTS + 1))
     fi
     
-    ***REMOVED*** Sleep between iterations
+    # Sleep between iterations
     if [ $i -lt "$ITERATIONS" ]; then
         echo "⏳ Sleeping ${SLEEP_BETWEEN}s before next iteration..."
         sleep "$SLEEP_BETWEEN"
     fi
 done
 
-***REMOVED*** Summary
+# Summary
 echo ""
 echo "=========================================="
 echo "Chaos Test Summary"
@@ -192,4 +192,5 @@ else
     echo "Service may have issues with self-healing or recovery time."
     exit 1
 fi
+
 

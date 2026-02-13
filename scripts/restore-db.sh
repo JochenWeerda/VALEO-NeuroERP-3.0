@@ -1,6 +1,6 @@
-***REMOVED***!/bin/bash
-***REMOVED*** PostgreSQL Restore Script for VALEO-NeuroERP
-***REMOVED*** Usage: ./scripts/restore-db.sh <backup_file>
+#!/bin/bash
+# PostgreSQL Restore Script for VALEO-NeuroERP
+# Usage: ./scripts/restore-db.sh <backup_file>
 
 set -e
 
@@ -12,7 +12,7 @@ fi
 
 BACKUP_FILE="$1"
 
-***REMOVED*** Database connection (from environment)
+# Database connection (from environment)
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-5432}"
 DB_NAME="${DB_NAME:-valeo_erp}"
@@ -30,13 +30,13 @@ fi
 
 echo "Starting PostgreSQL restore..."
 
-***REMOVED*** Check if backup file exists
+# Check if backup file exists
 if [ ! -f "${BACKUP_FILE}" ]; then
   echo "Error: Backup file not found: ${BACKUP_FILE}"
   exit 1
 fi
 
-***REMOVED*** Create a safety backup before restore
+# Create a safety backup before restore
 SAFETY_BACKUP="/tmp/valeo_erp_pre_restore_$(date +%Y%m%d_%H%M%S).sql.gz"
 echo "Creating safety backup: ${SAFETY_BACKUP}"
 pg_dump -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d "${DB_NAME}" \
@@ -45,7 +45,7 @@ pg_dump -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d "${DB_NAME}" \
 
 echo "Safety backup created: ${SAFETY_BACKUP}"
 
-***REMOVED*** Drop and recreate database
+# Drop and recreate database
 echo "Dropping database ${DB_NAME}..."
 psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d postgres \
   -c "DROP DATABASE IF EXISTS ${DB_NAME};"
@@ -54,13 +54,13 @@ echo "Creating database ${DB_NAME}..."
 psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d postgres \
   -c "CREATE DATABASE ${DB_NAME} OWNER ${DB_USER};"
 
-***REMOVED*** Restore from backup
+# Restore from backup
 echo "Restoring from backup..."
 gunzip -c "${BACKUP_FILE}" | psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d "${DB_NAME}"
 
 echo "Restore completed successfully"
 
-***REMOVED*** Verify restore
+# Verify restore
 echo "Verifying restore..."
 TABLE_COUNT=$(psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d "${DB_NAME}" \
   -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public';")
@@ -80,4 +80,5 @@ echo "Next steps:"
 echo "1. Test the application"
 echo "2. If successful, delete safety backup: rm ${SAFETY_BACKUP}"
 echo "3. If failed, restore from safety backup"
+
 

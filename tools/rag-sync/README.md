@@ -1,8 +1,8 @@
-***REMOVED*** RAG Sync Tool
+# RAG Sync Tool
 
 CLI-Utility zur Synchronisation von Wissensinhalten (`knowledge-base/`) mit der Vektor-Datenbank für die RAG-Pipeline.
 
-***REMOVED******REMOVED*** Features
+## Features
 
 - Rekursive Erfassung von Markdown/Text-Dateien.
 - Chunking nach Überschriften mit Tokenlimit.
@@ -14,16 +14,16 @@ CLI-Utility zur Synchronisation von Wissensinhalten (`knowledge-base/`) mit der 
 - Optionales Upsert gegen einen RAG- oder Vector-Store-Endpunkt.
 - Namespace-Unterstützung & Batch-Verarbeitung.
 
-***REMOVED******REMOVED*** Installation
+## Installation
 
 ```bash
 cd tools/rag-sync
 python -m venv .venv
-source .venv/bin/activate  ***REMOVED*** Windows: .venv\Scripts\activate
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-***REMOVED******REMOVED*** Nutzung
+## Nutzung
 
 ```bash
 python rag_sync.py \
@@ -35,17 +35,18 @@ python rag_sync.py \
   --embedding-model text-embedding-3-small
 ```
 
-***REMOVED******REMOVED******REMOVED*** Wichtige Flags
+### Wichtige Flags
 
 - `--dry-run`: Kein Upsert, nur Analyse/Export.
 - `--batch-size`: Kontrolle über Batch-Größe für Upserts.
 - `--verbose`: Detailliertes Logging.
 - `--embedding-provider auto`: nutzt automatisch OpenAI, sobald `OPENAI_API_KEY` in der Umgebung gesetzt ist.
 
-***REMOVED******REMOVED*** Ausblick
+## Ausblick
 
 - Unterstützung weiterer Dateitypen (HTML, PDF).
 - Delta-Sync über File-Hashes.
 - Automatischer Trigger via CI/CD.
+
 
 

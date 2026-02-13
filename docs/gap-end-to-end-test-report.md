@@ -1,35 +1,35 @@
-***REMOVED*** GAP-Pipeline End-to-End Test Report
+# GAP-Pipeline End-to-End Test Report
 
-***REMOVED******REMOVED*** Test-Datum
+## Test-Datum
 2025-01-17
 
-***REMOVED******REMOVED*** Voraussetzungen
+## Voraussetzungen
 - ✅ PostgreSQL läuft (Port 5432)
 - ✅ Backend läuft (Port 8000)
 - ✅ Frontend läuft (Port 3000)
 - ✅ CSV-Datei vorhanden: `data/gap/impdata2024.csv` (113.29 MB)
 - ✅ Feature-Flag aktiv: `VITE_ENABLE_PROSPECTING_UI=true`
 
-***REMOVED******REMOVED*** Test-Schritte
+## Test-Schritte
 
-***REMOVED******REMOVED******REMOVED*** 1. UI-Zugriff
+### 1. UI-Zugriff
 - **URL**: `http://localhost:3000/admin/gap-pipeline`
 - **Status**: ✅ Seite lädt korrekt
 - **Bemerkung**: Route `/admin/gap-pipeline` ist registriert und funktional
 
-***REMOVED******REMOVED******REMOVED*** 2. CSV-Upload (optional, da bereits vorhanden)
+### 2. CSV-Upload (optional, da bereits vorhanden)
 - **Datei**: `data/gap/impdata2024.csv`
 - **Größe**: 113.29 MB
 - **Status**: ⏳ Noch nicht getestet (Datei bereits vorhanden)
 
-***REMOVED******REMOVED******REMOVED*** 3. "Nur Import" Test
+### 3. "Nur Import" Test
 - **Status**: ⏳ Noch nicht ausgeführt
 - **Erwartung**: 
   - Status → "running" → "success"
   - DB-Check: `SELECT COUNT(*) FROM gap_payments WHERE ref_year = 2024;`
   - Erwartung: Signifikant mehr als 2 Zeilen (aktuell nur Test-Daten)
 
-***REMOVED******REMOVED******REMOVED*** 4. "Komplette Pipeline" Test
+### 4. "Komplette Pipeline" Test
 - **Status**: ⏳ Noch nicht ausgeführt
 - **Erwartung**:
   - Steps: Import → Aggregate → Match → Snapshot → Hydrate
@@ -39,11 +39,11 @@
     - `customer_potential_snapshot`: Snapshots erstellt
     - `customers.analytics_*`: Felder gefüllt
 
-***REMOVED******REMOVED******REMOVED*** 5. Frontend-Tests
+### 5. Frontend-Tests
 - **Kundenmaske - Tab "Potential & Leaddaten"**: ⏳ Noch nicht getestet
 - **LeadExplorer (`/prospecting/leads`)**: ⏳ Noch nicht getestet
 
-***REMOVED******REMOVED*** Aktuelle Datenlage (vor Test)
+## Aktuelle Datenlage (vor Test)
 ```sql
 -- gap_payments
 ref_year | count 
@@ -59,7 +59,7 @@ ref_year | count
 customers_with_analytics: 0
 ```
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 1. Backend-API-Verbindung prüfen
 2. "Nur Import" ausführen
 3. DB-Check nach Import
@@ -67,7 +67,8 @@ customers_with_analytics: 0
 5. DB-Checks nach Pipeline
 6. Frontend-Tests (Kundenmaske, LeadExplorer)
 
-***REMOVED******REMOVED*** Bekannte Probleme
+## Bekannte Probleme
 - API-Endpoint `/api/v1/gap/pipeline/status` gibt möglicherweise HTML statt JSON zurück (CORS/Proxy-Problem?)
 - Status-Anzeige zeigt "Status wird geladen…" - möglicherweise API-Verbindungsproblem
+
 

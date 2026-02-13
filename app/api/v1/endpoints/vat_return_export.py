@@ -55,7 +55,7 @@ class VATReturnResponse(BaseModel):
     total_output_tax: Decimal
     vat_payable: Decimal
     positions: List[Dict[str, Any]]
-    status: str  ***REMOVED*** draft, calculated, validated, submitted
+    status: str  # draft, calculated, validated, submitted
     calculated_at: Optional[datetime]
     validated_at: Optional[datetime]
     submitted_at: Optional[datetime]
@@ -85,11 +85,11 @@ async def calculate_vat_return(
     Calculate VAT return from journal entries for a period.
     """
     try:
-        ***REMOVED*** Get journal entries for period
+        # Get journal entries for period
         period_start = f"{request.period}-01"
         period_end = f"{request.period}-31"
         
-        ***REMOVED*** Get tax keys with UStVA positions
+        # Get tax keys with UStVA positions
         tax_keys_query = text("""
             SELECT code, steuersatz, ustva_position, ustva_bezeichnung
             FROM domain_erp.tax_keys
@@ -100,7 +100,7 @@ async def calculate_vat_return(
             "tenant_id": request.tenant_id
         }).fetchall()
         
-        ***REMOVED*** Build tax key lookup
+        # Build tax key lookup
         tax_key_map = {}
         for row in tax_keys_rows:
             code = str(row[0])
@@ -113,7 +113,7 @@ async def calculate_vat_return(
                 "ustva_description": ustva_desc
             }
         
-        ***REMOVED*** Get journal entry lines with tax codes
+        # Get journal entry lines with tax codes
         journal_query = text("""
             SELECT jel.account_id, jel.debit_amount, jel.credit_amount, jel.tax_code,
                    jel.description, jel.reference, je.entry_date, je.document_type
@@ -131,7 +131,7 @@ async def calculate_vat_return(
             "period": request.period
         }).fetchall()
         
-        ***REMOVED*** Aggregate by UStVA position
+        # Aggregate by UStVA position
         position_totals = {}
         
         for row in journal_rows:
@@ -140,11 +140,11 @@ async def calculate_vat_return(
             credit = Decimal(str(row[2]))
             tax_code = str(row[3]) if row[3] else ""
             
-            ***REMOVED*** Determine if this is sales (output tax) or purchase (input tax)
-            ***REMOVED*** Typically: debit on expense accounts = input tax, credit on revenue accounts = output tax
-            ***REMOVED*** For simplicity, we'll use account ranges (this should be configurable)
-            is_sales = account_id.startswith("8") or account_id.startswith("4")  ***REMOVED*** Revenue accounts
-            is_purchase = account_id.startswith("6") or account_id.startswith("5")  ***REMOVED*** Expense accounts
+            # Determine if this is sales (output tax) or purchase (input tax)
+            # Typically: debit on expense accounts = input tax, credit on revenue accounts = output tax
+            # For simplicity, we'll use account ranges (this should be configurable)
+            is_sales = account_id.startswith("8") or account_id.startswith("4")  # Revenue accounts
+            is_purchase = account_id.startswith("6") or account_id.startswith("5")  # Expense accounts
             
             if tax_code and tax_code in tax_key_map:
                 tax_key = tax_key_map[tax_code]
@@ -166,9 +166,9 @@ async def calculate_vat_return(
                         "purchase_tax": Decimal("0.00")
                     }
                 
-                ***REMOVED*** Calculate net and tax amounts
+                # Calculate net and tax amounts
                 if is_sales:
-                    ***REMOVED*** Output tax (Umsatzsteuer)
+                    # Output tax (Umsatzsteuer)
                     amount = credit if credit > 0 else debit
                     net_amount = amount / (Decimal("1") + tax_key["rate"] / Decimal("100"))
                     tax_amount = amount - net_amount
@@ -176,7 +176,7 @@ async def calculate_vat_return(
                     position_totals[ustva_pos]["sales_net"] += net_amount
                     position_totals[ustva_pos]["sales_tax"] += tax_amount
                 elif is_purchase:
-                    ***REMOVED*** Input tax (Vorsteuer)
+                    # Input tax (Vorsteuer)
                     amount = debit if debit > 0 else credit
                     net_amount = amount / (Decimal("1") + tax_key["rate"] / Decimal("100"))
                     tax_amount = amount - net_amount
@@ -187,7 +187,7 @@ async def calculate_vat_return(
                 position_totals[ustva_pos]["net_amount"] += net_amount
                 position_totals[ustva_pos]["tax_amount"] += tax_amount
         
-        ***REMOVED*** Convert to positions list
+        # Convert to positions list
         positions = []
         for pos_code, totals in position_totals.items():
             positions.append(VATReturnPosition(
@@ -198,14 +198,14 @@ async def calculate_vat_return(
                 tax_rate=totals["tax_rate"]
             ))
         
-        ***REMOVED*** Calculate totals
+        # Calculate totals
         total_sales_net = sum(p["sales_net"] for p in position_totals.values())
         total_purchase_net = sum(p["purchase_net"] for p in position_totals.values())
         total_output_tax = sum(p["sales_tax"] for p in position_totals.values())
         total_input_tax = sum(p["purchase_tax"] for p in position_totals.values())
         vat_payable = total_output_tax - total_input_tax
         
-        ***REMOVED*** Create VAT return
+        # Create VAT return
         return_id = str(uuid.uuid4())
         
         import json
@@ -231,7 +231,7 @@ async def calculate_vat_return(
             "tenant_id": request.tenant_id,
             "period": request.period,
             "return_type": "monthly",
-            "taxpayer_name": "Company Name",  ***REMOVED*** Should come from company master data
+            "taxpayer_name": "Company Name",  # Should come from company master data
             "tax_id": None,
             "vat_id": None,
             "total_sales_net": total_sales_net,
@@ -344,18 +344,18 @@ async def export_elster_xml(
     try:
         vat_return = await get_vat_return(return_id, tenant_id, db)
         
-        ***REMOVED*** Generate ELSTER XML (simplified format - actual ELSTER format is more complex)
-        ***REMOVED*** This is a basic structure that can be extended
+        # Generate ELSTER XML (simplified format - actual ELSTER format is more complex)
+        # This is a basic structure that can be extended
         ET.register_namespace('', 'http://www.elster.de/2002/XML-Schema')
         
         root = ET.Element("Elster", xmlns="http://www.elster.de/2002/XML-Schema")
         
-        ***REMOVED*** Header
+        # Header
         header = ET.SubElement(root, "Header")
         ET.SubElement(header, "Version").text = "1.0"
         ET.SubElement(header, "CreatedAt").text = datetime.now().isoformat()
         
-        ***REMOVED*** VAT Return Data
+        # VAT Return Data
         vat_data = ET.SubElement(root, "VATReturn")
         ET.SubElement(vat_data, "Period").text = vat_return.period
         ET.SubElement(vat_data, "ReturnType").text = vat_return.return_type
@@ -366,14 +366,14 @@ async def export_elster_xml(
         if vat_return.vat_id:
             ET.SubElement(vat_data, "VATID").text = vat_return.vat_id
         
-        ***REMOVED*** Summary
+        # Summary
         summary = ET.SubElement(vat_data, "Summary")
         ET.SubElement(summary, "TotalSalesNet").text = str(vat_return.total_sales_net)
         ET.SubElement(summary, "TotalInputTax").text = str(vat_return.total_input_tax)
         ET.SubElement(summary, "TotalOutputTax").text = str(vat_return.total_output_tax)
         ET.SubElement(summary, "VATPayable").text = str(vat_return.vat_payable)
         
-        ***REMOVED*** Positions
+        # Positions
         positions_elem = ET.SubElement(vat_data, "Positions")
         for pos in vat_return.positions:
             pos_elem = ET.SubElement(positions_elem, "Position")
@@ -383,7 +383,7 @@ async def export_elster_xml(
             ET.SubElement(pos_elem, "TaxAmount").text = str(pos.get("tax_amount", "0.00"))
             ET.SubElement(pos_elem, "TaxRate").text = str(pos.get("tax_rate", "0.00"))
         
-        ***REMOVED*** Convert to string
+        # Convert to string
         rough_string = ET.tostring(root, encoding='utf-8')
         reparsed = minidom.parseString(rough_string)
         xml_content = reparsed.toprettyxml(indent="  ", encoding='utf-8').decode('utf-8')
@@ -415,10 +415,10 @@ async def validate_vat_return(
     try:
         vat_return = await get_vat_return(return_id, tenant_id, db)
         
-        ***REMOVED*** Recalculate from GL to validate
+        # Recalculate from GL to validate
         period = vat_return.period
         
-        ***REMOVED*** Get GL totals for period
+        # Get GL totals for period
         gl_query = text("""
             SELECT 
                 SUM(CASE WHEN jel.tax_code IS NOT NULL AND je.document_type LIKE 'AR%' 
@@ -440,7 +440,7 @@ async def validate_vat_return(
         gl_sales = Decimal(str(gl_row[0])) if gl_row[0] else Decimal("0.00")
         gl_purchases = Decimal(str(gl_row[1])) if gl_row[1] else Decimal("0.00")
         
-        ***REMOVED*** Compare with VAT return
+        # Compare with VAT return
         differences = []
         
         sales_diff = abs(vat_return.total_sales_net - gl_sales)
@@ -463,7 +463,7 @@ async def validate_vat_return(
         
         is_valid = len(differences) == 0
         
-        ***REMOVED*** Update validation status
+        # Update validation status
         if is_valid:
             update_query = text("""
                 UPDATE domain_erp.vat_returns

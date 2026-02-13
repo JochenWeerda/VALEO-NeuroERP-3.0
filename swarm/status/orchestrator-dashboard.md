@@ -1,10 +1,10 @@
-***REMOVED*** Orchestrator Dashboard
+# Orchestrator Dashboard
 
 **Datum:** 2025-11-24 16:43:54
 **Sprint:** 0
 **Phase:** P0
 
-***REMOVED******REMOVED*** Agenten-Status
+## Agenten-Status
 
 | Agent | Domain | Status | Capabilities | Progress |
 |-------|--------|--------|--------------|----------|
@@ -13,7 +13,7 @@
 | Agent-3 | Sales/CRM | idle | 63 | 0% |
 | Agent-4 | Infrastructure | idle | Cross-Domain | 0% |
 
-***REMOVED******REMOVED*** Gesamt-Fortschritt
+## Gesamt-Fortschritt
 
 - **Capabilities gesamt:** 124
 - **Capabilities abgeschlossen:** 0
@@ -21,16 +21,17 @@
 - **Capabilities geplant:** 124
 - **Progress:** 0%
 
-***REMOVED******REMOVED*** Blockaden
+## Blockaden
 
 Keine Blockaden.
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 Keine aktiven Dependencies.
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. Sprint 1 starten
 2. Agenten initialisieren
 3. Erste Tasks zuweisen
+

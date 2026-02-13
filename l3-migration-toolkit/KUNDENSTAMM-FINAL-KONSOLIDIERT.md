@@ -1,44 +1,44 @@
-***REMOVED*** ✅ Kundenstamm - Finale Konsolidierung
+# ✅ Kundenstamm - Finale Konsolidierung
 
 **Datum:** 2025-10-26  
 **Status:** ✅ BEREIT FÜR IMPLEMENTATION
 
-***REMOVED******REMOVED*** 📊 Vergleichs-Ergebnisse
+## 📊 Vergleichs-Ergebnisse
 
-***REMOVED******REMOVED******REMOVED*** Feld-Statistik
+### Feld-Statistik
 - **Bestehende Felder:** 56
 - **ChatGPT Felder:** 170
 - **Neue Felder:** 144 ✨
 - **Fehlende Felder:** 30 ⚠️
 - **Gemeinsame Felder:** 26 ✅
 
-***REMOVED******REMOVED******REMOVED*** Tab-Statistik
+### Tab-Statistik
 - **Bestehende Tabs:** 10
 - **ChatGPT Tabs:** 23
 - **Neue Tabs:** 13 ✨
 
-***REMOVED******REMOVED*** 🎯 Konsolidierungs-Strategie
+## 🎯 Konsolidierungs-Strategie
 
-***REMOVED******REMOVED******REMOVED*** Option A: Single-Table-Approach (NICHT empfohlen)
+### Option A: Single-Table-Approach (NICHT empfohlen)
 - Alle Felder in eine `kunden`-Tabelle → **~200 Spalten**
 - ❌ Performance-Probleme
 - ❌ Unübersichtlich
 - ❌ Wartungsprobleme
 
-***REMOVED******REMOVED******REMOVED*** Option B: Normalisierte Struktur ✅ EMPFOHLEN
+### Option B: Normalisierte Struktur ✅ EMPFOHLEN
 
 **Haupttabelle:** `kunden` (Kern-Daten)
 **Untertabellen:** Separated Concerns
 
-***REMOVED******REMOVED*** 📋 Vorgeschlagene Tabellen-Struktur
+## 📋 Vorgeschlagene Tabellen-Struktur
 
-***REMOVED******REMOVED******REMOVED*** 1. `kunden` (Haupttabelle) - 60 Felder
+### 1. `kunden` (Haupttabelle) - 60 Felder
 ```sql
 -- Bestehende Struktur beibehalten
 -- Basis-Daten: Name, Adresse, Kontakt
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. `kunden_profil` - 13 Felder
+### 2. `kunden_profil` - 13 Felder
 ```sql
 CREATE TABLE kunden_profil (
     kunden_nr VARCHAR(20) PRIMARY KEY REFERENCES kunden(kunden_nr),
@@ -58,7 +58,7 @@ CREATE TABLE kunden_profil (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. `kunden_ansprechpartner` ⭐ KRITISCH! - 21 Felder
+### 3. `kunden_ansprechpartner` ⭐ KRITISCH! - 21 Felder
 ```sql
 CREATE TABLE kunden_ansprechpartner (
     id SERIAL PRIMARY KEY,
@@ -91,7 +91,7 @@ CREATE TABLE kunden_ansprechpartner (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. `kunden_versand` - 6 Felder
+### 4. `kunden_versand` - 6 Felder
 ```sql
 CREATE TABLE kunden_versand (
     kunden_nr VARCHAR(20) PRIMARY KEY REFERENCES kunden(kunden_nr),
@@ -104,7 +104,7 @@ CREATE TABLE kunden_versand (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 5. `kunden_lieferung_zahlung` - 6 Felder
+### 5. `kunden_lieferung_zahlung` - 6 Felder
 ```sql
 CREATE TABLE kunden_lieferung_zahlung (
     kunden_nr VARCHAR(20) PRIMARY KEY REFERENCES kunden(kunden_nr),
@@ -118,7 +118,7 @@ CREATE TABLE kunden_lieferung_zahlung (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 6. `kunden_datenschutz` - 4 Felder
+### 6. `kunden_datenschutz` - 4 Felder
 ```sql
 CREATE TABLE kunden_datenschutz (
     kunden_nr VARCHAR(20) PRIMARY KEY REFERENCES kunden(kunden_nr),
@@ -129,7 +129,7 @@ CREATE TABLE kunden_datenschutz (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 7. `kunden_genossenschaft` - 8 Felder
+### 7. `kunden_genossenschaft` - 8 Felder
 ```sql
 CREATE TABLE kunden_genossenschaft (
     kunden_nr VARCHAR(20) PRIMARY KEY REFERENCES kunden(kunden_nr),
@@ -144,7 +144,7 @@ CREATE TABLE kunden_genossenschaft (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 8. `kunden_email_verteiler` - 3 Felder (Mehrfach!)
+### 8. `kunden_email_verteiler` - 3 Felder (Mehrfach!)
 ```sql
 CREATE TABLE kunden_email_verteiler (
     id SERIAL PRIMARY KEY,
@@ -155,7 +155,7 @@ CREATE TABLE kunden_email_verteiler (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 9. `kunden_betriebsgemeinschaften` - 4 Felder (Mehrfach!)
+### 9. `kunden_betriebsgemeinschaften` - 4 Felder (Mehrfach!)
 ```sql
 CREATE TABLE kunden_betriebsgemeinschaften (
     id SERIAL PRIMARY KEY,
@@ -166,7 +166,7 @@ CREATE TABLE kunden_betriebsgemeinschaften (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 10. `kunden_freitext` - 3 Felder
+### 10. `kunden_freitext` - 3 Felder
 ```sql
 CREATE TABLE kunden_freitext (
     kunden_nr VARCHAR(20) PRIMARY KEY REFERENCES kunden(kunden_nr),
@@ -176,7 +176,7 @@ CREATE TABLE kunden_freitext (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 11. `kunden_allgemein_erweitert` - 15 Felder
+### 11. `kunden_allgemein_erweitert` - 15 Felder
 ```sql
 CREATE TABLE kunden_allgemein_erweitert (
     kunden_nr VARCHAR(20) PRIMARY KEY REFERENCES kunden(kunden_nr),
@@ -200,7 +200,7 @@ CREATE TABLE kunden_allgemein_erweitert (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 12. `kunden_cpd_konto` - 12 Felder
+### 12. `kunden_cpd_konto` - 12 Felder
 ```sql
 CREATE TABLE kunden_cpd_konto (
     id SERIAL PRIMARY KEY,
@@ -219,7 +219,7 @@ CREATE TABLE kunden_cpd_konto (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 13. `kunden_rabatte_detail` - 6 Felder (Mehrfach!)
+### 13. `kunden_rabatte_detail` - 6 Felder (Mehrfach!)
 ```sql
 CREATE TABLE kunden_rabatte_detail (
     id SERIAL PRIMARY KEY,
@@ -232,7 +232,7 @@ CREATE TABLE kunden_rabatte_detail (
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** 14. `kunden_preise_detail` - 10 Felder (Mehrfach!)
+### 14. `kunden_preise_detail` - 10 Felder (Mehrfach!)
 ```sql
 CREATE TABLE kunden_preise_detail (
     id SERIAL PRIMARY KEY,
@@ -250,38 +250,38 @@ CREATE TABLE kunden_preise_detail (
 );
 ```
 
-***REMOVED******REMOVED*** 📊 Finale Statistik
+## 📊 Finale Statistik
 
-***REMOVED******REMOVED******REMOVED*** Tabellen gesamt: 14
+### Tabellen gesamt: 14
 - 1 Haupttabelle (`kunden`)
 - 13 Untertabellen
 
-***REMOVED******REMOVED******REMOVED*** Felder gesamt: ~200
+### Felder gesamt: ~200
 - Haupttabelle: 60 Felder
 - Untertabellen: ~140 Felder
 
-***REMOVED******REMOVED******REMOVED*** Frontend-Tabs: 23
+### Frontend-Tabs: 23
 - Bestehend: 10 Tabs
 - Neu: 13 Tabs
 
-***REMOVED******REMOVED*** 🚀 Implementierungs-Plan
+## 🚀 Implementierungs-Plan
 
-***REMOVED******REMOVED******REMOVED*** Phase 1: SQL-Tabellen erstellen
+### Phase 1: SQL-Tabellen erstellen
 ```bash
 psql -U valeo -d valeo_neuro_erp -f schemas/sql/kundenstamm_complete.sql
 ```
 
-***REMOVED******REMOVED******REMOVED*** Phase 2: Mask Builder Schema erweitern
+### Phase 2: Mask Builder Schema erweitern
 - JSON mit allen 23 Tabs erstellen
 - Felder zuordnen
 - Relations definieren
 
-***REMOVED******REMOVED******REMOVED*** Phase 3: Frontend-Integration
+### Phase 3: Frontend-Integration
 - Tabs im UI hinzufügen
 - Untertabellen als Sub-Components
 - JOIN-Logik im Backend
 
-***REMOVED******REMOVED*** ✅ Nächste Schritte
+## ✅ Nächste Schritte
 
 1. **SQL-Tabellen-Generator erstellen** (`generate-complete-tables.py`)
 2. **Mask Builder JSON erweitern** (23 Tabs)
@@ -289,4 +289,5 @@ psql -U valeo -d valeo_neuro_erp -f schemas/sql/kundenstamm_complete.sql
 4. **Migration-Script** für L3 → VALEO
 
 **Bereit für Finalisierung!** 🎯
+
 

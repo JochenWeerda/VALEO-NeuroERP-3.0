@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Aktiviert den Pipeline-Modus für VALEO-NeuroERP
 
@@ -12,10 +12,10 @@ import os
 import sys
 from typing import Dict, Any, List
 
-***REMOVED*** Füge das Hauptverzeichnis zum Pythonpfad hinzu
+# Füge das Hauptverzeichnis zum Pythonpfad hinzu
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-***REMOVED*** Konfiguriere Logging
+# Konfiguriere Logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -90,13 +90,13 @@ def main():
     logger.info("Starte VALEO-NeuroERP Pipeline-Modus")
     
     try:
-        ***REMOVED*** Erstelle das logs-Verzeichnis, falls es nicht existiert
+        # Erstelle das logs-Verzeichnis, falls es nicht existiert
         os.makedirs('logs', exist_ok=True)
         
-        ***REMOVED*** Zeige Implementierungsstatus
+        # Zeige Implementierungsstatus
         list_pipeline_implementation_status()
         
-        ***REMOVED*** Hinweis zur Ausführung
+        # Hinweis zur Ausführung
         logger.info("Hinweis zur Pipeline-Ausführung:")
         logger.info("Die Pipelines wurden erfolgreich implementiert, aber die Ausführung erfordert")
         logger.info("weitere Anpassungen an der Systemarchitektur. Die folgenden Komponenten müssen")
@@ -115,3 +115,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

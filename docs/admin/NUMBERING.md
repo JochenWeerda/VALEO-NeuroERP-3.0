@@ -1,30 +1,30 @@
-***REMOVED*** Nummernkreise konfigurieren
+# Nummernkreise konfigurieren
 
-***REMOVED******REMOVED*** Überblick
+## Überblick
 
 VALEO-NeuroERP unterstützt flexible Nummernkreise mit Multi-Tenant und Jahreswechsel-Support.
 
-***REMOVED******REMOVED*** Konfiguration
+## Konfiguration
 
-***REMOVED******REMOVED******REMOVED*** Environment-Variablen
+### Environment-Variablen
 
 ```bash
-***REMOVED*** Nummernkreis-Präfixe
+# Nummernkreis-Präfixe
 NUMBERING_SALES_PREFIX=SO-
 NUMBERING_PURCHASE_PREFIX=PO-
 NUMBERING_INVOICE_PREFIX=INV-
 
-***REMOVED*** Nummernkreis-Breite (Anzahl Stellen)
+# Nummernkreis-Breite (Anzahl Stellen)
 NUMBERING_WIDTH=5
 
-***REMOVED*** Jahreswechsel aktivieren
+# Jahreswechsel aktivieren
 NUMBERING_YEARLY_RESET=true
 
-***REMOVED*** Multi-Tenant aktivieren
+# Multi-Tenant aktivieren
 NUMBERING_MULTI_TENANT=true
 ```
 
-***REMOVED******REMOVED******REMOVED*** Beispiele
+### Beispiele
 
 **Standard (ohne Jahreswechsel):**
 - `SO-00001`, `SO-00002`, `SO-00003`, ...
@@ -41,7 +41,7 @@ NUMBERING_MULTI_TENANT=true
 - Tenant A, 2025: `SO-A-2025-00001`
 - Tenant B, 2025: `SO-B-2025-00001`
 
-***REMOVED******REMOVED*** Datenbank-Schema
+## Datenbank-Schema
 
 ```sql
 CREATE TABLE number_series (
@@ -55,9 +55,9 @@ CREATE TABLE number_series (
 );
 ```
 
-***REMOVED******REMOVED*** API-Endpoints
+## API-Endpoints
 
-***REMOVED******REMOVED******REMOVED*** Nächste Nummer generieren
+### Nächste Nummer generieren
 
 ```bash
 POST /api/numbering/next
@@ -69,19 +69,19 @@ Content-Type: application/json
   "year": 2025
 }
 
-***REMOVED*** Response
+# Response
 {
   "ok": true,
   "number": "SO-A-2025-00001"
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Aktuellen Stand abfragen
+### Aktuellen Stand abfragen
 
 ```bash
 GET /api/numbering/status?domain=sales&tenant_id=A&year=2025
 
-***REMOVED*** Response
+# Response
 {
   "ok": true,
   "domain": "sales",
@@ -93,7 +93,7 @@ GET /api/numbering/status?domain=sales&tenant_id=A&year=2025
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Nummernkreis zurücksetzen
+### Nummernkreis zurücksetzen
 
 ```bash
 POST /api/numbering/reset
@@ -105,7 +105,7 @@ Content-Type: application/json
   "year": 2025
 }
 
-***REMOVED*** Response
+# Response
 {
   "ok": true,
   "message": "Number series reset for sales/A/2025"
@@ -114,24 +114,24 @@ Content-Type: application/json
 
 ⚠️ **Achtung:** Reset nur in Ausnahmefällen verwenden!
 
-***REMOVED******REMOVED*** Jahreswechsel-Procedure
+## Jahreswechsel-Procedure
 
-***REMOVED******REMOVED******REMOVED*** Automatisch (empfohlen)
+### Automatisch (empfohlen)
 
 Nummernkreise werden automatisch beim ersten Request im neuen Jahr erstellt.
 
-***REMOVED******REMOVED******REMOVED*** Manuell (optional)
+### Manuell (optional)
 
 ```bash
-***REMOVED*** Alle Nummernkreise für 2026 initialisieren
+# Alle Nummernkreise für 2026 initialisieren
 curl -X POST https://erp.valeo.example.com/api/numbering/init-year \
   -H "Content-Type: application/json" \
   -d '{"year": 2026}'
 ```
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: Doppelte Nummern
+### Problem: Doppelte Nummern
 
 **Ursache:** Race-Condition bei hoher Last
 
@@ -145,29 +145,29 @@ GROUP BY domain, tenant_id, year, number
 HAVING COUNT(*) > 1;
 ```
 
-***REMOVED******REMOVED******REMOVED*** Problem: Lücken in Nummernkreis
+### Problem: Lücken in Nummernkreis
 
 **Ursache:** Transaktion wurde abgebrochen nach Nummern-Generierung
 
 **Lösung:** Lücken sind normal und erlaubt (steuerrechtlich kein Problem)
 
-***REMOVED******REMOVED******REMOVED*** Problem: Falsches Präfix
+### Problem: Falsches Präfix
 
 **Ursache:** Environment-Variable falsch gesetzt
 
 **Lösung:**
 ```bash
-***REMOVED*** Check current config
+# Check current config
 kubectl get configmap valeo-erp-config -n production -o yaml
 
-***REMOVED*** Update config
+# Update config
 kubectl edit configmap valeo-erp-config -n production
 
-***REMOVED*** Restart pods
+# Restart pods
 kubectl rollout restart deployment valeo-erp -n production
 ```
 
-***REMOVED******REMOVED*** Best Practices
+## Best Practices
 
 1. **Präfixe kurz halten:** Max. 5 Zeichen (z.B. `SO-`, `INV-`)
 2. **Width konsistent:** Alle Domains gleiche Breite (z.B. 5 Stellen)
@@ -175,21 +175,21 @@ kubectl rollout restart deployment valeo-erp -n production
 4. **Multi-Tenant nur bei Bedarf:** Overhead nur wenn nötig
 5. **Kein Reset in Production:** Nur in Ausnahmefällen
 
-***REMOVED******REMOVED*** Migration von altem System
+## Migration von altem System
 
 ```python
-***REMOVED*** Skript: scripts/migrate-numbering.py
+# Skript: scripts/migrate-numbering.py
 import psycopg2
 
-***REMOVED*** Connect to old system
+# Connect to old system
 old_conn = psycopg2.connect("postgresql://old_system")
 old_cur = old_conn.cursor()
 
-***REMOVED*** Get max numbers from old system
+# Get max numbers from old system
 old_cur.execute("SELECT MAX(order_number) FROM orders;")
 max_order = old_cur.fetchone()[0]
 
-***REMOVED*** Update new system
+# Update new system
 new_conn = psycopg2.connect("postgresql://valeo_erp")
 new_cur = new_conn.cursor()
 new_cur.execute("""
@@ -202,7 +202,8 @@ new_conn.commit()
 print(f"Migrated: Sales counter set to {max_order}")
 ```
 
-***REMOVED******REMOVED*** Support
+## Support
 
 Bei Fragen: admin@valeo-erp.com
+
 

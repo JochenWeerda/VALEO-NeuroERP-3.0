@@ -121,6 +121,12 @@ export class ProcurementBFFService {
 
     // Analytics & reporting
     this.app.get('/api/analytics/spend', this.handleSpendAnalytics.bind(this));
+
+    // Supplier CRUD
+    this.app.get('/api/v1/crm/suppliers', this.handleListSuppliers.bind(this));
+    this.app.get('/api/v1/crm/suppliers/:id', this.handleGetSupplier.bind(this));
+    this.app.post('/api/v1/crm/suppliers', this.handleCreateSupplier.bind(this));
+    this.app.put('/api/v1/crm/suppliers/:id', this.handleUpdateSupplier.bind(this));
   }
 
   // ===== DASHBOARD ENDPOINTS =====
@@ -372,6 +378,90 @@ export class ProcurementBFFService {
     } catch (error) {
       console.error('Analytics error:', error);
       res.status(500).json({ error: 'Failed to fetch analytics' });
+    }
+  }
+
+  // ===== SUPPLIER ENDPOINTS =====
+
+  // In-memory store (TODO: connect to real DB/repository)
+  private suppliers = [
+    { id: 'sup_1', name: 'Saatgut AG', supplier_number: 'LF-001', type: 'Saatgut', city: 'Südhausen', email: 'info@saatgut-ag.de', phone: '+49 123 456789', tax_id: 'DE123456789', rating: 4.5, is_active: true, payment_terms: 30, created_at: '2025-01-15T10:00:00Z' },
+    { id: 'sup_2', name: 'Dünger GmbH', supplier_number: 'LF-002', type: 'Düngemittel', city: 'Nordhausen', email: 'kontakt@duenger-gmbh.de', phone: '+49 234 567890', tax_id: 'DE234567890', rating: 4.2, is_active: true, payment_terms: 14, created_at: '2025-02-01T08:30:00Z' },
+    { id: 'sup_3', name: 'Technik GmbH', supplier_number: 'LF-003', type: 'Landtechnik', city: 'Osthausen', email: 'info@technik-gmbh.de', phone: '+49 345 678901', tax_id: 'DE345678901', rating: 3.8, is_active: true, payment_terms: 45, created_at: '2025-03-10T14:00:00Z' },
+    { id: 'sup_4', name: 'BioFeed KG', supplier_number: 'LF-004', type: 'Futtermittel', city: 'Westhausen', email: 'vertrieb@biofeed.de', phone: '+49 456 789012', tax_id: 'DE456789012', rating: 4.0, is_active: true, payment_terms: 30, created_at: '2025-04-05T11:00:00Z' },
+    { id: 'sup_5', name: 'AgroChem AG', supplier_number: 'LF-005', type: 'Pflanzenschutz', city: 'Mittelhausen', email: 'info@agrochem.de', phone: '+49 567 890123', tax_id: 'DE567890123', rating: 3.5, is_active: false, payment_terms: 60, created_at: '2025-05-20T09:00:00Z' },
+  ];
+
+  private async handleListSuppliers(req: Request, res: Response): Promise<void> {
+    try {
+      const { search, is_active } = req.query;
+      let result = [...this.suppliers];
+
+      if (search) {
+        const s = String(search).toLowerCase();
+        result = result.filter(
+          (sup) =>
+            sup.name.toLowerCase().includes(s) ||
+            sup.type.toLowerCase().includes(s) ||
+            sup.city.toLowerCase().includes(s) ||
+            sup.supplier_number.toLowerCase().includes(s),
+        );
+      }
+
+      if (is_active !== undefined) {
+        const active = is_active === 'true';
+        result = result.filter((sup) => sup.is_active === active);
+      }
+
+      res.json({ items: result, total: result.length });
+    } catch (error) {
+      console.error('List suppliers error:', error);
+      res.status(500).json({ error: 'Failed to list suppliers' });
+    }
+  }
+
+  private async handleGetSupplier(req: Request, res: Response): Promise<void> {
+    try {
+      const supplier = this.suppliers.find((s) => s.id === req.params.id);
+      if (!supplier) {
+        res.status(404).json({ error: 'Supplier not found' });
+        return;
+      }
+      res.json(supplier);
+    } catch (error) {
+      console.error('Get supplier error:', error);
+      res.status(500).json({ error: 'Failed to get supplier' });
+    }
+  }
+
+  private async handleCreateSupplier(req: Request, res: Response): Promise<void> {
+    try {
+      const newSupplier = {
+        id: `sup_${Date.now()}`,
+        ...req.body,
+        supplier_number: `LF-${String(this.suppliers.length + 1).padStart(3, '0')}`,
+        created_at: new Date().toISOString(),
+      };
+      this.suppliers.push(newSupplier);
+      res.status(201).json(newSupplier);
+    } catch (error) {
+      console.error('Create supplier error:', error);
+      res.status(500).json({ error: 'Failed to create supplier' });
+    }
+  }
+
+  private async handleUpdateSupplier(req: Request, res: Response): Promise<void> {
+    try {
+      const idx = this.suppliers.findIndex((s) => s.id === req.params.id);
+      if (idx === -1) {
+        res.status(404).json({ error: 'Supplier not found' });
+        return;
+      }
+      this.suppliers[idx] = { ...this.suppliers[idx], ...req.body };
+      res.json(this.suppliers[idx]);
+    } catch (error) {
+      console.error('Update supplier error:', error);
+      res.status(500).json({ error: 'Failed to update supplier' });
     }
   }
 

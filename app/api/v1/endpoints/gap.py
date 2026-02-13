@@ -43,7 +43,7 @@ class PipelineProgressResponse(BaseModel):
     total_steps: int
     percentage: int
     message: str
-    status: str  ***REMOVED*** running, completed, error
+    status: str  # running, completed, error
     updated_at: str
     steps: Dict[str, Dict[str, Any]]
 
@@ -59,17 +59,17 @@ async def run_gap_pipeline_year(
     JETZT MIT PLZ-FILTER UNTERSTÜTZUNG!
     """
     try:
-        ***REMOVED*** Erstelle Job-ID falls nicht vorhanden
+        # Erstelle Job-ID falls nicht vorhanden
         from app.services.gap_progress import create_pipeline_job
         job_id = request.batch_id or create_pipeline_job(request.year)
         
-        ***REMOVED*** Parse PLZ-Filter falls vorhanden
+        # Parse PLZ-Filter falls vorhanden
         plz_list = None
         if plz_filter:
             plz_list = [plz.strip() for plz in plz_filter.split(",") if plz.strip()]
             print(f"[GAP API] PLZ-Filter aktiviert: {plz_list}")
         
-        ***REMOVED*** Führe Pipeline im Hintergrund aus - mit PLZ-Filter!
+        # Führe Pipeline im Hintergrund aus - mit PLZ-Filter!
         import threading
         pipeline_thread = threading.Thread(
             target=_execute_gap_pipeline_with_plz_filter,
@@ -110,14 +110,14 @@ async def run_gap_pipeline_year_optimized(
     try:
         from app.services.gap_progress import create_pipeline_job
         
-        ***REMOVED*** Parse PLZ-Filter
+        # Parse PLZ-Filter
         plz_list = [plz.strip() for plz in plz_filter.split(",") if plz.strip()]
         if not plz_list:
             raise HTTPException(status_code=400, detail="PLZ-Filter darf nicht leer sein")
         
         job_id = create_pipeline_job(year)
         
-        ***REMOVED*** Führe OPTIMIERTE Pipeline im Hintergrund aus
+        # Führe OPTIMIERTE Pipeline im Hintergrund aus
         import threading
         pipeline_thread = threading.Thread(
             target=_execute_gap_pipeline_optimized,
@@ -165,7 +165,7 @@ async def run_gap_pipeline_year_filtered(
         
         job_id = create_pipeline_job(year)
         
-        ***REMOVED*** Führe ULTRA-OPTIMIERTE Pipeline im Hintergrund aus
+        # Führe ULTRA-OPTIMIERTE Pipeline im Hintergrund aus
         import threading
         pipeline_thread = threading.Thread(
             target=_execute_gap_pipeline_filtered,
@@ -203,11 +203,11 @@ async def test_csv_streaming_pipeline(
     try:
         from app.services.gap_progress import create_pipeline_job
         
-        ***REMOVED*** Parse PLZ-Filter
+        # Parse PLZ-Filter
         plz_list = [plz.strip() for plz in plz_filter.split(",") if plz.strip()]
         job_id = create_pipeline_job(2024)
         
-        ***REMOVED*** CSV-STREAMING Pipeline starten
+        # CSV-STREAMING Pipeline starten
         import threading
         pipeline_thread = threading.Thread(
             target=_execute_gap_pipeline_optimized,
@@ -237,12 +237,12 @@ async def run_gap_import(
 ):
     """Führt nur den GAP-Import aus"""
     if not request.csv_path:
-        ***REMOVED*** Versuche lokalen Standardpfad
+        # Versuche lokalen Standardpfad
         default_path = Path(f"data/gap/impdata{request.year}.csv")
         if default_path.exists():
              request.csv_path = str(default_path)
         else:
-            ***REMOVED*** Check if it's a URL or non-existent path, the background task will handle or fail
+            # Check if it's a URL or non-existent path, the background task will handle or fail
             pass
     
     background_tasks.add_task(
@@ -296,11 +296,11 @@ async def run_gap_command(
             detail=f"Ungültiger Command. Verfügbar: {', '.join(valid_commands)}"
         )
     
-    ***REMOVED*** Special handling for 'import' if called via this endpoint (fallback)
-    ***REMOVED*** Usually 'import' should go to /pipeline/import, but if matched here:
+    # Special handling for 'import' if called via this endpoint (fallback)
+    # Usually 'import' should go to /pipeline/import, but if matched here:
     csv_path = None
     if command == "import":
-        ***REMOVED*** Try to find default CSV path
+        # Try to find default CSV path
         default_path = Path(f"data/gap/impdata{year}.csv")
         if default_path.exists():
             csv_path = str(default_path)
@@ -327,33 +327,33 @@ async def upload_gap_csv(
     Lädt eine GAP-CSV-Datei hoch und speichert sie im data/gap-Verzeichnis.
     """
     try:
-        ***REMOVED*** Jahr aus Dateiname extrahieren, falls nicht angegeben
+        # Jahr aus Dateiname extrahieren, falls nicht angegeben
         if year is None:
             if file.filename:
                 year_match = re.search(r'(\d{4})', file.filename)
                 if year_match:
                     year = int(year_match.group(1))
             
-            ***REMOVED*** Fallback: Aktuelles Jahr verwenden
+            # Fallback: Aktuelles Jahr verwenden
             if year is None:
                 from datetime import datetime
                 year = datetime.now().year
                 print(f"[Upload] Kein Jahr angegeben, verwende aktuelles Jahr: {year}")
 
-        ***REMOVED*** Validierung
+        # Validierung
         if year < 2020 or year > 2030:
             raise HTTPException(
                 status_code=400,
                 detail=f"Ungültiges Jahr: {year}. Muss zwischen 2020 und 2030 liegen."
             )
         
-        ***REMOVED*** Zielpfad erstellen
+        # Zielpfad erstellen
         data_dir = Path("data/gap")
         data_dir.mkdir(parents=True, exist_ok=True)
         
         target_path = data_dir / f"impdata{year}.csv"
         
-        ***REMOVED*** Datei speichern
+        # Datei speichern
         with open(target_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
@@ -385,19 +385,19 @@ async def get_pipeline_status(year: int = Query(..., description="Referenzjahr")
     db = next(get_db())
     
     try:
-        ***REMOVED*** Prüfe gap_payments
+        # Prüfe gap_payments
         gap_count = db.execute(
             text("SELECT COUNT(*) FROM gap_payments WHERE ref_year = :year"),
             {"year": year}
         ).scalar()
         
-        ***REMOVED*** Prüfe customer_potential_snapshot
+        # Prüfe customer_potential_snapshot
         snapshot_count = db.execute(
             text("SELECT COUNT(*) FROM customer_potential_snapshot WHERE ref_year = :year"),
             {"year": year}
         ).scalar()
         
-        ***REMOVED*** Prüfe customers mit Analytics
+        # Prüfe customers mit Analytics
         customer_count = db.execute(
             text("SELECT COUNT(*) FROM customers WHERE analytics_gap_ref_year = :year"),
             {"year": year}
@@ -460,16 +460,16 @@ async def test_pipeline_direct():
     try:
         from app.services.gap_progress import create_pipeline_job, PipelineProgress
         
-        year = 2024  ***REMOVED*** Festes Jahr für Test
+        year = 2024  # Festes Jahr für Test
         
-        ***REMOVED*** Erstelle Job-ID
+        # Erstelle Job-ID
         job_id = create_pipeline_job(year)
         progress = PipelineProgress(job_id, year)
         
-        ***REMOVED*** Sofortiger Test-Update
+        # Sofortiger Test-Update
         progress.update_status("testing", 1, 6, "Direkter Test gestartet...", "running")
         
-        ***REMOVED*** Test der Progress-Funktion
+        # Test der Progress-Funktion
         test_progress = progress.get_status()
         
         return {
@@ -523,7 +523,7 @@ async def check_csv_file():
         import os
         from pathlib import Path
         
-        ***REMOVED*** Suche nach CSV-Dateien
+        # Suche nach CSV-Dateien
         possible_paths = [
             "data/gap/impdata2024.csv",
             "./impdata2024.csv", 
@@ -569,7 +569,7 @@ async def run_snapshot_manual(
         
         print(f"[MANUAL SNAPSHOT] Starting manual snapshot for year {year}")
         
-        ***REMOVED*** Führe Snapshot-Schritt aus
+        # Führe Snapshot-Schritt aus
         result = run_snapshot(year)
         
         print(f"[MANUAL SNAPSHOT] Snapshot completed: {result}")
@@ -619,7 +619,7 @@ async def reset_gap_data(
         db = SessionLocal()
         
         try:
-            ***REMOVED*** Statistiken vor Reset
+            # Statistiken vor Reset
             before_stats = {}
             
             if tables in ["all", "payments"]:
@@ -628,7 +628,7 @@ async def reset_gap_data(
                     before_stats["gap_payments_agg"] = db.execute(text("SELECT COUNT(*) FROM gap_payments_direct_agg")).scalar()
                 else:
                     before_stats["gap_payments"] = db.execute(text("SELECT COUNT(*) FROM gap_payments WHERE ref_year = :year"), {"year": year}).scalar()
-                    ***REMOVED*** Prüfe VIEW-Daten (kann nicht gelöscht werden, aber für Statistik)
+                    # Prüfe VIEW-Daten (kann nicht gelöscht werden, aber für Statistik)
                     try:
                         before_stats["gap_payments_agg"] = db.execute(text("SELECT COUNT(*) FROM gap_payments_direct_agg WHERE ref_year = :year"), {"year": year}).scalar()
                     except Exception:
@@ -640,7 +640,7 @@ async def reset_gap_data(
             if tables in ["all", "matches"]:
                 before_stats["matches"] = db.execute(text("SELECT COUNT(*) FROM gap_customer_match WHERE ref_year = :year"), {"year": year}).scalar()
             
-            ***REMOVED*** Reset durchführen
+            # Reset durchführen
             deleted_counts = {}
             
             if tables in ["all", "snapshots"]:
@@ -656,7 +656,7 @@ async def reset_gap_data(
                     deleted_counts["matches"] = db.execute(text("DELETE FROM gap_customer_match WHERE ref_year = :year"), {"year": year}).rowcount
             
             if tables in ["all", "payments"]:
-                ***REMOVED*** Lösche nur die Basis-Tabelle, der VIEW wird automatisch aktualisiert
+                # Lösche nur die Basis-Tabelle, der VIEW wird automatisch aktualisiert
                 if all_years:
                     delete_result = db.execute(text("DELETE FROM gap_payments"))
                     deleted_counts["gap_payments"] = delete_result.rowcount
@@ -666,16 +666,16 @@ async def reset_gap_data(
                     deleted_counts["gap_payments"] = delete_result.rowcount
                     deleted_counts["reset_scope"] = f"Nur Jahr {year} gelöscht"
                 
-                ***REMOVED*** gap_payments_direct_agg ist ein VIEW und wird automatisch aktualisiert
+                # gap_payments_direct_agg ist ein VIEW und wird automatisch aktualisiert
                 deleted_counts["gap_payments_agg"] = "VIEW - automatisch aktualisiert"
                 
-                ***REMOVED*** DEBUG: Prüfe auch andere Jahre NACH dem Delete
+                # DEBUG: Prüfe auch andere Jahre NACH dem Delete
                 other_years = db.execute(text("SELECT ref_year, COUNT(*) FROM gap_payments GROUP BY ref_year ORDER BY ref_year")).fetchall()
                 deleted_counts["debug_remaining_years"] = [{"year": r[0], "count": r[1]} for r in other_years]
             
             db.commit()
             
-            ***REMOVED*** Statistiken nach Reset
+            # Statistiken nach Reset
             after_stats = {}
             
             if tables in ["all", "payments"]:
@@ -748,7 +748,7 @@ async def generate_leads_from_gap_frontend(
         db = SessionLocal()
         
         try:
-            ***REMOVED*** PLZ Filter aufbauen
+            # PLZ Filter aufbauen
             plz_filter = ""
             if plz_min and plz_max:
                 plz_filter = f"AND c.postal_code BETWEEN '{plz_min}' AND '{plz_max}'"
@@ -757,12 +757,12 @@ async def generate_leads_from_gap_frontend(
             elif plz_max:
                 plz_filter = f"AND c.postal_code <= '{plz_max}'"
             
-            ***REMOVED*** Segment Filter
+            # Segment Filter
             segment_filter = ""
             if segment and segment in ['A', 'B', 'C']:
                 segment_filter = f"AND s.segment = '{segment}'"
             
-            ***REMOVED*** Leads aus Snapshots generieren
+            # Leads aus Snapshots generieren
             leads_query = f"""
                 SELECT 
                     s.customer_id,
@@ -801,7 +801,7 @@ async def generate_leads_from_gap_frontend(
                 }
             ).fetchall()
             
-            ***REMOVED*** Frontend-kompatible Lead-Struktur
+            # Frontend-kompatible Lead-Struktur
             leads = []
             for row in result:
                 lead = {
@@ -874,10 +874,10 @@ async def check_farmers_available():
         db = SessionLocal()
         
         try:
-            ***REMOVED*** Prüfe Snapshots
+            # Prüfe Snapshots
             snapshot_count = db.execute(text("SELECT COUNT(*) FROM customer_potential_snapshot WHERE ref_year = 2024")).scalar()
             
-            ***REMOVED*** Prüfe Landwirtschafts-Kunden (mit relevanten Namen)
+            # Prüfe Landwirtschafts-Kunden (mit relevanten Namen)
             agro_customers = db.execute(text("""
                 SELECT COUNT(*) FROM customers c
                 WHERE EXISTS (
@@ -886,7 +886,7 @@ async def check_farmers_available():
                 )
             """)).scalar()
             
-            ***REMOVED*** Sample Landwirte mit Status
+            # Sample Landwirte mit Status
             if snapshot_count > 0:
                 sample_farmers = db.execute(text("""
                     SELECT 
@@ -951,10 +951,10 @@ async def test_view_direct(year: int = Query(2024, description="Jahr für View-T
         db = SessionLocal()
         
         try:
-            ***REMOVED*** Test 1: Basis-Tabelle gap_payments
+            # Test 1: Basis-Tabelle gap_payments
             base_count = db.execute(text("SELECT COUNT(*) FROM gap_payments WHERE ref_year = :year"), {"year": year}).scalar()
             
-            ***REMOVED*** Test 2: View gap_payments_direct_agg
+            # Test 2: View gap_payments_direct_agg
             try:
                 view_count = db.execute(text("SELECT COUNT(*) FROM gap_payments_direct_agg WHERE ref_year = :year"), {"year": year}).scalar()
                 view_error = None
@@ -962,7 +962,7 @@ async def test_view_direct(year: int = Query(2024, description="Jahr für View-T
                 view_count = None
                 view_error = str(e)
             
-            ***REMOVED*** Test 3: Sample-Daten aus der View
+            # Test 3: Sample-Daten aus der View
             try:
                 sample = db.execute(text("SELECT * FROM gap_payments_direct_agg WHERE ref_year = :year LIMIT 3"), {"year": year}).fetchall()
                 sample_data = [dict(row._mapping) for row in sample] if sample else []
@@ -1010,7 +1010,7 @@ async def check_measure_codes(year: int = Query(2024, description="Jahr für Cod
         db = SessionLocal()
         
         try:
-            ***REMOVED*** Alle verschiedenen measure_code Werte zählen
+            # Alle verschiedenen measure_code Werte zählen
             codes = db.execute(text("""
                 SELECT 
                     measure_code,
@@ -1025,7 +1025,7 @@ async def check_measure_codes(year: int = Query(2024, description="Jahr für Cod
             
             code_list = [{"code": row[0], "description": row[1], "count": row[2]} for row in codes]
             
-            ***REMOVED*** Prüfe ob die View-Filter-Codes vorhanden sind
+            # Prüfe ob die View-Filter-Codes vorhanden sind
             view_codes = ['I.1', 'I.2', 'I.3']
             present_view_codes = db.execute(text("""
                 SELECT measure_code, COUNT(*) as count
@@ -1075,10 +1075,10 @@ async def fix_view_definition():
         db = SessionLocal()
         
         try:
-            ***REMOVED*** Drop old view (falls vorhanden)
+            # Drop old view (falls vorhanden)
             db.execute(text("DROP VIEW IF EXISTS gap_payments_direct_agg"))
             
-            ***REMOVED*** Create new view mit korrigiertem Filter
+            # Create new view mit korrigiertem Filter
             view_sql = """
             CREATE OR REPLACE VIEW gap_payments_direct_agg AS
             SELECT
@@ -1095,7 +1095,7 @@ async def fix_view_definition():
             db.execute(text(view_sql))
             db.commit()
             
-            ***REMOVED*** Test die neue View
+            # Test die neue View
             test_count = db.execute(text("SELECT COUNT(*) FROM gap_payments_direct_agg WHERE ref_year = 2024")).scalar()
             
         finally:
@@ -1135,7 +1135,7 @@ async def debug_gap_years():
         db = SessionLocal()
         
         try:
-            ***REMOVED*** Alle Jahre mit GAP-Daten finden
+            # Alle Jahre mit GAP-Daten finden
             years = db.execute(text("""
                 SELECT 
                     ref_year,
@@ -1147,7 +1147,7 @@ async def debug_gap_years():
             
             year_data = [{"year": row[0], "count": row[1]} for row in years]
             
-            ***REMOVED*** Total über alle Jahre
+            # Total über alle Jahre
             total = db.execute(text("SELECT COUNT(*) FROM gap_payments")).scalar()
             
         finally:
@@ -1181,7 +1181,7 @@ async def get_gap_statistics(year: int = Query(2024, description="Jahr für Stat
         db = SessionLocal()
         
         try:
-            ***REMOVED*** Zähle alle relevanten Tabellen
+            # Zähle alle relevanten Tabellen
             stats = {
                 "gap_payments": db.execute(text("SELECT COUNT(*) FROM gap_payments WHERE ref_year = :year"), {"year": year}).scalar(),
                 "gap_payments_agg": db.execute(text("SELECT COUNT(*) FROM gap_payments_direct_agg WHERE ref_year = :year"), {"year": year}).scalar(),
@@ -1190,7 +1190,7 @@ async def get_gap_statistics(year: int = Query(2024, description="Jahr für Stat
                 "total_customers": db.execute(text("SELECT COUNT(*) FROM customers")).scalar()
             }
             
-            ***REMOVED*** Zusätzliche Informationen
+            # Zusätzliche Informationen
             if stats["gap_payments_agg"] > 0:
                 agg_info = db.execute(text("""
                     SELECT 
@@ -1262,7 +1262,7 @@ def _execute_gap_pipeline_optimized(year: int, csv_path: Optional[str] = None, b
             except Exception as callback_error:
                 print(f"[GAP OPTIMIZED PIPELINE] Progress callback error: {callback_error}")
         
-        ***REMOVED*** Führe optimierte Pipeline aus
+        # Führe optimierte Pipeline aus
         result = run_year_pipeline_optimized(year=year, csv_path=csv_path, batch_id=batch_id, plz_filter=plz_filter, progress_callback=progress_callback)
         
         progress.complete("OPTIMIERTE Pipeline erfolgreich abgeschlossen - nur heiße Bereiche verarbeitet!")
@@ -1329,7 +1329,7 @@ def _execute_gap_pipeline_with_plz_filter(year: int, csv_path: Optional[str] = N
         progress.update_status("initializing", 2, 6, "Initialisiere Pipeline-Parameter...", "running")
         print(f"[GAP PIPELINE] About to call run_year_pipeline with PLZ filter...")
         
-        ***REMOVED*** WICHTIG: PLZ-Filter wird jetzt korrekt übergeben!
+        # WICHTIG: PLZ-Filter wird jetzt korrekt übergeben!
         result = run_year_pipeline(year=year, csv_path=csv_path, batch_id=batch_id, progress_callback=progress_callback, plz_filter=plz_filter)
         
         progress.complete(f"Pipeline erfolgreich abgeschlossen{filter_info}")
@@ -1360,18 +1360,18 @@ def _execute_gap_pipeline(year: int, csv_path: Optional[str] = None, batch_id: O
         
         from app.services.gap_progress import PipelineProgress
         
-        ***REMOVED*** Verwende existierende Batch-ID (wurde bereits von create_pipeline_job erstellt)
+        # Verwende existierende Batch-ID (wurde bereits von create_pipeline_job erstellt)
         if not batch_id:
             print(f"[GAP Pipeline] ERROR: No batch_id provided!")
             return
         
         progress = PipelineProgress(batch_id, year)
         
-        ***REMOVED*** SOFORTIGER Progress-Update beim Start der Background-Task
+        # SOFORTIGER Progress-Update beim Start der Background-Task
         progress.update_status("starting", 1, 6, "Pipeline-Thread gestartet - beginne Ausführung...", "running")
         print(f"[GAP Pipeline] Initial progress update sent for batch_id={batch_id}")
         
-        ***REMOVED*** Import der Pipeline-Funktionen hier (späte Bindung)
+        # Import der Pipeline-Funktionen hier (späte Bindung)
         try:
             from app.services.gap_pipeline import run_year_pipeline
             print(f"[GAP Pipeline] Successfully imported run_year_pipeline")
@@ -1395,11 +1395,11 @@ def _execute_gap_pipeline(year: int, csv_path: Optional[str] = None, batch_id: O
                 import traceback
                 print(f"[GAP Pipeline] Callback traceback: {traceback.format_exc()}")
         
-        ***REMOVED*** Weitere Progress-Updates während der Ausführung
+        # Weitere Progress-Updates während der Ausführung
         progress.update_status("initializing", 2, 6, "Initialisiere Pipeline-Parameter...", "running")
         print(f"[GAP Pipeline] About to call run_year_pipeline...")
         
-        ***REMOVED*** Pipeline ausführen
+        # Pipeline ausführen
         result = run_year_pipeline(year=year, csv_path=csv_path, batch_id=batch_id, progress_callback=progress_callback)
         
         progress.complete("Pipeline erfolgreich abgeschlossen")
@@ -1414,7 +1414,7 @@ def _execute_gap_pipeline(year: int, csv_path: Optional[str] = None, batch_id: O
                 error_msg = f"Pipeline-Fehler: {str(e)}"
                 progress.error(error_msg)
         except:
-            pass  ***REMOVED*** Fallback wenn Progress-Update fehlschlägt
+            pass  # Fallback wenn Progress-Update fehlschlägt
             
         print(f"[GAP Pipeline] === PIPELINE FAILED ===")
         print(f"[GAP Pipeline] Error: {str(e)}")
@@ -1449,12 +1449,12 @@ def _execute_gap_command(
     try:
         if command == "import":
             if not csv_path:
-                ***REMOVED*** Wenn kein csv_path übergeben wurde, suche nach Standarddatei
+                # Wenn kein csv_path übergeben wurde, suche nach Standarddatei
                 default_path = Path(f"data/gap/impdata{year}.csv")
                 if default_path.exists():
                     csv_path = str(default_path)
                 else:
-                    ***REMOVED*** Wenn auch Standarddatei nicht existiert, versuche Download
+                    # Wenn auch Standarddatei nicht existiert, versuche Download
                     try:
                         from app.services.gap_pipeline import download_gap_csv
                         csv_path = download_gap_csv(year)
@@ -1484,7 +1484,7 @@ def _execute_gap_command(
 async def search_krummhoern(db: Session = Depends(get_db)):
     """🔍 Suche spezifisch nach PLZ 26736 Krummhörn - Test für Spaltenverschiebung"""
     try:
-        ***REMOVED*** Direkte Suche nach PLZ 26736
+        # Direkte Suche nach PLZ 26736
         plz_26736 = db.execute(text("""
             SELECT beneficiary_name_norm, postal_code, city, eur_amount 
             FROM gap_payments 
@@ -1492,7 +1492,7 @@ async def search_krummhoern(db: Session = Depends(get_db)):
             LIMIT 10
         """)).fetchall()
         
-        ***REMOVED*** Suche nach "Krummhörn" im Ortsnamen
+        # Suche nach "Krummhörn" im Ortsnamen
         krummhoern_city = db.execute(text("""
             SELECT beneficiary_name_norm, postal_code, city, eur_amount 
             FROM gap_payments 
@@ -1500,7 +1500,7 @@ async def search_krummhoern(db: Session = Depends(get_db)):
             LIMIT 10
         """)).fetchall()
         
-        ***REMOVED*** Suche nach "Krummhörn" in Begünstigten-Namen
+        # Suche nach "Krummhörn" in Begünstigten-Namen
         krummhoern_names = db.execute(text("""
             SELECT beneficiary_name_norm, postal_code, city, eur_amount 
             FROM gap_payments 
@@ -1508,7 +1508,7 @@ async def search_krummhoern(db: Session = Depends(get_db)):
             LIMIT 10
         """)).fetchall()
         
-        ***REMOVED*** Breite Suche im PLZ-Bereich 267xx
+        # Breite Suche im PLZ-Bereich 267xx
         plz_267xx = db.execute(text("""
             SELECT postal_code, COUNT(*) as count
             FROM gap_payments 
@@ -1517,7 +1517,7 @@ async def search_krummhoern(db: Session = Depends(get_db)):
             ORDER BY postal_code
         """)).fetchall()
         
-        ***REMOVED*** Alle verfügbaren PLZ in der Nähe von 26736
+        # Alle verfügbaren PLZ in der Nähe von 26736
         nearby_plz = db.execute(text("""
             SELECT postal_code, city, COUNT(*) as count
             FROM gap_payments 
@@ -1585,7 +1585,7 @@ async def analyze_csv_structure():
         import csv
         from pathlib import Path
         
-        ***REMOVED*** Mögliche CSV-Pfade
+        # Mögliche CSV-Pfade
         csv_paths = [
             "data/gap/impdata2024.csv",
             "./impdata2024.csv",
@@ -1605,7 +1605,7 @@ async def analyze_csv_structure():
             "krummhoern_analysis": None
         }
         
-        ***REMOVED*** Suche nach CSV-Datei
+        # Suche nach CSV-Datei
         csv_path = None
         for path in csv_paths:
             if os.path.exists(path):
@@ -1615,7 +1615,7 @@ async def analyze_csv_structure():
                 break
         
         if not csv_path:
-            ***REMOVED*** Versuche alle CSV-Dateien zu finden
+            # Versuche alle CSV-Dateien zu finden
             try:
                 all_csvs = []
                 for root, dirs, files in os.walk('.'):
@@ -1623,9 +1623,9 @@ async def analyze_csv_structure():
                         if file.endswith('.csv'):
                             all_csvs.append(os.path.join(root, file))
                 
-                analysis_result["csv_search"]["all_csv_files_found"] = all_csvs[:10]  ***REMOVED*** Erste 10
+                analysis_result["csv_search"]["all_csv_files_found"] = all_csvs[:10]  # Erste 10
                 
-                ***REMOVED*** Nimm die erste gefundene CSV als Test
+                # Nimm die erste gefundene CSV als Test
                 if all_csvs:
                     csv_path = all_csvs[0]
                     analysis_result["csv_search"]["using_first_found"] = csv_path
@@ -1635,18 +1635,18 @@ async def analyze_csv_structure():
         
         if csv_path and os.path.exists(csv_path):
             try:
-                ***REMOVED*** CSV-Header analysieren
+                # CSV-Header analysieren
                 with open(csv_path, 'r', encoding='utf-8-sig') as f:
-                    ***REMOVED*** Teste verschiedene Delimiter
+                    # Teste verschiedene Delimiter
                     delimiters = [';', ',', '\t', '|']
                     
                     for delimiter in delimiters:
-                        f.seek(0)  ***REMOVED*** Reset file pointer
+                        f.seek(0)  # Reset file pointer
                         try:
                             reader = csv.DictReader(f, delimiter=delimiter)
                             headers = reader.fieldnames
                             
-                            if headers and len(headers) > 5:  ***REMOVED*** Sinnvolle Header-Anzahl
+                            if headers and len(headers) > 5:  # Sinnvolle Header-Anzahl
                                 analysis_result["header_analysis"] = {
                                     "delimiter_used": delimiter,
                                     "total_headers": len(headers),
@@ -1656,22 +1656,22 @@ async def analyze_csv_structure():
                                     "city_like_headers": [h for h in headers if h and ('ort' in h.lower() or 'stadt' in h.lower() or 'gemeinde' in h.lower() or 'city' in h.lower())]
                                 }
                                 
-                                ***REMOVED*** Sample-Daten lesen
+                                # Sample-Daten lesen
                                 f.seek(0)
                                 reader = csv.DictReader(f, delimiter=delimiter)
                                 sample_rows = []
                                 
                                 for i, row in enumerate(reader):
-                                    if i >= 3:  ***REMOVED*** Erste 3 Zeilen
+                                    if i >= 3:  # Erste 3 Zeilen
                                         break
                                     sample_rows.append({
                                         "row_number": i + 1,
-                                        "sample_data": dict(list(row.items())[:10])  ***REMOVED*** Erste 10 Spalten
+                                        "sample_data": dict(list(row.items())[:10])  # Erste 10 Spalten
                                     })
                                 
                                 analysis_result["sample_data"] = sample_rows
                                 
-                                ***REMOVED*** Krummhörn-Suche in CSV
+                                # Krummhörn-Suche in CSV
                                 f.seek(0)
                                 reader = csv.DictReader(f, delimiter=delimiter)
                                 krummhoern_found = []
@@ -1679,10 +1679,10 @@ async def analyze_csv_structure():
                                 row_count = 0
                                 for row in reader:
                                     row_count += 1
-                                    if row_count > 1000:  ***REMOVED*** Maximal 1000 Zeilen durchsuchen
+                                    if row_count > 1000:  # Maximal 1000 Zeilen durchsuchen
                                         break
                                         
-                                    ***REMOVED*** Suche nach PLZ 26736 oder "Krummhörn" in allen Spalten
+                                    # Suche nach PLZ 26736 oder "Krummhörn" in allen Spalten
                                     for key, value in row.items():
                                         if value and (
                                             '26736' in str(value) or 
@@ -1692,11 +1692,11 @@ async def analyze_csv_structure():
                                             krummhoern_found.append({
                                                 "row_number": row_count,
                                                 "found_in_column": key,
-                                                "found_value": str(value)[:100],  ***REMOVED*** Erste 100 Zeichen
-                                                "full_row_sample": dict(list(row.items())[:5])  ***REMOVED*** Erste 5 Spalten
+                                                "found_value": str(value)[:100],  # Erste 100 Zeichen
+                                                "full_row_sample": dict(list(row.items())[:5])  # Erste 5 Spalten
                                             })
                                             
-                                            if len(krummhoern_found) >= 10:  ***REMOVED*** Max 10 Treffer
+                                            if len(krummhoern_found) >= 10:  # Max 10 Treffer
                                                 break
                                 
                                 analysis_result["krummhoern_analysis"] = {
@@ -1705,10 +1705,10 @@ async def analyze_csv_structure():
                                     "matches": krummhoern_found
                                 }
                                 
-                                break  ***REMOVED*** Erfolgreicher Delimiter gefunden
+                                break  # Erfolgreicher Delimiter gefunden
                                 
                         except Exception as e:
-                            continue  ***REMOVED*** Nächsten Delimiter probieren
+                            continue  # Nächsten Delimiter probieren
                             
             except Exception as e:
                 analysis_result["csv_error"] = str(e)
@@ -1747,11 +1747,11 @@ async def search_krummhoern_csv():
             }
         }
         
-        ***REMOVED*** CSV mit korrektem Typo lesen
+        # CSV mit korrektem Typo lesen
         with open(csv_path, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')
             
-            ***REMOVED*** Header analysieren
+            # Header analysieren
             headers = reader.fieldnames
             results["search_results"]["header_analysis"] = {
                 "total_headers": len(headers) if headers else 0,
@@ -1761,7 +1761,7 @@ async def search_krummhoern_csv():
                 "city_header": None
             }
             
-            ***REMOVED*** Korrekte Header identifizieren (mit Typo!)
+            # Korrekte Header identifizieren (mit Typo!)
             for header in (headers or []):
                 if 'begünstigten' in header.lower() and 'rechtsträgers' in header.lower():
                     results["search_results"]["header_analysis"]["name_header"] = header
@@ -1770,19 +1770,19 @@ async def search_krummhoern_csv():
                 elif 'gemeinde' in header.lower():
                     results["search_results"]["header_analysis"]["city_header"] = header
             
-            ***REMOVED*** Daten durchsuchen
+            # Daten durchsuchen
             for row_num, row in enumerate(reader, 1):
                 results["statistics"]["total_rows_scanned"] = row_num
                 
-                ***REMOVED*** Maximal 10.000 Zeilen scannen für Performance
+                # Maximal 10.000 Zeilen scannen für Performance
                 if row_num > 10000:
                     break
                     
                 plz = row.get('PLZ', '').strip()
-                name = row.get('Name des Begünstigten/Rechtsträgers/Verdands', '').strip()  ***REMOVED*** MIT TYPO!
+                name = row.get('Name des Begünstigten/Rechtsträgers/Verdands', '').strip()  # MIT TYPO!
                 city = row.get('Gemeinde', '').strip()
                 
-                ***REMOVED*** Suche nach PLZ 26736
+                # Suche nach PLZ 26736
                 if plz == '26736':
                     results["statistics"]["plz_26736_count"] += 1
                     if len(results["search_results"]["plz_26736_matches"]) < 10:
@@ -1794,7 +1794,7 @@ async def search_krummhoern_csv():
                             "egfl_amount": row.get('EGFL- Gesamtbetrag für diesen Begünstigten', '')
                         })
                 
-                ***REMOVED*** Suche nach Krummhörn
+                # Suche nach Krummhörn
                 if ('krumm' in name.lower() or 'krumm' in city.lower() or 
                     'hörn' in name.lower() or 'hörn' in city.lower()):
                     results["statistics"]["krummhoern_count"] += 1
@@ -1807,13 +1807,13 @@ async def search_krummhoern_csv():
                             "match_type": "krummhörn_text"
                         })
                 
-                ***REMOVED*** Suche nach PLZ 267xx Bereich
+                # Suche nach PLZ 267xx Bereich
                 if plz.startswith('267'):
                     results["statistics"]["plz_267xx_count"] += 1
                     if len(results["search_results"]["plz_267xx_matches"]) < 20:
                         results["search_results"]["plz_267xx_matches"].append({
                             "row": row_num,
-                            "name": name[:50],  ***REMOVED*** Erste 50 Zeichen
+                            "name": name[:50],  # Erste 50 Zeichen
                             "plz": plz,
                             "city": city
                         })
@@ -1833,20 +1833,20 @@ async def search_krummhoern_csv():
 async def simple_plz_check(db: Session = Depends(get_db)):
     """🔍 Einfacher Check der PLZ-Daten ohne komplexe Queries"""
     try:
-        ***REMOVED*** Sehr einfache Abfragen
+        # Sehr einfache Abfragen
         total_count = db.execute(text("SELECT COUNT(*) FROM gap_payments")).scalar()
         
-        ***REMOVED*** PLZ 26xxx speziell prüfen  
+        # PLZ 26xxx speziell prüfen  
         plz_26_count = db.execute(text("SELECT COUNT(*) FROM gap_payments WHERE postal_code LIKE '26%'")).scalar()
         
-        ***REMOVED*** Erste 3 Datensätze komplett anzeigen
+        # Erste 3 Datensätze komplett anzeigen
         sample = db.execute(text("""
             SELECT beneficiary_name_norm, postal_code, city, eur_amount 
             FROM gap_payments 
             LIMIT 3
         """)).fetchall()
         
-        ***REMOVED*** PLZ-Verteilung grob  
+        # PLZ-Verteilung grob  
         plz_stats = db.execute(text("""
             SELECT 
                 CASE 
@@ -1888,7 +1888,7 @@ async def simple_plz_check(db: Session = Depends(get_db)):
 async def debug_plz_data(db: Session = Depends(get_db)):
     """🔍 Debug endpoint to analyze postal code data distribution"""
     try:
-        ***REMOVED*** PLZ-Verteilung analysieren
+        # PLZ-Verteilung analysieren
         plz_analysis = db.execute(text("""
             SELECT 
                 SUBSTRING(postal_code, 1, 2) as plz_prefix,
@@ -1903,7 +1903,7 @@ async def debug_plz_data(db: Session = Depends(get_db)):
             ORDER BY plz_prefix
         """)).fetchall()
         
-        ***REMOVED*** Spezifische Analyse für PLZ 26xxx
+        # Spezifische Analyse für PLZ 26xxx
         plz_26_data = db.execute(text("""
             SELECT 
                 beneficiary_name_norm, 
@@ -1916,7 +1916,7 @@ async def debug_plz_data(db: Session = Depends(get_db)):
             LIMIT 10
         """)).fetchall()
         
-        ***REMOVED*** Sample der ersten 5 Datensätze zur Überprüfung der Spaltenreihenfolge
+        # Sample der ersten 5 Datensätze zur Überprüfung der Spaltenreihenfolge
         sample_data = db.execute(text("""
             SELECT 
                 beneficiary_name_norm, 
@@ -1929,7 +1929,7 @@ async def debug_plz_data(db: Session = Depends(get_db)):
             LIMIT 5
         """)).fetchall()
         
-        ***REMOVED*** CSV-Header analysieren
+        # CSV-Header analysieren
         csv_header_analysis = None
         try:
             import os
@@ -1953,7 +1953,7 @@ async def debug_plz_data(db: Session = Depends(get_db)):
                     reader = csv.DictReader(f, delimiter=';')
                     csv_headers = reader.fieldnames
                     
-                    ***REMOVED*** Erste 3 Zeilen als Sample
+                    # Erste 3 Zeilen als Sample
                     sample_rows = []
                     for i, row in enumerate(reader):
                         if i >= 3:
@@ -2034,7 +2034,7 @@ def _execute_gap_pipeline_filtered(year: int, batch_id: Optional[str] = None):
             except Exception as callback_error:
                 print(f"🚀 [GAP FILTERED PIPELINE] Progress callback error: {callback_error}")
         
-        ***REMOVED*** Führe ultra-optimierte Pipeline aus
+        # Führe ultra-optimierte Pipeline aus
         result = run_year_pipeline_filtered(year=year, progress_callback=progress_callback)
         
         if result.get("success", False):

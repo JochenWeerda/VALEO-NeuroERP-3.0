@@ -16,7 +16,7 @@ from .endpoints import (
 
 api_router = APIRouter()
 
-***REMOVED*** Include endpoint routers
+# Include endpoint routers
 api_router.include_router(
     assistants.router,
     prefix="/assistants",
@@ -58,4 +58,5 @@ api_router.include_router(
     prefix="/autocomplete",
     tags=["Autocomplete"]
 )
+
 

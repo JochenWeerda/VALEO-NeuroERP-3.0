@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 RAG-Server Starter für VALEO-NeuroERP
@@ -15,18 +15,18 @@ import time
 import json
 from pathlib import Path
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Konstanten
-RAG_API_TOKEN = "valeo_rag_api_token_2025"  ***REMOVED*** API-Token für den RAG-Server
-MONGODB_URI = "mongodb://localhost:27017/"   ***REMOVED*** MongoDB-URI
-MONGODB_DB = "valeo_neuroerp"               ***REMOVED*** MongoDB-Datenbankname
-PROJECT_ID = "valeo_neuroerp_project"       ***REMOVED*** Projekt-ID
+# Konstanten
+RAG_API_TOKEN = "valeo_rag_api_token_2025"  # API-Token für den RAG-Server
+MONGODB_URI = "mongodb://localhost:27017/"   # MongoDB-URI
+MONGODB_DB = "valeo_neuroerp"               # MongoDB-Datenbankname
+PROJECT_ID = "valeo_neuroerp_project"       # Projekt-ID
 
 def create_token_file():
     """Erstellt eine Datei mit dem RAG-API-Token."""
@@ -38,7 +38,7 @@ def create_token_file():
     token_data = {
         "api_token": RAG_API_TOKEN,
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        "expires_at": None  ***REMOVED*** Kein Ablaufdatum
+        "expires_at": None  # Kein Ablaufdatum
     }
     
     with open(token_file, "w", encoding="utf-8") as f:
@@ -49,47 +49,47 @@ def create_token_file():
 
 def start_rag_server():
     """Startet den RAG-Service-Server."""
-    ***REMOVED*** Umgebungsvariablen setzen
+    # Umgebungsvariablen setzen
     env = os.environ.copy()
     env["RAG_API_TOKEN"] = RAG_API_TOKEN
     env["MONGODB_URI"] = MONGODB_URI
     env["MONGODB_DB"] = MONGODB_DB
     env["PROJECT_ID"] = PROJECT_ID
     
-    ***REMOVED*** Token-Datei erstellen
+    # Token-Datei erstellen
     token_file = create_token_file()
     
     try:
-        ***REMOVED*** Verzeichnis für Logs erstellen
+        # Verzeichnis für Logs erstellen
         os.makedirs("logs", exist_ok=True)
         
-        ***REMOVED*** RAG-Service-Server starten
+        # RAG-Service-Server starten
         logger.info("Starte RAG-Service-Server...")
         
-        ***REMOVED*** Befehl zum Starten des Servers
+        # Befehl zum Starten des Servers
         cmd = [sys.executable, "-m", "backend.apm_framework.rag_service_server"]
         
-        ***REMOVED*** Server im Hintergrund starten
+        # Server im Hintergrund starten
         process = subprocess.Popen(
             cmd,
             env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            creationflags=subprocess.CREATE_NEW_CONSOLE  ***REMOVED*** Neues Konsolenfenster öffnen
+            creationflags=subprocess.CREATE_NEW_CONSOLE  # Neues Konsolenfenster öffnen
         )
         
-        ***REMOVED*** Kurz warten, um zu sehen, ob der Server startet
+        # Kurz warten, um zu sehen, ob der Server startet
         time.sleep(2)
         
-        ***REMOVED*** Prüfen, ob der Server läuft
+        # Prüfen, ob der Server läuft
         if process.poll() is None:
             logger.info("RAG-Service-Server erfolgreich gestartet")
             logger.info(f"API-Token: {RAG_API_TOKEN}")
             logger.info(f"Token-Datei: {token_file}")
             return True
         else:
-            ***REMOVED*** Fehlerausgabe lesen
+            # Fehlerausgabe lesen
             stdout, stderr = process.communicate()
             logger.error(f"RAG-Service-Server konnte nicht gestartet werden")
             logger.error(f"Stdout: {stdout}")

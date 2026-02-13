@@ -1,10 +1,10 @@
-***REMOVED*** Alert-Actions & Workflow-Buttons - Specification
+# Alert-Actions & Workflow-Buttons - Specification
 
-***REMOVED******REMOVED*** Phase I & J - KPI-Heatmap & Alert-Actions
+## Phase I & J - KPI-Heatmap & Alert-Actions
 
 Diese Spezifikation beschreibt das vollständige Alert-System mit Heatmap, regelbasierter Erkennung und ausführbaren Workflow-Actions.
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Das System bietet:
 - **KPI-Heatmap:** Farbcodierte Score-Matrix
@@ -14,7 +14,7 @@ Das System bietet:
 - **MCP-Integration:** Backend-Calls mit Optimistic Updates
 - **Realtime-Updates:** Automatische Aktualisierung
 
-***REMOVED******REMOVED*** Architektur
+## Architektur
 
 ```
 ┌─────────────────────────────────────┐
@@ -49,9 +49,9 @@ Das System bietet:
 └─────────────────────────────────────┘
 ```
 
-***REMOVED******REMOVED*** Komponenten
+## Komponenten
 
-***REMOVED******REMOVED******REMOVED*** 1. Color-Utility (`color.ts`)
+### 1. Color-Utility (`color.ts`)
 
 **Severity-Mapping:**
 ```typescript
@@ -64,18 +64,18 @@ score > -0.15  → "ok"    (normal)
 ```
 
 **Farben:**
-- Critical: Red-100 (***REMOVED***FEE2E2) / Red-300 Border
-- Warning: Amber-100 (***REMOVED***FEF3C7) / Amber-300 Border
-- Neutral: Cyan-50 (***REMOVED***ECFEFF)
-- Good: Emerald-100 (***REMOVED***D1FAE5)
-- Excellent: Emerald-200 (***REMOVED***A7F3D0)
+- Critical: Red-100 (#FEE2E2) / Red-300 Border
+- Warning: Amber-100 (#FEF3C7) / Amber-300 Border
+- Neutral: Cyan-50 (#ECFEFF)
+- Good: Emerald-100 (#D1FAE5)
+- Excellent: Emerald-200 (#A7F3D0)
 
 **Konstanten:**
 - `SEVERITY_THRESHOLD_CRITICAL = -0.4`
 - `SEVERITY_THRESHOLD_WARNING = -0.15`
 - Alle Farben als benannte Konstanten
 
-***REMOVED******REMOVED******REMOVED*** 2. Regel-Engine (`rules.ts`)
+### 2. Regel-Engine (`rules.ts`)
 
 **Score-Berechnung:**
 
@@ -105,7 +105,7 @@ score > -0.15  → "ok"    (normal)
 - `MARGIN_WARNING = 12`
 - `STOCK_VALUE_HIGH_THRESHOLD = 500_000`
 
-***REMOVED******REMOVED******REMOVED*** 3. Heatmap (`KpiHeatmap.tsx`)
+### 3. Heatmap (`KpiHeatmap.tsx`)
 
 **Layout:**
 - Dynamisches Grid (Zeilen × Spalten)
@@ -124,7 +124,7 @@ score > -0.15  → "ok"    (normal)
 - `GRID_CELL_MIN_WIDTH = "80px"`
 - `PERCENTAGE_MULTIPLIER = 100`
 
-***REMOVED******REMOVED******REMOVED*** 4. Alert-Actions (`AlertActions.tsx`)
+### 4. Alert-Actions (`AlertActions.tsx`)
 
 **Workflow-Buttons:**
 
@@ -150,7 +150,7 @@ score > -0.15  → "ok"    (normal)
 - `REORDER_QTY_CRITICAL = 500`
 - `REORDER_QTY_WARNING = 250`
 
-***REMOVED******REMOVED******REMOVED*** 5. Actions-Hook (`actions.ts`)
+### 5. Actions-Hook (`actions.ts`)
 
 **MCP-Mutations:**
 
@@ -171,9 +171,9 @@ notifySales: useMcpMutation<
 >("sales", "notify")
 ```
 
-***REMOVED******REMOVED*** Backend-Endpoints (Erwartung)
+## Backend-Endpoints (Erwartung)
 
-***REMOVED******REMOVED******REMOVED*** POST /mcp/pricing/adjust
+### POST /mcp/pricing/adjust
 
 **Request:**
 ```json
@@ -195,7 +195,7 @@ notifySales: useMcpMutation<
 - Optional: SKU-spezifisch
 - Broadcast: `{service:"pricing",type:"updated"}`
 
-***REMOVED******REMOVED******REMOVED*** POST /mcp/inventory/reorder
+### POST /mcp/inventory/reorder
 
 **Request:**
 ```json
@@ -216,7 +216,7 @@ notifySales: useMcpMutation<
 - Erzeugt Bestellvorschlag/PO-Draft
 - Broadcast: `{service:"inventory",type:"reorder-started"}`
 
-***REMOVED******REMOVED******REMOVED*** POST /mcp/sales/notify
+### POST /mcp/sales/notify
 
 **Request:**
 ```json
@@ -237,9 +237,9 @@ notifySales: useMcpMutation<
 - E-Mail/Task/Slack/Teams Notification
 - Broadcast: `{service:"sales",type:"notified"}`
 
-***REMOVED******REMOVED*** User Flow
+## User Flow
 
-***REMOVED******REMOVED******REMOVED*** 1. Alert erscheint
+### 1. Alert erscheint
 
 ```
 ┌─────────────────────────────────────┐
@@ -250,7 +250,7 @@ notifySales: useMcpMutation<
 └─────────────────────────────────────┘
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Button klicken
+### 2. Button klicken
 
 ```
 ┌─────────────────────────────────────┐
@@ -261,7 +261,7 @@ notifySales: useMcpMutation<
 └─────────────────────────────────────┘
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Bestätigen
+### 3. Bestätigen
 
 ```
 Toast: "✔ Preisupdate angestoßen"
@@ -272,9 +272,9 @@ Toast: "✔ Preisupdate angestoßen"
 → Dashboard aktualisiert sich
 ```
 
-***REMOVED******REMOVED*** Code-Qualität
+## Code-Qualität
 
-***REMOVED******REMOVED******REMOVED*** ✅ Memory-Bank Compliance
+### ✅ Memory-Bank Compliance
 
 **Frontend:**
 - TypeScript Strict Mode
@@ -289,16 +289,16 @@ Toast: "✔ Preisupdate angestoßen"
 - Wird in Phase K erweitert
 - MCP-Endpoints müssen implementiert werden
 
-***REMOVED******REMOVED******REMOVED*** ✅ Lint Status
+### ✅ Lint Status
 
 - 0 Errors
 - 0 Warnings
 - Import-Sortierung korrekt
 - Alle Event-Handler typisiert
 
-***REMOVED******REMOVED*** Testing
+## Testing
 
-***REMOVED******REMOVED******REMOVED*** Unit Tests (Frontend)
+### Unit Tests (Frontend)
 
 ```typescript
 describe('AlertActions', () => {
@@ -336,27 +336,27 @@ describe('AlertActions', () => {
 })
 ```
 
-***REMOVED******REMOVED******REMOVED*** Integration Test
+### Integration Test
 
 ```bash
-***REMOVED*** Terminal 1: Backend (mit Mock-Endpoints)
+# Terminal 1: Backend (mit Mock-Endpoints)
 cd packages/analytics-domain
 npm run dev
 
-***REMOVED*** Terminal 2: Frontend
+# Terminal 2: Frontend
 cd packages/frontend-web
 npm run dev
 
-***REMOVED*** Browser: http://localhost:5173
-***REMOVED*** 1. Navigate to Dashboard
-***REMOVED*** 2. Verify Heatmap shows colored cells
-***REMOVED*** 3. Verify Alerts appear
-***REMOVED*** 4. Click Action-Button
-***REMOVED*** 5. Confirm in Dialog
-***REMOVED*** 6. Verify Toast appears
+# Browser: http://localhost:5173
+# 1. Navigate to Dashboard
+# 2. Verify Heatmap shows colored cells
+# 3. Verify Alerts appear
+# 4. Click Action-Button
+# 5. Confirm in Dialog
+# 6. Verify Toast appears
 ```
 
-***REMOVED******REMOVED*** Optimistic Updates (Optional)
+## Optimistic Updates (Optional)
 
 ```typescript
 import { useQueryClient } from "@tanstack/react-query"
@@ -393,16 +393,16 @@ export function useAlertActions() {
 }
 ```
 
-***REMOVED******REMOVED*** Security & Validation
+## Security & Validation
 
-***REMOVED******REMOVED******REMOVED*** Input Validation
+### Input Validation
 
 - ✅ Alert-Severity prüfen
 - ✅ KPI-ID validieren
 - ✅ Numerische Werte begrenzen
 - ✅ Confirm-Dialog vor Ausführung
 
-***REMOVED******REMOVED******REMOVED*** Rate-Limiting (Backend)
+### Rate-Limiting (Backend)
 
 ```typescript
 import rateLimit from "express-rate-limit"
@@ -417,7 +417,7 @@ app.post("/inventory/reorder", actionLimiter, handler)
 app.post("/sales/notify", actionLimiter, handler)
 ```
 
-***REMOVED******REMOVED******REMOVED*** Audit-Logging
+### Audit-Logging
 
 ```typescript
 logger.info("Alert action executed", {
@@ -428,9 +428,9 @@ logger.info("Alert action executed", {
 })
 ```
 
-***REMOVED******REMOVED*** Erweiterungsmöglichkeiten
+## Erweiterungsmöglichkeiten
 
-***REMOVED******REMOVED******REMOVED*** Phase K - Policy-Framework
+### Phase K - Policy-Framework
 
 **Auto-Actions:**
 - Automatische Ausführung bei bestimmten Bedingungen
@@ -449,7 +449,7 @@ type Policy = {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Weitere Features
+### Weitere Features
 
 1. **Action-Historie**
    - Alle ausgeführten Actions loggen
@@ -476,9 +476,9 @@ type Policy = {
    - Snapshot-basiertes Rollback
    - Audit-Trail
 
-***REMOVED******REMOVED*** Code-Qualität
+## Code-Qualität
 
-***REMOVED******REMOVED******REMOVED*** ✅ Phase I - Heatmap & Alerts
+### ✅ Phase I - Heatmap & Alerts
 
 **color.ts:**
 - 3 Severity-Levels
@@ -503,7 +503,7 @@ type Policy = {
 - Explizite Return Types
 - Silent Fail bei fehlenden Daten
 
-***REMOVED******REMOVED******REMOVED*** ✅ Phase J - Actions
+### ✅ Phase J - Actions
 
 **actions.ts:**
 - 3 MCP-Mutations typisiert
@@ -522,16 +522,16 @@ type Policy = {
 - Accessibility-Features
 - Tailwind-Styling
 
-***REMOVED******REMOVED******REMOVED*** ✅ Lint Status
+### ✅ Lint Status
 
 - 0 Errors (Frontend + Backend)
 - 0 Warnings
 - Import-Sortierung korrekt
 - Memory-Bank konform
 
-***REMOVED******REMOVED*** Features
+## Features
 
-***REMOVED******REMOVED******REMOVED*** ✅ Phase I - Implementiert
+### ✅ Phase I - Implementiert
 
 1. **KPI-Heatmap**
    - Farbcodierte Score-Matrix
@@ -551,7 +551,7 @@ type Policy = {
    - Severity-Color-Coding
    - Framer Motion Animationen
 
-***REMOVED******REMOVED******REMOVED*** ✅ Phase J - Implementiert
+### ✅ Phase J - Implementiert
 
 1. **Workflow-Buttons**
    - Kontextabhängig (KPI-spezifisch)
@@ -575,7 +575,7 @@ type Policy = {
    - WebSocket-Events
    - Optimistic Updates (optional)
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 **Phase I & J - KPI-Heatmap & Alert-Actions** bietet:
 
@@ -591,7 +591,7 @@ type Policy = {
 
 **Status:** Production Ready 🚀
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 **Phase K - Policy-Framework:**
 - Auto-Execution Rules
@@ -601,4 +601,5 @@ type Policy = {
 - Rollback-Mechanismus
 
 Möchtest du Phase K implementiert haben? 😇
+
 

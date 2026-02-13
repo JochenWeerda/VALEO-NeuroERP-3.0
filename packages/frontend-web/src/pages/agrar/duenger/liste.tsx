@@ -1,212 +1,64 @@
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { AlertTriangle, Plus, Filter, Eye, Edit, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-
-type Duenger = {
-  id: string
-  artikelnummer: string
-  name: string
-  typ: string
-  hersteller: string
-  n_gehalt: number
-  p_gehalt: number
-  k_gehalt: number
-  s_gehalt: number
-  mg_gehalt: number
-  dmv_nummer: string
-  eu_zulassung: string
-  ablauf_zulassung: string
-  gefahrstoff_klasse: string
-  wassergefaehrdend: boolean
-  lagerklasse: string
-  kultur_typ: string
-  dosierung_min: number
-  dosierung_max: number
-  zeitpunkt: string
-  ek_preis: number
-  vk_preis: number
-  lagerbestand: number
-  ist_aktiv: boolean
-  ausgangsstoff_explosivstoffe: boolean
-  erklaerung_landwirt_erforderlich: boolean
-  erklaerung_landwirt_status: string | null
-}
+import { useDuenger, useDeleteDuenger } from '@/lib/api/agrar'
+import type { Duenger } from '@/lib/api/agrar'
 
 export default function DuengerListePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  const [duenger, setDuenger] = useState<Duenger[]>([
-    {
-      id: 'DUE-001',
-      artikelnummer: 'DUE-001',
-      name: 'NPK 15-15-15 Universal',
-      typ: 'Mineraldünger',
-      hersteller: 'BASF',
-      n_gehalt: 15.0,
-      p_gehalt: 15.0,
-      k_gehalt: 15.0,
-      s_gehalt: 8.0,
-      mg_gehalt: 2.0,
-      dmv_nummer: 'DMV-2024-001',
-      eu_zulassung: 'EU-2024-001',
-      ablauf_zulassung: '2026-12-31',
-      gefahrstoff_klasse: 'Nicht gefährlich',
-      wassergefaehrdend: false,
-      lagerklasse: 'Nicht wassergefährdend',
-      kultur_typ: 'Getreide',
-      dosierung_min: 200,
-      dosierung_max: 400,
-      zeitpunkt: 'Herbst',
-      ek_preis: 450.00,
-      vk_preis: 520.00,
-      lagerbestand: 2500,
-      ist_aktiv: true,
-      ausgangsstoff_explosivstoffe: false,
-      erklaerung_landwirt_erforderlich: false,
-      erklaerung_landwirt_status: null
-    },
-    {
-      id: 'DUE-002',
-      artikelnummer: 'DUE-002',
-      name: 'Kalkammonsalpeter 27',
-      typ: 'Mineraldünger',
-      hersteller: 'Yara',
-      n_gehalt: 27.0,
-      p_gehalt: 0.0,
-      k_gehalt: 0.0,
-      s_gehalt: 0.0,
-      mg_gehalt: 0.0,
-      dmv_nummer: 'DMV-2024-002',
-      eu_zulassung: 'EU-2024-002',
-      ablauf_zulassung: '2027-06-30',
-      gefahrstoff_klasse: 'Nicht gefährlich',
-      wassergefaehrdend: false,
-      lagerklasse: 'Nicht wassergefährdend',
-      kultur_typ: 'Mais',
-      dosierung_min: 150,
-      dosierung_max: 300,
-      zeitpunkt: 'Frühjahr',
-      ek_preis: 380.00,
-      vk_preis: 445.00,
-      lagerbestand: 1800,
-      ist_aktiv: true,
-      ausgangsstoff_explosivstoffe: true,
-      erklaerung_landwirt_erforderlich: true,
-      erklaerung_landwirt_status: 'ausstehend'
-    },
-    {
-      id: 'DUE-003',
-      artikelnummer: 'DUE-003',
-      name: 'Schwefelsaures Ammoniak',
-      typ: 'Mineraldünger',
-      hersteller: 'K+S',
-      n_gehalt: 21.0,
-      p_gehalt: 0.0,
-      k_gehalt: 0.0,
-      s_gehalt: 24.0,
-      mg_gehalt: 0.0,
-      dmv_nummer: 'DMV-2024-003',
-      eu_zulassung: 'EU-2024-003',
-      ablauf_zulassung: '2026-08-15',
-      gefahrstoff_klasse: 'Reizend',
-      wassergefaehrdend: true,
-      lagerklasse: 'WGK 1',
-      kultur_typ: 'Raps',
-      dosierung_min: 100,
-      dosierung_max: 200,
-      zeitpunkt: 'Herbst',
-      ek_preis: 295.00,
-      vk_preis: 355.00,
-      lagerbestand: 950,
-      ist_aktiv: true,
-      ausgangsstoff_explosivstoffe: true,
-      erklaerung_landwirt_erforderlich: true,
-      erklaerung_landwirt_status: 'geprueft'
-    }
-  ])
-
-  const [filteredDuenger, setFilteredDuenger] = useState<Duenger[]>(duenger)
   const [searchTerm, setSearchTerm] = useState('')
   const [typFilter, setTypFilter] = useState('')
   const [herstellerFilter, setHerstellerFilter] = useState('')
   const [erklaerungFilter, setErklaerungFilter] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    filterDuenger()
-  }, [duenger, searchTerm, typFilter, herstellerFilter, erklaerungFilter])
+  const { data, isLoading } = useDuenger({
+    search: searchTerm || undefined,
+    typ: typFilter || undefined,
+    hersteller: herstellerFilter || undefined,
+  })
+  const deleteMutation = useDeleteDuenger()
 
-  const filterDuenger = () => {
+  const duenger = data?.items ?? []
+
+  const filteredDuenger = useMemo(() => {
     let filtered = duenger
-
-    if (searchTerm) {
-      filtered = filtered.filter(d =>
-        d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        d.artikelnummer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        d.hersteller.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+    if (erklaerungFilter === 'erforderlich') {
+      filtered = filtered.filter(d => d.erklaerung_landwirt_erforderlich)
+    } else if (erklaerungFilter === 'ausstehend') {
+      filtered = filtered.filter(d => d.erklaerung_landwirt_status === 'ausstehend')
+    } else if (erklaerungFilter === 'geprueft') {
+      filtered = filtered.filter(d => d.erklaerung_landwirt_status === 'geprueft')
     }
-
-    if (typFilter) {
-      filtered = filtered.filter(d => d.typ === typFilter)
-    }
-
-    if (herstellerFilter) {
-      filtered = filtered.filter(d => d.hersteller === herstellerFilter)
-    }
-
-    if (erklaerungFilter) {
-      if (erklaerungFilter === 'erforderlich') {
-        filtered = filtered.filter(d => d.erklaerung_landwirt_erforderlich)
-      } else if (erklaerungFilter === 'ausstehend') {
-        filtered = filtered.filter(d => d.erklaerung_landwirt_status === 'ausstehend')
-      } else if (erklaerungFilter === 'geprueft') {
-        filtered = filtered.filter(d => d.erklaerung_landwirt_status === 'geprueft')
-      }
-    }
-
-    setFilteredDuenger(filtered)
-  }
+    return filtered
+  }, [duenger, erklaerungFilter])
 
   const handleDelete = async (id: string) => {
     if (!confirm('Dünger wirklich löschen?')) return
 
-    setIsLoading(true)
     try {
-      // API call to delete Dünger
-      // await fetch(`/api/v1/agrar/duenger/${id}`, { method: 'DELETE' })
-
-      setDuenger(prev => prev.filter(d => d.id !== id))
-
-      toast({
-        title: "Gelöscht",
-        description: "Dünger wurde erfolgreich gelöscht.",
-      })
-    } catch (error) {
-      toast({
-        title: "Fehler",
-        description: "Fehler beim Löschen des Düngers.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
+      await deleteMutation.mutateAsync(id)
+      toast({ title: "Gelöscht", description: "Dünger wurde erfolgreich gelöscht." })
+    } catch {
+      toast({ title: "Fehler", description: "Fehler beim Löschen des Düngers.", variant: "destructive" })
     }
   }
 
   const getErklaerungBadgeVariant = (status: string | null) => {
     switch (status) {
-      case 'geprueft': return 'default'
-      case 'eingegangen': return 'secondary'
-      case 'abgelehnt': return 'destructive'
-      default: return 'outline'
+      case 'geprueft': return 'default' as const
+      case 'eingegangen': return 'secondary' as const
+      case 'abgelehnt': return 'destructive' as const
+      default: return 'outline' as const
     }
   }
 
@@ -228,6 +80,22 @@ export default function DuengerListePage(): JSX.Element {
 
   const uniqueTypes = [...new Set(duenger.map(d => d.typ))]
   const uniqueHersteller = [...new Set(duenger.map(d => d.hersteller))]
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <Skeleton className="h-10 w-24" />
+        </div>
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -334,7 +202,7 @@ export default function DuengerListePage(): JSX.Element {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredDuenger.map((d) => (
+              {filteredDuenger.map((d: Duenger) => (
                 <TableRow key={d.id}>
                   <TableCell className="font-mono text-sm">{d.artikelnummer}</TableCell>
                   <TableCell>
@@ -403,7 +271,7 @@ export default function DuengerListePage(): JSX.Element {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(d.id)}
-                        disabled={isLoading}
+                        disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

@@ -6,7 +6,7 @@ import logging
 from pathlib import Path
 from linkup_mcp.apm_framework.workflow_manager import APMWorkflowManager
 
-***REMOVED*** Logging Setup
+# Logging Setup
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -22,10 +22,10 @@ async def main():
     try:
         logger.info("Starte APM Workflow...")
         
-        ***REMOVED*** Workflow Manager initialisieren
+        # Workflow Manager initialisieren
         workflow = APMWorkflowManager()
         
-        ***REMOVED*** Workflow starten
+        # Workflow starten
         result = await workflow.start_workflow()
         
         if result["status"] == "completed":

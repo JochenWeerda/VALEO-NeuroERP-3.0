@@ -1,35 +1,65 @@
-import { useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { CheckCircle } from 'lucide-react'
+import { ErrorState } from '@/components/ErrorState'
+
+type FaelligerPosten = {
+  id: string
+  kunde: string
+  rechnungsNr: string
+  betrag: number
+  tageUeberfaellig: number
+  selected: boolean
+}
 
 type MahnlaufData = {
   bezeichnung: string
   stufe: '1' | '2' | '3'
-  faelligePosten: Array<{
-    id: string
-    kunde: string
-    rechnungsNr: string
-    betrag: number
-    tageUeberfaellig: number
-    selected: boolean
-  }>
+  faelligePosten: FaelligerPosten[]
 }
 
 export default function MahnlaufPage(): JSX.Element {
   const navigate = useNavigate()
+
+  const { data: postenData = [], isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['mahnwesen', 'faellige-posten'],
+    queryFn: async () => {
+      const r = await apiClient.get<FaelligerPosten[]>('/api/v1/mahnwesen/faellige-posten')
+      return r.data.map((p) => ({ ...p, selected: true }))
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
   const [mahnlauf, setMahnlauf] = useState<MahnlaufData>({
     bezeichnung: '',
     stufe: '1',
-    faelligePosten: [
-      { id: '1', kunde: 'Landhandel Nord', rechnungsNr: 'RE-2025-035', betrag: 12500, tageUeberfaellig: 38, selected: true },
-      { id: '2', kunde: 'Müller GmbH', rechnungsNr: 'RE-2025-032', betrag: 8900, tageUeberfaellig: 45, selected: true },
-    ],
+    faelligePosten: [],
   })
+
+  useEffect(() => {
+    setMahnlauf((prev) => ({ ...prev, faelligePosten: postenData }))
+  }, [postenData])
+
+  if (isLoading) {
+    return (
+      <div className="p-3 md:p-6 space-y-4">
+        <Skeleton className="h-9 w-64" />
+        <Skeleton className="h-64" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   function updateField<K extends keyof MahnlaufData>(key: K, value: MahnlaufData[K]): void {
     setMahnlauf((prev) => ({ ...prev, [key]: value }))
@@ -69,12 +99,12 @@ export default function MahnlaufPage(): JSX.Element {
               className="w-full rounded-md border border-input bg-background px-3 py-2"
             >
               <option value="1">1. Mahnung (Erinnerung)</option>
-              <option value="2">2. Mahnung (+Gebühr 5€)</option>
-              <option value="3">3. Mahnung (+Gebühr 10€)</option>
+              <option value="2">2. Mahnung (+Gebuehr 5 EUR)</option>
+              <option value="3">3. Mahnung (+Gebuehr 10 EUR)</option>
             </select>
           </div>
           <div className="space-y-2">
-            <Label>Fällige Posten ({selected.length} von {mahnlauf.faelligePosten.length})</Label>
+            <Label>Faellige Posten ({selected.length} von {mahnlauf.faelligePosten.length})</Label>
             {mahnlauf.faelligePosten.map((posten) => (
               <Card key={posten.id} className={posten.selected ? 'border-blue-500' : ''}>
                 <CardContent className="pt-4">
@@ -88,7 +118,7 @@ export default function MahnlaufPage(): JSX.Element {
                     <div className="flex-1">
                       <div className="font-semibold">{posten.kunde}</div>
                       <div className="text-sm text-muted-foreground">
-                        Rechnung: {posten.rechnungsNr} • {posten.tageUeberfaellig} Tage überfällig
+                        Rechnung: {posten.rechnungsNr} - {posten.tageUeberfaellig} Tage ueberfaellig
                       </div>
                     </div>
                     <div className="text-right">
@@ -147,7 +177,7 @@ export default function MahnlaufPage(): JSX.Element {
   ]
 
   return (
-    <div className="p-6">
+    <div className="p-3 md:p-6">
       <Wizard
         title="Mahnlauf erstellen"
         steps={steps}

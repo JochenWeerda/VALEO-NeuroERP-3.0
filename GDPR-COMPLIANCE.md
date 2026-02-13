@@ -1,12 +1,12 @@
-***REMOVED*** GDPR Compliance Documentation
+# GDPR Compliance Documentation
 
-***REMOVED******REMOVED*** Überblick
+## Überblick
 
 VALEO-NeuroERP implementiert GDPR-konforme Datenschutzmaßnahmen gemäß EU-DSGVO (Regulation 2016/679).
 
-***REMOVED******REMOVED*** Implementierte Rechte
+## Implementierte Rechte
 
-***REMOVED******REMOVED******REMOVED*** 1. Recht auf Auskunft (Art. 15)
+### 1. Recht auf Auskunft (Art. 15)
 
 **Endpoint:** `GET /api/gdpr/export/{user_id}`
 
@@ -17,7 +17,7 @@ Exportiert alle personenbezogenen Daten eines Users:
 
 **Scope:** `gdpr:export`
 
-***REMOVED******REMOVED******REMOVED*** 2. Recht auf Löschung (Art. 17)
+### 2. Recht auf Löschung (Art. 17)
 
 **Endpoint:** `DELETE /api/gdpr/erase/{user_id}`
 
@@ -30,40 +30,40 @@ Anonymisiert alle personenbezogenen Daten eines Users:
 
 **Hinweis:** Vollständige Löschung ist aus Compliance-Gründen (Aufbewahrungspflichten) nicht möglich. Stattdessen wird eine Anonymisierung durchgeführt.
 
-***REMOVED******REMOVED*** PII-Redaction in Logs
+## PII-Redaction in Logs
 
-***REMOVED******REMOVED******REMOVED*** Implementierung
+### Implementierung
 
 `app/core/logging.py` - `PIIRedactionFilter`
 
-***REMOVED******REMOVED******REMOVED*** Redaktierte Felder
+### Redaktierte Felder
 
 - `token`, `password`, `secret`, `api_key` → `***`
 - `Bearer {token}` → `Bearer ***`
 - E-Mail-Adressen → `***@domain.com`
 
-***REMOVED******REMOVED******REMOVED*** Beispiel
+### Beispiel
 
 ```python
 logger.info(f"User login: token={token}")
-***REMOVED*** Output: User login: token=***
+# Output: User login: token=***
 ```
 
-***REMOVED******REMOVED*** Data Processing Impact Assessment (DPIA)
+## Data Processing Impact Assessment (DPIA)
 
-***REMOVED******REMOVED******REMOVED*** Verarbeitungszwecke
+### Verarbeitungszwecke
 
 1. **Dokumenten-Management:** Speicherung von Belegen (Angebote, Aufträge, Rechnungen)
 2. **Workflow-Audit:** Nachvollziehbarkeit von Freigaben und Änderungen
 3. **Archivierung:** Langzeitarchivierung für rechtliche Aufbewahrungspflichten
 
-***REMOVED******REMOVED******REMOVED*** Rechtsgrundlagen
+### Rechtsgrundlagen
 
 - **Art. 6 (1) b DSGVO:** Vertragserfüllung
 - **Art. 6 (1) c DSGVO:** Rechtliche Verpflichtung (Aufbewahrungspflichten)
 - **Art. 6 (1) f DSGVO:** Berechtigtes Interesse (Audit-Trail)
 
-***REMOVED******REMOVED******REMOVED*** Risiken & Maßnahmen
+### Risiken & Maßnahmen
 
 | Risiko | Maßnahme |
 |--------|----------|
@@ -72,7 +72,7 @@ logger.info(f"User login: token={token}")
 | Fehlende Löschung | GDPR-Erase-Endpoint |
 | Datenexport | GDPR-Export-Endpoint |
 
-***REMOVED******REMOVED*** Aufbewahrungsfristen
+## Aufbewahrungsfristen
 
 - **Dokumente:** 10 Jahre (§ 147 AO, § 257 HGB)
 - **Audit-Trail:** 10 Jahre
@@ -80,9 +80,9 @@ logger.info(f"User login: token={token}")
 
 Nach Ablauf: Automatische Anonymisierung via Cronjob.
 
-***REMOVED******REMOVED*** Technische & Organisatorische Maßnahmen (TOMs)
+## Technische & Organisatorische Maßnahmen (TOMs)
 
-***REMOVED******REMOVED******REMOVED*** Technisch
+### Technisch
 
 - [x] Verschlüsselung in Transit (TLS 1.3)
 - [x] Verschlüsselung at Rest (PostgreSQL Encryption)
@@ -91,7 +91,7 @@ Nach Ablauf: Automatische Anonymisierung via Cronjob.
 - [x] Rate-Limiting (DDoS-Schutz)
 - [x] Security-Scanning (OWASP ZAP, Trivy)
 
-***REMOVED******REMOVED******REMOVED*** Organisatorisch
+### Organisatorisch
 
 - [x] DPIA durchgeführt
 - [x] Datenschutzerklärung vorhanden
@@ -99,7 +99,7 @@ Nach Ablauf: Automatische Anonymisierung via Cronjob.
 - [x] Incident-Response-Plan
 - [x] Regelmäßige Security-Audits
 
-***REMOVED******REMOVED*** Meldepflichten
+## Meldepflichten
 
 Bei Datenschutzverletzungen (Art. 33, 34 DSGVO):
 
@@ -107,7 +107,7 @@ Bei Datenschutzverletzungen (Art. 33, 34 DSGVO):
 2. **Behörde:** Meldung an Aufsichtsbehörde innerhalb 72h
 3. **Betroffene:** Benachrichtigung bei hohem Risiko
 
-***REMOVED******REMOVED*** Kontakt
+## Kontakt
 
 **Datenschutzbeauftragter:** datenschutz@valeo-erp.com
 
@@ -118,4 +118,5 @@ Bei Datenschutzverletzungen (Art. 33, 34 DSGVO):
 **Letzte Aktualisierung:** 2025-10-09
 
 **Version:** 1.0
+
 

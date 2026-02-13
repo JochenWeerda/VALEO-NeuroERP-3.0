@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Ruft alle Code-Artefakte aus der MongoDB ab und zeigt sie an.
 """
@@ -11,12 +11,12 @@ import json
 from datetime import datetime
 from bson import ObjectId
 
-***REMOVED*** Pfad zum Projekt-Root hinzufügen
+# Pfad zum Projekt-Root hinzufügen
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ async def check_code_artifacts():
     Ruft alle Code-Artefakte aus der MongoDB ab und zeigt sie an.
     """
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         mongodb_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
         mongodb_db = os.getenv("MONGODB_DB", "valeo_neuroerp")
         
@@ -45,7 +45,7 @@ async def check_code_artifacts():
         mongodb = APMMongoDBConnector(mongodb_uri, mongodb_db)
         await mongodb.connect()
         
-        ***REMOVED*** Code-Artefakte abrufen
+        # Code-Artefakte abrufen
         code_artifacts = await mongodb.find_many("code_artifacts", {})
         
         if code_artifacts:
@@ -61,16 +61,16 @@ async def check_code_artifacts():
                 print(f"ID: {artifact.get('_id')}")
                 print(f"Timestamp: {artifact.get('timestamp')}")
                 
-                ***REMOVED*** Code anzeigen
+                # Code anzeigen
                 print(f"\nCode:")
                 print(f"{'-' * 40}")
                 print(artifact.get('code', 'Kein Code vorhanden'))
                 print(f"{'-' * 40}")
                 
-                ***REMOVED*** Frage, ob Code in Datei gespeichert werden soll
+                # Frage, ob Code in Datei gespeichert werden soll
                 save = input(f"Möchten Sie den Code für {artifact.get('name')} in einer Datei speichern? (j/n): ")
                 if save.lower() == 'j':
-                    ***REMOVED*** Pfad für die Datei festlegen
+                    # Pfad für die Datei festlegen
                     if artifact.get('language') == 'Python':
                         file_ext = '.py'
                         folder = 'backend/components'
@@ -81,10 +81,10 @@ async def check_code_artifacts():
                         file_ext = '.js'
                         folder = 'frontend/src/components'
                     
-                    ***REMOVED*** Ordner erstellen, falls nicht vorhanden
+                    # Ordner erstellen, falls nicht vorhanden
                     os.makedirs(folder, exist_ok=True)
                     
-                    ***REMOVED*** Datei speichern
+                    # Datei speichern
                     file_path = os.path.join(folder, f"{artifact.get('name')}{file_ext}")
                     with open(file_path, 'w', encoding='utf-8') as f:
                         f.write(artifact.get('code', ''))
@@ -93,7 +93,7 @@ async def check_code_artifacts():
         else:
             print("\nKeine Code-Artefakte gefunden.")
         
-        ***REMOVED*** Ressourcenanforderungen abrufen
+        # Ressourcenanforderungen abrufen
         resource_requirements = await mongodb.find_many("resource_requirements", {})
         
         if resource_requirements:
@@ -112,7 +112,7 @@ async def check_code_artifacts():
         else:
             print("\nKeine Ressourcenanforderungen gefunden.")
         
-        ***REMOVED*** Entwurfsmuster abrufen
+        # Entwurfsmuster abrufen
         design_patterns = await mongodb.find_many("design_patterns", {})
         
         if design_patterns:
@@ -131,7 +131,7 @@ async def check_code_artifacts():
         else:
             print("\nKeine Entwurfsmuster gefunden.")
         
-        ***REMOVED*** Testfälle abrufen
+        # Testfälle abrufen
         test_cases = await mongodb.find_many("test_cases", {})
         
         if test_cases:
@@ -147,10 +147,10 @@ async def check_code_artifacts():
                 print(f"ID: {test.get('_id')}")
                 print(f"Timestamp: {test.get('timestamp')}")
                 
-                ***REMOVED*** Frage, ob Testcode in Datei gespeichert werden soll
+                # Frage, ob Testcode in Datei gespeichert werden soll
                 save = input(f"Möchten Sie den Testcode für {test.get('name')} in einer Datei speichern? (j/n): ")
                 if save.lower() == 'j':
-                    ***REMOVED*** Pfad für die Datei festlegen
+                    # Pfad für die Datei festlegen
                     component_name = test.get('name').replace('Test für ', '')
                     if 'UserInterface' in component_name:
                         file_ext = '.test.tsx'
@@ -159,10 +159,10 @@ async def check_code_artifacts():
                         file_ext = '_test.py'
                         folder = 'backend/tests'
                     
-                    ***REMOVED*** Ordner erstellen, falls nicht vorhanden
+                    # Ordner erstellen, falls nicht vorhanden
                     os.makedirs(folder, exist_ok=True)
                     
-                    ***REMOVED*** Datei speichern
+                    # Datei speichern
                     file_path = os.path.join(folder, f"{component_name}{file_ext}")
                     with open(file_path, 'w', encoding='utf-8') as f:
                         f.write(test.get('test_code', ''))
@@ -174,11 +174,11 @@ async def check_code_artifacts():
         print(f"\nFehler: {str(e)}")
     
     finally:
-        ***REMOVED*** MongoDB-Verbindung trennen
+        # MongoDB-Verbindung trennen
         if 'mongodb' in locals():
             await mongodb.disconnect()
 
 
 if __name__ == "__main__":
-    ***REMOVED*** Asynchrone Funktion ausführen
+    # Asynchrone Funktion ausführen
     asyncio.run(check_code_artifacts()) 

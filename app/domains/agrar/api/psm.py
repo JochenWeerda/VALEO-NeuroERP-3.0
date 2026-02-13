@@ -3,7 +3,7 @@ PSM API endpoints
 Full CRUD for Pflanzenschutzmittel-Stammdaten management
 """
 
-from typing import Optional, List
+from typing import Optional, List, Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
@@ -15,6 +15,7 @@ from ....infrastructure.models import PSM as PSMModel
 from ....api.v1.schemas.base import PaginatedResponse
 from ....api.v1.schemas.agrar import PSM, PSMCreate, PSMUpdate
 from ....integrations.dms_client import upload_document, is_configured as dms_configured
+from ....integrations.bvl_psm_client import BVLPSMClient, map_bvl_mittel_to_psm_payload
 from ....services.sync_scheduler import sync_scheduler
 from ....services.competitor_monitor import competitor_monitor
 
@@ -22,10 +23,12 @@ router = APIRouter()
 
 DEFAULT_TENANT = "system"
 logger = logging.getLogger(__name__)
+bvl_client = BVLPSMClient()
 
 
 @router.get("/", response_model=PaginatedResponse[PSM])
 async def list_psm(
+    source: Literal["local", "bvl"] = Query("local", description="Data source"),
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     search: Optional[str] = Query(None, description="Search in name, wirkstoff, bvl_nummer"),
     mittel_typ: Optional[str] = Query(None, description="Filter by type"),
@@ -41,6 +44,30 @@ async def list_psm(
 ):
     """Return a paginated list of PSM."""
     effective_tenant = tenant_id or DEFAULT_TENANT
+    if source == "bvl":
+        try:
+            bvl_result = await bvl_client.list_mittel(search=search, skip=skip, limit=limit)
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail=f"BVL API not reachable: {exc}") from exc
+
+        payloads = [
+            map_bvl_mittel_to_psm_payload(item, effective_tenant)
+            for item in bvl_result["items"]
+        ]
+        mapped_items = [PSM.model_validate(item) for item in payloads]
+        total = bvl_result["total"]
+        page = (skip // limit) + 1
+        pages = (total + limit - 1) // limit if total else 1
+
+        return PaginatedResponse(
+            items=mapped_items,
+            total=total,
+            page=page,
+            pages=pages,
+            size=limit,
+            has_next=(skip + limit) < total,
+            has_prev=skip > 0,
+        )
 
     query = db.query(PSMModel).filter(PSMModel.tenant_id == effective_tenant)
 
@@ -54,7 +81,7 @@ async def list_psm(
         query = query.filter(PSMModel.wirkstoff.ilike(f"%{wirkstoff}%"))
 
     if kultur:
-        ***REMOVED*** Filter by crops in JSON array
+        # Filter by crops in JSON array
         query = query.filter(PSMModel.kulturen.contains([kultur]))
 
     if bienenschutz is not None:
@@ -73,7 +100,7 @@ async def list_psm(
             )
         )
 
-    ***REMOVED*** Filter by farmer declaration status
+    # Filter by farmer declaration status
     if erklaerung_status:
         query = query.filter(PSMModel.erklaerung_landwirt_status == erklaerung_status)
 
@@ -97,11 +124,20 @@ async def list_psm(
 @router.get("/{psm_id}", response_model=PSM)
 async def get_psm(
     psm_id: str,
+    source: Literal["local", "bvl"] = Query("local", description="Data source"),
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
     """Get a single PSM by ID."""
     effective_tenant = tenant_id or DEFAULT_TENANT
+    if source == "bvl":
+        try:
+            item = await bvl_client.get_mittel_by_kennr(psm_id)
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail=f"BVL API not reachable: {exc}") from exc
+        if not item:
+            raise HTTPException(status_code=404, detail="PSM not found")
+        return PSM.model_validate(map_bvl_mittel_to_psm_payload(item, effective_tenant))
 
     psm = (
         db.query(PSMModel)
@@ -127,7 +163,7 @@ async def create_psm(
     """Create a new PSM."""
     effective_tenant = tenant_id or DEFAULT_TENANT
 
-    ***REMOVED*** Check if bvl_nummer already exists
+    # Check if bvl_nummer already exists
     existing = (
         db.query(PSMModel)
         .filter(
@@ -143,14 +179,14 @@ async def create_psm(
             detail=f"PSM with BVL number {psm_data.bvl_nummer} already exists"
         )
 
-    ***REMOVED*** Validate business rules
+    # Validate business rules
     if psm_data.zulassung_ablauf and psm_data.zulassung_ablauf < datetime.utcnow().date():
         raise HTTPException(
             status_code=400,
             detail="Approval expiry date cannot be in the past"
         )
 
-    ***REMOVED*** Validate dosage ranges
+    # Validate dosage ranges
     if psm_data.dosierung_min and psm_data.dosierung_max and psm_data.dosierung_min > psm_data.dosierung_max:
         raise HTTPException(
             status_code=400,
@@ -193,7 +229,7 @@ async def update_psm(
 
     update_data = psm_data.model_dump(exclude_unset=True)
 
-    ***REMOVED*** Validate bvl_nummer uniqueness if changed
+    # Validate bvl_nummer uniqueness if changed
     if "bvl_nummer" in update_data and update_data["bvl_nummer"] != psm.bvl_nummer:
         existing = (
             db.query(PSMModel)
@@ -210,7 +246,7 @@ async def update_psm(
                 detail=f"PSM with BVL number {update_data['bvl_nummer']} already exists"
             )
 
-    ***REMOVED*** Validate approval expiry
+    # Validate approval expiry
     if "zulassung_ablauf" in update_data and update_data["zulassung_ablauf"]:
         from datetime import datetime
         if update_data["zulassung_ablauf"] < datetime.utcnow().date():
@@ -219,11 +255,11 @@ async def update_psm(
                 detail="Approval expiry date cannot be in the past"
             )
 
-    ***REMOVED*** Audit logging for compliance changes
+    # Audit logging for compliance changes
     if any(key in update_data for key in ["ausgangsstoff_explosivstoffe", "erklaerung_landwirt_erforderlich", "erklaerung_landwirt_status"]):
         logger.info(f"PSM compliance update: {psm_id} - {update_data}")
 
-    ***REMOVED*** Validate dosage ranges
+    # Validate dosage ranges
     if ("dosierung_min" in update_data or "dosierung_max" in update_data):
         min_dose = update_data.get("dosierung_min", psm.dosierung_min)
         max_dose = update_data.get("dosierung_max", psm.dosierung_max)
@@ -297,18 +333,18 @@ async def upload_farmer_declaration(
             detail="PSM does not require farmer declaration"
         )
 
-    ***REMOVED*** Update declaration status
+    # Update declaration status
     old_status = psm.erklaerung_landwirt_status
     new_status = erklaerung_data.get("status", "eingegangen")
     psm.erklaerung_landwirt_status = new_status
     db.commit()
     db.refresh(psm)
 
-    ***REMOVED*** Audit logging for status changes
+    # Audit logging for status changes
     if old_status != new_status:
         logger.info(f"PSM farmer declaration status changed: {psm_id} - {old_status} → {new_status}")
 
-    ***REMOVED*** DMS Integration: Upload declaration document if DMS is configured
+    # DMS Integration: Upload declaration document if DMS is configured
     if dms_configured() and erklaerung_data.get("file_path"):
         try:
             dms_result = upload_document(
@@ -323,10 +359,10 @@ async def upload_farmer_declaration(
                 }
             )
             if dms_result.get("ok"):
-                ***REMOVED*** Store DMS document ID in PSM record (would need additional field)
+                # Store DMS document ID in PSM record (would need additional field)
                 pass
         except Exception as e:
-            ***REMOVED*** Log error but don't fail the operation
+            # Log error but don't fail the operation
             logger.warning(f"Failed to upload declaration to DMS: {e}")
 
     return PSM.model_validate(psm)
@@ -407,7 +443,7 @@ async def get_psm_stats(
     """Get PSM statistics overview."""
     effective_tenant = tenant_id or DEFAULT_TENANT
 
-    ***REMOVED*** Count by type
+    # Count by type
     type_stats = {}
     types = db.query(PSMModel.mittel_typ, db.func.count(PSMModel.id)).filter(
         PSMModel.tenant_id == effective_tenant,
@@ -417,7 +453,7 @@ async def get_psm_stats(
     for typ, count in types:
         type_stats[typ or "Unbekannt"] = count
 
-    ***REMOVED*** Safety stats
+    # Safety stats
     safety_stats = {}
     safety = db.query(
         db.func.concat(
@@ -436,7 +472,7 @@ async def get_psm_stats(
     for safety_type, count in safety:
         safety_stats[safety_type or "Standard"] = count
 
-    ***REMOVED*** Approval expiry warnings (next 90 days)
+    # Approval expiry warnings (next 90 days)
     from datetime import datetime, timedelta
     expiry_cutoff = datetime.utcnow().date() + timedelta(days=90)
 
@@ -453,7 +489,7 @@ async def get_psm_stats(
         PSMModel.zulassung_ablauf < datetime.utcnow().date()
     ).count()
 
-    ***REMOVED*** Stock stats
+    # Stock stats
     stock_stats = db.query(
         db.func.sum(PSMModel.lagerbestand),
         db.func.avg(PSMModel.vk_preis)
@@ -462,7 +498,7 @@ async def get_psm_stats(
         PSMModel.ist_aktiv == True
     ).first()
 
-    ***REMOVED*** Farmer declaration stats
+    # Farmer declaration stats
     erklaerung_stats = {}
     erklaerung = db.query(
         PSMModel.erklaerung_landwirt_status,
@@ -506,12 +542,12 @@ async def sync_proplanta_psm(
     effective_tenant = tenant_id or DEFAULT_TENANT
 
     try:
-        ***REMOVED*** Import MCP client for Proplanta scraping
+        # Import MCP client for Proplanta scraping
         from ....integrations.mcp_client import call_mcp_tool
 
         logger.info(f"Starting PSM sync for tenant {effective_tenant}")
 
-        ***REMOVED*** Call MCP tool to scrape PSM data
+        # Call MCP tool to scrape PSM data
         result = await call_mcp_tool(
             server_name="proplanta-psm-scraper",
             tool_name="scrape_psm_list",
@@ -525,10 +561,10 @@ async def sync_proplanta_psm(
         if not result or not result.get("content"):
             raise HTTPException(status_code=500, detail="Failed to scrape PSM data from Proplanta")
 
-        ***REMOVED*** Parse scraped data
+        # Parse scraped data
         scraped_data = result["content"]
         if isinstance(scraped_data, list) and len(scraped_data) > 0:
-            ***REMOVED*** Extract PSM data from MCP response
+            # Extract PSM data from MCP response
             psm_items = scraped_data[0].get("text", "").split("\n")
             processed_count = 0
 
@@ -537,8 +573,8 @@ async def sync_proplanta_psm(
                     continue
 
                 try:
-                    ***REMOVED*** Parse PSM data (simplified - would need proper JSON parsing)
-                    ***REMOVED*** This is a placeholder for actual data processing
+                    # Parse PSM data (simplified - would need proper JSON parsing)
+                    # This is a placeholder for actual data processing
                     processed_count += 1
                 except Exception as e:
                     logger.warning(f"Failed to process PSM item: {e}")
@@ -575,7 +611,7 @@ async def get_sync_status(
     """Get current PSM synchronization status."""
     effective_tenant = tenant_id or DEFAULT_TENANT
 
-    ***REMOVED*** Get comprehensive sync status from scheduler
+    # Get comprehensive sync status from scheduler
     status = sync_scheduler.get_schedule_status()
 
     return {
@@ -601,7 +637,7 @@ async def schedule_sync(
     """Schedule automated PSM synchronization."""
     effective_tenant = tenant_id or DEFAULT_TENANT
 
-    ***REMOVED*** Add schedule to sync scheduler
+    # Add schedule to sync scheduler
     schedule = sync_scheduler.add_schedule(
         name=schedule_config.get("name", f"custom_sync_{datetime.now().strftime('%Y%m%d_%H%M%S')}"),
         interval_hours=schedule_config.get("interval_hours", 24),
@@ -638,12 +674,12 @@ async def run_due_schedules(
     for schedule in due_schedules:
         for article_group in schedule.article_groups:
             try:
-                ***REMOVED*** Start sync job
+                # Start sync job
                 job_id = sync_scheduler.start_sync_job(schedule.name, article_group)
 
-                ***REMOVED*** Execute sync based on article group
+                # Execute sync based on article group
                 if article_group == "PSM":
-                    ***REMOVED*** PSM sync logic
+                    # PSM sync logic
                     await sync_proplanta_psm(
                         sync_config={
                             "max_items": schedule.max_items,
@@ -655,11 +691,11 @@ async def run_due_schedules(
                     sync_scheduler.update_job_status(job_id, "completed", schedule.max_items)
 
                 elif article_group in ["DUENGER", "SAATGUT", "BIOSTIMULANZ"]:
-                    ***REMOVED*** Placeholder for other article syncs
+                    # Placeholder for other article syncs
                     sync_scheduler.update_job_status(job_id, "completed", 0)
 
                 elif article_group in ["PRICES", "COMPETITOR_PRICES"]:
-                    ***REMOVED*** Placeholder for price syncs
+                    # Placeholder for price syncs
                     sync_scheduler.update_job_status(job_id, "completed", 0)
 
                 executed_jobs.append({
@@ -746,7 +782,7 @@ async def search_competitor_products(
     effective_tenant = tenant_id or DEFAULT_TENANT
 
     try:
-        ***REMOVED*** Search for product URLs
+        # Search for product URLs
         product_urls = await competitor_monitor.search_products(query, category, max_results)
 
         return {
@@ -774,7 +810,7 @@ async def scrape_competitor_data(
     try:
         scraped_data = []
 
-        for url in product_urls[:20]:  ***REMOVED*** Limit to 20 URLs per request
+        for url in product_urls[:20]:  # Limit to 20 URLs per request
             product_data = await competitor_monitor.scrape_product_data(url)
             if product_data:
                 scraped_data.append({
@@ -796,7 +832,7 @@ async def scrape_competitor_data(
                     "scraped_at": product_data.scraped_at.isoformat() if product_data.scraped_at else None
                 })
 
-        ***REMOVED*** Save to price history
+        # Save to price history
         if scraped_data:
             competitor_monitor.save_price_history([
                 competitor_monitor._parse_scraped_data(item) for item in scraped_data
@@ -850,13 +886,13 @@ async def get_price_history(
     effective_tenant = tenant_id or DEFAULT_TENANT
 
     try:
-        ***REMOVED*** This would typically query a database
-        ***REMOVED*** For now, return mock data structure
+        # This would typically query a database
+        # For now, return mock data structure
         return {
             "product_url": product_url,
             "shop_name": shop_name,
             "days": days,
-            "history": [],  ***REMOVED*** Would contain actual price history
+            "history": [],  # Would contain actual price history
             "tenant_id": effective_tenant,
             "timestamp": datetime.utcnow().isoformat()
         }
@@ -880,7 +916,7 @@ async def start_competitor_monitoring(
     effective_tenant = tenant_id or DEFAULT_TENANT
 
     try:
-        ***REMOVED*** Add to sync scheduler as competitor monitoring job
+        # Add to sync scheduler as competitor monitoring job
         schedule = sync_scheduler.add_schedule(
             name=f"competitor_monitor_{effective_tenant}",
             interval_hours=config.get("schedule_hours", 24),

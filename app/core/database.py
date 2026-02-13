@@ -13,15 +13,15 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-***REMOVED*** SQLAlchemy setup for PostgreSQL
+# SQLAlchemy setup for PostgreSQL
 engine = create_engine(
     settings.DATABASE_URL,
-    poolclass=QueuePool,  ***REMOVED*** Better for PostgreSQL
+    poolclass=QueuePool,  # Better for PostgreSQL
     pool_size=10,
     max_overflow=20,
     pool_timeout=30,
     pool_recycle=3600,
-    echo=settings.DEBUG,  ***REMOVED*** SQL query logging in debug mode
+    echo=settings.DEBUG,  # SQL query logging in debug mode
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -45,20 +45,27 @@ def create_tables():
     try:
         logger.info("Creating database tables...")
         
-        ***REMOVED*** Import all models to register them with Base
+        # Import all models to register them with Base
         try:
             from app.crm import models as crm_models
             logger.info("CRM models imported")
         except Exception as e:
             logger.warning(f"CRM models import failed: {e}")
-        
+
+        # Ensure outbox table is part of metadata
+        try:
+            from app.infrastructure.eventbus import outbox as outbox_models  # noqa: F401
+            logger.info("Outbox models imported")
+        except Exception as e:
+            logger.warning(f"Outbox models import failed: {e}")
+
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created successfully")
     except Exception as e:
         logger.error(f"Failed to create database tables: {e}")
         logger.warning("Continuing without database tables (Testing mode)")
-        ***REMOVED*** Don't raise - allow server to start for UI testing
-        ***REMOVED*** raise
+        # Don't raise - allow server to start for UI testing
+        # raise
 
 def reset_database():
     """
@@ -80,11 +87,11 @@ def init_db():
     try:
         logger.info("Initializing database with sample data...")
 
-        ***REMOVED*** Use SQLAlchemy session for data seeding
+        # Use SQLAlchemy session for data seeding
         db = SessionLocal()
 
-        ***REMOVED*** Sample data will be inserted via Alembic migrations
-        ***REMOVED*** This function can be used for additional runtime initialization if needed
+        # Sample data will be inserted via Alembic migrations
+        # This function can be used for additional runtime initialization if needed
 
         db.close()
         logger.info("Database initialization completed")

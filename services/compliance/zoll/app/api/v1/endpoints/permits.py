@@ -38,5 +38,6 @@ async def update_permit(
 ) -> ExportPermitRead:
     try:
         return await service.update_permit(permit_id, payload)
-    except KeyError as exc:  ***REMOVED*** noqa: PERF203
+    except KeyError as exc:  # noqa: PERF203
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+

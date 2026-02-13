@@ -27,7 +27,7 @@ class DocumentService:
     def __init__(self):
         self.paperless = paperless_client
     
-    ***REMOVED*** ==================== Tag-Hilfsmethoden ====================
+    # ==================== Tag-Hilfsmethoden ====================
     
     def _build_tag_name(self, prefix: str, value: str) -> str:
         """Erstelle Tag-Namen nach Konvention"""
@@ -43,11 +43,11 @@ class DocumentService:
         """Hole oder erstelle Tags für Geschäftsobjekt-Verknüpfung"""
         tag_ids = []
         
-        ***REMOVED*** Tenant-Tag (immer erforderlich)
+        # Tenant-Tag (immer erforderlich)
         tenant_tag = self._build_tag_name(settings.TAG_PREFIX_TENANT, tenant_id)
         tag_ids.append(await self.paperless.get_or_create_tag(tenant_tag))
         
-        ***REMOVED*** Business-Object-Tags (optional)
+        # Business-Object-Tags (optional)
         if business_object_type:
             obj_type_tag = self._build_tag_name(settings.TAG_PREFIX_OBJECT_TYPE, business_object_type)
             tag_ids.append(await self.paperless.get_or_create_tag(obj_type_tag))
@@ -71,7 +71,7 @@ class DocumentService:
         except Exception:
             return []
     
-    ***REMOVED*** ==================== Dokument-Operationen ====================
+    # ==================== Dokument-Operationen ====================
     
     async def upload_document(
         self,
@@ -100,7 +100,7 @@ class DocumentService:
         Returns:
             DocumentResponse mit Dokument-Metadaten
         """
-        ***REMOVED*** Tags vorbereiten
+        # Tags vorbereiten
         tag_ids = await self._get_business_tags(
             tenant_id=tenant_id,
             business_object_type=business_object_type,
@@ -108,13 +108,13 @@ class DocumentService:
             document_type=document_type,
         )
         
-        ***REMOVED*** Zusätzliche Tags hinzufügen
+        # Zusätzliche Tags hinzufügen
         if additional_tags:
             for tag_name in additional_tags:
                 tag_id = await self.paperless.get_or_create_tag(tag_name)
                 tag_ids.append(tag_id)
         
-        ***REMOVED*** Dokument hochladen
+        # Dokument hochladen
         result = await self.paperless.upload_document(
             file=file,
             filename=filename,
@@ -122,7 +122,7 @@ class DocumentService:
             tags=tag_ids,
         )
         
-        ***REMOVED*** Response aufbereiten
+        # Response aufbereiten
         return DocumentResponse(
             id=result.get("id") or result.get("task_id"),
             paperless_id=result.get("id"),
@@ -159,10 +159,10 @@ class DocumentService:
         Returns:
             DocumentListResponse mit Dokumenten-Liste
         """
-        ***REMOVED*** Tags für Filterung holen
+        # Tags für Filterung holen
         filter_tags = await self._get_tag_ids_for_filter(tenant_id)
         
-        ***REMOVED*** Weitere Filter-Tags hinzufügen
+        # Weitere Filter-Tags hinzufügen
         if business_object_type:
             obj_type_tag = self._build_tag_name(settings.TAG_PREFIX_OBJECT_TYPE, business_object_type)
             try:
@@ -179,7 +179,7 @@ class DocumentService:
             except Exception:
                 pass
         
-        ***REMOVED*** Dokumente abrufen
+        # Dokumente abrufen
         result = await self.paperless.list_documents(
             query=query,
             tags=filter_tags if filter_tags else None,
@@ -187,7 +187,7 @@ class DocumentService:
             page_size=page_size,
         )
         
-        ***REMOVED*** Response aufbereiten
+        # Response aufbereiten
         documents = []
         for doc in result.get("results", []):
             documents.append(DocumentResponse(
@@ -214,7 +214,7 @@ class DocumentService:
         """Einzelnes Dokument abrufen"""
         doc = await self.paperless.get_document(document_id)
         
-        ***REMOVED*** TODO: Tenant-Prüfung (Tags checken)
+        # TODO: Tenant-Prüfung (Tags checken)
         
         return DocumentResponse(
             id=doc["id"],
@@ -231,12 +231,12 @@ class DocumentService:
     
     async def download_document(self, document_id: int, tenant_id: str) -> bytes:
         """Dokument herunterladen"""
-        ***REMOVED*** TODO: Tenant-Prüfung
+        # TODO: Tenant-Prüfung
         return await self.paperless.download_document(document_id)
     
     async def get_thumbnail(self, document_id: int, tenant_id: str) -> bytes:
         """Thumbnail abrufen"""
-        ***REMOVED*** TODO: Tenant-Prüfung
+        # TODO: Tenant-Prüfung
         return await self.paperless.get_thumbnail(document_id)
     
     async def link_document(
@@ -251,11 +251,11 @@ class DocumentService:
         Bestehendes Dokument nachträglich mit Geschäftsobjekt verknüpfen.
         Für Inbox-Workflow: Unzugeordnete Dokumente zuordnen.
         """
-        ***REMOVED*** Aktuelle Tags holen
+        # Aktuelle Tags holen
         doc = await self.paperless.get_document(paperless_document_id)
         current_tags = doc.get("tags", [])
         
-        ***REMOVED*** Neue Tags hinzufügen
+        # Neue Tags hinzufügen
         new_tag_ids = await self._get_business_tags(
             tenant_id=tenant_id,
             business_object_type=business_object_type,
@@ -263,10 +263,10 @@ class DocumentService:
             document_type=document_type,
         )
         
-        ***REMOVED*** Tags zusammenführen (ohne Duplikate)
+        # Tags zusammenführen (ohne Duplikate)
         all_tags = list(set(current_tags + new_tag_ids))
         
-        ***REMOVED*** Dokument aktualisieren
+        # Dokument aktualisieren
         await self.paperless.update_document(
             document_id=paperless_document_id,
             tags=all_tags,
@@ -276,7 +276,7 @@ class DocumentService:
     
     async def delete_document(self, document_id: int, tenant_id: str) -> bool:
         """Dokument löschen"""
-        ***REMOVED*** TODO: Tenant-Prüfung
+        # TODO: Tenant-Prüfung
         return await self.paperless.delete_document(document_id)
     
     async def get_inbox(self, tenant_id: str, page: int = 1, page_size: int = 25) -> DocumentListResponse:
@@ -284,20 +284,20 @@ class DocumentService:
         Unzugeordnete Dokumente (Inbox) abrufen.
         Dokumente mit Tenant-Tag aber ohne Business-Object-Tags.
         """
-        ***REMOVED*** Tenant-Tag holen
+        # Tenant-Tag holen
         tenant_tag_ids = await self._get_tag_ids_for_filter(tenant_id)
         
-        ***REMOVED*** Alle Dokumente mit Tenant-Tag
+        # Alle Dokumente mit Tenant-Tag
         result = await self.paperless.list_documents(
             tags=tenant_tag_ids,
             page=page,
             page_size=page_size,
         )
         
-        ***REMOVED*** Filtern: nur Dokumente OHNE OBJ-Tags
+        # Filtern: nur Dokumente OHNE OBJ-Tags
         inbox_docs = []
         for doc in result.get("results", []):
-            ***REMOVED*** Prüfe ob OBJ-Tag vorhanden
+            # Prüfe ob OBJ-Tag vorhanden
             tags = await self._get_document_tags(doc["id"])
             has_obj_tag = any(
                 t.startswith(f"{settings.TAG_PREFIX_OBJECT_TYPE}:") 
@@ -330,7 +330,7 @@ class DocumentService:
         doc = await self.paperless.get_document(document_id)
         tag_ids = doc.get("tags", [])
         
-        ***REMOVED*** Tag-Namen auflösen
+        # Tag-Namen auflösen
         all_tags = await self.paperless.list_tags()
         tag_map = {t["id"]: t["name"] for t in all_tags.get("results", [])}
         
@@ -344,10 +344,10 @@ class DocumentService:
         page_size: int = 25,
     ) -> DocumentListResponse:
         """Volltextsuche mit Tenant-Isolation"""
-        ***REMOVED*** Suche durchführen
+        # Suche durchführen
         result = await self.paperless.search(query=query, page=page, page_size=page_size)
         
-        ***REMOVED*** Ergebnisse nach Tenant filtern
+        # Ergebnisse nach Tenant filtern
         tenant_tag = self._build_tag_name(settings.TAG_PREFIX_TENANT, tenant_id)
         all_tags = await self.paperless.list_tags()
         tenant_tag_id = None
@@ -384,6 +384,7 @@ class DocumentService:
         return await self.paperless.health_check()
 
 
-***REMOVED*** Singleton-Instanz
+# Singleton-Instanz
 document_service = DocumentService()
+
 

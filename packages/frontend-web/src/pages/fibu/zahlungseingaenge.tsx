@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { AlertTriangle, CheckCircle, Search, Upload, XCircle, Link2, Sparkles } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Search, Upload, Link2, Sparkles } from 'lucide-react'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
+import { ErrorState } from '@/components/ErrorState'
 
 type Zahlungseingang = {
   id: string
@@ -59,35 +61,30 @@ export default function ZahlungseingangsPage(): JSX.Element {
   const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<Zahlungseingang['match_status'] | 'alle'>('alle')
-  const [zahlungen, setZahlungen] = useState<Zahlungseingang[]>([])
-  const [loading, setLoading] = useState(true)
   const [selectedPayment, setSelectedPayment] = useState<Zahlungseingang | null>(null)
   const [openItems, setOpenItems] = useState<OpenItem[]>([])
   const [matchDialogOpen, setMatchDialogOpen] = useState(false)
   const [autoMatching, setAutoMatching] = useState(false)
 
-  // Load unmatched payments
-  useEffect(() => {
-    loadPayments()
-  }, [])
+  const {
+    data: zahlungen = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['finance', 'payment-matching', 'unmatched'],
+    queryFn: async () => {
+      const response = await apiClient.get<Zahlungseingang[]>(
+        '/api/v1/finance/payment-matching/unmatched?tenant_id=system&limit=100',
+      )
+      return response.data
+    },
+    staleTime: 60 * 1000,
+  })
 
-  const loadPayments = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch('/api/v1/finance/payment-matching/unmatched?tenant_id=system&limit=100')
-      if (response.ok) {
-        const data = await response.json()
-        setZahlungen(data || [])
-      } else {
-        // Fallback to empty array if API not available
-        setZahlungen([])
-      }
-    } catch (error) {
-      console.error('Error loading payments:', error)
-      setZahlungen([])
-    } finally {
-      setLoading(false)
-    }
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
   const filteredZahlungen = zahlungen.filter((zahlung) => {
@@ -107,19 +104,15 @@ export default function ZahlungseingangsPage(): JSX.Element {
   const handleAutoMatch = async () => {
     setAutoMatching(true)
     try {
-      const response = await fetch('/api/v1/finance/payment-matching/auto-match?tenant_id=system', {
-        method: 'POST'
+      const response = await apiClient.post<unknown[]>(
+        '/api/v1/finance/payment-matching/auto-match?tenant_id=system',
+      )
+      const results = Array.isArray(response.data) ? response.data : []
+      toast({
+        title: t('crud.messages.autoMatchSuccess'),
+        description: t('crud.messages.autoMatchSuccessDesc', { count: results.length })
       })
-      if (response.ok) {
-        const results = await response.json()
-        toast({
-          title: t('crud.messages.autoMatchSuccess'),
-          description: t('crud.messages.autoMatchSuccessDesc', { count: results.length })
-        })
-        loadPayments()
-      } else {
-        throw new Error('Auto-match failed')
-      }
+      await refetch()
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -136,16 +129,17 @@ export default function ZahlungseingangsPage(): JSX.Element {
     // Load open items for customer
     try {
       // Extract customer ID from payment (would need to be determined from creditor/debtor)
-      const response = await fetch(`/api/v1/finance/payment-matching/match-suggestions/${payment.id}?tenant_id=system`)
-      if (response.ok) {
-        const suggestions = await response.json()
-        setOpenItems(suggestions || [])
-        setMatchDialogOpen(true)
-      }
-    } catch (error) {
-      console.error('Error loading match suggestions:', error)
-      setOpenItems([])
+      const response = await apiClient.get<OpenItem[]>(
+        `/api/v1/finance/payment-matching/match-suggestions/${payment.id}?tenant_id=system`,
+      )
+      setOpenItems(response.data)
       setMatchDialogOpen(true)
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.matchError'),
+        description: error instanceof Error ? error.message : String(error),
+      })
     }
   }
 
@@ -153,21 +147,16 @@ export default function ZahlungseingangsPage(): JSX.Element {
     if (!selectedPayment) return
 
     try {
-      const response = await fetch(
+      await apiClient.post(
         `/api/v1/finance/payment-matching/match/${selectedPayment.id}?op_id=${opId}&match_type=MANUAL&tenant_id=system`,
-        { method: 'POST' }
       )
-      if (response.ok) {
-        toast({
-          title: t('crud.messages.matchSuccess'),
-          description: t('crud.messages.matchSuccessDesc')
-        })
-        setMatchDialogOpen(false)
-        setSelectedPayment(null)
-        loadPayments()
-      } else {
-        throw new Error('Match failed')
-      }
+      toast({
+        title: t('crud.messages.matchSuccess'),
+        description: t('crud.messages.matchSuccessDesc')
+      })
+      setMatchDialogOpen(false)
+      setSelectedPayment(null)
+      await refetch()
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -346,7 +335,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          {loading ? (
+          {isLoading ? (
             <div className="text-center py-8">{t('crud.messages.paymentMatching.loading')}</div>
           ) : (
             <>

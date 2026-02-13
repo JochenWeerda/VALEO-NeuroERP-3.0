@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Handover-Generator für das APM-Framework.
 Generiert Handover-Dokumente zwischen verschiedenen Phasen des APM-Workflows.
@@ -12,12 +12,12 @@ import argparse
 from pathlib import Path
 from datetime import datetime
 
-***REMOVED*** Pfad zum Projektverzeichnis hinzufügen
+# Pfad zum Projektverzeichnis hinzufügen
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from backend.apm_framework.handover_manager import HandoverManager
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -33,19 +33,19 @@ async def generate_handover(phase: str, content_file: str = None) -> str:
         Pfad zum erstellten Handover-Dokument
     """
     try:
-        ***REMOVED*** HandoverManager initialisieren
+        # HandoverManager initialisieren
         manager = HandoverManager()
         
-        ***REMOVED*** Inhalt für das Handover-Dokument
+        # Inhalt für das Handover-Dokument
         content = {}
         
-        ***REMOVED*** Wenn eine Inhaltsdatei angegeben wurde, diese laden
+        # Wenn eine Inhaltsdatei angegeben wurde, diese laden
         if content_file:
             import json
             with open(content_file, "r", encoding="utf-8") as f:
                 content = json.load(f)
         else:
-            ***REMOVED*** Standardinhalt für das Handover-Dokument
+            # Standardinhalt für das Handover-Dokument
             content = {
                 "Beschreibung": "Automatisch generiertes Handover-Dokument",
                 "Prozent": "0%",
@@ -63,7 +63,7 @@ async def generate_handover(phase: str, content_file: str = None) -> str:
                 "Zusammenfassung der letzten Konversation und wichtige Entscheidungen": f"Automatisch generiertes Handover-Dokument für Phase {phase}"
             }
             
-            ***REMOVED*** Phasenspezifische Inhalte
+            # Phasenspezifische Inhalte
             if phase == HandoverManager.PHASE_VAN:
                 content.update({
                     "Anforderung 1": "Anforderungsanalyse durchführen",
@@ -81,15 +81,15 @@ async def generate_handover(phase: str, content_file: str = None) -> str:
                     "Meilenstein 2": "Meilenstein 2"
                 })
         
-        ***REMOVED*** Handover-Dokument erstellen
+        # Handover-Dokument erstellen
         handover_path = manager.create_handover_document(phase, content)
         logger.info(f"Handover-Dokument erstellt: {handover_path}")
         
-        ***REMOVED*** Handover-Dokument in MongoDB speichern
+        # Handover-Dokument in MongoDB speichern
         handover_id = await manager.save_to_mongodb(handover_path)
         logger.info(f"Handover-Dokument in MongoDB gespeichert mit ID: {handover_id}")
         
-        ***REMOVED*** Neuestes Handover-Dokument abrufen und anzeigen
+        # Neuestes Handover-Dokument abrufen und anzeigen
         latest_handover = manager.get_latest_handover()
         
         if latest_handover:
@@ -99,14 +99,14 @@ async def generate_handover(phase: str, content_file: str = None) -> str:
             print("\nZusammenfassung:")
             print(latest_handover.get('summary', 'Keine Zusammenfassung verfügbar'))
             
-            ***REMOVED*** Handover-Dokument als JSON exportieren
+            # Handover-Dokument als JSON exportieren
             import json
             output_dir = Path(__file__).resolve().parent.parent / "memory-bank" / "handover"
             output_dir.mkdir(parents=True, exist_ok=True)
             
             output_path = output_dir / "latest_handover.json"
             with open(output_path, "w", encoding="utf-8") as f:
-                ***REMOVED*** ObjectId in String umwandeln
+                # ObjectId in String umwandeln
                 latest_handover_copy = dict(latest_handover)
                 latest_handover_copy["_id"] = str(latest_handover_copy["_id"])
                 latest_handover_copy["project_id"] = str(latest_handover_copy["project_id"])
@@ -116,7 +116,7 @@ async def generate_handover(phase: str, content_file: str = None) -> str:
             
             logger.info(f"Handover-Dokument als JSON exportiert: {output_path}")
         
-        ***REMOVED*** Verbindung schließen
+        # Verbindung schließen
         manager.close()
         
         return handover_path
@@ -138,7 +138,7 @@ def main():
     
     args = parser.parse_args()
     
-    ***REMOVED*** Handover-Dokument generieren
+    # Handover-Dokument generieren
     asyncio.run(generate_handover(args.phase, args.content))
 
 if __name__ == "__main__":

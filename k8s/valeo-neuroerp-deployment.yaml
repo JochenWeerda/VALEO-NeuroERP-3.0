@@ -1,5 +1,5 @@
-***REMOVED*** VALEO-NeuroERP-3.0 Kubernetes Deployment Configuration
-***REMOVED*** Week 5: Containerization & Orchestration Implementation
+# VALEO-NeuroERP-3.0 Kubernetes Deployment Configuration
+# Week 5: Containerization & Orchestration Implementation
 
 apiVersion: apps/v1
 kind: Deployment

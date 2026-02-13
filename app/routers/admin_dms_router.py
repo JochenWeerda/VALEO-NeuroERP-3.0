@@ -37,7 +37,7 @@ def _cli(base: str, token: str) -> httpx.Client:
     )
 
 
-***REMOVED*** VALEO-Preset: Document Types
+# VALEO-Preset: Document Types
 DOCUMENT_TYPES = [
     "sales_order",
     "delivery",
@@ -48,7 +48,7 @@ DOCUMENT_TYPES = [
     "contract"
 ]
 
-***REMOVED*** VALEO-Preset: Metadata Fields
+# VALEO-Preset: Metadata Fields
 METADATA = [
     {"name": "number", "label": "Number", "type": "text", "required": True},
     {"name": "domain", "label": "Domain", "type": "choice", "choices": ["sales", "purchase", "logistics", "contract"]},
@@ -59,7 +59,7 @@ METADATA = [
     {"name": "date", "label": "Date", "type": "date"},
 ]
 
-***REMOVED*** VALEO-Preset: Metadata-Bindings
+# VALEO-Preset: Metadata-Bindings
 BINDINGS = {
     "invoice": ["number", "domain", "customerId", "status", "hash", "date"],
     "delivery": ["number", "domain", "customerId", "status", "hash", "date"],
@@ -80,13 +80,13 @@ def _ensure_doc_types(c: httpx.Client) -> Dict[str, int]:
     """
     ids: Dict[str, int] = {}
     
-    ***REMOVED*** Hole existierende Document Types
+    # Hole existierende Document Types
     response = c.get("/api/document_types/document_types/?page_size=1000")
     response.raise_for_status()
     cur = response.json().get("results", [])
     by_label = {x["label"]: x["id"] for x in cur}
     
-    ***REMOVED*** Erstelle fehlende Document Types
+    # Erstelle fehlende Document Types
     for name in DOCUMENT_TYPES:
         if name not in by_label:
             logger.info(f"Creating document type: {name}")
@@ -107,13 +107,13 @@ def _ensure_metadata(c: httpx.Client) -> Dict[str, int]:
     """
     ids: Dict[str, int] = {}
     
-    ***REMOVED*** Hole existierende Metadata Types
+    # Hole existierende Metadata Types
     response = c.get("/api/metadata/metadata_types/?page_size=1000")
     response.raise_for_status()
     cur = response.json().get("results", [])
     by_name = {x["name"]: x["id"] for x in cur}
     
-    ***REMOVED*** Erstelle fehlende Metadata Types
+    # Erstelle fehlende Metadata Types
     for m in METADATA:
         if m["name"] not in by_name:
             logger.info(f"Creating metadata type: {m['name']}")
@@ -137,7 +137,7 @@ def _ensure_bindings(c: httpx.Client, doc_ids: Dict[str, int], meta_ids: Dict[st
     Returns:
         Anzahl erstellter Bindings
     """
-    ***REMOVED*** Hole existierende Bindings
+    # Hole existierende Bindings
     response = c.get("/api/metadata/document_type_metadata_types/?page_size=1000")
     response.raise_for_status()
     cur = response.json().get("results", [])
@@ -181,7 +181,7 @@ async def test_connection(
             r = c.get("/api/")
             r.raise_for_status()
             
-            ***REMOVED*** Verify we can access document_types endpoint
+            # Verify we can access document_types endpoint
             r2 = c.get("/api/document_types/document_types/?page_size=1")
             r2.raise_for_status()
         
@@ -220,22 +220,22 @@ async def bootstrap_dms(
     """
     try:
         with _cli(str(conn.base), conn.token) as c:
-            ***REMOVED*** 1. Ensure Document Types
+            # 1. Ensure Document Types
             doc_ids = _ensure_doc_types(c)
             logger.info(f"Document types ensured: {len(doc_ids)}")
             
-            ***REMOVED*** 2. Ensure Metadata Types
+            # 2. Ensure Metadata Types
             meta_ids = _ensure_metadata(c)
             logger.info(f"Metadata types ensured: {len(meta_ids)}")
             
-            ***REMOVED*** 3. Ensure Bindings
+            # 3. Ensure Bindings
             created_bindings = _ensure_bindings(c, doc_ids, meta_ids)
             logger.info(f"Metadata bindings created: {created_bindings}")
         
-        ***REMOVED*** Persist config for ERP adapters
+        # Persist config for ERP adapters
         config_data = {
             "base": str(conn.base),
-            "token_set": True,  ***REMOVED*** Don't store actual token in config
+            "token_set": True,  # Don't store actual token in config
             "document_types": doc_ids,
             "metadata_types": meta_ids,
         }

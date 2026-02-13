@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 VALEO-NeuroERP Abschlusscheckliste
@@ -17,7 +17,7 @@ from datetime import datetime
 from pathlib import Path
 import logging
 
-***REMOVED*** Logging konfigurieren
+# Logging konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -38,7 +38,7 @@ class ProjectCompletionChecker:
         self.output_dir = Path("output")
         self.output_dir.mkdir(parents=True, exist_ok=True)
         
-        ***REMOVED*** Pfade für Ausgabedateien
+        # Pfade für Ausgabedateien
         self.checklist_path = self.output_dir / "final_checklist.md"
         self.status_path = self.output_dir / "completion_status.json"
         
@@ -117,7 +117,7 @@ class ProjectCompletionChecker:
         save_path = path or self.config_path or "config/final_checklist_config.yaml"
         
         try:
-            ***REMOVED*** Stelle sicher, dass das Verzeichnis existiert
+            # Stelle sicher, dass das Verzeichnis existiert
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
             
             with open(save_path, 'w', encoding='utf-8') as file:
@@ -161,7 +161,7 @@ class ProjectCompletionChecker:
                 if item.get("status") == "completed":
                     cat_completed += item_weight
             
-            ***REMOVED*** Normalisiere den Kategoriefortschritt
+            # Normalisiere den Kategoriefortschritt
             if cat_total > 0:
                 category_progress = cat_completed / cat_total
             else:
@@ -170,7 +170,7 @@ class ProjectCompletionChecker:
             total_weight += cat_weight
             completed_weight += cat_weight * category_progress
         
-        ***REMOVED*** Berechne den Gesamtfortschritt
+        # Berechne den Gesamtfortschritt
         if total_weight > 0:
             overall_progress = (completed_weight / total_weight) * 100
         else:
@@ -182,16 +182,16 @@ class ProjectCompletionChecker:
         """Generiert eine Markdown-Checkliste"""
         progress = self.calculate_progress()
         
-        checklist = f"""***REMOVED*** {self.config['project_name']} Abschlusscheckliste
+        checklist = f"""# {self.config['project_name']} Abschlusscheckliste
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 - **Projekt**: {self.config['project_name']}
 - **Version**: {self.config['version']}
 - **Generiert am**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 - **Gesamtfortschritt**: {progress}%
 
-***REMOVED******REMOVED*** Checkliste
+## Checkliste
 
 """
         
@@ -199,7 +199,7 @@ class ProjectCompletionChecker:
             cat_name = category.get("name", f"Kategorie {cat_index + 1}")
             cat_weight = category.get("weight", 0)
             
-            ***REMOVED*** Berechne den Kategoriefortschritt
+            # Berechne den Kategoriefortschritt
             cat_completed = sum(item.get("weight", 0) for item in category.get("items", []) if item.get("status") == "completed")
             cat_total = sum(item.get("weight", 0) for item in category.get("items", []))
             
@@ -208,7 +208,7 @@ class ProjectCompletionChecker:
             else:
                 cat_progress = 0
             
-            checklist += f"***REMOVED******REMOVED******REMOVED*** {cat_name} ({cat_progress:.2f}%)\n\n"
+            checklist += f"### {cat_name} ({cat_progress:.2f}%)\n\n"
             
             for item_index, item in enumerate(category.get("items", [])):
                 item_name = item.get("name", f"Element {item_index + 1}")
@@ -227,15 +227,15 @@ class ProjectCompletionChecker:
             
             checklist += "\n"
         
-        ***REMOVED*** Füge Legende hinzu
-        checklist += """***REMOVED******REMOVED*** Legende
+        # Füge Legende hinzu
+        checklist += """## Legende
 
 - ⬜ Ausstehend
 - 🟨 In Bearbeitung
 - ✅ Abgeschlossen
 - 🚫 Blockiert
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. Aktualisieren Sie den Status der Elemente mit dem Befehl:
    ```
@@ -249,7 +249,7 @@ class ProjectCompletionChecker:
 
 """
         
-        ***REMOVED*** Speichere die Checkliste
+        # Speichere die Checkliste
         try:
             with open(self.checklist_path, 'w', encoding='utf-8') as file:
                 file.write(checklist)
@@ -276,7 +276,7 @@ class ProjectCompletionChecker:
             cat_name = category.get("name", "")
             cat_weight = category.get("weight", 0)
             
-            ***REMOVED*** Berechne den Kategoriefortschritt
+            # Berechne den Kategoriefortschritt
             cat_completed = sum(item.get("weight", 0) for item in category.get("items", []) if item.get("status") == "completed")
             cat_total = sum(item.get("weight", 0) for item in category.get("items", []))
             
@@ -302,7 +302,7 @@ class ProjectCompletionChecker:
             
             status_data["categories"].append(cat_data)
         
-        ***REMOVED*** Speichere den Status
+        # Speichere den Status
         try:
             with open(self.status_path, 'w', encoding='utf-8') as file:
                 json.dump(status_data, file, indent=2)
@@ -318,12 +318,12 @@ class ProjectCompletionChecker:
         try:
             logger.info("Analysiere Projekt...")
             
-            ***REMOVED*** Zähle Python-Dateien und Tests
+            # Zähle Python-Dateien und Tests
             python_files = 0
             test_files = 0
             
             for root, _, files in os.walk('.'):
-                ***REMOVED*** Ignoriere versteckte Verzeichnisse und venv
+                # Ignoriere versteckte Verzeichnisse und venv
                 if '/.' in root or '\\.' in root or '/venv' in root or '\\venv' in root:
                     continue
                 
@@ -333,14 +333,14 @@ class ProjectCompletionChecker:
                         if '/tests/' in root or '\\tests\\' in root or file.startswith('test_'):
                             test_files += 1
             
-            ***REMOVED*** Überprüfe Docker-Dateien
+            # Überprüfe Docker-Dateien
             docker_files = []
             for root, _, files in os.walk('.'):
                 for file in files:
                     if file == 'Dockerfile' or file.endswith('.Dockerfile') or file == 'docker-compose.yml' or file == 'docker-compose.yaml':
                         docker_files.append(os.path.join(root, file))
             
-            ***REMOVED*** Überprüfe Kubernetes-Dateien
+            # Überprüfe Kubernetes-Dateien
             k8s_files = []
             try:
                 for root, _, files in os.walk('./kubernetes'):
@@ -350,7 +350,7 @@ class ProjectCompletionChecker:
             except:
                 pass
             
-            ***REMOVED*** Überprüfe Dokumentationsdateien
+            # Überprüfe Dokumentationsdateien
             api_docs = []
             user_docs = []
             dev_docs = []
@@ -374,14 +374,14 @@ class ProjectCompletionChecker:
             except:
                 pass
             
-            ***REMOVED*** Aktualisiere die Checkliste basierend auf den Ergebnissen
+            # Aktualisiere die Checkliste basierend auf den Ergebnissen
             for cat_index, category in enumerate(self.config["categories"]):
                 cat_name = category.get("name", "").lower()
                 
                 for item_index, item in enumerate(category.get("items", [])):
                     item_name = item.get("name", "").lower()
                     
-                    ***REMOVED*** Aktualisiere den Status basierend auf den Analyseresultaten
+                    # Aktualisiere den Status basierend auf den Analyseresultaten
                     if "unit-tests" in item_name and test_files > 0:
                         self.update_item_status(cat_index, item_index, "completed")
                     
@@ -411,35 +411,35 @@ def main():
     parser = argparse.ArgumentParser(description="VALEO-NeuroERP Abschlusscheckliste")
     subparsers = parser.add_subparsers(dest="command", help="Befehle")
     
-    ***REMOVED*** Befehl: init
+    # Befehl: init
     init_parser = subparsers.add_parser("init", help="Initialisiert die Abschlusscheckliste")
     init_parser.add_argument("--config", help="Pfad zur Konfigurationsdatei")
     
-    ***REMOVED*** Befehl: update
+    # Befehl: update
     update_parser = subparsers.add_parser("update", help="Aktualisiert den Status eines Elements")
     update_parser.add_argument("--config", help="Pfad zur Konfigurationsdatei")
     update_parser.add_argument("--category", type=int, required=True, help="Index der Kategorie (0-basiert)")
     update_parser.add_argument("--item", type=int, required=True, help="Index des Elements (0-basiert)")
     update_parser.add_argument("--status", choices=["pending", "in_progress", "completed", "blocked"], required=True, help="Neuer Status")
     
-    ***REMOVED*** Befehl: report
+    # Befehl: report
     report_parser = subparsers.add_parser("report", help="Generiert einen Bericht")
     report_parser.add_argument("--config", help="Pfad zur Konfigurationsdatei")
     
-    ***REMOVED*** Befehl: analyze
+    # Befehl: analyze
     analyze_parser = subparsers.add_parser("analyze", help="Analysiert das Projekt und aktualisiert die Checkliste")
     analyze_parser.add_argument("--config", help="Pfad zur Konfigurationsdatei")
     
     args = parser.parse_args()
     
-    ***REMOVED*** Standardbefehl, wenn keiner angegeben wurde
+    # Standardbefehl, wenn keiner angegeben wurde
     if not args.command:
         args.command = "report"
     
-    ***REMOVED*** Erstelle den ProjectCompletionChecker
+    # Erstelle den ProjectCompletionChecker
     checker = ProjectCompletionChecker(args.config if hasattr(args, "config") and args.config else None)
     
-    ***REMOVED*** Führe den entsprechenden Befehl aus
+    # Führe den entsprechenden Befehl aus
     if args.command == "init":
         checker.save_config("config/final_checklist_config.yaml")
         logger.info("Abschlusscheckliste initialisiert")

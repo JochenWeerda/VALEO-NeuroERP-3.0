@@ -19,7 +19,7 @@ router = APIRouter()
 class EncryptionRequest(BaseModel):
     """Request model for data encryption."""
     data: str
-    context: Optional[str] = None  ***REMOVED*** e.g., "customer_ssn", "payment_info"
+    context: Optional[str] = None  # e.g., "customer_ssn", "payment_info"
 
 
 class EncryptionResponse(BaseModel):
@@ -66,7 +66,7 @@ class AuditLogResponse(BaseModel):
 
 class DataSubjectRequest(BaseModel):
     """GDPR data subject request model."""
-    request_type: str  ***REMOVED*** "access", "rectification", "erasure", "portability"
+    request_type: str  # "access", "rectification", "erasure", "portability"
     data_subject_id: str
     data_subject_email: str
     reason: str
@@ -76,7 +76,7 @@ class DataSubjectRequest(BaseModel):
 class ComplianceReport(BaseModel):
     """Compliance report model."""
     report_id: str
-    report_type: str  ***REMOVED*** "gdpr", "ccpa", "security_audit"
+    report_type: str  # "gdpr", "ccpa", "security_audit"
     generated_at: datetime
     period_start: datetime
     period_end: datetime
@@ -101,27 +101,27 @@ class IncidentResponseRequest(BaseModel):
     immediate_actions: List[str]
 
 
-***REMOVED*** Encryption/Decryption endpoints
+# Encryption/Decryption endpoints
 @router.post("/encrypt", response_model=EncryptionResponse, status_code=status.HTTP_201_CREATED)
 async def encrypt_data(request: EncryptionRequest):
     """Encrypt sensitive data."""
     try:
-        ***REMOVED*** Initialize encryption
+        # Initialize encryption
         key = settings.ENCRYPTION_KEY.encode()
         fernet = Fernet(base64.urlsafe_b64encode(key))
 
-        ***REMOVED*** Add context metadata
+        # Add context metadata
         data_to_encrypt = {
             "data": request.data,
             "context": request.context,
             "timestamp": datetime.utcnow().isoformat()
         }
 
-        ***REMOVED*** Encrypt
+        # Encrypt
         json_data = json.dumps(data_to_encrypt)
         encrypted_data = fernet.encrypt(json_data.encode())
 
-        ***REMOVED*** Generate key ID (hash of key for tracking)
+        # Generate key ID (hash of key for tracking)
         key_id = hashlib.sha256(key).hexdigest()[:16]
 
         return EncryptionResponse(
@@ -142,7 +142,7 @@ async def encrypt_data(request: EncryptionRequest):
 async def decrypt_data(request: DecryptionRequest):
     """Decrypt sensitive data."""
     try:
-        ***REMOVED*** Validate key ID
+        # Validate key ID
         key = settings.ENCRYPTION_KEY.encode()
         expected_key_id = hashlib.sha256(key).hexdigest()[:16]
 
@@ -152,10 +152,10 @@ async def decrypt_data(request: DecryptionRequest):
                 detail="Invalid encryption key"
             )
 
-        ***REMOVED*** Initialize decryption
+        # Initialize decryption
         fernet = Fernet(base64.urlsafe_b64encode(key))
 
-        ***REMOVED*** Decrypt
+        # Decrypt
         decrypted_bytes = fernet.decrypt(request.encrypted_data.encode())
         decrypted_data = json.loads(decrypted_bytes.decode())
 
@@ -171,7 +171,7 @@ async def decrypt_data(request: DecryptionRequest):
         )
 
 
-***REMOVED*** Audit logging endpoints
+# Audit logging endpoints
 @router.get("/audit-logs", response_model=AuditLogResponse)
 async def get_audit_logs(
     user_id: Optional[str] = Query(None),
@@ -183,7 +183,7 @@ async def get_audit_logs(
     limit: int = Query(100, ge=1, le=1000)
 ):
     """Query audit logs with filtering."""
-    ***REMOVED*** Mock audit log data
+    # Mock audit log data
     mock_entries = [
         {
             "id": "audit_001",
@@ -209,7 +209,7 @@ async def get_audit_logs(
         }
     ]
 
-    ***REMOVED*** Apply filters
+    # Apply filters
     filtered_entries = mock_entries
     if user_id:
         filtered_entries = [e for e in filtered_entries if e["user_id"] == user_id]
@@ -218,7 +218,7 @@ async def get_audit_logs(
     if severity:
         filtered_entries = [e for e in filtered_entries if e["severity"] == severity]
 
-    ***REMOVED*** Pagination
+    # Pagination
     total = len(filtered_entries)
     paginated_entries = filtered_entries[skip:skip + limit]
 
@@ -230,14 +230,14 @@ async def get_audit_logs(
     )
 
 
-***REMOVED*** GDPR compliance endpoints
+# GDPR compliance endpoints
 @router.post("/data-subject-request", status_code=status.HTTP_202_ACCEPTED)
 async def handle_data_subject_request(request: DataSubjectRequest):
     """Handle GDPR data subject access/rectification/erasure requests."""
-    ***REMOVED*** Mock processing - in real implementation, queue for manual review
+    # Mock processing - in real implementation, queue for manual review
     request_id = f"dsr_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
 
-    ***REMOVED*** Log the request
+    # Log the request
     print(f"DATA SUBJECT REQUEST: {request_id} - {request.request_type} for {request.data_subject_email}")
 
     return {
@@ -255,7 +255,7 @@ async def get_compliance_reports(
     end_date: Optional[datetime] = Query(None)
 ):
     """Get compliance reports."""
-    ***REMOVED*** Mock compliance reports
+    # Mock compliance reports
     reports = [
         {
             "report_id": "gdpr_2025_q1",
@@ -275,11 +275,11 @@ async def get_compliance_reports(
     return [ComplianceReport(**report) for report in reports]
 
 
-***REMOVED*** Threat intelligence endpoints
+# Threat intelligence endpoints
 @router.get("/threat-intelligence", response_model=ThreatIntelligence)
 async def get_threat_intelligence():
     """Get current threat intelligence data."""
-    ***REMOVED*** Mock threat intelligence
+    # Mock threat intelligence
     return ThreatIntelligence(
         threats=[
             {
@@ -295,16 +295,16 @@ async def get_threat_intelligence():
     )
 
 
-***REMOVED*** Incident response endpoints
+# Incident response endpoints
 @router.post("/incident-response", status_code=status.HTTP_202_ACCEPTED)
 async def trigger_incident_response(request: IncidentResponseRequest):
     """Trigger automated incident response workflows."""
     incident_id = f"incident_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
 
-    ***REMOVED*** Log incident
+    # Log incident
     print(f"INCIDENT RESPONSE TRIGGERED: {incident_id} - {request.incident_type} ({request.severity})")
 
-    ***REMOVED*** Mock automated response actions
+    # Mock automated response actions
     response_actions = []
     if request.severity in ["high", "critical"]:
         response_actions.extend([
@@ -322,7 +322,7 @@ async def trigger_incident_response(request: IncidentResponseRequest):
     }
 
 
-***REMOVED*** Security monitoring endpoints
+# Security monitoring endpoints
 @router.get("/security/metrics")
 async def get_security_metrics():
     """Get real-time security metrics."""
@@ -349,7 +349,7 @@ async def apply_data_masking(
 
     masked_data = data.copy()
 
-    ***REMOVED*** Apply masking patterns
+    # Apply masking patterns
     for field, value in masked_data.items():
         if isinstance(value, str):
             if "email" in field.lower():
@@ -365,7 +365,7 @@ async def apply_data_masking(
 @router.get("/security/access-review")
 async def get_access_review_queue():
     """Get pending access review requests."""
-    ***REMOVED*** Mock access review queue
+    # Mock access review queue
     return {
         "pending_reviews": [
             {

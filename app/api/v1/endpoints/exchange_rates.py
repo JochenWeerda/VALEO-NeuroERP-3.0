@@ -138,7 +138,7 @@ async def list_exchange_rates(
         
     except Exception as e:
         logger.error(f"Error listing exchange rates: {e}")
-        ***REMOVED*** Return mock data if table doesn't exist
+        # Return mock data if table doesn't exist
         return [
             ExchangeRateResponse(
                 id="1",
@@ -234,11 +234,11 @@ async def create_exchange_rate(
     Create a new exchange rate.
     """
     try:
-        ***REMOVED*** Normalize currencies
+        # Normalize currencies
         from_currency = rate.from_currency.upper()
         to_currency = rate.to_currency.upper()
         
-        ***REMOVED*** Check if rate already exists for this date
+        # Check if rate already exists for this date
         check_query = text("""
             SELECT id FROM domain_erp.exchange_rates
             WHERE from_currency = :from_currency 
@@ -260,7 +260,7 @@ async def create_exchange_rate(
                 detail=f"Exchange rate for {from_currency}/{to_currency} on {rate.rate_date} already exists"
             )
         
-        ***REMOVED*** Insert new exchange rate
+        # Insert new exchange rate
         rate_id = str(uuid.uuid4())
         
         insert_query = text("""
@@ -320,7 +320,7 @@ async def update_exchange_rate(
     Update an existing exchange rate.
     """
     try:
-        ***REMOVED*** Build update query dynamically
+        # Build update query dynamically
         update_fields = []
         params = {"rate_id": rate_id, "tenant_id": tenant_id}
         
@@ -391,7 +391,7 @@ async def convert_currency(
         from_currency = request.from_currency.upper()
         to_currency = request.to_currency.upper()
         
-        ***REMOVED*** Same currency, no conversion needed
+        # Same currency, no conversion needed
         if from_currency == to_currency:
             return CurrencyConversionResponse(
                 original_amount=request.amount,
@@ -403,10 +403,10 @@ async def convert_currency(
                 rate_type=request.rate_type
             )
         
-        ***REMOVED*** Determine conversion date
+        # Determine conversion date
         conversion_date = request.conversion_date or date.today()
         
-        ***REMOVED*** Get exchange rate
+        # Get exchange rate
         rate_query = text("""
             SELECT rate, rate_date, rate_type
             FROM domain_erp.exchange_rates
@@ -427,7 +427,7 @@ async def convert_currency(
         }).fetchone()
         
         if not rate_row:
-            ***REMOVED*** Try reverse rate
+            # Try reverse rate
             reverse_rate_query = text("""
                 SELECT rate, rate_date, rate_type
                 FROM domain_erp.exchange_rates
@@ -448,7 +448,7 @@ async def convert_currency(
             }).fetchone()
             
             if reverse_rate_row:
-                ***REMOVED*** Use inverse rate
+                # Use inverse rate
                 exchange_rate = Decimal("1.00") / Decimal(str(reverse_rate_row[0]))
                 rate_date = reverse_rate_row[1]
                 rate_type = str(reverse_rate_row[2])
@@ -462,7 +462,7 @@ async def convert_currency(
             rate_date = rate_row[1]
             rate_type = str(rate_row[2])
         
-        ***REMOVED*** Perform conversion
+        # Perform conversion
         converted_amount = request.amount * exchange_rate
         
         return CurrencyConversionResponse(

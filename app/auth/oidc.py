@@ -13,7 +13,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Environment Configuration
+# Environment Configuration
 OIDC_ISSUER = os.environ.get("OIDC_ISSUER", "")
 OIDC_CLIENT_ID = os.environ.get("OIDC_CLIENT_ID", "")
 OIDC_AUDIENCE = os.environ.get("OIDC_AUDIENCE", OIDC_CLIENT_ID)
@@ -21,7 +21,7 @@ OIDC_METADATA_URL = os.environ.get("OIDC_METADATA_URL") or (
     f"{OIDC_ISSUER}/.well-known/openid-configuration" if OIDC_ISSUER else ""
 )
 
-***REMOVED*** Cache-Dauer für JWKS (5 Minuten)
+# Cache-Dauer für JWKS (5 Minuten)
 JWKS_CACHE_SECONDS = 300
 
 
@@ -67,7 +67,7 @@ class OIDC:
             self.jwks = response.json()
             logger.info(f"Fetched JWKS from {jwks_uri}")
 
-        ***REMOVED*** Cache für 5 Minuten
+        # Cache für 5 Minuten
         self.exp = time.time() + JWKS_CACHE_SECONDS
 
     async def _ensure_keys(self) -> None:
@@ -91,20 +91,20 @@ class OIDC:
         """
         await self._ensure_keys()
 
-        ***REMOVED*** Header lesen um KID zu kriegen
+        # Header lesen um KID zu kriegen
         header = jwt.get_unverified_header(token)
         kid = header.get("kid")
 
         if not kid:
             raise ValueError("Token has no kid in header")
 
-        ***REMOVED*** Key aus JWKS suchen
+        # Key aus JWKS suchen
         key = next(
             (k for k in self.jwks.get("keys", []) if k.get("kid") == kid), None
         )
 
         if not key:
-            ***REMOVED*** Key-Rotation? JWKS nochmal holen
+            # Key-Rotation? JWKS nochmal holen
             logger.warning(f"Key {kid} not found in cache, refreshing JWKS")
             await self._fetch_jwks()
             key = next(
@@ -114,7 +114,7 @@ class OIDC:
             if not key:
                 raise ValueError(f"JWKS key not found for kid: {kid}")
 
-        ***REMOVED*** Token validieren
+        # Token validieren
         claims = jwt.decode(
             token,
             key,
@@ -128,7 +128,7 @@ class OIDC:
         return claims
 
 
-***REMOVED*** Global OIDC Instance
+# Global OIDC Instance
 oidc = OIDC()
 
 
@@ -148,20 +148,20 @@ def extract_roles(claims: Dict[str, Any]) -> List[str]:
     Returns:
         Liste von Rollen-Strings
     """
-    ***REMOVED*** Azure AD: roles claim
+    # Azure AD: roles claim
     if isinstance(claims.get("roles"), list):
         return [str(r) for r in claims["roles"]]
 
-    ***REMOVED*** Keycloak: realm_access.roles
+    # Keycloak: realm_access.roles
     ra = claims.get("realm_access", {})
     if isinstance(ra, dict) and isinstance(ra.get("roles"), list):
         return [str(r) for r in ra["roles"]]
 
-    ***REMOVED*** Generic: groups
+    # Generic: groups
     if isinstance(claims.get("groups"), list):
         return [g.strip("/") for g in claims["groups"]]
 
-    ***REMOVED*** Auth0: custom namespace
+    # Auth0: custom namespace
     appmd = claims.get("https://app/roles")
     if isinstance(appmd, list):
         return [str(r) for r in appmd]
@@ -180,12 +180,12 @@ def extract_scopes(claims: Dict[str, Any]) -> List[str]:
     Returns:
         Liste von Scope-Strings
     """
-    ***REMOVED*** Azure AD: "scp" claim (space-separated)
+    # Azure AD: "scp" claim (space-separated)
     scp = claims.get("scp", "")
     if isinstance(scp, str) and scp:
         return scp.split()
 
-    ***REMOVED*** Generic: "scope" claim (space-separated)
+    # Generic: "scope" claim (space-separated)
     scope = claims.get("scope", "")
     if isinstance(scope, str) and scope:
         return scope.split()

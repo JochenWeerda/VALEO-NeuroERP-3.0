@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Migration-Script für L3 → VALEO Kundenstamm-Daten
 """
@@ -38,7 +38,7 @@ class L3ToValeoMigrator:
         elif transformation == 'trim':
             return str(value).strip()
         elif transformation == 'phone_format':
-            ***REMOVED*** Entferne Leerzeichen und normalisiere
+            # Entferne Leerzeichen und normalisiere
             return str(value).replace(' ', '').replace('-', '').replace('/', '')
         
         return value
@@ -51,7 +51,7 @@ class L3ToValeoMigrator:
         if field_type == 'email':
             return '@' in str(value)
         elif field_type == 'iban':
-            ***REMOVED*** Einfache IBAN-Validierung
+            # Einfache IBAN-Validierung
             return len(str(value)) >= 15 and len(str(value)) <= 34
         
         return True
@@ -68,13 +68,13 @@ class L3ToValeoMigrator:
                 l3_field = field_mapping['l3_field']
                 valeo_field = field_mapping['valeo_field']
                 
-                ***REMOVED*** Hole Wert aus L3-Daten
+                # Hole Wert aus L3-Daten
                 value = l3_record.get(l3_field)
                 
-                ***REMOVED*** Transformiere Wert
+                # Transformiere Wert
                 transformed_value = self.transform_value(value, field_mapping)
                 
-                ***REMOVED*** Validiere Wert
+                # Validiere Wert
                 if transformed_value is not None and not self.validate_value(transformed_value, field_mapping):
                     print(f"⚠️  Validierungsfehler: {l3_field} = {value}")
                     continue
@@ -165,14 +165,14 @@ def main():
     
     migrator = L3ToValeoMigrator()
     
-    ***REMOVED*** Beispiel: Lade L3-Daten (CSV)
+    # Beispiel: Lade L3-Daten (CSV)
     l3_csv_file = "l3-export/kunden.csv"
     
     if not Path(l3_csv_file).exists():
         print(f"\n⚠️  L3-Daten nicht gefunden: {l3_csv_file}")
         print("📝 Erstelle Beispiel-CSV für Tests...")
         
-        ***REMOVED*** Erstelle Beispiel-CSV
+        # Erstelle Beispiel-CSV
         Path("l3-export").mkdir(exist_ok=True)
         example_data = [
             {
@@ -197,7 +197,7 @@ def main():
         
         migrator.export_to_csv(example_data, l3_csv_file)
     
-    ***REMOVED*** Lade L3-Daten
+    # Lade L3-Daten
     print(f"\n📂 Lade L3-Daten aus: {l3_csv_file}")
     
     l3_data = []
@@ -207,24 +207,24 @@ def main():
     
     print(f"✅ {len(l3_data)} Datensätze geladen")
     
-    ***REMOVED*** Migriere Haupttabelle
+    # Migriere Haupttabelle
     print("\n🔄 Migriere Haupttabelle: kunden")
     valeo_kunden = migrator.migrate_main_table(l3_data)
     
-    ***REMOVED*** Exportiere Ergebnisse
+    # Exportiere Ergebnisse
     output_dir = Path("migration-output")
     output_dir.mkdir(exist_ok=True)
     
     migrator.export_to_csv(valeo_kunden, output_dir / "kunden.csv")
     migrator.export_to_sql(valeo_kunden, "kunden", output_dir / "kunden.sql")
     
-    ***REMOVED*** Migriere Untertabellen (Beispiel)
+    # Migriere Untertabellen (Beispiel)
     print("\n🔄 Migriere Untertabellen...")
     
     for subtable_name in migrator.subtable_mappings.keys():
         print(f"   • {subtable_name}")
-        ***REMOVED*** Hier würde die L3-Untertabellen-Daten geladen werden
-        ***REMOVED*** Für jetzt: Überspringe
+        # Hier würde die L3-Untertabellen-Daten geladen werden
+        # Für jetzt: Überspringe
         
     print("\n" + "=" * 80)
     print("✅ MIGRATION ABGESCHLOSSEN")
@@ -239,4 +239,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

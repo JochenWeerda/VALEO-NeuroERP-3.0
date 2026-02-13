@@ -14,19 +14,19 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="INFRASTAT_", case_sensitive=True)
 
-    ***REMOVED*** Server
+    # Server
     HOST: str = "0.0.0.0"
     PORT: int = 5200
     DEBUG: bool = False
 
-    ***REMOVED*** CORS
+    # CORS
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
         "http://localhost:3000",
         "http://localhost:8000",
         "http://backend:8000",
     ]
 
-    ***REMOVED*** Datenbank
+    # Datenbank
     DATABASE_URL: PostgresDsn = PostgresDsn.build(
         scheme="postgresql+asyncpg",
         username="valeo_compliance",
@@ -37,27 +37,27 @@ class Settings(BaseSettings):
     )
     DB_ECHO: bool = False
 
-    ***REMOVED*** Eventbus
+    # Eventbus
     EVENT_BUS_ENABLED: bool = True
     EVENT_BUS_URL: str = "nats://nats:4222"
     EVENT_BUS_SUBJECT_PREFIX: str = "compliance.infrastat"
 
-    ***REMOVED*** Mandantenfähigkeit
+    # Mandantenfähigkeit
     DEFAULT_TENANT: str = "default"
 
-    ***REMOVED*** Scheduler
+    # Scheduler
     SCHEDULER_ENABLED: bool = True
-    SCHEDULER_CRON: str = "0 6 10 * *"  ***REMOVED*** 10. des Monats 06:00 UTC
+    SCHEDULER_CRON: str = "0 6 10 * *"  # 10. des Monats 06:00 UTC
 
-    ***REMOVED*** Referenzdaten
+    # Referenzdaten
     TARIC_DATA_PATH: str = "data/reference/intrastat/taric.csv"
     COUNTRY_CODES_PATH: str = "data/reference/common/country_codes.csv"
 
-    ***REMOVED*** Workflow-Service
+    # Workflow-Service
     WORKFLOW_SERVICE_URL: str = "http://workflow-service:5100"
     WORKFLOW_REGISTRATION_TIMEOUT: float = 10.0
 
-    ***REMOVED*** Submission
+    # Submission
     SUBMISSION_ENABLED: bool = False
     SUBMISSION_BASE_URL: str = "https://www-idev.destatis.de/idev"
     SUBMISSION_USERNAME: str | None = None
@@ -77,4 +77,5 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
+
 

@@ -113,7 +113,7 @@ async def create_saatgut(
     """Create a new Saatgut."""
     effective_tenant = tenant_id or DEFAULT_TENANT
 
-    ***REMOVED*** Check if artikelnummer already exists
+    # Check if artikelnummer already exists
     existing = (
         db.query(SaatgutModel)
         .filter(
@@ -129,7 +129,7 @@ async def create_saatgut(
             detail=f"Saatgut with article number {saatgut_data.artikelnummer} already exists"
         )
 
-    ***REMOVED*** Validate business rules
+    # Validate business rules
     if saatgut_data.ablauf_zulassung and saatgut_data.ablauf_zulassung < datetime.utcnow().date():
         raise HTTPException(
             status_code=400,
@@ -172,7 +172,7 @@ async def update_saatgut(
 
     update_data = saatgut_data.model_dump(exclude_unset=True)
 
-    ***REMOVED*** Validate artikelnummer uniqueness if changed
+    # Validate artikelnummer uniqueness if changed
     if "artikelnummer" in update_data and update_data["artikelnummer"] != saatgut.artikelnummer:
         existing = (
             db.query(SaatgutModel)
@@ -189,7 +189,7 @@ async def update_saatgut(
                 detail=f"Saatgut with article number {update_data['artikelnummer']} already exists"
             )
 
-    ***REMOVED*** Validate approval expiry
+    # Validate approval expiry
     if "ablauf_zulassung" in update_data and update_data["ablauf_zulassung"]:
         from datetime import datetime
         if update_data["ablauf_zulassung"] < datetime.utcnow().date():
@@ -271,7 +271,7 @@ async def get_saatgut_stats(
     """Get Saatgut statistics overview."""
     effective_tenant = tenant_id or DEFAULT_TENANT
 
-    ***REMOVED*** Count by type
+    # Count by type
     type_stats = {}
     types = db.query(SaatgutModel.art, db.func.count(SaatgutModel.id)).filter(
         SaatgutModel.tenant_id == effective_tenant,
@@ -281,7 +281,7 @@ async def get_saatgut_stats(
     for art, count in types:
         type_stats[art or "Unbekannt"] = count
 
-    ***REMOVED*** Approval stats
+    # Approval stats
     approval_stats = {}
     approvals = db.query(
         db.func.concat(
@@ -300,7 +300,7 @@ async def get_saatgut_stats(
     for approval_type, count in approvals:
         approval_stats[approval_type or "Keine Zulassung"] = count
 
-    ***REMOVED*** Stock stats
+    # Stock stats
     stock_stats = db.query(
         db.func.sum(SaatgutModel.lagerbestand),
         db.func.sum(SaatgutModel.verfuegbar),

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Input } from '@/components/ui/input'
@@ -6,69 +6,68 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, CheckCircle, Euro, FileDown } from 'lucide-react'
+import { ErrorState } from '@/components/ErrorState'
+import { toast } from '@/hooks/use-toast'
+import { useDATEVExport, useZahlungslauf, useZahlungsvorschlaege, type Zahlungsvorschlag } from '@/lib/api/fibu'
 
 type ZahlungslaufData = {
   bezeichnung: string
   ausfuehrungsdatum: string
-  zahlungen: Array<{
-    id: string
-    lieferant: string
-    betrag: number
-    rechnungsNr: string
-    selected: boolean
-  }>
   format: 'sepa' | 'datev'
 }
 
 export default function ZahlungslaeufeePage(): JSX.Element {
   const navigate = useNavigate()
+  const { data: zahlungsvorschlaege = [], isLoading, isError, error, refetch } = useZahlungsvorschlaege()
+  const createZahlungslauf = useZahlungslauf()
+  const exportDatev = useDATEVExport()
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [zahlungslauf, setZahlungslauf] = useState<ZahlungslaufData>({
     bezeichnung: '',
     ausfuehrungsdatum: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-    zahlungen: [
-      {
-        id: '1',
-        lieferant: 'Saatgut AG',
-        betrag: 25000.0,
-        rechnungsNr: 'ER-2025-0001',
-        selected: true,
-      },
-      {
-        id: '2',
-        lieferant: 'Dünger GmbH',
-        betrag: 18500.5,
-        rechnungsNr: 'ER-2025-0002',
-        selected: true,
-      },
-      {
-        id: '3',
-        lieferant: 'Technik GmbH',
-        betrag: 8900.0,
-        rechnungsNr: 'ER-2025-0004',
-        selected: false,
-      },
-    ],
     format: 'sepa',
   })
+
+  useEffect(() => {
+    if (zahlungsvorschlaege.length > 0 && selectedIds.length === 0) {
+      setSelectedIds(zahlungsvorschlaege.map((z) => z.id))
+    }
+  }, [zahlungsvorschlaege, selectedIds.length])
 
   function updateField<K extends keyof ZahlungslaufData>(key: K, value: ZahlungslaufData[K]): void {
     setZahlungslauf((prev) => ({ ...prev, [key]: value }))
   }
 
   function toggleZahlung(id: string): void {
-    setZahlungslauf((prev) => ({
-      ...prev,
-      zahlungen: prev.zahlungen.map((z) => (z.id === id ? { ...z, selected: !z.selected } : z)),
-    }))
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
   }
 
   async function handleSubmit(): Promise<void> {
-    console.log('Zahlungslauf erstellen:', zahlungslauf)
-    // Hier würde der SEPA-Export erfolgen
-    navigate('/fibu/verbindlichkeiten')
+    try {
+      await createZahlungslauf.mutateAsync(selectedIds)
+      if (zahlungslauf.format === 'datev') {
+        await exportDatev.mutateAsync({ typ: 'zahlungslauf' })
+      }
+      toast({
+        title: 'Zahlungslauf erstellt',
+        description: `${selectedIds.length} Zahlungen wurden verarbeitet.`,
+      })
+      navigate('/fibu/verbindlichkeiten')
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'Zahlungslauf fehlgeschlagen',
+        description: err instanceof Error ? err.message : String(err),
+      })
+    }
   }
 
-  const selectedZahlungen = zahlungslauf.zahlungen.filter((z) => z.selected)
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const selectedZahlungen = zahlungsvorschlaege.filter((z) => selectedIds.includes(z.id))
   const gesamtbetrag = selectedZahlungen.reduce((sum, z) => sum + z.betrag, 0)
 
   const steps = [
@@ -88,7 +87,7 @@ export default function ZahlungslaeufeePage(): JSX.Element {
             />
           </div>
           <div>
-            <Label htmlFor="ausfuehrungsdatum">Ausführungsdatum *</Label>
+            <Label htmlFor="ausfuehrungsdatum">Ausfuehrungsdatum *</Label>
             <Input
               id="ausfuehrungsdatum"
               type="date"
@@ -98,35 +97,40 @@ export default function ZahlungslaeufeePage(): JSX.Element {
             />
           </div>
           <div className="space-y-2 mt-6">
-            <Label>Zahlungen auswählen ({selectedZahlungen.length} von {zahlungslauf.zahlungen.length})</Label>
-            {zahlungslauf.zahlungen.map((zahlung) => (
-              <Card key={zahlung.id} className={zahlung.selected ? 'border-blue-500' : ''}>
-                <CardContent className="pt-4">
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="checkbox"
-                      checked={zahlung.selected}
-                      onChange={() => toggleZahlung(zahlung.id)}
-                      className="h-4 w-4"
-                    />
-                    <div className="flex-1">
-                      <div className="font-semibold">{zahlung.lieferant}</div>
-                      <div className="text-sm text-muted-foreground">
-                        Rechnung: {zahlung.rechnungsNr}
+            <Label>Zahlungen auswaehlen ({selectedZahlungen.length} von {zahlungsvorschlaege.length})</Label>
+            {isLoading && <div className="text-sm text-muted-foreground">Lade Zahlungsvorschlaege...</div>}
+            {!isLoading && zahlungsvorschlaege.length === 0 && (
+              <div className="rounded border p-3 text-sm text-muted-foreground">Keine Zahlungsvorschlaege verfuegbar.</div>
+            )}
+            {zahlungsvorschlaege.map((zahlung: Zahlungsvorschlag) => {
+              const isSelected = selectedIds.includes(zahlung.id)
+              return (
+                <Card key={zahlung.id} className={isSelected ? 'border-blue-500' : ''}>
+                  <CardContent className="pt-4">
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleZahlung(zahlung.id)}
+                        className="h-4 w-4"
+                      />
+                      <div className="flex-1">
+                        <div className="font-semibold">{zahlung.lieferant}</div>
+                        <div className="text-sm text-muted-foreground">Rechnung: {zahlung.rechnungsNr}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold">
+                          {new Intl.NumberFormat('de-DE', {
+                            style: 'currency',
+                            currency: 'EUR',
+                          }).format(zahlung.betrag)}
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-bold">
-                        {new Intl.NumberFormat('de-DE', {
-                          style: 'currency',
-                          currency: 'EUR',
-                        }).format(zahlung.betrag)}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </div>
       ),
@@ -155,16 +159,13 @@ export default function ZahlungslaeufeePage(): JSX.Element {
                   <FileDown className="h-4 w-4" />
                   <span>Dateiname:</span>
                   <span className="font-mono">
-                    zahlungslauf_{new Date().toISOString().slice(0, 10)}.
-                    {zahlungslauf.format === 'sepa' ? 'xml' : 'csv'}
+                    zahlungslauf_{new Date().toISOString().slice(0, 10)}.{zahlungslauf.format === 'sepa' ? 'xml' : 'csv'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="h-4 w-4" />
-                  <span>Ausführung:</span>
-                  <span className="font-semibold">
-                    {new Date(zahlungslauf.ausfuehrungsdatum).toLocaleDateString('de-DE')}
-                  </span>
+                  <span>Ausfuehrung:</span>
+                  <span className="font-semibold">{new Date(zahlungslauf.ausfuehrungsdatum).toLocaleDateString('de-DE')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Euro className="h-4 w-4" />
@@ -194,10 +195,8 @@ export default function ZahlungslaeufeePage(): JSX.Element {
                   <dd className="text-sm font-semibold">{zahlungslauf.bezeichnung || '-'}</dd>
                 </div>
                 <div className="flex justify-between border-b pb-2">
-                  <dt className="text-sm font-medium text-muted-foreground">Ausführungsdatum</dt>
-                  <dd className="text-sm font-semibold">
-                    {new Date(zahlungslauf.ausfuehrungsdatum).toLocaleDateString('de-DE')}
-                  </dd>
+                  <dt className="text-sm font-medium text-muted-foreground">Ausfuehrungsdatum</dt>
+                  <dd className="text-sm font-semibold">{new Date(zahlungslauf.ausfuehrungsdatum).toLocaleDateString('de-DE')}</dd>
                 </div>
                 <div className="flex justify-between border-b pb-2">
                   <dt className="text-sm font-medium text-muted-foreground">Anzahl Zahlungen</dt>
@@ -212,9 +211,7 @@ export default function ZahlungslaeufeePage(): JSX.Element {
                 <div className="flex justify-between pt-3">
                   <dt className="text-lg font-bold">Gesamtbetrag</dt>
                   <dd className="text-lg font-bold text-green-600">
-                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
-                      gesamtbetrag
-                    )}
+                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamtbetrag)}
                   </dd>
                 </div>
               </dl>
@@ -222,7 +219,7 @@ export default function ZahlungslaeufeePage(): JSX.Element {
           </Card>
           <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
             <p className="font-semibold">Zahlungslauf wird erstellt und Datei generiert</p>
-            <p className="mt-1">Die Datei kann anschließend im Online-Banking importiert werden</p>
+            <p className="mt-1">Die Datei kann anschliessend im Online-Banking importiert werden</p>
           </div>
         </div>
       ),

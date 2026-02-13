@@ -22,7 +22,7 @@ router = APIRouter()
 
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Global PSM client instance
+# Global PSM client instance
 psm_client = ProplantaPSMClient()
 
 
@@ -49,7 +49,7 @@ async def sync_proplanta_psm_data(
                 detail="Proplanta PSM integration not configured"
             )
 
-        ***REMOVED*** Start sync in background
+        # Start sync in background
         background_tasks.add_task(_perform_psm_sync, force)
 
         return {
@@ -71,12 +71,12 @@ def _perform_psm_sync(force: bool = False):
 
         logger.info(f"Successfully synchronized {len(psm_data)} PSM items")
 
-        ***REMOVED*** TODO: Optionally update local database with synced data
-        ***REMOVED*** This could involve creating/updating PSM records in the local database
+        # TODO: Optionally update local database with synced data
+        # This could involve creating/updating PSM records in the local database
 
     except Exception as e:
         logger.error(f"PSM synchronization failed: {e}")
-        ***REMOVED*** TODO: Could send notification or update status
+        # TODO: Could send notification or update status
 
 
 @router.get("/list", response_model=List[Dict[str, Any]])
@@ -94,10 +94,10 @@ async def list_proplanta_psm(
                 detail="Proplanta PSM integration not configured"
             )
 
-        ***REMOVED*** Get all cached PSM data
+        # Get all cached PSM data
         all_psm = psm_client.get_all_psm()
 
-        ***REMOVED*** Apply filters
+        # Apply filters
         filtered_psm = all_psm
 
         if status:
@@ -116,7 +116,7 @@ async def list_proplanta_psm(
             filtered_psm = [psm for psm in filtered_psm
                           if psm.hazard_class == hazard_class]
 
-        ***REMOVED*** Apply limit
+        # Apply limit
         limited_psm = filtered_psm[:limit]
 
         return [psm.to_dict() for psm in limited_psm]
@@ -185,17 +185,17 @@ async def get_proplanta_psm_stats():
         active_psm = psm_client.get_active_psm()
         expired_psm = psm_client.get_expired_psm()
 
-        ***REMOVED*** Group by manufacturer
+        # Group by manufacturer
         manufacturers = {}
         for psm in all_psm:
             manufacturers[psm.manufacturer] = manufacturers.get(psm.manufacturer, 0) + 1
 
-        ***REMOVED*** Group by hazard class
+        # Group by hazard class
         hazard_classes = {}
         for psm in all_psm:
             hazard_classes[psm.hazard_class] = hazard_classes.get(psm.hazard_class, 0) + 1
 
-        ***REMOVED*** Group by application areas
+        # Group by application areas
         application_areas = {}
         for psm in all_psm:
             for area in psm.application_areas:
@@ -231,7 +231,7 @@ async def import_proplanta_psm_to_local(
                 detail="Proplanta PSM integration not configured"
             )
 
-        ***REMOVED*** Start import in background
+        # Start import in background
         background_tasks.add_task(_perform_psm_import, tenant_id, update_existing, db)
 
         return {
@@ -251,7 +251,7 @@ def _perform_psm_import(tenant_id: str, update_existing: bool, db: Session):
 
         logger.info("Starting PSM import to local database")
 
-        ***REMOVED*** Get PSM data from Proplanta
+        # Get PSM data from Proplanta
         psm_data_list = psm_client.get_all_psm()
 
         imported_count = 0
@@ -260,7 +260,7 @@ def _perform_psm_import(tenant_id: str, update_existing: bool, db: Session):
 
         for psm_data in psm_data_list:
             try:
-                ***REMOVED*** Check if PSM already exists (by approval number)
+                # Check if PSM already exists (by approval number)
                 existing = db.query(PSMModel).filter(
                     PSMModel.bvl_nummer == psm_data.approval_number,
                     PSMModel.tenant_id == tenant_id
@@ -268,7 +268,7 @@ def _perform_psm_import(tenant_id: str, update_existing: bool, db: Session):
 
                 if existing:
                     if update_existing:
-                        ***REMOVED*** Update existing record
+                        # Update existing record
                         existing.name = psm_data.name
                         existing.wirkstoff = psm_data.active_ingredient
                         existing.hersteller = psm_data.manufacturer
@@ -284,7 +284,7 @@ def _perform_psm_import(tenant_id: str, update_existing: bool, db: Session):
                     else:
                         skipped_count += 1
                 else:
-                    ***REMOVED*** Create new record
+                    # Create new record
                     new_psm = PSMModel(
                         name=psm_data.name,
                         wirkstoff=psm_data.active_ingredient,

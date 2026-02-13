@@ -20,11 +20,11 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["policy"])
 
-***REMOVED*** Global Policy Store Instance
+# Global Policy Store Instance
 policy_store = PolicyStore()
 
 
-***REMOVED*** Request/Response Models
+# Request/Response Models
 class UpsertRequest(BaseModel):
     """Upsert-Request (einzeln oder bulk)"""
     rules: List[Rule]
@@ -52,7 +52,7 @@ class RestoreRequest(BaseModel):
     json: str
 
 
-***REMOVED*** Endpoints
+# Endpoints
 
 @router.get("/policy/list")
 async def list_policies() -> Dict[str, Any]:

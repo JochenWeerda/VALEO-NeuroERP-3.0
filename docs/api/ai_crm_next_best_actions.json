@@ -29,7 +29,7 @@
         "actions": [
           {
             "title": "Call customer about delayed delivery",
-            "description": "Reference order ***REMOVED***123, propose expedited shipping.",
+            "description": "Reference order #123, propose expedited shipping.",
             "type": "call|email|task|meeting",
             "priority": "high|medium|low",
             "confidence": 0.87,
@@ -46,3 +46,4 @@
     }
   }
 }
+

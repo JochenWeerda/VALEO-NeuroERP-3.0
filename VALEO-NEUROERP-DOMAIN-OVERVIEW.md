@@ -1,4 +1,4 @@
-***REMOVED*** 📘 VALERO NeuroERP 3.0 – Domain Overview
+# 📘 VALERO NeuroERP 3.0 – Domain Overview
 
 **Master-Referenzübersicht** aller Domains im VALERO NeuroERP.
 
@@ -6,7 +6,7 @@ Grundlage für Implementierung, Architekturentscheidungen und Cursor.ai-Prompts.
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Architektur-Prinzipien
+## 🎯 Architektur-Prinzipien
 
 Alle Domains folgen konsequent:
 
@@ -23,9 +23,9 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED*** 🌍 Domain-Katalog (19 Domains)
+## 🌍 Domain-Katalog (19 Domains)
 
-***REMOVED******REMOVED******REMOVED*** 1. **Procurement / Suppliers-Domain**
+### 1. **Procurement / Suppliers-Domain**
 **Fokus:** Lieferantenstammdaten, Anfragen, Angebote, Bestellungen
 
 **Schnittstellen:** inventory, finance
@@ -34,7 +34,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2. **Inventory-Domain**
+### 2. **Inventory-Domain**
 **Fokus:** Lager, Silos, Bestände, Chargen, Bewegungen
 
 **Schnittstellen:** production, weighing, contracts, analytics
@@ -43,7 +43,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 3. **Logistics-Domain**
+### 3. **Logistics-Domain**
 **Fokus:** Transportaufträge, Routenplanung, Gate-Management
 
 **Schnittstellen:** fleet, weighing, inventory
@@ -52,7 +52,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 4. **Finance-Domain**
+### 4. **Finance-Domain**
 **Fokus:** Debitoren, Kreditoren, Hauptbuch, Zahlungen
 
 **Schnittstellen:** sales, contracts, document
@@ -61,7 +61,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 5. **CRM-Domain**
+### 5. **CRM-Domain**
 **Fokus:** Kundenstammdaten, Kontakte, Kommunikation, Historie
 
 **Schnittstellen:** sales, contracts, notifications
@@ -70,7 +70,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 6. **Sales-Domain**
+### 6. **Sales-Domain**
 **Fokus:** Angebote, Aufträge, Rechnungen
 
 **Schnittstellen:** pricing, contracts, document
@@ -79,7 +79,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 7. **HR-Domain**
+### 7. **HR-Domain**
 **Fokus:** Mitarbeiter, Rollen, Zeiterfassung, Payroll-Exports
 
 **Schnittstellen:** scheduler, audit
@@ -88,7 +88,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 8. **Production-Domain**
+### 8. **Production-Domain**
 **Fokus:** Rezepte, Mischungen, Lose, QM-Daten (Mahl- & Mischanlage)
 
 **Schnittstellen:** quality, regulatory, inventory
@@ -97,7 +97,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 9. **Contracts-Domain**
+### 9. **Contracts-Domain**
 **Fokus:** Ein-/Verkaufskontrakte, Hedging-Referenzen, Fulfilment
 
 **Schnittstellen:** pricing, analytics, regulatory, document
@@ -106,7 +106,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 10. **Quality-Domain**
+### 10. **Quality-Domain**
 **Fokus:** Prüfpläne, Proben, Laborergebnisse, NC/CAPA
 
 **Schnittstellen:** production, contracts, regulatory
@@ -115,7 +115,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 11. **Weighing-Domain**
+### 11. **Weighing-Domain**
 **Fokus:** Wiegescheine, Brutto/Tara/Netto, Slot-Management, ANPR
 
 **Schnittstellen:** logistics, inventory, document
@@ -124,7 +124,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 12. **Regulatory-Domain**
+### 12. **Regulatory-Domain**
 **Fokus:** VLOG, QS, PSM-Zulassungen, THG-Werte, Labels, Evidenzen
 
 **Schnittstellen:** production, contracts, quality, audit
@@ -133,7 +133,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 13. **Analytics-Domain** ✅
+### 13. **Analytics-Domain** ✅
 **Fokus:** KPIs, Cubes, Reports, Forecasts (Margen, NC-Quoten)
 
 **Schnittstellen:** empfängt Events von **allen Domains**
@@ -144,7 +144,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 14. **Pricing-Domain** ✅
+### 14. **Pricing-Domain** ✅
 **Fokus:** Preislisten, Konditionen, Rabatte, dynamische Preisformeln
 
 **Schnittstellen:** sales, contracts, analytics
@@ -155,7 +155,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 15. **Document-Domain** ✅
+### 15. **Document-Domain** ✅
 **Fokus:** Templates, Rendering (PDF, Etiketten, XRechnung), Archiv, Signatur
 
 **Schnittstellen:** sales, contracts, weighing, quality, regulatory, notifications
@@ -166,7 +166,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 16. **Notifications-Domain** ✅
+### 16. **Notifications-Domain** ✅
 **Fokus:** Multi-Channel-Versand (E-Mail, SMS, WhatsApp, Push, Webhooks)
 
 **Schnittstellen:** document, crm, hr, fleet
@@ -177,7 +177,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 17. **Fleet-Domain**
+### 17. **Fleet-Domain**
 **Fokus:** Fahrzeuge, Fahrer, Wartung, UVV/TÜV, Tank-/Telematikdaten
 
 **Schnittstellen:** logistics, analytics, regulatory, notifications
@@ -186,7 +186,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 18. **Scheduler-Domain**
+### 18. **Scheduler-Domain**
 **Fokus:** Zeitsteuerung (Cron, RRULE, Fixed-Delay), Jobs & Workflows
 
 **Schnittstellen:** analytics, contracts, weighing, hr, document
@@ -197,7 +197,7 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 19. **Audit-Domain** ✅
+### 19. **Audit-Domain** ✅
 **Fokus:** Revisionssicheres Logging (Events, Änderungen, User-Aktionen)
 
 **Features:** Hash-Chains, Signaturen, Exporte, Integritätsprüfung
@@ -210,20 +210,20 @@ Alle Domains folgen konsequent:
 
 ---
 
-***REMOVED******REMOVED*** 🔗 BFF-Struktur
+## 🔗 BFF-Struktur
 
-***REMOVED******REMOVED******REMOVED*** bff-web
+### bff-web
 Dashboards, Cockpits, Massenpflege, Admin-UI
 
-***REMOVED******REMOVED******REMOVED*** bff-mobile
+### bff-mobile
 Quick-Views, Fahrer, Außendienst, Mobile-First
 
-***REMOVED******REMOVED******REMOVED*** bff-back-office
+### bff-back-office
 Compliance, Audit, Serienläufe, Prüfer-Tools
 
 ---
 
-***REMOVED******REMOVED*** 🏗️ Gesamtarchitektur
+## 🏗️ Gesamtarchitektur
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -265,7 +265,7 @@ Compliance, Audit, Serienläufe, Prüfer-Tools
 
 ---
 
-***REMOVED******REMOVED*** 📊 Implementations-Status
+## 📊 Implementations-Status
 
 | Domain | Status | Features | Tests | Port |
 |--------|--------|----------|-------|------|
@@ -293,7 +293,7 @@ Compliance, Audit, Serienläufe, Prüfer-Tools
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Event-Flow-Matrix
+## 🔄 Event-Flow-Matrix
 
 | Quelle → Ziel | Events | Integration |
 |---------------|--------|-------------|
@@ -307,7 +307,7 @@ Compliance, Audit, Serienläufe, Prüfer-Tools
 
 ---
 
-***REMOVED******REMOVED*** 📑 Nutzung dieser Referenz
+## 📑 Nutzung dieser Referenz
 
 1. **Für Cursor.ai-Prompts**: Basis für Domain-Implementierung
 2. **Architekturentscheidungen**: Schnittstellendefinition
@@ -317,20 +317,20 @@ Compliance, Audit, Serienläufe, Prüfer-Tools
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Nächste Schritte
+## 🚀 Nächste Schritte
 
-***REMOVED******REMOVED******REMOVED*** Priorität 1 (Kern-Geschäftsprozesse)
+### Priorität 1 (Kern-Geschäftsprozesse)
 1. **Contracts-Domain** (Port 3085) - Kontrakte & Hedging
 2. **Sales-Domain** (Port 3055) - Angebote & Rechnungen
 3. **Weighing-Domain** (Port 3100) - Wiegeprozess
 4. **Inventory-Domain** (Port 3020) - Bestandsführung
 
-***REMOVED******REMOVED******REMOVED*** Priorität 2 (Support-Prozesse)
+### Priorität 2 (Support-Prozesse)
 5. **Quality-Domain** (Port 3095) - Qualitätsmanagement
 6. **Finance-Domain** (Port 3040) - Finanzbuchhaltung
 7. **Regulatory-Domain** (Port 3110) - Compliance & Zertifizierung
 
-***REMOVED******REMOVED******REMOVED*** Priorität 3 (Erweiterte Funktionen)
+### Priorität 3 (Erweiterte Funktionen)
 8. **CRM-Domain** (Port 3050) - Kundenmanagement
 9. **Production-Domain** (Port 3075) - Mischanlage
 10. **Fleet-Domain** (Port 3120) - Fuhrpark
@@ -340,3 +340,4 @@ Compliance, Audit, Serienläufe, Prüfer-Tools
 **Version:** 1.0  
 **Stand:** Oktober 2025  
 **Wartung:** Dieses Dokument wird bei Domain-Änderungen aktualisiert
+

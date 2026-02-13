@@ -19,65 +19,14 @@ import {
   Search, 
   Trash2, 
   ScanLine,
-  Info,
   FolderOpen,
   Shield,
   CheckCircle2,
-  Calendar,
-  Download,
-  Link2,
-  Inbox
+  Calendar
 } from "lucide-react"
-import { useTranslation } from "react-i18next"
 import { dmsService, type Document as DmsDocument } from "@/lib/services/dms-service"
 
 const KB_PRECISION = 0
-
-// Mock-Daten für Vorschau wenn API nicht verfügbar
-const mockDocuments: Doc[] = [
-  {
-    id: '1',
-    title: 'ISO 9001:2015 Zertifikat',
-    type: 'pdf',
-    sizeKB: 245,
-    ts: new Date('2024-12-15').toISOString(),
-  },
-  {
-    id: '2',
-    title: 'HACCP-Konzept Futtermittelproduktion',
-    type: 'pdf',
-    sizeKB: 1250,
-    ts: new Date('2024-11-20').toISOString(),
-  },
-  {
-    id: '3',
-    title: 'GMP+ B1 Zertifikat',
-    type: 'pdf',
-    sizeKB: 189,
-    ts: new Date('2024-10-05').toISOString(),
-  },
-  {
-    id: '4',
-    title: 'QS-Prüfbericht 2024',
-    type: 'pdf',
-    sizeKB: 856,
-    ts: new Date('2024-09-18').toISOString(),
-  },
-  {
-    id: '5',
-    title: 'Lieferantenaudit Protokoll',
-    type: 'docx',
-    sizeKB: 125,
-    ts: new Date('2024-08-22').toISOString(),
-  },
-  {
-    id: '6',
-    title: 'Rückverfolgbarkeitsmatrix Q3',
-    type: 'xlsx',
-    sizeKB: 456,
-    ts: new Date('2024-07-30').toISOString(),
-  },
-]
 
 // Icon basierend auf Dateityp
 function getFileIcon(type: string) {
@@ -196,20 +145,17 @@ function DocumentSkeleton() {
 }
 
 export default function DocumentPanel(): JSX.Element {
-  const { t } = useTranslation()
   const { data, isLoading: mcpLoading } = useMcpQuery<{ data: Doc[] }>('document', 'list', [])
-  const [useMockData, setUseMockData] = React.useState(false)
-  const [dmsConnected, setDmsConnected] = React.useState(false)
+    const [dmsConnected, setDmsConnected] = React.useState(false)
   const [dmsDocuments, setDmsDocuments] = React.useState<DmsDocument[]>([])
   const [dmsLoading, setDmsLoading] = React.useState(true)
   
   // Tenant-ID (TODO: Aus Auth-Context holen)
   const tenantId = "00000000-0000-0000-0000-000000000001"
   
-  // Verwende Mock-Daten wenn keine API verfügbar
   const apiRows: Doc[] = (data?.data ?? []) as Doc[]
   
-  // Kombiniere DMS- und MCP-Daten, oder nutze Mock-Daten
+  // Kombiniere DMS- und MCP-Daten
   const rows: Doc[] = React.useMemo(() => {
     if (dmsConnected && dmsDocuments.length > 0) {
       // DMS-Daten in Doc-Format konvertieren
@@ -224,11 +170,8 @@ export default function DocumentPanel(): JSX.Element {
     if (apiRows.length > 0) {
       return apiRows
     }
-    if (useMockData) {
-      return mockDocuments
-    }
     return []
-  }, [dmsConnected, dmsDocuments, apiRows, useMockData])
+  }, [dmsConnected, dmsDocuments, apiRows])
   
   const [q, setQ] = React.useState<string>("")
   const { push } = useToast()
@@ -262,13 +205,6 @@ export default function DocumentPanel(): JSX.Element {
     
     checkDmsAndLoad()
   }, [tenantId])
-
-  // Fallback zu Mock-Daten wenn keine API verfügbar
-  React.useEffect(() => {
-    if (!mcpLoading && !dmsLoading && apiRows.length === 0 && dmsDocuments.length === 0) {
-      setUseMockData(true)
-    }
-  }, [mcpLoading, dmsLoading, apiRows.length, dmsDocuments.length])
   
   const isLoading = mcpLoading || dmsLoading
 
@@ -403,23 +339,7 @@ export default function DocumentPanel(): JSX.Element {
             Paperless-ngx Dokumentenmanagement ist aktiv. Dokumente werden automatisch per OCR verarbeitet.
           </AlertDescription>
         </Alert>
-      )}
-      
-      {/* Vorschau-Modus Alert */}
-      {useMockData && !dmsConnected && (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertTitle>Vorschau-Modus</AlertTitle>
-          <AlertDescription>
-            Das Dokumentenmanagement-Backend ist nicht verfügbar. Es werden Beispieldaten angezeigt.
-            <br />
-            <span className="text-sm mt-1 block">
-              Um DMS zu aktivieren: <code className="bg-muted px-1 rounded">docker-compose up paperless dms-adapter -d</code>
-            </span>
-          </AlertDescription>
-        </Alert>
-      )}
-
+      )}`r`n
       {/* KPI Cards */}
       <QMKpiCards documentCount={rows.length} categories={categories} />
 
@@ -436,7 +356,7 @@ export default function DocumentPanel(): JSX.Element {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Upload Zone */}
-          {!useMockData && <DropUpload onFiles={onFiles} />}
+          {<DropUpload onFiles={onFiles} />}
           
           {/* Search */}
           <div className="flex gap-2">
@@ -489,7 +409,7 @@ export default function DocumentPanel(): JSX.Element {
                       size="sm" 
                       variant="outline"
                       onClick={(): void => handleScan(d.id)}
-                      disabled={scan.isPending || useMockData}
+                      disabled={scan.isPending}
                     >
                       <ScanLine className="h-4 w-4 mr-1" />
                       Scan
@@ -498,7 +418,7 @@ export default function DocumentPanel(): JSX.Element {
                       size="sm" 
                       variant="destructive"
                       onClick={(): void => handleDelete(d.id)}
-                      disabled={remove.isPending || useMockData}
+                      disabled={remove.isPending}
                     >
                       <Trash2 className="h-4 w-4 mr-1" />
                       Löschen
@@ -596,3 +516,4 @@ export default function DocumentPanel(): JSX.Element {
     </div>
   )
 }
+

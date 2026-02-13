@@ -19,10 +19,14 @@ env:
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
-  ***REMOVED*** ================================
-  ***REMOVED*** Job 1: Build & Test
-  ***REMOVED*** ================================
+  # ================================
+  # Job 1: Build & Test
+  # ================================
   build:
     name: Build & Test
     runs-on: ubuntu-latest
@@ -76,10 +80,10 @@ jobs:
       - name: Run Unit Tests
         if: ${{ github.event.inputs.skip_tests != 'true' }}
         run: |
-          ***REMOVED*** Frontend Tests
+          # Frontend Tests
           pnpm --filter frontend-web run test:unit || true
           
-          ***REMOVED*** Backend Tests
+          # Backend Tests
           pytest tests/ --maxfail=5 || true
 
       - name: Build Success
@@ -92,9 +96,9 @@ jobs:
           echo "ℹ️  Note: Docker images are built locally on Windows/Docker Desktop"
           echo "ℹ️  To deploy staging locally, run: .\scripts\staging-deploy.ps1"
 
-  ***REMOVED*** ================================
-  ***REMOVED*** Job 2: Security Scan
-  ***REMOVED*** ================================
+  # ================================
+  # Job 2: Security Scan
+  # ================================
   security:
     name: Security Scan
     runs-on: ubuntu-latest
@@ -131,7 +135,7 @@ jobs:
       - name: AI Contribution Analysis
         run: |
           echo "🤖 Analyzing AI contributions in commits..."
-          ***REMOVED*** Check for AI-related commit messages
+          # Check for AI-related commit messages
           AI_COMMITS=$(git log --oneline ${{ github.event.repository.default_branch }}..HEAD | grep -i "\[AI\]" | wc -l)
           if [ "$AI_COMMITS" -gt 0 ]; then
             echo "✅ Found $AI_COMMITS AI-assisted commits"
@@ -140,9 +144,9 @@ jobs:
             echo "ℹ️  No AI-assisted commits detected in this push"
           fi
 
-  ***REMOVED*** ================================
-  ***REMOVED*** Job 3: Deployment Instructions
-  ***REMOVED*** ================================
+  # ================================
+  # Job 3: Deployment Instructions
+  # ================================
   deployment-info:
     name: Deployment Instructions
     runs-on: ubuntu-latest
@@ -176,9 +180,9 @@ jobs:
           echo "💡 Staging runs on your local Windows/Docker Desktop"
           echo ""
 
-  ***REMOVED*** ================================
-  ***REMOVED*** Job 4: Notify
-  ***REMOVED*** ================================
+  # ================================
+  # Job 4: Notify
+  # ================================
   notify:
     name: Notify Team
     runs-on: ubuntu-latest
@@ -212,23 +216,23 @@ jobs:
           echo ""
           echo "Please check logs and fix issues before deploying."
 
-      ***REMOVED*** Optional: Slack Notification
-      ***REMOVED*** - name: Slack Notification
-      ***REMOVED***   uses: slackapi/slack-github-action@v1
-      ***REMOVED***   if: always()
-      ***REMOVED***   with:
-      ***REMOVED***     webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-      ***REMOVED***     payload: |
-      ***REMOVED***       {
-      ***REMOVED***         "text": "CI/CD Pipeline: ${{ needs.build.result == 'success' && needs.security.result == 'success' && '✅ SUCCESS' || '❌ FAILURE' }}",
-      ***REMOVED***         "blocks": [
-      ***REMOVED***           {
-      ***REMOVED***             "type": "section",
-      ***REMOVED***             "text": {
-      ***REMOVED***               "type": "mrkdwn",
-      ***REMOVED***               "text": "*Staging CI/CD*\nBuild: ${{ needs.build.result }}\nSecurity: ${{ needs.security.result }}\nBranch: ${{ github.ref_name }}"
-      ***REMOVED***             }
-      ***REMOVED***           }
-      ***REMOVED***         ]
-      ***REMOVED***       }
+      # Optional: Slack Notification
+      # - name: Slack Notification
+      #   uses: slackapi/slack-github-action@v1
+      #   if: always()
+      #   with:
+      #     webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #     payload: |
+      #       {
+      #         "text": "CI/CD Pipeline: ${{ needs.build.result == 'success' && needs.security.result == 'success' && '✅ SUCCESS' || '❌ FAILURE' }}",
+      #         "blocks": [
+      #           {
+      #             "type": "section",
+      #             "text": {
+      #               "type": "mrkdwn",
+      #               "text": "*Staging CI/CD*\nBuild: ${{ needs.build.result }}\nSecurity: ${{ needs.security.result }}\nBranch: ${{ github.ref_name }}"
+      #             }
+      #           }
+      #         ]
+      #       }
 

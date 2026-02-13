@@ -80,7 +80,6 @@ export interface FarmProfile {
 }
 
 // Helper: API Response (snake_case) zu Frontend Model (camelCase) transformieren
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformFarmProfile(apiData: any): FarmProfile {
   return {
     id: apiData.id,
@@ -177,7 +176,6 @@ export const crmService = {
   // Betriebsprofile (Farm Profiles)
   async getFarmProfiles(params?: { search?: string; limit?: number; offset?: number }) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const response = await apiClient.get<{ items: any[]; total: number }>('/api/v1/crm/farm-profiles', { params })
       // API gibt { items, total } zurück mit snake_case, Frontend erwartet { data, total } mit camelCase
       const transformedItems = (response.data.items || []).map(transformFarmProfile)

@@ -1,13 +1,13 @@
-***REMOVED*** 🎯 Final Review: Kundenstamm-Migration L3 → VALEO-NeuroERP
+# 🎯 Final Review: Kundenstamm-Migration L3 → VALEO-NeuroERP
 
 **Datum:** 2025-10-26  
 **Status:** PHASE 1 ABGESCHLOSSEN / PHASE 2 ERFORDERLICH
 
 ---
 
-***REMOVED******REMOVED*** ✅ Was wurde erfolgreich implementiert
+## ✅ Was wurde erfolgreich implementiert
 
-***REMOVED******REMOVED******REMOVED*** 1. **SQL-Schema** (14 Tabellen, ~200 Felder)
+### 1. **SQL-Schema** (14 Tabellen, ~200 Felder)
 
 **Tabellen erstellt:**
 - `kunden` (60 Felder) - Haupttabelle
@@ -34,7 +34,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2. **Seed-Daten** (43 Records)
+### 2. **Seed-Daten** (43 Records)
 
 **Importiert:**
 - 10 Kunden (K00001–K00010)
@@ -45,7 +45,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 3. **Mask-Builder Konfiguration** (JSON)
+### 3. **Mask-Builder Konfiguration** (JSON)
 
 **Datei:** `packages/frontend-web/src/config/mask-builder-valeo-modern.json`
 
@@ -72,7 +72,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 4. **Frontend-Integration**
+### 4. **Frontend-Integration**
 
 **Komponenten erstellt:**
 - ✅ `l3-mask-adapter.ts` - Adapter für L3 JSON → MaskConfig
@@ -83,7 +83,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 5. **TypeScript & Lint**
+### 5. **TypeScript & Lint**
 
 **Alle Fehler behoben:**
 - ✅ JSON-Import mit @ts-ignore
@@ -95,9 +95,9 @@
 
 ---
 
-***REMOVED******REMOVED*** ⚠️ Identifiziertes Problem
+## ⚠️ Identifiziertes Problem
 
-***REMOVED******REMOVED******REMOVED*** **Die Seite zeigt nur ~60 Felder statt ~200**
+### **Die Seite zeigt nur ~60 Felder statt ~200**
 
 **Grund:**
 Die `mask-builder-valeo-modern.json` enthält nur eine verkürzte Konfiguration mit den wichtigsten Feldern. Die vollständigen 200 Felder aus dem SQL-Schema sind **nicht** in der JSON enthalten.
@@ -120,11 +120,11 @@ Die `mask-builder-valeo-modern.json` enthält nur eine verkürzte Konfiguration 
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Phase 2: Vollständige Implementierung erforderlich
+## 🎯 Phase 2: Vollständige Implementierung erforderlich
 
-***REMOVED******REMOVED******REMOVED*** **Ziel:** Alle ~200 Felder in der Mask-Builder-JSON abbilden
+### **Ziel:** Alle ~200 Felder in der Mask-Builder-JSON abbilden
 
-***REMOVED******REMOVED******REMOVED*** **Ansatz 1: Manuell erweitern**
+### **Ansatz 1: Manuell erweitern**
 ```json
 {
   "id": "rechnung_kontoauszug",
@@ -144,22 +144,22 @@ Die `mask-builder-valeo-modern.json` enthält nur eine verkürzte Konfiguration 
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** **Ansatz 2: Automatisch aus SQL-Schema generieren**
+### **Ansatz 2: Automatisch aus SQL-Schema generieren**
 ```python
-***REMOVED*** l3-migration-toolkit/generate-complete-mask-from-sql.py
+# l3-migration-toolkit/generate-complete-mask-from-sql.py
 def generate_mask_from_sql():
-    ***REMOVED*** Parse SQL-Schema
-    ***REMOVED*** Generiere JSON-Views für alle Tabellen
-    ***REMOVED*** Mappe SQL-Typen → Field-Typen
+    # Parse SQL-Schema
+    # Generiere JSON-Views für alle Tabellen
+    # Mappe SQL-Typen → Field-Typen
     pass
 ```
 
-***REMOVED******REMOVED******REMOVED*** **Ansatz 3: Bestehende JSON erweitern**
+### **Ansatz 3: Bestehende JSON erweitern**
 Die aktuelle `mask-builder-valeo-modern.json` als Basis nehmen und schrittweise erweitern.
 
 ---
 
-***REMOVED******REMOVED*** 📊 Vergleich: Implementiert vs. L3-Vollständig
+## 📊 Vergleich: Implementiert vs. L3-Vollständig
 
 | Kategorie | SQL-Schema | Mask-Builder JSON | Status |
 |-----------|------------|-------------------|--------|
@@ -181,9 +181,9 @@ Die aktuelle `mask-builder-valeo-modern.json` als Basis nehmen und schrittweise 
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Empfohlene nächste Schritte
+## 🚀 Empfohlene nächste Schritte
 
-***REMOVED******REMOVED******REMOVED*** **Priorität 1: Vollständige Mask-Builder-JSON generieren**
+### **Priorität 1: Vollständige Mask-Builder-JSON generieren**
 
 ```bash
 cd l3-migration-toolkit
@@ -192,7 +192,7 @@ python generate-complete-mask-from-sql.py --update-frontend
 
 **Output:** `mask-builder-kundenstamm-complete.json` im Toolkit **und** aktualisierte Frontend-Datei `packages/frontend-web/src/config/mask-builder-valeo-modern.json` – enthält jetzt alle ~200 Felder (automatisch aus dem SQL-Schema gruppiert).
 
-***REMOVED******REMOVED******REMOVED*** **Priorität 2: Detail-Tabellen als Sub-Tables integrieren**
+### **Priorität 2: Detail-Tabellen als Sub-Tables integrieren**
 
 ```typescript
 // Ansprechpartner als Detail-Tabelle
@@ -208,54 +208,54 @@ python generate-complete-mask-from-sql.py --update-frontend
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** **Priorität 3: API-Endpoints implementieren**
+### **Priorität 3: API-Endpoints implementieren**
 
 ```python
-***REMOVED*** app.api.v1.endpoints.kunden.py
+# app.api.v1.endpoints.kunden.py
 @router.get("/kunden/{kunden_nr}")
 async def get_kunde(kunden_nr: str, db: Session = Depends(get_db)):
     kunde = db.query(Kunden).filter(Kunden.kunden_nr == kunden_nr).first()
     profil = db.query(KundenProfil).filter(...).first()
     ansprechpartner = db.query(KundenAnsprechpartner).filter(...).all()
-    ***REMOVED*** ... weitere Tabellen laden
+    # ... weitere Tabellen laden
     return {
         "kunde": kunde,
         "profil": profil,
         "ansprechpartner": ansprechpartner,
-        ***REMOVED*** ...
+        # ...
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** ✅ Neu: Backend-Aggregation
+### ✅ Neu: Backend-Aggregation
 
 - `GET /verkauf/kunden/{kunden_nr}/full` liefert ab sofort den kompletten Kundenstamm (14 Tabellen) in einem Payload – Grundlage für Masken-Tests.
 - Router ist unter `/verkauf` publiziert; bestehende CRUD-Routen bleiben unverändert nutzbar.
 
 ---
 
-***REMOVED******REMOVED*** ✅ Zusammenfassung
+## ✅ Zusammenfassung
 
-***REMOVED******REMOVED******REMOVED*** **Was funktioniert:**
+### **Was funktioniert:**
 - ✅ SQL-Schema vollständig (14 Tabellen, ~200 Felder)
 - ✅ Seed-Daten importiert (43 Records)
 - ✅ Mask-Builder Framework (responsive + AI)
 - ✅ Frontend-Integration (kompiliert ohne Fehler)
 - ✅ TypeScript/Lint sauber
 
-***REMOVED******REMOVED******REMOVED*** **Was fehlt:**
+### **Was fehlt:**
 - ⚠️ **140+ Felder in Mask-Builder-JSON** (nur 60 von 200)
 - ⚠️ Detail-Tabellen nicht als Sub-Tables integriert
 - ⚠️ API-Endpoints nicht implementiert
 - ⚠️ Keine Datenanbindung Backend ↔ Frontend
 
-***REMOVED******REMOVED******REMOVED*** **Empfehlung:**
+### **Empfehlung:**
 **Option A:** Schrittweise manuell erweitern (zeitaufwendig)  
 **Option B:** Generator-Script schreiben (schneller, wiederverwendbar)  
 **Option C:** Hybrid: Generator + manuelle Anpassungen
 
 ---
 
-***REMOVED******REMOVED*** 📈 Geschätzter Aufwand für Vervollständigung
+## 📈 Geschätzter Aufwand für Vervollständigung
 
 | Aufgabe | Aufwand | Priorität |
 |---------|---------|-----------|
@@ -269,7 +269,7 @@ async def get_kunde(kunden_nr: str, db: Session = Depends(get_db)):
 
 ---
 
-***REMOVED******REMOVED*** 🎉 Fazit
+## 🎉 Fazit
 
 **Phase 1 (Foundation):** ✅ ERFOLGREICH ABGESCHLOSSEN
 
@@ -284,6 +284,7 @@ Die Basis ist solide:
 Um alle ~200 Felder aus L3 vollständig abzubilden, muss die Mask-Builder-JSON erweitert werden.
 
 **Empfehlung:** Generator-Script schreiben für automatische Generierung aller Felder aus SQL-Schema.
+
 
 
 

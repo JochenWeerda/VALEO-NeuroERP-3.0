@@ -25,19 +25,19 @@ class InventoryService:
         query = self.db.query(ArticleModel).filter(ArticleModel.id == article_id)
 
         if warehouse_id:
-            ***REMOVED*** Get stock for specific warehouse
+            # Get stock for specific warehouse
             article = query.first()
             if not article:
                 return {"current_stock": 0, "available_stock": 0, "reserved_stock": 0}
 
-            ***REMOVED*** For now, return total stock (warehouse-specific stock tracking would need additional table)
+            # For now, return total stock (warehouse-specific stock tracking would need additional table)
             return {
                 "current_stock": float(article.current_stock or 0),
                 "available_stock": float(article.available_stock or 0),
                 "reserved_stock": float(article.reserved_stock or 0)
             }
         else:
-            ***REMOVED*** Get total stock across all warehouses
+            # Get total stock across all warehouses
             article = query.first()
             if not article:
                 return {"current_stock": 0, "available_stock": 0, "reserved_stock": 0}
@@ -87,39 +87,39 @@ class InventoryService:
     ) -> StockMovement:
         """Process a stock movement and update article stock levels."""
 
-        ***REMOVED*** Get current article
+        # Get current article
         article = self.db.query(ArticleModel).filter(ArticleModel.id == article_id).first()
         if not article:
             raise ValueError(f"Article {article_id} not found")
 
-        ***REMOVED*** Get current warehouse
+        # Get current warehouse
         warehouse = self.db.query(WarehouseModel).filter(WarehouseModel.id == warehouse_id).first()
         if not warehouse:
             raise ValueError(f"Warehouse {warehouse_id} not found")
 
         previous_stock = article.current_stock or Decimal(0)
 
-        ***REMOVED*** Calculate new stock based on movement type
+        # Calculate new stock based on movement type
         if movement_type in ['in', 'adjustment'] and quantity > 0:
             new_stock = previous_stock + quantity
         elif movement_type in ['out', 'adjustment'] and quantity < 0:
-            new_stock = previous_stock + quantity  ***REMOVED*** quantity is negative
+            new_stock = previous_stock + quantity  # quantity is negative
         elif movement_type == 'transfer':
-            ***REMOVED*** For transfers, quantity can be positive (incoming) or negative (outgoing)
+            # For transfers, quantity can be positive (incoming) or negative (outgoing)
             new_stock = previous_stock + quantity
         else:
             raise ValueError(f"Invalid movement type: {movement_type}")
 
-        ***REMOVED*** Ensure stock doesn't go negative for outbound movements
+        # Ensure stock doesn't go negative for outbound movements
         if movement_type == 'out' and new_stock < 0:
             raise ValueError(f"Insufficient stock. Current: {previous_stock}, Requested: {abs(quantity)}")
 
-        ***REMOVED*** Calculate total cost if unit cost provided
+        # Calculate total cost if unit cost provided
         total_cost = None
         if unit_cost is not None:
             total_cost = abs(quantity) * unit_cost
 
-        ***REMOVED*** Create stock movement record
+        # Create stock movement record
         movement = StockMovementModel(
             id=str(uuid.uuid4()),
             article_id=article_id,
@@ -135,17 +135,17 @@ class InventoryService:
             tenant_id=tenant_id or article.tenant_id
         )
 
-        ***REMOVED*** Update article stock
+        # Update article stock
         article.current_stock = new_stock
         article.available_stock = new_stock - (article.reserved_stock or Decimal(0))
         article.updated_at = datetime.utcnow()
 
-        ***REMOVED*** Save changes
+        # Save changes
         self.db.add(movement)
         self.db.commit()
         self.db.refresh(movement)
 
-        ***REMOVED*** Publish event for stock movement
+        # Publish event for stock movement
         from app.core.event_publisher import get_event_publisher
         from app.domains.shared.events.inventory_events import StockMovementRecordedEvent
 
@@ -165,7 +165,7 @@ class InventoryService:
             tenant_id=tenant_id
         )
 
-        ***REMOVED*** Publish event asynchronously (fire and forget for now)
+        # Publish event asynchronously (fire and forget for now)
         import asyncio
         asyncio.create_task(event_publisher.publish(event))
 
@@ -212,12 +212,12 @@ class InventoryService:
 
         for article in articles:
             if article.current_stock and article.current_stock > 0:
-                ***REMOVED*** Use sales price for valuation (could also use purchase price)
+                # Use sales price for valuation (could also use purchase price)
                 if article.sales_price:
                     total_value += article.current_stock * article.sales_price
                 total_items += 1
 
-            ***REMOVED*** Check for low stock
+            # Check for low stock
             if article.min_stock and article.current_stock and article.current_stock < article.min_stock:
                 low_stock_items += 1
 
@@ -225,5 +225,5 @@ class InventoryService:
             "total_value": float(total_value),
             "total_items": total_items,
             "low_stock_items": low_stock_items,
-            "currency": "EUR"  ***REMOVED*** Could be made configurable per tenant
+            "currency": "EUR"  # Could be made configurable per tenant
         }

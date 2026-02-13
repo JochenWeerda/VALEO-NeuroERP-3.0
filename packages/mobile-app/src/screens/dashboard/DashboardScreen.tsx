@@ -125,28 +125,28 @@ export default function DashboardScreen({ navigation }: any) {
   const getActivityColor = (type: string) => {
     switch (type) {
       case 'lead':
-        return '***REMOVED***FF6B35';
+        return '#FF6B35';
       case 'task':
-        return '***REMOVED***4ECDC4';
+        return '#4ECDC4';
       case 'customer':
-        return '***REMOVED***45B7D1';
+        return '#45B7D1';
       case 'opportunity':
-        return '***REMOVED***96CEB4';
+        return '#96CEB4';
       default:
-        return '***REMOVED***666';
+        return '#666';
     }
   };
 
   const getPriorityColor = (priority?: string) => {
     switch (priority) {
       case 'high':
-        return '***REMOVED***FF4444';
+        return '#FF4444';
       case 'medium':
-        return '***REMOVED***FFAA00';
+        return '#FFAA00';
       case 'low':
-        return '***REMOVED***44AA44';
+        return '#44AA44';
       default:
-        return '***REMOVED***666';
+        return '#666';
     }
   };
 
@@ -176,17 +176,17 @@ export default function DashboardScreen({ navigation }: any) {
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
           <View style={styles.statsRow}>
-            <Card style={[styles.statCard, { backgroundColor: '***REMOVED***E3F2FD' }]}>
+            <Card style={[styles.statCard, { backgroundColor: '#E3F2FD' }]}>
               <Card.Content>
-                <MaterialIcons name="business" size={24} color="***REMOVED***1976D2" />
+                <MaterialIcons name="business" size={24} color="#1976D2" />
                 <Title style={styles.statNumber}>{stats.totalCustomers}</Title>
                 <Paragraph style={styles.statLabel}>Customers</Paragraph>
               </Card.Content>
             </Card>
 
-            <Card style={[styles.statCard, { backgroundColor: '***REMOVED***F3E5F5' }]}>
+            <Card style={[styles.statCard, { backgroundColor: '#F3E5F5' }]}>
               <Card.Content>
-                <MaterialIcons name="person-add" size={24} color="***REMOVED***7B1FA2" />
+                <MaterialIcons name="person-add" size={24} color="#7B1FA2" />
                 <Title style={styles.statNumber}>{stats.totalLeads}</Title>
                 <Paragraph style={styles.statLabel}>Active Leads</Paragraph>
               </Card.Content>
@@ -194,17 +194,17 @@ export default function DashboardScreen({ navigation }: any) {
           </View>
 
           <View style={styles.statsRow}>
-            <Card style={[styles.statCard, { backgroundColor: '***REMOVED***E8F5E8' }]}>
+            <Card style={[styles.statCard, { backgroundColor: '#E8F5E8' }]}>
               <Card.Content>
-                <MaterialIcons name="assignment" size={24} color="***REMOVED***388E3C" />
+                <MaterialIcons name="assignment" size={24} color="#388E3C" />
                 <Title style={styles.statNumber}>{stats.activeTasks}</Title>
                 <Paragraph style={styles.statLabel}>Active Tasks</Paragraph>
               </Card.Content>
             </Card>
 
-            <Card style={[styles.statCard, { backgroundColor: '***REMOVED***FFF3E0' }]}>
+            <Card style={[styles.statCard, { backgroundColor: '#FFF3E0' }]}>
               <Card.Content>
-                <MaterialIcons name="trending-up" size={24} color="***REMOVED***F57C00" />
+                <MaterialIcons name="trending-up" size={24} color="#F57C00" />
                 <Title style={styles.statNumber}>{stats.conversionRate}%</Title>
                 <Paragraph style={styles.statLabel}>Conversion</Paragraph>
               </Card.Content>
@@ -286,14 +286,14 @@ export default function DashboardScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '***REMOVED***f5f5f5',
+    backgroundColor: '#f5f5f5',
   },
   scrollView: {
     flex: 1,
   },
   header: {
     padding: 20,
-    backgroundColor: '***REMOVED***007AFF',
+    backgroundColor: '#007AFF',
   },
   welcomeText: {
     fontSize: 24,
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     textAlign: 'center',
-    color: '***REMOVED***666',
+    color: '#666',
     marginTop: 4,
   },
   section: {
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '***REMOVED***333',
+    color: '#333',
   },
   activityCard: {
     marginBottom: 8,
@@ -356,12 +356,12 @@ const styles = StyleSheet.create({
   activityTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '***REMOVED***333',
+    color: '#333',
     marginBottom: 4,
   },
   activityDescription: {
     fontSize: 14,
-    color: '***REMOVED***666',
+    color: '#666',
     marginBottom: 8,
   },
   activityMeta: {
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   },
   activityTime: {
     fontSize: 12,
-    color: '***REMOVED***999',
+    color: '#999',
   },
   priorityChip: {
     height: 20,

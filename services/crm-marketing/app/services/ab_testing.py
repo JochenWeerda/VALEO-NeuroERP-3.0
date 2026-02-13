@@ -22,9 +22,9 @@ class ABTesting:
     ) -> str:
         """Assign A/B-Test variant to a recipient."""
         if not campaign.settings or not campaign.settings.get("ab_test_enabled"):
-            return "A"  ***REMOVED*** Default variant
+            return "A"  # Default variant
         
-        ***REMOVED*** Get variants
+        # Get variants
         variants_stmt = select(CampaignABTest).where(
             CampaignABTest.campaign_id == campaign.id
         )
@@ -32,15 +32,15 @@ class ABTesting:
         variants = list(variants_result.scalars().all())
         
         if not variants:
-            return "A"  ***REMOVED*** Default variant
+            return "A"  # Default variant
         
-        ***REMOVED*** Calculate distribution (equal split by default)
+        # Calculate distribution (equal split by default)
         variant_names = [v.variant_name for v in variants]
         
-        ***REMOVED*** Random assignment
+        # Random assignment
         assigned_variant = random.choice(variant_names)
         
-        ***REMOVED*** Update recipient
+        # Update recipient
         recipient = await self.db.get(CampaignRecipient, recipient_id)
         if recipient:
             recipient.variant = assigned_variant
@@ -53,7 +53,7 @@ class ABTesting:
         campaign_id: UUID,
     ) -> List[Dict]:
         """Calculate performance metrics for each variant."""
-        ***REMOVED*** Get variants
+        # Get variants
         variants_stmt = select(CampaignABTest).where(
             CampaignABTest.campaign_id == campaign_id
         )
@@ -63,7 +63,7 @@ class ABTesting:
         results = []
         
         for variant in variants:
-            ***REMOVED*** Count recipients
+            # Count recipients
             recipient_count = await self.db.scalar(
                 select(func.count(CampaignRecipient.id)).where(
                     and_(
@@ -73,7 +73,7 @@ class ABTesting:
                 )
             ) or 0
             
-            ***REMOVED*** Count opens
+            # Count opens
             opened = await self.db.scalar(
                 select(func.count(CampaignEvent.id)).where(
                     and_(
@@ -91,7 +91,7 @@ class ABTesting:
                 )
             ) or 0
             
-            ***REMOVED*** Count clicks
+            # Count clicks
             clicked = await self.db.scalar(
                 select(func.count(CampaignEvent.id)).where(
                     and_(
@@ -109,7 +109,7 @@ class ABTesting:
                 )
             ) or 0
             
-            ***REMOVED*** Count conversions
+            # Count conversions
             converted = await self.db.scalar(
                 select(func.count(CampaignEvent.id)).where(
                     and_(
@@ -127,12 +127,12 @@ class ABTesting:
                 )
             ) or 0
             
-            ***REMOVED*** Calculate rates
+            # Calculate rates
             open_rate = (opened / recipient_count * 100) if recipient_count > 0 else 0.0
             click_rate = (clicked / recipient_count * 100) if recipient_count > 0 else 0.0
             conversion_rate = (converted / recipient_count * 100) if recipient_count > 0 else 0.0
             
-            ***REMOVED*** Update variant
+            # Update variant
             variant.recipient_count = recipient_count
             variant.open_rate = round(open_rate, 2)
             variant.click_rate = round(click_rate, 2)
@@ -156,7 +156,7 @@ class ABTesting:
     async def get_winner(
         self,
         campaign_id: UUID,
-        metric: str = "conversion_rate",  ***REMOVED*** conversion_rate, click_rate, open_rate
+        metric: str = "conversion_rate",  # conversion_rate, click_rate, open_rate
     ) -> str | None:
         """Get the winning variant based on metric."""
         performance = await self.calculate_variant_performance(campaign_id)
@@ -164,7 +164,7 @@ class ABTesting:
         if not performance:
             return None
         
-        ***REMOVED*** Sort by metric
+        # Sort by metric
         sorted_performance = sorted(
             performance,
             key=lambda x: x.get(metric, 0),
@@ -173,4 +173,5 @@ class ABTesting:
         
         winner = sorted_performance[0]
         return winner.get("variant_name")
+
 

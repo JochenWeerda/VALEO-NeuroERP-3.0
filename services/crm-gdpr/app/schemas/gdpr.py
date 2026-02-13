@@ -69,7 +69,7 @@ class GDPRRequestHistory(BaseModel):
 class GDPRRequestVerify(BaseModel):
     """Schema for verifying a GDPR request."""
     verification_method: str = Field(..., description="email, id_card, manual, other")
-    verification_token: UUID | None = None  ***REMOVED*** For email verification
+    verification_token: UUID | None = None  # For email verification
 
 
 class GDPRRequestExport(BaseModel):
@@ -92,7 +92,7 @@ class GDPRRequestReject(BaseModel):
 class GDPRCheckRequest(BaseModel):
     """Request to check if GDPR request exists for contact."""
     contact_id: UUID
-    request_type: str | None = None  ***REMOVED*** If None, checks for any request type
+    request_type: str | None = None  # If None, checks for any request type
 
 
 class GDPRCheckResponse(BaseModel):
@@ -101,4 +101,5 @@ class GDPRCheckResponse(BaseModel):
     request_id: UUID | None = None
     status: str | None = None
     request_type: str | None = None
+
 

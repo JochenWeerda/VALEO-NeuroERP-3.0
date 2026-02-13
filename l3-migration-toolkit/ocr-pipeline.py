@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 L3-Masken OCR-Pipeline
 
@@ -40,7 +40,7 @@ class L3MaskOCR:
         if tesseract_path:
             pytesseract.pytesseract.tesseract_cmd = tesseract_path
         
-        self.confidence_threshold = 60  ***REMOVED*** Min. OCR-Confidence
+        self.confidence_threshold = 60  # Min. OCR-Confidence
     
     def preprocess_image(self, img: Image.Image) -> Image.Image:
         """
@@ -50,27 +50,27 @@ class L3MaskOCR:
         - Schärfung
         - Rauschreduzierung
         """
-        ***REMOVED*** Convert PIL Image to OpenCV format
+        # Convert PIL Image to OpenCV format
         img_cv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         
-        ***REMOVED*** Graustufen
+        # Graustufen
         gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
         
-        ***REMOVED*** Kontrast erhöhen (CLAHE)
+        # Kontrast erhöhen (CLAHE)
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
         enhanced = clahe.apply(gray)
         
-        ***REMOVED*** Bilateral Filter (Rauschreduzierung, Kanten behalten)
+        # Bilateral Filter (Rauschreduzierung, Kanten behalten)
         denoised = cv2.bilateralFilter(enhanced, 9, 75, 75)
         
-        ***REMOVED*** Schwellwert-Anpassung (Adaptive Thresholding)
+        # Schwellwert-Anpassung (Adaptive Thresholding)
         thresh = cv2.adaptiveThreshold(
             denoised, 255, 
             cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
             cv2.THRESH_BINARY, 11, 2
         )
         
-        ***REMOVED*** Convert back to PIL
+        # Convert back to PIL
         return Image.fromarray(thresh)
     
     def extract_fields(self, screenshot_path: str) -> Dict[str, Any]:
@@ -87,24 +87,24 @@ class L3MaskOCR:
         """
         img = Image.open(screenshot_path)
         
-        ***REMOVED*** Preprocessing
+        # Preprocessing
         processed_img = self.preprocess_image(img)
         
-        ***REMOVED*** OCR mit Bounding Boxes (Nur Englisch - bessere Erkennung!)
-        ***REMOVED*** Erfahrungswert: English traineddata funktioniert besser als Deutsch
+        # OCR mit Bounding Boxes (Nur Englisch - bessere Erkennung!)
+        # Erfahrungswert: English traineddata funktioniert besser als Deutsch
         ocr_data = pytesseract.image_to_data(
             processed_img, 
             lang='eng',
             output_type=pytesseract.Output.DICT
         )
         
-        ***REMOVED*** Raw Text für LLM-Analyse
+        # Raw Text für LLM-Analyse
         raw_text = pytesseract.image_to_string(processed_img, lang='eng')
         
-        ***REMOVED*** Parse UI-Felder
+        # Parse UI-Felder
         fields = self.parse_ui_fields(ocr_data)
         
-        ***REMOVED*** Extrahiere Tabs
+        # Extrahiere Tabs
         tabs = self.extract_tabs(ocr_data)
         
         return {
@@ -134,15 +134,15 @@ class L3MaskOCR:
             text = ocr_data['text'][i].strip()
             conf = int(ocr_data['conf'][i])
             
-            ***REMOVED*** Filtere niedrige Confidence
+            # Filtere niedrige Confidence
             if conf < self.confidence_threshold or not text:
                 continue
             
-            ***REMOVED*** Erkenne Label (endet mit ":")
+            # Erkenne Label (endet mit ":")
             if text.endswith(':'):
                 label = text[:-1].strip()
                 
-                ***REMOVED*** Finde zugehöriges Input-Feld (rechts vom Label)
+                # Finde zugehöriges Input-Feld (rechts vom Label)
                 field_value, field_type = self._find_field_right_of_label(
                     ocr_data, i
                 )
@@ -175,7 +175,7 @@ class L3MaskOCR:
         label_top = ocr_data['top'][label_idx]
         label_height = ocr_data['height'][label_idx]
         
-        ***REMOVED*** Suche Texte rechts vom Label (innerhalb 500px, gleiche Höhe ±20px)
+        # Suche Texte rechts vom Label (innerhalb 500px, gleiche Höhe ±20px)
         candidates = []
         n_boxes = len(ocr_data['text'])
         
@@ -187,9 +187,9 @@ class L3MaskOCR:
             left = ocr_data['left'][i]
             top = ocr_data['top'][i]
             
-            ***REMOVED*** Rechts vom Label?
+            # Rechts vom Label?
             if left > label_left and left < label_left + 500:
-                ***REMOVED*** Gleiche Höhe?
+                # Gleiche Höhe?
                 if abs(top - label_top) < 20:
                     candidates.append({
                         'text': text,
@@ -200,11 +200,11 @@ class L3MaskOCR:
         if not candidates:
             return '', 'text'
         
-        ***REMOVED*** Nächster Kandidat = Input-Feld
+        # Nächster Kandidat = Input-Feld
         candidates.sort(key=lambda x: x['left'])
         field_value = candidates[0]['text']
         
-        ***REMOVED*** Erkenne Feldtyp
+        # Erkenne Feldtyp
         field_type = self._detect_field_type(field_value, ocr_data, label_idx)
         
         return field_value, field_type
@@ -215,35 +215,35 @@ class L3MaskOCR:
         """
         Erkennt Feldtyp basierend auf Kontext
         """
-        ***REMOVED*** Lookup-Felder (haben "..." Button)
+        # Lookup-Felder (haben "..." Button)
         if '...' in field_value or '…' in field_value:
             return 'lookup'
         
-        ***REMOVED*** Dropdown (hat ▼ oder Dropdown-Symbol)
+        # Dropdown (hat ▼ oder Dropdown-Symbol)
         if '▼' in field_value or '▾' in field_value:
             return 'select'
         
-        ***REMOVED*** Checkbox (☐ oder ☑)
+        # Checkbox (☐ oder ☑)
         if '☐' in field_value or '☑' in field_value or '✓' in field_value:
             return 'boolean'
         
-        ***REMOVED*** Datum (Pattern matching)
+        # Datum (Pattern matching)
         if self._looks_like_date(field_value):
             return 'date'
         
-        ***REMOVED*** Nummer (nur Ziffern)
+        # Nummer (nur Ziffern)
         if field_value.replace('.', '').replace(',', '').isdigit():
             return 'number'
         
-        ***REMOVED*** Default: Text
+        # Default: Text
         return 'string'
     
     def _looks_like_date(self, text: str) -> bool:
         """Prüft ob Text ein Datum ist"""
         import re
         date_patterns = [
-            r'\d{2}\.\d{2}\.\d{4}',  ***REMOVED*** DD.MM.YYYY
-            r'\d{4}-\d{2}-\d{2}',     ***REMOVED*** YYYY-MM-DD
+            r'\d{2}\.\d{2}\.\d{4}',  # DD.MM.YYYY
+            r'\d{4}-\d{2}-\d{2}',     # YYYY-MM-DD
         ]
         return any(re.match(p, text) for p in date_patterns)
     
@@ -259,7 +259,7 @@ class L3MaskOCR:
         tabs = []
         n_boxes = len(ocr_data['text'])
         
-        ***REMOVED*** Suche nach Tab-Texten (Y-Position < 400, nur Großbuchstaben)
+        # Suche nach Tab-Texten (Y-Position < 400, nur Großbuchstaben)
         for i in range(n_boxes):
             text = ocr_data['text'][i].strip()
             top = ocr_data['top'][i]
@@ -268,11 +268,11 @@ class L3MaskOCR:
             if conf < self.confidence_threshold or not text:
                 continue
             
-            ***REMOVED*** Tab-Kriterien
+            # Tab-Kriterien
             if top < 400 and text.isupper() and len(text) > 3:
                 tabs.append(text)
         
-        return list(set(tabs))  ***REMOVED*** Deduplizierung
+        return list(set(tabs))  # Deduplizierung
     
     def _calculate_avg_confidence(self, ocr_data: Dict) -> float:
         """Berechnet durchschnittliche OCR-Confidence"""
@@ -310,7 +310,7 @@ def main():
         print(f"   Durchschn. Confidence: {results['metadata']['avg_confidence']:.1f}%")
         
         print(f"\n📋 Felder:")
-        for field in results['fields'][:10]:  ***REMOVED*** Erste 10
+        for field in results['fields'][:10]:  # Erste 10
             print(f"   - {field['label']}: {field['type']} (Confidence: {field['confidence']}%)")
         
         if results['tabs']:
@@ -322,7 +322,7 @@ def main():
             debug_path = Path(args.screenshot).with_suffix('.debug.png')
             ocr.save_debug_image(args.screenshot, str(debug_path))
         
-        ***REMOVED*** Speichere JSON
+        # Speichere JSON
         output_path = Path(args.screenshot).with_suffix('.ocr.json')
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
@@ -336,4 +336,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 

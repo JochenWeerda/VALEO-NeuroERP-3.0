@@ -12,7 +12,7 @@ from decimal import Decimal
 from .base import BaseSchema, TimestampMixin, SoftDeleteMixin
 
 
-***REMOVED*** Customer Schemas
+# Customer Schemas
 class CustomerBase(BaseSchema):
     """Base customer schema"""
     customer_number: str = Field(..., min_length=1, max_length=50, description="Unique customer number")
@@ -27,13 +27,13 @@ class CustomerBase(BaseSchema):
     country: Optional[str] = Field(None, max_length=50, description="Country")
     industry: Optional[str] = Field(None, max_length=50, description="Industry sector")
     website: Optional[str] = Field(None, max_length=100, description="Company website")
-    ***REMOVED*** Sales-spezifische Felder (nur neue)
+    # Sales-spezifische Felder (nur neue)
     price_group: Optional[str] = Field(None, max_length=50, description="Price group (standard, premium, wholesale, retail)")
     tax_category: Optional[str] = Field(None, max_length=50, description="Tax category (standard, reduced, zero, reverse_charge, exempt)")
-    ***REMOVED*** Bestehende Felder werden über Mapping verwendet:
-    ***REMOVED*** customer_segment → analytics.segment (Frontend)
-    ***REMOVED*** industry → profile.industry_code (Frontend)
-    ***REMOVED*** region → region (crm-core)
+    # Bestehende Felder werden über Mapping verwendet:
+    # customer_segment → analytics.segment (Frontend)
+    # industry → profile.industry_code (Frontend)
+    # region → region (crm-core)
 
     @field_validator("name", mode="before")
     @classmethod
@@ -62,7 +62,7 @@ class CustomerUpdate(BaseSchema):
     country: Optional[str] = Field(None, max_length=50, description="Country")
     industry: Optional[str] = Field(None, max_length=50, description="Industry sector")
     website: Optional[str] = Field(None, max_length=100, description="Company website")
-    ***REMOVED*** Sales-spezifische Felder (nur neue)
+    # Sales-spezifische Felder (nur neue)
     price_group: Optional[str] = Field(None, max_length=50, description="Price group")
     tax_category: Optional[str] = Field(None, max_length=50, description="Tax category")
     is_active: Optional[bool] = Field(None, description="Whether customer is active")
@@ -75,12 +75,12 @@ class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
     credit_limit: Optional[Decimal] = Field(None, ge=0, description="Credit limit")
     payment_terms: Optional[int] = Field(None, ge=0, description="Payment terms in days")
     tax_id: Optional[str] = Field(None, max_length=50, description="Tax identification number")
-    ***REMOVED*** Sales-spezifische Felder (nur neue)
+    # Sales-spezifische Felder (nur neue)
     price_group: Optional[str] = Field(None, max_length=50, description="Price group")
     tax_category: Optional[str] = Field(None, max_length=50, description="Tax category")
 
 
-***REMOVED*** Lead Schemas
+# Lead Schemas
 class LeadBase(BaseSchema):
     """Base lead schema"""
     source: str = Field(..., max_length=50, description="Lead source")
@@ -121,7 +121,7 @@ class Lead(LeadBase, TimestampMixin, SoftDeleteMixin):
     converted_to_customer_id: Optional[UUID] = Field(None, description="Converted customer ID")
 
 
-***REMOVED*** Contact Schemas
+# Contact Schemas
 class ContactBase(BaseSchema):
     """Base contact schema"""
     first_name: str = Field(..., min_length=1, max_length=50, description="First name")
@@ -153,7 +153,7 @@ class Contact(ContactBase, TimestampMixin, SoftDeleteMixin):
     customer_id: UUID = Field(..., description="Customer ID")
 
 
-***REMOVED*** Activity Schemas
+# Activity Schemas
 class ActivityBase(BaseSchema):
     """Base activity schema"""
     type: str = Field(..., max_length=20, description="Activity type (meeting, call, email, note)")
@@ -188,7 +188,7 @@ class Activity(ActivityBase, TimestampMixin):
     id: UUID = Field(..., description="Activity ID")
 
 
-***REMOVED*** Farm Profile Schemas
+# Farm Profile Schemas
 class CropItem(BaseSchema):
     """Crop item schema"""
     crop: str = Field(..., max_length=100, description="Crop name")
@@ -242,7 +242,7 @@ class FarmProfile(FarmProfileBase, TimestampMixin):
     id: str = Field(..., description="Farm profile ID")
 
 
-***REMOVED*** Case Schemas
+# Case Schemas
 class CaseBase(BaseSchema):
     """Base service case schema"""
     subject: str = Field(..., max_length=255, description="Case subject")
@@ -290,7 +290,7 @@ class Case(CaseBase, TimestampMixin):
     sla_breached: bool = Field(default=False, description="Indicates SLA breach")
 
 
-***REMOVED*** Opportunity Schemas
+# Opportunity Schemas
 class OpportunityBase(BaseSchema):
     """Base opportunity schema"""
     name: str = Field(..., min_length=1, max_length=255, description="Opportunity name")

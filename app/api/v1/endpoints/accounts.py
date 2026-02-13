@@ -53,7 +53,7 @@ async def list_accounts(
     try:
         account_repo = container.resolve(AccountRepository)
 
-        ***REMOVED*** Use provided tenant_id or default to system for now
+        # Use provided tenant_id or default to system for now
         effective_tenant_id = tenant_id or "system"
 
         accounts = await account_repo.get_all(
@@ -94,7 +94,7 @@ async def get_account(
     """
     try:
         account_repo = container.resolve(AccountRepository)
-        account = await account_repo.get_by_id(account_id, "system")  ***REMOVED*** TODO: tenant context
+        account = await account_repo.get_by_id(account_id, "system")  # TODO: tenant context
         if not account:
             raise HTTPException(status_code=404, detail="Account not found")
         return Account.model_validate(account)
@@ -116,7 +116,7 @@ async def get_account_by_number(
     """
     try:
         account_repo = container.resolve(AccountRepository)
-        account = await account_repo.get_by_number(account_number, "system")  ***REMOVED*** TODO: tenant context
+        account = await account_repo.get_by_number(account_number, "system")  # TODO: tenant context
         if not account:
             raise HTTPException(status_code=404, detail="Account not found")
         return Account.model_validate(account)
@@ -139,7 +139,7 @@ async def update_account(
     """
     try:
         account_repo = container.resolve(AccountRepository)
-        account = await account_repo.update(account_id, account_data.model_dump(exclude_unset=True), "system")  ***REMOVED*** TODO: tenant context
+        account = await account_repo.update(account_id, account_data.model_dump(exclude_unset=True), "system")  # TODO: tenant context
         if not account:
             raise HTTPException(status_code=404, detail="Account not found")
         return Account.model_validate(account)
@@ -161,7 +161,7 @@ async def delete_account(
     """
     try:
         account_repo = container.resolve(AccountRepository)
-        success = await account_repo.delete(account_id, "system")  ***REMOVED*** TODO: tenant context
+        success = await account_repo.delete(account_id, "system")  # TODO: tenant context
         if not success:
             raise HTTPException(status_code=404, detail="Account not found")
     except HTTPException:
@@ -182,7 +182,7 @@ async def get_account_balance(
     """
     try:
         account_repo = container.resolve(AccountRepository)
-        balance = await account_repo.get_balance(account_id, "system")  ***REMOVED*** TODO: tenant context
+        balance = await account_repo.get_balance(account_id, "system")  # TODO: tenant context
         return {"account_id": account_id, "balance": balance}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve account balance: {str(e)}")
@@ -204,7 +204,7 @@ async def get_accounts_hierarchy(
         
         effective_tenant_id = tenant_id or "system"
         
-        ***REMOVED*** Query all accounts
+        # Query all accounts
         query = db.query(AccountModel).filter(
             AccountModel.tenant_id == effective_tenant_id,
             AccountModel.is_active == True,
@@ -216,11 +216,11 @@ async def get_accounts_hierarchy(
         
         all_accounts = query.all()
         
-        ***REMOVED*** Build account map
+        # Build account map
         account_map: Dict[str, AccountHierarchy] = {}
         root_accounts: List[AccountHierarchy] = []
         
-        ***REMOVED*** First pass: create all account objects
+        # First pass: create all account objects
         from datetime import datetime
         for acc in all_accounts:
             account_dict = {
@@ -242,7 +242,7 @@ async def get_accounts_hierarchy(
             account_hierarchy = AccountHierarchy(**account_dict)
             account_map[str(acc.id)] = account_hierarchy
         
-        ***REMOVED*** Second pass: build hierarchy
+        # Second pass: build hierarchy
         for acc in all_accounts:
             account_hierarchy = account_map[str(acc.id)]
             if acc.parent_account_id:

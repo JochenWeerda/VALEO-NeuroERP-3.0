@@ -73,7 +73,7 @@ async def turnover_analysis(
     tenant_id: str = Depends(resolve_tenant_id),
     event_bus=Depends(get_event_bus),
 ) -> dict[str, object]:
-    ***REMOVED*** Placeholder values until detailed analytics exist
+    # Placeholder values until detailed analytics exist
     return {
         "period": "current_month",
         "throughput": {
@@ -82,4 +82,5 @@ async def turnover_analysis(
             "transfers": 0,
         },
     }
+
 

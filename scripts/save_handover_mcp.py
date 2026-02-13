@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Speichert das aktuelle Handover-Dokument in MongoDB und nutzt MCP für die Verarbeitung.
 """
@@ -11,16 +11,16 @@ from pathlib import Path
 from datetime import datetime
 import nest_asyncio
 
-***REMOVED*** Pfad zum Projektverzeichnis hinzufügen
+# Pfad zum Projektverzeichnis hinzufügen
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 from linkup_mcp.rag import RAGWorkflow
 
-***REMOVED*** Apply nest_asyncio für verschachtelte Event-Loops
+# Apply nest_asyncio für verschachtelte Event-Loops
 nest_asyncio.apply()
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class HandoverProcessor:
         self.mongodb_connector = APMMongoDBConnector(mongodb_uri, db_name)
         self.rag_workflow = RAGWorkflow()
         
-        ***REMOVED*** Projekt-ID abrufen oder erstellen
+        # Projekt-ID abrufen oder erstellen
         project = self.mongodb_connector.find_one("projects", {"name": "VALEO-NeuroERP"})
         if not project:
             project_id = self.mongodb_connector.insert_one("projects", {
@@ -45,7 +45,7 @@ class HandoverProcessor:
     async def initialize(self):
         """Initialisiert den RAG-Workflow mit den Dokumenten aus der Memory Bank."""
         try:
-            ***REMOVED*** Nur die Handover-Dokumente laden, nicht die gesamte Memory Bank
+            # Nur die Handover-Dokumente laden, nicht die gesamte Memory Bank
             handover_dir = Path(__file__).resolve().parent.parent / "memory-bank" / "handover"
             await self.rag_workflow.ingest_documents(str(handover_dir))
             logger.info(f"RAG-Workflow mit Dokumenten aus {handover_dir} initialisiert")
@@ -56,7 +56,7 @@ class HandoverProcessor:
     async def process_handover(self, handover_file_path):
         """Verarbeitet das Handover-Dokument und speichert es in MongoDB."""
         try:
-            ***REMOVED*** Handover-Dokument einlesen
+            # Handover-Dokument einlesen
             handover_path = Path(handover_file_path)
             if not handover_path.exists():
                 raise FileNotFoundError(f"Handover-Datei nicht gefunden: {handover_file_path}")
@@ -66,11 +66,11 @@ class HandoverProcessor:
             
             logger.info(f"Handover-Dokument aus {handover_file_path} eingelesen")
             
-            ***REMOVED*** MCP verwenden, um Kontext aus dem Handover zu extrahieren
+            # MCP verwenden, um Kontext aus dem Handover zu extrahieren
             summary_query = "Fasse die wichtigsten Punkte aus diesem Handover-Dokument zusammen und extrahiere die nächsten Schritte."
             summary = await self.rag_workflow.query(summary_query)
             
-            ***REMOVED*** Handover-Metadaten erstellen
+            # Handover-Metadaten erstellen
             handover_data = {
                 "content": handover_content,
                 "summary": str(summary),
@@ -80,11 +80,11 @@ class HandoverProcessor:
                 "project_id": self.project_id
             }
             
-            ***REMOVED*** In MongoDB speichern
+            # In MongoDB speichern
             handover_id = self.mongodb_connector.db["handovers"].insert_one(handover_data)
             logger.info(f"Handover in MongoDB gespeichert mit ID: {handover_id.inserted_id}")
             
-            ***REMOVED*** Referenz im Projekt-Dokument aktualisieren
+            # Referenz im Projekt-Dokument aktualisieren
             self.mongodb_connector.db["projects"].update_one(
                 {"_id": self.project_id},
                 {"$set": {"current_handover_id": handover_id.inserted_id}}
@@ -104,18 +104,18 @@ class HandoverProcessor:
 async def main():
     """Hauptfunktion zum Speichern des Handover-Dokuments in MongoDB."""
     try:
-        ***REMOVED*** HandoverProcessor initialisieren
+        # HandoverProcessor initialisieren
         processor = HandoverProcessor()
         await processor.initialize()
         
-        ***REMOVED*** Pfad zum aktuellen Handover-Dokument
+        # Pfad zum aktuellen Handover-Dokument
         handover_path = Path(__file__).resolve().parent.parent / "memory-bank" / "handover" / "current-handover.md"
         
-        ***REMOVED*** Handover verarbeiten und in MongoDB speichern
+        # Handover verarbeiten und in MongoDB speichern
         handover_id = await processor.process_handover(handover_path)
         logger.info(f"Handover erfolgreich verarbeitet und in MongoDB gespeichert (ID: {handover_id})")
         
-        ***REMOVED*** Verbindung schließen
+        # Verbindung schließen
         processor.close()
         
     except Exception as e:

@@ -4,55 +4,9 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Calendar, CheckCircle, Search, TrendingDown } from 'lucide-react'
-
-type Zahlungsvorschlag = {
-  id: string
-  rechnungsNr: string
-  lieferant: string
-  betrag: number
-  faelligAm: string
-  skonto: number
-  skontoBis: string
-  vorschlag: 'skonto' | 'faellig' | 'spaeter'
-  prioritaet: number
-}
-
-const mockVorschlaege: Zahlungsvorschlag[] = [
-  {
-    id: '1',
-    rechnungsNr: 'ER-2025-0001',
-    lieferant: 'Saatgut AG',
-    betrag: 25000.0,
-    faelligAm: '2025-11-07',
-    skonto: 2,
-    skontoBis: '2025-10-18',
-    vorschlag: 'skonto',
-    prioritaet: 1,
-  },
-  {
-    id: '2',
-    rechnungsNr: 'ER-2025-0004',
-    lieferant: 'Technik GmbH',
-    betrag: 8900.0,
-    faelligAm: '2025-10-20',
-    skonto: 3,
-    skontoBis: '2025-10-15',
-    vorschlag: 'skonto',
-    prioritaet: 2,
-  },
-  {
-    id: '3',
-    rechnungsNr: 'ER-2025-0003',
-    lieferant: 'Agrar-Handel Nord',
-    betrag: 12200.0,
-    faelligAm: '2025-11-09',
-    skonto: 0,
-    skontoBis: '',
-    vorschlag: 'faellig',
-    prioritaet: 3,
-  },
-]
+import { useZahlungsvorschlaege, type Zahlungsvorschlag } from '@/lib/api/fibu'
 
 const vorschlagVariantMap: Record<Zahlungsvorschlag['vorschlag'], 'default' | 'secondary' | 'outline'> = {
   skonto: 'default',
@@ -69,8 +23,18 @@ const vorschlagLabelMap: Record<Zahlungsvorschlag['vorschlag'], string> = {
 export default function ZahlungsvorschlaegePage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const { data: items, isLoading } = useZahlungsvorschlaege()
 
-  const filteredVorschlaege = mockVorschlaege.filter((vorschlag) =>
+  if (isLoading) return (
+    <div className="p-3 md:p-6 space-y-4">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>
+  )
+
+  const list = items ?? []
+
+  const filteredVorschlaege = list.filter((vorschlag) =>
     vorschlag.rechnungsNr.toLowerCase().includes(searchTerm.toLowerCase()) ||
     vorschlag.lieferant.toLowerCase().includes(searchTerm.toLowerCase())
   )
@@ -110,7 +74,7 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
     },
     {
       key: 'prioritaet' as const,
-      label: '***REMOVED***',
+      label: '#',
       render: (vorschlag: Zahlungsvorschlag) => (
         <span className="text-sm font-semibold">{vorschlag.prioritaet}</span>
       ),
@@ -185,7 +149,7 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Zahlungsvorschläge</h1>

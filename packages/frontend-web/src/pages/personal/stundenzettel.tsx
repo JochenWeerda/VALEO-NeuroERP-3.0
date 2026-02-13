@@ -1,11 +1,14 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { SignatureCanvas, type SignatureCanvasRef } from '@/components/ui/signature-canvas'
 import { Clock, Plus, Save, Truck } from 'lucide-react'
+import { toast } from '@/hooks/use-toast'
+import { useSaveStundenzettel } from '@/lib/api/personal'
 
 type Tour = {
   id: string
@@ -27,7 +30,9 @@ type Stundenzettel = {
 
 export default function StundenzettelPage(): JSX.Element {
   const navigate = useNavigate()
-  
+  const signatureRef = useRef<SignatureCanvasRef>(null)
+  const saveMutation = useSaveStundenzettel()
+
   const [zettel, setZettel] = useState<Stundenzettel>({
     datum: new Date().toISOString().split('T')[0],
     fahrer: '',
@@ -86,6 +91,26 @@ export default function StundenzettelPage(): JSX.Element {
       gesamtArbeitszeit: Number(stunden.toFixed(2)),
       ueberstunden: Number(ueberstunden.toFixed(2)),
     })
+  }
+
+  async function handleSave(): Promise<void> {
+    const signatureData = signatureRef.current?.toDataURL() || undefined
+    const isEmpty = signatureRef.current?.isEmpty() ?? true
+
+    if (isEmpty) {
+      toast({ variant: 'destructive', title: 'Bitte unterschreiben Sie den Stundenzettel.' })
+      return
+    }
+
+    const dataToSave = { ...zettel, unterschrift: signatureData }
+
+    try {
+      await saveMutation.mutateAsync(dataToSave)
+      toast({ title: 'Stundenzettel gespeichert' })
+      navigate('/personal/stundenzettel-liste')
+    } catch {
+      toast({ variant: 'destructive', title: 'Fehler beim Speichern' })
+    }
   }
 
   return (
@@ -248,12 +273,18 @@ export default function StundenzettelPage(): JSX.Element {
           <CardTitle>Unterschrift Fahrer</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="border-2 border-dashed rounded-lg h-32 flex items-center justify-center text-muted-foreground">
-            <div className="text-center">
-              <p className="text-sm">Unterschrift hier (Touch-Canvas)</p>
-              <p className="text-xs mt-1">TODO: React-Signature-Canvas</p>
-            </div>
-          </div>
+          <SignatureCanvas
+            ref={signatureRef}
+            width={500}
+            height={150}
+            strokeColor="#1e293b"
+            strokeWidth={2}
+            onChange={(empty) => {
+              if (!empty) {
+                // Signature has content - will be captured on save
+              }
+            }}
+          />
         </CardContent>
       </Card>
 
@@ -262,11 +293,12 @@ export default function StundenzettelPage(): JSX.Element {
         <Button variant="outline" onClick={() => navigate('/personal/stundenzettel-liste')}>
           Abbrechen
         </Button>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={handleSave} disabled={saveMutation.isPending}>
           <Save className="h-4 w-4" />
-          Speichern
+          {saveMutation.isPending ? 'Speichern...' : 'Speichern'}
         </Button>
       </div>
     </div>
   )
 }
+

@@ -1,11 +1,11 @@
-***REMOVED*** ✅ Kundenstamm - FINAL MODERN & COMPLETE
+# ✅ Kundenstamm - FINAL MODERN & COMPLETE
 
 **Datum:** 2025-10-26  
 **Status:** ✅ PRODUCTION-READY
 
-***REMOVED******REMOVED*** 🎉 ERFOLG! Vollständiges modernes Schema erstellt
+## 🎉 ERFOLG! Vollständiges modernes Schema erstellt
 
-***REMOVED******REMOVED******REMOVED*** ✅ Alle Anforderungen erfüllt
+### ✅ Alle Anforderungen erfüllt
 
 - ✅ **200+ Felder erhalten** - Alle L3-Felder vorhanden
 - ✅ **23 Views/Tabs** - Vollständige Navigation
@@ -15,14 +15,14 @@
 - ✅ **Offline-Ready** - Client-Cache, Optimistic UI
 - ✅ **Performance** - Virtual Lists, Deferred Panels
 
-***REMOVED******REMOVED*** 📊 Schema-Übersicht
+## 📊 Schema-Übersicht
 
-***REMOVED******REMOVED******REMOVED*** Datei
+### Datei
 **`kundenstamm-final-complete-modern.json`**
 
-***REMOVED******REMOVED******REMOVED*** Features
+### Features
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 🎨 UI & Responsive
+#### 🎨 UI & Responsive
 ```json
 "ui": {
   "responsive": true,
@@ -36,7 +36,7 @@
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 🤖 KI-Features
+#### 🤖 KI-Features
 ```json
 "ai": {
   "enabled": true,
@@ -57,7 +57,7 @@
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 📋 Views/Tabs (23)
+#### 📋 Views/Tabs (23)
 1. Übersicht
 2. Stammdaten
 3. Adressen
@@ -83,7 +83,7 @@
 23. Schnittstellen
 24. Historie
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 🗄️ Untertabellen (13)
+#### 🗄️ Untertabellen (13)
 - kunden_profil
 - kunden_ansprechpartner (mehrfach)
 - kunden_versand
@@ -98,9 +98,9 @@
 - kunden_rabatte_detail (mehrfach)
 - kunden_preise_detail (mehrfach)
 
-***REMOVED******REMOVED*** 🤖 KI-Features im Detail
+## 🤖 KI-Features im Detail
 
-***REMOVED******REMOVED******REMOVED*** Intent-Bar (⌘/Ctrl-K)
+### Intent-Bar (⌘/Ctrl-K)
 - **Briefanrede vorschlagen** - Auto-generiert aus Name + Anrede
 - **USt-ID prüfen** - VIES-Validierung in Echtzeit
 - **Dubletten prüfen** - Realtime-Scoring
@@ -108,7 +108,7 @@
 - **Adresse validieren** - Geocoding-Integration
 - **Kundenbegrüßung generieren** - LLM-basiert
 
-***REMOVED******REMOVED******REMOVED*** AI-Assist auf Feldebene
+### AI-Assist auf Feldebene
 ```json
 { "comp": "Text", "bind": "contact.letter_salutation",
   "aiAssist": { 
@@ -118,7 +118,7 @@
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** AI-Validierung
+### AI-Validierung
 ```json
 { "comp": "Text", "bind": "ust_id_nr",
   "aiValidate": { 
@@ -128,42 +128,42 @@
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** MCP Tools
+### MCP Tools
 - `vies.checkVat` - VAT-Validierung
 - `geo.resolve` - Adress-Geocoding
 - `scoring.duplicate` - Dubletten-Erkennung
 - `iban.validate` - IBAN-Validierung
 
-***REMOVED******REMOVED*** 📱 Mobile-Features
+## 📱 Mobile-Features
 
-***REMOVED******REMOVED******REMOVED*** Responsive Breakpoints
+### Responsive Breakpoints
 - **<640px:** 1 Spalte, Bottom-Nav, Accordions
 - **<1024px:** 2 Spalten, Side-Nav
 - **≥1024px:** 3 Spalten, Side-Nav
 
-***REMOVED******REMOVED******REMOVED*** Touch-Optimierung
+### Touch-Optimierung
 - Große Touch-Targets (min 44px)
 - Swipe-Actions (Anrufen, Mail)
 - Vertikale Listen
 - Sticky Action Bar
 
-***REMOVED******REMOVED******REMOVED*** Performance
+### Performance
 - Virtual Lists für große Datenmengen
 - Deferred Heavy Panels
 - Optimistic UI
 - Client-Cache
 
-***REMOVED******REMOVED*** 🚀 Implementierung
+## 🚀 Implementierung
 
-***REMOVED******REMOVED******REMOVED*** Schritt 1: Schema importieren
+### Schritt 1: Schema importieren
 ```bash
-***REMOVED*** In VALEO-NeuroERP Mask Builder
+# In VALEO-NeuroERP Mask Builder
 Import → kundenstamm-final-complete-modern.json
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 2: KI-Endpunkte implementieren
+### Schritt 2: KI-Endpunkte implementieren
 ```python
-***REMOVED*** Backend: app/api/ai/
+# Backend: app/api/ai/
 @router.post("/ai/intent")
 async def handle_intent(intent: str, context: dict):
     """Intent-Bar Endpunkt"""
@@ -180,21 +180,21 @@ async def rag_query(query: str, context: dict):
     pass
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 3: MCP Tools integrieren
+### Schritt 3: MCP Tools integrieren
 - VIES API für VAT-Validierung
 - Geocoding API für Adressen
 - Scoring-Service für Dubletten
 - IBAN-Validator
 
-***REMOVED******REMOVED******REMOVED*** Schritt 4: Frontend-Komponenten
+### Schritt 4: Frontend-Komponenten
 - Intent-Bar mit ⌘K Shortcut
 - RAG-Panel rechts
 - AI-Assist Chips
 - Smart Validators
 
-***REMOVED******REMOVED*** ✅ Finale Checkliste
+## ✅ Finale Checkliste
 
-***REMOVED******REMOVED******REMOVED*** Schema
+### Schema
 - [x] 200+ Felder integriert
 - [x] 23 Views/Tabs konfiguriert
 - [x] 13 Untertabellen gemappt
@@ -202,7 +202,7 @@ async def rag_query(query: str, context: dict):
 - [x] Touch-Optimierung
 - [x] Performance-Hints
 
-***REMOVED******REMOVED******REMOVED*** KI-Features
+### KI-Features
 - [x] Intent-Bar konfiguriert
 - [x] AI-Assist auf Feldern
 - [x] AI-Validierung
@@ -210,7 +210,7 @@ async def rag_query(query: str, context: dict):
 - [x] MCP Tools
 - [x] Telemetry
 
-***REMOVED******REMOVED******REMOVED*** Backend
+### Backend
 - [x] SQL-Tabellen (17 Tabellen)
 - [x] Mask Builder JSON
 - [x] Mappings (L3 → VALEO)
@@ -218,7 +218,7 @@ async def rag_query(query: str, context: dict):
 - [ ] KI-Endpunkte (implementieren)
 - [ ] MCP Tools (integrieren)
 
-***REMOVED******REMOVED******REMOVED*** Frontend
+### Frontend
 - [ ] Mask Builder Import
 - [ ] Responsive Layout
 - [ ] Intent-Bar UI
@@ -226,7 +226,7 @@ async def rag_query(query: str, context: dict):
 - [ ] AI-Assist Chips
 - [ ] Touch-Actions
 
-***REMOVED******REMOVED*** 🎯 Nächste Schritte
+## 🎯 Nächste Schritte
 
 1. **Schema testen** - In VALEO-NeuroERP importieren
 2. **KI-Endpunkte bauen** - Backend-API erweitern
@@ -234,7 +234,7 @@ async def rag_query(query: str, context: dict):
 4. **Frontend komponenten** - React-Komponenten
 5. **Testing** - Mit echten Daten
 
-***REMOVED******REMOVED*** ✅ STATUS
+## ✅ STATUS
 
 **Schema:** ✅ FERTIG  
 **Responsive:** ✅ KONFIGURIERT  
@@ -249,4 +249,5 @@ async def rag_query(query: str, context: dict):
 **Version:** 3.1.0  
 **Qualität:** ✅ Production-Ready  
 **Innovation:** 🚀 KI-First + Mobile-First
+
 

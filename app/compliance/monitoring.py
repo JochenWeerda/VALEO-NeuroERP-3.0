@@ -78,7 +78,7 @@ class ComplianceMetric:
     last_updated: datetime
     responsible_party: str
     alert_thresholds: Dict[str, float] = field(default_factory=dict)
-    trend: str = "stable"  ***REMOVED*** improving, stable, declining
+    trend: str = "stable"  # improving, stable, declining
     is_active: bool = True
 
 
@@ -114,7 +114,7 @@ class ComplianceDashboard:
     name: str
     standard: ComplianceStandard
     widgets: List[Dict[str, Any]] = field(default_factory=list)
-    refresh_interval: int = 300  ***REMOVED*** seconds
+    refresh_interval: int = 300  # seconds
     user_roles: List[str] = field(default_factory=list)
     is_active: bool = True
     created_at: datetime = field(default_factory=datetime.utcnow)
@@ -141,7 +141,7 @@ class ComplianceReport:
     id: str
     title: str
     standard: ComplianceStandard
-    report_type: str  ***REMOVED*** daily, weekly, monthly, quarterly
+    report_type: str  # daily, weekly, monthly, quarterly
     period_start: datetime
     period_end: datetime
     generated_at: datetime
@@ -159,7 +159,7 @@ class EscalationRule:
     id: str
     name: str
     severity: AlertSeverity
-    escalation_delays: List[int]  ***REMOVED*** minutes
+    escalation_delays: List[int]  # minutes
     escalation_contacts: List[str]
     notification_channels: List[str]
     is_active: bool = True
@@ -177,7 +177,7 @@ class ISOComplianceMonitoring:
         self.alert_service = alert_service
         self.notifications = notification_service
 
-        ***REMOVED*** Monitoring components
+        # Monitoring components
         self.compliance_metrics: Dict[str, ComplianceMetric] = {}
         self.active_alerts: Dict[str, ComplianceAlert] = {}
         self.monitoring_rules: Dict[str, MonitoringRule] = {}
@@ -185,21 +185,21 @@ class ISOComplianceMonitoring:
         self.escalation_rules: Dict[str, EscalationRule] = {}
         self.compliance_reports: List[ComplianceReport] = {}
 
-        ***REMOVED*** Monitoring configuration
+        # Monitoring configuration
         self.monitoring_config = self._initialize_monitoring_config()
 
-        ***REMOVED*** Alert thresholds
+        # Alert thresholds
         self.alert_thresholds = self._initialize_alert_thresholds()
 
     def _initialize_monitoring_config(self) -> Dict[str, Any]:
         """Initialize monitoring configuration"""
         return {
             'monitoring_intervals': {
-                'real_time': 60,    ***REMOVED*** seconds
-                'hourly': 3600,     ***REMOVED*** seconds
-                'daily': 86400,     ***REMOVED*** seconds
-                'weekly': 604800,   ***REMOVED*** seconds
-                'monthly': 2592000  ***REMOVED*** seconds
+                'real_time': 60,    # seconds
+                'hourly': 3600,     # seconds
+                'daily': 86400,     # seconds
+                'weekly': 604800,   # seconds
+                'monthly': 2592000  # seconds
             },
             'alert_escalation': {
                 'critical': {'initial_delay': 5, 'follow_up': 15, 'max_level': 3},
@@ -222,20 +222,20 @@ class ISOComplianceMonitoring:
         return {
             'ISO_27001': {
                 'compliance_score': 95.0,
-                'incident_rate': 0.1,  ***REMOVED*** incidents per month
+                'incident_rate': 0.1,  # incidents per month
                 'control_effectiveness': 90.0,
-                'audit_findings': 5.0   ***REMOVED*** max major findings
+                'audit_findings': 5.0   # max major findings
             },
             'ISO_9001': {
                 'compliance_score': 95.0,
-                'quality_incidents': 0.5,  ***REMOVED*** incidents per month
+                'quality_incidents': 0.5,  # incidents per month
                 'training_completion': 95.0,
                 'process_performance': 90.0
             },
             'ISO_22301': {
                 'compliance_score': 95.0,
-                'recovery_time': 4.0,  ***REMOVED*** hours RTO
-                'continuity_incidents': 0.2,  ***REMOVED*** incidents per month
+                'recovery_time': 4.0,  # hours RTO
+                'continuity_incidents': 0.2,  # incidents per month
                 'backup_success': 99.5
             }
         }
@@ -278,7 +278,7 @@ class ISOComplianceMonitoring:
         metric.current_value = new_value
         metric.last_updated = datetime.utcnow()
 
-        ***REMOVED*** Determine trend
+        # Determine trend
         if new_value > old_value:
             metric.trend = "improving"
         elif new_value < old_value:
@@ -286,7 +286,7 @@ class ISOComplianceMonitoring:
         else:
             metric.trend = "stable"
 
-        ***REMOVED*** Check for alerts
+        # Check for alerts
         self._check_metric_alerts(metric)
 
         logger.info(f"Metric updated: {metric.name} = {new_value} ({metric.trend})")
@@ -332,14 +332,14 @@ class ISOComplianceMonitoring:
 
         self.active_alerts[alert_id] = alert
 
-        ***REMOVED*** Trigger notifications
+        # Trigger notifications
         self._notify_alert(alert)
 
         logger.warning(f"Compliance alert created: {alert.title} (Severity: {alert.severity.value})")
 
     def _notify_alert(self, alert: ComplianceAlert):
         """Send alert notifications"""
-        ***REMOVED*** In production, this would send actual notifications
+        # In production, this would send actual notifications
         logger.info(f"Alert notification sent: {alert.title} to {alert.assigned_to}")
 
     def acknowledge_alert(self, alert_id: str, acknowledged_by: str) -> bool:
@@ -448,19 +448,19 @@ class ISOComplianceMonitoring:
 
         dashboard = self.compliance_dashboards[dashboard_id]
 
-        ***REMOVED*** Get relevant metrics for this dashboard
+        # Get relevant metrics for this dashboard
         relevant_metrics = [
             m for m in self.compliance_metrics.values()
             if m.standard == dashboard.standard and m.is_active
         ]
 
-        ***REMOVED*** Get active alerts
+        # Get active alerts
         active_alerts = [
             a for a in self.active_alerts.values()
             if a.standard == dashboard.standard and a.status == AlertStatus.ACTIVE
         ]
 
-        ***REMOVED*** Calculate compliance scores
+        # Calculate compliance scores
         compliance_data = self._calculate_compliance_scores(dashboard.standard, relevant_metrics)
 
         return {
@@ -503,7 +503,7 @@ class ISOComplianceMonitoring:
             score = min(100, (metric.current_value / metric.target_value) * 100) if metric.target_value > 0 else 0
             total_score += score
 
-            if score >= 95:  ***REMOVED*** Consider compliant if >= 95%
+            if score >= 95:  # Consider compliant if >= 95%
                 compliant_metrics += 1
 
         overall_score = total_score / len(metrics)
@@ -530,19 +530,19 @@ class ISOComplianceMonitoring:
 
     def get_compliance_monitoring_report(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Generate comprehensive compliance monitoring report"""
-        ***REMOVED*** Get all active metrics
+        # Get all active metrics
         active_metrics = [m for m in self.compliance_metrics.values() if m.is_active]
 
-        ***REMOVED*** Get active alerts
+        # Get active alerts
         active_alerts = list(self.active_alerts.values())
 
-        ***REMOVED*** Get recent reports
-        recent_reports = [r for r in self.compliance_reports[-10:]]  ***REMOVED*** Last 10 reports
+        # Get recent reports
+        recent_reports = [r for r in self.compliance_reports[-10:]]  # Last 10 reports
 
-        ***REMOVED*** Calculate monitoring statistics
+        # Calculate monitoring statistics
         monitoring_stats = self._calculate_monitoring_statistics(active_metrics, active_alerts)
 
-        ***REMOVED*** Get compliance by standard
+        # Get compliance by standard
         compliance_by_standard = {}
         for standard in ComplianceStandard:
             standard_metrics = [m for m in active_metrics if m.standard == standard]
@@ -620,7 +620,7 @@ class ISOComplianceMonitoring:
     def _assess_system_health(self, metrics: List[ComplianceMetric],
                             alerts: List[ComplianceAlert]) -> Dict[str, Any]:
         """Assess overall system health"""
-        ***REMOVED*** Calculate health score based on metrics and alerts
+        # Calculate health score based on metrics and alerts
         metric_health = len([m for m in metrics if m.current_value >= m.target_value * 0.95]) / len(metrics) if metrics else 0
         alert_health = 1 - (len([a for a in alerts if a.severity in [AlertSeverity.CRITICAL, AlertSeverity.HIGH]]) / max(len(alerts), 1))
 
@@ -673,7 +673,7 @@ class ISOComplianceMonitoring:
                 "Address remaining low-priority items",
                 "Plan for continuous improvement"
             ])
-        else:  ***REMOVED*** excellent
+        else:  # excellent
             recommendations.extend([
                 "Maintain current high standards",
                 "Focus on proactive improvements",
@@ -691,8 +691,8 @@ class ISOComplianceMonitoring:
 
         health_score = 100
 
-        ***REMOVED*** Check for adequate monitoring coverage
-        if metrics_count < 20:  ***REMOVED*** Arbitrary minimum
+        # Check for adequate monitoring coverage
+        if metrics_count < 20:  # Arbitrary minimum
             health_score -= 20
 
         if rules_count < 10:
@@ -701,7 +701,7 @@ class ISOComplianceMonitoring:
         if dashboards_count < 3:
             health_score -= 10
 
-        ***REMOVED*** Check for alert backlog
+        # Check for alert backlog
         critical_alerts = len([a for a in self.active_alerts.values()
                              if a.severity == AlertSeverity.CRITICAL and a.status == AlertStatus.ACTIVE])
         if critical_alerts > 0:

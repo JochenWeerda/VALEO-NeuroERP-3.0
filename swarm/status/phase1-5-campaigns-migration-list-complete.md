@@ -1,12 +1,12 @@
-***REMOVED*** Phase 1.5 - Kampagnenmanagement: Migration & Liste - Abgeschlossen
+# Phase 1.5 - Kampagnenmanagement: Migration & Liste - Abgeschlossen
 
 **Datum:** 2025-01-27  
 **Status:** ✅ Migration & Liste Complete  
 **Capability:** MKT-CAM-01
 
-***REMOVED******REMOVED*** ✅ Abgeschlossen
+## ✅ Abgeschlossen
 
-***REMOVED******REMOVED******REMOVED*** 1. Alembic Migration ✅
+### 1. Alembic Migration ✅
 - ✅ `002_add_campaign_schema.py` erstellt
 - ✅ Campaign-Tabellen definiert:
   - `crm_marketing_campaign_templates`
@@ -23,7 +23,7 @@
   - `crm_marketing_campaign_event_type`
 - ✅ Foreign Keys & Indizes definiert
 
-***REMOVED******REMOVED******REMOVED*** 2. Frontend: Campaigns Liste ✅
+### 2. Frontend: Campaigns Liste ✅
 - ✅ `packages/frontend-web/src/pages/crm/campaigns.tsx` erstellt
 - ✅ ListReport-Konfiguration:
   - Spalten: Name, Type, Status, Sent, Open, Click, Created
@@ -33,7 +33,7 @@
 - ✅ API-Integration: `/api/crm-marketing/campaigns`
 - ✅ i18n-Integration vollständig
 
-***REMOVED******REMOVED******REMOVED*** 3. i18n-Übersetzungen ✅
+### 3. i18n-Übersetzungen ✅
 - ✅ Campaign-Entity hinzugefügt
 - ✅ Campaign-Typen (email, sms, push, social)
 - ✅ Campaign-Status (draft, scheduled, running, paused, completed, cancelled)
@@ -42,7 +42,7 @@
 - ✅ Campaign-Messages (started, paused, cancelled, etc.)
 - ✅ Subtitle: "manageCampaigns"
 
-***REMOVED******REMOVED*** 📋 Nächste Schritte
+## 📋 Nächste Schritte
 
 1. **Frontend: Campaign Detail** - ObjectPage mit Tabs
 2. **Frontend: Campaign Builder** - Multi-Step Wizard
@@ -52,4 +52,5 @@
 ---
 
 **Migration & Liste sind fertig! Bereit für Detail-Seite.**
+
 

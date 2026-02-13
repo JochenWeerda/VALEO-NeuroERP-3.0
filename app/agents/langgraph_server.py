@@ -30,22 +30,22 @@ def build_bestellvorschlag_graph() -> StateGraph:
     """
     workflow = StateGraph(BestellvorschlagState)
     
-    ***REMOVED*** Add nodes
+    # Add nodes
     workflow.add_node("analyze", analyze_stock_levels)
     workflow.add_node("history", check_sales_history)
     workflow.add_node("proposal", generate_order_proposal)
     workflow.add_node("approval", wait_for_human_approval)
     workflow.add_node("create_order", create_purchase_order)
     
-    ***REMOVED*** Set entry point
+    # Set entry point
     workflow.set_entry_point("analyze")
     
-    ***REMOVED*** Add edges
+    # Add edges
     workflow.add_edge("analyze", "history")
     workflow.add_edge("history", "proposal")
     workflow.add_edge("proposal", "approval")
     
-    ***REMOVED*** Conditional edge from approval
+    # Conditional edge from approval
     def should_create_order(state: BestellvorschlagState) -> Literal["create_order", "__end__"]:
         """Decide if order should be created based on approval."""
         if state.get("approved"):
@@ -63,19 +63,19 @@ def build_bestellvorschlag_graph() -> StateGraph:
     
     workflow.add_edge("create_order", END)
     
-    ***REMOVED*** Compile with checkpointer and interrupt before approval
+    # Compile with checkpointer and interrupt before approval
     checkpointer = SqliteSaver.from_conn_string("data/workflows.db")
     
     app = workflow.compile(
         checkpointer=checkpointer,
-        interrupt_before=["approval"]  ***REMOVED*** Human-in-the-Loop checkpoint
+        interrupt_before=["approval"]  # Human-in-the-Loop checkpoint
     )
     
     logger.info("Bestellvorschlag workflow compiled with LangGraph")
     return app
 
 
-***REMOVED*** Global workflow instance
+# Global workflow instance
 _bestellvorschlag_workflow = None
 
 
@@ -93,7 +93,7 @@ async def invoke_bestellvorschlag(tenant_id: str, correlation_id: str) -> Bestel
 
     Returns state at checkpoint (before approval).
     """
-    ***REMOVED*** Use the new LangGraph-based workflow
+    # Use the new LangGraph-based workflow
     result = await run_bestellvorschlag_workflow(tenant_id, correlation_id)
 
     logger.info(f"Bestellvorschlag workflow paused at approval checkpoint: {correlation_id}")
@@ -112,18 +112,18 @@ async def resume_bestellvorschlag(
     
     config = {"configurable": {"thread_id": workflow_id}}
     
-    ***REMOVED*** Get current state from checkpoint
+    # Get current state from checkpoint
     state = await workflow.aget_state(config)
     
     if state is None:
         raise ValueError(f"Workflow {workflow_id} not found")
     
-    ***REMOVED*** Update state with approval decision
+    # Update state with approval decision
     state.values["approved"] = approved
     if rejection_reason:
         state.values["rejection_reason"] = rejection_reason
     
-    ***REMOVED*** Resume from checkpoint
+    # Resume from checkpoint
     result = await workflow.ainvoke(None, config)
     
     logger.info(f"Workflow {workflow_id} resumed: approved={approved}")

@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision = '001'
 down_revision = None
 branch_labels = None
@@ -17,7 +17,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** documents_header
+    # documents_header
     op.create_table(
         'documents_header',
         sa.Column('id', sa.String(length=36), nullable=False),
@@ -40,7 +40,7 @@ def upgrade() -> None:
     op.create_index('ix_documents_customer', 'documents_header', ['customer_id'])
     op.create_index('ix_documents_status', 'documents_header', ['status'])
 
-    ***REMOVED*** documents_line
+    # documents_line
     op.create_table(
         'documents_line',
         sa.Column('id', sa.String(length=36), nullable=False),
@@ -58,7 +58,7 @@ def upgrade() -> None:
     )
     op.create_index('ix_documents_line_header', 'documents_line', ['header_id'])
 
-    ***REMOVED*** document_flow
+    # document_flow
     op.create_table(
         'document_flow',
         sa.Column('id', sa.String(length=36), nullable=False),
@@ -80,4 +80,5 @@ def downgrade() -> None:
     op.drop_index('ix_documents_customer', table_name='documents_header')
     op.drop_index('ix_documents_type_number', table_name='documents_header')
     op.drop_table('documents_header')
+
 

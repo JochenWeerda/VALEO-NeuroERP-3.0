@@ -15,10 +15,10 @@ def _within_window(window: dict | None, now: datetime | None = None) -> bool:
     if now is None:
         now = datetime.now()
 
-    day = now.weekday()  ***REMOVED*** 0=Mon .. 6=Sun
+    day = now.weekday()  # 0=Mon .. 6=Sun
     days: List[int] = window.get("days", [])
 
-    ***REMOVED*** Support für beide Konventionen: 0=Mon oder 0=Sun
+    # Support für beide Konventionen: 0=Mon oder 0=Sun
     if day not in days and (day + 1) % 7 not in days:
         return False
 
@@ -37,7 +37,7 @@ def _resolve_params(
     out: Dict[str, object] = {}
     for k, v in (rule.params or {}).items():
         if isinstance(v, dict) and "warn" in v and "crit" in v:
-            ***REMOVED*** Severity-abhängige Werte
+            # Severity-abhängige Werte
             out[k] = v.get(sev, v.get("warn"))
         elif (
             isinstance(v, str)
@@ -45,7 +45,7 @@ def _resolve_params(
             and ("{delta}" in v)
             and alert.delta is not None
         ):
-            ***REMOVED*** Delta-Platzhalter
+            # Delta-Platzhalter
             out[k] = v.replace("{delta}", str(alert.delta))
         else:
             out[k] = v
@@ -64,7 +64,7 @@ def decide(user_roles: List[Role], alert: Alert, rules: List[Rule]) -> Decision:
     Returns:
         Decision (Allow oder Deny)
     """
-    ***REMOVED*** Matching rule finden
+    # Matching rule finden
     rule = next(
         (
             r
@@ -77,14 +77,14 @@ def decide(user_roles: List[Role], alert: Alert, rules: List[Rule]) -> Decision:
     if not rule:
         return DecisionDeny(type="deny", reason="No matching rule")
 
-    ***REMOVED*** Zeitfenster prüfen
+    # Zeitfenster prüfen
     if not _within_window(rule.window.model_dump() if rule.window else None):
         return DecisionDeny(type="deny", reason="Outside window")
 
-    ***REMOVED*** Parameter auflösen
+    # Parameter auflösen
     params = _resolve_params(rule, alert.severity, alert)
 
-    ***REMOVED*** Approval prüfen
+    # Approval prüfen
     appr = rule.approval
     needs_approval = bool(
         appr
@@ -93,7 +93,7 @@ def decide(user_roles: List[Role], alert: Alert, rules: List[Rule]) -> Decision:
     )
     approver_roles = appr.roles if appr and appr.roles else None
 
-    ***REMOVED*** Rollen-Check
+    # Rollen-Check
     role_ok = (not needs_approval) or any(
         r in (approver_roles or []) for r in user_roles
     )

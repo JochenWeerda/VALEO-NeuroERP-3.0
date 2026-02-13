@@ -53,13 +53,13 @@ def _build_address_jsonb(debtor_data) -> str:
 
 def _row_to_debtor(row) -> Debtor:
     """Convert database row to Debtor schema"""
-    address_data = _parse_address_jsonb(row[4])  ***REMOVED*** address column
+    address_data = _parse_address_jsonb(row[4])  # address column
     
     return Debtor(
         id=str(row[0]),
         tenant_id=row[1],
-        debtor_number=row[2],  ***REMOVED*** debitor_number
-        company_name=row[3],  ***REMOVED*** name
+        debtor_number=row[2],  # debitor_number
+        company_name=row[3],  # name
         contact_person=address_data.get("contact_person"),
         street=address_data.get("street", ""),
         postal_code=address_data.get("postal_code", ""),
@@ -76,8 +76,8 @@ def _row_to_debtor(row) -> Debtor:
         payment_terms_days=address_data.get("payment_terms_days", 30),
         discount_days=address_data.get("discount_days", 0),
         discount_percent=Decimal(str(address_data.get("discount_percent", 0.0))),
-        credit_limit=float(row[6]) if row[6] else 0.0,  ***REMOVED*** credit_limit column
-        is_active=row[7],  ***REMOVED*** is_active column
+        credit_limit=float(row[6]) if row[6] else 0.0,  # credit_limit column
+        is_active=row[7],  # is_active column
         notes=address_data.get("notes"),
         created_at=row[8].isoformat() if row[8] else None,
         updated_at=row[9].isoformat() if row[9] else None
@@ -93,7 +93,7 @@ async def create_debtor(
     Create a new debtor.
     """
     try:
-        ***REMOVED*** Check if debtor number already exists
+        # Check if debtor number already exists
         check_query = text("""
             SELECT id FROM domain_erp.debitors 
             WHERE debitor_number = :debtor_number AND tenant_id = :tenant_id
@@ -112,7 +112,7 @@ async def create_debtor(
                 detail=f"Debtor with number {debtor_data.debtor_number} already exists"
             )
 
-        ***REMOVED*** Insert new debtor
+        # Insert new debtor
         address_json = _build_address_jsonb(debtor_data)
         payment_terms = f"{debtor_data.payment_terms_days or 30}_days"
         
@@ -162,7 +162,7 @@ async def list_debtors(
     try:
         effective_tenant_id = tenant_id or "system"
         
-        ***REMOVED*** Build query
+        # Build query
         where_clauses = ["tenant_id = :tenant_id"]
         params = {"tenant_id": effective_tenant_id}
         
@@ -176,13 +176,13 @@ async def list_debtors(
         
         where_sql = " AND ".join(where_clauses)
         
-        ***REMOVED*** Count total
+        # Count total
         count_query = text(f"""
             SELECT COUNT(*) FROM domain_erp.debitors WHERE {where_sql}
         """)
         total = db.execute(count_query, params).scalar()
         
-        ***REMOVED*** Get paginated results
+        # Get paginated results
         list_query = text(f"""
             SELECT id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, 
                    is_active, created_at, updated_at
@@ -248,7 +248,7 @@ async def update_debtor(
     Update debtor information.
     """
     try:
-        ***REMOVED*** Get existing debtor
+        # Get existing debtor
         existing_query = text("""
             SELECT id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, 
                    is_active, created_at, updated_at
@@ -260,11 +260,11 @@ async def update_debtor(
         if not existing_row:
             raise HTTPException(status_code=404, detail="Debtor not found")
         
-        ***REMOVED*** Parse existing address
+        # Parse existing address
         existing_debtor = _row_to_debtor(existing_row)
         existing_address = _parse_address_jsonb(existing_row[4])
         
-        ***REMOVED*** Merge updates
+        # Merge updates
         updated_address = existing_address.copy()
         if debtor_data.contact_person is not None:
             updated_address["contact_person"] = debtor_data.contact_person
@@ -301,12 +301,12 @@ async def update_debtor(
         if debtor_data.notes is not None:
             updated_address["notes"] = debtor_data.notes
         
-        ***REMOVED*** Build update query
+        # Build update query
         update_fields = []
         params = {"debtor_id": debtor_id}
         
-        ***REMOVED*** Note: We can't update company_name directly as it's stored in 'name' column
-        ***REMOVED*** For now, we'll keep it as-is unless explicitly needed
+        # Note: We can't update company_name directly as it's stored in 'name' column
+        # For now, we'll keep it as-is unless explicitly needed
         
         if debtor_data.credit_limit is not None:
             update_fields.append("credit_limit = :credit_limit")
@@ -316,11 +316,11 @@ async def update_debtor(
             update_fields.append("is_active = :is_active")
             params["is_active"] = debtor_data.is_active
         
-        ***REMOVED*** Always update address JSONB
+        # Always update address JSONB
         update_fields.append("address = :address::jsonb")
         params["address"] = json.dumps(updated_address)
         
-        ***REMOVED*** Update payment_terms if payment_terms_days changed
+        # Update payment_terms if payment_terms_days changed
         payment_terms_days = updated_address.get("payment_terms_days", 30)
         update_fields.append("payment_terms = :payment_terms")
         params["payment_terms"] = f"{payment_terms_days}_days"
@@ -355,7 +355,7 @@ async def delete_debtor(
     Delete debtor (soft delete by setting is_active = false).
     """
     try:
-        ***REMOVED*** Check if debtor exists
+        # Check if debtor exists
         existing = db.execute(
             text("SELECT id FROM domain_erp.debitors WHERE id = :debtor_id"),
             {"debtor_id": debtor_id}
@@ -364,7 +364,7 @@ async def delete_debtor(
         if not existing:
             raise HTTPException(status_code=404, detail="Debtor not found")
         
-        ***REMOVED*** Soft delete
+        # Soft delete
         update_query = text("""
             UPDATE domain_erp.debitors
             SET is_active = false, updated_at = NOW()

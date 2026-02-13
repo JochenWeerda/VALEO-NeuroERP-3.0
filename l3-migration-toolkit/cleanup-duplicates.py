@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Räumt Dubletten auf und behält nur die beste Versionen
 """
@@ -10,23 +10,23 @@ print("=" * 80)
 print("CLEANUP: Dubletten löschen")
 print("=" * 80)
 
-***REMOVED*** Dateien die BEHALTEN werden sollen
+# Dateien die BEHALTEN werden sollen
 keep_files = [
-    "mask-builder-framework/kundenstamm-complete-framework.json",  ***REMOVED*** Neueste Version
-    "mask-builder-framework/generated/subtables/",  ***REMOVED*** Alle Untertabellen
-    "schemas/sql/kundenstamm_complete.sql",  ***REMOVED*** SQL-Tabellen
-    "schemas/mappings/l3-to-valeo-kundenstamm-extended.json",  ***REMOVED*** Mappings
-    "schemas/mappings/subtable-mappings.json",  ***REMOVED*** Untertabellen-Mappings
-    "schemas/kundenstamm_chatgpt.json",  ***REMOVED*** ChatGPT-Analyse
-    "schemas/mask-builder/comparison-report.json",  ***REMOVED*** Vergleichs-Report
+    "mask-builder-framework/kundenstamm-complete-framework.json",  # Neueste Version
+    "mask-builder-framework/generated/subtables/",  # Alle Untertabellen
+    "schemas/sql/kundenstamm_complete.sql",  # SQL-Tabellen
+    "schemas/mappings/l3-to-valeo-kundenstamm-extended.json",  # Mappings
+    "schemas/mappings/subtable-mappings.json",  # Untertabellen-Mappings
+    "schemas/kundenstamm_chatgpt.json",  # ChatGPT-Analyse
+    "schemas/mask-builder/comparison-report.json",  # Vergleichs-Report
 ]
 
-***REMOVED*** Dateien die GELÖSCHT werden
+# Dateien die GELÖSCHT werden
 delete_files = [
-    "kundenstamm-final-complete-modern.json",  ***REMOVED*** Ältere Version
-    "schemas/mask-builder/kundenstamm.json",  ***REMOVED*** Ältere Version
-    "schemas/mask-builder/kundenstamm_complete.json",  ***REMOVED*** Nicht Framework-basiert
-    "screenshots/l3-masks/kundenstamm.ocr.json",  ***REMOVED*** Alt
+    "kundenstamm-final-complete-modern.json",  # Ältere Version
+    "schemas/mask-builder/kundenstamm.json",  # Ältere Version
+    "schemas/mask-builder/kundenstamm_complete.json",  # Nicht Framework-basiert
+    "screenshots/l3-masks/kundenstamm.ocr.json",  # Alt
 ]
 
 print("\n🗑️  Lösche Dubletten:")
@@ -53,4 +53,5 @@ for file_path in keep_files:
 print("\n" + "=" * 80)
 print("✅ CLEANUP ABGESCHLOSSEN")
 print("=" * 80)
+
 

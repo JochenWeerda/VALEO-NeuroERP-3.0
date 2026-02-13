@@ -50,7 +50,7 @@ class BaseRepository(Generic[T, TCreate, TUpdate], ABC):
         pass
 
 
-***REMOVED*** Shared Repository Interfaces
+# Shared Repository Interfaces
 class TenantRepository(BaseRepository[T, TCreate, TUpdate], ABC):
     """Tenant repository interface"""
     pass
@@ -85,7 +85,7 @@ class UserRepository(BaseRepository[T, TCreate, TUpdate], ABC):
         pass
 
 
-***REMOVED*** CRM Repository Interfaces
+# CRM Repository Interfaces
 class CustomerRepository(BaseRepository[T, TCreate, TUpdate], ABC):
     """Customer repository interface"""
 
@@ -119,7 +119,7 @@ class FarmProfileRepository(BaseRepository[T, TCreate, TUpdate], ABC):
     pass
 
 
-***REMOVED*** Inventory Repository Interfaces
+# Inventory Repository Interfaces
 class ArticleRepository(BaseRepository[T, TCreate, TUpdate], ABC):
     """Article repository interface"""
 
@@ -149,7 +149,7 @@ class InventoryCountRepository(BaseRepository[T, TCreate, TUpdate], ABC):
     pass
 
 
-***REMOVED*** Finance Repository Interfaces
+# Finance Repository Interfaces
 class AccountRepository(BaseRepository[T, TCreate, TUpdate], ABC):
     """Account repository interface"""
 

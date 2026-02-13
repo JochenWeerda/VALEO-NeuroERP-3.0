@@ -1,19 +1,19 @@
-***REMOVED*** Feature Implementation Plan - Finance Routing Fix
+# Feature Implementation Plan - Finance Routing Fix
 
 **Erstellt:** 2025-11-24  
 **Basis:** GAP-FIN-001 (Routing-Inkonsistenz Finance-Modul)  
 **Status:** Planned  
 **Priorität:** P0 (Kritisch)
 
-***REMOVED******REMOVED*** Problem
+## Problem
 
 Finance-Modul zeigt falsche URLs:
 - Finance-Modul URL: `http://localhost:3000/crm/betriebsprofile` (sollte `/finance` sein)
 - Invoices URL: `http://localhost:3000/sales/invoice` (sollte `/finance/invoices` sein)
 
-***REMOVED******REMOVED*** Anforderungen
+## Anforderungen
 
-***REMOVED******REMOVED******REMOVED*** Routing-Korrekturen
+### Routing-Korrekturen
 
 1. **Finance-Modul Übersicht**
    - URL: `/finance` (statt `/crm/betriebsprofile`)
@@ -32,9 +32,9 @@ Finance-Modul zeigt falsche URLs:
    - URL: `/finance/invoices/new` (statt `/finance/bookings/new`)
    - Zeigt Create Invoice Formular
 
-***REMOVED******REMOVED*** Implementierungsplan
+## Implementierungsplan
 
-***REMOVED******REMOVED******REMOVED*** Phase 1: Routing-Definitionen (Priorität: Hoch)
+### Phase 1: Routing-Definitionen (Priorität: Hoch)
 
 1. **Frontend Routes**
    - `packages/frontend-web/src/app/route-aliases.json`
@@ -46,7 +46,7 @@ Finance-Modul zeigt falsche URLs:
    - Prüfe ob Auto-Routing korrekt funktioniert
    - Falls nicht, manuelle Routes in `App.tsx` hinzufügen
 
-***REMOVED******REMOVED******REMOVED*** Phase 2: Navigation-Komponenten (Priorität: Hoch)
+### Phase 2: Navigation-Komponenten (Priorität: Hoch)
 
 1. **Finance-Modul Übersicht**
    - Erstelle `packages/frontend-web/src/pages/finance/index.tsx`
@@ -56,7 +56,7 @@ Finance-Modul zeigt falsche URLs:
    - Korrigiere Links in Navigation-Menü
    - Stelle sicher, dass alle Finance-Links auf `/finance/*` zeigen
 
-***REMOVED******REMOVED******REMOVED*** Phase 3: Komponenten-Migration (Priorität: Mittel)
+### Phase 3: Komponenten-Migration (Priorität: Mittel)
 
 1. **Invoices-Liste**
    - Prüfe ob `packages/frontend-web/src/pages/sales/invoice.tsx` existiert
@@ -68,7 +68,7 @@ Finance-Modul zeigt falsche URLs:
    - Falls ja, migriere zu `packages/frontend-web/src/pages/finance/invoices/new.tsx`
    - Falls nein, erstelle neue Komponente
 
-***REMOVED******REMOVED******REMOVED*** Phase 4: Testing (Priorität: Hoch)
+### Phase 4: Testing (Priorität: Hoch)
 
 1. **Navigation Tests**
    - Teste Navigation zu `/finance`
@@ -79,19 +79,19 @@ Finance-Modul zeigt falsche URLs:
    - Verifiziere, dass URLs korrekt sind
    - Verifiziere, dass keine 404-Fehler auftreten
 
-***REMOVED******REMOVED*** Vergleich mit Referenz-Systemen
+## Vergleich mit Referenz-Systemen
 
-***REMOVED******REMOVED******REMOVED*** SAP
+### SAP
 - Klare Modul-Trennung: `/finance`, `/sales`, `/procurement`
 - Konsistente URL-Struktur
 - Keine Überschneidungen zwischen Modulen
 
-***REMOVED******REMOVED******REMOVED*** Odoo
+### Odoo
 - Modul-basierte URLs: `/finance/invoices`, `/sales/orders`
 - Klare Hierarchie
 - Konsistente Navigation
 
-***REMOVED******REMOVED*** Akzeptanzkriterien
+## Akzeptanzkriterien
 
 - [ ] `/finance` zeigt Finance-Modul Übersicht
 - [ ] `/finance/invoices` zeigt Invoices-Liste
@@ -100,7 +100,7 @@ Finance-Modul zeigt falsche URLs:
 - [ ] Keine 404-Fehler bei Navigation
 - [ ] URLs sind konsistent und logisch
 
-***REMOVED******REMOVED*** Geschätzter Aufwand
+## Geschätzter Aufwand
 
 - **Routing-Definitionen:** 0.5 Tage
 - **Navigation-Komponenten:** 1 Tag
@@ -108,14 +108,14 @@ Finance-Modul zeigt falsche URLs:
 - **Testing:** 0.5 Tage
 - **Gesamt:** 3-4 Tage
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. **Frontend-Entwickler:** Beginne mit Routing-Definitionen
 2. **Frontend-Entwickler:** Erstelle Finance-Modul Übersicht
 3. **Frontend-Entwickler:** Migriere/Erstelle Invoices-Komponenten
 4. **Tester:** Teste Navigation und Routing
 
-***REMOVED******REMOVED*** Referenzen
+## Referenzen
 
 - GAP-Analyse: `gap/gaps.md` (GAP-FIN-001)
 - Test-Plan: `specs/finance.md` (TC-FIN-001, TC-FIN-002)
@@ -123,4 +123,5 @@ Finance-Modul zeigt falsche URLs:
 - Screenshots: 
   - `evidence/screenshots/finance/20251124_095102_03_finance_module.png`
   - `evidence/screenshots/finance/20251124_095105_04_invoices_list.png`
+
 

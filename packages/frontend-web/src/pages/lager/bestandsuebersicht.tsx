@@ -5,45 +5,18 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BarChart3, TrendingDown, TrendingUp, Warehouse, Package, AlertCircle, ArrowUpDown, Clock, Calendar, ShieldAlert, Zap, Snail, ChevronRight } from 'lucide-react'
 import { useInventoryDashboard } from '@/lib/api/dashboard'
+import { useMhdItems, useRennerItems, usePennerItems } from '@/lib/api/inventory'
 import { useNavigate } from 'react-router-dom'
 
-// Beispieldaten für die Vorschau
-const mockTopArticles = [
-  { name: 'Weizen Saatgut Premium', quantity: 2500, value: 45000 },
-  { name: 'Dünger NPK 15-15-15', quantity: 1800, value: 36000 },
-  { name: 'Pflanzenschutzmittel A', quantity: 500, value: 25000 },
-  { name: 'Diesel Winterqualität', quantity: 3000, value: 18000 },
-  { name: 'Ersatzteile Mähdrescher', quantity: 45, value: 15500 },
-]
 
-// Mock-Daten für MHD und PSM Warnungen
-const mockMhdItems = [
-  { name: 'Pflanzenschutzmittel X', expiryDate: '2025-01-15', quantity: 50 },
-  { name: 'Saatgutbeize Premium', expiryDate: '2025-02-01', quantity: 25 },
-  { name: 'Herbizid Konzentrat', expiryDate: '2025-02-28', quantity: 100 },
-]
-
-const mockPsmItems = [
-  { name: 'Glyphosat-Produkt A', abverkaufsfrist: '2025-03-31', quantity: 200 },
-  { name: 'Insektizid Altbestand', abverkaufsfrist: '2025-06-30', quantity: 75 },
-]
-
-const mockRennerItems = [
-  { name: 'Weizen Saatgut Premium', absatz: 450, trend: '+15%' },
-  { name: 'Dünger NPK 15-15-15', absatz: 380, trend: '+8%' },
-  { name: 'Diesel Winterqualität', absatz: 320, trend: '+5%' },
-]
-
-const mockPennerItems = [
-  { name: 'Ersatzteile Typ B-alt', absatz: 2, trend: '-45%' },
-  { name: 'Altbestand Saatgut 2022', absatz: 5, trend: '-30%' },
-  { name: 'Spezialdünger Nische', absatz: 8, trend: '-20%' },
-]
 
 export default function BestandsuebersichtPage(): JSX.Element {
   const { data: bestand, isLoading } = useInventoryDashboard()
+  const { data: mhdItems } = useMhdItems()
+  const { data: rennerItems } = useRennerItems()
+  const { data: pennerItems } = usePennerItems()
   const navigate = useNavigate()
-  
+
   // Prüfe ob echte Daten vorhanden sind
   const hasData = bestand && bestand.totalArticles > 0
 
@@ -84,10 +57,8 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-blue-600">
-                  {hasData ? bestand.totalArticles : '1.247'}
-                </span>
-                {!hasData && <Badge variant="secondary" className="text-xs">Demo</Badge>}
-              </div>
+                  {hasData ? bestand.totalArticles : 0}
+                </span>              </div>
             )}
           </CardContent>
         </Card>
@@ -108,9 +79,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                   {hasData 
                     ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(bestand.totalValue)
                     : '€ 2.450.000'}
-                </span>
-                {!hasData && <Badge variant="secondary" className="text-xs">Demo</Badge>}
-              </div>
+                </span>              </div>
             )}
           </CardContent>
         </Card>
@@ -128,10 +97,8 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-purple-600">
-                  {hasData ? bestand.lowStockCount : '48'}
-                </span>
-                {!hasData && <Badge variant="secondary" className="text-xs">Demo</Badge>}
-              </div>
+                  {hasData ? bestand.lowStockCount : 0}
+                </span>              </div>
             )}
           </CardContent>
         </Card>
@@ -150,9 +117,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-orange-600">
                   {hasData ? `${bestand.totalArticles} Tage` : '32 Tage'}
-                </span>
-                {!hasData && <Badge variant="secondary" className="text-xs">Demo</Badge>}
-              </div>
+                </span>              </div>
             )}
           </CardContent>
         </Card>
@@ -173,7 +138,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-red-600">
-                  {hasData ? bestand.lowStockCount : '12'}
+                  {hasData ? bestand.lowStockCount : 0}
                 </span>
                 <span className="text-sm text-red-600">Artikel unter Mindestbestand</span>
               </div>
@@ -193,7 +158,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-yellow-600">
-                  {hasData ? Math.round(bestand.lowStockCount * 1.5) : '28'}
+                  {hasData ? Math.round(bestand.lowStockCount * 1.5) : 0}
                 </span>
                 <span className="text-sm text-yellow-600">Artikel in 7 Tagen kritisch</span>
               </div>
@@ -213,7 +178,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-green-600">
-                  {hasData ? bestand.totalArticles - bestand.lowStockCount : '1.207'}
+                  {hasData ? bestand.totalArticles - bestand.lowStockCount : 0}
                 </span>
                 <span className="text-sm text-green-600">Artikel im Sollbereich</span>
               </div>
@@ -253,11 +218,11 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl font-bold text-orange-600">
-                    {hasData ? 3 : mockMhdItems.length}
+                    {(mhdItems ?? []).length}
                   </span>
                   <span className="text-sm text-orange-600">Artikel mit MHD in den nächsten 90 Tagen</span>
                 </div>
-                {mockMhdItems.slice(0, 3).map((item, i) => (
+                {(mhdItems ?? []).slice(0, 3).map((item, i) => (
                   <div key={i} className="flex items-center justify-between rounded border border-orange-200 p-2 bg-white/50 text-sm">
                     <span className="font-medium truncate max-w-[200px]">{item.name}</span>
                     <div className="flex items-center gap-2">
@@ -267,9 +232,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                       </Badge>
                     </div>
                   </div>
-                ))}
-                {!hasData && <Badge variant="secondary" className="mt-2">Beispieldaten</Badge>}
-              </div>
+                ))}              </div>
             )}
           </CardContent>
         </Card>
@@ -303,11 +266,11 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl font-bold text-red-600">
-                    {hasData ? 2 : mockPsmItems.length}
+                    {0}
                   </span>
                   <span className="text-sm text-red-600">PSM mit endender Abverkaufsfrist</span>
                 </div>
-                {mockPsmItems.map((item, i) => (
+                {[].map((item, i) => (
                   <div key={i} className="flex items-center justify-between rounded border border-red-200 p-2 bg-white/50 text-sm">
                     <span className="font-medium truncate max-w-[200px]">{item.name}</span>
                     <div className="flex items-center gap-2">
@@ -317,9 +280,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                       </Badge>
                     </div>
                   </div>
-                ))}
-                {!hasData && <Badge variant="secondary" className="mt-2">Beispieldaten</Badge>}
-              </div>
+                ))}              </div>
             )}
           </CardContent>
         </Card>
@@ -355,10 +316,10 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="space-y-2">
                 <p className="text-sm text-green-600 mb-3">Artikel mit höchstem Absatz (letzte 30 Tage)</p>
-                {mockRennerItems.map((item, i) => (
+                {(rennerItems ?? []).map((item, i) => (
                   <div key={i} className="flex items-center justify-between rounded border border-green-200 p-2 bg-white/50 text-sm">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="bg-green-100 text-green-700 border-green-400">***REMOVED***{i + 1}</Badge>
+                      <Badge variant="outline" className="bg-green-100 text-green-700 border-green-400">#{i + 1}</Badge>
                       <span className="font-medium truncate max-w-[180px]">{item.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -366,9 +327,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                       <Badge className="bg-green-600">{item.trend}</Badge>
                     </div>
                   </div>
-                ))}
-                {!hasData && <Badge variant="secondary" className="mt-2">Beispieldaten</Badge>}
-              </div>
+                ))}              </div>
             )}
           </CardContent>
         </Card>
@@ -401,7 +360,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="space-y-2">
                 <p className="text-sm text-slate-600 mb-3">Artikel mit geringstem Absatz / Altbestand</p>
-                {mockPennerItems.map((item, i) => (
+                {(pennerItems ?? []).map((item, i) => (
                   <div key={i} className="flex items-center justify-between rounded border border-slate-200 p-2 bg-white/50 text-sm">
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-400">!</Badge>
@@ -412,9 +371,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                       <Badge variant="secondary" className="text-red-600">{item.trend}</Badge>
                     </div>
                   </div>
-                ))}
-                {!hasData && <Badge variant="secondary" className="mt-2">Beispieldaten</Badge>}
-              </div>
+                ))}              </div>
             )}
           </CardContent>
         </Card>
@@ -425,9 +382,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
-            Top-Artikel nach Wert
-            {!hasData && <Badge variant="secondary" className="ml-2">Beispieldaten</Badge>}
-          </CardTitle>
+            Top-Artikel nach Wert          </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -447,7 +402,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
             </div>
           ) : (
             <div className="space-y-3">
-              {(hasData ? bestand.topArticles : mockTopArticles).map((artikel, i) => (
+              {(hasData ? bestand.topArticles : []).map((artikel, i) => (
                 <div key={i} className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors">
                   <div>
                     <div className="font-semibold">{artikel.name}</div>
@@ -457,7 +412,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                     <div className="font-bold text-lg">
                       {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(artikel.value)}
                     </div>
-                    <Badge variant={i === 0 ? 'default' : 'outline'}>***REMOVED***{i + 1}</Badge>
+                    <Badge variant={i === 0 ? 'default' : 'outline'}>#{i + 1}</Badge>
                   </div>
                 </div>
               ))}
@@ -493,3 +448,6 @@ export default function BestandsuebersichtPage(): JSX.Element {
     </div>
   )
 }
+
+
+

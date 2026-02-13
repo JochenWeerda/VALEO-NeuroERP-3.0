@@ -1,34 +1,34 @@
-***REMOVED***!/usr/bin/env bash
-***REMOVED*** Mayan-DMS Bootstrap Script
-***REMOVED*** Idempotent setup via REST-API für VALEO-NeuroERP
+#!/usr/bin/env bash
+# Mayan-DMS Bootstrap Script
+# Idempotent setup via REST-API für VALEO-NeuroERP
 
 set -euo pipefail
 
-***REMOVED*** Colors für Output
+# Colors für Output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' ***REMOVED*** No Color
+NC='\033[0m' # No Color
 
-***REMOVED*** Pfade
+# Pfade
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ENV_FILE="$ROOT/.env"
 CFG="$ROOT/config/bootstrap.json"
 
-***REMOVED*** Load .env
+# Load .env
 if [ ! -f "$ENV_FILE" ]; then
   echo -e "${RED}❌ .env file not found. Copy env.example to .env first.${NC}"
   exit 1
 fi
 
-***REMOVED*** shellcheck disable=SC1090
+# shellcheck disable=SC1090
 source "$ENV_FILE"
 
-***REMOVED*** Config
+# Config
 BASE="${DMS_BASE:-http://localhost:8010}"
 TOKEN="${DMS_BOOTSTRAP_TOKEN:?❌ Set DMS_BOOTSTRAP_TOKEN in .env}"
 
-***REMOVED*** Headers
+# Headers
 AUTH="Authorization: Token ${TOKEN}"
 JSON="Content-Type: application/json"
 
@@ -37,7 +37,7 @@ echo "Base-URL: $BASE"
 echo "Config: $CFG"
 echo ""
 
-***REMOVED*** Helper-Funktionen
+# Helper-Funktionen
 get_all() { 
   curl -fsS -H "$AUTH" "$BASE$1"
 }
@@ -46,19 +46,19 @@ post() {
   curl -fsS -H "$AUTH" -H "$JSON" -X POST -d "$2" "$BASE$1"
 }
 
-***REMOVED*** 1) Warten bis Mayan bereit ist
+# 1) Warten bis Mayan bereit ist
 echo -e "${YELLOW}⏳ Waiting for Mayan to be ready...${NC}"
 "$(dirname "$0")/wait-for-http.sh" "${BASE}/api/" 120
 
-***REMOVED*** IDs cachen
+# IDs cachen
 declare -A META_ID DOC_ID
 
-***REMOVED*** 2) Document Types anlegen
+# 2) Document Types anlegen
 echo -e "${YELLOW}📄 Creating Document Types...${NC}"
 doc_types_created=0
 
 for dt in $(jq -r '.document_types[]' "$CFG"); do
-  ***REMOVED*** Check if exists
+  # Check if exists
   if ! get_all "/api/document_types/document_types/?page_size=1000" | jq -e --arg n "$dt" '.results[]|select(.label==$n)' >/dev/null 2>&1; then
     echo "Creating document type: $dt"
     post "/api/document_types/document_types/" "$(jq -n --arg label "$dt" '{label:$label}')" >/dev/null
@@ -67,14 +67,14 @@ for dt in $(jq -r '.document_types[]' "$CFG"); do
     echo "Document type already exists: $dt"
   fi
   
-  ***REMOVED*** Get ID
+  # Get ID
   id=$(get_all "/api/document_types/document_types/?page_size=1000" | jq -r --arg n "$dt" '.results[]|select(.label==$n)|.id' | head -n1)
   DOC_ID["$dt"]="$id"
 done
 
-echo -e "${GREEN}✅ Document Types: ${***REMOVED***DOC_ID[@]} total, $doc_types_created created${NC}"
+echo -e "${GREEN}✅ Document Types: ${#DOC_ID[@]} total, $doc_types_created created${NC}"
 
-***REMOVED*** 3) Metadata Types anlegen
+# 3) Metadata Types anlegen
 echo -e "${YELLOW}🏷️  Creating Metadata Types...${NC}"
 meta_types_created=0
 
@@ -86,7 +86,7 @@ for i in $(seq 0 $((meta_count - 1))); do
   required=$(jq -r ".metadata_types[$i].required // false" "$CFG")
   choices=$(jq -c ".metadata_types[$i].choices // []" "$CFG")
   
-  ***REMOVED*** Check if exists
+  # Check if exists
   if ! get_all "/api/metadata/metadata_types/?page_size=1000" | jq -e --arg n "$name" '.results[]|select(.name==$n)' >/dev/null 2>&1; then
     echo "Creating metadata type: $name"
     body=$(jq -n \
@@ -102,14 +102,14 @@ for i in $(seq 0 $((meta_count - 1))); do
     echo "Metadata type already exists: $name"
   fi
   
-  ***REMOVED*** Get ID
+  # Get ID
   id=$(get_all "/api/metadata/metadata_types/?page_size=1000" | jq -r --arg n "$name" '.results[]|select(.name==$n)|.id' | head -n1)
   META_ID["$name"]="$id"
 done
 
-echo -e "${GREEN}✅ Metadata Types: ${***REMOVED***META_ID[@]} total, $meta_types_created created${NC}"
+echo -e "${GREEN}✅ Metadata Types: ${#META_ID[@]} total, $meta_types_created created${NC}"
 
-***REMOVED*** 4) Metadata an DocumentTypes binden
+# 4) Metadata an DocumentTypes binden
 echo -e "${YELLOW}🔗 Creating Metadata Bindings...${NC}"
 bindings_created=0
 
@@ -121,7 +121,7 @@ for dt in "${!DOC_ID[@]}"; do
     mid="${META_ID[$m]}"
     [ -z "$mid" ] && continue
     
-    ***REMOVED*** Prüfe ob Binding bereits existiert
+    # Prüfe ob Binding bereits existiert
     exists=$(get_all "/api/metadata/document_type_metadata_types/?page_size=1000" | \
       jq -e --argjson dtid "${DOC_ID[$dt]}" --argjson mid "$mid" \
       '.results[]|select(.document_type==$dtid and .metadata_type==$mid)' 2>/dev/null || true)
@@ -138,7 +138,7 @@ done
 
 echo -e "${GREEN}✅ Metadata Bindings: $bindings_created created${NC}"
 
-***REMOVED*** 5) OCR-Konfiguration (Hinweis)
+# 5) OCR-Konfiguration (Hinweis)
 enable_ocr=$(jq -r '.ocr.enable' "$CFG")
 if [ "$enable_ocr" = "true" ]; then
   languages=$(jq -r '.ocr.languages[]' "$CFG" | paste -sd "," -)
@@ -146,19 +146,20 @@ if [ "$enable_ocr" = "true" ]; then
   echo "   Configure OCR backends in Mayan UI: Settings → OCR backends"
 fi
 
-***REMOVED*** Summary
+# Summary
 echo ""
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${GREEN}✔ Mayan-DMS Bootstrap Complete${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo "Summary:"
-echo "  Document Types: ${***REMOVED***DOC_ID[@]} ($doc_types_created created)"
-echo "  Metadata Types: ${***REMOVED***META_ID[@]} ($meta_types_created created)"
+echo "  Document Types: ${#DOC_ID[@]} ($doc_types_created created)"
+echo "  Metadata Types: ${#META_ID[@]} ($meta_types_created created)"
 echo "  Bindings: $bindings_created created"
 echo ""
 echo "Brand: ${VALEO_BRAND:-VALEO NeuroERP}"
 echo "DMS URL: $BASE"
 echo ""
 echo -e "${GREEN}🎉 Mayan is ready for VALEO-NeuroERP integration!${NC}"
+
 

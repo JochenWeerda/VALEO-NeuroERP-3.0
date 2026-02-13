@@ -24,13 +24,13 @@ depends_on = None
 
 def upgrade() -> None:
     """Create CRM Communication tables."""
-    ***REMOVED*** Create enums
+    # Create enums
     op.execute("CREATE TYPE crm_communication_email_status AS ENUM ('draft', 'queued', 'sent', 'delivered', 'opened', 'clicked', 'bounced', 'complaint', 'unsubscribed')")
     op.execute("CREATE TYPE crm_communication_email_direction AS ENUM ('inbound', 'outbound')")
     op.execute("CREATE TYPE crm_communication_template_type AS ENUM ('email', 'sms', 'letter')")
     op.execute("CREATE TYPE crm_communication_campaign_status AS ENUM ('draft', 'scheduled', 'running', 'paused', 'completed', 'cancelled')")
 
-    ***REMOVED*** Emails table
+    # Emails table
     op.create_table(
         "crm_communication_emails",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -65,7 +65,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Templates table
+    # Templates table
     op.create_table(
         "crm_communication_templates",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -87,7 +87,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Campaigns table
+    # Campaigns table
     op.create_table(
         "crm_communication_campaigns",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -113,7 +113,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Attachments table
+    # Attachments table
     op.create_table(
         "crm_communication_attachments",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -127,7 +127,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     )
 
-    ***REMOVED*** Automations table
+    # Automations table
     op.create_table(
         "crm_communication_automations",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -147,7 +147,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Seed initial data
+    # Seed initial data
     _seed_initial_data()
 
 
@@ -167,5 +167,5 @@ def downgrade() -> None:
 
 def _seed_initial_data():
     """Seed initial demo communication data."""
-    ***REMOVED*** This will be populated when the service starts and finds existing data
+    # This will be populated when the service starts and finds existing data
     pass

@@ -46,13 +46,13 @@ async def run_agent_workflow(request: AgentRequest) -> AgentResponse:
     
     workflow_id = request.workflow
     
-    ***REMOVED*** Real AI-powered workflow execution
+    # Real AI-powered workflow execution
     if workflow_id == "procurement_advisor":
         try:
-            ***REMOVED*** Import OpenAI service for AI-powered responses
+            # Import OpenAI service for AI-powered responses
             from app.services.openai_service import analyze_text
 
-            ***REMOVED*** Mock data for demonstration - in real implementation, this would come from database
+            # Mock data for demonstration - in real implementation, this would come from database
             mock_inventory_data = """
             Current Inventory:
             - Weizen Premium: 200kg (Min: 500kg)
@@ -97,7 +97,7 @@ async def run_agent_workflow(request: AgentRequest) -> AgentResponse:
                 ]
             )
         except Exception as e:
-            ***REMOVED*** Fallback to basic response if AI fails
+            # Fallback to basic response if AI fails
             return AgentResponse(
                 messages=[
                     AgentMessage(
@@ -177,4 +177,5 @@ async def list_workflows():
             }
         ]
     }
+
 

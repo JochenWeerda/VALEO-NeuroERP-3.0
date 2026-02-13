@@ -1,10 +1,10 @@
-***REMOVED*** Staging-Deployment - Quick Start ⚡
+# Staging-Deployment - Quick Start ⚡
 
 **Status:** ✅ **ALLES BEREIT - NUR NOCH SECRETS EINTRAGEN!**
 
 ---
 
-***REMOVED******REMOVED*** ✅ Was ist bereits erledigt
+## ✅ Was ist bereits erledigt
 
 - ✅ Docker Compose Staging-Konfiguration erstellt
 - ✅ Keycloak Realm mit Test-Users konfiguriert
@@ -17,9 +17,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Was du jetzt tun musst (5 Minuten)
+## 🎯 Was du jetzt tun musst (5 Minuten)
 
-***REMOVED******REMOVED******REMOVED*** Schritt 1: Secrets in GitHub eintragen (3 Minuten)
+### Schritt 1: Secrets in GitHub eintragen (3 Minuten)
 
 1. **Öffne die Datei `GITHUB-SECRETS.txt`** (in diesem Verzeichnis)
 2. **Öffne GitHub Secrets-Seite:**
@@ -40,17 +40,17 @@ Repository secrets (4)
 🔒 STAGING_REDIS_PASSWORD
 ```
 
-***REMOVED******REMOVED******REMOVED*** Schritt 2: Code zu GitHub pushen (2 Minuten)
+### Schritt 2: Code zu GitHub pushen (2 Minuten)
 
 ```powershell
-***REMOVED*** Alle neuen Dateien committen
+# Alle neuen Dateien committen
 git add .
 git commit -m "feat: complete staging deployment setup with GitHub Actions"
 
-***REMOVED*** Branch prüfen/erstellen
+# Branch prüfen/erstellen
 git checkout develop 2>$null || git checkout -b develop
 
-***REMOVED*** Zu GitHub pushen
+# Zu GitHub pushen
 git push origin develop
 ```
 
@@ -58,7 +58,7 @@ git push origin develop
 - ✅ Push erfolgreich
 - ✅ GitHub Actions Workflow startet automatisch
 
-***REMOVED******REMOVED******REMOVED*** Schritt 3: Workflow überwachen (20-25 Minuten)
+### Schritt 3: Workflow überwachen (20-25 Minuten)
 
 **Actions-Dashboard öffnen:**
 ```
@@ -81,9 +81,9 @@ https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Nach erfolgreichem Deployment
+## 🚀 Nach erfolgreichem Deployment
 
-***REMOVED******REMOVED******REMOVED*** Staging-Umgebung testen
+### Staging-Umgebung testen
 
 **URLs (wenn lokal deployed):**
 ```
@@ -101,65 +101,65 @@ User:      test-user / Test123!
 Read-Only: test-readonly / Test123!
 ```
 
-***REMOVED******REMOVED******REMOVED*** Smoke-Tests manuell ausführen
+### Smoke-Tests manuell ausführen
 
 ```powershell
-***REMOVED*** In Git Bash (oder WSL)
+# In Git Bash (oder WSL)
 ./scripts/smoke-tests-staging.sh
 
-***REMOVED*** Erwartetes Ergebnis:
-***REMOVED*** ✅ PostgreSQL Health Check
-***REMOVED*** ✅ Redis Health Check
-***REMOVED*** ✅ Keycloak Health Check
-***REMOVED*** ... (18 Tests)
-***REMOVED*** 🎉 All Smoke Tests Passed!
+# Erwartetes Ergebnis:
+# ✅ PostgreSQL Health Check
+# ✅ Redis Health Check
+# ✅ Keycloak Health Check
+# ... (18 Tests)
+# 🎉 All Smoke Tests Passed!
 ```
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Alternative: Lokales Deployment (ohne GitHub Actions)
+## 🔄 Alternative: Lokales Deployment (ohne GitHub Actions)
 
 Falls GitHub Actions nicht sofort funktioniert:
 
 ```powershell
-***REMOVED*** Staging-Stack lokal starten
+# Staging-Stack lokal starten
 .\scripts\staging-deploy.ps1
 
-***REMOVED*** Dauer: ~10 Minuten
-***REMOVED*** Wird automatisch:
-***REMOVED*** - Docker-Images bauen
-***REMOVED*** - Services starten
-***REMOVED*** - Health-Checks durchführen
-***REMOVED*** - Database migrieren
-***REMOVED*** - Smoke-Tests ausführen
+# Dauer: ~10 Minuten
+# Wird automatisch:
+# - Docker-Images bauen
+# - Services starten
+# - Health-Checks durchführen
+# - Database migrieren
+# - Smoke-Tests ausführen
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📊 Deployment-Status prüfen
+## 📊 Deployment-Status prüfen
 
-***REMOVED******REMOVED******REMOVED*** GitHub Actions
+### GitHub Actions
 
 ```bash
-***REMOVED*** Mit GitHub CLI
+# Mit GitHub CLI
 gh workflow list
 gh run list --workflow=deploy-staging.yml
 gh run view --log
 
-***REMOVED*** Oder im Browser
+# Oder im Browser
 https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions
 ```
 
-***REMOVED******REMOVED******REMOVED*** Lokaler Docker-Stack
+### Lokaler Docker-Stack
 
 ```powershell
-***REMOVED*** Container-Status
+# Container-Status
 docker-compose -f docker-compose.staging.yml ps
 
-***REMOVED*** Logs anzeigen
+# Logs anzeigen
 docker-compose -f docker-compose.staging.yml logs -f
 
-***REMOVED*** Health-Checks
+# Health-Checks
 docker exec valeo-staging-postgres pg_isready
 docker exec valeo-staging-redis redis-cli ping
 curl http://localhost:8180/health/ready
@@ -167,25 +167,25 @@ curl http://localhost:8180/health/ready
 
 ---
 
-***REMOVED******REMOVED*** 🐛 Troubleshooting
+## 🐛 Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: Workflow startet nicht
+### Problem: Workflow startet nicht
 
 **Lösung:**
 ```bash
-***REMOVED*** Prüfe ob develop-Branch existiert
+# Prüfe ob develop-Branch existiert
 git branch -a
 
-***REMOVED*** Falls nicht, erstelle ihn:
+# Falls nicht, erstelle ihn:
 git checkout -b develop
 git push origin develop
 
-***REMOVED*** Workflow manuell triggern:
-***REMOVED*** https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/deploy-staging.yml
-***REMOVED*** → "Run workflow" → Branch: develop → "Run workflow"
+# Workflow manuell triggern:
+# https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/deploy-staging.yml
+# → "Run workflow" → Branch: develop → "Run workflow"
 ```
 
-***REMOVED******REMOVED******REMOVED*** Problem: Secret not found
+### Problem: Secret not found
 
 **Symptom:**
 ```
@@ -199,40 +199,40 @@ Error: Required secret STAGING_POSTGRES_PASSWORD not found
 4. Warte 1-2 Minuten nach Erstellung (GitHub-Sync)
 5. Workflow neu starten
 
-***REMOVED******REMOVED******REMOVED*** Problem: Build-Fehler
+### Problem: Build-Fehler
 
 **Häufigste Ursachen:**
 ```bash
-***REMOVED*** 1. Node-Modules-Cache-Problem
-***REMOVED*** Lösung: Workflow mit "Skip tests" neu starten
+# 1. Node-Modules-Cache-Problem
+# Lösung: Workflow mit "Skip tests" neu starten
 
-***REMOVED*** 2. Docker-Image-Build schlägt fehl
-***REMOVED*** Lösung: Lokal testen mit:
+# 2. Docker-Image-Build schlägt fehl
+# Lösung: Lokal testen mit:
 docker-compose -f docker-compose.staging.yml build
 
-***REMOVED*** 3. Tests schlagen fehl
-***REMOVED*** Lösung: Workflow mit skip_tests=true starten
+# 3. Tests schlagen fehl
+# Lösung: Workflow mit skip_tests=true starten
 ```
 
-***REMOVED******REMOVED******REMOVED*** Problem: Smoke-Tests schlagen fehl
+### Problem: Smoke-Tests schlagen fehl
 
 **Lösung:**
 ```bash
-***REMOVED*** Prüfe Container-Status
+# Prüfe Container-Status
 docker ps | grep valeo-staging
 
-***REMOVED*** Prüfe Logs
+# Prüfe Logs
 docker logs valeo-staging-backend
 docker logs valeo-staging-keycloak
 
-***REMOVED*** Health-Checks manuell prüfen
+# Health-Checks manuell prüfen
 curl http://localhost:8001/healthz
 curl http://localhost:8180/health/ready
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📚 Dokumentation
+## 📚 Dokumentation
 
 Alle Details findest du in:
 
@@ -244,15 +244,15 @@ Alle Details findest du in:
 
 ---
 
-***REMOVED******REMOVED*** ✅ Checkliste
+## ✅ Checkliste
 
-***REMOVED******REMOVED******REMOVED*** Vor dem ersten Deployment
+### Vor dem ersten Deployment
 - [ ] `GITHUB-SECRETS.txt` erstellt und Passwörter gespeichert
 - [ ] 4 Secrets in GitHub eingetragen
 - [ ] Code committed und gepusht
 - [ ] develop-Branch existiert
 
-***REMOVED******REMOVED******REMOVED*** Nach dem Deployment
+### Nach dem Deployment
 - [ ] Workflow erfolgreich durchgelaufen (alle Jobs grün)
 - [ ] 18 Smoke-Tests bestanden
 - [ ] Frontend erreichbar (http://localhost:3001)
@@ -261,7 +261,7 @@ Alle Details findest du in:
 
 ---
 
-***REMOVED******REMOVED*** 🎉 Erfolg!
+## 🎉 Erfolg!
 
 Wenn alle Checks grün sind:
 
@@ -278,7 +278,7 @@ Wenn alle Checks grün sind:
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Nächste Schritte
+## 🔄 Nächste Schritte
 
 Nach erfolgreichem Staging-Deployment:
 
@@ -298,4 +298,5 @@ Nach erfolgreichem Staging-Deployment:
 ---
 
 **🚀 Du schaffst das! Let's deploy! 🎯**
+
 

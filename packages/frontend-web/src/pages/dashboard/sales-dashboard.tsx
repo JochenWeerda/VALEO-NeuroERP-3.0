@@ -179,7 +179,7 @@ export default function SalesDashboardPage(): JSX.Element {
               <div key={i} className="flex items-center justify-between rounded-lg border p-4">
                 <div>
                   <div className="font-semibold">{kunde.name}</div>
-                  <Badge variant="outline" className="mt-1">***REMOVED***{i + 1}</Badge>
+                  <Badge variant="outline" className="mt-1">#{i + 1}</Badge>
                 </div>
                 <div className="text-xl font-bold">
                   {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(kunde.revenue)}
@@ -192,3 +192,4 @@ export default function SalesDashboardPage(): JSX.Element {
     </div>
   )
 }
+

@@ -1,13 +1,13 @@
-***REMOVED***!/bin/bash
-***REMOVED*** ============================================================================
-***REMOVED*** CRM Service Entrypoint Script (Template)
-***REMOVED*** Führt Migrationen aus und startet dann den Server
-***REMOVED*** 
-***REMOVED*** Umgebungsvariablen:
-***REMOVED***   DATABASE_URL - PostgreSQL Connection String
-***REMOVED***   SERVICE_PORT - Port für den Service (default: 5600)
-***REMOVED***   SERVICE_NAME - Name des Services für Logging
-***REMOVED*** ============================================================================
+#!/bin/bash
+# ============================================================================
+# CRM Service Entrypoint Script (Template)
+# Führt Migrationen aus und startet dann den Server
+# 
+# Umgebungsvariablen:
+#   DATABASE_URL - PostgreSQL Connection String
+#   SERVICE_PORT - Port für den Service (default: 5600)
+#   SERVICE_NAME - Name des Services für Logging
+# ============================================================================
 
 set -e
 
@@ -17,7 +17,7 @@ SERVICE_PORT="${SERVICE_PORT:-5600}"
 echo "🚀 ${SERVICE_NAME} Starting..."
 echo "================================"
 
-***REMOVED*** Extrahiere DB-Host aus verschiedenen möglichen Umgebungsvariablen
+# Extrahiere DB-Host aus verschiedenen möglichen Umgebungsvariablen
 if [ -n "$CRM_CORE_DATABASE_URL" ]; then
     DB_URL="$CRM_CORE_DATABASE_URL"
 elif [ -n "$DATABASE_URL" ]; then
@@ -32,7 +32,7 @@ DB_PORT=$(echo $DB_URL | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
 
 echo "⏳ Warte auf PostgreSQL (${DB_HOST}:${DB_PORT})..."
 
-***REMOVED*** Warte auf PostgreSQL mit Python
+# Warte auf PostgreSQL mit Python
 python -c "
 import socket
 import time
@@ -62,7 +62,7 @@ print('❌ PostgreSQL nicht erreichbar nach {max_retries} Versuchen!')
 sys.exit(1)
 "
 
-***REMOVED*** Führe Alembic-Migrationen aus (falls vorhanden)
+# Führe Alembic-Migrationen aus (falls vorhanden)
 if [ -f "alembic.ini" ]; then
     echo ""
     echo "📦 Führe Datenbank-Migrationen aus..."
@@ -79,6 +79,7 @@ echo ""
 echo "🌐 Starte Uvicorn Server auf Port ${SERVICE_PORT}..."
 echo "================================"
 
-***REMOVED*** Starte den Server
+# Starte den Server
 exec uvicorn main:app --host 0.0.0.0 --port ${SERVICE_PORT}
+
 

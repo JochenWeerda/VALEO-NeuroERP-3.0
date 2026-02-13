@@ -1,4 +1,4 @@
-***REMOVED*** Sprint 5 Plan
+# Sprint 5 Plan
 
 **Datum:** 2025-01-30  
 **Sprint:** 5  
@@ -8,19 +8,19 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Sprint-Übersicht
+## 🎯 Sprint-Übersicht
 
-***REMOVED******REMOVED******REMOVED*** Ziel
+### Ziel
 Implementierung von 3 weiteren Procurement Capabilities (P2/P3) für Sprint 5.
 
-***REMOVED******REMOVED******REMOVED*** Priorität
+### Priorität
 P2/P3 - Mittel/Niedrig (SOLL/KANN, Priorität 3-4)
 
 ---
 
-***REMOVED******REMOVED*** 📋 Geplante Tasks
+## 📋 Geplante Tasks
 
-***REMOVED******REMOVED******REMOVED*** Task 1: PROC-SUP-03 - Compliance / Dokumente
+### Task 1: PROC-SUP-03 - Compliance / Dokumente
 **Status:** ❌ Nicht vorhanden  
 **Priorität:** P2 (SOLL, Priorität 3)
 
@@ -45,7 +45,7 @@ P2/P3 - Mittel/Niedrig (SOLL/KANN, Priorität 3-4)
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Task 2: PROC-RFQ-02 - Lieferantenangebote / Bids
+### Task 2: PROC-RFQ-02 - Lieferantenangebote / Bids
 **Status:** ❌ Nicht vorhanden  
 **Priorität:** P2 (SOLL, Priorität 3)
 
@@ -69,7 +69,7 @@ P2/P3 - Mittel/Niedrig (SOLL/KANN, Priorität 3-4)
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Task 3: PROC-RFQ-03 - Angebotsvergleich / Award
+### Task 3: PROC-RFQ-03 - Angebotsvergleich / Award
 **Status:** ❌ Nicht vorhanden  
 **Priorität:** P2 (SOLL, Priorität 3)
 
@@ -92,17 +92,17 @@ P2/P3 - Mittel/Niedrig (SOLL/KANN, Priorität 3-4)
 
 ---
 
-***REMOVED******REMOVED*** 📊 Sprint-Planung
+## 📊 Sprint-Planung
 
-***REMOVED******REMOVED******REMOVED*** Woche 1-2
+### Woche 1-2
 - **Tag 1-5:** PROC-SUP-03 (Compliance / Dokumente) - Start
 - **Tag 6-10:** PROC-SUP-03 (Compliance / Dokumente) - Fortsetzung
 
-***REMOVED******REMOVED******REMOVED*** Woche 3-4
+### Woche 3-4
 - **Tag 11-15:** PROC-RFQ-02 (Lieferantenangebote / Bids) - Start
 - **Day 16-20:** PROC-RFQ-02 (Lieferantenangebote / Bids) - Fortsetzung
 
-***REMOVED******REMOVED******REMOVED*** Woche 5
+### Woche 5
 - **Tag 21-25:** PROC-RFQ-03 (Angebotsvergleich / Award)
 - Integration-Tests
 - Bug-Fixes
@@ -110,20 +110,20 @@ P2/P3 - Mittel/Niedrig (SOLL/KANN, Priorität 3-4)
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Dependencies
+## 🔄 Dependencies
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 → Agent-1
+### Agent-2 → Agent-1
 - Keine neuen Dependencies
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 → Agent-4
+### Agent-2 → Agent-4
 - PROC-SUP-03 nutzt möglicherweise Dokumenten-Infrastructure
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 → Agent-3
+### Agent-2 → Agent-3
 - Keine Dependencies
 
 ---
 
-***REMOVED******REMOVED*** ✅ Definition of Done
+## ✅ Definition of Done
 
 - [ ] Alle 3 P2/P3 Capabilities implementiert
 - [ ] i18n vollständig integriert
@@ -135,7 +135,7 @@ P2/P3 - Mittel/Niedrig (SOLL/KANN, Priorität 3-4)
 
 ---
 
-***REMOVED******REMOVED*** 📝 Pre-Implementation Checklist
+## 📝 Pre-Implementation Checklist
 
 Vor Code-Erstellung:
 - [ ] Bestehende Frontend-Seiten analysieren
@@ -147,4 +147,5 @@ Vor Code-Erstellung:
 ---
 
 **Status:** 📋 **SPRINT 5 GEPLANT - BEREIT FÜR START**
+
 

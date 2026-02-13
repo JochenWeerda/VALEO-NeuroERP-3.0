@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Lädt die wichtigen Backend-Dateien in die MongoDB.
 """
@@ -12,7 +12,7 @@ from pathlib import Path
 import pymongo
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -23,7 +23,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("LoadBackendToMongoDB")
 
-***REMOVED*** MongoDB-Konfiguration
+# MongoDB-Konfiguration
 MONGODB_CONNECTION_STRING = "mongodb://localhost:27017/"
 MONGODB_DATABASE_NAME = "valeo_neuroerp"
 
@@ -40,7 +40,7 @@ def check_mongodb_connection():
             MONGODB_CONNECTION_STRING,
             serverSelectionTimeoutMS=5000
         )
-        ***REMOVED*** Verbindung testen
+        # Verbindung testen
         client.admin.command('ping')
         logger.info("Verbindung zu MongoDB erfolgreich hergestellt.")
         client.close()
@@ -59,22 +59,22 @@ def load_backend_files():
     logger.info("Lade Backend-Dateien in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["backend_files"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** Backend-Verzeichnis
+        # Backend-Verzeichnis
         backend_dir = Path("backend")
         
         if not backend_dir.exists():
             logger.warning(f"Backend-Verzeichnis {backend_dir} existiert nicht.")
             return False
         
-        ***REMOVED*** Wichtige Python-Dateien im Backend-Verzeichnis laden
+        # Wichtige Python-Dateien im Backend-Verzeichnis laden
         important_files = [
             "main.py",
             "mongodb_connector.py",
@@ -96,23 +96,23 @@ def load_backend_files():
             file_path = backend_dir / filename
             if file_path.exists():
                 try:
-                    ***REMOVED*** Binärmodus zum Erkennen von Null-Bytes
+                    # Binärmodus zum Erkennen von Null-Bytes
                     with open(file_path, 'rb') as f:
                         content_bytes = f.read()
                     
-                    ***REMOVED*** Prüfen auf Null-Bytes
+                    # Prüfen auf Null-Bytes
                     if b'\x00' in content_bytes:
                         logger.warning(f"Datei {file_path} enthält Null-Bytes und wird übersprungen.")
                         continue
                     
-                    ***REMOVED*** In Text umwandeln
+                    # In Text umwandeln
                     try:
                         content = content_bytes.decode('utf-8')
                     except UnicodeDecodeError:
                         logger.warning(f"Datei {file_path} konnte nicht als UTF-8 dekodiert werden, versuche latin-1.")
                         content = content_bytes.decode('latin-1')
                     
-                    ***REMOVED*** In MongoDB speichern
+                    # In MongoDB speichern
                     collection.insert_one({
                         "filename": file_path.name,
                         "path": str(file_path),
@@ -145,41 +145,41 @@ def load_apm_framework_files():
     logger.info("Lade APM-Framework-Dateien in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["apm_framework_files"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** APM-Framework-Verzeichnis
+        # APM-Framework-Verzeichnis
         apm_dir = Path("backend") / "apm_framework"
         
         if not apm_dir.exists():
             logger.warning(f"APM-Framework-Verzeichnis {apm_dir} existiert nicht.")
             return False
         
-        ***REMOVED*** Alle Python-Dateien im APM-Framework-Verzeichnis laden
+        # Alle Python-Dateien im APM-Framework-Verzeichnis laden
         for file_path in apm_dir.glob("*.py"):
             try:
-                ***REMOVED*** Binärmodus zum Erkennen von Null-Bytes
+                # Binärmodus zum Erkennen von Null-Bytes
                 with open(file_path, 'rb') as f:
                     content_bytes = f.read()
                 
-                ***REMOVED*** Prüfen auf Null-Bytes
+                # Prüfen auf Null-Bytes
                 if b'\x00' in content_bytes:
                     logger.warning(f"Datei {file_path} enthält Null-Bytes und wird übersprungen.")
                     continue
                 
-                ***REMOVED*** In Text umwandeln
+                # In Text umwandeln
                 try:
                     content = content_bytes.decode('utf-8')
                 except UnicodeDecodeError:
                     logger.warning(f"Datei {file_path} konnte nicht als UTF-8 dekodiert werden, versuche latin-1.")
                     content = content_bytes.decode('latin-1')
                 
-                ***REMOVED*** In MongoDB speichern
+                # In MongoDB speichern
                 collection.insert_one({
                     "filename": file_path.name,
                     "path": str(file_path),
@@ -212,41 +212,41 @@ def load_readme_files():
     logger.info("Lade README-Dateien in MongoDB...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["readme_files"]
         
-        ***REMOVED*** Sammlung leeren
+        # Sammlung leeren
         collection.delete_many({})
         
-        ***REMOVED*** Backend-Verzeichnis
+        # Backend-Verzeichnis
         backend_dir = Path("backend")
         
         if not backend_dir.exists():
             logger.warning(f"Backend-Verzeichnis {backend_dir} existiert nicht.")
             return False
         
-        ***REMOVED*** Alle README-Dateien im Backend-Verzeichnis laden
+        # Alle README-Dateien im Backend-Verzeichnis laden
         for file_path in backend_dir.glob("README*.md"):
             try:
-                ***REMOVED*** Binärmodus zum Erkennen von Null-Bytes
+                # Binärmodus zum Erkennen von Null-Bytes
                 with open(file_path, 'rb') as f:
                     content_bytes = f.read()
                 
-                ***REMOVED*** Prüfen auf Null-Bytes
+                # Prüfen auf Null-Bytes
                 if b'\x00' in content_bytes:
                     logger.warning(f"Datei {file_path} enthält Null-Bytes und wird übersprungen.")
                     continue
                 
-                ***REMOVED*** In Text umwandeln
+                # In Text umwandeln
                 try:
                     content = content_bytes.decode('utf-8')
                 except UnicodeDecodeError:
                     logger.warning(f"Datei {file_path} konnte nicht als UTF-8 dekodiert werden, versuche latin-1.")
                     content = content_bytes.decode('latin-1')
                 
-                ***REMOVED*** In MongoDB speichern
+                # In MongoDB speichern
                 collection.insert_one({
                     "filename": file_path.name,
                     "path": str(file_path),
@@ -279,20 +279,20 @@ def create_indexes():
     logger.info("Erstelle Indizes in MongoDB-Sammlungen...")
     
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         
-        ***REMOVED*** Indizes für backend_files
+        # Indizes für backend_files
         db.backend_files.create_index("filename")
         db.backend_files.create_index("category")
         db.backend_files.create_index([("content", pymongo.TEXT)])
         
-        ***REMOVED*** Indizes für apm_framework_files
+        # Indizes für apm_framework_files
         db.apm_framework_files.create_index("filename")
         db.apm_framework_files.create_index([("content", pymongo.TEXT)])
         
-        ***REMOVED*** Indizes für readme_files
+        # Indizes für readme_files
         db.readme_files.create_index("filename")
         db.readme_files.create_index([("content", pymongo.TEXT)])
         
@@ -307,27 +307,27 @@ def main():
     """
     Hauptfunktion für das Laden der wichtigen Backend-Dateien in die MongoDB.
     """
-    ***REMOVED*** MongoDB-Verbindung prüfen
+    # MongoDB-Verbindung prüfen
     if not check_mongodb_connection():
         logger.error("Konnte keine Verbindung zur MongoDB herstellen.")
         return 1
     
-    ***REMOVED*** Backend-Dateien laden
+    # Backend-Dateien laden
     if not load_backend_files():
         logger.error("Konnte Backend-Dateien nicht laden.")
         return 1
     
-    ***REMOVED*** APM-Framework-Dateien laden
+    # APM-Framework-Dateien laden
     if not load_apm_framework_files():
         logger.error("Konnte APM-Framework-Dateien nicht laden.")
         return 1
     
-    ***REMOVED*** README-Dateien laden
+    # README-Dateien laden
     if not load_readme_files():
         logger.error("Konnte README-Dateien nicht laden.")
         return 1
     
-    ***REMOVED*** Indizes erstellen
+    # Indizes erstellen
     if not create_indexes():
         logger.error("Konnte Indizes nicht erstellen.")
         return 1

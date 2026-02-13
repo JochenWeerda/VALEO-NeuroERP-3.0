@@ -1,4 +1,4 @@
-***REMOVED*** Agenten-Zuordnung - 124 Capabilities
+# Agenten-Zuordnung - 124 Capabilities
 
 **Datum:** 2025-01-27  
 **Status:** Final  
@@ -6,7 +6,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 📊 Übersicht
+## 📊 Übersicht
 
 | Agent | Domain | Capabilities | Priorität |
 |-------|--------|--------------|-----------|
@@ -17,15 +17,15 @@
 
 ---
 
-***REMOVED******REMOVED*** 💰 Agent-1: Finance & Accounting (33 Capabilities)
+## 💰 Agent-1: Finance & Accounting (33 Capabilities)
 
-***REMOVED******REMOVED******REMOVED*** P0 - Kritisch (4 Capabilities)
+### P0 - Kritisch (4 Capabilities)
 - **FIBU-AR-03:** Zahlungseingänge & Matching
 - **FIBU-AP-02:** Eingangsrechnungen
 - **FIBU-GL-05:** Periodensteuerung
 - **FIBU-COMP-01:** GoBD / Audit Trail UI
 
-***REMOVED******REMOVED******REMOVED*** P1 - Hoch (7 Capabilities)
+### P1 - Hoch (7 Capabilities)
 - **FIBU-GL-01:** Kontenplan & Kontenstamm
 - **FIBU-GL-02:** Belegprinzip & Nummernkreise
 - **FIBU-AR-01:** Debitorenstamm
@@ -34,7 +34,7 @@
 - **FIBU-AP-04:** Zahlungsläufe / SEPA
 - **FIBU-AP-05:** OP-Verwaltung & Ausgleich
 
-***REMOVED******REMOVED******REMOVED*** P2 - Mittel (13 Capabilities)
+### P2 - Mittel (13 Capabilities)
 - **FIBU-GL-04:** Sammel-/Massenbuchungen
 - **FIBU-GL-06:** Fremdwährung & Wechselkurse
 - **FIBU-GL-07:** Automatische Buchungsschemata
@@ -49,7 +49,7 @@
 - **FIBU-TAX-03:** E-Rechnung
 - **FIBU-CLS-02:** Nebenbuch-Abstimmung
 
-***REMOVED******REMOVED******REMOVED*** P3 - Niedrig (9 Capabilities)
+### P3 - Niedrig (9 Capabilities)
 - **FIBU-GL-08:** Kostenrechnung-Integrationspunkte
 - **FIBU-FA-01 bis FIBU-FA-05:** Anlagen (5)
 - **FIBU-CLS-01:** Abschlusschecklisten
@@ -59,21 +59,21 @@
 
 ---
 
-***REMOVED******REMOVED*** 🛒 Agent-2: Procurement & Supply Chain (28 Capabilities)
+## 🛒 Agent-2: Procurement & Supply Chain (28 Capabilities)
 
-***REMOVED******REMOVED******REMOVED*** P0 - Kritisch (4 Capabilities)
+### P0 - Kritisch (4 Capabilities)
 - **PROC-GR-01:** Wareneingang
 - **PROC-IV-02:** 2/3-Wege-Abgleich
 - **PROC-PO-02:** PO-Änderungen & Storno
 - **PROC-REQ-01:** Bedarfsmeldung vervollständigen
 
-***REMOVED******REMOVED******REMOVED*** P1 - Hoch (4 Capabilities)
+### P1 - Hoch (4 Capabilities)
 - **PROC-SUP-01:** Lieferantenstamm
 - **PROC-PO-01:** Bestellung erstellen
 - **PROC-IV-01:** Eingangsrechnung
 - **PROC-PAY-01:** Zahlungsläufe
 
-***REMOVED******REMOVED******REMOVED*** P2 - Mittel (9 Capabilities)
+### P2 - Mittel (9 Capabilities)
 - **PROC-SUP-02:** Lieferantenbewertung
 - **PROC-SUP-03:** Compliance / Dokumente
 - **PROC-REQ-02:** Bedarfsgenehmigung
@@ -84,7 +84,7 @@
 - **PROC-IV-03:** Rechnungsfreigabe
 - **PROC-PAY-02:** Gutschriften/Belastungen
 
-***REMOVED******REMOVED******REMOVED*** P3 - Niedrig (11 Capabilities)
+### P3 - Niedrig (11 Capabilities)
 - **PROC-REQ-03:** Katalog / Guided Buying
 - **PROC-PO-03:** PO-Kommunikation
 - **PROC-PO-04:** Bestellabrufe / Lieferpläne
@@ -99,9 +99,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 📊 Agent-3: Sales & CRM (63 Capabilities)
+## 📊 Agent-3: Sales & CRM (63 Capabilities)
 
-***REMOVED******REMOVED******REMOVED*** Sales (31 Capabilities)
+### Sales (31 Capabilities)
 **P0 - Kritisch:**
 - Top kritische Gaps aus `gaps-sales.md`
 
@@ -111,7 +111,7 @@
 **P2-P3 - Mittel/Niedrig:**
 - Restliche Sales Capabilities
 
-***REMOVED******REMOVED******REMOVED*** CRM/Marketing (32 Capabilities)
+### CRM/Marketing (32 Capabilities)
 **P0 - Kritisch:**
 - **CRM-OPP-01:** Opportunities / Deals
 - **CRM-CNS-01:** Opt-in/Opt-out & Consent Log
@@ -127,9 +127,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 🔧 Agent-4: Infrastructure & Integration
+## 🔧 Agent-4: Infrastructure & Integration
 
-***REMOVED******REMOVED******REMOVED*** Cross-Domain Features
+### Cross-Domain Features
 - **Workflow-Engine:** Vervollständigung für alle Domains
 - **RBAC/Rollen-System:** Vervollständigung
 - **Reporting-Infrastructure:** Cross-Domain Reporting
@@ -138,7 +138,7 @@
 - **Performance-Optimierung:** System-weit
 - **Monitoring & Observability:** System-weit
 
-***REMOVED******REMOVED******REMOVED*** Support für andere Agenten
+### Support für andere Agenten
 - **Agent-1 Support:**
   - Bankimport-Infrastructure
   - Payment-Match-Engine Basis
@@ -156,44 +156,44 @@
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Dependencies & Koordination
+## 🔄 Dependencies & Koordination
 
-***REMOVED******REMOVED******REMOVED*** Agent-1 ↔ Agent-4
+### Agent-1 ↔ Agent-4
 - **Bankimport:** Agent-4 stellt Infrastructure, Agent-1 implementiert UI
 - **Payment-Match:** Agent-4 stellt Engine, Agent-1 implementiert UI
 - **Audit-Trail:** Agent-4 stellt Backend, Agent-1 implementiert UI
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 ↔ Agent-4
+### Agent-2 ↔ Agent-4
 - **Abgleich-Engine:** Agent-4 stellt Engine, Agent-2 implementiert UI
 - **Change-Log:** Agent-4 stellt System, Agent-2 nutzt es
 - **Inventory-Integration:** Agent-4 koordiniert, Agent-2 implementiert
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 ↔ Agent-1
+### Agent-2 ↔ Agent-1
 - **Eingangsrechnungen:** Agent-1 implementiert, Agent-2 nutzt es
 - **Zahlungsläufe:** Agent-1 implementiert, Agent-2 nutzt es
 
-***REMOVED******REMOVED******REMOVED*** Agent-3 ↔ Agent-4
+### Agent-3 ↔ Agent-4
 - **Workflow-Engine:** Agent-4 stellt Engine, Agent-3 nutzt es
 - **RBAC:** Agent-4 stellt System, Agent-3 nutzt es
 
 ---
 
-***REMOVED******REMOVED*** 📅 Implementierungs-Reihenfolge
+## 📅 Implementierungs-Reihenfolge
 
-***REMOVED******REMOVED******REMOVED*** Phase 1 (P0) - Sprint 1-8
+### Phase 1 (P0) - Sprint 1-8
 1. **Sprint 1-2:** Agent-1 (Finance P0) + Agent-4 (Infrastructure)
 2. **Sprint 3-4:** Agent-1 (Finance P0) + Agent-2 (Procurement P0 Start) + Agent-4
 3. **Sprint 5-7:** Agent-2 (Procurement P0) + Agent-4
 4. **Sprint 8:** Agent-2 (Procurement P0 Finalisierung)
 
-***REMOVED******REMOVED******REMOVED*** Phase 2 (P1) - Sprint 9-16
+### Phase 2 (P1) - Sprint 9-16
 **Parallele Arbeit:**
 - Agent-1: Finance P1
 - Agent-2: Procurement P1
 - Agent-3: Sales/CRM P1
 - Agent-4: Infrastructure P1
 
-***REMOVED******REMOVED******REMOVED*** Phase 3 (P2-P3) - Sprint 17-52
+### Phase 3 (P2-P3) - Sprint 17-52
 **Parallele Arbeit:**
 - Agent-1: Finance P2-P3
 - Agent-2: Procurement P2-P3
@@ -203,4 +203,5 @@
 ---
 
 **Letzte Aktualisierung:** 2025-01-27
+
 

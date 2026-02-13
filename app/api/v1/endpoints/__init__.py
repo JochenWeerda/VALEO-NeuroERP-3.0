@@ -1,4 +1,4 @@
-***REMOVED*** VALEO-NeuroERP API v1 Endpoints Package
+# VALEO-NeuroERP API v1 Endpoints Package
 
 from .health import router as health
 from .tenants import router as tenants
@@ -40,3 +40,22 @@ from . import vat_return_export
 from . import closing_checklists
 from . import iban_lookup
 from . import credit_debit_memos
+from . import portal_shop
+from . import opportunities
+from . import cases
+# L3-Connect gap closure endpoints
+from . import inventory_counts
+from . import weighing_tickets
+from . import warehouse_transfers
+from . import preparation_lists
+from . import pick_lists
+from . import gs1_parser
+from . import nve
+from . import webhooks
+from . import article_extensions
+from . import customer_extensions
+from . import messages
+from . import dms_images
+from . import sales_shipping_ext
+from . import master_data
+from . import compat

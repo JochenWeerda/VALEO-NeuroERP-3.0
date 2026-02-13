@@ -5,59 +5,9 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { CheckCircle, Clock, Search, ShoppingCart, TrendingUp } from 'lucide-react'
-
-type Bestellvorschlag = {
-  id: string
-  artikel: string
-  aktuellBestand: number
-  mindestbestand: number
-  vorschlagMenge: number
-  lieferant: string
-  preis: number
-  lieferzeit: number
-  prioritaet: 'hoch' | 'mittel' | 'niedrig'
-  grund: string
-}
-
-const mockVorschlaege: Bestellvorschlag[] = [
-  {
-    id: '1',
-    artikel: 'Weizen Qualität A',
-    aktuellBestand: 5,
-    mindestbestand: 50,
-    vorschlagMenge: 100,
-    lieferant: 'Saatgut AG',
-    preis: 250.0,
-    lieferzeit: 7,
-    prioritaet: 'hoch',
-    grund: 'Unterschreitung Mindestbestand',
-  },
-  {
-    id: '2',
-    artikel: 'NPK-Dünger 15-15-15',
-    aktuellBestand: 20,
-    mindestbestand: 30,
-    vorschlagMenge: 50,
-    lieferant: 'Dünger GmbH',
-    preis: 185.0,
-    lieferzeit: 5,
-    prioritaet: 'mittel',
-    grund: 'Saisonale Nachfrage',
-  },
-  {
-    id: '3',
-    artikel: 'Glyphosat 360g',
-    aktuellBestand: 80,
-    mindestbestand: 50,
-    vorschlagMenge: 30,
-    lieferant: 'Agrar-Handel Nord',
-    preis: 122.0,
-    lieferzeit: 10,
-    prioritaet: 'niedrig',
-    grund: 'Prognose Absatzsteigerung',
-  },
-]
+import { useBestellvorschlaege, type Bestellvorschlag } from '@/lib/api/einkauf'
 
 const prioritaetVariantMap: Record<Bestellvorschlag['prioritaet'], 'default' | 'secondary' | 'destructive'> = {
   hoch: 'destructive',
@@ -73,11 +23,21 @@ const prioritaetLabelMap: Record<Bestellvorschlag['prioritaet'], string> = {
 
 export default function BestellvorschlaegePage(): JSX.Element {
   const navigate = useNavigate()
+  const { data: items, isLoading } = useBestellvorschlaege()
   const [searchTerm, setSearchTerm] = useState('')
   const [prioritaetFilter, setPriorityFilter] = useState<Bestellvorschlag['prioritaet'] | 'alle'>('alle')
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
-  const filteredVorschlaege = mockVorschlaege.filter((vorschlag) => {
+  if (isLoading) return (
+    <div className="p-3 md:p-6 space-y-4">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>
+  )
+
+  const list = items ?? []
+
+  const filteredVorschlaege = list.filter((vorschlag) => {
     const matchesSearch =
       vorschlag.artikel.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vorschlag.lieferant.toLowerCase().includes(searchTerm.toLowerCase())
@@ -191,7 +151,7 @@ export default function BestellvorschlaegePage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Bestellvorschläge</h1>

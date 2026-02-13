@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env ts-node
+#!/usr/bin/env ts-node
 /**
  * Domain bootstrap generator wires repository and services together for a domain slice.
  */

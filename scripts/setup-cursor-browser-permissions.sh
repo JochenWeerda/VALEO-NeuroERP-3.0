@@ -1,11 +1,11 @@
-***REMOVED***!/bin/bash
-***REMOVED*** Setup Cursor Browser Permissions
-***REMOVED*** Automatisch "run this time only" Meldungen umgehen
+#!/bin/bash
+# Setup Cursor Browser Permissions
+# Automatisch "run this time only" Meldungen umgehen
 
 echo "=== Cursor Browser Permissions Setup ==="
 echo ""
 
-***REMOVED*** Finde Cursor Settings JSON (Linux/Mac)
+# Finde Cursor Settings JSON (Linux/Mac)
 if [[ "$OSTYPE" == "darwin"* ]]; then
     SETTINGS_PATH="$HOME/Library/Application Support/Cursor/User/settings.json"
 else
@@ -20,7 +20,7 @@ fi
 
 echo "✅ Settings-Datei gefunden: $SETTINGS_PATH"
 
-***REMOVED*** Prüfe ob jq installiert ist
+# Prüfe ob jq installiert ist
 if ! command -v jq &> /dev/null; then
     echo "⚠️ jq ist nicht installiert. Installiere jq..."
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -30,11 +30,11 @@ if ! command -v jq &> /dev/null; then
     fi
 fi
 
-***REMOVED*** Backup erstellen
+# Backup erstellen
 cp "$SETTINGS_PATH" "${SETTINGS_PATH}.backup"
 echo "✅ Backup erstellt: ${SETTINGS_PATH}.backup"
 
-***REMOVED*** Setze Browser-Berechtigungen mit jq
+# Setze Browser-Berechtigungen mit jq
 jq '. + {
   "cursor.mcp.browser.autoApprove": true,
   "cursor.mcp.browser.trustedDomains": [
@@ -75,4 +75,5 @@ echo "⚠️ WICHTIG: Cursor muss neu gestartet werden, damit die Änderungen wi
 echo ""
 echo "✅ Setup abgeschlossen!"
 echo "Bitte starte Cursor neu und teste die Browser-Aktionen."
+
 

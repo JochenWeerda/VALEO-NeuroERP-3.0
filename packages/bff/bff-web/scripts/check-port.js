@@ -1,10 +1,10 @@
-***REMOVED***!/usr/bin/env node
+#!/usr/bin/env node
 
 /**
  * Utility script to check port availability and manage server processes
  * Usage:
- *   node scripts/check-port.js 4001  ***REMOVED*** Check if port 4001 is available
- *   node scripts/check-port.js       ***REMOVED*** Check default ports
+ *   node scripts/check-port.js 4001  # Check if port 4001 is available
+ *   node scripts/check-port.js       # Check default ports
  */
 
 const { execSync } = require('child_process');

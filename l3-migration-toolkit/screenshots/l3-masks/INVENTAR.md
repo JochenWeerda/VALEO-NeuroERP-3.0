@@ -1,12 +1,12 @@
-***REMOVED*** L3-Masken Screenshot-Inventar
+# L3-Masken Screenshot-Inventar
 
 **Erfassungsdatum:** 2025-10-17  
 **Erfasser:** AI-Agent + Jochen  
 **Methode:** Manuell navigiert, automatisch gescreenshottet
 
-***REMOVED******REMOVED*** 📸 Erfasste Masken
+## 📸 Erfasste Masken
 
-***REMOVED******REMOVED******REMOVED*** 1. ✅ Artikelstamm
+### 1. ✅ Artikelstamm
 - **Datei:** `l3-01-artikelstamm.png`
 - **Zeitstempel:** 2025-10-17 21:45
 - **Priorität:** ⭐⭐⭐⭐⭐ KRITISCH
@@ -25,9 +25,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Noch zu erfassen (Priorität)
+## 🎯 Noch zu erfassen (Priorität)
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐⭐⭐ KRITISCH
+### ⭐⭐⭐⭐⭐ KRITISCH
 - [ ] **Kunden-Stamm** - Kundenverwaltung
 - [ ] **Lieferschein** - Verkauf/Auslieferung
 - [ ] **Rechnung** - Fakturierung
@@ -36,20 +36,20 @@
 - [ ] **Lager-Bestand** - Lagerverwaltung
 - [ ] **PSM-Abgabe** - Pflanzenschutzmittel (AGRAR!)
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐⭐ WICHTIG
+### ⭐⭐⭐⭐ WICHTIG
 - [ ] **Kunden-Kontoauszug** - OP-Verwaltung
 - [ ] **Lieferanten-Stamm** - Lieferantenverwaltung
 - [ ] **Artikelgruppen** - Kategorien
 - [ ] **Preislisten** - Preisverwaltung
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐ NICE-TO-HAVE
+### ⭐⭐⭐ NICE-TO-HAVE
 - [ ] **CRM-Dashboard**
 - [ ] **Statistiken**
 - [ ] **Inventur**
 
 ---
 
-***REMOVED******REMOVED*** 📊 Fortschritt
+## 📊 Fortschritt
 - **Erfasst:** 1 / 15+ Masken
 - **Prozent:** ~7%
 - **Nächste Maske:** Kunden-Stamm oder Lieferschein
@@ -57,4 +57,5 @@
 ---
 
 **Bereit für die nächste Maske!** 🚀
+
 

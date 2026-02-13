@@ -1,8 +1,12 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Sprout, TrendingUp } from 'lucide-react'
+import { useDuengerKomponenten } from '@/lib/api/agrar'
 
 export default function DuengungsplanungPage(): JSX.Element {
+  const { data: komponenten, isLoading } = useDuengerKomponenten()
+
   const planung = {
     schlaege: [
       { schlag: 'S-001 Hinterfeld', kultur: 'Weizen', flaeche: 25, npk: { n: 180, p: 60, k: 120 }, geplant: 'KW 12' },
@@ -11,11 +15,28 @@ export default function DuengungsplanungPage(): JSX.Element {
     gesamtFlaeche: 43,
   }
 
+  const verfuegbareKomponenten = komponenten ?? []
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="h-10 w-1/2" />
+        <Skeleton className="h-4 w-1/3" />
+        <div className="grid gap-4 md:grid-cols-3">
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+        </div>
+        <Skeleton className="h-64 w-full" />
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
       <div>
         <h1 className="text-3xl font-bold">Düngungsplanung</h1>
-        <p className="text-muted-foreground">Nährstoffbedarf & Planung</p>
+        <p className="text-muted-foreground">Nährstoffbedarf & Planung ({verfuegbareKomponenten.length} Komponenten verfügbar)</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -65,7 +86,7 @@ export default function DuengungsplanungPage(): JSX.Element {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <div className="font-semibold text-lg">{schlag.schlag}</div>
-                      <div className="text-sm text-muted-foreground">{schlag.kultur} • {schlag.flaeche} ha</div>
+                      <div className="text-sm text-muted-foreground">{schlag.kultur} - {schlag.flaeche} ha</div>
                     </div>
                     <Badge variant="outline">Geplant: {schlag.geplant}</Badge>
                   </div>

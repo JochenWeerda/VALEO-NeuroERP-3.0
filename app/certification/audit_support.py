@@ -87,7 +87,7 @@ class AuditFinding:
     id: str
     audit_id: str
     control_id: str
-    finding_type: str  ***REMOVED*** major, minor, observation
+    finding_type: str  # major, minor, observation
     severity: str
     description: str
     root_cause: str
@@ -191,21 +191,21 @@ class ISOCertificationAuditSupport:
         self.evidence = evidence_service
         self.compliance = compliance_service
 
-        ***REMOVED*** Audit management
+        # Audit management
         self.audit_plans: Dict[str, AuditPlan] = {}
         self.audit_executions: Dict[str, AuditExecution] = {}
         self.audit_evidence: List[AuditEvidence] = {}
         self.audit_findings: List[AuditFinding] = {}
 
-        ***REMOVED*** Certification management
+        # Certification management
         self.certification_applications: Dict[str, CertificationApplication] = {}
         self.compliance_assessments: List[ComplianceAssessment] = {}
         self.readiness_checklists: Dict[str, AuditReadinessChecklist] = {}
 
-        ***REMOVED*** Certification standards configuration
+        # Certification standards configuration
         self.certification_standards = self._initialize_certification_standards()
 
-        ***REMOVED*** Audit checklists
+        # Audit checklists
         self.audit_checklists = self._initialize_audit_checklists()
 
     def _initialize_certification_standards(self) -> Dict[CertificationStandard, Dict[str, Any]]:
@@ -217,9 +217,9 @@ class ISOCertificationAuditSupport:
                 'controls': 93,
                 'annexes': ['A.5-A.18'],
                 'certification_bodies': ['BSI', 'TÜV', 'DNV', 'Lloyd\'s Register'],
-                'validity_period': 3,  ***REMOVED*** years
-                'surveillance_frequency': 12,  ***REMOVED*** months
-                'transition_period': 36  ***REMOVED*** months from 2013 version
+                'validity_period': 3,  # years
+                'surveillance_frequency': 12,  # months
+                'transition_period': 36  # months from 2013 version
             },
             CertificationStandard.ISO_9001: {
                 'name': 'Quality Management Systems',
@@ -321,7 +321,7 @@ class ISOCertificationAuditSupport:
 
         self.audit_executions[execution_id] = execution
 
-        ***REMOVED*** Update plan status
+        # Update plan status
         self.audit_plans[plan_id].status = "in_progress"
 
         logger.info(f"Audit execution started for plan: {plan_id}")
@@ -356,7 +356,7 @@ class ISOCertificationAuditSupport:
 
         self.audit_evidence[evidence_id].append(evidence)
 
-        ***REMOVED*** Add to execution
+        # Add to execution
         execution = self.audit_executions[execution_id]
         execution.evidence_collected.append(evidence)
 
@@ -391,7 +391,7 @@ class ISOCertificationAuditSupport:
 
         self.audit_findings.append(finding)
 
-        ***REMOVED*** Add to execution
+        # Add to execution
         execution = self.audit_executions[execution_id]
         execution.findings.append(finding)
 
@@ -438,11 +438,11 @@ class ISOCertificationAuditSupport:
         execution.status = "completed"
         execution.recommendations = completion_data.get('recommendations', [])
 
-        ***REMOVED*** Calculate overall compliance
+        # Calculate overall compliance
         execution.compliance_assessment['overall_compliance'] = self._calculate_overall_compliance(execution)
         execution.compliance_assessment['completion_summary'] = completion_data.get('completion_summary', '')
 
-        ***REMOVED*** Update plan status
+        # Update plan status
         plan = self.audit_plans[execution.audit_plan_id]
         plan.status = "completed"
 
@@ -468,7 +468,7 @@ class ISOCertificationAuditSupport:
             if assessment.get('compliance_status') == 'compliant':
                 compliant_count += 1
 
-        ***REMOVED*** Count findings
+        # Count findings
         for finding in execution.findings:
             if finding.finding_type == 'major':
                 major_findings += 1
@@ -477,7 +477,7 @@ class ISOCertificationAuditSupport:
 
         avg_score = total_score / len(assessments)
 
-        ***REMOVED*** Determine compliance level
+        # Determine compliance level
         if avg_score >= 95 and major_findings == 0:
             level = 'excellent'
         elif avg_score >= 85 and major_findings <= 2:
@@ -539,12 +539,12 @@ class ISOCertificationAuditSupport:
             scope=assessment_data['scope']
         )
 
-        ***REMOVED*** Perform automated assessment
+        # Perform automated assessment
         assessment.control_assessments = self._perform_automated_control_assessment(assessment.certification_standard)
         assessment.gaps_identified = self._identify_compliance_gaps(assessment.control_assessments)
         assessment.recommendations = self._generate_assessment_recommendations(assessment.gaps_identified)
 
-        ***REMOVED*** Calculate overall score
+        # Calculate overall score
         assessment.overall_compliance_score = self._calculate_compliance_score(assessment.control_assessments)
         assessment.readiness_level = self._determine_readiness_level(assessment.overall_compliance_score)
         assessment.estimated_certification_date = self._estimate_certification_date(assessment)
@@ -558,14 +558,14 @@ class ISOCertificationAuditSupport:
         """Perform automated control assessment"""
         assessments = {}
 
-        ***REMOVED*** Get checklist for standard
+        # Get checklist for standard
         checklist = self.audit_checklists.get(standard, {})
 
         for section, controls in checklist.items():
             for control in controls:
-                ***REMOVED*** Simulate assessment (in production, this would check actual implementation)
-                compliance_status = ComplianceStatus.COMPLIANT  ***REMOVED*** Assume compliant for demo
-                evidence_count = 5  ***REMOVED*** Mock evidence count
+                # Simulate assessment (in production, this would check actual implementation)
+                compliance_status = ComplianceStatus.COMPLIANT  # Assume compliant for demo
+                evidence_count = 5  # Mock evidence count
                 last_assessed = datetime.utcnow() - timedelta(days=30)
 
                 assessments[control] = {
@@ -634,11 +634,11 @@ class ISOCertificationAuditSupport:
     def _estimate_certification_date(self, assessment: ComplianceAssessment) -> Optional[datetime]:
         """Estimate certification date based on assessment"""
         if assessment.readiness_level == 'certification_ready':
-            return datetime.utcnow() + timedelta(days=90)  ***REMOVED*** 3 months for audit process
+            return datetime.utcnow() + timedelta(days=90)  # 3 months for audit process
         elif assessment.readiness_level == 'conditionally_ready':
-            return datetime.utcnow() + timedelta(days=180)  ***REMOVED*** 6 months with remediation
+            return datetime.utcnow() + timedelta(days=180)  # 6 months with remediation
         else:
-            return None  ***REMOVED*** Cannot estimate
+            return None  # Cannot estimate
 
     def generate_audit_readiness_checklist(self, standard: CertificationStandard) -> str:
         """
@@ -652,7 +652,7 @@ class ISOCertificationAuditSupport:
             certification_standard=standard
         )
 
-        ***REMOVED*** Generate checklist items based on standard
+        # Generate checklist items based on standard
         checklist_items = {}
 
         if standard == CertificationStandard.ISO_27001:
@@ -785,20 +785,20 @@ class ISOCertificationAuditSupport:
 
     def get_certification_readiness_report(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Generate comprehensive certification readiness report"""
-        ***REMOVED*** Get latest assessments
-        assessments = [a for a in self.compliance_assessments[-10:]]  ***REMOVED*** Last 10 assessments
+        # Get latest assessments
+        assessments = [a for a in self.compliance_assessments[-10:]]  # Last 10 assessments
 
-        ***REMOVED*** Get active applications
+        # Get active applications
         active_applications = [a for a in self.certification_applications.values()
                              if a.status in ['draft', 'submitted']]
 
-        ***REMOVED*** Get readiness checklists
+        # Get readiness checklists
         checklists = list(self.readiness_checklists.values())
 
-        ***REMOVED*** Calculate overall readiness
+        # Calculate overall readiness
         overall_readiness = self._calculate_overall_readiness(assessments, checklists)
 
-        ***REMOVED*** Generate recommendations
+        # Generate recommendations
         recommendations = self._generate_readiness_recommendations(overall_readiness, assessments)
 
         return {
@@ -811,7 +811,7 @@ class ISOCertificationAuditSupport:
                     'score': a.overall_compliance_score,
                     'readiness_level': a.readiness_level,
                     'date': a.assessment_date.isoformat()
-                } for a in assessments[-3:]  ***REMOVED*** Last 3 assessments
+                } for a in assessments[-3:]  # Last 3 assessments
             ],
             'active_applications': [
                 {
@@ -843,11 +843,11 @@ class ISOCertificationAuditSupport:
                 'avg_compliance_score': 0
             }
 
-        ***REMOVED*** Calculate average scores
+        # Calculate average scores
         total_score = sum(a.overall_compliance_score for a in assessments)
         avg_score = total_score / len(assessments)
 
-        ***REMOVED*** Determine overall readiness level
+        # Determine overall readiness level
         if avg_score >= 95:
             readiness_level = 'certification_ready'
         elif avg_score >= 85:
@@ -859,7 +859,7 @@ class ISOCertificationAuditSupport:
         else:
             readiness_level = 'significant_gaps'
 
-        ***REMOVED*** Checklist completion
+        # Checklist completion
         checklist_completion = sum(c.completion_percentage for c in checklists) / len(checklists) if checklists else 0
 
         return {
@@ -895,7 +895,7 @@ class ISOCertificationAuditSupport:
             recommendations.append("Submit formal certification application")
             recommendations.append("Prepare audit team and logistics")
 
-        ***REMOVED*** Standard recommendations
+        # Standard recommendations
         recommendations.extend([
             "Maintain regular compliance monitoring",
             "Keep documentation current and accessible",
@@ -939,7 +939,7 @@ class ISOCertificationAuditSupport:
 
     def check_audit_compliance(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Check overall audit and certification compliance"""
-        assessments = [a for a in self.compliance_assessments[-5:]]  ***REMOVED*** Last 5 assessments
+        assessments = [a for a in self.compliance_assessments[-5:]]  # Last 5 assessments
         applications = list(self.certification_applications.values())
         plans = list(self.audit_plans.values())
 
@@ -961,17 +961,17 @@ class ISOCertificationAuditSupport:
         """Assess overall audit compliance"""
         issues = []
 
-        ***REMOVED*** Check assessment frequency
+        # Check assessment frequency
         recent_assessments = len([a for a in assessments if (datetime.utcnow() - a.assessment_date).days <= 180])
         if recent_assessments < 3:
             issues.append("Insufficient recent compliance assessments")
 
-        ***REMOVED*** Check application status
+        # Check application status
         active_applications = len([a for a in applications if a.status in ['draft', 'submitted']])
         if active_applications == 0:
             issues.append("No active certification applications")
 
-        ***REMOVED*** Check audit planning
+        # Check audit planning
         planned_audits = len([p for p in plans if p.status == 'planned'])
         if planned_audits == 0:
             issues.append("No planned audits for upcoming period")

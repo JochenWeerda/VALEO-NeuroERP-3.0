@@ -19,7 +19,7 @@ def get_tenant_id(x_tenant: Optional[str] = Header(None)) -> str:
     return x_tenant or "default"
 
 
-***REMOVED*** --- CONTACTS ---
+# --- CONTACTS ---
 
 @router.post("/contacts", response_model=schemas.Contact, status_code=201)
 async def create_contact(
@@ -97,7 +97,7 @@ async def update_contact(
     if not db_contact:
         raise HTTPException(status_code=404, detail="Contact not found")
     
-    ***REMOVED*** Update fields
+    # Update fields
     for field, value in contact_update.model_dump(exclude_unset=True).items():
         setattr(db_contact, field, value)
     
@@ -126,7 +126,7 @@ async def delete_contact(
     return None
 
 
-***REMOVED*** --- LEADS ---
+# --- LEADS ---
 
 @router.post("/leads", response_model=schemas.Lead, status_code=201)
 async def create_lead(
@@ -227,7 +227,7 @@ async def delete_lead(
     return None
 
 
-***REMOVED*** --- ACTIVITIES ---
+# --- ACTIVITIES ---
 
 @router.post("/activities", response_model=schemas.Activity, status_code=201)
 async def create_activity(
@@ -332,7 +332,7 @@ async def delete_activity(
     return None
 
 
-***REMOVED*** --- BETRIEBSPROFILE ---
+# --- BETRIEBSPROFILE ---
 
 @router.post("/betriebsprofile", response_model=schemas.BetriebsProfil, status_code=201)
 async def create_betriebsprofil(

@@ -78,7 +78,7 @@ export default function DeckungsbeitragPage(): JSX.Element {
                 <div>
                   <div className="font-semibold">{k.kultur}</div>
                   <div className="text-sm text-muted-foreground">{k.flaeche} ha</div>
-                  <Badge variant="outline" className="mt-1">***REMOVED***{i + 1}</Badge>
+                  <Badge variant="outline" className="mt-1">#{i + 1}</Badge>
                 </div>
                 <div className="text-right">
                   <div className="text-xl font-bold">
@@ -96,3 +96,4 @@ export default function DeckungsbeitragPage(): JSX.Element {
     </div>
   )
 }
+

@@ -1,10 +1,10 @@
-***REMOVED*** DMS Integration: Paperless-ngx als Slave-Backend
+# DMS Integration: Paperless-ngx als Slave-Backend
 
-***REMOVED******REMOVED*** 📋 Übersicht
+## 📋 Übersicht
 
 Paperless-ngx wird als reines DMS-Backend (Slave) für NeuroERP eingesetzt. Das ERP bleibt "Single Source of Truth" für alle Geschäftsobjekte, während Paperless-ngx als "Dokumenten-Gehirn im Keller" fungiert.
 
-***REMOVED******REMOVED*** 🏗️ Architektur
+## 🏗️ Architektur
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -51,9 +51,9 @@ Paperless-ngx wird als reines DMS-Backend (Slave) für NeuroERP eingesetzt. Das 
 └────────────────────────────────────────────────────────────────┘
 ```
 
-***REMOVED******REMOVED*** 📊 Datenmodell
+## 📊 Datenmodell
 
-***REMOVED******REMOVED******REMOVED*** Gemeinsame Identifikatoren
+### Gemeinsame Identifikatoren
 
 Jedes Dokument, das zu einem Geschäftsobjekt gehört, benötigt:
 
@@ -63,7 +63,7 @@ Jedes Dokument, das zu einem Geschäftsobjekt gehört, benötigt:
 | `business_object_type` | Geschäftsobjekt-Typ | `OBJ:INVOICE` |
 | `business_object_id` | Geschäftsobjekt-ID | `OBJID:4711` |
 
-***REMOVED******REMOVED******REMOVED*** Tag-Konvention in Paperless-ngx
+### Tag-Konvention in Paperless-ngx
 
 ```
 TENANT:{tenant_id}
@@ -86,7 +86,7 @@ Beispiele für `business_object_type`:
 - `QM_CERT` - QM-Zertifikat
 - `QM_AUDIT` - Audit-Bericht
 
-***REMOVED******REMOVED******REMOVED*** ERP-seitige Speicherung
+### ERP-seitige Speicherung
 
 ```typescript
 interface DocumentReference {
@@ -102,11 +102,11 @@ interface DocumentReference {
 }
 ```
 
-***REMOVED******REMOVED*** 🔌 DMS-Adapter API
+## 🔌 DMS-Adapter API
 
-***REMOVED******REMOVED******REMOVED*** Endpoints
+### Endpoints
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Dokument hochladen und verknüpfen
+#### 1. Dokument hochladen und verknüpfen
 ```http
 POST /api/dms/documents
 Content-Type: multipart/form-data
@@ -131,7 +131,7 @@ tags: ["wichtig", "steuer"]
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2. Dokumente nach Geschäftsobjekt abrufen
+#### 2. Dokumente nach Geschäftsobjekt abrufen
 ```http
 GET /api/dms/documents?business_object_type=INVOICE&business_object_id=4711
 X-Tenant-ID: 1234
@@ -158,13 +158,13 @@ X-Tenant-ID: 1234
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3. Dokument herunterladen
+#### 3. Dokument herunterladen
 ```http
 GET /api/dms/documents/{id}/download
 X-Tenant-ID: 1234
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4. Nachträgliche Verknüpfung (Inbox → Geschäftsobjekt)
+#### 4. Nachträgliche Verknüpfung (Inbox → Geschäftsobjekt)
 ```http
 POST /api/dms/documents/{paperless_id}/link
 Content-Type: application/json
@@ -177,21 +177,21 @@ X-Tenant-ID: 1234
 }
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 5. Volltextsuche
+#### 5. Volltextsuche
 ```http
 GET /api/dms/search?q=Rechnung+Müller&limit=20
 X-Tenant-ID: 1234
 ```
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 6. Inbox (unzugeordnete Dokumente)
+#### 6. Inbox (unzugeordnete Dokumente)
 ```http
 GET /api/dms/inbox
 X-Tenant-ID: 1234
 ```
 
-***REMOVED******REMOVED*** 🔄 Workflows
+## 🔄 Workflows
 
-***REMOVED******REMOVED******REMOVED*** A) Eingehende Dokumente (Scan / E-Mail)
+### A) Eingehende Dokumente (Scan / E-Mail)
 
 ```mermaid
 sequenceDiagram
@@ -218,7 +218,7 @@ sequenceDiagram
     DMS-Adapter-->>NeuroERP: OK
 ```
 
-***REMOVED******REMOVED******REMOVED*** B) Dokumente aus ERP erzeugen
+### B) Dokumente aus ERP erzeugen
 
 ```mermaid
 sequenceDiagram
@@ -236,9 +236,9 @@ sequenceDiagram
     NeuroERP->>NeuroERP: Referenz am Geschäftsobjekt speichern
 ```
 
-***REMOVED******REMOVED*** 🔐 Sicherheit & Rechte
+## 🔐 Sicherheit & Rechte
 
-***REMOVED******REMOVED******REMOVED*** Rechte-Management
+### Rechte-Management
 
 - **NeuroERP** führt alle Rollen und Berechtigungen
 - **DMS-Adapter** prüft bei jedem Request:
@@ -247,7 +247,7 @@ sequenceDiagram
   - Business-Object-Berechtigung
 - **Paperless-ngx** kennt nur technische IDs, keine Business-Logik
 
-***REMOVED******REMOVED******REMOVED*** Multi-Tenant-Strategie
+### Multi-Tenant-Strategie
 
 **Option A: Single-Instance mit Tag-Trennung**
 ```
@@ -267,11 +267,11 @@ paperless-tenant-b.neuroerp.local
 
 **Empfehlung:** Option A für die meisten Szenarien, Option B nur bei strikt regulatorischen Anforderungen.
 
-***REMOVED******REMOVED*** 🐳 Docker-Compose Erweiterung
+## 🐳 Docker-Compose Erweiterung
 
 ```yaml
 services:
-  ***REMOVED*** ... bestehende Services ...
+  # ... bestehende Services ...
   
   paperless-redis:
     image: redis:7-alpine
@@ -300,7 +300,7 @@ services:
       - paperless-db
       - paperless-redis
     ports:
-      - "8001:8000"  ***REMOVED*** Paperless UI (nur intern)
+      - "8001:8000"  # Paperless UI (nur intern)
     environment:
       PAPERLESS_REDIS: redis://paperless-redis:6379
       PAPERLESS_DBHOST: paperless-db
@@ -312,7 +312,7 @@ services:
       PAPERLESS_ADMIN_USER: admin
       PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}
       PAPERLESS_URL: http://localhost:8001
-      ***REMOVED*** API-Token für DMS-Adapter
+      # API-Token für DMS-Adapter
       PAPERLESS_AUTO_LOGIN_USERNAME: ""
     networks:
       - neuroerp-network
@@ -349,7 +349,7 @@ volumes:
   paperless-consume:
 ```
 
-***REMOVED******REMOVED*** 📁 Projektstruktur
+## 📁 Projektstruktur
 
 ```
 services/
@@ -379,7 +379,7 @@ services/
     └── tests/
 ```
 
-***REMOVED******REMOVED*** ✅ Nächste Schritte
+## ✅ Nächste Schritte
 
 1. [ ] DMS-Adapter Service Grundstruktur erstellen
 2. [ ] Paperless-ngx Client implementieren
@@ -389,9 +389,10 @@ services/
 6. [ ] Docker-Compose erweitern
 7. [ ] E2E Tests schreiben
 
-***REMOVED******REMOVED*** 📚 Referenzen
+## 📚 Referenzen
 
 - [Paperless-ngx Dokumentation](https://docs.paperless-ngx.com/)
 - [Paperless-ngx API](https://docs.paperless-ngx.com/api/)
 - [Paperless-ngx GitHub](https://github.com/paperless-ngx/paperless-ngx)
+
 

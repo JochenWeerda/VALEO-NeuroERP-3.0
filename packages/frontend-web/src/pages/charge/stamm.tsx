@@ -5,39 +5,68 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Package, Save } from 'lucide-react'
-
-type ChargeData = {
-  id: string
-  chargenId: string
-  artikel: string
-  menge: number
-  lieferant: string
-  gvoStatus: string
-  qsMilch: boolean
-  eudr: boolean
-  lagerort: string
-  status: 'neu' | 'freigegeben' | 'gesperrt' | 'verbraucht'
-}
+import { useChargen } from '@/lib/api/betrieb'
 
 export default function ChargenStammPage(): JSX.Element {
   const navigate = useNavigate()
-  const [charge, _setCharge] = useState<ChargeData>({
-    id: 'CH-001',
-    chargenId: '251011-WEI-001',
-    artikel: 'Weizen Qualität A',
-    menge: 25.0,
+  const { data: chargen, isLoading } = useChargen()
+
+  const firstCharge = chargen?.[0]
+
+  const [editCharge, setEditCharge] = useState({
+    chargenId: '',
+    artikel: '',
+    menge: 0,
+    lieferant: '',
+    lagerort: '',
+    status: 'freigegeben' as 'freigegeben' | 'gesperrt' | 'in-pruefung',
+    gvoStatus: 'gvo-frei-zertifiziert',
+    qsMilch: true,
+    eudr: true,
+  })
+
+  // Sync from API data on first load
+  const charge = firstCharge ? {
+    id: firstCharge.id,
+    chargenId: firstCharge.chargenId,
+    artikel: firstCharge.artikel,
+    menge: firstCharge.menge,
     lieferant: 'Landwirt Schmidt',
     gvoStatus: 'gvo-frei-zertifiziert',
     qsMilch: true,
     eudr: true,
-    lagerort: 'Silo 1',
-    status: 'freigegeben',
-  })
+    lagerort: firstCharge.lagerort,
+    status: firstCharge.status,
+  } : {
+    id: 'CH-001',
+    chargenId: editCharge.chargenId || '251011-WEI-001',
+    artikel: editCharge.artikel || 'Weizen Qualitaet A',
+    menge: editCharge.menge || 25.0,
+    lieferant: editCharge.lieferant || 'Landwirt Schmidt',
+    gvoStatus: editCharge.gvoStatus,
+    qsMilch: editCharge.qsMilch,
+    eudr: editCharge.eudr,
+    lagerort: editCharge.lagerort || 'Silo 1',
+    status: editCharge.status,
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-40" />
+        </div>
+        <Skeleton className="h-80" />
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3">
@@ -50,7 +79,7 @@ export default function ChargenStammPage(): JSX.Element {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => navigate('/charge/liste')}>
-            Zurück
+            Zurueck
           </Button>
           <Button className="gap-2">
             <Save className="h-4 w-4" />
@@ -105,7 +134,7 @@ export default function ChargenStammPage(): JSX.Element {
                   <Label>Status</Label>
                   <div className="mt-2">
                     <Badge variant={charge.status === 'freigegeben' ? 'outline' : charge.status === 'gesperrt' ? 'destructive' : 'default'}>
-                      {charge.status === 'freigegeben' ? '✓ Freigegeben' : charge.status === 'gesperrt' ? '✗ Gesperrt' : charge.status}
+                      {charge.status === 'freigegeben' ? 'Freigegeben' : charge.status === 'gesperrt' ? 'Gesperrt' : charge.status}
                     </Badge>
                   </div>
                 </div>

@@ -18,14 +18,14 @@ export interface ChangeLogRepository {
 }
 
 export interface ChangeLogFilters {
-  tenantId?: string;
-  entityType?: string;
-  entityId?: string;
-  action?: string;
-  userId?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
-  hasReason?: boolean;
+  tenantId?: string | undefined;
+  entityType?: string | undefined;
+  entityId?: string | undefined;
+  action?: string | undefined;
+  userId?: string | undefined;
+  dateFrom?: Date | undefined;
+  dateTo?: Date | undefined;
+  hasReason?: boolean | undefined;
 }
 
 export interface ChangeLogServiceDependencies {

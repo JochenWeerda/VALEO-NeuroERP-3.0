@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Generiert vollständiges Mask Builder JSON für 23 Tabs
 """
@@ -6,7 +6,7 @@ Generiert vollständiges Mask Builder JSON für 23 Tabs
 import json
 from datetime import datetime
 
-***REMOVED*** Vollständiges Schema mit allen 23 Tabs
+# Vollständiges Schema mit allen 23 Tabs
 mask_builder_schema = {
     "mask_id": "kundenstamm",
     "mask_name": "Kundenstamm",
@@ -22,7 +22,7 @@ mask_builder_schema = {
     },
     "form": {
         "fields": [
-            ***REMOVED*** Basis-Felder in jedem Tab
+            # Basis-Felder in jedem Tab
             {"id": "kunden_nr", "label": "Kundennummer", "label_de": "Kundennummer", "l3_original_field": "Kunden-Nr.", "type": "lookup", "required": True, "validation": "unique", "ui_hint": "with_search_button", "max_length": 20, "database_column": "kunden_nr", "tab": "allgemein"}
         ],
         "tabs": [
@@ -346,7 +346,7 @@ def save_schema():
     return output_file
 
 if __name__ == "__main__":
-    ***REMOVED*** Speichere Schema
+    # Speichere Schema
     output_file = save_schema()
     
     print("=" * 80)
@@ -365,4 +365,5 @@ if __name__ == "__main__":
     print(f"\n✅ VOLLSTÄNDIG! Beide Artefakte erstellt:")
     print(f"   ✓ SQL-CREATE: schemas/sql/kundenstamm_complete.sql")
     print(f"   ✓ Mask Builder: {output_file}")
+
 

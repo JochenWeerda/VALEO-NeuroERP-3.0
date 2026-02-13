@@ -10,18 +10,18 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from alembic import context
 
-from app.db.models import Base  ***REMOVED*** Metadata
+from app.db.models import Base  # Metadata
 from app.config import settings
 
-***REMOVED*** Alembic Config object
+# Alembic Config object
 config = context.config
 
-***REMOVED*** Inject DB URL from settings/env if available
+# Inject DB URL from settings/env if available
 db_url = os.getenv("INVENTORY_DATABASE_URL", None)
 if db_url:
     config.set_main_option("sqlalchemy.url", db_url)
 else:
-    ***REMOVED*** Fallback to settings (async URL)
+    # Fallback to settings (async URL)
     config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.unicode_string())
 
 if config.config_file_name is not None:
@@ -63,6 +63,7 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     asyncio.run(run_migrations_online())
+
 
 
 

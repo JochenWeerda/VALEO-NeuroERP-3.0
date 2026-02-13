@@ -4,12 +4,14 @@
  * Übersicht aller Rechnungen des Kunden
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { usePortalRechnungen } from '@/lib/api/portal'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Dialog,
@@ -32,7 +34,6 @@ import {
   Receipt,
   Euro,
   CheckCircle2,
-  AlertCircle,
   Clock,
   Eye,
   Download,
@@ -55,71 +56,6 @@ interface Rechnung {
   dokument: string
 }
 
-const mockRechnungen: Rechnung[] = [
-  {
-    id: '1',
-    rechnungsnummer: 'R-2024-0567',
-    datum: '2024-11-15',
-    faelligkeitsdatum: '2024-12-15',
-    status: 'offen',
-    nettobetrag: 2100.00,
-    mwst: 399.00,
-    bruttobetrag: 2499.00,
-    bezahltBetrag: 0,
-    bestellung: 'B-2024-0138',
-    dokument: 'rechnung-r-2024-0567.pdf',
-  },
-  {
-    id: '2',
-    rechnungsnummer: 'R-2024-0542',
-    datum: '2024-11-01',
-    faelligkeitsdatum: '2024-12-01',
-    status: 'teilzahlung',
-    nettobetrag: 3500.00,
-    mwst: 665.00,
-    bruttobetrag: 4165.00,
-    bezahltBetrag: 2000.00,
-    bestellung: 'B-2024-0125',
-    dokument: 'rechnung-r-2024-0542.pdf',
-  },
-  {
-    id: '3',
-    rechnungsnummer: 'R-2024-0498',
-    datum: '2024-10-15',
-    faelligkeitsdatum: '2024-11-15',
-    status: 'bezahlt',
-    nettobetrag: 1580.00,
-    mwst: 300.20,
-    bruttobetrag: 1880.20,
-    bezahltBetrag: 1880.20,
-    dokument: 'rechnung-r-2024-0498.pdf',
-  },
-  {
-    id: '4',
-    rechnungsnummer: 'R-2024-0445',
-    datum: '2024-09-20',
-    faelligkeitsdatum: '2024-10-20',
-    status: 'bezahlt',
-    nettobetrag: 4200.00,
-    mwst: 798.00,
-    bruttobetrag: 4998.00,
-    bezahltBetrag: 4998.00,
-    dokument: 'rechnung-r-2024-0445.pdf',
-  },
-  {
-    id: '5',
-    rechnungsnummer: 'R-2024-0412',
-    datum: '2024-09-01',
-    faelligkeitsdatum: '2024-10-01',
-    status: 'ueberfaellig',
-    nettobetrag: 890.00,
-    mwst: 169.10,
-    bruttobetrag: 1059.10,
-    bezahltBetrag: 0,
-    dokument: 'rechnung-r-2024-0412.pdf',
-  },
-]
-
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   'bezahlt': { label: 'Bezahlt', color: 'bg-emerald-100 text-emerald-800', icon: <CheckCircle2 className="h-4 w-4" /> },
   'offen': { label: 'Offen', color: 'bg-amber-100 text-amber-800', icon: <Clock className="h-4 w-4" /> },
@@ -128,19 +64,28 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
 }
 
 export default function PortalRechnungen() {
-  const [loading, setLoading] = useState(true)
-  const [rechnungen, setRechnungen] = useState<Rechnung[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [activeTab, setActiveTab] = useState('alle')
   const [selectedRechnung, setSelectedRechnung] = useState<Rechnung | null>(null)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setRechnungen(mockRechnungen)
-      setLoading(false)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [])
+  const { data: portalRechnungen = [], isLoading, isError, error, refetch } = usePortalRechnungen()
+  const rechnungen: Rechnung[] = portalRechnungen.map((r) => {
+    const brutto = r.betrag
+    const netto = Number((brutto / 1.19).toFixed(2))
+    const mwst = Number((brutto - netto).toFixed(2))
+    return {
+      id: r.id,
+      rechnungsnummer: r.nummer,
+      datum: r.datum,
+      faelligkeitsdatum: r.datum,
+      status: r.status,
+      nettobetrag: netto,
+      mwst,
+      bruttobetrag: brutto,
+      bezahltBetrag: r.status === 'bezahlt' ? brutto : 0,
+      dokument: `${r.nummer}.pdf`,
+    }
+  })
 
   const filteredRechnungen = rechnungen.filter((r) => {
     const matchesSearch = r.rechnungsnummer.toLowerCase().includes(searchTerm.toLowerCase())
@@ -156,8 +101,12 @@ export default function PortalRechnungen() {
     .filter(r => r.status === 'ueberfaellig')
     .reduce((sum, r) => sum + r.bruttobetrag, 0)
 
-  if (loading) {
+  if (isLoading) {
     return <RechnungenSkeleton />
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
   return (
@@ -166,6 +115,7 @@ export default function PortalRechnungen() {
       <div>
         <h1 className="text-2xl font-bold">Rechnungen</h1>
         <p className="text-muted-foreground">Übersicht aller Ihrer Rechnungen</p>
+        <p className="text-xs text-muted-foreground">B2B-Portal: USt wird rechtskonform je Rechnung als Netto + MwSt + Brutto ausgewiesen.</p>
       </div>
 
       {/* Warnung bei überfälligen Rechnungen */}

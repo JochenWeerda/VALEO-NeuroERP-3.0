@@ -4,13 +4,15 @@
  * Übersicht aller Verträge und Kontrakte des Kunden
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { usePortalVertraege } from '@/lib/api/portal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Progress } from '@/components/ui/progress'
+import { ErrorState } from '@/components/ErrorState'
 import {
   Dialog,
   DialogContent,
@@ -18,14 +20,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import {
   Search,
   FileText,
@@ -35,9 +29,7 @@ import {
   Clock,
   Eye,
   Download,
-  ChevronRight,
   TrendingUp,
-  Package,
 } from 'lucide-react'
 
 interface Vertrag {
@@ -55,64 +47,6 @@ interface Vertrag {
   dokument?: string
 }
 
-const mockVertraege: Vertrag[] = [
-  {
-    id: 'V-2024-001',
-    bezeichnung: 'Futtermittel-Rahmenvertrag 2024',
-    typ: 'rahmenvertrag',
-    produkt: 'Milchleistungsfutter 18%',
-    startdatum: '2024-01-01',
-    enddatum: '2024-12-31',
-    status: 'aktiv',
-    gesamtmenge: 500,
-    gelieferteMenge: 380,
-    einheit: 'dt',
-    preis: 36.50,
-    dokument: 'vertrag-v-2024-001.pdf',
-  },
-  {
-    id: 'V-2024-002',
-    bezeichnung: 'PSM-Preiskontrakt Q4',
-    typ: 'preiskontrakt',
-    produkt: 'Glyphosat 360',
-    startdatum: '2024-10-01',
-    enddatum: '2024-12-31',
-    status: 'auslaufend',
-    gesamtmenge: 200,
-    gelieferteMenge: 120,
-    einheit: 'l',
-    preis: 7.80,
-    dokument: 'vertrag-v-2024-002.pdf',
-  },
-  {
-    id: 'V-2024-003',
-    bezeichnung: 'Saatgut-Liefervertrag Winterweizen',
-    typ: 'liefervertrag',
-    produkt: 'Winterweizen Premium',
-    startdatum: '2024-08-01',
-    enddatum: '2024-10-31',
-    status: 'abgelaufen',
-    gesamtmenge: 100,
-    gelieferteMenge: 100,
-    einheit: 'dt',
-    preis: 62.00,
-    dokument: 'vertrag-v-2024-003.pdf',
-  },
-  {
-    id: 'V-2024-004',
-    bezeichnung: 'Düngemittel-Jahresvertrag',
-    typ: 'rahmenvertrag',
-    produkt: 'NPK 15-15-15',
-    startdatum: '2024-01-01',
-    enddatum: '2024-12-31',
-    status: 'aktiv',
-    gesamtmenge: 300,
-    gelieferteMenge: 180,
-    einheit: 'dt',
-    preis: 38.00,
-    dokument: 'vertrag-v-2024-004.pdf',
-  },
-]
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   'aktiv': { label: 'Aktiv', color: 'bg-emerald-100 text-emerald-800', icon: <CheckCircle2 className="h-4 w-4" /> },
@@ -127,18 +61,24 @@ const typConfig: Record<string, { label: string; color: string }> = {
 }
 
 export default function PortalVertraege() {
-  const [loading, setLoading] = useState(true)
-  const [vertraege, setVertraege] = useState<Vertrag[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedVertrag, setSelectedVertrag] = useState<Vertrag | null>(null)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setVertraege(mockVertraege)
-      setLoading(false)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [])
+  const { data: portalVertraege = [], isLoading, isError, error, refetch } = usePortalVertraege()
+  const vertraege: Vertrag[] = portalVertraege.map((v) => ({
+    id: v.nummer || v.id,
+    bezeichnung: `${v.typ} ${v.nummer}`,
+    typ: 'rahmenvertrag',
+    produkt: v.partner,
+    startdatum: '',
+    enddatum: v.laufzeitBis,
+    status: v.status === 'beendet' ? 'abgelaufen' : v.status,
+    gesamtmenge: 100,
+    gelieferteMenge: 0,
+    einheit: 'Stk',
+    preis: 0,
+    dokument: `${v.nummer}.pdf`,
+  }))
 
   const filteredVertraege = vertraege.filter((v) =>
     v.bezeichnung.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -152,8 +92,12 @@ export default function PortalVertraege() {
     .filter(v => v.status !== 'abgelaufen')
     .reduce((sum, v) => sum + v.gesamtmenge * v.preis, 0)
 
-  if (loading) {
+  if (isLoading) {
     return <VertrageSkeleton />
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
   return (

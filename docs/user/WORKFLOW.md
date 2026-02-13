@@ -1,12 +1,12 @@
-***REMOVED*** Belegfluss & Freigaben
+# Belegfluss & Freigaben
 
-***REMOVED******REMOVED*** Überblick
+## Überblick
 
 VALEO-NeuroERP implementiert einen mehrstufigen Freigabe-Workflow für Belege.
 
-***REMOVED******REMOVED*** Workflow-Status
+## Workflow-Status
 
-***REMOVED******REMOVED******REMOVED*** Sales (Verkauf)
+### Sales (Verkauf)
 
 ```
 draft → pending → approved → posted
@@ -22,7 +22,7 @@ draft → pending → approved → posted
 - **posted:** Beleg gebucht (final, nicht mehr änderbar)
 - **rejected:** Beleg abgelehnt, zurück zu draft
 
-***REMOVED******REMOVED******REMOVED*** Purchase (Einkauf)
+### Purchase (Einkauf)
 
 ```
 draft → pending → approved → posted
@@ -32,9 +32,9 @@ draft → pending → approved → posted
 
 (Gleiche Stati wie Sales)
 
-***REMOVED******REMOVED*** Aktionen
+## Aktionen
 
-***REMOVED******REMOVED******REMOVED*** 1. Submit (Einreichen)
+### 1. Submit (Einreichen)
 
 **Wer:** Sachbearbeiter (Scope: `sales:write`)
 
@@ -54,7 +54,7 @@ draft → pending → approved → posted
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2. Approve (Freigeben)
+### 2. Approve (Freigeben)
 
 **Wer:** Manager (Scope: `sales:approve`)
 
@@ -73,7 +73,7 @@ draft → pending → approved → posted
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 3. Reject (Ablehnen)
+### 3. Reject (Ablehnen)
 
 **Wer:** Manager (Scope: `sales:approve`)
 
@@ -93,7 +93,7 @@ draft → pending → approved → posted
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 4. Post (Buchen)
+### 4. Post (Buchen)
 
 **Wer:** Buchhalter (Scope: `sales:post`)
 
@@ -113,9 +113,9 @@ draft → pending → approved → posted
 
 ---
 
-***REMOVED******REMOVED*** Guards (Automatische Prüfungen)
+## Guards (Automatische Prüfungen)
 
-***REMOVED******REMOVED******REMOVED*** Sales-Order Guards
+### Sales-Order Guards
 
 **Submit:**
 - ✅ Mindestens 1 Position
@@ -130,7 +130,7 @@ draft → pending → approved → posted
 - ✅ Status = `approved`
 - ✅ Inventory verfügbar (optional)
 
-***REMOVED******REMOVED******REMOVED*** Purchase-Order Guards
+### Purchase-Order Guards
 
 **Submit:**
 - ✅ Mindestens 1 Position
@@ -142,7 +142,7 @@ draft → pending → approved → posted
 **Post:**
 - ✅ Status = `approved`
 
-***REMOVED******REMOVED*** Realtime-Updates
+## Realtime-Updates
 
 Workflow-Änderungen werden in Echtzeit via SSE übertragen:
 
@@ -154,7 +154,7 @@ useWorkflow('sales', 'SO-00001')
 // → Toast-Notification: "Auftrag SO-00001 wurde freigegeben"
 ```
 
-***REMOVED******REMOVED*** Audit-Trail
+## Audit-Trail
 
 Alle Workflow-Aktionen werden protokolliert:
 
@@ -170,7 +170,7 @@ SELECT * FROM workflow_audit WHERE doc_number = 'SO-00001';
 - `user`: Benutzer
 - `reason`: Grund (bei reject)
 
-***REMOVED******REMOVED*** Berechtigungen
+## Berechtigungen
 
 | Rolle | Submit | Approve | Reject | Post |
 |-------|--------|---------|--------|------|
@@ -179,9 +179,9 @@ SELECT * FROM workflow_audit WHERE doc_number = 'SO-00001';
 | Accountant | ✅ | ✅ | ✅ | ✅ |
 | Admin | ✅ | ✅ | ✅ | ✅ |
 
-***REMOVED******REMOVED*** Beispiel-Workflow
+## Beispiel-Workflow
 
-***REMOVED******REMOVED******REMOVED*** Szenario: Sales Order erstellen und freigeben
+### Szenario: Sales Order erstellen und freigeben
 
 **1. Operator erstellt Auftrag:**
 ```
@@ -226,15 +226,15 @@ Status: approved → posted
 Effekt: Beleg ist nun immutable, Inventory-Bewegung ausgelöst
 ```
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: Button "Approve" nicht sichtbar
+### Problem: Button "Approve" nicht sichtbar
 
 **Ursache:** Fehlende Berechtigung
 
 **Lösung:** Admin muss Scope `sales:approve` zuweisen
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Guard failed: Credit limit exceeded"
+### Problem: "Guard failed: Credit limit exceeded"
 
 **Ursache:** Auftragswert überschreitet Kreditlimit
 
@@ -243,7 +243,7 @@ Effekt: Beleg ist nun immutable, Inventory-Bewegung ausgelöst
 2. Auftragswert reduzieren
 3. Teillieferung erstellen
 
-***REMOVED******REMOVED******REMOVED*** Problem: Workflow "hängt" in pending
+### Problem: Workflow "hängt" in pending
 
 **Ursache:** Manager hat Benachrichtigung übersehen
 
@@ -251,7 +251,8 @@ Effekt: Beleg ist nun immutable, Inventory-Bewegung ausgelöst
 1. Manager manuell informieren
 2. Eskalations-Regel einrichten (nach 24h → Team Lead)
 
-***REMOVED******REMOVED*** Support
+## Support
 
 Bei Fragen: support@valeo-erp.com
+
 

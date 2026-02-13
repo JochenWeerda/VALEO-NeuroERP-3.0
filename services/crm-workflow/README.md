@@ -1,8 +1,8 @@
-***REMOVED*** CRM Workflow
+# CRM Workflow
 
 Microservice handling automated workflows, triggers, notifications, and business process automation for the CRM system.
 
-***REMOVED******REMOVED*** Features
+## Features
 
 - **Workflow Engine**: Define and execute automated business processes
 - **Event Triggers**: React to CRM events (case created, opportunity updated, etc.)
@@ -11,7 +11,7 @@ Microservice handling automated workflows, triggers, notifications, and business
 - **Notification System**: Email, in-app, and external notifications
 - **SLA Monitoring**: Automatic breach detection and notifications
 
-***REMOVED******REMOVED*** API Endpoints
+## API Endpoints
 
 - `GET/POST/PUT/DELETE /api/v1/workflows` - Workflow definition management
 - `GET/POST/PUT/DELETE /api/v1/triggers` - Event trigger configuration
@@ -19,7 +19,7 @@ Microservice handling automated workflows, triggers, notifications, and business
 - `GET /api/v1/notifications` - Notification history and management
 - `POST /api/v1/events/process` - Process incoming events
 
-***REMOVED******REMOVED*** Database Tables
+## Database Tables
 
 - `crm_workflow_workflows`
 - `crm_workflow_triggers`
@@ -27,7 +27,7 @@ Microservice handling automated workflows, triggers, notifications, and business
 - `crm_workflow_executions`
 - `crm_workflow_notifications`
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 - PostgreSQL for workflow definitions and execution history
 - Redis for event queuing and caching

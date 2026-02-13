@@ -29,7 +29,7 @@ async def list_articles(
     """Return a paginated list of articles."""
     effective_tenant = tenant_id or DEFAULT_TENANT
 
-    query = db.query(ArticleModel).filter(ArticleModel.is_active == True)  ***REMOVED*** noqa: E712
+    query = db.query(ArticleModel).filter(ArticleModel.is_active == True)  # noqa: E712
     query = query.filter(ArticleModel.tenant_id == effective_tenant)
 
     if search:
@@ -80,7 +80,7 @@ async def search_articles(
     like = f"%{q}%"
     query = (
         db.query(ArticleModel)
-        .filter(ArticleModel.is_active == True)  ***REMOVED*** noqa: E712
+        .filter(ArticleModel.is_active == True)  # noqa: E712
         .filter(ArticleModel.tenant_id == effective_tenant)
         .filter(
             or_(

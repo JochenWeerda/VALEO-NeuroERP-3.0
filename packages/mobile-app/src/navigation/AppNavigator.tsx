@@ -33,13 +33,13 @@ function MainTabNavigator() {
         tabBarIcon: ({ focused, color, size }) => (
           <TabBarIcon route={route} focused={focused} color={color} size={size} />
         ),
-        tabBarActiveTintColor: '***REMOVED***007AFF',
+        tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: 'gray',
         headerRight: () => <HeaderRight />,
         headerStyle: {
-          backgroundColor: '***REMOVED***007AFF',
+          backgroundColor: '#007AFF',
         },
-        headerTintColor: '***REMOVED***fff',
+        headerTintColor: '#fff',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -89,9 +89,9 @@ function MainStackNavigator() {
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: '***REMOVED***007AFF',
+          backgroundColor: '#007AFF',
         },
-        headerTintColor: '***REMOVED***fff',
+        headerTintColor: '#fff',
         headerTitleStyle: {
           fontWeight: 'bold',
         },

@@ -1,6 +1,6 @@
-***REMOVED***!/usr/bin/env bash
-***REMOVED*** Wait-for-HTTP Helper
-***REMOVED*** Wartet bis HTTP-Endpoint erreichbar ist
+#!/usr/bin/env bash
+# Wait-for-HTTP Helper
+# Wartet bis HTTP-Endpoint erreichbar ist
 
 set -e
 
@@ -21,7 +21,7 @@ for i in $(seq 1 "$TIMEOUT"); do
     exit 0
   fi
   
-  ***REMOVED*** Progress indicator
+  # Progress indicator
   if [ $((i % 10)) -eq 0 ]; then
     echo "Still waiting... (${i}s / ${TIMEOUT}s)"
   fi
@@ -31,4 +31,5 @@ done
 
 echo "❌ Timeout waiting for $URL after ${TIMEOUT}s" >&2
 exit 1
+
 

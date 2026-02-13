@@ -1,12 +1,12 @@
-***REMOVED*** Integration Domain
+# Integration Domain
 
 VALEO NeuroERP 3.0 - Integration Domain with Clean Architecture
 
-***REMOVED******REMOVED*** 🏗️ Architecture Overview
+## 🏗️ Architecture Overview
 
 This package implements the Integration Domain following Clean Architecture principles and Domain-Driven Design patterns. It provides a robust, scalable, and maintainable foundation for handling integrations, webhooks, and sync jobs.
 
-***REMOVED******REMOVED******REMOVED*** Key Features
+### Key Features
 
 - **Clean Architecture**: Separation of concerns with clear layer boundaries
 - **Domain-Driven Design**: Rich domain models with business logic
@@ -15,24 +15,24 @@ This package implements the Integration Domain following Clean Architecture prin
 - **Extensible**: Plugin architecture for custom integrations
 - **Testable**: Dependency injection and interface-based design
 
-***REMOVED******REMOVED*** 📦 Package Structure
+## 📦 Package Structure
 
 ```
 src/
-├── domain/           ***REMOVED*** Core business logic
-│   ├── entities/     ***REMOVED*** Domain entities (Integration, Webhook, SyncJob)
-│   ├── events/       ***REMOVED*** Domain events for event sourcing
-│   ├── interfaces/   ***REMOVED*** Repository contracts
-│   └── values/       ***REMOVED*** Value objects (IDs, etc.)
-├── application/      ***REMOVED*** Application services and use cases
-├── infrastructure/   ***REMOVED*** External concerns (repositories, external services)
-├── presentation/     ***REMOVED*** API layer (controllers, middleware)
-└── shared/          ***REMOVED*** Shared utilities and types
+├── domain/           # Core business logic
+│   ├── entities/     # Domain entities (Integration, Webhook, SyncJob)
+│   ├── events/       # Domain events for event sourcing
+│   ├── interfaces/   # Repository contracts
+│   └── values/       # Value objects (IDs, etc.)
+├── application/      # Application services and use cases
+├── infrastructure/   # External concerns (repositories, external services)
+├── presentation/     # API layer (controllers, middleware)
+└── shared/          # Shared utilities and types
 ```
 
-***REMOVED******REMOVED*** 🚀 Quick Start
+## 🚀 Quick Start
 
-***REMOVED******REMOVED******REMOVED*** Basic Usage
+### Basic Usage
 
 ```typescript
 import { Integration, IntegrationType } from '@valero-neuroerp/integration-domain';
@@ -61,7 +61,7 @@ const events = integration.getUncommittedEvents();
 console.log(events); // [IntegrationCreatedEvent, IntegrationUpdatedEvent]
 ```
 
-***REMOVED******REMOVED******REMOVED*** Working with Webhooks
+### Working with Webhooks
 
 ```typescript
 import { Webhook } from '@valero-neuroerp/integration-domain';
@@ -88,7 +88,7 @@ webhook.trigger(
 );
 ```
 
-***REMOVED******REMOVED******REMOVED*** Managing Sync Jobs
+### Managing Sync Jobs
 
 ```typescript
 import { SyncJob } from '@valero-neuroerp/integration-domain';
@@ -119,22 +119,22 @@ const syncJob = SyncJob.create(
 syncJob.start('system');
 ```
 
-***REMOVED******REMOVED*** 🔧 Configuration
+## 🔧 Configuration
 
-***REMOVED******REMOVED******REMOVED*** Environment Variables
+### Environment Variables
 
 ```bash
-***REMOVED*** Database
+# Database
 DATABASE_URL=postgresql://user:pass@localhost:5432/integrations
 
-***REMOVED*** Redis (for caching)
+# Redis (for caching)
 REDIS_URL=redis://localhost:6379
 
-***REMOVED*** Monitoring
+# Monitoring
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 ```
 
-***REMOVED******REMOVED******REMOVED*** Package Configuration
+### Package Configuration
 
 ```json
 {
@@ -148,20 +148,20 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 }
 ```
 
-***REMOVED******REMOVED*** 🧪 Testing
+## 🧪 Testing
 
 ```bash
-***REMOVED*** Run tests
+# Run tests
 pnpm test
 
-***REMOVED*** Run tests with coverage
+# Run tests with coverage
 pnpm test:coverage
 
-***REMOVED*** Run tests in watch mode
+# Run tests in watch mode
 pnpm test:watch
 ```
 
-***REMOVED******REMOVED******REMOVED*** Example Test
+### Example Test
 
 ```typescript
 import { Integration } from '../src/domain/entities/integration.js';
@@ -182,7 +182,7 @@ describe('Integration Entity', () => {
 });
 ```
 
-***REMOVED******REMOVED*** 📈 Monitoring & Observability
+## 📈 Monitoring & Observability
 
 The Integration Domain includes built-in support for:
 
@@ -191,16 +191,16 @@ The Integration Domain includes built-in support for:
 - **Distributed Tracing**: Request tracing across services
 - **Health Checks**: Service health monitoring
 
-***REMOVED******REMOVED*** 🔒 Security
+## 🔒 Security
 
 - **API Key Management**: Secure storage and rotation of API keys
 - **Authentication**: JWT token validation
 - **Authorization**: Role-based access control
 - **Audit Logging**: Complete audit trail of all operations
 
-***REMOVED******REMOVED*** 🚀 Deployment
+## 🚀 Deployment
 
-***REMOVED******REMOVED******REMOVED*** Docker
+### Docker
 
 ```dockerfile
 FROM node:18-alpine
@@ -212,7 +212,7 @@ EXPOSE 3000
 CMD ["node", "dist/index.js"]
 ```
 
-***REMOVED******REMOVED******REMOVED*** Kubernetes
+### Kubernetes
 
 ```yaml
 apiVersion: apps/v1
@@ -242,27 +242,27 @@ spec:
               key: url
 ```
 
-***REMOVED******REMOVED*** 📚 API Reference
+## 📚 API Reference
 
-***REMOVED******REMOVED******REMOVED*** Domain Entities
+### Domain Entities
 
 - [Integration](./docs/entities/integration.md)
 - [Webhook](./docs/entities/webhook.md)
 - [SyncJob](./docs/entities/sync-job.md)
 
-***REMOVED******REMOVED******REMOVED*** Repository Interfaces
+### Repository Interfaces
 
 - [IntegrationRepository](./docs/repositories/integration-repository.md)
 - [WebhookRepository](./docs/repositories/webhook-repository.md)
 - [SyncJobRepository](./docs/repositories/sync-job-repository.md)
 
-***REMOVED******REMOVED******REMOVED*** Domain Events
+### Domain Events
 
 - [Integration Events](./docs/events/integration-events.md)
 - [Webhook Events](./docs/events/webhook-events.md)
 - [Sync Job Events](./docs/events/sync-job-events.md)
 
-***REMOVED******REMOVED*** 🤝 Contributing
+## 🤝 Contributing
 
 1. Follow Clean Architecture principles
 2. Write comprehensive tests
@@ -270,6 +270,7 @@ spec:
 4. Use conventional commits
 5. Ensure type safety
 
-***REMOVED******REMOVED*** 📄 License
+## 📄 License
 
 Private - VALEO NeuroERP 3.0
+

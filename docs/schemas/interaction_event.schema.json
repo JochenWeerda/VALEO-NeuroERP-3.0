@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema***REMOVED***",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "InteractionEvent",
   "type": "object",
   "required": ["id", "timestamp", "channel", "direction", "actor", "customer_ref", "subject"],
@@ -60,3 +60,4 @@
     "metadata": { "type": "object" }
   }
 }
+

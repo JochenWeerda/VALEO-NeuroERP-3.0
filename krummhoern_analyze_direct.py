@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 🔍 DIREKTE KRUMMHÖRN-ANALYSE mit Datei-Output
 Analysiert GAP-CSV für PLZ 26736 und Spaltenverschiebungs-Probleme
@@ -39,11 +39,11 @@ def analyze_krummhoern():
         with open(csv_path, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')
             
-            ***REMOVED*** Header-Analyse
+            # Header-Analyse
             headers = reader.fieldnames or []
             results["analysis"]["headers_found"] = headers
             
-            ***REMOVED*** Spalten-Mapping
+            # Spalten-Mapping
             for header in headers:
                 if 'PLZ' in header.upper():
                     results["analysis"]["column_mapping"]["plz_column"] = header
@@ -54,11 +54,11 @@ def analyze_krummhoern():
                 elif 'GEMEINDE' in header.upper():
                     results["analysis"]["column_mapping"]["city_column"] = header
             
-            ***REMOVED*** Daten-Scan
+            # Daten-Scan
             for row_num, row in enumerate(reader, 1):
                 results["analysis"]["total_rows_scanned"] = row_num
                 
-                ***REMOVED*** Maximal 500.000 Zeilen für Performance
+                # Maximal 500.000 Zeilen für Performance
                 if row_num > 500000:
                     results["conclusions"].append("Scan bei 500.000 Zeilen gestoppt (Performance)")
                     break
@@ -67,7 +67,7 @@ def analyze_krummhoern():
                 name = row.get('Name des Begünstigten/Rechtsträgers/Verdands', '').strip()
                 city = row.get('Gemeinde', '').strip()
                 
-                ***REMOVED*** Erste 10 Zeilen als Beispiel speichern
+                # Erste 10 Zeilen als Beispiel speichern
                 if row_num <= 10:
                     results["analysis"]["sample_data"].append({
                         "row": row_num,
@@ -76,14 +76,14 @@ def analyze_krummhoern():
                         "city": city
                     })
                 
-                ***REMOVED*** PLZ-Verteilung
+                # PLZ-Verteilung
                 if plz:
                     prefix = plz[:2] if len(plz) >= 2 else plz
                     if prefix not in results["analysis"]["plz_distribution"]:
                         results["analysis"]["plz_distribution"][prefix] = 0
                     results["analysis"]["plz_distribution"][prefix] += 1
                 
-                ***REMOVED*** PLZ 26xxx sammeln
+                # PLZ 26xxx sammeln
                 if plz.startswith('26'):
                     if plz not in results["analysis"]["plz_26xxx_found"]:
                         results["analysis"]["plz_26xxx_found"][plz] = []
@@ -95,11 +95,11 @@ def analyze_krummhoern():
                             "city": city
                         })
                     
-                    ***REMOVED*** Städte sammeln
+                    # Städte sammeln
                     if city and city not in results["analysis"]["cities_in_26xxx"]:
                         results["analysis"]["cities_in_26xxx"].append(city)
                 
-                ***REMOVED*** Krummhörn-Suche
+                # Krummhörn-Suche
                 is_krummhoern_match = False
                 match_reasons = []
                 
@@ -128,7 +128,7 @@ def analyze_krummhoern():
                         "reasons": match_reasons
                     })
         
-        ***REMOVED*** Schlussfolgerungen
+        # Schlussfolgerungen
         if '26736' in results["analysis"]["plz_26xxx_found"]:
             results["conclusions"].append("✅ PLZ 26736 (Krummhörn) GEFUNDEN!")
             count = len(results["analysis"]["plz_26xxx_found"]['26736'])
@@ -149,13 +149,13 @@ def analyze_krummhoern():
         results["error"] = str(e)
         results["conclusions"].append(f"❌ Fehler bei Analyse: {e}")
     
-    ***REMOVED*** Ergebnisse in Datei schreiben
+    # Ergebnisse in Datei schreiben
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     
     print(f"✅ Analyse abgeschlossen. Ergebnisse in: {output_path}")
     
-    ***REMOVED*** Kurze Zusammenfassung ausgeben
+    # Kurze Zusammenfassung ausgeben
     print(f"\n📊 KURZÜBERSICHT:")
     print(f"Zeilen gescannt: {results['analysis']['total_rows_scanned']:,}")
     print(f"PLZ 26xxx Bereiche: {len(results['analysis']['plz_26xxx_found'])}")
@@ -166,4 +166,5 @@ def analyze_krummhoern():
 
 if __name__ == "__main__":
     analyze_krummhoern()
+
 

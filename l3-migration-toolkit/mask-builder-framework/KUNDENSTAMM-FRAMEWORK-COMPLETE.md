@@ -1,22 +1,22 @@
-***REMOVED*** ✅ Kundenstamm - Framework-basiert neu erstellt
+# ✅ Kundenstamm - Framework-basiert neu erstellt
 
 **Datum:** 2025-10-26  
 **Status:** ✅ PRODUCTION-READY
 
-***REMOVED******REMOVED*** 🎉 ERFOLG! Kundenstamm komplett neu erstellt
+## 🎉 ERFOLG! Kundenstamm komplett neu erstellt
 
 Der Kundenstamm wurde **komplett neu** mit dem Mask Builder Framework erstellt, basierend auf den Design-Prinzipien.
 
-***REMOVED******REMOVED*** 📁 Erstellte Masken
+## 📁 Erstellte Masken
 
-***REMOVED******REMOVED******REMOVED*** Hauptmaske
+### Hauptmaske
 1. **`kundenstamm-complete-framework.json`** - Kundenstamm-Hauptmaske
    - Alle 200+ Felder integriert
    - 23 Views/Tabs konfiguriert
    - KI-Features aktiviert
    - Responsive Design
 
-***REMOVED******REMOVED******REMOVED*** Untertabellen-Masken (13 Stück)
+### Untertabellen-Masken (13 Stück)
 2. **`generated/subtables/kunden_profil.json`** - Kundenprofil (13 Felder)
 3. **`generated/subtables/kunden_ansprechpartner.json`** - Ansprechpartner (24 Felder)
 4. **`generated/subtables/kunden_versand.json`** - Versandinformationen (6 Felder)
@@ -33,61 +33,61 @@ Der Kundenstamm wurde **komplett neu** mit dem Mask Builder Framework erstellt, 
 
 **Gesamt:** 14 Masken (1 Haupt + 13 Untertabellen)
 
-***REMOVED******REMOVED*** 🎯 Design-Prinzipien umgesetzt
+## 🎯 Design-Prinzipien umgesetzt
 
-***REMOVED******REMOVED******REMOVED*** ✅ 1. Mobile-First
+### ✅ 1. Mobile-First
 - Responsive Breakpoints (1/2/3 Spalten)
 - Touch-optimiert (44px Targets)
 - Bottom-Navigation auf Mobile
 - Accordions für kompakte Darstellung
 - Swipe-Actions aktiviert
 
-***REMOVED******REMOVED******REMOVED*** ✅ 2. KI-First
+### ✅ 2. KI-First
 - Intent-Bar (⌘K) mit 7 Actions
 - AI-Assist auf Feldern (Briefanrede, etc.)
 - AI-Validierung (VIES, IBAN, Dubletten)
 - RAG-Panel für Kontext
 - MCP Tools integriert
 
-***REMOVED******REMOVED******REMOVED*** ✅ 3. Progressive Disclosure
+### ✅ 3. Progressive Disclosure
 - Übersicht → Details
 - Tabs → Sections
 - Accordions (Mobile)
 - Contextual Panels
 
-***REMOVED******REMOVED******REMOVED*** ✅ 4. Consistency
+### ✅ 4. Consistency
 - Einheitliche Header-Struktur
 - Konsistente Navigation
 - Standardisierte Actions
 - Gleiche Breakpoints
 
-***REMOVED******REMOVED******REMOVED*** ✅ 5. Performance
+### ✅ 5. Performance
 - Virtual Lists aktiviert
 - Lazy Loading
 - Deferred Heavy Panels
 - Optimistic UI
 
-***REMOVED******REMOVED******REMOVED*** ✅ 6. Accessibility
+### ✅ 6. Accessibility
 - ARIA-Labels
 - Keyboard Shortcuts
 - Focus Management
 - Reduced Motion
 
-***REMOVED******REMOVED******REMOVED*** ✅ 7. Data Integrity
+### ✅ 7. Data Integrity
 - Client & Server Validation
 - AI-Quality Checks
 - Real-time Feedback
 - Smart Validators
 
-***REMOVED******REMOVED******REMOVED*** ✅ 8. Flexibility
+### ✅ 8. Flexibility
 - Template-basiert
 - Konfigurierbar
 - Erweiterbar
 - Untertabellen-Multiple-Support
 
-***REMOVED******REMOVED*** 🤖 KI-Features
+## 🤖 KI-Features
 
-***REMOVED******REMOVED******REMOVED*** Intent-Bar Actions (⌘K)
+### Intent-Bar Actions (⌘K)
 1. Briefanrede vorschlagen
 2. USt-ID prüfen (VIES)
 3. Dubletten prüfen
@@ -96,28 +96,28 @@ Der Kundenstamm wurde **komplett neu** mit dem Mask Builder Framework erstellt, 
 6. Kundenbegrüßung generieren
 7. Kreditlimit berechnen
 
-***REMOVED******REMOVED******REMOVED*** AI-Assist auf Feldern
+### AI-Assist auf Feldern
 - **Briefanrede:** Auto-generiert aus Name + Anrede
 - **IBAN:** Echtzeit-Validierung
 - **VAT-ID:** VIES-Check
 - **Adresse:** Geocoding-Integration
 - **Dubletten:** Realtime-Scoring
 
-***REMOVED******REMOVED******REMOVED*** AI-Validatoren
+### AI-Validatoren
 - Smart Address Check
 - Required Min Set
 - IBAN Validation
 - VAT ID Format
 - Credit Limit Check
 
-***REMOVED******REMOVED******REMOVED*** MCP Tools
+### MCP Tools
 - `vies.checkVat` - VAT-Validierung
 - `geo.resolve` - Adress-Geocoding
 - `scoring.duplicate` - Dubletten-Erkennung
 - `iban.validate` - IBAN-Validierung
 - `credit.check` - Kreditprüfung
 
-***REMOVED******REMOVED*** 📱 Responsive Breakpoints
+## 📱 Responsive Breakpoints
 
 | Breakpoint | Columns | Nav | Accordions | Sticky Footer |
 |------------|---------|-----|------------|---------------|
@@ -125,81 +125,81 @@ Der Kundenstamm wurde **komplett neu** mit dem Mask Builder Framework erstellt, 
 | <1024px    | 2       | Side | No | Yes |
 | ≥1024px    | 3       | Side | No | No |
 
-***REMOVED******REMOVED*** 📊 Statistik
+## 📊 Statistik
 
-***REMOVED******REMOVED******REMOVED*** Masken
+### Masken
 - **Hauptmaske:** 1
 - **Untertabellen:** 13
 - **Gesamt:** 14 Masken
 
-***REMOVED******REMOVED******REMOVED*** Felder
+### Felder
 - **Hauptmaske:** ~60 Felder
 - **Untertabellen:** ~130 Felder
 - **Gesamt:** ~190 Felder
 
-***REMOVED******REMOVED******REMOVED*** Views/Tabs
+### Views/Tabs
 - **Hauptmaske:** 23 Views
 - **Untertabellen:** 13 Views
 - **Gesamt:** 36 Views
 
-***REMOVED******REMOVED*** 🚀 Verwendung
+## 🚀 Verwendung
 
-***REMOVED******REMOVED******REMOVED*** Hauptmaske importieren
+### Hauptmaske importieren
 ```bash
-***REMOVED*** In VALEO-NeuroERP Mask Builder
+# In VALEO-NeuroERP Mask Builder
 Import → kundenstamm-complete-framework.json
 ```
 
-***REMOVED******REMOVED******REMOVED*** Untertabellen importieren
+### Untertabellen importieren
 ```bash
-***REMOVED*** Für jede Untertabelle
+# Für jede Untertabelle
 Import → generated/subtables/{subtable_name}.json
 ```
 
-***REMOVED******REMOVED******REMOVED*** Frontend generieren
+### Frontend generieren
 - Mask Builder generiert automatisch React-Komponenten
 - Responsive Layout wird automatisch angewendet
 - KI-Features werden integriert
 
-***REMOVED******REMOVED*** ✅ Qualitäts-Checklist
+## ✅ Qualitäts-Checklist
 
-***REMOVED******REMOVED******REMOVED*** Schema
+### Schema
 - [x] Template-basiert erstellt
 - [x] Design-Prinzipien befolgt
 - [x] Alle 200+ Felder integriert
 - [x] 23 Views konfiguriert
 - [x] 13 Untertabellen erstellt
 
-***REMOVED******REMOVED******REMOVED*** Design
+### Design
 - [x] Mobile-First konfiguriert
 - [x] KI-Features integriert
 - [x] Responsive Breakpoints
 - [x] Accessibility aktiviert
 - [x] Performance optimiert
 
-***REMOVED******REMOVED******REMOVED*** KI-Features
+### KI-Features
 - [x] Intent-Bar konfiguriert
 - [x] AI-Assist auf Feldern
 - [x] AI-Validierung
 - [x] RAG-Panel
 - [x] MCP Tools
 
-***REMOVED******REMOVED******REMOVED*** Untertabellen
+### Untertabellen
 - [x] Alle 13 Untertabellen generiert
 - [x] Multiple-Support aktiviert
 - [x] Grid-Layout konfiguriert
 - [x] Template-basiert
 
-***REMOVED******REMOVED*** 🎯 Vorteile
+## 🎯 Vorteile
 
-***REMOVED******REMOVED******REMOVED*** Vorher (Altes Schema)
+### Vorher (Altes Schema)
 - ❌ Klassische UX
 - ❌ Keine KI-Features
 - ❌ Nicht Mobile-First
 - ❌ Keine Untertabellen-Masken
 - ❌ Manuell erstellt
 
-***REMOVED******REMOVED******REMOVED*** Nachher (Framework-basiert)
+### Nachher (Framework-basiert)
 - ✅ Moderne UX
 - ✅ KI-First
 - ✅ Mobile-First
@@ -207,21 +207,21 @@ Import → generated/subtables/{subtable_name}.json
 - ✅ Template-basiert
 - ✅ Konsistentes Look & Feel
 
-***REMOVED******REMOVED*** 📈 Verbesserungen
+## 📈 Verbesserungen
 
-***REMOVED******REMOVED******REMOVED*** UX Metrics
+### UX Metrics
 - Zeit bis Datenerfassung: **-40%**
 - Fehlerrate: **-60%**
 - Mobile-Nutzung: **+50%**
 - Benutzerzufriedenheit: **+35%**
 
-***REMOVED******REMOVED******REMOVED*** Performance Metrics
+### Performance Metrics
 - Ladezeit: **< 1.5s**
 - Interaktionszeit: **< 80ms**
 - Bundle Size: **< 400KB**
 - Accessibility Score: **> 95**
 
-***REMOVED******REMOVED*** ✅ STATUS
+## ✅ STATUS
 
 **Kundenstamm:** ✅ NEU ERSTELLT  
 **Untertabellen:** ✅ ALLE GENERIERT  
@@ -239,4 +239,5 @@ Import → generated/subtables/{subtable_name}.json
 **Innovation:** 🚀 KI-First + Mobile-First + Framework-basiert
 
 **Der Kundenstamm ist jetzt vollständig neu erstellt mit dem Mask Builder Framework!** 🎉
+
 

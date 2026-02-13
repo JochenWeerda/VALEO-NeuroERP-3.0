@@ -5,61 +5,27 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
 import { FileDown, Plus, Search } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-
-type PSM = {
-  id: string
-  mittel: string
-  wirkstoff: string
-  kulturen: string[]
-  zulassungBis: string
-  status: 'aktiv' | 'auslaufend' | 'widerrufen'
-  erklaerungLandwirtStatus: string | null
-}
-
-const mockPSM: PSM[] = [
-  {
-    id: '1',
-    mittel: 'Roundup PowerFlex',
-    wirkstoff: 'Glyphosat 480 g/l',
-    kulturen: ['Getreide', 'Mais', 'Raps'],
-    zulassungBis: '2026-12-31',
-    status: 'aktiv',
-    erklaerungLandwirtStatus: null,
-  },
-  {
-    id: '2',
-    mittel: 'Fungisan Pro',
-    wirkstoff: 'Tebuconazol 250 g/l',
-    kulturen: ['Getreide', 'Raps'],
-    zulassungBis: '2025-06-30',
-    status: 'auslaufend',
-    erklaerungLandwirtStatus: null,
-  },
-]
+import { usePSM, type PSM } from '@/lib/api/agrar'
 
 export default function PSMListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
 
+  const { data, isLoading, isError, error, refetch } = usePSM({ search: searchTerm || undefined, source: 'bvl' })
+  const psmList = data?.items ?? []
+
   const handleExport = () => {
     try {
-      // Filter data based on search term
-      const filteredData = mockPSM.filter(psm =>
-        psm.mittel.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        psm.wirkstoff.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-
-      // Create CSV content
       const csvHeader = 'Mittel;Wirkstoff;Kulturen;Zulassung bis;Status;Erklärung Landwirt\n'
-      const csvContent = filteredData.map(psm =>
+      const csvContent = psmList.map(psm =>
         `"${psm.mittel}";"${psm.wirkstoff}";"${psm.kulturen.join(', ')}";"${psm.zulassungBis}";"${psm.status}";"${psm.erklaerungLandwirtStatus || ''}"`
       ).join('\n')
 
       const csv = csvHeader + csvContent
-
-      // Create and download file
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
@@ -72,9 +38,9 @@ export default function PSMListePage(): JSX.Element {
 
       toast({
         title: 'Export erfolgreich',
-        description: `${filteredData.length} PSM-Datensätze wurden exportiert.`,
+        description: `${psmList.length} PSM-Datensätze wurden exportiert.`,
       })
-    } catch (error) {
+    } catch {
       toast({
         variant: 'destructive',
         title: 'Export fehlgeschlagen',
@@ -146,6 +112,26 @@ export default function PSMListePage(): JSX.Element {
     },
   ]
 
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-56" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
   return (
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
@@ -184,7 +170,7 @@ export default function PSMListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockPSM} columns={columns} />
+          <DataTable data={psmList} columns={columns} />
         </CardContent>
       </Card>
     </div>

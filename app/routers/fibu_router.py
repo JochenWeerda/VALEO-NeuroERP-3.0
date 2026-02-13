@@ -12,7 +12,7 @@ from app.finance.repositories import OffenerPostenRepository, BuchungRepository,
 
 router = APIRouter(prefix="/api/fibu", tags=["fibu"])
 
-***REMOVED*** ========== MODELS ==========
+# ========== MODELS ==========
 
 class OffenerPosten(BaseModel):
     id: str
@@ -38,14 +38,14 @@ class Buchung(BaseModel):
     haben_konto: str
     betrag: Decimal
     text: str
-    belegart: str  ***REMOVED*** ER=Erlös, EB=Eingangsrechnung, ZE=Zahlungseingang, etc.
+    belegart: str  # ER=Erlös, EB=Eingangsrechnung, ZE=Zahlungseingang, etc.
 
 class Konto(BaseModel):
     id: str
     kontonummer: str
     bezeichnung: str
     kontoart: str
-    typ: str  ***REMOVED*** aktiv, passiv, aufwand, ertrag
+    typ: str  # aktiv, passiv, aufwand, ertrag
     saldo: Decimal
 
 class Anlage(BaseModel):
@@ -54,7 +54,7 @@ class Anlage(BaseModel):
     bezeichnung: str
     anschaffung: date
     anschaffungswert: Decimal
-    nutzungsdauer: int  ***REMOVED*** Jahre
+    nutzungsdauer: int  # Jahre
     afa_satz: Decimal
     kumulierte_afa: Decimal
     buchwert: Decimal
@@ -80,11 +80,11 @@ class GuVData(BaseModel):
     aufwendungen: BilanzSeite
     jahresueberschuss: Decimal
 
-***REMOVED*** ========== DATABASE INTEGRATION ==========
+# ========== DATABASE INTEGRATION ==========
 
-***REMOVED*** ========== ENDPOINTS ==========
+# ========== ENDPOINTS ==========
 
-***REMOVED*** Debitoren
+# Debitoren
 @router.get("/debitoren", response_model=List[OffenerPosten])
 async def get_debitoren(
     ueberfaellig: Optional[bool] = Query(None),
@@ -104,7 +104,7 @@ async def mahnen(id: str, tenant_id: str = Query("system", description="Tenant I
         return {"success": True, "mahn_stufe": new_stufe}
     raise HTTPException(status_code=404, detail="Offener Posten nicht gefunden")
 
-***REMOVED*** Kreditoren
+# Kreditoren
 @router.get("/kreditoren", response_model=List[OffenerPosten])
 async def get_kreditoren(zahlbar: Optional[bool] = Query(None), tenant_id: str = Query("system", description="Tenant ID")):
     """Offene Posten Lieferanten abrufen"""
@@ -119,11 +119,11 @@ async def zahlungslauf(ids: List[str], tenant_id: str = Query("system", descript
     for id in ids:
         op = op_repo.get_by_id(id, tenant_id)
         if op and op.zahlbar:
-            op_repo.update_zahlung(id, tenant_id, op.offen)  ***REMOVED*** Pay the full remaining amount
+            op_repo.update_zahlung(id, tenant_id, op.offen)  # Pay the full remaining amount
             gezahlt.append(op.rechnungsnr)
     return {"success": True, "gezahlt": gezahlt, "anzahl": len(gezahlt)}
 
-***REMOVED*** Buchungsjournal
+# Buchungsjournal
 @router.get("/buchungen", response_model=List[Buchung])
 async def get_buchungen(
     datum_von: Optional[date] = Query(None),
@@ -140,11 +140,11 @@ async def create_buchung(buchung: Buchung, tenant_id: str = Query("system", desc
     """Neue Buchung erstellen"""
     buchung_repo = container.resolve(BuchungRepository)
     created_buchung = buchung_repo.create(buchung.model_dump(), tenant_id)
-    ***REMOVED*** Update Kontosalden
+    # Update Kontosalden
     buchung_repo.update_konten_saldi(tenant_id, buchung.soll_konto, buchung.haben_konto, buchung.betrag)
     return created_buchung
 
-***REMOVED*** Kontenplan
+# Kontenplan
 @router.get("/konten", response_model=List[Konto])
 async def get_konten(typ: Optional[str] = Query(None), tenant_id: str = Query("system", description="Tenant ID")):
     """Kontenplan abrufen"""
@@ -160,7 +160,7 @@ async def get_konto(kontonummer: str, tenant_id: str = Query("system", descripti
         raise HTTPException(status_code=404, detail="Konto nicht gefunden")
     return konto
 
-***REMOVED*** Anlagenbuchhaltung
+# Anlagenbuchhaltung
 @router.get("/anlagen", response_model=List[Anlage])
 async def get_anlagen(tenant_id: str = Query("system", description="Tenant ID")):
     """Anlagevermögen abrufen"""
@@ -182,14 +182,14 @@ async def berechne_afa(id: str, jahr: int = Query(default=2025), tenant_id: str 
         raise HTTPException(status_code=404, detail="Anlage nicht gefunden")
     return result
 
-***REMOVED*** Bilanz
+# Bilanz
 @router.get("/bilanz")
 async def get_bilanz(stichtag: str = Query(default="2024-12-31"), tenant_id: str = Query("system", description="Tenant ID")):
     """Bilanz abrufen"""
     konto_repo = container.resolve(KontoRepository)
     konten = konto_repo.get_all(tenant_id)
 
-    ***REMOVED*** Calculate from real account balances
+    # Calculate from real account balances
     anlagevermoegen = sum(k.saldo for k in konten if k.kontoart == "Anlagevermögen" and k.typ == "aktiv")
     umlaufvermoegen = sum(k.saldo for k in konten if k.kontoart == "Umlaufvermögen" and k.typ == "aktiv")
     eigenkapital = sum(k.saldo for k in konten if k.typ == "passiv" and "kapital" in k.bezeichnung.lower())
@@ -224,12 +224,12 @@ async def get_bilanz(stichtag: str = Query(default="2024-12-31"), tenant_id: str
         "eigenkapitalquote": round(eigenkapitalquote, 1),
     }
 
-***REMOVED*** GuV
+# GuV
 @router.get("/guv")
 async def get_guv(periode: str = Query(default="2024"), tenant_id: str = Query("system", description="Tenant ID")):
     """Gewinn- und Verlustrechnung abrufen"""
-    ***REMOVED*** TODO: Calculate from real booking data - requires complex P&L logic
-    ***REMOVED*** For now, return placeholder indicating real calculation needed
+    # TODO: Calculate from real booking data - requires complex P&L logic
+    # For now, return placeholder indicating real calculation needed
     return {
         "periode": periode,
         "status": "placeholder",
@@ -240,39 +240,39 @@ async def get_guv(periode: str = Query(default="2024"), tenant_id: str = Query("
         "umsatzrendite": 0,
     }
 
-***REMOVED*** BWA
+# BWA
 @router.get("/bwa")
 async def get_bwa(monat: int = Query(default=10), jahr: int = Query(default=2025), tenant_id: str = Query("system", description="Tenant ID")):
     """Betriebswirtschaftliche Auswertung abrufen"""
     buchung_repo = container.resolve(BuchungRepository)
 
-    ***REMOVED*** Calculate date ranges
+    # Calculate date ranges
     from datetime import date
     period_start = date(jahr, monat, 1)
-    period_end = date(jahr, monat, 28)  ***REMOVED*** Safe end date for any month
+    period_end = date(jahr, monat, 28)  # Safe end date for any month
 
-    ***REMOVED*** Get bookings for the period
+    # Get bookings for the period
     period_bookings = buchung_repo.get_by_filters(tenant_id, period_start, period_end)
 
-    ***REMOVED*** Get year-to-date bookings (January to current month)
+    # Get year-to-date bookings (January to current month)
     ytd_start = date(jahr, 1, 1)
     ytd_bookings = buchung_repo.get_by_filters(tenant_id, ytd_start, period_end)
 
-    ***REMOVED*** Calculate monthly figures (simplified - in reality would need account categorization)
-    umsatz = sum(b.betrag for b in period_bookings if b.belegart in ['ER', 'RE'])  ***REMOVED*** Revenue bookings
-    waren_eingang = sum(b.betrag for b in period_bookings if b.belegart in ['WE', 'EB'])  ***REMOVED*** Material costs
+    # Calculate monthly figures (simplified - in reality would need account categorization)
+    umsatz = sum(b.betrag for b in period_bookings if b.belegart in ['ER', 'RE'])  # Revenue bookings
+    waren_eingang = sum(b.betrag for b in period_bookings if b.belegart in ['WE', 'EB'])  # Material costs
     rohertrag = umsatz - waren_eingang if umsatz > 0 else 0
 
-    ***REMOVED*** Simplified personnel costs (would need proper account mapping)
+    # Simplified personnel costs (would need proper account mapping)
     personal_kosten = sum(b.betrag for b in period_bookings if 'personal' in b.text.lower() or 'gehalt' in b.text.lower())
 
-    ***REMOVED*** Calculate year-to-date figures
+    # Calculate year-to-date figures
     umsatz_ytd = sum(b.betrag for b in ytd_bookings if b.belegart in ['ER', 'RE'])
     waren_eingang_ytd = sum(b.betrag for b in ytd_bookings if b.belegart in ['WE', 'EB'])
     rohertrag_ytd = umsatz_ytd - waren_eingang_ytd if umsatz_ytd > 0 else 0
     personal_kosten_ytd = sum(b.betrag for b in ytd_bookings if 'personal' in b.text.lower() or 'gehalt' in b.text.lower())
 
-    ***REMOVED*** Calculate KPIs
+    # Calculate KPIs
     rohertrag_quote = (rohertrag / umsatz * 100) if umsatz > 0 else 0
     personal_kosten_quote = (personal_kosten / umsatz * 100) if umsatz > 0 else 0
 
@@ -283,10 +283,10 @@ async def get_bwa(monat: int = Query(default=10), jahr: int = Query(default=2025
             "wareneingang": float(waren_eingang),
             "rohertrag": float(rohertrag),
             "personalkosten": float(personal_kosten),
-            "raumkosten": 0.0,  ***REMOVED*** Would need account mapping
-            "sonstige_kosten": 0.0,  ***REMOVED*** Would need account mapping
+            "raumkosten": 0.0,  # Would need account mapping
+            "sonstige_kosten": 0.0,  # Would need account mapping
             "betriebsergebnis": float(rohertrag - personal_kosten),
-            "zinsen": 0.0,  ***REMOVED*** Would need account mapping
+            "zinsen": 0.0,  # Would need account mapping
             "ergebnis": float(rohertrag - personal_kosten),
         },
         "kumuliert": {
@@ -307,7 +307,7 @@ async def get_bwa(monat: int = Query(default=10), jahr: int = Query(default=2025
         },
     }
 
-***REMOVED*** OP-Verwaltung
+# OP-Verwaltung
 @router.get("/op-verwaltung")
 async def get_op_verwaltung(tenant_id: str = Query("system", description="Tenant ID")):
     """Offene Posten Übersicht (Debitoren + Kreditoren)"""
@@ -320,7 +320,7 @@ async def get_op_verwaltung(tenant_id: str = Query("system", description="Tenant
     debitoren_summe = sum(op.offen for op in debitoren)
     kreditoren_summe = sum(op.offen for op in kreditoren)
 
-    ***REMOVED*** Get bank balance from accounts
+    # Get bank balance from accounts
     bank_konten = [k for k in konto_repo.get_all(tenant_id) if "bank" in k.bezeichnung.lower()]
     bank_balance = sum(k.saldo for k in bank_konten) if bank_konten else Decimal("0.00")
 
@@ -345,7 +345,7 @@ async def get_op_verwaltung(tenant_id: str = Query("system", description="Tenant
         },
     }
 
-***REMOVED*** DATEV Export
+# DATEV Export
 @router.get("/export/datev")
 async def export_datev(
     typ: str = Query(..., description="buchungen, debitoren, kreditoren, anlagen"),
@@ -358,7 +358,7 @@ async def export_datev(
         buchung_repo = container.resolve(BuchungRepository)
         data = buchung_repo.get_by_filters(tenant_id, datum_von, datum_bis)
 
-        ***REMOVED*** CSV-Header
+        # CSV-Header
         csv = "Datum;Beleg;Soll;Haben;Betrag;Text\n"
         for b in data:
             csv += f"{b.datum.isoformat()};{b.belegnr};{b.soll_konto};{b.haben_konto};{b.betrag};{b.text}\n"
@@ -372,7 +372,7 @@ async def export_datev(
 
     return {"error": "Typ nicht unterstützt"}
 
-***REMOVED*** Dashboard/Statistik
+# Dashboard/Statistik
 @router.get("/stats")
 async def get_fibu_stats(tenant_id: str = Query("system", description="Tenant ID")):
     """Fibu-Dashboard Statistiken"""
@@ -386,7 +386,7 @@ async def get_fibu_stats(tenant_id: str = Query("system", description="Tenant ID
     konten = konto_repo.get_all(tenant_id)
     anlagen = anlage_repo.get_all(tenant_id)
 
-    ***REMOVED*** Get today's bookings
+    # Get today's bookings
     heute = date.today()
     buchungen_heute = len(buchung_repo.get_by_filters(tenant_id, heute, heute))
 

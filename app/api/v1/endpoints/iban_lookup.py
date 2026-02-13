@@ -14,9 +14,9 @@ import json
 
 router = APIRouter(prefix="/iban-lookup", tags=["finance", "iban"])
 
-***REMOVED*** In-memory cache for IBAN lookups (in production, use Redis or similar)
+# In-memory cache for IBAN lookups (in production, use Redis or similar)
 _iban_cache: dict[str, tuple[dict, datetime]] = {}
-CACHE_TTL_HOURS = 24  ***REMOVED*** Cache for 24 hours
+CACHE_TTL_HOURS = 24  # Cache for 24 hours
 
 
 def _get_cache_key(iban: str) -> str:
@@ -33,7 +33,7 @@ def _get_cached(iban: str) -> Optional[dict]:
         if datetime.now() - cached_time < timedelta(hours=CACHE_TTL_HOURS):
             return cached_data
         else:
-            ***REMOVED*** Remove expired entry
+            # Remove expired entry
             del _iban_cache[cache_key]
     return None
 
@@ -42,9 +42,9 @@ def _set_cache(iban: str, data: dict):
     """Cache IBAN lookup result"""
     cache_key = _get_cache_key(iban)
     _iban_cache[cache_key] = (data, datetime.now())
-    ***REMOVED*** Limit cache size (keep last 1000 entries)
+    # Limit cache size (keep last 1000 entries)
     if len(_iban_cache) > 1000:
-        ***REMOVED*** Remove oldest entries
+        # Remove oldest entries
         sorted_entries = sorted(_iban_cache.items(), key=lambda x: x[1][1])
         for key, _ in sorted_entries[:100]:
             del _iban_cache[key]
@@ -80,22 +80,22 @@ async def lookup_iban(
     Returns:
         IBANLookupResponse with validation result and bank information
     """
-    ***REMOVED*** Normalize IBAN: remove spaces and convert to uppercase
+    # Normalize IBAN: remove spaces and convert to uppercase
     normalized_iban = iban.replace(" ", "").replace("-", "").upper()
     
-    ***REMOVED*** Basic format validation
+    # Basic format validation
     if not normalized_iban or len(normalized_iban) < 15 or len(normalized_iban) > 34:
         raise HTTPException(
             status_code=400,
             detail="Invalid IBAN format: must be between 15 and 34 characters"
         )
     
-    ***REMOVED*** Check cache first
+    # Check cache first
     cached_result = _get_cached(normalized_iban)
     if cached_result:
         return IBANLookupResponse(**cached_result)
     
-    ***REMOVED*** Build openiban.com URL
+    # Build openiban.com URL
     base_url = "https://openiban.com/validate"
     params = {
         "getBIC": "true" if get_bic else "false",
@@ -104,13 +104,13 @@ async def lookup_iban(
     url = f"{base_url}/{normalized_iban}"
     
     try:
-        ***REMOVED*** Make request to openiban.com
+        # Make request to openiban.com
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(url, params=params)
             response.raise_for_status()
             data = response.json()
         
-        ***REMOVED*** Extract bank data if available
+        # Extract bank data if available
         bank_data = data.get("bankData", {})
         
         result = IBANLookupResponse(
@@ -125,7 +125,7 @@ async def lookup_iban(
             message=data.get("message")
         )
         
-        ***REMOVED*** Cache the result (only if valid to save space)
+        # Cache the result (only if valid to save space)
         if result.valid:
             _set_cache(normalized_iban, result.model_dump())
         
@@ -138,7 +138,7 @@ async def lookup_iban(
         )
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
-            ***REMOVED*** IBAN not found or invalid
+            # IBAN not found or invalid
             return IBANLookupResponse(
                 valid=False,
                 iban=normalized_iban,

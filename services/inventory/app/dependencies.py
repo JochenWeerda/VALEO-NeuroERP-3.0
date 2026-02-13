@@ -28,7 +28,7 @@ async def init_event_bus() -> None:
     bus = EventBus(settings.EVENT_BUS_URL, settings.EVENT_BUS_SUBJECT_PREFIX)
     try:
         await bus.connect()
-    except Exception as exc:  ***REMOVED*** noqa: BLE001
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Inventory EventBus konnte nicht verbunden werden: %s", exc)
         return
 
@@ -59,4 +59,5 @@ def resolve_tenant_id(x_tenant_id: Optional[str] = Header(default=None)) -> str:
     if x_tenant_id and x_tenant_id.strip():
         return x_tenant_id.strip()
     return settings.DEFAULT_TENANT
+
 

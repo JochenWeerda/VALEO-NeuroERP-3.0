@@ -218,6 +218,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   logoutButton: {
-    borderColor: '***REMOVED***F44336',
+    borderColor: '#F44336',
   },
 });

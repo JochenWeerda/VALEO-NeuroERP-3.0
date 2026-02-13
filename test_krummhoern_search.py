@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 🔍 KRUMMHÖRN CSV-SUCHE - Spaltenverschiebungs-Diagnose
 Direkte Analyse der GAP-CSV ohne Backend-Abhängigkeit
@@ -33,10 +33,10 @@ def search_krummhoern_in_csv():
         with open(csv_path, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')
             
-            ***REMOVED*** Header analysieren
+            # Header analysieren
             headers = reader.fieldnames
             print(f"📊 Gefundene Header ({len(headers)}):")
-            for i, header in enumerate(headers[:10]):  ***REMOVED*** Erste 10
+            for i, header in enumerate(headers[:10]):  # Erste 10
                 print(f"  {i+1:2d}. {header}")
             if len(headers) > 10:
                 print(f"  ... und {len(headers)-10} weitere")
@@ -62,11 +62,11 @@ def search_krummhoern_in_csv():
             print("🔍 Suche nach Krummhörn-Daten...")
             print("-" * 40)
             
-            ***REMOVED*** Daten durchsuchen
+            # Daten durchsuchen
             for row_num, row in enumerate(reader, 1):
                 results["statistics"]["total_rows"] = row_num
                 
-                ***REMOVED*** Maximal 50.000 Zeilen für schnelle Analyse
+                # Maximal 50.000 Zeilen für schnelle Analyse
                 if row_num > 50000:
                     print(f"⏹️  Scan gestoppt bei Zeile {row_num} (Performance)")
                     break
@@ -75,7 +75,7 @@ def search_krummhoern_in_csv():
                 name = row.get('Name des Begünstigten/Rechtsträgers/Verdands', '').strip()
                 city = row.get('Gemeinde', '').strip()
                 
-                ***REMOVED*** Suche nach PLZ 26736
+                # Suche nach PLZ 26736
                 if plz == '26736':
                     results["statistics"]["plz_26736_count"] += 1
                     if len(results["plz_26736_matches"]) < 5:
@@ -87,7 +87,7 @@ def search_krummhoern_in_csv():
                         })
                         print(f"🎯 PLZ 26736 gefunden! Zeile {row_num}: {name[:30]}... | {city}")
                 
-                ***REMOVED*** Suche nach Krummhörn-Text
+                # Suche nach Krummhörn-Text
                 if ('krumm' in name.lower() or 'krumm' in city.lower() or 
                     'hörn' in name.lower() or 'hörn' in city.lower()):
                     results["statistics"]["krummhoern_count"] += 1
@@ -100,7 +100,7 @@ def search_krummhoern_in_csv():
                         })
                         print(f"🏘️  Krummhörn-Text gefunden! Zeile {row_num}: {name[:30]}... | PLZ {plz} | {city}")
                 
-                ***REMOVED*** Suche nach PLZ 267xx
+                # Suche nach PLZ 267xx
                 if plz.startswith('267'):
                     results["statistics"]["plz_267xx_count"] += 1
                     if len(results["plz_267xx_matches"]) < 10:
@@ -111,7 +111,7 @@ def search_krummhoern_in_csv():
                             "city": city
                         })
                 
-                ***REMOVED*** Progress-Update
+                # Progress-Update
                 if row_num % 10000 == 0:
                     print(f"📊 Zeile {row_num}: PLZ 26736={results['statistics']['plz_26736_count']}, "
                           f"Krummhörn={results['statistics']['krummhoern_count']}, "
@@ -121,7 +121,7 @@ def search_krummhoern_in_csv():
         print(f"❌ Fehler beim CSV-Lesen: {e}")
         return
     
-    ***REMOVED*** Ergebnisse zusammenfassen
+    # Ergebnisse zusammenfassen
     print()
     print("📋 ANALYSE-ERGEBNISSE:")
     print("=" * 60)
@@ -147,4 +147,5 @@ def search_krummhoern_in_csv():
 
 if __name__ == "__main__":
     search_krummhoern_in_csv()
+
 

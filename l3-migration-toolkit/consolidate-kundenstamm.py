@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Konsolidiert die ChatGPT-Analyse mit dem bestehenden Schema
 """
@@ -7,26 +7,26 @@ import json
 from pathlib import Path
 from typing import Dict, List, Set
 
-***REMOVED*** Lade bestehendes Schema
+# Lade bestehendes Schema
 with open('schemas/mask-builder/kundenstamm.json', 'r', encoding='utf-8') as f:
     existing_schema = json.load(f)
 
-***REMOVED*** Lade ChatGPT-Analyse
+# Lade ChatGPT-Analyse
 with open('schemas/kundenstamm_chatgpt.json', 'r', encoding='utf-8') as f:
     chatgpt_data = json.load(f)
 
-***REMOVED*** Extrahiere Felder aus bestehendem Schema
+# Extrahiere Felder aus bestehendem Schema
 existing_fields = set()
 for field in existing_schema['form']['fields']:
     existing_fields.add(field['l3_original_field'].lower())
 
-***REMOVED*** Extrahiere Felder aus ChatGPT-Analyse
+# Extrahiere Felder aus ChatGPT-Analyse
 chatgpt_fields = set()
 for category, fields in chatgpt_data.items():
     for field in fields:
         chatgpt_fields.add(field.lower())
 
-***REMOVED*** Vergleich
+# Vergleich
 print("=" * 80)
 print("FELD-VERGLEICH: Bestehend vs. ChatGPT")
 print("=" * 80)
@@ -34,25 +34,25 @@ print("=" * 80)
 print(f"\n📊 Bestehende Felder: {len(existing_fields)}")
 print(f"📊 ChatGPT Felder: {len(chatgpt_fields)}")
 
-***REMOVED*** Felder die neu sind
+# Felder die neu sind
 new_fields = chatgpt_fields - existing_fields
 print(f"\n✨ Neue Felder aus ChatGPT: {len(new_fields)}")
 if new_fields:
     for field in sorted(new_fields):
         print(f"   + {field}")
 
-***REMOVED*** Felder die nur im bestehenden Schema sind
+# Felder die nur im bestehenden Schema sind
 missing_fields = existing_fields - chatgpt_fields
 print(f"\n⚠️  Felder nur im bestehenden Schema: {len(missing_fields)}")
 if missing_fields:
     for field in sorted(missing_fields):
         print(f"   - {field}")
 
-***REMOVED*** Gemeinsame Felder
+# Gemeinsame Felder
 common_fields = existing_fields & chatgpt_fields
 print(f"\n✅ Gemeinsame Felder: {len(common_fields)}")
 
-***REMOVED*** Erstelle konsolidierte Tabs-Liste
+# Erstelle konsolidierte Tabs-Liste
 print("\n" + "=" * 80)
 print("TAB-VERGLEICH")
 print("=" * 80)
@@ -68,14 +68,14 @@ print(f"\n📋 ChatGPT Tabs: {len(chatgpt_tabs)}")
 for tab in sorted(chatgpt_tabs):
     print(f"   - {tab}")
 
-***REMOVED*** Neue Tabs
+# Neue Tabs
 new_tabs = chatgpt_tabs - existing_tabs
 print(f"\n✨ Neue Tabs aus ChatGPT: {len(new_tabs)}")
 if new_tabs:
     for tab in sorted(new_tabs):
         print(f"   + {tab}")
 
-***REMOVED*** Generiere finalen Bericht
+# Generiere finalen Bericht
 report = {
     "vergleich": {
         "bestehende_felder": len(existing_fields),
@@ -89,7 +89,7 @@ report = {
     "neue_tabs": sorted(list(new_tabs))
 }
 
-***REMOVED*** Speichere Bericht
+# Speichere Bericht
 with open('schemas/kundenstamm_vergleich.json', 'w', encoding='utf-8') as f:
     json.dump(report, f, ensure_ascii=False, indent=2)
 
@@ -101,4 +101,5 @@ print(f"\n🎯 Nächste Schritte:")
 print(f"   1. Review des Vergleichs-Berichts")
 print(f"   2. Konsolidierung des Schemas")
 print(f"   3. Erstellung der SQL-Tabellen")
+
 

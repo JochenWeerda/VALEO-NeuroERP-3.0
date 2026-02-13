@@ -166,7 +166,7 @@ jobs:
       - name: Deploy to staging
         run: |
           echo "Deploying to staging environment"
-          ***REMOVED*** Add deployment commands here
+          # Add deployment commands here
 
   deploy-production:
     needs: docker
@@ -178,4 +178,4 @@ jobs:
       - name: Deploy to production
         run: |
           echo "Deploying to production environment"
-          ***REMOVED*** Add deployment commands here
+          # Add deployment commands here

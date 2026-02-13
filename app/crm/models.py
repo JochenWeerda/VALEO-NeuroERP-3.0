@@ -50,7 +50,7 @@ class Contact(Base):
     phone = Column(String(50))
     type = Column(Enum(ContactType), nullable=False, default=ContactType.CUSTOMER)
     
-    ***REMOVED*** Address
+    # Address
     address_street = Column(String(255))
     address_zip = Column(String(10))
     address_city = Column(String(100))
@@ -58,7 +58,7 @@ class Contact(Base):
     
     notes = Column(Text)
     
-    ***REMOVED*** Audit
+    # Audit
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     tenant_id = Column(String(36), nullable=False, index=True)
@@ -80,7 +80,7 @@ class Lead(Base):
     expected_close_date = Column(DateTime(timezone=True))
     notes = Column(Text)
     
-    ***REMOVED*** Audit
+    # Audit
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     tenant_id = Column(String(36), nullable=False, index=True)
@@ -98,7 +98,7 @@ class Activity(Base):
     status = Column(Enum(ActivityStatus), default=ActivityStatus.PLANNED)
     created_by = Column(String(100))
     
-    ***REMOVED*** Audit
+    # Audit
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     tenant_id = Column(String(36), nullable=False, index=True)
 
@@ -114,7 +114,7 @@ class BetriebsProfil(Base):
     contact_id = Column(String(36), ForeignKey("crm_contacts.id"), nullable=True)
     notes = Column(Text)
     
-    ***REMOVED*** Audit
+    # Audit
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     tenant_id = Column(String(36), nullable=False, index=True)
 

@@ -166,7 +166,7 @@ export default function PCNUFIPage(): JSX.Element {
   ]
 
   return (
-    <div className="p-6">
+    <div className="p-3 md:p-6">
       <Wizard
         title="PCN/UFI Generator"
         subtitle="Poison Centre Notification (ECHA Annex VIII)"

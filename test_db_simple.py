@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """Simple DB connection test from Windows to Docker PostgreSQL"""
 
 import psycopg2
@@ -32,4 +32,5 @@ except Exception as e:
     print(f"❌ Connection failed: {e}")
     import traceback
     traceback.print_exc()
+
 

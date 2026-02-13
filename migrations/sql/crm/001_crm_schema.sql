@@ -1,4 +1,4 @@
-﻿-- =====================================================
+-- =====================================================
 -- VALEO NeuroERP - CRM (Kundenverwaltung) Schema
 -- =====================================================
 
@@ -81,7 +81,7 @@ CREATE TABLE crm.kontakte (
 );
 
 -- =====================================================
--- VERKAUFSAKTIVITÃ„TEN
+-- VERKAUFSAKTIVITÄTEN
 -- =====================================================
 
 -- Leads
@@ -103,19 +103,19 @@ CREATE TABLE crm.leads (
     geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- VerkaufsaktivitÃ¤ten
+-- Verkaufsaktivitäten
 CREATE TABLE crm.verkaufsaktivitaeten (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     aktivitaet_nr VARCHAR(20) UNIQUE NOT NULL,
     kunde_id UUID REFERENCES crm.kunden(id),
     lead_id UUID REFERENCES crm.leads(id),
-    aktivitaet_typ VARCHAR(50) NOT NULL, -- 'TELEFONAT', 'EMAIL', 'BESUCH', 'PRÃ„SENTATION', 'ANGEBOT', 'VERHANDLUNG'
+    aktivitaet_typ VARCHAR(50) NOT NULL, -- 'TELEFONAT', 'EMAIL', 'BESUCH', 'PRÄSENTATION', 'ANGEBOT', 'VERHANDLUNG'
     titel VARCHAR(200) NOT NULL,
     beschreibung TEXT,
     datum DATE NOT NULL,
     uhrzeit TIME,
     dauer INTEGER, -- Minuten
-    status VARCHAR(50) DEFAULT 'GEPLANT', -- 'GEPLANT', 'DURCHGEFÃœHRT', 'ABGESAGT', 'VERSCHOBEN'
+    status VARCHAR(50) DEFAULT 'GEPLANT', -- 'GEPLANT', 'DURCHGEFÜHRT', 'ABGESAGT', 'VERSCHOBEN'
     ergebnis TEXT,
     naechste_aktion TEXT,
     verantwortlicher_id UUID,
@@ -272,7 +272,7 @@ CREATE INDEX idx_leads_quelle ON crm.leads(quelle);
 CREATE INDEX idx_leads_prioritaet ON crm.leads(prioritaet);
 CREATE INDEX idx_leads_verantwortlicher ON crm.leads(verantwortlicher_id);
 
--- VerkaufsaktivitÃ¤ten
+-- Verkaufsaktivitäten
 CREATE INDEX idx_verkaufsaktivitaeten_kunde ON crm.verkaufsaktivitaeten(kunde_id);
 CREATE INDEX idx_verkaufsaktivitaeten_typ ON crm.verkaufsaktivitaeten(aktivitaet_typ);
 CREATE INDEX idx_verkaufsaktivitaeten_datum ON crm.verkaufsaktivitaeten(datum);
@@ -297,7 +297,7 @@ CREATE INDEX idx_kundenbewertungen_datum ON crm.kundenbewertungen(datum);
 -- TRIGGERS
 -- =====================================================
 
--- Trigger-Funktion fÃ¼r automatische Timestamp-Updates
+-- Trigger-Funktion für automatische Timestamp-Updates
 CREATE OR REPLACE FUNCTION crm.update_geaendert_am()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -306,7 +306,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Triggers fÃ¼r alle Tabellen
+-- Triggers für alle Tabellen
 CREATE TRIGGER trigger_kunden_update
     BEFORE UPDATE ON crm.kunden
     FOR EACH ROW EXECUTE FUNCTION crm.update_geaendert_am();
@@ -385,7 +385,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger fÃ¼r automatische Kundennummer-Generierung
+-- Trigger für automatische Kundennummer-Generierung
 CREATE TRIGGER trigger_generate_kundennummer
     BEFORE INSERT ON crm.kunden
     FOR EACH ROW EXECUTE FUNCTION crm.generate_kundennummer();
@@ -412,7 +412,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger fÃ¼r automatische Kontaktnummer-Generierung
+-- Trigger für automatische Kontaktnummer-Generierung
 CREATE TRIGGER trigger_generate_kontaktnummer
     BEFORE INSERT ON crm.kontakte
     FOR EACH ROW EXECUTE FUNCTION crm.generate_kontaktnummer();
@@ -451,7 +451,7 @@ BEGIN
              NULLIF(COUNT(l.id), 0)) * 100, 2
         ) as konversionsrate,
         COUNT(va.id)::BIGINT as gesamt_aktivitaeten,
-        COUNT(CASE WHEN va.status = 'DURCHGEFÃœHRT' THEN 1 END)::BIGINT as durchgefuehrte_aktivitaeten
+        COUNT(CASE WHEN va.status = 'DURCHGEFÜHRT' THEN 1 END)::BIGINT as durchgefuehrte_aktivitaeten
     FROM crm.kunden k
     LEFT JOIN crm.kundenbewertungen kb ON kb.kunde_id = k.id
     LEFT JOIN crm.leads l ON l.erstellt_am::DATE BETWEEN start_datum AND end_datum
@@ -463,7 +463,7 @@ $$ LANGUAGE plpgsql;
 -- VIEWS
 -- =====================================================
 
--- KundenÃ¼bersicht
+-- Kundenübersicht
 CREATE VIEW crm.kunden_uebersicht AS
 SELECT 
     k.id,
@@ -493,7 +493,7 @@ LEFT JOIN crm.verkaufschancen vc ON vc.kunde_id = k.id
 GROUP BY k.id, k.kunden_nr, k.firmenname, k.kundentyp, k.kundenstatus, k.kundenbewertung, 
          k.kundenseit, k.umsatzklasse, p.name, ka.strasse, ka.plz, ka.ort, ka.telefon, ka.email;
 
--- Lead-Ãœbersicht
+-- Lead-Übersicht
 CREATE VIEW crm.lead_uebersicht AS
 SELECT 
     l.id,
@@ -516,7 +516,7 @@ LEFT JOIN crm.verkaufsaktivitaeten va ON va.lead_id = l.id
 GROUP BY l.id, l.lead_nr, l.firmenname, l.ansprechpartner, l.email, l.telefon, l.quelle, 
          l.status, l.prioritaet, l.wert, p.name, l.naechster_kontakt;
 
--- VerkaufsaktivitÃ¤ten-Ãœbersicht
+-- Verkaufsaktivitäten-Übersicht
 CREATE VIEW crm.aktivitaeten_uebersicht AS
 SELECT 
     va.id,
@@ -543,14 +543,14 @@ LEFT JOIN personal.mitarbeiter p ON p.id = va.verantwortlicher_id;
 
 -- Kundensegmente
 INSERT INTO crm.kundensegmente (segment_name, beschreibung, kriterien, durchschnittlicher_umsatz) VALUES
-('Premium-Kunden', 'Kunden mit hohem Umsatz und guter BonitÃ¤t', 'Umsatzklasse = GROSS, Kundenseit = A', 150000.00),
-('Mittelstand', 'Mittlere Unternehmen mit stabiler GeschÃ¤ftsbeziehung', 'Umsatzklasse = MITTEL, Kundenseit = B', 75000.00),
+('Premium-Kunden', 'Kunden mit hohem Umsatz und guter Bonität', 'Umsatzklasse = GROSS, Kundenseit = A', 150000.00),
+('Mittelstand', 'Mittlere Unternehmen mit stabiler Geschäftsbeziehung', 'Umsatzklasse = MITTEL, Kundenseit = B', 75000.00),
 ('Kleinbetriebe', 'Kleine landwirtschaftliche Betriebe', 'Umsatzklasse = KLEIN, Kundenseit = C', 25000.00),
-('Neukunden', 'Kunden in der ersten GeschÃ¤ftsbeziehung', 'Erstellt_am >= CURRENT_DATE - INTERVAL 1 year', 15000.00);
+('Neukunden', 'Kunden in der ersten Geschäftsbeziehung', 'Erstellt_am >= CURRENT_DATE - INTERVAL 1 year', 15000.00);
 
 -- Kunden (Beispiel)
 INSERT INTO crm.kunden (firmenname, kundentyp, branche, umsatzklasse, kundenstatus, kundenbewertung, kundenseit, zahlungsziel, skonto_prozent) VALUES
-('Agrarhof MÃ¼ller GmbH', 'GESCHAEFTSKUNDE', 'Landwirtschaft', 'GROSS', 'AKTIV', 5, 'A', 30, 2.00),
+('Agrarhof Müller GmbH', 'GESCHAEFTSKUNDE', 'Landwirtschaft', 'GROSS', 'AKTIV', 5, 'A', 30, 2.00),
 ('Bauernhof Schmidt', 'PRIVATKUNDE', 'Landwirtschaft', 'KLEIN', 'AKTIV', 4, 'B', 14, 0.00),
 ('Landwirtschaftliche Genossenschaft', 'GESCHAEFTSKUNDE', 'Genossenschaft', 'GROSS', 'AKTIV', 5, 'A', 30, 3.00),
 ('Bio-Bauernhof Weber', 'GESCHAEFTSKUNDE', 'Bio-Landwirtschaft', 'MITTEL', 'AKTIV', 4, 'B', 30, 1.50),
@@ -558,42 +558,42 @@ INSERT INTO crm.kunden (firmenname, kundentyp, branche, umsatzklasse, kundenstat
 
 -- Kundenadressen
 INSERT INTO crm.kunden_adressen (kunde_id, adress_typ, strasse, hausnummer, plz, ort, telefon, email, ist_hauptadresse) VALUES
-((SELECT id FROM crm.kunden WHERE firmenname = 'Agrarhof MÃ¼ller GmbH'), 'HAUPTADRESSE', 'MusterstraÃŸe', '123', '12345', 'Musterstadt', '01234-567890', 'info@agrarhof-mueller.de', true),
-((SELECT id FROM crm.kunden WHERE firmenname = 'Bauernhof Schmidt'), 'HAUPTADRESSE', 'DorfstraÃŸe', '45', '54321', 'Dorfstadt', '05432-123456', 'schmidt@bauernhof.de', true),
+((SELECT id FROM crm.kunden WHERE firmenname = 'Agrarhof Müller GmbH'), 'HAUPTADRESSE', 'Musterstraße', '123', '12345', 'Musterstadt', '01234-567890', 'info@agrarhof-mueller.de', true),
+((SELECT id FROM crm.kunden WHERE firmenname = 'Bauernhof Schmidt'), 'HAUPTADRESSE', 'Dorfstraße', '45', '54321', 'Dorfstadt', '05432-123456', 'schmidt@bauernhof.de', true),
 ((SELECT id FROM crm.kunden WHERE firmenname = 'Landwirtschaftliche Genossenschaft'), 'HAUPTADRESSE', 'Genossenschaftsweg', '1', '67890', 'Genossenschaftsstadt', '06789-987654', 'info@lwg.de', true);
 
 -- Kontakte
 INSERT INTO crm.kontakte (kunde_id, anrede, vorname, nachname, position, telefon, email, ist_hauptkontakt) VALUES
-((SELECT id FROM crm.kunden WHERE firmenname = 'Agrarhof MÃ¼ller GmbH'), 'HERR', 'Hans', 'MÃ¼ller', 'GeschÃ¤ftsfÃ¼hrer', '01234-567890', 'h.mueller@agrarhof-mueller.de', true),
+((SELECT id FROM crm.kunden WHERE firmenname = 'Agrarhof Müller GmbH'), 'HERR', 'Hans', 'Müller', 'Geschäftsführer', '01234-567890', 'h.mueller@agrarhof-mueller.de', true),
 ((SELECT id FROM crm.kunden WHERE firmenname = 'Bauernhof Schmidt'), 'FRAU', 'Maria', 'Schmidt', 'Inhaberin', '05432-123456', 'm.schmidt@bauernhof.de', true),
 ((SELECT id FROM crm.kunden WHERE firmenname = 'Landwirtschaftliche Genossenschaft'), 'HERR', 'Peter', 'Weber', 'Vorstand', '06789-987654', 'p.weber@lwg.de', true);
 
 -- Leads
 INSERT INTO crm.leads (firmenname, ansprechpartner, email, telefon, quelle, status, prioritaet, wert, beschreibung) VALUES
-('Neuer Landwirt GmbH', 'Max Mustermann', 'max@neuer-landwirt.de', '01234-111111', 'WEBSITE', 'NEU', 'HOCH', 50000.00, 'Interesse an Futtermitteln und DÃ¼nger'),
-('Bio-Hof Meier', 'Anna Meier', 'anna@bio-hof-meier.de', '01234-222222', 'EMPFOHLUNG', 'KONTAKTIERT', 'NORMAL', 30000.00, 'Bio-Landwirtschaft mit Fokus auf QualitÃ¤t'),
-('Test Lead', 'Test Person', 'test@test.de', '01234-333333', 'MESSE', 'INTERESSIERT', 'NIEDRIG', 15000.00, 'Test Lead fÃ¼r Demo-Zwecke');
+('Neuer Landwirt GmbH', 'Max Mustermann', 'max@neuer-landwirt.de', '01234-111111', 'WEBSITE', 'NEU', 'HOCH', 50000.00, 'Interesse an Futtermitteln und Dünger'),
+('Bio-Hof Meier', 'Anna Meier', 'anna@bio-hof-meier.de', '01234-222222', 'EMPFOHLUNG', 'KONTAKTIERT', 'NORMAL', 30000.00, 'Bio-Landwirtschaft mit Fokus auf Qualität'),
+('Test Lead', 'Test Person', 'test@test.de', '01234-333333', 'MESSE', 'INTERESSIERT', 'NIEDRIG', 15000.00, 'Test Lead für Demo-Zwecke');
 
--- VerkaufsaktivitÃ¤ten
+-- Verkaufsaktivitäten
 INSERT INTO crm.verkaufsaktivitaeten (kunde_id, aktivitaet_typ, titel, beschreibung, datum, uhrzeit, dauer, status, ergebnis) VALUES
-((SELECT id FROM crm.kunden WHERE firmenname = 'Agrarhof MÃ¼ller GmbH'), 'TELEFONAT', 'KundengesprÃ¤ch', 'Besprechung der neuen Produkte', '2024-01-15', '10:00:00', 30, 'DURCHGEFÃœHRT', 'Kunde interessiert an neuen Futtermitteln'),
-((SELECT id FROM crm.kunden WHERE firmenname = 'Bauernhof Schmidt'), 'BESUCH', 'Hofbesuch', 'Vorstellung der Produktpalette', '2024-01-16', '14:00:00', 120, 'DURCHGEFÃœHRT', 'Positives Feedback, Bestellung geplant'),
-((SELECT id FROM crm.leads WHERE firmenname = 'Neuer Landwirt GmbH'), 'EMAIL', 'Erstkontakt', 'Willkommens-E-Mail mit Produktinformationen', '2024-01-17', '09:00:00', 15, 'DURCHGEFÃœHRT', 'Interesse bekundet, RÃ¼ckruf gewÃ¼nscht');
+((SELECT id FROM crm.kunden WHERE firmenname = 'Agrarhof Müller GmbH'), 'TELEFONAT', 'Kundengespräch', 'Besprechung der neuen Produkte', '2024-01-15', '10:00:00', 30, 'DURCHGEFÜHRT', 'Kunde interessiert an neuen Futtermitteln'),
+((SELECT id FROM crm.kunden WHERE firmenname = 'Bauernhof Schmidt'), 'BESUCH', 'Hofbesuch', 'Vorstellung der Produktpalette', '2024-01-16', '14:00:00', 120, 'DURCHGEFÜHRT', 'Positives Feedback, Bestellung geplant'),
+((SELECT id FROM crm.leads WHERE firmenname = 'Neuer Landwirt GmbH'), 'EMAIL', 'Erstkontakt', 'Willkommens-E-Mail mit Produktinformationen', '2024-01-17', '09:00:00', 15, 'DURCHGEFÜHRT', 'Interesse bekundet, Rückruf gewünscht');
 
 -- Verkaufschancen
 INSERT INTO crm.verkaufschancen (kunde_id, titel, beschreibung, phase, wahrscheinlichkeit, wert, erwarteter_abschluss, status) VALUES
-((SELECT id FROM crm.kunden WHERE firmenname = 'Agrarhof MÃ¼ller GmbH'), 'Futtermittel-Liefervertrag', 'Langfristiger Liefervertrag fÃ¼r Premium-Futtermittel', 'VERHANDLUNG', 75, 120000.00, '2024-03-15', 'AKTIV'),
-((SELECT id FROM crm.kunden WHERE firmenname = 'Bauernhof Schmidt'), 'DÃ¼nger-Bestellung', 'FrÃ¼hjahrsbestellung fÃ¼r NPK-DÃ¼nger', 'ANGEBOT', 60, 25000.00, '2024-02-28', 'AKTIV'),
+((SELECT id FROM crm.kunden WHERE firmenname = 'Agrarhof Müller GmbH'), 'Futtermittel-Liefervertrag', 'Langfristiger Liefervertrag für Premium-Futtermittel', 'VERHANDLUNG', 75, 120000.00, '2024-03-15', 'AKTIV'),
+((SELECT id FROM crm.kunden WHERE firmenname = 'Bauernhof Schmidt'), 'Dünger-Bestellung', 'Frühjahrsbestellung für NPK-Dünger', 'ANGEBOT', 60, 25000.00, '2024-02-28', 'AKTIV'),
 ((SELECT id FROM crm.leads WHERE firmenname = 'Neuer Landwirt GmbH'), 'Erstbestellung', 'Erste Bestellung nach erfolgreicher Beratung', 'ANALYSE', 40, 15000.00, '2024-02-15', 'AKTIV');
 
 -- Kundenbewertungen
 INSERT INTO crm.kundenbewertungen (kunde_id, bewertung_typ, bewertung, kommentar, datum) VALUES
-((SELECT id FROM crm.kunden WHERE firmenname = 'Agrarhof MÃ¼ller GmbH'), 'GESAMT', 5, 'Sehr zufrieden mit der QualitÃ¤t und dem Service', '2024-01-10'),
+((SELECT id FROM crm.kunden WHERE firmenname = 'Agrarhof Müller GmbH'), 'GESAMT', 5, 'Sehr zufrieden mit der Qualität und dem Service', '2024-01-10'),
 ((SELECT id FROM crm.kunden WHERE firmenname = 'Bauernhof Schmidt'), 'GESAMT', 4, 'Gute Produkte, schnelle Lieferung', '2024-01-12'),
 ((SELECT id FROM crm.kunden WHERE firmenname = 'Landwirtschaftliche Genossenschaft'), 'GESAMT', 5, 'Exzellente Zusammenarbeit, sehr professionell', '2024-01-08');
 
 -- =====================================================
--- TAGESPROTOKOLL-ERWEITERUNG FÃœR AUSSENDIENST
+-- TAGESPROTOKOLL-ERWEITERUNG FÜR AUSSENDIENST
 -- =====================================================
 
 -- Tagesprotokoll-Haupttabelle
@@ -611,7 +611,7 @@ CREATE TABLE crm.tagesprotokolle (
     geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tagesprotokoll-EintrÃ¤ge
+-- Tagesprotokoll-Einträge
 CREATE TABLE crm.tagesprotokoll_eintraege (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     protokoll_id UUID NOT NULL REFERENCES crm.tagesprotokolle(id) ON DELETE CASCADE,
@@ -654,7 +654,7 @@ CREATE TABLE crm.tagesprotokoll_kategorien (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     kategorie_name VARCHAR(100) NOT NULL,
     beschreibung TEXT,
-    farbe VARCHAR(7) DEFAULT '***REMOVED***1976d2',
+    farbe VARCHAR(7) DEFAULT '#1976d2',
     aktiv BOOLEAN DEFAULT true,
     erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -669,7 +669,7 @@ CREATE TABLE crm.tagesprotokoll_eintrag_kategorien (
 );
 
 -- =====================================================
--- INDEXE FÃœR TAGESPROTOKOLL
+-- INDEXE FÜR TAGESPROTOKOLL
 -- =====================================================
 
 CREATE INDEX idx_tagesprotokolle_mitarbeiter ON crm.tagesprotokolle(mitarbeiter_id);
@@ -683,7 +683,7 @@ CREATE INDEX idx_tagesprotokoll_eintraege_typ ON crm.tagesprotokoll_eintraege(ei
 CREATE INDEX idx_tagesprotokoll_eintraege_richtung ON crm.tagesprotokoll_eintraege(kontakt_richtung);
 
 -- =====================================================
--- TRIGGER FÃœR TAGESPROTOKOLL
+-- TRIGGER FÜR TAGESPROTOKOLL
 -- =====================================================
 
 CREATE TRIGGER trigger_tagesprotokolle_update_geaendert_am
@@ -695,7 +695,7 @@ CREATE TRIGGER trigger_tagesprotokoll_eintraege_update_geaendert_am
     FOR EACH ROW EXECUTE FUNCTION crm.update_geaendert_am();
 
 -- =====================================================
--- FUNKTIONEN FÃœR TAGESPROTOKOLL
+-- FUNKTIONEN FÜR TAGESPROTOKOLL
 -- =====================================================
 
 -- Automatische Protokollnummer-Generierung
@@ -722,7 +722,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger fÃ¼r automatische Protokollnummer-Generierung
+-- Trigger für automatische Protokollnummer-Generierung
 CREATE TRIGGER trigger_generate_protokollnummer
     BEFORE INSERT ON crm.tagesprotokolle
     FOR EACH ROW EXECUTE FUNCTION crm.generate_protokollnummer();
@@ -758,7 +758,7 @@ BEGIN
     VALUES (p_mitarbeiter_id, p_datum, v_zeitraum_start, v_zeitraum_ende)
     RETURNING id INTO v_protokoll_id;
     
-    -- VerkaufsaktivitÃ¤ten als EintrÃ¤ge hinzufÃ¼gen
+    -- Verkaufsaktivitäten als Einträge hinzufügen
     INSERT INTO crm.tagesprotokoll_eintraege (
         protokoll_id, kunde_id, kontakt_id, eintrag_typ, kontakt_richtung, 
         titel, beschreibung, ergebnis, naechste_aktion, zeitaufwand_minuten
@@ -771,7 +771,7 @@ BEGIN
             WHEN va.aktivitaet_typ = 'TELEFONAT' THEN 'TELEFONAT'
             WHEN va.aktivitaet_typ = 'EMAIL' THEN 'EMAIL'
             WHEN va.aktivitaet_typ = 'BESUCH' THEN 'BETRIEBSBESUCH'
-            WHEN va.aktivitaet_typ = 'PRÃ„SENTATION' THEN 'ANGEBOT'
+            WHEN va.aktivitaet_typ = 'PRÄSENTATION' THEN 'ANGEBOT'
             ELSE 'SONSTIGES'
         END,
         'AUSGEHEND',
@@ -783,9 +783,9 @@ BEGIN
     FROM crm.verkaufsaktivitaeten va
     WHERE va.verantwortlicher_id = p_mitarbeiter_id
     AND va.datum BETWEEN v_zeitraum_start AND v_zeitraum_ende
-    AND va.status = 'DURCHGEFÃœHRT';
+    AND va.status = 'DURCHGEFÜHRT';
     
-    -- Kommunikation als EintrÃ¤ge hinzufÃ¼gen
+    -- Kommunikation als Einträge hinzufügen
     INSERT INTO crm.tagesprotokoll_eintraege (
         protokoll_id, kunde_id, kontakt_id, eintrag_typ, kontakt_richtung,
         titel, beschreibung, zeitaufwand_minuten
@@ -847,10 +847,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- =====================================================
--- VIEWS FÃœR TAGESPROTOKOLL
+-- VIEWS FÜR TAGESPROTOKOLL
 -- =====================================================
 
--- Tagesprotokoll-Ãœbersicht
+-- Tagesprotokoll-Übersicht
 CREATE VIEW crm.tagesprotokoll_uebersicht AS
 SELECT 
     tp.id,
@@ -871,7 +871,7 @@ LEFT JOIN crm.tagesprotokoll_eintraege tpe ON tpe.protokoll_id = tp.id
 GROUP BY tp.id, tp.protokoll_nr, tp.protokoll_datum, tp.zeitraum_start, tp.zeitraum_ende, 
          tp.status, m.vorname, m.nachname, f.vorname, f.nachname, tp.freigegeben_am;
 
--- Tagesprotokoll-EintrÃ¤ge-Ãœbersicht
+-- Tagesprotokoll-Einträge-Übersicht
 CREATE VIEW crm.tagesprotokoll_eintraege_uebersicht AS
 SELECT 
     tpe.id,
@@ -900,37 +900,37 @@ LEFT JOIN crm.kunden k ON k.id = tpe.kunde_id
 LEFT JOIN crm.kontakte kont ON kont.id = tpe.kontakt_id;
 
 -- =====================================================
--- BEISPIELDATEN FÃœR TAGESPROTOKOLL
+-- BEISPIELDATEN FÜR TAGESPROTOKOLL
 -- =====================================================
 
 -- Tagesprotokoll-Kategorien
 INSERT INTO crm.tagesprotokoll_kategorien (kategorie_name, beschreibung, farbe) VALUES
-('Betriebsbesuch', 'PersÃ¶nliche Besuche bei Kunden', '***REMOVED***1976d2'),
-('Telefonat', 'Telefonische Kontakte', '***REMOVED***388e3c'),
-('Email', 'E-Mail-Kommunikation', '***REMOVED***f57c00'),
-('WhatsApp', 'WhatsApp-Nachrichten', '***REMOVED***7b1fa2'),
-('Lieferung', 'Produktlieferungen', '***REMOVED***d32f2f'),
-('Bestellung', 'Kundenbestellungen', '***REMOVED***ff9800'),
-('Angebot', 'Preisangebote und Verhandlungen', '***REMOVED***9c27b0'),
-('Feldbegehung', 'Feldbesichtigungen und Beratung', '***REMOVED***4caf50'),
-('Messe', 'Messe- und Veranstaltungsbesuche', '***REMOVED***795548'),
-('Finanzen', 'Finanzielle Absprachen und Zahlungen', '***REMOVED***607d8b');
+('Betriebsbesuch', 'Persönliche Besuche bei Kunden', '#1976d2'),
+('Telefonat', 'Telefonische Kontakte', '#388e3c'),
+('Email', 'E-Mail-Kommunikation', '#f57c00'),
+('WhatsApp', 'WhatsApp-Nachrichten', '#7b1fa2'),
+('Lieferung', 'Produktlieferungen', '#d32f2f'),
+('Bestellung', 'Kundenbestellungen', '#ff9800'),
+('Angebot', 'Preisangebote und Verhandlungen', '#9c27b0'),
+('Feldbegehung', 'Feldbesichtigungen und Beratung', '#4caf50'),
+('Messe', 'Messe- und Veranstaltungsbesuche', '#795548'),
+('Finanzen', 'Finanzielle Absprachen und Zahlungen', '#607d8b');
 
 -- Tagesprotokoll-Vorlagen
 INSERT INTO crm.tagesprotokoll_vorlagen (vorlagen_name, beschreibung, eintrag_typ, standard_titel, standard_beschreibung, standard_ergebnis, standard_naechste_aktion) VALUES
-('Betriebsbesuch - Standard', 'Standard-Vorlage fÃ¼r Betriebsbesuche', 'BETRIEBSBESUCH', 'Betriebsbesuch', 'PersÃ¶nlicher Besuch beim Kunden', 'Kunde informiert Ã¼ber aktuelle Angebote', 'NÃ¤chsten Termin vereinbaren'),
-('Telefonat - RÃ¼ckruf', 'Standard-Vorlage fÃ¼r RÃ¼ckrufe', 'TELEFONAT', 'RÃ¼ckruf', 'RÃ¼ckruf auf Kundenanfrage', 'Kunde erreicht, Anliegen besprochen', 'Angebot erstellen'),
-('Email - Angebot', 'Standard-Vorlage fÃ¼r E-Mail-Angebote', 'EMAIL', 'Angebot per E-Mail', 'Preisangebot versendet', 'Angebot versendet', 'Auf RÃ¼ckmeldung warten'),
-('Lieferung - Standard', 'Standard-Vorlage fÃ¼r Lieferungen', 'LIEFERUNG', 'Produktlieferung', 'Lieferung durchgefÃ¼hrt', 'Lieferung erfolgreich', 'Rechnung erstellen'),
-('Feldbegehung - Beratung', 'Standard-Vorlage fÃ¼r Feldbegehungen', 'FELDBEGEHUNG', 'Feldbegehung', 'Feldbesichtigung und Beratung', 'Empfehlungen gegeben', 'Nachbereitung planen');
+('Betriebsbesuch - Standard', 'Standard-Vorlage für Betriebsbesuche', 'BETRIEBSBESUCH', 'Betriebsbesuch', 'Persönlicher Besuch beim Kunden', 'Kunde informiert über aktuelle Angebote', 'Nächsten Termin vereinbaren'),
+('Telefonat - Rückruf', 'Standard-Vorlage für Rückrufe', 'TELEFONAT', 'Rückruf', 'Rückruf auf Kundenanfrage', 'Kunde erreicht, Anliegen besprochen', 'Angebot erstellen'),
+('Email - Angebot', 'Standard-Vorlage für E-Mail-Angebote', 'EMAIL', 'Angebot per E-Mail', 'Preisangebot versendet', 'Angebot versendet', 'Auf Rückmeldung warten'),
+('Lieferung - Standard', 'Standard-Vorlage für Lieferungen', 'LIEFERUNG', 'Produktlieferung', 'Lieferung durchgeführt', 'Lieferung erfolgreich', 'Rechnung erstellen'),
+('Feldbegehung - Beratung', 'Standard-Vorlage für Feldbegehungen', 'FELDBEGEHUNG', 'Feldbegehung', 'Feldbesichtigung und Beratung', 'Empfehlungen gegeben', 'Nachbereitung planen');
 
 -- Beispiel-Tagesprotokoll (basierend auf dem Beispiel des Users)
 INSERT INTO crm.tagesprotokolle (mitarbeiter_id, protokoll_datum, zeitraum_start, zeitraum_ende, status) VALUES
 ((SELECT id FROM personal.mitarbeiter LIMIT 1), '2024-05-28', '2024-05-28', '2024-06-04', 'FREIGEGEBEN');
 
--- Beispiel-Tagesprotokoll-EintrÃ¤ge (basierend auf dem Beispiel des Users)
+-- Beispiel-Tagesprotokoll-Einträge (basierend auf dem Beispiel des Users)
 INSERT INTO crm.tagesprotokoll_eintraege (protokoll_id, kunde_id, eintrag_typ, titel, beschreibung, ergebnis, naechste_aktion, kundenspezifische_absprachen) VALUES
-((SELECT id FROM crm.tagesprotokolle LIMIT 1), (SELECT id FROM crm.kunden WHERE firmenname = 'Agrarhof MÃ¼ller GmbH' LIMIT 1), 'BETRIEBSBESUCH', 'Betriebsbesuch AuÃŸenstÃ¤nde', 'Betriebsbesuch bei Uwe Lay, Aynwolde', 'Interesse an MLF und Mehlmischung', 'Finanzielle Sicherheit mit TBK klÃ¤ren', 'Soll zuvor finanzielle Sicherheit mit TBK klÃ¤ren, bevor er von mir Angebote erhÃ¤lt'),
+((SELECT id FROM crm.tagesprotokolle LIMIT 1), (SELECT id FROM crm.kunden WHERE firmenname = 'Agrarhof Müller GmbH' LIMIT 1), 'BETRIEBSBESUCH', 'Betriebsbesuch Außenstände', 'Betriebsbesuch bei Uwe Lay, Aynwolde', 'Interesse an MLF und Mehlmischung', 'Finanzielle Sicherheit mit TBK klären', 'Soll zuvor finanzielle Sicherheit mit TBK klären, bevor er von mir Angebote erhält'),
 ((SELECT id FROM crm.tagesprotokolle LIMIT 1), (SELECT id FROM crm.kunden WHERE firmenname = 'Bauernhof Schmidt' LIMIT 1), 'TELEFONAT', 'Telefonat Hero Fisser', 'Telefonat mit Hero Fisser', 'Nicht erreicht, Wuxal angeboten', 'Erneut versuchen', 'Wuxal angeboten'),
 ((SELECT id FROM crm.tagesprotokolle LIMIT 1), (SELECT id FROM crm.kunden WHERE firmenname = 'Landwirtschaftliche Genossenschaft' LIMIT 1), 'BESTELLUNG', 'Futter bestellt', 'Futterbestellung von Albert Koopmann', 'Futter bestellt', 'Lieferung planen', 'Albert Koopmann hat Futter bestellt'),
 ((SELECT id FROM crm.tagesprotokolle LIMIT 1), (SELECT id FROM crm.kunden WHERE firmenname = 'Bio-Bauernhof Weber' LIMIT 1), 'LIEFERUNG', 'PSM geliefert', 'PSM-Lieferung an Albert Ohling', 'PSM geliefert', 'Rechnung erstellen', 'Albert Ohling hat PSM geliefert bekommen');
@@ -939,11 +939,12 @@ INSERT INTO crm.tagesprotokoll_eintraege (protokoll_id, kunde_id, eintrag_typ, t
 -- KOMMENTARE
 -- =====================================================
 
-COMMENT ON TABLE crm.tagesprotokolle IS 'Tagesprotokolle fÃ¼r AuÃŸendienst-Mitarbeiter';
-COMMENT ON TABLE crm.tagesprotokoll_eintraege IS 'Einzelne EintrÃ¤ge in Tagesprotokollen';
-COMMENT ON TABLE crm.tagesprotokoll_vorlagen IS 'Vorlagen fÃ¼r hÃ¤ufige Eintragstypen';
-COMMENT ON TABLE crm.tagesprotokoll_kategorien IS 'Kategorien fÃ¼r Tagesprotokoll-EintrÃ¤ge';
+COMMENT ON TABLE crm.tagesprotokolle IS 'Tagesprotokolle für Außendienst-Mitarbeiter';
+COMMENT ON TABLE crm.tagesprotokoll_eintraege IS 'Einzelne Einträge in Tagesprotokollen';
+COMMENT ON TABLE crm.tagesprotokoll_vorlagen IS 'Vorlagen für häufige Eintragstypen';
+COMMENT ON TABLE crm.tagesprotokoll_kategorien IS 'Kategorien für Tagesprotokoll-Einträge';
 COMMENT ON FUNCTION crm.generate_tagesprotokoll IS 'Generiert automatisch ein Tagesprotokoll aus CRM-Daten';
-COMMENT ON FUNCTION crm.get_tagesprotokoll_statistiken IS 'Berechnet Statistiken fÃ¼r Tagesprotokolle';
+COMMENT ON FUNCTION crm.get_tagesprotokoll_statistiken IS 'Berechnet Statistiken für Tagesprotokolle';
 
 COMMIT; 
+

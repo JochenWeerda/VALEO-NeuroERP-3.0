@@ -8,7 +8,7 @@ Create Date: 2025-10-09
 from alembic import op
 import sqlalchemy as sa
 
-***REMOVED*** revision identifiers
+# revision identifiers
 revision = '004'
 down_revision = '003'
 branch_labels = None
@@ -34,4 +34,5 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_index('ix_numbering_domain', table_name='number_series')
     op.drop_table('number_series')
+
 

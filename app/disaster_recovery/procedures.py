@@ -38,10 +38,10 @@ class RecoveryPhase(Enum):
 
 class RecoveryPriority(Enum):
     """Recovery priority levels"""
-    CRITICAL = "critical"  ***REMOVED*** < 4 hours
-    HIGH = "high"         ***REMOVED*** < 24 hours
-    MEDIUM = "medium"     ***REMOVED*** < 72 hours
-    LOW = "low"          ***REMOVED*** < 1 week
+    CRITICAL = "critical"  # < 4 hours
+    HIGH = "high"         # < 24 hours
+    MEDIUM = "medium"     # < 72 hours
+    LOW = "low"          # < 1 week
 
 
 class FailoverType(Enum):
@@ -75,7 +75,7 @@ class RecoveryProcedure:
     disaster_type: DisasterType
     recovery_phase: RecoveryPhase
     priority: RecoveryPriority
-    estimated_duration: int  ***REMOVED*** minutes
+    estimated_duration: int  # minutes
     required_resources: List[str]
     responsible_roles: List[str]
     prerequisites: List[str]
@@ -125,7 +125,7 @@ class FailoverConfiguration:
 class RecoveryResource:
     """Recovery resource allocation"""
     id: str
-    resource_type: str  ***REMOVED*** personnel, equipment, software, facilities
+    resource_type: str  # personnel, equipment, software, facilities
     resource_name: str
     quantity_available: int
     quantity_allocated: int = 0
@@ -146,17 +146,17 @@ class ISO22301DisasterRecovery:
         self.continuity = continuity_service
         self.backup = backup_service
 
-        ***REMOVED*** Disaster recovery management
+        # Disaster recovery management
         self.disaster_declarations: Dict[str, DisasterDeclaration] = {}
         self.recovery_procedures: Dict[str, RecoveryProcedure] = {}
         self.recovery_executions: List[RecoveryExecution] = {}
         self.failover_configurations: Dict[str, FailoverConfiguration] = {}
         self.recovery_resources: Dict[str, RecoveryResource] = {}
 
-        ***REMOVED*** Recovery workflows
+        # Recovery workflows
         self.recovery_workflows = self._initialize_recovery_workflows()
 
-        ***REMOVED*** Communication templates
+        # Communication templates
         self.communication_templates = self._initialize_communication_templates()
 
     def _initialize_recovery_workflows(self) -> Dict[str, Dict[str, Any]]:
@@ -220,10 +220,10 @@ class ISO22301DisasterRecovery:
 
         self.disaster_declarations[disaster_id] = declaration
 
-        ***REMOVED*** Trigger immediate response actions
+        # Trigger immediate response actions
         self._trigger_disaster_response(declaration)
 
-        ***REMOVED*** Notify stakeholders
+        # Notify stakeholders
         self._notify_disaster_stakeholders(declaration)
 
         logger.critical(f"DISASTER DECLARED: {declaration.disaster_type.value} - {declaration.severity_level} severity")
@@ -233,24 +233,24 @@ class ISO22301DisasterRecovery:
         """Trigger automated disaster response actions"""
         response_actions = []
 
-        ***REMOVED*** Get relevant recovery procedures
+        # Get relevant recovery procedures
         relevant_procedures = [
             p for p in self.recovery_procedures.values()
             if p.disaster_type == disaster.disaster_type and p.is_active
         ]
 
-        ***REMOVED*** Prioritize critical procedures
+        # Prioritize critical procedures
         critical_procedures = [p for p in relevant_procedures if p.priority == RecoveryPriority.CRITICAL]
 
         for procedure in critical_procedures:
-            ***REMOVED*** Auto-execute if possible
+            # Auto-execute if possible
             if self._can_auto_execute(procedure):
                 execution_id = self.execute_recovery_procedure(procedure.id, disaster.id, "system")
                 response_actions.append(f"Auto-executed procedure: {procedure.name} (ID: {execution_id})")
             else:
                 response_actions.append(f"Manual execution required: {procedure.name}")
 
-        ***REMOVED*** Trigger failover for affected systems
+        # Trigger failover for affected systems
         for system in disaster.affected_systems:
             failover_config = self._find_failover_config(system)
             if failover_config and failover_config.failover_type == FailoverType.AUTOMATIC:
@@ -263,12 +263,12 @@ class ISO22301DisasterRecovery:
 
     def _can_auto_execute(self, procedure: RecoveryProcedure) -> bool:
         """Check if procedure can be auto-executed"""
-        ***REMOVED*** Check if all prerequisites are met
+        # Check if all prerequisites are met
         for prereq in procedure.prerequisites:
             if not self._check_prerequisite(prereq):
                 return False
 
-        ***REMOVED*** Check if required resources are available
+        # Check if required resources are available
         for resource in procedure.required_resources:
             if not self._check_resource_availability(resource):
                 return False
@@ -277,8 +277,8 @@ class ISO22301DisasterRecovery:
 
     def _check_prerequisite(self, prerequisite: str) -> bool:
         """Check if a prerequisite is met"""
-        ***REMOVED*** Simplified prerequisite checking
-        ***REMOVED*** In production, this would check system status, dependencies, etc.
+        # Simplified prerequisite checking
+        # In production, this would check system status, dependencies, etc.
         return True
 
     def _check_resource_availability(self, resource: str) -> bool:
@@ -301,8 +301,8 @@ class ISO22301DisasterRecovery:
         """Execute system failover"""
         logger.critical(f"Executing failover for {config.system_name} from {config.primary_location} to {config.secondary_location}")
 
-        ***REMOVED*** In production, this would trigger actual failover procedures
-        ***REMOVED*** For now, simulate failover execution
+        # In production, this would trigger actual failover procedures
+        # For now, simulate failover execution
 
     def _notify_disaster_stakeholders(self, disaster: DisasterDeclaration):
         """Notify relevant stakeholders about disaster declaration"""
@@ -315,7 +315,7 @@ class ISO22301DisasterRecovery:
             'timestamp': disaster.declared_at.isoformat()
         }
 
-        ***REMOVED*** In production, this would send notifications via multiple channels
+        # In production, this would send notifications via multiple channels
         logger.critical(f"Disaster notification sent for: {disaster.disaster_type.value}")
 
     def create_recovery_procedure(self, procedure_data: Dict[str, Any]) -> str:
@@ -367,11 +367,11 @@ class ISO22301DisasterRecovery:
 
         self.recovery_executions[execution_id] = execution
 
-        ***REMOVED*** Allocate required resources
+        # Allocate required resources
         for resource_name in procedure.required_resources:
             self._allocate_resource(resource_name, execution_id)
 
-        ***REMOVED*** Start execution
+        # Start execution
         self._execute_procedure_steps(procedure, execution)
 
         logger.info(f"Recovery procedure execution started: {procedure.name} by {executed_by}")
@@ -390,10 +390,10 @@ class ISO22301DisasterRecovery:
             for step_index, step in enumerate(procedure.steps):
                 execution.current_step = step_index
 
-                ***REMOVED*** Execute step
+                # Execute step
                 step_result = self._execute_step(step, execution)
 
-                ***REMOVED*** Record executed step
+                # Record executed step
                 executed_step = {
                     'step_number': step_index + 1,
                     'step_name': step.get('name', f'Step {step_index + 1}'),
@@ -413,14 +413,14 @@ class ISO22301DisasterRecovery:
                 execution.status = 'completed'
                 execution.completed_at = datetime.utcnow()
 
-                ***REMOVED*** Calculate metrics
+                # Calculate metrics
                 execution.recovery_metrics = self._calculate_recovery_metrics(execution)
 
         except Exception as e:
             execution.status = 'failed'
             execution.issues_encountered.append(str(e))
 
-        ***REMOVED*** Release allocated resources
+        # Release allocated resources
         procedure_obj = self.recovery_procedures[execution.procedure_id]
         for resource_name in procedure_obj.required_resources:
             self._release_resource(resource_name, execution.id)
@@ -434,7 +434,7 @@ class ISO22301DisasterRecovery:
         elif step_type == 'verification':
             return self._execute_verification_step(step, execution)
         else:
-            ***REMOVED*** Manual step - simulate completion
+            # Manual step - simulate completion
             return {'success': True, 'message': f'Manual step completed: {step.get("name", "Unknown")}'}
 
     def _execute_automated_step(self, step: Dict[str, Any], execution: RecoveryExecution) -> Dict[str, Any]:
@@ -443,19 +443,19 @@ class ISO22301DisasterRecovery:
 
         try:
             if action == 'restart_service':
-                ***REMOVED*** Simulate service restart
+                # Simulate service restart
                 service_name = step.get('service_name', 'unknown')
                 return {'success': True, 'message': f'Service {service_name} restarted successfully'}
 
             elif action == 'failover_system':
-                ***REMOVED*** Simulate system failover
+                # Simulate system failover
                 system_name = step.get('system_name', 'unknown')
                 return {'success': True, 'message': f'System {system_name} failed over successfully'}
 
             elif action == 'restore_backup':
-                ***REMOVED*** Simulate backup restore
+                # Simulate backup restore
                 if self.backup:
-                    ***REMOVED*** In production, this would call backup service
+                    # In production, this would call backup service
                     return {'success': True, 'message': 'Backup restored successfully'}
                 else:
                     return {'success': False, 'error': 'Backup service not available'}
@@ -472,12 +472,12 @@ class ISO22301DisasterRecovery:
 
         if verification_type == 'service_check':
             service_name = step.get('service_name', 'unknown')
-            ***REMOVED*** Simulate service check
+            # Simulate service check
             return {'success': True, 'message': f'Service {service_name} is running'}
 
         elif verification_type == 'connectivity_check':
             target = step.get('target', 'unknown')
-            ***REMOVED*** Simulate connectivity check
+            # Simulate connectivity check
             return {'success': True, 'message': f'Connectivity to {target} verified'}
 
         else:
@@ -564,16 +564,16 @@ class ISO22301DisasterRecovery:
         disaster.status = 'resolved'
         disaster.resolved_at = datetime.utcnow()
 
-        ***REMOVED*** Execute failback procedures if applicable
+        # Execute failback procedures if applicable
         for system in disaster.affected_systems:
             config = self._find_failover_config(system)
             if config and config.failover_type != FailoverType.AUTOMATIC:
                 self._execute_failback(config)
 
-        ***REMOVED*** Generate lessons learned
+        # Generate lessons learned
         lessons_learned = self._generate_lessons_learned(disaster, resolution_data)
 
-        ***REMOVED*** Update continuity plans based on lessons learned
+        # Update continuity plans based on lessons learned
         if self.continuity:
             self.continuity.update_plans_from_incident(disaster, lessons_learned)
 
@@ -584,7 +584,7 @@ class ISO22301DisasterRecovery:
         """Execute failback to primary location"""
         logger.info(f"Executing failback for {config.system_name} to {config.primary_location}")
 
-        ***REMOVED*** In production, this would execute failback procedures
+        # In production, this would execute failback procedures
 
     def _generate_lessons_learned(self, disaster: DisasterDeclaration, resolution_data: Dict[str, Any]) -> Dict[str, Any]:
         """Generate lessons learned from disaster recovery"""
@@ -603,12 +603,12 @@ class ISO22301DisasterRecovery:
 
     def get_disaster_recovery_status(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Get comprehensive disaster recovery status"""
-        ***REMOVED*** Filter data by tenant
+        # Filter data by tenant
         tenant_disasters = [d for d in self.disaster_declarations.values() if d.id.startswith(tenant_id)]
         tenant_executions = [e for e in self.recovery_executions.values() if e.id.startswith(tenant_id)]
         tenant_resources = [r for r in self.recovery_resources.values() if r.id.startswith(tenant_id)]
 
-        ***REMOVED*** Calculate metrics
+        # Calculate metrics
         disaster_stats = self._calculate_disaster_statistics(tenant_disasters)
         recovery_stats = self._calculate_recovery_statistics(tenant_executions)
         resource_stats = self._calculate_resource_statistics(tenant_resources)
@@ -642,7 +642,7 @@ class ISO22301DisasterRecovery:
             ]
             avg_resolution_time = sum(resolution_times) / len(resolution_times)
 
-        ***REMOVED*** Count by type
+        # Count by type
         by_type = {}
         for disaster in disasters:
             type_key = disaster.disaster_type.value
@@ -687,7 +687,7 @@ class ISO22301DisasterRecovery:
         available = len([r for r in resources if r.availability_status == 'available'])
         utilization_rate = ((total - available) / total * 100) if total > 0 else 0
 
-        ***REMOVED*** Count by type
+        # Count by type
         by_type = {}
         for resource in resources:
             type_key = resource.resource_type
@@ -707,23 +707,23 @@ class ISO22301DisasterRecovery:
         """Assess overall disaster recovery readiness"""
         readiness_score = 100
 
-        ***REMOVED*** Check procedure coverage
+        # Check procedure coverage
         total_procedures = len(self.recovery_procedures)
-        if total_procedures < 10:  ***REMOVED*** Arbitrary minimum
+        if total_procedures < 10:  # Arbitrary minimum
             readiness_score -= 20
 
-        ***REMOVED*** Check resource availability
+        # Check resource availability
         resource_availability = len([r for r in self.recovery_resources.values() if r.availability_status == 'available'])
         total_resources = len(self.recovery_resources)
         if total_resources > 0 and (resource_availability / total_resources) < 0.8:
             readiness_score -= 15
 
-        ***REMOVED*** Check failover configurations
+        # Check failover configurations
         failover_configs = len([c for c in self.failover_configurations.values() if c.is_active])
-        if failover_configs < 5:  ***REMOVED*** Arbitrary minimum
+        if failover_configs < 5:  # Arbitrary minimum
             readiness_score -= 10
 
-        ***REMOVED*** Check recent testing
+        # Check recent testing
         recent_tests = len([p for p in self.recovery_procedures.values() if p.last_tested and
                            (datetime.utcnow() - p.last_tested).days <= 90])
         if recent_tests < total_procedures * 0.5:
@@ -764,25 +764,25 @@ class ISO22301DisasterRecovery:
         """Assess ISO 22301 disaster recovery compliance"""
         issues = []
 
-        ***REMOVED*** Check business impact analysis
+        # Check business impact analysis
         if not disasters:
             issues.append("No disaster declarations or impact analyses found")
 
-        ***REMOVED*** Check recovery procedures
+        # Check recovery procedures
         if len(procedures) < 5:
             issues.append("Insufficient number of recovery procedures defined")
 
-        ***REMOVED*** Check procedure testing
+        # Check procedure testing
         untested_procedures = [p for p in procedures if not p.last_tested or
                               (datetime.utcnow() - p.last_tested).days > 180]
         if untested_procedures:
             issues.append(f"{len(untested_procedures)} procedures not tested within 6 months")
 
-        ***REMOVED*** Check resource allocation
+        # Check resource allocation
         if not self.recovery_resources:
             issues.append("No recovery resources defined")
 
-        ***REMOVED*** Check failover configurations
+        # Check failover configurations
         if len(self.failover_configurations) < 3:
             issues.append("Insufficient failover configurations")
 

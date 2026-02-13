@@ -1,31 +1,20 @@
-import { useState } from 'react'
+﻿import { useQSCheckliste, type QSItem } from '@/lib/api/betrieb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { AlertTriangle, CheckCircle, ClipboardCheck } from 'lucide-react'
-
-type QSItem = {
-  id: string
-  bereich: string
-  pruefpunkt: string
-  erfuellt: boolean
-  bemerkung: string
-  geprueftAm: string
-}
-
-const mockQS: QSItem[] = [
-  { id: '1', bereich: 'Wareneingangskontrolle', pruefpunkt: 'Lieferschein-Prüfung', erfuellt: true, bemerkung: 'Vollständig', geprueftAm: '2025-10-11' },
-  { id: '2', bereich: 'Wareneingangskontrolle', pruefpunkt: 'Qualitätsprüfung', erfuellt: true, bemerkung: 'Alle Parameter OK', geprueftAm: '2025-10-11' },
-  { id: '3', bereich: 'Hygiene', pruefpunkt: 'Reinigung Annahme', erfuellt: false, bemerkung: 'Ausstehend', geprueftAm: '' },
-  { id: '4', bereich: 'Dokumentation', pruefpunkt: 'Chargendoku', erfuellt: true, bemerkung: 'Vollständig', geprueftAm: '2025-10-11' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function QSChecklistePage(): JSX.Element {
-  const [_searchTerm, _setSearchTerm] = useState('')
+  const { data: qs = [], isError, error, refetch } = useQSCheckliste()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     { key: 'bereich' as const, label: 'Bereich' },
-    { key: 'pruefpunkt' as const, label: 'Prüfpunkt' },
+    { key: 'pruefpunkt' as const, label: 'Pruefpunkt' },
     {
       key: 'erfuellt' as const,
       label: 'Status',
@@ -33,7 +22,7 @@ export default function QSChecklistePage(): JSX.Element {
         q.erfuellt ? (
           <div className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-green-600" />
-            <span className="font-semibold text-green-600">Erfüllt</span>
+            <span className="font-semibold text-green-600">Erfuellt</span>
           </div>
         ) : (
           <div className="flex items-center gap-2">
@@ -46,13 +35,13 @@ export default function QSChecklistePage(): JSX.Element {
     { key: 'bemerkung' as const, label: 'Bemerkung' },
     {
       key: 'geprueftAm' as const,
-      label: 'Geprüft am',
+      label: 'Geprueft am',
       render: (q: QSItem) => q.geprueftAm ? new Date(q.geprueftAm).toLocaleDateString('de-DE') : '-',
     },
   ]
 
-  const erfuellt = mockQS.filter((q) => q.erfuellt).length
-  const offen = mockQS.filter((q) => !q.erfuellt).length
+  const erfuellt = qs.filter((q) => q.erfuellt).length
+  const offen = qs.filter((q) => !q.erfuellt).length
 
   return (
     <div className="space-y-4 p-6">
@@ -69,7 +58,7 @@ export default function QSChecklistePage(): JSX.Element {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-red-900">
               <AlertTriangle className="h-5 w-5" />
-              <span className="font-semibold">{offen} Prüfpunkt(e) NICHT erfüllt!</span>
+              <span className="font-semibold">{offen} Pruefpunkt(e) NICHT erfuellt!</span>
             </div>
           </CardContent>
         </Card>
@@ -78,19 +67,19 @@ export default function QSChecklistePage(): JSX.Element {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Prüfpunkte Gesamt</CardTitle>
+            <CardTitle className="text-sm font-medium">Pruefpunkte Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <ClipboardCheck className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockQS.length}</span>
+              <span className="text-2xl font-bold">{qs.length}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Erfüllt</CardTitle>
+            <CardTitle className="text-sm font-medium">Erfuellt</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -112,9 +101,11 @@ export default function QSChecklistePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockQS} columns={columns} />
+          <DataTable data={qs} columns={columns} />
         </CardContent>
       </Card>
     </div>
   )
 }
+
+

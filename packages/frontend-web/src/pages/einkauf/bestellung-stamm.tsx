@@ -6,7 +6,7 @@ import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
-import { CrudAuditTrailPanel, CrudCancelDialog } from '@/features/crud/components'
+import { CrudAuditTrailPanel } from '@/features/crud/components'
 import { useCrudAuditTrail } from '@/features/crud/hooks'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
@@ -18,6 +18,7 @@ import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { History, XCircle, AlertTriangle, Mail, Globe } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { usePoCommunications, useSendPoCommunication } from '@/lib/api/procurement-plus'
 
 // Zod-Schema für Bestellung (wird in Komponente mit i18n erstellt)
 const createBestellungSchema = (t: any) => z.object({
@@ -259,7 +260,7 @@ export default function BestellungStammPage(): JSX.Element {
   const [sendDialogOpen, setSendDialogOpen] = useState(false)
   const [sendMethod, setSendMethod] = useState<'email' | 'portal'>('email')
   const [sendLanguage, setSendLanguage] = useState<'de' | 'en'>('de')
-  const [sendRecipients, setSendRecipients] = useState<string[]>([])
+  const [sendRecipients] = useState<string[]>([])
   const [sendMessage, setSendMessage] = useState('')
   const entityType = 'purchaseOrder'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bestellung')
@@ -269,6 +270,10 @@ export default function BestellungStammPage(): JSX.Element {
     apiUrl: bestellungConfig.api.baseUrl,
     id: id || undefined
   })
+  const poCommunicationId = id || data?.nummer || data?.purchaseOrderNumber || data?.id || ''
+  const { data: poCommunications = [] } = usePoCommunications(poCommunicationId)
+  const sendPoEmail = useSendPoCommunication(poCommunicationId, 'email')
+  const sendPoPortal = useSendPoCommunication(poCommunicationId, 'portal')
 
   // Audit Trail
   const { changeLogs, isLoading: isLoadingAudit, refetch: refetchAudit } = useCrudAuditTrail({
@@ -471,6 +476,44 @@ export default function BestellungStammPage(): JSX.Element {
         </Card>
       )}
 
+      {/* PO-Kommunikation */}
+      {poCommunicationId && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Kommunikation
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {poCommunications.length === 0 ? (
+              <div className="text-sm text-muted-foreground">Keine Kommunikation vorhanden.</div>
+            ) : (
+              <div className="space-y-2">
+                {poCommunications.map((entry) => (
+                  <div key={entry.id} className="flex items-center justify-between rounded border p-3">
+                    <div className="space-y-1">
+                      <div className="font-medium">{entry.subject || 'PO Kommunikation'}</div>
+                      <div className="text-sm text-muted-foreground">{entry.message || '-'}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {entry.createdAt ? new Date(entry.createdAt).toLocaleString() : '-'}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">{entry.status || '-'}</Badge>
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        {entry.channel === 'portal' ? <Globe className="h-3 w-3" /> : <Mail className="h-3 w-3" />}
+                        {entry.channel || 'email'}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Storno Dialog */}
       <Dialog open={stornoDialogOpen} onOpenChange={setStornoDialogOpen}>
         <DialogContent>
@@ -612,14 +655,18 @@ export default function BestellungStammPage(): JSX.Element {
                 setLoading(true)
                 try {
                   const poId = id || data?.nummer
-                  
-                  // Send PO via email or portal
-                  await apiClient.post(`/api/einkauf/bestellungen/${poId}/send`, {
-                    method: sendMethod,
-                    language: sendLanguage,
-                    recipients: sendRecipients,
+                  const sendPayload = {
+                    subject: `Bestellung ${data?.nummer || data?.purchaseOrderNumber || poId}`,
+                    recipient: sendRecipients[0] || data?.lieferantId || data?.supplierId,
                     message: sendMessage || undefined,
-                  })
+                    language: sendLanguage,
+                  }
+
+                  if (sendMethod === 'email') {
+                    await sendPoEmail.mutateAsync(sendPayload)
+                  } else {
+                    await sendPoPortal.mutateAsync(sendPayload)
+                  }
 
                   toast({
                     title: t('crud.messages.poSentSuccess'),
@@ -633,7 +680,7 @@ export default function BestellungStammPage(): JSX.Element {
                   toast({
                     variant: 'destructive',
                     title: t('crud.messages.poSendError'),
-                    description: error.message,
+                    description: error?.response?.data?.detail || error.message,
                   })
                 } finally {
                   setLoading(false)

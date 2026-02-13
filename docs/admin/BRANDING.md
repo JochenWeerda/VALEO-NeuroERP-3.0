@@ -1,24 +1,24 @@
-***REMOVED*** PDF-Templates & Branding
+# PDF-Templates & Branding
 
-***REMOVED******REMOVED*** Überblick
+## Überblick
 
 VALEO-NeuroERP unterstützt anpassbare PDF-Templates für Belege mit Logo, Farben und Layout-Varianten.
 
-***REMOVED******REMOVED*** Konfiguration
+## Konfiguration
 
-***REMOVED******REMOVED******REMOVED*** Environment-Variablen
+### Environment-Variablen
 
 ```bash
-***REMOVED*** PDF-Template-Sprache
-PDF_TEMPLATE_LANG=de  ***REMOVED*** oder 'en'
+# PDF-Template-Sprache
+PDF_TEMPLATE_LANG=de  # oder 'en'
 
-***REMOVED*** Seitengröße
-PDF_PAGE_SIZE=A4  ***REMOVED*** oder 'LETTER'
+# Seitengröße
+PDF_PAGE_SIZE=A4  # oder 'LETTER'
 
-***REMOVED*** Logo-Pfad
+# Logo-Pfad
 PDF_LOGO_PATH=/app/data/branding/logo.png
 
-***REMOVED*** Firmen-Informationen
+# Firmen-Informationen
 COMPANY_NAME="VALEO GmbH"
 COMPANY_ADDRESS="Musterstraße 123"
 COMPANY_CITY="12345 Musterstadt"
@@ -28,27 +28,27 @@ COMPANY_PHONE="+49 123 456789"
 COMPANY_EMAIL="info@valeo.example.com"
 COMPANY_WEBSITE="https://www.valeo.example.com"
 
-***REMOVED*** Farben (Hex)
-PDF_PRIMARY_COLOR="***REMOVED***003366"
-PDF_SECONDARY_COLOR="***REMOVED***0066CC"
-PDF_TEXT_COLOR="***REMOVED***333333"
+# Farben (Hex)
+PDF_PRIMARY_COLOR="#003366"
+PDF_SECONDARY_COLOR="#0066CC"
+PDF_TEXT_COLOR="#333333"
 ```
 
-***REMOVED******REMOVED*** Template-Struktur
+## Template-Struktur
 
-***REMOVED******REMOVED******REMOVED*** Verfügbare Templates
+### Verfügbare Templates
 
 ```
 data/templates/
-├── invoice_de.json       ***REMOVED*** Rechnung (Deutsch)
-├── invoice_en.json       ***REMOVED*** Invoice (English)
-├── order_de.json         ***REMOVED*** Auftrag (Deutsch)
-├── order_en.json         ***REMOVED*** Order (English)
-├── delivery_de.json      ***REMOVED*** Lieferschein (Deutsch)
-└── delivery_en.json      ***REMOVED*** Delivery Note (English)
+├── invoice_de.json       # Rechnung (Deutsch)
+├── invoice_en.json       # Invoice (English)
+├── order_de.json         # Auftrag (Deutsch)
+├── order_en.json         # Order (English)
+├── delivery_de.json      # Lieferschein (Deutsch)
+└── delivery_en.json      # Delivery Note (English)
 ```
 
-***REMOVED******REMOVED******REMOVED*** Template-Format
+### Template-Format
 
 ```json
 {
@@ -95,9 +95,9 @@ data/templates/
 }
 ```
 
-***REMOVED******REMOVED*** Logo hochladen
+## Logo hochladen
 
-***REMOVED******REMOVED******REMOVED*** Via API
+### Via API
 
 ```bash
 curl -X POST https://erp.valeo.example.com/api/branding/logo \
@@ -105,108 +105,108 @@ curl -X POST https://erp.valeo.example.com/api/branding/logo \
   -F "file=@logo.png"
 ```
 
-***REMOVED******REMOVED******REMOVED*** Via kubectl (Kubernetes)
+### Via kubectl (Kubernetes)
 
 ```bash
-***REMOVED*** Create ConfigMap with logo
+# Create ConfigMap with logo
 kubectl create configmap valeo-erp-logo \
   --from-file=logo.png=/path/to/logo.png \
   -n production
 
-***REMOVED*** Mount in Deployment
-***REMOVED*** (siehe k8s/helm/valeo-erp/values.yaml)
+# Mount in Deployment
+# (siehe k8s/helm/valeo-erp/values.yaml)
 ```
 
-***REMOVED******REMOVED******REMOVED*** Logo-Anforderungen
+### Logo-Anforderungen
 
 - **Format:** PNG (transparent) oder JPG
 - **Größe:** Max. 2 MB
 - **Auflösung:** 300 DPI empfohlen
 - **Abmessungen:** Max. 200x80 Pixel (wird automatisch skaliert)
 
-***REMOVED******REMOVED*** Farben anpassen
+## Farben anpassen
 
-***REMOVED******REMOVED******REMOVED*** Via Environment
+### Via Environment
 
 ```bash
-***REMOVED*** In values.yaml oder ConfigMap
+# In values.yaml oder ConfigMap
 env:
   - name: PDF_PRIMARY_COLOR
-    value: "***REMOVED***003366"
+    value: "#003366"
   - name: PDF_SECONDARY_COLOR
-    value: "***REMOVED***0066CC"
+    value: "#0066CC"
 ```
 
-***REMOVED******REMOVED******REMOVED*** Farbschema-Beispiele
+### Farbschema-Beispiele
 
 **Corporate Blue:**
 ```
-PRIMARY: ***REMOVED***003366
-SECONDARY: ***REMOVED***0066CC
-TEXT: ***REMOVED***333333
+PRIMARY: #003366
+SECONDARY: #0066CC
+TEXT: #333333
 ```
 
 **Modern Green:**
 ```
-PRIMARY: ***REMOVED***2E7D32
-SECONDARY: ***REMOVED***66BB6A
-TEXT: ***REMOVED***212121
+PRIMARY: #2E7D32
+SECONDARY: #66BB6A
+TEXT: #212121
 ```
 
 **Professional Gray:**
 ```
-PRIMARY: ***REMOVED***424242
-SECONDARY: ***REMOVED***757575
-TEXT: ***REMOVED***212121
+PRIMARY: #424242
+SECONDARY: #757575
+TEXT: #212121
 ```
 
-***REMOVED******REMOVED*** Multi-Language Support
+## Multi-Language Support
 
-***REMOVED******REMOVED******REMOVED*** Sprache pro Beleg
+### Sprache pro Beleg
 
 ```python
-***REMOVED*** API-Request
+# API-Request
 POST /api/print/invoice/INV-00001
 {
-  "lang": "en",  ***REMOVED*** Override default
+  "lang": "en",  # Override default
   "page_size": "LETTER"
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Automatische Sprach-Erkennung
+### Automatische Sprach-Erkennung
 
 ```python
-***REMOVED*** Basierend auf Customer-Land
+# Basierend auf Customer-Land
 if customer.country in ["US", "GB", "CA"]:
     lang = "en"
 elif customer.country in ["DE", "AT", "CH"]:
     lang = "de"
 ```
 
-***REMOVED******REMOVED*** Custom Templates erstellen
+## Custom Templates erstellen
 
-***REMOVED******REMOVED******REMOVED*** 1. Template-Datei erstellen
+### 1. Template-Datei erstellen
 
 ```bash
-***REMOVED*** Kopiere existierendes Template
+# Kopiere existierendes Template
 cp data/templates/invoice_de.json data/templates/invoice_custom.json
 
-***REMOVED*** Bearbeite Template
+# Bearbeite Template
 vim data/templates/invoice_custom.json
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Template registrieren
+### 2. Template registrieren
 
 ```python
-***REMOVED*** In app/services/pdf_service.py
+# In app/services/pdf_service.py
 TEMPLATES = {
     "invoice_de": "data/templates/invoice_de.json",
     "invoice_en": "data/templates/invoice_en.json",
-    "invoice_custom": "data/templates/invoice_custom.json",  ***REMOVED*** NEU
+    "invoice_custom": "data/templates/invoice_custom.json",  # NEU
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Template verwenden
+### 3. Template verwenden
 
 ```bash
 POST /api/print/invoice/INV-00001
@@ -215,31 +215,31 @@ POST /api/print/invoice/INV-00001
 }
 ```
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: Logo wird nicht angezeigt
+### Problem: Logo wird nicht angezeigt
 
 **Ursache:** Pfad falsch oder Datei nicht gefunden
 
 **Lösung:**
 ```bash
-***REMOVED*** Check logo file
+# Check logo file
 ls -lh /app/data/branding/logo.png
 
-***REMOVED*** Check permissions
+# Check permissions
 chmod 644 /app/data/branding/logo.png
 
-***REMOVED*** Check ENV
+# Check ENV
 echo $PDF_LOGO_PATH
 ```
 
-***REMOVED******REMOVED******REMOVED*** Problem: Falsche Farben im PDF
+### Problem: Falsche Farben im PDF
 
 **Ursache:** Hex-Code falsch formatiert
 
-**Lösung:** Hex-Code muss mit `***REMOVED***` beginnen, z.B. `***REMOVED***003366`
+**Lösung:** Hex-Code muss mit `#` beginnen, z.B. `#003366`
 
-***REMOVED******REMOVED******REMOVED*** Problem: Text abgeschnitten
+### Problem: Text abgeschnitten
 
 **Ursache:** Column-Width zu klein
 
@@ -249,7 +249,7 @@ echo $PDF_LOGO_PATH
 {"field": "description", "width": 250}  // vorher 200
 ```
 
-***REMOVED******REMOVED*** Best Practices
+## Best Practices
 
 1. **Logo transparent:** PNG mit transparentem Hintergrund
 2. **Farben kontrastreich:** Mindestens 4.5:1 Kontrast (WCAG AA)
@@ -257,7 +257,8 @@ echo $PDF_LOGO_PATH
 4. **Test auf beiden Seitengrößen:** A4 und Letter
 5. **Schriftgröße mindestens 9pt:** Für Lesbarkeit
 
-***REMOVED******REMOVED*** Support
+## Support
 
 Bei Fragen: admin@valeo-erp.com
+
 

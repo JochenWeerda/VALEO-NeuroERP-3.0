@@ -1,4 +1,4 @@
-***REMOVED*** FiBu Shared Libraries
+# FiBu Shared Libraries
 
 `finance-shared` bündelt wiederverwendbare Bausteine für alle FiBu-Microservices.
 Der Fokus liegt auf drei Querschnittsthemen:
@@ -14,14 +14,14 @@ Der Fokus liegt auf drei Querschnittsthemen:
    - Stark typisierte Event-Schemas für Buchungen, Stammdaten und OP-Verwaltung
    - Registry/Factory zur Serialisierung und Validierung von Nachrichten
 
-***REMOVED******REMOVED*** Installation
+## Installation
 
 ```bash
 cd packages/finance-shared
 pip install -e ".[dev]"
 ```
 
-***REMOVED******REMOVED*** Schnelleinstieg
+## Schnelleinstieg
 
 ```python
 from decimal import Decimal
@@ -29,13 +29,13 @@ from finance_shared.auth import FiBuRole, RoleAssignment, FiBuAccessPolicy, FiBu
 from finance_shared.events import BookingCreatedEvent, FiBuEventType
 from finance_shared.gobd import GoBDAuditTrail
 
-***REMOVED*** Auth
+# Auth
 assignment = RoleAssignment(tenant_id="tenant-a", user_id="user-1", roles=[FiBuRole.FREIGEBER])
 policy = FiBuAccessPolicy(assignment)
 policy.ensure_permission(FiBuPermission.JOURNAL_CREATE)
 policy.require_approval(amount=Decimal("1200.00"))
 
-***REMOVED*** Events
+# Events
 event = BookingCreatedEvent.from_values(
     tenant_id="tenant-a",
     booking_id="41d0b53d-fc02-45af-8a67-52c5630a0895",
@@ -46,7 +46,7 @@ event = BookingCreatedEvent.from_values(
 )
 payload = event.serialize()
 
-***REMOVED*** GoBD Audit Trail
+# GoBD Audit Trail
 trail = GoBDAuditTrail(tenant_id="tenant-a")
 entry = trail.create_entry(
     entity_type="journal_entry",
@@ -62,5 +62,6 @@ trail.verify_chain()
 Die einzelnen Module können unabhängig voneinander eingesetzt werden und sind
 bewusst framework-agnostisch gehalten, damit sie in FastAPI-Services, Worker-
 Jobs oder Skripten gleichermaßen funktionieren.
+
 
 

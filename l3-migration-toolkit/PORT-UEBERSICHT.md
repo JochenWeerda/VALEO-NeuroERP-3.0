@@ -1,12 +1,12 @@
-***REMOVED*** 🌐 Port-Übersicht - L3 Migration Toolkit
+# 🌐 Port-Übersicht - L3 Migration Toolkit
 
 **Status:** ✅ **KEINE PORT-KONFLIKTE**
 
 ---
 
-***REMOVED******REMOVED*** 📊 Port-Belegung
+## 📊 Port-Belegung
 
-***REMOVED******REMOVED******REMOVED*** VALEO-NeuroERP (Haupt-System)
+### VALEO-NeuroERP (Haupt-System)
 
 | Service | Port | URL | Status |
 |---------|------|-----|--------|
@@ -14,7 +14,7 @@
 | Backend (FastAPI) | **8000** | http://localhost:8000 | ✅ Läuft |
 | PostgreSQL | **5432** | localhost:5432 | ✅ Läuft |
 
-***REMOVED******REMOVED******REMOVED*** L3 Migration Toolkit (Isoliert)
+### L3 Migration Toolkit (Isoliert)
 
 | Service | Port | URL | Status |
 |---------|------|-----|--------|
@@ -25,9 +25,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Zugriff
+## 🎯 Zugriff
 
-***REMOVED******REMOVED******REMOVED*** Während Migration-Arbeit gleichzeitig offen:
+### Während Migration-Arbeit gleichzeitig offen:
 
 **Browser-Tabs:**
 1. **VALEO Frontend** → http://localhost:3000
@@ -47,15 +47,15 @@ Tab 4: Webtop (für Screenshots organisieren)
 
 ---
 
-***REMOVED******REMOVED*** 🔧 Port-Konflikte vermeiden
+## 🔧 Port-Konflikte vermeiden
 
-***REMOVED******REMOVED******REMOVED*** Falls Port 8090 belegt ist:
+### Falls Port 8090 belegt ist:
 
 **Ändern in docker-compose.yml:**
 ```yaml
 guacamole:
   ports:
-    - "8091:8080"   ***REMOVED*** Statt 8090
+    - "8091:8080"   # Statt 8090
 ```
 
 **Dann verwenden:**
@@ -63,20 +63,20 @@ guacamole:
 http://localhost:8091/guacamole
 ```
 
-***REMOVED******REMOVED******REMOVED*** Falls Port 3010 belegt ist:
+### Falls Port 3010 belegt ist:
 
 **Ändern in docker-compose.yml:**
 ```yaml
 webtop:
   ports:
-    - "3011:3000"   ***REMOVED*** Statt 3010
+    - "3011:3000"   # Statt 3010
 ```
 
 ---
 
-***REMOVED******REMOVED*** 🌐 Netzwerk-Isolation
+## 🌐 Netzwerk-Isolation
 
-***REMOVED******REMOVED******REMOVED*** L3 Migration Toolkit
+### L3 Migration Toolkit
 
 **Netzwerk:** `l3-network`  
 **Subnet:** `172.25.0.0/24`  
@@ -90,7 +90,7 @@ webtop:
 172.25.0.13 → l3-webtop
 ```
 
-***REMOVED******REMOVED******REMOVED*** VALEO-NeuroERP
+### VALEO-NeuroERP
 
 **Netzwerk:** `valeo-network` (aus docker-compose.dev.yml)  
 **Subnet:** Default Docker Bridge
@@ -99,34 +99,34 @@ webtop:
 
 ---
 
-***REMOVED******REMOVED*** ✅ Port-Test
+## ✅ Port-Test
 
 ```powershell
-***REMOVED*** Welche Ports sind belegt?
+# Welche Ports sind belegt?
 netstat -ano | findstr "LISTENING" | findstr ":3000 :8000 :8090 :3010"
 
-***REMOVED*** Erwartetes Ergebnis:
-***REMOVED*** :3000 → node.exe (VALEO Frontend)
-***REMOVED*** :8000 → python.exe (VALEO Backend)
-***REMOVED*** :8090 → Sollte frei sein (oder Docker)
-***REMOVED*** :3010 → Sollte frei sein (oder Docker)
+# Erwartetes Ergebnis:
+# :3000 → node.exe (VALEO Frontend)
+# :8000 → python.exe (VALEO Backend)
+# :8090 → Sollte frei sein (oder Docker)
+# :3010 → Sollte frei sein (oder Docker)
 ```
 
-***REMOVED******REMOVED******REMOVED*** Wenn Ports belegt:
+### Wenn Ports belegt:
 
 ```powershell
-***REMOVED*** Port 8090 finden
+# Port 8090 finden
 Get-Process -Id (Get-NetTCPConnection -LocalPort 8090).OwningProcess
 
-***REMOVED*** Port 3010 finden
+# Port 3010 finden
 Get-Process -Id (Get-NetTCPConnection -LocalPort 3010).OwningProcess
 
-***REMOVED*** Falls nötig: Process beenden oder andere Ports verwenden
+# Falls nötig: Process beenden oder andere Ports verwenden
 ```
 
 ---
 
-***REMOVED******REMOVED*** 📊 Finale Port-Tabelle
+## 📊 Finale Port-Tabelle
 
 | Port | Service | Projekt | Konflikt? |
 |------|---------|---------|-----------|
@@ -140,7 +140,7 @@ Get-Process -Id (Get-NetTCPConnection -LocalPort 3010).OwningProcess
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Zusammenfassung
+## 🎯 Zusammenfassung
 
 **L3 Migration Toolkit ist deployment-ready:**
 
@@ -155,4 +155,5 @@ Get-Process -Id (Get-NetTCPConnection -LocalPort 3010).OwningProcess
 ---
 
 **Bereit zum Starten?** Alle Dateien sind erstellt! 😊
+
 

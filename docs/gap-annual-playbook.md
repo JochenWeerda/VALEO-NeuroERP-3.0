@@ -1,8 +1,8 @@
-***REMOVED*** GAP-Annual-Playbook – Prospecting & Potentialdaten
+# GAP-Annual-Playbook – Prospecting & Potentialdaten
 
 Dieses Playbook beschreibt den jährlichen Ablauf, um GAP-Daten (Agrarfonds) in VALEO/VALERO einzuspielen und daraus Potenzial- und Leaddaten für den Außendienst zu erzeugen.
 
-***REMOVED******REMOVED*** 1. Voraussetzungen
+## 1. Voraussetzungen
 
 - PostgreSQL-Container läuft (`valeo-neuro-erp-postgres`, Port 5432)
 - Backend läuft (Port 8000)
@@ -18,13 +18,13 @@ Dieses Playbook beschreibt den jährlichen Ablauf, um GAP-Daten (Agrarfonds) in 
 VITE_ENABLE_PROSPECTING_UI=true
 ```
 
-***REMOVED******REMOVED*** 2. CSV von agrarzahlungen.de laden
+## 2. CSV von agrarzahlungen.de laden
 
 1. Website aufrufen: https://www.agrarzahlungen.de/agrarfonds/bs
 2. Für das gewünschte Jahr (z. B. 2024) die **"Gesamtliste der Begünstigten – CSV"** herunterladen.
 3. Datei lokal speichern, z. B. `impdata2024.csv`.
 
-***REMOVED******REMOVED*** 3. GAP-Pipeline im Admin-UI ausführen
+## 3. GAP-Pipeline im Admin-UI ausführen
 
 1. Admin-UI öffnen:
    * `http://localhost:3000/admin/gap-pipeline`
@@ -57,9 +57,9 @@ VITE_ENABLE_PROSPECTING_UI=true
      5. Hydration der `customers.analytics_*`-Spalten
    * Statusanzeige beobachten (Steps, Jahr, Meldungen).
 
-***REMOVED******REMOVED*** 4. Datenprüfung in der Datenbank
+## 4. Datenprüfung in der Datenbank
 
-***REMOVED******REMOVED******REMOVED*** 4.1 GAP-Zahlungen
+### 4.1 GAP-Zahlungen
 
 ```sql
 SELECT ref_year, COUNT(*)
@@ -67,7 +67,7 @@ FROM gap_payments
 GROUP BY ref_year;
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4.2 Potenzial-Snapshots
+### 4.2 Potenzial-Snapshots
 
 ```sql
 SELECT ref_year, COUNT(*)
@@ -75,7 +75,7 @@ FROM customer_potential_snapshot
 GROUP BY ref_year;
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4.3 Kunden mit Analytics
+### 4.3 Kunden mit Analytics
 
 ```sql
 SELECT
@@ -90,9 +90,9 @@ WHERE analytics_gap_ref_year IS NOT NULL
 LIMIT 20;
 ```
 
-***REMOVED******REMOVED*** 5. Frontend-Prüfungen
+## 5. Frontend-Prüfungen
 
-***REMOVED******REMOVED******REMOVED*** 5.1 Kunden-Detail – Tab "Potential & Leaddaten"
+### 5.1 Kunden-Detail – Tab "Potential & Leaddaten"
 
 1. Einen bekannten Betrieb im CRM öffnen (Kundenstamm).
 2. Tab **"Potential & Leaddaten"** prüfen:
@@ -112,7 +112,7 @@ LIMIT 20;
      * Letzter manueller Review (Jahr)
      * Potenzial-Notiz
 
-***REMOVED******REMOVED******REMOVED*** 5.2 Lead-Explorer – Prospektliste
+### 5.2 Lead-Explorer – Prospektliste
 
 1. LeadExplorer öffnen:
    * Route: `/prospecting/leads` (ggf. im Menü verlinkt)
@@ -136,7 +136,7 @@ LIMIT 20;
      * "Kunde öffnen" (wenn bereits Kunde)
      * "Aufgabe" / "Zu meinen Aufgaben hinzufügen"
 
-***REMOVED******REMOVED*** 6. Umgang mit Stammkunden und Schutz-Logik
+## 6. Umgang mit Stammkunden und Schutz-Logik
 
 * Für Kunden, bei denen das Potenzial **manuell gepflegt** wird, im Tab "Potential & Leaddaten" setzen:
   * `Stammkunde (geschützt)`
@@ -146,7 +146,7 @@ LIMIT 20;
 
 * Empfehlung: einmal jährlich im Außendienst-Team festlegen, welche A/B-Kunden als "Stammkunden" markiert werden.
 
-***REMOVED******REMOVED*** 7. Jahres-Routine (Kurzfassung)
+## 7. Jahres-Routine (Kurzfassung)
 
 1. CSV für Vorjahr von agrarzahlungen.de laden.
 2. Im Admin-UI `/admin/gap-pipeline` hochladen.
@@ -155,38 +155,38 @@ LIMIT 20;
 5. Leads pro Außendienstgebiet zuweisen und abarbeiten.
 6. Stammkunden-Flags (Schutz) und Potenzial-Notizen gezielt nachpflegen.
 
-***REMOVED******REMOVED*** 8. Troubleshooting
+## 8. Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Pipeline startet nicht
+### Pipeline startet nicht
 - Prüfe Backend-Logs: `docker logs valeo-neuro-erp-backend`
 - Prüfe ob CSV-Datei existiert: `ls -lh data/gap/impdata2024.csv`
 - Prüfe Datenbankverbindung im Backend
 
-***REMOVED******REMOVED******REMOVED*** CSV-Upload schlägt fehl
+### CSV-Upload schlägt fehl
 - Prüfe ob `data/gap/` Verzeichnis existiert
 - Prüfe Dateigröße (sollte < 200MB sein)
 - Prüfe Backend-Logs für Fehlerdetails
 
-***REMOVED******REMOVED******REMOVED*** Keine Daten nach Pipeline
+### Keine Daten nach Pipeline
 - Prüfe Backend-Logs für Fehler
 - Prüfe ob `customers`-Tabelle existiert
 - Prüfe ob GAP-Tabellen existieren: `\dt gap_*`
 
-***REMOVED******REMOVED******REMOVED*** Matching findet keine Kunden
+### Matching findet keine Kunden
 - Prüfe ob Kunden in `customers`-Tabelle existieren
 - Prüfe Name-Normalisierung (PLZ, Ort müssen übereinstimmen)
 - Prüfe `gap_customer_match` Tabelle für Match-Ergebnisse
 
-***REMOVED******REMOVED*** 9. API-Referenz
+## 9. API-Referenz
 
-***REMOVED******REMOVED******REMOVED*** CSV-Upload
+### CSV-Upload
 ```http
 POST /api/v1/gap/pipeline/upload
 Content-Type: multipart/form-data
 Body: file=<impdata2024.csv>
 ```
 
-***REMOVED******REMOVED******REMOVED*** Pipeline starten
+### Pipeline starten
 ```http
 POST /api/v1/gap/pipeline/run-year
 Content-Type: application/json
@@ -196,12 +196,12 @@ Body: {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Status prüfen
+### Status prüfen
 ```http
 GET /api/v1/gap/pipeline/status?year=2024
 ```
 
-***REMOVED******REMOVED*** 10. Segmentierung (A/B/C)
+## 10. Segmentierung (A/B/C)
 
 Die Segmentierung basiert auf dem Share of Wallet (SOW):
 
@@ -214,7 +214,7 @@ Berechnung:
 SOW = (Umsatz Vorjahr / Potenzial gesamt) * 100
 ```
 
-***REMOVED******REMOVED*** 11. Potenzial-Berechnung
+## 11. Potenzial-Berechnung
 
 Das Potenzial wird basierend auf der geschätzten Fläche berechnet:
 
@@ -225,4 +225,5 @@ Das Potenzial wird basierend auf der geschätzten Fläche berechnet:
 - **Potenzial gesamt**: Summe der drei Komponenten
 
 Die EUR/ha-Werte können über die Umgebungsvariable `GAP_EUR_PER_HA` angepasst werden (Standard: 270).
+
 

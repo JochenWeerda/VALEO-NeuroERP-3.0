@@ -7,12 +7,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Command as CommandIcon, HelpCircle, LogOut, Search, Settings, Sparkles, User } from 'lucide-react'
+import { NotificationCenter } from '@/components/ui/notification-center'
+import { Command as CommandIcon, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
+import { useTheme } from '@/hooks/useTheme'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 
 interface TopBarProps {
   onCommandOpen?: () => void
   commandPaletteEnabled?: boolean
+  onMobileMenuToggle?: () => void
 }
 
 export const topBarMCP = createMCPMetadata('TopBar', 'navigation', {
@@ -32,7 +35,8 @@ export const topBarMCP = createMCPMetadata('TopBar', 'navigation', {
   },
 })
 
-export function TopBar({ onCommandOpen, commandPaletteEnabled = true }: TopBarProps): JSX.Element {
+export function TopBar({ onCommandOpen, commandPaletteEnabled = true, onMobileMenuToggle }: TopBarProps): JSX.Element {
+  const { isDark, toggleTheme } = useTheme()
   const user = {
     name: 'Test Admin',
     email: 'test-admin@valeo.local',
@@ -47,10 +51,23 @@ export function TopBar({ onCommandOpen, commandPaletteEnabled = true }: TopBarPr
 
   return (
     <header
-      className="flex h-16 items-center gap-4 border-b bg-background px-6"
+      className="flex h-14 md:h-16 items-center gap-2 md:gap-4 border-b bg-background px-3 md:px-6"
       role="banner"
       data-mcp-component="top-bar"
     >
+      {/* Mobile Hamburger */}
+      {onMobileMenuToggle && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={onMobileMenuToggle}
+          aria-label="Menü öffnen"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+      )}
+
       <div className="flex-1 max-w-md">
         <Button
           variant="outline"
@@ -71,6 +88,7 @@ export function TopBar({ onCommandOpen, commandPaletteEnabled = true }: TopBarPr
         variant="ghost"
         size="icon"
         title="Ask VALEO - AI-Hilfe (Phase 3)"
+        className="hidden sm:inline-flex"
         data-mcp-action="ask-valeo"
         data-mcp-intent="ai-assistance"
       >
@@ -78,7 +96,20 @@ export function TopBar({ onCommandOpen, commandPaletteEnabled = true }: TopBarPr
         <span className="sr-only">AI-Hilfe</span>
       </Button>
 
-      <Button variant="ghost" size="icon" title="Hilfe">
+      <NotificationCenter />
+
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={toggleTheme}
+        className="hidden sm:inline-flex"
+        title={isDark ? 'Zum hellen Modus wechseln' : 'Zum dunklen Modus wechseln'}
+        aria-label={isDark ? 'Zum hellen Modus wechseln' : 'Zum dunklen Modus wechseln'}
+      >
+        {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      </Button>
+
+      <Button variant="ghost" size="icon" title="Hilfe" className="hidden lg:inline-flex">
         <HelpCircle className="h-5 w-5" />
         <span className="sr-only">Hilfe</span>
       </Button>

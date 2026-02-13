@@ -31,7 +31,7 @@ async def get_system_metrics() -> Dict[str, Any]:
         memory = psutil.virtual_memory()
         disk = psutil.disk_usage('/')
         
-        ***REMOVED*** Network I/O (if available)
+        # Network I/O (if available)
         try:
             net_io = psutil.net_io_counters()
             network = {
@@ -83,26 +83,26 @@ async def get_business_metrics(db: Session = Depends(get_db)) -> Dict[str, Any]:
     Returns: Queue lengths, processing times, error rates
     """
     try:
-        ***REMOVED*** 1. Database Connection Pool Status
+        # 1. Database Connection Pool Status
         from app.core.database import engine
         pool_status = engine.pool.status()
         
-        ***REMOVED*** 2. Event Bus Metrics
+        # 2. Event Bus Metrics
         event_bus_metrics = {
-            "pending_events": 0,  ***REMOVED*** TODO: Query outbox table
-            "published_today": 0,  ***REMOVED*** TODO: Query outbox table
-            "failed_events": 0     ***REMOVED*** TODO: Query outbox table
+            "pending_events": 0,  # TODO: Query outbox table
+            "published_today": 0,  # TODO: Query outbox table
+            "failed_events": 0     # TODO: Query outbox table
         }
         
-        ***REMOVED*** 3. Workflow Metrics (from Phase 3)
-        ***REMOVED*** TODO: Query workflow status from database
+        # 3. Workflow Metrics (from Phase 3)
+        # TODO: Query workflow status from database
         workflow_metrics = {
             "active_workflows": 0,
             "pending_approvals": 0,
             "completed_today": 0
         }
         
-        ***REMOVED*** 4. Document Processing Queue
+        # 4. Document Processing Queue
         document_metrics = {
             "pending_documents": 0,
             "processing_documents": 0,
@@ -143,7 +143,7 @@ async def get_optimization_signals() -> Dict[str, Any]:
         
         signals = []
         
-        ***REMOVED*** CPU Signals
+        # CPU Signals
         if cpu_percent > 85:
             signals.append({
                 "type": "scale_up",
@@ -163,7 +163,7 @@ async def get_optimization_signals() -> Dict[str, Any]:
                 "action": "Reduce worker processes to save resources"
             })
         
-        ***REMOVED*** Memory Signals
+        # Memory Signals
         if memory.percent > 90:
             signals.append({
                 "type": "memory_critical",
@@ -174,7 +174,7 @@ async def get_optimization_signals() -> Dict[str, Any]:
                 "action": "Clear caches, restart services, or scale up memory"
             })
         
-        ***REMOVED*** Database Connection Pool
+        # Database Connection Pool
         from app.core.database import engine
         pool_size = engine.pool.size()
         connections_used = engine.pool.checkedin() + engine.pool.checkedout()

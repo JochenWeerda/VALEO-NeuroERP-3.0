@@ -1,4 +1,4 @@
-***REMOVED*** Sprint 6 Plan
+# Sprint 6 Plan
 
 **Datum:** 2025-01-30  
 **Sprint:** 6  
@@ -8,19 +8,19 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Sprint-Übersicht
+## 🎯 Sprint-Übersicht
 
-***REMOVED******REMOVED******REMOVED*** Ziel
+### Ziel
 Implementierung von 3 weiteren Procurement Capabilities (P2/P3) für Sprint 6.
 
-***REMOVED******REMOVED******REMOVED*** Priorität
+### Priorität
 P2/P3 - Mittel/Niedrig (SOLL/KANN, Priorität 3-4)
 
 ---
 
-***REMOVED******REMOVED*** 📋 Geplante Tasks
+## 📋 Geplante Tasks
 
-***REMOVED******REMOVED******REMOVED*** Task 1: PROC-PO-03 - PO-Kommunikation
+### Task 1: PROC-PO-03 - PO-Kommunikation
 **Status:** ⚠️ Partial (Print vorhanden)  
 **Priorität:** P2 (SOLL, Priorität 3)
 
@@ -44,7 +44,7 @@ P2/P3 - Mittel/Niedrig (SOLL/KANN, Priorität 3-4)
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Task 2: PROC-GR-02 - Retouren an Lieferant
+### Task 2: PROC-GR-02 - Retouren an Lieferant
 **Status:** ❌ Nicht vorhanden  
 **Priorität:** P2 (SOLL, Priorität 3)
 
@@ -67,7 +67,7 @@ P2/P3 - Mittel/Niedrig (SOLL/KANN, Priorität 3-4)
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Task 3: PROC-PAY-02 - Lieferantengutschriften / Belastungen
+### Task 3: PROC-PAY-02 - Lieferantengutschriften / Belastungen
 **Status:** ❌ Nicht vorhanden  
 **Priorität:** P2 (SOLL, Priorität 3)
 
@@ -90,17 +90,17 @@ P2/P3 - Mittel/Niedrig (SOLL/KANN, Priorität 3-4)
 
 ---
 
-***REMOVED******REMOVED*** 📊 Sprint-Planung
+## 📊 Sprint-Planung
 
-***REMOVED******REMOVED******REMOVED*** Woche 1-2
+### Woche 1-2
 - **Tag 1-5:** PROC-PO-03 (PO-Kommunikation) - Email/Portal-Versand
 - **Tag 6-10:** PROC-PO-03 (PO-Kommunikation) - Sprachen/Branding
 
-***REMOVED******REMOVED******REMOVED*** Woche 3-4
+### Woche 3-4
 - **Tag 11-15:** PROC-GR-02 (Retouren an Lieferant) - Start
 - **Day 16-20:** PROC-GR-02 (Retouren an Lieferant) - Fortsetzung
 
-***REMOVED******REMOVED******REMOVED*** Woche 5-6
+### Woche 5-6
 - **Tag 21-30:** PROC-PAY-02 (Lieferantengutschriften / Belastungen)
 - Integration-Tests
 - Bug-Fixes
@@ -108,20 +108,20 @@ P2/P3 - Mittel/Niedrig (SOLL/KANN, Priorität 3-4)
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Dependencies
+## 🔄 Dependencies
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 → Agent-1
+### Agent-2 → Agent-1
 - PROC-PAY-02 nutzt möglicherweise Finance-APIs
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 → Agent-4
+### Agent-2 → Agent-4
 - PROC-PO-03 nutzt möglicherweise Email-Infrastructure
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 → Agent-3
+### Agent-2 → Agent-3
 - Keine Dependencies
 
 ---
 
-***REMOVED******REMOVED*** ✅ Definition of Done
+## ✅ Definition of Done
 
 - [ ] Alle 3 P2/P3 Capabilities implementiert
 - [ ] i18n vollständig integriert
@@ -133,7 +133,7 @@ P2/P3 - Mittel/Niedrig (SOLL/KANN, Priorität 3-4)
 
 ---
 
-***REMOVED******REMOVED*** 📝 Pre-Implementation Checklist
+## 📝 Pre-Implementation Checklist
 
 Vor Code-Erstellung:
 - [ ] Bestehende Frontend-Seiten analysieren
@@ -145,4 +145,5 @@ Vor Code-Erstellung:
 ---
 
 **Status:** 📋 **SPRINT 6 GEPLANT - BEREIT FÜR START**
+
 

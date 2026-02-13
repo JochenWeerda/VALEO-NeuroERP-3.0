@@ -114,10 +114,10 @@ class IncidentResponseTeam:
     """Incident response team member"""
     id: str
     user_id: str
-    role: str  ***REMOVED*** lead, technical, communication, legal, executive
+    role: str  # lead, technical, communication, legal, executive
     skills: List[str] = field(default_factory=list)
     contact_info: Dict[str, str] = field(default_factory=dict)
-    availability: str = "24/7"  ***REMOVED*** 24/7, business_hours, on_call
+    availability: str = "24/7"  # 24/7, business_hours, on_call
     is_active: bool = True
     joined_at: datetime = field(default_factory=datetime.utcnow)
 
@@ -127,7 +127,7 @@ class IncidentCommunication:
     """Incident communication record"""
     id: str
     incident_id: str
-    communication_type: str  ***REMOVED*** internal, external, regulatory, customer
+    communication_type: str  # internal, external, regulatory, customer
     recipient: str
     subject: str
     content: str
@@ -144,7 +144,7 @@ class IncidentEvidence:
     """Incident evidence record"""
     id: str
     incident_id: str
-    evidence_type: str  ***REMOVED*** log, screenshot, memory_dump, network_traffic, etc.
+    evidence_type: str  # log, screenshot, memory_dump, network_traffic, etc.
     description: str
     location: str
     collected_at: datetime
@@ -173,10 +173,10 @@ class IncidentMetrics:
     """Incident response metrics"""
     id: str
     incident_id: str
-    detection_time: Optional[timedelta] = None  ***REMOVED*** Time to detect
-    response_time: Optional[timedelta] = None   ***REMOVED*** Time to respond
-    containment_time: Optional[timedelta] = None  ***REMOVED*** Time to contain
-    recovery_time: Optional[timedelta] = None    ***REMOVED*** Time to recover
+    detection_time: Optional[timedelta] = None  # Time to detect
+    response_time: Optional[timedelta] = None   # Time to respond
+    containment_time: Optional[timedelta] = None  # Time to contain
+    recovery_time: Optional[timedelta] = None    # Time to recover
     total_resolution_time: Optional[timedelta] = None
     false_positive_rate: float = 0.0
     escalation_count: int = 0
@@ -215,7 +215,7 @@ class ISO27001IncidentManagement:
         self.alerts = alert_service
         self.communication = communication_service
 
-        ***REMOVED*** Incident management components
+        # Incident management components
         self.incidents: Dict[str, SecurityIncident] = {}
         self.response_team: Dict[str, IncidentResponseTeam] = {}
         self.incident_communications: List[IncidentCommunication] = {}
@@ -224,20 +224,20 @@ class ISO27001IncidentManagement:
         self.incident_metrics: Dict[str, IncidentMetrics] = {}
         self.incident_playbooks: Dict[str, IncidentPlaybook] = {}
 
-        ***REMOVED*** Incident response configuration
+        # Incident response configuration
         self.incident_config = self._initialize_incident_config()
 
-        ***REMOVED*** Default playbooks
+        # Default playbooks
         self._initialize_default_playbooks()
 
-        ***REMOVED*** Response team setup
+        # Response team setup
         self._initialize_response_team()
 
     def _initialize_incident_config(self) -> Dict[str, Any]:
         """Initialize incident response configuration"""
         return {
             'response_times': {
-                'critical': {'detection': 300, 'response': 1800, 'containment': 3600},  ***REMOVED*** seconds
+                'critical': {'detection': 300, 'response': 1800, 'containment': 3600},  # seconds
                 'high': {'detection': 1800, 'response': 7200, 'containment': 14400},
                 'medium': {'detection': 7200, 'response': 28800, 'containment': 86400},
                 'low': {'detection': 28800, 'response': 86400, 'containment': 259200}
@@ -249,12 +249,12 @@ class ISO27001IncidentManagement:
                 'low': {'business_impact': 'minimal', 'data_compromised': False}
             },
             'communication_requirements': {
-                'internal_notification': 1800,  ***REMOVED*** seconds
-                'external_notification': 7200,  ***REMOVED*** seconds for breaches
-                'regulatory_notification': 7200   ***REMOVED*** seconds for regulated data
+                'internal_notification': 1800,  # seconds
+                'external_notification': 7200,  # seconds for breaches
+                'regulatory_notification': 7200   # seconds for regulated data
             },
             'evidence_preservation': {
-                'log_retention': 2555,  ***REMOVED*** days (7 years)
+                'log_retention': 2555,  # days (7 years)
                 'evidence_retention': 2555,
                 'chain_of_custody': True,
                 'cryptographic_hashing': True
@@ -379,8 +379,8 @@ class ISO27001IncidentManagement:
 
     def _initialize_response_team(self):
         """Initialize incident response team structure"""
-        ***REMOVED*** This would be populated with actual team members
-        ***REMOVED*** For now, creating placeholder structure
+        # This would be populated with actual team members
+        # For now, creating placeholder structure
         team_roles = [
             {'role': 'incident_response_lead', 'required': True},
             {'role': 'technical_analyst', 'required': True},
@@ -390,7 +390,7 @@ class ISO27001IncidentManagement:
         ]
 
         for role_info in team_roles:
-            ***REMOVED*** Create placeholder team entries
+            # Create placeholder team entries
             team_id = str(uuid.uuid4())
             team_member = IncidentResponseTeam(
                 id=team_id,
@@ -408,10 +408,10 @@ class ISO27001IncidentManagement:
         """
         incident_id = str(uuid.uuid4())
 
-        ***REMOVED*** Determine severity based on detection data
+        # Determine severity based on detection data
         severity = self._assess_incident_severity(detection_data)
 
-        ***REMOVED*** Determine category
+        # Determine category
         category = IncidentCategory(detection_data.get('category', 'unauthorized_access'))
 
         incident = SecurityIncident(
@@ -431,14 +431,14 @@ class ISO27001IncidentManagement:
 
         self.incidents[incident_id] = incident
 
-        ***REMOVED*** Initialize metrics
+        # Initialize metrics
         self._initialize_incident_metrics(incident_id)
 
-        ***REMOVED*** Add timeline entry
+        # Add timeline entry
         self._add_timeline_entry(incident_id, IncidentPhase.DETECTION,
                                "Incident detected and registered", "system", automated=True)
 
-        ***REMOVED*** Trigger immediate response
+        # Trigger immediate response
         self._trigger_incident_response(incident)
 
         logger.warning(f"Security incident detected: {incident.title} (Severity: {incident.severity.value})")
@@ -446,7 +446,7 @@ class ISO27001IncidentManagement:
 
     def _assess_incident_severity(self, detection_data: Dict[str, Any]) -> IncidentSeverity:
         """Assess incident severity based on detection data"""
-        ***REMOVED*** Simple severity assessment - in production would be more sophisticated
+        # Simple severity assessment - in production would be more sophisticated
         if detection_data.get('critical_system_affected', False):
             return IncidentSeverity.CRITICAL
         elif detection_data.get('data_breach', False):
@@ -484,32 +484,32 @@ class ISO27001IncidentManagement:
 
     def _trigger_incident_response(self, incident: SecurityIncident):
         """Trigger automated incident response"""
-        ***REMOVED*** Find applicable playbook
+        # Find applicable playbook
         playbook_key = f"{incident.category.value}_{incident.severity.value}"
         playbook = self.incident_playbooks.get(playbook_key)
 
         if playbook:
-            ***REMOVED*** Execute immediate actions
+            # Execute immediate actions
             for action in playbook.immediate_actions:
                 self._execute_immediate_action(incident.id, action)
 
-            ***REMOVED*** Assign response team
+            # Assign response team
             self._assign_response_team(incident.id, playbook)
 
-            ***REMOVED*** Send initial notifications
+            # Send initial notifications
             self._send_incident_notifications(incident, playbook)
 
-        ***REMOVED*** Update incident status
+        # Update incident status
         incident.status = IncidentStatus.INVESTIGATING
         incident.current_phase = IncidentPhase.ASSESSMENT
 
-        ***REMOVED*** Start metrics tracking
+        # Start metrics tracking
         metrics = self.incident_metrics[incident.id]
         metrics.detection_time = datetime.utcnow() - incident.detected_at
 
     def _execute_immediate_action(self, incident_id: str, action: Dict[str, Any]):
         """Execute immediate response action"""
-        ***REMOVED*** In production, this would trigger actual system actions
+        # In production, this would trigger actual system actions
         action_description = f"Executed immediate action: {action['action']}"
         self._add_timeline_entry(incident_id, IncidentPhase.CONTAINMENT,
                                action['action'], "system", action_description, automated=True)
@@ -518,7 +518,7 @@ class ISO27001IncidentManagement:
         """Assign incident response team"""
         incident = self.incidents[incident_id]
 
-        ***REMOVED*** Assign incident response lead
+        # Assign incident response lead
         lead_team_member = None
         for team_member in self.response_team.values():
             if team_member.role == 'incident_response_lead' and team_member.is_active:
@@ -533,7 +533,7 @@ class ISO27001IncidentManagement:
 
     def _send_incident_notifications(self, incident: SecurityIncident, playbook: IncidentPlaybook):
         """Send incident notifications"""
-        ***REMOVED*** Internal notification
+        # Internal notification
         internal_communication = IncidentCommunication(
             id=str(uuid.uuid4()),
             incident_id=incident.id,
@@ -566,21 +566,21 @@ class ISO27001IncidentManagement:
         incident.current_phase = new_phase
         incident.updated_at = datetime.utcnow()
 
-        ***REMOVED*** Update metrics
+        # Update metrics
         metrics = self.incident_metrics[incident_id]
         if new_phase == IncidentPhase.CONTAINMENT and not metrics.containment_time:
             metrics.containment_time = datetime.utcnow() - incident.detected_at
         elif new_phase == IncidentPhase.RECOVERY and not metrics.recovery_time:
             metrics.recovery_time = datetime.utcnow() - incident.detected_at
 
-        ***REMOVED*** Add timeline entry
+        # Add timeline entry
         action = f"Status updated from {old_status.value} to {new_status.value}, Phase: {new_phase.value}"
         details = update_data.get('details', '')
         performed_by = update_data.get('performed_by', 'system')
 
         self._add_timeline_entry(incident_id, new_phase, action, performed_by, details)
 
-        ***REMOVED*** Execute phase-specific actions
+        # Execute phase-specific actions
         if new_phase == IncidentPhase.CONTAINMENT:
             self._execute_containment_actions(incident, update_data)
         elif new_phase == IncidentPhase.ERADICATION:
@@ -680,19 +680,19 @@ class ISO27001IncidentManagement:
         incident.closed_at = datetime.utcnow()
         incident.resolution_time = incident.closed_at - incident.detected_at
 
-        ***REMOVED*** Add closure data
+        # Add closure data
         incident.root_cause = closure_data.get('root_cause', '')
         incident.lessons_learned = closure_data.get('lessons_learned', [])
         incident.prevention_measures = closure_data.get('prevention_measures', [])
         incident.actual_impact = closure_data.get('actual_impact', {})
 
-        ***REMOVED*** Update metrics
+        # Update metrics
         metrics = self.incident_metrics[incident_id]
         metrics.total_resolution_time = incident.resolution_time
         metrics.lessons_learned_count = len(incident.lessons_learned)
         metrics.prevention_measures_implemented = len(incident.prevention_measures)
 
-        ***REMOVED*** Add final timeline entry
+        # Add final timeline entry
         self._add_timeline_entry(incident_id, IncidentPhase.CLOSURE,
                                "Incident closed with lessons learned",
                                closure_data.get('closed_by', 'system'))
@@ -702,32 +702,32 @@ class ISO27001IncidentManagement:
 
     def get_incident_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Generate incident management dashboard"""
-        ***REMOVED*** Current incidents by status
+        # Current incidents by status
         status_counts = {}
         for incident in self.incidents.values():
             status = incident.status.value
             status_counts[status] = status_counts.get(status, 0) + 1
 
-        ***REMOVED*** Incidents by severity
+        # Incidents by severity
         severity_counts = {}
         for incident in self.incidents.values():
             severity = incident.severity.value
             severity_counts[severity] = severity_counts.get(severity, 0) + 1
 
-        ***REMOVED*** Incidents by category
+        # Incidents by category
         category_counts = {}
         for incident in self.incidents.values():
             category = incident.category.value
             category_counts[category] = category_counts.get(category, 0) + 1
 
-        ***REMOVED*** Recent incidents (last 30 days)
+        # Recent incidents (last 30 days)
         thirty_days_ago = datetime.utcnow() - timedelta(days=30)
         recent_incidents = [
             incident for incident in self.incidents.values()
             if incident.detected_at > thirty_days_ago
         ]
 
-        ***REMOVED*** Average resolution times
+        # Average resolution times
         resolution_times = [
             incident.resolution_time.total_seconds()
             for incident in self.incidents.values()
@@ -735,7 +735,7 @@ class ISO27001IncidentManagement:
         ]
         avg_resolution_time = sum(resolution_times) / len(resolution_times) if resolution_times else 0
 
-        ***REMOVED*** Active response team
+        # Active response team
         active_team_members = len([member for member in self.response_team.values() if member.is_active])
 
         return {
@@ -765,7 +765,7 @@ class ISO27001IncidentManagement:
                     'status': incident.status.value,
                     'detected_at': incident.detected_at.isoformat(),
                     'assigned_to': incident.assigned_to
-                } for incident in recent_incidents[-10:]  ***REMOVED*** Last 10
+                } for incident in recent_incidents[-10:]  # Last 10
             ],
             'response_team_status': self._get_response_team_status()
         }
@@ -813,27 +813,27 @@ class ISO27001IncidentManagement:
         """Assess ISO 27001 incident management compliance"""
         issues = []
 
-        ***REMOVED*** Check incident response plan
-        if len(playbooks) < 5:  ***REMOVED*** Arbitrary minimum for different incident types
+        # Check incident response plan
+        if len(playbooks) < 5:  # Arbitrary minimum for different incident types
             issues.append("Insufficient incident response playbooks for common incident types")
 
-        ***REMOVED*** Check response team
+        # Check response team
         active_team = len([m for m in team_members if m.is_active])
-        if active_team < 3:  ***REMOVED*** Minimum team size
+        if active_team < 3:  # Minimum team size
             issues.append("Incident response team is understaffed")
 
-        ***REMOVED*** Check incident documentation
+        # Check incident documentation
         documented_incidents = len([i for i in incidents if i.root_cause and i.lessons_learned])
         if len(incidents) > 0 and documented_incidents / len(incidents) < 0.8:
             issues.append("Insufficient incident documentation and lessons learned")
 
-        ***REMOVED*** Check response times
+        # Check response times
         recent_incidents = [i for i in incidents if (datetime.utcnow() - i.detected_at).days <= 90]
         timely_responses = len([i for i in recent_incidents if i.resolution_time and i.resolution_time.days <= 7])
         if len(recent_incidents) > 0 and timely_responses / len(recent_incidents) < 0.7:
             issues.append("Incident response times exceed acceptable thresholds")
 
-        ***REMOVED*** Check communication procedures
+        # Check communication procedures
         incidents_with_communication = len([i for i in incidents if i.id in self.incident_communications])
         if len(incidents) > 0 and incidents_with_communication / len(incidents) < 0.9:
             issues.append("Incident communication procedures not consistently followed")

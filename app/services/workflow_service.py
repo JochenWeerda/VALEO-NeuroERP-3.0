@@ -16,7 +16,7 @@ TransitionGuard = Callable[[dict], tuple[bool, str]]
 
 @dataclass
 class Transition:
-    name: str           ***REMOVED*** e.g. "submit", "approve", "reject", "post"
+    name: str           # e.g. "submit", "approve", "reject", "post"
     src: str
     dst: str
     guard: Optional[TransitionGuard] = None
@@ -94,5 +94,5 @@ class WorkflowService:
         return True, cand.dst, "ok"
 
 
-***REMOVED*** Global Workflow Instance
+# Global Workflow Instance
 workflow = WorkflowService()

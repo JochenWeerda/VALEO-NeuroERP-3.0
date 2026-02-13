@@ -1,6 +1,6 @@
 Write-Host "=== Frontend-Backend Integration Test ==="
 
-***REMOVED*** Backend Health Check
+# Backend Health Check
 try {
     $health = Invoke-RestMethod -Uri "http://localhost:8000/health"
     Write-Host "✓ Backend Health: $($health.status)"
@@ -9,7 +9,7 @@ try {
     exit 1
 }
 
-***REMOVED*** Test 1: User Registration
+# Test 1: User Registration
 Write-Host "`n1. User Registration Test"
 $regData = @{ username='frontend_user'; password='test123'; email='frontend@test.de' } | ConvertTo-Json -Compress
 try {
@@ -19,7 +19,7 @@ try {
     Write-Host "! User bereits vorhanden oder Fehler: $($_.Exception.Message)"
 }
 
-***REMOVED*** Test 2: Authentication
+# Test 2: Authentication
 Write-Host "`n2. Authentication Test"
 try {
     $token = Invoke-RestMethod -Method POST -Uri "http://localhost:8000/token" -ContentType "application/x-www-form-urlencoded" -Body "username=frontend_user&password=test123"
@@ -30,10 +30,10 @@ try {
     exit 1
 }
 
-***REMOVED*** Test 3: Customer API Tests
+# Test 3: Customer API Tests
 Write-Host "`n3. Customer API Tests"
 
-***REMOVED*** GET Customers
+# GET Customers
 try {
     $customers = Invoke-RestMethod -Method GET -Uri "http://localhost:8000/api/customers" -Headers $authHeader
     Write-Host "✓ GET /api/customers: $($customers.Count) Kunden"
@@ -45,7 +45,7 @@ try {
     Write-Host "✗ GET Customers Fehler: $($_.Exception.Message)"
 }
 
-***REMOVED*** POST Customer
+# POST Customer
 Write-Host "`n4. Customer Creation Test"
 $newCustomer = @{
     id = "frontend-test-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
@@ -79,7 +79,7 @@ try {
     $createdCustomer = Invoke-RestMethod -Method POST -Uri "http://localhost:8000/api/customers" -ContentType "application/json" -Body $newCustomer -Headers $authHeader
     Write-Host "✓ POST Customer erfolgreich: $($createdCustomer.name)"
     
-    ***REMOVED*** Test GET specific customer
+    # Test GET specific customer
     $fetchedCustomer = Invoke-RestMethod -Method GET -Uri "http://localhost:8000/api/customers/$($createdCustomer.id)" -Headers $authHeader
     Write-Host "✓ GET Customer by ID erfolgreich: $($fetchedCustomer.name)"
     
@@ -87,7 +87,7 @@ try {
     Write-Host "✗ POST Customer Fehler: $($_.Exception.Message)"
 }
 
-***REMOVED*** Test 5: CORS Test (simuliert Frontend-Request)
+# Test 5: CORS Test (simuliert Frontend-Request)
 Write-Host "`n5. CORS Test"
 try {
     $corsHeaders = @{
@@ -104,7 +104,7 @@ try {
 Write-Host "`n=== Integration Test Abgeschlossen ==="
 Write-Host "Backend ist bereit für Frontend-Integration!"
 
-***REMOVED*** Frontend-Status prüfen
+# Frontend-Status prüfen
 Write-Host "`n6. Frontend Connection Test"
 try {
     $frontendTest = Invoke-WebRequest -Uri "http://localhost:3000" -UseBasicParsing -TimeoutSec 5
@@ -115,3 +115,4 @@ try {
     Write-Host "! Frontend nicht verfügbar auf Port 3000"
     Write-Host "  Starte Frontend manuell mit: npm run dev"
 }
+

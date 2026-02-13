@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => {
   const DEFAULT_SSE_PROXY = process.env.VITE_SSE_PROXY || env.VITE_SSE_PROXY || 'http://localhost:5174'
   // Im Container: backend (Docker-Service-Name), lokal: localhost
   const DEFAULT_BACKEND_PROXY = process.env.VITE_BACKEND_PROXY || env.VITE_BACKEND_PROXY || 'http://localhost:8000'
+  const DEV_PORT = Number(process.env.VITE_PORT || env.VITE_PORT || 3001)
 
   return {
   plugins: [
@@ -38,21 +39,16 @@ export default defineConfig(({ mode }) => {
   optimizeDeps: {
     include: ['react', 'react-dom', 'react/jsx-runtime'],
     exclude: [],
-    esbuildOptions: {
-      dedupe: ['react', 'react-dom'],
-    },
   },
   server: {
-    port: 3000,
-    host: '0.0.0.0', // Explizit für Docker
-    strictPort: true,
+    // 3000 is frequently occupied (Docker/other dev servers). Default to 3001 for stability.
+    port: DEV_PORT,
+    host: '0.0.0.0', // Explizit für Docker + von außen erreichbar
+    strictPort: false,
+    allowedHosts: true,
     hmr: {
-      // HMR im Browser: localhost, im Container: 0.0.0.0
-      // clientPort wird automatisch vom Browser verwendet
-      port: 3000,
-      clientPort: 3000,
+      // HMR: Keep defaults (works in Docker + via host.docker.internal).
       protocol: 'ws',
-      host: 'localhost', // Browser verwendet localhost
     },
     watch: {
       usePolling: true, // Für Docker-Kompatibilität
@@ -65,6 +61,14 @@ export default defineConfig(({ mode }) => {
         secure: false,
         ws: true, // WebSocket-Support
       },
+      // MCP Documents laufen im Backend (FastAPI), nicht im BFF
+      '/api/mcp/documents': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+      },
+      // MCP Analytics/Inventory/etc. laufen im BFF
       '/api/mcp': {
         target: DEFAULT_BFF_PROXY,
         changeOrigin: true,
@@ -81,6 +85,8 @@ export default defineConfig(({ mode }) => {
     outDir: 'dist',
     sourcemap: true,
     chunkSizeWarningLimit: 500,
+    // Performance: Module-Preload nur für kritische Chunks
+    modulePreload: { polyfill: false },
     rollupOptions: {
       output: {
         manualChunks: {

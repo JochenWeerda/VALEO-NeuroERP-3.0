@@ -10,7 +10,7 @@ class _DummyNATS:
         self.connected = False
         self.published: list[tuple[str, bytes]] = []
 
-    async def connect(self, *, servers, name):  ***REMOVED*** noqa: D401
+    async def connect(self, *, servers, name):  # noqa: D401
         self.connected = True
 
     async def publish(self, subject, payload):
@@ -71,4 +71,5 @@ async def test_event_publisher_skips_when_disabled():
     )
 
     assert dummy.published == []
+
 

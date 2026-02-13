@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Pipeline-Runner für VALEO-NeuroERP
 
@@ -15,10 +15,10 @@ import sys
 import time
 from typing import Dict, Any, List, Optional
 
-***REMOVED*** Füge das Hauptverzeichnis zum Pythonpfad hinzu
+# Füge das Hauptverzeichnis zum Pythonpfad hinzu
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-***REMOVED*** Konfiguriere Logging
+# Konfiguriere Logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -54,15 +54,15 @@ def save_result(pipeline_id: str, result: Dict[str, Any]) -> None:
         pipeline_id: Die ID der Pipeline
         result: Das Ergebnis der Pipeline-Ausführung
     """
-    ***REMOVED*** Erstelle das Verzeichnis, falls es nicht existiert
+    # Erstelle das Verzeichnis, falls es nicht existiert
     os.makedirs(RESULTS_DIR, exist_ok=True)
     
-    ***REMOVED*** Generiere den Dateinamen
+    # Generiere den Dateinamen
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     filename = f"{pipeline_id}_{timestamp}.json"
     filepath = os.path.join(RESULTS_DIR, filename)
     
-    ***REMOVED*** Speichere das Ergebnis
+    # Speichere das Ergebnis
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump(result, f, indent=4, ensure_ascii=False)
     
@@ -80,14 +80,14 @@ def load_pipeline_class(pipeline_id: str, config: Dict[str, Any]) -> Optional[ty
         Die Klasse der Pipeline oder None, wenn die Klasse nicht geladen werden konnte
     """
     try:
-        ***REMOVED*** Bestimme den Modulpfad und den Klassennamen
+        # Bestimme den Modulpfad und den Klassennamen
         module_path = f"pipelines.{pipeline_id}_pipeline"
         class_name = ''.join(word.capitalize() for word in pipeline_id.split('_')) + 'Pipeline'
         
-        ***REMOVED*** Importiere das Modul
+        # Importiere das Modul
         module = importlib.import_module(module_path)
         
-        ***REMOVED*** Hole die Klasse
+        # Hole die Klasse
         pipeline_class = getattr(module, class_name)
         
         return pipeline_class
@@ -104,14 +104,14 @@ def run_pipelines_for_phase(phase: str) -> None:
     """
     config = load_config()
     
-    ***REMOVED*** Prüfe, ob die Pipeline-Integration aktiviert ist
+    # Prüfe, ob die Pipeline-Integration aktiviert ist
     if not config['pipeline_integration']['enabled']:
         logger.info("Pipeline-Modus ist deaktiviert.")
         print("\nErgebnisse der Pipeline-Ausführung nach Phase", phase.upper() + ":")
         print("  - Übersprungen: Pipeline-Modus ist deaktiviert.")
         return
     
-    ***REMOVED*** Bestimme die Pipelines für diese Phase
+    # Bestimme die Pipelines für diese Phase
     integration_point = f"post_{phase.lower()}"
     pipelines_to_run = []
     
@@ -119,7 +119,7 @@ def run_pipelines_for_phase(phase: str) -> None:
         if pipeline_config['enabled'] and integration_point in pipeline_config['integration_points']:
             pipelines_to_run.append((pipeline_id, pipeline_config['priority']))
     
-    ***REMOVED*** Sortiere die Pipelines nach Priorität (high > medium > low)
+    # Sortiere die Pipelines nach Priorität (high > medium > low)
     priority_map = {'high': 0, 'medium': 1, 'low': 2}
     pipelines_to_run.sort(key=lambda x: priority_map.get(x[1], 99))
     
@@ -129,11 +129,11 @@ def run_pipelines_for_phase(phase: str) -> None:
         print("  - Keine Pipelines für diese Phase konfiguriert.")
         return
     
-    ***REMOVED*** Führe die Pipelines aus
+    # Führe die Pipelines aus
     results = []
     
     for pipeline_id, _ in pipelines_to_run:
-        ***REMOVED*** Lade die Pipeline-Klasse
+        # Lade die Pipeline-Klasse
         pipeline_class = load_pipeline_class(pipeline_id, config)
         
         if pipeline_class is None:
@@ -142,20 +142,20 @@ def run_pipelines_for_phase(phase: str) -> None:
             continue
         
         try:
-            ***REMOVED*** Instanziiere und führe die Pipeline aus
+            # Instanziiere und führe die Pipeline aus
             pipeline = pipeline_class()
             result = pipeline.execute()
             
-            ***REMOVED*** Speichere das Ergebnis
+            # Speichere das Ergebnis
             save_result(pipeline_id, result)
             
-            ***REMOVED*** Füge das Ergebnis zur Liste hinzu
+            # Füge das Ergebnis zur Liste hinzu
             results.append((pipeline_id, result['overall_status'], result['summary']['success_rate']))
         except Exception as e:
             logger.exception(f"Fehler bei der Ausführung der Pipeline {pipeline_id}: {e}")
             results.append((pipeline_id, "error", str(e)))
     
-    ***REMOVED*** Zeige die Ergebnisse an
+    # Zeige die Ergebnisse an
     print("\nErgebnisse der Pipeline-Ausführung nach Phase", phase.upper() + ":")
     for pipeline_id, status, details in results:
         print(f"  - {pipeline_id}: {status} ({details})")
@@ -175,11 +175,12 @@ def main() -> None:
     
     args = parser.parse_args()
     
-    ***REMOVED*** Simuliere eine Phase-Änderung (in der Realität würde dies vom APM-Framework kommen)
+    # Simuliere eine Phase-Änderung (in der Realität würde dies vom APM-Framework kommen)
     logger.info(f"Phase geändert zu: PIPELINE")
     
-    ***REMOVED*** Führe die Pipelines für die angegebene Phase aus
+    # Führe die Pipelines für die angegebene Phase aus
     run_pipelines_for_phase(args.phase)
 
 if __name__ == '__main__':
     main()
+

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Performance Profiler für API-Module
 
@@ -17,10 +17,10 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-***REMOVED*** Projektpfad hinzufügen, um Backend-Importe zu ermöglichen
+# Projektpfad hinzufügen, um Backend-Importe zu ermöglichen
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -31,10 +31,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger("perf_profiler")
 
-***REMOVED*** API-Host (Standard: localhost)
+# API-Host (Standard: localhost)
 API_HOST = "http://localhost:8000"
 
-***REMOVED*** Liste der API-Module und ihrer Endpunkte für den Test
+# Liste der API-Module und ihrer Endpunkte für den Test
 API_ENDPOINTS = {
     "articles": [
         {"method": "GET", "path": "/api/v1/artikel", "name": "Alle Artikel abrufen"},
@@ -79,7 +79,7 @@ def measure_response_time(method, url, iterations=10):
     """Misst die Antwortzeit eines API-Endpunkts über mehrere Iterationen"""
     response_times = []
     errors = 0
-    headers = {"X-Profiling": "enabled"}  ***REMOVED*** Header für detailliertes Profiling aktivieren
+    headers = {"X-Profiling": "enabled"}  # Header für detailliertes Profiling aktivieren
     
     logger.info(f"Teste {method} {url} ({iterations} Iterationen)")
     
@@ -100,13 +100,13 @@ def measure_response_time(method, url, iterations=10):
                 return None
             
             end_time = time.time()
-            duration = (end_time - start_time) * 1000  ***REMOVED*** in Millisekunden
+            duration = (end_time - start_time) * 1000  # in Millisekunden
             
-            if response.status_code < 400:  ***REMOVED*** Erfolgreiche Antwort
+            if response.status_code < 400:  # Erfolgreiche Antwort
                 response_times.append(duration)
                 logger.debug(f"  Iteration {i+1}: {duration:.2f} ms")
                 
-                ***REMOVED*** Extrahiere DB-Statistiken, falls vorhanden
+                # Extrahiere DB-Statistiken, falls vorhanden
                 db_stats = None
                 try:
                     if "X-DB-Stats" in response.headers:
@@ -122,7 +122,7 @@ def measure_response_time(method, url, iterations=10):
             logger.error(f"  Fehler bei {method} {url}: {str(e)}")
             errors += 1
     
-    ***REMOVED*** Ergebnisse berechnen
+    # Ergebnisse berechnen
     if response_times:
         avg_time = statistics.mean(response_times)
         median_time = statistics.median(response_times)
@@ -144,7 +144,7 @@ def measure_response_time(method, url, iterations=10):
             "db_stats": db_stats
         }
         
-        ***REMOVED*** Überprüfe, ob wir Optimierungshinweise haben
+        # Überprüfe, ob wir Optimierungshinweise haben
         if db_stats and "query_count" in db_stats and db_stats["query_count"] > 10:
             result["optimization_hints"] = [
                 f"Hohe Anzahl an Datenbankabfragen: {db_stats['query_count']}",
@@ -186,7 +186,7 @@ def run_all_tests(modules=None, iterations=10, parallel=False):
     
     logger.info(f"Starte Performance-Tests für Module: {', '.join(modules)}")
     
-    ***REMOVED*** Wähle zwischen paralleler und sequentieller Ausführung
+    # Wähle zwischen paralleler und sequentieller Ausführung
     if parallel:
         with ThreadPoolExecutor(max_workers=min(len(modules), 5)) as executor:
             futures = {}
@@ -223,7 +223,7 @@ def analyze_results(results):
         logger.warning("Keine Ergebnisse zur Analyse vorhanden")
         return {}
     
-    ***REMOVED*** Gruppiere Ergebnisse nach Modul
+    # Gruppiere Ergebnisse nach Modul
     modules = {}
     for result in results:
         module = result["module"]
@@ -238,16 +238,16 @@ def analyze_results(results):
             "slowest_endpoints": [],
             "fastest_endpoints": [],
             "most_variable": [],
-            "database_intensive": []  ***REMOVED*** Neue Kategorie für DB-intensive Endpunkte
+            "database_intensive": []  # Neue Kategorie für DB-intensive Endpunkte
         },
         "modules": {},
-        "database_recommendations": []  ***REMOVED*** Neue Kategorie für DB-Optimierungsempfehlungen
+        "database_recommendations": []  # Neue Kategorie für DB-Optimierungsempfehlungen
     }
     
-    ***REMOVED*** Sortiere Endpunkte nach Durchschnittszeit
+    # Sortiere Endpunkte nach Durchschnittszeit
     sorted_by_avg = sorted(results, key=lambda x: x["average_ms"], reverse=True)
     
-    ***REMOVED*** Identifiziere die langsamsten Endpunkte
+    # Identifiziere die langsamsten Endpunkte
     slowest = sorted_by_avg[:min(5, len(sorted_by_avg))]
     analysis["summary"]["slowest_endpoints"] = [
         {
@@ -260,7 +260,7 @@ def analyze_results(results):
         for endpoint in slowest
     ]
     
-    ***REMOVED*** Identifiziere die schnellsten Endpunkte
+    # Identifiziere die schnellsten Endpunkte
     fastest = sorted_by_avg[-min(5, len(sorted_by_avg)):]
     analysis["summary"]["fastest_endpoints"] = [
         {
@@ -273,11 +273,11 @@ def analyze_results(results):
         for endpoint in reversed(fastest)
     ]
     
-    ***REMOVED*** Berechne Variabilität (Max - Min) / Median
+    # Berechne Variabilität (Max - Min) / Median
     for result in results:
         result["variability"] = (result["max_ms"] - result["min_ms"]) / result["median_ms"] if result["median_ms"] > 0 else 0
     
-    ***REMOVED*** Identifiziere Endpunkte mit der höchsten Variabilität
+    # Identifiziere Endpunkte mit der höchsten Variabilität
     sorted_by_var = sorted(results, key=lambda x: x["variability"], reverse=True)
     most_variable = sorted_by_var[:min(5, len(sorted_by_var))]
     analysis["summary"]["most_variable"] = [
@@ -293,7 +293,7 @@ def analyze_results(results):
         for endpoint in most_variable
     ]
     
-    ***REMOVED*** Identifiziere Endpunkte mit intensiver Datenbanknutzung
+    # Identifiziere Endpunkte mit intensiver Datenbanknutzung
     db_intensive = []
     for result in results:
         if "db_stats" in result and result["db_stats"]:
@@ -310,11 +310,11 @@ def analyze_results(results):
                     "slowest_query_time": db_stats.get("slowest_query_time", 0)
                 })
     
-    ***REMOVED*** Sortiere nach Anzahl der Abfragen
+    # Sortiere nach Anzahl der Abfragen
     db_intensive = sorted(db_intensive, key=lambda x: x["query_count"], reverse=True)
     analysis["summary"]["database_intensive"] = db_intensive[:min(5, len(db_intensive))]
     
-    ***REMOVED*** Modulspezifische Analysen
+    # Modulspezifische Analysen
     for module_name, module_results in modules.items():
         module_avg = statistics.mean([r["average_ms"] for r in module_results])
         slowest_in_module = sorted(module_results, key=lambda x: x["average_ms"], reverse=True)[0]
@@ -330,7 +330,7 @@ def analyze_results(results):
             }
         }
         
-        ***REMOVED*** Füge DB-Optimierungsempfehlungen hinzu
+        # Füge DB-Optimierungsempfehlungen hinzu
         if any("db_stats" in r and r["db_stats"] for r in module_results):
             db_heavy_endpoints = []
             for r in module_results:
@@ -345,7 +345,7 @@ def analyze_results(results):
             if db_heavy_endpoints:
                 analysis["modules"][module_name]["database_heavy_endpoints"] = db_heavy_endpoints
                 
-                ***REMOVED*** Empfehlungen basierend auf den Endpunkten
+                # Empfehlungen basierend auf den Endpunkten
                 for ep in db_heavy_endpoints:
                     analysis["database_recommendations"].append({
                         "module": module_name,
@@ -376,10 +376,10 @@ def main():
     
     args = parser.parse_args()
     
-    ***REMOVED*** API-Host aktualisieren, wenn über Kommandozeile angegeben
+    # API-Host aktualisieren, wenn über Kommandozeile angegeben
     API_HOST = args.host
     
-    ***REMOVED*** Bestimme zu testende Module
+    # Bestimme zu testende Module
     modules = None
     if args.all_apis:
         modules = list(API_ENDPOINTS.keys())
@@ -389,14 +389,14 @@ def main():
     if not modules:
         parser.error("Bitte --modules oder --all-apis angeben")
     
-    ***REMOVED*** Führe Tests durch
+    # Führe Tests durch
     logger.info(f"Performance-Profiler startet mit {args.iterations} Iterationen pro Endpunkt")
     results = run_all_tests(modules, args.iterations, args.parallel)
     
-    ***REMOVED*** Analysiere Ergebnisse
+    # Analysiere Ergebnisse
     analysis = analyze_results(results)
     
-    ***REMOVED*** Ergebnisse ausgeben
+    # Ergebnisse ausgeben
     if args.output:
         output_data = {
             "raw_results": results,
@@ -416,7 +416,7 @@ def main():
         
         logger.info(f"Ergebnisse wurden in {args.output} gespeichert")
     
-    ***REMOVED*** Ausgabe der Zusammenfassung
+    # Ausgabe der Zusammenfassung
     print("\n=== PERFORMANCE-ANALYSE ===")
     print(f"Getestete Module: {len(analysis['modules'])}")
     print(f"Getestete Endpunkte: {analysis['summary']['total_endpoints']}")
@@ -429,7 +429,7 @@ def main():
     for i, endpoint in enumerate(analysis["summary"]["most_variable"]):
         print(f"{i+1}. {endpoint['name']} ({endpoint['module']}): {endpoint['min_ms']:.2f} - {endpoint['max_ms']:.2f} ms")
     
-    ***REMOVED*** Ausgabe der DB-intensiven Endpunkte
+    # Ausgabe der DB-intensiven Endpunkte
     if "database_intensive" in analysis["summary"] and analysis["summary"]["database_intensive"]:
         print("\nDatenbank-intensive Endpunkte:")
         for i, endpoint in enumerate(analysis["summary"]["database_intensive"]):

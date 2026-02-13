@@ -20,40 +20,40 @@ class AuditMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         start_time = time.time()
 
-        ***REMOVED*** Extract request information
+        # Extract request information
         request_id = str(uuid4())
         client_ip = self._get_client_ip(request)
         user_agent = request.headers.get("user-agent", "")
         user_id = self._get_user_id(request)
 
-        ***REMOVED*** Log request
+        # Log request
         await self._log_request(request, request_id, client_ip, user_agent, user_id)
 
         try:
-            ***REMOVED*** Process request
+            # Process request
             response = await call_next(request)
 
-            ***REMOVED*** Calculate response time
+            # Calculate response time
             response_time = time.time() - start_time
 
-            ***REMOVED*** Log response
+            # Log response
             await self._log_response(
                 request, response, request_id, client_ip, user_id, response_time
             )
 
-            ***REMOVED*** Check for security violations
+            # Check for security violations
             await self._check_security_violations(request, response, client_ip, user_id)
 
             return response
 
         except Exception as exc:
-            ***REMOVED*** Log error
+            # Log error
             response_time = time.time() - start_time
             await self._log_error(
                 request, exc, request_id, client_ip, user_id, response_time
             )
 
-            ***REMOVED*** Return error response
+            # Return error response
             return JSONResponse(
                 status_code=500,
                 content={"detail": "Internal server error", "request_id": request_id}
@@ -61,25 +61,25 @@ class AuditMiddleware(BaseHTTPMiddleware):
 
     def _get_client_ip(self, request: Request) -> str:
         """Extract client IP address."""
-        ***REMOVED*** Check for forwarded headers
+        # Check for forwarded headers
         forwarded = request.headers.get("x-forwarded-for")
         if forwarded:
             return forwarded.split(",")[0].strip()
 
-        ***REMOVED*** Check for real IP header
+        # Check for real IP header
         real_ip = request.headers.get("x-real-ip")
         if real_ip:
             return real_ip
 
-        ***REMOVED*** Fallback to client host
+        # Fallback to client host
         return request.client.host if request.client else "unknown"
 
     def _get_user_id(self, request: Request) -> str:
         """Extract user ID from request."""
-        ***REMOVED*** Try to get from JWT token or session
+        # Try to get from JWT token or session
         auth_header = request.headers.get("authorization", "")
         if auth_header.startswith("Bearer "):
-            ***REMOVED*** In a real implementation, decode JWT to get user ID
+            # In a real implementation, decode JWT to get user ID
             return "authenticated_user"
 
         return "anonymous"
@@ -104,7 +104,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
             "tenant_id": settings.DEFAULT_TENANT_ID,
         }
 
-        ***REMOVED*** Remove sensitive headers
+        # Remove sensitive headers
         sensitive_headers = ["authorization", "x-api-key", "cookie"]
         for header in sensitive_headers:
             if header in audit_entry["headers"]:
@@ -159,7 +159,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
         """Check for security violations and log alerts."""
         violations = []
 
-        ***REMOVED*** Check for suspicious patterns
+        # Check for suspicious patterns
         if self._is_suspicious_request(request):
             violations.append("suspicious_request_pattern")
 
@@ -169,13 +169,13 @@ class AuditMiddleware(BaseHTTPMiddleware):
         if self._is_unauthorized_access_attempt(request, response):
             violations.append("unauthorized_access_attempt")
 
-        ***REMOVED*** Log violations
+        # Log violations
         for violation in violations:
             await self._log_security_alert(violation, request, client_ip, user_id)
 
     def _is_suspicious_request(self, request: Request) -> bool:
         """Check if request matches suspicious patterns."""
-        ***REMOVED*** Check for SQL injection patterns
+        # Check for SQL injection patterns
         sql_patterns = ["union select", "1=1", "or 1=1", "drop table", "script"]
         query_string = str(request.url).lower() + str(request.query_params).lower()
 
@@ -183,7 +183,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
 
     def _is_rate_limit_exceeded(self, client_ip: str) -> bool:
         """Check if client has exceeded rate limits."""
-        ***REMOVED*** In a real implementation, check Redis or database for rate limiting
+        # In a real implementation, check Redis or database for rate limiting
         return False
 
     def _is_unauthorized_access_attempt(self, request: Request, response: Response) -> bool:
@@ -208,7 +208,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
 
         await self._store_audit_log(alert_entry)
 
-        ***REMOVED*** Send alert notifications if critical
+        # Send alert notifications if critical
         if alert_entry["severity"] == "critical":
             await self._send_security_notification(alert_entry)
 
@@ -223,11 +223,11 @@ class AuditMiddleware(BaseHTTPMiddleware):
 
     async def _send_security_notification(self, alert: dict):
         """Send security notification to administrators."""
-        ***REMOVED*** In a real implementation, send email/SMS/push notifications
+        # In a real implementation, send email/SMS/push notifications
         print(f"SECURITY ALERT: {alert}")
 
     async def _store_audit_log(self, entry: dict):
         """Store audit log entry."""
-        ***REMOVED*** In a real implementation, store in Elasticsearch/PostgreSQL
-        ***REMOVED*** For now, just print to console
+        # In a real implementation, store in Elasticsearch/PostgreSQL
+        # For now, just print to console
         print(f"AUDIT: {json.dumps(entry, default=str)}")
