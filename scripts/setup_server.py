@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Setup-Skript für den ERP-Server.
 
@@ -40,11 +40,11 @@ def create_dummy_modules():
     """Erstellt fehlende Dummy-Module, damit der Server starten kann."""
     print("Erstelle fehlende Module...")
     
-    ***REMOVED*** Backend-Modul für spätere Importe korrekt initialisieren
+    # Backend-Modul für spätere Importe korrekt initialisieren
     os.makedirs("backend/models/notfall", exist_ok=True)
     os.makedirs("backend/models/produktion", exist_ok=True)
     
-    ***REMOVED*** Erstelle leere __init__.py Dateien für Python-Module
+    # Erstelle leere __init__.py Dateien für Python-Module
     module_paths = [
         "backend/models/notfall",
         "backend/models/produktion"
@@ -56,7 +56,7 @@ def create_dummy_modules():
             with open(init_file, "w") as f:
                 f.write('"""Leeres Modul."""\n')
     
-    ***REMOVED*** Fehlende API-Module erstellen
+    # Fehlende API-Module erstellen
     missing_apis = [
         "backend/api/notifications_api.py",
         "backend/api/chargen_api.py",
@@ -75,23 +75,23 @@ def fix_imports():
     """Korrigiert Importpfade in den Modulen."""
     print("Korrigiere Importpfade...")
     
-    ***REMOVED*** Korrigiere die __init__.py in der API
+    # Korrigiere die __init__.py in der API
     api_init_path = "backend/api/__init__.py"
     
     try:
-        ***REMOVED*** Backup erstellen
+        # Backup erstellen
         shutil.copy2(api_init_path, f"{api_init_path}.backup")
         
         with open(api_init_path, "r") as f:
             content = f.read()
         
-        ***REMOVED*** Füge try/except-Blöcke um problematische Importe ein
+        # Füge try/except-Blöcke um problematische Importe ein
         modified_content = content.replace(
             "from .partner_api import router as partner_router",
             "try:\n    from .partner_api import router as partner_router\n    api_router.include_router(partner_router, prefix=\"/partner\", tags=[\"Partner\"])\nexcept ImportError as e:\n    print(f\"Partner-API konnte nicht importiert werden: {e}\")"
         )
         
-        ***REMOVED*** Entferne include_router-Zeilen, da sie jetzt in den try-Blöcken sind
+        # Entferne include_router-Zeilen, da sie jetzt in den try-Blöcken sind
         lines = modified_content.split("\n")
         cleaned_lines = []
         
@@ -106,16 +106,16 @@ def fix_imports():
     except Exception as e:
         print(f"Fehler beim Korrigieren der API-Initialisierungsdatei: {e}")
     
-    ***REMOVED*** Korrigiere Importpfade in emergency_api.py
+    # Korrigiere Importpfade in emergency_api.py
     try:
         emergency_api_path = "backend/api/emergency_api.py"
         if os.path.exists(emergency_api_path):
             with open(emergency_api_path, "r") as f:
                 content = f.read()
             
-            ***REMOVED*** Ersetze problematische Importpfade
+            # Ersetze problematische Importpfade
             content = content.replace("from ..db.database", "from backend.db.database")
-            content = content.replace("from ..services.emergency_service", "try:\n    from backend.services.emergency_service import EmergencyService\nexcept ImportError:\n    ***REMOVED*** Dummy-Service\n    class EmergencyService:\n        def __init__(self): pass")
+            content = content.replace("from ..services.emergency_service", "try:\n    from backend.services.emergency_service import EmergencyService\nexcept ImportError:\n    # Dummy-Service\n    class EmergencyService:\n        def __init__(self): pass")
             
             with open(emergency_api_path, "w") as f:
                 f.write(content)
@@ -124,14 +124,14 @@ def fix_imports():
     except Exception as e:
         print(f"Fehler beim Korrigieren der Emergency-API: {e}")
     
-    ***REMOVED*** Korrigiere Importpfade in inventory_api.py
+    # Korrigiere Importpfade in inventory_api.py
     try:
         inventory_api_path = "backend/api/inventory_api.py"
         if os.path.exists(inventory_api_path):
             with open(inventory_api_path, "r") as f:
                 content = f.read()
             
-            ***REMOVED*** Ersetze problematischen Import
+            # Ersetze problematischen Import
             content = content.replace("from enhanced_cache_manager import cache", "from backend.enhanced_cache_manager import cache")
             
             with open(inventory_api_path, "w") as f:
@@ -147,17 +147,17 @@ def fix_database_structure():
     """Korrigiert die Datenbankstruktur, um doppelte Tabellenregistrierungen zu vermeiden."""
     print("Korrigiere Datenbankstruktur...")
     
-    ***REMOVED*** Korrigiere die Modellinitialisierung
+    # Korrigiere die Modellinitialisierung
     try:
         models_init_path = "backend/models/__init__.py"
         if os.path.exists(models_init_path):
             with open(models_init_path, "r") as f:
                 content = f.read()
             
-            ***REMOVED*** Füge extend_existing=True hinzu, um Konflikte zu vermeiden
+            # Füge extend_existing=True hinzu, um Konflikte zu vermeiden
             modified_content = content.replace(
                 "from sqlalchemy import Column",
-                "from sqlalchemy import Column, MetaData\n\n***REMOVED*** Metadata mit extend_existing=True konfigurieren\nmetadata = MetaData()"
+                "from sqlalchemy import Column, MetaData\n\n# Metadata mit extend_existing=True konfigurieren\nmetadata = MetaData()"
             )
             
             with open(models_init_path, "w") as f:
@@ -167,20 +167,20 @@ def fix_database_structure():
     except Exception as e:
         print(f"Fehler beim Korrigieren der Modellinitialisierung: {e}")
     
-    ***REMOVED*** Korrigiere Base in database.py
+    # Korrigiere Base in database.py
     try:
         database_path = "backend/db/database.py"
         if os.path.exists(database_path):
             with open(database_path, "r") as f:
                 content = f.read()
             
-            ***REMOVED*** Verwende MetaData mit extend_existing=True
+            # Verwende MetaData mit extend_existing=True
             modified_content = content.replace(
                 "Base = declarative_base()",
                 "from sqlalchemy.ext.declarative import declarative_base\nBase = declarative_base(metadata=MetaData(bind=engine))"
             )
             
-            ***REMOVED*** Importiere MetaData
+            # Importiere MetaData
             modified_content = modified_content.replace(
                 "from sqlalchemy import create_engine",
                 "from sqlalchemy import create_engine, MetaData"
@@ -199,14 +199,14 @@ def create_basic_router():
     """Erstellt einen grundlegenden API-Router, falls der bestehende nicht funktioniert."""
     print("Erstelle grundlegenden API-Router...")
     
-    ***REMOVED*** Backup der bestehenden __init__.py erstellen
+    # Backup der bestehenden __init__.py erstellen
     api_init_path = "backend/api/__init__.py"
     backup_path = f"{api_init_path}.full_backup"
     
     if not os.path.exists(backup_path):
         shutil.copy2(api_init_path, backup_path)
     
-    ***REMOVED*** Erstelle einen neuen, minimalen Router
+    # Erstelle einen neuen, minimalen Router
     with open(api_init_path, "w") as f:
         f.write('''"""
 API-Modul-Initialisierung für das modulare ERP-System.
@@ -215,10 +215,10 @@ Dieses Modul definiert Router und API-Endpunkte für verschiedene Funktionsberei
 
 from fastapi import APIRouter
 
-***REMOVED*** Haupt-Router für alle API-Endpunkte
+# Haupt-Router für alle API-Endpunkte
 api_router = APIRouter()
 
-***REMOVED*** Router für Batch-Operationen und Performance-Monitoring
+# Router für Batch-Operationen und Performance-Monitoring
 try:
     from .batch_api import router as batch_router
     api_router.include_router(batch_router, prefix="/batch", tags=["Batch"])
@@ -233,7 +233,7 @@ try:
 except ImportError as e:
     print(f"Performance-API konnte nicht importiert werden: {e}")
 
-***REMOVED*** Status-API für Health-Checks und Monitoring
+# Status-API für Health-Checks und Monitoring
 @api_router.get("/status", tags=["System"])
 async def status():
     """Grundlegender Statusendpunkt für Health-Checks"""
@@ -247,12 +247,12 @@ def main():
     """Hauptfunktion des Setup-Skripts."""
     print("=== ERP-Server-Setup ===")
     
-    ***REMOVED*** Überprüfe das aktuelle Verzeichnis
+    # Überprüfe das aktuelle Verzeichnis
     if not os.path.isdir("backend"):
         print("Fehler: Dieses Skript muss im Hauptverzeichnis des Projekts ausgeführt werden!")
         return False
     
-    ***REMOVED*** Führe die Setup-Schritte aus
+    # Führe die Setup-Schritte aus
     steps = [
         ("Abhängigkeiten installieren", install_dependencies),
         ("Fehlende Module erstellen", create_dummy_modules),

@@ -1,29 +1,27 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useBenutzer, type Benutzer } from '@/lib/api/admin'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { FileDown, Plus, Search } from 'lucide-react'
-
-type Benutzer = {
-  id: string
-  name: string
-  email: string
-  rolle: string
-  status: 'aktiv' | 'inaktiv'
-  letzteAnmeldung: string
-}
-
-const mockBenutzer: Benutzer[] = [
-  { id: '1', name: 'Admin User', email: 'admin@valeo.de', rolle: 'Administrator', status: 'aktiv', letzteAnmeldung: '2025-10-11' },
-  { id: '2', name: 'Sales User', email: 'sales@valeo.de', rolle: 'Vertrieb', status: 'aktiv', letzteAnmeldung: '2025-10-10' },
-]
 
 export default function BenutzerListePage(): JSX.Element {
   const navigate = useNavigate()
+  const { data: items, isLoading } = useBenutzer()
   const [searchTerm, setSearchTerm] = useState('')
+
+  if (isLoading) return (
+    <div className="p-3 md:p-6 space-y-4">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>
+  )
+
+  const list = items ?? []
 
   const columns = [
     {
@@ -50,7 +48,7 @@ export default function BenutzerListePage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Benutzerverwaltung</h1>
@@ -82,7 +80,7 @@ export default function BenutzerListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockBenutzer} columns={columns} />
+          <DataTable data={list} columns={columns} />
         </CardContent>
       </Card>
     </div>

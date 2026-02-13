@@ -92,9 +92,10 @@ def main() -> None:
         print(f"Failed to connect to the database: {exc}")
         sys.exit(2)
     finally:
-        ***REMOVED*** Ensure connections are closed cleanly
+        # Ensure connections are closed cleanly
         SessionLocal.close_all()
 
 
 if __name__ == "__main__":
     main()
+

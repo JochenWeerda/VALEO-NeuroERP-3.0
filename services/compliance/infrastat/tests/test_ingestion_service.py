@@ -29,14 +29,14 @@ class FakeAsyncSession:
     def add_all(self, objs: list[Any]) -> None:
         self.added.extend(objs)
 
-    async def flush(self) -> None:  ***REMOVED*** pragma: no cover - nothing to do in fake session
+    async def flush(self) -> None:  # pragma: no cover - nothing to do in fake session
         return None
 
 
 @pytest.mark.asyncio
 async def test_ingestion_sets_ready_status() -> None:
     session = FakeAsyncSession()
-    service = InfrastatIngestionService(session)  ***REMOVED*** type: ignore[arg-type]
+    service = InfrastatIngestionService(session)  # type: ignore[arg-type]
     validator = InfrastatValidator()
     event_bus = DummyEventBus()
 
@@ -66,7 +66,7 @@ async def test_ingestion_sets_ready_status() -> None:
         payload,
         validator,
         tenant_id="tenant-a",
-        event_bus=event_bus,  ***REMOVED*** type: ignore[arg-type]
+        event_bus=event_bus,  # type: ignore[arg-type]
     )
 
     assert batch.status == models.DeclarationStatus.READY
@@ -78,7 +78,7 @@ async def test_ingestion_sets_ready_status() -> None:
 @pytest.mark.asyncio
 async def test_ingestion_with_validation_errors_emits_failure_event() -> None:
     session = FakeAsyncSession()
-    service = InfrastatIngestionService(session)  ***REMOVED*** type: ignore[arg-type]
+    service = InfrastatIngestionService(session)  # type: ignore[arg-type]
     validator = InfrastatValidator()
     event_bus = DummyEventBus()
 
@@ -92,7 +92,7 @@ async def test_ingestion_with_validation_errors_emits_failure_event() -> None:
                 commodity_code="12099190",
                 country_of_origin="DE",
                 country_of_destination="FR",
-                net_mass_kg=-5.0,  ***REMOVED*** invalid -> validation error
+                net_mass_kg=-5.0,  # invalid -> validation error
                 supplementary_units=None,
                 invoice_value_eur=15000.0,
                 statistical_value_eur=None,
@@ -108,9 +108,10 @@ async def test_ingestion_with_validation_errors_emits_failure_event() -> None:
         payload,
         validator,
         tenant_id="tenant-b",
-        event_bus=event_bus,  ***REMOVED*** type: ignore[arg-type]
+        event_bus=event_bus,  # type: ignore[arg-type]
     )
 
     assert batch.status == models.DeclarationStatus.ERROR
     assert result.validation_error_count == 1
     assert event_bus.events and event_bus.events[0]["event_type"] == "intrastat.validation.failed"
+

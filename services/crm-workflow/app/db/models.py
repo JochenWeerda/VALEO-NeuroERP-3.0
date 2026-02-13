@@ -48,7 +48,7 @@ class ExecutionStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-enum_values = lambda enum_cls: [member.value for member in enum_cls]  ***REMOVED*** noqa: E731
+enum_values = lambda enum_cls: [member.value for member in enum_cls]  # noqa: E731
 
 
 class Workflow(Base):
@@ -69,8 +69,8 @@ class Workflow(Base):
         nullable=False,
     )
 
-    trigger_conditions: Mapped[dict] = mapped_column(JSON, nullable=False)  ***REMOVED*** Conditions that trigger the workflow
-    actions: Mapped[list[dict]] = mapped_column(JSON, nullable=False)  ***REMOVED*** List of actions to execute
+    trigger_conditions: Mapped[dict] = mapped_column(JSON, nullable=False)  # Conditions that trigger the workflow
+    actions: Mapped[list[dict]] = mapped_column(JSON, nullable=False)  # List of actions to execute
 
     is_active: Mapped[bool] = mapped_column(default=True)
     created_by: Mapped[str | None] = mapped_column(String(64))
@@ -99,9 +99,9 @@ class Trigger(Base):
         nullable=False,
     )
 
-    event_type: Mapped[str | None] = mapped_column(String(128))  ***REMOVED*** For event triggers
-    schedule_cron: Mapped[str | None] = mapped_column(String(128))  ***REMOVED*** For scheduled triggers
-    conditions: Mapped[dict] = mapped_column(JSON, nullable=False)  ***REMOVED*** Filter conditions
+    event_type: Mapped[str | None] = mapped_column(String(128))  # For event triggers
+    schedule_cron: Mapped[str | None] = mapped_column(String(128))  # For scheduled triggers
+    conditions: Mapped[dict] = mapped_column(JSON, nullable=False)  # Filter conditions
 
     workflow_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("crm_workflow_workflows.id"))
     is_active: Mapped[bool] = mapped_column(default=True)
@@ -128,8 +128,8 @@ class WorkflowExecution(Base):
         nullable=False,
     )
 
-    trigger_event: Mapped[dict] = mapped_column(JSON, nullable=False)  ***REMOVED*** The event that triggered execution
-    execution_context: Mapped[dict] = mapped_column(JSON, nullable=False)  ***REMOVED*** Variables and context
+    trigger_event: Mapped[dict] = mapped_column(JSON, nullable=False)  # The event that triggered execution
+    execution_context: Mapped[dict] = mapped_column(JSON, nullable=False)  # Variables and context
 
     started_at: Mapped[datetime | None] = mapped_column(DateTime)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime)
@@ -155,11 +155,11 @@ class Notification(Base):
         nullable=False,
     )
 
-    recipient: Mapped[str] = mapped_column(String(255), nullable=False)  ***REMOVED*** Email, user ID, webhook URL
+    recipient: Mapped[str] = mapped_column(String(255), nullable=False)  # Email, user ID, webhook URL
     subject: Mapped[str] = mapped_column(String(255), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)
 
-    status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")  ***REMOVED*** pending, sent, failed
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")  # pending, sent, failed
     sent_at: Mapped[datetime | None] = mapped_column(DateTime)
     error_message: Mapped[str | None] = mapped_column(Text)
 

@@ -12,11 +12,11 @@ class SalesActivityBase(BaseModel):
     opportunity_id: Optional[UUID] = None
     customer_id: Optional[UUID] = None
     contact_id: Optional[UUID] = None
-    activity_type: str = Field(..., max_length=32)  ***REMOVED*** call, meeting, email, demo, etc.
+    activity_type: str = Field(..., max_length=32)  # call, meeting, email, demo, etc.
     subject: str = Field(..., max_length=255)
     description: Optional[str] = None
-    status: str = "planned"  ***REMOVED*** planned, completed, cancelled
-    priority: str = "medium"  ***REMOVED*** high, medium, low
+    status: str = "planned"  # planned, completed, cancelled
+    priority: str = "medium"  # high, medium, low
     scheduled_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     duration_minutes: Optional[float] = Field(None, ge=0)

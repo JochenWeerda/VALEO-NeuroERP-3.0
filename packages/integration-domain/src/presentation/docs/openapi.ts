@@ -138,9 +138,9 @@ export const openApiSpec = {
                       properties: {
                         data: {
                           type: 'array',
-                          items: { $ref: '***REMOVED***/components/schemas/Integration' }
+                          items: { $ref: '#/components/schemas/Integration' }
                         },
-                        pagination: { $ref: '***REMOVED***/components/schemas/Pagination' }
+                        pagination: { $ref: '#/components/schemas/Pagination' }
                       }
                     }
                   }
@@ -181,7 +181,7 @@ export const openApiSpec = {
                   type: 'object',
                   properties: {
                     success: { type: 'boolean' },
-                    data: { $ref: '***REMOVED***/components/schemas/Integration' }
+                    data: { $ref: '#/components/schemas/Integration' }
                   }
                 }
               }
@@ -191,7 +191,7 @@ export const openApiSpec = {
             description: 'Integration with this name already exists',
             content: {
               'application/json': {
-                schema: { $ref: '***REMOVED***/components/schemas/Error' }
+                schema: { $ref: '#/components/schemas/Error' }
               }
             }
           },
@@ -199,7 +199,7 @@ export const openApiSpec = {
             description: 'Validation error',
             content: {
               'application/json': {
-                schema: { $ref: '***REMOVED***/components/schemas/ValidationError' }
+                schema: { $ref: '#/components/schemas/ValidationError' }
               }
             }
           }
@@ -229,7 +229,7 @@ export const openApiSpec = {
                   type: 'object',
                   properties: {
                     success: { type: 'boolean' },
-                    data: { $ref: '***REMOVED***/components/schemas/Integration' }
+                    data: { $ref: '#/components/schemas/Integration' }
                   }
                 }
               }
@@ -239,7 +239,7 @@ export const openApiSpec = {
             description: 'Integration not found',
             content: {
               'application/json': {
-                schema: { $ref: '***REMOVED***/components/schemas/Error' }
+                schema: { $ref: '#/components/schemas/Error' }
               }
             }
           }
@@ -285,7 +285,7 @@ export const openApiSpec = {
                   type: 'object',
                   properties: {
                     success: { type: 'boolean' },
-                    data: { $ref: '***REMOVED***/components/schemas/Integration' }
+                    data: { $ref: '#/components/schemas/Integration' }
                   }
                 }
               }
@@ -295,7 +295,7 @@ export const openApiSpec = {
             description: 'Integration not found',
             content: {
               'application/json': {
-                schema: { $ref: '***REMOVED***/components/schemas/Error' }
+                schema: { $ref: '#/components/schemas/Error' }
               }
             }
           }
@@ -322,7 +322,7 @@ export const openApiSpec = {
             description: 'Integration not found',
             content: {
               'application/json': {
-                schema: { $ref: '***REMOVED***/components/schemas/Error' }
+                schema: { $ref: '#/components/schemas/Error' }
               }
             }
           }
@@ -352,7 +352,7 @@ export const openApiSpec = {
                   type: 'object',
                   properties: {
                     success: { type: 'boolean' },
-                    data: { $ref: '***REMOVED***/components/schemas/Integration' }
+                    data: { $ref: '#/components/schemas/Integration' }
                   }
                 }
               }
@@ -362,7 +362,7 @@ export const openApiSpec = {
             description: 'Integration not found',
             content: {
               'application/json': {
-                schema: { $ref: '***REMOVED***/components/schemas/Error' }
+                schema: { $ref: '#/components/schemas/Error' }
               }
             }
           }
@@ -392,7 +392,7 @@ export const openApiSpec = {
                   type: 'object',
                   properties: {
                     success: { type: 'boolean' },
-                    data: { $ref: '***REMOVED***/components/schemas/Integration' }
+                    data: { $ref: '#/components/schemas/Integration' }
                   }
                 }
               }
@@ -402,7 +402,7 @@ export const openApiSpec = {
             description: 'Integration not found',
             content: {
               'application/json': {
-                schema: { $ref: '***REMOVED***/components/schemas/Error' }
+                schema: { $ref: '#/components/schemas/Error' }
               }
             }
           }
@@ -489,4 +489,5 @@ export const openApiSpec = {
     }
   }
 };
+
 

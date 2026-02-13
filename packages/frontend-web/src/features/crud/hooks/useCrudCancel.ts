@@ -45,8 +45,6 @@ export function useCrudCancel({
       await onCancel(entityToCancel.id, reason);
       setEntityToCancel(null);
       setCancelDialogOpen(false);
-    } catch (error) {
-      throw error;
     } finally {
       setIsCancelling(false);
     }

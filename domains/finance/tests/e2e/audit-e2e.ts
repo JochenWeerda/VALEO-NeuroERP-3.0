@@ -64,15 +64,15 @@ async function main() {
   const eventPublisher = new NoopEventPublisher()
 
   const service = new AuditAssistApplicationService(
-    // @ts-expect-error minimal interface compat for test
+    // @ts-ignore minimal interface compat for test
     auditTrailRepo,
-    // @ts-expect-error minimal interface compat for test
+    // @ts-ignore minimal interface compat for test
     documentRepo,
-    // @ts-expect-error minimal interface compat for test
+    // @ts-ignore minimal interface compat for test
     aiDecisionRepo,
-    // @ts-expect-error minimal interface compat for test
+    // @ts-ignore minimal interface compat for test
     complianceEngine,
-    // @ts-expect-error minimal interface compat for test
+    // @ts-ignore minimal interface compat for test
     eventPublisher
   )
 
@@ -111,5 +111,6 @@ main().catch((err) => {
   console.error('Audit E2E error', err)
   process.exit(1)
 })
+
 
 

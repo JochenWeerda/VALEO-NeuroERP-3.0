@@ -10,6 +10,8 @@
     "lint:fix": "pnpm -r run lint:fix",
     "test": "pnpm -r run test",
     "check:dupes": "node scripts/check-dupes.cjs",
+    "guard:paths:staged": "node scripts/guard-forbidden-paths.cjs --staged",
+    "guard:paths:range": "node scripts/guard-forbidden-paths.cjs --range",
     "ts:check": "tsc -b tsconfig.build.json",
     "dev": "pnpm -r run dev",
     "mcp:dev": "ts-node src/mcp-server.ts",

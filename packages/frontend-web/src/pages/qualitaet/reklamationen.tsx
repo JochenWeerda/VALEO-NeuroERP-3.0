@@ -1,33 +1,21 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertCircle, FileDown, Plus, Search } from 'lucide-react'
-
-type Reklamation = {
-  id: string
-  nummer: string
-  kunde: string
-  artikel: string
-  grund: string
-  datum: string
-  prioritaet: 'hoch' | 'normal' | 'niedrig'
-  status: 'neu' | 'in-bearbeitung' | 'geloest' | 'abgelehnt'
-}
-
-const mockReklamationen: Reklamation[] = [
-  { id: '1', nummer: 'REK-2025-001', kunde: 'Landhandel Nord', artikel: 'Weizen', grund: 'Feuchtigkeit zu hoch', datum: '2025-10-11', prioritaet: 'hoch', status: 'neu' },
-  { id: '2', nummer: 'REK-2025-002', kunde: 'Müller GmbH', artikel: 'Sojaschrot', grund: 'Falsche Menge', datum: '2025-10-10', prioritaet: 'normal', status: 'in-bearbeitung' },
-]
+import { useReklamationen, type Reklamation } from '@/lib/api/misc-modules'
 
 export default function ReklamationenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: reklamationen, isLoading } = useReklamationen()
+  const list = useMemo(() => reklamationen ?? [], [reklamationen])
 
-  const neu = mockReklamationen.filter((r) => r.status === 'neu').length
+  const neu = list.filter((r) => r.status === 'neu').length
 
   const columns = [
     {
@@ -57,7 +45,7 @@ export default function ReklamationenPage(): JSX.Element {
     },
     {
       key: 'prioritaet' as const,
-      label: 'Priorität',
+      label: 'Prioritaet',
       render: (r: Reklamation) => (
         <Badge variant={r.prioritaet === 'hoch' ? 'destructive' : r.prioritaet === 'normal' ? 'secondary' : 'outline'}>
           {r.prioritaet === 'hoch' ? 'Hoch' : r.prioritaet === 'normal' ? 'Normal' : 'Niedrig'}
@@ -69,18 +57,30 @@ export default function ReklamationenPage(): JSX.Element {
       label: 'Status',
       render: (r: Reklamation) => (
         <Badge variant={r.status === 'geloest' ? 'outline' : r.status === 'abgelehnt' ? 'destructive' : 'default'}>
-          {r.status === 'neu' ? 'Neu' : r.status === 'in-bearbeitung' ? 'In Bearbeitung' : r.status === 'geloest' ? 'Gelöst' : 'Abgelehnt'}
+          {r.status === 'neu' ? 'Neu' : r.status === 'in-bearbeitung' ? 'In Bearbeitung' : r.status === 'geloest' ? 'Geloest' : 'Abgelehnt'}
         </Badge>
       ),
     },
   ]
 
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-3 md:p-6">
+        <Skeleton className="h-10 w-48" />
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24" />)}
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Reklamationen</h1>
-          <p className="text-muted-foreground">Qualitäts-Beschwerden</p>
+          <p className="text-muted-foreground">Qualitaets-Beschwerden</p>
         </div>
         <Button onClick={() => navigate('/qualitaet/reklamation/neu')} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -101,49 +101,34 @@ export default function ReklamationenPage(): JSX.Element {
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Reklamationen Gesamt</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Reklamationen Gesamt</CardTitle></CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockReklamationen.length}</span>
+              <span className="text-2xl font-bold">{list.length}</span>
             </div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Neu</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Neu</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold text-red-600">{neu}</span></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle></CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{neu}</span>
+            <span className="text-2xl font-bold text-orange-600">{list.filter((r) => r.status === 'in-bearbeitung').length}</span>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Geloest</CardTitle></CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{mockReklamationen.filter((r) => r.status === 'in-bearbeitung').length}</span>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Gelöst</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockReklamationen.filter((r) => r.status === 'geloest').length}</span>
+            <span className="text-2xl font-bold text-green-600">{list.filter((r) => r.status === 'geloest').length}</span>
           </CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Suche</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle>Suche</CardTitle></CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <div className="relative flex-1">
@@ -160,7 +145,7 @@ export default function ReklamationenPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockReklamationen} columns={columns} />
+          <DataTable data={list} columns={columns} />
         </CardContent>
       </Card>
     </div>

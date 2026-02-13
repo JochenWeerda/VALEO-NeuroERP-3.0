@@ -18,6 +18,11 @@ from services.finance.app.middleware.metrics import PrometheusMiddleware
 from services.finance.app.middleware.correlation import CorrelationMiddleware
 from services.finance.app.core.logging import setup_logging
 
+try:
+    from auth_shared import AuthMiddleware
+except ImportError:
+    AuthMiddleware = None  # type: ignore[assignment,misc]
+
 setup_logging(json_format=True)
 logger = logging.getLogger(__name__)
 
@@ -48,6 +53,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Auth middleware (must be before other middleware)
+if AuthMiddleware is not None:
+    app.add_middleware(AuthMiddleware)
+    logger.info("Auth middleware enabled")
 
 app.add_middleware(PrometheusMiddleware)
 app.add_middleware(CorrelationMiddleware)

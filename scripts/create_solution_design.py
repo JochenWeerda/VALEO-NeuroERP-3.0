@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Erstellt ein Lösungsdesign mit Komponenten für den CREATE-Modus.
 """
@@ -10,12 +10,12 @@ import logging
 from datetime import datetime
 from bson import ObjectId
 
-***REMOVED*** Pfad zum Projekt-Root hinzufügen
+# Pfad zum Projekt-Root hinzufügen
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ async def create_solution_design():
     Erstellt ein Lösungsdesign mit Komponenten für den CREATE-Modus.
     """
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         mongodb_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
         mongodb_db = os.getenv("MONGODB_DB", "valeo_neuroerp")
         
@@ -33,10 +33,10 @@ async def create_solution_design():
         mongodb = APMMongoDBConnector(mongodb_uri, mongodb_db)
         await mongodb.connect()
         
-        ***REMOVED*** Projekt-ID festlegen
+        # Projekt-ID festlegen
         project_id = os.getenv("PROJECT_ID", "valeo_neuroerp_project")
         
-        ***REMOVED*** Neuestes PLAN-Ergebnis abrufen
+        # Neuestes PLAN-Ergebnis abrufen
         plan_results = await mongodb.find_many("plan_results", {"project_id": project_id}, 
                                               sort_field="timestamp", sort_order=-1, limit=1)
         
@@ -53,7 +53,7 @@ async def create_solution_design():
         logger.info(f"PLAN-Ergebnis gefunden: {plan_result_id}")
         logger.info(f"Design-ID: {design_id}")
         
-        ***REMOVED*** Komponenten für das Lösungsdesign erstellen
+        # Komponenten für das Lösungsdesign erstellen
         components = [
             {
                 "name": "UserAuthenticationComponent",
@@ -121,7 +121,7 @@ async def create_solution_design():
             }
         ]
         
-        ***REMOVED*** Entwurfsmuster für das Lösungsdesign erstellen
+        # Entwurfsmuster für das Lösungsdesign erstellen
         design_patterns = [
             {
                 "name": "Repository Pattern",
@@ -153,7 +153,7 @@ async def create_solution_design():
             }
         ]
         
-        ***REMOVED*** Ressourcen für das Lösungsdesign erstellen
+        # Ressourcen für das Lösungsdesign erstellen
         resources = [
             {
                 "name": "PostgreSQL-Datenbank",
@@ -211,7 +211,7 @@ async def create_solution_design():
             }
         ]
         
-        ***REMOVED*** Lösungsdesign aktualisieren
+        # Lösungsdesign aktualisieren
         update_dict = {
             "$set": {
                 "name": "VALEO-NeuroERP Lösungsdesign",
@@ -234,7 +234,7 @@ async def create_solution_design():
             }
         }
         
-        ***REMOVED*** Lösungsdesign in der Datenbank aktualisieren
+        # Lösungsdesign in der Datenbank aktualisieren
         await mongodb.update_one("solution_designs", {"_id": design_id}, update_dict)
         
         logger.info(f"Lösungsdesign mit ID {design_id} aktualisiert")
@@ -254,11 +254,11 @@ async def create_solution_design():
         print(f"\nFehler: {str(e)}")
     
     finally:
-        ***REMOVED*** MongoDB-Verbindung trennen
+        # MongoDB-Verbindung trennen
         if 'mongodb' in locals():
             await mongodb.disconnect()
 
 
 if __name__ == "__main__":
-    ***REMOVED*** Asynchrone Funktion ausführen
+    # Asynchrone Funktion ausführen
     asyncio.run(create_solution_design()) 

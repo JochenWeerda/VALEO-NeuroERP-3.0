@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 VALEO-NeuroERP - L3 Tabellen Analyzer
 Analysiert die L3-Tabellenstruktur und generiert PostgreSQL-Äquivalente
@@ -9,23 +9,23 @@ from pathlib import Path
 from collections import defaultdict
 from typing import Dict, List, Tuple
 
-***REMOVED*** Wichtige L3-Tabellen für Landhandel/ERP
+# Wichtige L3-Tabellen für Landhandel/ERP
 PRIORITY_TABLES = [
-    'ADRESSEN',          ***REMOVED*** Kundenadressen
-    'ARTIKEL',           ***REMOVED*** Artikel/Produkte
-    'BESTAND',           ***REMOVED*** Lagerbestand
-    'BELEGE',            ***REMOVED*** Belege (Angebote, Aufträge, Rechnungen)
-    'BELEGPOSITIONEN',   ***REMOVED*** Belegpositionen
-    'BUCHUNG',           ***REMOVED*** Buchungen
-    'KONTO',             ***REMOVED*** Kontenplan
-    'LIEFERANT',         ***REMOVED*** Lieferanten
-    'KUNDE',             ***REMOVED*** Kunden
-    'RECHNUNG',          ***REMOVED*** Rechnungen
-    'AUFTRAG',           ***REMOVED*** Aufträge
-    'ANGEBOT',           ***REMOVED*** Angebote
-    'SAATGUT',           ***REMOVED*** Saatgut
-    'DUENGEMITTEL',      ***REMOVED*** Düngemittel
-    'PSM',               ***REMOVED*** Pflanzenschutzmittel
+    'ADRESSEN',          # Kundenadressen
+    'ARTIKEL',           # Artikel/Produkte
+    'BESTAND',           # Lagerbestand
+    'BELEGE',            # Belege (Angebote, Aufträge, Rechnungen)
+    'BELEGPOSITIONEN',   # Belegpositionen
+    'BUCHUNG',           # Buchungen
+    'KONTO',             # Kontenplan
+    'LIEFERANT',         # Lieferanten
+    'KUNDE',             # Kunden
+    'RECHNUNG',          # Rechnungen
+    'AUFTRAG',           # Aufträge
+    'ANGEBOT',           # Angebote
+    'SAATGUT',           # Saatgut
+    'DUENGEMITTEL',      # Düngemittel
+    'PSM',               # Pflanzenschutzmittel
 ]
 
 def parse_l3_xhtml(file_path: str) -> Dict[str, List[str]]:
@@ -35,11 +35,11 @@ def parse_l3_xhtml(file_path: str) -> Dict[str, List[str]]:
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
     
-    ***REMOVED*** Extrahiere Tabellennamen und Spaltennamen
+    # Extrahiere Tabellennamen und Spaltennamen
     tables = defaultdict(list)
     current_table = None
     
-    ***REMOVED*** Regex für Tabellenzeilen
+    # Regex für Tabellenzeilen
     row_pattern = re.compile(r'<p>(.*?)</p>')
     
     lines = content.split('</tr>')
@@ -50,7 +50,7 @@ def parse_l3_xhtml(file_path: str) -> Dict[str, List[str]]:
             column_name = matches[1].strip()
             
             if table_name and column_name:
-                if table_name != 'TABLE_NAME':  ***REMOVED*** Header überspringen
+                if table_name != 'TABLE_NAME':  # Header überspringen
                     tables[table_name].append(column_name)
     
     print(f"✅ {len(tables)} Tabellen gefunden")
@@ -60,46 +60,46 @@ def map_l3_to_postgres_type(column_name: str) -> str:
     """Mapped L3-Spaltentypen auf PostgreSQL-Typen"""
     column_upper = column_name.upper()
     
-    ***REMOVED*** ID/Key-Felder
+    # ID/Key-Felder
     if column_upper in ['ID', 'DBID', 'NUMMER', 'NR', 'SCHLUESSEL']:
         return 'SERIAL PRIMARY KEY' if column_upper == 'ID' else 'INTEGER'
     
-    ***REMOVED*** Datums-Felder
+    # Datums-Felder
     if 'DATUM' in column_upper or column_upper in ['LTDATUM', 'BUCHDATUM']:
         return 'DATE'
     
-    ***REMOVED*** Betrags-Felder
+    # Betrags-Felder
     if column_upper.startswith('D') or 'BETRAG' in column_upper or 'PREIS' in column_upper:
         if 'DBETRAG' in column_upper or 'DPREIS' in column_upper:
             return 'DECIMAL(12,2)'
     
-    ***REMOVED*** Boolean-Felder
+    # Boolean-Felder
     if column_upper.startswith('I') and len(column_upper) > 1:
         return 'BOOLEAN DEFAULT FALSE'
     
-    ***REMOVED*** Mengen-Felder
+    # Mengen-Felder
     if 'MENGE' in column_upper or 'ANZAHL' in column_upper:
         return 'DECIMAL(10,2)'
     
-    ***REMOVED*** Text-Felder
+    # Text-Felder
     if any(x in column_upper for x in ['NAME', 'BEZEICH', 'TEXT', 'BESCHR', 'ORT', 'STRASSE']):
         if 'NAME1' in column_upper or 'TEXT' in column_upper:
             return 'VARCHAR(255)'
         return 'VARCHAR(255)'
     
-    ***REMOVED*** Codes/Kennzeichen
+    # Codes/Kennzeichen
     if any(x in column_upper for x in ['CODE', 'PLZ', 'TELEFON', 'FAX', 'EMAIL']):
         if 'EMAIL' in column_upper:
             return 'VARCHAR(255)'
         return 'VARCHAR(100)'
     
-    ***REMOVED*** Default
+    # Default
     return 'VARCHAR(255)'
 
 def generate_postgresql_create_table(table_name: str, columns: List[str]) -> str:
     """Generiert CREATE TABLE Statement für PostgreSQL"""
     
-    ***REMOVED*** Tabellenname in Kleinbuchstaben + l3_ Präfix
+    # Tabellenname in Kleinbuchstaben + l3_ Präfix
     pg_table_name = f"l3_{table_name.lower()}"
     
     sql = f"-- {table_name}\n"
@@ -112,25 +112,25 @@ def generate_postgresql_create_table(table_name: str, columns: List[str]) -> str
         col_name = col.lower()
         col_type = map_l3_to_postgres_type(col)
         
-        ***REMOVED*** Erste Spalte ist meist Primary Key
+        # Erste Spalte ist meist Primary Key
         if i == 0 and col.upper() in ['ID', 'SCHLUESSEL', 'NUMMER']:
             col_type = 'SERIAL PRIMARY KEY'
         
         column_defs.append(f"    {col_name} {col_type}")
         
-        ***REMOVED*** Indices erstellen für wichtige Felder
+        # Indices erstellen für wichtige Felder
         if any(x in col.upper() for x in ['NUMMER', 'NAME', 'DATUM', 'KUNDE', 'ARTIKEL']):
             if 'PRIMARY KEY' not in col_type:
                 indices.append(f"CREATE INDEX IF NOT EXISTS idx_{pg_table_name}_{col_name} ON {pg_table_name}({col_name});")
     
-    ***REMOVED*** Timestamp-Felder hinzufügen
+    # Timestamp-Felder hinzufügen
     column_defs.append("    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     column_defs.append("    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     
     sql += ",\n".join(column_defs)
     sql += "\n);\n"
     
-    ***REMOVED*** Indices anhängen
+    # Indices anhängen
     if indices:
         sql += "\n" + "\n".join(indices) + "\n"
     
@@ -160,10 +160,10 @@ def main():
     print("VALEO-NeuroERP - L3 Tabellen Analyzer")
     print("=" * 80)
     
-    ***REMOVED*** Parse L3-Struktur
+    # Parse L3-Struktur
     tables = parse_l3_xhtml(l3_file)
     
-    ***REMOVED*** Generiere SQL für Prioritäts-Tabellen
+    # Generiere SQL für Prioritäts-Tabellen
     print(f"\n📝 Generiere PostgreSQL CREATE TABLE Statements...")
     sql_output = "-- ============================================================================\n"
     sql_output += "-- VALEO-NeuroERP - L3 Import Tabellen (PostgreSQL)\n"
@@ -178,26 +178,26 @@ def main():
             sql_output += "\n"
             priority_count += 1
     
-    ***REMOVED*** Schreibe SQL-Datei
+    # Schreibe SQL-Datei
     with open(output_sql, 'w', encoding='utf-8') as f:
         f.write(sql_output)
     print(f"✅ SQL generiert: {output_sql} ({priority_count} Tabellen)")
     
-    ***REMOVED*** Generiere Import-Mapping
+    # Generiere Import-Mapping
     print(f"\n📊 Generiere Import-Mapping...")
     mapping_json = generate_import_mapping(tables)
     with open(output_mapping, 'w', encoding='utf-8') as f:
         f.write(mapping_json)
     print(f"✅ Mapping generiert: {output_mapping}")
     
-    ***REMOVED*** Statistik
+    # Statistik
     print(f"\n📈 Statistik:")
     print(f"   - Gesamt-Tabellen in L3: {len(tables)}")
     print(f"   - Prioritäts-Tabellen gefunden: {priority_count}/{len(PRIORITY_TABLES)}")
     print(f"   - SQL-Datei: {output_sql}")
     print(f"   - Mapping-Datei: {output_mapping}")
     
-    ***REMOVED*** Zeige fehlende Prioritäts-Tabellen
+    # Zeige fehlende Prioritäts-Tabellen
     missing = set(PRIORITY_TABLES) - set(tables.keys())
     if missing:
         print(f"\n⚠️  Fehlende Prioritäts-Tabellen in L3:")
@@ -210,4 +210,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

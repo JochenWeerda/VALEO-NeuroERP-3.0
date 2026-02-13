@@ -8,15 +8,15 @@ const SEVERITY_THRESHOLD_WARNING = -0.15
 const SCORE_MIN = -1
 const SCORE_MAX = 1
 
-const COLOR_RED_100 = "***REMOVED***FEE2E2"
-const COLOR_AMBER_100 = "***REMOVED***FEF3C7"
-const COLOR_CYAN_50 = "***REMOVED***ECFEFF"
-const COLOR_EMERALD_100 = "***REMOVED***D1FAE5"
-const COLOR_EMERALD_200 = "***REMOVED***A7F3D0"
+const COLOR_RED_100 = "#FEE2E2"
+const COLOR_AMBER_100 = "#FEF3C7"
+const COLOR_CYAN_50 = "#ECFEFF"
+const COLOR_EMERALD_100 = "#D1FAE5"
+const COLOR_EMERALD_200 = "#A7F3D0"
 
-const COLOR_RED_300 = "***REMOVED***FCA5A5"
-const COLOR_AMBER_300 = "***REMOVED***FCD34D"
-const COLOR_EMERALD_300 = "***REMOVED***6EE7B7"
+const COLOR_RED_300 = "#FCA5A5"
+const COLOR_AMBER_300 = "#FCD34D"
+const COLOR_EMERALD_300 = "#6EE7B7"
 
 export type Severity = "ok" | "warn" | "crit"
 
@@ -72,3 +72,4 @@ export function severityBorder(severity: Severity): string {
   }
   return COLOR_EMERALD_300
 }
+

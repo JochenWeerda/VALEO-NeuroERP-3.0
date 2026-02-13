@@ -1,8 +1,8 @@
-***REMOVED*** Scheduler Domain
+# Scheduler Domain
 
 A comprehensive scheduling service built with Domain-Driven Design (DDD) principles, providing reliable job scheduling with support for CRON expressions, recurring rules, and event-driven execution.
 
-***REMOVED******REMOVED*** Features
+## Features
 
 - **Multiple Trigger Types**: CRON expressions, RRULE (iCal), fixed delays, and one-shot schedules
 - **Flexible Targets**: Event publishing, HTTP webhooks, and queue messaging
@@ -12,39 +12,39 @@ A comprehensive scheduling service built with Domain-Driven Design (DDD) princip
 - **Health Checks**: Comprehensive health, readiness, and liveness endpoints
 - **Docker Support**: Production-ready containerization
 
-***REMOVED******REMOVED*** Architecture
+## Architecture
 
-***REMOVED******REMOVED******REMOVED*** Domain Layer
+### Domain Layer
 - **Entities**: `ScheduleEntity` with business logic and validation
 - **Services**: `SchedulingService` for schedule execution and management
 - **Events**: Domain events for schedule lifecycle
 
-***REMOVED******REMOVED******REMOVED*** Infrastructure Layer
+### Infrastructure Layer
 - **Repository**: Data access layer with Drizzle ORM
 - **Messaging**: Event publishing infrastructure
 - **Security**: JWT authentication and RBAC
 - **Telemetry**: Logging and tracing
 
-***REMOVED******REMOVED******REMOVED*** Application Layer
+### Application Layer
 - **Routes**: REST API endpoints with OpenAPI documentation
 - **Middleware**: Authentication, tenant isolation, and request logging
 - **Server**: Fastify-based HTTP server
 
-***REMOVED******REMOVED*** Quick Start
+## Quick Start
 
-***REMOVED******REMOVED******REMOVED*** Prerequisites
+### Prerequisites
 - Node.js 18+
 - PostgreSQL
 - Redis (optional, for distributed locking)
 - NATS (optional, for event publishing)
 
-***REMOVED******REMOVED******REMOVED*** Installation
+### Installation
 
 ```bash
 npm install
 ```
 
-***REMOVED******REMOVED******REMOVED*** Configuration
+### Configuration
 
 Copy the example environment file:
 
@@ -55,22 +55,22 @@ cp .env.example .env
 Configure the following environment variables:
 
 ```env
-***REMOVED*** Server
+# Server
 PORT=3080
 HOST=0.0.0.0
 
-***REMOVED*** Database
+# Database
 POSTGRES_URL=postgres://user:pass@localhost:5432/scheduler
 
-***REMOVED*** Authentication
+# Authentication
 JWKS_URL=https://auth.example.com/.well-known/jwks.json
 
-***REMOVED*** Observability
+# Observability
 LOG_LEVEL=info
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 ```
 
-***REMOVED******REMOVED******REMOVED*** Database Setup
+### Database Setup
 
 Run the database migrations:
 
@@ -78,22 +78,22 @@ Run the database migrations:
 npm run migrate:up
 ```
 
-***REMOVED******REMOVED******REMOVED*** Development
+### Development
 
 ```bash
 npm run dev
 ```
 
-***REMOVED******REMOVED******REMOVED*** Production
+### Production
 
 ```bash
 npm run build
 npm start
 ```
 
-***REMOVED******REMOVED*** API Documentation
+## API Documentation
 
-***REMOVED******REMOVED******REMOVED*** Create Schedule
+### Create Schedule
 
 ```http
 POST /schedules
@@ -117,7 +117,7 @@ Content-Type: application/json
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** List Schedules
+### List Schedules
 
 ```http
 GET /schedules?tenantId=tenant-123&page=1&pageSize=20
@@ -125,7 +125,7 @@ Authorization: Bearer <token>
 X-Tenant-Id: <tenant-id>
 ```
 
-***REMOVED******REMOVED******REMOVED*** Update Schedule
+### Update Schedule
 
 ```http
 PATCH /schedules/{id}
@@ -138,9 +138,9 @@ Content-Type: application/json
 }
 ```
 
-***REMOVED******REMOVED*** Schedule Types
+## Schedule Types
 
-***REMOVED******REMOVED******REMOVED*** CRON Schedules
+### CRON Schedules
 ```json
 {
   "trigger": {
@@ -150,7 +150,7 @@ Content-Type: application/json
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** RRULE Schedules
+### RRULE Schedules
 ```json
 {
   "trigger": {
@@ -160,7 +160,7 @@ Content-Type: application/json
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Fixed Delay Schedules
+### Fixed Delay Schedules
 ```json
 {
   "trigger": {
@@ -170,7 +170,7 @@ Content-Type: application/json
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** One-shot Schedules
+### One-shot Schedules
 ```json
 {
   "trigger": {
@@ -180,9 +180,9 @@ Content-Type: application/json
 }
 ```
 
-***REMOVED******REMOVED*** Target Types
+## Target Types
 
-***REMOVED******REMOVED******REMOVED*** Event Targets
+### Event Targets
 ```json
 {
   "target": {
@@ -192,7 +192,7 @@ Content-Type: application/json
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** HTTP Targets
+### HTTP Targets
 ```json
 {
   "target": {
@@ -208,7 +208,7 @@ Content-Type: application/json
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Queue Targets
+### Queue Targets
 ```json
 {
   "target": {
@@ -220,24 +220,24 @@ Content-Type: application/json
 }
 ```
 
-***REMOVED******REMOVED*** Health Checks
+## Health Checks
 
-***REMOVED******REMOVED******REMOVED*** Health Check
+### Health Check
 ```http
 GET /health
 ```
 
-***REMOVED******REMOVED******REMOVED*** Readiness Check
+### Readiness Check
 ```http
 GET /ready
 ```
 
-***REMOVED******REMOVED******REMOVED*** Liveness Check
+### Liveness Check
 ```http
 GET /live
 ```
 
-***REMOVED******REMOVED*** Docker
+## Docker
 
 Build the Docker image:
 
@@ -261,7 +261,7 @@ services:
       - db
 ```
 
-***REMOVED******REMOVED*** Testing
+## Testing
 
 Run unit tests:
 
@@ -275,35 +275,35 @@ Run tests with coverage:
 npm run test:coverage
 ```
 
-***REMOVED******REMOVED*** Development
+## Development
 
-***REMOVED******REMOVED******REMOVED*** Project Structure
+### Project Structure
 
 ```
 src/
 ├── app/
-│   ├── middleware/     ***REMOVED*** Request middleware
-│   ├── routes/         ***REMOVED*** API routes
-│   └── server.ts       ***REMOVED*** Fastify server setup
+│   ├── middleware/     # Request middleware
+│   ├── routes/         # API routes
+│   └── server.ts       # Fastify server setup
 ├── domain/
-│   ├── entities/       ***REMOVED*** Domain entities
-│   └── services/       ***REMOVED*** Domain services
+│   ├── entities/       # Domain entities
+│   └── services/       # Domain services
 ├── infra/
-│   ├── db/            ***REMOVED*** Database schema and connections
-│   ├── messaging/     ***REMOVED*** Event publishing
-│   ├── repo/          ***REMOVED*** Data repositories
-│   ├── security/      ***REMOVED*** Authentication & authorization
-│   └── telemetry/     ***REMOVED*** Logging and tracing
-└── index.ts           ***REMOVED*** Main exports
+│   ├── db/            # Database schema and connections
+│   ├── messaging/     # Event publishing
+│   ├── repo/          # Data repositories
+│   ├── security/      # Authentication & authorization
+│   └── telemetry/     # Logging and tracing
+└── index.ts           # Main exports
 ```
 
-***REMOVED******REMOVED******REMOVED*** Adding New Features
+### Adding New Features
 
 1. **Domain Logic**: Add to `src/domain/`
 2. **API Endpoints**: Add to `src/app/routes/`
 3. **Infrastructure**: Add to `src/infra/`
 4. **Tests**: Add to `tests/`
 
-***REMOVED******REMOVED*** License
+## License
 
 MIT

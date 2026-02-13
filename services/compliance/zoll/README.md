@@ -1,8 +1,8 @@
-***REMOVED*** Zoll- & Exportkontrollservice
+# Zoll- & Exportkontrollservice
 
 Microservice für Sanktionslistenscreening, Genehmigungsverwaltung und Präferenzkalkulation.
 
-***REMOVED******REMOVED*** Features
+## Features
 
 - Screening-Engine gegen lokale/remote Sanktionslisten (EU, OFAC) (`/api/v1/screening/matches`) – publiziert Events `export.screening.cleared|review|failed`
 - Exportgenehmigungen CRUD (`/api/v1/permits`)
@@ -12,19 +12,19 @@ Microservice für Sanktionslistenscreening, Genehmigungsverwaltung und Präferen
 - Prometheus-Metriken (`zoll_sanctions_refresh_total`, `zoll_screening_status_total`, `zoll_sanctions_refresh_backoff_minutes`)
 - Workflow `export_clearance` wird beim Start beim Workflow-Service registriert
 
-***REMOVED******REMOVED*** Lokal starten
+## Lokal starten
 
 ```bash
 uvicorn main:app --reload --port 5300
 ```
 
-***REMOVED******REMOVED*** Tests
+## Tests
 
 ```bash
 pytest services/compliance/zoll/tests
 ```
 
-***REMOVED******REMOVED*** Konfiguration
+## Konfiguration
 
 Wichtige Variablen:
 - `ZOLL_SANCTIONS_REFRESH_URL`, `ZOLL_OFAC_API_KEY`, `ZOLL_EU_API_KEY`
@@ -33,7 +33,8 @@ Wichtige Variablen:
 - `ZOLL_SANCTIONS_REFRESH_MAX_BACKOFF_MINUTES`
 - `ZOLL_WORKFLOW_TENANT`
 
-***REMOVED******REMOVED*** TODO
+## TODO
 
 - Erweiterte Workflow-Policies (rollenspezifische Reviews) im Workflow-Service UI ausrollen
 - Präferenz- und Permit-APIs mit Frontend verbinden
+

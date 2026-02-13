@@ -25,7 +25,7 @@ async def create_bank_account(
     Create a new bank account.
     """
     try:
-        ***REMOVED*** Check if account number already exists
+        # Check if account number already exists
         check_query = text("""
             SELECT id FROM domain_erp.bank_accounts 
             WHERE account_number = :account_number AND tenant_id = :tenant_id
@@ -44,7 +44,7 @@ async def create_bank_account(
                 detail=f"Bank account with number {account_data.account_number} already exists"
             )
 
-        ***REMOVED*** Insert new bank account
+        # Insert new bank account
         insert_query = text("""
             INSERT INTO domain_erp.bank_accounts 
             (tenant_id, account_number, bank_name, iban, bic, currency, balance, is_active)
@@ -102,7 +102,7 @@ async def list_bank_accounts(
     try:
         effective_tenant_id = tenant_id or "system"
         
-        ***REMOVED*** Build query
+        # Build query
         where_clauses = ["tenant_id = :tenant_id"]
         params = {"tenant_id": effective_tenant_id}
         
@@ -112,13 +112,13 @@ async def list_bank_accounts(
         
         where_sql = " AND ".join(where_clauses)
         
-        ***REMOVED*** Count total
+        # Count total
         count_query = text(f"""
             SELECT COUNT(*) FROM domain_erp.bank_accounts WHERE {where_sql}
         """)
         total = db.execute(count_query, params).scalar()
         
-        ***REMOVED*** Get paginated results
+        # Get paginated results
         list_query = text(f"""
             SELECT id, tenant_id, account_number, bank_name, iban, bic, currency, balance, is_active, created_at, updated_at
             FROM domain_erp.bank_accounts
@@ -209,7 +209,7 @@ async def update_bank_account(
     Update bank account information.
     """
     try:
-        ***REMOVED*** Check if account exists
+        # Check if account exists
         existing = db.execute(
             text("SELECT id FROM domain_erp.bank_accounts WHERE id = :account_id"),
             {"account_id": account_id}
@@ -218,7 +218,7 @@ async def update_bank_account(
         if not existing:
             raise HTTPException(status_code=404, detail="Bank account not found")
         
-        ***REMOVED*** Build update query dynamically
+        # Build update query dynamically
         update_fields = []
         params = {"account_id": account_id}
         
@@ -247,7 +247,7 @@ async def update_bank_account(
             params["is_active"] = account_data.is_active
         
         if not update_fields:
-            ***REMOVED*** No fields to update, return existing account
+            # No fields to update, return existing account
             return await get_bank_account(account_id, db)
         
         update_fields.append("updated_at = NOW()")
@@ -291,7 +291,7 @@ async def delete_bank_account(
     Delete bank account (soft delete by setting is_active = false).
     """
     try:
-        ***REMOVED*** Check if account exists
+        # Check if account exists
         existing = db.execute(
             text("SELECT id FROM domain_erp.bank_accounts WHERE id = :account_id"),
             {"account_id": account_id}
@@ -300,7 +300,7 @@ async def delete_bank_account(
         if not existing:
             raise HTTPException(status_code=404, detail="Bank account not found")
         
-        ***REMOVED*** Soft delete
+        # Soft delete
         update_query = text("""
             UPDATE domain_erp.bank_accounts
             SET is_active = false, updated_at = NOW()

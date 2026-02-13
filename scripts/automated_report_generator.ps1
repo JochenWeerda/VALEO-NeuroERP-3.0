@@ -1,22 +1,22 @@
-***REMOVED*** ===================================================
-***REMOVED*** Automatisierter Chargenbericht-Generator
-***REMOVED*** ===================================================
-***REMOVED*** Erstellt automatisierte Berichte für Chargen
-***REMOVED*** basierend auf verschiedenen Berichtstypen
-***REMOVED*** ===================================================
+# ===================================================
+# Automatisierter Chargenbericht-Generator
+# ===================================================
+# Erstellt automatisierte Berichte für Chargen
+# basierend auf verschiedenen Berichtstypen
+# ===================================================
 
-***REMOVED*** Lade Hilfsfunktionen
+# Lade Hilfsfunktionen
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 . "$scriptPath\powershell_compatibility.ps1"
 
-***REMOVED*** Banner anzeigen
+# Banner anzeigen
 Write-Host ""
 Write-Host " =====================================================" -ForegroundColor Cyan
 Write-Host "  Automatisierter Chargenbericht-Generator" -ForegroundColor Cyan
 Write-Host " =====================================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Parameter definieren
+# Parameter definieren
 param (
     [string]$ChargeId = "",
     [string]$BerichtTyp = "zusammenfassung",
@@ -26,19 +26,19 @@ param (
     [switch]$Scheduled = $false
 )
 
-***REMOVED*** Pfade definieren
+# Pfade definieren
 $rootDir = Split-Path -Parent $scriptPath
 $frontendDir = Join-Path $rootDir "frontend"
 $apiEndpoint = "http://localhost:8003/api/v1/chargen"
 $outputDir = if ($OutputPath) { $OutputPath } else { Join-Path $rootDir "reports" }
 
-***REMOVED*** Überprüfe, ob der Ausgabepfad existiert
+# Überprüfe, ob der Ausgabepfad existiert
 if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir | Out-Null
     Write-Success "Berichtsverzeichnis erstellt: $outputDir"
 }
 
-***REMOVED*** Verfügbare Berichtstypen
+# Verfügbare Berichtstypen
 $verfuegbareBerichtstypen = @(
     "zusammenfassung", 
     "qualitaet", 
@@ -47,7 +47,7 @@ $verfuegbareBerichtstypen = @(
     "produktion"
 )
 
-***REMOVED*** Funktionen
+# Funktionen
 function Get-Charge {
     param (
         [string]$ChargeId
@@ -113,11 +113,11 @@ function Generate-ZusammenfassungsBericht {
         [string]$Format
     )
     
-    ***REMOVED*** Berichtsinhalt erstellen
+    # Berichtsinhalt erstellen
     $reportContent = @"
-***REMOVED*** Zusammenfassender Chargenbericht
+# Zusammenfassender Chargenbericht
 
-***REMOVED******REMOVED*** Chargeninformationen
+## Chargeninformationen
 - **Chargen-ID:** $($Charge.id)
 - **Chargennummer:** $($Charge.chargenNummer)
 - **Artikel:** $($Charge.artikelBezeichnung)
@@ -125,20 +125,20 @@ function Generate-ZusammenfassungsBericht {
 - **Erstellungsdatum:** $($Charge.erstellungsDatum)
 - **Status:** $($Charge.status)
 
-***REMOVED******REMOVED*** Qualität
+## Qualität
 - **Qualitätsstatus:** $($Charge.qualitaetsStatus)
 - **Prüfdatum:** $($Charge.pruefDatum)
 
-***REMOVED******REMOVED*** Lagerstatus
+## Lagerstatus
 - **Aktueller Lagerort:** $($Charge.lagerort)
 - **Verfügbare Menge:** $($Charge.verfuegbareMenge) $($Charge.einheit)
 
-***REMOVED******REMOVED*** Rückverfolgbarkeit
+## Rückverfolgbarkeit
 - **Herkunft:** $($Charge.herkunft)
 - **Verknüpfte Chargen:** $($Charge.verknuepfteChargen.Count)
 "@
 
-    ***REMOVED*** Bericht speichern
+    # Bericht speichern
     switch ($Format) {
         "pdf" { Export-ToPDF $reportContent $OutputFile }
         "csv" { Export-ToCSV $Charge $OutputFile }
@@ -156,32 +156,32 @@ function Generate-QualitaetsBericht {
         [string]$Format
     )
     
-    ***REMOVED*** Berichtsinhalt erstellen
+    # Berichtsinhalt erstellen
     $reportContent = @"
-***REMOVED*** Qualitätsbericht für Charge $($Charge.chargenNummer)
+# Qualitätsbericht für Charge $($Charge.chargenNummer)
 
-***REMOVED******REMOVED*** Chargeninformationen
+## Chargeninformationen
 - **Chargen-ID:** $($Charge.id)
 - **Chargennummer:** $($Charge.chargenNummer)
 - **Artikel:** $($Charge.artikelBezeichnung)
 
-***REMOVED******REMOVED*** Qualitätsparameter
+## Qualitätsparameter
 - **Qualitätsstatus:** $($Charge.qualitaetsStatus)
 - **Prüfdatum:** $($Charge.pruefDatum)
 - **Prüfer:** $($Charge.pruefer)
 
-***REMOVED******REMOVED*** Messwerte
+## Messwerte
 $(if ($Charge.qualitaetsparameter) {
     foreach ($param in $Charge.qualitaetsparameter) {
         "- **$($param.name):** $($param.wert) $($param.einheit) (Soll: $($param.sollWert) $($param.einheit))`n"
     }
 })
 
-***REMOVED******REMOVED*** Bemerkungen
+## Bemerkungen
 $($Charge.qualitaetsBemerkungen)
 "@
 
-    ***REMOVED*** Bericht speichern
+    # Bericht speichern
     switch ($Format) {
         "pdf" { Export-ToPDF $reportContent $OutputFile }
         "csv" { Export-ToCSV $Charge.qualitaetsparameter $OutputFile }
@@ -199,36 +199,36 @@ function Generate-RueckverfolgungsBericht {
         [string]$Format
     )
     
-    ***REMOVED*** Berichtsinhalt erstellen
+    # Berichtsinhalt erstellen
     $reportContent = @"
-***REMOVED*** Rückverfolgungsbericht für Charge $($Charge.chargenNummer)
+# Rückverfolgungsbericht für Charge $($Charge.chargenNummer)
 
-***REMOVED******REMOVED*** Chargeninformationen
+## Chargeninformationen
 - **Chargen-ID:** $($Charge.id)
 - **Chargennummer:** $($Charge.chargenNummer)
 - **Artikel:** $($Charge.artikelBezeichnung)
 - **Erstellungsdatum:** $($Charge.erstellungsDatum)
 
-***REMOVED******REMOVED*** Herkunft
+## Herkunft
 - **Lieferant:** $($Charge.lieferant)
 - **Herkunftsdatum:** $($Charge.herkunftsDatum)
 - **Herkunfts-ID:** $($Charge.herkunftsID)
 
-***REMOVED******REMOVED*** Vorwärts-Verfolgung
+## Vorwärts-Verfolgung
 $(if ($Charge.vorwaertsVerfolgung) {
     foreach ($item in $Charge.vorwaertsVerfolgung) {
         "- **$($item.typ):** $($item.chargenNummer) ($($item.datum))`n"
     }
 })
 
-***REMOVED******REMOVED*** Rückwärts-Verfolgung
+## Rückwärts-Verfolgung
 $(if ($Charge.rueckwaertsVerfolgung) {
     foreach ($item in $Charge.rueckwaertsVerfolgung) {
         "- **$($item.typ):** $($item.chargenNummer) ($($item.datum))`n"
     }
 })
 
-***REMOVED******REMOVED*** Prozessschritte
+## Prozessschritte
 $(if ($Charge.prozessSchritte) {
     foreach ($step in $Charge.prozessSchritte) {
         "- **$($step.name):** $($step.datum) ($($step.status))`n"
@@ -236,7 +236,7 @@ $(if ($Charge.prozessSchritte) {
 })
 "@
 
-    ***REMOVED*** Bericht speichern
+    # Bericht speichern
     switch ($Format) {
         "pdf" { Export-ToPDF $reportContent $OutputFile }
         "csv" { 
@@ -265,29 +265,29 @@ function Generate-LagerBericht {
         [string]$Format
     )
     
-    ***REMOVED*** Berichtsinhalt erstellen
+    # Berichtsinhalt erstellen
     $reportContent = @"
-***REMOVED*** Lagerbericht für Charge $($Charge.chargenNummer)
+# Lagerbericht für Charge $($Charge.chargenNummer)
 
-***REMOVED******REMOVED*** Chargeninformationen
+## Chargeninformationen
 - **Chargen-ID:** $($Charge.id)
 - **Chargennummer:** $($Charge.chargenNummer)
 - **Artikel:** $($Charge.artikelBezeichnung)
 - **Menge:** $($Charge.menge) $($Charge.einheit)
 
-***REMOVED******REMOVED*** Aktueller Lagerstatus
+## Aktueller Lagerstatus
 - **Lagerort:** $($Charge.lagerort)
 - **Verfügbare Menge:** $($Charge.verfuegbareMenge) $($Charge.einheit)
 - **Reservierte Menge:** $($Charge.reservierteMenge) $($Charge.einheit)
 
-***REMOVED******REMOVED*** Lagerbewegungen
+## Lagerbewegungen
 $(if ($Charge.lagerBewegungen) {
     foreach ($bewegung in $Charge.lagerBewegungen) {
         "- **$($bewegung.typ):** $($bewegung.menge) $($bewegung.einheit) am $($bewegung.datum) - $($bewegung.lagerort)`n"
     }
 })
 
-***REMOVED******REMOVED*** Reservierungen
+## Reservierungen
 $(if ($Charge.reservierungen) {
     foreach ($res in $Charge.reservierungen) {
         "- **$($res.typ):** $($res.menge) $($res.einheit) für $($res.ziel) bis $($res.bisDate)`n"
@@ -295,7 +295,7 @@ $(if ($Charge.reservierungen) {
 })
 "@
 
-    ***REMOVED*** Bericht speichern
+    # Bericht speichern
     switch ($Format) {
         "pdf" { Export-ToPDF $reportContent $OutputFile }
         "csv" { Export-ToCSV $Charge.lagerBewegungen $OutputFile }
@@ -319,41 +319,41 @@ function Generate-ProduktionsBericht {
         [string]$Format
     )
     
-    ***REMOVED*** Berichtsinhalt erstellen
+    # Berichtsinhalt erstellen
     $reportContent = @"
-***REMOVED*** Produktionsbericht für Charge $($Charge.chargenNummer)
+# Produktionsbericht für Charge $($Charge.chargenNummer)
 
-***REMOVED******REMOVED*** Chargeninformationen
+## Chargeninformationen
 - **Chargen-ID:** $($Charge.id)
 - **Chargennummer:** $($Charge.chargenNummer)
 - **Artikel:** $($Charge.artikelBezeichnung)
 - **Menge:** $($Charge.menge) $($Charge.einheit)
 
-***REMOVED******REMOVED*** Produktionsdaten
+## Produktionsdaten
 - **Produktionsauftrag:** $($Charge.produktionsAuftrag)
 - **Produktionsdatum:** $($Charge.produktionsDatum)
 - **Produktionslinie:** $($Charge.produktionsLinie)
 - **Verantwortlicher:** $($Charge.produktionsVerantwortlicher)
 
-***REMOVED******REMOVED*** Verwendete Materialien
+## Verwendete Materialien
 $(if ($Charge.materialien) {
     foreach ($material in $Charge.materialien) {
         "- **$($material.artikelBezeichnung):** $($material.menge) $($material.einheit) (Charge: $($material.chargenNummer))`n"
     }
 })
 
-***REMOVED******REMOVED*** Prozessparameter
+## Prozessparameter
 $(if ($Charge.prozessParameter) {
     foreach ($param in $Charge.prozessParameter) {
         "- **$($param.name):** $($param.wert) $($param.einheit)`n"
     }
 })
 
-***REMOVED******REMOVED*** Protokoll
+## Protokoll
 $($Charge.produktionsProtokoll)
 "@
 
-    ***REMOVED*** Bericht speichern
+    # Bericht speichern
     switch ($Format) {
         "pdf" { Export-ToPDF $reportContent $OutputFile }
         "csv" { Export-ToCSV $Charge.materialien $OutputFile }
@@ -377,13 +377,13 @@ function Export-ToPDF {
         [string]$OutputFile
     )
     
-    ***REMOVED*** Hier würde die eigentliche PDF-Generierung stattfinden
-    ***REMOVED*** Da das in PowerShell etwas komplexer ist, hier nur eine Simulation
+    # Hier würde die eigentliche PDF-Generierung stattfinden
+    # Da das in PowerShell etwas komplexer ist, hier nur eine Simulation
     $htmlFile = $OutputFile -replace '\.pdf$', '.html'
     Export-ToHTML $Content $htmlFile
     
-    ***REMOVED*** Conversion to PDF (in real-world scenario would use a library like PuppeteerSharp, etc.)
-    ***REMOVED*** Here we just use HTML as a placeholder
+    # Conversion to PDF (in real-world scenario would use a library like PuppeteerSharp, etc.)
+    # Here we just use HTML as a placeholder
     Write-Info "PDF-Generierung simuliert mit HTML als Ersatz: $htmlFile"
     Copy-Item $htmlFile $OutputFile
     Remove-Item $htmlFile
@@ -399,7 +399,7 @@ function Export-ToCSV {
         $Data | Export-Csv -Path $OutputFile -NoTypeInformation
     }
     else {
-        ***REMOVED*** Fallback wenn keine Array-Daten vorhanden sind
+        # Fallback wenn keine Array-Daten vorhanden sind
         $Data | ConvertTo-Json | Set-Content -Path $OutputFile
     }
 }
@@ -419,9 +419,9 @@ function Export-ToHTML {
         [string]$OutputFile
     )
     
-    ***REMOVED*** Einfache Konvertierung von Markdown-ähnlichem Format zu HTML
-    $htmlContent = $Content -replace '***REMOVED*** (.*)', '<h1>$1</h1>'
-    $htmlContent = $htmlContent -replace '***REMOVED******REMOVED*** (.*)', '<h2>$1</h2>'
+    # Einfache Konvertierung von Markdown-ähnlichem Format zu HTML
+    $htmlContent = $Content -replace '# (.*)', '<h1>$1</h1>'
+    $htmlContent = $htmlContent -replace '## (.*)', '<h2>$1</h2>'
     $htmlContent = $htmlContent -replace '- \*\*(.*?):\*\* (.*)', '<p><strong>$1:</strong> $2</p>'
     
     $html = @"
@@ -432,10 +432,10 @@ function Export-ToHTML {
     <title>Chargenbericht</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; }
-        h1 { color: ***REMOVED***2c3e50; border-bottom: 1px solid ***REMOVED***eee; padding-bottom: 10px; }
-        h2 { color: ***REMOVED***3498db; margin-top: 30px; }
+        h1 { color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        h2 { color: #3498db; margin-top: 30px; }
         p { margin: 5px 0; }
-        strong { color: ***REMOVED***444; }
+        strong { color: #444; }
     </style>
 </head>
 <body>
@@ -447,12 +447,12 @@ function Export-ToHTML {
     Set-Content -Path $OutputFile -Value $html
 }
 
-***REMOVED*** Hauptlogik
+# Hauptlogik
 if (-not $Silent) {
     Write-Info "Automatisierter Chargenbericht-Generator gestartet"
 }
 
-***REMOVED*** Wenn keine Charge-ID angegeben wurde, alle Chargen anzeigen
+# Wenn keine Charge-ID angegeben wurde, alle Chargen anzeigen
 if (-not $ChargeId) {
     $chargen = Get-ChargenListe
     
@@ -479,7 +479,7 @@ if (-not $ChargeId) {
     exit 0
 }
 
-***REMOVED*** Verarbeite die angegebene Charge
+# Verarbeite die angegebene Charge
 $charge = Get-Charge -ChargeId $ChargeId
 
 if (-not $charge) {
@@ -487,19 +487,19 @@ if (-not $charge) {
     exit 1
 }
 
-***REMOVED*** Überprüfe, ob der Berichtstyp gültig ist
+# Überprüfe, ob der Berichtstyp gültig ist
 if (-not $verfuegbareBerichtstypen.Contains($BerichtTyp.ToLower())) {
     Write-Error "Ungültiger Berichtstyp: $BerichtTyp. Verfügbar sind: $($verfuegbareBerichtstypen -join ', ')"
     exit 1
 }
 
-***REMOVED*** Generiere den Bericht
+# Generiere den Bericht
 $outputFile = Generate-Bericht -Charge $charge -BerichtTyp $BerichtTyp.ToLower() -ExportFormat $ExportFormat.ToLower()
 
 if ($outputFile -and -not $Silent) {
     Write-Success "Bericht wurde erfolgreich erstellt: $outputFile"
     
-    ***REMOVED*** Öffne den Bericht, wenn er erfolgreich erstellt wurde
+    # Öffne den Bericht, wenn er erfolgreich erstellt wurde
     if (-not $Scheduled) {
         try {
             Invoke-Item $outputFile

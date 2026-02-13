@@ -1,17 +1,17 @@
-***REMOVED*** Einkauf / Procurement Capability Model (Referenz für GAP-Analyse)
+# Einkauf / Procurement Capability Model (Referenz für GAP-Analyse)
 
 **Version:** 1.0  
 **Datum:** 2025-01-27  
 **Zweck:** Referenzmodell zur Funktionsabdeckung von Valero NeuroERP im Bereich Einkauf (Source-to-Pay)  
 **Baseline:** Vollumfängliches ERP-Niveau (SAP MM / Oracle Procurement / Odoo Enterprise Purchase)
 
-***REMOVED******REMOVED*** Legende Priorität
+## Legende Priorität
 
 - **MUSS** = rechtlich/operativ zwingend / Kernprozess
 - **SOLL** = Standard in großen ERPs
 - **KANN** = nice-to-have / branchenspezifisch
 
-***REMOVED******REMOVED*** Beleg-Evidence
+## Beleg-Evidence
 
 - UI-Screenshots (ID/Dateiname)
 - Playwright-Trace/Video
@@ -20,9 +20,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 1. Supplier Lifecycle & Stammdaten
+## 1. Supplier Lifecycle & Stammdaten
 
-***REMOVED******REMOVED******REMOVED*** PROC-SUP-01 Lieferantenstamm
+### PROC-SUP-01 Lieferantenstamm
 
 **Priorität:** MUSS  
 
@@ -38,7 +38,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-SUP-02 Lieferantenbewertung
+### PROC-SUP-02 Lieferantenbewertung
 
 **Priorität:** SOLL  
 
@@ -53,7 +53,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-SUP-03 Compliance / Dokumente
+### PROC-SUP-03 Compliance / Dokumente
 
 **Priorität:** SOLL  
 
@@ -68,9 +68,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 2. Bedarf / Requisition-to-Order
+## 2. Bedarf / Requisition-to-Order
 
-***REMOVED******REMOVED******REMOVED*** PROC-REQ-01 Bedarfsmeldung (Purchase Requisition)
+### PROC-REQ-01 Bedarfsmeldung (Purchase Requisition)
 
 **Priorität:** MUSS  
 
@@ -86,7 +86,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-REQ-02 Bedarfsgenehmigung
+### PROC-REQ-02 Bedarfsgenehmigung
 
 **Priorität:** MUSS/SOLL je Unternehmen  
 
@@ -101,7 +101,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-REQ-03 Katalog / Guided Buying
+### PROC-REQ-03 Katalog / Guided Buying
 
 **Priorität:** KANN/SOLL  
 
@@ -116,9 +116,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 3. Sourcing / RFQ / Angebotsvergleich
+## 3. Sourcing / RFQ / Angebotsvergleich
 
-***REMOVED******REMOVED******REMOVED*** PROC-RFQ-01 Anfrage / RFQ
+### PROC-RFQ-01 Anfrage / RFQ
 
 **Priorität:** SOLL  
 
@@ -133,7 +133,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-RFQ-02 Lieferantenangebote / Bids
+### PROC-RFQ-02 Lieferantenangebote / Bids
 
 **Priorität:** SOLL  
 
@@ -148,7 +148,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-RFQ-03 Angebotsvergleich / Award
+### PROC-RFQ-03 Angebotsvergleich / Award
 
 **Priorität:** SOLL  
 
@@ -163,7 +163,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-CTR-01 Rahmenverträge
+### PROC-CTR-01 Rahmenverträge
 
 **Priorität:** SOLL  
 
@@ -178,9 +178,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 4. Bestellung / Purchase Order Management
+## 4. Bestellung / Purchase Order Management
 
-***REMOVED******REMOVED******REMOVED*** PROC-PO-01 Bestellung (PO) erstellen
+### PROC-PO-01 Bestellung (PO) erstellen
 
 **Priorität:** MUSS  
 
@@ -195,7 +195,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-PO-02 PO-Änderungen & Storno
+### PROC-PO-02 PO-Änderungen & Storno
 
 **Priorität:** MUSS  
 
@@ -210,7 +210,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-PO-03 PO-Kommunikation
+### PROC-PO-03 PO-Kommunikation
 
 **Priorität:** SOLL  
 
@@ -225,7 +225,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-PO-04 Bestellabrufe / Lieferpläne
+### PROC-PO-04 Bestellabrufe / Lieferpläne
 
 **Priorität:** KANN/SOLL  
 
@@ -240,9 +240,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 5. Wareneingang / Service Entry (Receipt-to-Verify)
+## 5. Wareneingang / Service Entry (Receipt-to-Verify)
 
-***REMOVED******REMOVED******REMOVED*** PROC-GR-01 Wareneingang
+### PROC-GR-01 Wareneingang
 
 **Priorität:** MUSS  
 
@@ -258,7 +258,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-GR-02 Retouren an Lieferant
+### PROC-GR-02 Retouren an Lieferant
 
 **Priorität:** SOLL  
 
@@ -272,7 +272,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-SE-01 Leistungsnachweis (Service Entry Sheet)
+### PROC-SE-01 Leistungsnachweis (Service Entry Sheet)
 
 **Priorität:** SOLL (MUSS wenn Services in Scope)  
 
@@ -286,9 +286,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 6. Rechnungsprüfung / Invoice-to-Pay
+## 6. Rechnungsprüfung / Invoice-to-Pay
 
-***REMOVED******REMOVED******REMOVED*** PROC-IV-01 Eingangsrechnung
+### PROC-IV-01 Eingangsrechnung
 
 **Priorität:** MUSS  
 
@@ -303,7 +303,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-IV-02 2/3-Wege-Abgleich (PO-GR-IV)
+### PROC-IV-02 2/3-Wege-Abgleich (PO-GR-IV)
 
 **Priorität:** MUSS  
 
@@ -318,7 +318,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-IV-03 Rechnungsfreigabe
+### PROC-IV-03 Rechnungsfreigabe
 
 **Priorität:** MUSS/SOLL  
 
@@ -333,7 +333,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-PAY-01 Zahlungsläufe
+### PROC-PAY-01 Zahlungsläufe
 
 **Priorität:** MUSS (wenn AP-Zahlung in Scope)  
 
@@ -347,7 +347,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-PAY-02 Lieferantengutschriften / Belastungen
+### PROC-PAY-02 Lieferantengutschriften / Belastungen
 
 **Priorität:** SOLL  
 
@@ -361,9 +361,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 7. Reporting & Kontrolle
+## 7. Reporting & Kontrolle
 
-***REMOVED******REMOVED******REMOVED*** PROC-REP-01 Standardreports Einkauf
+### PROC-REP-01 Standardreports Einkauf
 
 **Priorität:** MUSS  
 
@@ -379,7 +379,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-REP-02 Belegkette / Audit Trail
+### PROC-REP-02 Belegkette / Audit Trail
 
 **Priorität:** SOLL  
 
@@ -393,9 +393,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 8. Rollen, Berechtigungen, Workflows
+## 8. Rollen, Berechtigungen, Workflows
 
-***REMOVED******REMOVED******REMOVED*** PROC-AUTH-01 Rollenmodell Einkauf
+### PROC-AUTH-01 Rollenmodell Einkauf
 
 **Priorität:** MUSS  
 
@@ -409,7 +409,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-AUTH-02 Workflow-Regeln
+### PROC-AUTH-02 Workflow-Regeln
 
 **Priorität:** MUSS/SOLL  
 
@@ -423,9 +423,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 9. Schnittstellen & Integrationen
+## 9. Schnittstellen & Integrationen
 
-***REMOVED******REMOVED******REMOVED*** PROC-INT-01 API / Import / Export
+### PROC-INT-01 API / Import / Export
 
 **Priorität:** MUSS  
 
@@ -440,7 +440,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-INT-02 EDI / Lieferantenportal
+### PROC-INT-02 EDI / Lieferantenportal
 
 **Priorität:** KANN/SOLL je Branche  
 
@@ -455,7 +455,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-INT-03 Katalog/Punchout
+### PROC-INT-03 Katalog/Punchout
 
 **Priorität:** KANN  
 
@@ -469,7 +469,7 @@
 
 ---
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 **Gesamt Capabilities:** 28  
 **MUSS:** 12  
@@ -481,4 +481,5 @@
 2. Evidence sammeln (Screenshots, Flows, API-Docs)
 3. GAP-Matrix aktualisieren (`gap/matrix.csv`)
 4. Implementierungsplan erstellen
+
 

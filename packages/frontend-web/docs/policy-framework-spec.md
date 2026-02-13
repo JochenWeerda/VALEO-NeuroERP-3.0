@@ -1,10 +1,10 @@
-***REMOVED*** Policy-Framework - Specification
+# Policy-Framework - Specification
 
-***REMOVED******REMOVED*** Phase K - Auto-Actions, Approval & Audit
+## Phase K - Auto-Actions, Approval & Audit
 
 Diese Spezifikation beschreibt das Policy-Framework für regelbasierte Alert-Actions mit Vier-Augen-Prinzip, Zeitfenster-Checks und Audit-Logging.
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Das Policy-Framework bietet:
 - **Regelbasierte Entscheidungen:** JSON-konfigurierbare Policies
@@ -15,7 +15,7 @@ Das Policy-Framework bietet:
 - **Audit-Logging:** Vollständige Nachvollziehbarkeit
 - **Rollenbasiert:** Admin/Manager/Operator
 
-***REMOVED******REMOVED*** Architektur
+## Architektur
 
 ```
 ┌─────────────────────────────────────┐
@@ -48,9 +48,9 @@ Das Policy-Framework bietet:
 └─────────────────────────────────────┘
 ```
 
-***REMOVED******REMOVED*** Policy-Konfiguration
+## Policy-Konfiguration
 
-***REMOVED******REMOVED******REMOVED*** Datei: `src/policy/policies.json`
+### Datei: `src/policy/policies.json`
 
 **Struktur:**
 ```json
@@ -63,7 +63,7 @@ Das Policy-Framework bietet:
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Regel-Schema
+### Regel-Schema
 
 ```typescript
 type Rule = {
@@ -99,7 +99,7 @@ type Rule = {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Beispiel-Regeln
+### Beispiel-Regeln
 
 **1. Pricing-Adjustment (mit Approval):**
 ```json
@@ -151,9 +151,9 @@ type Rule = {
 - Approval: Nicht erforderlich
 - Ausführung: Automatisch (autoExecute: true)
 
-***REMOVED******REMOVED*** Komponenten
+## Komponenten
 
-***REMOVED******REMOVED******REMOVED*** 1. Policy-Engine (`engine.ts`)
+### 1. Policy-Engine (`engine.ts`)
 
 **Hauptfunktion: `decide()`**
 
@@ -186,7 +186,7 @@ type Decision =
 - `MINUTES_PER_HOUR = 60`
 - `ISO_DATE_LENGTH = 10`
 
-***REMOVED******REMOVED******REMOVED*** 2. Audit-Logging (`audit.ts`)
+### 2. Audit-Logging (`audit.ts`)
 
 **AuditEntry-Type:**
 ```typescript
@@ -215,7 +215,7 @@ export async function audit(entry: AuditEntry): Promise<void>
 - POST an `/api/mcp/audit/log`
 - Backend persistiert in DB/File
 
-***REMOVED******REMOVED******REMOVED*** 3. PolicyBadge (`PolicyBadge.tsx`)
+### 3. PolicyBadge (`PolicyBadge.tsx`)
 
 **Visuelle Policy-Anzeige:**
 
@@ -231,7 +231,7 @@ export async function audit(entry: AuditEntry): Promise<void>
 <PolicyBadge alert={alert} roles={userRoles} />
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. AlertActions mit Policy (`AlertActions.tsx`)
+### 4. AlertActions mit Policy (`AlertActions.tsx`)
 
 **Erweiterte Logik:**
 
@@ -276,9 +276,9 @@ export async function audit(entry: AuditEntry): Promise<void>
    })
    ```
 
-***REMOVED******REMOVED*** Backend-Integration
+## Backend-Integration
 
-***REMOVED******REMOVED******REMOVED*** Audit-Endpoint
+### Audit-Endpoint
 
 **URL:** `POST /mcp/audit/log`
 
@@ -325,9 +325,9 @@ app.post("/audit/log", async (req, res) => {
 })
 ```
 
-***REMOVED******REMOVED*** User Experience
+## User Experience
 
-***REMOVED******REMOVED******REMOVED*** Scenario 1: Auto-Execute (Inventory Reorder)
+### Scenario 1: Auto-Execute (Inventory Reorder)
 
 ```
 Alert: [WARN] Lagerwert hoch — 550.000 €
@@ -339,7 +339,7 @@ Toast: "✔ Nachbestellung gestartet"
 Audit: { result: "executed" }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Scenario 2: Approval Required (Pricing)
+### Scenario 2: Approval Required (Pricing)
 
 ```
 Alert: [WARN] Marge unter Ziel — 14.5 %
@@ -355,7 +355,7 @@ Toast: "✔ Preisupdate angestoßen"
 Audit: { result: "executed", approval: { by: "manager", at: "..." } }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Scenario 3: Policy Deny (Outside Window)
+### Scenario 3: Policy Deny (Outside Window)
 
 ```
 Alert: [CRIT] Marge zu niedrig — 10.2 %
@@ -367,7 +367,7 @@ User klickt → Nicht ausgeführt
 Toast: "🚫 Policy: Outside window"
 ```
 
-***REMOVED******REMOVED******REMOVED*** Scenario 4: Limit Exceeded
+### Scenario 4: Limit Exceeded
 
 ```
 Alert: [CRIT] Marge zu niedrig — 10.2 %
@@ -380,9 +380,9 @@ User klickt → Nicht ausgeführt
 Toast: "🚫 Policy: Limit exceeded"
 ```
 
-***REMOVED******REMOVED*** Code-Qualität
+## Code-Qualität
 
-***REMOVED******REMOVED******REMOVED*** ✅ Memory-Bank Compliance
+### ✅ Memory-Bank Compliance
 
 **engine.ts:**
 - TypeScript Strict Mode
@@ -408,16 +408,16 @@ Toast: "🚫 Policy: Limit exceeded"
 - Counter-Updates
 - Audit-Logging bei jedem Schritt
 
-***REMOVED******REMOVED******REMOVED*** ✅ Lint Status
+### ✅ Lint Status
 
 - 0 Errors
 - 0 Warnings
 - Import-Sortierung korrekt
 - Memory-Bank konform
 
-***REMOVED******REMOVED*** Features
+## Features
 
-***REMOVED******REMOVED******REMOVED*** ✅ Implementiert
+### ✅ Implementiert
 
 1. **Policy-Engine**
    - Rule-Matching nach KPI + Severity
@@ -445,7 +445,7 @@ Toast: "🚫 Policy: Limit exceeded"
    - Audit-Logging
    - Toast-Feedback
 
-***REMOVED******REMOVED******REMOVED*** 🚀 Erweiterungsmöglichkeiten
+### 🚀 Erweiterungsmöglichkeiten
 
 1. **Admin-UI: Policy-Manager**
    - CRUD für Policies
@@ -476,9 +476,9 @@ Toast: "🚫 Policy: Limit exceeded"
    - Vererbung von Global → Tenant
    - Override-Mechanismus
 
-***REMOVED******REMOVED*** Testing
+## Testing
 
-***REMOVED******REMOVED******REMOVED*** Unit Tests
+### Unit Tests
 
 ```typescript
 describe('Policy Engine', () => {
@@ -531,30 +531,30 @@ describe('Audit Logging', () => {
 })
 ```
 
-***REMOVED******REMOVED******REMOVED*** Integration Test
+### Integration Test
 
 ```bash
-***REMOVED*** Terminal 1: Backend
+# Terminal 1: Backend
 cd packages/analytics-domain
 npm run dev
 
-***REMOVED*** Terminal 2: Frontend
+# Terminal 2: Frontend
 cd packages/frontend-web
 npm run dev
 
-***REMOVED*** Browser: http://localhost:5173
-***REMOVED*** 1. Navigate to Dashboard
-***REMOVED*** 2. Verify Alerts appear
-***REMOVED*** 3. Check PolicyBadge shows correct status
-***REMOVED*** 4. Click Action-Button
-***REMOVED*** 5. Verify Policy-Check (Toast)
-***REMOVED*** 6. Confirm in Dialog
-***REMOVED*** 7. Verify Audit-Log sent to backend
+# Browser: http://localhost:5173
+# 1. Navigate to Dashboard
+# 2. Verify Alerts appear
+# 3. Check PolicyBadge shows correct status
+# 4. Click Action-Button
+# 5. Verify Policy-Check (Toast)
+# 6. Confirm in Dialog
+# 7. Verify Audit-Log sent to backend
 ```
 
-***REMOVED******REMOVED*** Security
+## Security
 
-***REMOVED******REMOVED******REMOVED*** Client-Side vs Server-Side
+### Client-Side vs Server-Side
 
 **Client-Side (UI-Guidance):**
 - ✅ Zeitfenster-Check
@@ -571,7 +571,7 @@ npm run dev
 
 **Empfehlung:** Alle Checks serverseitig wiederholen!
 
-***REMOVED******REMOVED******REMOVED*** Backend-Validierung (Beispiel)
+### Backend-Validierung (Beispiel)
 
 ```typescript
 app.post("/pricing/adjust", async (req, res) => {
@@ -599,9 +599,9 @@ app.post("/pricing/adjust", async (req, res) => {
 })
 ```
 
-***REMOVED******REMOVED*** Monitoring
+## Monitoring
 
-***REMOVED******REMOVED******REMOVED*** Metrics
+### Metrics
 
 ```typescript
 const policyDecisionsCounter = new Counter({
@@ -617,7 +617,7 @@ const policyApprovalsCounter = new Counter({
 })
 ```
 
-***REMOVED******REMOVED******REMOVED*** Logging
+### Logging
 
 ```typescript
 logger.info("Policy decision", {
@@ -633,21 +633,21 @@ logger.warn("Policy denied", {
 })
 ```
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Policy: No matching rule"
+### Problem: "Policy: No matching rule"
 **Lösung:** Regel in `policies.json` hinzufügen für KPI + Severity
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Policy: Outside window"
+### Problem: "Policy: Outside window"
 **Lösung:** Zeitfenster in Regel anpassen oder auf 0-6, 00:00-23:59 setzen
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Policy: Limit exceeded"
+### Problem: "Policy: Limit exceeded"
 **Lösung:** Counter zurücksetzen oder Limit erhöhen
 
-***REMOVED******REMOVED******REMOVED*** Problem: PolicyBadge zeigt nicht an
+### Problem: PolicyBadge zeigt nicht an
 **Lösung:** Import prüfen, Alert.kpiId muss gesetzt sein
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 **Phase K - Policy-Framework** bietet:
 
@@ -664,7 +664,7 @@ logger.warn("Policy denied", {
 
 **Status:** Production Ready 🚀
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 **Phase L - Policy-Manager (Admin-UI):**
 - CRUD für Policy-Regeln
@@ -674,4 +674,5 @@ logger.warn("Policy denied", {
 - Import/Export
 
 Möchtest du Phase L implementiert haben? 😊
+
 

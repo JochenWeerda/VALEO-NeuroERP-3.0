@@ -1,20 +1,20 @@
-***REMOVED***!/bin/bash
-***REMOVED*** Bash Script: CRM Migration 003 - Sales Fields
-***REMOVED*** Führt die Migration für SALES-CRM-02 aus
+#!/bin/bash
+# Bash Script: CRM Migration 003 - Sales Fields
+# Führt die Migration für SALES-CRM-02 aus
 
 set -e
 
-***REMOVED*** Farben für Output
+# Farben für Output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
-NC='\033[0m' ***REMOVED*** No Color
+NC='\033[0m' # No Color
 
 echo -e "${CYAN}🚀 CRM Migration 003: Sales Fields (SALES-CRM-02)${NC}"
 echo -e "${CYAN}============================================================${NC}"
 
-***REMOVED*** Migration-Script-Pfad
+# Migration-Script-Pfad
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MIGRATION_FILE="$SCRIPT_DIR/../migrations/sql/crm/003_add_sales_fields_to_customers.sql"
 
@@ -25,7 +25,7 @@ fi
 
 echo -e "${GREEN}📄 Migration-Script: $MIGRATION_FILE${NC}"
 
-***REMOVED*** Datenbankverbindung
+# Datenbankverbindung
 if [ -n "$DATABASE_URL" ]; then
     echo -e "${YELLOW}🔌 Verwende DATABASE_URL${NC}"
     psql "$DATABASE_URL" -f "$MIGRATION_FILE"
@@ -62,4 +62,5 @@ echo ""
 echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}✨ Migration 003 abgeschlossen!${NC}"
 echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
+
 

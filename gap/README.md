@@ -1,4 +1,4 @@
-***REMOVED*** GAP-Analyse Dokumentation
+# GAP-Analyse Dokumentation
 
 **Zweck:** Systematische Analyse der Funktionsabdeckung von VALEO NeuroERP im Vergleich zu ERP-Referenzsystemen (SAP / Oracle / Odoo Enterprise)
 
@@ -6,23 +6,23 @@
 
 ---
 
-***REMOVED******REMOVED*** 📋 Dokumente
+## 📋 Dokumente
 
-***REMOVED******REMOVED******REMOVED*** 1. Capability Models (Referenz)
+### 1. Capability Models (Referenz)
 
 - **[capability-model.md](./capability-model.md)** - Allgemeines Capability Model (Übersicht)
 - **[procurement-capability-model.md](./procurement-capability-model.md)** - Detailliertes Procurement Capability Model (28 Capabilities)
 - **[capability-model-sales.md](./capability-model-sales.md)** - Sales/Order-to-Cash Capability Model
 - **[capability-model-crm-marketing.md](./capability-model-crm-marketing.md)** - CRM & Marketing Capability Model
 
-***REMOVED******REMOVED******REMOVED*** 2. GAP-Analysen
+### 2. GAP-Analysen
 
 - **[gaps.md](./gaps.md)** - Detaillierte GAP-Analyse Finance/FiBU (33 Capabilities)
 - **[procurement-gaps.md](./procurement-gaps.md)** - Detaillierte GAP-Analyse Procurement/Einkauf (28 Capabilities)
 - **[gaps-sales.md](./gaps-sales.md)** - Detaillierte GAP-Analyse Sales/Order-to-Cash (31 Capabilities)
 - **[gaps-crm-marketing.md](./gaps-crm-marketing.md)** - Detaillierte GAP-Analyse CRM & Marketing (32 Capabilities)
 
-***REMOVED******REMOVED******REMOVED*** 3. Matrizen (CSV)
+### 3. Matrizen (CSV)
 
 - **[matrix.csv](./matrix.csv)** - Gesamt-Matrix Finance + Procurement (61 Capabilities)
 - **[matrix-sales.csv](./matrix-sales.csv)** - Sales/Order-to-Cash Matrix (31 Capabilities)
@@ -32,59 +32,59 @@
 
 ---
 
-***REMOVED******REMOVED*** 📊 Aktuelle Übersicht
+## 📊 Aktuelle Übersicht
 
-***REMOVED******REMOVED******REMOVED*** Finance/FiBU
+### Finance/FiBU
 - **Gesamt:** 33 Capabilities
 - **Yes:** 1 (3%)
 - **Partial:** 15 (45%)
 - **No:** 17 (52%)
 
-***REMOVED******REMOVED******REMOVED*** Procurement/Einkauf
+### Procurement/Einkauf
 - **Gesamt:** 28 Capabilities
 - **Yes:** 0 (0%)
 - **Partial:** 12 (43%)
 - **No:** 16 (57%)
 
-***REMOVED******REMOVED******REMOVED*** Sales/Order-to-Cash
+### Sales/Order-to-Cash
 - **Gesamt:** 31 Capabilities
 - **Status:** Siehe `gaps-sales.md` für Details
 
-***REMOVED******REMOVED******REMOVED*** CRM & Marketing
+### CRM & Marketing
 - **Gesamt:** 32 Capabilities
 - **Status:** Siehe `gaps-crm-marketing.md` für Details
 
-***REMOVED******REMOVED******REMOVED*** Gesamt (Finance + Procurement + Sales + CRM/Marketing)
+### Gesamt (Finance + Procurement + Sales + CRM/Marketing)
 - **Gesamt:** 124 Capabilities
 - **Status:** In Progress - Detaillierte Analyse pro Domain verfügbar
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Priorisierung
+## 🎯 Priorisierung
 
-***REMOVED******REMOVED******REMOVED*** P0 - Kritisch (MUSS, Priorität 1)
+### P0 - Kritisch (MUSS, Priorität 1)
 - **Finance:** 4 Capabilities
 - **Procurement:** 4 Capabilities
 - **Gesamt:** 8 kritische Gaps
 
-***REMOVED******REMOVED******REMOVED*** P1 - Hoch (MUSS, Priorität 2)
+### P1 - Hoch (MUSS, Priorität 2)
 - **Finance:** 7 Capabilities
 - **Procurement:** 4 Capabilities
 - **Gesamt:** 11 wichtige Gaps
 
-***REMOVED******REMOVED******REMOVED*** P2 - Mittel (SOLL, Priorität 3)
+### P2 - Mittel (SOLL, Priorität 3)
 - **Finance:** 13 Capabilities
 - **Procurement:** 9 Capabilities
 - **Gesamt:** 22 nice-to-have Gaps
 
-***REMOVED******REMOVED******REMOVED*** P3 - Niedrig (KANN, Priorität 4-5)
+### P3 - Niedrig (KANN, Priorität 4-5)
 - **Finance:** 5 Capabilities
 - **Procurement:** 3 Capabilities
 - **Gesamt:** 8 optionale Gaps
 
 ---
 
-***REMOVED******REMOVED*** 📈 Maturity-Vergleich
+## 📈 Maturity-Vergleich
 
 | Domain | VALEO | SAP | Oracle | Odoo |
 |--------|-------|-----|--------|------|
@@ -94,9 +94,9 @@
 
 ---
 
-***REMOVED******REMOVED*** 🚀 Implementierungs-Roadmap
+## 🚀 Implementierungs-Roadmap
 
-***REMOVED******REMOVED******REMOVED*** Phase 1: Kritische Gaps (P0) - 10-14 Wochen
+### Phase 1: Kritische Gaps (P0) - 10-14 Wochen
 **Finance:**
 1. FIBU-AR-03: Zahlungseingänge & Matching (2-3 Wochen)
 2. FIBU-AP-02: Eingangsrechnungen (2-3 Wochen)
@@ -109,17 +109,17 @@
 3. PROC-PO-02: PO-Änderungen & Storno (2 Wochen)
 4. PROC-REQ-01: Bedarfsmeldung vervollständigen (1 Woche)
 
-***REMOVED******REMOVED******REMOVED*** Phase 2: Wichtige Gaps (P1) - 8-12 Wochen
+### Phase 2: Wichtige Gaps (P1) - 8-12 Wochen
 **Finance:** 7 Capabilities
 **Procurement:** 4 Capabilities
 
-***REMOVED******REMOVED******REMOVED*** Phase 3: Nice-to-Have (P2-P3) - 25-35 Wochen
+### Phase 3: Nice-to-Have (P2-P3) - 25-35 Wochen
 **Finance:** 18 Capabilities
 **Procurement:** 12 Capabilities
 
 ---
 
-***REMOVED******REMOVED*** 📝 Nächste Schritte
+## 📝 Nächste Schritte
 
 1. ✅ Capability Models erstellt
 2. ✅ GAP-Matrizen erstellt
@@ -130,26 +130,26 @@
 
 ---
 
-***REMOVED******REMOVED*** 🔍 Verwendung
+## 🔍 Verwendung
 
-***REMOVED******REMOVED******REMOVED*** Für Entwickler
+### Für Entwickler
 - Siehe `gaps.md` oder `procurement-gaps.md` für detaillierte Gap-Beschreibungen
 - Siehe `matrix.csv` für tabellarische Übersicht
 - Jede Capability enthält: Status, Typ, Beschreibung, Lösung, Owner, Effort
 
-***REMOVED******REMOVED******REMOVED*** Für Projektmanager
+### Für Projektmanager
 - Siehe Zusammenfassung oben für Priorisierung
 - Siehe Implementierungs-Roadmap für Planung
 - Siehe Maturity-Vergleich für Benchmarking
 
-***REMOVED******REMOVED******REMOVED*** Für Stakeholder
+### Für Stakeholder
 - Siehe Capability Models für Funktionsumfang
 - Siehe GAP-Analysen für Lücken
 - Siehe Maturity-Vergleich für Standortbestimmung
 
 ---
 
-***REMOVED******REMOVED*** 📚 Referenzen
+## 📚 Referenzen
 
 - **ERP-Referenz:** SAP MM, Oracle Procurement, Odoo Enterprise Purchase
 - **Compliance:** GoBD, HGB, GMP+, ISO, RED II
@@ -159,7 +159,7 @@
 
 ---
 
-***REMOVED******REMOVED*** 📄 Weitere Dokumente
+## 📄 Weitere Dokumente
 
 - **[executive-summary.md](./executive-summary.md)** - Executive Summary für Management/Stakeholder ⭐
 - **[consolidated-overview.md](./consolidated-overview.md)** - Konsolidierte Gesamtübersicht aller Domains
@@ -168,4 +168,5 @@
 ---
 
 **Letzte Aktualisierung:** 2025-01-27
+
 

@@ -1,16 +1,16 @@
-***REMOVED*** Copilot Insights 2.0 - Specification
+# Copilot Insights 2.0 - Specification
 
-***REMOVED******REMOVED*** Phase E - Interaktiver KI-Analyse-Layer
+## Phase E - Interaktiver KI-Analyse-Layer
 
 Diese Spezifikation beschreibt die Copilot Insights 2.0 Komponente, einen interaktiven KI-gestützten Analyse-Layer für das Analytics Dashboard.
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Copilot Insights 2.0 wertet automatisch KPIs und Trends aus, formuliert verständliche Erkenntnisse und ermöglicht Rückfragen für tiefergehende Analysen.
 
-***REMOVED******REMOVED*** Komponenten
+## Komponenten
 
-***REMOVED******REMOVED******REMOVED*** 1. `useCopilotInsight.ts` - Custom Hook
+### 1. `useCopilotInsight.ts` - Custom Hook
 
 **Pfad:** `src/features/copilot/useCopilotInsight.ts`
 
@@ -57,7 +57,7 @@ type Insight = {
 - `INSIGHT_GENERATION_DELAY_MS = 1200` - Simulierte Ladezeit
 - `MILLISECONDS_PER_KILOGRAM = 1000` - Umrechnungsfaktor für Tonnen
 
-***REMOVED******REMOVED******REMOVED*** 2. `CopilotInsights.tsx` - UI Komponente
+### 2. `CopilotInsights.tsx` - UI Komponente
 
 **Pfad:** `src/features/copilot/CopilotInsights.tsx`
 
@@ -85,9 +85,9 @@ const COPILOT_RESPONSES: Record<CopilotQuestion, string> = {
 }
 ```
 
-***REMOVED******REMOVED*** Integration
+## Integration
 
-***REMOVED******REMOVED******REMOVED*** In `analytics.tsx`:
+### In `analytics.tsx`:
 
 ```typescript
 import { CopilotInsights } from "@/features/copilot/CopilotInsights"
@@ -96,7 +96,7 @@ import { CopilotInsights } from "@/features/copilot/CopilotInsights"
 <CopilotInsights />
 ```
 
-***REMOVED******REMOVED*** Styling
+## Styling
 
 **Design-System:**
 - Gradient-Hintergrund: `from-emerald-50 to-teal-50`
@@ -110,12 +110,12 @@ import { CopilotInsights } from "@/features/copilot/CopilotInsights"
 - Buttons: `flex flex-wrap gap-2`
 - Antworten: `border-t pt-2 italic text-gray-700`
 
-***REMOVED******REMOVED*** Backend-Integration (Optional)
+## Backend-Integration (Optional)
 
-***REMOVED******REMOVED******REMOVED*** Aktuell: Simuliert
+### Aktuell: Simuliert
 Die aktuelle Implementierung simuliert KI-Antworten mit festen Texten und Timeouts.
 
-***REMOVED******REMOVED******REMOVED*** Zukünftig: GPT-API
+### Zukünftig: GPT-API
 
 **Endpoint-Vorschlag:** `POST /mcp/copilot/analyze`
 
@@ -167,9 +167,9 @@ Die aktuelle Implementierung simuliert KI-Antworten mit festen Texten und Timeou
 }
 ```
 
-***REMOVED******REMOVED*** Code-Qualität
+## Code-Qualität
 
-***REMOVED******REMOVED******REMOVED*** ✅ Memory-Bank Compliance
+### ✅ Memory-Bank Compliance
 
 - **TypeScript Strict Mode:** Alle Typen explizit definiert
 - **Keine Magic Numbers:** Alle Konstanten benannt
@@ -178,16 +178,16 @@ Die aktuelle Implementierung simuliert KI-Antworten mit festen Texten und Timeou
 - **Nullish Coalescing:** `??` statt `||`
 - **Explizite Boolean Checks:** Keine impliziten Truthy-Checks
 
-***REMOVED******REMOVED******REMOVED*** ✅ Lint Status
+### ✅ Lint Status
 
 - 0 Errors
 - 0 Warnings
 - Import-Sortierung korrekt
 - Ungenutzte Variablen vermieden
 
-***REMOVED******REMOVED*** Features
+## Features
 
-***REMOVED******REMOVED******REMOVED*** ✅ Implementiert
+### ✅ Implementiert
 
 1. **Automatische KI-Analyse**
    - Generiert Zusammenfassung aus KPIs & Trends
@@ -209,7 +209,7 @@ Die aktuelle Implementierung simuliert KI-Antworten mit festen Texten und Timeou
    - Loading-State während Generierung
    - Smooth Transitions für Antworten
 
-***REMOVED******REMOVED******REMOVED*** 🚀 Erweiterungsmöglichkeiten
+### 🚀 Erweiterungsmöglichkeiten
 
 1. **GPT-Integration**
    - Echter LLM-API-Call statt Simulation
@@ -236,9 +236,9 @@ Die aktuelle Implementierung simuliert KI-Antworten mit festen Texten und Timeou
    - Priorisierung nach Wichtigkeit
    - Proaktive Benachrichtigungen
 
-***REMOVED******REMOVED*** Testing
+## Testing
 
-***REMOVED******REMOVED******REMOVED*** Unit Tests (Vorschlag)
+### Unit Tests (Vorschlag)
 
 ```typescript
 describe('useCopilotInsight', () => {
@@ -269,28 +269,28 @@ describe('CopilotInsights', () => {
 })
 ```
 
-***REMOVED******REMOVED*** Deployment
+## Deployment
 
-***REMOVED******REMOVED******REMOVED*** Voraussetzungen
+### Voraussetzungen
 
 - `framer-motion` installiert
 - `recharts` installiert (für Analytics Dashboard)
 - MCP-Backend mit `analytics/kpis` und `analytics/trends` Endpoints
 
-***REMOVED******REMOVED******REMOVED*** Build
+### Build
 
 ```bash
 cd packages/frontend-web
 pnpm run build
 ```
 
-***REMOVED******REMOVED******REMOVED*** Lint
+### Lint
 
 ```bash
-pnpm run lint  ***REMOVED*** Sollte 0 Errors, 0 Warnings zeigen
+pnpm run lint  # Sollte 0 Errors, 0 Warnings zeigen
 ```
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 **Phase E - Copilot Insights 2.0** erweitert das Analytics Dashboard um einen intelligenten KI-Layer, der:
 
@@ -301,3 +301,4 @@ pnpm run lint  ***REMOVED*** Sollte 0 Errors, 0 Warnings zeigen
 - ✅ Einfach an echte GPT-API anbindbar ist
 
 **Status:** Production Ready 🚀
+

@@ -21,7 +21,7 @@ async def create_case(
     db: AsyncSession = Depends(get_db),
 ):
     """Create a new support case."""
-    ***REMOVED*** Generate case number
+    # Generate case number
     case_number = f"CASE-{UUID(case_data.tenant_id).hex[:8].upper()}"
 
     case = CaseModel(**case_data.model_dump(), case_number=case_number)
@@ -29,7 +29,7 @@ async def create_case(
     await db.commit()
     await db.refresh(case)
 
-    ***REMOVED*** Create initial history entry
+    # Create initial history entry
     history = CaseHistoryModel(
         case_id=case.id,
         action="created",
@@ -150,10 +150,10 @@ async def escalate_case(
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
 
-    ***REMOVED*** Update case status to escalated
+    # Update case status to escalated
     case.status = "escalated"
 
-    ***REMOVED*** Create history entry
+    # Create history entry
     history = CaseHistoryModel(
         case_id=case.id,
         action="escalated",
@@ -182,3 +182,4 @@ async def get_case_history(
     result = await db.execute(stmt)
     history = result.scalars().all()
     return [CaseHistory.model_validate(entry) for entry in history]
+

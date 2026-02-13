@@ -19,7 +19,6 @@ if (
   (MASK_MISSING_FIELDS.length > 0 || MASK_EXTRA_FIELDS.length > 0) &&
   import.meta.env.MODE !== 'production'
 ) {
-  // eslint-disable-next-line no-console
   console.warn('[crm-masks] registry/mask mismatch detected', {
     missing: MASK_MISSING_FIELDS,
     extra: MASK_EXTRA_FIELDS,

@@ -47,7 +47,7 @@ export async function deliveryNotesRoutes(app: FastifyInstance, options: { deliv
           properties: {
             data: {
               type: 'array',
-              items: { $ref: 'DeliveryNote***REMOVED***' }
+              items: { $ref: 'DeliveryNote#' }
             },
             pagination: {
               type: 'object',
@@ -150,7 +150,7 @@ export async function deliveryNotesRoutes(app: FastifyInstance, options: { deliv
         }
       },
       response: {
-        201: { $ref: 'DeliveryNote***REMOVED***' }
+        201: { $ref: 'DeliveryNote#' }
       }
     }
   }, async (request, reply) => {
@@ -224,7 +224,7 @@ export async function deliveryNotesRoutes(app: FastifyInstance, options: { deliv
         }
       },
       response: {
-        201: { $ref: 'DeliveryNote***REMOVED***' }
+        201: { $ref: 'DeliveryNote#' }
       }
     }
   }, async (request, reply) => {
@@ -270,7 +270,7 @@ export async function deliveryNotesRoutes(app: FastifyInstance, options: { deliv
         }
       },
       response: {
-        200: { $ref: 'DeliveryNote***REMOVED***' },
+        200: { $ref: 'DeliveryNote#' },
         404: {
           type: 'object',
           properties: {
@@ -326,7 +326,7 @@ export async function deliveryNotesRoutes(app: FastifyInstance, options: { deliv
         }
       },
       response: {
-        200: { $ref: 'DeliveryNote***REMOVED***' }
+        200: { $ref: 'DeliveryNote#' }
       }
     }
   }, async (request, reply) => {
@@ -367,7 +367,7 @@ export async function deliveryNotesRoutes(app: FastifyInstance, options: { deliv
         }
       },
       response: {
-        200: { $ref: 'DeliveryNote***REMOVED***' }
+        200: { $ref: 'DeliveryNote#' }
       }
     }
   }, async (request, reply) => {
@@ -396,7 +396,7 @@ export async function deliveryNotesRoutes(app: FastifyInstance, options: { deliv
         }
       },
       response: {
-        200: { $ref: 'DeliveryNote***REMOVED***' }
+        200: { $ref: 'DeliveryNote#' }
       }
     }
   }, async (request, reply) => {
@@ -424,7 +424,7 @@ export async function deliveryNotesRoutes(app: FastifyInstance, options: { deliv
         }
       },
       response: {
-        200: { $ref: 'DeliveryNote***REMOVED***' }
+        200: { $ref: 'DeliveryNote#' }
       }
     }
   }, async (request, reply) => {
@@ -475,7 +475,7 @@ export async function deliveryNotesRoutes(app: FastifyInstance, options: { deliv
       response: {
         200: {
           type: 'array',
-          items: { $ref: 'DeliveryNote***REMOVED***' }
+          items: { $ref: 'DeliveryNote#' }
         }
       }
     }

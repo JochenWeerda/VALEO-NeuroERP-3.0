@@ -102,9 +102,9 @@ export function useCustomers(filters?: { search?: string; is_active?: boolean })
       const params = new URLSearchParams()
       if (filters?.search) params.append('search', filters.search)
       if (filters?.is_active !== undefined) params.append('is_active', String(filters.is_active))
-      
+
       const response = await apiClient.get<PaginatedResponse<Customer>>(
-        `/api/v1/crm/customers?${String(params)}`
+        `/api/v1/crm/customers?${String(params)}`,
       )
       return response.data
     },
@@ -124,7 +124,7 @@ export function useCustomer(id: string) {
 
 export function useCreateCustomer() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (data: CustomerCreate) => {
       const response = await apiClient.post<Customer>('/api/v1/crm/customers', data)
@@ -138,7 +138,7 @@ export function useCreateCustomer() {
 
 export function useUpdateCustomer() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: CustomerUpdate }) => {
       const response = await apiClient.put<Customer>(`/api/v1/crm/customers/${id}`, data)
@@ -153,7 +153,7 @@ export function useUpdateCustomer() {
 
 export function useDeleteCustomer() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (id: string) => {
       await apiClient.delete(`/api/v1/crm/customers/${id}`)
@@ -172,10 +172,8 @@ export function useLeads(filters?: { search?: string; status?: string }) {
       const params = new URLSearchParams()
       if (filters?.search) params.append('search', filters.search)
       if (filters?.status) params.append('status', filters.status)
-      
-      const response = await apiClient.get<PaginatedResponse<Lead>>(
-        `/api/v1/crm/leads?${String(params)}`
-      )
+
+      const response = await apiClient.get<PaginatedResponse<Lead>>(`/api/v1/crm/leads?${String(params)}`)
       return response.data
     },
   })
@@ -194,7 +192,7 @@ export function useLead(id: string) {
 
 export function useCreateLead() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (data: LeadCreate) => {
       const response = await apiClient.post<Lead>('/api/v1/crm/leads', data)
@@ -208,7 +206,7 @@ export function useCreateLead() {
 
 export function useUpdateLead() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: LeadUpdate }) => {
       const response = await apiClient.put<Lead>(`/api/v1/crm/leads/${id}`, data)
@@ -223,7 +221,7 @@ export function useUpdateLead() {
 
 export function useDeleteLead() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (id: string) => {
       await apiClient.delete(`/api/v1/crm/leads/${id}`)
@@ -234,3 +232,71 @@ export function useDeleteLead() {
   })
 }
 
+// Dashboard
+
+export type CRMDashboardKPI = {
+  title: string
+  value: string
+  change: { value: number; type: 'increase' | 'decrease'; period: string }
+  icon: string
+  color: string
+}
+
+export type CRMDashboardChart = {
+  title: string
+  type: 'line' | 'bar' | 'pie'
+  data: number[]
+}
+
+export function useCRMDashboard() {
+  return useQuery({
+    queryKey: [...crmKeys.all, 'dashboard'],
+    queryFn: async () => {
+      const response = await apiClient.get<{ kpis: CRMDashboardKPI[]; charts: CRMDashboardChart[] }>(
+        '/api/v1/crm/dashboard',
+      )
+      return response.data
+    },
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 5 * 60 * 1000,
+  })
+}
+
+// Suppliers (Lieferanten)
+
+export type Supplier = {
+  id: string
+  name: string
+  supplier_number?: string
+  type?: string
+  city?: string
+  email?: string
+  phone?: string
+  tax_id?: string
+  iban?: string
+  payment_terms?: number
+  rating?: number
+  is_active: boolean
+  created_at?: string
+}
+
+export type SupplierListResponse = {
+  items: Supplier[]
+  total: number
+}
+
+export function useSuppliers(params?: { search?: string; is_active?: boolean }) {
+  return useQuery({
+    queryKey: [...crmKeys.all, 'suppliers', params],
+    queryFn: async () => {
+      const response = await apiClient.get<SupplierListResponse>('/api/v1/crm/suppliers', {
+        params: {
+          search: params?.search,
+          is_active: params?.is_active,
+        },
+      })
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+}

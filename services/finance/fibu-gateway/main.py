@@ -13,6 +13,11 @@ from app.config import settings
 from app.middleware.tenant import tenant_middleware
 from app.dependencies import get_event_publisher
 
+try:
+    from auth_shared import AuthMiddleware
+except ImportError:
+    AuthMiddleware = None  # type: ignore[assignment,misc]
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -44,6 +49,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Auth middleware
+if AuthMiddleware is not None:
+    app.add_middleware(AuthMiddleware)
+    logger.info("Auth middleware enabled")
+
 app.middleware("http")(tenant_middleware)
 
 app.include_router(api_router, prefix="/api")
@@ -72,4 +83,3 @@ if __name__ == "__main__":
         port=settings.PORT,
         reload=settings.DEBUG,
     )
-

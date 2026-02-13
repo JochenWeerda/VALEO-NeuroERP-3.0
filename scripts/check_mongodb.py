@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Überprüft, ob MongoDB installiert ist und gibt bei Bedarf Installationsanweisungen.
 """
@@ -9,7 +9,7 @@ import subprocess
 import platform
 import logging
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -29,7 +29,7 @@ def check_mongodb_installed():
     system = platform.system().lower()
     
     if system == "windows":
-        ***REMOVED*** Prüfe, ob der MongoDB-Dienst existiert
+        # Prüfe, ob der MongoDB-Dienst existiert
         try:
             result = subprocess.run(
                 ["sc", "query", "MongoDB"],
@@ -46,7 +46,7 @@ def check_mongodb_installed():
         except Exception:
             pass
         
-        ***REMOVED*** Prüfe, ob mongod.exe im Pfad ist
+        # Prüfe, ob mongod.exe im Pfad ist
         try:
             result = subprocess.run(
                 ["where", "mongod"],
@@ -61,7 +61,7 @@ def check_mongodb_installed():
             pass
     
     elif system == "linux":
-        ***REMOVED*** Prüfe, ob der MongoDB-Dienst existiert
+        # Prüfe, ob der MongoDB-Dienst existiert
         try:
             result = subprocess.run(
                 ["systemctl", "status", "mongodb"],
@@ -75,7 +75,7 @@ def check_mongodb_installed():
         except Exception:
             pass
         
-        ***REMOVED*** Alternative: Prüfe mit service
+        # Alternative: Prüfe mit service
         try:
             result = subprocess.run(
                 ["service", "mongodb", "status"],
@@ -89,7 +89,7 @@ def check_mongodb_installed():
         except Exception:
             pass
         
-        ***REMOVED*** Prüfe, ob mongod im Pfad ist
+        # Prüfe, ob mongod im Pfad ist
         try:
             result = subprocess.run(
                 ["which", "mongod"],
@@ -103,8 +103,8 @@ def check_mongodb_installed():
         except Exception:
             pass
     
-    elif system == "darwin":  ***REMOVED*** macOS
-        ***REMOVED*** Prüfe mit Homebrew
+    elif system == "darwin":  # macOS
+        # Prüfe mit Homebrew
         try:
             result = subprocess.run(
                 ["brew", "services", "list"],
@@ -118,7 +118,7 @@ def check_mongodb_installed():
         except Exception:
             pass
         
-        ***REMOVED*** Prüfe, ob mongod im Pfad ist
+        # Prüfe, ob mongod im Pfad ist
         try:
             result = subprocess.run(
                 ["which", "mongod"],
@@ -171,7 +171,7 @@ def print_installation_instructions():
         print("6. Aktiviere den automatischen Start beim Systemstart:")
         print("   sudo systemctl enable mongod")
     
-    elif system == "darwin":  ***REMOVED*** macOS
+    elif system == "darwin":  # macOS
         print("Installation von MongoDB unter macOS mit Homebrew:")
         print("1. Installiere Homebrew, falls noch nicht geschehen:")
         print("   /bin/bash -c '$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)'")

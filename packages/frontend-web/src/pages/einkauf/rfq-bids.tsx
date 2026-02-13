@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,10 +12,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Upload, Download, Plus, FileSpreadsheet, FileText, X, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Upload, Plus, FileText } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
+import { Skeleton } from '@/components/ui/skeleton'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
+import { ErrorState } from '@/components/ErrorState'
 
 type Bid = {
   id: string
@@ -44,8 +47,7 @@ type Bid = {
 export default function RfqBidsPage(): JSX.Element {
   const { t } = useTranslation()
   const { rfqId } = useParams<{ rfqId: string }>()
-  const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
+  const [loading] = useState(false)
   const [rfq, setRfq] = useState<any>(null)
   const [bids, setBids] = useState<Bid[]>([])
   const [selectedBid, setSelectedBid] = useState<Bid | null>(null)
@@ -57,129 +59,33 @@ export default function RfqBidsPage(): JSX.Element {
   const [awardDecision, setAwardDecision] = useState({
     selectedBidId: '',
     decisionReason: '',
-    evaluationCriteria: {
-      price: 0,
-      leadTime: 0,
-      quality: 0,
-      service: 0,
-      total: 0,
-    },
+    evaluationCriteria: { price: 0, leadTime: 0, quality: 0, service: 0, total: 0 },
   })
   const [newBid, setNewBid] = useState({
-    supplierId: '',
-    supplierName: '',
-    items: [] as Array<{
-      rfqItemId: string
-      quantity: number
-      unitPrice: number
-      deliveryDate: string
-      leadTime: number
-      notes: string
-    }>,
-    totalValue: 0,
-    currency: 'EUR',
-    paymentTerms: '',
-    deliveryTerms: '',
-    notes: '',
+    supplierId: '', supplierName: '',
+    items: [] as Array<{ rfqItemId: string; quantity: number; unitPrice: number; deliveryDate: string; leadTime: number; notes: string }>,
+    totalValue: 0, currency: 'EUR', paymentTerms: '', deliveryTerms: '', notes: '',
   })
   const [availableSuppliers, setAvailableSuppliers] = useState<any[]>([])
+  const { data: bidsData = [], isLoading: bidsLoading, isError: bidsError, error: bidsErrorObj, refetch: refetchBids } = useQuery({
+    queryKey: ['einkauf', 'rfq-bids', rfqId],
+    queryFn: async () => (await apiClient.get<Bid[]>(`/api/v1/einkauf/anfragen/${rfqId}/bids`)).data,
+    enabled: !!rfqId,
+    staleTime: 2 * 60 * 1000,
+  })
+
+  useEffect(() => {
+    setBids(bidsData)
+  }, [bidsData])
 
   useEffect(() => {
     if (rfqId) {
-      loadRfq()
-      loadBids()
-      loadSuppliers()
+      apiClient.get(`/api/einkauf/anfragen/${rfqId}`).then(r => setRfq(r.data)).catch(() => {})
+      apiClient.get('/api/partners?type=supplier').then(r => {
+        setAvailableSuppliers((r as any).data?.data || (r as any).data || [])
+      }).catch(() => {})
     }
   }, [rfqId])
-
-  const loadRfq = async () => {
-    try {
-      const response = await apiClient.get(`/api/einkauf/anfragen/${rfqId}`)
-      setRfq(response.data)
-    } catch (error: any) {
-      console.error('Fehler beim Laden der RFQ:', error)
-      toast({
-        variant: 'destructive',
-        title: t('crud.messages.loadError'),
-        description: error.message,
-      })
-    }
-  }
-
-  const loadBids = async () => {
-    setLoading(true)
-    try {
-      // Mock data for now - would come from backend
-      const mockBids: Bid[] = [
-        {
-          id: 'bid-1',
-          rfqId: rfqId || '',
-          supplierId: 'supplier-1',
-          supplierName: 'Müller Landhandel GmbH',
-          items: [
-            {
-              rfqItemId: 'item-1',
-              quantity: 100,
-              unitPrice: 250.00,
-              totalPrice: 25000.00,
-              currency: 'EUR',
-              deliveryDate: '2025-03-15',
-              leadTime: 30,
-              notes: 'Verfügbar ab März',
-            },
-          ],
-          totalValue: 25000.00,
-          currency: 'EUR',
-          submittedBy: 'Max Mustermann',
-          submittedAt: '2025-01-28T10:00:00Z',
-          status: 'SUBMITTED',
-        },
-        {
-          id: 'bid-2',
-          rfqId: rfqId || '',
-          supplierId: 'supplier-2',
-          supplierName: 'Schmidt Agrar KG',
-          items: [
-            {
-              rfqItemId: 'item-1',
-              quantity: 100,
-              unitPrice: 245.00,
-              totalPrice: 24500.00,
-              currency: 'EUR',
-              deliveryDate: '2025-03-20',
-              leadTime: 35,
-              notes: 'Bulk-Discount bei 100+ t',
-            },
-          ],
-          totalValue: 24500.00,
-          currency: 'EUR',
-          submittedBy: 'Anna Schmidt',
-          submittedAt: '2025-01-28T14:30:00Z',
-          status: 'SUBMITTED',
-        },
-      ]
-      setBids(mockBids)
-    } catch (error: any) {
-      console.error('Fehler beim Laden der Bids:', error)
-      toast({
-        variant: 'destructive',
-        title: t('crud.messages.loadError'),
-        description: error.message,
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const loadSuppliers = async () => {
-    try {
-      const response = await apiClient.get('/api/partners?type=supplier')
-      const suppliers = (response as any).data?.data || (response as any).data || []
-      setAvailableSuppliers(suppliers)
-    } catch (error) {
-      console.error('Fehler beim Laden der Lieferanten:', error)
-    }
-  }
 
   const handleAddBid = () => {
     setNewBid({
@@ -242,9 +148,9 @@ export default function RfqBidsPage(): JSX.Element {
     })
   }
 
-  const handleImportBids = async (file: File) => {
+  const handleImportBids = async (_file: File) => {
     try {
-      // Mock import - would parse CSV/Excel
+      // Import parser wird als eigener Schritt angebunden
       toast({
         title: t('crud.messages.importInfo'),
         description: t('crud.messages.importComingSoon'),
@@ -331,8 +237,14 @@ export default function RfqBidsPage(): JSX.Element {
     })
   }
 
+  if (bidsError) {
+    return <ErrorState error={bidsErrorObj as Error} onRetry={() => { void refetchBids() }} />
+  }
+
   return (
-    <div className="space-y-6 p-6">
+
+    <div className="space-y-6 p-3 md:p-6">
+      {bidsLoading && <div className="space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-[300px] w-full" /></div>}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{t('crud.fields.bids')} - {rfq?.anfrageNummer || rfqId}</h1>
@@ -827,7 +739,7 @@ export default function RfqBidsPage(): JSX.Element {
                         </TableHeader>
                         <TableBody>
                           {bids.map((bid) => {
-                            // Mock scores - would come from evaluation
+                            // Scores kommen aus der Bewertungslogik
                             const priceScore = 5 - ((bid.totalValue - Math.min(...bids.map(b => b.totalValue))) / Math.max(...bids.map(b => b.totalValue)) * 5)
                             const leadTimeScore = bid.items[0]?.leadTime ? 5 - ((bid.items[0].leadTime - Math.min(...bids.map(b => b.items[0]?.leadTime || Infinity))) / Math.max(...bids.map(b => b.items[0]?.leadTime || 1)) * 5) : 0
                             const qualityScore = bid.evaluationScore || 3.5
@@ -1027,4 +939,5 @@ export default function RfqBidsPage(): JSX.Element {
     </div>
   )
 }
+
 

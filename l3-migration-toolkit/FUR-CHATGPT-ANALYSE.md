@@ -1,14 +1,14 @@
-***REMOVED*** L3-Screenshots für ChatGPT-Analyse
+# L3-Screenshots für ChatGPT-Analyse
 
-***REMOVED******REMOVED*** 📸 Screenshots erstellt von Jochen
+## 📸 Screenshots erstellt von Jochen
 
 Speicherort: `l3-migration-toolkit/screenshots/l3-masks/`
 
-***REMOVED******REMOVED*** 🤖 Aufgabe für ChatGPT
+## 🤖 Aufgabe für ChatGPT
 
 **Analysiere jeden Screenshot und extrahiere ALLE Formularfelder!**
 
-***REMOVED******REMOVED******REMOVED*** Output-Format pro Maske:
+### Output-Format pro Maske:
 
 ```json
 {
@@ -67,7 +67,7 @@ Speicherort: `l3-migration-toolkit/screenshots/l3-masks/`
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Wichtige Regeln:
+### Wichtige Regeln:
 
 1. **ALLE Felder erfassen** - keine überspringen!
 2. **Feldtypen erkennen:**
@@ -84,15 +84,15 @@ Speicherort: `l3-migration-toolkit/screenshots/l3-masks/`
 4. **Required-Felder** = Meist Primärschlüssel (Nummern-Felder)
 5. **Relations** = Lookup-Felder → Foreign Keys
 
-***REMOVED******REMOVED******REMOVED*** Output-Dateien:
+### Output-Dateien:
 
 Für jede Maske erstellen:
 1. **JSON-Schema:** `schemas/mask-builder/{maske}.json`
 2. **SQL-Statement:** `schemas/sql/{maske}.sql`
 
-***REMOVED******REMOVED*** 📋 Zu analysierende Masken (Priorität)
+## 📋 Zu analysierende Masken (Priorität)
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐⭐⭐ KRITISCH
+### ⭐⭐⭐⭐⭐ KRITISCH
 1. Artikelstamm
 2. Kundenstamm
 3. Lieferantenstamm
@@ -102,20 +102,20 @@ Für jede Maske erstellen:
 7. Bestellung
 8. PSM-Abgabe (Pflanzenschutzmittel!)
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐⭐ WICHTIG
+### ⭐⭐⭐⭐ WICHTIG
 9. Lager-Bestand
 10. Angebot
 11. Wareneingang
 12. Kunden-Kontoauszug
 
-***REMOVED******REMOVED*** 🔄 Workflow
+## 🔄 Workflow
 
 1. **Jochen:** Erstellt Screenshots aller Masken
 2. **ChatGPT:** Analysiert und erstellt JSON + SQL
 3. **Import:** Schemas werden in VALEO-NeuroERP Mask Builder importiert
 4. **Auto-Generate:** Frontend-Masken werden automatisch generiert
 
-***REMOVED******REMOVED*** 💾 Speicherorte
+## 💾 Speicherorte
 
 - **Screenshots:** `l3-migration-toolkit/screenshots/l3-masks/`
 - **JSON-Schemas:** `l3-migration-toolkit/schemas/mask-builder/`
@@ -125,4 +125,5 @@ Für jede Maske erstellen:
 ---
 
 **Bereit für ChatGPT-Analyse!** 🚀
+
 

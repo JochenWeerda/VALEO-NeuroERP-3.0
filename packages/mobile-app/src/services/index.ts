@@ -49,7 +49,7 @@ const configureNotifications = async () => {
     name: 'New Leads',
     importance: Notifications.AndroidImportance.HIGH,
     vibrationPattern: [0, 250, 250, 250],
-    lightColor: '***REMOVED***FF6B35',
+    lightColor: '#FF6B35',
     sound: 'default',
   });
 
@@ -57,7 +57,7 @@ const configureNotifications = async () => {
     name: 'Task Reminders',
     importance: Notifications.AndroidImportance.HIGH,
     vibrationPattern: [0, 250, 250, 250],
-    lightColor: '***REMOVED***4ECDC4',
+    lightColor: '#4ECDC4',
     sound: 'default',
   });
 
@@ -65,7 +65,7 @@ const configureNotifications = async () => {
     name: 'Opportunities',
     importance: Notifications.AndroidImportance.DEFAULT,
     vibrationPattern: [0, 250, 250, 250],
-    lightColor: '***REMOVED***45B7D1',
+    lightColor: '#45B7D1',
     sound: 'default',
   });
 

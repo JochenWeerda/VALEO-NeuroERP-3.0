@@ -1,12 +1,12 @@
-***REMOVED*** syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1
 
-***REMOVED*** Playwright Python Image mit vorinstallierten Browsern
+# Playwright Python Image mit vorinstallierten Browsern
 ARG PW_VERSION=1.55.0-noble
 FROM mcr.microsoft.com/playwright/python:v${PW_VERSION}
 
 WORKDIR /work
 
-***REMOVED*** Empfohlene ENV-Settings für browser-use in Docker
+# Empfohlene ENV-Settings für browser-use in Docker
 ENV IN_DOCKER=true \
     PYTHONUNBUFFERED=1 \
     PYTHONIOENCODING=utf-8 \
@@ -16,19 +16,20 @@ ENV IN_DOCKER=true \
     XDG_CONFIG_HOME=/tmp \
     BROWSER_USE_CONFIG_DIR=/tmp/browser_use_config \
     BROWSER_USE_PROFILES_DIR=/tmp/browser_use_profiles \
-    ***REMOVED*** Browser sind im Image bereits unter /ms-playwright vorhanden
+    # Browser sind im Image bereits unter /ms-playwright vorhanden
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
-***REMOVED*** Python deps installieren
+# Python deps installieren
 COPY swarm/requirements.ui-explorer.txt /work/requirements.ui-explorer.txt
 RUN pip install --no-cache-dir -r requirements.ui-explorer.txt
 
-***REMOVED*** Falls du *doch* Browser neu laden willst (meist unnötig):
-***REMOVED*** RUN playwright install chromium --with-deps
+# Falls du *doch* Browser neu laden willst (meist unnötig):
+# RUN playwright install chromium --with-deps
 
-***REMOVED*** Code rein
+# Code rein
 COPY swarm /work/swarm
 
-***REMOVED*** Standard-Startpunkt (passt an deinen Modulnamen an)
+# Standard-Startpunkt (passt an deinen Modulnamen an)
 CMD ["python", "swarm/ui_explorer.py"]
+
 

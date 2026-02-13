@@ -1,10 +1,11 @@
-﻿***REMOVED*** maintenance
+# maintenance
 
-***REMOVED******REMOVED*** Beschreibung
+## Beschreibung
 Wartungs-Skripte
 
-***REMOVED******REMOVED*** Struktur
+## Struktur
 
 
-***REMOVED******REMOVED*** Verwendung
+## Verwendung
 Beschreiben Sie hier, wie dieses Modul verwendet wird...
+

@@ -85,7 +85,7 @@ export class DeliveryNoteItem {
 }
 
 export interface CreateDeliveryNoteInput {
-  salesOfferId?: string;
+  salesOfferId?: string | undefined;
   customerId: string;
   subject: string;
   description: string;
@@ -98,31 +98,31 @@ export interface CreateDeliveryNoteInput {
   };
   items: Array<{
     itemType: DeliveryNoteItemType;
-    articleId?: string;
+    articleId?: string | undefined;
     description: string;
     quantity: number;
     unitPrice: number;
-    discountPercent?: number;
-    notes?: string;
+    discountPercent?: number | undefined;
+    notes?: string | undefined;
   }>;
-  carrierId?: string;
-  trackingNumber?: string;
-  notes?: string;
+  carrierId?: string | undefined;
+  trackingNumber?: string | undefined;
+  notes?: string | undefined;
 }
 
 export interface UpdateDeliveryNoteInput {
-  subject?: string;
-  description?: string;
-  deliveryDate?: Date;
+  subject?: string | undefined;
+  description?: string | undefined;
+  deliveryDate?: Date | undefined;
   shippingAddress?: {
     street: string;
     postalCode: string;
     city: string;
     country: string;
-  };
-  carrierId?: string;
-  trackingNumber?: string;
-  notes?: string;
+  } | undefined;
+  carrierId?: string | undefined;
+  trackingNumber?: string | undefined;
+  notes?: string | undefined;
 }
 
 export type DeliveryNoteStatusType = DeliveryNoteStatus;
@@ -175,20 +175,20 @@ export class DeliveryNote {
     items: DeliveryNoteItem[],
     createdBy: string,
     options: {
-      id?: string;
-      deliveryNoteNumber?: string;
-      salesOfferId?: string;
-      carrierId?: string;
-      trackingNumber?: string;
-      notes?: string;
-      status?: DeliveryNoteStatus;
-      version?: number;
-      shippedAt?: Date;
-      shippedBy?: string;
-      deliveredAt?: Date;
-      deliveredBy?: string;
-      createdAt?: Date;
-      updatedAt?: Date;
+      id?: string | undefined;
+      deliveryNoteNumber?: string | undefined;
+      salesOfferId?: string | undefined;
+      carrierId?: string | undefined;
+      trackingNumber?: string | undefined;
+      notes?: string | undefined;
+      status?: DeliveryNoteStatus | undefined;
+      version?: number | undefined;
+      shippedAt?: Date | undefined;
+      shippedBy?: string | undefined;
+      deliveredAt?: Date | undefined;
+      deliveredBy?: string | undefined;
+      createdAt?: Date | undefined;
+      updatedAt?: Date | undefined;
     } = {}
   ) {
     this.id = options.id || randomUUID();

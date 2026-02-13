@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 GENXAIS Cron-Zyklus-Updater
@@ -15,7 +15,7 @@ import datetime
 from pathlib import Path
 import sys
 
-***REMOVED*** Verzeichnisse und Dateien
+# Verzeichnisse und Dateien
 DATA_DIR = Path("data/dashboard")
 PHASES_FILE = DATA_DIR / "phases.json"
 PIPELINES_FILE = DATA_DIR / "pipelines.json"
@@ -29,7 +29,7 @@ def get_version():
             version_data = json.load(f)
         return version_data.get("current", "v1.8")
     except Exception:
-        return "v1.8"  ***REMOVED*** Fallback
+        return "v1.8"  # Fallback
 
 def normalize_progress_values(data):
     """Normalisiert Fortschrittswerte auf den Bereich 0-100"""
@@ -52,7 +52,7 @@ def normalize_progress_values(data):
 def update_cycle_progress(version, speed_factor=1.0):
     """Aktualisiert den Fortschritt des GENXAIS-Zyklus"""
     
-    ***REMOVED*** Lade aktuelle Daten
+    # Lade aktuelle Daten
     try:
         with open(PHASES_FILE, 'r', encoding='utf-8') as f:
             phases_data = json.load(f)
@@ -68,7 +68,7 @@ def update_cycle_progress(version, speed_factor=1.0):
         print(f"Fehler beim Laden der Daten: {e}")
         return False
     
-    ***REMOVED*** Finde aktuelle Phase
+    # Finde aktuelle Phase
     current_phase_name = phases_data.get("current_phase", "VAN")
     current_phase = None
     current_phase_index = 0
@@ -83,12 +83,12 @@ def update_cycle_progress(version, speed_factor=1.0):
         print("Fehler: Aktuelle Phase nicht gefunden.")
         return False
     
-    ***REMOVED*** Aktualisiere Phase-Fortschritt
+    # Aktualisiere Phase-Fortschritt
     progress_increment = random.uniform(1.0, 3.0) * speed_factor
     old_progress = current_phase["progress"]
     current_phase["progress"] = min(100, current_phase["progress"] + progress_increment)
     
-    ***REMOVED*** Aktualisiere Tasks
+    # Aktualisiere Tasks
     active_tasks = []
     completed_tasks = []
     for task in current_phase.get("tasks", []):
@@ -107,31 +107,31 @@ def update_cycle_progress(version, speed_factor=1.0):
                 task["status"] = "completed"
                 completed_tasks.append(task["name"])
     
-    ***REMOVED*** Wechsle zur nächsten Phase, wenn aktuelle Phase zu 98% abgeschlossen ist
+    # Wechsle zur nächsten Phase, wenn aktuelle Phase zu 98% abgeschlossen ist
     phase_changed = False
     if current_phase["progress"] >= 98:
         current_phase["progress"] = 100
         current_phase["status"] = "completed"
         phase_changed = True
         
-        ***REMOVED*** Setze alle Tasks auf completed
+        # Setze alle Tasks auf completed
         for task in current_phase.get("tasks", []):
             task["status"] = "completed"
             task["progress"] = 100
         
-        ***REMOVED*** Wechsle zur nächsten Phase
+        # Wechsle zur nächsten Phase
         if current_phase_index < len(phases_data["phases"]) - 1:
             next_phase_index = current_phase_index + 1
             next_phase = phases_data["phases"][next_phase_index]
             next_phase["status"] = "active"
             phases_data["current_phase"] = next_phase["name"]
             
-            ***REMOVED*** Markiere erste Task als aktiv
+            # Markiere erste Task als aktiv
             if next_phase.get("tasks"):
                 next_phase["tasks"][0]["status"] = "active"
                 next_phase["tasks"][0]["progress"] = random.uniform(5.0, 15.0) * speed_factor
     
-    ***REMOVED*** Aktualisiere Pipelines basierend auf der aktuellen Phase
+    # Aktualisiere Pipelines basierend auf der aktuellen Phase
     phase_to_pipeline_progress = {
         "VAN": (0, 20),
         "PLAN": (20, 40),
@@ -146,7 +146,7 @@ def update_cycle_progress(version, speed_factor=1.0):
     completed_pipelines = []
     
     for pipeline in pipelines_data.get("pipelines", []):
-        ***REMOVED*** Bestimme Status basierend auf der aktuellen Phase
+        # Bestimme Status basierend auf der aktuellen Phase
         if current_phase_name == "VAN":
             if pipeline.get("status") == "planning":
                 continue
@@ -173,7 +173,7 @@ def update_cycle_progress(version, speed_factor=1.0):
                 completed_pipelines.append(pipeline["name"])
             continue
         
-        ***REMOVED*** Aktualisiere Fortschritt basierend auf der aktuellen Phase
+        # Aktualisiere Fortschritt basierend auf der aktuellen Phase
         if pipeline.get("status") != "completed":
             current_progress = pipeline.get("progress", 0)
             target_progress = random.uniform(min_progress, max_progress)
@@ -184,7 +184,7 @@ def update_cycle_progress(version, speed_factor=1.0):
                 pipeline["progress"] = min(target_progress, current_progress + progress_increment)
                 active_pipelines.append(f"{pipeline['name']} ({pipeline['progress']:.1f}%)")
         
-        ***REMOVED*** Aktualisiere Ziele
+        # Aktualisiere Ziele
         for goal in pipeline.get("goals", []):
             if goal.get("status") == "pending":
                 goal["status"] = "active"
@@ -197,7 +197,7 @@ def update_cycle_progress(version, speed_factor=1.0):
                     goal["progress"] = 100
                     goal["status"] = "completed"
         
-        ***REMOVED*** Aktualisiere Laufzeit
+        # Aktualisiere Laufzeit
         runtime = pipeline.get("runtime", "0h 0m")
         hours, minutes = runtime.split("h ")
         minutes = minutes.replace("m", "")
@@ -209,7 +209,7 @@ def update_cycle_progress(version, speed_factor=1.0):
             minutes -= 60
         pipeline["runtime"] = f"{hours}h {minutes}m"
     
-    ***REMOVED*** Aktualisiere Graphiti Decision Map basierend auf der aktuellen Phase
+    # Aktualisiere Graphiti Decision Map basierend auf der aktuellen Phase
     phase_to_decision_points = {
         "VAN": ["d1", "d2", "d3"],
         "PLAN": ["d4"],
@@ -218,21 +218,21 @@ def update_cycle_progress(version, speed_factor=1.0):
         "REFLECT": ["d8"]
     }
     
-    ***REMOVED*** Setze aktuelle Phase auf aktiv
+    # Setze aktuelle Phase auf aktiv
     for node in graphiti_data.get("nodes", []):
         if node.get("id") == current_phase_name.lower():
             node["status"] = "active"
         elif node.get("type") == "phase" and node.get("id") in [p.get("name", "").lower() for p in phases_data.get("phases", []) if p.get("status") == "completed"]:
             node["status"] = "completed"
         
-        ***REMOVED*** Aktualisiere Entscheidungspunkte
+        # Aktualisiere Entscheidungspunkte
         if node.get("type") == "decision" and node.get("id") in phase_to_decision_points.get(current_phase_name, []):
             if current_phase["progress"] > 50:
                 node["status"] = "active"
             if current_phase["progress"] > 90:
                 node["status"] = "completed"
     
-    ***REMOVED*** Aktualisiere DOT-Source
+    # Aktualisiere DOT-Source
     dot_source_lines = graphiti_data.get("dot_source", "").split("\n")
     updated_dot_source = []
     for line in dot_source_lines:
@@ -250,11 +250,11 @@ def update_cycle_progress(version, speed_factor=1.0):
         updated_dot_source.append(line)
     graphiti_data["dot_source"] = "\n".join(updated_dot_source)
     
-    ***REMOVED*** Normalisiere Fortschrittswerte
+    # Normalisiere Fortschrittswerte
     normalize_progress_values(phases_data)
     normalize_progress_values(pipelines_data)
     
-    ***REMOVED*** Speichere aktualisierte Daten
+    # Speichere aktualisierte Daten
     phases_data["last_updated"] = datetime.datetime.now().isoformat()
     pipelines_data["last_updated"] = datetime.datetime.now().isoformat()
     graphiti_data["last_updated"] = datetime.datetime.now().isoformat()
@@ -268,7 +268,7 @@ def update_cycle_progress(version, speed_factor=1.0):
     with open(decision_map_file, 'w', encoding='utf-8') as f:
         json.dump(graphiti_data, f, indent=2, ensure_ascii=False)
     
-    ***REMOVED*** Erstelle detaillierte Ausgabe
+    # Erstelle detaillierte Ausgabe
     print(f"Fortschritt aktualisiert:")
     print(f"  Phase: {current_phase_name} ({old_progress:.1f}% → {current_phase['progress']:.1f}%)")
     

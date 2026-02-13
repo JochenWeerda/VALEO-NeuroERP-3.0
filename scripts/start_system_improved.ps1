@@ -1,18 +1,18 @@
-***REMOVED*** Start-System-Improved.ps1
-***REMOVED***
-***REMOVED*** Dieses Skript startet alle erforderlichen Komponenten des ERP-Systems:
-***REMOVED*** - Redis-Server
-***REMOVED*** - Celery-Worker
-***REMOVED*** - Celery-Flower
-***REMOVED*** - FastAPI-Server
-***REMOVED***
-***REMOVED*** Verwendung: .\start_system_improved.ps1 [-SkipRedis] [-SkipCelery] [-SkipFlower] [-SkipAPI] [-LogLevel <Level>]
-***REMOVED*** Parameter:
-***REMOVED***   -SkipRedis    : Redis-Server nicht starten
-***REMOVED***   -SkipCelery   : Celery-Worker nicht starten
-***REMOVED***   -SkipFlower   : Celery-Flower nicht starten
-***REMOVED***   -SkipAPI      : API-Server nicht starten
-***REMOVED***   -LogLevel     : Log-Level (Verbose, Info, Warning, Error) - Standard: Info
+# Start-System-Improved.ps1
+#
+# Dieses Skript startet alle erforderlichen Komponenten des ERP-Systems:
+# - Redis-Server
+# - Celery-Worker
+# - Celery-Flower
+# - FastAPI-Server
+#
+# Verwendung: .\start_system_improved.ps1 [-SkipRedis] [-SkipCelery] [-SkipFlower] [-SkipAPI] [-LogLevel <Level>]
+# Parameter:
+#   -SkipRedis    : Redis-Server nicht starten
+#   -SkipCelery   : Celery-Worker nicht starten
+#   -SkipFlower   : Celery-Flower nicht starten
+#   -SkipAPI      : API-Server nicht starten
+#   -LogLevel     : Log-Level (Verbose, Info, Warning, Error) - Standard: Info
 
 param (
     [switch]$SkipRedis,
@@ -23,14 +23,14 @@ param (
     [string]$LogLevel = "Info"
 )
 
-***REMOVED*** Konfiguration
+# Konfiguration
 $WORKSPACE_ROOT = "C:\AI_driven_ERP\AI_driven_ERP"
 $REDIS_PATH = Join-Path $WORKSPACE_ROOT "redis"
 $LOG_DIR = Join-Path $WORKSPACE_ROOT "logs"
 $PROCESS_FILE = Join-Path $LOG_DIR "process_info.json"
 $ERROR_LOG = Join-Path $LOG_DIR "start_error.log"
 
-***REMOVED*** Definiere Log-Farben basierend auf Log-Level
+# Definiere Log-Farben basierend auf Log-Level
 $LogColors = @{
     "Verbose" = "Gray"
     "Info" = "White"
@@ -40,7 +40,7 @@ $LogColors = @{
     "Emphasis" = "Cyan"
 }
 
-***REMOVED*** Funktion für einheitliches Logging
+# Funktion für einheitliches Logging
 function Write-SystemLog {
     param (
         [Parameter(Mandatory=$true)]
@@ -54,12 +54,12 @@ function Write-SystemLog {
         [switch]$LogToFile
     )
     
-    ***REMOVED*** Log-Level-Filter
+    # Log-Level-Filter
     $levelOrder = @{"Verbose" = 0; "Info" = 1; "Warning" = 2; "Error" = 3}
     $currentLevelValue = $levelOrder[$LogLevel]
     $messageLevelValue = $levelOrder[$Level]
     
-    ***REMOVED*** Wenn Level nicht im levelOrder ist (Success/Emphasis), immer anzeigen
+    # Wenn Level nicht im levelOrder ist (Success/Emphasis), immer anzeigen
     if ($levelOrder.ContainsKey($Level) -and $messageLevelValue -lt $currentLevelValue) {
         return
     }
@@ -78,7 +78,7 @@ function Write-SystemLog {
     }
 }
 
-***REMOVED*** Fehlerbehandlungsfunktion
+# Fehlerbehandlungsfunktion
 function Handle-Error {
     param (
         [string]$ComponentName,
@@ -95,7 +95,7 @@ function Handle-Error {
     }
 }
 
-***REMOVED*** Erstelle Log-Verzeichnis, falls nicht vorhanden
+# Erstelle Log-Verzeichnis, falls nicht vorhanden
 try {
     if (-not (Test-Path $LOG_DIR)) {
         New-Item -ItemType Directory -Path $LOG_DIR -Force | Out-Null
@@ -105,7 +105,7 @@ try {
     Handle-Error -ComponentName "Log-Verzeichnis" -ErrorMessage $_.Exception.Message -Fatal
 }
 
-***REMOVED*** Prüfe, ob Verzeichnisse existieren
+# Prüfe, ob Verzeichnisse existieren
 if (-not (Test-Path $WORKSPACE_ROOT)) {
     Handle-Error -ComponentName "Workspace" -ErrorMessage "Workspace-Verzeichnis nicht gefunden: $WORKSPACE_ROOT" -Fatal
 }
@@ -114,16 +114,16 @@ if (-not $SkipRedis -and -not (Test-Path $REDIS_PATH)) {
     Handle-Error -ComponentName "Redis" -ErrorMessage "Redis-Verzeichnis nicht gefunden: $REDIS_PATH" -Fatal
 }
 
-***REMOVED*** Aktuelles Datum für Log-Dateien
+# Aktuelles Datum für Log-Dateien
 $DATE = Get-Date -Format "yyyy-MM-dd_HH-mm"
 
-***REMOVED*** Log-Dateien definieren
+# Log-Dateien definieren
 $REDIS_LOG = Join-Path $LOG_DIR "redis_$DATE.log"
 $CELERY_LOG = Join-Path $LOG_DIR "celery_$DATE.log"
 $FLOWER_LOG = Join-Path $LOG_DIR "flower_$DATE.log"
 $API_LOG = Join-Path $LOG_DIR "api_$DATE.log"
 
-***REMOVED*** Funktion zum Prüfen, ob ein Dienst läuft
+# Funktion zum Prüfen, ob ein Dienst läuft
 function Test-ServiceRunning {
     param (
         [string]$ServiceName,
@@ -133,7 +133,7 @@ function Test-ServiceRunning {
     
     Write-SystemLog "Prüfe, ob $ServiceName läuft..." -Level Verbose
     
-    ***REMOVED*** Prüfe Prozess, falls angegeben
+    # Prüfe Prozess, falls angegeben
     if ($ProcessName -ne "") {
         $process = Get-Process -Name $ProcessName -ErrorAction SilentlyContinue
         if ($process) {
@@ -142,7 +142,7 @@ function Test-ServiceRunning {
         }
     }
     
-    ***REMOVED*** Prüfe Port, falls angegeben
+    # Prüfe Port, falls angegeben
     if ($Port -gt 0) {
         $tcpConnection = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue
         if ($tcpConnection) {
@@ -154,7 +154,7 @@ function Test-ServiceRunning {
     return $false
 }
 
-***REMOVED*** Funktion zum Starten von Prozessen im Hintergrund mit PowerShell
+# Funktion zum Starten von Prozessen im Hintergrund mit PowerShell
 function Start-BackgroundProcess {
     param (
         [string]$Name,
@@ -167,18 +167,18 @@ function Start-BackgroundProcess {
     
     Write-SystemLog "Starte $Name..." -Level Emphasis
     
-    ***REMOVED*** Prüfe, ob der Dienst bereits läuft
+    # Prüfe, ob der Dienst bereits läuft
     if ($Port -gt 0 -and (Test-ServiceRunning -ServiceName $Name -Port $Port)) {
         Write-SystemLog "$Name läuft bereits auf Port $Port - wird wiederverwendet" -Level Warning
         
-        ***REMOVED*** Suche die Prozess-ID für den Port
+        # Suche die Prozess-ID für den Port
         $tcpConnection = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue
         if ($tcpConnection) {
             $processId = $tcpConnection.OwningProcess
             try {
                 $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
                 if ($process) {
-                    ***REMOVED*** Füge den existierenden Prozess zu unserem Tracking hinzu
+                    # Füge den existierenden Prozess zu unserem Tracking hinzu
                     Write-SystemLog "Übernehme existierenden Prozess: $Name (PID: $processId)" -Level Success -LogToFile
                     return $process
                 }
@@ -187,7 +187,7 @@ function Start-BackgroundProcess {
             }
         }
         
-        ***REMOVED*** Wenn wir hierher kommen, ist der Port besetzt, aber wir konnten den Prozess nicht identifizieren
+        # Wenn wir hierher kommen, ist der Port besetzt, aber wir konnten den Prozess nicht identifizieren
         Write-SystemLog "Port $Port ist belegt, aber der Prozess konnte nicht identifiziert werden" -Level Warning
         return $null
     }
@@ -197,7 +197,7 @@ function Start-BackgroundProcess {
     
     while ($attempt -le $RetryCount -and -not $process) {
         try {
-            ***REMOVED*** Die korrekte Syntax für PowerShell - OHNE -NoExit Parameter
+            # Die korrekte Syntax für PowerShell - OHNE -NoExit Parameter
             $psi = New-Object System.Diagnostics.ProcessStartInfo
             $psi.FileName = "powershell.exe"
             $psi.Arguments = "-Command `"$Command | Tee-Object -FilePath '$LogFile'`""
@@ -222,10 +222,10 @@ function Start-BackgroundProcess {
         }
     }
     
-    ***REMOVED*** Prüfe, ob Prozess erfolgreich gestartet wurde
+    # Prüfe, ob Prozess erfolgreich gestartet wurde
     if ($Port -gt 0 -and $process) {
-        ***REMOVED*** Warte und prüfe, ob der Port geöffnet wird
-        $maxWaitTime = 30  ***REMOVED*** Sekunden
+        # Warte und prüfe, ob der Port geöffnet wird
+        $maxWaitTime = 30  # Sekunden
         $waited = 0
         $portOpen = $false
         
@@ -243,7 +243,7 @@ function Start-BackgroundProcess {
                 Write-SystemLog "Warte weiterhin auf $Name (Port $Port)..." -Level Verbose
             }
             
-            ***REMOVED*** Prüfe, ob der Prozess noch läuft
+            # Prüfe, ob der Prozess noch läuft
             if ($process.HasExited) {
                 Handle-Error -ComponentName $Name -ErrorMessage "Prozess wurde unerwartet beendet (Exit-Code: $($process.ExitCode))"
                 return $null
@@ -258,7 +258,7 @@ function Start-BackgroundProcess {
     return $process
 }
 
-***REMOVED*** Speichern der Prozessinformationen
+# Speichern der Prozessinformationen
 function Save-ProcessInfo {
     param (
         [hashtable]$ProcessInfo
@@ -272,7 +272,7 @@ function Save-ProcessInfo {
     }
 }
 
-***REMOVED*** Wechsle zum Projektverzeichnis
+# Wechsle zum Projektverzeichnis
 try {
     Set-Location $WORKSPACE_ROOT
     Write-SystemLog "Arbeitsverzeichnis: $WORKSPACE_ROOT" -Level Emphasis
@@ -280,10 +280,10 @@ try {
     Handle-Error -ComponentName "Set-Location" -ErrorMessage $_.Exception.Message -Fatal
 }
 
-***REMOVED*** Prozess-Dictionary zum Speichern aller gestarteten Prozesse
+# Prozess-Dictionary zum Speichern aller gestarteten Prozesse
 $processInfo = @{}
 
-***REMOVED*** 1. Redis-Server starten
+# 1. Redis-Server starten
 if (-not $SkipRedis) {
     $redisCommand = "Set-Location '$REDIS_PATH'; .\redis-server.exe"
     $redisProcess = Start-BackgroundProcess -Name "Redis-Server" -Command $redisCommand -LogFile $REDIS_LOG -Port 6379
@@ -296,14 +296,14 @@ if (-not $SkipRedis) {
             "LogFile" = $REDIS_LOG
         }
         
-        ***REMOVED*** Warte einen Moment, damit Redis hochfahren kann
+        # Warte einen Moment, damit Redis hochfahren kann
         Start-Sleep -Seconds 3
     } else {
         Write-SystemLog "Redis-Server konnte nicht gestartet werden. Einige Komponenten könnten nicht funktionieren." -Level Warning
     }
 }
 
-***REMOVED*** 2. Celery-Worker starten
+# 2. Celery-Worker starten
 if (-not $SkipCelery) {
     if ($SkipRedis) {
         Write-SystemLog "Achtung: Redis wurde übersprungen, Celery könnte Verbindungsprobleme haben" -Level Warning
@@ -320,14 +320,14 @@ if (-not $SkipCelery) {
             "LogFile" = $CELERY_LOG
         }
         
-        ***REMOVED*** Warte einen Moment, damit Celery hochfahren kann
+        # Warte einen Moment, damit Celery hochfahren kann
         Start-Sleep -Seconds 5
     } else {
         Write-SystemLog "Celery-Worker konnte nicht gestartet werden. Task-Verarbeitung wird nicht funktionieren." -Level Warning
     }
 }
 
-***REMOVED*** 3. Celery-Flower starten
+# 3. Celery-Flower starten
 if (-not $SkipFlower) {
     if ($SkipCelery) {
         Write-SystemLog "Achtung: Celery wurde übersprungen, Flower wird keine Daten anzeigen" -Level Warning
@@ -344,14 +344,14 @@ if (-not $SkipFlower) {
             "LogFile" = $FLOWER_LOG
         }
         
-        ***REMOVED*** Warte einen Moment, damit Flower hochfahren kann
+        # Warte einen Moment, damit Flower hochfahren kann
         Start-Sleep -Seconds 3
     } else {
         Write-SystemLog "Celery-Flower konnte nicht gestartet werden. Monitoring wird nicht verfügbar sein." -Level Warning
     }
 }
 
-***REMOVED*** 4. Demo-Server starten (verbesserte Version mit Celery-Unterstützung)
+# 4. Demo-Server starten (verbesserte Version mit Celery-Unterstützung)
 if (-not $SkipAPI) {
     $apiCommand = "uvicorn backend.demo_server_celery_enhanced:app --reload --host 0.0.0.0 --port 8003"
     $apiProcess = Start-BackgroundProcess -Name "Demo-Server" -Command $apiCommand -LogFile $API_LOG -Port 8003
@@ -364,17 +364,17 @@ if (-not $SkipAPI) {
             "LogFile" = $API_LOG
         }
         
-        ***REMOVED*** Warte einen Moment, damit der API-Server hochfahren kann
+        # Warte einen Moment, damit der API-Server hochfahren kann
         Start-Sleep -Seconds 3
     } else {
         Write-SystemLog "Demo-Server konnte nicht gestartet werden. API wird nicht verfügbar sein." -Level Warning
     }
 }
 
-***REMOVED*** Speichere Prozessinformationen
+# Speichere Prozessinformationen
 Save-ProcessInfo -ProcessInfo $processInfo
 
-***REMOVED*** System-Status anzeigen
+# System-Status anzeigen
 Write-SystemLog "`nERP-System Status:" -Level Emphasis
 Write-SystemLog "--------------------------------------" -Level Emphasis
 
@@ -422,7 +422,7 @@ if ($processInfo.ContainsKey("API")) {
 Write-SystemLog "Log-Verzeichnis  : $LOG_DIR" -Level Info
 Write-SystemLog "--------------------------------------" -Level Emphasis
 
-***REMOVED*** Optionale Funktion zum Beenden aller Prozesse
+# Optionale Funktion zum Beenden aller Prozesse
 function Stop-AllProcesses {
     param (
         [switch]$Silent
@@ -455,7 +455,7 @@ function Stop-AllProcesses {
         }
     }
     
-    ***REMOVED*** Lösche die Prozessinformation
+    # Lösche die Prozessinformation
     if (Test-Path $PROCESS_FILE) {
         Remove-Item -Path $PROCESS_FILE -Force -ErrorAction SilentlyContinue
     }
@@ -465,7 +465,7 @@ function Stop-AllProcesses {
     }
 }
 
-***REMOVED*** Zeige Hilfstext
+# Zeige Hilfstext
 Write-SystemLog "`nVerwenden Sie:" -Level Info
 Write-SystemLog " - 'Q' zum Beenden aller Prozesse und Verlassen" -Level Info
 Write-SystemLog " - 'R' zum Neustarten aller Prozesse" -Level Info
@@ -473,7 +473,7 @@ Write-SystemLog " - 'L' zum Anzeigen der Log-Dateien" -Level Info
 Write-SystemLog " - 'S' zum Anzeigen des aktuellen Status" -Level Info
 Write-SystemLog " - 'X' zum Verlassen ohne Prozesse zu beenden" -Level Info
 
-***REMOVED*** Funktion zum Anzeigen der Log-Dateien
+# Funktion zum Anzeigen der Log-Dateien
 function Show-Logs {
     Write-SystemLog "`nVerfügbare Log-Dateien:" -Level Emphasis
     
@@ -496,7 +496,7 @@ function Show-Logs {
     }
 }
 
-***REMOVED*** Funktion zum Anzeigen des aktuellen Status
+# Funktion zum Anzeigen des aktuellen Status
 function Show-Status {
     Write-SystemLog "`nAktueller Status:" -Level Emphasis
     
@@ -520,17 +520,17 @@ function Show-Status {
     }
 }
 
-***REMOVED*** Funktion zum Neustarten der Prozesse
+# Funktion zum Neustarten der Prozesse
 function Restart-AllProcesses {
     Write-SystemLog "Starte alle Prozesse neu..." -Level Warning
     
-    ***REMOVED*** Stoppe alle Prozesse
+    # Stoppe alle Prozesse
     Stop-AllProcesses -Silent
     
-    ***REMOVED*** Warte einen Moment
+    # Warte einen Moment
     Start-Sleep -Seconds 3
     
-    ***REMOVED*** Starte das Skript neu mit den gleichen Parametern
+    # Starte das Skript neu mit den gleichen Parametern
     $arguments = ""
     if ($SkipRedis) { $arguments += " -SkipRedis" }
     if ($SkipCelery) { $arguments += " -SkipCelery" }
@@ -540,13 +540,13 @@ function Restart-AllProcesses {
     
     Start-Process -FilePath "powershell.exe" -ArgumentList "-File `"$($MyInvocation.MyCommand.Path)`"$arguments"
     
-    ***REMOVED*** Beende das aktuelle Skript
+    # Beende das aktuelle Skript
     exit 0
 }
 
-***REMOVED*** Registriere einen Event-Handler für Ctrl+C, um ordnungsgemäß aufzuräumen
+# Registriere einen Event-Handler für Ctrl+C, um ordnungsgemäß aufzuräumen
 try {
-    ***REMOVED*** Diese Zeile funktioniert nur in PowerShell 7+, in PowerShell 5.1 wird sie übersprungen
+    # Diese Zeile funktioniert nur in PowerShell 7+, in PowerShell 5.1 wird sie übersprungen
     $null = [Console]::CancelKeyPress.GetType()
     
     [Console]::CancelKeyPress += {
@@ -560,7 +560,7 @@ try {
     Write-SystemLog "Hinweis: Erweiterte Ctrl+C-Behandlung nicht verfügbar (benötigt PowerShell 7+)" -Level Verbose
 }
 
-***REMOVED*** Halte das Skript am Laufen und ermögliche das Beenden aller Prozesse
+# Halte das Skript am Laufen und ermögliche das Beenden aller Prozesse
 try {
     while ($true) {
         if ([Console]::KeyAvailable) {
@@ -588,8 +588,8 @@ try {
             }
         }
         
-        ***REMOVED*** Prüfe periodisch, ob alle Prozesse noch laufen
-        foreach ($key in @($processInfo.Keys)) {  ***REMOVED*** Verwende eine Kopie der Keys
+        # Prüfe periodisch, ob alle Prozesse noch laufen
+        foreach ($key in @($processInfo.Keys)) {  # Verwende eine Kopie der Keys
             $id = $processInfo[$key].Id
             $name = $processInfo[$key].Name
             
@@ -604,6 +604,6 @@ try {
         Start-Sleep -Seconds 2
     }
 } finally {
-    ***REMOVED*** Stelle sicher, dass wir den Status speichern, falls das Skript unterbrochen wird
+    # Stelle sicher, dass wir den Status speichern, falls das Skript unterbrochen wird
     Save-ProcessInfo -ProcessInfo $processInfo
 } 

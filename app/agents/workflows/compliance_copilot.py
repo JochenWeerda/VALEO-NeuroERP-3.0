@@ -15,20 +15,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-***REMOVED*** State Definition
+# State Definition
 class ComplianceCopilotState(TypedDict):
     """State for compliance checking workflow."""
     messages: Annotated[List[BaseMessage], operator.add]
-    entity_type: str  ***REMOVED*** "customer", "article", "transaction"
+    entity_type: str  # "customer", "article", "transaction"
     entity_id: str
     entity_data: Dict[str, Any]
     compliance_checks: List[Dict[str, Any]]
     violations: List[Dict[str, Any]]
     recommendations: List[str]
-    risk_score: float  ***REMOVED*** 0-1
+    risk_score: float  # 0-1
 
 
-***REMOVED*** Compliance Check Definitions
+# Compliance Check Definitions
 COMPLIANCE_RULES = {
     "psm": {
         "name": "Pflanzenschutzmittel-Gesetz",
@@ -69,7 +69,7 @@ COMPLIANCE_RULES = {
 }
 
 
-***REMOVED*** Workflow Nodes
+# Workflow Nodes
 def identify_applicable_rules(state: ComplianceCopilotState) -> dict:
     """Identify which compliance rules apply to this entity."""
     logger.info(
@@ -101,7 +101,7 @@ def run_compliance_checks(state: ComplianceCopilotState) -> dict:
     for check in state["compliance_checks"]:
         rule_id = check["rule_id"]
         
-        ***REMOVED*** PSM Check
+        # PSM Check
         if rule_id == "psm" and state["entity_type"] == "customer":
             if not entity_data.get("psm_sachkundenachweis"):
                 violations.append({
@@ -112,7 +112,7 @@ def run_compliance_checks(state: ComplianceCopilotState) -> dict:
                     "action": "Nachweis anfordern oder PSM-Verkauf sperren"
                 })
         
-        ***REMOVED*** Explosivstoff Check
+        # Explosivstoff Check
         if rule_id == "explosivstoff" and state["entity_type"] == "article":
             if entity_data.get("category") == "Düngemittel":
                 if not entity_data.get("explosivstoff_konform"):
@@ -123,7 +123,7 @@ def run_compliance_checks(state: ComplianceCopilotState) -> dict:
                         "action": "Konformitätsprüfung durchführen"
                     })
         
-        ***REMOVED*** ENNI Check
+        # ENNI Check
         if rule_id == "enni" and state["entity_type"] == "transaction":
             if not entity_data.get("enni_export_done"):
                 violations.append({
@@ -134,7 +134,7 @@ def run_compliance_checks(state: ComplianceCopilotState) -> dict:
                     "action": "ENNI-Export durchführen"
                 })
     
-    ***REMOVED*** Calculate risk score
+    # Calculate risk score
     risk_score = min(len(violations) * 0.25, 1.0)
     
     logger.info(f"Found {len(violations)} violations (risk: {risk_score})")
@@ -168,14 +168,14 @@ def generate_recommendations(state: ComplianceCopilotState) -> dict:
             f"7 Tagen beheben"
         )
     
-    ***REMOVED*** Specific actions
+    # Specific actions
     for violation in state["violations"]:
         recommendations.append(f"• {violation['rule']}: {violation['action']}")
     
     return {"recommendations": recommendations}
 
 
-***REMOVED*** Build Workflow
+# Build Workflow
 def build_compliance_workflow():
     """Build the compliance checking workflow."""
     workflow = StateGraph(ComplianceCopilotState)
@@ -192,7 +192,7 @@ def build_compliance_workflow():
     return workflow.compile()
 
 
-***REMOVED*** Execute workflow
+# Execute workflow
 async def check_compliance(
     entity_type: str,
     entity_id: str,

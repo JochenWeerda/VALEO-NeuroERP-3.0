@@ -2,74 +2,12 @@ import { useState } from 'react'
 import { Worklist } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { WorklistConfig, WorklistItem } from '@/components/mask-builder/types'
+import { useFutterQualitaet } from '@/lib/api/futter'
 
-// Mock-Daten für Qualitätskontrolle
-const mockQualityItems: WorklistItem[] = [
-  {
-    id: 'qc-001',
-    title: 'Weizenmehl Charge W-2024-001',
-    description: 'Aflatoxin-Gehalt überschreitet Grenzwert',
-    status: 'overdue',
-    priority: 'urgent',
-    assignedTo: 'Dr. Müller',
-    dueDate: '2024-10-20',
-    metadata: {
-      charge: 'W-2024-001',
-      parameter: 'Aflatoxin',
-      wert: '15.2 µg/kg',
-      grenzwert: '10 µg/kg'
-    }
-  },
-  {
-    id: 'qc-002',
-    title: 'Mais Charge M-2024-015',
-    description: 'Feuchtigkeitsgehalt zu hoch',
-    status: 'pending',
-    priority: 'high',
-    assignedTo: 'Labor',
-    dueDate: '2024-10-18',
-    metadata: {
-      charge: 'M-2024-015',
-      parameter: 'Feuchtigkeit',
-      wert: '16.5%',
-      grenzwert: '15%'
-    }
-  },
-  {
-    id: 'qc-003',
-    title: 'Sojaextraktionsschrot Charge S-2024-008',
-    description: 'Rohproteingehalt unter Spezifikation',
-    status: 'in-progress',
-    priority: 'medium',
-    assignedTo: 'Qualitätsmanagement',
-    dueDate: '2024-10-25',
-    metadata: {
-      charge: 'S-2024-008',
-      parameter: 'Rohprotein',
-      wert: '45.2%',
-      grenzwert: '48%'
-    }
-  },
-  {
-    id: 'qc-004',
-    title: 'Milchviehfutter Premium Charge MP-2024-012',
-    description: 'Routinekontrolle fällig',
-    status: 'pending',
-    priority: 'low',
-    assignedTo: 'Automatisch',
-    dueDate: '2024-10-30',
-    metadata: {
-      charge: 'MP-2024-012',
-      parameter: 'Routinekontrolle',
-      naechstePruefung: '2024-10-30'
-    }
-  }
-]
-
-// Konfiguration für Qualitätskontrolle Worklist
+// Konfiguration fuer Qualitaetskontrolle Worklist
 const qualityControlConfig: WorklistConfig = {
-  title: 'Futtermittel-Qualitätskontrolle',
-  subtitle: 'Laboranalysen und Qualitätsprüfungen nach QS-Standards',
+  title: 'Futtermittel-Qualitaetskontrolle',
+  subtitle: 'Laboranalysen und Qualitaetspruefungen nach QS-Standards',
   type: 'worklist',
   groupBy: 'status',
   itemTemplate: (item: WorklistItem) => <div>{item.title}</div>,
@@ -112,13 +50,40 @@ const qualityControlConfig: WorklistConfig = {
   ],
   filters: [
     { name: 'status', label: 'Status', type: 'select' },
-    { name: 'priority', label: 'Priorität', type: 'select' },
+    { name: 'priority', label: 'Prioritaet', type: 'select' },
     { name: 'assignedTo', label: 'Zugewiesen an', type: 'text' }
   ]
 }
 
+function mapQualitaetToWorklistItems(data: ReturnType<typeof useFutterQualitaet>['data']): WorklistItem[] {
+  if (!data) return []
+  return data.map(q => ({
+    id: q.id,
+    title: `${q.produkt} Charge ${q.chargenId}`,
+    description: `${q.pruefung}: ${q.ergebnis}`,
+    status: q.status === 'bestanden' ? 'completed' as const
+      : q.status === 'nicht-bestanden' ? 'overdue' as const
+      : 'pending' as const,
+    priority: q.status === 'nicht-bestanden' ? 'urgent' as const : 'medium' as const,
+    assignedTo: 'Labor',
+    dueDate: q.datum,
+    metadata: {
+      charge: q.chargenId,
+      parameter: q.pruefung,
+      ergebnis: q.ergebnis
+    }
+  }))
+}
+
 export default function FuttermittelQualitaetskontrollePage(): JSX.Element {
-  const [items, setItems] = useState<WorklistItem[]>(mockQualityItems)
+  const { data: qualitaetData, isLoading } = useFutterQualitaet()
+  const apiItems = mapQualitaetToWorklistItems(qualitaetData)
+  const [items, setItems] = useState<WorklistItem[]>([])
+
+  // Sync API data into local state when available
+  if (apiItems.length > 0 && items.length === 0) {
+    setItems(apiItems)
+  }
 
   const { handleAction } = useMaskActions(async (action: string, item: WorklistItem) => {
     if (!item) return
@@ -139,7 +104,7 @@ export default function FuttermittelQualitaetskontrollePage(): JSX.Element {
         break
 
       case 'analyze':
-        alert(`Analyse für ${item.title} wurde angefordert.`)
+        alert(`Analyse fuer ${item.title} wurde angefordert.`)
         break
 
       case 'escalate':
@@ -163,7 +128,7 @@ export default function FuttermittelQualitaetskontrollePage(): JSX.Element {
       config={qualityControlConfig}
       items={items}
       onAction={handleActionClick}
-      isLoading={false}
+      isLoading={isLoading}
     />
   )
 }

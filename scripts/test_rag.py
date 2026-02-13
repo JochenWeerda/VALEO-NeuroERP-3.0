@@ -17,45 +17,45 @@ class TestRAGIntegration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Wird einmal vor allen Tests ausgeführt."""
-        ***REMOVED*** Erstelle temporäres Verzeichnis
+        # Erstelle temporäres Verzeichnis
         cls.temp_dir = tempfile.mkdtemp()
         cls.test_doc_path = os.path.join(cls.temp_dir, "test_doc.md")
         
-        ***REMOVED*** Erstelle Testdokument
+        # Erstelle Testdokument
         with open(cls.test_doc_path, "w", encoding="utf-8") as f:
-            f.write("""***REMOVED*** Test Dokument
+            f.write("""# Test Dokument
 
-***REMOVED******REMOVED*** Compliance-System
+## Compliance-System
 
 Das VALEO-NeuroERP Compliance-System ist eine integrierte Lösung für die Qualitätssicherung.
 Es umfasst Validatoren für QS, GMP und EU-Regularien.
 
-***REMOVED******REMOVED******REMOVED*** Komponenten
+### Komponenten
 
 - Backend mit Pydantic-Modellen
 - Monitoring-System
 - API-Endpunkte
 
-***REMOVED******REMOVED*** Dokumentation
+## Dokumentation
 
 Die technische Dokumentation enthält:
 - Installationsanleitung
 - Wartungshinweise
 - Best Practices""")
         
-        ***REMOVED*** Initialisiere Processor und Retriever
+        # Initialisiere Processor und Retriever
         cls.processor = DocumentProcessor()
         cls.retriever = DocumentationRetriever()
         
-        ***REMOVED*** Lösche bestehende Dokumente
+        # Lösche bestehende Dokumente
         cls.processor.collection.delete_many({})
         
-        ***REMOVED*** Verarbeite Testdokument
+        # Verarbeite Testdokument
         cls.processor.store_document(cls.test_doc_path)
 
     def setUp(self):
         """Wird vor jedem Test ausgeführt."""
-        ***REMOVED*** Warte kurz, damit die Indizes erstellt werden können
+        # Warte kurz, damit die Indizes erstellt werden können
         time.sleep(1)
 
     def test_document_storage(self):
@@ -93,16 +93,16 @@ Die technische Dokumentation enthält:
         doc = self.retriever.db.rag_documents.find_one({"metadata.title": os.path.basename(self.test_doc_path)})
         sections = doc.get("sections", [])
         
-        ***REMOVED*** Prüfe die Anzahl der Hauptabschnitte (nur ***REMOVED*** und ***REMOVED******REMOVED***)
+        # Prüfe die Anzahl der Hauptabschnitte (nur # und ##)
         main_sections = [s for s in sections if s["level"] <= 2]
         self.assertEqual(len(main_sections), 3, "Falsche Anzahl von Hauptabschnitten")
         
-        ***REMOVED*** Prüfe die Reihenfolge und Titel der Hauptabschnitte
+        # Prüfe die Reihenfolge und Titel der Hauptabschnitte
         self.assertEqual(main_sections[0]["title"], "Test Dokument", "Falscher erster Abschnittstitel")
         self.assertEqual(main_sections[1]["title"], "Compliance-System", "Falscher zweiter Abschnittstitel")
         self.assertEqual(main_sections[2]["title"], "Dokumentation", "Falscher dritter Abschnittstitel")
         
-        ***REMOVED*** Prüfe den Inhalt der Abschnitte
+        # Prüfe den Inhalt der Abschnitte
         self.assertIn("Komponenten", main_sections[1]["content"], "Unterabschnitt nicht im Hauptabschnitt enthalten")
         self.assertIn("Installationsanleitung", main_sections[2]["content"], "Aufzählungspunkte nicht im Abschnitt enthalten")
 
@@ -123,11 +123,11 @@ Die technische Dokumentation enthält:
     @classmethod
     def tearDownClass(cls):
         """Wird einmal nach allen Tests ausgeführt."""
-        ***REMOVED*** Lösche Testdokument und temporäres Verzeichnis
+        # Lösche Testdokument und temporäres Verzeichnis
         os.remove(cls.test_doc_path)
         os.rmdir(cls.temp_dir)
         
-        ***REMOVED*** Lösche Testdaten aus der Datenbank
+        # Lösche Testdaten aus der Datenbank
         cls.processor.collection.delete_many({})
 
 if __name__ == "__main__":

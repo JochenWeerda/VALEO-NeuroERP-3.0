@@ -5,23 +5,23 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from sqlalchemy import create_engine, text
 from core.config import settings
 
-***REMOVED*** Configure logging
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def vacuum_postgresql():
     """PostgreSQL VACUUM durchführen"""
     try:
-        ***REMOVED*** Create database URL
+        # Create database URL
         db_url = (
             f"postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}"
             f"@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
         )
         
-        ***REMOVED*** Create engine
+        # Create engine
         engine = create_engine(db_url)
         
-        ***REMOVED*** Run VACUUM ANALYZE
+        # Run VACUUM ANALYZE
         with engine.connect() as conn:
             conn.execute(text("VACUUM ANALYZE"))
             logger.info("PostgreSQL VACUUM ANALYZE erfolgreich durchgeführt")
@@ -33,16 +33,16 @@ def vacuum_postgresql():
 async def cleanup_mongodb():
     """MongoDB-Bereinigung durchführen"""
     try:
-        ***REMOVED*** Connect to MongoDB
+        # Connect to MongoDB
         client = AsyncIOMotorClient(settings.MONGODB_URI)
         db = client[settings.MONGODB_DATABASE]
         
-        ***REMOVED*** Cleanup old logs (older than 30 days)
+        # Cleanup old logs (older than 30 days)
         cutoff_date = datetime.utcnow() - timedelta(days=30)
         result = await db.logs.delete_many({"timestamp": {"$lt": cutoff_date}})
         logger.info(f"{result.deleted_count} alte Log-Einträge gelöscht")
         
-        ***REMOVED*** Run compact on collections
+        # Run compact on collections
         collections = await db.list_collection_names()
         for collection in collections:
             await db.command("compact", collection)
@@ -55,18 +55,18 @@ async def cleanup_mongodb():
 def analyze_postgresql():
     """PostgreSQL-Analyse durchführen"""
     try:
-        ***REMOVED*** Create database URL
+        # Create database URL
         db_url = (
             f"postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}"
             f"@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
         )
         
-        ***REMOVED*** Create engine
+        # Create engine
         engine = create_engine(db_url)
         
-        ***REMOVED*** Run analysis queries
+        # Run analysis queries
         with engine.connect() as conn:
-            ***REMOVED*** Check table sizes
+            # Check table sizes
             result = conn.execute(text("""
                 SELECT schemaname, relname, pg_size_pretty(pg_total_relation_size(relid))
                 FROM pg_stat_user_tables
@@ -76,7 +76,7 @@ def analyze_postgresql():
             for row in result:
                 logger.info(f"{row[0]}.{row[1]}: {row[2]}")
             
-            ***REMOVED*** Check index usage
+            # Check index usage
             result = conn.execute(text("""
                 SELECT schemaname, relname, 
                     idx_scan as index_scans,
@@ -97,11 +97,11 @@ def analyze_postgresql():
 async def analyze_mongodb():
     """MongoDB-Analyse durchführen"""
     try:
-        ***REMOVED*** Connect to MongoDB
+        # Connect to MongoDB
         client = AsyncIOMotorClient(settings.MONGODB_URI)
         db = client[settings.MONGODB_DATABASE]
         
-        ***REMOVED*** Get collection stats
+        # Get collection stats
         collections = await db.list_collection_names()
         for collection in collections:
             stats = await db.command("collStats", collection)
@@ -110,7 +110,7 @@ async def analyze_mongodb():
             logger.info(f"Dokumente: {stats['count']}")
             logger.info(f"Durchschnittliche Objektgröße: {stats['avgObjSize']} Bytes")
             
-        ***REMOVED*** Get database stats
+        # Get database stats
         db_stats = await db.command("dbStats")
         logger.info("\nDatenbank-Statistik:")
         logger.info(f"Gesamtgröße: {db_stats['dataSize']} Bytes")
@@ -124,11 +124,11 @@ async def analyze_mongodb():
 async def maintenance_all():
     """Alle Wartungsaufgaben durchführen"""
     try:
-        ***REMOVED*** PostgreSQL maintenance
+        # PostgreSQL maintenance
         vacuum_postgresql()
         analyze_postgresql()
         
-        ***REMOVED*** MongoDB maintenance
+        # MongoDB maintenance
         await cleanup_mongodb()
         await analyze_mongodb()
         

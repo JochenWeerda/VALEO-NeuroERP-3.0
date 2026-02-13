@@ -39,7 +39,7 @@ from app.services.events import get_event_publisher
 router = APIRouter()
 
 
-***REMOVED*** Campaign CRUD
+# Campaign CRUD
 @router.post("", response_model=CampaignSchema, status_code=201)
 async def create_campaign(
     campaign_data: CampaignCreate,
@@ -60,14 +60,14 @@ async def create_campaign(
         subject=campaign_data.subject,
         budget=campaign_data.budget,
         settings=campaign_data.settings,
-        created_by="system",  ***REMOVED*** TODO: Get from auth context
+        created_by="system",  # TODO: Get from auth context
     )
     
     db.add(campaign)
     await db.commit()
     await db.refresh(campaign)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_campaign_created(
         campaign_id=campaign.id,
@@ -121,7 +121,7 @@ async def update_campaign(
     if not campaign:
         raise HTTPException(status_code=404, detail="Campaign not found")
     
-    ***REMOVED*** Update fields
+    # Update fields
     if campaign_data.name:
         campaign.name = campaign_data.name
     if campaign_data.description is not None:
@@ -145,13 +145,13 @@ async def update_campaign(
     if campaign_data.settings is not None:
         campaign.settings = campaign_data.settings
     
-    campaign.updated_by = "system"  ***REMOVED*** TODO: Get from auth context
+    campaign.updated_by = "system"  # TODO: Get from auth context
     campaign.updated_at = datetime.utcnow()
     
     await db.commit()
     await db.refresh(campaign)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_campaign_updated(
         campaign_id=campaign.id,
@@ -174,7 +174,7 @@ async def delete_campaign(
     await db.delete(campaign)
     await db.commit()
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_campaign_deleted(
         campaign_id=campaign_id,
@@ -184,7 +184,7 @@ async def delete_campaign(
     return None
 
 
-***REMOVED*** Campaign Actions
+# Campaign Actions
 @router.post("/{campaign_id}/schedule", response_model=CampaignSchema)
 async def schedule_campaign(
     campaign_id: UUID,
@@ -224,7 +224,7 @@ async def start_campaign(
     await db.commit()
     await db.refresh(campaign)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_campaign_started(
         campaign_id=campaign.id,
@@ -370,13 +370,13 @@ async def test_campaign(
     if not campaign:
         raise HTTPException(status_code=404, detail="Campaign not found")
     
-    ***REMOVED*** TODO: Implement test send logic
-    ***REMOVED*** This would send a test email to the specified recipient_email
+    # TODO: Implement test send logic
+    # This would send a test email to the specified recipient_email
     
     return {"message": "Test campaign sent", "recipient_email": request.recipient_email}
 
 
-***REMOVED*** Campaign Templates
+# Campaign Templates
 @router.post("/templates", response_model=CampaignTemplateSchema, status_code=201)
 async def create_campaign_template(
     template_data: CampaignTemplateCreate,
@@ -445,7 +445,7 @@ async def update_campaign_template(
     if not template:
         raise HTTPException(status_code=404, detail="Campaign template not found")
     
-    ***REMOVED*** Update fields
+    # Update fields
     if template_data.name:
         template.name = template_data.name
     if template_data.description is not None:
@@ -485,7 +485,7 @@ async def delete_campaign_template(
     return None
 
 
-***REMOVED*** Public Tracking Endpoints
+# Public Tracking Endpoints
 @router.post("/tracking/open", status_code=200)
 async def track_campaign_open(
     campaign_id: UUID = Query(..., description="Campaign ID"),
@@ -501,7 +501,7 @@ async def track_campaign_open(
     if not recipient or recipient.campaign_id != campaign_id:
         raise HTTPException(status_code=404, detail="Recipient not found")
     
-    ***REMOVED*** Create event
+    # Create event
     event = CampaignEvent(
         campaign_id=campaign_id,
         recipient_id=recipient_id,
@@ -509,18 +509,18 @@ async def track_campaign_open(
     )
     db.add(event)
     
-    ***REMOVED*** Update recipient
+    # Update recipient
     if not recipient.opened_at:
         recipient.opened_at = datetime.utcnow()
     recipient.open_count += 1
     recipient.status = RecipientStatus.DELIVERED
     
-    ***REMOVED*** Update campaign metrics
+    # Update campaign metrics
     campaign.open_count += 1
     
     await db.commit()
     
-    ***REMOVED*** Return 1x1 transparent pixel
+    # Return 1x1 transparent pixel
     from fastapi.responses import Response
     pixel = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'
     return Response(content=pixel, media_type="image/gif")
@@ -542,7 +542,7 @@ async def track_campaign_click(
     if not recipient or recipient.campaign_id != campaign_id:
         raise HTTPException(status_code=404, detail="Recipient not found")
     
-    ***REMOVED*** Create event
+    # Create event
     event = CampaignEvent(
         campaign_id=campaign_id,
         recipient_id=recipient_id,
@@ -551,16 +551,17 @@ async def track_campaign_click(
     )
     db.add(event)
     
-    ***REMOVED*** Update recipient
+    # Update recipient
     if not recipient.clicked_at:
         recipient.clicked_at = datetime.utcnow()
     recipient.click_count += 1
     
-    ***REMOVED*** Update campaign metrics
+    # Update campaign metrics
     campaign.click_count += 1
     
     await db.commit()
     
-    ***REMOVED*** Redirect to target URL
+    # Redirect to target URL
     from fastapi.responses import RedirectResponse
     return RedirectResponse(url=url, status_code=307)
+

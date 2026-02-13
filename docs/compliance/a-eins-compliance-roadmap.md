@@ -1,6 +1,6 @@
-***REMOVED*** Compliance-Roadmap für a.eins-Parität
+# Compliance-Roadmap für a.eins-Parität
 
-***REMOVED******REMOVED*** Verpflichtende Themen
+## Verpflichtende Themen
 
 - **InfraStat/Intrastat**: Automatisierte Erfassung und Übermittlung monatlicher Meldungen, Validierung gegen Zolltarifnummern, Volumen- und Wertprüfungen.
 - **Zoll & Exportkontrolle**: Screening gegen Sanktionslisten (EU/OFAC), Ausfuhrgenehmigungen, Präferenzkalkulation, Dokumentationspflichten.
@@ -9,7 +9,7 @@
 - **BAFA & Außenwirtschaft**: Meldepflichten für Dual-Use-Güter, Einhaltung von Embargos, Auditierbarkeit.
 - **Lieferkettensorgfaltspflicht**: Risikoanalysen, Maßnahmenkatalog, Reporting.
 
-***REMOVED******REMOVED*** Maßnahmenkatalog
+## Maßnahmenkatalog
 
 1. **Compliance-Scoping**
    - Verantwortlichkeiten klären (Legal, Finance, Operations).
@@ -30,7 +30,7 @@
    - Schulungen für Fachbereiche (Finanzbuchhaltung, Export, Einkauf).
    - Change-Management-Plan mit Stakeholder-Updates.
 
-***REMOVED******REMOVED*** Roadmap-Milestones
+## Roadmap-Milestones
 
 | Phase | Zeitraum | Ziele |
 |-------|----------|-------|
@@ -40,7 +40,7 @@
 | Auditvorbereitung | KW 9–11 | Kontrolltests, Dokumentation, Schulung |
 | Go-Live & Monitoring | ab KW 12 | Produktivsetzung, KPIs, kontinuierliche Audits |
 
-***REMOVED******REMOVED*** Kennzahlen & Monitoring
+## Kennzahlen & Monitoring
 
 - Meldungserfolg InfraStat (% fristgerecht, % ohne Fehler).
 - Zollprüfungsquote (Anteil beanstandeter Sendungen).
@@ -48,7 +48,7 @@
 - Datenschutz-Inzidenzen.
 - SLA-Erfüllung für Compliance-Reports.
 
-***REMOVED******REMOVED*** Verantwortlichkeitsmatrix (RACI)
+## Verantwortlichkeitsmatrix (RACI)
 
 | Aufgabe | Legal | Finance | Operations | IT/Platform | Data Governance |
 |---------|-------|---------|------------|-------------|-----------------|
@@ -60,4 +60,5 @@
 | Monitoring | C | R | C | A | R |
 
 Legende: **R** = Responsible, **A** = Accountable, **C** = Consulted, **I** = Informed.
+
 

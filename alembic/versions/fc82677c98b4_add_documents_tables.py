@@ -11,7 +11,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = 'fc82677c98b4'
 down_revision: Union[str, None] = 'f49745206879'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -19,7 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Create documents_header table
+    # Create documents_header table
     op.create_table('documents_header',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('type', sa.String(50), nullable=False),
@@ -37,7 +37,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id')
     )
 
-    ***REMOVED*** Create documents_line table
+    # Create documents_line table
     op.create_table('documents_line',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('header_id', sa.String(36), nullable=False),
@@ -53,7 +53,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id')
     )
 
-    ***REMOVED*** Create document_flow table
+    # Create document_flow table
     op.create_table('document_flow',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('from_type', sa.String(50), nullable=False),
@@ -64,7 +64,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id')
     )
 
-    ***REMOVED*** Create workflow_status table
+    # Create workflow_status table
     op.create_table('workflow_status',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('domain', sa.String(50), nullable=False),
@@ -75,7 +75,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id')
     )
 
-    ***REMOVED*** Create workflow_audit table
+    # Create workflow_audit table
     op.create_table('workflow_audit',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('domain', sa.String(50), nullable=False),
@@ -89,7 +89,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id')
     )
 
-    ***REMOVED*** Create archive_index table
+    # Create archive_index table
     op.create_table('archive_index',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('domain', sa.String(50), nullable=False),
@@ -101,7 +101,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id')
     )
 
-    ***REMOVED*** Create number_series table
+    # Create number_series table
     op.create_table('number_series',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('domain', sa.String(50), nullable=False),
@@ -115,7 +115,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    ***REMOVED*** Drop tables in reverse order (due to foreign keys)
+    # Drop tables in reverse order (due to foreign keys)
     op.drop_table('number_series')
     op.drop_table('archive_index')
     op.drop_table('workflow_audit')

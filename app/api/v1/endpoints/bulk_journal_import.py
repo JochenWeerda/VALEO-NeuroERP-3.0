@@ -65,12 +65,12 @@ class JournalEntryImportRow(BaseModel):
 def parse_csv_file(file_content: bytes, delimiter: str = ',') -> List[Dict[str, Any]]:
     """Parse CSV file content"""
     try:
-        ***REMOVED*** Try to detect encoding
-        content = file_content.decode('utf-8-sig')  ***REMOVED*** Handle BOM
+        # Try to detect encoding
+        content = file_content.decode('utf-8-sig')  # Handle BOM
         reader = csv.DictReader(io.StringIO(content), delimiter=delimiter)
         rows = []
         for row in reader:
-            ***REMOVED*** Clean up keys (remove BOM, whitespace)
+            # Clean up keys (remove BOM, whitespace)
             cleaned_row = {k.strip().strip('\ufeff'): v.strip() if v else '' for k, v in row.items()}
             rows.append(cleaned_row)
         return rows
@@ -82,7 +82,7 @@ def validate_and_parse_row(row_data: Dict[str, Any], row_number: int) -> tuple[O
     """Validate and parse a single import row"""
     errors = []
     
-    ***REMOVED*** Required fields
+    # Required fields
     if 'entry_date' not in row_data and 'buchungsdatum' not in row_data:
         return None, ImportError(
             row_number=row_number,
@@ -107,10 +107,10 @@ def validate_and_parse_row(row_data: Dict[str, Any], row_number: int) -> tuple[O
             row_data=row_data
         )
     
-    ***REMOVED*** Parse date
+    # Parse date
     date_str = row_data.get('entry_date') or row_data.get('buchungsdatum', '')
     try:
-        ***REMOVED*** Try different date formats
+        # Try different date formats
         if len(date_str) == 10:
             entry_date = datetime.strptime(date_str, '%Y-%m-%d').date()
         elif len(date_str) == 8:
@@ -125,7 +125,7 @@ def validate_and_parse_row(row_data: Dict[str, Any], row_number: int) -> tuple[O
             row_data=row_data
         )
     
-    ***REMOVED*** Parse amounts
+    # Parse amounts
     debit_str = row_data.get('debit_amount') or row_data.get('soll', '0')
     credit_str = row_data.get('credit_amount') or row_data.get('haben', '0')
     
@@ -140,7 +140,7 @@ def validate_and_parse_row(row_data: Dict[str, Any], row_number: int) -> tuple[O
             row_data=row_data
         )
     
-    ***REMOVED*** At least one amount must be > 0
+    # At least one amount must be > 0
     if debit_amount == Decimal("0.00") and credit_amount == Decimal("0.00"):
         return None, ImportError(
             row_number=row_number,
@@ -193,10 +193,10 @@ async def import_journal_entries_csv(
     - reference (or beleg): Optional reference
     """
     try:
-        ***REMOVED*** Read file content
+        # Read file content
         file_content = await file.read()
         
-        ***REMOVED*** Parse CSV
+        # Parse CSV
         rows = parse_csv_file(file_content, delimiter)
         
         if not rows:
@@ -206,10 +206,10 @@ async def import_journal_entries_csv(
         successful_entries: List[JournalEntryImportRow] = []
         created_entry_ids: List[str] = []
         
-        ***REMOVED*** Group rows by entry (same entry_date and entry_number)
+        # Group rows by entry (same entry_date and entry_number)
         entries_dict: Dict[str, List[JournalEntryImportRow]] = {}
         
-        for idx, row_data in enumerate(rows, start=2):  ***REMOVED*** Start at 2 (header is row 1)
+        for idx, row_data in enumerate(rows, start=2):  # Start at 2 (header is row 1)
             entry, error = validate_and_parse_row(row_data, idx)
             
             if error:
@@ -217,7 +217,7 @@ async def import_journal_entries_csv(
                 continue
             
             if entry:
-                ***REMOVED*** Group by entry_date and entry_number
+                # Group by entry_date and entry_number
                 key = f"{entry.entry_date.isoformat()}_{entry.entry_number or 'default'}"
                 if key not in entries_dict:
                     entries_dict[key] = []
@@ -225,20 +225,20 @@ async def import_journal_entries_csv(
                 successful_entries.append(entry)
         
         if not dry_run:
-            ***REMOVED*** Create journal entries
+            # Create journal entries
             for entry_key, entry_lines in entries_dict.items():
                 if not entry_lines:
                     continue
                 
-                ***REMOVED*** Get first line for entry metadata
+                # Get first line for entry metadata
                 first_line = entry_lines[0]
                 entry_date = first_line.entry_date
                 
-                ***REMOVED*** Calculate totals
+                # Calculate totals
                 total_debit = sum(line.debit_amount for line in entry_lines)
                 total_credit = sum(line.credit_amount for line in entry_lines)
                 
-                ***REMOVED*** Validate balance
+                # Validate balance
                 if abs(total_debit - total_credit) >= Decimal("0.01"):
                     errors.append(ImportError(
                         row_number=0,
@@ -248,12 +248,12 @@ async def import_journal_entries_csv(
                     ))
                     continue
                 
-                ***REMOVED*** Generate entry number if not provided
+                # Generate entry number if not provided
                 entry_number = first_line.entry_number
                 if not entry_number:
                     entry_number = f"IMP-{entry_date.strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
                 
-                ***REMOVED*** Create journal entry
+                # Create journal entry
                 entry_id = str(uuid.uuid4())
                 journal_entry_insert = text("""
                     INSERT INTO domain_erp.journal_entries
@@ -273,14 +273,14 @@ async def import_journal_entries_csv(
                     "description": first_line.description,
                     "source": "bulk_import",
                     "currency": "EUR",
-                    "status": "draft",  ***REMOVED*** Imported entries start as draft
+                    "status": "draft",  # Imported entries start as draft
                     "total_debit": total_debit,
                     "total_credit": total_credit
                 })
                 
-                ***REMOVED*** Create journal entry lines
+                # Create journal entry lines
                 for line_idx, line in enumerate(entry_lines, start=1):
-                    ***REMOVED*** Get account ID
+                    # Get account ID
                     account_query = text("""
                         SELECT id FROM domain_erp.chart_of_accounts
                         WHERE account_number = :account_number AND tenant_id = :tenant_id
@@ -304,7 +304,7 @@ async def import_journal_entries_csv(
                     
                     account_id = str(account_row[0])
                     
-                    ***REMOVED*** Insert journal entry line
+                    # Insert journal entry line
                     line_id = f"{entry_id}-L{line_idx}"
                     journal_line_insert = text("""
                         INSERT INTO domain_erp.journal_entry_lines

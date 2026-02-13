@@ -1,12 +1,12 @@
-***REMOVED*** Policy Manager - Backend Integration
+# Policy Manager - Backend Integration
 
-***REMOVED******REMOVED*** Übersicht
+## Übersicht
 
 Der Policy Manager benötigt folgende MCP-Endpoints für vollständige Funktionalität.
 
-***REMOVED******REMOVED*** Erforderliche Endpoints
+## Erforderliche Endpoints
 
-***REMOVED******REMOVED******REMOVED*** 1. GET `/api/mcp/policy/list`
+### 1. GET `/api/mcp/policy/list`
 
 Listet alle aktiven Policy-Regeln auf.
 
@@ -30,7 +30,7 @@ Listet alle aktiven Policy-Regeln auf.
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. POST `/api/mcp/policy/upsert`
+### 2. POST `/api/mcp/policy/upsert`
 
 Erstellt oder aktualisiert mehrere Policies (Bulk-Import).
 
@@ -60,7 +60,7 @@ Erstellt oder aktualisiert mehrere Policies (Bulk-Import).
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. POST `/api/mcp/policy/delete`
+### 3. POST `/api/mcp/policy/delete`
 
 Löscht eine Policy.
 
@@ -78,7 +78,7 @@ Löscht eine Policy.
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 4. POST `/api/mcp/policy/test`
+### 4. POST `/api/mcp/policy/test`
 
 Testet eine Policy-Entscheidung gegen einen Alert (Simulator).
 
@@ -123,18 +123,18 @@ Oder bei Ablehnung:
 }
 ```
 
-***REMOVED******REMOVED*** Persistenz
+## Persistenz
 
 Policies sollten persistent gespeichert werden:
 - **SQLite**: Eigene Tabelle `policies` mit JSON-Spalte für `rule`
 - **JSON-Datei**: `config/policies.json` (einfacher, aber weniger robust)
 - **PostgreSQL**: Separate Tabelle mit JSONB-Spalte
 
-***REMOVED******REMOVED*** Validierung
+## Validierung
 
 Serverseitig sollte die Zod-Schema-Validierung aus `packages/frontend-web/src/policy/schema.ts` repliziert werden, um ungültige Regeln abzulehnen.
 
-***REMOVED******REMOVED*** Realtime-Updates
+## Realtime-Updates
 
 Bei Änderungen an Policies sollte ein WebSocket-Event gesendet werden:
 
@@ -147,13 +147,13 @@ Bei Änderungen an Policies sollte ein WebSocket-Event gesendet werden:
 
 Dies triggert automatisch ein Re-Fetch im Frontend via React Query Invalidation.
 
-***REMOVED******REMOVED*** Sicherheit
+## Sicherheit
 
 - **RBAC**: Nur Nutzer mit Rolle `admin` oder `manager` sollten Policies ändern dürfen
 - **Audit-Log**: Jede Änderung sollte im Audit-Log festgehalten werden
 - **Validierung**: Alle Regeln müssen serverseitig gegen Schema validiert werden
 
-***REMOVED******REMOVED*** Beispiel-Implementation (Python/FastAPI)
+## Beispiel-Implementation (Python/FastAPI)
 
 ```python
 from fastapi import APIRouter, HTTPException
@@ -163,7 +163,7 @@ import json
 
 router = APIRouter(prefix="/api/mcp/policy")
 
-***REMOVED*** In-Memory Store (ersetzen durch DB)
+# In-Memory Store (ersetzen durch DB)
 policies_store: List[Dict[str, Any]] = []
 
 class Rule(BaseModel):
@@ -186,15 +186,15 @@ async def upsert_policies(body: Dict[str, Any]):
     rules = body.get("rules", [])
     for rule_data in rules:
         rule = Rule(**rule_data)
-        ***REMOVED*** Ersetze bestehende oder füge hinzu
+        # Ersetze bestehende oder füge hinzu
         existing_idx = next((i for i, r in enumerate(policies_store) if r["id"] == rule.id), None)
         if existing_idx is not None:
             policies_store[existing_idx] = rule.dict()
         else:
             policies_store.append(rule.dict())
     
-    ***REMOVED*** Broadcast WS-Event
-    ***REMOVED*** await ws_broadcast({"service": "policy", "type": "rules-updated"})
+    # Broadcast WS-Event
+    # await ws_broadcast({"service": "policy", "type": "rules-updated"})
     
     return {"ok": True}
 
@@ -204,17 +204,17 @@ async def delete_policy(body: Dict[str, str]):
     global policies_store
     policies_store = [r for r in policies_store if r["id"] != rule_id]
     
-    ***REMOVED*** Broadcast WS-Event
-    ***REMOVED*** await ws_broadcast({"service": "policy", "type": "rules-updated"})
+    # Broadcast WS-Event
+    # await ws_broadcast({"service": "policy", "type": "rules-updated"})
     
     return {"ok": True}
 
 @router.post("/test")
 async def test_policy(body: Dict[str, Any]):
-    ***REMOVED*** Importiere Policy-Engine aus Phase K
-    ***REMOVED*** decision = policy_engine.decide(body["roles"], body["alert"])
+    # Importiere Policy-Engine aus Phase K
+    # decision = policy_engine.decide(body["roles"], body["alert"])
     
-    ***REMOVED*** Mock für Demo
+    # Mock für Demo
     decision = {
         "type": "allow",
         "execute": False,
@@ -227,11 +227,12 @@ async def test_policy(body: Dict[str, Any]):
     return {"ok": True, "decision": decision}
 ```
 
-***REMOVED******REMOVED*** Next Steps
+## Next Steps
 
 1. Backend-Endpoints implementieren (siehe Beispiel oben)
 2. Policy-Engine aus `packages/frontend-web/src/policy/engine.ts` nach Python/Backend portieren
 3. WebSocket-Events für Realtime-Updates einrichten
 4. Audit-Logging für Policy-Änderungen aktivieren
 5. RBAC-Checks für Policy-CRUD aktivieren
+
 

@@ -37,7 +37,7 @@ from .implementations import (
 )
 
 __all__ = [
-    ***REMOVED*** Interfaces
+    # Interfaces
     "BaseRepository",
     "TenantRepository",
     "UserRepository",
@@ -52,7 +52,7 @@ __all__ = [
     "InventoryCountRepository",
     "AccountRepository",
     "JournalEntryRepository",
-    ***REMOVED*** Implementations
+    # Implementations
     "BaseRepositoryImpl",
     "TenantRepositoryImpl",
     "UserRepositoryImpl",

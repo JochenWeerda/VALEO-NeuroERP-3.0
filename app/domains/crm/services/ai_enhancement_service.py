@@ -29,7 +29,7 @@ class AIEnhancementService:
         Returns:
             Sentiment analysis results
         """
-        ***REMOVED*** Simple rule-based sentiment analysis (can be enhanced with ML models)
+        # Simple rule-based sentiment analysis (can be enhanced with ML models)
         positive_words = [
             'zufrieden', 'gut', 'super', 'exzellent', 'perfekt', 'toll', 'freue',
             'danke', 'lob', 'positiv', 'erfolgreich', 'zufriedenstellend', 'angenehm'
@@ -75,14 +75,14 @@ class AIEnhancementService:
 
     def _extract_keywords(self, text: str) -> List[str]:
         """Extract relevant keywords from text"""
-        ***REMOVED*** Product-related keywords
+        # Product-related keywords
         product_keywords = [
             'dünger', 'saatgut', 'psm', 'pflanzenschutz', 'futtermittel',
             'getreide', 'mais', 'raps', 'weizen', 'gerste', 'protein',
             'mineralstoff', 'biostimulanzien', 'preis', 'qualität'
         ]
 
-        ***REMOVED*** Action keywords
+        # Action keywords
         action_keywords = [
             'bestellung', 'lieferung', 'angebot', 'reklamation', 'support',
             'beratung', 'besuch', 'anruf', 'email', 'termin'
@@ -95,7 +95,7 @@ class AIEnhancementService:
             if keyword in text_lower:
                 keywords.append(keyword)
 
-        return list(set(keywords))  ***REMOVED*** Remove duplicates
+        return list(set(keywords))  # Remove duplicates
 
     def suggest_follow_ups(self, activity_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
@@ -112,10 +112,10 @@ class AIEnhancementService:
         description = activity_data.get('description', '').lower()
         customer_id = activity_data.get('customer_id')
 
-        ***REMOVED*** Get customer information for context
+        # Get customer information for context
         customer = self.db.query(self.db.query().filter_by(id=customer_id).first()) if customer_id else None
 
-        ***REMOVED*** Analyze activity content for suggestions
+        # Analyze activity content for suggestions
         if 'angebot' in description or 'offer' in description:
             suggestions.append({
                 'action': 'Angebot nachfassen',
@@ -152,7 +152,7 @@ class AIEnhancementService:
                 'reason': 'Preisgespräche sollten strukturiert geführt werden'
             })
 
-        ***REMOVED*** Default follow-up for any activity
+        # Default follow-up for any activity
         if not suggestions:
             suggestions.append({
                 'action': 'Allgemeine Nachverfolgung',
@@ -185,7 +185,7 @@ class AIEnhancementService:
         activities = report_data.get('activities', [])
         visits = report_data.get('visits', [])
 
-        ***REMOVED*** Analyze activity patterns
+        # Analyze activity patterns
         total_activities = summary.get('total_activities', 0)
         total_visits = summary.get('total_visits', 0)
 
@@ -203,7 +203,7 @@ class AIEnhancementService:
                 'priority': 'medium'
             })
 
-        ***REMOVED*** Analyze topics
+        # Analyze topics
         main_topics = summary.get('main_topics', [])
         if len(main_topics) > 3:
             insights['trends'].append({
@@ -212,7 +212,7 @@ class AIEnhancementService:
                 'insight': 'Vielfältige Kundenbedarfe zeigen gute Marktabdeckung'
             })
 
-        ***REMOVED*** Analyze conversion
+        # Analyze conversion
         orders_placed = summary.get('orders_placed', 0)
         quotes_created = summary.get('quotes_created', 0)
 
@@ -225,15 +225,15 @@ class AIEnhancementService:
                     'impact': 'positive'
                 })
 
-        ***REMOVED*** Generate recommendations
-        if summary.get('total_time_minutes', 0) > 480:  ***REMOVED*** 8 hours
+        # Generate recommendations
+        if summary.get('total_time_minutes', 0) > 480:  # 8 hours
             insights['recommendations'].append({
                 'type': 'workload',
                 'message': 'Hohe Arbeitsbelastung - Work-Life-Balance beachten',
                 'action': 'Arbeitszeiten überprüfen und bei Bedarf reduzieren'
             })
 
-        ***REMOVED*** Analyze customer feedback
+        # Analyze customer feedback
         negative_feedback = []
         for visit in visits:
             feedback = visit.get('customer_feedback', '')
@@ -262,7 +262,7 @@ class AIEnhancementService:
         Returns:
             Customer value prediction
         """
-        ***REMOVED*** Get customer data
+        # Get customer data
         customer = self.db.query(
             self.db.query().filter_by(id=customer_id).first()
         ).first()
@@ -270,14 +270,14 @@ class AIEnhancementService:
         if not customer:
             return {'error': 'Customer not found'}
 
-        ***REMOVED*** Simple prediction based on historical data
+        # Simple prediction based on historical data
         total_revenue = customer.total_revenue or 0
         last_order_days = 0
 
         if customer.last_order_date:
             last_order_days = (datetime.now() - customer.last_order_date).days
 
-        ***REMOVED*** Predict next order probability
+        # Predict next order probability
         if last_order_days < 30:
             next_order_probability = 0.8
         elif last_order_days < 90:
@@ -287,11 +287,11 @@ class AIEnhancementService:
         else:
             next_order_probability = 0.1
 
-        ***REMOVED*** Predict lifetime value
+        # Predict lifetime value
         avg_order_value = total_revenue / max(1, customer.order_count or 1)
         predicted_lifetime_value = total_revenue + (avg_order_value * next_order_probability * 12)
 
-        ***REMOVED*** Determine segment
+        # Determine segment
         if predicted_lifetime_value > 50000:
             segment = 'A - Premium'
         elif predicted_lifetime_value > 20000:
@@ -337,22 +337,22 @@ class AIEnhancementService:
         Returns:
             Optimized route suggestions
         """
-        ***REMOVED*** Simple nearest neighbor optimization (can be enhanced with TSP algorithms)
+        # Simple nearest neighbor optimization (can be enhanced with TSP algorithms)
         if len(visits) <= 1:
             return {'optimized_route': visits, 'savings': 0}
 
-        ***REMOVED*** Calculate current total distance (simplified)
+        # Calculate current total distance (simplified)
         current_distance = sum(visit.get('kilometers', 0) for visit in visits)
 
-        ***REMOVED*** For demonstration, suggest a more efficient order
-        ***REMOVED*** In practice, this would use GPS coordinates and routing APIs
+        # For demonstration, suggest a more efficient order
+        # In practice, this would use GPS coordinates and routing APIs
         optimized_visits = sorted(visits, key=lambda x: x.get('location', ''))
 
         return {
             'original_route': visits,
             'optimized_route': optimized_visits,
-            'estimated_savings_km': max(0, current_distance * 0.15),  ***REMOVED*** 15% savings estimate
-            'estimated_savings_time': max(0, current_distance * 0.15 * 2),  ***REMOVED*** 2 min per km
+            'estimated_savings_km': max(0, current_distance * 0.15),  # 15% savings estimate
+            'estimated_savings_time': max(0, current_distance * 0.15 * 2),  # 2 min per km
             'recommendations': [
                 'Start mit südlichen Kunden für bessere Tagesstruktur',
                 'Berücksichtige Verkehrszeiten bei Routenplanung',

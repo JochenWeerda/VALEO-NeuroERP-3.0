@@ -1,1 +1,1 @@
-***REMOVED*** Schemas package
+# Schemas package

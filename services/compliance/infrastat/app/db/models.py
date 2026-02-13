@@ -33,7 +33,7 @@ class DeclarationBatch(Base):
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
-    flow_type: Mapped[str] = mapped_column(String(8), nullable=False)  ***REMOVED*** arrival / dispatch
+    flow_type: Mapped[str] = mapped_column(String(8), nullable=False)  # arrival / dispatch
     reference_period: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[DeclarationStatus] = mapped_column(Enum(DeclarationStatus), default=DeclarationStatus.COLLECTING)
     total_value_eur: Mapped[Optional[float]] = mapped_column(Numeric(16, 2))
@@ -103,4 +103,5 @@ class SubmissionLog(Base):
     success: Mapped[bool] = mapped_column(Boolean, default=False)
 
     batch: Mapped["DeclarationBatch"] = relationship(back_populates="submissions")
+
 

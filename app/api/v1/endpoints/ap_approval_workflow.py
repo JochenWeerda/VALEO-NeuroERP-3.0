@@ -70,7 +70,7 @@ class ApprovalAction(BaseModel):
 class ApprovalStatusResponse(BaseModel):
     """Response schema for approval status"""
     invoice_id: str
-    status: str  ***REMOVED*** pending, approved, rejected, partially_approved
+    status: str  # pending, approved, rejected, partially_approved
     required_approvals: int
     current_approvals: int
     approvals: List[Dict[str, Any]]
@@ -129,7 +129,7 @@ async def list_approval_rules(
         
     except Exception as e:
         logger.error(f"Error listing approval rules: {e}")
-        ***REMOVED*** Return default rules if table doesn't exist
+        # Return default rules if table doesn't exist
         return [
             ApprovalRuleResponse(
                 id="1",
@@ -250,7 +250,7 @@ async def request_approval(
     Request approval for an AP invoice.
     """
     try:
-        ***REMOVED*** Get invoice
+        # Get invoice
         from app.documents.router_helpers import get_repository, get_from_store
         repo = get_repository(db)
         invoice = get_from_store("ap_invoice", request.invoice_id, repo)
@@ -258,11 +258,11 @@ async def request_approval(
         if not invoice:
             raise HTTPException(status_code=404, detail="AP Invoice not found")
         
-        ***REMOVED*** Check if already approved
+        # Check if already approved
         if invoice.get("status") == "FREIGEGEBEN":
             raise HTTPException(status_code=400, detail="Invoice is already approved")
         
-        ***REMOVED*** Find applicable approval rule
+        # Find applicable approval rule
         rules = await list_approval_rules(active_only=True, tenant_id=tenant_id, db=db)
         
         applicable_rule = None
@@ -280,7 +280,7 @@ async def request_approval(
                 elif field == "material_group":
                     field_value = invoice.get("materialGroup", "")
                 elif field == "supplier_id":
-                    field_value = invoice.get("customerId", "")  ***REMOVED*** customerId = supplier_id for AP
+                    field_value = invoice.get("customerId", "")  # customerId = supplier_id for AP
                 else:
                     field_value = invoice.get(field, "")
                 
@@ -307,10 +307,10 @@ async def request_approval(
                 applicable_rule = rule
                 break
         
-        ***REMOVED*** If no rule matches, default to 1 approval (no workflow)
+        # If no rule matches, default to 1 approval (no workflow)
         required_approvals = applicable_rule.required_approvals if applicable_rule else 1
         
-        ***REMOVED*** Create approval request
+        # Create approval request
         approval_id = str(uuid.uuid4())
         
         import json
@@ -342,7 +342,7 @@ async def request_approval(
             "comment": request.comment
         }).fetchone()
         
-        ***REMOVED*** Update invoice status
+        # Update invoice status
         from app.documents.router_helpers import save_to_store
         invoice["status"] = "ZUR_FREIGABE"
         invoice["approvalRequestId"] = approval_id
@@ -380,7 +380,7 @@ async def approve_invoice(
     Approve or reject an AP invoice.
     """
     try:
-        ***REMOVED*** Get approval request
+        # Get approval request
         query = text("""
             SELECT id, invoice_id, required_approvals, applicable_rule, status
             FROM domain_erp.ap_approval_requests
@@ -406,7 +406,7 @@ async def approve_invoice(
         if current_status in ["approved", "rejected"]:
             raise HTTPException(status_code=400, detail=f"Approval request is already {current_status}")
         
-        ***REMOVED*** Get existing approvals/rejections
+        # Get existing approvals/rejections
         approvals_query = text("""
             SELECT approved_by, approved_at, comment
             FROM domain_erp.ap_approvals
@@ -429,7 +429,7 @@ async def approve_invoice(
             "approval_request_id": approval_request_id
         }).fetchall()
         
-        ***REMOVED*** Check if user already approved/rejected
+        # Check if user already approved/rejected
         existing_approval = db.execute(text("""
             SELECT id FROM domain_erp.ap_approvals
             WHERE approval_request_id = :approval_request_id AND approved_by = :approved_by
@@ -441,7 +441,7 @@ async def approve_invoice(
         if existing_approval:
             raise HTTPException(status_code=400, detail="You have already approved/rejected this invoice")
         
-        ***REMOVED*** Insert approval/rejection
+        # Insert approval/rejection
         approval_id = str(uuid.uuid4())
         insert_approval = text("""
             INSERT INTO domain_erp.ap_approvals
@@ -457,11 +457,11 @@ async def approve_invoice(
             "comment": action.comment
         })
         
-        ***REMOVED*** Update approval request status
+        # Update approval request status
         if action.action == "reject":
             update_status = "rejected"
         else:
-            ***REMOVED*** Count approvals
+            # Count approvals
             new_approvals_count = len(approvals_rows) + 1
             if new_approvals_count >= required_approvals:
                 update_status = "approved"
@@ -479,7 +479,7 @@ async def approve_invoice(
             "approval_request_id": approval_request_id
         })
         
-        ***REMOVED*** Update invoice status if fully approved
+        # Update invoice status if fully approved
         if update_status == "approved":
             from app.documents.router_helpers import get_repository, get_from_store, save_to_store
             repo = get_repository(db)
@@ -492,7 +492,7 @@ async def approve_invoice(
         
         db.commit()
         
-        ***REMOVED*** Get updated approvals/rejections
+        # Get updated approvals/rejections
         approvals_rows = db.execute(approvals_query, {
             "approval_request_id": approval_request_id
         }).fetchall()
@@ -549,7 +549,7 @@ async def get_approval_status(
     Get approval status for an AP invoice.
     """
     try:
-        ***REMOVED*** Get approval request
+        # Get approval request
         query = text("""
             SELECT id, invoice_id, required_approvals, applicable_rule, status
             FROM domain_erp.ap_approval_requests
@@ -564,7 +564,7 @@ async def get_approval_status(
         }).fetchone()
         
         if not row:
-            ***REMOVED*** No approval request - check invoice status
+            # No approval request - check invoice status
             from app.documents.router_helpers import get_repository, get_from_store
             repo = get_repository(db)
             invoice = get_from_store("ap_invoice", invoice_id, repo)
@@ -591,7 +591,7 @@ async def get_approval_status(
         applicable_rule = json.loads(row[3]) if row[3] else None
         current_status = str(row[4])
         
-        ***REMOVED*** Get approvals/rejections
+        # Get approvals/rejections
         approvals_query = text("""
             SELECT approved_by, approved_at, comment
             FROM domain_erp.ap_approvals

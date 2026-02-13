@@ -181,7 +181,7 @@ export default function LaborAuftragPage(): JSX.Element {
   ]
 
   return (
-    <div className="p-6">
+    <div className="p-3 md:p-6">
       <Wizard
         title="Labor-Auftrag erstellen"
         steps={steps}

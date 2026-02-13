@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import csv
 import os
@@ -18,37 +18,37 @@ def analyze_filtered_csv():
     print("=== ANALYSE DER VORGEFILTERTEN PLZ 26XXX CSV (FINAL) ===")
     print(f"Datei: {csv_path}")
     
-    ***REMOVED*** Flächenprämien Codes (basierend auf PDF)
+    # Flächenprämien Codes (basierend auf PDF)
     FLAECHENPRAEMIEN_CODES = ['I.1', 'I.2', 'I.3', 'I.4', 'I.6', 'V.1']
     
-    ***REMOVED*** Spalten-Mapping basierend auf den bereitgestellten Headern
+    # Spalten-Mapping basierend auf den bereitgestellten Headern
     COLUMN_MAP = {
-        'year': 0,                    ***REMOVED*** Haushaltsjahr
-        'name': 1,                    ***REMOVED*** Name des Begünstigten/Rechtsträgers/Verdands
-        'parent_company': 2,          ***REMOVED*** Wenn Teil einer Gruppe: Name des Mutterunternehmens
-        'tax_id': 3,                  ***REMOVED*** Wenn Teil einer Gruppe: Steuerliches Identifikationsmerkmal
-        'plz': 4,                     ***REMOVED*** PLZ
-        'city': 5,                    ***REMOVED*** Gemeinde
-        'country': 6,                 ***REMOVED*** Betroffener Staat
-        'measure_code': 7,            ***REMOVED*** Code der Maßnahme/der Interventionskategorie/des Sektors gemäß Anhang IX
-        'specific_goal': 8,           ***REMOVED*** Spezifisches Ziel
-        'start_date': 9,              ***REMOVED*** Anfangsdatum
-        'end_date': 10,               ***REMOVED*** Enddatum
-        'egfl_amount': 11,            ***REMOVED*** Betrag je Vorhaben im Rahmen des EGFL
-        'egfl_total': 12,             ***REMOVED*** EGFL- Gesamtbetrag für diesen Begünstigten
-        'eler_amount': 13,            ***REMOVED*** Betrag je Vorhaben im Rahmen des ELER (EU-Mittel)
-        'eler_total': 14,             ***REMOVED*** ELER-Gesamtbetrag für diesen Begünstigten (EU-Mittel)
-        'national_amount': 15,        ***REMOVED*** Betrag je Vorhaben im Rahmen der nationalen Kofinanzierung
-        'national_total': 16,         ***REMOVED*** National kofinanzierter Gesamtbetrag für diesen Begünstigten
-        'eler_plus_national': 17,     ***REMOVED*** Summe des ELER-Betrags (EU-Mittel) und des kofinanzierten Betrags
-        'total_amount': 18            ***REMOVED*** EU-Betrag (EGFL und ELER) und kofinanzierter Betrag insgesamt für diesen Begünstigten*
+        'year': 0,                    # Haushaltsjahr
+        'name': 1,                    # Name des Begünstigten/Rechtsträgers/Verdands
+        'parent_company': 2,          # Wenn Teil einer Gruppe: Name des Mutterunternehmens
+        'tax_id': 3,                  # Wenn Teil einer Gruppe: Steuerliches Identifikationsmerkmal
+        'plz': 4,                     # PLZ
+        'city': 5,                    # Gemeinde
+        'country': 6,                 # Betroffener Staat
+        'measure_code': 7,            # Code der Maßnahme/der Interventionskategorie/des Sektors gemäß Anhang IX
+        'specific_goal': 8,           # Spezifisches Ziel
+        'start_date': 9,              # Anfangsdatum
+        'end_date': 10,               # Enddatum
+        'egfl_amount': 11,            # Betrag je Vorhaben im Rahmen des EGFL
+        'egfl_total': 12,             # EGFL- Gesamtbetrag für diesen Begünstigten
+        'eler_amount': 13,            # Betrag je Vorhaben im Rahmen des ELER (EU-Mittel)
+        'eler_total': 14,             # ELER-Gesamtbetrag für diesen Begünstigten (EU-Mittel)
+        'national_amount': 15,        # Betrag je Vorhaben im Rahmen der nationalen Kofinanzierung
+        'national_total': 16,         # National kofinanzierter Gesamtbetrag für diesen Begünstigten
+        'eler_plus_national': 17,     # Summe des ELER-Betrags (EU-Mittel) und des kofinanzierten Betrags
+        'total_amount': 18            # EU-Betrag (EGFL und ELER) und kofinanzierter Betrag insgesamt für diesen Begünstigten*
     }
     
     try:
         with open(csv_path, 'r', encoding='windows-1252') as file:
             reader = csv.reader(file, delimiter=',', quotechar='"')
             
-            ***REMOVED*** Daten analysieren (ohne Header)
+            # Daten analysieren (ohne Header)
             leads_data = defaultdict(lambda: {
                 'name': '', 
                 'plz': '',
@@ -64,27 +64,27 @@ def analyze_filtered_csv():
             
             for row in reader:
                 if len(row) < 19:
-                    continue  ***REMOVED*** Überspringe unvollständige Zeilen
+                    continue  # Überspringe unvollständige Zeilen
                 
                 total_rows += 1
                 
-                ***REMOVED*** Daten extrahieren
+                # Daten extrahieren
                 year = row[COLUMN_MAP['year']].strip()
                 name = row[COLUMN_MAP['name']].strip()
                 plz = row[COLUMN_MAP['plz']].strip()
                 city = row[COLUMN_MAP['city']].strip()
                 measure_code = row[COLUMN_MAP['measure_code']].strip()
                 
-                ***REMOVED*** GAP Betrag (Gesamtbetrag)
+                # GAP Betrag (Gesamtbetrag)
                 amount_str = row[COLUMN_MAP['total_amount']].strip()
                 try:
-                    ***REMOVED*** Deutsche Zahlenformate und Anführungszeichen entfernen
+                    # Deutsche Zahlenformate und Anführungszeichen entfernen
                     amount_str = amount_str.replace('"', '').replace(',', '.')
                     gap_amount = float(amount_str) if amount_str else 0.0
                 except ValueError:
                     gap_amount = 0.0
                 
-                if name and plz and year == '2024':  ***REMOVED*** Nur 2024 Daten
+                if name and plz and year == '2024':  # Nur 2024 Daten
                     lead_key = f"{name}_{plz}_{city}"
                     leads_data[lead_key]['name'] = name
                     leads_data[lead_key]['plz'] = plz
@@ -93,13 +93,13 @@ def analyze_filtered_csv():
                     leads_data[lead_key]['measure_codes'].add(measure_code)
                     leads_data[lead_key]['payments_count'] += 1
                 
-                ***REMOVED*** Flächenprämien prüfen
+                # Flächenprämien prüfen
                 if measure_code in FLAECHENPRAEMIEN_CODES:
                     flaechenpraemien_rows += 1
                     if name and plz:
                         leads_data[lead_key]['total_flaechenpraemien'] += gap_amount
                 
-                ***REMOVED*** Debug: erste 5 Zeilen anzeigen
+                # Debug: erste 5 Zeilen anzeigen
                 if total_rows <= 5:
                     print(f"Zeile {total_rows}: Jahr={year}, Name='{name[:30]}...', PLZ={plz}, Stadt='{city[:20]}...', Code={measure_code}, Betrag={gap_amount:.2f}")
             
@@ -108,7 +108,7 @@ def analyze_filtered_csv():
             print(f"Flächenprämien-Zeilen: {flaechenpraemien_rows}")
             print(f"Einzigartige Betriebe: {len(leads_data)}")
             
-            ***REMOVED*** Flächenprämien-Statistiken
+            # Flächenprämien-Statistiken
             qualified_farms = 0
             large_farms = 0
             medium_farms = 0
@@ -122,11 +122,11 @@ def analyze_filtered_csv():
                     qualified_farms += 1
                     total_flaechenpraemien += lead_data['total_flaechenpraemien']
                     
-                    ***REMOVED*** Geschätzte Betriebsgröße (300 EUR/ha Flächenprämie)
+                    # Geschätzte Betriebsgröße (300 EUR/ha Flächenprämie)
                     estimated_ha = lead_data['total_flaechenpraemien'] / 300
-                    if estimated_ha >= 100:  ***REMOVED*** Großbetrieb
+                    if estimated_ha >= 100:  # Großbetrieb
                         large_farms += 1
-                    elif estimated_ha >= 50:  ***REMOVED*** Mittelbetrieb
+                    elif estimated_ha >= 50:  # Mittelbetrieb
                         medium_farms += 1
             
             print(f"\nFLÄCHENPRÄMIEN ANALYSE:")
@@ -143,7 +143,7 @@ def analyze_filtered_csv():
                 print(f"Durchschnitt Flächenprämien: {avg_flaechenpraemien:,.2f} EUR")
                 print(f"Durchschnitt geschätzte Betriebsgröße: {avg_ha:.1f} ha")
             
-            ***REMOVED*** Top 15 Betriebe mit höchsten Flächenprämien
+            # Top 15 Betriebe mit höchsten Flächenprämien
             print(f"\nTOP 15 BETRIEBE (Flächenprämien):")
             sorted_leads = sorted(
                 [(k, v) for k, v in leads_data.items() if v['total_flaechenpraemien'] > 0],
@@ -157,7 +157,7 @@ def analyze_filtered_csv():
                 print(f"  {i+1:2d}. {lead_data['name'][:40]:40} (PLZ {lead_data['plz']})")
                 print(f"       {lead_data['total_flaechenpraemien']:8,.0f} EUR (~{estimated_ha:5.0f} ha) [{size_category}]")
             
-            ***REMOVED*** PLZ-Statistiken (Top 15)
+            # PLZ-Statistiken (Top 15)
             plz_stats = defaultdict(lambda: {'count': 0, 'flaechenpraemien': 0.0, 'total_gap': 0.0})
             for lead_data in leads_data.values():
                 plz_key = lead_data['plz']
@@ -173,7 +173,7 @@ def analyze_filtered_csv():
                     avg_per_farm = stats['flaechenpraemien'] / stats['count']
                     print(f"  {plz}: {stats['count']:3d} Betriebe, {stats['flaechenpraemien']:8,.0f} EUR (Avg {avg_per_farm:6,.0f} EUR)")
             
-            ***REMOVED*** Maßnahmencode-Statistiken
+            # Maßnahmencode-Statistiken
             measure_stats = defaultdict(lambda: {'count': 0, 'amount': 0.0})
             with open(csv_path, 'r', encoding='windows-1252') as file:
                 reader = csv.reader(file, delimiter=',', quotechar='"')
@@ -201,3 +201,4 @@ def analyze_filtered_csv():
 
 if __name__ == "__main__":
     analyze_filtered_csv()
+

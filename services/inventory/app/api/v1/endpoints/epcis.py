@@ -49,38 +49,38 @@ async def create_epcis_event(
     event_bus=Depends(get_event_bus),
     tenant_id: str = Depends(resolve_tenant_id),
 ) -> EpcisEventRead:
-    ***REMOVED*** Rate-Limit (pro Client-IP)
-    ***REMOVED*** Hinweis: Für produktive Nutzung eher pro Tenant o. API-Key
+    # Rate-Limit (pro Client-IP)
+    # Hinweis: Für produktive Nutzung eher pro Tenant o. API-Key
     key = "anonymous"
-    ***REMOVED*** Request-Objekt für IP ermitteln
-    ***REMOVED*** Wir verwenden optional Request, um backward-compat zu wahren
-    ***REMOVED*** (FastAPI erlaubt fehlende Injection, wenn nicht genutzt)
-    ***REMOVED*** Falls kein Request verfügbar: fallback auf 'anonymous'
+    # Request-Objekt für IP ermitteln
+    # Wir verwenden optional Request, um backward-compat zu wahren
+    # (FastAPI erlaubt fehlende Injection, wenn nicht genutzt)
+    # Falls kein Request verfügbar: fallback auf 'anonymous'
     try:
-        import contextvars  ***REMOVED*** lazy import
-        ***REMOVED*** Not strictly reliable; could use dependency to receive Request
+        import contextvars  # lazy import
+        # Not strictly reliable; could use dependency to receive Request
     except Exception:
         pass
-    ***REMOVED*** Wenn möglich IP aus Headern (X-Forwarded-For) ziehen
+    # Wenn möglich IP aus Headern (X-Forwarded-For) ziehen
     def _extract_client_ip(request: Request) -> str:
         xff = request.headers.get("x-forwarded-for")
         if xff:
             return xff.split(",")[0].strip()
         return request.client.host if request.client else "unknown"
 
-    ***REMOVED*** Versuche Request aus FastAPI dependencies zu beziehen
-    ***REMOVED*** (wir deklarieren Request in Signatur nicht als Pflicht, um breaking change zu vermeiden)
+    # Versuche Request aus FastAPI dependencies zu beziehen
+    # (wir deklarieren Request in Signatur nicht als Pflicht, um breaking change zu vermeiden)
     try:
-        from fastapi import Request as _Req  ***REMOVED*** type: ignore
+        from fastapi import Request as _Req  # type: ignore
     except Exception:
-        _Req = None  ***REMOVED*** type: ignore
+        _Req = None  # type: ignore
 
-    ***REMOVED*** Wenn Request im globalen Kontext verfügbar wäre, könnte man ihn nutzen.
-    ***REMOVED*** Hier fallbacken wir auf 'anonymous' und bieten die einfache Variante:
+    # Wenn Request im globalen Kontext verfügbar wäre, könnte man ihn nutzen.
+    # Hier fallbacken wir auf 'anonymous' und bieten die einfache Variante:
     if not _ratelimiter.check(key):
         raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Rate limit exceeded")
 
-    ***REMOVED*** Idempotenzschlüssel bestimmen
+    # Idempotenzschlüssel bestimmen
     provided_key = getattr(payload, "idempotency_key", None)
     if provided_key:
         event_key = provided_key.strip() or None
@@ -88,7 +88,7 @@ async def create_epcis_event(
         base = f"{payload.event_type}|{payload.event_time or ''}|{payload.biz_step or ''}|{payload.read_point or ''}|{payload.lot_id or ''}|{payload.sku or ''}|{payload.quantity or ''}"
         event_key = hashlib.sha256(base.encode("utf-8")).hexdigest()[:32]
 
-    ***REMOVED*** Deduplikation: vorhandenes Event mit gleichem key zurückgeben
+    # Deduplikation: vorhandenes Event mit gleichem key zurückgeben
     if event_key:
         existing_q = await session.execute(select(EpcisEvent).where(EpcisEvent.event_key == event_key))
         existing = existing_q.scalar_one_or_none()
@@ -96,7 +96,7 @@ async def create_epcis_event(
             return EpcisEventRead.model_validate(existing, from_attributes=True)
 
     try:
-        ***REMOVED*** Zeitmessung
+        # Zeitmessung
         with EPCIS_PROCESSING_TIME.labels(type=payload.event_type, biz_step=payload.biz_step or "unknown").time():
             event = EpcisEvent(
             event_key=event_key,
@@ -117,10 +117,10 @@ async def create_epcis_event(
         EPCIS_EVENTS_FAILURES.labels(error_type="database_error").inc()
         raise
 
-    ***REMOVED*** Publish to NATS if available
+    # Publish to NATS if available
     if event_bus:
         if _nats_breaker.is_open:
-            ***REMOVED*** Kurzschluss: sofortige Eskalation, ohne weitere Publishes
+            # Kurzschluss: sofortige Eskalation, ohne weitere Publishes
             EPCIS_EVENTS_FAILURES.labels(error_type="nats_circuit_open").inc()
             await notify_ops(
                 "NATS Circuit Open - Publish übersprungen",
@@ -149,7 +149,7 @@ async def create_epcis_event(
                 publish_ok = True
                 _nats_breaker.record_success()
                 break
-            except Exception:  ***REMOVED*** noqa: BLE001
+            except Exception:  # noqa: BLE001
                 _nats_breaker.record_failure()
                 if attempt == 3:
                     await notify_ops(
@@ -181,7 +181,7 @@ async def enforce_epcis_retention(
     """Durchsetzen von DSGVO-Retention und Pseudonymisierung für EPCIS-Events des Tenants."""
     cutoff = datetime.utcnow() - timedelta(days=settings.EPCIS_RETENTION_DAYS)
 
-    ***REMOVED*** 1) Lösche Events älter als Retention
+    # 1) Lösche Events älter als Retention
     delete_stmt = (
         delete(EpcisEvent)
         .where(and_(EpcisEvent.tenant_id == tenant_id, EpcisEvent.event_time < cutoff))
@@ -189,9 +189,9 @@ async def enforce_epcis_retention(
     )
     result_delete = await session.execute(delete_stmt)
 
-    ***REMOVED*** 2) Pseudonymisiere sensible Keys in extensions für restliche Events älter als Retention (keine Löschung, nur Reduktion)
-    ***REMOVED*** Hinweis: DB-unabhängig sicher lösen: hole Kandidaten, passe im Python an und speichere zurück
-    ***REMOVED*** (JSONB-partielle Updates sind DB-spezifisch, daher hier portabel gehalten)
+    # 2) Pseudonymisiere sensible Keys in extensions für restliche Events älter als Retention (keine Löschung, nur Reduktion)
+    # Hinweis: DB-unabhängig sicher lösen: hole Kandidaten, passe im Python an und speichere zurück
+    # (JSONB-partielle Updates sind DB-spezifisch, daher hier portabel gehalten)
     to_anonymize_rs = await session.execute(
         select(EpcisEvent).where(and_(EpcisEvent.tenant_id == tenant_id, EpcisEvent.event_time < cutoff))
     )
@@ -210,4 +210,5 @@ async def enforce_epcis_retention(
             anonymized += 1
 
     return {"deleted": int(result_delete.rowcount or 0), "anonymized": anonymized}
+
 

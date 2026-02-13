@@ -2,7 +2,7 @@ name: E2E Full UAT Tests
 
 on:
   schedule:
-    - cron: '0 2 * * *'  ***REMOVED*** Täglich um 2 Uhr nachts
+    - cron: '0 2 * * *'  # Täglich um 2 Uhr nachts
   workflow_dispatch:
 
 jobs:
@@ -18,12 +18,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
       
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 9
+
+      # `actions/setup-node`'s pnpm caching requires `pnpm` to already be on PATH.
+      - name: Setup Node.js (pnpm cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -38,7 +45,7 @@ jobs:
           echo "VALEO_BASE_URL=http://localhost:3000" >> .env
       
       - name: Build Application
-        run: pnpm build
+        run: pnpm --filter @valero-neuroerp/frontend-web build
       
       - name: Start Backend (Background)
         run: |
@@ -92,13 +99,13 @@ jobs:
       - name: Generate UAT Summary
         if: always()
         run: |
-          echo "***REMOVED*** Full UAT Summary" > docs/uat/UAT-SUMMARY.md
+          echo "# Full UAT Summary" > docs/uat/UAT-SUMMARY.md
           echo "" >> docs/uat/UAT-SUMMARY.md
           echo "**Run ID:** ${{ github.run_id }}" >> docs/uat/UAT-SUMMARY.md
           echo "**Build:** ${{ github.sha }}" >> docs/uat/UAT-SUMMARY.md
           echo "**Datum:** $(date -u)" >> docs/uat/UAT-SUMMARY.md
           echo "" >> docs/uat/UAT-SUMMARY.md
-          echo "***REMOVED******REMOVED*** KPIs" >> docs/uat/UAT-SUMMARY.md
+          echo "## KPIs" >> docs/uat/UAT-SUMMARY.md
           echo "- Tests gesamt: TBD" >> docs/uat/UAT-SUMMARY.md
           echo "- Bestanden: TBD" >> docs/uat/UAT-SUMMARY.md
           echo "- Fehlgeschlagen: TBD" >> docs/uat/UAT-SUMMARY.md

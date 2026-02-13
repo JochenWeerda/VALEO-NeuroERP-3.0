@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useGiftCards, type GiftCard as ApiGiftCard } from '@/lib/api/pos'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { AlertTriangle, Gift, Plus, Scan } from 'lucide-react'
+import { ErrorState } from '@/components/ErrorState'
 
 type GiftCard = {
   id: string
@@ -18,42 +20,24 @@ type GiftCard = {
   status: 'aktiv' | 'teilweise-eingeloest' | 'eingeloest' | 'abgelaufen'
 }
 
-const mockGiftCards: GiftCard[] = [
-  {
-    id: '1',
-    cardNumber: 'GC-2025-001234',
-    wert: 50.00,
-    restguthaben: 50.00,
-    gueltigBis: '2027-10-11',
-    ausgestelltAm: '2025-10-11',
-    kunde: 'Maria Schmidt',
-    status: 'aktiv',
-  },
-  {
-    id: '2',
-    cardNumber: 'GC-2025-001235',
-    wert: 100.00,
-    restguthaben: 35.50,
-    gueltigBis: '2027-09-20',
-    ausgestelltAm: '2025-09-20',
-    kunde: 'Thomas Weber',
-    status: 'teilweise-eingeloest',
-  },
-  {
-    id: '3',
-    cardNumber: 'GC-2024-000987',
-    wert: 25.00,
-    restguthaben: 0,
-    gueltigBis: '2026-12-25',
-    ausgestelltAm: '2024-12-25',
-    status: 'eingeloest',
-  },
-]
-
 export default function GiftCardsPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [scanMode, setScanMode] = useState(false)
+  const { data: apiGiftCards = [], isError, error, refetch } = useGiftCards()
+  const giftCards: GiftCard[] = apiGiftCards.map((gc: ApiGiftCard) => ({
+    id: gc.id,
+    cardNumber: gc.nummer,
+    wert: gc.betrag,
+    restguthaben: gc.restbetrag,
+    gueltigBis: gc.gueltigBis,
+    ausgestelltAm: gc.ausgestellt,
+    status: gc.status === 'eingeloest' ? 'eingeloest' : gc.status,
+  }))
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     {
@@ -125,13 +109,13 @@ export default function GiftCardsPage(): JSX.Element {
     },
   ]
 
-  const ablaufend = mockGiftCards.filter((gc) => {
+  const ablaufend = giftCards.filter((gc) => {
     const ablauf = new Date(gc.gueltigBis)
     return ablauf <= new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) && gc.restguthaben > 0
   }).length
 
-  const gesamtWert = mockGiftCards.reduce((sum, gc) => sum + gc.wert, 0)
-  const gesamtGuthaben = mockGiftCards.reduce((sum, gc) => sum + gc.restguthaben, 0)
+  const gesamtWert = giftCards.reduce((sum, gc) => sum + gc.wert, 0)
+  const gesamtGuthaben = giftCards.reduce((sum, gc) => sum + gc.restguthaben, 0)
 
   return (
     <div className="space-y-4 p-6">
@@ -168,6 +152,7 @@ export default function GiftCardsPage(): JSX.Element {
         <p className="mt-1">
           Im POS-Terminal scannen → Automatische Einlösung • Restguthaben bleibt auf Karte • Gültigkeit: 3 Jahre ab Ausstellung
         </p>
+        <p className="mt-1 text-xs font-medium">Ausweis an der Ladenkasse als B2C-Endpreis inkl. gesetzl. MwSt.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -176,7 +161,7 @@ export default function GiftCardsPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Gift Cards Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockGiftCards.length}</span>
+            <span className="text-2xl font-bold">{giftCards.length}</span>
           </CardContent>
         </Card>
 
@@ -203,7 +188,7 @@ export default function GiftCardsPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Aktive Karten</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockGiftCards.filter((gc) => gc.status === 'aktiv' || gc.status === 'teilweise-eingeloest').length}</span>
+            <span className="text-2xl font-bold">{giftCards.filter((gc) => gc.status === 'aktiv' || gc.status === 'teilweise-eingeloest').length}</span>
           </CardContent>
         </Card>
       </div>
@@ -233,7 +218,7 @@ export default function GiftCardsPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockGiftCards} columns={columns} />
+          <DataTable data={giftCards} columns={columns} />
         </CardContent>
       </Card>
     </div>

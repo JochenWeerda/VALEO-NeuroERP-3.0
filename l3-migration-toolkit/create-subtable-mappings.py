@@ -1,11 +1,11 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Erstellt Mappings für Untertabellen
 """
 
 import json
 
-***REMOVED*** Definition der Untertabellen
+# Definition der Untertabellen
 subtable_mappings = {
     "kunden_profil": {
         "description": "Firmeninformationen und Unternehmensprofil",
@@ -187,7 +187,7 @@ subtable_mappings = {
     }
 }
 
-***REMOVED*** Speichere Untertabellen-Mappings
+# Speichere Untertabellen-Mappings
 output_file = 'schemas/mappings/subtable-mappings.json'
 with open(output_file, 'w', encoding='utf-8') as f:
     json.dump(subtable_mappings, f, ensure_ascii=False, indent=2)
@@ -202,4 +202,5 @@ print(f"📋 Felder gesamt: {sum(len(v['fields']) for v in subtable_mappings.val
 print("\n🗂️  Übersicht:")
 for table_name, table_info in subtable_mappings.items():
     print(f"   • {table_name}: {len(table_info['fields'])} Felder - {table_info['description']}")
+
 

@@ -1,5 +1,5 @@
-***REMOVED*** PowerShell Script: CRM Migration 003 - Sales Fields
-***REMOVED*** Fuehrt die Migration fuer SALES-CRM-02 aus
+# PowerShell Script: CRM Migration 003 - Sales Fields
+# Fuehrt die Migration fuer SALES-CRM-02 aus
 
 param(
     [string]$DatabaseUrl = $env:DATABASE_URL,
@@ -15,7 +15,7 @@ $ErrorActionPreference = "Stop"
 Write-Host "CRM Migration 003: Sales Fields (SALES-CRM-02)" -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 
-***REMOVED*** Migration-Script-Pfad
+# Migration-Script-Pfad
 $migrationFile = Join-Path $PSScriptRoot "..\migrations\sql\crm\003_add_sales_fields_to_customers.sql"
 
 if (-not (Test-Path $migrationFile)) {
@@ -25,25 +25,25 @@ if (-not (Test-Path $migrationFile)) {
 
 Write-Host "Migration-Script: $migrationFile" -ForegroundColor Green
 
-***REMOVED*** SQL-Inhalt lesen
+# SQL-Inhalt lesen
 $sqlContent = Get-Content $migrationFile -Raw -Encoding UTF8
 
-***REMOVED*** Datenbankverbindung aufbauen
+# Datenbankverbindung aufbauen
 Write-Host "Verbindung zur Datenbank..." -ForegroundColor Yellow
 
 if ($DatabaseUrl) {
-    ***REMOVED*** DATABASE_URL verwenden
+    # DATABASE_URL verwenden
     $connectionString = $DatabaseUrl
     Write-Host "   Verwendet DATABASE_URL" -ForegroundColor Gray
 } else {
-    ***REMOVED*** Einzelne Parameter verwenden
+    # Einzelne Parameter verwenden
     $connectionString = "postgresql://${DbUser}:${DbPassword}@${DbHost}:${DbPort}/${Database}"
     Write-Host "   Host: $DbHost" -ForegroundColor Gray
     Write-Host "   Database: $Database" -ForegroundColor Gray
 }
 
 try {
-    ***REMOVED*** Pruefe ob psql verfuegbar ist
+    # Pruefe ob psql verfuegbar ist
     $psqlPath = Get-Command psql -ErrorAction SilentlyContinue
     if (-not $psqlPath) {
         Write-Host "ERROR: psql nicht gefunden. Bitte PostgreSQL Client installieren." -ForegroundColor Red
@@ -56,7 +56,7 @@ try {
     Write-Host "Fuehre Migration aus..." -ForegroundColor Yellow
     Write-Host ""
 
-    ***REMOVED*** Migration ausfuehren
+    # Migration ausfuehren
     if ($DatabaseUrl) {
         $env:PGPASSWORD = ($DatabaseUrl -split '@')[0] -replace '.*:', ''
         $dbPart = ($DatabaseUrl -split '@')[1]
@@ -105,7 +105,7 @@ try {
     Write-Host "   psql -h $DbHost -p $DbPort -U $DbUser -d $Database -f $migrationFile" -ForegroundColor Gray
     exit 1
 } finally {
-    ***REMOVED*** PGPASSWORD zuruecksetzen
+    # PGPASSWORD zuruecksetzen
     Remove-Item Env:\PGPASSWORD -ErrorAction SilentlyContinue
 }
 
@@ -113,3 +113,4 @@ Write-Host ""
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host "Migration 003 abgeschlossen!" -ForegroundColor Green
 Write-Host "============================================================" -ForegroundColor Cyan
+

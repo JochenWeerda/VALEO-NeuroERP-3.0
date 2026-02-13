@@ -10,13 +10,13 @@ function Write-Ok($msg) { Write-Host "[OK]   $msg" -ForegroundColor Green }
 function Write-Warn($msg) { Write-Host "[WARN] $msg" -ForegroundColor Yellow }
 function Write-Err($msg) { Write-Host "[ERR]  $msg" -ForegroundColor Red }
 
-***REMOVED*** Repo-Root ermitteln
+# Repo-Root ermitteln
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot = Resolve-Path (Join-Path $ScriptDir '..')
 Set-Location $RepoRoot
 Write-Info "RepoRoot: $RepoRoot"
 
-***REMOVED*** Virtuelle Umgebung aktivieren (optional, wenn vorhanden)
+# Virtuelle Umgebung aktivieren (optional, wenn vorhanden)
 $venvActivate = Join-Path $RepoRoot 'venv\Scripts\Activate.ps1'
 if (Test-Path $venvActivate) {
   Write-Info "Aktiviere venv"
@@ -25,11 +25,11 @@ if (Test-Path $venvActivate) {
   Write-Warn "Keine venv gefunden unter $venvActivate (fahre ohne fort)"
 }
 
-***REMOVED*** PYTHONPATH setzen für diesen Prozess und Child-Prozesse
+# PYTHONPATH setzen für diesen Prozess und Child-Prozesse
 $env:PYTHONPATH = "$RepoRoot"
 Write-Info "PYTHONPATH: $env:PYTHONPATH"
 
-***REMOVED*** Frontend API-Basis setzen
+# Frontend API-Basis setzen
 $FrontendDir = Join-Path $RepoRoot 'frontend'
 $EnvLocal = Join-Path $FrontendDir '.env.local'
 $apiLine = 'VITE_API_BASE=http://127.0.0.1:8001/api'
@@ -52,12 +52,12 @@ if (Test-Path $EnvLocal) {
   Write-Ok ".env.local erstellt mit VITE_API_BASE"
 }
 
-***REMOVED*** Alte Prozesse ggf. beenden
+# Alte Prozesse ggf. beenden
 Write-Info "Beende alte node/uvicorn Prozesse (falls vorhanden)"
 Get-Process -Name node -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 Get-Process -Name uvicorn,python -ErrorAction SilentlyContinue | Where-Object { $_.Path -like '*uvicorn*' -or $_.StartInfo -ne $null } | Stop-Process -Force -ErrorAction SilentlyContinue
 
-***REMOVED*** Vite-Caches leeren (optional)
+# Vite-Caches leeren (optional)
 if (-not $NoCacheClear) {
   Write-Info "Leere Vite-Caches"
   $viteA = Join-Path $FrontendDir '.vite'
@@ -71,13 +71,13 @@ if (-not $NoCacheClear) {
   Write-Info "Vite-Caches werden behalten (NoCacheClear)"
 }
 
-***REMOVED*** Backend starten (Uvicorn 127.0.0.1:8001)
+# Backend starten (Uvicorn 127.0.0.1:8001)
 Write-Info "Starte Backend (Uvicorn) auf 127.0.0.1:8001"
 $backendCmd = "python -m uvicorn backend.api.main:app --host 127.0.0.1 --port 8001 --app-dir `"$RepoRoot`""
 $backend = Start-Process -PassThru -WindowStyle Minimized powershell -ArgumentList @('-NoProfile','-Command',"cd `"$RepoRoot`"; `$env:PYTHONPATH=`"$RepoRoot`"; $backendCmd")
 Write-Ok "Backend PID: $($backend.Id)"
 
-***REMOVED*** Frontend starten (Vite auf 3004)
+# Frontend starten (Vite auf 3004)
 Write-Info "Starte Frontend (Vite) auf Port 3004"
 $frontendCmd = "npm run dev -- --port 3004"
 $frontend = Start-Process -PassThru -WorkingDirectory $FrontendDir -WindowStyle Minimized powershell -ArgumentList @('-NoProfile','-Command',$frontendCmd)
@@ -97,14 +97,14 @@ function Wait-Http($url, $timeoutSec = 60) {
   return $false
 }
 
-***REMOVED*** Health-Checks
+# Health-Checks
 if (Wait-Http 'http://127.0.0.1:8001/openapi.json' 60) {
   Write-Ok "Backend erreichbar: http://127.0.0.1:8001"
 } else {
   Write-Err "Backend nicht erreichbar (Timeout)"
 }
 
-***REMOVED*** Vite-Standardport 3004 checken (optional)
+# Vite-Standardport 3004 checken (optional)
 if (Wait-Http 'http://localhost:3004' 60) {
   Write-Ok "Frontend erreichbar: http://localhost:3004"
   try { Start-Process 'http://localhost:3004' | Out-Null } catch { }
@@ -113,3 +113,4 @@ if (Wait-Http 'http://localhost:3004' 60) {
 }
 
 Write-Ok "Start abgeschlossen. Logs laufen in den minimierten Fenstern."
+

@@ -40,11 +40,11 @@ class NumberingServicePG:
         Returns:
             Formatierte Belegnummer (z.B. "SO-2025-00001")
         """
-        ***REMOVED*** Hole Konfiguration aus ENV
+        # Hole Konfiguration aus ENV
         prefix = self._get_prefix(domain, tenant_id, year)
         width = int(os.environ.get(f"NUMBER_WIDTH_{domain.upper()}", "5"))
         
-        ***REMOVED*** Hole oder erstelle Nummernkreis (mit Row-Level-Lock)
+        # Hole oder erstelle Nummernkreis (mit Row-Level-Lock)
         result = await self.db.execute(
             text("""
                 SELECT counter FROM number_series
@@ -59,7 +59,7 @@ class NumberingServicePG:
         row = result.fetchone()
         
         if row is None:
-            ***REMOVED*** Erstelle neuen Nummernkreis
+            # Erstelle neuen Nummernkreis
             counter = 1
             await self.db.execute(
                 text("""
@@ -76,7 +76,7 @@ class NumberingServicePG:
                 }
             )
         else:
-            ***REMOVED*** Incrementiere Counter
+            # Incrementiere Counter
             counter = row[0] + 1
             await self.db.execute(
                 text("""
@@ -91,7 +91,7 @@ class NumberingServicePG:
         
         await self.db.commit()
         
-        ***REMOVED*** Formatiere Nummer
+        # Formatiere Nummer
         number = f"{prefix}{counter:0{width}d}"
         logger.info(f"Generated number: {number} for {domain}/{tenant_id}/{year}")
         
@@ -156,16 +156,16 @@ class NumberingServicePG:
         - Mit Jahr: "SO-2025-"
         - Mit Tenant+Jahr: "SO-A-2025-"
         """
-        ***REMOVED*** Base-Prefix aus ENV
+        # Base-Prefix aus ENV
         base = os.environ.get(f"NUMBER_PREFIX_{domain.upper()}", f"{domain.upper()}-")
         
-        ***REMOVED*** Multi-Tenant aktiviert?
+        # Multi-Tenant aktiviert?
         multi_tenant = os.environ.get("NUMBERING_MULTI_TENANT", "false").lower() == "true"
         
-        ***REMOVED*** Jahreswechsel aktiviert?
+        # Jahreswechsel aktiviert?
         yearly_reset = os.environ.get("NUMBERING_YEARLY_RESET", "false").lower() == "true"
         
-        ***REMOVED*** Baue Präfix zusammen
+        # Baue Präfix zusammen
         parts = [base.rstrip("-")]
         
         if multi_tenant and tenant_id != "default":
@@ -177,7 +177,7 @@ class NumberingServicePG:
         return "-".join(parts) + "-"
 
 
-***REMOVED*** Dependency für FastAPI
+# Dependency für FastAPI
 async def get_numbering_pg(db: Annotated[AsyncSession, Depends(get_db)]) -> NumberingServicePG:
     """FastAPI Dependency für NumberingServicePG"""
     return NumberingServicePG(db)

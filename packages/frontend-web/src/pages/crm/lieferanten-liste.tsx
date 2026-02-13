@@ -1,25 +1,22 @@
-import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
-import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { apiClient } from '@/lib/api-client'
 import { toast } from '@/hooks/use-toast'
 
-// API Client für Lieferanten
-const apiClient = createApiClient('/api/crm')
-
 // Konfiguration für Lieferanten ListReport
-const lieferantenListConfig: ListConfig = {
-  title: 'Lieferanten-Liste',
-  subtitle: 'Übersicht aller Lieferanten und deren Konditionen',
+const createLieferantenListConfig = (t: any): ListConfig => ({
+  title: t('crud.entities.suppliers', { defaultValue: 'Lieferanten-Liste' }),
+  subtitle: t('crud.subtitles.manageSuppliers', { defaultValue: 'Übersicht aller Lieferanten und deren Konditionen' }),
   type: 'list-report',
   columns: [
     {
       key: 'firma',
-      label: 'Firma',
+      label: t('crud.fields.company', { defaultValue: 'Firma' }),
       sortable: true,
       filterable: true,
       render: (value, row) => (
@@ -31,121 +28,111 @@ const lieferantenListConfig: ListConfig = {
     },
     {
       key: 'ort',
-      label: 'Ort',
+      label: t('crud.fields.location', { defaultValue: 'Ort' }),
       sortable: true,
       filterable: true,
       render: (value, row) => `${row.plz} ${value}`
     },
     {
       key: 'land',
-      label: 'Land',
+      label: t('crud.fields.country', { defaultValue: 'Land' }),
       filterable: true,
       render: (value) => {
-        const countries = {
-          'DE': '🇩🇪 Deutschland',
-          'AT': '🇦🇹 Österreich',
-          'CH': '🇨🇭 Schweiz',
-          'NL': '🇳🇱 Niederlande',
-          'DK': '🇩🇰 Dänemark',
-          'PL': '🇵🇱 Polen',
-          'FR': '🇫🇷 Frankreich',
-          'IT': '🇮🇹 Italien'
+        const countries: Record<string, string> = {
+          'DE': 'Deutschland',
+          'AT': 'Österreich',
+          'CH': 'Schweiz',
+          'NL': 'Niederlande',
+          'DK': 'Dänemark',
+          'PL': 'Polen',
+          'FR': 'Frankreich',
+          'IT': 'Italien'
         }
-        return countries[value as keyof typeof countries] || value
+        return countries[value as string] || value
       }
     },
     {
       key: 'telefon',
-      label: 'Telefon',
+      label: t('crud.fields.phone', { defaultValue: 'Telefon' }),
       render: (value) => value || '-'
     },
     {
       key: 'email',
-      label: 'E-Mail',
+      label: t('crud.fields.email', { defaultValue: 'E-Mail' }),
       render: (value) => value ? <a href={`mailto:${value}`} className="text-blue-600 hover:underline">{value}</a> : '-'
     },
     {
       key: 'zahlungsbedingungen',
-      label: 'Z-Bedingungen',
+      label: t('crud.fields.paymentTerms', { defaultValue: 'Z-Bedingungen' }),
       sortable: true,
       filterable: true,
       render: (value) => value || '30 Tage'
     },
     {
       key: 'rabatt',
-      label: 'Rabatt',
+      label: t('crud.fields.discount', { defaultValue: 'Rabatt' }),
       sortable: true,
       render: (value) => value ? `${formatNumber(value, 1)}%` : '-'
     },
     {
       key: 'mindestbestellwert',
-      label: 'Min.-Bestellwert',
+      label: t('crud.fields.minOrderValue', { defaultValue: 'Min.-Bestellwert' }),
       sortable: true,
       render: (value) => value ? formatCurrency(value) : '-'
     },
     {
       key: 'lieferzeit',
-      label: 'Lieferzeit',
+      label: t('crud.fields.deliveryTime', { defaultValue: 'Lieferzeit' }),
       sortable: true,
-      render: (value) => value ? `${value} Tage` : '-'
+      render: (value) => value ? `${value} ${t('crud.fields.days', { defaultValue: 'Tage' })}` : '-'
     },
     {
       key: 'qualitaetszertifikat',
-      label: 'QS-Zert.',
-      render: (value) => value ? <Badge variant="outline">✅</Badge> : <Badge variant="secondary">❌</Badge>
+      label: t('crud.fields.qsCert', { defaultValue: 'QS-Zert.' }),
+      render: (value) => value ? <Badge variant="outline">Ja</Badge> : <Badge variant="secondary">Nein</Badge>
     },
     {
       key: 'bioZertifiziert',
-      label: 'Bio-Zert.',
-      render: (value) => value ? <Badge variant="outline">🌱</Badge> : <Badge variant="secondary">❌</Badge>
+      label: t('crud.fields.bioCert', { defaultValue: 'Bio-Zert.' }),
+      render: (value) => value ? <Badge variant="outline">Ja</Badge> : <Badge variant="secondary">Nein</Badge>
     },
     {
       key: 'produkte',
-      label: 'Produkte',
+      label: t('crud.fields.products', { defaultValue: 'Produkte' }),
       render: (value) => {
         if (!value || value.length === 0) return '-'
-        const productLabels = {
-          'getreide': '🌾',
-          'oelsaat': '🥜',
-          'protein': '🥩',
-          'mineralstoff': '🧂',
-          'biostimulanzien': '🌱',
-          'pflanzenschutz': '🌿',
-          'duenger': '🌱',
-          'saatgut': '🌱'
-        }
         return (
           <div className="flex gap-1">
             {value.slice(0, 3).map((produkt: string, i: number) =>
-              <span key={i} title={produkt}>{productLabels[produkt as keyof typeof productLabels] || '📦'}</span>
+              <Badge key={i} variant="outline" className="text-xs">{produkt}</Badge>
             )}
-            {value.length > 3 && <span title={`+${value.length - 3} weitere`}>...</span>}
+            {value.length > 3 && <Badge variant="outline" className="text-xs">+{value.length - 3}</Badge>}
           </div>
         )
       }
     },
     {
       key: 'umsatzGesamt',
-      label: 'Gesamtumsatz',
+      label: t('crud.fields.totalRevenue', { defaultValue: 'Gesamtumsatz' }),
       sortable: true,
       render: (value) => formatCurrency(value || 0)
     },
     {
       key: 'letzteLieferung',
-      label: 'Letzte Lieferung',
+      label: t('crud.fields.lastDelivery', { defaultValue: 'Letzte Lieferung' }),
       sortable: true,
       render: (value) => value ? new Date(value).toLocaleDateString('de-DE') : '-'
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('crud.fields.status', { defaultValue: 'Status' }),
       sortable: true,
       filterable: true,
       render: (value) => {
         const statusLabels = {
-          'aktiv': { label: 'Aktiv', variant: 'default' as const },
-          'inaktiv': { label: 'Inaktiv', variant: 'secondary' as const },
-          'gesperrt': { label: 'Gesperrt', variant: 'destructive' as const }
+          'aktiv': { label: t('status.active', { defaultValue: 'Aktiv' }), variant: 'default' as const },
+          'inaktiv': { label: t('status.inactive', { defaultValue: 'Inaktiv' }), variant: 'secondary' as const },
+          'gesperrt': { label: t('status.blocked', { defaultValue: 'Gesperrt' }), variant: 'destructive' as const }
         }
         const status = statusLabels[value as keyof typeof statusLabels] || statusLabels.aktiv
         return <Badge variant={status.variant}>{status.label}</Badge>
@@ -155,17 +142,17 @@ const lieferantenListConfig: ListConfig = {
   filters: [
     {
       name: 'status',
-      label: 'Status',
+      label: t('crud.fields.status', { defaultValue: 'Status' }),
       type: 'select',
       options: [
-        { value: 'aktiv', label: 'Aktiv' },
-        { value: 'inaktiv', label: 'Inaktiv' },
-        { value: 'gesperrt', label: 'Gesperrt' }
+        { value: 'aktiv', label: t('status.active', { defaultValue: 'Aktiv' }) },
+        { value: 'inaktiv', label: t('status.inactive', { defaultValue: 'Inaktiv' }) },
+        { value: 'gesperrt', label: t('status.blocked', { defaultValue: 'Gesperrt' }) }
       ]
     },
     {
       name: 'land',
-      label: 'Land',
+      label: t('crud.fields.country', { defaultValue: 'Land' }),
       type: 'select',
       options: [
         { value: 'DE', label: 'Deutschland' },
@@ -180,25 +167,25 @@ const lieferantenListConfig: ListConfig = {
     },
     {
       name: 'qualitaetszertifikat',
-      label: 'QS-zertifiziert',
+      label: t('crud.fields.qsCert', { defaultValue: 'QS-zertifiziert' }),
       type: 'select',
       options: [
-        { value: 'true', label: 'Ja' },
-        { value: 'false', label: 'Nein' }
+        { value: 'true', label: t('common.yes', { defaultValue: 'Ja' }) },
+        { value: 'false', label: t('common.no', { defaultValue: 'Nein' }) }
       ]
     },
     {
       name: 'bioZertifiziert',
-      label: 'Bio-zertifiziert',
+      label: t('crud.fields.bioCert', { defaultValue: 'Bio-zertifiziert' }),
       type: 'select',
       options: [
-        { value: 'true', label: 'Ja' },
-        { value: 'false', label: 'Nein' }
+        { value: 'true', label: t('common.yes', { defaultValue: 'Ja' }) },
+        { value: 'false', label: t('common.no', { defaultValue: 'Nein' }) }
       ]
     },
     {
       name: 'zahlungsbedingungen',
-      label: 'Zahlungsbedingungen',
+      label: t('crud.fields.paymentTerms', { defaultValue: 'Zahlungsbedingungen' }),
       type: 'select',
       options: [
         { value: 'sofort', label: 'Sofort' },
@@ -211,7 +198,7 @@ const lieferantenListConfig: ListConfig = {
     },
     {
       name: 'produkte',
-      label: 'Produktbereich',
+      label: t('crud.fields.productArea', { defaultValue: 'Produktbereich' }),
       type: 'select',
       options: [
         { value: 'getreide', label: 'Getreide' },
@@ -228,27 +215,27 @@ const lieferantenListConfig: ListConfig = {
   bulkActions: [
     {
       key: 'export',
-      label: 'Exportieren',
+      label: t('crud.actions.export', { defaultValue: 'Exportieren' }),
       type: 'secondary',
-      onClick: () => console.log('Export clicked')
+      onClick: () => {}
     },
     {
       key: 'newsletter',
-      label: 'Newsletter senden',
+      label: t('crud.actions.sendNewsletter', { defaultValue: 'Newsletter senden' }),
       type: 'secondary',
-      onClick: () => console.log('Newsletter clicked')
+      onClick: () => {}
     },
     {
       key: 'audit',
-      label: 'Qualitätsaudit',
+      label: t('crud.actions.qualityAudit', { defaultValue: 'Qualitätsaudit' }),
       type: 'secondary',
-      onClick: () => console.log('Audit clicked')
+      onClick: () => {}
     },
     {
       key: 'block',
-      label: 'Sperren',
+      label: t('crud.actions.block', { defaultValue: 'Sperren' }),
       type: 'danger',
-      onClick: () => console.log('Block clicked')
+      onClick: () => {}
     }
   ],
   defaultSort: { field: 'firma', direction: 'asc' },
@@ -265,63 +252,60 @@ const lieferantenListConfig: ListConfig = {
   },
   permissions: ['crm.read', 'supplier.read'],
   actions: []
-}
+})
 
 export default function LieferantenListePage(): JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
+  const lieferantenListConfig = createLieferantenListConfig(t)
 
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
-    if (action === 'edit' && item) {
-      navigate(`/crm/lieferanten/stamm/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(`Lieferanten "${item.firma}" wirklich löschen?`)) {
-        try {
-          await apiClient.delete(`/lieferanten/${item.id}`)
-          loadData() // Liste neu laden
-        } catch (error) {
-          alert('Fehler beim Löschen')
+  const { data: queryData, isLoading } = useQuery({
+    queryKey: ['crm', 'lieferanten'],
+    queryFn: async () => {
+      try {
+        const r = await apiClient.get('/api/crm/lieferanten')
+        if (r.data) {
+          const raw = r.data as any
+          const items = raw.data || (Array.isArray(raw) ? raw : [])
+          const total = raw.total || items.length
+          return { items, total }
         }
-      }
-    }
+      } catch { /* API nicht erreichbar */ }
+      return { items: [], total: 0 }
+    },
+    staleTime: 2 * 60 * 1000,
   })
 
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const response = await apiClient.get('/lieferanten')
-      if (response.success) {
-        setData((response.data as any).data || [])
-        setTotal((response.data as any).total || 0)
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Daten:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const data = queryData?.items || []
+  const total = queryData?.total || 0
 
-  useEffect(() => {
-    loadData()
-  }, [])
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'lieferanten'] })
 
   const handleCreate = () => {
     navigate('/crm/lieferanten/stamm/new')
   }
 
   const handleEdit = (item: any) => {
-    handleAction('edit', item)
+    navigate(`/crm/lieferanten/stamm/${item.id}`)
   }
 
-  const handleDelete = (item: any) => {
-    handleAction('delete', item)
+  const handleDelete = async (item: any) => {
+    if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: 'Lieferant', defaultValue: `Lieferanten "${item.firma}" wirklich löschen?` }))) {
+      try {
+        await apiClient.delete(`/api/crm/lieferanten/${item.id}`)
+        invalidate()
+      } catch {
+        toast({
+          variant: 'destructive',
+          title: t('crud.messages.deleteError', { defaultValue: 'Fehler beim Löschen' })
+        })
+      }
+    }
   }
 
   const handleExport = () => {
     try {
-      // Create CSV content
       const csvHeader = 'Firma;Ort;Land;Telefon;E-Mail;Z-Bedingungen;Rabatt;Min-Bestellwert;Lieferzeit;QS-Zert;Bio-Zert;Gesamtumsatz;Status\n'
       const csvContent = data.map((lieferant: any) =>
         `"${lieferant.firma}";"${lieferant.plz} ${lieferant.ort}";"${lieferant.land || ''}";"${lieferant.telefon || ''}";"${lieferant.email || ''}";"${lieferant.zahlungsbedingungen || '30 Tage'}";"${lieferant.rabatt || 0}";"${lieferant.mindestbestellwert || 0}";"${lieferant.lieferzeit || 0}";"${lieferant.qualitaetszertifikat ? 'Ja' : 'Nein'}";"${lieferant.bioZertifiziert ? 'Ja' : 'Nein'}";"${lieferant.umsatzGesamt || 0}";"${lieferant.status || 'aktiv'}"`
@@ -329,7 +313,6 @@ export default function LieferantenListePage(): JSX.Element {
 
       const csv = csvHeader + csvContent
 
-      // Create and download file
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
@@ -341,14 +324,14 @@ export default function LieferantenListePage(): JSX.Element {
       document.body.removeChild(link)
 
       toast({
-        title: 'Export erfolgreich',
-        description: `${data.length} Lieferanten wurden exportiert.`,
+        title: t('crud.messages.exportSuccess', { defaultValue: 'Export erfolgreich' }),
+        description: t('crud.messages.exportedItems', { count: data.length, entityType: 'Lieferanten', defaultValue: `${data.length} Lieferanten wurden exportiert.` }),
       })
-    } catch (error) {
+    } catch {
       toast({
         variant: 'destructive',
-        title: 'Export fehlgeschlagen',
-        description: 'Beim Exportieren ist ein Fehler aufgetreten.',
+        title: t('crud.messages.exportError', { defaultValue: 'Export fehlgeschlagen' }),
+        description: t('crud.messages.exportFailed', { defaultValue: 'Beim Exportieren ist ein Fehler aufgetreten.' }),
       })
     }
   }
@@ -364,11 +347,11 @@ export default function LieferantenListePage(): JSX.Element {
       onExport={handleExport}
       onImport={() => {
         toast({
-          title: 'Import-Funktion',
-          description: 'CSV-Import wird in der nächsten Version verfügbar sein.',
+          title: t('crud.messages.importInfo', { defaultValue: 'Import-Funktion' }),
+          description: t('crud.messages.importComingSoon', { defaultValue: 'CSV-Import wird in der nächsten Version verfügbar sein.' }),
         })
       }}
-      isLoading={loading}
+      isLoading={isLoading}
     />
   )
 }

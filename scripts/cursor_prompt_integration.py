@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 Cursor.ai Prompt Integration für VALEO-NeuroERP
@@ -20,7 +20,7 @@ from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-***REMOVED*** Konfiguration
+# Konfiguration
 PROMPT_FILE = "data/cursor_prompts/latest_prompt.json"
 PROMPT_SPEC_DIR = "data/cursor_prompts/specs"
 MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "http://localhost:8000")
@@ -41,7 +41,7 @@ class PromptSpec:
     def from_json(cls, data):
         """Erstellt ein PromptSpec aus JSON-Daten."""
         if isinstance(data, str):
-            ***REMOVED*** Falls ein String übergeben wird, behandle es als Raw-Prompt
+            # Falls ein String übergeben wird, behandle es als Raw-Prompt
             return cls(goal=data)
         
         return cls(
@@ -55,29 +55,29 @@ class PromptSpec:
         """Konvertiert das PromptSpec in Markdown."""
         md = []
         
-        ***REMOVED*** Ziel
-        md.append("***REMOVED******REMOVED*** 🎯 Ziel")
+        # Ziel
+        md.append("## 🎯 Ziel")
         md.append(self.goal)
         md.append("")
         
-        ***REMOVED*** Kontext
-        md.append("***REMOVED******REMOVED*** 📎 Kontext")
+        # Kontext
+        md.append("## 📎 Kontext")
         md.append(self.context)
         md.append("")
         
-        ***REMOVED*** Anforderungen
-        md.append("***REMOVED******REMOVED*** ✅ Anforderungen")
+        # Anforderungen
+        md.append("## ✅ Anforderungen")
         for req in self.requirements:
             md.append(f"- {req}")
         md.append("")
         
-        ***REMOVED*** Hinweise
-        md.append("***REMOVED******REMOVED*** 🧠 Hinweise")
+        # Hinweise
+        md.append("## 🧠 Hinweise")
         for hint in self.hints:
             md.append(f"- {hint}")
         md.append("")
         
-        ***REMOVED*** Standardhinweise
+        # Standardhinweise
         md.append("👉 Schreibe klaren, dokumentierten Code mit Typannotation.")
         
         return "\n".join(md)
@@ -97,10 +97,10 @@ class PromptFileHandler(FileSystemEventHandler):
     def process_prompt_file(self):
         """Verarbeitet die Prompt-Datei und sendet den Prompt an Cursor.ai über MCP."""
         try:
-            ***REMOVED*** Warten, um sicherzustellen, dass die Datei vollständig geschrieben wurde
+            # Warten, um sicherzustellen, dass die Datei vollständig geschrieben wurde
             time.sleep(0.5)
             
-            ***REMOVED*** Prompt aus Datei lesen
+            # Prompt aus Datei lesen
             with open(PROMPT_FILE, "r", encoding="utf-8") as file:
                 data = json.load(file)
                 prompt = data.get("prompt", "")
@@ -109,17 +109,17 @@ class PromptFileHandler(FileSystemEventHandler):
                 print("Kein Prompt in der Datei gefunden.")
                 return
             
-            ***REMOVED*** Prompt in die Zwischenablage kopieren (als Fallback)
+            # Prompt in die Zwischenablage kopieren (als Fallback)
             pyperclip.copy(prompt)
             print(f"Prompt in die Zwischenablage kopiert: {prompt[:50]}...")
             
-            ***REMOVED*** Prompt in standardisiertes Format konvertieren
+            # Prompt in standardisiertes Format konvertieren
             spec = self.convert_to_prompt_spec(prompt, data)
             
-            ***REMOVED*** Prompt als Cursor Task speichern
+            # Prompt als Cursor Task speichern
             task_file = self.save_as_cursor_task(spec, data)
             
-            ***REMOVED*** Versuche, den Prompt über MCP an Cursor.ai zu senden
+            # Versuche, den Prompt über MCP an Cursor.ai zu senden
             self.send_to_mcp(prompt, data, spec, task_file)
             
         except Exception as e:
@@ -127,10 +127,10 @@ class PromptFileHandler(FileSystemEventHandler):
     
     def convert_to_prompt_spec(self, prompt, data):
         """Konvertiert einen Prompt in das standardisierte PromptSpec-Format."""
-        ***REMOVED*** Versuche, aus dem Prompt strukturierte Informationen zu extrahieren
+        # Versuche, aus dem Prompt strukturierte Informationen zu extrahieren
         goal = prompt.split("\n")[0] if prompt else ""
         
-        ***REMOVED*** Kontext aus den Quelldaten extrahieren
+        # Kontext aus den Quelldaten extrahieren
         context = ""
         source = data.get("source", {})
         if source:
@@ -143,7 +143,7 @@ class PromptFileHandler(FileSystemEventHandler):
             if review_changes:
                 context += f"Review-Änderungen:\n{review_changes}\n\n"
         
-        ***REMOVED*** Anforderungen und Hinweise
+        # Anforderungen und Hinweise
         requirements = ["Implementierung gemäß VALEO-NeuroERP Standards"]
         hints = [
             "Cursor arbeitet mit OpenAI GPT-4o",
@@ -155,20 +155,20 @@ class PromptFileHandler(FileSystemEventHandler):
     
     def save_as_cursor_task(self, spec, data):
         """Speichert den Prompt als Cursor Task."""
-        ***REMOVED*** Sicherstellen, dass das Verzeichnis existiert
+        # Sicherstellen, dass das Verzeichnis existiert
         os.makedirs(CURSOR_TASK_DIR, exist_ok=True)
         os.makedirs(PROMPT_SPEC_DIR, exist_ok=True)
         
-        ***REMOVED*** Dateinamen generieren
+        # Dateinamen generieren
         timestamp = time.strftime("%Y%m%d-%H%M%S")
         phase = data.get("phase", "unknown").lower()
         task_name = f"valeo-task-{phase}-{timestamp}"
         
-        ***REMOVED*** Speicherpfade
+        # Speicherpfade
         spec_file = os.path.join(PROMPT_SPEC_DIR, f"{task_name}.md")
         cursor_task_file = os.path.join(CURSOR_TASK_DIR, f"{task_name}.md")
         
-        ***REMOVED*** PromptSpec speichern
+        # PromptSpec speichern
         spec.save_to_file(spec_file)
         spec.save_to_file(cursor_task_file)
         
@@ -178,7 +178,7 @@ class PromptFileHandler(FileSystemEventHandler):
     def send_to_mcp(self, prompt, data, spec, task_file):
         """Sendet den Prompt über MCP an Cursor.ai."""
         try:
-            ***REMOVED*** MCP-Anfrage vorbereiten
+            # MCP-Anfrage vorbereiten
             headers = {
                 "Content-Type": "application/json"
             }
@@ -186,12 +186,12 @@ class PromptFileHandler(FileSystemEventHandler):
             if MCP_API_KEY:
                 headers["Authorization"] = f"Bearer {MCP_API_KEY}"
             
-            ***REMOVED*** Vereinfachte Payload für den /api/prompt-Endpunkt
+            # Vereinfachte Payload für den /api/prompt-Endpunkt
             payload = {
                 "prompt": spec.to_markdown()
             }
             
-            ***REMOVED*** Anfrage an MCP senden
+            # Anfrage an MCP senden
             response = requests.post(
                 f"{MCP_SERVER_URL}/api/prompt",
                 headers=headers,
@@ -201,18 +201,18 @@ class PromptFileHandler(FileSystemEventHandler):
             if response.status_code == 200:
                 print("Prompt erfolgreich über MCP an Cursor.ai gesendet!")
                 
-                ***REMOVED*** Optional: Langgraph-Integration für Workflow-Steuerung
+                # Optional: Langgraph-Integration für Workflow-Steuerung
                 self.trigger_langgraph_workflow(prompt, data, spec)
             else:
                 print(f"Fehler beim Senden des Prompts über MCP: {response.status_code}")
                 print(f"Antwort: {response.text}")
                 
-                ***REMOVED*** Fallback: Öffne Cursor.ai direkt und füge den Prompt ein
+                # Fallback: Öffne Cursor.ai direkt und füge den Prompt ein
                 self.open_cursor_with_prompt(task_file)
         
         except Exception as e:
             print(f"Fehler bei der MCP-Anfrage: {str(e)}")
-            ***REMOVED*** Fallback: Öffne Cursor.ai direkt
+            # Fallback: Öffne Cursor.ai direkt
             self.open_cursor_with_prompt(task_file)
     
     def trigger_langgraph_workflow(self, prompt, data, spec):
@@ -221,12 +221,12 @@ class PromptFileHandler(FileSystemEventHandler):
             if not LANGGRAPH_URL:
                 return
                 
-            ***REMOVED*** Langgraph-Anfrage vorbereiten
+            # Langgraph-Anfrage vorbereiten
             headers = {
                 "Content-Type": "application/json"
             }
             
-            ***REMOVED*** Workflow-Payload
+            # Workflow-Payload
             payload = {
                 "workflow": "cursor_prompt_workflow",
                 "inputs": {
@@ -240,7 +240,7 @@ class PromptFileHandler(FileSystemEventHandler):
                 }
             }
             
-            ***REMOVED*** Anfrage an Langgraph senden
+            # Anfrage an Langgraph senden
             response = requests.post(
                 f"{LANGGRAPH_URL}/api/workflows/execute",
                 headers=headers,
@@ -258,10 +258,10 @@ class PromptFileHandler(FileSystemEventHandler):
     def open_cursor_with_prompt(self, task_file):
         """Öffnet Cursor.ai und fügt den Prompt ein (Fallback)."""
         try:
-            ***REMOVED*** Prüfen, ob Cursor.ai installiert ist
+            # Prüfen, ob Cursor.ai installiert ist
             cursor_path = "C:\\Program Files\\Cursor\\Cursor.exe"
             if os.path.exists(cursor_path):
-                ***REMOVED*** Starte Cursor.ai mit dem Task-File
+                # Starte Cursor.ai mit dem Task-File
                 subprocess.Popen([cursor_path, task_file])
                 print(f"Cursor.ai geöffnet mit Task: {task_file}")
             else:
@@ -275,7 +275,7 @@ def ensure_prompt_directory():
     os.makedirs(PROMPT_SPEC_DIR, exist_ok=True)
     os.makedirs(CURSOR_TASK_DIR, exist_ok=True)
     
-    ***REMOVED*** Erstelle eine leere Prompt-Datei, falls sie nicht existiert
+    # Erstelle eine leere Prompt-Datei, falls sie nicht existiert
     if not os.path.exists(PROMPT_FILE):
         with open(PROMPT_FILE, "w", encoding="utf-8") as file:
             json.dump({"prompt": ""}, file)
@@ -323,7 +323,7 @@ def start_watching():
 if __name__ == "__main__":
     print("Cursor.ai Prompt Integration über MCP gestartet")
     
-    ***REMOVED*** MCP-Verbindung prüfen
+    # MCP-Verbindung prüfen
     try:
         response = requests.get(f"{MCP_SERVER_URL}/api/status")
         if response.status_code == 200:
@@ -333,5 +333,5 @@ if __name__ == "__main__":
     except:
         print(f"MCP-Server nicht erreichbar: {MCP_SERVER_URL}")
     
-    ***REMOVED*** Starte die Überwachung
+    # Starte die Überwachung
     start_watching() 

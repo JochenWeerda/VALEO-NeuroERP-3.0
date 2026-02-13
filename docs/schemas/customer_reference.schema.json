@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema***REMOVED***",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "CustomerReference",
   "type": "object",
   "required": ["customer_id", "type", "display_name", "status", "master_domain_owner"],
@@ -41,3 +41,4 @@
     }
   }
 }
+

@@ -1,10 +1,10 @@
-***REMOVED*** SALES-CRM-02: Migration erfolgreich ausgeführt
+# SALES-CRM-02: Migration erfolgreich ausgeführt
 
-***REMOVED******REMOVED*** ✅ Datum: 2025-01-24
+## ✅ Datum: 2025-01-24
 
-***REMOVED******REMOVED*** 🎉 Migration erfolgreich!
+## 🎉 Migration erfolgreich!
 
-***REMOVED******REMOVED******REMOVED*** Ausgeführte Schritte
+### Ausgeführte Schritte
 
 1. ✅ **Spalte `price_group` hinzugefügt**
    ```sql
@@ -24,7 +24,7 @@
    - `idx_crm_customers_price_group`
    - `idx_crm_customers_tax_category`
 
-***REMOVED******REMOVED******REMOVED*** Validierung
+### Validierung
 
 **Spalten:**
 - ✅ `price_group` (VARCHAR(50), nullable)
@@ -34,33 +34,33 @@
 - ✅ `idx_crm_customers_price_group`
 - ✅ `idx_crm_customers_tax_category`
 
-***REMOVED******REMOVED******REMOVED*** Datenbank-Credentials
+### Datenbank-Credentials
 
 - **User:** `valeo_dev`
 - **Database:** `valeo_neuro_erp`
 - **Container:** `valeo-neuro-erp-postgres`
 
-***REMOVED******REMOVED*** 📋 Nächste Schritte
+## 📋 Nächste Schritte
 
-***REMOVED******REMOVED******REMOVED*** 1. Tests ausführen
+### 1. Tests ausführen
 
 ```powershell
-***REMOVED*** Frontend starten (falls nicht läuft)
+# Frontend starten (falls nicht läuft)
 cd packages\frontend-web
 npm run dev
 
-***REMOVED*** Tests ausführen
+# Tests ausführen
 npx playwright test tests\e2e\sales\customer-master-sales-fields.spec.ts --ui
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Manuelle Validierung
+### 2. Manuelle Validierung
 
 1. Navigiere zu: `http://localhost:3000/crm/kunden-stamm`
 2. Prüfe "konditionen" Tab → `preisgruppe` Feld
 3. Prüfe "steuern" Tab → `steuerkategorie` Feld
 4. Speichere Werte und prüfe Persistenz
 
-***REMOVED******REMOVED*** ✅ Status
+## ✅ Status
 
 - ✅ Migration ausgeführt
 - ✅ Spalten vorhanden
@@ -73,4 +73,5 @@ npx playwright test tests\e2e\sales\customer-master-sales-fields.spec.ts --ui
 
 **Erstellt:** 2025-01-24  
 **Status:** ✅ Migration erfolgreich abgeschlossen
+
 

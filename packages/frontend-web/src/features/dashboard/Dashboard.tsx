@@ -1,4 +1,4 @@
-﻿import type { ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import {
@@ -160,7 +160,7 @@ export default function Dashboard(): ReactElement {
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-sm text-slate-500">Valero NeuroERP · Echtzeit Kennzahlen</p>
+          <p className="text-sm text-slate-500">Valero NeuroERP � Echtzeit Kennzahlen</p>
         </div>
         <p className="text-xs text-slate-400">Aktualisiert am {lastUpdatedLabel}</p>
       </div>
@@ -204,13 +204,13 @@ export default function Dashboard(): ReactElement {
             ) : trend.length > 0 ? (
               <ResponsiveContainer height={300} width="100%">
                 <LineChart data={trend}>
-                  <CartesianGrid stroke="***REMOVED***e2e8f0" strokeDasharray="3 3" />
+                  <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
                   <XAxis
                     dataKey="date"
-                    stroke="***REMOVED***94a3b8"
+                    stroke="#94a3b8"
                     tickFormatter={(value) => dateFormatter.format(new Date(value))}
                   />
-                  <YAxis stroke="***REMOVED***94a3b8" />
+                  <YAxis stroke="#94a3b8" />
                   <Tooltip
                     labelFormatter={(value) => dateFormatter.format(new Date(value))}
                     formatter={(value: number, name: string) => [
@@ -218,8 +218,8 @@ export default function Dashboard(): ReactElement {
                       name === 'contract_long_tons' ? 'Long' : 'Short',
                     ]}
                   />
-                  <Line type="monotone" dataKey="contract_long_tons" stroke="***REMOVED***2563eb" strokeWidth={2} dot={false} name="Long" />
-                  <Line type="monotone" dataKey="contract_short_tons" stroke="***REMOVED***f97316" strokeWidth={2} dot={false} name="Short" />
+                  <Line type="monotone" dataKey="contract_long_tons" stroke="#2563eb" strokeWidth={2} dot={false} name="Long" />
+                  <Line type="monotone" dataKey="contract_short_tons" stroke="#f97316" strokeWidth={2} dot={false} name="Short" />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -249,18 +249,18 @@ export default function Dashboard(): ReactElement {
             ) : trend.length > 0 ? (
               <ResponsiveContainer height={300} width="100%">
                 <BarChart data={trend}>
-                  <CartesianGrid stroke="***REMOVED***e2e8f0" strokeDasharray="3 3" />
+                  <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
                   <XAxis
                     dataKey="date"
-                    stroke="***REMOVED***94a3b8"
+                    stroke="#94a3b8"
                     tickFormatter={(value) => dateFormatter.format(new Date(value))}
                   />
-                  <YAxis stroke="***REMOVED***94a3b8" />
+                  <YAxis stroke="#94a3b8" />
                   <Tooltip
                     labelFormatter={(value) => dateFormatter.format(new Date(value))}
                     formatter={(value: number) => [`${tonsFormatter.format(value)} t`, 'Netto']}
                   />
-                  <Bar dataKey="contract_long_tons" fill="***REMOVED***2563eb" radius={[BAR_CORNER_RADIUS, BAR_CORNER_RADIUS, 0, 0]} name="Netto" />
+                  <Bar dataKey="contract_long_tons" fill="#2563eb" radius={[BAR_CORNER_RADIUS, BAR_CORNER_RADIUS, 0, 0]} name="Netto" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -275,6 +275,7 @@ export default function Dashboard(): ReactElement {
     </div>
   )
 }
+
 
 
 

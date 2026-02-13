@@ -1,11 +1,11 @@
-***REMOVED*** ===================================================
-***REMOVED*** Frontend-Umgebung Visualisierung
-***REMOVED*** ===================================================
-***REMOVED*** Dieses Skript erstellt eine visuelle Darstellung der
-***REMOVED*** Frontend-Entwicklungsumgebung und zeigt Statusberichte
-***REMOVED*** ===================================================
+# ===================================================
+# Frontend-Umgebung Visualisierung
+# ===================================================
+# Dieses Skript erstellt eine visuelle Darstellung der
+# Frontend-Entwicklungsumgebung und zeigt Statusberichte
+# ===================================================
 
-***REMOVED*** Farbige Ausgabe-Funktionen für bessere Lesbarkeit
+# Farbige Ausgabe-Funktionen für bessere Lesbarkeit
 function Write-ColorOutput {
     param (
         [string]$Text,
@@ -34,21 +34,21 @@ function Write-Info {
     Write-ColorOutput $Text "Cyan"
 }
 
-***REMOVED*** Definiere Pfade
+# Definiere Pfade
 $rootDir = Join-Path $PSScriptRoot ".."
 $frontendDir = Join-Path $rootDir "frontend"
 $packageJsonPath = Join-Path $frontendDir "package.json"
 $viteConfigPath = Join-Path $frontendDir "vite.config.js"
 $rootPackageJsonPath = Join-Path $rootDir "package.json"
 
-***REMOVED*** Banner ausgeben
+# Banner ausgeben
 Write-Host ""
 Write-Host " ======================================================" -ForegroundColor Cyan
 Write-Host "  Frontend-Umgebung Visualisierung - Folkerts Landhandel ERP" -ForegroundColor Cyan
 Write-Host " ======================================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Prüfe Verzeichnisstruktur
+# Prüfe Verzeichnisstruktur
 $directories = @(
     "frontend",
     "frontend\src",
@@ -72,7 +72,7 @@ Write-Host "    +-- cd_frontend.ps1" -ForegroundColor $(if (Test-Path (Join-Path
 Write-Host "+-- package.json (Root)" -ForegroundColor $(if (Test-Path $rootPackageJsonPath) { "Green" } else { "Yellow" })
 Write-Host ""
 
-***REMOVED*** Anzeige der Abhängigkeiten (wenn package.json vorhanden)
+# Anzeige der Abhängigkeiten (wenn package.json vorhanden)
 if (Test-Path $packageJsonPath) {
     Write-Info "Frontend-Abhängigkeiten:"
     Write-Host ""
@@ -97,7 +97,7 @@ if (Test-Path $packageJsonPath) {
                 Write-Host "  $depName" -ForegroundColor $color -NoNewline
                 Write-Host ": $depVersion" -ForegroundColor "Gray"
                 
-                ***REMOVED*** Begrenze die Anzeige auf maximal 10 Abhängigkeiten
+                # Begrenze die Anzeige auf maximal 10 Abhängigkeiten
                 if ($depCount -ge 10) {
                     $remainingCount = $packageJson.dependencies.PSObject.Properties.Count - 10
                     if ($remainingCount -gt 0) {
@@ -114,7 +114,7 @@ if (Test-Path $packageJsonPath) {
     }
 }
 
-***REMOVED*** Status der Frontend-Umgebung
+# Status der Frontend-Umgebung
 Write-Host ""
 Write-Info "Frontend-Umgebungsstatus:"
 
@@ -135,7 +135,7 @@ foreach ($key in $status.Keys) {
     Write-Host ": $($status[$key])" -ForegroundColor $color
 }
 
-***REMOVED*** JSX-Konfigurationsstatus
+# JSX-Konfigurationsstatus
 Write-Host ""
 Write-Info "JSX-Konfigurationsstatus:"
 
@@ -158,7 +158,7 @@ if (Test-Path $viteConfigPath) {
     Write-Error "  JSX-Konfiguration: vite.config.js fehlt"
 }
 
-***REMOVED*** Port-Status
+# Port-Status
 Write-Host ""
 Write-Info "Port-Status für Frontend-Entwicklung:"
 
@@ -181,7 +181,7 @@ foreach ($port in $standardPorts) {
                     Write-Host "    Verwendet von: $($process.ProcessName) (PID: $($process.Id))" -ForegroundColor "Gray"
                 }
             } catch {
-                ***REMOVED*** Ignoriere Fehler bei der Prozessabfrage
+                # Ignoriere Fehler bei der Prozessabfrage
             }
         }
     } catch {
@@ -189,7 +189,7 @@ foreach ($port in $standardPorts) {
     }
 }
 
-***REMOVED*** Empfehlungen
+# Empfehlungen
 Write-Host ""
 Write-Info "Empfehlungen für die Frontend-Entwicklung:"
 
@@ -222,7 +222,7 @@ Write-Host "  6. Verwenden Sie das Start-Frontend-Skript für den Entwicklungsse
 Write-Host "     ./scripts/start_frontend.ps1" -ForegroundColor "White"
 Write-Host ""
 
-***REMOVED*** Abschluss
+# Abschluss
 Write-Host " ======================================================" -ForegroundColor Cyan
 Write-Host "  Frontend-Umgebung Visualisierung - Abgeschlossen" -ForegroundColor Cyan
 Write-Host " ======================================================" -ForegroundColor Cyan

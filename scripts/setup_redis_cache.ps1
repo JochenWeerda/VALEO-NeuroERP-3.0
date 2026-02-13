@@ -1,7 +1,7 @@
-***REMOVED*** Redis-Setup für erweiterten Cache-Manager
-***REMOVED*** Dieses Skript prüft, ob Redis installiert ist, installiert es bei Bedarf und konfiguriert es für den Cache-Manager
+# Redis-Setup für erweiterten Cache-Manager
+# Dieses Skript prüft, ob Redis installiert ist, installiert es bei Bedarf und konfiguriert es für den Cache-Manager
 
-***REMOVED*** Parameter
+# Parameter
 param (
     [switch]$Install = $false,
     [switch]$ConfigureOnly = $false,
@@ -9,20 +9,20 @@ param (
     [string]$RedisHost = "localhost"
 )
 
-***REMOVED*** Konstanten
+# Konstanten
 $REDIS_URL = "redis://${RedisHost}:${RedisPort}/0"
 $REDIS_WINDOWS_URL = "https://github.com/tporadowski/redis/releases/download/v5.0.14.1/Redis-x64-5.0.14.1.zip"
 $REDIS_DOWNLOAD_PATH = "$env:TEMP\redis.zip"
 $REDIS_EXTRACT_PATH = "$env:ProgramFiles\Redis"
 $REDIS_CONFIG_PATH = "$env:ProgramFiles\Redis\redis.windows.conf"
 
-***REMOVED*** Farbdefinitionen für die Ausgabe
+# Farbdefinitionen für die Ausgabe
 $GREEN = [ConsoleColor]::Green
 $YELLOW = [ConsoleColor]::Yellow
 $RED = [ConsoleColor]::Red
 $CYAN = [ConsoleColor]::Cyan
 
-***REMOVED*** Funktion zum Prüfen, ob Redis installiert ist
+# Funktion zum Prüfen, ob Redis installiert ist
 function Test-RedisInstalled {
     try {
         $redisCliPath = "$env:ProgramFiles\Redis\redis-cli.exe"
@@ -39,7 +39,7 @@ function Test-RedisInstalled {
     }
 }
 
-***REMOVED*** Funktion zum Prüfen, ob Redis läuft
+# Funktion zum Prüfen, ob Redis läuft
 function Test-RedisRunning {
     param (
         [string]$HostName = $RedisHost,
@@ -47,7 +47,7 @@ function Test-RedisRunning {
     )
 
     try {
-        ***REMOVED*** TCP-Verbindung zum Redis-Port prüfen
+        # TCP-Verbindung zum Redis-Port prüfen
         $tcpClient = New-Object System.Net.Sockets.TcpClient
         $connectResult = $tcpClient.BeginConnect($HostName, [int]$Port, $null, $null)
         $connectSuccess = $connectResult.AsyncWaitHandle.WaitOne(1000, $false)
@@ -68,10 +68,10 @@ function Test-RedisRunning {
     }
 }
 
-***REMOVED*** Funktion zum Installieren von Redis unter Windows
+# Funktion zum Installieren von Redis unter Windows
 function Install-Redis {
     try {
-        ***REMOVED*** Prüfen, ob Redis bereits installiert ist
+        # Prüfen, ob Redis bereits installiert ist
         if (Test-RedisInstalled) {
             Write-Host "Redis ist bereits installiert." -ForegroundColor $GREEN
             return $true
@@ -79,41 +79,41 @@ function Install-Redis {
 
         Write-Host "Starte Redis-Installation..." -ForegroundColor $CYAN
 
-        ***REMOVED*** Redis herunterladen
+        # Redis herunterladen
         Write-Host "Lade Redis herunter von $REDIS_WINDOWS_URL..." -ForegroundColor $CYAN
         Invoke-WebRequest -Uri $REDIS_WINDOWS_URL -OutFile $REDIS_DOWNLOAD_PATH
 
-        ***REMOVED*** Prüfen, ob Download erfolgreich war
+        # Prüfen, ob Download erfolgreich war
         if (-not (Test-Path $REDIS_DOWNLOAD_PATH)) {
             Write-Host "Fehler beim Herunterladen von Redis." -ForegroundColor $RED
             return $false
         }
 
-        ***REMOVED*** Zielverzeichnis erstellen, falls es nicht existiert
+        # Zielverzeichnis erstellen, falls es nicht existiert
         if (-not (Test-Path $REDIS_EXTRACT_PATH)) {
             New-Item -Path $REDIS_EXTRACT_PATH -ItemType Directory -Force | Out-Null
         }
 
-        ***REMOVED*** Redis entpacken
+        # Redis entpacken
         Write-Host "Entpacke Redis nach $REDIS_EXTRACT_PATH..." -ForegroundColor $CYAN
         Expand-Archive -Path $REDIS_DOWNLOAD_PATH -DestinationPath $REDIS_EXTRACT_PATH -Force
 
-        ***REMOVED*** Prüfen, ob Entpacken erfolgreich war
+        # Prüfen, ob Entpacken erfolgreich war
         if (-not (Test-Path "$REDIS_EXTRACT_PATH\redis-server.exe")) {
             Write-Host "Fehler beim Entpacken von Redis." -ForegroundColor $RED
             return $false
         }
 
-        ***REMOVED*** Redis als Windows-Dienst einrichten
+        # Redis als Windows-Dienst einrichten
         Write-Host "Richte Redis als Windows-Dienst ein..." -ForegroundColor $CYAN
         $redisSvcPath = "$REDIS_EXTRACT_PATH\redis-server.exe"
         Start-Process -FilePath $redisSvcPath -ArgumentList "--service-install $REDIS_CONFIG_PATH" -Wait -NoNewWindow
 
-        ***REMOVED*** Redis-Dienst starten
+        # Redis-Dienst starten
         Write-Host "Starte Redis-Dienst..." -ForegroundColor $CYAN
         Start-Process -FilePath $redisSvcPath -ArgumentList "--service-start" -Wait -NoNewWindow
 
-        ***REMOVED*** Temporäre Dateien aufräumen
+        # Temporäre Dateien aufräumen
         if (Test-Path $REDIS_DOWNLOAD_PATH) {
             Remove-Item -Path $REDIS_DOWNLOAD_PATH -Force
         }
@@ -126,7 +126,7 @@ function Install-Redis {
     }
 }
 
-***REMOVED*** Funktion zum Konfigurieren des Python-Redis-Pakets
+# Funktion zum Konfigurieren des Python-Redis-Pakets
 function Configure-PythonRedis {
     try {
         Write-Host "Prüfe, ob das Python-Redis-Paket installiert ist..." -ForegroundColor $CYAN
@@ -151,7 +151,7 @@ function Configure-PythonRedis {
     }
 }
 
-***REMOVED*** Funktion zum Aktualisieren der Cache-Konfiguration im Projekt
+# Funktion zum Aktualisieren der Cache-Konfiguration im Projekt
 function Update-CacheConfig {
     try {
         $enhancedCacheManagerPath = Join-Path (Get-Location) "backend\enhanced_cache_manager.py"
@@ -163,11 +163,11 @@ function Update-CacheConfig {
         
         Write-Host "Aktualisiere Cache-Konfiguration in $enhancedCacheManagerPath..." -ForegroundColor $CYAN
         
-        ***REMOVED*** Dateiinhalt lesen
+        # Dateiinhalt lesen
         $content = Get-Content -Path $enhancedCacheManagerPath -Raw
         
-        ***REMOVED*** Aktive Cache-Instanz mit Redis konfigurieren
-        $redisConfigLine = "***REMOVED*** redis_cache = EnhancedCacheManager(backend=`"redis`", redis_url=`"redis://localhost:6379/0`")"
+        # Aktive Cache-Instanz mit Redis konfigurieren
+        $redisConfigLine = "# redis_cache = EnhancedCacheManager(backend=`"redis`", redis_url=`"redis://localhost:6379/0`")"
         $newRedisConfigLine = "redis_cache = EnhancedCacheManager(backend=`"redis`", redis_url=`"$REDIS_URL`")"
         
         if ($content -match [regex]::Escape($redisConfigLine)) {
@@ -185,7 +185,7 @@ function Update-CacheConfig {
     }
 }
 
-***REMOVED*** Funktion zum Testen der Redis-Verbindung mit Python
+# Funktion zum Testen der Redis-Verbindung mit Python
 function Test-RedisPython {
     try {
         $testCode = @"
@@ -227,7 +227,7 @@ except Exception as e:
     }
 }
 
-***REMOVED*** Funktion zum Erstellen einer Beispiel-Verwendung
+# Funktion zum Erstellen einer Beispiel-Verwendung
 function Create-Example {
     try {
         $exampleFile = Join-Path (Get-Location) "backend\examples\cache_example.py"
@@ -246,12 +246,12 @@ import asyncio
 import time
 from enhanced_cache_manager import cache, redis_cache
 
-***REMOVED*** Cache-Instanz für das Beispiel auswählen
-***REMOVED*** Kommentare ändern, um zwischen Memory und Redis zu wechseln
-active_cache = cache  ***REMOVED*** Memory-Cache
-***REMOVED*** active_cache = redis_cache  ***REMOVED*** Redis-Cache
+# Cache-Instanz für das Beispiel auswählen
+# Kommentare ändern, um zwischen Memory und Redis zu wechseln
+active_cache = cache  # Memory-Cache
+# active_cache = redis_cache  # Redis-Cache
 
-***REMOVED*** Beispielfunktion mit Cache-Dekorator
+# Beispielfunktion mit Cache-Dekorator
 @active_cache.cached(ttl=60, tags=["example", "articles"])
 async def get_articles(category=None, limit=10):
     """
@@ -260,10 +260,10 @@ async def get_articles(category=None, limit=10):
     """
     print("Lade Artikel für Kategorie '{}' (Limit: {})...".format(category, limit))
     
-    ***REMOVED*** Simuliere langsame Datenbankabfrage
+    # Simuliere langsame Datenbankabfrage
     await asyncio.sleep(2)
     
-    ***REMOVED*** Dummy-Daten
+    # Dummy-Daten
     articles = [
         {"id": i, "title": "Artikel {}".format(i), "category": category or "allgemein"}
         for i in range(1, limit + 1)
@@ -272,47 +272,47 @@ async def get_articles(category=None, limit=10):
     print("{} Artikel geladen.".format(len(articles)))
     return articles
 
-***REMOVED*** Funktion zum Testen der Tag-Invalidierung
+# Funktion zum Testen der Tag-Invalidierung
 async def test_tag_invalidation():
     """
     Demonstriert die Verwendung von Tag-Invalidierung
     """
-    ***REMOVED*** Ersten Aufruf ausführen (wird aus der Datenbank geladen)
+    # Ersten Aufruf ausführen (wird aus der Datenbank geladen)
     articles1 = await get_articles(category="technik", limit=5)
     print("Erstes Ergebnis: {} Artikel".format(len(articles1)))
     
-    ***REMOVED*** Zweiten Aufruf ausführen (sollte aus dem Cache kommen)
+    # Zweiten Aufruf ausführen (sollte aus dem Cache kommen)
     start_time = time.time()
     articles2 = await get_articles(category="technik", limit=5)
     elapsed = time.time() - start_time
     print("Zweites Ergebnis: {} Artikel, Dauer: {:.4f}s (sollte schnell sein)".format(len(articles2), elapsed))
     
-    ***REMOVED*** Tag invalidieren
+    # Tag invalidieren
     print("Invalidiere Tag 'articles'...")
     invalidated = active_cache.invalidate_tag("articles")
     print("{} Cache-Einträge invalidiert".format(invalidated))
     
-    ***REMOVED*** Dritten Aufruf ausführen (sollte wieder aus der Datenbank kommen)
+    # Dritten Aufruf ausführen (sollte wieder aus der Datenbank kommen)
     start_time = time.time()
     articles3 = await get_articles(category="technik", limit=5)
     elapsed = time.time() - start_time
     print("Drittes Ergebnis: {} Artikel, Dauer: {:.4f}s (sollte langsam sein)".format(len(articles3), elapsed))
     
-    ***REMOVED*** Cache-Statistiken anzeigen
+    # Cache-Statistiken anzeigen
     stats = active_cache.get_stats()
     print("Cache-Statistiken: {}".format(stats))
 
-***REMOVED*** Hauptfunktion
+# Hauptfunktion
 async def main():
     print("=== Erweiterter Cache-Manager - Beispiel ===")
     backend_type = 'Redis-Cache' if active_cache._backend == 'redis' else 'Memory-Cache'
     print("Verwende {}".format(backend_type))
     
-    ***REMOVED*** Beispiel für normale Cache-Verwendung
+    # Beispiel für normale Cache-Verwendung
     print("\n--- Beispiel 1: Grundlegende Cache-Verwendung ---")
     await test_basic_caching()
     
-    ***REMOVED*** Beispiel für Tag-Invalidierung
+    # Beispiel für Tag-Invalidierung
     print("\n--- Beispiel 2: Tag-Invalidierung ---")
     await test_tag_invalidation()
 
@@ -320,20 +320,20 @@ async def test_basic_caching():
     """
     Demonstriert die grundlegende Cache-Verwendung
     """
-    ***REMOVED*** Ersten Aufruf ausführen (wird aus der Datenbank geladen)
+    # Ersten Aufruf ausführen (wird aus der Datenbank geladen)
     start_time = time.time()
     result1 = await get_articles(category="news", limit=3)
     elapsed1 = time.time() - start_time
     print("Erster Aufruf: {} Artikel, Dauer: {:.4f}s".format(len(result1), elapsed1))
     
-    ***REMOVED*** Zweiten Aufruf mit denselben Parametern ausführen (sollte aus dem Cache kommen)
+    # Zweiten Aufruf mit denselben Parametern ausführen (sollte aus dem Cache kommen)
     start_time = time.time()
     result2 = await get_articles(category="news", limit=3)
     elapsed2 = time.time() - start_time
     print("Zweiter Aufruf: {} Artikel, Dauer: {:.4f}s".format(len(result2), elapsed2))
     print("Cache-Beschleunigung: {:.1f}x schneller".format(elapsed1 / elapsed2))
     
-    ***REMOVED*** Aufruf mit anderen Parametern (sollte aus der Datenbank kommen)
+    # Aufruf mit anderen Parametern (sollte aus der Datenbank kommen)
     start_time = time.time()
     result3 = await get_articles(category="news", limit=5)
     elapsed3 = time.time() - start_time
@@ -352,7 +352,7 @@ if __name__ == "__main__":
     }
 }
 
-***REMOVED*** Hauptfunktion
+# Hauptfunktion
 function Main {
     Write-Host "=== Redis-Setup für den erweiterten Cache-Manager ===" -ForegroundColor $CYAN
     Write-Host "Host: $RedisHost, Port: $RedisPort" -ForegroundColor $CYAN
@@ -378,7 +378,7 @@ function Main {
         return
     }
     
-    ***REMOVED*** Python-Redis-Paket konfigurieren
+    # Python-Redis-Paket konfigurieren
     $pythonRedisConfigured = Configure-PythonRedis
     
     if (-not $pythonRedisConfigured) {
@@ -386,7 +386,7 @@ function Main {
         return
     }
     
-    ***REMOVED*** Cache-Konfiguration aktualisieren
+    # Cache-Konfiguration aktualisieren
     $cacheConfigUpdated = Update-CacheConfig
     
     if (-not $cacheConfigUpdated) {
@@ -394,7 +394,7 @@ function Main {
         return
     }
     
-    ***REMOVED*** Redis-Verbindung mit Python testen
+    # Redis-Verbindung mit Python testen
     if (-not $ConfigureOnly) {
         $redisPythonTest = Test-RedisPython
         
@@ -404,7 +404,7 @@ function Main {
         }
     }
     
-    ***REMOVED*** Beispiel erstellen
+    # Beispiel erstellen
     Create-Example
     
     Write-Host ""
@@ -415,5 +415,5 @@ function Main {
     Write-Host "python backend\examples\cache_example.py" -ForegroundColor $CYAN
 }
 
-***REMOVED*** Skript ausführen
+# Skript ausführen
 Main 

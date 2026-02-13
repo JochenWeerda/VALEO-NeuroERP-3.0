@@ -1,30 +1,22 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { FileDown, Plus, Search, Users } from 'lucide-react'
-
-type Mitarbeiter = {
-  id: string
-  name: string
-  abteilung: string
-  position: string
-  eintrittsdatum: string
-  status: 'aktiv' | 'urlaub' | 'krank'
-}
-
-const mockMitarbeiter: Mitarbeiter[] = [
-  { id: '1', name: 'Max Schmidt', abteilung: 'Lager', position: 'Lagerleiter', eintrittsdatum: '2018-03-15', status: 'aktiv' },
-  { id: '2', name: 'Anna Müller', abteilung: 'Vertrieb', position: 'Verkaufsleiter', eintrittsdatum: '2019-08-01', status: 'aktiv' },
-  { id: '3', name: 'Tom Weber', abteilung: 'Annahme', position: 'Schichtleiter', eintrittsdatum: '2020-01-10', status: 'urlaub' },
-]
+import { useMitarbeiter, type Mitarbeiter } from '@/lib/api/personal'
 
 export default function MitarbeiterListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: mitarbeiter, isLoading } = useMitarbeiter(
+    searchTerm ? { search: searchTerm } : undefined
+  )
+
+  const list = useMemo(() => mitarbeiter ?? [], [mitarbeiter])
 
   const columns = [
     {
@@ -54,8 +46,20 @@ export default function MitarbeiterListePage(): JSX.Element {
     },
   ]
 
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-3 md:p-6">
+        <Skeleton className="h-10 w-48" />
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24" />)}
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Mitarbeiter</h1>
@@ -75,7 +79,7 @@ export default function MitarbeiterListePage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockMitarbeiter.length}</span>
+              <span className="text-2xl font-bold">{list.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -85,7 +89,7 @@ export default function MitarbeiterListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Aktiv</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockMitarbeiter.filter((m) => m.status === 'aktiv').length}</span>
+            <span className="text-2xl font-bold text-green-600">{list.filter((m) => m.status === 'aktiv').length}</span>
           </CardContent>
         </Card>
 
@@ -94,7 +98,7 @@ export default function MitarbeiterListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Urlaub</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockMitarbeiter.filter((m) => m.status === 'urlaub').length}</span>
+            <span className="text-2xl font-bold">{list.filter((m) => m.status === 'urlaub').length}</span>
           </CardContent>
         </Card>
 
@@ -103,7 +107,7 @@ export default function MitarbeiterListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Krank</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{mockMitarbeiter.filter((m) => m.status === 'krank').length}</span>
+            <span className="text-2xl font-bold text-red-600">{list.filter((m) => m.status === 'krank').length}</span>
           </CardContent>
         </Card>
       </div>
@@ -128,7 +132,7 @@ export default function MitarbeiterListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockMitarbeiter} columns={columns} />
+          <DataTable data={list} columns={columns} />
         </CardContent>
       </Card>
     </div>

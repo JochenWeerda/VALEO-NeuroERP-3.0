@@ -28,19 +28,19 @@ async def erase_user_data(
     ⚠️ Requires admin scope: gdpr:erase
     """
     try:
-        ***REMOVED*** Anonymize user in audit trails
+        # Anonymize user in audit trails
         await db.execute(
             text("UPDATE workflow_audit SET user = 'DELETED' WHERE user = :user_id"),
             {"user_id": user_id}
         )
         
-        ***REMOVED*** Anonymize user in archive
+        # Anonymize user in archive
         await db.execute(
             text("UPDATE archive_index SET user = 'DELETED' WHERE user = :user_id"),
             {"user_id": user_id}
         )
         
-        ***REMOVED*** Anonymize user in documents
+        # Anonymize user in documents
         await db.execute(
             text("UPDATE documents_header SET created_by = 'DELETED' WHERE created_by = :user_id"),
             {"user_id": user_id}
@@ -74,21 +74,21 @@ async def export_user_data(
     ⚠️ Requires scope: gdpr:export
     """
     try:
-        ***REMOVED*** Fetch user's audit trail
+        # Fetch user's audit trail
         result = await db.execute(
             text("SELECT * FROM workflow_audit WHERE user = :user_id"),
             {"user_id": user_id}
         )
         audit_entries = [dict(row._mapping) for row in result]
         
-        ***REMOVED*** Fetch user's documents
+        # Fetch user's documents
         result = await db.execute(
             text("SELECT * FROM documents_header WHERE created_by = :user_id"),
             {"user_id": user_id}
         )
         documents = [dict(row._mapping) for row in result]
         
-        ***REMOVED*** Fetch user's archive entries
+        # Fetch user's archive entries
         result = await db.execute(
             text("SELECT * FROM archive_index WHERE user = :user_id"),
             {"user_id": user_id}

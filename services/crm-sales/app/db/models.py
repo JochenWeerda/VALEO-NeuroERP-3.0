@@ -33,7 +33,7 @@ class OpportunityStage(str, Enum):
     CLOSED_LOST = "closed_lost"
 
 
-enum_values = lambda enum_cls: [member.value for member in enum_cls]  ***REMOVED*** noqa: E731
+enum_values = lambda enum_cls: [member.value for member in enum_cls]  # noqa: E731
 
 
 class Opportunity(Base):
@@ -41,13 +41,13 @@ class Opportunity(Base):
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    number: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)  ***REMOVED*** Opportunity number
+    number: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)  # Opportunity number
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
-    amount: Mapped[float | None] = mapped_column(Float)  ***REMOVED*** Deal value
-    currency: Mapped[str | None] = mapped_column(String(3), default="EUR")  ***REMOVED*** Currency code
+    amount: Mapped[float | None] = mapped_column(Float)  # Deal value
+    currency: Mapped[str | None] = mapped_column(String(3), default="EUR")  # Currency code
     probability: Mapped[float | None] = mapped_column(Float, default=0.0)
-    expected_revenue: Mapped[float | None] = mapped_column(Float)  ***REMOVED*** amount * probability
+    expected_revenue: Mapped[float | None] = mapped_column(Float)  # amount * probability
     expected_close_date: Mapped[datetime | None] = mapped_column(DateTime)
     actual_close_date: Mapped[datetime | None] = mapped_column(DateTime)
 
@@ -72,18 +72,18 @@ class Opportunity(Base):
     )
 
     lead_source: Mapped[str | None] = mapped_column(String(128))
-    source: Mapped[str | None] = mapped_column(String(128))  ***REMOVED*** Lead source (web, referral, etc.)
-    campaign_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)  ***REMOVED*** Marketing campaign
-    assigned_to: Mapped[str | None] = mapped_column(String(64))  ***REMOVED*** Owner/User ID
-    owner_id: Mapped[str | None] = mapped_column(String(64))  ***REMOVED*** Alias for assigned_to
+    source: Mapped[str | None] = mapped_column(String(128))  # Lead source (web, referral, etc.)
+    campaign_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)  # Marketing campaign
+    assigned_to: Mapped[str | None] = mapped_column(String(64))  # Owner/User ID
+    owner_id: Mapped[str | None] = mapped_column(String(64))  # Alias for assigned_to
     customer_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)
     contact_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)
-    notes: Mapped[str | None] = mapped_column(Text)  ***REMOVED*** Additional notes
+    notes: Mapped[str | None] = mapped_column(Text)  # Additional notes
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    created_by: Mapped[str | None] = mapped_column(String(64))  ***REMOVED*** User who created
-    updated_by: Mapped[str | None] = mapped_column(String(64))  ***REMOVED*** User who last updated
+    created_by: Mapped[str | None] = mapped_column(String(64))  # User who created
+    updated_by: Mapped[str | None] = mapped_column(String(64))  # User who last updated
 
     quotes: Mapped[list["Quote"]] = relationship(back_populates="opportunity", cascade="all, delete-orphan")
     history: Mapped[list["OpportunityHistory"]] = relationship(back_populates="opportunity", cascade="all, delete-orphan")
@@ -146,18 +146,18 @@ class SalesActivity(Base):
     customer_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)
     contact_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)
 
-    activity_type: Mapped[str] = mapped_column(String(32), nullable=False)  ***REMOVED*** call, meeting, email, demo, etc.
+    activity_type: Mapped[str] = mapped_column(String(32), nullable=False)  # call, meeting, email, demo, etc.
     subject: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
-    status: Mapped[str] = mapped_column(String(32), default="planned")  ***REMOVED*** planned, completed, cancelled
-    priority: Mapped[str] = mapped_column(String(16), default="medium")  ***REMOVED*** high, medium, low
+    status: Mapped[str] = mapped_column(String(32), default="planned")  # planned, completed, cancelled
+    priority: Mapped[str] = mapped_column(String(16), default="medium")  # high, medium, low
 
     scheduled_at: Mapped[datetime | None] = mapped_column(DateTime)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime)
     duration_minutes: Mapped[int | None] = mapped_column(Float)
 
     assigned_to: Mapped[str | None] = mapped_column(String(64))
-    outcome: Mapped[str | None] = mapped_column(Text)  ***REMOVED*** Result of the activity
+    outcome: Mapped[str | None] = mapped_column(Text)  # Result of the activity
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -171,13 +171,13 @@ class OpportunityStage(Base):
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     tenant_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    name: Mapped[str] = mapped_column(String(128), nullable=False)  ***REMOVED*** Stage name
-    stage_key: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)  ***REMOVED*** Key for enum mapping
-    order: Mapped[int] = mapped_column(Float, nullable=False, default=0)  ***REMOVED*** Display order
-    probability_default: Mapped[float | None] = mapped_column(Float)  ***REMOVED*** Default probability for this stage
-    required_fields: Mapped[str | None] = mapped_column(Text)  ***REMOVED*** JSON array of required field names
-    is_closed: Mapped[bool] = mapped_column(default=False)  ***REMOVED*** Is this a closed stage (won/lost)
-    is_won: Mapped[bool] = mapped_column(default=False)  ***REMOVED*** Is this a won stage
+    name: Mapped[str] = mapped_column(String(128), nullable=False)  # Stage name
+    stage_key: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)  # Key for enum mapping
+    order: Mapped[int] = mapped_column(Float, nullable=False, default=0)  # Display order
+    probability_default: Mapped[float | None] = mapped_column(Float)  # Default probability for this stage
+    required_fields: Mapped[str | None] = mapped_column(Text)  # JSON array of required field names
+    is_closed: Mapped[bool] = mapped_column(default=False)  # Is this a closed stage (won/lost)
+    is_won: Mapped[bool] = mapped_column(default=False)  # Is this a won stage
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -189,11 +189,11 @@ class OpportunityHistory(Base):
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     opportunity_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("crm_sales_opportunities.id"), nullable=False, index=True)
-    field_name: Mapped[str] = mapped_column(String(128), nullable=False)  ***REMOVED*** Field that changed
-    old_value: Mapped[str | None] = mapped_column(Text)  ***REMOVED*** Previous value (as string)
-    new_value: Mapped[str | None] = mapped_column(Text)  ***REMOVED*** New value (as string)
-    changed_by: Mapped[str] = mapped_column(String(64), nullable=False)  ***REMOVED*** User who made the change
+    field_name: Mapped[str] = mapped_column(String(128), nullable=False)  # Field that changed
+    old_value: Mapped[str | None] = mapped_column(Text)  # Previous value (as string)
+    new_value: Mapped[str | None] = mapped_column(Text)  # New value (as string)
+    changed_by: Mapped[str] = mapped_column(String(64), nullable=False)  # User who made the change
     changed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
-    change_reason: Mapped[str | None] = mapped_column(Text)  ***REMOVED*** Optional reason for change
+    change_reason: Mapped[str | None] = mapped_column(Text)  # Optional reason for change
 
     opportunity: Mapped[Opportunity] = relationship(back_populates="history")

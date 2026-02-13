@@ -1,4 +1,4 @@
-***REMOVED*** CRM Reuse / Refactor / Rewrite – Inventory & Related Modules
+# CRM Reuse / Refactor / Rewrite – Inventory & Related Modules
 
 | module_name                           | domain                 | responsibilities                                                                 | apis_exposed                                                           | events_published                                            | tech_debt_level | reuse_strategy | notes |
 |---------------------------------------|------------------------|----------------------------------------------------------------------------------|-------------------------------------------------------------------------|-------------------------------------------------------------|-----------------|----------------|-------|
@@ -13,7 +13,8 @@
 | `services/order` / Sales domain       | Sales                  | Orders, deliveries                                                               | REST `/api/v1/orders`                                                 | `order.created`, `delivery.shipped`                        | medium          | **reuse**      | CRM consumes events for timeline and analytics; add canonical customer reference mapping. |
 | `services/integration` (if any)       | Integration            | External sync jobs                                                               | batch APIs                                                             | minimal                                                     | high            | **rewrite**    | Replace ad-hoc scripts with `crm-sync` event-driven adapters. |
 
-***REMOVED******REMOVED*** Rationale
+## Rationale
 - Modules already extracted as microservices (Inventory, AI, Workflow) are **reused** with adapters to the CRM bounded context.
 - Monolithic or inconsistent CRM logic is **rewritten** inside the new services to gain clean domain boundaries.
 - Shared UI components are **refactored** into the new CRM route/layout rather than rebuilt from scratch.
+

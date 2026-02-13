@@ -141,7 +141,7 @@ export default function AnalyticsDashboard(): JSX.Element {
               <Line
                 type="monotone"
                 dataKey="sales"
-                stroke="***REMOVED***10B981"
+                stroke="#10B981"
                 strokeWidth={2}
               />
             </LineChart>
@@ -156,7 +156,7 @@ export default function AnalyticsDashboard(): JSX.Element {
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="inventory" fill="***REMOVED***047857" />
+              <Bar dataKey="inventory" fill="#047857" />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -213,3 +213,4 @@ export default function AnalyticsDashboard(): JSX.Element {
     </div>
   )
 } 
+

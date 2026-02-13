@@ -8,7 +8,7 @@ Create Date: 2025-10-09
 from alembic import op
 import sqlalchemy as sa
 
-***REMOVED*** revision identifiers
+# revision identifiers
 revision = '002'
 down_revision = '001'
 branch_labels = None
@@ -16,7 +16,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** workflow_status
+    # workflow_status
     op.create_table(
         'workflow_status',
         sa.Column('id', sa.String(length=36), nullable=False),
@@ -30,7 +30,7 @@ def upgrade() -> None:
     )
     op.create_index('ix_workflow_domain_number', 'workflow_status', ['domain', 'doc_number'])
 
-    ***REMOVED*** workflow_audit
+    # workflow_audit
     op.create_table(
         'workflow_audit',
         sa.Column('id', sa.String(length=36), nullable=False),
@@ -54,4 +54,5 @@ def downgrade() -> None:
     op.drop_table('workflow_audit')
     op.drop_index('ix_workflow_domain_number', table_name='workflow_status')
     op.drop_table('workflow_status')
+
 

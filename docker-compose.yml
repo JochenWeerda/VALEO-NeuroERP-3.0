@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  ***REMOVED*** PostgreSQL Database
+  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: valeo-neuro-erp-postgres
@@ -27,7 +27,7 @@ services:
       retries: 5
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
 
-  ***REMOVED*** Redis Cache
+  # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: valeo-neuro-erp-redis
@@ -46,7 +46,7 @@ services:
       retries: 5
     command: redis-server /etc/redis/redis.conf
 
-  ***REMOVED*** Keycloak Identity Provider
+  # Keycloak Identity Provider
   keycloak:
     image: quay.io/keycloak/keycloak:22.0
     container_name: valeo-neuro-erp-keycloak
@@ -55,7 +55,10 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin123!
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/valeo_neuro_erp
+      KC_DB_HOST: postgres
+      KC_DB_PORT: "5432"
+      KC_DB_NAME: valeo_neuro_erp
+      KC_DB_URL: jdbc:postgresql://${KC_DB_HOST}:${KC_DB_PORT}/${KC_DB_NAME}
       KC_DB_USERNAME: valeo_dev
       KC_DB_PASSWORD: valeo_dev_2024
       KC_HOSTNAME: localhost
@@ -77,8 +80,8 @@ services:
       start_period: 60s
     command: start-dev
 
-  ***REMOVED*** pgAdmin Database Management
-  ***REMOVED*** NATS Event Bus (shared)
+  # pgAdmin Database Management
+  # NATS Event Bus (shared)
   nats:
     image: nats:2.10-alpine
     container_name: valeo-neuro-erp-nats
@@ -115,7 +118,7 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
-  ***REMOVED*** Redis Commander (Web UI for Redis)
+  # Redis Commander (Web UI for Redis)
   redis-commander:
     image: rediscommander/redis-commander:latest
     container_name: valeo-neuro-erp-redis-commander
@@ -278,7 +281,7 @@ services:
     build:
       context: ./services/crm-core
       dockerfile: Dockerfile
-    ***REMOVED*** no container_name to preserve DNS service alias
+    # no container_name to preserve DNS service alias
     restart: unless-stopped
     environment:
       CRM_CORE_DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp
@@ -534,12 +537,12 @@ services:
       - ./services/ai/main.py:/app/main.py
       - ai_data:/app/data
 
-  ***REMOVED*** ===========================================
-  ***REMOVED*** DMS (Document Management System)
-  ***REMOVED*** Paperless-ngx als Slave-Backend
-  ***REMOVED*** ===========================================
+  # ===========================================
+  # DMS (Document Management System)
+  # Paperless-ngx als Slave-Backend
+  # ===========================================
   
-  ***REMOVED*** Redis für Paperless-ngx (separater Redis für DMS)
+  # Redis für Paperless-ngx (separater Redis für DMS)
   paperless-redis:
     image: redis:7-alpine
     container_name: valeo-neuro-erp-paperless-redis
@@ -554,7 +557,7 @@ services:
       timeout: 5s
       retries: 5
 
-  ***REMOVED*** PostgreSQL für Paperless-ngx (separater DB für DMS)
+  # PostgreSQL für Paperless-ngx (separater DB für DMS)
   paperless-db:
     image: postgres:15-alpine
     container_name: valeo-neuro-erp-paperless-db
@@ -573,7 +576,7 @@ services:
       timeout: 5s
       retries: 5
 
-  ***REMOVED*** Paperless-ngx DMS Backend
+  # Paperless-ngx DMS Backend
   paperless:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
     container_name: valeo-neuro-erp-paperless
@@ -584,33 +587,33 @@ services:
       paperless-redis:
         condition: service_healthy
     ports:
-      - "8001:8000"  ***REMOVED*** Paperless Web UI (Admin-Zugang)
+      - "8001:8000"  # Paperless Web UI (Admin-Zugang)
     environment:
-      ***REMOVED*** Database
+      # Database
       PAPERLESS_REDIS: redis://paperless-redis:6379
       PAPERLESS_DBHOST: paperless-db
       PAPERLESS_DBUSER: paperless
       PAPERLESS_DBPASS: ${PAPERLESS_DB_PASSWORD:-paperless_dev_2024}
       PAPERLESS_DBNAME: paperless
-      ***REMOVED*** Security
+      # Security
       PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY:-change-me-in-production-32-chars}
       PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER:-admin}
       PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD:-admin123!}
-      ***REMOVED*** Localization
+      # Localization
       PAPERLESS_TIME_ZONE: Europe/Berlin
       PAPERLESS_OCR_LANGUAGE: deu+eng
       PAPERLESS_DATE_ORDER: DMY
       PAPERLESS_FILENAME_FORMAT: "{created_year}/{correspondent}/{title}"
-      ***REMOVED*** URL Configuration
+      # URL Configuration
       PAPERLESS_URL: http://localhost:8001
-      ***REMOVED*** Performance
+      # Performance
       PAPERLESS_TASK_WORKERS: 2
       PAPERLESS_THREADS_PER_WORKER: 2
-      ***REMOVED*** Consumer Settings
+      # Consumer Settings
       PAPERLESS_CONSUMER_RECURSIVE: "true"
       PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
-      ***REMOVED*** API Token für DMS-Adapter (wird nach erstem Start generiert)
-      ***REMOVED*** PAPERLESS_AUTO_LOGIN_USERNAME: ""
+      # API Token für DMS-Adapter (wird nach erstem Start generiert)
+      # PAPERLESS_AUTO_LOGIN_USERNAME: ""
     networks:
       - valeo-network
     volumes:
@@ -625,7 +628,7 @@ services:
       retries: 5
       start_period: 60s
 
-  ***REMOVED*** DMS-Adapter Service (Brücke zwischen NeuroERP und Paperless)
+  # DMS-Adapter Service (Brücke zwischen NeuroERP und Paperless)
   dms-adapter:
     build:
       context: ./services/dms-adapter
@@ -640,20 +643,20 @@ services:
     ports:
       - "8002:8000"
     environment:
-      ***REMOVED*** Paperless Connection
+      # Paperless Connection
       PAPERLESS_URL: http://paperless:8000
       PAPERLESS_TOKEN: ${PAPERLESS_API_TOKEN:-}
       PAPERLESS_TIMEOUT: 30
-      ***REMOVED*** Database (für Document References)
+      # Database (für Document References)
       DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp
-      ***REMOVED*** Security
+      # Security
       JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-production}
-      ***REMOVED*** Tag Configuration
+      # Tag Configuration
       TAG_PREFIX_TENANT: TENANT
       TAG_PREFIX_OBJECT_TYPE: OBJ
       TAG_PREFIX_OBJECT_ID: OBJID
       TAG_PREFIX_DOCTYPE: DOCTYPE
-      ***REMOVED*** Debug
+      # Debug
       DEBUG: "true"
     networks:
       - valeo-network
@@ -681,7 +684,7 @@ volumes:
     driver: local
   bff_node_modules:
     driver: local
-  ***REMOVED*** Paperless-ngx DMS Volumes
+  # Paperless-ngx DMS Volumes
   paperless_redis_data:
     driver: local
   paperless_db_data:
@@ -701,3 +704,4 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/16
+

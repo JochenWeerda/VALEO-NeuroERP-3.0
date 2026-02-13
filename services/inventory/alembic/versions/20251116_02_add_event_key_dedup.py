@@ -9,7 +9,7 @@ from __future__ import annotations
 from alembic import op
 import sqlalchemy as sa
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision = "20251116_02"
 down_revision = "20251116_01"
 branch_labels = None
@@ -24,6 +24,5 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_index(op.f("ix_inventory_epcis_events_event_key"), table_name="inventory_epcis_events")
     op.drop_column("inventory_epcis_events", "event_key")
-*** End Patch***  ***REMOVED***-}
-'</json>```' ***!
+
 

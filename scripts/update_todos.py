@@ -26,7 +26,7 @@ def analyze_todo_priority(content: str) -> str:
     
     content_lower = content.lower()
     
-    ***REMOVED*** Prüfe auf explizite Prioritätsmarkierungen
+    # Prüfe auf explizite Prioritätsmarkierungen
     if any(f"priorität: {p}" in content_lower for p in ["hoch", "high"]):
         return "Hoch"
     if any(f"priorität: {p}" in content_lower for p in ["mittel", "medium"]):
@@ -34,7 +34,7 @@ def analyze_todo_priority(content: str) -> str:
     if any(f"priorität: {p}" in content_lower for p in ["niedrig", "low"]):
         return "Normal"
     
-    ***REMOVED*** Prüfe auf Prioritätsindikatoren
+    # Prüfe auf Prioritätsindikatoren
     if any(indicator in content_lower for indicator in high_priority_indicators):
         return "Hoch"
     if any(indicator in content_lower for indicator in medium_priority_indicators):
@@ -44,35 +44,35 @@ def analyze_todo_priority(content: str) -> str:
 
 def normalize_path(path: str) -> str:
     """Normalisiert einen Dateipfad für den Vergleich."""
-    ***REMOVED*** Entferne ./ und .\ am Anfang
+    # Entferne ./ und .\ am Anfang
     path = path.lstrip("./\\")
-    ***REMOVED*** Ersetze Backslashes durch Forward Slashes
+    # Ersetze Backslashes durch Forward Slashes
     path = path.replace("\\", "/")
-    ***REMOVED*** Entferne ***REMOVED***-Abschnitte
-    path = path.split("***REMOVED***")[0]
+    # Entferne #-Abschnitte
+    path = path.split("#")[0]
     return path.lower().strip()
 
 def is_duplicate_todo(todo: Dict[str, Any], todos: List[Dict[str, Any]]) -> bool:
     """Prüft, ob ein TODO bereits in der Liste existiert."""
-    ***REMOVED*** Normalisiere den Text für den Vergleich
+    # Normalisiere den Text für den Vergleich
     todo_text = todo["todo_line"].lower().strip()
     todo_source = normalize_path(todo["source"])
     
-    ***REMOVED*** Entferne häufige Präfixe und Markierungen
-    for prefix in ["todo:", "todo", "fixme:", "fixme", "xxx:", "xxx", "- [ ]", "-", "**", "***REMOVED***"]:
+    # Entferne häufige Präfixe und Markierungen
+    for prefix in ["todo:", "todo", "fixme:", "fixme", "xxx:", "xxx", "- [ ]", "-", "**", "#"]:
         todo_text = todo_text.replace(prefix, "").strip()
     
     for existing in todos:
         existing_text = existing["todo_line"].lower().strip()
         existing_source = normalize_path(existing["source"])
         
-        ***REMOVED*** Entferne die gleichen Präfixe
-        for prefix in ["todo:", "todo", "fixme:", "fixme", "xxx:", "xxx", "- [ ]", "-", "**", "***REMOVED***"]:
+        # Entferne die gleichen Präfixe
+        for prefix in ["todo:", "todo", "fixme:", "fixme", "xxx:", "xxx", "- [ ]", "-", "**", "#"]:
             existing_text = existing_text.replace(prefix, "").strip()
         
-        ***REMOVED*** Prüfe auf Textähnlichkeit
+        # Prüfe auf Textähnlichkeit
         if todo_text == existing_text:
-            ***REMOVED*** Wenn die Quelle die gleiche ist oder eine die andere enthält
+            # Wenn die Quelle die gleiche ist oder eine die andere enthält
             if (todo_source == existing_source or
                 todo_source in existing_source or
                 existing_source in todo_source):
@@ -85,31 +85,31 @@ def extract_todo_context(lines: List[str], todo_index: int, window: int = 5) -> 
     start = max(0, todo_index - window)
     end = min(len(lines), todo_index + window + 1)
     
-    ***REMOVED*** Extrahiere Kontext
+    # Extrahiere Kontext
     context_before = "\n".join(lines[start:todo_index]).strip()
     todo_line = lines[todo_index].strip()
     context_after = "\n".join(lines[todo_index + 1:end]).strip()
     
-    ***REMOVED*** Analysiere Titel
+    # Analysiere Titel
     title = todo_line
-    for prefix in ["TODO:", "ToDo:", "FIXME:", "XXX:", "- [ ]", "-", "**", "***REMOVED***"]:
+    for prefix in ["TODO:", "ToDo:", "FIXME:", "XXX:", "- [ ]", "-", "**", "#"]:
         if title.startswith(prefix):
             title = title[len(prefix):].strip()
     
-    ***REMOVED*** Wenn der Titel leer ist oder nur aus dem Marker besteht,
-    ***REMOVED*** versuche einen besseren Titel aus dem Kontext zu extrahieren
+    # Wenn der Titel leer ist oder nur aus dem Marker besteht,
+    # versuche einen besseren Titel aus dem Kontext zu extrahieren
     if not title or title.lower() in ["todo", "fixme", "xxx"]:
-        ***REMOVED*** Suche im nachfolgenden Kontext nach einem aussagekräftigen Titel
+        # Suche im nachfolgenden Kontext nach einem aussagekräftigen Titel
         next_lines = [l.strip() for l in lines[todo_index + 1:end]]
         for line in next_lines:
-            if line and not line.startswith(("***REMOVED***", "//", "/*", "*", "*/", "'''", '"""', "-", "**")):
+            if line and not line.startswith(("#", "//", "/*", "*", "*/", "'''", '"""', "-", "**")):
                 title = line
                 break
     
-    ***REMOVED*** Entferne Markdown-Formatierung aus dem Titel
-    title = title.strip("****REMOVED***- ")
+    # Entferne Markdown-Formatierung aus dem Titel
+    title = title.strip("*#- ")
     
-    ***REMOVED*** Stelle sicher, dass alle Strings UTF-8 kodiert sind
+    # Stelle sicher, dass alle Strings UTF-8 kodiert sind
     return {
         "title": ensure_utf8(title),
         "context_before": ensure_utf8(context_before),
@@ -122,7 +122,7 @@ def get_todos_from_docs(retriever: DocumentationRetriever) -> List[Dict[str, Any
     """Extrahiert TODOs aus der Dokumentation mit verbesserter Kontextanalyse."""
     todos = []
     
-    ***REMOVED*** Direkte Textsuche nach TODO-Markierungen
+    # Direkte Textsuche nach TODO-Markierungen
     search_terms = [
         "TODO", "ToDo", "To-Do", "FIXME", "XXX",
         "Implementierung ausstehend", "Noch zu implementieren",
@@ -131,22 +131,22 @@ def get_todos_from_docs(retriever: DocumentationRetriever) -> List[Dict[str, Any
         "Implementiere", "Erweitere", "Verbessere"
     ]
     
-    ***REMOVED*** Suche nach expliziten TODOs
+    # Suche nach expliziten TODOs
     for term in search_terms:
         results = retriever.text_search(term)
         for doc in results:
             content = ensure_utf8(doc.get("content", ""))
             sections = doc.get("sections", [])
             
-            ***REMOVED*** Suche in Hauptinhalt
+            # Suche in Hauptinhalt
             if content:
                 lines = content.split("\n")
                 for i, line in enumerate(lines):
                     if term.lower() in line.lower():
-                        ***REMOVED*** Extrahiere TODO-Kontext
+                        # Extrahiere TODO-Kontext
                         todo_context = extract_todo_context(lines, i)
                         
-                        ***REMOVED*** Erstelle ein eindeutiges TODO-Item
+                        # Erstelle ein eindeutiges TODO-Item
                         todo_item = {
                             "type": "explicit",
                             "title": todo_context["title"],
@@ -160,11 +160,11 @@ def get_todos_from_docs(retriever: DocumentationRetriever) -> List[Dict[str, Any
                             "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         }
                         
-                        ***REMOVED*** Prüfe auf Duplikate mit verbesserter Erkennung
+                        # Prüfe auf Duplikate mit verbesserter Erkennung
                         if not is_duplicate_todo(todo_item, todos):
                             todos.append(todo_item)
             
-            ***REMOVED*** Suche in Abschnitten mit gleichem Verfahren
+            # Suche in Abschnitten mit gleichem Verfahren
             for section in sections:
                 section_content = ensure_utf8(section.get("content", ""))
                 if section_content:
@@ -180,17 +180,17 @@ def get_todos_from_docs(retriever: DocumentationRetriever) -> List[Dict[str, Any
                                 "context_before": todo_context["context_before"],
                                 "todo_line": todo_context["todo_line"],
                                 "context_after": todo_context["context_after"],
-                                "source": ensure_utf8(f"{doc.get('file_path', doc.get('source', 'Unbekannt'))}***REMOVED***{section.get('title', '')}"),
+                                "source": ensure_utf8(f"{doc.get('file_path', doc.get('source', 'Unbekannt'))}#{section.get('title', '')}"),
                                 "status": "Offen",
                                 "priority": analyze_todo_priority(todo_context["full_context"]),
                                 "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             }
                             
-                            ***REMOVED*** Prüfe auf Duplikate mit verbesserter Erkennung
+                            # Prüfe auf Duplikate mit verbesserter Erkennung
                             if not is_duplicate_todo(todo_item, todos):
                                 todos.append(todo_item)
     
-    ***REMOVED*** Semantische Suche nach impliziten TODOs
+    # Semantische Suche nach impliziten TODOs
     semantic_queries = [
         "Aufgaben die noch implementiert werden müssen",
         "Geplante Erweiterungen und Verbesserungen",
@@ -204,7 +204,7 @@ def get_todos_from_docs(retriever: DocumentationRetriever) -> List[Dict[str, Any
         for doc in results:
             content = ensure_utf8(doc.get("content", ""))
             
-            ***REMOVED*** Prüfe auf relevante Schlüsselwörter
+            # Prüfe auf relevante Schlüsselwörter
             keywords = [
                 "implementier", "erweitern", "verbessern",
                 "hinzufügen", "entwickeln", "beheben",
@@ -213,7 +213,7 @@ def get_todos_from_docs(retriever: DocumentationRetriever) -> List[Dict[str, Any
             
             if content and any(keyword in content.lower() for keyword in keywords):
                 lines = content.split("\n")
-                ***REMOVED*** Suche nach Zeilen mit Keywords
+                # Suche nach Zeilen mit Keywords
                 for i, line in enumerate(lines):
                     if any(keyword in line.lower() for keyword in keywords):
                         todo_context = extract_todo_context(lines, i)
@@ -231,7 +231,7 @@ def get_todos_from_docs(retriever: DocumentationRetriever) -> List[Dict[str, Any
                             "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         }
                         
-                        ***REMOVED*** Prüfe auf Duplikate mit verbesserter Erkennung
+                        # Prüfe auf Duplikate mit verbesserter Erkennung
                         if not is_duplicate_todo(todo_item, todos):
                             todos.append(todo_item)
     
@@ -239,10 +239,10 @@ def get_todos_from_docs(retriever: DocumentationRetriever) -> List[Dict[str, Any
 
 def update_todo_file(todos: List[Dict[str, Any]]) -> None:
     """Aktualisiert die TODO.md Datei."""
-    content = "***REMOVED*** VALEO-NeuroERP Entwicklungs-TODOs\n\n"
+    content = "# VALEO-NeuroERP Entwicklungs-TODOs\n\n"
     content += f"Automatisch aktualisiert durch RAG-System am {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
     
-    ***REMOVED*** Gruppiere TODOs nach Typ und Priorität
+    # Gruppiere TODOs nach Typ und Priorität
     todo_groups = {
         "explicit": {"Hoch": [], "Normal": []},
         "implicit": {"Hoch": [], "Normal": []}
@@ -251,13 +251,13 @@ def update_todo_file(todos: List[Dict[str, Any]]) -> None:
     for todo in todos:
         todo_groups[todo["type"]][todo["priority"]].append(todo)
     
-    ***REMOVED*** Explizite TODOs
-    content += "***REMOVED******REMOVED*** Explizit markierte TODOs\n\n"
+    # Explizite TODOs
+    content += "## Explizit markierte TODOs\n\n"
     for priority in ["Hoch", "Normal"]:
         if todo_groups["explicit"][priority]:
-            content += f"***REMOVED******REMOVED******REMOVED*** {priority}e Priorität\n\n"
+            content += f"### {priority}e Priorität\n\n"
             for todo in todo_groups["explicit"][priority]:
-                content += f"***REMOVED******REMOVED******REMOVED******REMOVED*** {todo['title']}\n\n"
+                content += f"#### {todo['title']}\n\n"
                 content += f"**Status:** {todo['status']}\n"
                 content += f"**Quelle:** {todo['source']}\n"
                 content += f"**Aktualisiert:** {todo['updated_at']}\n\n"
@@ -267,13 +267,13 @@ def update_todo_file(todos: List[Dict[str, Any]]) -> None:
                 if todo.get("context_after"):
                     content += "**Kontext danach:**\n```\n" + todo["context_after"] + "\n```\n\n"
     
-    ***REMOVED*** Implizite TODOs
-    content += "***REMOVED******REMOVED*** Implizit erkannte TODOs\n\n"
+    # Implizite TODOs
+    content += "## Implizit erkannte TODOs\n\n"
     for priority in ["Hoch", "Normal"]:
         if todo_groups["implicit"][priority]:
-            content += f"***REMOVED******REMOVED******REMOVED*** {priority}e Priorität\n\n"
+            content += f"### {priority}e Priorität\n\n"
             for todo in todo_groups["implicit"][priority]:
-                content += f"***REMOVED******REMOVED******REMOVED******REMOVED*** {todo['title']}\n\n"
+                content += f"#### {todo['title']}\n\n"
                 content += f"**Status:** {todo['status']}\n"
                 content += f"**Quelle:** {todo['source']}\n"
                 content += f"**Aktualisiert:** {todo['updated_at']}\n\n"
@@ -283,12 +283,12 @@ def update_todo_file(todos: List[Dict[str, Any]]) -> None:
                 if todo.get("context_after"):
                     content += "**Kontext danach:**\n```\n" + todo["context_after"] + "\n```\n\n"
     
-    ***REMOVED*** Speichere die aktualisierte TODO-Liste mit expliziter UTF-8-Kodierung
+    # Speichere die aktualisierte TODO-Liste mit expliziter UTF-8-Kodierung
     with open("memory-bank/todo.md", "w", encoding="utf-8") as f:
         f.write(content)
 
 def main():
-    ***REMOVED*** Setze den OpenAI API-Schlüssel
+    # Setze den OpenAI API-Schlüssel
     with open("api_keys.local.json", "r") as f:
         import json
         api_keys = json.load(f)
@@ -297,7 +297,7 @@ def main():
     retriever = DocumentationRetriever()
     print("Starte TODO-Aktualisierung...")
     
-    ***REMOVED*** Extrahiere TODOs aus der Dokumentation
+    # Extrahiere TODOs aus der Dokumentation
     print("Extrahiere TODOs aus der Dokumentation...")
     todos = get_todos_from_docs(retriever)
     

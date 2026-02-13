@@ -1,10 +1,10 @@
-***REMOVED*** Daily Standup - Template
+# Daily Standup - Template
 
 **Datum:** YYYY-MM-DD  
 **Sprint:** Sprint X, Day Y  
 **Team:** [Team-Name]
 
-***REMOVED******REMOVED*** Teilnehmer
+## Teilnehmer
 
 - [Name 1]
 - [Name 2]
@@ -12,9 +12,9 @@
 
 ---
 
-***REMOVED******REMOVED*** Updates
+## Updates
 
-***REMOVED******REMOVED******REMOVED*** [Name 1]
+### [Name 1]
 
 **Was wurde gestern gemacht?**
 - Task 1.X.Y: [Status] - [Kurze Beschreibung]
@@ -32,7 +32,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** [Name 2]
+### [Name 2]
 
 **Was wurde gestern gemacht?**
 - Task 1.X.Y: [Status] - [Kurze Beschreibung]
@@ -48,7 +48,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** [Name 3]
+### [Name 3]
 
 **Was wurde gestern gemacht?**
 - Task 1.X.Y: [Status] - [Kurze Beschreibung]
@@ -64,14 +64,14 @@
 
 ---
 
-***REMOVED******REMOVED*** Action Items
+## Action Items
 
 - [ ] Action 1 - Owner: [Name] - Due: [Datum]
 - [ ] Action 2 - Owner: [Name] - Due: [Datum]
 
 ---
 
-***REMOVED******REMOVED*** Sprint-Status
+## Sprint-Status
 
 **Offene Tasks:** X / Y  
 **In Progress:** X  
@@ -84,4 +84,5 @@
 ---
 
 **Nächster Standup:** YYYY-MM-DD, 09:00 Uhr
+
 

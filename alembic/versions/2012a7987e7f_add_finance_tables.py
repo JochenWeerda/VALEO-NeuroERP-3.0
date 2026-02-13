@@ -11,7 +11,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = '2012a7987e7f'
 down_revision: Union[str, None] = 'fc82677c98b4'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -19,7 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Create offene_posten table
+    # Create offene_posten table
     op.create_table('offene_posten',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('tenant_id', sa.String(36), nullable=False),
@@ -43,7 +43,7 @@ def upgrade() -> None:
         sa.Index('ix_offene_posten_rechnungsnr', 'rechnungsnr')
     )
 
-    ***REMOVED*** Create buchungen table
+    # Create buchungen table
     op.create_table('buchungen',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('tenant_id', sa.String(36), nullable=False),
@@ -61,7 +61,7 @@ def upgrade() -> None:
         sa.Index('ix_buchungen_belegnr', 'belegnr')
     )
 
-    ***REMOVED*** Create konten table
+    # Create konten table
     op.create_table('konten',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('tenant_id', sa.String(36), nullable=False),
@@ -77,7 +77,7 @@ def upgrade() -> None:
         sa.Index('ix_konten_kontonummer', 'kontonummer', unique=True)
     )
 
-    ***REMOVED*** Create anlagen table
+    # Create anlagen table
     op.create_table('anlagen',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('tenant_id', sa.String(36), nullable=False),
@@ -98,7 +98,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    ***REMOVED*** Drop tables in reverse order (due to potential foreign keys)
+    # Drop tables in reverse order (due to potential foreign keys)
     op.drop_table('anlagen')
     op.drop_table('konten')
     op.drop_table('buchungen')

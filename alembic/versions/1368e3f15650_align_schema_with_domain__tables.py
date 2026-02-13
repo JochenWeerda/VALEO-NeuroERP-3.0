@@ -10,7 +10,7 @@ from typing import Sequence, Union
 from alembic import op
 from sqlalchemy import text
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = '1368e3f15650'
 down_revision: Union[str, None] = '001'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -18,7 +18,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Move policy_rules table into the domain_erp schema (only if it exists)
+    # Move policy_rules table into the domain_erp schema (only if it exists)
     bind = op.get_bind()
     result = bind.execute(text("""
         SELECT EXISTS (

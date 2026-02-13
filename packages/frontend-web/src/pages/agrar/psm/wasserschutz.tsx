@@ -6,18 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import { CheckCircle, MapPin, Shield, XCircle, Search } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-
-type WasserschutzZone = {
-  id: string
-  name: string
-  typ: 'Trinkwasserschutzgebiet' | 'Heilquellenschutzgebiet' | 'Oberflächenwasserschutz'
-  zone: 'Zone I' | 'Zone II' | 'Zone III' | 'Zone IIIa' | 'Zone IIIb'
-  koordinaten: { lat: number; lng: number }
-  radius: number // in Metern
-  restriktionsgrad: 'hoch' | 'mittel' | 'niedrig'
-}
+import { useWasserschutzZonen } from '@/lib/api/agrar'
 
 type PSMMittel = {
   id: string
@@ -41,26 +33,15 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
 
+  const { data: wasserschutzZonen, isLoading } = useWasserschutzZonen()
+
   const [schlagKoordinaten, setSchlagKoordinaten] = useState({ lat: 52.5200, lng: 13.4050 })
   const [schlagAdresse, setSchlagAdresse] = useState('')
   const [gewaesserEntfernung, setGewaesserEntfernung] = useState(0)
   const [gewaesserTyp, setGewaesserTyp] = useState('')
   const [ausgewaehltesPSM, setAusgewaehltesPSM] = useState<PSMMittel | null>(null)
   const [pruefErgebnis, setPruefErgebnis] = useState<PruefErgebnis | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-
-  // Mock data
-  const wasserschutzZonen: WasserschutzZone[] = [
-    {
-      id: '1',
-      name: 'Trinkwasserschutzgebiet Berlin',
-      typ: 'Trinkwasserschutzgebiet',
-      zone: 'Zone II',
-      koordinaten: { lat: 52.5200, lng: 13.4050 },
-      radius: 5000,
-      restriktionsgrad: 'hoch'
-    }
-  ]
+  const [isPruefLoading, setIsPruefLoading] = useState(false)
 
   const verfuegbarePSM: PSMMittel[] = [
     {
@@ -92,14 +73,15 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
     }
   ]
 
+  const zonen = wasserschutzZonen ?? []
+
   const pruefeWasserschutz = async () => {
     if (!ausgewaehltesPSM) return
 
-    setIsLoading(true)
+    setIsPruefLoading(true)
 
     try {
-      // Mock Wasserschutz-Prüfung
-      const inZone = wasserschutzZonen.some(zone => {
+      const inZone = zonen.some(zone => {
         const distance = calculateDistance(schlagKoordinaten, zone.koordinaten)
         return distance <= zone.radius
       })
@@ -137,13 +119,12 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
         variant: "destructive",
       })
     } finally {
-      setIsLoading(false)
+      setIsPruefLoading(false)
     }
   }
 
   const calculateDistance = (point1: { lat: number; lng: number }, point2: { lat: number; lng: number }) => {
-    // Simplified distance calculation in meters
-    const R = 6371000 // Earth's radius in meters
+    const R = 6371000
     const dLat = (point2.lat - point1.lat) * Math.PI / 180
     const dLng = (point2.lng - point1.lng) * Math.PI / 180
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -154,7 +135,6 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
   }
 
   const sucheAdresse = async () => {
-    // Mock geocoding
     if (schlagAdresse.includes('Berlin')) {
       setSchlagKoordinaten({ lat: 52.5200, lng: 13.4050 })
       toast({
@@ -170,8 +150,22 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
     }
   }
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="h-10 w-1/2" />
+        <Skeleton className="h-4 w-1/3" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+        <Skeleton className="h-64 w-full" />
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">PSM-Wasserschutz-Prüfung</h1>
@@ -263,7 +257,7 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {wasserschutzZonen.map((zone) => (
+            {zonen.map((zone) => (
               <div key={zone.id} className="flex items-center justify-between p-3 border rounded">
                 <div>
                   <div className="font-medium">{zone.name}</div>
@@ -324,7 +318,7 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
 
             <Button
               onClick={pruefeWasserschutz}
-              disabled={!ausgewaehltesPSM || isLoading}
+              disabled={!ausgewaehltesPSM || isPruefLoading}
               className="w-full"
             >
               Wasserschutz-Prüfung durchführen

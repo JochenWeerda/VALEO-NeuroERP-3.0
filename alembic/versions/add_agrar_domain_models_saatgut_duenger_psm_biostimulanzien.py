@@ -11,7 +11,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = 'add_agrar_mod'
 down_revision: Union[str, None] = 'add_inv_ent'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -19,12 +19,12 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Create domain_agrar schema
+    # Create domain_agrar schema
     op.execute("CREATE SCHEMA IF NOT EXISTS domain_agrar")
 
-    ***REMOVED*** Create Saatgut table
+    # Create Saatgut table
     op.create_table('agrar_saatgut',
-        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('artikelnummer', sa.String(length=50), nullable=False),
         sa.Column('name', sa.String(length=200), nullable=False),
         sa.Column('sorte', sa.String(length=100), nullable=False),
@@ -46,7 +46,7 @@ def upgrade() -> None:
         sa.Column('verfuegbar', sa.DECIMAL(precision=10, scale=2), nullable=True),
         sa.Column('lagerort', sa.String(length=100), nullable=True),
         sa.Column('ist_aktiv', sa.Boolean(), nullable=True),
-        sa.Column('tenant_id', sa.String(), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['tenant_id'], ['domain_shared.tenants.id'], ),
@@ -55,17 +55,17 @@ def upgrade() -> None:
         schema='domain_agrar'
     )
 
-    ***REMOVED*** Create SaatgutLizenz table
+    # Create SaatgutLizenz table
     op.create_table('agrar_saatgut_lizenzen',
-        sa.Column('id', sa.String(), nullable=False),
-        sa.Column('saatgut_id', sa.String(), nullable=False),
+        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('saatgut_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('typ', sa.String(length=50), nullable=False),
         sa.Column('saison', sa.String(length=9), nullable=False),
         sa.Column('gebuehr_pro_tonne', sa.DECIMAL(precision=8, scale=2), nullable=True),
         sa.Column('gesamt_gebuehr', sa.DECIMAL(precision=10, scale=2), nullable=True),
         sa.Column('bezahlt', sa.Boolean(), nullable=True),
         sa.Column('bezahlt_am', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('tenant_id', sa.String(), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.ForeignKeyConstraint(['saatgut_id'], ['domain_agrar.agrar_saatgut.id'], ),
         sa.ForeignKeyConstraint(['tenant_id'], ['domain_shared.tenants.id'], ),
@@ -73,9 +73,9 @@ def upgrade() -> None:
         schema='domain_agrar'
     )
 
-    ***REMOVED*** Create Duenger table
+    # Create Duenger table
     op.create_table('agrar_duenger',
-        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('artikelnummer', sa.String(length=50), nullable=False),
         sa.Column('name', sa.String(length=200), nullable=False),
         sa.Column('typ', sa.String(length=50), nullable=False),
@@ -100,7 +100,7 @@ def upgrade() -> None:
         sa.Column('waehrung', sa.String(length=3), nullable=True),
         sa.Column('lagerbestand', sa.DECIMAL(precision=10, scale=2), nullable=True),
         sa.Column('ist_aktiv', sa.Boolean(), nullable=True),
-        sa.Column('tenant_id', sa.String(), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['tenant_id'], ['domain_shared.tenants.id'], ),
@@ -109,9 +109,9 @@ def upgrade() -> None:
         schema='domain_agrar'
     )
 
-    ***REMOVED*** Create DuengerMischung table
+    # Create DuengerMischung table
     op.create_table('agrar_duenger_mischungen',
-        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('name', sa.String(length=200), nullable=False),
         sa.Column('beschreibung', sa.Text(), nullable=True),
         sa.Column('komponenten', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
@@ -122,8 +122,8 @@ def upgrade() -> None:
         sa.Column('ist_aktiv', sa.Boolean(), nullable=True),
         sa.Column('freigegeben', sa.Boolean(), nullable=True),
         sa.Column('freigegeben_am', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('freigegeben_durch', sa.String(), nullable=True),
-        sa.Column('tenant_id', sa.String(), nullable=False),
+        sa.Column('freigegeben_durch', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['tenant_id'], ['domain_shared.tenants.id'], ),
@@ -131,9 +131,9 @@ def upgrade() -> None:
         schema='domain_agrar'
     )
 
-    ***REMOVED*** Create PSM table
+    # Create PSM table
     op.create_table('agrar_psm',
-        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('artikelnummer', sa.String(length=50), nullable=False),
         sa.Column('name', sa.String(length=200), nullable=False),
         sa.Column('wirkstoff', sa.String(length=100), nullable=False),
@@ -158,7 +158,7 @@ def upgrade() -> None:
         sa.Column('waehrung', sa.String(length=3), nullable=True),
         sa.Column('lagerbestand', sa.DECIMAL(precision=10, scale=2), nullable=True),
         sa.Column('ist_aktiv', sa.Boolean(), nullable=True),
-        sa.Column('tenant_id', sa.String(), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['tenant_id'], ['domain_shared.tenants.id'], ),
@@ -167,10 +167,10 @@ def upgrade() -> None:
         schema='domain_agrar'
     )
 
-    ***REMOVED*** Create Sachkunde table
+    # Create Sachkunde table
     op.create_table('agrar_sachkunde',
-        sa.Column('id', sa.String(), nullable=False),
-        sa.Column('person_id', sa.String(), nullable=False),
+        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('person_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('sachkunde_typ', sa.String(length=50), nullable=False),
         sa.Column('zertifikat_nummer', sa.String(length=50), nullable=True),
         sa.Column('ausgestellt_am', sa.DateTime(timezone=True), nullable=False),
@@ -178,16 +178,16 @@ def upgrade() -> None:
         sa.Column('aussteller', sa.String(length=100), nullable=True),
         sa.Column('ist_gueltig', sa.Boolean(), nullable=True),
         sa.Column('erinnerung_versendet', sa.Boolean(), nullable=True),
-        sa.Column('tenant_id', sa.String(), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.ForeignKeyConstraint(['tenant_id'], ['domain_shared.tenants.id'], ),
         sa.PrimaryKeyConstraint('id'),
         schema='domain_agrar'
     )
 
-    ***REMOVED*** Create Biostimulanz table
+    # Create Biostimulanz table
     op.create_table('agrar_biostimulanzien',
-        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('artikelnummer', sa.String(length=50), nullable=False),
         sa.Column('name', sa.String(length=200), nullable=False),
         sa.Column('typ', sa.String(length=50), nullable=False),
@@ -202,7 +202,7 @@ def upgrade() -> None:
         sa.Column('waehrung', sa.String(length=3), nullable=True),
         sa.Column('lagerbestand', sa.DECIMAL(precision=10, scale=2), nullable=True),
         sa.Column('ist_aktiv', sa.Boolean(), nullable=True),
-        sa.Column('tenant_id', sa.String(), nullable=False),
+        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['tenant_id'], ['domain_shared.tenants.id'], ),
@@ -213,7 +213,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    ***REMOVED*** Drop tables in reverse order
+    # Drop tables in reverse order
     op.drop_table('agrar_biostimulanzien', schema='domain_agrar')
     op.drop_table('agrar_sachkunde', schema='domain_agrar')
     op.drop_table('agrar_psm', schema='domain_agrar')
@@ -222,5 +222,5 @@ def downgrade() -> None:
     op.drop_table('agrar_saatgut_lizenzen', schema='domain_agrar')
     op.drop_table('agrar_saatgut', schema='domain_agrar')
 
-    ***REMOVED*** Drop schema
+    # Drop schema
     op.execute("DROP SCHEMA IF EXISTS domain_agrar CASCADE")

@@ -4,7 +4,7 @@ foreach ($domain in $domains) {
     $result = cmd /c "cd $($domain.FullName) && npm run lint 2>&1"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "$domain has lint errors"
-        ***REMOVED*** output first few lines
+        # output first few lines
         $result | Select-Object -First 5
     } else {
         Write-Host "$domain is clean"

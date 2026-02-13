@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """Validate the L3 → VALEO-NeuroERP mapping file against extracted metadata.
 
 The validator performs structural checks so that we fail fast before running
@@ -38,7 +38,7 @@ ALLOWED_TYPES: Set[str] = {
     "json",
 }
 
-***REMOVED*** Keys we tolerate inside a mapping entry besides the required ones.
+# Keys we tolerate inside a mapping entry besides the required ones.
 KNOWN_KEYS: Set[str] = {
     "target",
     "type",
@@ -52,8 +52,8 @@ KNOWN_KEYS: Set[str] = {
     "nullable",
 }
 
-***REMOVED*** Domain-specific expectations: schema -> column -> rule config.
-***REMOVED*** Rules can assert expected types and mark them as required.
+# Domain-specific expectations: schema -> column -> rule config.
+# Rules can assert expected types and mark them as required.
 DOMAIN_RULES: Dict[str, Dict[str, Dict[str, Any]]] = {
     "domain_finance": {
         "currency_code": {
@@ -154,7 +154,7 @@ DOMAIN_RULES: Dict[str, Dict[str, Dict[str, Any]]] = {
 
 @dataclass
 class Finding:
-    level: str  ***REMOVED*** "ERROR" | "WARN"
+    level: str  # "ERROR" | "WARN"
     message: str
     context: Optional[str] = None
 
@@ -203,13 +203,13 @@ def load_mapping(path: Path) -> Dict[str, Dict[str, Dict[str, Any]]]:
         raise ValidationError(f"Mapping file not found: {path}")
     try:
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
-    except yaml.YAMLError as exc:  ***REMOVED*** pragma: no cover - defensive
+    except yaml.YAMLError as exc:  # pragma: no cover - defensive
         raise ValidationError(f"Failed to parse mapping YAML: {exc}") from exc
 
     if not isinstance(data, dict):
         raise ValidationError("Mapping YAML must define a dictionary at top-level.")
 
-    ***REMOVED*** Ensure nested structure is dict -> dict -> dict
+    # Ensure nested structure is dict -> dict -> dict
     normalized: Dict[str, Dict[str, Dict[str, Any]]] = {}
     for table_name, columns in data.items():
         if not isinstance(table_name, str):
@@ -242,12 +242,12 @@ def load_raw_metadata(path: Path) -> Dict[str, List[str]]:
         raise ValidationError(f"Raw metadata JSON not found: {path}")
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:  ***REMOVED*** pragma: no cover - defensive
+    except json.JSONDecodeError as exc:  # pragma: no cover - defensive
         raise ValidationError(f"Failed to parse raw metadata JSON: {exc}") from exc
     if not isinstance(data, dict):
         raise ValidationError("Raw metadata JSON must contain an object at top-level.")
 
-    ***REMOVED*** Normalize to str -> list[str]
+    # Normalize to str -> list[str]
     normalized: Dict[str, List[str]] = {}
     for table_name, columns in data.items():
         if not isinstance(table_name, str):
@@ -347,7 +347,7 @@ def validate_entries(
                 apply_domain_specific_rules(payload, context)
             )
 
-    ***REMOVED*** Detect duplicate targets
+    # Detect duplicate targets
     for target, sources in target_usage.items():
         if len(sources) > 1:
             src_list = ", ".join(sorted(sources))

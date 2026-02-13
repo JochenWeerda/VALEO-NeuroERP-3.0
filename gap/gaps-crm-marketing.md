@@ -1,4 +1,4 @@
-***REMOVED*** GAP-Liste CRM & Marketing – Valero NeuroERP
+# GAP-Liste CRM & Marketing – Valero NeuroERP
 
 Stand: 2025-01-27
 
@@ -20,7 +20,7 @@ Referenz:
 
 ---
 
-***REMOVED******REMOVED*** 1) Priorisierungslogik
+## 1) Priorisierungslogik
 
 PS = (BI × PF × RC) / IA
 
@@ -34,7 +34,7 @@ IA (Implementierungsaufwand): 1–5
 
 ---
 
-***REMOVED******REMOVED*** 2) TOP-Gaps nach Score
+## 2) TOP-Gaps nach Score
 
 | Rank | Capability_ID | Gap-Titel | Status | PS | Lösungstyp | Owner |
 |---|---|---|---|---:|---|---|
@@ -51,9 +51,9 @@ IA (Implementierungsaufwand): 1–5
 
 ---
 
-***REMOVED******REMOVED*** 3) GAP-Details (Solution-Cards)
+## 3) GAP-Details (Solution-Cards)
 
-***REMOVED******REMOVED******REMOVED*** CARD CRM-MKT-001 — Opportunities / Deals (Sales Pipeline)
+### CARD CRM-MKT-001 — Opportunities / Deals (Sales Pipeline)
 
 **Capability_ID(s):** CRM-OPP-01  
 
@@ -141,7 +141,7 @@ IA (Implementierungsaufwand): 1–5
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD CRM-MKT-002 — Opt-in/Opt-out & Consent Log
+### CARD CRM-MKT-002 — Opt-in/Opt-out & Consent Log
 
 **Capability_ID(s):** CRM-CNS-01  
 
@@ -229,7 +229,7 @@ IA (Implementierungsaufwand): 1–5
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD CRM-MKT-003 — DSGVO-Funktionen
+### CARD CRM-MKT-003 — DSGVO-Funktionen
 
 **Capability_ID(s):** CRM-CNS-02  
 
@@ -321,7 +321,7 @@ IA (Implementierungsaufwand): 1–5
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD CRM-MKT-004 — Segmente & Zielgruppen
+### CARD CRM-MKT-004 — Segmente & Zielgruppen
 
 **Capability_ID(s):** MKT-SEG-01  
 
@@ -409,7 +409,7 @@ IA (Implementierungsaufwand): 1–5
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD CRM-MKT-005 — Lead-Routing / Zuweisung
+### CARD CRM-MKT-005 — Lead-Routing / Zuweisung
 
 **Capability_ID(s):** CRM-LED-03  
 
@@ -497,7 +497,7 @@ IA (Implementierungsaufwand): 1–5
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD CRM-MKT-006 — Standard-CRM-Reports
+### CARD CRM-MKT-006 — Standard-CRM-Reports
 
 **Capability_ID(s):** CRM-REP-01  
 
@@ -583,7 +583,7 @@ IA (Implementierungsaufwand): 1–5
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD CRM-MKT-007 — Kampagnenmanagement (Erweiterung)
+### CARD CRM-MKT-007 — Kampagnenmanagement (Erweiterung)
 
 **Capability_ID(s):** MKT-CAM-01  
 
@@ -671,7 +671,7 @@ IA (Implementierungsaufwand): 1–5
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD CRM-MKT-008 — Accounts / Firmenstamm (Erweiterung)
+### CARD CRM-MKT-008 — Accounts / Firmenstamm (Erweiterung)
 
 **Capability_ID(s):** CRM-ACC-01  
 
@@ -759,7 +759,7 @@ IA (Implementierungsaufwand): 1–5
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD CRM-MKT-009 — Customer Timeline
+### CARD CRM-MKT-009 — Customer Timeline
 
 **Capability_ID(s):** CRM-360-01  
 
@@ -847,7 +847,7 @@ IA (Implementierungsaufwand): 1–5
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** CARD CRM-MKT-010 — Angebots-/Auftragsbezug
+### CARD CRM-MKT-010 — Angebots-/Auftragsbezug
 
 **Capability_ID(s):** CRM-OPP-04  
 
@@ -933,7 +933,7 @@ IA (Implementierungsaufwand): 1–5
 
 ---
 
-***REMOVED******REMOVED*** 4) Zusammenfassung
+## 4) Zusammenfassung
 
 **Gesamt-Gaps:** 30 Capabilities
 
@@ -980,4 +980,5 @@ Siehe: `swarm/missions/crm-marketing-implementation.md`
    - Event-/Webinar-Marketing
    - Social/Ads Tracking
    - Dritttools/Connectoren
+
 

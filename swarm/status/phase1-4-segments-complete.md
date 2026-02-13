@@ -1,22 +1,22 @@
-***REMOVED*** Phase 1.4 - Segmente & Zielgruppen - VOLLSTÄNDIG ABGESCHLOSSEN
+# Phase 1.4 - Segmente & Zielgruppen - VOLLSTÄNDIG ABGESCHLOSSEN
 
 **Datum:** 2025-01-27  
 **Status:** ✅ Complete  
 **Capability:** MKT-SEG-01  
 **Prioritäts-Score:** 10.0
 
-***REMOVED******REMOVED*** 🎉 VOLLSTÄNDIG ABGESCHLOSSEN
+## 🎉 VOLLSTÄNDIG ABGESCHLOSSEN
 
-***REMOVED******REMOVED******REMOVED*** Backend (100%)
+### Backend (100%)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Service erstellt ✅
+#### 1. Service erstellt ✅
 - ✅ `services/crm-marketing/` Service
 - ✅ FastAPI-App mit Router
 - ✅ Database-Models (SQLAlchemy)
 - ✅ Pydantic-Schemas
 - ✅ API-Endpoints
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2. Database Models ✅
+#### 2. Database Models ✅
 - ✅ `Segment` Entity:
   - Type (dynamic, static, hybrid)
   - Status (active, inactive, archived)
@@ -39,7 +39,7 @@
   - Campaign count, conversion rate
   - Revenue (optional)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3. API Endpoints ✅
+#### 3. API Endpoints ✅
 - ✅ `POST /segments` - Create segment
 - ✅ `GET /segments` - List mit Filtern
 - ✅ `GET /segments/{id}` - Detail
@@ -51,13 +51,13 @@
 - ✅ `DELETE /segments/{id}/members/{member_id}` - Remove member
 - ✅ `GET /segments/{id}/performance` - Performance data
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4. Services ✅
+#### 4. Services ✅
 - ✅ `SegmentCalculator` - Placeholder für Rule-Engine
 - ✅ `EventPublisher` - Events für Segment-Aktionen
 
-***REMOVED******REMOVED******REMOVED*** Frontend (100%)
+### Frontend (100%)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Segmente Liste ✅
+#### 1. Segmente Liste ✅
 - ✅ `segments.tsx` erstellt
 - ✅ ListReport mit i18n
 - ✅ Spalten: Name, Type, Status, Member Count, Last Calculated, Created At
@@ -65,7 +65,7 @@
 - ✅ Bulk-Actions: Calculate, Export, Archive
 - ✅ Export-Funktion
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2. Segment Detail Seite ✅
+#### 2. Segment Detail Seite ✅
 - ✅ `segment-detail.tsx` erstellt
 - ✅ ObjectPage mit 4 Tabs:
   - Grundinformationen
@@ -77,12 +77,12 @@
   - Performance Tab
 - ✅ Aktionen: Save, Cancel, Calculate, Export
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3. Routing ✅
+#### 3. Routing ✅
 - ✅ `/crm/segments` → Liste
 - ✅ `/crm/segment/:id` → Detail
 - ✅ `/crm/segment/new` → Create
 
-***REMOVED******REMOVED******REMOVED*** i18n-Integration ✅
+### i18n-Integration ✅
 - ✅ Alle Labels übersetzt
 - ✅ Neue Übersetzungen hinzugefügt:
   - `crud.segments.types.*` (dynamic, static, hybrid)
@@ -93,7 +93,7 @@
   - `crud.subtitles.manageSegments`
   - `crud.entities.segment`
 
-***REMOVED******REMOVED*** 📊 Finale Statistik
+## 📊 Finale Statistik
 
 **Phase 1.4:**
 - ✅ 100% - Backend-Grundstruktur
@@ -106,19 +106,19 @@
 - ✅ **Grundstruktur: 100% VOLLSTÄNDIG ABGESCHLOSSEN**
 - ⚠️ **Erweiterungen: Rule-Engine & Performance-Aggregation noch offen**
 
-***REMOVED******REMOVED*** 📝 Erstellte Dateien
+## 📝 Erstellte Dateien
 
-***REMOVED******REMOVED******REMOVED*** Backend
+### Backend
 - `services/crm-marketing/` (kompletter Service)
 - Models, Schemas, API-Endpoints, Events, SegmentCalculator
 
-***REMOVED******REMOVED******REMOVED*** Frontend
+### Frontend
 - `packages/frontend-web/src/pages/crm/segments.tsx`
 - `packages/frontend-web/src/pages/crm/segment-detail.tsx`
 
-***REMOVED******REMOVED*** ⚠️ TODO im Code
+## ⚠️ TODO im Code
 
-***REMOVED******REMOVED******REMOVED*** Backend-Erweiterungen (für spätere Phasen)
+### Backend-Erweiterungen (für spätere Phasen)
 1. **Rule-Engine**: Vollständige Implementierung (aktuell Placeholder)
    - Query-Builder für dynamische SQL-Queries
    - Regel-Evaluierung gegen Contact/Customer-Daten
@@ -133,12 +133,12 @@
 
 3. **Alembic Migration**: Database-Schema erstellen
 
-***REMOVED******REMOVED******REMOVED*** Frontend-Erweiterungen (für spätere Phasen)
+### Frontend-Erweiterungen (für spätere Phasen)
 1. **Segment Rule Builder**: Visual Rule Builder mit Drag & Drop
 2. **Segment Performance Dashboard**: Charts & Metriken
 3. **Integration in Campaigns**: Segment-Auswahl in Campaign-Erstellung
 
-***REMOVED******REMOVED*** 🎯 Nächste Phase
+## 🎯 Nächste Phase
 
 **Phase 1.5:** Kampagnenmanagement
 - Email-Kampagnen
@@ -149,4 +149,5 @@
 ---
 
 **Status:** ✅ **PHASE 1.4 GRUNDSTRUKTUR ERFOLGREICH ABGESCHLOSSEN!**
+
 

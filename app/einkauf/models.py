@@ -24,7 +24,7 @@ class Lieferant(Base):
     land = Column(String(100), default="Deutschland")
     zahlungsbedingungen = Column(Text)
     lieferzeit_tage = Column(Integer)
-    bewertung = Column(Integer)  ***REMOVED*** 1-5
+    bewertung = Column(Integer)  # 1-5
     aktiv = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
@@ -39,7 +39,7 @@ class Bestellung(Base):
     lieferant_id = Column(Integer, ForeignKey("einkauf_lieferanten.id"))
     bestelldatum = Column(Date, nullable=False)
     gewuenschtes_lieferdatum = Column(Date)
-    status = Column(String(50), default="entwurf", index=True)  ***REMOVED*** entwurf, bestellt, geliefert, storniert
+    status = Column(String(50), default="entwurf", index=True)  # entwurf, bestellt, geliefert, storniert
     netto_summe = Column(Numeric(12, 2))
     mwst_betrag = Column(Numeric(12, 2))
     brutto_summe = Column(Numeric(12, 2))

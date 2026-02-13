@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Vision-basierte Koordinaten-Erkennung für L3-Icons
 
@@ -39,10 +39,10 @@ class VisionCoordinateDetector:
         img = Image.open(screenshot_path)
         width, height = img.size
         
-        ***REMOVED*** Base64-Encoding
+        # Base64-Encoding
         image_b64 = self.encode_image_base64(screenshot_path)
         
-        ***REMOVED*** Vision-Prompt
+        # Vision-Prompt
         prompt = f"""Analyze this screenshot of the L3 ERP software (zvoove).
 
 **Task:** Identify ALL clickable icons and buttons in the toolbar/ribbon area.
@@ -84,16 +84,16 @@ For EACH icon/button, provide:
 Provide ALL visible clickable elements (15-25 expected).
 """
         
-        ***REMOVED*** LLM-Call (Simulated - hier würde OpenAI/Anthropic API aufgerufen)
+        # LLM-Call (Simulated - hier würde OpenAI/Anthropic API aufgerufen)
         print("🔍 Vision-Analyse läuft...")
         print(f"   Bild: {width}x{height}px")
         print(f"   Modell: {self.model}")
         print(f"   Prompt-Länge: {len(prompt)} Zeichen")
         
-        ***REMOVED*** TODO: Echter API-Call
-        ***REMOVED*** response = self._call_vision_api(image_b64, prompt)
+        # TODO: Echter API-Call
+        # response = self._call_vision_api(image_b64, prompt)
         
-        ***REMOVED*** Placeholder-Response
+        # Placeholder-Response
         print("\n⚠️  Vision-API nicht konfiguriert - verwende Fallback")
         print("   Bitte konfigurieren Sie OPENAI_API_KEY oder ANTHROPIC_API_KEY")
         
@@ -108,19 +108,19 @@ Provide ALL visible clickable elements (15-25 expected).
         - Anthropic Claude 3 Vision
         - Google Gemini Vision
         """
-        ***REMOVED*** OpenAI-Beispiel:
-        ***REMOVED*** import openai
-        ***REMOVED*** response = openai.ChatCompletion.create(
-        ***REMOVED***     model="gpt-4-vision-preview",
-        ***REMOVED***     messages=[{
-        ***REMOVED***         "role": "user",
-        ***REMOVED***         "content": [
-        ***REMOVED***             {"type": "text", "text": prompt},
-        ***REMOVED***             {"type": "image_url", "image_url": f"data:image/png;base64,{image_b64}"}
-        ***REMOVED***         ]
-        ***REMOVED***     }]
-        ***REMOVED*** )
-        ***REMOVED*** return response.choices[0].message.content
+        # OpenAI-Beispiel:
+        # import openai
+        # response = openai.ChatCompletion.create(
+        #     model="gpt-4-vision-preview",
+        #     messages=[{
+        #         "role": "user",
+        #         "content": [
+        #             {"type": "text", "text": prompt},
+        #             {"type": "image_url", "image_url": f"data:image/png;base64,{image_b64}"}
+        #         ]
+        #     }]
+        # )
+        # return response.choices[0].message.content
         
         pass
     
@@ -134,7 +134,7 @@ Provide ALL visible clickable elements (15-25 expected).
         """
         print("🎯 Starte Kalibrierung...\n")
         
-        ***REMOVED*** Vision-Analyse
+        # Vision-Analyse
         icons = self.detect_all_icons(screenshot_path)
         
         if not icons:
@@ -143,7 +143,7 @@ Provide ALL visible clickable elements (15-25 expected).
             print("   C:\\Users\\Jochen\\Downloads\\L3_GUI_Map__percent_coordinates_.csv")
             return
         
-        ***REMOVED*** Generiere CSV
+        # Generiere CSV
         import csv
         with open(output_csv, 'w', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=['group', 'name', 'x_pct', 'y_pct', 'submenu_y_pct'])
@@ -180,4 +180,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 

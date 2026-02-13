@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 
 import os
 import sys
@@ -8,7 +8,7 @@ from datetime import datetime
 def activate_plan_phase():
     """Aktiviert die PLAN-Phase des APM-Frameworks"""
     
-    ***REMOVED*** Aktuellen Status speichern
+    # Aktuellen Status speichern
     status = {
         "previous_phase": "VAN",
         "current_phase": "PLAN",
@@ -16,12 +16,12 @@ def activate_plan_phase():
         "status": "active"
     }
     
-    ***REMOVED*** Status-Datei erstellen/aktualisieren
+    # Status-Datei erstellen/aktualisieren
     os.makedirs('data/apm_status', exist_ok=True)
     with open('data/apm_status/phase_status.json', 'w') as f:
         json.dump(status, f, indent=2)
     
-    ***REMOVED*** Memory Bank Status aktualisieren
+    # Memory Bank Status aktualisieren
     memory_bank_status = {
         "phase": "PLAN",
         "context": "planning",

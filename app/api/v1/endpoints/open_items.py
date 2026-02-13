@@ -28,7 +28,7 @@ class OpenItemSettlement(BaseModel):
     payment_amount: Decimal
     payment_date: datetime
     payment_reference: Optional[str] = None
-    payment_type: str = "payment"  ***REMOVED*** payment, discount, credit_note, reversal
+    payment_type: str = "payment"  # payment, discount, credit_note, reversal
     notes: Optional[str] = None
 
 
@@ -39,7 +39,7 @@ class SettlementResult(BaseModel):
     previous_open_amount: Decimal
     settlement_amount: Decimal
     new_open_amount: Decimal
-    status: str  ***REMOVED*** settled, partial, overpaid
+    status: str  # settled, partial, overpaid
     settlement_date: datetime
     audit_trail_id: Optional[str] = None
 
@@ -56,7 +56,7 @@ async def settle_open_item(
     Creates audit trail entry for GoBD compliance.
     """
     try:
-        ***REMOVED*** Get current open item from offene_posten table
+        # Get current open item from offene_posten table
         op_query = text("""
             SELECT id, tenant_id, rechnungsnr, datum, faelligkeit, betrag, offen, 
                    kunde_id, kunde_name, mahn_stufe, zahlbar
@@ -70,7 +70,7 @@ async def settle_open_item(
             raise HTTPException(status_code=404, detail="Open item not found")
         
         current_open_amount = Decimal(str(op_row[6])) if op_row[6] else Decimal("0.00")
-        ***REMOVED*** op_row indices: 0=id, 1=tenant_id, 2=rechnungsnr, 3=datum, 4=faelligkeit, 5=betrag, 6=offen
+        # op_row indices: 0=id, 1=tenant_id, 2=rechnungsnr, 3=datum, 4=faelligkeit, 5=betrag, 6=offen
         settlement_amount = Decimal(str(settlement.payment_amount))
         
         if settlement_amount <= 0:
@@ -82,20 +82,20 @@ async def settle_open_item(
                 detail=f"Settlement amount ({settlement_amount}) exceeds open amount ({current_open_amount})"
             )
         
-        ***REMOVED*** Calculate new open amount
+        # Calculate new open amount
         new_open_amount = current_open_amount - settlement_amount
         
-        ***REMOVED*** Determine new status
+        # Determine new status
         if new_open_amount <= Decimal("0.01"):
             new_status = "settled"
             new_open_amount = Decimal("0.00")
         else:
             new_status = "partial"
         
-        ***REMOVED*** Create settlement record
+        # Create settlement record
         settlement_id = f"SET-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{op_id[:8]}"
         
-        ***REMOVED*** Update open item in offene_posten table
+        # Update open item in offene_posten table
         update_query = text("""
             UPDATE offene_posten
             SET offen = :new_open_amount,
@@ -111,12 +111,12 @@ async def settle_open_item(
             "payment_date": settlement.payment_date
         })
         
-        ***REMOVED*** Create payment record (store in journal_entries as reference)
-        ***REMOVED*** Note: In production, create a separate open_item_payments table
-        ***REMOVED*** For now, we'll store payment info in the journal entry description
+        # Create payment record (store in journal_entries as reference)
+        # Note: In production, create a separate open_item_payments table
+        # For now, we'll store payment info in the journal entry description
         
-        ***REMOVED*** Create audit trail entry (GoBD compliance)
-        ***REMOVED*** Store in infrastructure.audit_log if available
+        # Create audit trail entry (GoBD compliance)
+        # Store in infrastructure.audit_log if available
         audit_trail_id = f"AUDIT-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{op_id[:8]}"
         
         try:
@@ -137,22 +137,22 @@ async def settle_open_item(
             
             db.execute(audit_insert, {
                 "id": audit_trail_id,
-                "user_id": None,  ***REMOVED*** TODO: Get from context
+                "user_id": None,  # TODO: Get from context
                 "action": "settle_open_item",
                 "entity_type": "offener_posten",
                 "entity_id": op_id,
                 "changes": json.dumps(changes)
             })
         except Exception:
-            ***REMOVED*** If audit_log table doesn't exist, continue without audit trail
+            # If audit_log table doesn't exist, continue without audit trail
             audit_trail_id = None
         
-        ***REMOVED*** Create GL journal entry for the payment
-        ***REMOVED*** This ensures proper accounting
+        # Create GL journal entry for the payment
+        # This ensures proper accounting
         journal_entry_id = f"JE-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{op_id[:8]}"
         
-        ***REMOVED*** Debit: Bank account (or cash)
-        ***REMOVED*** Credit: Accounts Receivable (Debitoren)
+        # Debit: Bank account (or cash)
+        # Credit: Accounts Receivable (Debitoren)
         journal_insert = text("""
             INSERT INTO domain_erp.journal_entries
             (id, tenant_id, entry_number, entry_date, posting_date, description, 
@@ -173,15 +173,15 @@ async def settle_open_item(
             "posting_date": settlement.payment_date,
             "description": description,
             "source": "op_settlement",
-            "currency": "EUR",  ***REMOVED*** Default currency
+            "currency": "EUR",  # Default currency
             "status": "posted",
             "total_debit": settlement_amount,
             "total_credit": settlement_amount
         })
         
-        ***REMOVED*** Create journal entry lines
-        ***REMOVED*** Line 1: Debit Bank/Cash
-        bank_account = "1000"  ***REMOVED*** Default bank account - TODO: Get from settlement
+        # Create journal entry lines
+        # Line 1: Debit Bank/Cash
+        bank_account = "1000"  # Default bank account - TODO: Get from settlement
         journal_line1 = text("""
             INSERT INTO domain_erp.journal_entry_lines
             (id, tenant_id, journal_entry_id, account_id, debit_amount, credit_amount,
@@ -201,8 +201,8 @@ async def settle_open_item(
             "description": f"Zahlungseingang {settlement.payment_reference or ''}"
         })
         
-        ***REMOVED*** Line 2: Credit Accounts Receivable
-        ar_account = "1200"  ***REMOVED*** Forderungen aus Lieferungen und Leistungen
+        # Line 2: Credit Accounts Receivable
+        ar_account = "1200"  # Forderungen aus Lieferungen und Leistungen
         journal_line2 = text("""
             INSERT INTO domain_erp.journal_entry_lines
             (id, tenant_id, journal_entry_id, account_id, debit_amount, credit_amount,
@@ -252,7 +252,7 @@ async def get_settlements(
     Get all settlements for an open item (audit trail).
     """
     try:
-        ***REMOVED*** Get settlements from journal entries related to this OP
+        # Get settlements from journal entries related to this OP
         query = text("""
             SELECT id, entry_number, entry_date, description, total_debit, created_at
             FROM domain_erp.journal_entries
@@ -270,15 +270,15 @@ async def get_settlements(
                 "id": str(row[0]),
                 "payment_amount": float(row[4]) if row[4] else 0.0,
                 "payment_date": row[2].isoformat() if row[2] else None,
-                "payment_reference": row[1],  ***REMOVED*** Use entry_number as reference
+                "payment_reference": row[1],  # Use entry_number as reference
                 "payment_type": "payment",
-                "notes": row[3],  ***REMOVED*** Use description as notes
+                "notes": row[3],  # Use description as notes
                 "created_at": row[5].isoformat() if row[5] else None
             }
             for row in rows
         ]
     except Exception as e:
-        ***REMOVED*** If table doesn't exist, return empty list
+        # If table doesn't exist, return empty list
         return []
 
 
@@ -295,7 +295,7 @@ async def reverse_settlement(
     Requires reason for GoBD compliance.
     """
     try:
-        ***REMOVED*** Get settlement from journal entry
+        # Get settlement from journal entry
         settlement_query = text("""
             SELECT id, total_debit, entry_date
             FROM domain_erp.journal_entries
@@ -313,7 +313,7 @@ async def reverse_settlement(
         
         settlement_amount = Decimal(str(settlement_row[1]))
         
-        ***REMOVED*** Get current open item
+        # Get current open item
         op_query = text("""
             SELECT id, offen
             FROM offene_posten
@@ -328,7 +328,7 @@ async def reverse_settlement(
         current_open_amount = Decimal(str(op_row[1])) if op_row[1] else Decimal("0.00")
         new_open_amount = current_open_amount + settlement_amount
         
-        ***REMOVED*** Update open item
+        # Update open item
         update_query = text("""
             UPDATE offene_posten
             SET offen = :new_open_amount,
@@ -341,7 +341,7 @@ async def reverse_settlement(
             "new_open_amount": new_open_amount
         })
         
-        ***REMOVED*** Mark journal entry as reversed
+        # Mark journal entry as reversed
         reverse_query = text("""
             UPDATE domain_erp.journal_entries
             SET status = 'cancelled',
@@ -355,7 +355,7 @@ async def reverse_settlement(
             "reason": reason
         })
         
-        ***REMOVED*** Create audit trail entry
+        # Create audit trail entry
         audit_trail_id = f"AUDIT-REV-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{op_id[:8]}"
         
         try:
@@ -375,14 +375,14 @@ async def reverse_settlement(
             
             db.execute(audit_insert, {
                 "id": audit_trail_id,
-                "user_id": None,  ***REMOVED*** TODO: Get from context
+                "user_id": None,  # TODO: Get from context
                 "action": "reverse_settlement",
                 "entity_type": "offener_posten",
                 "entity_id": op_id,
                 "changes": json.dumps(changes)
             })
         except Exception:
-            ***REMOVED*** If audit_log table doesn't exist, continue without audit trail
+            # If audit_log table doesn't exist, continue without audit trail
             audit_trail_id = None
         
         db.commit()

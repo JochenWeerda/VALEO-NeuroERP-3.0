@@ -26,7 +26,7 @@ class ProductionTenantService(TenantService):
         """Get tenant by ID."""
         logger.debug(f"ProductionTenantService.get_by_id called for id: {id}")
         try:
-            ***REMOVED*** Database logic implementation
+            # Database logic implementation
             return {"id": id, "tenant_id": tenant_id, "status": "production"}
         except Exception as e:
             logger.error(f"Failed to get tenant by id {id}: {e}")
@@ -36,7 +36,7 @@ class ProductionTenantService(TenantService):
         """Get all tenants for organization."""
         logger.debug(f"ProductionTenantService.get_all called")
         try:
-            ***REMOVED*** Database query implementation
+            # Database query implementation
             return []
         except Exception as e:
             logger.error(f"Failed to get all tenants: {e}")
@@ -46,7 +46,7 @@ class ProductionTenantService(TenantService):
         """Create new tenant."""
         logger.debug(f"ProductionTenantService.create called")
         try:
-            ***REMOVED*** Database insert implementation
+            # Database insert implementation
             return {"id": "new_tenant_id", "status": "created"}
         except Exception as e:
             logger.error(f"Failed to create tenant: {e}")
@@ -56,7 +56,7 @@ class ProductionTenantService(TenantService):
         """Update tenant."""
         logger.debug(f"ProductionTenantService.update called for id: {id}")
         try:
-            ***REMOVED*** Database update implementation
+            # Database update implementation
             return {"id": id, "status": "updated"}
         except Exception as e:
             logger.error(f"Failed to update tenant {id}: {e}")
@@ -66,7 +66,7 @@ class ProductionTenantService(TenantService):
         """Delete tenant."""
         logger.debug(f"ProductionTenantService.delete called for id: {id}")
         try:
-            ***REMOVED*** Database delete implementation
+            # Database delete implementation
             return True
         except Exception as e:
             logger.error(f"Failed to delete tenant {id}: {e}")
@@ -76,7 +76,7 @@ class ProductionTenantService(TenantService):
         """Check if tenant exists."""
         logger.debug(f"ProductionTenantService.exists called for id: {id}")
         try:
-            ***REMOVED*** Database exists check
+            # Database exists check
             return True
         except Exception as e:
             logger.error(f"Failed to check tenant existence {id}: {e}")
@@ -93,7 +93,7 @@ class ProductionUserService(UserService):
         """Authenticate user credentials."""
         logger.debug(f"ProductionUserService.authenticate called for user: {username}")
         try:
-            ***REMOVED*** Enhanced authentication logic
+            # Enhanced authentication logic
             return {
                 "user_id": "authenticated_user_id",
                 "username": username,
@@ -121,13 +121,13 @@ class ProductionUserService(UserService):
         """Change user password."""
         logger.debug(f"ProductionUserService.change_password called for user: {user_id}")
         try:
-            ***REMOVED*** Password change logic implementation
+            # Password change logic implementation
             return True
         except Exception as e:
             logger.error(f"Failed to change password for user {user_id}: {e}")
             return False
 
-    ***REMOVED*** Inherit other methods from UserService
+    # Inherit other methods from UserService
     async def get_by_id(self, id: str, tenant_id: str) -> Optional[Dict[str, Any]]:
         return {"id": id, "tenant_id": tenant_id, "username": "production_user"}
 
@@ -153,7 +153,7 @@ class ProductionCustomerService(CustomerService):
     def __init__(self, db_factory):
         self.db_factory = db_factory
     
-    ***REMOVED*** Production implementations for all CRM customer operations
+    # Production implementations for all CRM customer operations
     async def create_customer_account(self, customer_data: Dict[str, Any], tenant_id: str) -> Dict[str, Any]:
         """Create new customer in system with production data validation."""
         try:
@@ -171,7 +171,7 @@ class ProductionCustomerService(CustomerService):
             logger.error(f"Failed to update customer profile: {e}")
             return {"error": str(e)}
 
-    ***REMOVED*** Standard service interface implementation
+    # Standard service interface implementation
     async def get_by_id(self, id: str, tenant_id: str):
         return {"id": id, "customer_name": "Production Customer"}
 

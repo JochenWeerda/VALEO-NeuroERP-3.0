@@ -32,13 +32,13 @@ class InventoryEventHandlers:
     async def handle_stock_movement_recorded(self, event: StockMovementRecordedEvent) -> None:
         """Handle stock movement recorded events."""
         try:
-            ***REMOVED*** Check for low stock alerts
+            # Check for low stock alerts
             await self._check_low_stock_alert(event.article_id, event.tenant_id)
 
-            ***REMOVED*** Check for stock out conditions
+            # Check for stock out conditions
             await self._check_stock_out_alert(event.article_id, event.tenant_id)
 
-            ***REMOVED*** Publish stock level changed event
+            # Publish stock level changed event
             stock_change_event = StockLevelChangedEvent(
                 aggregate_id=event.article_id,
                 timestamp=event.timestamp,
@@ -73,7 +73,7 @@ class InventoryEventHandlers:
 
         current_stock = article.current_stock or 0
         if current_stock < article.min_stock:
-            ***REMOVED*** Trigger low stock alert
+            # Trigger low stock alert
             alert_event = LowStockAlertEvent(
                 aggregate_id=article_id,
                 timestamp=article.updated_at,
@@ -83,13 +83,13 @@ class InventoryEventHandlers:
                 article_name=article.name,
                 current_stock=current_stock,
                 min_stock=article.min_stock,
-                warehouse_id="",  ***REMOVED*** Would need warehouse-specific tracking
+                warehouse_id="",  # Would need warehouse-specific tracking
                 tenant_id=tenant_id
             )
 
             await self.event_publisher.publish(alert_event)
 
-            ***REMOVED*** Also trigger replenishment suggestion
+            # Also trigger replenishment suggestion
             suggested_quantity = (article.max_stock or article.min_stock * 2) - current_stock
             priority = self._calculate_replenishment_priority(current_stock, article.min_stock)
 
@@ -126,7 +126,7 @@ class InventoryEventHandlers:
 
         current_stock = article.current_stock or 0
         if current_stock <= 0:
-            ***REMOVED*** Trigger stock out alert
+            # Trigger stock out alert
             out_event = StockOutEvent(
                 aggregate_id=article_id,
                 timestamp=article.updated_at,
@@ -134,7 +134,7 @@ class InventoryEventHandlers:
                 article_id=article_id,
                 article_number=article.article_number,
                 article_name=article.name,
-                warehouse_id="",  ***REMOVED*** Would need warehouse-specific tracking
+                warehouse_id="",  # Would need warehouse-specific tracking
                 tenant_id=tenant_id
             )
 
@@ -143,40 +143,40 @@ class InventoryEventHandlers:
     def _calculate_replenishment_priority(self, current_stock: float, min_stock: float) -> int:
         """Calculate replenishment priority (1-5, 5 being highest)."""
         if current_stock <= 0:
-            return 5  ***REMOVED*** Critical - out of stock
+            return 5  # Critical - out of stock
         elif current_stock < min_stock * 0.5:
-            return 4  ***REMOVED*** Very urgent
+            return 4  # Very urgent
         elif current_stock < min_stock:
-            return 3  ***REMOVED*** Urgent
+            return 3  # Urgent
         elif current_stock < min_stock * 1.5:
-            return 2  ***REMOVED*** Soon
+            return 2  # Soon
         else:
-            return 1  ***REMOVED*** Normal
+            return 1  # Normal
 
 
-***REMOVED*** Event handler registration
+# Event handler registration
 async def register_inventory_event_handlers():
     """Register all inventory event handlers."""
-    ***REMOVED*** This would be called during application startup
-    ***REMOVED*** For now, handlers are called directly from services
+    # This would be called during application startup
+    # For now, handlers are called directly from services
     pass
 
 
-***REMOVED*** Notification handlers for external integrations
+# Notification handlers for external integrations
 class InventoryNotificationHandlers:
     """Handles notifications for inventory events."""
 
     async def handle_low_stock_alert(self, event: LowStockAlertEvent) -> None:
         """Send notifications for low stock alerts."""
-        ***REMOVED*** Implementation would integrate with notification service
+        # Implementation would integrate with notification service
         logger.info(f"Low stock alert: {event.article_name} ({event.article_number}) - Current: {event.current_stock}, Min: {event.min_stock}")
 
     async def handle_stock_out(self, event: StockOutEvent) -> None:
         """Send notifications for stock out events."""
-        ***REMOVED*** Implementation would integrate with notification service
+        # Implementation would integrate with notification service
         logger.warning(f"Stock out alert: {event.article_name} ({event.article_number}) is out of stock")
 
     async def handle_replenishment_needed(self, event: ReplenishmentNeededEvent) -> None:
         """Handle replenishment suggestions."""
-        ***REMOVED*** Could trigger automated purchase orders or notifications
+        # Could trigger automated purchase orders or notifications
         logger.info(f"Replenishment needed: {event.article_name} - Suggest ordering {event.suggested_quantity} units (Priority: {event.priority})")

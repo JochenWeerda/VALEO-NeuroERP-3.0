@@ -1,6 +1,6 @@
-***REMOVED*** Zoll / Exportkontrolle – Produktiv-Setup
+# Zoll / Exportkontrolle – Produktiv-Setup
 
-***REMOVED******REMOVED*** 1. Secrets anlegen
+## 1. Secrets anlegen
 
 ```bash
 kubectl create secret generic zoll-sanctions \
@@ -9,7 +9,7 @@ kubectl create secret generic zoll-sanctions \
   --from-literal=euApiKey='<EU_API_KEY>'
 ```
 
-***REMOVED******REMOVED*** 2. Helm-Overrides anwenden
+## 2. Helm-Overrides anwenden
 
 ```bash
 helm upgrade --install valeo-erp ./k8s/helm/valeo-erp \
@@ -19,13 +19,13 @@ helm upgrade --install valeo-erp ./k8s/helm/valeo-erp \
   --wait
 ```
 
-***REMOVED******REMOVED*** 3. Workflow-Policies
+## 3. Workflow-Policies
 
 - `services/compliance/zoll/app/workflows/registration.py` registriert `export_clearance`.  
 - Rollen/Approvals im Workflow-Service prüfen (`tenant=zoll`).  
 - Optional: Policy-Overrides via `packages/frontend-web/src/pages/policy-manager`.
 
-***REMOVED******REMOVED*** 4. Smoke-Test
+## 4. Smoke-Test
 
 1. Port-Forward:
    ```bash
@@ -43,11 +43,12 @@ helm upgrade --install valeo-erp ./k8s/helm/valeo-erp \
    ```
 4. Logs kontrollieren (`Sanktionsdaten aktualisiert ...`).
 
-***REMOVED******REMOVED*** 5. Monitoring & Alerts
+## 5. Monitoring & Alerts
 
 - Prometheus Queries:
   - `zoll_sanctions_refresh_total`
   - `zoll_screening_status_total`
 - Alertmanager-Routing `component=zoll`.  
 - Backoff-Status via `zoll_sanctions_refresh_backoff_minutes`.
+
 

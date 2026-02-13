@@ -1,4 +1,4 @@
-***REMOVED*** Sprint 4 Plan
+# Sprint 4 Plan
 
 **Datum:** 2025-01-30  
 **Sprint:** 4  
@@ -8,19 +8,19 @@
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Sprint-Übersicht
+## 🎯 Sprint-Übersicht
 
-***REMOVED******REMOVED******REMOVED*** Ziel
+### Ziel
 Implementierung von 3 Procurement Capabilities (P2) für Sprint 4.
 
-***REMOVED******REMOVED******REMOVED*** Priorität
+### Priorität
 P2 - Mittel (SOLL, Priorität 2-3)
 
 ---
 
-***REMOVED******REMOVED*** 📋 Geplante Tasks
+## 📋 Geplante Tasks
 
-***REMOVED******REMOVED******REMOVED*** Task 1: PROC-SUP-02 - Lieferantenbewertung
+### Task 1: PROC-SUP-02 - Lieferantenbewertung
 **Status:** ❌ Nicht vorhanden  
 **Priorität:** P2 (SOLL, Priorität 3)
 
@@ -46,7 +46,7 @@ P2 - Mittel (SOLL, Priorität 2-3)
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Task 2: PROC-RFQ-01 - Anfrage / RFQ
+### Task 2: PROC-RFQ-01 - Anfrage / RFQ
 **Status:** ⚠️ Teilweise vorhanden  
 **Priorität:** P2 (SOLL, Priorität 2)
 
@@ -76,7 +76,7 @@ P2 - Mittel (SOLL, Priorität 2-3)
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Task 3: PROC-REP-01 - Standardreports Einkauf
+### Task 3: PROC-REP-01 - Standardreports Einkauf
 **Status:** ❌ Nicht vorhanden  
 **Priorität:** P2 (MUSS, Priorität 2)
 
@@ -104,17 +104,17 @@ P2 - Mittel (SOLL, Priorität 2-3)
 
 ---
 
-***REMOVED******REMOVED*** 📊 Sprint-Planung
+## 📊 Sprint-Planung
 
-***REMOVED******REMOVED******REMOVED*** Woche 1-2
+### Woche 1-2
 - **Tag 1-5:** PROC-RFQ-01 (RFQ vervollständigen)
 - **Tag 6-10:** PROC-SUP-02 (Lieferantenbewertung) - Start
 
-***REMOVED******REMOVED******REMOVED*** Woche 3-4
+### Woche 3-4
 - **Tag 11-15:** PROC-SUP-02 (Lieferantenbewertung) - Fortsetzung
 - **Tag 16-20:** PROC-REP-01 (Standardreports) - Start
 
-***REMOVED******REMOVED******REMOVED*** Woche 5 (Puffer)
+### Woche 5 (Puffer)
 - **Tag 21-25:** PROC-REP-01 (Standardreports) - Fortsetzung
 - Integration-Tests
 - Bug-Fixes
@@ -122,20 +122,20 @@ P2 - Mittel (SOLL, Priorität 2-3)
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Dependencies
+## 🔄 Dependencies
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 → Agent-1
+### Agent-2 → Agent-1
 - Keine neuen Dependencies
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 → Agent-4
+### Agent-2 → Agent-4
 - PROC-REP-01 nutzt möglicherweise Report-Infrastructure
 
-***REMOVED******REMOVED******REMOVED*** Agent-2 → Agent-3
+### Agent-2 → Agent-3
 - Keine Dependencies
 
 ---
 
-***REMOVED******REMOVED*** ✅ Definition of Done
+## ✅ Definition of Done
 
 - [ ] Alle 3 P2 Capabilities implementiert
 - [ ] i18n vollständig integriert
@@ -147,7 +147,7 @@ P2 - Mittel (SOLL, Priorität 2-3)
 
 ---
 
-***REMOVED******REMOVED*** 📝 Pre-Implementation Checklist
+## 📝 Pre-Implementation Checklist
 
 Vor Code-Erstellung:
 - [ ] Bestehende Frontend-Seiten analysieren
@@ -159,4 +159,5 @@ Vor Code-Erstellung:
 ---
 
 **Status:** 📋 **SPRINT 4 GEPLANT - BEREIT FÜR START**
+
 

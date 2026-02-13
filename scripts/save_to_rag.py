@@ -14,7 +14,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
-***REMOVED*** Logging konfigurieren
+# Logging konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -24,10 +24,10 @@ logger = logging.getLogger(__name__)
 def setup_paths() -> Path:
     """Erstellt die notwendigen Verzeichnisse."""
     try:
-        ***REMOVED*** Projektroot-Verzeichnis finden
+        # Projektroot-Verzeichnis finden
         project_root = Path(__file__).parent.parent
         
-        ***REMOVED*** FAISS DB Verzeichnis
+        # FAISS DB Verzeichnis
         db_path = project_root / "data" / "faiss_db"
         db_path.mkdir(parents=True, exist_ok=True)
         
@@ -58,11 +58,11 @@ def process_document(filepath: str, db_path: Optional[Path] = None) -> bool:
         
         logger.info(f"Verarbeite Dokument: {filepath}")
         
-        ***REMOVED*** Dokument laden
+        # Dokument laden
         loader = TextLoader(str(filepath), encoding='utf-8')
         documents = loader.load()
         
-        ***REMOVED*** Text in Chunks aufteilen
+        # Text in Chunks aufteilen
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,
@@ -71,11 +71,11 @@ def process_document(filepath: str, db_path: Optional[Path] = None) -> bool:
         chunks = text_splitter.split_documents(documents)
         logger.info(f"Dokument in {len(chunks)} Chunks aufgeteilt")
         
-        ***REMOVED*** Embeddings erstellen
+        # Embeddings erstellen
         logger.info("Erstelle Embeddings...")
         embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
         
-        ***REMOVED*** Vectorstore erstellen oder laden
+        # Vectorstore erstellen oder laden
         index_path = db_path / "index.faiss"
         docstore_path = db_path / "docstore.json"
         
@@ -93,7 +93,7 @@ def process_document(filepath: str, db_path: Optional[Path] = None) -> bool:
             logger.info("Erstelle neuen Vectorstore...")
             vectorstore = FAISS.from_documents(chunks, embeddings)
         
-        ***REMOVED*** Vectorstore speichern
+        # Vectorstore speichern
         vectorstore.save_local(str(db_path))
         logger.info(f"Vectorstore in {db_path} gespeichert")
         

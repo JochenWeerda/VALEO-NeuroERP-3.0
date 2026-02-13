@@ -1,29 +1,49 @@
+﻿import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { BarChart3, TrendingDown, TrendingUp } from 'lucide-react'
+import { ErrorState } from '@/components/ErrorState'
+
+type PreisHistorie = {
+  artikel: string
+  aktuell: number
+  vorwoche: number
+  vormonat: number
+  veraenderung: { woche: number; monat: number }
+  verlauf: { datum: string; preis: number }[]
+}
 
 export default function PreishistoriePage(): JSX.Element {
-  const preise = {
-    artikel: 'Weizen Premium',
-    aktuell: 220.5,
-    vorwoche: 218.0,
-    vormonat: 215.0,
-    veraenderung: {
-      woche: 1.1,
-      monat: 2.6,
+  const { data: preise, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['preise', 'historie'],
+    queryFn: async () => {
+      const r = await apiClient.get<PreisHistorie>('/api/v1/preise/historie')
+      return r.data
     },
-    verlauf: [
-      { datum: '2025-09-11', preis: 215.0 },
-      { datum: '2025-09-18', preis: 216.5 },
-      { datum: '2025-09-25', preis: 218.0 },
-      { datum: '2025-10-02', preis: 219.5 },
-      { datum: '2025-10-09', preis: 220.5 },
-    ],
+    staleTime: 5 * 60 * 1000,
+  })
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="h-9 w-48" />
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    )
+  }
+
+  if (isError || !preise) {
+    return <ErrorState error={(error as Error) ?? new Error('Preishistorie konnte nicht geladen werden')} onRetry={() => { void refetch() }} />
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Preishistorie</h1>
@@ -34,9 +54,7 @@ export default function PreishistoriePage(): JSX.Element {
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Aktueller Preis</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktueller Preis</CardTitle></CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(preise.aktuell)} / t
@@ -45,9 +63,7 @@ export default function PreishistoriePage(): JSX.Element {
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Vorwoche</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Vorwoche</CardTitle></CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(preise.vorwoche)} / t
@@ -56,9 +72,7 @@ export default function PreishistoriePage(): JSX.Element {
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Veränderung (Woche)</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Veraenderung (Woche)</CardTitle></CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-green-600" />
@@ -68,9 +82,7 @@ export default function PreishistoriePage(): JSX.Element {
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Veränderung (Monat)</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Veraenderung (Monat)</CardTitle></CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-green-600" />
@@ -105,7 +117,7 @@ export default function PreishistoriePage(): JSX.Element {
                     {trend !== 0 && (
                       <div className={`text-sm font-semibold ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {trend > 0 ? <TrendingUp className="inline h-3 w-3" /> : <TrendingDown className="inline h-3 w-3" />}
-                        {trend > 0 ? '+' : ''}{trend.toFixed(2)} €
+                        {trend > 0 ? '+' : ''}{trend.toFixed(2)} EUR
                       </div>
                     )}
                   </div>

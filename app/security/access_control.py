@@ -144,7 +144,7 @@ class AccessPolicy:
     name: str
     description: str
     conditions: Dict[str, Any]
-    effect: str  ***REMOVED*** allow, deny
+    effect: str  # allow, deny
     priority: int = 100
     is_active: bool = True
     created_at: datetime = field(default_factory=datetime.utcnow)
@@ -161,25 +161,25 @@ class ISO27001AccessControl:
         self.jwt_secret = jwt_secret or secrets.token_hex(32)
         self.mfa = mfa_service
 
-        ***REMOVED*** User and role management
+        # User and role management
         self.users: Dict[str, User] = {}
         self.roles: Dict[str, Role] = {}
         self.permissions: Dict[str, Permission] = {}
 
-        ***REMOVED*** Session management
+        # Session management
         self.active_sessions: Dict[str, UserSession] = {}
 
-        ***REMOVED*** Access control
+        # Access control
         self.access_policies: Dict[str, AccessPolicy] = {}
         self.access_attempts: List[AccessAttempt] = []
 
-        ***REMOVED*** Security policies
+        # Security policies
         self.security_policies = self._initialize_security_policies()
 
-        ***REMOVED*** Password policies
+        # Password policies
         self.password_policy = self._initialize_password_policy()
 
-        ***REMOVED*** Session policies
+        # Session policies
         self.session_policy = self._initialize_session_policy()
 
     def _initialize_security_policies(self) -> Dict[str, Dict[str, Any]]:
@@ -248,10 +248,10 @@ class ISO27001AccessControl:
         """
         user_id = str(uuid.uuid4())
 
-        ***REMOVED*** Validate user data
+        # Validate user data
         self._validate_user_data(user_data)
 
-        ***REMOVED*** Hash password
+        # Hash password
         password_hash = None
         if 'password' in user_data:
             password_hash = self._hash_password(user_data['password'])
@@ -267,7 +267,7 @@ class ISO27001AccessControl:
 
         self.users[user_id] = user
 
-        ***REMOVED*** Assign default role based on role_type
+        # Assign default role based on role_type
         default_role = self._get_default_role_for_type(user.role_type)
         if default_role:
             self.assign_role_to_user(user_id, default_role)
@@ -282,25 +282,25 @@ class ISO27001AccessControl:
             if field not in data:
                 raise ValueError(f"Required field missing: {field}")
 
-        ***REMOVED*** Validate username format
+        # Validate username format
         if not re.match(r'^[a-zA-Z0-9_-]{3,50}$', data['username']):
             raise ValueError("Invalid username format")
 
-        ***REMOVED*** Validate email format
+        # Validate email format
         if not re.match(r'^[^@]+@[^@]+\.[^@]+$', data['email']):
             raise ValueError("Invalid email format")
 
-        ***REMOVED*** Check for duplicate username
+        # Check for duplicate username
         if any(u.username == data['username'] for u in self.users.values()):
             raise ValueError("Username already exists")
 
-        ***REMOVED*** Validate role type
+        # Validate role type
         try:
             RoleType[data['role_type'].upper()]
         except KeyError:
             raise ValueError(f"Invalid role type: {data['role_type']}")
 
-        ***REMOVED*** Validate password if provided
+        # Validate password if provided
         if 'password' in data:
             self._validate_password_complexity(data['password'])
 
@@ -323,14 +323,14 @@ class ISO27001AccessControl:
         if policy['require_special_chars'] and not re.search(r'[^a-zA-Z0-9]', password):
             raise ValueError("Password must contain special characters")
 
-        ***REMOVED*** Check for consecutive characters
+        # Check for consecutive characters
         if policy['max_consecutive_chars']:
             for i in range(len(password) - policy['max_consecutive_chars'] + 1):
                 chars = password[i:i + policy['max_consecutive_chars']]
                 if len(set(chars)) == 1:
                     raise ValueError(f"Password cannot contain {policy['max_consecutive_chars']} consecutive identical characters")
 
-        ***REMOVED*** Check unique characters
+        # Check unique characters
         if len(set(password)) < policy['min_unique_chars']:
             raise ValueError(f"Password must contain at least {policy['min_unique_chars']} unique characters")
 
@@ -361,7 +361,7 @@ class ISO27001AccessControl:
 
     def _get_default_role_for_type(self, role_type: RoleType) -> Optional[str]:
         """Get default role ID for role type"""
-        ***REMOVED*** This would map role types to actual role IDs in production
+        # This would map role types to actual role IDs in production
         role_mapping = {
             RoleType.SYSTEM_ADMIN: "system_admin_role",
             RoleType.SECURITY_ADMIN: "security_admin_role",
@@ -400,7 +400,7 @@ class ISO27001AccessControl:
         user = self.users[user_id]
         role = self.roles[role_id]
 
-        ***REMOVED*** In production, this would update a user-role mapping table
+        # In production, this would update a user-role mapping table
         logger.info(f"Role {role.name} assigned to user {user.username}")
         return True
 
@@ -410,7 +410,7 @@ class ISO27001AccessControl:
         Authenticate user and return session token
         Returns session token if successful
         """
-        ***REMOVED*** Find user
+        # Find user
         user = None
         for u in self.users.values():
             if u.username == username and u.is_active:
@@ -422,17 +422,17 @@ class ISO27001AccessControl:
                                    "User not found", ip_address, user_agent)
             return None
 
-        ***REMOVED*** Check account lockout
+        # Check account lockout
         if user.account_locked_until and user.account_locked_until > datetime.utcnow():
             self._log_access_attempt(user.id, username, "authentication", "login", False,
                                    "Account locked", ip_address, user_agent)
             return None
 
-        ***REMOVED*** Verify password
+        # Verify password
         if not user.password_hash or not self._verify_password(password, user.password_hash):
             user.failed_login_attempts += 1
 
-            ***REMOVED*** Check lockout threshold
+            # Check lockout threshold
             if user.failed_login_attempts >= self.security_policies['authentication']['account_lockout_threshold']:
                 lockout_duration = self.security_policies['authentication']['account_lockout_duration']
                 user.account_locked_until = datetime.utcnow() + lockout_duration
@@ -442,21 +442,21 @@ class ISO27001AccessControl:
                                    "Invalid password", ip_address, user_agent)
             return None
 
-        ***REMOVED*** Reset failed attempts on successful login
+        # Reset failed attempts on successful login
         user.failed_login_attempts = 0
         user.account_locked_until = None
         user.last_login = datetime.utcnow()
 
-        ***REMOVED*** Check if MFA is required
+        # Check if MFA is required
         if self._requires_mfa(user, "login"):
-            ***REMOVED*** In production, this would initiate MFA challenge
+            # In production, this would initiate MFA challenge
             logger.info(f"MFA required for user {username}")
-            ***REMOVED*** For now, assume MFA verification
+            # For now, assume MFA verification
             mfa_verified = True
         else:
             mfa_verified = False
 
-        ***REMOVED*** Create session
+        # Create session
         session_token = self._create_user_session(user.id, ip_address, user_agent, device_fingerprint, mfa_verified)
 
         self._log_access_attempt(user.id, username, "authentication", "login", True,
@@ -482,7 +482,7 @@ class ISO27001AccessControl:
         """Create user session and return token"""
         session_id = str(uuid.uuid4())
 
-        ***REMOVED*** Create JWT token
+        # Create JWT token
         payload = {
             'user_id': user_id,
             'session_id': session_id,
@@ -516,27 +516,27 @@ class ISO27001AccessControl:
         Authorize access to resource
         Returns: (authorized, reason)
         """
-        ***REMOVED*** Validate session
+        # Validate session
         session = self._validate_session(session_token)
         if not session:
             return False, "Invalid or expired session"
 
-        ***REMOVED*** Update session activity
+        # Update session activity
         session.last_activity = datetime.utcnow()
 
-        ***REMOVED*** Get user
+        # Get user
         user = self.users.get(session.user_id)
         if not user or not user.is_active:
             return False, "User account inactive"
 
-        ***REMOVED*** Check account lockout
+        # Check account lockout
         if user.account_locked_until and user.account_locked_until > datetime.utcnow():
             return False, "Account temporarily locked"
 
-        ***REMOVED*** Evaluate access policies
+        # Evaluate access policies
         authorized, reason = self._evaluate_access_policies(user, resource, action, session, ip_address)
 
-        ***REMOVED*** Log access attempt
+        # Log access attempt
         self._log_access_attempt(
             user.id, user.username, resource, action, authorized,
             reason, ip_address, session.user_agent, session.id,
@@ -555,12 +555,12 @@ class ISO27001AccessControl:
             if not session or session.status != SessionStatus.ACTIVE:
                 return None
 
-            ***REMOVED*** Check expiration
+            # Check expiration
             if session.expires_at < datetime.utcnow():
                 session.status = SessionStatus.EXPIRED
                 return None
 
-            ***REMOVED*** Check idle timeout
+            # Check idle timeout
             idle_time = datetime.utcnow() - session.last_activity
             if idle_time > self.session_policy['idle_timeout']:
                 session.status = SessionStatus.EXPIRED
@@ -574,10 +574,10 @@ class ISO27001AccessControl:
     def _evaluate_access_policies(self, user: User, resource: str, action: str,
                                 session: UserSession, ip_address: str) -> Tuple[bool, str]:
         """Evaluate access control policies"""
-        ***REMOVED*** Get user permissions (from roles)
+        # Get user permissions (from roles)
         user_permissions = self._get_user_permissions(user.id)
 
-        ***REMOVED*** Check resource-specific permissions
+        # Check resource-specific permissions
         required_level = self._get_required_access_level(resource, action)
         user_level = user_permissions.get(resource, AccessLevel.NONE)
 
@@ -587,15 +587,15 @@ class ISO27001AccessControl:
         if not self._level_satisfies_requirement(user_level, required_level):
             return False, "Insufficient access level"
 
-        ***REMOVED*** Check MFA requirements
+        # Check MFA requirements
         if self._requires_mfa(user, f"{resource}:{action}") and not session.mfa_verified:
             return False, "MFA verification required"
 
-        ***REMOVED*** Check time-based restrictions
+        # Check time-based restrictions
         if not self._check_time_restrictions(user.id, resource, action):
             return False, "Access outside allowed time window"
 
-        ***REMOVED*** Check IP restrictions
+        # Check IP restrictions
         if not self._check_ip_restrictions(user.id, ip_address):
             return False, "Access from unauthorized IP address"
 
@@ -603,14 +603,14 @@ class ISO27001AccessControl:
 
     def _get_user_permissions(self, user_id: str) -> Dict[str, AccessLevel]:
         """Get effective permissions for user"""
-        ***REMOVED*** In production, this would aggregate permissions from all user roles
+        # In production, this would aggregate permissions from all user roles
         permissions = {}
 
-        ***REMOVED*** Simplified: assume users have permissions based on their role type
+        # Simplified: assume users have permissions based on their role type
         user = self.users.get(user_id)
         if user:
             if user.role_type == RoleType.SYSTEM_ADMIN:
-                permissions = {resource: AccessLevel.ADMIN for resource in ['*']}  ***REMOVED*** All resources
+                permissions = {resource: AccessLevel.ADMIN for resource in ['*']}  # All resources
             elif user.role_type == RoleType.SECURITY_ADMIN:
                 permissions = {
                     'security': AccessLevel.ADMIN,
@@ -629,7 +629,7 @@ class ISO27001AccessControl:
 
     def _get_required_access_level(self, resource: str, action: str) -> AccessLevel:
         """Get required access level for resource and action"""
-        ***REMOVED*** Define access requirements
+        # Define access requirements
         requirements = {
             'admin': AccessLevel.ADMIN,
             'security': AccessLevel.ADMIN,
@@ -640,7 +640,7 @@ class ISO27001AccessControl:
             'public_data': AccessLevel.READ
         }
 
-        ***REMOVED*** Map actions to levels
+        # Map actions to levels
         action_levels = {
             'create': AccessLevel.WRITE,
             'read': AccessLevel.READ,
@@ -652,7 +652,7 @@ class ISO27001AccessControl:
         base_level = requirements.get(resource, AccessLevel.NONE)
         action_level = action_levels.get(action, AccessLevel.NONE)
 
-        ***REMOVED*** Return the more restrictive level
+        # Return the more restrictive level
         return max(base_level, action_level, key=lambda x: x.value)
 
     def _level_satisfies_requirement(self, user_level: AccessLevel, required_level: AccessLevel) -> bool:
@@ -670,12 +670,12 @@ class ISO27001AccessControl:
 
     def _check_time_restrictions(self, user_id: str, resource: str, action: str) -> bool:
         """Check time-based access restrictions"""
-        ***REMOVED*** Simplified: no time restrictions for now
+        # Simplified: no time restrictions for now
         return True
 
     def _check_ip_restrictions(self, user_id: str, ip_address: str) -> bool:
         """Check IP-based access restrictions"""
-        ***REMOVED*** Simplified: no IP restrictions for now
+        # Simplified: no IP restrictions for now
         return True
 
     def _log_access_attempt(self, user_id: Optional[str], username: str, resource: str,
@@ -724,35 +724,35 @@ class ISO27001AccessControl:
         if not user:
             return False
 
-        ***REMOVED*** Verify old password
+        # Verify old password
         if not user.password_hash or not self._verify_password(old_password, user.password_hash):
             return False
 
-        ***REMOVED*** Validate new password
+        # Validate new password
         self._validate_password_complexity(new_password)
 
-        ***REMOVED*** Check password history (simplified)
+        # Check password history (simplified)
         if user.password_changed_at:
             min_age = self.security_policies['authentication']['password_min_age']
             if datetime.utcnow() - user.password_changed_at < min_age:
                 raise ValueError("Password changed too recently")
 
-        ***REMOVED*** Hash and update password
+        # Hash and update password
         user.password_hash = self._hash_password(new_password)
         user.password_changed_at = datetime.utcnow()
-        user.failed_login_attempts = 0  ***REMOVED*** Reset failed attempts
+        user.failed_login_attempts = 0  # Reset failed attempts
 
         logger.info(f"Password changed for user: {user.username}")
         return True
 
     def get_access_control_status(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Get comprehensive access control status"""
-        ***REMOVED*** Filter data by tenant
+        # Filter data by tenant
         tenant_users = [u for u in self.users.values() if u.id.startswith(tenant_id)]
         tenant_sessions = [s for s in self.active_sessions.values() if s.user_id.startswith(tenant_id)]
         recent_attempts = [a for a in self.access_attempts[-1000:] if a.user_id and a.user_id.startswith(tenant_id)]
 
-        ***REMOVED*** Calculate metrics
+        # Calculate metrics
         user_stats = self._calculate_user_statistics(tenant_users)
         session_stats = self._calculate_session_statistics(tenant_sessions)
         access_stats = self._calculate_access_statistics(recent_attempts)
@@ -815,7 +815,7 @@ class ISO27001AccessControl:
         successful_attempts = len([a for a in attempts if a.success])
         success_rate = (successful_attempts / total_attempts * 100) if total_attempts > 0 else 0
 
-        ***REMOVED*** Calculate failure reasons
+        # Calculate failure reasons
         failure_reasons = {}
         for attempt in attempts:
             if not attempt.success:
@@ -834,20 +834,20 @@ class ISO27001AccessControl:
         """Assess ISO 27001 access control compliance"""
         issues = []
 
-        ***REMOVED*** Check MFA adoption
+        # Check MFA adoption
         mfa_users = len([u for u in users if u.mfa_enabled])
-        if users and (mfa_users / len(users)) < 0.8:  ***REMOVED*** Less than 80% MFA adoption
+        if users and (mfa_users / len(users)) < 0.8:  # Less than 80% MFA adoption
             issues.append("Insufficient MFA adoption")
 
-        ***REMOVED*** Check failed login attempts
+        # Check failed login attempts
         if attempts:
             failed_rate = len([a for a in attempts if not a.success]) / len(attempts)
-            if failed_rate > 0.1:  ***REMOVED*** More than 10% failures
+            if failed_rate > 0.1:  # More than 10% failures
                 issues.append("High rate of access failures")
 
-        ***REMOVED*** Check account lockouts
+        # Check account lockouts
         locked_users = len([u for u in users if u.account_locked_until and u.account_locked_until > datetime.utcnow()])
-        if locked_users > len(users) * 0.05:  ***REMOVED*** More than 5% accounts locked
+        if locked_users > len(users) * 0.05:  # More than 5% accounts locked
             issues.append("Excessive account lockouts")
 
         compliance_score = max(0, 100 - (len(issues) * 10))
@@ -880,7 +880,7 @@ class ISO27001AccessControl:
         """Get active access control alerts"""
         alerts = []
 
-        ***REMOVED*** Check for suspicious login patterns
+        # Check for suspicious login patterns
         recent_attempts = [a for a in self.access_attempts[-100:] if a.user_id and a.user_id.startswith(tenant_id)]
         failed_attempts = [a for a in recent_attempts if not a.success]
 
@@ -892,9 +892,9 @@ class ISO27001AccessControl:
                 'details': {'failed_attempts': len(failed_attempts)}
             })
 
-        ***REMOVED*** Check for accounts with excessive failed attempts
+        # Check for accounts with excessive failed attempts
         user_failures = {}
-        for attempt in failed_attempts[-50:]:  ***REMOVED*** Last 50 failed attempts
+        for attempt in failed_attempts[-50:]:  # Last 50 failed attempts
             user_failures[attempt.user_id] = user_failures.get(attempt.user_id, 0) + 1
 
         for user_id, failures in user_failures.items():

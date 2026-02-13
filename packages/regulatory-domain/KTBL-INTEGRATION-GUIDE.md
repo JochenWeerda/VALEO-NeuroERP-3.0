@@ -1,6 +1,6 @@
-***REMOVED*** KTBL-Integration für THG-Berechnungen
+# KTBL-Integration für THG-Berechnungen
 
-***REMOVED******REMOVED*** 📋 Überblick
+## 📋 Überblick
 
 Die **regulatory-domain** bereitet die Integration mit der [KTBL BEK-Parameter-Datenbank](https://www.ktbl.de/webanwendungen/bek-parameter) vor.
 
@@ -8,7 +8,7 @@ Die **regulatory-domain** bereitet die Integration mit der [KTBL BEK-Parameter-D
 
 **BEK** = Berechnungsstandard für einzelbetriebliche Klimabilanzen
 
-***REMOVED******REMOVED*** 🎯 Zweck
+## 🎯 Zweck
 
 Die KTBL-Datenbank liefert wissenschaftlich fundierte Parameter für Treibhausgas-Emissionen in der Landwirtschaft:
 
@@ -16,18 +16,18 @@ Die KTBL-Datenbank liefert wissenschaftlich fundierte Parameter für Treibhausga
 - **Indirekte Emissionen** - Aus Umsetzungen emittierter Substanzen
 - **Vorgelagerte Emissionen** - Aus Herstellung von Betriebsmitteln (Dünger, Pestizide, Diesel)
 
-***REMOVED******REMOVED*** ⚠️ Aktueller Status
+## ⚠️ Aktueller Status
 
 **Die KTBL-Webanwendung ist derzeit offline** (Stand: Oktober 2025)
 
 > _"Die Berechnungsparameter werden zur Zeit überarbeitet und stehen deshalb vorübergehend nicht zur Verfügung."_  
 > Quelle: [KTBL Website](https://www.ktbl.de/webanwendungen/bek-parameter)
 
-***REMOVED******REMOVED*** ✅ Implementierter Fallback-Mechanismus
+## ✅ Implementierter Fallback-Mechanismus
 
 Die regulatory-domain verwendet **Literaturwerte** bis KTBL wieder verfügbar ist:
 
-***REMOVED******REMOVED******REMOVED*** Fallback-Daten (kg CO2eq/t)
+### Fallback-Daten (kg CO2eq/t)
 
 | Crop | Direct | Indirect | Upstream | Total |
 |------|--------|----------|----------|-------|
@@ -39,9 +39,9 @@ Die regulatory-domain verwendet **Literaturwerte** bis KTBL wieder verfügbar is
 
 Quellen: KTBL-Schriften (ältere Versionen), RED II Annex V, Literaturwerte
 
-***REMOVED******REMOVED*** 🔧 Integration vorbereitet
+## 🔧 Integration vorbereitet
 
-***REMOVED******REMOVED******REMOVED*** 1. KTBL-API-Client
+### 1. KTBL-API-Client
 
 **Datei:** `src/infra/integrations/ktbl-api.ts`
 
@@ -60,7 +60,7 @@ await calculateCropEmissions('Raps', {
 await getKTBLStatus();
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. GHG-Service integriert KTBL
+### 2. GHG-Service integriert KTBL
 
 **Automatische Nutzung** bei `method: 'Actual'`:
 
@@ -78,7 +78,7 @@ POST /regulatory/api/v1/ghg/calc
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. API-Endpunkte
+### 3. API-Endpunkte
 
 ```
 GET  /regulatory/api/v1/ktbl/status
@@ -86,28 +86,28 @@ GET  /regulatory/api/v1/ktbl/crop-emissions/:crop?region=
 POST /regulatory/api/v1/ktbl/calculate
 ```
 
-***REMOVED******REMOVED*** 🚀 Aktivierung (sobald KTBL online)
+## 🚀 Aktivierung (sobald KTBL online)
 
-***REMOVED******REMOVED******REMOVED*** Option 1: REST-API (falls KTBL bereitstellt)
+### Option 1: REST-API (falls KTBL bereitstellt)
 
 ```env
-***REMOVED*** .env
+# .env
 KTBL_API_ENABLED=true
 KTBL_API_URL=https://www.ktbl.de/api/bek-parameter
-KTBL_API_KEY=your-api-key  ***REMOVED*** Falls erforderlich
+KTBL_API_KEY=your-api-key  # Falls erforderlich
 ```
 
-***REMOVED******REMOVED******REMOVED*** Option 2: CSV-Import
+### Option 2: CSV-Import
 
 ```bash
-***REMOVED*** Download KTBL CSV-Export
+# Download KTBL CSV-Export
 curl -O https://www.ktbl.de/downloads/bek-parameters.csv
 
-***REMOVED*** Import in DB
+# Import in DB
 npm run ktbl:import -- bek-parameters.csv
 ```
 
-***REMOVED******REMOVED******REMOVED*** Option 3: Web-Scraping
+### Option 3: Web-Scraping
 
 ```typescript
 // Implementierung in ktbl-api.ts
@@ -117,11 +117,11 @@ async function scrapeKTBLWebsite(crop: string) {
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Option 4: Lizensierte Datenbank
+### Option 4: Lizensierte Datenbank
 
 Kontakt: **ktbl@ktbl.de**
 
-***REMOVED******REMOVED*** 📊 Vorteile der KTBL-Integration
+## 📊 Vorteile der KTBL-Integration
 
 | Vorteil | Beschreibung |
 |---------|--------------|
@@ -131,9 +131,9 @@ Kontakt: **ktbl@ktbl.de**
 | **Detailliert** | Breakdown nach Emissionsquellen |
 | **Rechtssicher** | Anerkannt für Klimabilanzen |
 
-***REMOVED******REMOVED*** 🔄 Workflow mit KTBL
+## 🔄 Workflow mit KTBL
 
-***REMOVED******REMOVED******REMOVED*** Aktuell (Fallback)
+### Aktuell (Fallback)
 ```
 GHG-Calculation (Actual)
   → Operator Data (cultivationEmissions)
@@ -141,7 +141,7 @@ GHG-Calculation (Actual)
   → Result mit "Fallback Values"
 ```
 
-***REMOVED******REMOVED******REMOVED*** Mit KTBL (zukünftig)
+### Mit KTBL (zukünftig)
 ```
 GHG-Calculation (Actual)
   → KTBL-Lookup (crop, region, yield, N-fertilizer)
@@ -151,30 +151,30 @@ GHG-Calculation (Actual)
   → Result mit "KTBL BEK 2025"
 ```
 
-***REMOVED******REMOVED*** 📈 Emissionsanpassungen
+## 📈 Emissionsanpassungen
 
-***REMOVED******REMOVED******REMOVED*** Yield-Adjustment
+### Yield-Adjustment
 ```typescript
 // Höherer Ertrag = niedrigere Emissionen pro Tonne
 emissionsPerTon = ktbl.emissions.total * (ktbl.yieldPerHa / actualYieldPerHa)
 ```
 
-***REMOVED******REMOVED******REMOVED*** Fertilizer-Adjustment
+### Fertilizer-Adjustment
 ```typescript
 // Mehr N-Dünger = höhere N2O-Emissionen
 additionalN2O = (actualFertilizer - ktbl.nitrogenFertilizer) * 4.5  // IPCC-Faktor
 ```
 
-***REMOVED******REMOVED*** 🧪 Testing
+## 🧪 Testing
 
 ```bash
-***REMOVED*** Test KTBL status
+# Test KTBL status
 curl http://localhost:3008/regulatory/api/v1/ktbl/status
 
-***REMOVED*** Test crop emissions
+# Test crop emissions
 curl "http://localhost:3008/regulatory/api/v1/ktbl/crop-emissions/Raps?region=DE21"
 
-***REMOVED*** Test calculation
+# Test calculation
 curl -X POST http://localhost:3008/regulatory/api/v1/ktbl/calculate \
   -H "Content-Type: application/json" \
   -d '{
@@ -185,26 +185,26 @@ curl -X POST http://localhost:3008/regulatory/api/v1/ktbl/calculate \
   }'
 ```
 
-***REMOVED******REMOVED*** 📚 Quellen
+## 📚 Quellen
 
 - **KTBL Website:** [ktbl.de](https://www.ktbl.de)
 - **BEK-Parameter:** [ktbl.de/webanwendungen/bek-parameter](https://www.ktbl.de/webanwendungen/bek-parameter)
 - **KTBL-Schriften:** [ktbl.de/themen/klima](https://www.ktbl.de/themen/klima)
 - **Kontakt:** ktbl@ktbl.de, +49 6151 7001-0
 
-***REMOVED******REMOVED*** 📞 Nächste Schritte
+## 📞 Nächste Schritte
 
 1. **Monitoring** - Prüfe regelmäßig ob KTBL-Webanwendung wieder online
 2. **Kontakt** - Anfrage an KTBL bzgl. API-Zugang oder CSV-Export
 3. **Alternative** - Prüfe andere Datenquellen (z.B. Agri-footprint, Ecoinvent)
 4. **Validierung** - Vergleiche Fallback-Werte mit KTBL sobald verfügbar
 
-***REMOVED******REMOVED*** ⚡ Quick Start (aktuell)
+## ⚡ Quick Start (aktuell)
 
 Die KTBL-Integration ist **bereits implementiert** und nutzt automatisch Fallback-Daten:
 
 ```bash
-***REMOVED*** GHG-Berechnung mit KTBL-Fallback
+# GHG-Berechnung mit KTBL-Fallback
 POST /regulatory/api/v1/ghg/calc
 {
   "commodity": "RAPE_OIL",
@@ -217,12 +217,12 @@ POST /regulatory/api/v1/ghg/calc
   "originRegion": "DE21"
 }
 
-***REMOVED*** Response enthält:
-***REMOVED*** - cultivationEmissions (aus KTBL-Fallback)
-***REMOVED*** - dataSource: "Fallback Values (KTBL offline)"
+# Response enthält:
+# - cultivationEmissions (aus KTBL-Fallback)
+# - dataSource: "Fallback Values (KTBL offline)"
 ```
 
-***REMOVED******REMOVED*** 🎯 Production-Ready
+## 🎯 Production-Ready
 
 ✅ Fallback-Mechanismus funktioniert  
 ✅ Cache-Strategie implementiert (7 Tage)  
@@ -235,3 +235,4 @@ POST /regulatory/api/v1/ghg/calc
 **Status:** ✅ Implementiert & Ready for KTBL-Activation  
 **Wartend auf:** KTBL BEK-Parameter-Webanwendung  
 **Alternative:** Fallback-Daten basierend auf Literatur
+

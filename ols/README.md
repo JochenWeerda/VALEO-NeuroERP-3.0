@@ -1,17 +1,17 @@
-***REMOVED*** VALEO NeuroERP 3.0 – Engineering Tooling
+# VALEO NeuroERP 3.0 – Engineering Tooling
 
 The `tools/` workspace hosts the scripts that automated the CRM migration and will be reused for upcoming domains. Combine this README with the curated manifest in [`tools/migration/CRM_TOOLKIT.md`](migration/CRM_TOOLKIT.md) for a quick start.
 
-***REMOVED******REMOVED*** Prerequisites
+## Prerequisites
 
 - **Node.js = 18** with npm workspaces enabled.
 - **ts-node** included in workspace devDependencies; run tooling with `ts-node …`.
 - **Python = 3.10** for the legacy inventory helper.
 - **PostgreSQL client connectivity** (Docker compose spins up local instances; environment variables such as `CRM_DATABASE_URL`, `ERP_DATABASE_URL` must be exported before running repositories/tests).
 
-***REMOVED******REMOVED*** Tool Catalog
+## Tool Catalog
 
-***REMOVED******REMOVED******REMOVED*** Code Generation (`tools/codegen`)
+### Code Generation (`tools/codegen`)
 
 | Script | Description | Typical Usage |
 | --- | --- | --- |
@@ -24,7 +24,7 @@ The `tools/` workspace hosts the scripts that automated the CRM migration and wi
 - Store reusable field definitions in `memory-bank/schema-registry.json` and feed them into the generators in upcoming sprints.
 - Generated imports follow conventional filenames; adjust when the target directory deviates.
 
-***REMOVED******REMOVED******REMOVED*** Migration (`tools/migration`)
+### Migration (`tools/migration`)
 
 | Script | Description | Typical Usage |
 | --- | --- | --- |
@@ -36,28 +36,28 @@ The `tools/` workspace hosts the scripts that automated the CRM migration and wi
 - Prefix filenames with an ordinal (`001_`, `002_`) to preserve execution order.
 - The CRM Docker compose file already sets `CRM_DATABASE_URL`; replicate the pattern for other domains before running migrations inside containers.
 
-***REMOVED******REMOVED******REMOVED*** Testing (`tools/testing`)
+### Testing (`tools/testing`)
 
 Existing helpers (coverage reporter, watch scripts) rely on Jest. Update runners when adopting Vitest or other frameworks. Review each file before reuse; most expect a `--domains <name>` argument.
 
-***REMOVED******REMOVED*** CRM Toolkit Snapshot
+## CRM Toolkit Snapshot
 
 The CRM migration relied on a stable subset of scripts. The definitive manifest, usage notes, and lessons learned live in [`tools/migration/CRM_TOOLKIT.md`](migration/CRM_TOOLKIT.md). Treat that file as the authoritative checklist when starting another domain.
 
-***REMOVED******REMOVED*** Adding New Tools
+## Adding New Tools
 
 1. Place new helpers under an appropriate subdirectory (`codegen`, `migration`, `testing`, `ci`).
 2. Document the script at the top of the file and add a short entry to the tables above.
 3. Update the memory bank (see `memory-bank/migration`) with scenarios and pitfalls discovered during use.
 
-***REMOVED******REMOVED*** Known Limitations & Follow-up
+## Known Limitations & Follow-up
 
 - `run_sql_migration.ts` currently processes a single file. Wrap it in a shell loop or extend it to walk a directory when batch execution is required.
 - The code generators do not yet consume the planned `schema-registry.json`. Capture descriptors during ERP analysis and patch the generators to ingest them in the next sprint.
 - Some generated paths point to placeholders (e.g. `@packages/utilities/service-locator`). Ensure those packages exist before committing the output.
 - If TypeScript path aliases diverge from defaults, pass the `TS_NODE_PROJECT` environment variable so `ts-node` resolves the correct `tsconfig.json`.
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
 | Symptom | Resolution |
 | --- | --- |
@@ -67,3 +67,4 @@ The CRM migration relied on a stable subset of scripts. The definitive manifest,
 | Generated repositories fail tests due to missing pool | Import and invoke `getPostgresPool({ connectionString, name })` before executing queries, and dispose pools (`disposePools()`) in `afterAll`. |
 
 Keep this README concise and factual; detailed run-books belong in the memory bank.
+

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 🔍 OSTFRIESLAND-SUCHE in GAP-CSV
 Suche nach Emden, Moormerland, Ihlow in der gesamten CSV
@@ -23,7 +23,7 @@ def search_ostfriesland():
         with open(csv_path, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')
             
-            ***REMOVED*** Header anzeigen
+            # Header anzeigen
             headers = reader.fieldnames
             print(f"📊 CSV-Header ({len(headers)} Spalten):")
             for i, header in enumerate(headers[:10]):
@@ -38,35 +38,35 @@ def search_ostfriesland():
             for row_num, row in enumerate(reader, 1):
                 total_rows = row_num
                 
-                ***REMOVED*** Progress alle 100.000 Zeilen
+                # Progress alle 100.000 Zeilen
                 if row_num % 100000 == 0:
                     print(f"📊 Zeile {row_num:,}: {len(results)} Treffer gefunden")
                 
-                ***REMOVED*** Alle Spalten nach Suchbegriffen durchsuchen
+                # Alle Spalten nach Suchbegriffen durchsuchen
                 row_found = False
                 found_terms = []
                 row_data = {}
                 
                 for key, value in row.items():
-                    if value:  ***REMOVED*** Nur nicht-leere Werte
+                    if value:  # Nur nicht-leere Werte
                         value_lower = value.lower()
                         for term in search_terms:
                             if term in value_lower:
                                 if not row_found:
-                                    ***REMOVED*** Ersten Treffer in dieser Zeile - alle Daten sammeln
+                                    # Ersten Treffer in dieser Zeile - alle Daten sammeln
                                     row_data = {
                                         'row_number': row_num,
                                         'plz': row.get('PLZ', '').strip(),
                                         'name': row.get('Name des Begünstigten/Rechtsträgers/Verdands', '').strip(),
                                         'city': row.get('Gemeinde', '').strip(),
-                                        'full_row': dict(row)  ***REMOVED*** Komplette Zeile für Analyse
+                                        'full_row': dict(row)  # Komplette Zeile für Analyse
                                     }
                                     row_found = True
                                 
                                 if term not in found_terms:
                                     found_terms.append(term)
                                     
-                                ***REMOVED*** Sofort ausgeben für ersten Treffer
+                                # Sofort ausgeben für ersten Treffer
                                 if len(results) == 0:
                                     print(f"🎯 ERSTER TREFFER GEFUNDEN!")
                                     print(f"   Zeile: {row_num}")
@@ -81,16 +81,16 @@ def search_ostfriesland():
                     row_data['found_terms'] = found_terms
                     results.append(row_data)
                     
-                    ***REMOVED*** Nach 10 Treffern Details ausgeben
+                    # Nach 10 Treffern Details ausgeben
                     if len(results) <= 10:
-                        print(f"🏘️ TREFFER ***REMOVED***{len(results)}:")
+                        print(f"🏘️ TREFFER #{len(results)}:")
                         print(f"   Zeile {row_num}: PLZ {row_data['plz']}")
                         print(f"   Name: {row_data['name'][:50]}...")
                         print(f"   Stadt: {row_data['city']}")
                         print(f"   Gefunden: {', '.join(found_terms)}")
                         print()
                 
-                ***REMOVED*** Stopp nach erstem Treffer falls gewünscht
+                # Stopp nach erstem Treffer falls gewünscht
                 if len(results) >= 1:
                     print("⏹️ STOPP nach erstem Treffer für Analyse")
                     break
@@ -101,7 +101,7 @@ def search_ostfriesland():
         traceback.print_exc()
         return
     
-    ***REMOVED*** Ergebnisse zusammenfassen
+    # Ergebnisse zusammenfassen
     print()
     print("📋 ENDERGEBNIS:")
     print("="*60)
@@ -111,22 +111,22 @@ def search_ostfriesland():
     if results:
         print()
         print("🏘️ GEFUNDENE OSTFRIESISCHE ORTE:")
-        for i, result in enumerate(results[:5], 1):  ***REMOVED*** Erste 5 Treffer
+        for i, result in enumerate(results[:5], 1):  # Erste 5 Treffer
             print(f"\n{i}. Zeile {result['row_number']}:")
             print(f"   PLZ: {result['plz']}")
             print(f"   Name: {result['name'][:60]}...")
             print(f"   Stadt: {result['city']}")
             print(f"   Suchbegriffe: {', '.join(result['found_terms'])}")
             
-            ***REMOVED*** Vollständige Zeile für ersten Treffer
+            # Vollständige Zeile für ersten Treffer
             if i == 1:
-                print(f"\n📋 VOLLSTÄNDIGE ZEILEN-ANALYSE (Treffer ***REMOVED***{i}):")
+                print(f"\n📋 VOLLSTÄNDIGE ZEILEN-ANALYSE (Treffer #{i}):")
                 print("-" * 40)
                 for key, value in result['full_row'].items():
-                    if value and value.strip():  ***REMOVED*** Nur nicht-leere Werte
+                    if value and value.strip():  # Nur nicht-leere Werte
                         print(f"   {key}: {value}")
         
-        ***REMOVED*** PLZ-Auswertung
+        # PLZ-Auswertung
         found_plz = [r['plz'] for r in results if r['plz']]
         if found_plz:
             print(f"\n📍 GEFUNDENE PLZ-BEREICHE:")
@@ -142,4 +142,5 @@ def search_ostfriesland():
 
 if __name__ == "__main__":
     search_ostfriesland()
+
 

@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  ***REMOVED*** PostgreSQL für Guacamole
+  # PostgreSQL für Guacamole
   postgres:
     image: postgres:14
     container_name: guac-postgres
@@ -16,7 +16,7 @@ services:
     networks:
       - guac-network
 
-  ***REMOVED*** Guacamole Daemon
+  # Guacamole Daemon
   guacd:
     image: guacamole/guacd:latest
     container_name: guacd
@@ -24,7 +24,7 @@ services:
     networks:
       - guac-network
 
-  ***REMOVED*** Guacamole Web-UI
+  # Guacamole Web-UI
   guacamole:
     image: guacamole/guacamole:latest
     container_name: guacamole
@@ -45,7 +45,7 @@ services:
     networks:
       - guac-network
 
-  ***REMOVED*** Webtop (Linux Desktop im Browser - optional)
+  # Webtop (Linux Desktop im Browser - optional)
   webtop:
     image: lscr.io/linuxserver/webtop:ubuntu-xfce
     container_name: webtop
@@ -59,7 +59,7 @@ services:
       - ./webtop-config:/config
       - ./l3-screenshots:/config/screenshots
     ports:
-      - "3001:3000"  ***REMOVED*** Port 3001 (Frontend läuft auf 3000)
+      - "3001:3000"  # Port 3001 (Frontend läuft auf 3000)
     shm_size: "2gb"
     restart: unless-stopped
     networks:
@@ -72,4 +72,5 @@ networks:
 volumes:
   pg-data:
   webtop-config:
+
 

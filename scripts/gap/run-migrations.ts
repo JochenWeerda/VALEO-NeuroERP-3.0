@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env ts-node
+#!/usr/bin/env ts-node
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { db } from './db'
@@ -46,4 +46,5 @@ async function main() {
 }
 
 main().catch(console.error)
+
 

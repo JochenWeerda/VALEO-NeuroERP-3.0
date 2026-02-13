@@ -1,12 +1,12 @@
-***REMOVED*** MCP Browser Berechtigungen - "Run this time only" umgehen
+# MCP Browser Berechtigungen - "Run this time only" umgehen
 
-***REMOVED******REMOVED*** Problem
+## Problem
 
 Bei der Verwendung des MCP Browser-Tools in Cursor erscheinen "run this time only" Meldungen, die bei jeder Ausführung bestätigt werden müssen.
 
-***REMOVED******REMOVED*** Lösungen
+## Lösungen
 
-***REMOVED******REMOVED******REMOVED*** Lösung 1: Cursor-Einstellungen (Empfohlen)
+### Lösung 1: Cursor-Einstellungen (Empfohlen)
 
 1. **Cursor-Einstellungen öffnen:**
    - `File > Preferences > Settings` (oder `Ctrl+,`)
@@ -20,7 +20,7 @@ Bei der Verwendung des MCP Browser-Tools in Cursor erscheinen "run this time onl
    - Setze `cursor.mcp.browser.autoApprove` auf `true`
    - Oder: `mcp.browser.autoApproveActions` auf `true`
 
-***REMOVED******REMOVED******REMOVED*** Lösung 2: Cursor Settings JSON
+### Lösung 2: Cursor Settings JSON
 
 1. **Settings JSON öffnen:**
    - `Ctrl+Shift+P` (oder `Cmd+Shift+P` auf Mac)
@@ -48,7 +48,7 @@ Bei der Verwendung des MCP Browser-Tools in Cursor erscheinen "run this time onl
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Lösung 3: Workspace-spezifische Einstellungen
+### Lösung 3: Workspace-spezifische Einstellungen
 
 Erstelle eine `.vscode/settings.json` im Projekt-Root:
 
@@ -63,7 +63,7 @@ Erstelle eine `.vscode/settings.json` im Projekt-Root:
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Lösung 4: MCP-Server-Konfiguration
+### Lösung 4: MCP-Server-Konfiguration
 
 Falls der MCP-Server eine Konfigurationsdatei hat, füge dort hinzu:
 
@@ -83,7 +83,7 @@ Falls der MCP-Server eine Konfigurationsdatei hat, füge dort hinzu:
 }
 ```
 
-***REMOVED******REMOVED*** Verifikation
+## Verifikation
 
 Nach dem Setzen der Einstellungen:
 
@@ -96,28 +96,28 @@ Nach dem Setzen der Einstellungen:
 
 3. **Prüfe, ob keine Dialoge mehr erscheinen**
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: Einstellungen werden nicht übernommen
+### Problem: Einstellungen werden nicht übernommen
 
 **Lösung:**
 - Cursor komplett neu starten
 - Prüfe, ob die Einstellungen in der JSON-Datei korrekt sind
 - Prüfe, ob es Konflikte mit anderen Einstellungen gibt
 
-***REMOVED******REMOVED******REMOVED*** Problem: Nur bestimmte Aktionen werden automatisch genehmigt
+### Problem: Nur bestimmte Aktionen werden automatisch genehmigt
 
 **Lösung:**
 - Erweitere die `autoApproveActions` Liste
 - Oder setze `autoApproveActions: "*"` für alle Aktionen
 
-***REMOVED******REMOVED******REMOVED*** Problem: Sicherheitswarnungen erscheinen weiterhin
+### Problem: Sicherheitswarnungen erscheinen weiterhin
 
 **Lösung:**
 - Füge die Domains zu `trustedDomains` hinzu
 - Prüfe, ob die Domain-Formatierung korrekt ist (mit/ohne Protokoll)
 
-***REMOVED******REMOVED*** Best Practices
+## Best Practices
 
 1. **Nur vertrauenswürdige Domains hinzufügen:**
    - Nicht für öffentliche/unsichere Domains verwenden
@@ -131,12 +131,12 @@ Nach dem Setzen der Einstellungen:
    - Verwende `.vscode/settings.json` für projektspezifische Einstellungen
    - Nicht global für alle Projekte
 
-***REMOVED******REMOVED*** Alternative: Script-basierte Lösung
+## Alternative: Script-basierte Lösung
 
 Falls die Einstellungen nicht funktionieren, kann ein Script die Berechtigungen setzen:
 
 ```powershell
-***REMOVED*** Windows PowerShell
+# Windows PowerShell
 $settingsPath = "$env:APPDATA\Cursor\User\settings.json"
 $settings = Get-Content $settingsPath | ConvertFrom-Json
 $settings.'cursor.mcp.browser.autoApprove' = $true
@@ -144,14 +144,15 @@ $settings | ConvertTo-Json -Depth 10 | Set-Content $settingsPath
 ```
 
 ```bash
-***REMOVED*** Linux/Mac
-***REMOVED*** Cursor Settings JSON bearbeiten
+# Linux/Mac
+# Cursor Settings JSON bearbeiten
 jq '. + {"cursor.mcp.browser.autoApprove": true}' ~/.config/Cursor/User/settings.json > /tmp/settings.json
 mv /tmp/settings.json ~/.config/Cursor/User/settings.json
 ```
 
-***REMOVED******REMOVED*** Weitere Informationen
+## Weitere Informationen
 
 - [Cursor MCP Documentation](https://docs.cursor.com/mcp)
 - [MCP Browser Tool Reference](https://modelcontextprotocol.io/tools/browser)
+
 

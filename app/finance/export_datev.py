@@ -13,7 +13,7 @@ from io import StringIO
 class DATEVExporter:
     """DATEV ASCII-Export Generator"""
     
-    ***REMOVED*** DATEV-Format Version
+    # DATEV-Format Version
     DATEV_VERSION = "700"
     
     def __init__(self, mandant_nr: str = "1000", berater_nr: str = "1000", wj_beginn: str = "0101"):
@@ -36,34 +36,34 @@ class DATEVExporter:
         output = StringIO()
         writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_MINIMAL)
         
-        ***REMOVED*** Header (Zeile 1)
+        # Header (Zeile 1)
         header_line1 = [
-            "EXTF",                    ***REMOVED*** Formatname
-            self.DATEV_VERSION,        ***REMOVED*** Versionsnummer
-            "21",                      ***REMOVED*** Datenkategorie (21 = Buchungsstapel)
-            "",                        ***REMOVED*** Formatname (leer)
-            "",                        ***REMOVED*** Formatversion (leer)
-            datetime.now().strftime("%Y%m%d%H%M%S"),  ***REMOVED*** Generiert am
-            "",                        ***REMOVED*** Importiert (leer)
-            "RE",                      ***REMOVED*** Herkunft (RE = Rechnungswesen)
-            "",                        ***REMOVED*** Exportiert von (leer)
-            "",                        ***REMOVED*** Importiert von (leer)
-            self.berater_nr,           ***REMOVED*** Beraternummer
-            self.mandant_nr,           ***REMOVED*** Mandantennummer
-            self.wj_beginn,            ***REMOVED*** WJ-Beginn
-            "4",                       ***REMOVED*** Sachkontenlänge
-            von_datum,                 ***REMOVED*** Datum von
-            bis_datum,                 ***REMOVED*** Datum bis
-            "",                        ***REMOVED*** Bezeichnung
-            "",                        ***REMOVED*** Diktatkürzel
-            "1",                       ***REMOVED*** Buchungstyp (1 = Finanzbuchführung)
-            "0",                       ***REMOVED*** Rechnungslegungszweck
-            "",                        ***REMOVED*** Festschreibung
-            "EUR"                      ***REMOVED*** Währungskennzeichen
+            "EXTF",                    # Formatname
+            self.DATEV_VERSION,        # Versionsnummer
+            "21",                      # Datenkategorie (21 = Buchungsstapel)
+            "",                        # Formatname (leer)
+            "",                        # Formatversion (leer)
+            datetime.now().strftime("%Y%m%d%H%M%S"),  # Generiert am
+            "",                        # Importiert (leer)
+            "RE",                      # Herkunft (RE = Rechnungswesen)
+            "",                        # Exportiert von (leer)
+            "",                        # Importiert von (leer)
+            self.berater_nr,           # Beraternummer
+            self.mandant_nr,           # Mandantennummer
+            self.wj_beginn,            # WJ-Beginn
+            "4",                       # Sachkontenlänge
+            von_datum,                 # Datum von
+            bis_datum,                 # Datum bis
+            "",                        # Bezeichnung
+            "",                        # Diktatkürzel
+            "1",                       # Buchungstyp (1 = Finanzbuchführung)
+            "0",                       # Rechnungslegungszweck
+            "",                        # Festschreibung
+            "EUR"                      # Währungskennzeichen
         ]
         writer.writerow(header_line1)
         
-        ***REMOVED*** Header (Zeile 2) - Spaltenbeschriftung
+        # Header (Zeile 2) - Spaltenbeschriftung
         header_line2 = [
             "Umsatz (ohne Soll/Haben-Kz)",
             "Soll/Haben-Kennzeichen",
@@ -184,47 +184,47 @@ class DATEVExporter:
         ]
         writer.writerow(header_line2)
         
-        ***REMOVED*** Buchungszeilen
+        # Buchungszeilen
         for buchung in buchungen:
             betrag = abs(Decimal(str(buchung.get('betrag', 0))))
             
-            ***REMOVED*** Soll/Haben bestimmen
-            ***REMOVED*** Bei DATEV: S = Soll, H = Haben
-            soll_haben = "S"  ***REMOVED*** Default
+            # Soll/Haben bestimmen
+            # Bei DATEV: S = Soll, H = Haben
+            soll_haben = "S"  # Default
             if betrag < 0:
                 soll_haben = "H"
                 betrag = abs(betrag)
             
-            ***REMOVED*** Datum formatieren (DDMM)
+            # Datum formatieren (DDMM)
             buchungsdatum = buchung.get('buchungsdatum', datetime.now())
             if isinstance(buchungsdatum, str):
                 buchungsdatum = datetime.strptime(buchungsdatum, "%Y-%m-%d")
             datum_ddmm = buchungsdatum.strftime("%d%m")
             
             buchungszeile = [
-                f"{betrag:.2f}".replace('.', ','),  ***REMOVED*** Umsatz
-                soll_haben,                          ***REMOVED*** Soll/Haben
-                "EUR",                               ***REMOVED*** Währung
-                "",                                  ***REMOVED*** Kurs
-                "",                                  ***REMOVED*** Basis-Umsatz
-                "",                                  ***REMOVED*** Währung Basis
-                buchung.get('soll_konto', ''),       ***REMOVED*** Konto
-                buchung.get('haben_konto', ''),      ***REMOVED*** Gegenkonto
-                buchung.get('steuerschluessel', ''), ***REMOVED*** BU-Schlüssel
-                datum_ddmm,                          ***REMOVED*** Belegdatum
-                buchung.get('belegnummer', '')[:36], ***REMOVED*** Belegfeld 1 (max 36 Zeichen)
-                "",                                  ***REMOVED*** Belegfeld 2
-                "",                                  ***REMOVED*** Skonto
-                buchung.get('buchungstext', '')[:60], ***REMOVED*** Buchungstext (max 60 Zeichen)
-                "",                                  ***REMOVED*** Postensperre
-                "",                                  ***REMOVED*** Diverse Adressnummer
-                "",                                  ***REMOVED*** Geschäftspartnerbank
-                "",                                  ***REMOVED*** Sachverhalt
-                "",                                  ***REMOVED*** Zinssperre
-                "",                                  ***REMOVED*** Beleglink
+                f"{betrag:.2f}".replace('.', ','),  # Umsatz
+                soll_haben,                          # Soll/Haben
+                "EUR",                               # Währung
+                "",                                  # Kurs
+                "",                                  # Basis-Umsatz
+                "",                                  # Währung Basis
+                buchung.get('soll_konto', ''),       # Konto
+                buchung.get('haben_konto', ''),      # Gegenkonto
+                buchung.get('steuerschluessel', ''), # BU-Schlüssel
+                datum_ddmm,                          # Belegdatum
+                buchung.get('belegnummer', '')[:36], # Belegfeld 1 (max 36 Zeichen)
+                "",                                  # Belegfeld 2
+                "",                                  # Skonto
+                buchung.get('buchungstext', '')[:60], # Buchungstext (max 60 Zeichen)
+                "",                                  # Postensperre
+                "",                                  # Diverse Adressnummer
+                "",                                  # Geschäftspartnerbank
+                "",                                  # Sachverhalt
+                "",                                  # Zinssperre
+                "",                                  # Beleglink
             ]
             
-            ***REMOVED*** Fülle restliche Felder mit leeren Werten auf (bis zu 116 Spalten)
+            # Fülle restliche Felder mit leeren Werten auf (bis zu 116 Spalten)
             while len(buchungszeile) < 116:
                 buchungszeile.append("")
             
@@ -252,9 +252,9 @@ class DATEVExporter:
         return filename
 
 
-***REMOVED*** Beispiel-Verwendung
+# Beispiel-Verwendung
 if __name__ == "__main__":
-    ***REMOVED*** Test-Buchungen
+    # Test-Buchungen
     test_buchungen = [
         {
             "betrag": 1190.00,
@@ -282,7 +282,7 @@ if __name__ == "__main__":
     print("DATEV-Export generiert:")
     print(csv_output)
     
-    ***REMOVED*** Datei speichern
+    # Datei speichern
     filename = exporter.save_to_file(csv_output)
     print(f"\n✅ Exportiert nach: {filename}")
 

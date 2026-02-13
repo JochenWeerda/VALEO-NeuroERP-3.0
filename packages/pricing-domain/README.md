@@ -1,10 +1,10 @@
-***REMOVED*** @valero-neuroerp/pricing-domain
+# @valero-neuroerp/pricing-domain
 
 **Pricing & Quote Calculation Engine** für VALEO-NeuroERP 3.0
 
 Zentrale Preisbildung für Landhandel (Getreide, Raps, Kraftfutter, Düngemittel).
 
-***REMOVED******REMOVED*** 📋 Überblick
+## 📋 Überblick
 
 Die Pricing-Domain ist verantwortlich für:
 
@@ -14,7 +14,7 @@ Die Pricing-Domain ist verantwortlich für:
 - **Steuer/Abgaben** - Als Stammdaten (KEINE Buchungslogik!)
 - **Price Quotes** - Berechnete Angebote (24h TTL)
 
-***REMOVED******REMOVED*** 🚫 Abgrenzung zu anderen Domains
+## 🚫 Abgrenzung zu anderen Domains
 
 | Domain | Was macht pricing NICHT |
 |--------|-------------------------|
@@ -25,9 +25,9 @@ Die Pricing-Domain ist verantwortlich für:
 
 **Pricing-Domain liefert NUR:** Berechnete Preise als Input für andere Domains!
 
-***REMOVED******REMOVED*** 🔄 Calculator-Pipeline
+## 🔄 Calculator-Pipeline
 
-***REMOVED******REMOVED******REMOVED*** 5-Stufen-Kalkulation
+### 5-Stufen-Kalkulation
 
 ```
 Input: { customerId, sku, qty, channel, ... }
@@ -45,34 +45,34 @@ Input: { customerId, sku, qty, channel, ... }
 Output: PriceQuote { components[], totalNet, totalGross }
 ```
 
-***REMOVED******REMOVED*** 🚀 Quick Start
+## 🚀 Quick Start
 
 ```bash
 npm install
 cp .env.example .env
 npm run migrate:up
-npm run dev  ***REMOVED*** Port 3060
+npm run dev  # Port 3060
 ```
 
-***REMOVED******REMOVED*** 📡 API-Endpunkte
+## 📡 API-Endpunkte
 
-***REMOVED******REMOVED******REMOVED*** Base URL
+### Base URL
 `http://localhost:3060/pricing/api/v1`
 
-***REMOVED******REMOVED******REMOVED*** Quotes (Kern-Feature!)
+### Quotes (Kern-Feature!)
 
 ```
 POST /quotes/calc       - Preis berechnen
 GET  /quotes/:id        - Quote abrufen
 ```
 
-***REMOVED******REMOVED******REMOVED*** Health
+### Health
 
 ```
 GET  /health, /ready, /live
 ```
 
-***REMOVED******REMOVED*** 💡 Beispiel: Quote berechnen
+## 💡 Beispiel: Quote berechnen
 
 ```bash
 POST /pricing/api/v1/quotes/calc
@@ -90,7 +90,7 @@ x-tenant-id: 123e4567-e89b-12d3-a456-426614174000
   }
 }
 
-***REMOVED*** Response:
+# Response:
 {
   "id": "quote-uuid",
   "tenantId": "...",
@@ -108,35 +108,35 @@ x-tenant-id: 123e4567-e89b-12d3-a456-426614174000
 }
 ```
 
-***REMOVED******REMOVED*** 🏗️ Domain-Modell
+## 🏗️ Domain-Modell
 
-***REMOVED******REMOVED******REMOVED*** 1. PriceList
+### 1. PriceList
 - Lines mit SKU/Commodity
 - Tier-Breaks (Staffelpreise)
 - Status: Draft → Active → Archived
 
-***REMOVED******REMOVED******REMOVED*** 2. ConditionSet
+### 2. ConditionSet
 - Customer/Segment-Konditionen
 - Rules: Discount, Markup, Rebate, Surcharge
 - Conflict-Strategy: Stack, MaxWins, FirstWins
 
-***REMOVED******REMOVED******REMOVED*** 3. DynamicFormula
+### 3. DynamicFormula
 - Expression: "MATIF_NOV + BASIS - FREIGHT"
 - Inputs: Index, Futures, Basis, FX
 - Rounding: step + mode
 - Caps: min/max
 
-***REMOVED******REMOVED******REMOVED*** 4. TaxChargeRef
+### 4. TaxChargeRef
 - VAT, Tax, Levy, Fee, Deposit
 - Method: ABS oder PCT
 - **Nur Stammdaten** (keine Buchung!)
 
-***REMOVED******REMOVED******REMOVED*** 5. PriceQuote
+### 5. PriceQuote
 - Calculated Components (Breakdown)
 - TTL: 24h
 - Für sales-domain
 
-***REMOVED******REMOVED*** 🔔 Domain-Events
+## 🔔 Domain-Events
 
 ```
 pricing.quote.calculated
@@ -145,31 +145,31 @@ pricing.conditions.created|updated
 pricing.formula.created|updated
 ```
 
-***REMOVED******REMOVED*** 🔗 Integration
+## 🔗 Integration
 
-***REMOVED******REMOVED******REMOVED*** → Sales Domain
+### → Sales Domain
 ```
 Price-Quote → Angebot/Order
 ```
 
-***REMOVED******REMOVED******REMOVED*** → Analytics Domain
+### → Analytics Domain
 ```
 Events → Margin-KPI, Elasticity
 ```
 
-***REMOVED******REMOVED******REMOVED*** ← Contracts Domain
+### ← Contracts Domain
 ```
 Futures-Referenzen
 ```
 
-***REMOVED******REMOVED*** 🧪 Testing
+## 🧪 Testing
 
 ```bash
 npm run test
 npm run test:coverage
 ```
 
-***REMOVED******REMOVED*** 📊 Observability
+## 📊 Observability
 
 - OpenTelemetry
 - Pino Logs
@@ -180,3 +180,4 @@ npm run test:coverage
 **Status:** ✅ Production-Ready (MVP)  
 **Port:** 3060  
 **Version:** 0.1.0
+

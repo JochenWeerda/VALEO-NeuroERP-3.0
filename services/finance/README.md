@@ -1,4 +1,4 @@
-***REMOVED*** Finance Service (GoBD Foundations)
+# Finance Service (GoBD Foundations)
 
 Dieser Service stellt die Python/FastAPI-Basis für die FiBu-Domain bereit, wie in `docs/specs/fibu_phase1_architecture.md` gefordert. Wichtige Eckpunkte:
 
@@ -7,7 +7,7 @@ Dieser Service stellt die Python/FastAPI-Basis für die FiBu-Domain bereit, wie 
 - **Domain**: `app/domains/finance/` enthält SQLAlchemy-Modelle, Repositories, Services und den FastAPI-Router (`/api/v1/...`).
 - **GoBD/Audit**: `finance_shared.gobd.audit_trail.GoBDAuditTrail` erzeugt Hash-Chains bei Journalbuchungen.
 
-***REMOVED******REMOVED*** Endpunkte (Phase 0)
+## Endpunkte (Phase 0)
 
 - `GET /health` & `GET /ready`: Service- und DB-Status.
 - `GET /api/v1/chart-of-accounts`: Seedet bei Bedarf Standardkonten und liefert sie zurück.
@@ -17,11 +17,12 @@ Dieser Service stellt die Python/FastAPI-Basis für die FiBu-Domain bereit, wie 
 
 Alle API-Aufrufe akzeptieren optional den Header `X-Tenant-ID`, sonst greift `DEFAULT_TENANT` aus den Settings.
 
-***REMOVED******REMOVED*** Tests
+## Tests
 
 ```
 python -m pytest services/finance/tests/unit/test_finance_api.py -q
 ```
 
 Die Tests setzen die SQLite-Datenbank (`finance.db`) jedes Mal zurück und prüfen Health, Kontenliste sowie Journalbuchungen.
+
 

@@ -1,8 +1,8 @@
-***REMOVED*** VALEO-NeuroERP Service-Konfiguration
-***REMOVED*** Zentrale Übersicht aller Services und ihrer Ports
+# VALEO-NeuroERP Service-Konfiguration
+# Zentrale Übersicht aller Services und ihrer Ports
 
 services:
-  ***REMOVED*** Frontend
+  # Frontend
   frontend:
     name: "Frontend (Vite Dev Server)"
     port: 3000
@@ -11,7 +11,7 @@ services:
     required: true
     type: "node"
     
-  ***REMOVED*** Backend
+  # Backend
   backend:
     name: "Backend (FastAPI/Uvicorn)"
     port: 8000
@@ -20,7 +20,7 @@ services:
     required: true
     type: "python"
     
-  ***REMOVED*** Database
+  # Database
   postgres:
     name: "PostgreSQL Database"
     port: 5432
@@ -30,17 +30,17 @@ services:
     required: true
     type: "docker"
     
-  ***REMOVED*** Cache
+  # Cache
   redis:
     name: "Redis Cache"
     port: 6379
     command: "docker"
     container: "valeo-redis"
     health_check: "docker exec valeo-redis redis-cli ping"
-    required: false  ***REMOVED*** Optional für Testing
+    required: false  # Optional für Testing
     type: "docker"
     
-  ***REMOVED*** Event Bus
+  # Event Bus
   nats:
     name: "NATS Event Bus"
     port: 4222
@@ -48,21 +48,21 @@ services:
     command: "docker"
     container: "valeo-nats"
     health_check: "curl -s http://localhost:8222/healthz"
-    required: false  ***REMOVED*** Optional für Testing
+    required: false  # Optional für Testing
     type: "docker"
     
-  ***REMOVED*** Authentication (Optional)
+  # Authentication (Optional)
   keycloak:
     name: "Keycloak Auth Server"
     port: 8080
     command: "docker"
     container: "valeo-keycloak"
     health_check: "curl -s http://localhost:8080/health/ready"
-    required: false  ***REMOVED*** Optional für Testing
+    required: false  # Optional für Testing
     type: "docker"
-    startup_time: 120  ***REMOVED*** Keycloak braucht länger zum Starten
+    startup_time: 120  # Keycloak braucht länger zum Starten
     
-  ***REMOVED*** Monitoring (Optional - nur für Production)
+  # Monitoring (Optional - nur für Production)
   prometheus:
     name: "Prometheus Metrics"
     port: 9090
@@ -74,7 +74,7 @@ services:
     
   grafana:
     name: "Grafana Dashboard"
-    port: 3001  ***REMOVED*** Nicht 3000 - das ist für Frontend!
+    port: 3001  # Nicht 3000 - das ist für Frontend!
     command: "docker"
     container: "valeo-grafana"
     health_check: "curl -s http://localhost:3001/api/health"
@@ -90,14 +90,14 @@ services:
     required: false
     type: "docker"
 
-***REMOVED*** Service-Abhängigkeiten
+# Service-Abhängigkeiten
 dependencies:
   backend:
-    - postgres  ***REMOVED*** Backend braucht PostgreSQL
+    - postgres  # Backend braucht PostgreSQL
   frontend:
-    - backend   ***REMOVED*** Frontend braucht Backend
+    - backend   # Frontend braucht Backend
 
-***REMOVED*** Startup-Reihenfolge
+# Startup-Reihenfolge
 startup_order:
   1:
     - postgres
@@ -107,13 +107,13 @@ startup_order:
     - backend
   3:
     - frontend
-  4:  ***REMOVED*** Optional
+  4:  # Optional
     - keycloak
     - prometheus
     - grafana
     - loki
 
-***REMOVED*** Testing-Minimal-Set (nur das Nötigste)
+# Testing-Minimal-Set (nur das Nötigste)
 testing_services:
   required:
     - postgres
@@ -121,4 +121,5 @@ testing_services:
     - frontend
   optional:
     - redis
+
 

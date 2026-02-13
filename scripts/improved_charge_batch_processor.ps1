@@ -1,22 +1,22 @@
-***REMOVED*** ===================================================
-***REMOVED*** Verbesserter Chargenbericht-Batchprozessor
-***REMOVED*** ===================================================
-***REMOVED*** Leistungsfähiger Batchprozessor mit paralleler Verarbeitung
-***REMOVED*** für die Generierung von Chargenberichten
-***REMOVED*** ===================================================
+# ===================================================
+# Verbesserter Chargenbericht-Batchprozessor
+# ===================================================
+# Leistungsfähiger Batchprozessor mit paralleler Verarbeitung
+# für die Generierung von Chargenberichten
+# ===================================================
 
-***REMOVED*** Lade Hilfsfunktionen
+# Lade Hilfsfunktionen
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 . "$scriptPath\powershell_compatibility.ps1"
 
-***REMOVED*** Banner anzeigen
+# Banner anzeigen
 Write-Host ""
 Write-Host " =====================================================" -ForegroundColor Cyan
 Write-Host "  Verbesserter Chargenbericht-Batchprozessor" -ForegroundColor Cyan
 Write-Host " =====================================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Parameter definieren
+# Parameter definieren
 param (
     [string]$FilterTyp = "alle",
     [string]$FilterWert = "",
@@ -31,7 +31,7 @@ param (
     [switch]$Silent = $false
 )
 
-***REMOVED*** Pfade definieren
+# Pfade definieren
 $rootDir = Split-Path -Parent $scriptPath
 $reportGeneratorPath = Join-Path $scriptPath "automated_report_generator.ps1"
 $apiEndpoint = "http://localhost:8003/api/v1/chargen"
@@ -39,7 +39,7 @@ $outputDir = if ($OutputPath) { $OutputPath } else { Join-Path $rootDir "reports
 $logDir = Join-Path $rootDir "logs"
 $logFile = Join-Path $logDir "batch_processor_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
 
-***REMOVED*** Überprüfe, ob die Verzeichnisse existieren und erstelle sie gegebenenfalls
+# Überprüfe, ob die Verzeichnisse existieren und erstelle sie gegebenenfalls
 if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir | Out-Null
     Write-Success "Berichtsverzeichnis erstellt: $outputDir"
@@ -50,7 +50,7 @@ if (-not (Test-Path $logDir)) {
     Write-Success "Log-Verzeichnis erstellt: $logDir"
 }
 
-***REMOVED*** Verfügbare Filtertypen
+# Verfügbare Filtertypen
 $verfuegbareFilter = @(
     "alle", 
     "produkt", 
@@ -61,7 +61,7 @@ $verfuegbareFilter = @(
     "lieferant"
 )
 
-***REMOVED*** Funktionen
+# Funktionen
 function Write-Log {
     param (
         [string]$Message,
@@ -72,10 +72,10 @@ function Write-Log {
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $logEntry = "[$timestamp] [$Level] $Message"
     
-    ***REMOVED*** In Logdatei schreiben
+    # In Logdatei schreiben
     Add-Content -Path $logFile -Value $logEntry
     
-    ***REMOVED*** Auf Konsole ausgeben, wenn gewünscht
+    # Auf Konsole ausgeben, wenn gewünscht
     if ($ToConsole -and -not $Silent) {
         $color = switch ($Level) {
             "ERROR" { "Red" }
@@ -95,10 +95,10 @@ function Get-ChargenListe {
     )
     
     try {
-        ***REMOVED*** Basisendpunkt
+        # Basisendpunkt
         $endpoint = $apiEndpoint
         
-        ***REMOVED*** Filter hinzufügen, wenn angegeben
+        # Filter hinzufügen, wenn angegeben
         if ($FilterTyp -ne "alle" -and $FilterWert) {
             $queryParam = switch ($FilterTyp) {
                 "produkt" { "product=$FilterWert" }
@@ -140,7 +140,7 @@ function Process-Charge {
             Write-Log "Thread $ThreadId: Verarbeite Charge $($Charge.id)" -ToConsole:$false
         }
         
-        ***REMOVED*** Erstelle die Argumentliste
+        # Erstelle die Argumentliste
         $args = "-ChargeId `"$($Charge.id)`" -BerichtTyp `"$BerichtTyp`" -ExportFormat `"$ExportFormat`""
         
         if ($OutputPath) {
@@ -149,10 +149,10 @@ function Process-Charge {
         
         $args += " -Silent"
         
-        ***REMOVED*** Führe den Berichtsgenerator aus
+        # Führe den Berichtsgenerator aus
         $output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $reportGeneratorPath $args
         
-        ***REMOVED*** Ermittle den Pfad des generierten Berichts
+        # Ermittle den Pfad des generierten Berichts
         $reportFileName = "Charge_$(if ($Charge.chargenNummer) {$Charge.chargenNummer} else {$Charge.id})_$BerichtTyp.$ExportFormat"
         $reportPath = Join-Path $OutputPath $reportFileName
         
@@ -205,7 +205,7 @@ function Process-Charges-Parallel {
         [int]$MaxParallel
     )
     
-    ***REMOVED*** Initialisiere Ergebnisse
+    # Initialisiere Ergebnisse
     $results = @{
         erfolgreich = 0
         fehlgeschlagen = 0
@@ -213,10 +213,10 @@ function Process-Charges-Parallel {
         fehlerliste = @()
     }
     
-    ***REMOVED*** PowerShell 5+ unterstützt ForEach -Parallel mit -ThrottleLimit, aber wir implementieren
-    ***REMOVED*** unsere eigene Lösung für maximale Kompatibilität
+    # PowerShell 5+ unterstützt ForEach -Parallel mit -ThrottleLimit, aber wir implementieren
+    # unsere eigene Lösung für maximale Kompatibilität
     
-    ***REMOVED*** Erstelle Runspaces
+    # Erstelle Runspaces
     $runspacePool = [runspacefactory]::CreateRunspacePool(1, $MaxParallel)
     $runspacePool.Open()
     
@@ -226,16 +226,16 @@ function Process-Charges-Parallel {
     
     Write-Log "Starte parallele Verarbeitung mit $MaxParallel Threads für $total Chargen" -Level "INFO"
     
-    ***REMOVED*** Bereite Powershell-Instanzen für jeden Thread vor
+    # Bereite Powershell-Instanzen für jeden Thread vor
     foreach ($charge in $Chargen) {
         $powershell = [powershell]::Create().AddScript({
             param($Charge, $BerichtTyp, $ExportFormat, $OutputPath, $ThreadId, $ReportGeneratorPath, $DetailedLog)
             
-            ***REMOVED*** In einem Runspace haben wir keinen Zugriff auf die Funktionen des Hauptskripts,
-            ***REMOVED*** daher müssen wir die Process-Charge-Funktion hier inline implementieren
+            # In einem Runspace haben wir keinen Zugriff auf die Funktionen des Hauptskripts,
+            # daher müssen wir die Process-Charge-Funktion hier inline implementieren
             
             try {
-                ***REMOVED*** Erstelle die Argumentliste
+                # Erstelle die Argumentliste
                 $args = "-ChargeId `"$($Charge.id)`" -BerichtTyp `"$BerichtTyp`" -ExportFormat `"$ExportFormat`""
                 
                 if ($OutputPath) {
@@ -244,10 +244,10 @@ function Process-Charges-Parallel {
                 
                 $args += " -Silent"
                 
-                ***REMOVED*** Führe den Berichtsgenerator aus
+                # Führe den Berichtsgenerator aus
                 $output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $ReportGeneratorPath $args
                 
-                ***REMOVED*** Ermittle den Pfad des generierten Berichts
+                # Ermittle den Pfad des generierten Berichts
                 $reportFileName = "Charge_$(if ($Charge.chargenNummer) {$Charge.chargenNummer} else {$Charge.id})_$BerichtTyp.$ExportFormat"
                 $reportPath = Join-Path $OutputPath $reportFileName
                 
@@ -281,19 +281,19 @@ function Process-Charges-Parallel {
             }
         })
         
-        ***REMOVED*** Parameter übergeben
+        # Parameter übergeben
         $powershell.AddArgument($charge)
         $powershell.AddArgument($BerichtTyp)
         $powershell.AddArgument($ExportFormat)
         $powershell.AddArgument($OutputPath)
-        $powershell.AddArgument($runspaces.Count + 1)  ***REMOVED*** Thread-ID
+        $powershell.AddArgument($runspaces.Count + 1)  # Thread-ID
         $powershell.AddArgument($reportGeneratorPath)
         $powershell.AddArgument($DetailedLog)
         
-        ***REMOVED*** Runspace zuweisen
+        # Runspace zuweisen
         $powershell.RunspacePool = $runspacePool
         
-        ***REMOVED*** Asynchron starten
+        # Asynchron starten
         $runspaces += [PSCustomObject]@{
             Powershell = $powershell
             Handle = $powershell.BeginInvoke()
@@ -302,7 +302,7 @@ function Process-Charges-Parallel {
         }
     }
     
-    ***REMOVED*** Progress-Bar einrichten, wenn nicht im Silent-Modus
+    # Progress-Bar einrichten, wenn nicht im Silent-Modus
     if (-not $Silent) {
         $progressParams = @{
             Activity = "Verarbeite Chargenberichte"
@@ -312,7 +312,7 @@ function Process-Charges-Parallel {
         Write-Progress @progressParams
     }
     
-    ***REMOVED*** Ergebnisse sammeln, während die Threads laufen
+    # Ergebnisse sammeln, während die Threads laufen
     do {
         foreach ($runspace in $runspaces | Where-Object { -not $_.Completed }) {
             if ($runspace.Handle.IsCompleted) {
@@ -335,13 +335,13 @@ function Process-Charges-Parallel {
                     }
                 }
                 
-                ***REMOVED*** Runspace als abgeschlossen markieren
+                # Runspace als abgeschlossen markieren
                 $runspace.Completed = $true
                 
-                ***REMOVED*** Aufräumen
+                # Aufräumen
                 $runspace.Powershell.Dispose()
                 
-                ***REMOVED*** Fortschritt aktualisieren
+                # Fortschritt aktualisieren
                 $processed++
                 
                 if (-not $Silent) {
@@ -353,17 +353,17 @@ function Process-Charges-Parallel {
             }
         }
         
-        ***REMOVED*** Kurze Pause, um CPU-Last zu reduzieren
+        # Kurze Pause, um CPU-Last zu reduzieren
         Start-Sleep -Milliseconds 100
         
     } while ($runspaces | Where-Object { -not $_.Completed })
     
-    ***REMOVED*** Progress-Bar beenden
+    # Progress-Bar beenden
     if (-not $Silent) {
         Write-Progress -Activity "Verarbeite Chargenberichte" -Completed
     }
     
-    ***REMOVED*** Runspace-Pool schließen
+    # Runspace-Pool schließen
     $runspacePool.Close()
     $runspacePool.Dispose()
     
@@ -386,11 +386,11 @@ function Send-BatchReportEmail {
     }
     
     try {
-        ***REMOVED*** Erstelle das E-Mail-Objekt
+        # Erstelle das E-Mail-Objekt
         $outlook = New-Object -ComObject Outlook.Application
         $mail = $outlook.CreateItem(0)
         
-        ***REMOVED*** Setze die E-Mail-Eigenschaften
+        # Setze die E-Mail-Eigenschaften
         $mail.To = $Recipient
         $mail.Subject = "Automatisierte Chargenberichte: $FilterInfo"
         
@@ -410,11 +410,11 @@ function Send-BatchReportEmail {
         
         $mail.Body = $body
         
-        ***REMOVED*** Füge die Berichte als Anhänge hinzu
+        # Füge die Berichte als Anhänge hinzu
         $reportCounter = 0
         foreach ($reportPath in $ReportPaths) {
             if (Test-Path $reportPath) {
-                ***REMOVED*** E-Mail-Größe begrenzen, max 20 Anhänge
+                # E-Mail-Größe begrenzen, max 20 Anhänge
                 if ($reportCounter -lt 20) {
                     $mail.Attachments.Add($reportPath)
                     $reportCounter++
@@ -457,19 +457,19 @@ function Create-SummaryReport {
     <title>Zusammenfassung der parallelen Stapelverarbeitung</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; }
-        h1 { color: ***REMOVED***2c3e50; border-bottom: 1px solid ***REMOVED***eee; padding-bottom: 10px; }
-        h2 { color: ***REMOVED***3498db; margin-top: 30px; }
+        h1 { color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        h2 { color: #3498db; margin-top: 30px; }
         table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid ***REMOVED***ddd; }
-        th { background-color: ***REMOVED***f2f2f2; }
-        tr:hover { background-color: ***REMOVED***f5f5f5; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f5f5f5; }
         .success { color: green; }
         .error { color: red; }
-        .summary { background-color: ***REMOVED***f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .summary { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
         .stats { display: flex; gap: 20px; flex-wrap: wrap; }
-        .stat-box { flex: 1; min-width: 150px; padding: 15px; background-color: ***REMOVED***e9ecef; border-radius: 5px; text-align: center; }
+        .stat-box { flex: 1; min-width: 150px; padding: 15px; background-color: #e9ecef; border-radius: 5px; text-align: center; }
         .stat-value { font-size: 24px; font-weight: bold; margin: 10px 0; }
-        .performance { margin-top: 20px; padding: 15px; background-color: ***REMOVED***e3f2fd; border-radius: 5px; }
+        .performance { margin-top: 20px; padding: 15px; background-color: #e3f2fd; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -583,27 +583,27 @@ function Create-SummaryReport {
     return $summaryPath
 }
 
-***REMOVED*** Starte Timer für Leistungsmessung
+# Starte Timer für Leistungsmessung
 $startTime = Get-Date
 
-***REMOVED*** Hauptlogik
+# Hauptlogik
 Write-Log "Verbesserter Chargenbericht-Batchprozessor gestartet" -Level "INFO"
 Write-Log "Filter: $FilterTyp=$FilterWert, Berichtstyp: $BerichtTyp, Format: $ExportFormat" -Level "INFO"
 Write-Log "Parallele Verarbeitung mit max. $MaxParallel Threads" -Level "INFO"
 
-***REMOVED*** Überprüfe, ob der Filtertyp gültig ist
+# Überprüfe, ob der Filtertyp gültig ist
 if (-not $verfuegbareFilter.Contains($FilterTyp.ToLower())) {
     Write-Log "Ungültiger Filtertyp: $FilterTyp. Verfügbar sind: $($verfuegbareFilter -join ', ')" -Level "ERROR"
     exit 1
 }
 
-***REMOVED*** Überprüfe den Report Generator
+# Überprüfe den Report Generator
 if (-not (Test-Path $reportGeneratorPath)) {
     Write-Log "Berichtsgenerator nicht gefunden: $reportGeneratorPath" -Level "ERROR"
     exit 1
 }
 
-***REMOVED*** Hole die Chargenliste
+# Hole die Chargenliste
 $chargen = Get-ChargenListe -FilterTyp $FilterTyp.ToLower() -FilterWert $FilterWert
 
 if ($chargen.Count -eq 0) {
@@ -613,13 +613,13 @@ if ($chargen.Count -eq 0) {
 
 Write-Log "Gefundene Chargen: $($chargen.Count)" -Level "INFO"
 
-***REMOVED*** Wenn eine maximale Anzahl angegeben wurde, begrenze die Liste
+# Wenn eine maximale Anzahl angegeben wurde, begrenze die Liste
 if ($MaxChargen -gt 0 -and $chargen.Count -gt $MaxChargen) {
     $chargen = $chargen | Select-Object -First $MaxChargen
     Write-Log "Verarbeitung begrenzt auf $MaxChargen Chargen" -Level "INFO"
 }
 
-***REMOVED*** Erstelle eine lesbare Filterbeschreibung
+# Erstelle eine lesbare Filterbeschreibung
 $filterInfo = switch ($FilterTyp.ToLower()) {
     "alle" { "Alle Chargen" }
     "produkt" { "Produkt: $FilterWert" }
@@ -631,7 +631,7 @@ $filterInfo = switch ($FilterTyp.ToLower()) {
     default { "Benutzerdefinierter Filter" }
 }
 
-***REMOVED*** Verarbeite die Chargen parallel
+# Verarbeite die Chargen parallel
 $results = Process-Charges-Parallel `
     -Chargen $chargen `
     -BerichtTyp $BerichtTyp.ToLower() `
@@ -639,11 +639,11 @@ $results = Process-Charges-Parallel `
     -OutputPath $outputDir `
     -MaxParallel $MaxParallel
 
-***REMOVED*** Zeitmessung beenden
+# Zeitmessung beenden
 $endTime = Get-Date
 $processingTime = $endTime - $startTime
 
-***REMOVED*** Verarbeitungsstatistiken ausgeben
+# Verarbeitungsstatistiken ausgeben
 $chargesPerMinute = if ($processingTime.TotalMinutes -gt 0) { 
     [math]::Round($results.erfolgreich / $processingTime.TotalMinutes, 2) 
 } else { 
@@ -654,16 +654,16 @@ Write-Log "Verarbeitung abgeschlossen in $([math]::Round($processingTime.TotalMi
 Write-Log "Leistung: $chargesPerMinute Berichte pro Minute" -Level "INFO"
 Write-Log "Erfolgsrate: $(if ($chargen.Count -gt 0) { [math]::Round(($results.erfolgreich / $chargen.Count) * 100) } else { 0 })%" -Level "INFO"
 
-***REMOVED*** Erstelle einen Zusammenfassungsbericht
+# Erstelle einen Zusammenfassungsbericht
 $summaryPath = Create-SummaryReport `
     -Chargen $chargen `
     -Results $results `
     -FilterInfo $filterInfo `
     -OutputPath $outputDir
 
-***REMOVED*** Sende E-Mail, wenn gewünscht
+# Sende E-Mail, wenn gewünscht
 if ($EmailVersenden -and $EmailEmpfaenger) {
-    ***REMOVED*** Füge den Zusammenfassungsbericht zu den E-Mail-Anhängen hinzu
+    # Füge den Zusammenfassungsbericht zu den E-Mail-Anhängen hinzu
     $allReports = $results.berichte + @($summaryPath)
     
     Send-BatchReportEmail `
@@ -673,7 +673,7 @@ if ($EmailVersenden -and $EmailEmpfaenger) {
         -Fehler $results.fehlerliste
 }
 
-***REMOVED*** Abschlussnachricht
+# Abschlussnachricht
 if (-not $Silent) {
     Write-Host ""
     Write-Success "Stapelverarbeitung abgeschlossen:"
@@ -683,7 +683,7 @@ if (-not $Silent) {
     Write-Host "  Leistung: $chargesPerMinute Berichte/Minute" -ForegroundColor Cyan
     Write-Host "  Zusammenfassung: $summaryPath" -ForegroundColor Cyan
     
-    ***REMOVED*** Öffne den Zusammenfassungsbericht
+    # Öffne den Zusammenfassungsbericht
     try {
         Invoke-Item $summaryPath
     }

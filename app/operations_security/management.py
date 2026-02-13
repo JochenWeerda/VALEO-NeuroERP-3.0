@@ -123,8 +123,8 @@ class ChangeApproval:
     id: str
     change_request_id: str
     approver: str
-    approval_level: str  ***REMOVED*** technical, business, security
-    decision: str  ***REMOVED*** approved, rejected, conditional
+    approval_level: str  # technical, business, security
+    decision: str  # approved, rejected, conditional
     comments: str = ""
     approved_at: datetime = field(default_factory=datetime.utcnow)
     conditions: List[str] = field(default_factory=list)
@@ -138,7 +138,7 @@ class BackupJob:
     backup_type: BackupType
     source_systems: List[str]
     destination: str
-    schedule: str  ***REMOVED*** cron expression
+    schedule: str  # cron expression
     retention_days: int
     encryption_enabled: bool = True
     compression_enabled: bool = True
@@ -170,10 +170,10 @@ class CapacityBaseline:
     metric: CapacityMetric
     baseline_value: float
     unit: str
-    measurement_period: str  ***REMOVED*** daily, weekly, monthly
+    measurement_period: str  # daily, weekly, monthly
     tolerance_percent: float = 10.0
     last_updated: datetime = field(default_factory=datetime.utcnow)
-    trend: str = "stable"  ***REMOVED*** increasing, decreasing, stable
+    trend: str = "stable"  # increasing, decreasing, stable
 
 
 @dataclass
@@ -218,7 +218,7 @@ class MaintenanceWindow:
     systems_affected: List[str]
     start_time: datetime
     end_time: datetime
-    frequency: str  ***REMOVED*** daily, weekly, monthly
+    frequency: str  # daily, weekly, monthly
     approval_required: bool = True
     notification_days: int = 7
     contact_groups: List[str] = field(default_factory=list)
@@ -252,7 +252,7 @@ class ISO27001OperationsSecurity:
         self.monitoring = monitoring_service
         self.change_svc = change_service
 
-        ***REMOVED*** Operations security components
+        # Operations security components
         self.change_requests: Dict[str, ChangeRequest] = {}
         self.change_approvals: List[ChangeApproval] = {}
         self.backup_jobs: Dict[str, BackupJob] = {}
@@ -262,10 +262,10 @@ class ISO27001OperationsSecurity:
         self.operations_logs: List[OperationsLog] = {}
         self.maintenance_windows: Dict[str, MaintenanceWindow] = {}
 
-        ***REMOVED*** Operations configuration
+        # Operations configuration
         self.operations_config = self._initialize_operations_config()
 
-        ***REMOVED*** Default maintenance schedules
+        # Default maintenance schedules
         self._initialize_default_maintenance()
 
     def _initialize_operations_config(self) -> Dict[str, Any]:
@@ -273,10 +273,10 @@ class ISO27001OperationsSecurity:
         return {
             'change_management': {
                 'approval_levels': ['technical', 'business', 'security'],
-                'emergency_change_window': 4,  ***REMOVED*** hours
-                'standard_change_window': 168,  ***REMOVED*** hours (1 week)
-                'post_implementation_review': 72,  ***REMOVED*** hours
-                'rollback_time_limit': 24  ***REMOVED*** hours
+                'emergency_change_window': 4,  # hours
+                'standard_change_window': 168,  # hours (1 week)
+                'post_implementation_review': 72,  # hours
+                'rollback_time_limit': 24  # hours
             },
             'backup_operations': {
                 'retention_periods': {
@@ -287,19 +287,19 @@ class ISO27001OperationsSecurity:
                 'offsite_replication': True
             },
             'capacity_management': {
-                'monitoring_interval': 300,  ***REMOVED*** seconds
-                'baseline_calculation_period': 90,  ***REMOVED*** days
-                'forecasting_period': 180,  ***REMOVED*** days
+                'monitoring_interval': 300,  # seconds
+                'baseline_calculation_period': 90,  # days
+                'forecasting_period': 180,  # days
                 'alert_thresholds': {
                     'cpu': {'warning': 70, 'critical': 90},
                     'memory': {'warning': 75, 'critical': 95},
                     'storage': {'warning': 80, 'critical': 95},
-                    'response_time': {'warning': 1000, 'critical': 5000}  ***REMOVED*** milliseconds
+                    'response_time': {'warning': 1000, 'critical': 5000}  # milliseconds
                 }
             },
             'maintenance_scheduling': {
-                'blackout_windows': ['02:00-04:00'],  ***REMOVED*** UTC
-                'notification_period': 7,  ***REMOVED*** days
+                'blackout_windows': ['02:00-04:00'],  # UTC
+                'notification_period': 7,  # days
                 'approval_levels': ['system_owner', 'business_owner']
             }
         }
@@ -344,7 +344,7 @@ class ISO27001OperationsSecurity:
         """
         change_id = str(uuid.uuid4())
 
-        ***REMOVED*** Assess change risk automatically
+        # Assess change risk automatically
         risk_assessment = self._assess_change_risk(change_data)
 
         change = ChangeRequest(
@@ -366,7 +366,7 @@ class ISO27001OperationsSecurity:
 
         self.change_requests[change_id] = change
 
-        ***REMOVED*** Log change request creation
+        # Log change request creation
         self._log_operations_event(
             system_id='change_management',
             event_type='change_request_created',
@@ -383,7 +383,7 @@ class ISO27001OperationsSecurity:
         """Automatically assess change risk"""
         risk_score = 0
 
-        ***REMOVED*** Risk factors
+        # Risk factors
         if change_data.get('affects_production', False):
             risk_score += 3
         if change_data.get('affects_customers', False):
@@ -395,7 +395,7 @@ class ISO27001OperationsSecurity:
         if len(change_data.get('affected_systems', [])) > 3:
             risk_score += 1
 
-        ***REMOVED*** Map score to risk level
+        # Map score to risk level
         if risk_score >= 8:
             return ChangeRisk.VERY_HIGH
         elif risk_score >= 6:
@@ -416,7 +416,7 @@ class ISO27001OperationsSecurity:
 
         change = self.change_requests[change_id]
 
-        ***REMOVED*** Create approval record
+        # Create approval record
         approval = ChangeApproval(
             id=str(uuid.uuid4()),
             change_request_id=change_id,
@@ -432,7 +432,7 @@ class ISO27001OperationsSecurity:
 
         self.change_approvals[change_id].append(approval)
 
-        ***REMOVED*** Update change status if all required approvals are received
+        # Update change status if all required approvals are received
         if approval.decision == 'approved':
             change.status = ChangeStatus.APPROVED
         else:
@@ -453,7 +453,7 @@ class ISO27001OperationsSecurity:
         change.actual_start = schedule_data.get('actual_start')
         change.actual_end = schedule_data.get('actual_end')
 
-        ***REMOVED*** Check for maintenance window conflicts
+        # Check for maintenance window conflicts
         conflicts = self._check_maintenance_conflicts(change)
         if conflicts:
             logger.warning(f"Change {change_id} conflicts with maintenance windows: {conflicts}")
@@ -469,7 +469,7 @@ class ISO27001OperationsSecurity:
             if not window.is_active:
                 continue
 
-            ***REMOVED*** Check if change overlaps with maintenance window
+            # Check if change overlaps with maintenance window
             if (change.actual_start and window.start_time <= change.actual_start <= window.end_time) or \
                (change.actual_end and window.start_time <= change.actual_end <= window.end_time):
                 conflicts.append(f"Conflicts with {window.name}")
@@ -488,7 +488,7 @@ class ISO27001OperationsSecurity:
         change.actual_start = datetime.utcnow()
         change.implementation_notes = execution_data.get('notes', '')
 
-        ***REMOVED*** Log execution start
+        # Log execution start
         self._log_operations_event(
             system_id='change_management',
             event_type='change_execution_started',
@@ -513,11 +513,11 @@ class ISO27001OperationsSecurity:
         change.actual_end = datetime.utcnow()
         change.post_implementation_review = completion_data.get('review', '')
 
-        ***REMOVED*** Schedule post-implementation review
+        # Schedule post-implementation review
         review_time = datetime.utcnow() + timedelta(hours=self.operations_config['change_management']['post_implementation_review'])
         self._schedule_post_implementation_review(change_id, review_time)
 
-        ***REMOVED*** Log completion
+        # Log completion
         self._log_operations_event(
             system_id='change_management',
             event_type='change_completed',
@@ -532,7 +532,7 @@ class ISO27001OperationsSecurity:
 
     def _schedule_post_implementation_review(self, change_id: str, review_time: datetime):
         """Schedule post-implementation review"""
-        ***REMOVED*** In production, this would create a scheduled task
+        # In production, this would create a scheduled task
         logger.info(f"Post-implementation review scheduled for change {change_id} at {review_time}")
 
     def create_backup_job(self, backup_data: Dict[str, Any]) -> str:
@@ -580,7 +580,7 @@ class ISO27001OperationsSecurity:
 
         self.backup_executions.append(execution)
 
-        ***REMOVED*** Log backup start
+        # Log backup start
         self._log_operations_event(
             system_id='backup_system',
             event_type='backup_started',
@@ -613,7 +613,7 @@ class ISO27001OperationsSecurity:
         execution.verification_status = completion_data.get('verification_status')
         execution.error_message = completion_data.get('error_message', '')
 
-        ***REMOVED*** Log completion
+        # Log completion
         severity = 'error' if execution.status == BackupStatus.FAILED else 'info'
         self._log_operations_event(
             system_id='backup_system',
@@ -645,7 +645,7 @@ class ISO27001OperationsSecurity:
                 if alert_id:
                     alert_ids.append(alert_id)
             except KeyError:
-                continue  ***REMOVED*** Skip unknown metrics
+                continue  # Skip unknown metrics
 
         return alert_ids
 
@@ -659,7 +659,7 @@ class ISO27001OperationsSecurity:
 
         threshold_config = thresholds[metric_key]
 
-        ***REMOVED*** Determine threshold type and severity
+        # Determine threshold type and severity
         if current_value >= threshold_config['critical']:
             threshold_type = MonitoringThreshold.CRITICAL
             severity = 'critical'
@@ -667,9 +667,9 @@ class ISO27001OperationsSecurity:
             threshold_type = MonitoringThreshold.WARNING
             severity = 'warning'
         else:
-            return None  ***REMOVED*** No alert needed
+            return None  # No alert needed
 
-        ***REMOVED*** Create alert
+        # Create alert
         alert_id = str(uuid.uuid4())
 
         alert = CapacityAlert(
@@ -686,7 +686,7 @@ class ISO27001OperationsSecurity:
 
         self.capacity_alerts.append(alert)
 
-        ***REMOVED*** Log alert
+        # Log alert
         self._log_operations_event(
             system_id=system_id,
             event_type='capacity_alert',
@@ -747,26 +747,26 @@ class ISO27001OperationsSecurity:
 
     def get_operations_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Generate comprehensive operations dashboard"""
-        ***REMOVED*** Get current system health
+        # Get current system health
         system_health = self._calculate_system_health()
 
-        ***REMOVED*** Get capacity metrics summary
+        # Get capacity metrics summary
         capacity_summary = self._get_capacity_summary()
 
-        ***REMOVED*** Get change management status
+        # Get change management status
         change_summary = self._get_change_management_summary()
 
-        ***REMOVED*** Get backup status
+        # Get backup status
         backup_summary = self._get_backup_summary()
 
-        ***REMOVED*** Get active alerts
+        # Get active alerts
         active_alerts = [alert for alert in self.capacity_alerts
-                        if not alert.resolved_at][:10]  ***REMOVED*** Last 10
+                        if not alert.resolved_at][:10]  # Last 10
 
-        ***REMOVED*** Get upcoming maintenance
+        # Get upcoming maintenance
         upcoming_maintenance = self._get_upcoming_maintenance()
 
-        ***REMOVED*** Generate recommendations
+        # Generate recommendations
         recommendations = self._generate_operations_recommendations(
             system_health, capacity_summary, change_summary, backup_summary
         )
@@ -804,7 +804,7 @@ class ISO27001OperationsSecurity:
 
     def _calculate_system_health(self) -> Dict[str, Any]:
         """Calculate overall system health"""
-        ***REMOVED*** Get recent operations logs (last 24 hours)
+        # Get recent operations logs (last 24 hours)
         recent_logs = [log for log in self.operations_logs
                       if (datetime.utcnow() - log.timestamp).days < 1]
 
@@ -812,7 +812,7 @@ class ISO27001OperationsSecurity:
         error_logs = len([log for log in recent_logs if log.severity in ['error', 'critical']])
         warning_logs = len([log for log in recent_logs if log.severity == 'warning'])
 
-        ***REMOVED*** Calculate health score (simplified)
+        # Calculate health score (simplified)
         if total_logs == 0:
             health_score = 100
         else:
@@ -831,7 +831,7 @@ class ISO27001OperationsSecurity:
 
     def _get_capacity_summary(self) -> Dict[str, Any]:
         """Get capacity metrics summary"""
-        ***REMOVED*** Get recent alerts (last 7 days)
+        # Get recent alerts (last 7 days)
         recent_alerts = [alert for alert in self.capacity_alerts
                         if (datetime.utcnow() - alert.triggered_at).days <= 7]
 
@@ -851,7 +851,7 @@ class ISO27001OperationsSecurity:
             return None
 
         total_time = sum((a.resolved_at - a.acknowledged_at).total_seconds() for a in resolved_alerts)
-        return round(total_time / len(resolved_alerts) / 3600, 1)  ***REMOVED*** hours
+        return round(total_time / len(resolved_alerts) / 3600, 1)  # hours
 
     def _get_change_management_summary(self) -> Dict[str, Any]:
         """Get change management summary"""
@@ -904,7 +904,7 @@ class ISO27001OperationsSecurity:
             if not window.is_active:
                 continue
 
-            ***REMOVED*** Calculate next occurrence (simplified - assumes weekly)
+            # Calculate next occurrence (simplified - assumes weekly)
             if window.frequency == 'weekly':
                 days_until = (window.start_time.weekday() - datetime.utcnow().weekday()) % 7
                 next_occurrence = datetime.utcnow() + timedelta(days=days_until)
@@ -926,7 +926,7 @@ class ISO27001OperationsSecurity:
                     'days_until': (next_occurrence - datetime.utcnow()).days
                 })
 
-        return sorted(upcoming, key=lambda x: x['days_until'])[:5]  ***REMOVED*** Next 5
+        return sorted(upcoming, key=lambda x: x['days_until'])[:5]  # Next 5
 
     def _generate_operations_recommendations(self, health: Dict, capacity: Dict,
                                            changes: Dict, backups: Dict) -> List[str]:
@@ -986,13 +986,13 @@ class ISO27001OperationsSecurity:
         changes = list(self.change_requests.values())
 
         if not changes:
-            return 100.0  ***REMOVED*** No changes means no issues
+            return 100.0  # No changes means no issues
 
-        ***REMOVED*** Check approval rates
+        # Check approval rates
         approved_changes = len([c for c in changes if c.status in [ChangeStatus.APPROVED, ChangeStatus.DEPLOYED]])
         approval_rate = approved_changes / len(changes) * 100
 
-        ***REMOVED*** Check documentation completeness
+        # Check documentation completeness
         documented_changes = len([c for c in changes if c.rollback_plan and c.test_plan])
         documentation_rate = documented_changes / len(changes) * 100
 
@@ -1000,16 +1000,16 @@ class ISO27001OperationsSecurity:
 
     def _check_backup_operations_compliance(self) -> float:
         """Check backup operations compliance"""
-        executions = self.backup_executions[-50:]  ***REMOVED*** Last 50 executions
+        executions = self.backup_executions[-50:]  # Last 50 executions
 
         if not executions:
-            return 50.0  ***REMOVED*** Some compliance but no data
+            return 50.0  # Some compliance but no data
 
-        ***REMOVED*** Check success rate
+        # Check success rate
         successful = len([e for e in executions if e.status == BackupStatus.COMPLETED])
         success_rate = successful / len(executions) * 100
 
-        ***REMOVED*** Check verification rate
+        # Check verification rate
         verified = len([e for e in executions if e.verification_status == 'passed'])
         verification_rate = verified / len(executions) * 100
 
@@ -1017,12 +1017,12 @@ class ISO27001OperationsSecurity:
 
     def _check_capacity_management_compliance(self) -> float:
         """Check capacity management compliance"""
-        ***REMOVED*** Check if baselines are established
+        # Check if baselines are established
         systems_with_baselines = len(set(b.system_id for b in self.capacity_baselines.values()))
-        total_systems = 10  ***REMOVED*** Assumed number of systems
+        total_systems = 10  # Assumed number of systems
         baseline_coverage = min(systems_with_baselines / total_systems * 100, 100)
 
-        ***REMOVED*** Check alert response
+        # Check alert response
         resolved_alerts = len([a for a in self.capacity_alerts if a.resolved_at])
         total_alerts = len(self.capacity_alerts)
         resolution_rate = (resolved_alerts / total_alerts * 100) if total_alerts > 0 else 100
@@ -1033,7 +1033,7 @@ class ISO27001OperationsSecurity:
         """Check maintenance operations compliance"""
         active_windows = len([w for w in self.maintenance_windows.values() if w.is_active])
 
-        ***REMOVED*** Assume minimum of 3 maintenance windows
+        # Assume minimum of 3 maintenance windows
         if active_windows >= 3:
             return 100.0
         elif active_windows >= 2:
@@ -1048,7 +1048,7 @@ class ISO27001OperationsSecurity:
         recent_logs = len([log for log in self.operations_logs
                           if (datetime.utcnow() - log.timestamp).days <= 7])
 
-        ***REMOVED*** Assume minimum of 100 log entries per week
+        # Assume minimum of 100 log entries per week
         if recent_logs >= 100:
             return 100.0
         elif recent_logs >= 50:

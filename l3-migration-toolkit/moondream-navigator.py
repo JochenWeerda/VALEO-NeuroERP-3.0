@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Moondream-basierter UI-Navigator für L3
 
@@ -12,13 +12,13 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 from PIL import Image
 
-***REMOVED*** Versuche Moondream Python API zu importieren
+# Versuche Moondream Python API zu importieren
 try:
     from moondream import VL
     MOONDREAM_API_AVAILABLE = True
 except ImportError:
     try:
-        ***REMOVED*** Fallback: transformers-basiert
+        # Fallback: transformers-basiert
         from transformers import AutoModelForCausalLM, AutoTokenizer
         MOONDREAM_API_AVAILABLE = "transformers"
     except ImportError:
@@ -43,11 +43,11 @@ class MoondreamNavigator:
         """Initialisiert Moondream Model"""
         try:
             if MOONDREAM_API_AVAILABLE == True:
-                ***REMOVED*** Native Moondream API
+                # Native Moondream API
                 self.model = VL()
                 print("✅ Moondream Model geladen (Native API)")
             elif MOONDREAM_API_AVAILABLE == "transformers":
-                ***REMOVED*** Transformers-basiert
+                # Transformers-basiert
                 model_id = "vikhyatk/moondream2"
                 self.model = AutoModelForCausalLM.from_pretrained(
                     model_id,
@@ -88,16 +88,16 @@ class MoondreamNavigator:
                 "Installieren Sie: pip install transformers torch pillow"
             )
         
-        ***REMOVED*** Bild laden
+        # Bild laden
         image = Image.open(screenshot_path)
         
-        ***REMOVED*** Moondream Query ausführen
+        # Moondream Query ausführen
         try:
             if MOONDREAM_API_AVAILABLE == True:
-                ***REMOVED*** Native API
+                # Native API
                 response = self.model.query(image, query)["answer"]
             elif MOONDREAM_API_AVAILABLE == "transformers":
-                ***REMOVED*** Transformers API
+                # Transformers API
                 enc_image = self.model.encode_image(image)
                 response = self.model.answer_question(enc_image, query, self.tokenizer)
         except Exception as e:
@@ -108,7 +108,7 @@ class MoondreamNavigator:
                 'confidence': 0.0
             }
         
-        ***REMOVED*** Parse Response
+        # Parse Response
         parsed = self._parse_moondream_response(response, return_coordinates)
         
         return parsed
@@ -128,7 +128,7 @@ class MoondreamNavigator:
         """
         response_lower = response.lower()
         
-        ***REMOVED*** Prüfe ob Element gefunden wurde
+        # Prüfe ob Element gefunden wurde
         found_indicators = ['yes', 'found', 'located', 'visible', 'there is']
         not_found_indicators = ['no', 'not found', 'cannot find', 'unable to locate']
         
@@ -138,12 +138,12 @@ class MoondreamNavigator:
         if not_found:
             found = False
         
-        ***REMOVED*** Extrahiere Koordinaten (verschiedene Formate)
+        # Extrahiere Koordinaten (verschiedene Formate)
         coordinates = None
         if extract_coords and found:
             coordinates = self._extract_coordinates(response)
         
-        ***REMOVED*** Confidence-Schätzung basierend auf Response
+        # Confidence-Schätzung basierend auf Response
         confidence = 0.8 if found and coordinates else 0.5 if found else 0.0
         
         return {
@@ -163,19 +163,19 @@ class MoondreamNavigator:
         - x=123, y=456
         - coordinates: 123, 456
         """
-        ***REMOVED*** Pattern 1: (x, y)
+        # Pattern 1: (x, y)
         pattern1 = r'\((\d+),\s*(\d+)\)'
         match = re.search(pattern1, text)
         if match:
             return (int(match.group(1)), int(match.group(2)))
         
-        ***REMOVED*** Pattern 2: x=123, y=456
+        # Pattern 2: x=123, y=456
         pattern2 = r'x\s*=\s*(\d+).*?y\s*=\s*(\d+)'
         match = re.search(pattern2, text, re.IGNORECASE)
         if match:
             return (int(match.group(1)), int(match.group(2)))
         
-        ***REMOVED*** Pattern 3: coordinates: 123, 456
+        # Pattern 3: coordinates: 123, 456
         pattern3 = r'coordinates?:?\s*(\d+),\s*(\d+)'
         match = re.search(pattern3, text, re.IGNORECASE)
         if match:
@@ -263,13 +263,13 @@ class MoondreamNavigator:
         result = self.detect_ui_elements(screenshot_path, query, return_coordinates=True)
         
         if result['found'] and result['coordinates']:
-            ***REMOVED*** Schätze Dimensionen basierend auf Screenshot
+            # Schätze Dimensionen basierend auf Screenshot
             img = Image.open(screenshot_path)
             width, height = img.size
             
-            ***REMOVED*** Canvas ist typischerweise zentriert
+            # Canvas ist typischerweise zentriert
             return {
-                'left': 72,  ***REMOVED*** Guacamole Standard
+                'left': 72,  # Guacamole Standard
                 'top': 0,
                 'width': width - 72,
                 'height': height
@@ -314,4 +314,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 

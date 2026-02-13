@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 GENXAIS Framework - Memory Bank Initialisierung
 
@@ -16,21 +16,21 @@ import argparse
 from datetime import datetime
 from pathlib import Path
 
-***REMOVED*** Pfad zum Projektverzeichnis hinzufügen
+# Pfad zum Projektverzeichnis hinzufügen
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Importiere das GENXAIS SDK
+# Importiere das GENXAIS SDK
 try:
     from genxais_sdk import GENXAISFramework
 except ImportError:
     logger.error("GENXAIS SDK konnte nicht importiert werden. Bitte stellen Sie sicher, dass es installiert ist.")
     sys.exit(1)
 
-***REMOVED*** Versuche MongoDB-Unterstützung zu importieren
+# Versuche MongoDB-Unterstützung zu importieren
 try:
     import pymongo
     MONGODB_AVAILABLE = True
@@ -53,7 +53,7 @@ class MemoryBankInitializer:
         self.base_dir = Path(base_dir) if base_dir else Path.cwd()
         self.memory_bank_dir = self.base_dir / "memory-bank"
         
-        ***REMOVED*** MongoDB-Verbindung einrichten, falls verfügbar
+        # MongoDB-Verbindung einrichten, falls verfügbar
         self.mongodb_client = None
         self.db = None
         if MONGODB_AVAILABLE and mongodb_uri and db_name:
@@ -68,7 +68,7 @@ class MemoryBankInitializer:
         """Erstellt die Verzeichnisstruktur für die Memory Bank"""
         logger.info("Erstelle Memory Bank Verzeichnisstruktur...")
         
-        ***REMOVED*** Hauptverzeichnisse
+        # Hauptverzeichnisse
         directories = [
             self.memory_bank_dir,
             self.memory_bank_dir / "archive",
@@ -83,7 +83,7 @@ class MemoryBankInitializer:
             self.memory_bank_dir / "visual-maps"
         ]
         
-        ***REMOVED*** Erstelle alle Verzeichnisse
+        # Erstelle alle Verzeichnisse
         for directory in directories:
             os.makedirs(directory, exist_ok=True)
             logger.debug(f"Verzeichnis erstellt: {directory}")
@@ -94,16 +94,16 @@ class MemoryBankInitializer:
         """Erstellt die Basisdateien für die Memory Bank"""
         logger.info("Erstelle Memory Bank Basisdateien...")
         
-        ***REMOVED*** activeContext.md - Aktiver Kontext
-        active_context_content = """***REMOVED*** Aktiver Kontext
+        # activeContext.md - Aktiver Kontext
+        active_context_content = """# Aktiver Kontext
 
-***REMOVED******REMOVED*** Aktueller Modus
+## Aktueller Modus
 Der aktuelle Modus ist: ${CURRENT_MODE}
 
-***REMOVED******REMOVED*** Aktuelle Aufgabe
+## Aktuelle Aufgabe
 ${CURRENT_TASK}
 
-***REMOVED******REMOVED*** Projektkontext
+## Projektkontext
 Das GENXAIS-Framework ist ein modulares Framework für KI-gestützte Softwareentwicklung.
 Es unterstützt verschiedene Modi für den Entwicklungsprozess:
 
@@ -113,17 +113,17 @@ Es unterstützt verschiedene Modi für den Entwicklungsprozess:
 - IMPLEMENT-Modus: Integration, Deployment
 - REFLECT-Modus: Reflexion, Dokumentation
 
-***REMOVED******REMOVED*** Letzte Aktivitäten
+## Letzte Aktivitäten
 ${RECENT_ACTIVITIES}
 """
         
-        ***REMOVED*** current_mode.txt - Aktueller Modus
+        # current_mode.txt - Aktueller Modus
         current_mode_content = "VAN"
         
-        ***REMOVED*** todo.md - Todo-Liste
-        todo_content = """***REMOVED*** Todo-Liste
+        # todo.md - Todo-Liste
+        todo_content = """# Todo-Liste
 
-***REMOVED******REMOVED*** Offene Aufgaben
+## Offene Aufgaben
 
 - [ ] Framework-Struktur vervollständigen
 - [ ] Dokumentation erweitern
@@ -131,63 +131,63 @@ ${RECENT_ACTIVITIES}
 - [ ] CI/CD-Pipeline einrichten
 - [ ] Beispielanwendung erstellen
 
-***REMOVED******REMOVED*** Erledigte Aufgaben
+## Erledigte Aufgaben
 
 - [x] Grundlegende Framework-Struktur erstellen
 - [x] Modus-Kommandos implementieren
 - [x] Memory Bank initialisieren
 """
         
-        ***REMOVED*** tasks.md - Aufgabenliste
-        tasks_content = """***REMOVED*** Aufgabenliste
+        # tasks.md - Aufgabenliste
+        tasks_content = """# Aufgabenliste
 
-***REMOVED******REMOVED*** Aktuelle Aufgaben
+## Aktuelle Aufgaben
 
-***REMOVED******REMOVED******REMOVED*** Framework-Entwicklung
+### Framework-Entwicklung
 - Implementierung der Kernfunktionalität
 - Integration mit externen Diensten
 - Dokumentation der API
 
-***REMOVED******REMOVED******REMOVED*** Dokumentation
+### Dokumentation
 - Benutzerhandbuch erstellen
 - API-Dokumentation generieren
 - Beispiele dokumentieren
 
-***REMOVED******REMOVED******REMOVED*** Tests
+### Tests
 - Unit-Tests schreiben
 - Integrationstests implementieren
 - Performance-Tests durchführen
 """
         
-        ***REMOVED*** Handover-Template
-        handover_template_content = """***REMOVED*** Handover-Dokument
+        # Handover-Template
+        handover_template_content = """# Handover-Dokument
 
-***REMOVED******REMOVED*** Datum und Zeit
+## Datum und Zeit
 ${DATE_TIME}
 
-***REMOVED******REMOVED*** Von Modus
+## Von Modus
 ${FROM_MODE}
 
-***REMOVED******REMOVED*** Zu Modus
+## Zu Modus
 ${TO_MODE}
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 ${SUMMARY}
 
-***REMOVED******REMOVED*** Aktueller Status
+## Aktueller Status
 ${CURRENT_STATUS}
 
-***REMOVED******REMOVED*** Offene Aufgaben
+## Offene Aufgaben
 ${OPEN_TASKS}
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 ${NEXT_STEPS}
 
-***REMOVED******REMOVED*** Hinweise
+## Hinweise
 ${NOTES}
 """
         
-        ***REMOVED*** Dateien schreiben
+        # Dateien schreiben
         files_to_create = [
             (self.memory_bank_dir / "activeContext.md", active_context_content),
             (self.memory_bank_dir / "current_mode.txt", current_mode_content),
@@ -211,19 +211,19 @@ ${NOTES}
         
         logger.info("Lade Memory Bank Dateien in MongoDB...")
         
-        ***REMOVED*** Sammlungen erstellen
+        # Sammlungen erstellen
         collections = {
             "memory_bank": self.db["memory_bank"],
             "tasks": self.db["tasks"],
             "handover": self.db["handover"]
         }
         
-        ***REMOVED*** Dateien in MongoDB laden
+        # Dateien in MongoDB laden
         for collection_name, collection in collections.items():
-            ***REMOVED*** Bestehende Dokumente löschen
+            # Bestehende Dokumente löschen
             collection.delete_many({})
         
-        ***REMOVED*** Memory Bank Dateien laden
+        # Memory Bank Dateien laden
         memory_bank_files = []
         for root, _, files in os.walk(self.memory_bank_dir):
             for file in files:
@@ -235,7 +235,7 @@ ${NOTES}
                         with open(file_path, "r", encoding="utf-8") as f:
                             content = f.read()
                         
-                        ***REMOVED*** Dokument erstellen
+                        # Dokument erstellen
                         document = {
                             "path": str(relative_path),
                             "content": content,
@@ -244,7 +244,7 @@ ${NOTES}
                             "type": "memory_bank"
                         }
                         
-                        ***REMOVED*** In die entsprechende Sammlung einfügen
+                        # In die entsprechende Sammlung einfügen
                         if "tasks" in str(relative_path):
                             collections["tasks"].insert_one(document)
                         elif "handover" in str(relative_path):

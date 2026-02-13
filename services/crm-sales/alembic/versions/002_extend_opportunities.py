@@ -24,7 +24,7 @@ depends_on = None
 def upgrade() -> None:
     """Add new fields to opportunities and create new tables."""
     
-    ***REMOVED*** Add new columns to crm_sales_opportunities
+    # Add new columns to crm_sales_opportunities
     op.add_column("crm_sales_opportunities", sa.Column("number", sa.String(64), nullable=True))
     op.add_column("crm_sales_opportunities", sa.Column("currency", sa.String(3), nullable=True, server_default="EUR"))
     op.add_column("crm_sales_opportunities", sa.Column("expected_revenue", sa.Float, nullable=True))
@@ -35,7 +35,7 @@ def upgrade() -> None:
     op.add_column("crm_sales_opportunities", sa.Column("created_by", sa.String(64), nullable=True))
     op.add_column("crm_sales_opportunities", sa.Column("updated_by", sa.String(64), nullable=True))
     
-    ***REMOVED*** Create unique index on number
+    # Create unique index on number
     op.create_index(
         "ix_crm_sales_opportunities_number",
         "crm_sales_opportunities",
@@ -43,8 +43,8 @@ def upgrade() -> None:
         unique=True,
     )
     
-    ***REMOVED*** Make number NOT NULL after populating with default values
-    ***REMOVED*** Generate default numbers for existing records
+    # Make number NOT NULL after populating with default values
+    # Generate default numbers for existing records
     op.execute("""
         UPDATE crm_sales_opportunities 
         SET number = 'OPP-' || LPAD(ROW_NUMBER() OVER (ORDER BY created_at)::text, 6, '0')
@@ -53,7 +53,7 @@ def upgrade() -> None:
     
     op.alter_column("crm_sales_opportunities", "number", nullable=False)
     
-    ***REMOVED*** Create opportunity_stages table
+    # Create opportunity_stages table
     op.create_table(
         "crm_sales_opportunity_stages",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -62,21 +62,21 @@ def upgrade() -> None:
         sa.Column("stage_key", sa.String(64), nullable=False),
         sa.Column("order", sa.Float, nullable=False, server_default="0"),
         sa.Column("probability_default", sa.Float, nullable=True),
-        sa.Column("required_fields", sa.Text, nullable=True),  ***REMOVED*** JSON array
+        sa.Column("required_fields", sa.Text, nullable=True),  # JSON array
         sa.Column("is_closed", sa.Boolean, nullable=False, server_default="false"),
         sa.Column("is_won", sa.Boolean, nullable=False, server_default="false"),
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
     
-    ***REMOVED*** Create unique constraint on tenant_id + stage_key
+    # Create unique constraint on tenant_id + stage_key
     op.create_unique_constraint(
         "uq_crm_sales_opportunity_stages_tenant_stage_key",
         "crm_sales_opportunity_stages",
         ["tenant_id", "stage_key"],
     )
     
-    ***REMOVED*** Create opportunity_history table
+    # Create opportunity_history table
     op.create_table(
         "crm_sales_opportunity_history",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -89,21 +89,21 @@ def upgrade() -> None:
         sa.Column("change_reason", sa.Text, nullable=True),
     )
     
-    ***REMOVED*** Create index on opportunity_id for faster lookups
+    # Create index on opportunity_id for faster lookups
     op.create_index(
         "ix_crm_sales_opportunity_history_opportunity_id",
         "crm_sales_opportunity_history",
         ["opportunity_id"],
     )
     
-    ***REMOVED*** Create index on changed_at for time-based queries
+    # Create index on changed_at for time-based queries
     op.create_index(
         "ix_crm_sales_opportunity_history_changed_at",
         "crm_sales_opportunity_history",
         ["changed_at"],
     )
     
-    ***REMOVED*** Seed default opportunity stages
+    # Seed default opportunity stages
     op.execute("""
         INSERT INTO crm_sales_opportunity_stages (id, tenant_id, name, stage_key, "order", probability_default, required_fields, is_closed, is_won, created_at, updated_at)
         VALUES
@@ -122,14 +122,14 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Remove new fields and tables."""
     
-    ***REMOVED*** Drop tables
+    # Drop tables
     op.drop_table("crm_sales_opportunity_history")
     op.drop_table("crm_sales_opportunity_stages")
     
-    ***REMOVED*** Drop index
+    # Drop index
     op.drop_index("ix_crm_sales_opportunities_number", table_name="crm_sales_opportunities")
     
-    ***REMOVED*** Remove columns
+    # Remove columns
     op.drop_column("crm_sales_opportunities", "updated_by")
     op.drop_column("crm_sales_opportunities", "created_by")
     op.drop_column("crm_sales_opportunities", "notes")
@@ -139,4 +139,5 @@ def downgrade() -> None:
     op.drop_column("crm_sales_opportunities", "expected_revenue")
     op.drop_column("crm_sales_opportunities", "currency")
     op.drop_column("crm_sales_opportunities", "number")
+
 

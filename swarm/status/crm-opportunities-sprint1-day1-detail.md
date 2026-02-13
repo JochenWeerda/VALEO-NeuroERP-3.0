@@ -1,20 +1,20 @@
-***REMOVED*** Sprint 1, Day 1 - Opportunity-Detail-Seite
+# Sprint 1, Day 1 - Opportunity-Detail-Seite
 
 **Datum:** 2025-01-27  
 **Sprint:** Sprint 1 (Week 1-2)  
 **Mission:** Phase 1.1 - Opportunities / Deals
 
-***REMOVED******REMOVED*** ✅ Abgeschlossen
+## ✅ Abgeschlossen
 
-***REMOVED******REMOVED******REMOVED*** Opportunity-Detail-Seite ✅
+### Opportunity-Detail-Seite ✅
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Hauptkomponente
+#### 1. Hauptkomponente
 - ✅ `opportunity-detail.tsx` erstellt
 - ✅ ObjectPage-Integration mit Mask Builder
 - ✅ Create/Edit-Modus (neu/bestehend)
 - ✅ Navigation zurück zur Liste
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2. Formular-Tabs
+#### 2. Formular-Tabs
 - ✅ **Grundinformationen**:
   - number (read-only, auto-generated)
   - name (required)
@@ -42,7 +42,7 @@
 - ✅ **Notizen**:
   - notes (textarea)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3. Sidebar-Komponenten
+#### 3. Sidebar-Komponenten
 - ✅ **History-Tab**:
   - Lädt History von API
   - Zeigt Feld-Änderungen
@@ -55,20 +55,20 @@
   - "Angebot erstellen" Button
   - TODO: Quotes API-Integration
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4. Aktionen
+#### 4. Aktionen
 - ✅ Save (Create/Update)
 - ✅ Cancel
 - ✅ Convert to Quote (Placeholder)
 - ✅ Mark as Won
 - ✅ Mark as Lost
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 5. Validierung
+#### 5. Validierung
 - ✅ Zod-Schema für Opportunities
 - ✅ Auto-Berechnung expected_revenue
 - ✅ Auto-Set owner_id von assigned_to
 - ✅ Validation-Feedback
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 6. i18n-Integration
+#### 6. i18n-Integration
 - ✅ Alle Labels übersetzt
 - ✅ Neue Übersetzungen hinzugefügt:
   - `crud.stages.*` (8 Stages)
@@ -92,13 +92,13 @@
   - `crud.messages.comingSoon`
   - `crud.tooltips.placeholders.*` (12 neue)
 
-***REMOVED******REMOVED*** 📋 Nächste Schritte
+## 📋 Nächste Schritte
 
 1. **Pipeline-Kanban** (Drag & Drop)
 2. **Forecast-Report** (Visualisierungen)
 3. **Tests** (Unit, Integration, E2E)
 
-***REMOVED******REMOVED*** 📊 Fortschritt
+## 📊 Fortschritt
 
 **Sprint 1 (Frontend):**
 - ✅ 50% - Opportunities-Liste
@@ -114,4 +114,5 @@
 ---
 
 **Nächster Update:** Nach Pipeline-Kanban
+
 

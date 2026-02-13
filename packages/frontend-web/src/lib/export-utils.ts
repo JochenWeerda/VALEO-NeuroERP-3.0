@@ -82,11 +82,11 @@ export function printTable<T extends Record<string, any>>(
       <title>${title}</title>
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: ***REMOVED***333; border-bottom: 2px solid ***REMOVED***333; padding-bottom: 10px; }
+        h1 { color: #333; border-bottom: 2px solid #333; padding-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: ***REMOVED***f0f0f0; padding: 12px; text-align: left; border: 1px solid ***REMOVED***ddd; font-weight: bold; }
-        td { padding: 8px; border: 1px solid ***REMOVED***ddd; }
-        tr:nth-child(even) { background: ***REMOVED***f9f9f9; }
+        th { background: #f0f0f0; padding: 12px; text-align: left; border: 1px solid #ddd; font-weight: bold; }
+        td { padding: 8px; border: 1px solid #ddd; }
+        tr:nth-child(even) { background: #f9f9f9; }
         @media print {
           button { display: none; }
         }
@@ -110,7 +110,7 @@ export function printTable<T extends Record<string, any>>(
         </tbody>
       </table>
       <div style="margin-top: 20px;">
-        <button onclick="window.print()" style="padding: 10px 20px; background: ***REMOVED***333; color: white; border: none; cursor: pointer;">Drucken</button>
+        <button onclick="window.print()" style="padding: 10px 20px; background: #333; color: white; border: none; cursor: pointer;">Drucken</button>
         <button onclick="window.close()" style="padding: 10px 20px; margin-left: 10px; cursor: pointer;">Schließen</button>
       </div>
     </body>
@@ -154,4 +154,5 @@ export function formatCurrencyForExport(amount: number, currency = 'EUR'): strin
     currency,
   }).format(amount)
 }
+
 

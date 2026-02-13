@@ -16,12 +16,12 @@ from app.models.translation import Translation, TranslationValue, create_transla
 router = APIRouter(prefix="/api/translations", tags=["translations"])
 
 
-***REMOVED*** Pydantic-Models
+# Pydantic-Models
 class TranslationCreate(BaseModel):
     translation_key: str
     context: str
     description: Optional[str] = None
-    values: Dict[str, str]  ***REMOVED*** {'de': 'Speichern', 'en': 'Save'}
+    values: Dict[str, str]  # {'de': 'Speichern', 'en': 'Save'}
 
 
 class TranslationUpdate(BaseModel):
@@ -38,7 +38,7 @@ class MissingTranslationsResponse(BaseModel):
     missing_keys: List[str]
 
 
-***REMOVED*** --- GET-Endpoints ---
+# --- GET-Endpoints ---
 
 @router.get("/{language_code}")
 async def get_translations(
@@ -78,17 +78,17 @@ async def get_missing_translations(
     Findet fehlende Übersetzungen für eine Sprache.
     Wichtig beim Hinzufügen neuer Sprachen!
     """
-    ***REMOVED*** Alle Translation-Keys
+    # Alle Translation-Keys
     all_keys_query = db.query(Translation.translation_key).all()
     all_keys = {key[0] for key in all_keys_query}
     
-    ***REMOVED*** Existierende Übersetzungen für diese Sprache
+    # Existierende Übersetzungen für diese Sprache
     existing_query = db.query(Translation.translation_key).join(
         TranslationValue
     ).filter(TranslationValue.language_code == language_code).all()
     existing_keys = {key[0] for key in existing_query}
     
-    ***REMOVED*** Fehlende Keys
+    # Fehlende Keys
     missing = sorted(all_keys - existing_keys)
     
     return MissingTranslationsResponse(
@@ -118,7 +118,7 @@ async def get_contexts(
     ]
 
 
-***REMOVED*** --- POST-Endpoints ---
+# --- POST-Endpoints ---
 
 @router.post("/")
 async def create_new_translation(
@@ -128,7 +128,7 @@ async def create_new_translation(
     """
     Neue Übersetzung anlegen mit Werten für mehrere Sprachen
     """
-    ***REMOVED*** Prüfe ob Key bereits existiert
+    # Prüfe ob Key bereits existiert
     existing = db.query(Translation).filter(
         Translation.translation_key == translation.translation_key
     ).first()
@@ -139,7 +139,7 @@ async def create_new_translation(
             detail=f"Translation key '{translation.translation_key}' already exists"
         )
     
-    ***REMOVED*** Erstelle Translation
+    # Erstelle Translation
     new_translation = create_translation(
         db,
         key=translation.translation_key,
@@ -166,7 +166,7 @@ async def update_translation(
     """
     Übersetzung für eine Sprache aktualisieren
     """
-    ***REMOVED*** Finde Translation
+    # Finde Translation
     translation = db.query(Translation).filter(
         Translation.translation_key == translation_key
     ).first()
@@ -177,7 +177,7 @@ async def update_translation(
             detail=f"Translation key '{translation_key}' not found"
         )
     
-    ***REMOVED*** Finde oder erstelle TranslationValue
+    # Finde oder erstelle TranslationValue
     trans_value = db.query(TranslationValue).filter(
         and_(
             TranslationValue.translation_id == translation.id,
@@ -186,12 +186,12 @@ async def update_translation(
     ).first()
     
     if trans_value:
-        ***REMOVED*** Update existing
+        # Update existing
         trans_value.value = update.value
         if update.is_approved is not None:
             trans_value.is_approved = update.is_approved
     else:
-        ***REMOVED*** Create new
+        # Create new
         trans_value = TranslationValue(
             translation_id=translation.id,
             language_code=update.language_code,
@@ -209,7 +209,7 @@ async def update_translation(
     }
 
 
-***REMOVED*** --- Bulk-Operations ---
+# --- Bulk-Operations ---
 
 @router.post("/bulk/seed")
 async def bulk_seed_translations(
@@ -224,7 +224,7 @@ async def bulk_seed_translations(
     
     for trans in translations:
         try:
-            ***REMOVED*** Prüfe ob bereits existiert
+            # Prüfe ob bereits existiert
             existing = db.query(Translation).filter(
                 Translation.translation_key == trans.translation_key
             ).first()
@@ -271,7 +271,7 @@ async def export_translations(
         return translations
     
     elif format == "csv":
-        ***REMOVED*** CSV-Export (für Übersetzer)
+        # CSV-Export (für Übersetzer)
         import io
         import csv
         

@@ -37,30 +37,30 @@ class SecurityHeaders(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response: Response = await call_next(request)
 
-        ***REMOVED*** HSTS - Force HTTPS
+        # HSTS - Force HTTPS
         response.headers["Strict-Transport-Security"] = (
             "max-age=63072000; includeSubDomains; preload"
         )
 
-        ***REMOVED*** Prevent MIME-Sniffing
+        # Prevent MIME-Sniffing
         response.headers["X-Content-Type-Options"] = "nosniff"
 
-        ***REMOVED*** Prevent Clickjacking
+        # Prevent Clickjacking
         response.headers["X-Frame-Options"] = "DENY"
 
-        ***REMOVED*** Referrer Policy
+        # Referrer Policy
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
-        ***REMOVED*** Permissions Policy (Feature-Policy)
+        # Permissions Policy (Feature-Policy)
         response.headers["Permissions-Policy"] = (
             "geolocation=(), camera=(), microphone=()"
         )
 
-        ***REMOVED*** Cross-Origin Policies
+        # Cross-Origin Policies
         response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
         response.headers["Cross-Origin-Resource-Policy"] = "same-site"
 
-        ***REMOVED*** Content Security Policy
+        # Content Security Policy
         response.headers["Content-Security-Policy"] = self.csp
 
         return response
@@ -78,22 +78,22 @@ class CorrelationMiddleware(BaseHTTPMiddleware):
     """
 
     async def dispatch(self, request: Request, call_next):
-        ***REMOVED*** Correlation-ID aus Header oder neu generieren
+        # Correlation-ID aus Header oder neu generieren
         cid = request.headers.get("x-correlation-id", str(uuid.uuid4()))
 
-        ***REMOVED*** Start-Zeit für Latency-Messung
+        # Start-Zeit für Latency-Messung
         start = time.time()
 
-        ***REMOVED*** Request verarbeiten
+        # Request verarbeiten
         response = await call_next(request)
 
-        ***REMOVED*** Latency berechnen
+        # Latency berechnen
         latency_ms = int((time.time() - start) * 1000)
 
-        ***REMOVED*** Correlation-ID in Response-Header
+        # Correlation-ID in Response-Header
         response.headers["X-Correlation-Id"] = cid
 
-        ***REMOVED*** Structured Logging
+        # Structured Logging
         log_data = {
             "correlation_id": cid,
             "method": request.method,
@@ -103,7 +103,7 @@ class CorrelationMiddleware(BaseHTTPMiddleware):
             "client_host": request.client.host if request.client else "unknown",
         }
 
-        ***REMOVED*** Log-Level basierend auf Status-Code
+        # Log-Level basierend auf Status-Code
         if response.status_code >= 500:
             logger.error(json.dumps(log_data))
         elif response.status_code >= 400:

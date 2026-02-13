@@ -32,7 +32,7 @@ class WorkflowRepository:
             with self._session_factory() as session:
                 rows = session.query(WorkflowDefinitionModel).all()
                 return [
-                    WorkflowDefinition(**row.definition)  ***REMOVED*** type: ignore[arg-type]
+                    WorkflowDefinition(**row.definition)  # type: ignore[arg-type]
                     for row in rows
                 ]
 
@@ -101,5 +101,6 @@ class WorkflowRepository:
                 )
 
         return await asyncio.to_thread(_fetch)
+
 
 

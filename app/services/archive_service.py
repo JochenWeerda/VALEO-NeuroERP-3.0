@@ -52,21 +52,21 @@ class ArchiveService:
         Returns:
             Archive-Metadaten
         """
-        ***REMOVED*** Hash berechnen
+        # Hash berechnen
         with open(file_path, "rb") as f:
             file_hash = hashlib.sha256(f.read()).hexdigest()
 
-        ***REMOVED*** Archiv-Pfad
+        # Archiv-Pfad
         year = datetime.now().year
         archive_dir = self.base_path / domain / str(year)
         archive_dir.mkdir(parents=True, exist_ok=True)
 
-        ***REMOVED*** Datei kopieren
+        # Datei kopieren
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         archive_path = archive_dir / f"{doc_id}_{timestamp}.pdf"
         shutil.copy(file_path, archive_path)
 
-        ***REMOVED*** Index aktualisieren
+        # Index aktualisieren
         if doc_id not in self.index:
             self.index[doc_id] = []
 
@@ -113,13 +113,13 @@ class ArchiveService:
         if not entry:
             return False
 
-        ***REMOVED*** Hash neu berechnen
+        # Hash neu berechnen
         with open(archive_path, "rb") as f:
             current_hash = hashlib.sha256(f.read()).hexdigest()
 
         return current_hash == entry["sha256"]
 
 
-***REMOVED*** Global Archive Instance
+# Global Archive Instance
 archive = ArchiveService()
 

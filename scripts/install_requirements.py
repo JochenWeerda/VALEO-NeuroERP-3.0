@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 Installationsskript für VALEO-NeuroERP Streamlit-App und Cursor-Integration
@@ -13,7 +13,7 @@ import sys
 import subprocess
 import platform
 
-***REMOVED*** Liste der benötigten Pakete
+# Liste der benötigten Pakete
 REQUIRED_PACKAGES = [
     "streamlit>=1.22.0",
     "flask>=2.0.0",
@@ -22,7 +22,7 @@ REQUIRED_PACKAGES = [
     "pyperclip>=1.8.2",
     "openai>=0.27.0",
     "watchdog>=2.1.0",
-    "modelcontextprotocol>=0.1.0",  ***REMOVED*** Falls verfügbar, ansonsten muss angepasst werden
+    "modelcontextprotocol>=0.1.0",  # Falls verfügbar, ansonsten muss angepasst werden
 ]
 
 def check_python_version():
@@ -36,10 +36,10 @@ def install_packages():
     print("Installiere benötigte Pakete...")
     
     try:
-        ***REMOVED*** Pip aktualisieren
+        # Pip aktualisieren
         subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
         
-        ***REMOVED*** Pakete installieren
+        # Pakete installieren
         for package in REQUIRED_PACKAGES:
             try:
                 print(f"Installiere {package}...")
@@ -71,13 +71,13 @@ def create_directories():
 
 def create_config_files():
     """Erstellt die benötigten Konfigurationsdateien."""
-    ***REMOVED*** Version-Konfiguration
+    # Version-Konfiguration
     if not os.path.exists("config/version.yaml"):
         with open("config/version.yaml", "w") as file:
             file.write("current_version: '1.8.1'\n")
         print("Konfigurationsdatei config/version.yaml erstellt.")
     
-    ***REMOVED*** Pipeline-Status
+    # Pipeline-Status
     if not os.path.exists("data/pipeline_status.json"):
         with open("data/pipeline_status.json", "w") as file:
             file.write('{"phase": "none", "progress": 0, "status": "idle", "completed": []}\n')
@@ -87,7 +87,7 @@ def create_environment_file():
     """Erstellt eine .env-Datei für Umgebungsvariablen."""
     if not os.path.exists(".env"):
         with open(".env", "w") as file:
-            file.write("***REMOVED*** Umgebungsvariablen für VALEO-NeuroERP\n")
+            file.write("# Umgebungsvariablen für VALEO-NeuroERP\n")
             file.write("OPENAI_API_KEY=\n")
             file.write("CURSOR_API_KEY=\n")
             file.write("CURSOR_API_URL=http://localhost:6500/api/v1\n")
@@ -104,7 +104,7 @@ def create_startup_script():
         print("Windows-Startskript start_app.bat erstellt.")
     else:
         with open("start_app.sh", "w") as file:
-            file.write("***REMOVED***!/bin/bash\n")
+            file.write("#!/bin/bash\n")
             file.write("echo \"Starte VALEO-NeuroERP Streamlit-App...\"\n")
             file.write("python scripts/cursor_prompt_integration.py &\n")
             file.write("streamlit run scripts/streamlit_app_mcp_integration.py\n")
@@ -116,22 +116,22 @@ def main():
     print("VALEO-NeuroERP Installation")
     print("==========================")
     
-    ***REMOVED*** Python-Version prüfen
+    # Python-Version prüfen
     check_python_version()
     
-    ***REMOVED*** Verzeichnisse erstellen
+    # Verzeichnisse erstellen
     create_directories()
     
-    ***REMOVED*** Konfigurationsdateien erstellen
+    # Konfigurationsdateien erstellen
     create_config_files()
     
-    ***REMOVED*** Umgebungsvariablen-Datei erstellen
+    # Umgebungsvariablen-Datei erstellen
     create_environment_file()
     
-    ***REMOVED*** Pakete installieren
+    # Pakete installieren
     install_packages()
     
-    ***REMOVED*** Startskript erstellen
+    # Startskript erstellen
     create_startup_script()
     
     print("\nInstallation abgeschlossen!")

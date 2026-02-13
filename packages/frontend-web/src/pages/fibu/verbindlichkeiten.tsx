@@ -6,67 +6,35 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertCircle, FileDown, Search } from 'lucide-react'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { useVerbindlichkeiten, type Verbindlichkeit } from '@/lib/api/fibu'
 
-type Verbindlichkeit = {
-  id: string
-  rechnungsNr: string
-  lieferant: string
-  rechnungsDatum: string
-  faelligAm: string
-  betrag: number
-  offen: number
-  status: 'offen' | 'teilbezahlt' | 'bezahlt' | 'skontofähig'
-}
-
-const mockVerbindlichkeiten: Verbindlichkeit[] = [
-  {
-    id: '1',
-    rechnungsNr: 'ER-2025-0001',
-    lieferant: 'Saatgut AG',
-    rechnungsDatum: '2025-10-08',
-    faelligAm: '2025-11-07',
-    betrag: 25000.0,
-    offen: 25000.0,
-    status: 'skontofähig',
-  },
-  {
-    id: '2',
-    rechnungsNr: 'ER-2025-0002',
-    lieferant: 'Dünger GmbH',
-    rechnungsDatum: '2025-10-09',
-    faelligAm: '2025-11-08',
-    betrag: 18500.5,
-    offen: 9250.25,
-    status: 'teilbezahlt',
-  },
-  {
-    id: '3',
-    rechnungsNr: 'ER-2025-0003',
-    lieferant: 'Agrar-Handel Nord',
-    rechnungsDatum: '2025-10-10',
-    faelligAm: '2025-11-09',
-    betrag: 12200.0,
-    offen: 12200.0,
-    status: 'offen',
-  },
-]
-
-const statusVariantMap: Record<Verbindlichkeit['status'], 'default' | 'outline' | 'secondary' | 'destructive'> = {
+const statusVariantMap: Record<string, 'default' | 'outline' | 'secondary' | 'destructive'> = {
   offen: 'default',
   teilbezahlt: 'secondary',
   bezahlt: 'outline',
-  skontofähig: 'default',
+  skontofaehig: 'default',
 }
 
 export default function VerbindlichkeitenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<Verbindlichkeit['status'] | 'alle'>('alle')
+  const [statusFilter, setStatusFilter] = useState<string>('alle')
+  const { data: items, isLoading } = useVerbindlichkeiten()
 
-  const filteredVerbindlichkeiten = mockVerbindlichkeiten.filter((verb) => {
+  if (isLoading) return (
+    <div className="p-3 md:p-6 space-y-4">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>
+  )
+
+  const list = items ?? []
+
+  const filteredVerbindlichkeiten = list.filter((verb) => {
     const matchesSearch =
       verb.rechnungsNr.toLowerCase().includes(searchTerm.toLowerCase()) ||
       verb.lieferant.toLowerCase().includes(searchTerm.toLowerCase())
@@ -75,7 +43,7 @@ export default function VerbindlichkeitenPage(): JSX.Element {
   })
 
   const gesamtOffen = filteredVerbindlichkeiten.reduce((sum, v) => sum + v.offen, 0)
-  const skontofähig = filteredVerbindlichkeiten.filter((v) => v.status === 'skontofähig')
+  const skontofaehig = filteredVerbindlichkeiten.filter((v) => v.status === 'skontofaehig')
 
   const columns = [
     {
@@ -123,13 +91,13 @@ export default function VerbindlichkeitenPage(): JSX.Element {
       key: 'status' as const,
       label: 'Status',
       render: (verb: Verbindlichkeit) => (
-        <Badge variant={statusVariantMap[verb.status]}>{getStatusLabel(t, verb.status, verb.status)}</Badge>
+        <Badge variant={statusVariantMap[verb.status] ?? 'default'}>{getStatusLabel(t, verb.status, verb.status)}</Badge>
       ),
     },
   ]
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Verbindlichkeiten</h1>
@@ -157,7 +125,7 @@ export default function VerbindlichkeitenPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold">{skontofähig.length}</span>
+              <span className="text-2xl font-bold">{skontofaehig.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -169,7 +137,7 @@ export default function VerbindlichkeitenPage(): JSX.Element {
           <CardContent>
             <div className="text-2xl font-bold">
               {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
-                skontofähig.reduce((sum, v) => sum + v.offen, 0) * 0.02
+                skontofaehig.reduce((sum, v) => sum + v.offen, 0) * 0.02
               )}
             </div>
           </CardContent>
@@ -193,14 +161,14 @@ export default function VerbindlichkeitenPage(): JSX.Element {
             </div>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as Verbindlichkeit['status'] | 'alle')}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="rounded-md border border-input bg-background px-3 py-2"
             >
               <option value="alle">Alle Status</option>
               <option value="offen">Offen</option>
               <option value="teilbezahlt">Teilbezahlt</option>
               <option value="bezahlt">Bezahlt</option>
-              <option value="skontofähig">Skontofähig</option>
+              <option value="skontofaehig">Skontofähig</option>
             </select>
             <Button variant="outline" className="gap-2">
               <FileDown className="h-4 w-4" />
@@ -214,7 +182,7 @@ export default function VerbindlichkeitenPage(): JSX.Element {
         <CardContent className="pt-6">
           <DataTable data={filteredVerbindlichkeiten} columns={columns} />
           <div className="mt-4 text-sm text-muted-foreground">
-            {filteredVerbindlichkeiten.length} von {mockVerbindlichkeiten.length} Verbindlichkeit(en) angezeigt
+            {filteredVerbindlichkeiten.length} von {list.length} Verbindlichkeit(en) angezeigt
           </div>
         </CardContent>
       </Card>

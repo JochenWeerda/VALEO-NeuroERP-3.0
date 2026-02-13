@@ -17,7 +17,7 @@ class FakeSession:
 @pytest.mark.asyncio
 async def test_preference_service_calculates_ratio():
     session = FakeSession()
-    service = PreferenceService(session)  ***REMOVED*** type: ignore[arg-type]
+    service = PreferenceService(session)  # type: ignore[arg-type]
 
     payload = PreferenceCalculationRequest(
         tenant_id="tenant-a",
@@ -32,3 +32,4 @@ async def test_preference_service_calculates_ratio():
     result = await service.calculate(payload)
     assert result.qualifies is True
     assert result.originating_value_percent == 60.0
+

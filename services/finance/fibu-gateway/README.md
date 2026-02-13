@@ -1,15 +1,15 @@
-***REMOVED*** FiBu-Gateway
+# FiBu-Gateway
 
 Anti-Corruption-Layer zwischen Frontend/anderen Domains und den FiBu-Microservices.
 
-***REMOVED******REMOVED*** Ziele
+## Ziele
 
 - Einheitliche REST-/GraphQL-API für das Frontend
 - Weiterleitung von Requests an spezialisierte FiBu-Services (`fibu-core`, `fibu-master-data`, `fibu-op`, …)
 - Mandanten- / Rollen-Kontext einspeisen (Header `X-Tenant-ID`)
 - Optionale Event-Publishing- und Workflow-Hooks
 
-***REMOVED******REMOVED*** Features (Stand Scaffold)
+## Features (Stand Scaffold)
 
 - FastAPI-Anwendung mit Health/Ready-Endpoints
 - Konfigurierbare Ziel-Services via Environment (`FIBU_CORE_URL`, `FIBU_MASTER_DATA_URL`, …)
@@ -22,7 +22,7 @@ Anti-Corruption-Layer zwischen Frontend/anderen Domains und den FiBu-Microservic
 - Tenant-Middleware + Dependency Injection
 - Tests (pytest + httpx AsyncClient)
 
-***REMOVED******REMOVED*** Getting Started
+## Getting Started
 
 ```bash
 cd services/finance/fibu-gateway
@@ -41,11 +41,12 @@ Environment Variables (Auszug):
 | `FIBUGW_FIBU_OP_URL` | `http://finance-service:8003` | OP-Verwaltung |
 | `FIBUGW_DEFAULT_TENANT` | `default` | Fallback-Tenant |
 
-***REMOVED******REMOVED*** Open Tasks
+## Open Tasks
 
 - AuthN/RBAC Integration
 - Event-Bus & Workflow-Hooks
 - GraphQL-Schema / Federation
 - Error-Mapping & Circuit-Breaker pro Downstream-Service
+
 
 

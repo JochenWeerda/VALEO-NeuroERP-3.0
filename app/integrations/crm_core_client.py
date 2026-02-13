@@ -289,7 +289,7 @@ async def delete_farm_profile(profile_id: str) -> None:
     await _request("DELETE", f"/api/v1/farm-profiles/{profile_id}")
 
 
-***REMOVED*** CRM Sales client functions
+# CRM Sales client functions
 async def list_opportunities(
     tenant_id: str | None = None,
     status: str | None = None,
@@ -329,7 +329,7 @@ async def delete_opportunity(opportunity_id: str) -> None:
     await _request_crm_sales("DELETE", f"/api/v1/opportunities/{opportunity_id}")
 
 
-***REMOVED*** CRM Service client functions
+# CRM Service client functions
 async def list_cases(
     tenant_id: str | None = None,
     status: str | None = None,

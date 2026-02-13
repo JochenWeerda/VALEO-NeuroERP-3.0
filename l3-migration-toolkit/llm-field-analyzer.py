@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 LLM-basierte L3-Feldanalyse
 
@@ -56,18 +56,18 @@ class LLMFieldAnalyzer:
             ocr_text, ocr_fields, mask_name
         )
         
-        ***REMOVED*** LLM-Call (hier: Simulated für Entwicklung)
-        ***REMOVED*** In Produktion: OpenAI/Anthropic API
+        # LLM-Call (hier: Simulated für Entwicklung)
+        # In Produktion: OpenAI/Anthropic API
         response = self._call_llm(prompt)
         
-        ***REMOVED*** Parse LLM-Response
+        # Parse LLM-Response
         try:
             analyzed_fields = json.loads(response)
         except json.JSONDecodeError:
-            ***REMOVED*** Fallback: Extrahiere JSON aus Markdown-Code-Block
+            # Fallback: Extrahiere JSON aus Markdown-Code-Block
             analyzed_fields = self._extract_json_from_markdown(response)
         
-        ***REMOVED*** Enrich mit Mapping-Kontext
+        # Enrich mit Mapping-Kontext
         analyzed_fields = self._enrich_with_mapping(analyzed_fields, mask_name)
         
         return analyzed_fields
@@ -80,7 +80,7 @@ class LLMFieldAnalyzer:
     ) -> str:
         """Baut strukturierten Analyse-Prompt"""
         
-        ***REMOVED*** Finde relevantes Mapping
+        # Finde relevantes Mapping
         relevant_mapping = self._find_relevant_mapping(mask_name)
         
         prompt = f"""Analyze this OCR text from L3 ERP mask '{mask_name}'.
@@ -89,7 +89,7 @@ class LLMFieldAnalyzer:
 
 **OCR Raw Text:**
 ```
-{ocr_text[:2000]}  ***REMOVED*** Limit für Token-Effizienz
+{ocr_text[:2000]}  # Limit für Token-Effizienz
 ```
 
 **OCR-erkannte Felder (Vorschlag):**
@@ -165,16 +165,16 @@ class LLMFieldAnalyzer:
         """Findet relevantes Mapping für Maske"""
         mask_lower = mask_name.lower()
         
-        ***REMOVED*** Mapping-Logik
+        # Mapping-Logik
         relevant = {}
         
         for table_name, mapping in self.existing_mapping.items():
-            ***REMOVED*** Fuzzy-Match: Artikelstamm → ARTIKEL
+            # Fuzzy-Match: Artikelstamm → ARTIKEL
             if any(keyword in mask_lower for keyword in ['artikel', 'product']):
                 if 'artikel' in table_name.lower():
                     relevant[table_name] = mapping
             elif any(keyword in mask_lower for keyword in ['kunde', 'customer']):
-                if 'adress' in table_name.lower():  ***REMOVED*** L3: ADRESSEN
+                if 'adress' in table_name.lower():  # L3: ADRESSEN
                     relevant[table_name] = mapping
         
         return relevant
@@ -188,13 +188,13 @@ class LLMFieldAnalyzer:
         - Anthropic API (claude-3.5-sonnet)
         - Lokales LLM (Ollama)
         """
-        ***REMOVED*** TODO: Echte LLM-Integration
-        ***REMOVED*** Für jetzt: Return Placeholder
+        # TODO: Echte LLM-Integration
+        # Für jetzt: Return Placeholder
         
         print("⚠️  LLM-Call simuliert (keine echte API-Integration)")
         print("📝 In Produktion: OpenAI/Anthropic API aufrufen")
         
-        ***REMOVED*** Placeholder-Response (würde von LLM kommen)
+        # Placeholder-Response (würde von LLM kommen)
         return json.dumps({
             "mask_id": "placeholder",
             "mask_name": "Placeholder",
@@ -207,14 +207,14 @@ class LLMFieldAnalyzer:
         """Extrahiert JSON aus Markdown-Code-Block"""
         import re
         
-        ***REMOVED*** Finde JSON-Block
+        # Finde JSON-Block
         json_pattern = r'```json\s*(\{.*?\})\s*```'
         match = re.search(json_pattern, text, re.DOTALL)
         
         if match:
             return json.loads(match.group(1))
         
-        ***REMOVED*** Fallback: Versuche direktes Parsing
+        # Fallback: Versuche direktes Parsing
         return json.loads(text)
     
     def _enrich_with_mapping(
@@ -230,23 +230,23 @@ class LLMFieldAnalyzer:
         - Relations
         - Validierungen
         """
-        ***REMOVED*** Finde Mapping für diese Maske
+        # Finde Mapping für diese Maske
         relevant_mapping = self._find_relevant_mapping(mask_name)
         
         if not relevant_mapping:
             return analyzed_fields
         
-        ***REMOVED*** Enrich Fields
+        # Enrich Fields
         for field in analyzed_fields.get('fields', []):
             l3_field = field.get('l3_original_field', '')
             
-            ***REMOVED*** Suche Mapping
+            # Suche Mapping
             for table_name, table_mapping in relevant_mapping.items():
                 for col_name, col_mapping in table_mapping.items():
                     source_col = col_mapping.get('source_column', '')
                     
                     if source_col and source_col.lower() in l3_field.lower():
-                        ***REMOVED*** Update database_column
+                        # Update database_column
                         field['database_column'] = col_mapping['target_column']
                         field['mapped_from_l3'] = True
                         break
@@ -294,11 +294,11 @@ def main():
     
     args = parser.parse_args()
     
-    ***REMOVED*** Lade OCR-Ergebnisse
+    # Lade OCR-Ergebnisse
     with open(args.ocr_json, 'r', encoding='utf-8') as f:
         ocr_data = json.load(f)
     
-    ***REMOVED*** Analysiere
+    # Analysiere
     analyzer = LLMFieldAnalyzer()
     result = analyzer.analyze_ocr_with_llm(
         ocr_data['raw_text'],
@@ -306,10 +306,10 @@ def main():
         {'mask_name': args.mask_name}
     )
     
-    ***REMOVED*** Ausgabe
+    # Ausgabe
     print(json.dumps(result, indent=2, ensure_ascii=False))
     
-    ***REMOVED*** Speichere
+    # Speichere
     output_path = Path(args.ocr_json).with_suffix('.analyzed.json')
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
@@ -319,4 +319,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 

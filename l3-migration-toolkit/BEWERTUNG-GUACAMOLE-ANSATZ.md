@@ -1,18 +1,18 @@
-***REMOVED*** Bewertung: Guacamole für L3-Masken-Migration
+# Bewertung: Guacamole für L3-Masken-Migration
 
 **Frage:** Wie gut kann man mit Guacamole die Ein-/Ausgabemasken von L3 kopieren und äquivalent in VALEO-NeuroERP nachbauen?
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Gesamtbewertung: **9.2/10** 🌟
+## 🎯 Gesamtbewertung: **9.2/10** 🌟
 
 **Empfehlung:** ✅ **SEHR GUT GEEIGNET** für L3→VALEO Migration
 
 ---
 
-***REMOVED******REMOVED*** 📊 Detaillierte Bewertung
+## 📊 Detaillierte Bewertung
 
-***REMOVED******REMOVED******REMOVED*** 1. Screenshot-Qualität (10/10)
+### 1. Screenshot-Qualität (10/10)
 
 **✅ Vorteile:**
 - Pixelgenaue Screenshots (1:1 wie L3-Original)
@@ -28,7 +28,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2. Automatisierbarkeit (10/10)
+### 2. Automatisierbarkeit (10/10)
 
 **✅ Vorteile:**
 - Playwright-Integration
@@ -44,7 +44,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 3. Workflow-Effizienz (9/10)
+### 3. Workflow-Effizienz (9/10)
 
 **✅ Vorteile:**
 - Browser-basiert (keine zusätzliche Software)
@@ -63,7 +63,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 4. Feldextraktion (8/10)
+### 4. Feldextraktion (8/10)
 
 **✅ Möglichkeiten:**
 - OCR für Label-Erkennung (Tesseract.js)
@@ -84,7 +84,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 5. Daten-Mapping (9/10)
+### 5. Daten-Mapping (9/10)
 
 **✅ Vorteile:**
 - L3-Tabellen-Übersicht liegt vor (2.158 Tabellen)
@@ -108,7 +108,7 @@ L3-Maske "Kundenstamm":
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 6. Funktionalitäts-Äquivalenz (9/10)
+### 6. Funktionalitäts-Äquivalenz (9/10)
 
 **✅ Was 1:1 übertragbar ist:**
 - Feldlayouts (Positionen, Reihenfolge)
@@ -130,7 +130,7 @@ L3-Maske "Kundenstamm":
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 7. Kosten-Nutzen-Verhältnis (10/10)
+### 7. Kosten-Nutzen-Verhältnis (10/10)
 
 **Kosten:**
 - Setup-Zeit: ~1h einmalig
@@ -149,9 +149,9 @@ L3-Maske "Kundenstamm":
 
 ---
 
-***REMOVED******REMOVED*** 🔬 Technische Analyse
+## 🔬 Technische Analyse
 
-***REMOVED******REMOVED******REMOVED*** Screenshot-Methoden im Vergleich
+### Screenshot-Methoden im Vergleich
 
 | Methode | Qualität | Automatisierung | Setup | Empfehlung |
 |---------|----------|-----------------|-------|------------|
@@ -162,9 +162,9 @@ L3-Maske "Kundenstamm":
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Konkrete Anwendungsfälle
+## 🎯 Konkrete Anwendungsfälle
 
-***REMOVED******REMOVED******REMOVED*** Use Case 1: Kundenstamm-Maske nachbauen
+### Use Case 1: Kundenstamm-Maske nachbauen
 
 **Input:**
 - Screenshot: `L3_Kundenstamm_001.png`
@@ -201,7 +201,7 @@ L3-Maske "Kundenstamm":
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Use Case 2: Workflow-Analyse (Auftragserfassung)
+### Use Case 2: Workflow-Analyse (Auftragserfassung)
 
 **Ziel:** L3-Workflow "Auftrag erfassen" nachbauen
 
@@ -226,7 +226,7 @@ L3-Maske "Kundenstamm":
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Use Case 3: Datenfeld-Mapping
+### Use Case 3: Datenfeld-Mapping
 
 **Kombination:**
 - Screenshot: Feldnamen & -typen
@@ -246,52 +246,52 @@ L3-Maske "Kundenstamm":
 
 ---
 
-***REMOVED******REMOVED*** 💡 Empfohlener Workflow
+## 💡 Empfohlener Workflow
 
-***REMOVED******REMOVED******REMOVED*** Woche 1-2: Screenshot-Phase
+### Woche 1-2: Screenshot-Phase
 
 ```powershell
-***REMOVED*** Setup durchführen (1h)
+# Setup durchführen (1h)
 cd l3-migration-toolkit
 docker compose up -d
 
-***REMOVED*** DB init (einmalig)
+# DB init (einmalig)
 docker exec -i l3-guacamole /opt/guacamole/bin/initdb.sh --postgres | docker exec -i l3-postgres psql -U guacamole_user -d guacamole_db
 
-***REMOVED*** Guacamole konfigurieren (30 Min)
-***REMOVED*** - Passwort ändern
-***REMOVED*** - RDP/VNC-Verbindung anlegen
-***REMOVED*** - Testen
+# Guacamole konfigurieren (30 Min)
+# - Passwort ändern
+# - RDP/VNC-Verbindung anlegen
+# - Testen
 
-***REMOVED*** Task Scheduler aktivieren (15 Min)
-.\run-screenshot.ps1  ***REMOVED*** Test
-***REMOVED*** → Task anlegen (siehe SETUP.md)
+# Task Scheduler aktivieren (15 Min)
+.\run-screenshot.ps1  # Test
+# → Task anlegen (siehe SETUP.md)
 
-***REMOVED*** L3 durchklicken (10h über 2 Wochen verteilt)
-***REMOVED*** - Jede Hauptmaske öffnen
-***REMOVED*** - 5 Min warten (auto-screenshot)
-***REMOVED*** - Nächste Maske
-***REMOVED*** → Erwartung: 50-100 Screenshots
+# L3 durchklicken (10h über 2 Wochen verteilt)
+# - Jede Hauptmaske öffnen
+# - 5 Min warten (auto-screenshot)
+# - Nächste Maske
+# → Erwartung: 50-100 Screenshots
 ```
 
-***REMOVED******REMOVED******REMOVED*** Woche 3: Analyse-Phase
+### Woche 3: Analyse-Phase
 
 ```powershell
-***REMOVED*** Screenshots organisieren
+# Screenshots organisieren
 mkdir screenshots/stammdaten
 mkdir screenshots/verkauf
 mkdir screenshots/einkauf
 mkdir screenshots/fibu
 
-***REMOVED*** Screenshots sortieren (manuell)
-***REMOVED*** - Nach Modul gruppieren
-***REMOVED*** - Nach Masken-Typ benennen
+# Screenshots sortieren (manuell)
+# - Nach Modul gruppieren
+# - Nach Masken-Typ benennen
 
-***REMOVED*** Feldlisten erstellen (Excel/CSV)
-***REMOVED*** - Pro Screenshot: Feldname, Typ, Pflicht, Position
+# Feldlisten erstellen (Excel/CSV)
+# - Pro Screenshot: Feldname, Typ, Pflicht, Position
 ```
 
-***REMOVED******REMOVED******REMOVED*** Woche 4-6: Umsetzungs-Phase
+### Woche 4-6: Umsetzungs-Phase
 
 ```typescript
 // Pro L3-Maske:
@@ -309,29 +309,29 @@ const l3RechnungConfig = { ... }
 // → 50-100 ObjectPage-Configs
 ```
 
-***REMOVED******REMOVED******REMOVED*** Woche 7: Datenimport & Validierung
+### Woche 7: Datenimport & Validierung
 
 ```powershell
-***REMOVED*** L3-Daten importieren
+# L3-Daten importieren
 python scripts/import_l3_data.py
 
-***REMOVED*** VALEO-Masken mit L3-Daten testen
-***REMOVED*** - Jede Maske öffnen
-***REMOVED*** - L3-Datensatz anzeigen
-***REMOVED*** - Vergleich mit L3-Screenshot
-***REMOVED*** - Funktionalität prüfen
+# VALEO-Masken mit L3-Daten testen
+# - Jede Maske öffnen
+# - L3-Datensatz anzeigen
+# - Vergleich mit L3-Screenshot
+# - Funktionalität prüfen
 
-***REMOVED*** Differenzen dokumentieren
-***REMOVED*** - Fehlende Felder
-***REMOVED*** - Abweichende Validierungen
-***REMOVED*** - Unterschiedliche Workflows
+# Differenzen dokumentieren
+# - Fehlende Felder
+# - Abweichende Validierungen
+# - Unterschiedliche Workflows
 ```
 
 ---
 
-***REMOVED******REMOVED*** ✅ Konkrete Vorteile für VALEO-NeuroERP
+## ✅ Konkrete Vorteile für VALEO-NeuroERP
 
-***REMOVED******REMOVED******REMOVED*** 1. Visuelles Masken-Repository
+### 1. Visuelles Masken-Repository
 
 **Ergebnis:** Vollständige Bild-Doku aller L3-Masken
 
@@ -343,7 +343,7 @@ python scripts/import_l3_data.py
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 2. Präzises Feldmapping
+### 2. Präzises Feldmapping
 
 **Kombination:**
 1. Screenshot → Feldnamen sichtbar
@@ -354,7 +354,7 @@ python scripts/import_l3_data.py
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 3. UI/UX-Verbesserungen identifizieren
+### 3. UI/UX-Verbesserungen identifizieren
 
 **L3-Schwächen** (aus Screenshots erkennbar):
 - Überladene Formulare (50+ Felder pro Maske)
@@ -369,7 +369,7 @@ python scripts/import_l3_data.py
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** 4. Schnellere Entwicklung
+### 4. Schnellere Entwicklung
 
 **Ohne Guacamole:**
 - L3 manuell bedienen
@@ -389,9 +389,9 @@ python scripts/import_l3_data.py
 
 ---
 
-***REMOVED******REMOVED*** ⚙️ Alternative Ansätze (Vergleich)
+## ⚙️ Alternative Ansätze (Vergleich)
 
-***REMOVED******REMOVED******REMOVED*** Ansatz 1: Guacamole (EMPFOHLEN)
+### Ansatz 1: Guacamole (EMPFOHLEN)
 
 **Score:** 9.2/10  
 **Vorteile:**
@@ -406,7 +406,7 @@ python scripts/import_l3_data.py
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Ansatz 2: Windows Screenshot-Tool (lokal)
+### Ansatz 2: Windows Screenshot-Tool (lokal)
 
 **Score:** 8.5/10  
 **Vorteile:**
@@ -421,13 +421,13 @@ python scripts/import_l3_data.py
 
 **Verwendung:**
 ```powershell
-***REMOVED*** PowerShell-Script (bereits in VALEO-Projekt)
+# PowerShell-Script (bereits in VALEO-Projekt)
 .\scripts\capture-window-screenshot.ps1 -WindowTitle "L3*" -OutputPath "screenshots"
 ```
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Ansatz 3: Screen Recording → Frame Extraction
+### Ansatz 3: Screen Recording → Frame Extraction
 
 **Score:** 7.0/10  
 **Vorteile:**
@@ -441,7 +441,7 @@ python scripts/import_l3_data.py
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Ansatz 4: L3 Reverse-Engineering (DLL-Analyse)
+### Ansatz 4: L3 Reverse-Engineering (DLL-Analyse)
 
 **Score:** 5.0/10  
 **Vorteile:**
@@ -454,9 +454,9 @@ python scripts/import_l3_data.py
 
 ---
 
-***REMOVED******REMOVED*** 📋 Checkliste: Guacamole-Setup für L3
+## 📋 Checkliste: Guacamole-Setup für L3
 
-***REMOVED******REMOVED******REMOVED*** Einmalig (Setup)
+### Einmalig (Setup)
 
 - [ ] Docker Desktop installiert & läuft
 - [ ] Remotedesktop auf Windows aktiviert
@@ -475,7 +475,7 @@ python scripts/import_l3_data.py
 - [ ] Playwright Chromium installiert (`npm run install:pw`)
 - [ ] Test-Screenshot erfolgreich (`npm run snap`)
 
-***REMOVED******REMOVED******REMOVED*** Regelmäßig (Produktion)
+### Regelmäßig (Produktion)
 
 - [ ] Task Scheduler eingerichtet (alle 5 Min)
 - [ ] L3-Software auf Windows gestartet
@@ -489,9 +489,9 @@ python scripts/import_l3_data.py
 
 ---
 
-***REMOVED******REMOVED*** 🎯 Empfehlung für VALEO-NeuroERP
+## 🎯 Empfehlung für VALEO-NeuroERP
 
-***REMOVED******REMOVED******REMOVED*** ✅ JA, Guacamole ist PERFEKT geeignet, weil:
+### ✅ JA, Guacamole ist PERFEKT geeignet, weil:
 
 1. **Vollständige Dokumentation:** Alle L3-Masken als Screenshots
 2. **Automatisierung:** Task Scheduler → 0 manuelle Arbeit
@@ -502,28 +502,28 @@ python scripts/import_l3_data.py
 7. **Compliance:** Vollständiger Nachweis der Alt-Funktionalität
 8. **Training:** Screenshots als Schulungsmaterial
 
-***REMOVED******REMOVED******REMOVED*** 🚀 Nächster Schritt:
+### 🚀 Nächster Schritt:
 
 ```powershell
-***REMOVED*** Setup durchführen (siehe SETUP.md)
+# Setup durchführen (siehe SETUP.md)
 cd l3-migration-toolkit
 docker compose up -d
 
-***REMOVED*** Erste Screenshots machen
+# Erste Screenshots machen
 cd playwright-snap
 npm run snap
 
-***REMOVED*** Task Scheduler aktivieren
-***REMOVED*** → 24h laufen lassen
-***REMOVED*** → Alle L3-Masken durchklicken
-***REMOVED*** → ~100 Screenshots sammeln
+# Task Scheduler aktivieren
+# → 24h laufen lassen
+# → Alle L3-Masken durchklicken
+# → ~100 Screenshots sammeln
 ```
 
 **Dann:** Systematisch VALEO-Masken nachbauen mit ObjectPage-Komponente! 🎨
 
 ---
 
-***REMOVED******REMOVED*** 📊 Geschätzter Zeitaufwand
+## 📊 Geschätzter Zeitaufwand
 
 | Phase | Aufwand | Mit Guacamole | Ohne Guacamole |
 |-------|---------|---------------|----------------|
@@ -540,4 +540,5 @@ npm run snap
 **Fazit:** ✅ **GUACAMOLE-ANSATZ WIRD STARK EMPFOHLEN!** 🌟
 
 **Status:** Setup ready to deploy in eigenem IP-Raum (172.25.0.0/24) 🚀
+
 

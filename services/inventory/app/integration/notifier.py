@@ -43,7 +43,7 @@ async def notify_ops(summary: str, details: dict[str, Any] | None = None) -> Non
         async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.post(settings.TEAMS_WEBHOOK_URL, json=payload)
             resp.raise_for_status()
-    except Exception as exc:  ***REMOVED*** noqa: BLE001
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Ops-Notify fehlgeschlagen: %s", exc)
 
 
@@ -63,10 +63,10 @@ async def send_email_escalation(subject: str, body: str, to_email: str | None = 
         
         msg.attach(MIMEText(body, 'plain'))
         
-        ***REMOVED*** SMTP-Server konfigurieren (einfache Implementierung)
+        # SMTP-Server konfigurieren (einfache Implementierung)
         with smtplib.SMTP('smtp.valeo.com', 587) as server:
             server.starttls()
-            ***REMOVED*** Hier würden SMTP-Credentials verwendet werden
+            # Hier würden SMTP-Credentials verwendet werden
             server.send_message(msg)
             
         logger.info("Eskalations-E-Mail gesendet an %s", email_to)
@@ -89,19 +89,19 @@ async def auto_remediate_epcis_failure(
     action = remediation_actions.get(error, "Unbekannter Fehler - manuelle Prüfung erforderlich")
     
     if retry_count < max_retries:
-        ***REMOVED*** Automatischer Retry
+        # Automatischer Retry
         logger.warning("Auto-Remediation: Retry %d/%d für Event %s: %s", 
                       retry_count + 1, max_retries, event_id, action)
-        await asyncio.sleep(2 ** retry_count)  ***REMOVED*** Exponential backoff
+        await asyncio.sleep(2 ** retry_count)  # Exponential backoff
         return True
     
-    ***REMOVED*** Eskalation nach max_retries
+    # Eskalation nach max_retries
     escalation_msg = (
         f"EPCIS-Event {event_id} konnte nach {max_retries} Retries nicht verarbeitet werden. "
         f"Fehler: {error}. Letzte Remediation-Aktion: {action}"
     )
     
-    ***REMOVED*** Teams-Webhook Eskalation
+    # Teams-Webhook Eskalation
     await notify_ops(
         summary=f"EPCIS-Event Eskalation: {error}",
         details={
@@ -113,7 +113,7 @@ async def auto_remediate_epcis_failure(
         }
     )
     
-    ***REMOVED*** E-Mail Fallback Eskalation
+    # E-Mail Fallback Eskalation
     email_body = f"""
 EPCIS Event Processing Failure - Auto-Remediation fehlgeschlagen
 
@@ -136,4 +136,5 @@ Required Action: Manuelle Intervention erforderlich
     )
     
     return False
+
 

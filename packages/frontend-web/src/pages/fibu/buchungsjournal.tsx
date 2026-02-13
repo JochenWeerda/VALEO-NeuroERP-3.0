@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
-import { BookOpen, FileDown, Search } from 'lucide-react'
+import { BookOpen, FileDown, Loader2, Search } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
+import { ErrorState } from '@/components/ErrorState'
 
 type Buchung = {
   id: string
@@ -17,14 +20,58 @@ type Buchung = {
   belegart: string
 }
 
-const mockBuchungen: Buchung[] = [
-  { id: '1', belegnr: 'RE-2025-0123', datum: '2025-10-11', sollKonto: '1200', habenKonto: '8400', betrag: 12500, text: 'Agrar Schmidt GmbH', belegart: 'ER' },
-  { id: '2', belegnr: 'EB-2025-0098', datum: '2025-10-11', sollKonto: '4200', habenKonto: '1600', betrag: 18500, text: 'Saatgut Nord GmbH', belegart: 'EB' },
-  { id: '3', belegnr: 'ZE-2025-0045', datum: '2025-10-10', sollKonto: '1800', habenKonto: '1200', betrag: 8750, text: 'Zahlung Kunde K-10023', belegart: 'ZE' },
-]
+interface JournalEntryAPI {
+  id: string
+  account_id: string
+  description: string
+  amount: number
+  currency: string
+  period: string
+  document_id?: string
+  posted_at: string
+  created_by: string
+}
+
+function mapApiEntry(e: JournalEntryAPI): Buchung {
+  return {
+    id: e.id,
+    belegnr: e.document_id || e.id,
+    datum: e.posted_at?.split('T')[0] || '',
+    sollKonto: e.account_id,
+    habenKonto: '-',
+    betrag: Math.abs(e.amount),
+    text: e.description,
+    belegart: e.amount >= 0 ? 'ER' : 'EB',
+  }
+}
 
 export default function BuchungsjournalPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
+
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['fibu', 'journal-entries'],
+    queryFn: async () => {
+      const res = await apiClient.get<unknown>('/api/v1/journal-entries')
+      const payload = res.data as { items?: JournalEntryAPI[] } | JournalEntryAPI[]
+
+      if (Array.isArray(payload)) {
+        return payload.map(mapApiEntry)
+      }
+
+      if (payload && typeof payload === 'object' && Array.isArray(payload.items)) {
+        return payload.items.map(mapApiEntry)
+      }
+
+      throw new Error('Ungueltige Antwort fuer Journal Entries')
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const buchungen = data ?? []
 
   const columns = [
     { key: 'datum' as const, label: 'Datum', render: (b: Buchung) => new Date(b.datum).toLocaleDateString('de-DE') },
@@ -34,7 +81,7 @@ export default function BuchungsjournalPage(): JSX.Element {
       label: 'Art',
       render: (b: Buchung) => (
         <Badge variant="outline">
-          {b.belegart === 'ER' ? 'Erlös' : b.belegart === 'EB' ? 'Eingang' : b.belegart === 'ZE' ? 'Zahlung' : b.belegart}
+          {b.belegart === 'ER' ? 'Erloes' : b.belegart === 'EB' ? 'Eingang' : b.belegart === 'ZE' ? 'Zahlung' : b.belegart}
         </Badge>
       ),
     },
@@ -52,13 +99,13 @@ export default function BuchungsjournalPage(): JSX.Element {
     { key: 'text' as const, label: 'Buchungstext' },
   ]
 
-  const gesamtBetrag = mockBuchungen.reduce((sum, b) => sum + b.betrag, 0)
+  const gesamtBetrag = buchungen.reduce((sum, b) => sum + b.betrag, 0)
 
   return (
     <div className="space-y-4 p-6">
       <div>
         <h1 className="text-3xl font-bold">Buchungsjournal</h1>
-        <p className="text-muted-foreground">Alle Buchungssätze</p>
+        <p className="text-muted-foreground">Alle Buchungssaetze</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -69,7 +116,7 @@ export default function BuchungsjournalPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockBuchungen.length}</span>
+              <span className="text-2xl font-bold">{buchungen.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -90,7 +137,7 @@ export default function BuchungsjournalPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Periode</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">10/2025</span>
+            <span className="text-2xl font-bold">02/2026</span>
           </CardContent>
         </Card>
       </div>
@@ -115,7 +162,14 @@ export default function BuchungsjournalPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockBuchungen} columns={columns} />
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">Lade Buchungen...</span>
+            </div>
+          ) : (
+            <DataTable data={buchungen} columns={columns} />
+          )}
         </CardContent>
       </Card>
     </div>

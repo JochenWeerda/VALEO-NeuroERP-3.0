@@ -1,23 +1,23 @@
-***REMOVED*** PowerShell-Skript zur Installation von Claude Flow mit Administratorrechten
-***REMOVED*** Ausführung: PowerShell als Administrator starten und dieses Skript ausführen
+# PowerShell-Skript zur Installation von Claude Flow mit Administratorrechten
+# Ausführung: PowerShell als Administrator starten und dieses Skript ausführen
 
 param(
     [switch]$Force = $false
 )
 
-***REMOVED*** Prüfe Administratorrechte
+# Prüfe Administratorrechte
 function Test-Administrator {
     $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
     return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-***REMOVED*** Hauptfunktion
+# Hauptfunktion
 function Install-ClaudeFlow {
     Write-Host "=== Claude Flow Installation mit Administratorrechten ===" -ForegroundColor Green
     Write-Host ""
 
-    ***REMOVED*** Prüfe Administratorrechte
+    # Prüfe Administratorrechte
     if (-not (Test-Administrator)) {
         Write-Host "FEHLER: Dieses Skript muss mit Administratorrechten ausgeführt werden!" -ForegroundColor Red
         Write-Host "Bitte PowerShell als Administrator starten und das Skript erneut ausführen." -ForegroundColor Yellow
@@ -26,7 +26,7 @@ function Install-ClaudeFlow {
 
     Write-Host "✓ Administratorrechte bestätigt" -ForegroundColor Green
 
-    ***REMOVED*** Setze Execution Policy
+    # Setze Execution Policy
     Write-Host "Setze PowerShell Execution Policy..." -ForegroundColor Yellow
     try {
         Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
@@ -36,7 +36,7 @@ function Install-ClaudeFlow {
         Write-Host "Warnung: Execution Policy konnte nicht gesetzt werden: $($_.Exception.Message)" -ForegroundColor Yellow
     }
 
-    ***REMOVED*** Prüfe Node.js Installation
+    # Prüfe Node.js Installation
     Write-Host "Prüfe Node.js Installation..." -ForegroundColor Yellow
     try {
         $nodeVersion = node --version
@@ -45,15 +45,15 @@ function Install-ClaudeFlow {
     catch {
         Write-Host "Node.js nicht gefunden. Installiere Node.js..." -ForegroundColor Yellow
         
-        ***REMOVED*** Installiere Node.js über winget
+        # Installiere Node.js über winget
         try {
             winget install OpenJS.NodeJS
             Write-Host "✓ Node.js installiert" -ForegroundColor Green
             
-            ***REMOVED*** Aktualisiere PATH
+            # Aktualisiere PATH
             $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
             
-            ***REMOVED*** Prüfe Installation erneut
+            # Prüfe Installation erneut
             $nodeVersion = node --version
             Write-Host "✓ Node.js Version: $nodeVersion" -ForegroundColor Green
         }
@@ -64,7 +64,7 @@ function Install-ClaudeFlow {
         }
     }
 
-    ***REMOVED*** Prüfe npm Installation
+    # Prüfe npm Installation
     Write-Host "Prüfe npm Installation..." -ForegroundColor Yellow
     try {
         $npmVersion = npm --version
@@ -75,7 +75,7 @@ function Install-ClaudeFlow {
         exit 1
     }
 
-    ***REMOVED*** Wechsle zum Projektverzeichnis
+    # Wechsle zum Projektverzeichnis
     $projectPath = "C:\Users\Jochen\VALEO-NeuroERP-2.0"
     if (Test-Path $projectPath) {
         Set-Location $projectPath
@@ -86,17 +86,17 @@ function Install-ClaudeFlow {
         exit 1
     }
 
-    ***REMOVED*** Prüfe ob Claude Flow bereits installiert ist
+    # Prüfe ob Claude Flow bereits installiert ist
     if (Test-Path "claude-flow-alpha") {
         Write-Host "Claude Flow Verzeichnis gefunden. Prüfe Installation..." -ForegroundColor Yellow
         
         Set-Location "claude-flow-alpha"
         
-        ***REMOVED*** Prüfe package.json
+        # Prüfe package.json
         if (Test-Path "package.json") {
             Write-Host "✓ package.json gefunden" -ForegroundColor Green
             
-            ***REMOVED*** Installiere Dependencies
+            # Installiere Dependencies
             Write-Host "Installiere Dependencies..." -ForegroundColor Yellow
             try {
                 npm install
@@ -115,11 +115,11 @@ function Install-ClaudeFlow {
     else {
         Write-Host "Claude Flow Verzeichnis nicht gefunden. Erstelle Installation..." -ForegroundColor Yellow
         
-        ***REMOVED*** Erstelle Claude Flow Verzeichnis
+        # Erstelle Claude Flow Verzeichnis
         New-Item -ItemType Directory -Name "claude-flow-alpha" -Force | Out-Null
         Set-Location "claude-flow-alpha"
         
-        ***REMOVED*** Initialisiere npm Projekt
+        # Initialisiere npm Projekt
         Write-Host "Initialisiere npm Projekt..." -ForegroundColor Yellow
         try {
             npm init -y
@@ -131,7 +131,7 @@ function Install-ClaudeFlow {
         }
     }
 
-    ***REMOVED*** Installiere Claude Flow Dependencies
+    # Installiere Claude Flow Dependencies
     Write-Host "Installiere Claude Flow Dependencies..." -ForegroundColor Yellow
     
     $dependencies = @(
@@ -156,7 +156,7 @@ function Install-ClaudeFlow {
         }
     }
 
-    ***REMOVED*** Installiere Development Dependencies
+    # Installiere Development Dependencies
     Write-Host "Installiere Development Dependencies..." -ForegroundColor Yellow
     
     $devDependencies = @(
@@ -181,7 +181,7 @@ function Install-ClaudeFlow {
         }
     }
 
-    ***REMOVED*** Erstelle TypeScript Konfiguration
+    # Erstelle TypeScript Konfiguration
     Write-Host "Erstelle TypeScript Konfiguration..." -ForegroundColor Yellow
     $tsConfig = '{
   "compilerOptions": {
@@ -206,7 +206,7 @@ function Install-ClaudeFlow {
     $tsConfig | Out-File -FilePath "tsconfig.json" -Encoding UTF8
     Write-Host "✓ TypeScript Konfiguration erstellt" -ForegroundColor Green
 
-    ***REMOVED*** Erstelle package.json Scripts
+    # Erstelle package.json Scripts
     Write-Host "Aktualisiere package.json Scripts..." -ForegroundColor Yellow
     
     $packageJson = Get-Content "package.json" | ConvertFrom-Json
@@ -222,12 +222,12 @@ function Install-ClaudeFlow {
     $packageJson | ConvertTo-Json -Depth 10 | Out-File -FilePath "package.json" -Encoding UTF8
     Write-Host "✓ package.json Scripts aktualisiert" -ForegroundColor Green
 
-    ***REMOVED*** Erstelle src Verzeichnis und Basis-Dateien
+    # Erstelle src Verzeichnis und Basis-Dateien
     Write-Host "Erstelle Basis-Dateien..." -ForegroundColor Yellow
     
     New-Item -ItemType Directory -Name "src" -Force | Out-Null
     
-    ***REMOVED*** Erstelle index.ts
+    # Erstelle index.ts
     $indexTs = 'import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -256,8 +256,8 @@ app.listen(PORT, () => {
     $indexTs | Out-File -FilePath "src\index.ts" -Encoding UTF8
     Write-Host "✓ index.ts erstellt" -ForegroundColor Green
 
-    ***REMOVED*** Erstelle .env Datei
-    $envContent = "***REMOVED*** Claude Flow Konfiguration
+    # Erstelle .env Datei
+    $envContent = "# Claude Flow Konfiguration
 PORT=3000
 ANTHROPIC_API_KEY=your_api_key_here
 NODE_ENV=development"
@@ -265,7 +265,7 @@ NODE_ENV=development"
     $envContent | Out-File -FilePath ".env" -Encoding UTF8
     Write-Host "✓ .env Datei erstellt" -ForegroundColor Green
 
-    ***REMOVED*** Erstelle .gitignore
+    # Erstelle .gitignore
     $gitignore = "node_modules/
 dist/
 .env
@@ -275,7 +275,7 @@ dist/
     $gitignore | Out-File -FilePath ".gitignore" -Encoding UTF8
     Write-Host "✓ .gitignore erstellt" -ForegroundColor Green
 
-    ***REMOVED*** Baue das Projekt
+    # Baue das Projekt
     Write-Host "Baue das Projekt..." -ForegroundColor Yellow
     try {
         npm run build
@@ -285,7 +285,7 @@ dist/
         Write-Host "Warnung: Build fehlgeschlagen: $($_.Exception.Message)" -ForegroundColor Yellow
     }
 
-    ***REMOVED*** Erstelle Startskript
+    # Erstelle Startskript
     Write-Host "Erstelle Startskript..." -ForegroundColor Yellow
     
     $startScript = '@echo off
@@ -297,7 +297,7 @@ pause'
     $startScript | Out-File -FilePath "start_claude_flow.bat" -Encoding ASCII
     Write-Host "✓ Startskript erstellt: start_claude_flow.bat" -ForegroundColor Green
 
-    ***REMOVED*** Erstelle Development Startskript
+    # Erstelle Development Startskript
     $devStartScript = '@echo off
 echo Starte Claude Flow Server im Development Mode...
 cd /d "%~dp0claude-flow-alpha"
@@ -318,5 +318,5 @@ pause'
     Write-Host "Server wird auf http://localhost:3000 laufen" -ForegroundColor Cyan
 }
 
-***REMOVED*** Führe Installation aus
+# Führe Installation aus
 Install-ClaudeFlow 

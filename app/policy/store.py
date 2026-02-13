@@ -11,13 +11,13 @@ from app.services.policy_service import PolicyStore as ServicePolicyStore, Rule 
 
 from .models import Rule
 
-DEFAULT_DB = None  ***REMOVED*** Retained for backwards compatibility
+DEFAULT_DB = None  # Retained for backwards compatibility
 
 
 class PolicyStore:
     """Compatibility wrapper delegating to the shared PolicyService."""
 
-    def __init__(self, _db_path: str | None = None) -> None:  ***REMOVED*** pragma: no cover - legacy signature
+    def __init__(self, _db_path: str | None = None) -> None:  # pragma: no cover - legacy signature
         self._delegate = ServicePolicyStore()
 
     def list(self) -> List[Rule]:

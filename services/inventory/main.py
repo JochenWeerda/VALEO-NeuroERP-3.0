@@ -16,6 +16,11 @@ from app.db.session import dispose_engine, get_engine
 from app.dependencies import init_event_bus, shutdown_event_bus
 from app.workflows import register_inventory_workflow
 
+try:
+    from auth_shared import AuthMiddleware
+except ImportError:
+    AuthMiddleware = None  # type: ignore[assignment,misc]
+
 logging.basicConfig(
     level=logging.INFO,
     format='{"timestamp": "%(asctime)s", "level": "%(levelname)s", "logger": "%(name)s", "message": "%(message)s"}',
@@ -56,6 +61,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Auth middleware
+if AuthMiddleware is not None:
+    app.add_middleware(AuthMiddleware)
+    logger.info("Auth middleware enabled")
+
 app.include_router(api_router, prefix="/api/v1")
 
 metrics_app = make_asgi_app()
@@ -76,4 +86,3 @@ if __name__ == "__main__":
         port=settings.PORT,
         reload=settings.DEBUG,
     )
-

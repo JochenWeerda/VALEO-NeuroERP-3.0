@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/mcp/form-specs", tags=["forms"])
 
-***REMOVED*** Form-Specs (In Production: aus DB/Datei laden)
+# Form-Specs (In Production: aus DB/Datei laden)
 SCHEMAS: Dict[str, Dict[str, Any]] = {
     "sales_order": {
         "id": "sales_order",

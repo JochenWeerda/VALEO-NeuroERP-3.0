@@ -1,31 +1,34 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useErnten, type Ernte } from '@/lib/api/agrar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
 import { Calendar, FileDown, Plus, Search } from 'lucide-react'
-
-type Ernte = {
-  id: string
-  schlag: string
-  kultur: string
-  datum: string
-  menge: number
-  ertrag: number
-  status: 'geplant' | 'laufend' | 'abgeschlossen'
-}
-
-const mockErnten: Ernte[] = [
-  { id: '1', schlag: 'Nordfeld 1', kultur: 'Weizen', datum: '2025-08-15', menge: 150, ertrag: 12.0, status: 'abgeschlossen' },
-  { id: '2', schlag: 'Südacker', kultur: 'Raps', datum: '2025-07-20', menge: 66.4, ertrag: 8.0, status: 'abgeschlossen' },
-  { id: '3', schlag: 'Wiesengrund', kultur: 'Mais', datum: '2025-10-25', menge: 0, ertrag: 0, status: 'geplant' },
-]
 
 export default function ErnteListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data, isLoading, isError, error, refetch } = useErnten()
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const ernten: Ernte[] = data ?? []
 
   const columns = [
     {
@@ -56,13 +59,13 @@ export default function ErnteListePage(): JSX.Element {
     },
   ]
 
-  const gesamtMenge = mockErnten.reduce((sum, e) => sum + e.menge, 0)
+  const gesamtMenge = ernten.reduce((sum, e) => sum + e.menge, 0)
 
   return (
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Ernte-Übersicht</h1>
+          <h1 className="text-3xl font-bold">Ernte-Uebersicht</h1>
           <p className="text-muted-foreground">Erntesaison 2025</p>
         </div>
         <Button onClick={() => navigate('/agrar/ernte/neu')} className="gap-2">
@@ -74,12 +77,12 @@ export default function ErnteListePage(): JSX.Element {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Schläge Gesamt</CardTitle>
+            <CardTitle className="text-sm font-medium">Schlaege Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockErnten.length}</span>
+              <span className="text-2xl font-bold">{ernten.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -98,7 +101,7 @@ export default function ErnteListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Abgeschlossen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockErnten.filter((e) => e.status === 'abgeschlossen').length}</span>
+            <span className="text-2xl font-bold text-green-600">{ernten.filter((e) => e.status === 'abgeschlossen').length}</span>
           </CardContent>
         </Card>
 
@@ -107,7 +110,7 @@ export default function ErnteListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Geplant</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockErnten.filter((e) => e.status === 'geplant').length}</span>
+            <span className="text-2xl font-bold">{ernten.filter((e) => e.status === 'geplant').length}</span>
           </CardContent>
         </Card>
       </div>
@@ -132,7 +135,7 @@ export default function ErnteListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockErnten} columns={columns} />
+          <DataTable data={ernten} columns={columns} />
         </CardContent>
       </Card>
     </div>

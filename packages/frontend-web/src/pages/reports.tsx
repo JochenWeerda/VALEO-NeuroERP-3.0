@@ -50,11 +50,11 @@ interface ReportData {
 }
 
 const REPORT_TYPES = [
-  { id: 'sales-performance' as ReportType, label: 'Verkaufs\u00ADperformance', icon: BarChart3, color: '***REMOVED***10B981' },
-  { id: 'customer-analytics' as ReportType, label: 'Kundenanalyse', icon: Users, color: '***REMOVED***3B82F6' },
-  { id: 'product-analytics' as ReportType, label: 'Produktanalyse', icon: Package, color: '***REMOVED***8B5CF6' },
-  { id: 'financial-analytics' as ReportType, label: 'Finanzanalyse', icon: Euro, color: '***REMOVED***F59E0B' },
-  { id: 'trend-analytics' as ReportType, label: 'Trendanalyse', icon: TrendingUp, color: '***REMOVED***EF4444' },
+  { id: 'sales-performance' as ReportType, label: 'Verkaufs\u00ADperformance', icon: BarChart3, color: '#10B981' },
+  { id: 'customer-analytics' as ReportType, label: 'Kundenanalyse', icon: Users, color: '#3B82F6' },
+  { id: 'product-analytics' as ReportType, label: 'Produktanalyse', icon: Package, color: '#8B5CF6' },
+  { id: 'financial-analytics' as ReportType, label: 'Finanzanalyse', icon: Euro, color: '#F59E0B' },
+  { id: 'trend-analytics' as ReportType, label: 'Trendanalyse', icon: TrendingUp, color: '#EF4444' },
 ]
 
 export default function ReportsDashboard(): JSX.Element {
@@ -116,7 +116,7 @@ export default function ReportsDashboard(): JSX.Element {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip formatter={(value) => [`${value.toLocaleString('de-DE')} €`, 'Umsatz']} />
-                  <Bar dataKey="value" fill="***REMOVED***10B981" />
+                  <Bar dataKey="value" fill="#10B981" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -141,7 +141,7 @@ export default function ReportsDashboard(): JSX.Element {
                       { name: 'Angebot → Auftrag', value: data?.conversionRates?.offerToOrder ?? 0 },
                       { name: 'Auftrag → Rechnung', value: data?.conversionRates?.orderToInvoice ?? 0 },
                     ].map((_entry, index) => (
-                      <Cell key={`cell-${index}`} fill={['***REMOVED***10B981', '***REMOVED***3B82F6', '***REMOVED***8B5CF6'][index % 3]} />
+                      <Cell key={`cell-${index}`} fill={['#10B981', '#3B82F6', '#8B5CF6'][index % 3]} />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -162,7 +162,7 @@ export default function ReportsDashboard(): JSX.Element {
                   <XAxis type="number" />
                   <YAxis dataKey="customerId" type="category" width={80} />
                   <Tooltip formatter={(value) => [`${value.toLocaleString('de-DE')} €`, 'Umsatz']} />
-                  <Bar dataKey="totalRevenue" fill="***REMOVED***3B82F6" />
+                  <Bar dataKey="totalRevenue" fill="#3B82F6" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -174,7 +174,7 @@ export default function ReportsDashboard(): JSX.Element {
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
-                  <Line type="monotone" dataKey="count" stroke="***REMOVED***3B82F6" strokeWidth={2} />
+                  <Line type="monotone" dataKey="count" stroke="#3B82F6" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </Card>
@@ -192,7 +192,7 @@ export default function ReportsDashboard(): JSX.Element {
                   <XAxis dataKey="article" angle={-45} textAnchor="end" height={80} />
                   <YAxis />
                   <Tooltip formatter={(value) => [`${value.toLocaleString('de-DE')} €`, 'Umsatz']} />
-                  <Bar dataKey="revenue" fill="***REMOVED***8B5CF6" />
+                  <Bar dataKey="revenue" fill="#8B5CF6" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -204,7 +204,7 @@ export default function ReportsDashboard(): JSX.Element {
                   <XAxis dataKey="article" angle={-45} textAnchor="end" height={80} />
                   <YAxis />
                   <Tooltip formatter={(value) => [`${value.toLocaleString('de-DE')} kg`, 'Menge']} />
-                  <Bar dataKey="quantity" fill="***REMOVED***8B5CF6" />
+                  <Bar dataKey="quantity" fill="#8B5CF6" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -226,7 +226,7 @@ export default function ReportsDashboard(): JSX.Element {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip formatter={(value) => [`${value.toLocaleString('de-DE')} €`, 'Betrag']} />
-                  <Bar dataKey="value" fill="***REMOVED***F59E0B" />
+                  <Bar dataKey="value" fill="#F59E0B" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -243,7 +243,7 @@ export default function ReportsDashboard(): JSX.Element {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip formatter={(value) => [`${value.toLocaleString('de-DE')} €`, 'Ausstehend']} />
-                  <Bar dataKey="value" fill="***REMOVED***EF4444" />
+                  <Bar dataKey="value" fill="#EF4444" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -261,7 +261,7 @@ export default function ReportsDashboard(): JSX.Element {
                   <XAxis dataKey="period" />
                   <YAxis />
                   <Tooltip formatter={(value) => [`${value.toLocaleString('de-DE')} €`, 'Umsatz']} />
-                  <Line type="monotone" dataKey="value" stroke="***REMOVED***EF4444" strokeWidth={2} />
+                  <Line type="monotone" dataKey="value" stroke="#EF4444" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </Card>
@@ -273,7 +273,7 @@ export default function ReportsDashboard(): JSX.Element {
                   <XAxis dataKey="period" />
                   <YAxis />
                   <Tooltip formatter={(value) => [`${String(value)}`, 'Aufträge']} />
-                  <Line type="monotone" dataKey="value" stroke="***REMOVED***EF4444" strokeWidth={2} />
+                  <Line type="monotone" dataKey="value" stroke="#EF4444" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </Card>

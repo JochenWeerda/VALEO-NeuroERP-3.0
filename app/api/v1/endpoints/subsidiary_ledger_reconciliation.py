@@ -45,7 +45,7 @@ class ReconciliationDetail(BaseModel):
 
 class ReconciliationResult(BaseModel):
     """Result of subsidiary ledger reconciliation"""
-    ledger_type: str  ***REMOVED*** AR, AP, BANK, FA
+    ledger_type: str  # AR, AP, BANK, FA
     period: str
     reconciliation_date: date
     total_accounts: int
@@ -66,7 +66,7 @@ async def reconcile_ar(
     Reconcile Accounts Receivable (Debitoren) with General Ledger.
     """
     try:
-        ***REMOVED*** Get AR account (typically 1400)
+        # Get AR account (typically 1400)
         ar_account_query = text("""
             SELECT id, account_number, name
             FROM domain_erp.chart_of_accounts
@@ -80,7 +80,7 @@ async def reconcile_ar(
         ar_account = db.execute(ar_account_query, {"tenant_id": tenant_id}).fetchone()
         
         if not ar_account:
-            ***REMOVED*** Return mock data if no AR account found
+            # Return mock data if no AR account found
             return ReconciliationResult(
                 ledger_type="AR",
                 period=period,
@@ -96,7 +96,7 @@ async def reconcile_ar(
         ar_account_number = str(ar_account[1])
         ar_account_name = str(ar_account[2])
         
-        ***REMOVED*** Get GL balance for AR account
+        # Get GL balance for AR account
         gl_balance_query = text("""
             SELECT 
                 COALESCE(SUM(CASE WHEN jel.debit_amount > 0 THEN jel.debit_amount ELSE 0 END), 0) as total_debit,
@@ -119,7 +119,7 @@ async def reconcile_ar(
         gl_credit = Decimal(str(gl_row[1])) if gl_row and gl_row[1] else Decimal("0.00")
         gl_balance = gl_debit - gl_credit
         
-        ***REMOVED*** Get AR subsidiary ledger balance (from offene_posten)
+        # Get AR subsidiary ledger balance (from offene_posten)
         ar_balance_query = text("""
             SELECT 
                 COALESCE(SUM(open_amount), 0) as total_open
@@ -136,7 +136,7 @@ async def reconcile_ar(
         
         ar_balance = Decimal(str(ar_row[0])) if ar_row and ar_row[0] else Decimal("0.00")
         
-        ***REMOVED*** Count entries
+        # Count entries
         entry_count_query = text("""
             SELECT COUNT(*)
             FROM domain_erp.offene_posten
@@ -190,7 +190,7 @@ async def reconcile_ap(
     Reconcile Accounts Payable (Kreditoren) with General Ledger.
     """
     try:
-        ***REMOVED*** Get AP account (typically 4400)
+        # Get AP account (typically 4400)
         ap_account_query = text("""
             SELECT id, account_number, name
             FROM domain_erp.chart_of_accounts
@@ -219,7 +219,7 @@ async def reconcile_ap(
         ap_account_number = str(ap_account[1])
         ap_account_name = str(ap_account[2])
         
-        ***REMOVED*** Get GL balance for AP account
+        # Get GL balance for AP account
         gl_balance_query = text("""
             SELECT 
                 COALESCE(SUM(CASE WHEN jel.debit_amount > 0 THEN jel.debit_amount ELSE 0 END), 0) as total_debit,
@@ -240,10 +240,10 @@ async def reconcile_ap(
         
         gl_debit = Decimal(str(gl_row[0])) if gl_row and gl_row[0] else Decimal("0.00")
         gl_credit = Decimal(str(gl_row[1])) if gl_row and gl_row[1] else Decimal("0.00")
-        ***REMOVED*** For liabilities, balance = credit - debit
+        # For liabilities, balance = credit - debit
         gl_balance = gl_credit - gl_debit
         
-        ***REMOVED*** Get AP subsidiary ledger balance (from offene_posten)
+        # Get AP subsidiary ledger balance (from offene_posten)
         ap_balance_query = text("""
             SELECT 
                 COALESCE(SUM(open_amount), 0) as total_open
@@ -260,7 +260,7 @@ async def reconcile_ap(
         
         ap_balance = Decimal(str(ap_row[0])) if ap_row and ap_row[0] else Decimal("0.00")
         
-        ***REMOVED*** Count entries
+        # Count entries
         entry_count_query = text("""
             SELECT COUNT(*)
             FROM domain_erp.offene_posten
@@ -314,7 +314,7 @@ async def reconcile_bank(
     Reconcile Bank accounts with General Ledger.
     """
     try:
-        ***REMOVED*** Get all bank accounts
+        # Get all bank accounts
         bank_accounts_query = text("""
             SELECT ba.id, ba.account_number, coa.name, ba.balance
             FROM domain_erp.bank_accounts ba
@@ -347,7 +347,7 @@ async def reconcile_bank(
             account_name = str(bank_account[2])
             bank_balance = Decimal(str(bank_account[3])) if bank_account[3] else Decimal("0.00")
             
-            ***REMOVED*** Get GL balance for bank account
+            # Get GL balance for bank account
             gl_balance_query = text("""
                 SELECT 
                     COALESCE(SUM(CASE WHEN jel.debit_amount > 0 THEN jel.debit_amount ELSE 0 END), 0) as total_debit,
@@ -421,7 +421,7 @@ async def get_reconciliation_details(
         details = []
         
         if ledger_type == "AR":
-            ***REMOVED*** Get AR entries from offene_posten
+            # Get AR entries from offene_posten
             query = text("""
                 SELECT id, op_number, booking_date, open_amount, description, 'op' as source, 'open' as status
                 FROM domain_erp.offene_posten
@@ -449,7 +449,7 @@ async def get_reconciliation_details(
                 ))
         
         elif ledger_type == "AP":
-            ***REMOVED*** Get AP entries from offene_posten
+            # Get AP entries from offene_posten
             query = text("""
                 SELECT id, op_number, booking_date, open_amount, description, 'op' as source, 'open' as status
                 FROM domain_erp.offene_posten
@@ -493,13 +493,13 @@ async def get_reconciliation_summary(
     Get summary of all subsidiary ledger reconciliations.
     """
     try:
-        ***REMOVED*** Get AR reconciliation
+        # Get AR reconciliation
         ar_result = await reconcile_ar(period, tenant_id, db)
         
-        ***REMOVED*** Get AP reconciliation
+        # Get AP reconciliation
         ap_result = await reconcile_ap(period, tenant_id, db)
         
-        ***REMOVED*** Get Bank reconciliation
+        # Get Bank reconciliation
         bank_result = await reconcile_bank(period, tenant_id, db)
         
         total_accounts = ar_result.total_accounts + ap_result.total_accounts + bank_result.total_accounts

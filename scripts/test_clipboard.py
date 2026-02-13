@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 Test-Skript für die Zwischenablage-Funktionalität
@@ -12,7 +12,7 @@ def main():
     """Hauptfunktion"""
     print("Teste die Zwischenablage-Funktionalität...")
     
-    ***REMOVED*** Text in die Zwischenablage kopieren
+    # Text in die Zwischenablage kopieren
     test_text = "Dies ist ein Test-Text für die Zwischenablage"
     print(f"Kopiere Text in die Zwischenablage: {test_text}")
     
@@ -20,14 +20,14 @@ def main():
         pyperclip.copy(test_text)
         print("Text wurde in die Zwischenablage kopiert.")
         
-        ***REMOVED*** Kurz warten
+        # Kurz warten
         time.sleep(1)
         
-        ***REMOVED*** Text aus der Zwischenablage lesen
+        # Text aus der Zwischenablage lesen
         clipboard_content = pyperclip.paste()
         print(f"Inhalt der Zwischenablage: {clipboard_content}")
         
-        ***REMOVED*** Prüfen, ob der Text korrekt kopiert wurde
+        # Prüfen, ob der Text korrekt kopiert wurde
         if clipboard_content == test_text:
             print("Test erfolgreich: Der Text wurde korrekt in die Zwischenablage kopiert.")
         else:

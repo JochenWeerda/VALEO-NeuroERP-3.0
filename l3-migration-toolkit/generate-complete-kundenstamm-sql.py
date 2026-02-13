@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Generiert vollständige SQL-CREATE-Statements für alle 14 Kundenstamm-Tabellen
 """
@@ -574,25 +574,25 @@ def generate_sql():
     
     sql_content = SQL_HEADER
     
-    ***REMOVED*** ERST: Hilfstabellen (müssen vor Haupttabellen existieren wegen Foreign Keys)
+    # ERST: Hilfstabellen (müssen vor Haupttabellen existieren wegen Foreign Keys)
     sql_content += SQL_HELPER_TABLES
     sql_content += "\n"
     
-    ***REMOVED*** DANN: Haupttabellen
+    # DANN: Haupttabellen
     for table_name, table_sql in SQL_TABLES.items():
         sql_content += table_sql
         sql_content += "\n"
     
-    ***REMOVED*** Footer
+    # Footer
     sql_content += SQL_FOOTER
     
     return sql_content
 
 if __name__ == "__main__":
-    ***REMOVED*** Generiere SQL
+    # Generiere SQL
     sql_output = generate_sql()
     
-    ***REMOVED*** Speichere in Datei
+    # Speichere in Datei
     output_file = "schemas/sql/kundenstamm_complete.sql"
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(sql_output)
@@ -608,4 +608,5 @@ if __name__ == "__main__":
     print(f"   2. In PostgreSQL importieren:")
     print(f"      psql -U valeo -d valeo_neuro_erp -f {output_file}")
     print(f"   3. Mask Builder JSON erstellen (nächster Schritt)")
+
 

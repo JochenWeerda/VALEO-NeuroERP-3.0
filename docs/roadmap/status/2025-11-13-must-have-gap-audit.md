@@ -1,48 +1,48 @@
-***REMOVED*** Must-Have Gap Audit – 13.11.2025 (Update)
+# Must-Have Gap Audit – 13.11.2025 (Update)
 
-***REMOVED******REMOVED*** Überblick
+## Überblick
 
 - Quelle: `docs/roadmap/a-eins-gap-backlog.md`
 - Kontext: Prüfung der Verzeichnisstruktur und Implementierungsstände der **Must-Have**-Gaps zur a.eins-Parität.
 - Ergebnis: InfraStat & Zoll-Service jetzt vorhanden (Integrationstests/Helm eingerichtet), übrige Must-Haves unverändert teil/offen. Konkrete Arbeitspakete siehe Abschnitt **Nächste Schritte**.
 
-***REMOVED******REMOVED*** Gap-Status im Detail
+## Gap-Status im Detail
 
-***REMOVED******REMOVED******REMOVED*** InfraStat/Intrastat Meldewesen
+### InfraStat/Intrastat Meldewesen
 - **Status:** Bereit für Produktiv-Rollout (15.11.2025)
 - **Nachweis:** `services/compliance/infrastat/**` + Helm-Overrides mit IDEV-Referenzen (`docs/deployment/helm/infra/values-infrastat.yaml`), Prometheus-Alerts aktiviert (`alerts.infrastatEnabled`), Runbook `docs/deployment/runbook/infra/idev-setup.md` mit Port-Forward/Smoke-Test.
 - **Restaufgaben:** Go-Live-Termin planen und produktive Credentials hinter `infrastat-idev` Secret legen; Monitoring dauerhaft beobachten.
 
-***REMOVED******REMOVED******REMOVED*** Zoll- & Exportkontrolle
+### Zoll- & Exportkontrolle
 - **Status:** Bereit für Produktiv-Rollout (15.11.2025)
 - **Nachweis:** `services/compliance/zoll/**` (Screening mit OFAC/EU-Anbindung, Delta-Updates + Backoff, Prometheus-Metriken `zoll_*`), Helm-Overrides (`docs/deployment/helm/infra/values-zoll.yaml`), Runbook `docs/deployment/runbook/compliance/zoll-setup.md`.
 - **Restaufgaben:** Erweiterte Workflow-Policies im UI sowie produktive Geheimnisse pflegen.
 
-***REMOVED******REMOVED******REMOVED*** Mehrlager- & Chargenverwaltung
+### Mehrlager- & Chargenverwaltung
 - **Status:** Frontend & Workflow verdrahtet (15.11.2025)
 - **Nachweis:** `services/inventory/` publiziert Events nach Workflow-Service (`emit_workflow_event`), React-Frontend nutzt `useLotTrace` + Stock-Hooks, Docker/Helm + Compose aktiviert EventBus real.
 - **Restaufgabe:** KPI/Tracing-Dashboards weiter ausbauen (z. B. ETA-Berechnungen, Alerts im UI).
 
-***REMOVED******REMOVED******REMOVED*** Finanz- & Anlagenbuchhaltung (GoBD)
+### Finanz- & Anlagenbuchhaltung (GoBD)
 - **Status:** Teilweise (Domain vorhanden, Service fehlt)
 - **Nachweis:** Umfangreiche Domain in `packages/finance-domain/**`, jedoch `services/finance/` lediglich Stub ohne Implementierung (`app/`-Package fehlt). Details zur Zielarchitektur siehe `docs/specs/fibu_architektur_spezifikation.md`.
 - **Folgen:** Kein produktiver Finanzservice, keine GoBD-konforme Belegkette im Microservice-Verbund.
 
-***REMOVED******REMOVED******REMOVED*** Mandantenfähige Workflows/Policy-as-Code
+### Mandantenfähige Workflows/Policy-as-Code
 - **Status:** Grundfunktion vorhanden
 - **Nachweis:** `services/workflow/` mit Mandanten-Feld (`tenant`) in Definitionen/Instanzen, Policy- & Saga-Engine, NATS-/Postgres-Anbindung.
 - **Restlücke:** Admin-Oberfläche/Konfig-API für Mandanten-Templates und Tests für Mandantenwechsel fehlen noch.
 
-***REMOVED******REMOVED******REMOVED*** Lieferketten-Tracking & Eventing
+### Lieferketten-Tracking & Eventing
 - **Status:** Teilweise (Domain & UI vorhanden)
 - **Nachweis:** `packages/inventory-domain/src/services/traceability-service.ts` (EPCIS/Gs1), Frontend (`packages/frontend-web/src/pages/charge/rueckverfolgung.tsx`). Keine produktive Event-/Persistenzintegration.
 - **Folgen:** Tracking-Daten nicht abrufbar, keine ETA-/Abweichungsalarme im System.
 
-***REMOVED******REMOVED******REMOVED*** Compliance-Archiv & Audit Trail
+### Compliance-Archiv & Audit Trail
 - **Status:** Weitgehend erfüllt
 - **Nachweis:** `packages/audit-domain/**` (Hash-Chain, Events, Integritätsprüfungen), Vielzahl an Tests/Docs. Restaufgabe: End-to-End-Verifikation in CI.
 
-***REMOVED******REMOVED*** Nächste Schritte (Priorisierte ToDos)
+## Nächste Schritte (Priorisierte ToDos)
 
 1. **(Erledigt 15.11.2025) InfraStat Produktiv-Rollout**  
    - Helm-Overrides + Secrets + Alerts dokumentiert, Runbook ergänzt.  
@@ -67,11 +67,12 @@
 6. **Audit-Domain in CI verankern**  
    - End-to-End-Testfall (Workflow → Audit → Archiv) in `.github/workflows/ci.yml` ergänzen.
 
-***REMOVED******REMOVED*** Offene Fragen
+## Offene Fragen
 
 - Welche Datenquellen stehen kurzfristig für InfraStat zur Verfügung (z. B. Warenwirtschaft-DB, Data Warehouse)?  
 - Wie werden Finance/Inventory-Services produktiv geführt (Python vs. Node.js)?  
 - Schnittstellen zu Zollbehörden (ELSTER, ATLAS) geplant oder Mock-Endpunkte nötig?
 
 _Aktualisiert von GPT-5 Codex, 13.11.2025_
+
 

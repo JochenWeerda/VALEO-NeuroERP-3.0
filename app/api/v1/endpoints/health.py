@@ -39,7 +39,7 @@ async def readiness_check() -> JSONResponse:
     checks = {}
     ready = True
     
-    ***REMOVED*** 1. Database Check
+    # 1. Database Check
     try:
         from app.core.database import SessionLocal
         db = SessionLocal()
@@ -51,29 +51,29 @@ async def readiness_check() -> JSONResponse:
         ready = False
         logger.error(f"Database check failed: {e}")
     
-    ***REMOVED*** 2. Event Bus Check (NATS)
+    # 2. Event Bus Check (NATS)
     try:
         from app.infrastructure.eventbus.nats_publisher import nats_publisher
         if nats_publisher._connected:
             checks["event_bus"] = {"status": "healthy", "connected": True}
         else:
             checks["event_bus"] = {"status": "degraded", "connected": False}
-            ***REMOVED*** Not critical, we have fallback
+            # Not critical, we have fallback
     except Exception as e:
         checks["event_bus"] = {"status": "unknown", "error": str(e)}
         logger.warning(f"Event Bus check failed: {e}")
     
-    ***REMOVED*** 3. Vector Store Check (Chroma/RAG)
+    # 3. Vector Store Check (Chroma/RAG)
     try:
         from app.infrastructure.rag.vector_store import get_vector_store
         vector_store = get_vector_store()
-        ***REMOVED*** Simple ping
+        # Simple ping
         checks["vector_store"] = {"status": "healthy"}
     except Exception as e:
         checks["vector_store"] = {"status": "degraded", "error": str(e)}
         logger.warning(f"Vector Store check failed: {e}")
     
-    ***REMOVED*** 4. System Resources
+    # 4. System Resources
     try:
         cpu_percent = psutil.cpu_percent(interval=0.1)
         memory = psutil.virtual_memory()
@@ -117,7 +117,7 @@ async def startup_check() -> Dict[str, Any]:
     """
     Kubernetes startup probe - has the service finished starting?
     """
-    ***REMOVED*** TODO: Add startup state tracking
+    # TODO: Add startup state tracking
     return {
         "status": "started",
         "timestamp": datetime.utcnow().isoformat()

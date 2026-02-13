@@ -61,6 +61,12 @@ de_modules/
 ckage-lock.json
 ckage.json
 mory-bank/
+memory-bank/
+.backups/
+nul
+
+***REMOVED*** Miscreated nested workspace folder (should never be committed)
+C*workspaces*VALEO-NeuroERP-3.0/
 
 ***REMOVED*** PNPM
 .pnpm-store/
@@ -102,6 +108,7 @@ build/
 
 ***REMOVED*** Alembic
 alembic.ini.local
+alembic/versions_wip/
 
 ***REMOVED*** ===================================
 ***REMOVED*** Docker
@@ -183,7 +190,14 @@ test-results/
 coverage/
 .nyc_output/
 playwright-report/
+playwright-tests/artifacts/
 *.spec.js.snap
+
+# Generated reports/artifacts (should not be committed)
+evidence/
+lint-results.json
+FINAL-LINT-STATUS-REPORT.md
+coverage.xml
 
 ***REMOVED*** ===================================
 ***REMOVED*** Temporary Files
@@ -198,6 +212,7 @@ temp/
 ***REMOVED*** ===================================
 ***REMOVED*** Security & Secrets
 ***REMOVED*** ===================================
+gitleaks-report.json
 ***REMOVED*** SSL Certificates
 *.pem
 *.key

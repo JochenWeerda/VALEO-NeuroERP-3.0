@@ -5,14 +5,14 @@ from sqlalchemy.orm import sessionmaker
 
 from app.config.settings import settings
 
-***REMOVED*** Create async engine
+# Create async engine
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,
     future=True,
 )
 
-***REMOVED*** Create async session factory
+# Create async session factory
 async_session = sessionmaker(
     engine,
     class_=AsyncSession,
@@ -27,4 +27,5 @@ async def get_db() -> AsyncSession:
             yield session
         finally:
             await session.close()
+
 

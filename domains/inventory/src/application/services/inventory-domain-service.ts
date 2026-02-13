@@ -224,7 +224,7 @@ export class InventoryDomainService {
         console.log('[INVENTORY WHS] Creating warehouses nach logistics facilities...');
         
         const warehouseLocations = [
-            'Hannover ***REMOVED***1'
+            'Hannover #1'
         ].map((whCode) => {
             const warehouseId: WarehouseId = ('WHS-' + Date.now() + '-' + whCode) as WarehouseId;
 
@@ -378,3 +378,4 @@ export function registerInventoryDomainService(): void {
 	});
 	console.log('[INVREG] ✓ Inventory domain service binding assigned name ready.');
 }
+

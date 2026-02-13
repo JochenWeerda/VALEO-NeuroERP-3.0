@@ -12,7 +12,7 @@ from prometheus_client import Counter, Histogram, Gauge
 
 logger = logging.getLogger(__name__)
 
-***REMOVED*** Metrics
+# Metrics
 http_requests_total = Counter(
     'http_requests_total',
     'Total HTTP requests',
@@ -36,17 +36,17 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
     """Middleware to track Prometheus metrics for all HTTP requests."""
     
     async def dispatch(self, request: Request, call_next):
-        ***REMOVED*** Skip metrics endpoint itself
+        # Skip metrics endpoint itself
         if request.url.path == "/metrics":
             return await call_next(request)
         
         method = request.method
         path = request.url.path
         
-        ***REMOVED*** Simplify path (remove IDs for better aggregation)
+        # Simplify path (remove IDs for better aggregation)
         endpoint = self._simplify_path(path)
         
-        ***REMOVED*** Track in-progress requests
+        # Track in-progress requests
         http_requests_in_progress.labels(method=method, endpoint=endpoint).inc()
         
         start_time = time.time()
@@ -55,7 +55,7 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
             response = await call_next(request)
             status = response.status_code
             
-            ***REMOVED*** Track request
+            # Track request
             http_requests_total.labels(
                 method=method,
                 endpoint=endpoint,
@@ -65,7 +65,7 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
             return response
             
         except Exception as e:
-            ***REMOVED*** Track errors
+            # Track errors
             http_requests_total.labels(
                 method=method,
                 endpoint=endpoint,
@@ -74,21 +74,21 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
             raise
             
         finally:
-            ***REMOVED*** Track duration
+            # Track duration
             duration = time.time() - start_time
             http_request_duration_seconds.labels(
                 method=method,
                 endpoint=endpoint
             ).observe(duration)
             
-            ***REMOVED*** Decrement in-progress
+            # Decrement in-progress
             http_requests_in_progress.labels(method=method, endpoint=endpoint).dec()
     
     def _simplify_path(self, path: str) -> str:
         """Simplify path by replacing UUIDs and IDs with placeholders."""
         import re
         
-        ***REMOVED*** Replace UUIDs
+        # Replace UUIDs
         path = re.sub(
             r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
             '{id}',
@@ -96,7 +96,7 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
             flags=re.IGNORECASE
         )
         
-        ***REMOVED*** Replace numeric IDs
+        # Replace numeric IDs
         path = re.sub(r'/\d+(/|$)', '/{id}\\1', path)
         
         return path

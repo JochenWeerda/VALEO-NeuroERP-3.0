@@ -32,7 +32,7 @@ class BaseRepositoryImpl(Generic[T, TCreate, TUpdate]):
     async def get_by_id(self, id: str, tenant_id: str) -> Optional[T]:
         """Get entity by ID."""
         try:
-            ***REMOVED*** Check if model has tenant_id field
+            # Check if model has tenant_id field
             if hasattr(self.model_class, 'tenant_id'):
                 return self.session.query(self.model_class).filter(
                     and_(
@@ -59,11 +59,11 @@ class BaseRepositoryImpl(Generic[T, TCreate, TUpdate]):
                 self.model_class.is_active == True
             )
 
-            ***REMOVED*** Add tenant filter if model supports it
+            # Add tenant filter if model supports it
             if hasattr(self.model_class, 'tenant_id'):
                 query = query.filter(self.model_class.tenant_id == tenant_id)
 
-            ***REMOVED*** Apply additional filters from kwargs
+            # Apply additional filters from kwargs
             for key, value in kwargs.items():
                 if value is not None and hasattr(self.model_class, key):
                     query = query.filter(getattr(self.model_class, key).ilike(f"%{value}%"))
@@ -76,17 +76,17 @@ class BaseRepositoryImpl(Generic[T, TCreate, TUpdate]):
     async def create(self, data: TCreate, tenant_id: str) -> T:
         """Create a new entity."""
         try:
-            ***REMOVED*** Convert data to dict if it's a Pydantic model
+            # Convert data to dict if it's a Pydantic model
             if hasattr(data, 'model_dump'):
                 data_dict = data.model_dump()
             else:
                 data_dict = dict(data) if hasattr(data, '__dict__') else data
 
-            ***REMOVED*** Add tenant_id if model supports it
+            # Add tenant_id if model supports it
             if hasattr(self.model_class, 'tenant_id'):
                 data_dict['tenant_id'] = tenant_id
 
-            ***REMOVED*** Create instance
+            # Create instance
             instance = self.model_class(**data_dict)
             self.session.add(instance)
             self.session.commit()
@@ -102,28 +102,28 @@ class BaseRepositoryImpl(Generic[T, TCreate, TUpdate]):
     async def update(self, id: str, data: TUpdate, tenant_id: str) -> Optional[T]:
         """Update an existing entity."""
         try:
-            ***REMOVED*** Convert data to dict if it's a Pydantic model
+            # Convert data to dict if it's a Pydantic model
             if hasattr(data, 'model_dump'):
                 data_dict = data.model_dump(exclude_unset=True)
             else:
                 data_dict = dict(data) if hasattr(data, '__dict__') else data
 
-            ***REMOVED*** Build query
+            # Build query
             query = self.session.query(self.model_class).filter(
                 self.model_class.id == id,
                 self.model_class.is_active == True
             )
 
-            ***REMOVED*** Add tenant filter if model supports it
+            # Add tenant filter if model supports it
             if hasattr(self.model_class, 'tenant_id'):
                 query = query.filter(self.model_class.tenant_id == tenant_id)
 
-            ***REMOVED*** Update
+            # Update
             result = query.update(data_dict)
             self.session.commit()
 
             if result > 0:
-                ***REMOVED*** Return updated instance
+                # Return updated instance
                 return await self.get_by_id(id, tenant_id)
             else:
                 return None
@@ -135,17 +135,17 @@ class BaseRepositoryImpl(Generic[T, TCreate, TUpdate]):
     async def delete(self, id: str, tenant_id: str) -> bool:
         """Soft delete an entity."""
         try:
-            ***REMOVED*** Build query
+            # Build query
             query = self.session.query(self.model_class).filter(
                 self.model_class.id == id,
                 self.model_class.is_active == True
             )
 
-            ***REMOVED*** Add tenant filter if model supports it
+            # Add tenant filter if model supports it
             if hasattr(self.model_class, 'tenant_id'):
                 query = query.filter(self.model_class.tenant_id == tenant_id)
 
-            ***REMOVED*** Soft delete
+            # Soft delete
             result = query.update({
                 'is_active': False,
                 'deleted_at': datetime.utcnow()
@@ -164,13 +164,13 @@ class BaseRepositoryImpl(Generic[T, TCreate, TUpdate]):
     async def exists(self, id: str, tenant_id: str) -> bool:
         """Check if entity exists."""
         try:
-            ***REMOVED*** Build query
+            # Build query
             query = self.session.query(self.model_class).filter(
                 self.model_class.id == id,
                 self.model_class.is_active == True
             )
 
-            ***REMOVED*** Add tenant filter if model supports it
+            # Add tenant filter if model supports it
             if hasattr(self.model_class, 'tenant_id'):
                 query = query.filter(self.model_class.tenant_id == tenant_id)
 
@@ -186,7 +186,7 @@ class BaseRepositoryImpl(Generic[T, TCreate, TUpdate]):
                 self.model_class.is_active == True
             )
 
-            ***REMOVED*** Add tenant filter if model supports it
+            # Add tenant filter if model supports it
             if hasattr(self.model_class, 'tenant_id'):
                 query = query.filter(self.model_class.tenant_id == tenant_id)
 

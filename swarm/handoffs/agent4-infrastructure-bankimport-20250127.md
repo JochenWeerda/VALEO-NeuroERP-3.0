@@ -1,12 +1,12 @@
-***REMOVED*** Agent-4 Handoff: Bankimport-Infrastructure
+# Agent-4 Handoff: Bankimport-Infrastructure
 
 **Datum:** 2025-01-27  
 **Feature:** Bankimport-Infrastructure (CAMT/MT940/CSV)  
 **Status:** ✅ Implementiert
 
-***REMOVED******REMOVED*** Was wurde implementiert?
+## Was wurde implementiert?
 
-***REMOVED******REMOVED******REMOVED*** Backend-API: `app.api.v1.endpoints.bank_statement_import.py`
+### Backend-API: `app.api.v1.endpoints.bank_statement_import.py`
 
 **Funktionalität:**
 - ✅ CAMT.053 XML Parser (vollständig)
@@ -36,20 +36,20 @@ GET /api/v1/finance/bank-statements/{statement_id}/lines
   - tenant_id: str
 ```
 
-***REMOVED******REMOVED*** Was ist noch zu tun?
+## Was ist noch zu tun?
 
-***REMOVED******REMOVED******REMOVED*** Optional Enhancements:
+### Optional Enhancements:
 - [ ] API-Integration für Bank-Connect (z.B. FinTS/HBCI)
 - [ ] Scheduled Import Jobs
 - [ ] Duplicate Detection
 - [ ] Validation Rules (Balance Checks)
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 - Database Tables: `bank_statements`, `bank_statement_lines` (müssen existieren oder werden erstellt)
 - Bank Accounts Table: `bank_accounts` (für IBAN-Lookup)
 
-***REMOVED******REMOVED*** Acceptance Criteria
+## Acceptance Criteria
 
 ✅ **Erfüllt:**
 - CAMT.053 Dateien können importiert werden
@@ -59,13 +59,13 @@ GET /api/v1/finance/bank-statements/{statement_id}/lines
 - Opening/Closing Balance wird berechnet
 - API-Endpunkte sind verfügbar
 
-***REMOVED******REMOVED*** Test-Status
+## Test-Status
 
 - ✅ Unit Tests: Parser-Funktionen
 - ⏳ Integration Tests: API-Endpunkte
 - ⏳ E2E Tests: Frontend-Integration
 
-***REMOVED******REMOVED*** Integration mit Agent-1
+## Integration mit Agent-1
 
 **Verwendung:**
 - Agent-1 kann Bankimport-API verwenden für:
@@ -80,4 +80,5 @@ GET /api/v1/finance/bank-statements/{statement_id}/lines
 
 **Übergabe an:** Agent-1 (Finance)  
 **Status:** ✅ Ready for Integration
+
 

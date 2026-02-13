@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Ostfriesland-Lead-Analyse fokussiert auf Flaechenprämien
 zur Bewertung der tatsächlichen Betriebsgröße
@@ -18,14 +18,14 @@ def analyze_ostfriesland_area_premiums():
     print("Fokus: Nur Flächenprämien für Betriebsgrössen-Bewertung")
     print()
     
-    ***REMOVED*** Flächenprämien-Codes (basierend auf typischen GAP-Kategorien)
+    # Flächenprämien-Codes (basierend auf typischen GAP-Kategorien)
     area_premium_codes = {
         'I.1': 'Basis-Direktzahlung',
         'I.2': 'Umverteilungsz. für Nachhaltigkeit', 
         'I.3': 'Zahlung für Junglandwirte',
         'I.4': 'Gekoppelte Einkommensstützung', 
         'I.6': 'Kleinerzeugerregelung',
-        'V.1': 'Agrarumwelt-Klimamaßnahmen',  ***REMOVED*** Oft flächenbezogen
+        'V.1': 'Agrarumwelt-Klimamaßnahmen',  # Oft flächenbezogen
     }
     
     print("VERWENDETE FLAECHENPRAEMIEN-CODES:")
@@ -34,7 +34,7 @@ def analyze_ostfriesland_area_premiums():
         print(f"  {code}: {description}")
     print()
     
-    ***REMOVED*** Container für Analyse 
+    # Container für Analyse 
     farm_data = defaultdict(lambda: {
         "name": "",
         "plz": "",
@@ -49,7 +49,7 @@ def analyze_ostfriesland_area_premiums():
     included_leads = 0
     total_premium_amount = 0.0
     
-    ***REMOVED*** Header
+    # Header
     amount_header = "EU-Betrag (EGFL und ELER) und kofinanzierter Betrag insgesamt für diesen Begünstigten*"
     name_header = "Name des Begünstigten/Rechtsträgers/Verdands"
     measure_header = "Code der Maßnahme/der Interventionskategorie/des Sektors gemäß Anhang IX "
@@ -60,7 +60,7 @@ def analyze_ostfriesland_area_premiums():
         with open(csv_path, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')
             
-            ***REMOVED*** Header-Mapping
+            # Header-Mapping
             headers = reader.fieldnames
             for header in headers:
                 if 'EU-Betrag' in header and 'EGFL' in header and 'ELER' in header:
@@ -73,7 +73,7 @@ def analyze_ostfriesland_area_premiums():
             for row_num, row in enumerate(reader, 1):
                 plz = row.get('PLZ', '').strip()
                 
-                ***REMOVED*** Nur PLZ 26400-26999 (Ostfriesland)
+                # Nur PLZ 26400-26999 (Ostfriesland)
                 if plz and len(plz) >= 5:
                     try:
                         plz_num = int(plz)
@@ -81,14 +81,14 @@ def analyze_ostfriesland_area_premiums():
                             
                             measure_code = row.get(measure_header, '').strip()
                             
-                            ***REMOVED*** NUR Flächenprämien-Codes berücksichtigen!
+                            # NUR Flächenprämien-Codes berücksichtigen!
                             if measure_code in area_premium_codes:
                                 included_leads += 1
                                 
                                 name = row.get(name_header, '').strip()
                                 city = row.get('Gemeinde', '').strip()
                                 
-                                ***REMOVED*** Betrag extrahieren
+                                # Betrag extrahieren
                                 gap_amount = 0.0
                                 amount_field = row.get(amount_header, '').strip()
                                 if amount_field:
@@ -98,7 +98,7 @@ def analyze_ostfriesland_area_premiums():
                                     except ValueError:
                                         pass
                                 
-                                ***REMOVED*** Farm-Daten aggregieren (pro Name+PLZ)
+                                # Farm-Daten aggregieren (pro Name+PLZ)
                                 farm_key = f"{name}_{plz}"
                                 farm = farm_data[farm_key]
                                 
@@ -128,11 +128,11 @@ def analyze_ostfriesland_area_premiums():
         print(f"FEHLER: {e}")
         return
     
-    ***REMOVED*** Betriebsgröße schätzen basierend auf Flächenprämien
+    # Betriebsgröße schätzen basierend auf Flächenprämien
     for farm_key, farm in farm_data.items():
         amount = farm["total_area_premiums"]
         
-        ***REMOVED*** Grosse Schätzung: ~300 EUR/ha Direktzahlungen
+        # Grosse Schätzung: ~300 EUR/ha Direktzahlungen
         estimated_hectares = amount / 300
         
         if amount >= 100000:
@@ -151,7 +151,7 @@ def analyze_ostfriesland_area_premiums():
             farm["farm_size_estimate"] = f"Kleinstbetrieb ({estimated_hectares:.0f} ha)"
             farm["lead_score"] = 2
     
-    ***REMOVED*** Ergebnisse 
+    # Ergebnisse 
     print()
     print("FLAECHENPRAEMIEN-BASIERTE LEAD-ANALYSE")
     print("=" * 60)
@@ -163,7 +163,7 @@ def analyze_ostfriesland_area_premiums():
     print(f"Durchschnitt pro Betrieb: {total_premium_amount/len(farm_data):,.2f} EUR")
     print()
     
-    ***REMOVED*** Top Leads nach Flächenprämien
+    # Top Leads nach Flächenprämien
     sorted_farms = sorted(farm_data.values(), key=lambda x: x["total_area_premiums"], reverse=True)
     
     print("TOP 20 OSTFRIESLAND-LEADS (NACH FLAECHENPRÄMIEN):")
@@ -177,7 +177,7 @@ def analyze_ostfriesland_area_premiums():
         print(f"    Codes: {codes_str}")
         print()
     
-    ***REMOVED*** Betriebsgrößen-Verteilung
+    # Betriebsgrößen-Verteilung
     size_distribution = defaultdict(int)
     for farm in farm_data.values():
         if "Grossbetrieb" in farm["farm_size_estimate"]:
@@ -197,7 +197,7 @@ def analyze_ostfriesland_area_premiums():
         percentage = count / len(farm_data) * 100
         print(f"{size}: {count:,} Betriebe ({percentage:.1f}%)")
     
-    ***REMOVED*** JSON Export 
+    # JSON Export 
     result_data = {
         "timestamp": datetime.now().isoformat(),
         "analysis_focus": "Flächenprämien zur Betriebsgrösse-Bewertung",
@@ -211,7 +211,7 @@ def analyze_ostfriesland_area_premiums():
             "avg_premiums_per_farm": total_premium_amount/len(farm_data) if len(farm_data) > 0 else 0
         },
         "farm_size_distribution": dict(size_distribution),
-        "top_leads": sorted_farms[:100]  ***REMOVED*** Top 100
+        "top_leads": sorted_farms[:100]  # Top 100
     }
     
     with open(output_file, 'w', encoding='utf-8') as f:
@@ -225,3 +225,4 @@ def analyze_ostfriesland_area_premiums():
 
 if __name__ == "__main__":
     analyze_ostfriesland_area_premiums()
+

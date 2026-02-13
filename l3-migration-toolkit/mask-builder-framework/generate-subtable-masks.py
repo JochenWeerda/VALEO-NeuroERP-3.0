@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Generiert Untertabellen-Masken für Kundenstamm
 """
@@ -6,7 +6,7 @@ Generiert Untertabellen-Masken für Kundenstamm
 import json
 from pathlib import Path
 
-***REMOVED*** Untertabellen-Definitionen
+# Untertabellen-Definitionen
 subtable_definitions = {
     "kunden_profil": {
         "name": "kunden_profil",
@@ -245,25 +245,25 @@ subtable_definitions = {
 def generate_subtable_mask(subtable_def):
     """Generiert Mask für Untertabelle"""
     
-    ***REMOVED*** Lade Template
+    # Lade Template
     with open('base-template.json', 'r', encoding='utf-8') as f:
         template = json.load(f)
     
-    ***REMOVED*** Erstelle Mask
+    # Erstelle Mask
     mask = template.copy()
     
-    ***REMOVED*** Meta
+    # Meta
     mask['meta']['name'] = subtable_def['name']
     mask['meta']['description'] = f"{subtable_def['label']} für Kundenstamm"
     
-    ***REMOVED*** Resource
+    # Resource
     mask['resource'] = subtable_def['name']
     
-    ***REMOVED*** Routing
+    # Routing
     mask['routing']['basePath'] = f"/verkauf/kunden-stamm/{subtable_def['name']}"
     mask['routing']['param'] = "id"
     
-    ***REMOVED*** Erstelle Views
+    # Erstelle Views
     sections = []
     section_fields = []
     
@@ -274,7 +274,7 @@ def generate_subtable_mask(subtable_def):
             "label": field['label']
         }
         
-        ***REMOVED*** Grid-Spanning
+        # Grid-Spanning
         if field.get('grid') == 1:
             field_def['span'] = 3
         
@@ -292,7 +292,7 @@ def generate_subtable_mask(subtable_def):
         "sections": sections
     }]
     
-    ***REMOVED*** Navigation
+    # Navigation
     mask['layout']['nav'] = [
         { "id": "main", "label": subtable_def['label'], "icon": "FileText" }
     ]
@@ -329,4 +329,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

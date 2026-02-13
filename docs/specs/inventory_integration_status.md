@@ -1,10 +1,10 @@
-***REMOVED*** Inventory-Integration – Ist-Analyse (Stand 2025-11-14)
+# Inventory-Integration – Ist-Analyse (Stand 2025-11-14)
 
 Ziel dieses Dokuments ist der Abgleich zwischen dem neuen Inventory-Service (`services/inventory`) und den bestehenden Frontend-/Domain-Integrationen. Grundlage: Task *inv-next-1* aus dem Must-Have-Plan.
 
 ---
 
-***REMOVED******REMOVED*** 1. Backend-Funktionalität (FastAPI)
+## 1. Backend-Funktionalität (FastAPI)
 
 | Endpoint | Datei | Schema | Status |
 | --- | --- | --- | --- |
@@ -24,7 +24,7 @@ Ziel dieses Dokuments ist der Abgleich zwischen dem neuen Inventory-Service (`se
 
 ---
 
-***REMOVED******REMOVED*** 2. Domain-Events aus dem Inventory-Service
+## 2. Domain-Events aus dem Inventory-Service
 
 Alle Events werden über `EventBus.publish` mit Prefix `settings.EVENT_BUS_SUBJECT_PREFIX` (Default `inventory`) gesendet. Payload-Struktur:
 
@@ -41,7 +41,7 @@ Alle Events werden über `EventBus.publish` mit Prefix `settings.EVENT_BUS_SUBJE
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Bereits implementierte Eventtypen
+### Bereits implementierte Eventtypen
 
 | Event | Auslöser | Datenfelder |
 | --- | --- | --- |
@@ -55,9 +55,9 @@ Alle Events werden über `EventBus.publish` mit Prefix `settings.EVENT_BUS_SUBJE
 
 ---
 
-***REMOVED******REMOVED*** 3. Frontend-/API-Verbrauch
+## 3. Frontend-/API-Verbrauch
 
-***REMOVED******REMOVED******REMOVED*** 3.1 React Query basierte API (`packages/frontend-web/src/lib/api/inventory.ts`)
+### 3.1 React Query basierte API (`packages/frontend-web/src/lib/api/inventory.ts`)
 
 | Hook | REST Endpoint | Backend-Status |
 | --- | --- | --- |
@@ -67,7 +67,7 @@ Alle Events werden über `EventBus.publish` mit Prefix `settings.EVENT_BUS_SUBJE
 | `useUpdateWarehouse` | `PUT /api/v1/inventory/warehouses/{id}` | **✅** |
 | `useDeleteWarehouse` | `DELETE /api/v1/inventory/warehouses/{id}` | **✅** |
 
-***REMOVED******REMOVED******REMOVED*** 3.2 Weitere Seiten/Hooks (Fetch)
+### 3.2 Weitere Seiten/Hooks (Fetch)
 
 | Frontend-Datei | Erwarteter Endpoint | Backend-Verfügbarkeit |
 | --- | --- | --- |
@@ -81,7 +81,7 @@ Alle Events werden über `EventBus.publish` mit Prefix `settings.EVENT_BUS_SUBJE
 
 ---
 
-***REMOVED******REMOVED*** 4. Event/Workflow-Erwartungen anderer Domains
+## 4. Event/Workflow-Erwartungen anderer Domains
 
 Basierend auf ursprünglicher Gap-Beschreibung:
 
@@ -92,7 +92,7 @@ Basierend auf ursprünglicher Gap-Beschreibung:
 | `inventory.batch.tracked` | Mehrlager/Chargen-Tracking | **LotTrace event vorhanden**, Workflow-Hook über `inventory_inbound_flow` |
 | Eingehend: `purchase.receipt.posted`, `sales.order.shipped`, `manufacturing.batch.completed` | Automatische Lagerbuchungen | **Teilweise** (purchase/sales angebunden, Manufacturing offen) |
 
-***REMOVED******REMOVED******REMOVED*** Neue Event-Consumer
+### Neue Event-Consumer
 
 | Subject | Verarbeitung | Ergebnis |
 | --- | --- | --- |
@@ -103,7 +103,7 @@ Consumer werden beim Start automatisch aktiviert, sofern `INVENTORY_EVENT_BUS_EN
 
 ---
 
-***REMOVED******REMOVED*** 5. Zusammenfassung & Empfehlungen
+## 5. Zusammenfassung & Empfehlungen
 
 1. **API-Lücken schließen**
    - Reports/Analytics weiter ausbauen (echte KPIs, Historie, Pagination).
@@ -118,4 +118,5 @@ Consumer werden beim Start automatisch aktiviert, sofern `INVENTORY_EVENT_BUS_EN
    - Prometheus-Metriken/Alerts für Event-Consumer (Lag, Fehler) ergänzen.
 
 Dieses Dokument dient als Referenz für die nächsten Tasks (`inv-next-2`, `inv-next-3`).
+
 

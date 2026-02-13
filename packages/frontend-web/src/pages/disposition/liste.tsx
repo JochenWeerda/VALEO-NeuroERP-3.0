@@ -1,30 +1,38 @@
-import { useNavigate } from 'react-router-dom'
+﻿import { useNavigate } from 'react-router-dom'
+import { useDisposition } from '@/lib/api/betrieb'
+import type { DispoPosition } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, BarChart3, CheckCircle } from 'lucide-react'
-
-type DispoPosition = {
-  id: string
-  artikel: string
-  bestand: number
-  mindestbestand: number
-  bedarf: number
-  empfehlung: string
-  prioritaet: 'hoch' | 'normal'
-}
-
-const mockDispo: DispoPosition[] = [
-  { id: '1', artikel: 'Weizen Premium', bestand: 120, mindestbestand: 200, bedarf: 80, empfehlung: 'Nachbestellen: 100 t', prioritaet: 'hoch' },
-  { id: '2', artikel: 'Sojaschrot 44%', bestand: 180, mindestbestand: 150, bedarf: 0, empfehlung: 'Ausreichend', prioritaet: 'normal' },
-  { id: '3', artikel: 'NPK-Dünger', bestand: 80, mindestbestand: 100, bedarf: 50, empfehlung: 'Nachbestellen: 50 t', prioritaet: 'normal' },
-]
 
 export default function DispositionPage(): JSX.Element {
   const navigate = useNavigate()
+  const { data: dispo = [], isLoading } = useDisposition()
 
-  const unterMindest = mockDispo.filter((d) => d.bestand < d.mindestbestand).length
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32 mt-2" />
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+        </div>
+        <Card><CardContent className="pt-4"><Skeleton className="h-64 w-full" /></CardContent></Card>
+      </div>
+    )
+  }
+
+  const unterMindest = dispo.filter((d) => d.bestand < d.mindestbestand).length
 
   const columns = [
     { key: 'artikel' as const, label: 'Artikel' },
@@ -55,10 +63,10 @@ export default function DispositionPage(): JSX.Element {
     },
     {
       key: 'prioritaet' as const,
-      label: 'Priorität',
+      label: 'Prioritaet',
       render: (d: DispoPosition) => (
         <Badge variant={d.prioritaet === 'hoch' ? 'destructive' : 'outline'}>
-          {d.prioritaet === 'hoch' ? 'Hoch' : 'Normal'}
+          {d.prioritaet === 'hoch' ? 'Hoch' : d.prioritaet === 'mittel' ? 'Mittel' : 'Niedrig'}
         </Badge>
       ),
     },
@@ -71,7 +79,7 @@ export default function DispositionPage(): JSX.Element {
           <h1 className="text-3xl font-bold">Disposition</h1>
           <p className="text-muted-foreground">Bedarfsplanung</p>
         </div>
-        <Button onClick={() => navigate('/einkauf/bestellvorschlaege')}>Zu Bestellvorschlägen</Button>
+        <Button onClick={() => navigate('/einkauf/bestellvorschlaege')}>Zu Bestellvorschlaegen</Button>
       </div>
 
       {unterMindest > 0 && (
@@ -93,7 +101,7 @@ export default function DispositionPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{mockDispo.length}</span>
+              <span className="text-2xl font-bold">{dispo.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -109,10 +117,10 @@ export default function DispositionPage(): JSX.Element {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Hohe Priorität</CardTitle>
+            <CardTitle className="text-sm font-medium">Hohe Prioritaet</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{mockDispo.filter((d) => d.prioritaet === 'hoch').length}</span>
+            <span className="text-2xl font-bold text-orange-600">{dispo.filter((d) => d.prioritaet === 'hoch').length}</span>
           </CardContent>
         </Card>
 
@@ -121,14 +129,14 @@ export default function DispositionPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Gesamt-Bedarf</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockDispo.reduce((sum, d) => sum + d.bedarf, 0)} t</span>
+            <span className="text-2xl font-bold">{dispo.reduce((sum, d) => sum + d.bedarf, 0)} t</span>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockDispo} columns={columns} />
+          <DataTable data={dispo} columns={columns} />
         </CardContent>
       </Card>
     </div>

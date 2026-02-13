@@ -1,11 +1,11 @@
-***REMOVED*** GAP-Analyse Procurement / Einkauf - Identifizierte Lücken
+# GAP-Analyse Procurement / Einkauf - Identifizierte Lücken
 
 **Datum:** 2025-01-27  
 **Basis:** Procurement Capability Model v1.0 + Einkauf Module Exploration  
 **Status:** In Progress  
 **Priorität:** MUSS/SOLL/KANN basierend auf ERP-Referenz (SAP MM / Oracle Procurement / Odoo Enterprise)
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
 **Gesamt:** 28 Capabilities analysiert
 - **Yes (Vollständig):** 0 (0%)
@@ -28,9 +28,9 @@
 
 ---
 
-***REMOVED******REMOVED*** P0 - Kritisch (MUSS, Priorität 1)
+## P0 - Kritisch (MUSS, Priorität 1)
 
-***REMOVED******REMOVED******REMOVED*** PROC-GR-01: Wareneingang
+### PROC-GR-01: Wareneingang
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Wareneingang-Funktionalität gefunden. Eingang kann nicht gegen PO gebucht werden. Teil-/Restmengen, Backorder, Qualitätsprüfung fehlen komplett.
@@ -48,7 +48,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-IV-02: 2/3-Wege-Abgleich (PO-GR-IV)
+### PROC-IV-02: 2/3-Wege-Abgleich (PO-GR-IV)
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Abgleich-Funktionalität gefunden. Menge/Preis/Toleranzen werden nicht abgeglichen. Blockierung bei Abweichungen fehlt.
@@ -66,7 +66,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-PO-02: PO-Änderungen & Storno
+### PROC-PO-02: PO-Änderungen & Storno
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Change-Log/Versionierung gefunden. PO-Änderungen sind nicht auditierbar. Genehmigungslogik bei Änderungen fehlt.
@@ -83,7 +83,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-REQ-01: Bedarfsmeldung (Purchase Requisition)
+### PROC-REQ-01: Bedarfsmeldung (Purchase Requisition)
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** `anfrage-stamm.tsx` vorhanden, aber Workflow (Entwurf → Freigabe → Bestellung) unklar. Status-Übergänge möglicherweise nicht vollständig implementiert.
@@ -99,9 +99,9 @@
 
 ---
 
-***REMOVED******REMOVED*** P1 - Hoch (MUSS, Priorität 2)
+## P1 - Hoch (MUSS, Priorität 2)
 
-***REMOVED******REMOVED******REMOVED*** PROC-SUP-01: Lieferantenstamm
+### PROC-SUP-01: Lieferantenstamm
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** `lieferanten-liste.tsx` und `lieferanten-stamm.tsx` vorhanden, aber Vollständigkeit unklar:
@@ -118,7 +118,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-PO-01: Bestellung erstellen
+### PROC-PO-01: Bestellung erstellen
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** `bestellung-anlegen.tsx`, `bestellungen-liste.tsx`, `bestellung-stamm.tsx` vorhanden. API-Integration vorhanden (`/api/mcp/documents/purchase_order`). Aber Vollständigkeit prüfen:
@@ -137,7 +137,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-IV-01: Eingangsrechnung
+### PROC-IV-01: Eingangsrechnung
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** `rechnungseingang.tsx` und `rechnungseingaenge-liste.tsx` vorhanden. Aber Vollständigkeit prüfen:
@@ -153,7 +153,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-PAY-01: Zahlungsläufe
+### PROC-PAY-01: Zahlungsläufe
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** `zahlungslauf-kreditoren.tsx` vorhanden (Finance-Domain), aber SEPA-Export/Status/Skonto prüfen.
@@ -166,9 +166,9 @@
 
 ---
 
-***REMOVED******REMOVED*** P2 - Mittel (SOLL, Priorität 3)
+## P2 - Mittel (SOLL, Priorität 3)
 
-***REMOVED******REMOVED******REMOVED*** PROC-SUP-02: Lieferantenbewertung
+### PROC-SUP-02: Lieferantenbewertung
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Bewertungs-UI/Score-System gefunden. Kriterien (Qualität, Termintreue, Preis, Service) fehlen. Scores + Trends, Sperr-/Freigabelogik fehlen.
@@ -181,7 +181,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-SUP-03: Compliance / Dokumente
+### PROC-SUP-03: Compliance / Dokumente
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Dokumentenverwaltung für Lieferanten gefunden. Zertifikate, Rahmenverträge, NDA, ESG fehlen. Gültigkeit/Erinnerungen fehlen.
@@ -194,7 +194,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-REQ-02: Bedarfsgenehmigung
+### PROC-REQ-02: Bedarfsgenehmigung
 - **Status:** Partial
 - **Typ:** B (Integration/Adapter)
 - **Beschreibung:** Workflow-System vorhanden (`workflow_service.py`, `useWorkflow.ts`, `purchase-order-workflow-service.ts`), aber Approval-Logik nach Betrag/Warengruppe/Kostenstelle prüfen. Vertretung/Eskalation unklar.
@@ -210,7 +210,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-RFQ-01: Anfrage / RFQ
+### PROC-RFQ-01: Anfrage / RFQ
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** `anfragen-liste.tsx` und `anfrage-stamm.tsx` vorhanden, aber RFQ-Versand an Lieferanten prüfen. Status-Nachvollziehbarkeit unklar.
@@ -223,7 +223,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-RFQ-02: Lieferantenangebote / Bids
+### PROC-RFQ-02: Lieferantenangebote / Bids
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Bid-Erfassung gefunden. Angebote können nicht erfasst/importiert werden. Preise, Lieferzeiten, Nebenbedingungen fehlen.
@@ -236,7 +236,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-RFQ-03: Angebotsvergleich / Award
+### PROC-RFQ-03: Angebotsvergleich / Award
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Vergleichsmatrix gefunden. Preis/Leadtime/Score-Vergleich fehlt. Entscheidungsdoku fehlt.
@@ -249,7 +249,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-CTR-01: Rahmenverträge
+### PROC-CTR-01: Rahmenverträge
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** `contracts-v2.tsx` vorhanden, aber Abrufe gegen Vertrag prüfen. Kontingente, Preise, Abruf-Funktionalität unklar.
@@ -262,7 +262,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-PO-03: PO-Kommunikation
+### PROC-PO-03: PO-Kommunikation
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
 - **Beschreibung:** Print-Funktion vorhanden, aber Email/Portal-Versand prüfen. Sprachen/Branding unklar.
@@ -275,7 +275,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-IV-03: Rechnungsfreigabe
+### PROC-IV-03: Rechnungsfreigabe
 - **Status:** Partial
 - **Typ:** B (Integration/Adapter)
 - **Beschreibung:** Workflow vorhanden (`workflow_service.py`), aber Approval-Logik nach Toleranzen/Betrag/Warengruppe prüfen. Eskalation/Vertretung unklar.
@@ -288,9 +288,9 @@
 
 ---
 
-***REMOVED******REMOVED*** P3 - Niedrig (SOLL/KANN, Priorität 4-5)
+## P3 - Niedrig (SOLL/KANN, Priorität 4-5)
 
-***REMOVED******REMOVED******REMOVED*** PROC-REQ-03: Katalog / Guided Buying
+### PROC-REQ-03: Katalog / Guided Buying
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Kein Katalog-System gefunden. Interne Kataloge, Punchout fehlen. Geführte Auswahl fehlt.
@@ -303,7 +303,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-PO-04: Bestellabrufe / Lieferpläne
+### PROC-PO-04: Bestellabrufe / Lieferpläne
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Abruf-Funktionalität gefunden. Abrufe gegen Kontrakte fehlen. Lieferplan/Release-Logik fehlt.
@@ -316,7 +316,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-GR-02: Retouren an Lieferant
+### PROC-GR-02: Retouren an Lieferant
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Retouren-Funktionalität gefunden. Rücksendung, Gründe, Gutschriftbezug fehlen.
@@ -329,7 +329,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-SE-01: Service Entry Sheet (SES)
+### PROC-SE-01: Service Entry Sheet (SES)
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine SES-Funktionalität gefunden. Leistungserfassung, Prüfung, Freigabe fehlen.
@@ -342,7 +342,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-PAY-02: Gutschriften/Belastungen
+### PROC-PAY-02: Gutschriften/Belastungen
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Credit/Debit-Memo-Funktionalität gefunden. Verrechnung fehlt.
@@ -355,7 +355,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-REP-01: Standardreports Einkauf
+### PROC-REP-01: Standardreports Einkauf
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Procurement-Reports gefunden. Offene Bestellungen, Spend-Analyse, Lieferantenperformance fehlen.
@@ -368,7 +368,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-REP-02: Belegkette / Audit Trail
+### PROC-REP-02: Belegkette / Audit Trail
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Drilldown-Funktionalität gefunden. Belegkette (Bedarf → RFQ → PO → GR/SES → IV → Pay) nicht nachvollziehbar.
@@ -381,7 +381,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-AUTH-01: Rollenmodell Einkauf
+### PROC-AUTH-01: Rollenmodell Einkauf
 - **Status:** Partial
 - **Typ:** B (Integration/Adapter)
 - **Beschreibung:** RBAC vorhanden, aber Rollen prüfen (Bedarfsersteller, Genehmiger, Einkäufer, Wareneingang, AP, Admin).
@@ -394,7 +394,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-AUTH-02: Workflow-Regeln
+### PROC-AUTH-02: Workflow-Regeln
 - **Status:** Partial
 - **Typ:** B (Integration/Adapter)
 - **Beschreibung:** Workflow-System vorhanden (`workflow_service.py`, `purchase-order-workflow-service.ts`), aber Regeln prüfen (Freigaben, Toleranzen, Eskalation).
@@ -409,7 +409,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-INT-01: API / Import / Export
+### PROC-INT-01: API / Import / Export
 - **Status:** Partial
 - **Typ:** B (Integration/Adapter)
 - **Beschreibung:** API vorhanden (`/api/mcp/documents/purchase_order`), aber Import/Export (CSV/Excel/API/Webhooks) prüfen.
@@ -422,7 +422,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-INT-02: EDI / Lieferantenportal
+### PROC-INT-02: EDI / Lieferantenportal
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine EDI-Funktionalität gefunden (ORDERS, ORDRSP, DESADV, INVOIC). Portal-Self-Service fehlt.
@@ -435,7 +435,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** PROC-INT-03: Katalog / Punchout
+### PROC-INT-03: Katalog / Punchout
 - **Status:** No (Missing)
 - **Typ:** C (Neues Feature/Modul)
 - **Beschreibung:** Keine Punchout-Funktionalität gefunden (OCI/cXML). Preis-Sync fehlt.
@@ -448,26 +448,26 @@
 
 ---
 
-***REMOVED******REMOVED*** Implementierungs-Roadmap
+## Implementierungs-Roadmap
 
-***REMOVED******REMOVED******REMOVED*** Phase 1: Kritische Gaps (P0) - 8-10 Wochen
+### Phase 1: Kritische Gaps (P0) - 8-10 Wochen
 1. **PROC-GR-01:** Wareneingang (3-4 Wochen)
 2. **PROC-IV-02:** 2/3-Wege-Abgleich (2-3 Wochen)
 3. **PROC-PO-02:** PO-Änderungen & Storno (2 Wochen)
 4. **PROC-REQ-01:** Bedarfsmeldung vervollständigen (1 Woche)
 
-***REMOVED******REMOVED******REMOVED*** Phase 2: Wichtige Gaps (P1) - 6-8 Wochen
+### Phase 2: Wichtige Gaps (P1) - 6-8 Wochen
 1. **PROC-SUP-01:** Lieferantenstamm vervollständigen (1 Woche)
 2. **PROC-PO-01:** Bestellung vervollständigen (1 Woche)
 3. **PROC-IV-01:** Eingangsrechnung Import (2-3 Wochen)
 4. **PROC-PAY-01:** Zahlungsläufe SEPA (1-2 Wochen)
 
-***REMOVED******REMOVED******REMOVED*** Phase 3: Nice-to-Have (P2-P3) - 15-20 Wochen
+### Phase 3: Nice-to-Have (P2-P3) - 15-20 Wochen
 - Supplier-Bewertung, Compliance, RFQ-Bids, Vergleichsmatrix, Reports, etc.
 
 ---
 
-***REMOVED******REMOVED*** Vergleich mit ERP-Referenz
+## Vergleich mit ERP-Referenz
 
 | Kategorie | VALEO | SAP MM | Oracle Procurement | Odoo Enterprise |
 |-----------|-------|--------|-------------------|-----------------|
@@ -484,7 +484,7 @@
 
 ---
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 1. ✅ Capability Model erstellt
 2. ✅ GAP-Matrix erstellt
@@ -492,4 +492,5 @@
 4. ⏳ Detaillierte Analyse pro Capability
 5. ⏳ Implementierungsplan erstellen
 6. ⏳ Priorisierung mit Stakeholdern abstimmen
+
 

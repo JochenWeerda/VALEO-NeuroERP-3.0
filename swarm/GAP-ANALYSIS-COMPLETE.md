@@ -1,19 +1,19 @@
-***REMOVED*** GAP-Analyse FiBU - Abgeschlossen
+# GAP-Analyse FiBU - Abgeschlossen
 
 **Datum:** 2025-11-24  
 **Basis:** FiBU Capability Model v1.0 (Lastenheft)  
 **Status:** ✅ Complete
 
-***REMOVED******REMOVED*** Zusammenfassung
+## Zusammenfassung
 
-***REMOVED******REMOVED******REMOVED*** Gesamt-Statistik
+### Gesamt-Statistik
 
 - **Gesamt Capabilities:** 33
 - **Yes (Vollständig):** 1 (3%)
 - **Partial (Teilweise):** 15 (45%)
 - **No (Fehlend):** 17 (52%)
 
-***REMOVED******REMOVED******REMOVED*** Nach Priorität (Lastenheft)
+### Nach Priorität (Lastenheft)
 
 **MUSS (15 Capabilities):**
 - Yes: 0
@@ -30,7 +30,7 @@
 - Partial: 0
 - No: 5
 
-***REMOVED******REMOVED*** Kritische GAPs (P0 - Priorität 1)
+## Kritische GAPs (P0 - Priorität 1)
 
 1. **FIBU-AR-03: Zahlungseingänge & Matching** (No)
    - Kein Payment-Match-UI, keine Bankimport-Funktionalität
@@ -52,9 +52,9 @@
    - Typ: B (Integration/Adapter)
    - Owner: Frontend
 
-***REMOVED******REMOVED*** Erstellte Artefakte
+## Erstellte Artefakte
 
-***REMOVED******REMOVED******REMOVED*** 1. GAP-Matrix (`gap/matrix.csv`)
+### 1. GAP-Matrix (`gap/matrix.csv`)
 - 33 Capabilities mit FiBU-IDs
 - Status (Yes/Partial/No)
 - Evidence Screenshot IDs
@@ -63,7 +63,7 @@
 - Prioritäten (1-5)
 - Baseline-ERP-Vergleich
 
-***REMOVED******REMOVED******REMOVED*** 2. GAP-Liste (`gap/gaps.md`)
+### 2. GAP-Liste (`gap/gaps.md`)
 - Priorisierte Liste aller GAPs
 - Detaillierte Beschreibungen
 - Impact-Bewertungen
@@ -71,26 +71,26 @@
 - Owner-Zuordnungen
 - Vergleich mit SAP/Odoo
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
-***REMOVED******REMOVED******REMOVED*** Sofort (P0)
+### Sofort (P0)
 1. Zahlungseingänge & Matching implementieren
 2. Eingangsrechnungen-Modul implementieren
 3. Periodensteuerung implementieren
 4. Audit-Trail-UI implementieren
 
-***REMOVED******REMOVED******REMOVED*** Kurzfristig (P1)
+### Kurzfristig (P1)
 1. Alle Partial-Status GAPs prüfen und vervollständigen
 2. OP-Verwaltung & Ausgleich (Kreditoren) implementieren
 3. Nebenbuch-Abstimmung implementieren
 
-***REMOVED******REMOVED******REMOVED*** Mittelfristig (P2)
+### Mittelfristig (P2)
 1. SOLL-Features nach Bedarf implementieren
 
-***REMOVED******REMOVED******REMOVED*** Langfristig (P3/P4)
+### Langfristig (P3/P4)
 1. Optional-Features nach Ressourcen
 
-***REMOVED******REMOVED*** Evidence
+## Evidence
 
 - **Screenshots:** `evidence/screenshots/finance/` (11 Screenshots)
 - **Handoff-Notizen:** `swarm/handoffs/ui-explorer-finance-*.md` (2 Dateien)
@@ -98,10 +98,11 @@
 - **Test-Plan:** `specs/finance.md`
 - **Tests:** `tests/e2e/finance.spec.ts`
 
-***REMOVED******REMOVED*** Referenzen
+## Referenzen
 
 - **FiBU Capability Model:** User-Query (Lastenheft)
 - **Matrix:** `gap/matrix.csv`
 - **GAP-Liste:** `gap/gaps.md`
 - **Mission-Report:** `swarm/MISSION-REPORT.md`
+
 

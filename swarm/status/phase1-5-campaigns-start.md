@@ -1,21 +1,21 @@
-***REMOVED*** Phase 1.5 - Kampagnenmanagement - Start
+# Phase 1.5 - Kampagnenmanagement - Start
 
 **Datum:** 2025-01-27  
 **Status:** 🚀 In Progress  
 **Priorität:** 🟡 Mittel  
 **Capability:** MKT-CAM-01
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 Phase 1.4 (Segmente & Zielgruppen) ist vollständig abgeschlossen ✅
 
 Jetzt beginnt **Phase 1.5: Kampagnenmanagement**
 
-***REMOVED******REMOVED******REMOVED*** Plan erstellt
+### Plan erstellt
 - ✅ Detaillierter Implementierungsplan: `swarm/missions/phase1-5-campaign-management.md`
 - ✅ TODOs erstellt
 
-***REMOVED******REMOVED******REMOVED*** Backend-Models
+### Backend-Models
 - ✅ Campaign Models erweitert:
   - `Campaign` Entity
   - `CampaignTemplate` Entity
@@ -24,7 +24,7 @@ Jetzt beginnt **Phase 1.5: Kampagnenmanagement**
   - `CampaignEvent` Entity (für Tracking)
   - `CampaignPerformance` Entity
 
-***REMOVED******REMOVED******REMOVED*** Nächste Schritte
+### Nächste Schritte
 - [ ] Alembic Migration für Campaign-Tabellen
 - [ ] Pydantic Schemas für Campaigns
 - [ ] API Endpoints implementieren
@@ -37,3 +37,4 @@ Jetzt beginnt **Phase 1.5: Kampagnenmanagement**
 ---
 
 **Bereit für Implementierung!**
+

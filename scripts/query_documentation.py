@@ -9,7 +9,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from langchain_openai import OpenAIEmbeddings
 
-***REMOVED*** MongoDB Verbindung
+# MongoDB Verbindung
 MONGODB_URI = os.environ.get("MONGODB_URI", "mongodb://localhost:27017")
 DB_NAME = "valeo_neuroerp"
 COLLECTION_NAME = "documentation"
@@ -23,10 +23,10 @@ class DocumentationRetriever:
 
     def search_similar_chunks(self, query: str, n_results: int = 5) -> List[Dict[str, Any]]:
         """Sucht ähnliche Dokumentchunks basierend auf einer Anfrage."""
-        ***REMOVED*** Query-Embedding erstellen
+        # Query-Embedding erstellen
         query_embedding = self.embeddings.embed_query(query)
         
-        ***REMOVED*** Ähnliche Chunks finden
+        # Ähnliche Chunks finden
         similar_chunks = []
         for doc in self.collection.find():
             for chunk in doc.get("chunks", []):
@@ -43,14 +43,14 @@ class DocumentationRetriever:
                         "file_path": doc.get("file_path", "")
                     })
         
-        ***REMOVED*** Nach Ähnlichkeit sortieren und Top-N zurückgeben
+        # Nach Ähnlichkeit sortieren und Top-N zurückgeben
         similar_chunks.sort(key=lambda x: x["similarity"], reverse=True)
         return similar_chunks[:n_results]
 
     def text_search(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
         """Führt eine Textsuche in den Dokumenten durch."""
         try:
-            ***REMOVED*** Suche in allen Feldern
+            # Suche in allen Feldern
             results = list(self.collection.find(
                 {
                     "$or": [
@@ -63,20 +63,20 @@ class DocumentationRetriever:
                 }
             ).limit(limit))
             
-            ***REMOVED*** Füge Relevanz-Score hinzu
+            # Füge Relevanz-Score hinzu
             for doc in results:
                 score = 0
-                ***REMOVED*** Score für Titel
+                # Score für Titel
                 if "metadata" in doc and "title" in doc["metadata"]:
                     title = doc["metadata"]["title"]
                     score += title.lower().count(query.lower()) * 2
                 
-                ***REMOVED*** Score für Inhalt
+                # Score für Inhalt
                 if "content" in doc:
                     content = doc["content"]
                     score += content.lower().count(query.lower())
                 
-                ***REMOVED*** Score für Abschnitte
+                # Score für Abschnitte
                 if "sections" in doc:
                     for section in doc["sections"]:
                         if "title" in section:
@@ -86,7 +86,7 @@ class DocumentationRetriever:
                 
                 doc["score"] = score
             
-            ***REMOVED*** Sortiere nach Score
+            # Sortiere nach Score
             results.sort(key=lambda x: x.get("score", 0), reverse=True)
             return results
             
@@ -99,13 +99,13 @@ class DocumentationRetriever:
         try:
             query_embedding = self.embeddings.embed_query(query)
             
-            ***REMOVED*** Hole alle Dokumente
+            # Hole alle Dokumente
             documents = list(self.collection.find())
             
-            ***REMOVED*** Berechne Ähnlichkeiten mit Kontext
+            # Berechne Ähnlichkeiten mit Kontext
             similarities = []
             for doc in documents:
-                ***REMOVED*** Erstelle Hierarchie-Map für schnellen Zugriff
+                # Erstelle Hierarchie-Map für schnellen Zugriff
                 section_map = {
                     section.get("title", ""): {
                         "content": section.get("content", ""),
@@ -115,20 +115,20 @@ class DocumentationRetriever:
                     for section in doc.get("sections", [])
                 }
                 
-                ***REMOVED*** Berechne Ähnlichkeit für jeden Abschnitt mit Kontext
+                # Berechne Ähnlichkeit für jeden Abschnitt mit Kontext
                 for section in doc.get("sections", []):
                     if "embedding" in section:
-                        ***REMOVED*** Basis-Ähnlichkeit
+                        # Basis-Ähnlichkeit
                         base_similarity = cosine_similarity(
                             [query_embedding],
                             [section["embedding"]]
                         )[0][0]
                         
-                        ***REMOVED*** Kontext-Ähnlichkeit (Parent-Abschnitte)
+                        # Kontext-Ähnlichkeit (Parent-Abschnitte)
                         context_similarity = 0.0
                         parent_title = section.get("parent")
                         depth = 0
-                        while parent_title and depth < 3:  ***REMOVED*** Maximal 3 Ebenen nach oben
+                        while parent_title and depth < 3:  # Maximal 3 Ebenen nach oben
                             if parent_title in section_map:
                                 parent_section = section_map[parent_title]
                                 if "embedding" in parent_section:
@@ -136,12 +136,12 @@ class DocumentationRetriever:
                                         [query_embedding],
                                         [parent_section["embedding"]]
                                     )[0][0]
-                                    ***REMOVED*** Gewichtung nimmt mit Tiefe ab
+                                    # Gewichtung nimmt mit Tiefe ab
                                     context_similarity += parent_sim * (0.5 ** (depth + 1))
                                 parent_title = parent_section.get("parent")
                             depth += 1
                         
-                        ***REMOVED*** Kombinierte Ähnlichkeit (70% Basis + 30% Kontext)
+                        # Kombinierte Ähnlichkeit (70% Basis + 30% Kontext)
                         final_similarity = 0.7 * base_similarity + 0.3 * context_similarity
                         
                         result = {
@@ -154,7 +154,7 @@ class DocumentationRetriever:
                             "context_path": []
                         }
                         
-                        ***REMOVED*** Füge Pfad zum Abschnitt hinzu
+                        # Füge Pfad zum Abschnitt hinzu
                         current_title = section.get("title")
                         while current_title:
                             result["context_path"].insert(0, current_title)
@@ -162,10 +162,10 @@ class DocumentationRetriever:
                         
                         similarities.append((result, final_similarity))
             
-            ***REMOVED*** Sortiere nach Ähnlichkeit
+            # Sortiere nach Ähnlichkeit
             similarities.sort(key=lambda x: x[1], reverse=True)
             
-            ***REMOVED*** Gib die Top-N Ergebnisse zurück
+            # Gib die Top-N Ergebnisse zurück
             return [doc for doc, _ in similarities[:limit]]
             
         except Exception as e:
@@ -175,12 +175,12 @@ class DocumentationRetriever:
     def search_sections(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
         """Sucht in einzelnen Abschnitten der Dokumente."""
         try:
-            ***REMOVED*** Hole alle Dokumente
+            # Hole alle Dokumente
             documents = list(self.collection.find())
             results = []
             
             for doc in documents:
-                ***REMOVED*** Durchsuche jeden Abschnitt
+                # Durchsuche jeden Abschnitt
                 for section in doc.get("sections", []):
                     if query.lower() in section.get("title", "").lower() or query.lower() in section.get("content", "").lower():
                         result = {
@@ -189,13 +189,13 @@ class DocumentationRetriever:
                             "file_path": doc.get("file_path", ""),
                             "section": section,
                             "score": (
-                                section.get("title", "").lower().count(query.lower()) * 2 +  ***REMOVED*** Titel zählt doppelt
+                                section.get("title", "").lower().count(query.lower()) * 2 +  # Titel zählt doppelt
                                 section.get("content", "").lower().count(query.lower())
                             )
                         }
                         results.append(result)
             
-            ***REMOVED*** Sortiere nach Score
+            # Sortiere nach Score
             results.sort(key=lambda x: x["score"], reverse=True)
             return results[:limit]
             
@@ -221,7 +221,7 @@ class DocumentationRetriever:
 def main():
     retriever = DocumentationRetriever()
     
-    ***REMOVED*** Beispielsuchen
+    # Beispielsuchen
     print("\nTextsuche nach 'Compliance':")
     results = retriever.text_search("Compliance")
     for doc in results:

@@ -1,7 +1,7 @@
-***REMOVED*** ============================================================================
-***REMOVED*** VALEO-NeuroERP - Setup Service Migrations
-***REMOVED*** Kopiert Entrypoint-Scripts zu allen CRM-Services
-***REMOVED*** ============================================================================
+# ============================================================================
+# VALEO-NeuroERP - Setup Service Migrations
+# Kopiert Entrypoint-Scripts zu allen CRM-Services
+# ============================================================================
 
 $ErrorActionPreference = "Stop"
 
@@ -9,7 +9,7 @@ Write-Host "🔧 VALEO-NeuroERP - Service Migration Setup" -ForegroundColor Cyan
 Write-Host "===========================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Services mit Alembic-Migrationen
+# Services mit Alembic-Migrationen
 $Services = @(
     @{ Name = "crm-core"; Port = 5600 }
     @{ Name = "crm-sales"; Port = 5700 }
@@ -47,14 +47,14 @@ foreach ($Service in $Services) {
         continue
     }
     
-    ***REMOVED*** Kopiere Entrypoint-Script (mit Service-spezifischen Anpassungen)
+    # Kopiere Entrypoint-Script (mit Service-spezifischen Anpassungen)
     $CustomContent = $TemplateContent -replace 'SERVICE_PORT:-5600', "SERVICE_PORT:-$($Service.Port)"
     $CustomContent = $CustomContent -replace 'SERVICE_NAME:-crm-service', "SERVICE_NAME:-$($Service.Name)"
     
     Set-Content -Path $EntrypointPath -Value $CustomContent -NoNewline
     Write-Host "   ✅ Entrypoint-Script erstellt" -ForegroundColor Green
     
-    ***REMOVED*** Prüfe und aktualisiere Dockerfile
+    # Prüfe und aktualisiere Dockerfile
     if (Test-Path $DockerfilePath) {
         $DockerfileContent = Get-Content $DockerfilePath -Raw
         
@@ -79,4 +79,5 @@ Write-Host "Nächste Schritte:" -ForegroundColor Yellow
 Write-Host "1. Dockerfiles anpassen (falls nötig)" -ForegroundColor DarkGray
 Write-Host "2. Container neu bauen: docker-compose build" -ForegroundColor DarkGray
 Write-Host "3. Container starten: docker-compose up -d" -ForegroundColor DarkGray
+
 

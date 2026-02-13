@@ -10,7 +10,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision = "20251116_01"
 down_revision = None
 branch_labels = None
@@ -18,13 +18,13 @@ depends_on = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Create enum type for EPCIS event
+    # Create enum type for EPCIS event
     epcis_enum = postgresql.ENUM(
         "ObjectEvent", "AggregationEvent", "TransformationEvent", "TransactionEvent", name="epcis_event_type"
     )
     epcis_enum.create(op.get_bind(), checkfirst=True)
 
-    ***REMOVED*** Create table
+    # Create table
     op.create_table(
         "inventory_epcis_events",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
@@ -39,7 +39,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(["lot_id"], ["inventory_lots.id"]),
     )
-    ***REMOVED*** Indexes
+    # Indexes
     op.create_index("ix_epcis_event_time", "inventory_epcis_events", ["event_time"])
     op.create_index("ix_epcis_biz_step", "inventory_epcis_events", ["biz_step"])
     op.create_index("ix_epcis_sku", "inventory_epcis_events", ["sku"])
@@ -50,11 +50,12 @@ def downgrade() -> None:
     op.drop_index("ix_epcis_biz_step", table_name="inventory_epcis_events")
     op.drop_index("ix_epcis_event_time", table_name="inventory_epcis_events")
     op.drop_table("inventory_epcis_events")
-    ***REMOVED*** Drop enum
+    # Drop enum
     epcis_enum = postgresql.ENUM(
         "ObjectEvent", "AggregationEvent", "TransformationEvent", "TransactionEvent", name="epcis_event_type"
     )
     epcis_enum.drop(op.get_bind(), checkfirst=True)
+
 
 
 

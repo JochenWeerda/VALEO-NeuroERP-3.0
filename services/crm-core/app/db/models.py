@@ -27,7 +27,7 @@ class CustomerType(str, Enum):
     PERSON = "person"
 
 
-enum_values = lambda enum_cls: [member.value for member in enum_cls]  ***REMOVED*** noqa: E731
+enum_values = lambda enum_cls: [member.value for member in enum_cls]  # noqa: E731
 
 
 class Customer(Base):
@@ -145,3 +145,4 @@ class FarmProfile(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     customer: Mapped[Customer | None] = relationship("Customer")
+

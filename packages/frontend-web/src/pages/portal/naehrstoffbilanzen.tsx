@@ -1,14 +1,21 @@
 /**
- * Kundenportal - Nährstoffbilanzen
+ * Kundenportal - NÃ¤hrstoffbilanzen
  * 
- * Jahresübersichten der Nährstoffbilanzen zum Download als PDF
+ * JahresÃ¼bersichten der NÃ¤hrstoffbilanzen zum Download als PDF
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import {
+  downloadSalesDeliverySustainabilityCsv,
+  downloadSalesDeliverySustainabilityPdf,
+  usePortalNaehrstoffbilanzen,
+} from '@/lib/api/portal'
+import { useSustainabilityProviders, useSustainabilityPsm } from '@/lib/api/sustainability'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
 import {
   Select,
   SelectContent,
@@ -38,8 +45,6 @@ import {
   Info,
   CheckCircle2,
   AlertTriangle,
-  FileText,
-  Eye,
 } from 'lucide-react'
 
 interface NaehrstoffBilanz {
@@ -48,7 +53,7 @@ interface NaehrstoffBilanz {
   phosphor: { zugang: number; abgang: number; saldo: number }
   kalium: { zugang: number; abgang: number; saldo: number }
   flaeche: number
-  status: 'abgeschlossen' | 'vorläufig'
+  status: 'abgeschlossen' | 'vorlaeufig'
   dokument: string
 }
 
@@ -64,61 +69,44 @@ interface SchlagBilanz {
   pSaldo: number
 }
 
-const mockBilanzen: NaehrstoffBilanz[] = [
-  {
-    jahr: 2024,
-    stickstoff: { zugang: 185, abgang: 170, saldo: 15 },
-    phosphor: { zugang: 42, abgang: 38, saldo: 4 },
-    kalium: { zugang: 65, abgang: 72, saldo: -7 },
-    flaeche: 32.8,
-    status: 'vorläufig',
-    dokument: 'naehrstoffbilanz-2024.pdf',
-  },
-  {
-    jahr: 2023,
-    stickstoff: { zugang: 178, abgang: 165, saldo: 13 },
-    phosphor: { zugang: 40, abgang: 35, saldo: 5 },
-    kalium: { zugang: 60, abgang: 58, saldo: 2 },
-    flaeche: 32.8,
-    status: 'abgeschlossen',
-    dokument: 'naehrstoffbilanz-2023.pdf',
-  },
-  {
-    jahr: 2022,
-    stickstoff: { zugang: 172, abgang: 158, saldo: 14 },
-    phosphor: { zugang: 38, abgang: 32, saldo: 6 },
-    kalium: { zugang: 55, abgang: 52, saldo: 3 },
-    flaeche: 30.5,
-    status: 'abgeschlossen',
-    dokument: 'naehrstoffbilanz-2022.pdf',
-  },
-]
 
-const mockSchlagBilanzen: SchlagBilanz[] = [
-  { schlag: 'Großer Acker', kultur: 'Winterweizen', flaeche: 12.5, nZugang: 220, nAbgang: 200, nSaldo: 20, pZugang: 45, pAbgang: 40, pSaldo: 5 },
-  { schlag: 'Hinteres Feld', kultur: 'Wintergerste', flaeche: 8.3, nZugang: 180, nAbgang: 175, nSaldo: 5, pZugang: 40, pAbgang: 38, pSaldo: 2 },
-  { schlag: 'Waldstück', kultur: 'Mais', flaeche: 5.2, nZugang: 160, nAbgang: 150, nSaldo: 10, pZugang: 42, pAbgang: 35, pSaldo: 7 },
-  { schlag: 'Wiese am Bach', kultur: 'Grünland', flaeche: 6.8, nZugang: 120, nAbgang: 125, nSaldo: -5, pZugang: 35, pAbgang: 38, pSaldo: -3 },
-]
 
 // Gesetzliche Grenzwerte (kg N/ha im 3-Jahres-Durchschnitt)
 const N_GRENZWERT = 50
 const P_GRENZWERT = 10
 
 export default function PortalNaehrstoffbilanzen() {
-  const [loading, setLoading] = useState(true)
-  const [bilanzen, setBilanzen] = useState<NaehrstoffBilanz[]>([])
-  const [schlagBilanzen, setSchlagBilanzen] = useState<SchlagBilanz[]>([])
-  const [selectedJahr, setSelectedJahr] = useState<string>('2024')
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setBilanzen(mockBilanzen)
-      setSchlagBilanzen(mockSchlagBilanzen)
-      setLoading(false)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [])
+  const [selectedJahr, setSelectedJahr] = useState<string>(String(new Date().getFullYear()))
+  const [psmInput, setPsmInput] = useState('')
+  const [psmLookup, setPsmLookup] = useState<string | null>(null)
+  const [exporting, setExporting] = useState<'csv' | 'pdf' | null>(null)
+  const [exportError, setExportError] = useState<string | null>(null)
+  const { data: portalBilanzen = [], isLoading, isError, error, refetch } = usePortalNaehrstoffbilanzen()
+  const { data: providers } = useSustainabilityProviders()
+  const { data: psmResult, isFetching: isPsmLoading, isError: isPsmError, error: psmError } = useSustainabilityPsm(psmLookup)
+  const currentYear = new Date().getFullYear()
+  const bilanzen: NaehrstoffBilanz[] = portalBilanzen.length > 0
+    ? [{
+      jahr: currentYear,
+      stickstoff: { zugang: 0, abgang: 0, saldo: Number((portalBilanzen.reduce((s, b) => s + b.n_saldo, 0) / portalBilanzen.length).toFixed(1)) },
+      phosphor: { zugang: 0, abgang: 0, saldo: Number((portalBilanzen.reduce((s, b) => s + b.p_saldo, 0) / portalBilanzen.length).toFixed(1)) },
+      kalium: { zugang: 0, abgang: 0, saldo: Number((portalBilanzen.reduce((s, b) => s + b.k_saldo, 0) / portalBilanzen.length).toFixed(1)) },
+      flaeche: 0,
+      status: 'vorlaeufig',
+      dokument: `naehrstoffbilanz-${currentYear}.pdf`,
+    }]
+    : []
+  const schlagBilanzen: SchlagBilanz[] = portalBilanzen.map((b) => ({
+    schlag: b.schlag,
+    kultur: b.kultur,
+    flaeche: 0,
+    nZugang: 0,
+    nAbgang: 0,
+    nSaldo: b.n_saldo,
+    pZugang: 0,
+    pAbgang: 0,
+    pSaldo: b.p_saldo,
+  }))
 
   const currentBilanz = bilanzen.find(b => b.jahr.toString() === selectedJahr)
 
@@ -139,8 +127,32 @@ export default function PortalNaehrstoffbilanzen() {
     return <Minus className="h-4 w-4" />
   }
 
-  if (loading) {
+  const selectedYearNumber = Number(selectedJahr) || currentYear
+
+  const onDownload = async (format: 'csv' | 'pdf', year?: number) => {
+    setExportError(null)
+    setExporting(format)
+    const targetYear = year ?? selectedYearNumber
+    try {
+      if (format === 'csv') {
+        await downloadSalesDeliverySustainabilityCsv(targetYear)
+      } else {
+        await downloadSalesDeliverySustainabilityPdf(targetYear)
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Export fehlgeschlagen'
+      setExportError(message)
+    } finally {
+      setExporting(null)
+    }
+  }
+
+  if (isLoading) {
     return <NaehrstoffbilanzenSkeleton />
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
   return (
@@ -148,12 +160,12 @@ export default function PortalNaehrstoffbilanzen() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Nährstoffbilanzen</h1>
-          <p className="text-muted-foreground">Jahresübersichten gemäß Düngeverordnung</p>
+          <h1 className="text-2xl font-bold">NÃ¤hrstoffbilanzen</h1>
+          <p className="text-muted-foreground">JahresÃ¼bersichten gemÃ¤ÃŸ DÃ¼ngeverordnung</p>
         </div>
         <Select value={selectedJahr} onValueChange={setSelectedJahr}>
           <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Jahr wählen" />
+            <SelectValue placeholder="Jahr wÃ¤hlen" />
           </SelectTrigger>
           <SelectContent>
             {bilanzen.map((b) => (
@@ -165,14 +177,75 @@ export default function PortalNaehrstoffbilanzen() {
         </Select>
       </div>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Runtime Nachhaltigkeitsquellen</CardTitle>
+          <CardDescription>PSM live via BVL, CO₂ via Climatiq (wenn konfiguriert), Nährstoffdaten via FAOSTAT</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {exportError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Export fehlgeschlagen</AlertTitle>
+              <AlertDescription>{exportError}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant={providers?.providers.bvl_psm.configured ? 'default' : 'destructive'}>
+              BVL {providers?.providers.bvl_psm.configured ? 'aktiv' : 'inaktiv'}
+            </Badge>
+            <Badge variant={providers?.providers.climatiq.configured ? 'default' : 'secondary'}>
+              Climatiq {providers?.providers.climatiq.configured ? 'aktiv' : 'nicht konfiguriert'}
+            </Badge>
+            <Badge variant={providers?.providers.faostat.configured ? 'default' : 'destructive'}>
+              FAOSTAT {providers?.providers.faostat.configured ? 'aktiv' : 'inaktiv'}
+            </Badge>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+              placeholder="BVL Zulassungsnummer (z. B. 024567-00)"
+              value={psmInput}
+              onChange={(e) => setPsmInput(e.target.value)}
+            />
+            <Button
+              variant="outline"
+              disabled={!psmInput.trim() || isPsmLoading}
+              onClick={() => setPsmLookup(psmInput.trim())}
+            >
+              {isPsmLoading ? 'Suche läuft...' : 'PSM live prüfen'}
+            </Button>
+          </div>
+
+          {isPsmError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>PSM-Lookup fehlgeschlagen</AlertTitle>
+              <AlertDescription>{(psmError as Error).message}</AlertDescription>
+            </Alert>
+          )}
+
+          {psmResult && (
+            <div className="rounded-lg border p-3 text-sm">
+              <div className="font-medium">{String(psmResult.item.mittelname ?? psmResult.item.kennr ?? psmResult.zulassungsnummer)}</div>
+              <div className="text-muted-foreground">ZNR: {String(psmResult.item.kennr ?? psmResult.zulassungsnummer)}</div>
+              <div className="text-muted-foreground">Wirkstoff/Bezug: {String(psmResult.item.versuchsbez ?? '-')}</div>
+              <div className="text-muted-foreground">Zulassung Ende: {String(psmResult.item.zul_ende ?? '-')}</div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Compliance Alert */}
       {dreiJahresDurchschnittN > N_GRENZWERT || dreiJahresDurchschnittP > P_GRENZWERT ? (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Grenzwertüberschreitung</AlertTitle>
+          <AlertTitle>GrenzwertÃ¼berschreitung</AlertTitle>
           <AlertDescription>
-            Der 3-Jahres-Durchschnitt überschreitet die gesetzlichen Grenzwerte. 
-            Bitte beachten Sie die Düngeverordnung.
+            Der 3-Jahres-Durchschnitt Ã¼berschreitet die gesetzlichen Grenzwerte. 
+            Bitte beachten Sie die DÃ¼ngeverordnung.
           </AlertDescription>
         </Alert>
       ) : (
@@ -233,7 +306,7 @@ export default function PortalNaehrstoffbilanzen() {
                   <BarChart3 className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">3-J. Ø Stickstoff</p>
+                  <p className="text-sm text-muted-foreground">3-J. Ã˜ Stickstoff</p>
                   <p className={`text-2xl font-bold ${getSaldoColor(dreiJahresDurchschnittN, N_GRENZWERT)}`}>
                     {dreiJahresDurchschnittN > 0 ? '+' : ''}{dreiJahresDurchschnittN.toFixed(1)} kg/ha
                   </p>
@@ -254,14 +327,14 @@ export default function PortalNaehrstoffbilanzen() {
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Fläche {selectedJahr}</p>
+                  <p className="text-sm text-muted-foreground">FlÃ¤che {selectedJahr}</p>
                   <p className="text-2xl font-bold">{currentBilanz.flaeche} ha</p>
                 </div>
               </div>
               <Badge 
                 className={`mt-2 ${currentBilanz.status === 'abgeschlossen' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}
               >
-                {currentBilanz.status === 'abgeschlossen' ? 'Abgeschlossen' : 'Vorläufig'}
+                {currentBilanz.status === 'abgeschlossen' ? 'Abgeschlossen' : 'VorlÃ¤ufig'}
               </Badge>
             </CardContent>
           </Card>
@@ -273,19 +346,34 @@ export default function PortalNaehrstoffbilanzen() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Nährstoffbilanz {selectedJahr}</CardTitle>
-              <CardDescription>Detaillierte Übersicht in kg/ha</CardDescription>
+              <CardTitle>NÃ¤hrstoffbilanz {selectedJahr}</CardTitle>
+              <CardDescription>Detaillierte Ãœbersicht in kg/ha</CardDescription>
             </div>
-            <Button className="gap-2">
-              <Download className="h-4 w-4" />
-              PDF herunterladen
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="gap-2"
+                disabled={exporting !== null}
+                onClick={() => { void onDownload('csv') }}
+              >
+                <Download className="h-4 w-4" />
+                {exporting === 'csv' ? 'CSV wird erstellt...' : 'CSV'}
+              </Button>
+              <Button
+                className="gap-2"
+                disabled={exporting !== null}
+                onClick={() => { void onDownload('pdf') }}
+              >
+                <Download className="h-4 w-4" />
+                {exporting === 'pdf' ? 'PDF wird erstellt...' : 'PDF herunterladen'}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nährstoff</TableHead>
+                  <TableHead>NÃ¤hrstoff</TableHead>
                   <TableHead className="text-right">Zugang</TableHead>
                   <TableHead className="text-right">Abgang</TableHead>
                   <TableHead className="text-right">Saldo</TableHead>
@@ -300,19 +388,19 @@ export default function PortalNaehrstoffbilanzen() {
                   <TableCell className={`text-right font-bold ${getSaldoColor(currentBilanz.stickstoff.saldo, N_GRENZWERT)}`}>
                     {currentBilanz.stickstoff.saldo > 0 ? '+' : ''}{currentBilanz.stickstoff.saldo} kg/ha
                   </TableCell>
-                  <TableCell className="text-right">{N_GRENZWERT} kg/ha (3-J.Ø)</TableCell>
+                  <TableCell className="text-right">{N_GRENZWERT} kg/ha (3-J.Ã˜)</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Phosphor (P₂O₅)</TableCell>
+                  <TableCell className="font-medium">Phosphor (Pâ‚‚Oâ‚…)</TableCell>
                   <TableCell className="text-right">{currentBilanz.phosphor.zugang} kg/ha</TableCell>
                   <TableCell className="text-right">{currentBilanz.phosphor.abgang} kg/ha</TableCell>
                   <TableCell className={`text-right font-bold ${getSaldoColor(currentBilanz.phosphor.saldo, P_GRENZWERT)}`}>
                     {currentBilanz.phosphor.saldo > 0 ? '+' : ''}{currentBilanz.phosphor.saldo} kg/ha
                   </TableCell>
-                  <TableCell className="text-right">{P_GRENZWERT} kg/ha (3-J.Ø)</TableCell>
+                  <TableCell className="text-right">{P_GRENZWERT} kg/ha (3-J.Ã˜)</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Kalium (K₂O)</TableCell>
+                  <TableCell className="font-medium">Kalium (Kâ‚‚O)</TableCell>
                   <TableCell className="text-right">{currentBilanz.kalium.zugang} kg/ha</TableCell>
                   <TableCell className="text-right">{currentBilanz.kalium.abgang} kg/ha</TableCell>
                   <TableCell className={`text-right font-bold ${currentBilanz.kalium.saldo < 0 ? 'text-blue-600' : 'text-emerald-600'}`}>
@@ -329,8 +417,8 @@ export default function PortalNaehrstoffbilanzen() {
       {/* Schlagbezogene Bilanz */}
       <Card>
         <CardHeader>
-          <CardTitle>Schlagbezogene Übersicht {selectedJahr}</CardTitle>
-          <CardDescription>Nährstoffsalden je Schlag in kg/ha</CardDescription>
+          <CardTitle>Schlagbezogene Ãœbersicht {selectedJahr}</CardTitle>
+          <CardDescription>NÃ¤hrstoffsalden je Schlag in kg/ha</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -338,7 +426,7 @@ export default function PortalNaehrstoffbilanzen() {
               <TableRow>
                 <TableHead>Schlag</TableHead>
                 <TableHead>Kultur</TableHead>
-                <TableHead className="text-right">Fläche</TableHead>
+                <TableHead className="text-right">FlÃ¤che</TableHead>
                 <TableHead className="text-right">N-Saldo</TableHead>
                 <TableHead className="text-right">P-Saldo</TableHead>
               </TableRow>
@@ -368,7 +456,7 @@ export default function PortalNaehrstoffbilanzen() {
       <Card>
         <CardHeader>
           <CardTitle>Historische Bilanzen</CardTitle>
-          <CardDescription>Alle verfügbaren Jahresbilanzen</CardDescription>
+          <CardDescription>Alle verfÃ¼gbaren Jahresbilanzen</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-3">
@@ -380,7 +468,7 @@ export default function PortalNaehrstoffbilanzen() {
                     <Badge 
                       className={bilanz.status === 'abgeschlossen' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}
                     >
-                      {bilanz.status === 'abgeschlossen' ? 'Abgeschlossen' : 'Vorläufig'}
+                      {bilanz.status === 'abgeschlossen' ? 'Abgeschlossen' : 'VorlÃ¤ufig'}
                     </Badge>
                   </div>
                   <div className="space-y-1 text-sm">
@@ -397,13 +485,22 @@ export default function PortalNaehrstoffbilanzen() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Fläche:</span>
+                      <span className="text-muted-foreground">FlÃ¤che:</span>
                       <span className="font-medium">{bilanz.flaeche} ha</span>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" className="w-full mt-3 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-3 gap-2"
+                    disabled={exporting !== null}
+                    onClick={() => {
+                      setSelectedJahr(String(bilanz.jahr))
+                      void onDownload('pdf', bilanz.jahr)
+                    }}
+                  >
                     <Download className="h-4 w-4" />
-                    PDF
+                    {exporting === 'pdf' ? 'PDF wird erstellt...' : 'PDF'}
                   </Button>
                 </CardContent>
               </Card>
@@ -415,10 +512,10 @@ export default function PortalNaehrstoffbilanzen() {
       {/* Info */}
       <Alert>
         <Info className="h-4 w-4" />
-        <AlertTitle>Hinweis zur Düngeverordnung</AlertTitle>
+        <AlertTitle>Hinweis zur DÃ¼ngeverordnung</AlertTitle>
         <AlertDescription>
-          Die Nährstoffbilanzen werden gemäß DüV erstellt. Der 3-Jahres-Durchschnitt für Stickstoff 
-          darf 50 kg N/ha und für Phosphor 10 kg P₂O₅/ha nicht überschreiten.
+          Die NÃ¤hrstoffbilanzen werden gemÃ¤ÃŸ DÃ¼V erstellt. Der 3-Jahres-Durchschnitt fÃ¼r Stickstoff 
+          darf 50 kg N/ha und fÃ¼r Phosphor 10 kg Pâ‚‚Oâ‚…/ha nicht Ã¼berschreiten.
         </AlertDescription>
       </Alert>
     </div>
@@ -453,4 +550,6 @@ function NaehrstoffbilanzenSkeleton() {
     </div>
   )
 }
+
+
 

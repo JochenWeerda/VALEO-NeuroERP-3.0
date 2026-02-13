@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python
+#!/usr/bin/env python
 """
 Skript zum Aktivieren des VAN-Modus und Speichern der Ergebnisse.
 """
@@ -11,7 +11,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-***REMOVED*** Pfade konfigurieren
+# Pfade konfigurieren
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.append(str(PROJECT_ROOT))
 
@@ -24,17 +24,17 @@ except ImportError:
     print("Stellen Sie sicher, dass Sie sich im Projektverzeichnis befinden.")
     sys.exit(1)
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("activate_van_phase")
 
 async def main():
     """Hauptfunktion zum Aktivieren des VAN-Modus und Speichern der Ergebnisse."""
     
-    ***REMOVED*** Konfiguration laden
+    # Konfiguration laden
     logger.info("VAN-Phase wird aktiviert...")
     
-    ***REMOVED*** MongoDB-Verbindung herstellen
+    # MongoDB-Verbindung herstellen
     try:
         mongodb_uri = os.environ.get("MONGODB_URI", "mongodb://localhost:27017/")
         db_name = os.environ.get("MONGODB_DB", "valeo_neuroerp")
@@ -42,19 +42,19 @@ async def main():
         logger.info(f"Verbindung zu MongoDB wird hergestellt: {mongodb_uri}")
         mongodb = APMMongoDBConnector(mongodb_uri, db_name)
         
-        ***REMOVED*** Projekt-ID festlegen oder aus der Umgebung laden
+        # Projekt-ID festlegen oder aus der Umgebung laden
         project_id = os.environ.get("PROJECT_ID", "valero_neuroerp_project")
         
-        ***REMOVED*** VAN-Modus initialisieren
+        # VAN-Modus initialisieren
         logger.info(f"VAN-Modus wird für Projekt {project_id} initialisiert...")
         van_mode = VANMode(mongodb, project_id)
         
-        ***REMOVED*** RAG-Service initialisieren
+        # RAG-Service initialisieren
         logger.info("RAG-Service wird initialisiert...")
         rag_service = RAGService()
         van_mode.set_rag_service(rag_service)
         
-        ***REMOVED*** Anforderungstext aus Datei laden oder als Parameter übergeben
+        # Anforderungstext aus Datei laden oder als Parameter übergeben
         requirement_file = os.environ.get("REQUIREMENT_FILE", "memory-bank/tasks/van_phase/requirements.txt")
         
         if os.path.exists(requirement_file):
@@ -65,16 +65,16 @@ async def main():
             VALERO-NeuroERP ist ein vollständiges ERP-System, das ERP, CRM, Kassenprogramm, FIBU und BI integriert.
             Das System soll auf dem GENXAIS-Framework basieren und alle notwendigen Module für ein modernes ERP-System bereitstellen.
             """
-            ***REMOVED*** Anforderungsdatei erstellen
+            # Anforderungsdatei erstellen
             os.makedirs(os.path.dirname(requirement_file), exist_ok=True)
             with open(requirement_file, "w", encoding="utf-8") as f:
                 f.write(requirement_text)
         
-        ***REMOVED*** VAN-Modus ausführen
+        # VAN-Modus ausführen
         logger.info("VAN-Modus wird ausgeführt...")
         result = await van_mode.run(requirement_text)
         
-        ***REMOVED*** Ergebnisse speichern
+        # Ergebnisse speichern
         results_dir = os.path.join(PROJECT_ROOT, "memory-bank", "tasks", "van_phase", "results")
         os.makedirs(results_dir, exist_ok=True)
         
@@ -86,14 +86,14 @@ async def main():
         
         logger.info(f"VAN-Modus-Ergebnisse wurden in {result_file} gespeichert.")
         
-        ***REMOVED*** Status in current_mode.txt speichern
+        # Status in current_mode.txt speichern
         mode_file = os.path.join(PROJECT_ROOT, "memory-bank", "current_mode.txt")
         with open(mode_file, "w", encoding="utf-8") as f:
             f.write("VAN")
         
         logger.info("VAN-Phase wurde erfolgreich aktiviert.")
         
-        ***REMOVED*** Verbindung schließen
+        # Verbindung schließen
         mongodb.close()
         
         return 0

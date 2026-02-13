@@ -26,7 +26,7 @@ class Translation(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    ***REMOVED*** Relationship
+    # Relationship
     values = relationship(
         "TranslationValue",
         back_populates="translation",
@@ -54,10 +54,10 @@ class TranslationValue(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    ***REMOVED*** Relationship
+    # Relationship
     translation = relationship("Translation", back_populates="values")
     
-    ***REMOVED*** Unique Constraint: Ein Translation-Key kann nur eine Übersetzung pro Sprache haben
+    # Unique Constraint: Ein Translation-Key kann nur eine Übersetzung pro Sprache haben
     __table_args__ = (
         Index('idx_translation_lang', 'translation_id', 'language_code', unique=True),
     )
@@ -66,7 +66,7 @@ class TranslationValue(Base):
         return f"<TranslationValue {self.language_code}: {self.value[:30]}...>"
 
 
-***REMOVED*** Helper-Functions für Seeds
+# Helper-Functions für Seeds
 def create_translation(db, key: str, context: str, values: dict, description: str = None):
     """
     Helper zum Erstellen einer Übersetzung mit Werten
@@ -93,7 +93,7 @@ def create_translation(db, key: str, context: str, values: dict, description: st
             translation_id=translation.id,
             language_code=lang_code,
             value=value,
-            is_approved=True  ***REMOVED*** Seeds sind pre-approved
+            is_approved=True  # Seeds sind pre-approved
         )
         db.add(trans_value)
     

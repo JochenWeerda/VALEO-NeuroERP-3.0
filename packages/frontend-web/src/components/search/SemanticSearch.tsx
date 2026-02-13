@@ -105,7 +105,7 @@ export function SemanticSearch() {
       case 'document':
         return `/dokumente/${id}`
       default:
-        return '***REMOVED***'
+        return '#'
     }
   }
 
@@ -234,4 +234,5 @@ export function SemanticSearch() {
     </Dialog>
   )
 }
+
 

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 VALEO-NeuroERP Mask Builder Generator
 Generiert neue Masken basierend auf Template und Konfiguration
@@ -27,34 +27,34 @@ class MaskBuilderGenerator:
         
         mask = self.template.copy()
         
-        ***REMOVED*** Ersetze Platzhalter
+        # Ersetze Platzhalter
         mask['meta']['name'] = config.get('name', 'unnamed-mask')
         mask['meta']['description'] = config.get('description', '')
         mask['resource'] = config.get('resource', '')
         mask['routing']['basePath'] = config.get('basePath', '')
         mask['routing']['param'] = config.get('param', 'id')
         
-        ***REMOVED*** Füge Felder hinzu
+        # Füge Felder hinzu
         if 'fields' in config:
             mask['views'] = self.create_views(config['fields'])
         
-        ***REMOVED*** Füge Navigation hinzu
+        # Füge Navigation hinzu
         if 'navigation' in config:
             mask['layout']['nav'] = config['navigation']
         
-        ***REMOVED*** Füge Actions hinzu
+        # Füge Actions hinzu
         if 'actions' in config:
             mask['layout']['header']['actions'] = config['actions']
         
-        ***REMOVED*** Füge Validierung hinzu
+        # Füge Validierung hinzu
         if 'validation' in config:
             mask['validation']['rules'] = config['validation']
         
-        ***REMOVED*** Füge AI-Features hinzu
+        # Füge AI-Features hinzu
         if 'aiActions' in config:
             mask['ai']['intentBar']['actions'] = config['aiActions']
         
-        ***REMOVED*** Update Metadata
+        # Update Metadata
         mask['meta']['lastModified'] = datetime.now().isoformat()
         
         return mask
@@ -64,7 +64,7 @@ class MaskBuilderGenerator:
         
         views = []
         
-        ***REMOVED*** Gruppiere Felder nach Tabs
+        # Gruppiere Felder nach Tabs
         tabs = {}
         for field in fields:
             tab_id = field.get('tab', 'general')
@@ -72,7 +72,7 @@ class MaskBuilderGenerator:
                 tabs[tab_id] = []
             tabs[tab_id].append(field)
         
-        ***REMOVED*** Erstelle View pro Tab
+        # Erstelle View pro Tab
         for tab_id, tab_fields in tabs.items():
             view = {
                 "id": tab_id,
@@ -80,7 +80,7 @@ class MaskBuilderGenerator:
                 "sections": []
             }
             
-            ***REMOVED*** Gruppiere Felder nach Sections
+            # Gruppiere Felder nach Sections
             sections = {}
             for field in tab_fields:
                 section_id = field.get('section', 'main')
@@ -88,7 +88,7 @@ class MaskBuilderGenerator:
                     sections[section_id] = []
                 sections[section_id].append(field)
             
-            ***REMOVED*** Erstelle Sections
+            # Erstelle Sections
             for section_id, section_fields in sections.items():
                 section = {
                     "title": self.capitalize(section_id),
@@ -119,7 +119,7 @@ class MaskBuilderGenerator:
             "label": label
         }
         
-        ***REMOVED*** Füge Constraints hinzu
+        # Füge Constraints hinzu
         if field.get('required'):
             field_def['validators'] = ['required']
         
@@ -129,15 +129,15 @@ class MaskBuilderGenerator:
         if field.get('readonly'):
             field_def['readonly'] = True
         
-        ***REMOVED*** Füge Options hinzu
+        # Füge Options hinzu
         if 'options' in field:
             field_def['options'] = field['options']
         
-        ***REMOVED*** Füge AI-Assist hinzu
+        # Füge AI-Assist hinzu
         if 'aiAssist' in field:
             field_def['aiAssist'] = field['aiAssist']
         
-        ***REMOVED*** Füge AI-Validierung hinzu
+        # Füge AI-Validierung hinzu
         if 'aiValidate' in field:
             field_def['aiValidate'] = field['aiValidate']
         
@@ -165,7 +165,7 @@ def main():
     print("VALEO-NeuroERP Mask Builder Generator")
     print("=" * 80)
     
-    ***REMOVED*** Beispiel-Config
+    # Beispiel-Config
     config = {
         "name": "artikelstamm",
         "description": "Artikelstamm für VALEO-NeuroERP",
@@ -212,11 +212,11 @@ def main():
         }
     }
     
-    ***REMOVED*** Generiere Maske
+    # Generiere Maske
     generator = MaskBuilderGenerator()
     mask = generator.generate(config)
     
-    ***REMOVED*** Speichere Maske
+    # Speichere Maske
     output_path = f"generated/{config['name']}.json"
     generator.save(mask, output_path)
     
@@ -232,4 +232,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

@@ -1,4 +1,4 @@
-***REMOVED*** Agent-2: PROC-GR-01 - Wareneingang Frontend implementiert
+# Agent-2: PROC-GR-01 - Wareneingang Frontend implementiert
 
 **Datum:** 2025-01-30  
 **Sprint:** 2  
@@ -7,15 +7,15 @@
 
 ---
 
-***REMOVED******REMOVED*** ✅ Implementierung abgeschlossen
+## ✅ Implementierung abgeschlossen
 
-***REMOVED******REMOVED******REMOVED*** Neue Datei erstellt
+### Neue Datei erstellt
 - ✅ `packages/frontend-web/src/pages/einkauf/wareneingang.tsx`
   - Vollständige Wareneingang-Seite für Procurement
   - Integration mit Backend-API `POST /api/purchase-workflow/orders/:orderId/goods-receipt`
   - i18n vollständig integriert (Deutsch)
 
-***REMOVED******REMOVED******REMOVED*** Features implementiert
+### Features implementiert
 
 1. **PO-Auswahl**
    - Dropdown mit freigegebenen Bestellungen
@@ -43,7 +43,7 @@
    - Error Handling mit Toast-Notifications
    - Erfolgreiche Buchung navigiert zurück zur Bestellungen-Liste
 
-***REMOVED******REMOVED******REMOVED*** i18n-Übersetzungen hinzugefügt
+### i18n-Übersetzungen hinzugefügt
 
 ```json
 {
@@ -76,26 +76,26 @@
 
 ---
 
-***REMOVED******REMOVED*** 🔄 Nächste Schritte
+## 🔄 Nächste Schritte
 
-***REMOVED******REMOVED******REMOVED*** PROC-GR-01: Vervollständigung
+### PROC-GR-01: Vervollständigung
 - ⏳ Backorder-Verwaltung hinzufügen (optional)
 - ⏳ Liste der Wareneingänge erstellen (`wareneingaenge-liste.tsx`)
 - ⏳ Detail-Seite für Wareneingang (`wareneingang-detail.tsx`)
 
-***REMOVED******REMOVED******REMOVED*** PROC-IV-02: 2/3-Wege-Abgleich
+### PROC-IV-02: 2/3-Wege-Abgleich
 - ⏳ `rechnung-abgleich.tsx` erstellen
 - ⏳ Toleranz-Konfiguration UI
 - ⏳ Blockierung bei Abweichungen
 
-***REMOVED******REMOVED******REMOVED*** PROC-PO-02: PO-Änderungen & Storno
+### PROC-PO-02: PO-Änderungen & Storno
 - ⏳ Change-Log/Versionierung (nutze Audit-Trail)
 - ⏳ Storno-Funktionalität
 - ⏳ Genehmigungslogik (nutze Workflow-Engine)
 
 ---
 
-***REMOVED******REMOVED*** ✅ Keine Doppelstrukturen
+## ✅ Keine Doppelstrukturen
 
 **Bestätigt:**
 - ✅ Backend-API existiert bereits - NICHT neu erstellt
@@ -105,4 +105,5 @@
 ---
 
 **Status:** ✅ **PROC-GR-01 TEILWEISE ABGESCHLOSSEN - Backend-Integration funktioniert**
+
 

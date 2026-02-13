@@ -1,7 +1,7 @@
-***REMOVED*** ============================================================================
-***REMOVED*** VALEO-NeuroERP - MASTER MIGRATION SCRIPT (PowerShell)
-***REMOVED*** Führt alle Alembic-Migrationen für alle CRM-Services aus
-***REMOVED*** ============================================================================
+# ============================================================================
+# VALEO-NeuroERP - MASTER MIGRATION SCRIPT (PowerShell)
+# Führt alle Alembic-Migrationen für alle CRM-Services aus
+# ============================================================================
 
 $ErrorActionPreference = "Continue"
 
@@ -9,7 +9,7 @@ Write-Host "🗄️  VALEO-NeuroERP Database Migration Script" -ForegroundColor 
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Liste aller Services mit Alembic-Migrationen
+# Liste aller Services mit Alembic-Migrationen
 $SERVICES = @(
     "crm-core"
     "crm-sales"
@@ -25,7 +25,7 @@ $SERVICES = @(
     "inventory"
 )
 
-***REMOVED*** Zähler
+# Zähler
 $SuccessCount = 0
 $ErrorCount = 0
 $SkippedCount = 0
@@ -39,11 +39,11 @@ foreach ($SERVICE in $SERVICES) {
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Gray
     Write-Host "🔧 Service: $SERVICE" -ForegroundColor White
     
-    ***REMOVED*** Prüfe ob Container läuft
+    # Prüfe ob Container läuft
     $ContainerRunning = docker ps --filter "name=$ContainerName" --format "{{.Names}}" 2>$null
     
     if (-not $ContainerRunning) {
-        ***REMOVED*** Versuche alternativen Container-Namen
+        # Versuche alternativen Container-Namen
         $ContainerName = "valeo-neuro-erp-$($SERVICE.Replace('-', ''))"
         $ContainerRunning = docker ps --filter "name=$ContainerName" --format "{{.Names}}" 2>$null
     }
@@ -51,7 +51,7 @@ foreach ($SERVICE in $SERVICES) {
     if ($ContainerRunning) {
         Write-Host "   📦 Container gefunden: $ContainerRunning" -ForegroundColor Green
         
-        ***REMOVED*** Führe Migration aus
+        # Führe Migration aus
         Write-Host "   ⬆️  Führe Migration aus..." -ForegroundColor Yellow
         
         try {
@@ -89,4 +89,5 @@ if ($ErrorCount -gt 0) {
 } else {
     Write-Host "🎉 Alle Migrationen abgeschlossen!" -ForegroundColor Green
 }
+
 

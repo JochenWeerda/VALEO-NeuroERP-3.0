@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  ***REMOVED*** ===== FINANCE DOMAIN SERVICE =====
+  # ===== FINANCE DOMAIN SERVICE =====
   finance-service:
     build:
       context: .
@@ -34,7 +34,7 @@ services:
     networks:
       - valero-neuroerp
 
-  ***REMOVED*** ===== FINANCE DATABASE =====
+  # ===== FINANCE DATABASE =====
   finance-postgres:
     image: postgres:15-alpine
     container_name: valero-neuroerp-finance-postgres
@@ -56,7 +56,7 @@ services:
     networks:
       - valero-neuroerp
 
-  ***REMOVED*** ===== MESSAGE BROKER (KAFKA) =====
+  # ===== MESSAGE BROKER (KAFKA) =====
   kafka:
     image: confluentinc/cp-kafka:7.4.0
     container_name: valero-neuroerp-kafka
@@ -99,7 +99,7 @@ services:
     networks:
       - valero-neuroerp
 
-  ***REMOVED*** ===== KAFKA UI (Optional) =====
+  # ===== KAFKA UI (Optional) =====
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: valero-neuroerp-kafka-ui
@@ -115,12 +115,12 @@ services:
     networks:
       - valero-neuroerp
 
-***REMOVED*** ===== VOLUMES =====
+# ===== VOLUMES =====
 volumes:
   finance_postgres_data:
     driver: local
 
-***REMOVED*** ===== NETWORKS =====
+# ===== NETWORKS =====
 networks:
   valero-neuroerp:
     external: true

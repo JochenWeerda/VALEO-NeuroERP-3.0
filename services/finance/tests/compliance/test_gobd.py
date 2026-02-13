@@ -12,9 +12,9 @@ from fastapi.testclient import TestClient
 
 os.environ["FINANCE_DATABASE_URL"] = "sqlite:///./gobd_test.db"
 
-from services.finance.app.core.database import Base, engine, SessionLocal  ***REMOVED*** noqa: E402
-from services.finance.app.domains.finance import service as finance_domain_service  ***REMOVED*** noqa: E402
-from services.finance.main import app  ***REMOVED*** noqa: E402
+from services.finance.app.core.database import Base, engine, SessionLocal  # noqa: E402
+from services.finance.app.domains.finance import service as finance_domain_service  # noqa: E402
+from services.finance.main import app  # noqa: E402
 
 client = TestClient(app)
 _DB_FILE = Path("gobd_test.db")
@@ -24,11 +24,11 @@ _DB_FILE = Path("gobd_test.db")
 def reset_finance_db() -> Iterator[None]:
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
-    finance_domain_service._audit_registry.clear()  ***REMOVED*** type: ignore[attr-defined]
+    finance_domain_service._audit_registry.clear()  # type: ignore[attr-defined]
     yield
-    ***REMOVED*** Ensure all sessions are closed and engine disposed before deleting sqlite file on Windows
+    # Ensure all sessions are closed and engine disposed before deleting sqlite file on Windows
     try:
-        SessionLocal.remove()  ***REMOVED*** type: ignore[attr-defined]
+        SessionLocal.remove()  # type: ignore[attr-defined]
     except Exception:
         pass
     try:
@@ -92,7 +92,7 @@ def test_audit_trail_is_hash_chained() -> None:
     second_hash = resp.json()["audit_hash"]
 
     assert first_hash != second_hash
-    audit_trail = finance_domain_service._audit_registry["default"]  ***REMOVED*** type: ignore[index]
+    audit_trail = finance_domain_service._audit_registry["default"]  # type: ignore[index]
     audit_trail.verify_chain()
 
 
@@ -108,4 +108,5 @@ def test_invalid_period_is_rejected() -> None:
     }
     resp = client.post("/api/v1/journal-entries", json=payload)
     assert resp.status_code == 422
+
 

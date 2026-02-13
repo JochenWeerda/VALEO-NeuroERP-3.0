@@ -150,7 +150,7 @@ class InventoryService:
         return await self._serialize_stock_item(stock_item)
 
     async def transfer_stock(self, payload: TransferCreate) -> StockItemRead:
-        ***REMOVED*** Determine source stock item
+        # Determine source stock item
         stock_item = None
         if payload.source_stock_item_id:
             stock_item = await self._session.get(models.StockItem, payload.source_stock_item_id, options=[selectinload(models.StockItem.lot)])
@@ -612,3 +612,4 @@ class InventoryService:
         if self._event_bus:
             await self._event_bus.publish(event_type=event_type, tenant=self._tenant_id, data=payload)
         await emit_workflow_event(event_type=event_type, tenant=self._tenant_id, payload=payload)
+

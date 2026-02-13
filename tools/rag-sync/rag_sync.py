@@ -70,7 +70,7 @@ class MarkdownChunker:
         current_heading = "root"
 
         for line in lines:
-            if line.startswith("***REMOVED***"):
+            if line.startswith("#"):
                 if buffer:
                     chunks.append(
                         {
@@ -80,7 +80,7 @@ class MarkdownChunker:
                     )
                     buffer = []
                     token_count = 0
-                current_heading = line.lstrip("***REMOVED*** ").strip() or "section"
+                current_heading = line.lstrip("# ").strip() or "section"
                 continue
 
             buffer.append(line)
@@ -176,7 +176,7 @@ class RAGSync:
                     else self.embedding_provider.embed(chunk["text"])
                 )
                 record = {
-                    "id": hashlib.md5(f"{chunk['document']}::{chunk['heading']}::{hashlib.md5(chunk['text'].encode('utf-8')).hexdigest()}".encode("utf-8")).hexdigest(),  ***REMOVED*** noqa: S324
+                    "id": hashlib.md5(f"{chunk['document']}::{chunk['heading']}::{hashlib.md5(chunk['text'].encode('utf-8')).hexdigest()}".encode("utf-8")).hexdigest(),  # noqa: S324
                     "text": chunk["text"],
                     "metadata": {
                         "document": chunk["document"],
@@ -237,5 +237,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
 
 

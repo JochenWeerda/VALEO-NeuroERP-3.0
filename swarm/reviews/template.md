@@ -1,11 +1,11 @@
-***REMOVED*** Sprint Review - Template
+# Sprint Review - Template
 
 **Sprint:** Sprint X  
 **Datum:** YYYY-MM-DD  
 **Dauer:** 1 Stunde  
 **Teilnehmer:** [Liste]
 
-***REMOVED******REMOVED*** Sprint-Übersicht
+## Sprint-Übersicht
 
 **Mission:** [Mission-Name]  
 **Ziel:** [Sprint-Ziel]  
@@ -13,27 +13,27 @@
 
 ---
 
-***REMOVED******REMOVED*** Was wurde erreicht?
+## Was wurde erreicht?
 
-***REMOVED******REMOVED******REMOVED*** Abgeschlossene Tasks
+### Abgeschlossene Tasks
 
 - ✅ Task 1.X.Y: [Beschreibung] - Owner: [Name]
 - ✅ Task 1.X.Z: [Beschreibung] - Owner: [Name]
 - ✅ Task 1.X.A: [Beschreibung] - Owner: [Name]
 
-***REMOVED******REMOVED******REMOVED*** In Progress
+### In Progress
 
 - ⏳ Task 1.X.B: [Beschreibung] - Owner: [Name] - Status: [X%]
 
-***REMOVED******REMOVED******REMOVED*** Nicht abgeschlossen
+### Nicht abgeschlossen
 
 - ❌ Task 1.X.C: [Beschreibung] - Owner: [Name] - Grund: [Grund]
 
 ---
 
-***REMOVED******REMOVED*** Demo
+## Demo
 
-***REMOVED******REMOVED******REMOVED*** Feature 1: [Name]
+### Feature 1: [Name]
 
 **Beschreibung:** [Was wurde gebaut?]
 
@@ -51,7 +51,7 @@
 
 ---
 
-***REMOVED******REMOVED******REMOVED*** Feature 2: [Name]
+### Feature 2: [Name]
 
 **Beschreibung:** [Was wurde gebaut?]
 
@@ -67,7 +67,7 @@
 
 ---
 
-***REMOVED******REMOVED*** Metrics
+## Metrics
 
 **Velocity:** X Story Points  
 **Test-Coverage:** X%  
@@ -80,7 +80,7 @@
 
 ---
 
-***REMOVED******REMOVED*** Lessons Learned
+## Lessons Learned
 
 **Was lief gut?**
 - [Positives 1]
@@ -92,7 +92,7 @@
 
 ---
 
-***REMOVED******REMOVED*** Nächste Schritte
+## Nächste Schritte
 
 **Sprint X+1:**
 - [ ] Task 1.X.Y: [Beschreibung] - Owner: [Name]
@@ -105,4 +105,5 @@
 ---
 
 **Nächste Review:** Sprint X+1, YYYY-MM-DD, 14:00 Uhr
+
 

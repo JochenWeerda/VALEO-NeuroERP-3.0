@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/mcp/lookup", tags=["lookup"])
 
-***REMOVED*** Mock-Daten (TODO: durch echte DB-Suche ersetzen)
+# Mock-Daten (TODO: durch echte DB-Suche ersetzen)
 _FAKE_CUSTOMERS = [
     {"id": "CUST-001", "label": "Landhandel Meyer GmbH", "hint": "Emden"},
     {"id": "CUST-002", "label": "AGRAR Nord GmbH", "hint": "Oldenburg"},

@@ -30,36 +30,36 @@ async def create_consent(
     request: Request = None,
 ):
     """Create a new consent record with double opt-in token."""
-    ***REMOVED*** Generate double opt-in token
+    # Generate double opt-in token
     double_opt_in_token = uuid4()
     
-    ***REMOVED*** Get IP address and user agent from request
+    # Get IP address and user agent from request
     ip_address = None
     user_agent = None
     if request:
         ip_address = request.client.host if request.client else None
         user_agent = request.headers.get("user-agent")
     
-    ***REMOVED*** Create consent record
+    # Create consent record
     consent = Consent(
         tenant_id=consent_data.tenant_id,
         contact_id=consent_data.contact_id,
         channel=ConsentChannel(consent_data.channel),
         consent_type=ConsentType(consent_data.consent_type),
-        status=ConsentStatus.PENDING,  ***REMOVED*** Pending until double opt-in confirmed
+        status=ConsentStatus.PENDING,  # Pending until double opt-in confirmed
         source=ConsentSource(consent_data.source),
         double_opt_in_token=double_opt_in_token,
         ip_address=ip_address or consent_data.ip_address,
         user_agent=user_agent or consent_data.user_agent,
         expires_at=consent_data.expires_at,
-        created_by=consent_data.tenant_id,  ***REMOVED*** TODO: Get from auth context
+        created_by=consent_data.tenant_id,  # TODO: Get from auth context
     )
     
     db.add(consent)
     await db.commit()
     await db.refresh(consent)
     
-    ***REMOVED*** Create history entry
+    # Create history entry
     history = ConsentHistory(
         consent_id=consent.id,
         action=ConsentHistoryAction.GRANTED,
@@ -72,7 +72,7 @@ async def create_consent(
     db.add(history)
     await db.commit()
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_consent_created(
         consent_id=consent.id,
@@ -82,8 +82,8 @@ async def create_consent(
         consent_type=consent.consent_type.value,
     )
     
-    ***REMOVED*** TODO: Send double opt-in email
-    ***REMOVED*** await send_double_opt_in_email(consent.contact_id, double_opt_in_token)
+    # TODO: Send double opt-in email
+    # await send_double_opt_in_email(consent.contact_id, double_opt_in_token)
     
     return consent
 
@@ -137,10 +137,10 @@ async def update_consent(
     
     old_status = consent.status
     
-    ***REMOVED*** Update fields
+    # Update fields
     if consent_data.status:
         consent.status = ConsentStatus(consent_data.status)
-        ***REMOVED*** Update timestamps based on status
+        # Update timestamps based on status
         now = datetime.utcnow()
         if consent.status == ConsentStatus.GRANTED:
             consent.granted_at = now
@@ -155,7 +155,7 @@ async def update_consent(
     consent.updated_by = changed_by or "system"
     consent.updated_at = datetime.utcnow()
     
-    ***REMOVED*** Create history entry if status changed
+    # Create history entry if status changed
     if old_status != consent.status:
         history = ConsentHistory(
             consent_id=consent.id,
@@ -170,7 +170,7 @@ async def update_consent(
     await db.commit()
     await db.refresh(consent)
     
-    ***REMOVED*** Publish event if status changed
+    # Publish event if status changed
     if old_status != consent.status:
         event_publisher = get_event_publisher()
         await event_publisher.publish_consent_updated(
@@ -215,34 +215,34 @@ async def confirm_double_opt_in(
     if consent.double_opt_in_token != token:
         raise HTTPException(status_code=400, detail="Invalid token")
     
-    ***REMOVED*** Check if token is expired
+    # Check if token is expired
     if consent.created_at:
         expiry_time = consent.created_at + timedelta(hours=settings.DOUBLE_OPT_IN_TOKEN_EXPIRY_HOURS)
         if datetime.utcnow() > expiry_time:
             raise HTTPException(status_code=400, detail="Token expired")
     
-    ***REMOVED*** Update consent status
+    # Update consent status
     old_status = consent.status
     consent.status = ConsentStatus.GRANTED
     consent.granted_at = datetime.utcnow()
     consent.double_opt_in_confirmed_at = datetime.utcnow()
-    consent.double_opt_in_token = None  ***REMOVED*** Clear token after confirmation
+    consent.double_opt_in_token = None  # Clear token after confirmation
     consent.updated_at = datetime.utcnow()
     
-    ***REMOVED*** Get IP and user agent
+    # Get IP and user agent
     ip_address = None
     user_agent = None
     if request:
         ip_address = request.client.host if request.client else None
         user_agent = request.headers.get("user-agent")
     
-    ***REMOVED*** Create history entry
+    # Create history entry
     history = ConsentHistory(
         consent_id=consent.id,
         action=ConsentHistoryAction.GRANTED,
         old_status=old_status,
         new_status=ConsentStatus.GRANTED,
-        changed_by="contact",  ***REMOVED*** User confirmed themselves
+        changed_by="contact",  # User confirmed themselves
         ip_address=ip_address,
         user_agent=user_agent,
     )
@@ -251,7 +251,7 @@ async def confirm_double_opt_in(
     await db.commit()
     await db.refresh(consent)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_consent_confirmed(
         consent_id=consent.id,
@@ -285,14 +285,14 @@ async def revoke_consent(
     consent.updated_at = datetime.utcnow()
     consent.updated_by = changed_by or "contact"
     
-    ***REMOVED*** Get IP and user agent
+    # Get IP and user agent
     ip_address = None
     user_agent = None
     if request:
         ip_address = request.client.host if request.client else None
         user_agent = request.headers.get("user-agent")
     
-    ***REMOVED*** Create history entry
+    # Create history entry
     history = ConsentHistory(
         consent_id=consent.id,
         action=ConsentHistoryAction.REVOKED,
@@ -308,7 +308,7 @@ async def revoke_consent(
     await db.commit()
     await db.refresh(consent)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_consent_revoked(
         consent_id=consent.id,
@@ -384,7 +384,7 @@ async def check_consent(
             is_expired=False,
         )
     
-    ***REMOVED*** Check if expired
+    # Check if expired
     is_expired = False
     if consent.expires_at and consent.expires_at < datetime.utcnow():
         is_expired = True
@@ -397,4 +397,5 @@ async def check_consent(
         expires_at=consent.expires_at,
         is_expired=is_expired,
     )
+
 

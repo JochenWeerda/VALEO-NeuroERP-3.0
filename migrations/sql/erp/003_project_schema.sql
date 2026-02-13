@@ -1,4 +1,4 @@
-﻿-- =====================================================
+-- =====================================================
 -- PROJEKTMANAGEMENT SCHEMA
 -- =====================================================
 
@@ -14,7 +14,7 @@ CREATE TABLE projekte.projektkategorien (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     kategorie_name VARCHAR(100) NOT NULL,
     beschreibung TEXT,
-    farbe VARCHAR(7) DEFAULT '***REMOVED***1976d2',
+    farbe VARCHAR(7) DEFAULT '#1976d2',
     erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     geaendert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -286,10 +286,10 @@ CREATE INDEX idx_zeiterfassung_datum ON projekte.zeiterfassung(datum);
 CREATE INDEX idx_zeiterfassung_status ON projekte.zeiterfassung(status);
 
 -- =====================================================
--- TRIGGER FÃœR AUTOMATISCHE TIMESTAMP-UPDATES
+-- TRIGGER FÜR AUTOMATISCHE TIMESTAMP-UPDATES
 -- =====================================================
 
--- Trigger-Funktion fÃ¼r geaendert_am
+-- Trigger-Funktion für geaendert_am
 CREATE OR REPLACE FUNCTION projekte.update_geaendert_am()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -298,7 +298,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger fÃ¼r alle Tabellen
+-- Trigger für alle Tabellen
 CREATE TRIGGER trigger_projekte_update_geaendert_am
     BEFORE UPDATE ON projekte.projekte
     FOR EACH ROW EXECUTE FUNCTION projekte.update_geaendert_am();
@@ -312,7 +312,7 @@ CREATE TRIGGER trigger_zeiterfassung_update_geaendert_am
     FOR EACH ROW EXECUTE FUNCTION projekte.update_geaendert_am();
 
 -- =====================================================
--- FUNKTIONEN FÃœR AUTOMATISCHE NUMMERIERUNG
+-- FUNKTIONEN FÜR AUTOMATISCHE NUMMERIERUNG
 -- =====================================================
 
 -- Projektnummern-Generierung
@@ -333,7 +333,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- =====================================================
--- FUNKTIONEN FÃœR BERECHNUNGEN
+-- FUNKTIONEN FÜR BERECHNUNGEN
 -- =====================================================
 
 -- Projektfortschritt berechnen
@@ -387,10 +387,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- =====================================================
--- VIEWS FÃœR REPORTING
+-- VIEWS FÜR REPORTING
 -- =====================================================
 
--- ProjektÃ¼bersicht
+-- Projektübersicht
 CREATE VIEW projekte.projekt_uebersicht AS
 SELECT 
     p.id,
@@ -410,16 +410,16 @@ SELECT
     p.stunden_ist,
     p.fortschritt_prozent,
     CASE 
-        WHEN p.enddatum < CURRENT_DATE AND p.status NOT IN ('abgeschlossen', 'abgebrochen') THEN 'Ã¼berfÃ¤llig'
-        WHEN p.enddatum = CURRENT_DATE THEN 'heute fÃ¤llig'
-        ELSE 'pÃ¼nktlich'
+        WHEN p.enddatum < CURRENT_DATE AND p.status NOT IN ('abgeschlossen', 'abgebrochen') THEN 'überfällig'
+        WHEN p.enddatum = CURRENT_DATE THEN 'heute fällig'
+        ELSE 'pünktlich'
     END as termin_status
 FROM projekte.projekte p
 LEFT JOIN projekte.projektkategorien pk ON p.kategorie_id = pk.id
 LEFT JOIN personal.mitarbeiter m ON p.projektleiter_id = m.id
 LEFT JOIN crm.kunden c ON p.kunde_id = c.id;
 
--- AufgabenÃ¼bersicht
+-- Aufgabenübersicht
 CREATE VIEW projekte.aufgaben_uebersicht AS
 SELECT 
     a.id,
@@ -437,9 +437,9 @@ SELECT
     a.tatsaechliche_stunden,
     a.fortschritt_prozent,
     CASE 
-        WHEN a.enddatum < CURRENT_DATE AND a.status NOT IN ('abgeschlossen', 'abgebrochen') THEN 'Ã¼berfÃ¤llig'
-        WHEN a.enddatum = CURRENT_DATE THEN 'heute fÃ¤llig'
-        ELSE 'pÃ¼nktlich'
+        WHEN a.enddatum < CURRENT_DATE AND a.status NOT IN ('abgeschlossen', 'abgebrochen') THEN 'überfällig'
+        WHEN a.enddatum = CURRENT_DATE THEN 'heute fällig'
+        ELSE 'pünktlich'
     END as termin_status
 FROM projekte.aufgaben a
 LEFT JOIN projekte.projekte p ON a.projekt_id = p.id
@@ -447,7 +447,7 @@ LEFT JOIN projekte.projektphasen pp ON a.phasen_id = pp.id
 LEFT JOIN projekte.aufgabentypen at ON a.aufgabentyp_id = at.id
 LEFT JOIN personal.mitarbeiter m ON a.zugewiesen_an = m.id;
 
--- ZeiterfassungsÃ¼bersicht
+-- Zeiterfassungsübersicht
 CREATE VIEW projekte.zeiterfassung_uebersicht AS
 SELECT 
     z.id,
@@ -473,17 +473,17 @@ LEFT JOIN projekte.aufgaben a ON z.aufgabe_id = a.id;
 
 -- Projektkategorien
 INSERT INTO projekte.projektkategorien (kategorie_name, beschreibung, farbe) VALUES
-('Software-Entwicklung', 'Entwicklung von Software-LÃ¶sungen', '***REMOVED***1976d2'),
-('Beratung', 'Beratungsprojekte und Consulting', '***REMOVED***388e3c'),
-('Schulung', 'Schulungs- und Trainingsprojekte', '***REMOVED***f57c00'),
-('Wartung', 'Wartungs- und Support-Projekte', '***REMOVED***7b1fa2'),
-('Migration', 'Datenmigration und Systemumstellung', '***REMOVED***d32f2f');
+('Software-Entwicklung', 'Entwicklung von Software-Lösungen', '#1976d2'),
+('Beratung', 'Beratungsprojekte und Consulting', '#388e3c'),
+('Schulung', 'Schulungs- und Trainingsprojekte', '#f57c00'),
+('Wartung', 'Wartungs- und Support-Projekte', '#7b1fa2'),
+('Migration', 'Datenmigration und Systemumstellung', '#d32f2f');
 
 -- Aufgabentypen
 INSERT INTO projekte.aufgabentypen (typ_name, beschreibung, standard_dauer_stunden) VALUES
 ('Analyse', 'Anforderungsanalyse und Konzeption', 8.0),
 ('Entwicklung', 'Programmierung und Implementierung', 16.0),
-('Test', 'Testing und QualitÃ¤tssicherung', 4.0),
+('Test', 'Testing und Qualitätssicherung', 4.0),
 ('Dokumentation', 'Erstellung von Dokumentation', 4.0),
 ('Schulung', 'Benutzerschulung und Training', 8.0),
 ('Deployment', 'Installation und Inbetriebnahme', 4.0);
@@ -497,10 +497,10 @@ INSERT INTO projekte.ressourcentypen (typ_name, beschreibung, einheit) VALUES
 
 -- Zeiterfassungskategorien
 INSERT INTO projekte.zeiterfassungskategorien (kategorie_name, beschreibung, ist_ueberstunden) VALUES
-('Normale Arbeitszeit', 'RegulÃ¤re Arbeitszeiten', FALSE),
-('Ãœberstunden', 'Ãœberstunden und Mehrarbeit', TRUE),
-('Reisezeit', 'Zeit fÃ¼r Dienstreisen', FALSE),
-('Schulung', 'Zeit fÃ¼r Schulungen und Weiterbildung', FALSE);
+('Normale Arbeitszeit', 'Reguläre Arbeitszeiten', FALSE),
+('Überstunden', 'Überstunden und Mehrarbeit', TRUE),
+('Reisezeit', 'Zeit für Dienstreisen', FALSE),
+('Schulung', 'Zeit für Schulungen und Weiterbildung', FALSE);
 
 -- Beispiel-Projekte
 INSERT INTO projekte.projekte (projektnummer, projektname, beschreibung, kategorie_id, status, prioritaet, startdatum, enddatum, budget_geplant, stunden_geplant) VALUES
@@ -512,7 +512,7 @@ INSERT INTO projekte.projekte (projektnummer, projektname, beschreibung, kategor
 INSERT INTO projekte.aufgaben (aufgabenname, beschreibung, projekt_id, aufgabentyp_id, status, prioritaet, geschaetzte_stunden) VALUES
 ('Anforderungsanalyse', 'Detaillierte Analyse der Anforderungen', (SELECT id FROM projekte.projekte WHERE projektname = 'ERP-System Modernisierung' LIMIT 1), 1, 'abgeschlossen', 'hoch', 40.0),
 ('Datenbank-Design', 'Entwicklung des neuen Datenbankschemas', (SELECT id FROM projekte.projekte WHERE projektname = 'ERP-System Modernisierung' LIMIT 1), 2, 'in_arbeit', 'hoch', 80.0),
-('Frontend-Entwicklung', 'Entwicklung der BenutzeroberflÃ¤che', (SELECT id FROM projekte.projekte WHERE projektname = 'ERP-System Modernisierung' LIMIT 1), 2, 'offen', 'normal', 120.0);
+('Frontend-Entwicklung', 'Entwicklung der Benutzeroberfläche', (SELECT id FROM projekte.projekte WHERE projektname = 'ERP-System Modernisierung' LIMIT 1), 2, 'offen', 'normal', 120.0);
 
 -- Beispiel-Zeiterfassung
 INSERT INTO projekte.zeiterfassung (mitarbeiter_id, projekt_id, aufgabe_id, datum, startzeit, endzeit, arbeitsstunden, beschreibung) VALUES
@@ -523,10 +523,11 @@ INSERT INTO projekte.zeiterfassung (mitarbeiter_id, projekt_id, aufgabe_id, datu
 -- KOMMENTARE
 -- =====================================================
 
-COMMENT ON SCHEMA projekte IS 'Projektmanagement-Modul fÃ¼r VALEO NeuroERP';
-COMMENT ON TABLE projekte.projekte IS 'Haupttabelle fÃ¼r Projekte und Projektverwaltung';
+COMMENT ON SCHEMA projekte IS 'Projektmanagement-Modul für VALEO NeuroERP';
+COMMENT ON TABLE projekte.projekte IS 'Haupttabelle für Projekte und Projektverwaltung';
 COMMENT ON TABLE projekte.aufgaben IS 'Aufgaben und Arbeitspakete innerhalb von Projekten';
-COMMENT ON TABLE projekte.zeiterfassung IS 'Zeiterfassung fÃ¼r Projekte und Aufgaben';
-COMMENT ON TABLE projekte.projektressourcen IS 'Ressourcen (Personal, Hardware, etc.) fÃ¼r Projekte';
+COMMENT ON TABLE projekte.zeiterfassung IS 'Zeiterfassung für Projekte und Aufgaben';
+COMMENT ON TABLE projekte.projektressourcen IS 'Ressourcen (Personal, Hardware, etc.) für Projekte';
 COMMENT ON TABLE projekte.meilensteine IS 'Meilensteine und wichtige Termine in Projekten';
-COMMENT ON TABLE projekte.projektbudgets IS 'Budgetplanung und -verfolgung fÃ¼r Projekte'; 
+COMMENT ON TABLE projekte.projektbudgets IS 'Budgetplanung und -verfolgung für Projekte'; 
+

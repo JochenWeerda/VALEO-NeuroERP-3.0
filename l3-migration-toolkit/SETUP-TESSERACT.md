@@ -1,17 +1,17 @@
-***REMOVED*** Tesseract-OCR Installation (Windows)
+# Tesseract-OCR Installation (Windows)
 
 Tesseract ist erforderlich für die automatische Feldextraktion aus L3-Screenshots.
 
-***REMOVED******REMOVED*** 📦 Installation
+## 📦 Installation
 
-***REMOVED******REMOVED******REMOVED*** Option 1: Chocolatey (empfohlen)
+### Option 1: Chocolatey (empfohlen)
 
 **Als Administrator:**
 ```powershell
 choco install tesseract --yes
 ```
 
-***REMOVED******REMOVED******REMOVED*** Option 2: Manueller Download
+### Option 2: Manueller Download
 
 1. **Download:**
    - https://github.com/UB-Mannheim/tesseract/wiki
@@ -33,7 +33,7 @@ choco install tesseract --yes
    )
    ```
 
-***REMOVED******REMOVED*** ✅ Verifikation
+## ✅ Verifikation
 
 ```powershell
 tesseract --version
@@ -46,7 +46,7 @@ tesseract 5.x.x
   ...
 ```
 
-***REMOVED******REMOVED*** 🔧 Python-Integration
+## 🔧 Python-Integration
 
 Nach der Installation:
 
@@ -60,35 +60,35 @@ Oder in `ocr-pipeline.py`:
 python ocr-pipeline.py screenshots/artikelstamm.png --tesseract "C:\Program Files\Tesseract-OCR\tesseract.exe"
 ```
 
-***REMOVED******REMOVED*** 🐛 Troubleshooting
+## 🐛 Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: "tesseract is not recognized"
+### Problem: "tesseract is not recognized"
 
 **Lösung:** PATH-Variable nicht gesetzt
 
 ```powershell
-***REMOVED*** Überprüfen:
+# Überprüfen:
 $env:Path
 
-***REMOVED*** Manuell setzen (temporär):
+# Manuell setzen (temporär):
 $env:Path += ";C:\Program Files\Tesseract-OCR"
 ```
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Language pack not found"
+### Problem: "Language pack not found"
 
 **Lösung:** English-Pack sollte standardmäßig vorhanden sein
 
 ```powershell
-***REMOVED*** Prüfe ob eng.traineddata vorhanden:
+# Prüfe ob eng.traineddata vorhanden:
 dir "C:\Program Files\Tesseract-OCR\tessdata\eng.traineddata"
 
-***REMOVED*** Falls nicht: Download von GitHub
-***REMOVED*** https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata
+# Falls nicht: Download von GitHub
+# https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata
 ```
 
 **Hinweis:** Verwenden Sie NUR `eng.traineddata` - funktioniert auch für deutsche UI-Texte!
 
-***REMOVED******REMOVED*** 📚 Weitere Informationen
+## 📚 Weitere Informationen
 
 - **Dokumentation:** https://tesseract-ocr.github.io/
 - **GitHub:** https://github.com/tesseract-ocr/tesseract
@@ -97,4 +97,5 @@ dir "C:\Program Files\Tesseract-OCR\tessdata\eng.traineddata"
 ---
 
 **Nach der Installation:** Führen Sie `python ocr-pipeline.py screenshots/l3-masks/artikelstamm.png` aus!
+
 

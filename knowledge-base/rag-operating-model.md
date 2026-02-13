@@ -1,12 +1,12 @@
-***REMOVED*** RAG Operating Model für VALEO NeuroERP 3.0
+# RAG Operating Model für VALEO NeuroERP 3.0
 
-***REMOVED******REMOVED*** Ziele
+## Ziele
 
 - **Kontext-Hub** für Entwickler:innen, Produkt und Betrieb, um a.eins-Funktionsparität nachvollziehbar abzubilden.
 - **Adaptive Assistenz**: KI-gestützte Features nutzen kontinuierlich aktualisierte Wissensinhalte für Empfehlungen, Validierungen und Automatisierung.
 - **Governance**: Sicherstellen, dass vertrauliche Informationen kontrolliert versioniert, überprüft und gelöscht werden können.
 
-***REMOVED******REMOVED*** Inhaltsdomänen
+## Inhaltsdomänen
 
 1. **Produkt & Feature Mapping**
    - Vergleichstabellen a.eins ↔ NeuroERP (Module, Prozesse, KPIs).
@@ -20,7 +20,7 @@
 5. **Change-Learnings**
    - Post-Mortems, Feature-Retrospektiven, Lessons Learned.
 
-***REMOVED******REMOVED*** Pipeline-Architektur
+## Pipeline-Architektur
 
 ```mermaid
 flowchart LR
@@ -43,7 +43,7 @@ flowchart LR
 - **API**: Einheitliche Retrieval-Schnittstelle mit Re-Ranking und Prompt Guardrails.
 - **Konsumenten**: IDE-Erweiterung, ChatOps, Automations-Agents, QA-Assistent.
 
-***REMOVED******REMOVED*** Betriebsmodell
+## Betriebsmodell
 
 - **Kurationsprozess**
   - Contributors erstellen/aktualisieren Inhalte via Pull Requests.
@@ -59,7 +59,7 @@ flowchart LR
   - Re-Ranking Tests, Antwortqualität-Metriken (Precision@K, Deflection Rate).
   - Feedback aus Clients fließt zurück (Thumbs Up/Down, Missing Context).
 
-***REMOVED******REMOVED*** Implementierungsschritte
+## Implementierungsschritte
 
 1. **Content-Audit**: Inventarisierung vorhandener Dokumente (docs/, ADRs, Runbooks, Compliance).
 2. **Schema & Konventionen**: Definieren von Metadaten, Tags, Ordnerstruktur (`knowledge-base/<domäne>/<thema>.md`).
@@ -68,16 +68,17 @@ flowchart LR
 5. **Dev-Erlebnis**: Integration in IDE über Cursor/VS Code Plugin, Bereitstellung von Prompt-Vorlagen.
 6. **Monitoring**: KPI-Dashboard (z. B. Superset) für Nutzungs- und Qualitätsmetriken, Alerts bei Drift.
 
-***REMOVED******REMOVED*** Governance & Compliance
+## Governance & Compliance
 
 - **Retention**: Zeitliche Aufbewahrungsregeln, automatische Depublizierung veralteter oder sensibler Inhalte.
 - **Legal Review**: Spezielle Freigabeprozesse für rechtlich relevante Dokumente (InfraStat, Zoll).
 - **Ethik & Bias**: Regelmäßige Evaluation von Antworten, Bias-Tests, Rotlisten für unerwünschte Empfehlungen.
 - **Audit-Trails**: Vollständige Protokollierung von Zugriffen und Änderungen; Integration in SIEM.
 
-***REMOVED******REMOVED*** Weiterer Ausbau
+## Weiterer Ausbau
 
 - Automatisierte Synchronisation mit Issue-Tracker (Jira/GitHub) für kontextbezogene Antworten.
 - Personalisierte Retrieval-Profile (z. B. Rolle, Squad) zur besseren Relevanzsteuerung.
 - Nutzung des RAG-Kontexts für generative Tests, Migrationsscripte und Change Simulationen.
+
 

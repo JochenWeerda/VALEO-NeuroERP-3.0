@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     DEFAULT_CURRENCY: str = "EUR"
     JOURNAL_APPROVAL_THRESHOLD_EUR: float = 1000.0
 
-    ***REMOVED*** Während Phase 0 bündeln alle FiBu-Endpunkte der neue Python-Service
+    # Während Phase 0 bündeln alle FiBu-Endpunkte der neue Python-Service
     FIBU_CORE_URL: AnyHttpUrl = "http://finance-service:8003"
     FIBU_MASTER_DATA_URL: AnyHttpUrl = "http://finance-service:8003"
     FIBU_OP_URL: AnyHttpUrl = "http://finance-service:8003"
@@ -52,4 +52,5 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
+
 

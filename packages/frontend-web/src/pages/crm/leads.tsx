@@ -80,7 +80,7 @@ export default function LeadsPage(): JSX.Element {
 
   if (error) {
     return (
-      <div className="space-y-4 p-6">
+      <div className="space-y-4 p-3 md:p-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600">{t('crud.messages.loadError')}</h1>
           <p className="text-muted-foreground">
@@ -92,7 +92,7 @@ export default function LeadsPage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{getListTitle(t, entityTypeLabel)}</h1>

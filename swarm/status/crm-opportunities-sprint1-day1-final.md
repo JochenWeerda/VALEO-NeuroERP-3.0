@@ -1,19 +1,19 @@
-***REMOVED*** Sprint 1, Day 1 - Final Status
+# Sprint 1, Day 1 - Final Status
 
 **Datum:** 2025-01-27  
 **Sprint:** Sprint 1 (Week 1-2)  
 **Mission:** Phase 1.1 - Opportunities / Deals
 
-***REMOVED******REMOVED*** ✅ Vollständig Abgeschlossen
+## ✅ Vollständig Abgeschlossen
 
-***REMOVED******REMOVED******REMOVED*** Backend (100%)
+### Backend (100%)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Datenmodell ✅
+#### 1. Datenmodell ✅
 - ✅ Opportunity Model erweitert (number, currency, expected_revenue, source, campaign_id, owner_id, notes, created_by, updated_by)
 - ✅ OpportunityStage Entity (Lookup-Tabelle mit default probability, required fields)
 - ✅ OpportunityHistory Entity (Audit-Trail)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2. Migration ✅
+#### 2. Migration ✅
 - ✅ `002_extend_opportunities.py` erstellt
 - ✅ Neue Felder zu `crm_sales_opportunities` hinzugefügt
 - ✅ `crm_sales_opportunity_stages` Tabelle erstellt
@@ -21,14 +21,14 @@
 - ✅ Seed-Daten für 8 Standard-Stages
 - ✅ Indizes für Performance
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3. Schemas ✅
+#### 3. Schemas ✅
 - ✅ `OpportunityBase`, `OpportunityCreate`, `OpportunityUpdate`, `Opportunity` erweitert
 - ✅ `OpportunityStage*` Schemas (Base, Create, Update, Full)
 - ✅ `OpportunityHistory*` Schemas (Base, Create, Full)
 - ✅ `PipelineAggregation` Schema
 - ✅ `ForecastData` Schema
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4. API-Endpoints ✅
+#### 4. API-Endpoints ✅
 - ✅ `POST /opportunities` - Erstellen mit Auto-Number, expected_revenue Berechnung
 - ✅ `GET /opportunities` - Liste mit Pagination & Filtering
 - ✅ `GET /opportunities/{id}` - Detail
@@ -42,7 +42,7 @@
 - ✅ `GET /opportunities/pipeline/aggregation` - Pipeline-Aggregation nach Stage
 - ✅ `GET /opportunities/forecast` - Forecast-Daten nach Periode/Owner/Stage
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 5. Events ✅
+#### 5. Events ✅
 - ✅ `EventPublisher` Service erstellt
 - ✅ `crm.opportunity.created` Event
 - ✅ `crm.opportunity.updated` Event
@@ -52,9 +52,9 @@
 - ✅ `crm.opportunity.deleted` Event
 - ✅ Events in alle API-Endpoints integriert
 
-***REMOVED******REMOVED******REMOVED*** Frontend (In Progress)
+### Frontend (In Progress)
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Opportunities-Liste ✅
+#### 1. Opportunities-Liste ✅
 - ✅ `opportunities-liste.tsx` erstellt
 - ✅ ListReport-Konfiguration mit i18n
 - ✅ Spalten: number, name, customer_id, stage, amount, probability, expected_revenue, expected_close_date, owner_id, status, created_at
@@ -63,9 +63,9 @@
 - ✅ Export-Funktion (CSV)
 - ✅ CRUD-Actions (Create, Edit, Delete)
 
-***REMOVED******REMOVED*** 📋 Nächste Schritte (Sprint 1, Day 2)
+## 📋 Nächste Schritte (Sprint 1, Day 2)
 
-***REMOVED******REMOVED******REMOVED*** Frontend
+### Frontend
 1. **Opportunity-Detail-Seite** (`opportunity-detail.tsx`)
    - Formular mit allen Feldern
    - History-Timeline
@@ -82,12 +82,12 @@
    - Filter nach Owner, Stage, Periode
    - Charts/Visualisierungen
 
-***REMOVED******REMOVED******REMOVED*** Tests
+### Tests
 1. **Unit-Tests** für API-Endpoints
 2. **Integration-Tests** für Event-Publishing
 3. **E2E-Tests** für Frontend-Flows
 
-***REMOVED******REMOVED*** 📊 Fortschritt
+## 📊 Fortschritt
 
 **Sprint 1 (Backend & Datenmodell):**
 - ✅ 100% - Model erweitert
@@ -110,4 +110,5 @@
 ---
 
 **Nächster Update:** Nach Frontend-Detail-Seite
+
 

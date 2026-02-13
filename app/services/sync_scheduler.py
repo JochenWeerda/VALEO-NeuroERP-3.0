@@ -65,7 +65,7 @@ class SyncScheduler:
                             article_groups=config.get('article_groups', ['PSM']),
                             max_items=config.get('max_items', 1000)
                         )
-                        ***REMOVED*** Calculate next run time
+                        # Calculate next run time
                         if schedule.enabled:
                             schedule.next_run = self._calculate_next_run(schedule)
                         self.schedules[name] = schedule
@@ -73,7 +73,7 @@ class SyncScheduler:
             except Exception as e:
                 logger.error(f"Failed to load sync schedules: {e}")
 
-        ***REMOVED*** Create default schedules if none exist
+        # Create default schedules if none exist
         if not self.schedules:
             self._create_default_schedules()
 
@@ -81,25 +81,25 @@ class SyncScheduler:
         """Create default sync schedules"""
         default_schedules = {
             "psm_weekly": {
-                "interval_hours": 168,  ***REMOVED*** Weekly
+                "interval_hours": 168,  # Weekly
                 "enabled": True,
                 "article_groups": ["PSM"],
                 "max_items": 1000
             },
             "psm_monthly": {
-                "interval_hours": 720,  ***REMOVED*** Monthly
+                "interval_hours": 720,  # Monthly
                 "enabled": True,
                 "article_groups": ["PSM"],
                 "max_items": 2000
             },
             "articles_weekend": {
-                "interval_hours": 168,  ***REMOVED*** Weekly on weekends
+                "interval_hours": 168,  # Weekly on weekends
                 "enabled": True,
                 "article_groups": ["DUENGER", "SAATGUT", "BIOSTIMULANZ"],
                 "max_items": 5000
             },
             "prices_nightly": {
-                "interval_hours": 24,  ***REMOVED*** Daily
+                "interval_hours": 24,  # Daily
                 "enabled": True,
                 "article_groups": ["PRICES", "COMPETITOR_PRICES"],
                 "max_items": 10000
@@ -125,7 +125,7 @@ class SyncScheduler:
         now = datetime.now()
 
         if schedule.name == "articles_weekend":
-            ***REMOVED*** Schedule for next Saturday 2:00 AM
+            # Schedule for next Saturday 2:00 AM
             days_until_saturday = (5 - now.weekday()) % 7
             if days_until_saturday == 0 and now.time() >= time(2, 0):
                 days_until_saturday = 7
@@ -133,12 +133,12 @@ class SyncScheduler:
             return next_run.replace(hour=2, minute=0, second=0, microsecond=0)
 
         elif schedule.name == "prices_nightly":
-            ***REMOVED*** Schedule for next day 1:00 AM
+            # Schedule for next day 1:00 AM
             tomorrow = now + timedelta(days=1)
             return tomorrow.replace(hour=1, minute=0, second=0, microsecond=0)
 
         else:
-            ***REMOVED*** Regular interval-based scheduling
+            # Regular interval-based scheduling
             return now + timedelta(hours=schedule.interval_hours)
 
     def save_schedules(self):
@@ -225,7 +225,7 @@ class SyncScheduler:
                 job.errors.append(error)
 
             if status in ['completed', 'failed']:
-                ***REMOVED*** Update schedule last run
+                # Update schedule last run
                 if job.schedule_name in self.schedules:
                     schedule = self.schedules[job.schedule_name]
                     schedule.last_run = job.start_time
@@ -234,7 +234,7 @@ class SyncScheduler:
                         schedule.next_run = self._calculate_next_run(schedule)
                     self.save_schedules()
 
-                ***REMOVED*** Remove completed job
+                # Remove completed job
                 del self.active_jobs[job_id]
 
             logger.info(f"Updated job {job_id}: {status} ({processed_items} items)")
@@ -285,5 +285,5 @@ class SyncScheduler:
         }
 
 
-***REMOVED*** Global scheduler instance
+# Global scheduler instance
 sync_scheduler = SyncScheduler()

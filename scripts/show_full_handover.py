@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Zeigt das vollständige Handover-Dokument aus MongoDB an.
 """
@@ -10,7 +10,7 @@ from pathlib import Path
 from datetime import datetime
 from bson import ObjectId, json_util
 
-***REMOVED*** Pfad zum Projektverzeichnis hinzufügen
+# Pfad zum Projektverzeichnis hinzufügen
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
@@ -22,10 +22,10 @@ def parse_json(data):
 def main():
     """Hauptfunktion zum Anzeigen des vollständigen Handover-Dokuments."""
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         mongodb_connector = APMMongoDBConnector("mongodb://localhost:27017/", "valeo_neuroerp")
         
-        ***REMOVED*** Neuestes Handover-Dokument abrufen
+        # Neuestes Handover-Dokument abrufen
         handovers = mongodb_connector.find_many("handovers", {}, sort=[("timestamp", -1)], limit=1)
         
         if not handovers:
@@ -34,31 +34,31 @@ def main():
         
         handover = handovers[0]
         
-        ***REMOVED*** Vollständiges Dokument ausgeben
+        # Vollständiges Dokument ausgeben
         print("\n" + "="*50)
         print("VOLLSTÄNDIGES HANDOVER-DOKUMENT")
         print("="*50 + "\n")
         
-        ***REMOVED*** Inhalt ausgeben
+        # Inhalt ausgeben
         print("INHALT:")
         print("-"*50)
         print(handover.get('content', 'Kein Inhalt verfügbar'))
         print("-"*50 + "\n")
         
-        ***REMOVED*** Zusammenfassung ausgeben
+        # Zusammenfassung ausgeben
         print("ZUSAMMENFASSUNG:")
         print("-"*50)
         print(handover.get('summary', 'Keine Zusammenfassung verfügbar'))
         print("-"*50 + "\n")
         
-        ***REMOVED*** Vollständiges Dokument als JSON speichern
+        # Vollständiges Dokument als JSON speichern
         output_file = Path(__file__).resolve().parent.parent / "handover_document.json"
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(parse_json(handover), f, indent=2, ensure_ascii=False)
         
         print(f"Vollständiges Dokument als JSON gespeichert in: {output_file}")
         
-        ***REMOVED*** Verbindung schließen
+        # Verbindung schließen
         mongodb_connector.close()
         print("MongoDB-Verbindung geschlossen")
         

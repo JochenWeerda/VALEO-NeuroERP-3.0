@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Analysiere die bereits gefilterte PLZ 26XXX CSV-Datei
 für optimierte Ostfriesland-Lead-Generierung
@@ -18,7 +18,7 @@ def analyze_filtered_ostfriesland_csv():
     print(f"Quelle: {csv_path}")
     print()
     
-    ***REMOVED*** Flächenprämien-Codes (aus vorheriger Analyse)
+    # Flächenprämien-Codes (aus vorheriger Analyse)
     area_premium_codes = {
         'I.1': 'Basis-Direktzahlung',
         'I.2': 'Umverteilungsz. für Nachhaltigkeit', 
@@ -28,7 +28,7 @@ def analyze_filtered_ostfriesland_csv():
         'V.1': 'Agrarumwelt-Klimamaßnahmen',
     }
     
-    ***REMOVED*** Statistiken
+    # Statistiken
     total_rows = 0
     total_amount = 0.0
     area_premium_amount = 0.0
@@ -36,7 +36,7 @@ def analyze_filtered_ostfriesland_csv():
     plz_distribution = defaultdict(int)
     measure_code_stats = defaultdict(lambda: {"count": 0, "total_amount": 0.0})
     
-    ***REMOVED*** Lead-Container (pro Betrieb aggregiert)
+    # Lead-Container (pro Betrieb aggregiert)
     farms = defaultdict(lambda: {
         "name": "",
         "plz": "",
@@ -58,7 +58,7 @@ def analyze_filtered_ostfriesland_csv():
             headers = reader.fieldnames
             print(f"CSV Headers: {len(headers)} Spalten")
             
-            ***REMOVED*** Header-Mapping finden
+            # Header-Mapping finden
             amount_header = None
             name_header = None
             measure_header = None
@@ -79,7 +79,7 @@ def analyze_filtered_ostfriesland_csv():
             for row_num, row in enumerate(reader, 1):
                 total_rows += 1
                 
-                ***REMOVED*** Daten extrahieren
+                # Daten extrahieren
                 plz = row.get('PLZ', '').strip()
                 name = row.get(name_header, '').strip()
                 city = row.get('Gemeinde', '').strip()
@@ -88,7 +88,7 @@ def analyze_filtered_ostfriesland_csv():
                 if not measure_code:
                     measure_code = "LEER"
                 
-                ***REMOVED*** Betrag extrahieren
+                # Betrag extrahieren
                 gap_amount = 0.0
                 amount_field = row.get(amount_header, '').strip()
                 if amount_field:
@@ -98,15 +98,15 @@ def analyze_filtered_ostfriesland_csv():
                     except ValueError:
                         pass
                 
-                ***REMOVED*** PLZ-Verteilung
+                # PLZ-Verteilung
                 if plz:
                     plz_distribution[plz] += 1
                 
-                ***REMOVED*** Measure Code Statistik
+                # Measure Code Statistik
                 measure_code_stats[measure_code]["count"] += 1
                 measure_code_stats[measure_code]["total_amount"] += gap_amount
                 
-                ***REMOVED*** Farm-Aggregation (pro Name+PLZ)
+                # Farm-Aggregation (pro Name+PLZ)
                 farm_key = f"{name}_{plz}"
                 farm = farms[farm_key]
                 
@@ -118,7 +118,7 @@ def analyze_filtered_ostfriesland_csv():
                 farm["total_all_payments"] += gap_amount
                 farm["all_codes"].add(measure_code)
                 
-                ***REMOVED*** Nur Flächenprämien für Betriebsgröße
+                # Nur Flächenprämien für Betriebsgröße
                 if measure_code in area_premium_codes:
                     area_premium_count += 1
                     area_premium_amount += gap_amount
@@ -136,13 +136,13 @@ def analyze_filtered_ostfriesland_csv():
         print(f"FEHLER: {e}")
         return
     
-    ***REMOVED*** Betriebsgrößen-Schätzung
+    # Betriebsgrößen-Schätzung
     for farm in farms.values():
         if farm["total_area_premiums"] > 0:
-            ***REMOVED*** Schätzung: ~300 EUR/ha Direktzahlungen
+            # Schätzung: ~300 EUR/ha Direktzahlungen
             farm["estimated_hectares"] = farm["total_area_premiums"] / 300
             
-            ***REMOVED*** Lead-Scoring
+            # Lead-Scoring
             if farm["total_area_premiums"] >= 100000:
                 farm["lead_score"] = 10
             elif farm["total_area_premiums"] >= 50000:
@@ -154,9 +154,9 @@ def analyze_filtered_ostfriesland_csv():
             else:
                 farm["lead_score"] = 2
         else:
-            farm["lead_score"] = 1  ***REMOVED*** Nur andere Zahlungen
+            farm["lead_score"] = 1  # Nur andere Zahlungen
     
-    ***REMOVED*** Ergebnisse ausgeben
+    # Ergebnisse ausgeben
     print()
     print("ERGEBNISSE DER GEFILTERTEN ANALYSE")
     print("=" * 50)
@@ -168,7 +168,7 @@ def analyze_filtered_ostfriesland_csv():
     print(f"Verschiedene PLZ: {len(plz_distribution)}")
     print()
     
-    ***REMOVED*** PLZ-Verteilung (Top 15)
+    # PLZ-Verteilung (Top 15)
     print("TOP PLZ-BEREICHE:")
     print("-" * 25)
     sorted_plz = sorted(plz_distribution.items(), key=lambda x: x[1], reverse=True)
@@ -177,7 +177,7 @@ def analyze_filtered_ostfriesland_csv():
     
     print()
     
-    ***REMOVED*** Measure Code Statistik (Top 10)
+    # Measure Code Statistik (Top 10)
     print("TOP MEASURE CODES:")
     print("-" * 30)
     sorted_codes = sorted(measure_code_stats.items(), key=lambda x: x[1]["count"], reverse=True)
@@ -188,7 +188,7 @@ def analyze_filtered_ostfriesland_csv():
     
     print()
     
-    ***REMOVED*** Top Leads nach Flächenprämien
+    # Top Leads nach Flächenprämien
     area_farms = [f for f in farms.values() if f["total_area_premiums"] > 0]
     sorted_farms = sorted(area_farms, key=lambda x: x["total_area_premiums"], reverse=True)
     
@@ -203,7 +203,7 @@ def analyze_filtered_ostfriesland_csv():
         print(f"    Lead-Score: {farm['lead_score']}/10 | Codes: {codes_str}")
         print()
     
-    ***REMOVED*** Betriebsgrößen-Verteilung
+    # Betriebsgrößen-Verteilung
     size_categories = {"Großbetrieb (100k+)": 0, "Mittlerer Betrieb (50-100k)": 0, 
                       "Kleinbetrieb (20-50k)": 0, "Kleinstbetrieb (<20k)": 0, "Nur andere Zahlungen": 0}
     
@@ -225,7 +225,7 @@ def analyze_filtered_ostfriesland_csv():
         percentage = count / len(farms) * 100 if len(farms) > 0 else 0
         print(f"{category}: {count:,} ({percentage:.1f}%)")
     
-    ***REMOVED*** JSON Export
+    # JSON Export
     result_data = {
         "timestamp": datetime.now().isoformat(),
         "source_file": csv_path,
@@ -245,7 +245,7 @@ def analyze_filtered_ostfriesland_csv():
             "estimated_hectares": f["estimated_hectares"],
             "lead_score": f["lead_score"],
             "premium_codes": list(f["premium_codes"])
-        } for f in sorted_farms[:50]]  ***REMOVED*** Top 50
+        } for f in sorted_farms[:50]]  # Top 50
     }
     
     with open(output_file, 'w', encoding='utf-8') as f:
@@ -259,4 +259,5 @@ def analyze_filtered_ostfriesland_csv():
 
 if __name__ == "__main__":
     analyze_filtered_ostfriesland_csv()
+
 

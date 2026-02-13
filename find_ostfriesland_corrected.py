@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Korrigierte Ostfriesland-Suche mit richtigen GAP-Betraegen
 """
@@ -16,11 +16,11 @@ def find_ostfriesland_corrected():
     print("Mit korrekten GAP-Betraegen!")
     print()
     
-    ***REMOVED*** Korrekte Header-Namen (aus Debug gefunden)
+    # Korrekte Header-Namen (aus Debug gefunden)
     correct_amount_header = "EU-Betrag (EGFL und ELER) und kofinanzierter Betrag insgesamt fuer diesen Beguenstigten*"
     correct_name_header = "Name des Beguenstigten/Rechtstraegers/Verdands"
     
-    ***REMOVED*** Ergebnis-Container
+    # Ergebnis-Container
     leads_found = []
     plz_stats = {}
     total_scanned = 0
@@ -35,7 +35,7 @@ def find_ostfriesland_corrected():
             headers = reader.fieldnames
             print(f"CSV-Header: {len(headers)} Spalten")
             
-            ***REMOVED*** Pruefe ob korrekte Header vorhanden
+            # Pruefe ob korrekte Header vorhanden
             if correct_amount_header not in headers:
                 print("WARNUNG: Suche nach alternativem Betrag-Header...")
                 for header in headers:
@@ -63,32 +63,32 @@ def find_ostfriesland_corrected():
                 
                 plz = row.get('PLZ', '').strip()
                 
-                ***REMOVED*** Pruefe PLZ-Bereich 26400-26999
+                # Pruefe PLZ-Bereich 26400-26999
                 if plz and len(plz) >= 5:
                     try:
                         plz_num = int(plz)
                         if 26400 <= plz_num <= 26999:
-                            ***REMOVED*** Lead gefunden!
+                            # Lead gefunden!
                             name = row.get(correct_name_header, '').strip()
                             city = row.get('Gemeinde', '').strip()
                             
-                            ***REMOVED*** GAP-Betrag mit korrektem Header
+                            # GAP-Betrag mit korrektem Header
                             gap_amount = 0.0
                             amount_field = row.get(correct_amount_header, '').strip()
                             if amount_field:
                                 try:
-                                    ***REMOVED*** Komma durch Punkt ersetzen fuer float conversion
+                                    # Komma durch Punkt ersetzen fuer float conversion
                                     gap_amount = float(amount_field.replace(',', '.'))
                                     total_gap_amount += gap_amount
                                 except ValueError:
-                                    ***REMOVED*** Falls Conversion fehlschlaegt, 0 verwenden
+                                    # Falls Conversion fehlschlaegt, 0 verwenden
                                     pass
                             
-                            ***REMOVED*** Lead-Daten sammeln
+                            # Lead-Daten sammeln
                             lead = {
                                 "row": row_num,
                                 "plz": plz,
-                                "name": name[:50],  ***REMOVED*** Kuerzen fuer Output
+                                "name": name[:50],  # Kuerzen fuer Output
                                 "city": city,
                                 "gap_amount": gap_amount,
                                 "measure_code": row.get('Code der Massnahme/der Interventionskategorie/des Sektors gemaess Anhang IX ', '').strip()
@@ -96,7 +96,7 @@ def find_ostfriesland_corrected():
                             
                             leads_found.append(lead)
                             
-                            ***REMOVED*** PLZ-Statistik
+                            # PLZ-Statistik
                             if plz not in plz_stats:
                                 plz_stats[plz] = {"count": 0, "total_amount": 0.0, "cities": set(), "top_lead": None}
                             
@@ -105,18 +105,18 @@ def find_ostfriesland_corrected():
                             if city:
                                 plz_stats[plz]["cities"].add(city)
                             
-                            ***REMOVED*** Top Lead pro PLZ tracken
+                            # Top Lead pro PLZ tracken
                             if plz_stats[plz]["top_lead"] is None or gap_amount > plz_stats[plz]["top_lead"]["gap_amount"]:
                                 plz_stats[plz]["top_lead"] = lead.copy()
                             
-                            ***REMOVED*** Erste Treffer mit Betraegen ausgeben
+                            # Erste Treffer mit Betraegen ausgeben
                             if len(leads_found) <= 15:
-                                print(f"LEAD ***REMOVED***{len(leads_found)}: PLZ {plz} - {name[:30]}... | {city} | {gap_amount:,.2f} EUR")
+                                print(f"LEAD #{len(leads_found)}: PLZ {plz} - {name[:30]}... | {city} | {gap_amount:,.2f} EUR")
                     
                     except ValueError:
-                        continue  ***REMOVED*** PLZ nicht numerisch
+                        continue  # PLZ nicht numerisch
                 
-                ***REMOVED*** Progress
+                # Progress
                 if row_num % 300000 == 0:
                     print(f"Zeile {row_num:,}: {len(leads_found)} Leads | {total_gap_amount:,.2f} EUR")
     
@@ -126,7 +126,7 @@ def find_ostfriesland_corrected():
         traceback.print_exc()
         return
     
-    ***REMOVED*** Finale Ergebnisse
+    # Finale Ergebnisse
     print()
     print("FINALE KORRIGIERTE ANALYSE")
     print("=" * 60)
@@ -140,11 +140,11 @@ def find_ostfriesland_corrected():
         print("TOP OSTFRIESLAND-PLZS NACH GAP-BETRAG:")
         print("-" * 50)
         
-        ***REMOVED*** Nach Gesamtbetrag pro PLZ sortieren
+        # Nach Gesamtbetrag pro PLZ sortieren
         sorted_plz_by_amount = sorted(plz_stats.items(), 
                                     key=lambda x: x[1]["total_amount"], reverse=True)
         
-        for i, (plz, stats) in enumerate(sorted_plz_by_amount[:20], 1):  ***REMOVED*** Top 20
+        for i, (plz, stats) in enumerate(sorted_plz_by_amount[:20], 1):  # Top 20
             cities = list(stats["cities"])[:3]
             cities_str = ", ".join(cities)
             if len(stats["cities"]) > 3:
@@ -158,7 +158,7 @@ def find_ostfriesland_corrected():
                 print(f"    Top: {top['name'][:35]}... ({top['gap_amount']:,.0f} EUR)")
             print()
         
-        ***REMOVED*** Top 10 Einzelne Leads
+        # Top 10 Einzelne Leads
         print("TOP 10 EINZELNE LEADS:")
         print("-" * 30)
         top_leads = sorted(leads_found, key=lambda x: x["gap_amount"], reverse=True)[:10]
@@ -166,7 +166,7 @@ def find_ostfriesland_corrected():
         for i, lead in enumerate(top_leads, 1):
             print(f"{i:2d}. {lead['name'][:40]}... | PLZ {lead['plz']} | {lead['gap_amount']:,.0f} EUR")
         
-        ***REMOVED*** Daten speichern
+        # Daten speichern
         result_data = {
             "timestamp": datetime.now().isoformat(),
             "total_leads": len(leads_found),
@@ -180,7 +180,7 @@ def find_ostfriesland_corrected():
                 "cities": list(stats["cities"]),
                 "top_lead": stats["top_lead"]
             } for plz, stats in plz_stats.items()},
-            "top_leads": top_leads[:50]  ***REMOVED*** Top 50 Leads
+            "top_leads": top_leads[:50]  # Top 50 Leads
         }
         
         with open(output_file, 'w', encoding='utf-8') as f:
@@ -197,4 +197,5 @@ def find_ostfriesland_corrected():
 
 if __name__ == "__main__":
     find_ostfriesland_corrected()
+
 

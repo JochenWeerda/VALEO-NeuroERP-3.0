@@ -1,12 +1,12 @@
-***REMOVED*** CSV/XLSX-Export
+# CSV/XLSX-Export
 
-***REMOVED******REMOVED*** Überblick
+## Überblick
 
 VALEO-NeuroERP ermöglicht den Export von Belegen und Listen in CSV- und XLSX-Formaten.
 
-***REMOVED******REMOVED*** Einzelexport
+## Einzelexport
 
-***REMOVED******REMOVED******REMOVED*** Beleg exportieren
+### Beleg exportieren
 
 **1. Beleg öffnen:**
 ```
@@ -23,7 +23,7 @@ Navigation → Sales → Orders → SO-00001
 → Datei: SO-00001.csv oder SO-00001.xlsx
 ```
 
-***REMOVED******REMOVED******REMOVED*** Export-Inhalt
+### Export-Inhalt
 
 **Header-Daten:**
 - Belegnummer
@@ -39,9 +39,9 @@ Navigation → Sales → Orders → SO-00001
 - Einzelpreis
 - Gesamt
 
-***REMOVED******REMOVED*** Listen-Export
+## Listen-Export
 
-***REMOVED******REMOVED******REMOVED*** Beleg-Liste exportieren
+### Beleg-Liste exportieren
 
 **1. Liste öffnen:**
 ```
@@ -66,7 +66,7 @@ Kunde: [ACME Corp]
 → Enthält alle gefilterten Belege
 ```
 
-***REMOVED******REMOVED******REMOVED*** Spalten-Auswahl
+### Spalten-Auswahl
 
 **Standard-Spalten:**
 - Belegnummer
@@ -93,9 +93,9 @@ Kunde: [ACME Corp]
 [Export]
 ```
 
-***REMOVED******REMOVED*** Batch-Export (Mehrere Belege)
+## Batch-Export (Mehrere Belege)
 
-***REMOVED******REMOVED******REMOVED*** 1. Belege auswählen
+### 1. Belege auswählen
 
 ```
 Orders-Liste
@@ -104,13 +104,13 @@ Orders-Liste
 → [x] SO-00003
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2. Export starten
+### 2. Export starten
 
 ```
 [Export Selected ▼] → CSV / XLSX
 ```
 
-***REMOVED******REMOVED******REMOVED*** 3. Export-Optionen
+### 3. Export-Optionen
 
 **Einzelne Dateien:**
 ```
@@ -127,9 +127,9 @@ Orders-Liste
 → Alle Belege in einer Tabelle
 ```
 
-***REMOVED******REMOVED*** XLSX-Features
+## XLSX-Features
 
-***REMOVED******REMOVED******REMOVED*** Formatierung
+### Formatierung
 
 **Automatische Formatierung:**
 - Zahlen: Tausender-Trennzeichen
@@ -142,7 +142,7 @@ Orders-Liste
 - Summen: Fett
 - Negative Werte: Rot
 
-***REMOVED******REMOVED******REMOVED*** Formeln
+### Formeln
 
 **Summen-Zeile:**
 ```
@@ -156,7 +156,7 @@ Orders-Liste
 → Excel-Formel: =C2*D2
 ```
 
-***REMOVED******REMOVED******REMOVED*** Mehrere Sheets
+### Mehrere Sheets
 
 **Sheet 1: Header**
 ```
@@ -171,36 +171,36 @@ SO-00001 | 1 | SKU-001 | Widget A | 10 | 50,00 €
 SO-00001 | 2 | SKU-002 | Widget B | 20 | 25,00 €
 ```
 
-***REMOVED******REMOVED*** API-Export
+## API-Export
 
-***REMOVED******REMOVED******REMOVED*** Programmatischer Export
+### Programmatischer Export
 
 ```bash
-***REMOVED*** CSV-Export
+# CSV-Export
 curl -H "Authorization: Bearer $TOKEN" \
   "https://erp.valeo.example.com/api/export/csv/sales?from=2025-01-01&to=2025-12-31" \
   -o sales_2025.csv
 
-***REMOVED*** XLSX-Export
+# XLSX-Export
 curl -H "Authorization: Bearer $TOKEN" \
   "https://erp.valeo.example.com/api/export/xlsx/sales?from=2025-01-01&to=2025-12-31" \
   -o sales_2025.xlsx
 ```
 
-***REMOVED******REMOVED******REMOVED*** Query-Parameter
+### Query-Parameter
 
 ```
-?from=2025-01-01          ***REMOVED*** Start-Datum
-&to=2025-12-31            ***REMOVED*** End-Datum
-&status=approved          ***REMOVED*** Filter nach Status
-&customer_id=CUST-001     ***REMOVED*** Filter nach Kunde
-&columns=number,date,total ***REMOVED*** Spalten-Auswahl
-&format=csv               ***REMOVED*** Format (csv/xlsx)
+?from=2025-01-01          # Start-Datum
+&to=2025-12-31            # End-Datum
+&status=approved          # Filter nach Status
+&customer_id=CUST-001     # Filter nach Kunde
+&columns=number,date,total # Spalten-Auswahl
+&format=csv               # Format (csv/xlsx)
 ```
 
-***REMOVED******REMOVED*** Automatisierte Exports
+## Automatisierte Exports
 
-***REMOVED******REMOVED******REMOVED*** Scheduled Exports (Admin)
+### Scheduled Exports (Admin)
 
 **Konfiguration:**
 ```
@@ -222,7 +222,7 @@ E-Mail an: accounting@valeo.example.com
 → E-Mail mit Anhang versendet
 ```
 
-***REMOVED******REMOVED*** Berechtigungen
+## Berechtigungen
 
 | Rolle | Einzelexport | Listen-Export | Batch-Export | API-Export |
 |-------|--------------|---------------|--------------|------------|
@@ -233,9 +233,9 @@ E-Mail an: accounting@valeo.example.com
 
 **Scope:** `docs:export`
 
-***REMOVED******REMOVED*** Datenschutz
+## Datenschutz
 
-***REMOVED******REMOVED******REMOVED*** GDPR-Konformität
+### GDPR-Konformität
 
 **Personenbezogene Daten:**
 - Kunden-Namen
@@ -250,7 +250,7 @@ E-Mail an: accounting@valeo.example.com
 → Nicht per unverschlüsselter E-Mail versenden
 ```
 
-***REMOVED******REMOVED******REMOVED*** Audit-Trail
+### Audit-Trail
 
 Alle Exports werden protokolliert:
 
@@ -261,9 +261,9 @@ Admin → Audit Log → Export-Events
 08.10.2025 10:15 - Anna Schmidt - Export: SO-00001.xlsx
 ```
 
-***REMOVED******REMOVED*** Troubleshooting
+## Troubleshooting
 
-***REMOVED******REMOVED******REMOVED*** Problem: Excel zeigt falsche Zahlen
+### Problem: Excel zeigt falsche Zahlen
 
 **Ursache:** Locale-Einstellung (Komma vs. Punkt)
 
@@ -272,7 +272,7 @@ Admin → Audit Log → Export-Events
 2. Trennzeichen: Semikolon (;)
 3. Dezimaltrennzeichen: Komma (,)
 
-***REMOVED******REMOVED******REMOVED*** Problem: Umlaute falsch dargestellt
+### Problem: Umlaute falsch dargestellt
 
 **Ursache:** Encoding-Problem (UTF-8 vs. ISO-8859-1)
 
@@ -281,7 +281,7 @@ Admin → Audit Log → Export-Events
 2. Encoding → UTF-8 (ohne BOM)
 3. Speichern und erneut in Excel öffnen
 
-***REMOVED******REMOVED******REMOVED*** Problem: Export dauert sehr lange
+### Problem: Export dauert sehr lange
 
 **Ursache:** Zu viele Belege (> 10.000)
 
@@ -290,7 +290,7 @@ Admin → Audit Log → Export-Events
 2. Filter anwenden
 3. API-Export mit Pagination verwenden
 
-***REMOVED******REMOVED******REMOVED*** Problem: "Rate limit exceeded"
+### Problem: "Rate limit exceeded"
 
 **Ursache:** Zu viele Exports in kurzer Zeit
 
@@ -299,9 +299,9 @@ Admin → Audit Log → Export-Events
 2. Exports zusammenfassen (Batch statt Einzel)
 3. Admin kontaktieren (Rate-Limit erhöhen)
 
-***REMOVED******REMOVED*** Tipps & Tricks
+## Tipps & Tricks
 
-***REMOVED******REMOVED******REMOVED*** Excel-Pivot-Tabelle
+### Excel-Pivot-Tabelle
 
 ```
 1. XLSX-Export öffnen
@@ -312,7 +312,7 @@ Admin → Audit Log → Export-Events
 → Umsatz pro Kunde
 ```
 
-***REMOVED******REMOVED******REMOVED*** CSV in Google Sheets
+### CSV in Google Sheets
 
 ```
 1. Google Sheets öffnen
@@ -322,7 +322,7 @@ Admin → Audit Log → Export-Events
 5. [Importieren]
 ```
 
-***REMOVED******REMOVED******REMOVED*** Power BI Integration
+### Power BI Integration
 
 ```
 1. Power BI Desktop öffnen
@@ -333,7 +333,8 @@ Admin → Audit Log → Export-Events
 → Automatische Aktualisierung möglich
 ```
 
-***REMOVED******REMOVED*** Support
+## Support
 
 Bei Fragen: support@valeo-erp.com
+
 

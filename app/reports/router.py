@@ -1,6 +1,7 @@
 """
 Reports Router
 API endpoints for reports and analytics dashboard
+Uses real database queries via SQLAlchemy
 """
 
 from __future__ import annotations
@@ -11,26 +12,29 @@ import logging
 
 from .services import ReportsService
 from .models import ReportResponse, ReportMetadata
-from ..documents.router_helpers import _DB  ***REMOVED*** Import the shared DB store
+from app.core.database import get_db
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/reports", tags=["reports"])
 
-***REMOVED*** Initialize service with shared DB
-reports_service = ReportsService(_DB)
+def get_reports_service(db: Session = Depends(get_db)) -> ReportsService:
+    """Dependency to get ReportsService with database session"""
+    return ReportsService(db_session=db)
 
 
 @router.get("/dashboard/summary")
 async def get_dashboard_summary(
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)")
+    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+    service: ReportsService = Depends(get_reports_service)
 ) -> dict:
     """
     Get dashboard summary with key performance indicators
     """
     try:
-        summary = reports_service.get_dashboard_summary(start_date, end_date)
+        summary = service.get_dashboard_summary(start_date, end_date)
         return {
             "ok": True,
             "data": summary.model_dump()
@@ -43,7 +47,8 @@ async def get_dashboard_summary(
 @router.get("/sales-performance")
 async def get_sales_performance_report(
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)")
+    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+    service: ReportsService = Depends(get_reports_service)
 ) -> dict:
     """
     Sales Performance Report
@@ -51,7 +56,7 @@ async def get_sales_performance_report(
     - Conversion rates through the sales funnel
     """
     try:
-        report = reports_service.get_sales_performance_report(start_date, end_date)
+        report = service.get_sales_performance_report(start_date, end_date)
         return ReportResponse(
             metadata=ReportMetadata(
                 reportType="sales_performance",
@@ -68,7 +73,8 @@ async def get_sales_performance_report(
 @router.get("/customer-analytics")
 async def get_customer_analytics_report(
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)")
+    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+    service: ReportsService = Depends(get_reports_service)
 ) -> dict:
     """
     Customer Analytics Report
@@ -77,7 +83,7 @@ async def get_customer_analytics_report(
     - Customer retention metrics
     """
     try:
-        report = reports_service.get_customer_analytics_report(start_date, end_date)
+        report = service.get_customer_analytics_report(start_date, end_date)
         return ReportResponse(
             metadata=ReportMetadata(
                 reportType="customer_analytics",
@@ -94,7 +100,8 @@ async def get_customer_analytics_report(
 @router.get("/product-analytics")
 async def get_product_analytics_report(
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)")
+    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+    service: ReportsService = Depends(get_reports_service)
 ) -> dict:
     """
     Product Analytics Report
@@ -102,7 +109,7 @@ async def get_product_analytics_report(
     - Product performance trends
     """
     try:
-        report = reports_service.get_product_analytics_report(start_date, end_date)
+        report = service.get_product_analytics_report(start_date, end_date)
         return ReportResponse(
             metadata=ReportMetadata(
                 reportType="product_analytics",
@@ -119,7 +126,8 @@ async def get_product_analytics_report(
 @router.get("/financial-analytics")
 async def get_financial_analytics_report(
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)")
+    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+    service: ReportsService = Depends(get_reports_service)
 ) -> dict:
     """
     Financial Analytics Report
@@ -128,7 +136,7 @@ async def get_financial_analytics_report(
     - Payment method distribution
     """
     try:
-        report = reports_service.get_financial_analytics_report(start_date, end_date)
+        report = service.get_financial_analytics_report(start_date, end_date)
         return ReportResponse(
             metadata=ReportMetadata(
                 reportType="financial_analytics",
@@ -146,7 +154,8 @@ async def get_financial_analytics_report(
 async def get_trend_analytics_report(
     period: str = Query("monthly", description="Aggregation period: daily, weekly, monthly"),
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)")
+    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+    service: ReportsService = Depends(get_reports_service)
 ) -> dict:
     """
     Trend Analytics Report
@@ -155,7 +164,7 @@ async def get_trend_analytics_report(
     - Customer acquisition trends
     """
     try:
-        report = reports_service.get_trend_analytics_report(period, start_date, end_date)
+        report = service.get_trend_analytics_report(period, start_date, end_date)
         return ReportResponse(
             metadata=ReportMetadata(
                 reportType="trend_analytics",
@@ -174,28 +183,29 @@ async def export_report(
     report_type: str,
     format: str = Query("json", description="Export format: json, csv"),
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)")
+    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+    service: ReportsService = Depends(get_reports_service)
 ) -> dict:
     """
     Export report data in various formats
     """
     try:
-        ***REMOVED*** Get the report data
+        # Get the report data
         if report_type == "sales-performance":
-            report = reports_service.get_sales_performance_report(start_date, end_date)
+            report = service.get_sales_performance_report(start_date, end_date)
         elif report_type == "customer-analytics":
-            report = reports_service.get_customer_analytics_report(start_date, end_date)
+            report = service.get_customer_analytics_report(start_date, end_date)
         elif report_type == "product-analytics":
-            report = reports_service.get_product_analytics_report(start_date, end_date)
+            report = service.get_product_analytics_report(start_date, end_date)
         elif report_type == "financial-analytics":
-            report = reports_service.get_financial_analytics_report(start_date, end_date)
+            report = service.get_financial_analytics_report(start_date, end_date)
         elif report_type == "trend-analytics":
-            report = reports_service.get_trend_analytics_report("monthly", start_date, end_date)
+            report = service.get_trend_analytics_report("monthly", start_date, end_date)
         else:
             raise HTTPException(status_code=400, detail=f"Unknown report type: {report_type}")
 
         if format == "csv":
-            ***REMOVED*** Simple CSV conversion (in production, use proper CSV library)
+            # Simple CSV conversion (in production, use proper CSV library)
             data = report.model_dump()
             csv_content = f"Report Type: {report_type}\n"
             csv_content += f"Generated: {ReportMetadata().generatedAt}\n\n"
@@ -216,7 +226,7 @@ async def export_report(
                 "filename": f"{report_type}_report.csv"
             }
 
-        ***REMOVED*** Default JSON response
+        # Default JSON response
         return ReportResponse(
             metadata=ReportMetadata(
                 reportType=report_type,
@@ -225,6 +235,8 @@ async def export_report(
             data=report.model_dump()
         ).model_dump()
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to export report {report_type}: {e}")
         raise HTTPException(status_code=500, detail=str(e))

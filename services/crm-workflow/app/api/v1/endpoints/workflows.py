@@ -114,7 +114,7 @@ async def execute_workflow(
     if not workflow:
         raise HTTPException(status_code=404, detail="Workflow not found")
 
-    ***REMOVED*** Create execution record
+    # Create execution record
     execution = WorkflowExecutionModel(
         workflow_id=workflow_id,
         trigger_event=trigger_event,
@@ -125,8 +125,8 @@ async def execute_workflow(
     await db.commit()
     await db.refresh(execution)
 
-    ***REMOVED*** TODO: Actually execute the workflow actions
-    ***REMOVED*** For now, just mark as completed
+    # TODO: Actually execute the workflow actions
+    # For now, just mark as completed
     execution.status = "completed"
     await db.commit()
     await db.refresh(execution)

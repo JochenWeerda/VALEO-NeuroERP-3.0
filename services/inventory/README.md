@@ -1,8 +1,8 @@
-***REMOVED*** Inventory Service
+# Inventory Service
 
 Mehrlager- und Chargenverwaltung als eigenständiger FastAPI-Microservice.
 
-***REMOVED******REMOVED*** Features
+## Features
 - Verwaltung von Lagerhäusern, Lagerorten & Artikeln
 - Chargen/Lot-Verwaltung (SKU + Lot-Nummer) inkl. Traceability
 - Wareneingänge, Umlagerungen, Auslagerungen & Korrekturen
@@ -12,13 +12,13 @@ Mehrlager- und Chargenverwaltung als eigenständiger FastAPI-Microservice.
 - Workflow-Registrierung (`inventory_inbound_flow`) + Weiterleitung sämtlicher Events an den Workflow-Service
 - EPCIS-Persistenz (Object/Aggregation/Transformation/Transaction) inkl. REST-API, NATS-Publish und Prometheus-Metriken
 
-***REMOVED******REMOVED*** Lokal starten
+## Lokal starten
 ```bash
 uvicorn main:app --reload --port 5400
 ```
 
-***REMOVED******REMOVED*** Konfiguration
-***REMOVED******REMOVED******REMOVED*** Betriebsprofile
+## Konfiguration
+### Betriebsprofile
 | Variable | Werte | Wirkung |
 | --- | --- | --- |
 | `INVENTORY_GLOBAL_OPERATION_MODE` | `test` (Default) \| `real` | Legt den Standardmodus für alle Module fest. `real` aktiviert automatisch produktive Integrationen (z. B. EventBus). |
@@ -26,17 +26,17 @@ uvicorn main:app --reload --port 5400
 
 Die aktiven Werte können zur Laufzeit über `settings.get_module_mode("<modul>")` bzw. `settings.is_real_mode("<modul>")` abgefragt werden.
 
-***REMOVED******REMOVED******REMOVED*** Beispielprofile
+### Beispielprofile
 - Testbetrieb (lokal, ohne NATS/Produktivabhängigkeiten): `env/test.env.example` kopieren und als `.env` im Service-Verzeichnis ablegen.
 - Produktivbetrieb (mit NATS & Postgres): `env/production.env.example` nutzen und Secrets ergänzen. EventBus wird automatisch aktiv.
 - Selektive Umschaltung: z. B. global `test`, aber `INVENTORY_MODULE_MODE_OVERRIDES=event_bus=real`, falls nur Event-Publishing echt laufen soll.
 
-***REMOVED******REMOVED*** Tests
+## Tests
 ```bash
 pytest services/inventory/tests
 ```
 
-***REMOVED******REMOVED*** Migrationen (Alembic)
+## Migrationen (Alembic)
 
 - Konfiguration: `services/inventory/alembic.ini`
 - DB-URL via `INVENTORY_DATABASE_URL`
@@ -51,7 +51,7 @@ Neue Migration erzeugen:
 alembic -c services/inventory/alembic.ini revision --autogenerate -m "epcis indices"
 ```
 
-***REMOVED******REMOVED*** EPCIS – API & Betriebsleitfaden
+## EPCIS – API & Betriebsleitfaden
 
 - Basis-URL: `/api/v1/inventory/epcis`
 - Mandant: per Header `X-Tenant-Id` (Fallback: `default`)
@@ -59,7 +59,7 @@ alembic -c services/inventory/alembic.ini revision --autogenerate -m "epcis indi
 - Rate-Limit: globaler Token-Bucket (konfigurierbar über `RATE_LIMIT_PER_MINUTE`)
 - Circuit Breaker: für NATS-Publish (`NATS_FAILURE_THRESHOLD`, `NATS_CIRCUIT_BREAKER_OPEN_SECONDS`)
 
-***REMOVED******REMOVED******REMOVED*** Endpunkte
+### Endpunkte
 - `POST /api/v1/inventory/epcis/events`
   - Request-Body:
     ```json
@@ -85,19 +85,19 @@ alembic -c services/inventory/alembic.ini revision --autogenerate -m "epcis indi
   - Header: `X-Tenant-Id: <tenant>`
   - Antwort: `{ "deleted": number, "anonymized": number }`
 
-***REMOVED******REMOVED******REMOVED*** Einstellungen (Auszug)
+### Einstellungen (Auszug)
 - `EPCIS_RETENTION_DAYS` (Standard 365)
 - `EPCIS_ANONYMIZE_KEYS` (Default: `["userName","email","phone","address","personalId"]`)
 - `RATE_LIMIT_PER_MINUTE` (z. B. 600)
 - `NATS_FAILURE_THRESHOLD`, `NATS_CIRCUIT_BREAKER_OPEN_SECONDS`
 - `TEAMS_WEBHOOK_URL`, `ESCALATION_EMAIL` (für Eskalation)
 
-***REMOVED******REMOVED******REMOVED*** Auto-Remediation & Eskalation
+### Auto-Remediation & Eskalation
 - Automatischer Retry (exponentielles Backoff) für NATS/DB-Fehler bis zur definierten Grenze
 - Bei Erreichen der Grenze: Teams/E-Mail Eskalation inkl. Eventdetails
 - Details und Playbooks: `docs/deployment/runbook/inventory/epcis-auto-remediation.md`
 
-***REMOVED******REMOVED******REMOVED*** Frontend (EPCIS-Ansicht)
+### Frontend (EPCIS-Ansicht)
 - Seite: `packages/frontend-web/src/pages/inventory/epcis/index.tsx`
 - Funktionen:
   - Tabelle mit Filtern (`biz_step`, `sku`)
@@ -105,7 +105,7 @@ alembic -c services/inventory/alembic.ini revision --autogenerate -m "epcis indi
   - Tenant-Feld (`X-Tenant-Id`) und Limit-Auswahl
 - API-Client: `packages/frontend-web/src/lib/services/inventory-service.ts`
 
-***REMOVED******REMOVED*** API-Überblick
+## API-Überblick
 
 | Endpoint | Beschreibung |
 | --- | --- |
@@ -119,9 +119,9 @@ alembic -c services/inventory/alembic.ini revision --autogenerate -m "epcis indi
 | `POST /api/v1/inventory/epcis/events` | EPCIS-Event erfassen (Body: `event_type`, `biz_step`, `read_point`, `sku`, `quantity`, optional `lot_id`, `extensions`) |
 | `GET /api/v1/inventory/epcis/events` | Letzte EPCIS-Events (max. 200) |
 
-***REMOVED******REMOVED*** Domain-Events
+## Domain-Events
 
-***REMOVED******REMOVED******REMOVED*** Publizierte Events
+### Publizierte Events
 - `inventory.warehouse.created`
 - `inventory.location.created`
 - `inventory.goods.received`
@@ -150,13 +150,13 @@ Payload (vereinfacht):
 }
 ```
 
-***REMOVED******REMOVED******REMOVED*** Konsumierte Events
+### Konsumierte Events
 - `purchase.receipt.posted` → erzeugt automatisch Wareneingänge
 - `sales.shipment.confirmed` → löst Auslagerung / Bestandsreduzierung aus
 
 Subscriptions laufen über `InventoryEventSubscribers` (NATS). Falls `INVENTORY_EVENT_BUS_ENABLED` deaktiviert ist, werden weder Events publiziert noch konsumiert.
 
-***REMOVED******REMOVED*** Workflow-Integration
+## Workflow-Integration
 
 Beim Service-Start wird automatisch die Definition `inventory_inbound_flow` im Workflow-Service registriert. Dabei werden folgende Events gemappt:
 
@@ -167,14 +167,14 @@ Beim Service-Start wird automatisch die Definition `inventory_inbound_flow` im W
 | allocated → shipped | `inventory.stock.issued` |
 | * → exception | `inventory.receiving.mismatch` |
 
-***REMOVED******REMOVED*** Frontend-Kompatibilität
+## Frontend-Kompatibilität
 
 - React Query Hooks (`packages/frontend-web/src/lib/api/inventory.ts`) greifen nun auf die neuen REST-Routen zu (inkl. Filterparametern `is_active`).
 - `StockManagement` nutzt `/articles` & `/stock-movements` direkt.
 - Dashboard-/Berichtsseiten konsumieren `/reports/*`.
 - Die Chargen-Rückverfolgung (`pages/charge/rueckverfolgung.tsx`) ruft `GET /api/v1/inventory/lots/{id}` mittels `useLotTrace` auf.
 
-***REMOVED******REMOVED*** Monitoring & Alerts
+## Monitoring & Alerts
 
 - Prometheus-Metriken:
   - `inventory_epcis_events_total{type,biz_step}`
@@ -183,7 +183,7 @@ Beim Service-Start wird automatisch die Definition `inventory_inbound_flow` im W
   - `InventoryEpcisEventFailures` (Fehler > 0 in 10m)
   - `InventoryEpcisNoEvents` (keine Events in 30m über 1h)
 
-***REMOVED******REMOVED*** Runbook – EPCIS Smoke-Test
+## Runbook – EPCIS Smoke-Test
 
 1) Lokaler Start:
 ```bash
@@ -205,3 +205,4 @@ curl http://localhost:5400/metrics | rg inventory_epcis
 ```
 
 Mock-/Sampledaten entstehen direkt aus den tatsächlichen Lagerbeständen; zusätzliche Fixtures sind nicht nötig.
+

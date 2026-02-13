@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTSEJournal, type TSEEintrag } from '@/lib/api/pos'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { AlertTriangle, CheckCircle, FileDown, Search, XCircle } from 'lucide-react'
+import { ErrorState } from '@/components/ErrorState'
 
 type TSETransaction = {
   id: string
@@ -20,46 +22,26 @@ type TSETransaction = {
   fibuBelegnr?: string
 }
 
-const mockTSETransaktionen: TSETransaction[] = [
-  {
-    id: '1',
-    datum: '2025-10-11 09:15:23',
-    bonnummer: 'BON-2025-00123',
-    tseTransactionNumber: 7843,
-    tseSignature: 'TSE_SIG_1728640523',
-    betrag: 45.97,
-    zahlungsart: 'bar',
-    fibuStatus: 'gebucht',
-    fibuDatum: '2025-10-11',
-    fibuBelegnr: 'KA-2025-10-11',
-  },
-  {
-    id: '2',
-    datum: '2025-10-11 10:42:11',
-    bonnummer: 'BON-2025-00124',
-    tseTransactionNumber: 7844,
-    tseSignature: 'TSE_SIG_1728645731',
-    betrag: 128.50,
-    zahlungsart: 'ec',
-    fibuStatus: 'gebucht',
-    fibuDatum: '2025-10-11',
-    fibuBelegnr: 'KA-2025-10-11',
-  },
-  {
-    id: '3',
-    datum: '2025-10-11 14:20:45',
-    bonnummer: 'BON-2025-00125',
-    tseTransactionNumber: 7845,
-    tseSignature: 'TSE_SIG_1728659245',
-    betrag: 89.99,
-    zahlungsart: 'bar',
-    fibuStatus: 'offen',
-  },
-]
-
 export default function TSEJournalPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: apiTse = [], isError, error, refetch } = useTSEJournal()
+  const tseTransaktionen: TSETransaction[] = apiTse.map((t: TSEEintrag) => ({
+    id: t.id,
+    datum: t.zeitstempel,
+    bonnummer: t.transaktionsNr,
+    tseTransactionNumber: Number(t.transaktionsNr.replace(/\D/g, '')) || 0,
+    tseSignature: t.signatur,
+    betrag: t.betrag,
+    zahlungsart: 'bar',
+    fibuStatus: t.status === 'ok' ? 'gebucht' : 'offen',
+    fibuDatum: t.status === 'ok' ? t.zeitstempel.slice(0, 10) : undefined,
+    fibuBelegnr: t.status === 'ok' ? t.transaktionsNr : undefined,
+  }))
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     {
@@ -126,9 +108,9 @@ export default function TSEJournalPage(): JSX.Element {
     },
   ]
 
-  const offen = mockTSETransaktionen.filter((t) => t.fibuStatus === 'offen').length
-  const gesamtBetrag = mockTSETransaktionen.reduce((sum, t) => sum + t.betrag, 0)
-  const offenerBetrag = mockTSETransaktionen.filter((t) => t.fibuStatus === 'offen').reduce((sum, t) => sum + t.betrag, 0)
+  const offen = tseTransaktionen.filter((t) => t.fibuStatus === 'offen').length
+  const gesamtBetrag = tseTransaktionen.reduce((sum, t) => sum + t.betrag, 0)
+  const offenerBetrag = tseTransaktionen.filter((t) => t.fibuStatus === 'offen').reduce((sum, t) => sum + t.betrag, 0)
 
   return (
     <div className="space-y-4 p-6">
@@ -159,6 +141,7 @@ export default function TSEJournalPage(): JSX.Element {
           Alle Kassentransaktionen mit zertifizierter TSE signiert • Unveränderbar • 10 Jahre Aufbewahrungspflicht •
           DSFinV-K Export für DATEV/Finanzamt
         </p>
+        <p className="mt-1 text-xs font-medium">POS-Umsätze werden als B2C-Endpreise inkl. gesetzl. MwSt. protokolliert.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -167,7 +150,7 @@ export default function TSEJournalPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Transaktionen Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockTSETransaktionen.length}</span>
+            <span className="text-2xl font-bold">{tseTransaktionen.length}</span>
           </CardContent>
         </Card>
 
@@ -220,7 +203,7 @@ export default function TSEJournalPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockTSETransaktionen} columns={columns} />
+          <DataTable data={tseTransaktionen} columns={columns} />
         </CardContent>
       </Card>
     </div>

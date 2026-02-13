@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """Fügt Sales-Übersetzungen zu translation.json hinzu"""
 import json
 from pathlib import Path
@@ -53,7 +53,7 @@ def main():
     with open(TRANSLATION_FILE, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
-    ***REMOVED*** Füge Fields hinzu
+    # Füge Fields hinzu
     if 'crud' not in data:
         data['crud'] = {}
     if 'fields' not in data['crud']:
@@ -63,7 +63,7 @@ def main():
         if key not in data['crud']['fields']:
             data['crud']['fields'][key] = value
     
-    ***REMOVED*** Füge Placeholders hinzu
+    # Füge Placeholders hinzu
     if 'tooltips' not in data['crud']:
         data['crud']['tooltips'] = {}
     if 'placeholders' not in data['crud']['tooltips']:
@@ -73,7 +73,7 @@ def main():
         if key not in data['crud']['tooltips']['placeholders']:
             data['crud']['tooltips']['placeholders'][key] = value
     
-    ***REMOVED*** Speichere
+    # Speichere
     with open(TRANSLATION_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
@@ -81,4 +81,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

@@ -45,8 +45,6 @@ export function useCrudDelete({
       await onDelete(entityToDelete.id, reason);
       setEntityToDelete(null);
       setDeleteDialogOpen(false);
-    } catch (error) {
-      throw error;
     } finally {
       setIsDeleting(false);
     }

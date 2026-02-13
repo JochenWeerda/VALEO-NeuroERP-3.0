@@ -8,11 +8,11 @@ from datetime import datetime
 from .events import DomainEvent
 
 
-***REMOVED*** Inventory Events
+# Inventory Events
 @dataclass
 class ArticleCreated(DomainEvent):
     """Fired when a new article is created."""
-    aggregate_id: str  ***REMOVED*** Article ID
+    aggregate_id: str  # Article ID
     timestamp: datetime
     article_number: str
     name: str
@@ -23,7 +23,7 @@ class ArticleCreated(DomainEvent):
 @dataclass
 class StockUpdated(DomainEvent):
     """Fired when article stock quantity changes."""
-    aggregate_id: str  ***REMOVED*** Article ID
+    aggregate_id: str  # Article ID
     timestamp: datetime
     article_number: str
     old_quantity: int
@@ -36,7 +36,7 @@ class StockUpdated(DomainEvent):
 @dataclass
 class LowStockDetected(DomainEvent):
     """Fired when article stock falls below minimum."""
-    aggregate_id: str  ***REMOVED*** Article ID
+    aggregate_id: str  # Article ID
     timestamp: datetime
     article_number: str
     name: str
@@ -45,11 +45,11 @@ class LowStockDetected(DomainEvent):
     tenant_id: str
 
 
-***REMOVED*** CRM Events
+# CRM Events
 @dataclass
 class CustomerCreated(DomainEvent):
     """Fired when a new customer is created."""
-    aggregate_id: str  ***REMOVED*** Customer ID
+    aggregate_id: str  # Customer ID
     timestamp: datetime
     customer_number: str
     name: str
@@ -60,7 +60,7 @@ class CustomerCreated(DomainEvent):
 @dataclass
 class LeadConverted(DomainEvent):
     """Fired when a lead is converted to customer."""
-    aggregate_id: str  ***REMOVED*** Lead ID
+    aggregate_id: str  # Lead ID
     timestamp: datetime
     lead_id: str
     customer_id: str
@@ -71,7 +71,7 @@ class LeadConverted(DomainEvent):
 @dataclass
 class LeadStatusChanged(DomainEvent):
     """Fired when lead status changes."""
-    aggregate_id: str  ***REMOVED*** Lead ID
+    aggregate_id: str  # Lead ID
     timestamp: datetime
     lead_id: str
     old_status: str
@@ -79,11 +79,11 @@ class LeadStatusChanged(DomainEvent):
     tenant_id: str
 
 
-***REMOVED*** Finance Events
+# Finance Events
 @dataclass
 class JournalEntryPosted(DomainEvent):
     """Fired when journal entry is posted."""
-    aggregate_id: str  ***REMOVED*** Journal Entry ID
+    aggregate_id: str  # Journal Entry ID
     timestamp: datetime
     entry_number: str
     entry_date: str
@@ -95,7 +95,7 @@ class JournalEntryPosted(DomainEvent):
 @dataclass
 class AccountBalanceChanged(DomainEvent):
     """Fired when account balance changes."""
-    aggregate_id: str  ***REMOVED*** Account ID
+    aggregate_id: str  # Account ID
     timestamp: datetime
     account_number: str
     old_balance: float

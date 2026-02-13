@@ -40,20 +40,20 @@ async def create_opportunity(
     """Create a new sales opportunity."""
     data = opportunity_data.model_dump()
     
-    ***REMOVED*** Generate number if not provided
+    # Generate number if not provided
     if not data.get("number"):
-        ***REMOVED*** Get next number from sequence or count
+        # Get next number from sequence or count
         count_stmt = select(func.count()).select_from(OpportunityModel).where(
             OpportunityModel.tenant_id == data["tenant_id"]
         )
         count = (await db.execute(count_stmt)).scalar_one()
         data["number"] = f"OPP-{str(count + 1).zfill(6)}"
     
-    ***REMOVED*** Calculate expected_revenue if amount and probability are provided
+    # Calculate expected_revenue if amount and probability are provided
     if data.get("amount") and data.get("probability"):
         data["expected_revenue"] = data["amount"] * (data["probability"] / 100)
     
-    ***REMOVED*** Set owner_id from assigned_to if not provided
+    # Set owner_id from assigned_to if not provided
     if not data.get("owner_id") and data.get("assigned_to"):
         data["owner_id"] = data["assigned_to"]
     
@@ -62,7 +62,7 @@ async def create_opportunity(
     await db.commit()
     await db.refresh(opportunity)
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_opportunity_created(
         opportunity.id,
@@ -143,22 +143,22 @@ async def update_opportunity(
 
     update_data = opportunity_data.model_dump(exclude_unset=True)
     
-    ***REMOVED*** Track old values for history
+    # Track old values for history
     old_stage = opportunity.stage.value if opportunity.stage else None
     old_status = opportunity.status.value if opportunity.status else None
     
-    ***REMOVED*** Calculate expected_revenue if amount or probability changed
+    # Calculate expected_revenue if amount or probability changed
     if "amount" in update_data or "probability" in update_data:
         amount = update_data.get("amount", opportunity.amount)
         probability = update_data.get("probability", opportunity.probability)
         if amount and probability:
             update_data["expected_revenue"] = amount * (probability / 100)
     
-    ***REMOVED*** Set owner_id from assigned_to if not provided
+    # Set owner_id from assigned_to if not provided
     if "assigned_to" in update_data and not update_data.get("owner_id"):
         update_data["owner_id"] = update_data["assigned_to"]
     
-    ***REMOVED*** Create history entries for changed fields
+    # Create history entries for changed fields
     if changed_by:
         history_entries = []
         for field, new_value in update_data.items():
@@ -166,7 +166,7 @@ async def update_opportunity(
                 continue
             old_value = getattr(opportunity, field, None)
             if old_value != new_value:
-                ***REMOVED*** Convert enum to string for history
+                # Convert enum to string for history
                 if hasattr(old_value, "value"):
                     old_value = old_value.value
                 if hasattr(new_value, "value"):
@@ -187,7 +187,7 @@ async def update_opportunity(
         if history_entries:
             db.add_all(history_entries)
     
-    ***REMOVED*** Update fields
+    # Update fields
     for field, value in update_data.items():
         setattr(opportunity, field, value)
     
@@ -197,7 +197,7 @@ async def update_opportunity(
     await db.commit()
     await db.refresh(opportunity)
     
-    ***REMOVED*** Publish events for stage/status changes
+    # Publish events for stage/status changes
     event_publisher = get_event_publisher()
     
     if old_stage and opportunity.stage.value != old_stage:
@@ -223,11 +223,11 @@ async def update_opportunity(
                 opportunity_id=opportunity.id,
                 tenant_id=opportunity.tenant_id,
                 amount=opportunity.amount,
-                lost_reason=update_data.get("notes"),  ***REMOVED*** Use notes as reason if available
+                lost_reason=update_data.get("notes"),  # Use notes as reason if available
                 lost_by=changed_by,
             )
     
-    ***REMOVED*** Publish general update event
+    # Publish general update event
     await event_publisher.publish_opportunity_updated(
         opportunity_id=opportunity.id,
         tenant_id=opportunity.tenant_id,
@@ -255,7 +255,7 @@ async def delete_opportunity(
     await db.delete(opportunity)
     await db.commit()
     
-    ***REMOVED*** Publish event
+    # Publish event
     event_publisher = get_event_publisher()
     await event_publisher.publish_opportunity_deleted(
         opportunity_id=opportunity_id_value,
@@ -264,7 +264,7 @@ async def delete_opportunity(
     )
 
 
-***REMOVED*** Stages endpoints
+# Stages endpoints
 @router.get("/stages", response_model=list[OpportunityStage])
 async def list_stages(
     tenant_id: Optional[str] = Query(None),
@@ -330,7 +330,7 @@ async def update_stage(
     return OpportunityStage.model_validate(stage)
 
 
-***REMOVED*** History endpoints
+# History endpoints
 @router.get("/{opportunity_id}/history", response_model=list[OpportunityHistory])
 async def get_opportunity_history(
     opportunity_id: UUID,
@@ -350,7 +350,7 @@ async def get_opportunity_history(
     return [OpportunityHistory.model_validate(h) for h in history]
 
 
-***REMOVED*** Pipeline aggregation endpoint
+# Pipeline aggregation endpoint
 @router.get("/pipeline/aggregation", response_model=list[PipelineAggregation])
 async def get_pipeline_aggregation(
     tenant_id: Optional[str] = Query(None),
@@ -389,7 +389,7 @@ async def get_pipeline_aggregation(
     ]
 
 
-***REMOVED*** Forecast endpoint
+# Forecast endpoint
 @router.get("/forecast", response_model=list[ForecastData])
 async def get_forecast(
     tenant_id: Optional[str] = Query(None),
@@ -404,7 +404,7 @@ async def get_forecast(
     if owner_id:
         filters.append(OpportunityModel.owner_id == owner_id)
     if period:
-        ***REMOVED*** Filter by expected_close_date in period
+        # Filter by expected_close_date in period
         year, month = period.split("-")
         filters.append(
             func.extract("year", OpportunityModel.expected_close_date) == int(year)
@@ -444,3 +444,4 @@ async def get_forecast(
         )
         for row in rows
     ]
+

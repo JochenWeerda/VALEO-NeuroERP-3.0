@@ -103,7 +103,7 @@ async def list_contacts(
 async def get_contact(contact_id: str):
     try:
         contact = await crm_core_client.get_contact(contact_id)
-    except httpx.HTTPStatusError as exc:  ***REMOVED*** type: ignore[name-defined]
+    except httpx.HTTPStatusError as exc:  # type: ignore[name-defined]
         if exc.response.status_code == 404:
             raise HTTPException(status_code=404, detail="Contact not found") from exc
         raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
@@ -128,7 +128,7 @@ async def update_contact(contact_id: str, contact_data: ContactUpdate):
         payload = _map_update_payload(contact_data)
         updated = await crm_core_client.update_contact(contact_id, payload)
         return {"data": _adapt_contact(updated)}
-    except httpx.HTTPStatusError as exc:  ***REMOVED*** type: ignore[name-defined]
+    except httpx.HTTPStatusError as exc:  # type: ignore[name-defined]
         if exc.response.status_code == 404:
             raise HTTPException(status_code=404, detail="Contact not found") from exc
         raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
@@ -140,7 +140,7 @@ async def update_contact(contact_id: str, contact_data: ContactUpdate):
 async def delete_contact(contact_id: str):
     try:
         await crm_core_client.delete_contact(contact_id)
-    except httpx.HTTPStatusError as exc:  ***REMOVED*** type: ignore[name-defined]
+    except httpx.HTTPStatusError as exc:  # type: ignore[name-defined]
         if exc.response.status_code == 404:
             raise HTTPException(status_code=404, detail="Contact not found") from exc
         raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc

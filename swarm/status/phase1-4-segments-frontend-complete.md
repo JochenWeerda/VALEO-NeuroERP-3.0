@@ -1,14 +1,14 @@
-***REMOVED*** Phase 1.4 - Segmente & Zielgruppen Frontend - Abgeschlossen
+# Phase 1.4 - Segmente & Zielgruppen Frontend - Abgeschlossen
 
 **Datum:** 2025-01-27  
 **Status:** ✅ Frontend Complete  
 **Capability:** MKT-SEG-01
 
-***REMOVED******REMOVED*** ✅ Abgeschlossen
+## ✅ Abgeschlossen
 
-***REMOVED******REMOVED******REMOVED*** Frontend-Komponenten
+### Frontend-Komponenten
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 1. Segmente Liste ✅
+#### 1. Segmente Liste ✅
 - ✅ `segments.tsx` erstellt
 - ✅ ListReport mit i18n
 - ✅ Spalten: Name, Type, Status, Member Count, Last Calculated, Created At
@@ -16,7 +16,7 @@
 - ✅ Bulk-Actions: Calculate, Export, Archive
 - ✅ Export-Funktion
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 2. Segment Detail Seite ✅
+#### 2. Segment Detail Seite ✅
 - ✅ `segment-detail.tsx` erstellt
 - ✅ ObjectPage mit 4 Tabs:
   - Grundinformationen
@@ -28,12 +28,12 @@
   - Performance Tab
 - ✅ Aktionen: Save, Cancel, Calculate, Export
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 3. Routing ✅
+#### 3. Routing ✅
 - ✅ `/crm/segments` → Liste
 - ✅ `/crm/segment/:id` → Detail
 - ✅ `/crm/segment/new` → Create
 
-***REMOVED******REMOVED******REMOVED******REMOVED*** 4. i18n-Integration ✅
+#### 4. i18n-Integration ✅
 - ✅ Alle Labels übersetzt
 - ✅ Neue Übersetzungen hinzugefügt:
   - `crud.segments.types.*` (dynamic, static, hybrid)
@@ -44,7 +44,7 @@
   - `crud.subtitles.manageSegments`
   - `crud.entities.segment`
 
-***REMOVED******REMOVED*** 📋 Nächste Schritte
+## 📋 Nächste Schritte
 
 1. **Segment Rule Builder** (Visual Rule Builder)
 2. **Segment Performance Dashboard** (Charts & Metriken)
@@ -54,4 +54,5 @@
 ---
 
 **Frontend-Grundstruktur ist fertig! Bereit für Rule Builder und Performance Dashboard.**
+
 

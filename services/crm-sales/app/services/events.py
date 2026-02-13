@@ -5,8 +5,8 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 from uuid import UUID
 
-***REMOVED*** TODO: Integrate with actual event bus (RabbitMQ/Kafka)
-***REMOVED*** For now, this is a stub that logs events
+# TODO: Integrate with actual event bus (RabbitMQ/Kafka)
+# For now, this is a stub that logs events
 
 
 class EventPublisher:
@@ -14,7 +14,7 @@ class EventPublisher:
     
     def __init__(self):
         """Initialize event publisher."""
-        ***REMOVED*** TODO: Initialize event bus connection
+        # TODO: Initialize event bus connection
         pass
     
     async def publish(self, event_type: str, payload: Dict[str, Any]) -> None:
@@ -25,15 +25,15 @@ class EventPublisher:
             event_type: Event type (e.g., 'crm.opportunity.created')
             payload: Event payload
         """
-        ***REMOVED*** TODO: Publish to actual event bus
-        ***REMOVED*** For now, just log
+        # TODO: Publish to actual event bus
+        # For now, just log
         event = {
             "event_type": event_type,
             "payload": payload,
             "timestamp": datetime.utcnow().isoformat(),
         }
         print(f"[EVENT] {event_type}: {json.dumps(event, default=str)}")
-        ***REMOVED*** In production: await self.event_bus.publish(event_type, event)
+        # In production: await self.event_bus.publish(event_type, event)
     
     async def publish_opportunity_created(
         self,
@@ -154,7 +154,7 @@ class EventPublisher:
         )
 
 
-***REMOVED*** Singleton instance
+# Singleton instance
 _event_publisher: Optional[EventPublisher] = None
 
 
@@ -164,3 +164,4 @@ def get_event_publisher() -> EventPublisher:
     if _event_publisher is None:
         _event_publisher = EventPublisher()
     return _event_publisher
+

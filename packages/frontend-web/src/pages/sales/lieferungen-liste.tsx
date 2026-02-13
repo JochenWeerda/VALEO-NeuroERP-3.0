@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -8,48 +8,9 @@ import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileDown, Search, Truck } from 'lucide-react'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { useLieferungen, type Lieferung, type LieferungStatus } from '@/lib/api/sales'
 
-type Lieferung = {
-  id: string
-  nummer: string
-  datum: string
-  kunde: string
-  auftragsNr: string
-  menge: number
-  status: 'geplant' | 'unterwegs' | 'zugestellt' | 'storniert'
-}
-
-const mockLieferungen: Lieferung[] = [
-  {
-    id: '1',
-    nummer: 'LF-2025-0001',
-    datum: '2025-10-11',
-    kunde: 'Landhandel Nord GmbH',
-    auftragsNr: 'SO-2025-0001',
-    menge: 25,
-    status: 'unterwegs',
-  },
-  {
-    id: '2',
-    nummer: 'LF-2025-0002',
-    datum: '2025-10-10',
-    kunde: 'Agrar-Zentrum Süd',
-    auftragsNr: 'SO-2025-0002',
-    menge: 15,
-    status: 'zugestellt',
-  },
-  {
-    id: '3',
-    nummer: 'LF-2025-0003',
-    datum: '2025-10-12',
-    kunde: 'Müller Landwirtschaft',
-    auftragsNr: 'SO-2025-0003',
-    menge: 10,
-    status: 'geplant',
-  },
-]
-
-const statusVariantMap: Record<Lieferung['status'], 'default' | 'outline' | 'secondary' | 'destructive'> = {
+const statusVariantMap: Record<LieferungStatus, 'default' | 'outline' | 'secondary' | 'destructive'> = {
   geplant: 'default',
   unterwegs: 'secondary',
   zugestellt: 'outline',
@@ -63,46 +24,9 @@ export default function LieferungenListePage(): JSX.Element {
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lieferung')
   const pageTitle = getListTitle(t, entityTypeLabel)
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<Lieferung['status'] | 'alle'>('alle')
-  const [lieferungen, setLieferungen] = useState<Lieferung[]>([])
-  const [loading, setLoading] = useState(true)
+  const [statusFilter, setStatusFilter] = useState<LieferungStatus | 'alle'>('alle')
 
-
-  // Lade Daten von API
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true)
-      try {
-        const response = await fetch('/api/mcp/documents/sales_delivery?skip=0&limit=100')
-        if (response.ok) {
-          const result = await response.json()
-          if (result.ok && result.data) {
-            // Transformiere API-Daten
-            const transformed = result.data.map((doc: any) => ({
-              id: doc.number,
-              nummer: doc.number,
-              datum: doc.date,
-              kunde: doc.customerId || '',
-              auftragsNr: doc.sourceOrder || '',
-              menge: doc.lines?.reduce((sum: number, line: any) => sum + (line.qty || 0), 0) || 0,
-              status: (doc.status?.toLowerCase() || 'geplant') as Lieferung['status'],
-            }))
-            setLieferungen(transformed.length > 0 ? transformed : mockLieferungen)
-          } else {
-            setLieferungen(mockLieferungen)
-          }
-        } else {
-          setLieferungen(mockLieferungen)
-        }
-      } catch (error) {
-        console.error('Fehler beim Laden der Lieferungen:', error)
-        setLieferungen(mockLieferungen)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadData()
-  }, [])
+  const { data: lieferungen = [], isLoading: loading } = useLieferungen()
 
   const filteredLieferungen = lieferungen.filter((lieferung) => {
     const matchesSearch =
@@ -211,7 +135,7 @@ export default function LieferungenListePage(): JSX.Element {
         <CardContent className="pt-6">
           <DataTable data={filteredLieferungen} columns={columns} />
           <div className="mt-4 text-sm text-muted-foreground">
-            {t('crud.list.showing', { count: filteredLieferungen.length, total: mockLieferungen.length, entityType: entityTypeLabel })}
+            {t('crud.list.showing', { count: filteredLieferungen.length, total: lieferungen.length, entityType: entityTypeLabel })}
           </div>
         </CardContent>
       </Card>

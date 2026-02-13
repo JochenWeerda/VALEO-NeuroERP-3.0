@@ -1,8 +1,8 @@
-***REMOVED*** OIDC Development Setup
+# OIDC Development Setup
 
 Dieser Leitfaden beschreibt, wie VALEO-NeuroERP lokal oder in Testumgebungen mit einem OpenID-Connect-Provider betrieben wird. Für produktive Szenarien gelten strengere Sicherheitsrichtlinien (siehe Security-Handbuch).
 
-***REMOVED******REMOVED*** 1. Token-Konfiguration für lokale Entwicklung
+## 1. Token-Konfiguration für lokale Entwicklung
 
 | Variable | Beschreibung | Default |
 |----------|--------------|---------|
@@ -17,9 +17,9 @@ Dieser Leitfaden beschreibt, wie VALEO-NeuroERP lokal oder in Testumgebungen mit
 
 > Sobald ein echter OIDC-Provider angebunden ist, sollte der Dev-Token deaktiviert werden (entfernen der Variablen).
 
-***REMOVED******REMOVED*** 2. Einen Test-IdP bereitstellen
+## 2. Einen Test-IdP bereitstellen
 
-***REMOVED******REMOVED******REMOVED*** 2.1 Keycloak (lokal per Docker)
+### 2.1 Keycloak (lokal per Docker)
 ```bash
 docker run -d --name keycloak -p 8080:8080 \
   -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin \
@@ -33,15 +33,15 @@ In `.env`:
 ```
 VITE_OIDC_DISCOVERY_URL=http://localhost:8080/realms/valeo-neuro-erp/.well-known/openid-configuration
 VITE_OIDC_CLIENT_ID=valeo-neuro-erp-frontend
-OIDC_CLIENT_SECRET=<secret>  ***REMOVED*** optional für Server-Side-Flows
+OIDC_CLIENT_SECRET=<secret>  # optional für Server-Side-Flows
 ```
 
-***REMOVED******REMOVED******REMOVED*** 2.2 Azure AD / Auth0 / Okta
+### 2.2 Azure AD / Auth0 / Okta
 - Registriere eine App, aktiviere `Authorization Code` + PKCE.
 - Setze Redirect-URL auf `http://localhost:3000/callback` (Frontend) bzw. `http://localhost:8000/auth/callback` (Backend, falls genutzt).
 - Notiere `client_id`, `client_secret` (falls erforderlich) und die Discovery-URL.
 
-***REMOVED******REMOVED*** 3. Backend-Konfiguration
+## 3. Backend-Konfiguration
 
 Die FastAPI-Anwendung nutzt Pydantic Settings (`app/core/config.py`). Folgende Variablen sollten gesetzt werden:
 ```
@@ -52,7 +52,7 @@ API_DEV_TOKEN=<optional, nur für lokale Tests>
 ```
 > Aktuell erzwingt die Middleware mindestens einen Bearer-Token. Sobald ein IdP aktiv ist, muss der Token validiert und optional gegen Rollen (`roles`-Claim) geprüft werden.
 
-***REMOVED******REMOVED*** 4. Frontend-Konfiguration
+## 4. Frontend-Konfiguration
 
 `packages/frontend-web/env.example` enthält die wichtigsten Parameter:
 ```
@@ -64,12 +64,13 @@ VITE_API_DEV_TOKEN=<Fallback, optional>
 ```
 Trigger den Login über `auth.login()` im Frontend; die Bibliothek nutzt PKCE und speichert Tokens in `localStorage`.
 
-***REMOVED******REMOVED*** 5. Test-Strategie
+## 5. Test-Strategie
 - **Lokale Entwicklung:** Dev-Token aktiv lassen, während IdP eingerichtet wird. Endpoints, die Auth erfordern, sollten mit `Authorization: Bearer <token>` angesprochen werden.
 - **CI/CD:** Tokens als Secrets setzen (z. B. `API_DEV_TOKEN`, `VITE_API_DEV_TOKEN`) oder Test-IdP per Docker im Workflow starten.
 - **Playwright:** Übergib `API_URL` und `API_DEV_TOKEN`, damit die API-Tests authentifiziert laufen.
 
-***REMOVED******REMOVED*** 6. Nächste Schritte
+## 6. Nächste Schritte
 1. Bearer-Middleware um JWT-Validierung erweitern (je nach Provider).
 2. Rollen-/Scope-Mapping im Backend implementieren (RBAC/ABAC).
 3. Dev-Token in Staging/Production deaktivieren.
+

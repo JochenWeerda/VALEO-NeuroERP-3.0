@@ -49,11 +49,11 @@ class StorageType(Enum):
 
 class RetentionPolicy(Enum):
     """Data retention policies"""
-    DAILY = "daily"  ***REMOVED*** Keep daily backups for 30 days
-    WEEKLY = "weekly"  ***REMOVED*** Keep weekly backups for 1 year
-    MONTHLY = "monthly"  ***REMOVED*** Keep monthly backups for 7 years
-    YEARLY = "yearly"  ***REMOVED*** Keep yearly backups indefinitely
-    COMPLIANCE = "compliance"  ***REMOVED*** Legal retention requirements
+    DAILY = "daily"  # Keep daily backups for 30 days
+    WEEKLY = "weekly"  # Keep weekly backups for 1 year
+    MONTHLY = "monthly"  # Keep monthly backups for 7 years
+    YEARLY = "yearly"  # Keep yearly backups indefinitely
+    COMPLIANCE = "compliance"  # Legal retention requirements
 
 
 @dataclass
@@ -66,13 +66,13 @@ class BackupJob:
     source_paths: List[str]
     destination_path: str
     storage_type: StorageType
-    schedule: str  ***REMOVED*** Cron expression
+    schedule: str  # Cron expression
     retention_policy: RetentionPolicy
     compression_enabled: bool = True
     encryption_enabled: bool = True
     verification_enabled: bool = True
     max_parallel_jobs: int = 2
-    timeout_minutes: int = 480  ***REMOVED*** 8 hours
+    timeout_minutes: int = 480  # 8 hours
     is_active: bool = True
     created_at: datetime = field(default_factory=datetime.utcnow)
     last_run: Optional[datetime] = None
@@ -103,7 +103,7 @@ class BackupRestore:
     """Backup restore operation"""
     id: str
     backup_execution_id: str
-    restore_type: str  ***REMOVED*** full, partial, point_in_time
+    restore_type: str  # full, partial, point_in_time
     target_path: str
     requested_by: str
     requested_at: datetime
@@ -143,19 +143,19 @@ class ISO27001AutomatedBackup:
         self.encryption_key = encryption_key or "default-backup-key-change-in-production"
         self.storage = storage_service
 
-        ***REMOVED*** Backup management
+        # Backup management
         self.backup_jobs: Dict[str, BackupJob] = {}
         self.backup_executions: List[BackupExecution] = []
         self.backup_restores: List[BackupRestore] = []
         self.backup_storages: Dict[str, BackupStorage] = {}
 
-        ***REMOVED*** Backup policies
+        # Backup policies
         self.backup_policies = self._initialize_backup_policies()
 
-        ***REMOVED*** Retention policies
+        # Retention policies
         self.retention_policies = self._initialize_retention_policies()
 
-        ***REMOVED*** Encryption settings
+        # Encryption settings
         self.encryption_settings = self._initialize_encryption_settings()
 
     def _initialize_backup_policies(self) -> Dict[str, Dict[str, Any]]:
@@ -164,8 +164,8 @@ class ISO27001AutomatedBackup:
             'critical_business_data': {
                 'backup_frequency': 'hourly',
                 'retention_period_days': 365,
-                'rpo_max_minutes': 60,  ***REMOVED*** Recovery Point Objective
-                'rto_max_hours': 4,     ***REMOVED*** Recovery Time Objective
+                'rpo_max_minutes': 60,  # Recovery Point Objective
+                'rto_max_hours': 4,     # Recovery Time Objective
                 'encryption_required': True,
                 'offsite_replication': True,
                 'verification_required': True
@@ -173,7 +173,7 @@ class ISO27001AutomatedBackup:
             'important_business_data': {
                 'backup_frequency': 'daily',
                 'retention_period_days': 180,
-                'rpo_max_minutes': 1440,  ***REMOVED*** 24 hours
+                'rpo_max_minutes': 1440,  # 24 hours
                 'rto_max_hours': 24,
                 'encryption_required': True,
                 'offsite_replication': True,
@@ -190,9 +190,9 @@ class ISO27001AutomatedBackup:
             },
             'archival_data': {
                 'backup_frequency': 'weekly',
-                'retention_period_days': 2555,  ***REMOVED*** 7 years
-                'rpo_max_minutes': 10080,  ***REMOVED*** 1 week
-                'rto_max_hours': 168,  ***REMOVED*** 1 week
+                'retention_period_days': 2555,  # 7 years
+                'rpo_max_minutes': 10080,  # 1 week
+                'rto_max_hours': 168,  # 1 week
                 'encryption_required': True,
                 'offsite_replication': True,
                 'verification_required': True
@@ -226,7 +226,7 @@ class ISO27001AutomatedBackup:
                 'compliance_required': True
             },
             RetentionPolicy.COMPLIANCE: {
-                'keep_years': 30,  ***REMOVED*** Based on legal requirements
+                'keep_years': 30,  # Based on legal requirements
                 'legal_hold': True,
                 'tamper_proof': True,
                 'compliance_required': True
@@ -238,7 +238,7 @@ class ISO27001AutomatedBackup:
         return {
             'algorithm': 'AES-256-GCM',
             'key_rotation_days': 90,
-            'hsm_integration': False,  ***REMOVED*** Hardware Security Module
+            'hsm_integration': False,  # Hardware Security Module
             'key_backup_enabled': True,
             'encryption_verification': True
         }
@@ -250,7 +250,7 @@ class ISO27001AutomatedBackup:
         """
         job_id = str(uuid.uuid4())
 
-        ***REMOVED*** Validate job data
+        # Validate job data
         self._validate_backup_job_data(job_data)
 
         job = BackupJob(
@@ -270,7 +270,7 @@ class ISO27001AutomatedBackup:
             timeout_minutes=job_data.get('timeout_minutes', 480)
         )
 
-        ***REMOVED*** Calculate next run time
+        # Calculate next run time
         job.next_run = self._calculate_next_run(job.schedule)
 
         self.backup_jobs[job_id] = job
@@ -286,18 +286,18 @@ class ISO27001AutomatedBackup:
             if field not in data:
                 raise ValueError(f"Required field missing: {field}")
 
-        ***REMOVED*** Validate backup type
+        # Validate backup type
         try:
             BackupType[data['backup_type'].upper()]
         except KeyError:
             raise ValueError(f"Invalid backup type: {data['backup_type']}")
 
-        ***REMOVED*** Validate source paths exist
+        # Validate source paths exist
         for path in data['source_paths']:
             if not os.path.exists(path):
                 raise ValueError(f"Source path does not exist: {path}")
 
-        ***REMOVED*** Validate destination path is writable
+        # Validate destination path is writable
         dest_path = data['destination_path']
         dest_dir = os.path.dirname(dest_path)
         if not os.access(dest_dir, os.W_OK):
@@ -305,8 +305,8 @@ class ISO27001AutomatedBackup:
 
     def _calculate_next_run(self, schedule: str) -> datetime:
         """Calculate next run time from cron expression"""
-        ***REMOVED*** Simplified cron parsing - in production, use a proper cron library
-        ***REMOVED*** For now, assume schedule is like "0 2 * * *" (daily at 2 AM)
+        # Simplified cron parsing - in production, use a proper cron library
+        # For now, assume schedule is like "0 2 * * *" (daily at 2 AM)
         now = datetime.utcnow()
 
         if schedule == "hourly":
@@ -319,7 +319,7 @@ class ISO27001AutomatedBackup:
                 days_until_sunday = 7
             next_run = (now + timedelta(days=days_until_sunday)).replace(hour=2, minute=0, second=0, microsecond=0)
         else:
-            ***REMOVED*** Default to daily
+            # Default to daily
             next_run = now.replace(hour=2, minute=0, second=0, microsecond=0) + timedelta(days=1)
 
         return next_run
@@ -346,10 +346,10 @@ class ISO27001AutomatedBackup:
         self.backup_executions.append(execution)
 
         try:
-            ***REMOVED*** Execute the backup
+            # Execute the backup
             result = self._perform_backup(job, execution)
 
-            ***REMOVED*** Update execution with results
+            # Update execution with results
             execution.completed_at = datetime.utcnow()
             execution.status = BackupStatus.COMPLETED
             execution.total_size_bytes = result['total_size']
@@ -358,18 +358,18 @@ class ISO27001AutomatedBackup:
             execution.duration_seconds = int((execution.completed_at - execution.started_at).total_seconds())
             execution.checksum = result['checksum']
 
-            ***REMOVED*** Perform verification if enabled
+            # Perform verification if enabled
             if job.verification_enabled:
                 verification_result = self._verify_backup(execution)
                 execution.verification_status = "passed" if verification_result else "failed"
                 if not verification_result:
                     execution.status = BackupStatus.VERIFICATION_FAILED
 
-            ***REMOVED*** Update job last run time
+            # Update job last run time
             job.last_run = execution.started_at
             job.next_run = self._calculate_next_run(job.schedule)
 
-            ***REMOVED*** Clean up old backups based on retention policy
+            # Clean up old backups based on retention policy
             self._cleanup_old_backups(job)
 
             logger.info(f"Backup job completed: {job.name} - {execution.files_count} files, "
@@ -391,14 +391,14 @@ class ISO27001AutomatedBackup:
         files_count = 0
         checksums = []
 
-        ***REMOVED*** Create backup destination directory
+        # Create backup destination directory
         backup_dir = os.path.join(job.destination_path, f"backup_{execution.execution_id}")
         os.makedirs(backup_dir, exist_ok=True)
 
         try:
             for source_path in job.source_paths:
                 if os.path.isfile(source_path):
-                    ***REMOVED*** Single file backup
+                    # Single file backup
                     dest_file = os.path.join(backup_dir, os.path.basename(source_path))
                     self._backup_file(source_path, dest_file, job)
                     file_size = os.path.getsize(source_path)
@@ -406,14 +406,14 @@ class ISO27001AutomatedBackup:
                     files_count += 1
                     checksums.append(self._calculate_file_checksum(source_path))
                 elif os.path.isdir(source_path):
-                    ***REMOVED*** Directory backup
+                    # Directory backup
                     for root, dirs, files in os.walk(source_path):
                         for file in files:
                             src_file = os.path.join(root, file)
                             rel_path = os.path.relpath(src_file, source_path)
                             dest_file = os.path.join(backup_dir, rel_path)
 
-                            ***REMOVED*** Create destination directory
+                            # Create destination directory
                             os.makedirs(os.path.dirname(dest_file), exist_ok=True)
 
                             self._backup_file(src_file, dest_file, job)
@@ -422,16 +422,16 @@ class ISO27001AutomatedBackup:
                             files_count += 1
                             checksums.append(self._calculate_file_checksum(src_file))
 
-            ***REMOVED*** Compress if enabled
+            # Compress if enabled
             compressed_size = total_size
             if job.compression_enabled:
                 compressed_size = self._compress_backup(backup_dir)
 
-            ***REMOVED*** Encrypt if enabled
+            # Encrypt if enabled
             if job.encryption_enabled:
                 self._encrypt_backup(backup_dir)
 
-            ***REMOVED*** Calculate overall checksum
+            # Calculate overall checksum
             overall_checksum = hashlib.sha256(json.dumps(checksums, sort_keys=True).encode()).hexdigest()
 
             return {
@@ -442,7 +442,7 @@ class ISO27001AutomatedBackup:
             }
 
         except Exception as e:
-            ***REMOVED*** Clean up failed backup
+            # Clean up failed backup
             if os.path.exists(backup_dir):
                 shutil.rmtree(backup_dir)
             raise e
@@ -452,27 +452,27 @@ class ISO27001AutomatedBackup:
         if job.backup_type == BackupType.FULL:
             shutil.copy2(src, dest)
         elif job.backup_type == BackupType.INCREMENTAL:
-            ***REMOVED*** In production, check modification time against last backup
+            # In production, check modification time against last backup
             shutil.copy2(src, dest)
         elif job.backup_type == BackupType.DIFFERENTIAL:
-            ***REMOVED*** In production, check against last full backup
+            # In production, check against last full backup
             shutil.copy2(src, dest)
 
     def _compress_backup(self, backup_dir: str) -> int:
         """Compress backup directory"""
-        ***REMOVED*** Simplified compression - in production, use proper compression library
+        # Simplified compression - in production, use proper compression library
         total_size = 0
         for root, dirs, files in os.walk(backup_dir):
             for file in files:
                 total_size += os.path.getsize(os.path.join(root, file))
 
-        ***REMOVED*** Simulate compression (reduce size by 30%)
+        # Simulate compression (reduce size by 30%)
         return int(total_size * 0.7)
 
     def _encrypt_backup(self, backup_dir: str):
         """Encrypt backup directory"""
-        ***REMOVED*** In production, implement proper encryption
-        ***REMOVED*** For now, just mark as encrypted
+        # In production, implement proper encryption
+        # For now, just mark as encrypted
         pass
 
     def _calculate_file_checksum(self, file_path: str) -> str:
@@ -485,8 +485,8 @@ class ISO27001AutomatedBackup:
 
     def _verify_backup(self, execution: BackupExecution) -> bool:
         """Verify backup integrity"""
-        ***REMOVED*** In production, implement proper verification
-        ***REMOVED*** For now, simulate verification
+        # In production, implement proper verification
+        # For now, simulate verification
         return True
 
     def _calculate_retention_expiry(self, policy: RetentionPolicy) -> datetime:
@@ -496,7 +496,7 @@ class ISO27001AutomatedBackup:
 
     def _cleanup_old_backups(self, job: BackupJob):
         """Clean up old backups based on retention policy"""
-        ***REMOVED*** In production, implement proper cleanup logic
+        # In production, implement proper cleanup logic
         pass
 
     def restore_from_backup(self, restore_data: Dict[str, Any]) -> str:
@@ -518,7 +518,7 @@ class ISO27001AutomatedBackup:
         self.backup_restores.append(restore)
 
         try:
-            ***REMOVED*** Find backup execution
+            # Find backup execution
             backup_execution = None
             for execution in self.backup_executions:
                 if execution.id == restore_data['backup_execution_id']:
@@ -528,17 +528,17 @@ class ISO27001AutomatedBackup:
             if not backup_execution:
                 raise ValueError(f"Backup execution not found: {restore_data['backup_execution_id']}")
 
-            ***REMOVED*** Perform restore
+            # Perform restore
             restore.started_at = datetime.utcnow()
             result = self._perform_restore(backup_execution, restore)
 
-            ***REMOVED*** Update restore with results
+            # Update restore with results
             restore.completed_at = datetime.utcnow()
             restore.status = "completed"
             restore.files_restored = result['files_restored']
             restore.size_restored_bytes = result['size_restored']
 
-            ***REMOVED*** Verify restore if requested
+            # Verify restore if requested
             if restore_data.get('verify_restore', True):
                 verification_result = self._verify_restore(restore)
                 restore.verification_status = "passed" if verification_result else "failed"
@@ -556,8 +556,8 @@ class ISO27001AutomatedBackup:
 
     def _perform_restore(self, backup_execution: BackupExecution, restore: BackupRestore) -> Dict[str, Any]:
         """Perform the actual restore operation"""
-        ***REMOVED*** In production, implement proper restore logic
-        ***REMOVED*** For now, simulate restore
+        # In production, implement proper restore logic
+        # For now, simulate restore
         return {
             'files_restored': 100,
             'size_restored': 1024000
@@ -565,17 +565,17 @@ class ISO27001AutomatedBackup:
 
     def _verify_restore(self, restore: BackupRestore) -> bool:
         """Verify restore integrity"""
-        ***REMOVED*** In production, implement proper verification
+        # In production, implement proper verification
         return True
 
     def get_backup_status(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Get comprehensive backup system status"""
-        ***REMOVED*** Filter data by tenant
+        # Filter data by tenant
         tenant_jobs = [j for j in self.backup_jobs.values() if j.id.startswith(tenant_id)]
         tenant_executions = [e for e in self.backup_executions if e.job_id.startswith(tenant_id)]
-        recent_executions = tenant_executions[-100:]  ***REMOVED*** Last 100 executions
+        recent_executions = tenant_executions[-100:]  # Last 100 executions
 
-        ***REMOVED*** Calculate metrics
+        # Calculate metrics
         job_stats = self._calculate_job_statistics(tenant_jobs)
         execution_stats = self._calculate_execution_statistics(recent_executions)
         storage_stats = self._calculate_storage_statistics()
@@ -655,7 +655,7 @@ class ISO27001AutomatedBackup:
         """Assess ISO 27001 backup compliance"""
         issues = []
 
-        ***REMOVED*** Check for jobs without recent executions
+        # Check for jobs without recent executions
         for job in jobs:
             if job.is_active:
                 recent_executions = [e for e in executions if e.job_id == job.id and e.completed_at]
@@ -665,18 +665,18 @@ class ISO27001AutomatedBackup:
                     last_execution = max(recent_executions, key=lambda x: x.completed_at)
                     days_since_last = (datetime.utcnow() - last_execution.completed_at).days
 
-                    ***REMOVED*** Check based on schedule
+                    # Check based on schedule
                     if job.schedule == "daily" and days_since_last > 2:
                         issues.append(f"Job {job.name} overdue for execution ({days_since_last} days)")
                     elif job.schedule == "weekly" and days_since_last > 9:
                         issues.append(f"Job {job.name} overdue for execution ({days_since_last} days)")
 
-        ***REMOVED*** Check for failed executions
+        # Check for failed executions
         failed_executions = len([e for e in executions if e.status == BackupStatus.FAILED])
-        if failed_executions > len(executions) * 0.1:  ***REMOVED*** More than 10% failures
+        if failed_executions > len(executions) * 0.1:  # More than 10% failures
             issues.append(f"High failure rate: {failed_executions} failed executions")
 
-        ***REMOVED*** Check encryption compliance
+        # Check encryption compliance
         unencrypted_jobs = len([j for j in jobs if not j.encryption_enabled])
         if unencrypted_jobs > 0:
             issues.append(f"{unencrypted_jobs} jobs without encryption enabled")
@@ -714,7 +714,7 @@ class ISO27001AutomatedBackup:
         """Get active backup system alerts"""
         alerts = []
 
-        ***REMOVED*** Check for failed backups
+        # Check for failed backups
         recent_failures = [e for e in self.backup_executions[-50:]
                           if e.status == BackupStatus.FAILED and e.job_id.startswith(tenant_id)]
         if recent_failures:
@@ -725,7 +725,7 @@ class ISO27001AutomatedBackup:
                 'details': {'failed_backups': len(recent_failures)}
             })
 
-        ***REMOVED*** Check for overdue backups
+        # Check for overdue backups
         overdue_jobs = []
         for job in self.backup_jobs.values():
             if job.is_active and job.id.startswith(tenant_id) and job.next_run:
@@ -740,7 +740,7 @@ class ISO27001AutomatedBackup:
                 'details': {'overdue_jobs': overdue_jobs}
             })
 
-        ***REMOVED*** Check storage utilization
+        # Check storage utilization
         for storage in self.backup_storages.values():
             utilization = (storage.used_bytes / storage.capacity_bytes * 100) if storage.capacity_bytes > 0 else 0
             if utilization > 90:

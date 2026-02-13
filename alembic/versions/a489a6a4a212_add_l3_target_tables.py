@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 
-***REMOVED*** revision identifiers, used by Alembic.
+# revision identifiers, used by Alembic.
 revision: str = 'a489a6a4a212'
 down_revision: Union[str, None] = '1368e3f15650'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -20,10 +20,14 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ***REMOVED*** Create l3_staging schema for raw import
+    # Create l3_staging schema for raw import
     op.execute("CREATE SCHEMA IF NOT EXISTS l3_staging")
 
-    ***REMOVED*** Domain Finance tables
+    # Ensure target schemas exist on a fresh DB.
+    for schema in ("domain_finance", "domain_crm", "domain_hr", "domain_mfg", "domain_inventory"):
+        op.execute(f"CREATE SCHEMA IF NOT EXISTS {schema}")
+
+    # Domain Finance tables
     op.create_table('period_closure',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
@@ -57,7 +61,7 @@ def upgrade() -> None:
         schema='domain_finance'
     )
 
-    ***REMOVED*** Domain CRM tables
+    # Domain CRM tables
     op.create_table('cancellation_reason',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
@@ -85,7 +89,7 @@ def upgrade() -> None:
         schema='domain_crm'
     )
 
-    ***REMOVED*** Domain Inventory tables
+    # Domain Inventory tables
     op.create_table('stock_item',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
@@ -109,7 +113,7 @@ def upgrade() -> None:
         schema='domain_inventory'
     )
 
-    ***REMOVED*** Domain HR tables
+    # Domain HR tables
     op.create_table('person',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
@@ -136,7 +140,7 @@ def upgrade() -> None:
         schema='domain_hr'
     )
 
-    ***REMOVED*** Domain Manufacturing tables
+    # Domain Manufacturing tables
     op.create_table('bill_of_material',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
@@ -172,7 +176,7 @@ def upgrade() -> None:
         schema='domain_mfg'
     )
 
-    ***REMOVED*** Create indexes for performance
+    # Create indexes for performance
     op.create_index('idx_period_closure_fiscal_year', 'period_closure', ['fiscal_year'], schema='domain_finance')
     op.create_index('idx_sales_order_currency', 'sales_order', ['currency_code'], schema='domain_finance')
     op.create_index('idx_opportunity_stage', 'opportunity', ['stage'], schema='domain_crm')
@@ -182,7 +186,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    ***REMOVED*** Drop indexes
+    # Drop indexes
     op.drop_index('idx_production_event_ts', schema='domain_mfg')
     op.drop_index('idx_employment_dates', schema='domain_hr')
     op.drop_index('idx_stock_movement_quantity', schema='domain_inventory')
@@ -190,7 +194,7 @@ def downgrade() -> None:
     op.drop_index('idx_sales_order_currency', schema='domain_finance')
     op.drop_index('idx_period_closure_fiscal_year', schema='domain_finance')
 
-    ***REMOVED*** Drop tables
+    # Drop tables
     op.drop_table('production_event', schema='domain_mfg')
     op.drop_table('production_order', schema='domain_mfg')
     op.drop_table('bill_of_material', schema='domain_mfg')
@@ -203,5 +207,5 @@ def downgrade() -> None:
     op.drop_table('sales_order', schema='domain_finance')
     op.drop_table('period_closure', schema='domain_finance')
 
-    ***REMOVED*** Drop staging schema
+    # Drop staging schema
     op.execute("DROP SCHEMA IF EXISTS l3_staging CASCADE")

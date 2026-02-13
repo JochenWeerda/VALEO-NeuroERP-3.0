@@ -147,6 +147,16 @@ export interface PrePurchase {
   valid_until?: string
 }
 
+export interface PortalInquiryCreate {
+  anforderer: string
+  typ?: 'ANF' | 'BANF'
+  prioritaet?: 'niedrig' | 'normal' | 'hoch' | 'dringend'
+  artikel?: string
+  begruendung: string
+  notizen?: string
+  datum?: string
+}
+
 // ============================================
 // API Funktionen
 // ============================================
@@ -206,41 +216,26 @@ export async function getPortalProducts(options?: {
   skip?: number
   limit?: number
 }): Promise<PortalProductList> {
-  try {
-    const params = new URLSearchParams({
-      tenant_id: TENANT_ID,
-      ...(options?.kategorie && options.kategorie !== 'alle' ? { kategorie: options.kategorie } : {}),
-      ...(options?.search ? { search: options.search } : {}),
-      ...(options?.skip ? { skip: String(options.skip) } : {}),
-      ...(options?.limit ? { limit: String(options.limit) } : {}),
-    })
-    
-    const response = await apiClient.get<PortalProductList>(`/api/v1/portal/products?${params}`)
-    
-    // Transformiere Produkte für Frontend
-    return {
-      ...response.data,
-      items: response.data.items.map(item => transformProduct(item as unknown as Record<string, unknown>))
-    }
-  } catch (error) {
-    // Fallback: Leere Liste bei API-Fehler (Mock-Daten werden im Frontend verwendet)
-    return {
-      items: [],
-      total: 0,
-      page: 1,
-      size: 50,
-      has_contracts: 0,
-      has_pre_purchases: 0
-    }
+  const params = new URLSearchParams({
+    tenant_id: TENANT_ID,
+    ...(options?.kategorie && options.kategorie !== 'alle' ? { kategorie: options.kategorie } : {}),
+    ...(options?.search ? { search: options.search } : {}),
+    ...(options?.skip ? { skip: String(options.skip) } : {}),
+    ...(options?.limit ? { limit: String(options.limit) } : {}),
+  })
+  const response = await apiClient.get<PortalProductList>(`/api/v1/portal/products?${params.toString()}`)
+  // Transformiere Produkte fuer Frontend
+  return {
+    ...response.data,
+    items: response.data.items.map(item => transformProduct(item as unknown as Record<string, unknown>))
   }
 }
-
 /**
  * Erstellt eine neue Bestellung
  */
 export async function createOrder(order: OrderCreate): Promise<OrderResponse> {
   const params = new URLSearchParams({ tenant_id: TENANT_ID })
-  const response = await apiClient.post<OrderResponse>(`/api/v1/portal/orders?${params}`, order)
+  const response = await apiClient.post<OrderResponse>(`/api/v1/portal/orders?${params.toString()}`, order)
   return response.data
 }
 
@@ -260,7 +255,7 @@ export async function getOrders(options?: {
       ...(options?.limit ? { limit: String(options.limit) } : {}),
     })
     
-    const response = await apiClient.get<{ items: OrderListItem[]; total: number }>(`/api/v1/portal/orders?${params}`)
+    const response = await apiClient.get<{ items: OrderListItem[]; total: number }>(`/api/v1/portal/orders?${params.toString()}`)
     return response.data
   } catch {
     return { items: [], total: 0 }
@@ -273,7 +268,7 @@ export async function getOrders(options?: {
 export async function getOrder(orderId: string): Promise<OrderResponse | null> {
   try {
     const params = new URLSearchParams({ tenant_id: TENANT_ID })
-    const response = await apiClient.get<OrderResponse>(`/api/v1/portal/orders/${orderId}?${params}`)
+    const response = await apiClient.get<OrderResponse>(`/api/v1/portal/orders/${orderId}?${params.toString()}`)
     return response.data
   } catch {
     return null
@@ -286,7 +281,7 @@ export async function getOrder(orderId: string): Promise<OrderResponse | null> {
 export async function getContracts(): Promise<Contract[]> {
   try {
     const params = new URLSearchParams({ tenant_id: TENANT_ID })
-    const response = await apiClient.get<Contract[]>(`/api/v1/portal/contracts?${params}`)
+    const response = await apiClient.get<Contract[]>(`/api/v1/portal/contracts?${params.toString()}`)
     return response.data
   } catch {
     return []
@@ -299,17 +294,36 @@ export async function getContracts(): Promise<Contract[]> {
 export async function getPrePurchases(): Promise<PrePurchase[]> {
   try {
     const params = new URLSearchParams({ tenant_id: TENANT_ID })
-    const response = await apiClient.get<PrePurchase[]>(`/api/v1/portal/pre-purchases?${params}`)
+    const response = await apiClient.get<PrePurchase[]>(`/api/v1/portal/pre-purchases?${params.toString()}`)
     return response.data
   } catch {
     return []
   }
 }
-
+export async function createPortalInquiry(
+  inquiry: PortalInquiryCreate,
+): Promise<{ id: string; anfrageNummer?: string; message?: string }> {
+  const payload = {
+    typ: inquiry.typ ?? 'ANF',
+    anforderer: inquiry.anforderer,
+    prioritaet: inquiry.prioritaet ?? 'normal',
+    artikel: inquiry.artikel,
+    begruendung: inquiry.begruendung,
+    notizen: inquiry.notizen,
+    datum: inquiry.datum,
+    status: 'ENTWURF',
+  }
+  const response = await apiClient.post<{ id: string; anfrageNummer?: string; message?: string }>(
+    '/api/einkauf/anfragen',
+    payload,
+  )
+  return response.data
+}
 // Export als Objekt für einfachen Import
 export const portalService = {
   getProducts: getPortalProducts,
   createOrder,
+  createInquiry: createPortalInquiry,
   getOrders,
   getOrder,
   getContracts,

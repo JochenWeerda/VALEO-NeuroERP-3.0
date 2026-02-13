@@ -144,7 +144,7 @@ class ProcessPerformance:
     performance_metric: str
     current_value: float
     target_value: float
-    trend: str  ***REMOVED*** improving, stable, declining
+    trend: str  # improving, stable, declining
     last_updated: datetime
     responsible_party: str
     action_required: bool = False
@@ -162,7 +162,7 @@ class ISO9001ContinuousImprovement:
         self.quality = quality_service
         self.audit = audit_service
 
-        ***REMOVED*** Improvement management
+        # Improvement management
         self.quality_metrics: Dict[str, QualityMetric] = {}
         self.metric_measurements: List[MetricMeasurement] = {}
         self.improvement_initiatives: Dict[str, ImprovementInitiative] = {}
@@ -170,10 +170,10 @@ class ISO9001ContinuousImprovement:
         self.corrective_actions: Dict[str, CorrectiveAction] = {}
         self.process_performance: Dict[str, ProcessPerformance] = {}
 
-        ***REMOVED*** Improvement configuration
+        # Improvement configuration
         self.improvement_config = self._initialize_improvement_config()
 
-        ***REMOVED*** Quality objectives
+        # Quality objectives
         self.quality_objectives = self._initialize_quality_objectives()
 
     def _initialize_improvement_config(self) -> Dict[str, Any]:
@@ -191,9 +191,9 @@ class ISO9001ContinuousImprovement:
                 'low': {'sla_days': 180, 'resources': 'as_available'}
             },
             'quality_gates': {
-                'metric_deviation_threshold': 0.1,  ***REMOVED*** 10% deviation triggers review
-                'improvement_success_rate_target': 0.8,  ***REMOVED*** 80% success rate
-                'review_completion_target': 0.95  ***REMOVED*** 95% of reviews completed on time
+                'metric_deviation_threshold': 0.1,  # 10% deviation triggers review
+                'improvement_success_rate_target': 0.8,  # 80% success rate
+                'review_completion_target': 0.95  # 95% of reviews completed on time
             },
             'stakeholder_engagement': {
                 'management_involvement': True,
@@ -284,7 +284,7 @@ class ISO9001ContinuousImprovement:
 
         self.metric_measurements[measurement_id].append(measurement)
 
-        ***REMOVED*** Check for significant deviations
+        # Check for significant deviations
         self._check_metric_deviation(measurement)
 
         logger.info(f"Metric measurement recorded: {measurement.measured_value} for metric {measurement.metric_id}")
@@ -298,7 +298,7 @@ class ISO9001ContinuousImprovement:
             deviation = abs(measurement.measured_value - measurement.target_value) / measurement.target_value
 
             if deviation > deviation_threshold:
-                ***REMOVED*** Create improvement initiative for metric deviation
+                # Create improvement initiative for metric deviation
                 initiative_data = {
                     'title': f"Metric Deviation: {measurement.metric_id}",
                     'description': f"Metric {measurement.metric_id} deviated by {deviation:.1%} from target",
@@ -407,7 +407,7 @@ class ISO9001ContinuousImprovement:
 
         self.management_reviews.append(review)
 
-        ***REMOVED*** Process action items from review
+        # Process action items from review
         for action_item in review.action_items:
             if action_item.get('type') == 'improvement_initiative':
                 self.create_improvement_initiative(action_item)
@@ -438,7 +438,7 @@ class ISO9001ContinuousImprovement:
 
         self.process_performance[performance_id] = performance
 
-        ***REMOVED*** Check if action is required
+        # Check if action is required
         if performance.action_required:
             initiative_data = {
                 'title': f"Process Performance: {process_name}",
@@ -462,13 +462,13 @@ class ISO9001ContinuousImprovement:
 
     def get_improvement_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Get comprehensive improvement dashboard"""
-        ***REMOVED*** Filter data by tenant
+        # Filter data by tenant
         tenant_metrics = [m for m in self.quality_metrics.values() if m.id.startswith(tenant_id)]
         tenant_initiatives = [i for i in self.improvement_initiatives.values() if i.id.startswith(tenant_id)]
         tenant_reviews = [r for r in self.management_reviews if r.id.startswith(tenant_id)]
         tenant_actions = [a for a in self.corrective_actions.values() if a.id.startswith(tenant_id)]
 
-        ***REMOVED*** Calculate metrics
+        # Calculate metrics
         metric_performance = self._calculate_metric_performance(tenant_metrics)
         initiative_progress = self._calculate_initiative_progress(tenant_initiatives)
         review_compliance = self._calculate_review_compliance(tenant_reviews)
@@ -495,7 +495,7 @@ class ISO9001ContinuousImprovement:
         total_deviation = 0
 
         for metric in metrics:
-            ***REMOVED*** Get latest measurement
+            # Get latest measurement
             measurements = [m for m_list in self.metric_measurements.values()
                           for m in m_list if m.metric_id == metric.id]
             if measurements:
@@ -525,7 +525,7 @@ class ISO9001ContinuousImprovement:
 
         completion_rate = (completed / total * 100) if total > 0 else 0
 
-        ***REMOVED*** Calculate by type
+        # Calculate by type
         by_type = {}
         for initiative in initiatives:
             type_key = initiative.improvement_type.value
@@ -602,9 +602,9 @@ class ISO9001ContinuousImprovement:
         objectives_status = {}
 
         for obj_name, objective in self.quality_objectives.items():
-            ***REMOVED*** Get latest measurements for this objective
-            ***REMOVED*** This is a simplified implementation
-            current_value = 85.0  ***REMOVED*** Placeholder - would be calculated from actual data
+            # Get latest measurements for this objective
+            # This is a simplified implementation
+            current_value = 85.0  # Placeholder - would be calculated from actual data
             target = objective['target']
 
             status = 'achieved' if current_value >= target else 'not_achieved'
@@ -631,7 +631,7 @@ class ISO9001ContinuousImprovement:
         """Get active improvement alerts"""
         alerts = []
 
-        ***REMOVED*** Check for overdue initiatives
+        # Check for overdue initiatives
         overdue_initiatives = [
             i for i in self.improvement_initiatives.values()
             if i.id.startswith(tenant_id) and i.status != ImprovementStatus.CLOSED and
@@ -646,7 +646,7 @@ class ISO9001ContinuousImprovement:
                 'details': {'overdue_count': len(overdue_initiatives)}
             })
 
-        ***REMOVED*** Check for metric deviations
+        # Check for metric deviations
         deviated_metrics = []
         for metric in self.quality_metrics.values():
             if metric.id.startswith(tenant_id):
@@ -655,7 +655,7 @@ class ISO9001ContinuousImprovement:
                 if measurements:
                     latest = max(measurements, key=lambda x: x.measurement_date)
                     deviation = abs(latest.measured_value - latest.target_value) / latest.target_value
-                    if deviation > 0.1:  ***REMOVED*** 10% deviation
+                    if deviation > 0.1:  # 10% deviation
                         deviated_metrics.append(metric.name)
 
         if deviated_metrics:
@@ -666,7 +666,7 @@ class ISO9001ContinuousImprovement:
                 'details': {'deviated_metrics': deviated_metrics}
             })
 
-        ***REMOVED*** Check for upcoming reviews
+        # Check for upcoming reviews
         next_review = min([r.next_review_date for r in self.management_reviews
                           if r.next_review_date > datetime.utcnow()], default=None)
         if next_review and (next_review - datetime.utcnow()).days <= 7:
@@ -705,24 +705,24 @@ class ISO9001ContinuousImprovement:
         """Assess ISO 9001 continuous improvement compliance"""
         issues = []
 
-        ***REMOVED*** Check quality metrics
+        # Check quality metrics
         if len(metrics) < 5:
             issues.append("Insufficient quality metrics defined for comprehensive monitoring")
 
-        ***REMOVED*** Check improvement initiatives
+        # Check improvement initiatives
         if len(initiatives) < 3:
             issues.append("Limited improvement initiatives - continuous improvement not adequately demonstrated")
 
-        ***REMOVED*** Check management reviews
+        # Check management reviews
         recent_reviews = [r for r in reviews if (datetime.utcnow() - r.review_date).days <= 180]
         if len(recent_reviews) < 2:
             issues.append("Insufficient management reviews conducted in the last 6 months")
 
-        ***REMOVED*** Check corrective actions
+        # Check corrective actions
         if len(actions) < 5:
             issues.append("Limited corrective action records - problem resolution process may be inadequate")
 
-        ***REMOVED*** Check metric monitoring
+        # Check metric monitoring
         active_metrics = len([m for m in metrics if m.is_active])
         if active_metrics < len(metrics) * 0.8:
             issues.append("Many quality metrics are inactive - monitoring coverage insufficient")

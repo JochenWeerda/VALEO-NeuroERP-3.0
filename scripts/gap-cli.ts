@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env ts-node
+#!/usr/bin/env ts-node
 import { Command } from 'commander'
 import { runImport } from './gap/import'
 import { runAggregate } from './gap/aggregate'
@@ -64,3 +64,4 @@ program.parseAsync(process.argv).catch((err) => {
   console.error(err)
   process.exit(1)
 })
+

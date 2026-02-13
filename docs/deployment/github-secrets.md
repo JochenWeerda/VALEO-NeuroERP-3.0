@@ -1,6 +1,6 @@
-***REMOVED*** GitHub Secrets – Compliance Services
+# GitHub Secrets – Compliance Services
 
-***REMOVED******REMOVED*** InfraStat
+## InfraStat
 - `INFRASTAT_SUBMISSION_USERNAME`
 - `INFRASTAT_SUBMISSION_PASSWORD`
 - `INFRASTAT_SUBMISSION_CLIENT_CERT`
@@ -10,7 +10,8 @@ Optional:
 - `INFRASTAT_SUBMISSION_RETRY_ATTEMPTS` (Fallback: 5)
 - `INFRASTAT_SUBMISSION_RETRY_DELAY_SECONDS` (Fallback: 60)
 
-***REMOVED******REMOVED*** Zoll / Exportkontrolle
+## Zoll / Exportkontrolle
 - `ZOLL_OFAC_API_KEY`
 - `ZOLL_EU_API_KEY`
 - (falls benötigt) `ZOLL_SANCTIONS_REFRESH_URL`
+

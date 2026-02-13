@@ -2,14 +2,14 @@ import subprocess
 import logging
 from core.config import settings
 
-***REMOVED*** Configure logging
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def run_alembic_migrations():
     """Alembic-Migrationen ausführen"""
     try:
-        ***REMOVED*** Run migrations
+        # Run migrations
         subprocess.run(["alembic", "upgrade", "head"], check=True)
         logger.info("Alembic-Migrationen erfolgreich ausgeführt")
         
@@ -20,7 +20,7 @@ def run_alembic_migrations():
 def create_new_migration(message):
     """Neue Alembic-Migration erstellen"""
     try:
-        ***REMOVED*** Create new migration
+        # Create new migration
         subprocess.run(["alembic", "revision", "--autogenerate", "-m", message], check=True)
         logger.info(f"Neue Migration erstellt: {message}")
         

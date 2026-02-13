@@ -155,7 +155,7 @@ async def list_booking_templates(
         
     except Exception as e:
         logger.error(f"Error listing booking templates: {e}")
-        ***REMOVED*** Return mock data if table doesn't exist
+        # Return mock data if table doesn't exist
         return [
             BookingTemplateResponse(
                 id="1",
@@ -249,7 +249,7 @@ async def create_booking_template(
     Create a new booking template.
     """
     try:
-        ***REMOVED*** Validate that lines balance
+        # Validate that lines balance
         total_debit_pct = sum(line.debit_percentage for line in template.lines)
         total_credit_pct = sum(line.credit_percentage for line in template.lines)
         
@@ -259,7 +259,7 @@ async def create_booking_template(
                 detail=f"Template lines must balance. Total debit: {total_debit_pct}%, Total credit: {total_credit_pct}%"
             )
         
-        ***REMOVED*** Insert new template
+        # Insert new template
         template_id = str(uuid.uuid4())
         
         import json
@@ -329,21 +329,21 @@ async def apply_booking_template(
     Apply a booking template to create a journal entry.
     """
     try:
-        ***REMOVED*** Get template
+        # Get template
         template = await get_booking_template(template_id, tenant_id, db)
         
         if not template.active:
             raise HTTPException(status_code=400, detail="Template is not active")
         
-        ***REMOVED*** Determine amount
+        # Determine amount
         amount = request.amount or template.default_amount
         if not amount:
             raise HTTPException(status_code=400, detail="Amount is required (either in request or template default)")
         
-        ***REMOVED*** Generate entry number
+        # Generate entry number
         entry_number = f"TMP-{request.entry_date.strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
         
-        ***REMOVED*** Create journal entry
+        # Create journal entry
         entry_id = str(uuid.uuid4())
         journal_entry_insert = text("""
             INSERT INTO domain_erp.journal_entries
@@ -356,7 +356,7 @@ async def apply_booking_template(
         
         description = request.description or template.name
         if template.lines and template.lines[0].description_template:
-            ***REMOVED*** Replace placeholders in description
+            # Replace placeholders in description
             desc_template = template.lines[0].description_template
             if request.variables:
                 for key, value in request.variables.items():
@@ -366,7 +366,7 @@ async def apply_booking_template(
         total_debit = Decimal("0.00")
         total_credit = Decimal("0.00")
         
-        ***REMOVED*** Calculate totals from template lines
+        # Calculate totals from template lines
         for line in template.lines:
             if line.debit_percentage > 0:
                 total_debit += amount * (line.debit_percentage / Decimal("100.00"))
@@ -392,9 +392,9 @@ async def apply_booking_template(
             "total_credit": total_credit
         })
         
-        ***REMOVED*** Create journal entry lines
+        # Create journal entry lines
         for line in template.lines:
-            ***REMOVED*** Get account ID
+            # Get account ID
             account_query = text("""
                 SELECT id FROM domain_erp.chart_of_accounts
                 WHERE account_number = :account_number AND tenant_id = :tenant_id
@@ -414,7 +414,7 @@ async def apply_booking_template(
             
             account_id = str(account_row[0])
             
-            ***REMOVED*** Calculate line amounts
+            # Calculate line amounts
             line_debit = Decimal("0.00")
             line_credit = Decimal("0.00")
             
@@ -428,7 +428,7 @@ async def apply_booking_template(
             elif line.fixed_credit:
                 line_credit = line.fixed_credit
             
-            ***REMOVED*** Line description
+            # Line description
             line_description = description
             if line.description_template:
                 line_desc_template = line.description_template
@@ -437,7 +437,7 @@ async def apply_booking_template(
                         line_desc_template = line_desc_template.replace(f"{{{{{key}}}}}", str(value))
                 line_description = line_desc_template
             
-            ***REMOVED*** Insert journal entry line
+            # Insert journal entry line
             line_id = f"{entry_id}-L{line.line_number}"
             journal_line_insert = text("""
                 INSERT INTO domain_erp.journal_entry_lines
@@ -493,7 +493,7 @@ async def update_booking_template(
     Update an existing booking template.
     """
     try:
-        ***REMOVED*** Build update query dynamically
+        # Build update query dynamically
         update_fields = []
         params = {"template_id": template_id, "tenant_id": tenant_id}
         
@@ -514,7 +514,7 @@ async def update_booking_template(
             update_fields.append("trigger_config = :trigger_config")
             params["trigger_config"] = json.dumps(template.trigger_config)
         if template.lines is not None:
-            ***REMOVED*** Validate balance
+            # Validate balance
             total_debit_pct = sum(line.debit_percentage for line in template.lines)
             total_credit_pct = sum(line.credit_percentage for line in template.lines)
             if abs(total_debit_pct - total_credit_pct) >= Decimal("0.01"):

@@ -16,7 +16,7 @@ class CircuitBreaker:
         if self.open_until is None:
             return False
         if time.monotonic() >= self.open_until:
-            ***REMOVED*** Half-open: reset and allow a trial
+            # Half-open: reset and allow a trial
             self.failures = 0
             self.open_until = None
             return False
@@ -30,4 +30,5 @@ class CircuitBreaker:
         self.failures += 1
         if self.failures >= self.failure_threshold:
             self.open_until = time.monotonic() + self.open_seconds
+
 

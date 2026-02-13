@@ -1,19 +1,19 @@
-***REMOVED***!/bin/bash
-***REMOVED*** ===================================
-***REMOVED*** VALEO NeuroERP - Staging Smoke Tests
-***REMOVED*** ===================================
-***REMOVED*** Version: 3.0.0
-***REMOVED*** Purpose: Automated health checks and functional tests for staging environment
+#!/bin/bash
+# ===================================
+# VALEO NeuroERP - Staging Smoke Tests
+# ===================================
+# Version: 3.0.0
+# Purpose: Automated health checks and functional tests for staging environment
 
 set -e
 
-***REMOVED*** Colors for output
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' ***REMOVED*** No Color
+NC='\033[0m' # No Color
 
-***REMOVED*** Configuration
+# Configuration
 FRONTEND_URL="http://localhost:3001"
 BACKEND_URL="http://localhost:8001"
 BFF_URL="http://localhost:4001"
@@ -22,13 +22,13 @@ POSTGRES_CONTAINER="valeo-staging-postgres"
 REDIS_CONTAINER="valeo-staging-redis"
 KEYCLOAK_CONTAINER="valeo-staging-keycloak"
 
-***REMOVED*** Test counters
+# Test counters
 TESTS_PASSED=0
 TESTS_FAILED=0
 
-***REMOVED*** ===================================
-***REMOVED*** Helper Functions
-***REMOVED*** ===================================
+# ===================================
+# Helper Functions
+# ===================================
 
 log_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
@@ -52,9 +52,9 @@ test_failed() {
     ((TESTS_FAILED++))
 }
 
-***REMOVED*** ===================================
-***REMOVED*** Test Functions
-***REMOVED*** ===================================
+# ===================================
+# Test Functions
+# ===================================
 
 test_postgresql_health() {
     log_info "Testing PostgreSQL Health..."
@@ -226,7 +226,7 @@ test_disk_space() {
 test_memory_usage() {
     log_info "Testing Memory Usage..."
     
-    ***REMOVED*** This is a basic check; might need adjustment for Windows
+    # This is a basic check; might need adjustment for Windows
     if command -v free > /dev/null 2>&1; then
         mem_used=$(free | grep Mem | awk '{print int($3/$2 * 100)}')
         
@@ -240,14 +240,14 @@ test_memory_usage() {
     fi
 }
 
-***REMOVED*** ===================================
-***REMOVED*** API Integration Tests
-***REMOVED*** ===================================
+# ===================================
+# API Integration Tests
+# ===================================
 
 test_api_customers_list() {
     log_info "Testing API - List Customers..."
     
-    ***REMOVED*** Note: This requires authentication in production, but staging might have test endpoints
+    # Note: This requires authentication in production, but staging might have test endpoints
     response=$(curl -s "$BACKEND_URL/api/customers")
     
     if [ $? -eq 0 ]; then
@@ -270,7 +270,7 @@ test_api_health_details() {
             test_failed "API - Detailed Health (Status: $status)"
         fi
     else
-        ***REMOVED*** Fallback if response is just "OK" string
+        # Fallback if response is just "OK" string
         if [ "$response" == "OK" ] || [ "$response" == "ok" ]; then
             test_passed "API - Detailed Health"
         else
@@ -279,9 +279,9 @@ test_api_health_details() {
     fi
 }
 
-***REMOVED*** ===================================
-***REMOVED*** Main Test Runner
-***REMOVED*** ===================================
+# ===================================
+# Main Test Runner
+# ===================================
 
 main() {
     echo "========================================="
@@ -289,48 +289,48 @@ main() {
     echo "========================================="
     echo ""
     
-    ***REMOVED*** Infrastructure Tests
+    # Infrastructure Tests
     echo "--- Infrastructure Health Checks ---"
     test_postgresql_health
     test_redis_health
     test_keycloak_health
     echo ""
     
-    ***REMOVED*** Application Tests
+    # Application Tests
     echo "--- Application Health Checks ---"
     test_backend_health
     test_bff_health
     test_frontend_health
     echo ""
     
-    ***REMOVED*** OIDC Tests
+    # OIDC Tests
     echo "--- OIDC Configuration Tests ---"
     test_keycloak_realm
     test_oidc_discovery
     test_oidc_jwks
     echo ""
     
-    ***REMOVED*** Database & Cache Tests
+    # Database & Cache Tests
     echo "--- Data Layer Tests ---"
     test_database_tables
     test_redis_connection
     echo ""
     
-    ***REMOVED*** API Tests
+    # API Tests
     echo "--- API Tests ---"
     test_backend_docs
     test_api_health_details
     test_cors_headers
     echo ""
     
-    ***REMOVED*** System Tests
+    # System Tests
     echo "--- System Resource Tests ---"
     test_container_status
     test_disk_space
     test_memory_usage
     echo ""
     
-    ***REMOVED*** Summary
+    # Summary
     echo "========================================="
     echo "  Test Summary"
     echo "========================================="
@@ -348,11 +348,11 @@ main() {
     fi
 }
 
-***REMOVED*** ===================================
-***REMOVED*** Run Tests
-***REMOVED*** ===================================
+# ===================================
+# Run Tests
+# ===================================
 
-***REMOVED*** Check if specific test requested
+# Check if specific test requested
 if [ ! -z "$1" ]; then
     case $1 in
         health)
@@ -384,4 +384,5 @@ if [ ! -z "$1" ]; then
 else
     main
 fi
+
 

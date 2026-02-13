@@ -1,21 +1,21 @@
-***REMOVED*** Delivery-Plan Must-Have Gaps – Stand 13.11.2025
+# Delivery-Plan Must-Have Gaps – Stand 13.11.2025
 
-***REMOVED******REMOVED*** Ziel
+## Ziel
 Schrittweise Umsetzung der noch offenen Must-Have-Gaps: **InfraStat**, **Zoll/Exportkontrolle**, **RAG-Gateway**, **QA-Automatisierung**.  
 Plan bezieht sich auf Ergebnisse der Gap-Audit-Datei `docs/roadmap/status/2025-11-13-must-have-gap-audit.md`.
 
 ---
 
-***REMOVED******REMOVED*** 1. InfraStat / Intrastat Automation
+## 1. InfraStat / Intrastat Automation
 
-***REMOVED******REMOVED******REMOVED*** Architektur
+### Architektur
 - Neuer Microservice `services/compliance/infrastat/` (FastAPI + SQLAlchemy).
 - Persistenz: Postgres-Schema `compliance_infrastat` mit Tabellen `declaration_batches`, `declaration_lines`, `validation_errors`, `submission_log`.
 - Event-getriebene Vorbefüllung (NATS Subjects `inventory.shipment.posted`, `purchase.receipt.posted`, `finance.invoice.booked`).
 - Saga-Orchestrierung via bestehendem Workflow-Service (State-Machine `INTRASTAT_SAGA`).
 - Ausleitung: XML/CSV-Export für ELSTER/IDEV (Mock-Endpunkte in QA).
 
-***REMOVED******REMOVED******REMOVED*** Umsetzungs-Backlog
+### Umsetzungs-Backlog
 1. **Scaffolding & Config**  
    - [x] Verzeichnis anlegen, Settings & Dependency Injection aufsetzen (analog Workflow-Service).  
    - [x] Datenbankmigration (Alembic) erzeugen.
@@ -36,20 +36,20 @@ Plan bezieht sich auf Ergebnisse der Gap-Audit-Datei `docs/roadmap/status/2025-1
    - [ ] Prometheus-Metriken (Anzahl Meldungen, Fehlerquote) inkl. Smoke-Test.  
    - [x] Contract-Tests gegen Workflow-Service.
 
-***REMOVED******REMOVED******REMOVED*** Abhängigkeiten
+### Abhängigkeiten
 - Zugriff auf Produkt-/Belegdaten (Inventory-, Finance-Domains).  
 - Referenzdaten (TARIC, Länder-/Warentabellen) als Seed (`data/reference/intrastat/`).
 
 ---
 
-***REMOVED******REMOVED*** 2. Zoll & Exportkontrolle
+## 2. Zoll & Exportkontrolle
 
-***REMOVED******REMOVED******REMOVED*** Architektur
+### Architektur
 - Neuer Microservice `services/compliance/zoll/` mit FastAPI, Async-Postgres und NATS Event-Bus.
 - Module: Screening-Engine (Sanktionslisten), Export-Genehmigungen, Präferenzkalkulation.
 - Event-basierte Workflow-Integration (`compliance.zoll.*`).
 
-***REMOVED******REMOVED******REMOVED*** Umsetzungs-Backlog
+### Umsetzungs-Backlog
 1. **Scaffolding & Config**  
    - [x] Service-Struktur, Settings, DB-Modelle (`ScreeningMatch`, `ExportPermit`, `PreferenceCalculation`).
 2. **Geschäftslogik**  
@@ -65,16 +65,16 @@ Plan bezieht sich auf Ergebnisse der Gap-Audit-Datei `docs/roadmap/status/2025-1
    - [x] Eigener Test-Job in `.github/workflows/ci.yml`.  
    - [ ] Container-Build & Helm Values ergänzen.
 
-***REMOVED******REMOVED******REMOVED*** Nächste Aufgaben
+### Nächste Aufgaben
 - Echtzeit-Updates für Sanktionslisten (Scheduler + Provider-APIs).  
 - Workflow-Definition `export_clearance` mit Block/Review-Knoten.  
 - Präferenzkalkulation an BOM-Service koppeln.
 
 ---
 
-***REMOVED******REMOVED*** 3. RAG-Gateway
+## 3. RAG-Gateway
 
-***REMOVED******REMOVED******REMOVED*** Architektur
+### Architektur
 - Service `services/rag-gateway/` (FastAPI oder Node). Empfehlung: FastAPI für Homogenität.
 - Schnittstellen:
   - `POST /api/v1/retrieval/query` → orchestriert Vector Store + LLM (via `services/ai`).
@@ -84,7 +84,7 @@ Plan bezieht sich auf Ergebnisse der Gap-Audit-Datei `docs/roadmap/status/2025-1
 - AuthN/AuthZ: OAuth2/JWT, Tenant-Scopes.
 - Observability: OpenTelemetry, Prometheus.
 
-***REMOVED******REMOVED******REMOVED*** Umsetzungs-Backlog
+### Umsetzungs-Backlog
 1. **Gerüst & Konfiguration**  
    - Service-Struktur + Settings (`rag_gateway/config.py`).  
    - Dependency Injection (VectorStoreClient, LLMClient).
@@ -101,19 +101,19 @@ Plan bezieht sich auf Ergebnisse der Gap-Audit-Datei `docs/roadmap/status/2025-1
    - Contract-Tests mit `services/ai`.  
    - Load-Test Baseline (Locust/Playwright API).
 
-***REMOVED******REMOVED******REMOVED*** Abhängigkeiten
+### Abhängigkeiten
 - `tools/rag-sync` (bestehend) zur Datenbefüllung.  
 - AI-Service (`services/ai`) für LLM/Embedding Fallback.
 
 ---
 
-***REMOVED******REMOVED*** 4. QA-Automatisierung
+## 4. QA-Automatisierung
 
-***REMOVED******REMOVED******REMOVED*** Zielbild
+### Zielbild
 - Abdeckung der neuen Compliance- und RAG-Komponenten in CI/CD (`.github/workflows/ci.yml`).
 - Kombi aus Unit-, Integration-, Contract- und End-to-End-Tests.
 
-***REMOVED******REMOVED******REMOVED*** Maßnahmen
+### Maßnahmen
 1. **Test-Suites erweitern**
    - `tests/compliance/` um `test_infrastat.py`, `test_customs.py`.  
    - `tests/rag/` für Retrieval und AuthZ.
@@ -132,7 +132,7 @@ Plan bezieht sich auf Ergebnisse der Gap-Audit-Datei `docs/roadmap/status/2025-1
 
 ---
 
-***REMOVED******REMOVED*** Sequenzierung & Verantwortlichkeiten
+## Sequenzierung & Verantwortlichkeiten
 
 | Sprint | Fokus | Deliverables | Hauptteam |
 |--------|-------|--------------|-----------|
@@ -144,10 +144,11 @@ Plan bezieht sich auf Ergebnisse der Gap-Audit-Datei `docs/roadmap/status/2025-1
 
 ---
 
-***REMOVED******REMOVED*** Offene Punkte
+## Offene Punkte
 - Entscheidung über Technik-Stack für RAG-Gateway (Python vs. Node).  
 - Bereitstellung echter Sanktionslisten/TARIC-Daten (Lizenz/Quelle).  
 - Abstimmung mit DevOps bzgl. Infrastruktur (Postgres-Schema, Vector Store Deployment).
 
 _Erstellt von GPT-5 Codex, 13.11.2025_
+
 

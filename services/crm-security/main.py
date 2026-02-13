@@ -19,11 +19,11 @@ app = FastAPI(
     version="1.0.0",
 )
 
-***REMOVED*** Security middleware (must be first)
+# Security middleware (must be first)
 app.add_middleware(SecurityMiddleware)
 app.add_middleware(AuditMiddleware)
 
-***REMOVED*** CORS middleware
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -32,13 +32,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-***REMOVED*** Trusted host middleware
+# Trusted host middleware
 app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=settings.ALLOWED_HOSTS,
 )
 
-***REMOVED*** Include API routes
+# Include API routes
 app.include_router(api_router, prefix="/api/v1")
 
 

@@ -25,17 +25,17 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         try:
-            ***REMOVED*** Pre-request security checks
+            # Pre-request security checks
             await self._check_ip_blocklist(request)
             await self._check_rate_limits(request)
             await self._validate_request_signature(request)
             await self._check_sql_injection(request)
             await self._check_xss_attempts(request)
 
-            ***REMOVED*** Process request
+            # Process request
             response = await call_next(request)
 
-            ***REMOVED*** Post-request security measures
+            # Post-request security measures
             response = await self._add_security_headers(response)
             await self._log_security_metrics(request, response)
 
@@ -44,7 +44,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         except HTTPException:
             raise
         except Exception as exc:
-            ***REMOVED*** Log security incident
+            # Log security incident
             await self._log_security_incident(request, str(exc))
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -61,7 +61,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 detail="Access denied: IP address blocked"
             )
 
-        ***REMOVED*** Check against configured blacklist
+        # Check against configured blacklist
         if client_ip in settings.THREAT_DETECTION_IP_BLACKLIST:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -76,21 +76,21 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         client_ip = self._get_client_ip(request)
         current_time = request.app.state.request_time if hasattr(request.app.state, 'request_time') else 0
 
-        ***REMOVED*** Clean old entries
+        # Clean old entries
         cutoff_time = current_time - settings.THREAT_DETECTION_RATE_LIMIT_WINDOW
         if client_ip in self.rate_limits:
             self.rate_limits[client_ip] = [
                 ts for ts in self.rate_limits[client_ip] if ts > cutoff_time
             ]
 
-        ***REMOVED*** Check rate limit
+        # Check rate limit
         if client_ip not in self.rate_limits:
             self.rate_limits[client_ip] = []
 
         self.rate_limits[client_ip].append(current_time)
 
         if len(self.rate_limits[client_ip]) > settings.THREAT_DETECTION_RATE_LIMIT_REQUESTS:
-            ***REMOVED*** Block IP temporarily
+            # Block IP temporarily
             self.blocked_ips.add(client_ip)
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -99,14 +99,14 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
     async def _validate_request_signature(self, request: Request):
         """Validate request signature for API authentication."""
-        ***REMOVED*** Skip for health checks and public endpoints
+        # Skip for health checks and public endpoints
         if request.url.path in ["/health", "/docs", "/openapi.json"]:
             return
 
-        ***REMOVED*** Check for API key in header
+        # Check for API key in header
         api_key = request.headers.get("x-api-key")
         if api_key:
-            ***REMOVED*** Validate API key (in real implementation, check against database)
+            # Validate API key (in real implementation, check against database)
             if not self._validate_api_key(api_key):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -114,10 +114,10 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 )
             return
 
-        ***REMOVED*** Check for JWT token
+        # Check for JWT token
         auth_header = request.headers.get("authorization", "")
         if auth_header.startswith("Bearer "):
-            ***REMOVED*** Validate JWT token
+            # Validate JWT token
             if not self._validate_jwt_token(auth_header[7:]):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -126,7 +126,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
     async def _check_sql_injection(self, request: Request):
         """Check for SQL injection attempts."""
-        ***REMOVED*** Check query parameters
+        # Check query parameters
         for key, value in request.query_params.items():
             if self._contains_sql_injection(value):
                 await self._log_security_incident(request, f"SQL injection attempt in query param: {key}")
@@ -135,7 +135,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                     detail="Invalid request parameters"
                 )
 
-        ***REMOVED*** Check request body for JSON requests
+        # Check request body for JSON requests
         if request.method in ["POST", "PUT", "PATCH"] and request.headers.get("content-type") == "application/json":
             try:
                 body = await request.json()
@@ -146,11 +146,11 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                         detail="Invalid request data"
                     )
             except:
-                pass  ***REMOVED*** Skip if body can't be parsed
+                pass  # Skip if body can't be parsed
 
     async def _check_xss_attempts(self, request: Request):
         """Check for XSS attempts."""
-        ***REMOVED*** Check query parameters and headers
+        # Check query parameters and headers
         for key, value in request.query_params.items():
             if self._contains_xss_patterns(value):
                 await self._log_security_incident(request, f"XSS attempt in query param: {key}")
@@ -169,7 +169,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
 
-        ***REMOVED*** Add request ID for tracking
+        # Add request ID for tracking
         import uuid
         response.headers["X-Request-ID"] = str(uuid.uuid4())
 
@@ -177,7 +177,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
     async def _log_security_metrics(self, request: Request, response: Response):
         """Log security-related metrics."""
-        ***REMOVED*** In a real implementation, send metrics to monitoring system
+        # In a real implementation, send metrics to monitoring system
         pass
 
     async def _log_security_incident(self, request: Request, details: str):
@@ -192,7 +192,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             "severity": "medium"
         }
 
-        ***REMOVED*** In a real implementation, store in database and send alerts
+        # In a real implementation, store in database and send alerts
         print(f"SECURITY INCIDENT: {json.dumps(incident)}")
 
     def _get_client_ip(self, request: Request) -> str:
@@ -209,13 +209,13 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
     def _validate_api_key(self, api_key: str) -> bool:
         """Validate API key."""
-        ***REMOVED*** In a real implementation, check against database
+        # In a real implementation, check against database
         return api_key.startswith("sk_") and len(api_key) > 20
 
     def _validate_jwt_token(self, token: str) -> bool:
         """Validate JWT token."""
-        ***REMOVED*** In a real implementation, decode and verify JWT
-        return len(token) > 20  ***REMOVED*** Basic length check
+        # In a real implementation, decode and verify JWT
+        return len(token) > 20  # Basic length check
 
     def _contains_sql_injection(self, value: str) -> bool:
         """Check if string contains SQL injection patterns."""

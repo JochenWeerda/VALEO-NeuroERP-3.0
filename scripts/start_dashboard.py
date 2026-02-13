@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 GENXAIS Dashboard Starter
@@ -16,7 +16,7 @@ def main():
     """Hauptfunktion zum Starten des Dashboards"""
     print("Starte GENXAIS Dashboard...")
     
-    ***REMOVED*** Prüfe, ob Streamlit installiert ist
+    # Prüfe, ob Streamlit installiert ist
     try:
         import streamlit
         print("Streamlit gefunden.")
@@ -25,20 +25,20 @@ def main():
         subprocess.run([sys.executable, "-m", "pip", "install", "streamlit"], check=True)
         print("Streamlit installiert.")
     
-    ***REMOVED*** Prüfe, ob das Dashboard-Skript existiert
+    # Prüfe, ob das Dashboard-Skript existiert
     dashboard_script = Path("scripts/enhanced_dashboard.py")
     if not dashboard_script.exists():
         print(f"Fehler: Dashboard-Skript {dashboard_script} nicht gefunden.")
         return
     
-    ***REMOVED*** Starte das Dashboard
+    # Starte das Dashboard
     print("Starte Streamlit-Server...")
     
-    ***REMOVED*** Setze Umgebungsvariablen für Streamlit
+    # Setze Umgebungsvariablen für Streamlit
     os.environ["STREAMLIT_SERVER_PORT"] = "8501"
     os.environ["STREAMLIT_SERVER_HEADLESS"] = "true"
     
-    ***REMOVED*** Starte Streamlit-Server
+    # Starte Streamlit-Server
     try:
         subprocess.run([
             sys.executable, "-m", "streamlit", "run",

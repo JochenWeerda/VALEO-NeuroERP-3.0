@@ -63,7 +63,7 @@ async def configure_event_bus() -> None:
     bus = EventBus(settings.EVENT_BUS_URL, settings.EVENT_BUS_SUBJECT_PREFIX)
     try:
         await bus.connect()
-    except Exception as exc:  ***REMOVED*** noqa: BLE001
+    except Exception as exc:  # noqa: BLE001
         logger.warning("EventBus konnte nicht verbunden werden: %s", exc)
         return
     _event_bus = bus
@@ -93,4 +93,5 @@ async def shutdown_event_bus() -> None:
     if _event_bus:
         await _event_bus.close()
         _event_bus = None
+
 

@@ -1,10 +1,10 @@
-***REMOVED*** Ausgefüllte Domain-Checklisten & Freigabehinweise
+# Ausgefüllte Domain-Checklisten & Freigabehinweise
 
 Referenz: Abschnitt „Domain Owner Review Checklist“ in `docs/db/l3_import_best_practices.md`. Die folgenden Einträge wurden von den jeweiligen Domain Ownern bestätigt.
 
 ---
 
-***REMOVED******REMOVED*** 1) Finance (domain_finance)
+## 1) Finance (domain_finance)
 
 **A. Abdeckung & Tabellen**
 - **Fiscal Periods:** `fiscal_year`, `fiscal_period` (Monats-/Quartalsperioden, 4-4-5 unterstützt). Perioden schließen sauber; keine Überlappungen.
@@ -35,7 +35,7 @@ Alle als dimensionale Referenzen (Surrogate Keys) in `dim_cost_center`, `dim_pro
 
 ---
 
-***REMOVED******REMOVED*** 2) CRM / Sales (domain_crm)
+## 2) CRM / Sales (domain_crm)
 
 **A. Stammdaten & Beziehungen**
 - **Contact Hierarchies:** `account` ↔ `contact` (1:n), `contact_role` (Buying Center: Economic, User, Technical, Gatekeeper).
@@ -59,7 +59,7 @@ Alle als dimensionale Referenzen (Surrogate Keys) in `dim_cost_center`, `dim_pro
 
 ---
 
-***REMOVED******REMOVED*** 3) Inventory / Logistics (domain_inventory)
+## 3) Inventory / Logistics (domain_inventory)
 
 **A. Maßeinheiten & Konversion**
 - **UoM-System:** Basiseinheiten je Warengruppe (z. B. kg/l/stk) + Konversionstabellen (`uom_conversion`) mit Präzision ≥ 6 Dezimalstellen. Pflicht: `uom_base` je Artikel.
@@ -86,7 +86,7 @@ Alle als dimensionale Referenzen (Surrogate Keys) in `dim_cost_center`, `dim_pro
 
 ---
 
-***REMOVED******REMOVED*** 4) HR / Workforce (domain_hr)
+## 4) HR / Workforce (domain_hr)
 
 **A. Datenschutz & Pseudonymisierung**
 - **PII-Trennung:** Personenstammdaten (`hr_person`) getrennt von Beschäftigungsverhältnissen (`hr_employment`).
@@ -110,7 +110,7 @@ Alle als dimensionale Referenzen (Surrogate Keys) in `dim_cost_center`, `dim_pro
 
 ---
 
-***REMOVED******REMOVED*** 5) Manufacturing / Production (domain_mfg)
+## 5) Manufacturing / Production (domain_mfg)
 
 **A. Routing & BOM**
 - **BOM:** mehrstufig, mit `effective_from/through`.
@@ -134,7 +134,7 @@ Alle als dimensionale Referenzen (Surrogate Keys) in `dim_cost_center`, `dim_pro
 
 ---
 
-***REMOVED******REMOVED*** 6) Cross-Cutting (alle Domains)
+## 6) Cross-Cutting (alle Domains)
 
 **A. Data-Quality Contracts**
 - **Nullability:** Pflichtfelder je Entität dokumentiert; CI bricht bei Verstoß.
@@ -156,9 +156,10 @@ Alle als dimensionale Referenzen (Surrogate Keys) in `dim_cost_center`, `dim_pro
 
 ---
 
-***REMOVED******REMOVED*** Konkrete Nächste Schritte (Walkthrough)
+## Konkrete Nächste Schritte (Walkthrough)
 
 1. Checklisten als PR-Kommentar je Domain anhängen und in `config/l3_mapping.yaml` die beschlossenen Zuordnungen einpflegen (insb. Finance-Codes & CRM-Enums).
 2. Validierungs-Prompts als Testscripte hinterlegen (`tests/l3_import/...`), plus CI-Job für Dry-Run-Import mit Metriken.
 3. Akzeptanzkriterien in `scripts/validate_mapping.py` als harte Gates kodieren (Fail-Fast).
 4. Stakeholder-Sign-off: Entscheidungsmatrix (Grün/Gelb/Rot) pro Domain, offene Punkte mit Owner und Frist dokumentieren.
+

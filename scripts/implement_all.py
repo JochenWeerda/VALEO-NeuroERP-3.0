@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Implementiert automatisch alle Code-Artefakte aus der MongoDB.
 """
@@ -11,12 +11,12 @@ import json
 from datetime import datetime
 from bson import ObjectId
 
-***REMOVED*** Pfad zum Projekt-Root hinzufügen
+# Pfad zum Projekt-Root hinzufügen
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.apm_framework.mongodb_connector import APMMongoDBConnector
 
-***REMOVED*** Logger konfigurieren
+# Logger konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ async def implement_all():
     Implementiert automatisch alle Code-Artefakte aus der MongoDB.
     """
     try:
-        ***REMOVED*** MongoDB-Verbindung herstellen
+        # MongoDB-Verbindung herstellen
         mongodb_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
         mongodb_db = os.getenv("MONGODB_DB", "valeo_neuroerp")
         
@@ -45,13 +45,13 @@ async def implement_all():
         mongodb = APMMongoDBConnector(mongodb_uri, mongodb_db)
         await mongodb.connect()
         
-        ***REMOVED*** Code-Artefakte abrufen
+        # Code-Artefakte abrufen
         code_artifacts = await mongodb.find_many("code_artifacts", {})
         
         if code_artifacts:
             print(f"\nImplementiere {len(code_artifacts)} Code-Artefakte...")
             
-            ***REMOVED*** Ordnerstruktur erstellen
+            # Ordnerstruktur erstellen
             backend_components_dir = "backend/components"
             frontend_components_dir = "frontend/src/components"
             backend_tests_dir = "backend/tests"
@@ -62,13 +62,13 @@ async def implement_all():
             os.makedirs(backend_tests_dir, exist_ok=True)
             os.makedirs(frontend_tests_dir, exist_ok=True)
             
-            ***REMOVED*** Code-Artefakte implementieren
+            # Code-Artefakte implementieren
             for i, artifact in enumerate(code_artifacts):
                 name = artifact.get("name")
                 language = artifact.get("language")
                 code = artifact.get("code", "")
                 
-                ***REMOVED*** Dateiendung und Ordner bestimmen
+                # Dateiendung und Ordner bestimmen
                 if language == "Python":
                     file_ext = ".py"
                     folder = backend_components_dir
@@ -79,7 +79,7 @@ async def implement_all():
                     file_ext = ".js"
                     folder = frontend_components_dir
                 
-                ***REMOVED*** Datei speichern
+                # Datei speichern
                 file_path = os.path.join(folder, f"{name}{file_ext}")
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(code)
@@ -91,18 +91,18 @@ async def implement_all():
         else:
             print("\nKeine Code-Artefakte gefunden.")
         
-        ***REMOVED*** Testfälle abrufen
+        # Testfälle abrufen
         test_cases = await mongodb.find_many("test_cases", {})
         
         if test_cases:
             print(f"\nImplementiere {len(test_cases)} Testfälle...")
             
-            ***REMOVED*** Testfälle implementieren
+            # Testfälle implementieren
             for i, test in enumerate(test_cases):
                 name = test.get("name", "").replace("Test für ", "")
                 test_code = test.get("test_code", "")
                 
-                ***REMOVED*** Dateiendung und Ordner bestimmen
+                # Dateiendung und Ordner bestimmen
                 if "UserInterface" in name:
                     file_ext = ".test.tsx"
                     folder = frontend_tests_dir
@@ -110,7 +110,7 @@ async def implement_all():
                     file_ext = "_test.py"
                     folder = backend_tests_dir
                 
-                ***REMOVED*** Datei speichern
+                # Datei speichern
                 file_path = os.path.join(folder, f"{name}{file_ext}")
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(test_code)
@@ -122,17 +122,17 @@ async def implement_all():
         else:
             print("\nKeine Testfälle gefunden.")
         
-        ***REMOVED*** Ressourcenanforderungen in Konfigurationsdateien umwandeln
+        # Ressourcenanforderungen in Konfigurationsdateien umwandeln
         resource_requirements = await mongodb.find_many("resource_requirements", {})
         
         if resource_requirements:
             print(f"\nErstelle Konfigurationsdateien für {len(resource_requirements)} Ressourcenanforderungen...")
             
-            ***REMOVED*** Ordner für Konfigurationsdateien erstellen
+            # Ordner für Konfigurationsdateien erstellen
             config_dir = "config"
             os.makedirs(config_dir, exist_ok=True)
             
-            ***REMOVED*** Alle Ressourcenanforderungen in einer JSON-Datei speichern
+            # Alle Ressourcenanforderungen in einer JSON-Datei speichern
             resources_config = {
                 "resources": [
                     {
@@ -153,13 +153,13 @@ async def implement_all():
             logger.info(f"Ressourcenanforderungen gespeichert in: {resources_file_path}")
             print(f"Ressourcenanforderungen gespeichert in: {resources_file_path}")
             
-            ***REMOVED*** Docker Compose-Datei erstellen
+            # Docker Compose-Datei erstellen
             docker_compose = {
                 "version": "3.8",
                 "services": {}
             }
             
-            ***REMOVED*** Services basierend auf Ressourcenanforderungen hinzufügen
+            # Services basierend auf Ressourcenanforderungen hinzufügen
             for resource in resource_requirements:
                 name = resource.get("name", "").lower().replace("-", "_")
                 resource_type = resource.get("type", "").lower()
@@ -210,16 +210,16 @@ async def implement_all():
                         "depends_on": ["api"]
                     }
             
-            ***REMOVED*** Volumes hinzufügen
+            # Volumes hinzufügen
             docker_compose["volumes"] = {
                 "postgres_data": {},
                 "mongodb_data": {}
             }
             
-            ***REMOVED*** Docker Compose-Datei speichern
+            # Docker Compose-Datei speichern
             docker_compose_path = "docker-compose.yml"
             with open(docker_compose_path, "w", encoding="utf-8") as f:
-                yaml_content = "***REMOVED*** Automatisch generierte Docker Compose-Datei\n\n"
+                yaml_content = "# Automatisch generierte Docker Compose-Datei\n\n"
                 yaml_content += "version: '3.8'\n\n"
                 
                 yaml_content += "services:\n"
@@ -265,11 +265,11 @@ async def implement_all():
             logger.info(f"Docker Compose-Datei gespeichert in: {docker_compose_path}")
             print(f"Docker Compose-Datei gespeichert in: {docker_compose_path}")
             
-            ***REMOVED*** Dockerfile für API-Server erstellen
+            # Dockerfile für API-Server erstellen
             os.makedirs("docker", exist_ok=True)
             
             api_dockerfile_path = "docker/api-server.Dockerfile"
-            api_dockerfile_content = """***REMOVED*** Automatisch generierte Dockerfile für API-Server
+            api_dockerfile_content = """# Automatisch generierte Dockerfile für API-Server
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -289,9 +289,9 @@ CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
             logger.info(f"API-Server Dockerfile gespeichert in: {api_dockerfile_path}")
             print(f"API-Server Dockerfile gespeichert in: {api_dockerfile_path}")
             
-            ***REMOVED*** Dockerfile für Frontend-Server erstellen
+            # Dockerfile für Frontend-Server erstellen
             frontend_dockerfile_path = "docker/frontend-server.Dockerfile"
-            frontend_dockerfile_content = """***REMOVED*** Automatisch generierte Dockerfile für Frontend-Server
+            frontend_dockerfile_content = """# Automatisch generierte Dockerfile für Frontend-Server
 FROM node:18-alpine as build
 
 WORKDIR /app
@@ -317,7 +317,7 @@ CMD ["nginx", "-g", "daemon off;"]
             logger.info(f"Frontend-Server Dockerfile gespeichert in: {frontend_dockerfile_path}")
             print(f"Frontend-Server Dockerfile gespeichert in: {frontend_dockerfile_path}")
             
-            ***REMOVED*** NGINX-Konfiguration erstellen
+            # NGINX-Konfiguration erstellen
             nginx_conf_path = "docker/nginx.conf"
             nginx_conf_content = """server {
     listen 3000;
@@ -343,10 +343,10 @@ CMD ["nginx", "-g", "daemon off;"]
         else:
             print("\nKeine Ressourcenanforderungen gefunden.")
         
-        ***REMOVED*** CI/CD-Konfiguration erstellen
+        # CI/CD-Konfiguration erstellen
         print(f"\nErstelle CI/CD-Konfiguration...")
         
-        ***REMOVED*** GitHub Actions Workflow erstellen
+        # GitHub Actions Workflow erstellen
         github_dir = ".github/workflows"
         os.makedirs(github_dir, exist_ok=True)
         
@@ -447,7 +447,7 @@ jobs:
     - name: Deploy to production
       run: |
         echo "Deployment would happen here"
-        ***REMOVED*** In a real scenario, you would use kubectl, helm, or another deployment tool
+        # In a real scenario, you would use kubectl, helm, or another deployment tool
 """
         with open(github_workflow_path, "w", encoding="utf-8") as f:
             f.write(github_workflow_content)
@@ -455,9 +455,9 @@ jobs:
         logger.info(f"GitHub Actions Workflow gespeichert in: {github_workflow_path}")
         print(f"GitHub Actions Workflow gespeichert in: {github_workflow_path}")
         
-        ***REMOVED*** Anforderungen in requirements.txt speichern
+        # Anforderungen in requirements.txt speichern
         requirements_path = "requirements.txt"
-        requirements_content = """***REMOVED*** Automatisch generierte requirements.txt
+        requirements_content = """# Automatisch generierte requirements.txt
 fastapi>=0.95.0
 uvicorn>=0.21.1
 sqlalchemy>=2.0.9
@@ -478,63 +478,63 @@ httpx>=0.24.0
         logger.info(f"Requirements gespeichert in: {requirements_path}")
         print(f"Requirements gespeichert in: {requirements_path}")
         
-        ***REMOVED*** README.md erstellen
+        # README.md erstellen
         readme_path = "README.md"
-        readme_content = """***REMOVED*** VALEO-NeuroERP
+        readme_content = """# VALEO-NeuroERP
 
 Ein modernes ERP-System mit KI-Unterstützung.
 
-***REMOVED******REMOVED*** Komponenten
+## Komponenten
 
 Das System besteht aus folgenden Hauptkomponenten:
 
 """
         
-        ***REMOVED*** Komponenten zum README hinzufügen
+        # Komponenten zum README hinzufügen
         for artifact in code_artifacts:
             name = artifact.get("name")
             description = artifact.get("description")
             readme_content += f"- **{name}**: {description}\n"
         
         readme_content += """
-***REMOVED******REMOVED*** Installation
+## Installation
 
-***REMOVED******REMOVED******REMOVED*** Voraussetzungen
+### Voraussetzungen
 
 - Docker und Docker Compose
 - Node.js 18 oder höher (für lokale Entwicklung)
 - Python 3.11 oder höher (für lokale Entwicklung)
 
-***REMOVED******REMOVED******REMOVED*** Mit Docker
+### Mit Docker
 
 ```bash
 docker-compose up -d
 ```
 
-***REMOVED******REMOVED******REMOVED*** Lokale Entwicklung
+### Lokale Entwicklung
 
 ```bash
-***REMOVED*** Backend
+# Backend
 pip install -r requirements.txt
 uvicorn backend.main:app --reload
 
-***REMOVED*** Frontend
+# Frontend
 cd frontend
 npm install
 npm start
 ```
 
-***REMOVED******REMOVED*** Tests
+## Tests
 
 ```bash
 pytest backend/tests/
 ```
 
-***REMOVED******REMOVED*** CI/CD
+## CI/CD
 
 Das Projekt verwendet GitHub Actions für CI/CD. Bei jedem Push auf den main-Branch werden Tests ausgeführt und bei Erfolg Docker-Images gebaut und in die Registry gepusht.
 
-***REMOVED******REMOVED*** Lizenz
+## Lizenz
 
 MIT
 """
@@ -567,11 +567,11 @@ MIT
         print(f"\nFehler: {str(e)}")
     
     finally:
-        ***REMOVED*** MongoDB-Verbindung trennen
+        # MongoDB-Verbindung trennen
         if 'mongodb' in locals():
             await mongodb.disconnect()
 
 
 if __name__ == "__main__":
-    ***REMOVED*** Asynchrone Funktion ausführen
+    # Asynchrone Funktion ausführen
     asyncio.run(implement_all()) 

@@ -118,7 +118,7 @@ class AccessLog:
     person_name: str
     access_method: AccessMethod
     access_time: datetime
-    access_result: str  ***REMOVED*** granted, denied, forced
+    access_result: str  # granted, denied, forced
     denial_reason: str = ""
     location_details: str = ""
     authorized_by: Optional[str] = None
@@ -282,7 +282,7 @@ class ISO27001PhysicalSecurity:
         self.access_control = access_control_service
         self.monitoring = monitoring_service
 
-        ***REMOVED*** Physical security components
+        # Physical security components
         self.security_zones: Dict[str, SecurityZone] = {}
         self.access_logs: List[AccessLog] = {}
         self.equipment_inventory: Dict[str, EquipmentInventory] = {}
@@ -292,10 +292,10 @@ class ISO27001PhysicalSecurity:
         self.maintenance_access: List[MaintenanceAccess] = {}
         self.security_incidents: List[SecurityIncident] = {}
 
-        ***REMOVED*** Security configuration
+        # Security configuration
         self.security_config = self._initialize_security_config()
 
-        ***REMOVED*** Default security zones
+        # Default security zones
         self._initialize_default_zones()
 
     def _initialize_security_config(self) -> Dict[str, Any]:
@@ -448,7 +448,7 @@ class ISO27001PhysicalSecurity:
 
         self.access_logs[access_data['zone_id']].append(access_log)
 
-        ***REMOVED*** Check for security violations
+        # Check for security violations
         if access_log.access_result == 'denied':
             self._handle_access_denial(access_log)
 
@@ -457,7 +457,7 @@ class ISO27001PhysicalSecurity:
 
     def _handle_access_denial(self, access_log: AccessLog):
         """Handle access denial security event"""
-        ***REMOVED*** Create security incident for repeated access denials
+        # Create security incident for repeated access denials
         denial_count = len([log for log in self.access_logs[access_log.zone_id][-10:]
                            if log.person_id == access_log.person_id and log.access_result == 'denied'])
 
@@ -501,7 +501,7 @@ class ISO27001PhysicalSecurity:
 
         self.equipment_inventory[equipment_id] = equipment
 
-        ***REMOVED*** Check security requirements
+        # Check security requirements
         self._validate_equipment_security(equipment)
 
         logger.info(f"Equipment registered: {equipment.asset_tag} ({equipment.equipment_type.value})")
@@ -511,12 +511,12 @@ class ISO27001PhysicalSecurity:
         """Validate equipment meets security requirements"""
         issues = []
 
-        ***REMOVED*** Check encryption requirements
+        # Check encryption requirements
         if equipment.equipment_type in [EquipmentType.SERVER, EquipmentType.STORAGE_SYSTEM, EquipmentType.MOBILE_DEVICE]:
             if not equipment.encryption_enabled:
                 issues.append("Encryption required but not enabled")
 
-        ***REMOVED*** Check remote wipe capability for mobile devices
+        # Check remote wipe capability for mobile devices
         if equipment.equipment_type == EquipmentType.MOBILE_DEVICE:
             if not equipment.remote_wipe_capable:
                 issues.append("Remote wipe capability required for mobile devices")
@@ -545,7 +545,7 @@ class ISO27001PhysicalSecurity:
             water_detected=monitoring_data.get('water_detected', False)
         )
 
-        ***REMOVED*** Check for alarm conditions
+        # Check for alarm conditions
         alarm_triggered, alarm_type, severity = self._check_environmental_alarms(monitoring)
 
         if alarm_triggered:
@@ -554,7 +554,7 @@ class ISO27001PhysicalSecurity:
             monitoring.alarm_severity = severity
             monitoring.response_actions = self._get_alarm_response_actions(alarm_type, severity)
 
-            ***REMOVED*** Create security alarm
+            # Create security alarm
             self._create_environmental_alarm(monitoring)
 
         self.environmental_monitoring.append(monitoring)
@@ -565,24 +565,24 @@ class ISO27001PhysicalSecurity:
         """Check if environmental conditions trigger alarms"""
         config = self.security_config['environmental_monitoring']
 
-        ***REMOVED*** Temperature check
+        # Temperature check
         if monitoring.temperature_celsius is not None:
             temp_range = config['temperature_range_celsius']
             if monitoring.temperature_celsius < temp_range['min'] or monitoring.temperature_celsius > temp_range['max']:
                 severity = AlarmSeverity.HIGH if abs(monitoring.temperature_celsius - 22.5) > 10 else AlarmSeverity.MEDIUM
                 return True, AlarmType.ENVIRONMENTAL, severity
 
-        ***REMOVED*** Humidity check
+        # Humidity check
         if monitoring.humidity_percent is not None:
             humidity_range = config['humidity_range_percent']
             if monitoring.humidity_percent < humidity_range['min'] or monitoring.humidity_percent > humidity_range['max']:
                 return True, AlarmType.ENVIRONMENTAL, AlarmSeverity.MEDIUM
 
-        ***REMOVED*** Smoke detection
+        # Smoke detection
         if monitoring.smoke_detected:
             return True, AlarmType.FIRE, AlarmSeverity.CRITICAL
 
-        ***REMOVED*** Water detection
+        # Water detection
         if monitoring.water_detected:
             return True, AlarmType.ENVIRONMENTAL, AlarmSeverity.HIGH
 
@@ -657,7 +657,7 @@ class ISO27001PhysicalSecurity:
 
         self.visitor_access.append(visitor)
 
-        ***REMOVED*** Log visitor check-in
+        # Log visitor check-in
         self._log_visitor_check_in(visitor)
 
         logger.info(f"Visitor access registered: {visitor.visitor_name} from {visitor.visitor_company}")
@@ -727,7 +727,7 @@ class ISO27001PhysicalSecurity:
 
         self.security_incidents.append(incident)
 
-        ***REMOVED*** Create corresponding alarm if not already created
+        # Create corresponding alarm if not already created
         if incident.severity in ['high', 'critical']:
             alarm = SecurityAlarm(
                 id=str(uuid.uuid4()),
@@ -772,7 +772,7 @@ class ISO27001PhysicalSecurity:
 
     def get_physical_security_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
         """Generate comprehensive physical security dashboard"""
-        ***REMOVED*** Get zone status
+        # Get zone status
         zone_status = {}
         for zone_id, zone in self.security_zones.items():
             recent_access = len([log for logs in self.access_logs.values() for log in logs
@@ -789,7 +789,7 @@ class ISO27001PhysicalSecurity:
                 'status': 'ALERT' if active_alarms > 0 else 'SECURE'
             }
 
-        ***REMOVED*** Get access statistics
+        # Get access statistics
         total_access_attempts = sum(len(logs) for logs in self.access_logs.values())
         granted_access = sum(len([log for log in logs if log.access_result == 'granted'])
                            for logs in self.access_logs.values())
@@ -804,7 +804,7 @@ class ISO27001PhysicalSecurity:
                                  if log.access_result == 'denied' and (datetime.utcnow() - log.access_time).hours <= 24])
         }
 
-        ***REMOVED*** Get alarm summary
+        # Get alarm summary
         alarm_summary = {
             'total_alarms': len(self.security_alarms),
             'active_alarms': len([a for a in self.security_alarms if not a.resolved_at]),
@@ -819,10 +819,10 @@ class ISO27001PhysicalSecurity:
             }
         }
 
-        ***REMOVED*** Get environmental status
+        # Get environmental status
         environmental_status = self._get_environmental_status()
 
-        ***REMOVED*** Get equipment inventory summary
+        # Get equipment inventory summary
         equipment_inventory = {
             'total_equipment': len(self.equipment_inventory),
             'by_type': {},
@@ -835,15 +835,15 @@ class ISO27001PhysicalSecurity:
             eq_type = equipment.equipment_type.value
             equipment_inventory['by_type'][eq_type] = equipment_inventory['by_type'].get(eq_type, 0) + 1
 
-            ***REMOVED*** Check security compliance
+            # Check security compliance
             if self._is_equipment_security_compliant(equipment):
                 equipment_inventory['security_compliant'] += 1
 
-            ***REMOVED*** Check warranty
+            # Check warranty
             if equipment.warranty_expiry and (equipment.warranty_expiry - datetime.utcnow()).days <= 30:
                 equipment_inventory['warranty_expiring'] += 1
 
-        ***REMOVED*** Get visitor and maintenance activity
+        # Get visitor and maintenance activity
         visitor_activity = {
             'active_visitors': len([v for v in self.visitor_access if not v.checked_out_at]),
             'total_today': len([v for v in self.visitor_access if (datetime.utcnow() - v.access_start).days < 1]),
@@ -858,7 +858,7 @@ class ISO27001PhysicalSecurity:
                                       if (m.scheduled_start - datetime.utcnow()).days <= 7])
         }
 
-        ***REMOVED*** Get security incidents
+        # Get security incidents
         security_incidents = {
             'total_incidents': len(self.security_incidents),
             'open_incidents': len([i for i in self.security_incidents if i.resolution_status == 'open']),
@@ -872,7 +872,7 @@ class ISO27001PhysicalSecurity:
             }
         }
 
-        ***REMOVED*** Generate recommendations
+        # Generate recommendations
         recommendations = self._generate_security_recommendations(
             zone_status, access_statistics, alarm_summary, equipment_inventory
         )
@@ -933,12 +933,12 @@ class ISO27001PhysicalSecurity:
 
     def _is_equipment_security_compliant(self, equipment: EquipmentInventory) -> bool:
         """Check if equipment meets security requirements"""
-        ***REMOVED*** Check encryption requirements
+        # Check encryption requirements
         if equipment.equipment_type in [EquipmentType.SERVER, EquipmentType.STORAGE_SYSTEM, EquipmentType.MOBILE_DEVICE]:
             if not equipment.encryption_enabled:
                 return False
 
-        ***REMOVED*** Check remote wipe for mobile devices
+        # Check remote wipe for mobile devices
         if equipment.equipment_type == EquipmentType.MOBILE_DEVICE:
             if not equipment.remote_wipe_capable:
                 return False
@@ -950,23 +950,23 @@ class ISO27001PhysicalSecurity:
         """Generate security recommendations"""
         recommendations = []
 
-        ***REMOVED*** Zone security recommendations
+        # Zone security recommendations
         alert_zones = [zone_id for zone_id, status in zones.items() if status['status'] == 'ALERT']
         if alert_zones:
             recommendations.append(f"Address active alarms in zones: {', '.join(alert_zones)}")
 
-        ***REMOVED*** Access control recommendations
+        # Access control recommendations
         if access['success_rate'] < 95:
             recommendations.append("Review access control policies to reduce denial rates")
 
         if access['recent_denials'] > 10:
             recommendations.append("Investigate recent access denial patterns")
 
-        ***REMOVED*** Alarm management recommendations
+        # Alarm management recommendations
         if alarms['active_alarms'] > 5:
             recommendations.append("Reduce active alarm count through better maintenance")
 
-        ***REMOVED*** Equipment security recommendations
+        # Equipment security recommendations
         if equipment['security_compliant'] / equipment['total_equipment'] < 0.9:
             recommendations.append("Improve equipment security compliance")
 
@@ -1019,19 +1019,19 @@ class ISO27001PhysicalSecurity:
         for zone in zones:
             score = 100
 
-            ***REMOVED*** Check surveillance
+            # Check surveillance
             if not zone.surveillance_cameras:
                 score -= 20
 
-            ***REMOVED*** Check alarm systems
+            # Check alarm systems
             if not zone.alarm_systems:
                 score -= 15
 
-            ***REMOVED*** Check access controls
+            # Check access controls
             if not zone.access_methods:
                 score -= 25
 
-            ***REMOVED*** Check environmental controls for critical zones
+            # Check environmental controls for critical zones
             if zone.zone_type in [SecurityZone.SERVER_ROOM, SecurityZone.DATA_CENTER]:
                 if not zone.environmental_controls:
                     score -= 20
@@ -1056,7 +1056,7 @@ class ISO27001PhysicalSecurity:
 
     def _check_environmental_security_compliance(self) -> float:
         """Check environmental security compliance"""
-        ***REMOVED*** Check if critical zones have environmental monitoring
+        # Check if critical zones have environmental monitoring
         critical_zones = [z for z in self.security_zones.values()
                          if z.zone_type in [SecurityZone.SERVER_ROOM, SecurityZone.DATA_CENTER]]
 
@@ -1065,17 +1065,17 @@ class ISO27001PhysicalSecurity:
 
         monitored_zones = 0
         for zone in critical_zones:
-            ***REMOVED*** Check if zone has recent environmental monitoring
+            # Check if zone has recent environmental monitoring
             recent_monitoring = len([m for m in self.environmental_monitoring
                                    if m.zone_id == zone.id and (datetime.utcnow() - m.measurement_time).hours <= 24])
-            if recent_monitoring >= 12:  ***REMOVED*** At least every 2 hours
+            if recent_monitoring >= 12:  # At least every 2 hours
                 monitored_zones += 1
 
         return (monitored_zones / len(critical_zones)) * 100
 
     def _check_physical_access_control_compliance(self) -> float:
         """Check physical access control compliance"""
-        ***REMOVED*** Check access log completeness
+        # Check access log completeness
         total_zones = len(self.security_zones)
         logged_zones = len([z for z in self.security_zones.keys() if z in self.access_logs])
 
@@ -1084,21 +1084,21 @@ class ISO27001PhysicalSecurity:
 
         log_completeness = (logged_zones / total_zones) * 100
 
-        ***REMOVED*** Check access denial rates
+        # Check access denial rates
         total_access = sum(len(logs) for logs in self.access_logs.values())
         denied_access = sum(len([log for log in logs if log.access_result == 'denied'])
                           for logs in self.access_logs.values())
 
         denial_rate = (denied_access / total_access * 100) if total_access > 0 else 0
 
-        ***REMOVED*** Lower score if denial rate is too high
+        # Lower score if denial rate is too high
         access_score = max(0, 100 - denial_rate)
 
         return (log_completeness + access_score) / 2
 
     def _check_maintenance_security_compliance(self) -> float:
         """Check maintenance security compliance"""
-        maintenance = self.maintenance_access[-20:]  ***REMOVED*** Last 20 maintenance activities
+        maintenance = self.maintenance_access[-20:]  # Last 20 maintenance activities
 
         if not maintenance:
             return 100.0

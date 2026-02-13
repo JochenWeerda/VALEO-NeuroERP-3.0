@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Analyse der vorgefilteren PLZ 26XXX-Daten aus LibreOffice Calc
 Fokus auf Flächenprämien für präzise Betriebsgrößen-Bewertung
@@ -10,7 +10,7 @@ from collections import defaultdict
 from datetime import datetime
 
 def analyze_filtered_26xxx():
-    ***REMOVED*** Pfad zur vorgefilteren CSV
+    # Pfad zur vorgefilteren CSV
     csv_path = r"C:\Users\Jochen\Downloads\impdata2024_PLZ_26XXX.csv"
     output_file = "PLZ_26XXX_final_leads.json"
     
@@ -20,7 +20,7 @@ def analyze_filtered_26xxx():
     print(f"Datei: {csv_path}")
     print()
     
-    ***REMOVED*** Flächenprämien-Codes (basierend auf GAP-Systematik)
+    # Flächenprämien-Codes (basierend auf GAP-Systematik)
     area_premium_codes = {
         'I.1': 'Basis-Direktzahlung (Flächenprämie)',
         'I.2': 'Umverteilungsz. für Nachhaltigkeit (Flächenprämie)', 
@@ -36,7 +36,7 @@ def analyze_filtered_26xxx():
         print(f"  {code}: {description}")
     print()
     
-    ***REMOVED*** Container für Betriebsanalyse
+    # Container für Betriebsanalyse
     farm_data = defaultdict(lambda: {
         "name": "",
         "plz": "",
@@ -59,7 +59,7 @@ def analyze_filtered_26xxx():
     
     print("Lese vorgefilterte CSV...")
     
-    ***REMOVED*** Verschiedene Encodings versuchen (LibreOffice Calc verwendet oft andere Encodings)
+    # Verschiedene Encodings versuchen (LibreOffice Calc verwendet oft andere Encodings)
     encodings_to_try = ['utf-8-sig', 'utf-8', 'windows-1252', 'iso-8859-1', 'cp1252']
     
     for encoding in encodings_to_try:
@@ -77,7 +77,7 @@ def analyze_filtered_26xxx():
                         print(f"  {i:2d}. {header}")
                 print()
                 
-                ***REMOVED*** Header-Mapping finden
+                # Header-Mapping finden
                 amount_header = None
                 name_header = None
                 measure_header = None
@@ -107,7 +107,7 @@ def analyze_filtered_26xxx():
                     city = row.get('Gemeinde', '').strip()
                     measure_code = row.get(measure_header, '').strip() if measure_header else ''
                     
-                    ***REMOVED*** GAP-Betrag extrahieren
+                    # GAP-Betrag extrahieren
                     gap_amount = 0.0
                     if amount_header:
                         amount_field = row.get(amount_header, '').strip()
@@ -117,36 +117,36 @@ def analyze_filtered_26xxx():
                             except ValueError:
                                 pass
                     
-                    ***REMOVED*** PLZ-Verteilung tracken
+                    # PLZ-Verteilung tracken
                     if plz:
                         plz_distribution[plz] += 1
                     
-                    ***REMOVED*** Measure Code Stats
+                    # Measure Code Stats
                     if measure_code:
                         measure_code_stats[measure_code]["count"] += 1
                         measure_code_stats[measure_code]["amount"] += gap_amount
                     
-                    ***REMOVED*** NUR Flächenprämien-Codes verarbeiten
+                    # NUR Flächenprämien-Codes verarbeiten
                     if measure_code in area_premium_codes:
                         area_premium_rows += 1
                         total_amount += gap_amount
                         
-                        ***REMOVED*** Farm-Key (Name + PLZ für Eindeutigkeit)
+                        # Farm-Key (Name + PLZ für Eindeutigkeit)
                         farm_key = f"{name}_{plz}"
                         farm = farm_data[farm_key]
                         
-                        ***REMOVED*** Basisdaten setzen (beim ersten Mal)
+                        # Basisdaten setzen (beim ersten Mal)
                         if not farm["name"]:
                             farm["name"] = name[:60]
                             farm["plz"] = plz
                             farm["city"] = city
                             farm["premium_breakdown"] = {}
                         
-                        ***REMOVED*** Flächenprämien aggregieren
+                        # Flächenprämien aggregieren
                         farm["total_area_premiums"] += gap_amount
                         farm["payment_count"] += 1
                         
-                        ***REMOVED*** Premium-Breakdown
+                        # Premium-Breakdown
                         if measure_code not in farm["premium_breakdown"]:
                             farm["premium_breakdown"][measure_code] = {
                                 "description": area_premium_codes[measure_code],
@@ -157,19 +157,19 @@ def analyze_filtered_26xxx():
                         farm["premium_breakdown"][measure_code]["amount"] += gap_amount
                         farm["premium_breakdown"][measure_code]["count"] += 1
                         
-                        ***REMOVED*** Erste paar Zeilen ausgeben
+                        # Erste paar Zeilen ausgeben
                         if area_premium_rows <= 10:
                             print(f"Row {area_premium_rows:2d}: {name[:35]}... | PLZ {plz} | {measure_code} | {gap_amount:,.0f} EUR")
                     
                     else:
                         excluded_rows += 1
                     
-                    ***REMOVED*** Progress
+                    # Progress
                     if total_rows % 1000 == 0:
                         print(f"Verarbeitet: {total_rows:,} | Flächenprämien: {area_premium_rows} | Ausgeschlossen: {excluded_rows}")
             
             print(f"Erfolgreich gelesen mit Encoding: {encoding}")
-            break  ***REMOVED*** Erfolgreich gelesen, Schleife verlassen
+            break  # Erfolgreich gelesen, Schleife verlassen
             
         except UnicodeDecodeError:
             print(f"Encoding {encoding} fehlgeschlagen, versuche nächstes...")
@@ -185,14 +185,14 @@ def analyze_filtered_26xxx():
         print(f"FEHLER: Datei nicht gefunden: {csv_path}")
         return
     
-    ***REMOVED*** Betriebsgrößen schätzen und kategorisieren
+    # Betriebsgrößen schätzen und kategorisieren
     for farm_key, farm in farm_data.items():
         amount = farm["total_area_premiums"]
         
-        ***REMOVED*** Schätzung: ~300 EUR/ha Direktzahlungen (EU-Standard)
+        # Schätzung: ~300 EUR/ha Direktzahlungen (EU-Standard)
         farm["estimated_hectares"] = amount / 300
         
-        ***REMOVED*** Betriebskategorisierung
+        # Betriebskategorisierung
         if amount >= 200000:
             farm["farm_category"] = "Mega-Betrieb"
             farm["lead_score"] = 10
@@ -212,7 +212,7 @@ def analyze_filtered_26xxx():
             farm["farm_category"] = "Kleinstbetrieb"
             farm["lead_score"] = 1
     
-    ***REMOVED*** Ergebnisse ausgeben
+    # Ergebnisse ausgeben
     print()
     print("PLZ 26XXX FINALE ANALYSE")
     print("=" * 50)
@@ -224,7 +224,7 @@ def analyze_filtered_26xxx():
     print(f"Durchschnitt/Betrieb: {total_amount/len(farm_data):,.2f} EUR" if len(farm_data) > 0 else "N/A")
     print()
     
-    ***REMOVED*** Top PLZ anzeigen
+    # Top PLZ anzeigen
     print("PLZ-VERTEILUNG (TOP 15):")
     print("-" * 25)
     sorted_plz = sorted(plz_distribution.items(), key=lambda x: x[1], reverse=True)
@@ -232,7 +232,7 @@ def analyze_filtered_26xxx():
         print(f"PLZ {plz}: {count:,} Zahlungen")
     print()
     
-    ***REMOVED*** Top Measure Codes
+    # Top Measure Codes
     print("MEASURE CODE VERTEILUNG:")
     print("-" * 28)
     sorted_measures = sorted(measure_code_stats.items(), key=lambda x: x[1]["count"], reverse=True)
@@ -241,14 +241,14 @@ def analyze_filtered_26xxx():
         print(f"{in_focus} {code}: {stats['count']:,} Zahlungen | {stats['amount']:,.0f} EUR")
     print()
     
-    ***REMOVED*** Top Leads
+    # Top Leads
     sorted_farms = sorted(farm_data.values(), key=lambda x: x["total_area_premiums"], reverse=True)
     
     print("TOP 15 PLZ 26XXX LEADS (NACH FLAECHENPRÄMIEN):")
     print("-" * 55)
     for i, farm in enumerate(sorted_farms[:15], 1):
         codes = list(farm["premium_breakdown"].keys())
-        codes_str = ", ".join(codes[:4])  ***REMOVED*** Max 4 Codes anzeigen
+        codes_str = ", ".join(codes[:4])  # Max 4 Codes anzeigen
         if len(codes) > 4:
             codes_str += f" (+{len(codes)-4})"
         
@@ -260,7 +260,7 @@ def analyze_filtered_26xxx():
         print(f"    Codes: {codes_str} | Zahlungen: {farm['payment_count']}")
         print()
     
-    ***REMOVED*** Betriebsgrößen-Verteilung
+    # Betriebsgrößen-Verteilung
     category_distribution = defaultdict(int)
     for farm in farm_data.values():
         category_distribution[farm["farm_category"]] += 1
@@ -271,7 +271,7 @@ def analyze_filtered_26xxx():
         percentage = count / len(farm_data) * 100 if len(farm_data) > 0 else 0
         print(f"{category}: {count:,} Betriebe ({percentage:.1f}%)")
     
-    ***REMOVED*** JSON Export
+    # JSON Export
     result_data = {
         "source": "LibreOffice Calc gefilterte PLZ 26XXX CSV",
         "timestamp": datetime.now().isoformat(),
@@ -288,7 +288,7 @@ def analyze_filtered_26xxx():
         "measure_code_stats": {code: stats for code, stats in sorted_measures},
         "farm_size_distribution": dict(category_distribution),
         "area_premium_codes_used": area_premium_codes,
-        "top_leads": sorted_farms[:50]  ***REMOVED*** Top 50 Leads
+        "top_leads": sorted_farms[:50]  # Top 50 Leads
     }
     
     with open(output_file, 'w', encoding='utf-8') as f:
@@ -302,3 +302,4 @@ def analyze_filtered_26xxx():
 
 if __name__ == "__main__":
     analyze_filtered_26xxx()
+

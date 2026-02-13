@@ -22,7 +22,7 @@ class ReplenishmentService:
     def get_replenishment_suggestions(self, tenant_id: str, days_ahead: int = 30) -> List[Dict[str, Any]]:
         """Generate replenishment suggestions based on stock levels and usage patterns."""
 
-        ***REMOVED*** Get articles that need replenishment
+        # Get articles that need replenishment
         articles = (
             self.db.query(ArticleModel)
             .filter(
@@ -38,14 +38,14 @@ class ReplenishmentService:
         for article in articles:
             current_stock = article.current_stock or Decimal(0)
             min_stock = article.min_stock or Decimal(0)
-            max_stock = article.max_stock or min_stock * Decimal(2)  ***REMOVED*** Default max = 2x min
+            max_stock = article.max_stock or min_stock * Decimal(2)  # Default max = 2x min
 
-            ***REMOVED*** Check if replenishment is needed
+            # Check if replenishment is needed
             if current_stock < min_stock:
                 deficit = min_stock - current_stock
-                suggested_quantity = max_stock - current_stock  ***REMOVED*** Replenish to max level
+                suggested_quantity = max_stock - current_stock  # Replenish to max level
 
-                ***REMOVED*** Calculate estimated cost
+                # Calculate estimated cost
                 estimated_cost = None
                 if article.purchase_price:
                     estimated_cost = suggested_quantity * article.purchase_price
@@ -66,7 +66,7 @@ class ReplenishmentService:
                     "priority": self._calculate_priority(current_stock, min_stock, max_stock)
                 })
 
-        ***REMOVED*** Sort by priority (high first)
+        # Sort by priority (high first)
         suggestions.sort(key=lambda x: x["priority"], reverse=True)
 
         return suggestions
@@ -75,25 +75,25 @@ class ReplenishmentService:
         """Calculate replenishment priority (1-5, 5 being highest)."""
 
         if current <= 0:
-            return 5  ***REMOVED*** Critical - out of stock
+            return 5  # Critical - out of stock
         elif current < min_stock * Decimal(0.5):
-            return 4  ***REMOVED*** Very urgent
+            return 4  # Very urgent
         elif current < min_stock:
-            return 3  ***REMOVED*** Urgent
+            return 3  # Urgent
         elif current < min_stock * Decimal(1.5):
-            return 2  ***REMOVED*** Soon
+            return 2  # Soon
         else:
-            return 1  ***REMOVED*** Normal
+            return 1  # Normal
 
     def get_slow_moving_inventory(self, tenant_id: str, days_threshold: int = 90) -> List[Dict[str, Any]]:
         """Identify slow-moving inventory that may need special handling."""
 
-        ***REMOVED*** This would typically analyze stock movement history
-        ***REMOVED*** For now, return articles with no recent movements (simplified)
+        # This would typically analyze stock movement history
+        # For now, return articles with no recent movements (simplified)
 
         cutoff_date = datetime.utcnow() - timedelta(days=days_threshold)
 
-        ***REMOVED*** Get articles with low turnover (simplified logic)
+        # Get articles with low turnover (simplified logic)
         articles = (
             self.db.query(ArticleModel)
             .filter(
@@ -107,19 +107,19 @@ class ReplenishmentService:
 
         slow_moving = []
         for article in articles:
-            ***REMOVED*** Calculate stock turnover ratio (simplified)
-            ***REMOVED*** In a real implementation, this would analyze actual movement history
+            # Calculate stock turnover ratio (simplified)
+            # In a real implementation, this would analyze actual movement history
             stock_value = float((article.current_stock or 0) * (article.purchase_price or article.sales_price or 0))
 
-            ***REMOVED*** Flag as slow moving if stock value is significant but no recent activity
-            if stock_value > 1000:  ***REMOVED*** Configurable threshold
+            # Flag as slow moving if stock value is significant but no recent activity
+            if stock_value > 1000:  # Configurable threshold
                 slow_moving.append({
                     "article_id": article.id,
                     "article_number": article.article_number,
                     "name": article.name,
                     "current_stock": float(article.current_stock or 0),
                     "stock_value": stock_value,
-                    "days_since_last_movement": days_threshold,  ***REMOVED*** Placeholder
+                    "days_since_last_movement": days_threshold,  # Placeholder
                     "category": article.category,
                     "recommendation": "Consider markdown or special promotion"
                 })
@@ -135,7 +135,7 @@ class ReplenishmentService:
 
         suggestions = self.get_replenishment_suggestions(tenant_id)
 
-        ***REMOVED*** Group by supplier
+        # Group by supplier
         by_supplier = {}
         for suggestion in suggestions:
             supplier = suggestion.get("supplier_number", "Unknown Supplier")
@@ -148,7 +148,7 @@ class ReplenishmentService:
 
             by_supplier[supplier].append(suggestion)
 
-        ***REMOVED*** Sort items within each supplier by priority
+        # Sort items within each supplier by priority
         for supplier_items in by_supplier.values():
             supplier_items.sort(key=lambda x: x["priority"], reverse=True)
 
@@ -157,7 +157,7 @@ class ReplenishmentService:
     def get_inventory_turnover_report(self, tenant_id: str, period_days: int = 30) -> Dict[str, Any]:
         """Generate inventory turnover analysis."""
 
-        ***REMOVED*** This is a simplified version - real implementation would analyze movement history
+        # This is a simplified version - real implementation would analyze movement history
         articles = (
             self.db.query(ArticleModel)
             .filter(
@@ -168,13 +168,13 @@ class ReplenishmentService:
         )
 
         total_inventory_value = Decimal(0)
-        total_cost_of_goods_sold = Decimal(0)  ***REMOVED*** Would be calculated from actual sales
+        total_cost_of_goods_sold = Decimal(0)  # Would be calculated from actual sales
 
         for article in articles:
             if article.current_stock and article.purchase_price:
                 total_inventory_value += article.current_stock * article.purchase_price
 
-        ***REMOVED*** Calculate turnover ratio (simplified)
+        # Calculate turnover ratio (simplified)
         if total_inventory_value > 0:
             turnover_ratio = total_cost_of_goods_sold / total_inventory_value
             turnover_days = period_days / float(turnover_ratio) if turnover_ratio > 0 else float('inf')

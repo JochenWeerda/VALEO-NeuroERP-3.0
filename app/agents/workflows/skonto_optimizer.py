@@ -16,7 +16,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-***REMOVED*** State Definition
+# State Definition
 class SkontoOptimizerState(TypedDict):
     """State for skonto optimization workflow."""
     messages: Annotated[List[BaseMessage], operator.add]
@@ -28,20 +28,20 @@ class SkontoOptimizerState(TypedDict):
     recommendations: List[str]
 
 
-***REMOVED*** Workflow Nodes
+# Workflow Nodes
 def fetch_open_invoices(state: SkontoOptimizerState) -> dict:
     """Fetch all open invoices with skonto opportunities."""
     logger.info("Fetching open invoices...")
     
-    ***REMOVED*** TODO: Real database query
-    ***REMOVED*** For now, mock data
+    # TODO: Real database query
+    # For now, mock data
     mock_invoices = [
         {
             "invoice_id": "INV-001",
             "supplier": "Raiffeisen AG",
             "amount": Decimal("10000.00"),
             "due_date": datetime.now() + timedelta(days=30),
-            "skonto_rate": Decimal("0.03"),  ***REMOVED*** 3%
+            "skonto_rate": Decimal("0.03"),  # 3%
             "skonto_days": 14,
             "potential_saving": Decimal("300.00")
         },
@@ -50,7 +50,7 @@ def fetch_open_invoices(state: SkontoOptimizerState) -> dict:
             "supplier": "BayWa Agrar",
             "amount": Decimal("5000.00"),
             "due_date": datetime.now() + timedelta(days=20),
-            "skonto_rate": Decimal("0.02"),  ***REMOVED*** 2%
+            "skonto_rate": Decimal("0.02"),  # 2%
             "skonto_days": 10,
             "potential_saving": Decimal("100.00")
         },
@@ -67,7 +67,7 @@ def calculate_optimal_plan(state: SkontoOptimizerState) -> dict:
     available = state["available_cash"]
     payment_date = state["payment_date"]
     
-    ***REMOVED*** Sort by savings potential (highest first)
+    # Sort by savings potential (highest first)
     sorted_invoices = sorted(
         invoices,
         key=lambda x: x["potential_saving"],
@@ -83,7 +83,7 @@ def calculate_optimal_plan(state: SkontoOptimizerState) -> dict:
             days=30 - invoice["skonto_days"]
         )
         
-        ***REMOVED*** Can we pay within skonto period?
+        # Can we pay within skonto period?
         if payment_date <= skonto_deadline:
             discounted_amount = (
                 invoice["amount"] * (1 - invoice["skonto_rate"])
@@ -130,7 +130,7 @@ def generate_recommendations(state: SkontoOptimizerState) -> dict:
     return {"recommendations": recommendations}
 
 
-***REMOVED*** Build Workflow
+# Build Workflow
 def build_skonto_workflow():
     """Build the skonto optimization workflow."""
     workflow = StateGraph(SkontoOptimizerState)
@@ -147,7 +147,7 @@ def build_skonto_workflow():
     return workflow.compile()
 
 
-***REMOVED*** Execute workflow
+# Execute workflow
 async def optimize_skonto(
     available_cash: Decimal,
     payment_date: Optional[datetime] = None

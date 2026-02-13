@@ -22,7 +22,7 @@ import logging
 from typing import Dict, Any
 from pathlib import Path
 
-***REMOVED*** Lokales Repo-Verzeichnis priorisieren
+# Lokales Repo-Verzeichnis priorisieren
 repo_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(repo_root))
 
@@ -48,7 +48,7 @@ def load_demo_requirement() -> str:
                     return req.strip()
     except Exception as e:
         logger.warning("Konnte Demo-Konfiguration nicht laden: %s", e)
-    ***REMOVED*** Fallback
+    # Fallback
     return (
         "Als Disponent möchte ich eingehende Bestellungen automatisch prüfen, "
         "validieren und bei Unklarheiten Rückfragen generieren, damit der "
@@ -60,17 +60,17 @@ async def main() -> None:
     mongodb_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
     mongodb_db = os.getenv("MONGODB_DB", "valeo_neuroerp")
     project_id = os.getenv("APM_PROJECT_ID", "demo-project-van")
-    llm_provider = os.getenv("LLM_PROVIDER", "ollama")  ***REMOVED*** Ollama als Standard
+    llm_provider = os.getenv("LLM_PROVIDER", "ollama")  # Ollama als Standard
     ollama_model = os.getenv("OLLAMA_MODEL", "llama3.2:3b")
 
     logger.info("Starte VAN-Workflow-Demo (DB=%s, Projekt=%s, LLM=%s, Modell=%s)", 
                 mongodb_db, project_id, llm_provider, ollama_model)
 
-    ***REMOVED*** Connector und Workflow initialisieren
+    # Connector und Workflow initialisieren
     connector = APMMongoDBConnector(mongodb_uri, mongodb_db)
     workflow = APMWorkflow(connector, project_id)
 
-    ***REMOVED*** Optional: RAG-Service setzen (nutzt dieselbe DB)
+    # Optional: RAG-Service setzen (nutzt dieselbe DB)
     try:
         rag_service = RAGService(connector, project_id)
         workflow.set_rag_service(rag_service)
@@ -78,14 +78,14 @@ async def main() -> None:
     except Exception as e:
         logger.warning("RAG-Service konnte nicht initialisiert werden: %s", e)
 
-    ***REMOVED*** Optional: LLM-Service setzen
+    # Optional: LLM-Service setzen
     try:
         llm_service = create_llm_service(llm_provider)
-        ***REMOVED*** LLM-Service direkt an VAN-Modus setzen
+        # LLM-Service direkt an VAN-Modus setzen
         workflow.van_mode.set_llm_provider(llm_provider)
         logger.info("LLM-Service mit Provider %s gesetzt", llm_provider)
         
-        ***REMOVED*** Zusätzliche Info für Ollama
+        # Zusätzliche Info für Ollama
         if llm_provider == "ollama":
             logger.info("Ollama-Modell: %s", ollama_model)
             logger.info("Ollama-URL: %s", os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"))
@@ -93,24 +93,24 @@ async def main() -> None:
     except Exception as e:
         logger.warning("LLM-Service konnte nicht initialisiert werden: %s", e)
 
-    ***REMOVED*** Beispielanforderung laden
+    # Beispielanforderung laden
     requirement_text = load_demo_requirement()
 
-    ***REMOVED*** VAN-Modus ausführen
+    # VAN-Modus ausführen
     result = await workflow.run_van(requirement_text)
 
-    ***REMOVED*** Ausgabe
+    # Ausgabe
     print("\n=== VAN-Demo Ergebnis ===")
     print(json.dumps(result, ensure_ascii=False, indent=2))
     
-    ***REMOVED*** Zusätzliche Informationen
+    # Zusätzliche Informationen
     print(f"\n=== Zusätzliche Informationen ===")
     print(f"LLM-Provider: {result.get('llm_provider', 'unbekannt')}")
     print(f"RAG-Service: {result.get('rag_service', 'unbekannt')}")
     print(f"Klärungsfragen generiert: {len(result.get('clarifications', []))}")
     print(f"Ähnliche Anforderungen gefunden: {len(result.get('similar_requirements', []))}")
     
-    ***REMOVED*** Ollama-spezifische Informationen
+    # Ollama-spezifische Informationen
     if llm_provider == "ollama":
         print(f"\n=== Ollama-Informationen ===")
         print(f"Verwendetes Modell: {ollama_model}")
@@ -120,5 +120,6 @@ async def main() -> None:
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 

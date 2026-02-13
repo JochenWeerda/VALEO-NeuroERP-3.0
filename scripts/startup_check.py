@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 VALEO-NeuroERP Startup-Check & Installation-Routine
 Prüft ob System in Installation oder Produktiv-Phase ist
@@ -12,7 +12,7 @@ from pathlib import Path
 from datetime import datetime
 import json
 
-***REMOVED*** Füge Projekt-Root zu sys.path hinzu
+# Füge Projekt-Root zu sys.path hinzu
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
@@ -33,7 +33,7 @@ class StartupChecker:
         sock.close()
         
         if result == 0:
-            ***REMOVED*** Port ist belegt
+            # Port ist belegt
             self.port_conflicts.append({
                 "port": port,
                 "service": service_name,
@@ -90,7 +90,7 @@ class StartupChecker:
         print("=" * 80)
         
         try:
-            ***REMOVED*** Prüfe Docker-Container
+            # Prüfe Docker-Container
             result = subprocess.run(
                 ["docker", "ps", "--filter", "name=valeo-postgres", "--format", "{{.Names}}"],
                 capture_output=True,
@@ -105,7 +105,7 @@ class StartupChecker:
             
             print("   ✅ PostgreSQL-Container läuft")
             
-            ***REMOVED*** Prüfe Schemas
+            # Prüfe Schemas
             check_schemas = subprocess.run(
                 ["docker", "exec", "valeo-postgres", "psql", "-U", "valeo", "-d", "valeo_neuro_erp", "-c", "\\dn"],
                 capture_output=True,
@@ -157,7 +157,7 @@ class StartupChecker:
                     timeout=5
                 )
                 
-                ***REMOVED*** Parse Ausgabe (Zeile 3 enthält die Zahl)
+                # Parse Ausgabe (Zeile 3 enthält die Zahl)
                 lines = result.stdout.strip().split('\n')
                 if len(lines) >= 3:
                     count = int(lines[2].strip())
@@ -221,10 +221,10 @@ class StartupChecker:
         print("\n🧹 Process-Cleanup...")
         print("=" * 80)
         
-        ***REMOVED*** Prüfe Python-Prozesse auf kritischen Ports
+        # Prüfe Python-Prozesse auf kritischen Ports
         try:
             if sys.platform == "win32":
-                ***REMOVED*** Windows: Finde Prozesse auf Port 8000
+                # Windows: Finde Prozesse auf Port 8000
                 result = subprocess.run(
                     ["netstat", "-ano"],
                     capture_output=True,
@@ -250,13 +250,13 @@ class StartupChecker:
         print(f"Datum: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"Projekt-Root: {project_root}")
         
-        ***REMOVED*** 1. Status prüfen
+        # 1. Status prüfen
         status = self.check_installation_status()
         
-        ***REMOVED*** 2. Process-Cleanup
+        # 2. Process-Cleanup
         self.cleanup_stale_processes()
         
-        ***REMOVED*** 3. Port-Check
+        # 3. Port-Check
         ports_ok = self.check_all_ports()
         
         if not ports_ok:
@@ -269,11 +269,11 @@ class StartupChecker:
             print("   2. Stoppe Docker-Container: docker-compose down")
             print("   3. Prüfe Ports: netstat -ano | findstr \":8000\"")
         
-        ***REMOVED*** 4. Datenbank-Check (nur wenn Installation)
+        # 4. Datenbank-Check (nur wenn Installation)
         if status == "INSTALLATION":
             print("\n🔧 INSTALLATIONS-MODUS - Führe Setup durch...")
             
-            ***REMOVED*** 4a. Schema-Check
+            # 4a. Schema-Check
             schemas_ok = self.check_database_schemas()
             
             if not schemas_ok:
@@ -282,7 +282,7 @@ class StartupChecker:
                     print("\n   ❌ Schema-Erstellung fehlgeschlagen")
                     return False
             
-            ***REMOVED*** 4b. Tabellen-Check
+            # 4b. Tabellen-Check
             tables = self.check_database_tables()
             total_tables = sum(tables.values())
             
@@ -290,19 +290,19 @@ class StartupChecker:
                 print("\n   ⚠️  Keine Tabellen gefunden - Backend muss sie beim Start erstellen")
                 print("   💡 Das passiert automatisch bei `create_tables()` in main.py")
             
-            ***REMOVED*** Markiere Installation als abgeschlossen
+            # Markiere Installation als abgeschlossen
             self.mark_installation_complete()
             
         else:
             print("\n✅ PRODUKTIV-MODUS - Überspringe Installation")
             
-            ***REMOVED*** Trotzdem Schema-Check durchführen
+            # Trotzdem Schema-Check durchführen
             self.check_database_schemas()
             tables = self.check_database_tables()
             total_tables = sum(tables.values())
             print(f"\n   📊 Gesamt: {total_tables} Tabellen in Datenbank")
         
-        ***REMOVED*** 5. Zusammenfassung
+        # 5. Zusammenfassung
         print("\n" + "=" * 80)
         print("📊 Zusammenfassung:")
         print("=" * 80)
@@ -341,7 +341,7 @@ def main():
     checker = StartupChecker()
     success = checker.run_full_check()
     
-    ***REMOVED*** Speichere Check-Ergebnis
+    # Speichere Check-Ergebnis
     log_file = project_root / "logs" / f"startup_check_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     log_file.parent.mkdir(exist_ok=True)
     
@@ -363,4 +363,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

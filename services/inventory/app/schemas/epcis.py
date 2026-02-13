@@ -31,8 +31,8 @@ class EpcisEventRead(BaseModel):
     quantity: float | None
     extensions: dict[str, Any] | None
     created_at: datetime
-    ***REMOVED*** Event-Key kann weggelassen werden; für Transparenz optional exponieren
-    ***REMOVED*** event_key: str | None = None
+    # Event-Key kann weggelassen werden; für Transparenz optional exponieren
+    # event_key: str | None = None
 
     class Config:
         from_attributes = True
@@ -41,4 +41,5 @@ class EpcisEventRead(BaseModel):
 class EpcisEventsResponse(BaseModel):
     items: list[EpcisEventRead]
     total: int
+
 

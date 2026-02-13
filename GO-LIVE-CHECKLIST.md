@@ -1,8 +1,8 @@
-***REMOVED*** VALEO-NeuroERP Go-Live Checklist
+# VALEO-NeuroERP Go-Live Checklist
 
-***REMOVED******REMOVED*** Phase 1: Pre-Deployment
+## Phase 1: Pre-Deployment
 
-***REMOVED******REMOVED******REMOVED*** Infrastructure
+### Infrastructure
 
 - [ ] **PostgreSQL Database**
   - [ ] Production database provisioned
@@ -25,7 +25,7 @@
   - [ ] Log aggregation active (ELK/Loki)
   - [ ] Tracing enabled (Jaeger/Tempo)
 
-***REMOVED******REMOVED******REMOVED*** Security
+### Security
 
 - [ ] **Authentication & Authorization**
   - [ ] OIDC provider configured
@@ -60,7 +60,7 @@
   - [ ] Restore endpoints limited (5/min)
   - [ ] Rate limit tests passed
 
-***REMOVED******REMOVED******REMOVED*** Testing
+### Testing
 
 - [ ] **Unit Tests**
   - [ ] All tests passing (pytest)
@@ -95,7 +95,7 @@
   - [ ] SSE reconnection tested
   - [ ] Database failover tested
 
-***REMOVED******REMOVED******REMOVED*** Database
+### Database
 
 - [ ] **Migrations**
   - [ ] All Alembic migrations applied
@@ -108,7 +108,7 @@
   - [ ] Test data removed
   - [ ] Production data migrated (if applicable)
 
-***REMOVED******REMOVED******REMOVED*** Documentation
+### Documentation
 
 - [ ] **Operator Runbooks**
   - [ ] ALERTS.md complete
@@ -133,9 +133,9 @@
 
 ---
 
-***REMOVED******REMOVED*** Phase 2: Deployment
+## Phase 2: Deployment
 
-***REMOVED******REMOVED******REMOVED*** Staging Deployment
+### Staging Deployment
 
 - [ ] **Deploy to Staging**
   ```bash
@@ -162,7 +162,7 @@
   - [ ] Memory usage acceptable
   - [ ] No errors in logs
 
-***REMOVED******REMOVED******REMOVED*** Production Deployment
+### Production Deployment
 
 - [ ] **Pre-Deployment**
   - [ ] Maintenance window scheduled
@@ -195,9 +195,9 @@
 
 ---
 
-***REMOVED******REMOVED*** Phase 3: Post-Deployment
+## Phase 3: Post-Deployment
 
-***REMOVED******REMOVED******REMOVED*** Monitoring
+### Monitoring
 
 - [ ] **Grafana Dashboard**
   - [ ] Request rate normal
@@ -216,7 +216,7 @@
   - [ ] PII redaction working
   - [ ] Correlation IDs present
 
-***REMOVED******REMOVED******REMOVED*** Verification
+### Verification
 
 - [ ] **Database**
   - [ ] Connection pool healthy
@@ -233,7 +233,7 @@
   - [ ] No timeouts
   - [ ] Autoscaling working (HPA)
 
-***REMOVED******REMOVED******REMOVED*** User Acceptance Testing (UAT)
+### User Acceptance Testing (UAT)
 
 - [ ] **Stakeholder Sign-Off**
   - [ ] Business Owner: _______________
@@ -247,7 +247,7 @@
   - [ ] Accountants trained
   - [ ] Admins trained
 
-***REMOVED******REMOVED******REMOVED*** Final Steps
+### Final Steps
 
 - [ ] **Documentation**
   - [ ] Production URLs documented
@@ -266,26 +266,26 @@
 
 ---
 
-***REMOVED******REMOVED*** Rollback Plan
+## Rollback Plan
 
-***REMOVED******REMOVED******REMOVED*** If Critical Issues Occur
+### If Critical Issues Occur
 
 1. **Immediate Actions**
    ```bash
-   ***REMOVED*** Rollback to previous version
+   # Rollback to previous version
    helm rollback valeo-erp-production -n production
    
-   ***REMOVED*** Verify rollback
+   # Verify rollback
    kubectl get pods -n production
    curl https://erp.valeo.example.com/healthz
    ```
 
 2. **Database Rollback** (if needed)
    ```bash
-   ***REMOVED*** Rollback migration
+   # Rollback migration
    alembic downgrade -1
    
-   ***REMOVED*** Or restore from backup
+   # Or restore from backup
    ./scripts/restore-db.sh /backups/postgresql/daily/valeo_erp_backup_YYYYMMDD_HHMMSS.sql.gz
    ```
 
@@ -296,23 +296,23 @@
 
 ---
 
-***REMOVED******REMOVED*** Post-Go-Live
+## Post-Go-Live
 
-***REMOVED******REMOVED******REMOVED*** Week 1
+### Week 1
 
 - [ ] Daily health checks
 - [ ] Monitor error rates
 - [ ] Collect user feedback
 - [ ] Address urgent issues
 
-***REMOVED******REMOVED******REMOVED*** Week 2-4
+### Week 2-4
 
 - [ ] Weekly health checks
 - [ ] Performance optimization
 - [ ] User training follow-ups
 - [ ] Documentation updates
 
-***REMOVED******REMOVED******REMOVED*** Month 2+
+### Month 2+
 
 - [ ] Monthly reviews
 - [ ] Quarterly DR tests
@@ -321,7 +321,7 @@
 
 ---
 
-***REMOVED******REMOVED*** Sign-Off
+## Sign-Off
 
 **Deployment Date:** _______________
 
@@ -345,4 +345,5 @@ _____________________________________________
 
 **Version:** 1.0  
 **Last Updated:** 2025-10-09
+
 

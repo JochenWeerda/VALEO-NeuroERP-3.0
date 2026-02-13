@@ -5,15 +5,17 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { AlertTriangle, Brain, CheckCircle, Leaf, Search, Sparkles, Target, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useSchadbilder, useKulturen } from '@/lib/api/agrar'
 
 type Schadbild = {
   id: string
   name: string
   beschreibung: string
-  schwere: 'leicht' | 'mittel' | 'schwer'
+  schwere: 'leicht' | 'mittel' | 'schwer' | 'gering' | 'hoch'
   kultur: string
   saison: string
 }
@@ -25,8 +27,8 @@ type PSMEmpfehlung = {
   wirkstoffGruppe: string
   dosierung: string
   wartezeit: number
-  effektivitaet: number // 0-100
-  umweltscore: number // 0-100
+  effektivitaet: number
+  umweltscore: number
   kosten: number
   verfuegbar: boolean
   begruendung: string
@@ -44,6 +46,9 @@ export default function PSMBeratungPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
 
+  const { data: schadbilderData, isLoading: isLoadingSchadbilder } = useSchadbilder()
+  const { data: kulturenData, isLoading: isLoadingKulturen } = useKulturen()
+
   const [schritt, setSchritt] = useState(1)
   const [kultur, setKultur] = useState('')
   const [saison, setSaison] = useState('')
@@ -51,42 +56,14 @@ export default function PSMBeratungPage(): JSX.Element {
   const [schweregrad, setSchweregrad] = useState<'leicht' | 'mittel' | 'schwer'>('mittel')
   const [ausgewaehltesSchadbild, setAusgewaehltesSchadbild] = useState<Schadbild | null>(null)
   const [beratungsErgebnis, setBeratungsErgebnis] = useState<BeratungsErgebnis | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isAnalyseLoading, setIsAnalyseLoading] = useState(false)
 
-  // Mock data
-  const verfuegbareKulturen = [
-    'Weizen', 'Gerste', 'Raps', 'Mais', 'Kartoffeln', 'Zuckerrüben'
-  ]
-
-  const schadbilder: Schadbild[] = [
-    {
-      id: '1',
-      name: 'Gelbrost am Weizen',
-      beschreibung: 'Gelbe bis orange Streifen auf Blättern, später schwarze Sporenlager',
-      schwere: 'mittel',
-      kultur: 'Weizen',
-      saison: 'Frühjahr'
-    },
-    {
-      id: '2',
-      name: 'Mehltau an Gerste',
-      beschreibung: 'Weißer, mehlartiger Belag auf Blättern und Ähren',
-      schwere: 'schwer',
-      kultur: 'Gerste',
-      saison: 'Frühjahr'
-    },
-    {
-      id: '3',
-      name: 'Rapserdfloh',
-      beschreibung: 'Kleine schwarze Käfer fressen Schadlochmuster in Blätter',
-      schwere: 'leicht',
-      kultur: 'Raps',
-      saison: 'Herbst'
-    }
-  ]
+  const schadbilder = schadbilderData ?? []
+  const kulturen = kulturenData ?? []
+  const verfuegbareKulturen = kulturen.map(k => k.name)
+  const isLoading = isLoadingSchadbilder || isLoadingKulturen
 
   const generateEmpfehlungen = (schadbild: Schadbild): PSMEmpfehlung[] => {
-    // Mock AI-basierte Empfehlungen
     const basisEmpfehlungen: PSMEmpfehlung[] = [
       {
         id: 'PSM-001',
@@ -129,7 +106,6 @@ export default function PSMBeratungPage(): JSX.Element {
       }
     ]
 
-    // Filter basierend auf Schadbild und Kultur
     return basisEmpfehlungen.filter(psm => {
       if (schadbild.name.includes('Rost') && psm.wirkstoffGruppe.includes('Strobilurine')) return true
       if (schadbild.name.includes('Mehltau') && psm.wirkstoffGruppe.includes('Triazole')) return true
@@ -141,14 +117,12 @@ export default function PSMBeratungPage(): JSX.Element {
   const analysiereSchadbild = async () => {
     if (!kultur || !schadbildBeschreibung) return
 
-    setIsLoading(true)
+    setIsAnalyseLoading(true)
 
     try {
-      // Mock AI-Analyse
       await new Promise(resolve => setTimeout(resolve, 2000))
 
-      // Finde passendes Schadbild oder erstelle neues
-      const gefundenesSchadbild = schadbilder.find(s =>
+      const gefundenesSchadbild: Schadbild = schadbilder.find(s =>
         s.kultur === kultur &&
         schadbildBeschreibung.toLowerCase().includes(s.name.toLowerCase().split(' ')[0])
       ) || {
@@ -202,7 +176,7 @@ export default function PSMBeratungPage(): JSX.Element {
         variant: "destructive",
       })
     } finally {
-      setIsLoading(false)
+      setIsAnalyseLoading(false)
     }
   }
 
@@ -272,11 +246,11 @@ export default function PSMBeratungPage(): JSX.Element {
         <div className="flex gap-2">
           <Button
             onClick={analysiereSchadbild}
-            disabled={!kultur || !schadbildBeschreibung || isLoading}
+            disabled={!kultur || !schadbildBeschreibung || isAnalyseLoading}
             className="gap-2"
           >
             <Brain className="h-4 w-4" />
-            {isLoading ? 'Analysiere...' : 'Schadbild analysieren'}
+            {isAnalyseLoading ? 'Analysiere...' : 'Schadbild analysieren'}
           </Button>
         </div>
       </CardContent>
@@ -299,7 +273,7 @@ export default function PSMBeratungPage(): JSX.Element {
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-medium text-blue-900">{ausgewaehltesSchadbild.name}</h3>
                 <Badge variant={
-                  ausgewaehltesSchadbild.schwere === 'leicht' ? 'secondary' :
+                  ausgewaehltesSchadbild.schwere === 'leicht' || ausgewaehltesSchadbild.schwere === 'gering' ? 'secondary' :
                   ausgewaehltesSchadbild.schwere === 'mittel' ? 'default' : 'destructive'
                 }>
                   {ausgewaehltesSchadbild.schwere}
@@ -354,7 +328,7 @@ export default function PSMBeratungPage(): JSX.Element {
                   </div>
                   <div>
                     <div className="text-sm font-medium">Kosten</div>
-                    <div className="text-lg">€{psm.kosten}/ha</div>
+                    <div className="text-lg">{psm.kosten}/ha</div>
                   </div>
                 </div>
 
@@ -446,8 +420,19 @@ export default function PSMBeratungPage(): JSX.Element {
     </div>
   )
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="h-10 w-1/2" />
+        <Skeleton className="h-4 w-1/3" />
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">PSM-Beratungs-Tool</h1>

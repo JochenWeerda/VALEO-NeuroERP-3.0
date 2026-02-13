@@ -6,26 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { AlertTriangle, Calculator, FlaskConical, Plus, Save, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-
-type DuengerKomponente = {
-  id: string
-  name: string
-  typ: string
-  n_gehalt: number
-  p_gehalt: number
-  k_gehalt: number
-  s_gehalt: number
-  mg_gehalt: number
-  preis_pro_tonne: number
-  verfuegbar: number
-}
+import { useDuengerKomponenten } from '@/lib/api/agrar'
 
 type MischungsKomponente = {
   komponente_id: string
-  anteil: number // Prozent
+  anteil: number
   menge_tonne: number
 }
 
@@ -49,6 +38,10 @@ export default function DuengerMischungenPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
 
+  const { data: komponentenData, isLoading } = useDuengerKomponenten()
+
+  const verfuegbareKomponenten = komponentenData ?? []
+
   const [mischung, setMischung] = useState<DuengerMischung>({
     id: 'MIX-001',
     name: '',
@@ -65,59 +58,7 @@ export default function DuengerMischungenPage(): JSX.Element {
     status: 'entwurf'
   })
 
-  const [isLoading, setIsLoading] = useState(false)
-
-  // Mock data für verfügbare Dünger-Komponenten
-  const verfuegbareKomponenten: DuengerKomponente[] = [
-    {
-      id: 'DUE-001',
-      name: 'Kalkammonsalpeter',
-      typ: 'Mineraldünger',
-      n_gehalt: 27.0,
-      p_gehalt: 0.0,
-      k_gehalt: 0.0,
-      s_gehalt: 0.0,
-      mg_gehalt: 0.0,
-      preis_pro_tonne: 450.00,
-      verfuegbar: 1500
-    },
-    {
-      id: 'DUE-002',
-      name: 'Superphosphat',
-      typ: 'Mineraldünger',
-      n_gehalt: 0.0,
-      p_gehalt: 18.0,
-      k_gehalt: 0.0,
-      s_gehalt: 0.0,
-      mg_gehalt: 0.0,
-      preis_pro_tonne: 380.00,
-      verfuegbar: 800
-    },
-    {
-      id: 'DUE-003',
-      name: 'Kaliumnitrat',
-      typ: 'Mineraldünger',
-      n_gehalt: 13.0,
-      p_gehalt: 0.0,
-      k_gehalt: 38.0,
-      s_gehalt: 0.0,
-      mg_gehalt: 0.0,
-      preis_pro_tonne: 650.00,
-      verfuegbar: 600
-    },
-    {
-      id: 'DUE-004',
-      name: 'Gülle',
-      typ: 'Organischer Dünger',
-      n_gehalt: 4.0,
-      p_gehalt: 1.5,
-      k_gehalt: 5.0,
-      s_gehalt: 0.5,
-      mg_gehalt: 0.3,
-      preis_pro_tonne: 25.00,
-      verfuegbar: 5000
-    }
-  ]
+  const [isSaving, setIsSaving] = useState(false)
 
   const berechneMischung = () => {
     if (mischung.komponenten.length === 0) return
@@ -170,12 +111,10 @@ export default function DuengerMischungenPage(): JSX.Element {
     const updatedKomponenten = [...mischung.komponenten]
     updatedKomponenten[index] = { ...updatedKomponenten[index], [field]: value }
 
-    // Wenn Komponente geändert wurde, setze Menge zurück
     if (field === 'komponente_id') {
       updatedKomponenten[index].menge_tonne = 0
     }
 
-    // Wenn Anteil geändert wurde, berechne Menge
     if (field === 'anteil' && mischung.berechnete_werte.gesamt_menge > 0) {
       const ziel_menge = mischung.berechnete_werte.gesamt_menge
       updatedKomponenten[index].menge_tonne = (value / 100) * ziel_menge
@@ -195,15 +134,8 @@ export default function DuengerMischungenPage(): JSX.Element {
   }
 
   const handleSave = async () => {
-    setIsLoading(true)
+    setIsSaving(true)
     try {
-      // API call to save Dünger-Mischung
-      // const response = await fetch('/api/v1/agrar/duenger/mischungen', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(mischung)
-      // })
-
       toast({
         title: "Mischung gespeichert",
         description: "Dünger-Mischung wurde erfolgreich gespeichert.",
@@ -217,7 +149,7 @@ export default function DuengerMischungenPage(): JSX.Element {
         variant: "destructive",
       })
     } finally {
-      setIsLoading(false)
+      setIsSaving(false)
     }
   }
 
@@ -225,11 +157,23 @@ export default function DuengerMischungenPage(): JSX.Element {
 
   const validateMischung = () => {
     const total_anteil = mischung.komponenten.reduce((sum, k) => sum + k.anteil, 0)
-    return Math.abs(total_anteil - 100) < 0.1 // Toleranz von 0.1%
+    return Math.abs(total_anteil - 100) < 0.1
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="h-10 w-1/2" />
+        <Skeleton className="h-4 w-1/3" />
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Dünger-Mischungen</h1>
@@ -239,7 +183,7 @@ export default function DuengerMischungenPage(): JSX.Element {
           <Button variant="outline" onClick={() => navigate('/agrar/duenger/liste')}>
             Abbrechen
           </Button>
-          <Button onClick={handleSave} disabled={isLoading} className="gap-2">
+          <Button onClick={handleSave} disabled={isSaving} className="gap-2">
             <Save className="h-4 w-4" />
             Speichern
           </Button>
@@ -413,7 +357,7 @@ export default function DuengerMischungenPage(): JSX.Element {
                         <div><strong>N:</strong> {komponente.n_gehalt}%</div>
                         <div><strong>P:</strong> {komponente.p_gehalt}%</div>
                         <div><strong>K:</strong> {komponente.k_gehalt}%</div>
-                        <div><strong>Preis:</strong> €{komponente.preis_pro_tonne}/t</div>
+                        <div><strong>Preis:</strong> {komponente.preis_pro_tonne}/t</div>
                       </div>
                     </div>
                   )}
@@ -461,7 +405,7 @@ export default function DuengerMischungenPage(): JSX.Element {
               </div>
               <div className="p-4 bg-orange-50 rounded-lg">
                 <div className="text-sm text-orange-600">Kosten/Tonne</div>
-                <div className="text-2xl font-bold text-orange-900">€{mischung.berechnete_werte.kosten_pro_tonne}</div>
+                <div className="text-2xl font-bold text-orange-900">{mischung.berechnete_werte.kosten_pro_tonne}</div>
                 <div className="text-xs text-orange-600">Gesamt: {mischung.berechnete_werte.gesamt_menge}t</div>
               </div>
             </div>

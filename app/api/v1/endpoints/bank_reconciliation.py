@@ -31,7 +31,7 @@ class BalanceComparison(BaseModel):
 
 class DifferenceItem(BaseModel):
     """Single difference between bank and accounting"""
-    item_type: str  ***REMOVED*** UNMATCHED_STATEMENT, UNMATCHED_ACCOUNTING, AMOUNT_MISMATCH
+    item_type: str  # UNMATCHED_STATEMENT, UNMATCHED_ACCOUNTING, AMOUNT_MISMATCH
     statement_line_id: Optional[str] = None
     journal_entry_id: Optional[str] = None
     date: date
@@ -41,7 +41,7 @@ class DifferenceItem(BaseModel):
     reference: Optional[str] = None
     description: str
     suggested_account: Optional[str] = None
-    suggested_action: Optional[str] = None  ***REMOVED*** CREATE_ENTRY, ADJUST_ENTRY, INVESTIGATE
+    suggested_action: Optional[str] = None  # CREATE_ENTRY, ADJUST_ENTRY, INVESTIGATE
 
 
 class ReconciliationResult(BaseModel):
@@ -66,7 +66,7 @@ async def get_balance_comparison(
     Compare bank statement balance with accounting balance.
     """
     try:
-        ***REMOVED*** Get bank statement balance
+        # Get bank statement balance
         statement_query = text("""
             SELECT opening_balance, closing_balance, statement_date
             FROM domain_erp.bank_statements
@@ -84,8 +84,8 @@ async def get_balance_comparison(
         bank_statement_balance = Decimal(str(statement_row[1])) if statement_row[1] else Decimal("0.00")
         statement_date = statement_row[2] if statement_row[2] else date.today()
         
-        ***REMOVED*** Get accounting balance for bank account
-        ***REMOVED*** Sum all journal entries for this bank account
+        # Get accounting balance for bank account
+        # Sum all journal entries for this bank account
         accounting_query = text("""
             SELECT 
                 COALESCE(SUM(CASE WHEN jel.debit_amount > 0 THEN jel.debit_amount ELSE 0 END), 0) as total_debit,
@@ -107,7 +107,7 @@ async def get_balance_comparison(
         }).fetchone()
         
         if not accounting_row:
-            ***REMOVED*** If no journal entries, try to get balance from bank_accounts table
+            # If no journal entries, try to get balance from bank_accounts table
             bank_account_query = text("""
                 SELECT balance FROM domain_erp.bank_accounts
                 WHERE id = :bank_account_id AND tenant_id = :tenant_id
@@ -124,7 +124,7 @@ async def get_balance_comparison(
         else:
             total_debit = Decimal(str(accounting_row[0])) if accounting_row[0] else Decimal("0.00")
             total_credit = Decimal(str(accounting_row[1])) if accounting_row[1] else Decimal("0.00")
-            ***REMOVED*** For asset accounts (bank), balance = debit - credit
+            # For asset accounts (bank), balance = debit - credit
             accounting_balance = total_debit - total_credit
         
         difference = bank_statement_balance - accounting_balance
@@ -159,7 +159,7 @@ async def get_reconciliation_differences(
     try:
         differences = []
         
-        ***REMOVED*** Get unmatched statement lines
+        # Get unmatched statement lines
         unmatched_statement_query = text("""
             SELECT id, booking_date, amount, reference, remittance_info
             FROM domain_erp.bank_statement_lines
@@ -183,13 +183,13 @@ async def get_reconciliation_differences(
                 bank_amount=Decimal(str(row[2])),
                 reference=row[3],
                 description=row[4] or row[3] or "Unmatched bank transaction",
-                suggested_account="1200",  ***REMOVED*** Default: Accounts Receivable
+                suggested_account="1200",  # Default: Accounts Receivable
                 suggested_action="CREATE_ENTRY"
             ))
         
-        ***REMOVED*** Get accounting entries that might not be in bank statement
-        ***REMOVED*** This is more complex - we'd need to match by date/amount
-        ***REMOVED*** For now, we'll focus on unmatched statement lines
+        # Get accounting entries that might not be in bank statement
+        # This is more complex - we'd need to match by date/amount
+        # For now, we'll focus on unmatched statement lines
         
         return differences
         
@@ -210,24 +210,24 @@ async def reconcile_bank_statement(
     Perform bank reconciliation and generate booking suggestions.
     """
     try:
-        ***REMOVED*** Get balance comparison
+        # Get balance comparison
         balance_comp = await get_balance_comparison(statement_id, bank_account_id, tenant_id, db)
         
-        ***REMOVED*** Get differences
+        # Get differences
         differences = await get_reconciliation_differences(statement_id, bank_account_id, tenant_id, db)
         
-        ***REMOVED*** Generate booking suggestions for unmatched items
+        # Generate booking suggestions for unmatched items
         booking_suggestions = []
         
         for diff in differences:
             if diff.item_type == "UNMATCHED_STATEMENT" and diff.suggested_action == "CREATE_ENTRY":
-                ***REMOVED*** Suggest journal entry for unmatched bank transaction
+                # Suggest journal entry for unmatched bank transaction
                 suggestion = {
                     "type": "journal_entry",
                     "description": diff.description,
                     "date": diff.date.isoformat(),
-                    "account_debit": "1000",  ***REMOVED*** Bank account
-                    "account_credit": diff.suggested_account or "1200",  ***REMOVED*** Default AR
+                    "account_debit": "1000",  # Bank account
+                    "account_credit": diff.suggested_account or "1200",  # Default AR
                     "amount": float(diff.amount),
                     "reference": diff.reference,
                     "statement_line_id": diff.statement_line_id
@@ -236,11 +236,11 @@ async def reconcile_bank_statement(
         
         can_be_booked = balance_comp.is_balanced or len(differences) == 0
         
-        ***REMOVED*** Auto-book if requested and balanced
+        # Auto-book if requested and balanced
         if auto_book and can_be_booked and booking_suggestions:
             for suggestion in booking_suggestions:
                 try:
-                    ***REMOVED*** Create journal entry
+                    # Create journal entry
                     journal_entry_id = f"JE-RECON-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
                     
                     journal_insert = text("""
@@ -269,8 +269,8 @@ async def reconcile_bank_statement(
                         "total_credit": Decimal(str(suggestion["amount"]))
                     })
                     
-                    ***REMOVED*** Create journal entry lines
-                    ***REMOVED*** Debit: Bank account
+                    # Create journal entry lines
+                    # Debit: Bank account
                     bank_account_query = text("""
                         SELECT id FROM domain_erp.chart_of_accounts
                         WHERE account_number = :account_number AND tenant_id = :tenant_id
@@ -301,7 +301,7 @@ async def reconcile_bank_statement(
                             "description": suggestion["description"]
                         })
                     
-                    ***REMOVED*** Credit: Suggested account
+                    # Credit: Suggested account
                     credit_account_row = db.execute(bank_account_query, {
                         "account_number": suggestion["account_credit"],
                         "tenant_id": tenant_id
@@ -327,7 +327,7 @@ async def reconcile_bank_statement(
                             "description": suggestion["description"]
                         })
                     
-                    ***REMOVED*** Mark statement line as matched
+                    # Mark statement line as matched
                     if suggestion.get("statement_line_id"):
                         update_line = text("""
                             UPDATE domain_erp.bank_statement_lines
@@ -375,13 +375,13 @@ async def get_reconciliation_summary(
     Get summary of bank reconciliation status.
     """
     try:
-        ***REMOVED*** Get balance comparison
+        # Get balance comparison
         balance_comp = await get_balance_comparison(statement_id, bank_account_id, tenant_id, db)
         
-        ***REMOVED*** Get differences count
+        # Get differences count
         differences = await get_reconciliation_differences(statement_id, bank_account_id, tenant_id, db)
         
-        ***REMOVED*** Get statement line counts
+        # Get statement line counts
         line_counts_query = text("""
             SELECT 
                 COUNT(*) as total,

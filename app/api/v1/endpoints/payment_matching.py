@@ -37,7 +37,7 @@ class PaymentEntry(BaseModel):
     debtor_name: Optional[str] = None
     debtor_iban: Optional[str] = None
     matched_op_id: Optional[str] = None
-    match_status: str = "UNMATCHED"  ***REMOVED*** UNMATCHED, MATCHED, PARTIAL, MANUAL
+    match_status: str = "UNMATCHED"  # UNMATCHED, MATCHED, PARTIAL, MANUAL
     created_at: Optional[datetime] = None
 
 
@@ -58,10 +58,10 @@ class MatchResult(BaseModel):
     """Result of payment matching."""
     payment_id: str
     matched_op_id: Optional[str] = None
-    match_type: str  ***REMOVED*** FULL, PARTIAL, MULTIPLE
+    match_type: str  # FULL, PARTIAL, MULTIPLE
     matched_amount: Decimal
     remaining_amount: Decimal
-    confidence: float  ***REMOVED*** 0.0 - 1.0
+    confidence: float  # 0.0 - 1.0
     match_reason: str
 
 
@@ -80,7 +80,7 @@ async def import_payments_csv(
         
         payments = []
         for row in csv_reader:
-            ***REMOVED*** Expected CSV format: date, amount, reference, remittance_info
+            # Expected CSV format: date, amount, reference, remittance_info
             try:
                 booking_date = datetime.strptime(row.get('date', ''), '%Y-%m-%d').date()
                 amount = Decimal(str(row.get('amount', '0')).replace(',', '.'))
@@ -91,7 +91,7 @@ async def import_payments_csv(
                     tenant_id=tenant_id,
                     bank_account=bank_account,
                     booking_date=booking_date,
-                    value_date=booking_date,  ***REMOVED*** Use booking_date if value_date not provided
+                    value_date=booking_date,  # Use booking_date if value_date not provided
                     amount=amount,
                     reference=reference,
                     remittance_info=remittance_info,
@@ -102,7 +102,7 @@ async def import_payments_csv(
                 logger.warning(f"Skipping invalid CSV row: {e}")
                 continue
         
-        ***REMOVED*** Store payments (simplified - in production, use proper table)
+        # Store payments (simplified - in production, use proper table)
         payment_ids = []
         for payment in payments:
             payment_id = f"PAY-{datetime.now().timestamp()}-{len(payment_ids)}"
@@ -126,8 +126,8 @@ async def get_unmatched_payments(
     db: Session = Depends(get_db)
 ):
     """Get unmatched payment entries."""
-    ***REMOVED*** In production, query from payment_entries table
-    ***REMOVED*** For now, return empty list as placeholder
+    # In production, query from payment_entries table
+    # For now, return empty list as placeholder
     return []
 
 
@@ -139,8 +139,8 @@ async def get_open_items_for_matching(
 ):
     """Get open items for a customer for payment matching."""
     try:
-        ***REMOVED*** Query open items from finance_open_items or offene_posten
-        ***REMOVED*** Using simplified query - in production, use proper ORM
+        # Query open items from finance_open_items or offene_posten
+        # Using simplified query - in production, use proper ORM
         query = """
             SELECT 
                 id, document_number, customer_id, customer_name,
@@ -174,7 +174,7 @@ async def get_open_items_for_matching(
         
     except Exception as e:
         logger.error(f"Error fetching open items: {e}")
-        ***REMOVED*** Return empty list if table doesn't exist yet
+        # Return empty list if table doesn't exist yet
         return []
 
 
@@ -182,19 +182,19 @@ async def get_open_items_for_matching(
 async def match_payment(
     payment_id: str,
     op_id: Optional[str] = Query(None),
-    match_type: str = Query("AUTO"),  ***REMOVED*** AUTO, MANUAL
+    match_type: str = Query("AUTO"),  # AUTO, MANUAL
     tenant_id: str = Query("default"),
     db: Session = Depends(get_db)
 ):
     """Match a payment to an open item."""
     try:
-        ***REMOVED*** In production, fetch payment and OP from database
-        ***REMOVED*** For now, return a match result
+        # In production, fetch payment and OP from database
+        # For now, return a match result
         
         if not op_id:
             raise HTTPException(status_code=400, detail="op_id is required for manual matching")
         
-        ***REMOVED*** Fetch OP
+        # Fetch OP
         op_query = """
             SELECT id, document_number, customer_id, customer_name,
                    amount, amount as open_amount, due_date, currency, status
@@ -211,12 +211,12 @@ async def match_payment(
         
         open_amount = Decimal(str(op_result[5]))
         
-        ***REMOVED*** In production, fetch payment amount and match
-        ***REMOVED*** For now, assume full match
+        # In production, fetch payment amount and match
+        # For now, assume full match
         matched_amount = open_amount
         remaining_amount = Decimal("0.00")
         
-        ***REMOVED*** Update OP status
+        # Update OP status
         if remaining_amount == 0:
             new_status = "closed"
         else:
@@ -265,10 +265,10 @@ async def auto_match_payments(
 ):
     """Automatically match unmatched payments to open items."""
     try:
-        ***REMOVED*** Get unmatched payments (simplified - in production, query from payment_entries table)
-        ***REMOVED*** For now, we'll match based on bank statement lines
+        # Get unmatched payments (simplified - in production, query from payment_entries table)
+        # For now, we'll match based on bank statement lines
         
-        ***REMOVED*** Get unmatched bank statement lines
+        # Get unmatched bank statement lines
         unmatched_query = text("""
             SELECT id, booking_date, amount, reference, remittance_info, creditor_name, debtor_name
             FROM domain_erp.bank_statement_lines
@@ -294,10 +294,10 @@ async def auto_match_payments(
             creditor_name = line[5]
             debtor_name = line[6]
             
-            ***REMOVED*** Rule 1: Match by reference number (extract invoice number from reference/remittance)
+            # Rule 1: Match by reference number (extract invoice number from reference/remittance)
             invoice_match = None
             if reference:
-                ***REMOVED*** Try to extract invoice number (e.g., "RE-2025-0001" or "INV-123")
+                # Try to extract invoice number (e.g., "RE-2025-0001" or "INV-123")
                 import re
                 invoice_pattern = r'(RE|INV|RE-?\d{4}-?\d+|\d{4}-\d+)'
                 invoice_match = re.search(invoice_pattern, reference.upper())
@@ -305,10 +305,10 @@ async def auto_match_payments(
             if not invoice_match and remittance_info:
                 invoice_match = re.search(invoice_pattern, remittance_info.upper())
             
-            ***REMOVED*** Rule 2: Match by amount and customer
+            # Rule 2: Match by amount and customer
             customer_id = None
             if creditor_name:
-                ***REMOVED*** Try to find customer by name
+                # Try to find customer by name
                 customer_query = text("""
                     SELECT id FROM domain_erp.customers
                     WHERE tenant_id = :tenant_id 
@@ -322,7 +322,7 @@ async def auto_match_payments(
                 if customer_row:
                     customer_id = str(customer_row[0])
             
-            ***REMOVED*** Find matching open item
+            # Find matching open item
             op_query = text("""
                 SELECT id, document_number, customer_id, customer_name, amount, amount as open_amount, due_date, currency, status
                 FROM finance_open_items
@@ -352,16 +352,16 @@ async def auto_match_payments(
             ).fetchall()
             
             if op_results:
-                ***REMOVED*** Match to first (best) open item
+                # Match to first (best) open item
                 best_op = op_results[0]
                 op_id = str(best_op[0])
                 open_amount = Decimal(str(best_op[5]))
                 
-                ***REMOVED*** Calculate match
+                # Calculate match
                 matched_amount = min(amount, open_amount)
                 remaining_amount = amount - matched_amount
                 
-                ***REMOVED*** Update bank statement line
+                # Update bank statement line
                 update_line = text("""
                     UPDATE domain_erp.bank_statement_lines
                     SET status = :status,
@@ -380,7 +380,7 @@ async def auto_match_payments(
                     }
                 )
                 
-                ***REMOVED*** Update open item
+                # Update open item
                 update_op = text("""
                     UPDATE finance_open_items
                     SET status = CASE WHEN (amount - :matched) <= 0.01 THEN 'closed' ELSE 'partial' END,
@@ -424,7 +424,7 @@ async def get_match_suggestions(
 ):
     """Get suggested open items for a payment."""
     try:
-        ***REMOVED*** Get payment from bank statement lines
+        # Get payment from bank statement lines
         payment_query = text("""
             SELECT amount, reference, remittance_info, creditor_name, debtor_name
             FROM domain_erp.bank_statement_lines
@@ -445,7 +445,7 @@ async def get_match_suggestions(
         creditor_name = payment_row[3]
         debtor_name = payment_row[4]
         
-        ***REMOVED*** Find customer ID
+        # Find customer ID
         customer_id = None
         if creditor_name:
             customer_query = text("""
@@ -461,7 +461,7 @@ async def get_match_suggestions(
             if customer_row:
                 customer_id = str(customer_row[0])
         
-        ***REMOVED*** Extract invoice number from reference/remittance
+        # Extract invoice number from reference/remittance
         import re
         invoice_pattern = r'(RE|INV|RE-?\d{4}-?\d+|\d{4}-\d+)'
         invoice_match = None
@@ -470,7 +470,7 @@ async def get_match_suggestions(
         if not invoice_match and remittance_info:
             invoice_match = re.search(invoice_pattern, remittance_info.upper())
         
-        ***REMOVED*** Find matching open items
+        # Find matching open items
         op_query = text("""
             SELECT id, document_number, customer_id, customer_name, amount, amount as open_amount, due_date, currency, status
             FROM finance_open_items
@@ -516,6 +516,6 @@ async def get_match_suggestions(
         
     except Exception as e:
         logger.error(f"Error getting match suggestions: {e}")
-        ***REMOVED*** Return empty list if error (table may not exist)
+        # Return empty list if error (table may not exist)
         return []
 

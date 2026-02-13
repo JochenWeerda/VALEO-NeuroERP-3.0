@@ -78,5 +78,6 @@ async def register_export_workflow() -> None:
                 logger.info("Workflow export_clearance registriert (status %s)", response.status_code)
             else:
                 response.raise_for_status()
-        except httpx.HTTPError as exc:  ***REMOVED*** noqa: BLE001
+        except httpx.HTTPError as exc:  # noqa: BLE001
             logger.warning("Workflow-Registrierung fehlgeschlagen: %s", exc)
+

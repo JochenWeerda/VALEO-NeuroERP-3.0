@@ -73,7 +73,7 @@ class InventoryEventSubscribers:
                         quantity=receipt.quantity,
                         lot_number=receipt.lot_number,
                     )
-                except Exception as exc:  ***REMOVED*** noqa: BLE001
+                except Exception as exc:  # noqa: BLE001
                     logger.warning("Konnte purchase.receipt.posted nicht verarbeiten: %s", exc)
 
     async def _handle_sales_shipment(self, message: dict[str, Any]) -> None:
@@ -107,7 +107,7 @@ class InventoryEventSubscribers:
                         quantity=float(line.get("quantity") or line.get("qty") or 0),
                         lot_number=line.get("lotNumber"),
                     )
-                except Exception as exc:  ***REMOVED*** noqa: BLE001
+                except Exception as exc:  # noqa: BLE001
                     logger.warning("Konnte sales.shipment.confirmed nicht verarbeiten: %s", exc)
 
     async def _create_epcis_object_event(
@@ -124,16 +124,16 @@ class InventoryEventSubscribers:
         if lot_number:
             lot = (
                 await session.execute(
-                    models.select(models.Lot).where(models.Lot.lot_number == lot_number)  ***REMOVED*** type: ignore[attr-defined]
+                    models.select(models.Lot).where(models.Lot.lot_number == lot_number)  # type: ignore[attr-defined]
                 )
-            )  ***REMOVED*** pragma: no cover
-        ***REMOVED*** Bestimme lot_id falls verfügbar
+            )  # pragma: no cover
+        # Bestimme lot_id falls verfügbar
         lot_id = None
         if lot and hasattr(lot, "scalar_one_or_none"):
             lot_row = lot.scalar_one_or_none()
             lot_id = getattr(lot_row, "id", None)
-        event = models.EpcisEvent(  ***REMOVED*** type: ignore[attr-defined]
-            event_type=models.EpcisEventType.OBJECT,  ***REMOVED*** type: ignore[attr-defined]
+        event = models.EpcisEvent(  # type: ignore[attr-defined]
+            event_type=models.EpcisEventType.OBJECT,  # type: ignore[attr-defined]
             biz_step=biz_step,
             read_point=read_point,
             lot_id=lot_id,
@@ -141,13 +141,13 @@ class InventoryEventSubscribers:
             quantity=quantity,
             extensions=None,
         )
-        ***REMOVED*** Auto-Remediation: bis zu 3 Versuche mit Eskalation
+        # Auto-Remediation: bis zu 3 Versuche mit Eskalation
         for attempt in range(1, 4):
             try:
                 session.add(event)
                 await session.flush()
                 break
-            except Exception as exc:  ***REMOVED*** noqa: BLE001
+            except Exception as exc:  # noqa: BLE001
                 if attempt == 3:
                     await notify_ops(
                         "EPCIS-Event Persistenz fehlgeschlagen",
@@ -155,3 +155,4 @@ class InventoryEventSubscribers:
                     )
                 else:
                     continue
+

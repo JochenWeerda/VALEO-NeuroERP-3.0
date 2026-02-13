@@ -1,10 +1,10 @@
 version: "3.8"
 
-***REMOVED*** Microservices Stack for VALEO-NeuroERP
-***REMOVED*** 3 isolated services: CRM, Inventory, Finance
+# Microservices Stack for VALEO-NeuroERP
+# 3 isolated services: CRM, Inventory, Finance
 
 services:
-  ***REMOVED*** CRM Service
+  # CRM Service
   crm-service:
     build:
       context: .
@@ -33,7 +33,7 @@ services:
       timeout: 10s
       retries: 3
 
-  ***REMOVED*** Inventory Service
+  # Inventory Service
   inventory-service:
     build:
       context: .
@@ -62,7 +62,7 @@ services:
       timeout: 10s
       retries: 3
 
-  ***REMOVED*** Finance Service
+  # Finance Service
   finance-service:
     build:
       context: .
@@ -91,7 +91,7 @@ services:
       timeout: 10s
       retries: 3
 
-  ***REMOVED*** API Gateway (Traefik)
+  # API Gateway (Traefik)
   gateway:
     image: traefik:v2.11
     container_name: valeo-gateway
@@ -105,7 +105,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"  ***REMOVED*** Traefik Dashboard
+      - "8080:8080"  # Traefik Dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./k8s/gateway/traefik-config.yml:/etc/traefik/traefik.yml:ro
@@ -113,7 +113,7 @@ services:
       - valeo-network
     restart: unless-stopped
 
-  ***REMOVED*** PostgreSQL (shared)
+  # PostgreSQL (shared)
   postgres:
     image: postgres:15-alpine
     container_name: valeo-postgres
@@ -134,7 +134,7 @@ services:
       timeout: 5s
       retries: 5
 
-  ***REMOVED*** Redis (shared)
+  # Redis (shared)
   redis:
     image: redis:7-alpine
     container_name: valeo-redis
@@ -152,7 +152,7 @@ services:
       timeout: 3s
       retries: 3
 
-  ***REMOVED*** NATS (shared)
+  # NATS (shared)
   nats:
     image: nats:2.10-alpine
     container_name: valeo-nats
@@ -181,4 +181,5 @@ volumes:
   postgres_data:
   redis_data:
   nats_data:
+
 

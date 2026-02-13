@@ -108,7 +108,7 @@ async def create_duenger(
     """Create a new Dünger."""
     effective_tenant = tenant_id or DEFAULT_TENANT
 
-    ***REMOVED*** Check if artikelnummer already exists
+    # Check if artikelnummer already exists
     existing = (
         db.query(DuengerModel)
         .filter(
@@ -124,14 +124,14 @@ async def create_duenger(
             detail=f"Dünger with article number {duenger_data.artikelnummer} already exists"
         )
 
-    ***REMOVED*** Validate business rules
+    # Validate business rules
     if duenger_data.ablauf_zulassung and duenger_data.ablauf_zulassung < datetime.utcnow().date():
         raise HTTPException(
             status_code=400,
             detail="Approval expiry date cannot be in the past"
         )
 
-    ***REMOVED*** Validate NPK values
+    # Validate NPK values
     if any(val < 0 or val > 100 for val in [
         duenger_data.n_gehalt or 0,
         duenger_data.p_gehalt or 0,
@@ -180,7 +180,7 @@ async def update_duenger(
 
     update_data = duenger_data.model_dump(exclude_unset=True)
 
-    ***REMOVED*** Validate artikelnummer uniqueness if changed
+    # Validate artikelnummer uniqueness if changed
     if "artikelnummer" in update_data and update_data["artikelnummer"] != duenger.artikelnummer:
         existing = (
             db.query(DuengerModel)
@@ -197,7 +197,7 @@ async def update_duenger(
                 detail=f"Dünger with article number {update_data['artikelnummer']} already exists"
             )
 
-    ***REMOVED*** Validate approval expiry
+    # Validate approval expiry
     if "ablauf_zulassung" in update_data and update_data["ablauf_zulassung"]:
         from datetime import datetime
         if update_data["ablauf_zulassung"] < datetime.utcnow().date():
@@ -206,7 +206,7 @@ async def update_duenger(
                 detail="Approval expiry date cannot be in the past"
             )
 
-    ***REMOVED*** Validate NPK values
+    # Validate NPK values
     npk_fields = ['n_gehalt', 'p_gehalt', 'k_gehalt', 's_gehalt', 'mg_gehalt']
     for field in npk_fields:
         if field in update_data and (update_data[field] < 0 or update_data[field] > 100):
@@ -288,7 +288,7 @@ async def get_duenger_stats(
     """Get Dünger statistics overview."""
     effective_tenant = tenant_id or DEFAULT_TENANT
 
-    ***REMOVED*** Count by type
+    # Count by type
     type_stats = {}
     types = db.query(DuengerModel.typ, db.func.count(DuengerModel.id)).filter(
         DuengerModel.tenant_id == effective_tenant,
@@ -298,7 +298,7 @@ async def get_duenger_stats(
     for typ, count in types:
         type_stats[typ or "Unbekannt"] = count
 
-    ***REMOVED*** Safety stats
+    # Safety stats
     safety_stats = {}
     safety = db.query(
         db.func.concat(
@@ -317,7 +317,7 @@ async def get_duenger_stats(
     for safety_type, count in safety:
         safety_stats[safety_type or "Standard"] = count
 
-    ***REMOVED*** Stock stats
+    # Stock stats
     stock_stats = db.query(
         db.func.sum(DuengerModel.lagerbestand),
         db.func.avg(DuengerModel.vk_preis)

@@ -1,8 +1,8 @@
-***REMOVED*** CRM AI
+# CRM AI
 
 Advanced AI and machine learning service for CRM predictive analytics, lead scoring, and intelligent automation.
 
-***REMOVED******REMOVED*** Features
+## Features
 
 - **Lead Scoring**: ML-powered lead qualification and prioritization
 - **Predictive Analytics**: Customer churn prediction, lifetime value forecasting
@@ -11,7 +11,7 @@ Advanced AI and machine learning service for CRM predictive analytics, lead scor
 - **Automated Classification**: Intelligent routing and categorization
 - **Performance Optimization**: A/B testing and campaign optimization
 
-***REMOVED******REMOVED*** API Endpoints
+## API Endpoints
 
 - `POST /api/v1/ai/lead-score` - Calculate lead scores with ML models
 - `POST /api/v1/ai/predict/churn` - Predict customer churn probability
@@ -21,7 +21,7 @@ Advanced AI and machine learning service for CRM predictive analytics, lead scor
 - `POST /api/v1/ai/classify/case` - Auto-classify support cases
 - `GET /api/v1/ai/models` - List available ML models and their performance
 
-***REMOVED******REMOVED*** Database Tables
+## Database Tables
 
 - `crm_ai_models` - Trained ML models and metadata
 - `crm_ai_predictions` - Prediction results and caching
@@ -29,7 +29,7 @@ Advanced AI and machine learning service for CRM predictive analytics, lead scor
 - `crm_ai_experiments` - A/B testing and model experiments
 - `crm_ai_feedback` - User feedback for model improvement
 
-***REMOVED******REMOVED*** Dependencies
+## Dependencies
 
 - PostgreSQL for AI data storage
 - Redis for model caching and prediction results

@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Führt eine einzelne Pipeline für VALEO-NeuroERP aus
 
@@ -14,10 +14,10 @@ import sys
 import argparse
 from typing import Dict, Any, Optional
 
-***REMOVED*** Füge das Hauptverzeichnis zum Pythonpfad hinzu
+# Füge das Hauptverzeichnis zum Pythonpfad hinzu
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-***REMOVED*** Konfiguriere Logging
+# Konfiguriere Logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -65,16 +65,16 @@ def main():
     """
     Hauptfunktion zum Ausführen einer einzelnen Pipeline.
     """
-    ***REMOVED*** Parse Kommandozeilenargumente
+    # Parse Kommandozeilenargumente
     parser = argparse.ArgumentParser(description="Führt eine einzelne Pipeline für VALEO-NeuroERP aus")
     parser.add_argument("pipeline", nargs="?", help="Name der auszuführenden Pipeline")
     parser.add_argument("--list", action="store_true", help="Listet alle verfügbaren Pipelines auf")
     args = parser.parse_args()
     
-    ***REMOVED*** Erstelle das logs-Verzeichnis, falls es nicht existiert
+    # Erstelle das logs-Verzeichnis, falls es nicht existiert
     os.makedirs('logs', exist_ok=True)
     
-    ***REMOVED*** Liste alle verfügbaren Pipelines auf
+    # Liste alle verfügbaren Pipelines auf
     if args.list or not args.pipeline:
         list_available_pipelines()
         return

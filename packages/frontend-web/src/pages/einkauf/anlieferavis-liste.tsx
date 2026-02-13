@@ -1,21 +1,17 @@
-import { useState, useEffect } from 'react'
+﻿import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
-import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { toast } from '@/hooks/use-toast'
+import { useAnlieferavis, type Anlieferavis } from '@/lib/api/einkauf'
 
-// API Client für Anlieferavis
-const apiClient = createApiClient('/api/einkauf')
-
-// Konfiguration für Anlieferavis ListReport
 const createAnlieferavisConfig = (t: any): ListConfig => ({
   title: 'Anlieferavis',
-  subtitle: 'Lieferavise für Wareneingangsvorbereitung',
+  subtitle: 'Lieferavise fuer Wareneingangsvorbereitung',
   type: 'list-report',
   columns: [
     {
@@ -44,9 +40,10 @@ const createAnlieferavisConfig = (t: any): ListConfig => ({
       render: (value) => {
         const statusLabel = getStatusLabel(t, (value as string).toLowerCase(), value as string)
         const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
-          'GESENDET': 'secondary',
-          'BESTAETIGT': 'outline',
-          'STORNIERT': 'destructive'
+          ANGEKUENDIGT: 'secondary',
+          GESENDET: 'secondary',
+          BESTAETIGT: 'outline',
+          STORNIERT: 'destructive'
         }
         return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
       }
@@ -75,8 +72,9 @@ const createAnlieferavisConfig = (t: any): ListConfig => ({
       label: 'Status',
       type: 'select',
       options: [
+        { value: 'ANGEKUENDIGT', label: 'Angekuendigt' },
         { value: 'GESENDET', label: 'Gesendet' },
-        { value: 'BESTAETIGT', label: 'Bestätigt' },
+        { value: 'BESTAETIGT', label: 'Bestaetigt' },
         { value: 'STORNIERT', label: 'Storniert' }
       ]
     },
@@ -95,9 +93,9 @@ const createAnlieferavisConfig = (t: any): ListConfig => ({
     },
     {
       key: 'bestaetigen',
-      label: 'Bestätigen',
+      label: 'Bestaetigen',
       type: 'secondary',
-      onClick: () => console.log('Bestätigen clicked')
+      onClick: () => console.log('Bestaetigen clicked')
     },
     {
       key: 'stornieren',
@@ -126,58 +124,29 @@ export default function AnlieferavisListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const anlieferavisConfig = createAnlieferavisConfig(t)
-  const [data, setData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
-
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
-    if (action === 'edit' && item) {
-      navigate(`/einkauf/anlieferavis/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(`Anlieferavis "${item.avisNummer}" wirklich löschen?`)) {
-        try {
-          await apiClient.delete(`/anlieferavis/${item.id}`)
-          loadData() // Liste neu laden
-        } catch (error) {
-          alert('Fehler beim Löschen')
-        }
-      }
-    }
-  })
-
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const response = await apiClient.get('/anlieferavis')
-      if (response.success) {
-        setData((response.data as any).data || [])
-        setTotal((response.data as any).total || 0)
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Daten:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadData()
-  }, [])
+  const { data: apiData = [], isLoading } = useAnlieferavis()
+  const data = useMemo(() => apiData.map((item: Anlieferavis) => ({
+    ...item,
+    bestellung: { nummer: item.bestellung },
+    fahrzeug: { kennzeichen: item.kennzeichen },
+  })), [apiData])
+  const total = data.length
 
   const handleCreate = () => {
     navigate('/einkauf/anlieferavis/neu')
   }
 
   const handleEdit = (item: any) => {
-    handleAction('edit', item)
+    if (item?.id) {
+      navigate(`/einkauf/anlieferavis/${item.id}`)
+    }
   }
 
-  const handleDelete = (item: any) => {
-    handleAction('delete', item)
-  }
-
-  const handleExport = () => {
-    alert('Export-Funktion wird implementiert')
+  const handleDelete = (_item: any) => {
+    toast({
+      title: t('crud.messages.importInfo'),
+      description: 'Loeschen wird in dieser Ansicht noch nicht unterstuetzt.',
+    })
   }
 
   return (
@@ -188,9 +157,13 @@ export default function AnlieferavisListePage(): JSX.Element {
       onCreate={handleCreate}
       onEdit={handleEdit}
       onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => alert('Import-Funktion wird implementiert')}
-      isLoading={loading}
+      onExport={() => {
+        toast({ title: t('crud.messages.importInfo'), description: t('crud.messages.importComingSoon') })
+      }}
+      onImport={() => {
+        toast({ title: t('crud.messages.importInfo'), description: t('crud.messages.importComingSoon') })
+      }}
+      isLoading={isLoading}
     />
   )
 }

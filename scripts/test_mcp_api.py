@@ -1,5 +1,5 @@
-***REMOVED***!/usr/bin/env python3
-***REMOVED*** -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 Test-Skript für den MCP-Server
@@ -14,10 +14,10 @@ def main():
     """Hauptfunktion"""
     print("Sende Test-Prompt an den MCP-Server...")
     
-    ***REMOVED*** API-Key (aus dem MCP-Server-Code)
+    # API-Key (aus dem MCP-Server-Code)
     API_KEY = "aca0b877-88dd-4423-a35b-97de39012db9"
     
-    ***REMOVED*** Test-Prompt
+    # Test-Prompt
     data = {
         "prompt": "Test-Prompt für Cursor-Integration",
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -27,13 +27,13 @@ def main():
         "version": "1.0.0"
     }
     
-    ***REMOVED*** Speichere den Prompt in der latest_prompt.json-Datei
+    # Speichere den Prompt in der latest_prompt.json-Datei
     os.makedirs("data/cursor_prompts", exist_ok=True)
     with open("data/cursor_prompts/latest_prompt.json", "w", encoding="utf-8") as file:
         json.dump(data, file, indent=2)
     print("Prompt in latest_prompt.json gespeichert.")
     
-    ***REMOVED*** Sende den Prompt an den MCP-Server
+    # Sende den Prompt an den MCP-Server
     try:
         response = requests.post(
             "http://localhost:8000/api/prompt",

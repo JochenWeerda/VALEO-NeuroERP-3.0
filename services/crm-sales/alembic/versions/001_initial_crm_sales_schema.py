@@ -24,7 +24,7 @@ depends_on = None
 
 def upgrade() -> None:
     """Create CRM Sales tables."""
-    ***REMOVED*** Create enums
+    # Create enums
     op.execute(
         """
         DO $$
@@ -51,7 +51,7 @@ def upgrade() -> None:
         """
     )
 
-    ***REMOVED*** Opportunities table
+    # Opportunities table
     op.create_table(
         "crm_sales_opportunities",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -72,7 +72,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Quotes table
+    # Quotes table
     op.create_table(
         "crm_sales_quotes",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -94,7 +94,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Quote line items table
+    # Quote line items table
     op.create_table(
         "crm_sales_quote_line_items",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -110,7 +110,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Sales activities table
+    # Sales activities table
     op.create_table(
         "crm_sales_activities",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
@@ -132,7 +132,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    ***REMOVED*** Seed initial data
+    # Seed initial data
     _seed_initial_data()
 
 
@@ -149,5 +149,6 @@ def downgrade() -> None:
 
 def _seed_initial_data():
     """Seed initial demo data."""
-    ***REMOVED*** This will be populated when the service starts and finds existing customers
+    # This will be populated when the service starts and finds existing customers
     pass
+

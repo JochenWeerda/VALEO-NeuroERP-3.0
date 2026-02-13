@@ -2,7 +2,7 @@ name: Codebase Index (Qdrant) Nightly
 
 on:
   schedule:
-    - cron: "15 00 * * *"   ***REMOVED*** täglich 00:15 UTC (~02:15 CET/CEST)
+    - cron: "15 00 * * *"   # täglich 00:15 UTC (~02:15 CET/CEST)
   workflow_dispatch:
 
 jobs:
@@ -12,12 +12,12 @@ jobs:
       contents: read
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      QDRANT_URL: ${{ secrets.QDRANT_URL }}                 ***REMOVED*** z.B. https://<cluster>.<region>.cloud.qdrant.io
+      QDRANT_URL: ${{ secrets.QDRANT_URL }}                 # z.B. https://<cluster>.<region>.cloud.qdrant.io
       QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
-      EMBEDDING_MODEL: text-embedding-3-large               ***REMOVED*** 3072 dims (empfohlen)
-      ALERT_RAM_THRESHOLD_PCT: "80"                         ***REMOVED*** Warnen ab 80 %
-      ALERT_VECTORS_HARDLIMIT: "120000"                     ***REMOVED*** grobe Kapazitätsgrenze Free Tier
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}   ***REMOVED*** optional
+      EMBEDDING_MODEL: text-embedding-3-large               # 3072 dims (empfohlen)
+      ALERT_RAM_THRESHOLD_PCT: "80"                         # Warnen ab 80 %
+      ALERT_VECTORS_HARDLIMIT: "120000"                     # grobe Kapazitätsgrenze Free Tier
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}   # optional
     steps:
       - uses: actions/checkout@v4
 

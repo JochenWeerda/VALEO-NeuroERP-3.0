@@ -11,7 +11,7 @@ const path = require('path');
 
 // Konfiguration
 const CONFIG = {
-  guacamoleUrl: 'http://localhost:8090/guacamole/***REMOVED***/client/MQBjAHBvc3RncmVzcWw',
+  guacamoleUrl: 'http://localhost:8090/guacamole/#/client/MQBjAHBvc3RncmVzcWw',
   outputDir: path.join(__dirname, '../screenshots/l3-masks'),
   delay: 2000, // Wartezeit zwischen Aktionen (ms)
   clickDelay: 500, // Wartezeit nach Klick (ms)
@@ -239,4 +239,5 @@ if (require.main === module) {
 }
 
 module.exports = { captureAllMasks, manualScreenshot, L3_MASKS };
+
 

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 🔍 VOLLSTÄNDIGE PLZ-ANALYSE 26400-26999 für Ostfriesland/Norddeutschland
 Findet ALLE potentiellen Leads im erweiterten PLZ-Bereich
@@ -29,9 +29,9 @@ def find_all_plz_26400_26999():
             "unique_cities": 0,
             "total_landwirte": 0
         },
-        "plz_data": {},  ***REMOVED*** PLZ -> {city, count, examples, total_amount}
-        "city_mapping": {},  ***REMOVED*** Stadt -> [PLZ-Liste]
-        "landwirte_examples": [],  ***REMOVED*** Erste 20 Beispiele
+        "plz_data": {},  # PLZ -> {city, count, examples, total_amount}
+        "city_mapping": {},  # Stadt -> [PLZ-Liste]
+        "landwirte_examples": [],  # Erste 20 Beispiele
         "regional_breakdown": {
             "264xx": {"count": 0, "cities": set()},
             "265xx": {"count": 0, "cities": set()},
@@ -48,7 +48,7 @@ def find_all_plz_26400_26999():
         with open(csv_path, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')
             
-            ***REMOVED*** Header-Info
+            # Header-Info
             headers = reader.fieldnames
             print(f"✅ CSV-Header: {len(headers)} Spalten")
             print("📍 Relevante Spalten gefunden:")
@@ -65,13 +65,13 @@ def find_all_plz_26400_26999():
                 city = row.get('Gemeinde', '').strip()
                 amount_str = row.get('EU-Betrag (EGFL und ELER) und kofinanzierter Betrag insgesamt für diesen Begünstigten*', '').strip()
                 
-                ***REMOVED*** PLZ-Bereich-Check: 26400-26999
+                # PLZ-Bereich-Check: 26400-26999
                 if plz and len(plz) == 5 and plz.isdigit():
                     plz_num = int(plz)
                     if 26400 <= plz_num <= 26999:
                         results["statistics"]["target_plz_count"] += 1
                         
-                        ***REMOVED*** PLZ-Daten sammeln
+                        # PLZ-Daten sammeln
                         if plz not in results["plz_data"]:
                             results["plz_data"][plz] = {
                                 "city": city,
@@ -83,7 +83,7 @@ def find_all_plz_26400_26999():
                         
                         results["plz_data"][plz]["count"] += 1
                         
-                        ***REMOVED*** Beispiele sammeln (max 3 pro PLZ)
+                        # Beispiele sammeln (max 3 pro PLZ)
                         if len(results["plz_data"][plz]["examples"]) < 3:
                             results["plz_data"][plz]["examples"].append({
                                 "row": row_num,
@@ -91,7 +91,7 @@ def find_all_plz_26400_26999():
                                 "city": city
                             })
                         
-                        ***REMOVED*** Gesamtbeispiele (erste 20)
+                        # Gesamtbeispiele (erste 20)
                         if len(results["landwirte_examples"]) < 20:
                             results["landwirte_examples"].append({
                                 "row": row_num,
@@ -101,7 +101,7 @@ def find_all_plz_26400_26999():
                                 "amount": amount_str[:20] if amount_str else "N/A"
                             })
                         
-                        ***REMOVED*** Betrag verarbeiten
+                        # Betrag verarbeiten
                         try:
                             if amount_str:
                                 amount = float(amount_str.replace(',', '.'))
@@ -109,27 +109,27 @@ def find_all_plz_26400_26999():
                         except:
                             pass
                         
-                        ***REMOVED*** Stadt-Mapping
+                        # Stadt-Mapping
                         if city:
                             if city not in results["city_mapping"]:
                                 results["city_mapping"][city] = []
                             if plz not in results["city_mapping"][city]:
                                 results["city_mapping"][city].append(plz)
                         
-                        ***REMOVED*** Regionale Aufschlüsselung
+                        # Regionale Aufschlüsselung
                         prefix = plz[:3] + "xx"
                         if prefix in results["regional_breakdown"]:
                             results["regional_breakdown"][prefix]["count"] += 1
                             if city:
                                 results["regional_breakdown"][prefix]["cities"].add(city)
                         
-                        ***REMOVED*** Progress-Output
+                        # Progress-Output
                         if results["statistics"]["target_plz_count"] == 1:
                             print(f"🎯 ERSTER TREFFER! PLZ {plz} | {city} | {name[:30]}...")
                         elif results["statistics"]["target_plz_count"] % 50 == 0:
                             print(f"📊 {results['statistics']['target_plz_count']} Treffer | PLZ: {results['statistics']['unique_plz_found']} | Aktuell: {plz}")
                 
-                ***REMOVED*** Progress alle 200.000 Zeilen
+                # Progress alle 200.000 Zeilen
                 if row_num % 200000 == 0:
                     print(f"📋 Zeile {row_num:,}: {results['statistics']['target_plz_count']} Treffer im Zielbereich")
                     
@@ -137,20 +137,20 @@ def find_all_plz_26400_26999():
         print(f"❌ Fehler: {e}")
         results["error"] = str(e)
     
-    ***REMOVED*** Nachbearbeitung
+    # Nachbearbeitung
     results["statistics"]["unique_cities"] = len(results["city_mapping"])
     results["statistics"]["total_landwirte"] = results["statistics"]["target_plz_count"]
     
-    ***REMOVED*** Sets zu Listen konvertieren
+    # Sets zu Listen konvertieren
     for prefix_data in results["regional_breakdown"].values():
         if "cities" in prefix_data:
             prefix_data["cities"] = list(prefix_data["cities"])
     
-    ***REMOVED*** Ergebnisse in Datei speichern
+    # Ergebnisse in Datei speichern
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     
-    ***REMOVED*** Detaillierte Ausgabe
+    # Detaillierte Ausgabe
     print()
     print("📋 FINALE ERGEBNISSE PLZ 26400-26999:")
     print("="*60)
@@ -183,7 +183,7 @@ def find_all_plz_26400_26999():
         print()
         print("🏘️ STÄDTE IM ZIELGEBIET:")
         city_list = sorted(results["city_mapping"].keys())
-        for i, city in enumerate(city_list[:15]):  ***REMOVED*** Erste 15 Städte
+        for i, city in enumerate(city_list[:15]):  # Erste 15 Städte
             plz_list = ", ".join(results["city_mapping"][city])
             print(f"  - {city} (PLZ: {plz_list})")
         if len(city_list) > 15:
@@ -202,3 +202,4 @@ def find_all_plz_26400_26999():
 
 if __name__ == "__main__":
     find_all_plz_26400_26999()
+

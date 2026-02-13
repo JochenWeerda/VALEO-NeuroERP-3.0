@@ -36,19 +36,19 @@ def copy_rules():
     rules_dir = ".cursor/rules/implementation"
     os.makedirs(rules_dir, exist_ok=True)
     
-    ***REMOVED*** Basis Rules kopieren
+    # Basis Rules kopieren
     shutil.copy(
         "rules/implementation/base_rules.json",
         f"{rules_dir}/base_rules.json"
     )
     
-    ***REMOVED*** Test Rules kopieren
+    # Test Rules kopieren
     shutil.copy(
         "rules/implementation/test_rules.json",
         f"{rules_dir}/test_rules.json"
     )
     
-    ***REMOVED*** CI/CD Rules kopieren
+    # CI/CD Rules kopieren
     shutil.copy(
         "rules/implementation/ci_cd_rules.json",
         f"{rules_dir}/ci_cd_rules.json"
@@ -59,15 +59,15 @@ def main():
     try:
         print("Aktiviere IMPLEMENTATION Mode...")
         
-        ***REMOVED*** Verzeichnisse erstellen
+        # Verzeichnisse erstellen
         create_implementation_structure()
         print("✓ Verzeichnisstruktur erstellt")
         
-        ***REMOVED*** Status speichern
+        # Status speichern
         save_phase_status()
         print("✓ Phase Status gespeichert")
         
-        ***REMOVED*** Rules kopieren
+        # Rules kopieren
         copy_rules()
         print("✓ APM Rules kopiert")
         

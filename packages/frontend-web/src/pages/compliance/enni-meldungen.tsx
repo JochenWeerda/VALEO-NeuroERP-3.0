@@ -1,31 +1,22 @@
+import { useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { AlertTriangle, Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-
-type ENNIMeldung = {
-  id: string
-  typ: 'DBE' | 'DdD' | '170-N'
-  betrieb: string
-  vvvo: string
-  datum: string
-  status: 'entwurf' | 'eingereicht' | 'bestaetigt'
-  naehrstoffe: {
-    n: number
-    p: number
-    k: number
-  }
-}
-
-const mockENNI: ENNIMeldung[] = [
-  { id: '1', typ: 'DBE', betrieb: 'Landwirtschaft Müller', vvvo: '03-276-1234', datum: '2025-10-01', status: 'bestaetigt', naehrstoffe: { n: 180, p: 60, k: 120 } },
-  { id: '2', typ: 'DdD', betrieb: 'Hofgut Weber', vvvo: '03-276-5678', datum: '2025-09-15', status: 'eingereicht', naehrstoffe: { n: 220, p: 80, k: 150 } },
-]
+import { useENNIMeldungen, type ENNIMeldung } from '@/lib/api/betrieb'
+import { ErrorState } from '@/components/ErrorState'
 
 export default function ENNIMeldungenPage(): JSX.Element {
   const navigate = useNavigate()
+  const { data: meldungen = [], isError, error, refetch } = useENNIMeldungen()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const offen = useMemo(() => meldungen.filter((m) => m.status === 'entwurf').length, [meldungen])
 
   const columns = [
     { key: 'typ' as const, label: 'Typ', render: (m: ENNIMeldung) => <Badge variant="outline">{m.typ}</Badge> },
@@ -47,21 +38,19 @@ export default function ENNIMeldungenPage(): JSX.Element {
       key: 'status' as const,
       label: 'Status',
       render: (m: ENNIMeldung) => (
-        <Badge variant={m.status === 'bestaetigt' ? 'outline' : m.status === 'eingereicht' ? 'secondary' : 'default'}>
-          {m.status === 'bestaetigt' ? 'Bestätigt' : m.status === 'eingereicht' ? 'Eingereicht' : 'Entwurf'}
+        <Badge variant={m.status === 'bestaetigt' ? 'outline' : m.status === 'gesendet' ? 'secondary' : 'default'}>
+          {m.status === 'bestaetigt' ? 'Bestaetigt' : m.status === 'gesendet' ? 'Gesendet' : 'Entwurf'}
         </Badge>
       ),
     },
   ]
-
-  const offen = mockENNI.filter((m) => m.status === 'entwurf').length
 
   return (
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">ENNI-Meldungen</h1>
-          <p className="text-muted-foreground">Niedersachsen Wirtschaftsdünger (DBE/DdD/170-N)</p>
+          <p className="text-muted-foreground">Niedersachsen Wirtschaftsduenger (DBE/DdD/170-N)</p>
         </div>
         <Button onClick={() => navigate('/compliance/enni-neu')} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -74,7 +63,7 @@ export default function ENNIMeldungenPage(): JSX.Element {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-orange-900">
               <AlertTriangle className="h-5 w-5" />
-              <span className="font-semibold">{offen} Meldung(en) noch nicht eingereicht!</span>
+              <span className="font-semibold">{offen} Meldung(en) noch nicht gesendet!</span>
             </div>
           </CardContent>
         </Card>
@@ -86,25 +75,25 @@ export default function ENNIMeldungenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Meldungen Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{mockENNI.length}</span>
+            <span className="text-2xl font-bold">{meldungen.length}</span>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Bestätigt</CardTitle>
+            <CardTitle className="text-sm font-medium">Bestaetigt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{mockENNI.filter((m) => m.status === 'bestaetigt').length}</span>
+            <span className="text-2xl font-bold text-green-600">{meldungen.filter((m) => m.status === 'bestaetigt').length}</span>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Eingereicht</CardTitle>
+            <CardTitle className="text-sm font-medium">Gesendet</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{mockENNI.filter((m) => m.status === 'eingereicht').length}</span>
+            <span className="text-2xl font-bold text-orange-600">{meldungen.filter((m) => m.status === 'gesendet').length}</span>
           </CardContent>
         </Card>
 
@@ -119,14 +108,14 @@ export default function ENNIMeldungenPage(): JSX.Element {
       </div>
 
       <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
-        <p className="font-semibold">📋 ENNI-Portal Niedersachsen</p>
-        <p className="mt-1">Elektronische Erfassung von Nährstoffströmen • Meldepflicht für Händler und Betriebe</p>
+        <p className="font-semibold">ENNI-Portal Niedersachsen</p>
+        <p className="mt-1">Elektronische Erfassung von Naehrstoffstroemen, Meldepflicht fuer Haendler und Betriebe.</p>
         <p className="mt-1">Fristen: DBE (30.04.), DdD (31.05.), 170-N (31.12.)</p>
       </div>
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={mockENNI} columns={columns} />
+          <DataTable data={meldungen} columns={columns} />
         </CardContent>
       </Card>
     </div>

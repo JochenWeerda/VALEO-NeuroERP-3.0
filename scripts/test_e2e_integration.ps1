@@ -1,9 +1,9 @@
-***REMOVED*** End-to-End Integration Test für VALEO NeuroERP
-***REMOVED*** Testet Frontend-Backend-Verbindung und Authentifizierung
+# End-to-End Integration Test für VALEO NeuroERP
+# Testet Frontend-Backend-Verbindung und Authentifizierung
 
 Write-Host "=== VALEO NeuroERP E2E Integration Test ===" -ForegroundColor Green
 
-***REMOVED*** 1. Backend Health Check
+# 1. Backend Health Check
 Write-Host "`n1. Backend Health Check..." -ForegroundColor Yellow
 try {
     $health = Invoke-RestMethod -Uri "http://localhost:8000/health" -ErrorAction Stop
@@ -13,7 +13,7 @@ try {
     exit 1
 }
 
-***REMOVED*** 2. Authentifizierung testen
+# 2. Authentifizierung testen
 Write-Host "`n2. Authentifizierung testen..." -ForegroundColor Yellow
 try {
     $token = Invoke-RestMethod -Method POST -Uri "http://localhost:8000/token" -ContentType "application/x-www-form-urlencoded" -Body "username=admin`&password=admin" -ErrorAction Stop
@@ -24,7 +24,7 @@ try {
     exit 1
 }
 
-***REMOVED*** 3. Customer API testen
+# 3. Customer API testen
 Write-Host "`n3. Customer API testen..." -ForegroundColor Yellow
 try {
     $customers = Invoke-RestMethod -Method GET -Uri "http://localhost:8000/api/customers" -Headers $headers -ErrorAction Stop
@@ -37,7 +37,7 @@ try {
     Write-Host "✗ Customer API Fehler: $($_.Exception.Message)" -ForegroundColor Red
 }
 
-***REMOVED*** 4. Agent Progress API testen
+# 4. Agent Progress API testen
 Write-Host "`n4. Agent Progress API testen..." -ForegroundColor Yellow
 try {
     $progress = Invoke-RestMethod -Method GET -Uri "http://localhost:8000/api/agents/progress" -ErrorAction Stop
@@ -47,7 +47,7 @@ try {
     Write-Host "✗ Agent Progress API Fehler: $($_.Exception.Message)" -ForegroundColor Red
 }
 
-***REMOVED*** 5. Voice Status API testen
+# 5. Voice Status API testen
 Write-Host "`n5. Voice Status API testen..." -ForegroundColor Yellow
 try {
     $voice = Invoke-RestMethod -Method GET -Uri "http://localhost:8000/api/voice/status" -ErrorAction Stop
@@ -57,7 +57,7 @@ try {
     Write-Host "✗ Voice Status API Fehler: $($_.Exception.Message)" -ForegroundColor Red
 }
 
-***REMOVED*** 6. CORS-Test (Frontend-Backend)
+# 6. CORS-Test (Frontend-Backend)
 Write-Host "`n6. CORS-Test (Frontend-Backend)..." -ForegroundColor Yellow
 try {
     $corsHeaders = @{
@@ -72,10 +72,10 @@ try {
     Write-Host "⚠ CORS-Test nicht verfügbar (normal für OPTIONS)" -ForegroundColor Yellow
 }
 
-***REMOVED*** 7. Customer CRUD Test
+# 7. Customer CRUD Test
 Write-Host "`n7. Customer CRUD Test..." -ForegroundColor Yellow
 try {
-    ***REMOVED*** Test Customer erstellen
+    # Test Customer erstellen
     $testCustomer = @{
         customerNumber = "E2E-TEST-001"
         name = "E2E Test Firma GmbH"
@@ -106,11 +106,11 @@ try {
     $createdCustomer = Invoke-RestMethod -Method POST -Uri "http://localhost:8000/api/customers" -ContentType "application/json" -Body $testCustomer -Headers $headers -ErrorAction Stop
     Write-Host "✓ Customer erstellt: $($createdCustomer.name) (ID: $($createdCustomer.id))" -ForegroundColor Green
     
-    ***REMOVED*** Customer abrufen
+    # Customer abrufen
     $fetchedCustomer = Invoke-RestMethod -Method GET -Uri "http://localhost:8000/api/customers/$($createdCustomer.id)" -Headers $headers -ErrorAction Stop
     Write-Host "✓ Customer abgerufen: $($fetchedCustomer.name)" -ForegroundColor Green
     
-    ***REMOVED*** Alle Kunden zählen
+    # Alle Kunden zählen
     $allCustomers = Invoke-RestMethod -Method GET -Uri "http://localhost:8000/api/customers" -Headers $headers -ErrorAction Stop
     Write-Host "✓ Gesamt Kunden: $($allCustomers.Count)" -ForegroundColor Green
     
@@ -118,7 +118,7 @@ try {
     Write-Host "✗ Customer CRUD Fehler: $($_.Exception.Message)" -ForegroundColor Red
 }
 
-***REMOVED*** 8. Frontend-Verfügbarkeit prüfen
+# 8. Frontend-Verfügbarkeit prüfen
 Write-Host "`n8. Frontend-Verfügbarkeit prüfen..." -ForegroundColor Yellow
 try {
     $frontendPorts = @(3000, 3001, 3002, 3003, 3004)
@@ -131,7 +131,7 @@ try {
             $frontendAvailable = $true
             break
         } catch {
-            ***REMOVED*** Port nicht verfügbar, weiter versuchen
+            # Port nicht verfügbar, weiter versuchen
         }
     }
     
@@ -142,7 +142,7 @@ try {
     Write-Host "⚠ Frontend-Test nicht verfügbar" -ForegroundColor Yellow
 }
 
-***REMOVED*** 9. Zusammenfassung
+# 9. Zusammenfassung
 Write-Host "`n=== E2E Integration Test Zusammenfassung ===" -ForegroundColor Green
 Write-Host "✓ Backend läuft auf Port 8000" -ForegroundColor Green
 Write-Host "✓ Authentifizierung funktioniert" -ForegroundColor Green
@@ -154,3 +154,4 @@ Write-Host "✓ Frontend läuft (Vite Dev-Modus)" -ForegroundColor Green
 
 Write-Host "`n🎉 E2E Integration Test erfolgreich abgeschlossen!" -ForegroundColor Green
 Write-Host "Das VALEO NeuroERP System ist bereit fuer die Produktion!" -ForegroundColor Cyan
+

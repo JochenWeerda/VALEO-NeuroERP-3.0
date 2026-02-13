@@ -1,27 +1,27 @@
-***REMOVED*** L3-Masken Screenshot Quick-Guide
+# L3-Masken Screenshot Quick-Guide
 
-***REMOVED******REMOVED*** 🎯 Pragmatischer Ansatz
+## 🎯 Pragmatischer Ansatz
 
 Da die automatische Klick-Erkennung auf dem RDP-Canvas Herausforderungen bietet, verwenden wir einen **hybriden Ansatz**:
 
-***REMOVED******REMOVED******REMOVED*** Option A: **Sie navigieren manuell + ich erstelle Screenshots**
+### Option A: **Sie navigieren manuell + ich erstelle Screenshots**
 1. **Sie öffnen die gewünschte L3-Maske** im Browser
 2. **Sie sagen mir den Masken-Namen** (z.B. "Artikel-Stamm")
 3. **Ich erstelle sofort einen Screenshot** via Playwright
 4. **Ich dokumentiere die Maske** in einer strukturierten Liste
 
-***REMOVED******REMOVED******REMOVED*** Option B: **Ich übernehme Ihre Maus (falls möglich)**
+### Option B: **Ich übernehme Ihre Maus (falls möglich)**
 - Falls Sie Fernzugriff auf Ihren Rechner erlauben, kann ich direkt navigieren
 
-***REMOVED******REMOVED******REMOVED*** Option C: **Manuelle Screenshots + Batch-Upload**
+### Option C: **Manuelle Screenshots + Batch-Upload**
 - Sie erstellen Screenshots selbst (Windows + Shift + S)
 - Speichern in `l3-migration-toolkit/screenshots/l3-masks/`
 - Benennung: `01_artikel-stamm.png`, `02_kunden-liste.png`, etc.
 - Ich analysiere und dokumentiere alle Bilder auf einmal
 
-***REMOVED******REMOVED*** 📋 Zu erfassende Masken (Priorität)
+## 📋 Zu erfassende Masken (Priorität)
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐⭐⭐ KRITISCH (für Migration essentiell)
+### ⭐⭐⭐⭐⭐ KRITISCH (für Migration essentiell)
 1. **Artikel-Stamm** - Artikelverwaltung
 2. **Kunden-Stamm** - Kundenverwaltung
 3. **Lieferschein** - Verkauf/Lieferschein
@@ -31,18 +31,18 @@ Da die automatische Klick-Erkennung auf dem RDP-Canvas Herausforderungen bietet,
 7. **Lager-Bestand** - Lagerverwaltung
 8. **PSM-Abgabe** - Pflanzenschutzmittel (BRANCHENSPEZIFISCH!)
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐⭐ WICHTIG
+### ⭐⭐⭐⭐ WICHTIG
 9. **Kunden-Kontoauszug** - Offene Posten
 10. **Lieferanten-Stamm** - Lieferantenverwaltung
 11. **Artikelgruppen** - Kategorisierung
 12. **Preislisten** - Preisverwaltung
 
-***REMOVED******REMOVED******REMOVED*** ⭐⭐⭐ NICE-TO-HAVE
+### ⭐⭐⭐ NICE-TO-HAVE
 13. **CRM-Dashboard** - Kundenbeziehungen
 14. **Kalender** (bereits vorhanden)
 15. **Statistiken/Reports**
 
-***REMOVED******REMOVED*** 🚀 Nächster Schritt
+## 🚀 Nächster Schritt
 
 **Welche Option bevorzugen Sie?**
 - **Option A:** Ich sage "fertig", Sie erstellen Screenshot
@@ -54,4 +54,5 @@ Oder wir probieren einen **vierten Ansatz**: Ich gebe Ihnen präzise **Klick-Anw
 ---
 
 **Ihre Entscheidung?** (A, B, C, oder Alternative)
+
 

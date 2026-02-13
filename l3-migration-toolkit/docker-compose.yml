@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  ***REMOVED*** PostgreSQL für Guacamole
+  # PostgreSQL für Guacamole
   postgres:
     image: postgres:14
     container_name: l3-postgres
@@ -17,7 +17,7 @@ services:
       l3-network:
         ipv4_address: 172.25.0.10
 
-  ***REMOVED*** Guacamole Daemon
+  # Guacamole Daemon
   guacd:
     image: guacamole/guacd:latest
     container_name: l3-guacd
@@ -26,7 +26,7 @@ services:
       l3-network:
         ipv4_address: 172.25.0.11
 
-  ***REMOVED*** Guacamole Web-UI
+  # Guacamole Web-UI
   guacamole:
     image: guacamole/guacamole:latest
     container_name: l3-guacamole
@@ -42,13 +42,13 @@ services:
       POSTGRESQL_AUTO_CREATE_ACCOUNTS: "true"
       TZ: Europe/Berlin
     ports:
-      - "8090:8080"   ***REMOVED*** Port 8090 (um Konflikte zu vermeiden)
+      - "8090:8080"   # Port 8090 (um Konflikte zu vermeiden)
     restart: unless-stopped
     networks:
       l3-network:
         ipv4_address: 172.25.0.12
 
-  ***REMOVED*** Webtop (Linux Desktop im Browser)
+  # Webtop (Linux Desktop im Browser)
   webtop:
     image: lscr.io/linuxserver/webtop:ubuntu-xfce
     container_name: l3-webtop
@@ -61,9 +61,9 @@ services:
     volumes:
       - l3-webtop-config:/config
       - l3-screenshots:/config/screenshots
-      - ./shared:/shared  ***REMOVED*** Für Datenaustausch
+      - ./shared:/shared  # Für Datenaustausch
     ports:
-      - "3010:3000"   ***REMOVED*** Port 3010 (Frontend auf 3000, VALEO Backend auf 8000)
+      - "3010:3000"   # Port 3010 (Frontend auf 3000, VALEO Backend auf 8000)
     shm_size: "2gb"
     restart: unless-stopped
     networks:
@@ -85,4 +85,5 @@ volumes:
     name: l3-migration-webtop-config
   l3-screenshots:
     name: l3-migration-screenshots
+
 

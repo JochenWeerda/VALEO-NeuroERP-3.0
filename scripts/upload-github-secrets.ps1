@@ -1,6 +1,6 @@
-***REMOVED*** GitHub Secrets Upload Script
-***REMOVED*** Automatisches Hochladen der Secrets zu GitHub
-***REMOVED*** Requires: GitHub CLI (gh) installiert
+# GitHub Secrets Upload Script
+# Automatisches Hochladen der Secrets zu GitHub
+# Requires: GitHub CLI (gh) installiert
 
 param(
     [switch]$DryRun = $false
@@ -14,18 +14,18 @@ Write-Host "  GitHub Secrets Upload" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
-***REMOVED*** Repository
+# Repository
 $REPO = "JochenWeerda/VALEO-NeuroERP-3.0"
 
-***REMOVED*** Secrets aus der generierten Datei
+# Secrets aus der generierten Datei
 $SECRETS = @{
     "STAGING_POSTGRES_PASSWORD" = 'LieE0VQnmN9&r5Pd%RcjbvkU'
     "STAGING_KEYCLOAK_PASSWORD" = 'neZfWPk0utE@rAKBYI8QyMXw'
-    "STAGING_PGADMIN_PASSWORD"  = 'D@I2&lyz***REMOVED***SUjMHT8RgYL4ct1'
+    "STAGING_PGADMIN_PASSWORD"  = 'D@I2&lyz#SUjMHT8RgYL4ct1'
     "STAGING_REDIS_PASSWORD"    = 'DtOAn!VMK1rL$5lBQE60k%y9'
 }
 
-***REMOVED*** Pruefe ob GitHub CLI installiert ist
+# Pruefe ob GitHub CLI installiert ist
 Write-Host "Pruefe GitHub CLI Installation..." -ForegroundColor Yellow
 try {
     $ghVersion = gh --version 2>&1 | Select-String "gh version"
@@ -41,7 +41,7 @@ catch {
     exit 1
 }
 
-***REMOVED*** Pruefe Authentifizierung
+# Pruefe Authentifizierung
 Write-Host ""
 Write-Host "Pruefe GitHub Authentifizierung..." -ForegroundColor Yellow
 try {
@@ -61,14 +61,14 @@ catch {
     exit 1
 }
 
-***REMOVED*** Dry-Run Info
+# Dry-Run Info
 if ($DryRun) {
     Write-Host ""
     Write-Host "DRY-RUN MODE - Keine Aenderungen!" -ForegroundColor Yellow
     Write-Host ""
 }
 
-***REMOVED*** Secrets hochladen
+# Secrets hochladen
 Write-Host ""
 Write-Host "Lade Secrets zu GitHub Repository: $REPO" -ForegroundColor Cyan
 Write-Host ""
@@ -87,7 +87,7 @@ foreach ($secretName in $SECRETS.Keys) {
     }
     else {
         try {
-            ***REMOVED*** Secret hochladen
+            # Secret hochladen
             $secretValue | gh secret set $secretName --repo $REPO
             
             if ($LASTEXITCODE -eq 0) {
@@ -108,7 +108,7 @@ foreach ($secretName in $SECRETS.Keys) {
     Start-Sleep -Milliseconds 500
 }
 
-***REMOVED*** Zusammenfassung
+# Zusammenfassung
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "  Upload abgeschlossen" -ForegroundColor Cyan
@@ -121,7 +121,7 @@ if ($failed -gt 0) {
 Write-Host ""
 
 if (-not $DryRun) {
-    ***REMOVED*** Secrets verifizieren
+    # Secrets verifizieren
     Write-Host "Verifiziere Secrets in GitHub..." -ForegroundColor Yellow
     Write-Host ""
     
@@ -148,3 +148,4 @@ else {
     Write-Host "  .\scripts\upload-github-secrets.ps1" -ForegroundColor White
     Write-Host ""
 }
+

@@ -1,4 +1,4 @@
-***REMOVED***!/usr/bin/env ts-node
+#!/usr/bin/env ts-node
 /**
  * Service generator to wire repository operations with business logic placeholders.
  */
