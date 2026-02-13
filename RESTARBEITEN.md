@@ -219,7 +219,7 @@
 ### Sprint 5 (18.04-01.05) Compliance + Migration
 - [x] `AGRAR-COMP-01` Gefahrstoff-/Nährstoff-Export | P0 | M | Backend
 - [x] `AGRAR-MIG-01` Backfill + idempotente Migration | P0 | M | Backend
-- [ ] `AGRAR-COMP-UI-01` Export- und Prüfprotokollseite | P1 | M | Frontend
+- [x] `AGRAR-COMP-UI-01` Export- und Prüfprotokollseite | P1 | M | Frontend
 
 ### Sprint 6 (02.05-14.05) UAT, Last, Go-Live
 - [ ] `AGRAR-UAT-01` 3 E2E-Fachszenarien mit Key-Usern | P0 | M | QA
@@ -255,7 +255,7 @@ AGRAR-SET-02,Feuchte-/Schwund-Engine im Domain-Service,Story,P0,M,Backend,Sprint
 AGRAR-SET-UI-01,Gutschrift-Ansicht mit Abzugsnachweis,Story,P1,M,Frontend,Sprint 4,2026-04-04,2026-04-17,Backlog,AGRAR-SET-01,UI listet Abzüge transparent und prüfbar auf
 AGRAR-COMP-01,Gefahrstoff- und Nährstoff-Export,Story,P0,M,Backend,Sprint 5,2026-04-18,2026-05-01,Backlog,AGRAR-SET-01,Exportdateien vollständig und fachlich plausibel
 AGRAR-MIG-01,Backfill und idempotente Migration,Story,P0,M,Backend,Sprint 5,2026-04-18,2026-05-01,Done,AGRAR-WG-01|AGRAR-CT-01,Migration ohne Datenverlust mehrfach ausführbar
-AGRAR-COMP-UI-01,Export- und Prüfprotokollseite,Story,P1,M,Frontend,Sprint 5,2026-04-18,2026-05-01,Backlog,AGRAR-COMP-01,UI zeigt Exportlauf und Prüfergebnis pro Lauf
+AGRAR-COMP-UI-01,Export- und Prüfprotokollseite,Story,P1,M,Frontend,Sprint 5,2026-04-18,2026-05-01,Done,AGRAR-COMP-01,UI zeigt Exportlauf und Prüfergebnis pro Lauf
 AGRAR-UAT-01,3 E2E-Fachszenarien mit Key-Usern,Story,P0,M,QA,Sprint 6,2026-05-02,2026-05-14,Backlog,AGRAR-SET-01|AGRAR-COMP-01,UAT-Protokoll signiert und P1/P2 Findings geschlossen
 AGRAR-PERF-01,Lasttest für Wiegeschein/Abrechnung/Eventbus,Story,P0,M,QA,Sprint 6,2026-05-02,2026-05-14,Backlog,AGRAR-WG-02,Lastziele erreicht und Engpässe dokumentiert
 AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026-05-02,2026-05-14,Backlog,AGRAR-UAT-01|AGRAR-PERF-01,Go/No-Go dokumentiert und Rollback verifiziert
