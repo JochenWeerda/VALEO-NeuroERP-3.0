@@ -35,18 +35,22 @@ class ModuleRegistry:
     def list_all(self) -> List[ModuleDefinition]:
         return list(self._definitions.values())
 
-    def is_enabled(self, name: str) -> bool:
+    def is_enabled(self, name: str, tenant_id: str | None = None) -> bool:
         installed = set(settings.INSTALLED_MODULES)
+        if tenant_id:
+            tenant_modules = settings.TENANT_MODULE_FLAGS.get(tenant_id)
+            if tenant_modules is not None:
+                installed = set(tenant_modules)
         return name in installed
 
-    def enabled_modules(self) -> List[ModuleDefinition]:
-        return [m for m in self.list_all() if self.is_enabled(m.name)]
+    def enabled_modules(self, tenant_id: str | None = None) -> List[ModuleDefinition]:
+        return [m for m in self.list_all() if self.is_enabled(m.name, tenant_id=tenant_id)]
 
-    def as_dict(self) -> List[dict]:
+    def as_dict(self, tenant_id: str | None = None) -> List[dict]:
         modules: List[dict] = []
         for definition in self.list_all():
             payload = asdict(definition)
-            payload["enabled"] = self.is_enabled(definition.name)
+            payload["enabled"] = self.is_enabled(definition.name, tenant_id=tenant_id)
             modules.append(payload)
         return modules
 

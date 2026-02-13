@@ -2,7 +2,9 @@
 Runtime module visibility endpoints.
 """
 
-from fastapi import APIRouter, HTTPException
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException, Query
 
 from app.core.module_registry import registry
 from modules.agrar.contracts.events_v1 import AGRAR_EVENT_CONTRACTS_V1
@@ -13,13 +15,13 @@ router = APIRouter(tags=["modules"])
 
 
 @router.get("/modules")
-async def list_modules():
+async def list_modules(tenant_id: Optional[str] = Query(None)):
     initialize_module_registry()
-    return {"items": registry.as_dict()}
+    return {"items": registry.as_dict(tenant_id=tenant_id), "tenant_id": tenant_id}
 
 
 @router.get("/modules/{module_name}")
-async def get_module(module_name: str):
+async def get_module(module_name: str, tenant_id: Optional[str] = Query(None)):
     initialize_module_registry()
     module = registry.get(module_name)
     if not module:
@@ -30,7 +32,8 @@ async def get_module(module_name: str):
         "version": module.version,
         "description": module.description,
         "required_modules": module.required_modules,
-        "enabled": registry.is_enabled(module.name),
+        "enabled": registry.is_enabled(module.name, tenant_id=tenant_id),
+        "tenant_id": tenant_id,
     }
 
 
