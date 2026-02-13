@@ -204,7 +204,7 @@
 ### Sprint 2 (28.02-20.03) Wiegeschein + Kontrakt-Basis
 - [x] `AGRAR-WG-01` Wiegeschein-Datenmodell + CRUD | P0 | L | Backend
 - [x] `AGRAR-CT-01` Kontrakte + Restmengenlogik | P0 | L | Backend
-- [ ] `AGRAR-WG-UI-01` Wiegeschein-Erfassung UI (ohne Mock) | P1 | M | Frontend
+- [x] `AGRAR-WG-UI-01` Wiegeschein-Erfassung UI (ohne Mock) | P1 | M | Frontend
 
 ### Sprint 3 (21.03-03.04) Löschlogik + Silo/Partie
 - [x] `AGRAR-WG-02` Wiegeschein -> Kontraktlöschung atomar | P0 | M | Backend
@@ -246,7 +246,7 @@ AGRAR-ARCH-02,Event-/Hook-Verträge versionieren,Story,P0,M,Backend,Sprint 1,202
 AGRAR-ARCH-03,CI-Guardrails gegen Core-Kontamination,Story,P0,M,DevOps,Sprint 1,2026-02-13,2026-02-27,Backlog,AGRAR-ARCH-01,CI blockiert verbotene Core-Imports
 AGRAR-WG-01,Wiegeschein-Datenmodell und CRUD,Story,P0,L,Backend,Sprint 2,2026-02-28,2026-03-20,Backlog,AGRAR-ARCH-01,Wiegeschein persistiert mit Audit-Trail und validierter API
 AGRAR-CT-01,Kontrakte und Restmengenlogik,Story,P0,L,Backend,Sprint 2,2026-02-28,2026-03-20,Backlog,AGRAR-ARCH-02,Restmengen korrekt berechnet und Überbuchung verhindert
-AGRAR-WG-UI-01,Wiegeschein-Erfassung UI ohne Mock,Story,P1,M,Frontend,Sprint 2,2026-02-28,2026-03-20,Backlog,AGRAR-WG-01,UI nutzt echte API mit sauberem Error-Handling
+AGRAR-WG-UI-01,Wiegeschein-Erfassung UI ohne Mock,Story,P1,M,Frontend,Sprint 2,2026-02-28,2026-03-20,Done,AGRAR-WG-01,UI nutzt echte API mit sauberem Error-Handling
 AGRAR-WG-02,Wiegeschein zu Kontraktlöschung atomar,Story,P0,M,Backend,Sprint 3,2026-03-21,2026-04-03,Backlog,AGRAR-WG-01|AGRAR-CT-01,Atomare Buchung mit Outbox-Events und Rollback
 AGRAR-SILO-01,Sammelpartie und Qualitätsmittelwerte,Story,P0,L,Backend,Sprint 3,2026-03-21,2026-04-03,Backlog,AGRAR-WG-01,Siloqualität reproduzierbar aus Bewegungen berechnet
 AGRAR-SILO-UI-01,Siloübersicht mit Qualitätssnapshot,Story,P1,M,Frontend,Sprint 3,2026-03-21,2026-04-03,Backlog,AGRAR-SILO-01,UI zeigt Füllstand und Qualitätskennzahlen pro Silo
