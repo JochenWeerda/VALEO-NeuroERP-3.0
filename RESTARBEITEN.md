@@ -36,6 +36,9 @@
 - Staging-Verifikations-Runbook: `docs/deployment/staging-verification.md`
 - Staging-Check-Skript: `scripts/check-staging.ps1`
 - Monitoring-Verifikation: `docs/operations/monitoring-dashboards-verification.md`
+- AGRAR Lasttest-Runbook: `docs/testing/agrar-loadtest.md`
+- AGRAR Lasttest-Skript: `tests/performance/agrar-core-loadtest.js`
+- AGRAR Lasttest-Runner: `scripts/run-agrar-loadtest.ps1`
 
 ---
 
@@ -69,6 +72,7 @@
 - Modulaktivierung: `docs/deployment/module-activation.md`
 - GitOps/ArgoCD: `docs/deployment/gitops/argocd.md`
 - Procurement-Smoketest: `docs/procurement-wave2-smoketest.md`
+- AGRAR Lasttest: `docs/testing/agrar-loadtest.md`
 - Production Deployment Plan: `docs/PRODUCTION-DEPLOYMENT.md`
 
 ---
