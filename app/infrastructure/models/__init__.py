@@ -372,6 +372,7 @@ from .l3c_models import (
     InventoryCountLine,
     WeighingTicket,
     WeighingTicketLine,
+    WeighingMeasurement,
     WarehouseTransfer,
     WarehouseTransferLine,
     StockCorrection,
