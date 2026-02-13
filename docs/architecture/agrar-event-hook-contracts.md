@@ -11,6 +11,7 @@ Versionierte Event-Payloads liegen in:
 Initiale Event-Typen:
 
 - `agrar.weighing_ticket.created`
+- `agrar.weighing_ticket.allocated`
 - `agrar.contract.allocated`
 - `agrar.settlement.issued`
 
