@@ -55,6 +55,9 @@ class WeighingTicket(Base):
     hl_weight = Column(DECIMAL(6, 2), nullable=True)
     billing_weight = Column(DECIMAL(12, 3), nullable=True)
     quality_data = Column(JSONB, nullable=True)
+    contract_id = Column(String, ForeignKey("domain_inventory.agrar_contracts.id"), nullable=True)
+    allocated_quantity_kg = Column(DECIMAL(12, 3), nullable=True)
+    allocation_status = Column(String(20), nullable=False, default="unallocated")  # unallocated / allocated / posted
     weighing_date = Column(DateTime(timezone=True), server_default=func.now())
     status = Column(String(20), default="open")
     direction = Column(String(10), default="in")  # in / out

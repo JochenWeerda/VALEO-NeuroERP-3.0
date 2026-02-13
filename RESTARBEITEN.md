@@ -113,9 +113,9 @@
 - Restmenge wird korrekt geführt, invalides Überbuchen wird geblockt.
 
 ### Woche 6 (23.03-27.03): EPIC AGRAR-WG-02 Wiegeschein -> Kontraktlöschung
-- [ ] Story AGRAR-WG-02-01: Zuordnung Wiegeschein zu Kontrakt.
-- [ ] Story AGRAR-WG-02-02: Automatische Löschlogik bei Buchung.
-- [ ] Story AGRAR-WG-02-03: Outbox-Events bei Löschung und Fehlerfällen.
+- [x] Story AGRAR-WG-02-01: Zuordnung Wiegeschein zu Kontrakt.
+- [x] Story AGRAR-WG-02-02: Automatische Löschlogik bei Buchung.
+- [x] Story AGRAR-WG-02-03: Outbox-Events bei Löschung und Fehlerfällen.
 - Akzeptanzkriterien:
 - Buchungsfluss atomar, Event-Emission nachweisbar, Rollback sauber.
 
@@ -207,7 +207,7 @@
 - [ ] `AGRAR-WG-UI-01` Wiegeschein-Erfassung UI (ohne Mock) | P1 | M | Frontend
 
 ### Sprint 3 (21.03-03.04) Löschlogik + Silo/Partie
-- [ ] `AGRAR-WG-02` Wiegeschein -> Kontraktlöschung atomar | P0 | M | Backend
+- [x] `AGRAR-WG-02` Wiegeschein -> Kontraktlöschung atomar | P0 | M | Backend
 - [ ] `AGRAR-SILO-01` Sammelpartie + Qualitätsmittelwerte | P0 | L | Backend
 - [ ] `AGRAR-SILO-UI-01` Siloübersicht mit Qualitätssnapshot | P1 | M | Frontend
 
