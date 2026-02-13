@@ -66,6 +66,7 @@
 - Abnahme-Template Deployment/Rollout: `docs/deployment/go-live-abnahme-template.md`
 - OpenAPI: `docs/api/openapi.md`
 - Multi-Tenancy: `docs/deployment/multi-tenancy.md`
+- Modulaktivierung: `docs/deployment/module-activation.md`
 - GitOps/ArgoCD: `docs/deployment/gitops/argocd.md`
 - Procurement-Smoketest: `docs/procurement-wave2-smoketest.md`
 - Production Deployment Plan: `docs/PRODUCTION-DEPLOYMENT.md`
@@ -92,9 +93,9 @@
 - Versionierte Event-Verträge liegen vor, Contract-Tests erfolgreich.
 
 ### Woche 3 (28.02-06.03): EPIC AGRAR-ARCH-03 Guardrails in CI
-- [ ] Story AGRAR-ARCH-03-01: Architektur-Checks (verbotene Imports) in CI einbauen.
-- [ ] Story AGRAR-ARCH-03-02: Feature-Flag-Gating pro Mandant ergänzen.
-- [ ] Story AGRAR-ARCH-03-03: Dokumentation Modulaktivierung erstellen.
+- [x] Story AGRAR-ARCH-03-01: Architektur-Checks (verbotene Imports) in CI einbauen.
+- [x] Story AGRAR-ARCH-03-02: Feature-Flag-Gating pro Mandant ergänzen.
+- [x] Story AGRAR-ARCH-03-03: Dokumentation Modulaktivierung erstellen.
 - Akzeptanzkriterien:
 - CI blockiert Core-Verstöße, Modul per Flag aktiv/inaktiv schaltbar.
 
@@ -243,7 +244,7 @@
 id,title,type,priority,effort,owner_role,sprint,start_date,end_date,status,dependencies,acceptance_criteria
 AGRAR-ARCH-01,Modulrahmen aufsetzen,Story,P0,M,Fullstack,Sprint 1,2026-02-13,2026-02-27,Backlog,,modules/agrar Struktur vorhanden und registrierbar
 AGRAR-ARCH-02,Event-/Hook-Verträge versionieren,Story,P0,M,Backend,Sprint 1,2026-02-13,2026-02-27,Backlog,AGRAR-ARCH-01,Versionierte Events mit Contract-Tests grün
-AGRAR-ARCH-03,CI-Guardrails gegen Core-Kontamination,Story,P0,M,DevOps,Sprint 1,2026-02-13,2026-02-27,Backlog,AGRAR-ARCH-01,CI blockiert verbotene Core-Imports
+AGRAR-ARCH-03,CI-Guardrails gegen Core-Kontamination,Story,P0,M,DevOps,Sprint 1,2026-02-13,2026-02-27,Done,AGRAR-ARCH-01,CI blockiert verbotene Core-Imports
 AGRAR-WG-01,Wiegeschein-Datenmodell und CRUD,Story,P0,L,Backend,Sprint 2,2026-02-28,2026-03-20,Backlog,AGRAR-ARCH-01,Wiegeschein persistiert mit Audit-Trail und validierter API
 AGRAR-CT-01,Kontrakte und Restmengenlogik,Story,P0,L,Backend,Sprint 2,2026-02-28,2026-03-20,Backlog,AGRAR-ARCH-02,Restmengen korrekt berechnet und Überbuchung verhindert
 AGRAR-WG-UI-01,Wiegeschein-Erfassung UI ohne Mock,Story,P1,M,Frontend,Sprint 2,2026-02-28,2026-03-20,Done,AGRAR-WG-01,UI nutzt echte API mit sauberem Error-Handling
