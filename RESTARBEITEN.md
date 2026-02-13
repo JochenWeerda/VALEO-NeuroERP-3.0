@@ -209,7 +209,7 @@
 ### Sprint 3 (21.03-03.04) Löschlogik + Silo/Partie
 - [x] `AGRAR-WG-02` Wiegeschein -> Kontraktlöschung atomar | P0 | M | Backend
 - [x] `AGRAR-SILO-01` Sammelpartie + Qualitätsmittelwerte | P0 | L | Backend
-- [ ] `AGRAR-SILO-UI-01` Siloübersicht mit Qualitätssnapshot | P1 | M | Frontend
+- [x] `AGRAR-SILO-UI-01` Siloübersicht mit Qualitätssnapshot | P1 | M | Frontend
 
 ### Sprint 4 (04.04-17.04) Abrechnung + Physiklogik
 - [ ] `AGRAR-SET-01` Self-Billing inkl. Abzüge | P0 | L | Backend
