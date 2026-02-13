@@ -2,14 +2,20 @@
 
 from datetime import datetime
 from typing import Optional
+from collections import defaultdict
+import csv
+import io
 
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.documents.router_helpers import get_repository, list_from_store
 from app.domains.operations.models import (
     ComplianceEintrag,
     ENNIMeldung,
+    Charge,
     QSCheckEintrag,
     ZulassungRegister,
     SachkundeEintrag,
@@ -22,6 +28,119 @@ router = APIRouter(prefix="/compliance", tags=["Compliance"])
 
 def _dt(v: Optional[datetime]) -> Optional[str]:
     return v.date().isoformat() if v else None
+
+
+def _list_sales_deliveries(db: Session) -> list[dict]:
+    repo = get_repository(db)
+    payload = list_from_store("sales_delivery", skip=0, limit=10_000, repo=repo)
+    return payload.get("data", []) if isinstance(payload, dict) else []
+
+
+def _extract_hazard_export_rows(deliveries: list[dict], year: Optional[int] = None) -> list[dict]:
+    rows: list[dict] = []
+    for d in deliveries:
+        date_str = str(d.get("date") or "")
+        if year and not date_str.startswith(f"{year}-"):
+            continue
+        doc_compliance = d.get("psmCompliance") or {}
+        for line in d.get("lines") or []:
+            has_psm = any([line.get("bvlZulassungsnummer"), line.get("hazardHinweise"), line.get("sdsReference")])
+            if not has_psm:
+                continue
+            rows.append(
+                {
+                    "deliveryNumber": d.get("number") or d.get("id"),
+                    "deliveryDate": date_str[:10] if len(date_str) >= 10 else None,
+                    "supplierName": d.get("supplierName"),
+                    "customerId": d.get("customerId"),
+                    "article": line.get("article"),
+                    "bvlZulassungsnummer": line.get("bvlZulassungsnummer"),
+                    "hazardHinweise": line.get("hazardHinweise"),
+                    "sdsReference": line.get("sdsReference"),
+                    "sachkundeStatus": doc_compliance.get("sachkundeStatus"),
+                    "sdsMitgeliefert": doc_compliance.get("sdsMitgeliefert"),
+                    "adrPunkte": float(d.get("adrPunkte") or doc_compliance.get("adrPunkte") or 0),
+                    "compliant": bool(doc_compliance.get("compliant", False)),
+                }
+            )
+    return rows
+
+
+def _compute_nutrient_stream(deliveries: list[dict], year: int) -> dict:
+    by_month: dict[str, dict[str, float]] = defaultdict(lambda: {"deliveries": 0.0, "n_kg": 0.0, "p2o5_kg": 0.0})
+    total_n = 0.0
+    total_p2o5 = 0.0
+    count = 0
+
+    for d in deliveries:
+        date_str = str(d.get("date") or "")
+        if not date_str.startswith(f"{year}-"):
+            continue
+        month = date_str[:7]
+        n_kg = float(d.get("totalNutrientNKg") or 0.0)
+        p2o5_kg = float(d.get("totalNutrientP2o5Kg") or 0.0)
+
+        by_month[month]["deliveries"] += 1
+        by_month[month]["n_kg"] += n_kg
+        by_month[month]["p2o5_kg"] += p2o5_kg
+        total_n += n_kg
+        total_p2o5 += p2o5_kg
+        count += 1
+
+    return {
+        "year": year,
+        "deliveryCount": count,
+        "totalNutrientNKg": round(total_n, 3),
+        "totalNutrientP2o5Kg": round(total_p2o5, 3),
+        "byMonth": {
+            k: {
+                "deliveries": int(v["deliveries"]),
+                "n_kg": round(v["n_kg"], 3),
+                "p2o5_kg": round(v["p2o5_kg"], 3),
+            }
+            for k, v in sorted(by_month.items())
+        },
+    }
+
+
+def _build_lot_trace_report(lot: Charge, deliveries: list[dict]) -> dict:
+    events = [
+        {"type": "charge_created", "date": lot.eingang.isoformat() if lot.eingang else None, "note": "Wareneingang erfasst"},
+        {"type": "charge_updated", "date": lot.updated_at.isoformat() if lot.updated_at else None, "note": "Letzte Aktualisierung"},
+    ]
+    linked_deliveries = []
+    for d in deliveries:
+        for line in d.get("lines") or []:
+            if (line.get("batchNumber") and str(line.get("batchNumber")) == str(lot.chargen_id)) or (
+                line.get("articleId") and str(line.get("articleId")) == str(lot.artikel_id)
+            ):
+                linked_deliveries.append(
+                    {
+                        "deliveryNumber": d.get("number") or d.get("id"),
+                        "deliveryDate": str(d.get("date") or "")[:10],
+                        "article": line.get("article"),
+                        "quantity": float(line.get("qty") or 0),
+                        "customerId": d.get("customerId"),
+                    }
+                )
+                break
+
+    return {
+        "lot": {
+            "id": lot.id,
+            "lotId": lot.chargen_id,
+            "article": lot.artikel,
+            "articleId": lot.artikel_id,
+            "quantity": float(lot.menge or 0),
+            "location": lot.lagerort,
+            "status": lot.status,
+            "qualityStatus": lot.qualitaetsstatus,
+            "origin": lot.herkunft,
+        },
+        "events": events,
+        "linkedDeliveries": linked_deliveries,
+        "deliveryCount": len(linked_deliveries),
+    }
 
 
 def _seed(db: Session) -> None:
@@ -274,3 +393,116 @@ async def get_compliance_stats(db: Session = Depends(get_db)) -> dict:
         },
         "generated_at": datetime.utcnow().isoformat(),
     }
+
+
+@router.get("/exports/gefahrstoffdoku", response_model=dict)
+async def export_gefahrstoffdoku(
+    year: Optional[int] = Query(None, ge=2000, le=2100),
+    db: Session = Depends(get_db),
+) -> dict:
+    deliveries = _list_sales_deliveries(db)
+    rows = _extract_hazard_export_rows(deliveries, year=year)
+    return {
+        "year": year,
+        "rows": rows,
+        "total": len(rows),
+        "generated_at": datetime.utcnow().isoformat(),
+    }
+
+
+@router.get("/exports/gefahrstoffdoku.csv")
+async def export_gefahrstoffdoku_csv(
+    year: Optional[int] = Query(None, ge=2000, le=2100),
+    db: Session = Depends(get_db),
+):
+    payload = await export_gefahrstoffdoku(year=year, db=db)
+    buffer = io.StringIO()
+    writer = csv.writer(buffer, delimiter=";")
+    writer.writerow(
+        [
+            "Lieferschein",
+            "Datum",
+            "Lieferant",
+            "Kunde",
+            "Artikel",
+            "BVL-Zulassungsnummer",
+            "Gefahrhinweise",
+            "SDB-Referenz",
+            "Sachkunde-Status",
+            "SDB mitgeliefert",
+            "ADR Punkte",
+            "Compliance",
+        ]
+    )
+    for row in payload["rows"]:
+        writer.writerow(
+            [
+                row.get("deliveryNumber"),
+                row.get("deliveryDate"),
+                row.get("supplierName"),
+                row.get("customerId"),
+                row.get("article"),
+                row.get("bvlZulassungsnummer"),
+                row.get("hazardHinweise"),
+                row.get("sdsReference"),
+                row.get("sachkundeStatus"),
+                row.get("sdsMitgeliefert"),
+                row.get("adrPunkte"),
+                "ja" if row.get("compliant") else "nein",
+            ]
+        )
+    filename = f"gefahrstoffdoku-{year}.csv" if year else "gefahrstoffdoku.csv"
+    return StreamingResponse(
+        io.BytesIO(buffer.getvalue().encode("utf-8-sig")),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/exports/naehrstoffstrom", response_model=dict)
+async def export_naehrstoffstrom(
+    year: int = Query(..., ge=2000, le=2100),
+    db: Session = Depends(get_db),
+) -> dict:
+    deliveries = _list_sales_deliveries(db)
+    data = _compute_nutrient_stream(deliveries, year=year)
+    data["generated_at"] = datetime.utcnow().isoformat()
+    return data
+
+
+@router.get("/exports/naehrstoffstrom.csv")
+async def export_naehrstoffstrom_csv(
+    year: int = Query(..., ge=2000, le=2100),
+    db: Session = Depends(get_db),
+):
+    data = await export_naehrstoffstrom(year=year, db=db)
+    buffer = io.StringIO()
+    writer = csv.writer(buffer, delimiter=";")
+    writer.writerow(["Jahr", data["year"]])
+    writer.writerow(["Anzahl Lieferscheine", data["deliveryCount"]])
+    writer.writerow(["Summe N (kg)", data["totalNutrientNKg"]])
+    writer.writerow(["Summe P2O5 (kg)", data["totalNutrientP2o5Kg"]])
+    writer.writerow([])
+    writer.writerow(["Monat", "Lieferscheine", "N (kg)", "P2O5 (kg)"])
+    for month, row in data.get("byMonth", {}).items():
+        writer.writerow([month, row.get("deliveries", 0), row.get("n_kg", 0), row.get("p2o5_kg", 0)])
+    filename = f"naehrstoffstrom-{year}.csv"
+    return StreamingResponse(
+        io.BytesIO(buffer.getvalue().encode("utf-8-sig")),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/exports/chargen-trace/{lot_id}", response_model=dict)
+async def export_chargen_trace_report(
+    lot_id: str,
+    db: Session = Depends(get_db),
+) -> dict:
+    lot = db.query(Charge).filter((Charge.id == lot_id) | (Charge.chargen_id == lot_id)).first()
+    if not lot:
+        return {"error": "lot not found", "lot_id": lot_id}
+    deliveries = _list_sales_deliveries(db)
+    report = _build_lot_trace_report(lot, deliveries)
+    report["generated_at"] = datetime.utcnow().isoformat()
+    return report

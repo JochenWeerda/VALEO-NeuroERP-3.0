@@ -141,9 +141,9 @@
 - Formelpfad deterministisch, testabgedeckt, keine SQL- oder UI-Formellogik.
 
 ### Woche 10 (20.04-24.04): EPIC AGRAR-COMP-01 Compliance-MVP
-- [ ] Story AGRAR-COMP-01-01: Gefahrstoffdoku-Export für PSM/Dünger.
-- [ ] Story AGRAR-COMP-01-02: Nährstoffstrom-Export (N/P2O5) je Zeitraum.
-- [ ] Story AGRAR-COMP-01-03: Chargen-Trace Bericht Saatgut -> Endprodukt.
+- [x] Story AGRAR-COMP-01-01: Gefahrstoffdoku-Export für PSM/Dünger.
+- [x] Story AGRAR-COMP-01-02: Nährstoffstrom-Export (N/P2O5) je Zeitraum.
+- [x] Story AGRAR-COMP-01-03: Chargen-Trace Bericht Saatgut -> Endprodukt.
 - Akzeptanzkriterien:
 - Pflichtfelder vollständig, Exportdateien fachlich prüfbar.
 
@@ -217,7 +217,7 @@
 - [x] `AGRAR-SET-UI-01` Gutschrift-Ansicht inkl. Abzugsnachweis | P1 | M | Frontend
 
 ### Sprint 5 (18.04-01.05) Compliance + Migration
-- [ ] `AGRAR-COMP-01` Gefahrstoff-/Nährstoff-Export | P0 | M | Backend
+- [x] `AGRAR-COMP-01` Gefahrstoff-/Nährstoff-Export | P0 | M | Backend
 - [ ] `AGRAR-MIG-01` Backfill + idempotente Migration | P0 | M | Backend
 - [ ] `AGRAR-COMP-UI-01` Export- und Prüfprotokollseite | P1 | M | Frontend
 
