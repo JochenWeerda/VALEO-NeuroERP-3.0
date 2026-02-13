@@ -4,8 +4,7 @@
  * Kunden können hier Produkte bestellen und Angebotsanfragen stellen
  * 
  * Verwendet das Backend-API für Produkte mit Kontrakt/Vorkauf-Informationen.
- * Bei API-Fehler werden Mock-Daten als Skeleton/Vorschau angezeigt.
- */
+  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,7 +12,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -32,6 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { ErrorState } from '@/components/ErrorState'
 import {
   Search,
   ShoppingCart,
@@ -43,8 +42,6 @@ import {
   Droplets,
   Bug,
   Wheat,
-  Filter,
-  ChevronRight,
   Check,
   Info,
   FileQuestion,
@@ -53,7 +50,6 @@ import {
   FileText,
   AlertTriangle,
   Wallet,
-  Database,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -63,7 +59,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { Progress } from '@/components/ui/progress'
-import { portalService, type PortalProduct } from '@/lib/services/portal-service'
+import { portalService } from '@/lib/services/portal-service'
 
 // Kontrakt-Status für Rahmenverträge
 type ContractStatus = 'NONE' | 'ACTIVE' | 'LOW' | 'EXHAUSTED'
@@ -199,228 +195,6 @@ interface CartItem extends Product {
   lastOrderParity?: DeliveryParity
 }
 
-// Berechne Datum für Mock-Daten (X Tage in der Vergangenheit)
-function daysAgo(days: number): string {
-  const date = new Date()
-  date.setDate(date.getDate() - days)
-  return date.toISOString().split('T')[0]
-}
-
-// Mock-Produkte mit Kontrakt- und Vorkauf-Informationen
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Winterweizen Premium',
-    kategorie: 'saatgut',
-    beschreibung: 'Hochertragsorte für intensive Standorte, Z-Saatgut',
-    einheit: 'dt',
-    preis: 65.00,
-    verfuegbar: true,
-    bestand: 250,
-    zertifikate: ['Z-Saatgut', 'VLOG'],
-    artikelnummer: 'SAA-WW-001',
-    // Aktiver Kontrakt
-    contractStatus: 'ACTIVE',
-    contractPrice: 58.00,
-    contractTotalQty: 100,
-    contractRemainingQty: 75,
-  },
-  {
-    id: '2',
-    name: 'NPK 15-15-15',
-    kategorie: 'duenger',
-    beschreibung: 'Volldünger für Grunddüngung, gekörnt',
-    einheit: 'dt',
-    preis: 42.50,
-    rabattPreis: 39.90,
-    verfuegbar: true,
-    bestand: 500,
-    zertifikate: ['GMP+'],
-    artikelnummer: 'DUE-NPK-001',
-    letzteBestellung: { datum: daysAgo(14), menge: 50 },
-    // Vorkauf - bereits bezahlt!
-    isPrePurchase: true,
-    prePurchasePrice: 32.00,
-    prePurchaseTotalQty: 150,
-    prePurchaseRemainingQty: 80,
-  },
-  {
-    id: '3',
-    name: 'Glyphosat 360',
-    kategorie: 'psm',
-    beschreibung: 'Totalherbizid zur Stoppelbehandlung',
-    einheit: 'l',
-    preis: 8.50,
-    verfuegbar: true,
-    bestand: 100,
-    zertifikate: ['BVL zugelassen'],
-    artikelnummer: 'PSM-GLY-001',
-  },
-  {
-    id: '4',
-    name: 'Rapsöl technisch',
-    kategorie: 'sonstiges',
-    beschreibung: 'Für technische Anwendungen und Additive',
-    einheit: 'l',
-    preis: 2.20,
-    verfuegbar: true,
-    bestand: 1000,
-    zertifikate: [],
-    artikelnummer: 'SON-RAP-001',
-  },
-  {
-    id: '5',
-    name: 'Wintergerste Hyvido',
-    kategorie: 'saatgut',
-    beschreibung: 'Hybridgerste mit hohem Ertragspotenzial',
-    einheit: 'Einheit',
-    preis: 185.00,
-    verfuegbar: true,
-    bestand: 50,
-    zertifikate: ['Z-Saatgut'],
-    artikelnummer: 'SAA-WG-002',
-    // Kontrakt fast ausgeschöpft
-    contractStatus: 'LOW',
-    contractPrice: 165.00,
-    contractTotalQty: 50,
-    contractRemainingQty: 8,
-  },
-  {
-    id: '6',
-    name: 'AHL 28%',
-    kategorie: 'duenger',
-    beschreibung: 'Ammonium-Harnstoff-Lösung für Flüssigdüngung',
-    einheit: 'l',
-    preis: 0.85,
-    verfuegbar: false,
-    bestand: 0,
-    zertifikate: ['DüMV konform'],
-    artikelnummer: 'DUE-AHL-001',
-  },
-  {
-    id: '7',
-    name: 'Fungizid Opus Top',
-    kategorie: 'psm',
-    beschreibung: 'Breitband-Fungizid für Getreide',
-    einheit: 'l',
-    preis: 32.50,
-    verfuegbar: true,
-    bestand: 75,
-    zertifikate: ['BVL zugelassen'],
-    artikelnummer: 'PSM-OPU-001',
-    // Kontrakt ausgeschöpft
-    contractStatus: 'EXHAUSTED',
-    contractPrice: 28.00,
-    contractTotalQty: 200,
-    contractRemainingQty: 0,
-  },
-  {
-    id: '8',
-    name: 'Milchleistungsfutter 18%',
-    kategorie: 'futtermittel',
-    beschreibung: 'Ausgewogenes Kraftfutter für Milchkühe',
-    einheit: 'dt',
-    preis: 38.00,
-    verfuegbar: true,
-    bestand: 300,
-    zertifikate: ['GMP+', 'QS', 'VLOG'],
-    artikelnummer: 'FUT-MLF-001',
-    letzteBestellung: { datum: daysAgo(7), menge: 25 },
-    // Aktiver Kontrakt
-    contractStatus: 'ACTIVE',
-    contractPrice: 32.00,
-    contractTotalQty: 300,
-    contractRemainingQty: 120,
-  },
-  {
-    id: '9',
-    name: 'Strohmehl',
-    kategorie: 'futtermittel',
-    beschreibung: 'Einstreu für Tierhaltung, entstaubt',
-    einheit: 'dt',
-    preis: 12.50,
-    verfuegbar: true,
-    bestand: 200,
-    zertifikate: ['GMP+'],
-    artikelnummer: 'FUT-STR-001',
-    letzteBestellung: { datum: daysAgo(21), menge: 40 },
-  },
-  {
-    id: '10',
-    name: 'Mineralfutter Rind',
-    kategorie: 'futtermittel',
-    beschreibung: 'Mineralergänzung für Milchvieh und Mastrinder',
-    einheit: 'kg',
-    preis: 1.85,
-    verfuegbar: true,
-    bestand: 500,
-    zertifikate: ['GMP+', 'QS'],
-    artikelnummer: 'FUT-MIN-001',
-    letzteBestellung: { datum: daysAgo(35), menge: 100 },
-  },
-  {
-    id: '11',
-    name: 'Sägespäne Premium',
-    kategorie: 'sonstiges',
-    beschreibung: 'Hochwertige Einstreu für Boxenhaltung',
-    einheit: 'm³',
-    preis: 28.00,
-    verfuegbar: true,
-    bestand: 80,
-    zertifikate: [],
-    artikelnummer: 'SON-SAE-001',
-    letzteBestellung: { datum: daysAgo(28), menge: 10 },
-  },
-  {
-    id: '12',
-    name: 'Kälbermilch Standard',
-    kategorie: 'futtermittel',
-    beschreibung: 'Milchaustauscher für Kälberaufzucht',
-    einheit: 'kg',
-    preis: 2.40,
-    verfuegbar: true,
-    bestand: 400,
-    zertifikate: ['GMP+', 'QS'],
-    artikelnummer: 'FUT-KAE-001',
-    letzteBestellung: { datum: daysAgo(10), menge: 200 },
-  },
-  {
-    id: '13',
-    name: 'Kalkammonsalpeter (KAS)',
-    kategorie: 'duenger',
-    beschreibung: 'Stickstoffdünger 27% N, schnell wirksam',
-    einheit: 'dt',
-    preis: 39.90,
-    verfuegbar: true,
-    bestand: 800,
-    zertifikate: ['DüMV konform'],
-    artikelnummer: 'DUE-KAS-001',
-    letzteBestellung: { datum: daysAgo(5), menge: 100 },
-    // Vorkauf - bereits bezahlt!
-    isPrePurchase: true,
-    prePurchasePrice: 28.50,
-    prePurchaseTotalQty: 200,
-    prePurchaseRemainingQty: 150,
-  },
-  {
-    id: '14',
-    name: 'Harnstoff 46%',
-    kategorie: 'duenger',
-    beschreibung: 'Konzentrierter Stickstoffdünger, langsam wirksam',
-    einheit: 'dt',
-    preis: 52.00,
-    verfuegbar: true,
-    bestand: 300,
-    zertifikate: ['DüMV konform'],
-    artikelnummer: 'DUE-HAR-001',
-    // Vorkauf fast aufgebraucht
-    isPrePurchase: true,
-    prePurchasePrice: 42.00,
-    prePurchaseTotalQty: 100,
-    prePurchaseRemainingQty: 15,
-  },
-]
-
 const kategorien = [
   { value: 'alle', label: 'Alle Produkte', icon: <Package className="h-4 w-4" /> },
   { value: 'saatgut', label: 'Saatgut', icon: <Wheat className="h-4 w-4" /> },
@@ -443,33 +217,26 @@ export default function PortalShop() {
   const [anfrageText, setAnfrageText] = useState('')
   const [anfrageProdukt, setAnfrageProdukt] = useState('')
 
-  const [usingMockData, setUsingMockData] = useState(false)
+  const [loadError, setLoadError] = useState<Error | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [orderSubmitting, setOrderSubmitting] = useState(false)
+  const [inquirySubmitting, setInquirySubmitting] = useState(false)
 
-  // Lade Produkte vom Backend, Fallback auf Mock-Daten
   const loadProducts = useCallback(async () => {
     setLoading(true)
+    setLoadError(null)
     try {
       const response = await portalService.getProducts({
         kategorie: selectedKategorie !== 'alle' ? selectedKategorie : undefined,
         search: searchTerm || undefined,
       })
-      
-      if (response.items.length > 0) {
-        // Backend-Daten verfügbar
-        setProducts(response.items.map(item => ({
-          ...item,
-          beschreibung: item.beschreibung || '',
-        })) as Product[])
-        setUsingMockData(false)
-      } else {
-        // Keine Daten vom Backend, verwende Mock-Daten als Vorschau
-        setProducts(mockProducts)
-        setUsingMockData(true)
-      }
-    } catch {
-      // API-Fehler, verwende Mock-Daten als Vorschau
-      setProducts(mockProducts)
-      setUsingMockData(true)
+      setProducts(response.items.map(item => ({
+        ...item,
+        beschreibung: item.beschreibung || '',
+      })) as Product[])
+    } catch (err) {
+      setProducts([])
+      setLoadError(err instanceof Error ? err : new Error('Produkte konnten nicht geladen werden'))
     } finally {
       setLoading(false)
     }
@@ -500,7 +267,9 @@ export default function PortalShop() {
       
       // Bei beiden kürzlich bestellt: nach Datum sortieren (neueste zuerst)
       if (aRecentOrder && bRecentOrder) {
-        return new Date(b.letzteBestellung!.datum).getTime() - new Date(a.letzteBestellung!.datum).getTime()
+        const aDate = a.letzteBestellung?.datum ?? ''
+        const bDate = b.letzteBestellung?.datum ?? ''
+        return new Date(bDate).getTime() - new Date(aDate).getTime()
       }
       
       // Sonst: Standard-Reihenfolge beibehalten
@@ -558,7 +327,6 @@ export default function PortalShop() {
       }
       
       // Vorbelegung aus letzter Bestellung (Mock - später aus API)
-      // TODO: Echte Daten aus CustomerOrderHistory laden
       const lastOrderSilo = product.letzteBestellung ? 'Silo 1' : undefined
       const lastOrderParity: DeliveryParity = product.letzteBestellung ? 'frei_silo_geblasen' : 'ab_lager'
       const defaultMenge = product.letzteBestellung?.menge || 1
@@ -643,42 +411,76 @@ export default function PortalShop() {
     setCart((prev) => prev.filter((item) => item.id !== productId))
   }
 
-  const handleOrder = () => {
-    // TODO: API Call für Bestellung
-    setOrderSuccess(true)
-    setCart([])
-    setTimeout(() => {
-      setShowCart(false)
-      setOrderSuccess(false)
-    }, 2000)
+  const handleOrder = async () => {
+    if (cart.length === 0) return
+    setActionError(null)
+    setOrderSubmitting(true)
+    try {
+      await portalService.createOrder({
+        items: cart.map((item) => ({
+          article_id: item.id,
+          quantity: item.menge,
+        })),
+        customer_notes: cart
+          .filter((item) => isBulkProduct(item))
+          .map((item) => `${item.name}: ${item.deliveryParity}${item.siloNummer ? `, Silo ${item.siloNummer}` : ''}`)
+          .join(' | '),
+      })
+      setOrderSuccess(true)
+      setCart([])
+      setTimeout(() => {
+        setShowCart(false)
+        setOrderSuccess(false)
+      }, 2000)
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Bestellung konnte nicht gesendet werden')
+    } finally {
+      setOrderSubmitting(false)
+    }
   }
 
-  const handleAnfrage = () => {
-    // TODO: API Call für Anfrage
-    setAnfrageSuccess(true)
-    setTimeout(() => {
-      setShowAnfrage(false)
-      setAnfrageSuccess(false)
-      setAnfrageText('')
-      setAnfrageProdukt('')
-    }, 2000)
+  const handleAnfrage = async () => {
+    if (!anfrageText || !anfrageProdukt) return
+    setActionError(null)
+    setInquirySubmitting(true)
+    try {
+      await portalService.createInquiry({
+        anforderer: 'Portal-Kunde',
+        typ: 'ANF',
+        prioritaet: 'normal',
+        artikel: anfrageProdukt,
+        begruendung: `Portal-Anfrage: ${anfrageProdukt}`,
+        notizen: anfrageText,
+        datum: new Date().toISOString().slice(0, 10),
+      })
+      setAnfrageSuccess(true)
+      setTimeout(() => {
+        setShowAnfrage(false)
+        setAnfrageSuccess(false)
+        setAnfrageText('')
+        setAnfrageProdukt('')
+      }, 2000)
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Anfrage konnte nicht gesendet werden')
+    } finally {
+      setInquirySubmitting(false)
+    }
   }
 
   if (loading) {
     return <ShopSkeleton />
   }
 
+  if (loadError) {
+    return <ErrorState error={loadError} onRetry={() => { void loadProducts() }} />
+  }
+
   return (
     <div className="space-y-6">
-      {/* Mock-Daten Hinweis */}
-      {usingMockData && (
-        <Alert className="border-amber-200 bg-amber-50">
-          <Database className="h-4 w-4 text-amber-600" />
-          <AlertTitle className="text-amber-800">Vorschau-Modus</AlertTitle>
-          <AlertDescription className="text-amber-700">
-            Die angezeigten Produkte sind Beispieldaten. Sobald das Backend verbunden ist, 
-            werden Ihre echten Produkte mit Kontrakt- und Vorkauf-Informationen geladen.
-          </AlertDescription>
+      {actionError && (
+        <Alert variant="destructive">
+          <AlertTitle>Aktion fehlgeschlagen</AlertTitle>
+          <AlertDescription>{actionError}</AlertDescription>
         </Alert>
       )}
 
@@ -1061,9 +863,9 @@ export default function PortalShop() {
                     <Button variant="outline" onClick={() => setShowCart(false)}>
                       Weiter einkaufen
                     </Button>
-                    <Button onClick={handleOrder} className="gap-2">
+                    <Button onClick={() => { void handleOrder() }} className="gap-2" disabled={orderSubmitting}>
                       <Send className="h-4 w-4" />
-                      Bestellung absenden
+                      {orderSubmitting ? 'Sende...' : 'Bestellung absenden'}
                     </Button>
                   </DialogFooter>
                 </>
@@ -1133,12 +935,12 @@ export default function PortalShop() {
                   Abbrechen
                 </Button>
                 <Button
-                  onClick={handleAnfrage}
-                  disabled={!anfrageText || !anfrageProdukt}
+                  onClick={() => { void handleAnfrage() }}
+                  disabled={!anfrageText || !anfrageProdukt || inquirySubmitting}
                   className="gap-2"
                 >
                   <Send className="h-4 w-4" />
-                  Anfrage absenden
+                  {inquirySubmitting ? 'Sende...' : 'Anfrage absenden'}
                 </Button>
               </DialogFooter>
             </>
@@ -1156,10 +958,6 @@ function formatPrice(price: number): string {
   return price.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
-// Formatiert Preis mit Euro-Zeichen
-function formatEuro(price: number): string {
-  return `€ ${formatPrice(price)}`
-}
 
 // Kontrakt-Status Badge Konfiguration
 const contractStatusConfig: Record<ContractStatus, { label: string; color: string; icon: React.ReactNode }> = {
@@ -1195,7 +993,8 @@ function ProductCard({
     : null
 
   // Kontrakt-Logik
-  const hasContract = product.contractStatus && product.contractStatus !== 'NONE'
+  const contractStatusKey: ContractStatus = product.contractStatus ?? 'NONE'
+  const hasContract = contractStatusKey !== 'NONE'
   const contractRemaining = product.contractRemainingQty ?? 0
   const contractTotal = product.contractTotalQty ?? 0
   const contractPercent = contractTotal > 0 ? (contractRemaining / contractTotal) * 100 : 0
@@ -1206,14 +1005,6 @@ function ProductCard({
   const prePurchaseTotal = product.prePurchaseTotalQty ?? 0
   const prePurchasePercent = prePurchaseTotal > 0 ? (prePurchaseRemaining / prePurchaseTotal) * 100 : 0
   const prePurchaseLow = prePurchasePercent < 20
-
-  // Effektiver Preis für Bestellung
-  const effectivePrice = hasPrePurchase 
-    ? 0 // Vorkauf = bereits bezahlt
-    : hasContract && product.contractStatus !== 'EXHAUSTED'
-      ? product.contractPrice!
-      : product.rabattPreis || product.preis
-
   return (
     <TooltipProvider>
       <Card className={cn(
@@ -1245,7 +1036,7 @@ function ProductCard({
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Rest: {prePurchaseRemaining} {product.einheit} von {prePurchaseTotal} {product.einheit}</p>
-                    <p>Vorkaufpreis: € {formatPrice(product.prePurchasePrice!)} pro {product.einheit}</p>
+                    <p>Vorkaufpreis: € {formatPrice((product.prePurchasePrice ?? 0))} pro {product.einheit}</p>
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -1254,14 +1045,14 @@ function ProductCard({
               {!hasPrePurchase && hasContract && (
                 <Tooltip>
                   <TooltipTrigger>
-                    <Badge className={cn('text-xs gap-1 border', contractStatusConfig[product.contractStatus!].color)}>
-                      {contractStatusConfig[product.contractStatus!].icon}
-                      {contractStatusConfig[product.contractStatus!].label}
+                    <Badge className={cn('text-xs gap-1 border', contractStatusConfig[contractStatusKey].color)}>
+                      {contractStatusConfig[contractStatusKey].icon}
+                      {contractStatusConfig[contractStatusKey].label}
                     </Badge>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Restmenge: {contractRemaining} {product.einheit} von {contractTotal} {product.einheit}</p>
-                    <p>Vertragspreis: € {formatPrice(product.contractPrice!)} pro {product.einheit}</p>
+                    <p>Vertragspreis: € {formatPrice((product.contractPrice ?? product.preis))} pro {product.einheit}</p>
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -1286,7 +1077,7 @@ function ProductCard({
           <CardDescription className="text-xs">{product.artikelnummer}</CardDescription>
           {recentlyOrdered && daysSinceOrder !== null && (
             <p className="text-xs text-blue-600">
-              Zuletzt bestellt: vor {daysSinceOrder} Tag{daysSinceOrder !== 1 ? 'en' : ''} ({product.letzteBestellung!.menge} {product.einheit})
+              Zuletzt bestellt: vor {daysSinceOrder} Tag{daysSinceOrder !== 1 ? 'en' : ''} ({(product.letzteBestellung?.menge ?? 0)} {product.einheit})
             </p>
           )}
         </CardHeader>
@@ -1325,7 +1116,7 @@ function ProductCard({
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span className="text-xs text-muted-foreground">Vorkaufpreis (bereits bezahlt)</span>
-                  <span className="text-sm font-bold text-purple-700">€ {formatPrice(product.prePurchasePrice!)}</span>
+                  <span className="text-sm font-bold text-purple-700">€ {formatPrice((product.prePurchasePrice ?? 0))}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-xs text-muted-foreground">Listenpreis</span>
@@ -1359,7 +1150,7 @@ function ProductCard({
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span className="text-xs text-muted-foreground">Kontraktpreis</span>
-                  <span className="text-lg font-bold text-emerald-600">€ {formatPrice(product.contractPrice!)}</span>
+                  <span className="text-lg font-bold text-emerald-600">€ {formatPrice((product.contractPrice ?? product.preis))}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-xs text-muted-foreground">Listenpreis</span>

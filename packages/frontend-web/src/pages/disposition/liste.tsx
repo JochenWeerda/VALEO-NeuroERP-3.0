@@ -5,17 +5,32 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, BarChart3, CheckCircle } from 'lucide-react'
-
-const mockDispo: DispoPosition[] = [
-  { id: '1', artikel: 'Weizen Premium', bestand: 120, mindestbestand: 200, bedarf: 80, empfehlung: 'Nachbestellen: 100 t', prioritaet: 'hoch' },
-  { id: '2', artikel: 'Sojaschrot 44%', bestand: 180, mindestbestand: 150, bedarf: 0, empfehlung: 'Ausreichend', prioritaet: 'mittel' },
-  { id: '3', artikel: 'NPK-Duenger', bestand: 80, mindestbestand: 100, bedarf: 50, empfehlung: 'Nachbestellen: 50 t', prioritaet: 'mittel' },
-]
 
 export default function DispositionPage(): JSX.Element {
   const navigate = useNavigate()
-  const { data: dispo = mockDispo } = useDisposition()
+  const { data: dispo = [], isLoading } = useDisposition()
+
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32 mt-2" />
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+        </div>
+        <Card><CardContent className="pt-4"><Skeleton className="h-64 w-full" /></CardContent></Card>
+      </div>
+    )
+  }
 
   const unterMindest = dispo.filter((d) => d.bestand < d.mindestbestand).length
 

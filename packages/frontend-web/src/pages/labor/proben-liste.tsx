@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Beaker, FileDown, Plus, Search } from 'lucide-react'
-
-const mockProben: Probe[] = [
-  { id: '1', probennummer: 'LB-2025-001', typ: 'Qualitaetspruefung', artikel: 'Weizen Premium', datum: '2025-10-10', labor: 'Lufa Nord-West', status: 'abgeschlossen' },
-  { id: '2', probennummer: 'LB-2025-002', typ: 'Mykotoxin-Test', artikel: 'Mais', datum: '2025-10-11', labor: 'Agroisolab', status: 'in-bearbeitung' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function LaborProbenListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: proben = mockProben } = useLaborProben()
+  const { data: proben = [], isError, error, refetch } = useLaborProben()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     { key: 'probennummer' as const, label: 'Probennummer', render: (p: Probe) => <button onClick={() => navigate(`/labor/probe/${p.id}`)} className="font-medium text-blue-600 hover:underline font-mono">{p.probennummer}</button> },

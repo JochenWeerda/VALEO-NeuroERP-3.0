@@ -8,12 +8,13 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BackButton } from '@/components/BackButton'
 import { AlertTriangle, Euro, FileDown, Search } from 'lucide-react'
-import { useDebitorenMock, type DebitOPMock } from '@/lib/api/fibu'
+import { useDebitorenOP, type DebitOP } from '@/lib/api/fibu'
+import { ErrorState } from '@/components/ErrorState'
 
 export default function DebitorenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: items, isLoading } = useDebitorenMock()
+  const { data: items, isLoading, isError, error, refetch } = useDebitorenOP()
 
   if (isLoading) return (
     <div className="p-3 md:p-6 space-y-4">
@@ -22,25 +23,29 @@ export default function DebitorenPage(): JSX.Element {
     </div>
   )
 
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
   const list = items ?? []
 
   const columns = [
     {
       key: 'rechnungsnr' as const,
       label: 'Rechnung',
-      render: (op: DebitOPMock) => (
+      render: (op: DebitOP) => (
         <button onClick={() => navigate(`/sales/invoice/${op.id}`)} className="font-medium text-blue-600 hover:underline font-mono">
           {op.rechnungsnr}
         </button>
       ),
     },
     { key: 'kunde' as const, label: 'Kunde' },
-    { key: 'kundennr' as const, label: 'Kd-Nr', render: (op: DebitOPMock) => <span className="font-mono text-sm">{op.kundennr}</span> },
-    { key: 'datum' as const, label: 'Re-Datum', render: (op: DebitOPMock) => new Date(op.datum).toLocaleDateString('de-DE') },
+    { key: 'kundennr' as const, label: 'Kd-Nr', render: (op: DebitOP) => <span className="font-mono text-sm">{op.kundennr}</span> },
+    { key: 'datum' as const, label: 'Re-Datum', render: (op: DebitOP) => new Date(op.datum).toLocaleDateString('de-DE') },
     {
       key: 'faelligkeit' as const,
       label: 'Fälligkeit',
-      render: (op: DebitOPMock) => {
+      render: (op: DebitOP) => {
         const faellig = new Date(op.faelligkeit)
         const ueberfaellig = faellig < new Date()
         return (
@@ -53,12 +58,12 @@ export default function DebitorenPage(): JSX.Element {
     {
       key: 'betrag' as const,
       label: 'Betrag',
-      render: (op: DebitOPMock) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(op.betrag),
+      render: (op: DebitOP) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(op.betrag),
     },
     {
       key: 'offen' as const,
       label: 'Offen',
-      render: (op: DebitOPMock) => (
+      render: (op: DebitOP) => (
         <span className="font-bold">
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(op.offen)}
         </span>
@@ -67,7 +72,7 @@ export default function DebitorenPage(): JSX.Element {
     {
       key: 'mahnStufe' as const,
       label: 'Status',
-      render: (op: DebitOPMock) => {
+      render: (op: DebitOP) => {
         if (op.mahnStufe > 0) {
           return <Badge variant="destructive">Mahnstufe {op.mahnStufe}</Badge>
         }

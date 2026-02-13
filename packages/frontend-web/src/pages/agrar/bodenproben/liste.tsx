@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBodenproben, type Bodenprobe } from '@/lib/api/agrar'
 import { Badge } from '@/components/ui/badge'
@@ -6,17 +6,29 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
 import { Beaker, FileDown, Plus, Search } from 'lucide-react'
-
-const mockProben: Bodenprobe[] = [
-  { id: '1', schlag: 'Nordfeld 1', datum: '2025-09-15', labor: 'Labor Nord', n: 12.5, p: 18.2, k: 25.8, ph: 6.8, status: 'analysiert' },
-  { id: '2', schlag: 'SÃ¼dacker', datum: '2025-10-05', labor: 'Labor SÃ¼d', n: 0, p: 0, k: 0, ph: 0, status: 'beauftragt' },
-]
 
 export default function BodenprobenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: proben = mockProben } = useBodenproben()
+  const { data, isLoading, isError, error, refetch } = useBodenproben()
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const proben: Bodenprobe[] = data ?? []
 
   const columns = [
     {
@@ -54,7 +66,7 @@ export default function BodenprobenPage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Bodenproben</h1>
-          <p className="text-muted-foreground">NÃ¤hrstoff-Analysen</p>
+          <p className="text-muted-foreground">Naehrstoff-Analysen</p>
         </div>
         <Button onClick={() => navigate('/agrar/bodenprobe/neu')} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -120,6 +132,3 @@ export default function BodenprobenPage(): JSX.Element {
     </div>
   )
 }
-
-
-

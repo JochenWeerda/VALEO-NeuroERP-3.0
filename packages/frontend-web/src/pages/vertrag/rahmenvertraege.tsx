@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { AlertTriangle, FileDown, FileText, Plus, Search } from 'lucide-react'
-
-const mockVertraege: Vertrag[] = [
-  { id: '1', nummer: 'RV-2025-001', partner: 'Landhandel Nord', typ: 'Verkauf', artikel: 'Weizen', menge: 500, restmenge: 120, laufzeitBis: '2026-06-30', status: 'aktiv' },
-  { id: '2', nummer: 'RV-2025-002', partner: 'Mueller Agrar', typ: 'Verkauf', artikel: 'Raps', menge: 300, restmenge: 45, laufzeitBis: '2025-12-31', status: 'auslaufend' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function RahmenvertraegePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: vertraege = mockVertraege } = useRahmenvertraege()
+  const { data: vertraege = [], isError, error, refetch } = useRahmenvertraege()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const auslaufend = vertraege.filter((v) => v.status === 'auslaufend').length
 

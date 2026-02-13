@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Beaker, FileDown, Plus, Search } from 'lucide-react'
-
-const mockAuftraege: LaborAuftrag[] = [
-  { id: 'LA-001', chargenId: '251011-WEI-001', labor: 'Labor Nord', analysen: 4, auftragsdatum: '2025-10-11', status: 'in-bearbeitung' },
-  { id: 'LA-002', chargenId: '251010-RAP-002', labor: 'Labor Sued', analysen: 6, auftragsdatum: '2025-10-10', status: 'abgeschlossen' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function LaborListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: auftraege = mockAuftraege } = useLaborAuftraege()
+  const { data: auftraege = [], isError, error, refetch } = useLaborAuftraege()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     { key: 'id' as const, label: 'Auftrag', render: (l: LaborAuftrag) => <button onClick={() => navigate(`/qualitaet/labor/${l.id}`)} className="font-medium text-blue-600 hover:underline">{l.id}</button> },

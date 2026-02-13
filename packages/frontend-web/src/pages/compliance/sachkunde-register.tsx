@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { AlertTriangle, Award, FileDown, Plus, Search } from 'lucide-react'
-
-const mockSachkunde: Sachkundenachweis[] = [
-  { id: '1', kunde: 'Landwirtschaft Mueller', kundennr: 'K-10023', nachweisNr: 'SK-NDS-2022-4567', ausstellungsdatum: '2022-03-15', gueltigBis: '2025-03-15', ausstellendeStelle: 'LWK Niedersachsen', status: 'ablaufend' },
-  { id: '2', kunde: 'Hofgut Weber', kundennr: 'K-10045', nachweisNr: 'SK-NDS-2023-8901', ausstellungsdatum: '2023-06-20', gueltigBis: '2026-06-20', ausstellendeStelle: 'LWK Niedersachsen', status: 'gueltig' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function SachkundeRegisterPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: sachkunde = mockSachkunde } = useSachkundeRegister()
+  const { data: sachkunde = [], isError, error, refetch } = useSachkundeRegister()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const ablaufend = sachkunde.filter((s) => {
     const ablauf = new Date(s.gueltigBis)

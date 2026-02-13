@@ -88,12 +88,26 @@ def list_from_store(
             "purchase_request": ["PR-"],
             "purchase_offer": ["POF-"],
             "purchase_order": ["PO-", "EK-"],
+            "credit_memo": ["CM-"],
+            "debit_memo": ["DM-"],
+            "service_entry_sheet": ["SES-"],
+            "edi_message": ["EDI-"],
+            "supplier_rating": ["SUPR-"],
         }
         
         prefixes = type_prefixes.get(doc_type, [])
         if any(key.startswith(prefix) for prefix in prefixes):
-            if not filters or all(value.get(k) == v for k, v in filters.items()):
+            if not filters:
                 filtered_docs.append(value)
+            else:
+                def _match(item_key: str, item_value: object) -> bool:
+                    if item_key == "tenantId":
+                        # Backward compatibility for legacy docs without tenant
+                        return value.get(item_key) in {item_value, None, ""}
+                    return value.get(item_key) == item_value
+
+                if all(_match(k, v) for k, v in filters.items()):
+                    filtered_docs.append(value)
     
     total = len(filtered_docs)
     paginated_docs = filtered_docs[skip:skip + limit]

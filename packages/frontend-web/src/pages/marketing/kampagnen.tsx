@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, Megaphone, Plus, Search } from 'lucide-react'
-
-const mockKampagnen: Kampagne[] = [
-  { id: '1', name: 'Herbst-Aktion Weizen', typ: 'E-Mail', zielgruppe: 'Landwirte', startdatum: '2025-10-01', enddatum: '2025-10-31', budget: 2500, status: 'aktiv' },
-  { id: '2', name: 'Saatgut-Fruehjahr 2026', typ: 'Print', zielgruppe: 'Alle Kunden', startdatum: '2025-11-01', enddatum: '2025-12-31', budget: 5000, status: 'geplant' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function KampagnenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: kampagnen = mockKampagnen } = useMarketingKampagnen()
+  const { data: kampagnen = [], isError, error, refetch } = useMarketingKampagnen()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const filteredData = useMemo(
     () => kampagnen.filter((k) =>

@@ -1,12 +1,11 @@
-/**
+﻿/**
  * Inventory API Hooks
- * TanStack Query hooks for Warehouse and Stock management
+ * Error-first fetching without mock fallback data.
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../api-client'
 
-// Types
 export type Warehouse = {
   id: string
   code: string
@@ -20,7 +19,6 @@ export type Warehouse = {
 }
 
 export type WarehouseCreate = Omit<Warehouse, 'id' | 'created_at' | 'updated_at' | 'tenant_id'>
-
 export type WarehouseUpdate = Partial<WarehouseCreate>
 
 type PaginatedResponse<T> = {
@@ -46,7 +44,6 @@ export type LotTrace = {
   }>
 }
 
-// Query Keys
 export const inventoryKeys = {
   all: ['inventory'] as const,
   warehouses: () => [...inventoryKeys.all, 'warehouses'] as const,
@@ -54,18 +51,13 @@ export const inventoryKeys = {
   lotTrace: (id?: string) => [...inventoryKeys.all, 'lot-trace', id] as const,
 }
 
-// Warehouse Hooks
 export function useWarehouses(filters?: { is_active?: boolean }) {
   return useQuery({
     queryKey: [...inventoryKeys.warehouses(), filters],
     queryFn: async () => {
       const params = new URLSearchParams()
       if (filters?.is_active !== undefined) params.append('is_active', String(filters.is_active))
-      
-      const response = await apiClient.get<PaginatedResponse<Warehouse>>(
-        `/api/v1/inventory/warehouses?${String(params)}`
-      )
-      return response.data
+      return (await apiClient.get<PaginatedResponse<Warehouse>>(`/api/v1/inventory/warehouses?${String(params)}`)).data
     },
   })
 }
@@ -73,36 +65,23 @@ export function useWarehouses(filters?: { is_active?: boolean }) {
 export function useWarehouse(id: string) {
   return useQuery({
     queryKey: inventoryKeys.warehouse(id),
-    queryFn: async () => {
-      const response = await apiClient.get<Warehouse>(`/api/v1/inventory/warehouses/${id}`)
-      return response.data
-    },
+    queryFn: async () => (await apiClient.get<Warehouse>(`/api/v1/inventory/warehouses/${id}`)).data,
     enabled: !!id,
   })
 }
 
 export function useCreateWarehouse() {
   const queryClient = useQueryClient()
-  
   return useMutation({
-    mutationFn: async (data: WarehouseCreate) => {
-      const response = await apiClient.post<Warehouse>('/api/v1/inventory/warehouses', data)
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.warehouses() })
-    },
+    mutationFn: async (data: WarehouseCreate) => (await apiClient.post<Warehouse>('/api/v1/inventory/warehouses', data)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: inventoryKeys.warehouses() }),
   })
 }
 
 export function useUpdateWarehouse() {
   const queryClient = useQueryClient()
-  
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: WarehouseUpdate }) => {
-      const response = await apiClient.put<Warehouse>(`/api/v1/inventory/warehouses/${id}`, data)
-      return response.data
-    },
+    mutationFn: async ({ id, data }: { id: string; data: WarehouseUpdate }) => (await apiClient.put<Warehouse>(`/api/v1/inventory/warehouses/${id}`, data)).data,
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.warehouse(variables.id) })
       queryClient.invalidateQueries({ queryKey: inventoryKeys.warehouses() })
@@ -112,30 +91,22 @@ export function useUpdateWarehouse() {
 
 export function useDeleteWarehouse() {
   const queryClient = useQueryClient()
-  
   return useMutation({
     mutationFn: async (id: string) => {
       await apiClient.delete(`/api/v1/inventory/warehouses/${id}`)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.warehouses() })
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: inventoryKeys.warehouses() }),
   })
 }
 
 export function useLotTrace(lotId?: string) {
   return useQuery({
     queryKey: inventoryKeys.lotTrace(lotId),
-    queryFn: async () => {
-      const response = await apiClient.get<LotTrace>(`/api/v1/inventory/lots/${lotId}`)
-      return response.data
-    },
+    queryFn: async () => (await apiClient.get<LotTrace>(`/api/v1/inventory/lots/${lotId}`)).data,
     enabled: Boolean(lotId),
     staleTime: 30_000,
   })
 }
-
-// ── Inventur Types & Hooks ─────────────────────────────────────────────
 
 export type InventurPosition = {
   id: string
@@ -170,7 +141,6 @@ export type LKWEintrag = {
   status: 'wartend' | 'in-bearbeitung' | 'abgeschlossen'
 }
 
-// Extended Query Keys
 export const inventoryExtraKeys = {
   inventur: () => [...inventoryKeys.all, 'inventur'] as const,
   mhd: () => [...inventoryKeys.all, 'mhd'] as const,
@@ -179,55 +149,15 @@ export const inventoryExtraKeys = {
   warteschlange: () => [...inventoryKeys.all, 'warteschlange'] as const,
 }
 
-// Fallback data
-const fallbackInventur: InventurPosition[] = [
-  { id: '1', artikel: 'Weizen Premium', lagerort: 'Silo 1', sollBestand: 450, istBestand: 0, differenz: 0, status: 'offen' },
-  { id: '2', artikel: 'Sojaschrot 44%', lagerort: 'Halle A', sollBestand: 280, istBestand: 278, differenz: -2, status: 'gezaehlt' },
-  { id: '3', artikel: 'NPK 15-15-15', lagerort: 'Halle B', sollBestand: 120, istBestand: 125, differenz: 5, status: 'gezaehlt' },
-  { id: '4', artikel: 'Diesel Winterqualität', lagerort: 'Tank 1', sollBestand: 5000, istBestand: 0, differenz: 0, status: 'offen' },
-]
-
-const fallbackMhd: MhdItem[] = [
-  { name: 'Pflanzenschutzmittel X', expiryDate: '2026-04-15', quantity: 50 },
-  { name: 'Saatgutbeize Premium', expiryDate: '2026-05-01', quantity: 25 },
-  { name: 'Herbizid Konzentrat', expiryDate: '2026-05-28', quantity: 100 },
-]
-
-const fallbackRenner: RennerPennerItem[] = [
-  { name: 'Weizen Saatgut Premium', absatz: 450, trend: '+15%' },
-  { name: 'Dünger NPK 15-15-15', absatz: 380, trend: '+8%' },
-  { name: 'Diesel Winterqualität', absatz: 320, trend: '+5%' },
-]
-
-const fallbackPenner: RennerPennerItem[] = [
-  { name: 'Ersatzteile Typ B-alt', absatz: 2, trend: '-45%' },
-  { name: 'Altbestand Saatgut 2022', absatz: 5, trend: '-30%' },
-  { name: 'Spezialdünger Nische', absatz: 8, trend: '-20%' },
-]
-
-const fallbackWarteschlange: LKWEintrag[] = [
-  { id: '1', position: 1, kennzeichen: 'AB-CD 1234', lieferant: 'Landwirt Schmidt', artikel: 'Weizen', ankunft: '08:30', wartezeit: 15, status: 'in-bearbeitung' },
-  { id: '2', position: 2, kennzeichen: 'EF-GH 5678', lieferant: 'Müller Agrar', artikel: 'Raps', ankunft: '08:45', wartezeit: 30, status: 'wartend' },
-]
-
 export function useInventur(filters?: { search?: string }) {
   return useQuery({
     queryKey: [...inventoryExtraKeys.inventur(), filters],
     queryFn: async () => {
-      try {
-        const response = await apiClient.get<{ items: InventurPosition[]; total: number }>(
-          '/api/v1/inventory/inventur'
-        )
-        if (response.data?.items?.length) return response.data
-      } catch { /* fallback */ }
-      let items = [...fallbackInventur]
-      if (filters?.search) {
-        const s = filters.search.toLowerCase()
-        items = items.filter(p =>
-          p.artikel.toLowerCase().includes(s) ||
-          p.lagerort.toLowerCase().includes(s)
-        )
-      }
+      const response = await apiClient.get<{ items: InventurPosition[]; total: number }>('/api/v1/inventory/inventur')
+      const payload = response.data
+      if (!filters?.search) return payload
+      const s = filters.search.toLowerCase()
+      const items = payload.items.filter((p) => p.artikel.toLowerCase().includes(s) || p.lagerort.toLowerCase().includes(s))
       return { items, total: items.length }
     },
     staleTime: 30 * 1000,
@@ -240,22 +170,14 @@ export function useCompleteInventurPositions() {
     mutationFn: async (ids: string[]) => {
       await apiClient.post('/api/v1/inventory/inventur/complete', { ids })
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inventoryExtraKeys.inventur() })
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: inventoryExtraKeys.inventur() }),
   })
 }
 
 export function useMhdItems() {
   return useQuery({
     queryKey: inventoryExtraKeys.mhd(),
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<{ items: MhdItem[] }>('/api/v1/inventory/mhd-warnings')
-        if (response.data?.items?.length) return response.data.items
-      } catch { /* fallback */ }
-      return fallbackMhd
-    },
+    queryFn: async () => (await apiClient.get<{ items: MhdItem[] }>('/api/v1/inventory/mhd-warnings')).data.items,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -263,13 +185,7 @@ export function useMhdItems() {
 export function useRennerItems() {
   return useQuery({
     queryKey: inventoryExtraKeys.renner(),
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<{ items: RennerPennerItem[] }>('/api/v1/inventory/top-sellers')
-        if (response.data?.items?.length) return response.data.items
-      } catch { /* fallback */ }
-      return fallbackRenner
-    },
+    queryFn: async () => (await apiClient.get<{ items: RennerPennerItem[] }>('/api/v1/inventory/top-sellers')).data.items,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -277,13 +193,7 @@ export function useRennerItems() {
 export function usePennerItems() {
   return useQuery({
     queryKey: inventoryExtraKeys.penner(),
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<{ items: RennerPennerItem[] }>('/api/v1/inventory/slow-movers')
-        if (response.data?.items?.length) return response.data.items
-      } catch { /* fallback */ }
-      return fallbackPenner
-    },
+    queryFn: async () => (await apiClient.get<{ items: RennerPennerItem[] }>('/api/v1/inventory/slow-movers')).data.items,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -291,15 +201,8 @@ export function usePennerItems() {
 export function useWarteschlange() {
   return useQuery({
     queryKey: inventoryExtraKeys.warteschlange(),
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<{ items: LKWEintrag[] }>('/api/v1/annahme/warteschlange')
-        if (response.data?.items?.length) return response.data
-      } catch { /* fallback */ }
-      return { items: fallbackWarteschlange, total: fallbackWarteschlange.length }
-    },
+    queryFn: async () => (await apiClient.get<{ items: LKWEintrag[]; total: number }>('/api/v1/annahme/warteschlange')).data,
     staleTime: 15 * 1000,
     refetchInterval: 30 * 1000,
   })
 }
-

@@ -9,28 +9,26 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
+import { ErrorState } from '@/components/ErrorState'
 
 type WorkflowRule = ApiWorkflowRule & { condition?: string }
-
-const mockRules: WorkflowRule[] = [
-  { id: '1', triggerEntity: 'Anfrage', triggerAction: 'FREIGEGEBEN', targetEntity: 'Anfrage', targetAction: 'ANGEBOTSPHASE', active: true },
-  { id: '2', triggerEntity: 'Angebot', triggerAction: 'GENEHMIGT', targetEntity: 'Bestellung', targetAction: 'CREATE_FROM_ANGEBOT', active: true },
-]
 
 const entityOptions = ['Anfrage', 'Angebot', 'Bestellung', 'Auftragsbestaetigung', 'Anlieferavis', 'Wareneingang', 'Rechnungseingang']
 const actionOptions = ['ERFASST', 'FREIGEGEBEN', 'GEPRUEFT', 'GENEHMIGT', 'BESTAETIGT', 'GEBUCHT', 'VOLLGELIEFERT', 'ABGELEHNT']
 
 export default function WorkflowRegelnPage(): JSX.Element {
-  const { data: apiRules = mockRules } = useWorkflowRules()
-  const [rules, setRules] = useState<WorkflowRule[]>(mockRules)
+  const { data: apiRules = [], isError, error, refetch } = useWorkflowRules()
+  const [rules, setRules] = useState<WorkflowRule[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingRule, setEditingRule] = useState<WorkflowRule | null>(null)
 
   useEffect(() => {
-    if (rules.length === 0 || rules === mockRules) {
-      setRules(apiRules.map((r) => ({ ...r })))
-    }
+    setRules(apiRules.map((r) => ({ ...r })))
   }, [apiRules])
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     { key: 'triggerEntity' as const, label: 'Ausloeser-Entitaet', render: (rule: WorkflowRule) => <Badge variant="outline">{rule.triggerEntity}</Badge> },

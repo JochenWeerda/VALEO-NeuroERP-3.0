@@ -107,46 +107,8 @@ export default function AngebotErstellenPage(): JSX.Element {
       
       setEmpfehlungen(empfehlungen)
     } catch (error) {
-      // Falls API nicht verfügbar, versuche alternative Endpunkte oder verwende Mock-Daten
-      console.warn('Empfehlungs-API nicht verfügbar, verwende Fallback:', error)
-      
-      try {
-        // Alternative: Suche nach ähnlichen Artikeln in derselben Kategorie
-        const erstePosition = angebot.positionen.find((pos) => pos.artikelId)
-        if (erstePosition?.artikelDetails?.kategorie) {
-          const kategorieResponse = await apiClient.get<{ items: any[] }>('/api/v1/articles', {
-            params: {
-              category: erstePosition.artikelDetails.kategorie,
-              limit: 6,
-              exclude: artikelIds.join(','),
-            },
-          })
-          
-          const kategorieEmpfehlungen: Artikel[] = kategorieResponse.data.items
-            .filter((item: any) => !artikelIds.includes(item.id))
-            .slice(0, 6)
-            .map((item: any) => ({
-              id: item.id,
-              artikelnr: item.article_number || '',
-              artikelgruppe: item.article_number?.substring(0, 3) || '',
-              bezeichnung: item.name || '',
-              einheit: item.unit || 't',
-              preis: typeof item.sales_price === 'string' ? Number(item.sales_price) : item.sales_price || 0,
-              eigenschaften: item.properties || [],
-              deklarationen: item.declarations || [],
-              gefahrenpunkte: item.hazards || [],
-              hinweise: item.notes || '',
-              kategorie: item.category || '',
-            }))
-          
-          setEmpfehlungen(kategorieEmpfehlungen)
-        } else {
-          setEmpfehlungen([])
-        }
-      } catch (fallbackError) {
-        console.warn('Fallback-Empfehlungen nicht verfügbar:', fallbackError)
-        setEmpfehlungen([])
-      }
+      console.warn('Empfehlungen konnten nicht geladen werden:', error)
+      setEmpfehlungen([])
     }
   }
 
@@ -691,3 +653,5 @@ export default function AngebotErstellenPage(): JSX.Element {
     </div>
   )
 }
+
+

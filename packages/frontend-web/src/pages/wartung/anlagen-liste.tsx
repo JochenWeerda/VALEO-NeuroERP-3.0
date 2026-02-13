@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { AlertTriangle, FileDown, Plus, Search, Settings } from 'lucide-react'
-
-const mockAnlagen: WartungAnlage[] = [
-  { id: '1', name: 'Silo 1', typ: 'Lagersilo', standort: 'Hauptstandort', letzteWartung: '2025-09-01', naechsteWartung: '2025-12-01', status: 'aktiv' },
-  { id: '2', name: 'Foerderband A', typ: 'Foerderanlage', standort: 'Annahme', letzteWartung: '2025-08-15', naechsteWartung: '2025-10-15', status: 'wartung' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function AnlagenListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: anlagen = mockAnlagen } = useWartungAnlagen()
+  const { data: anlagen = [], isError, error, refetch } = useWartungAnlagen()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const wartungFaellig = anlagen.filter((a) => new Date(a.naechsteWartung) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)).length
 

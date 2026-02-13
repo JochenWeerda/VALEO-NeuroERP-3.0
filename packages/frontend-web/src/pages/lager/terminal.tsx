@@ -1,11 +1,5 @@
 /**
  * Warehouse Terminal
- *
- * Hauptseite für Lager-Terminals mit:
- * - Scan-First Interface
- * - High-Contrast Theme
- * - Touch-Optimierung (60px min)
- * - One-Hand Bedienung
  */
 
 import { useState, useCallback } from 'react'
@@ -17,11 +11,10 @@ import {
   QuickActionGrid,
   warehouseActions,
 } from '@/components/warehouse'
-import { useBarcodeScan } from '@/hooks/useBarcodeScan'
 import { useToast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/api-client'
 
-// Mock-Artikel-Daten (später durch API ersetzen)
-const mockArticles: Record<string, {
+type TerminalArticle = {
   id: string
   artikelNr: string
   bezeichnung: string
@@ -32,41 +25,21 @@ const mockArticles: Record<string, {
   charge?: string
   mhd?: string
   status: 'verfuegbar' | 'gesperrt' | 'reserviert'
-}> = {
-  '4006381333931': {
-    id: '1',
-    artikelNr: 'ART-001',
-    bezeichnung: 'Weizen Saatgut Premium Elite',
-    einheit: 'kg',
-    bestand: 2500,
-    lagerort: 'L-A01',
-    lagerplatz: 'Regal 3, Fach 2',
-    charge: 'CH-2024-001',
-    mhd: '15.06.2025',
-    status: 'verfuegbar',
-  },
-  '4006381333948': {
-    id: '2',
-    artikelNr: 'ART-002',
-    bezeichnung: 'NPK Dünger 15-15-15 BigBag',
-    einheit: 't',
-    bestand: 45,
-    lagerort: 'L-B03',
-    lagerplatz: 'Außenlager West',
-    status: 'verfuegbar',
-  },
-  '4006381333955': {
-    id: '3',
-    artikelNr: 'ART-003',
-    bezeichnung: 'Pflanzenschutzmittel XP-200',
-    einheit: 'l',
-    bestand: 120,
-    lagerort: 'L-PSM',
-    lagerplatz: 'PSM-Lager, Fach 5',
-    charge: 'CH-2024-089',
-    mhd: '28.02.2025',
-    status: 'reserviert',
-  },
+}
+
+function mapArticle(row: Record<string, unknown>): TerminalArticle {
+  return {
+    id: String(row.id ?? ''),
+    artikelNr: String(row.article_number ?? row.sku ?? ''),
+    bezeichnung: String(row.name ?? row.description ?? 'Unbekannt'),
+    einheit: String(row.unit ?? 'Stk'),
+    bestand: Number(row.stock_quantity ?? row.quantity ?? 0),
+    lagerort: String(row.warehouse_code ?? row.warehouse ?? '-'),
+    lagerplatz: String(row.storage_location ?? '-'),
+    charge: row.lot_number ? String(row.lot_number) : undefined,
+    mhd: row.expiry_date ? String(row.expiry_date) : undefined,
+    status: (row.is_blocked ? 'gesperrt' : 'verfuegbar') as 'verfuegbar' | 'gesperrt' | 'reserviert',
+  }
 }
 
 export default function WarehouseTerminalPage(): JSX.Element {
@@ -74,86 +47,87 @@ export default function WarehouseTerminalPage(): JSX.Element {
   const { toast } = useToast()
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null)
   const [scannedFormat, setScannedFormat] = useState<string>('')
-  const [article, setArticle] = useState<typeof mockArticles[string] | null>(null)
+  const [article, setArticle] = useState<TerminalArticle | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [recentScans, setRecentScans] = useState<Array<{ barcode: string; name: string; time: string }>>([])
 
-  // Artikel suchen
   const searchArticle = useCallback(async (barcode: string) => {
     setLoading(true)
     setError(null)
     setArticle(null)
 
-    // Simuliere API-Aufruf
-    await new Promise(resolve => setTimeout(resolve, 500))
+    try {
+      const res = await apiClient.get<{ items?: Record<string, unknown>[] }>('/api/v1/articles', {
+        params: { search: barcode },
+      })
+      const row = res.data?.items?.[0]
+      if (!row) {
+        setError('Artikel nicht im Bestand gefunden')
+        playBeep('error')
+        return
+      }
 
-    const found = mockArticles[barcode]
-    if (found) {
-      setArticle(found)
-      // Akustisches Feedback
+      const mapped = mapArticle(row)
+      setArticle(mapped)
+      setRecentScans((prev) => [{ barcode, name: mapped.bezeichnung, time: 'gerade eben' }, ...prev].slice(0, 8))
       playBeep('success')
-    } else {
-      setError('Artikel nicht im Bestand gefunden')
+    } catch {
+      setError('Artikel konnte nicht geladen werden')
       playBeep('error')
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }, [])
 
-  // Scan-Handler
-  const handleScan = useCallback((barcode: string, format: string) => {
-    setScannedBarcode(barcode)
-    setScannedFormat(format)
-    searchArticle(barcode)
-  }, [searchArticle])
+  const handleScan = useCallback(
+    (barcode: string, format: string) => {
+      setScannedBarcode(barcode)
+      setScannedFormat(format)
+      void searchArticle(barcode)
+    },
+    [searchArticle],
+  )
 
-  // Fehler-Handler
-  const handleScanError = useCallback((errorMsg: string) => {
-    toast({
-      variant: 'destructive',
-      title: 'Scan-Fehler',
-      description: errorMsg,
-    })
-    playBeep('error')
-  }, [toast])
+  const handleScanError = useCallback(
+    (errorMsg: string) => {
+      toast({
+        variant: 'destructive',
+        title: 'Scan-Fehler',
+        description: errorMsg,
+      })
+      playBeep('error')
+    },
+    [toast],
+  )
 
-  // Artikel-Aktion
-  const handleArticleAction = useCallback((action: 'eingang' | 'ausgang' | 'umlagerung' | 'details') => {
-    if (!article) return
+  const handleArticleAction = useCallback(
+    (action: 'eingang' | 'ausgang' | 'umlagerung' | 'details') => {
+      if (!article) return
 
-    switch (action) {
-      case 'eingang':
-        navigate(`/lager/einlagerung?artikel=${article.artikelNr}`)
-        break
-      case 'ausgang':
-        navigate(`/lager/auslagerung?artikel=${article.artikelNr}`)
-        break
-      case 'umlagerung':
-        navigate(`/lager/umlagerung?artikel=${article.artikelNr}`)
-        break
-      case 'details':
-        navigate(`/artikel/${article.id}`)
-        break
-    }
-  }, [article, navigate])
+      switch (action) {
+        case 'eingang':
+          navigate(`/lager/einlagerung?artikel=${article.artikelNr}`)
+          break
+        case 'ausgang':
+          navigate(`/lager/auslagerung?artikel=${article.artikelNr}`)
+          break
+        case 'umlagerung':
+          navigate(`/lager/umlagerung?artikel=${article.artikelNr}`)
+          break
+        case 'details':
+          navigate(`/artikel/${article.id}`)
+          break
+      }
+    },
+    [article, navigate],
+  )
 
   return (
-    <WarehouseLayout
-      title="Lager-Terminal"
-      subtitle="Scan & Go"
-      showScanner
-      onScan={handleScan}
-    >
+    <WarehouseLayout title="Lager-Terminal" subtitle="Scan & Go" showScanner onScan={handleScan}>
       <div className="space-y-4 max-w-3xl mx-auto">
-        {/* Scanner Input */}
-        <ScannerInput
-          onScan={handleScan}
-          onError={handleScanError}
-          placeholder="Barcode scannen..."
-          autoFocus
-        />
+        <ScannerInput onScan={handleScan} onError={handleScanError} placeholder="Barcode scannen..." autoFocus />
 
-        {/* Scan-Ergebnis */}
         {scannedBarcode && (
           <ScanResult
             barcode={scannedBarcode}
@@ -165,7 +139,6 @@ export default function WarehouseTerminalPage(): JSX.Element {
           />
         )}
 
-        {/* Quick Actions wenn kein Scan aktiv */}
         {!scannedBarcode && (
           <>
             <div className="pt-4">
@@ -173,12 +146,10 @@ export default function WarehouseTerminalPage(): JSX.Element {
               <QuickActionGrid actions={warehouseActions} columns={2} />
             </div>
 
-            {/* Letzte Scans */}
-            <RecentScans onSelect={(barcode) => handleScan(barcode, 'HISTORY')} />
+            <RecentScans scans={recentScans} onSelect={(barcode) => handleScan(barcode, 'HISTORY')} />
           </>
         )}
 
-        {/* Reset Button nach Scan */}
         {scannedBarcode && (
           <button
             onClick={() => {
@@ -196,26 +167,22 @@ export default function WarehouseTerminalPage(): JSX.Element {
   )
 }
 
-/**
- * Letzte Scans Komponente
- */
-function RecentScans({ onSelect }: { onSelect: (barcode: string) => void }) {
-  // Mock-Daten für letzte Scans
-  const recentScans = [
-    { barcode: '4006381333931', name: 'Weizen Saatgut Premium', time: 'vor 5 Min.' },
-    { barcode: '4006381333948', name: 'NPK Dünger 15-15-15', time: 'vor 12 Min.' },
-    { barcode: '4006381333955', name: 'PSM XP-200', time: 'vor 28 Min.' },
-  ]
-
-  if (recentScans.length === 0) return null
+function RecentScans({
+  scans,
+  onSelect,
+}: {
+  scans: Array<{ barcode: string; name: string; time: string }>
+  onSelect: (barcode: string) => void
+}) {
+  if (scans.length === 0) return null
 
   return (
     <div className="pt-4">
       <h2 className="text-xl font-bold mb-3">Letzte Scans</h2>
       <div className="space-y-2">
-        {recentScans.map((scan) => (
+        {scans.map((scan) => (
           <button
-            key={scan.barcode}
+            key={`${scan.barcode}-${scan.time}`}
             onClick={() => onSelect(scan.barcode)}
             className="w-full flex items-center justify-between p-4 rounded-xl bg-card border border-border active:bg-muted text-left"
           >
@@ -231,12 +198,11 @@ function RecentScans({ onSelect }: { onSelect: (barcode: string) => void }) {
   )
 }
 
-/**
- * Akustisches Feedback abspielen
- */
 function playBeep(type: 'success' | 'error') {
   try {
-    const AudioContext = window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext
+    const AudioContext =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext
     if (!AudioContext) return
 
     const ctx = new AudioContext()
@@ -258,6 +224,6 @@ function playBeep(type: 'success' | 'error') {
     oscillator.start()
     oscillator.stop(ctx.currentTime + 0.1)
   } catch {
-    // Audio nicht verfügbar
+    // Audio nicht verfuegbar
   }
 }

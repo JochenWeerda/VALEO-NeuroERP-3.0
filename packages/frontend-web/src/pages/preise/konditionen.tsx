@@ -1,11 +1,14 @@
-import { useState } from 'react'
+﻿import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Save } from 'lucide-react'
+import { ErrorState } from '@/components/ErrorState'
 
 type KonditionData = {
   id: string
@@ -20,22 +23,35 @@ type KonditionData = {
 }
 
 export default function KonditionenPage(): JSX.Element {
-  const [kondition, _setKondition] = useState<KonditionData>({
-    id: 'K-001',
-    kunde: 'Landhandel Nord GmbH',
-    artikel: 'Weizen Premium',
-    basispreis: 220.0,
-    rabatt: 5.0,
-    skonto: 2.0,
-    gueltigAb: '2025-01-01',
-    gueltigBis: '2025-12-31',
-    status: 'aktiv',
+  const { data: kondition, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['preise', 'konditionen'],
+    queryFn: async () => {
+      const r = await apiClient.get<KonditionData>('/api/v1/preise/konditionen')
+      return r.data
+    },
+    staleTime: 5 * 60 * 1000,
   })
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <Skeleton className="h-80" />
+      </div>
+    )
+  }
+
+  if (isError || !kondition) {
+    return <ErrorState error={(error as Error) ?? new Error('Konditionen konnten nicht geladen werden')} onRetry={() => { void refetch() }} />
+  }
 
   const nettopreis = kondition.basispreis * (1 - kondition.rabatt / 100)
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Preiskonditionen</h1>
@@ -62,7 +78,7 @@ export default function KonditionenPage(): JSX.Element {
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <Label>Basispreis (€/t)</Label>
+                  <Label>Basispreis (EUR/t)</Label>
                   <Input type="number" value={kondition.basispreis} step="0.01" />
                 </div>
                 <div>
@@ -102,11 +118,11 @@ export default function KonditionenPage(): JSX.Element {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <Label>Gültig ab</Label>
+                  <Label>Gueltig ab</Label>
                   <Input type="date" value={kondition.gueltigAb} />
                 </div>
                 <div>
-                  <Label>Gültig bis</Label>
+                  <Label>Gueltig bis</Label>
                   <Input type="date" value={kondition.gueltigBis} />
                 </div>
               </div>
@@ -125,7 +141,7 @@ export default function KonditionenPage(): JSX.Element {
         <TabsContent value="historie">
           <Card>
             <CardContent className="pt-6">
-              <p className="text-muted-foreground">Keine Änderungen</p>
+              <p className="text-muted-foreground">Keine Aenderungen</p>
             </CardContent>
           </Card>
         </TabsContent>

@@ -1,25 +1,41 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useFoerderAntraege } from '@/lib/api/betrieb'
 import { Euro, FileText, TrendingUp } from 'lucide-react'
 
 export default function SubventionenDashboardPage(): JSX.Element {
-  const subventionen = {
-    jahr: 2025,
-    beantragt: 45000,
-    bewilligt: 40250,
-    ausgezahlt: 38000,
-    programme: [
-      { name: 'Greening / Direktzahlungen', betrag: 21250, status: 'bewilligt' },
-      { name: 'Biodiversität', betrag: 18960, status: 'in-pruefung' },
-      { name: 'Agrarumwelt-Maßnahmen', betrag: 5040, status: 'ausgezahlt' },
-    ],
+  const { data: antraege, isLoading } = useFoerderAntraege()
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <div><Skeleton className="h-9 w-48" /><Skeleton className="mt-2 h-5 w-64" /></div>
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1,2,3,4].map(i => <Skeleton key={i} className="h-24" />)}
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    )
   }
 
+  const items = antraege ?? []
+  const beantragt = items.reduce((s, a) => s + a.betrag, 0)
+  const bewilligt = items.filter(a => a.status === 'bewilligt' || a.status === 'eingereicht').reduce((s, a) => s + a.betrag, 0)
+  const ausgezahlt = items.filter(a => a.status === 'bewilligt').reduce((s, a) => s + a.betrag, 0)
+  const quote = beantragt > 0 ? ((bewilligt / beantragt) * 100).toFixed(1) : '0.0'
+
+  const programme = items.map(a => ({
+    name: a.programm,
+    betrag: a.betrag,
+    status: a.status === 'bewilligt' ? 'ausgezahlt' : a.status === 'eingereicht' ? 'in-pruefung' : a.status,
+  }))
+
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
       <div>
         <h1 className="text-3xl font-bold">Subventionen</h1>
-        <p className="text-muted-foreground">Fördermittel-Dashboard {subventionen.jahr}</p>
+        <p className="text-muted-foreground">Foerdermittel-Dashboard {new Date().getFullYear()}</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -31,7 +47,7 @@ export default function SubventionenDashboardPage(): JSX.Element {
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-blue-600" />
               <span className="text-2xl font-bold">
-                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(subventionen.beantragt)}
+                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(beantragt)}
               </span>
             </div>
           </CardContent>
@@ -45,7 +61,7 @@ export default function SubventionenDashboardPage(): JSX.Element {
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-green-600" />
               <span className="text-2xl font-bold text-green-600">
-                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(subventionen.bewilligt)}
+                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(bewilligt)}
               </span>
             </div>
           </CardContent>
@@ -59,7 +75,7 @@ export default function SubventionenDashboardPage(): JSX.Element {
             <div className="flex items-center gap-2">
               <Euro className="h-5 w-5 text-blue-600" />
               <span className="text-2xl font-bold">
-                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(subventionen.ausgezahlt)}
+                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(ausgezahlt)}
               </span>
             </div>
           </CardContent>
@@ -71,7 +87,7 @@ export default function SubventionenDashboardPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold text-green-600">
-              {((subventionen.bewilligt / subventionen.beantragt) * 100).toFixed(1)}%
+              {quote}%
             </span>
           </CardContent>
         </Card>
@@ -83,7 +99,7 @@ export default function SubventionenDashboardPage(): JSX.Element {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {subventionen.programme.map((programm, i) => (
+            {programme.map((programm, i) => (
               <div key={i} className="rounded-lg border p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -93,7 +109,7 @@ export default function SubventionenDashboardPage(): JSX.Element {
                     </div>
                   </div>
                   <Badge variant={programm.status === 'ausgezahlt' ? 'outline' : programm.status === 'bewilligt' ? 'secondary' : 'default'}>
-                    {programm.status === 'ausgezahlt' ? 'Ausgezahlt' : programm.status === 'bewilligt' ? 'Bewilligt' : 'In Prüfung'}
+                    {programm.status === 'ausgezahlt' ? 'Ausgezahlt' : programm.status === 'bewilligt' ? 'Bewilligt' : 'In Pruefung'}
                   </Badge>
                 </div>
               </div>

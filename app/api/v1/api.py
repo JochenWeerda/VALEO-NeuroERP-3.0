@@ -63,6 +63,21 @@ from app.api.v1.endpoints import (
     dms_images,
     sales_shipping_ext,
     master_data,
+    charges,
+    banken,
+    compliance,
+    disposition,
+    dokumente,
+    vertraege,
+    waage,
+    zertifikate,
+    foerderung,
+    marketing,
+    labor,
+    fuhrpark,
+    tours,
+    sustainability,
+    compat,
 )
 
 # Import domain routers
@@ -437,4 +452,78 @@ api_router.include_router(
     master_data.router,
     prefix="/master-data",
     tags=["system", "master-data"]
+)
+
+# Charges API
+api_router.include_router(
+    charges.router
+)
+
+api_router.include_router(
+    banken.router
+)
+
+# Compliance API
+api_router.include_router(
+    compliance.router
+)
+
+# Disposition API
+api_router.include_router(
+    disposition.router
+)
+
+# Dokumente API
+api_router.include_router(
+    dokumente.router
+)
+
+# Verträge API
+api_router.include_router(
+    vertraege.router
+)
+
+# Waage API
+api_router.include_router(
+    waage.router
+)
+
+# Zertifikate API
+api_router.include_router(
+    zertifikate.router
+)
+
+# Förderung API
+api_router.include_router(
+    foerderung.router
+)
+
+# Marketing API
+api_router.include_router(
+    marketing.router
+)
+
+# Labor API
+api_router.include_router(
+    labor.router
+)
+
+# Fuhrpark API
+api_router.include_router(
+    fuhrpark.router
+)
+
+# Tours API
+api_router.include_router(
+    tours.router
+)
+
+# Sustainability runtime API (BVL/Climatiq/FAOSTAT)
+api_router.include_router(
+    sustainability.router
+)
+
+# Compatibility API (path alignment and missing frontend endpoints)
+api_router.include_router(
+    compat.router
 )

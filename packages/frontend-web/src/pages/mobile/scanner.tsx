@@ -4,20 +4,50 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Camera, CheckCircle, QrCode } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
+import { ErrorState } from '@/components/ErrorState'
+
+type Artikel = { name: string; bestand: number; preis: number }
+
+function mapArticle(row: Record<string, unknown>): Artikel {
+  return {
+    name: String(row.name ?? row.description ?? 'Unbekannt'),
+    bestand: Number(row.stock_quantity ?? row.quantity ?? 0),
+    preis: Number(row.price ?? row.sell_price ?? 0),
+  }
+}
 
 export default function MobileScannerPage(): JSX.Element {
   const [scanResult, setScanResult] = useState<string>('')
-  const [artikel, setArtikel] = useState<{ name: string; bestand: number; preis: number } | null>(null)
+  const [manualCode, setManualCode] = useState<string>('')
+  const [artikel, setArtikel] = useState<Artikel | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
 
-  function handleScan(): void {
-    // Mock scan result
-    const mockData = {
-      name: 'Weizen Premium',
-      bestand: 125.5,
-      preis: 220,
+  async function lookup(code: string): Promise<void> {
+    if (!code.trim()) return
+    setIsLoading(true)
+    setError(null)
+    setArtikel(null)
+    try {
+      const res = await apiClient.get<{ items?: Record<string, unknown>[] }>('/api/v1/articles', {
+        params: { search: code.trim() },
+      })
+      const item = res.data?.items?.[0]
+      if (!item) {
+        throw new Error('Kein Artikel zum Scan-Code gefunden')
+      }
+      setScanResult(code.trim())
+      setArtikel(mapArticle(item))
+    } catch (err) {
+      setError(err as Error)
+    } finally {
+      setIsLoading(false)
     }
-    setScanResult('251011-WEI-001')
-    setArtikel(mockData)
+  }
+
+  if (error) {
+    return <ErrorState error={error} onRetry={() => { void lookup(scanResult || manualCode) }} />
   }
 
   return (
@@ -41,14 +71,25 @@ export default function MobileScannerPage(): JSX.Element {
             <p className="text-sm text-muted-foreground mt-2">Barcode/QR-Code vor Kamera halten</p>
           </div>
 
-          <Button className="w-full gap-2" size="lg" onClick={handleScan}>
+          <Button className="w-full gap-2" size="lg" onClick={() => { void lookup(manualCode) }} disabled={isLoading}>
             <Camera className="h-5 w-5" />
-            Scan starten (Mock)
+            {isLoading ? 'Suche...' : 'Scan starten'}
           </Button>
 
           <div>
             <Label htmlFor="manual">Manuelle Eingabe</Label>
-            <Input id="manual" placeholder="Barcode oder Chargen-ID" className="font-mono" />
+            <Input
+              id="manual"
+              placeholder="Barcode oder Chargen-ID"
+              className="font-mono"
+              value={manualCode}
+              onChange={(e) => setManualCode(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  void lookup(manualCode)
+                }
+              }}
+            />
           </div>
         </CardContent>
       </Card>
@@ -89,8 +130,8 @@ export default function MobileScannerPage(): JSX.Element {
       )}
 
       <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
-        <p className="font-semibold">📱 Mobile-Optimiert</p>
-        <p className="mt-1">Zugriff über Smartphone/Tablet für schnelle Erfassung im Lager</p>
+        <p className="font-semibold">Mobile-Optimiert</p>
+        <p className="mt-1">Zugriff ueber Smartphone/Tablet fuer schnelle Erfassung im Lager</p>
       </div>
     </div>
   )

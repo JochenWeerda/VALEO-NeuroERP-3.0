@@ -1,33 +1,34 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useKulturen } from '@/lib/api/agrar'
+import { useKulturen, type Kultur } from '@/lib/api/agrar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
 import { FileDown, Plus, Search, Sprout } from 'lucide-react'
-
-type Kultur = {
-  id: string
-  name: string
-  kategorie: string
-  flaeche: number
-  ertrag: number
-  preis: number
-  deckungsbeitrag: number
-}
-
-const mockKulturen: Kultur[] = [
-  { id: '1', name: 'Weizen (Winterweizen)', kategorie: 'Getreide', flaeche: 65.5, ertrag: 7.8, preis: 220, deckungsbeitrag: 850 },
-  { id: '2', name: 'Raps (Winterraps)', kategorie: 'Ölsaaten', flaeche: 28.0, ertrag: 4.2, preis: 450, deckungsbeitrag: 720 },
-  { id: '3', name: 'Mais (Körnermais)', kategorie: 'Getreide', flaeche: 32.0, ertrag: 9.5, preis: 190, deckungsbeitrag: 680 },
-]
 
 export default function KulturpflanzenListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: kulturen = mockKulturen } = useKulturen()
+  const { data, isLoading, isError, error, refetch } = useKulturen()
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const kulturen: Kultur[] = data ?? []
 
   const columns = [
     {
@@ -40,17 +41,17 @@ export default function KulturpflanzenListePage(): JSX.Element {
       ),
     },
     { key: 'kategorie' as const, label: 'Kategorie', render: (k: Kultur) => <Badge variant="outline">{k.kategorie}</Badge> },
-    { key: 'flaeche' as const, label: 'Fläche (ha)', render: (k: Kultur) => `${k.flaeche} ha` },
+    { key: 'flaeche' as const, label: 'Flaeche (ha)', render: (k: Kultur) => `${k.flaeche} ha` },
     { key: 'ertrag' as const, label: 'Ertrag (t/ha)', render: (k: Kultur) => `${k.ertrag} t/ha` },
     {
       key: 'preis' as const,
-      label: 'Preis (€/t)',
-      render: (k: Kultur) => `${new Intl.NumberFormat('de-DE').format(k.preis)} €`,
+      label: 'Preis (EUR/t)',
+      render: (k: Kultur) => `${new Intl.NumberFormat('de-DE').format(k.preis)} EUR`,
     },
     {
       key: 'deckungsbeitrag' as const,
-      label: 'DB (€/ha)',
-      render: (k: Kultur) => <span className="font-bold">{new Intl.NumberFormat('de-DE').format(k.deckungsbeitrag)} €</span>,
+      label: 'DB (EUR/ha)',
+      render: (k: Kultur) => <span className="font-bold">{new Intl.NumberFormat('de-DE').format(k.deckungsbeitrag)} EUR</span>,
     },
   ]
 
@@ -61,7 +62,7 @@ export default function KulturpflanzenListePage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Kulturpflanzen</h1>
-          <p className="text-muted-foreground">Anbau-Übersicht & Deckungsbeiträge</p>
+          <p className="text-muted-foreground">Anbau-Uebersicht & Deckungsbeitraege</p>
         </div>
         <Button onClick={() => navigate('/agrar/kulturpflanzen/neu')} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -84,7 +85,7 @@ export default function KulturpflanzenListePage(): JSX.Element {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Gesamt-Fläche</CardTitle>
+            <CardTitle className="text-sm font-medium">Gesamt-Flaeche</CardTitle>
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold">{gesamtFlaeche.toFixed(1)} ha</span>
@@ -97,7 +98,7 @@ export default function KulturpflanzenListePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold text-green-600">
-              {(kulturen.reduce((sum, k) => sum + k.deckungsbeitrag, 0) / Math.max(kulturen.length, 1)).toFixed(0)} € / ha
+              {(kulturen.reduce((sum, k) => sum + k.deckungsbeitrag, 0) / Math.max(kulturen.length, 1)).toFixed(0)} EUR / ha
             </span>
           </CardContent>
         </Card>

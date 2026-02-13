@@ -6,15 +6,15 @@ import { DataTable } from '@/components/ui/data-table'
 import { AlertTriangle, Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useENNIMeldungen, type ENNIMeldung } from '@/lib/api/betrieb'
-
-const mockENNI: ENNIMeldung[] = [
-  { id: '1', typ: 'DBE', betrieb: 'Landwirtschaft Mueller', vvvo: '03-276-1234', datum: '2025-10-01', status: 'bestaetigt', naehrstoffe: { n: 180, p: 60, k: 120 } },
-  { id: '2', typ: 'DdD', betrieb: 'Hofgut Weber', vvvo: '03-276-5678', datum: '2025-09-15', status: 'gesendet', naehrstoffe: { n: 220, p: 80, k: 150 } },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function ENNIMeldungenPage(): JSX.Element {
   const navigate = useNavigate()
-  const { data: meldungen = mockENNI } = useENNIMeldungen()
+  const { data: meldungen = [], isError, error, refetch } = useENNIMeldungen()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const offen = useMemo(() => meldungen.filter((m) => m.status === 'entwurf').length, [meldungen])
 

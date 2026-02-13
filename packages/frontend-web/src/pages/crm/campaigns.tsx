@@ -1,19 +1,16 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+﻿import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
-import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
-import { formatDate, formatCurrency } from '@/components/mask-builder/utils/formatting'
+import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel, getStatusLabel, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
+import { ErrorState } from '@/components/ErrorState'
 
-// API Client
-const apiClient = createApiClient('/api/crm-marketing')
-
-// Konfiguration für Campaigns ListReport
+// Konfiguration fÃ¼r Campaigns ListReport
 const createCampaignsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
@@ -136,107 +133,29 @@ const createCampaignsConfig = (t: any, entityTypeLabel: string): ListConfig => (
 export default function CampaignsPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const entityType = 'campaign'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kampagne')
   const campaignsConfig = createCampaignsConfig(t, entityTypeLabel)
 
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
-    if (action === 'edit' && item) {
-      navigate(`/crm/campaign/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
-        try {
-          await apiClient.delete(`/campaigns/${item.id}`)
-          toast({
-            title: getSuccessMessage(t, 'delete', entityType),
-          })
-          loadData()
-        } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: getErrorMessage(t, 'delete', entityType),
-          })
-        }
-      }
-    } else if (action === 'start' && item) {
-      try {
-        await apiClient.post(`/campaigns/${item.id}/start`)
-        toast({
-          title: t('crud.messages.campaignStarted'),
-        })
-        loadData()
-      } catch (error) {
-        toast({
-          variant: 'destructive',
-          title: t('crud.messages.campaignStartError'),
-        })
-      }
-    } else if (action === 'pause' && item) {
-      try {
-        await apiClient.post(`/campaigns/${item.id}/pause`)
-        toast({
-          title: t('crud.messages.campaignPaused'),
-        })
-        loadData()
-      } catch (error) {
-        toast({
-          variant: 'destructive',
-          title: t('crud.messages.campaignPauseError'),
-        })
-      }
-    } else if (action === 'cancel' && item) {
-      if (confirm(t('crud.dialogs.cancel.descriptionGeneric', { entityType: entityTypeLabel }))) {
-        try {
-          await apiClient.post(`/campaigns/${item.id}/cancel`)
-          toast({
-            title: t('crud.messages.campaignCancelled'),
-          })
-          loadData()
-        } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.campaignCancelError'),
-          })
-        }
-      }
-    }
+  const { data: queryData, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['crm', 'campaigns'],
+    queryFn: async () => {
+      const r = await apiClient.get('/api/crm-marketing/campaigns')
+      const items = Array.isArray(r.data) ? r.data : ((r.data as any).data || [])
+      return { items, total: items.length }
+    },
+    staleTime: 2 * 60 * 1000,
   })
 
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const response = await apiClient.get('/campaigns', {
-        params: {
-          tenant_id: '00000000-0000-0000-0000-000000000001' // TODO: Get from auth context
-        }
-      })
-      
-      if (response.success) {
-        const items = Array.isArray(response.data) ? response.data : []
-        setData(items)
-        setTotal(items.length)
-      } else {
-        const items = Array.isArray(response) ? response : []
-        setData(items)
-        setTotal(items.length)
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Kampagnen:', error)
-      toast({
-        variant: 'destructive',
-        title: t('crud.messages.loadError')
-      })
-    } finally {
-      setLoading(false)
-    }
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
-  useEffect(() => {
-    loadData()
-  }, [])
+  const data = queryData?.items || []
+  const total = queryData?.total || 0
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'campaigns'] })
 
   const handleCreate = () => {
     navigate('/crm/campaign/new')
@@ -264,7 +183,7 @@ export default function CampaignsPage(): JSX.Element {
         title: t('crud.messages.exportSuccess'),
         description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
       })
-    } catch (error) {
+    } catch {
       toast({
         variant: 'destructive',
         title: t('crud.messages.exportError'),
@@ -277,17 +196,17 @@ export default function CampaignsPage(): JSX.Element {
       config={campaignsConfig}
       data={data}
       total={total}
-      isLoading={loading}
+      isLoading={isLoading}
       onEdit={(item) => navigate(`/crm/campaign/${item.id}`)}
       onDelete={async (item) => {
         if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
           try {
-            await apiClient.delete(`/campaigns/${item.id}`)
+            await apiClient.delete(`/api/crm-marketing/campaigns/${item.id}`)
             toast({
               title: getSuccessMessage(t, 'delete', entityType),
             })
-            loadData()
-          } catch (error) {
+            invalidate()
+          } catch {
             toast({
               variant: 'destructive',
               title: getErrorMessage(t, 'delete', entityType),

@@ -239,6 +239,136 @@ class PDFGenerator:
             )
             story.append(table)
 
+            if doc_type == "sales_delivery":
+                story.append(Spacer(1, 6 * mm))
+                story.append(Paragraph("<b>Bilanzrelevante NÃ¤hrstoff- und CO2-Werte</b>", self.styles["Normal"]))
+                story.append(Spacer(1, 2 * mm))
+
+                total_n = payload.get("totalNutrientNKg")
+                total_p2o5 = payload.get("totalNutrientP2o5Kg")
+                total_co2e = payload.get("totalCo2eKg")
+
+                if total_n is None:
+                    total_n = sum(
+                        float(line.get("nutrientNTotalKg") or (line.get("qty", 0) * (line.get("nutrientNKgPerUnit", 0) or 0)))
+                        for line in lines
+                    )
+                if total_p2o5 is None:
+                    total_p2o5 = sum(
+                        float(line.get("nutrientP2o5TotalKg") or (line.get("qty", 0) * (line.get("nutrientP2o5KgPerUnit", 0) or 0)))
+                        for line in lines
+                    )
+                if total_co2e is None:
+                    total_co2e = sum(
+                        float(line.get("co2eTotalKg") or (line.get("qty", 0) * (line.get("co2eKgPerUnit", 0) or 0)))
+                        for line in lines
+                    )
+
+                sustainability_summary = [
+                    ["Kennzahl", "Wert"],
+                    ["Gesamt N", f"{float(total_n):.3f} kg"],
+                    ["Gesamt P2O5", f"{float(total_p2o5):.3f} kg"],
+                    ["Gesamt CO2e", f"{float(total_co2e):.3f} kg"],
+                ]
+
+                summary_table = Table(sustainability_summary, colWidths=[80 * mm, 40 * mm])
+                summary_table.setStyle(
+                    TableStyle(
+                        [
+                            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e5e7eb")),
+                            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                            ("ALIGN", (1, 1), (1, -1), "RIGHT"),
+                            ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                        ]
+                    )
+                )
+                story.append(summary_table)
+
+                position_sustainability = [["Artikel", "N kg", "P2O5 kg", "CO2e kg"]]
+                for line in lines:
+                    qty = float(line.get("qty", 0) or 0)
+                    line_n = float(line.get("nutrientNTotalKg") or (qty * (line.get("nutrientNKgPerUnit", 0) or 0)))
+                    line_p2o5 = float(line.get("nutrientP2o5TotalKg") or (qty * (line.get("nutrientP2o5KgPerUnit", 0) or 0)))
+                    line_co2e = float(line.get("co2eTotalKg") or (qty * (line.get("co2eKgPerUnit", 0) or 0)))
+                    position_sustainability.append(
+                        [
+                            str(line.get("article", "")),
+                            f"{line_n:.3f}",
+                            f"{line_p2o5:.3f}",
+                            f"{line_co2e:.3f}",
+                        ]
+                    )
+
+                story.append(Spacer(1, 3 * mm))
+                detail_table = Table(position_sustainability, colWidths=[70 * mm, 25 * mm, 25 * mm, 25 * mm])
+                detail_table.setStyle(
+                    TableStyle(
+                        [
+                            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f3f4f6")),
+                            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                            ("ALIGN", (1, 1), (-1, -1), "RIGHT"),
+                            ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                        ]
+                    )
+                )
+                story.append(detail_table)
+
+                psm_lines = [
+                    line for line in lines
+                    if line.get("bvlZulassungsnummer") or line.get("sdsReference") or line.get("hazardHinweise")
+                ]
+                if psm_lines:
+                    story.append(Spacer(1, 5 * mm))
+                    story.append(Paragraph("<b>PSM Pflichtangaben und Gefahrenhinweise</b>", self.styles["Normal"]))
+
+                    compliance = payload.get("psmCompliance", {}) or {}
+                    status_label = "konform" if compliance.get("compliant") else "nicht konform"
+                    supplier_name = payload.get("supplierName") or compliance.get("supplierName") or "-"
+                    sachkunde = payload.get("sachkundeStatus") or compliance.get("sachkundeStatus") or "-"
+                    sds_mitgeliefert = payload.get("sdsMitgeliefert") or compliance.get("sdsMitgeliefert") or "-"
+                    adr_punkte = float(payload.get("adrPunkte") or compliance.get("adrPunkte") or 0.0)
+
+                    psm_header = [
+                        ["Lieferant", "Sachkunde", "SDB", "ADR Punkte", "Status"],
+                        [str(supplier_name), str(sachkunde), str(sds_mitgeliefert), f"{adr_punkte:.1f}", status_label],
+                    ]
+                    psm_header_table = Table(psm_header, colWidths=[45 * mm, 30 * mm, 20 * mm, 25 * mm, 30 * mm])
+                    psm_header_table.setStyle(
+                        TableStyle(
+                            [
+                                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f3f4f6")),
+                                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                                ("ALIGN", (3, 1), (3, 1), "RIGHT"),
+                                ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                            ]
+                        )
+                    )
+                    story.append(psm_header_table)
+
+                    psm_table = [["Produkt", "BVL-Zulassung", "SDB-Ref.", "Gefahrenhinweise"]]
+                    for line in psm_lines:
+                        psm_table.append(
+                            [
+                                str(line.get("article", "")),
+                                str(line.get("bvlZulassungsnummer", "")),
+                                str(line.get("sdsReference", "")),
+                                str(line.get("hazardHinweise", "")),
+                            ]
+                        )
+
+                    story.append(Spacer(1, 3 * mm))
+                    psm_detail_table = Table(psm_table, colWidths=[45 * mm, 35 * mm, 30 * mm, 40 * mm])
+                    psm_detail_table.setStyle(
+                        TableStyle(
+                            [
+                                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e5e7eb")),
+                                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                                ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                            ]
+                        )
+                    )
+                    story.append(psm_detail_table)
+
         # QR-Code mit Belegnummer
         story.append(Spacer(1, 10 * mm))
         self._add_qr_code(story, doc_number)

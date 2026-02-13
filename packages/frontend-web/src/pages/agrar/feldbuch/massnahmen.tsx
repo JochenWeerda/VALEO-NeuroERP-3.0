@@ -1,6 +1,6 @@
 /**
  * Maßnahmen-Dokumentation - Mandantenfähiges Spritztagebuch / Feldbuch
- * 
+ *
  * Features:
  * - Multi-Tenant: Maßnahmen für verschiedene Kunden dokumentieren
  * - Compliance: PSM-Dokumentation gemäß Pflanzenschutzgesetz
@@ -9,7 +9,6 @@
 
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,11 +18,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  CalendarDays, 
-  FileDown, 
-  Plus, 
-  Search, 
+import {
+  CalendarDays,
+  FileDown,
+  Plus,
+  Search,
   Building2,
   Droplets,
   Bug,
@@ -37,14 +36,9 @@ import {
   FileText,
   Info
 } from 'lucide-react'
+import { useMassnahmen, useAgrarKunden } from '@/lib/api/agrar'
 
 // Types
-type Kunde = {
-  id: string
-  name: string
-  betriebsnummer: string
-}
-
 type MassnahmeTyp = 'Aussaat' | 'Düngung' | 'PSM' | 'Ernte' | 'Bodenbearbeitung' | 'Sonstiges'
 
 type Massnahme = {
@@ -55,143 +49,28 @@ type Massnahme = {
   schlagName: string
   kundeId: string
   kundeName: string
-  typ: MassnahmeTyp
+  typ: MassnahmeTyp | string
   mittel: string
   mittelId?: string
   menge: number
   einheit: string
-  flaeche: number // behandelte Fläche in ha
+  flaeche: number
   anwender?: string
   geraet?: string
-  windgeschwindigkeit?: number // km/h
-  temperatur?: number // °C
+  windgeschwindigkeit?: number
+  temperatur?: number
   anwendungshinweise?: string
   auflagen?: string[]
   compliant: boolean
   exportiert: boolean
 }
 
-// Mock-Daten für Kunden
-const mockKunden: Kunde[] = [
-  { id: 'k1', name: 'Schmidt Landwirtschaft GbR', betriebsnummer: 'DE-NI-030012' },
-  { id: 'k2', name: 'Müller Agrar KG', betriebsnummer: 'DE-NI-030045' },
-  { id: 'k3', name: 'Bauer Hof Meier', betriebsnummer: 'DE-BY-094015' },
-  { id: 'all', name: 'Alle Kunden', betriebsnummer: '' },
-]
-
-// Mock-Daten für Maßnahmen mit Mandantenzuordnung
-const mockMassnahmen: Massnahme[] = [
-  { 
-    id: '1', 
-    datum: '2025-11-15', 
-    uhrzeit: '08:30',
-    schlagId: '1',
-    schlagName: 'Nordfeld 1', 
-    kundeId: 'k1',
-    kundeName: 'Schmidt Landwirtschaft GbR',
-    typ: 'Düngung', 
-    mittel: 'ENTEC 26', 
-    menge: 350, 
-    einheit: 'kg/ha',
-    flaeche: 12.5,
-    anwender: 'Max Mustermann',
-    geraet: 'Amazone ZA-M 1500',
-    compliant: true,
-    exportiert: false
-  },
-  { 
-    id: '2', 
-    datum: '2025-11-14', 
-    uhrzeit: '14:00',
-    schlagId: '2',
-    schlagName: 'Südacker', 
-    kundeId: 'k2',
-    kundeName: 'Müller Agrar KG',
-    typ: 'PSM', 
-    mittel: 'Roundup PowerFlex', 
-    mittelId: 'PSM-00456',
-    menge: 3.5, 
-    einheit: 'l/ha',
-    flaeche: 8.3,
-    anwender: 'Hans Schmidt',
-    geraet: 'Holder 24m Feldspritze',
-    windgeschwindigkeit: 12,
-    temperatur: 14,
-    auflagen: ['NT101', 'NT102', 'NW605'],
-    compliant: true,
-    exportiert: true
-  },
-  { 
-    id: '3', 
-    datum: '2025-11-10', 
-    uhrzeit: '07:00',
-    schlagId: '1',
-    schlagName: 'Nordfeld 1', 
-    kundeId: 'k1',
-    kundeName: 'Schmidt Landwirtschaft GbR',
-    typ: 'Aussaat', 
-    mittel: 'Winterweizen Asano', 
-    menge: 180, 
-    einheit: 'kg/ha',
-    flaeche: 12.5,
-    anwender: 'Max Mustermann',
-    geraet: 'Amazone Cirrus 3001',
-    compliant: true,
-    exportiert: false
-  },
-  { 
-    id: '4', 
-    datum: '2025-11-08', 
-    uhrzeit: '09:15',
-    schlagId: '4',
-    schlagName: 'Bergacker', 
-    kundeId: 'k3',
-    kundeName: 'Bauer Hof Meier',
-    typ: 'PSM', 
-    mittel: 'Gladio', 
-    mittelId: 'PSM-00789',
-    menge: 0.8, 
-    einheit: 'l/ha',
-    flaeche: 10.5,
-    anwender: 'Peter Weber',
-    geraet: 'Selbstfahrspritze Horsch',
-    windgeschwindigkeit: 8,
-    temperatur: 12,
-    auflagen: ['NW601', 'NT103'],
-    compliant: true,
-    exportiert: false
-  },
-  { 
-    id: '5', 
-    datum: '2025-11-05', 
-    uhrzeit: '10:30',
-    schlagId: '3',
-    schlagName: 'Wiesengrund', 
-    kundeId: 'k1',
-    kundeName: 'Schmidt Landwirtschaft GbR',
-    typ: 'Bodenbearbeitung', 
-    mittel: 'Grubber 3m', 
-    menge: 1, 
-    einheit: 'Durchgang',
-    flaeche: 15.2,
-    anwender: 'Max Mustermann',
-    geraet: 'Lemken Karat 9',
-    compliant: true,
-    exportiert: false
-  },
-]
-
-// API-Funktionen (simuliert)
-async function fetchMassnahmen(_kundeId?: string): Promise<Massnahme[]> {
-  await new Promise(resolve => setTimeout(resolve, 600))
-  return mockMassnahmen
-}
-
 // Icon für Maßnahmentyp
-function getMassnahmeIcon(typ: MassnahmeTyp) {
+function getMassnahmeIcon(typ: string) {
   switch (typ) {
     case 'Düngung': return <Droplets className="h-4 w-4 text-blue-600" />
     case 'PSM': return <Bug className="h-4 w-4 text-red-600" />
+    case 'PSM-Behandlung': return <Bug className="h-4 w-4 text-red-600" />
     case 'Aussaat': return <Wheat className="h-4 w-4 text-amber-600" />
     case 'Ernte': return <Wheat className="h-4 w-4 text-green-600" />
     case 'Bodenbearbeitung': return <Tractor className="h-4 w-4 text-brown-600" />
@@ -202,7 +81,7 @@ function getMassnahmeIcon(typ: MassnahmeTyp) {
 // Skeleton-Komponente
 function MassnahmenSkeleton() {
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <Skeleton className="h-8 w-64" />
@@ -210,7 +89,7 @@ function MassnahmenSkeleton() {
         </div>
         <Skeleton className="h-10 w-36" />
       </div>
-      
+
       <div className="grid gap-4 md:grid-cols-4">
         {[1, 2, 3, 4].map(i => (
           <Card key={i}>
@@ -242,28 +121,27 @@ export default function MassnahmenPage(): JSX.Element {
   const [filterTyp, setFilterTyp] = useState<string>('alle')
   const [activeTab, setActiveTab] = useState<string>('liste')
 
-  // Daten laden
-  const { data: massnahmen, isLoading } = useQuery({
-    queryKey: ['massnahmen', selectedKundeId],
-    queryFn: () => fetchMassnahmen(selectedKundeId)
-  })
+  // Daten laden via TanStack Query hooks
+  const { data: massnahmenData, isLoading: isLoadingMassnahmen } = useMassnahmen()
+  const { data: kundenData, isLoading: isLoadingKunden } = useAgrarKunden()
+
+  const massnahmen: Massnahme[] = (massnahmenData ?? []) as Massnahme[]
+  const kunden = kundenData ?? []
+  const isLoading = isLoadingMassnahmen || isLoadingKunden
 
   // Gefilterte Maßnahmen
   const filteredMassnahmen = useMemo(() => {
     if (!massnahmen) return []
-    
+
     return massnahmen.filter(m => {
-      // Kundenfilter
       if (selectedKundeId !== 'all' && m.kundeId !== selectedKundeId) {
         return false
       }
-      
-      // Typfilter
+
       if (filterTyp !== 'alle' && m.typ !== filterTyp) {
         return false
       }
-      
-      // Suchfilter
+
       if (searchTerm) {
         const search = searchTerm.toLowerCase()
         return (
@@ -272,7 +150,7 @@ export default function MassnahmenPage(): JSX.Element {
           m.kundeName.toLowerCase().includes(search)
         )
       }
-      
+
       return true
     })
   }, [massnahmen, selectedKundeId, filterTyp, searchTerm])
@@ -286,12 +164,12 @@ export default function MassnahmenPage(): JSX.Element {
       const diffTage = Math.floor((heute.getTime() - datum.getTime()) / (1000 * 60 * 60 * 24))
       return diffTage <= 7
     })
-    
+
     return {
       gesamt: filtered.length,
       letzte7Tage: letzte7Tage.length,
       duengungen: filtered.filter(m => m.typ === 'Düngung').length,
-      psmAnwendungen: filtered.filter(m => m.typ === 'PSM').length,
+      psmAnwendungen: filtered.filter(m => m.typ === 'PSM' || m.typ === 'PSM-Behandlung').length,
       compliant: filtered.filter(m => m.compliant).length,
       nichtExportiert: filtered.filter(m => !m.exportiert).length
     }
@@ -299,7 +177,7 @@ export default function MassnahmenPage(): JSX.Element {
 
   // PSM-spezifische Maßnahmen für Spritztagebuch
   const psmMassnahmen = useMemo(() => {
-    return filteredMassnahmen.filter(m => m.typ === 'PSM')
+    return filteredMassnahmen.filter(m => m.typ === 'PSM' || m.typ === 'PSM-Behandlung')
   }, [filteredMassnahmen])
 
   // Spalten-Definition
@@ -314,11 +192,11 @@ export default function MassnahmenPage(): JSX.Element {
         </div>
       ),
     },
-    { 
-      key: 'schlagName' as const, 
+    {
+      key: 'schlagName' as const,
       label: 'Schlag',
       render: (m: Massnahme) => (
-        <button 
+        <button
           onClick={() => navigate(`/agrar/feldbuch/schlag/${m.schlagId}`)}
           className="text-blue-600 hover:underline"
         >
@@ -332,17 +210,17 @@ export default function MassnahmenPage(): JSX.Element {
       render: (m: Massnahme) => (
         <div className="flex items-center gap-2">
           {getMassnahmeIcon(m.typ)}
-          <Badge variant={m.typ === 'PSM' ? 'destructive' : 'outline'}>
+          <Badge variant={m.typ === 'PSM' || m.typ === 'PSM-Behandlung' ? 'destructive' : 'outline'}>
             {m.typ}
           </Badge>
         </div>
       ),
     },
     { key: 'mittel' as const, label: 'Mittel' },
-    { 
-      key: 'menge' as const, 
-      label: 'Menge', 
-      render: (m: Massnahme) => `${m.menge} ${m.einheit}` 
+    {
+      key: 'menge' as const,
+      label: 'Menge',
+      render: (m: Massnahme) => `${m.menge} ${m.einheit}`
     },
     {
       key: 'flaeche' as const,
@@ -389,10 +267,10 @@ export default function MassnahmenPage(): JSX.Element {
     },
     { key: 'schlagName' as const, label: 'Schlag' },
     { key: 'mittel' as const, label: 'Pflanzenschutzmittel' },
-    { 
-      key: 'menge' as const, 
-      label: 'Aufwandmenge', 
-      render: (m: Massnahme) => `${m.menge} ${m.einheit}` 
+    {
+      key: 'menge' as const,
+      label: 'Aufwandmenge',
+      render: (m: Massnahme) => `${m.menge} ${m.einheit}`
     },
     {
       key: 'flaeche' as const,
@@ -415,7 +293,7 @@ export default function MassnahmenPage(): JSX.Element {
       render: (m: Massnahme) => (
         <div className="text-sm">
           {m.windgeschwindigkeit && <div>{m.windgeschwindigkeit} km/h Wind</div>}
-          {m.temperatur && <div>{m.temperatur}°C</div>}
+          {m.temperatur && <div>{m.temperatur}C</div>}
         </div>
       )
     },
@@ -438,7 +316,7 @@ export default function MassnahmenPage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -561,7 +439,7 @@ export default function MassnahmenPage(): JSX.Element {
                       <SelectValue placeholder="Kunde wählen..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockKunden.map(kunde => (
+                      {kunden.map(kunde => (
                         <SelectItem key={kunde.id} value={kunde.id}>
                           {kunde.name}
                         </SelectItem>
@@ -594,11 +472,11 @@ export default function MassnahmenPage(): JSX.Element {
                   <div className="flex gap-4">
                     <div className="relative flex-1">
                       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input 
-                        placeholder="Schlag, Mittel, Kunde..." 
-                        value={searchTerm} 
-                        onChange={(e) => setSearchTerm(e.target.value)} 
-                        className="pl-10" 
+                      <Input
+                        placeholder="Schlag, Mittel, Kunde..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
                       />
                     </div>
                     <Button variant="outline" className="gap-2">
@@ -632,7 +510,7 @@ export default function MassnahmenPage(): JSX.Element {
         <TabsContent value="spritztagebuch" className="space-y-4">
           <Alert>
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Spritztagebuch gemäß § 11 PflSchG</AlertTitle>
+            <AlertTitle>Spritztagebuch gemäß Paragraph 11 PflSchG</AlertTitle>
             <AlertDescription>
               Dokumentation aller Pflanzenschutzmaßnahmen gemäß Pflanzenschutzgesetz.
               Alle PSM-Anwendungen müssen innerhalb von 30 Tagen dokumentiert werden.

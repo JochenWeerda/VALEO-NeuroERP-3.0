@@ -6,24 +6,185 @@ API-Endpoints für Belegverwaltung & Folgebeleg-Erstellung
 from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Query, Depends
 from sqlalchemy.orm import Session
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from typing import Dict, Callable, Any, List, Optional
 import logging
 from datetime import datetime, timedelta
 from collections import defaultdict
+import csv
+import io
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.pdfgen import canvas
 
 from .models import (
     CustomerInquiry, SalesOffer, SalesOrder, SalesDelivery, SalesInvoice, PaymentReceived,
     PurchaseRequest, PurchaseOffer, PurchaseOrder, FollowRequest
 )
 from .router_helpers import (
-    get_repository, save_to_store, get_from_store, list_from_store, delete_from_store
+    _DB, get_repository, save_to_store, get_from_store, list_from_store, delete_from_store
 )
 from app.core.database import get_db
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/mcp/documents", tags=["documents"])
+
+
+def _enrich_delivery_sustainability(doc_data: dict[str, Any]) -> dict[str, Any]:
+    """Calculate and persist nutrient/CO2 totals for sales delivery documents."""
+    total_n = 0.0
+    total_p2o5 = 0.0
+    total_co2e = 0.0
+
+    lines = doc_data.get("lines", [])
+    psm_line_count = 0
+    missing_mandatory_fields: list[str] = []
+    for line in lines:
+        qty = float(line.get("qty") or 0.0)
+        n_per_unit = float(line.get("nutrientNKgPerUnit") or 0.0)
+        p2o5_per_unit = float(line.get("nutrientP2o5KgPerUnit") or 0.0)
+        co2e_per_unit = float(line.get("co2eKgPerUnit") or 0.0)
+
+        n_total = round(qty * n_per_unit, 3)
+        p2o5_total = round(qty * p2o5_per_unit, 3)
+        co2e_total = round(qty * co2e_per_unit, 3)
+
+        line["nutrientNTotalKg"] = n_total
+        line["nutrientP2o5TotalKg"] = p2o5_total
+        line["co2eTotalKg"] = co2e_total
+
+        is_psm_line = any(
+            [
+                bool(line.get("bvlZulassungsnummer")),
+                bool(line.get("hazardHinweise")),
+                bool(line.get("sdsReference")),
+            ]
+        )
+        if is_psm_line:
+            psm_line_count += 1
+            if not line.get("bvlZulassungsnummer"):
+                missing_mandatory_fields.append(f"{line.get('article', 'Position')}: fehlende BVL-Zulassungsnummer")
+            if not line.get("sdsReference") and not line.get("hazardHinweise"):
+                missing_mandatory_fields.append(f"{line.get('article', 'Position')}: fehlender SDB-/Gefahrhinweis")
+
+        total_n += n_total
+        total_p2o5 += p2o5_total
+        total_co2e += co2e_total
+
+    doc_data["totalNutrientNKg"] = round(total_n, 3)
+    doc_data["totalNutrientP2o5Kg"] = round(total_p2o5, 3)
+    doc_data["totalCo2eKg"] = round(total_co2e, 3)
+
+    adr_punkte = float(doc_data.get("adrPunkte") or 0.0)
+    sachkunde_status = str(doc_data.get("sachkundeStatus") or "offen")
+    sds_mitgeliefert = str(doc_data.get("sdsMitgeliefert") or "offen")
+    has_sachkunde_ok = sachkunde_status in ["geprueft", "nicht_erforderlich"]
+    has_sds_ok = sds_mitgeliefert in ["ja", "nicht_erforderlich"]
+
+    compliant = True
+    if psm_line_count > 0:
+        compliant = (
+            len(missing_mandatory_fields) == 0
+            and has_sachkunde_ok
+            and has_sds_ok
+            and adr_punkte <= 1000
+            and bool(doc_data.get("supplierName"))
+        )
+
+    hinweise: list[str] = []
+    if psm_line_count > 0 and sachkunde_status == "offen":
+        hinweise.append(
+            "Hinweis: Bitte einmalig eine Kopie des Sachkundenachweises Pflanzenschutz zeitnah zusenden."
+        )
+    if psm_line_count > 0 and sds_mitgeliefert == "offen":
+        hinweise.append(
+            "Hinweis: Sicherheitsdatenblatt (SDB) bei Erstlieferung bereitstellen bzw. nachreichen."
+        )
+    if psm_line_count > 0 and adr_punkte > 1000:
+        hinweise.append("Hinweis: ADR-1000-Punkte-Regel prüfen (Transportkennzeichnung/Anforderungen).")
+
+    doc_data["psmCompliance"] = {
+        "psmLineCount": psm_line_count,
+        "supplierName": doc_data.get("supplierName"),
+        "sachkundeStatus": sachkunde_status,
+        "sdsMitgeliefert": sds_mitgeliefert,
+        "adrPunkte": adr_punkte,
+        "adrWithin1000Rule": adr_punkte <= 1000,
+        "missingMandatoryFields": missing_mandatory_fields,
+        "hinweise": hinweise,
+        "compliant": compliant,
+        "recordRetentionYears": 5,
+    }
+
+    date_value = str(doc_data.get("date") or "")
+    if len(date_value) >= 10:
+        try:
+            dt = datetime.fromisoformat(date_value[:10])
+            doc_data["aufbewahrungBis"] = dt.replace(year=dt.year + 5).date().isoformat()
+        except ValueError:
+            pass
+    return doc_data
+
+
+def _compute_sales_delivery_sustainability(
+    *,
+    year: int,
+    customer_id: Optional[str],
+    db: Session,
+) -> dict[str, Any]:
+    repo = get_repository(db)
+    listed = list_from_store("sales_delivery", skip=0, limit=10_000, repo=repo)
+    deliveries = listed.get("data", [])
+
+    filtered: list[dict[str, Any]] = []
+    for delivery in deliveries:
+        date_str = str(delivery.get("date") or "")
+        if not date_str.startswith(f"{year}-"):
+            continue
+        if customer_id and str(delivery.get("customerId") or "") != customer_id:
+            continue
+        filtered.append(delivery)
+
+    by_month: dict[str, dict[str, float]] = defaultdict(
+        lambda: {"deliveries": 0.0, "n_kg": 0.0, "p2o5_kg": 0.0, "co2e_kg": 0.0}
+    )
+    total_n = 0.0
+    total_p2o5 = 0.0
+    total_co2e = 0.0
+
+    for delivery in filtered:
+        month = str(delivery.get("date", ""))[:7]
+        d_n = float(delivery.get("totalNutrientNKg") or 0.0)
+        d_p2o5 = float(delivery.get("totalNutrientP2o5Kg") or 0.0)
+        d_co2e = float(delivery.get("totalCo2eKg") or 0.0)
+
+        by_month[month]["deliveries"] += 1
+        by_month[month]["n_kg"] += d_n
+        by_month[month]["p2o5_kg"] += d_p2o5
+        by_month[month]["co2e_kg"] += d_co2e
+
+        total_n += d_n
+        total_p2o5 += d_p2o5
+        total_co2e += d_co2e
+
+    return {
+        "year": year,
+        "customerId": customer_id,
+        "deliveryCount": len(filtered),
+        "totalNutrientNKg": round(total_n, 3),
+        "totalNutrientP2o5Kg": round(total_p2o5, 3),
+        "totalCo2eKg": round(total_co2e, 3),
+        "byMonth": {
+            k: {
+                "deliveries": int(v["deliveries"]),
+                "n_kg": round(v["n_kg"], 3),
+                "p2o5_kg": round(v["p2o5_kg"], 3),
+                "co2e_kg": round(v["co2e_kg"], 3),
+            }
+            for k, v in sorted(by_month.items())
+        },
+    }
 
 
 # --- CRUD Endpoints ---
@@ -122,12 +283,12 @@ async def upsert_sales_order(doc: SalesOrder, db: Session = Depends(get_db)) -> 
 
 
 @router.post("/sales_delivery")
-async def upsert_sales_delivery(doc: SalesDelivery) -> dict:
+async def upsert_sales_delivery(doc: SalesDelivery, db: Session = Depends(get_db)) -> dict:
     """Erstellt oder aktualisiert Lieferschein"""
     try:
-        # Wird durch save_to_store ersetzt
         repo = get_repository(db)
-        save_to_store("sales_delivery", doc.number, doc.model_dump(), repo)
+        doc_data = _enrich_delivery_sustainability(doc.model_dump())
+        save_to_store("sales_delivery", doc.number, doc_data, repo)
         logger.info(f"Saved sales delivery: {doc.number}")
         return {"ok": True, "number": doc.number}
     except Exception as e:
@@ -992,6 +1153,165 @@ async def get_financial_analytics(
         }
     except Exception as e:
         logger.error(f"Failed to get financial analytics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/analytics/sales-delivery-sustainability")
+async def get_sales_delivery_sustainability(
+    year: int = Query(..., ge=2000, le=2100, description="Reporting year (YYYY)"),
+    customer_id: Optional[str] = Query(None, description="Optional customer filter"),
+    db: Session = Depends(get_db),
+) -> dict:
+    """
+    Aggregated sustainability figures from sales delivery notes.
+
+    Returns totals for N, P2O5 and CO2e to support yearly nutrient and
+    sustainability reporting requested by farms and downstream processors.
+    """
+    try:
+        data = _compute_sales_delivery_sustainability(year=year, customer_id=customer_id, db=db)
+
+        return {
+            "ok": True,
+            "data": data,
+        }
+    except Exception as e:
+        logger.error(f"Failed to aggregate sales delivery sustainability analytics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/analytics/sales-delivery-sustainability/export.csv")
+async def export_sales_delivery_sustainability_csv(
+    year: int = Query(..., ge=2000, le=2100, description="Reporting year (YYYY)"),
+    customer_id: Optional[str] = Query(None, description="Optional customer filter"),
+    db: Session = Depends(get_db),
+):
+    """Export yearly delivery sustainability analytics as CSV."""
+    try:
+        data = _compute_sales_delivery_sustainability(year=year, customer_id=customer_id, db=db)
+
+        buffer = io.StringIO()
+        writer = csv.writer(buffer, delimiter=";")
+
+        writer.writerow(["Jahr", data["year"]])
+        writer.writerow(["Kunde", data["customerId"] or "alle"])
+        writer.writerow(["Anzahl Lieferscheine", data["deliveryCount"]])
+        writer.writerow(["Summe N (kg)", f"{float(data['totalNutrientNKg']):.3f}"])
+        writer.writerow(["Summe P2O5 (kg)", f"{float(data['totalNutrientP2o5Kg']):.3f}"])
+        writer.writerow(["Summe CO2e (kg)", f"{float(data['totalCo2eKg']):.3f}"])
+        writer.writerow([])
+        writer.writerow(["Monat", "Lieferscheine", "N (kg)", "P2O5 (kg)", "CO2e (kg)"])
+
+        by_month = data.get("byMonth", {})
+        for month, row in by_month.items():
+            writer.writerow([
+                month,
+                int(row.get("deliveries", 0)),
+                f"{float(row.get('n_kg', 0.0)):.3f}",
+                f"{float(row.get('p2o5_kg', 0.0)):.3f}",
+                f"{float(row.get('co2e_kg', 0.0)):.3f}",
+            ])
+
+        payload = io.BytesIO(buffer.getvalue().encode("utf-8-sig"))
+        filename = f"sales-delivery-sustainability-{year}.csv"
+        if customer_id:
+            filename = f"sales-delivery-sustainability-{year}-{customer_id}.csv"
+
+        return StreamingResponse(
+            payload,
+            media_type="text/csv; charset=utf-8",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+    except Exception as e:
+        logger.error(f"Failed to export sales delivery sustainability CSV: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/analytics/sales-delivery-sustainability/export.pdf")
+async def export_sales_delivery_sustainability_pdf(
+    year: int = Query(..., ge=2000, le=2100, description="Reporting year (YYYY)"),
+    customer_id: Optional[str] = Query(None, description="Optional customer filter"),
+    db: Session = Depends(get_db),
+):
+    """Export yearly delivery sustainability analytics as PDF."""
+    try:
+        data = _compute_sales_delivery_sustainability(year=year, customer_id=customer_id, db=db)
+
+        pdf_buffer = io.BytesIO()
+        c = canvas.Canvas(pdf_buffer, pagesize=A4)
+        _, height = A4
+
+        y = height - 20 * mm
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(20 * mm, y, "Jahresreport Lieferschein-Nachhaltigkeit")
+        y -= 8 * mm
+
+        c.setFont("Helvetica", 10)
+        c.drawString(20 * mm, y, f"Jahr: {data['year']}")
+        y -= 5 * mm
+        c.drawString(20 * mm, y, f"Kunde: {data['customerId'] or 'alle'}")
+        y -= 5 * mm
+        c.drawString(20 * mm, y, f"Lieferscheine: {data['deliveryCount']}")
+        y -= 7 * mm
+
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(20 * mm, y, "Summen")
+        y -= 5 * mm
+
+        c.setFont("Helvetica", 10)
+        c.drawString(22 * mm, y, f"N gesamt: {float(data['totalNutrientNKg']):.3f} kg")
+        y -= 5 * mm
+        c.drawString(22 * mm, y, f"P2O5 gesamt: {float(data['totalNutrientP2o5Kg']):.3f} kg")
+        y -= 5 * mm
+        c.drawString(22 * mm, y, f"CO2e gesamt: {float(data['totalCo2eKg']):.3f} kg")
+        y -= 8 * mm
+
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(20 * mm, y, "Monat")
+        c.drawString(55 * mm, y, "Lieferscheine")
+        c.drawString(90 * mm, y, "N (kg)")
+        c.drawString(125 * mm, y, "P2O5 (kg)")
+        c.drawString(160 * mm, y, "CO2e (kg)")
+        y -= 4 * mm
+        c.line(20 * mm, y, 190 * mm, y)
+        y -= 5 * mm
+
+        c.setFont("Helvetica", 9)
+        for month, row in data.get("byMonth", {}).items():
+            if y < 20 * mm:
+                c.showPage()
+                y = height - 20 * mm
+                c.setFont("Helvetica-Bold", 10)
+                c.drawString(20 * mm, y, "Monat")
+                c.drawString(55 * mm, y, "Lieferscheine")
+                c.drawString(90 * mm, y, "N (kg)")
+                c.drawString(125 * mm, y, "P2O5 (kg)")
+                c.drawString(160 * mm, y, "CO2e (kg)")
+                y -= 6 * mm
+                c.setFont("Helvetica", 9)
+
+            c.drawString(20 * mm, y, str(month))
+            c.drawRightString(82 * mm, y, str(int(row.get("deliveries", 0))))
+            c.drawRightString(118 * mm, y, f"{float(row.get('n_kg', 0.0)):.3f}")
+            c.drawRightString(153 * mm, y, f"{float(row.get('p2o5_kg', 0.0)):.3f}")
+            c.drawRightString(188 * mm, y, f"{float(row.get('co2e_kg', 0.0)):.3f}")
+            y -= 5 * mm
+
+        c.showPage()
+        c.save()
+        pdf_buffer.seek(0)
+
+        filename = f"sales-delivery-sustainability-{year}.pdf"
+        if customer_id:
+            filename = f"sales-delivery-sustainability-{year}-{customer_id}.pdf"
+
+        return StreamingResponse(
+            pdf_buffer,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+    except Exception as e:
+        logger.error(f"Failed to export sales delivery sustainability PDF: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

@@ -14,6 +14,15 @@ class DocLine(BaseModel):
     qty: float
     price: Optional[float] = None
     vatRate: Optional[float] = None
+    nutrientNKgPerUnit: Optional[float] = None
+    nutrientP2o5KgPerUnit: Optional[float] = None
+    co2eKgPerUnit: Optional[float] = None
+    nutrientNTotalKg: Optional[float] = None
+    nutrientP2o5TotalKg: Optional[float] = None
+    co2eTotalKg: Optional[float] = None
+    bvlZulassungsnummer: Optional[str] = None
+    hazardHinweise: Optional[str] = None
+    sdsReference: Optional[str] = None
 
 
 class CustomerInquiry(BaseModel):
@@ -78,6 +87,13 @@ class SalesDelivery(BaseModel):
     status: str = "ENTWURF"  # Status-Management: ENTWURF → VERSENDET → GELIEFERT
     notes: Optional[str] = ""
     lines: List[DocLine] = Field(default_factory=list)
+    totalNutrientNKg: float = 0.0
+    totalNutrientP2o5Kg: float = 0.0
+    totalCo2eKg: float = 0.0
+    supplierName: Optional[str] = None
+    sachkundeStatus: Optional[str] = "offen"
+    sdsMitgeliefert: Optional[str] = "offen"
+    adrPunkte: Optional[float] = 0.0
 
 
 class SalesInvoice(BaseModel):

@@ -1,12 +1,10 @@
-/**
+﻿/**
  * Einkauf (Procurement) API Hooks
- * TanStack Query hooks for Bestellvorschläge, Warengruppen, Reports, Retouren, RFQ, Anfragen, etc.
+ * Error-first fetching without mock fallback data.
  */
 
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../api-client'
-
-// ── Types ──────────────────────────────────────────────────────────────
 
 export type Bestellvorschlag = {
   id: string
@@ -89,8 +87,33 @@ export type Rechnungseingang = {
 
 export type EinkaufSpendItem = { kategorie: string; anteil: number; betrag: number }
 export type EinkaufPerformance = { lieferant: string; qualitaet: number; liefertreue: number; preis: number; gesamt: number }
-
-// ── Query Keys ─────────────────────────────────────────────────────────
+export type EinkaufSupplierPerformance = {
+  supplier: string
+  onTimeDelivery: number
+  qualityScore: number
+  priceScore: number
+  serviceScore: number
+  overallScore: number
+  totalOrders: number
+}
+export type EinkaufOpenOrder = {
+  id?: string
+  purchaseOrderNumber?: string
+  supplierId?: string
+  supplierName?: string
+  status?: string
+  deliveryDate?: string
+  totalAmount?: number
+}
+export type EinkaufToleranceReport = { purchaseOrderNumber?: string; deviation?: number; type?: string }
+export type EinkaufRetoure = {
+  id: string
+  nummer: string
+  grund: string
+  status: string
+  datum?: string | null
+  lieferant?: string
+}
 
 export const einkaufKeys = {
   all: ['einkauf'] as const,
@@ -102,70 +125,14 @@ export const einkaufKeys = {
   bestaetigungen: () => [...einkaufKeys.all, 'bestaetigungen'] as const,
   rechnungseingaenge: () => [...einkaufKeys.all, 'rechnungseingaenge'] as const,
   reports: () => [...einkaufKeys.all, 'reports'] as const,
+  reportsStandard: () => [...einkaufKeys.all, 'reports-standard'] as const,
+  retouren: () => [...einkaufKeys.all, 'retouren'] as const,
 }
-
-// ── Fallback Data ──────────────────────────────────────────────────────
-
-const fallbackVorschlaege: Bestellvorschlag[] = [
-  { id: '1', artikel: 'Weizen Saatgut', aktuellBestand: 120, mindestbestand: 200, vorschlagMenge: 100, lieferant: 'Saatgut AG', preis: 45000, lieferzeit: 5, prioritaet: 'hoch', grund: 'Bestand unter Mindestbestand' },
-  { id: '2', artikel: 'NPK-Dünger 15-15-15', aktuellBestand: 85, mindestbestand: 100, vorschlagMenge: 50, lieferant: 'Dünger GmbH', preis: 26000, lieferzeit: 3, prioritaet: 'mittel', grund: 'Saisonaler Mehrbedarf' },
-  { id: '3', artikel: 'Glyphosat 360 g/l', aktuellBestand: 200, mindestbestand: 150, vorschlagMenge: 25, lieferant: 'AgroChem AG', preis: 8750, lieferzeit: 7, prioritaet: 'niedrig', grund: 'Auffüllung Sicherheitsbestand' },
-]
-
-const fallbackWarengruppen: Warengruppe[] = [
-  { id: '1', name: 'Getreide', kategorie: 'Agrar', artikel: 45, umsatz: 1250000 },
-  { id: '2', name: 'Saatgut', kategorie: 'Agrar', artikel: 32, umsatz: 890000 },
-  { id: '3', name: 'Düngemittel', kategorie: 'Agrar', artikel: 28, umsatz: 750000 },
-  { id: '4', name: 'Futtermittel', kategorie: 'Agrar', artikel: 18, umsatz: 420000 },
-]
-
-const fallbackAnfragen: EinkaufAnfrage[] = [
-  { id: '1', anfrageNummer: 'BANF-2026-001', typ: 'BANF', anforderer: 'Lager Nord', artikel: 'Weizen Saatgut', menge: 100, prioritaet: 'hoch', status: 'OFFEN', faelligkeit: '2026-03-01', createdAt: '2026-02-10' },
-  { id: '2', anfrageNummer: 'ANF-2026-002', typ: 'ANF', anforderer: 'Einkauf', artikel: 'NPK-Dünger', menge: 50, prioritaet: 'normal', status: 'IN_BEARBEITUNG', faelligkeit: '2026-03-15', createdAt: '2026-02-09' },
-]
-
-const fallbackAngebote: EinkaufAngebot[] = [
-  { id: '1', angebotNummer: 'ANG-2026-001', anfrage: 'ANF-2026-002', lieferant: 'Dünger GmbH', artikel: 'NPK-Dünger', preis: 520, gueltigBis: '2026-03-15', status: 'ERFASST', lieferzeit: '3 Tage', createdAt: '2026-02-10' },
-  { id: '2', angebotNummer: 'ANG-2026-002', anfrage: 'ANF-2026-002', lieferant: 'AgroChem AG', artikel: 'NPK-Dünger', preis: 495, gueltigBis: '2026-03-10', status: 'GEPRUEFT', lieferzeit: '5 Tage', createdAt: '2026-02-09' },
-]
-
-const fallbackAnlieferavis: Anlieferavis[] = [
-  { id: '1', avisNummer: 'AVIS-2026-001', bestellung: 'PO-2026-042', lieferant: 'Saatgut AG', status: 'ANGEKUENDIGT', geplantesAnlieferDatum: '2026-02-15', kennzeichen: 'AB-CD 1234', createdAt: '2026-02-10' },
-]
-
-const fallbackBestaetigungen: Auftragsbestaetigung[] = [
-  { id: '1', bestaetigungsNummer: 'AB-2026-001', bestellung: 'PO-2026-042', lieferant: 'Saatgut AG', status: 'BESTAETIGT', createdAt: '2026-02-10' },
-]
-
-const fallbackRechnungseingaenge: Rechnungseingang[] = [
-  { id: '1', rechnungsNummer: 'RE-L-2026-001', lieferant: 'Saatgut AG', bestellung: 'PO-2026-042', wareneingang: 'WE-2026-001', status: 'ERFASST', bruttoBetrag: 45000, rechnungsDatum: '2026-02-10', createdAt: '2026-02-10' },
-]
-
-const fallbackSpend: EinkaufSpendItem[] = [
-  { kategorie: 'Saatgut', anteil: 36, betrag: 890000 },
-  { kategorie: 'Düngemittel', anteil: 30.4, betrag: 750000 },
-  { kategorie: 'Landtechnik', anteil: 25.6, betrag: 632000 },
-  { kategorie: 'Sonstiges', anteil: 8, betrag: 198000 },
-]
-
-const fallbackPerformance: EinkaufPerformance[] = [
-  { lieferant: 'Saatgut AG', qualitaet: 95, liefertreue: 92, preis: 88, gesamt: 91.7 },
-  { lieferant: 'Dünger GmbH', qualitaet: 90, liefertreue: 85, preis: 92, gesamt: 89.0 },
-  { lieferant: 'AgroChem AG', qualitaet: 88, liefertreue: 78, preis: 95, gesamt: 87.0 },
-]
-
-// ── Hooks ──────────────────────────────────────────────────────────────
 
 export function useBestellvorschlaege() {
   return useQuery({
     queryKey: einkaufKeys.vorschlaege(),
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<Bestellvorschlag[]>('/api/v1/einkauf/bestellvorschlaege')
-        if (response.data?.length) return response.data
-      } catch { /* fallback */ }
-      return fallbackVorschlaege
-    },
+    queryFn: async () => (await apiClient.get<Bestellvorschlag[]>('/api/v1/einkauf/bestellvorschlaege')).data,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -173,13 +140,7 @@ export function useBestellvorschlaege() {
 export function useWarengruppen() {
   return useQuery({
     queryKey: einkaufKeys.warengruppen(),
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<Warengruppe[]>('/api/v1/einkauf/warengruppen')
-        if (response.data?.length) return response.data
-      } catch { /* fallback */ }
-      return fallbackWarengruppen
-    },
+    queryFn: async () => (await apiClient.get<Warengruppe[]>('/api/v1/einkauf/warengruppen')).data,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -187,13 +148,7 @@ export function useWarengruppen() {
 export function useEinkaufAnfragen() {
   return useQuery({
     queryKey: einkaufKeys.anfragen(),
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<EinkaufAnfrage[]>('/api/v1/einkauf/anfragen')
-        if (response.data?.length) return response.data
-      } catch { /* fallback */ }
-      return fallbackAnfragen
-    },
+    queryFn: async () => (await apiClient.get<EinkaufAnfrage[]>('/api/v1/einkauf/anfragen')).data,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -201,13 +156,7 @@ export function useEinkaufAnfragen() {
 export function useEinkaufAngebote() {
   return useQuery({
     queryKey: einkaufKeys.angebote(),
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<EinkaufAngebot[]>('/api/v1/einkauf/angebote')
-        if (response.data?.length) return response.data
-      } catch { /* fallback */ }
-      return fallbackAngebote
-    },
+    queryFn: async () => (await apiClient.get<EinkaufAngebot[]>('/api/v1/einkauf/angebote')).data,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -215,13 +164,7 @@ export function useEinkaufAngebote() {
 export function useAnlieferavis() {
   return useQuery({
     queryKey: einkaufKeys.anlieferavis(),
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<Anlieferavis[]>('/api/v1/einkauf/anlieferavis')
-        if (response.data?.length) return response.data
-      } catch { /* fallback */ }
-      return fallbackAnlieferavis
-    },
+    queryFn: async () => (await apiClient.get<Anlieferavis[]>('/api/v1/einkauf/anlieferavis')).data,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -229,13 +172,7 @@ export function useAnlieferavis() {
 export function useAuftragsbestaetigungen() {
   return useQuery({
     queryKey: einkaufKeys.bestaetigungen(),
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<Auftragsbestaetigung[]>('/api/v1/einkauf/auftragsbestaetigungen')
-        if (response.data?.length) return response.data
-      } catch { /* fallback */ }
-      return fallbackBestaetigungen
-    },
+    queryFn: async () => (await apiClient.get<Auftragsbestaetigung[]>('/api/v1/einkauf/auftragsbestaetigungen')).data,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -243,13 +180,7 @@ export function useAuftragsbestaetigungen() {
 export function useRechnungseingaenge() {
   return useQuery({
     queryKey: einkaufKeys.rechnungseingaenge(),
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<Rechnungseingang[]>('/api/v1/einkauf/rechnungseingaenge')
-        if (response.data?.length) return response.data
-      } catch { /* fallback */ }
-      return fallbackRechnungseingaenge
-    },
+    queryFn: async () => (await apiClient.get<Rechnungseingang[]>('/api/v1/einkauf/rechnungseingaenge')).data,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -257,13 +188,39 @@ export function useRechnungseingaenge() {
 export function useEinkaufReports() {
   return useQuery({
     queryKey: einkaufKeys.reports(),
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<{ spend: EinkaufSpendItem[]; performance: EinkaufPerformance[] }>('/api/v1/einkauf/reports')
-        if (response.data?.spend) return response.data
-      } catch { /* fallback */ }
-      return { spend: fallbackSpend, performance: fallbackPerformance }
-    },
+    queryFn: async () => (await apiClient.get<{ spend: EinkaufSpendItem[]; performance: EinkaufPerformance[] }>('/api/v1/einkauf/reports')).data,
     staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useEinkaufReportsStandard() {
+  return useQuery({
+    queryKey: einkaufKeys.reportsStandard(),
+    queryFn: async () =>
+      (
+        await apiClient.get<{
+          openOrders: EinkaufOpenOrder[]
+          supplierPerformance: EinkaufSupplierPerformance[]
+          toleranceReports: EinkaufToleranceReport[]
+        }>('/api/v1/einkauf/reports/standard')
+      ).data,
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useEinkaufRetouren() {
+  return useQuery({
+    queryKey: einkaufKeys.retouren(),
+    queryFn: async () => (await apiClient.get<EinkaufRetoure[]>('/api/v1/einkauf/retouren')).data,
+    staleTime: 60 * 1000,
+  })
+}
+
+export function useUpdateEinkaufRetoure() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, status, grund }: { id: string; status: string; grund?: string }) =>
+      (await apiClient.patch(`/api/v1/einkauf/retouren/${encodeURIComponent(id)}`, { status, grund })).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: einkaufKeys.retouren() }),
   })
 }

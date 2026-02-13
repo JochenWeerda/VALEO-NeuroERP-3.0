@@ -196,15 +196,19 @@ const fb = {
 
 // ── Helper ─────────────────────────────────────────────────────────────
 
-function makeHook<T>(key: string[], endpoint: string, fallback: T, stale = 2 * 60 * 1000) {
+function makeHook<T>(key: string[], endpoint: string, _fallback: T, stale = 2 * 60 * 1000) {
   return () => useQuery({
     queryKey: key,
     queryFn: async () => {
-      try {
-        const r = await apiClient.get<T>(endpoint)
-        if (r.data && (Array.isArray(r.data) ? r.data.length > 0 : true)) return r.data
-      } catch { /* fallback */ }
-      return fallback
+      const r = await apiClient.get<unknown>(endpoint)
+      const data = r.data as { items?: T } | T
+      if (data && typeof data === 'object' && !Array.isArray(data) && 'items' in data) {
+        if (data.items === undefined || data.items === null) {
+          throw new Error(`Invalid API payload for ${endpoint}: missing items`)
+        }
+        return data.items as T
+      }
+      return data as T
     },
     staleTime: stale,
   })
@@ -237,7 +241,7 @@ export const useFahrerListe = makeHook<Fahrer[]>(['transporte', 'fahrer'], '/api
 export const useVerladungen = makeHook<VerladungItem[]>(['verladung'], '/api/v1/verladung', fb.verladungen)
 export const useVersicherungen = makeHook<Versicherung[]>(['versicherungen'], '/api/v1/versicherungen', fb.versicherungen)
 export const useRahmenvertraege = makeHook<Vertrag[]>(['vertraege', 'rahmen'], '/api/v1/vertrag/rahmenvertraege', fb.vertraege)
-export const useWaagen = makeHook<Waage[]>(['waage', 'liste'], '/api/v1/waage', fb.waagen)
+export const useWaagen = makeHook<Waage[]>(['waage', 'liste'], '/api/v1/waage/waagen', fb.waagen)
 export const useWiegungen = makeHook<Wiegung[]>(['waage', 'wiegungen'], '/api/v1/waage/wiegungen', fb.wiegungen, 30 * 1000)
 export const useWartungAnlagen = makeHook<WartungAnlage[]>(['wartung', 'anlagen'], '/api/v1/wartung/anlagen', fb.wartung)
 export const useWorkflowExecutions = makeHook<WorkflowExecution[]>(['workflow', 'executions'], '/api/v1/workflow/executions', fb.workflowExecutions, 30 * 1000)

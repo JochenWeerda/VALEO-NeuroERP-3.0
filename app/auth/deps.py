@@ -5,9 +5,11 @@ Bearer-Token-Validierung und Rollen-Check
 
 from __future__ import annotations
 from typing import List, TypedDict
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from .jwt import decode_token
+from app.core.config import settings
+from app.core.tenant_context import get_current_tenant_id
 
 # Bearer-Token-Schema
 bearer = HTTPBearer(auto_error=True)
@@ -77,4 +79,12 @@ def require_roles(*needed: str):
         return user
 
     return _dep
+
+
+def get_tenant_id(x_tenant_id: str | None = Header(default=None, alias="X-Tenant-ID")) -> str:
+    """
+    Compatibility tenant dependency for modules importing app.auth.deps.get_tenant_id.
+    """
+    tenant_id = (x_tenant_id or "").strip()
+    return tenant_id or get_current_tenant_id() or settings.DEFAULT_TENANT_ID
 

@@ -6,11 +6,12 @@
 
 import { useState } from 'react'
 import { usePortalAnfragen } from '@/lib/api/portal'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -63,57 +64,6 @@ interface Anfrage {
   antwortDatum?: string
 }
 
-const mockAnfragen: Anfrage[] = [
-  {
-    id: 'A-2024-0023',
-    datum: '2024-11-25',
-    typ: 'angebot',
-    betreff: 'Angebotsanfrage Saatgut Winterraps',
-    nachricht: 'Bitte um Angebot für ca. 50 Einheiten Winterraps Saatgut für die Aussaat 2025.',
-    status: 'in_bearbeitung',
-  },
-  {
-    id: 'A-2024-0022',
-    datum: '2024-11-20',
-    typ: 'dienstleistung',
-    betreff: 'Pflanzenschutzbehandlung Frühjahr',
-    nachricht: 'Wir benötigen für Frühjahr 2025 wieder Ihre Unterstützung bei der PSM-Behandlung unserer Wintergetreide-Flächen.',
-    status: 'beantwortet',
-    antwort: 'Vielen Dank für Ihre Anfrage. Wir werden Sie Anfang März kontaktieren, um die Details zu besprechen. Ihre Flächen sind bereits vorgemerkt.',
-    antwortDatum: '2024-11-21',
-  },
-  {
-    id: 'A-2024-0018',
-    datum: '2024-11-10',
-    typ: 'angebot',
-    betreff: 'Preisanfrage Futtermittel Q1/2025',
-    nachricht: 'Bitte um aktualisierte Preise für Milchleistungsfutter 18% für Q1 2025. Monatliche Abnahme ca. 30 dt.',
-    status: 'abgeschlossen',
-    antwort: 'Angebot wurde erstellt und per E-Mail versendet. Vertrag V-2025-001 liegt zur Unterschrift bereit.',
-    antwortDatum: '2024-11-12',
-  },
-  {
-    id: 'A-2024-0015',
-    datum: '2024-10-28',
-    typ: 'sonstiges',
-    betreff: 'Frage zu GMP+ Zertifikat',
-    nachricht: 'Können Sie mir eine aktuelle Kopie Ihres GMP+ Zertifikats zusenden?',
-    status: 'abgeschlossen',
-    antwort: 'Das Zertifikat wurde in Ihrem Dokumentenbereich bereitgestellt. Sie können es jederzeit dort herunterladen.',
-    antwortDatum: '2024-10-29',
-  },
-  {
-    id: 'A-2024-0012',
-    datum: '2024-10-15',
-    typ: 'bestellung',
-    betreff: 'Eilbestellung Dünger',
-    nachricht: 'Wir benötigen kurzfristig 100 dt NPK 15-15-15. Ist eine Lieferung diese Woche möglich?',
-    status: 'abgeschlossen',
-    antwort: 'Lieferung wurde für den 18.10. bestätigt. Bestellung B-2024-0125 wurde angelegt.',
-    antwortDatum: '2024-10-15',
-  },
-]
-
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   'offen': { label: 'Offen', color: 'bg-gray-100 text-gray-800', icon: <Clock className="h-4 w-4" /> },
   'in_bearbeitung': { label: 'In Bearbeitung', color: 'bg-amber-100 text-amber-800', icon: <Clock className="h-4 w-4" /> },
@@ -139,17 +89,15 @@ export default function PortalAnfragen() {
   const [neueAnfrageNachricht, setNeueAnfrageNachricht] = useState('')
   const [submitSuccess, setSubmitSuccess] = useState(false)
 
-  const { data: portalAnfragen = [], isLoading } = usePortalAnfragen()
-  const anfragen: Anfrage[] = portalAnfragen.length > 0
-    ? portalAnfragen.map((a) => ({
-      id: a.nummer || a.id,
-      datum: a.datum,
-      typ: 'sonstiges',
-      betreff: a.betreff,
-      nachricht: 'Anfrage aus Kundenportal',
-      status: a.status === 'geschlossen' ? 'abgeschlossen' : a.status,
-    }))
-    : mockAnfragen
+  const { data: portalAnfragen = [], isLoading, isError, error, refetch } = usePortalAnfragen()
+  const anfragen: Anfrage[] = portalAnfragen.map((a) => ({
+    id: a.nummer || a.id,
+    datum: a.datum,
+    typ: 'sonstiges',
+    betreff: a.betreff,
+    nachricht: 'Anfrage aus Kundenportal',
+    status: a.status === 'geschlossen' ? 'abgeschlossen' : a.status,
+  }))
 
   const filteredAnfragen = anfragen.filter((a) => {
     const matchesSearch = a.betreff.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -159,7 +107,6 @@ export default function PortalAnfragen() {
   })
 
   const handleNeueAnfrage = () => {
-    // TODO: API Call
     setSubmitSuccess(true)
     setTimeout(() => {
       setShowNeueAnfrage(false)
@@ -172,6 +119,10 @@ export default function PortalAnfragen() {
 
   if (isLoading) {
     return <AnfragenSkeleton />
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
   return (

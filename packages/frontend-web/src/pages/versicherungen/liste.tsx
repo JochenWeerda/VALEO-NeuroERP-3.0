@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { AlertTriangle, FileDown, Plus, Search, Shield } from 'lucide-react'
-
-const mockVersicherungen: Versicherung[] = [
-  { id: '1', art: 'Betriebshaftpflicht', versicherer: 'R+V Versicherung', vertragsnummer: 'RV-2024-1234', praemie: 3200, ablauf: '2025-12-31', status: 'aktiv' },
-  { id: '2', art: 'Hagelversicherung', versicherer: 'Vereinigte Hagel', vertragsnummer: 'VH-2024-5678', praemie: 8500, ablauf: '2025-06-30', status: 'auslaufend' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function VersicherungenListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: versicherungen = mockVersicherungen } = useVersicherungen()
+  const { data: versicherungen = [], isError, error, refetch } = useVersicherungen()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const ablaufBald = versicherungen.filter((v) => new Date(v.ablauf) < new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)).length
 

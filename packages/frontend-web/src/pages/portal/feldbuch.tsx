@@ -6,14 +6,13 @@
 
 import { useState, useRef } from 'react'
 import { usePortalFeldbuch } from '@/lib/api/portal'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog,
   DialogContent,
@@ -48,10 +47,8 @@ import {
   FileSpreadsheet,
   Info,
   CheckCircle2,
-  AlertCircle,
   Droplets,
   Bug,
-  Eye,
   FileDown,
   FileUp,
   Sprout,
@@ -81,22 +78,6 @@ interface Massnahme {
   bemerkung?: string
 }
 
-const mockSchlaege: Schlag[] = [
-  { id: '1', name: 'Großer Acker', flaeche: 12.5, kultur: 'Winterweizen', flik: 'DENI0123456789', gemeinde: 'Musterstadt', gemarkung: 'Flur 1' },
-  { id: '2', name: 'Hinteres Feld', flaeche: 8.3, kultur: 'Wintergerste', flik: 'DENI0123456790', gemeinde: 'Musterstadt', gemarkung: 'Flur 2' },
-  { id: '3', name: 'Waldstück', flaeche: 5.2, kultur: 'Mais', flik: 'DENI0123456791', gemeinde: 'Musterstadt', gemarkung: 'Flur 3' },
-  { id: '4', name: 'Wiese am Bach', flaeche: 6.8, kultur: 'Grünland', flik: 'DENI0123456792', gemeinde: 'Musterdorf', gemarkung: 'Flur 1' },
-]
-
-const mockMassnahmen: Massnahme[] = [
-  { id: '1', schlagId: '1', schlagName: 'Großer Acker', datum: '2024-11-15', typ: 'duengung', bezeichnung: 'N-Düngung Herbst', mittel: 'AHL 28%', menge: 150, einheit: 'l/ha', anwender: 'VALEO GmbH' },
-  { id: '2', schlagId: '1', schlagName: 'Großer Acker', datum: '2024-10-20', typ: 'psm', bezeichnung: 'Herbizidbehandlung', mittel: 'Atlantis Flex', menge: 1.5, einheit: 'l/ha', anwender: 'VALEO GmbH' },
-  { id: '3', schlagId: '1', schlagName: 'Großer Acker', datum: '2024-10-05', typ: 'aussaat', bezeichnung: 'Winterweizen Aussaat', mittel: 'WW Reform', menge: 180, einheit: 'kg/ha' },
-  { id: '4', schlagId: '2', schlagName: 'Hinteres Feld', datum: '2024-11-10', typ: 'duengung', bezeichnung: 'Grunddüngung', mittel: 'NPK 15-15-15', menge: 300, einheit: 'kg/ha', anwender: 'VALEO GmbH' },
-  { id: '5', schlagId: '3', schlagName: 'Waldstück', datum: '2024-09-25', typ: 'ernte', bezeichnung: 'Maisernte', bemerkung: 'Ertrag: 45 t/ha' },
-  { id: '6', schlagId: '2', schlagName: 'Hinteres Feld', datum: '2024-09-20', typ: 'aussaat', bezeichnung: 'Wintergerste Aussaat', mittel: 'Hyvido', menge: 1.5, einheit: 'Einheiten/ha' },
-]
-
 const typConfig: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   'duengung': { label: 'Düngung', icon: <Droplets className="h-4 w-4" />, color: 'bg-blue-100 text-blue-800' },
   'psm': { label: 'Pflanzenschutz', icon: <Bug className="h-4 w-4" />, color: 'bg-amber-100 text-amber-800' },
@@ -112,12 +93,12 @@ export default function PortalFeldbuch() {
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [importSuccess, setImportSuccess] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
   const [exportSuccess, setExportSuccess] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { data: portalFeldbuch = [], isLoading } = usePortalFeldbuch()
+  const { data: portalFeldbuch = [], isLoading, isError, error, refetch } = usePortalFeldbuch()
 
-  const schlaege: Schlag[] = portalFeldbuch.length > 0
-    ? portalFeldbuch.map((s) => ({
+  const schlaege: Schlag[] = portalFeldbuch.map((s) => ({
       id: s.id,
       name: s.schlag,
       flaeche: s.flaeche,
@@ -126,10 +107,8 @@ export default function PortalFeldbuch() {
       gemeinde: '',
       gemarkung: '',
     }))
-    : mockSchlaege
 
-  const massnahmen: Massnahme[] = portalFeldbuch.length > 0
-    ? portalFeldbuch.map((s, idx) => ({
+  const massnahmen: Massnahme[] = portalFeldbuch.map((s, idx) => ({
       id: `pm-${idx}`,
       schlagId: s.id,
       schlagName: s.schlag,
@@ -138,7 +117,6 @@ export default function PortalFeldbuch() {
       bezeichnung: s.letzteMassnahme || 'Dokumentierte Massnahme',
       bemerkung: s.naechsteMassnahme ? `Naechste: ${s.naechsteMassnahme}` : undefined,
     }))
-    : mockMassnahmen
 
   const filteredSchlaege = schlaege.filter((s) =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -205,17 +183,17 @@ export default function PortalFeldbuch() {
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      // TODO: Parse CSV and import data
-      setImportSuccess(true)
-      setTimeout(() => {
-        setShowImportDialog(false)
-        setImportSuccess(false)
-      }, 2000)
+      setImportSuccess(false)
+      setImportError(`Import derzeit nicht verfuegbar (${file.name}). Bitte Backend-Importendpoint anbinden.`)
     }
   }
 
   if (isLoading) {
     return <FeldbuchSkeleton />
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
   return (
@@ -246,6 +224,13 @@ export default function PortalFeldbuch() {
           <AlertDescription className="text-emerald-700">
             Die CSV-Datei wurde heruntergeladen.
           </AlertDescription>
+        </Alert>
+      )}
+
+      {importError && (
+        <Alert variant="destructive">
+          <AlertTitle>Import fehlgeschlagen</AlertTitle>
+          <AlertDescription>{importError}</AlertDescription>
         </Alert>
       )}
 

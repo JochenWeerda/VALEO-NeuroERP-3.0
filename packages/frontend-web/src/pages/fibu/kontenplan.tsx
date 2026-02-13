@@ -8,6 +8,7 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { BookMarked, FileDown, Loader2, Plus, Search } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { ErrorState } from '@/components/ErrorState'
 
 type Konto = {
   id: string
@@ -17,15 +18,6 @@ type Konto = {
   saldo: number
   typ: 'aktiv' | 'passiv' | 'aufwand' | 'ertrag'
 }
-
-// Fallback mock data for when API is unavailable
-const fallbackKonten: Konto[] = [
-  { id: '1', kontonummer: '1200', bezeichnung: 'Bank', kontoart: 'Umlaufvermögen', saldo: 285000, typ: 'aktiv' },
-  { id: '2', kontonummer: '1600', bezeichnung: 'Verbindlichkeiten aus LuL', kontoart: 'Verbindlichkeiten', saldo: -125000, typ: 'passiv' },
-  { id: '3', kontonummer: '4200', bezeichnung: 'Wareneinkauf', kontoart: 'Aufwendungen', saldo: 450000, typ: 'aufwand' },
-  { id: '4', kontonummer: '8400', bezeichnung: 'Erlöse', kontoart: 'Erträge', saldo: 680000, typ: 'ertrag' },
-  { id: '5', kontonummer: '1800', bezeichnung: 'Kasse', kontoart: 'Umlaufvermögen', saldo: 12500, typ: 'aktiv' },
-]
 
 function mapApiAccount(a: { id: string; account_number: string; name: string; category?: string }): Konto {
   const num = parseInt(a.account_number, 10)
@@ -47,23 +39,23 @@ export default function KontenplanPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
 
-  const { data: konten = fallbackKonten, isLoading } = useQuery({
+  const { data: konten = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['fibu', 'chart-of-accounts'],
     queryFn: async () => {
-      try {
-        const res = await apiClient.get<{ items: Array<{ id: string; account_number: string; name: string; category?: string }> }>(
-          '/api/v1/chart-of-accounts'
-        )
-        if (res.data?.items?.length) {
-          return res.data.items.map(mapApiAccount)
-        }
-      } catch {
-        // API not available – use fallback
+      const res = await apiClient.get<{ items: Array<{ id: string; account_number: string; name: string; category?: string }> }>(
+        '/api/v1/chart-of-accounts'
+      )
+      if (!res.data?.items) {
+        throw new Error('Ungültige Antwort für Kontenplan')
       }
-      return fallbackKonten
+      return res.data.items.map(mapApiAccount)
     },
     staleTime: 2 * 60 * 1000,
   })
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     {

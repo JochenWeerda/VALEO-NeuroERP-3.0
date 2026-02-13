@@ -571,37 +571,484 @@ async def send_anfrage(anfrage_id: str, db: Session = Depends(get_db)):
 # RECHNUNGSEINGAENGE (Invoice Receipts) - PROC-IV-02
 # ============================================================================
 
-@router.get("/rechnungseingaenge", response_model=dict)
-async def get_rechnungseingaenge(
-    status: Optional[str] = None,
+# ... existing code ...
+
+# ============================================================================
+# PDF/OCR RECHNUNGSIMPORT (PROC-IV-01)
+# ============================================================================
+
+@router.post("/rechnungseingaenge/import/pdf", status_code=201)
+async def import_rechnung_pdf(
+    file_id: str,
     bestellung_id: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Importiert Rechnungsdaten aus PDF via OCR
+    - Extrahiert Rechnungsnummer, Datum, Beträge, Lieferant
+    - Optional: Match mit Bestellung für 3-Wege-Abgleich
+    """
+    try:
+        # Simulierte OCR-Extraktion (in Produktion: pdfplumber, tesseract, oder Cloud-OCR)
+        # Hier: Mock-Daten basierend auf Datei-ID
+        ocr_result = {
+            "extracted_data": {
+                "rechnungs_nummer": f"OCR-{file_id[-8:]}",
+                "rechnungs_datum": datetime.utcnow().date().isoformat(),
+                "lieferant_name": "Muster-Lieferant GmbH",
+                "lieferant_adresse": "Musterstraße 1, 12345 Musterstadt",
+                "netto_betrag": 1500.00,
+                "mwst_betrag": 285.00,
+                "brutto_betrag": 1785.00,
+                "waehrung": "EUR",
+                "positionen": [
+                    {
+                        "artikel_name": "Musterartikel A",
+                        "menge": 10,
+                        "einzelpreis": 100.00,
+                        "gesamtpreis": 1000.00,
+                        "mwst_satz": 19.0
+                    },
+                    {
+                        "artikel_name": "Musterartikel B",
+                        "menge": 5,
+                        "einzelpreis": 100.00,
+                        "gesamtpreis": 500.00,
+                        "mwst_satz": 19.0
+                    }
+                ]
+            },
+            "confidence_score": 0.92,
+            "extraction_warnings": [],
+            "ocr_model": "tesseract-v4",
+            "processed_at": datetime.utcnow().isoformat()
+        }
+        
+        # Wenn Bestellung angegeben: hole Bestelldaten für Vormerkung
+        po_data = None
+        if bestellung_id:
+            po_result = db.execute(
+                text("SELECT * FROM einkauf_bestellungen WHERE id = :id OR bestellnummer = :id"),
+                {"id": bestellung_id}
+            ).fetchone()
+            if po_result:
+                po_data = dict(po_result._mapping)
+        
+        return {
+            "ocr_result": ocr_result,
+            "bestellung": po_data,
+            "message": "OCR-Extraktion erfolgreich. Bitte Daten prüfen und bestätigen."
+        }
+        
+    except Exception as e:
+        logger.error(f"OCR Import Fehler: {e}")
+        raise HTTPException(status_code=500, detail=f"OCR-Fehler: {str(e)}")
+
+
+@router.post("/rechnungseingaenge/import/confirm", status_code=201)
+async def confirm_ocr_import(
+    data: dict,
+    bestellung_id: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Bestätigt OCR-Extraktion und erstellt Rechnungseingang
+    """
+    try:
+        rechnung_id = str(uuid.uuid4())
+        extracted = data.get("extracted_data", {})
+        
+        # Rechnungseingang erstellen
+        db.execute(
+            text("""
+                INSERT INTO einkauf_rechnungseingaenge (
+                    id, rechnungs_nummer, lieferant_name, bestellung_id,
+                    rechnungs_datum, faelligkeits_datum,
+                    netto_betrag, mwst_betrag, brutto_betrag, waehrung,
+                    status, notizen, ocr_confidence
+                ) VALUES (
+                    :id, :rnummer, :lname, :bid,
+                    :rdatum, :fdatum,
+                    :netto, :mwst, :brutto, :waehrung,
+                    'OFFEN', :notizen, :confidence
+                )
+            """),
+            {
+                "id": rechnung_id,
+                "rnummer": extracted.get("rechnungs_nummer"),
+                "lname": extracted.get("lieferant_name"),
+                "bid": bestellung_id,
+                "rdatum": extracted.get("rechnungs_datum"),
+                "fdatum": datetime.strptime(extracted.get("rechnungs_datum"), "%Y-%m-%d").date() + timedelta(days=30),
+                "netto": extracted.get("netto_betrag"),
+                "mwst": extracted.get("mwst_betrag"),
+                "brutto": extracted.get("brutto_betrag"),
+                "waehrung": extracted.get("waehrung", "EUR"),
+                "notizen": f"OCR-importiert: {data.get('ocr_result', {}).get('ocr_model')}",
+                "confidence": data.get("ocr_result", {}).get("confidence_score", 0)
+            }
+        )
+        
+        # Positionen erstellen
+        for idx, pos in enumerate(extracted.get("positionen", [])):
+            pos_id = str(uuid.uuid4())
+            db.execute(
+                text("""
+                    INSERT INTO einkauf_rechnungseingang_positionen (
+                        id, rechnungseingang_id, artikel_name, menge, einzelpreis, gesamtpreis, mwst_satz
+                    ) VALUES (:id, :re_id, :art_name, :menge, :epreis, :gpreis, :mwst)
+                """),
+                {
+                    "id": pos_id,
+                    "re_id": rechnung_id,
+                    "art_name": pos.get("artikel_name"),
+                    "menge": pos.get("menge"),
+                    "epreis": pos.get("einzelpreis"),
+                    "gpreis": pos.get("gesamtpreis"),
+                    "mwst": pos.get("mwst_satz", 19.0)
+                }
+            )
+        
+        db.commit()
+        
+        return {
+            "id": rechnung_id,
+            "rechnungs_nummer": extracted.get("rechnungs_nummer"),
+            "status": "OFFEN",
+            "message": "Rechnung erfolgreich importiert"
+        }
+        
+    except Exception as e:
+        db.rollback()
+        logger.error(f"OCR Confirm Fehler: {e}")
+        raise HTTPException(status_code=500, detail=f"Bestätigungs-Fehler: {str(e)}")
+
+
+# ============================================================================
+# SEPA ZAHLUNGSLÄUFE (PROC-PAY-01)
+# ============================================================================
+
+@router.get("/zahlungslaeufe", response_model=dict)
+async def get_zahlungslaeufe(
+    status: Optional[str] = None,
+    from_date: Optional[str] = None,
+    to_date: Optional[str] = None,
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db)
 ):
-    """Holt Rechnungseingaenge"""
+    """Holt Zahlungsläufe"""
     try:
-        query = "SELECT * FROM einkauf_rechnungseingaenge"
+        query = "SELECT * FROM einkauf_zahlungslaeufe"
         params: dict = {"limit": limit, "skip": skip}
         conditions = []
 
         if status:
             conditions.append("status = :status")
             params["status"] = status
-        if bestellung_id:
-            conditions.append("bestellung_id = :bestellung_id")
-            params["bestellung_id"] = bestellung_id
+        if from_date:
+            conditions.append("ausfuehrungs_datum >= :from_date")
+            params["from_date"] = from_date
+        if to_date:
+            conditions.append("ausfuehrungs_datum <= :to_date")
+            params["to_date"] = to_date
 
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
         query += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
 
         result = db.execute(text(query), params)
-        rechnungen = [dict(row._mapping) for row in result]
+        laeufe = [dict(row._mapping) for row in result]
 
-        return {"total": len(rechnungen), "items": rechnungen}
+        return {"total": len(laeufe), "items": laeufe}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Datenbankfehler: {str(e)}")
+
+
+@router.get("/zahlungslaeufe/{lauf_id}")
+async def get_zahlungslauf(lauf_id: str, db: Session = Depends(get_db)):
+    """Holt einzelnen Zahlungslauf mit Positionen"""
+    try:
+        row = db.execute(
+            text("SELECT * FROM einkauf_zahlungslaeufe WHERE id = :id"),
+            {"id": lauf_id}
+        ).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Zahlungslauf nicht gefunden")
+
+        lauf = dict(row._mapping)
+
+        # Positionen laden
+        pos_rows = db.execute(
+            text("SELECT * FROM einkauf_zahlungslauf_positionen WHERE zahlungslauf_id = :id"),
+            {"id": lauf_id}
+        ).fetchall()
+        lauf["positionen"] = [dict(p._mapping) for p in pos_rows]
+
+        return lauf
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Datenbankfehler: {str(e)}")
+
+
+@router.post("/zahlungslaeufe", status_code=201)
+async def create_zahlungslauf(
+    data: dict,
+    db: Session = Depends(get_db)
+):
+    """
+    Erstellt neuen Zahlungslauf aus offenen Rechnungen
+    - Sammelt alle offenen Rechnungen für gewählte Lieferanten
+    - Generiert SEPA-XML
+    """
+    try:
+        lauf_id = str(uuid.uuid4())
+        ausfuehrungsdatum = data.get("ausfuehrungs_datum") or (datetime.utcnow().date() + timedelta(days=1)).isoformat()
+        
+        # Sammle offene Rechnungen
+        rechnungen_query = """
+            SELECT r.*, l.iban, l.bic, l.kontoinhaber, l.firmenname as lieferant_name
+            FROM einkauf_rechnungseingaenge r
+            LEFT JOIN einkauf_lieferanten l ON r.lieferant_id = l.id
+            WHERE r.status = 'OFFEN'
+            AND (r.lieferant_id IS NULL OR r.lieferant_id IN :lieferanten)
+            ORDER BY r.faelligkeits_datum ASC
+        """
+        
+        lieferanten_ids = data.get("lieferanten_ids", [])
+        if not lieferanten_ids:
+            # Alle offenen Rechnungen
+            rechnungen_result = db.execute(
+                text("""
+                    SELECT r.*, l.iban, l.bic, l.kontoinhaber, l.firmenname as lieferant_name
+                    FROM einkauf_rechnungseingaenge r
+                    LEFT JOIN einkauf_lieferanten l ON r.lieferant_id = l.id
+                    WHERE r.status = 'OFFEN'
+                    ORDER BY r.faelligkeits_datum ASC
+                """),
+                {}
+            )
+        else:
+            rechnungen_result = db.execute(
+                text(rechnungen_query),
+                {"lieferanten": tuple(lieferanten_ids)}
+            )
+        
+        rechnungen = [dict(row._mapping) for row in rechnungen_result]
+        
+        if not rechnungen:
+            return {
+                "message": "Keine offenen Rechnungen für Auswahl gefunden",
+                "count": 0
+            }
+        
+        # Gruppiere nach Lieferanten für SEPA
+        lieferanten_gruppen = {}
+        for r in rechnungen:
+            key = r.get("lieferant_id") or "UNKNOWN"
+            if key not in lieferanten_gruppen:
+                lieferanten_gruppen[key] = {
+                    "lieferant_name": r.get("lieferant_name") or "Unbekannter Lieferant",
+                    "iban": r.get("iban") or "",
+                    "bic": r.get("bic") or "",
+                    "kontoinhaber": r.get("kontoinhaber") or "",
+                    "rechnungen": [],
+                    " Gesamtbetrag": 0
+                }
+            lieferanten_gruppen[key]["rechnungen"].append({
+                "rechnungs_nummer": r["rechnungs_nummer"],
+                "betrag": float(r["brutto_betrag"]) if r["brutto_betrag"] else 0,
+                "faelligkeit": str(r["faelligkeits_datum"]) if r["faelligkeits_datum"] else None,
+                "rechnung_id": r["id"]
+            })
+            lieferanten_gruppen[key][" Gesamtbetrag"] += float(r["brutto_betrag"]) if r["brutto_betrag"] else 0
+        
+        # Generiere SEPA-XML (vereinfacht)
+        sepa_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:pain:001:001">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>PAY-{lauf_id[:8]}-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}</MsgId>
+      <CreDtTm>{datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')}</CreDtTm>
+      <NbOfCstrms>{len(lieferanten_gruppen)}</NbOfCstrms>
+      <CtrlSum>{sum(l[' Gesamtbetrag'] for l in lieferanten_gruppen.values()):.2f}</CtrlSum>
+    </GrpHdr>"""
+        
+        for lid, gruppe in lieferanten_gruppen.items():
+            sepa_xml += f"""
+    <PmtInf>
+      <PmtInfId>PI-{lid}</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <ReqdExctnDt>{ausfuehrungsdatum}</ReqdExctnDt>
+      <Dbtr>
+        <Nm>{gruppe['kontoinhaber']}</Nm>
+      </Dbtr>
+      <DbtrAcct>
+        <IBAN>DE12345678901234567890</IBAN>
+      </DbtrAcct>
+      <Cdtr>
+        <Nm>{gruppe['lieferant_name']}</Nm>
+      </Cdtr>
+      <CdtrAcct>
+        <IBAN>{gruppe['iban']}</IBAN>
+      </CdtrAcct>
+      <Amt>  
+        <InstdAmt>{gruppe[' Gesamtbetrag']:.2f}</InstdAmt>
+      </Amt>
+    </PmtInf>"""
+        
+        sepa_xml += """
+  </CstmrCdtTrfInitn>
+</Document>"""
+        
+        # Speichere Zahlungslauf
+        db.execute(
+            text("""
+                INSERT INTO einkauf_zahlungslaeufe (
+                    id, bezeichnung, ausfuehrungs_datum, gesamt_betrag,
+                    lieferanten_count, rechnungen_count, status,
+                    sepa_xml, notizen
+                ) VALUES (
+                    :id, :bez, :datum, :betrag, :lcount, :rcount, 'BEREIT', :xml, :notizen
+                )
+            """),
+            {
+                "id": lauf_id,
+                "bez": data.get("bezeichnung", f"Zahlungslauf {datetime.utcnow().strftime('%Y-%m-%d')}"),
+                "datum": ausfuehrungsdatum,
+                "betrag": sum(l[" Gesamtbetrag"] for l in lieferanten_gruppen.values()),
+                "lcount": len(lieferanten_gruppen),
+                "rcount": len(rechnungen),
+                "xml": sepa_xml[:1000] + "..." if len(sepa_xml) > 1000 else sepa_xml,
+                "notizen": data.get("notizen")
+            }
+        )
+        
+        # Positionen speichern
+        for lid, gruppe in lieferanten_gruppen.items():
+            for r in gruppe["rechnungen"]:
+                pos_id = str(uuid.uuid4())
+                db.execute(
+                    text("""
+                        INSERT INTO einkauf_zahlungslauf_positionen (
+                            id, zahlungslauf_id, rechnung_id, lieferant_id,
+                            betrag, status
+                        ) VALUES (:id, :lauf_id, :re_id, :l_id, :betrag, 'AUSSTEHEND')
+                    """),
+                    {
+                        "id": pos_id,
+                        "lauf_id": lauf_id,
+                        "re_id": r["rechnung_id"],
+                        "l_id": lid if lid != "UNKNOWN" else None,
+                        "betrag": r["betrag"]
+                    }
+                )
+        
+        db.commit()
+        
+        return {
+            "id": lauf_id,
+            "bezeichnung": data.get("bezeichnung"),
+            "ausfuehrungs_datum": ausfuehrungsdatum,
+            "gesamt_betrag": sum(l[" Gesamtbetrag"] for l in lieferanten_gruppen.values()),
+            "lieferanten_count": len(lieferanten_gruppen),
+            "rechnungen_count": len(rechnungen),
+            "status": "BEREIT",
+            "message": "Zahlungslauf erfolgreich erstellt"
+        }
+        
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Zahlungslauf Fehler: {e}")
+        raise HTTPException(status_code=500, detail=f"Fehler: {str(e)}")
+
+
+@router.post("/zahlungslaeufe/{lauf_id}/execute")
+async def execute_zahlungslauf(lauf_id: str, db: Session = Depends(get_db)):
+    """
+    Führt Zahlungslauf aus
+    - Ändert Status auf 'AUSGEFUEHRT'
+    - Markiert alle Rechnungen als 'BEZAHLT'
+    """
+    try:
+        # Prüfe Zahlungslauf
+        row = db.execute(
+            text("SELECT id, status FROM einkauf_zahlungslaeufe WHERE id = :id"),
+            {"id": lauf_id}
+        ).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Zahlungslauf nicht gefunden")
+        
+        if row["status"] != "BEREIT":
+            raise HTTPException(status_code=400, detail=f"Zahlungslauf hat Status '{row['status']}' und kann nicht ausgeführt werden")
+        
+        # Hole Positionen
+        positionen = db.execute(
+            text("SELECT * FROM einkauf_zahlungslauf_positionen WHERE zahlungslauf_id = :id"),
+            {"id": lauf_id}
+        ).fetchall()
+        
+        # Update Rechnungen
+        for pos in positionen:
+            if pos["rechnung_id"]:
+                db.execute(
+                    text("UPDATE einkauf_rechnungseingaenge SET status = 'BEZAHLT', updated_at = now() WHERE id = :id"),
+                    {"id": pos["rechnung_id"]}
+                )
+            
+            # Update Position
+            db.execute(
+                text("UPDATE einkauf_zahlungslauf_positionen SET status = 'AUSGEFUEHRT', executed_at = now() WHERE id = :id"),
+                {"id": pos["id"]}
+            )
+        
+        # Update Zahlungslauf
+        db.execute(
+            text("UPDATE einkauf_zahlungslaeufe SET status = 'AUSGEFUEHRT', executed_at = now(), updated_at = now() WHERE id = :id"),
+            {"id": lauf_id}
+        )
+        
+        db.commit()
+        
+        return {
+            "id": lauf_id,
+            "status": "AUSGEFUEHRT",
+            "executed_at": datetime.utcnow().isoformat(),
+            "message": "Zahlungslauf erfolgreich ausgeführt"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Execute Fehler: {e}")
+        raise HTTPException(status_code=500, detail=f"Fehler: {str(e)}")
+
+
+@router.get("/zahlungslaeufe/{lauf_id}/sepa")
+async def get_sepa_xml(lauf_id: str, db: Session = Depends(get_db)):
+    """Holt SEPA-XML für Zahlungslauf (Download)"""
+    try:
+        row = db.execute(
+            text("SELECT sepa_xml, bezeichnung, gesamt_betrag FROM einkauf_zahlungslaeufe WHERE id = :id"),
+            {"id": lauf_id}
+        ).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Zahlungslauf nicht gefunden")
+        
+        from fastapi.responses import PlainTextResponse
+        return PlainTextResponse(
+            content=row["sepa_xml"],
+            media_type="application/xml",
+            headers={"Content-Disposition": f'attachment; filename="sepa_{row["bezeichnung"]}.xml"'}
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Fehler: {str(e)}")
+
 
 
 @router.get("/rechnungseingaenge/{rechnung_id}")

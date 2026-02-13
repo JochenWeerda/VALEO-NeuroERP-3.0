@@ -3,7 +3,7 @@ PSM API endpoints
 Full CRUD for Pflanzenschutzmittel-Stammdaten management
 """
 
-from typing import Optional, List
+from typing import Optional, List, Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
@@ -15,6 +15,7 @@ from ....infrastructure.models import PSM as PSMModel
 from ....api.v1.schemas.base import PaginatedResponse
 from ....api.v1.schemas.agrar import PSM, PSMCreate, PSMUpdate
 from ....integrations.dms_client import upload_document, is_configured as dms_configured
+from ....integrations.bvl_psm_client import BVLPSMClient, map_bvl_mittel_to_psm_payload
 from ....services.sync_scheduler import sync_scheduler
 from ....services.competitor_monitor import competitor_monitor
 
@@ -22,10 +23,12 @@ router = APIRouter()
 
 DEFAULT_TENANT = "system"
 logger = logging.getLogger(__name__)
+bvl_client = BVLPSMClient()
 
 
 @router.get("/", response_model=PaginatedResponse[PSM])
 async def list_psm(
+    source: Literal["local", "bvl"] = Query("local", description="Data source"),
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     search: Optional[str] = Query(None, description="Search in name, wirkstoff, bvl_nummer"),
     mittel_typ: Optional[str] = Query(None, description="Filter by type"),
@@ -41,6 +44,30 @@ async def list_psm(
 ):
     """Return a paginated list of PSM."""
     effective_tenant = tenant_id or DEFAULT_TENANT
+    if source == "bvl":
+        try:
+            bvl_result = await bvl_client.list_mittel(search=search, skip=skip, limit=limit)
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail=f"BVL API not reachable: {exc}") from exc
+
+        payloads = [
+            map_bvl_mittel_to_psm_payload(item, effective_tenant)
+            for item in bvl_result["items"]
+        ]
+        mapped_items = [PSM.model_validate(item) for item in payloads]
+        total = bvl_result["total"]
+        page = (skip // limit) + 1
+        pages = (total + limit - 1) // limit if total else 1
+
+        return PaginatedResponse(
+            items=mapped_items,
+            total=total,
+            page=page,
+            pages=pages,
+            size=limit,
+            has_next=(skip + limit) < total,
+            has_prev=skip > 0,
+        )
 
     query = db.query(PSMModel).filter(PSMModel.tenant_id == effective_tenant)
 
@@ -97,11 +124,20 @@ async def list_psm(
 @router.get("/{psm_id}", response_model=PSM)
 async def get_psm(
     psm_id: str,
+    source: Literal["local", "bvl"] = Query("local", description="Data source"),
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
     """Get a single PSM by ID."""
     effective_tenant = tenant_id or DEFAULT_TENANT
+    if source == "bvl":
+        try:
+            item = await bvl_client.get_mittel_by_kennr(psm_id)
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail=f"BVL API not reachable: {exc}") from exc
+        if not item:
+            raise HTTPException(status_code=404, detail="PSM not found")
+        return PSM.model_validate(map_bvl_mittel_to_psm_payload(item, effective_tenant))
 
     psm = (
         db.query(PSMModel)

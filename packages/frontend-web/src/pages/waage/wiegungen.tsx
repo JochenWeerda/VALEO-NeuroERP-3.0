@@ -6,15 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, Scale, Search } from 'lucide-react'
-
-const mockWiegungen: Wiegung[] = [
-  { id: '1', kennzeichen: 'AB-CD 1234', artikel: 'Weizen', brutto: 48.5, tara: 23.5, netto: 25.0, zeitstempel: '2025-10-11 14:32', waage: 'W-001' },
-  { id: '2', kennzeichen: 'EF-GH 5678', artikel: 'Raps', brutto: 42.0, tara: 23.5, netto: 18.5, zeitstempel: '2025-10-11 13:15', waage: 'W-001' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function WiegungenPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: wiegungen = mockWiegungen } = useWiegungen()
+  const { data: wiegungen = [], isError, error, refetch } = useWiegungen()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     { key: 'zeitstempel' as const, label: 'Zeitstempel', render: (w: Wiegung) => <span className="font-mono text-sm">{w.zeitstempel}</span> },

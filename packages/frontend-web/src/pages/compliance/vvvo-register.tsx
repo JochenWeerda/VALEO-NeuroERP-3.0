@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, Plus, Search } from 'lucide-react'
-
-const mockVVVO: VVVOBetrieb[] = [
-  { id: '1', betriebsname: 'Landwirtschaft Mueller', vvvo: '03-276-123456', bundesland: 'Niedersachsen', tierart: 'Rind (Milch)', status: 'aktiv', letzteAktualisierung: '2025-09-15' },
-  { id: '2', betriebsname: 'Hofgut Weber', vvvo: '03-276-789012', bundesland: 'Niedersachsen', tierart: 'Schwein (Mast)', status: 'aktiv', letzteAktualisierung: '2025-08-20' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function VVVORegisterPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: vvvo = mockVVVO } = useVVVORegister()
+  const { data: vvvo = [], isError, error, refetch } = useVVVORegister()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     { key: 'betriebsname' as const, label: 'Betrieb', render: (v: VVVOBetrieb) => <button onClick={() => navigate(`/crm/betrieb/${v.id}`)} className="font-medium text-blue-600 hover:underline">{v.betriebsname}</button> },

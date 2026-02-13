@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, FolderKanban, Plus, Search } from 'lucide-react'
-
-const mockProjekte: Projekt[] = [
-  { id: '1', name: 'Silo-Neubau', kunde: 'Eigenbau', startdatum: '2025-09-01', enddatum: '2025-12-31', fortschritt: 45, budget: 250000, status: 'aktiv' },
-  { id: '2', name: 'Lagerhallen-Sanierung', kunde: 'Eigenbau', startdatum: '2026-01-01', enddatum: '2026-03-31', fortschritt: 0, budget: 85000, status: 'pausiert' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function ProjekteListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: projekte = mockProjekte } = useProjekte()
+  const { data: projekte = [], isError, error, refetch } = useProjekte()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     { key: 'name' as const, label: 'Projekt', render: (p: Projekt) => <button onClick={() => navigate(`/projekte/${p.id}`)} className="font-medium text-blue-600 hover:underline">{p.name}</button> },

@@ -6,16 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
 import { FileDown, Plus, Search } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-import { usePSM } from '@/lib/api/agrar'
-import type { PSM } from '@/lib/api/agrar'
+import { usePSM, type PSM } from '@/lib/api/agrar'
 
 export default function PSMListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
 
-  const { data, isLoading } = usePSM({ search: searchTerm || undefined })
+  const { data, isLoading, isError, error, refetch } = usePSM({ search: searchTerm || undefined, source: 'bvl' })
   const psmList = data?.items ?? []
 
   const handleExport = () => {
@@ -126,6 +126,10 @@ export default function PSMListePage(): JSX.Element {
         <Skeleton className="h-48 w-full" />
       </div>
     )
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
   return (

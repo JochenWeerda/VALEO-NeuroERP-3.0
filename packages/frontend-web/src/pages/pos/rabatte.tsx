@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Percent, Plus, Search } from 'lucide-react'
+import { ErrorState } from '@/components/ErrorState'
 
 type Rabatt = {
   id: string
@@ -22,68 +23,24 @@ type Rabatt = {
   status: 'aktiv' | 'inaktiv' | 'abgelaufen'
 }
 
-const mockRabatte: Rabatt[] = [
-  {
-    id: '1',
-    name: 'Herbst-Aktion 2025',
-    typ: 'prozent',
-    wert: 15,
-    bedingung: 'Alle Saatgut-Artikel',
-    gueltigVon: '2025-10-01',
-    gueltigBis: '2025-10-31',
-    status: 'aktiv',
-  },
-  {
-    id: '2',
-    name: 'Treue-Rabatt Gold',
-    typ: 'prozent',
-    wert: 10,
-    bedingung: 'Kundengruppe: Gold',
-    gueltigVon: '2025-01-01',
-    gueltigBis: '2025-12-31',
-    kundengruppe: 'Gold',
-    status: 'aktiv',
-  },
-  {
-    id: '3',
-    name: 'Mengenrabatt Dünger',
-    typ: 'mengenrabatt',
-    wert: 20,
-    bedingung: 'Ab 10 Sack',
-    gueltigVon: '2025-01-01',
-    gueltigBis: '2025-12-31',
-    artikel: 'Dünger',
-    status: 'aktiv',
-  },
-  {
-    id: '4',
-    name: 'Sommer-Aktion',
-    typ: 'absolut',
-    wert: 5,
-    bedingung: 'Ab 50 € Bestellwert',
-    gueltigVon: '2025-06-01',
-    gueltigBis: '2025-08-31',
-    minBestellwert: 50,
-    status: 'abgelaufen',
-  },
-]
-
 export default function RabattePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: apiRabatte = [] } = useRabatte()
-  const rabatte: Rabatt[] = apiRabatte.length > 0
-    ? apiRabatte.map((r: ApiRabatt) => ({
-      id: r.id,
-      name: r.name,
-      typ: r.typ === 'betrag' ? 'absolut' : 'prozent',
-      wert: r.wert,
-      bedingung: r.bedingung,
-      gueltigVon: r.gueltigVon,
-      gueltigBis: r.gueltigBis,
-      status: r.status === 'inaktiv' ? 'inaktiv' : 'aktiv',
-    }))
-    : mockRabatte
+  const { data: apiRabatte = [], isError, error, refetch } = useRabatte()
+  const rabatte: Rabatt[] = apiRabatte.map((r: ApiRabatt) => ({
+    id: r.id,
+    name: r.name,
+    typ: r.typ === 'betrag' ? 'absolut' : 'prozent',
+    wert: r.wert,
+    bedingung: r.bedingung,
+    gueltigVon: r.gueltigVon,
+    gueltigBis: r.gueltigBis,
+    status: r.status === 'inaktiv' ? 'inaktiv' : 'aktiv',
+  }))
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     {

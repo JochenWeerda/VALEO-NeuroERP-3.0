@@ -6,15 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, Fuel, Search } from 'lucide-react'
-
-const mockZapfungen: Zapfung[] = [
-  { id: '1', kennzeichen: 'AB-LH 101', artikel: 'Diesel', menge: 120.5, zeitstempel: '2025-10-11 08:15', fahrer: 'Schmidt' },
-  { id: '2', kennzeichen: 'AB-LH 102', artikel: 'Diesel', menge: 98.3, zeitstempel: '2025-10-11 09:45', fahrer: 'Mueller' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function ZapfungenPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: zapfungen = mockZapfungen } = useZapfungen()
+  const { data: zapfungen = [], isError, error, refetch } = useZapfungen()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     { key: 'zeitstempel' as const, label: 'Zeitpunkt', render: (z: Zapfung) => <span className="font-mono text-sm">{z.zeitstempel}</span> },

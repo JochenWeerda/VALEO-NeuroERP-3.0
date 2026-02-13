@@ -119,6 +119,15 @@ class DocumentRepository:
                 if "customerId" in filters:
                     query += " AND data::jsonb->>'customerId' = :customerId"
                     params["customerId"] = filters["customerId"]
+                if "tenantId" in filters:
+                    query += " AND (data::jsonb->>'tenantId' = :tenantId OR data::jsonb->>'tenantId' IS NULL)"
+                    params["tenantId"] = filters["tenantId"]
+                if "supplierId" in filters:
+                    query += " AND data::jsonb->>'supplierId' = :supplierId"
+                    params["supplierId"] = filters["supplierId"]
+                if "purchaseOrderId" in filters:
+                    query += " AND data::jsonb->>'purchaseOrderId' = :purchaseOrderId"
+                    params["purchaseOrderId"] = filters["purchaseOrderId"]
             
             query += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
             
@@ -157,6 +166,12 @@ class DocumentRepository:
                 if "status" in filters:
                     query += " AND data::jsonb->>'status' = :status"
                     params["status"] = filters["status"]
+                if "tenantId" in filters:
+                    query += " AND (data::jsonb->>'tenantId' = :tenantId OR data::jsonb->>'tenantId' IS NULL)"
+                    params["tenantId"] = filters["tenantId"]
+                if "supplierId" in filters:
+                    query += " AND data::jsonb->>'supplierId' = :supplierId"
+                    params["supplierId"] = filters["supplierId"]
             
             result = self.db.execute(text(query), params).scalar()
             return result or 0

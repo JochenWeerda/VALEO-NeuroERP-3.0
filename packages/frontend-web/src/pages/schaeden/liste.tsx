@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { AlertTriangle, FileDown, Plus, Search } from 'lucide-react'
-
-const mockSchaeden: Schaden[] = [
-  { id: '1', nummer: 'SCH-2025-001', art: 'Hagelschaden', datum: '2025-07-15', ort: 'Schlag S-001', schadenhoehe: 12500, status: 'reguliert' },
-  { id: '2', nummer: 'SCH-2025-002', art: 'Fahrzeugunfall', datum: '2025-09-20', ort: 'Hofeinfahrt', schadenhoehe: 3200, status: 'in-pruefung' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function SchaedenListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: schaeden = mockSchaeden } = useSchaeden()
+  const { data: schaeden = [], isError, error, refetch } = useSchaeden()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     { key: 'nummer' as const, label: 'Schadennummer', render: (s: Schaden) => <button onClick={() => navigate(`/schaeden/${s.id}`)} className="font-medium text-blue-600 hover:underline">{s.nummer}</button> },

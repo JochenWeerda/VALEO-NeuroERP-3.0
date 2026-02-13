@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, HeadphonesIcon, Plus, Search } from 'lucide-react'
-
-const mockAnfragen: ServiceAnfrage[] = [
-  { id: '1', nummer: 'SR-2025-001', kunde: 'Landhandel Nord', betreff: 'Lieferverzoegerung', datum: '2025-10-11', prioritaet: 'hoch', status: 'neu' },
-  { id: '2', nummer: 'SR-2025-002', kunde: 'Mueller GmbH', betreff: 'Preisanfrage Weizen', datum: '2025-10-10', prioritaet: 'normal', status: 'in-bearbeitung' },
-]
+import { ErrorState } from '@/components/ErrorState'
 
 export default function ServiceAnfragenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: anfragen = mockAnfragen } = useServiceAnfragen()
+  const { data: anfragen = [], isError, error, refetch } = useServiceAnfragen()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const neu = anfragen.filter((a) => a.status === 'neu').length
 

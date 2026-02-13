@@ -2,127 +2,70 @@ import { useMemo } from 'react'
 import { OverviewPage } from '@/components/mask-builder'
 import { useFutterStatistik, type FutterStatistik } from '@/lib/api/futter'
 import { OverviewConfig, OverviewCard, OverviewChart } from '@/components/mask-builder/types'
+import { ErrorState } from '@/components/ErrorState'
 
-// Mock-Daten für KPIs
-const mockKPIs: OverviewCard[] = [
-  {
-    title: 'Gesamtbestand',
-    value: '2.847 t',
-    change: {
-      value: 5.2,
-      type: 'increase',
-      period: 'vs. letzter Monat'
-    },
-    icon: '📦',
-    color: 'blue'
-  },
-  {
-    title: 'Monatlicher Verbrauch',
-    value: '487 t',
-    change: {
-      value: 2.1,
-      type: 'decrease',
-      period: 'vs. letzter Monat'
-    },
-    icon: '📉',
-    color: 'orange'
-  },
-  {
-    title: 'Qualitätsrate',
-    value: '97,3%',
-    change: {
-      value: 0.8,
-      type: 'increase',
-      period: 'vs. letzter Monat'
-    },
-    icon: '✅',
-    color: 'green'
-  },
-  {
-    title: 'Recall-Rate',
-    value: '0,02%',
-    change: {
-      value: 50,
-      type: 'decrease',
-      period: 'vs. letzter Monat'
-    },
-    icon: '🚨',
-    color: 'red'
-  }
-]
-
-// Mock-Daten für Charts
-const mockChartData: OverviewChart[] = [
-  {
-    title: 'Bestandsentwicklung',
-    type: 'line',
-    data: [2450, 2380, 2520, 2680, 2750, 2847]
-  },
-  {
-    title: 'Verbrauch nach Tierart',
-    type: 'pie',
-    data: [45, 25, 15, 10, 5]
-  },
-  {
-    title: 'Qualitätskennzahlen',
-    type: 'bar',
-    data: [99.2, 97.8, 98.5, 99.1]
-  }
-]
-
-// Konfiguration für Futtermittel-Statistik OverviewPage
 const statistikConfig: OverviewConfig = {
   title: 'Futtermittel-Statistik',
-  subtitle: 'KPIs und Analysen für Qualitätssicherung und Bestandsmanagement',
+  subtitle: 'KPIs und Analysen fuer Qualitaetssicherung und Bestandsmanagement',
   type: 'overview-page',
-  cards: mockKPIs,
-  charts: mockChartData,
+  cards: [],
+  charts: [],
   actions: [],
   api: {
     baseUrl: '/api/futtermittel/statistics',
     endpoints: {
-      list: '/api/futtermittel/statistics'
-    }
+      list: '/api/futtermittel/statistics',
+    },
   },
-  permissions: ['futtermittel.read', 'statistics.read']
+  permissions: ['futtermittel.read', 'statistics.read'],
 }
 
 export default function FuttermittelStatistikPage(): JSX.Element {
-  const { data, isLoading } = useFutterStatistik()
+  const { data, isLoading, isError, error, refetch } = useFutterStatistik()
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const { kpiData, chartData } = useMemo(() => {
-    if (!data) return { kpiData: mockKPIs, chartData: mockChartData }
-    const stats = data as FutterStatistik
+    const stats = (data ?? {
+      gesamtProduktion: 0,
+      gesamtAbsatz: 0,
+      durchschnittsPreis: 0,
+      topProdukte: [],
+    }) as FutterStatistik
+
     const cards: OverviewCard[] = [
       {
         title: 'Gesamtproduktion',
         value: `${stats.gesamtProduktion.toLocaleString('de-DE')} t`,
         change: { value: 0, type: 'increase', period: 'aktuell' },
-        icon: '📦',
+        icon: 'PKG',
         color: 'blue',
       },
       {
         title: 'Gesamtabsatz',
         value: `${stats.gesamtAbsatz.toLocaleString('de-DE')} t`,
         change: { value: 0, type: 'increase', period: 'aktuell' },
-        icon: '📉',
+        icon: 'TREND',
         color: 'orange',
       },
       {
-        title: 'Ø Preis',
-        value: `${stats.durchschnittsPreis.toLocaleString('de-DE')} €/t`,
+        title: 'Oe Preis',
+        value: `${stats.durchschnittsPreis.toLocaleString('de-DE')} EUR/t`,
         change: { value: 0, type: 'increase', period: 'aktuell' },
-        icon: '💶',
+        icon: 'MONEY',
         color: 'green',
       },
       {
         title: 'Top-Produkte',
         value: `${stats.topProdukte.length}`,
         change: { value: 0, type: 'increase', period: 'aktuell' },
-        icon: '🏆',
+        icon: 'TOP',
         color: 'red',
       },
     ]
+
     const charts: OverviewChart[] = [
       {
         title: 'Top-Produkte nach Menge',
@@ -140,20 +83,15 @@ export default function FuttermittelStatistikPage(): JSX.Element {
         data: stats.topProdukte.map((p) => p.menge * stats.durchschnittsPreis),
       },
     ]
+
     return { kpiData: cards, chartData: charts }
   }, [data])
 
-  // Aktualisierte Konfiguration mit echten Daten
   const currentConfig: OverviewConfig = {
     ...statistikConfig,
     cards: kpiData,
-    charts: chartData
+    charts: chartData,
   }
 
-  return (
-    <OverviewPage
-      config={currentConfig}
-      isLoading={isLoading}
-    />
-  )
+  return <OverviewPage config={currentConfig} isLoading={isLoading} />
 }

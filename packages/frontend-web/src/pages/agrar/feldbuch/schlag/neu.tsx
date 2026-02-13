@@ -1,6 +1,6 @@
 /**
  * Neuen Schlag anlegen
- * 
+ *
  * Formular zum Anlegen eines neuen Schlags in der Ackerschlagkartei
  */
 
@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
@@ -20,20 +21,7 @@ import {
 } from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ArrowLeft, Save, MapPin, Leaf, Info } from 'lucide-react'
-
-// Mock Kulturen (später aus API)
-const KULTUREN = [
-  { value: 'winterweizen', label: 'Winterweizen' },
-  { value: 'wintergerste', label: 'Wintergerste' },
-  { value: 'winterraps', label: 'Winterraps' },
-  { value: 'mais', label: 'Mais' },
-  { value: 'zuckerrueben', label: 'Zuckerrüben' },
-  { value: 'kartoffeln', label: 'Kartoffeln' },
-  { value: 'sommergerste', label: 'Sommergerste' },
-  { value: 'hafer', label: 'Hafer' },
-  { value: 'gruenland', label: 'Grünland' },
-  { value: 'stilllegung', label: 'Stilllegung / Brache' },
-]
+import { useKulturen } from '@/lib/api/agrar'
 
 // Mock Bodenarten
 const BODENARTEN = [
@@ -50,11 +38,18 @@ const BODENARTEN = [
 export default function SchlagNeu() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  
+
+  const { data: kulturenData, isLoading } = useKulturen()
+
+  const kulturen = (kulturenData ?? []).map(k => ({
+    value: k.name.toLowerCase().replace(/[^a-z]/g, ''),
+    label: k.name,
+  }))
+
   // Vorbelegung aus URL-Parametern (z.B. von Feldblockfinder)
   const initialFlik = searchParams.get('flik') || ''
   const initialFlaeche = searchParams.get('flaeche') || ''
-  
+
   const [formData, setFormData] = useState({
     name: '',
     flik: initialFlik,
@@ -64,7 +59,7 @@ export default function SchlagNeu() {
     ackerzahl: '',
     bemerkungen: '',
   })
-  
+
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -76,14 +71,11 @@ export default function SchlagNeu() {
     e.preventDefault()
     setError(null)
     setSaving(true)
-    
+
     try {
       // TODO: API Call zum Speichern
-      // await api.createSchlag(formData)
-      
-      // Simuliere API-Aufruf
       await new Promise(resolve => setTimeout(resolve, 500))
-      
+
       // Zurück zur Übersicht
       navigate('/agrar/feldbuch/schlagkartei')
     } catch (err) {
@@ -95,8 +87,21 @@ export default function SchlagNeu() {
 
   const isValid = formData.name && formData.flik && formData.flaeche && formData.kultur
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-48" />
+        <div className="grid gap-6 md:grid-cols-2">
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-3 md:p-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
@@ -139,7 +144,7 @@ export default function SchlagNeu() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="flik">FLIK-Nummer *</Label>
                 <Input
@@ -153,7 +158,7 @@ export default function SchlagNeu() {
                   16-stellige Feldblock-Identifikationsnummer
                 </p>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="flaeche">Fläche (ha) *</Label>
                 <Input
@@ -167,7 +172,7 @@ export default function SchlagNeu() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="kultur">Aktuelle Kultur *</Label>
                 <Select value={formData.kultur} onValueChange={(v) => handleChange('kultur', v)}>
@@ -175,7 +180,7 @@ export default function SchlagNeu() {
                     <SelectValue placeholder="Kultur wählen..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {KULTUREN.map((k) => (
+                    {kulturen.map((k) => (
                       <SelectItem key={k.value} value={k.value}>{k.label}</SelectItem>
                     ))}
                   </SelectContent>
@@ -207,7 +212,7 @@ export default function SchlagNeu() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="ackerzahl">Ackerzahl</Label>
                 <Input
@@ -223,7 +228,7 @@ export default function SchlagNeu() {
                   Bodengütezahl (0-100)
                 </p>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="bemerkungen">Bemerkungen</Label>
                 <Textarea
@@ -243,8 +248,8 @@ export default function SchlagNeu() {
           <Info className="h-4 w-4" />
           <AlertTitle>Hinweis</AlertTitle>
           <AlertDescription>
-            Die FLIK-Nummer und Flächenangabe können Sie auch über den Feldblockfinder 
-            automatisch ermitteln lassen. Nach dem Speichern können Sie Maßnahmen 
+            Die FLIK-Nummer und Flächenangabe können Sie auch über den Feldblockfinder
+            automatisch ermitteln lassen. Nach dem Speichern können Sie Maßnahmen
             (Düngung, Pflanzenschutz etc.) zu diesem Schlag erfassen.
           </AlertDescription>
         </Alert>
@@ -263,4 +268,3 @@ export default function SchlagNeu() {
     </div>
   )
 }
-

@@ -1,14 +1,16 @@
 """
 Domain Events Infrastructure
-Provides abstract base classes and in-memory stub for event publishing
+Provides event abstractions and runtime-configurable publisher selection.
 """
 
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Callable, Dict, Type
+from typing import Any, Callable, Dict, List, Optional, Type
 from uuid import uuid4
+
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -16,71 +18,100 @@ logger = logging.getLogger(__name__)
 @dataclass(kw_only=True)
 class DomainEvent(ABC):
     """Base class for all domain events."""
+
     aggregate_id: str
     timestamp: datetime
     event_id: str = field(default_factory=lambda: str(uuid4()))
 
 
+@dataclass(kw_only=True)
+class IntegrationEvent(DomainEvent):
+    """Generic integration event for outbox/event-bus transport."""
+
+    event_type: str
+    payload: Dict[str, Any] = field(default_factory=dict)
+
+
 class IEventPublisher(ABC):
     """Interface for event publishing."""
-    
+
     @abstractmethod
     async def publish(self, event: DomainEvent) -> None:
         """Publish a domain event."""
-        pass
 
 
 class InMemoryEventPublisher(IEventPublisher):
-    """
-    In-memory event publisher for Phase 1.
-    Logs events and notifies registered handlers.
-    Later replaced with NATS/Redis Streams.
-    """
-    
+    """In-memory publisher, useful for local fallback and tests."""
+
     def __init__(self):
         self._handlers: Dict[Type[DomainEvent], List[Callable]] = {}
         self._event_log: List[DomainEvent] = []
-    
+
     async def publish(self, event: DomainEvent) -> None:
-        """Publish event to in-memory handlers."""
         logger.info(
-            f"Event published: {event.__class__.__name__}",
+            "Event published in-memory: %s",
+            event.__class__.__name__,
             extra={
                 "event_id": event.event_id,
                 "aggregate_id": event.aggregate_id,
-                "timestamp": event.timestamp.isoformat()
-            }
+                "timestamp": event.timestamp.isoformat(),
+            },
         )
-        
-        # Store in memory log
         self._event_log.append(event)
-        
-        # Notify handlers
-        event_type = type(event)
-        if event_type in self._handlers:
-            for handler in self._handlers[event_type]:
-                try:
-                    await handler(event)
-                except Exception as e:
-                    logger.error(f"Event handler failed: {e}", exc_info=True)
-    
+
+        handlers = self._handlers.get(type(event), [])
+        for handler in handlers:
+            try:
+                await handler(event)
+            except Exception as exc:
+                logger.error("Event handler failed: %s", exc, exc_info=True)
+
     def subscribe(self, event_type: Type[DomainEvent], handler: Callable) -> None:
-        """Subscribe to specific event type."""
-        if event_type not in self._handlers:
-            self._handlers[event_type] = []
-        self._handlers[event_type].append(handler)
-        logger.debug(f"Registered handler for {event_type.__name__}")
-    
+        self._handlers.setdefault(event_type, []).append(handler)
+        logger.debug("Registered handler for %s", event_type.__name__)
+
     def get_events(self, limit: int = 100) -> List[DomainEvent]:
-        """Get recent events (for debugging)."""
         return self._event_log[-limit:]
 
 
-# Singleton instance
-_event_publisher = InMemoryEventPublisher()
+_event_publisher: Optional[IEventPublisher] = None
+
+
+def _build_publisher() -> IEventPublisher:
+    provider = getattr(settings, "EVENT_BUS_PROVIDER", "memory")
+    enabled = bool(getattr(settings, "EVENT_BUS_ENABLED", False))
+
+    if enabled and provider == "nats":
+        from app.infrastructure.eventbus.nats_publisher import nats_publisher
+
+        nats_publisher.enabled = True
+        nats_publisher.nats_url = getattr(settings, "EVENT_BUS_NATS_URL", nats_publisher.nats_url)
+        logger.info("Using NATS event publisher")
+        return nats_publisher
+
+    logger.info("Using in-memory event publisher")
+    return InMemoryEventPublisher()
 
 
 def get_event_publisher() -> IEventPublisher:
-    """Get the global event publisher instance."""
+    """Get (or initialize) the global event publisher instance."""
+    global _event_publisher
+    if _event_publisher is None:
+        _event_publisher = _build_publisher()
     return _event_publisher
 
+
+async def startup_event_publisher() -> None:
+    """Initialize publisher and connect if supported."""
+    publisher = get_event_publisher()
+    connect = getattr(publisher, "connect", None)
+    if callable(connect):
+        await connect()
+
+
+async def shutdown_event_publisher() -> None:
+    """Disconnect publisher if supported."""
+    publisher = get_event_publisher()
+    disconnect = getattr(publisher, "disconnect", None)
+    if callable(disconnect):
+        await disconnect()

@@ -151,7 +151,7 @@ export default function LKWBeladungPage(): JSX.Element {
   ]
 
   return (
-    <div className="p-6">
+    <div className="p-3 md:p-6">
       <Wizard
         title="LKW-Beladung"
         steps={steps}

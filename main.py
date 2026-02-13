@@ -12,6 +12,8 @@ from fastapi.responses import JSONResponse
 from prometheus_client import make_asgi_app
 import logging
 import time
+import asyncio
+import contextlib
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
@@ -21,6 +23,9 @@ from app.api.v1.endpoints import policies as policies_v1
 from app.core.logging import setup_logging
 from app.core.security import require_bearer_token
 from app.core.container_config import configure_container  # Import container configuration
+from app.core.tenant_context import reset_current_tenant_id, set_current_tenant_id
+from app.domains.shared.events import startup_event_publisher, shutdown_event_publisher
+from app.workers.outbox_publisher import start_outbox_worker, stop_outbox_worker
 
 # Logger muss vor der Verwendung definiert werden
 logger = logging.getLogger(__name__)
@@ -74,6 +79,8 @@ setup_logging()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan context manager"""
+    outbox_task = None
+
     # Startup
     logger.info("Starting VALEO-NeuroERP API server...")
 
@@ -93,9 +100,30 @@ async def lifespan(app: FastAPI):
         logger.error(f"Failed to initialize database: {e}")
         raise
 
+    try:
+        await startup_event_publisher()
+        logger.info("Event publisher initialized")
+    except Exception as e:
+        logger.error(f"Failed to initialize event publisher: {e}")
+        raise
+
+    if settings.OUTBOX_WORKER_ENABLED:
+        outbox_task = asyncio.create_task(start_outbox_worker())
+        logger.info("Outbox worker started")
+
     yield
 
     # Shutdown
+    if settings.OUTBOX_WORKER_ENABLED:
+        try:
+            await stop_outbox_worker()
+        finally:
+            if outbox_task:
+                outbox_task.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await outbox_task
+
+    await shutdown_event_publisher()
     logger.info("Shutting down VALEO-NeuroERP API server...")
 
 # Create FastAPI application
@@ -172,7 +200,20 @@ async def enforce_bearer_token(request: Request, call_next):
             response.headers["Access-Control-Allow-Methods"] = "*"
             response.headers["Access-Control-Allow-Headers"] = "*"
         return response
-    return await call_next(request)
+    header_tenant = (request.headers.get("X-Tenant-ID") or "").strip()
+    claims = getattr(request.state, "token_claims", {}) or {}
+    token_tenant = str(claims.get("tenant_id") or claims.get("tid") or "").strip()
+    resolved_tenant = header_tenant or token_tenant or settings.DEFAULT_TENANT_ID
+
+    token = set_current_tenant_id(resolved_tenant)
+    request.state.tenant_id = resolved_tenant
+    try:
+        response = await call_next(request)
+    finally:
+        reset_current_tenant_id(token)
+
+    response.headers["X-Tenant-ID"] = resolved_tenant
+    return response
 
 # Request logging middleware
 @app.middleware("http")
@@ -271,6 +312,7 @@ if finance_router:
 if einkauf_router:
     app.include_router(einkauf_router, tags=["Einkauf"])
     app.include_router(einkauf_router, prefix="/api", tags=["Einkauf"])
+    app.include_router(einkauf_router, prefix="/api/v1", tags=["Einkauf"])
 
 # Purchase Workflow (Wareneingang, Abgleich, PO-Storno)
 if purchase_workflow_router:

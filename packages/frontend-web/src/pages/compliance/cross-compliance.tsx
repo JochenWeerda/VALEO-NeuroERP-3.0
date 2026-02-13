@@ -2,16 +2,31 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, CheckCircle, ClipboardCheck } from 'lucide-react'
 
-const mockCompliance: ComplianceItem[] = [
-  { id: '1', bereich: 'Gewaesserschutz', anforderung: 'Gewaesserrandstreifen 5m', erfuellt: true, nachweis: 'Feldprotokoll 2025', frist: '2025-12-31' },
-  { id: '2', bereich: 'Tierschutz', anforderung: 'Stallgroesse mind. 6qm/GV', erfuellt: true, nachweis: 'Stallplan', frist: '2025-12-31' },
-  { id: '3', bereich: 'Duengeverordnung', anforderung: 'Naehrstoffbilanz', erfuellt: false, nachweis: 'Ausstehend', frist: '2025-11-15' },
-]
-
 export default function CrossCompliancePage(): JSX.Element {
-  const { data: compliance = mockCompliance } = useCrossCompliance()
+  const { data: compliance = [], isLoading } = useCrossCompliance()
+
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-48 mt-2" />
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          <Card><CardContent className="pt-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+        </div>
+        <Card><CardContent className="pt-4"><Skeleton className="h-64 w-full" /></CardContent></Card>
+      </div>
+    )
+  }
 
   const columns = [
     { key: 'bereich' as const, label: 'Bereich', render: (c: ComplianceItem) => <Badge variant="outline">{c.bereich}</Badge> },

@@ -5,18 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { ErrorState } from '@/components/ErrorState'
 
 type WorkflowExecution = ApiWorkflowExecution & { status: 'SUCCESS' | 'FAILED' | 'PENDING' | 'RUNNING'; errorMessage?: string }
 
-const mockExecutions: WorkflowExecution[] = [
-  { id: '1', ruleId: '2', triggerEntity: 'Angebot', triggerAction: 'GENEHMIGT', targetEntity: 'Bestellung', targetAction: 'CREATE_FROM_ANGEBOT', status: 'SUCCESS', startedAt: '2025-10-15T10:30:00Z', completedAt: '2025-10-15T10:30:05Z', actorId: 'user123' },
-  { id: '2', ruleId: '3', triggerEntity: 'Bestellung', triggerAction: 'FREIGEGEBEN', targetEntity: 'Auftragsbestaetigung', targetAction: 'CREATE_FROM_BESTELLUNG', status: 'RUNNING', startedAt: '2025-10-15T11:15:00Z', actorId: 'user456' },
-]
-
 export default function WorkflowMonitoringPage(): JSX.Element {
   const { t } = useTranslation()
-  const { data: apiExecutions = mockExecutions } = useWorkflowExecutions()
+  const { data: apiExecutions = [], isError, error, refetch } = useWorkflowExecutions()
   const executions: WorkflowExecution[] = apiExecutions.map((e) => ({ ...e, status: e.status as WorkflowExecution['status'] }))
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {

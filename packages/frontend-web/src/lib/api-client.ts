@@ -8,6 +8,7 @@ import { auth } from './auth'
 const DEV_TOKEN = import.meta.env.VITE_API_DEV_TOKEN as string | undefined || 'dev-token'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const DEFAULT_TENANT_ID = import.meta.env.VITE_TENANT_ID || '00000000-0000-0000-0000-000000000001'
 
 class APIClient {
   private client: AxiosInstance
@@ -28,6 +29,11 @@ class APIClient {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }
+        const tenantId =
+          window.localStorage.getItem('tenant_id')
+          || window.sessionStorage.getItem('tenant_id')
+          || DEFAULT_TENANT_ID
+        config.headers['X-Tenant-ID'] = tenantId
         return config
       },
       (error) => Promise.reject(error),
