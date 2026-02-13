@@ -99,9 +99,9 @@
 - CI blockiert Core-Verstöße, Modul per Flag aktiv/inaktiv schaltbar.
 
 ### Woche 4 (09.03-13.03): EPIC AGRAR-WG-01 Wiegeschein-Datenmodell
-- [ ] Story AGRAR-WG-01-01: Tabellen `weighing_tickets` + `weighing_measurements` per Migration.
-- [ ] Story AGRAR-WG-01-02: CRUD-API für Wiegeschein mit Validierung.
-- [ ] Story AGRAR-WG-01-03: Erst-/Zweitwiegung inkl. Brutto/Tara/Netto.
+- [x] Story AGRAR-WG-01-01: Tabellen `weighing_tickets` + `weighing_measurements` per Migration.
+- [x] Story AGRAR-WG-01-02: CRUD-API für Wiegeschein mit Validierung.
+- [x] Story AGRAR-WG-01-03: Erst-/Zweitwiegung inkl. Brutto/Tara/Netto.
 - Akzeptanzkriterien:
 - Persistente Wiegescheine mit Audit-Trail, API ohne Mock/Fallback.
 
@@ -202,7 +202,7 @@
 - [x] `AGRAR-ARCH-03` CI-Guardrails gegen Core-Kontamination | P0 | M | DevOps
 
 ### Sprint 2 (28.02-20.03) Wiegeschein + Kontrakt-Basis
-- [ ] `AGRAR-WG-01` Wiegeschein-Datenmodell + CRUD | P0 | L | Backend
+- [x] `AGRAR-WG-01` Wiegeschein-Datenmodell + CRUD | P0 | L | Backend
 - [ ] `AGRAR-CT-01` Kontrakte + Restmengenlogik | P0 | L | Backend
 - [ ] `AGRAR-WG-UI-01` Wiegeschein-Erfassung UI (ohne Mock) | P1 | M | Frontend
 
