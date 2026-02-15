@@ -123,6 +123,8 @@ class DocflowCreateRequest(BaseModel):
     doc_type: str = Field(..., min_length=3, max_length=40)
     doc_number: str = Field(..., min_length=1, max_length=80)
     status: str = Field(default="draft", min_length=3, max_length=20)
+    source_system: Optional[str] = Field(default=None, max_length=40)
+    source_ref: Optional[str] = Field(default=None, max_length=80)
     customer_id: Optional[str] = None
     supplier_id: Optional[str] = None
     currency: str = Field(default="EUR", min_length=3, max_length=3)
@@ -135,6 +137,8 @@ class DocflowCreateRequest(BaseModel):
 class DocflowUpdateRequest(BaseModel):
     expected_version: Optional[int] = Field(default=None, ge=1)
     status: Optional[str] = Field(default=None, min_length=3, max_length=20)
+    source_system: Optional[str] = Field(default=None, max_length=40)
+    source_ref: Optional[str] = Field(default=None, max_length=80)
     customer_id: Optional[str] = None
     supplier_id: Optional[str] = None
     currency: Optional[str] = Field(default=None, min_length=3, max_length=3)
@@ -573,7 +577,7 @@ async def create_document(
                 (id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id,
                  currency, total_net, total_tax, total_gross, document_date, posting_date, version, created_by, updated_by, created_at, updated_at)
                 VALUES
-                (:id, :tenant_id, :doc_type, :doc_number, :status, 'docflow.ui', NULL, :customer_id, :supplier_id,
+                (:id, :tenant_id, :doc_type, :doc_number, :status, :source_system, :source_ref, :customer_id, :supplier_id,
                  :currency, :total_net, :total_tax, :total_gross, :document_date, :posting_date, 1, :created_by, :updated_by, NOW(), NOW())
                 """
             ),
@@ -583,6 +587,8 @@ async def create_document(
                 "doc_type": payload.doc_type,
                 "doc_number": payload.doc_number,
                 "status": payload.status,
+                "source_system": payload.source_system or "docflow.ui",
+                "source_ref": payload.source_ref,
                 "customer_id": payload.customer_id,
                 "supplier_id": payload.supplier_id,
                 "currency": payload.currency,
@@ -680,6 +686,12 @@ async def update_document(
         if payload.customer_id is not None:
             set_parts.append("customer_id = :customer_id")
             updates["customer_id"] = payload.customer_id
+        if payload.source_system is not None:
+            set_parts.append("source_system = :source_system")
+            updates["source_system"] = payload.source_system
+        if payload.source_ref is not None:
+            set_parts.append("source_ref = :source_ref")
+            updates["source_ref"] = payload.source_ref
         if payload.supplier_id is not None:
             set_parts.append("supplier_id = :supplier_id")
             updates["supplier_id"] = payload.supplier_id

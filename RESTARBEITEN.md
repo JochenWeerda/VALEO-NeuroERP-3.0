@@ -880,7 +880,7 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 3. [x] `DOCFLOW-P0-03`: Idempotent Command API (`convert`, `post`, `reverse`) mit Outbox.
 4. [x] `DOCFLOW-P0-04`: `sales/delivery-editor` und `sales/invoice-editor` auf Domain-API umstellen.
 5. [x] `DOCFLOW-P0-05`: Workflow-Persistenz (DB) aktivieren, in-memory deaktivieren.
-6. [ ] `DOCFLOW-P0-06`: E2E-Suite fuer Teillieferung/Teilrechnung/Wiegeschein-Ausloesung/Bestellvorschlag.
+6. [x] `DOCFLOW-P0-06`: E2E-Suite fuer Teillieferung/Teilrechnung/Wiegeschein-Ausloesung/Bestellvorschlag.
 7. [x] `DOCFLOW-P0-07`: Fremdbestand-Datenmodell + Buchungslogik (`ownership_type`, owner_partner_id, consignment ledger).
 8. [x] `DOCFLOW-P0-08`: Lagergeld-Engine (monatlicher idempotenter Lauf, Stichtag/Freimenge/Staffel, Audit).
 9. [ ] `DOCFLOW-P0-09`: Chargen-Linking fuer Mischungen/Entnahmen mit Mengenanteil und Rueckverfolgbarkeit.
@@ -909,6 +909,21 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - `app/api/v1/endpoints/docflow.py` erweitert um `POST /api/v1/docflow/` und `PUT /api/v1/docflow/{id}` fuer Editor-Save ohne MCP.
   - `app/routers/workflow_router.py` in-memory entfernt (`_STATE`/`_AUDIT` entfallen), Persistenz voll auf `workflow_status`/`workflow_audit`.
   - `app/routers/print_router.py` entkoppelt von `_STATE`, Statusbezug jetzt ueber `WorkflowRepository` (DB).
+- [x] Neu umgesetzt (P0-06 Multi-Channel E2E/Governance):
+  - Neues E2E-Skript: `scripts/test-docflow-multi-channel-e2e.ps1`
+  - Deckt 3 Sales-Kanaele auf demselben Command-Stack ab:
+    - `erp_sales` (sales_order -> sales_delivery),
+    - `pos_b2c` (sales_delivery -> sales_invoice),
+    - `portal_b2b` (sales_order -> sales_invoice).
+  - Validiert pro Kanal:
+    - `create` auf `/api/v1/docflow/` mit `source_system/source_ref`,
+    - `convert` Dry-Run + Echtlauf + Idempotenz-Hit,
+    - `post` + Idempotenz-Hit.
+  - Governance/Workflow:
+    - negativer SoD-Check (`submit` ohne Rolle wird blockiert),
+    - positiver Ablauf (`submit -> approve -> post`) mit DB-Auditnachweis.
+  - DB-Nachweise (automatisiert via Docker-Postgres):
+    - `document_links`, `command_idempotency_keys`, `outbox_events`, `source_system`-Tagging.
 - [x] Abnahmekriterien je Welle festgelegt:
   - Keine Doppelbelege/Doppelbuchungen unter Retry/Parallelklick.
   - Vollstaendige Belegkette auf Item-Ebene rueckverfolgbar.
