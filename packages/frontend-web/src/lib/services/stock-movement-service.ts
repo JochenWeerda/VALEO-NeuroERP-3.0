@@ -14,8 +14,17 @@ export interface StockMovement {
   movement_type: 'in' | 'out' | 'transfer' | 'adjustment'
   quantity: number
   unit_cost?: number
+  unit?: string
+  movement_number?: string
+  movement_date?: string
+  movement_time?: string
   reference_number?: string
   notes?: string
+  warehouse_location?: string
+  charge?: string
+  booking_user?: string
+  auto_created?: boolean
+  linked_order_id?: string
   previous_stock: number
   new_stock: number
   total_cost?: number
@@ -23,14 +32,36 @@ export interface StockMovement {
 }
 
 export interface StockMovementCreate {
-  tenant_id: string
   article_id: string
   warehouse_id: string
   movement_type: 'in' | 'out' | 'transfer' | 'adjustment'
   quantity: number
   unit_cost?: number
+  unit?: string
+  movement_number?: string
+  movement_date?: string
+  movement_time?: string
   reference_number?: string
   notes?: string
+  warehouse_location?: string
+  charge?: string
+  booking_user?: string
+  auto_created?: boolean
+  linked_order_id?: string
+}
+
+export interface StockMovementUpdate {
+  movement_number?: string
+  movement_date?: string
+  movement_time?: string
+  unit?: string
+  reference_number?: string
+  notes?: string
+  warehouse_location?: string
+  charge?: string
+  booking_user?: string
+  auto_created?: boolean
+  linked_order_id?: string
 }
 
 export interface StockMovementsResponse {
@@ -49,8 +80,9 @@ export const stockMovementService = {
     article_id?: string
     warehouse_id?: string
     movement_type?: string
+    search?: string
     limit?: number
-    offset?: number
+    skip?: number
     tenant_id?: string
   }) {
     const response = await apiClient.get<StockMovementsResponse>('/api/v1/inventory/stock-movements', { params })
@@ -65,5 +97,14 @@ export const stockMovementService = {
   async createStockMovement(data: StockMovementCreate) {
     const response = await apiClient.post<StockMovement>('/api/v1/inventory/stock-movements', data)
     return response.data
-  }
+  },
+
+  async updateStockMovement(id: string, data: StockMovementUpdate) {
+    const response = await apiClient.put<StockMovement>(`/api/v1/inventory/stock-movements/${id}`, data)
+    return response.data
+  },
+
+  async deleteStockMovement(id: string) {
+    await apiClient.delete(`/api/v1/inventory/stock-movements/${id}`)
+  },
 }

@@ -1,6 +1,6 @@
 ﻿import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useChargen, type Charge } from '@/lib/api/betrieb'
+import { useCharges, type Charge } from '@/lib/api/charges'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,12 +8,11 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, FileDown, Package, Search } from 'lucide-react'
-import { toast } from '@/hooks/use-toast'
 
 export default function ChargenListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: chargen = [], isLoading } = useChargen()
+  const { data: chargen = [], isLoading } = useCharges()
 
   const filteredChargen = useMemo(() => {
     if (!searchTerm) return chargen
@@ -70,8 +69,8 @@ export default function ChargenListePage(): JSX.Element {
       key: 'status' as const,
       label: 'Status',
       render: (c: Charge) => (
-        <Badge variant={c.status === 'freigegeben' ? 'outline' : c.status === 'gesperrt' ? 'destructive' : 'secondary'}>
-          {c.status === 'freigegeben' ? 'Freigegeben' : c.status === 'gesperrt' ? 'Gesperrt' : 'In Pruefung'}
+        <Badge variant={c.status === 'freigegeben' ? 'outline' : c.status === 'gesperrt' ? 'destructive' : c.status === 'erfasst' ? 'default' : 'secondary'}>
+          {c.status === 'freigegeben' ? 'Freigegeben' : c.status === 'gesperrt' ? 'Gesperrt' : c.status === 'erfasst' ? 'Erfasst' : 'In Pruefung'}
         </Badge>
       ),
     },
@@ -150,7 +149,7 @@ export default function ChargenListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={chargen} columns={columns} />
+          <DataTable data={filteredChargen} columns={columns} />
         </CardContent>
       </Card>
     </div>

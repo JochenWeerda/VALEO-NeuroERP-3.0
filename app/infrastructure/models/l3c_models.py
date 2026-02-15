@@ -4,7 +4,7 @@ Database models for inventory extensions, logistics, messaging, webhooks,
 and master-data tables required for L3-Connect API parity.
 """
 
-from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Text, ForeignKey, DECIMAL
+from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Date, Text, ForeignKey, DECIMAL
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 import uuid
@@ -177,6 +177,163 @@ class AgrarSettlementDeduction(Base):
     basis_quantity_tons = Column(DECIMAL(12, 3), nullable=True)
     amount_eur = Column(DECIMAL(14, 2), nullable=False)
     note = Column(Text, nullable=True)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class NawaroPrintNotification(Base):
+    """NaWaRo print message request header."""
+    __tablename__ = "nawaro_print_notifications"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    document_name = Column(String(255), nullable=False)
+    harvest_year = Column(Integer, nullable=False)
+    article_number = Column(String(80), nullable=True)
+    debtor_from = Column(String(80), nullable=True)
+    debtor_to = Column(String(80), nullable=True)
+    delivery_option = Column(String(40), nullable=False, default="vollstaendige_ablieferung")
+    form_code = Column(String(40), nullable=False, default="W12151")
+    copies = Column(Integer, nullable=False, default=1)
+    printer_name = Column(String(255), nullable=True)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class NawaroContractSheet(Base):
+    """NaWaRo contracts sheet header."""
+    __tablename__ = "nawaro_contract_sheets"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    harvest_year = Column(Integer, nullable=False)
+    article_number = Column(String(80), nullable=True)
+    is_summer = Column(Boolean, nullable=False, default=True)
+    is_winter = Column(Boolean, nullable=False, default=False)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class NawaroContractSheetRow(Base):
+    """NaWaRo contracts sheet row."""
+    __tablename__ = "nawaro_contract_sheet_rows"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    sheet_id = Column(String, ForeignKey("domain_inventory.nawaro_contract_sheets.id", ondelete="CASCADE"), nullable=False)
+    contract_number = Column(String(80), nullable=True)
+    customer_name = Column(String(255), nullable=True)
+    name_1 = Column(String(255), nullable=True)
+    total_area = Column(DECIMAL(12, 3), nullable=True)
+    standard_quantity = Column(DECIMAL(12, 3), nullable=True)
+    delivery_count = Column(Integer, nullable=True)
+    delivery_resource = Column(String(120), nullable=True)
+    quantity_b = Column(DECIMAL(12, 3), nullable=True)
+    harvest_declaration = Column(String(255), nullable=True)
+    row_order = Column(Integer, nullable=False, default=0)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class NawaroAreaSheet(Base):
+    """NaWaRo cultivation area sheet header."""
+    __tablename__ = "nawaro_area_sheets"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    harvest_year_from = Column(Integer, nullable=False)
+    harvest_year_to = Column(Integer, nullable=False)
+    article_number = Column(String(80), nullable=True)
+    is_summer = Column(Boolean, nullable=False, default=True)
+    is_winter = Column(Boolean, nullable=False, default=False)
+    form_code = Column(String(40), nullable=False, default="W12071")
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class NawaroAreaSheetRow(Base):
+    """NaWaRo cultivation area sheet row."""
+    __tablename__ = "nawaro_area_sheet_rows"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    sheet_id = Column(String, ForeignKey("domain_inventory.nawaro_area_sheets.id", ondelete="CASCADE"), nullable=False)
+    customer_name = Column(String(255), nullable=True)
+    name_1 = Column(String(255), nullable=True)
+    name_2 = Column(String(255), nullable=True)
+    postal_code = Column(String(20), nullable=True)
+    city = Column(String(120), nullable=True)
+    phone = Column(String(80), nullable=True)
+    fax = Column(String(80), nullable=True)
+    area_2022 = Column(DECIMAL(12, 3), nullable=True)
+    area_2023 = Column(DECIMAL(12, 3), nullable=True)
+    area_2024 = Column(DECIMAL(12, 3), nullable=True)
+    area_2025 = Column(DECIMAL(12, 3), nullable=True)
+    area_2026 = Column(DECIMAL(12, 3), nullable=True)
+    row_order = Column(Integer, nullable=False, default=0)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class NawaroRapsProfile(Base):
+    """Raps NaWaRo profile for usage split, sustainability metrics, and bookkeeping basis."""
+    __tablename__ = "nawaro_raps_profiles"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=True)
+    article_number = Column(String(80), nullable=True)
+    article_name = Column(String(255), nullable=False, default="Raps")
+    harvest_year = Column(Integer, nullable=False)
+    usage_food_pct = Column(DECIMAL(5, 2), nullable=False, default=0)
+    usage_feed_pct = Column(DECIMAL(5, 2), nullable=False, default=0)
+    usage_energy_pct = Column(DECIMAL(5, 2), nullable=False, default=0)
+    usage_material_pct = Column(DECIMAL(5, 2), nullable=False, default=0)
+    thg_gco2eq_mj = Column(DECIMAL(10, 3), nullable=True)
+    yield_dt_per_ha = Column(DECIMAL(10, 3), nullable=True)
+    notes = Column(Text, nullable=True)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class NawaroRapsCertificate(Base):
+    """Sustainability certificate chain entries for a Raps NaWaRo profile."""
+    __tablename__ = "nawaro_raps_certificates"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    profile_id = Column(String, ForeignKey("domain_inventory.nawaro_raps_profiles.id", ondelete="CASCADE"), nullable=False)
+    scheme = Column(String(80), nullable=False)  # REDcert, ISCC, etc.
+    certificate_number = Column(String(120), nullable=False)
+    chain_stage = Column(String(80), nullable=True)  # farm, trade, mill
+    valid_from = Column(Date, nullable=True)
+    valid_until = Column(Date, nullable=True)
+    issuer = Column(String(120), nullable=True)
+    status = Column(String(40), nullable=False, default="valid")
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class NawaroRapsBalance(Base):
+    """Input/output and cost allocation for Raps processing coproducts."""
+    __tablename__ = "nawaro_raps_balances"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    profile_id = Column(String, ForeignKey("domain_inventory.nawaro_raps_profiles.id", ondelete="CASCADE"), nullable=False)
+    booking_period = Column(String(20), nullable=True)  # YYYY-MM
+    input_seed_tons = Column(DECIMAL(12, 3), nullable=False, default=0)
+    output_oil_tons = Column(DECIMAL(12, 3), nullable=False, default=0)
+    output_meal_tons = Column(DECIMAL(12, 3), nullable=False, default=0)
+    output_other_tons = Column(DECIMAL(12, 3), nullable=False, default=0)
+    allocation_oil_pct = Column(DECIMAL(5, 2), nullable=True)
+    allocation_meal_pct = Column(DECIMAL(5, 2), nullable=True)
+    heap_location = Column(String(255), nullable=True)  # Erntegutmiete / logistic place
+    logistics_note = Column(Text, nullable=True)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

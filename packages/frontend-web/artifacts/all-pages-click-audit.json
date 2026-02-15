@@ -1,0 +1,1548 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "results": [
+    {
+      "route": "/admin/audit-log",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/admin/benutzer-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/admin/compliance-dashboard",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/admin/GapPipelineConsole",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/admin/monitoring/alerts",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/admin/rollen-verwaltung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/admin/setup/dms-integration",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/admin/setup",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/aussaat/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/biostimulanzien-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/bodenproben/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/duenger-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/duenger-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/duenger/bedarfsrechner",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/duenger/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/duenger/mischungen",
+      "ok": false,
+      "title": "",
+      "error": "Error: page.goto: net::ERR_ABORTED at http://localhost:3000/agrar/duenger/mischungen\nCall log:\n  \u001b[2m- navigating to \"http://localhost:3000/agrar/duenger/mischungen\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/agrar/duenger/stamm",
+      "ok": false,
+      "title": "",
+      "error": "TimeoutError: page.goto: Timeout 25000ms exceeded.\nCall log:\n  \u001b[2m- navigating to \"http://localhost:3000/agrar/duenger/stamm\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/agrar/duengung/planung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/ernte/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/feldbuch/massnahmen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/feldbuch/schlag/neu",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/feldbuch/schlagkartei",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/kulturpflanzen/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/maschinenauslastung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/pflanzenschutz/applikation",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/psm/abgabedokumentation",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/psm/auflagen-manager",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/psm/beratung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/psm/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/psm/resistenz",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/psm/sachkunde-register",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/psm/stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/psm/wasserschutz",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/saatgut-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/saatgut-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/saatgut/bestellung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/saatgut/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/saatgut/sortenregister",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/saatgut/stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/schlaege/karte",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/wetter/prognose",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agrar/wetterwarnung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agribusiness/farmers",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/agribusiness/field-service-tasks",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/analytics",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/annahme/abrechnung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/annahme/lkw-registrierung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/annahme/qualitaets-check",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/annahme/warteschlange",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/artikel/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/artikel/stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/auth/Callback",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/auth/Login",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/banken/konten",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/benachrichtigungen/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/charge/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/charge/rueckverfolgung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/charge/stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/charge/wareneingang",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/compliance/bvl-umsatzmeldung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/compliance/cross-compliance",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/compliance/enni-meldungen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/compliance/export-pruefprotokoll",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/compliance/pcn-ufi",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/compliance/qs-checkliste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/compliance/saatgut-nachbau",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/compliance/sachkunde-register",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/compliance/vvvo-register",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/compliance/zulassungen-register",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/contracts-v2",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/controlling/plan-ist",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/aktivitaet-detail",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/aktivitaeten",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/betriebsprofil-detail",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/betriebsprofile-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/campaign-builder",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/campaign-detail",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/campaign-performance-dashboard",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/campaign-template-detail",
+      "ok": false,
+      "title": "",
+      "error": "TimeoutError: page.goto: Timeout 25000ms exceeded.\nCall log:\n  \u001b[2m- navigating to \"http://localhost:3000/crm/campaign-template-detail\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/crm/campaign-templates",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/campaigns",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/consent-confirm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/consent-detail",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/consent-management",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/crm-dashboard",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/gdpr-request-detail",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/gdpr-request-public",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/gdpr-requests",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/kontakt-detail",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/kontakt-management",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/kontakte-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/kunden-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/kunden-stamm-modern",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/kunden-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/lead-detail",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/leads",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/lieferanten-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/lieferanten-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/opportunities-forecast",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/opportunities-kanban",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/opportunities-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/opportunity-detail",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/segment-detail",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/crm/segments",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/dashboard/customizable",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/dashboard/einkauf-dashboard",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/dashboard/sales-dashboard",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/dashboards/geschaeftsfuehrung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/disposition/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/document",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/dokumente/ablage",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/anfrage-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/anfragen-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/angebot-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/angebote-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/anlieferavis-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/anlieferavis",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/audit-drilldown",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/auftragsbestaetigung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/auftragsbestaetigungen-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/bestellung-anlegen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/bestellung-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/bestellungen-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/bestellvorschlaege",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/edi-portal",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/gutschriften-belastungen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/lieferanten-dokumente",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/lieferanten-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/lieferanten-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/lieferantenbewertung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/rechnung-abgleich",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/rechnungseingaenge-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/rechnungseingang",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/reports",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/retouren",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/rfq-bids",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/service-entry-sheets",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/wareneingang",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einkauf/warengruppen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/einstellungen/system",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/energie/verbrauch",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/etiketten/drucken",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/export/umsatzsteuervoranmeldung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/anlagen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/bilanz",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/buchungsjournal",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/bwa",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/debitoren-api",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/debitoren",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/guv",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/hauptbuch",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/kontenplan",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/kostenstellenrechnung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/kreditlinien",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/kreditoren",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/offene-posten",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/op-verwaltung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/sachkonto",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/sicherheiten",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/verbindlichkeiten",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/zahlungseingaenge",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/zahlungslaeufe",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fibu/zahlungsvorschlaege",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/abschluss",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/ap-invoice-form",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/ap-invoices-list",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/audit-trail",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/bank-abgleich",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/bankkonten-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/buchungserfassung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/chart-of-accounts",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/debitoren-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/debitoren-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/dunning-editor",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/invoice-form",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/invoices-list",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/kasse",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/kontenplan",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/kreditoren-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/lastschriften-debitoren",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/mahnwesen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/nebenbuch-abstimmung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/op-debitoren",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/op-kreditoren",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/payment-matching",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/periods",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/steuerschluessel",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/ustva",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finance/zahlungslauf-kreditoren",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/finanzplanung/liquiditaet",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/foerderung/antrag",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/foerderung/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/fuhrpark/fahrzeuge",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/futter/einzel/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/futter/einzel/stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/futter/misch/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/futter/misch/stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/futtermittel/charge-verfolgung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/futtermittel/einzelfuttermittel-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/futtermittel/einzelfuttermittel-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/futtermittel/futtermittel-bestellung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/futtermittel/futtermittel-qualitaetskontrolle",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/futtermittel/futtermittel-statistik",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/futtermittel/futtermittel-wareneingang",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/futtermittel/mischfuttermittel-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/futtermittel/mischfuttermittel-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/inbox",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/inventory-dashboard",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/inventory-reports",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/inventory",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/inventory/epcis",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/kasse/tagesabschluss",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/labor/proben-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/lager/auslagerung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/lager/bestandsuebersicht",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/lager/einlagerung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/lager/inventur",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/lager/lagerplaetze",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/lager/terminal",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/logistik/frachtbriefe",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/logistik/tourenplanung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/mahnwesen/mahnlauf",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/management/executive-dashboard",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/marketing/kampagnen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/mobile/scanner",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/nachhaltigkeit/biodiversitaet",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/nachhaltigkeit/co2-bilanz",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/nachhaltigkeit/eudr-compliance",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/personal/mitarbeiter-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/personal/schulungen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/personal/stundenzettel",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/personal/zeiterfassung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/policy-manager",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/portal/anfragen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/portal/bestellungen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/portal/dokumente",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/portal/feldbuch",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/portal",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/portal/naehrstoffbilanzen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/portal/rechnungen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/portal/shop",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/portal/vertraege",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/portal/zertifikate",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/pos/customer-display",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/pos/gift-cards",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/pos/rabatte",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/pos/suspended-sales",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/pos/tagesabschluss-enhanced",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/pos/terminal",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/pos/tse-journal",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/preise/historie",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/preise/konditionen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/pricing",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/produktion/mischfutter-produktion",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/projekte/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/prospecting/LeadExplorer",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/public/verify",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/qualitaet/labor-auftrag",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/qualitaet/labor-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/qualitaet/reklamationen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/reports",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/reports/deckungsbeitrag",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/reports/lagerbestand",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/reports/umsatz",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/rezepte/editor",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/sales/angebot-erstellen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/sales/angebote-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/sales/auftraege-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/sales/credit-note-editor",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/sales/delivery-editor",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/sales/invoice-editor",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/sales/lieferungen-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/sales/order-editor",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/sales/orders-modern",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/sales/rechnungen-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/schaeden/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/schaeden/meldung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/schichtplan/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/service/anfragen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/setup/firma",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/silo/kapazitaeten",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/start-dashboard",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/statistik/bewegungen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/stock-management",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/subventionen/dashboard",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/system/live-monitor",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/tankstelle/zapfungen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/termine/kalender",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/transporte/fahrer-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/verkauf/kunde-neu",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/verkauf/kunden-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/verkauf/kunden-stamm-enhanced",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/verkauf/kunden-stamm",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/verladung/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/verladung/lkw-beladung",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/versicherungen/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/vertrag/rahmenvertraege",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/vertrieb/kundenumsatz",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/waage/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/waage/wiegungen",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/wartung/anlagen-liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/weighing",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/workflow/workflow-monitoring",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/workflow/workflow-regeln",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/workflows/approval",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/workflows/trigger",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    },
+    {
+      "route": "/zertifikate/liste",
+      "ok": true,
+      "title": "VALEO NeuroERP"
+    }
+  ]
+}

@@ -246,6 +246,8 @@ services:
       - valeo-network
     volumes:
       - ./app:/app/app
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
       - ./main.py:/app/main.py
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 

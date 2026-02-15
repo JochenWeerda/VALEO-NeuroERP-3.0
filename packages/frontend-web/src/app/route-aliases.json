@@ -57,12 +57,36 @@
       "path": "agrar/saatgut/stamm"
     },
     {
-      "module": "@/pages/analytics",
+      "module": "@/pages/start-dashboard",
       "index": true
+    },
+    {
+      "module": "@/pages/charge/liste",
+      "path": "charge/liste"
+    },
+    {
+      "module": "@/pages/charge/stamm",
+      "path": "charge/stamm/:id"
+    },
+    {
+      "module": "@/pages/charge/stamm",
+      "path": "charge/stamm"
+    },
+    {
+      "module": "@/pages/charge/wareneingang",
+      "path": "charge/wareneingang"
     },
     {
       "module": "@/pages/analytics",
       "path": "copilot"
+    },
+    {
+      "module": "@/pages/artikel/stamm",
+      "path": "artikel/:id"
+    },
+    {
+      "module": "@/pages/artikel/stamm",
+      "path": "artikel/neu"
     },
     {
       "module": "@/pages/contracts-v2",
@@ -325,16 +349,44 @@
       "path": "sales/orders/new"
     },
     {
-      "module": "@/pages/verkauf/kunde-neu",
+      "module": "@/pages/verkauf/kunden-stamm",
       "path": "verkauf/kunde/neu"
     },
     {
-      "module": "@/pages/verkauf/kunden-stamm-enhanced",
+      "module": "@/pages/verkauf/kunden-stamm",
       "path": "verkauf/kunde/:id"
+    },
+    {
+      "module": "@/pages/verkauf/kunden-stamm",
+      "path": "verkauf/kunden-stamm/:id"
     },
     {
       "module": "@/pages/verkauf/kunden-stamm-enhanced",
       "path": "verkauf/kunden-stamm-enhanced/:id"
+    },
+    {
+      "module": "@/pages/einkauf/lieferschein-frachtauftrag",
+      "path": "einkauf/lieferschein-frachtauftrag"
+    },
+    {
+      "module": "@/pages/einkauf/bestellungen-liste",
+      "path": "einkauf/bestellungen"
+    },
+    {
+      "module": "@/pages/einkauf/bestellung-anlegen",
+      "path": "einkauf/bestellungen/neu"
+    },
+    {
+      "module": "@/pages/einkauf/bestellung-stamm",
+      "path": "einkauf/bestellungen/:id"
+    },
+    {
+      "module": "@/pages/fuhrpark/fahrzeug-stamm",
+      "path": "fuhrpark/fahrzeug/neu"
+    },
+    {
+      "module": "@/pages/fuhrpark/fahrzeug-stamm",
+      "path": "fuhrpark/fahrzeug/:id"
     }
   ]
 }

@@ -32,6 +32,22 @@ export type Rolle = {
   rechte: number
 }
 
+export type MonitoringAlert = {
+  id: string
+  level: 'critical' | 'warning' | 'info'
+  type: string
+  message: string
+  timestamp: string
+}
+
+export type MonitoringAlertsResponse = {
+  active: number
+  critical: number
+  warning: number
+  system_status: 'online' | 'degraded' | 'offline'
+  items: MonitoringAlert[]
+}
+
 export function useAuditLog() {
   return useQuery({
     queryKey: ['admin', 'audit-log'],
@@ -53,5 +69,13 @@ export function useRollen() {
     queryKey: ['admin', 'rollen'],
     queryFn: async () => (await apiClient.get<Rolle[]>('/api/v1/admin/rollen')).data,
     staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useMonitoringAlerts() {
+  return useQuery({
+    queryKey: ['admin', 'monitoring', 'alerts'],
+    queryFn: async () => (await apiClient.get<MonitoringAlertsResponse>('/api/v1/admin/monitoring/alerts')).data,
+    staleTime: 30 * 1000,
   })
 }

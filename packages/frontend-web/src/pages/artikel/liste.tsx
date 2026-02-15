@@ -27,8 +27,8 @@ function mapApiArticle(a: Record<string, unknown>): Artikel {
     artikelnr: String(a.article_number ?? a.sku ?? String(a.id ?? '').substring(0, 5)),
     bezeichnung: String(a.name ?? a.description ?? '-'),
     warengruppe: String(a.category ?? a.product_group ?? 'Sonstige'),
-    vkPreis: Number(a.price ?? a.sell_price ?? 0),
-    bestand: Number(a.stock_quantity ?? a.quantity ?? 0),
+    vkPreis: Number(a.sales_price ?? a.price ?? a.sell_price ?? 0),
+    bestand: Number(a.current_stock ?? a.stock_quantity ?? a.quantity ?? 0),
     status: a.is_active === false ? 'auslaufend' : 'aktiv',
   }
 }

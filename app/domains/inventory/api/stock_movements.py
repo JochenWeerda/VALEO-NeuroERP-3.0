@@ -1,22 +1,54 @@
-"""
-Stock Movements API endpoints
-Full CRUD for stock movement management
-"""
+"""Stock Movements API endpoints."""
 
+from __future__ import annotations
+
+from datetime import datetime
+from decimal import Decimal
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from sqlalchemy import or_, desc
 
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from sqlalchemy import desc, or_
+from sqlalchemy.orm import Session
+
+from ....api.v1.schemas.base import PaginatedResponse
+from ....api.v1.schemas.inventory import StockMovement, StockMovementCreate, StockMovementUpdate
+from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import StockMovement as StockMovementModel
-from ....api.v1.schemas.base import PaginatedResponse
-from ....api.v1.schemas.inventory import StockMovement, StockMovementCreate
-from .inventory_auth import require_inventory_access, get_current_tenant_id
+from .inventory_auth import get_current_tenant_id, require_inventory_access
 
 router = APIRouter()
 
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+
+
+def _to_schema(row: StockMovementModel) -> StockMovement:
+    return StockMovement.model_validate(
+        {
+            "id": str(row.id),
+            "article_id": str(row.article_id),
+            "warehouse_id": str(row.warehouse_id),
+            "movement_type": row.movement_type,
+            "quantity": row.quantity,
+            "unit_cost": row.unit_cost,
+            "unit": row.unit,
+            "movement_number": row.movement_number,
+            "movement_date": row.movement_date,
+            "movement_time": row.movement_time,
+            "reference_number": row.reference_number,
+            "notes": row.notes,
+            "warehouse_location": row.warehouse_location,
+            "charge": row.charge,
+            "booking_user": row.booking_user,
+            "auto_created": bool(row.auto_created),
+            "linked_order_id": str(row.linked_order_id) if row.linked_order_id else None,
+            "previous_stock": row.previous_stock,
+            "new_stock": row.new_stock,
+            "total_cost": row.total_cost,
+            "tenant_id": str(row.tenant_id),
+            "created_at": row.created_at,
+        }
+    )
 
 
 @router.get("/", response_model=PaginatedResponse[StockMovement])
@@ -25,7 +57,7 @@ async def list_stock_movements(
     article_id: Optional[str] = Query(None, description="Filter by article ID"),
     warehouse_id: Optional[str] = Query(None, description="Filter by warehouse ID"),
     movement_type: Optional[str] = Query(None, description="Filter by movement type"),
-    search: Optional[str] = Query(None, description="Search in reference number or notes"),
+    search: Optional[str] = Query(None, description="Search in movement/reference/order fields"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(25, ge=1, le=200, description="Maximum number of records"),
     db: Session = Depends(get_db),
@@ -33,7 +65,7 @@ async def list_stock_movements(
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Return a paginated list of stock movements."""
-    effective_tenant = tenant_id or effective_tenant
+    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
 
     query = db.query(StockMovementModel).filter(StockMovementModel.tenant_id == effective_tenant)
 
@@ -47,8 +79,11 @@ async def list_stock_movements(
         like = f"%{search}%"
         query = query.filter(
             or_(
+                StockMovementModel.movement_number.ilike(like),
                 StockMovementModel.reference_number.ilike(like),
                 StockMovementModel.notes.ilike(like),
+                StockMovementModel.charge.ilike(like),
+                StockMovementModel.booking_user.ilike(like),
             )
         )
 
@@ -59,7 +94,7 @@ async def list_stock_movements(
     pages = (total + limit - 1) // limit if total else 1
 
     return PaginatedResponse(
-        items=[StockMovement.model_validate(item) for item in items],
+        items=[_to_schema(item) for item in items],
         total=total,
         page=page,
         pages=pages,
@@ -78,13 +113,13 @@ async def get_stock_movement(
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Get a single stock movement by ID."""
-    effective_tenant = tenant_id or effective_tenant
+    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
 
     movement = (
         db.query(StockMovementModel)
         .filter(
             StockMovementModel.id == movement_id,
-            StockMovementModel.tenant_id == effective_tenant
+            StockMovementModel.tenant_id == effective_tenant,
         )
         .first()
     )
@@ -92,7 +127,7 @@ async def get_stock_movement(
     if not movement:
         raise HTTPException(status_code=404, detail="Stock movement not found")
 
-    return StockMovement.model_validate(movement)
+    return _to_schema(movement)
 
 
 @router.post("/", response_model=StockMovement, status_code=201)
@@ -106,9 +141,8 @@ async def create_stock_movement(
     """Create a new stock movement."""
     from ..application.services.inventory_service import InventoryService
 
-    effective_tenant = tenant_id or effective_tenant
+    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
 
-    # Use the inventory service to process the movement
     service = InventoryService(db)
     try:
         movement = service.process_stock_movement(
@@ -117,13 +151,86 @@ async def create_stock_movement(
             movement_type=movement_data.movement_type,
             quantity=movement_data.quantity,
             unit_cost=movement_data.unit_cost,
+            unit=movement_data.unit,
+            movement_number=movement_data.movement_number,
+            movement_date=movement_data.movement_date,
+            movement_time=movement_data.movement_time,
             reference_number=movement_data.reference_number,
             notes=movement_data.notes,
-            tenant_id=effective_tenant
+            warehouse_location=movement_data.warehouse_location,
+            charge=movement_data.charge,
+            booking_user=movement_data.booking_user,
+            auto_created=movement_data.auto_created,
+            linked_order_id=movement_data.linked_order_id,
+            tenant_id=effective_tenant,
         )
-        return movement
+        if not movement.movement_number:
+            movement.movement_number = f"MOV-{str(movement.id)[:8]}"
+            db.commit()
+            db.refresh(movement)
+        return _to_schema(movement)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/{movement_id}", response_model=StockMovement)
+async def update_stock_movement(
+    movement_id: str,
+    movement_data: StockMovementUpdate,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_access),
+    effective_tenant: str = Depends(get_current_tenant_id),
+):
+    """Update stock movement metadata (non-stock impacting fields)."""
+    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
+
+    movement = (
+        db.query(StockMovementModel)
+        .filter(
+            StockMovementModel.id == movement_id,
+            StockMovementModel.tenant_id == effective_tenant,
+        )
+        .first()
+    )
+    if not movement:
+        raise HTTPException(status_code=404, detail="Stock movement not found")
+
+    payload = movement_data.model_dump(exclude_unset=True)
+    for key, value in payload.items():
+        setattr(movement, key, value)
+
+    movement.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(movement)
+    return _to_schema(movement)
+
+
+@router.delete("/{movement_id}", status_code=204, response_class=Response)
+async def delete_stock_movement(
+    movement_id: str,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_access),
+    effective_tenant: str = Depends(get_current_tenant_id),
+) -> Response:
+    """Delete a stock movement record."""
+    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
+
+    movement = (
+        db.query(StockMovementModel)
+        .filter(
+            StockMovementModel.id == movement_id,
+            StockMovementModel.tenant_id == effective_tenant,
+        )
+        .first()
+    )
+    if not movement:
+        raise HTTPException(status_code=404, detail="Stock movement not found")
+
+    db.delete(movement)
+    db.commit()
+    return Response(status_code=204)
 
 
 @router.get("/summary/article/{article_id}")
@@ -138,7 +245,7 @@ async def get_article_movement_summary(
     """Get movement summary for a specific article."""
     from datetime import datetime, timedelta
 
-    effective_tenant = tenant_id or effective_tenant
+    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
     cutoff_date = datetime.utcnow() - timedelta(days=days)
 
     movements = (
@@ -146,7 +253,7 @@ async def get_article_movement_summary(
         .filter(
             StockMovementModel.article_id == article_id,
             StockMovementModel.tenant_id == effective_tenant,
-            StockMovementModel.created_at >= cutoff_date
+            StockMovementModel.created_at >= cutoff_date,
         )
         .all()
     )
@@ -158,7 +265,7 @@ async def get_article_movement_summary(
         "movements_by_type": {},
         "total_quantity_in": 0,
         "total_quantity_out": 0,
-        "net_quantity_change": 0
+        "net_quantity_change": 0,
     }
 
     for movement in movements:

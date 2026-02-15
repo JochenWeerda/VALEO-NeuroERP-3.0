@@ -51,6 +51,9 @@ export interface Activity {
   status: 'planned' | 'completed' | 'overdue'
   assignedTo: string
   description?: string
+  mainTopics?: string[]
+  ordersPlaced?: string[]
+  followUpActions?: string[]
   createdAt: string
   updatedAt: string
 }
@@ -94,6 +97,32 @@ function transformFarmProfile(apiData: any): FarmProfile {
     createdAt: apiData.created_at || apiData.createdAt || '',
     updatedAt: apiData.updated_at || apiData.updatedAt || '',
   }
+}
+
+function transformActivity(apiData: any): Activity {
+  return {
+    id: apiData.id,
+    type: apiData.type || 'note',
+    title: apiData.title || '',
+    customer: apiData.customer || apiData.customer_name || '',
+    contactPerson: apiData.contact_person || apiData.contactPerson || '',
+    date: apiData.date || apiData.scheduled_at || '',
+    status: apiData.status || 'planned',
+    assignedTo: apiData.assigned_to || apiData.assignedTo || '',
+    description: apiData.description,
+    mainTopics: (apiData.main_topics || apiData.mainTopics || []).map((item: unknown) => String(item)),
+    ordersPlaced: (apiData.orders_placed || apiData.ordersPlaced || []).map((item: unknown) => String(item)),
+    followUpActions: (apiData.follow_up_actions || apiData.followUpActions || []).map((item: unknown) => String(item)),
+    createdAt: apiData.created_at || apiData.createdAt || '',
+    updatedAt: apiData.updated_at || apiData.updatedAt || '',
+  }
+}
+
+function unwrapItem<T>(payload: any): T {
+  if (payload && typeof payload === 'object' && 'data' in payload) {
+    return payload.data as T
+  }
+  return payload as T
 }
 
 // API Functions
@@ -150,23 +179,24 @@ export const crmService = {
 
   // Activities
   async getActivities(params?: { search?: string; type?: string; status?: string; limit?: number; offset?: number }) {
-    const response = await apiClient.get<{ data: Activity[]; total: number }>('/api/v1/crm/activities', { params })
-    return response.data
+    const response = await apiClient.get<{ items?: any[]; total?: number }>('/api/v1/crm/activities', { params })
+    const items = response.data.items || []
+    return { data: items.map(transformActivity), total: response.data.total || 0 }
   },
 
   async getActivity(id: string) {
-    const response = await apiClient.get<{ data: Activity }>(`/api/v1/crm/activities/${id}`)
-    return response.data.data
+    const response = await apiClient.get<any>(`/api/v1/crm/activities/${id}`)
+    return transformActivity(unwrapItem<any>(response.data))
   },
 
   async createActivity(data: Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>) {
-    const response = await apiClient.post<{ data: Activity }>('/api/v1/crm/activities', data)
-    return response.data.data
+    const response = await apiClient.post<any>('/api/v1/crm/activities', data)
+    return transformActivity(unwrapItem<any>(response.data))
   },
 
   async updateActivity(id: string, data: Partial<Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>>) {
-    const response = await apiClient.put<{ data: Activity }>(`/api/v1/crm/activities/${id}`, data)
-    return response.data.data
+    const response = await apiClient.put<any>(`/api/v1/crm/activities/${id}`, data)
+    return transformActivity(unwrapItem<any>(response.data))
   },
 
   async deleteActivity(id: string) {
@@ -187,21 +217,97 @@ export const crmService = {
   },
 
   async getFarmProfile(id: string) {
-    const response = await apiClient.get<{ data: FarmProfile }>(`/api/v1/crm/farm-profiles/${id}`)
-    return response.data.data
+    const response = await apiClient.get<any>(`/api/v1/crm/farm-profiles/${id}`)
+    return transformFarmProfile(unwrapItem<any>(response.data))
   },
 
   async createFarmProfile(data: Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>) {
-    const response = await apiClient.post<{ data: FarmProfile }>('/api/v1/crm/farm-profiles', data)
-    return response.data.data
+    const response = await apiClient.post<any>('/api/v1/crm/farm-profiles', data)
+    return transformFarmProfile(unwrapItem<any>(response.data))
   },
 
   async updateFarmProfile(id: string, data: Partial<Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>>) {
-    const response = await apiClient.put<{ data: FarmProfile }>(`/api/v1/crm/farm-profiles/${id}`, data)
-    return response.data.data
+    const response = await apiClient.put<any>(`/api/v1/crm/farm-profiles/${id}`, data)
+    return transformFarmProfile(unwrapItem<any>(response.data))
   },
 
   async deleteFarmProfile(id: string) {
     await apiClient.delete(`/api/v1/crm/farm-profiles/${id}`)
+  },
+
+  async syncFarmProfileSubResources(
+    id: string,
+    collections: {
+      crops?: Array<{ crop: string; area: number }>
+      livestock?: Array<{ type: string; count: number }>
+      certifications?: string[]
+    },
+  ) {
+    const syncIndexedList = async <T>(
+      basePath: string,
+      targetItems: T[],
+    ) => {
+      const currentResponse = await apiClient.get<T[]>(basePath)
+      const currentItems = currentResponse.data || []
+      const commonLength = Math.min(currentItems.length, targetItems.length)
+
+      for (let index = 0; index < commonLength; index += 1) {
+        await apiClient.put(`${basePath}/${index}`, targetItems[index])
+      }
+      for (let index = commonLength; index < targetItems.length; index += 1) {
+        await apiClient.post(basePath, targetItems[index])
+      }
+      for (let index = currentItems.length - 1; index >= targetItems.length; index -= 1) {
+        await apiClient.delete(`${basePath}/${index}`)
+      }
+    }
+
+    if (collections.crops) {
+      await syncIndexedList(`/api/v1/crm/farm-profiles/${id}/crops`, collections.crops)
+    }
+    if (collections.livestock) {
+      await syncIndexedList(`/api/v1/crm/farm-profiles/${id}/livestock`, collections.livestock)
+    }
+    if (collections.certifications) {
+      await syncIndexedList(
+        `/api/v1/crm/farm-profiles/${id}/certifications`,
+        collections.certifications.map((value) => ({ value })),
+      )
+    }
+  },
+
+  async syncActivitySubResources(
+    id: string,
+    collections: {
+      mainTopics?: string[]
+      ordersPlaced?: string[]
+      followUpActions?: string[]
+    },
+  ) {
+    const syncStringList = async (basePath: string, targetItems: string[]) => {
+      const currentResponse = await apiClient.get<string[]>(basePath)
+      const currentItems = currentResponse.data || []
+      const commonLength = Math.min(currentItems.length, targetItems.length)
+
+      for (let index = 0; index < commonLength; index += 1) {
+        await apiClient.put(`${basePath}/${index}`, { value: targetItems[index] })
+      }
+      for (let index = commonLength; index < targetItems.length; index += 1) {
+        await apiClient.post(basePath, { value: targetItems[index] })
+      }
+      for (let index = currentItems.length - 1; index >= targetItems.length; index -= 1) {
+        await apiClient.delete(`${basePath}/${index}`)
+      }
+    }
+
+    if (collections.mainTopics) {
+      await syncStringList(`/api/v1/crm/activities/${id}/main-topics`, collections.mainTopics)
+    }
+    if (collections.ordersPlaced) {
+      await syncStringList(`/api/v1/crm/activities/${id}/orders-placed`, collections.ordersPlaced)
+    }
+    if (collections.followUpActions) {
+      await syncStringList(`/api/v1/crm/activities/${id}/follow-up-actions`, collections.followUpActions)
+    }
   },
 }

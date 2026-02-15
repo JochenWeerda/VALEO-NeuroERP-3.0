@@ -156,12 +156,13 @@ export default function BestellungAnlegenPage(): JSX.Element {
       // Generiere Bestellnummer
       const bestellnummer = `PO-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`
       
-      // Transformiere Daten in MCP-Format
       const purchaseOrder = {
-        number: bestellnummer,
-        date: new Date().toISOString().slice(0, 10),
+        purchaseOrderNumber: bestellnummer,
+        orderDate: new Date().toISOString().slice(0, 10),
         supplierId: bestellung.lieferant,
-        status: "ENTWURF",
+        subject: `Bestellung ${bestellnummer}`,
+        description: bestellung.notizen || '',
+        status: 'ENTWURF',
         deliveryDate: bestellung.liefertermin,
         deliveryAddress: bestellung.lieferadresse,
         paymentTerms: bestellung.zahlungsbedingung,
@@ -169,40 +170,19 @@ export default function BestellungAnlegenPage(): JSX.Element {
         requisitionId: bestellung.requisitionId,
         contractId: bestellung.contractId,
         rfqId: bestellung.rfqId,
-        notes: bestellung.notizen,
-        lines: bestellung.positionen.map(pos => ({
-          article: pos.artikel,
-          qty: pos.menge,
-          price: pos.preis,
-          vatRate: 19 // Standard MwSt
+        notes: bestellung.notizen || undefined,
+        taxRate: 19,
+        items: bestellung.positionen.map((pos) => ({
+          itemType: 'PRODUCT',
+          description: pos.artikel,
+          quantity: pos.menge,
+          unitPrice: pos.preis,
+          discountPercent: 0,
         })),
-        subtotalNet: 0,
-        totalTax: 0,
-        totalGross: 0
       }
-      
-      // Berechne Gesamtbeträge
-      purchaseOrder.subtotalNet = purchaseOrder.lines.reduce((sum, line) => sum + (line.qty * (line.price || 0)), 0)
-      purchaseOrder.totalTax = purchaseOrder.lines.reduce((sum, line) => sum + (line.qty * (line.price || 0) * (line.vatRate || 0) / 100), 0)
-      purchaseOrder.totalGross = purchaseOrder.subtotalNet + purchaseOrder.totalTax
-      
-      // Speichere über MCP-API
-      const response = await fetch('/api/mcp/documents/purchase_order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(purchaseOrder)
-      })
-      
-      if (!response.ok) {
-        throw new Error('Fehler beim Speichern der Bestellung')
-      }
-      
-      const result = await response.json()
-      if (result.ok) {
-        navigate('/einkauf/bestellungen-liste')
-      } else {
-        throw new Error(result.error || 'Unbekannter Fehler')
-      }
+
+      await apiClient.post('/api/v1/purchase-orders', purchaseOrder)
+      navigate('/einkauf/bestellungen')
     } catch (error) {
       console.error('Fehler beim Erstellen der Bestellung:', error)
       alert(t('crud.messages.createError', { entityType: entityTypeLabel }))
@@ -477,8 +457,10 @@ export default function BestellungAnlegenPage(): JSX.Element {
         title={`${t('crud.actions.new')} ${entityTypeLabel} ${t('crud.actions.create')}`}
         steps={steps}
         onFinish={handleSubmit}
-        onCancel={() => navigate('/einkauf/bestellungen-liste')}
+        onCancel={() => navigate('/einkauf/bestellungen')}
       />
     </div>
   )
 }
+
+

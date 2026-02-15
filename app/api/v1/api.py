@@ -19,6 +19,7 @@ from app.api.v1.endpoints import (
     accounts,
     journal_entries,
     articles,
+    sales_orders,
     warehouses,
     policies,
     gap,
@@ -59,6 +60,7 @@ from app.api.v1.endpoints import (
     webhooks,
     article_extensions,
     customer_extensions,
+    business_partners,
     messages,
     dms_images,
     sales_shipping_ext,
@@ -82,6 +84,11 @@ from app.api.v1.endpoints import (
     agrar_contracts,
     silo,
     agrar_settlements,
+    nawaro,
+    nawaro_raps,
+    einkauf_lieferschein,
+    admin_monitoring,
+    admin_core,
 )
 
 # Import domain routers
@@ -113,6 +120,18 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    admin_monitoring.router,
+    prefix="/admin/monitoring",
+    tags=["admin", "monitoring"]
+)
+
+api_router.include_router(
+    admin_core.router,
+    prefix="/admin",
+    tags=["admin"]
+)
+
+api_router.include_router(
     tenants,
     prefix="/tenants",
     tags=["tenants"]
@@ -128,6 +147,12 @@ api_router.include_router(
     customers,
     prefix="/crm/customers",
     tags=["crm", "customers"]
+)
+
+api_router.include_router(
+    sales_orders.router,
+    prefix="/sales/orders",
+    tags=["sales", "orders"]
 )
 
 api_router.include_router(
@@ -391,6 +416,18 @@ api_router.include_router(
     tags=["agrar", "settlements", "self-billing"]
 )
 
+api_router.include_router(
+    nawaro.router,
+    prefix="/agrar/nawaro",
+    tags=["agrar", "nawaro"]
+)
+
+api_router.include_router(
+    nawaro_raps.router,
+    prefix="/agrar/nawaro",
+    tags=["agrar", "nawaro", "raps"]
+)
+
 # Kundenportal
 api_router.include_router(
     portal_shop.router,
@@ -458,6 +495,12 @@ api_router.include_router(
     customer_extensions.router,
     prefix="/crm/customers",
     tags=["crm", "customers"]
+)
+
+api_router.include_router(
+    business_partners.router,
+    prefix="/crm/business-partners",
+    tags=["crm", "business-partners"]
 )
 
 api_router.include_router(
@@ -556,4 +599,8 @@ api_router.include_router(
 # Compatibility API (path alignment and missing frontend endpoints)
 api_router.include_router(
     compat.router
+)
+
+api_router.include_router(
+    einkauf_lieferschein.router
 )

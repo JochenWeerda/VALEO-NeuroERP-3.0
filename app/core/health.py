@@ -9,14 +9,19 @@ from app.core.database_pg import engine
 from app.core.sse import sse_hub
 
 
-async def check_postgresql() -> tuple[bool, str]:
-    """Check PostgreSQL connection"""
+def _check_postgresql_sync() -> tuple[bool, str]:
+    """Run a lightweight sync DB ping using the configured SQLAlchemy engine."""
     try:
-        async with engine.connect() as conn:
-            await conn.execute(text("SELECT 1"))
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
         return True, "ok"
     except Exception as e:
         return False, str(e)
+
+
+async def check_postgresql() -> tuple[bool, str]:
+    """Check PostgreSQL connection from async context."""
+    return await asyncio.to_thread(_check_postgresql_sync)
 
 
 async def check_sse_hub() -> tuple[bool, str]:
