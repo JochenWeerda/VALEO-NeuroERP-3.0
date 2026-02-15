@@ -411,7 +411,8 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - Onboarding-Checklisten: `GET/POST/PUT/DELETE /api/v1/training/onboarding/checklists`
   - Onboarding-Runs: `GET/POST/PUT/DELETE /api/v1/training/onboarding/runs`
 - Masken:
-- [~] Backend-CRUD ist vollstaendig; UI-Masken-Cutover steht noch aus.
+- [~] Backend-CRUD ist vollstaendig; UI-Masken-Cutover laeuft.
+  - [x] `packages/frontend-web/src/pages/personal/schulungen.tsx` nutzt jetzt echte Domain-Daten ueber `packages/frontend-web/src/lib/api/personal.ts` -> `/api/v1/training/assignments` (Mapping ohne Mock-Fallback).
 
 ### 8.9 Priorisierte Restarbeiten (konkret)
 1. P0: Kundenmaske auf `business_partners` CRUD finalisieren, fehlende Pflichtfelder (z. B. Zahlungsart/Preisgruppe/Rabatt) per Migration ergaenzen.

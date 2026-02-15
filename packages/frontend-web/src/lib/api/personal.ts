@@ -92,13 +92,75 @@ export function useZeiterfassung(datum?: string) {
 }
 
 export function useSchulungen(filters?: { typ?: SchulungTyp; status?: SchulungStatus }) {
+  type TrainingAssignmentApi = {
+    id: string
+    employee_ref: string
+    course_code?: string
+    course_title?: string
+    assigned_at?: string
+    assigned_by?: string
+    status?: string
+    due_date?: string
+    completed_at?: string
+    evidence_url?: string
+  }
+
+  const toSchulungTyp = (item: TrainingAssignmentApi): SchulungTyp => {
+    const raw = `${item.course_code ?? ''} ${item.course_title ?? ''}`.toLowerCase()
+    if (raw.includes('psm')) return 'PSM'
+    if (raw.includes('gefahr')) return 'Gefahrstoffe'
+    if (raw.includes('stapler')) return 'Gabelstapler'
+    if (raw.includes('erste')) return 'Erste Hilfe'
+    if (raw.includes('brand')) return 'Brandschutz'
+    return 'Arbeitssicherheit'
+  }
+
+  const toStatus = (item: TrainingAssignmentApi): SchulungStatus => {
+    if (item.status === 'overdue') return 'abgelaufen'
+    if (!item.due_date) return 'gueltig'
+    const due = new Date(item.due_date)
+    if (Number.isNaN(due.getTime())) return 'gueltig'
+    const now = new Date()
+    if (due < now) return 'abgelaufen'
+    const warning = new Date()
+    warning.setDate(warning.getDate() + 60)
+    if (due <= warning) return 'ablaufend'
+    return 'gueltig'
+  }
+
+  const toSchulung = (item: TrainingAssignmentApi): Schulung => {
+    const date = item.assigned_at || item.completed_at || new Date().toISOString()
+    const thema = item.course_title || item.course_code || 'Schulung'
+    return {
+      id: item.id,
+      mitarbeiter: item.employee_ref,
+      personalnr: item.employee_ref,
+      thema,
+      typ: toSchulungTyp(item),
+      datum: date,
+      dauer: 0,
+      schulungsleiter: item.assigned_by || 'System',
+      zertifikatNr: item.evidence_url || undefined,
+      gueltigBis: item.due_date || undefined,
+      status: toStatus(item),
+    }
+  }
+
   return useQuery({
     queryKey: personalKeys.schulungen(filters),
     queryFn: async () => {
       const params = new URLSearchParams()
-      if (filters?.typ) params.append('typ', filters.typ)
-      if (filters?.status) params.append('status', filters.status)
-      return (await apiClient.get<Schulung[]>(`/api/v1/personal/schulungen?${String(params)}`)).data
+      if (filters?.status === 'abgelaufen') params.append('status', 'overdue')
+      if (filters?.status === 'gueltig') params.append('status', 'completed')
+      const rows = (await apiClient.get<TrainingAssignmentApi[]>(`/api/v1/training/assignments?${String(params)}`)).data
+      let mapped = rows.map(toSchulung)
+      if (filters?.typ) {
+        mapped = mapped.filter((item) => item.typ === filters.typ)
+      }
+      if (filters?.status) {
+        mapped = mapped.filter((item) => item.status === filters.status)
+      }
+      return mapped
     },
     staleTime: 5 * 60 * 1000,
   })
