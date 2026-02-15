@@ -463,6 +463,11 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - Routing: Alias-Pfade `personal/mitarbeiter/:id` und `personal/mitarbeiter/neu` in `packages/frontend-web/src/app/route-aliases.json`.
 - [x] Mitarbeiter-Liste UX:
   - `packages/frontend-web/src/pages/personal/mitarbeiter-liste.tsx` zeigt `email` und direkte Zeilenaktion `Bearbeiten`.
+- [x] Stundenzettel-Liste + Export umgesetzt:
+  - Backend: `GET /api/v1/personal/stundenzettel` in `app/api/v1/endpoints/personal.py`.
+  - Frontend: `packages/frontend-web/src/pages/personal/stundenzettel-liste.tsx` (Filter + CSV-Export).
+  - Navigation: `packages/frontend-web/src/app/navigation/manifest.tsx` verweist `Stundenzettel` auf die Listenmaske.
+  - Erfassungsmaske `packages/frontend-web/src/pages/personal/stundenzettel.tsx` navigiert nach Save/Cancel zur Listenansicht.
 
 ### 8.10 Docker Speicherbereinigung (14.02.2026)
 - Ausgangslage: `docker system df` zeigte `Images: 57`, `77.23GB` und `Build Cache: 39.77GB`.

@@ -107,7 +107,7 @@ export default function StundenzettelPage(): JSX.Element {
     try {
       await saveMutation.mutateAsync(dataToSave)
       toast({ title: 'Stundenzettel gespeichert' })
-      navigate('/personal/zeiterfassung')
+      navigate('/personal/stundenzettel-liste')
     } catch {
       toast({ variant: 'destructive', title: 'Fehler beim Speichern' })
     }
@@ -290,7 +290,7 @@ export default function StundenzettelPage(): JSX.Element {
 
       {/* Actions */}
       <div className="flex justify-end gap-4">
-        <Button variant="outline" onClick={() => navigate('/personal/zeiterfassung')}>
+        <Button variant="outline" onClick={() => navigate('/personal/stundenzettel-liste')}>
           Abbrechen
         </Button>
         <Button className="gap-2" onClick={handleSave} disabled={saveMutation.isPending}>

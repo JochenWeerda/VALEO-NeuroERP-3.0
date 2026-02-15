@@ -69,6 +69,17 @@ export type StundenzettelData = {
   unterschrift?: string
 }
 
+export type StundenzettelEintrag = {
+  id: string
+  datum: string
+  fahrer: string
+  kennzeichen: string
+  touren: Array<Record<string, unknown>>
+  gesamtArbeitszeit: number
+  ueberstunden: number
+  erstelltAm: string
+}
+
 export type QualificationLevel = 'basic' | 'advanced' | 'expert'
 
 export type Qualifikation = {
@@ -106,6 +117,7 @@ export const personalKeys = {
   onboardingRuns: (filters?: Record<string, unknown>) => [...personalKeys.all, 'onboarding-runs', filters] as const,
   onboardingChecklists: () => [...personalKeys.all, 'onboarding-checklists'] as const,
   mitarbeiterDetail: (id: string) => [...personalKeys.all, 'mitarbeiter-detail', id] as const,
+  stundenzettelListe: (filters?: Record<string, unknown>) => [...personalKeys.all, 'stundenzettel-liste', filters] as const,
 }
 
 export function useMitarbeiter(filters?: { search?: string; status?: MitarbeiterStatus }) {
@@ -246,6 +258,19 @@ export function useSaveStundenzettel() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: personalKeys.zeiterfassung() })
     },
+  })
+}
+
+export function useStundenzettelListe(filters?: { datumVon?: string; datumBis?: string }) {
+  return useQuery({
+    queryKey: personalKeys.stundenzettelListe(filters),
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (filters?.datumVon) params.append('datum_von', filters.datumVon)
+      if (filters?.datumBis) params.append('datum_bis', filters.datumBis)
+      return (await apiClient.get<StundenzettelEintrag[]>(`/api/v1/personal/stundenzettel?${String(params)}`)).data
+    },
+    staleTime: 30_000,
   })
 }
 
