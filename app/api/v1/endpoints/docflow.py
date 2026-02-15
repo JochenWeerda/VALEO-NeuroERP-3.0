@@ -107,6 +107,43 @@ class DocflowCommandResult(BaseModel):
     payload: dict[str, Any] = Field(default_factory=dict)
 
 
+class DocflowLineInput(BaseModel):
+    article_number: str = Field(..., min_length=1, max_length=80)
+    description: Optional[str] = None
+    quantity: float = Field(default=0, ge=0)
+    unit: Optional[str] = Field(default=None, max_length=20)
+    unit_price: float = Field(default=0, ge=0)
+    discount_percent: float = Field(default=0, ge=0, le=100)
+    tax_rate: float = Field(default=0, ge=0, le=100)
+    batch_id: Optional[str] = Field(default=None, max_length=64)
+    charge: Optional[str] = Field(default=None, max_length=64)
+
+
+class DocflowCreateRequest(BaseModel):
+    doc_type: str = Field(..., min_length=3, max_length=40)
+    doc_number: str = Field(..., min_length=1, max_length=80)
+    status: str = Field(default="draft", min_length=3, max_length=20)
+    customer_id: Optional[str] = None
+    supplier_id: Optional[str] = None
+    currency: str = Field(default="EUR", min_length=3, max_length=3)
+    document_date: Optional[datetime] = None
+    posting_date: Optional[date] = None
+    created_by: Optional[str] = Field(default=None, max_length=100)
+    items: list[DocflowLineInput] = Field(default_factory=list)
+
+
+class DocflowUpdateRequest(BaseModel):
+    expected_version: Optional[int] = Field(default=None, ge=1)
+    status: Optional[str] = Field(default=None, min_length=3, max_length=20)
+    customer_id: Optional[str] = None
+    supplier_id: Optional[str] = None
+    currency: Optional[str] = Field(default=None, min_length=3, max_length=3)
+    document_date: Optional[datetime] = None
+    posting_date: Optional[date] = None
+    updated_by: Optional[str] = Field(default=None, max_length=100)
+    items: Optional[list[DocflowLineInput]] = None
+
+
 def _money(v: Decimal) -> Decimal:
     return v.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
@@ -502,6 +539,246 @@ async def get_document(
         raise HTTPException(status_code=404, detail="Document not found")
     db.commit()
     return _row_to_header_out(db, effective_tenant, doc_id)
+
+
+@router.post("/", response_model=DocflowHeaderOut)
+async def create_document(
+    payload: DocflowCreateRequest,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    now = datetime.now(timezone.utc)
+    doc_id = str(uuid4())
+
+    total_net = Decimal("0")
+    total_tax = Decimal("0")
+    total_gross = Decimal("0")
+    for line in payload.items:
+        line_net, line_tax, line_gross = _line_amounts(
+            _qty(Decimal(str(line.quantity))),
+            Decimal(str(line.unit_price)),
+            Decimal(str(line.discount_percent)),
+            Decimal(str(line.tax_rate)),
+        )
+        total_net += line_net
+        total_tax += line_tax
+        total_gross += line_gross
+
+    try:
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_docflow.document_headers
+                (id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id,
+                 currency, total_net, total_tax, total_gross, document_date, posting_date, version, created_by, updated_by, created_at, updated_at)
+                VALUES
+                (:id, :tenant_id, :doc_type, :doc_number, :status, 'docflow.ui', NULL, :customer_id, :supplier_id,
+                 :currency, :total_net, :total_tax, :total_gross, :document_date, :posting_date, 1, :created_by, :updated_by, NOW(), NOW())
+                """
+            ),
+            {
+                "id": doc_id,
+                "tenant_id": effective_tenant,
+                "doc_type": payload.doc_type,
+                "doc_number": payload.doc_number,
+                "status": payload.status,
+                "customer_id": payload.customer_id,
+                "supplier_id": payload.supplier_id,
+                "currency": payload.currency,
+                "total_net": _money(total_net),
+                "total_tax": _money(total_tax),
+                "total_gross": _money(total_gross),
+                "document_date": payload.document_date or now,
+                "posting_date": payload.posting_date,
+                "created_by": payload.created_by,
+                "updated_by": payload.created_by,
+            },
+        )
+
+        for idx, line in enumerate(payload.items, start=1):
+            qty_value = _qty(Decimal(str(line.quantity)))
+            price = Decimal(str(line.unit_price))
+            discount = Decimal(str(line.discount_percent))
+            tax_rate = Decimal(str(line.tax_rate))
+            line_net, line_tax, line_gross = _line_amounts(qty_value, price, discount, tax_rate)
+            db.execute(
+                text(
+                    """
+                    INSERT INTO domain_docflow.document_items
+                    (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit,
+                     unit_price, discount_percent, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, created_at, updated_at)
+                    VALUES
+                    (:id, :tenant_id, :header_id, :line_number, NULL, :article_number, :description, :quantity, :unit,
+                     :unit_price, :discount_percent, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :batch_id, :charge, NOW(), NOW())
+                    """
+                ),
+                {
+                    "id": str(uuid4()),
+                    "tenant_id": effective_tenant,
+                    "header_id": doc_id,
+                    "line_number": idx,
+                    "article_number": line.article_number,
+                    "description": line.description,
+                    "quantity": qty_value,
+                    "unit": line.unit,
+                    "unit_price": price,
+                    "discount_percent": discount,
+                    "tax_rate": tax_rate,
+                    "line_total_net": line_net,
+                    "line_total_tax": line_tax,
+                    "line_total_gross": line_gross,
+                    "batch_id": line.batch_id,
+                    "charge": line.charge,
+                },
+            )
+
+        _best_effort_audit(
+            db,
+            tenant_id=effective_tenant,
+            action="docflow_create",
+            resource_type="docflow_document",
+            resource_id=doc_id,
+            payload={"doc_type": payload.doc_type, "doc_number": payload.doc_number, "status": payload.status},
+        )
+        db.commit()
+        return _row_to_header_out(db, effective_tenant, doc_id)
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"create failed: {exc}") from exc
+
+
+@router.put("/{doc_id}", response_model=DocflowHeaderOut)
+async def update_document(
+    doc_id: str,
+    payload: DocflowUpdateRequest,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    header = _fetch_doc_header(db, effective_tenant, doc_id)
+    if not header:
+        raise HTTPException(status_code=404, detail="Document not found")
+    if payload.expected_version and int(header.get("version") or 1) != payload.expected_version:
+        raise HTTPException(status_code=409, detail="Version conflict")
+    if str(header.get("status")) in {"posted", "reversed", "cancelled"}:
+        raise HTTPException(status_code=409, detail="Posted/Reversed/Cancelled document cannot be edited")
+
+    try:
+        updates: dict[str, Any] = {
+            "id": doc_id,
+            "tenant_id": effective_tenant,
+            "updated_by": payload.updated_by,
+        }
+        set_parts: list[str] = ["updated_at = NOW()", "version = version + 1", "updated_by = :updated_by"]
+        if payload.status is not None:
+            set_parts.append("status = :status")
+            updates["status"] = payload.status
+        if payload.customer_id is not None:
+            set_parts.append("customer_id = :customer_id")
+            updates["customer_id"] = payload.customer_id
+        if payload.supplier_id is not None:
+            set_parts.append("supplier_id = :supplier_id")
+            updates["supplier_id"] = payload.supplier_id
+        if payload.currency is not None:
+            set_parts.append("currency = :currency")
+            updates["currency"] = payload.currency
+        if payload.document_date is not None:
+            set_parts.append("document_date = :document_date")
+            updates["document_date"] = payload.document_date
+        if payload.posting_date is not None:
+            set_parts.append("posting_date = :posting_date")
+            updates["posting_date"] = payload.posting_date
+
+        db.execute(
+            text(f"UPDATE domain_docflow.document_headers SET {', '.join(set_parts)} WHERE id = :id AND tenant_id = :tenant_id"),
+            updates,
+        )
+
+        if payload.items is not None:
+            db.execute(
+                text("DELETE FROM domain_docflow.document_items WHERE tenant_id = :tenant_id AND header_id = :header_id"),
+                {"tenant_id": effective_tenant, "header_id": doc_id},
+            )
+            total_net = Decimal("0")
+            total_tax = Decimal("0")
+            total_gross = Decimal("0")
+            for idx, line in enumerate(payload.items, start=1):
+                qty_value = _qty(Decimal(str(line.quantity)))
+                price = Decimal(str(line.unit_price))
+                discount = Decimal(str(line.discount_percent))
+                tax_rate = Decimal(str(line.tax_rate))
+                line_net, line_tax, line_gross = _line_amounts(qty_value, price, discount, tax_rate)
+                total_net += line_net
+                total_tax += line_tax
+                total_gross += line_gross
+                db.execute(
+                    text(
+                        """
+                        INSERT INTO domain_docflow.document_items
+                        (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit,
+                         unit_price, discount_percent, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, created_at, updated_at)
+                        VALUES
+                        (:id, :tenant_id, :header_id, :line_number, NULL, :article_number, :description, :quantity, :unit,
+                         :unit_price, :discount_percent, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :batch_id, :charge, NOW(), NOW())
+                        """
+                    ),
+                    {
+                        "id": str(uuid4()),
+                        "tenant_id": effective_tenant,
+                        "header_id": doc_id,
+                        "line_number": idx,
+                        "article_number": line.article_number,
+                        "description": line.description,
+                        "quantity": qty_value,
+                        "unit": line.unit,
+                        "unit_price": price,
+                        "discount_percent": discount,
+                        "tax_rate": tax_rate,
+                        "line_total_net": line_net,
+                        "line_total_tax": line_tax,
+                        "line_total_gross": line_gross,
+                        "batch_id": line.batch_id,
+                        "charge": line.charge,
+                    },
+                )
+
+            db.execute(
+                text(
+                    """
+                    UPDATE domain_docflow.document_headers
+                    SET total_net = :total_net, total_tax = :total_tax, total_gross = :total_gross
+                    WHERE id = :id AND tenant_id = :tenant_id
+                    """
+                ),
+                {
+                    "id": doc_id,
+                    "tenant_id": effective_tenant,
+                    "total_net": _money(total_net),
+                    "total_tax": _money(total_tax),
+                    "total_gross": _money(total_gross),
+                },
+            )
+
+        _best_effort_audit(
+            db,
+            tenant_id=effective_tenant,
+            action="docflow_update",
+            resource_type="docflow_document",
+            resource_id=doc_id,
+            payload={"updated_by": payload.updated_by},
+        )
+        db.commit()
+        return _row_to_header_out(db, effective_tenant, doc_id)
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"update failed: {exc}") from exc
 
 
 @router.post("/{doc_id}/convert", response_model=DocflowCommandResult)

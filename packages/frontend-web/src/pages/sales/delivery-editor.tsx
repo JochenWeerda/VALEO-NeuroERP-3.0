@@ -1,7 +1,7 @@
-import { useState } from "react"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useQuery } from "@tanstack/react-query"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/components/ui/toast-provider"
 import { FormBuilder, type FormSchema } from "@/features/forms/FormBuilder"
@@ -10,6 +10,7 @@ import ApprovalPanel from "@/features/workflow/ApprovalPanel"
 import deliverySchema from "@/domain-schemas/sales_delivery.schema.json"
 import { getEntityTypeLabel, getSuccessMessage, getErrorMessage, getStatusLabel } from "@/features/crud/utils/i18n-helpers"
 import { businessPartnerService } from "@/lib/services/business-partner-service"
+import { apiClient } from "@/lib/api-client"
 
 const ISO_DATE_LENGTH = 10
 
@@ -49,8 +50,12 @@ type SalesDelivery = {
 export default function SalesDeliveryEditorPage(): JSX.Element {
   const { t } = useTranslation()
   const { push } = useToast()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const editId = searchParams.get("id")
   const entityType = 'delivery'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lieferschein')
+  const [docId, setDocId] = useState<string | null>(editId)
   const [delivery, setDelivery] = useState<SalesDelivery>({
     number: "DL-2025-0001",
     date: new Date().toISOString().slice(0, ISO_DATE_LENGTH),
@@ -75,6 +80,40 @@ export default function SalesDeliveryEditorPage(): JSX.Element {
       hazardHinweise: "",
     }],
   })
+
+  useEffect(() => {
+    if (!editId) {
+      return
+    }
+    void (async () => {
+      try {
+        const response = await apiClient.get(`/api/v1/docflow/${editId}`)
+        const doc = response.data as any
+        setDocId(String(doc.id))
+        setDelivery((prev) => ({
+          ...prev,
+          number: doc.doc_number ?? prev.number,
+          date: String(doc.document_date ?? prev.date).slice(0, ISO_DATE_LENGTH),
+          customerId: doc.customer_id ?? "",
+          status: doc.status ?? prev.status,
+          lines: Array.isArray(doc.items)
+            ? doc.items.map((it: any) => ({
+                article: it.article_number ?? "",
+                qty: Number(it.quantity ?? 0),
+                nutrientNKgPerUnit: 0,
+                nutrientP2o5KgPerUnit: 0,
+                co2eKgPerUnit: 0,
+                bvlZulassungsnummer: "",
+                sdsReference: "",
+                hazardHinweise: "",
+              }))
+            : prev.lines,
+        }))
+      } catch {
+        push(getErrorMessage(t, "read", entityType))
+      }
+    })()
+  }, [editId, push, t])
   const instructionsQuery = useQuery({
     queryKey: ["bp-instructions-delivery", delivery.customerId],
     queryFn: async () => businessPartnerService.listInstructions(delivery.customerId),
@@ -129,14 +168,26 @@ export default function SalesDeliveryEditorPage(): JSX.Element {
         totalNutrientP2o5Kg: Number(sustainabilityTotals.totalNutrientP2o5Kg.toFixed(3)),
         totalCo2eKg: Number(sustainabilityTotals.totalCo2eKg.toFixed(3)),
       }
-      const response = await fetch("/api/mcp/documents/sales_delivery", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-
-      if (!response.ok) {
-        throw new Error("Save failed")
+      const docPayload = {
+        doc_type: "sales_delivery",
+        doc_number: payload.number,
+        status: "open",
+        customer_id: payload.customerId || null,
+        document_date: payload.date ? new Date(payload.date).toISOString() : null,
+        items: payload.lines.map((line) => ({
+          article_number: line.article || "n/a",
+          description: line.article || "",
+          quantity: Number(line.qty || 0),
+          unit_price: 0,
+          discount_percent: 0,
+          tax_rate: 0,
+        })),
+      }
+      if (docId) {
+        await apiClient.put(`/api/v1/docflow/${docId}`, docPayload)
+      } else {
+        const created = await apiClient.post("/api/v1/docflow", docPayload)
+        setDocId(String(created.data?.id))
       }
 
       push(getSuccessMessage(t, 'update', entityType))
@@ -146,23 +197,21 @@ export default function SalesDeliveryEditorPage(): JSX.Element {
   }
 
   async function createFollowUp(toType: string): Promise<void> {
+    if (!docId) {
+      push("Bitte zuerst den Lieferschein speichern.")
+      return
+    }
+    const targetDocType = toType === "invoice" ? "sales_invoice" : toType
     try {
-      const response = await fetch("/api/mcp/documents/follow", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fromType: "sales_delivery",
-          toType,
-          payload: delivery,
-        }),
+      const response = await apiClient.post(`/api/v1/docflow/${docId}/convert`, {
+        target_doc_type: targetDocType,
+        idempotency_key: `ui-${docId}-${targetDocType}-${Date.now()}`,
       })
-
-      if (!response.ok) {
-        throw new Error("Follow-up creation failed")
+      const data = response.data as { target_doc_id?: string; payload?: { target_doc_number?: string } }
+      push(`${getSuccessMessage(t, 'create', 'invoice')}: ${data.payload?.target_doc_number ?? ''}`)
+      if (data.target_doc_id) {
+        navigate(`/sales/invoice-editor?id=${data.target_doc_id}`)
       }
-
-      const data = (await response.json()) as { ok: boolean; number: string }
-      push(`${getSuccessMessage(t, 'create', 'invoice')}: ${data.number}`)
     } catch {
       push(getErrorMessage(t, 'create', 'invoice'))
     }
@@ -172,7 +221,7 @@ export default function SalesDeliveryEditorPage(): JSX.Element {
     <div className="space-y-4">
       <BelegFlowPanel
         current={{
-          id: "1",
+          id: docId ?? "new",
           type: entityTypeLabel,
           number: delivery.number,
           status: getStatusLabel(t, delivery.status, delivery.status),

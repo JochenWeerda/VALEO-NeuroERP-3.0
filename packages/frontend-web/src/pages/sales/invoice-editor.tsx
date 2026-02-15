@@ -1,5 +1,6 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useSearchParams } from "react-router-dom"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/components/ui/toast-provider"
 import { FormBuilder, type FormSchema } from "@/features/forms/FormBuilder"
@@ -7,6 +8,7 @@ import { BelegFlowPanel } from "@/features/flows/BelegFlowPanel"
 import ApprovalPanel from "@/features/workflow/ApprovalPanel"
 import invoiceSchema from "@/domain-schemas/sales_invoice.schema.json"
 import { getEntityTypeLabel, getSuccessMessage, getErrorMessage } from "@/features/crud/utils/i18n-helpers"
+import { apiClient } from "@/lib/api-client"
 
 const ISO_DATE_LENGTH = 10
 const DAYS_IN_MS = 24 * 60 * 60 * 1000
@@ -40,8 +42,11 @@ type SalesInvoice = {
 export default function SalesInvoiceEditorPage(): JSX.Element {
   const { t } = useTranslation()
   const { push } = useToast()
+  const [searchParams] = useSearchParams()
+  const editId = searchParams.get("id")
   const entityType = 'invoice'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Rechnung')
+  const [docId, setDocId] = useState<string | null>(editId)
   const [invoice, setInvoice] = useState<SalesInvoice>({
     number: "INV-2025-0001",
     date: new Date().toISOString().slice(0, ISO_DATE_LENGTH),
@@ -58,16 +63,62 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
     totalGross: 0,
   })
 
+  useEffect(() => {
+    if (!editId) {
+      return
+    }
+    void (async () => {
+      try {
+        const response = await apiClient.get(`/api/v1/docflow/${editId}`)
+        const doc = response.data as any
+        setDocId(String(doc.id))
+        setInvoice((prev) => ({
+          ...prev,
+          number: doc.doc_number ?? prev.number,
+          date: String(doc.document_date ?? prev.date).slice(0, ISO_DATE_LENGTH),
+          customerId: doc.customer_id ?? "",
+          status: doc.status ?? prev.status,
+          lines: Array.isArray(doc.items)
+            ? doc.items.map((it: any) => ({
+                article: it.article_number ?? "",
+                qty: Number(it.quantity ?? 0),
+                price: Number(it.unit_price ?? 0),
+                vatRate: Number(it.tax_rate ?? 0),
+              }))
+            : prev.lines,
+          subtotalNet: Number(doc.total_net ?? prev.subtotalNet),
+          totalTax: Number(doc.total_tax ?? prev.totalTax),
+          totalGross: Number(doc.total_gross ?? prev.totalGross),
+        }))
+      } catch {
+        push(getErrorMessage(t, "read", entityType))
+      }
+    })()
+  }, [editId, push, t])
+
   async function save(v: SalesInvoice): Promise<void> {
     try {
-      const response = await fetch("/api/mcp/documents/sales_invoice", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(v),
-      })
-
-      if (!response.ok) {
-        throw new Error("Save failed")
+      const docPayload = {
+        doc_type: "sales_invoice",
+        doc_number: v.number,
+        status: "open",
+        customer_id: v.customerId || null,
+        document_date: v.date ? new Date(v.date).toISOString() : null,
+        posting_date: v.dueDate || null,
+        items: v.lines.map((line) => ({
+          article_number: line.article || "n/a",
+          description: line.article || "",
+          quantity: Number(line.qty || 0),
+          unit_price: Number(line.price || 0),
+          discount_percent: 0,
+          tax_rate: Number(line.vatRate || 0),
+        })),
+      }
+      if (docId) {
+        await apiClient.put(`/api/v1/docflow/${docId}`, docPayload)
+      } else {
+        const created = await apiClient.post("/api/v1/docflow", docPayload)
+        setDocId(String(created.data?.id))
       }
 
       push(getSuccessMessage(t, 'update', entityType))
@@ -83,7 +134,7 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
     <div className="space-y-4">
       <BelegFlowPanel
         current={{
-          id: "1",
+          id: docId ?? "new",
           type: entityTypeLabel,
           number: invoice.number,
           status: t('status.draft'),

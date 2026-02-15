@@ -12,10 +12,10 @@ import logging
 
 from app.services.pdf_service import generator
 from app.services.archive_service import archive
-from app.services.workflow_service import workflow
-from app.routers.workflow_router import _STATE
 from app.integrations.dms_client import upload_document, is_configured as is_dms_configured
 from app.repositories.document_repository import DocumentRepository
+from app.repositories.workflow_repository import WorkflowRepository
+from app.core.database_pg import SessionLocal
 from app.core.dependency_container import container
 
 logger = logging.getLogger(__name__)
@@ -51,8 +51,10 @@ async def print_document(domain: str, doc_id: str) -> FileResponse:
         # Convert DocumentHeader to dict format expected by PDF service
         doc = doc_repo.to_dict(doc_header)
 
-        # Workflow-Status holen
-        workflow_status = _STATE.get((domain, doc_id), "draft")
+        workflow_domain = "purchase" if domain.startswith("purchase") else "sales"
+        with SessionLocal() as wf_db:
+            workflow_repo = WorkflowRepository(wf_db)
+            workflow_status = workflow_repo.get_status(workflow_domain, doc_id)
 
         # PDF generieren
         temp_dir = Path("data/temp")
