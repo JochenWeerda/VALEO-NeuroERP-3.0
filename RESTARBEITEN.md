@@ -54,11 +54,13 @@
 
 ### Deployment & Rollout (operativ)
 Hinweis: Diese Punkte sind umgebungs-/zugriffsabhängig und erfordern Ausführung in Zielumgebungen (Staging/Production).
-- [ ] GitHub Secrets (8 Production-Secrets) in der Zielumgebung setzen.
-- [ ] Staging-Deployment durchführen und mit Runbook verifizieren.
-- [ ] UAT mit Key-Usern durchführen und Abnahme dokumentieren.
-- [ ] Blue-Green Deployment durchführen.
-- [ ] Monitoring-Dashboards nach Go-Live-Kriterien final verifizieren.
+Detaillierte Tickets mit Abhaengigkeiten und Akzeptanzkriterien siehe §9.
+- [ ] GitHub Secrets (8 Production-Secrets) in der Zielumgebung setzen → `GOLIVE-01`.
+- [ ] Staging-Deployment durchführen und mit Runbook verifizieren → `GOLIVE-02`.
+- [ ] UAT mit Key-Usern durchführen und Abnahme dokumentieren → `GOLIVE-03`.
+- [ ] Blue-Green Deployment durchführen → `GOLIVE-04`.
+- [ ] Monitoring-Dashboards nach Go-Live-Kriterien final verifizieren → `GOLIVE-05`.
+- [ ] Produktionsfreigabe mit Abnahmeprotokoll → `GOLIVE-06`.
 
 ---
 
@@ -1321,4 +1323,245 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] API-Smoke erfolgreich: `POST/GET/DELETE /api/v1/admin/report-permissions`.
 - [x] Frontend-Checks: ESLint + `tsc --noEmit` gruen.
 
+---
 
+## 9. Offene Tickets (priorisiert, Stand 15.02.2026)
+
+### Legende
+- **Stufe 1:** Go-Live-Blocker (operativ)
+- **Stufe 2:** Kurzfristig nach Go-Live (< 30 Tage)
+- **Stufe 3:** Mittelfristig (30-90 Tage)
+- **Stufe 4:** Langfristig (> 90 Tage, bei Bedarf)
+
+---
+
+### Stufe 1: Go-Live-Blocker
+
+#### GOLIVE-01: GitHub Production-Secrets setzen
+- Typ: Task | Prio: P0 | Aufwand: S | Owner: DevOps
+- Beschreibung: 8 Production-Secrets (`DATABASE_URL`, `REDIS_URL`, `SECRET_KEY`, `SMTP_*`, `SENTRY_DSN`, `S3_*`, `OIDC_*`) in GitHub-Secrets der Zielumgebung hinterlegen.
+- Akzeptanzkriterien: Alle 8 Secrets gesetzt, `scripts/check-staging.ps1` meldet keine fehlenden Variablen.
+- Referenz: `docs/deployment/production-secrets.md`
+- Abhaengigkeiten: keine
+- Status: [ ]
+
+#### GOLIVE-02: Staging-Deployment + Runbook-Verifikation
+- Typ: Task | Prio: P0 | Aufwand: M | Owner: DevOps
+- Beschreibung: Deployment auf Staging-Umgebung durchfuehren, Runbook `docs/deployment/staging-verification.md` Punkt fuer Punkt abarbeiten, Ergebnisse dokumentieren.
+- Akzeptanzkriterien: Staging laeuft stabil, alle Runbook-Checks gruen, Ergebnisprotokoll abgelegt.
+- Referenz: `docs/deployment/staging-verification.md`, `scripts/check-staging.ps1`
+- Abhaengigkeiten: GOLIVE-01
+- Status: [ ]
+
+#### GOLIVE-03: UAT mit Key-Usern durchfuehren
+- Typ: Story | Prio: P0 | Aufwand: L | Owner: QA
+- Beschreibung: Mindestens 3 End-to-End-Fachszenarien mit Key-Usern auf Staging testen (deckt AGRAR-UAT-01-01 und AGRAR-UAT-01-03 ab). Findings priorisieren, P1/P2-Befunde als Hotfix-Batch schliessen.
+- Akzeptanzkriterien: UAT-Protokoll signiert, alle P1/P2-Findings geschlossen oder mit Workaround dokumentiert.
+- Abhaengigkeiten: GOLIVE-02
+- Status: [ ]
+
+#### GOLIVE-04: Blue-Green Deployment durchfuehren
+- Typ: Task | Prio: P0 | Aufwand: M | Owner: DevOps
+- Beschreibung: Produktions-Deployment im Blue-Green-Modus ausfuehren. Rollback-Probe mindestens einmal erfolgreich durchlaufen.
+- Akzeptanzkriterien: Production erreichbar, Health-Checks gruen, Rollback-Probe dokumentiert.
+- Abhaengigkeiten: GOLIVE-03
+- Status: [ ]
+
+#### GOLIVE-05: Monitoring-Dashboards Go-Live-Verifikation
+- Typ: Task | Prio: P0 | Aufwand: S | Owner: DevOps
+- Beschreibung: Monitoring-Dashboards gegen Go-Live-Kriterien (`docs/operations/monitoring-dashboards-verification.md`) final verifizieren. Alerting-Schwellen fuer Production bestaetigen (deckt AGRAR-GO-01-02 ab).
+- Akzeptanzkriterien: Alle Dashboard-Panels zeigen Live-Daten, Alert-Kanaele zustellbar, Schwellen dokumentiert.
+- Referenz: `docs/operations/monitoring-dashboards-verification.md`
+- Abhaengigkeiten: GOLIVE-04
+- Status: [ ]
+
+#### GOLIVE-06: Produktionsfreigabe mit Abnahmeprotokoll
+- Typ: Task | Prio: P0 | Aufwand: S | Owner: QA/Management
+- Beschreibung: Go/No-Go-Entscheidung dokumentieren, Abnahmeprotokoll (`docs/deployment/go-live-abnahme-template.md`) ausfuellen und gegenzeichnen (deckt AGRAR-GO-01-01 und AGRAR-GO-01-03 ab).
+- Akzeptanzkriterien: Abnahmeprotokoll signiert, Betriebshandbuch vollstaendig, Rollback-Plan finalisiert.
+- Referenz: `docs/deployment/go-live-abnahme-template.md`
+- Abhaengigkeiten: GOLIVE-03, GOLIVE-05
+- Status: [ ]
+
+---
+
+### Stufe 2: Kurzfristig nach Go-Live (< 30 Tage)
+
+#### POSTGO-01: Nummernkreise zentral administrierbar
+- Typ: Story | Prio: P0 | Aufwand: M | Owner: Backend + Frontend
+- Beschreibung: Admin-UI und API fuer mandanten-/jahres-/belegtyp-spezifische Nummernkreise. Docflow-Engine (`domain_docflow.number_series`) ist vorhanden, aber es fehlt die zentrale Administrationsoberflaeche.
+- Akzeptanzkriterien:
+  - CRUD-API `GET/POST/PUT/DELETE /api/v1/admin/number-series` vorhanden.
+  - Admin-UI unter Einstellungen → Nummernkreise.
+  - Mandant kann Praefix, Startwert, Jahresreset pro Belegtyp konfigurieren.
+- Abhaengigkeiten: keine
+- Status: [ ]
+
+#### POSTGO-02: Buchungskreise und Periodensteuerung
+- Typ: Story | Prio: P0 | Aufwand: M | Owner: Backend + Frontend
+- Beschreibung: Zentrale Verwaltung von Buchungskreisen und Geschaeftsperioden (Monats-/Jahresabschluss). Periodensperre muss Buchungen ausserhalb offener Perioden blockieren.
+- Akzeptanzkriterien:
+  - CRUD-API fuer Buchungskreise und Perioden.
+  - Admin-UI unter Einstellungen → Buchungskreise.
+  - Buchungsversuche in gesperrte Perioden werden mit Fehlermeldung abgewiesen.
+- Abhaengigkeiten: keine
+- Status: [ ]
+
+#### POSTGO-03: Zentrale Incoterms-/Zahlungs-/Lieferbedingungen
+- Typ: Story | Prio: P1 | Aufwand: S | Owner: Backend + Frontend
+- Beschreibung: Stammdatentabellen + CRUD fuer Incoterms, Zahlungsbedingungen und Lieferbedingungen als zentrale Referenz statt Freitext pro Beleg.
+- Akzeptanzkriterien:
+  - CRUD-API `GET/POST/PUT/DELETE /api/v1/admin/master-data/{incoterms|payment-terms|delivery-terms}`.
+  - Admin-UI unter Einstellungen → Stammdaten.
+  - Belege referenzieren Stammdaten per FK statt Freitext.
+- Abhaengigkeiten: keine
+- Status: [ ]
+
+#### POSTGO-04: Globale Rundungs-/Bewertungsparameter
+- Typ: Story | Prio: P1 | Aufwand: S | Owner: Backend
+- Beschreibung: Mandantenweite Konfiguration fuer Nachkommastellen (Preis, Menge, Steuer, Rabatt) und Rundungsverfahren. Aktuell hardcoded (2/4 Nachkommastellen).
+- Akzeptanzkriterien:
+  - Konfiguration ueber `tenants.settings.rounding_rules` oder eigene Tabelle.
+  - Domain-Services lesen Rundungsparameter zur Laufzeit.
+  - Kein Hardcoding von Nachkommastellenzahl in Geschaeftslogik.
+- Abhaengigkeiten: keine
+- Status: [ ]
+
+#### POSTGO-05: `customers`-Tabelle bereinigen (Dual-Entity-Problem)
+- Typ: Story | Prio: P1 | Aufwand: M | Owner: Backend
+- Beschreibung: `domain_crm.customers` ist nur ein Basis-Subset von `domain_crm.business_partners` (§8.2). Zwei parallele Entitaeten fuer denselben Zweck erzeugen Mapping-Overhead und Dateninkonsistenz. Migration auf einheitliches `business_partners`-Modell mit Rolle `is_customer`.
+- Akzeptanzkriterien:
+  - Alle Lesezugriffe auf `customers` durch Views oder direkte Abfragen auf `business_partners` ersetzt.
+  - `customers`-Tabelle deprecated und leer (Backfill abgeschlossen).
+  - Keine Frontend-Seite nutzt mehr `/api/v1/customers` direkt.
+- Abhaengigkeiten: keine
+- Status: [ ]
+
+---
+
+### Stufe 3: Mittelfristig (30-90 Tage)
+
+#### MIDTERM-01: Abschluss-Cockpit (Controlling)
+- Typ: Story | Prio: P1 | Aufwand: M | Owner: Backend + Frontend
+- Beschreibung: Uebersichtsseite fuer Monats-/Quartals-/Jahresabschluss mit Status je Buchungskreis, offene Perioden, Abstimmungsdifferenzen und Freigabe-Workflow.
+- Akzeptanzkriterien:
+  - API liefert Abschluss-Status je Buchungskreis/Periode.
+  - UI zeigt Ampelstatus + Drill-Down auf offene Posten.
+  - Abschluss-Freigabe per Button mit Audit-Trail.
+- Abhaengigkeiten: POSTGO-02
+- Status: [ ]
+
+#### MIDTERM-02: Durchgaengige Freigabe-/Vertretungsregeln
+- Typ: Story | Prio: P1 | Aufwand: L | Owner: Backend + Frontend
+- Beschreibung: Zentrale Definition von Freigaberegeln (Wertgrenzen, Vier-Augen-Prinzip) und Vertretungsregelungen. Aktuell ueber manuelle Rollenzuweisung abgefangen.
+- Akzeptanzkriterien:
+  - Admin-UI fuer Freigabeketten (Betragschwellen, Rollenanforderungen, Eskalation).
+  - Vertretungsregeln mit Zeitraum und automatischer Aktivierung.
+  - Docflow-Commands pruefen Freigaberegeln vor Statusuebergang.
+- Abhaengigkeiten: keine
+- Status: [ ]
+
+#### MIDTERM-03: Integrations-Quarantaene mit SLA und Eskalation
+- Typ: Story | Prio: P2 | Aufwand: L | Owner: Backend + Frontend
+- Beschreibung: Zentrale Fehlerqueue ueber alle Integrations-Connectoren mit SLA-Tracking, automatischer Retry-Policy und Eskalationsworkflow. Basis (`admin_connector_events`) vorhanden, aber ohne SLA/Eskalation.
+- Akzeptanzkriterien:
+  - SLA-Timer pro Event-Typ konfigurierbar.
+  - Automatische Eskalation bei SLA-Verletzung (Benachrichtigung + Status-Aenderung).
+  - Admin-UI zeigt Quarantaene-Queue mit Filter/Sort/Retry.
+- Abhaengigkeiten: keine
+- Status: [ ]
+
+#### MIDTERM-04: Chargen-Feldnamen harmonisieren
+- Typ: Task | Prio: P2 | Aufwand: S | Owner: Backend
+- Beschreibung: `domain_ops.ops_chargen` Feldnamen an fachliche Konvention angleichen (`chargen_id` → `chargennummer`, `eingang` → `eingangsdatum`, `qualitaetsstatus` → `qs_status`). Aktuell weichen Feldnamen ab (§8.6 [~]).
+- Akzeptanzkriterien:
+  - Alembic-Migration mit Spaltenumbenennung (oder Alias-Views).
+  - API-Schema angepasst, bestehende Konsumenten migriert.
+  - Kein Breaking Change fuer Frontend (Uebergangszeit mit Alias).
+- Abhaengigkeiten: keine
+- Status: [ ]
+
+---
+
+### Stufe 4: Langfristig (> 90 Tage, bei Bedarf)
+
+#### LONGTERM-01: Konfig-Transporte DEV → TEST → PROD
+- Typ: Story | Prio: P2 | Aufwand: L | Owner: DevOps + Backend
+- Beschreibung: Mechanismus zum Export/Import von Mandantenkonfigurationen (Nummernkreise, Rundungsregeln, Freigabeketten, Monitoring-Regeln) zwischen Umgebungen. Verhindert manuelle Nachkonfiguration bei Deployments.
+- Akzeptanzkriterien:
+  - CLI-Befehl oder Admin-Aktion `Export Config Bundle` / `Import Config Bundle`.
+  - Diff-Vorschau vor Import.
+  - Audit-Trail fuer importierte Aenderungen.
+- Abhaengigkeiten: POSTGO-01, POSTGO-02
+- Status: [ ]
+
+#### LONGTERM-02: farm_profiles Subtabellen normalisieren
+- Typ: Story | Prio: P2 | Aufwand: M | Owner: Backend
+- Beschreibung: `domain_crm.farm_profiles` JSON-Felder (`crops`, `livestock`, `certifications`) in eigene Subtabellen extrahieren fuer filterbare Agrar-Reports.
+- Akzeptanzkriterien:
+  - Neue Tabellen `farm_profile_crops`, `farm_profile_livestock`, `farm_profile_certifications`.
+  - Backfill-Migration aus JSON.
+  - Sub-CRUD-Endpoints (analog §8.13) vorhanden.
+  - Bestehende Aggregate-API bleibt als Kompatibilitaetsschicht.
+- Abhaengigkeiten: keine
+- Trigger: Wenn Agrar-Reporting filtern/aggregieren ueber Kulturen/Tierbestand erfordert.
+- Status: [ ]
+
+#### LONGTERM-03: activities Subtabellen normalisieren
+- Typ: Story | Prio: P2 | Aufwand: M | Owner: Backend
+- Beschreibung: `domain_crm.activities` JSON-Listen (`main_topics`, `follow_up_actions`, `orders_placed`) in eigene Subtabellen extrahieren fuer KPI/Controlling-Auswertungen.
+- Akzeptanzkriterien:
+  - Neue Tabellen `activity_topics`, `activity_follow_ups`, `activity_orders`.
+  - Backfill-Migration aus JSON.
+  - Sub-CRUD-Endpoints vorhanden.
+- Abhaengigkeiten: keine
+- Trigger: Wenn KPI/Controlling Aktivitaetsdaten aggregiert auswerten soll.
+- Status: [ ]
+
+#### LONGTERM-04: QS-Chargen-Dokumente normalisieren
+- Typ: Story | Prio: P3 | Aufwand: L | Owner: Backend
+- Beschreibung: `domain_ops.ops_qs_charge_docs` JSON-Felder (`rohstoffe`, `haccp_system`, `eigenkontrollen`) in relationale Struktur ueberfuehren, wenn regulatorische Einzelfakt-Reportpflicht entsteht.
+- Akzeptanzkriterien:
+  - Normalisierte Tabellen mit FK auf `ops_qs_charge_docs`.
+  - Backfill-Migration.
+  - Compliance-Export kann Einzelfakten filtern/aggregieren.
+- Abhaengigkeiten: keine
+- Trigger: Regulatorische Anforderung fuer granulare QS-Auswertungen.
+- Status: [ ]
+
+---
+
+### Kritischer Pfad (Go-Live)
+
+```
+GOLIVE-01 → GOLIVE-02 → GOLIVE-03 → GOLIVE-04 → GOLIVE-05 → GOLIVE-06
+                                                       ↑
+                                                  GOLIVE-03 ──→ GOLIVE-06
+```
+
+Geschaetzter Gesamtaufwand Go-Live: **7-10 Arbeitstage** (exkl. UAT-Hotfixes).
+
+### Ticket-Uebersicht (CSV-Export)
+
+```csv
+id,title,type,priority,effort,owner_role,stufe,status,dependencies
+GOLIVE-01,Production-Secrets setzen,Task,P0,S,DevOps,1,Backlog,
+GOLIVE-02,Staging-Deployment + Runbook-Verifikation,Task,P0,M,DevOps,1,Backlog,GOLIVE-01
+GOLIVE-03,UAT mit Key-Usern,Story,P0,L,QA,1,Backlog,GOLIVE-02
+GOLIVE-04,Blue-Green Deployment,Task,P0,M,DevOps,1,Backlog,GOLIVE-03
+GOLIVE-05,Monitoring-Dashboards Go-Live-Verifikation,Task,P0,S,DevOps,1,Backlog,GOLIVE-04
+GOLIVE-06,Produktionsfreigabe Abnahmeprotokoll,Task,P0,S,QA/Management,1,Backlog,GOLIVE-03|GOLIVE-05
+POSTGO-01,Nummernkreise zentral administrierbar,Story,P0,M,Backend+Frontend,2,Backlog,
+POSTGO-02,Buchungskreise und Periodensteuerung,Story,P0,M,Backend+Frontend,2,Backlog,
+POSTGO-03,Zentrale Incoterms/Zahlungs/Lieferbedingungen,Story,P1,S,Backend+Frontend,2,Backlog,
+POSTGO-04,Globale Rundungs-/Bewertungsparameter,Story,P1,S,Backend,2,Backlog,
+POSTGO-05,customers-Tabelle bereinigen (Dual-Entity),Story,P1,M,Backend,2,Backlog,
+MIDTERM-01,Abschluss-Cockpit Controlling,Story,P1,M,Backend+Frontend,3,Backlog,POSTGO-02
+MIDTERM-02,Freigabe-/Vertretungsregeln,Story,P1,L,Backend+Frontend,3,Backlog,
+MIDTERM-03,Integrations-Quarantaene SLA/Eskalation,Story,P2,L,Backend+Frontend,3,Backlog,
+MIDTERM-04,Chargen-Feldnamen harmonisieren,Task,P2,S,Backend,3,Backlog,
+LONGTERM-01,Konfig-Transporte DEV/TEST/PROD,Story,P2,L,DevOps+Backend,4,Backlog,POSTGO-01|POSTGO-02
+LONGTERM-02,farm_profiles Subtabellen normalisieren,Story,P2,M,Backend,4,Backlog,
+LONGTERM-03,activities Subtabellen normalisieren,Story,P2,M,Backend,4,Backlog,
+LONGTERM-04,QS-Chargen-Dokumente normalisieren,Story,P3,L,Backend,4,Backlog,
+```
