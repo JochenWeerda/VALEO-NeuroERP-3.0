@@ -1365,6 +1365,17 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] Backend-Compile + Frontend ESLint/TS gruen
 - [x] API-Smoke erfolgreich: `retry_status=warning`, danach `resolve_status=ok`
 
+### 8.44 Routing-Fix Verkauf Kundenliste
+- Befund:
+- [x] `/verkauf/kunden-liste` konnte auf das Start-Dashboard fallen (Routing-Aufloesung nicht hart genug fixiert).
+- Umsetzung:
+- [x] `packages/frontend-web/src/app/navigation/manifest.tsx`
+  - Nav-Eintrag `Kunden` auf `preferredPath: 'verkauf/kunden-liste'` gesetzt.
+- [x] `packages/frontend-web/src/app/route-aliases.json`
+  - expliziter Alias fuer `@/pages/verkauf/kunden-liste` hinzugefuegt.
+- Verifikation:
+- [x] Frontend `eslint` + `tsc --noEmit` gruen.
+
 ---
 
 ## 9. Offene Tickets (priorisiert, Stand 15.02.2026)

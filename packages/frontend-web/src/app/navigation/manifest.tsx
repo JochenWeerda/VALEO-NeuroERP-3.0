@@ -254,6 +254,7 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         label: 'Kunden',
         icon: Users,
         module: '@/pages/verkauf/kunden-liste',
+        preferredPath: 'verkauf/kunden-liste',
         keywords: ['kunden', 'crm', 'customer'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },

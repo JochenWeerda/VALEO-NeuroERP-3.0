@@ -389,6 +389,10 @@
       "path": "verkauf/kunden-stamm-enhanced/:id"
     },
     {
+      "module": "@/pages/verkauf/kunden-liste",
+      "path": "verkauf/kunden-liste"
+    },
+    {
       "module": "@/pages/einkauf/lieferschein-frachtauftrag",
       "path": "einkauf/lieferschein-frachtauftrag"
     },
