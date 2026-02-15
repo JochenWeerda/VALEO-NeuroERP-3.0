@@ -997,6 +997,20 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         mcp: { businessDomain: 'hr', scope: 'hr:read' },
       },
       {
+        id: 'qualifikationen',
+        label: 'Qualifikationen',
+        icon: UserCog,
+        module: '@/pages/personal/qualifikationen',
+        mcp: { businessDomain: 'hr', scope: 'hr:read' },
+      },
+      {
+        id: 'onboarding',
+        label: 'Onboarding',
+        icon: Users,
+        module: '@/pages/personal/onboarding',
+        mcp: { businessDomain: 'hr', scope: 'hr:read' },
+      },
+      {
         id: 'schichtplan',
         label: 'Schichtplan',
         icon: Calendar,
