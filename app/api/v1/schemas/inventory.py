@@ -159,6 +159,14 @@ class StockMovementBase(BaseSchema):
     booking_user: Optional[str] = Field(None, max_length=100, description="Booking user")
     auto_created: bool = Field(default=False, description="Automatically created movement")
     linked_order_id: Optional[str] = Field(None, description="Linked order ID")
+    ownership_type: str = Field(default="owned", pattern="^(owned|consigned)$", description="Stock ownership type")
+    owner_partner_id: Optional[str] = Field(None, max_length=64, description="Owner partner for consigned stock")
+    agrar_contract_id: Optional[str] = Field(None, max_length=64, description="Linked agrar contract")
+    weighing_ticket_id: Optional[str] = Field(None, max_length=64, description="Linked weighing ticket")
+    storage_fee_relevant: bool = Field(default=False, description="Whether storage fee applies")
+    storage_fee_start_date: Optional[date] = Field(None, description="Storage fee start date")
+    storage_fee_monthly_rate: Optional[Decimal] = Field(None, ge=0, description="Monthly storage fee rate")
+    storage_fee_last_charged_until: Optional[date] = Field(None, description="Last storage-fee run covered until")
 
 
 class StockMovementCreate(StockMovementBase):
@@ -179,6 +187,14 @@ class StockMovementUpdate(BaseSchema):
     booking_user: Optional[str] = Field(None, max_length=100)
     auto_created: Optional[bool] = None
     linked_order_id: Optional[str] = None
+    ownership_type: Optional[str] = Field(None, pattern="^(owned|consigned)$")
+    owner_partner_id: Optional[str] = Field(None, max_length=64)
+    agrar_contract_id: Optional[str] = Field(None, max_length=64)
+    weighing_ticket_id: Optional[str] = Field(None, max_length=64)
+    storage_fee_relevant: Optional[bool] = None
+    storage_fee_start_date: Optional[date] = None
+    storage_fee_monthly_rate: Optional[Decimal] = Field(None, ge=0)
+    storage_fee_last_charged_until: Optional[date] = None
 
 
 class StockMovement(StockMovementBase, TimestampMixin):
