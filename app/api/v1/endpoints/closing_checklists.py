@@ -907,3 +907,108 @@ async def list_closing_checklists(
         logger.error(f"Error listing closing checklists: {e}")
         return []
 
+
+@router.get("/cockpit/summary", response_model=Dict[str, Any])
+async def get_closing_cockpit_summary(
+    tenant_id: str = Query("system", description="Tenant ID"),
+    period: Optional[str] = Query(None, description="Period in YYYY-MM"),
+    db: Session = Depends(get_db),
+):
+    """
+    Aggregated summary for Abschluss-Cockpit (period status + checklist progress + blockers).
+    """
+    result: Dict[str, Any] = {
+        "tenant_id": tenant_id,
+        "period": period,
+        "periods": {"open": 0, "closed": 0, "adjusting": 0},
+        "checklists": {"total": 0, "completed": 0, "in_progress": 0, "blocked": 0, "avg_progress": 0.0},
+        "blockers": [],
+        "latest_checklists": [],
+    }
+    try:
+        period_query = text(
+            """
+            SELECT
+              SUM(CASE WHEN status='OPEN' THEN 1 ELSE 0 END) AS open_cnt,
+              SUM(CASE WHEN status='CLOSED' THEN 1 ELSE 0 END) AS closed_cnt,
+              SUM(CASE WHEN status='ADJUSTING' THEN 1 ELSE 0 END) AS adjusting_cnt
+            FROM finance_accounting_periods
+            WHERE tenant_id=:tenant_id
+            """
+        )
+        period_params = {"tenant_id": tenant_id}
+        if period:
+            period_query = text(str(period_query) + " AND period = :period")
+            period_params["period"] = period
+        period_row = db.execute(period_query, period_params).first()
+        if period_row:
+            result["periods"] = {
+                "open": int(period_row[0] or 0),
+                "closed": int(period_row[1] or 0),
+                "adjusting": int(period_row[2] or 0),
+            }
+    except Exception as exc:
+        logger.warning(f"cockpit-summary period aggregation failed: {exc}")
+
+    try:
+        cl_query = text(
+            """
+            SELECT
+              COUNT(*) AS total_cnt,
+              SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) AS completed_cnt,
+              SUM(CASE WHEN status='in_progress' THEN 1 ELSE 0 END) AS in_progress_cnt,
+              SUM(CASE WHEN status='blocked' THEN 1 ELSE 0 END) AS blocked_cnt,
+              AVG(progress_percentage) AS avg_progress
+            FROM domain_erp.closing_checklists
+            WHERE tenant_id = :tenant_id
+            """
+        )
+        cl_params = {"tenant_id": tenant_id}
+        if period:
+            cl_query = text(str(cl_query) + " AND period = :period")
+            cl_params["period"] = period
+        cl_row = db.execute(cl_query, cl_params).first()
+        if cl_row:
+            result["checklists"] = {
+                "total": int(cl_row[0] or 0),
+                "completed": int(cl_row[1] or 0),
+                "in_progress": int(cl_row[2] or 0),
+                "blocked": int(cl_row[3] or 0),
+                "avg_progress": float(cl_row[4] or 0.0),
+            }
+
+        latest_rows = db.execute(
+            text(
+                """
+                SELECT id, period, closing_type, status, progress_percentage, completed_required_items, required_items, updated_at
+                FROM domain_erp.closing_checklists
+                WHERE tenant_id=:tenant_id
+                ORDER BY updated_at DESC
+                LIMIT 10
+                """
+            ),
+            {"tenant_id": tenant_id},
+        ).fetchall()
+        latest: list[Dict[str, Any]] = []
+        blockers: list[Dict[str, Any]] = []
+        for row in latest_rows:
+            item = {
+                "id": str(row[0]),
+                "period": str(row[1]),
+                "closing_type": str(row[2]),
+                "status": str(row[3]),
+                "progress_percentage": float(row[4] or 0.0),
+                "completed_required_items": int(row[5] or 0),
+                "required_items": int(row[6] or 0),
+                "updated_at": row[7].isoformat() if row[7] else None,
+            }
+            latest.append(item)
+            if item["status"] == "blocked" or item["completed_required_items"] < item["required_items"]:
+                blockers.append(item)
+        result["latest_checklists"] = latest
+        result["blockers"] = blockers
+    except Exception as exc:
+        logger.warning(f"cockpit-summary checklist aggregation failed: {exc}")
+
+    return result
+
