@@ -1050,11 +1050,27 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:write' },
       },
       {
+        id: 'widget-verwaltung',
+        label: 'Widget-Verwaltung',
+        icon: Settings,
+        module: '@/pages/controlling/widget-verwaltung',
+        keywords: ['widget', 'dashboard', 'controlling'],
+        mcp: { businessDomain: 'finance', scope: 'finance:write' },
+      },
+      {
         id: 'timeseries-erfassung',
         label: 'Timeseries-Erfassung',
         icon: BarChart3,
         module: '@/pages/controlling/timeseries-erfassung',
         keywords: ['timeseries', 'kpi', 'controlling'],
+        mcp: { businessDomain: 'finance', scope: 'finance:write' },
+      },
+      {
+        id: 'massnahmen',
+        label: 'Massnahmen',
+        icon: FileText,
+        module: '@/pages/controlling/massnahmen',
+        keywords: ['massnahmen', 'actions', 'controlling'],
         mcp: { businessDomain: 'finance', scope: 'finance:write' },
       },
       {

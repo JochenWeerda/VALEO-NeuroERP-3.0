@@ -387,7 +387,9 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - [x] `packages/frontend-web/src/pages/controlling/plan-ist.tsx` bezieht Daten jetzt ueber `packages/frontend-web/src/lib/api/misc-modules.ts` aus echtem Controlling-Stack (`/api/v1/controlling/kpis` + `/api/v1/controlling/timeseries`) statt nicht vorhandenem `plan-ist` Endpoint.
   - [x] KPI-CRUD-UI vorhanden: `packages/frontend-web/src/pages/controlling/kpi-verwaltung.tsx` (Hook `packages/frontend-web/src/lib/api/controlling.ts`) mit `GET/POST/PUT/DELETE /api/v1/controlling/kpis`.
   - [x] Dashboard-CRUD-UI vorhanden: `packages/frontend-web/src/pages/controlling/dashboard-verwaltung.tsx` mit `GET/POST/PUT/DELETE /api/v1/controlling/dashboards`.
+  - [x] Widget-CRUD-UI vorhanden: `packages/frontend-web/src/pages/controlling/widget-verwaltung.tsx` mit `GET/POST/PUT/DELETE` fuer `/api/v1/controlling/dashboards/{id}/widgets` und `/api/v1/controlling/widgets/{id}`.
   - [x] Timeseries-Erfassung vorhanden: `packages/frontend-web/src/pages/controlling/timeseries-erfassung.tsx` mit `GET/POST/DELETE /api/v1/controlling/timeseries`.
+  - [x] Maßnahmen-Tracking-UI vorhanden: `packages/frontend-web/src/pages/controlling/massnahmen.tsx` mit `GET/POST/PUT/DELETE /api/v1/controlling/actions`.
   - [x] Navigation erweitert (`packages/frontend-web/src/app/navigation/manifest.tsx`): `Dashboard-Verwaltung`, `Timeseries-Erfassung`.
 
 ### 8.37 Gap-Closure: Chargen-MHD + Controlling-CRUD
