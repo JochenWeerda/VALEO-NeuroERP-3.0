@@ -383,7 +383,8 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - Zeitreihen: `GET/POST/DELETE /api/v1/controlling/timeseries`
   - Maßnahmen: `GET/POST/PUT/DELETE /api/v1/controlling/actions`
 - Masken:
-- [~] Einzelne UI-Seiten vorhanden, aber kein persistenter, durchgaengiger Domain-CRUD-Stack sichtbar.
+- [~] Einzelne UI-Seiten vorhanden, aber kein vollstaendiger Domain-Cockpit-Cutover.
+  - [x] `packages/frontend-web/src/pages/controlling/plan-ist.tsx` bezieht Daten jetzt ueber `packages/frontend-web/src/lib/api/misc-modules.ts` aus echtem Controlling-Stack (`/api/v1/controlling/kpis` + `/api/v1/controlling/timeseries`) statt nicht vorhandenem `plan-ist` Endpoint.
 
 ### 8.37 Gap-Closure: Chargen-MHD + Controlling-CRUD
 - [x] `ops_chargen.mhd` fachlich und technisch nachgezogen:
