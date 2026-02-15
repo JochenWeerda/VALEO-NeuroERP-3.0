@@ -293,6 +293,14 @@
           "path": "finance/bankkonten/:id"
         },
     {
+      "module": "@/pages/personal/mitarbeiter-stamm",
+      "path": "personal/mitarbeiter/:id"
+    },
+    {
+      "module": "@/pages/personal/mitarbeiter-stamm",
+      "path": "personal/mitarbeiter/neu"
+    },
+    {
       "module": "@/pages/fibu/buchungsjournal",
       "path": "finance/bookings/new"
     },

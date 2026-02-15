@@ -11,9 +11,18 @@ export type MitarbeiterStatus = 'aktiv' | 'urlaub' | 'krank'
 export type Mitarbeiter = {
   id: string
   name: string
+  email: string
   abteilung: string
   position: string
   eintrittsdatum: string
+  status: MitarbeiterStatus
+}
+
+export type MitarbeiterInput = {
+  name: string
+  email: string
+  abteilung: string
+  position: string
   status: MitarbeiterStatus
 }
 
@@ -96,6 +105,7 @@ export const personalKeys = {
   qualifikationen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'qualifikationen', filters] as const,
   onboardingRuns: (filters?: Record<string, unknown>) => [...personalKeys.all, 'onboarding-runs', filters] as const,
   onboardingChecklists: () => [...personalKeys.all, 'onboarding-checklists'] as const,
+  mitarbeiterDetail: (id: string) => [...personalKeys.all, 'mitarbeiter-detail', id] as const,
 }
 
 export function useMitarbeiter(filters?: { search?: string; status?: MitarbeiterStatus }) {
@@ -194,6 +204,38 @@ export function useSchulungen(filters?: { typ?: SchulungTyp; status?: SchulungSt
       return mapped
     },
     staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useMitarbeiterDetail(id?: string) {
+  return useQuery({
+    queryKey: personalKeys.mitarbeiterDetail(id || ''),
+    enabled: Boolean(id),
+    queryFn: async () => {
+      return (await apiClient.get<Mitarbeiter>(`/api/v1/personal/mitarbeiter/${id}`)).data
+    },
+    staleTime: 60_000,
+  })
+}
+
+export function useCreateMitarbeiter() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: MitarbeiterInput) => (await apiClient.post<Mitarbeiter>('/api/v1/personal/mitarbeiter', data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.mitarbeiter() })
+    },
+  })
+}
+
+export function useUpdateMitarbeiter(id: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: MitarbeiterInput) => (await apiClient.put<Mitarbeiter>(`/api/v1/personal/mitarbeiter/${id}`, data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.mitarbeiter() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.mitarbeiterDetail(id) })
+    },
   })
 }
 

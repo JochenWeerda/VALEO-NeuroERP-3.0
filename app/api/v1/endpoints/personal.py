@@ -21,10 +21,19 @@ router = APIRouter(prefix="/personal", tags=["personal", "hr"])
 class MitarbeiterOut(BaseModel):
     id: str
     name: str
+    email: str
     abteilung: str
     position: str
     eintrittsdatum: str
     status: str
+
+
+class MitarbeiterIn(BaseModel):
+    name: str = Field(..., min_length=1, max_length=120)
+    email: str = Field(..., min_length=3, max_length=120)
+    abteilung: str = Field(default="Allgemein", max_length=120)
+    position: str = Field(default="Mitarbeiter", max_length=120)
+    status: str = Field(default="aktiv", pattern="^(aktiv|urlaub|krank)$")
 
 
 class ZeitEintragOut(BaseModel):
@@ -74,6 +83,35 @@ def _to_time_text(value: Any) -> str:
     return text_value
 
 
+def _normalize_status(value: Any, fallback: str = "aktiv") -> str:
+    normalized = str(value or "").strip().lower()
+    if normalized in {"aktiv", "urlaub", "krank"}:
+        return normalized
+    return fallback
+
+
+def _parse_preferences(raw: Any) -> dict[str, Any]:
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, str):
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, dict):
+                return parsed
+        except Exception:
+            return {}
+    return {}
+
+
+def _split_name(full_name: str) -> tuple[str, str]:
+    parts = [part for part in full_name.strip().split(" ") if part]
+    if not parts:
+        return "", ""
+    if len(parts) == 1:
+        return parts[0], ""
+    return " ".join(parts[:-1]), parts[-1]
+
+
 @router.get("/mitarbeiter", response_model=list[MitarbeiterOut])
 async def list_mitarbeiter(
     search: str | None = Query(default=None),
@@ -93,7 +131,7 @@ async def list_mitarbeiter(
     rows = db.execute(
         text(
             f"""
-            SELECT id, username, email, first_name, last_name, roles, is_active, created_at
+            SELECT id, username, email, first_name, last_name, roles, is_active, preferences, created_at
             FROM domain_shared.users
             WHERE {' AND '.join(where)}
             ORDER BY last_name ASC, first_name ASC, username ASC
@@ -108,6 +146,9 @@ async def list_mitarbeiter(
         role_name = "Mitarbeiter"
         if isinstance(roles, list) and roles:
             role_name = str(roles[0])
+        prefs = _parse_preferences(row.get("preferences"))
+        hr_status = _normalize_status(prefs.get("hr_status"), "aktiv" if bool(row.get("is_active")) else "krank")
+        abteilung = str(prefs.get("abteilung") or "Allgemein")
         first = (row.get("first_name") or "").strip()
         last = (row.get("last_name") or "").strip()
         display = f"{first} {last}".strip() or (row.get("username") or row.get("email") or str(row["id"]))
@@ -115,16 +156,151 @@ async def list_mitarbeiter(
             MitarbeiterOut(
                 id=str(row["id"]),
                 name=display,
-                abteilung="Allgemein",
+                email=str(row.get("email") or ""),
+                abteilung=abteilung,
                 position=role_name,
                 eintrittsdatum=_to_iso(row.get("created_at")),
-                status="aktiv" if bool(row.get("is_active")) else "krank",
+                status=hr_status,
             )
         )
 
-    if status in {"urlaub", "krank"}:
+    if status in {"aktiv", "urlaub", "krank"}:
         out = [item for item in out if item.status == status]
     return out
+
+
+@router.get("/mitarbeiter/{user_id}", response_model=MitarbeiterOut)
+async def get_mitarbeiter(
+    user_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    row = db.execute(
+        text(
+            """
+            SELECT id, username, email, first_name, last_name, roles, is_active, preferences, created_at
+            FROM domain_shared.users
+            WHERE id = :user_id AND tenant_id = :tenant_id
+            """
+        ),
+        {"user_id": user_id, "tenant_id": tenant_id},
+    ).mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Mitarbeiter nicht gefunden")
+    roles = row.get("roles") or []
+    role_name = "Mitarbeiter"
+    if isinstance(roles, list) and roles:
+        role_name = str(roles[0])
+    prefs = _parse_preferences(row.get("preferences"))
+    hr_status = _normalize_status(prefs.get("hr_status"), "aktiv" if bool(row.get("is_active")) else "krank")
+    abteilung = str(prefs.get("abteilung") or "Allgemein")
+    first = (row.get("first_name") or "").strip()
+    last = (row.get("last_name") or "").strip()
+    display = f"{first} {last}".strip() or (row.get("username") or row.get("email") or str(row["id"]))
+    return MitarbeiterOut(
+        id=str(row["id"]),
+        name=display,
+        email=str(row.get("email") or ""),
+        abteilung=abteilung,
+        position=role_name,
+        eintrittsdatum=_to_iso(row.get("created_at")),
+        status=hr_status,
+    )
+
+
+@router.post("/mitarbeiter", response_model=MitarbeiterOut, status_code=201)
+async def create_mitarbeiter(
+    payload: MitarbeiterIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    existing = db.execute(
+        text(
+            """
+            SELECT 1
+            FROM domain_shared.users
+            WHERE tenant_id = :tenant_id AND (email = :email OR username = :username)
+            LIMIT 1
+            """
+        ),
+        {"tenant_id": tenant_id, "email": payload.email, "username": payload.email},
+    ).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="Mitarbeiter mit E-Mail existiert bereits")
+
+    first_name, last_name = _split_name(payload.name)
+    user_id = str(uuid4())
+    role_slug = payload.position.strip().lower().replace(" ", "_")
+    if not role_slug:
+        role_slug = "mitarbeiter"
+    db.execute(
+        text(
+            """
+            INSERT INTO domain_shared.users
+              (id, keycloak_id, username, email, first_name, last_name, is_active, roles, tenant_id, preferences, created_at, updated_at)
+            VALUES
+              (:id, :keycloak_id, :username, :email, :first_name, :last_name, :is_active, :roles, :tenant_id, CAST(:preferences AS jsonb), NOW(), NOW())
+            """
+        ),
+        {
+            "id": user_id,
+            "keycloak_id": f"local-{user_id}",
+            "username": payload.email,
+            "email": payload.email,
+            "first_name": first_name,
+            "last_name": last_name,
+            "is_active": payload.status != "krank",
+            "roles": [role_slug],
+            "tenant_id": tenant_id,
+            "preferences": json.dumps({"hr_status": payload.status, "abteilung": payload.abteilung}),
+        },
+    )
+    db.commit()
+    return await get_mitarbeiter(user_id=user_id, tenant_id=tenant_id, db=db)
+
+
+@router.put("/mitarbeiter/{user_id}", response_model=MitarbeiterOut)
+async def update_mitarbeiter(
+    user_id: str,
+    payload: MitarbeiterIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    first_name, last_name = _split_name(payload.name)
+    role_slug = payload.position.strip().lower().replace(" ", "_")
+    if not role_slug:
+        role_slug = "mitarbeiter"
+    updated = db.execute(
+        text(
+            """
+            UPDATE domain_shared.users
+            SET email = :email,
+                username = :username,
+                first_name = :first_name,
+                last_name = :last_name,
+                is_active = :is_active,
+                roles = :roles,
+                preferences = COALESCE(preferences, '{}'::jsonb) || CAST(:preferences AS jsonb),
+                updated_at = NOW()
+            WHERE id = :user_id AND tenant_id = :tenant_id
+            """
+        ),
+        {
+            "tenant_id": tenant_id,
+            "user_id": user_id,
+            "email": payload.email,
+            "username": payload.email,
+            "first_name": first_name,
+            "last_name": last_name,
+            "is_active": payload.status != "krank",
+            "roles": [role_slug],
+            "preferences": json.dumps({"hr_status": payload.status, "abteilung": payload.abteilung}),
+        },
+    ).rowcount
+    if not updated:
+        raise HTTPException(status_code=404, detail="Mitarbeiter nicht gefunden")
+    db.commit()
+    return await get_mitarbeiter(user_id=user_id, tenant_id=tenant_id, db=db)
 
 
 @router.get("/zeiterfassung", response_model=list[ZeitEintragOut])
