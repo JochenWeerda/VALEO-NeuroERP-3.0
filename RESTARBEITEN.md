@@ -769,12 +769,18 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] Prioritaet P0: echte IAM-Admin-CRUD-Endpunkte und SoD-Regeln, Audit-Events fuer Rollen/Rechte/Token.
 - D) Integration/Automatisierung
 - [~] DMS-Bootstrap vorhanden.
-- [~] Prioritaet P1: Connector-Verwaltung (Office/Slack/n8n), API-Key-Scopes/Rotation/IP-Allowlist/Rate-Limits, Retry-Policies pro Connector.
+- [x] Prioritaet P1 umgesetzt: Connector-Verwaltung (Office/Slack/n8n) inkl. CRUD, Retry-Policies und Connector-Event-Queue (keine Mock-Pfade).
+- [~] Restoffen: zentrale Integrations-Quarantaene mit SLA-/Eskalationsworkflow ueber alle Domains.
 - E) Reporting/Controlling
-- [ ] Prioritaet P1: KPI-/Drilldown-Admin, Abschluss-Cockpit, Self-Service-Report-Berechtigungen.
+- [~] Prioritaet P1 teilerledigt: KPI-/Dashboard-/Widget-/Timeseries-/Massnahmen-Admin produktiv verdrahtet.
+- [ ] Restoffen: Abschluss-Cockpit + Self-Service-Report-Berechtigungen (rollenbasiert pro Report-Datensatz).
 - F) Systembetrieb
-- [~] Monitoring-Alerts jetzt live, aber nur Basissignale.
-- [ ] Prioritaet P1: Job-Scheduler-UI, Alert-Regeln/Eskalationen/Kanaele (E-Mail/SMS/Webhook/ChatOps), Konfig-Transporte DEV->TEST->PROD.
+- [x] Monitoring-Alerts + Konfigurations-CRUD jetzt live:
+  - Alert-Regeln: `GET/POST/PUT/DELETE /api/v1/admin/monitoring/rules`
+  - Alarmkanaele: `GET/POST/PUT/DELETE /api/v1/admin/monitoring/channels`
+  - Scheduler-Jobs: `GET/POST/PUT/DELETE /api/v1/admin/monitoring/scheduler-jobs`
+  - UI: `packages/frontend-web/src/pages/admin/monitoring/regeln.tsx`
+- [ ] Restoffen: Konfig-Transporte DEV->TEST->PROD.
 
 - Zusatzpunkte aus Anforderung explizit aufgenommen:
 - [x] API-Keys/Token-Management inkl. Rotation, Ablauf, letzte Nutzung, Scopes, Sperren.
@@ -884,12 +890,19 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - Verifikation:
 - [x] API-Smoke erfolgreich:
   - `GET /api/v1/admin/mobile/stations`
+  - `GET /api/v1/admin/mobile/station-devices`
   - `GET /api/v1/admin/mobile/routing-rules`
   - `GET /api/v1/admin/mobile/scan-profiles`
   - `GET /api/v1/admin/mobile/mobile-devices`
   - `GET /api/v1/admin/mobile/connectors`
   - `GET /api/v1/admin/mobile/connector-events`
-  - `POST /api/v1/admin/mobile/routing-rules` erfolgreich
+  - `POST/PUT/DELETE /api/v1/admin/mobile/stations`
+  - `POST/PUT/DELETE /api/v1/admin/mobile/station-devices`
+  - `POST/PUT/DELETE /api/v1/admin/mobile/routing-rules`
+  - `POST/PUT/DELETE /api/v1/admin/mobile/scan-profiles`
+  - `POST/PUT/DELETE /api/v1/admin/mobile/mobile-devices`
+  - `POST/PUT/DELETE /api/v1/admin/mobile/connectors`
+  - `POST/PUT/DELETE /api/v1/admin/mobile/connector-events`
   - bereinigt alte fehlerhafte Rollenkeys im Tenant-Settings-JSON
   - schreibt initiale Audit-Eintraege (idempotent)
 - Verifikation (Docker lokal):
@@ -1244,5 +1257,34 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] UUID-Typdrift in Migration korrigiert (FK auf `inventory_stock_movements.id`)
 - [x] Pydantic-Serialisierung fuer UUID-Felder in `charge_lineage` API gehaertet
 - [x] E2E-Skript robust gemacht (DB-Seed ohne Mock, API-Readiness-Check, tenant_id-Query fuer dev-token)
+
+### 8.40 Monitoring-/Mobile-Gaps geschlossen (Code-Stand 2026-02-15)
+- Backend:
+- [x] `app/api/v1/endpoints/admin_mobile.py` auf echten Voll-CRUD erweitert:
+  - `stations`: `GET/POST/PUT/DELETE`
+  - `station-devices`: `GET/POST/PUT/DELETE`
+  - `routing-rules`: `GET/POST/PUT/DELETE`
+  - `scan-profiles`: `GET/POST/PUT/DELETE`
+  - `mobile-devices`: `GET/POST/PUT/DELETE`
+  - `connectors`: `GET/POST/PUT/DELETE`
+  - `connector-events`: `GET/POST/PUT/DELETE`
+- [x] `app/api/v1/endpoints/admin_monitoring.py` um konfigurierbare Monitoring-Admin-CRUD erweitert:
+  - `rules`: `GET/POST/PUT/DELETE /api/v1/admin/monitoring/rules`
+  - `channels`: `GET/POST/PUT/DELETE /api/v1/admin/monitoring/channels`
+  - `scheduler-jobs`: `GET/POST/PUT/DELETE /api/v1/admin/monitoring/scheduler-jobs`
+  - Persistenz tenant-spezifisch in `domain_shared.tenants.settings.admin_monitoring`.
+- Frontend:
+- [x] `packages/frontend-web/src/lib/api/admin.ts` um Hooks fuer Rules/Channels/Scheduler-Jobs erweitert.
+- [x] Neue Seite `packages/frontend-web/src/pages/admin/monitoring/regeln.tsx` (CRUD-Maske fuer Alert-Regeln, Kanaele, Scheduler-Jobs).
+- [x] Navigation/Aliase verdrahtet:
+  - `packages/frontend-web/src/app/navigation/manifest.tsx`
+  - `packages/frontend-web/src/app/route-aliases.json`
+- Verifikation:
+- [x] `python -m py_compile app/api/v1/endpoints/admin_mobile.py app/api/v1/endpoints/admin_monitoring.py` gruen.
+- [x] `pnpm -C packages/frontend-web exec eslint src/lib/api/admin.ts src/pages/admin/monitoring/regeln.tsx src/app/navigation/manifest.tsx --max-warnings=0` gruen.
+- [x] `pnpm -C packages/frontend-web exec tsc --noEmit --pretty false` gruen.
+- [x] API-Smoke lokal mit `Bearer dev-token` + `X-Tenant-ID`:
+  - `GET /api/v1/admin/mobile/station-devices` gruen.
+  - `POST/GET/DELETE /api/v1/admin/monitoring/rules` gruen.
 
 
