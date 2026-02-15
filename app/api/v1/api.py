@@ -91,6 +91,7 @@ from app.api.v1.endpoints import (
     admin_monitoring,
     admin_core,
     admin_pos,
+    admin_devices,
 )
 
 # Import domain routers
@@ -138,6 +139,12 @@ api_router.include_router(
     admin_pos.router,
     prefix="/admin",
     tags=["admin", "pos", "tse", "dsfinvk"]
+)
+
+api_router.include_router(
+    admin_devices.router,
+    prefix="/admin",
+    tags=["admin", "settings", "devices", "output"]
 )
 
 api_router.include_router(
