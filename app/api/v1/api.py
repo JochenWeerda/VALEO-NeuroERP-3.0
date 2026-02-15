@@ -90,6 +90,7 @@ from app.api.v1.endpoints import (
     einkauf_lieferschein,
     admin_monitoring,
     admin_core,
+    admin_pos,
 )
 
 # Import domain routers
@@ -130,6 +131,12 @@ api_router.include_router(
     admin_core.router,
     prefix="/admin",
     tags=["admin"]
+)
+
+api_router.include_router(
+    admin_pos.router,
+    prefix="/admin",
+    tags=["admin", "pos", "tse", "dsfinvk"]
 )
 
 api_router.include_router(

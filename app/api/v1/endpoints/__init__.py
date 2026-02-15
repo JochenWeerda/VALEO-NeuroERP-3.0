@@ -71,3 +71,4 @@ from . import nawaro_raps
 from . import einkauf_lieferschein
 from . import admin_monitoring
 from . import admin_core
+from . import admin_pos
