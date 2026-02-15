@@ -422,6 +422,7 @@ class Charge(Base):
     lagerort = Column(String(100), nullable=False)
     eingang = Column(DateTime(timezone=True), nullable=False)
     herstellungsdatum = Column(DateTime(timezone=True), nullable=True)
+    mhd = Column(DateTime(timezone=True), nullable=True)
     status = Column(String(20), default=ChargeStatus.ERFASST.value)
     qualitaetsstatus = Column(String(30), default=ChargeStatus.IN_PRUEFUNG.value)
     freigabe_datum = Column(DateTime(timezone=True))

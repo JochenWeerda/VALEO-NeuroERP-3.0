@@ -93,6 +93,7 @@ from app.api.v1.endpoints import (
     admin_pos,
     admin_devices,
     admin_mobile,
+    controlling,
 )
 
 # Import domain routers
@@ -638,4 +639,9 @@ api_router.include_router(
 
 api_router.include_router(
     einkauf_lieferschein.router
+)
+
+api_router.include_router(
+    controlling.router,
+    tags=["controlling", "kpi", "dashboard"]
 )

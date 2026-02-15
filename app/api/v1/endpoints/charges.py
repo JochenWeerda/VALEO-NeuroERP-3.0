@@ -28,6 +28,7 @@ class ChargeCreate(BaseModel):
     lagerort: str = Field(..., description="Storage location")
     eingang: str = Field(..., description="Receipt date ISO format")
     herstellungsdatum: Optional[str] = Field(default=None, description="Production date ISO format")
+    mhd: Optional[str] = Field(default=None, description="Best-before date ISO format")
     losnummer: Optional[str] = None
     produktbezeichnung: Optional[str] = None
     rueckverfolgbar_bis_stunden: int = Field(default=4, ge=1, le=24)
@@ -56,6 +57,7 @@ class ChargeUpdate(BaseModel):
     bemerkungen: Optional[str] = None
     status: Optional[str] = None
     herstellungsdatum: Optional[str] = None
+    mhd: Optional[str] = None
     losnummer: Optional[str] = None
     produktbezeichnung: Optional[str] = None
     rueckverfolgbar_bis_stunden: Optional[int] = Field(default=None, ge=1, le=24)
@@ -85,6 +87,7 @@ def _to_dict(charge) -> dict:
         "lagerort": charge.lagerort,
         "eingang": charge.eingang.isoformat() if charge.eingang else None,
         "herstellungsdatum": charge.herstellungsdatum.isoformat() if charge.herstellungsdatum else None,
+        "mhd": charge.mhd.isoformat() if charge.mhd else None,
         "status": charge.status,
         "qualitaetsstatus": charge.qualitaetsstatus,
         "freigabeDatum": charge.freigabe_datum.isoformat() if charge.freigabe_datum else None,
@@ -142,6 +145,8 @@ async def create_charge(data: ChargeCreate, db: Session = Depends(get_db)) -> di
     payload["eingang"] = _parse_iso_datetime(payload["eingang"])
     if payload.get("herstellungsdatum"):
         payload["herstellungsdatum"] = _parse_iso_datetime(payload["herstellungsdatum"])
+    if payload.get("mhd"):
+        payload["mhd"] = _parse_iso_datetime(payload["mhd"])
     payload["status"] = ChargeStatus.ERFASST.value
     charge = repo.create(payload)
     return _to_dict(charge)
@@ -155,6 +160,8 @@ async def update_charge(charge_id: str, data: ChargeUpdate, db: Session = Depend
         payload["freigabe_datum"] = _parse_iso_datetime(payload["freigabe_datum"])
     if "herstellungsdatum" in payload and payload["herstellungsdatum"]:
         payload["herstellungsdatum"] = _parse_iso_datetime(payload["herstellungsdatum"])
+    if "mhd" in payload and payload["mhd"]:
+        payload["mhd"] = _parse_iso_datetime(payload["mhd"])
     charge = repo.update(charge_id, payload)
     if not charge:
         raise HTTPException(status_code=404, detail="Charge not found")
