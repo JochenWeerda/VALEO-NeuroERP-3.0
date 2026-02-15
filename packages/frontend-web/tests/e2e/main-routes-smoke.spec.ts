@@ -44,3 +44,21 @@ test.describe('Main Routes Smoke (no dashboard fallback)', () => {
     })
   }
 })
+
+test.describe('Auth and NotFound routes', () => {
+  test('route /login renders login page', async ({ page }) => {
+    await page.goto('/login')
+    await page.waitForLoadState('domcontentloaded')
+
+    await expect(page.getByRole('heading', { name: /valeo neuroerp/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /sso anmelden/i })).toBeVisible()
+  })
+
+  test('unknown route renders 404 page', async ({ page }) => {
+    await page.goto('/this-route-does-not-exist')
+    await page.waitForLoadState('domcontentloaded')
+
+    await expect(page.getByRole('heading', { name: /404/i })).toBeVisible()
+    await expect(page.getByText(/seite nicht gefunden/i)).toBeVisible()
+  })
+})

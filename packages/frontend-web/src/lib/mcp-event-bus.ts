@@ -96,10 +96,10 @@ class McpEventBus {
   private readonly stateListeners = new Set<ConnectionListener>();
   private connectionState: ConnectionState = "idle";
   private readonly registeredTypes = new Set<string>();
-  private eventsUrl: string | undefined =
+  private eventsUrl: string =
     typeof import.meta !== "undefined" && typeof import.meta.env?.VITE_MCP_EVENTS_URL === "string"
       ? import.meta.env.VITE_MCP_EVENTS_URL
-      : undefined;
+      : "/api/events?stream=mcp";
   private sseOptions: SSEOptions = {};
 
   addConnectionListener(listener: ConnectionListener): () => void {

@@ -28,7 +28,7 @@ const config: AuthConfig = {
   oidc: {
     discoveryUrl: import.meta.env.VITE_OIDC_DISCOVERY_URL ?? '',
     clientId: import.meta.env.VITE_OIDC_CLIENT_ID ?? '',
-    redirectUri: import.meta.env.VITE_OIDC_REDIRECT_URI ?? `${window.location.origin}/callback`,
+    redirectUri: import.meta.env.VITE_OIDC_REDIRECT_URI ?? `${window.location.origin}/auth/callback`,
     scopes: ['openid', 'profile', 'email', 'offline_access'],
   },
 }

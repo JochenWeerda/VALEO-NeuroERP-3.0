@@ -12,7 +12,7 @@ interface AuthHook {
   hasRole: (_role: string) => boolean
 }
 
-const DASHBOARD_PATH = '/dashboard'
+const DASHBOARD_PATH = '/'
 const LOGIN_PATH = '/login'
 
 const safeRedirect = (target: string): void => {

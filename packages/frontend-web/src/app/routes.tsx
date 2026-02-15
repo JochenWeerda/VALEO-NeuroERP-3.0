@@ -5,6 +5,7 @@ import CustomerPortalLayout from '@/layouts/CustomerPortalLayout'
 import { ErrorBoundary } from '@/shared/errors/ErrorBoundary'
 import { PageLoader } from '@/app/PageLoader'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import routeAliasData from './route-aliases.json'
 
 type PageModule = { default: ComponentType<unknown> }
@@ -16,6 +17,7 @@ type RouteAliasEntry = {
 }
 
 const pageModules = import.meta.glob<PageModule>('../pages/**/*.tsx')
+const AUTH_REQUIRED = String((import.meta.env as Record<string, string | undefined>).VITE_AUTH_REQUIRED ?? '').toLowerCase() === 'true'
 
 const AUTO_ROUTE_IGNORE_PATTERNS: RegExp[] = [
   /\/__tests__\//,
@@ -38,11 +40,33 @@ const routerConfig: RouteObject[] = [
     element: <CustomerPortalLayout />,
     children: buildPortalRoutes(),
   },
+  {
+    path: '/login',
+    element: createRouteElementByModule('@/pages/auth/Login'),
+  },
+  {
+    path: '/auth/login',
+    element: createRouteElementByModule('@/pages/auth/Login'),
+  },
+  {
+    path: '/auth/callback',
+    element: createRouteElementByModule('@/pages/auth/Callback'),
+  },
   // Hauptanwendung
   {
     path: '/',
-    element: <AppLayout />,
-    children: [...buildAutoRoutes(), ...buildAliasRoutes(routeAliasData.aliases ?? [])],
+    element: AUTH_REQUIRED ? (
+      <ProtectedRoute>
+        <AppLayout />
+      </ProtectedRoute>
+    ) : (
+      <AppLayout />
+    ),
+    children: [
+      ...buildAutoRoutes(),
+      ...buildAliasRoutes(routeAliasData.aliases ?? []),
+      { path: '*', element: createRouteElementByModule('@/pages/errors/NotFound') },
+    ],
   },
 ]
 
@@ -133,6 +157,15 @@ function resolveModuleKey(modulePath: string): string {
     resolved = `${resolved}.tsx`
   }
   return resolved
+}
+
+function createRouteElementByModule(modulePath: string): JSX.Element {
+  const moduleKey = resolveModuleKey(modulePath)
+  const loader = pageModules[moduleKey]
+  if (!loader) {
+    throw new Error(`Route references unknown module: ${modulePath}`)
+  }
+  return createRouteElement(loader)
 }
 
 function isAutoRoutable(modulePath: string): boolean {
