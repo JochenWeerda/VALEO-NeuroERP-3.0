@@ -18,7 +18,9 @@ export const controllingKeys = {
   all: ['controlling'] as const,
   kpis: () => [...controllingKeys.all, 'kpis'] as const,
   dashboards: () => [...controllingKeys.all, 'dashboards'] as const,
+  widgets: (dashboardId?: string) => [...controllingKeys.all, 'widgets', dashboardId ?? 'all'] as const,
   timeseries: (kpiId?: string) => [...controllingKeys.all, 'timeseries', kpiId ?? 'all'] as const,
+  actions: () => [...controllingKeys.all, 'actions'] as const,
 }
 
 const toNumberOrUndefined = (value: unknown): number | undefined => {
@@ -182,6 +184,109 @@ export function useDeleteDashboard() {
   })
 }
 
+export type DashboardWidget = {
+  id: string
+  dashboard_id: string
+  widget_type: string
+  title: string
+  kpi_id?: string
+  position_x: number
+  position_y: number
+  size_w: number
+  size_h: number
+}
+
+const normalizeWidget = (row: Record<string, unknown>): DashboardWidget => ({
+  id: String(row.id),
+  dashboard_id: String(row.dashboard_id ?? ''),
+  widget_type: String(row.widget_type ?? ''),
+  title: String(row.title ?? ''),
+  kpi_id: row.kpi_id ? String(row.kpi_id) : undefined,
+  position_x: Number(row.position_x ?? 0),
+  position_y: Number(row.position_y ?? 0),
+  size_w: Number(row.size_w ?? 4),
+  size_h: Number(row.size_h ?? 3),
+})
+
+export type WidgetInput = {
+  widget_type: string
+  title: string
+  kpi_id?: string
+  position_x?: number
+  position_y?: number
+  size_w?: number
+  size_h?: number
+}
+
+export function useDashboardWidgets(dashboardId?: string) {
+  return useQuery({
+    queryKey: controllingKeys.widgets(dashboardId),
+    enabled: Boolean(dashboardId),
+    queryFn: async () => {
+      const rows = (await apiClient.get<Record<string, unknown>[]>(`/api/v1/controlling/dashboards/${dashboardId}/widgets`)).data
+      return rows.map(normalizeWidget)
+    },
+    staleTime: 60_000,
+  })
+}
+
+export function useCreateWidget(dashboardId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: WidgetInput) => {
+      const payload: Payload = {
+        data: {
+          ...data,
+          position_x: data.position_x ?? 0,
+          position_y: data.position_y ?? 0,
+          size_w: data.size_w ?? 4,
+          size_h: data.size_h ?? 3,
+          settings: {},
+        },
+      }
+      await apiClient.post(`/api/v1/controlling/dashboards/${dashboardId}/widgets`, payload)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: controllingKeys.widgets(dashboardId) })
+    },
+  })
+}
+
+export function useUpdateWidget() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, dashboardId, data }: { id: string; dashboardId: string; data: WidgetInput }) => {
+      const payload: Payload = {
+        data: {
+          ...data,
+          position_x: data.position_x ?? 0,
+          position_y: data.position_y ?? 0,
+          size_w: data.size_w ?? 4,
+          size_h: data.size_h ?? 3,
+          settings: {},
+        },
+      }
+      await apiClient.put(`/api/v1/controlling/widgets/${id}`, payload)
+      return dashboardId
+    },
+    onSuccess: (dashboardId) => {
+      queryClient.invalidateQueries({ queryKey: controllingKeys.widgets(dashboardId) })
+    },
+  })
+}
+
+export function useDeleteWidget(dashboardId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/api/v1/controlling/widgets/${id}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: controllingKeys.widgets(dashboardId) })
+    },
+  })
+}
+
 export type KpiTimeseriesItem = {
   id: string
   kpi_id: string
@@ -247,6 +352,89 @@ export function useDeleteTimeseriesItem() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: controllingKeys.timeseries() })
+    },
+  })
+}
+
+export type ControllingAction = {
+  id: string
+  kpi_id?: string
+  dashboard_id?: string
+  title: string
+  description?: string
+  owner_user_id?: string
+  status: string
+  due_date?: string
+}
+
+const normalizeAction = (row: Record<string, unknown>): ControllingAction => ({
+  id: String(row.id),
+  kpi_id: row.kpi_id ? String(row.kpi_id) : undefined,
+  dashboard_id: row.dashboard_id ? String(row.dashboard_id) : undefined,
+  title: String(row.title ?? ''),
+  description: row.description ? String(row.description) : undefined,
+  owner_user_id: row.owner_user_id ? String(row.owner_user_id) : undefined,
+  status: String(row.status ?? 'open'),
+  due_date: row.due_date ? String(row.due_date) : undefined,
+})
+
+export type ActionInput = {
+  kpi_id?: string
+  dashboard_id?: string
+  title: string
+  description?: string
+  owner_user_id?: string
+  status: string
+  due_date?: string
+}
+
+export function useControllingActions(status?: string) {
+  return useQuery({
+    queryKey: controllingKeys.actions(),
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (status) params.append('status', status)
+      const rows = (await apiClient.get<Record<string, unknown>[]>(`/api/v1/controlling/actions?${String(params)}`)).data
+      return rows.map(normalizeAction)
+    },
+    staleTime: 60_000,
+  })
+}
+
+export function useCreateAction() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: ActionInput) => {
+      const payload: Payload = { data }
+      await apiClient.post('/api/v1/controlling/actions', payload)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: controllingKeys.actions() })
+    },
+  })
+}
+
+export function useUpdateAction() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: ActionInput }) => {
+      const payload: Payload = { data }
+      await apiClient.put(`/api/v1/controlling/actions/${id}`, payload)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: controllingKeys.actions() })
+    },
+  })
+}
+
+export function useDeleteAction() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/api/v1/controlling/actions/${id}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: controllingKeys.actions() })
     },
   })
 }
