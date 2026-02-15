@@ -313,6 +313,10 @@
       "path": "finance/bookings/new"
     },
     {
+      "module": "@/pages/fibu/abschluss-cockpit",
+      "path": "fibu/abschluss-cockpit"
+    },
+    {
       "module": "@/pages/inventory",
       "path": "inventory/adjust"
     },

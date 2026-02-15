@@ -776,7 +776,7 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [~] Restoffen: zentrale Integrations-Quarantaene mit SLA-/Eskalationsworkflow ueber alle Domains.
 - E) Reporting/Controlling
 - [~] Prioritaet P1 teilerledigt: KPI-/Dashboard-/Widget-/Timeseries-/Massnahmen-Admin produktiv verdrahtet.
-- [~] Restoffen: Abschluss-Cockpit.
+- [x] Abschluss-Cockpit umgesetzt (aggregierter API-Endpunkt + FIBU-UI-Cockpit).
 - [x] Self-Service-Report-Berechtigungen (rollenbasiert pro Report-Datensatz) als Admin-CRUD umgesetzt.
 - F) Systembetrieb
 - [x] Monitoring-Alerts + Konfigurations-CRUD jetzt live:
@@ -1322,6 +1322,27 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] Alembic in Docker auf Head (`admin_report_permissions_20260215`) erfolgreich.
 - [x] API-Smoke erfolgreich: `POST/GET/DELETE /api/v1/admin/report-permissions`.
 - [x] Frontend-Checks: ESLint + `tsc --noEmit` gruen.
+
+### 8.42 Abschluss-Cockpit umgesetzt (API + UI)
+- Backend:
+- [x] `app/api/v1/endpoints/closing_checklists.py`
+  - neuer Endpunkt `GET /api/v1/finance/closing-checklists/cockpit/summary`
+  - liefert aggregiert:
+    - Periodenstatus (`open/closed/adjusting`)
+    - Checklistenstatus (`total/completed/in_progress/blocked/avg_progress`)
+    - `latest_checklists` und `blockers`
+  - robust gegen fehlende Tabellen (warn-log statt Hard-Fail).
+- Frontend:
+- [x] neue Seite `packages/frontend-web/src/pages/fibu/abschluss-cockpit.tsx`
+  - KPI-Kacheln + aktuelle Checklisten + Blocker-Anzeige
+  - nutzt echten Endpoint `/api/v1/finance/closing-checklists/cockpit/summary`
+- [x] Navigation/Route:
+  - `packages/frontend-web/src/app/navigation/manifest.tsx` (Menuepunkt `Abschluss-Cockpit`)
+  - `packages/frontend-web/src/app/route-aliases.json` (`fibu/abschluss-cockpit`)
+- Verifikation:
+- [x] Backend-Compile: `python -m py_compile app/api/v1/endpoints/closing_checklists.py`
+- [x] Frontend: ESLint + `tsc --noEmit` gruen
+- [x] API-Smoke mit Auth/Tenant: `GET /api/v1/finance/closing-checklists/cockpit/summary` erfolgreich
 
 ---
 

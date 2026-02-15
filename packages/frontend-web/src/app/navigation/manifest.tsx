@@ -540,6 +540,15 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:read' },
       },
       {
+        id: 'abschluss-cockpit',
+        label: 'Abschluss-Cockpit',
+        icon: ShieldCheck,
+        module: '@/pages/fibu/abschluss-cockpit',
+        preferredPath: 'fibu/abschluss-cockpit',
+        keywords: ['abschluss', 'cockpit', 'periodenabschluss'],
+        mcp: { businessDomain: 'finance', scope: 'finance:read' },
+      },
+      {
         id: 'zahlungslaeufe',
         label: 'Zahlungsläufe',
         icon: Euro,
