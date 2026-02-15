@@ -64,6 +64,17 @@ class StundenzettelIn(BaseModel):
     unterschrift: str | None = None
 
 
+class StundenzettelOut(BaseModel):
+    id: str
+    datum: str
+    fahrer: str
+    kennzeichen: str
+    touren: list[dict[str, Any]]
+    gesamtArbeitszeit: float
+    ueberstunden: float
+    erstelltAm: str
+
+
 def _to_iso(d: date | datetime | None) -> str:
     if d is None:
         return datetime.utcnow().date().isoformat()
@@ -404,3 +415,64 @@ async def create_stundenzettel(
     )
     db.commit()
     return {"ok": True, "timesheet_id": timesheet_id}
+
+
+@router.get("/stundenzettel", response_model=list[StundenzettelOut])
+async def list_stundenzettel(
+    datum_von: str | None = Query(default=None),
+    datum_bis: str | None = Query(default=None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    params: dict[str, Any] = {"tenant_id": tenant_id}
+    where = ["tenant_id = :tenant_id"]
+    if datum_von:
+        where.append("entry_date >= :datum_von")
+        params["datum_von"] = datum_von
+    if datum_bis:
+        where.append("entry_date <= :datum_bis")
+        params["datum_bis"] = datum_bis
+
+    rows = db.execute(
+        text(
+            f"""
+            SELECT id, entry_date, driver_name, vehicle_plate, tours, total_hours, overtime_hours, created_at
+            FROM domain_hr.driver_timesheets
+            WHERE {' AND '.join(where)}
+            ORDER BY entry_date DESC, created_at DESC
+            """
+        ),
+        params,
+    ).mappings().all()
+
+    out: list[StundenzettelOut] = []
+    for row in rows:
+        tours_raw = row.get("tours")
+        tours: list[dict[str, Any]]
+        if isinstance(tours_raw, list):
+            tours = [dict(item) if isinstance(item, dict) else {"value": item} for item in tours_raw]
+        elif isinstance(tours_raw, str):
+            try:
+                parsed = json.loads(tours_raw)
+                if isinstance(parsed, list):
+                    tours = [dict(item) if isinstance(item, dict) else {"value": item} for item in parsed]
+                else:
+                    tours = []
+            except Exception:
+                tours = []
+        else:
+            tours = []
+
+        out.append(
+            StundenzettelOut(
+                id=str(row["id"]),
+                datum=_to_iso(row.get("entry_date")),
+                fahrer=str(row.get("driver_name") or ""),
+                kennzeichen=str(row.get("vehicle_plate") or ""),
+                touren=tours,
+                gesamtArbeitszeit=float(row.get("total_hours") or 0),
+                ueberstunden=float(row.get("overtime_hours") or 0),
+                erstelltAm=_to_iso(row.get("created_at")),
+            )
+        )
+    return out

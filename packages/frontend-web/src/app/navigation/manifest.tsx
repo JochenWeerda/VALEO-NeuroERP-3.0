@@ -986,7 +986,7 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         id: 'stundenzettel',
         label: 'Stundenzettel',
         icon: FileText,
-        module: '@/pages/personal/stundenzettel',
+        module: '@/pages/personal/stundenzettel-liste',
         mcp: { businessDomain: 'hr', scope: 'hr:read' },
       },
       {
