@@ -82,6 +82,19 @@ export type SchedulerJob = {
   channel_ids: string[]
 }
 
+export type ReportPermission = {
+  id: string
+  role_id: string
+  report_key: string
+  can_view: boolean
+  can_export: boolean
+  allowed_scopes: string[]
+  filters: Record<string, unknown>
+  active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export function useAuditLog() {
   return useQuery({
     queryKey: ['admin', 'audit-log'],
@@ -233,6 +246,55 @@ export function useDeleteSchedulerJob() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'monitoring', 'scheduler-jobs'] })
+    },
+  })
+}
+
+export function useReportPermissions(params?: { roleId?: string; reportKey?: string; activeOnly?: boolean }) {
+  return useQuery({
+    queryKey: ['admin', 'report-permissions', params?.roleId ?? '', params?.reportKey ?? '', params?.activeOnly ?? true],
+    queryFn: async () => {
+      const search = new URLSearchParams()
+      if (params?.roleId) search.set('role_id', params.roleId)
+      if (params?.reportKey) search.set('report_key', params.reportKey)
+      if (typeof params?.activeOnly === 'boolean') search.set('active_only', String(params.activeOnly))
+      const url = search.size > 0 ? `/api/v1/admin/report-permissions?${search.toString()}` : '/api/v1/admin/report-permissions'
+      return (await apiClient.get<ReportPermission[]>(url)).data
+    },
+    staleTime: 60 * 1000,
+  })
+}
+
+export function useCreateReportPermission() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: Omit<ReportPermission, 'id' | 'created_at' | 'updated_at'>) =>
+      (await apiClient.post<ReportPermission>('/api/v1/admin/report-permissions', payload)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'report-permissions'] })
+    },
+  })
+}
+
+export function useUpdateReportPermission() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: Omit<ReportPermission, 'id' | 'created_at' | 'updated_at'> }) =>
+      (await apiClient.put<ReportPermission>(`/api/v1/admin/report-permissions/${id}`, payload)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'report-permissions'] })
+    },
+  })
+}
+
+export function useDeleteReportPermission() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/api/v1/admin/report-permissions/${id}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'report-permissions'] })
     },
   })
 }

@@ -9,6 +9,10 @@
       "path": "admin/gap-pipeline"
     },
     {
+      "module": "@/pages/admin/report-berechtigungen",
+      "path": "admin/report-berechtigungen"
+    },
+    {
       "module": "@/pages/admin/monitoring/alerts",
       "path": "monitoring/alerts"
     },
