@@ -195,9 +195,9 @@ services:
       sh -lc "npm install && npm run dev -- --host 0.0.0.0 --port 3000"
     environment:
       NODE_ENV: development
-      VITE_MCP_EVENTS_URL: http://localhost:5174/api/events?stream=mcp
+      VITE_MCP_EVENTS_URL: /api/events?stream=mcp
       VITE_BFF_PROXY: http://bff-web:4001
-      VITE_SSE_PROXY: http://localhost:5174
+      VITE_SSE_PROXY: http://dev-sse:5174
       VITE_BACKEND_PROXY: http://backend:8000
       VITE_ENABLE_PROSPECTING_UI: "true"
       VITE_API_BASE_URL: http://localhost:8000

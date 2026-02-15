@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 
-const DASHBOARD_PATH = '/dashboard'
+const DASHBOARD_PATH = '/'
 
 export default function LoginPage(): JSX.Element {
   const { login, loading, isAuthenticated } = useAuth()

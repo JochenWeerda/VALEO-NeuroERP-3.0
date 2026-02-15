@@ -25,7 +25,9 @@ const resolveSseToken = (): string | undefined => {
 function Application(): JSX.Element {
   // useFeature kann nur innerhalb von FeatureFlagProvider verwendet werden
   // Da Application innerhalb von FeatureFlagProvider ist, sollte es funktionieren
-  const sseUrl = (import.meta.env as Record<string, string | undefined>).VITE_MCP_EVENTS_URL
+  const sseUrl =
+    (import.meta.env as Record<string, string | undefined>).VITE_MCP_EVENTS_URL ||
+    '/api/events?stream=mcp'
   const sseEnabled = useFeature('sse') && Boolean(sseUrl)
 
   const providerConfig = useMemo(

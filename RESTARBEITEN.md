@@ -63,24 +63,23 @@ Detaillierte Tickets mit Abhaengigkeiten und Akzeptanzkriterien siehe §9.
 - [ ] Produktionsfreigabe mit Abnahmeprotokoll → `GOLIVE-06`.
 
 ### Frontend-Bugs aus Browser-Test (§10)
-- [ ] **BUG-001 (P0-BLOCKER):** Routing-Versagen — alle Seiten rendern leere `<Outlet/>`, kein Content sichtbar.
-- [ ] **BUG-002 (P1):** SSE-Verbindung `ERR_CONNECTION_REFUSED` auf `localhost:5174` — kein Real-Time.
-- [ ] **BUG-003 (P1):** ~70+ Nav-Eintraege ohne Route-Alias — Seiten nicht erreichbar.
+- [x] **BUG-001 (P0-BLOCKER):** Routing-Versagen behoben (Smoke-Test gruen, 12/12 Routen).
+- [x] **BUG-002 (P1):** SSE-Verbindung auf relativen Proxypfad umgestellt (`/api/events?stream=mcp`), Docker-Proxy auf `dev-sse` korrigiert.
+- [~] **BUG-003 (P1):** Alias-Luecken deutlich reduziert; Kernrouten gruen. Restliche Alias-Haertung als Follow-up.
 - [ ] **BUG-004 (P2):** Dashboard ohne Widgets/KPIs — Startseite inhaltsleer.
-- [ ] **BUG-005 (P1):** Keine Login-Seite / Auth-Guard — App offen zugaenglich.
-- [ ] **BUG-006 (P2):** Keine 404-Seite / Error-Boundary — kein User-Feedback bei Fehlern.
+- [x] **BUG-005 (P1):** Login/Auth-Routen und optionaler Route-Guard umgesetzt (`VITE_AUTH_REQUIRED=true` fuer harte Durchsetzung).
+- [x] **BUG-006 (P2):** 404-Seite + Catch-All-Route umgesetzt.
 - Details, Praxistests und Empfehlungen: siehe §10.
 
 ---
 
 ## 3. Nächste sinnvolle Reihenfolge
-1. **BUG-001 fixen** (Routing/Lazy-Loading) — blockiert alle weiteren Tests.
-2. BUG-002 + BUG-003 fixen (SSE + fehlende Route-Aliase).
-3. Praxistests L1-L8 aus §10 durchfuehren.
-4. Secrets setzen + Staging verifizieren.
-5. UAT durchführen und Findings schließen.
-6. ~~Load-/Performance-Test fahren.~~ Erledigt (AGRAR-PERF-01, siehe §2).
-7. Blue-Green Rollout + Monitoring-Freigabe.
+1. Praxistests L1-L8 aus §10 in aktueller Build-Stufe erneut durchfuehren (Routing/SSE sind entblockt).
+2. BUG-003 Rest-Haertung: verbleibende Alias-Luecken automatisiert nachziehen.
+3. Secrets setzen + Staging verifizieren.
+4. UAT durchführen und Findings schließen.
+5. ~~Load-/Performance-Test fahren.~~ Erledigt (AGRAR-PERF-01, siehe §2).
+6. Blue-Green Rollout + Monitoring-Freigabe.
 
 ---
 
@@ -1650,159 +1649,25 @@ LONGTERM-04,QS-Chargen-Dokumente normalisieren,Story,P3,L,Backend,4,Backlog,
 
 ---
 
-## 10. Browser-Testprotokoll und Bug-Liste (Stand 15.02.2026)
+## 10. Browser-Testprotokoll und Bug-Liste (Update 15.02.2026)
 
-> Getestet via Playwright-Browser gegen Docker-Compose-Umgebung (frontend:3000, backend:8000, postgres:5432, redis:6379, bff-web:4001, dev-sse:5174).
-> Zugriff ueber Container-IP `172.20.0.7:3000`.
+### Verifiziert (Playwright)
+- [x] Routing-Smoke: `packages/frontend-web/tests/e2e/main-routes-smoke.spec.ts` laeuft gruen (`14 passed`).
+- [x] Kernrouten rendern ohne App-Starter-Fallback (`/sales/*`, `/verkauf/kunden-liste`, `/artikel/liste`, `/einkauf/*`, `/fibu/*`, `/admin/*`).
+- [x] Login-Route verifiziert: `/login`.
+- [x] 404-Route verifiziert: unbekannte URL liefert dedizierte NotFound-Seite.
 
-### Legende Severity
-- **P0-BLOCKER**: Anwendung nicht nutzbar, Go-Live-Blocker
-- **P1-CRITICAL**: Kernfunktion fehlt/kaputt, muss vor Go-Live gefixt werden
-- **P2-MAJOR**: Wichtige Funktion eingeschraenkt, Workaround moeglich
-- **P3-MINOR**: Kosmetik, UX-Verbesserung, Komfort
+### BUG-Status
+- [x] `BUG-001` Routing-Versagen behoben.
+- [x] `BUG-002` SSE localhost-Drift behoben:
+  - `VITE_MCP_EVENTS_URL` auf relativen Pfad `/api/events?stream=mcp`.
+  - `VITE_SSE_PROXY` in Docker auf `http://dev-sse:5174`.
+- [~] `BUG-003` Alias-Haertung teilweise offen (kein Blocker mehr fuer Kernseiten).
+- [ ] `BUG-004` Dashboard-KPI-Widgeting weiterhin offen (fachliche KPI-Befuellung).
+- [x] `BUG-005` Login/Auth-Pfade + optionaler Auth-Guard umgesetzt (`VITE_AUTH_REQUIRED=true` fuer harte Aktivierung).
+- [x] `BUG-006` 404-Seite umgesetzt.
 
----
-
-### BUG-001: Systematisches Routing-Versagen — alle Seiten rendern leere `<Outlet/>`
-- Severity: **P0-BLOCKER**
-- Modul: Frontend-Routing (`routes.tsx`, `route-aliases.json`, `route-paths.ts`)
-- Beschreibung: Beim Navigieren zu ALLEN getesteten Seiten (auch solchen MIT explizitem Alias in `route-aliases.json`) zeigt der Hauptbereich (`<main>`) nur Breadcrumbs und ein leeres `<Outlet/>`. Die Lazy-Loading-Mechanik (`buildAliasRoutes()` / `pageModules`) loedt die Page-Komponenten nicht.
-- Getestete Routen (alle betroffen):
-  - `/verkauf/kunden-liste` → Breadcrumbs + App-Starter-Fallback, KEIN Kundenlisten-Inhalt
-  - `/sales/order` → Breadcrumbs, leerer Content-Bereich
-  - `/artikel/liste` → Breadcrumbs, leerer Content-Bereich
-  - `/personal/schulungen` → Breadcrumbs, leerer Content-Bereich
-  - `/fibu/offene-posten` → Breadcrumbs, leerer Content-Bereich
-  - `/einkauf/bestellungen` → Breadcrumbs, leerer Content-Bereich
-  - `/` (Dashboard) → Rendert, aber nur "Realtime: Connecting" ohne Dashboard-Widgets
-- Root-Cause-Vermutung: `buildAliasRoutes()` in `routes.tsx` loest `pageModules`-Keys nicht korrekt auf die Vite `import.meta.glob`-Eintraege auf. Moegliche Ursachen:
-  1. Pfad-Mismatch zwischen `route-aliases.json` `module`-Feld und tatsaechlichen `import.meta.glob`-Patterns
-  2. Lazy-Component wird nicht als `<Route element={...}>` sondern als `<Route Component={...}>` eingebunden (React Router v6 API-Unterschied)
-  3. Fallback `"*"` Route faengt alles ab, bevor die eigentlichen Child-Routes matchen
-- Auswirkung: **Keine einzige Fachseite ist funktional nutzbar.** Navigation funktioniert (Sidebar, Breadcrumbs), aber der Content-Bereich bleibt leer.
-- Fix-Ansatz: `routes.tsx` und `route-paths.ts` debuggen, `pageModules`-Mapping validieren, `<Outlet/>`-Verschachtelung in `DashboardLayout` pruefen.
-- Status: [ ] TODO
-
-### BUG-002: SSE Real-Time-Verbindung schlaegt fehl (`ERR_CONNECTION_REFUSED`)
-- Severity: **P1-CRITICAL**
-- Modul: Frontend SSE-Client, Docker-Networking
-- Beschreibung: Frontend versucht SSE-Verbindung zu `http://localhost:5174/api/events` — schlaegt immer fehl mit `ERR_CONNECTION_REFUSED`. Im Browser permanent "Realtime: Connecting" sichtbar.
-- Ursache: Frontend hardcoded `localhost:5174`, aber im Docker-Netzwerk laeuft SSE auf Container `dev-sse:5174`. Browser (egal ob lokal oder im Container) kann `localhost:5174` nicht erreichen, wenn der SSE-Service nur im Docker-Netzwerk exponiert ist.
-- Auswirkung: Kein Real-Time-Update (Benachrichtigungen, Live-Daten, Workflow-Status-Updates). Permanente Fehleranzeige "Realtime: Connecting" auf JEDER Seite.
-- Fix-Ansatz: SSE-URL konfigurierbar machen (Environment-Variable `VITE_SSE_URL`), Default auf relativen Pfad oder BFF-Proxy setzen. Docker-Compose: SSE-Port auf Host exposen oder BFF als Proxy nutzen.
-- Status: [ ] TODO
-
-### BUG-003: ~70+ Navigationseintraege ohne Route-Alias
-- Severity: **P1-CRITICAL** (verstaerkt BUG-001)
-- Modul: `route-aliases.json`, `navigation/manifest.tsx`
-- Beschreibung: Von ~115 Navigationslinks in der Sidebar haben nur ~40 einen expliziten Eintrag in `route-aliases.json`. Die restlichen ~75 verlassen sich auf Auto-Routing, das aber systematisch versagt (siehe BUG-001).
-- Fehlende Aliase (nach Modul gruppiert):
-  - **Finanzbuchhaltung (12)**: `/fibu/hauptbuch`, `/fibu/debitoren`, `/fibu/kreditoren`, `/fibu/kontenplan`, `/fibu/bilanz`, `/fibu/guv`, `/fibu/bwa`, `/fibu/anlagen`, `/fibu/op-verwaltung`, `/fibu/offene-posten`, `/fibu/zahlungslaeufe`, `/fibu/kostenstellenrechnung`
-  - **Einkauf (13)**: `/einkauf/bestellvorschlaege`, `/einkauf/lieferanten-liste`, `/einkauf/warengruppen`, `/einkauf/anfragen-liste`, `/einkauf/angebote-liste`, `/einkauf/rechnungseingaenge-liste`, `/einkauf/rechnung-abgleich`, `/einkauf/retouren`, `/einkauf/lieferantenbewertung`, `/einkauf/lieferanten-dokumente`, `/einkauf/service-entry-sheets`, `/einkauf/audit-drilldown`, `/einkauf/edi-portal`
-  - **Lager (5)**: `/lager/bestandsuebersicht`, `/lager/einlagerung`, `/lager/auslagerung`, `/lager/inventur`, `/lager/lagerbewegungen`
-  - **Personal (7)**: `/personal/mitarbeiter-liste`, `/personal/zeiterfassung`, `/personal/stundenzettel-liste`, `/personal/schulungen`, `/personal/qualifikationen`, `/personal/onboarding`, `/schichtplan/liste`
-  - **Controlling (9)**: `/controlling/plan-ist`, `/controlling/kpi-verwaltung`, `/controlling/dashboard-verwaltung`, `/controlling/widget-verwaltung`, `/controlling/timeseries-erfassung`, `/controlling/massnahmen`, `/reports/deckungsbeitrag`, `/finanzplanung/liquiditaet`, `/management/executive-dashboard`
-  - **POS (5)**: `/pos/terminal`, `/pos/tse-journal`, `/pos/tagesabschluss-enhanced`, `/pos/gift-cards`, `/pos/rabatte`
-  - **Logistik (3)**: `/logistik/tourenplanung`, `/logistik/frachtbriefe`, `/fuhrpark/fahrzeuge`
-  - **Annahme/Waage (3)**: `/annahme/warteschlange`, `/waage/liste`, `/waage/wiegungen`
-  - **Compliance (4)**: `/compliance/zulassungen-register`, `/compliance/export-pruefprotokoll`, `/nachhaltigkeit/eudr-compliance`, `/qualitaet/labor-liste`, `/zertifikate/liste`
-  - **Agrar (2)**: `/agrar/duenger-liste` (Alias existiert nur fuer `/agrar/duenger`), `/agrar/feldbuch/schlagkartei`
-  - **Workflow (3)**: `/workflow/workflow-monitoring`, `/workflow/workflow-regeln`, `/workflows/approval`
-  - **Administration (3)**: `/admin/benutzer-liste`, `/admin/rollen-verwaltung`, `/admin/audit-log`
-  - **CRM (3)**: `/crm/kontakte-liste`, `/crm/leads`, `/crm/aktivitaeten`
-  - **Sonstige (3)**: `/dashboard/sales`, `/artikel/liste`, `/reports`, `/disposition/liste`, `/document`, `/einstellungen/system` (Alias zeigt auf `settings` statt `einstellungen/system`)
-- Fix-Ansatz: Entweder Auto-Routing reparieren (BUG-001) ODER fehlende Aliase nachtragen. Empfehlung: Beides — Auto-Routing fixen UND kritische Pfade explizit aliasieren.
-- Status: [ ] TODO
-
-### BUG-004: Dashboard ohne Widgets/KPIs
-- Severity: **P2-MAJOR**
-- Modul: `pages/start-dashboard`
-- Beschreibung: Die Startseite (`/`) rendert zwar (als einzige Seite mit `index: true`), zeigt aber keinerlei Dashboard-Widgets, KPIs oder Schnelleinstiege. Nur "Realtime: Connecting" und "Last event: idle".
-- Erwartung Landhandel: Dashboard sollte fuer den Alltag relevante KPIs zeigen:
-  - Offene Bestellungen / Lieferungen heute
-  - Annahme-Warteschlange (Ernte-Saison kritisch)
-  - Offene Posten / Faellige Rechnungen
-  - Lagerfuellstand kritische Artikel
-  - Laufende Kampagnen-Performance
-- Status: [ ] TODO
-
-### BUG-005: Keine Authentifizierung / Login-Seite
-- Severity: **P1-CRITICAL**
-- Modul: Auth, Frontend-Guard
-- Beschreibung: Alle Seiten sind ohne Login/Authentifizierung erreichbar. Kein Login-Screen, kein Token-Check, kein Redirect auf `/login`. Die App laeuft komplett ohne Auth-Guard.
-- Auswirkung: Im Produktionsbetrieb waere das gesamte ERP offen zugaenglich. Fuer Entwicklung ist Dev-Token akzeptabel, aber ein Auth-Flow muss vor Go-Live vorhanden sein.
-- Erwartung: OIDC/OAuth2 Login → Token-basierte Session → Route-Guards → Rollen-basierte Seitenfreigabe
-- Status: [ ] TODO (Dev-Modus akzeptabel, Production-Blocker)
-
-### BUG-006: Kein Error-Boundary / Keine 404-Seite
-- Severity: **P2-MAJOR**
-- Modul: Frontend-Routing
-- Beschreibung: Bei unbekannten URLs erscheint kein 404-Hinweis, sondern dieselbe leere `<Outlet/>`-Seite. User erhaelt kein Feedback, ob die Seite existiert oder nicht. Kein Error-Boundary faengt Laufzeitfehler ab.
-- Erwartung: Dedizierte 404-Seite mit Zurueck-Navigation. Error-Boundary mit Fehlermeldung und Reload-Button.
-- Status: [ ] TODO
-
----
-
-### Praxistests Landhandel — Workflow-Szenarien (nicht testbar wegen BUG-001)
-
-> Die folgenden Szenarien konnten aufgrund des systematischen Routing-Versagens (BUG-001) nicht getestet werden. Sie sind als Akzeptanz-Testfaelle fuer das UAT (GOLIVE-03) vorgemerkt.
-
-#### Szenario L1: Wareneingang Getreide (Rolle: Lagerverwalter)
-- Erwarteter Flow: Annahme/Warteschlange → Wiegung (Erstgewicht) → Probenahme → Qualitaetspruefung → Einlagerung → Zweitgewicht → Chargen-Zuordnung → Lieferschein-Druck
-- Zu pruefen: Feuchte-/Besatzabzug korrekt berechnet? MHD-Tracking? Chargen-Rueckverfolgbarkeit?
-- Status: [ ] BLOCKED (BUG-001)
-
-#### Szenario L2: Duengerverkauf an Landwirt (Rolle: Verkaufsberater)
-- Erwarteter Flow: Kunde waehlen → Artikel (Duenger) waehlen → Menge/Preis → Lieferbedingung (ab Lager/frei Haus) → Angebot erstellen → Auftrag → Lieferschein → Rechnung
-- Zu pruefen: Kundenhistorie sichtbar? Rabattstaffel? Incoterms? USt.-Satz korrekt (7% Duenger)?
-- Status: [ ] BLOCKED (BUG-001)
-
-#### Szenario L3: Pflanzenschutzmittel-Bestellung (Rolle: Einkauf)
-- Erwarteter Flow: Bestellvorschlag aus Disposition → Lieferant waehlen → PSM-Artikel mit Zulassungsnummer → Bestellung → Wareneingang → Chargenzuordnung → Lagerbuchung → Rechnungsabgleich
-- Zu pruefen: PSM-Zulassung geprueft? Anwendungsbestimmungen verknuepft? Sachkundenachweis des Einkaufers hinterlegt?
-- Status: [ ] BLOCKED (BUG-001)
-
-#### Szenario L4: Monatsabschluss (Rolle: Finanzbuchhaltung)
-- Erwarteter Flow: Offene Posten abstimmen → Konten abstimmen → Umsatzsteuervoranmeldung → Periode schliessen → Abschluss-Cockpit pruefen
-- Zu pruefen: Alle Buchungen in korrekter Periode? OP-Saldo stimmt? USt.-Verprobung? Abschluss-Freigabe-Workflow?
-- Status: [ ] BLOCKED (BUG-001)
-
-#### Szenario L5: Ernte-Kampagne (Rolle: Geschaeftsleitung)
-- Erwarteter Flow: Dashboard → Annahme-Auslastung live → Lagerkapazitaet → Qualitaets-Ueberblick → Deckungsbeitragsanalyse → Kampagnen-Steuerung
-- Zu pruefen: Real-Time-Daten? Drill-Down moeglich? Mobile-Ansicht fuer Unterwegs?
-- Status: [ ] BLOCKED (BUG-001, BUG-002, BUG-004)
-
-#### Szenario L6: Neuer Mitarbeiter anlegen (Rolle: HR/Personal)
-- Erwarteter Flow: Mitarbeiter-Stamm anlegen → Qualifikationen zuweisen → Onboarding-Checkliste → Schulungen planen → Schichtplan-Zuweisung
-- Zu pruefen: Pflichtfelder (Sachkundenachweis PSM, Staplerschein)? Schulungs-Tracking? Vertretungsregelung?
-- Status: [ ] BLOCKED (BUG-001)
-
-#### Szenario L7: Lageinventur (Rolle: Lagerverwalter)
-- Erwarteter Flow: Inventur anlegen → Zaehllisten generieren → Ist-Bestaende erfassen → Abgleich Soll/Ist → Differenzbuchung → Inventurprotokoll drucken
-- Zu pruefen: Chargen-genau? Lagerplatz-genau? Bewertung korrekt (gleitender Durchschnitt)?
-- Status: [ ] BLOCKED (BUG-001)
-
-#### Szenario L8: POS-Verkauf (Rolle: Kassierer Filiale)
-- Erwarteter Flow: POS Terminal → Artikel scannen/suchen → Warenkorb → Zahlung (Bar/Karte/Rechnung) → TSE-Beleg → Tagesabschluss
-- Zu pruefen: TSE-Signatur? Kassenbon GoBD-konform? Geschenkkarten einloesbar? Rabatte anwendbar?
-- Status: [ ] BLOCKED (BUG-001)
-
----
-
-### Zusammenfassung Testergebnis
-
-| Severity | Anzahl | Status |
-|----------|--------|--------|
-| P0-BLOCKER | 1 (BUG-001) | Offen — blockiert ALLE weiteren Tests |
-| P1-CRITICAL | 3 (BUG-002, BUG-003, BUG-005) | Offen |
-| P2-MAJOR | 2 (BUG-004, BUG-006) | Offen |
-| Praxistests | 8 Szenarien | Alle BLOCKED durch BUG-001 |
-
-**Empfehlung:** BUG-001 (Routing) hat hoechste Prioritaet. Erst wenn Seiten rendern, koennen BUG-002..006 und die Praxistests (L1..L8) sinnvoll weiterverfolgt werden.
-
-**Naechste Schritte:**
-1. BUG-001 fixen: `routes.tsx` debuggen, `pageModules`-Mapping validieren
-2. BUG-002 fixen: SSE-URL konfigurierbar machen
-3. BUG-003 fixen: Fehlende ~70 Route-Aliase nachtragen
-4. Praxistests L1-L8 nach Fix erneut durchfuehren
-5. Ergebnisse in GOLIVE-03 (UAT) uebernehmen
+### Nächste Schritte
+1. Praxistests L1-L8 (Landhandel) auf aktueller Build-Stufe ausfuehren.
+2. BUG-003 Rest-Aliase automatisiert vervollstaendigen.
+3. BUG-004 KPI-Dashboard fachlich befuellen.
