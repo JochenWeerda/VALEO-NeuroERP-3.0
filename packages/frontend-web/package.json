@@ -24,6 +24,7 @@
     "build-storybook": "storybook build",
     "typecheck": "pnpm run type-check",
     "test:e2e": "playwright test",
+    "test:e2e:routing-smoke": "playwright test tests/e2e/main-routes-smoke.spec.ts",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report"
   },
