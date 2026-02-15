@@ -879,8 +879,100 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 4. [ ] `DOCFLOW-P0-04`: `sales/delivery-editor` und `sales/invoice-editor` auf Domain-API umstellen.
 5. [ ] `DOCFLOW-P0-05`: Workflow-Persistenz (DB) aktivieren, in-memory deaktivieren.
 6. [ ] `DOCFLOW-P0-06`: E2E-Suite fuer Teillieferung/Teilrechnung/Wiegeschein-Ausloesung/Bestellvorschlag.
-7. [ ] `DOCFLOW-P0-07`: Fremdbestand-Datenmodell + Buchungslogik (`ownership_type`, owner_partner_id, consignment ledger).
-8. [ ] `DOCFLOW-P0-08`: Lagergeld-Engine (monatlicher idempotenter Lauf, Stichtag/Freimenge/Staffel, Audit).
+7. [x] `DOCFLOW-P0-07`: Fremdbestand-Datenmodell + Buchungslogik (`ownership_type`, owner_partner_id, consignment ledger).
+8. [x] `DOCFLOW-P0-08`: Lagergeld-Engine (monatlicher idempotenter Lauf, Stichtag/Freimenge/Staffel, Audit).
 9. [ ] `DOCFLOW-P0-09`: Chargen-Linking fuer Mischungen/Entnahmen mit Mengenanteil und Rueckverfolgbarkeit.
 10. [ ] `DOCFLOW-P0-10`: Agrar-Modul-Gating-Ende-zu-Ende (Feature Flags, API Guards, Tests).
+
+#### 8.27.10 Vollstaendig bearbeitet: umsetzungsreifes Programm (Stand 2026-02-15)
+- [x] Architektur-/Risikoanalyse abgeschlossen (Ist, Ziel, Compliance, Eventualitaeten, Cutover, Leitplanken, Nachweise).
+- [x] Ticket-Backlog in priorisierte P0-Serie ueberfuehrt (`DOCFLOW-P0-01` bis `DOCFLOW-P0-10`).
+- [x] Bereits umgesetzt und in 8.28/8.29 nachweisbar:
+  - `DOCFLOW-P0-07` Fremdbestand-Datenmodell + CRUD-Felder.
+  - `DOCFLOW-P0-08` Lagergeld-Engine inkl. idempotentem Monatslauf, Buchung, Audit, E2E.
+- [x] Offene Punkte klar abgegrenzt (keine versteckte technische Schuld):
+  - Kanonisches Docflow-Datenmodell + Command-API (`P0-01`..`P0-03`).
+  - Frontend-Cutover von MCP auf Domain-Docflow (`P0-04`).
+  - Workflow-DB-Persistenz statt in-memory (`P0-05`).
+  - Vollstaendige E2E-/Belastungs-/Governance-Nachweise (`P0-06`, `P0-09`, `P0-10`).
+- [x] Abnahmekriterien je Welle festgelegt:
+  - Keine Doppelbelege/Doppelbuchungen unter Retry/Parallelklick.
+  - Vollstaendige Belegkette auf Item-Ebene rueckverfolgbar.
+  - Buchungen nur attestierbar und stornierbar, nie still ueberschreibbar.
+  - Agrar/Landhandel-Sonderlogik strikt modul-gesteuert.
+
+### 8.28 Umsetzung gestartet: DOCFLOW-P0-07 Fremdbestand-Basis (DB + CRUD)
+- Migration:
+- [x] `alembic/versions/inventory_stock_movements_consignment_ownership_20260215.py`
+  - erweitert `domain_inventory.inventory_stock_movements` um:
+    - `ownership_type` (`owned|consigned`)
+    - `owner_partner_id`
+    - `agrar_contract_id`
+    - `weighing_ticket_id`
+    - `storage_fee_relevant`
+    - `storage_fee_start_date`
+    - `storage_fee_monthly_rate`
+    - `storage_fee_last_charged_until`
+  - inkl. Check-Constraints und Indizes fuer Eigentumstyp/Owner/Kontrakt/Ticket.
+- Backend-Modelle/CRUD:
+- [x] `app/infrastructure/models/__init__.py` `StockMovement` erweitert.
+- [x] `app/api/v1/schemas/inventory.py` (`StockMovementBase/Create/Update`) um Fremdbestand/Lagergeld-Felder erweitert.
+- [x] `app/domains/inventory/application/services/inventory_service.py`
+  - Validierung: `owner_partner_id` ist Pflicht bei `ownership_type=consigned`.
+- [x] `app/domains/inventory/api/stock_movements.py`
+  - neue Felder in Read/Create verdrahtet.
+- Offen fuer naechsten Schritt:
+- [x] Lagergeld-Lauf/Engine (`DOCFLOW-P0-08`) auf Basis der neuen Felder implementieren.
+- [x] E2E-Szenario Fremdbestand + Entnahme + Gebuehrenlauf + Buchung + Audit nachgezogen.
+
+### 8.29 DOCFLOW-P0-08 umgesetzt: Lagergeld-Engine + idempotenter Monatslauf
+- Migration:
+- [x] `alembic/versions/consignment_storage_fee_engine_20260215.py`
+  - neue Tabellen:
+    - `domain_inventory.consignment_storage_fee_runs`
+    - `domain_inventory.consignment_storage_fee_charges`
+  - inklusive Constraints und Indizes (Perioden-Idempotenz, Non-Negative Checks).
+- API:
+- [x] Neuer Router `app/domains/inventory/api/storage_fees.py`
+  - `POST /api/v1/inventory/storage-fees/run`:
+    - `dry_run` Vorschau (ohne Persistenz)
+    - echter Monatslauf mit Persistenz
+    - Idempotenz: vorhandener `posted`-Run fuer `tenant+period` wird wiederverwendet (keine Doppelbelastung)
+    - optionale GL-Buchung (`domain_erp.journal_entries` + `journal_entry_lines`)
+    - Audit-Eintrag (best effort in `infrastructure.audit_log`)
+  - `GET /api/v1/inventory/storage-fees/runs`
+  - `GET /api/v1/inventory/storage-fees/runs/{run_id}`
+- Verdrahtung:
+- [x] `app/domains/inventory/api/__init__.py` um `storage-fees` erweitert.
+- Berechnungslogik:
+- [x] Basis = positiver konsignierter Schlussbestand je `owner_partner_id + article_id + warehouse_id + charge`.
+- [x] Rate = letzte gueltige `storage_fee_monthly_rate` aus fee-relevanten Bewegungen bis Periodenende.
+- [x] Betrag = `closing_qty * monthly_rate`, kaufmaennisch auf 2 Stellen gerundet.
+- [x] Fortschreibung `storage_fee_last_charged_until` auf zugrunde liegenden Bewegungen.
+- E2E-Skript:
+- [x] `scripts/test-consignment-storage-fee-flow.ps1`
+  - Ablauf: Fremdbestand-Einlagerung -> Teilentnahme -> Dry-Run -> Post-Run -> Idempotenz-Replay -> Run-Detailabruf.
+- Verifikation/Blocker (lokal):
+- [x] Alembic-Head-Konflikt bereinigt (Merge-Revision `merge_sales_orders_and_consignment_20260215`), Migration laeuft in Docker sauber.
+- [x] Persistenzpfad gehaertet: transaktionskritisches Audit-Write entkoppelt (separate Best-Effort-Transaktion), dadurch kein stilles Rollback des Hauptlaufs mehr.
+- [x] API-Lauf `POST /api/v1/inventory/storage-fees/run` persistiert Runs/Charges stabil und liefert `journal_entry_id`.
+- [x] Idempotenz-Nachweis erbracht: zweiter Monatslauf liefert `idempotent_hit=true` und referenziert denselben Run.
+- [x] Audit-Nachweis erbracht: `storage_fee_run_posted` in `infrastructure.audit_log` mit `resource_type=consignment_storage_fee_run`.
+- [x] E2E-Skript `scripts/test-consignment-storage-fee-flow.ps1` final `gruen`.
+
+### 8.30 Learnings/Guardrails (dauerhaft, um Wiederholungsfehler auszuschliessen)
+- [x] Keine fachkritische Persistenz an optionale Nebenpfade koppeln:
+  - Audit/Telemetry immer best-effort und getrennt von der Business-Transaktion ausfuehren.
+- [x] SQL-Parameter immer DB-neutral binden:
+  - keine `:param::jsonb`-Syntax; stattdessen `CAST(:param AS jsonb)`.
+- [x] Idempotenz technisch und fachlich pruefen:
+  - API-Response (`idempotent_hit`) plus DB-Nachweis (`runs`/`charges`) plus Re-Run-Test.
+- [x] Persistenz nie nur per API-Body vertrauen:
+  - immer SQL-Readback auf Zieltabellen + Folgeeffekte (z. B. `storage_fee_last_charged_until`) verifizieren.
+- [x] Fehlerbilder dokumentieren:
+  - Symptom: `COMMIT` im Log, aber keine Zeilen sichtbar.
+  - Ursache: transaktioneller Abort durch geschluckten Audit-Fehler.
+  - Gegenmassnahme: Transaktionsentkopplung und schema-korrektes Audit-Mapping.
+- [x] P0-Definition fuer Kernprozesse:
+  - erst dann `gruen`, wenn API, DB, Buchung, Audit und E2E-Skript konsistent positiv sind.
 

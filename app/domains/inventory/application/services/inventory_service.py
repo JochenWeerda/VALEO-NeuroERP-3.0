@@ -90,6 +90,14 @@ class InventoryService:
         booking_user: Optional[str] = None,
         auto_created: bool = False,
         linked_order_id: Optional[str] = None,
+        ownership_type: str = "owned",
+        owner_partner_id: Optional[str] = None,
+        agrar_contract_id: Optional[str] = None,
+        weighing_ticket_id: Optional[str] = None,
+        storage_fee_relevant: bool = False,
+        storage_fee_start_date: Optional[date] = None,
+        storage_fee_monthly_rate: Optional[Decimal] = None,
+        storage_fee_last_charged_until: Optional[date] = None,
         tenant_id: str = None
     ):
         """Process a stock movement and update article stock levels."""
@@ -124,6 +132,8 @@ class InventoryService:
         # Ensure stock doesn't go negative for outbound movements
         if movement_type == 'out' and new_stock < 0:
             raise ValueError(f"Insufficient stock. Current: {previous_stock}, Requested: {abs(quantity)}")
+        if ownership_type == "consigned" and not owner_partner_id:
+            raise ValueError("owner_partner_id is required for consigned stock movements")
 
         # Calculate total cost if unit cost provided
         total_cost = None
@@ -149,6 +159,14 @@ class InventoryService:
             booking_user=booking_user,
             auto_created=auto_created,
             linked_order_id=linked_order_id,
+            ownership_type=ownership_type,
+            owner_partner_id=owner_partner_id,
+            agrar_contract_id=agrar_contract_id,
+            weighing_ticket_id=weighing_ticket_id,
+            storage_fee_relevant=storage_fee_relevant,
+            storage_fee_start_date=storage_fee_start_date,
+            storage_fee_monthly_rate=storage_fee_monthly_rate,
+            storage_fee_last_charged_until=storage_fee_last_charged_until,
             previous_stock=previous_stock,
             new_stock=new_stock,
             total_cost=total_cost,
