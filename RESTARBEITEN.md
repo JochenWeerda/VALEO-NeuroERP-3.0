@@ -386,6 +386,9 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [~] Einzelne UI-Seiten vorhanden, aber kein vollstaendiger Domain-Cockpit-Cutover.
   - [x] `packages/frontend-web/src/pages/controlling/plan-ist.tsx` bezieht Daten jetzt ueber `packages/frontend-web/src/lib/api/misc-modules.ts` aus echtem Controlling-Stack (`/api/v1/controlling/kpis` + `/api/v1/controlling/timeseries`) statt nicht vorhandenem `plan-ist` Endpoint.
   - [x] KPI-CRUD-UI vorhanden: `packages/frontend-web/src/pages/controlling/kpi-verwaltung.tsx` (Hook `packages/frontend-web/src/lib/api/controlling.ts`) mit `GET/POST/PUT/DELETE /api/v1/controlling/kpis`.
+  - [x] Dashboard-CRUD-UI vorhanden: `packages/frontend-web/src/pages/controlling/dashboard-verwaltung.tsx` mit `GET/POST/PUT/DELETE /api/v1/controlling/dashboards`.
+  - [x] Timeseries-Erfassung vorhanden: `packages/frontend-web/src/pages/controlling/timeseries-erfassung.tsx` mit `GET/POST/DELETE /api/v1/controlling/timeseries`.
+  - [x] Navigation erweitert (`packages/frontend-web/src/app/navigation/manifest.tsx`): `Dashboard-Verwaltung`, `Timeseries-Erfassung`.
 
 ### 8.37 Gap-Closure: Chargen-MHD + Controlling-CRUD
 - [x] `ops_chargen.mhd` fachlich und technisch nachgezogen:
