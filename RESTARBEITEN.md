@@ -878,8 +878,8 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 1. [x] `DOCFLOW-P0-01`: Canonical `DocumentType` + `TransitionPolicy` als zentrale Domain.
 2. [x] `DOCFLOW-P0-02`: Migration `document_headers/items/links/postings` inkl. Constraints/Indizes.
 3. [x] `DOCFLOW-P0-03`: Idempotent Command API (`convert`, `post`, `reverse`) mit Outbox.
-4. [ ] `DOCFLOW-P0-04`: `sales/delivery-editor` und `sales/invoice-editor` auf Domain-API umstellen.
-5. [ ] `DOCFLOW-P0-05`: Workflow-Persistenz (DB) aktivieren, in-memory deaktivieren.
+4. [x] `DOCFLOW-P0-04`: `sales/delivery-editor` und `sales/invoice-editor` auf Domain-API umstellen.
+5. [x] `DOCFLOW-P0-05`: Workflow-Persistenz (DB) aktivieren, in-memory deaktivieren.
 6. [ ] `DOCFLOW-P0-06`: E2E-Suite fuer Teillieferung/Teilrechnung/Wiegeschein-Ausloesung/Bestellvorschlag.
 7. [x] `DOCFLOW-P0-07`: Fremdbestand-Datenmodell + Buchungslogik (`ownership_type`, owner_partner_id, consignment ledger).
 8. [x] `DOCFLOW-P0-08`: Lagergeld-Engine (monatlicher idempotenter Lauf, Stichtag/Freimenge/Staffel, Audit).
@@ -901,6 +901,14 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - `app/api/v1/endpoints/docflow.py` (`GET /api/v1/docflow/`, `GET /api/v1/docflow/{id}`, `POST /convert`, `POST /post`, `POST /reverse`).
   - Router-Verdrahtung in `app/api/v1/endpoints/__init__.py` und `app/api/v1/api.py`.
   - Smoke verifiziert: Dry-Run/Convert/Post/Reverse + Idempotenz-Hit + Persistenz in `domain_docflow.*`.
+- [x] Neu umgesetzt (P0-04/P0-05):
+  - Frontend-Cutover auf Domain-Docflow:
+    - `packages/frontend-web/src/pages/sales/delivery-editor.tsx`
+    - `packages/frontend-web/src/pages/sales/invoice-editor.tsx`
+    - `packages/frontend-web/src/pages/sales/order-editor.tsx` Follow-up ebenfalls auf `docflow/convert`.
+  - `app/api/v1/endpoints/docflow.py` erweitert um `POST /api/v1/docflow/` und `PUT /api/v1/docflow/{id}` fuer Editor-Save ohne MCP.
+  - `app/routers/workflow_router.py` in-memory entfernt (`_STATE`/`_AUDIT` entfallen), Persistenz voll auf `workflow_status`/`workflow_audit`.
+  - `app/routers/print_router.py` entkoppelt von `_STATE`, Statusbezug jetzt ueber `WorkflowRepository` (DB).
 - [x] Abnahmekriterien je Welle festgelegt:
   - Keine Doppelbelege/Doppelbuchungen unter Retry/Parallelklick.
   - Vollstaendige Belegkette auf Item-Ebene rueckverfolgbar.
