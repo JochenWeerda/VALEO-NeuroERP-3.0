@@ -6,7 +6,10 @@
       "Bash(git push:*)",
       "Bash(git commit:*)",
       "Bash(docker compose:*)",
-      "mcp__MCP_DOCKER__browser_navigate"
+      "mcp__MCP_DOCKER__browser_navigate",
+      "mcp__MCP_DOCKER__browser_take_screenshot",
+      "mcp__MCP_DOCKER__browser_click",
+      "mcp__MCP_DOCKER__browser_evaluate"
     ]
   }
 }

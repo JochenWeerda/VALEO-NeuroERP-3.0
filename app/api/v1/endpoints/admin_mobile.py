@@ -554,12 +554,43 @@ async def delete_connector(item_id: str, tenant_id: str = Depends(get_tenant_id)
 @router.get("/connector-events", response_model=list[dict[str, Any]])
 async def list_connector_events(
     connector_id: str | None = Query(default=None),
+    status: str | None = Query(default=None),
     limit: int = Query(default=250, ge=1, le=2000),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     params: dict[str, Any] = {"tenant_id": tenant_id, "limit": limit}
     where = ["tenant_id = :tenant_id"]
+    if connector_id:
+        where.append("connector_id = :connector_id")
+        params["connector_id"] = connector_id
+    if status:
+        where.append("status = :status")
+        params["status"] = status
+    rows = db.execute(
+        text(
+            f"""
+            SELECT *
+            FROM domain_shared.admin_connector_events
+            WHERE {' AND '.join(where)}
+            ORDER BY created_at DESC
+            LIMIT :limit
+            """
+        ),
+        params,
+    ).mappings().all()
+    return [_jsonable(dict(r)) for r in rows]
+
+
+@router.get("/connector-events/quarantine", response_model=list[dict[str, Any]])
+async def list_connector_events_quarantine(
+    connector_id: str | None = Query(default=None),
+    limit: int = Query(default=250, ge=1, le=2000),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    params: dict[str, Any] = {"tenant_id": tenant_id, "limit": limit}
+    where = ["tenant_id = :tenant_id", "status = 'error'"]
     if connector_id:
         where.append("connector_id = :connector_id")
         params["connector_id"] = connector_id
@@ -652,3 +683,54 @@ async def delete_connector_event(item_id: str, tenant_id: str = Depends(get_tena
         raise HTTPException(status_code=404, detail="Connector event not found")
     db.commit()
     return None
+
+
+@router.post("/connector-events/{item_id}/retry", response_model=dict)
+async def retry_connector_event(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    updated = db.execute(
+        text(
+            """
+            UPDATE domain_shared.admin_connector_events
+            SET status='warning',
+                retry_count = COALESCE(retry_count, 0) + 1,
+                next_retry_at = NOW() + INTERVAL '5 minute',
+                message = COALESCE(message, '') || ' | retry requested',
+                payload = COALESCE(payload, '{}'::jsonb) || jsonb_build_object('retry_requested_at', NOW()::text)
+            WHERE tenant_id=:tenant_id AND id=:id
+            """
+        ),
+        {"tenant_id": tenant_id, "id": item_id},
+    ).rowcount
+    if not updated:
+        raise HTTPException(status_code=404, detail="Connector event not found")
+    db.commit()
+    row = db.execute(
+        text("SELECT * FROM domain_shared.admin_connector_events WHERE tenant_id=:tenant_id AND id=:id"),
+        {"tenant_id": tenant_id, "id": item_id},
+    ).mappings().first()
+    return _jsonable(dict(row))
+
+
+@router.post("/connector-events/{item_id}/resolve", response_model=dict)
+async def resolve_connector_event(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    updated = db.execute(
+        text(
+            """
+            UPDATE domain_shared.admin_connector_events
+            SET status='ok',
+                next_retry_at = NULL,
+                message = COALESCE(message, '') || ' | resolved',
+                payload = COALESCE(payload, '{}'::jsonb) || jsonb_build_object('resolved_at', NOW()::text)
+            WHERE tenant_id=:tenant_id AND id=:id
+            """
+        ),
+        {"tenant_id": tenant_id, "id": item_id},
+    ).rowcount
+    if not updated:
+        raise HTTPException(status_code=404, detail="Connector event not found")
+    db.commit()
+    row = db.execute(
+        text("SELECT * FROM domain_shared.admin_connector_events WHERE tenant_id=:tenant_id AND id=:id"),
+        {"tenant_id": tenant_id, "id": item_id},
+    ).mappings().first()
+    return _jsonable(dict(row))

@@ -95,6 +95,18 @@ export type ReportPermission = {
   updated_at: string
 }
 
+export type ConnectorEvent = {
+  id: string
+  connector_id: string
+  event_type: string
+  status: 'ok' | 'warning' | 'error'
+  message?: string | null
+  retry_count: number
+  next_retry_at?: string | null
+  created_at: string
+  payload: Record<string, unknown>
+}
+
 export function useAuditLog() {
   return useQuery({
     queryKey: ['admin', 'audit-log'],
@@ -295,6 +307,40 @@ export function useDeleteReportPermission() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'report-permissions'] })
+    },
+  })
+}
+
+export function useConnectorEventQuarantine(params?: { connectorId?: string; limit?: number }) {
+  return useQuery({
+    queryKey: ['admin', 'mobile', 'connector-events', 'quarantine', params?.connectorId ?? '', params?.limit ?? 250],
+    queryFn: async () => {
+      const search = new URLSearchParams()
+      if (params?.connectorId) search.set('connector_id', params.connectorId)
+      if (params?.limit) search.set('limit', String(params.limit))
+      const suffix = search.size > 0 ? `?${search.toString()}` : ''
+      return (await apiClient.get<ConnectorEvent[]>(`/api/v1/admin/mobile/connector-events/quarantine${suffix}`)).data
+    },
+    staleTime: 15 * 1000,
+  })
+}
+
+export function useRetryConnectorEvent() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => (await apiClient.post<ConnectorEvent>(`/api/v1/admin/mobile/connector-events/${id}/retry`)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'mobile', 'connector-events'] })
+    },
+  })
+}
+
+export function useResolveConnectorEvent() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => (await apiClient.post<ConnectorEvent>(`/api/v1/admin/mobile/connector-events/${id}/resolve`)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'mobile', 'connector-events'] })
     },
   })
 }
