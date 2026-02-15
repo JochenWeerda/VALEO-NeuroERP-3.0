@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { FileDown, Plus, Search, Users } from 'lucide-react'
+import { Edit, FileDown, Plus, Search, Users } from 'lucide-react'
 import { useMitarbeiter, type Mitarbeiter } from '@/lib/api/personal'
 
 export default function MitarbeiterListePage(): JSX.Element {
@@ -29,6 +29,7 @@ export default function MitarbeiterListePage(): JSX.Element {
       ),
     },
     { key: 'abteilung' as const, label: 'Abteilung', render: (m: Mitarbeiter) => <Badge variant="outline">{m.abteilung}</Badge> },
+    { key: 'email' as const, label: 'E-Mail' },
     { key: 'position' as const, label: 'Position' },
     {
       key: 'eintrittsdatum' as const,
@@ -42,6 +43,16 @@ export default function MitarbeiterListePage(): JSX.Element {
         <Badge variant={m.status === 'aktiv' ? 'outline' : m.status === 'urlaub' ? 'secondary' : 'destructive'}>
           {m.status === 'aktiv' ? 'Aktiv' : m.status === 'urlaub' ? 'Urlaub' : 'Krank'}
         </Badge>
+      ),
+    },
+    {
+      key: 'id' as const,
+      label: 'Aktionen',
+      render: (m: Mitarbeiter) => (
+        <Button size="sm" variant="outline" onClick={() => navigate(`/personal/mitarbeiter/${m.id}`)} className="gap-1">
+          <Edit className="h-3 w-3" />
+          Bearbeiten
+        </Button>
       ),
     },
   ]

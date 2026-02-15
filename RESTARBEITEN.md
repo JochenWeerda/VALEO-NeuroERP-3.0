@@ -385,6 +385,7 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - Masken:
 - [~] Einzelne UI-Seiten vorhanden, aber kein vollstaendiger Domain-Cockpit-Cutover.
   - [x] `packages/frontend-web/src/pages/controlling/plan-ist.tsx` bezieht Daten jetzt ueber `packages/frontend-web/src/lib/api/misc-modules.ts` aus echtem Controlling-Stack (`/api/v1/controlling/kpis` + `/api/v1/controlling/timeseries`) statt nicht vorhandenem `plan-ist` Endpoint.
+  - [x] KPI-CRUD-UI vorhanden: `packages/frontend-web/src/pages/controlling/kpi-verwaltung.tsx` (Hook `packages/frontend-web/src/lib/api/controlling.ts`) mit `GET/POST/PUT/DELETE /api/v1/controlling/kpis`.
 
 ### 8.37 Gap-Closure: Chargen-MHD + Controlling-CRUD
 - [x] `ops_chargen.mhd` fachlich und technisch nachgezogen:
@@ -455,6 +456,8 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - Status-/Abteilungs-Persistenz ueber `domain_shared.users.preferences` (`hr_status`, `abteilung`) statt implizitem Bool-Status.
   - Frontend: neue Seite `packages/frontend-web/src/pages/personal/mitarbeiter-stamm.tsx`.
   - Routing: Alias-Pfade `personal/mitarbeiter/:id` und `personal/mitarbeiter/neu` in `packages/frontend-web/src/app/route-aliases.json`.
+- [x] Mitarbeiter-Liste UX:
+  - `packages/frontend-web/src/pages/personal/mitarbeiter-liste.tsx` zeigt `email` und direkte Zeilenaktion `Bearbeiten`.
 
 ### 8.10 Docker Speicherbereinigung (14.02.2026)
 - Ausgangslage: `docker system df` zeigte `Images: 57`, `77.23GB` und `Build Cache: 39.77GB`.

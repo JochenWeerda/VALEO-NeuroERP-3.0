@@ -1034,6 +1034,14 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:read' },
       },
       {
+        id: 'kpi-verwaltung',
+        label: 'KPI-Verwaltung',
+        icon: Settings,
+        module: '@/pages/controlling/kpi-verwaltung',
+        keywords: ['kpi', 'controlling', 'dashboard'],
+        mcp: { businessDomain: 'finance', scope: 'finance:write' },
+      },
+      {
         id: 'deckungsbeitrag',
         label: 'Deckungsbeitrag',
         icon: Calculator,
