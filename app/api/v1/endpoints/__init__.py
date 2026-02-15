@@ -73,3 +73,4 @@ from . import admin_monitoring
 from . import admin_core
 from . import admin_pos
 from . import admin_devices
+from . import admin_mobile

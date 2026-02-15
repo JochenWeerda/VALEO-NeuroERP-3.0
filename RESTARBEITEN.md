@@ -705,7 +705,7 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] Mitarbeiter-/Rollenanlage inkl. On-/Offboarding und Rechte auf Funktions-/Feldebene.
 - [x] Geraete-Mapping (Drucker/Scanner) je Arbeitsplatz/Belegart/Prozess.
 - [x] Formular-/Papier-Handler mit Vorlagenversionierung, Ausgabeprofilen, Archivierungsregeln.
-- [ ] Software-Verknuepfungen (MS Office/LibreOffice/Slack/n8n) als Connectoren mit Mapping und Fehlerbehandlung.
+- [x] Software-Verknuepfungen (MS Office/LibreOffice/Slack/n8n) als Connectoren mit Mapping und Fehlerbehandlung.
 
 ### 8.26 P0 abgeschlossen: IAM-CRUD + Admin-Seed (Benutzer/Rollen/Audit)
 - Backend (`app/api/v1/endpoints/admin_core.py`):
@@ -781,6 +781,39 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] API-Smoke-Test erfolgreich:
   - Listen-Endpunkte liefern Daten (`devices`, `device-mappings`, `output-templates`, `output-profiles`)
   - `POST/PUT` fuer Geraete erfolgreich
+
+### 8.36 Admin-Gap erweitert: Mobile/WMS + Stationen + Routing + Connector-Monitoring
+- Migration:
+- [x] `alembic/versions/admin_mobile_routing_connectors_20260215.py`
+  - neue Tabellen:
+    - `domain_shared.admin_stations`
+    - `domain_shared.admin_station_devices`
+    - `domain_shared.admin_routing_rules`
+    - `domain_shared.admin_scan_profiles`
+    - `domain_shared.admin_mobile_devices`
+    - `domain_shared.admin_connector_configs`
+    - `domain_shared.admin_connector_events`
+- Backend-Endpunkte:
+- [x] Neuer Router `app/api/v1/endpoints/admin_mobile.py`, eingebunden unter `/api/v1/admin/mobile/*`
+  - `GET/POST/PUT/DELETE /stations`
+  - `GET/POST/PUT/DELETE /station-devices`
+  - `GET/POST/PUT/DELETE /routing-rules`
+  - `GET/POST/PUT/DELETE /scan-profiles`
+  - `GET/POST/PUT/DELETE /mobile-devices`
+  - `GET/POST/PUT/DELETE /connectors`
+  - `GET/POST /connector-events` (Monitoring-/Retry-Queue-Sicht)
+- Seed (DB, keine Mocks):
+- [x] `scripts/seed-admin-mobile-routing-connectors.ps1`
+  - Beispielstationen, Scan-Profil, Mobile Device, Slack/n8n-Connectoren, Connector-Events
+- Verifikation:
+- [x] API-Smoke erfolgreich:
+  - `GET /api/v1/admin/mobile/stations`
+  - `GET /api/v1/admin/mobile/routing-rules`
+  - `GET /api/v1/admin/mobile/scan-profiles`
+  - `GET /api/v1/admin/mobile/mobile-devices`
+  - `GET /api/v1/admin/mobile/connectors`
+  - `GET /api/v1/admin/mobile/connector-events`
+  - `POST /api/v1/admin/mobile/routing-rules` erfolgreich
   - bereinigt alte fehlerhafte Rollenkeys im Tenant-Settings-JSON
   - schreibt initiale Audit-Eintraege (idempotent)
 - Verifikation (Docker lokal):
