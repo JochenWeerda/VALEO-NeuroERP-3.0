@@ -434,6 +434,22 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - `app/api/v1/endpoints/__init__.py`
   - `app/api/v1/api.py`
 
+### 8.39 Gap-Closure: Personal-Endpoints (Mitarbeiter/Zeiterfassung/Stundenzettel)
+- [x] 404-Pfade fuer Personal geschlossen (`/api/v1/personal/*`):
+  - `GET /api/v1/personal/mitarbeiter`
+  - `GET /api/v1/personal/zeiterfassung`
+  - `POST /api/v1/personal/stundenzettel`
+- [x] Migration umgesetzt: `alembic/versions/hr_personal_time_tracking_20260215.py`
+  - Tabellen: `domain_hr.time_entries`, `domain_hr.driver_timesheets`
+  - Constraints/Indizes fuer Stundenbereich, Typen und Zugriffspfade
+  - Seed-Testdaten (keine Mocks)
+- [x] API umgesetzt: `app/api/v1/endpoints/personal.py`
+- [x] Router-Verdrahtung:
+  - `app/api/v1/endpoints/__init__.py`
+  - `app/api/v1/api.py`
+- [x] Frontend-Flow korrigiert:
+  - `packages/frontend-web/src/pages/personal/stundenzettel.tsx` navigiert nach Save/Cancel auf existierende Route `/personal/zeiterfassung`.
+
 ### 8.10 Docker Speicherbereinigung (14.02.2026)
 - Ausgangslage: `docker system df` zeigte `Images: 57`, `77.23GB` und `Build Cache: 39.77GB`.
 - Durchgefuehrt:

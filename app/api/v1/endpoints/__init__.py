@@ -76,3 +76,4 @@ from . import admin_devices
 from . import admin_mobile
 from . import controlling
 from . import training
+from . import personal
