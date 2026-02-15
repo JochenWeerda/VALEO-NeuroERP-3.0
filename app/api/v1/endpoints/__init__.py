@@ -12,6 +12,7 @@ from .accounts import router as accounts
 from .journal_entries import router as journal_entries
 from .articles import router as articles
 from . import sales_orders
+from . import docflow
 from .warehouses import router as warehouses
 from . import gap
 from . import prospecting
