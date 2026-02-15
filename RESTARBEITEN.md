@@ -450,6 +450,11 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - `app/api/v1/api.py`
 - [x] Frontend-Flow korrigiert:
   - `packages/frontend-web/src/pages/personal/stundenzettel.tsx` navigiert nach Save/Cancel auf existierende Route `/personal/zeiterfassung`.
+- [x] Mitarbeiter-Stamm CRUD-Pfad erweitert:
+  - Backend: `GET/POST/PUT /api/v1/personal/mitarbeiter` inkl. Detail `/{id}` in `app/api/v1/endpoints/personal.py`.
+  - Status-/Abteilungs-Persistenz ueber `domain_shared.users.preferences` (`hr_status`, `abteilung`) statt implizitem Bool-Status.
+  - Frontend: neue Seite `packages/frontend-web/src/pages/personal/mitarbeiter-stamm.tsx`.
+  - Routing: Alias-Pfade `personal/mitarbeiter/:id` und `personal/mitarbeiter/neu` in `packages/frontend-web/src/app/route-aliases.json`.
 
 ### 8.10 Docker Speicherbereinigung (14.02.2026)
 - Ausgangslage: `docker system df` zeigte `Images: 57`, `77.23GB` und `Build Cache: 39.77GB`.
