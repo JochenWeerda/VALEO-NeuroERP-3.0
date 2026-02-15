@@ -690,10 +690,10 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [ ] Fehlend zentral administrierbar: durchgaengige Freigabe-/Vertretungsregeln, globale Rundungs-/Bewertungsparameter, Integrations-Fehlerqueue mit Quarantaene.
 - C) Sicherheit/Rollen/Audit
 - [~] Basis vorhanden.
-- [ ] Prioritaet P0: echte IAM-Admin-CRUD-Endpunkte und SoD-Regeln, Audit-Events fuer Rollen/Rechte/Token.
+- [x] Prioritaet P0: echte IAM-Admin-CRUD-Endpunkte und SoD-Regeln, Audit-Events fuer Rollen/Rechte/Token.
 - D) Integration/Automatisierung
 - [~] DMS-Bootstrap vorhanden.
-- [ ] Prioritaet P1: Connector-Verwaltung (Office/Slack/n8n), API-Key-Scopes/Rotation/IP-Allowlist/Rate-Limits, Retry-Policies pro Connector.
+- [~] Prioritaet P1: Connector-Verwaltung (Office/Slack/n8n), API-Key-Scopes/Rotation/IP-Allowlist/Rate-Limits, Retry-Policies pro Connector.
 - E) Reporting/Controlling
 - [ ] Prioritaet P1: KPI-/Drilldown-Admin, Abschluss-Cockpit, Self-Service-Report-Berechtigungen.
 - F) Systembetrieb
@@ -701,8 +701,8 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [ ] Prioritaet P1: Job-Scheduler-UI, Alert-Regeln/Eskalationen/Kanaele (E-Mail/SMS/Webhook/ChatOps), Konfig-Transporte DEV->TEST->PROD.
 
 - Zusatzpunkte aus Anforderung explizit aufgenommen:
-- [ ] API-Keys/Token-Management inkl. Rotation, Ablauf, letzte Nutzung, Scopes, Sperren.
-- [ ] Mitarbeiter-/Rollenanlage inkl. On-/Offboarding und Rechte auf Funktions-/Feldebene.
+- [x] API-Keys/Token-Management inkl. Rotation, Ablauf, letzte Nutzung, Scopes, Sperren.
+- [x] Mitarbeiter-/Rollenanlage inkl. On-/Offboarding und Rechte auf Funktions-/Feldebene.
 - [ ] Geraete-Mapping (Drucker/Scanner) je Arbeitsplatz/Belegart/Prozess.
 - [ ] Formular-/Papier-Handler mit Vorlagenversionierung, Ausgabeprofilen, Archivierungsregeln.
 - [ ] Software-Verknuepfungen (MS Office/LibreOffice/Slack/n8n) als Connectoren mit Mapping und Fehlerbehandlung.
@@ -728,6 +728,27 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] `scripts/seed-admin-iam.ps1` angelegt/erweitert:
   - legt Tenant-`admin_roles` (`dispo_lead`, `audit_reader`) an
   - legt 3 Admin-Testbenutzer an (`admin.master`, `dispo.lead`, `audit.reader`)
+
+### 8.34 P0 nachgezogen: Admin API-Keys/Token-Management (CRUD + Rotation + Revocation)
+- Backend (`app/api/v1/endpoints/admin_core.py`):
+- [x] `GET /api/v1/admin/api-keys` (inkl. Statusfilter aktiv/revoked)
+- [x] `POST /api/v1/admin/api-keys` (Token-Erzeugung, Scopes, IP-Allowlist, Rate-Limit, Ablaufdatum)
+- [x] `PUT /api/v1/admin/api-keys/{key_id}` (Metadaten/Policies aktualisieren)
+- [x] `POST /api/v1/admin/api-keys/{key_id}/rotate` (neues Secret, alter Hash ersetzt)
+- [x] `POST /api/v1/admin/api-keys/{key_id}/revoke` (Sperre, keine Hard-Deletes)
+- [x] Audit-Events verdrahtet:
+  - `admin.api_key.created`
+  - `admin.api_key.updated`
+  - `admin.api_key.rotated`
+  - `admin.api_key.revoked`
+- Migration:
+- [x] `alembic/versions/admin_api_keys_20260215.py`
+  - neue Tabelle `domain_shared.api_keys`
+  - Felder: `name`, `key_prefix`, `key_hash`, `scopes`, `ip_allowlist`, `rate_limit_per_minute`, `expires_at`, `last_used_at`, `status`, `revoked_at`
+  - Constraints/Indizes fuer Status, Name je Tenant, Prefix-Lookup
+- Seed (DB, keine Mocks):
+- [x] `scripts/seed-admin-api-keys.ps1`
+  - legt aktive + gesperrte Beispiel-Keys an, damit Admin-Seite nicht leer startet
   - bereinigt alte fehlerhafte Rollenkeys im Tenant-Settings-JSON
   - schreibt initiale Audit-Eintraege (idempotent)
 - Verifikation (Docker lokal):

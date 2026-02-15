@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
+import secrets
 from datetime import datetime
 from typing import Any
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
@@ -76,6 +78,43 @@ class AdminAuditOut(BaseModel):
     aktion: str
     objekt: str
     status: str
+
+
+class AdminApiKeyOut(BaseModel):
+    id: str
+    name: str
+    key_prefix: str
+    scopes: list[str]
+    ip_allowlist: list[str]
+    rate_limit_per_minute: int | None
+    expires_at: str | None
+    last_used_at: str | None
+    status: str
+    created_at: str
+
+
+class AdminApiKeyCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=120)
+    scopes: list[str] = Field(default_factory=list)
+    ip_allowlist: list[str] = Field(default_factory=list)
+    rate_limit_per_minute: int | None = Field(default=None, ge=1, le=20000)
+    expires_at: datetime | None = None
+
+
+class AdminApiKeyUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=120)
+    scopes: list[str] | None = None
+    ip_allowlist: list[str] | None = None
+    rate_limit_per_minute: int | None = Field(default=None, ge=1, le=20000)
+    expires_at: datetime | None = None
+
+
+class AdminApiKeySecretOut(BaseModel):
+    id: str
+    name: str
+    key_prefix: str
+    token: str
+    created_at: str
 
 
 ROLE_DESCRIPTIONS: dict[str, str] = {
@@ -254,6 +293,31 @@ def _resolve_actor_user_id(db: Session, tenant_id: str) -> str | None:
         {"tenant_id": tenant_id},
     ).first()
     return str(row[0]) if row else None
+
+
+def _hash_api_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def _new_api_token() -> str:
+    return f"vak_{secrets.token_urlsafe(32)}"
+
+
+def _to_api_key_out(row: dict[str, Any]) -> AdminApiKeyOut:
+    scopes = row.get("scopes")
+    allowlist = row.get("ip_allowlist")
+    return AdminApiKeyOut(
+        id=str(row["id"]),
+        name=str(row["name"]),
+        key_prefix=str(row["key_prefix"]),
+        scopes=[str(item) for item in (scopes or []) if str(item).strip()],
+        ip_allowlist=[str(item) for item in (allowlist or []) if str(item).strip()],
+        rate_limit_per_minute=row.get("rate_limit_per_minute"),
+        expires_at=_to_iso(row["expires_at"]) if row.get("expires_at") else None,
+        last_used_at=_to_iso(row["last_used_at"]) if row.get("last_used_at") else None,
+        status=str(row["status"]),
+        created_at=_to_iso(row["created_at"]),
+    )
 
 
 @router.get("/benutzer", response_model=list[AdminUserOut])
@@ -690,3 +754,263 @@ async def list_admin_audit_log(
             )
         )
     return result
+
+
+@router.get("/api-keys", response_model=list[AdminApiKeyOut])
+async def list_admin_api_keys(
+    include_revoked: bool = Query(default=False),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    where = "WHERE tenant_id = :tenant_id"
+    if not include_revoked:
+        where += " AND status = 'active'"
+    rows = db.execute(
+        text(
+            f"""
+            SELECT id, name, key_prefix, scopes, ip_allowlist, rate_limit_per_minute, expires_at, last_used_at, status, created_at
+            FROM domain_shared.api_keys
+            {where}
+            ORDER BY created_at DESC
+            """
+        ),
+        {"tenant_id": tenant_id},
+    ).mappings().all()
+    return [_to_api_key_out(dict(row)) for row in rows]
+
+
+@router.post("/api-keys", response_model=AdminApiKeySecretOut, status_code=201)
+async def create_admin_api_key(
+    payload: AdminApiKeyCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    duplicate = db.execute(
+        text(
+            """
+            SELECT id
+            FROM domain_shared.api_keys
+            WHERE tenant_id = :tenant_id AND lower(name) = lower(:name) AND status = 'active'
+            LIMIT 1
+            """
+        ),
+        {"tenant_id": tenant_id, "name": payload.name.strip()},
+    ).first()
+    if duplicate:
+        raise HTTPException(status_code=409, detail="API key name already exists")
+
+    token = _new_api_token()
+    key_prefix = token[:16]
+    key_id = str(uuid4())
+    actor_user_id = _resolve_actor_user_id(db, tenant_id)
+    db.execute(
+        text(
+            """
+            INSERT INTO domain_shared.api_keys
+              (id, tenant_id, name, key_prefix, key_hash, scopes, ip_allowlist, rate_limit_per_minute, expires_at,
+               status, created_by, created_at, updated_at)
+            VALUES
+              (:id, :tenant_id, :name, :key_prefix, :key_hash, CAST(:scopes AS jsonb), CAST(:ip_allowlist AS jsonb), :rate_limit,
+               :expires_at, 'active', :created_by, NOW(), NOW())
+            """
+        ),
+        {
+            "id": key_id,
+            "tenant_id": tenant_id,
+            "name": payload.name.strip(),
+            "key_prefix": key_prefix,
+            "key_hash": _hash_api_token(token),
+            "scopes": json.dumps([str(item).strip() for item in payload.scopes if str(item).strip()]),
+            "ip_allowlist": json.dumps([str(item).strip() for item in payload.ip_allowlist if str(item).strip()]),
+            "rate_limit": payload.rate_limit_per_minute,
+            "expires_at": payload.expires_at,
+            "created_by": actor_user_id,
+        },
+    )
+    if actor_user_id:
+        _write_admin_audit(db, actor_user_id, "admin.api_key.created", "api_key", key_id)
+    db.commit()
+    return AdminApiKeySecretOut(
+        id=key_id,
+        name=payload.name.strip(),
+        key_prefix=key_prefix,
+        token=token,
+        created_at=_to_iso(datetime.utcnow()),
+    )
+
+
+@router.put("/api-keys/{key_id}", response_model=AdminApiKeyOut)
+async def update_admin_api_key(
+    key_id: str,
+    payload: AdminApiKeyUpdate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    current = db.execute(
+        text(
+            """
+            SELECT id, name, key_prefix, scopes, ip_allowlist, rate_limit_per_minute, expires_at, last_used_at, status, created_at
+            FROM domain_shared.api_keys
+            WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {"id": key_id, "tenant_id": tenant_id},
+    ).mappings().first()
+    if not current:
+        raise HTTPException(status_code=404, detail="API key not found")
+    if current["status"] != "active":
+        raise HTTPException(status_code=400, detail="Only active API keys can be updated")
+
+    new_name = payload.name.strip() if payload.name is not None else current["name"]
+    if payload.name is not None and new_name.lower() != str(current["name"]).lower():
+        conflict = db.execute(
+            text(
+                """
+                SELECT id
+                FROM domain_shared.api_keys
+                WHERE tenant_id = :tenant_id AND lower(name) = lower(:name) AND id <> :id AND status = 'active'
+                LIMIT 1
+                """
+            ),
+            {"tenant_id": tenant_id, "name": new_name, "id": key_id},
+        ).first()
+        if conflict:
+            raise HTTPException(status_code=409, detail="API key name already exists")
+
+    scopes = payload.scopes if payload.scopes is not None else (current.get("scopes") or [])
+    allowlist = payload.ip_allowlist if payload.ip_allowlist is not None else (current.get("ip_allowlist") or [])
+    rate_limit = payload.rate_limit_per_minute if payload.rate_limit_per_minute is not None else current["rate_limit_per_minute"]
+    expires_at = payload.expires_at if payload.expires_at is not None else current["expires_at"]
+
+    db.execute(
+        text(
+            """
+            UPDATE domain_shared.api_keys
+            SET name = :name,
+                scopes = CAST(:scopes AS jsonb),
+                ip_allowlist = CAST(:ip_allowlist AS jsonb),
+                rate_limit_per_minute = :rate_limit,
+                expires_at = :expires_at,
+                updated_at = NOW()
+            WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {
+            "id": key_id,
+            "tenant_id": tenant_id,
+            "name": new_name,
+            "scopes": json.dumps([str(item).strip() for item in scopes if str(item).strip()]),
+            "ip_allowlist": json.dumps([str(item).strip() for item in allowlist if str(item).strip()]),
+            "rate_limit": rate_limit,
+            "expires_at": expires_at,
+        },
+    )
+    actor_user_id = _resolve_actor_user_id(db, tenant_id)
+    if actor_user_id:
+        _write_admin_audit(db, actor_user_id, "admin.api_key.updated", "api_key", key_id)
+    db.commit()
+
+    row = db.execute(
+        text(
+            """
+            SELECT id, name, key_prefix, scopes, ip_allowlist, rate_limit_per_minute, expires_at, last_used_at, status, created_at
+            FROM domain_shared.api_keys
+            WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {"id": key_id, "tenant_id": tenant_id},
+    ).mappings().first()
+    return _to_api_key_out(dict(row))
+
+
+@router.post("/api-keys/{key_id}/rotate", response_model=AdminApiKeySecretOut)
+async def rotate_admin_api_key(
+    key_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    current = db.execute(
+        text(
+            """
+            SELECT id, name, status
+            FROM domain_shared.api_keys
+            WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {"id": key_id, "tenant_id": tenant_id},
+    ).mappings().first()
+    if not current:
+        raise HTTPException(status_code=404, detail="API key not found")
+    if current["status"] != "active":
+        raise HTTPException(status_code=400, detail="Only active API keys can be rotated")
+
+    token = _new_api_token()
+    key_prefix = token[:16]
+    db.execute(
+        text(
+            """
+            UPDATE domain_shared.api_keys
+            SET key_prefix = :key_prefix,
+                key_hash = :key_hash,
+                updated_at = NOW()
+            WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {
+            "id": key_id,
+            "tenant_id": tenant_id,
+            "key_prefix": key_prefix,
+            "key_hash": _hash_api_token(token),
+        },
+    )
+    actor_user_id = _resolve_actor_user_id(db, tenant_id)
+    if actor_user_id:
+        _write_admin_audit(db, actor_user_id, "admin.api_key.rotated", "api_key", key_id)
+    db.commit()
+
+    return AdminApiKeySecretOut(
+        id=str(current["id"]),
+        name=str(current["name"]),
+        key_prefix=key_prefix,
+        token=token,
+        created_at=_to_iso(datetime.utcnow()),
+    )
+
+
+@router.post("/api-keys/{key_id}/revoke", status_code=204)
+async def revoke_admin_api_key(
+    key_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    row = db.execute(
+        text(
+            """
+            SELECT id, status
+            FROM domain_shared.api_keys
+            WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {"id": key_id, "tenant_id": tenant_id},
+    ).mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="API key not found")
+    if row["status"] == "revoked":
+        return
+
+    db.execute(
+        text(
+            """
+            UPDATE domain_shared.api_keys
+            SET status = 'revoked',
+                revoked_at = NOW(),
+                updated_at = NOW()
+            WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {"id": key_id, "tenant_id": tenant_id},
+    )
+    actor_user_id = _resolve_actor_user_id(db, tenant_id)
+    if actor_user_id:
+        _write_admin_audit(db, actor_user_id, "admin.api_key.revoked", "api_key", key_id)
+    db.commit()
