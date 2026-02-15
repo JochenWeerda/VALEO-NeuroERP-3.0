@@ -13,6 +13,10 @@
       "path": "admin/report-berechtigungen"
     },
     {
+      "module": "@/pages/admin/integrationen-quarantaene",
+      "path": "admin/integrationen-quarantaene"
+    },
+    {
       "module": "@/pages/admin/monitoring/alerts",
       "path": "monitoring/alerts"
     },

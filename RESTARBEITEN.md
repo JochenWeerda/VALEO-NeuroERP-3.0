@@ -766,14 +766,16 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [ ] Fehlend als zentraler Admin-Customizing-Workspace: Nummernkreise, Buchungskreise/Periodensteuerung, zentrale Incoterms-/Zahlungs-/Lieferbedingungen.
 - B) Prozess-/Regelwerk
 - [~] Teilweise vorhanden (Preis-/Rabattregeln, Lager-/Bewegungslogik, Teil-Workflows).
-- [ ] Fehlend zentral administrierbar: durchgaengige Freigabe-/Vertretungsregeln, globale Rundungs-/Bewertungsparameter, Integrations-Fehlerqueue mit Quarantaene.
+- [~] Zentral administrierbar nachgezogen:
+  - Integrations-Fehlerqueue mit Quarantaene (`/api/v1/admin/mobile/connector-events/quarantine` + `retry`/`resolve` + UI).
+  - Restoffen: durchgaengige Freigabe-/Vertretungsregeln, globale Rundungs-/Bewertungsparameter.
 - C) Sicherheit/Rollen/Audit
 - [~] Basis vorhanden.
 - [x] Prioritaet P0: echte IAM-Admin-CRUD-Endpunkte und SoD-Regeln, Audit-Events fuer Rollen/Rechte/Token.
 - D) Integration/Automatisierung
 - [~] DMS-Bootstrap vorhanden.
 - [x] Prioritaet P1 umgesetzt: Connector-Verwaltung (Office/Slack/n8n) inkl. CRUD, Retry-Policies und Connector-Event-Queue (keine Mock-Pfade).
-- [~] Restoffen: zentrale Integrations-Quarantaene mit SLA-/Eskalationsworkflow ueber alle Domains.
+- [~] Restoffen: SLA-/Eskalationsworkflow ueber alle Domains (Quarantaene-Basis inkl. Retry/Resolve ist live).
 - E) Reporting/Controlling
 - [~] Prioritaet P1 teilerledigt: KPI-/Dashboard-/Widget-/Timeseries-/Massnahmen-Admin produktiv verdrahtet.
 - [x] Abschluss-Cockpit umgesetzt (aggregierter API-Endpunkt + FIBU-UI-Cockpit).
@@ -1343,6 +1345,25 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] Backend-Compile: `python -m py_compile app/api/v1/endpoints/closing_checklists.py`
 - [x] Frontend: ESLint + `tsc --noEmit` gruen
 - [x] API-Smoke mit Auth/Tenant: `GET /api/v1/finance/closing-checklists/cockpit/summary` erfolgreich
+
+### 8.43 Integrations-Quarantaene erweitert (Fehlerqueue + Retry/Resolve)
+- Backend:
+- [x] `app/api/v1/endpoints/admin_mobile.py`
+  - `GET /api/v1/admin/mobile/connector-events?status=...` (Statusfilter)
+  - `GET /api/v1/admin/mobile/connector-events/quarantine` (nur Fehlerqueue `status=error`)
+  - `POST /api/v1/admin/mobile/connector-events/{id}/retry` (inkrementiert `retry_count`, plant `next_retry_at`, setzt `warning`)
+  - `POST /api/v1/admin/mobile/connector-events/{id}/resolve` (setzt `ok`, entfernt `next_retry_at`)
+- Frontend:
+- [x] `packages/frontend-web/src/lib/api/admin.ts` um Hooks erweitert:
+  - `useConnectorEventQuarantine`, `useRetryConnectorEvent`, `useResolveConnectorEvent`
+- [x] Neue Seite `packages/frontend-web/src/pages/admin/integrationen-quarantaene.tsx`
+  - Liste Quarantaene-Events + Aktionen `Retry`/`Resolve`
+- [x] Navigation/Route verdrahtet:
+  - `packages/frontend-web/src/app/navigation/manifest.tsx`
+  - `packages/frontend-web/src/app/route-aliases.json`
+- Verifikation:
+- [x] Backend-Compile + Frontend ESLint/TS gruen
+- [x] API-Smoke erfolgreich: `retry_status=warning`, danach `resolve_status=ok`
 
 ---
 

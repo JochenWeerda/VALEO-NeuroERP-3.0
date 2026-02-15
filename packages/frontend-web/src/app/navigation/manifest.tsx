@@ -1192,6 +1192,14 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
       {
+        id: 'integrationen-quarantaene',
+        label: 'Integrationen-Quarantaene',
+        icon: AlertCircle,
+        module: '@/pages/admin/integrationen-quarantaene',
+        preferredPath: 'admin/integrationen-quarantaene',
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
         id: 'compliance-dashboard',
         label: 'Compliance',
         icon: ShieldCheck,
