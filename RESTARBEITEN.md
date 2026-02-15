@@ -703,8 +703,8 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - Zusatzpunkte aus Anforderung explizit aufgenommen:
 - [x] API-Keys/Token-Management inkl. Rotation, Ablauf, letzte Nutzung, Scopes, Sperren.
 - [x] Mitarbeiter-/Rollenanlage inkl. On-/Offboarding und Rechte auf Funktions-/Feldebene.
-- [ ] Geraete-Mapping (Drucker/Scanner) je Arbeitsplatz/Belegart/Prozess.
-- [ ] Formular-/Papier-Handler mit Vorlagenversionierung, Ausgabeprofilen, Archivierungsregeln.
+- [x] Geraete-Mapping (Drucker/Scanner) je Arbeitsplatz/Belegart/Prozess.
+- [x] Formular-/Papier-Handler mit Vorlagenversionierung, Ausgabeprofilen, Archivierungsregeln.
 - [ ] Software-Verknuepfungen (MS Office/LibreOffice/Slack/n8n) als Connectoren mit Mapping und Fehlerbehandlung.
 
 ### 8.26 P0 abgeschlossen: IAM-CRUD + Admin-Seed (Benutzer/Rollen/Audit)
@@ -749,6 +749,38 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - Seed (DB, keine Mocks):
 - [x] `scripts/seed-admin-api-keys.ps1`
   - legt aktive + gesperrte Beispiel-Keys an, damit Admin-Seite nicht leer startet
+
+### 8.35 Admin-Gap geschlossen: Geraete-Mapping + Formular-/Output-Handler
+- Migration:
+- [x] `alembic/versions/admin_devices_output_profiles_20260215.py`
+  - neue Tabellen:
+    - `domain_shared.admin_devices`
+    - `domain_shared.admin_device_mappings`
+    - `domain_shared.admin_output_templates`
+    - `domain_shared.admin_output_template_versions`
+    - `domain_shared.admin_output_profiles`
+  - inkl. Constraints (Typen, Copies, Channels, Archivmodus), Unique Keys und Indizes
+- Backend-Endpunkte:
+- [x] Neuer Router `app/api/v1/endpoints/admin_devices.py`, eingebunden unter `/api/v1/admin/*`
+  - Geraete:
+    - `GET/POST/PUT/DELETE /api/v1/admin/devices`
+  - Geraetezuordnung je Dokument/Prozess:
+    - `GET/POST/PUT/DELETE /api/v1/admin/device-mappings`
+  - Formularvorlagen mit Versionierung:
+    - `GET/POST/PUT/DELETE /api/v1/admin/output-templates`
+    - `GET /api/v1/admin/output-templates/{template_id}/versions`
+  - Ausgabe-/Archivprofile:
+    - `GET/POST/PUT/DELETE /api/v1/admin/output-profiles`
+- Verdrahtung:
+- [x] `app/api/v1/endpoints/__init__.py`
+- [x] `app/api/v1/api.py`
+- Seed (DB, keine Mocks):
+- [x] `scripts/seed-admin-devices-output.ps1`
+  - Seed fuer Drucker/Scanner, Mapping, Template+Version und Output-Profil
+- Verifikation:
+- [x] API-Smoke-Test erfolgreich:
+  - Listen-Endpunkte liefern Daten (`devices`, `device-mappings`, `output-templates`, `output-profiles`)
+  - `POST/PUT` fuer Geraete erfolgreich
   - bereinigt alte fehlerhafte Rollenkeys im Tenant-Settings-JSON
   - schreibt initiale Audit-Eintraege (idempotent)
 - Verifikation (Docker lokal):
