@@ -1005,4 +1005,27 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] P0-Definition fuer Kernprozesse:
   - erst dann `gruen`, wenn API, DB, Buchung, Audit und E2E-Skript konsistent positiv sind.
 
+### 8.31 POS/TSE Belegfolge (Landhandel/Hofmarkt) nachgezogen
+- Ziel: POS-Belegkette revisionssicher und TSE-nachvollziehbar abbilden (Kauf, B2B-Sofortrechnung, Storno/Retoure als eigene Folgebelege).
+- Backend:
+- [x] Migration `alembic/versions/docflow_pos_tse_compliance_20260215.py`
+  - neue Tabelle `domain_docflow.pos_receipt_compliance`
+  - Felder fuer TSE-/Kassenkontext (`terminal_id`, `tse_transaction_id`, `tse_signature`, Zeitstempel, Zahlungsaufschluesselung)
+  - Korrektur-Referenzlogik (`correction_type`, `original_header_id`) mit Constraint.
+- [x] `app/api/v1/endpoints/docflow.py`
+  - neue POS-Belegtypen im Flow:
+    - `pos_receipt -> sales_invoice` (Sofort-Rechnung am Tresen)
+    - `pos_receipt -> pos_storno` / `pos_retoure` (Korrektur als eigener Vorgang)
+  - `POST/PUT /api/v1/docflow` um `pos_compliance` erweitert.
+  - harte Validierung:
+    - POS-Beleg ohne `pos_compliance` wird abgewiesen.
+    - POS-Posting ohne gespeicherte TSE-Daten wird blockiert.
+  - `GET /api/v1/docflow/{id}/pos-compliance` bereitgestellt.
+- E2E:
+- [x] `scripts/test-pos-tse-b2b-flow.ps1`
+  - Fall 1: Stammkunde am POS -> Bon (`pos_receipt`) -> Posting -> Sofort-Rechnung (`sales_invoice`).
+  - Fall 2: ODP (Einmalkunde ohne Konto) -> Bon -> Posting -> Sofort-Rechnung ohne erzwungenes Kundenkonto.
+  - Storno-Fall: `pos_receipt -> pos_storno` mit Referenz auf Originalbeleg.
+  - DB-Nachweis auf `pos_receipt_compliance` erfolgreich.
+
 

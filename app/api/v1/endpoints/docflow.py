@@ -25,6 +25,8 @@ _TRANSITIONS: dict[str, dict[str, str]] = {
     "sales_order": {"sales_delivery": "order_to_delivery", "sales_invoice": "order_to_invoice"},
     "sales_delivery": {"sales_invoice": "delivery_to_invoice"},
     "sales_invoice": {"sales_credit_memo": "invoice_to_credit_memo"},
+    "pos_receipt": {"sales_invoice": "receipt_to_invoice", "pos_storno": "receipt_to_storno", "pos_retoure": "receipt_to_retoure"},
+    "pos_retoure": {"sales_credit_memo": "retoure_to_credit_memo"},
 }
 
 _DOC_PREFIX: dict[str, str] = {
@@ -33,7 +35,12 @@ _DOC_PREFIX: dict[str, str] = {
     "sales_delivery": "SDL",
     "sales_invoice": "SIV",
     "sales_credit_memo": "SCM",
+    "pos_receipt": "POS",
+    "pos_storno": "PST",
+    "pos_retoure": "PRT",
 }
+
+_POS_TYPES = {"pos_receipt", "pos_storno", "pos_retoure"}
 
 
 class DocflowItemOut(BaseModel):
@@ -72,6 +79,7 @@ class DocflowHeaderOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     items: list[DocflowItemOut] = Field(default_factory=list)
+    pos_compliance: Optional[dict[str, Any]] = None
 
 
 class DocflowConvertRequest(BaseModel):
@@ -119,6 +127,22 @@ class DocflowLineInput(BaseModel):
     charge: Optional[str] = Field(default=None, max_length=64)
 
 
+class PosComplianceInput(BaseModel):
+    terminal_id: str = Field(..., min_length=1, max_length=60)
+    cash_register_id: Optional[str] = Field(default=None, max_length=60)
+    transaction_type: str = Field(default="sale", min_length=4, max_length=20)
+    payment_breakdown: Optional[dict[str, Any]] = None
+    tse_transaction_id: str = Field(..., min_length=1, max_length=120)
+    tse_signature: str = Field(..., min_length=1)
+    tse_signature_counter: Optional[int] = None
+    transaction_started_at: datetime
+    transaction_ended_at: datetime
+    receipt_issued_at: datetime
+    dsfinvk_export_batch_id: Optional[str] = Field(default=None, max_length=120)
+    correction_type: Optional[str] = Field(default=None, max_length=20)
+    original_header_id: Optional[str] = Field(default=None, max_length=36)
+
+
 class DocflowCreateRequest(BaseModel):
     doc_type: str = Field(..., min_length=3, max_length=40)
     doc_number: str = Field(..., min_length=1, max_length=80)
@@ -132,6 +156,7 @@ class DocflowCreateRequest(BaseModel):
     posting_date: Optional[date] = None
     created_by: Optional[str] = Field(default=None, max_length=100)
     items: list[DocflowLineInput] = Field(default_factory=list)
+    pos_compliance: Optional[PosComplianceInput] = None
 
 
 class DocflowUpdateRequest(BaseModel):
@@ -146,6 +171,7 @@ class DocflowUpdateRequest(BaseModel):
     posting_date: Optional[date] = None
     updated_by: Optional[str] = Field(default=None, max_length=100)
     items: Optional[list[DocflowLineInput]] = None
+    pos_compliance: Optional[PosComplianceInput] = None
 
 
 def _money(v: Decimal) -> Decimal:
@@ -193,6 +219,92 @@ def _fetch_doc_items(db: Session, tenant_id: str, header_id: str) -> list[dict[s
         {"tenant_id": tenant_id, "header_id": header_id},
     ).mappings().all()
     return [dict(r) for r in rows]
+
+
+def _fetch_pos_compliance(db: Session, tenant_id: str, header_id: str) -> Optional[dict[str, Any]]:
+    row = db.execute(
+        text(
+            """
+            SELECT *
+            FROM domain_docflow.pos_receipt_compliance
+            WHERE tenant_id = :tenant_id AND header_id = :header_id
+            """
+        ),
+        {"tenant_id": tenant_id, "header_id": header_id},
+    ).mappings().first()
+    return dict(row) if row else None
+
+
+def _validate_pos_compliance_requirements(doc_type: str, pos: Optional[PosComplianceInput]) -> None:
+    if doc_type in _POS_TYPES and pos is None:
+        raise HTTPException(status_code=400, detail="pos_compliance is required for POS documents")
+    if pos is None:
+        return
+    if pos.transaction_ended_at < pos.transaction_started_at:
+        raise HTTPException(status_code=400, detail="transaction_ended_at must be >= transaction_started_at")
+    if pos.receipt_issued_at < pos.transaction_started_at:
+        raise HTTPException(status_code=400, detail="receipt_issued_at must be >= transaction_started_at")
+    if pos.correction_type and not pos.original_header_id:
+        raise HTTPException(status_code=400, detail="original_header_id required for correction_type")
+
+
+def _upsert_pos_compliance(
+    db: Session,
+    *,
+    tenant_id: str,
+    header_id: str,
+    pos: Optional[PosComplianceInput],
+) -> None:
+    if pos is None:
+        return
+    db.execute(
+        text(
+            """
+            INSERT INTO domain_docflow.pos_receipt_compliance
+            (id, tenant_id, header_id, terminal_id, cash_register_id, transaction_type, payment_breakdown,
+             tse_transaction_id, tse_signature, tse_signature_counter, transaction_started_at, transaction_ended_at,
+             receipt_issued_at, dsfinvk_export_batch_id, correction_type, original_header_id, created_at, updated_at)
+            VALUES
+            (:id, :tenant_id, :header_id, :terminal_id, :cash_register_id, :transaction_type, CAST(:payment_breakdown AS jsonb),
+             :tse_transaction_id, :tse_signature, :tse_signature_counter, :transaction_started_at, :transaction_ended_at,
+             :receipt_issued_at, :dsfinvk_export_batch_id, :correction_type, :original_header_id, NOW(), NOW())
+            ON CONFLICT ON CONSTRAINT uq_pos_tse_header
+            DO UPDATE SET
+              terminal_id = EXCLUDED.terminal_id,
+              cash_register_id = EXCLUDED.cash_register_id,
+              transaction_type = EXCLUDED.transaction_type,
+              payment_breakdown = EXCLUDED.payment_breakdown,
+              tse_transaction_id = EXCLUDED.tse_transaction_id,
+              tse_signature = EXCLUDED.tse_signature,
+              tse_signature_counter = EXCLUDED.tse_signature_counter,
+              transaction_started_at = EXCLUDED.transaction_started_at,
+              transaction_ended_at = EXCLUDED.transaction_ended_at,
+              receipt_issued_at = EXCLUDED.receipt_issued_at,
+              dsfinvk_export_batch_id = EXCLUDED.dsfinvk_export_batch_id,
+              correction_type = EXCLUDED.correction_type,
+              original_header_id = EXCLUDED.original_header_id,
+              updated_at = NOW()
+            """
+        ),
+        {
+            "id": str(uuid4()),
+            "tenant_id": tenant_id,
+            "header_id": header_id,
+            "terminal_id": pos.terminal_id,
+            "cash_register_id": pos.cash_register_id,
+            "transaction_type": pos.transaction_type,
+            "payment_breakdown": json.dumps(pos.payment_breakdown or {}),
+            "tse_transaction_id": pos.tse_transaction_id,
+            "tse_signature": pos.tse_signature,
+            "tse_signature_counter": pos.tse_signature_counter,
+            "transaction_started_at": pos.transaction_started_at,
+            "transaction_ended_at": pos.transaction_ended_at,
+            "receipt_issued_at": pos.receipt_issued_at,
+            "dsfinvk_export_batch_id": pos.dsfinvk_export_batch_id,
+            "correction_type": pos.correction_type,
+            "original_header_id": pos.original_header_id,
+        },
+    )
 
 
 def _bootstrap_sales_order_if_needed(db: Session, tenant_id: str, doc_id: str) -> Optional[dict[str, Any]]:
@@ -463,6 +575,7 @@ def _row_to_header_out(db: Session, tenant_id: str, header_id: str) -> DocflowHe
     if not header:
         raise HTTPException(status_code=404, detail="Document not found")
     items = _fetch_doc_items(db, tenant_id, header_id)
+    pos_compliance = _fetch_pos_compliance(db, tenant_id, header_id)
     return DocflowHeaderOut(
         id=str(header["id"]),
         tenant_id=str(header["tenant_id"]),
@@ -482,6 +595,7 @@ def _row_to_header_out(db: Session, tenant_id: str, header_id: str) -> DocflowHe
         version=int(header.get("version") or 1),
         created_at=header["created_at"],
         updated_at=header["updated_at"],
+        pos_compliance=pos_compliance,
         items=[
             DocflowItemOut(
                 id=str(i["id"]),
@@ -545,6 +659,22 @@ async def get_document(
     return _row_to_header_out(db, effective_tenant, doc_id)
 
 
+@router.get("/{doc_id}/pos-compliance", response_model=dict[str, Any])
+async def get_pos_compliance(
+    doc_id: str,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    header = _fetch_doc_header(db, effective_tenant, doc_id)
+    if not header:
+        raise HTTPException(status_code=404, detail="Document not found")
+    payload = _fetch_pos_compliance(db, effective_tenant, doc_id)
+    if not payload:
+        raise HTTPException(status_code=404, detail="POS compliance not found")
+    return payload
+
+
 @router.post("/", response_model=DocflowHeaderOut)
 async def create_document(
     payload: DocflowCreateRequest,
@@ -552,6 +682,7 @@ async def create_document(
     db: Session = Depends(get_db),
 ):
     effective_tenant = tenant_id or DEFAULT_TENANT
+    _validate_pos_compliance_requirements(payload.doc_type, payload.pos_compliance)
     now = datetime.now(timezone.utc)
     doc_id = str(uuid4())
 
@@ -639,6 +770,13 @@ async def create_document(
                 },
             )
 
+        _upsert_pos_compliance(
+            db,
+            tenant_id=effective_tenant,
+            header_id=doc_id,
+            pos=payload.pos_compliance,
+        )
+
         _best_effort_audit(
             db,
             tenant_id=effective_tenant,
@@ -672,6 +810,8 @@ async def update_document(
         raise HTTPException(status_code=409, detail="Version conflict")
     if str(header.get("status")) in {"posted", "reversed", "cancelled"}:
         raise HTTPException(status_code=409, detail="Posted/Reversed/Cancelled document cannot be edited")
+    effective_doc_type = str(header.get("doc_type") or "")
+    _validate_pos_compliance_requirements(effective_doc_type, payload.pos_compliance)
 
     try:
         updates: dict[str, Any] = {
@@ -775,6 +915,13 @@ async def update_document(
                 },
             )
 
+        _upsert_pos_compliance(
+            db,
+            tenant_id=effective_tenant,
+            header_id=doc_id,
+            pos=payload.pos_compliance,
+        )
+
         _best_effort_audit(
             db,
             tenant_id=effective_tenant,
@@ -822,6 +969,9 @@ async def convert_document(
         relation_type = _TRANSITIONS.get(source_type, {}).get(payload.target_doc_type)
         if not relation_type:
             raise HTTPException(status_code=400, detail=f"Transition not allowed: {source_type} -> {payload.target_doc_type}")
+        source_pos = _fetch_pos_compliance(db, effective_tenant, doc_id)
+        if payload.target_doc_type in _POS_TYPES and not source_pos:
+            raise HTTPException(status_code=400, detail="POS conversion requires source POS compliance")
 
         source_items = _fetch_doc_items(db, effective_tenant, doc_id)
         selected_items: list[dict[str, Any]] = []
@@ -965,6 +1115,29 @@ async def convert_document(
             )
             line_no += 1
 
+        if payload.target_doc_type in _POS_TYPES and source_pos:
+            correction_type = "storno" if payload.target_doc_type == "pos_storno" else "retoure"
+            _upsert_pos_compliance(
+                db,
+                tenant_id=effective_tenant,
+                header_id=target_id,
+                pos=PosComplianceInput(
+                    terminal_id=str(source_pos.get("terminal_id") or ""),
+                    cash_register_id=source_pos.get("cash_register_id"),
+                    transaction_type="storno" if correction_type == "storno" else "retoure",
+                    payment_breakdown=source_pos.get("payment_breakdown") or {},
+                    tse_transaction_id=f"{source_pos.get('tse_transaction_id')}-R",
+                    tse_signature=str(source_pos.get("tse_signature") or ""),
+                    tse_signature_counter=source_pos.get("tse_signature_counter"),
+                    transaction_started_at=now,
+                    transaction_ended_at=now,
+                    receipt_issued_at=now,
+                    dsfinvk_export_batch_id=source_pos.get("dsfinvk_export_batch_id"),
+                    correction_type=correction_type,
+                    original_header_id=doc_id,
+                ),
+            )
+
         event_id = _upsert_outbox_event(
             db,
             tenant_id=effective_tenant,
@@ -1055,6 +1228,10 @@ async def post_document(
             raise HTTPException(status_code=409, detail="Version conflict")
         if str(header.get("status")) in {"reversed", "cancelled"}:
             raise HTTPException(status_code=409, detail="Document cannot be posted in current status")
+        if str(header.get("doc_type") or "") in _POS_TYPES:
+            pos = _fetch_pos_compliance(db, effective_tenant, doc_id)
+            if not pos:
+                raise HTTPException(status_code=400, detail="POS posting requires POS/TSE compliance payload")
 
         posting_id = str(uuid4())
         outbox_event_id = _upsert_outbox_event(
