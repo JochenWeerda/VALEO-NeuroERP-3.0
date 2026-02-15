@@ -1,6 +1,6 @@
 ﻿# VALEO-NeuroERP 3.0 – Restarbeiten (Finale Übersicht)
 
-**Stand:** 14.02.2026  
+**Stand:** 15.02.2026
 **Branch:** `develop`
 
 ## 1. Finaler Status (kompakt)
@@ -65,7 +65,7 @@ Hinweis: Diese Punkte sind umgebungs-/zugriffsabhängig und erfordern Ausführun
 ## 3. Nächste sinnvolle Reihenfolge
 1. Secrets setzen + Staging verifizieren.
 2. UAT durchführen und Findings schließen.
-3. Load-/Performance-Test fahren.
+3. ~~Load-/Performance-Test fahren.~~ Erledigt (AGRAR-PERF-01, siehe §2).
 4. Blue-Green Rollout + Monitoring-Freigabe.
 
 ---
@@ -239,37 +239,39 @@ Hinweis: Diese Punkte sind umgebungs-/zugriffsabhängig und erfordern Ausführun
 - [ ] `AGRAR-GO-01` Go-Live-Readiness + Rollback-Probe | P0 | M | DevOps
 
 ### Definition of Done (DoD)
-- [ ] Code + Tests + OpenAPI aktualisiert.
-- [ ] Kein Mock/Fallback auf produktiven Pfaden.
-- [ ] Observability vorhanden (Logs, Metriken, Fehlercodes).
-- [ ] Fachliche Akzeptanzkriterien erfüllt und dokumentiert.
-- [ ] Migration/Rollback beschrieben (falls Schemaänderung).
+Gilt fuer alle abgeschlossenen Sprints 1-5. Sprint 6 (UAT/Go-Live) ist operativ offen (siehe §2).
+- [x] Code + Tests + OpenAPI aktualisiert.
+- [x] Kein Mock/Fallback auf produktiven Pfaden.
+- [x] Observability vorhanden (Logs, Metriken, Fehlercodes).
+- [x] Fachliche Akzeptanzkriterien erfüllt und dokumentiert.
+- [x] Migration/Rollback beschrieben (falls Schemaänderung).
 
 ---
 
 ## 7. CSV-Import (Jira/GitHub Projects)
 
 **Hinweis:** UTF-8 speichern, Trennzeichen `,`, Datumsformat `YYYY-MM-DD`.
+**Autoritative Quelle** fuer den Umsetzungsstatus sind die Checkboxen in §5 und §6. Dieses CSV ist ein Exportformat und wird bei Statusaenderungen synchron aktualisiert.
 
 ```csv
 id,title,type,priority,effort,owner_role,sprint,start_date,end_date,status,dependencies,acceptance_criteria
-AGRAR-ARCH-01,Modulrahmen aufsetzen,Story,P0,M,Fullstack,Sprint 1,2026-02-13,2026-02-27,Backlog,,modules/agrar Struktur vorhanden und registrierbar
-AGRAR-ARCH-02,Event-/Hook-Verträge versionieren,Story,P0,M,Backend,Sprint 1,2026-02-13,2026-02-27,Backlog,AGRAR-ARCH-01,Versionierte Events mit Contract-Tests grün
+AGRAR-ARCH-01,Modulrahmen aufsetzen,Story,P0,M,Fullstack,Sprint 1,2026-02-13,2026-02-27,Done,,modules/agrar Struktur vorhanden und registrierbar
+AGRAR-ARCH-02,Event-/Hook-Verträge versionieren,Story,P0,M,Backend,Sprint 1,2026-02-13,2026-02-27,Done,AGRAR-ARCH-01,Versionierte Events mit Contract-Tests grün
 AGRAR-ARCH-03,CI-Guardrails gegen Core-Kontamination,Story,P0,M,DevOps,Sprint 1,2026-02-13,2026-02-27,Done,AGRAR-ARCH-01,CI blockiert verbotene Core-Imports
-AGRAR-WG-01,Wiegeschein-Datenmodell und CRUD,Story,P0,L,Backend,Sprint 2,2026-02-28,2026-03-20,Backlog,AGRAR-ARCH-01,Wiegeschein persistiert mit Audit-Trail und validierter API
-AGRAR-CT-01,Kontrakte und Restmengenlogik,Story,P0,L,Backend,Sprint 2,2026-02-28,2026-03-20,Backlog,AGRAR-ARCH-02,Restmengen korrekt berechnet und Überbuchung verhindert
+AGRAR-WG-01,Wiegeschein-Datenmodell und CRUD,Story,P0,L,Backend,Sprint 2,2026-02-28,2026-03-20,Done,AGRAR-ARCH-01,Wiegeschein persistiert mit Audit-Trail und validierter API
+AGRAR-CT-01,Kontrakte und Restmengenlogik,Story,P0,L,Backend,Sprint 2,2026-02-28,2026-03-20,Done,AGRAR-ARCH-02,Restmengen korrekt berechnet und Überbuchung verhindert
 AGRAR-WG-UI-01,Wiegeschein-Erfassung UI ohne Mock,Story,P1,M,Frontend,Sprint 2,2026-02-28,2026-03-20,Done,AGRAR-WG-01,UI nutzt echte API mit sauberem Error-Handling
-AGRAR-WG-02,Wiegeschein zu Kontraktlöschung atomar,Story,P0,M,Backend,Sprint 3,2026-03-21,2026-04-03,Backlog,AGRAR-WG-01|AGRAR-CT-01,Atomare Buchung mit Outbox-Events und Rollback
-AGRAR-SILO-01,Sammelpartie und Qualitätsmittelwerte,Story,P0,L,Backend,Sprint 3,2026-03-21,2026-04-03,Backlog,AGRAR-WG-01,Siloqualität reproduzierbar aus Bewegungen berechnet
-AGRAR-SILO-UI-01,Siloübersicht mit Qualitätssnapshot,Story,P1,M,Frontend,Sprint 3,2026-03-21,2026-04-03,Backlog,AGRAR-SILO-01,UI zeigt Füllstand und Qualitätskennzahlen pro Silo
-AGRAR-SET-01,Self-Billing mit Abzügen,Story,P0,L,Backend,Sprint 4,2026-04-04,2026-04-17,Backlog,AGRAR-WG-02,Gutschrift erzeugt korrekte Fibu-Buchungen inklusive Abzüge
-AGRAR-SET-02,Feuchte-/Schwund-Engine im Domain-Service,Story,P0,M,Backend,Sprint 4,2026-04-04,2026-04-17,Backlog,AGRAR-WG-01,Deterministische Abrechnungsgewichte mit Grenzwerttests
-AGRAR-SET-UI-01,Gutschrift-Ansicht mit Abzugsnachweis,Story,P1,M,Frontend,Sprint 4,2026-04-04,2026-04-17,Backlog,AGRAR-SET-01,UI listet Abzüge transparent und prüfbar auf
-AGRAR-COMP-01,Gefahrstoff- und Nährstoff-Export,Story,P0,M,Backend,Sprint 5,2026-04-18,2026-05-01,Backlog,AGRAR-SET-01,Exportdateien vollständig und fachlich plausibel
+AGRAR-WG-02,Wiegeschein zu Kontraktlöschung atomar,Story,P0,M,Backend,Sprint 3,2026-03-21,2026-04-03,Done,AGRAR-WG-01|AGRAR-CT-01,Atomare Buchung mit Outbox-Events und Rollback
+AGRAR-SILO-01,Sammelpartie und Qualitätsmittelwerte,Story,P0,L,Backend,Sprint 3,2026-03-21,2026-04-03,Done,AGRAR-WG-01,Siloqualität reproduzierbar aus Bewegungen berechnet
+AGRAR-SILO-UI-01,Siloübersicht mit Qualitätssnapshot,Story,P1,M,Frontend,Sprint 3,2026-03-21,2026-04-03,Done,AGRAR-SILO-01,UI zeigt Füllstand und Qualitätskennzahlen pro Silo
+AGRAR-SET-01,Self-Billing mit Abzügen,Story,P0,L,Backend,Sprint 4,2026-04-04,2026-04-17,Done,AGRAR-WG-02,Gutschrift erzeugt korrekte Fibu-Buchungen inklusive Abzüge
+AGRAR-SET-02,Feuchte-/Schwund-Engine im Domain-Service,Story,P0,M,Backend,Sprint 4,2026-04-04,2026-04-17,Done,AGRAR-WG-01,Deterministische Abrechnungsgewichte mit Grenzwerttests
+AGRAR-SET-UI-01,Gutschrift-Ansicht mit Abzugsnachweis,Story,P1,M,Frontend,Sprint 4,2026-04-04,2026-04-17,Done,AGRAR-SET-01,UI listet Abzüge transparent und prüfbar auf
+AGRAR-COMP-01,Gefahrstoff- und Nährstoff-Export,Story,P0,M,Backend,Sprint 5,2026-04-18,2026-05-01,Done,AGRAR-SET-01,Exportdateien vollständig und fachlich plausibel
 AGRAR-MIG-01,Backfill und idempotente Migration,Story,P0,M,Backend,Sprint 5,2026-04-18,2026-05-01,Done,AGRAR-WG-01|AGRAR-CT-01,Migration ohne Datenverlust mehrfach ausführbar
 AGRAR-COMP-UI-01,Export- und Prüfprotokollseite,Story,P1,M,Frontend,Sprint 5,2026-04-18,2026-05-01,Done,AGRAR-COMP-01,UI zeigt Exportlauf und Prüfergebnis pro Lauf
 AGRAR-UAT-01,3 E2E-Fachszenarien mit Key-Usern,Story,P0,M,QA,Sprint 6,2026-05-02,2026-05-14,Backlog,AGRAR-SET-01|AGRAR-COMP-01,UAT-Protokoll signiert und P1/P2 Findings geschlossen
-AGRAR-PERF-01,Lasttest für Wiegeschein/Abrechnung/Eventbus,Story,P0,M,QA,Sprint 6,2026-05-02,2026-05-14,Backlog,AGRAR-WG-02,Lastziele erreicht und Engpässe dokumentiert
+AGRAR-PERF-01,Lasttest für Wiegeschein/Abrechnung/Eventbus,Story,P0,M,QA,Sprint 6,2026-05-02,2026-05-14,Done,AGRAR-WG-02,Lastziele erreicht und Engpässe dokumentiert
 AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026-05-02,2026-05-14,Backlog,AGRAR-UAT-01|AGRAR-PERF-01,Go/No-Go dokumentiert und Rollback verifiziert
 ```
 
@@ -370,6 +372,12 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] `app/api/v1/endpoints/charges.py` mit List/Get/Create/Patch/Delete + `qs-readiness`.
 - CRUD Maske Frontend:
 - [x] `packages/frontend-web/src/pages/charge/liste.tsx`, `packages/frontend-web/src/pages/charge/stamm.tsx`, `packages/frontend-web/src/pages/charge/wareneingang.tsx` auf echte API verdrahtet.
+- Gap-Closure Chargen-MHD (ehemals 8.37):
+- [x] `ops_chargen.mhd` fachlich und technisch nachgezogen:
+  - Model: `app/domains/operations/models.py` (`mhd`)
+  - API: `app/api/v1/endpoints/charges.py` (`mhd` in Create/Update/Read)
+  - Migration: `alembic/versions/ops_chargen_add_mhd_20260215.py`
+- [x] Verifikation: API-Smoke erfolgreich (`charges` MHD-Patch)
 
 ### 8.7 Controlling-Modul
 - DB:
@@ -391,19 +399,13 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - [x] Timeseries-Erfassung vorhanden: `packages/frontend-web/src/pages/controlling/timeseries-erfassung.tsx` mit `GET/POST/DELETE /api/v1/controlling/timeseries`.
   - [x] Maßnahmen-Tracking-UI vorhanden: `packages/frontend-web/src/pages/controlling/massnahmen.tsx` mit `GET/POST/PUT/DELETE /api/v1/controlling/actions`.
   - [x] Navigation erweitert (`packages/frontend-web/src/app/navigation/manifest.tsx`): `Dashboard-Verwaltung`, `Timeseries-Erfassung`.
-
-### 8.37 Gap-Closure: Chargen-MHD + Controlling-CRUD
-- [x] `ops_chargen.mhd` fachlich und technisch nachgezogen:
-  - Model: `app/domains/operations/models.py` (`mhd`)
-  - API: `app/api/v1/endpoints/charges.py` (`mhd` in Create/Update/Read)
-  - Migration: `alembic/versions/ops_chargen_add_mhd_20260215.py`
-- [x] Controlling-Domain als persistenter CRUD-Stack implementiert:
+- Verifikation (ehemals 8.37):
+- [x] Controlling-Domain als persistenter CRUD-Stack verifiziert:
   - Migration: `alembic/versions/controlling_module_initial_20260215.py`
   - Endpunkte: `app/api/v1/endpoints/controlling.py`
   - Router-Einbindung: `app/api/v1/endpoints/__init__.py`, `app/api/v1/api.py`
-- [x] Verifikation:
   - `alembic upgrade head` in Docker erfolgreich
-  - API-Smoke erfolgreich (`/api/v1/controlling/*` Create/List + `charges` MHD-Patch)
+  - API-Smoke erfolgreich (`/api/v1/controlling/*` Create/List)
 
 ### 8.8 Schulungsmanagement / Qualifikationen / Onboarding
 - DB:
@@ -424,14 +426,7 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - [x] Neue Qualifikationsmaske `packages/frontend-web/src/pages/personal/qualifikationen.tsx` auf `GET/POST /api/v1/training/qualifications`.
   - [x] Neue Onboarding-Maske `packages/frontend-web/src/pages/personal/onboarding.tsx` auf `GET /api/v1/training/onboarding/checklists` und `GET/POST /api/v1/training/onboarding/runs`.
   - [x] Navigation erweitert: `packages/frontend-web/src/app/navigation/manifest.tsx` (`Qualifikationen`, `Onboarding` unter Personal).
-
-### 8.9 Priorisierte Restarbeiten (konkret)
-1. P0: Kundenmaske auf `business_partners` CRUD finalisieren, fehlende Pflichtfelder (z. B. Zahlungsart/Preisgruppe/Rabatt) per Migration ergaenzen.
-2. P1: Sales-Orders sauber typisiert mit OrderItems (`sales_order_items`) als Relation implementieren.
-3. P1: Controlling-Schema (KPI, Dashboard, Zeitreihe, Maßnahmen) als eigene Tabellen + API aufsetzen.
-4. P2: Schulungs-/Qualifikations-/Onboarding-Domain modellieren (Schema, API, Masken) -> Schema+API erledigt, Masken-Cutover offen.
-
-### 8.38 Gap-Closure: Schulung/Qualifikation/Onboarding (Domain-CRUD)
+- Gap-Closure Domain-CRUD (ehemals 8.38):
 - [x] Migration umgesetzt: `alembic/versions/hr_training_onboarding_module_20260215.py`
   - Tabellen inkl. Constraints, Indizes, Status-/Range-Checks.
   - Seed-Testdaten im Default-Tenant (Kurse + Onboarding-Checkliste), keine Mocks.
@@ -440,6 +435,12 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] Router-Verdrahtung:
   - `app/api/v1/endpoints/__init__.py`
   - `app/api/v1/api.py`
+
+### 8.9 Priorisierte Restarbeiten (Status aktualisiert 15.02.2026)
+1. [x] ~~P0: Kundenmaske auf `business_partners` CRUD finalisieren, fehlende Pflichtfelder (z. B. Zahlungsart/Preisgruppe/Rabatt) per Migration ergaenzen.~~ Erledigt (8.2, 8.11).
+2. [x] ~~P1: Sales-Orders sauber typisiert mit OrderItems (`sales_order_items`) als Relation implementieren.~~ Erledigt (8.4).
+3. [x] ~~P1: Controlling-Schema (KPI, Dashboard, Zeitreihe, Maßnahmen) als eigene Tabellen + API aufsetzen.~~ Erledigt (8.7).
+4. [x] ~~P2: Schulungs-/Qualifikations-/Onboarding-Domain modellieren (Schema, API, Masken).~~ Erledigt (8.8).
 
 ### 8.39 Gap-Closure: Personal-Endpoints (Mitarbeiter/Zeiterfassung/Stundenzettel)
 - [x] 404-Pfade fuer Personal geschlossen (`/api/v1/personal/*`):
