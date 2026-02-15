@@ -413,6 +413,7 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - Masken:
 - [~] Backend-CRUD ist vollstaendig; UI-Masken-Cutover laeuft.
   - [x] `packages/frontend-web/src/pages/personal/schulungen.tsx` nutzt jetzt echte Domain-Daten ueber `packages/frontend-web/src/lib/api/personal.ts` -> `/api/v1/training/assignments` (Mapping ohne Mock-Fallback).
+  - [x] Neue Erfassungsmaske `packages/frontend-web/src/pages/personal/schulung-neu.tsx` erstellt und direkt auf `POST /api/v1/training/assignments` verdrahtet.
 
 ### 8.9 Priorisierte Restarbeiten (konkret)
 1. P0: Kundenmaske auf `business_partners` CRUD finalisieren, fehlende Pflichtfelder (z. B. Zahlungsart/Preisgruppe/Rabatt) per Migration ergaenzen.
