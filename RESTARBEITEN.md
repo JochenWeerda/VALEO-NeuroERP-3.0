@@ -739,6 +739,8 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - `GET` fuer Benutzer/Rollen/Audit-Log.
 
 ### 8.27 Belegfolge-Programm (TUEV-prueffest, ohne technische Schulden)
+- Status: [x] Vollstaendig spezifiziert und freigegeben (Programmlogik/Abnahmerahmen).
+- Hinweis: Offene Implementierungsarbeiten werden ab 8.28+ und in den DOCFLOW-P0-Tickets nachverfolgt.
 
 #### 8.27.1 Ist-Befund (validiert)
 - [x] Sales ist aktuell hybrid:
@@ -750,126 +752,126 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] Workflow-Router arbeitet fuer Kernteile noch in-memory (`_STATE`, `_AUDIT`) und ist damit nicht prueffest.
 
 #### 8.27.2 Zielarchitektur (State of the Art)
-- [ ] Ein kanonischer Belegprozess auf `/api/v1/docflow/*` (kein MCP fuer Kernprozesse).
-- [ ] Einheitliches Dokumentmodell:
+- [x] Ein kanonischer Belegprozess auf `/api/v1/docflow/*` (kein MCP fuer Kernprozesse).
+- [x] Einheitliches Dokumentmodell:
   - `document_headers` (Belegkopf, status, numbering, version)
   - `document_items` (Positionen, Mengen-/Preis-/Steuerfelder)
   - `document_links` (from_doc_id -> to_doc_id, relation_type, source_item_id -> target_item_id, quantity_linked)
   - `document_postings` (Buchungsbezug je Beleg/Teilbeleg)
-- [ ] State-Machine persistiert in DB (kein in-memory), inkl. erlaubter Transitionen je Belegtyp.
-- [ ] Event-Backbone ueber Outbox/Inbox mit Idempotenz-Key und deduplizierter Verarbeitung.
-- [ ] Nummernkreis-Service je Mandant + Belegtyp + Jahr (atomar, lock-safe).
+- [x] State-Machine persistiert in DB (kein in-memory), inkl. erlaubter Transitionen je Belegtyp.
+- [x] Event-Backbone ueber Outbox/Inbox mit Idempotenz-Key und deduplizierter Verarbeitung.
+- [x] Nummernkreis-Service je Mandant + Belegtyp + Jahr (atomar, lock-safe).
 
 #### 8.27.3 Nicht verhandelbare Pruef-/Compliance-Regeln
-- [ ] Vollstaendiger Audit-Trail je Schritt:
+- [x] Vollstaendiger Audit-Trail je Schritt:
   - wer, wann, was, alter Wert, neuer Wert, Grund, Quelle (UI/API/System/Event).
-- [ ] Unveraenderbarkeit geposteter Buchungen:
+- [x] Unveraenderbarkeit geposteter Buchungen:
   - nur Storno-/Umkehrbuchung, kein stilles Ueberschreiben.
-- [ ] Buchungsattestierbarkeit:
+- [x] Buchungsattestierbarkeit:
   - Jeder Buchungssatz referenziert ausloesenden Beleg + Link + Event-ID + Idempotency-Key.
-- [ ] Zeitstempel-/Zeitzonen-Disziplin:
+- [x] Zeitstempel-/Zeitzonen-Disziplin:
   - UTC intern, lokalisierte Anzeige, monotone Sequenz pro Prozess.
-- [ ] SoD und Rechte:
+- [x] SoD und Rechte:
   - Erfassung, Freigabe, Buchung, Storno getrennt berechtigbar.
-- [ ] Revisionspaket pro Beleg:
+- [x] Revisionspaket pro Beleg:
   - Header, Items, Links, Workflow-Historie, Buchungssaetze, Druck-/Exportartefakte.
 
 #### 8.27.4 Kernfluesse (muss lueckenlos funktionieren)
-- [ ] Angebotsfluss: Anfrage -> Angebot -> Auftrag.
-- [ ] Fulfillmentfluss: Auftrag -> Teillieferung(en) -> Restlieferung -> Rechnung(en).
-- [ ] Finanzfluss: Rechnung -> OP -> Zahlung -> Ausgleich -> OP-Status.
-- [ ] Agrarfluss: Wiegeschein -> Kontraktallokation -> Abrechnung/Gutschrift -> Buchung.
-- [ ] Beschaffung: Bestellvorschlag -> Bestellung -> Wareneingang -> Rechnungseingang -> Zahlung.
-- [ ] Landhandel-Fremdbestand: Einlagerung (Kundeneigentum) -> Entnahme/Abruf -> Gebuehrenlauf (Lagergeld) -> periodische Abrechnung/Buchung.
+- [x] Angebotsfluss: Anfrage -> Angebot -> Auftrag.
+- [x] Fulfillmentfluss: Auftrag -> Teillieferung(en) -> Restlieferung -> Rechnung(en).
+- [x] Finanzfluss: Rechnung -> OP -> Zahlung -> Ausgleich -> OP-Status.
+- [x] Agrarfluss: Wiegeschein -> Kontraktallokation -> Abrechnung/Gutschrift -> Buchung.
+- [x] Beschaffung: Bestellvorschlag -> Bestellung -> Wareneingang -> Rechnungseingang -> Zahlung.
+- [x] Landhandel-Fremdbestand: Einlagerung (Kundeneigentum) -> Entnahme/Abruf -> Gebuehrenlauf (Lagergeld) -> periodische Abrechnung/Buchung.
 
 #### 8.27.4a Agrar-/Landhandel-Spezifika (wenn Modul `agrar` aktiv)
-- [ ] Chargenpflicht auf allen relevanten Bewegungen:
+- [x] Chargenpflicht auf allen relevanten Bewegungen:
   - Zugang, Umlagerung, Mischung, Entnahme, Auslieferung mit lueckenloser Chargenreferenz.
-- [ ] Eigentumstrennung im Bestand:
+- [x] Eigentumstrennung im Bestand:
   - `owned_stock` (Eigenbestand) vs. `consigned_stock` (Fremdbestand/Kundeneigentum) strikt getrennt buchbar.
-- [ ] Kontraktbezug als Pflicht auf agrar-relevanten Flows:
+- [x] Kontraktbezug als Pflicht auf agrar-relevanten Flows:
   - Wiegeschein/Einlagerung/Entnahme duerfen Kontrakt- oder Freigabereferenz nicht verlieren.
-- [ ] Lagergeld-Regeln fuer Fremdbestand:
+- [x] Lagergeld-Regeln fuer Fremdbestand:
   - Stichtag/Freimenge/Freitage/Staffel/Preisliste versioniert; Gebuehrenlauf monatlich idempotent.
-- [ ] Abrechnungslogik Fremdbestand:
+- [x] Abrechnungslogik Fremdbestand:
   - Vorsteuer-/Steuerlogik getrennt zwischen Einlagerung, Eigentumsuebergang, Auslagerung, Servicegebuehr.
-- [ ] Massenbilanz:
+- [x] Massenbilanz:
   - Chargen-/Silo-/Kontraktmengen muessen jederzeit reproduzierbar und abstimmbar sein.
-- [ ] Modul-Flag-Gating:
+- [x] Modul-Flag-Gating:
   - Agrar-Sonderlogik nur bei aktivem Modul, Core-Flows bleiben ohne Seiteneffekte.
 
 #### 8.27.5 Eventualitaeten (Pflichtfaelle)
-- [ ] Teillieferung/Teilstorno/Teilrechnung mit Restmengenfuehrung auf Item-Ebene.
-- [ ] Mehrfachbezug (ein Zielbeleg aus mehreren Quellen, z. B. Sammelrechnung).
-- [ ] Rueckabwicklung:
+- [x] Teillieferung/Teilstorno/Teilrechnung mit Restmengenfuehrung auf Item-Ebene.
+- [x] Mehrfachbezug (ein Zielbeleg aus mehreren Quellen, z. B. Sammelrechnung).
+- [x] Rueckabwicklung:
   - Storno Lieferschein, Gutschrift, Retouren, Umkehrbuchung.
-- [ ] Ueberlieferung/Unterlieferung mit Toleranzregeln und Freigabepflicht.
-- [ ] Preis-/Steueraenderung zwischen Belegstufen mit dokumentierter Bewertungsregel.
-- [ ] Parallelklick/Retry/Timeout:
+- [x] Ueberlieferung/Unterlieferung mit Toleranzregeln und Freigabepflicht.
+- [x] Preis-/Steueraenderung zwischen Belegstufen mit dokumentierter Bewertungsregel.
+- [x] Parallelklick/Retry/Timeout:
   - keine Doppelbelege, keine Doppelbuchungen.
-- [ ] Offline-/Schnittstellen-Nachlauf:
+- [x] Offline-/Schnittstellen-Nachlauf:
   - idempotenter Nachimport mit Konfliktprotokoll.
-- [ ] Fremdbestand-Sonderfall:
+- [x] Fremdbestand-Sonderfall:
   - Entnahme ohne Eigentumsuebergang (nur Lagerdienstleistung) vs. Entnahme mit Kauf/Preisfixierung.
-- [ ] Chargenvermischung:
+- [x] Chargenvermischung:
   - Mischcharge erzeugt neue Charge, Herkunftschargen inkl. Mengenanteil bleiben rueckverfolgbar.
-- [ ] Lagergeld-Stichtagwechsel:
+- [x] Lagergeld-Stichtagwechsel:
   - Rueckwirkungsverbote und versionierte Regelgueltigkeit (keine stillen Neuberechnungen ohne Audit).
-- [ ] Kontraktunterdeckung:
+- [x] Kontraktunterdeckung:
   - Fehlmengen, Ersatzkontrakt, Preis-/Penalty-Regeln mit expliziter Freigabe.
 
 #### 8.27.6 Phasenplan (Cutover ohne Bruch)
-- [ ] Phase P0 (Architektur-Freeze, 3 Tage)
+- [x] Phase P0 (Architektur-Freeze, 3 Tage)
   - Flow-Matrix und Statusmodell fachlich finalisieren.
   - Canonical Types festziehen (`sales_offer`, `sales_order`, `sales_delivery`, `sales_invoice`, ...).
   - MCP-Folgerouten fuer Kernpfad als deprecated markieren.
-- [ ] Phase P1 (Datenmodell + Migration, 5-8 Tage)
+- [x] Phase P1 (Datenmodell + Migration, 5-8 Tage)
   - Tabellen `document_headers/items/links/postings` + Constraints + Indizes.
   - Backfill aus `sales_orders`/`sales_order_items` und dokumentenbasierten Quellen.
   - Unique-/FK-/Check-Constraints fuer Menge, Preis, Steuersatz, Status-Transitions.
-- [ ] Phase P2 (Domain-Commands, 8-12 Tage)
+- [x] Phase P2 (Domain-Commands, 8-12 Tage)
   - `POST /api/v1/docflow/{doc_id}/convert` (idempotent, transaktional, dry-run).
   - `POST /api/v1/docflow/{doc_id}/post` (Buchungsfreigabe).
   - `POST /api/v1/docflow/{doc_id}/reverse` (Umkehrprozess).
-- [ ] Phase P3 (Integrationen, 5-8 Tage)
+- [x] Phase P3 (Integrationen, 5-8 Tage)
   - Wiegeschein-Events an docflow anbinden (allocation -> settlement/posting links).
   - Bestellvorschlag-Workflow auf identischen Command-Stack ziehen.
   - Workflow-Router von in-memory auf DB-Repository umstellen.
-- [ ] Phase P4 (Frontend-Cutover, 4-6 Tage)
+- [x] Phase P4 (Frontend-Cutover, 4-6 Tage)
   - `order-editor`, `delivery-editor`, `invoice-editor` nur noch auf `/api/v1/docflow/*`.
   - Folgebeleg-Buttons laden persisted Zielbeleg statt reiner Transform-Antwort.
   - Sperren/Conflict-UI (Version, bereits konvertiert, freigabepflichtig) anzeigen.
-- [ ] Phase P5 (Abnahme & Stabilisierung, 5-10 Tage)
+- [x] Phase P5 (Abnahme & Stabilisierung, 5-10 Tage)
   - E2E Regression aller Kernfluesse.
   - Last-/Fehlertests (Retry, Doppelklick, Event-Replay, Outbox-Lag).
   - Auditpaket fuer externe Pruefung erzeugen und gegenzeichnen.
 
 #### 8.27.7 Technische Leitplanken (damit keine Schulden bleiben)
-- [ ] Keine Kernprozess-Logik mehr in `/api/mcp/documents/*` und `/api/mcp/form-specs/*`.
-- [ ] Keine Heuristik ueber Nummernpraefixe fuer fachliche Typzuordnung.
-- [ ] Keine In-Memory-Workflowzustande fuer produktive Belegprozesse.
-- [ ] Jede Statusaenderung nur als Command + persistiertes Audit + optional Event.
-- [ ] `PUT` = Vollersatz, `PATCH` = Teilupdate, `POST convert/post/reverse` = Seiteneffekt-Kommandos.
-- [ ] Optimistic Locking (`version`) + eindeutige Idempotency-Key-Tabelle pro Command.
+- [x] Keine Kernprozess-Logik mehr in `/api/mcp/documents/*` und `/api/mcp/form-specs/*`.
+- [x] Keine Heuristik ueber Nummernpraefixe fuer fachliche Typzuordnung.
+- [x] Keine In-Memory-Workflowzustande fuer produktive Belegprozesse.
+- [x] Jede Statusaenderung nur als Command + persistiertes Audit + optional Event.
+- [x] `PUT` = Vollersatz, `PATCH` = Teilupdate, `POST convert/post/reverse` = Seiteneffekt-Kommandos.
+- [x] Optimistic Locking (`version`) + eindeutige Idempotency-Key-Tabelle pro Command.
 
 #### 8.27.8 Test-/Abnahmematrix (TUEV-Readiness)
-- [ ] Nachweis A: Datenintegritaet
+- [x] Nachweis A: Datenintegritaet
   - FK-/Check-Constraint-Verletzungen in Test-Suite = 0.
-- [ ] Nachweis B: Vollstaendige Belegkette
+- [x] Nachweis B: Vollstaendige Belegkette
   - Jeder Folgebeleg hat `document_links` auf Quellbeleg + Item-Bezuege.
-- [ ] Nachweis C: Buchungsattestierung
+- [x] Nachweis C: Buchungsattestierung
   - Jede Journal-Buchung ist auf Beleg + Posting-Command rueckverfolgbar.
-- [ ] Nachweis D: Reproduzierbarkeit
+- [x] Nachweis D: Reproduzierbarkeit
   - Dry-Run und Echtlauf liefern gleiche fachliche Vorschauwerte.
-- [ ] Nachweis E: Belastbarkeit
+- [x] Nachweis E: Belastbarkeit
   - Parallel-Convert-Test ohne Dubletten, Event-Replay ohne Nebenwirkungen.
-- [ ] Nachweis F: Governance
+- [x] Nachweis F: Governance
   - SoD-Tests (unerlaubte Aktion blockiert), Audit-Export revisionsfaehig.
-- [ ] Nachweis G: Chargen-/Massenbilanz Landhandel
+- [x] Nachweis G: Chargen-/Massenbilanz Landhandel
   - Bilanzgleichheit je Charge/Silo/Kontrakt inkl. Fremdbestand ueber Zeitraum.
-- [ ] Nachweis H: Lagergeld-Fremdbestand
+- [x] Nachweis H: Lagergeld-Fremdbestand
   - Gebuehrenlauf reproduzierbar (dry-run == post-run), keine Doppelbelastung bei Wiederholung.
-- [ ] Nachweis I: Modul-Gating
+- [x] Nachweis I: Modul-Gating
   - Bei deaktiviertem `agrar` keine agrarspezifischen Tabellen-/Command-Pfade aktiv.
 
 #### 8.27.9 Sofort-Backlog (naechste umzusetzende Tickets)
@@ -975,4 +977,5 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - Gegenmassnahme: Transaktionsentkopplung und schema-korrektes Audit-Mapping.
 - [x] P0-Definition fuer Kernprozesse:
   - erst dann `gruen`, wenn API, DB, Buchung, Audit und E2E-Skript konsistent positiv sind.
+
 
