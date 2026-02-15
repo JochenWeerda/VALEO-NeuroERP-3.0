@@ -60,11 +60,42 @@ export type StundenzettelData = {
   unterschrift?: string
 }
 
+export type QualificationLevel = 'basic' | 'advanced' | 'expert'
+
+export type Qualifikation = {
+  id: string
+  employeeRef: string
+  roleCode: string
+  qualificationLevel: QualificationLevel
+  skills: string[]
+  notes?: string
+  validUntil?: string
+}
+
+export type OnboardingStatus = 'not_started' | 'in_progress' | 'completed' | 'cancelled'
+
+export type OnboardingRun = {
+  id: string
+  checklistId: string
+  checklistCode?: string
+  checklistTitle?: string
+  employeeRef: string
+  assignedBy?: string
+  startedAt?: string
+  dueDate?: string
+  completedAt?: string
+  status: OnboardingStatus
+  progressPercent: number
+}
+
 export const personalKeys = {
   all: ['personal'] as const,
   mitarbeiter: (filters?: Record<string, unknown>) => [...personalKeys.all, 'mitarbeiter', filters] as const,
   zeiterfassung: (datum?: string) => [...personalKeys.all, 'zeit', datum] as const,
   schulungen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'schulungen', filters] as const,
+  qualifikationen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'qualifikationen', filters] as const,
+  onboardingRuns: (filters?: Record<string, unknown>) => [...personalKeys.all, 'onboarding-runs', filters] as const,
+  onboardingChecklists: () => [...personalKeys.all, 'onboarding-checklists'] as const,
 }
 
 export function useMitarbeiter(filters?: { search?: string; status?: MitarbeiterStatus }) {
@@ -172,6 +203,142 @@ export function useSaveStundenzettel() {
     mutationFn: async (data: StundenzettelData) => (await apiClient.post<StundenzettelData>('/api/v1/personal/stundenzettel', data)).data,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: personalKeys.zeiterfassung() })
+    },
+  })
+}
+
+type QualificationApi = {
+  id: string
+  employee_ref: string
+  role_code: string
+  qualification_level: QualificationLevel
+  skills?: unknown
+  notes?: string
+  valid_until?: string
+}
+
+type OnboardingChecklistApi = {
+  id: string
+  checklist_code: string
+  title: string
+}
+
+type OnboardingRunApi = {
+  id: string
+  checklist_id: string
+  checklist_code?: string
+  checklist_title?: string
+  employee_ref: string
+  assigned_by?: string
+  started_at?: string
+  due_date?: string
+  completed_at?: string
+  status: OnboardingStatus
+  progress_percent?: number
+}
+
+const toQualification = (item: QualificationApi): Qualifikation => ({
+  id: item.id,
+  employeeRef: item.employee_ref,
+  roleCode: item.role_code,
+  qualificationLevel: item.qualification_level,
+  skills: Array.isArray(item.skills) ? item.skills.map((s) => String(s)) : [],
+  notes: item.notes || undefined,
+  validUntil: item.valid_until || undefined,
+})
+
+const toOnboardingRun = (item: OnboardingRunApi): OnboardingRun => ({
+  id: item.id,
+  checklistId: item.checklist_id,
+  checklistCode: item.checklist_code || undefined,
+  checklistTitle: item.checklist_title || undefined,
+  employeeRef: item.employee_ref,
+  assignedBy: item.assigned_by || undefined,
+  startedAt: item.started_at || undefined,
+  dueDate: item.due_date || undefined,
+  completedAt: item.completed_at || undefined,
+  status: item.status,
+  progressPercent: Number(item.progress_percent ?? 0),
+})
+
+export function useQualifikationen(filters?: { employeeRef?: string }) {
+  return useQuery({
+    queryKey: personalKeys.qualifikationen(filters),
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (filters?.employeeRef) params.append('employee_ref', filters.employeeRef)
+      const rows = (await apiClient.get<QualificationApi[]>(`/api/v1/training/qualifications?${String(params)}`)).data
+      return rows.map(toQualification)
+    },
+    staleTime: 60_000,
+  })
+}
+
+export function useCreateQualifikation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: Omit<Qualifikation, 'id'>) => {
+      await apiClient.post('/api/v1/training/qualifications', {
+        data: {
+          employee_ref: data.employeeRef,
+          role_code: data.roleCode,
+          qualification_level: data.qualificationLevel,
+          skills: data.skills,
+          notes: data.notes ?? null,
+          valid_until: data.validUntil ?? null,
+        },
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.qualifikationen() })
+    },
+  })
+}
+
+export function useOnboardingChecklists() {
+  return useQuery({
+    queryKey: personalKeys.onboardingChecklists(),
+    queryFn: async () => {
+      return (await apiClient.get<OnboardingChecklistApi[]>('/api/v1/training/onboarding/checklists')).data
+    },
+    staleTime: 60_000,
+  })
+}
+
+export function useOnboardingRuns(filters?: { employeeRef?: string; status?: OnboardingStatus }) {
+  return useQuery({
+    queryKey: personalKeys.onboardingRuns(filters),
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (filters?.employeeRef) params.append('employee_ref', filters.employeeRef)
+      if (filters?.status) params.append('status', filters.status)
+      const rows = (await apiClient.get<OnboardingRunApi[]>(`/api/v1/training/onboarding/runs?${String(params)}`)).data
+      return rows.map(toOnboardingRun)
+    },
+    staleTime: 60_000,
+  })
+}
+
+export function useCreateOnboardingRun() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: Omit<OnboardingRun, 'id' | 'checklistCode' | 'checklistTitle'>) => {
+      await apiClient.post('/api/v1/training/onboarding/runs', {
+        data: {
+          checklist_id: data.checklistId,
+          employee_ref: data.employeeRef,
+          assigned_by: data.assignedBy ?? null,
+          started_at: data.startedAt ?? null,
+          due_date: data.dueDate ?? null,
+          completed_at: data.completedAt ?? null,
+          status: data.status,
+          progress_percent: data.progressPercent,
+          state: {},
+        },
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.onboardingRuns() })
     },
   })
 }
