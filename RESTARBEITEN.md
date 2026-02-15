@@ -883,8 +883,8 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 6. [x] `DOCFLOW-P0-06`: E2E-Suite fuer Teillieferung/Teilrechnung/Wiegeschein-Ausloesung/Bestellvorschlag.
 7. [x] `DOCFLOW-P0-07`: Fremdbestand-Datenmodell + Buchungslogik (`ownership_type`, owner_partner_id, consignment ledger).
 8. [x] `DOCFLOW-P0-08`: Lagergeld-Engine (monatlicher idempotenter Lauf, Stichtag/Freimenge/Staffel, Audit).
-9. [ ] `DOCFLOW-P0-09`: Chargen-Linking fuer Mischungen/Entnahmen mit Mengenanteil und Rueckverfolgbarkeit.
-10. [ ] `DOCFLOW-P0-10`: Agrar-Modul-Gating-Ende-zu-Ende (Feature Flags, API Guards, Tests).
+9. [x] `DOCFLOW-P0-09`: Chargen-Linking fuer Mischungen/Entnahmen mit Mengenanteil und Rueckverfolgbarkeit.
+10. [x] `DOCFLOW-P0-10`: Agrar-Modul-Gating-Ende-zu-Ende (Feature Flags, API Guards, Tests).
 
 #### 8.27.10 Vollstaendig bearbeitet: umsetzungsreifes Programm (Stand 2026-02-15)
 - [x] Architektur-/Risikoanalyse abgeschlossen (Ist, Ziel, Compliance, Eventualitaeten, Cutover, Leitplanken, Nachweise).
@@ -895,7 +895,7 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] Offene Punkte klar abgegrenzt (keine versteckte technische Schuld):
   - Frontend-Cutover von MCP auf Domain-Docflow (`P0-04`).
   - Workflow-DB-Persistenz statt in-memory (`P0-05`).
-  - Vollstaendige E2E-/Belastungs-/Governance-Nachweise (`P0-06`, `P0-09`, `P0-10`).
+  - Vollstaendige E2E-/Belastungs-/Governance-Nachweise (`P0-06`, `P0-09`, `P0-10`) umgesetzt und reproduzierbar.
 - [x] Neu umgesetzt (Code, nicht nur Doku):
   - `alembic/versions/docflow_core_20260215.py` (Schema `domain_docflow`, `document_headers/items/links/postings`, `number_series`, `command_idempotency_keys`).
   - `app/api/v1/endpoints/docflow.py` (`GET /api/v1/docflow/`, `GET /api/v1/docflow/{id}`, `POST /convert`, `POST /post`, `POST /reverse`).
@@ -1052,5 +1052,35 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - Kasse anlegen, TSE-Geraet anlegen, Meldung anlegen,
   - DSFinV-K Export erzeugen (`status=completed`) und Download ausfuehren.
 - [x] Regression: `scripts/test-pos-tse-b2b-flow.ps1` weiterhin grün.
+
+### 8.33 DOCFLOW-P0-09 + DOCFLOW-P0-10 umgesetzt (Chargen-Linking + Agrar-Gating)
+- Migration:
+- [x] `alembic/versions/inventory_charge_lineage_20260215.py`
+  - neue Tabelle `domain_inventory.charge_lineage_links`
+  - Felder: `from_charge`, `to_charge`, `process_type`, `quantity_share`, `share_percent`, `source_movement_id`, `target_movement_id`
+  - Constraints: Prozess-Typ, positive Mengenanteile, Prozentbereich
+  - Indizes auf `tenant_id + to_charge` und `tenant_id + from_charge`
+- API/CRUD:
+- [x] `app/domains/inventory/api/charge_lineage.py`
+  - `GET /api/v1/inventory/charge-lineage/`
+  - `POST /api/v1/inventory/charge-lineage/`
+- [x] `app/domains/inventory/api/stock_movements.py`
+  - `POST /api/v1/inventory/stock-movements/` schreibt optional Charge-Lineage-Links bei `lineage_sources`
+  - tenant-spezifisches Agrar-Gating fuer `agrar_contract_id`, `weighing_ticket_id`, `lineage_sources`
+- [x] Router-Verdrahtung:
+  - `app/domains/inventory/api/__init__.py` erweitert
+  - `app/api/v1/api.py` bindet `inventory_domain_router` unter `/api/v1/inventory` ein
+- Schema:
+- [x] `app/api/v1/schemas/inventory.py`
+  - `process_type` und `lineage_sources` fuer Stock-Movement-Create
+- E2E/Verifikation:
+- [x] `scripts/test-inventory-charge-lineage-gating.ps1` final grün
+  - Fall A: `agrar` deaktiviert -> `stock-movements` mit Agrar-/Lineage-Payload blockiert
+  - Fall B: `agrar` deaktiviert -> `charge-lineage` POST blockiert
+  - Fall C: `agrar` aktiviert -> Einlagerung mit `lineage_sources` erfolgreich, API+DB-Nachweis vorhanden
+- Stabilitaetsfixes waehrend Umsetzung:
+- [x] UUID-Typdrift in Migration korrigiert (FK auf `inventory_stock_movements.id`)
+- [x] Pydantic-Serialisierung fuer UUID-Felder in `charge_lineage` API gehaertet
+- [x] E2E-Skript robust gemacht (DB-Seed ohne Mock, API-Readiness-Check, tenant_id-Query fuer dev-token)
 
 

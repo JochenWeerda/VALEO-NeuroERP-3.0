@@ -95,6 +95,7 @@ from app.api.v1.endpoints import (
 
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
+from app.domains.inventory.api import router as inventory_domain_router
 from app.documents.router import router as documents_router
 from app.reports.router import router as reports_router
 from app.verkauf.router import router as verkauf_router
@@ -364,6 +365,12 @@ api_router.include_router(
     warehouses,
     prefix="/warehouses",
     tags=["inventory", "warehouses"]
+)
+
+api_router.include_router(
+    inventory_domain_router,
+    prefix="/inventory",
+    tags=["inventory"]
 )
 
 api_router.include_router(

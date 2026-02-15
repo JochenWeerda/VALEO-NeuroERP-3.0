@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
+import json
 from typing import Optional
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from sqlalchemy import desc, or_
+from sqlalchemy import desc, or_, text
 from sqlalchemy.orm import Session
 
 from ....api.v1.schemas.base import PaginatedResponse
@@ -15,11 +17,54 @@ from ....api.v1.schemas.inventory import StockMovement, StockMovementCreate, Sto
 from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import StockMovement as StockMovementModel
+from ....core.module_registry import registry
+from modules.bootstrap import initialize_module_registry
 from .inventory_auth import get_current_tenant_id, require_inventory_access
 
 router = APIRouter()
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+
+
+def _is_agrar_enabled(db: Session, tenant_id: str) -> bool:
+    row = db.execute(
+        text(
+            """
+            SELECT settings
+            FROM domain_shared.tenants
+            WHERE id = :tenant_id
+            """
+        ),
+        {"tenant_id": tenant_id},
+    ).first()
+    if row and row[0]:
+        raw = row[0]
+        try:
+            parsed = raw if isinstance(raw, dict) else json.loads(raw)
+            modules = parsed.get("enabled_modules") if isinstance(parsed, dict) else None
+            if isinstance(modules, list):
+                return "agrar" in [str(m).strip() for m in modules]
+        except Exception:
+            pass
+
+    initialize_module_registry()
+    return registry.is_enabled("agrar", tenant_id=tenant_id)
+
+
+def _assert_agrar_fields_allowed(
+    db: Session,
+    *,
+    tenant_id: str,
+    agrar_contract_id: Optional[str],
+    weighing_ticket_id: Optional[str],
+    lineage_sources_count: int = 0,
+) -> None:
+    has_agrar_payload = bool(agrar_contract_id or weighing_ticket_id or lineage_sources_count > 0)
+    if has_agrar_payload and not _is_agrar_enabled(db, tenant_id):
+        raise HTTPException(
+            status_code=400,
+            detail="Agrar module disabled for tenant; agrar fields/lineage are not allowed",
+        )
 
 
 def _to_schema(row: StockMovementModel) -> StockMovement:
@@ -152,6 +197,13 @@ async def create_stock_movement(
     effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
 
     service = InventoryService(db)
+    _assert_agrar_fields_allowed(
+        db,
+        tenant_id=effective_tenant,
+        agrar_contract_id=movement_data.agrar_contract_id,
+        weighing_ticket_id=movement_data.weighing_ticket_id,
+        lineage_sources_count=len(movement_data.lineage_sources or []),
+    )
     try:
         movement = service.process_stock_movement(
             article_id=movement_data.article_id,
@@ -184,6 +236,41 @@ async def create_stock_movement(
             movement.movement_number = f"MOV-{str(movement.id)[:8]}"
             db.commit()
             db.refresh(movement)
+
+        if movement_data.lineage_sources:
+            if not movement_data.charge:
+                raise HTTPException(status_code=400, detail="charge is required when lineage_sources are provided")
+            if movement_data.process_type is None:
+                raise HTTPException(status_code=400, detail="process_type is required when lineage_sources are provided")
+
+            for src in movement_data.lineage_sources:
+                db.execute(
+                    text(
+                        """
+                        INSERT INTO domain_inventory.charge_lineage_links
+                        (id, tenant_id, article_id, from_charge, to_charge, process_type, quantity_share, share_percent,
+                         source_movement_id, target_movement_id, notes, created_by, created_at)
+                        VALUES
+                        (:id, :tenant_id, :article_id, :from_charge, :to_charge, :process_type, :quantity_share, :share_percent,
+                         :source_movement_id, :target_movement_id, :notes, :created_by, NOW())
+                        """
+                    ),
+                    {
+                        "id": str(uuid4()),
+                        "tenant_id": effective_tenant,
+                        "article_id": movement_data.article_id,
+                        "from_charge": src.from_charge,
+                        "to_charge": movement_data.charge,
+                        "process_type": movement_data.process_type,
+                        "quantity_share": src.quantity_share,
+                        "share_percent": src.share_percent,
+                        "source_movement_id": src.source_movement_id,
+                        "target_movement_id": str(movement.id),
+                        "notes": src.notes,
+                        "created_by": movement_data.booking_user,
+                    },
+                )
+            db.commit()
         return _to_schema(movement)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -211,6 +298,13 @@ async def update_stock_movement(
     )
     if not movement:
         raise HTTPException(status_code=404, detail="Stock movement not found")
+
+    _assert_agrar_fields_allowed(
+        db,
+        tenant_id=effective_tenant,
+        agrar_contract_id=movement_data.agrar_contract_id,
+        weighing_ticket_id=movement_data.weighing_ticket_id,
+    )
 
     payload = movement_data.model_dump(exclude_unset=True)
     for key, value in payload.items():
