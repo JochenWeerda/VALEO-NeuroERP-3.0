@@ -1159,6 +1159,14 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
       {
+        id: 'report-berechtigungen',
+        label: 'Report-Berechtigungen',
+        icon: ShieldCheck,
+        module: '@/pages/admin/report-berechtigungen',
+        preferredPath: 'admin/report-berechtigungen',
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
         id: 'monitoring',
         label: 'Monitoring',
         icon: AlertCircle,

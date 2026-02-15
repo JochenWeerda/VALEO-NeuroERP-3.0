@@ -74,6 +74,7 @@ from . import admin_core
 from . import admin_pos
 from . import admin_devices
 from . import admin_mobile
+from . import admin_reporting
 from . import controlling
 from . import training
 from . import personal

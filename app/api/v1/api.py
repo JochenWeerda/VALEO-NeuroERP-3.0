@@ -93,6 +93,7 @@ from app.api.v1.endpoints import (
     admin_pos,
     admin_devices,
     admin_mobile,
+    admin_reporting,
     controlling,
     training,
     personal,
@@ -155,6 +156,12 @@ api_router.include_router(
     admin_mobile.router,
     prefix="/admin/mobile",
     tags=["admin", "settings", "mobile", "routing", "connectors"]
+)
+
+api_router.include_router(
+    admin_reporting.router,
+    prefix="/admin",
+    tags=["admin", "settings", "reporting"]
 )
 
 api_router.include_router(

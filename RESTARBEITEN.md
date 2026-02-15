@@ -773,7 +773,8 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [~] Restoffen: zentrale Integrations-Quarantaene mit SLA-/Eskalationsworkflow ueber alle Domains.
 - E) Reporting/Controlling
 - [~] Prioritaet P1 teilerledigt: KPI-/Dashboard-/Widget-/Timeseries-/Massnahmen-Admin produktiv verdrahtet.
-- [ ] Restoffen: Abschluss-Cockpit + Self-Service-Report-Berechtigungen (rollenbasiert pro Report-Datensatz).
+- [~] Restoffen: Abschluss-Cockpit.
+- [x] Self-Service-Report-Berechtigungen (rollenbasiert pro Report-Datensatz) als Admin-CRUD umgesetzt.
 - F) Systembetrieb
 - [x] Monitoring-Alerts + Konfigurations-CRUD jetzt live:
   - Alert-Regeln: `GET/POST/PUT/DELETE /api/v1/admin/monitoring/rules`
@@ -1286,5 +1287,37 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] API-Smoke lokal mit `Bearer dev-token` + `X-Tenant-ID`:
   - `GET /api/v1/admin/mobile/station-devices` gruen.
   - `POST/GET/DELETE /api/v1/admin/monitoring/rules` gruen.
+
+### 8.41 Reporting-Gap geschlossen: Self-Service-Report-Berechtigungen (CRUD + DB + UI)
+- Migration:
+- [x] `alembic/versions/admin_report_permissions_20260215.py`
+  - neue Tabelle `domain_shared.admin_report_permissions`
+  - Felder: `role_id`, `report_key`, `can_view`, `can_export`, `allowed_scopes`, `filters`, `active`
+  - Unique: `tenant_id + role_id + report_key`
+  - Indizes: `tenant+role`, `tenant+report`
+- Backend:
+- [x] Neuer Router `app/api/v1/endpoints/admin_reporting.py` unter `/api/v1/admin`
+  - `GET /report-permissions`
+  - `GET /report-permissions/{id}`
+  - `POST /report-permissions`
+  - `PUT /report-permissions/{id}`
+  - `DELETE /report-permissions/{id}`
+- [x] Router-Verdrahtung:
+  - `app/api/v1/endpoints/__init__.py`
+  - `app/api/v1/api.py`
+- Frontend:
+- [x] API-Hooks in `packages/frontend-web/src/lib/api/admin.ts`:
+  - `useReportPermissions`, `useCreateReportPermission`, `useUpdateReportPermission`, `useDeleteReportPermission`
+- [x] Neue Admin-Maske:
+  - `packages/frontend-web/src/pages/admin/report-berechtigungen.tsx`
+- [x] Navigation + Route:
+  - `packages/frontend-web/src/app/navigation/manifest.tsx`
+  - `packages/frontend-web/src/app/route-aliases.json`
+- Seed (DB, keine Mocks):
+- [x] `scripts/seed-admin-report-permissions.ps1` (idempotent, korrekt auf `valeo_dev/valeo_neuro_erp` angepasst)
+- Verifikation:
+- [x] Alembic in Docker auf Head (`admin_report_permissions_20260215`) erfolgreich.
+- [x] API-Smoke erfolgreich: `POST/GET/DELETE /api/v1/admin/report-permissions`.
+- [x] Frontend-Checks: ESLint + `tsc --noEmit` gruen.
 
 
