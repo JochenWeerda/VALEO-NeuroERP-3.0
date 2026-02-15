@@ -167,11 +167,25 @@ class StockMovementBase(BaseSchema):
     storage_fee_start_date: Optional[date] = Field(None, description="Storage fee start date")
     storage_fee_monthly_rate: Optional[Decimal] = Field(None, ge=0, description="Monthly storage fee rate")
     storage_fee_last_charged_until: Optional[date] = Field(None, description="Last storage-fee run covered until")
+    process_type: Optional[str] = Field(
+        default=None,
+        pattern="^(mix|withdrawal|split|transfer)$",
+        description="Process type for charge lineage",
+    )
+
+
+class ChargeLineageSource(BaseSchema):
+    from_charge: str = Field(..., min_length=1, max_length=64, description="Source charge")
+    quantity_share: Decimal = Field(..., gt=0, description="Quantity share from source charge")
+    share_percent: Optional[Decimal] = Field(None, ge=0, le=100, description="Optional percentage share")
+    source_movement_id: Optional[str] = Field(None, description="Optional source movement reference")
+    notes: Optional[str] = Field(None, max_length=500, description="Lineage note")
 
 
 class StockMovementCreate(StockMovementBase):
     """Schema for creating a stock movement"""
     tenant_id: Optional[str] = Field(None, description="Tenant ID")
+    lineage_sources: list[ChargeLineageSource] = Field(default_factory=list, description="Source charges for lineage linking")
 
 
 class StockMovementUpdate(BaseSchema):
