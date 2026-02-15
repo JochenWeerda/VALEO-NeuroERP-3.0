@@ -365,7 +365,7 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 - [x] `domain_ops.ops_chargen` inkl. neuer QS-Felder vorhanden.
 - [~] Feldnamen differieren teilweise (`chargen_id` statt `chargennummer`, `eingang` statt `eingangsdatum`, `qualitaetsstatus` statt `qs_status`).
 - Fehlende DB-Felder:
-- [ ] explizites `mhd` in `ops_chargen` (derzeit nicht vorhanden).
+- [x] explizites `mhd` in `ops_chargen` vorhanden (`alembic/versions/ops_chargen_add_mhd_20260215.py`).
 - CRUD Backend:
 - [x] `app/api/v1/endpoints/charges.py` mit List/Get/Create/Patch/Delete + `qs-readiness`.
 - CRUD Maske Frontend:
@@ -373,11 +373,30 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 
 ### 8.7 Controlling-Modul
 - DB:
-- [ ] Keine dedizierten Tabellen fuer KPI/Dashboard/Abweichungsanalyse/Report-Archiv gefunden.
+- [x] Dedizierte Tabellen vorhanden (`domain_controlling.*` via `alembic/versions/controlling_module_initial_20260215.py`):
+  - `kpi_definitions`, `dashboard_configs`, `dashboard_widgets`, `kpi_timeseries`, `controlling_actions`.
 - CRUD/API:
-- [ ] Kein vollstaendiger CRUD-Backbone fuer KPI-Definitionen, Dashboard-Konfiguration, Zeitreihen, Task-Verknuepfung.
+- [x] CRUD-Backbone vorhanden in `app/api/v1/endpoints/controlling.py`:
+  - KPIs: `GET/POST/PUT/DELETE /api/v1/controlling/kpis`
+  - Dashboards: `GET/POST/PUT/DELETE /api/v1/controlling/dashboards`
+  - Widgets: `GET/POST/PUT/DELETE /api/v1/controlling/dashboards/{id}/widgets` + `/api/v1/controlling/widgets/{id}`
+  - Zeitreihen: `GET/POST/DELETE /api/v1/controlling/timeseries`
+  - Maßnahmen: `GET/POST/PUT/DELETE /api/v1/controlling/actions`
 - Masken:
 - [~] Einzelne UI-Seiten vorhanden, aber kein persistenter, durchgaengiger Domain-CRUD-Stack sichtbar.
+
+### 8.37 Gap-Closure: Chargen-MHD + Controlling-CRUD
+- [x] `ops_chargen.mhd` fachlich und technisch nachgezogen:
+  - Model: `app/domains/operations/models.py` (`mhd`)
+  - API: `app/api/v1/endpoints/charges.py` (`mhd` in Create/Update/Read)
+  - Migration: `alembic/versions/ops_chargen_add_mhd_20260215.py`
+- [x] Controlling-Domain als persistenter CRUD-Stack implementiert:
+  - Migration: `alembic/versions/controlling_module_initial_20260215.py`
+  - Endpunkte: `app/api/v1/endpoints/controlling.py`
+  - Router-Einbindung: `app/api/v1/endpoints/__init__.py`, `app/api/v1/api.py`
+- [x] Verifikation:
+  - `alembic upgrade head` in Docker erfolgreich
+  - API-Smoke erfolgreich (`/api/v1/controlling/*` Create/List + `charges` MHD-Patch)
 
 ### 8.8 Schulungsmanagement / Qualifikationen / Onboarding
 - DB:
