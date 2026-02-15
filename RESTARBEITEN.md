@@ -1028,4 +1028,29 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - Storno-Fall: `pos_receipt -> pos_storno` mit Referenz auf Originalbeleg.
   - DB-Nachweis auf `pos_receipt_compliance` erfolgreich.
 
+### 8.32 POS-Admin + DSFinV-K Export (Einstellungen/Systembetrieb)
+- Ziel: Kassen-/TSE-Administration und pruefbare DSFinV-K Exporte als echte Admin-Funktionen.
+- Backend:
+- [x] Migration `alembic/versions/docflow_pos_admin_dsfinvk_20260215.py`
+  - neue Tabellen:
+    - `domain_docflow.pos_terminals` (Kassen/Standorte)
+    - `domain_docflow.pos_tse_devices` (TSE-Geraete je Kasse)
+    - `domain_docflow.pos_regulatory_notices` (Meldeereignisse nach §146a-Kontext)
+    - `domain_docflow.dsfinvk_exports` (Export-Laufhistorie)
+- [x] Neue Endpunkte `app/api/v1/endpoints/admin_pos.py`, verdrahtet unter `/api/v1/admin/*`:
+  - `GET/POST/PUT/DELETE /api/v1/admin/pos/terminals`
+  - `GET/POST/PUT /api/v1/admin/pos/tse-devices`
+  - `GET/POST /api/v1/admin/pos/notices`
+  - `POST /api/v1/admin/pos/dsfinvk-exports` (Exportlauf)
+  - `GET /api/v1/admin/pos/dsfinvk-exports` (Historie)
+  - `GET /api/v1/admin/pos/dsfinvk-exports/{id}/download` (CSV-Download)
+- [x] Router-Einbindung:
+  - `app/api/v1/endpoints/__init__.py`
+  - `app/api/v1/api.py`
+- Verifikation:
+- [x] Smoke-Skript `scripts/test-admin-pos-settings.ps1` grün:
+  - Kasse anlegen, TSE-Geraet anlegen, Meldung anlegen,
+  - DSFinV-K Export erzeugen (`status=completed`) und Download ausfuehren.
+- [x] Regression: `scripts/test-pos-tse-b2b-flow.ps1` weiterhin grün.
+
 
