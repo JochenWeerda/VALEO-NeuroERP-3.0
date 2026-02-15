@@ -1,5 +1,7 @@
 import { useState } from "react"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { useQuery } from "@tanstack/react-query"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/components/ui/toast-provider"
 import { FormBuilder, type FormSchema } from "@/features/forms/FormBuilder"
@@ -7,6 +9,7 @@ import { BelegFlowPanel } from "@/features/flows/BelegFlowPanel"
 import ApprovalPanel from "@/features/workflow/ApprovalPanel"
 import deliverySchema from "@/domain-schemas/sales_delivery.schema.json"
 import { getEntityTypeLabel, getSuccessMessage, getErrorMessage, getStatusLabel } from "@/features/crud/utils/i18n-helpers"
+import { businessPartnerService } from "@/lib/services/business-partner-service"
 
 const ISO_DATE_LENGTH = 10
 
@@ -72,6 +75,20 @@ export default function SalesDeliveryEditorPage(): JSX.Element {
       hazardHinweise: "",
     }],
   })
+  const instructionsQuery = useQuery({
+    queryKey: ["bp-instructions-delivery", delivery.customerId],
+    queryFn: async () => businessPartnerService.listInstructions(delivery.customerId),
+    enabled: Boolean(delivery.customerId?.trim()),
+  })
+  const activeInstructions = useMemo(() => {
+    const today = new Date().toISOString().slice(0, ISO_DATE_LENGTH)
+    return (instructionsQuery.data ?? []).filter((item) => {
+      const fromOk = !item.valid_from || item.valid_from <= today
+      const toOk = !item.valid_to || item.valid_to >= today
+      return fromOk && toOk
+    })
+  }, [instructionsQuery.data])
+  const hasCriticalInstruction = activeInstructions.some((item) => item.instruction_priority === "critical" || item.instruction_priority === "high")
   const psmLines = delivery.lines.filter((line) =>
     Boolean(line.bvlZulassungsnummer || line.sdsReference || line.hazardHinweise)
   )
@@ -165,6 +182,27 @@ export default function SalesDeliveryEditorPage(): JSX.Element {
       />
 
       <ApprovalPanel domain="sales" doc={delivery} />
+
+      <Card className="p-4">
+        <h3 className="mb-2 text-sm font-semibold">Chefanweisungen zum Kunden</h3>
+        {!delivery.customerId && (
+          <p className="text-sm text-muted-foreground">Bitte zuerst einen Kunden waehlen, um Chefanweisungen anzuzeigen.</p>
+        )}
+        {delivery.customerId && activeInstructions.length === 0 && (
+          <p className="text-sm text-muted-foreground">Keine aktiven Chefanweisungen vorhanden.</p>
+        )}
+        {activeInstructions.length > 0 && (
+          <div className={`rounded border p-3 text-sm ${hasCriticalInstruction ? "border-red-400 bg-red-50" : "border-amber-300 bg-amber-50"}`}>
+            <ul className="list-disc pl-5">
+              {activeInstructions.map((item) => (
+                <li key={item.id}>
+                  <span className="font-semibold">[{item.instruction_priority}]</span> {item.instruction_text}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </Card>
 
       <Card className="p-4">
         <FormBuilder

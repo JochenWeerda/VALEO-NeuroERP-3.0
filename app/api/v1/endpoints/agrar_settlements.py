@@ -5,7 +5,7 @@ Agrar self-billing settlements with deduction and posting workflow (AGRAR-SET-01
 from __future__ import annotations
 
 from datetime import datetime
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 from typing import Literal, Optional
 import uuid
 
@@ -18,6 +18,12 @@ from app.core.tenant import get_tenant_id
 from app.documents.router_helpers import get_repository, save_to_store
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
 from modules.agrar.services.moisture_engine import MoistureEngineInput, calculate_billing_weight
+from modules.agrar.services.settlement_calculator import (
+    calc_deduction_amount as _calc_deduction_amount_impl,
+    compute_settlement_amounts as _compute_settlement_amounts_impl,
+    round_money as _round_money_impl,
+    round_qty as _round_qty_impl,
+)
 
 router = APIRouter()
 
@@ -27,11 +33,11 @@ SettlementStatus = Literal["draft", "posted", "cancelled"]
 
 
 def _round_money(value: Decimal | float | int) -> Decimal:
-    return Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return _round_money_impl(value)
 
 
 def _round_qty(value: Decimal | float | int) -> Decimal:
-    return Decimal(str(value)).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
+    return _round_qty_impl(value)
 
 
 class DeductionInput(BaseModel):
@@ -113,10 +119,7 @@ class SettlementOut(BaseModel):
 
 
 def _calc_deduction_amount(deduction: DeductionInput, billing_qty_tons: Decimal) -> Decimal:
-    if deduction.mode == "fixed":
-        return _round_money(deduction.fixed_amount_eur or 0)
-    basis = _round_qty(deduction.basis_quantity_tons) if deduction.basis_quantity_tons is not None else billing_qty_tons
-    return _round_money((Decimal(str(deduction.rate_per_ton_eur or 0)) * basis))
+    return _calc_deduction_amount_impl(deduction, billing_qty_tons)
 
 
 def _compute_settlement_amounts(
@@ -125,18 +128,15 @@ def _compute_settlement_amounts(
     unit_price_eur_per_ton: Decimal,
     deductions: list[DeductionInput],
 ) -> dict[str, Decimal]:
-    billing_qty_tons = (billing_quantity_kg / Decimal("1000")).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
-    gross_amount = _round_money(billing_qty_tons * unit_price_eur_per_ton)
-    total_deductions = _round_money(sum(_calc_deduction_amount(d, billing_qty_tons) for d in deductions))
-    net_amount = _round_money(gross_amount - total_deductions)
+    result = _compute_settlement_amounts_impl(
+        billing_quantity_kg=billing_quantity_kg,
+        unit_price_eur_per_ton=unit_price_eur_per_ton,
+        deductions=deductions,
+    )
+    net_amount = result["net_amount"]
     if net_amount < Decimal("0"):
         raise HTTPException(status_code=400, detail="Deductions exceed gross amount")
-    return {
-        "billing_qty_tons": billing_qty_tons,
-        "gross_amount": gross_amount,
-        "total_deductions": total_deductions,
-        "net_amount": net_amount,
-    }
+    return result
 
 
 def _to_out(settlement: AgrarSettlement, deductions: list[AgrarSettlementDeduction]) -> SettlementOut:

@@ -35,7 +35,12 @@ def _list_docs(db: Session, doc_type: str, limit: int = 1000, tenant_id: Optiona
     repo = _doc_repo(db)
     filters = {"tenantId": tenant_id} if tenant_id else None
     payload = list_from_store(doc_type, skip=0, limit=limit, filters=filters, repo=repo)
-    return payload.get("data", []) if isinstance(payload, dict) else []
+    docs = payload.get("data", []) if isinstance(payload, dict) else []
+    if docs:
+        return docs
+    # Fallback to in-memory store when DB-backed document store is empty or unavailable.
+    payload_mem = list_from_store(doc_type, skip=0, limit=limit, filters=filters, repo=None)
+    return payload_mem.get("data", []) if isinstance(payload_mem, dict) else []
 
 
 def _cache_key(*parts: Any) -> str:
@@ -121,8 +126,17 @@ async def crm_suppliers(
     try:
         rows = db.execute(text(query), params).fetchall()
         total = int(db.execute(text(count_query), params).scalar() or 0)
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Suppliers query failed: {exc}") from exc
+    except Exception:
+        db.rollback()
+        fallback_query = "SELECT id, lieferantennummer, firmenname, ort, email, telefon, bewertung, aktiv, created_at FROM einkauf_lieferanten"
+        if conditions:
+            fallback_query += " WHERE " + " AND ".join(conditions)
+        fallback_query += " ORDER BY firmenname LIMIT :limit OFFSET :skip"
+        try:
+            rows = db.execute(text(fallback_query), params).fetchall()
+            total = int(db.execute(text(count_query), params).scalar() or 0)
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=f"Suppliers query failed: {exc}") from exc
 
     items = [
         {
@@ -159,6 +173,8 @@ async def po_list(
     db: Session = Depends(get_db),
 ) -> dict:
     docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
+    if not docs:
+        docs = _list_docs(db, "purchase_order", limit=5000)
 
     def _match(d: dict[str, Any]) -> bool:
         if status and str(d.get("status")) != status:
@@ -182,6 +198,8 @@ async def po_list(
 @router.get("/purchase-orders/{po_id}", response_model=dict)
 async def po_get(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
+    if not docs:
+        docs = _list_docs(db, "purchase_order", limit=5000)
     for d in docs:
         if str(d.get("id")) == po_id or str(d.get("purchaseOrderNumber")) == po_id:
             return d
@@ -382,22 +400,202 @@ async def einkauf_goods_receipts(db: Session = Depends(get_db)) -> list[dict[str
     try:
         rows = db.execute(
             text(
-                "SELECT id, wareneingangs_nummer, bestelldatum, created_at, status, lieferant_name, brutto_gesamt FROM einkauf_wareneingaenge ORDER BY created_at DESC LIMIT 500"
+                """
+                SELECT
+                    we.id,
+                    we.delivery_note_number AS nummer,
+                    we.received_date AS datum,
+                    we.quality_inspection_status AS status,
+                    COALESCE(po.subject, '') AS lieferant,
+                    COALESCE(SUM(pos.accepted_quantity * 0), 0) AS betrag
+                FROM einkauf_wareneingaenge we
+                LEFT JOIN einkauf_wareneingang_positionen pos ON pos.wareneingang_id = we.id
+                LEFT JOIN LATERAL (
+                    SELECT data::jsonb->>'subject' AS subject
+                    FROM docs_store
+                    WHERE doc_type = 'purchase_order'
+                      AND (
+                        data::jsonb->>'id' = we.purchase_order_id
+                        OR data::jsonb->>'purchaseOrderNumber' = we.purchase_order_id
+                      )
+                    ORDER BY updated_at DESC
+                    LIMIT 1
+                ) po ON TRUE
+                GROUP BY we.id, we.delivery_note_number, we.received_date, we.quality_inspection_status, po.subject
+                ORDER BY we.created_at DESC
+                LIMIT 500
+                """
             )
         ).fetchall()
     except Exception:
-        return []
+        try:
+            rows = db.execute(
+                text(
+                    "SELECT id, wareneingangs_nummer AS nummer, bestelldatum AS datum, status, lieferant_name AS lieferant, brutto_gesamt AS betrag FROM einkauf_wareneingaenge ORDER BY created_at DESC LIMIT 500"
+                )
+            ).fetchall()
+        except Exception:
+            return []
     return [
         {
             "id": str(r._mapping.get("id")),
-            "nummer": r._mapping.get("wareneingangs_nummer") or str(r._mapping.get("id")),
-            "datum": (r._mapping.get("bestelldatum") or r._mapping.get("created_at")).isoformat()[:10] if (r._mapping.get("bestelldatum") or r._mapping.get("created_at")) else None,
+            "nummer": r._mapping.get("nummer") or str(r._mapping.get("id")),
+            "datum": r._mapping.get("datum").isoformat()[:10] if r._mapping.get("datum") else None,
             "status": r._mapping.get("status") or "offen",
-            "lieferant": r._mapping.get("lieferant_name") or "",
-            "betrag": float(r._mapping.get("brutto_gesamt") or 0),
+            "lieferant": r._mapping.get("lieferant") or "",
+            "betrag": float(r._mapping.get("betrag") or 0),
         }
         for r in rows
     ]
+
+
+@router.post("/einkauf/goods-receipts", response_model=dict, status_code=201)
+async def einkauf_goods_receipts_create(
+    payload: dict[str, Any],
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    receipt_id = str(uuid4())
+    purchase_order_id = str(payload.get("purchaseOrderId") or payload.get("purchase_order_id") or "")
+    if not purchase_order_id:
+        raise HTTPException(status_code=400, detail="purchaseOrderId is required")
+
+    items = payload.get("items") or []
+    if not isinstance(items, list) or not items:
+        raise HTTPException(status_code=400, detail="items must contain at least one row")
+
+    received_by = str(payload.get("receivedBy") or payload.get("received_by") or "").strip()
+    received_location = str(payload.get("receivedLocation") or payload.get("received_location") or "").strip()
+    if not received_by or not received_location:
+        raise HTTPException(status_code=400, detail="receivedBy and receivedLocation are required")
+
+    received_date = str(payload.get("receivedDate") or payload.get("received_date") or _now_iso()[:10])
+    delivery_note_number = payload.get("deliveryNoteNumber") or payload.get("delivery_note_number")
+    quality_status = str(payload.get("qualityInspectionStatus") or payload.get("quality_inspection_status") or "PENDING")
+    inspection_notes = payload.get("inspectionNotes") or payload.get("inspection_notes")
+    damage_report = payload.get("damageReport") or payload.get("damage_report")
+
+    try:
+        db.execute(
+            text(
+                """
+                INSERT INTO einkauf_wareneingaenge (
+                    id, purchase_order_id, delivery_note_number, received_date,
+                    received_by, received_location, quality_inspection_status,
+                    inspection_notes, damage_report, created_at, updated_at
+                ) VALUES (
+                    :id, :purchase_order_id, :delivery_note_number, :received_date,
+                    :received_by, :received_location, :quality_inspection_status,
+                    :inspection_notes, :damage_report, now(), now()
+                )
+                """
+            ),
+            {
+                "id": receipt_id,
+                "purchase_order_id": purchase_order_id,
+                "delivery_note_number": delivery_note_number,
+                "received_date": received_date,
+                "received_by": received_by,
+                "received_location": received_location,
+                "quality_inspection_status": quality_status,
+                "inspection_notes": inspection_notes,
+                "damage_report": damage_report,
+            },
+        )
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Could not create goods receipt: {exc}") from exc
+
+    for line in items:
+        pos_id = str(uuid4())
+        received_qty = float(line.get("receivedQuantity") or line.get("received_quantity") or 0)
+        accepted_qty = float(line.get("acceptedQuantity") or line.get("accepted_quantity") or received_qty)
+        rejected_qty = float(line.get("rejectedQuantity") or line.get("rejected_quantity") or 0)
+        ordered_qty = float(line.get("orderedQuantity") or line.get("ordered_quantity") or received_qty)
+        try:
+            db.execute(
+                text(
+                    """
+                    INSERT INTO einkauf_wareneingang_positionen (
+                        id, wareneingang_id, purchase_order_item_id, article_id, article_name,
+                        ordered_quantity, received_quantity, accepted_quantity, rejected_quantity,
+                        condition, created_at, updated_at
+                    ) VALUES (
+                        :id, :wareneingang_id, :purchase_order_item_id, :article_id, :article_name,
+                        :ordered_quantity, :received_quantity, :accepted_quantity, :rejected_quantity,
+                        :condition, now(), now()
+                    )
+                    """
+                ),
+                {
+                    "id": pos_id,
+                    "wareneingang_id": receipt_id,
+                    "purchase_order_item_id": line.get("purchaseOrderItemId") or line.get("purchase_order_item_id"),
+                    "article_id": line.get("articleId") or line.get("article_id") or "",
+                    "article_name": line.get("articleName") or line.get("article_name"),
+                    "ordered_quantity": ordered_qty,
+                    "received_quantity": received_qty,
+                    "accepted_quantity": accepted_qty,
+                    "rejected_quantity": rejected_qty,
+                    "condition": line.get("condition") or "PERFECT",
+                },
+            )
+        except Exception as exc:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=f"Could not create goods receipt item: {exc}") from exc
+
+    # Update purchase order quantities and status for document-store based purchase orders.
+    repo = _doc_repo(db)
+    po = get_from_store("purchase_order", purchase_order_id, repo)
+    if not po:
+        docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
+        if not docs:
+            docs = _list_docs(db, "purchase_order", limit=5000)
+        po = next((d for d in docs if str(d.get("id")) == purchase_order_id or str(d.get("purchaseOrderNumber")) == purchase_order_id), None)
+    if po:
+        po_items = po.get("items", []) or []
+        for line in items:
+            target_item_id = str(line.get("purchaseOrderItemId") or line.get("purchase_order_item_id") or "")
+            if not target_item_id:
+                continue
+            received_qty = float(line.get("receivedQuantity") or line.get("received_quantity") or 0)
+            for po_item in po_items:
+                po_item_id = str(po_item.get("id") or "")
+                if po_item_id == target_item_id:
+                    current_received = float(po_item.get("quantityReceived") or 0)
+                    po_item["quantityReceived"] = round(current_received + received_qty, 3)
+                    break
+        po["items"] = po_items
+        total_open = 0.0
+        for po_item in po_items:
+            qty = float(po_item.get("quantity") or 0)
+            rec = float(po_item.get("quantityReceived") or 0)
+            total_open += max(0.0, qty - rec)
+        po["status"] = "KOMPLETT" if total_open <= 0.0001 else "TEILGELIEFERT"
+        po["updatedAt"] = _now_iso()
+        save_to_store("purchase_order", po.get("purchaseOrderNumber") or purchase_order_id, po, repo)
+
+    await _enqueue_event(
+        db,
+        event_type="goods_receipt.created",
+        aggregate_id=receipt_id,
+        payload={
+            "receiptId": receipt_id,
+            "purchaseOrderId": purchase_order_id,
+            "status": quality_status,
+            "receivedDate": received_date,
+            "itemCount": len(items),
+        },
+        tenant_id=tenant_id,
+    )
+    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+    db.commit()
+    return {
+        "id": receipt_id,
+        "purchaseOrderId": purchase_order_id,
+        "status": quality_status,
+        "message": "Wareneingang erfasst",
+    }
 
 
 @router.get("/einkauf/bestellvorschlaege", response_model=list)
@@ -933,7 +1131,10 @@ async def annahme_warteschlange(db: Session = Depends(get_db)) -> dict:
 async def portal_dashboard(db: Session = Depends(get_db)) -> dict:
     orders = _list_docs(db, "sales_order", limit=20)
     invoices = _list_docs(db, "sales_invoice", limit=20)
-    docs = db.query(Dokument).order_by(Dokument.hochgeladen_am.desc()).limit(5).all()
+    try:
+        docs = db.query(Dokument).order_by(Dokument.hochgeladen_am.desc()).limit(5).all()
+    except Exception:
+        docs = []
 
     offene_rechnungen = sum(1 for i in invoices if str(i.get("status", "")).lower() in {"offen", "ueberfaellig"})
 
@@ -999,7 +1200,10 @@ async def portal_bestellungen(db: Session = Depends(get_db)) -> list[dict[str, A
 
 @router.get("/portal/dokumente", response_model=list)
 async def portal_dokumente(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    docs = db.query(Dokument).order_by(Dokument.hochgeladen_am.desc()).limit(500).all()
+    try:
+        docs = db.query(Dokument).order_by(Dokument.hochgeladen_am.desc()).limit(500).all()
+    except Exception:
+        docs = []
     return [
         {
             "id": d.id,
@@ -1079,7 +1283,10 @@ async def portal_shop(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
 
 @router.get("/portal/vertraege", response_model=list)
 async def portal_vertraege(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    items = db.query(Rahmenvertrag).order_by(Rahmenvertrag.laufzeit_bis.desc()).limit(500).all()
+    try:
+        items = db.query(Rahmenvertrag).order_by(Rahmenvertrag.laufzeit_bis.desc()).limit(500).all()
+    except Exception:
+        items = []
     return [
         {
             "id": i.id,
@@ -1095,7 +1302,10 @@ async def portal_vertraege(db: Session = Depends(get_db)) -> list[dict[str, Any]
 
 @router.get("/portal/zertifikate", response_model=list)
 async def portal_zertifikate(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    items = db.query(ZertifikatEintrag).order_by(ZertifikatEintrag.gueltig_bis.desc()).limit(500).all()
+    try:
+        items = db.query(ZertifikatEintrag).order_by(ZertifikatEintrag.gueltig_bis.desc()).limit(500).all()
+    except Exception:
+        items = []
     return [
         {
             "id": i.id,

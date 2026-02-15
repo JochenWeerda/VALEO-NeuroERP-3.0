@@ -184,10 +184,10 @@ export default function AnalyticsDashboard(): JSX.Element {
       {loadingForecast && (
         <p className="text-sm opacity-70">Berechne Prognose …</p>
       )}
-      {forecast !== null && (
+      {forecast?.forecast != null && (
         <motion.div
           className={`border rounded-xl p-4 shadow ${
-            forecast.forecast.anomaly
+            forecast?.forecast?.anomaly === true
               ? "bg-red-50 border-red-300"
               : "bg-emerald-50 border-emerald-300"
           }`}
@@ -196,14 +196,14 @@ export default function AnalyticsDashboard(): JSX.Element {
         >
           <div className="font-semibold flex items-center gap-2">
             <span>🔮 Prognose</span>
-            {forecast.forecast.anomaly && (
+            {forecast?.forecast?.anomaly === true && (
               <span className="text-red-600 text-xs">⚠️ ANOMALIE</span>
             )}
           </div>
-          <p className="text-sm mt-1">{forecast.summary}</p>
-          {forecast.factors.length > 0 && (
+          <p className="text-sm mt-1">{forecast?.summary ?? "Keine Prognosedaten verfuegbar."}</p>
+          {(forecast?.factors?.length ?? 0) > 0 && (
             <ul className="list-disc list-inside text-sm mt-2">
-              {forecast.factors.map((factor, index): JSX.Element => (
+              {(forecast?.factors ?? []).map((factor, index): JSX.Element => (
                 <li key={index}>{factor}</li>
               ))}
             </ul>

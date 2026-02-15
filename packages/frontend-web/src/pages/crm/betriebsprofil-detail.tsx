@@ -54,7 +54,15 @@ export default function BetriebsprofilePage(): JSX.Element {
   }, [data])
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>) => crmService.createFarmProfile(data),
+    mutationFn: async (data: Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>) => {
+      const created = await crmService.createFarmProfile(data)
+      await crmService.syncFarmProfileSubResources(created.id, {
+        crops: data.crops,
+        livestock: data.livestock,
+        certifications: data.certifications,
+      })
+      return created
+    },
     onSuccess: () => {
       toast.push(getSuccessMessage(t, 'create', entityType))
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.farmProfiles.all })
@@ -67,8 +75,16 @@ export default function BetriebsprofilePage(): JSX.Element {
   })
 
   const updateMutation = useMutation({
-    mutationFn: (data: Partial<Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>>) =>
-      crmService.updateFarmProfile(id ?? '', data),
+    mutationFn: async (data: Partial<Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>>) => {
+      const { crops, livestock, certifications, ...baseData } = data
+      const updated = await crmService.updateFarmProfile(id ?? '', baseData)
+      await crmService.syncFarmProfileSubResources(id ?? '', {
+        crops,
+        livestock,
+        certifications,
+      })
+      return updated
+    },
     onSuccess: () => {
       toast.push(getSuccessMessage(t, 'update', entityType))
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.farmProfiles.detail(id ?? '') })
@@ -81,10 +97,17 @@ export default function BetriebsprofilePage(): JSX.Element {
   })
 
   const handleSave = () => {
+    const payload: Partial<FarmProfile> = {
+      ...farmProfile,
+      crops: (farmProfile.crops || []).filter((item) => item.crop?.trim()),
+      livestock: (farmProfile.livestock || []).filter((item) => item.type?.trim()),
+      certifications: (farmProfile.certifications || []).map((item) => item.trim()).filter(Boolean),
+    }
+
     if (isNew) {
-      createMutation.mutate(farmProfile as Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>)
+      createMutation.mutate(payload as Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>)
     } else {
-      updateMutation.mutate(farmProfile)
+      updateMutation.mutate(payload)
     }
   }
 

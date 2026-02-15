@@ -408,10 +408,11 @@ class ChargeRepository:
         return self.db.query(Charge).filter(Charge.chargen_id == chargen_id).first()
 
     def create(self, charge_data: dict) -> Charge:
+        payload = dict(charge_data)
+        payload.setdefault("status", ChargeStatus.ERFASST.value)
         charge = Charge(
             id=f"CH-{str(uuid.uuid4())[:8].upper()}",
-            status=charge_data.get("status", ChargeStatus.ERFASST.value),
-            **charge_data,
+            **payload,
         )
         self.db.add(charge)
         self.db.commit()

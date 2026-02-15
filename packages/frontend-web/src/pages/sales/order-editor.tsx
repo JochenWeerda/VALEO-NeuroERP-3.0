@@ -7,13 +7,15 @@ import { BelegFlowPanel } from "@/features/flows/BelegFlowPanel"
 import { PolicyWarningBanner } from "@/features/forms/PolicyWarningBanner"
 import ApprovalPanel from "@/features/workflow/ApprovalPanel"
 import orderSchema from "@/domain-schemas/sales_order.schema.json"
-import { getEntityTypeLabel, getSuccessMessage, getErrorMessage, getStatusLabel } from "@/features/crud/utils/i18n-helpers"
+import { getEntityTypeLabel, getSuccessMessage, getErrorMessage } from "@/features/crud/utils/i18n-helpers"
+import { apiClient } from "@/lib/api-client"
 
 type SalesOrder = {
   number: string
   date: string
   customerId: string
   deliveryAddress?: string
+  shippingMethod?: string
   paymentTerms: string
   notes?: string
   lines: Array<{
@@ -39,21 +41,43 @@ export default function SalesOrderEditorPage(): JSX.Element {
     date: new Date().toISOString().slice(0, ISO_DATE_LENGTH),
     customerId: "",
     paymentTerms: "net30",
+    shippingMethod: "spedition",
     notes: "",
     lines: [{ article: "", qty: 1, price: 0 }],
   })
 
   async function save(v: SalesOrder): Promise<void> {
-    try {
-      const response = await fetch("/api/mcp/documents/sales_order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(v),
-      })
+    if (!v.customerId?.trim()) {
+      push(t("sales.orderEditor.validation.customerRequired", "Bitte einen Kunden auswaehlen."))
+      return
+    }
 
-      if (!response.ok) {
-        throw new Error("Save failed")
+    try {
+      const totalAmount = v.lines.reduce((sum, line) => sum + Number(line.qty || 0) * Number(line.price || 0), 0)
+      const payload = {
+        tenant_id: import.meta.env.VITE_TENANT_ID ?? "00000000-0000-0000-0000-000000000001",
+        customer_id: v.customerId,
+        order_number: v.number,
+        subject: `Verkaufsauftrag ${v.number}`,
+        description: v.notes || "",
+        total_amount: totalAmount,
+        currency: "EUR",
+        status: "open",
+        delivery_date: v.date ? new Date(v.date).toISOString() : null,
+        delivery_address: v.deliveryAddress || null,
+        shipping_method: v.shippingMethod || null,
+        payment_terms: v.paymentTerms || null,
+        notes: v.notes || null,
+        items: v.lines.map((line) => ({
+          article_number: line.article,
+          description: line.article,
+          quantity: Number(line.qty || 0),
+          unit_price: Number(line.price || 0),
+          discount_percent: 0,
+        })),
       }
+
+      await apiClient.post("/api/v1/sales/orders", payload)
 
       push(getSuccessMessage(t, 'update', entityType))
     } catch {
@@ -78,10 +102,6 @@ export default function SalesOrderEditorPage(): JSX.Element {
       }
 
       const data = (await response.json()) as { ok: boolean; number: string }
-      const followUpTypeLabel = toType === "delivery" 
-        ? getEntityTypeLabel(t, 'delivery', 'Lieferschein')
-        : getEntityTypeLabel(t, 'invoice', 'Rechnung')
-      
       push(`${getSuccessMessage(t, 'create', toType)}: ${data.number}`)
 
       // TODO: Navigate to new document

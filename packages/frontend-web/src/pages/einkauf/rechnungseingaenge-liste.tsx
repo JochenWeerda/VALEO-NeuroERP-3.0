@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
@@ -131,13 +131,13 @@ const createRechnungseingaengeConfig = (t: any, entityTypeLabel: string): ListCo
   defaultSort: { field: 'createdAt', direction: 'desc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/einkauf/rechnungseingaenge',
+    baseUrl: '/api/v1/einkauf/rechnungseingaenge',
     endpoints: {
-      list: '/api/einkauf/rechnungseingaenge',
-      get: '/api/einkauf/rechnungseingaenge/{id}',
-      create: '/api/einkauf/rechnungseingaenge',
-      update: '/api/einkauf/rechnungseingaenge/{id}',
-      delete: '/api/einkauf/rechnungseingaenge/{id}'
+      list: '/api/v1/einkauf/rechnungseingaenge',
+      get: '/api/v1/einkauf/rechnungseingaenge/{id}',
+      create: '/api/v1/einkauf/rechnungseingaenge',
+      update: '/api/v1/einkauf/rechnungseingaenge/{id}',
+      delete: '/api/v1/einkauf/rechnungseingaenge/{id}'
     }
   },
   permissions: ['einkauf.read', 'einkauf.write', 'finance.read'],
@@ -225,3 +225,4 @@ export default function RechnungseingaengeListePage(): JSX.Element {
     />
   )
 }
+

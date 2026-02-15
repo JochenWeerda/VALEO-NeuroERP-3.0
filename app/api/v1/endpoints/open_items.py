@@ -9,12 +9,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, date
 import json
 import logging
+import uuid
 
 from ....core.database import get_db
-from ..schemas.base import PaginatedResponse
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -42,6 +42,323 @@ class SettlementResult(BaseModel):
     status: str  # settled, partial, overpaid
     settlement_date: datetime
     audit_trail_id: Optional[str] = None
+
+
+class OpenItemBase(BaseModel):
+    konto_nr: Optional[str] = None
+    konto_name: Optional[str] = None
+    konto_typ: str = "debitoren"  # debitoren|kreditoren
+    op_status: str = "offen"  # offen|teilweise|geschlossen|storniert
+    rechnungsnr: str
+    rechnungsdatum: date
+    faelligkeit: date
+    valuta: Optional[date] = None
+    op_betrag: Decimal
+    saldo: Decimal = Decimal("0.00")
+    offen: Decimal
+    op_text: Optional[str] = None
+    waehrung: str = "EUR"
+    kunde_id: Optional[str] = None
+    kunde_name: Optional[str] = None
+    lieferant_id: Optional[str] = None
+    lieferant_name: Optional[str] = None
+    skonto_prozent: Optional[Decimal] = None
+    skonto_bis: Optional[date] = None
+    mahn_stufe: int = 0
+    zahlbar: bool = True
+    letzte_bewegung_am: Optional[date] = None
+    kredit_limit: Optional[Decimal] = None
+    kv_limit: Optional[Decimal] = None
+    sperre_grund: Optional[str] = None
+
+
+class OpenItemCreate(OpenItemBase):
+    pass
+
+
+class OpenItemUpdate(BaseModel):
+    konto_nr: Optional[str] = None
+    konto_name: Optional[str] = None
+    konto_typ: Optional[str] = None
+    op_status: Optional[str] = None
+    rechnungsnr: Optional[str] = None
+    rechnungsdatum: Optional[date] = None
+    faelligkeit: Optional[date] = None
+    valuta: Optional[date] = None
+    op_betrag: Optional[Decimal] = None
+    saldo: Optional[Decimal] = None
+    offen: Optional[Decimal] = None
+    op_text: Optional[str] = None
+    waehrung: Optional[str] = None
+    kunde_id: Optional[str] = None
+    kunde_name: Optional[str] = None
+    lieferant_id: Optional[str] = None
+    lieferant_name: Optional[str] = None
+    skonto_prozent: Optional[Decimal] = None
+    skonto_bis: Optional[date] = None
+    mahn_stufe: Optional[int] = None
+    zahlbar: Optional[bool] = None
+    letzte_bewegung_am: Optional[date] = None
+    kredit_limit: Optional[Decimal] = None
+    kv_limit: Optional[Decimal] = None
+    sperre_grund: Optional[str] = None
+
+
+class OpenItem(OpenItemBase):
+    id: str
+    tenant_id: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class OpenItemListResponse(BaseModel):
+    items: List[OpenItem]
+    summary: dict
+
+
+def _normalize_open_item(row) -> OpenItem:
+    op_amount = Decimal(str(row.op_betrag if row.op_betrag is not None else row.betrag))
+    return OpenItem(
+        id=str(row.id),
+        tenant_id=str(row.tenant_id),
+        konto_nr=row.konto_nr,
+        konto_name=row.konto_name,
+        konto_typ=row.konto_typ or "debitoren",
+        op_status=row.op_status or "offen",
+        rechnungsnr=row.rechnungsnr,
+        rechnungsdatum=row.rechnungsdatum or row.datum,
+        faelligkeit=row.faelligkeit,
+        valuta=row.valuta,
+        op_betrag=op_amount,
+        saldo=Decimal(str(row.saldo if row.saldo is not None else 0)),
+        offen=Decimal(str(row.offen)),
+        op_text=row.op_text,
+        waehrung=row.waehrung or "EUR",
+        kunde_id=row.kunde_id,
+        kunde_name=row.kunde_name,
+        lieferant_id=row.lieferant_id,
+        lieferant_name=row.lieferant_name,
+        skonto_prozent=Decimal(str(row.skonto_prozent)) if row.skonto_prozent is not None else None,
+        skonto_bis=row.skonto_bis,
+        mahn_stufe=int(row.mahn_stufe or 0),
+        zahlbar=bool(row.zahlbar),
+        letzte_bewegung_am=row.letzte_bewegung_am,
+        kredit_limit=Decimal(str(row.kredit_limit)) if row.kredit_limit is not None else None,
+        kv_limit=Decimal(str(row.kv_limit)) if row.kv_limit is not None else None,
+        sperre_grund=row.sperre_grund,
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+    )
+
+
+def _validate_op(payload: OpenItemBase) -> None:
+    if payload.konto_typ not in {"debitoren", "kreditoren"}:
+        raise HTTPException(status_code=400, detail="konto_typ must be debitoren or kreditoren")
+    if payload.op_status not in {"offen", "teilweise", "geschlossen", "storniert"}:
+        raise HTTPException(status_code=400, detail="op_status invalid")
+    if payload.op_betrag < 0 or payload.offen < 0:
+        raise HTTPException(status_code=400, detail="Amounts must be non-negative")
+    if payload.mahn_stufe < 0 or payload.mahn_stufe > 3:
+        raise HTTPException(status_code=400, detail="mahn_stufe must be 0..3")
+
+
+@router.get("", response_model=OpenItemListResponse)
+async def list_open_items(
+    tenant_id: str = Query("system", description="Tenant ID"),
+    konto_typ: Optional[str] = Query(None),
+    op_status: Optional[str] = Query(None),
+    konto_nr: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    limit: int = Query(500, ge=1, le=5000),
+    db: Session = Depends(get_db),
+):
+    where_clauses = ["tenant_id = :tenant_id"]
+    params = {"tenant_id": tenant_id, "limit": limit}
+    if konto_typ:
+        where_clauses.append("konto_typ = :konto_typ")
+        params["konto_typ"] = konto_typ
+    if op_status:
+        where_clauses.append("op_status = :op_status")
+        params["op_status"] = op_status
+    if konto_nr:
+        where_clauses.append("konto_nr = :konto_nr")
+        params["konto_nr"] = konto_nr
+    if search:
+        where_clauses.append("(rechnungsnr ILIKE :search OR COALESCE(kunde_name,'') ILIKE :search OR COALESCE(konto_name,'') ILIKE :search)")
+        params["search"] = f"%{search}%"
+
+    rows = db.execute(
+        text(
+            f"""
+            SELECT id, tenant_id, konto_nr, konto_name, konto_typ, op_status, rechnungsnr, rechnungsdatum, datum, faelligkeit, valuta,
+                   op_betrag, betrag, saldo, offen, op_text, waehrung, kunde_id, kunde_name, lieferant_id, lieferant_name,
+                   skonto_prozent, skonto_bis, mahn_stufe, zahlbar, letzte_bewegung_am, kredit_limit, kv_limit, sperre_grund,
+                   created_at, updated_at
+            FROM offene_posten
+            WHERE {' AND '.join(where_clauses)}
+            ORDER BY faelligkeit ASC, rechnungsnr ASC
+            LIMIT :limit
+            """
+        ),
+        params,
+    ).fetchall()
+    items = [_normalize_open_item(r) for r in rows]
+    summary = {
+        "count": len(items),
+        "op_summe": float(sum((item.op_betrag for item in items), Decimal("0.00"))),
+        "faellig": float(sum((item.offen for item in items if item.faelligkeit <= date.today()), Decimal("0.00"))),
+        "nicht_faellig": float(sum((item.offen for item in items if item.faelligkeit > date.today()), Decimal("0.00"))),
+        "letzte_bewegung_am": max((item.letzte_bewegung_am for item in items if item.letzte_bewegung_am), default=None),
+    }
+    return OpenItemListResponse(items=items, summary=summary)
+
+
+@router.get("/{op_id}", response_model=OpenItem)
+async def get_open_item(op_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+    row = db.execute(
+        text(
+            """
+            SELECT id, tenant_id, konto_nr, konto_name, konto_typ, op_status, rechnungsnr, rechnungsdatum, datum, faelligkeit, valuta,
+                   op_betrag, betrag, saldo, offen, op_text, waehrung, kunde_id, kunde_name, lieferant_id, lieferant_name,
+                   skonto_prozent, skonto_bis, mahn_stufe, zahlbar, letzte_bewegung_am, kredit_limit, kv_limit, sperre_grund,
+                   created_at, updated_at
+            FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {"id": op_id, "tenant_id": tenant_id},
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Open item not found")
+    return _normalize_open_item(row)
+
+
+@router.post("", response_model=OpenItem, status_code=201)
+async def create_open_item(payload: OpenItemCreate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+    _validate_op(payload)
+    op_id = str(uuid.uuid4())
+    db.execute(
+        text(
+            """
+            INSERT INTO offene_posten (
+                id, tenant_id, konto_nr, konto_name, konto_typ, op_status, rechnungsnr, rechnungsdatum, datum, faelligkeit, valuta,
+                op_betrag, betrag, saldo, offen, op_text, waehrung, kunde_id, kunde_name, lieferant_id, lieferant_name,
+                skonto_prozent, skonto_bis, mahn_stufe, zahlbar, letzte_bewegung_am, kredit_limit, kv_limit, sperre_grund,
+                created_at, updated_at
+            ) VALUES (
+                :id, :tenant_id, :konto_nr, :konto_name, :konto_typ, :op_status, :rechnungsnr, :rechnungsdatum, :datum, :faelligkeit, :valuta,
+                :op_betrag, :betrag, :saldo, :offen, :op_text, :waehrung, :kunde_id, :kunde_name, :lieferant_id, :lieferant_name,
+                :skonto_prozent, :skonto_bis, :mahn_stufe, :zahlbar, :letzte_bewegung_am, :kredit_limit, :kv_limit, :sperre_grund,
+                NOW(), NOW()
+            )
+            """
+        ),
+        {
+            "id": op_id,
+            "tenant_id": tenant_id,
+            "konto_nr": payload.konto_nr,
+            "konto_name": payload.konto_name,
+            "konto_typ": payload.konto_typ,
+            "op_status": payload.op_status,
+            "rechnungsnr": payload.rechnungsnr,
+            "rechnungsdatum": payload.rechnungsdatum,
+            "datum": payload.rechnungsdatum,
+            "faelligkeit": payload.faelligkeit,
+            "valuta": payload.valuta,
+            "op_betrag": payload.op_betrag,
+            "betrag": payload.op_betrag,
+            "saldo": payload.saldo,
+            "offen": payload.offen,
+            "op_text": payload.op_text,
+            "waehrung": payload.waehrung,
+            "kunde_id": payload.kunde_id,
+            "kunde_name": payload.kunde_name,
+            "lieferant_id": payload.lieferant_id,
+            "lieferant_name": payload.lieferant_name,
+            "skonto_prozent": payload.skonto_prozent,
+            "skonto_bis": payload.skonto_bis,
+            "mahn_stufe": payload.mahn_stufe,
+            "zahlbar": payload.zahlbar,
+            "letzte_bewegung_am": payload.letzte_bewegung_am,
+            "kredit_limit": payload.kredit_limit,
+            "kv_limit": payload.kv_limit,
+            "sperre_grund": payload.sperre_grund,
+        },
+    )
+    db.commit()
+    return await get_open_item(op_id, tenant_id, db)
+
+
+@router.put("/{op_id}", response_model=OpenItem)
+async def update_open_item(op_id: str, payload: OpenItemCreate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+    _validate_op(payload)
+    exists = db.execute(text("SELECT id FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"), {"id": op_id, "tenant_id": tenant_id}).fetchone()
+    if not exists:
+        raise HTTPException(status_code=404, detail="Open item not found")
+    db.execute(
+        text(
+            """
+            UPDATE offene_posten
+            SET konto_nr=:konto_nr, konto_name=:konto_name, konto_typ=:konto_typ, op_status=:op_status,
+                rechnungsnr=:rechnungsnr, rechnungsdatum=:rechnungsdatum, datum=:datum, faelligkeit=:faelligkeit, valuta=:valuta,
+                op_betrag=:op_betrag, betrag=:betrag, saldo=:saldo, offen=:offen, op_text=:op_text, waehrung=:waehrung,
+                kunde_id=:kunde_id, kunde_name=:kunde_name, lieferant_id=:lieferant_id, lieferant_name=:lieferant_name,
+                skonto_prozent=:skonto_prozent, skonto_bis=:skonto_bis, mahn_stufe=:mahn_stufe, zahlbar=:zahlbar,
+                letzte_bewegung_am=:letzte_bewegung_am, kredit_limit=:kredit_limit, kv_limit=:kv_limit, sperre_grund=:sperre_grund,
+                updated_at=NOW()
+            WHERE id=:id AND tenant_id=:tenant_id
+            """
+        ),
+        {
+            "id": op_id,
+            "tenant_id": tenant_id,
+            "konto_nr": payload.konto_nr,
+            "konto_name": payload.konto_name,
+            "konto_typ": payload.konto_typ,
+            "op_status": payload.op_status,
+            "rechnungsnr": payload.rechnungsnr,
+            "rechnungsdatum": payload.rechnungsdatum,
+            "datum": payload.rechnungsdatum,
+            "faelligkeit": payload.faelligkeit,
+            "valuta": payload.valuta,
+            "op_betrag": payload.op_betrag,
+            "betrag": payload.op_betrag,
+            "saldo": payload.saldo,
+            "offen": payload.offen,
+            "op_text": payload.op_text,
+            "waehrung": payload.waehrung,
+            "kunde_id": payload.kunde_id,
+            "kunde_name": payload.kunde_name,
+            "lieferant_id": payload.lieferant_id,
+            "lieferant_name": payload.lieferant_name,
+            "skonto_prozent": payload.skonto_prozent,
+            "skonto_bis": payload.skonto_bis,
+            "mahn_stufe": payload.mahn_stufe,
+            "zahlbar": payload.zahlbar,
+            "letzte_bewegung_am": payload.letzte_bewegung_am,
+            "kredit_limit": payload.kredit_limit,
+            "kv_limit": payload.kv_limit,
+            "sperre_grund": payload.sperre_grund,
+        },
+    )
+    db.commit()
+    return await get_open_item(op_id, tenant_id, db)
+
+
+@router.patch("/{op_id}", response_model=OpenItem)
+async def patch_open_item(op_id: str, payload: OpenItemUpdate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+    existing = await get_open_item(op_id, tenant_id, db)
+    merged = OpenItemCreate(**{**existing.model_dump(exclude={"id", "tenant_id", "created_at", "updated_at"}), **payload.model_dump(exclude_unset=True)})
+    return await update_open_item(op_id, merged, tenant_id, db)
+
+
+@router.delete("/{op_id}", status_code=204)
+async def delete_open_item(op_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+    row = db.execute(text("SELECT id FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"), {"id": op_id, "tenant_id": tenant_id}).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Open item not found")
+    db.execute(text("DELETE FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"), {"id": op_id, "tenant_id": tenant_id})
+    db.commit()
+    return None
 
 
 @router.post("/{op_id}/settle", response_model=SettlementResult)

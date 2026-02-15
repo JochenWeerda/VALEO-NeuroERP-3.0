@@ -6,12 +6,10 @@ Core business logic for inventory management
 from typing import List, Optional, Dict, Any
 from decimal import Decimal
 import uuid
-from datetime import datetime
+from datetime import datetime, date, time
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
 from app.infrastructure.models import Article as ArticleModel, Warehouse as WarehouseModel, StockMovement as StockMovementModel
-from app.domains.inventory.domain.entities import Article, Warehouse, StockMovement
 
 
 class InventoryService:
@@ -81,10 +79,19 @@ class InventoryService:
         movement_type: str,
         quantity: Decimal,
         unit_cost: Optional[Decimal] = None,
+        unit: Optional[str] = None,
+        movement_number: Optional[str] = None,
+        movement_date: Optional[date] = None,
+        movement_time: Optional[time] = None,
         reference_number: Optional[str] = None,
         notes: Optional[str] = None,
+        warehouse_location: Optional[str] = None,
+        charge: Optional[str] = None,
+        booking_user: Optional[str] = None,
+        auto_created: bool = False,
+        linked_order_id: Optional[str] = None,
         tenant_id: str = None
-    ) -> StockMovement:
+    ):
         """Process a stock movement and update article stock levels."""
 
         # Get current article
@@ -93,7 +100,11 @@ class InventoryService:
             raise ValueError(f"Article {article_id} not found")
 
         # Get current warehouse
-        warehouse = self.db.query(WarehouseModel).filter(WarehouseModel.id == warehouse_id).first()
+        warehouse = (
+            self.db.query(WarehouseModel.id)
+            .filter(WarehouseModel.id == warehouse_id)
+            .first()
+        )
         if not warehouse:
             raise ValueError(f"Warehouse {warehouse_id} not found")
 
@@ -127,8 +138,17 @@ class InventoryService:
             movement_type=movement_type,
             quantity=quantity,
             unit_cost=unit_cost,
+            unit=unit,
+            movement_number=movement_number,
+            movement_date=movement_date or datetime.utcnow().date(),
+            movement_time=movement_time or datetime.utcnow().time().replace(microsecond=0),
             reference_number=reference_number,
             notes=notes,
+            warehouse_location=warehouse_location,
+            charge=charge,
+            booking_user=booking_user,
+            auto_created=auto_created,
+            linked_order_id=linked_order_id,
             previous_stock=previous_stock,
             new_stock=new_stock,
             total_cost=total_cost,
@@ -145,31 +165,33 @@ class InventoryService:
         self.db.commit()
         self.db.refresh(movement)
 
-        # Publish event for stock movement
-        from app.core.event_publisher import get_event_publisher
-        from app.domains.shared.events.inventory_events import StockMovementRecordedEvent
+        # Best-effort event publishing; do not break core booking if event infra is unavailable.
+        try:
+            from app.core.event_publisher import get_event_publisher
+            from app.domains.shared.events.inventory_events import StockMovementRecordedEvent
+            import asyncio
 
-        event_publisher = get_event_publisher()
-        event = StockMovementRecordedEvent(
-            aggregate_id=article_id,
-            timestamp=datetime.utcnow(),
-            event_id=f"movement-{movement.id}",
-            movement_id=movement.id,
-            article_id=article_id,
-            warehouse_id=warehouse_id,
-            movement_type=movement_type,
-            quantity=quantity,
-            previous_stock=previous_stock,
-            new_stock=new_stock,
-            reference_number=reference_number,
-            tenant_id=tenant_id
-        )
+            event_publisher = get_event_publisher()
+            resolved_tenant_id = tenant_id or article.tenant_id
+            event = StockMovementRecordedEvent(
+                aggregate_id=article_id,
+                timestamp=datetime.utcnow(),
+                event_id=f"movement-{movement.id}",
+                movement_id=movement.id,
+                article_id=article_id,
+                warehouse_id=warehouse_id,
+                movement_type=movement_type,
+                quantity=quantity,
+                previous_stock=previous_stock,
+                new_stock=new_stock,
+                reference_number=reference_number,
+                tenant_id=resolved_tenant_id
+            )
+            asyncio.create_task(event_publisher.publish(event))
+        except Exception:
+            pass
 
-        # Publish event asynchronously (fire and forget for now)
-        import asyncio
-        asyncio.create_task(event_publisher.publish(event))
-
-        return StockMovement.model_validate(movement)
+        return movement
 
     def get_stock_movements(
         self,
@@ -178,7 +200,7 @@ class InventoryService:
         movement_type: Optional[str] = None,
         tenant_id: str = None,
         limit: int = 50
-    ) -> List[StockMovement]:
+    ) -> List[StockMovementModel]:
         """Get stock movement history with optional filters."""
 
         query = self.db.query(StockMovementModel).filter(StockMovementModel.tenant_id == tenant_id)
@@ -191,8 +213,7 @@ class InventoryService:
             query = query.filter(StockMovementModel.movement_type == movement_type)
 
         movements = query.order_by(StockMovementModel.created_at.desc()).limit(limit).all()
-
-        return [StockMovement.model_validate(movement) for movement in movements]
+        return movements
 
     def calculate_inventory_value(self, tenant_id: str) -> Dict[str, Any]:
         """Calculate total inventory value and statistics."""

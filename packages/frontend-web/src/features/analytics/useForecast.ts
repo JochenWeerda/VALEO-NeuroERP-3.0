@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useMcpQuery } from "@/lib/mcp"
+import { buildMcpHeaders, useMcpQuery } from "@/lib/mcp"
 
 type TrendPoint = {
   date: string
@@ -28,6 +28,25 @@ type ForecastResponse = {
   error?: string
 }
 
+function isValidForecast(data: unknown): data is Forecast {
+  if (typeof data !== "object" || data === null) {
+    return false
+  }
+  const candidate = data as {
+    forecast?: { sales?: unknown; anomaly?: unknown } | null
+    summary?: unknown
+    factors?: unknown
+  }
+  return (
+    candidate.forecast !== null &&
+    candidate.forecast !== undefined &&
+    typeof candidate.forecast.sales === "number" &&
+    typeof candidate.forecast.anomaly === "boolean" &&
+    typeof candidate.summary === "string" &&
+    Array.isArray(candidate.factors)
+  )
+}
+
 /**
  * Custom Hook für Umsatz-Prognosen und Anomalie-Erkennung
  * Lädt Trenddaten und berechnet Forecasts via Backend
@@ -49,9 +68,9 @@ export function useForecast(): {
 
     const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
-    fetch(`${apiBaseUrl}/api/v1/mcp/copilot/forecast`, {
+    fetch(`${apiBaseUrl}/api/mcp/copilot/forecast`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: buildMcpHeaders(),
       body: JSON.stringify({ trends: trendData.data }),
     })
       .then((response) => {
@@ -62,8 +81,10 @@ export function useForecast(): {
         return response.json()
       })
       .then((json: ForecastResponse) => {
-        if (json.ok === true && json.data !== undefined) {
+        if (json.ok === true && isValidForecast(json.data)) {
           setResult(json.data)
+        } else {
+          setResult(null)
         }
       })
       .catch(() => {

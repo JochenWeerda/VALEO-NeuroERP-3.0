@@ -7,6 +7,7 @@ from typing import Optional
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....core.security import require_bearer_token
 from ....infrastructure.models import User as UserModel
@@ -110,7 +111,7 @@ def get_current_tenant_id(
 
     # For development token, return default tenant
     if claims.get('token_type') == 'dev':
-        return "system"
+        return settings.DEFAULT_TENANT_ID
 
     # Extract tenant ID from JWT claims
     tenant_id = claims.get('tenant_id')

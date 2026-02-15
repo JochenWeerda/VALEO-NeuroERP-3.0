@@ -12,6 +12,22 @@ export interface Article {
   article_number: string
   name: string
   description?: string
+  suchbegriff?: string
+  hersteller?: string
+  herkunftsland?: string
+  naehrwertangaben?: string
+  mhd_erforderlich: boolean
+  lagerartikel: boolean
+  mehrwertsteuer_prozent?: number
+  warengruppe?: string
+  gefahrgutklasse?: string
+  lagerorte: string[]
+  chargenpflicht: boolean
+  qs_pruefung_erforderlich: boolean
+  zolltarifnummer?: string
+  bio_kennzeichnung: boolean
+  gmp_plus_relevanz: boolean
+  lieferantennummer?: string
   unit: string
   category: string
   subcategory?: string
@@ -37,6 +53,22 @@ export interface ArticleCreate {
   article_number: string
   name: string
   description?: string
+  suchbegriff?: string
+  hersteller?: string
+  herkunftsland?: string
+  naehrwertangaben?: string
+  mhd_erforderlich?: boolean
+  lagerartikel?: boolean
+  mehrwertsteuer_prozent?: number
+  warengruppe?: string
+  gefahrgutklasse?: string
+  lagerorte?: string[]
+  chargenpflicht?: boolean
+  qs_pruefung_erforderlich?: boolean
+  zolltarifnummer?: string
+  bio_kennzeichnung?: boolean
+  gmp_plus_relevanz?: boolean
+  lieferantennummer?: string
   unit: string
   category: string
   subcategory?: string
@@ -55,6 +87,22 @@ export interface ArticleUpdate {
   article_number?: string
   name?: string
   description?: string
+  suchbegriff?: string
+  hersteller?: string
+  herkunftsland?: string
+  naehrwertangaben?: string
+  mhd_erforderlich?: boolean
+  lagerartikel?: boolean
+  mehrwertsteuer_prozent?: number
+  warengruppe?: string
+  gefahrgutklasse?: string
+  lagerorte?: string[]
+  chargenpflicht?: boolean
+  qs_pruefung_erforderlich?: boolean
+  zolltarifnummer?: string
+  bio_kennzeichnung?: boolean
+  gmp_plus_relevanz?: boolean
+  lieferantennummer?: string
   unit?: string
   category?: string
   subcategory?: string
@@ -88,23 +136,29 @@ export const articleService = {
     offset?: number
     tenant_id?: string
   }) {
-    const response = await apiClient.get<ArticlesResponse>('/api/v1/articles', { params })
+    const queryParams = {
+      search: params?.search,
+      limit: params?.limit,
+      skip: params?.offset,
+      tenant_id: params?.tenant_id,
+    }
+    const response = await apiClient.get<ArticlesResponse>('/api/v1/articles', { params: queryParams })
     return response.data
   },
 
   async getArticle(id: string) {
-    const response = await apiClient.get<{ data: Article }>(`/api/v1/articles/${id}`)
-    return response.data.data
+    const response = await apiClient.get<Article>(`/api/v1/articles/${id}`)
+    return response.data
   },
 
   async createArticle(data: ArticleCreate) {
-    const response = await apiClient.post<{ data: Article }>('/api/v1/articles', data)
-    return response.data.data
+    const response = await apiClient.post<Article>('/api/v1/articles', data)
+    return response.data
   },
 
   async updateArticle(id: string, data: ArticleUpdate) {
-    const response = await apiClient.put<{ data: Article }>(`/api/v1/articles/${id}`, data)
-    return response.data.data
+    const response = await apiClient.put<Article>(`/api/v1/articles/${id}`, data)
+    return response.data
   },
 
   async deleteArticle(id: string) {

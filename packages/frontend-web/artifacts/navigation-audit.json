@@ -1,0 +1,3728 @@
+{
+  "summary": {
+    "pagesTotal": 308,
+    "menuPointsTotal": 122,
+    "starterCardsTotal": 16,
+    "missingModules": 0,
+    "missingRoutes": 0,
+    "unassignedPages": 204
+  },
+  "cards": [
+    {
+      "id": "dashboard",
+      "label": "Dashboard",
+      "path": "/",
+      "module": "@/pages/start-dashboard"
+    },
+    {
+      "id": "verkauf",
+      "label": "Verkauf",
+      "path": "/dashboard/sales"
+    },
+    {
+      "id": "crm",
+      "label": "CRM & Marketing",
+      "path": "/crm/kontakte-liste"
+    },
+    {
+      "id": "einkauf",
+      "label": "Einkauf",
+      "path": "/dashboard/einkauf"
+    },
+    {
+      "id": "fibu",
+      "label": "Finanzbuchhaltung",
+      "path": "/fibu/hauptbuch"
+    },
+    {
+      "id": "lager",
+      "label": "Lager & Bestände",
+      "path": "/lager/bestandsuebersicht"
+    },
+    {
+      "id": "agrar",
+      "label": "Agrar & Warenwirtschaft",
+      "path": "/agrar/psm",
+      "featureKey": "agrar"
+    },
+    {
+      "id": "annahme",
+      "label": "Annahme & Waage",
+      "path": "/annahme/warteschlange"
+    },
+    {
+      "id": "quality",
+      "label": "Qualität & Compliance",
+      "path": "/document"
+    },
+    {
+      "id": "compliance",
+      "label": "Compliance",
+      "path": "/policies"
+    },
+    {
+      "id": "logistik",
+      "label": "Logistik",
+      "path": "/logistik/tourenplanung"
+    },
+    {
+      "id": "pos",
+      "label": "POS & Filialen",
+      "path": "/pos/terminal"
+    },
+    {
+      "id": "personal",
+      "label": "Personal",
+      "path": "/personal/mitarbeiter-liste"
+    },
+    {
+      "id": "controlling",
+      "label": "Controlling",
+      "path": "/controlling/plan-ist"
+    },
+    {
+      "id": "workflow",
+      "label": "Workflows",
+      "path": "/workflow/workflow-monitoring"
+    },
+    {
+      "id": "admin",
+      "label": "Administration",
+      "path": "/admin/benutzer-liste"
+    }
+  ],
+  "menuPoints": [
+    {
+      "id": "dashboard",
+      "label": "Dashboard",
+      "depth": 0,
+      "module": "@/pages/start-dashboard",
+      "path": "/",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "verkauf",
+      "label": "Verkauf",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "sales-dashboard",
+      "label": "Dashboard",
+      "depth": 1,
+      "module": "@/pages/dashboard/sales-dashboard",
+      "path": "/dashboard/sales",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "angebot",
+      "label": "Angebote",
+      "depth": 1,
+      "module": "@/pages/sales/angebote-liste",
+      "path": "/sales",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "auftrag",
+      "label": "Aufträge",
+      "depth": 1,
+      "module": "@/pages/sales/order-editor",
+      "path": "/sales/order",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "lieferung",
+      "label": "Lieferungen",
+      "depth": 1,
+      "module": "@/pages/sales/delivery-editor",
+      "path": "/sales/delivery",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "rechnung",
+      "label": "Rechnungen",
+      "depth": 1,
+      "module": "@/pages/sales/invoice-editor",
+      "path": "/sales/invoice",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "kunden",
+      "label": "Kunden",
+      "depth": 1,
+      "module": "@/pages/verkauf/kunden-liste",
+      "path": "/verkauf/kunden-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "artikel",
+      "label": "Artikel",
+      "depth": 1,
+      "module": "@/pages/artikel/liste",
+      "path": "/artikel/liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "analytics",
+      "label": "Analytics",
+      "depth": 1,
+      "module": "@/pages/analytics",
+      "path": "/copilot",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "reports",
+      "label": "Berichte",
+      "depth": 1,
+      "module": "@/pages/reports",
+      "path": "/reports",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "crm",
+      "label": "CRM & Marketing",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "kontakte",
+      "label": "Kontakte",
+      "depth": 1,
+      "module": "@/pages/crm/kontakte-liste",
+      "path": "/crm/kontakte-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "leads",
+      "label": "Leads",
+      "depth": 1,
+      "module": "@/pages/crm/leads",
+      "path": "/crm/leads",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "prospecting",
+      "label": "Prospecting",
+      "depth": 1,
+      "module": "@/pages/prospecting/LeadExplorer",
+      "path": "/prospecting/leads",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "aktivitaeten",
+      "label": "Aktivitäten",
+      "depth": 1,
+      "module": "@/pages/crm/aktivitaeten",
+      "path": "/crm/aktivitaeten",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "betriebsprofile",
+      "label": "Betriebsprofile",
+      "depth": 1,
+      "module": "@/pages/crm/betriebsprofile-liste",
+      "path": "/crm/betriebsprofile",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "kampagnen",
+      "label": "Kampagnen",
+      "depth": 1,
+      "module": "@/pages/crm/campaigns",
+      "path": "/crm/campaigns",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "kampagnen-vorlagen",
+      "label": "Kampagnen-Vorlagen",
+      "depth": 1,
+      "module": "@/pages/crm/campaign-templates",
+      "path": "/crm/campaign-templates",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "kampagnen-performance",
+      "label": "Kampagnen-Performance",
+      "depth": 1,
+      "module": "@/pages/crm/campaign-performance-dashboard",
+      "path": "/crm/campaign-performance",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "segmente",
+      "label": "Segmente",
+      "depth": 1,
+      "module": "@/pages/crm/segments",
+      "path": "/crm/segments",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "einwilligungen",
+      "label": "Einwilligungen",
+      "depth": 1,
+      "module": "@/pages/crm/consent-management",
+      "path": "/crm/consents",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "dsgvo-anfragen",
+      "label": "DSGVO-Anfragen",
+      "depth": 1,
+      "module": "@/pages/crm/gdpr-requests",
+      "path": "/crm/gdpr-requests",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "einkauf",
+      "label": "Einkauf",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "einkauf-dashboard",
+      "label": "Dashboard",
+      "depth": 1,
+      "module": "@/pages/dashboard/einkauf-dashboard",
+      "path": "/dashboard/einkauf",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "bestellvorschlaege",
+      "label": "Bestellvorschläge",
+      "depth": 1,
+      "module": "@/pages/einkauf/bestellvorschlaege",
+      "path": "/einkauf/bestellvorschlaege",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "bestellungen",
+      "label": "Bestellungen",
+      "depth": 1,
+      "module": "@/pages/einkauf/bestellungen-liste",
+      "path": "/einkauf/bestellungen-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "wareneingang",
+      "label": "Wareneingang",
+      "depth": 1,
+      "module": "@/pages/charge/wareneingang",
+      "path": "/charge/wareneingang",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "lieferanten",
+      "label": "Lieferanten",
+      "depth": 1,
+      "module": "@/pages/einkauf/lieferanten-liste",
+      "path": "/einkauf/lieferanten-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "warengruppen",
+      "label": "Warengruppen",
+      "depth": 1,
+      "module": "@/pages/einkauf/warengruppen",
+      "path": "/einkauf/warengruppen",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "anfragen",
+      "label": "Anfragen (RFQ)",
+      "depth": 1,
+      "module": "@/pages/einkauf/anfragen-liste",
+      "path": "/einkauf/anfragen-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "angebote-einkauf",
+      "label": "Angebote",
+      "depth": 1,
+      "module": "@/pages/einkauf/angebote-liste",
+      "path": "/einkauf/angebote-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "rechnungseingaenge",
+      "label": "Rechnungseingänge",
+      "depth": 1,
+      "module": "@/pages/einkauf/rechnungseingaenge-liste",
+      "path": "/einkauf/rechnungseingaenge-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "rechnung-abgleich",
+      "label": "Rechnungsabgleich",
+      "depth": 1,
+      "module": "@/pages/einkauf/rechnung-abgleich",
+      "path": "/einkauf/rechnung-abgleich",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "retouren",
+      "label": "Retouren",
+      "depth": 1,
+      "module": "@/pages/einkauf/retouren",
+      "path": "/einkauf/retouren",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "disposition",
+      "label": "Disposition",
+      "depth": 1,
+      "module": "@/pages/disposition/liste",
+      "path": "/disposition/liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "lieferantenbewertung",
+      "label": "Lieferantenbewertung",
+      "depth": 1,
+      "module": "@/pages/einkauf/lieferantenbewertung",
+      "path": "/einkauf/lieferantenbewertung",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "lieferanten-dokumente",
+      "label": "Lieferanten-Dokumente",
+      "depth": 1,
+      "module": "@/pages/einkauf/lieferanten-dokumente",
+      "path": "/einkauf/lieferanten-dokumente",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "service-entry-sheets",
+      "label": "Service Entry Sheets",
+      "depth": 1,
+      "module": "@/pages/einkauf/service-entry-sheets",
+      "path": "/einkauf/service-entry-sheets",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "audit-drilldown",
+      "label": "Audit Drilldown",
+      "depth": 1,
+      "module": "@/pages/einkauf/audit-drilldown",
+      "path": "/einkauf/audit-drilldown",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "edi-portal",
+      "label": "EDI Portal",
+      "depth": 1,
+      "module": "@/pages/einkauf/edi-portal",
+      "path": "/einkauf/edi-portal",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "fibu",
+      "label": "Finanzbuchhaltung",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "hauptbuch",
+      "label": "Hauptbuch",
+      "depth": 1,
+      "module": "@/pages/fibu/hauptbuch",
+      "path": "/fibu/hauptbuch",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "debitoren",
+      "label": "Debitoren",
+      "depth": 1,
+      "module": "@/pages/fibu/debitoren",
+      "path": "/fibu/debitoren",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "kreditoren",
+      "label": "Kreditoren",
+      "depth": 1,
+      "module": "@/pages/fibu/kreditoren",
+      "path": "/fibu/kreditoren",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "buchungsjournal",
+      "label": "Buchungsjournal",
+      "depth": 1,
+      "module": "@/pages/fibu/buchungsjournal",
+      "path": "/finance/bookings/new",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "kontenplan",
+      "label": "Kontenplan",
+      "depth": 1,
+      "module": "@/pages/fibu/kontenplan",
+      "path": "/fibu/kontenplan",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "bilanz",
+      "label": "Bilanz",
+      "depth": 1,
+      "module": "@/pages/fibu/bilanz",
+      "path": "/fibu/bilanz",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "guv",
+      "label": "GuV",
+      "depth": 1,
+      "module": "@/pages/fibu/guv",
+      "path": "/fibu/guv",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "bwa",
+      "label": "BWA",
+      "depth": 1,
+      "module": "@/pages/fibu/bwa",
+      "path": "/fibu/bwa",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "anlagen",
+      "label": "Anlagenbuchhaltung",
+      "depth": 1,
+      "module": "@/pages/fibu/anlagen",
+      "path": "/fibu/anlagen",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "op-verwaltung",
+      "label": "OP-Verwaltung",
+      "depth": 1,
+      "module": "@/pages/fibu/op-verwaltung",
+      "path": "/fibu/op-verwaltung",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "offene-posten",
+      "label": "Offene Posten",
+      "depth": 1,
+      "module": "@/pages/fibu/offene-posten",
+      "path": "/fibu/offene-posten",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "zahlungslaeufe",
+      "label": "Zahlungsläufe",
+      "depth": 1,
+      "module": "@/pages/fibu/zahlungslaeufe",
+      "path": "/fibu/zahlungslaeufe",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "kostenstellenrechnung",
+      "label": "Kostenstellen",
+      "depth": 1,
+      "module": "@/pages/fibu/kostenstellenrechnung",
+      "path": "/fibu/kostenstellenrechnung",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "ustva",
+      "label": "USt.-Voranmeldung",
+      "depth": 1,
+      "module": "@/pages/export/umsatzsteuervoranmeldung",
+      "path": "/export/ustva",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "audit-trail-finance",
+      "label": "Audit-Trail (GoBD)",
+      "depth": 1,
+      "module": "@/pages/finance/audit-trail",
+      "path": "/finance/audit-trail",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "lager",
+      "label": "Lager & Bestände",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "bestandsuebersicht",
+      "label": "Bestandsübersicht",
+      "depth": 1,
+      "module": "@/pages/lager/bestandsuebersicht",
+      "path": "/lager/bestandsuebersicht",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "einlagerung",
+      "label": "Einlagerung",
+      "depth": 1,
+      "module": "@/pages/lager/einlagerung",
+      "path": "/lager/einlagerung",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "auslagerung",
+      "label": "Auslagerung",
+      "depth": 1,
+      "module": "@/pages/lager/auslagerung",
+      "path": "/lager/auslagerung",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "inventur",
+      "label": "Inventur",
+      "depth": 1,
+      "module": "@/pages/lager/inventur",
+      "path": "/lager/inventur",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "agrar",
+      "label": "Agrar & Warenwirtschaft",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "psm",
+      "label": "Pflanzenschutz",
+      "depth": 1,
+      "module": "@/pages/agrar/psm/liste",
+      "path": "/agrar/psm",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "duenger",
+      "label": "Dünger",
+      "depth": 1,
+      "module": "@/pages/agrar/duenger-liste",
+      "path": "/agrar/duenger-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "saatgut",
+      "label": "Saatgut",
+      "depth": 1,
+      "module": "@/pages/agrar/saatgut-liste",
+      "path": "/agrar/saatgut-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "bodenproben",
+      "label": "Bodenproben",
+      "depth": 1,
+      "module": "@/pages/agrar/bodenproben/liste",
+      "path": "/agrar/bodenproben",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "ernte",
+      "label": "Ernteplanung",
+      "depth": 1,
+      "module": "@/pages/agrar/ernte/liste",
+      "path": "/agrar/ernte",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "feldbuch",
+      "label": "Feldbuch",
+      "depth": 1,
+      "module": "@/pages/agrar/feldbuch/schlagkartei",
+      "path": "/agrar/feldbuch/schlagkartei",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "futtermittel",
+      "label": "Futtermittel",
+      "depth": 1,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "einzelfuttermittel",
+      "label": "Einzelfuttermittel",
+      "depth": 2,
+      "module": "@/pages/futtermittel/einzelfuttermittel-liste",
+      "path": "/futtermittel/einzelfuttermittel-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "mischfuttermittel",
+      "label": "Mischfuttermittel",
+      "depth": 2,
+      "module": "@/pages/futtermittel/mischfuttermittel-liste",
+      "path": "/futtermittel/mischfuttermittel-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "futtermittel-wareneingang",
+      "label": "Wareneingang",
+      "depth": 2,
+      "module": "@/pages/futtermittel/futtermittel-wareneingang",
+      "path": "/futtermittel/futtermittel-wareneingang",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "futtermittel-qualitaet",
+      "label": "Qualitätskontrolle",
+      "depth": 2,
+      "module": "@/pages/futtermittel/futtermittel-qualitaetskontrolle",
+      "path": "/futtermittel/futtermittel-qualitaetskontrolle",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "futtermittel-statistik",
+      "label": "Statistik",
+      "depth": 2,
+      "module": "@/pages/futtermittel/futtermittel-statistik",
+      "path": "/futtermittel/futtermittel-statistik",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "annahme",
+      "label": "Annahme & Waage",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "warteschlange",
+      "label": "Warteschlange",
+      "depth": 1,
+      "module": "@/pages/annahme/warteschlange",
+      "path": "/annahme/warteschlange",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "waage-liste",
+      "label": "Waagen",
+      "depth": 1,
+      "module": "@/pages/waage/liste",
+      "path": "/waage/liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "wiegungen",
+      "label": "Wiegungen",
+      "depth": 1,
+      "module": "@/pages/waage/wiegungen",
+      "path": "/waage/wiegungen",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "quality",
+      "label": "Qualität & Compliance",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "qm-dokumente",
+      "label": "QM-Dokumente",
+      "depth": 1,
+      "module": "@/pages/document",
+      "path": "/document",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "audit-trails",
+      "label": "Audit Trails",
+      "depth": 1,
+      "module": "@/pages/admin/audit-log",
+      "path": "/admin/audit-log",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "compliance",
+      "label": "Compliance Cockpit",
+      "depth": 1,
+      "module": "@/pages/admin/compliance-dashboard",
+      "path": "/admin/compliance",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "compliance",
+      "label": "Compliance",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "policies",
+      "label": "Policies",
+      "depth": 1,
+      "module": "@/pages/policy-manager",
+      "path": "/policies",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "zulassungen",
+      "label": "Zulassungen",
+      "depth": 1,
+      "module": "@/pages/compliance/zulassungen-register",
+      "path": "/compliance/zulassungen-register",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "export-pruefprotokoll",
+      "label": "Export-Protokoll",
+      "depth": 1,
+      "module": "@/pages/compliance/export-pruefprotokoll",
+      "path": "/compliance/export-pruefprotokoll",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "eudr",
+      "label": "EUDR-Compliance",
+      "depth": 1,
+      "module": "@/pages/nachhaltigkeit/eudr-compliance",
+      "path": "/nachhaltigkeit/eudr-compliance",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "labor",
+      "label": "Labor",
+      "depth": 1,
+      "module": "@/pages/qualitaet/labor-liste",
+      "path": "/qualitaet/labor-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "zertifikate",
+      "label": "Zertifikate",
+      "depth": 1,
+      "module": "@/pages/zertifikate/liste",
+      "path": "/zertifikate/liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "logistik",
+      "label": "Logistik",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "tourenplanung",
+      "label": "Tourenplanung",
+      "depth": 1,
+      "module": "@/pages/logistik/tourenplanung",
+      "path": "/logistik/tourenplanung",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "frachtbriefe",
+      "label": "Frachtbriefe",
+      "depth": 1,
+      "module": "@/pages/logistik/frachtbriefe",
+      "path": "/logistik/frachtbriefe",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "pos",
+      "label": "POS & Filialen",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "pos-terminal",
+      "label": "POS Terminal",
+      "depth": 1,
+      "module": "@/pages/pos/terminal",
+      "path": "/pos/terminal",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "tse-journal",
+      "label": "TSE Journal",
+      "depth": 1,
+      "module": "@/pages/pos/tse-journal",
+      "path": "/pos/tse-journal",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "tagesabschluss",
+      "label": "Tagesabschluss",
+      "depth": 1,
+      "module": "@/pages/pos/tagesabschluss-enhanced",
+      "path": "/pos/tagesabschluss-enhanced",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "gift-cards",
+      "label": "Geschenkkarten",
+      "depth": 1,
+      "module": "@/pages/pos/gift-cards",
+      "path": "/pos/gift-cards",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "rabatte",
+      "label": "Rabatte",
+      "depth": 1,
+      "module": "@/pages/pos/rabatte",
+      "path": "/pos/rabatte",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "personal",
+      "label": "Personal",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "mitarbeiter-liste",
+      "label": "Mitarbeiter",
+      "depth": 1,
+      "module": "@/pages/personal/mitarbeiter-liste",
+      "path": "/personal/mitarbeiter-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "zeiterfassung",
+      "label": "Zeiterfassung",
+      "depth": 1,
+      "module": "@/pages/personal/zeiterfassung",
+      "path": "/personal/zeiterfassung",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "stundenzettel",
+      "label": "Stundenzettel",
+      "depth": 1,
+      "module": "@/pages/personal/stundenzettel",
+      "path": "/personal/stundenzettel",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "schulungen",
+      "label": "Schulungen",
+      "depth": 1,
+      "module": "@/pages/personal/schulungen",
+      "path": "/personal/schulungen",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "schichtplan",
+      "label": "Schichtplan",
+      "depth": 1,
+      "module": "@/pages/schichtplan/liste",
+      "path": "/schichtplan/liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "controlling",
+      "label": "Controlling",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "plan-ist",
+      "label": "Plan/Ist-Vergleich",
+      "depth": 1,
+      "module": "@/pages/controlling/plan-ist",
+      "path": "/controlling/plan-ist",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "deckungsbeitrag",
+      "label": "Deckungsbeitrag",
+      "depth": 1,
+      "module": "@/pages/reports/deckungsbeitrag",
+      "path": "/reports/deckungsbeitrag",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "liquiditaet",
+      "label": "Liquiditätsplanung",
+      "depth": 1,
+      "module": "@/pages/finanzplanung/liquiditaet",
+      "path": "/finanzplanung/liquiditaet",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "executive-dashboard",
+      "label": "Geschäftsführung",
+      "depth": 1,
+      "module": "@/pages/management/executive-dashboard",
+      "path": "/management/executive-dashboard",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "workflow",
+      "label": "Workflows",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "workflow-monitoring",
+      "label": "Monitoring",
+      "depth": 1,
+      "module": "@/pages/workflow/workflow-monitoring",
+      "path": "/workflow/workflow-monitoring",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "workflow-regeln",
+      "label": "Regeln",
+      "depth": 1,
+      "module": "@/pages/workflow/workflow-regeln",
+      "path": "/workflow/workflow-regeln",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "workflow-approval",
+      "label": "Freigaben",
+      "depth": 1,
+      "module": "@/pages/workflows/approval",
+      "path": "/workflows/approval",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "admin",
+      "label": "Administration",
+      "depth": 0,
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "benutzer",
+      "label": "Benutzer",
+      "depth": 1,
+      "module": "@/pages/admin/benutzer-liste",
+      "path": "/admin/benutzer-liste",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "rollen-verwaltung",
+      "label": "Rollen",
+      "depth": 1,
+      "module": "@/pages/admin/rollen-verwaltung",
+      "path": "/admin/rollen-verwaltung",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "audit-log",
+      "label": "Audit-Log",
+      "depth": 1,
+      "module": "@/pages/admin/audit-log",
+      "path": "/admin/audit-log",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "monitoring",
+      "label": "Monitoring",
+      "depth": 1,
+      "module": "@/pages/admin/monitoring/alerts",
+      "path": "/monitoring/alerts",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "compliance-dashboard",
+      "label": "Compliance",
+      "depth": 1,
+      "module": "@/pages/admin/compliance-dashboard",
+      "path": "/admin/compliance",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "gap-pipeline",
+      "label": "GAP-Pipeline",
+      "depth": 1,
+      "module": "@/pages/admin/GapPipelineConsole",
+      "path": "/admin/gap-pipeline",
+      "fileExists": true,
+      "routeLinked": true
+    },
+    {
+      "id": "system-einstellungen",
+      "label": "System",
+      "depth": 1,
+      "module": "@/pages/einstellungen/system",
+      "path": "/einstellungen/system",
+      "fileExists": true,
+      "routeLinked": true
+    }
+  ],
+  "pages": [
+    {
+      "pagePath": "pages/admin/audit-log.tsx",
+      "moduleSpecifier": "@/pages/admin/audit-log",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/admin/benutzer-liste.tsx",
+      "moduleSpecifier": "@/pages/admin/benutzer-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/admin/compliance-dashboard.tsx",
+      "moduleSpecifier": "@/pages/admin/compliance-dashboard",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/admin/GapPipelineConsole.tsx",
+      "moduleSpecifier": "@/pages/admin/GapPipelineConsole",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/admin/monitoring/alerts.tsx",
+      "moduleSpecifier": "@/pages/admin/monitoring/alerts",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/admin/rollen-verwaltung.tsx",
+      "moduleSpecifier": "@/pages/admin/rollen-verwaltung",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/admin/setup/dms-integration.tsx",
+      "moduleSpecifier": "@/pages/admin/setup/dms-integration",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/admin/setup/index.tsx",
+      "moduleSpecifier": "@/pages/admin/setup/index",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/aussaat/liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/aussaat/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/biostimulanzien-liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/biostimulanzien-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/bodenproben/liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/bodenproben/liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/agrar/duenger-liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/duenger-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/agrar/duenger-stamm.tsx",
+      "moduleSpecifier": "@/pages/agrar/duenger-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/duenger/bedarfsrechner.tsx",
+      "moduleSpecifier": "@/pages/agrar/duenger/bedarfsrechner",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/duenger/liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/duenger/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/duenger/mischungen.tsx",
+      "moduleSpecifier": "@/pages/agrar/duenger/mischungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/duenger/stamm.tsx",
+      "moduleSpecifier": "@/pages/agrar/duenger/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/duengung/planung.tsx",
+      "moduleSpecifier": "@/pages/agrar/duengung/planung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/ernte/liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/ernte/liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/agrar/feldbuch/massnahmen.tsx",
+      "moduleSpecifier": "@/pages/agrar/feldbuch/massnahmen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/feldbuch/schlag/neu.tsx",
+      "moduleSpecifier": "@/pages/agrar/feldbuch/schlag/neu",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/feldbuch/schlagkartei.tsx",
+      "moduleSpecifier": "@/pages/agrar/feldbuch/schlagkartei",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/agrar/kulturpflanzen/liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/kulturpflanzen/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/maschinenauslastung.tsx",
+      "moduleSpecifier": "@/pages/agrar/maschinenauslastung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/pflanzenschutz/applikation.tsx",
+      "moduleSpecifier": "@/pages/agrar/pflanzenschutz/applikation",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/abgabedokumentation.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/abgabedokumentation",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/auflagen-manager.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/auflagen-manager",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/beratung.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/beratung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/agrar/psm/resistenz.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/resistenz",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/sachkunde-register.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/sachkunde-register",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/stamm.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/wasserschutz.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/wasserschutz",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/saatgut-liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/saatgut-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/agrar/saatgut-stamm.tsx",
+      "moduleSpecifier": "@/pages/agrar/saatgut-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/saatgut/bestellung.tsx",
+      "moduleSpecifier": "@/pages/agrar/saatgut/bestellung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/saatgut/liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/saatgut/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/saatgut/sortenregister.tsx",
+      "moduleSpecifier": "@/pages/agrar/saatgut/sortenregister",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/saatgut/stamm.tsx",
+      "moduleSpecifier": "@/pages/agrar/saatgut/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/schlaege/karte.tsx",
+      "moduleSpecifier": "@/pages/agrar/schlaege/karte",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/wetter/prognose.tsx",
+      "moduleSpecifier": "@/pages/agrar/wetter/prognose",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/wetterwarnung.tsx",
+      "moduleSpecifier": "@/pages/agrar/wetterwarnung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agribusiness/farmers.tsx",
+      "moduleSpecifier": "@/pages/agribusiness/farmers",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agribusiness/field-service-tasks.tsx",
+      "moduleSpecifier": "@/pages/agribusiness/field-service-tasks",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/analytics.tsx",
+      "moduleSpecifier": "@/pages/analytics",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/annahme/abrechnung.tsx",
+      "moduleSpecifier": "@/pages/annahme/abrechnung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/annahme/lkw-registrierung.tsx",
+      "moduleSpecifier": "@/pages/annahme/lkw-registrierung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/annahme/qualitaets-check.tsx",
+      "moduleSpecifier": "@/pages/annahme/qualitaets-check",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/annahme/warteschlange.tsx",
+      "moduleSpecifier": "@/pages/annahme/warteschlange",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/artikel/liste.tsx",
+      "moduleSpecifier": "@/pages/artikel/liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/artikel/stamm.tsx",
+      "moduleSpecifier": "@/pages/artikel/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/auth/Callback.tsx",
+      "moduleSpecifier": "@/pages/auth/Callback",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/auth/Login.tsx",
+      "moduleSpecifier": "@/pages/auth/Login",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/banken/konten.tsx",
+      "moduleSpecifier": "@/pages/banken/konten",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/benachrichtigungen/liste.tsx",
+      "moduleSpecifier": "@/pages/benachrichtigungen/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/charge/liste.tsx",
+      "moduleSpecifier": "@/pages/charge/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/charge/rueckverfolgung.tsx",
+      "moduleSpecifier": "@/pages/charge/rueckverfolgung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/charge/stamm.tsx",
+      "moduleSpecifier": "@/pages/charge/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/charge/wareneingang.tsx",
+      "moduleSpecifier": "@/pages/charge/wareneingang",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/compliance/bvl-umsatzmeldung.tsx",
+      "moduleSpecifier": "@/pages/compliance/bvl-umsatzmeldung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/cross-compliance.tsx",
+      "moduleSpecifier": "@/pages/compliance/cross-compliance",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/enni-meldungen.tsx",
+      "moduleSpecifier": "@/pages/compliance/enni-meldungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/export-pruefprotokoll.tsx",
+      "moduleSpecifier": "@/pages/compliance/export-pruefprotokoll",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/compliance/pcn-ufi.tsx",
+      "moduleSpecifier": "@/pages/compliance/pcn-ufi",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/qs-checkliste.tsx",
+      "moduleSpecifier": "@/pages/compliance/qs-checkliste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/saatgut-nachbau.tsx",
+      "moduleSpecifier": "@/pages/compliance/saatgut-nachbau",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/sachkunde-register.tsx",
+      "moduleSpecifier": "@/pages/compliance/sachkunde-register",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/vvvo-register.tsx",
+      "moduleSpecifier": "@/pages/compliance/vvvo-register",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/zulassungen-register.tsx",
+      "moduleSpecifier": "@/pages/compliance/zulassungen-register",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/contracts-v2.tsx",
+      "moduleSpecifier": "@/pages/contracts-v2",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/controlling/plan-ist.tsx",
+      "moduleSpecifier": "@/pages/controlling/plan-ist",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/crm/aktivitaet-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/aktivitaet-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/aktivitaeten.tsx",
+      "moduleSpecifier": "@/pages/crm/aktivitaeten",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/crm/betriebsprofil-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/betriebsprofil-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/betriebsprofile-liste.tsx",
+      "moduleSpecifier": "@/pages/crm/betriebsprofile-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/crm/campaign-builder.tsx",
+      "moduleSpecifier": "@/pages/crm/campaign-builder",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/campaign-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/campaign-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/campaign-performance-dashboard.tsx",
+      "moduleSpecifier": "@/pages/crm/campaign-performance-dashboard",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/crm/campaign-template-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/campaign-template-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/campaign-templates.tsx",
+      "moduleSpecifier": "@/pages/crm/campaign-templates",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/crm/campaigns.tsx",
+      "moduleSpecifier": "@/pages/crm/campaigns",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/crm/consent-confirm.tsx",
+      "moduleSpecifier": "@/pages/crm/consent-confirm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/consent-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/consent-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/consent-management.tsx",
+      "moduleSpecifier": "@/pages/crm/consent-management",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/crm/crm-dashboard.tsx",
+      "moduleSpecifier": "@/pages/crm/crm-dashboard",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/gdpr-request-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/gdpr-request-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/gdpr-request-public.tsx",
+      "moduleSpecifier": "@/pages/crm/gdpr-request-public",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/gdpr-requests.tsx",
+      "moduleSpecifier": "@/pages/crm/gdpr-requests",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/crm/kontakt-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/kontakt-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/kontakt-management.tsx",
+      "moduleSpecifier": "@/pages/crm/kontakt-management",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/kontakte-liste.tsx",
+      "moduleSpecifier": "@/pages/crm/kontakte-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/crm/kunden-liste.tsx",
+      "moduleSpecifier": "@/pages/crm/kunden-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/kunden-stamm-modern.tsx",
+      "moduleSpecifier": "@/pages/crm/kunden-stamm-modern",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/kunden-stamm.tsx",
+      "moduleSpecifier": "@/pages/crm/kunden-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/lead-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/lead-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/leads.tsx",
+      "moduleSpecifier": "@/pages/crm/leads",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/crm/lieferanten-liste.tsx",
+      "moduleSpecifier": "@/pages/crm/lieferanten-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/lieferanten-stamm.tsx",
+      "moduleSpecifier": "@/pages/crm/lieferanten-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/opportunities-forecast.tsx",
+      "moduleSpecifier": "@/pages/crm/opportunities-forecast",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/opportunities-kanban.tsx",
+      "moduleSpecifier": "@/pages/crm/opportunities-kanban",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/opportunities-liste.tsx",
+      "moduleSpecifier": "@/pages/crm/opportunities-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/opportunity-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/opportunity-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/segment-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/segment-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/segments.tsx",
+      "moduleSpecifier": "@/pages/crm/segments",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/dashboard/customizable.tsx",
+      "moduleSpecifier": "@/pages/dashboard/customizable",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/dashboard/einkauf-dashboard.tsx",
+      "moduleSpecifier": "@/pages/dashboard/einkauf-dashboard",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/dashboard/sales-dashboard.tsx",
+      "moduleSpecifier": "@/pages/dashboard/sales-dashboard",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/dashboards/geschaeftsfuehrung.tsx",
+      "moduleSpecifier": "@/pages/dashboards/geschaeftsfuehrung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/disposition/liste.tsx",
+      "moduleSpecifier": "@/pages/disposition/liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/document.tsx",
+      "moduleSpecifier": "@/pages/document",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/dokumente/ablage.tsx",
+      "moduleSpecifier": "@/pages/dokumente/ablage",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/anfrage-stamm.tsx",
+      "moduleSpecifier": "@/pages/einkauf/anfrage-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/anfragen-liste.tsx",
+      "moduleSpecifier": "@/pages/einkauf/anfragen-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einkauf/angebot-stamm.tsx",
+      "moduleSpecifier": "@/pages/einkauf/angebot-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/angebote-liste.tsx",
+      "moduleSpecifier": "@/pages/einkauf/angebote-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einkauf/anlieferavis-liste.tsx",
+      "moduleSpecifier": "@/pages/einkauf/anlieferavis-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/anlieferavis.tsx",
+      "moduleSpecifier": "@/pages/einkauf/anlieferavis",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/audit-drilldown.tsx",
+      "moduleSpecifier": "@/pages/einkauf/audit-drilldown",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einkauf/auftragsbestaetigung.tsx",
+      "moduleSpecifier": "@/pages/einkauf/auftragsbestaetigung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/auftragsbestaetigungen-liste.tsx",
+      "moduleSpecifier": "@/pages/einkauf/auftragsbestaetigungen-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/bestellung-anlegen.tsx",
+      "moduleSpecifier": "@/pages/einkauf/bestellung-anlegen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/bestellung-stamm.tsx",
+      "moduleSpecifier": "@/pages/einkauf/bestellung-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/bestellungen-liste.tsx",
+      "moduleSpecifier": "@/pages/einkauf/bestellungen-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einkauf/bestellvorschlaege.tsx",
+      "moduleSpecifier": "@/pages/einkauf/bestellvorschlaege",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einkauf/edi-portal.tsx",
+      "moduleSpecifier": "@/pages/einkauf/edi-portal",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einkauf/gutschriften-belastungen.tsx",
+      "moduleSpecifier": "@/pages/einkauf/gutschriften-belastungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/lieferanten-dokumente.tsx",
+      "moduleSpecifier": "@/pages/einkauf/lieferanten-dokumente",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einkauf/lieferanten-liste.tsx",
+      "moduleSpecifier": "@/pages/einkauf/lieferanten-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einkauf/lieferanten-stamm.tsx",
+      "moduleSpecifier": "@/pages/einkauf/lieferanten-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/lieferantenbewertung.tsx",
+      "moduleSpecifier": "@/pages/einkauf/lieferantenbewertung",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einkauf/rechnung-abgleich.tsx",
+      "moduleSpecifier": "@/pages/einkauf/rechnung-abgleich",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einkauf/rechnungseingaenge-liste.tsx",
+      "moduleSpecifier": "@/pages/einkauf/rechnungseingaenge-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einkauf/rechnungseingang.tsx",
+      "moduleSpecifier": "@/pages/einkauf/rechnungseingang",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/reports.tsx",
+      "moduleSpecifier": "@/pages/einkauf/reports",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/retouren.tsx",
+      "moduleSpecifier": "@/pages/einkauf/retouren",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einkauf/rfq-bids.tsx",
+      "moduleSpecifier": "@/pages/einkauf/rfq-bids",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/service-entry-sheets.tsx",
+      "moduleSpecifier": "@/pages/einkauf/service-entry-sheets",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einkauf/wareneingang.tsx",
+      "moduleSpecifier": "@/pages/einkauf/wareneingang",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/warengruppen.tsx",
+      "moduleSpecifier": "@/pages/einkauf/warengruppen",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/einstellungen/system.tsx",
+      "moduleSpecifier": "@/pages/einstellungen/system",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/energie/verbrauch.tsx",
+      "moduleSpecifier": "@/pages/energie/verbrauch",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/etiketten/drucken.tsx",
+      "moduleSpecifier": "@/pages/etiketten/drucken",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/export/umsatzsteuervoranmeldung.tsx",
+      "moduleSpecifier": "@/pages/export/umsatzsteuervoranmeldung",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/anlagen.tsx",
+      "moduleSpecifier": "@/pages/fibu/anlagen",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/bilanz.tsx",
+      "moduleSpecifier": "@/pages/fibu/bilanz",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/buchungsjournal.tsx",
+      "moduleSpecifier": "@/pages/fibu/buchungsjournal",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/bwa.tsx",
+      "moduleSpecifier": "@/pages/fibu/bwa",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/debitoren-api.tsx",
+      "moduleSpecifier": "@/pages/fibu/debitoren-api",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fibu/debitoren.tsx",
+      "moduleSpecifier": "@/pages/fibu/debitoren",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/guv.tsx",
+      "moduleSpecifier": "@/pages/fibu/guv",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/hauptbuch.tsx",
+      "moduleSpecifier": "@/pages/fibu/hauptbuch",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/kontenplan.tsx",
+      "moduleSpecifier": "@/pages/fibu/kontenplan",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/kostenstellenrechnung.tsx",
+      "moduleSpecifier": "@/pages/fibu/kostenstellenrechnung",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/kreditlinien.tsx",
+      "moduleSpecifier": "@/pages/fibu/kreditlinien",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fibu/kreditoren.tsx",
+      "moduleSpecifier": "@/pages/fibu/kreditoren",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/offene-posten.tsx",
+      "moduleSpecifier": "@/pages/fibu/offene-posten",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/op-verwaltung.tsx",
+      "moduleSpecifier": "@/pages/fibu/op-verwaltung",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/sachkonto.tsx",
+      "moduleSpecifier": "@/pages/fibu/sachkonto",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fibu/sicherheiten.tsx",
+      "moduleSpecifier": "@/pages/fibu/sicherheiten",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fibu/verbindlichkeiten.tsx",
+      "moduleSpecifier": "@/pages/fibu/verbindlichkeiten",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fibu/zahlungseingaenge.tsx",
+      "moduleSpecifier": "@/pages/fibu/zahlungseingaenge",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fibu/zahlungslaeufe.tsx",
+      "moduleSpecifier": "@/pages/fibu/zahlungslaeufe",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/fibu/zahlungsvorschlaege.tsx",
+      "moduleSpecifier": "@/pages/fibu/zahlungsvorschlaege",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/abschluss.tsx",
+      "moduleSpecifier": "@/pages/finance/abschluss",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/ap-invoice-form.tsx",
+      "moduleSpecifier": "@/pages/finance/ap-invoice-form",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/ap-invoices-list.tsx",
+      "moduleSpecifier": "@/pages/finance/ap-invoices-list",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/audit-trail.tsx",
+      "moduleSpecifier": "@/pages/finance/audit-trail",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/finance/bank-abgleich.tsx",
+      "moduleSpecifier": "@/pages/finance/bank-abgleich",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/bankkonten-stamm.tsx",
+      "moduleSpecifier": "@/pages/finance/bankkonten-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/buchungserfassung.tsx",
+      "moduleSpecifier": "@/pages/finance/buchungserfassung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/chart-of-accounts.tsx",
+      "moduleSpecifier": "@/pages/finance/chart-of-accounts",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/debitoren-liste.tsx",
+      "moduleSpecifier": "@/pages/finance/debitoren-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/debitoren-stamm.tsx",
+      "moduleSpecifier": "@/pages/finance/debitoren-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/dunning-editor.tsx",
+      "moduleSpecifier": "@/pages/finance/dunning-editor",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/index.tsx",
+      "moduleSpecifier": "@/pages/finance/index",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/invoice-form.tsx",
+      "moduleSpecifier": "@/pages/finance/invoice-form",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/invoices-list.tsx",
+      "moduleSpecifier": "@/pages/finance/invoices-list",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/kasse.tsx",
+      "moduleSpecifier": "@/pages/finance/kasse",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/kontenplan.tsx",
+      "moduleSpecifier": "@/pages/finance/kontenplan",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/kreditoren-stamm.tsx",
+      "moduleSpecifier": "@/pages/finance/kreditoren-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/lastschriften-debitoren.tsx",
+      "moduleSpecifier": "@/pages/finance/lastschriften-debitoren",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/mahnwesen.tsx",
+      "moduleSpecifier": "@/pages/finance/mahnwesen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/nebenbuch-abstimmung.tsx",
+      "moduleSpecifier": "@/pages/finance/nebenbuch-abstimmung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/op-debitoren.tsx",
+      "moduleSpecifier": "@/pages/finance/op-debitoren",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/op-kreditoren.tsx",
+      "moduleSpecifier": "@/pages/finance/op-kreditoren",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/payment-matching.tsx",
+      "moduleSpecifier": "@/pages/finance/payment-matching",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/periods.tsx",
+      "moduleSpecifier": "@/pages/finance/periods",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/steuerschluessel.tsx",
+      "moduleSpecifier": "@/pages/finance/steuerschluessel",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/ustva.tsx",
+      "moduleSpecifier": "@/pages/finance/ustva",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/zahlungslauf-kreditoren.tsx",
+      "moduleSpecifier": "@/pages/finance/zahlungslauf-kreditoren",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finanzplanung/liquiditaet.tsx",
+      "moduleSpecifier": "@/pages/finanzplanung/liquiditaet",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/foerderung/antrag.tsx",
+      "moduleSpecifier": "@/pages/foerderung/antrag",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/foerderung/liste.tsx",
+      "moduleSpecifier": "@/pages/foerderung/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fuhrpark/fahrzeuge.tsx",
+      "moduleSpecifier": "@/pages/fuhrpark/fahrzeuge",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futter/einzel/liste.tsx",
+      "moduleSpecifier": "@/pages/futter/einzel/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futter/einzel/stamm.tsx",
+      "moduleSpecifier": "@/pages/futter/einzel/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futter/misch/liste.tsx",
+      "moduleSpecifier": "@/pages/futter/misch/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futter/misch/stamm.tsx",
+      "moduleSpecifier": "@/pages/futter/misch/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futtermittel/charge-verfolgung.tsx",
+      "moduleSpecifier": "@/pages/futtermittel/charge-verfolgung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futtermittel/einzelfuttermittel-liste.tsx",
+      "moduleSpecifier": "@/pages/futtermittel/einzelfuttermittel-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/futtermittel/einzelfuttermittel-stamm.tsx",
+      "moduleSpecifier": "@/pages/futtermittel/einzelfuttermittel-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futtermittel/futtermittel-bestellung.tsx",
+      "moduleSpecifier": "@/pages/futtermittel/futtermittel-bestellung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futtermittel/futtermittel-qualitaetskontrolle.tsx",
+      "moduleSpecifier": "@/pages/futtermittel/futtermittel-qualitaetskontrolle",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/futtermittel/futtermittel-statistik.tsx",
+      "moduleSpecifier": "@/pages/futtermittel/futtermittel-statistik",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/futtermittel/futtermittel-wareneingang.tsx",
+      "moduleSpecifier": "@/pages/futtermittel/futtermittel-wareneingang",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/futtermittel/mischfuttermittel-liste.tsx",
+      "moduleSpecifier": "@/pages/futtermittel/mischfuttermittel-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/futtermittel/mischfuttermittel-stamm.tsx",
+      "moduleSpecifier": "@/pages/futtermittel/mischfuttermittel-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/inbox/index.tsx",
+      "moduleSpecifier": "@/pages/inbox/index",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/inventory-dashboard.tsx",
+      "moduleSpecifier": "@/pages/inventory-dashboard",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/inventory-reports.tsx",
+      "moduleSpecifier": "@/pages/inventory-reports",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/inventory.tsx",
+      "moduleSpecifier": "@/pages/inventory",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/inventory/epcis/index.tsx",
+      "moduleSpecifier": "@/pages/inventory/epcis/index",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/kasse/tagesabschluss.tsx",
+      "moduleSpecifier": "@/pages/kasse/tagesabschluss",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/labor/proben-liste.tsx",
+      "moduleSpecifier": "@/pages/labor/proben-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/lager/auslagerung.tsx",
+      "moduleSpecifier": "@/pages/lager/auslagerung",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/lager/bestandsuebersicht.tsx",
+      "moduleSpecifier": "@/pages/lager/bestandsuebersicht",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/lager/einlagerung.tsx",
+      "moduleSpecifier": "@/pages/lager/einlagerung",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/lager/inventur.tsx",
+      "moduleSpecifier": "@/pages/lager/inventur",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/lager/lagerplaetze.tsx",
+      "moduleSpecifier": "@/pages/lager/lagerplaetze",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/lager/terminal.tsx",
+      "moduleSpecifier": "@/pages/lager/terminal",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/logistik/frachtbriefe.tsx",
+      "moduleSpecifier": "@/pages/logistik/frachtbriefe",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/logistik/tourenplanung.tsx",
+      "moduleSpecifier": "@/pages/logistik/tourenplanung",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/mahnwesen/mahnlauf.tsx",
+      "moduleSpecifier": "@/pages/mahnwesen/mahnlauf",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/management/executive-dashboard.tsx",
+      "moduleSpecifier": "@/pages/management/executive-dashboard",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/marketing/kampagnen.tsx",
+      "moduleSpecifier": "@/pages/marketing/kampagnen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/mobile/scanner.tsx",
+      "moduleSpecifier": "@/pages/mobile/scanner",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/nachhaltigkeit/biodiversitaet.tsx",
+      "moduleSpecifier": "@/pages/nachhaltigkeit/biodiversitaet",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/nachhaltigkeit/co2-bilanz.tsx",
+      "moduleSpecifier": "@/pages/nachhaltigkeit/co2-bilanz",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/nachhaltigkeit/eudr-compliance.tsx",
+      "moduleSpecifier": "@/pages/nachhaltigkeit/eudr-compliance",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/personal/mitarbeiter-liste.tsx",
+      "moduleSpecifier": "@/pages/personal/mitarbeiter-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/personal/schulungen.tsx",
+      "moduleSpecifier": "@/pages/personal/schulungen",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/personal/stundenzettel.tsx",
+      "moduleSpecifier": "@/pages/personal/stundenzettel",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/personal/zeiterfassung.tsx",
+      "moduleSpecifier": "@/pages/personal/zeiterfassung",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/policy-manager.tsx",
+      "moduleSpecifier": "@/pages/policy-manager",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/portal/anfragen.tsx",
+      "moduleSpecifier": "@/pages/portal/anfragen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/bestellungen.tsx",
+      "moduleSpecifier": "@/pages/portal/bestellungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/dokumente.tsx",
+      "moduleSpecifier": "@/pages/portal/dokumente",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/feldbuch.tsx",
+      "moduleSpecifier": "@/pages/portal/feldbuch",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/index.tsx",
+      "moduleSpecifier": "@/pages/portal/index",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/naehrstoffbilanzen.tsx",
+      "moduleSpecifier": "@/pages/portal/naehrstoffbilanzen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/rechnungen.tsx",
+      "moduleSpecifier": "@/pages/portal/rechnungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/shop.tsx",
+      "moduleSpecifier": "@/pages/portal/shop",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/vertraege.tsx",
+      "moduleSpecifier": "@/pages/portal/vertraege",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/zertifikate.tsx",
+      "moduleSpecifier": "@/pages/portal/zertifikate",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/pos/customer-display.tsx",
+      "moduleSpecifier": "@/pages/pos/customer-display",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/pos/gift-cards.tsx",
+      "moduleSpecifier": "@/pages/pos/gift-cards",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/pos/rabatte.tsx",
+      "moduleSpecifier": "@/pages/pos/rabatte",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/pos/suspended-sales.tsx",
+      "moduleSpecifier": "@/pages/pos/suspended-sales",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/pos/tagesabschluss-enhanced.tsx",
+      "moduleSpecifier": "@/pages/pos/tagesabschluss-enhanced",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/pos/terminal.tsx",
+      "moduleSpecifier": "@/pages/pos/terminal",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/pos/tse-journal.tsx",
+      "moduleSpecifier": "@/pages/pos/tse-journal",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/preise/historie.tsx",
+      "moduleSpecifier": "@/pages/preise/historie",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/preise/konditionen.tsx",
+      "moduleSpecifier": "@/pages/preise/konditionen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/pricing.tsx",
+      "moduleSpecifier": "@/pages/pricing",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/produktion/mischfutter-produktion.tsx",
+      "moduleSpecifier": "@/pages/produktion/mischfutter-produktion",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/projekte/liste.tsx",
+      "moduleSpecifier": "@/pages/projekte/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/prospecting/LeadExplorer.tsx",
+      "moduleSpecifier": "@/pages/prospecting/LeadExplorer",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/public/verify.tsx",
+      "moduleSpecifier": "@/pages/public/verify",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/qualitaet/labor-auftrag.tsx",
+      "moduleSpecifier": "@/pages/qualitaet/labor-auftrag",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/qualitaet/labor-liste.tsx",
+      "moduleSpecifier": "@/pages/qualitaet/labor-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/qualitaet/reklamationen.tsx",
+      "moduleSpecifier": "@/pages/qualitaet/reklamationen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/reports.tsx",
+      "moduleSpecifier": "@/pages/reports",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/reports/deckungsbeitrag.tsx",
+      "moduleSpecifier": "@/pages/reports/deckungsbeitrag",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/reports/lagerbestand.tsx",
+      "moduleSpecifier": "@/pages/reports/lagerbestand",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/reports/umsatz.tsx",
+      "moduleSpecifier": "@/pages/reports/umsatz",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/rezepte/editor.tsx",
+      "moduleSpecifier": "@/pages/rezepte/editor",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/sales/angebot-erstellen.tsx",
+      "moduleSpecifier": "@/pages/sales/angebot-erstellen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/sales/angebote-liste.tsx",
+      "moduleSpecifier": "@/pages/sales/angebote-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/sales/auftraege-liste.tsx",
+      "moduleSpecifier": "@/pages/sales/auftraege-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/sales/credit-note-editor.tsx",
+      "moduleSpecifier": "@/pages/sales/credit-note-editor",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/sales/delivery-editor.tsx",
+      "moduleSpecifier": "@/pages/sales/delivery-editor",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/sales/invoice-editor.tsx",
+      "moduleSpecifier": "@/pages/sales/invoice-editor",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/sales/lieferungen-liste.tsx",
+      "moduleSpecifier": "@/pages/sales/lieferungen-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/sales/order-editor.tsx",
+      "moduleSpecifier": "@/pages/sales/order-editor",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/sales/orders-modern.tsx",
+      "moduleSpecifier": "@/pages/sales/orders-modern",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/sales/rechnungen-liste.tsx",
+      "moduleSpecifier": "@/pages/sales/rechnungen-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/schaeden/liste.tsx",
+      "moduleSpecifier": "@/pages/schaeden/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/schaeden/meldung.tsx",
+      "moduleSpecifier": "@/pages/schaeden/meldung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/schichtplan/liste.tsx",
+      "moduleSpecifier": "@/pages/schichtplan/liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/service/anfragen.tsx",
+      "moduleSpecifier": "@/pages/service/anfragen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/setup/firma.tsx",
+      "moduleSpecifier": "@/pages/setup/firma",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/silo/kapazitaeten.tsx",
+      "moduleSpecifier": "@/pages/silo/kapazitaeten",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/start-dashboard.tsx",
+      "moduleSpecifier": "@/pages/start-dashboard",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/statistik/bewegungen.tsx",
+      "moduleSpecifier": "@/pages/statistik/bewegungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/stock-management.tsx",
+      "moduleSpecifier": "@/pages/stock-management",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/subventionen/dashboard.tsx",
+      "moduleSpecifier": "@/pages/subventionen/dashboard",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/system/live-monitor.tsx",
+      "moduleSpecifier": "@/pages/system/live-monitor",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/tankstelle/zapfungen.tsx",
+      "moduleSpecifier": "@/pages/tankstelle/zapfungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/termine/kalender.tsx",
+      "moduleSpecifier": "@/pages/termine/kalender",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/transporte/fahrer-liste.tsx",
+      "moduleSpecifier": "@/pages/transporte/fahrer-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/verkauf/kunde-neu.tsx",
+      "moduleSpecifier": "@/pages/verkauf/kunde-neu",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/verkauf/kunden-liste.tsx",
+      "moduleSpecifier": "@/pages/verkauf/kunden-liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/verkauf/kunden-stamm-enhanced.tsx",
+      "moduleSpecifier": "@/pages/verkauf/kunden-stamm-enhanced",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/verkauf/kunden-stamm.tsx",
+      "moduleSpecifier": "@/pages/verkauf/kunden-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/verladung/liste.tsx",
+      "moduleSpecifier": "@/pages/verladung/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/verladung/lkw-beladung.tsx",
+      "moduleSpecifier": "@/pages/verladung/lkw-beladung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/versicherungen/liste.tsx",
+      "moduleSpecifier": "@/pages/versicherungen/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/vertrag/rahmenvertraege.tsx",
+      "moduleSpecifier": "@/pages/vertrag/rahmenvertraege",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/vertrieb/kundenumsatz.tsx",
+      "moduleSpecifier": "@/pages/vertrieb/kundenumsatz",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/waage/liste.tsx",
+      "moduleSpecifier": "@/pages/waage/liste",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/waage/wiegungen.tsx",
+      "moduleSpecifier": "@/pages/waage/wiegungen",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/wartung/anlagen-liste.tsx",
+      "moduleSpecifier": "@/pages/wartung/anlagen-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/weighing.tsx",
+      "moduleSpecifier": "@/pages/weighing",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/workflow/workflow-monitoring.tsx",
+      "moduleSpecifier": "@/pages/workflow/workflow-monitoring",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/workflow/workflow-regeln.tsx",
+      "moduleSpecifier": "@/pages/workflow/workflow-regeln",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/workflows/approval.tsx",
+      "moduleSpecifier": "@/pages/workflows/approval",
+      "assignedInNav": true
+    },
+    {
+      "pagePath": "pages/workflows/trigger.tsx",
+      "moduleSpecifier": "@/pages/workflows/trigger",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/zertifikate/liste.tsx",
+      "moduleSpecifier": "@/pages/zertifikate/liste",
+      "assignedInNav": true
+    }
+  ],
+  "missingModules": [],
+  "missingRoutes": [],
+  "unassignedPages": [
+    {
+      "pagePath": "pages/admin/setup/dms-integration.tsx",
+      "moduleSpecifier": "@/pages/admin/setup/dms-integration",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/admin/setup/index.tsx",
+      "moduleSpecifier": "@/pages/admin/setup/index",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/aussaat/liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/aussaat/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/biostimulanzien-liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/biostimulanzien-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/duenger-stamm.tsx",
+      "moduleSpecifier": "@/pages/agrar/duenger-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/duenger/bedarfsrechner.tsx",
+      "moduleSpecifier": "@/pages/agrar/duenger/bedarfsrechner",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/duenger/liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/duenger/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/duenger/mischungen.tsx",
+      "moduleSpecifier": "@/pages/agrar/duenger/mischungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/duenger/stamm.tsx",
+      "moduleSpecifier": "@/pages/agrar/duenger/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/duengung/planung.tsx",
+      "moduleSpecifier": "@/pages/agrar/duengung/planung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/feldbuch/massnahmen.tsx",
+      "moduleSpecifier": "@/pages/agrar/feldbuch/massnahmen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/feldbuch/schlag/neu.tsx",
+      "moduleSpecifier": "@/pages/agrar/feldbuch/schlag/neu",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/kulturpflanzen/liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/kulturpflanzen/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/maschinenauslastung.tsx",
+      "moduleSpecifier": "@/pages/agrar/maschinenauslastung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/pflanzenschutz/applikation.tsx",
+      "moduleSpecifier": "@/pages/agrar/pflanzenschutz/applikation",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/abgabedokumentation.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/abgabedokumentation",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/auflagen-manager.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/auflagen-manager",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/beratung.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/beratung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/resistenz.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/resistenz",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/sachkunde-register.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/sachkunde-register",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/stamm.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/psm/wasserschutz.tsx",
+      "moduleSpecifier": "@/pages/agrar/psm/wasserschutz",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/saatgut-stamm.tsx",
+      "moduleSpecifier": "@/pages/agrar/saatgut-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/saatgut/bestellung.tsx",
+      "moduleSpecifier": "@/pages/agrar/saatgut/bestellung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/saatgut/liste.tsx",
+      "moduleSpecifier": "@/pages/agrar/saatgut/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/saatgut/sortenregister.tsx",
+      "moduleSpecifier": "@/pages/agrar/saatgut/sortenregister",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/saatgut/stamm.tsx",
+      "moduleSpecifier": "@/pages/agrar/saatgut/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/schlaege/karte.tsx",
+      "moduleSpecifier": "@/pages/agrar/schlaege/karte",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/wetter/prognose.tsx",
+      "moduleSpecifier": "@/pages/agrar/wetter/prognose",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agrar/wetterwarnung.tsx",
+      "moduleSpecifier": "@/pages/agrar/wetterwarnung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agribusiness/farmers.tsx",
+      "moduleSpecifier": "@/pages/agribusiness/farmers",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/agribusiness/field-service-tasks.tsx",
+      "moduleSpecifier": "@/pages/agribusiness/field-service-tasks",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/annahme/abrechnung.tsx",
+      "moduleSpecifier": "@/pages/annahme/abrechnung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/annahme/lkw-registrierung.tsx",
+      "moduleSpecifier": "@/pages/annahme/lkw-registrierung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/annahme/qualitaets-check.tsx",
+      "moduleSpecifier": "@/pages/annahme/qualitaets-check",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/artikel/stamm.tsx",
+      "moduleSpecifier": "@/pages/artikel/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/auth/Callback.tsx",
+      "moduleSpecifier": "@/pages/auth/Callback",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/auth/Login.tsx",
+      "moduleSpecifier": "@/pages/auth/Login",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/banken/konten.tsx",
+      "moduleSpecifier": "@/pages/banken/konten",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/benachrichtigungen/liste.tsx",
+      "moduleSpecifier": "@/pages/benachrichtigungen/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/charge/liste.tsx",
+      "moduleSpecifier": "@/pages/charge/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/charge/rueckverfolgung.tsx",
+      "moduleSpecifier": "@/pages/charge/rueckverfolgung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/charge/stamm.tsx",
+      "moduleSpecifier": "@/pages/charge/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/bvl-umsatzmeldung.tsx",
+      "moduleSpecifier": "@/pages/compliance/bvl-umsatzmeldung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/cross-compliance.tsx",
+      "moduleSpecifier": "@/pages/compliance/cross-compliance",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/enni-meldungen.tsx",
+      "moduleSpecifier": "@/pages/compliance/enni-meldungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/pcn-ufi.tsx",
+      "moduleSpecifier": "@/pages/compliance/pcn-ufi",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/qs-checkliste.tsx",
+      "moduleSpecifier": "@/pages/compliance/qs-checkliste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/saatgut-nachbau.tsx",
+      "moduleSpecifier": "@/pages/compliance/saatgut-nachbau",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/sachkunde-register.tsx",
+      "moduleSpecifier": "@/pages/compliance/sachkunde-register",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/compliance/vvvo-register.tsx",
+      "moduleSpecifier": "@/pages/compliance/vvvo-register",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/contracts-v2.tsx",
+      "moduleSpecifier": "@/pages/contracts-v2",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/aktivitaet-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/aktivitaet-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/betriebsprofil-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/betriebsprofil-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/campaign-builder.tsx",
+      "moduleSpecifier": "@/pages/crm/campaign-builder",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/campaign-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/campaign-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/campaign-template-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/campaign-template-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/consent-confirm.tsx",
+      "moduleSpecifier": "@/pages/crm/consent-confirm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/consent-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/consent-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/crm-dashboard.tsx",
+      "moduleSpecifier": "@/pages/crm/crm-dashboard",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/gdpr-request-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/gdpr-request-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/gdpr-request-public.tsx",
+      "moduleSpecifier": "@/pages/crm/gdpr-request-public",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/kontakt-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/kontakt-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/kontakt-management.tsx",
+      "moduleSpecifier": "@/pages/crm/kontakt-management",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/kunden-liste.tsx",
+      "moduleSpecifier": "@/pages/crm/kunden-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/kunden-stamm-modern.tsx",
+      "moduleSpecifier": "@/pages/crm/kunden-stamm-modern",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/kunden-stamm.tsx",
+      "moduleSpecifier": "@/pages/crm/kunden-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/lead-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/lead-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/lieferanten-liste.tsx",
+      "moduleSpecifier": "@/pages/crm/lieferanten-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/lieferanten-stamm.tsx",
+      "moduleSpecifier": "@/pages/crm/lieferanten-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/opportunities-forecast.tsx",
+      "moduleSpecifier": "@/pages/crm/opportunities-forecast",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/opportunities-kanban.tsx",
+      "moduleSpecifier": "@/pages/crm/opportunities-kanban",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/opportunities-liste.tsx",
+      "moduleSpecifier": "@/pages/crm/opportunities-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/opportunity-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/opportunity-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/crm/segment-detail.tsx",
+      "moduleSpecifier": "@/pages/crm/segment-detail",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/dashboard/customizable.tsx",
+      "moduleSpecifier": "@/pages/dashboard/customizable",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/dashboards/geschaeftsfuehrung.tsx",
+      "moduleSpecifier": "@/pages/dashboards/geschaeftsfuehrung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/dokumente/ablage.tsx",
+      "moduleSpecifier": "@/pages/dokumente/ablage",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/anfrage-stamm.tsx",
+      "moduleSpecifier": "@/pages/einkauf/anfrage-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/angebot-stamm.tsx",
+      "moduleSpecifier": "@/pages/einkauf/angebot-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/anlieferavis-liste.tsx",
+      "moduleSpecifier": "@/pages/einkauf/anlieferavis-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/anlieferavis.tsx",
+      "moduleSpecifier": "@/pages/einkauf/anlieferavis",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/auftragsbestaetigung.tsx",
+      "moduleSpecifier": "@/pages/einkauf/auftragsbestaetigung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/auftragsbestaetigungen-liste.tsx",
+      "moduleSpecifier": "@/pages/einkauf/auftragsbestaetigungen-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/bestellung-anlegen.tsx",
+      "moduleSpecifier": "@/pages/einkauf/bestellung-anlegen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/bestellung-stamm.tsx",
+      "moduleSpecifier": "@/pages/einkauf/bestellung-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/gutschriften-belastungen.tsx",
+      "moduleSpecifier": "@/pages/einkauf/gutschriften-belastungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/lieferanten-stamm.tsx",
+      "moduleSpecifier": "@/pages/einkauf/lieferanten-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/rechnungseingang.tsx",
+      "moduleSpecifier": "@/pages/einkauf/rechnungseingang",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/reports.tsx",
+      "moduleSpecifier": "@/pages/einkauf/reports",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/rfq-bids.tsx",
+      "moduleSpecifier": "@/pages/einkauf/rfq-bids",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/einkauf/wareneingang.tsx",
+      "moduleSpecifier": "@/pages/einkauf/wareneingang",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/energie/verbrauch.tsx",
+      "moduleSpecifier": "@/pages/energie/verbrauch",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/etiketten/drucken.tsx",
+      "moduleSpecifier": "@/pages/etiketten/drucken",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fibu/debitoren-api.tsx",
+      "moduleSpecifier": "@/pages/fibu/debitoren-api",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fibu/kreditlinien.tsx",
+      "moduleSpecifier": "@/pages/fibu/kreditlinien",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fibu/sachkonto.tsx",
+      "moduleSpecifier": "@/pages/fibu/sachkonto",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fibu/sicherheiten.tsx",
+      "moduleSpecifier": "@/pages/fibu/sicherheiten",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fibu/verbindlichkeiten.tsx",
+      "moduleSpecifier": "@/pages/fibu/verbindlichkeiten",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fibu/zahlungseingaenge.tsx",
+      "moduleSpecifier": "@/pages/fibu/zahlungseingaenge",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fibu/zahlungsvorschlaege.tsx",
+      "moduleSpecifier": "@/pages/fibu/zahlungsvorschlaege",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/abschluss.tsx",
+      "moduleSpecifier": "@/pages/finance/abschluss",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/ap-invoice-form.tsx",
+      "moduleSpecifier": "@/pages/finance/ap-invoice-form",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/ap-invoices-list.tsx",
+      "moduleSpecifier": "@/pages/finance/ap-invoices-list",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/bank-abgleich.tsx",
+      "moduleSpecifier": "@/pages/finance/bank-abgleich",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/bankkonten-stamm.tsx",
+      "moduleSpecifier": "@/pages/finance/bankkonten-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/buchungserfassung.tsx",
+      "moduleSpecifier": "@/pages/finance/buchungserfassung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/chart-of-accounts.tsx",
+      "moduleSpecifier": "@/pages/finance/chart-of-accounts",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/debitoren-liste.tsx",
+      "moduleSpecifier": "@/pages/finance/debitoren-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/debitoren-stamm.tsx",
+      "moduleSpecifier": "@/pages/finance/debitoren-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/dunning-editor.tsx",
+      "moduleSpecifier": "@/pages/finance/dunning-editor",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/index.tsx",
+      "moduleSpecifier": "@/pages/finance/index",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/invoice-form.tsx",
+      "moduleSpecifier": "@/pages/finance/invoice-form",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/invoices-list.tsx",
+      "moduleSpecifier": "@/pages/finance/invoices-list",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/kasse.tsx",
+      "moduleSpecifier": "@/pages/finance/kasse",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/kontenplan.tsx",
+      "moduleSpecifier": "@/pages/finance/kontenplan",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/kreditoren-stamm.tsx",
+      "moduleSpecifier": "@/pages/finance/kreditoren-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/lastschriften-debitoren.tsx",
+      "moduleSpecifier": "@/pages/finance/lastschriften-debitoren",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/mahnwesen.tsx",
+      "moduleSpecifier": "@/pages/finance/mahnwesen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/nebenbuch-abstimmung.tsx",
+      "moduleSpecifier": "@/pages/finance/nebenbuch-abstimmung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/op-debitoren.tsx",
+      "moduleSpecifier": "@/pages/finance/op-debitoren",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/op-kreditoren.tsx",
+      "moduleSpecifier": "@/pages/finance/op-kreditoren",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/payment-matching.tsx",
+      "moduleSpecifier": "@/pages/finance/payment-matching",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/periods.tsx",
+      "moduleSpecifier": "@/pages/finance/periods",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/steuerschluessel.tsx",
+      "moduleSpecifier": "@/pages/finance/steuerschluessel",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/ustva.tsx",
+      "moduleSpecifier": "@/pages/finance/ustva",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/finance/zahlungslauf-kreditoren.tsx",
+      "moduleSpecifier": "@/pages/finance/zahlungslauf-kreditoren",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/foerderung/antrag.tsx",
+      "moduleSpecifier": "@/pages/foerderung/antrag",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/foerderung/liste.tsx",
+      "moduleSpecifier": "@/pages/foerderung/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/fuhrpark/fahrzeuge.tsx",
+      "moduleSpecifier": "@/pages/fuhrpark/fahrzeuge",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futter/einzel/liste.tsx",
+      "moduleSpecifier": "@/pages/futter/einzel/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futter/einzel/stamm.tsx",
+      "moduleSpecifier": "@/pages/futter/einzel/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futter/misch/liste.tsx",
+      "moduleSpecifier": "@/pages/futter/misch/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futter/misch/stamm.tsx",
+      "moduleSpecifier": "@/pages/futter/misch/stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futtermittel/charge-verfolgung.tsx",
+      "moduleSpecifier": "@/pages/futtermittel/charge-verfolgung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futtermittel/einzelfuttermittel-stamm.tsx",
+      "moduleSpecifier": "@/pages/futtermittel/einzelfuttermittel-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futtermittel/futtermittel-bestellung.tsx",
+      "moduleSpecifier": "@/pages/futtermittel/futtermittel-bestellung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/futtermittel/mischfuttermittel-stamm.tsx",
+      "moduleSpecifier": "@/pages/futtermittel/mischfuttermittel-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/inbox/index.tsx",
+      "moduleSpecifier": "@/pages/inbox/index",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/inventory-dashboard.tsx",
+      "moduleSpecifier": "@/pages/inventory-dashboard",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/inventory-reports.tsx",
+      "moduleSpecifier": "@/pages/inventory-reports",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/inventory.tsx",
+      "moduleSpecifier": "@/pages/inventory",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/inventory/epcis/index.tsx",
+      "moduleSpecifier": "@/pages/inventory/epcis/index",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/kasse/tagesabschluss.tsx",
+      "moduleSpecifier": "@/pages/kasse/tagesabschluss",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/labor/proben-liste.tsx",
+      "moduleSpecifier": "@/pages/labor/proben-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/lager/lagerplaetze.tsx",
+      "moduleSpecifier": "@/pages/lager/lagerplaetze",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/lager/terminal.tsx",
+      "moduleSpecifier": "@/pages/lager/terminal",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/mahnwesen/mahnlauf.tsx",
+      "moduleSpecifier": "@/pages/mahnwesen/mahnlauf",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/marketing/kampagnen.tsx",
+      "moduleSpecifier": "@/pages/marketing/kampagnen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/mobile/scanner.tsx",
+      "moduleSpecifier": "@/pages/mobile/scanner",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/nachhaltigkeit/biodiversitaet.tsx",
+      "moduleSpecifier": "@/pages/nachhaltigkeit/biodiversitaet",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/nachhaltigkeit/co2-bilanz.tsx",
+      "moduleSpecifier": "@/pages/nachhaltigkeit/co2-bilanz",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/anfragen.tsx",
+      "moduleSpecifier": "@/pages/portal/anfragen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/bestellungen.tsx",
+      "moduleSpecifier": "@/pages/portal/bestellungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/dokumente.tsx",
+      "moduleSpecifier": "@/pages/portal/dokumente",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/feldbuch.tsx",
+      "moduleSpecifier": "@/pages/portal/feldbuch",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/index.tsx",
+      "moduleSpecifier": "@/pages/portal/index",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/naehrstoffbilanzen.tsx",
+      "moduleSpecifier": "@/pages/portal/naehrstoffbilanzen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/rechnungen.tsx",
+      "moduleSpecifier": "@/pages/portal/rechnungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/shop.tsx",
+      "moduleSpecifier": "@/pages/portal/shop",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/vertraege.tsx",
+      "moduleSpecifier": "@/pages/portal/vertraege",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/portal/zertifikate.tsx",
+      "moduleSpecifier": "@/pages/portal/zertifikate",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/pos/customer-display.tsx",
+      "moduleSpecifier": "@/pages/pos/customer-display",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/pos/suspended-sales.tsx",
+      "moduleSpecifier": "@/pages/pos/suspended-sales",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/preise/historie.tsx",
+      "moduleSpecifier": "@/pages/preise/historie",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/preise/konditionen.tsx",
+      "moduleSpecifier": "@/pages/preise/konditionen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/pricing.tsx",
+      "moduleSpecifier": "@/pages/pricing",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/produktion/mischfutter-produktion.tsx",
+      "moduleSpecifier": "@/pages/produktion/mischfutter-produktion",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/projekte/liste.tsx",
+      "moduleSpecifier": "@/pages/projekte/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/public/verify.tsx",
+      "moduleSpecifier": "@/pages/public/verify",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/qualitaet/labor-auftrag.tsx",
+      "moduleSpecifier": "@/pages/qualitaet/labor-auftrag",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/qualitaet/reklamationen.tsx",
+      "moduleSpecifier": "@/pages/qualitaet/reklamationen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/reports/lagerbestand.tsx",
+      "moduleSpecifier": "@/pages/reports/lagerbestand",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/reports/umsatz.tsx",
+      "moduleSpecifier": "@/pages/reports/umsatz",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/rezepte/editor.tsx",
+      "moduleSpecifier": "@/pages/rezepte/editor",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/sales/angebot-erstellen.tsx",
+      "moduleSpecifier": "@/pages/sales/angebot-erstellen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/sales/auftraege-liste.tsx",
+      "moduleSpecifier": "@/pages/sales/auftraege-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/sales/credit-note-editor.tsx",
+      "moduleSpecifier": "@/pages/sales/credit-note-editor",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/sales/lieferungen-liste.tsx",
+      "moduleSpecifier": "@/pages/sales/lieferungen-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/sales/orders-modern.tsx",
+      "moduleSpecifier": "@/pages/sales/orders-modern",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/sales/rechnungen-liste.tsx",
+      "moduleSpecifier": "@/pages/sales/rechnungen-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/schaeden/liste.tsx",
+      "moduleSpecifier": "@/pages/schaeden/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/schaeden/meldung.tsx",
+      "moduleSpecifier": "@/pages/schaeden/meldung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/service/anfragen.tsx",
+      "moduleSpecifier": "@/pages/service/anfragen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/setup/firma.tsx",
+      "moduleSpecifier": "@/pages/setup/firma",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/silo/kapazitaeten.tsx",
+      "moduleSpecifier": "@/pages/silo/kapazitaeten",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/statistik/bewegungen.tsx",
+      "moduleSpecifier": "@/pages/statistik/bewegungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/stock-management.tsx",
+      "moduleSpecifier": "@/pages/stock-management",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/subventionen/dashboard.tsx",
+      "moduleSpecifier": "@/pages/subventionen/dashboard",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/system/live-monitor.tsx",
+      "moduleSpecifier": "@/pages/system/live-monitor",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/tankstelle/zapfungen.tsx",
+      "moduleSpecifier": "@/pages/tankstelle/zapfungen",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/termine/kalender.tsx",
+      "moduleSpecifier": "@/pages/termine/kalender",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/transporte/fahrer-liste.tsx",
+      "moduleSpecifier": "@/pages/transporte/fahrer-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/verkauf/kunde-neu.tsx",
+      "moduleSpecifier": "@/pages/verkauf/kunde-neu",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/verkauf/kunden-stamm-enhanced.tsx",
+      "moduleSpecifier": "@/pages/verkauf/kunden-stamm-enhanced",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/verkauf/kunden-stamm.tsx",
+      "moduleSpecifier": "@/pages/verkauf/kunden-stamm",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/verladung/liste.tsx",
+      "moduleSpecifier": "@/pages/verladung/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/verladung/lkw-beladung.tsx",
+      "moduleSpecifier": "@/pages/verladung/lkw-beladung",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/versicherungen/liste.tsx",
+      "moduleSpecifier": "@/pages/versicherungen/liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/vertrag/rahmenvertraege.tsx",
+      "moduleSpecifier": "@/pages/vertrag/rahmenvertraege",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/vertrieb/kundenumsatz.tsx",
+      "moduleSpecifier": "@/pages/vertrieb/kundenumsatz",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/wartung/anlagen-liste.tsx",
+      "moduleSpecifier": "@/pages/wartung/anlagen-liste",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/weighing.tsx",
+      "moduleSpecifier": "@/pages/weighing",
+      "assignedInNav": false
+    },
+    {
+      "pagePath": "pages/workflows/trigger.tsx",
+      "moduleSpecifier": "@/pages/workflows/trigger",
+      "assignedInNav": false
+    }
+  ]
+}

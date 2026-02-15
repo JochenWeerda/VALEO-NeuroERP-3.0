@@ -1,0 +1,315 @@
+{
+  "meta": {
+    "mode": "option_2",
+    "description": "Full structured extraction for OCR tab-based master data. UI tabs are separated from persistent data fields.",
+    "version": "2026-02-14",
+    "language": "de"
+  },
+  "extraction_protocol": {
+    "batch_size_images": 10,
+    "input_expected": "screenshots with all tab headers clicked by user",
+    "output_strategy": [
+      "group fields by tab title",
+      "separate ui_navigation labels from data fields",
+      "mark uncertain OCR fields with confidence low",
+      "map each field to normalized target entity"
+    ],
+    "normalization_rules": {
+      "repeatable_rows": "own child table",
+      "time_validity": "valid_from/valid_to on child item",
+      "money": "decimal with explicit scale",
+      "percent": "decimal percent 0..100",
+      "contact_persons": "separate contact table"
+    }
+  },
+  "customer_master": {
+    "ui_navigation_tabs_only": [
+      "kunden_lieferanten",
+      "kunden",
+      "cpd_konto_anlegen",
+      "zuruecksetzen_alle_einzeln",
+      "kunden_gruppen",
+      "rabatt_listen",
+      "preisvereinbarungen_import_stapel_intern",
+      "lieferanten"
+    ],
+    "tab_21_chef_anweisung": {
+      "entity": "customer_internal_instructions",
+      "fields": [
+        { "key": "instruction_text", "type": "string_long" },
+        { "key": "instruction_priority", "type": "enum", "values": ["low", "normal", "high", "critical"] },
+        { "key": "valid_from", "type": "date" },
+        { "key": "valid_to", "type": "date" },
+        { "key": "created_by", "type": "uuid" },
+        { "key": "created_at", "type": "datetime" }
+      ]
+    },
+    "tab_22_ansprechpartner": {
+      "entity": "customer_contacts",
+      "fields": [
+        { "key": "priority", "type": "integer" },
+        { "key": "salutation", "type": "string" },
+        { "key": "title", "type": "string" },
+        { "key": "first_name", "type": "string" },
+        { "key": "last_name", "type": "string" },
+        { "key": "position", "type": "string" },
+        { "key": "department", "type": "string" },
+        { "key": "phone_1", "type": "string" },
+        { "key": "phone_2", "type": "string" },
+        { "key": "mobile", "type": "string" },
+        { "key": "email", "type": "string" },
+        { "key": "street", "type": "string" },
+        { "key": "postal_code", "type": "string" },
+        { "key": "city", "type": "string" },
+        { "key": "birth_date", "type": "date" },
+        { "key": "hobbies", "type": "string_long" },
+        { "key": "info_1", "type": "string" },
+        { "key": "info_2", "type": "string" },
+        { "key": "invoice_email_recipient", "type": "boolean" },
+        { "key": "reminder_email_recipient", "type": "boolean" },
+        { "key": "contact_type", "type": "enum", "values": ["main", "billing", "logistics", "sales", "other"] },
+        { "key": "created_by", "type": "uuid" },
+        { "key": "created_at", "type": "datetime" },
+        { "key": "cad_system", "type": "string" },
+        { "key": "software_systems", "type": "json_array_string" },
+        { "key": "is_data_protection_officer", "type": "boolean" }
+      ]
+    },
+    "tab_23_kundenstamm_erfassung": {
+      "entity": "business_partners",
+      "fields": [
+        { "key": "name_1", "type": "string" },
+        { "key": "name_2", "type": "string" },
+        { "key": "name_3", "type": "string" },
+        { "key": "street", "type": "string" },
+        { "key": "country", "type": "string2" },
+        { "key": "postal_code", "type": "string" },
+        { "key": "city", "type": "string" },
+        { "key": "po_box", "type": "string" },
+        { "key": "po_box_postal_code", "type": "string" },
+        { "key": "po_box_city", "type": "string" },
+        { "key": "phone", "type": "string" },
+        { "key": "fax", "type": "string" },
+        { "key": "email", "type": "string" },
+        { "key": "website", "type": "string" },
+        { "key": "salutation", "type": "string" },
+        { "key": "brief_salutation", "type": "string" },
+        { "key": "free_field_1", "type": "string" },
+        { "key": "free_field_2", "type": "string" },
+        { "key": "free_field_3", "type": "string" },
+        { "key": "region_code", "type": "string" },
+        { "key": "state_name", "type": "string" },
+        { "key": "federal_state", "type": "string" },
+        { "key": "customer_since", "type": "date" },
+        { "key": "debtor_account", "type": "string" },
+        { "key": "main_account", "type": "string" },
+        { "key": "dispatcher", "type": "string" },
+        { "key": "sales_representative", "type": "string" },
+        { "key": "abc_status", "type": "enum", "values": ["A", "B", "C"] },
+        { "key": "farm_operation_number", "type": "string" },
+        { "key": "vat_id", "type": "string" },
+        { "key": "tax_number", "type": "string" },
+        { "key": "block_reason", "type": "string" },
+        { "key": "customer_group", "type": "string" },
+        { "key": "fax_blocked", "type": "boolean" },
+        { "key": "info_4", "type": "string" },
+        { "key": "info_5", "type": "string" },
+        { "key": "info_6", "type": "string" }
+      ]
+    },
+    "tab_24_kundenerweiterung_rechnung_kontoauszug": {
+      "entity": "business_partner_billing_profile",
+      "fields": [
+        { "key": "customer_group", "type": "string" },
+        { "key": "customer_type", "type": "enum", "values": ["standard", "organ", "group_internal"] },
+        { "key": "account_statement_mode", "type": "enum", "values": ["none", "print", "split", "reprint"] },
+        { "key": "last_statement_number", "type": "string" },
+        { "key": "last_statement_date", "type": "date" },
+        { "key": "balance", "type": "decimal_14_2" },
+        { "key": "print_ad_text", "type": "boolean" },
+        { "key": "shipping_surcharge_mode", "type": "string" },
+        { "key": "settlement_mode", "type": "enum", "values": ["single", "collective"] },
+        { "key": "admin_overhead_surcharge_percent", "type": "decimal_7_2" },
+        { "key": "invoice_number_range", "type": "string" },
+        { "key": "bonus_eligible", "type": "boolean" },
+        { "key": "self_billing_sales", "type": "boolean" },
+        { "key": "self_billing_purchase", "type": "boolean" },
+        { "key": "notable_claim", "type": "string_long" },
+        { "key": "vat_optimizer_enabled", "type": "boolean" }
+      ]
+    },
+    "tab_25_cpd_konto_anlegen": {
+      "entity": "cpd_accounts",
+      "fields": [
+        { "key": "customer_number", "type": "string" },
+        { "key": "debtor_account", "type": "string" },
+        { "key": "search_term", "type": "string" },
+        { "key": "name_1", "type": "string" },
+        { "key": "name_2", "type": "string" },
+        { "key": "name_3", "type": "string" },
+        { "key": "street", "type": "string" },
+        { "key": "country", "type": "string2" },
+        { "key": "postal_code", "type": "string" },
+        { "key": "city", "type": "string" },
+        { "key": "po_box_city", "type": "string" },
+        { "key": "phone_1", "type": "string" },
+        { "key": "phone_2", "type": "string" },
+        { "key": "fax", "type": "string" },
+        { "key": "salutation", "type": "string" },
+        { "key": "brief_salutation", "type": "string" },
+        { "key": "email", "type": "string" },
+        { "key": "website", "type": "string" },
+        { "key": "branch_office", "type": "string" },
+        { "key": "cost_center", "type": "string" },
+        { "key": "invoice_type", "type": "string" },
+        { "key": "collective_invoice", "type": "boolean" },
+        { "key": "invoice_form", "type": "string" },
+        { "key": "sales_representative", "type": "string" },
+        { "key": "region_code", "type": "string" },
+        { "key": "cash_discount_percent", "type": "decimal_7_2" },
+        { "key": "cash_discount_days", "type": "integer" },
+        { "key": "net_due_days", "type": "integer" }
+      ]
+    }
+  },
+  "tax_logic_grain_accounts": {
+    "jurisdiction": "DE",
+    "compliance_reference": [
+      "UStG §13 (steuerentstehung)",
+      "UStG §15 (vorsteuerabzug)",
+      "UStG §24 (durchschnittssaetze landwirtschaft)"
+    ],
+    "process_model": {
+      "business_case": "einlagerungskunde liefert getreide ein; landhandel kauft erst spaeter",
+      "rules": [
+        {
+          "key": "no_purchase_no_input_vat",
+          "rule": "Keine vorsteuer aus einkauf ziehen, solange kein steuerbarer einkaufsvorgang mit rechnung/zahlung vorliegt."
+        },
+        {
+          "key": "tax_point_on_purchase_or_advance",
+          "rule": "USt entsteht mit ausfuehrung der lieferung bzw. bei anzahlung bereits bei vereinnahmung."
+        },
+        {
+          "key": "farmer_compensation_at_actual_purchase_date",
+          "rule": "Weiterverguetung an landwirt erst mit tatsaechlichem kaufdatum/abrechnung und zugehoerigem steuertatbestand."
+        }
+      ],
+      "erp_fields": [
+        { "key": "storage_booking_type", "type": "enum", "values": ["storage_only", "purchase"] },
+        { "key": "ownership_status", "type": "enum", "values": ["farmer_owned", "dealer_owned"] },
+        { "key": "purchase_contract_id", "type": "uuid" },
+        { "key": "purchase_date_actual", "type": "date" },
+        { "key": "input_vat_claimable", "type": "boolean" },
+        { "key": "input_vat_claim_date", "type": "date" },
+        { "key": "farmer_compensation_due_date", "type": "date" },
+        { "key": "farmer_compensation_paid_at", "type": "datetime" },
+        { "key": "tax_regime", "type": "enum", "values": ["regular_vat", "avg_rate_24_ustg"] },
+        { "key": "tax_decision_log", "type": "json_array_object" }
+      ],
+      "note": "fachliche/steuerliche pruefung durch steuerberater erforderlich"
+    }
+  },
+  "personnel_master": {
+    "entities": {
+      "employee_core": [
+        { "key": "employee_id", "type": "uuid" },
+        { "key": "personnel_number", "type": "string", "unique": true },
+        { "key": "salutation", "type": "string" },
+        { "key": "first_name", "type": "string" },
+        { "key": "last_name", "type": "string" },
+        { "key": "birth_date", "type": "date" },
+        { "key": "street", "type": "string" },
+        { "key": "postal_code", "type": "string" },
+        { "key": "city", "type": "string" },
+        { "key": "country", "type": "string2" },
+        { "key": "email", "type": "string" },
+        { "key": "phone", "type": "string" },
+        { "key": "mobile", "type": "string" },
+        { "key": "status", "type": "enum", "values": ["active", "inactive", "terminated"] }
+      ],
+      "employee_job": [
+        { "key": "department", "type": "string" },
+        { "key": "position", "type": "string" },
+        { "key": "cost_center", "type": "string" },
+        { "key": "manager_employee_id", "type": "uuid" },
+        { "key": "employment_type", "type": "enum", "values": ["full_time", "part_time", "temporary", "intern"] },
+        { "key": "entry_date", "type": "date" },
+        { "key": "exit_date", "type": "date" }
+      ],
+      "employee_payroll": [
+        { "key": "tax_id", "type": "string" },
+        { "key": "social_security_number", "type": "string" },
+        { "key": "health_insurance", "type": "string" },
+        { "key": "iban", "type": "string" },
+        { "key": "bic", "type": "string" },
+        { "key": "hourly_rate", "type": "decimal_14_4" },
+        { "key": "salary_monthly", "type": "decimal_14_2" }
+      ],
+      "employee_qualifications": [
+        { "key": "qualification_id", "type": "uuid" },
+        { "key": "employee_id", "type": "uuid" },
+        { "key": "qualification_name", "type": "string" },
+        { "key": "certificate_number", "type": "string" },
+        { "key": "valid_until", "type": "date" }
+      ]
+    },
+    "ai_erp_fields": [
+      { "key": "skill_vector", "type": "json_array_number" },
+      { "key": "recommended_trainings", "type": "json_array_object" },
+      { "key": "attrition_risk_score", "type": "decimal_5_4" },
+      { "key": "workload_anomaly_score", "type": "decimal_5_4" }
+    ]
+  },
+  "article_master": {
+    "core": [
+      { "key": "article_id", "type": "uuid" },
+      { "key": "article_number", "type": "string", "unique": true },
+      { "key": "search_term", "type": "string" },
+      { "key": "name", "type": "string" },
+      { "key": "article_type", "type": "enum", "values": ["product", "service", "raw_material"] },
+      { "key": "category", "type": "string" },
+      { "key": "unit", "type": "string" },
+      { "key": "active", "type": "boolean" }
+    ],
+    "pricing": [
+      { "key": "purchase_price", "type": "decimal_14_4" },
+      { "key": "sales_price", "type": "decimal_14_4" },
+      { "key": "vat_percent", "type": "decimal_5_2" },
+      { "key": "discount_group", "type": "string" }
+    ],
+    "inventory": [
+      { "key": "stock_managed", "type": "boolean" },
+      { "key": "minimum_stock", "type": "decimal_14_4" },
+      { "key": "maximum_stock", "type": "decimal_14_4" },
+      { "key": "reorder_point", "type": "decimal_14_4" },
+      { "key": "batch_required", "type": "boolean" },
+      { "key": "expiry_required", "type": "boolean" },
+      { "key": "default_location", "type": "string" }
+    ],
+    "compliance": [
+      { "key": "hazard_class", "type": "string" },
+      { "key": "un_number", "type": "string" },
+      { "key": "adr_class", "type": "string" },
+      { "key": "customs_tariff_number", "type": "string" },
+      { "key": "bio_label", "type": "boolean" },
+      { "key": "gmp_plus_relevant", "type": "boolean" },
+      { "key": "qs_check_required", "type": "boolean" }
+    ],
+    "agri_extension": [
+      { "key": "crop_type", "type": "string" },
+      { "key": "variety", "type": "string" },
+      { "key": "harvest_year", "type": "integer" },
+      { "key": "base_moisture", "type": "decimal_7_4" },
+      { "key": "base_protein", "type": "decimal_7_4" },
+      { "key": "drying_cost_per_percent", "type": "decimal_14_4" }
+    ],
+    "ai_erp_fields": [
+      { "key": "demand_forecast_30d", "type": "decimal_14_4" },
+      { "key": "recommended_purchase_qty", "type": "decimal_14_4" },
+      { "key": "price_volatility_score", "type": "decimal_5_4" },
+      { "key": "quality_risk_score", "type": "decimal_5_4" },
+      { "key": "substitution_candidates", "type": "json_array_object" }
+    ]
+  }
+}

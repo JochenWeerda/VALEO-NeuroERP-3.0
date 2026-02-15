@@ -11,6 +11,7 @@ from . import farm_profiles
 from .accounts import router as accounts
 from .journal_entries import router as journal_entries
 from .articles import router as articles
+from . import sales_orders
 from .warehouses import router as warehouses
 from . import gap
 from . import prospecting
@@ -54,6 +55,7 @@ from . import nve
 from . import webhooks
 from . import article_extensions
 from . import customer_extensions
+from . import business_partners
 from . import messages
 from . import dms_images
 from . import sales_shipping_ext
@@ -63,3 +65,8 @@ from . import modules
 from . import agrar_contracts
 from . import silo
 from . import agrar_settlements
+from . import nawaro
+from . import nawaro_raps
+from . import einkauf_lieferschein
+from . import admin_monitoring
+from . import admin_core
