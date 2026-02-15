@@ -875,9 +875,9 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - Bei deaktiviertem `agrar` keine agrarspezifischen Tabellen-/Command-Pfade aktiv.
 
 #### 8.27.9 Sofort-Backlog (naechste umzusetzende Tickets)
-1. [ ] `DOCFLOW-P0-01`: Canonical `DocumentType` + `TransitionPolicy` als zentrale Domain.
-2. [ ] `DOCFLOW-P0-02`: Migration `document_headers/items/links/postings` inkl. Constraints/Indizes.
-3. [ ] `DOCFLOW-P0-03`: Idempotent Command API (`convert`, `post`, `reverse`) mit Outbox.
+1. [x] `DOCFLOW-P0-01`: Canonical `DocumentType` + `TransitionPolicy` als zentrale Domain.
+2. [x] `DOCFLOW-P0-02`: Migration `document_headers/items/links/postings` inkl. Constraints/Indizes.
+3. [x] `DOCFLOW-P0-03`: Idempotent Command API (`convert`, `post`, `reverse`) mit Outbox.
 4. [ ] `DOCFLOW-P0-04`: `sales/delivery-editor` und `sales/invoice-editor` auf Domain-API umstellen.
 5. [ ] `DOCFLOW-P0-05`: Workflow-Persistenz (DB) aktivieren, in-memory deaktivieren.
 6. [ ] `DOCFLOW-P0-06`: E2E-Suite fuer Teillieferung/Teilrechnung/Wiegeschein-Ausloesung/Bestellvorschlag.
@@ -893,10 +893,14 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
   - `DOCFLOW-P0-07` Fremdbestand-Datenmodell + CRUD-Felder.
   - `DOCFLOW-P0-08` Lagergeld-Engine inkl. idempotentem Monatslauf, Buchung, Audit, E2E.
 - [x] Offene Punkte klar abgegrenzt (keine versteckte technische Schuld):
-  - Kanonisches Docflow-Datenmodell + Command-API (`P0-01`..`P0-03`).
   - Frontend-Cutover von MCP auf Domain-Docflow (`P0-04`).
   - Workflow-DB-Persistenz statt in-memory (`P0-05`).
   - Vollstaendige E2E-/Belastungs-/Governance-Nachweise (`P0-06`, `P0-09`, `P0-10`).
+- [x] Neu umgesetzt (Code, nicht nur Doku):
+  - `alembic/versions/docflow_core_20260215.py` (Schema `domain_docflow`, `document_headers/items/links/postings`, `number_series`, `command_idempotency_keys`).
+  - `app/api/v1/endpoints/docflow.py` (`GET /api/v1/docflow/`, `GET /api/v1/docflow/{id}`, `POST /convert`, `POST /post`, `POST /reverse`).
+  - Router-Verdrahtung in `app/api/v1/endpoints/__init__.py` und `app/api/v1/api.py`.
+  - Smoke verifiziert: Dry-Run/Convert/Post/Reverse + Idempotenz-Hit + Persistenz in `domain_docflow.*`.
 - [x] Abnahmekriterien je Welle festgelegt:
   - Keine Doppelbelege/Doppelbuchungen unter Retry/Parallelklick.
   - Vollstaendige Belegkette auf Item-Ebene rueckverfolgbar.

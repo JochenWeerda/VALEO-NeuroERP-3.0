@@ -20,6 +20,7 @@ from app.api.v1.endpoints import (
     journal_entries,
     articles,
     sales_orders,
+    docflow,
     warehouses,
     policies,
     gap,
@@ -153,6 +154,12 @@ api_router.include_router(
     sales_orders.router,
     prefix="/sales/orders",
     tags=["sales", "orders"]
+)
+
+api_router.include_router(
+    docflow.router,
+    prefix="/docflow",
+    tags=["docflow"]
 )
 
 api_router.include_router(
