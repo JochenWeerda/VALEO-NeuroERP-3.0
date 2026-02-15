@@ -1167,6 +1167,14 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
       {
+        id: 'monitoring-regeln',
+        label: 'Monitoring-Regeln',
+        icon: Settings,
+        module: '@/pages/admin/monitoring/regeln',
+        preferredPath: 'monitoring/regeln',
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
         id: 'compliance-dashboard',
         label: 'Compliance',
         icon: ShieldCheck,

@@ -13,6 +13,10 @@
       "path": "monitoring/alerts"
     },
     {
+      "module": "@/pages/admin/monitoring/regeln",
+      "path": "monitoring/regeln"
+    },
+    {
       "module": "@/pages/agrar/aussaat/liste",
       "path": "agrar/aussaat"
     },
