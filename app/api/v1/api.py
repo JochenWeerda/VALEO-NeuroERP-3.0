@@ -94,6 +94,7 @@ from app.api.v1.endpoints import (
     admin_devices,
     admin_mobile,
     controlling,
+    training,
 )
 
 # Import domain routers
@@ -644,4 +645,9 @@ api_router.include_router(
 api_router.include_router(
     controlling.router,
     tags=["controlling", "kpi", "dashboard"]
+)
+
+api_router.include_router(
+    training.router,
+    tags=["training", "hr", "onboarding"]
 )

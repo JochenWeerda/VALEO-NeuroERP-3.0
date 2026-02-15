@@ -400,17 +400,34 @@ AGRAR-GO-01,Go-Live-Readiness und Rollback-Probe,Story,P0,M,DevOps,Sprint 6,2026
 
 ### 8.8 Schulungsmanagement / Qualifikationen / Onboarding
 - DB:
-- [ ] Keine dedizierten Tabellen fuer Schulungen, Zertifikate, Qualifikationsprofile, Onboarding-Checklisten.
+- [x] Dedizierte Tabellen vorhanden (`domain_hr.*` via `alembic/versions/hr_training_onboarding_module_20260215.py`):
+  - `training_courses`, `training_assignments`, `employee_certificates`, `qualification_profiles`, `onboarding_checklists`, `onboarding_runs`.
 - CRUD/API:
-- [ ] Keine entsprechenden Domain-Endpunkte gefunden.
+- [x] Domain-CRUD-Endpunkte vorhanden in `app/api/v1/endpoints/training.py`:
+  - Kurse: `GET/POST/PUT/DELETE /api/v1/training/courses`
+  - Zuweisungen: `GET/POST/PUT/DELETE /api/v1/training/assignments`
+  - Zertifikate: `GET/POST/PUT/DELETE /api/v1/training/certificates`
+  - Qualifikationen: `GET/POST/PUT/DELETE /api/v1/training/qualifications`
+  - Onboarding-Checklisten: `GET/POST/PUT/DELETE /api/v1/training/onboarding/checklists`
+  - Onboarding-Runs: `GET/POST/PUT/DELETE /api/v1/training/onboarding/runs`
 - Masken:
-- [ ] Kein vollstaendiger CRUD-Flow fuer dieses Modul vorhanden.
+- [~] Backend-CRUD ist vollstaendig; UI-Masken-Cutover steht noch aus.
 
 ### 8.9 Priorisierte Restarbeiten (konkret)
 1. P0: Kundenmaske auf `business_partners` CRUD finalisieren, fehlende Pflichtfelder (z. B. Zahlungsart/Preisgruppe/Rabatt) per Migration ergaenzen.
 2. P1: Sales-Orders sauber typisiert mit OrderItems (`sales_order_items`) als Relation implementieren.
 3. P1: Controlling-Schema (KPI, Dashboard, Zeitreihe, Maßnahmen) als eigene Tabellen + API aufsetzen.
-4. P2: Schulungs-/Qualifikations-/Onboarding-Domain modellieren (Schema, API, Masken).
+4. P2: Schulungs-/Qualifikations-/Onboarding-Domain modellieren (Schema, API, Masken) -> Schema+API erledigt, Masken-Cutover offen.
+
+### 8.38 Gap-Closure: Schulung/Qualifikation/Onboarding (Domain-CRUD)
+- [x] Migration umgesetzt: `alembic/versions/hr_training_onboarding_module_20260215.py`
+  - Tabellen inkl. Constraints, Indizes, Status-/Range-Checks.
+  - Seed-Testdaten im Default-Tenant (Kurse + Onboarding-Checkliste), keine Mocks.
+- [x] API umgesetzt: `app/api/v1/endpoints/training.py`
+  - Voller CRUD fuer Kurse, Zuweisungen, Zertifikate, Qualifikationsprofile, Onboarding-Checklisten und -Runs.
+- [x] Router-Verdrahtung:
+  - `app/api/v1/endpoints/__init__.py`
+  - `app/api/v1/api.py`
 
 ### 8.10 Docker Speicherbereinigung (14.02.2026)
 - Ausgangslage: `docker system df` zeigte `Images: 57`, `77.23GB` und `Build Cache: 39.77GB`.
