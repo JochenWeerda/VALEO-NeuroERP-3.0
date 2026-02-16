@@ -45,7 +45,7 @@ export default defineConfig(({ mode }) => {
     port: DEV_PORT,
     host: '0.0.0.0', // Explizit für Docker + von außen erreichbar
     strictPort: false,
-    allowedHosts: true,
+    allowedHosts: ['localhost', 'host.docker.internal', '.local'],
     hmr: {
       // HMR: Keep defaults (works in Docker + via host.docker.internal).
       protocol: 'ws',
