@@ -1,6 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Pin, PinOff, Search } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import {
+  DollarSign,
+  Package,
+  Pin,
+  PinOff,
+  Search,
+  ShoppingCart,
+  Users,
+} from 'lucide-react'
 import {
   ACTION_SHORTCUTS,
   NAV_SECTIONS,
@@ -10,8 +19,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useFeature } from '@/hooks/useFeature'
 import { usePinnedTiles } from '@/hooks/usePinnedTiles'
+import { queryKeys } from '@/lib/query'
+import { apiClient } from '@/lib/axios'
 
 type StarterTile = {
   id: string
@@ -25,6 +37,21 @@ type StarterTile = {
 
 const SEARCH_KEYS = ['label', 'description'] as const
 const MAX_CHILD_LINKS = 5
+const NUM_DE = new Intl.NumberFormat('de-DE')
+
+interface KpiTile {
+  key: string
+  label: string
+  format: (v: number) => string
+  icon: JSX.Element
+}
+
+const KPI_TILES: KpiTile[] = [
+  { key: 'revenue', label: 'Umsatz', format: (v) => `\u20AC ${NUM_DE.format(v)}`, icon: <DollarSign className="h-4 w-4" /> },
+  { key: 'orders', label: 'Auftraege', format: (v) => NUM_DE.format(v), icon: <ShoppingCart className="h-4 w-4" /> },
+  { key: 'customers', label: 'Kunden', format: (v) => NUM_DE.format(v), icon: <Users className="h-4 w-4" /> },
+  { key: 'inventory', label: 'Lagerauslastung', format: (v) => `${v}%`, icon: <Package className="h-4 w-4" /> },
+]
 
 function toStarterTile(section: NavItem): StarterTile | null {
   const resolvedPath = section.path ?? findFirstRoutableChildPath(section)
@@ -115,8 +142,44 @@ export default function StartDashboardPage(): JSX.Element {
     [allTiles, pinnedTileIds],
   )
 
+  const { data: kpis, isPending: kpiLoading } = useQuery({
+    queryKey: queryKeys.analytics.kpis,
+    queryFn: async () => {
+      const res = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis')
+      return res.data
+    },
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  })
+
   return (
     <div className="space-y-6">
+      {/* KPI-Streifen */}
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {KPI_TILES.map((tile) => {
+          const value = kpis?.[tile.key]
+          return (
+            <Card key={tile.key}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">{tile.label}</span>
+                  <span className="text-muted-foreground">{tile.icon}</span>
+                </div>
+                <div className="mt-2">
+                  {kpiLoading ? (
+                    <Skeleton className="h-8 w-24" />
+                  ) : (
+                    <div className="text-2xl font-bold">
+                      {value !== undefined ? tile.format(value) : '-'}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </section>
+
       <section className="rounded-2xl border bg-card p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>

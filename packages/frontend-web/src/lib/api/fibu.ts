@@ -372,6 +372,8 @@ export function useKreditorenOP() {
   })
 }
 
+export { useHauptbuchBuchungen as useHauptbuch }
+
 export function useHauptbuchBuchungen() {
   return useQuery({
     queryKey: [...fibuKeys.buchungen(), 'hauptbuch'],
