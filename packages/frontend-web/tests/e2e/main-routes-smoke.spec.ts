@@ -18,6 +18,8 @@ const MAIN_ROUTES: RouteCheck[] = [
   { path: '/fibu/abschluss-cockpit', expectedHeading: /abschluss-cockpit|abschluss/i },
   { path: '/admin/monitoring/alerts' },
   { path: '/admin/report-berechtigungen' },
+  { path: '/einstellungen/system' },
+  { path: '/nawaro/vertraege' },
 ]
 
 test.describe('Main Routes Smoke (no dashboard fallback)', () => {

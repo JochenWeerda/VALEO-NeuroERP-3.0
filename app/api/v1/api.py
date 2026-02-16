@@ -97,6 +97,7 @@ from app.api.v1.endpoints import (
     controlling,
     training,
     personal,
+    analytics,
 )
 
 # Import domain routers
@@ -428,6 +429,11 @@ api_router.include_router(
 api_router.include_router(
     reports_router,
     tags=["reports", "analytics", "dashboard"]
+)
+
+api_router.include_router(
+    analytics.router,
+    tags=["analytics", "dashboard"]
 )
 
 # Agrar domain routers
