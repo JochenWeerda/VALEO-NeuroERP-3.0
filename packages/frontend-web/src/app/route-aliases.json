@@ -205,18 +205,6 @@
       "path": "crm/campaign/new"
     },
     {
-      "module": "@/pages/crm/campaigns",
-      "path": "crm/campaigns"
-    },
-    {
-      "module": "@/pages/crm/campaign-detail",
-      "path": "crm/campaign/:id"
-    },
-    {
-      "module": "@/pages/crm/campaign-detail",
-      "path": "crm/campaign/new"
-    },
-    {
       "module": "@/pages/crm/campaign-templates",
       "path": "crm/campaign-templates"
     },
@@ -450,11 +438,11 @@
     },
     {
       "module": "@/pages/agrar/duenger/stamm",
-      "path": "agrar/duenger"
+      "path": "agrar/duenger/stamm/:id"
     },
     {
       "module": "@/pages/agrar/duenger-liste",
-      "path": "agrar/duenger"
+      "path": "agrar/duenger-liste"
     },
     {
       "module": "@/pages/agrar/duengung/planung",
@@ -510,7 +498,7 @@
     },
     {
       "module": "@/pages/agrar/saatgut/liste",
-      "path": "agrar/saatgut"
+      "path": "agrar/saatgut/liste"
     },
     {
       "module": "@/pages/agrar/saatgut/sortenregister",
@@ -518,7 +506,7 @@
     },
     {
       "module": "@/pages/agrar/saatgut/stamm",
-      "path": "agrar/saatgut"
+      "path": "agrar/saatgut/stamm/:id"
     },
     {
       "module": "@/pages/agrar/schlaege/karte",
@@ -674,7 +662,7 @@
     },
     {
       "module": "@/pages/crm/kunden-stamm",
-      "path": "crm/kunden"
+      "path": "crm/kunden/:id"
     },
     {
       "module": "@/pages/crm/leads",
@@ -686,7 +674,7 @@
     },
     {
       "module": "@/pages/crm/lieferanten-stamm",
-      "path": "crm/lieferanten"
+      "path": "crm/lieferanten/:id"
     },
     {
       "module": "@/pages/dashboard/customizable",
@@ -730,7 +718,7 @@
     },
     {
       "module": "@/pages/einkauf/anlieferavis",
-      "path": "einkauf/anlieferavis"
+      "path": "einkauf/anlieferavis/neu"
     },
     {
       "module": "@/pages/einkauf/audit-drilldown",
@@ -766,7 +754,7 @@
     },
     {
       "module": "@/pages/einkauf/lieferanten-stamm",
-      "path": "einkauf/lieferanten"
+      "path": "einkauf/lieferanten/:id"
     },
     {
       "module": "@/pages/einkauf/lieferantenbewertung",
@@ -914,7 +902,7 @@
     },
     {
       "module": "@/pages/finance/debitoren-liste",
-      "path": "finance/debitoren"
+      "path": "finance/debitoren-liste"
     },
     {
       "module": "@/pages/finance/dunning-editor",
@@ -982,7 +970,7 @@
     },
     {
       "module": "@/pages/futter/einzel/stamm",
-      "path": "futter/einzel"
+      "path": "futter/einzel/:id"
     },
     {
       "module": "@/pages/futter/misch/liste",
@@ -990,7 +978,7 @@
     },
     {
       "module": "@/pages/futter/misch/stamm",
-      "path": "futter/misch"
+      "path": "futter/misch/:id"
     },
     {
       "module": "@/pages/futtermittel/charge-verfolgung",
@@ -998,11 +986,11 @@
     },
     {
       "module": "@/pages/futtermittel/einzelfuttermittel-liste",
-      "path": "futtermittel/einzelfuttermittel"
+      "path": "futtermittel/einzelfuttermittel-liste"
     },
     {
       "module": "@/pages/futtermittel/einzelfuttermittel-stamm",
-      "path": "futtermittel/einzelfuttermittel"
+      "path": "futtermittel/einzelfuttermittel/:id"
     },
     {
       "module": "@/pages/futtermittel/futtermittel-bestellung",
@@ -1022,11 +1010,11 @@
     },
     {
       "module": "@/pages/futtermittel/mischfuttermittel-liste",
-      "path": "futtermittel/mischfuttermittel"
+      "path": "futtermittel/mischfuttermittel-liste"
     },
     {
       "module": "@/pages/futtermittel/mischfuttermittel-stamm",
-      "path": "futtermittel/mischfuttermittel"
+      "path": "futtermittel/mischfuttermittel/:id"
     },
     {
       "module": "@/pages/inbox/index",
@@ -1158,7 +1146,7 @@
     },
     {
       "module": "@/pages/personal/stundenzettel",
-      "path": "personal/stundenzettel"
+      "path": "personal/stundenzettel/:id"
     },
     {
       "module": "@/pages/personal/zeiterfassung",
