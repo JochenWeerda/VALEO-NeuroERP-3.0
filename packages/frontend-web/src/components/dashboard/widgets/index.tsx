@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { type WidgetLayout } from '@/hooks/useDashboardLayout'
 import {
   ArrowDown,
@@ -13,7 +14,10 @@ import {
   Users,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { queryKeys } from '@/lib/query'
+import { apiClient } from '@/lib/axios'
 
 // Widget Registry
 export interface WidgetDefinition {
@@ -25,65 +29,169 @@ export interface WidgetDefinition {
   component: (props: { widget: WidgetLayout }) => ReactNode
 }
 
-// KPI Widget
+// KPI-Mapping: Widget-ID zu Backend-KPI-Key
+// Backend: GET /api/v1/analytics/kpis → { revenue, orders, customers, inventory, contract_long_tons, ... }
+const NUM_DE = new Intl.NumberFormat('de-DE')
+const NUM_DE_1 = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+
+const KPI_MAPPING: Record<string, { key: string; label: string; format: (value: number) => string; icon: ReactNode }> = {
+  // Kern-Business-KPIs
+  'kpi-revenue': {
+    key: 'revenue',
+    label: 'Umsatz',
+    format: (value) => `€ ${NUM_DE.format(value)}`,
+    icon: <DollarSign className="h-4 w-4" />,
+  },
+  'kpi-orders': {
+    key: 'orders',
+    label: 'Aufträge',
+    format: (value) => NUM_DE.format(value),
+    icon: <ShoppingCart className="h-4 w-4" />,
+  },
+  'kpi-customers': {
+    key: 'customers',
+    label: 'Kunden',
+    format: (value) => NUM_DE.format(value),
+    icon: <Users className="h-4 w-4" />,
+  },
+  'kpi-stock': {
+    key: 'inventory',
+    label: 'Lagerauslastung',
+    format: (value) => `${NUM_DE_1.format(value)}%`,
+    icon: <Package className="h-4 w-4" />,
+  },
+  // Agrar-spezifische KPIs
+  'kpi-contract-long': {
+    key: 'contract_long_tons',
+    label: 'Kontrakt Long',
+    format: (value) => `${NUM_DE_1.format(value)} t`,
+    icon: <TrendingUp className="h-4 w-4" />,
+  },
+  'kpi-contract-short': {
+    key: 'contract_short_tons',
+    label: 'Kontrakt Short',
+    format: (value) => `${NUM_DE_1.format(value)} t`,
+    icon: <TrendingUp className="h-4 w-4" />,
+  },
+  'kpi-weighing-today': {
+    key: 'weighing_today_tons',
+    label: 'Wiegen heute',
+    format: (value) => `${NUM_DE_1.format(value)} t`,
+    icon: <Package className="h-4 w-4" />,
+  },
+  'kpi-inventory-blocked': {
+    key: 'inventory_lots_blocked',
+    label: 'Blockierte Lose',
+    format: (value) => NUM_DE.format(value),
+    icon: <Package className="h-4 w-4" />,
+  },
+}
+
+// Mock-Daten als Fallback
+const MOCK_KPI_DATA: Record<string, { label: string; value: string; delta: number; icon: ReactNode }> = {
+  'kpi-revenue': {
+    label: 'Umsatz',
+    value: '€ 129.200',
+    delta: 12.5,
+    icon: <DollarSign className="h-4 w-4" />,
+  },
+  'kpi-orders': {
+    label: 'Aufträge',
+    value: '501',
+    delta: 8.2,
+    icon: <ShoppingCart className="h-4 w-4" />,
+  },
+  'kpi-customers': {
+    label: 'Kunden',
+    value: '1.234',
+    delta: 3.1,
+    icon: <Users className="h-4 w-4" />,
+  },
+  'kpi-stock': {
+    label: 'Lager',
+    value: '97%',
+    delta: -2.1,
+    icon: <Package className="h-4 w-4" />,
+  },
+}
+
+// KPI Widget mit echten Backend-Daten
 function KPIWidget({ widget }: { widget: WidgetLayout }) {
-  const kpiData: Record<string, { label: string; value: string; delta: number; icon: ReactNode }> = {
-    'kpi-revenue': {
-      label: 'Umsatz',
-      value: '€ 129.200',
-      delta: 12.5,
-      icon: <DollarSign className="h-4 w-4" />,
+  const kpiConfig = KPI_MAPPING[widget.id]
+  const mockData = MOCK_KPI_DATA[widget.id]
+
+  // Lade echte KPI-Daten vom Backend, wenn Mapping vorhanden
+  const { data: kpiData, isPending, isError } = useQuery({
+    queryKey: queryKeys.analytics.kpis,
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis')
+        return response.data
+      } catch (error) {
+        console.warn('KPI-Daten konnten nicht geladen werden, verwende Fallback:', error)
+        return null
+      }
     },
-    'kpi-orders': {
-      label: 'Aufträge',
-      value: '501',
-      delta: 8.2,
-      icon: <ShoppingCart className="h-4 w-4" />,
-    },
-    'kpi-customers': {
-      label: 'Kunden',
-      value: '1.234',
-      delta: 3.1,
-      icon: <Users className="h-4 w-4" />,
-    },
-    'kpi-stock': {
-      label: 'Lager',
-      value: '97%',
-      delta: -2.1,
-      icon: <Package className="h-4 w-4" />,
-    },
+    enabled: !!kpiConfig, // Nur laden, wenn Mapping vorhanden
+    staleTime: 30 * 1000, // 30 Sekunden
+    refetchInterval: 60 * 1000, // Alle 60 Sekunden aktualisieren
+  })
+
+  // Bestimme die anzuzeigenden Daten
+  let displayData: { label: string; value: string; delta: number; icon: ReactNode }
+
+  if (kpiConfig && kpiData && kpiData[kpiConfig.key] !== undefined) {
+    // Echte Daten vom Backend
+    const value = kpiData[kpiConfig.key] || 0
+    displayData = {
+      label: kpiConfig.label,
+      value: kpiConfig.format(value),
+      delta: 0, // TODO: Trend-Berechnung implementieren, wenn historische Daten verfügbar
+      icon: kpiConfig.icon,
+    }
+  } else if (mockData) {
+    // Fallback auf Mock-Daten
+    displayData = mockData
+  } else {
+    // Default-Fallback
+    displayData = {
+      label: 'KPI',
+      value: '-',
+      delta: 0,
+      icon: <BarChart3 className="h-4 w-4" />,
+    }
   }
 
-  const data = kpiData[widget.id] || {
-    label: 'KPI',
-    value: '-',
-    delta: 0,
-    icon: <BarChart3 className="h-4 w-4" />,
-  }
-
-  const isPositive = data.delta >= 0
+  const isPositive = displayData.delta >= 0
+  const isLoading = isPending && kpiConfig
 
   return (
     <div className="p-4 h-full flex flex-col justify-between">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-muted-foreground">{data.label}</span>
-        <span className="text-muted-foreground">{data.icon}</span>
+        <span className="text-sm font-medium text-muted-foreground">{displayData.label}</span>
+        <span className="text-muted-foreground">{displayData.icon}</span>
       </div>
       <div className="mt-2">
-        <div className="text-2xl font-bold">{data.value}</div>
-        <div
-          className={cn(
-            'flex items-center text-xs mt-1',
-            isPositive ? 'text-green-600' : 'text-red-600'
-          )}
-        >
-          {isPositive ? (
-            <ArrowUp className="h-3 w-3 mr-1" />
-          ) : (
-            <ArrowDown className="h-3 w-3 mr-1" />
-          )}
-          <span>{Math.abs(data.delta)}% vs. Vormonat</span>
-        </div>
+        {isLoading ? (
+          <Skeleton className="h-8 w-24" />
+        ) : (
+          <div className="text-2xl font-bold">{displayData.value}</div>
+        )}
+        {displayData.delta !== 0 && (
+          <div
+            className={cn(
+              'flex items-center text-xs mt-1',
+              isPositive ? 'text-green-600' : 'text-red-600'
+            )}
+          >
+            {isPositive ? (
+              <ArrowUp className="h-3 w-3 mr-1" />
+            ) : (
+              <ArrowDown className="h-3 w-3 mr-1" />
+            )}
+            <span>{Math.abs(displayData.delta)}% vs. Vormonat</span>
+          </div>
+        )}
       </div>
     </div>
   )

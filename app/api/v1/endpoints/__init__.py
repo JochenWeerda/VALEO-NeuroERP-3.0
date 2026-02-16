@@ -78,3 +78,4 @@ from . import admin_reporting
 from . import controlling
 from . import training
 from . import personal
+from . import analytics

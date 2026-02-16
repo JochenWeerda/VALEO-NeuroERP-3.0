@@ -18,8 +18,19 @@ for (const alias of (routeAliases.aliases ?? []) as AliasEntry[]) {
 
 export function resolveRoutePathFromModule(moduleSpecifier: string, fallbackPath?: string): string {
   const moduleKey = normalizeModule(moduleSpecifier)
+  const defaultPath = toAbsolutePath(computeDefaultPath(moduleKey))
   if (fallbackPath) {
-    return toAbsolutePath(fallbackPath)
+    const normalizedFallback = toAbsolutePath(fallbackPath)
+    if (normalizedFallback === '/') {
+      return normalizedFallback
+    }
+    if (normalizedFallback === defaultPath) {
+      return normalizedFallback
+    }
+    if (hasExplicitAlias(moduleKey, normalizedFallback)) {
+      return normalizedFallback
+    }
+    return defaultPath
   }
 
   const aliasPath = aliasMap.get(moduleKey)?.[0]
@@ -27,8 +38,7 @@ export function resolveRoutePathFromModule(moduleSpecifier: string, fallbackPath
     return toAbsolutePath(aliasPath)
   }
 
-  const defaultPath = computeDefaultPath(moduleKey)
-  return toAbsolutePath(defaultPath)
+  return defaultPath
 }
 
 function normalizeModule(moduleSpecifier: string): string {
@@ -59,4 +69,12 @@ function toAbsolutePath(routePath: string): string {
     return '/'
   }
   return routePath.startsWith('/') ? routePath : `/${routePath}`
+}
+
+function hasExplicitAlias(moduleKey: string, routePath: string): boolean {
+  const aliasPaths = aliasMap.get(moduleKey)
+  if (!aliasPaths || aliasPaths.length === 0) {
+    return false
+  }
+  return aliasPaths.some((aliasPath) => toAbsolutePath(aliasPath) === routePath)
 }
