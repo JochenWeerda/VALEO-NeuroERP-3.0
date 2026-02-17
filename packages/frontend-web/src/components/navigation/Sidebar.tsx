@@ -47,7 +47,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
     .filter((item) => item.children && item.children.length > 0)
     .map((item) => item.id)
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
-    new Set(allGroupIds),
+    new Set(), // Standardmäßig alle Gruppen eingeklappt
   )
   const settingsPath = useMemo(
     () =>
@@ -104,8 +104,22 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
       data-mcp-component="sidebar"
       data-mcp-collapsed={collapsed}
     >
-      <div className="flex h-16 items-center border-b px-4">
+      <div className="flex h-16 items-center justify-between border-b px-4">
         {collapsed ? <span className="text-lg font-bold">V</span> : <h2 className="text-lg font-semibold">VALEO ERP</h2>}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggle}
+          className="h-8 w-8"
+          aria-label={collapsed ? 'Sidebar erweitern' : 'Sidebar einklappen'}
+          title={collapsed ? 'Erweitern (Strg+B)' : 'Einklappen (Strg+B)'}
+        >
+          {collapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
+        </Button>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-2">
@@ -155,23 +169,6 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
           <Settings className="h-5 w-5" />
           {!collapsed && <span>Einstellungen</span>}
         </NavLink>
-
-        <Button
-          variant="ghost"
-          size={collapsed ? 'icon' : 'sm'}
-          onClick={onToggle}
-          className="mt-2 w-full"
-          aria-label={collapsed ? 'Sidebar erweitern' : 'Sidebar einklappen'}
-        >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <>
-              <ChevronLeft className="h-4 w-4" />
-              <span className="ml-2">Einklappen</span>
-            </>
-          )}
-        </Button>
       </div>
     </aside>
   )

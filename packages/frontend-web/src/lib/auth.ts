@@ -23,6 +23,29 @@ export interface AuthConfig {
   }
 }
 
+// Helper: Check if OIDC is actually configured (not just placeholder)
+const isOidcConfigured = (): boolean => {
+  const discoveryUrl = import.meta.env.VITE_OIDC_DISCOVERY_URL ?? ''
+  // Check if URL is empty or is a placeholder
+  if (!discoveryUrl || discoveryUrl.length === 0) {
+    return false
+  }
+  // Check for common placeholder patterns
+  const placeholderPatterns = [
+    'your-oidc-provider.com',
+    'example.com',
+    'keycloak.example.com',
+    'login.microsoftonline.com/{tenant-id}',
+    '{domain}.auth0.com',
+    '{domain}.okta.com',
+    '{tenant-id}',
+    '{application-id}',
+    '{client-id}',
+    '{domain}',
+  ]
+  return !placeholderPatterns.some(pattern => discoveryUrl.includes(pattern))
+}
+
 // Auth-Config aus ENV
 const config: AuthConfig = {
   oidc: {
@@ -45,15 +68,94 @@ class AuthService {
     this.accessToken = localStorage.getItem('access_token')
     this.refreshToken = localStorage.getItem('refresh_token')
     
+    // Development mode: Create mock user if no OIDC config
+    const oidcConfigured = isOidcConfigured()
+    
+    // If OIDC not configured, always use dev token (even if token exists in localStorage)
+    if (!oidcConfigured) {
+      // Create a mock user for development
+      const mockUser: User = {
+        sub: 'dev-user',
+        email: 'dev@valeo-neuro-erp.local',
+        name: 'Development User',
+        scopes: ['admin:all', 'sales:read', 'sales:write', 'crm:read', 'crm:write'],
+        roles: ['admin', 'user'],
+        exp: Math.floor(Date.now() / 1000) + 86400, // 24 hours from now
+      }
+      this.user = mockUser
+      // Always use dev token in dev mode (override any existing token)
+      const devToken = import.meta.env.VITE_API_DEV_TOKEN || 'dev-token'
+      this.accessToken = devToken
+      localStorage.setItem('access_token', devToken)
+      return
+    }
+    
+    // OIDC configured - only create mock user if no token exists
+    if (this.accessToken == null) {
+      // No token and OIDC configured - user needs to login
+      return
+    }
+    
     if (this.accessToken != null) {
+      // If token is dev-token, don't try to decode it as JWT
+      if (this.accessToken === 'dev-token' || this.accessToken === import.meta.env.VITE_API_DEV_TOKEN) {
+        // Dev token - use mock user
+        if (!this.user) {
+          const mockUser: User = {
+            sub: 'dev-user',
+            email: 'dev@valeo-neuro-erp.local',
+            name: 'Development User',
+            scopes: ['admin:all', 'sales:read', 'sales:write', 'crm:read', 'crm:write'],
+            roles: ['admin', 'user'],
+            exp: Math.floor(Date.now() / 1000) + 86400,
+          }
+          this.user = mockUser
+        }
+        return
+      }
+      
       try {
         this.user = jwtDecode<User>(this.accessToken)
         
         // Check if expired
         if (this.user.exp * 1000 < Date.now()) {
+          // In dev mode without OIDC, recreate mock user instead of logout
+          if (!oidcConfigured) {
+            const mockUser: User = {
+              sub: 'dev-user',
+              email: 'dev@valeo-neuro-erp.local',
+              name: 'Development User',
+              scopes: ['admin:all', 'sales:read', 'sales:write', 'crm:read', 'crm:write'],
+              roles: ['admin', 'user'],
+              exp: Math.floor(Date.now() / 1000) + 86400,
+            }
+            this.user = mockUser
+            // Reset token to dev-token
+            const devToken = import.meta.env.VITE_API_DEV_TOKEN || 'dev-token'
+            this.accessToken = devToken
+            localStorage.setItem('access_token', devToken)
+            return
+          }
           this.logout()
         }
       } catch (e) {
+        // In dev mode without OIDC, create mock user instead of logout
+        if (!oidcConfigured) {
+          const mockUser: User = {
+            sub: 'dev-user',
+            email: 'dev@valeo-neuro-erp.local',
+            name: 'Development User',
+            scopes: ['admin:all', 'sales:read', 'sales:write', 'crm:read', 'crm:write'],
+            roles: ['admin', 'user'],
+            exp: Math.floor(Date.now() / 1000) + 86400,
+          }
+          this.user = mockUser
+          // Reset token to dev-token
+          const devToken = import.meta.env.VITE_API_DEV_TOKEN || 'dev-token'
+          this.accessToken = devToken
+          localStorage.setItem('access_token', devToken)
+          return
+        }
         this.logout()
       }
     }
@@ -197,21 +299,43 @@ class AuthService {
   /**
    * Logout (lokale Tokens löschen)
    */
+  logout(): void {
+    const oidcConfigured = config.oidc.discoveryUrl.length > 0
+    // In dev mode without OIDC, don't clear tokens (keep dev token)
+    if (!oidcConfigured && this.accessToken === 'dev-token') {
+      // Keep dev token for development
+      return
+    }
+    this.accessToken = null
+    this.refreshToken = null
+    this.user = null
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
+  }
+
+  /**
+   * Clear tokens (alias for logout)
+   */
   clearTokens(): void {
     this.logout()
   }
 
   /**
-   * Logout (alias)
+   * Logout (lokale Tokens löschen)
    */
   logout(): void {
+    const oidcConfigured = config.oidc.discoveryUrl.length > 0
+    // In dev mode without OIDC, don't clear dev token
+    if (!oidcConfigured && this.accessToken === 'dev-token') {
+      // Keep dev token for development - just clear user if needed
+      // Don't remove tokens from localStorage
+      return
+    }
     this.accessToken = null
     this.refreshToken = null
     this.user = null
-
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
-
     // Optional: OIDC-Logout
     // window.location.href = `${discovery.end_session_endpoint}?...`
   }
@@ -234,6 +358,11 @@ class AuthService {
    * Prüft ob User authenticated ist
    */
   isAuthenticated(): boolean {
+    // In development mode without OIDC, allow access if mock user exists
+    const oidcConfigured = config.oidc.discoveryUrl.length > 0
+    if (!oidcConfigured && this.user !== null) {
+      return true
+    }
     return this.accessToken !== null && this.user !== null
   }
 
@@ -282,8 +411,15 @@ export function clearAuthSession(): void {
 }
 
 export function handleUnauthorized(): void {
-  auth.logout()
-  if (typeof window !== 'undefined') {
-    window.location.assign('/login')
+  const oidcConfigured = isOidcConfigured()
+  // Only redirect to login if OIDC is configured
+  if (oidcConfigured) {
+    auth.logout()
+    if (typeof window !== 'undefined') {
+      window.location.assign('/login')
+    }
+  } else {
+    // In dev mode without OIDC, just clear session but don't redirect
+    auth.logout()
   }
 }

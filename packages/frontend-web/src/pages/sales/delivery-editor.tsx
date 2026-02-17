@@ -1,318 +1,540 @@
-import { useEffect, useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
-import { useQuery } from "@tanstack/react-query"
-import { useNavigate, useSearchParams } from "react-router-dom"
-import { Card } from "@/components/ui/card"
-import { useToast } from "@/components/ui/toast-provider"
-import { FormBuilder, type FormSchema } from "@/features/forms/FormBuilder"
-import { BelegFlowPanel } from "@/features/flows/BelegFlowPanel"
-import ApprovalPanel from "@/features/workflow/ApprovalPanel"
-import deliverySchema from "@/domain-schemas/sales_delivery.schema.json"
-import { getEntityTypeLabel, getSuccessMessage, getErrorMessage, getStatusLabel } from "@/features/crud/utils/i18n-helpers"
-import { businessPartnerService } from "@/lib/services/business-partner-service"
-import { apiClient } from "@/lib/api-client"
+/**
+ * Lieferschein-Erfassungsmaske
+ * Nachbau der zvoove Lieferschein-Maske basierend auf Screenshots
+ * 
+ * Workflow:
+ * 1. Menü Lieferschein erstellen
+ * 2. Feld Kunde - Kunde auswählen
+ * 3. Feld Artikel Button ... drücken
+ * 4. Artikel auswählen (Suchmaske)
+ * 5. Klick auf Position OK
+ * 6. Nächster Artikel oder klick auf Lieferschein drucken
+ * 7. Im Auswahlfenster Drucker und Formularvorlage wählen oder übernehmen
+ * 8. Druck bestätigen mit OK
+ * 9. Damit schließen das Druckfenster und der Lieferschein wird gebucht
+ * 10. Anschließend neuen Kunden aussuchen oder Eingabemaske schließen
+ */
 
-const ISO_DATE_LENGTH = 10
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Card } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useToast } from '@/components/ui/toast-provider'
+import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
+import { ArticleSearchDialog, type Article } from '@/components/sales/ArticleSearchDialog'
+import { PrintDialog } from '@/components/sales/PrintDialog'
+import { apiClient } from '@/lib/axios'
+import { MoreHorizontal, Check, X, Printer, Save } from 'lucide-react'
 
-type SalesDelivery = {
-  number: string
-  date: string
-  customerId: string
-  sourceOrder?: string
-  deliveryAddress: string
-  carrier?: string
-  deliveryDate?: string
-  status: string
-  notes?: string
-  totalNutrientNKg?: number
-  totalNutrientP2o5Kg?: number
-  totalCo2eKg?: number
-  supplierName?: string
-  sachkundeStatus?: 'geprueft' | 'nicht_erforderlich' | 'offen'
-  sdsMitgeliefert?: 'ja' | 'nicht_erforderlich' | 'offen'
-  adrPunkte?: number
-  lines: Array<{
-    article: string
-    qty: number
-    nutrientNKgPerUnit?: number
-    nutrientP2o5KgPerUnit?: number
-    co2eKgPerUnit?: number
-    bvlZulassungsnummer?: string
-    sdsReference?: string
-    hazardHinweise?: string
-  }>
+type DeliveryNotePosition = {
+  positionNumber: number
+  articleNumber: string
+  articleDescription: string
+  quantity: number
+  unit: string
+  listPrice: number
+  discount: number
+  netPrice: number
+  netAmount: number
+  branch?: string
+  location?: string
 }
 
-/**
- * Sales Delivery Editor Page
- * Lieferschein erstellen/bearbeiten
- */
-export default function SalesDeliveryEditorPage(): JSX.Element {
-  const { t } = useTranslation()
-  const { push } = useToast()
+type DeliveryNote = {
+  deliveryNumber: string
+  deliveryDate: string
+  deliveryTime: string
+  costCenter: string
+  isCreditNote: boolean
+  referenceInvoiceNumber: string
+  branch: string
+  representative: string
+  operator: string
+  truckNumber: string
+  customerId: string
+  customerName: string
+  customerAccount: string
+  creditLimit: string
+  isPrinted: boolean
+  isDelivered: boolean
+  invoiceNumber: string
+  positions: DeliveryNotePosition[]
+  netTotal: number
+  vatTotal: number
+  grossTotal: number
+  total: number
+}
+
+export default function DeliveryEditorNewPage(): JSX.Element {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const editId = searchParams.get("id")
-  const entityType = 'delivery'
-  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lieferschein')
-  const [docId, setDocId] = useState<string | null>(editId)
-  const [delivery, setDelivery] = useState<SalesDelivery>({
-    number: "DL-2025-0001",
-    date: new Date().toISOString().slice(0, ISO_DATE_LENGTH),
-    customerId: "",
-    deliveryAddress: "",
-    carrier: "dhl",
-    deliveryDate: new Date().toISOString().slice(0, ISO_DATE_LENGTH),
-    status: "ENTWURF",
-    notes: "",
-    supplierName: "",
-    sachkundeStatus: "offen",
-    sdsMitgeliefert: "offen",
-    adrPunkte: 0,
-    lines: [{
-      article: "",
-      qty: 1,
-      nutrientNKgPerUnit: 0,
-      nutrientP2o5KgPerUnit: 0,
-      co2eKgPerUnit: 0,
-      bvlZulassungsnummer: "",
-      sdsReference: "",
-      hazardHinweise: "",
-    }],
+  const { push } = useToast()
+  
+  const [deliveryNote, setDeliveryNote] = useState<DeliveryNote>({
+    deliveryNumber: '2600894',
+    deliveryDate: new Date().toISOString().split('T')[0].split('-').reverse().join('.'),
+    deliveryTime: new Date().toTimeString().slice(0, 5),
+    costCenter: '0',
+    isCreditNote: false,
+    referenceInvoiceNumber: '',
+    branch: '0',
+    representative: 'JW',
+    operator: 'JW',
+    truckNumber: '0',
+    customerId: '',
+    customerName: '',
+    customerAccount: '',
+    creditLimit: '',
+    isPrinted: false,
+    isDelivered: false,
+    invoiceNumber: '',
+    positions: [],
+    netTotal: 0,
+    vatTotal: 0,
+    grossTotal: 0,
+    total: 0,
   })
 
-  useEffect(() => {
-    if (!editId) {
+  const [currentPosition, setCurrentPosition] = useState<Partial<DeliveryNotePosition>>({
+    positionNumber: 10,
+    articleNumber: '',
+    articleDescription: '',
+    quantity: 0,
+    unit: '',
+    listPrice: 0,
+    discount: 0,
+    netPrice: 0,
+    netAmount: 0,
+  })
+
+  const [showCustomerDialog, setShowCustomerDialog] = useState(false)
+  const [showArticleDialog, setShowArticleDialog] = useState(false)
+  const [showPrintDialog, setShowPrintDialog] = useState(false)
+
+  const handleCustomerSelect = (customer: Customer): void => {
+    setDeliveryNote((prev) => ({
+      ...prev,
+      customerId: customer.id,
+      customerName: customer.name,
+      customerAccount: customer.debitorAccount,
+    }))
+  }
+
+  const handleArticleSelect = (article: Article): void => {
+    setCurrentPosition((prev) => ({
+      ...prev,
+      articleNumber: article.articleNumber,
+      articleDescription: article.description,
+      unit: article.unit || 'Stk',
+    }))
+  }
+
+  const handlePositionOK = (): void => {
+    if (!currentPosition.articleNumber || !currentPosition.quantity) {
+      push('Bitte Artikel und Menge eingeben')
       return
     }
-    void (async () => {
-      try {
-        const response = await apiClient.get(`/api/v1/docflow/${editId}`)
-        const doc = response.data as any
-        setDocId(String(doc.id))
-        setDelivery((prev) => ({
-          ...prev,
-          number: doc.doc_number ?? prev.number,
-          date: String(doc.document_date ?? prev.date).slice(0, ISO_DATE_LENGTH),
-          customerId: doc.customer_id ?? "",
-          status: doc.status ?? prev.status,
-          lines: Array.isArray(doc.items)
-            ? doc.items.map((it: any) => ({
-                article: it.article_number ?? "",
-                qty: Number(it.quantity ?? 0),
-                nutrientNKgPerUnit: 0,
-                nutrientP2o5KgPerUnit: 0,
-                co2eKgPerUnit: 0,
-                bvlZulassungsnummer: "",
-                sdsReference: "",
-                hazardHinweise: "",
-              }))
-            : prev.lines,
-        }))
-      } catch {
-        push(getErrorMessage(t, "read", entityType))
-      }
-    })()
-  }, [editId, push, t])
-  const instructionsQuery = useQuery({
-    queryKey: ["bp-instructions-delivery", delivery.customerId],
-    queryFn: async () => businessPartnerService.listInstructions(delivery.customerId),
-    enabled: Boolean(delivery.customerId?.trim()),
-  })
-  const activeInstructions = useMemo(() => {
-    const today = new Date().toISOString().slice(0, ISO_DATE_LENGTH)
-    return (instructionsQuery.data ?? []).filter((item) => {
-      const fromOk = !item.valid_from || item.valid_from <= today
-      const toOk = !item.valid_to || item.valid_to >= today
-      return fromOk && toOk
+
+    const position: DeliveryNotePosition = {
+      positionNumber: currentPosition.positionNumber || deliveryNote.positions.length * 10 + 10,
+      articleNumber: currentPosition.articleNumber || '',
+      articleDescription: currentPosition.articleDescription || '',
+      quantity: currentPosition.quantity || 0,
+      unit: currentPosition.unit || 'Stk',
+      listPrice: currentPosition.listPrice || 0,
+      discount: currentPosition.discount || 0,
+      netPrice: currentPosition.netPrice || 0,
+      netAmount: currentPosition.netAmount || 0,
+    }
+
+    setDeliveryNote((prev) => ({
+      ...prev,
+      positions: [...prev.positions, position],
+    }))
+
+    // Reset current position
+    setCurrentPosition({
+      positionNumber: (deliveryNote.positions.length + 1) * 10 + 10,
+      articleNumber: '',
+      articleDescription: '',
+      quantity: 0,
+      unit: '',
+      listPrice: 0,
+      discount: 0,
+      netPrice: 0,
+      netAmount: 0,
     })
-  }, [instructionsQuery.data])
-  const hasCriticalInstruction = activeInstructions.some((item) => item.instruction_priority === "critical" || item.instruction_priority === "high")
-  const psmLines = delivery.lines.filter((line) =>
-    Boolean(line.bvlZulassungsnummer || line.sdsReference || line.hazardHinweise)
-  )
-  const missingPsmFields = psmLines.flatMap((line) => {
-    const issues: string[] = []
-    if (!line.bvlZulassungsnummer) issues.push(`${line.article || 'Position'}: BVL-Zulassungsnr fehlt`)
-    if (!line.sdsReference && !line.hazardHinweise) issues.push(`${line.article || 'Position'}: SDB/Gefahrhinweis fehlt`)
-    return issues
-  })
-  const psmCompliant =
-    psmLines.length === 0 ||
-    (
-      missingPsmFields.length === 0 &&
-      Boolean(delivery.supplierName) &&
-      ['geprueft', 'nicht_erforderlich'].includes(delivery.sachkundeStatus || 'offen') &&
-      ['ja', 'nicht_erforderlich'].includes(delivery.sdsMitgeliefert || 'offen') &&
-      Number(delivery.adrPunkte || 0) <= 1000
-    )
-  const sustainabilityTotals = delivery.lines.reduce(
-    (acc, line) => {
-      const qty = Number(line.qty ?? 0)
-      const n = Number(line.nutrientNKgPerUnit ?? 0)
-      const p2o5 = Number(line.nutrientP2o5KgPerUnit ?? 0)
-      const co2e = Number(line.co2eKgPerUnit ?? 0)
-      acc.totalNutrientNKg += qty * n
-      acc.totalNutrientP2o5Kg += qty * p2o5
-      acc.totalCo2eKg += qty * co2e
-      return acc
-    },
-    { totalNutrientNKg: 0, totalNutrientP2o5Kg: 0, totalCo2eKg: 0 }
-  )
+  }
 
-  async function save(v: SalesDelivery): Promise<void> {
+  const handlePrint = async (printer: string, template: string): Promise<void> => {
     try {
-      const payload: SalesDelivery = {
-        ...v,
-        totalNutrientNKg: Number(sustainabilityTotals.totalNutrientNKg.toFixed(3)),
-        totalNutrientP2o5Kg: Number(sustainabilityTotals.totalNutrientP2o5Kg.toFixed(3)),
-        totalCo2eKg: Number(sustainabilityTotals.totalCo2eKg.toFixed(3)),
-      }
-      const docPayload = {
-        doc_type: "sales_delivery",
-        doc_number: payload.number,
-        status: "open",
-        customer_id: payload.customerId || null,
-        document_date: payload.date ? new Date(payload.date).toISOString() : null,
-        items: payload.lines.map((line) => ({
-          article_number: line.article || "n/a",
-          description: line.article || "",
-          quantity: Number(line.qty || 0),
-          unit_price: 0,
-          discount_percent: 0,
-          tax_rate: 0,
-        })),
-      }
-      if (docId) {
-        await apiClient.put(`/api/v1/docflow/${docId}`, docPayload)
-      } else {
-        const created = await apiClient.post("/api/v1/docflow", docPayload)
-        setDocId(String(created.data?.id))
-      }
+      // Druck-Logik hier
+      await apiClient.post('/api/v1/sales/delivery-notes/print', {
+        deliveryNoteId: deliveryNote.deliveryNumber,
+        printer,
+        template,
+      })
 
-      push(getSuccessMessage(t, 'update', entityType))
-    } catch {
-      push(getErrorMessage(t, 'update', entityType))
+      // Lieferschein buchen
+      await apiClient.post('/api/v1/sales/delivery-notes', {
+        deliveryNumber: deliveryNote.deliveryNumber,
+        customerId: deliveryNote.customerId,
+        positions: deliveryNote.positions,
+      })
+
+      push('Lieferschein erfolgreich gedruckt und gebucht')
+      setDeliveryNote((prev) => ({ ...prev, isPrinted: true }))
+    } catch (error) {
+      push('Fehler beim Drucken/Buchen des Lieferscheins')
     }
   }
 
-  async function createFollowUp(toType: string): Promise<void> {
-    if (!docId) {
-      push("Bitte zuerst den Lieferschein speichern.")
-      return
-    }
-    const targetDocType = toType === "invoice" ? "sales_invoice" : toType
+  const handleSave = async (): Promise<void> => {
     try {
-      const response = await apiClient.post(`/api/v1/docflow/${docId}/convert`, {
-        target_doc_type: targetDocType,
-        idempotency_key: `ui-${docId}-${targetDocType}-${Date.now()}`,
+      await apiClient.post('/api/v1/sales/delivery-notes', {
+        deliveryNumber: deliveryNote.deliveryNumber,
+        customerId: deliveryNote.customerId,
+        positions: deliveryNote.positions,
       })
-      const data = response.data as { target_doc_id?: string; payload?: { target_doc_number?: string } }
-      push(`${getSuccessMessage(t, 'create', 'invoice')}: ${data.payload?.target_doc_number ?? ''}`)
-      if (data.target_doc_id) {
-        navigate(`/sales/invoice-editor?id=${data.target_doc_id}`)
-      }
-    } catch {
-      push(getErrorMessage(t, 'create', 'invoice'))
+      push('Lieferschein erfolgreich gespeichert')
+    } catch (error) {
+      push('Fehler beim Speichern des Lieferscheins')
     }
   }
 
   return (
-    <div className="space-y-4">
-      <BelegFlowPanel
-        current={{
-          id: docId ?? "new",
-          type: entityTypeLabel,
-          number: delivery.number,
-          status: getStatusLabel(t, delivery.status, delivery.status),
-        }}
-        nextTypes={[{ to: "invoice", label: getEntityTypeLabel(t, 'invoice', 'Rechnung') }]}
-        onCreateFollowUp={createFollowUp}
-      />
+    <div className="space-y-4 p-4">
+      <div className="border-b-2 border-green-600 pb-2">
+        <h1 className="text-xl font-bold text-green-700">LIEFERSCHEIN-ERFASSUNG</h1>
+      </div>
 
-      <ApprovalPanel domain="sales" doc={delivery} />
-
+      {/* Lieferschein-Erfassung Header */}
       <Card className="p-4">
-        <h3 className="mb-2 text-sm font-semibold">Chefanweisungen zum Kunden</h3>
-        {!delivery.customerId && (
-          <p className="text-sm text-muted-foreground">Bitte zuerst einen Kunden waehlen, um Chefanweisungen anzuzeigen.</p>
-        )}
-        {delivery.customerId && activeInstructions.length === 0 && (
-          <p className="text-sm text-muted-foreground">Keine aktiven Chefanweisungen vorhanden.</p>
-        )}
-        {activeInstructions.length > 0 && (
-          <div className={`rounded border p-3 text-sm ${hasCriticalInstruction ? "border-red-400 bg-red-50" : "border-amber-300 bg-amber-50"}`}>
-            <ul className="list-disc pl-5">
-              {activeInstructions.map((item) => (
-                <li key={item.id}>
-                  <span className="font-semibold">[{item.instruction_priority}]</span> {item.instruction_text}
-                </li>
-              ))}
-            </ul>
+        <div className="grid grid-cols-3 gap-4">
+          {/* Linke Spalte */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label className="w-32">Liefersch.-Nr.:</Label>
+              <Input value={deliveryNote.deliveryNumber} readOnly className="flex-1" />
+              <Button variant="ghost" size="sm">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Label className="w-32">Liefer-Datum:</Label>
+              <Input
+                type="date"
+                value={deliveryNote.deliveryDate.split('.').reverse().join('-')}
+                onChange={(e) =>
+                  setDeliveryNote((prev) => ({
+                    ...prev,
+                    deliveryDate: e.target.value.split('-').reverse().join('.'),
+                  }))
+                }
+                className="flex-1"
+              />
+              <Input
+                type="time"
+                value={deliveryNote.deliveryTime}
+                onChange={(e) => setDeliveryNote((prev) => ({ ...prev, deliveryTime: e.target.value }))}
+                className="w-20"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Label className="w-32">Kostenstelle:</Label>
+              <Input
+                value={deliveryNote.costCenter}
+                onChange={(e) => setDeliveryNote((prev) => ({ ...prev, costCenter: e.target.value }))}
+                className="flex-1"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={deliveryNote.isCreditNote}
+                onCheckedChange={(checked) =>
+                  setDeliveryNote((prev) => ({ ...prev, isCreditNote: checked === true }))
+                }
+              />
+              <Label>Gutschrift kennzeichnen</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Label className="w-32">Re.-Nr. (Bezug):</Label>
+              <Input
+                value={deliveryNote.referenceInvoiceNumber}
+                onChange={(e) =>
+                  setDeliveryNote((prev) => ({ ...prev, referenceInvoiceNumber: e.target.value }))
+                }
+                className="flex-1"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={deliveryNote.isPrinted}
+                onCheckedChange={(checked) =>
+                  setDeliveryNote((prev) => ({ ...prev, isPrinted: checked === true }))
+                }
+              />
+              <Label>gedruckt</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={deliveryNote.isDelivered}
+                onCheckedChange={(checked) =>
+                  setDeliveryNote((prev) => ({ ...prev, isDelivered: checked === true }))
+                }
+              />
+              <Label>ausgeliefert</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Label className="w-32">fakturiert: Rechn.-Nr.:</Label>
+              <Input
+                value={deliveryNote.invoiceNumber}
+                onChange={(e) => setDeliveryNote((prev) => ({ ...prev, invoiceNumber: e.target.value }))}
+                className="flex-1"
+              />
+            </div>
           </div>
-        )}
-      </Card>
 
-      <Card className="p-4">
-        <FormBuilder
-          schema={deliverySchema as unknown as FormSchema}
-          data={delivery}
-          onChange={(p): void => {
-            setDelivery((o) => ({ ...o, ...p }))
-          }}
-          onSubmit={save}
-          submitLabel={`${t('crud.actions.save')} ${entityTypeLabel}`}
-        />
-      </Card>
+          {/* Mittlere Spalte */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label className="w-32">Niederlassung:</Label>
+              <Input value={deliveryNote.branch} className="flex-1" />
+              <Button variant="ghost" size="sm">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Label className="w-32">Vertreter:</Label>
+              <Input value={deliveryNote.representative} className="flex-1" />
+              <Button variant="ghost" size="sm">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Label className="w-32">Bediener:</Label>
+              <Input value={deliveryNote.operator} className="flex-1" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Label className="w-32">Lkw-Nr.:</Label>
+              <Input
+                value={deliveryNote.truckNumber}
+                onChange={(e) => setDeliveryNote((prev) => ({ ...prev, truckNumber: e.target.value }))}
+                className="flex-1"
+              />
+            </div>
+          </div>
 
-      <Card className="p-4">
-        <h3 className="mb-2 text-sm font-semibold">Bilanzrelevante Summen aus Lieferschein-Positionen</h3>
-        <div className="grid gap-2 sm:grid-cols-3 text-sm">
-          <div className="rounded border p-2">
-            <div className="text-muted-foreground">Gesamt N</div>
-            <div className="font-semibold">{sustainabilityTotals.totalNutrientNKg.toFixed(3)} kg</div>
-          </div>
-          <div className="rounded border p-2">
-            <div className="text-muted-foreground">Gesamt P2O5</div>
-            <div className="font-semibold">{sustainabilityTotals.totalNutrientP2o5Kg.toFixed(3)} kg</div>
-          </div>
-          <div className="rounded border p-2">
-            <div className="text-muted-foreground">Gesamt CO2e</div>
-            <div className="font-semibold">{sustainabilityTotals.totalCo2eKg.toFixed(3)} kg</div>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="p-4">
-        <h3 className="mb-2 text-sm font-semibold">PSM-Compliance Check (Lieferschein)</h3>
-        <div className="grid gap-2 sm:grid-cols-4 text-sm">
-          <div className="rounded border p-2">
-            <div className="text-muted-foreground">PSM-Positionen</div>
-            <div className="font-semibold">{psmLines.length}</div>
-          </div>
-          <div className="rounded border p-2">
-            <div className="text-muted-foreground">ADR Punkte</div>
-            <div className="font-semibold">{Number(delivery.adrPunkte || 0).toFixed(1)}</div>
-          </div>
-          <div className="rounded border p-2">
-            <div className="text-muted-foreground">Sachkunde</div>
-            <div className="font-semibold">{delivery.sachkundeStatus || 'offen'}</div>
-          </div>
-          <div className="rounded border p-2">
-            <div className="text-muted-foreground">Status</div>
-            <div className={`font-semibold ${psmCompliant ? 'text-emerald-600' : 'text-red-600'}`}>
-              {psmCompliant ? 'konform' : 'unvollstaendig'}
+          {/* Rechte Spalte - Kunde */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Button onClick={() => setShowCustomerDialog(true)}>KUNDE</Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Label className="w-32">Debitor-Kto.:</Label>
+              <Input value={deliveryNote.customerAccount} readOnly className="flex-1" />
+              <Button variant="ghost" size="sm" onClick={() => setShowCustomerDialog(true)}>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </div>
+            {deliveryNote.customerName && (
+              <div className="text-sm">
+                <div>{deliveryNote.customerName}</div>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <Label className="w-32">Kredit-Limit:</Label>
+              <Input
+                value={deliveryNote.creditLimit}
+                onChange={(e) => setDeliveryNote((prev) => ({ ...prev, creditLimit: e.target.value }))}
+                className="flex-1"
+              />
             </div>
           </div>
         </div>
-        {missingPsmFields.length > 0 && (
-          <ul className="mt-3 list-disc pl-5 text-sm text-red-600">
-            {missingPsmFields.map((issue) => (
-              <li key={issue}>{issue}</li>
-            ))}
-          </ul>
-        )}
       </Card>
+
+      {/* Positionen-Tabelle */}
+      <Card className="p-4">
+        <h2 className="mb-2 font-semibold">Positionen</h2>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Pos.-Nr.</TableHead>
+                <TableHead>Artikel-Nr.</TableHead>
+                <TableHead>Bezeichn...</TableHead>
+                <TableHead>Menge</TableHead>
+                <TableHead>Einheit</TableHead>
+                <TableHead>Listenpreis</TableHead>
+                <TableHead>Rabatt</TableHead>
+                <TableHead>Netto-Pr...</TableHead>
+                <TableHead>Netto-Be...</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {deliveryNote.positions.map((position) => (
+                <TableRow key={position.positionNumber}>
+                  <TableCell>{position.positionNumber}</TableCell>
+                  <TableCell>{position.articleNumber}</TableCell>
+                  <TableCell>{position.articleDescription}</TableCell>
+                  <TableCell>{position.quantity}</TableCell>
+                  <TableCell>{position.unit}</TableCell>
+                  <TableCell>{position.listPrice.toFixed(2)}</TableCell>
+                  <TableCell>{position.discount}%</TableCell>
+                  <TableCell>{position.netPrice.toFixed(2)}</TableCell>
+                  <TableCell>{position.netAmount.toFixed(2)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
+
+      {/* Positions-Details */}
+      <Card className="p-4">
+        <h2 className="mb-2 font-semibold">Positions-Details</h2>
+        <div className="grid grid-cols-4 gap-4">
+          <div className="space-y-2">
+            <Label>Pos.-Nr.:</Label>
+            <Input value={currentPosition.positionNumber || ''} readOnly />
+          </div>
+          <div className="space-y-2">
+            <Label>Artikel-Nr.:</Label>
+            <div className="flex gap-2">
+              <Input
+                value={currentPosition.articleNumber || ''}
+                onChange={(e) =>
+                  setCurrentPosition((prev) => ({ ...prev, articleNumber: e.target.value }))
+                }
+                className="flex-1"
+              />
+              <Button variant="ghost" size="sm" onClick={() => setShowArticleDialog(true)}>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Artikel-Bezeichn:</Label>
+            <Input value={currentPosition.articleDescription || ''} readOnly />
+          </div>
+          <div className="space-y-2">
+            <Label>Menge/Gebinde:</Label>
+            <Input
+              type="number"
+              value={currentPosition.quantity || 0}
+              onChange={(e) =>
+                setCurrentPosition((prev) => ({ ...prev, quantity: Number(e.target.value) }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Einheit:</Label>
+            <Input value={currentPosition.unit || ''} readOnly />
+          </div>
+          <div className="space-y-2">
+            <Label>Listenpreis:</Label>
+            <Input
+              type="number"
+              value={currentPosition.listPrice || 0}
+              onChange={(e) =>
+                setCurrentPosition((prev) => ({ ...prev, listPrice: Number(e.target.value) }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Rabatt:</Label>
+            <Input
+              type="number"
+              value={currentPosition.discount || 0}
+              onChange={(e) =>
+                setCurrentPosition((prev) => ({ ...prev, discount: Number(e.target.value) }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Einh.-Preis:</Label>
+            <Input value={currentPosition.netPrice || 0} readOnly />
+          </div>
+          <div className="space-y-2">
+            <Label>Betrag:</Label>
+            <Input value={currentPosition.netAmount || 0} readOnly />
+          </div>
+          <div className="flex items-end">
+            <Button onClick={handlePositionOK} className="gap-2">
+              <Check className="h-4 w-4" />
+              Zeile OK
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      {/* Summen */}
+      <Card className="p-4">
+        <h2 className="mb-2 font-semibold">Summen</h2>
+        <div className="grid grid-cols-5 gap-4">
+          <div>
+            <Label>Netto</Label>
+            <Input value={deliveryNote.netTotal.toFixed(2)} readOnly />
+          </div>
+          <div>
+            <Label>MWSt.</Label>
+            <Input value={deliveryNote.vatTotal.toFixed(2)} readOnly />
+          </div>
+          <div>
+            <Label>Brutto</Label>
+            <Input value={deliveryNote.grossTotal.toFixed(2)} readOnly />
+          </div>
+          <div>
+            <Label>Gesamt</Label>
+            <Input value={deliveryNote.total.toFixed(2)} readOnly />
+          </div>
+          <div>
+            <Label>EUR</Label>
+            <Input value="EUR" readOnly />
+          </div>
+        </div>
+      </Card>
+
+      {/* Buttons */}
+      <div className="flex justify-between">
+        <div className="flex gap-2">
+          <Button onClick={() => setShowPrintDialog(true)} className="gap-2">
+            <Printer className="h-4 w-4" />
+            LS drucken
+          </Button>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={handleSave} className="gap-2">
+            <Save className="h-4 w-4" />
+            Speichern
+          </Button>
+          <Button variant="outline" onClick={() => navigate('/sales')}>
+            Schließen
+          </Button>
+        </div>
+      </div>
+
+      {/* Dialoge */}
+      <CustomerSelectionDialog
+        open={showCustomerDialog}
+        onClose={() => setShowCustomerDialog(false)}
+        onSelect={handleCustomerSelect}
+      />
+      <ArticleSearchDialog
+        open={showArticleDialog}
+        onClose={() => setShowArticleDialog(false)}
+        onSelect={handleArticleSelect}
+        customerId={deliveryNote.customerId}
+      />
+      <PrintDialog
+        open={showPrintDialog}
+        onClose={() => setShowPrintDialog(false)}
+        onConfirm={handlePrint}
+      />
     </div>
   )
 }

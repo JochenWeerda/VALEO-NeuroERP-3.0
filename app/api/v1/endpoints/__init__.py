@@ -79,3 +79,6 @@ from . import controlling
 from . import training
 from . import personal
 from . import analytics
+from . import sales_delivery_notes
+from . import branches
+from . import pricing

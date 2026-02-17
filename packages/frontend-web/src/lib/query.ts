@@ -33,6 +33,7 @@ const shouldRetryQuery = (failureCount: number, error: DefaultError): boolean =>
 export const queryKeys = {
   analytics: {
     kpis: ["analytics", "kpis"] as const,
+    kpisPrevious: ["analytics", "kpis", "previous"] as const,
     cubes: (cubeName: string) => ["analytics", "cubes", cubeName] as const,
   },
   contracts: {
