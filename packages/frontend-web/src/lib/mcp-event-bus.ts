@@ -147,8 +147,8 @@ class McpEventBus {
     if (url === this.eventsUrl) {
       return;
     }
-    this.eventsUrl = url;
-    this.applyOptions({ url });
+    this.eventsUrl = url ?? "/api/events?stream=mcp";
+    this.applyOptions({ url: this.eventsUrl });
   }
 
   setAuthTokenResolver(resolver?: () => string | undefined): void {

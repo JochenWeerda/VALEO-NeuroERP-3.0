@@ -337,11 +337,11 @@
       "path": "sales/angebote"
     },
     {
-      "module": "@/pages/sales/delivery-editor",
+      "module": "@/pages/verkauf/lieferschein-erfassung",
       "path": "sales/deliveries/new"
     },
     {
-      "module": "@/pages/sales/delivery-editor",
+      "module": "@/pages/verkauf/lieferschein-erfassung",
       "path": "sales/delivery"
     },
     {
@@ -415,6 +415,10 @@
     {
       "module": "@/pages/admin/rollen-verwaltung",
       "path": "admin/rollen-verwaltung"
+    },
+    {
+      "module": "@/pages/verkauf/lieferschein-erfassung",
+      "path": "verkauf/lieferschein-erfassung"
     },
     {
       "module": "@/pages/admin/setup/dms-integration",

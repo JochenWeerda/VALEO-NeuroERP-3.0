@@ -30,59 +30,54 @@ export interface WidgetDefinition {
 }
 
 // KPI-Mapping: Widget-ID zu Backend-KPI-Key
-// Backend: GET /api/v1/analytics/kpis → { revenue, orders, customers, inventory, contract_long_tons, ... }
-const NUM_DE = new Intl.NumberFormat('de-DE')
-const NUM_DE_1 = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
-
 const KPI_MAPPING: Record<string, { key: string; label: string; format: (value: number) => string; icon: ReactNode }> = {
-  // Kern-Business-KPIs
   'kpi-revenue': {
     key: 'revenue',
     label: 'Umsatz',
-    format: (value) => `€ ${NUM_DE.format(value)}`,
+    format: (value) => `€ ${new Intl.NumberFormat('de-DE').format(value)}`,
     icon: <DollarSign className="h-4 w-4" />,
   },
   'kpi-orders': {
     key: 'orders',
     label: 'Aufträge',
-    format: (value) => NUM_DE.format(value),
+    format: (value) => new Intl.NumberFormat('de-DE').format(value),
     icon: <ShoppingCart className="h-4 w-4" />,
   },
   'kpi-customers': {
     key: 'customers',
     label: 'Kunden',
-    format: (value) => NUM_DE.format(value),
+    format: (value) => new Intl.NumberFormat('de-DE').format(value),
     icon: <Users className="h-4 w-4" />,
   },
   'kpi-stock': {
     key: 'inventory',
-    label: 'Lagerauslastung',
-    format: (value) => `${NUM_DE_1.format(value)}%`,
+    label: 'Lager',
+    format: (value) => `${new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 }).format(value)}%`,
     icon: <Package className="h-4 w-4" />,
   },
-  // Agrar-spezifische KPIs
+  // Agrar-spezifische KPIs (aus Dashboard.tsx)
   'kpi-contract-long': {
     key: 'contract_long_tons',
-    label: 'Kontrakt Long',
-    format: (value) => `${NUM_DE_1.format(value)} t`,
+    label: 'Contract Long',
+    format: (value) => `${new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value)} t`,
     icon: <TrendingUp className="h-4 w-4" />,
   },
   'kpi-contract-short': {
     key: 'contract_short_tons',
-    label: 'Kontrakt Short',
-    format: (value) => `${NUM_DE_1.format(value)} t`,
+    label: 'Contract Short',
+    format: (value) => `${new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value)} t`,
     icon: <TrendingUp className="h-4 w-4" />,
   },
   'kpi-weighing-today': {
     key: 'weighing_today_tons',
     label: 'Wiegen heute',
-    format: (value) => `${NUM_DE_1.format(value)} t`,
+    format: (value) => `${new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value)} t`,
     icon: <Package className="h-4 w-4" />,
   },
   'kpi-inventory-blocked': {
     key: 'inventory_lots_blocked',
     label: 'Blockierte Lose',
-    format: (value) => NUM_DE.format(value),
+    format: (value) => new Intl.NumberFormat('de-DE').format(value),
     icon: <Package className="h-4 w-4" />,
   },
 }
@@ -115,45 +110,71 @@ const MOCK_KPI_DATA: Record<string, { label: string; value: string; delta: numbe
   },
 }
 
-// KPI Widget mit echten Backend-Daten
+// Hilfsfunktionen fuer Datumsbereichsberechnung
+function getDateRange(offsetMonths: number): { start: string; end: string } {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), now.getMonth() + offsetMonths, 1)
+  const end = new Date(now.getFullYear(), now.getMonth() + offsetMonths + 1, 0)
+  const fmt = (d: Date) => d.toISOString().slice(0, 10)
+  return { start: fmt(start), end: fmt(end) }
+}
+
+function computeDelta(current: number, previous: number): number {
+  if (previous === 0) return current > 0 ? 100 : 0
+  return Math.round(((current - previous) / previous) * 1000) / 10
+}
+
+// KPI Widget mit echten Backend-Daten und Trend-Berechnung
 function KPIWidget({ widget }: { widget: WidgetLayout }) {
   const kpiConfig = KPI_MAPPING[widget.id]
   const mockData = MOCK_KPI_DATA[widget.id]
 
-  // Lade echte KPI-Daten vom Backend, wenn Mapping vorhanden
-  const { data: kpiData, isPending, isError } = useQuery({
+  const currentRange = getDateRange(0)
+  const previousRange = getDateRange(-1)
+
+  // Lade aktuelle KPI-Daten
+  const { data: kpiData, isPending } = useQuery({
     queryKey: queryKeys.analytics.kpis,
     queryFn: async () => {
-      try {
-        const response = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis')
-        return response.data
-      } catch (error) {
-        console.warn('KPI-Daten konnten nicht geladen werden, verwende Fallback:', error)
-        return null
-      }
+      const response = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis', {
+        params: { start_date: currentRange.start, end_date: currentRange.end },
+      })
+      return response.data
     },
-    enabled: !!kpiConfig, // Nur laden, wenn Mapping vorhanden
-    staleTime: 30 * 1000, // 30 Sekunden
-    refetchInterval: 60 * 1000, // Alle 60 Sekunden aktualisieren
+    enabled: !!kpiConfig,
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000,
+  })
+
+  // Lade Vormonatsdaten fuer Trend-Berechnung
+  const { data: prevKpiData } = useQuery({
+    queryKey: queryKeys.analytics.kpisPrevious,
+    queryFn: async () => {
+      const response = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis', {
+        params: { start_date: previousRange.start, end_date: previousRange.end },
+      })
+      return response.data
+    },
+    enabled: !!kpiConfig,
+    staleTime: 5 * 60 * 1000, // Vormonat aendert sich selten
   })
 
   // Bestimme die anzuzeigenden Daten
   let displayData: { label: string; value: string; delta: number; icon: ReactNode }
 
   if (kpiConfig && kpiData && kpiData[kpiConfig.key] !== undefined) {
-    // Echte Daten vom Backend
     const value = kpiData[kpiConfig.key] || 0
+    const prevValue = prevKpiData?.[kpiConfig.key]
+    const delta = prevValue !== undefined ? computeDelta(value, prevValue) : 0
     displayData = {
       label: kpiConfig.label,
       value: kpiConfig.format(value),
-      delta: 0, // TODO: Trend-Berechnung implementieren, wenn historische Daten verfügbar
+      delta,
       icon: kpiConfig.icon,
     }
   } else if (mockData) {
-    // Fallback auf Mock-Daten
     displayData = mockData
   } else {
-    // Default-Fallback
     displayData = {
       label: 'KPI',
       value: '-',

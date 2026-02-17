@@ -67,15 +67,14 @@ Detaillierte Tickets mit Abhaengigkeiten und Akzeptanzkriterien siehe §9.
   - Verifikation: `packages/frontend-web/tests/e2e/main-routes-smoke.spec.ts`
 - [x] **BUG-002 (P1):** SSE-Verbindung auf relativen Proxypfad umgestellt (`/api/events?stream=mcp`), Docker-Proxy auf `dev-sse` korrigiert.
   - Status: Stabil, keine weiteren Aenderungen erforderlich.
-- [~] **BUG-003 (P1):** Alias-Luecken deutlich reduziert; Kernrouten gruen. Restliche Alias-Haertung als Follow-up.
-  - Aktuell: 164+ Aliase in `route-aliases.json`, Kernrouten abgedeckt.
-  - Tool erstellt: `scripts/check-route-aliases.js` zur Identifikation fehlender Aliase.
-  - Offen: Skript ausfuehren und fehlende Aliase manuell hinzufuegen (siehe §10 Naechste Schritte).
-- [~] **BUG-004 (P2):** Dashboard-KPI-Widgeting teilweise behoben.
-  - Status: Widget-Komponente nutzt jetzt echte Backend-Daten (`/analytics/api/v1/kpis`).
+- [x] **BUG-003 (P1):** Alias-Luecken geschlossen. Alle 330 Page-Module haben Aliase.
+  - Verifikation: `node scripts/check-route-aliases.js` → 330/330 Module mit Aliases.
+  - Datei: `packages/frontend-web/src/app/route-aliases.json`.
+- [x] **BUG-004 (P2):** Dashboard-KPI-Widgeting fertiggestellt.
+  - API-Pfad korrigiert (`/analytics/api/v1/kpis` → `/api/v1/analytics/kpis`).
+  - Trend-Berechnung (delta vs. Vormonat) implementiert.
+  - 8 KPI-Mappings aktiv (Revenue, Orders, Customers, Inventory, Contract Long/Short, Wiegen heute, Blockierte Lose).
   - Fallback auf Mock-Daten, wenn Backend nicht verfuegbar.
-  - Offen: Trend-Berechnung und zusaetzliche KPI-Mappings.
-  - Offen: Widget-Registry mit echten Backend-KPI-Daten verbinden (siehe §10 Naechste Schritte).
 - [x] **BUG-005 (P1):** Login/Auth-Routen und optionaler Route-Guard umgesetzt (`VITE_AUTH_REQUIRED=true` fuer harte Durchsetzung).
   - Status: Vollstaendig implementiert und getestet.
 - [x] **BUG-006 (P2):** 404-Seite + Catch-All-Route umgesetzt.
@@ -94,8 +93,8 @@ Detaillierte Tickets mit Abhaengigkeiten und Akzeptanzkriterien siehe §9.
 5. Blue-Green Rollout + Monitoring-Freigabe → `GOLIVE-04`, `GOLIVE-05`, `GOLIVE-06`.
 
 ### Nach Go-Live (empfohlen, nicht blockierend)
-6. BUG-003 Rest-Haertung: verbleibende Alias-Luecken automatisiert nachziehen (P1, 2-4h).
-7. BUG-004 Dashboard-KPI-Widgeting: Widget-Registry mit echten Backend-Daten verbinden (P2, 1-2 Tage).
+6. ~~BUG-003 Rest-Haertung~~ Erledigt (330/330 Aliase, 16.02.2026).
+7. ~~BUG-004 Dashboard-KPI-Widgeting~~ Erledigt (Trend-Berechnung + API-Fix, 16.02.2026).
 
 ---
 
@@ -1681,20 +1680,17 @@ LONGTERM-04,QS-Chargen-Dokumente normalisieren,Story,P3,L,Backend,4,Backlog,
   - `VITE_MCP_EVENTS_URL` auf relativen Pfad `/api/events?stream=mcp`.
   - `VITE_SSE_PROXY` in Docker auf `http://dev-sse:5174`.
   - Status: Abgeschlossen. SSE-Verbindung funktioniert stabil.
-- [~] `BUG-003` Alias-Haertung teilweise offen (kein Blocker mehr fuer Kernseiten).
-  - Status: In Arbeit. Kernrouten haben Aliase, Rest-Aliase fehlen noch.
-  - Aktuell: `packages/frontend-web/src/app/route-aliases.json` enthaelt 164+ Eintraege.
-  - Tool: Skript `scripts/check-route-aliases.js` erstellt zur Identifikation fehlender Aliase.
-  - Offen: Skript ausfuehren und fehlende Aliase manuell zu `route-aliases.json` hinzufuegen.
-  - Prioritaet: P1 (nicht blockierend fuer Go-Live).
-- [~] `BUG-004` Dashboard-KPI-Widgeting weiterhin offen (fachliche KPI-Befuellung).
-  - Status: Teilweise behoben. Widget-Komponente nutzt jetzt echte Backend-Daten.
+- [x] `BUG-003` Alias-Haertung abgeschlossen.
+  - Status: Erledigt (16.02.2026). Alle 330 Page-Module haben Aliase.
+  - Verifikation: `node scripts/check-route-aliases.js` → 330/330 Module.
+- [x] `BUG-004` Dashboard-KPI-Widgeting abgeschlossen.
+  - Status: Erledigt (16.02.2026).
   - Aenderungen:
-    - `packages/frontend-web/src/components/dashboard/widgets/index.tsx` verbindet KPIWidget mit `/analytics/api/v1/kpis` API.
-    - Widget unterstuetzt Mapping von Widget-IDs zu Backend-KPI-Keys.
-    - Fallback auf Mock-Daten, wenn Backend-Daten nicht verfuegbar sind.
-  - Offen: Trend-Berechnung (delta) implementieren, wenn historische Daten verfuegbar sind.
-  - Prioritaet: P2 (nicht blockierend fuer Go-Live, aber UX-Verbesserung).
+    - API-Pfad korrigiert auf `/api/v1/analytics/kpis`.
+    - Trend-Berechnung (delta vs. Vormonat) implementiert via zweitem API-Call mit Vormonats-Datumsbereich.
+    - 8 KPI-Mappings aktiv (Revenue, Orders, Customers, Inventory + 4 Agrar-KPIs).
+    - Fallback auf Mock-Daten, wenn Backend nicht erreichbar.
+  - Dateien: `widgets/index.tsx`, `lib/query.ts` (neuer queryKey `kpisPrevious`).
 - [x] `BUG-005` Login/Auth-Pfade + optionaler Auth-Guard umgesetzt (`VITE_AUTH_REQUIRED=true` fuer harte Aktivierung).
   - Status: Abgeschlossen. Auth-Routen und Route-Guard implementiert.
 - [x] `BUG-006` 404-Seite umgesetzt.
@@ -1707,29 +1703,9 @@ LONGTERM-04,QS-Chargen-Dokumente normalisieren,Story,P3,L,Backend,4,Backlog,
    - Routing/SSE sind entblockt, Tests koennen durchgefuehrt werden.
    - Dokumentation: Siehe §10 Browser-Testprotokoll.
 
-#### Kurzfristig (P1, vor Go-Live empfohlen)
-2. **BUG-003 Rest-Aliase automatisiert vervollstaendigen.**
-   - Status: Tool erstellt. Skript `scripts/check-route-aliases.js` identifiziert fehlende Aliase.
-   - Naechste Schritte:
-     a. Skript ausfuehren: `node scripts/check-route-aliases.js`
-     b. Vorgeschlagene Aliase pruefen und zu `route-aliases.json` hinzufuegen.
-   - Datei: `packages/frontend-web/src/app/route-aliases.json`
-   - Geschaetzter Aufwand: 1-2 Stunden (manuelle Pruefung und Hinzufuegung).
-
-#### Mittelfristig (P2, nach Go-Live)
-3. **BUG-004 KPI-Dashboard fachlich befuellen.**
-   - Status: Teilweise behoben. Widget-Komponente nutzt jetzt echte Backend-Daten.
-   - Erledigt:
-     a. `KPIWidget` Komponente umgestellt von Mock-Daten auf API-Call.
-     b. Widget-Layout-System mit Backend-Datenquelle verbunden (`/analytics/api/v1/kpis`).
-     c. Fallback-Mechanismus auf Mock-Daten implementiert.
-   - Offen:
-     a. Trend-Berechnung (delta) implementieren, wenn historische Daten verfuegbar sind.
-     b. Zusaetzliche KPI-Mappings hinzufuegen (z.B. Revenue, Orders, Customers).
-   - Dateien:
-     - `packages/frontend-web/src/components/dashboard/widgets/index.tsx` (Widget-Definitionen, aktualisiert)
-     - `packages/frontend-web/src/features/dashboard/Dashboard.tsx` (Dashboard-Hauptkomponente)
-   - Geschaetzter Aufwand: 2-4 Stunden (Trend-Berechnung und zusaetzliche KPIs).
+#### Erledigt (16.02.2026)
+2. ~~**BUG-003 Rest-Aliase**~~ Abgeschlossen. 330/330 Module haben Aliase.
+3. ~~**BUG-004 KPI-Dashboard**~~ Abgeschlossen. Trend-Berechnung, API-Pfad-Fix, 8 KPI-Mappings.
 
 #### Deployment-Vorbereitung
 4. **Production-Secrets setzen** → `GOLIVE-01`

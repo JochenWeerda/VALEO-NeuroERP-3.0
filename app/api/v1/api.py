@@ -189,6 +189,23 @@ api_router.include_router(
     tags=["sales", "orders"]
 )
 
+from .endpoints import sales_delivery_notes, branches, pricing
+
+api_router.include_router(
+    sales_delivery_notes.router,
+    tags=["sales", "delivery-notes"]
+)
+
+api_router.include_router(
+    branches.router,
+    tags=["admin", "branches"]
+)
+
+api_router.include_router(
+    pricing.router,
+    tags=["pricing"]
+)
+
 api_router.include_router(
     docflow.router,
     prefix="/docflow",

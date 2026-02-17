@@ -235,9 +235,9 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         id: 'lieferung',
         label: 'Lieferungen',
         icon: Truck,
-        module: '@/pages/sales/delivery-editor',
-        preferredPath: 'sales/delivery',
-        keywords: ['lieferungen'],
+        module: '@/pages/verkauf/lieferschein-erfassung',
+        preferredPath: 'verkauf/lieferschein-erfassung',
+        keywords: ['lieferungen', 'lieferschein'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {
