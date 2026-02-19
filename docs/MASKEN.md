@@ -344,6 +344,7 @@ Alle Masken müssen die folgenden **globalen Shortcuts** unterstützen:
 
 ## 📚 Weitere Dokumentation
 
+- **Masken-Referenz (Lieferschein):** `docs/masken-referenz-lieferschein.md` ⭐ **NEU - Vollständige Referenz für neue Masken**
 - **Global Shortcuts System:** `docs/global-shortcuts-system.md`
 - **Shortcuts F8/F11 Unterschied:** `docs/shortcuts-f8-f11-unterschied.md`
 - **Lieferschein Keyboard Shortcuts:** `docs/lieferschein-keyboard-shortcuts.md`
@@ -352,11 +353,34 @@ Alle Masken müssen die folgenden **globalen Shortcuts** unterstützen:
 
 ## ✅ Beispiel-Implementierung
 
-Siehe `packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx` für eine vollständige Referenz-Implementierung:
+### Vollständige Referenz-Dokumentation
 
+**📖 Siehe:** `docs/masken-referenz-lieferschein.md` für eine **vollständige Referenz-Dokumentation** der Lieferschein-Erfassungsmaske:
+
+- ✅ Architektur & Struktur
+- ✅ Datenstrukturen (Frontend & Backend)
+- ✅ API-Integrationen (alle Endpoints)
+- ✅ UI-Komponenten
+- ✅ Keyboard-Shortcuts
+- ✅ State-Management
+- ✅ Validierungen & Business-Logic
+- ✅ Best Practices
+- ✅ Code-Beispiele
+- ✅ Checkliste für neue Masken
+
+### Code-Referenz
+
+**📁 Datei:** `packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx`
+
+**Features:**
 - ✅ Alle globalen Shortcuts registriert
 - ✅ Buttons mit ShortcutHintButton gewrappt
 - ✅ Konsistente UX mit anderen Masken
+- ✅ Vollständige CRUD-Funktionalität
+- ✅ Preisberechnung mit API
+- ✅ Gefahrgut-Punkte Validierung
+- ✅ Gewichtsberechnung
+- ✅ "Wie vorheriger Beleg" Funktionalität
 
 ---
 
