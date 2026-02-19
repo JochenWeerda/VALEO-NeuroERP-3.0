@@ -17,6 +17,7 @@ services:
       - ./scripts/init-all-tables.sql:/docker-entrypoint-initdb.d/01-init-all-tables.sql:ro
       - ./scripts/seed-crm-data.sql:/docker-entrypoint-initdb.d/02-seed-crm.sql:ro
       - ./scripts/seed-agrar-data.sql:/docker-entrypoint-initdb.d/03-seed-agrar.sql:ro
+      - ./scripts/seed-waage-artikel.sql:/docker-entrypoint-initdb.d/04-seed-waage-artikel.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d valeo"]
       interval: 5s

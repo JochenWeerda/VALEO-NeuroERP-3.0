@@ -22,6 +22,10 @@ export type WeighingTicket = {
   status: string
   direction: string
   reference_doc?: string | null
+  article_group?: string | null
+  article_id?: string | null
+
+  notes?: string | null
 }
 
 type PageResponse<T> = {
@@ -48,6 +52,10 @@ export type WeighingTicketCreateInput = {
   billing_weight?: number
   direction?: string
   reference_doc?: string
+  article_group?: string
+  article_id?: string
+
+  notes?: string
 }
 
 export type WeighingTicketUpdateInput = Partial<{
@@ -61,6 +69,9 @@ export type WeighingTicketUpdateInput = Partial<{
   billing_weight: number
   vehicle_plate: string
   status: string
+  article_group: string
+  article_id: string
+  notes: string
 }>
 
 export type AgrarContract = {
@@ -70,6 +81,20 @@ export type AgrarContract = {
   partner_id: string
   remaining_quantity_kg: number
   status: 'open' | 'partially_allocated' | 'fulfilled' | 'cancelled'
+}
+
+export type ArticleGroup = {
+  warengruppe: string
+  count: number
+}
+
+export type ArticleItem = {
+  id: string
+  article_number: string
+  name: string
+  warengruppe?: string | null
+  unit: string
+  category: string
 }
 
 export function useWeighingTickets(params?: { skip?: number; limit?: number; tenantId?: string }) {
@@ -136,3 +161,30 @@ export function useAllocateContract() {
     },
   })
 }
+
+export function useArticleGroups() {
+  return useQuery({
+    queryKey: ['weighing-tickets', 'article-groups'],
+    queryFn: async () =>
+      (await apiClient.get<ArticleGroup[]>('/api/v1/weighing-tickets/article-groups')).data,
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useArticlesByGroup(group: string | null) {
+  return useQuery({
+    queryKey: ['articles', 'by-group', group],
+    queryFn: async () => {
+      if (!group) return []
+      const data = (
+        await apiClient.get<PageResponse<ArticleItem>>(
+          `/api/v1/articles?search=${encodeURIComponent(group)}&limit=100`,
+        )
+      ).data
+      return data.items.filter((a) => a.warengruppe === group)
+    },
+    enabled: !!group,
+    staleTime: 5 * 60 * 1000,
+  })
+}
+

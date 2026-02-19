@@ -4,7 +4,8 @@ Database models for inventory extensions, logistics, messaging, webhooks,
 and master-data tables required for L3-Connect API parity.
 """
 
-from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Date, Text, ForeignKey, DECIMAL
+from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Date, Text, ForeignKey, DECIMAL, UniqueConstraint
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 import uuid
@@ -62,6 +63,9 @@ class WeighingTicket(Base):
     status = Column(String(20), default="open")
     direction = Column(String(10), default="in")  # in / out
     reference_doc = Column(String(100), nullable=True)
+    article_group = Column(String(80), nullable=True, comment="Warengruppe/Artikelgruppe")
+    article_id = Column(String, ForeignKey("domain_inventory.articles.id", ondelete="SET NULL"), nullable=True)
+    notes = Column(Text, nullable=True, comment="Notizen/Bemerkungen")
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -158,9 +162,90 @@ class AgrarSettlement(Base):
     posted_journal_ref = Column(String(80), nullable=True)
     posted_at = Column(DateTime(timezone=True), nullable=True)
     note = Column(Text, nullable=True)
+    # Drying/audit snapshot (computed invoice weight/loss/fee + used rule references)
+    drying_result = Column(JSONB, nullable=False, default=dict)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class DryingRuleSet(Base):
+    """
+    Configurable drying rules for invoice weight/loss/fee by crop/site and validity.
+    
+    Fester Vertragsteil jedes Ankaufskontrakts:
+    - Allgemeingültige Tabellen: contract_id=NULL, customer_id=NULL, is_customer_specific=False
+    - Kundenspezifische Sonderregelungen: customer_id gesetzt, is_customer_specific=True, justification erforderlich
+    - Vertragsverknüpfung: contract_id gesetzt (für automatische Zuordnung)
+    - DMS-Referenz: document_id für Tabelle/Formel-Dokument (Papierform oder Portal-Download)
+    - Versionsverwaltung: version, created_at/created_by, updated_at/updated_by
+    - Schreibrechte: Nur Admin (Rollenprüfung in API)
+    """
+    __tablename__ = "drying_rule_sets"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    crop_code = Column(String(40), nullable=False)
+    site_id = Column(String(64), nullable=True)
+    valid_from = Column(Date, nullable=True)
+    valid_to = Column(Date, nullable=True)
+    version = Column(Integer, nullable=False, default=1)
+    is_active = Column(Boolean, nullable=False, default=True)
+
+    method = Column(String(40), nullable=False)  # LOOKUP_TABLE | FACTOR_FROM_BASE | DRY_MATTER_NORMALIZATION
+    base_moisture_pct = Column(DECIMAL(5, 2), nullable=False)
+    rounding_mode = Column(String(20), nullable=False, default="ROUND_NEAREST")  # ROUND_NEAREST|ROUND_UP|ROUND_DOWN
+    clamp_mode = Column(String(20), nullable=False, default="HARD_ERROR")  # CLAMP_TO_MAX|HARD_ERROR
+    min_moisture_pct = Column(DECIMAL(5, 2), nullable=False, default=0)
+    max_moisture_pct = Column(DECIMAL(5, 2), nullable=False, default=60)
+    start_threshold_moisture_pct = Column(DECIMAL(5, 2), nullable=True)  # for FACTOR_FROM_BASE
+    fee_basis = Column(String(20), nullable=False, default="INVOICE_WEIGHT")  # INVOICE_WEIGHT|NET_WEIGHT
+
+    # Audit fields (Versionsverwaltung)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(64), nullable=True, comment="User-ID der Person, die die Regel angelegt hat")
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_by = Column(String(64), nullable=True, comment="User-ID der Person, die die Regel zuletzt geändert hat")
+
+    # Vertragsverknüpfung (fester Vertragsteil)
+    contract_id = Column(String, ForeignKey("domain_inventory.agrar_contracts.id"), nullable=True, comment="Verknüpfung zu Ankaufskontrakt (optional)")
+
+    # Kundenspezifische Sonderregelungen
+    customer_id = Column(String, ForeignKey("domain_crm.customers.id"), nullable=True, comment="Kunde für Sonderregelung (optional)")
+    is_customer_specific = Column(Boolean, nullable=False, default=False, comment="True = kundenspezifische Sonderregelung (justification erforderlich)")
+    justification = Column(Text, nullable=True, comment="Begründung für kundenspezifische Sonderregelungen (z.B. 'Freigrenze ab 15,5% Feuchte')")
+
+    # DMS-Referenz (Tabelle/Formel-Dokument)
+    document_id = Column(String(64), nullable=True, comment="DMS-Referenz für Tabelle/Formel-Dokument (Papierform oder Portal-Download)")
+
+
+class DryingRuleLookupRow(Base):
+    """Lookup table row: moisture -> entzug points, loss %, optional fee."""
+    __tablename__ = "drying_rule_lookup_rows"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    rule_set_id = Column(String, ForeignKey("domain_inventory.drying_rule_sets.id"), nullable=False)
+    moisture_pct = Column(DECIMAL(5, 1), nullable=False)  # 0.1 steps
+    entzug_pct_points = Column(DECIMAL(5, 1), nullable=False)
+    loss_pct = Column(DECIMAL(8, 4), nullable=False)
+    fee_value = Column(DECIMAL(12, 4), nullable=True)
+    fee_unit = Column(String(20), nullable=True)  # EUR_PER_T|EUR_PER_DT|EUR_FIXED
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class DryingRuleFactorRange(Base):
+    """Factor ranges for FACTOR_FROM_BASE: moisture range -> factor."""
+    __tablename__ = "drying_rule_factor_ranges"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    rule_set_id = Column(String, ForeignKey("domain_inventory.drying_rule_sets.id"), nullable=False)
+    from_moisture_incl = Column(DECIMAL(5, 1), nullable=False)
+    to_moisture_incl = Column(DECIMAL(5, 1), nullable=False)
+    factor = Column(DECIMAL(8, 4), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 class AgrarSettlementDeduction(Base):
@@ -181,6 +266,212 @@ class AgrarSettlementDeduction(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
+# ── Harvest Acceptance (Ernte-Annahme) ────────────────────────────────────────
+
+class HarvestAcceptance(Base):
+    """
+    Ernte-Annahme (Harvest Acceptance) - Hauptbeleg für Anlieferung, Verwiegung, Qualitätsprüfung, Abrechnung.
+    
+    NUTS-2-Code:
+    - Bedeutung: "Herkunft/Region der Erzeugung" (nicht Standort des Lagers)
+    - Hauptzweck: Nachhaltigkeitsnachweise / Biomasse-Zertifizierung (RED-II, ISCC, REDcert, SURE)
+    - Speicherung: Am Delivery-Event (Anlieferung), als Snapshot mit Version
+    - Ableitung: Aus Herkunftsadresse (PLZ/Ort → NUTS-2 über offizielle Tabellen)
+    - Mischladung: Pro Position origin_nuts2_code (siehe HarvestAcceptancePosition)
+    """
+    __tablename__ = "harvest_acceptances"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    acceptance_number = Column(String(50), nullable=False, comment="Annahmeschein-Nummer (fortlaufend)")
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+
+    # Header-Bereich
+    branch_id = Column(String, ForeignKey("domain_shared.branches.id"), nullable=True, comment="Niederlassung")
+    warehouse_id = Column(String, ForeignKey("domain_inventory.warehouses.id"), nullable=True, comment="Lagerhalle")
+    delivery_date = Column(Date, nullable=False, comment="Liefer-Datum")
+    delivery_time = Column(String(8), nullable=True, comment="Uhrzeit (HH:MM)")
+    sales_rep_id = Column(String(64), nullable=True, comment="VB (Vertreter)")
+    operator_id = Column(String(64), nullable=False, comment="Bediener (aktueller Benutzer)")
+    weighing_ticket_id = Column(String, ForeignKey("domain_inventory.weighing_tickets.id"), nullable=True, comment="Wiegesch.-Nr.")
+    cost_center_id = Column(String(64), nullable=True, comment="Kostenstelle")
+
+    # Kunden-Bereich
+    customer_id = Column(String, ForeignKey("domain_crm.customers.id"), nullable=False, comment="Debitor-Kto.")
+    contract_id = Column(String, ForeignKey("domain_inventory.agrar_contracts.id"), nullable=True, comment="Kontrakt-Nr.")
+    forwarder_id = Column(String, ForeignKey("domain_crm.business_partners.id"), nullable=True, comment="Spediteur-Kto.")
+    intermediate_dealer_id = Column(String, ForeignKey("domain_crm.business_partners.id"), nullable=True, comment="Zw-Händler-Kto.")
+    deviating_vat_id = Column(String(20), nullable=True, comment="Abweichende USTID")
+
+    # ANLIEFERUNG Tab
+    article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=True, comment="Artikel-Nr.")
+    variety_id = Column(String(64), nullable=True, comment="Sorte")
+    vehicle_plate = Column(String(20), nullable=True, comment="Fahrzeug-Kennzeichen")
+
+    # NUTS-2 (Herkunft/Region der Erzeugung) - Header-Level (für einfache Anlieferungen)
+    origin_nuts2_code = Column(String(10), nullable=True, comment="NUTS-2-Code der Herkunft (Region der Erzeugung/Anbau)")
+    nuts_version = Column(String(20), nullable=True, default="NUTS 2024", comment="NUTS-Version (z.B. 'NUTS 2024') für Audit")
+    origin_postal_code = Column(String(10), nullable=True, comment="PLZ der Herkunft (für Ableitung/Validierung)")
+    origin_city = Column(String(100), nullable=True, comment="Ort der Herkunft (für Ableitung/Validierung)")
+    origin_country_code = Column(String(2), nullable=True, default="DE", comment="Ländercode der Herkunft (ISO 3166-1 alpha-2)")
+
+    # Nachhaltigkeit
+    is_sustainable_biomass = Column(Boolean, nullable=False, default=False, comment="Nachhaltige Biomasse (für RED-II/ISCC/REDcert)")
+
+    # Status (erweitert nach praxisnahen Default-Entscheidungen)
+    release_status = Column(String(20), nullable=False, default="draft", comment="Freigabe: draft / provisional / final / credit_note_created / paid / disputed / cancelled")
+    provisional_invoice_number = Column(String(50), nullable=True, comment="vorl. Rechn.-Nr.")
+    invoice_id = Column(String(64), nullable=True, comment="FK zu invoice (Gutschrift)")
+    invoice_number = Column(String(50), nullable=True, comment="Rechnungs-Nr. (nach Gutschrift)")
+    
+    # Preisermittlung (nach praxisnahen Default-Entscheidungen)
+    pricing_mode = Column(String(20), nullable=False, default="spot_daily", comment="Preismodell: fixed_contract / spot_daily / exchange_fix_later")
+    price_source_id = Column(String(64), nullable=True, comment="Referenz zu Preisquelle (daily_price_id, exchange_index_id, etc.)")
+    
+    # Belegkette-Referenzen
+    stock_movement_id = Column(String, ForeignKey("domain_inventory.inventory_stock_movements.id"), nullable=True, comment="Referenz zu Wareneingang (wird bei Freigabe erstellt)")
+    quality_protocol_id = Column(String(64), nullable=True, comment="Referenz zu Qualitätsprotokoll")
+
+    # Bemerkungen
+    remarks = Column(Text, nullable=True, comment="Bemerkungen")
+    print_remarks_on_acceptance_note = Column(Boolean, nullable=False, default=False)
+    print_remarks_on_settlement = Column(Boolean, nullable=False, default=False)
+
+    # Summen
+    total_net_amount_eur = Column(DECIMAL(15, 2), nullable=True, comment="Netto-Betrag")
+    total_vat_amount_eur = Column(DECIMAL(15, 2), nullable=True, comment="MWSt-Betrag")
+    total_gross_amount_eur = Column(DECIMAL(15, 2), nullable=True, comment="Brutto-Betrag")
+    vat_rate_percent = Column(DECIMAL(5, 2), nullable=True, comment="MWSt %")
+    
+    # VAT/Steuer-Modi (für Vorsteuerabzug und Geschäftsmodell)
+    acceptance_mode = Column(String(30), nullable=True, default="PURCHASE_AT_DELIVERY_PTBF", comment="Geschäftsmodell: STORAGE_ONLY (Fremdware, keine Vorsteuer) / PURCHASE_AT_DELIVERY_PTBF (Ankauf jetzt, Preis später, Vorsteuer möglich) / ADVANCE_ON_STORAGE (Einlagerung + Abschlag/Anzahlung)")
+    ownership_type = Column(String(20), nullable=True, default="OWN_STOCK", comment="Eigentumsverhältnis: THIRD_PARTY_STOCK (Fremdware) / OWN_STOCK (Eigene Ware)")
+    vat_event = Column(String(40), nullable=True, default="NO_INVOICE", comment="VAT-Ereignis: NO_INVOICE (Storage) / PROVISIONAL_CREDIT_NOTE_CREATED / FINAL_CREDIT_NOTE_CREATED / CORRECTION_ISSUED")
+    
+    # Anzahlung (für ADVANCE_ON_STORAGE)
+    advance_payment_amount_eur = Column(DECIMAL(14, 2), nullable=True, comment="Anzahlungsbetrag (EUR) - für ADVANCE_ON_STORAGE Modus")
+    advance_payment_date = Column(Date, nullable=True, comment="Anzahlungsdatum - für ADVANCE_ON_STORAGE Modus")
+    advance_invoice_id = Column(String, ForeignKey("domain_inventory.self_billing_invoices.id", ondelete="SET NULL"), nullable=True, comment="Referenz auf Anzahlungsrechnung/-gutschrift")
+
+    # Audit
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(64), nullable=True)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_by = Column(String(64), nullable=True)
+
+
+class HarvestAcceptancePosition(Base):
+    """
+    Ernte-Annahme Position (für Mischladungen: mehrere Herkunftsorte/Artikel).
+    
+    NUTS-2 pro Position:
+    - Bei Mischladungen: Jede Position kann eigene Herkunft (origin_nuts2_code) haben
+    - Summe der Positionen = Gesamtmenge der Anlieferung
+    """
+    __tablename__ = "harvest_acceptance_positions"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    harvest_acceptance_id = Column(String, ForeignKey("domain_inventory.harvest_acceptances.id"), nullable=False)
+    position_number = Column(Integer, nullable=False, comment="Positionsnummer (10, 15, 20, ...)")
+    description = Column(String(200), nullable=False, comment="Bezeichnung (z.B. 'Angelieferte Menge', 'Windabgang', ...)")
+
+    # Berechnungslogik
+    is_printable = Column(Boolean, nullable=False, default=True, comment="Soll auf Druckausgabe?")
+    is_calculable = Column(Boolean, nullable=False, default=True, comment="Soll berechnet werden?")
+    lab_value_pct = Column(DECIMAL(5, 2), nullable=True, comment="Laborwert (Prozent)")
+    quantity_kg = Column(DECIMAL(12, 3), nullable=True, comment="Menge (kg)")
+    unit = Column(String(20), nullable=True, comment="Einheit (kg, %, Mon., Euro/St)")
+    price_per_unit_eur = Column(DECIMAL(10, 2), nullable=True, comment="Preis EUR pro Einheit")
+    amount_eur = Column(DECIMAL(15, 2), nullable=True, comment="Betrag EUR")
+    calculation_formula = Column(Text, nullable=True, comment="Berechnungsformel (für Audit/Nachvollziehbarkeit)")
+
+    # NUTS-2 pro Position (für Mischladungen)
+    origin_nuts2_code = Column(String(10), nullable=True, comment="NUTS-2-Code der Herkunft (Region der Erzeugung/Anbau) für diese Position")
+    nuts_version = Column(String(20), nullable=True, default="NUTS 2024", comment="NUTS-Version (z.B. 'NUTS 2024') für Audit")
+    origin_postal_code = Column(String(10), nullable=True, comment="PLZ der Herkunft (für Ableitung/Validierung)")
+    origin_city = Column(String(100), nullable=True, comment="Ort der Herkunft (für Ableitung/Validierung)")
+    origin_country_code = Column(String(2), nullable=True, default="DE", comment="Ländercode der Herkunft (ISO 3166-1 alpha-2)")
+
+    # Artikel/Sorte (falls Position-spezifisch)
+    article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=True, comment="Artikel-Nr. (falls abweichend vom Header)")
+    variety_id = Column(String(64), nullable=True, comment="Sorte (falls abweichend vom Header)")
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class HarvestAcceptanceLine(Base):
+    """
+    Ernte-Annahme Zeilen für Verteilungen (Silo/Partie-Splits).
+    
+    Default: 1 Wiegeschein = 1 Ernte-Annahme, aber mit Zeilen für Verteilungen.
+    Constraint: Sum(line.qty) = Wiegeschein.netto (± Rundungstoleranz).
+    """
+    __tablename__ = "harvest_acceptance_lines"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    harvest_acceptance_id = Column(String, ForeignKey("domain_inventory.harvest_acceptances.id", ondelete="CASCADE"), nullable=False)
+    line_number = Column(Integer, nullable=False, comment="Zeilennummer (1, 2, 3, ...)")
+    silo_id = Column(String(64), nullable=True, comment="Silo-Nr./Lagerort")
+    lot_id = Column(String(64), nullable=True, comment="Partie/Charge")
+    qty_kg_allocated = Column(DECIMAL(12, 3), nullable=False, comment="Zugeordnete Menge (kg)")
+    notes = Column(Text, nullable=True, comment="Bemerkungen zur Verteilung")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class SupplierTaxProfile(Base):
+    """
+    Steuerprofil am Lieferanten (mit Gültigkeit).
+    
+    Default: eigene Tabelle für taxation_type mit Gültigkeit.
+    Priorität: Lieferant-Profil > Artikel/Warengruppe > Standard
+    """
+    __tablename__ = "supplier_tax_profiles"
+    __table_args__ = {"schema": "domain_crm", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    supplier_id = Column(String, ForeignKey("domain_crm.business_partners.partner_id"), nullable=False, comment="Lieferant (Business Partner)")
+    taxation_type = Column(String(20), nullable=False, comment="Besteuerungsart: regular / ustg24_flat_rate / small_business")
+    vat_id = Column(String(30), nullable=True, comment="USt-ID (optional)")
+    valid_from = Column(Date, nullable=False, comment="Gültig ab")
+    valid_to = Column(Date, nullable=True, comment="Gültig bis (NULL = unbegrenzt)")
+    notes = Column(Text, nullable=True, comment="Hinweise/Texts")
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(64), nullable=True)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_by = Column(String(64), nullable=True)
+
+
+class PriceAdjustmentRule(Base):
+    """
+    Rule-Tabellen für Zu-/Abschläge (produkt- & gültigkeitsbezogen).
+    
+    Default: Rules konfigurierbar, nicht hart codieren.
+    Beispiele: HL-Gewicht, Besatz-Staffel, Mykotoxin, etc.
+    """
+    __tablename__ = "price_adjustment_rules"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=True, comment="Artikel (optional, wenn warengruppe-basiert)")
+    warengruppe = Column(String(80), nullable=True, comment="Warengruppe (optional, wenn artikel-basiert)")
+    adjustment_type = Column(String(30), nullable=False, comment="Typ: hl_weight / impurity / mycotoxin / other")
+    parameter_name = Column(String(50), nullable=False, comment="Parameter (z.B. 'hl_weight_kg_per_hl', 'impurity_pct')")
+    method = Column(String(20), nullable=False, comment="Methode: table / factor / percentage")
+    steps = Column(JSONB(astext_type=Text()), nullable=True, comment="Staffeln/Tabelle (JSONB)")
+    effective_from = Column(Date, nullable=False, comment="Gültig ab")
+    effective_to = Column(Date, nullable=True, comment="Gültig bis (NULL = unbegrenzt)")
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(64), nullable=True)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_by = Column(String(64), nullable=True)
+
+
 class NawaroPrintNotification(Base):
     """NaWaRo print message request header."""
     __tablename__ = "nawaro_print_notifications"
@@ -190,6 +481,168 @@ class NawaroPrintNotification(Base):
     document_name = Column(String(255), nullable=False)
     harvest_year = Column(Integer, nullable=False)
     article_number = Column(String(80), nullable=True)
+
+
+# ── Quality Protocols ─────────────────────────────────────────────────────────────
+
+class QualityProtocol(Base):
+    """
+    Qualitätsprotokoll für Laborwerte mit Versionierung.
+    
+    Verwaltet Laborwerte für Ernte-Annahmen mit Import-Funktionalität und Audit-Trail.
+    """
+    __tablename__ = "quality_protocols"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    harvest_acceptance_id = Column(String, ForeignKey("domain_inventory.harvest_acceptances.id", ondelete="SET NULL"), nullable=True)
+    protocol_number = Column(String(50), nullable=False)
+    version = Column(Integer, nullable=False, server_default="1")
+    
+    # Laborwerte
+    moisture_pct = Column(DECIMAL(5, 2), nullable=True, comment="Feuchte (%)")
+    impurities_pct = Column(DECIMAL(5, 2), nullable=True, comment="Besatz (%)")
+    hl_weight_kg_per_hl = Column(DECIMAL(6, 2), nullable=True, comment="Hektolitergewicht (kg/hl)")
+    protein_pct = Column(DECIMAL(5, 2), nullable=True, comment="Protein (%)")
+    mycotoxin_ppb = Column(DECIMAL(10, 2), nullable=True, comment="Mykotoxin (ppb)")
+    other_values = Column(JSONB(astext_type=Text()), nullable=True, comment="Weitere Laborwerte (JSONB)")
+    
+    # Quelle
+    source_type = Column(String(20), nullable=True, comment="Quelle: manual / import / lims / device")
+    source_device_id = Column(String(64), nullable=True)
+    source_file_name = Column(String(255), nullable=True)
+    source_file_content = Column(Text(), nullable=True, comment="Original-Dateiinhalt (für Audit)")
+    
+    # Status
+    is_final = Column(Boolean, nullable=False, server_default="false")
+    approved_by = Column(String(64), nullable=True)
+    approved_at = Column(DateTime(timezone=True), nullable=True)
+    
+    # Audit
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(64), nullable=True)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_by = Column(String(64), nullable=True)
+
+
+# ── Daily Prices ──────────────────────────────────────────────────────────────────
+
+class DailyPrice(Base):
+    """
+    Tagespreise für dynamische Preisermittlung.
+    
+    Verwaltet Tagespreise für Artikel, Warengruppen oder Crop Codes mit Gültigkeitszeitraum.
+    """
+    __tablename__ = "daily_prices"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    article_id = Column(String, ForeignKey("domain_inventory.articles.id", ondelete="SET NULL"), nullable=True)
+    warengruppe = Column(String(80), nullable=True, comment="Warengruppe (falls artikel_id NULL)")
+    crop_code = Column(String(20), nullable=True, comment="Crop Code (MAIZE, WHEAT, BARLEY, etc.)")
+    
+    # Preis
+    price_eur_per_ton = Column(DECIMAL(10, 2), nullable=False)
+    currency = Column(String(3), nullable=False, server_default="EUR")
+    
+    # Gültigkeit
+    price_date = Column(Date, nullable=False)
+    valid_from = Column(DateTime(timezone=True), nullable=False)
+    valid_to = Column(DateTime(timezone=True), nullable=True)
+    
+    # Quelle
+    source_type = Column(String(20), nullable=True, comment="Quelle: manual / exchange / api")
+    source_id = Column(String(64), nullable=True)
+    source_name = Column(String(255), nullable=True)
+    
+    # Audit
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(64), nullable=True)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_by = Column(String(64), nullable=True)
+
+
+# ── Self-Billing Invoices ─────────────────────────────────────────────────────────
+
+class SelfBillingInvoice(Base):
+    """
+    Self-Billing Gutschrift für Ernte-Annahmen.
+    
+    Verwaltet Self-Billing Gutschriften mit E-Rechnung-Erstellung und Dispute-Handling.
+    """
+    __tablename__ = "self_billing_invoices"
+    __table_args__ = {"schema": "domain_finance", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    harvest_acceptance_id = Column(String, ForeignKey("domain_inventory.harvest_acceptances.id", ondelete="SET NULL"), nullable=True)
+    
+    # Rechnungsnummern
+    invoice_number = Column(String(50), nullable=False)
+    provisional_invoice_number = Column(String(50), nullable=True)
+    
+    # Status
+    status = Column(String(20), nullable=False, server_default="draft", comment="draft / issued / paid / disputed / cancelled")
+    dispute_status = Column(String(20), nullable=True, comment="none / raised / resolved / rejected")
+    dispute_reason = Column(Text(), nullable=True)
+    dispute_date = Column(DateTime(timezone=True), nullable=True)
+    dispute_user_id = Column(String(64), nullable=True)
+    
+    # Beträge
+    total_net_amount_eur = Column(DECIMAL(15, 2), nullable=False)
+    total_vat_amount_eur = Column(DECIMAL(15, 2), nullable=False)
+    total_gross_amount_eur = Column(DECIMAL(15, 2), nullable=False)
+    vat_rate_percent = Column(DECIMAL(5, 2), nullable=False)
+    
+    # E-Rechnung
+    einvoice_xml = Column(Text(), nullable=True, comment="XRechnung/ZUGFeRD XML")
+    einvoice_pdf = Column(postgresql.BYTEA(), nullable=True, comment="PDF (optional)")
+    einvoice_sent_at = Column(DateTime(timezone=True), nullable=True)
+    einvoice_received_at = Column(DateTime(timezone=True), nullable=True)
+    
+    # Pflichttexte
+    mandatory_texts = Column(JSONB(astext_type=Text()), nullable=True, comment="Array von Pflichttexten (JSONB)")
+    
+    # Audit
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(64), nullable=True)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_by = Column(String(64), nullable=True)
+
+
+# ── Dispute Records ──────────────────────────────────────────────────────────────
+
+class DisputeRecord(Base):
+    """
+    Dispute-Records für Self-Billing Gutschriften.
+    
+    Verwaltet Widersprüche gegen Gutschriften mit Status-Tracking und Auflösung.
+    """
+    __tablename__ = "dispute_records"
+    __table_args__ = {"schema": "domain_finance", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    invoice_id = Column(String, ForeignKey("domain_finance.self_billing_invoices.id", ondelete="CASCADE"), nullable=False)
+    
+    # Dispute-Details
+    dispute_type = Column(String(30), nullable=True, comment="amount / quality / quantity / other")
+    dispute_reason = Column(Text(), nullable=False)
+    disputed_amount_eur = Column(DECIMAL(15, 2), nullable=True)
+    
+    # Status
+    status = Column(String(20), nullable=False, server_default="raised", comment="raised / resolved / rejected")
+    resolution_notes = Column(Text(), nullable=True)
+    resolved_by = Column(String(64), nullable=True)
+    resolved_at = Column(DateTime(timezone=True), nullable=True)
+    
+    # Audit
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(64), nullable=True)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_by = Column(String(64), nullable=True)
     debtor_from = Column(String(80), nullable=True)
     debtor_to = Column(String(80), nullable=True)
     delivery_option = Column(String(40), nullable=False, default="vollstaendige_ablieferung")
@@ -644,6 +1097,28 @@ class MasterDataEntry(Base):
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+# ── System Properties (Subledger / Jahresabschluss) ───────────────
+
+class SystemProperty(Base):
+    """
+    Systemeigenschaften für Subledger-Workflow, Konten-Mapping, Stichtags-Umgliederung.
+    Tenant-spezifische Overrides für SKR-Konten und Feature-Flags.
+    """
+    __tablename__ = "system_properties"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "property_key", name="uq_system_properties_tenant_key"),
+        {"schema": "domain_shared", "extend_existing": True},
+    )
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    property_key = Column(String(100), nullable=False, comment="z.B. SUBLEDGER_AR_ACCOUNT")
+    property_value = Column(Text, nullable=True)
+    property_type = Column(String(20), default="string", comment="string / number / boolean / json")
+    category = Column(String(50), default="subledger", comment="subledger / year_end / harvest")
+    description = Column(Text, nullable=True)
 
 
 # ── Dispatchers ──────────────────────────────────────────────────

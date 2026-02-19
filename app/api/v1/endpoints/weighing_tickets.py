@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 from ....domains.shared.events import IntegrationEvent, get_event_publisher
 from ....infrastructure.eventbus.outbox import OutboxPublisher
-from ....infrastructure.models import AgrarContract, AgrarContractAllocation, WeighingTicket
+from ....infrastructure.models import AgrarContract, AgrarContractAllocation, Article, WeighingTicket
 from modules.agrar.services.weighing_domain import (
     derive_billing_weight as _derive_billing_weight_impl,
     resolve_ticket_allocation_quantity as _resolve_ticket_allocation_quantity_impl,
@@ -50,6 +50,9 @@ class WeighingTicketOut(BaseSchema):
     status: str = "open"
     direction: str = "in"
     reference_doc: Optional[str] = None
+    article_group: Optional[str] = None
+    article_id: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class WeighingTicketCreate(BaseModel):
@@ -69,6 +72,9 @@ class WeighingTicketCreate(BaseModel):
     quality_data: Optional[dict[str, Any]] = None
     direction: str = "in"
     reference_doc: Optional[str] = None
+    article_group: Optional[str] = None
+    article_id: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class WeighingTicketUpdate(BaseModel):
@@ -85,6 +91,9 @@ class WeighingTicketUpdate(BaseModel):
     quality_data: Optional[dict[str, Any]] = None
     status: Optional[str] = None
     vehicle_plate: Optional[str] = None
+    article_group: Optional[str] = None
+    article_id: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class WeighingTicketContractAllocationRequest(BaseModel):
@@ -148,6 +157,35 @@ async def list_weighing_tickets(
     )
 
 
+class ArticleGroupOut(BaseModel):
+    warengruppe: str
+    count: int
+
+
+@router.get("/article-groups", response_model=list[ArticleGroupOut])
+async def list_article_groups(
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Liefert die vorhandenen Artikelgruppen (DISTINCT warengruppe aus articles)."""
+    from sqlalchemy import func as sqla_func
+
+    tid = tenant_id or DEFAULT_TENANT
+    rows = (
+        db.query(Article.warengruppe, sqla_func.count(Article.id).label("count"))
+        .filter(
+            Article.tenant_id == tid,
+            Article.is_active == True,  # noqa: E712
+            Article.warengruppe.isnot(None),
+            Article.warengruppe != "",
+        )
+        .group_by(Article.warengruppe)
+        .order_by(Article.warengruppe)
+        .all()
+    )
+    return [ArticleGroupOut(warengruppe=r[0], count=r[1]) for r in rows]
+
+
 @router.post("/", response_model=WeighingTicketOut, status_code=201)
 async def create_weighing_ticket(
     payload: WeighingTicketCreate,
@@ -181,6 +219,9 @@ async def create_weighing_ticket(
         quality_data=payload.quality_data,
         direction=payload.direction,
         reference_doc=payload.reference_doc,
+        article_group=payload.article_group,
+        article_id=payload.article_id,
+        notes=payload.notes,
         tenant_id=tid,
     )
     db.add(ticket)
