@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   # PostgreSQL Database
@@ -10,7 +9,6 @@ services:
       POSTGRES_DB: valeo_neuro_erp
       POSTGRES_USER: valeo_dev
       POSTGRES_PASSWORD: valeo_dev_2024
-      POSTGRES_ROOT_PASSWORD: valeo_root_2024
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
@@ -57,10 +55,10 @@ services:
       KC_DB: postgres
       KC_DB_HOST: postgres
       KC_DB_PORT: "5432"
-      KC_DB_NAME: valeo_neuro_erp
-      KC_DB_URL: jdbc:postgresql://${KC_DB_HOST}:${KC_DB_PORT}/${KC_DB_NAME}
-      KC_DB_USERNAME: valeo_dev
-      KC_DB_PASSWORD: valeo_dev_2024
+      KC_DB_NAME: keycloak
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak_dev_2024
       KC_HOSTNAME: localhost
       KC_HTTP_PORT: 8080
       KC_HTTPS_PORT: 8443
@@ -73,7 +71,7 @@ services:
     networks:
       - valeo-network
     healthcheck:
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e 'GET /health/ready HTTP/1.1\r\nhost: localhost\r\nConnection: close\r\n\r\n' >&3;grep -q '200 OK' <&3"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -244,6 +242,12 @@ services:
         condition: service_healthy
     networks:
       - valeo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     volumes:
       - ./app:/app/app
       - ./alembic:/app/alembic
@@ -262,7 +266,7 @@ services:
       INVENTORY_DEBUG: "true"
       INVENTORY_EVENT_BUS_ENABLED: "true"
       INVENTORY_EVENT_BUS_URL: nats://nats:4222
-      INVENTORY_DEFAULT_TENANT: default
+      INVENTORY_DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
       INVENTORY_TEAMS_WEBHOOK_URL: ""
       INVENTORY_ESCALATION_EMAIL: ""
       INVENTORY_RATE_LIMIT_PER_MINUTE: "600"
@@ -275,7 +279,7 @@ services:
       postgres:
         condition: service_healthy
       nats:
-        condition: service_started
+        condition: service_healthy
     networks:
       - valeo-network
 
@@ -422,6 +426,7 @@ services:
       - valeo-network
 
   crm-ai:
+    profiles: ["ai"]
     build:
       context: ./services/crm-ai
       dockerfile: Dockerfile
@@ -512,6 +517,7 @@ services:
       - valeo-network
 
   ai:
+    profiles: ["ai"]
     build:
       context: ./services/ai
       dockerfile: Dockerfile
