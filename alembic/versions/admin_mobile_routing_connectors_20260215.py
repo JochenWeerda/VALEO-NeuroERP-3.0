@@ -21,8 +21,8 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         "admin_stations",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("station_code", sa.String(length=80), nullable=False),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("station_type", sa.String(length=30), nullable=False, server_default="workstation"),
@@ -46,10 +46,10 @@ def upgrade() -> None:
 
     op.create_table(
         "admin_station_devices",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("station_id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("device_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("station_id", sa.String(), nullable=False),
+        sa.Column("device_id", sa.String(), nullable=False),
         sa.Column("device_role", sa.String(length=40), nullable=False),
         sa.Column("priority", sa.Integer(), nullable=False, server_default="1"),
         sa.Column("is_fallback", sa.Boolean(), nullable=False, server_default=sa.text("false")),
@@ -80,17 +80,17 @@ def upgrade() -> None:
 
     op.create_table(
         "admin_routing_rules",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("rule_code", sa.String(length=80), nullable=False),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("document_type", sa.String(length=60), nullable=False),
         sa.Column("process_code", sa.String(length=60), nullable=False),
         sa.Column("priority", sa.Integer(), nullable=False, server_default="100"),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-        sa.Column("station_id", postgresql.UUID(as_uuid=False), nullable=True),
-        sa.Column("device_id", postgresql.UUID(as_uuid=False), nullable=True),
-        sa.Column("output_profile_id", postgresql.UUID(as_uuid=False), nullable=True),
+        sa.Column("station_id", sa.String(), nullable=True),
+        sa.Column("device_id", sa.String(), nullable=True),
+        sa.Column("output_profile_id", sa.String(), nullable=True),
         sa.Column("conditions", postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default=sa.text("'{}'::jsonb")),
         sa.Column("actions", postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default=sa.text("'{}'::jsonb")),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),
@@ -113,8 +113,8 @@ def upgrade() -> None:
 
     op.create_table(
         "admin_scan_profiles",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("profile_code", sa.String(length=80), nullable=False),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("source_type", sa.String(length=20), nullable=False, server_default="camera"),
@@ -143,8 +143,8 @@ def upgrade() -> None:
 
     op.create_table(
         "admin_mobile_devices",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("device_code", sa.String(length=80), nullable=False),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("device_type", sa.String(length=30), nullable=False, server_default="smartphone"),
@@ -152,8 +152,8 @@ def upgrade() -> None:
         sa.Column("platform", sa.String(length=20), nullable=False, server_default="android"),
         sa.Column("os_version", sa.String(length=60), nullable=True),
         sa.Column("app_version", sa.String(length=60), nullable=True),
-        sa.Column("station_id", postgresql.UUID(as_uuid=False), nullable=True),
-        sa.Column("scan_profile_id", postgresql.UUID(as_uuid=False), nullable=True),
+        sa.Column("station_id", sa.String(), nullable=True),
+        sa.Column("scan_profile_id", sa.String(), nullable=True),
         sa.Column("status", sa.String(length=20), nullable=False, server_default="active"),
         sa.Column("last_sync_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("capabilities", postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default=sa.text("'{}'::jsonb")),
@@ -180,8 +180,8 @@ def upgrade() -> None:
 
     op.create_table(
         "admin_connector_configs",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("config_code", sa.String(length=80), nullable=False),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("connector_type", sa.String(length=40), nullable=False),
@@ -212,9 +212,9 @@ def upgrade() -> None:
 
     op.create_table(
         "admin_connector_events",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("connector_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("connector_id", sa.String(), nullable=False),
         sa.Column("event_type", sa.String(length=60), nullable=False),
         sa.Column("status", sa.String(length=20), nullable=False, server_default="ok"),
         sa.Column("message", sa.String(length=255), nullable=True),

@@ -7,7 +7,7 @@ from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Text, 
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-import uuid
+from app.core.uuid7 import uuid7
 
 from ...core.database import Base
 
@@ -17,7 +17,7 @@ class Customer(Base):
     __tablename__ = "crm_customers"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: uuid7())
     customer_number = Column(String(20), nullable=False, unique=True)
     company_name = Column(String(200), nullable=False)
     salutation = Column(String(20))
@@ -71,7 +71,7 @@ class Contact(Base):
     __tablename__ = "crm_contacts"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: uuid7())
     customer_id = Column(String, ForeignKey("domain_crm.crm_customers.id"), nullable=False)
 
     first_name = Column(String(100), nullable=False)
@@ -111,7 +111,7 @@ class Activity(Base):
     __tablename__ = "crm_activities"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: uuid7())
     customer_id = Column(String, ForeignKey("domain_crm.crm_customers.id"), nullable=False)
     contact_id = Column(String, ForeignKey("domain_crm.crm_contacts.id"))
 
@@ -154,7 +154,7 @@ class VisitReport(Base):
     __tablename__ = "crm_visit_reports"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: uuid7())
     customer_id = Column(String, ForeignKey("domain_crm.crm_customers.id"), nullable=False)
 
     # Visit details
@@ -205,7 +205,7 @@ class Opportunity(Base):
     __tablename__ = "crm_opportunities"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: uuid7())
     customer_id = Column(String, ForeignKey("domain_crm.crm_customers.id"), nullable=False)
 
     # Opportunity details

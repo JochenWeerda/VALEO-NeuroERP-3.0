@@ -9,6 +9,7 @@ from sqlalchemy import text
 from datetime import datetime
 import json
 import logging
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +23,6 @@ class DocumentRepository:
     def save_document(self, doc_type: str, doc_number: str, data: dict) -> dict:
         """Speichert oder aktualisiert ein Dokument"""
         try:
-            import uuid
-            
             # Prüfe ob Dokument existiert
             existing = self.db.execute(
                 text("""
@@ -51,7 +50,7 @@ class DocumentRepository:
                 )
             else:
                 # Insert
-                doc_id = str(uuid.uuid4())
+                doc_id = uuid7()
                 self.db.execute(
                     text("""
                         INSERT INTO documents (id, doc_type, doc_number, data, created_at, updated_at)

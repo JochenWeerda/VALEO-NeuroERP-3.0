@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-import uuid
+from app.core.uuid7 import uuid7
 
 from app.models.documents import ArchiveIndex
 
@@ -29,7 +29,7 @@ class ArchiveRepository:
     ) -> ArchiveIndex:
         """Fügt Archiv-Eintrag hinzu"""
         entry = ArchiveIndex(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             domain=domain,
             doc_number=doc_number,
             ts=ts,

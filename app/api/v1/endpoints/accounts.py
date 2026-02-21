@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....infrastructure.repositories import AccountRepository
 from ....core.dependency_container import container
 from ..schemas.finance import (
@@ -21,6 +22,7 @@ router = APIRouter()
 @router.post("/", response_model=Account, status_code=201)
 async def create_account(
     account_data: AccountCreate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -30,7 +32,7 @@ async def create_account(
     """
     try:
         account_repo = container.resolve(AccountRepository)
-        account = await account_repo.create(account_data.model_dump(), account_data.tenant_id)
+        account = await account_repo.create(account_data.model_dump(), tenant_id)
         return Account.model_validate(account)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create account: {str(e)}")
@@ -38,7 +40,7 @@ async def create_account(
 
 @router.get("/", response_model=PaginatedResponse[Account])
 async def list_accounts(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     account_type: Optional[str] = Query(None, description="Filter by account type"),
     category: Optional[str] = Query(None, description="Filter by category"),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
@@ -53,18 +55,15 @@ async def list_accounts(
     try:
         account_repo = container.resolve(AccountRepository)
 
-        # Use provided tenant_id or default to system for now
-        effective_tenant_id = tenant_id or "system"
-
         accounts = await account_repo.get_all(
-            effective_tenant_id,
+            tenant_id,
             skip,
             limit,
             account_type=account_type,
             category=category
         )
         total = await account_repo.count(
-            effective_tenant_id,
+            tenant_id,
             account_type=account_type,
             category=category
         )
@@ -85,6 +84,7 @@ async def list_accounts(
 @router.get("/{account_id}", response_model=Account)
 async def get_account(
     account_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -94,7 +94,7 @@ async def get_account(
     """
     try:
         account_repo = container.resolve(AccountRepository)
-        account = await account_repo.get_by_id(account_id, "system")  # TODO: tenant context
+        account = await account_repo.get_by_id(account_id, tenant_id)
         if not account:
             raise HTTPException(status_code=404, detail="Account not found")
         return Account.model_validate(account)
@@ -107,6 +107,7 @@ async def get_account(
 @router.get("/number/{account_number}", response_model=Account)
 async def get_account_by_number(
     account_number: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -116,7 +117,7 @@ async def get_account_by_number(
     """
     try:
         account_repo = container.resolve(AccountRepository)
-        account = await account_repo.get_by_number(account_number, "system")  # TODO: tenant context
+        account = await account_repo.get_by_number(account_number, tenant_id)
         if not account:
             raise HTTPException(status_code=404, detail="Account not found")
         return Account.model_validate(account)
@@ -130,6 +131,7 @@ async def get_account_by_number(
 async def update_account(
     account_id: str,
     account_data: AccountUpdate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -139,7 +141,7 @@ async def update_account(
     """
     try:
         account_repo = container.resolve(AccountRepository)
-        account = await account_repo.update(account_id, account_data.model_dump(exclude_unset=True), "system")  # TODO: tenant context
+        account = await account_repo.update(account_id, account_data.model_dump(exclude_unset=True), tenant_id)
         if not account:
             raise HTTPException(status_code=404, detail="Account not found")
         return Account.model_validate(account)
@@ -152,6 +154,7 @@ async def update_account(
 @router.delete("/{account_id}", status_code=204)
 async def delete_account(
     account_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -161,7 +164,7 @@ async def delete_account(
     """
     try:
         account_repo = container.resolve(AccountRepository)
-        success = await account_repo.delete(account_id, "system")  # TODO: tenant context
+        success = await account_repo.delete(account_id, tenant_id)
         if not success:
             raise HTTPException(status_code=404, detail="Account not found")
     except HTTPException:
@@ -173,6 +176,7 @@ async def delete_account(
 @router.get("/{account_id}/balance", response_model=dict)
 async def get_account_balance(
     account_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -182,7 +186,7 @@ async def get_account_balance(
     """
     try:
         account_repo = container.resolve(AccountRepository)
-        balance = await account_repo.get_balance(account_id, "system")  # TODO: tenant context
+        balance = await account_repo.get_balance(account_id, tenant_id)
         return {"account_id": account_id, "balance": balance}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve account balance: {str(e)}")
@@ -190,7 +194,7 @@ async def get_account_balance(
 
 @router.get("/hierarchy", response_model=List[AccountHierarchy])
 async def get_accounts_hierarchy(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     account_type: Optional[str] = Query(None, description="Filter by account type"),
     db: Session = Depends(get_db)
 ):
@@ -202,11 +206,9 @@ async def get_accounts_hierarchy(
     try:
         from ....infrastructure.models import Account as AccountModel
         
-        effective_tenant_id = tenant_id or "system"
-        
-        # Query all accounts
+        # Query all accounts for the tenant
         query = db.query(AccountModel).filter(
-            AccountModel.tenant_id == effective_tenant_id,
+            AccountModel.tenant_id == tenant_id,
             AccountModel.is_active == True,
             AccountModel.deleted_at.is_(None)
         )

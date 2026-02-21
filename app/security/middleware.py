@@ -7,8 +7,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 from starlette.requests import Request
 from starlette.responses import Response
-import uuid
 import time
+from app.core.uuid7 import uuid7
 import logging
 import json
 
@@ -79,7 +79,7 @@ class CorrelationMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         # Correlation-ID aus Header oder neu generieren
-        cid = request.headers.get("x-correlation-id", str(uuid.uuid4()))
+        cid = request.headers.get("x-correlation-id", uuid7())
 
         # Start-Zeit für Latency-Messung
         start = time.time()

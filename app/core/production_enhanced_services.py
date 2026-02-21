@@ -6,7 +6,7 @@ Adds infrastructure and notification services with production-ready implementati
 import logging
 from typing import Optional, Dict, Any, List
 from datetime import datetime
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ class ProductionNotificationService:
             logger.info(f"Production Notification Service: Sending notification to user {user_id}")
             # Store in database notification table
             notification_data = {
-                "id": str(uuid.uuid4()),
+                "id": uuid7(),
                 "user_id": user_id,
                 "title": title,
                 "message": message,
@@ -91,7 +91,7 @@ class ProductionAuditService:
         """Log audit action with database persistence."""
         try:
             audit_entry = {
-                "id": str(uuid.uuid4()),
+                "id": uuid7(),
                 "user_id": user_id,
                 "action": action,
                 "resource": resource,

@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -239,7 +239,7 @@ class ISO27001SecurityIncidentResponseTeam:
         Add a member to the security incident response team
         Returns member ID
         """
-        member_id = str(uuid.uuid4())
+        member_id = uuid7()
 
         member = TeamMember(
             id=member_id,
@@ -264,7 +264,7 @@ class ISO27001SecurityIncidentResponseTeam:
         Create an incident escalation rule
         Returns rule ID
         """
-        rule_id = str(uuid.uuid4())
+        rule_id = uuid7()
 
         rule = EscalationRule(
             id=rule_id,
@@ -286,7 +286,7 @@ class ISO27001SecurityIncidentResponseTeam:
         Create an incident response workflow
         Returns workflow ID
         """
-        workflow_id = str(uuid.uuid4())
+        workflow_id = uuid7()
 
         workflow = ResponseWorkflow(
             id=workflow_id,
@@ -320,7 +320,7 @@ class ISO27001SecurityIncidentResponseTeam:
         for role in required_roles:
             member = self._find_available_team_member(role)
             if member:
-                assignment_id = str(uuid.uuid4())
+                assignment_id = uuid7()
                 assignment = IncidentAssignment(
                     id=assignment_id,
                     incident_id=incident_id,
@@ -385,7 +385,7 @@ class ISO27001SecurityIncidentResponseTeam:
             raise ValueError(f"Response workflow not found: {workflow_id}")
 
         workflow = self.response_workflows[workflow_id]
-        execution_id = str(uuid.uuid4())
+        execution_id = uuid7()
 
         logger.info(f"Starting response workflow {workflow.name} for incident {incident_id}")
 
@@ -481,7 +481,7 @@ class ISO27001SecurityIncidentResponseTeam:
         Send incident communication
         Returns communication log ID
         """
-        comm_id = str(uuid.uuid4())
+        comm_id = uuid7()
 
         communication = CommunicationLog(
             id=comm_id,

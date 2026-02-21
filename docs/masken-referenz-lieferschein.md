@@ -876,3 +876,4 @@ const handleArticleSelect = (article: any): void => {
 **Version:** 1.0  
 **Status:** ✅ Referenz-Dokumentation vollständig
 
+

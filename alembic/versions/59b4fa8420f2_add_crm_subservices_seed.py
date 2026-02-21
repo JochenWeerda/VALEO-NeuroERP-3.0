@@ -35,13 +35,13 @@ def downgrade() -> None:
 def _create_interaction_events(bind) -> None:
     op.create_table(
         "interaction_events",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
-        sa.Column("tenant_id", sa.dialects.postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("channel", sa.String(32), nullable=False),
         sa.Column("direction", sa.String(8), nullable=False),
         sa.Column("actor_type", sa.String(16), nullable=False),
         sa.Column("actor_id", sa.String(64), nullable=True),
-        sa.Column("customer_id", sa.dialects.postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("customer_id", sa.String(), nullable=False),
         sa.Column("subject", sa.String(255), nullable=False),
         sa.Column("body", sa.Text, nullable=True),
         sa.Column("tags", sa.ARRAY(sa.String), nullable=True),
@@ -77,9 +77,9 @@ def _create_interaction_events(bind) -> None:
 def _create_sales_opportunities(bind) -> None:
     op.create_table(
         "sales_opportunities",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
-        sa.Column("tenant_id", sa.dialects.postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("customer_id", sa.dialects.postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("customer_id", sa.String(), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("stage", sa.String(32), nullable=False),
         sa.Column("amount", sa.Numeric(12, 2), nullable=False),
@@ -119,8 +119,8 @@ def _create_sales_opportunities(bind) -> None:
 def _create_marketing_campaigns(bind) -> None:
     op.create_table(
         "marketing_campaigns",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
-        sa.Column("tenant_id", sa.dialects.postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("status", sa.String(32), nullable=False),
         sa.Column("channel", sa.String(32), nullable=False),
@@ -155,9 +155,9 @@ def _create_marketing_campaigns(bind) -> None:
 def _create_service_tickets(bind) -> None:
     op.create_table(
         "service_tickets",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
-        sa.Column("tenant_id", sa.dialects.postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("customer_id", sa.dialects.postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("customer_id", sa.String(), nullable=False),
         sa.Column("title", sa.String(255), nullable=False),
         sa.Column("status", sa.String(32), nullable=False),
         sa.Column("priority", sa.String(16), nullable=False),
@@ -193,9 +193,9 @@ def _create_service_tickets(bind) -> None:
 def _create_analytics_scores(bind) -> None:
     op.create_table(
         "analytics_customer_scores",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
-        sa.Column("tenant_id", sa.dialects.postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("customer_id", sa.dialects.postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("customer_id", sa.String(), nullable=False),
         sa.Column("lead_score", sa.Float, nullable=True),
         sa.Column("churn_score", sa.Float, nullable=True),
         sa.Column("calculated_at", sa.DateTime, nullable=False, default=datetime.utcnow),
@@ -225,7 +225,7 @@ def _create_analytics_scores(bind) -> None:
 def _create_sync_mappings(bind) -> None:
     op.create_table(
         "sync_legacy_mappings",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("legacy_system", sa.String(64), nullable=False),
         sa.Column("legacy_id", sa.String(64), nullable=False),
         sa.Column("crm_entity", sa.String(32), nullable=False),
@@ -256,9 +256,9 @@ def _create_sync_mappings(bind) -> None:
 def _create_ai_requests(bind) -> None:
     op.create_table(
         "ai_assist_requests",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
-        sa.Column("tenant_id", sa.dialects.postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("customer_id", sa.dialects.postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("customer_id", sa.String(), nullable=True),
         sa.Column("request_type", sa.String(32), nullable=False),
         sa.Column("prompt_hash", sa.String(64), nullable=False),
         sa.Column("status", sa.String(16), nullable=False),

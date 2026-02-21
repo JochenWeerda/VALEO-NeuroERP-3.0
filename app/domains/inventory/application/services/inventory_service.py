@@ -5,8 +5,8 @@ Core business logic for inventory management
 
 from typing import List, Optional, Dict, Any
 from decimal import Decimal
-import uuid
 from datetime import datetime, date, time
+from app.core.uuid7 import uuid7
 from sqlalchemy.orm import Session
 
 from app.infrastructure.models import Article as ArticleModel, Warehouse as WarehouseModel, StockMovement as StockMovementModel
@@ -142,7 +142,7 @@ class InventoryService:
 
         # Create stock movement record
         movement = StockMovementModel(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             article_id=article_id,
             warehouse_id=warehouse_id,
             movement_type=movement_type,

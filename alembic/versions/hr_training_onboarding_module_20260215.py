@@ -25,8 +25,8 @@ def upgrade() -> None:
 
     op.create_table(
         "training_courses",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("course_code", sa.String(length=80), nullable=False),
         sa.Column("title", sa.String(length=160), nullable=False),
         sa.Column("topic", sa.String(length=120), nullable=True),
@@ -61,9 +61,9 @@ def upgrade() -> None:
 
     op.create_table(
         "training_assignments",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("course_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("course_id", sa.String(), nullable=False),
         sa.Column("employee_ref", sa.String(length=80), nullable=False),
         sa.Column("assigned_by", sa.String(length=80), nullable=True),
         sa.Column("assigned_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),
@@ -108,8 +108,8 @@ def upgrade() -> None:
 
     op.create_table(
         "employee_certificates",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("employee_ref", sa.String(length=80), nullable=False),
         sa.Column("certificate_type", sa.String(length=80), nullable=False),
         sa.Column("certificate_name", sa.String(length=160), nullable=False),
@@ -146,8 +146,8 @@ def upgrade() -> None:
 
     op.create_table(
         "qualification_profiles",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("employee_ref", sa.String(length=80), nullable=False),
         sa.Column("role_code", sa.String(length=80), nullable=False),
         sa.Column("qualification_level", sa.String(length=40), nullable=False, server_default=sa.text("'basic'")),
@@ -172,8 +172,8 @@ def upgrade() -> None:
 
     op.create_table(
         "onboarding_checklists",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("checklist_code", sa.String(length=80), nullable=False),
         sa.Column("title", sa.String(length=160), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
@@ -196,9 +196,9 @@ def upgrade() -> None:
 
     op.create_table(
         "onboarding_runs",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("checklist_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("checklist_id", sa.String(), nullable=False),
         sa.Column("employee_ref", sa.String(length=80), nullable=False),
         sa.Column("assigned_by", sa.String(length=80), nullable=True),
         sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),

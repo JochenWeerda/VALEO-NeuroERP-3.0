@@ -6,12 +6,11 @@ GET/POST/PUT for weighing tickets.
 from datetime import datetime
 from decimal import Decimal
 from typing import Any, Optional
-import uuid
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....domains.shared.events import IntegrationEvent, get_event_publisher
 from ....infrastructure.eventbus.outbox import OutboxPublisher
@@ -23,9 +22,10 @@ from modules.agrar.services.weighing_domain import (
 )
 from .agrar_contracts import _compute_status
 from ..schemas.base import PaginatedResponse, BaseSchema
+from app.core.uuid7 import uuid7
 
 router = APIRouter()
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class WeighingTicketOut(BaseSchema):
@@ -193,10 +193,9 @@ async def create_weighing_ticket(
     db: Session = Depends(get_db),
 ):
     """POST Wiegescheine anlegen"""
-    import uuid
     tid = tenant_id or DEFAULT_TENANT
     ticket = WeighingTicket(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         ticket_number=payload.ticket_number,
         scale_id=payload.scale_id,
         vehicle_plate=payload.vehicle_plate,
@@ -294,7 +293,7 @@ async def allocate_ticket_to_contract(
         )
 
         allocation = AgrarContractAllocation(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             contract_id=contract.id,
             ticket_id=ticket.id,
             allocation_quantity_kg=float(allocation_quantity),

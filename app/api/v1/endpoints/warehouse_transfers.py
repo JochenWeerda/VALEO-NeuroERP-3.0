@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import (
     WarehouseTransfer, WarehouseTransferLine,
@@ -18,7 +19,7 @@ from ....infrastructure.models import (
 from ..schemas.base import PaginatedResponse, BaseSchema
 
 router = APIRouter()
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 # ── Schemas ──────────────────────────────────────────────────────
@@ -130,10 +131,10 @@ async def create_transfer(
     db: Session = Depends(get_db),
 ):
     """POST Lager-zu-Lager Buchung Anlegen"""
-    import uuid
+    from app.core.uuid7 import uuid7
     tid = tenant_id or DEFAULT_TENANT
     obj = WarehouseTransfer(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         transfer_number=payload.transfer_number,
         from_warehouse_id=payload.from_warehouse_id,
         to_warehouse_id=payload.to_warehouse_id,
@@ -179,10 +180,10 @@ async def create_transfer_line(
     db: Session = Depends(get_db),
 ):
     """POST Lager-zu-Lager Buchung: Position Anlegen"""
-    import uuid
+    from app.core.uuid7 import uuid7
     tid = tenant_id or DEFAULT_TENANT
     line = WarehouseTransferLine(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         transfer_id=transfer_id,
         article_id=payload.article_id,
         quantity=payload.quantity,
@@ -262,10 +263,10 @@ async def create_correction(
     db: Session = Depends(get_db),
 ):
     """POST Bestandskorrektur Anlegen"""
-    import uuid
+    from app.core.uuid7 import uuid7
     tid = tenant_id or DEFAULT_TENANT
     obj = StockCorrection(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         correction_number=payload.correction_number,
         warehouse_id=payload.warehouse_id,
         reason=payload.reason,
@@ -285,10 +286,10 @@ async def create_correction_line(
     db: Session = Depends(get_db),
 ):
     """POST Bestandskorrektur Position Anlegen"""
-    import uuid
+    from app.core.uuid7 import uuid7
     tid = tenant_id or DEFAULT_TENANT
     line = StockCorrectionLine(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         correction_id=corr_id,
         article_id=payload.article_id,
         old_quantity=payload.old_quantity,

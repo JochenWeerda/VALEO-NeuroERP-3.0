@@ -64,8 +64,13 @@ from . import master_data
 from . import compat
 from . import modules
 from . import agrar_contracts
+from . import agrar_varieties
 from . import silo
 from . import agrar_settlements
+from . import harvest_acceptance
+from . import quality_protocols
+from . import daily_prices
+from . import self_billing
 from . import nawaro
 from . import nawaro_raps
 from . import einkauf_lieferschein
@@ -82,3 +87,5 @@ from . import analytics
 from . import sales_delivery_notes
 from . import branches
 from . import pricing
+from . import config_service
+from . import job_runner

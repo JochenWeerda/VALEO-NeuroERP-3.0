@@ -22,7 +22,6 @@ aiohttp==3.12.13
 
 # AI/ML Core
 langchain==0.3.26
-langchain-core==0.3.29
 langchain-community==0.3.26
 langgraph==0.2.59
 langgraph-checkpoint-sqlite==2.0.11

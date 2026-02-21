@@ -13,6 +13,7 @@ from enum import Enum
 import logging
 import ipaddress
 import re
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +174,7 @@ class ISO27001NetworkSecurity:
         Register a network asset for security monitoring
         Returns asset ID
         """
-        asset_id = asset_data.get('id') or str(uuid.uuid4())
+        asset_id = asset_data.get('id') or uuid7()
 
         asset = NetworkAsset(
             id=asset_id,
@@ -224,7 +225,7 @@ class ISO27001NetworkSecurity:
         Create a firewall rule
         Returns rule ID
         """
-        rule_id = str(uuid.uuid4())
+        rule_id = uuid7()
 
         rule = FirewallRule(
             id=rule_id,
@@ -377,7 +378,7 @@ class ISO27001NetworkSecurity:
 
     def _create_security_event(self, traffic_data: Dict[str, Any], anomalies: List[str]) -> str:
         """Create a security event"""
-        event_id = str(uuid.uuid4())
+        event_id = uuid7()
 
         # Determine severity based on anomalies
         severity = 'LOW'
@@ -433,7 +434,7 @@ class ISO27001NetworkSecurity:
         Establish a secure VPN connection
         Returns connection ID
         """
-        connection_id = str(uuid.uuid4())
+        connection_id = uuid7()
 
         connection = VPNConnection(
             id=connection_id,

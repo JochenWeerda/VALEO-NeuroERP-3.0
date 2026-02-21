@@ -8,9 +8,9 @@ from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Date, 
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
-import uuid
 
 from ...core.database import Base
+from ...core.uuid7 import uuid7
 
 
 # ── Inventory Count Lines ────────────────────────────────────────
@@ -20,7 +20,7 @@ class InventoryCountLine(Base):
     __tablename__ = "inventory_count_lines"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     inventory_count_id = Column(String, ForeignKey("domain_inventory.inventory_counts.id"), nullable=False)
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=False)
     expected_qty = Column(DECIMAL(12, 3), default=0)
@@ -41,7 +41,7 @@ class WeighingTicket(Base):
     __tablename__ = "weighing_tickets"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     ticket_number = Column(String(50), nullable=False)
     scale_id = Column(String(50), nullable=True)
     vehicle_plate = Column(String(20), nullable=True)
@@ -76,7 +76,7 @@ class WeighingTicketLine(Base):
     __tablename__ = "weighing_ticket_lines"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     ticket_id = Column(String, ForeignKey("domain_inventory.weighing_tickets.id"), nullable=False)
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=False)
     quantity = Column(DECIMAL(12, 3), nullable=False)
@@ -90,7 +90,7 @@ class WeighingMeasurement(Base):
     __tablename__ = "weighing_measurements"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     ticket_id = Column(String, ForeignKey("domain_inventory.weighing_tickets.id"), nullable=False)
     metric_key = Column(String(50), nullable=False)
     metric_value = Column(DECIMAL(10, 3), nullable=False)
@@ -105,7 +105,7 @@ class AgrarContract(Base):
     __tablename__ = "agrar_contracts"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     contract_number = Column(String(50), nullable=False)
     contract_type = Column(String(10), nullable=False)  # buy / sell
     harvest_year = Column(Integer, nullable=False)
@@ -130,7 +130,7 @@ class AgrarContractAllocation(Base):
     __tablename__ = "agrar_contract_allocations"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     contract_id = Column(String, ForeignKey("domain_inventory.agrar_contracts.id"), nullable=False)
     ticket_id = Column(String, ForeignKey("domain_inventory.weighing_tickets.id"), nullable=True)
     allocation_quantity_kg = Column(DECIMAL(12, 3), nullable=False)
@@ -145,7 +145,7 @@ class AgrarSettlement(Base):
     __tablename__ = "agrar_settlements"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     settlement_number = Column(String(50), nullable=False)
     contract_id = Column(String, ForeignKey("domain_inventory.agrar_contracts.id"), nullable=True)
     ticket_id = Column(String, ForeignKey("domain_inventory.weighing_tickets.id"), nullable=True)
@@ -184,7 +184,7 @@ class DryingRuleSet(Base):
     __tablename__ = "drying_rule_sets"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     crop_code = Column(String(40), nullable=False)
     site_id = Column(String(64), nullable=True)
@@ -225,7 +225,7 @@ class DryingRuleLookupRow(Base):
     __tablename__ = "drying_rule_lookup_rows"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     rule_set_id = Column(String, ForeignKey("domain_inventory.drying_rule_sets.id"), nullable=False)
     moisture_pct = Column(DECIMAL(5, 1), nullable=False)  # 0.1 steps
     entzug_pct_points = Column(DECIMAL(5, 1), nullable=False)
@@ -240,7 +240,7 @@ class DryingRuleFactorRange(Base):
     __tablename__ = "drying_rule_factor_ranges"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     rule_set_id = Column(String, ForeignKey("domain_inventory.drying_rule_sets.id"), nullable=False)
     from_moisture_incl = Column(DECIMAL(5, 1), nullable=False)
     to_moisture_incl = Column(DECIMAL(5, 1), nullable=False)
@@ -253,7 +253,7 @@ class AgrarSettlementDeduction(Base):
     __tablename__ = "agrar_settlement_deductions"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     settlement_id = Column(String, ForeignKey("domain_inventory.agrar_settlements.id"), nullable=False)
     deduction_type = Column(String(30), nullable=False)  # drying / cleaning / freight / other
     mode = Column(String(20), nullable=False)  # per_ton / fixed
@@ -282,7 +282,7 @@ class HarvestAcceptance(Base):
     __tablename__ = "harvest_acceptances"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     acceptance_number = Column(String(50), nullable=False, comment="Annahmeschein-Nummer (fortlaufend)")
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
 
@@ -371,7 +371,7 @@ class HarvestAcceptancePosition(Base):
     __tablename__ = "harvest_acceptance_positions"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     harvest_acceptance_id = Column(String, ForeignKey("domain_inventory.harvest_acceptances.id"), nullable=False)
     position_number = Column(Integer, nullable=False, comment="Positionsnummer (10, 15, 20, ...)")
     description = Column(String(200), nullable=False, comment="Bezeichnung (z.B. 'Angelieferte Menge', 'Windabgang', ...)")
@@ -411,7 +411,7 @@ class HarvestAcceptanceLine(Base):
     __tablename__ = "harvest_acceptance_lines"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     harvest_acceptance_id = Column(String, ForeignKey("domain_inventory.harvest_acceptances.id", ondelete="CASCADE"), nullable=False)
     line_number = Column(Integer, nullable=False, comment="Zeilennummer (1, 2, 3, ...)")
     silo_id = Column(String(64), nullable=True, comment="Silo-Nr./Lagerort")
@@ -432,7 +432,7 @@ class SupplierTaxProfile(Base):
     __tablename__ = "supplier_tax_profiles"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     supplier_id = Column(String, ForeignKey("domain_crm.business_partners.partner_id"), nullable=False, comment="Lieferant (Business Partner)")
     taxation_type = Column(String(20), nullable=False, comment="Besteuerungsart: regular / ustg24_flat_rate / small_business")
     vat_id = Column(String(30), nullable=True, comment="USt-ID (optional)")
@@ -456,7 +456,7 @@ class PriceAdjustmentRule(Base):
     __tablename__ = "price_adjustment_rules"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=True, comment="Artikel (optional, wenn warengruppe-basiert)")
     warengruppe = Column(String(80), nullable=True, comment="Warengruppe (optional, wenn artikel-basiert)")
     adjustment_type = Column(String(30), nullable=False, comment="Typ: hl_weight / impurity / mycotoxin / other")
@@ -477,7 +477,7 @@ class NawaroPrintNotification(Base):
     __tablename__ = "nawaro_print_notifications"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     document_name = Column(String(255), nullable=False)
     harvest_year = Column(Integer, nullable=False)
     article_number = Column(String(80), nullable=True)
@@ -494,7 +494,7 @@ class QualityProtocol(Base):
     __tablename__ = "quality_protocols"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     harvest_acceptance_id = Column(String, ForeignKey("domain_inventory.harvest_acceptances.id", ondelete="SET NULL"), nullable=True)
     protocol_number = Column(String(50), nullable=False)
@@ -537,7 +537,7 @@ class DailyPrice(Base):
     __tablename__ = "daily_prices"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     article_id = Column(String, ForeignKey("domain_inventory.articles.id", ondelete="SET NULL"), nullable=True)
     warengruppe = Column(String(80), nullable=True, comment="Warengruppe (falls artikel_id NULL)")
@@ -575,7 +575,7 @@ class SelfBillingInvoice(Base):
     __tablename__ = "self_billing_invoices"
     __table_args__ = {"schema": "domain_finance", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     harvest_acceptance_id = Column(String, ForeignKey("domain_inventory.harvest_acceptances.id", ondelete="SET NULL"), nullable=True)
     
@@ -623,7 +623,7 @@ class DisputeRecord(Base):
     __tablename__ = "dispute_records"
     __table_args__ = {"schema": "domain_finance", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     invoice_id = Column(String, ForeignKey("domain_finance.self_billing_invoices.id", ondelete="CASCADE"), nullable=False)
     
@@ -659,7 +659,7 @@ class NawaroContractSheet(Base):
     __tablename__ = "nawaro_contract_sheets"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     harvest_year = Column(Integer, nullable=False)
     article_number = Column(String(80), nullable=True)
     is_summer = Column(Boolean, nullable=False, default=True)
@@ -674,7 +674,7 @@ class NawaroContractSheetRow(Base):
     __tablename__ = "nawaro_contract_sheet_rows"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     sheet_id = Column(String, ForeignKey("domain_inventory.nawaro_contract_sheets.id", ondelete="CASCADE"), nullable=False)
     contract_number = Column(String(80), nullable=True)
     customer_name = Column(String(255), nullable=True)
@@ -695,7 +695,7 @@ class NawaroAreaSheet(Base):
     __tablename__ = "nawaro_area_sheets"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     harvest_year_from = Column(Integer, nullable=False)
     harvest_year_to = Column(Integer, nullable=False)
     article_number = Column(String(80), nullable=True)
@@ -712,7 +712,7 @@ class NawaroAreaSheetRow(Base):
     __tablename__ = "nawaro_area_sheet_rows"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     sheet_id = Column(String, ForeignKey("domain_inventory.nawaro_area_sheets.id", ondelete="CASCADE"), nullable=False)
     customer_name = Column(String(255), nullable=True)
     name_1 = Column(String(255), nullable=True)
@@ -736,7 +736,7 @@ class NawaroRapsProfile(Base):
     __tablename__ = "nawaro_raps_profiles"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=True)
     article_number = Column(String(80), nullable=True)
     article_name = Column(String(255), nullable=False, default="Raps")
@@ -758,7 +758,7 @@ class NawaroRapsCertificate(Base):
     __tablename__ = "nawaro_raps_certificates"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     profile_id = Column(String, ForeignKey("domain_inventory.nawaro_raps_profiles.id", ondelete="CASCADE"), nullable=False)
     scheme = Column(String(80), nullable=False)  # REDcert, ISCC, etc.
     certificate_number = Column(String(120), nullable=False)
@@ -776,7 +776,7 @@ class NawaroRapsBalance(Base):
     __tablename__ = "nawaro_raps_balances"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     profile_id = Column(String, ForeignKey("domain_inventory.nawaro_raps_profiles.id", ondelete="CASCADE"), nullable=False)
     booking_period = Column(String(20), nullable=True)  # YYYY-MM
     input_seed_tons = Column(DECIMAL(12, 3), nullable=False, default=0)
@@ -796,7 +796,7 @@ class Silo(Base):
     __tablename__ = "silos"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     silo_number = Column(String(50), nullable=False)
     name = Column(String(120), nullable=True)
     article_id = Column(String(64), nullable=True)
@@ -812,7 +812,7 @@ class SiloLot(Base):
     __tablename__ = "silo_lots"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     silo_id = Column(String, ForeignKey("domain_inventory.silos.id"), nullable=False)
     virtual_lot_number = Column(String(64), nullable=False)
     source_ticket_id = Column(String, ForeignKey("domain_inventory.weighing_tickets.id"), nullable=True)
@@ -834,7 +834,7 @@ class SiloLotMovement(Base):
     __tablename__ = "silo_lot_movements"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     silo_lot_id = Column(String, ForeignKey("domain_inventory.silo_lots.id"), nullable=False)
     movement_type = Column(String(20), nullable=False)  # in, out, treatment
     quantity_tons = Column(DECIMAL(12, 3), nullable=False)
@@ -848,7 +848,7 @@ class SiloQualitySnapshot(Base):
     __tablename__ = "silo_quality_snapshots"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     silo_id = Column(String, ForeignKey("domain_inventory.silos.id"), nullable=False)
     total_quantity_tons = Column(DECIMAL(12, 3), nullable=False, default=0)
     moisture_avg_pct = Column(DECIMAL(5, 2), nullable=True)
@@ -867,7 +867,7 @@ class WarehouseTransfer(Base):
     __tablename__ = "warehouse_transfers"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     transfer_number = Column(String(50), nullable=False)
     from_warehouse_id = Column(String, ForeignKey("domain_inventory.warehouses.id"), nullable=False)
     to_warehouse_id = Column(String, ForeignKey("domain_inventory.warehouses.id"), nullable=False)
@@ -883,7 +883,7 @@ class WarehouseTransferLine(Base):
     __tablename__ = "warehouse_transfer_lines"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     transfer_id = Column(String, ForeignKey("domain_inventory.warehouse_transfers.id"), nullable=False)
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=False)
     quantity = Column(DECIMAL(12, 3), nullable=False)
@@ -899,7 +899,7 @@ class StockCorrection(Base):
     __tablename__ = "stock_corrections"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     correction_number = Column(String(50), nullable=False)
     warehouse_id = Column(String, ForeignKey("domain_inventory.warehouses.id"), nullable=False)
     reason = Column(String(100), nullable=True)
@@ -915,7 +915,7 @@ class StockCorrectionLine(Base):
     __tablename__ = "stock_correction_lines"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     correction_id = Column(String, ForeignKey("domain_inventory.stock_corrections.id"), nullable=False)
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=False)
     old_quantity = Column(DECIMAL(12, 3), nullable=False)
@@ -933,7 +933,7 @@ class BinLocation(Base):
     __tablename__ = "bin_locations"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     code = Column(String(50), nullable=False)
     warehouse_id = Column(String, ForeignKey("domain_inventory.warehouses.id"), nullable=False)
     zone = Column(String(20), nullable=True)
@@ -951,7 +951,7 @@ class PreparationList(Base):
     __tablename__ = "preparation_lists"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     list_number = Column(String(50), nullable=False)
     status = Column(String(20), default="open")
     notes = Column(Text, nullable=True)
@@ -966,7 +966,7 @@ class PreparationListLine(Base):
     __tablename__ = "preparation_list_lines"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     list_id = Column(String, ForeignKey("domain_inventory.preparation_lists.id"), nullable=False)
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=False)
     required_qty = Column(DECIMAL(12, 3), nullable=False)
@@ -983,7 +983,7 @@ class PickList(Base):
     __tablename__ = "pick_lists"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     pick_list_number = Column(Integer, nullable=False)
     status = Column(String(20), default="open")
     tour_id = Column(String, nullable=True)
@@ -999,7 +999,7 @@ class PickListLine(Base):
     __tablename__ = "pick_list_lines"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     pick_list_id = Column(String, ForeignKey("domain_inventory.pick_lists.id"), nullable=False)
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=False)
     required_qty = Column(DECIMAL(12, 3), nullable=False)
@@ -1017,7 +1017,7 @@ class ShippingUnit(Base):
     __tablename__ = "shipping_units"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     sscc = Column(String(18), nullable=False, unique=True)
     status = Column(String(20), default="created")
     order_id = Column(String, nullable=True)
@@ -1036,7 +1036,7 @@ class WebhookRegistration(Base):
     __tablename__ = "webhook_registrations"
     __table_args__ = {"schema": "domain_shared", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     url = Column(String(500), nullable=False)
     event_area = Column(String(50), nullable=False)
     secret = Column(String(200), nullable=True)
@@ -1053,7 +1053,7 @@ class ArticleBatch(Base):
     __tablename__ = "article_batches"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=False)
     batch_number = Column(String(50), nullable=False)
     warehouse_id = Column(String, ForeignKey("domain_inventory.warehouses.id"), nullable=False)
@@ -1070,7 +1070,7 @@ class InternalMessage(Base):
     __tablename__ = "internal_messages"
     __table_args__ = {"schema": "domain_shared", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     sender_id = Column(String, ForeignKey("domain_shared.users.id"), nullable=False)
     recipient_id = Column(String, ForeignKey("domain_shared.users.id"), nullable=False)
     subject = Column(String(200), nullable=False)
@@ -1087,7 +1087,7 @@ class MasterDataEntry(Base):
     __tablename__ = "master_data_entries"
     __table_args__ = {"schema": "domain_shared", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     category = Column(String(50), nullable=False)  # e.g. 'branch', 'country', 'shipping_method'
     code = Column(String(50), nullable=False)
     label = Column(String(200), nullable=False)
@@ -1112,7 +1112,7 @@ class SystemProperty(Base):
         {"schema": "domain_shared", "extend_existing": True},
     )
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     property_key = Column(String(100), nullable=False, comment="z.B. SUBLEDGER_AR_ACCOUNT")
     property_value = Column(Text, nullable=True)
@@ -1128,7 +1128,7 @@ class Dispatcher(Base):
     __tablename__ = "dispatchers"
     __table_args__ = {"schema": "domain_shared", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     name = Column(String(100), nullable=False)
     code = Column(String(20), nullable=True)
     email = Column(String(100), nullable=True)
@@ -1146,7 +1146,7 @@ class ArticleSelection(Base):
     __tablename__ = "article_selections"
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=uuid7)
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=False)
     selection_code = Column(String(50), nullable=False)
     label = Column(String(200), nullable=True)

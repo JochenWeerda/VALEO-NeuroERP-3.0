@@ -7,17 +7,26 @@ from __future__ import annotations
 from datetime import datetime
 from decimal import Decimal
 from typing import Literal, Optional
-import uuid
-
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.orm import Session
+from datetime import date
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.documents.router_helpers import get_repository, save_to_store
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
+from app.domains.inventory.api.inventory_auth import require_inventory_admin
+from app.core.uuid7 import uuid7
 from modules.agrar.services.moisture_engine import MoistureEngineInput, calculate_billing_weight
+from modules.agrar.services.drying_rule_engine import (
+    DryingFactorRange as _DryingFactorRange,
+    DryingLookupRow as _DryingLookupRow,
+    DryingRuleRepository as _DryingRuleRepository,
+    DryingRuleSet as _DryingRuleSet,
+    compute_settlement as _compute_drying_settlement,
+)
+from app.infrastructure.models import DryingRuleFactorRange, DryingRuleLookupRow, DryingRuleSet
 from modules.agrar.services.settlement_calculator import (
     calc_deduction_amount as _calc_deduction_amount_impl,
     compute_settlement_amounts as _compute_settlement_amounts_impl,
@@ -57,6 +66,22 @@ class DeductionInput(BaseModel):
         return self
 
 
+class DryingApplyInput(BaseModel):
+    """
+    Optional helper payload to compute invoice weight (Mengenabzug) + optional drying fee (€)
+    from net weight + measured moisture using configured crop/site rules.
+
+    Wichtig: keine doppelte Feuchte-Abzugslogik. Es wird ausschließlich die Methode
+    des gefundenen Rule-Sets angewendet und als Audit-Snapshot persistiert.
+    """
+
+    crop_code: str = Field(..., min_length=2, max_length=40)
+    site_id: Optional[str] = None
+    moisture_pct: float = Field(..., ge=0, le=100)
+    calc_date: Optional[str] = None  # defaults to today
+    rounding_mode: Optional[str] = None  # ROUND_NEAREST|ROUND_UP|ROUND_DOWN
+
+
 class SettlementCreate(BaseModel):
     settlement_number: Optional[str] = Field(default=None, min_length=3, max_length=50)
     contract_id: Optional[str] = None
@@ -68,6 +93,7 @@ class SettlementCreate(BaseModel):
     unit_price_eur_per_ton: float = Field(..., gt=0)
     deductions: list[DeductionInput] = Field(default_factory=list)
     note: Optional[str] = None
+    drying: Optional[DryingApplyInput] = None
 
 
 class SettlementPostRequest(BaseModel):
@@ -84,6 +110,168 @@ class BillingWeightPreviewRequest(BaseModel):
     target_moisture_pct: float = Field(default=14.0, ge=0, lt=100)
     base_impurities_pct: float = Field(default=2.0, ge=0, lt=100)
     allow_bonus: bool = False
+
+
+class DryingComputeRequest(BaseModel):
+    crop_code: str = Field(..., min_length=2, max_length=40)
+    site_id: Optional[str] = None
+    net_weight_kg: float = Field(..., gt=0)
+    moisture_pct: float = Field(..., ge=0, le=100)
+    calc_date: Optional[str] = None  # YYYY-MM-DD, defaults to today
+    rounding_mode: Optional[str] = None  # ROUND_NEAREST|ROUND_UP|ROUND_DOWN
+
+
+class DryingComputeResponse(BaseModel):
+    entzug_pct_points: float
+    loss_pct: float
+    loss_kg: float
+    invoice_weight_kg: float
+    drying_fee_eur: Optional[float] = None
+    used_rule_set_id: str
+    used_rule_version: int
+    used_row_moisture_pct: Optional[float] = None
+    warnings: list[str] = Field(default_factory=list)
+
+
+class _DbDryingRuleRepo(_DryingRuleRepository):
+    def __init__(self, db: Session, *, tenant_id: str):
+        self.db = db
+        self.tenant_id = tenant_id
+
+    def find_rule_set(self, *, crop_code: str, site_id: Optional[str], calc_date, contract_id: Optional[str] = None, customer_id: Optional[str] = None) -> _DryingRuleSet:
+        """
+        Find rule set with priority:
+        1. Customer-specific rule (if customer_id provided)
+        2. Contract-specific rule (if contract_id provided)
+        3. Site-specific rule
+        4. Global rule (site_id=NULL)
+        """
+        def _base_q():
+            return (
+                self.db.query(DryingRuleSet)
+                .filter(DryingRuleSet.tenant_id == self.tenant_id)
+                .filter(DryingRuleSet.crop_code == crop_code)
+                .filter(DryingRuleSet.is_active == True)  # noqa: E712
+                .filter((DryingRuleSet.valid_from.is_(None)) | (DryingRuleSet.valid_from <= calc_date))
+                .filter((DryingRuleSet.valid_to.is_(None)) | (DryingRuleSet.valid_to >= calc_date))
+            )
+
+        # 1. Customer-specific rule (höchste Priorität)
+        if customer_id:
+            row = (
+                _base_q()
+                .filter(DryingRuleSet.customer_id == customer_id)
+                .filter(DryingRuleSet.is_customer_specific == True)  # noqa: E712
+                .order_by(DryingRuleSet.valid_from.desc().nullslast(), DryingRuleSet.version.desc())
+                .first()
+            )
+            if row:
+                return self._row_to_rule_set(row)
+
+        # 2. Contract-specific rule
+        if contract_id:
+            row = (
+                _base_q()
+                .filter(DryingRuleSet.contract_id == contract_id)
+                .filter(DryingRuleSet.is_customer_specific == False)  # noqa: E712
+                .order_by(DryingRuleSet.valid_from.desc().nullslast(), DryingRuleSet.version.desc())
+                .first()
+            )
+            if row:
+                return self._row_to_rule_set(row)
+
+        # 3. Site-specific rule (nur allgemeingültige)
+        row = None
+        if site_id is not None:
+            row = (
+                _base_q()
+                .filter(DryingRuleSet.site_id == site_id)
+                .filter(DryingRuleSet.contract_id.is_(None))
+                .filter(DryingRuleSet.is_customer_specific == False)  # noqa: E712
+                .order_by(DryingRuleSet.valid_from.desc().nullslast(), DryingRuleSet.version.desc())
+                .first()
+            )
+        # 4. Global rule (fallback)
+        if row is None:
+            row = (
+                _base_q()
+                .filter(DryingRuleSet.site_id.is_(None))
+                .filter(DryingRuleSet.contract_id.is_(None))
+                .filter(DryingRuleSet.is_customer_specific == False)  # noqa: E712
+                .order_by(DryingRuleSet.valid_from.desc().nullslast(), DryingRuleSet.version.desc())
+                .first()
+            )
+        if not row:
+            raise HTTPException(status_code=404, detail=f"No drying rule set found for crop_code={crop_code} (site_id={site_id}, contract_id={contract_id}, customer_id={customer_id})")
+        return self._row_to_rule_set(row)
+
+    def _row_to_rule_set(self, row) -> _DryingRuleSet:
+
+        row = None
+        if site_id is not None:
+            row = (
+                _base_q()
+                .filter(DryingRuleSet.site_id == site_id)
+                .order_by(DryingRuleSet.valid_from.desc().nullslast(), DryingRuleSet.version.desc())
+                .first()
+            )
+        if row is None:
+            row = (
+                _base_q()
+                .filter(DryingRuleSet.site_id.is_(None))
+                .order_by(DryingRuleSet.valid_from.desc().nullslast(), DryingRuleSet.version.desc())
+                .first()
+            )
+        return _DryingRuleSet(
+            id=row.id,
+            version=int(row.version),
+            crop_code=row.crop_code,
+            site_id=row.site_id,
+            valid_from=row.valid_from,
+            valid_to=row.valid_to,
+            method=row.method,  # type: ignore[arg-type]
+            base_moisture_pct=Decimal(str(row.base_moisture_pct)),
+            rounding_mode=row.rounding_mode,  # type: ignore[arg-type]
+            clamp_mode=row.clamp_mode,  # type: ignore[arg-type]
+            min_moisture_pct=Decimal(str(row.min_moisture_pct)),
+            max_moisture_pct=Decimal(str(row.max_moisture_pct)),
+            start_threshold_moisture_pct=Decimal(str(row.start_threshold_moisture_pct)) if row.start_threshold_moisture_pct is not None else None,
+            fee_basis=row.fee_basis,  # type: ignore[arg-type]
+        )
+
+    def list_lookup_rows(self, *, rule_set_id: str) -> list[_DryingLookupRow]:
+        rows = (
+            self.db.query(DryingRuleLookupRow)
+            .filter(DryingRuleLookupRow.rule_set_id == rule_set_id)
+            .order_by(DryingRuleLookupRow.moisture_pct.asc())
+            .all()
+        )
+        return [
+            _DryingLookupRow(
+                moisture_pct=Decimal(str(r.moisture_pct)),
+                entzug_pct_points=Decimal(str(r.entzug_pct_points)),
+                loss_pct=Decimal(str(r.loss_pct)),
+                fee_value=Decimal(str(r.fee_value)) if r.fee_value is not None else None,
+                fee_unit=r.fee_unit,  # type: ignore[arg-type]
+            )
+            for r in rows
+        ]
+
+    def list_factor_ranges(self, *, rule_set_id: str) -> list[_DryingFactorRange]:
+        rows = (
+            self.db.query(DryingRuleFactorRange)
+            .filter(DryingRuleFactorRange.rule_set_id == rule_set_id)
+            .order_by(DryingRuleFactorRange.from_moisture_incl.asc())
+            .all()
+        )
+        return [
+            _DryingFactorRange(
+                from_moisture_incl=Decimal(str(r.from_moisture_incl)),
+                to_moisture_incl=Decimal(str(r.to_moisture_incl)),
+                factor=Decimal(str(r.factor)),
+            )
+            for r in rows
+        ]
 
 
 class DeductionOut(BaseModel):
@@ -195,6 +383,44 @@ async def preview_billing_weight(payload: BillingWeightPreviewRequest) -> dict:
     }
 
 
+@router.post("/drying/compute", response_model=DryingComputeResponse)
+async def compute_drying_settlement(
+    payload: DryingComputeRequest,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    calc_date = payload.calc_date or datetime.utcnow().date().isoformat()
+    repo = _DbDryingRuleRepo(db, tenant_id=tenant_id)
+    try:
+        result = _compute_drying_settlement(
+            repo,
+            {
+                "cropCode": payload.crop_code,
+                "siteId": payload.site_id,
+                "netWeightKg": payload.net_weight_kg,
+                "moisturePct": payload.moisture_pct,
+                "calcDate": calc_date,
+                "roundingMode": payload.rounding_mode,
+                "contractId": payload.contract_id,
+                "customerId": payload.customer_id,
+            },
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    return DryingComputeResponse(
+        entzug_pct_points=float(result.entzug_pct_points),
+        loss_pct=float(result.loss_pct),
+        loss_kg=float(result.loss_kg),
+        invoice_weight_kg=float(result.invoice_weight_kg),
+        drying_fee_eur=float(result.drying_fee_eur) if result.drying_fee_eur is not None else None,
+        used_rule_set_id=result.used_rule_set_id,
+        used_rule_version=int(result.used_rule_version),
+        used_row_moisture_pct=float(result.used_row_moisture_pct) if result.used_row_moisture_pct is not None else None,
+        warnings=list(result.warnings),
+    )
+
+
 @router.post("/preview", response_model=dict)
 async def preview_settlement(payload: SettlementCreate):
     billing_qty = _round_qty(payload.billing_quantity_kg if payload.billing_quantity_kg is not None else payload.gross_quantity_kg)
@@ -228,7 +454,70 @@ async def create_settlement(
         raise HTTPException(status_code=409, detail="settlement_number already exists")
 
     gross_qty = _round_qty(payload.gross_quantity_kg)
-    billing_qty = _round_qty(payload.billing_quantity_kg if payload.billing_quantity_kg is not None else payload.gross_quantity_kg)
+
+    # Optional: compute drying loss/invoice weight + fee and persist audit snapshot on settlement.
+    drying_snapshot: dict | None = None
+    if payload.drying is not None:
+        # Prevent double application of drying fee if caller already sends a 'drying' deduction line.
+        if any(d.deduction_type == "drying" for d in payload.deductions):
+            raise HTTPException(
+                status_code=400,
+                detail="Do not provide deductions[].deduction_type='drying' together with payload.drying (prevents double fee application).",
+            )
+
+        repo = _DbDryingRuleRepo(db, tenant_id=tenant_id)
+        calc_date = payload.drying.calc_date or datetime.utcnow().date().isoformat()
+        try:
+            drying_result = _compute_drying_settlement(
+                repo,
+                {
+                    "cropCode": payload.drying.crop_code,
+                    "siteId": payload.drying.site_id,
+                    "netWeightKg": float(gross_qty),
+                    "moisturePct": payload.drying.moisture_pct,
+                    "calcDate": calc_date,
+                    "roundingMode": payload.drying.rounding_mode,
+                },
+            )
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+
+        drying_snapshot = {
+            "crop_code": payload.drying.crop_code,
+            "site_id": payload.drying.site_id,
+            "net_weight_kg": float(gross_qty),
+            "moisture_pct": float(payload.drying.moisture_pct),
+            "calc_date": calc_date,
+            "entzug_pct_points": float(drying_result.entzug_pct_points),
+            "loss_pct": float(drying_result.loss_pct),
+            "loss_kg": float(drying_result.loss_kg),
+            "invoice_weight_kg": float(drying_result.invoice_weight_kg),
+            "drying_fee_eur": float(drying_result.drying_fee_eur) if drying_result.drying_fee_eur is not None else None,
+            "used_rule_set_id": drying_result.used_rule_set_id,
+            "used_rule_version": int(drying_result.used_rule_version),
+            "used_row_moisture_pct": float(drying_result.used_row_moisture_pct) if drying_result.used_row_moisture_pct is not None else None,
+            "warnings": list(drying_result.warnings),
+        }
+
+        # If caller didn't explicitly provide billing_quantity_kg, use computed invoice weight.
+        if payload.billing_quantity_kg is None:
+            billing_qty = _round_qty(drying_result.invoice_weight_kg)
+        else:
+            billing_qty = _round_qty(payload.billing_quantity_kg)
+
+        # Optional fee becomes a settlement deduction line (fixed amount).
+        if drying_result.drying_fee_eur is not None and drying_result.drying_fee_eur > 0:
+            payload.deductions.append(
+                DeductionInput(
+                    deduction_type="drying",
+                    mode="fixed",
+                    fixed_amount_eur=float(drying_result.drying_fee_eur),
+                    note=f"Drying fee via rule-set {drying_result.used_rule_set_id} v{drying_result.used_rule_version}",
+                )
+            )
+    else:
+        billing_qty = _round_qty(payload.billing_quantity_kg if payload.billing_quantity_kg is not None else payload.gross_quantity_kg)
+
     amounts = _compute_settlement_amounts(
         billing_quantity_kg=billing_qty,
         unit_price_eur_per_ton=Decimal(str(payload.unit_price_eur_per_ton)),
@@ -236,7 +525,7 @@ async def create_settlement(
     )
 
     settlement = AgrarSettlement(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         settlement_number=settlement_number,
         contract_id=payload.contract_id,
         ticket_id=payload.ticket_id,
@@ -251,6 +540,7 @@ async def create_settlement(
         currency="EUR",
         status="draft",
         note=payload.note,
+        drying_result=drying_snapshot or {},
         tenant_id=tenant_id,
     )
     db.add(settlement)
@@ -259,7 +549,7 @@ async def create_settlement(
     billing_qty_tons = amounts["billing_qty_tons"]
     for d in payload.deductions:
         deduction = AgrarSettlementDeduction(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             settlement_id=settlement.id,
             deduction_type=d.deduction_type,
             mode=d.mode,
@@ -394,3 +684,868 @@ async def cancel_settlement(
     settlement.status = "cancelled"
     db.commit()
     return {"ok": True, "settlement_id": settlement.id, "status": settlement.status}
+
+
+# ── Drying Rule Sets CRUD (Admin-only write, read for all) ──────────────────────
+
+def _get_user_id_from_request(request: Request) -> Optional[str]:
+    """Extract user ID from request state (token claims)."""
+    claims = getattr(request.state, 'token_claims', {})
+    return claims.get('sub') or claims.get('user_id')
+
+
+class DryingRuleSetCreate(BaseModel):
+    crop_code: str = Field(..., min_length=1, max_length=40)
+    site_id: Optional[str] = Field(None, max_length=64)
+    valid_from: Optional[str] = Field(None, description="ISO date (YYYY-MM-DD)")
+    valid_to: Optional[str] = Field(None, description="ISO date (YYYY-MM-DD)")
+    method: Literal["LOOKUP_TABLE", "FACTOR_FROM_BASE", "DRY_MATTER_NORMALIZATION"] = Field(...)
+    base_moisture_pct: float = Field(..., ge=0, le=100)
+    rounding_mode: Literal["ROUND_NEAREST", "ROUND_UP", "ROUND_DOWN"] = Field(default="ROUND_NEAREST")
+    clamp_mode: Literal["CLAMP_TO_MAX", "HARD_ERROR"] = Field(default="HARD_ERROR")
+    min_moisture_pct: float = Field(default=0, ge=0, le=100)
+    max_moisture_pct: float = Field(default=60, ge=0, le=100)
+    start_threshold_moisture_pct: Optional[float] = Field(None, ge=0, le=100)
+    fee_basis: Literal["INVOICE_WEIGHT", "NET_WEIGHT"] = Field(default="INVOICE_WEIGHT")
+    contract_id: Optional[str] = Field(None, description="Verknüpfung zu Ankaufskontrakt (optional)")
+    customer_id: Optional[str] = Field(None, description="Kunde für Sonderregelung (optional)")
+    is_customer_specific: bool = Field(default=False)
+    justification: Optional[str] = Field(None, description="Begründung für kundenspezifische Sonderregelungen (erforderlich wenn is_customer_specific=True)")
+    document_id: Optional[str] = Field(None, max_length=64, description="DMS-Referenz für Tabelle/Formel-Dokument")
+
+    @model_validator(mode="after")
+    def validate_customer_specific(self):
+        if self.is_customer_specific and not self.customer_id:
+            raise ValueError("customer_id is required when is_customer_specific=True")
+        if self.is_customer_specific and not self.justification:
+            raise ValueError("justification is required when is_customer_specific=True")
+        return self
+
+
+class DryingRuleSetUpdate(BaseModel):
+    site_id: Optional[str] = Field(None, max_length=64)
+    valid_from: Optional[str] = Field(None, description="ISO date (YYYY-MM-DD)")
+    valid_to: Optional[str] = Field(None, description="ISO date (YYYY-MM-DD)")
+    method: Optional[Literal["LOOKUP_TABLE", "FACTOR_FROM_BASE", "DRY_MATTER_NORMALIZATION"]] = None
+    base_moisture_pct: Optional[float] = Field(None, ge=0, le=100)
+    rounding_mode: Optional[Literal["ROUND_NEAREST", "ROUND_UP", "ROUND_DOWN"]] = None
+    clamp_mode: Optional[Literal["CLAMP_TO_MAX", "HARD_ERROR"]] = None
+    min_moisture_pct: Optional[float] = Field(None, ge=0, le=100)
+    max_moisture_pct: Optional[float] = Field(None, ge=0, le=100)
+    start_threshold_moisture_pct: Optional[float] = Field(None, ge=0, le=100)
+    fee_basis: Optional[Literal["INVOICE_WEIGHT", "NET_WEIGHT"]] = None
+    contract_id: Optional[str] = None
+    customer_id: Optional[str] = None
+    is_customer_specific: Optional[bool] = None
+    justification: Optional[str] = None
+    document_id: Optional[str] = Field(None, max_length=64)
+    is_active: Optional[bool] = None
+
+    @model_validator(mode="after")
+    def validate_customer_specific(self):
+        if self.is_customer_specific is True and not self.customer_id:
+            raise ValueError("customer_id is required when is_customer_specific=True")
+        if self.is_customer_specific is True and not self.justification:
+            raise ValueError("justification is required when is_customer_specific=True")
+        return self
+
+
+class DryingRuleSetOut(BaseModel):
+    id: str
+    crop_code: str
+    site_id: Optional[str]
+    valid_from: Optional[str]
+    valid_to: Optional[str]
+    version: int
+    is_active: bool
+    method: str
+    base_moisture_pct: float
+    rounding_mode: str
+    clamp_mode: str
+    min_moisture_pct: float
+    max_moisture_pct: float
+    start_threshold_moisture_pct: Optional[float]
+    fee_basis: str
+    created_at: str
+    created_by: Optional[str]
+    updated_at: Optional[str]
+    updated_by: Optional[str]
+    contract_id: Optional[str]
+    customer_id: Optional[str]
+    is_customer_specific: bool
+    justification: Optional[str]
+    document_id: Optional[str]
+
+
+@router.get("/drying-rules", response_model=list[DryingRuleSetOut])
+async def list_drying_rules(
+    crop_code: Optional[str] = Query(None),
+    contract_id: Optional[str] = Query(None),
+    customer_id: Optional[str] = Query(None),
+    is_customer_specific: Optional[bool] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Liste aller Trocknungs-/Schwundtabellen (Leserechte für alle)."""
+    query = db.query(DryingRuleSet).filter(DryingRuleSet.tenant_id == tenant_id)
+    if crop_code:
+        query = query.filter(DryingRuleSet.crop_code == crop_code)
+    if contract_id:
+        query = query.filter(DryingRuleSet.contract_id == contract_id)
+    if customer_id:
+        query = query.filter(DryingRuleSet.customer_id == customer_id)
+    if is_customer_specific is not None:
+        query = query.filter(DryingRuleSet.is_customer_specific == is_customer_specific)
+    rules = query.order_by(DryingRuleSet.crop_code.asc(), DryingRuleSet.version.desc()).all()
+    return [
+        DryingRuleSetOut(
+            id=r.id,
+            crop_code=r.crop_code,
+            site_id=r.site_id,
+            valid_from=r.valid_from.isoformat() if r.valid_from else None,
+            valid_to=r.valid_to.isoformat() if r.valid_to else None,
+            version=int(r.version),
+            is_active=r.is_active,
+            method=r.method,
+            base_moisture_pct=float(r.base_moisture_pct),
+            rounding_mode=r.rounding_mode,
+            clamp_mode=r.clamp_mode,
+            min_moisture_pct=float(r.min_moisture_pct),
+            max_moisture_pct=float(r.max_moisture_pct),
+            start_threshold_moisture_pct=float(r.start_threshold_moisture_pct) if r.start_threshold_moisture_pct else None,
+            fee_basis=r.fee_basis,
+            created_at=r.created_at.isoformat() if r.created_at else "",
+            created_by=r.created_by,
+            updated_at=r.updated_at.isoformat() if r.updated_at else None,
+            updated_by=r.updated_by,
+            contract_id=r.contract_id,
+            customer_id=r.customer_id,
+            is_customer_specific=r.is_customer_specific,
+            justification=r.justification,
+            document_id=r.document_id,
+        )
+        for r in rules
+    ]
+
+
+@router.get("/drying-rules/{rule_id}", response_model=DryingRuleSetOut)
+async def get_drying_rule(
+    rule_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Einzelne Trocknungs-/Schwundtabelle abrufen (Leserechte für alle)."""
+    rule = db.query(DryingRuleSet).filter(DryingRuleSet.id == rule_id, DryingRuleSet.tenant_id == tenant_id).first()
+    if not rule:
+        raise HTTPException(status_code=404, detail="Drying rule set not found")
+    return DryingRuleSetOut(
+        id=rule.id,
+        crop_code=rule.crop_code,
+        site_id=rule.site_id,
+        valid_from=rule.valid_from.isoformat() if rule.valid_from else None,
+        valid_to=rule.valid_to.isoformat() if rule.valid_to else None,
+        version=int(rule.version),
+        is_active=rule.is_active,
+        method=rule.method,
+        base_moisture_pct=float(rule.base_moisture_pct),
+        rounding_mode=rule.rounding_mode,
+        clamp_mode=rule.clamp_mode,
+        min_moisture_pct=float(rule.min_moisture_pct),
+        max_moisture_pct=float(rule.max_moisture_pct),
+        start_threshold_moisture_pct=float(rule.start_threshold_moisture_pct) if rule.start_threshold_moisture_pct else None,
+        fee_basis=rule.fee_basis,
+        created_at=rule.created_at.isoformat() if rule.created_at else "",
+        created_by=rule.created_by,
+        updated_at=rule.updated_at.isoformat() if rule.updated_at else None,
+        updated_by=rule.updated_by,
+        contract_id=rule.contract_id,
+        customer_id=rule.customer_id,
+        is_customer_specific=rule.is_customer_specific,
+        justification=rule.justification,
+        document_id=rule.document_id,
+    )
+
+
+@router.post("/drying-rules", response_model=DryingRuleSetOut, status_code=201)
+async def create_drying_rule(
+    payload: DryingRuleSetCreate,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_admin),  # Nur Admin kann schreiben
+):
+    """Neue Trocknungs-/Schwundtabelle anlegen (nur Admin)."""
+    user_id = _get_user_id_from_request(request) or "system"
+    valid_from_date = datetime.fromisoformat(payload.valid_from).date() if payload.valid_from else None
+    valid_to_date = datetime.fromisoformat(payload.valid_to).date() if payload.valid_to else None
+
+    rule = DryingRuleSet(
+        id=uuid7(),
+        tenant_id=tenant_id,
+        crop_code=payload.crop_code,
+        site_id=payload.site_id,
+        valid_from=valid_from_date,
+        valid_to=valid_to_date,
+        version=1,
+        is_active=True,
+        method=payload.method,
+        base_moisture_pct=Decimal(str(payload.base_moisture_pct)),
+        rounding_mode=payload.rounding_mode,
+        clamp_mode=payload.clamp_mode,
+        min_moisture_pct=Decimal(str(payload.min_moisture_pct)),
+        max_moisture_pct=Decimal(str(payload.max_moisture_pct)),
+        start_threshold_moisture_pct=Decimal(str(payload.start_threshold_moisture_pct)) if payload.start_threshold_moisture_pct is not None else None,
+        fee_basis=payload.fee_basis,
+        created_by=user_id,
+        contract_id=payload.contract_id,
+        customer_id=payload.customer_id,
+        is_customer_specific=payload.is_customer_specific,
+        justification=payload.justification,
+        document_id=payload.document_id,
+    )
+    db.add(rule)
+    db.commit()
+    db.refresh(rule)
+    return get_drying_rule(rule.id, tenant_id, db)
+
+
+@router.put("/drying-rules/{rule_id}", response_model=DryingRuleSetOut)
+async def update_drying_rule(
+    rule_id: str,
+    payload: DryingRuleSetUpdate,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_admin),  # Nur Admin kann schreiben
+):
+    """Trocknungs-/Schwundtabelle aktualisieren (nur Admin). Erstellt neue Version bei Änderungen."""
+    user_id = _get_user_id_from_request(request) or "system"
+    rule = db.query(DryingRuleSet).filter(DryingRuleSet.id == rule_id, DryingRuleSet.tenant_id == tenant_id).first()
+    if not rule:
+        raise HTTPException(status_code=404, detail="Drying rule set not found")
+
+    # Bei Änderungen: Neue Version erstellen (alte Version bleibt für Audit)
+    needs_new_version = any([
+        payload.method is not None and payload.method != rule.method,
+        payload.base_moisture_pct is not None and Decimal(str(payload.base_moisture_pct)) != rule.base_moisture_pct,
+        payload.rounding_mode is not None and payload.rounding_mode != rule.rounding_mode,
+        payload.clamp_mode is not None and payload.clamp_mode != rule.clamp_mode,
+        payload.min_moisture_pct is not None and Decimal(str(payload.min_moisture_pct)) != rule.min_moisture_pct,
+        payload.max_moisture_pct is not None and Decimal(str(payload.max_moisture_pct)) != rule.max_moisture_pct,
+        payload.start_threshold_moisture_pct is not None and (
+            rule.start_threshold_moisture_pct is None or Decimal(str(payload.start_threshold_moisture_pct)) != rule.start_threshold_moisture_pct
+        ),
+        payload.fee_basis is not None and payload.fee_basis != rule.fee_basis,
+    ])
+
+    if needs_new_version:
+        # Alte Version deaktivieren
+        rule.is_active = False
+        db.flush()
+
+        # Neue Version erstellen
+        new_rule = DryingRuleSet(
+            id=uuid7(),
+            tenant_id=tenant_id,
+            crop_code=rule.crop_code,
+            site_id=payload.site_id if payload.site_id is not None else rule.site_id,
+            valid_from=datetime.fromisoformat(payload.valid_from).date() if payload.valid_from else rule.valid_from,
+            valid_to=datetime.fromisoformat(payload.valid_to).date() if payload.valid_to else rule.valid_to,
+            version=rule.version + 1,
+            is_active=True,
+            method=payload.method if payload.method is not None else rule.method,
+            base_moisture_pct=Decimal(str(payload.base_moisture_pct)) if payload.base_moisture_pct is not None else rule.base_moisture_pct,
+            rounding_mode=payload.rounding_mode if payload.rounding_mode is not None else rule.rounding_mode,
+            clamp_mode=payload.clamp_mode if payload.clamp_mode is not None else rule.clamp_mode,
+            min_moisture_pct=Decimal(str(payload.min_moisture_pct)) if payload.min_moisture_pct is not None else rule.min_moisture_pct,
+            max_moisture_pct=Decimal(str(payload.max_moisture_pct)) if payload.max_moisture_pct is not None else rule.max_moisture_pct,
+            start_threshold_moisture_pct=Decimal(str(payload.start_threshold_moisture_pct)) if payload.start_threshold_moisture_pct is not None else rule.start_threshold_moisture_pct,
+            fee_basis=payload.fee_basis if payload.fee_basis is not None else rule.fee_basis,
+            created_by=user_id,
+            contract_id=payload.contract_id if payload.contract_id is not None else rule.contract_id,
+            customer_id=payload.customer_id if payload.customer_id is not None else rule.customer_id,
+            is_customer_specific=payload.is_customer_specific if payload.is_customer_specific is not None else rule.is_customer_specific,
+            justification=payload.justification if payload.justification is not None else rule.justification,
+            document_id=payload.document_id if payload.document_id is not None else rule.document_id,
+        )
+        db.add(new_rule)
+        db.commit()
+        db.refresh(new_rule)
+        return get_drying_rule(new_rule.id, tenant_id, db)
+    else:
+        # Nur Metadaten aktualisieren (keine neue Version)
+        if payload.site_id is not None:
+            rule.site_id = payload.site_id
+        if payload.valid_from is not None:
+            rule.valid_from = datetime.fromisoformat(payload.valid_from).date()
+        if payload.valid_to is not None:
+            rule.valid_to = datetime.fromisoformat(payload.valid_to).date()
+        if payload.is_active is not None:
+            rule.is_active = payload.is_active
+        if payload.contract_id is not None:
+            rule.contract_id = payload.contract_id
+        if payload.customer_id is not None:
+            rule.customer_id = payload.customer_id
+        if payload.is_customer_specific is not None:
+            rule.is_customer_specific = payload.is_customer_specific
+        if payload.justification is not None:
+            rule.justification = payload.justification
+        if payload.document_id is not None:
+            rule.document_id = payload.document_id
+        rule.updated_by = user_id
+        db.commit()
+        db.refresh(rule)
+        return get_drying_rule(rule.id, tenant_id, db)
+
+
+@router.delete("/drying-rules/{rule_id}", status_code=204)
+async def delete_drying_rule(
+    rule_id: str,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_admin),  # Nur Admin kann löschen
+):
+    """Trocknungs-/Schwundtabelle löschen (nur Admin). Soft-Delete: is_active=False."""
+    rule = db.query(DryingRuleSet).filter(DryingRuleSet.id == rule_id, DryingRuleSet.tenant_id == tenant_id).first()
+    if not rule:
+        raise HTTPException(status_code=404, detail="Drying rule set not found")
+    user_id = _get_user_id_from_request(request) or "system"
+    rule.is_active = False
+    rule.updated_by = user_id
+    db.commit()
+
+
+@router.get("/drying-rules/{rule_id}/download", response_model=dict)
+async def download_drying_rule_document(
+    rule_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Portal-Download für Trocknungs-/Schwundtabelle (für Kunden).
+    Gibt DMS-Referenz oder Regel-Daten als JSON zurück (später: PDF-Export).
+    """
+    rule = db.query(DryingRuleSet).filter(DryingRuleSet.id == rule_id, DryingRuleSet.tenant_id == tenant_id).first()
+    if not rule:
+        raise HTTPException(status_code=404, detail="Drying rule set not found")
+
+    # TODO: Wenn document_id gesetzt ist, DMS-Dokument abrufen
+    # Falls nicht: Regel-Daten als JSON zurückgeben (später: PDF generieren)
+    return {
+        "rule_id": rule.id,
+        "crop_code": rule.crop_code,
+        "version": int(rule.version),
+        "valid_from": rule.valid_from.isoformat() if rule.valid_from else None,
+        "valid_to": rule.valid_to.isoformat() if rule.valid_to else None,
+        "document_id": rule.document_id,
+        "method": rule.method,
+        "base_moisture_pct": float(rule.base_moisture_pct),
+        "note": "TODO: PDF-Export implementieren oder DMS-Dokument abrufen",
+    }
+
+
+# ── Drying Rule Lookup Rows CRUD (Admin-only) ────────────────────────────────
+
+class DryingLookupRowCreate(BaseModel):
+    rule_set_id: str
+    moisture_pct: float = Field(..., ge=0, le=100, description="Feuchte in % (0.1-Schritte)")
+    entzug_pct_points: float = Field(..., ge=0, description="Entzug in %-Punkten")
+    loss_pct: float = Field(..., ge=0, le=100, description="Schwund in %")
+    fee_value: Optional[float] = Field(None, ge=0, description="Trocknungskosten (optional)")
+    fee_unit: Optional[Literal["EUR_PER_T", "EUR_PER_DT", "EUR_FIXED"]] = Field(None, description="Einheit der Trocknungskosten")
+
+
+class DryingLookupRowUpdate(BaseModel):
+    moisture_pct: Optional[float] = Field(None, ge=0, le=100)
+    entzug_pct_points: Optional[float] = Field(None, ge=0)
+    loss_pct: Optional[float] = Field(None, ge=0, le=100)
+    fee_value: Optional[float] = Field(None, ge=0)
+    fee_unit: Optional[Literal["EUR_PER_T", "EUR_PER_DT", "EUR_FIXED"]] = None
+
+
+class DryingLookupRowOut(BaseModel):
+    id: str
+    rule_set_id: str
+    moisture_pct: float
+    entzug_pct_points: float
+    loss_pct: float
+    fee_value: Optional[float]
+    fee_unit: Optional[str]
+    created_at: str
+
+
+@router.get("/drying-rules/{rule_id}/lookup-rows", response_model=list[DryingLookupRowOut])
+async def list_drying_lookup_rows(
+    rule_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Lookup-Rows einer Regel auflisten (Leserechte für alle)."""
+    # Prüfe, dass Regel existiert und zum Tenant gehört
+    rule = db.query(DryingRuleSet).filter(DryingRuleSet.id == rule_id, DryingRuleSet.tenant_id == tenant_id).first()
+    if not rule:
+        raise HTTPException(status_code=404, detail="Drying rule set not found")
+
+    rows = (
+        db.query(DryingRuleLookupRow)
+        .filter(DryingRuleLookupRow.rule_set_id == rule_id)
+        .order_by(DryingRuleLookupRow.moisture_pct.asc())
+        .all()
+    )
+    return [
+        DryingLookupRowOut(
+            id=r.id,
+            rule_set_id=r.rule_set_id,
+            moisture_pct=float(r.moisture_pct),
+            entzug_pct_points=float(r.entzug_pct_points),
+            loss_pct=float(r.loss_pct),
+            fee_value=float(r.fee_value) if r.fee_value is not None else None,
+            fee_unit=r.fee_unit,
+            created_at=r.created_at.isoformat() if r.created_at else "",
+        )
+        for r in rows
+    ]
+
+
+@router.post("/drying-rules/lookup-rows", response_model=DryingLookupRowOut, status_code=201)
+async def create_drying_lookup_row(
+    payload: DryingLookupRowCreate,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_admin),  # Nur Admin kann schreiben
+):
+    """Lookup-Row anlegen (nur Admin)."""
+    # Prüfe, dass Regel existiert und zum Tenant gehört
+    rule = db.query(DryingRuleSet).filter(DryingRuleSet.id == payload.rule_set_id, DryingRuleSet.tenant_id == tenant_id).first()
+    if not rule:
+        raise HTTPException(status_code=404, detail="Drying rule set not found")
+    if rule.method != "LOOKUP_TABLE":
+        raise HTTPException(status_code=400, detail="Rule set method must be LOOKUP_TABLE")
+
+    # Prüfe auf Duplikat (moisture_pct muss eindeutig sein pro rule_set_id)
+    existing = (
+        db.query(DryingRuleLookupRow)
+        .filter(
+            DryingRuleLookupRow.rule_set_id == payload.rule_set_id,
+            DryingRuleLookupRow.moisture_pct == Decimal(str(round(payload.moisture_pct, 1))),
+        )
+        .first()
+    )
+    if existing:
+        raise HTTPException(status_code=409, detail=f"Lookup row for moisture {payload.moisture_pct} already exists")
+
+    row = DryingRuleLookupRow(
+        id=uuid7(),
+        rule_set_id=payload.rule_set_id,
+        moisture_pct=Decimal(str(round(payload.moisture_pct, 1))),  # Auf 0.1 runden
+        entzug_pct_points=Decimal(str(payload.entzug_pct_points)),
+        loss_pct=Decimal(str(payload.loss_pct)),
+        fee_value=Decimal(str(payload.fee_value)) if payload.fee_value is not None else None,
+        fee_unit=payload.fee_unit,
+    )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return DryingLookupRowOut(
+        id=row.id,
+        rule_set_id=row.rule_set_id,
+        moisture_pct=float(row.moisture_pct),
+        entzug_pct_points=float(row.entzug_pct_points),
+        loss_pct=float(row.loss_pct),
+        fee_value=float(row.fee_value) if row.fee_value is not None else None,
+        fee_unit=row.fee_unit,
+        created_at=row.created_at.isoformat() if row.created_at else "",
+    )
+
+
+@router.put("/drying-rules/lookup-rows/{row_id}", response_model=DryingLookupRowOut)
+async def update_drying_lookup_row(
+    row_id: str,
+    payload: DryingLookupRowUpdate,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_admin),  # Nur Admin kann schreiben
+):
+    """Lookup-Row aktualisieren (nur Admin)."""
+    row = db.query(DryingRuleLookupRow).filter(DryingRuleLookupRow.id == row_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Lookup row not found")
+
+    # Prüfe, dass Regel zum Tenant gehört
+    rule = db.query(DryingRuleSet).filter(DryingRuleSet.id == row.rule_set_id, DryingRuleSet.tenant_id == tenant_id).first()
+    if not rule:
+        raise HTTPException(status_code=404, detail="Drying rule set not found")
+
+    if payload.moisture_pct is not None:
+        new_moisture = Decimal(str(round(payload.moisture_pct, 1)))
+        # Prüfe auf Duplikat (außer bei der aktuellen Row)
+        existing = (
+            db.query(DryingRuleLookupRow)
+            .filter(
+                DryingRuleLookupRow.rule_set_id == row.rule_set_id,
+                DryingRuleLookupRow.moisture_pct == new_moisture,
+                DryingRuleLookupRow.id != row_id,
+            )
+            .first()
+        )
+        if existing:
+            raise HTTPException(status_code=409, detail=f"Lookup row for moisture {payload.moisture_pct} already exists")
+        row.moisture_pct = new_moisture
+
+    if payload.entzug_pct_points is not None:
+        row.entzug_pct_points = Decimal(str(payload.entzug_pct_points))
+    if payload.loss_pct is not None:
+        row.loss_pct = Decimal(str(payload.loss_pct))
+    if payload.fee_value is not None:
+        row.fee_value = Decimal(str(payload.fee_value))
+    if payload.fee_unit is not None:
+        row.fee_unit = payload.fee_unit
+
+    db.commit()
+    db.refresh(row)
+    return DryingLookupRowOut(
+        id=row.id,
+        rule_set_id=row.rule_set_id,
+        moisture_pct=float(row.moisture_pct),
+        entzug_pct_points=float(row.entzug_pct_points),
+        loss_pct=float(row.loss_pct),
+        fee_value=float(row.fee_value) if row.fee_value is not None else None,
+        fee_unit=row.fee_unit,
+        created_at=row.created_at.isoformat() if row.created_at else "",
+    )
+
+
+@router.delete("/drying-rules/lookup-rows/{row_id}", status_code=204)
+async def delete_drying_lookup_row(
+    row_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_admin),  # Nur Admin kann löschen
+):
+    """Lookup-Row löschen (nur Admin)."""
+    row = db.query(DryingRuleLookupRow).filter(DryingRuleLookupRow.id == row_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Lookup row not found")
+
+    # Prüfe, dass Regel zum Tenant gehört
+    rule = db.query(DryingRuleSet).filter(DryingRuleSet.id == row.rule_set_id, DryingRuleSet.tenant_id == tenant_id).first()
+    if not rule:
+        raise HTTPException(status_code=404, detail="Drying rule set not found")
+
+    db.delete(row)
+    db.commit()
+
+
+# ── Drying Rule Factor Ranges CRUD (Admin-only) ───────────────────────────────
+
+class DryingFactorRangeCreate(BaseModel):
+    rule_set_id: str
+    from_moisture_incl: float = Field(..., ge=0, le=100, description="Von Feuchte in % (inklusive, 0.1-Schritte)")
+    to_moisture_incl: float = Field(..., ge=0, le=100, description="Bis Feuchte in % (inklusive, 0.1-Schritte)")
+    factor: float = Field(..., gt=0, description="Faktor für Schwundberechnung")
+
+    @model_validator(mode="after")
+    def validate_range(self):
+        if self.from_moisture_incl > self.to_moisture_incl:
+            raise ValueError("from_moisture_incl must be <= to_moisture_incl")
+        return self
+
+
+class DryingFactorRangeUpdate(BaseModel):
+    from_moisture_incl: Optional[float] = Field(None, ge=0, le=100)
+    to_moisture_incl: Optional[float] = Field(None, ge=0, le=100)
+    factor: Optional[float] = Field(None, gt=0)
+
+    @model_validator(mode="after")
+    def validate_range(self):
+        if self.from_moisture_incl is not None and self.to_moisture_incl is not None:
+            if self.from_moisture_incl > self.to_moisture_incl:
+                raise ValueError("from_moisture_incl must be <= to_moisture_incl")
+        return self
+
+
+class DryingFactorRangeOut(BaseModel):
+    id: str
+    rule_set_id: str
+    from_moisture_incl: float
+    to_moisture_incl: float
+    factor: float
+    created_at: str
+
+
+@router.get("/drying-rules/{rule_id}/factor-ranges", response_model=list[DryingFactorRangeOut])
+async def list_drying_factor_ranges(
+    rule_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Factor-Ranges einer Regel auflisten (Leserechte für alle)."""
+    # Prüfe, dass Regel existiert und zum Tenant gehört
+    rule = db.query(DryingRuleSet).filter(DryingRuleSet.id == rule_id, DryingRuleSet.tenant_id == tenant_id).first()
+    if not rule:
+        raise HTTPException(status_code=404, detail="Drying rule set not found")
+
+    ranges = (
+        db.query(DryingRuleFactorRange)
+        .filter(DryingRuleFactorRange.rule_set_id == rule_id)
+        .order_by(DryingRuleFactorRange.from_moisture_incl.asc())
+        .all()
+    )
+    return [
+        DryingFactorRangeOut(
+            id=r.id,
+            rule_set_id=r.rule_set_id,
+            from_moisture_incl=float(r.from_moisture_incl),
+            to_moisture_incl=float(r.to_moisture_incl),
+            factor=float(r.factor),
+            created_at=r.created_at.isoformat() if r.created_at else "",
+        )
+        for r in ranges
+    ]
+
+
+@router.post("/drying-rules/factor-ranges", response_model=DryingFactorRangeOut, status_code=201)
+async def create_drying_factor_range(
+    payload: DryingFactorRangeCreate,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_admin),  # Nur Admin kann schreiben
+):
+    """Factor-Range anlegen (nur Admin)."""
+    # Prüfe, dass Regel existiert und zum Tenant gehört
+    rule = db.query(DryingRuleSet).filter(DryingRuleSet.id == payload.rule_set_id, DryingRuleSet.tenant_id == tenant_id).first()
+    if not rule:
+        raise HTTPException(status_code=404, detail="Drying rule set not found")
+    if rule.method != "FACTOR_FROM_BASE":
+        raise HTTPException(status_code=400, detail="Rule set method must be FACTOR_FROM_BASE")
+
+    # Prüfe auf Überlappungen (später: automatische Auflösung oder Fehler)
+    existing = (
+        db.query(DryingRuleFactorRange)
+        .filter(DryingRuleFactorRange.rule_set_id == payload.rule_set_id)
+        .all()
+    )
+    from_m = Decimal(str(round(payload.from_moisture_incl, 1)))
+    to_m = Decimal(str(round(payload.to_moisture_incl, 1)))
+    for r in existing:
+        if not (to_m < Decimal(str(r.from_moisture_incl)) or from_m > Decimal(str(r.to_moisture_incl))):
+            raise HTTPException(
+                status_code=409,
+                detail=f"Factor range overlaps with existing range ({r.from_moisture_incl}-{r.to_moisture_incl})",
+            )
+
+    range_obj = DryingRuleFactorRange(
+        id=uuid7(),
+        rule_set_id=payload.rule_set_id,
+        from_moisture_incl=from_m,
+        to_moisture_incl=to_m,
+        factor=Decimal(str(payload.factor)),
+    )
+    db.add(range_obj)
+    db.commit()
+    db.refresh(range_obj)
+    return DryingFactorRangeOut(
+        id=range_obj.id,
+        rule_set_id=range_obj.rule_set_id,
+        from_moisture_incl=float(range_obj.from_moisture_incl),
+        to_moisture_incl=float(range_obj.to_moisture_incl),
+        factor=float(range_obj.factor),
+        created_at=range_obj.created_at.isoformat() if range_obj.created_at else "",
+    )
+
+
+@router.put("/drying-rules/factor-ranges/{range_id}", response_model=DryingFactorRangeOut)
+async def update_drying_factor_range(
+    range_id: str,
+    payload: DryingFactorRangeUpdate,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_admin),  # Nur Admin kann schreiben
+):
+    """Factor-Range aktualisieren (nur Admin)."""
+    range_obj = db.query(DryingRuleFactorRange).filter(DryingRuleFactorRange.id == range_id).first()
+    if not range_obj:
+        raise HTTPException(status_code=404, detail="Factor range not found")
+
+    # Prüfe, dass Regel zum Tenant gehört
+    rule = db.query(DryingRuleSet).filter(DryingRuleSet.id == range_obj.rule_set_id, DryingRuleSet.tenant_id == tenant_id).first()
+    if not rule:
+        raise HTTPException(status_code=404, detail="Drying rule set not found")
+
+    from_m = Decimal(str(round(payload.from_moisture_incl, 1))) if payload.from_moisture_incl is not None else range_obj.from_moisture_incl
+    to_m = Decimal(str(round(payload.to_moisture_incl, 1))) if payload.to_moisture_incl is not None else range_obj.to_moisture_incl
+
+    # Prüfe auf Überlappungen (außer bei der aktuellen Range)
+    if payload.from_moisture_incl is not None or payload.to_moisture_incl is not None:
+        existing = (
+            db.query(DryingRuleFactorRange)
+            .filter(
+                DryingRuleFactorRange.rule_set_id == range_obj.rule_set_id,
+                DryingRuleFactorRange.id != range_id,
+            )
+            .all()
+        )
+        for r in existing:
+            if not (to_m < r.from_moisture_incl or from_m > r.to_moisture_incl):
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"Factor range overlaps with existing range ({r.from_moisture_incl}-{r.to_moisture_incl})",
+                )
+
+    if payload.from_moisture_incl is not None:
+        range_obj.from_moisture_incl = from_m
+    if payload.to_moisture_incl is not None:
+        range_obj.to_moisture_incl = to_m
+    if payload.factor is not None:
+        range_obj.factor = Decimal(str(payload.factor))
+
+    db.commit()
+    db.refresh(range_obj)
+    return DryingFactorRangeOut(
+        id=range_obj.id,
+        rule_set_id=range_obj.rule_set_id,
+        from_moisture_incl=float(range_obj.from_moisture_incl),
+        to_moisture_incl=float(range_obj.to_moisture_incl),
+        factor=float(range_obj.factor),
+        created_at=range_obj.created_at.isoformat() if range_obj.created_at else "",
+    )
+
+
+@router.delete("/drying-rules/factor-ranges/{range_id}", status_code=204)
+async def delete_drying_factor_range(
+    range_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_admin),  # Nur Admin kann löschen
+):
+    """Factor-Range löschen (nur Admin)."""
+    range_obj = db.query(DryingRuleFactorRange).filter(DryingRuleFactorRange.id == range_id).first()
+    if not range_obj:
+        raise HTTPException(status_code=404, detail="Factor range not found")
+
+    # Prüfe, dass Regel zum Tenant gehört
+    rule = db.query(DryingRuleSet).filter(DryingRuleSet.id == range_obj.rule_set_id, DryingRuleSet.tenant_id == tenant_id).first()
+    if not rule:
+        raise HTTPException(status_code=404, detail="Drying rule set not found")
+
+    db.delete(range_obj)
+    db.commit()
+
+
+# ============================================================================
+# PDF-EXPORT FÜR ABRECHNUNGEN
+# ============================================================================
+
+@router.get("/{settlement_id}/export-pdf")
+async def export_settlement_pdf(
+    settlement_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Exportiere Abrechnung als PDF (GoBD-konform)."""
+    from datetime import datetime
+    from app.infrastructure.models import BusinessPartner, Article
+    
+    # Hole Abrechnung
+    settlement = db.query(AgrarSettlement).filter(
+        AgrarSettlement.id == settlement_id,
+        AgrarSettlement.tenant_id == tenant_id
+    ).first()
+    
+    if not settlement:
+        raise HTTPException(status_code=404, detail="Abrechnung nicht gefunden")
+    
+    # Hole Lieferant
+    supplier = db.query(BusinessPartner).filter(
+        BusinessPartner.id == settlement.supplier_id,
+        BusinessPartner.tenant_id == tenant_id
+    ).first()
+    
+    # Hole Artikel
+    article = None
+    if settlement.article_id:
+        article = db.query(Article).filter(Article.id == settlement.article_id).first()
+    
+    # Hole Abzüge
+    deductions = db.query(AgrarSettlementDeduction).filter(
+        AgrarSettlementDeduction.settlement_id == settlement_id
+    ).all()
+    
+    # Berechne Summen
+    total_deductions = sum(float(d.amount_eur or 0) for d in deductions)
+    net_amount = float(settlement.billing_amount_eur or 0) - total_deductions
+    
+    # Erstelle PDF-Inhalt (textbasiert für Demo - in Produktion PDF-Library verwenden)
+    pdf_content = f"""
+{'=' * 70}
+SELBSTABRECHNUNG / LIEFERANTEN-ABRECHNUNG
+{'=' * 70}
+
+Abrechnungsnummer: {settlement.settlement_number or settlement.id}
+Datum: {settlement.settlement_date.strftime('%d.%m.%Y') if settlement.settlement_date else 'N/A'}
+Status: {settlement.status.upper()}
+
+{'=' * 70}
+LIEFERANT
+{'=' * 70}
+Name: {supplier.name if supplier else 'N/A'}
+Nummer: {supplier.partner_number if supplier else 'N/A'}
+Adresse: {f'{supplier.street}, {supplier.zip} {supplier.city}' if supplier else 'N/A'}
+
+{'=' * 70}
+WARENANGABEN
+{'=' * 70}
+Artikel: {article.name if article else 'N/A'}
+Artikelnummer: {article.item_number if article else 'N/A'}
+
+Bruttogewicht: {settlement.gross_quantity_kg:,.2f} kg
+Abrechnungsgewicht: {settlement.billing_quantity_kg:,.2f} kg
+Preis: {settlement.unit_price_eur_per_ton:,.2f} EUR/to
+
+{'=' * 70}
+abzüge
+{'=' * 70}
+"""
+    
+    for ded in deductions:
+        pdf_content += f"\n{ded.deduction_type.upper()}: -{ded.amount_eur:,.2f} EUR"
+        if ded.note:
+            pdf_content += f" ({ded.note})"
+    
+    pdf_content += f"""
+Summe Abzüge: -{total_deductions:,.2f} EUR
+
+{'=' * 70}
+RECHNUNGSBETRAG
+{'=' * 70}
+Abrechnungsbetrag (brutto): {settlement.billing_amount_eur:,.2f} EUR
+-abzüge: -{total_deductions:,.2f} EUR
+-----------------------------------
+ZAHLBAR: {net_amount:,.2f} EUR
+
+{'=' * 70}
+SONSTIGES
+{'=' * 70}
+"""
+    
+    if settlement.note:
+        pdf_content += f"\nNotiz: {settlement.note}"
+    
+    pdf_content += f"""
+Erstellt am: {datetime.utcnow().strftime('%d.%m.%Y %H:%M:%S')}
+GoBD-konforme Dokumentation gemäß §147 AO
+
+Dieses Dokument ist maschinell erstellt und revisionssicher gespeichert.
+{'=' * 70}
+    """
+    
+    return {
+        "content": pdf_content,
+        "filename": f"abrechnung_{settlement.settlement_number or settlement.id}.txt",
+        "content_type": "text/plain"
+    }

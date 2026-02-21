@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from decimal import Decimal, InvalidOperation
 from typing import Literal
-import uuid
+from app.core.uuid7 import uuid7
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -245,7 +245,7 @@ async def create_print_notification(
     db: Session = Depends(get_db),
 ):
     item = NawaroPrintNotification(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         tenant_id=tenant_id,
         document_name=payload.document_name,
         harvest_year=payload.harvest_year,
@@ -349,7 +349,7 @@ async def create_contract_sheet(
     db: Session = Depends(get_db),
 ):
     item = NawaroContractSheet(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         tenant_id=tenant_id,
         harvest_year=payload.harvest_year,
         article_number=payload.article_number,
@@ -362,7 +362,7 @@ async def create_contract_sheet(
     for index, row in enumerate(payload.rows):
         db.add(
             NawaroContractSheetRow(
-                id=str(uuid.uuid4()),
+                id=uuid7(),
                 tenant_id=tenant_id,
                 sheet_id=item.id,
                 contract_number=row.contract_number,
@@ -427,7 +427,7 @@ async def update_contract_sheet(
     for index, row in enumerate(payload.rows):
         db.add(
             NawaroContractSheetRow(
-                id=str(uuid.uuid4()),
+                id=uuid7(),
                 tenant_id=tenant_id,
                 sheet_id=item.id,
                 contract_number=row.contract_number,
@@ -493,7 +493,7 @@ async def create_area_sheet(
     db: Session = Depends(get_db),
 ):
     item = NawaroAreaSheet(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         tenant_id=tenant_id,
         harvest_year_from=payload.harvest_year_from,
         harvest_year_to=payload.harvest_year_to,
@@ -508,7 +508,7 @@ async def create_area_sheet(
     for index, row in enumerate(payload.rows):
         db.add(
             NawaroAreaSheetRow(
-                id=str(uuid.uuid4()),
+                id=uuid7(),
                 tenant_id=tenant_id,
                 sheet_id=item.id,
                 customer_name=row.customer_name,
@@ -578,7 +578,7 @@ async def update_area_sheet(
     for index, row in enumerate(payload.rows):
         db.add(
             NawaroAreaSheetRow(
-                id=str(uuid.uuid4()),
+                id=uuid7(),
                 tenant_id=tenant_id,
                 sheet_id=item.id,
                 customer_name=row.customer_name,

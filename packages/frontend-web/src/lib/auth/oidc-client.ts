@@ -123,7 +123,7 @@ export class OIDCClient {
     if (!user) return null
 
     const profile = user.profile as any
-    return profile.tenant_id || profile.tid || 'system'
+    return profile.tenant_id || profile.tid || '00000000-0000-0000-0000-000000000001'
   }
 
   /**

@@ -89,6 +89,7 @@ type DeliveryNoteResponse = {
 export type Position = {
   posNr: number
   artikelNr: string
+  artikelId: string | null // Artikel-ID (UUID) für Backend-Mapping
   bezeichnung: string
   bezeichnung2: string
   menge: number
@@ -115,6 +116,9 @@ export type Position = {
   mwstProzent: number
   gewicht: number // Gewicht pro Einheit (aus Artikel)
   gesamtGewicht: number // Gesamtgewicht (gewicht × menge)
+  kontraktNr: string // Vertragsnummer
+  skontierf: boolean // Skontierfähig
+  fremdware: boolean // Fremdware
 }
 
 type LieferscheinState = {
@@ -142,6 +146,7 @@ type LieferscheinState = {
 type CurrentPositionDetails = {
   posNr: number
   artikelNr: string
+  artikelId: string | null // Artikel-ID (UUID) für Backend-Mapping
   artikelBezeichnung: string
   artikelBezeichnung2: string
   mengeGebinde: number
@@ -274,6 +279,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             return {
               posNr: pos.pos_nr,
               artikelNr: pos.artikel_nr || '',
+              artikelId: pos.artikel_id || null, // Artikel-ID aus Backend
               bezeichnung: pos.bezeichnung || '',
               bezeichnung2: pos.bezeichnung2 || '',
               menge: pos.menge,
@@ -288,7 +294,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
               lagerfach: pos.lagerfach || '',
               charge: pos.charge || '',
               serienNr: pos.serien_nr || '',
-              gefPunkt: pos.gef_punkt || '',
+              gefPunkt: pos.gef_punkt || (artikelGefahrgutPunkte > 0 ? artikelGefahrgutPunkte.toString() : ''),
+              gefahrgutPunkte: artikelGefahrgutPunkte,
+              gesamtGefahrgutPunkte,
               naBio: pos.na_bio || '',
               musterNr: pos.muster_nr || '',
               strecke: pos.strecke || '',
@@ -298,8 +306,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
               mwstProzent: pos.mwst_prozent,
               gewicht: artikelGewicht,
               gesamtGewicht,
-              gefahrgutPunkte: artikelGefahrgutPunkte,
-              gesamtGefahrgutPunkte,
+              kontraktNr: pos.kontrakt_nr || '', // Vertragsnummer aus Backend
+              skontierf: pos.skontierf || false, // Skontierfähig aus Backend
+              fremdware: pos.fremdware || false, // Fremdware aus Backend
             }
           })
         )
@@ -312,11 +321,26 @@ export default function LieferscheinErfassungPage(): JSX.Element {
           ? response.delivery_time.substring(0, 5) // HH:MM
           : new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 
+        // Mappe branch_id zu niederlassung (branch_number)
+        let niederlassung = 0
+        const branchId = response.branch_id
+        if (branchId) {
+          try {
+            const branch = await apiClient.get<any>(`/api/v1/admin/branches/${branchId}`)
+            niederlassung = branch.branch_number || 0
+            // Cache speichern
+            setBranchCache((prev) => new Map(prev).set(niederlassung, branchId))
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.warn('Fehler beim Laden der Branch:', error)
+          }
+        }
+
         setState({
           id: response.id,
           lieferscheinNr: response.delivery_note_number, // Vom Backend vergeben
-          niederlassung: 0, // TODO: Map branch_id to niederlassung
-          vertreter: '', // TODO: Map sales_rep_id to vertreter
+          niederlassung, // Gemappt von branch_id
+          vertreter: customer?.representative || '', // Vertreter aus Kunden-Stammdaten
           bediener: getUserShortName(),
           lieferDatum: deliveryDate,
           uhrzeit: deliveryTime,
@@ -348,6 +372,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const [currentPosition, setCurrentPosition] = useState<CurrentPositionDetails>({
     posNr: 10,
     artikelNr: '',
+    artikelId: null, // Artikel-ID für Backend-Mapping
     artikelBezeichnung: '',
     artikelBezeichnung2: '',
     mengeGebinde: 0,
@@ -373,8 +398,11 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const [showInformationDialog, setShowInformationDialog] = useState(false)
   const [customerTab, setCustomerTab] = useState<'kunde' | 'lieferanschr' | 'rechnanschrift' | 'bestellung' | 'rechnung' | 'texte' | 'spediteur' | 'lieferung'>('kunde')
   
-  // State für Bestellungen (TODO: Vom Backend laden)
+  // State für Bestellungen
   const [bestellungen, setBestellungen] = useState<Array<{ id: string; bestellNr: string; datum: string }>>([])
+  
+  // Cache für Branch-Mapping (niederlassung -> branch_id)
+  const [branchCache, setBranchCache] = useState<Map<number, string>>(new Map())
 
   // Berechne Summen
   const summen = useMemo(() => {
@@ -393,7 +421,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   }, [state.positionen])
 
   // Kunde auswählen
-  const handleCustomerSelect = (customer: Customer): void => {
+  const handleCustomerSelect = async (customer: Customer): Promise<void> => {
     setState((prev) => ({
       ...prev,
       customer,
@@ -401,12 +429,31 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       vertreter: customer.representative || prev.vertreter || '',
     }))
     
-    // TODO: Lade Bestellungen für den ausgewählten Kunden vom Backend
-    // Beispiel:
-    // const orders = await apiClient.get(`/api/v1/sales/orders?customer_id=${customer.id}`)
-    // setBestellungen(orders.map(o => ({ id: o.id, bestellNr: o.order_number, datum: o.order_date })))
-    // Für jetzt: Leere Liste (zeigt "Es liegt keine Bestellung vor")
-    setBestellungen([])
+    // Lade Bestellungen für den ausgewählten Kunden vom Backend
+    try {
+      const response = await apiClient.get<any>('/api/v1/sales/orders', {
+        params: {
+          customer_id: customer.id,
+          limit: 10, // Maximal 10 Bestellungen anzeigen
+        },
+      })
+      
+      // Handle PaginatedResponse or direct array
+      const orders = response.items || response || []
+      setBestellungen(
+        orders.map((o: any) => ({
+          id: o.id,
+          bestellNr: o.order_number || o.orderNumber || '',
+          datum: o.created_at 
+            ? new Date(o.created_at).toLocaleDateString('de-DE')
+            : new Date().toLocaleDateString('de-DE'),
+        }))
+      )
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Fehler beim Laden der Bestellungen:', error)
+      setBestellungen([]) // Fallback: Leere Liste
+    }
   }
 
   // Artikel auswählen
@@ -426,6 +473,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     setCurrentPosition((prev) => ({
       ...prev,
       artikelNr: article.article_number || article.articleNumber || '',
+      artikelId: article.id || articleId || null, // Artikel-ID für Backend-Mapping
       artikelBezeichnung: article.name || article.description || '',
       artikelBezeichnung2: article.description || article.description2 || '',
       einheit: article.unit || 'Stk',
@@ -494,6 +542,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     const position: Position = {
       posNr: currentPosition.posNr,
       artikelNr: currentPosition.artikelNr,
+      artikelId: currentPosition.artikelId, // Artikel-ID für Backend-Mapping
       bezeichnung: currentPosition.artikelBezeichnung,
       bezeichnung2: currentPosition.artikelBezeichnung2,
       menge: currentPosition.mengeGebinde,
@@ -520,6 +569,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       mwstProzent: currentPosition.mwstProzent,
       gewicht: currentPosition.artikelGewicht, // Gewicht pro Einheit
       gesamtGewicht, // Gesamtgewicht (gewicht × menge)
+      kontraktNr: currentPosition.kontraktNr, // Vertragsnummer
+      skontierf: currentPosition.skontierf, // Skontierfähig
+      fremdware: currentPosition.fremdware, // Fremdware
     }
 
     setState((prev) => ({
@@ -532,6 +584,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     setCurrentPosition({
       posNr: currentPosition.posNr + 10,
       artikelNr: '',
+      artikelId: null, // Reset Artikel-ID
       artikelBezeichnung: '',
       artikelBezeichnung2: '',
       mengeGebinde: 0,
@@ -581,7 +634,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         // invoice_number: state.fakturiertRechnNr || null,
         positionen: state.positionen.map((pos) => ({
           pos_nr: pos.posNr,
-          artikel_id: null, // TODO: Map artikelNr to artikel_id
+          artikel_id: pos.artikelId || null, // Artikel-ID aus Position
           artikel_nr: pos.artikelNr,
           bezeichnung: pos.bezeichnung,
           bezeichnung2: pos.bezeichnung2,
@@ -599,9 +652,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
           serien_nr: pos.serienNr || null,
           erloskonto: pos.erloskonto || null,
           mwst_prozent: pos.mwstProzent,
-          kontrakt_nr: null, // TODO: From position
-          skontierf: false, // TODO: From position
-          fremdware: false, // TODO: From position
+          kontrakt_nr: pos.kontraktNr || null, // Vertragsnummer aus Position
+          skontierf: pos.skontierf, // Skontierfähig aus Position
+          fremdware: pos.fremdware, // Fremdware aus Position
           gef_punkt: pos.gefPunkt || null,
           na_bio: pos.naBio || null,
           muster_nr: pos.musterNr || null,
@@ -738,15 +791,229 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       push('Löschen-Funktion noch nicht implementiert')
     },
     'close-document': () => navigate(-1),
-    'copy-previous-full': () => {
+    'copy-previous-full': async () => {
       // F11: Kopiert ALLE Daten vom vorherigen Beleg (Kunde + Positionen)
-      // TODO: Implementieren - Lade letzten Beleg vom aktuellen Benutzer
-      push('"Wie vorheriger Beleg (F11)" - Kopiert Kunde + Positionen - noch nicht implementiert')
+      try {
+        const response = await apiClient.get<DeliveryNoteResponse | null>('/api/v1/sales/delivery-notes/last', {
+          params: {
+            operator_id: user?.sub || undefined,
+            customer_id: state.customer?.id || undefined,
+          },
+        })
+        
+        if (!response) {
+          push('Kein vorheriger Beleg gefunden')
+          return
+        }
+        
+        // Lade Kunde
+        let customer: Customer | null = null
+        if (response.customer_id) {
+          try {
+            const customerData = await apiClient.get<any>(`/api/v1/crm/customers/${response.customer_id}`)
+            customer = {
+              id: customerData.id,
+              customerNumber: customerData.customer_number || customerData.customerNumber || '',
+              name: customerData.company_name || customerData.name || '',
+              debitorAccount: customerData.customer_number || customerData.customerNumber || '',
+              representative: customerData.contact_person || customerData.representative,
+              postalCode: customerData.postal_code || customerData.postalCode,
+              city: customerData.city,
+              creditLimit: customerData.credit_limit?.toString(),
+              address: customerData.address,
+              phone: customerData.phone,
+              email: customerData.email,
+              chefanweisung: customerData.chefanweisung || customerData.executive_note,
+            }
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.warn('Kunde konnte nicht geladen werden:', err)
+          }
+        }
+        
+        // Mappe Positionen
+        const positionen: Position[] = await Promise.all(
+          response.positionen.map(async (pos) => {
+            // Lade Artikel-Daten für Gewicht und Gefahrgut-Punkte
+            let artikelGewicht = 0
+            let artikelGefahrgutPunkte = 0
+            if (pos.artikel_id) {
+              try {
+                const artikelResponse = await apiClient.get<any>(`/api/v1/articles/${pos.artikel_id}`)
+                artikelGewicht = artikelResponse.weight || artikelResponse.gewicht || 0
+                artikelGefahrgutPunkte = artikelResponse.gefahrgut_punkte || artikelResponse.gefahrgutpunkte || 
+                  artikelResponse.gefahrgutPunkte || (artikelResponse.gefahrgutklasse ? parseFloat(artikelResponse.gefahrgutklasse) || 0 : 0)
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.warn(`Artikel-Daten konnten nicht geladen werden für Artikel ${pos.artikel_id}:`, err)
+              }
+            }
+            const gesamtGewicht = artikelGewicht * pos.menge
+            const gesamtGefahrgutPunkte = artikelGefahrgutPunkte * pos.menge
+            
+            return {
+              posNr: pos.pos_nr,
+              artikelNr: pos.artikel_nr || '',
+              artikelId: pos.artikel_id || null,
+              bezeichnung: pos.bezeichnung || '',
+              bezeichnung2: pos.bezeichnung2 || '',
+              menge: pos.menge,
+              einheit: pos.einheit || '',
+              listenpreis: pos.listenpreis || 0,
+              rabatt: pos.rabatt,
+              art: pos.art || '',
+              nettoPreis: pos.netto_preis || 0,
+              nettoBetrag: pos.netto_betrag || 0,
+              niederlassung: String(pos.niederlassung || ''),
+              lagerhalle: pos.lagerhalle || '',
+              lagerfach: pos.lagerfach || '',
+              charge: pos.charge || '',
+              serienNr: pos.serien_nr || '',
+              gefPunkt: pos.gef_punkt || (artikelGefahrgutPunkte > 0 ? artikelGefahrgutPunkte.toString() : ''),
+              gefahrgutPunkte: artikelGefahrgutPunkte,
+              gesamtGefahrgutPunkte,
+              naBio: pos.na_bio || '',
+              musterNr: pos.muster_nr || '',
+              strecke: pos.strecke || '',
+              zusBeleg: pos.zus_beleg || '',
+              anerken: pos.anerken || '',
+              erloskonto: pos.erloskonto || '',
+              mwstProzent: pos.mwst_prozent,
+              gewicht: artikelGewicht,
+              gesamtGewicht,
+              kontraktNr: pos.kontrakt_nr || '',
+              skontierf: pos.skontierf || false,
+              fremdware: pos.fremdware || false,
+            }
+          })
+        )
+        
+        // Setze alle Daten
+        const deliveryDate = response.delivery_date ? formatDateForInput(new Date(response.delivery_date)) : formatDateForInput(new Date())
+        const deliveryTime = response.delivery_time 
+          ? response.delivery_time.substring(0, 5)
+          : new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+        
+        setState((prev) => ({
+          ...prev,
+          customer,
+          vertreter: customer?.representative || prev.vertreter || '',
+          lieferDatum: deliveryDate,
+          uhrzeit: deliveryTime,
+          kostenstelle: response.cost_center_id ? Number(response.cost_center_id) : prev.kostenstelle,
+          lkwNr: response.truck_number || prev.lkwNr,
+          gutschriftKennz: response.is_credit_note,
+          selbstabholung: response.is_self_pickup,
+          fruehbezugRechnung: response.is_early_payment,
+          reNrBezug: response.reference_invoice_number || '',
+          positionen,
+          aktivePositionIndex: null,
+        }))
+        
+        // Lade auch Bestellungen für den Kunden
+        if (customer) {
+          await handleCustomerSelect(customer)
+        }
+        
+        push('Daten vom vorherigen Beleg übernommen')
+      } catch (error: any) {
+        // eslint-disable-next-line no-console
+        console.error('Fehler beim Laden des vorherigen Belegs:', error)
+        push(`Fehler: ${error.response?.data?.detail || error.message}`)
+      }
     },
-    'copy-previous-positions': () => {
+    'copy-previous-positions': async () => {
       // Strg+F8: Kopiert nur Positionen (aktuell ausgewählter Kunde bleibt erhalten)
-      // TODO: Implementieren - Lade nur Positionen vom letzten Beleg
-      push('"Wie vorheriger Beleg (Strg+F8)" - Kopiert nur Positionen - noch nicht implementiert')
+      if (!state.customer) {
+        push('Bitte wählen Sie zuerst einen Kunden aus')
+        return
+      }
+      
+      try {
+        const response = await apiClient.get<DeliveryNoteResponse | null>('/api/v1/sales/delivery-notes/last', {
+          params: {
+            operator_id: user?.sub || undefined,
+            customer_id: state.customer.id, // Nur Positionen vom gleichen Kunden
+          },
+        })
+        
+        if (!response || !response.positionen || response.positionen.length === 0) {
+          push('Keine Positionen im vorherigen Beleg gefunden')
+          return
+        }
+        
+        // Mappe nur Positionen
+        const positionen: Position[] = await Promise.all(
+          response.positionen.map(async (pos) => {
+            // Lade Artikel-Daten für Gewicht und Gefahrgut-Punkte
+            let artikelGewicht = 0
+            let artikelGefahrgutPunkte = 0
+            if (pos.artikel_id) {
+              try {
+                const artikelResponse = await apiClient.get<any>(`/api/v1/articles/${pos.artikel_id}`)
+                artikelGewicht = artikelResponse.weight || artikelResponse.gewicht || 0
+                artikelGefahrgutPunkte = artikelResponse.gefahrgut_punkte || artikelResponse.gefahrgutpunkte || 
+                  artikelResponse.gefahrgutPunkte || (artikelResponse.gefahrgutklasse ? parseFloat(artikelResponse.gefahrgutklasse) || 0 : 0)
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.warn(`Artikel-Daten konnten nicht geladen werden für Artikel ${pos.artikel_id}:`, err)
+              }
+            }
+            const gesamtGewicht = artikelGewicht * pos.menge
+            const gesamtGefahrgutPunkte = artikelGefahrgutPunkte * pos.menge
+            
+            return {
+              posNr: state.positionen.length > 0 
+                ? Math.max(...state.positionen.map(p => p.posNr)) + 10 
+                : pos.pos_nr,
+              artikelNr: pos.artikel_nr || '',
+              artikelId: pos.artikel_id || null,
+              bezeichnung: pos.bezeichnung || '',
+              bezeichnung2: pos.bezeichnung2 || '',
+              menge: pos.menge,
+              einheit: pos.einheit || '',
+              listenpreis: pos.listenpreis || 0,
+              rabatt: pos.rabatt,
+              art: pos.art || '',
+              nettoPreis: pos.netto_preis || 0,
+              nettoBetrag: pos.netto_betrag || 0,
+              niederlassung: String(pos.niederlassung || state.niederlassung),
+              lagerhalle: pos.lagerhalle || '',
+              lagerfach: pos.lagerfach || '',
+              charge: pos.charge || '',
+              serienNr: pos.serien_nr || '',
+              gefPunkt: pos.gef_punkt || (artikelGefahrgutPunkte > 0 ? artikelGefahrgutPunkte.toString() : ''),
+              gefahrgutPunkte: artikelGefahrgutPunkte,
+              gesamtGefahrgutPunkte,
+              naBio: pos.na_bio || '',
+              musterNr: pos.muster_nr || '',
+              strecke: pos.strecke || '',
+              zusBeleg: pos.zus_beleg || '',
+              anerken: pos.anerken || '',
+              erloskonto: pos.erloskonto || '',
+              mwstProzent: pos.mwst_prozent,
+              gewicht: artikelGewicht,
+              gesamtGewicht,
+              kontraktNr: pos.kontrakt_nr || '',
+              skontierf: pos.skontierf || false,
+              fremdware: pos.fremdware || false,
+            }
+          })
+        )
+        
+        // Füge Positionen hinzu (nicht ersetzen)
+        setState((prev) => ({
+          ...prev,
+          positionen: [...prev.positionen, ...positionen],
+          aktivePositionIndex: prev.positionen.length,
+        }))
+        
+        push(`${positionen.length} Positionen vom vorherigen Beleg übernommen`)
+      } catch (error: any) {
+        // eslint-disable-next-line no-console
+        console.error('Fehler beim Laden der Positionen:', error)
+        push(`Fehler: ${error.response?.data?.detail || error.message}`)
+      }
     },
     'create-invoice': () => {
       // TODO: Implementieren
@@ -1041,21 +1308,26 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                   <div className="text-sm space-y-2">
                     {state.customer ? (
                       <>
-                        {/* TODO: Bestellungen vom Backend laden */}
-                        {/* Platzhalter: Prüfe ob Bestellungen vorhanden sind */}
-                        {false ? ( // TODO: Ersetze mit tatsächlicher Prüfung auf Bestellungen
+                        {bestellungen.length > 0 ? (
                           <>
-                            <div className="font-semibold">Zu Bestellungen (01-10)</div>
-                            <div className="text-muted-foreground text-xs">
-                              Bestellungen werden hier angezeigt
+                            <div className="font-semibold">
+                              Zu Bestellungen (01-{String(bestellungen.length).padStart(2, '0')})
                             </div>
+                            <ul className="list-disc pl-5 space-y-1">
+                              {bestellungen.map((order) => (
+                                <li key={order.id} className="text-sm">
+                                  Bestell-Nr: {order.bestellNr} vom {order.datum}
+                                </li>
+                              ))}
+                            </ul>
                             <Button
                               variant="outline"
                               size="sm"
                               className="mt-2"
-                              onClick={() => {
+                              onClick={async () => {
                                 // TODO: Implementiere "Alle Bestellpositionen übernehmen"
-                                push('Alle Bestellpositionen übernehmen - noch nicht implementiert')
+                                // Dies erfordert eine API zum Laden der Bestellpositionen
+                                push('Alle Bestellpositionen übernehmen - noch nicht vollständig implementiert')
                               }}
                             >
                               Alle Bestellpositionen übernehmen

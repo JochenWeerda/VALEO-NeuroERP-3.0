@@ -34,7 +34,7 @@ def upgrade() -> None:
     # Workflows table
     op.create_table(
         "crm_workflow_workflows",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
@@ -51,7 +51,7 @@ def upgrade() -> None:
     # Triggers table
     op.create_table(
         "crm_workflow_triggers",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
@@ -59,7 +59,7 @@ def upgrade() -> None:
         sa.Column("event_type", sa.String(128)),
         sa.Column("schedule_cron", sa.String(128)),
         sa.Column("conditions", postgresql.JSONB, nullable=False),
-        sa.Column("workflow_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_workflow_workflows.id"), nullable=False),
+        sa.Column("workflow_id", sa.String(), sa.ForeignKey("crm_workflow_workflows.id"), nullable=False),
         sa.Column("is_active", sa.Boolean, nullable=False, server_default='true'),
         sa.Column("created_by", sa.String(64)),
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
@@ -68,8 +68,8 @@ def upgrade() -> None:
     # Workflow executions table
     op.create_table(
         "crm_workflow_executions",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
-        sa.Column("workflow_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_workflow_workflows.id"), nullable=False),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
+        sa.Column("workflow_id", sa.String(), sa.ForeignKey("crm_workflow_workflows.id"), nullable=False),
         sa.Column("status", postgresql.ENUM('pending', 'running', 'completed', 'failed', 'cancelled', name='crm_workflow_execution_status'), nullable=False, server_default='pending'),
         sa.Column("trigger_event", postgresql.JSONB, nullable=False),
         sa.Column("execution_context", postgresql.JSONB, nullable=False),
@@ -82,7 +82,7 @@ def upgrade() -> None:
     # Notifications table
     op.create_table(
         "crm_workflow_notifications",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("notification_type", postgresql.ENUM('email', 'in_app', 'sms', 'webhook', name='crm_workflow_notification_type'), nullable=False),
         sa.Column("recipient", sa.String(255), nullable=False),
@@ -91,7 +91,7 @@ def upgrade() -> None:
         sa.Column("status", sa.String(32), nullable=False, server_default='pending'),
         sa.Column("sent_at", sa.DateTime),
         sa.Column("error_message", sa.Text),
-        sa.Column("workflow_execution_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_workflow_executions.id")),
+        sa.Column("workflow_execution_id", sa.String(), sa.ForeignKey("crm_workflow_executions.id")),
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     )
 

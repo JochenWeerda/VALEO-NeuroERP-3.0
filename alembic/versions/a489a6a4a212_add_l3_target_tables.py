@@ -29,8 +29,8 @@ def upgrade() -> None:
 
     # Domain Finance tables
     op.create_table('period_closure',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('fiscal_year', sa.Integer(), nullable=False),
         sa.Column('fiscal_period', sa.Integer(), nullable=False),
         sa.Column('code', sa.String(length=50), nullable=False),
@@ -47,8 +47,8 @@ def upgrade() -> None:
     )
 
     op.create_table('sales_order',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('currency_code', sa.String(length=3), nullable=False),
         sa.Column('fx_rate', sa.Numeric(precision=10, scale=6), nullable=False),
         sa.Column('fx_rate_ts', postgresql.TIMESTAMP(timezone=True), nullable=False),
@@ -63,8 +63,8 @@ def upgrade() -> None:
 
     # Domain CRM tables
     op.create_table('cancellation_reason',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('cancel_reason_id', sa.Integer(), nullable=False),
         sa.Column('description', sa.Text(), nullable=False),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -76,8 +76,8 @@ def upgrade() -> None:
     )
 
     op.create_table('opportunity',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('stage', sa.String(length=50), nullable=False),
         sa.Column('status', sa.String(length=50), nullable=False),
         sa.Column('cancel_reason_id', sa.Integer(), nullable=True),
@@ -91,8 +91,8 @@ def upgrade() -> None:
 
     # Domain Inventory tables
     op.create_table('stock_item',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('uom_base', sa.String(length=20), nullable=False),
         sa.Column('lot_id', sa.String(length=100), nullable=False),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -103,8 +103,8 @@ def upgrade() -> None:
     )
 
     op.create_table('stock_movement',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('quantity', sa.Numeric(precision=15, scale=4), nullable=False),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -115,9 +115,9 @@ def upgrade() -> None:
 
     # Domain HR tables
     op.create_table('person',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column('person_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
+        sa.Column('person_id', sa.String(), nullable=False),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.ForeignKeyConstraint(['tenant_id'], ['domain_shared.tenants.id'], ),
@@ -127,9 +127,9 @@ def upgrade() -> None:
     )
 
     op.create_table('employment',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column('person_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
+        sa.Column('person_id', sa.String(), nullable=False),
         sa.Column('employment_start', sa.Date(), nullable=False),
         sa.Column('employment_end', sa.Date(), nullable=True),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -142,8 +142,8 @@ def upgrade() -> None:
 
     # Domain Manufacturing tables
     op.create_table('bill_of_material',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('bom_id', sa.Integer(), nullable=False),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -154,8 +154,8 @@ def upgrade() -> None:
     )
 
     op.create_table('production_order',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('routing_id', sa.Integer(), nullable=False),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -166,8 +166,8 @@ def upgrade() -> None:
     )
 
     op.create_table('production_event',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('event_ts', postgresql.TIMESTAMP(timezone=True), nullable=False),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),

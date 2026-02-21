@@ -10,7 +10,7 @@ Modelle für:
 
 from datetime import datetime
 from decimal import Decimal
-import uuid
+from app.core.uuid7 import uuid7
 
 from sqlalchemy import (
     Boolean, Column, DateTime, ForeignKey, Integer,
@@ -52,7 +52,7 @@ class CustomerContract(Base):
     __tablename__ = "customer_contracts"
     __table_args__ = {"schema": "domain_portal"}
     
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String(36), primary_key=True, default=lambda: uuid7())
     
     # Mandant & Kunde
     tenant_id = Column(String(36), nullable=False, index=True)
@@ -106,7 +106,7 @@ class CustomerPrePurchase(Base):
     __tablename__ = "customer_pre_purchases"
     __table_args__ = {"schema": "domain_portal"}
     
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String(36), primary_key=True, default=lambda: uuid7())
     
     # Mandant & Kunde
     tenant_id = Column(String(36), nullable=False, index=True)
@@ -156,7 +156,7 @@ class CustomerOrder(Base):
     __tablename__ = "customer_orders"
     __table_args__ = {"schema": "domain_portal"}
     
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String(36), primary_key=True, default=lambda: uuid7())
     
     # Mandant & Kunde
     tenant_id = Column(String(36), nullable=False, index=True)
@@ -198,7 +198,7 @@ class CustomerOrderItem(Base):
     __tablename__ = "customer_order_items"
     __table_args__ = {"schema": "domain_portal"}
     
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String(36), primary_key=True, default=lambda: uuid7())
     
     # Bestellung
     order_id = Column(String(36), ForeignKey("domain_portal.customer_orders.id"), nullable=False)
@@ -235,7 +235,7 @@ class CustomerOrderHistory(Base):
     __tablename__ = "customer_order_history"
     __table_args__ = {"schema": "domain_portal"}
     
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String(36), primary_key=True, default=lambda: uuid7())
     
     tenant_id = Column(String(36), nullable=False, index=True)
     customer_id = Column(String(36), nullable=False, index=True)

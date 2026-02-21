@@ -25,9 +25,9 @@ def upgrade() -> None:
 
     op.create_table(
         "sales_order_items",
-        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("order_id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("order_id", sa.String(), nullable=False),
         sa.Column("line_number", sa.Integer(), nullable=False),
         sa.Column("article_number", sa.String(length=80), nullable=False),
         sa.Column("description", sa.String(length=255), nullable=True),

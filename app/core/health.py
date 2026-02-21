@@ -13,8 +13,21 @@ def _check_postgresql_sync() -> tuple[bool, str]:
     """Run a lightweight sync DB ping using the configured SQLAlchemy engine."""
     try:
         with engine.connect() as conn:
+            # Check basic connectivity
             conn.execute(text("SELECT 1"))
-        return True, "ok"
+            
+            # Check alembic version table exists and has at least one migration
+            result = conn.execute(text("SELECT COUNT(*) FROM alembic_version"))
+            version_count = result.scalar()
+            
+            if version_count == 0:
+                return False, "No alembic migrations applied (empty alembic_version table)"
+            
+            # Get current migration version
+            result = conn.execute(text("SELECT version FROM alembic_version LIMIT 1"))
+            current_version = result.scalar()
+            
+        return True, f"ok (migration: {current_version})"
     except Exception as e:
         return False, str(e)
 

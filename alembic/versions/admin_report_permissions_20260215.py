@@ -21,8 +21,8 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         "admin_report_permissions",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("role_id", sa.String(length=64), nullable=False),
         sa.Column("report_key", sa.String(length=120), nullable=False),
         sa.Column("can_view", sa.Boolean(), nullable=False, server_default=sa.text("true")),

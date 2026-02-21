@@ -33,7 +33,7 @@ def upgrade() -> None:
     # Emails table
     op.create_table(
         "crm_communication_emails",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("message_id", sa.String(255), unique=True),
         sa.Column("thread_id", sa.String(255), index=True),
@@ -46,12 +46,12 @@ def upgrade() -> None:
         sa.Column("body_html", sa.Text),
         sa.Column("body_text", sa.Text),
         sa.Column("status", postgresql.ENUM('draft', 'queued', 'sent', 'delivered', 'opened', 'clicked', 'bounced', 'complaint', 'unsubscribed', name='crm_communication_email_status'), nullable=False, server_default='draft'),
-        sa.Column("customer_id", postgresql.UUID(as_uuid=True), index=True),
-        sa.Column("lead_id", postgresql.UUID(as_uuid=True), index=True),
-        sa.Column("case_id", postgresql.UUID(as_uuid=True), index=True),
-        sa.Column("opportunity_id", postgresql.UUID(as_uuid=True), index=True),
-        sa.Column("template_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_communication_templates.id")),
-        sa.Column("campaign_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_communication_campaigns.id")),
+        sa.Column("customer_id", sa.String(), index=True),
+        sa.Column("lead_id", sa.String(), index=True),
+        sa.Column("case_id", sa.String(), index=True),
+        sa.Column("opportunity_id", sa.String(), index=True),
+        sa.Column("template_id", sa.String(), sa.ForeignKey("crm_communication_templates.id")),
+        sa.Column("campaign_id", sa.String(), sa.ForeignKey("crm_communication_campaigns.id")),
         sa.Column("sent_at", sa.DateTime),
         sa.Column("delivered_at", sa.DateTime),
         sa.Column("opened_at", sa.DateTime),
@@ -68,7 +68,7 @@ def upgrade() -> None:
     # Templates table
     op.create_table(
         "crm_communication_templates",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
@@ -90,11 +90,11 @@ def upgrade() -> None:
     # Campaigns table
     op.create_table(
         "crm_communication_campaigns",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
-        sa.Column("template_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_communication_templates.id"), nullable=False),
+        sa.Column("template_id", sa.String(), sa.ForeignKey("crm_communication_templates.id"), nullable=False),
         sa.Column("status", postgresql.ENUM('draft', 'scheduled', 'running', 'paused', 'completed', 'cancelled', name='crm_communication_campaign_status'), nullable=False, server_default='draft'),
         sa.Column("target_filters", postgresql.JSONB, default=dict),
         sa.Column("target_count", sa.Integer),
@@ -116,8 +116,8 @@ def upgrade() -> None:
     # Attachments table
     op.create_table(
         "crm_communication_attachments",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
-        sa.Column("email_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_communication_emails.id"), nullable=False),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
+        sa.Column("email_id", sa.String(), sa.ForeignKey("crm_communication_emails.id"), nullable=False),
         sa.Column("filename", sa.String(255), nullable=False),
         sa.Column("content_type", sa.String(100), nullable=False),
         sa.Column("size", sa.Integer, nullable=False),
@@ -130,7 +130,7 @@ def upgrade() -> None:
     # Automations table
     op.create_table(
         "crm_communication_automations",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),

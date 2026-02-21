@@ -9,12 +9,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import WebhookRegistration
 from ..schemas.base import PaginatedResponse, BaseSchema
 
 router = APIRouter()
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 # Pre-defined event areas matching L3-Connect
 EVENT_AREAS = [
@@ -76,12 +77,12 @@ async def register_webhook(
     db: Session = Depends(get_db),
 ):
     """POST Registrieren"""
-    import uuid
+    from app.core.uuid7 import uuid7
     tid = tenant_id or DEFAULT_TENANT
     if payload.event_area not in EVENT_AREAS:
         raise HTTPException(400, f"Unknown event area: {payload.event_area}")
     obj = WebhookRegistration(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         url=payload.url,
         event_area=payload.event_area,
         secret=payload.secret,

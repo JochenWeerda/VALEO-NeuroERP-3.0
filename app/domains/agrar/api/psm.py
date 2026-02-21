@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc
 import logging
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import PSM as PSMModel
 from ....api.v1.schemas.base import PaginatedResponse
@@ -21,7 +22,7 @@ from ....services.competitor_monitor import competitor_monitor
 
 router = APIRouter()
 
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 logger = logging.getLogger(__name__)
 bvl_client = BVLPSMClient()
 

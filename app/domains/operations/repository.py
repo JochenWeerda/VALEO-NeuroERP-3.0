@@ -6,7 +6,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, func
 from datetime import datetime, timezone
-import uuid
+from app.core.uuid7 import uuid7
 
 from app.domains.operations.models import (
     Waage, WaageStatus,
@@ -411,7 +411,7 @@ class ChargeRepository:
         payload = dict(charge_data)
         payload.setdefault("status", ChargeStatus.ERFASST.value)
         charge = Charge(
-            id=f"CH-{str(uuid.uuid4())[:8].upper()}",
+            id=f"CH-{uuid7()[:8].upper()}",
             **payload,
         )
         self.db.add(charge)
@@ -493,7 +493,7 @@ class BankKontoRepository:
         return self.db.query(BankKonto).filter(BankKonto.iban == iban).first()
 
     def create(self, konto_data: dict) -> BankKonto:
-        konto = BankKonto(id=f"BK-{str(uuid.uuid4())[:8].upper()}", **konto_data)
+        konto = BankKonto(id=f"BK-{uuid7()[:8].upper()}", **konto_data)
         self.db.add(konto)
         self.db.commit()
         self.db.refresh(konto)
@@ -554,7 +554,7 @@ class RahmenvertragRepository:
         return self.db.query(Rahmenvertrag).filter(Rahmenvertrag.nummer == nummer).first()
 
     def create(self, vertrag_data: dict) -> Rahmenvertrag:
-        vertrag = Rahmenvertrag(id=f"RV-{str(uuid.uuid4())[:8].upper()}", **vertrag_data)
+        vertrag = Rahmenvertrag(id=f"RV-{uuid7()[:8].upper()}", **vertrag_data)
         self.db.add(vertrag)
         self.db.commit()
         self.db.refresh(vertrag)

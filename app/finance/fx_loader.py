@@ -196,7 +196,7 @@ class FXLoader:
                 else:
                     # Insert
                     wk = Wechselkurs(
-                        id=str(uuid.uuid4()),
+                        id=uuid7(),
                         tenant_id=self.tenant_id,
                         waehrung_von=currency,
                         waehrung_nach="EUR",
@@ -255,7 +255,7 @@ class FXLoader:
                 
                 if not existing:
                     wk = Wechselkurs(
-                        id=str(uuid.uuid4()),
+                        id=uuid7(),
                         tenant_id=self.tenant_id,
                         waehrung_von=currency,
                         waehrung_nach="EUR",
@@ -292,7 +292,7 @@ class FXLoader:
         try:
             for rate in rates:
                 wk = Wechselkurs(
-                    id=str(uuid.uuid4()),
+                    id=uuid7(),
                     tenant_id=self.tenant_id,
                     waehrung_von=rate["waehrung_von"],
                     waehrung_nach=rate["waehrung_nach"],
@@ -377,5 +377,5 @@ def convert_currency(
     return amount_eur * rates[to_currency]
 
 
-import uuid
+from app.core.uuid7 import uuid7
 from crontab import crontab

@@ -680,6 +680,15 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
       },
       {
+        id: 'ernte-annahme',
+        label: 'Ernte-Annahme',
+        icon: Tractor,
+        module: '@/pages/agrar/ernte-annahme-erfassung',
+        preferredPath: 'agrar/ernte-annahme-erfassung',
+        keywords: ['ernte', 'annahme', 'erfassung'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:write' },
+      },
+      {
         id: 'nawaro',
         label: 'NaWaRo',
         icon: Leaf,
@@ -792,6 +801,15 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         mcp: { businessDomain: 'logistics', scope: 'logistics:read' },
       },
       {
+        id: 'hofliste',
+        label: 'Hofliste',
+        icon: Scale,
+        module: '@/pages/waage/hofliste',
+        path: '/waage/hofliste',
+        keywords: ['hofliste', 'hof', 'yard'],
+        mcp: { businessDomain: 'logistics', scope: 'logistics:read' },
+      },
+      {
         id: 'waage-liste',
         label: 'Waagen',
         icon: Scale,
@@ -869,6 +887,15 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         module: '@/pages/compliance/export-pruefprotokoll',
         path: '/compliance/export-pruefprotokoll',
         keywords: ['export', 'gefahrstoff', 'naehrstoff', 'trace'],
+        mcp: { businessDomain: 'compliance', scope: 'compliance:read' },
+      },
+      {
+        id: 'meldewesen',
+        label: 'Meldewesen',
+        icon: FileText,
+        module: '@/pages/compliance/meldewesen-konsole',
+        path: '/compliance/meldewesen-konsole',
+        keywords: ['meldewesen', 'intrastat', 'mvo', 'eudr'],
         mcp: { businessDomain: 'compliance', scope: 'compliance:read' },
       },
       {
@@ -1264,6 +1291,14 @@ const ACTION_SHORTCUTS_CONFIG: Array<
     icon: Calculator,
     module: '@/pages/einkauf/bestellvorschlaege',
     keywords: ['bestellvorschlag'],
+  },
+  {
+    id: 'action-ernte-annahme',
+    label: 'Ernte-Annahme erfassen',
+    icon: Tractor,
+    module: '@/pages/agrar/ernte-annahme-erfassung',
+    preferredPath: 'agrar/ernte-annahme-erfassung',
+    keywords: ['ernte', 'annahme'],
   },
 ]
 
