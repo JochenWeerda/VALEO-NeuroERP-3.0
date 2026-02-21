@@ -11,8 +11,8 @@ from decimal import Decimal
 from datetime import date, datetime, timedelta
 from pydantic import BaseModel, Field
 import logging
-import uuid
 import re
+from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
 
@@ -185,7 +185,7 @@ async def create_matching_rule(
     Create a new matching rule.
     """
     try:
-        rule_id = str(uuid.uuid4())
+        rule_id = uuid7()
         
         import json
         conditions_json = json.dumps(rule.conditions)
@@ -559,7 +559,7 @@ async def auto_match(
                     })
                     
                     # Create match record
-                    match_id = str(uuid.uuid4())
+                    match_id = uuid7()
                     match_insert = text("""
                         INSERT INTO domain_erp.bank_matches
                         (id, tenant_id, statement_line_id, op_id, confidence, match_type, auto_matched, matched_at)
@@ -627,7 +627,7 @@ async def apply_match(
             raise HTTPException(status_code=404, detail="Statement line not found")
         
         # Create match record
-        match_id = str(uuid.uuid4())
+        match_id = uuid7()
         match_insert = text("""
             INSERT INTO domain_erp.bank_matches
             (id, tenant_id, statement_line_id, op_id, confidence, match_type, auto_matched, matched_at)

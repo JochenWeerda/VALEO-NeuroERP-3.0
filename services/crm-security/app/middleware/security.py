@@ -170,8 +170,15 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
 
         # Add request ID for tracking
-        import uuid
-        response.headers["X-Request-ID"] = str(uuid.uuid4())
+        import os, time
+        def _uuid7():
+            ts = int(time.time() * 1000)
+            ra = int.from_bytes(os.urandom(2), "big") & 0x0FFF
+            rb = int.from_bytes(os.urandom(8), "big") & 0x3FFFFFFFFFFFFFFF
+            v = (ts << 80) | (0x7 << 76) | (ra << 64) | (0x2 << 62) | rb
+            h = f"{v:032x}"
+            return f"{h[:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:]}"
+        response.headers["X-Request-ID"] = _uuid7()
 
         return response
 

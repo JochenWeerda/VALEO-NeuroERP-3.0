@@ -7,10 +7,10 @@ from sqlalchemy import Column, String, Integer, Float, DateTime, Text, ForeignKe
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-import uuid
 import enum
 
 from ...core.database import Base
+from app.core.uuid7 import uuid7
 
 
 class WaageStatus(str, enum.Enum):
@@ -45,7 +45,7 @@ class Waage(Base):
     __tablename__ = "ops_waagen"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"W-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"W-{uuid7()[:8].upper()}")
     
     # Stammdaten
     standort = Column(String(100), nullable=False)
@@ -81,7 +81,7 @@ class Wiegung(Base):
     __tablename__ = "ops_wiegungen"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"WG-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"WG-{uuid7()[:8].upper()}")
     
     # Fahrzeugdaten
     kennzeichen = Column(String(20), nullable=False)
@@ -119,7 +119,7 @@ class Fahrzeug(Base):
     __tablename__ = "ops_fahrzeuge"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"F-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"F-{uuid7()[:8].upper()}")
 
     # Stammdaten (zvoove Fuhrpark)
     ro_nummer = Column(String(50))
@@ -224,7 +224,7 @@ class Fahrer(Base):
     __tablename__ = "ops_fahrer"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"DR-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"DR-{uuid7()[:8].upper()}")
     
     # Stammdaten
     personalnummer = Column(String(20), unique=True)
@@ -276,7 +276,7 @@ class FahrzeugTour(Base):
     __tablename__ = "ops_fahrzeug_touren"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"TOUR-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"TOUR-{uuid7()[:8].upper()}")
     
     # Referenzen
     fahrzeug_id = Column(String, ForeignKey("domain_ops.ops_fahrzeuge.id", ondelete="CASCADE"))
@@ -334,7 +334,7 @@ class Dokument(Base):
     __tablename__ = "ops_dokumente"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"DOC-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"DOC-{uuid7()[:8].upper()}")
     
     # Stammdaten
     name = Column(String(255), nullable=False)
@@ -376,7 +376,7 @@ class DokumentVersion(Base):
     __tablename__ = "ops_dokument_versionen"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"VER-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"VER-{uuid7()[:8].upper()}")
     
     # Referenz
     dokument_id = Column(String, ForeignKey("domain_ops.ops_dokumente.id", ondelete="CASCADE"))
@@ -412,7 +412,7 @@ class Charge(Base):
     __tablename__ = "ops_chargen"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"CH-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"CH-{uuid7()[:8].upper()}")
     chargen_id = Column(String(50), nullable=False, unique=True)
     losnummer = Column(String(50), nullable=True)
     artikel = Column(String(100), nullable=False)
@@ -454,7 +454,7 @@ class BankKonto(Base):
     __tablename__ = "ops_bankkonten"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"BK-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"BK-{uuid7()[:8].upper()}")
     iban = Column(String(50), nullable=False, unique=True)
     bic = Column(String(20), nullable=False)
     bank = Column(String(255), nullable=False)
@@ -476,7 +476,7 @@ class Rahmenvertrag(Base):
     __tablename__ = "ops_rahmenvertraege"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"RV-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"RV-{uuid7()[:8].upper()}")
     nummer = Column(String(50), nullable=False, unique=True)
     partner = Column(String(255), nullable=False)
     partner_id = Column(String(100), nullable=False)
@@ -498,7 +498,7 @@ class ComplianceEintrag(Base):
     __tablename__ = "ops_compliance_items"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"CMP-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"CMP-{uuid7()[:8].upper()}")
     bereich = Column(String(120), nullable=False)
     anforderung = Column(String(255), nullable=False)
     erfuellt = Column(Boolean, default=False)
@@ -512,7 +512,7 @@ class ENNIMeldung(Base):
     __tablename__ = "ops_enni_meldungen"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"ENNI-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"ENNI-{uuid7()[:8].upper()}")
     typ = Column(String(20), nullable=False)
     betrieb = Column(String(255), nullable=False)
     vvvo = Column(String(50), nullable=False)
@@ -529,7 +529,7 @@ class QSCheckEintrag(Base):
     __tablename__ = "ops_qs_checks"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"QS-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"QS-{uuid7()[:8].upper()}")
     bereich = Column(String(120), nullable=False)
     pruefpunkt = Column(String(255), nullable=False)
     erfuellt = Column(Boolean, default=False)
@@ -543,7 +543,7 @@ class ZulassungRegister(Base):
     __tablename__ = "ops_zulassungen_register"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"ZUL-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"ZUL-{uuid7()[:8].upper()}")
     produkt = Column(String(255), nullable=False)
     typ = Column(String(50), nullable=False)
     nummer = Column(String(80), nullable=False)
@@ -558,7 +558,7 @@ class SachkundeEintrag(Base):
     __tablename__ = "ops_sachkunde_register"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"SACH-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"SACH-{uuid7()[:8].upper()}")
     kunde = Column(String(255), nullable=False)
     kundennr = Column(String(80), nullable=False)
     nachweis_nr = Column(String(120), nullable=False)
@@ -574,7 +574,7 @@ class SaatgutNachbauEintrag(Base):
     __tablename__ = "ops_saatgut_nachbau"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"NACH-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"NACH-{uuid7()[:8].upper()}")
     betrieb = Column(String(255), nullable=False)
     sorte = Column(String(120), nullable=False)
     kultur = Column(String(120), nullable=False)
@@ -590,7 +590,7 @@ class VVVOEintrag(Base):
     __tablename__ = "ops_vvvo_register"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"VVVO-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"VVVO-{uuid7()[:8].upper()}")
     betriebsname = Column(String(255), nullable=False)
     vvvo = Column(String(50), nullable=False)
     bundesland = Column(String(80), nullable=True)
@@ -605,7 +605,7 @@ class DispositionPosition(Base):
     __tablename__ = "ops_disposition"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"DIS-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"DIS-{uuid7()[:8].upper()}")
     artikel = Column(String(255), nullable=False)
     artikel_id = Column(String(100), nullable=False)
     bestand = Column(Float, default=0)
@@ -621,7 +621,7 @@ class FoerderAntrag(Base):
     __tablename__ = "ops_foerderantraege"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"FA-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"FA-{uuid7()[:8].upper()}")
     nummer = Column(String(80), nullable=False)
     programm = Column(String(120), nullable=False)
     antragsdatum = Column(DateTime(timezone=True), nullable=True)
@@ -636,7 +636,7 @@ class LaborProbe(Base):
     __tablename__ = "ops_labor_proben"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"LB-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"LB-{uuid7()[:8].upper()}")
     probennummer = Column(String(80), nullable=False)
     typ = Column(String(80), nullable=False)
     artikel = Column(String(255), nullable=False)
@@ -651,7 +651,7 @@ class LaborAuftragEntry(Base):
     __tablename__ = "ops_labor_auftraege"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"LA-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"LA-{uuid7()[:8].upper()}")
     chargen_id = Column(String(80), nullable=False)
     labor = Column(String(255), nullable=False)
     analysen = Column(Integer, default=0)
@@ -665,7 +665,7 @@ class MarketingKampagneEntry(Base):
     __tablename__ = "ops_marketing_kampagnen"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"MK-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"MK-{uuid7()[:8].upper()}")
     name = Column(String(255), nullable=False)
     typ = Column(String(80), nullable=False)
     zielgruppe = Column(String(120), nullable=True)
@@ -681,7 +681,7 @@ class ZertifikatEintrag(Base):
     __tablename__ = "ops_zertifikate"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"ZERT-{str(uuid.uuid4())[:8].upper()}")
+    id = Column(String, primary_key=True, default=lambda: f"ZERT-{uuid7()[:8].upper()}")
     art = Column(String(120), nullable=False)
     standard = Column(String(120), nullable=False)
     nummer = Column(String(120), nullable=False)

@@ -7,8 +7,8 @@ from __future__ import annotations
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-import uuid
 import time
+from app.core.uuid7 import uuid7
 
 from app.models.documents import WorkflowStatus, WorkflowAudit
 
@@ -41,7 +41,7 @@ class WorkflowRepository:
             status.updated_by = user
         else:
             status = WorkflowStatus(
-                id=str(uuid.uuid4()),
+                id=uuid7(),
                 domain=domain,
                 doc_number=doc_number,
                 state=state,
@@ -63,7 +63,7 @@ class WorkflowRepository:
     ) -> None:
         """Fügt Audit-Eintrag hinzu"""
         audit = WorkflowAudit(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             domain=domain,
             doc_number=doc_number,
             ts=int(time.time()),

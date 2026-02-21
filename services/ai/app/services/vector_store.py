@@ -96,8 +96,15 @@ async def add_document(
         if store is None:
             raise Exception("Vector store not initialized")
         
-        import uuid
-        doc_id = doc_id or str(uuid.uuid4())
+        import os, time
+        def _uuid7():
+            ts = int(time.time() * 1000)
+            ra = int.from_bytes(os.urandom(2), "big") & 0x0FFF
+            rb = int.from_bytes(os.urandom(8), "big") & 0x3FFFFFFFFFFFFFFF
+            v = (ts << 80) | (0x7 << 76) | (ra << 64) | (0x2 << 62) | rb
+            h = f"{v:032x}"
+            return f"{h[:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:]}"
+        doc_id = doc_id or _uuid7()
         
         store.add(
             documents=[content],

@@ -30,7 +30,7 @@ def upgrade():
 
     # Create shared tables
     op.create_table('tenants',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), nullable=False),
         sa.Column('name', sa.String(length=255), nullable=False),
         sa.Column('domain', sa.String(length=255), nullable=True),
         sa.Column('is_active', sa.Boolean(), nullable=True, default=True),
@@ -42,7 +42,7 @@ def upgrade():
     )
 
     op.create_table('users',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), nullable=False),
         sa.Column('keycloak_id', sa.String(length=255), nullable=False),
         sa.Column('username', sa.String(length=255), nullable=False),
         sa.Column('email', sa.String(length=255), nullable=False),
@@ -50,7 +50,7 @@ def upgrade():
         sa.Column('last_name', sa.String(length=255), nullable=True),
         sa.Column('is_active', sa.Boolean(), nullable=True, default=True),
         sa.Column('roles', postgresql.ARRAY(sa.String()), nullable=True),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('preferences', postgresql.JSONB(astext_type=sa.Text()), nullable=True, default='{}'),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -64,8 +64,8 @@ def upgrade():
 
     # Create CRM tables
     op.create_table('customers',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('customer_number', sa.String(length=50), nullable=False),
         sa.Column('company_name', sa.String(length=255), nullable=True),
         sa.Column('contact_person', sa.String(length=255), nullable=True),
@@ -79,8 +79,8 @@ def upgrade():
         sa.Column('notes', sa.Text(), nullable=True),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.Column('created_by', postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column('updated_by', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('created_by', sa.String(), nullable=True),
+        sa.Column('updated_by', sa.String(), nullable=True),
         sa.ForeignKeyConstraint(['created_by'], ['domain_shared.users.id'], ),
         sa.ForeignKeyConstraint(['tenant_id'], ['domain_shared.tenants.id'], ),
         sa.ForeignKeyConstraint(['updated_by'], ['domain_shared.users.id'], ),
@@ -90,14 +90,14 @@ def upgrade():
     )
 
     op.create_table('leads',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column('customer_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
+        sa.Column('customer_id', sa.String(), nullable=True),
         sa.Column('lead_source', sa.String(length=100), nullable=True),
         sa.Column('status', sa.String(length=50), nullable=True, default='new'),
         sa.Column('estimated_value', sa.Numeric(precision=15, scale=2), nullable=True),
         sa.Column('probability', sa.Numeric(precision=5, scale=2), nullable=True),
-        sa.Column('assigned_to', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('assigned_to', sa.String(), nullable=True),
         sa.Column('expected_close_date', sa.Date(), nullable=True),
         sa.Column('notes', sa.Text(), nullable=True),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -111,8 +111,8 @@ def upgrade():
 
     # Create ERP tables
     op.create_table('chart_of_accounts',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('account_number', sa.String(length=20), nullable=False),
         sa.Column('account_name', sa.String(length=255), nullable=False),
         sa.Column('account_type', sa.String(length=50), nullable=False),
@@ -127,8 +127,8 @@ def upgrade():
     )
 
     op.create_table('bank_accounts',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('account_number', sa.String(length=50), nullable=False),
         sa.Column('bank_name', sa.String(length=255), nullable=False),
         sa.Column('iban', sa.String(length=34), nullable=True),
@@ -145,8 +145,8 @@ def upgrade():
     )
 
     op.create_table('journal_entries',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('entry_number', sa.String(length=50), nullable=False),
         sa.Column('entry_date', sa.Date(), nullable=False),
         sa.Column('posting_date', sa.Date(), nullable=False),
@@ -157,7 +157,7 @@ def upgrade():
         sa.Column('total_debit', sa.Numeric(precision=15, scale=2), nullable=True, default=0),
         sa.Column('total_credit', sa.Numeric(precision=15, scale=2), nullable=True, default=0),
         sa.Column('status', sa.String(length=50), nullable=True, default='draft'),
-        sa.Column('posted_by', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('posted_by', sa.String(), nullable=True),
         sa.Column('posted_at', postgresql.TIMESTAMP(timezone=True), nullable=True),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -169,9 +169,9 @@ def upgrade():
     )
 
     op.create_table('journal_entry_lines',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('journal_entry_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('account_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('journal_entry_id', sa.String(), nullable=False),
+        sa.Column('account_id', sa.String(), nullable=False),
         sa.Column('description', sa.String(length=255), nullable=True),
         sa.Column('debit', sa.Numeric(precision=15, scale=2), nullable=True, default=0),
         sa.Column('credit', sa.Numeric(precision=15, scale=2), nullable=True, default=0),
@@ -186,9 +186,9 @@ def upgrade():
     )
 
     op.create_table('debitors',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column('customer_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
+        sa.Column('customer_id', sa.String(), nullable=True),
         sa.Column('debitor_number', sa.String(length=50), nullable=False),
         sa.Column('name', sa.String(length=255), nullable=False),
         sa.Column('address', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
@@ -206,8 +206,8 @@ def upgrade():
     )
 
     op.create_table('creditors',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('creditor_number', sa.String(length=50), nullable=False),
         sa.Column('name', sa.String(length=255), nullable=False),
         sa.Column('address', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
@@ -224,8 +224,8 @@ def upgrade():
 
     # Create Inventory tables
     op.create_table('warehouses',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('warehouse_code', sa.String(length=20), nullable=False),
         sa.Column('name', sa.String(length=255), nullable=False),
         sa.Column('address', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
@@ -239,8 +239,8 @@ def upgrade():
     )
 
     op.create_table('articles',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('article_number', sa.String(length=50), nullable=False),
         sa.Column('name', sa.String(length=255), nullable=False),
         sa.Column('description', sa.Text(), nullable=True),
@@ -261,8 +261,8 @@ def upgrade():
     )
 
     op.create_table('stock_locations',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('warehouse_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('warehouse_id', sa.String(), nullable=False),
         sa.Column('location_code', sa.String(length=50), nullable=False),
         sa.Column('location_type', sa.String(length=50), nullable=True, default='shelf'),
         sa.Column('capacity', sa.Integer(), nullable=True),
@@ -274,16 +274,16 @@ def upgrade():
     )
 
     op.create_table('stock_movements',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column('article_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('warehouse_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('location_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=True),
+        sa.Column('article_id', sa.String(), nullable=False),
+        sa.Column('warehouse_id', sa.String(), nullable=False),
+        sa.Column('location_id', sa.String(), nullable=True),
         sa.Column('movement_type', sa.String(length=50), nullable=False),
         sa.Column('quantity', sa.Integer(), nullable=False),
         sa.Column('reference_document', sa.String(length=100), nullable=True),
         sa.Column('reason', sa.String(length=255), nullable=True),
-        sa.Column('performed_by', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('performed_by', sa.String(), nullable=True),
         sa.Column('movement_date', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.ForeignKeyConstraint(['article_id'], ['domain_inventory.articles.id'], ),
@@ -297,8 +297,8 @@ def upgrade():
 
     # Create Infrastructure tables
     op.create_table('event_store',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('aggregate_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('aggregate_id', sa.String(), nullable=False),
         sa.Column('aggregate_type', sa.String(length=255), nullable=False),
         sa.Column('event_type', sa.String(length=255), nullable=False),
         sa.Column('event_data', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
@@ -311,7 +311,7 @@ def upgrade():
     )
 
     op.create_table('outbox',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), nullable=False),
         sa.Column('event_type', sa.String(length=255), nullable=False),
         sa.Column('event_data', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column('event_metadata', postgresql.JSONB(astext_type=sa.Text()), nullable=True, default='{}'),
@@ -343,11 +343,11 @@ def upgrade():
     )
 
     op.create_table('audit_log',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('user_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('user_id', sa.String(), nullable=True),
         sa.Column('action', sa.String(length=100), nullable=False),
         sa.Column('resource_type', sa.String(length=100), nullable=False),
-        sa.Column('resource_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('resource_id', sa.String(), nullable=True),
         sa.Column('old_values', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column('new_values', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column('ip_address', postgresql.INET(), nullable=True),

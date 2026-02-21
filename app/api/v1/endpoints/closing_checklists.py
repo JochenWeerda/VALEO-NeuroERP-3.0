@@ -11,7 +11,7 @@ from decimal import Decimal
 from datetime import date, datetime
 from pydantic import BaseModel, Field
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
 
@@ -322,7 +322,7 @@ async def create_checklist_template(
     Create a new checklist template.
     """
     try:
-        template_id = str(uuid.uuid4())
+        template_id = uuid7()
         
         import json
         items_json = json.dumps([item.dict() for item in template.items])
@@ -376,7 +376,7 @@ async def create_closing_checklist(
     Create a closing checklist for a period.
     """
     try:
-        checklist_id = str(uuid.uuid4())
+        checklist_id = uuid7()
         
         # Get template if provided
         items = []

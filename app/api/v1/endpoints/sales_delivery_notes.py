@@ -5,8 +5,8 @@ from __future__ import annotations
 from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Optional
-import uuid
 import json
+from app.core.uuid7 import uuid7
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
@@ -181,7 +181,7 @@ async def create_delivery_note(
     db: Session = Depends(get_db),
 ):
     """Create a new delivery note."""
-    ls_id = str(uuid.uuid4())
+    ls_id = uuid7()
     delivery_note_number = _generate_delivery_note_number(db, tenant_id)
     
     # Calculate totals
@@ -239,7 +239,7 @@ async def create_delivery_note(
     
     # Insert positions
     for pos in payload.positionen:
-        pos_id = str(uuid.uuid4())
+        pos_id = uuid7()
         listenpreis = pos.listenpreis or Decimal("0")
         rabatt = pos.rabatt or Decimal("0")
         menge = pos.menge
@@ -386,7 +386,7 @@ async def print_delivery_note(
     
     # Create attestation record if needed
     if attestation:
-        attestation_id = str(uuid.uuid4())
+        attestation_id = uuid7()
         db.execute(
             text("""
                 INSERT INTO domain_audit.attestations (
@@ -459,4 +459,40 @@ async def list_delivery_notes(
         )
     
     return result
+
+
+@router.get("/last", response_model=Optional[DeliveryNote])
+async def get_last_delivery_note(
+    operator_id: Optional[str] = Query(None, description="Filter by operator ID (user who created the delivery note)"),
+    customer_id: Optional[str] = Query(None, description="Filter by customer ID"),
+    tenant_id: str = Query(DEFAULT_TENANT),
+    db: Session = Depends(get_db),
+):
+    """Get the last delivery note for a user/customer (for 'Wie vorheriger Beleg' functionality)."""
+    query = """
+        SELECT * FROM domain_sales.delivery_notes 
+        WHERE tenant_id = :tenant_id
+    """
+    params = {"tenant_id": tenant_id}
+    
+    if operator_id:
+        query += " AND operator_id = :operator_id"
+        params["operator_id"] = operator_id
+    
+    if customer_id:
+        query += " AND customer_id = :customer_id"
+        params["customer_id"] = customer_id
+    
+    query += " ORDER BY created_at DESC LIMIT 1"
+    
+    row = db.execute(text(query), params).mappings().first()
+    
+    if not row:
+        return None
+    
+    positions = _list_positions(db, row["id"])
+    return DeliveryNote(
+        **dict(row),
+        positionen=[DeliveryNotePosition(**dict(p)) for p in positions]
+    )
 

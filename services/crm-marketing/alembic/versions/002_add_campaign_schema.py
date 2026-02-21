@@ -39,7 +39,7 @@ def upgrade() -> None:
     # Campaign Templates
     op.create_table(
         'crm_marketing_campaign_templates',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column('id', sa.String(), primary_key=True),
         sa.Column('tenant_id', sa.String(64), nullable=False),
         sa.Column('name', sa.String(255), nullable=False),
         sa.Column('description', sa.Text(), nullable=True),
@@ -59,14 +59,14 @@ def upgrade() -> None:
     # Campaigns
     op.create_table(
         'crm_marketing_campaigns',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column('id', sa.String(), primary_key=True),
         sa.Column('tenant_id', sa.String(64), nullable=False),
         sa.Column('name', sa.String(255), nullable=False),
         sa.Column('description', sa.Text(), nullable=True),
         sa.Column('type', postgresql.ENUM('email', 'sms', 'push', 'social', name='crm_marketing_campaign_type'), nullable=False),
         sa.Column('status', postgresql.ENUM('draft', 'scheduled', 'running', 'paused', 'completed', 'cancelled', name='crm_marketing_campaign_status'), nullable=False, server_default='draft'),
-        sa.Column('segment_id', postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column('template_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('segment_id', sa.String(), nullable=True),
+        sa.Column('template_id', sa.String(), nullable=True),
         sa.Column('scheduled_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('started_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('completed_at', sa.DateTime(timezone=True), nullable=True),
@@ -96,12 +96,12 @@ def upgrade() -> None:
     # Campaign Variants (for A/B Testing)
     op.create_table(
         'crm_marketing_campaign_variants',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column('campaign_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), primary_key=True),
+        sa.Column('campaign_id', sa.String(), nullable=False),
         sa.Column('name', sa.String(255), nullable=False),
         sa.Column('description', sa.Text(), nullable=True),
         sa.Column('variant_type', sa.String(10), nullable=False),
-        sa.Column('template_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('template_id', sa.String(), nullable=True),
         sa.Column('target_percentage', sa.Integer(), nullable=False, server_default='50'),
         sa.Column('sent_count', sa.Integer(), nullable=False, server_default='0'),
         sa.Column('open_count', sa.Integer(), nullable=False, server_default='0'),
@@ -116,10 +116,10 @@ def upgrade() -> None:
     # Campaign Recipients
     op.create_table(
         'crm_marketing_campaign_recipients',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column('campaign_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('contact_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('variant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), primary_key=True),
+        sa.Column('campaign_id', sa.String(), nullable=False),
+        sa.Column('contact_id', sa.String(), nullable=False),
+        sa.Column('variant_id', sa.String(), nullable=True),
         sa.Column('email', sa.String(255), nullable=True),
         sa.Column('phone', sa.String(50), nullable=True),
         sa.Column('status', postgresql.ENUM('pending', 'sent', 'delivered', 'bounced', 'failed', name='crm_marketing_recipient_status'), nullable=False, server_default='pending'),
@@ -144,9 +144,9 @@ def upgrade() -> None:
     # Campaign Events
     op.create_table(
         'crm_marketing_campaign_events',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column('campaign_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('recipient_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.String(), primary_key=True),
+        sa.Column('campaign_id', sa.String(), nullable=False),
+        sa.Column('recipient_id', sa.String(), nullable=True),
         sa.Column('event_type', postgresql.ENUM('sent', 'delivered', 'opened', 'clicked', 'bounced', 'converted', name='crm_marketing_campaign_event_type'), nullable=False),
         sa.Column('timestamp', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('now()')),
         sa.Column('metadata', postgresql.JSONB(), nullable=True),
@@ -160,8 +160,8 @@ def upgrade() -> None:
     # Campaign Performance
     op.create_table(
         'crm_marketing_campaign_performance',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column('campaign_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), primary_key=True),
+        sa.Column('campaign_id', sa.String(), nullable=False),
         sa.Column('date', sa.DateTime(timezone=True), nullable=False),
         sa.Column('sent_count', sa.Integer(), nullable=False, server_default='0'),
         sa.Column('delivered_count', sa.Integer(), nullable=False, server_default='0'),
@@ -181,8 +181,8 @@ def upgrade() -> None:
     # Campaign AB Tests
     op.create_table(
         'crm_marketing_campaign_ab_tests',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column('campaign_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), primary_key=True),
+        sa.Column('campaign_id', sa.String(), nullable=False),
         sa.Column('variant_name', sa.String(10), nullable=False),
         sa.Column('subject', sa.String(500), nullable=True),
         sa.Column('body_template', sa.Text(), nullable=True),

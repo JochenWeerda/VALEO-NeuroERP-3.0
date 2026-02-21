@@ -353,7 +353,7 @@ export default function BankAbgleichPage(): JSX.Element {
 
         // Call import API
         const response = await fetch(
-          `/api/v1/finance/bank-statements/import?format=${format}&bank_account_id=${formData.kontoId}&tenant_id=system`,
+          `/api/v1/finance/bank-statements/import?format=${format}&bank_account_id=${formData.kontoId}&tenant_id=00000000-0000-0000-0000-000000000001`,
           {
             method: 'POST',
             body: uploadFormData,
@@ -465,7 +465,7 @@ export default function BankAbgleichPage(): JSX.Element {
 
       try {
         const response = await fetch(
-          `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=system&auto_book=false`
+          `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=00000000-0000-0000-0000-000000000001&auto_book=false`
         )
 
         if (!response.ok) {

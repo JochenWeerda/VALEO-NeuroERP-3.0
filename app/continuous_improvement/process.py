@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -243,7 +243,7 @@ class ISO9001ContinuousImprovement:
         Create a quality metric
         Returns metric ID
         """
-        metric_id = str(uuid.uuid4())
+        metric_id = uuid7()
 
         metric = QualityMetric(
             id=metric_id,
@@ -267,7 +267,7 @@ class ISO9001ContinuousImprovement:
         Record a metric measurement
         Returns measurement ID
         """
-        measurement_id = str(uuid.uuid4())
+        measurement_id = uuid7()
 
         measurement = MetricMeasurement(
             id=measurement_id,
@@ -321,7 +321,7 @@ class ISO9001ContinuousImprovement:
         Create an improvement initiative
         Returns initiative ID
         """
-        initiative_id = str(uuid.uuid4())
+        initiative_id = uuid7()
 
         initiative = ImprovementInitiative(
             id=initiative_id,
@@ -369,7 +369,7 @@ class ISO9001ContinuousImprovement:
         Create a corrective action
         Returns action ID
         """
-        action_id = str(uuid.uuid4())
+        action_id = uuid7()
 
         action = CorrectiveAction(
             id=action_id,
@@ -392,7 +392,7 @@ class ISO9001ContinuousImprovement:
         Conduct a management review
         Returns review ID
         """
-        review_id = str(uuid.uuid4())
+        review_id = uuid7()
 
         review = ManagementReview(
             id=review_id,

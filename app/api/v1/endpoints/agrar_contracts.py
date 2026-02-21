@@ -5,18 +5,19 @@ Agrar contract endpoints with remaining quantity and allocation logic.
 from datetime import datetime
 from decimal import Decimal
 from typing import Literal, Optional
-import uuid
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.infrastructure.models import AgrarContract, AgrarContractAllocation
 from app.api.v1.schemas.base import BaseSchema, PaginatedResponse
+from app.core.uuid7 import uuid7
 
 router = APIRouter()
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 ContractStatus = Literal["open", "partially_allocated", "fulfilled", "cancelled"]
 PricingModel = Literal["fixed", "follow", "pool"]
@@ -120,8 +121,9 @@ async def list_agrar_contracts(
     skip: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=200),
     db: Session = Depends(get_db),
+    header_tenant: str = Depends(get_tenant_id),
 ):
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id or header_tenant or DEFAULT_TENANT
     query = db.query(AgrarContract).filter(AgrarContract.tenant_id == tid)
     if status:
         query = query.filter(AgrarContract.status == status)
@@ -166,7 +168,7 @@ async def create_agrar_contract(
         raise HTTPException(status_code=409, detail="contract_number already exists")
 
     contract = AgrarContract(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         contract_number=payload.contract_number,
         contract_type=payload.contract_type,
         harvest_year=payload.harvest_year,
@@ -246,7 +248,7 @@ async def allocate_contract_quantity(
     )
 
     allocation = AgrarContractAllocation(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         contract_id=contract.id,
         ticket_id=payload.ticket_id,
         allocation_quantity_kg=payload.allocation_quantity_kg,

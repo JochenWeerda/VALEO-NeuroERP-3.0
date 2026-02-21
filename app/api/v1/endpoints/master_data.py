@@ -9,12 +9,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import MasterDataEntry, Dispatcher
 from ..schemas.base import PaginatedResponse, BaseSchema
 
 router = APIRouter()
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 # ── Schemas ──────────────────────────────────────────────────────
@@ -87,10 +88,10 @@ async def create_master_data(
     db: Session = Depends(get_db),
 ):
     """POST Stammdaten anlegen"""
-    import uuid
+    from app.core.uuid7 import uuid7
     tid = tenant_id or DEFAULT_TENANT
     obj = MasterDataEntry(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         category=payload.category,
         code=payload.code,
         label=payload.label,
@@ -184,10 +185,10 @@ async def create_contact_type(
     db: Session = Depends(get_db),
 ):
     """POST Kontaktart Anlegen"""
-    import uuid
+    from app.core.uuid7 import uuid7
     tid = tenant_id or DEFAULT_TENANT
     obj = MasterDataEntry(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         category="contact_type",
         code=payload.code,
         label=payload.label,
@@ -230,10 +231,10 @@ async def create_dispatcher(
     db: Session = Depends(get_db),
 ):
     """POST Disponent anlegen"""
-    import uuid
+    from app.core.uuid7 import uuid7
     tid = tenant_id or DEFAULT_TENANT
     obj = Dispatcher(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         name=payload.name,
         code=payload.code,
         email=payload.email,

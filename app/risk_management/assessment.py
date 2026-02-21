@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -300,7 +300,7 @@ class ISO27001RiskManagement:
         Perform risk assessment
         Returns risk assessment ID
         """
-        risk_id = str(uuid.uuid4())
+        risk_id = uuid7()
 
         # Calculate risk score
         likelihood = RiskLevel[risk_data['likelihood'].upper()]
@@ -343,7 +343,7 @@ class ISO27001RiskManagement:
     def _create_risk_register_entry(self, risk: RiskAssessment):
         """Create risk register entry"""
         register_entry = RiskRegister(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             risk_assessment_id=risk.id,
             current_likelihood=risk.likelihood,
             current_impact=risk.impact,
@@ -403,7 +403,7 @@ class ISO27001RiskManagement:
         Create risk treatment plan
         Returns treatment plan ID
         """
-        plan_id = str(uuid.uuid4())
+        plan_id = uuid7()
 
         plan = RiskTreatmentPlan(
             id=plan_id,
@@ -433,7 +433,7 @@ class ISO27001RiskManagement:
         Monitor risk status
         Returns monitoring record ID
         """
-        monitoring_id = str(uuid.uuid4())
+        monitoring_id = uuid7()
 
         # Get current risk register entry
         register_entry = None
@@ -491,7 +491,7 @@ class ISO27001RiskManagement:
         Generate risk heatmap
         Returns heatmap ID
         """
-        heatmap_id = str(uuid.uuid4())
+        heatmap_id = uuid7()
 
         period_end = datetime.utcnow()
         period_start = period_end - timedelta(days=period_days)

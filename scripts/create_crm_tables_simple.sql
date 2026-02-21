@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS domain_crm.activities (
     status VARCHAR(20) NOT NULL,
     assigned_to VARCHAR(100) NOT NULL,
     description TEXT,
-    tenant_id VARCHAR,
+    tenant_id VARCHAR(36),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE
 );
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS domain_crm.farm_profiles (
     location JSONB,
     certifications JSONB DEFAULT '[]'::jsonb,
     notes TEXT,
-    tenant_id VARCHAR,
+    tenant_id VARCHAR(36),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE
 );
@@ -40,10 +40,10 @@ CREATE INDEX IF NOT EXISTS idx_farm_profiles_farm_name ON domain_crm.farm_profil
 
 -- Insert test data for Activities
 INSERT INTO domain_crm.activities (id, type, title, customer, contact_person, date, status, assigned_to, description, tenant_id) VALUES
-('activity_1', 'meeting', 'Jahresgespräch 2025', 'Musterfirma GmbH', 'Max Mustermann', NOW() + INTERVAL '30 days', 'planned', 'Hans Mueller', 'Wichtiges Jahresgespräch mit Neukunden', 'system'),
-('activity_2', 'call', 'Telefon-Follow-up Schmidt GmbH', 'Schmidt GmbH', 'Anna Schmidt', NOW() + INTERVAL '7 days', 'planned', 'Maria Weber', 'Angebot besprechen', 'system'),
-('activity_3', 'email', 'Angebot versenden', 'Bio-Hof Müller', 'Thomas Müller', NOW() - INTERVAL '2 days', 'completed', 'Hans Mueller', 'Jahresangebot für Saatgut versendet', 'system'),
-('activity_4', 'note', 'Kundengespräch dokumentiert', 'Agrar Schmidt', 'Werner Schmidt', NOW(), 'completed', 'Hans Mueller', 'Notizen vom heutigen Besuch', 'system');
+('activity_1', 'meeting', 'Jahresgespräch 2025', 'Musterfirma GmbH', 'Max Mustermann', NOW() + INTERVAL '30 days', 'planned', 'Hans Mueller', 'Wichtiges Jahresgespräch mit Neukunden', '00000000-0000-0000-0000-000000000001'),
+('activity_2', 'call', 'Telefon-Follow-up Schmidt GmbH', 'Schmidt GmbH', 'Anna Schmidt', NOW() + INTERVAL '7 days', 'planned', 'Maria Weber', 'Angebot besprechen', '00000000-0000-0000-0000-000000000001'),
+('activity_3', 'email', 'Angebot versenden', 'Bio-Hof Müller', 'Thomas Müller', NOW() - INTERVAL '2 days', 'completed', 'Hans Mueller', 'Jahresangebot für Saatgut versendet', '00000000-0000-0000-0000-000000000001'),
+('activity_4', 'note', 'Kundengespräch dokumentiert', 'Agrar Schmidt', 'Werner Schmidt', NOW(), 'completed', 'Hans Mueller', 'Notizen vom heutigen Besuch', '00000000-0000-0000-0000-000000000001');
 
 -- Insert test data for Farm Profiles
 INSERT INTO domain_crm.farm_profiles (id, farm_name, owner, total_area, crops, livestock, location, certifications, notes, tenant_id) VALUES
@@ -52,19 +52,19 @@ INSERT INTO domain_crm.farm_profiles (id, farm_name, owner, total_area, crops, l
  '[{"type": "Milchkühe", "count": 60}, {"type": "Kälber", "count": 15}]'::jsonb,
  '{"latitude": 52.520008, "longitude": 13.404954, "address": "Hauptstraße 123, 12345 Teststadt, Deutschland"}'::jsonb,
  '["Bio", "QS", "HACCP"]'::jsonb,
- 'Traditionsreicher Betrieb seit 1950', 'system'),
+ 'Traditionsreicher Betrieb seit 1950', '00000000-0000-0000-0000-000000000001'),
  
 ('farm_2', 'Hof Müller', 'Thomas Müller', 85.0,
  '[{"crop": "Mais", "area": 50}, {"crop": "Sonnenblumen", "area": 35}]'::jsonb,
  '[{"type": "Schweine", "count": 200}]'::jsonb,
  '{"latitude": 51.165691, "longitude": 10.451526, "address": "Dorfstraße 45, 34567 Musterstadt, Deutschland"}'::jsonb,
  '["QS"]'::jsonb,
- 'Spezialisiert auf Schweinezucht', 'system'),
+ 'Spezialisiert auf Schweinezucht', '00000000-0000-0000-0000-000000000001'),
  
 ('farm_3', 'Gemüsehof Weber', 'Maria Weber', 25.0,
  '[{"crop": "Kartoffeln", "area": 10}, {"crop": "Möhren", "area": 8}, {"crop": "Kohl", "area": 7}]'::jsonb,
  '[]'::jsonb,
  '{"latitude": 53.551086, "longitude": 9.993682, "address": "Feldweg 7, 20095 Hamburg, Deutschland"}'::jsonb,
  '["Bio", "GAP"]'::jsonb,
- 'Bio-Gemüsebau mit Direktvermarktung', 'system');
+ 'Bio-Gemüsebau mit Direktvermarktung', '00000000-0000-0000-0000-000000000001');
 

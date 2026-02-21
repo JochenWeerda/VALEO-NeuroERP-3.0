@@ -9,8 +9,8 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from datetime import datetime
-import uuid
 from decimal import Decimal
+from app.core.uuid7 import uuid7
 
 from app.core.database_pg import SessionLocal
 from app.infrastructure.models import Article, Customer
@@ -21,7 +21,7 @@ def seed_customers(db, tenant_id: str = "default"):
     
     customers_data = [
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "customer_number": "K-10001",
             "company_name": "Mustermann Agrar GmbH",
             "contact_person": "Max Mustermann",
@@ -40,7 +40,7 @@ def seed_customers(db, tenant_id: str = "default"):
             "is_active": True,
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "customer_number": "K-10002",
             "company_name": "Schmidt Landwirtschaft",
             "contact_person": "Anna Schmidt",
@@ -59,7 +59,7 @@ def seed_customers(db, tenant_id: str = "default"):
             "is_active": True,
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "customer_number": "K-10003",
             "company_name": "Weber Agrar Service",
             "contact_person": "Thomas Weber",
@@ -78,7 +78,7 @@ def seed_customers(db, tenant_id: str = "default"):
             "is_active": True,
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "customer_number": "K-10004",
             "company_name": "Bauer Hof GmbH & Co. KG",
             "contact_person": "Klaus Bauer",
@@ -97,7 +97,7 @@ def seed_customers(db, tenant_id: str = "default"):
             "is_active": True,
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "customer_number": "K-10005",
             "company_name": "Fischer Gemüsebau",
             "contact_person": "Sandra Fischer",
@@ -168,7 +168,7 @@ def seed_articles(db, tenant_id: str = "default"):
     
     articles_data = [
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "article_number": "ART-10001",
             "name": "Weizen Saatgut Premium",
             "description": "Hochwertiges Weizensaatgut, ertragsstark, zertifiziert",
@@ -195,7 +195,7 @@ def seed_articles(db, tenant_id: str = "default"):
             "is_active": True,
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "article_number": "ART-10002",
             "name": "Stickstoff-Dünger 27%",
             "description": "Mineralischer Stickstoffdünger, 27% N-Gehalt",
@@ -222,7 +222,7 @@ def seed_articles(db, tenant_id: str = "default"):
             "is_active": True,
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "article_number": "ART-10003",
             "name": "Glyphosat Herbizid 360g/l",
             "description": "Breitbandherbizid, glyphosathaltig, 5 Liter Kanister",
@@ -251,7 +251,7 @@ def seed_articles(db, tenant_id: str = "default"):
             "is_active": True,
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "article_number": "ART-10004",
             "name": "Raps Saatgut Hybrid",
             "description": "Hochleistungs-Rapssaatgut, hybrid, ertragsstark",
@@ -278,7 +278,7 @@ def seed_articles(db, tenant_id: str = "default"):
             "is_active": True,
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "article_number": "ART-10005",
             "name": "Mais Saatgut Silo",
             "description": "Maissaatgut für Silomais, frühreif, hoher Ertrag",
@@ -305,7 +305,7 @@ def seed_articles(db, tenant_id: str = "default"):
             "is_active": True,
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "article_number": "ART-10006",
             "name": "Phosphat-Dünger 18%",
             "description": "Phosphatdünger, 18% P2O5, granuliert",
@@ -332,7 +332,7 @@ def seed_articles(db, tenant_id: str = "default"):
             "is_active": True,
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "article_number": "ART-10007",
             "name": "Fungizid Tebuconazol",
             "description": "Fungizid gegen Getreidekrankheiten, 250ml Flasche",
@@ -361,7 +361,7 @@ def seed_articles(db, tenant_id: str = "default"):
             "is_active": True,
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "article_number": "ART-10008",
             "name": "Kartoffel Saatgut",
             "description": "Zertifiziertes Pflanzkartoffeln, mittelfrüh, festkochend",
@@ -388,7 +388,7 @@ def seed_articles(db, tenant_id: str = "default"):
             "is_active": True,
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "article_number": "ART-10009",
             "name": "Kali-Dünger 40%",
             "description": "Kaliumdünger, 40% K2O, für alle Kulturen",
@@ -415,7 +415,7 @@ def seed_articles(db, tenant_id: str = "default"):
             "is_active": True,
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "article_number": "ART-10010",
             "name": "Insektizid Lambda-Cyhalothrin",
             "description": "Insektizid gegen Schädlinge, 1 Liter Flasche",
@@ -482,7 +482,7 @@ def main():
         tenant = db.query(Tenant).filter(Tenant.name == "default").first()
         if not tenant:
             # Erstelle default tenant
-            tenant_id_str = str(uuid.uuid4())
+            tenant_id_str = uuid7()
             tenant = Tenant(id=tenant_id_str, name="default", is_active=True)
             db.add(tenant)
             db.commit()

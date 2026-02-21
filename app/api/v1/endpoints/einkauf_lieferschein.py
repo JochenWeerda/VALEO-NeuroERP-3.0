@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
-import uuid
+from app.core.uuid7 import uuid7
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -190,7 +190,7 @@ async def create_lieferschein(
     tenant_id: str = Query("system"),
     db: Session = Depends(get_db),
 ):
-    ls_id = str(uuid.uuid4())
+    ls_id = uuid7()
     db.execute(
         text(
             """
@@ -224,7 +224,7 @@ async def create_lieferschein(
                 )
                 """
             ),
-            {"id": str(uuid.uuid4()), "lieferschein_id": ls_id, **pos.model_dump()},
+            {"id": uuid7(), "lieferschein_id": ls_id, **pos.model_dump()},
         )
     db.commit()
     row = _get_lieferschein_or_404(db, ls_id, tenant_id)
@@ -261,7 +261,7 @@ async def delete_lieferschein(ls_id: str, tenant_id: str = Query("system"), db: 
 @router.post("/lieferscheine/{ls_id}/positionen", response_model=LieferscheinPosition, status_code=201)
 async def add_lieferschein_position(ls_id: str, payload: LieferscheinPositionCreate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
-    pos_id = str(uuid.uuid4())
+    pos_id = uuid7()
     db.execute(
         text(
             """
@@ -325,7 +325,7 @@ async def list_frachtauftraege(tenant_id: str = Query("system"), db: Session = D
 
 @router.post("/frachtauftraege", response_model=Frachtauftrag, status_code=201)
 async def create_frachtauftrag(payload: FrachtauftragCreate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
-    fa_id = str(uuid.uuid4())
+    fa_id = uuid7()
     db.execute(
         text(
             """

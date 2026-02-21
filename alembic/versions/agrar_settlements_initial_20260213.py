@@ -7,6 +7,7 @@ Create Date: 2026-02-13 19:45:00.000000
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 
 revision = "agrar_settlements_initial_20260213"

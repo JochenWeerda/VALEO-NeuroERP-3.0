@@ -12,7 +12,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -280,7 +280,7 @@ class ISOCertificationAuditSupport:
         Create an audit plan
         Returns plan ID
         """
-        plan_id = str(uuid.uuid4())
+        plan_id = uuid7()
 
         plan = AuditPlan(
             id=plan_id,
@@ -310,7 +310,7 @@ class ISOCertificationAuditSupport:
         if plan_id not in self.audit_plans:
             raise ValueError(f"Audit plan not found: {plan_id}")
 
-        execution_id = str(uuid.uuid4())
+        execution_id = uuid7()
 
         execution = AuditExecution(
             id=execution_id,
@@ -335,7 +335,7 @@ class ISOCertificationAuditSupport:
         if execution_id not in self.audit_executions:
             raise ValueError(f"Audit execution not found: {execution_id}")
 
-        evidence_id = str(uuid.uuid4())
+        evidence_id = uuid7()
 
         evidence = AuditEvidence(
             id=evidence_id,
@@ -371,7 +371,7 @@ class ISOCertificationAuditSupport:
         if execution_id not in self.audit_executions:
             raise ValueError(f"Audit execution not found: {execution_id}")
 
-        finding_id = str(uuid.uuid4())
+        finding_id = uuid7()
 
         finding = AuditFinding(
             id=finding_id,
@@ -502,7 +502,7 @@ class ISOCertificationAuditSupport:
         Create a certification application
         Returns application ID
         """
-        application_id = str(uuid.uuid4())
+        application_id = uuid7()
 
         application = CertificationApplication(
             id=application_id,
@@ -529,7 +529,7 @@ class ISOCertificationAuditSupport:
         Perform comprehensive compliance assessment
         Returns assessment ID
         """
-        assessment_id = str(uuid.uuid4())
+        assessment_id = uuid7()
 
         assessment = ComplianceAssessment(
             id=assessment_id,
@@ -645,7 +645,7 @@ class ISOCertificationAuditSupport:
         Generate audit readiness checklist
         Returns checklist ID
         """
-        checklist_id = str(uuid.uuid4())
+        checklist_id = uuid7()
 
         checklist = AuditReadinessChecklist(
             id=checklist_id,

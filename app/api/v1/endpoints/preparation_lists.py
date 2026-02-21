@@ -9,12 +9,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import PreparationList, PreparationListLine
 from ..schemas.base import PaginatedResponse, BaseSchema
 
 router = APIRouter()
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class PrepListOut(BaseSchema):

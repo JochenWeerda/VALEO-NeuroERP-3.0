@@ -64,7 +64,7 @@ async def create_branch(
     db: Session = Depends(get_db),
 ):
     """Create a new branch."""
-    import uuid
+    from app.core.uuid7 import uuid7
     
     # Check if branch_number already exists for this tenant
     existing = db.execute(
@@ -81,7 +81,7 @@ async def create_branch(
             detail=f"Branch number {payload.branch_number} already exists for this tenant"
         )
     
-    branch_id = str(uuid.uuid4())
+    branch_id = uuid7()
     
     db.execute(
         text("""

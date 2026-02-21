@@ -8,8 +8,8 @@ from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy import select, and_, or_
 from decimal import Decimal
-import uuid
 from datetime import datetime
+from app.core.uuid7 import uuid7
 
 from .models import OffenerPosten, Buchung, Konto, Anlage
 
@@ -23,7 +23,7 @@ class OffenerPostenRepository:
     def create(self, op_data: dict, tenant_id: str) -> OffenerPosten:
         """Create new Offener Posten"""
         op = OffenerPosten(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             tenant_id=tenant_id,
             **op_data
         )
@@ -100,7 +100,7 @@ class BuchungRepository:
     def create(self, buchung_data: dict, tenant_id: str) -> Buchung:
         """Create new Buchung"""
         buchung = Buchung(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             tenant_id=tenant_id,
             **buchung_data
         )
@@ -151,7 +151,7 @@ class KontoRepository:
     def create(self, konto_data: dict, tenant_id: str) -> Konto:
         """Create new Konto"""
         konto = Konto(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             tenant_id=tenant_id,
             **konto_data
         )
@@ -183,7 +183,7 @@ class AnlageRepository:
     def create(self, anlage_data: dict, tenant_id: str) -> Anlage:
         """Create new Anlage"""
         anlage = Anlage(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             tenant_id=tenant_id,
             **anlage_data
         )

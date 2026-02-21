@@ -36,7 +36,7 @@ type StarterTile = {
 }
 
 const SEARCH_KEYS = ['label', 'description'] as const
-const MAX_CHILD_LINKS = 5
+const MAX_CHILD_LINKS = 7
 const NUM_DE = new Intl.NumberFormat('de-DE')
 
 interface KpiTile {

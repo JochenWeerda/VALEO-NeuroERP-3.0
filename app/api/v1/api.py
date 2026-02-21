@@ -26,6 +26,7 @@ from app.api.v1.endpoints import (
     gap,
     prospecting,
     finance_invoices,
+    vat_codes,
     audit,
     accounting_periods,
     payment_matching,
@@ -60,6 +61,7 @@ from app.api.v1.endpoints import (
     nve,
     webhooks,
     article_extensions,
+    nutrient_compositions,
     customer_extensions,
     business_partners,
     messages,
@@ -83,8 +85,13 @@ from app.api.v1.endpoints import (
     compat,
     modules,
     agrar_contracts,
+    agrar_varieties,
     silo,
     agrar_settlements,
+    harvest_acceptance,
+    quality_protocols,
+    daily_prices,
+    self_billing,
     nawaro,
     nawaro_raps,
     einkauf_lieferschein,
@@ -94,6 +101,8 @@ from app.api.v1.endpoints import (
     admin_devices,
     admin_mobile,
     admin_reporting,
+    config_service,
+    job_runner,
     controlling,
     training,
     personal,
@@ -163,6 +172,18 @@ api_router.include_router(
     admin_reporting.router,
     prefix="/admin",
     tags=["admin", "settings", "reporting"]
+)
+
+api_router.include_router(
+    config_service.router,
+    prefix="/config",
+    tags=["config", "connectors", "reporting-units", "schedules"]
+)
+
+api_router.include_router(
+    job_runner.router,
+    prefix="/jobs",
+    tags=["jobs", "scheduler", "artifacts"]
 )
 
 api_router.include_router(
@@ -263,6 +284,11 @@ api_router.include_router(
 api_router.include_router(
     finance_invoices.router,
     tags=["finance", "invoices"]
+)
+
+api_router.include_router(
+    vat_codes.router,
+    tags=["finance", "vat-codes"]
 )
 
 api_router.include_router(
@@ -473,6 +499,12 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    agrar_varieties.router,
+    prefix="/agrar/varieties",
+    tags=["agrar", "varieties", "sorten"]
+)
+
+api_router.include_router(
     silo.router,
     prefix="/silo",
     tags=["agrar", "silo"]
@@ -482,6 +514,30 @@ api_router.include_router(
     agrar_settlements.router,
     prefix="/agrar/settlements",
     tags=["agrar", "settlements", "self-billing"]
+)
+
+api_router.include_router(
+    harvest_acceptance.router,
+    prefix="/agrar/harvest-acceptance",
+    tags=["agrar", "harvest", "acceptance", "ernte-annahme"]
+)
+
+api_router.include_router(
+    quality_protocols.router,
+    prefix="/agrar/quality-protocols",
+    tags=["agrar", "quality", "protocols", "labor"]
+)
+
+api_router.include_router(
+    daily_prices.router,
+    prefix="/agrar/daily-prices",
+    tags=["agrar", "pricing", "daily-prices"]
+)
+
+api_router.include_router(
+    self_billing.router,
+    prefix="/agrar/self-billing",
+    tags=["agrar", "self-billing", "invoices", "e-invoice"]
 )
 
 api_router.include_router(
@@ -557,6 +613,12 @@ api_router.include_router(
     article_extensions.router,
     prefix="/articles",
     tags=["inventory", "articles"]
+)
+
+api_router.include_router(
+    nutrient_compositions.router,
+    prefix="/nutrient-compositions",
+    tags=["nutrient-compositions", "duengemittel", "composition"]
 )
 
 api_router.include_router(

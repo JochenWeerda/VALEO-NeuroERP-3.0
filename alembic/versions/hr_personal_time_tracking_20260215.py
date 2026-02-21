@@ -25,8 +25,8 @@ def upgrade() -> None:
 
     op.create_table(
         "time_entries",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("employee_ref", sa.String(length=120), nullable=False),
         sa.Column("entry_date", sa.Date(), nullable=False),
         sa.Column("start_time", sa.Time(), nullable=True),
@@ -59,8 +59,8 @@ def upgrade() -> None:
 
     op.create_table(
         "driver_timesheets",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("entry_date", sa.Date(), nullable=False),
         sa.Column("driver_name", sa.String(length=120), nullable=False),
         sa.Column("vehicle_plate", sa.String(length=40), nullable=False),

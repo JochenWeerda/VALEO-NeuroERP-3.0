@@ -19,9 +19,9 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         "crm_core_leads",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
-        sa.Column("customer_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_core_customers.id"), nullable=True),
+        sa.Column("customer_id", sa.String(), sa.ForeignKey("crm_core_customers.id"), nullable=True),
         sa.Column("company_name", sa.String(255), nullable=False),
         sa.Column("contact_person", sa.String(150), nullable=False),
         sa.Column("email", sa.String(255)),
@@ -38,10 +38,10 @@ def upgrade() -> None:
 
     op.create_table(
         "crm_core_activities",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
-        sa.Column("customer_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_core_customers.id"), nullable=True),
-        sa.Column("contact_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_core_contacts.id"), nullable=True),
+        sa.Column("customer_id", sa.String(), sa.ForeignKey("crm_core_customers.id"), nullable=True),
+        sa.Column("contact_id", sa.String(), sa.ForeignKey("crm_core_contacts.id"), nullable=True),
         sa.Column("type", sa.String(32), nullable=False),
         sa.Column("title", sa.String(255), nullable=False),
         sa.Column("status", sa.String(32), nullable=False, server_default="planned"),
@@ -54,9 +54,9 @@ def upgrade() -> None:
 
     op.create_table(
         "crm_core_farm_profiles",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
-        sa.Column("customer_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_core_customers.id"), nullable=True),
+        sa.Column("customer_id", sa.String(), sa.ForeignKey("crm_core_customers.id"), nullable=True),
         sa.Column("farm_name", sa.String(255), nullable=False),
         sa.Column("owner", sa.String(150), nullable=False),
         sa.Column("total_area", sa.Float, nullable=False),

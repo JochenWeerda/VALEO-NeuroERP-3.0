@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -286,7 +286,7 @@ class ISO22301CrisisCommunicationPlan:
         Create a communication template
         Returns template ID
         """
-        template_id = str(uuid.uuid4())
+        template_id = uuid7()
 
         template = CommunicationTemplate(
             id=template_id,
@@ -311,7 +311,7 @@ class ISO22301CrisisCommunicationPlan:
         Register a stakeholder contact
         Returns contact ID
         """
-        contact_id = str(uuid.uuid4())
+        contact_id = uuid7()
 
         contact = StakeholderContact(
             id=contact_id,
@@ -566,7 +566,7 @@ class ISO22301CrisisCommunicationPlan:
                           priority: CommunicationPriority, subject: str, content: str,
                           sent_by: str) -> Dict[str, Any]:
         """Send a communication and log it"""
-        comm_id = str(uuid.uuid4())
+        comm_id = uuid7()
 
         # In production, this would actually send the communication
         # For now, simulate sending
@@ -689,7 +689,7 @@ class ISO22301CrisisCommunicationPlan:
         Handle media inquiry during crisis
         Returns response ID
         """
-        response_id = str(uuid.uuid4())
+        response_id = uuid7()
 
         inquiry = MediaResponse(
             id=response_id,
@@ -744,7 +744,7 @@ class ISO22301CrisisCommunicationPlan:
         Submit regulatory incident report
         Returns report ID
         """
-        report_id = str(uuid.uuid4())
+        report_id = uuid7()
 
         report = RegulatoryReporting(
             id=report_id,

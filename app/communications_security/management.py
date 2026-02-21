@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -346,7 +346,7 @@ class ISO27001CommunicationsSecurity:
         Create a new network segment
         Returns segment ID
         """
-        segment_id = str(uuid.uuid4())
+        segment_id = uuid7()
 
         segment = NetworkSegment(
             id=segment_id,
@@ -392,7 +392,7 @@ class ISO27001CommunicationsSecurity:
         Generate a new encryption key
         Returns key ID
         """
-        key_id = str(uuid.uuid4())
+        key_id = uuid7()
 
         # Calculate expiry based on rotation schedule
         rotation_days = {
@@ -440,7 +440,7 @@ class ISO27001CommunicationsSecurity:
         Establish a secure communication channel
         Returns channel ID
         """
-        channel_id = str(uuid.uuid4())
+        channel_id = uuid7()
 
         channel = SecureChannel(
             id=channel_id,
@@ -496,7 +496,7 @@ class ISO27001CommunicationsSecurity:
         Initiate a secure data transfer
         Returns transfer ID
         """
-        transfer_id = str(uuid.uuid4())
+        transfer_id = uuid7()
 
         transfer = DataTransfer(
             id=transfer_id,
@@ -571,7 +571,7 @@ class ISO27001CommunicationsSecurity:
         Record network traffic for monitoring
         Returns traffic record ID
         """
-        traffic_id = str(uuid.uuid4())
+        traffic_id = uuid7()
 
         traffic = NetworkTraffic(
             id=traffic_id,
@@ -617,7 +617,7 @@ class ISO27001CommunicationsSecurity:
         Configure a security gateway
         Returns gateway ID
         """
-        gateway_id = str(uuid.uuid4())
+        gateway_id = uuid7()
 
         gateway = SecurityGateway(
             id=gateway_id,
@@ -642,7 +642,7 @@ class ISO27001CommunicationsSecurity:
         Perform communications security audit
         Returns audit ID
         """
-        audit_id = str(uuid.uuid4())
+        audit_id = uuid7()
 
         audit = CommunicationsAudit(
             id=audit_id,
@@ -856,7 +856,7 @@ class ISO27001CommunicationsSecurity:
         )
 
         dashboard = CommunicationsDashboard(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             generated_at=datetime.utcnow(),
             period_start=datetime.utcnow() - timedelta(days=7),
             period_end=datetime.utcnow(),

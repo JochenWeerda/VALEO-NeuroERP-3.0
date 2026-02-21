@@ -34,7 +34,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
   const loadSummary = async () => {
     try {
       const response = await fetch(
-        `/api/v1/finance/subsidiary-ledger-reconciliation/summary?period=${period}&tenant_id=system`
+        `/api/v1/finance/subsidiary-ledger-reconciliation/summary?period=${period}&tenant_id=00000000-0000-0000-0000-000000000001`
       )
       if (response.ok) {
         const data = await response.json()
@@ -49,7 +49,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
     setLoading(true)
     try {
       const response = await fetch(
-        `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}?period=${period}&tenant_id=system`
+        `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}?period=${period}&tenant_id=00000000-0000-0000-0000-000000000001`
       )
       if (response.ok) {
         const data = await response.json()
@@ -76,7 +76,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
     setSelectedAccount(accountNumber)
     try {
       const response = await fetch(
-        `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}/details?account_number=${accountNumber}&period=${period}&tenant_id=system`
+        `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}/details?account_number=${accountNumber}&period=${period}&tenant_id=00000000-0000-0000-0000-000000000001`
       )
       if (response.ok) {
         const data = await response.json()

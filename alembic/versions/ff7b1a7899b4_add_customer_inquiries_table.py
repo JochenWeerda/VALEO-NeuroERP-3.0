@@ -22,10 +22,10 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # Create customer_inquiries table
     op.create_table('customer_inquiries',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=False),
         sa.Column('inquiry_number', sa.String(), nullable=False),
-        sa.Column('customer_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('customer_id', sa.String(), nullable=False),
         sa.Column('type', sa.String(), nullable=False),
         sa.Column('subject', sa.String(), nullable=False),
         sa.Column('description', sa.Text(), nullable=False),
@@ -35,7 +35,7 @@ def upgrade() -> None:
         sa.Column('contact_person', sa.String(), nullable=True),
         sa.Column('requested_delivery_date', postgresql.TIMESTAMP(timezone=True), nullable=True),
         sa.Column('budget', sa.Numeric(15, 2), nullable=True),
-        sa.Column('assigned_to', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('assigned_to', sa.String(), nullable=True),
         sa.Column('notes', sa.Text(), nullable=True),
         sa.Column('version', sa.Integer(), nullable=False, default=1),
         sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),

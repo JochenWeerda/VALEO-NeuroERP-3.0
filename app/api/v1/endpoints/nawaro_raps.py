@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from datetime import date, datetime, timezone
 from decimal import Decimal, InvalidOperation
-import uuid
+from app.core.uuid7 import uuid7
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, model_validator
@@ -226,7 +226,7 @@ def _replace_children(db: Session, tenant_id: str, profile_id: str, payload: Rap
     for cert in payload.certificates:
         db.add(
             NawaroRapsCertificate(
-                id=str(uuid.uuid4()),
+                id=uuid7(),
                 profile_id=profile_id,
                 scheme=cert.scheme,
                 certificate_number=cert.certificate_number,
@@ -242,7 +242,7 @@ def _replace_children(db: Session, tenant_id: str, profile_id: str, payload: Rap
     for bal in payload.balances:
         db.add(
             NawaroRapsBalance(
-                id=str(uuid.uuid4()),
+                id=uuid7(),
                 profile_id=profile_id,
                 booking_period=bal.booking_period,
                 input_seed_tons=_to_decimal(bal.input_seed_tons) or Decimal('0'),
@@ -385,7 +385,7 @@ async def create_raps_profile(
 ):
     _validate_balances(payload)
     item = NawaroRapsProfile(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         article_id=payload.article_id,
         article_number=payload.article_number,
         article_name=payload.article_name,

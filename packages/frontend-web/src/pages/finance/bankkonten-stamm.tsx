@@ -237,7 +237,7 @@ export default function BankKontenStammPage(): JSX.Element {
 
         await saveData({
           ...formData,
-          tenant_id: 'system' // TODO: Get from context
+          tenant_id: '00000000-0000-0000-0000-000000000001' // TODO: Get from context
         })
         setIsDirty(false)
         toast.success(t('crud.messages.saveSuccess', { entityType: entityTypeLabel }))

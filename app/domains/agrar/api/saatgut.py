@@ -9,6 +9,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import Saatgut as SaatgutModel
 from ....api.v1.schemas.base import PaginatedResponse
@@ -16,7 +17,7 @@ from ....api.v1.schemas.agrar import Saatgut, SaatgutCreate, SaatgutUpdate
 
 router = APIRouter()
 
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 @router.get("/", response_model=PaginatedResponse[Saatgut])

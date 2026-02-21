@@ -21,7 +21,7 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         "charge_lineage_links",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
         sa.Column("tenant_id", sa.String(length=64), nullable=False),
         sa.Column("article_id", sa.String(length=64), nullable=False),
         sa.Column("from_charge", sa.String(length=64), nullable=False),
@@ -29,8 +29,8 @@ def upgrade() -> None:
         sa.Column("process_type", sa.String(length=20), nullable=False, server_default="mix"),
         sa.Column("quantity_share", sa.Numeric(14, 3), nullable=False),
         sa.Column("share_percent", sa.Numeric(7, 3), nullable=True),
-        sa.Column("source_movement_id", postgresql.UUID(as_uuid=False), nullable=True),
-        sa.Column("target_movement_id", postgresql.UUID(as_uuid=False), nullable=True),
+        sa.Column("source_movement_id", sa.String(), nullable=True),
+        sa.Column("target_movement_id", sa.String(), nullable=True),
         sa.Column("notes", sa.Text(), nullable=True),
         sa.Column("created_by", sa.String(length=100), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),

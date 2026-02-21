@@ -23,8 +23,8 @@ def upgrade() -> None:
 
     op.create_table(
         "kpi_definitions",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("kpi_code", sa.String(length=80), nullable=False),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
@@ -51,8 +51,8 @@ def upgrade() -> None:
 
     op.create_table(
         "dashboard_configs",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("dashboard_code", sa.String(length=80), nullable=False),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
@@ -77,12 +77,12 @@ def upgrade() -> None:
 
     op.create_table(
         "dashboard_widgets",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("dashboard_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("dashboard_id", sa.String(), nullable=False),
         sa.Column("widget_type", sa.String(length=40), nullable=False),
         sa.Column("title", sa.String(length=120), nullable=False),
-        sa.Column("kpi_id", postgresql.UUID(as_uuid=False), nullable=True),
+        sa.Column("kpi_id", sa.String(), nullable=True),
         sa.Column("position_x", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("position_y", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("size_w", sa.Integer(), nullable=False, server_default="4"),
@@ -106,9 +106,9 @@ def upgrade() -> None:
 
     op.create_table(
         "kpi_timeseries",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("kpi_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("kpi_id", sa.String(), nullable=False),
         sa.Column("period_start", sa.DateTime(timezone=True), nullable=False),
         sa.Column("period_end", sa.DateTime(timezone=True), nullable=False),
         sa.Column("value", sa.Numeric(18, 4), nullable=False),
@@ -130,13 +130,13 @@ def upgrade() -> None:
 
     op.create_table(
         "controlling_actions",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("kpi_id", postgresql.UUID(as_uuid=False), nullable=True),
-        sa.Column("dashboard_id", postgresql.UUID(as_uuid=False), nullable=True),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("kpi_id", sa.String(), nullable=True),
+        sa.Column("dashboard_id", sa.String(), nullable=True),
         sa.Column("title", sa.String(length=160), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
-        sa.Column("owner_user_id", postgresql.UUID(as_uuid=False), nullable=True),
+        sa.Column("owner_user_id", sa.String(), nullable=True),
         sa.Column("status", sa.String(length=20), nullable=False, server_default="open"),
         sa.Column("due_date", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),

@@ -54,7 +54,7 @@ def upgrade() -> None:
     # Opportunities table
     op.create_table(
         "crm_sales_opportunities",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
@@ -66,8 +66,8 @@ def upgrade() -> None:
         sa.Column("stage", postgresql.ENUM('initial_contact', 'needs_analysis', 'value_proposition', 'identify_decision_makers', 'proposal_price_quote', 'negotiation_review', 'closed_won', 'closed_lost', name='crm_sales_opportunity_stage', create_type=False), nullable=False, server_default='initial_contact'),
         sa.Column("lead_source", sa.String(128)),
         sa.Column("assigned_to", sa.String(64)),
-        sa.Column("customer_id", postgresql.UUID(as_uuid=True)),
-        sa.Column("contact_id", postgresql.UUID(as_uuid=True)),
+        sa.Column("customer_id", sa.String()),
+        sa.Column("contact_id", sa.String()),
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
@@ -75,14 +75,14 @@ def upgrade() -> None:
     # Quotes table
     op.create_table(
         "crm_sales_quotes",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("quote_number", sa.String(64), nullable=False, unique=True),
         sa.Column("title", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
-        sa.Column("opportunity_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_sales_opportunities.id")),
-        sa.Column("customer_id", postgresql.UUID(as_uuid=True)),
-        sa.Column("contact_id", postgresql.UUID(as_uuid=True)),
+        sa.Column("opportunity_id", sa.String(), sa.ForeignKey("crm_sales_opportunities.id")),
+        sa.Column("customer_id", sa.String()),
+        sa.Column("contact_id", sa.String()),
         sa.Column("subtotal", sa.Float, nullable=False, server_default='0.0'),
         sa.Column("tax_amount", sa.Float, nullable=False, server_default='0.0'),
         sa.Column("discount_amount", sa.Float, nullable=False, server_default='0.0'),
@@ -97,8 +97,8 @@ def upgrade() -> None:
     # Quote line items table
     op.create_table(
         "crm_sales_quote_line_items",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
-        sa.Column("quote_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_sales_quotes.id"), nullable=False),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
+        sa.Column("quote_id", sa.String(), sa.ForeignKey("crm_sales_quotes.id"), nullable=False),
         sa.Column("product_id", sa.String(64)),
         sa.Column("product_name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
@@ -113,11 +113,11 @@ def upgrade() -> None:
     # Sales activities table
     op.create_table(
         "crm_sales_activities",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
-        sa.Column("opportunity_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_sales_opportunities.id")),
-        sa.Column("customer_id", postgresql.UUID(as_uuid=True)),
-        sa.Column("contact_id", postgresql.UUID(as_uuid=True)),
+        sa.Column("opportunity_id", sa.String(), sa.ForeignKey("crm_sales_opportunities.id")),
+        sa.Column("customer_id", sa.String()),
+        sa.Column("contact_id", sa.String()),
         sa.Column("activity_type", sa.String(32), nullable=False),
         sa.Column("subject", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),

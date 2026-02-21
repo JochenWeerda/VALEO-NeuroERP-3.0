@@ -21,8 +21,8 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         "admin_devices",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("device_type", sa.String(length=20), nullable=False),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("vendor", sa.String(length=120), nullable=True),
@@ -48,9 +48,9 @@ def upgrade() -> None:
 
     op.create_table(
         "admin_device_mappings",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("device_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("device_id", sa.String(), nullable=False),
         sa.Column("document_type", sa.String(length=60), nullable=False),
         sa.Column("process_code", sa.String(length=60), nullable=False),
         sa.Column("output_format", sa.String(length=20), nullable=False, server_default="pdf"),
@@ -84,8 +84,8 @@ def upgrade() -> None:
 
     op.create_table(
         "admin_output_templates",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("template_code", sa.String(length=80), nullable=False),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("document_type", sa.String(length=60), nullable=False),
@@ -111,14 +111,14 @@ def upgrade() -> None:
 
     op.create_table(
         "admin_output_template_versions",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("template_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
+        sa.Column("template_id", sa.String(), nullable=False),
         sa.Column("version_no", sa.Integer(), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column("metadata", postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default=sa.text("'{}'::jsonb")),
         sa.Column("change_note", sa.String(length=255), nullable=True),
-        sa.Column("created_by", postgresql.UUID(as_uuid=False), nullable=True),
+        sa.Column("created_by", sa.String(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),
         sa.ForeignKeyConstraint(["tenant_id"], ["domain_shared.tenants.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["template_id"], ["domain_shared.admin_output_templates.id"], ondelete="CASCADE"),
@@ -136,14 +136,14 @@ def upgrade() -> None:
 
     op.create_table(
         "admin_output_profiles",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("profile_code", sa.String(length=80), nullable=False),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("document_type", sa.String(length=60), nullable=False),
         sa.Column("process_code", sa.String(length=60), nullable=False),
-        sa.Column("template_id", postgresql.UUID(as_uuid=False), nullable=True),
-        sa.Column("device_id", postgresql.UUID(as_uuid=False), nullable=True),
+        sa.Column("template_id", sa.String(), nullable=True),
+        sa.Column("device_id", sa.String(), nullable=True),
         sa.Column("output_channel", sa.String(length=20), nullable=False, server_default="print"),
         sa.Column("archive_mode", sa.String(length=20), nullable=False, server_default="dms"),
         sa.Column("archive_retention_days", sa.Integer(), nullable=True),

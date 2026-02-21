@@ -64,7 +64,7 @@ export function useTriggerWorkflow() {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: async (tenant_id = 'system') => {
+    mutationFn: async (tenant_id = '00000000-0000-0000-0000-000000000001') => {
       const response = await apiClient.post('/api/v1/agents/bestellvorschlag/trigger', {
         tenant_id,
         parameters: {}

@@ -24,7 +24,7 @@ export function useSustainabilityProviders() {
   })
 }
 
-export function useSustainabilityPsm(zulassungsnummer: string | null, tenantId = 'system') {
+export function useSustainabilityPsm(zulassungsnummer: string | null, tenantId = '00000000-0000-0000-0000-000000000001') {
   return useQuery({
     queryKey: ['sustainability', 'psm', zulassungsnummer, tenantId],
     queryFn: async () => (

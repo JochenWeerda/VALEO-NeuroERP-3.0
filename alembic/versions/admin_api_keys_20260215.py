@@ -21,8 +21,8 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         "api_keys",
-        sa.Column("id", postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("key_prefix", sa.String(length=24), nullable=False),
         sa.Column("key_hash", sa.String(length=128), nullable=False),
@@ -37,7 +37,7 @@ def upgrade() -> None:
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("last_used_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("status", sa.String(length=20), nullable=False, server_default="active"),
-        sa.Column("created_by", postgresql.UUID(as_uuid=False), nullable=True),
+        sa.Column("created_by", sa.String(), nullable=True),
         sa.Column("revoked_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),

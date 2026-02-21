@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS domain_crm.activities (
     status VARCHAR(20) NOT NULL,
     assigned_to VARCHAR(100) NOT NULL,
     description TEXT,
-    tenant_id VARCHAR REFERENCES domain_shared.tenants(id),
+    tenant_id VARCHAR(36) REFERENCES domain_shared.tenants(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE
 );
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS domain_crm.farm_profiles (
     location JSONB,
     certifications JSONB,
     notes TEXT,
-    tenant_id VARCHAR REFERENCES domain_shared.tenants(id),
+    tenant_id VARCHAR(36) REFERENCES domain_shared.tenants(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE
 );

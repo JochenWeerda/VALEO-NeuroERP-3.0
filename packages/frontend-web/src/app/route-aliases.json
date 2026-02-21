@@ -45,6 +45,14 @@
       "path": "agrar/ernte"
     },
     {
+      "module": "@/pages/agrar/ernte-annahme-erfassung",
+      "path": "agrar/ernte-annahme-erfassung"
+    },
+    {
+      "module": "@/pages/agrar/ernte-annahme-erfassung",
+      "path": "agrar/ernte-annahme-erfassung/:id"
+    },
+    {
       "module": "@/pages/agrar/kulturpflanzen/liste",
       "path": "agrar/kulturpflanzen"
     },
@@ -575,6 +583,10 @@
     {
       "module": "@/pages/compliance/bvl-umsatzmeldung",
       "path": "compliance/bvl-umsatzmeldung"
+    },
+    {
+      "module": "@/pages/compliance/meldewesen-konsole",
+      "path": "compliance/meldewesen-konsole"
     },
     {
       "module": "@/pages/compliance/cross-compliance",
@@ -1375,6 +1387,10 @@
     {
       "module": "@/pages/waage/liste",
       "path": "waage"
+    },
+    {
+      "module": "@/pages/waage/hofliste",
+      "path": "waage/hofliste"
     },
     {
       "module": "@/pages/waage/wiegungen",

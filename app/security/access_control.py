@@ -15,6 +15,7 @@ import hashlib
 import secrets
 import jwt
 import re
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -246,7 +247,7 @@ class ISO27001AccessControl:
         Create a new user account
         Returns user ID
         """
-        user_id = str(uuid.uuid4())
+        user_id = uuid7()
 
         # Validate user data
         self._validate_user_data(user_data)
@@ -375,7 +376,7 @@ class ISO27001AccessControl:
         Create a new security role
         Returns role ID
         """
-        role_id = str(uuid.uuid4())
+        role_id = uuid7()
 
         role = Role(
             id=role_id,
@@ -480,7 +481,7 @@ class ISO27001AccessControl:
     def _create_user_session(self, user_id: str, ip_address: str, user_agent: str,
                            device_fingerprint: str = None, mfa_verified: bool = False) -> str:
         """Create user session and return token"""
-        session_id = str(uuid.uuid4())
+        session_id = uuid7()
 
         # Create JWT token
         payload = {
@@ -683,7 +684,7 @@ class ISO27001AccessControl:
                           user_agent: str, session_id: str = None, mfa_used: bool = False):
         """Log access attempt"""
         attempt = AccessAttempt(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             user_id=user_id,
             username=username,
             resource=resource,

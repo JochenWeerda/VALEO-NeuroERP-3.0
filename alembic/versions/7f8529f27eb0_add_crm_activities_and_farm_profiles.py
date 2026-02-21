@@ -23,7 +23,7 @@ def upgrade() -> None:
     # Create activities table
     op.create_table(
         'activities',
-        sa.Column('id', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+        sa.Column('id', sa.String(), server_default=sa.text('gen_random_uuid()'), nullable=False),
         sa.Column('type', sa.String(length=20), nullable=False),
         sa.Column('title', sa.String(length=200), nullable=False),
         sa.Column('customer', sa.String(length=100), nullable=False),
@@ -32,7 +32,7 @@ def upgrade() -> None:
         sa.Column('status', sa.String(length=20), nullable=False),
         sa.Column('assigned_to', sa.String(length=100), nullable=False),
         sa.Column('description', sa.Text(), nullable=True),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['tenant_id'], ['domain_shared.tenants.id'], ),
@@ -43,7 +43,7 @@ def upgrade() -> None:
     # Create farm_profiles table
     op.create_table(
         'farm_profiles',
-        sa.Column('id', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+        sa.Column('id', sa.String(), server_default=sa.text('gen_random_uuid()'), nullable=False),
         sa.Column('farm_name', sa.String(length=200), nullable=False),
         sa.Column('owner', sa.String(length=100), nullable=False),
         sa.Column('total_area', sa.Float(), nullable=False),
@@ -52,7 +52,7 @@ def upgrade() -> None:
         sa.Column('location', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column('certifications', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column('notes', sa.Text(), nullable=True),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('tenant_id', sa.String(), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['tenant_id'], ['domain_shared.tenants.id'], ),

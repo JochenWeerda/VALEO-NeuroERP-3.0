@@ -47,7 +47,7 @@ def upgrade() -> None:
     # SLAs table
     op.create_table(
         "crm_service_slas",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
@@ -62,11 +62,11 @@ def upgrade() -> None:
     # Categories table (self-referencing for subcategories)
     op.create_table(
         "crm_service_categories",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
-        sa.Column("parent_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_service_categories.id")),
+        sa.Column("parent_id", sa.String(), sa.ForeignKey("crm_service_categories.id")),
         sa.Column("is_active", sa.Boolean, nullable=False, server_default='true'),
         sa.Column("sort_order", sa.Integer, nullable=False, server_default='0'),
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
@@ -76,7 +76,7 @@ def upgrade() -> None:
     # Cases table
     op.create_table(
         "crm_service_cases",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("case_number", sa.String(32), nullable=False, unique=True),
         sa.Column("subject", sa.String(255), nullable=False),
@@ -84,17 +84,17 @@ def upgrade() -> None:
         sa.Column("status", postgresql.ENUM('new', 'assigned', 'in_progress', 'pending_customer', 'resolved', 'closed', 'escalated', name='crm_service_case_status', create_type=False), nullable=False, server_default='new'),
         sa.Column("priority", postgresql.ENUM('low', 'medium', 'high', 'urgent', name='crm_service_case_priority', create_type=False), nullable=False, server_default='medium'),
         sa.Column("case_type", postgresql.ENUM('incident', 'problem', 'question', 'feature_request', 'complaint', name='crm_service_case_type', create_type=False), nullable=False, server_default='incident'),
-        sa.Column("customer_id", postgresql.UUID(as_uuid=True)),
-        sa.Column("contact_id", postgresql.UUID(as_uuid=True)),
+        sa.Column("customer_id", sa.String()),
+        sa.Column("contact_id", sa.String()),
         sa.Column("assigned_to", sa.String(64)),
         sa.Column("assigned_by", sa.String(64)),
         sa.Column("assigned_at", sa.DateTime),
         sa.Column("resolution", sa.Text),
         sa.Column("resolved_at", sa.DateTime),
         sa.Column("resolved_by", sa.String(64)),
-        sa.Column("sla_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_service_slas.id")),
+        sa.Column("sla_id", sa.String(), sa.ForeignKey("crm_service_slas.id")),
         sa.Column("sla_breached", sa.Boolean, nullable=False, server_default='false'),
-        sa.Column("category_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_service_categories.id")),
+        sa.Column("category_id", sa.String(), sa.ForeignKey("crm_service_categories.id")),
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now()),
     )
@@ -102,8 +102,8 @@ def upgrade() -> None:
     # Case history table
     op.create_table(
         "crm_service_case_history",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
-        sa.Column("case_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_service_cases.id"), nullable=False),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
+        sa.Column("case_id", sa.String(), sa.ForeignKey("crm_service_cases.id"), nullable=False),
         sa.Column("action", sa.String(64), nullable=False),
         sa.Column("old_value", sa.Text),
         sa.Column("new_value", sa.Text),
@@ -116,12 +116,12 @@ def upgrade() -> None:
     # Knowledge articles table
     op.create_table(
         "crm_service_knowledge_articles",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("title", sa.String(255), nullable=False),
         sa.Column("content", sa.Text, nullable=False),
         sa.Column("summary", sa.String(500)),
-        sa.Column("category_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_service_categories.id")),
+        sa.Column("category_id", sa.String(), sa.ForeignKey("crm_service_categories.id")),
         sa.Column("tags", sa.String(500)),
         sa.Column("is_published", sa.Boolean, nullable=False, server_default='false'),
         sa.Column("is_featured", sa.Boolean, nullable=False, server_default='false'),

@@ -11,8 +11,8 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
 import hashlib
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -340,7 +340,7 @@ class ISO27001AccessControlManagement:
         Create a new user account
         Returns user ID
         """
-        user_id = str(uuid.uuid4())
+        user_id = uuid7()
 
         # Hash password
         password_hash = self._hash_password(user_data['password'])
@@ -366,7 +366,7 @@ class ISO27001AccessControlManagement:
 
     def _hash_password(self, password: str) -> str:
         """Hash password using secure hashing"""
-        salt = uuid.uuid4().hex
+        salt = uuid7().replace("-", "")
         hashed = hashlib.sha256(f"{password}{salt}".encode()).hexdigest()
         return f"{salt}:{hashed}"
 
@@ -435,8 +435,8 @@ class ISO27001AccessControlManagement:
 
     def _create_user_session(self, user_id: str, ip_address: str, user_agent: str) -> str:
         """Create a new user session"""
-        session_id = str(uuid.uuid4())
-        session_token = uuid.uuid4().hex
+        session_id = uuid7()
+        session_token = uuid7().replace("-", "")
 
         session = UserSession(
             id=session_id,
@@ -493,7 +493,7 @@ class ISO27001AccessControlManagement:
                            access_level: AccessLevel, success: bool):
         """Log access attempt"""
         access_log = AccessLog(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             user_id=session.user_id,
             session_id=session.id,
             resource_type=resource_type,
@@ -512,7 +512,7 @@ class ISO27001AccessControlManagement:
         Request privilege escalation
         Returns request ID
         """
-        request_id = str(uuid.uuid4())
+        request_id = uuid7()
 
         request = AccessRequest(
             id=request_id,
@@ -624,7 +624,7 @@ class ISO27001AccessControlManagement:
         Create an access rights review
         Returns review ID
         """
-        review_id = str(uuid.uuid4())
+        review_id = uuid7()
 
         review = AccessReview(
             id=review_id,

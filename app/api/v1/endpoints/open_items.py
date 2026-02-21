@@ -12,9 +12,10 @@ from decimal import Decimal
 from datetime import datetime, date
 import json
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -164,7 +165,7 @@ def _validate_op(payload: OpenItemBase) -> None:
 
 @router.get("", response_model=OpenItemListResponse)
 async def list_open_items(
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     konto_typ: Optional[str] = Query(None),
     op_status: Optional[str] = Query(None),
     konto_nr: Optional[str] = Query(None),
@@ -214,7 +215,7 @@ async def list_open_items(
 
 
 @router.get("/{op_id}", response_model=OpenItem)
-async def get_open_item(op_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+async def get_open_item(op_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     row = db.execute(
         text(
             """
@@ -233,9 +234,9 @@ async def get_open_item(op_id: str, tenant_id: str = Query("system"), db: Sessio
 
 
 @router.post("", response_model=OpenItem, status_code=201)
-async def create_open_item(payload: OpenItemCreate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+async def create_open_item(payload: OpenItemCreate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _validate_op(payload)
-    op_id = str(uuid.uuid4())
+    op_id = uuid7()
     db.execute(
         text(
             """
@@ -289,7 +290,7 @@ async def create_open_item(payload: OpenItemCreate, tenant_id: str = Query("syst
 
 
 @router.put("/{op_id}", response_model=OpenItem)
-async def update_open_item(op_id: str, payload: OpenItemCreate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+async def update_open_item(op_id: str, payload: OpenItemCreate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _validate_op(payload)
     exists = db.execute(text("SELECT id FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"), {"id": op_id, "tenant_id": tenant_id}).fetchone()
     if not exists:
@@ -345,14 +346,14 @@ async def update_open_item(op_id: str, payload: OpenItemCreate, tenant_id: str =
 
 
 @router.patch("/{op_id}", response_model=OpenItem)
-async def patch_open_item(op_id: str, payload: OpenItemUpdate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+async def patch_open_item(op_id: str, payload: OpenItemUpdate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     existing = await get_open_item(op_id, tenant_id, db)
     merged = OpenItemCreate(**{**existing.model_dump(exclude={"id", "tenant_id", "created_at", "updated_at"}), **payload.model_dump(exclude_unset=True)})
     return await update_open_item(op_id, merged, tenant_id, db)
 
 
 @router.delete("/{op_id}", status_code=204)
-async def delete_open_item(op_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+async def delete_open_item(op_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     row = db.execute(text("SELECT id FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"), {"id": op_id, "tenant_id": tenant_id}).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Open item not found")
@@ -365,7 +366,7 @@ async def delete_open_item(op_id: str, tenant_id: str = Query("system"), db: Ses
 async def settle_open_item(
     op_id: str,
     settlement: OpenItemSettlement,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """

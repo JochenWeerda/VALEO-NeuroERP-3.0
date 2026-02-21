@@ -76,7 +76,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
     queryKey: ['finance', 'payment-matching', 'unmatched'],
     queryFn: async () => {
       const response = await apiClient.get<Zahlungseingang[]>(
-        '/api/v1/finance/payment-matching/unmatched?tenant_id=system&limit=100',
+        '/api/v1/finance/payment-matching/unmatched?tenant_id=00000000-0000-0000-0000-000000000001&limit=100',
       )
       return response.data
     },
@@ -105,7 +105,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
     setAutoMatching(true)
     try {
       const response = await apiClient.post<unknown[]>(
-        '/api/v1/finance/payment-matching/auto-match?tenant_id=system',
+        '/api/v1/finance/payment-matching/auto-match?tenant_id=00000000-0000-0000-0000-000000000001',
       )
       const results = Array.isArray(response.data) ? response.data : []
       toast({
@@ -130,7 +130,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
     try {
       // Extract customer ID from payment (would need to be determined from creditor/debtor)
       const response = await apiClient.get<OpenItem[]>(
-        `/api/v1/finance/payment-matching/match-suggestions/${payment.id}?tenant_id=system`,
+        `/api/v1/finance/payment-matching/match-suggestions/${payment.id}?tenant_id=00000000-0000-0000-0000-000000000001`,
       )
       setOpenItems(response.data)
       setMatchDialogOpen(true)
@@ -148,7 +148,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
 
     try {
       await apiClient.post(
-        `/api/v1/finance/payment-matching/match/${selectedPayment.id}?op_id=${opId}&match_type=MANUAL&tenant_id=system`,
+        `/api/v1/finance/payment-matching/match/${selectedPayment.id}?op_id=${opId}&match_type=MANUAL&tenant_id=00000000-0000-0000-0000-000000000001`,
       )
       toast({
         title: t('crud.messages.matchSuccess'),

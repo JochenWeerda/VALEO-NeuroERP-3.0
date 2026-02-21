@@ -25,6 +25,7 @@ from .router_helpers import (
     _DB, get_repository, save_to_store, get_from_store, list_from_store, delete_from_store
 )
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -852,31 +853,108 @@ async def create_follow_up(req: FollowRequest) -> dict:
 
 
 @router.get("/customers/search")
-async def search_customers(q: str = "") -> dict:
-    """Sucht Kunden (Autocomplete)"""
-    # TODO: Echte DB-Suche
-    mock_customers = [
-        {"id": "CUST-001", "label": "Müller GmbH"},
-        {"id": "CUST-002", "label": "Schmidt AG"},
-        {"id": "CUST-003", "label": "Weber & Co."},
+async def search_customers(
+    q: str = "",
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db)
+) -> dict:
+    """Sucht Kunden (Autocomplete) - Echte DB-Suche"""
+    from app.infrastructure.models import BusinessPartner
+    from sqlalchemy import or_
+    
+    if not q or len(q) < 2:
+        return {"ok": True, "data": []}
+    
+    # Suche in name, city, partner_number
+    query = db.query(BusinessPartner).filter(
+        BusinessPartner.tenant_id == tenant_id,
+        BusinessPartner.is_customer == True,
+        or_(
+            BusinessPartner.name.ilike(f"%{q}%"),
+            BusinessPartner.city.ilike(f"%{q}%"),
+            BusinessPartner.partner_number.ilike(f"%{q}%")
+        )
+    ).limit(20)
+    
+    results = [
+        {
+            "id": c.id,
+            "label": f"{c.name} ({c.city or 'N/A'})" if c.city else c.name,
+            "name": c.name,
+            "partner_number": c.partner_number,
+            "city": c.city,
+        }
+        for c in query.all()
     ]
-
-    filtered = [c for c in mock_customers if q.lower() in c["label"].lower()]
-    return {"ok": True, "data": filtered}
+    
+    return {"ok": True, "data": results}
 
 
 @router.get("/articles/search")
-async def search_articles(q: str = "") -> dict:
-    """Sucht Artikel (Autocomplete)"""
-    # TODO: Echte DB-Suche
-    mock_articles = [
-        {"id": "ART-001", "label": "Apfel Elstar"},
-        {"id": "ART-002", "label": "Birne Conference"},
-        {"id": "ART-003", "label": "Kartoffel festkochend"},
+async def search_articles(
+    q: str = "",
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db)
+) -> dict:
+    """Sucht Artikel (Autocomplete) - Echte DB-Suche"""
+    from app.infrastructure.models import Article
+    from sqlalchemy import or_
+    
+    if not q or len(q) < 2:
+        return {"ok": True, "data": []}
+    
+    # Suche in name, item_number, ean
+    query = db.query(Article).filter(
+        Article.tenant_id == tenant_id,
+        or_(
+            Article.name.ilike(f"%{q}%"),
+            Article.item_number.ilike(f"%{q}%"),
+            Article.ean.ilike(f"%{q}%")
+        )
+    ).limit(20)
+    
+    results = [
+        {
+            "id": a.id,
+            "label": f"{a.name} ({a.item_number})" if a.item_number else a.name,
+            "name": a.name,
+            "item_number": a.item_number,
+            "ean": a.ean,
+        }
+        for a in query.all()
     ]
+    
+    return {"ok": True, "data": results}
 
-    filtered = [a for a in mock_articles if q.lower() in a["label"].lower()]
-    return {"ok": True, "data": filtered}
+
+# --- Due-Date Berechnung ---
+
+
+@router.post("/due-date/calculate")
+async def calculate_due_date(
+    data: dict,
+    db: Session = Depends(get_db)
+) -> dict:
+    """Berechnet Fälligkeitsdatum (Due-Date) +30 Tage"""
+    from datetime import datetime, timedelta
+    
+    base_date_str = data.get("base_date")  # YYYY-MM-DD
+    tage = data.get("tage", 30)
+    
+    if base_date_str:
+        base_date = datetime.strptime(base_date_str, "%Y-%m-%d").date()
+    else:
+        base_date = datetime.now().date()
+    
+    # Berechne Fälligkeitsdatum
+    faelligkeitsdatum = base_date + timedelta(days=tage)
+    
+    return {
+        "ok": True,
+        "base_date": base_date.isoformat(),
+        "tage": tage,
+        "faelligkeitsdatum": faelligkeitsdatum.isoformat(),
+    }
 
 
 # --- Analytics Endpoints ---

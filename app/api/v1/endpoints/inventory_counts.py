@@ -9,12 +9,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import InventoryCount, InventoryCountLine
 from ..schemas.base import PaginatedResponse, BaseSchema
 
 router = APIRouter()
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 # ── Schemas ──────────────────────────────────────────────────────
@@ -91,10 +92,10 @@ async def create_count_line(
     db: Session = Depends(get_db),
 ):
     """POST Inventur Daten anlegen"""
-    import uuid
+    from app.core.uuid7 import uuid7
     tid = tenant_id or DEFAULT_TENANT
     line = InventoryCountLine(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         inventory_count_id=count_id,
         article_id=payload.article_id,
         expected_qty=payload.expected_qty,

@@ -11,7 +11,7 @@ from decimal import Decimal
 from datetime import date, datetime
 from pydantic import BaseModel, Field, field_validator
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
 
@@ -261,7 +261,7 @@ async def create_exchange_rate(
             )
         
         # Insert new exchange rate
-        rate_id = str(uuid.uuid4())
+        rate_id = uuid7()
         
         insert_query = text("""
             INSERT INTO domain_erp.exchange_rates

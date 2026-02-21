@@ -7,14 +7,14 @@ from __future__ import annotations
 from datetime import datetime, date
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Any, Optional
-import uuid
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.uuid7 import uuid7
+from app.core.tenant import get_tenant_id
 from app.infrastructure.models import (
     BusinessPartnerAddress,
     BusinessPartnerBillingConfig,
@@ -1201,17 +1201,22 @@ def _apply_payload(row: BusinessPartner, payload: BusinessPartnerPayload) -> Non
 
 
 @router.post("/", response_model=BusinessPartnerEnvelope, status_code=201)
-async def create_business_partner(payload: BusinessPartnerEnvelope, db: Session = Depends(get_db)):
+async def create_business_partner(
+    payload: BusinessPartnerEnvelope,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db)
+):
     existing = (
         db.query(BusinessPartner)
+        .filter(BusinessPartner.tenant_id == tenant_id)
         .filter(BusinessPartner.partner_number == payload.business_partner.core_identity.partner_number)
         .first()
     )
     if existing:
         raise HTTPException(status_code=409, detail="partner_number already exists")
 
-    partner_id = payload.business_partner.core_identity.partner_id or str(uuid.uuid4())
-    row = BusinessPartner(partner_id=partner_id)
+    partner_id = payload.business_partner.core_identity.partner_id or uuid7()
+    row = BusinessPartner(partner_id=partner_id, tenant_id=tenant_id)
     _apply_payload(row, payload.business_partner)
     db.add(row)
     db.commit()
@@ -1223,9 +1228,10 @@ async def create_business_partner(payload: BusinessPartnerEnvelope, db: Session 
 async def list_business_partners(
     status: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    q = db.query(BusinessPartner)
+    q = db.query(BusinessPartner).filter(BusinessPartner.tenant_id == tenant_id)
     if status:
         q = q.filter(BusinessPartner.status == status)
     if search:
@@ -1236,22 +1242,38 @@ async def list_business_partners(
 
 
 @router.get("/{partner_id}", response_model=BusinessPartnerEnvelope)
-async def get_business_partner(partner_id: str, db: Session = Depends(get_db)):
-    row = db.query(BusinessPartner).filter(BusinessPartner.partner_id == partner_id).first()
+async def get_business_partner(
+    partner_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db)
+):
+    row = db.query(BusinessPartner).filter(
+        BusinessPartner.partner_id == partner_id,
+        BusinessPartner.tenant_id == tenant_id
+    ).first()
     if not row:
         raise HTTPException(status_code=404, detail="Business partner not found")
     return _to_out(row)
 
 
 @router.put("/{partner_id}", response_model=BusinessPartnerEnvelope)
-async def update_business_partner(partner_id: str, payload: BusinessPartnerEnvelope, db: Session = Depends(get_db)):
-    row = db.query(BusinessPartner).filter(BusinessPartner.partner_id == partner_id).first()
+async def update_business_partner(
+    partner_id: str,
+    payload: BusinessPartnerEnvelope,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db)
+):
+    row = db.query(BusinessPartner).filter(
+        BusinessPartner.partner_id == partner_id,
+        BusinessPartner.tenant_id == tenant_id
+    ).first()
     if not row:
         raise HTTPException(status_code=404, detail="Business partner not found")
 
     if payload.business_partner.core_identity.partner_number != row.partner_number:
         duplicate = (
             db.query(BusinessPartner)
+            .filter(BusinessPartner.tenant_id == tenant_id)
             .filter(BusinessPartner.partner_number == payload.business_partner.core_identity.partner_number)
             .first()
         )
@@ -1342,7 +1364,7 @@ async def create_discount_item(
 ):
     _ensure_partner_exists(partner_id, db)
     row = BusinessPartnerDiscountItem(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         partner_id=partner_id,
         article_number=payload.article_number,
         description=payload.description,
@@ -1478,7 +1500,7 @@ async def create_price_agreement(
 ):
     _ensure_partner_exists(partner_id, db)
     row = BusinessPartnerPriceAgreement(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         partner_id=partner_id,
         article_number=payload.article_number,
         description=payload.description,
@@ -1775,7 +1797,7 @@ async def list_instructions(partner_id: str, db: Session = Depends(get_db)):
 async def create_instruction(partner_id: str, payload: InstructionCreate, db: Session = Depends(get_db)):
     _ensure_partner_exists(partner_id, db)
     row = BusinessPartnerInstruction(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         partner_id=partner_id,
         instruction_text=payload.instruction_text,
         instruction_priority=payload.instruction_priority,
@@ -1894,7 +1916,7 @@ async def list_contacts(partner_id: str, db: Session = Depends(get_db)):
 async def create_contact(partner_id: str, payload: ContactCreate, db: Session = Depends(get_db)):
     _ensure_partner_exists(partner_id, db)
     row = BusinessPartnerContact(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         partner_id=partner_id,
         priority=payload.priority,
         salutation=payload.salutation,
@@ -2061,7 +2083,7 @@ async def create_address(
 ):
     _ensure_partner_exists(partner_id, db)
     row = BusinessPartnerAddress(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         partner_id=partner_id,
         address_type=payload.address_type,
         name_1=payload.name_1,
@@ -2228,7 +2250,7 @@ async def put_billing_config(
         .first()
     )
     if row is None:
-        row = BusinessPartnerBillingConfig(id=str(uuid.uuid4()), partner_id=partner_id)
+        row = BusinessPartnerBillingConfig(id=uuid7(), partner_id=partner_id)
         db.add(row)
 
     row.customer_group = payload.customer_group
@@ -2270,7 +2292,7 @@ async def patch_billing_config(
         .first()
     )
     if row is None:
-        row = BusinessPartnerBillingConfig(id=str(uuid.uuid4()), partner_id=partner_id)
+        row = BusinessPartnerBillingConfig(id=uuid7(), partner_id=partner_id)
         db.add(row)
     values = payload.model_dump(exclude_unset=True)
     for key, value in values.items():
@@ -2302,7 +2324,7 @@ async def create_cpd_account(
 ):
     _ensure_partner_exists(partner_id, db)
     row = BusinessPartnerCpdAccount(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         partner_id=partner_id,
         cpd_customer_number=payload.cpd_customer_number,
         debtor_account=payload.debtor_account,
@@ -2493,7 +2515,7 @@ async def list_pricing_rules(partner_id: str, db: Session = Depends(get_db)):
 async def create_pricing_rule(partner_id: str, payload: PricingRuleCreate, db: Session = Depends(get_db)):
     _ensure_partner_exists(partner_id, db)
     row = BusinessPartnerPricingRule(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         partner_id=partner_id,
         direct_account=payload.direct_account,
         discount_settlement=payload.discount_settlement,
@@ -2615,7 +2637,7 @@ async def list_interest_settings(partner_id: str, db: Session = Depends(get_db))
 @router.post("/{partner_id}/interest-settings", response_model=InterestSetting, status_code=201)
 async def create_interest_setting(partner_id: str, payload: InterestSettingCreate, db: Session = Depends(get_db)):
     _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerInterestSetting(id=str(uuid.uuid4()), partner_id=partner_id, **payload.model_dump())
+    row = BusinessPartnerInterestSetting(id=uuid7(), partner_id=partner_id, **payload.model_dump())
     db.add(row)
     _commit_with_validation(db, "Interest setting violates constraints")
     db.refresh(row)
@@ -2706,7 +2728,7 @@ async def list_dispatch_media(partner_id: str, db: Session = Depends(get_db)):
 @router.post("/{partner_id}/dispatch-media", response_model=DispatchMedium, status_code=201)
 async def create_dispatch_medium(partner_id: str, payload: DispatchMediumCreate, db: Session = Depends(get_db)):
     _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerDispatchMedium(id=str(uuid.uuid4()), partner_id=partner_id, **payload.model_dump())
+    row = BusinessPartnerDispatchMedium(id=uuid7(), partner_id=partner_id, **payload.model_dump())
     db.add(row)
     _commit_with_validation(db, "Dispatch medium violates constraints or duplicate key")
     db.refresh(row)
@@ -2801,7 +2823,7 @@ async def create_cooperative_membership(
     partner_id: str, payload: CooperativeMembershipCreate, db: Session = Depends(get_db)
 ):
     _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerCooperativeMembership(id=str(uuid.uuid4()), partner_id=partner_id, **payload.model_dump())
+    row = BusinessPartnerCooperativeMembership(id=uuid7(), partner_id=partner_id, **payload.model_dump())
     db.add(row)
     _commit_with_validation(db, "Cooperative membership violates constraints")
     db.refresh(row)
@@ -2876,7 +2898,7 @@ async def list_email_distributions(partner_id: str, db: Session = Depends(get_db
 @router.post("/{partner_id}/email-distributions", response_model=EmailDistribution, status_code=201)
 async def create_email_distribution(partner_id: str, payload: EmailDistributionCreate, db: Session = Depends(get_db)):
     _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerEmailDistribution(id=str(uuid.uuid4()), partner_id=partner_id, **payload.model_dump())
+    row = BusinessPartnerEmailDistribution(id=uuid7(), partner_id=partner_id, **payload.model_dump())
     db.add(row)
     _commit_with_validation(db, "Email distribution violates constraints or duplicate key")
     db.refresh(row)
@@ -2952,7 +2974,7 @@ async def list_communities(db: Session = Depends(get_db)):
 
 @router.post("/catalog/communities", response_model=Community, status_code=201)
 async def create_community(payload: CommunityCreate, db: Session = Depends(get_db)):
-    row = BusinessPartnerCommunity(id=str(uuid.uuid4()), **payload.model_dump())
+    row = BusinessPartnerCommunity(id=uuid7(), **payload.model_dump())
     db.add(row)
     _commit_with_validation(db, "Community violates constraints")
     db.refresh(row)
@@ -2995,7 +3017,7 @@ async def list_community_members(community_id: str, db: Session = Depends(get_db
 @router.post("/catalog/communities/{community_id}/members", response_model=CommunityMember, status_code=201)
 async def create_community_member(community_id: str, payload: CommunityMemberCreate, db: Session = Depends(get_db)):
     _ensure_partner_exists(payload.partner_id, db)
-    row = BusinessPartnerCommunityMember(id=str(uuid.uuid4()), community_id=community_id, **payload.model_dump())
+    row = BusinessPartnerCommunityMember(id=uuid7(), community_id=community_id, **payload.model_dump())
     db.add(row)
     _commit_with_validation(db, "Community member violates constraints or duplicate key")
     db.refresh(row)
@@ -3073,7 +3095,7 @@ async def put_profile(partner_id: str, payload: ProfileCreate, db: Session = Dep
     _ensure_partner_exists(partner_id, db)
     row = db.query(BusinessPartnerProfile).filter(BusinessPartnerProfile.partner_id == partner_id).first()
     if not row:
-        row = BusinessPartnerProfile(id=str(uuid.uuid4()), partner_id=partner_id)
+        row = BusinessPartnerProfile(id=uuid7(), partner_id=partner_id)
         db.add(row)
     for key, value in payload.model_dump().items():
         setattr(row, key, value)
@@ -3125,7 +3147,7 @@ async def put_interface_profile(partner_id: str, payload: InterfaceProfileCreate
     _ensure_partner_exists(partner_id, db)
     row = db.query(BusinessPartnerInterfaceProfile).filter(BusinessPartnerInterfaceProfile.partner_id == partner_id).first()
     if not row:
-        row = BusinessPartnerInterfaceProfile(id=str(uuid.uuid4()), partner_id=partner_id)
+        row = BusinessPartnerInterfaceProfile(id=uuid7(), partner_id=partner_id)
         db.add(row)
     for key, value in payload.model_dump().items():
         setattr(row, key, value)

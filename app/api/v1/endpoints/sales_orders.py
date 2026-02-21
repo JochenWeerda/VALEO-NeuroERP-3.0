@@ -149,6 +149,7 @@ def _row_to_order(row: dict, items: Optional[list[SalesOrderItemOut]] = None) ->
 @router.get("/", response_model=PaginatedResponse[SalesOrder])
 async def list_sales_orders(
     tenant_id: Optional[str] = Query(None),
+    customer_id: Optional[str] = Query(None, description="Filter by customer ID"),
     search: Optional[str] = Query(None),
     status_filter: Optional[str] = Query(None, alias="status"),
     skip: int = Query(0, ge=0),
@@ -163,6 +164,9 @@ async def list_sales_orders(
     }
 
     where = ["tenant_id = :tenant_id", "deleted_at IS NULL"]
+    if customer_id:
+        where.append("customer_id = :customer_id")
+        params["customer_id"] = customer_id
     if search:
         where.append("(order_number ILIKE :search OR subject ILIKE :search)")
         params["search"] = f"%{search}%"
