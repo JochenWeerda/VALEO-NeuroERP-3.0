@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { useWorkflowRules, type WorkflowRule as ApiWorkflowRule } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,13 +18,19 @@ const actionOptions = ['ERFASST', 'FREIGEGEBEN', 'GEPRUEFT', 'GENEHMIGT', 'BESTA
 
 export default function WorkflowRegelnPage(): JSX.Element {
   const { data: apiRules = [], isError, error, refetch } = useWorkflowRules()
-  const [rules, setRules] = useState<WorkflowRule[]>([])
+  const stableRules = useMemo<WorkflowRule[]>(() => apiRules.map((r) => ({ ...r })), [JSON.stringify(apiRules)])
+  const [localEdits, setLocalEdits] = useState<Map<string, Partial<WorkflowRule>>>(new Map())
+  const [addedRules, setAddedRules] = useState<WorkflowRule[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingRule, setEditingRule] = useState<WorkflowRule | null>(null)
 
-  useEffect(() => {
-    setRules(apiRules.map((r) => ({ ...r })))
-  }, [apiRules])
+  const rules = useMemo(() => {
+    const merged = stableRules.map((r) => {
+      const edits = localEdits.get(r.id)
+      return edits ? { ...r, ...edits } : r
+    })
+    return [...merged, ...addedRules]
+  }, [stableRules, localEdits, addedRules])
 
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
@@ -50,10 +56,20 @@ export default function WorkflowRegelnPage(): JSX.Element {
   ]
 
   const handleEdit = (rule: WorkflowRule) => { setEditingRule(rule); setIsDialogOpen(true) }
-  const handleToggleActive = (rule: WorkflowRule) => { setRules((prev) => prev.map((r) => r.id === rule.id ? { ...r, active: !r.active } : r)) }
+  const handleToggleActive = (rule: WorkflowRule) => {
+    if (addedRules.some((r) => r.id === rule.id)) {
+      setAddedRules((prev) => prev.map((r) => r.id === rule.id ? { ...r, active: !r.active } : r))
+    } else {
+      setLocalEdits((prev) => new Map(prev).set(rule.id, { ...prev.get(rule.id), active: !rule.active }))
+    }
+  }
   const handleSave = (ruleData: Partial<WorkflowRule>) => {
     if (editingRule) {
-      setRules((prev) => prev.map((r) => r.id === editingRule.id ? { ...r, ...ruleData } : r))
+      if (addedRules.some((r) => r.id === editingRule.id)) {
+        setAddedRules((prev) => prev.map((r) => r.id === editingRule.id ? { ...r, ...ruleData } : r))
+      } else {
+        setLocalEdits((prev) => new Map(prev).set(editingRule.id, { ...prev.get(editingRule.id), ...ruleData }))
+      }
     } else {
       const newRule: WorkflowRule = {
         id: Date.now().toString(),
@@ -64,7 +80,7 @@ export default function WorkflowRegelnPage(): JSX.Element {
         condition: ruleData.condition,
         active: ruleData.active ?? true,
       }
-      setRules((prev) => [...prev, newRule])
+      setAddedRules((prev) => [...prev, newRule])
     }
     setIsDialogOpen(false)
     setEditingRule(null)
