@@ -29,7 +29,7 @@ def upgrade() -> None:
     op.add_column("crm_sales_opportunities", sa.Column("currency", sa.String(3), nullable=True, server_default="EUR"))
     op.add_column("crm_sales_opportunities", sa.Column("expected_revenue", sa.Float, nullable=True))
     op.add_column("crm_sales_opportunities", sa.Column("source", sa.String(128), nullable=True))
-    op.add_column("crm_sales_opportunities", sa.Column("campaign_id", postgresql.UUID(as_uuid=True), nullable=True))
+    op.add_column("crm_sales_opportunities", sa.Column("campaign_id", sa.String(), nullable=True))
     op.add_column("crm_sales_opportunities", sa.Column("owner_id", sa.String(64), nullable=True))
     op.add_column("crm_sales_opportunities", sa.Column("notes", sa.Text, nullable=True))
     op.add_column("crm_sales_opportunities", sa.Column("created_by", sa.String(64), nullable=True))
@@ -56,7 +56,7 @@ def upgrade() -> None:
     # Create opportunity_stages table
     op.create_table(
         "crm_sales_opportunity_stages",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(128), nullable=False),
         sa.Column("stage_key", sa.String(64), nullable=False),
@@ -79,8 +79,8 @@ def upgrade() -> None:
     # Create opportunity_history table
     op.create_table(
         "crm_sales_opportunity_history",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
-        sa.Column("opportunity_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_sales_opportunities.id", ondelete="CASCADE"), nullable=False),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
+        sa.Column("opportunity_id", sa.String(), sa.ForeignKey("crm_sales_opportunities.id", ondelete="CASCADE"), nullable=False),
         sa.Column("field_name", sa.String(128), nullable=False),
         sa.Column("old_value", sa.Text, nullable=True),
         sa.Column("new_value", sa.Text, nullable=True),

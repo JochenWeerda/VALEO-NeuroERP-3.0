@@ -7,7 +7,7 @@ from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Text, 
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-import uuid
+from app.core.uuid7 import uuid7
 
 from ...core.database import Base
 
@@ -18,7 +18,7 @@ class Saatgut(Base):
     __tablename__ = "agrar_saatgut"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: uuid7())
     artikelnummer = Column(String(50), nullable=False, unique=True)
     name = Column(String(200), nullable=False)
     sorte = Column(String(100), nullable=False)
@@ -58,7 +58,7 @@ class SaatgutLizenz(Base):
     __tablename__ = "agrar_saatgut_lizenzen"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: uuid7())
     saatgut_id = Column(String, ForeignKey("domain_agrar.agrar_saatgut.id"), nullable=False)
     typ = Column(String(50), nullable=False)  # Nachbaugebühr, Z-Saatgut, etc.
     saison = Column(String(9), nullable=False)  # 2024/2025
@@ -77,7 +77,7 @@ class Duenger(Base):
     __tablename__ = "agrar_duenger"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: uuid7())
     artikelnummer = Column(String(50), nullable=False, unique=True)
     name = Column(String(200), nullable=False)
     typ = Column(String(50), nullable=False)  # Mineraldünger, Organisch, etc.
@@ -129,7 +129,7 @@ class DuengerMischung(Base):
     __tablename__ = "agrar_duenger_mischungen"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: uuid7())
     name = Column(String(200), nullable=False)
     beschreibung = Column(Text, nullable=True)
 
@@ -159,7 +159,7 @@ class PSM(Base):
     __tablename__ = "agrar_psm"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: uuid7())
     artikelnummer = Column(String(50), nullable=False, unique=True)
     name = Column(String(200), nullable=False)
     wirkstoff = Column(String(100), nullable=False)
@@ -213,7 +213,7 @@ class Sachkunde(Base):
     __tablename__ = "agrar_sachkunde"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: uuid7())
     person_id = Column(String, nullable=False)  # Verknüpfung zu CRM/Contact
     sachkunde_typ = Column(String(50), nullable=False)  # PSM, Dünger, etc.
     zertifikat_nummer = Column(String(50), nullable=True)
@@ -235,7 +235,7 @@ class Biostimulanz(Base):
     __tablename__ = "agrar_biostimulanzien"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: uuid7())
     artikelnummer = Column(String(50), nullable=False, unique=True)
     name = Column(String(200), nullable=False)
     typ = Column(String(50), nullable=False)  # Biostimulanz, Kalk, Substrat, etc.

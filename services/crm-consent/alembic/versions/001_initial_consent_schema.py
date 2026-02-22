@@ -22,16 +22,16 @@ def upgrade() -> None:
     # Create consent_consents table
     op.create_table(
         'crm_consent_consents',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column('id', sa.String(), primary_key=True),
         sa.Column('tenant_id', sa.String(64), nullable=False),
-        sa.Column('contact_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('contact_id', sa.String(), nullable=False),
         sa.Column('channel', sa.String(20), nullable=False),  # email, sms, phone, postal
         sa.Column('consent_type', sa.String(20), nullable=False),  # marketing, service, required
         sa.Column('status', sa.String(20), nullable=False, server_default='pending'),  # pending, granted, denied, revoked
         sa.Column('granted_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('denied_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('revoked_at', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('double_opt_in_token', postgresql.UUID(as_uuid=True), nullable=True, unique=True),
+        sa.Column('double_opt_in_token', sa.String(), nullable=True, unique=True),
         sa.Column('double_opt_in_confirmed_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('source', sa.String(20), nullable=False, server_default='manual'),  # web_form, api, import, manual
         sa.Column('ip_address', sa.String(45), nullable=True),
@@ -53,8 +53,8 @@ def upgrade() -> None:
     # Create consent_history table
     op.create_table(
         'crm_consent_history',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column('consent_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), primary_key=True),
+        sa.Column('consent_id', sa.String(), nullable=False),
         sa.Column('action', sa.String(20), nullable=False),  # granted, denied, revoked, updated
         sa.Column('old_status', sa.String(20), nullable=True),
         sa.Column('new_status', sa.String(20), nullable=False),

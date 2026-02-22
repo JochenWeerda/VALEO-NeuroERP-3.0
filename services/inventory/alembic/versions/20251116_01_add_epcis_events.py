@@ -27,12 +27,12 @@ def upgrade() -> None:
     # Create table
     op.create_table(
         "inventory_epcis_events",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
+        sa.Column("id", sa.String(), primary_key=True, nullable=False),
         sa.Column("event_type", sa.Enum(name="epcis_event_type"), nullable=False),
         sa.Column("event_time", sa.DateTime(), nullable=False),
         sa.Column("biz_step", sa.String(length=128), nullable=True),
         sa.Column("read_point", sa.String(length=128), nullable=True),
-        sa.Column("lot_id", postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column("lot_id", sa.String(), nullable=True),
         sa.Column("sku", sa.String(length=64), nullable=True),
         sa.Column("quantity", sa.Numeric(16, 3), nullable=True),
         sa.Column("extensions", sa.JSON(), nullable=True),

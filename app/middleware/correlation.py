@@ -3,8 +3,8 @@ Correlation ID Middleware
 Generates and tracks correlation IDs for request tracing
 """
 
-import uuid
 import logging
+from app.core.uuid7 import uuid7
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from app.core.logging import set_correlation_id, get_correlation_id
@@ -22,7 +22,7 @@ class CorrelationMiddleware(BaseHTTPMiddleware):
         correlation_id = request.headers.get(CORRELATION_ID_HEADER)
         
         if not correlation_id:
-            correlation_id = str(uuid.uuid4())
+            correlation_id = uuid7()
         
         # Set in context
         set_correlation_id(correlation_id)

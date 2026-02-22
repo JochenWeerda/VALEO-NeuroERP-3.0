@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix inconsistencies in RESTARBEITEN.md: sync CSV status, consolidate sections\n\n- Sync CSV ticket statuses with checkbox state \\(12 tickets Backlog→Done\\)\n- Integrate §8.37 \\(Chargen-MHD\\) into §8.6 and §8.7 \\(Controlling\\)\n- Integrate §8.38 \\(Schulung Domain-CRUD\\) into §8.8\n- Close DoD checkboxes for completed Sprints 1-5\n- Update §8.9 to reflect all 4 items as completed with cross-refs\n- Mark Load-Test in §3 as completed \\(AGRAR-PERF-01\\)\n- Add authoritative-source note to CSV export section\n- Update document date to 15.02.2026\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(docker compose:*)",
+      "mcp__MCP_DOCKER__browser_navigate",
+      "mcp__MCP_DOCKER__browser_take_screenshot",
+      "mcp__MCP_DOCKER__browser_click",
+      "mcp__MCP_DOCKER__browser_evaluate",
+      "Bash(git status:*)",
+      "Bash(ls:*)",
+      "Bash(gh api:*)",
+      "mcp__MCP_DOCKER__browser_console_messages",
+      "mcp__MCP_DOCKER__browser_network_requests",
+      "Bash(powershell -Command:*)",
+      "Bash(Group-Object)",
+      "Bash(/tmp/show_dupes.ps1 << 'EOF'\n$json = Get-Content 'C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\packages\\\\frontend-web\\\\src\\\\app\\\\route-aliases.json' | ConvertFrom-Json\n$dupeItems = $json.aliases | Where-Object { $_.path -eq 'agrar/saatgut' }\n\nWrite-Host \"Found $\\($dupeItems.Count\\) entries with path 'agrar/saatgut':\"\nWrite-Host \"\"\n$dupeItems | ForEach-Object -Begin { $i = 1 } {\n    Write-Host \"[$i]\"\n    Write-Host \"  path: $\\($_.path\\)\"\n    Write-Host \"  name: $\\($_.name\\)\"\n    $i++\n}\nEOF)",
+      "Bash(powershell:*)",
+      "Bash(node -e:*)",
+      "Bash(npx vite:*)",
+      "Bash(cmd.exe /c \"netstat -ano | findstr LISTENING | findstr :51\")",
+      "Bash(cmd.exe /c \"tasklist | findstr node\")",
+      "Bash(powershell.exe -Command \"cd ''C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\packages\\\\frontend-web''; if \\(Test-Path node_modules\\) { ''node_modules exists'' } else { ''node_modules MISSING'' }; if \\(Test-Path node_modules\\\\.vite\\) { ''vite cache exists'' } else { ''vite cache missing'' }\")",
+      "Bash(powershell.exe -Command \"cd ''C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\packages\\\\frontend-web''; node -e ''console.log\\(process.version\\)''\")",
+      "Bash(cmd.exe /c \"netstat -ano | findstr LISTENING | findstr :3000\")",
+      "Bash(powershell.exe -NoProfile -Command \"Set-Location ''C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\packages\\\\frontend-web''; node node_modules/.bin/vite --host 0.0.0.0 --port 3000 2>&1 | Select-Object -First 30\")",
+      "Bash(powershell.exe -NoProfile -Command \"Set-Location ''C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\packages\\\\frontend-web''; & node_modules\\\\.bin\\\\vite.cmd --host 0.0.0.0 --port 3000 2>&1 | Select-Object -First 20\")",
+      "Bash(cmd.exe /c \"taskkill /f /im node.exe 2>nul & echo done\")",
+      "Bash(cmd.exe /c \"taskkill /f /im node.exe 2>nul & echo killed\")",
+      "Bash(cmd.exe /c \"taskkill /f /im node.exe 2>nul & ping -n 3 127.0.0.1 >nul & echo killed\")",
+      "Bash(cmd.exe /c \"taskkill /f /im node.exe >nul 2>&1 & taskkill /f /im node.exe >nul 2>&1 & taskkill /f /im node.exe >nul 2>&1 & ping -n 5 127.0.0.1 >nul & netstat -ano | findstr LISTENING | findstr :300\")",
+      "Bash(powershell.exe -NoProfile -Command \"Set-Location ''C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\packages\\\\frontend-web''; & node_modules\\\\.bin\\\\vite.cmd --host 0.0.0.0 --port 3000 2>&1 | Select-Object -First 15\")",
+      "mcp__MCP_DOCKER__browser_press_key",
+      "Bash(dir:*)",
+      "Bash(node scripts/check-route-aliases.js:*)",
+      "Bash(npx tsc:*)",
+      "Bash(find:*)"
+    ]
+  }
+}

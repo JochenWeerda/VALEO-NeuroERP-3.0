@@ -1,191 +1,164 @@
 """
 Workflow Router
-API-Endpoints für Workflow-Management mit State-Machine und SSE-Broadcasts
+Persisted workflow endpoints (no in-memory runtime state).
 """
 
 from __future__ import annotations
-from fastapi import APIRouter, Body, HTTPException
-from typing import Literal
-import time
-import logging
 
-from app.services.workflow_service import workflow
-from app.core.sse import sse_hub
-from app.core.metrics import workflow_transitions_total
-from app.repositories.workflow_repository import WorkflowRepository
+import asyncio
+import logging
+import time
+from typing import Literal
+
+from fastapi import APIRouter, Body, Depends, HTTPException
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
 from app.core.database_pg import get_db
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.metrics import workflow_transitions_total
+from app.core.sse import sse_hub
+from app.models.documents import WorkflowAudit
+from app.repositories.workflow_repository import WorkflowRepository
+from app.services.workflow_service import workflow
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/workflow", tags=["workflow"])
 
-# In-memory stores (DEPRECATED - wird durch PostgreSQL ersetzt)
-_STATE: dict[tuple[str, str], str] = {}      # (domain,number) -> state
-_AUDIT: dict[tuple[str, str], list] = {}
 
-# PostgreSQL-Repository (wird schrittweise aktiviert)
-async def get_workflow_repo(db: AsyncSession = get_db()) -> WorkflowRepository:
-    """FastAPI Dependency für WorkflowRepository"""
+def get_workflow_repo(db: Session = Depends(get_db)) -> WorkflowRepository:
     return WorkflowRepository(db)
-
-# Export für andere Module
-__all__ = ["_STATE"]
 
 
 @router.get("/{domain}/{number}")
-async def get_status(domain: Literal["sales", "purchase"], number: str):
-    """
-    Holt aktuellen Workflow-Status für Beleg
-
-    Args:
-        domain: Belegtyp (sales/purchase)
-        number: Beleg-Nummer
-
-    Returns:
-        Status-Info
-    """
+async def get_status(
+    domain: Literal["sales", "purchase"],
+    number: str,
+    repo: WorkflowRepository = Depends(get_workflow_repo),
+):
     try:
-        st = _STATE.get((domain, number), "draft")
-        return {"ok": True, "state": st}
-    except Exception as e:
-        logger.error(f"Failed to get workflow status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return {"ok": True, "state": repo.get_status(domain, number)}
+    except Exception as exc:
+        logger.error("Failed to get workflow status: %s", exc)
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @router.post("/{domain}/{number}/transition")
 async def do_transition(
     domain: Literal["sales", "purchase"],
     number: str,
-    action: Literal["submit", "approve", "reject", "post"],
-    payload: dict = Body(...)
+    action: Literal["submit", "approve", "reject", "post"] | None = None,
+    payload: dict = Body(...),
+    repo: WorkflowRepository = Depends(get_workflow_repo),
 ):
-    """
-    Führt Workflow-Transition aus
-
-    Args:
-        domain: Belegtyp
-        number: Beleg-Nummer
-        action: Aktion
-        payload: Beleg-Daten für Guards
-
-    Returns:
-        Neuer Status
-    """
     try:
-        cur = _STATE.get((domain, number), "draft")
-
-        # Guards werden in workflow.next() geprüft
-        ok, nxt, msg = workflow.next(domain, cur, action, payload)
+        resolved_action = action or payload.get("action")
+        if resolved_action not in {"submit", "approve", "reject", "post"}:
+            raise HTTPException(status_code=400, detail="Invalid action")
+        cur = repo.get_status(domain, number)
+        ok, nxt, msg = workflow.next(domain, cur, resolved_action, payload)
         if not ok:
-            raise HTTPException(400, detail=msg)
+            raise HTTPException(status_code=400, detail=msg)
 
-        _STATE[(domain, number)] = nxt
-        _AUDIT.setdefault((domain, number), []).append({
-            "ts": int(time.time()),
-            "from": cur,
-            "to": nxt,
-            "action": action
-        })
+        reason = payload.get("reason") if isinstance(payload.get("reason"), str) else None
+        repo.set_status(domain, number, nxt, user=None)
+        repo.add_audit(domain, number, cur, nxt, resolved_action, user=None, reason=reason)
 
-        # Prometheus Metric
-        workflow_transitions_total.labels(domain=domain, action=action, status=nxt).inc()
+        workflow_transitions_total.labels(domain=domain, action=resolved_action, status=nxt).inc()
 
-        # SSE Broadcast
-        import asyncio
-        asyncio.create_task(sse_hub.broadcast("workflow", {
-            "id": f"workflow-{domain}-{number}-{int(time.time())}",
-            "ts": time.time(),
-            "source": "mcp",
-            "topic": "workflow",
-            "domain": domain,
-            "number": number,
-            "action": action,
-            "fromState": cur,
-            "toState": nxt,
-        }))
+        asyncio.create_task(
+            sse_hub.broadcast(
+                "workflow",
+                {
+                    "id": f"workflow-{domain}-{number}-{int(time.time())}",
+                    "ts": time.time(),
+                    "source": "db",
+                    "topic": "workflow",
+                    "domain": domain,
+                    "number": number,
+                    "action": resolved_action,
+                    "fromState": cur,
+                    "toState": nxt,
+                },
+            )
+        )
 
-        logger.info(f"Workflow transition: {domain}/{number} {cur} → {nxt} ({action})")
         return {"ok": True, "state": nxt}
-
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Failed to transition workflow: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as exc:
+        logger.error("Failed to transition workflow: %s", exc)
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @router.get("/{domain}/{number}/audit")
-async def audit(domain: Literal["sales", "purchase"], number: str):
-    """
-    Holt Audit-Trail für Beleg
-
-    Args:
-        domain: Belegtyp
-        number: Beleg-Nummer
-
-    Returns:
-        Audit-Einträge
-    """
+async def audit(
+    domain: Literal["sales", "purchase"],
+    number: str,
+    repo: WorkflowRepository = Depends(get_workflow_repo),
+):
     try:
-        items = _AUDIT.get((domain, number), [])
+        items = repo.get_audit(domain, number)
+        payload_items = [
+            {
+                "ts": int(item.ts),
+                "from": item.from_state,
+                "to": item.to_state,
+                "action": item.action,
+                "user": item.user,
+                "reason": item.reason,
+            }
+            for item in items
+        ]
 
-        # SSE Broadcast für Audit-Abruf
-        import asyncio
-        asyncio.create_task(sse_hub.broadcast("workflow", {
-            "id": f"audit-{domain}-{number}-{int(time.time())}",
-            "ts": time.time(),
-            "source": "mcp",
-            "topic": "workflow",
-            "type": "audit_access",
-            "domain": domain,
-            "number": number,
-            "count": len(items),
-        }))
+        asyncio.create_task(
+            sse_hub.broadcast(
+                "workflow",
+                {
+                    "id": f"audit-{domain}-{number}-{int(time.time())}",
+                    "ts": time.time(),
+                    "source": "db",
+                    "topic": "workflow",
+                    "type": "audit_access",
+                    "domain": domain,
+                    "number": number,
+                    "count": len(payload_items),
+                },
+            )
+        )
 
-        return {"ok": True, "items": items}
-    except Exception as e:
-        logger.error(f"Failed to get audit trail: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return {"ok": True, "items": payload_items}
+    except Exception as exc:
+        logger.error("Failed to get audit trail: %s", exc)
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @router.get("/replay/{channel}")
-async def replay_events(channel: str, since: float = 0.0):
-    """
-    Replay von Workflow-Events seit Timestamp
-
-    Args:
-        channel: SSE-Channel (z.B. "workflow")
-        since: Unix-Timestamp für Replay-Start
-
-    Returns:
-        Events seit dem angegebenen Zeitpunkt
-    """
+async def replay_events(
+    channel: str,
+    since: float = 0.0,
+    repo: WorkflowRepository = Depends(get_workflow_repo),
+):
     try:
-        # Sammle alle relevanten Events seit dem Timestamp
-        events = []
-
-        # Durchsuche alle Workflow-States und deren Audit-Trails
-        for (domain, number), audit_trail in _AUDIT.items():
-            for entry in audit_trail:
-                if entry["ts"] >= since:
-                    events.append({
-                        "id": f"replay-{domain}-{number}-{entry['ts']}",
-                        "ts": entry["ts"],
-                        "source": "mcp",
-                        "topic": "workflow",
-                        "type": "replay",
-                        "domain": domain,
-                        "number": number,
-                        "action": entry["action"],
-                        "fromState": entry["from"],
-                        "toState": entry["to"],
-                    })
-
-        # Sortiere nach Timestamp
-        events.sort(key=lambda x: x["ts"])
-
+        _ = channel
+        stmt = select(WorkflowAudit).where(WorkflowAudit.ts >= int(since)).order_by(WorkflowAudit.ts.asc())
+        rows = repo.db.execute(stmt).scalars().all()
+        events = [
+            {
+                "id": f"replay-{row.domain}-{row.doc_number}-{row.ts}",
+                "ts": row.ts,
+                "source": "db",
+                "topic": "workflow",
+                "type": "replay",
+                "domain": row.domain,
+                "number": row.doc_number,
+                "action": row.action,
+                "fromState": row.from_state,
+                "toState": row.to_state,
+            }
+            for row in rows
+        ]
         return {"ok": True, "events": events, "count": len(events)}
-    except Exception as e:
-        logger.error(f"Failed to replay events: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as exc:
+        logger.error("Failed to replay events: %s", exc)
+        raise HTTPException(status_code=500, detail=str(exc)) from exc

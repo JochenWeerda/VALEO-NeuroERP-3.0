@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
-import { Package, CheckCircle, XCircle, AlertTriangle } from 'lucide-react'
+import { Package } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
 type PurchaseOrderItem = {
@@ -87,40 +87,24 @@ export default function WareneingangPage(): JSX.Element {
 
   const loadPurchaseOrders = async () => {
     try {
-      // Versuche MCP-API, dann Fallback
-      try {
-        const response = await fetch('/api/mcp/documents/purchase_order?status=FREIGEGEBEN&limit=100')
-        if (response.ok) {
-          const result = await response.json()
-          if (result.ok && result.data) {
-            setPurchaseOrders(result.data.map((po: any) => ({
-              id: po.id || po.number,
-              number: po.number,
-              supplierId: po.supplierId || '',
-              supplierName: po.supplierName || po.supplier?.name || '',
-              status: po.status,
-              items: po.lines?.map((line: any) => ({
-                id: line.id || `${po.id}-${line.productId}`,
-                productId: line.productId,
-                productName: line.productName || line.product?.name || '',
-                quantityOrdered: line.qty || line.quantity || 0,
-                quantityReceived: line.quantityReceived || 0,
-                unit: line.unit || 'Stk',
-                price: line.price || 0,
-              })) || [],
-            })))
-            return
-          }
-        }
-      } catch (mcpError) {
-        console.warn('MCP-API nicht verfügbar, verwende Fallback:', mcpError)
-      }
-
-      // Fallback
-      const response = await apiClient.get('/einkauf/bestellungen?status=FREIGEGEBEN')
-      if (response.data?.data) {
-        setPurchaseOrders(response.data.data)
-      }
+      const response = await apiClient.get('/api/v1/purchase-orders?status=FREIGEGEBEN&page=1&pageSize=100')
+      const rows = response.data?.data || []
+      setPurchaseOrders(rows.map((po: any) => ({
+        id: po.id,
+        number: po.purchaseOrderNumber || po.number,
+        supplierId: po.supplierId || '',
+        supplierName: po.subject || po.supplierName || '',
+        status: po.status,
+        items: (po.items || []).map((line: any) => ({
+          id: line.id || `${po.id}-${line.articleId || line.description}`,
+          productId: line.articleId || line.productId || '',
+          productName: line.description || line.productName || '',
+          quantityOrdered: Number(line.quantity || 0),
+          quantityReceived: Number(line.quantityReceived || 0),
+          unit: line.unit || 'Stk',
+          price: Number(line.unitPrice || line.price || 0),
+        })),
+      })))
     } catch (error) {
       console.error('Fehler beim Laden der Bestellungen:', error)
       toast({
@@ -133,68 +117,36 @@ export default function WareneingangPage(): JSX.Element {
   const loadPurchaseOrder = async (orderId: string) => {
     setLoading(true)
     try {
-      // Versuche MCP-API, dann Fallback
-      try {
-        const response = await fetch(`/api/mcp/documents/purchase_order/${orderId}`)
-        if (response.ok) {
-          const result = await response.json()
-          if (result.ok && result.data) {
-            const po = result.data
-            setPurchaseOrder({
-              id: po.id || po.number,
-              number: po.number,
-              supplierId: po.supplierId || '',
-              supplierName: po.supplierName || po.supplier?.name || '',
-              status: po.status,
-              items: po.lines?.map((line: any) => ({
-                id: line.id || `${po.id}-${line.productId}`,
-                productId: line.productId,
-                productName: line.productName || line.product?.name || '',
-                quantityOrdered: line.qty || line.quantity || 0,
-                quantityReceived: line.quantityReceived || 0,
-                unit: line.unit || 'Stk',
-                price: line.price || 0,
-              })) || [],
-            })
-            // Initialisiere Receipt Items
-            const items: GoodsReceiptItem[] = po.lines?.map((line: any) => ({
-              purchaseOrderItemId: line.id || `${po.id}-${line.productId}`,
-              receivedQuantity: 0,
-              acceptedQuantity: 0,
-              rejectedQuantity: 0,
-              condition: 'PERFECT' as const,
-            })) || []
-            setReceiptData(prev => ({
-              ...prev,
-              purchaseOrderId: orderId,
-              items,
-            }))
-            setLoading(false)
-            return
-          }
-        }
-      } catch (mcpError) {
-        console.warn('MCP-API nicht verfügbar, verwende Fallback:', mcpError)
-      }
-
-      // Fallback
-      const response = await apiClient.get(`/einkauf/bestellungen/${orderId}`)
-      if (response.data) {
-        const po = response.data
-        setPurchaseOrder(po)
-        const items: GoodsReceiptItem[] = (po.items || []).map((item: any) => ({
-          purchaseOrderItemId: item.id,
-          receivedQuantity: 0,
-          acceptedQuantity: 0,
-          rejectedQuantity: 0,
-          condition: 'PERFECT' as const,
-        }))
-        setReceiptData(prev => ({
-          ...prev,
-          purchaseOrderId: orderId,
-          items,
-        }))
-      }
+      const response = await apiClient.get(`/api/v1/purchase-orders/${orderId}`)
+      const po = response.data
+      setPurchaseOrder({
+        id: po.id,
+        number: po.purchaseOrderNumber || po.number,
+        supplierId: po.supplierId || '',
+        supplierName: po.subject || po.supplierName || '',
+        status: po.status,
+        items: (po.items || []).map((line: any) => ({
+          id: line.id || `${po.id}-${line.articleId || line.description}`,
+          productId: line.articleId || line.productId || '',
+          productName: line.description || line.productName || '',
+          quantityOrdered: Number(line.quantity || 0),
+          quantityReceived: Number(line.quantityReceived || 0),
+          unit: line.unit || 'Stk',
+          price: Number(line.unitPrice || line.price || 0),
+        })),
+      })
+      const items: GoodsReceiptItem[] = (po.items || []).map((item: any) => ({
+        purchaseOrderItemId: item.id || `${po.id}-${item.articleId || item.description}`,
+        receivedQuantity: 0,
+        acceptedQuantity: 0,
+        rejectedQuantity: 0,
+        condition: 'PERFECT' as const,
+      }))
+      setReceiptData((prev) => ({
+        ...prev,
+        purchaseOrderId: orderId,
+        items,
+      }))
     } catch (error) {
       console.error('Fehler beim Laden der Bestellung:', error)
       toast({
@@ -205,7 +157,6 @@ export default function WareneingangPage(): JSX.Element {
       setLoading(false)
     }
   }
-
   const updateReceiptItem = (index: number, field: keyof GoodsReceiptItem, value: any) => {
     setReceiptData(prev => {
       const newItems = [...prev.items]
@@ -227,7 +178,7 @@ export default function WareneingangPage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: t('crud.messages.validationError'),
-        description: t('crud.fields.purchaseOrder') + ' ist erforderlich',
+        description: `${t('crud.fields.purchaseOrder')} ist erforderlich`,
       })
       return
     }
@@ -253,20 +204,17 @@ export default function WareneingangPage(): JSX.Element {
 
     setLoading(true)
     try {
-      // Rufe Backend-API auf
-      const response = await apiClient.post(
-        `/api/purchase-workflow/orders/${receiptData.purchaseOrderId}/goods-receipt`,
-        {
-          deliveryNoteNumber: receiptData.deliveryNoteNumber,
-          receivedDate: new Date(receiptData.receivedDate).toISOString(),
-          receivedBy: receiptData.receivedBy,
-          receivedLocation: receiptData.receivedLocation,
-          items: receiptData.items.filter(item => item.receivedQuantity > 0),
-          qualityInspectionStatus: receiptData.qualityInspectionStatus,
-          inspectionNotes: receiptData.inspectionNotes,
-          damageReport: receiptData.damageReport,
-        }
-      )
+      await apiClient.post('/api/v1/einkauf/goods-receipts', {
+        purchaseOrderId: receiptData.purchaseOrderId,
+        deliveryNoteNumber: receiptData.deliveryNoteNumber,
+        receivedDate: receiptData.receivedDate,
+        receivedBy: receiptData.receivedBy,
+        receivedLocation: receiptData.receivedLocation,
+        items: receiptData.items.filter(item => item.receivedQuantity > 0),
+        qualityInspectionStatus: receiptData.qualityInspectionStatus,
+        inspectionNotes: receiptData.inspectionNotes,
+        damageReport: receiptData.damageReport,
+      })
 
       toast({
         title: t('crud.messages.createSuccess', { entityType: entityTypeLabel }),
@@ -501,4 +449,5 @@ export default function WareneingangPage(): JSX.Element {
     </div>
   )
 }
+
 

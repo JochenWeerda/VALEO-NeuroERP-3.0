@@ -4,8 +4,15 @@ Tests für revisionssichere Buchhaltung, Hash-Chain, Audit-Trail
 """
 
 from fastapi.testclient import TestClient
-from datetime import date, datetime
+from main import app
 import pytest
+
+_client = TestClient(app, raise_server_exceptions=False)
+
+
+@pytest.fixture
+def client():
+    return _client
 
 
 class TestGoBDStatus:

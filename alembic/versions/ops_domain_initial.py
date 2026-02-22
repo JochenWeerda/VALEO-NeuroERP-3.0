@@ -6,7 +6,7 @@ Creates tables for Waage, Wiegung, Fahrzeug, Fahrer, FahrzeugTour, and Dokumente
 from typing import Optional
 from alembic import op
 import sqlalchemy as sa
-import uuid
+from app.core.uuid7 import uuid7
 
 # Revision identifiers
 revision = "ops_domain_initial"
@@ -16,10 +16,13 @@ depends_on = None
 
 
 def generate_uuid() -> str:
-    return str(uuid.uuid4())
+    return uuid7()
 
 
 def upgrade():
+    # Create domain_ops schema
+    op.execute('CREATE SCHEMA IF NOT EXISTS domain_ops')
+    
     # Create enum types if they don't exist
     op.execute("""
         DO $$ BEGIN
@@ -38,25 +41,25 @@ def upgrade():
     """)
     
     op.execute("""
-        DO $ BEGIN
+        DO $body$ BEGIN
             CREATE TYPE fahrer_status AS ENUM ('verfuegbar', 'unterwegs', 'pause', 'urlaub', 'krank');
         EXCEPTION
             WHEN duplicate_object THEN null;
-        END $;
+        END $body$;
     """)
     
     op.execute("""
-        DO $ BEGIN
+        DO $body$ BEGIN
             CREATE TYPE dokument_status AS ENUM ('aktiv', 'geloescht', 'archiviert');
         EXCEPTION
             WHEN duplicate_object THEN null;
-        END $;
+        END $body$;
     """)
     
     # Create ops_waagen table
     op.create_table(
         "ops_waagen",
-        sa.Column("id", sa.String, primary_key=True, default=lambda: f"W-{str(uuid.uuid4())[:8].upper()}"),
+        sa.Column("id", sa.String, primary_key=True, default=lambda: f"W-{uuid7()[:8].upper()}"),
         sa.Column("standort", sa.String(100), nullable=False),
         sa.Column("typ", sa.String(50), nullable=False),
         sa.Column("max_kapazitaet", sa.Float, nullable=False),
@@ -76,7 +79,7 @@ def upgrade():
     # Create ops_wiegungen table
     op.create_table(
         "ops_wiegungen",
-        sa.Column("id", sa.String, primary_key=True, default=lambda: f"WG-{str(uuid.uuid4())[:8].upper()}"),
+        sa.Column("id", sa.String, primary_key=True, default=lambda: f"WG-{uuid7()[:8].upper()}"),
         sa.Column("kennzeichen", sa.String(20), nullable=False),
         sa.Column("fahrer_name", sa.String(100)),
         sa.Column("artikel", sa.String(100), nullable=False),
@@ -96,7 +99,7 @@ def upgrade():
     # Create ops_fahrzeuge table
     op.create_table(
         "ops_fahrzeuge",
-        sa.Column("id", sa.String, primary_key=True, default=lambda: f"F-{str(uuid.uuid4())[:8].upper()}"),
+        sa.Column("id", sa.String, primary_key=True, default=lambda: f"F-{uuid7()[:8].upper()}"),
         sa.Column("kennzeichen", sa.String(20), nullable=False, unique=True),
         sa.Column("typ", sa.String(50), nullable=False),
         sa.Column("marke", sa.String(50)),
@@ -122,7 +125,7 @@ def upgrade():
     # Create ops_fahrer table
     op.create_table(
         "ops_fahrer",
-        sa.Column("id", sa.String, primary_key=True, default=lambda: f"DR-{str(uuid.uuid4())[:8].upper()}"),
+        sa.Column("id", sa.String, primary_key=True, default=lambda: f"DR-{uuid7()[:8].upper()}"),
         sa.Column("personalnummer", sa.String(20), unique=True),
         sa.Column("name", sa.String(100), nullable=False),
         sa.Column("vorname", sa.String(100)),
@@ -149,7 +152,7 @@ def upgrade():
     # Create ops_fahrzeug_touren table
     op.create_table(
         "ops_fahrzeug_touren",
-        sa.Column("id", sa.String, primary_key=True, default=lambda: f"TOUR-{str(uuid.uuid4())[:8].upper()}"),
+        sa.Column("id", sa.String, primary_key=True, default=lambda: f"TOUR-{uuid7()[:8].upper()}"),
         sa.Column("fahrzeug_id", sa.String, sa.ForeignKey("domain_ops.ops_fahrzeuge.id", ondelete="CASCADE")),
         sa.Column("fahrer_id", sa.String, sa.ForeignKey("domain_ops.ops_fahrer.id", ondelete="SET NULL")),
         sa.Column("tour_nummer", sa.String(50)),
@@ -180,7 +183,7 @@ def upgrade():
     # Create ops_dokumente table
     op.create_table(
         "ops_dokumente",
-        sa.Column("id", sa.String, primary_key=True, default=lambda: f"DOC-{str(uuid.uuid4())[:8].upper()}"),
+        sa.Column("id", sa.String, primary_key=True, default=lambda: f"DOC-{uuid7()[:8].upper()}"),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("typ", sa.String(20), nullable=False),
         sa.Column("kategorie", sa.String(100), nullable=False),
@@ -207,7 +210,7 @@ def upgrade():
     # Create ops_dokument_versionen table
     op.create_table(
         "ops_dokument_versionen",
-        sa.Column("id", sa.String, primary_key=True, default=lambda: f"VER-{str(uuid.uuid4())[:8].upper()}"),
+        sa.Column("id", sa.String, primary_key=True, default=lambda: f"VER-{uuid7()[:8].upper()}"),
         sa.Column("dokument_id", sa.String, sa.ForeignKey("domain_ops.ops_dokumente.id", ondelete="CASCADE")),
         sa.Column("version", sa.Integer, nullable=False),
         sa.Column("name", sa.String(255), nullable=False),

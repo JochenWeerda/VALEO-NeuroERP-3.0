@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Camera, FileCheck, MapPin, Package } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { useCreateCharge } from '@/lib/api/charges'
 
 type WareneingangData = {
   lieferant: string
@@ -26,6 +28,8 @@ type WareneingangData = {
 
 export default function WareneingangPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
+  const createCharge = useCreateCharge()
   const [wareneingang, setWareneingang] = useState<WareneingangData>({
     lieferant: '',
     lieferscheinNr: '',
@@ -56,8 +60,40 @@ export default function WareneingangPage(): JSX.Element {
   }
 
   async function handleSubmit(): Promise<void> {
-    console.log('Wareneingang buchen:', wareneingang)
-    navigate('/charge/liste')
+    if (!wareneingang.artikel || !wareneingang.chargenId || !wareneingang.lagerort || !wareneingang.menge) {
+      toast({ title: 'Pflichtfelder fehlen', description: 'Artikel, Menge, Chargen-ID und Lagerort sind erforderlich.', variant: 'destructive' })
+      return
+    }
+    try {
+      await createCharge.mutateAsync({
+        artikel_id: `ART-${wareneingang.artikel.slice(0, 12).toUpperCase().replace(/[^A-Z0-9]/g, '')}`,
+        artikel: wareneingang.artikel,
+        chargen_id: wareneingang.chargenId,
+        menge: wareneingang.menge,
+        lagerort: wareneingang.lagerort,
+        eingang: new Date().toISOString(),
+        produktbezeichnung: wareneingang.artikel,
+        rueckverfolgbar_bis_stunden: 4,
+        herkunft: wareneingang.lieferant || undefined,
+        bemerkungen: `Lieferschein: ${wareneingang.lieferscheinNr || '-'}`,
+        rohstoffe: [{ name: wareneingang.artikel, menge: wareneingang.menge, einheit: wareneingang.einheit }],
+        lieferant_info: { name: wareneingang.lieferant || null },
+        kunden_info: {},
+        produktionsprozess: {},
+        digitales_mischbuch: {},
+        haccp_system: {},
+        eigenkontrollen: [],
+        warentrennung_qs_nicht_qs: false,
+        krisenmanagement: {},
+        futtermittelmonitoring: {},
+        qualitaetspersonal: {},
+        qs_datenbank: {},
+      })
+      toast({ title: 'Charge angelegt', description: wareneingang.chargenId })
+      navigate('/charge/liste')
+    } catch (error) {
+      toast({ title: 'Fehler', description: error instanceof Error ? error.message : 'Charge konnte nicht angelegt werden.', variant: 'destructive' })
+    }
   }
 
   const steps = [

@@ -8,14 +8,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { NotificationCenter } from '@/components/ui/notification-center'
-import { Command as CommandIcon, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
+import { Command as CommandIcon, HelpCircle, Keyboard, LogOut, Menu, Moon, PanelLeft, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
 import { useTheme } from '@/hooks/useTheme'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
+import { useEffect, useState } from 'react'
+import { cn } from '@/lib/utils'
 
 interface TopBarProps {
   onCommandOpen?: () => void
   commandPaletteEnabled?: boolean
   onMobileMenuToggle?: () => void
+  onSidebarToggle?: () => void
+  onShortcutsToggle?: () => void
 }
 
 export const topBarMCP = createMCPMetadata('TopBar', 'navigation', {
@@ -35,7 +39,63 @@ export const topBarMCP = createMCPMetadata('TopBar', 'navigation', {
   },
 })
 
-export function TopBar({ onCommandOpen, commandPaletteEnabled = true, onMobileMenuToggle }: TopBarProps): JSX.Element {
+// Komponente für Shortcuts-Toggle-Button mit dynamischem Tooltip
+function ShortcutsToggleButton({ onToggle }: { onToggle: () => void }): JSX.Element {
+  const [displayMode, setDisplayMode] = useState<'always' | 'hover' | 'hidden'>('always')
+  const [tooltip, setTooltip] = useState('Shortcuts-Liste (Strg+N)')
+
+  useEffect(() => {
+    // Lade aktuellen Modus
+    const updateMode = (): void => {
+      if (typeof (window as any).__getShortcutDisplayMode === 'function') {
+        const mode = (window as any).__getShortcutDisplayMode() || 'always'
+        setDisplayMode(mode)
+        
+        // Setze Tooltip basierend auf Modus
+        const tooltips = {
+          always: 'Shortcuts-Liste: Immer anzeigen (Strg+N)',
+          hover: 'Shortcuts-Liste: Bei Hover anzeigen (Strg+N)',
+          hidden: 'Shortcuts-Liste: Ausgeblendet (Strg+N)',
+        }
+        setTooltip(tooltips[mode as keyof typeof tooltips] || 'Shortcuts-Liste (Strg+N)')
+      }
+    }
+
+    // Initial load
+    updateMode()
+
+    // Poll für Änderungen (alle 500ms)
+    const interval = setInterval(updateMode, 500)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={onToggle}
+      className="hidden md:inline-flex"
+      title={tooltip}
+      aria-label="Shortcuts-Liste"
+    >
+      <Keyboard className={cn(
+        'h-5 w-5',
+        displayMode === 'hidden' && 'opacity-50',
+        displayMode === 'hover' && 'opacity-75'
+      )} />
+      <span className="sr-only">Shortcuts</span>
+    </Button>
+  )
+}
+
+export function TopBar({ 
+  onCommandOpen, 
+  commandPaletteEnabled = true, 
+  onMobileMenuToggle,
+  onSidebarToggle,
+  onShortcutsToggle,
+}: TopBarProps): JSX.Element {
   const { isDark, toggleTheme } = useTheme()
   const user = {
     name: 'Test Admin',
@@ -95,6 +155,26 @@ export function TopBar({ onCommandOpen, commandPaletteEnabled = true, onMobileMe
         <Sparkles className="h-5 w-5 text-primary" />
         <span className="sr-only">AI-Hilfe</span>
       </Button>
+
+      {/* Sidebar Toggle (Strg+B) */}
+      {onSidebarToggle && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onSidebarToggle}
+          className="hidden md:inline-flex"
+          title="Seitenleiste ein-/ausklappen (Strg+B)"
+          aria-label="Seitenleiste ein-/ausklappen"
+        >
+          <PanelLeft className="h-5 w-5" />
+          <span className="sr-only">Seitenleiste</span>
+        </Button>
+      )}
+
+      {/* Shortcuts Help Toggle (Strg+N) */}
+      {onShortcutsToggle && (
+        <ShortcutsToggleButton onToggle={onShortcutsToggle} />
+      )}
 
       <NotificationCenter />
 

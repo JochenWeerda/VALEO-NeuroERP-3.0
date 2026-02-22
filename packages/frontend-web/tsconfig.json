@@ -26,7 +26,28 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "vite.config.ts"],
+  "include": [
+    "src/app/**/*",
+    "src/components/**/*",
+    "src/components/navigation/**/*",
+    "src/components/patterns/**/*",
+    "src/components/ui/**/*",
+    "src/vite-env.d.ts",
+    "src/shared/**/*",
+    "src/features/agrar/**/*",
+    "src/pages/**/*",
+    "src/pages/agrar/**/*",
+    "src/hooks/**/*",
+    "src/hooks/useFeature.ts",
+    "src/hooks/useSSE.ts",
+    "src/lib/**/*",
+    "src/lib/mcp-event-bus.ts",
+    "src/lib/sse-client.ts",
+    "src/lib/useMcpRealtime.ts",
+    "src/main.tsx",
+    "src/types/**/*",
+    "vite.config.ts"
+  ],
   "exclude": ["node_modules", "dist", "vite.config.performance.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

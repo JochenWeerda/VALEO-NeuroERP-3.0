@@ -235,13 +235,13 @@ const createBestellungConfig = (t: any, entityTypeLabel: string): MaskConfig => 
     }
   ],
   api: {
-    baseUrl: '/api/einkauf/bestellungen',
+    baseUrl: '/api/v1/purchase-orders',
     endpoints: {
-      list: '/api/einkauf/bestellungen',
-      get: '/api/einkauf/bestellungen/{id}',
-      create: '/api/einkauf/bestellungen',
-      update: '/api/einkauf/bestellungen/{id}',
-      delete: '/api/einkauf/bestellungen/{id}'
+      list: '/api/v1/purchase-orders',
+      get: '/api/v1/purchase-orders/{id}',
+      create: '/api/v1/purchase-orders',
+      update: '/api/v1/purchase-orders/{id}',
+      delete: '/api/v1/purchase-orders/{id}'
     }
   },
   validation: createBestellungSchema(t),
@@ -351,7 +351,7 @@ export default function BestellungStammPage(): JSX.Element {
         title: t('crud.messages.updateSuccess', { entityType: entityTypeLabel }),
       })
 
-      navigate('/einkauf/bestellungen-liste')
+      navigate('/einkauf/bestellungen')
     } catch (error: any) {
       console.error(t('crud.messages.updateError', { entityType: entityTypeLabel }), error)
       toast({
@@ -366,7 +366,7 @@ export default function BestellungStammPage(): JSX.Element {
 
   const handleCancel = () => {
     if (confirm(t('crud.messages.discardChanges'))) {
-      navigate('/einkauf/bestellungen-liste')
+      navigate('/einkauf/bestellungen')
     }
   }
 
@@ -415,7 +415,7 @@ export default function BestellungStammPage(): JSX.Element {
 
       setStornoDialogOpen(false)
       setStornoReason('')
-      navigate('/einkauf/bestellungen-liste')
+      navigate('/einkauf/bestellungen')
     } catch (error: any) {
       console.error(t('crud.messages.cancelError', { entityType: entityTypeLabel }), error)
       toast({
@@ -730,3 +730,5 @@ export default function BestellungStammPage(): JSX.Element {
     </div>
   )
 }
+
+

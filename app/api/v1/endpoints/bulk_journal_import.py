@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field, field_validator
 import csv
 import io
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
 
@@ -251,10 +251,10 @@ async def import_journal_entries_csv(
                 # Generate entry number if not provided
                 entry_number = first_line.entry_number
                 if not entry_number:
-                    entry_number = f"IMP-{entry_date.strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
+                    entry_number = f"IMP-{entry_date.strftime('%Y%m%d')}-{uuid7()[:6].upper()}"
                 
                 # Create journal entry
-                entry_id = str(uuid.uuid4())
+                entry_id = uuid7()
                 journal_entry_insert = text("""
                     INSERT INTO domain_erp.journal_entries
                     (id, tenant_id, entry_number, entry_date, posting_date, description,
@@ -338,7 +338,7 @@ async def import_journal_entries_csv(
             else:
                 db.commit()
         
-        import_id = str(uuid.uuid4())
+        import_id = uuid7()
         
         return ImportResult(
             total_rows=len(rows),

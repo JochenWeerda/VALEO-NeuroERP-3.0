@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Save, Loader2, ArrowLeft, Calendar, Mail, Phone, Users, Trash2 } from 'lucide-react'
+import { Save, Loader2, ArrowLeft, Calendar, Mail, Phone, Users, Trash2, Plus, Minus } from 'lucide-react'
 import { queryKeys, mutationKeys } from '@/lib/query'
 import { crmService, type Activity } from '@/lib/services/crm-service'
 import { useToast } from '@/components/ui/toast-provider'
@@ -34,6 +34,9 @@ export default function AktivitaetDetailPage(): JSX.Element {
     status: 'planned',
     assignedTo: '',
     description: '',
+    mainTopics: [''],
+    ordersPlaced: [''],
+    followUpActions: [''],
   })
 
   const { data: existingActivity, isLoading } = useQuery({
@@ -50,7 +53,15 @@ export default function AktivitaetDetailPage(): JSX.Element {
 
   const createMutation = useMutation({
     mutationKey: mutationKeys.crm.activities.create,
-    mutationFn: (data: Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>) => crmService.createActivity(data),
+    mutationFn: async (data: Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>) => {
+      const created = await crmService.createActivity(data)
+      await crmService.syncActivitySubResources(created.id, {
+        mainTopics: data.mainTopics,
+        ordersPlaced: data.ordersPlaced,
+        followUpActions: data.followUpActions,
+      })
+      return created
+    },
     onSuccess: () => {
       toast.push(getSuccessMessage(t, 'create', entityType))
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.activities.all })
@@ -64,8 +75,16 @@ export default function AktivitaetDetailPage(): JSX.Element {
 
   const updateMutation = useMutation({
     mutationKey: mutationKeys.crm.activities.update,
-    mutationFn: (data: Partial<Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>>) =>
-      crmService.updateActivity(id ?? '', data),
+    mutationFn: async (data: Partial<Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>>) => {
+      const { mainTopics, ordersPlaced, followUpActions, ...baseData } = data
+      const updated = await crmService.updateActivity(id ?? '', baseData)
+      await crmService.syncActivitySubResources(id ?? '', {
+        mainTopics,
+        ordersPlaced,
+        followUpActions,
+      })
+      return updated
+    },
     onSuccess: () => {
       toast.push(getSuccessMessage(t, 'update', entityType))
       queryClient.invalidateQueries({ queryKey: queryKeys.crm.activities.detail(id ?? '') })
@@ -97,10 +116,17 @@ export default function AktivitaetDetailPage(): JSX.Element {
       return
     }
 
+    const payload: Omit<Activity, 'id' | 'createdAt' | 'updatedAt'> = {
+      ...(activity as Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>),
+      mainTopics: (activity.mainTopics || []).map((item) => item.trim()).filter(Boolean),
+      ordersPlaced: (activity.ordersPlaced || []).map((item) => item.trim()).filter(Boolean),
+      followUpActions: (activity.followUpActions || []).map((item) => item.trim()).filter(Boolean),
+    }
+
     if (isNew) {
-      createMutation.mutate(activity as Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>)
+      createMutation.mutate(payload)
     } else {
-      updateMutation.mutate(activity)
+      updateMutation.mutate(payload)
     }
   }
 
@@ -112,6 +138,22 @@ export default function AktivitaetDetailPage(): JSX.Element {
 
   const updateField = (field: keyof Activity, value: any) => {
     setActivity(prev => ({ ...prev, [field]: value }))
+  }
+
+  const updateStringList = (field: 'mainTopics' | 'ordersPlaced' | 'followUpActions', index: number, value: string) => {
+    setActivity((prev) => {
+      const current = [...(prev[field] || [])]
+      current[index] = value
+      return { ...prev, [field]: current }
+    })
+  }
+
+  const addStringListItem = (field: 'mainTopics' | 'ordersPlaced' | 'followUpActions') => {
+    setActivity((prev) => ({ ...prev, [field]: [...(prev[field] || []), ''] }))
+  }
+
+  const removeStringListItem = (field: 'mainTopics' | 'ordersPlaced' | 'followUpActions', index: number) => {
+    setActivity((prev) => ({ ...prev, [field]: (prev[field] || []).filter((_, i) => i !== index) }))
   }
 
   const getTypeIcon = (type: string) => {
@@ -298,6 +340,78 @@ export default function AktivitaetDetailPage(): JSX.Element {
               placeholder={t('crud.tooltips.placeholders.activityDescription')}
               rows={6}
             />
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Main Topics</CardTitle>
+            <Button type="button" size="sm" variant="outline" onClick={() => addStringListItem('mainTopics')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Hinzufügen
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {(activity.mainTopics || []).map((item, index) => (
+              <div key={`topic-${index}`} className="flex items-center gap-2">
+                <Input
+                  value={item}
+                  onChange={(e) => updateStringList('mainTopics', index, e.target.value)}
+                  placeholder="Thema"
+                />
+                <Button type="button" size="icon" variant="outline" onClick={() => removeStringListItem('mainTopics', index)}>
+                  <Minus className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Orders Placed</CardTitle>
+            <Button type="button" size="sm" variant="outline" onClick={() => addStringListItem('ordersPlaced')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Hinzufügen
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {(activity.ordersPlaced || []).map((item, index) => (
+              <div key={`order-${index}`} className="flex items-center gap-2">
+                <Input
+                  value={item}
+                  onChange={(e) => updateStringList('ordersPlaced', index, e.target.value)}
+                  placeholder="Auftrag/Beleg"
+                />
+                <Button type="button" size="icon" variant="outline" onClick={() => removeStringListItem('ordersPlaced', index)}>
+                  <Minus className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Follow-up Actions</CardTitle>
+            <Button type="button" size="sm" variant="outline" onClick={() => addStringListItem('followUpActions')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Hinzufügen
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {(activity.followUpActions || []).map((item, index) => (
+              <div key={`followup-${index}`} className="flex items-center gap-2">
+                <Input
+                  value={item}
+                  onChange={(e) => updateStringList('followUpActions', index, e.target.value)}
+                  placeholder="Folgeaktion"
+                />
+                <Button type="button" size="icon" variant="outline" onClick={() => removeStringListItem('followUpActions', index)}>
+                  <Minus className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
           </CardContent>
         </Card>
       </div>

@@ -19,11 +19,14 @@ from app.api.v1.endpoints import (
     accounts,
     journal_entries,
     articles,
+    sales_orders,
+    docflow,
     warehouses,
     policies,
     gap,
     prospecting,
     finance_invoices,
+    vat_codes,
     audit,
     accounting_periods,
     payment_matching,
@@ -58,7 +61,9 @@ from app.api.v1.endpoints import (
     nve,
     webhooks,
     article_extensions,
+    nutrient_compositions,
     customer_extensions,
+    business_partners,
     messages,
     dms_images,
     sales_shipping_ext,
@@ -80,12 +85,33 @@ from app.api.v1.endpoints import (
     compat,
     modules,
     agrar_contracts,
+    agrar_varieties,
     silo,
     agrar_settlements,
+    harvest_acceptance,
+    quality_protocols,
+    daily_prices,
+    self_billing,
+    nawaro,
+    nawaro_raps,
+    einkauf_lieferschein,
+    admin_monitoring,
+    admin_core,
+    admin_pos,
+    admin_devices,
+    admin_mobile,
+    admin_reporting,
+    config_service,
+    job_runner,
+    controlling,
+    training,
+    personal,
+    analytics,
 )
 
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
+from app.domains.inventory.api import router as inventory_domain_router
 from app.documents.router import router as documents_router
 from app.reports.router import router as reports_router
 from app.verkauf.router import router as verkauf_router
@@ -113,6 +139,54 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    admin_monitoring.router,
+    prefix="/admin/monitoring",
+    tags=["admin", "monitoring"]
+)
+
+api_router.include_router(
+    admin_core.router,
+    prefix="/admin",
+    tags=["admin"]
+)
+
+api_router.include_router(
+    admin_pos.router,
+    prefix="/admin",
+    tags=["admin", "pos", "tse", "dsfinvk"]
+)
+
+api_router.include_router(
+    admin_devices.router,
+    prefix="/admin",
+    tags=["admin", "settings", "devices", "output"]
+)
+
+api_router.include_router(
+    admin_mobile.router,
+    prefix="/admin/mobile",
+    tags=["admin", "settings", "mobile", "routing", "connectors"]
+)
+
+api_router.include_router(
+    admin_reporting.router,
+    prefix="/admin",
+    tags=["admin", "settings", "reporting"]
+)
+
+api_router.include_router(
+    config_service.router,
+    prefix="/config",
+    tags=["config", "connectors", "reporting-units", "schedules"]
+)
+
+api_router.include_router(
+    job_runner.router,
+    prefix="/jobs",
+    tags=["jobs", "scheduler", "artifacts"]
+)
+
+api_router.include_router(
     tenants,
     prefix="/tenants",
     tags=["tenants"]
@@ -128,6 +202,35 @@ api_router.include_router(
     customers,
     prefix="/crm/customers",
     tags=["crm", "customers"]
+)
+
+api_router.include_router(
+    sales_orders.router,
+    prefix="/sales/orders",
+    tags=["sales", "orders"]
+)
+
+from .endpoints import sales_delivery_notes, branches, pricing
+
+api_router.include_router(
+    sales_delivery_notes.router,
+    tags=["sales", "delivery-notes"]
+)
+
+api_router.include_router(
+    branches.router,
+    tags=["admin", "branches"]
+)
+
+api_router.include_router(
+    pricing.router,
+    tags=["pricing"]
+)
+
+api_router.include_router(
+    docflow.router,
+    prefix="/docflow",
+    tags=["docflow"]
 )
 
 api_router.include_router(
@@ -181,6 +284,11 @@ api_router.include_router(
 api_router.include_router(
     finance_invoices.router,
     tags=["finance", "invoices"]
+)
+
+api_router.include_router(
+    vat_codes.router,
+    tags=["finance", "vat-codes"]
 )
 
 api_router.include_router(
@@ -328,6 +436,12 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    inventory_domain_router,
+    prefix="/inventory",
+    tags=["inventory"]
+)
+
+api_router.include_router(
     policies.router,
     prefix="/mcp",
     tags=["mcp", "policies"]
@@ -360,6 +474,11 @@ api_router.include_router(
     tags=["reports", "analytics", "dashboard"]
 )
 
+api_router.include_router(
+    analytics.router,
+    tags=["analytics", "dashboard"]
+)
+
 # Agrar domain routers
 api_router.include_router(
     psm.router,
@@ -380,6 +499,12 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    agrar_varieties.router,
+    prefix="/agrar/varieties",
+    tags=["agrar", "varieties", "sorten"]
+)
+
+api_router.include_router(
     silo.router,
     prefix="/silo",
     tags=["agrar", "silo"]
@@ -389,6 +514,42 @@ api_router.include_router(
     agrar_settlements.router,
     prefix="/agrar/settlements",
     tags=["agrar", "settlements", "self-billing"]
+)
+
+api_router.include_router(
+    harvest_acceptance.router,
+    prefix="/agrar/harvest-acceptance",
+    tags=["agrar", "harvest", "acceptance", "ernte-annahme"]
+)
+
+api_router.include_router(
+    quality_protocols.router,
+    prefix="/agrar/quality-protocols",
+    tags=["agrar", "quality", "protocols", "labor"]
+)
+
+api_router.include_router(
+    daily_prices.router,
+    prefix="/agrar/daily-prices",
+    tags=["agrar", "pricing", "daily-prices"]
+)
+
+api_router.include_router(
+    self_billing.router,
+    prefix="/agrar/self-billing",
+    tags=["agrar", "self-billing", "invoices", "e-invoice"]
+)
+
+api_router.include_router(
+    nawaro.router,
+    prefix="/agrar/nawaro",
+    tags=["agrar", "nawaro"]
+)
+
+api_router.include_router(
+    nawaro_raps.router,
+    prefix="/agrar/nawaro",
+    tags=["agrar", "nawaro", "raps"]
 )
 
 # Kundenportal
@@ -455,9 +616,21 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    nutrient_compositions.router,
+    prefix="/nutrient-compositions",
+    tags=["nutrient-compositions", "duengemittel", "composition"]
+)
+
+api_router.include_router(
     customer_extensions.router,
     prefix="/crm/customers",
     tags=["crm", "customers"]
+)
+
+api_router.include_router(
+    business_partners.router,
+    prefix="/crm/business-partners",
+    tags=["crm", "business-partners"]
 )
 
 api_router.include_router(
@@ -556,4 +729,23 @@ api_router.include_router(
 # Compatibility API (path alignment and missing frontend endpoints)
 api_router.include_router(
     compat.router
+)
+
+api_router.include_router(
+    einkauf_lieferschein.router
+)
+
+api_router.include_router(
+    controlling.router,
+    tags=["controlling", "kpi", "dashboard"]
+)
+
+api_router.include_router(
+    training.router,
+    tags=["training", "hr", "onboarding"]
+)
+
+api_router.include_router(
+    personal.router,
+    tags=["personal", "hr"]
 )

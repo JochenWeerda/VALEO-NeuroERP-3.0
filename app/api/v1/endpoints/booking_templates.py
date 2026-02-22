@@ -11,7 +11,7 @@ from decimal import Decimal
 from datetime import date, datetime
 from pydantic import BaseModel, Field
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
 
@@ -260,7 +260,7 @@ async def create_booking_template(
             )
         
         # Insert new template
-        template_id = str(uuid.uuid4())
+        template_id = uuid7()
         
         import json
         lines_json = json.dumps([line.dict() for line in template.lines])
@@ -341,10 +341,10 @@ async def apply_booking_template(
             raise HTTPException(status_code=400, detail="Amount is required (either in request or template default)")
         
         # Generate entry number
-        entry_number = f"TMP-{request.entry_date.strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
+        entry_number = f"TMP-{request.entry_date.strftime('%Y%m%d')}-{uuid7()[:6].upper()}"
         
         # Create journal entry
-        entry_id = str(uuid.uuid4())
+        entry_id = uuid7()
         journal_entry_insert = text("""
             INSERT INTO domain_erp.journal_entries
             (id, tenant_id, entry_number, entry_date, posting_date, description,

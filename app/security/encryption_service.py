@@ -45,7 +45,7 @@ class ISO27001EncryptionService:
 
         # Determine encryption context
         data_classification = context.get('classification', 'internal')
-        tenant_id = context.get('tenant_id', 'system')
+        tenant_id = context.get('tenant_id', '00000000-0000-0000-0000-000000000001')
         purpose = context.get('purpose', 'general')
 
         # Get appropriate encryption key
@@ -206,9 +206,9 @@ class ISO27001EncryptionService:
 
         # Implement role-based access control for encrypted data
         access_matrix = {
-            'public': ['user', 'admin', 'auditor', 'system'],
-            'internal': ['user', 'admin', 'auditor', 'system'],
-            'confidential': ['admin', 'auditor', 'system'],
+            'public': ['user', 'admin', 'auditor', '00000000-0000-0000-0000-000000000001'],
+            'internal': ['user', 'admin', 'auditor', '00000000-0000-0000-0000-000000000001'],
+            'confidential': ['admin', 'auditor', '00000000-0000-0000-0000-000000000001'],
             'restricted': ['admin', 'auditor']  # Highest security
         }
 
@@ -356,7 +356,7 @@ class SecurityException(Exception):
 
 
 # Convenience functions
-def encrypt_data(data: str, classification: str = 'internal', tenant_id: str = 'system') -> Dict[str, Any]:
+def encrypt_data(data: str, classification: str = 'internal', tenant_id: str = '00000000-0000-0000-0000-000000000001') -> Dict[str, Any]:
     """Convenience function for data encryption"""
     service = ISO27001EncryptionService()
     context = {
@@ -367,7 +367,7 @@ def encrypt_data(data: str, classification: str = 'internal', tenant_id: str = '
     return service.encrypt_sensitive_data(data, context)
 
 
-def decrypt_data(encrypted_package: Dict[str, Any], user_role: str = 'user', tenant_id: str = 'system') -> str:
+def decrypt_data(encrypted_package: Dict[str, Any], user_role: str = 'user', tenant_id: str = '00000000-0000-0000-0000-000000000001') -> str:
     """Convenience function for data decryption"""
     service = ISO27001EncryptionService()
     context = {

@@ -34,11 +34,32 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
   const commandPaletteFeatureEnabled = useFeature('commandPalette')
   const commandPaletteAvailable = enableCommandPalette && commandPaletteFeatureEnabled
   const [commandOpen, setCommandOpen] = useState<boolean>(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false)
 
   const handleToggleSidebar = useCallback((): void => {
     setSidebarCollapsed((collapsed) => !collapsed)
+  }, [])
+
+  const handleToggleShortcuts = useCallback((): void => {
+    // Zyklische Schaltlogik: always → hover → hidden → always
+    // Warte kurz, falls die Funktion noch nicht initialisiert ist
+    const cycleMode = (): void => {
+      if (typeof (window as any).__cycleShortcutDisplayMode === 'function') {
+        ;(window as any).__cycleShortcutDisplayMode()
+      } else {
+        // Retry nach kurzer Verzögerung
+        setTimeout(() => {
+          if (typeof (window as any).__cycleShortcutDisplayMode === 'function') {
+            ;(window as any).__cycleShortcutDisplayMode()
+          } else {
+            // eslint-disable-next-line no-console
+            console.warn('ShortcutHelpPanel cycle function not found')
+          }
+        }, 100)
+      }
+    }
+    cycleMode()
   }, [])
 
   const handleMobileMenuToggle = useCallback((): void => {
@@ -67,23 +88,37 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
   )
 
   useEffect(() => {
-    if (!commandPaletteAvailable) {
-      setCommandOpen(false)
-      return
-    }
-
     const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey)) {
+      // Strg+B: Sidebar ein-/ausklappen
+      if (event.key.toLowerCase() === 'b' && (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey) {
         event.preventDefault()
+        event.stopPropagation()
+        handleToggleSidebar()
+        return
+      }
+
+      // Strg+N: Shortcuts-Liste ein-/ausblenden
+      if (event.key.toLowerCase() === 'n' && (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey) {
+        event.preventDefault()
+        event.stopPropagation()
+        handleToggleShortcuts()
+        return
+      }
+
+      // Strg+K: Command Palette (nur wenn verfügbar)
+      if (commandPaletteAvailable && event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey) {
+        event.preventDefault()
+        event.stopPropagation()
         setCommandOpen((open) => !open)
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown)
+    // Verwende window mit capture phase für bessere Event-Capture
+    window.addEventListener('keydown', handleKeyDown, true)
     return () => {
-      document.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keydown', handleKeyDown, true)
     }
-  }, [commandPaletteAvailable])
+  }, [commandPaletteAvailable, handleToggleSidebar, handleToggleShortcuts])
 
   const commandPaletteProps = useMemo(() => {
     if (!commandPaletteAvailable) {
@@ -127,6 +162,8 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
           onCommandOpen={handleCommandOpen}
           commandPaletteEnabled={commandPaletteAvailable}
           onMobileMenuToggle={handleMobileMenuToggle}
+          onSidebarToggle={handleToggleSidebar}
+          onShortcutsToggle={handleToggleShortcuts}
         />
 
         <main className="flex-1 overflow-y-auto overflow-x-hidden" role="main" aria-label="Main content">

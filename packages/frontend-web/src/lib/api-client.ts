@@ -44,9 +44,19 @@ class APIClient {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          // Token expired - redirect to login
-          auth.clearTokens()
-          window.location.href = '/login'
+          // Only redirect to login if OIDC is configured
+          // Check if OIDC is actually configured (not just placeholder)
+          const discoveryUrl = import.meta.env.VITE_OIDC_DISCOVERY_URL ?? ''
+          const placeholderPatterns = ['your-oidc-provider.com', 'example.com', 'keycloak.example.com', '{tenant-id}', '{domain}', '{application-id}', '{client-id}']
+          const oidcConfigured = discoveryUrl.length > 0 && !placeholderPatterns.some(pattern => discoveryUrl.includes(pattern))
+          if (oidcConfigured) {
+            auth.clearTokens()
+            window.location.href = '/login'
+          } else {
+            // In dev mode without OIDC, just log the error
+            // eslint-disable-next-line no-console
+            console.warn('API request returned 401 Unauthorized. In dev mode without OIDC, this might be expected.')
+          }
         }
         return Promise.reject(error)
       },

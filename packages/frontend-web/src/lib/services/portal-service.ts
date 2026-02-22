@@ -161,7 +161,7 @@ export interface PortalInquiryCreate {
 // API Funktionen
 // ============================================
 
-const TENANT_ID = import.meta.env.VITE_TENANT_ID || 'system'
+const TENANT_ID = import.meta.env.VITE_TENANT_ID || '00000000-0000-0000-0000-000000000001'
 
 /**
  * Transformiert snake_case zu camelCase für Frontend-Kompatibilität

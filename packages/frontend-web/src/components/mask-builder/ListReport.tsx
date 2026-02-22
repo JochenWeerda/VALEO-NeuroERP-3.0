@@ -182,7 +182,16 @@ const ListReport: React.FC<ListReportProps> = ({
       return new Date(value).toLocaleDateString('de-DE')
     }
 
-    return value || '-'
+    // React cannot render plain objects – convert to JSON string
+    if (value !== null && typeof value === 'object') {
+      return (
+        <span className="font-mono text-xs">
+          {JSON.stringify(value)}
+        </span>
+      )
+    }
+
+    return value ?? '-'
   }
 
   return (

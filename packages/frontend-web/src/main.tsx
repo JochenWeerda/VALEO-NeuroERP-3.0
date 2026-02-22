@@ -6,6 +6,7 @@ import { FeatureFlagProvider } from '@/app/providers/FeatureFlagProvider'
 import { SSEProvider } from '@/app/providers/SSEProvider'
 import { router } from '@/app/routes'
 import { ToastProvider } from '@/components/ui/toast-provider'
+import { GlobalShortcutProvider } from '@/components/shortcuts/GlobalShortcutProvider'
 // Temporarily disabled - will be re-enabled later
 // import { CommandPalette } from '@/components/command/CommandPalette'
 // import { AskVALEO } from '@/components/ai/AskVALEO'
@@ -25,7 +26,9 @@ const resolveSseToken = (): string | undefined => {
 function Application(): JSX.Element {
   // useFeature kann nur innerhalb von FeatureFlagProvider verwendet werden
   // Da Application innerhalb von FeatureFlagProvider ist, sollte es funktionieren
-  const sseUrl = (import.meta.env as Record<string, string | undefined>).VITE_MCP_EVENTS_URL
+  const sseUrl =
+    (import.meta.env as Record<string, string | undefined>).VITE_MCP_EVENTS_URL ||
+    '/api/events?stream=mcp'
   const sseEnabled = useFeature('sse') && Boolean(sseUrl)
 
   const providerConfig = useMemo(
@@ -40,14 +43,16 @@ function Application(): JSX.Element {
   return (
     <SSEProvider {...providerConfig} tokenResolver={resolveSseToken}>
       <ToastProvider>
-        <RouterProvider 
-          router={router} 
-          future={{ v7_startTransition: true }}
-        />
-        {/* TODO: Diese Komponenten müssen in Router-Kontext verschoben werden */}
-        {/* <CommandPalette /> */}
-        {/* <AskVALEO /> */}
-        {/* <SemanticSearch /> */}
+        <GlobalShortcutProvider>
+          <RouterProvider 
+            router={router} 
+            future={{ v7_startTransition: true }}
+          />
+          {/* TODO: Diese Komponenten müssen in Router-Kontext verschoben werden */}
+          {/* <CommandPalette /> */}
+          {/* <AskVALEO /> */}
+          {/* <SemanticSearch /> */}
+        </GlobalShortcutProvider>
       </ToastProvider>
     </SSEProvider>
   )

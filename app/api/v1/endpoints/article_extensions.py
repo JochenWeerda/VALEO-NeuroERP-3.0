@@ -9,12 +9,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import ArticleBatch, ArticleSelection
 from ..schemas.base import PaginatedResponse, BaseSchema
 
 router = APIRouter()
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class BatchOut(BaseSchema):
@@ -118,10 +119,10 @@ async def create_article_selection(
     db: Session = Depends(get_db),
 ):
     """POST Artikel Selektionen anlegen"""
-    import uuid
+    from app.core.uuid7 import uuid7
     tid = tenant_id or DEFAULT_TENANT
     obj = ArticleSelection(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         article_id=payload.article_id,
         selection_code=payload.selection_code,
         label=payload.label,

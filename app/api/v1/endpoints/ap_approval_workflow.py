@@ -11,7 +11,7 @@ from decimal import Decimal
 from datetime import date, datetime
 from pydantic import BaseModel, Field
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
 
@@ -186,7 +186,7 @@ async def create_approval_rule(
     Create a new approval workflow rule.
     """
     try:
-        rule_id = str(uuid.uuid4())
+        rule_id = uuid7()
         
         import json
         conditions_json = json.dumps([c.dict() for c in rule.conditions])
@@ -311,7 +311,7 @@ async def request_approval(
         required_approvals = applicable_rule.required_approvals if applicable_rule else 1
         
         # Create approval request
-        approval_id = str(uuid.uuid4())
+        approval_id = uuid7()
         
         import json
         rule_data = {
@@ -442,7 +442,7 @@ async def approve_invoice(
             raise HTTPException(status_code=400, detail="You have already approved/rejected this invoice")
         
         # Insert approval/rejection
-        approval_id = str(uuid.uuid4())
+        approval_id = uuid7()
         insert_approval = text("""
             INSERT INTO domain_erp.ap_approvals
             (id, approval_request_id, approved_by, action, comment, approved_at)

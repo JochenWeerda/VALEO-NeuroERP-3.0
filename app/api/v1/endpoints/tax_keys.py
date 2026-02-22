@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field, field_validator
 import logging
 
 from ....core.database import get_db
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -333,8 +334,7 @@ async def create_tax_key(
             raise HTTPException(status_code=400, detail=f"Tax key with code {tax_key.code} already exists")
         
         # Insert new tax key
-        import uuid
-        tax_key_id = str(uuid.uuid4())
+        tax_key_id = uuid7()
         
         insert_query = text("""
             INSERT INTO domain_erp.tax_keys

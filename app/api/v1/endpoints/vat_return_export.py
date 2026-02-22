@@ -11,8 +11,8 @@ from decimal import Decimal
 from datetime import date, datetime
 from pydantic import BaseModel, Field
 import logging
-import uuid
 import xml.etree.ElementTree as ET
+from app.core.uuid7 import uuid7
 from xml.dom import minidom
 
 from ....core.database import get_db
@@ -206,7 +206,7 @@ async def calculate_vat_return(
         vat_payable = total_output_tax - total_input_tax
         
         # Create VAT return
-        return_id = str(uuid.uuid4())
+        return_id = uuid7()
         
         import json
         positions_json = json.dumps([p.dict() for p in positions])

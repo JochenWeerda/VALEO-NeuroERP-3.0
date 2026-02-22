@@ -48,8 +48,10 @@ class Settings(BaseSettings):
     ALLOWED_HOSTS: List[str] = ["localhost", "127.0.0.1"]
 
     # Database Configuration
+    # HINWEIS: In Docker-Umgebung muss host="postgres" sein (Service-Name aus docker-compose.yml)
+    # In lokalen Umgebung ohne Docker kann 127.0.0.1 verwendet werden
     DATABASE_URL: str = Field(
-        default="postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_neuro_erp",
+        default="postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp",
         env="DATABASE_URL"
     )
     DATABASE_CONNECT_ARGS: dict = {}

@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -400,7 +400,7 @@ class ISO27001PhysicalSecurity:
         Create a new security zone
         Returns zone ID
         """
-        zone_id = str(uuid.uuid4())
+        zone_id = uuid7()
 
         zone = SecurityZone(
             id=zone_id,
@@ -427,7 +427,7 @@ class ISO27001PhysicalSecurity:
         Log physical access attempt
         Returns access log ID
         """
-        log_id = str(uuid.uuid4())
+        log_id = uuid7()
 
         access_log = AccessLog(
             id=log_id,
@@ -479,7 +479,7 @@ class ISO27001PhysicalSecurity:
         Register equipment in inventory
         Returns equipment ID
         """
-        equipment_id = str(uuid.uuid4())
+        equipment_id = uuid7()
 
         equipment = EquipmentInventory(
             id=equipment_id,
@@ -529,7 +529,7 @@ class ISO27001PhysicalSecurity:
         Record environmental monitoring data
         Returns monitoring record ID
         """
-        record_id = str(uuid.uuid4())
+        record_id = uuid7()
 
         monitoring = EnvironmentalMonitoring(
             id=record_id,
@@ -618,7 +618,7 @@ class ISO27001PhysicalSecurity:
     def _create_environmental_alarm(self, monitoring: EnvironmentalMonitoring):
         """Create environmental alarm"""
         alarm = SecurityAlarm(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             zone_id=monitoring.zone_id,
             alarm_type=monitoring.alarm_type,
             severity=monitoring.alarm_severity,
@@ -637,7 +637,7 @@ class ISO27001PhysicalSecurity:
         Register visitor access
         Returns visitor access ID
         """
-        access_id = str(uuid.uuid4())
+        access_id = uuid7()
 
         visitor = VisitorAccess(
             id=access_id,
@@ -682,7 +682,7 @@ class ISO27001PhysicalSecurity:
         Register maintenance access
         Returns maintenance access ID
         """
-        access_id = str(uuid.uuid4())
+        access_id = uuid7()
 
         maintenance = MaintenanceAccess(
             id=access_id,
@@ -709,7 +709,7 @@ class ISO27001PhysicalSecurity:
         Report a physical security incident
         Returns incident ID
         """
-        incident_id = str(uuid.uuid4())
+        incident_id = uuid7()
 
         incident = SecurityIncident(
             id=incident_id,
@@ -730,7 +730,7 @@ class ISO27001PhysicalSecurity:
         # Create corresponding alarm if not already created
         if incident.severity in ['high', 'critical']:
             alarm = SecurityAlarm(
-                id=str(uuid.uuid4()),
+                id=uuid7(),
                 zone_id=incident.zone_id,
                 alarm_type=AlarmType.INTRUSION if 'intrusion' in incident.incident_type.lower() else AlarmType.EMERGENCY,
                 severity=AlarmSeverity.CRITICAL if incident.severity == 'critical' else AlarmSeverity.HIGH,
@@ -878,7 +878,7 @@ class ISO27001PhysicalSecurity:
         )
 
         dashboard = PhysicalSecurityDashboard(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             generated_at=datetime.utcnow(),
             period_start=datetime.utcnow() - timedelta(days=7),
             period_end=datetime.utcnow(),

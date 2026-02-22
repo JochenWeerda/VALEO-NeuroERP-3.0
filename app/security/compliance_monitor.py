@@ -93,7 +93,7 @@ class ISO27001ComplianceMonitor:
             }
         }
 
-    def run_compliance_checks(self, tenant_id: str = 'system') -> Dict[str, Any]:
+    def run_compliance_checks(self, tenant_id: str = '00000000-0000-0000-0000-000000000001') -> Dict[str, Any]:
         """Run all compliance checks and return results"""
         logger.info(f"Running compliance checks for tenant: {tenant_id}")
 

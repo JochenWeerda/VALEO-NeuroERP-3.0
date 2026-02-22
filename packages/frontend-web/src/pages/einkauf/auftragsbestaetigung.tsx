@@ -41,8 +41,8 @@ const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): Mask
           label: t('crud.entities.purchaseOrder'),
           type: 'lookup',
           required: true,
-          endpoint: '/api/einkauf/bestellungen?status=FREIGEGEBEN',
-          displayField: 'nummer',
+          endpoint: '/api/v1/purchase-orders?status=FREIGEGEBEN',
+          displayField: 'purchaseOrderNumber',
           valueField: 'id'
         },
         {
@@ -160,13 +160,13 @@ const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): Mask
     }
   ],
   api: {
-    baseUrl: '/api/einkauf/auftragsbestaetigungen',
+    baseUrl: '/api/v1/einkauf/auftragsbestaetigungen',
     endpoints: {
-      list: '/api/einkauf/auftragsbestaetigungen',
-      get: '/api/einkauf/auftragsbestaetigungen/{id}',
-      create: '/api/einkauf/auftragsbestaetigungen',
-      update: '/api/einkauf/auftragsbestaetigungen/{id}',
-      delete: '/api/einkauf/auftragsbestaetigungen/{id}'
+      list: '/api/v1/einkauf/auftragsbestaetigungen',
+      get: '/api/v1/einkauf/auftragsbestaetigungen/{id}',
+      create: '/api/v1/einkauf/auftragsbestaetigungen',
+      update: '/api/v1/einkauf/auftragsbestaetigungen/{id}',
+      delete: '/api/v1/einkauf/auftragsbestaetigungen/{id}'
     }
   },
   validation: createAuftragsbestaetigungSchema(t),

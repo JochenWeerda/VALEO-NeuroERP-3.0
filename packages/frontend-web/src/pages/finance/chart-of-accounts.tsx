@@ -94,7 +94,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
   const createMutation = useMutation({
     mutationFn: (data: AccountCreateForm) => financeService.createAccount({
       ...data,
-      tenant_id: 'system', // TODO: Get from context
+      tenant_id: '00000000-0000-0000-0000-000000000001', // TODO: Get from context
     }),
     onSuccess: () => {
       toast.success('Konto erfolgreich erstellt')

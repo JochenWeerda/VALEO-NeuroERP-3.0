@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -230,7 +230,7 @@ class ISO27001PhysicalSecurity:
         Register a physical asset for security tracking
         Returns asset ID
         """
-        asset_id = asset_data.get('id') or str(uuid.uuid4())
+        asset_id = asset_data.get('id') or uuid7()
 
         asset = PhysicalAsset(
             id=asset_id,
@@ -281,7 +281,7 @@ class ISO27001PhysicalSecurity:
         Grant physical access permission
         Returns permission ID
         """
-        permission_id = str(uuid.uuid4())
+        permission_id = uuid7()
 
         zone_requirements = self.access_requirements[zone]
 
@@ -418,7 +418,7 @@ class ISO27001PhysicalSecurity:
                           access_granted: bool, reason: str, location_details: Dict[str, Any]):
         """Log physical access attempt"""
         event = AccessEvent(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             timestamp=datetime.utcnow(),
             person_id=person_id,
             facility_zone=zone,
@@ -440,7 +440,7 @@ class ISO27001PhysicalSecurity:
         Report a physical security incident
         Returns incident ID
         """
-        incident_id = str(uuid.uuid4())
+        incident_id = uuid7()
 
         incident = SecurityIncident(
             id=incident_id,
@@ -495,7 +495,7 @@ class ISO27001PhysicalSecurity:
         Record environmental monitoring reading
         Returns reading ID
         """
-        reading_id = str(uuid.uuid4())
+        reading_id = uuid7()
 
         reading = EnvironmentalReading(
             id=reading_id,

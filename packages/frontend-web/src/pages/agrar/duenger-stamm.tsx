@@ -248,7 +248,7 @@ const DuengerStammPage: React.FC = () => {
     const submitData = {
       ...formData,
       ablauf_zulassung: formData.ablauf_zulassung?.toISOString().split('T')[0] || null,
-      tenant_id: 'system', // TODO: Get from auth context
+      tenant_id: '00000000-0000-0000-0000-000000000001', // TODO: Get from auth context
     };
 
     if (isEditing) {

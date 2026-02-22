@@ -1,19 +1,31 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useMonitoringAlerts } from '@/lib/api/admin'
 import { AlertTriangle, CheckCircle, Info, XCircle } from 'lucide-react'
 
 export default function MonitoringAlertsPage(): JSX.Element {
-  const alerts = {
-    aktiv: 3,
-    liste: [
-      { id: '1', stufe: 'critical', typ: 'Lagerbestand kritisch', nachricht: 'Weizen Premium unter Mindestbestand (120t < 200t)', timestamp: '2025-10-11 14:32' },
-      { id: '2', stufe: 'warning', typ: 'Inspektion fällig', nachricht: 'Fahrzeug AB-LH 103 - Inspektion in 9 Tagen', timestamp: '2025-10-11 08:15' },
-      { id: '3', stufe: 'info', typ: 'Wetter-Warnung', nachricht: 'DWD: Starkregen ab morgen 18:00 Uhr', timestamp: '2025-10-11 06:00' },
-    ],
-  }
+  const { data, isLoading } = useMonitoringAlerts()
+  const alerts = data?.items ?? []
+  const active = data?.active ?? 0
+  const critical = data?.critical ?? 0
+  const warning = data?.warning ?? 0
+  const systemStatus = data?.system_status ?? 'online'
 
-  const kritisch = alerts.liste.filter((a) => a.stufe === 'critical').length
-  const warnung = alerts.liste.filter((a) => a.stufe === 'warning').length
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid gap-4 md:grid-cols-4">
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+        </div>
+        <Skeleton className="h-[360px]" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -30,7 +42,7 @@ export default function MonitoringAlertsPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-orange-600" />
-              <span className="text-2xl font-bold">{alerts.aktiv}</span>
+              <span className="text-2xl font-bold">{active}</span>
             </div>
           </CardContent>
         </Card>
@@ -42,7 +54,7 @@ export default function MonitoringAlertsPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <XCircle className="h-5 w-5 text-red-600" />
-              <span className="text-2xl font-bold text-red-600">{kritisch}</span>
+              <span className="text-2xl font-bold text-red-600">{critical}</span>
             </div>
           </CardContent>
         </Card>
@@ -54,7 +66,7 @@ export default function MonitoringAlertsPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-orange-600" />
-              <span className="text-2xl font-bold text-orange-600">{warnung}</span>
+              <span className="text-2xl font-bold text-orange-600">{warning}</span>
             </div>
           </CardContent>
         </Card>
@@ -65,8 +77,25 @@ export default function MonitoringAlertsPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <Badge variant="outline" className="text-green-600">Online</Badge>
+              {systemStatus === 'offline' ? (
+                <XCircle className="h-5 w-5 text-red-600" />
+              ) : systemStatus === 'degraded' ? (
+                <AlertTriangle className="h-5 w-5 text-orange-600" />
+              ) : (
+                <CheckCircle className="h-5 w-5 text-green-600" />
+              )}
+              <Badge
+                variant="outline"
+                className={
+                  systemStatus === 'offline'
+                    ? 'text-red-600'
+                    : systemStatus === 'degraded'
+                      ? 'text-orange-600'
+                      : 'text-green-600'
+                }
+              >
+                {systemStatus === 'offline' ? 'Offline' : systemStatus === 'degraded' ? 'Eingeschraenkt' : 'Online'}
+              </Badge>
             </div>
           </CardContent>
         </Card>
@@ -78,26 +107,35 @@ export default function MonitoringAlertsPage(): JSX.Element {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {alerts.liste.map((alert) => (
-              <Card key={alert.id} className={alert.stufe === 'critical' ? 'border-red-500' : alert.stufe === 'warning' ? 'border-orange-500' : 'border-blue-500'}>
+            {alerts.map((alert) => (
+              <Card
+                key={alert.id}
+                className={
+                  alert.level === 'critical'
+                    ? 'border-red-500'
+                    : alert.level === 'warning'
+                      ? 'border-orange-500'
+                      : 'border-blue-500'
+                }
+              >
                 <CardContent className="pt-4">
                   <div className="flex items-start gap-4">
-                    {alert.stufe === 'critical' ? (
+                    {alert.level === 'critical' ? (
                       <XCircle className="h-8 w-8 text-red-600" />
-                    ) : alert.stufe === 'warning' ? (
+                    ) : alert.level === 'warning' ? (
                       <AlertTriangle className="h-8 w-8 text-orange-600" />
                     ) : (
                       <Info className="h-8 w-8 text-blue-600" />
                     )}
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="font-semibold text-lg">{alert.typ}</span>
-                        <Badge variant={alert.stufe === 'critical' ? 'destructive' : alert.stufe === 'warning' ? 'secondary' : 'outline'}>
-                          {alert.stufe === 'critical' ? 'Kritisch' : alert.stufe === 'warning' ? 'Warnung' : 'Info'}
+                      <div className="mb-2 flex items-center gap-2">
+                        <span className="text-lg font-semibold">{alert.type}</span>
+                        <Badge variant={alert.level === 'critical' ? 'destructive' : alert.level === 'warning' ? 'secondary' : 'outline'}>
+                          {alert.level === 'critical' ? 'Kritisch' : alert.level === 'warning' ? 'Warnung' : 'Info'}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-2">{alert.nachricht}</p>
-                      <div className="text-xs text-muted-foreground font-mono">{alert.timestamp}</div>
+                      <p className="mb-2 text-sm text-muted-foreground">{alert.message}</p>
+                      <div className="font-mono text-xs text-muted-foreground">{alert.timestamp}</div>
                     </div>
                   </div>
                 </CardContent>

@@ -1,0 +1,368 @@
+"""Admin monitoring endpoints."""
+
+from __future__ import annotations
+
+import json
+from datetime import date
+from typing import Literal
+from uuid import uuid4
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
+from ....core.database import get_db
+from ....core.tenant import get_tenant_id
+
+router = APIRouter()
+
+
+class AdminAlert(BaseModel):
+    id: str
+    level: Literal["critical", "warning", "info"]
+    type: str
+    message: str
+    timestamp: str
+
+
+class AdminAlertsResponse(BaseModel):
+    active: int
+    critical: int
+    warning: int
+    system_status: Literal["online", "degraded", "offline"]
+    items: list[AdminAlert]
+
+
+class MonitoringRuleIn(BaseModel):
+    code: str = Field(..., min_length=1, max_length=80)
+    name: str = Field(..., min_length=1, max_length=140)
+    metric: str = Field(..., min_length=1, max_length=80)
+    level: Literal["critical", "warning", "info"] = "warning"
+    threshold: float | None = None
+    operator: Literal["gt", "gte", "lt", "lte", "eq", "neq"] = "gte"
+    active: bool = True
+    escalation_minutes: int = Field(default=30, ge=0, le=10080)
+    channel_ids: list[str] = Field(default_factory=list)
+
+
+class MonitoringRuleOut(MonitoringRuleIn):
+    id: str
+
+
+class MonitoringChannelIn(BaseModel):
+    code: str = Field(..., min_length=1, max_length=80)
+    name: str = Field(..., min_length=1, max_length=140)
+    channel_type: Literal["email", "sms", "webhook", "chatops"] = "email"
+    target: str = Field(..., min_length=1, max_length=255)
+    active: bool = True
+
+
+class MonitoringChannelOut(MonitoringChannelIn):
+    id: str
+
+
+class SchedulerJobIn(BaseModel):
+    code: str = Field(..., min_length=1, max_length=80)
+    name: str = Field(..., min_length=1, max_length=140)
+    cron: str = Field(..., min_length=5, max_length=120)
+    process: str = Field(..., min_length=1, max_length=80)
+    active: bool = True
+    retry_max: int = Field(default=3, ge=0, le=100)
+    timeout_seconds: int = Field(default=300, ge=10, le=86400)
+    channel_ids: list[str] = Field(default_factory=list)
+
+
+class SchedulerJobOut(SchedulerJobIn):
+    id: str
+
+
+def _load_tenant_settings(db: Session, tenant_id: str) -> dict:
+    row = db.execute(
+        text("SELECT settings FROM domain_shared.tenants WHERE id = :tenant_id"),
+        {"tenant_id": tenant_id},
+    ).first()
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Tenant not found: {tenant_id}")
+    raw = row[0]
+    if not raw:
+        return {}
+    if isinstance(raw, dict):
+        return raw
+    try:
+        parsed = json.loads(raw)
+        return parsed if isinstance(parsed, dict) else {}
+    except Exception:
+        return {}
+
+
+def _save_tenant_settings(db: Session, tenant_id: str, settings: dict) -> None:
+    db.execute(
+        text("UPDATE domain_shared.tenants SET settings = :settings, updated_at = NOW() WHERE id = :tenant_id"),
+        {"tenant_id": tenant_id, "settings": json.dumps(settings)},
+    )
+
+
+def _monitoring_cfg(settings: dict) -> dict:
+    cfg = settings.get("admin_monitoring")
+    if not isinstance(cfg, dict):
+        cfg = {}
+    cfg.setdefault("rules", [])
+    cfg.setdefault("channels", [])
+    cfg.setdefault("scheduler_jobs", [])
+    return cfg
+
+
+def _find_by_id(items: list[dict], item_id: str) -> int:
+    for idx, item in enumerate(items):
+        if str(item.get("id")) == str(item_id):
+            return idx
+    return -1
+
+
+@router.get("/alerts", response_model=AdminAlertsResponse)
+def list_admin_monitoring_alerts(db: Session = Depends(get_db)):
+    alerts: list[AdminAlert] = []
+    today_iso = date.today().isoformat()
+
+    # 1) Health probe (DB reachability in current request context)
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception:
+        alerts.append(
+            AdminAlert(
+                id="db-unreachable",
+                level="critical",
+                type="Datenbank nicht erreichbar",
+                message="Health-Check fehlgeschlagen: Datenbankverbindung nicht verfuegbar.",
+                timestamp=today_iso,
+            )
+        )
+
+    # 2) Inventory critical stock candidates
+    try:
+        rows = db.execute(
+            text(
+                """
+                SELECT article_number, COALESCE(name, article_number) AS name, current_stock, min_stock
+                FROM domain_inventory.articles
+                WHERE min_stock IS NOT NULL
+                  AND current_stock IS NOT NULL
+                  AND current_stock < min_stock
+                ORDER BY (min_stock - current_stock) DESC
+                LIMIT 3
+                """
+            )
+        ).fetchall()
+        for idx, row in enumerate(rows):
+            alerts.append(
+                AdminAlert(
+                    id=f"stock-{idx}",
+                    level="warning",
+                    type="Lagerbestand kritisch",
+                    message=(
+                        f"Artikel {row.article_number} ({row.name}) unter Mindestbestand: "
+                        f"{float(row.current_stock):.2f} < {float(row.min_stock):.2f}"
+                    ),
+                    timestamp=today_iso,
+                )
+            )
+    except Exception:
+        # Table may not exist in all environments; keep endpoint resilient.
+        pass
+
+    # 3) Overdue open items snapshot
+    try:
+        overdue_row = db.execute(
+            text(
+                """
+                SELECT COUNT(*) AS cnt
+                FROM offene_posten
+                WHERE faelligkeit < CURRENT_DATE
+                  AND COALESCE(offen, 0) > 0
+                """
+            )
+        ).first()
+        overdue_count = int(overdue_row.cnt if overdue_row else 0)
+        if overdue_count > 0:
+            alerts.append(
+                AdminAlert(
+                    id="overdue-open-items",
+                    level="warning",
+                    type="Offene Posten ueberfaellig",
+                    message=f"{overdue_count} offene Posten sind ueberfaellig.",
+                    timestamp=today_iso,
+                )
+            )
+    except Exception:
+        pass
+
+    if not alerts:
+        alerts.append(
+            AdminAlert(
+                id="system-ok",
+                level="info",
+                type="Systemstatus",
+                message="Keine kritischen Hinweise aus den aktuell angebundenen Monitoring-Quellen.",
+                timestamp=today_iso,
+            )
+        )
+
+    critical = sum(1 for item in alerts if item.level == "critical")
+    warning = sum(1 for item in alerts if item.level == "warning")
+    system_status: Literal["online", "degraded", "offline"]
+    if critical > 0:
+        system_status = "offline"
+    elif warning > 0:
+        system_status = "degraded"
+    else:
+        system_status = "online"
+
+    return AdminAlertsResponse(
+        active=len(alerts),
+        critical=critical,
+        warning=warning,
+        system_status=system_status,
+        items=alerts,
+    )
+
+
+@router.get("/rules", response_model=list[MonitoringRuleOut])
+def list_monitoring_rules(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    cfg = _monitoring_cfg(_load_tenant_settings(db, tenant_id))
+    return [MonitoringRuleOut(**item) for item in cfg["rules"] if isinstance(item, dict)]
+
+
+@router.post("/rules", response_model=MonitoringRuleOut, status_code=201)
+def create_monitoring_rule(payload: MonitoringRuleIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    settings = _load_tenant_settings(db, tenant_id)
+    cfg = _monitoring_cfg(settings)
+    item = {"id": str(uuid4()), **payload.model_dump()}
+    cfg["rules"].append(item)
+    settings["admin_monitoring"] = cfg
+    _save_tenant_settings(db, tenant_id, settings)
+    db.commit()
+    return MonitoringRuleOut(**item)
+
+
+@router.put("/rules/{rule_id}", response_model=MonitoringRuleOut)
+def update_monitoring_rule(rule_id: str, payload: MonitoringRuleIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    settings = _load_tenant_settings(db, tenant_id)
+    cfg = _monitoring_cfg(settings)
+    idx = _find_by_id(cfg["rules"], rule_id)
+    if idx < 0:
+        raise HTTPException(status_code=404, detail="Monitoring rule not found")
+    item = {"id": rule_id, **payload.model_dump()}
+    cfg["rules"][idx] = item
+    settings["admin_monitoring"] = cfg
+    _save_tenant_settings(db, tenant_id, settings)
+    db.commit()
+    return MonitoringRuleOut(**item)
+
+
+@router.delete("/rules/{rule_id}", status_code=204)
+def delete_monitoring_rule(rule_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    settings = _load_tenant_settings(db, tenant_id)
+    cfg = _monitoring_cfg(settings)
+    idx = _find_by_id(cfg["rules"], rule_id)
+    if idx < 0:
+        raise HTTPException(status_code=404, detail="Monitoring rule not found")
+    del cfg["rules"][idx]
+    settings["admin_monitoring"] = cfg
+    _save_tenant_settings(db, tenant_id, settings)
+    db.commit()
+    return None
+
+
+@router.get("/channels", response_model=list[MonitoringChannelOut])
+def list_monitoring_channels(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    cfg = _monitoring_cfg(_load_tenant_settings(db, tenant_id))
+    return [MonitoringChannelOut(**item) for item in cfg["channels"] if isinstance(item, dict)]
+
+
+@router.post("/channels", response_model=MonitoringChannelOut, status_code=201)
+def create_monitoring_channel(payload: MonitoringChannelIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    settings = _load_tenant_settings(db, tenant_id)
+    cfg = _monitoring_cfg(settings)
+    item = {"id": str(uuid4()), **payload.model_dump()}
+    cfg["channels"].append(item)
+    settings["admin_monitoring"] = cfg
+    _save_tenant_settings(db, tenant_id, settings)
+    db.commit()
+    return MonitoringChannelOut(**item)
+
+
+@router.put("/channels/{channel_id}", response_model=MonitoringChannelOut)
+def update_monitoring_channel(channel_id: str, payload: MonitoringChannelIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    settings = _load_tenant_settings(db, tenant_id)
+    cfg = _monitoring_cfg(settings)
+    idx = _find_by_id(cfg["channels"], channel_id)
+    if idx < 0:
+        raise HTTPException(status_code=404, detail="Monitoring channel not found")
+    item = {"id": channel_id, **payload.model_dump()}
+    cfg["channels"][idx] = item
+    settings["admin_monitoring"] = cfg
+    _save_tenant_settings(db, tenant_id, settings)
+    db.commit()
+    return MonitoringChannelOut(**item)
+
+
+@router.delete("/channels/{channel_id}", status_code=204)
+def delete_monitoring_channel(channel_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    settings = _load_tenant_settings(db, tenant_id)
+    cfg = _monitoring_cfg(settings)
+    idx = _find_by_id(cfg["channels"], channel_id)
+    if idx < 0:
+        raise HTTPException(status_code=404, detail="Monitoring channel not found")
+    del cfg["channels"][idx]
+    settings["admin_monitoring"] = cfg
+    _save_tenant_settings(db, tenant_id, settings)
+    db.commit()
+    return None
+
+
+@router.get("/scheduler-jobs", response_model=list[SchedulerJobOut])
+def list_scheduler_jobs(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    cfg = _monitoring_cfg(_load_tenant_settings(db, tenant_id))
+    return [SchedulerJobOut(**item) for item in cfg["scheduler_jobs"] if isinstance(item, dict)]
+
+
+@router.post("/scheduler-jobs", response_model=SchedulerJobOut, status_code=201)
+def create_scheduler_job(payload: SchedulerJobIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    settings = _load_tenant_settings(db, tenant_id)
+    cfg = _monitoring_cfg(settings)
+    item = {"id": str(uuid4()), **payload.model_dump()}
+    cfg["scheduler_jobs"].append(item)
+    settings["admin_monitoring"] = cfg
+    _save_tenant_settings(db, tenant_id, settings)
+    db.commit()
+    return SchedulerJobOut(**item)
+
+
+@router.put("/scheduler-jobs/{job_id}", response_model=SchedulerJobOut)
+def update_scheduler_job(job_id: str, payload: SchedulerJobIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    settings = _load_tenant_settings(db, tenant_id)
+    cfg = _monitoring_cfg(settings)
+    idx = _find_by_id(cfg["scheduler_jobs"], job_id)
+    if idx < 0:
+        raise HTTPException(status_code=404, detail="Scheduler job not found")
+    item = {"id": job_id, **payload.model_dump()}
+    cfg["scheduler_jobs"][idx] = item
+    settings["admin_monitoring"] = cfg
+    _save_tenant_settings(db, tenant_id, settings)
+    db.commit()
+    return SchedulerJobOut(**item)
+
+
+@router.delete("/scheduler-jobs/{job_id}", status_code=204)
+def delete_scheduler_job(job_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    settings = _load_tenant_settings(db, tenant_id)
+    cfg = _monitoring_cfg(settings)
+    idx = _find_by_id(cfg["scheduler_jobs"], job_id)
+    if idx < 0:
+        raise HTTPException(status_code=404, detail="Scheduler job not found")
+    del cfg["scheduler_jobs"][idx]
+    settings["admin_monitoring"] = cfg
+    _save_tenant_settings(db, tenant_id, settings)
+    db.commit()
+    return None

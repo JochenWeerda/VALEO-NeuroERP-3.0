@@ -66,7 +66,7 @@ const integerFormatter = new Intl.NumberFormat('de-DE')
 const dateFormatter = new Intl.DateTimeFormat('de-DE')
 
 const fetchKpis = async (): Promise<KpiResult> => {
-  const payload = await apiClient.get<unknown>('/analytics/api/v1/kpis')
+  const payload = await apiClient.get<unknown>('/api/v1/analytics/kpis')
   const parsed = kpiSchema.safeParse(payload)
   if (parsed.success) {
     return parsed.data
@@ -83,7 +83,7 @@ const fetchKpis = async (): Promise<KpiResult> => {
 }
 
 const fetchTrend = async (): Promise<TrendPoint[]> => {
-  const payload = await apiClient.get<unknown>('/analytics/api/v1/cubes/contract-positions')
+  const payload = await apiClient.get<unknown>('/api/v1/analytics/cubes/contract-positions')
   const parsed = trendResponseSchema.safeParse(payload)
   if (parsed.success) {
     return parsed.data.slice(-TREND_HISTORY_LIMIT)
@@ -160,7 +160,7 @@ export default function Dashboard(): ReactElement {
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-sm text-slate-500">Valero NeuroERP · Echtzeit Kennzahlen</p>
+          <p className="text-sm text-slate-500">Valero NeuroERP ï¿½ Echtzeit Kennzahlen</p>
         </div>
         <p className="text-xs text-slate-400">Aktualisiert am {lastUpdatedLabel}</p>
       </div>

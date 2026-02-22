@@ -5,7 +5,8 @@ Revises:
 Create Date: 2025-11-14 11:25:00
 """
 
-import uuid
+import os
+import time
 from datetime import datetime
 from typing import Sequence, Union
 
@@ -48,7 +49,7 @@ def upgrade() -> None:
 
     op.create_table(
         "crm_core_customers",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("id", sa.String(), primary_key=True),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("type", sa.String(32), nullable=False),
         sa.Column("display_name", sa.String(255), nullable=False),
@@ -82,10 +83,10 @@ def upgrade() -> None:
 
     op.create_table(
         "crm_core_contacts",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("id", sa.String(), primary_key=True),
         sa.Column(
             "customer_id",
-            sa.dialects.postgresql.UUID(as_uuid=True),
+            sa.String(),
             sa.ForeignKey("crm_core_customers.id", ondelete="CASCADE"),
             nullable=False,
             index=True,
@@ -102,7 +103,7 @@ def upgrade() -> None:
 
     customers_table = sa.table(
         "crm_core_customers",
-        sa.column("id", sa.dialects.postgresql.UUID(as_uuid=True)),
+        sa.column("id", sa.String()),
         sa.column("tenant_id", sa.String(64)),
         sa.column("type", sa.String(32)),
         sa.column("display_name", sa.String(255)),
@@ -120,8 +121,8 @@ def upgrade() -> None:
     )
     contacts_table = sa.table(
         "crm_core_contacts",
-        sa.column("id", sa.dialects.postgresql.UUID(as_uuid=True)),
-        sa.column("customer_id", sa.dialects.postgresql.UUID(as_uuid=True)),
+        sa.column("id", sa.String()),
+        sa.column("customer_id", sa.String()),
         sa.column("first_name", sa.String(100)),
         sa.column("last_name", sa.String(100)),
         sa.column("email", sa.String(255)),
@@ -131,7 +132,14 @@ def upgrade() -> None:
         sa.column("created_at", sa.DateTime),
         sa.column("updated_at", sa.DateTime),
     )
-    demo_customer_id = uuid.uuid4()
+    def _uuid7():
+        ts = int(time.time() * 1000)
+        ra = int.from_bytes(os.urandom(2), "big") & 0x0FFF
+        rb = int.from_bytes(os.urandom(8), "big") & 0x3FFFFFFFFFFFFFFF
+        v = (ts << 80) | (0x7 << 76) | (ra << 64) | (0x2 << 62) | rb
+        h = f"{v:032x}"
+        return f"{h[:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:]}"
+    demo_customer_id = _uuid7()
     default_tenant_id = "00000000-0000-0000-0000-000000000001"
     now = datetime.utcnow()
     op.bulk_insert(
@@ -160,7 +168,7 @@ def upgrade() -> None:
         contacts_table,
         [
             {
-                "id": uuid.uuid4(),
+                "id": _uuid7(),
                 "customer_id": demo_customer_id,
                 "first_name": "Carla",
                 "last_name": "Muster",

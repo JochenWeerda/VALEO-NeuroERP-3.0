@@ -9,12 +9,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import ShippingUnit
 from ..schemas.base import PaginatedResponse, BaseSchema
 
 router = APIRouter()
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class NVEOut(BaseSchema):
@@ -62,10 +63,10 @@ async def create_nve(
     db: Session = Depends(get_db),
 ):
     """POST NVE anlegen"""
-    import uuid
+    from app.core.uuid7 import uuid7
     tid = tenant_id or DEFAULT_TENANT
     obj = ShippingUnit(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         sscc=payload.sscc,
         order_id=payload.order_id,
         delivery_note_id=payload.delivery_note_id,

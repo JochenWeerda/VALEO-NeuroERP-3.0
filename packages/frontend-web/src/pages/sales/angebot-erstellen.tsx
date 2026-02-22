@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { Plus, Trash2, Check, ChevronsUpDown, AlertTriangle, Info } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { apiClient } from '@/lib/api-client'
+import { businessPartnerService } from '@/lib/services/business-partner-service'
 import { cn } from '@/lib/utils'
 
 type Artikel = {
@@ -41,6 +43,7 @@ type AngebotPosition = {
 }
 
 type AngebotData = {
+  customerId: string
   kunde: string
   ansprechpartner: string
   email: string
@@ -57,6 +60,7 @@ export default function AngebotErstellenPage(): JSX.Element {
   const entityType = 'offer'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Angebot')
   const [angebot, setAngebot] = useState<AngebotData>({
+    customerId: '',
     kunde: '',
     ansprechpartner: '',
     email: '',
@@ -66,10 +70,42 @@ export default function AngebotErstellenPage(): JSX.Element {
     positionen: [{ artikel: '', menge: 1, einheit: 't', preis: 0 }],
     notizen: '',
   })
+  const [customerValidationError, setCustomerValidationError] = useState('')
   const [artikelSuche, setArtikelSuche] = useState<Record<number, string>>({})
   const [artikelErgebnisse, setArtikelErgebnisse] = useState<Record<number, Artikel[]>>({})
   const [artikelSucheOffen, setArtikelSucheOffen] = useState<Record<number, boolean>>({})
   const [empfehlungen, setEmpfehlungen] = useState<Artikel[]>([])
+  const customersQuery = useQuery({
+    queryKey: ['bp-customer-options-offer'],
+    queryFn: async () => businessPartnerService.list(),
+  })
+  const customerOptions = useMemo(
+    () =>
+      (customersQuery.data ?? [])
+        .filter((bp) => bp.business_partner.roles.is_customer)
+        .map((bp) => ({
+          id: String(bp.business_partner.core_identity.partner_id ?? ''),
+          number: bp.business_partner.core_identity.partner_number,
+          name: bp.business_partner.core_identity.name_1,
+          email: String(bp.business_partner.contact_data.email ?? ''),
+          phone: String(bp.business_partner.contact_data.phone ?? ''),
+        })),
+    [customersQuery.data],
+  )
+  const instructionsQuery = useQuery({
+    queryKey: ['bp-instructions-offer', angebot.customerId],
+    queryFn: async () => businessPartnerService.listInstructions(angebot.customerId),
+    enabled: Boolean(angebot.customerId?.trim()),
+  })
+  const activeInstructions = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    return (instructionsQuery.data ?? []).filter((item) => {
+      const fromOk = !item.valid_from || item.valid_from <= today
+      const toOk = !item.valid_to || item.valid_to >= today
+      return fromOk && toOk
+    })
+  }, [instructionsQuery.data])
+  const hasCriticalInstruction = activeInstructions.some((item) => item.instruction_priority === 'critical' || item.instruction_priority === 'high')
 
   // Lade Empfehlungen basierend auf ausgewählten Artikeln
   useEffect(() => {
@@ -192,6 +228,10 @@ export default function AngebotErstellenPage(): JSX.Element {
   }
 
   async function handleSubmit(): Promise<void> {
+    if (!angebot.customerId.trim()) {
+      setCustomerValidationError('Bitte einen Kunden auswaehlen.')
+      return
+    }
     // TODO: API-Call
     console.log('Angebot erstellen:', angebot)
     navigate('/sales/angebote-liste')
@@ -207,12 +247,36 @@ export default function AngebotErstellenPage(): JSX.Element {
         <div className="space-y-4">
           <div>
             <Label htmlFor="kunde">{t('crud.entities.customer')} *</Label>
-            <Input
+            <select
               id="kunde"
+              value={angebot.customerId}
+              onChange={(e) => {
+                const selected = customerOptions.find((c) => c.id === e.target.value)
+                updateField('customerId', e.target.value)
+                updateField('kunde', selected?.name ?? '')
+                updateField('email', selected?.email ?? angebot.email)
+                updateField('telefon', selected?.phone ?? angebot.telefon)
+                setCustomerValidationError('')
+              }}
+              className="w-full rounded-md border border-input bg-background px-3 py-2"
+              required
+            >
+              <option value="">Bitte Kunde waehlen</option>
+              {customerOptions.map((customer) => (
+                <option key={customer.id} value={customer.id}>
+                  {customer.number} - {customer.name}
+                </option>
+              ))}
+            </select>
+            {customerValidationError && <p className="mt-1 text-xs text-red-600">{customerValidationError}</p>}
+          </div>
+          <div>
+            <Label htmlFor="kundeName">Kundenname</Label>
+            <Input
+              id="kundeName"
               value={angebot.kunde}
               onChange={(e) => updateField('kunde', e.target.value)}
               placeholder={t('crud.tooltips.placeholders.customerExample')}
-              required
             />
           </div>
           <div>
@@ -245,6 +309,26 @@ export default function AngebotErstellenPage(): JSX.Element {
                 placeholder={t('crud.tooltips.placeholders.phone')}
               />
             </div>
+          </div>
+          <div>
+            <Label>Chefanweisungen</Label>
+            {!angebot.customerId && (
+              <p className="text-sm text-muted-foreground">Bitte zuerst einen Kunden waehlen.</p>
+            )}
+            {angebot.customerId && activeInstructions.length === 0 && (
+              <p className="text-sm text-muted-foreground">Keine aktiven Chefanweisungen vorhanden.</p>
+            )}
+            {activeInstructions.length > 0 && (
+              <div className={`rounded border p-3 text-sm ${hasCriticalInstruction ? 'border-red-400 bg-red-50' : 'border-amber-300 bg-amber-50'}`}>
+                <ul className="list-disc pl-5">
+                  {activeInstructions.map((item) => (
+                    <li key={item.id}>
+                      <span className="font-semibold">[{item.instruction_priority}]</span> {item.instruction_text}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       ),

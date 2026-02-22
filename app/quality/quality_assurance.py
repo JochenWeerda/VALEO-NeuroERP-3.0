@@ -11,8 +11,8 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
 import statistics
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -207,7 +207,7 @@ class ISO9001QualityAssurance:
         Report a new quality issue
         Returns issue ID
         """
-        issue_id = str(uuid.uuid4())
+        issue_id = uuid7()
 
         issue = QualityIssue(
             id=issue_id,
@@ -219,7 +219,7 @@ class ISO9001QualityAssurance:
             component=issue_data.get('component', 'unknown'),
             reported_by=issue_data['reported_by'],
             assigned_to=issue_data.get('assigned_to'),
-            tenant_id=issue_data.get('tenant_id', 'system'),
+            tenant_id=issue_data.get('tenant_id', '00000000-0000-0000-0000-000000000001'),
             affected_processes=issue_data.get('affected_processes', []),
             business_impact=issue_data.get('business_impact', ''),
             customer_impact=issue_data.get('customer_impact', ''),
@@ -304,7 +304,7 @@ class ISO9001QualityAssurance:
         Record a quality metric data point
         Returns metric data ID
         """
-        metric_id = str(uuid.uuid4())
+        metric_id = uuid7()
 
         metric_data = QualityMetricData(
             id=metric_id,

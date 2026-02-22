@@ -11,7 +11,7 @@ from decimal import Decimal
 from datetime import date, datetime, timedelta
 from pydantic import BaseModel, Field
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
 
@@ -240,7 +240,7 @@ async def create_dunning_rule(
             )
         
         # Insert new rule
-        rule_id = str(uuid.uuid4())
+        rule_id = uuid7()
         
         insert_query = text("""
             INSERT INTO domain_erp.dunning_rules
@@ -394,7 +394,7 @@ async def process_dunning(
             payment_deadline = today + timedelta(days=applicable_rule.payment_deadline_days)
             
             # Create dunning notice
-            dunning_id = str(uuid.uuid4())
+            dunning_id = uuid7()
             dunning_insert = text("""
                 INSERT INTO domain_erp.dunning_notices
                 (id, tenant_id, op_id, debtor_id, dunning_level, dunning_date, due_date,
@@ -542,7 +542,7 @@ async def create_dunning(
         payment_deadline = dunning.dunning_date + timedelta(days=payment_deadline_days)
         
         # Create dunning notice
-        dunning_id = str(uuid.uuid4())
+        dunning_id = uuid7()
         dunning_insert = text("""
             INSERT INTO domain_erp.dunning_notices
             (id, tenant_id, op_id, debtor_id, dunning_level, dunning_date, due_date,

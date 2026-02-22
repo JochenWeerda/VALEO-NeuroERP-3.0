@@ -3,8 +3,8 @@ VALEO-NeuroERP - Einkauf Router
 REST API Endpoints für Einkauf/Beschaffung
 """
 
-import uuid
 import logging
+from app.core.uuid7 import uuid7
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -412,7 +412,7 @@ async def create_anfrage(
 ):
     """Erstellt neue Anfrage/Bedarfsmeldung"""
     try:
-        anfrage_id = str(uuid.uuid4())
+        anfrage_id = uuid7()
         anfrage_nummer = anfrage.anfrageNummer or f"BANF-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
 
         db.execute(
@@ -450,7 +450,7 @@ async def create_anfrage(
         # Positionen anlegen
         if anfrage.positionen:
             for pos in anfrage.positionen:
-                pos_id = str(uuid.uuid4())
+                pos_id = uuid7()
                 db.execute(
                     text("""
                         INSERT INTO einkauf_anfragen_positionen (
@@ -655,7 +655,7 @@ async def confirm_ocr_import(
     Bestätigt OCR-Extraktion und erstellt Rechnungseingang
     """
     try:
-        rechnung_id = str(uuid.uuid4())
+        rechnung_id = uuid7()
         extracted = data.get("extracted_data", {})
         
         # Rechnungseingang erstellen
@@ -691,7 +691,7 @@ async def confirm_ocr_import(
         
         # Positionen erstellen
         for idx, pos in enumerate(extracted.get("positionen", [])):
-            pos_id = str(uuid.uuid4())
+            pos_id = uuid7()
             db.execute(
                 text("""
                     INSERT INTO einkauf_rechnungseingang_positionen (
@@ -803,7 +803,7 @@ async def create_zahlungslauf(
     - Generiert SEPA-XML
     """
     try:
-        lauf_id = str(uuid.uuid4())
+        lauf_id = uuid7()
         ausfuehrungsdatum = data.get("ausfuehrungs_datum") or (datetime.utcnow().date() + timedelta(days=1)).isoformat()
         
         # Sammle offene Rechnungen
@@ -928,7 +928,7 @@ async def create_zahlungslauf(
         # Positionen speichern
         for lid, gruppe in lieferanten_gruppen.items():
             for r in gruppe["rechnungen"]:
-                pos_id = str(uuid.uuid4())
+                pos_id = uuid7()
                 db.execute(
                     text("""
                         INSERT INTO einkauf_zahlungslauf_positionen (
@@ -1085,7 +1085,7 @@ async def create_rechnungseingang(
 ):
     """Erstellt neuen Rechnungseingang"""
     try:
-        rechnung_id = str(uuid.uuid4())
+        rechnung_id = uuid7()
 
         db.execute(
             text("""
@@ -1122,7 +1122,7 @@ async def create_rechnungseingang(
         # Positionen anlegen
         if rechnung.positionen:
             for pos in rechnung.positionen:
-                pos_id = str(uuid.uuid4())
+                pos_id = uuid7()
                 gesamtpreis = pos.gesamtpreis or (pos.menge * pos.einzelpreis)
                 db.execute(
                     text("""

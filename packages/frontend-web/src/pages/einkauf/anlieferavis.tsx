@@ -40,8 +40,8 @@ const anlieferavisConfig: MaskConfig = {
           label: 'Bestellung',
           type: 'lookup',
           required: true,
-          endpoint: '/api/einkauf/bestellungen?status=FREIGEGEBEN',
-          displayField: 'nummer',
+          endpoint: '/api/v1/purchase-orders?status=FREIGEGEBEN',
+          displayField: 'purchaseOrderNumber',
           valueField: 'id'
         },
         {
@@ -163,13 +163,13 @@ const anlieferavisConfig: MaskConfig = {
     }
   ],
   api: {
-    baseUrl: '/api/einkauf/anlieferavis',
+    baseUrl: '/api/v1/einkauf/anlieferavis',
     endpoints: {
-      list: '/api/einkauf/anlieferavis',
-      get: '/api/einkauf/anlieferavis/{id}',
-      create: '/api/einkauf/anlieferavis',
-      update: '/api/einkauf/anlieferavis/{id}',
-      delete: '/api/einkauf/anlieferavis/{id}'
+      list: '/api/v1/einkauf/anlieferavis',
+      get: '/api/v1/einkauf/anlieferavis/{id}',
+      create: '/api/v1/einkauf/anlieferavis',
+      update: '/api/v1/einkauf/anlieferavis/{id}',
+      delete: '/api/v1/einkauf/anlieferavis/{id}'
     }
   },
   validation: anlieferavisSchema,
