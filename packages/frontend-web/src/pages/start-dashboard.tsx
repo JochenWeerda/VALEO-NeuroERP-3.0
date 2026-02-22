@@ -42,15 +42,16 @@ const NUM_DE = new Intl.NumberFormat('de-DE')
 interface KpiTile {
   key: string
   label: string
+  path: string
   format: (v: number) => string
   icon: JSX.Element
 }
 
 const KPI_TILES: KpiTile[] = [
-  { key: 'revenue', label: 'Umsatz', format: (v) => `\u20AC ${NUM_DE.format(v)}`, icon: <DollarSign className="h-4 w-4" /> },
-  { key: 'orders', label: 'Auftraege', format: (v) => NUM_DE.format(v), icon: <ShoppingCart className="h-4 w-4" /> },
-  { key: 'customers', label: 'Kunden', format: (v) => NUM_DE.format(v), icon: <Users className="h-4 w-4" /> },
-  { key: 'inventory', label: 'Lagerauslastung', format: (v) => `${v}%`, icon: <Package className="h-4 w-4" /> },
+  { key: 'revenue', label: 'Umsatz', path: '/dashboard/sales', format: (v) => `\u20AC ${NUM_DE.format(v)}`, icon: <DollarSign className="h-4 w-4" /> },
+  { key: 'orders', label: 'Auftraege', path: '/sales/order', format: (v) => NUM_DE.format(v), icon: <ShoppingCart className="h-4 w-4" /> },
+  { key: 'customers', label: 'Kunden', path: '/verkauf/kunden-liste', format: (v) => NUM_DE.format(v), icon: <Users className="h-4 w-4" /> },
+  { key: 'inventory', label: 'Lagerauslastung', path: '/lager/bestandsuebersicht', format: (v) => `${v}%`, icon: <Package className="h-4 w-4" /> },
 ]
 
 function toStarterTile(section: NavItem): StarterTile | null {
@@ -159,23 +160,25 @@ export default function StartDashboardPage(): JSX.Element {
         {KPI_TILES.map((tile) => {
           const value = kpis?.[tile.key]
           return (
-            <Card key={tile.key}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted-foreground">{tile.label}</span>
-                  <span className="text-muted-foreground">{tile.icon}</span>
-                </div>
-                <div className="mt-2">
-                  {kpiLoading ? (
-                    <Skeleton className="h-8 w-24" />
-                  ) : (
-                    <div className="text-2xl font-bold">
-                      {value !== undefined ? tile.format(value) : '-'}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <Link key={tile.key} to={tile.path} className="hover:shadow-md transition-shadow rounded-lg">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-muted-foreground">{tile.label}</span>
+                    <span className="text-muted-foreground">{tile.icon}</span>
+                  </div>
+                  <div className="mt-2">
+                    {kpiLoading ? (
+                      <Skeleton className="h-8 w-24" />
+                    ) : (
+                      <div className="text-2xl font-bold">
+                        {value !== undefined ? tile.format(value) : '-'}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           )
         })}
       </section>
@@ -280,7 +283,9 @@ export default function StartDashboardPage(): JSX.Element {
                       <Icon className="h-4 w-4" />
                     </span>
                     <div>
-                      <CardTitle className="text-base">{tile.label}</CardTitle>
+                      <CardTitle className="text-base">
+                        <Link to={tile.path} className="hover:underline">{tile.label}</Link>
+                      </CardTitle>
                       <CardDescription>{tile.description}</CardDescription>
                     </div>
                   </div>
